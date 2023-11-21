@@ -11,7 +11,11 @@ from numpy.typing import DTypeLike, NDArray
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core.commands import CommandListingOutput
-from ansys.mapdl.core.errors import IncorrectWorkingDirectory, MapdlRuntimeError
+from ansys.mapdl.core.errors import (
+    ComponentDoesNotExits,
+    IncorrectWorkingDirectory,
+    MapdlRuntimeError,
+)
 from ansys.mapdl.core.mapdl_core import _MapdlCore
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
 from ansys.mapdl.core.misc import (
