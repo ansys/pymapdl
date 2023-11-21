@@ -430,7 +430,7 @@ class _MapdlCore(Commands):
         """Set default file type for plots.
 
         Used when device is not properly set, for instance when the device is closed."""
-        if not isinstance(value, str) and value.upper() not in VALID_FILE_TYPE_FOR_PLOT:
+        if not isinstance(value, str) or value.upper() not in VALID_FILE_TYPE_FOR_PLOT:
             raise ValueError(f"'{value}' is not allowed as file output for plots.")
         return self._default_file_type_for_plots
 

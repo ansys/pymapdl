@@ -1,4 +1,7 @@
 """Test ansys.mapdl.solution.Solution"""
+import pytest
+
+from ansys.mapdl.core.errors import MapdlRuntimeError
 
 
 def time_step_size(mapdl):

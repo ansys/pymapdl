@@ -19,7 +19,7 @@ from ansys.mapdl.core.launcher import (
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from conftest import QUICK_LAUNCH_SWITCHES, requires
+from conftest import ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 
 try:
     import ansys_corba  # noqa: F401
