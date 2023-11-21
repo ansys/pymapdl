@@ -128,9 +128,6 @@ def requires(requirement: str):
     elif "console" == requirement:
         return pytest.mark.console
 
-    elif "corba" == requirement:
-        return pytest.mark.corba
-
     else:
         return requires_dependency(requirement)
 
