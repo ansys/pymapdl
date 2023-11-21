@@ -338,7 +338,7 @@ class Parameters:
             )
 
         if not isinstance(key, str):
-            raise TypeError("Parameter name must be a string")
+            raise TypeError("Parameter name must be a string.")
         key = key.upper()
 
         with self.full_parameters_output:
