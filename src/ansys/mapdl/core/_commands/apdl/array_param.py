@@ -1479,12 +1479,5 @@ class ArrayParam:
         This command is valid in any processor.
 
         """
-        # cannot be in interactive mode
-        if not self._store_commands:
-            raise MapdlRuntimeError(
-                "VWRTIE cannot run interactively.  \n\nPlease use "
-                "``with mapdl.non_interactive:``"
-            )
-
         command = f"*VWRITE,{par1},{par2},{par3},{par4},{par5},{par6},{par7},{par8},{par9},{par10},{par11},{par12},{par13},{par14},{par15},{par16},{par17},{par18},{par19}"
         return self.run(command, **kwargs)
