@@ -93,8 +93,8 @@ class LocalMapdlPool:
         By default, the instances directories are named as "Instances_{i}".
 
     **kwargs : dict, optional
-        See :func:`ansys.mapdl.core.launch_mapdl` for a complete
-        listing of all additional keyword arguments.
+        Additional keyword arguments. For a complete listing, see the description for the
+        :func:`ansys.mapdl.core.launcher.launch_mapdl` method.
 
     Examples
     --------
@@ -564,9 +564,9 @@ class LocalMapdlPool:
         --------
         >>> mapdl = pool.next_available()
         >>> print(mapdl)
-        Product:         ANSYS Mechanical Enterprise
-        MAPDL Version:   RELEASE                    BUILD  0.0      UPDATE        0
-        PyANSYS Version: 0.55.1
+        Product:             Ansys Mechanical Enterprise
+        MAPDL Version:       24.1
+        ansys.mapdl Version: 0.68.dev0
         """
 
         # loop until the next instance is available
