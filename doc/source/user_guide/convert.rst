@@ -1,5 +1,6 @@
 Translate scripts
 ===================
+
 The `ansys-mapdl-core <pymapdl_docs_>`_
 library contains a few basic functions to translate existing MAPDL
 scripts into PyMAPDL scripts. Ideally, all math and variable setting
@@ -8,7 +9,7 @@ are less transparent and more difficult to debug.
 
 
 Command-line interface
-~~~~~~~~~~~~~~~~~~~~~~
+----------------------
 
 In PyMAPDL v0.64.0 and later, you use the converter from the command line.
 After you have activated and installed the package as described
@@ -40,7 +41,7 @@ The ``pymapdl_convert_script`` command uses the
 Hence, this command accepts most of this function's arguments.
 
 Usage
------
+~~~~~
 
 You can call this command from the terminal with different
 arguments. Here is an example that converts the ``mapdl.dat``
@@ -90,12 +91,13 @@ function documentation.
 
 Caveats
 ~~~~~~~
+
 These examples only show an automatic translation of a verification:
 file and not optimized code. Should it be necessary to pull
-parameters or arrays from ansys, use the :func:`Mapdl.get_value()
-<ansys.mapdl.core.Mapdl.get_value>` function, which is quite similar to the
-MAPDL :func:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` 
-command shown here:
+parameters or arrays from ansys, use the 
+:func:`Mapdl.get_value() <ansys.mapdl.core.Mapdl.get_value>` function,
+which is quite similar to the MAPDL
+:func:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` command shown here:
 
 .. code:: pycon
 
@@ -122,6 +124,7 @@ with:
 
 Script translation
 ~~~~~~~~~~~~~~~~~~
+
 Existing Ansys scripts can be translated using the :func:`convert_script() <ansys.mapdl.core.convert_script>`
 function:
 
@@ -135,7 +138,8 @@ function:
 Or, you can convert code in form of strings for later processing using the
 :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>` function:
 
-.. code:: pycon
+
+.. code:: python
 
     from ansys.mapdl.core.convert import convert_apdl_block
 
@@ -150,15 +154,14 @@ Or, you can convert code in form of strings for later processing using the
 The script conversion functions allow some interesting arguments, which you can see in
 the respective :func:`convert_script() <ansys.mapdl.core.convert_script>`
 and :func:`convert_apdl_block() <ansys.mapdl.core.convert_apdl_block>`
-function documentation. Especially interesting are the ``add_imports``, ``comment_solve``, and
-``print_com`` keyword arguments.
+function documentation. Especially interesting are the ``add_imports``, ``comment_solve``,
+and ``print_com`` keyword arguments.
 
-Of particular note in the following examples is how most of the
-commands can be called as a method to the Ansys object rather than
-sending a string as a command. Additionally, take note that some
-commands require the :attr:`Mapdl.non_interactive
-<ansys.mapdl.core.Mapdl.non_interactive>` context manager since some
-commands require and may break the server connection for some
+Of particular note in the following examples is how most of the commands can be called
+as a method to the Ansys object rather than sending a string as a command. Additionally,
+take note that some commands require the
+:attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
+context manager since some commands require and may break the server connection for some
 interfaces (such as CORBA) or are invalid (as in gRPC).
 
 Also note that APDL macros that use ``*CREATE`` have been replaced
@@ -168,6 +171,7 @@ should it be necessary to insert a ``breakpoint()`` in the script.
 
 Example: VM1 - statically indeterminate reaction force analysis
 ---------------------------------------------------------------
+
 Ansys MAPDL contains over 200 verification files used for Ansys
 validation and demonstration. These validation files are used here to
 demo the use of the PyMAPDL file translator :func:`convert_script()

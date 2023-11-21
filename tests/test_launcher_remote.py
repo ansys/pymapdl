@@ -1,4 +1,11 @@
 """Test the PyPIM integration."""
+import pytest
+
+from conftest import has_dependency
+
+if not has_dependency("ansys-platform-instancemanagement"):
+    pytest.skip(allow_module_level=True)
+
 from unittest.mock import create_autospec
 
 import ansys.platform.instancemanagement as pypim
@@ -6,6 +13,7 @@ import grpc
 
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH
+from conftest import QUICK_LAUNCH_SWITCHES
 
 
 def test_launch_remote_instance(monkeypatch, mapdl):
@@ -42,7 +50,9 @@ def test_launch_remote_instance(monkeypatch, mapdl):
     # Start MAPDL with launch_mapdl
     # Note: This is mocking to start MAPDL, but actually reusing the common one
     # Thus cleanup_on_exit is set to false
-    mapdl = launch_mapdl(cleanup_on_exit=False)
+    mapdl = launch_mapdl(
+        cleanup_on_exit=False, additional_switches=QUICK_LAUNCH_SWITCHES
+    )
 
     # Assert: pymapdl went through the pypim workflow
     assert mock_is_configured.called

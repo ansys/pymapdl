@@ -49,7 +49,6 @@ import os
 import tempfile
 
 from ansys.dpf import core as dpf
-from ansys.dpf.core import Model
 import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
@@ -146,7 +145,7 @@ areas = mapdl.geometry.anum
 mapdl.geometry.area_select(areas[0], "r")
 mapdl.nsla("r", 1)
 mapdl.nsel("r", "loc", "x", pre_crack, length + pre_crack + eps)
-mapdl.cm("cm_1", "node")
+mapdl.components["cm_1"] = "node"
 
 mapdl.allsel()
 mapdl.asel("s", "loc", "z", 1.7)
@@ -154,11 +153,11 @@ areas = mapdl.geometry.anum
 mapdl.geometry.area_select(areas[1], "r")
 mapdl.nsla("r", 1)
 mapdl.nsel("r", "loc", "x", pre_crack, length + pre_crack + eps)
-mapdl.cm("cm_2", "node")
+mapdl.components["cm_2"] = "node"
 
 # Identify all the elements before generation of TARGE170 elements
 mapdl.allsel()
-mapdl.cm("_elemcm", "elem")
+mapdl.components["_elemcm"] = "elem"
 mapdl.mat(2)
 
 # Assign real constants and key options
@@ -182,7 +181,7 @@ mapdl.keyopt(2, 5, 0)
 
 # Generate TARGE170 elements on top of cm_1
 mapdl.nsel("s", "", "", "cm_1")
-mapdl.cm("_target", "node")
+mapdl.components["_target"] = "node"
 mapdl.type(2)
 mapdl.esln("s", 0)
 mapdl.esurf()
@@ -190,7 +189,7 @@ mapdl.esurf()
 # Generate CONTA174 elements on top of cm_2
 mapdl.cmsel("s", "_elemcm")
 mapdl.nsel("s", "", "", "cm_2")
-mapdl.cm("_contact", "node")
+mapdl.components["_contact"] = "node"
 mapdl.type(3)
 mapdl.esln("s", 0)
 mapdl.esurf()
@@ -212,13 +211,13 @@ mapdl.allsel()
 mapdl.nsel(type_="s", item="loc", comp="x", vmin=0.0, vmax=0.0)
 mapdl.nsel(type_="r", item="loc", comp="z", vmin=2 * height, vmax=2 * height)
 mapdl.d(node="all", lab="uz", value=d)
-mapdl.cm("top_nod", "node")
+mapdl.components["top_nod"] = "node"
 
 mapdl.allsel()
 mapdl.nsel(type_="s", item="loc", comp="x", vmin=0.0, vmax=0.0)
 mapdl.nsel(type_="r", item="loc", comp="z", vmin=0.0, vmax=0.0)
 mapdl.d(node="all", lab="uz", value=-10)
-mapdl.cm("bot_nod", "node")
+mapdl.components["bot_nod"] = "node"
 
 # Apply the fix condition
 mapdl.allsel()
@@ -313,18 +312,15 @@ damage_df = mapdl.pretab("damage").to_dataframe()
 temp_directory = tempfile.gettempdir()
 rst_path = mapdl.download_result(temp_directory)
 
-try:
-    # ONLY IF DPF SERVER DEPLOYED WITH gRPC COMMUNICATION
-    # Upload file to DPF server
-    dpf.connect_to_server()
-    server_file_path = dpf.upload_file_in_tmp_folder(rst_path)
-    data_src = dpf.DataSources(server_file_path)
-except:
-    # Using DPF locally
-    data_src = dpf.DataSources(rst_path)
+dpf.core.make_tmp_dir_server(dpf.SERVER)
 
-# Generate the DPF model
-model = Model(data_src)
+if dpf.SERVER.local_server:
+    path_source = rst_path
+else:
+    path_source = dpf.upload_file_in_tmp_folder(rst_path)
+
+# Building the model
+model = dpf.Model(path_source)
 
 # Get the mesh of the whole model
 meshed_region = model.metadata.meshed_region
@@ -348,6 +344,7 @@ mesh_field_cohesive = result_mesh.field_of_properties(
 nmisc_index = 70
 
 # Generate the damage result operator
+data_src = dpf.DataSources(path_source)
 dam_op = dpf.operators.result.nmisc(data_sources=data_src, item_index=70)
 
 # Generate the displacement operator
@@ -451,8 +448,9 @@ camera_pos = disp.animate(
 ###############################################################################
 #
 # Exit MAPDL
-try:
-    os.remove(rst_path)
-except FileNotFoundError:
-    pass
 mapdl.exit()
+
+try:
+    os.remove(path_source)
+except (FileNotFoundError, PermissionError):
+    pass

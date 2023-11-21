@@ -89,3 +89,11 @@
 - name: Won't fix
   description: ""
   color: ffffff
+
+- name: reminder
+  description: "Label for the reminder bot"
+  color: c5def5
+
+- name: Nightly build failed
+  description: "Label for the nightly fails"
+  color: b5f226

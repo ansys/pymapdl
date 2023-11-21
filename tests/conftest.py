@@ -1,20 +1,12 @@
 from collections import namedtuple
+from importlib import import_module
 import os
 from pathlib import Path
 from sys import platform
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
-from ansys.tools.path import get_available_ansys_installations
 import pytest
-import pyvista
 
-import ansys.mapdl.core as pymapdl
-
-pymapdl.RUNNING_TESTS = True
-
-from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
-from ansys.mapdl.core.examples import vmfiles
-from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 from common import (
     Element,
     Node,
@@ -25,6 +17,9 @@ from common import (
     is_on_ci,
     is_on_local,
     is_on_ubuntu,
+    is_smp,
+    support_plotting,
+    testing_minimal,
 )
 
 ################################################################
@@ -32,24 +27,24 @@ from common import (
 # Setting testing environment
 # ---------------------------
 #
-# Necessary for CI plotting
-pyvista.OFF_SCREEN = True
+
+TESTING_MINIMAL = testing_minimal()
 
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()
 
-ON_UBUNTU = is_on_ubuntu()
+ON_UBUNTU = is_on_ubuntu()  # Tells if MAPDL is running on Ubuntu system or not.
+# Whether PyMAPDL is running on an ubuntu or different machine is irrelevant.
 ON_WINDOWS = platform == "win32"
 ON_LINUX = platform == "linux" or platform == "linux2"
 ON_MACOS = platform == "darwin"
 
 HAS_GRPC = has_grpc()
 HAS_DPF = has_dpf()
-SUPPORT_PLOTTING = pyvista.system_supports_plotting()
+SUPPORT_PLOTTING = support_plotting()
+IS_SMP = is_smp()
 
-
-# check if the user wants to permit pytest to start MAPDL
-START_INSTANCE = get_start_instance()
+QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
 
 ## Skip ifs
 skip_on_windows = pytest.mark.skipif(ON_WINDOWS, reason="Skip on Windows")
@@ -79,6 +74,106 @@ skip_if_no_has_dpf = pytest.mark.skipif(
     reason="""Requires DPF.""",
 )
 
+requires_linux = pytest.mark.skipif(not ON_LINUX, reason="This test requires Linux")
+requires_windows = pytest.mark.skipif(
+    not ON_WINDOWS, reason="This test requires Windows"
+)
+requires_on_cicd = pytest.mark.skipif(
+    not ON_CI, reason="This test requires to be on CICD"
+)
+
+
+def has_dependency(requirement):
+    try:
+        import_module(requirement)
+        return True
+    except ModuleNotFoundError:
+        return False
+
+
+def requires(requirement: str):
+    """Check requirements"""
+    requirement = requirement.lower()
+
+    if "grpc" == requirement:
+        return skip_if_no_has_grpc
+
+    elif "dpf" == requirement:
+        return skip_if_no_has_dpf
+
+    elif "local" == requirement:
+        return skip_if_not_local
+
+    elif "cicd" == requirement:
+        return skip_if_on_cicd
+
+    elif "nocicd" == requirement:
+        return skip_if_on_cicd
+
+    elif "xserver" == requirement:
+        return skip_no_xserver
+
+    elif "linux" == requirement:
+        return requires_linux
+
+    elif "nolinux" == requirement:
+        return skip_on_linux
+
+    elif "windows" == requirement:
+        return requires_windows
+
+    elif "nowindows" == requirement:
+        return skip_on_windows
+
+    elif "console" == requirement:
+        return pytest.mark.console
+
+    elif "corba" == requirement:
+        return pytest.mark.corba
+
+    else:
+        return requires_dependency(requirement)
+
+
+def requires_dependency(dependency: str):
+    try:
+        import_module(dependency)
+        return pytest.mark.skipif(
+            False, reason="Never skip"
+        )  # faking a null skipif decorator
+
+    except ModuleNotFoundError:
+        # package does not exist
+        return pytest.mark.skip(reason=f"Requires '{dependency}' package")
+
+
+################
+
+if has_dependency("ansys-tools-package"):
+    from ansys.tools.path import get_available_ansys_installations
+
+
+if has_dependency("pyvista"):
+    import pyvista
+
+    from ansys.mapdl.core.theme import _apply_default_theme
+
+    _apply_default_theme()
+
+    # Necessary for CI plotting
+    pyvista.OFF_SCREEN = True
+
+import ansys.mapdl.core as pymapdl
+
+pymapdl.RUNNING_TESTS = True
+
+from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
+from ansys.mapdl.core.examples import vmfiles
+from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+
+# check if the user wants to permit pytest to start MAPDL
+START_INSTANCE = get_start_instance()
+
 ################
 if os.name == "nt":
     os_msg = """SET PYMAPDL_START_INSTANCE=False
@@ -100,6 +195,7 @@ automatically find your Ansys installation.  Email the developer at:
 alexander.kaszynski@ansys.com
 
 """
+MAPDL_VERSION = None  # this is cached by mapdl fixture and used in the minimal testing
 
 if START_INSTANCE and not ON_LOCAL:
     raise MapdlRuntimeError(ERRMSG)
@@ -186,6 +282,20 @@ def pytest_collection_modifyitems(config, items):
 # ---------------------------
 #
 
+if has_dependency("pytest-pyvista"):
+
+    @pytest.fixture(autouse=True)
+    def wrapped_verify_image_cache(verify_image_cache, pytestconfig):
+        # Configuration
+        verify_image_cache.error_value = 500.0
+        verify_image_cache.warning_value = 200.0
+
+        # High variance test
+        verify_image_cache.var_error_value = 1000.0
+        verify_image_cache.var_warning_value = 1000.0
+
+        return verify_image_cache
+
 
 class Running_test:
     def __init__(self, active: bool = True) -> None:
@@ -234,6 +344,7 @@ def run_before_and_after_tests(request, mapdl):
         # Restoring the local configuration
         mapdl._local = local_
 
+    mapdl.gopr()
     yield  # this is where the testing happens
 
     # Teardown : fill with any logic you want
@@ -294,10 +405,10 @@ def mapdl(request, tmpdir_factory):
         run_location=run_path,
         cleanup_on_exit=cleanup,
         license_server_check=False,
-        additional_switches="-smp",
         start_timeout=50,
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
+    MAPDL_VERSION = mapdl.version  # Caching version
 
     if ON_CI:
         mapdl._local = ON_LOCAL  # CI: override for testing
@@ -529,6 +640,7 @@ def coupled_example(mapdl, cleared):
     mapdl_code = mapdl_code.replace(
         "SOLVE", "SOLVE\n/COM Ending script after first simulation\n/EOF"
     )
+    mapdl.finish()
     mapdl.input_strings(mapdl_code)
 
 
@@ -640,7 +752,6 @@ def contact_geom_and_mesh(mapdl):
     mapdl.vsweep("all")
     mapdl.allsel("all")
 
-    # mapdl.eplot()
     # ==========================================================
     # * Contact Pairs
     # ==========================================================
@@ -682,12 +793,10 @@ def contact_geom_and_mesh(mapdl):
     mapdl.mat(1)
     mapdl.asel("s", "", "", 5)
     mapdl.nsla("", 1)
-    # mapdl.nplot()
     mapdl.cm("tn.cnt", "node")  # Creating component on weld side of plate1
 
     mapdl.asel("s", "", "", 12)
     mapdl.nsla("", 1)
-    # mapdl.nplot()
     mapdl.cm("tn.tgt", "node")  # Creating component on weld side of plate2
 
     mapdl.allsel("all")
@@ -699,7 +808,6 @@ def contact_geom_and_mesh(mapdl):
     # for welding, 'C
     mapdl.real(6)
     mapdl.cmsel("s", "tn.cnt")
-    # mapdl.nplot()
     mapdl.esurf()
     mapdl.type(7)
     mapdl.real(6)
@@ -876,7 +984,6 @@ def cuadratic_beam_problem(mapdl):
 
     mapdl.mp("EX", 1, 30e6)
     mapdl.mp("PRXY", 1, 0.3)
-    print(mapdl.mplist())
 
     w_f = 1.048394965
     w_w = 0.6856481
@@ -891,17 +998,8 @@ def cuadratic_beam_problem(mapdl):
     # Define one node for the orientation of the beam cross-section.
     orient_node = mapdl.n(6, 60, 1)
 
-    # Print the list of the created nodes.
-    print(mapdl.nlist())
-
     for elem_num in range(1, 5):
         mapdl.e(elem_num, elem_num + 1, orient_node)
-
-    # Print the list of the created elements.
-    print(mapdl.elist())
-
-    # Display elements with their nodes numbers.
-    mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy", font_size=40)
 
     # BC for the beams seats
     mapdl.d(2, "UX", lab2="UY")

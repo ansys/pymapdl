@@ -15,7 +15,10 @@
 [Pp]ythonic
 [Pp]ythonically
 [Ss]uperelements
+[Vv]on Mises
+2D
 3-D
+3D
 aadd
 aas
 AAS
@@ -24,10 +27,12 @@ ALIS
 AMLs
 ans
 ANSYS
+Ansys Mechanical APDL
 APDL Math
 APDLMath
 APIs
 appen
+Apple Silicon
 argparse
 Arruda-Boyce
 BCs
@@ -58,8 +63,9 @@ extrem
 filname
 Fortran
 FSW
-Getting Started with PyMAPDL
+GitHub
 Gmsh
+GPa
 GUI
 hexahedral
 hostname
@@ -67,7 +73,6 @@ Imagemagick
 ImageMagick
 imagin
 importlib
-Intro to Ansys Mechanical APDL Scripting
 ist
 Julia
 Krylov
@@ -77,25 +82,31 @@ larg
 LDHI
 levl
 Linux
+MacOS
+mapdl
 MAPDL
 mater
 MATLAB
+matricies
 mesher
 midside
 Mises
 mkdir
 MSc
+Multi-[Ff]ield
 multipoint
 nce
 Newton-Raphson
 nin
 nonlinearities
+NORML
 NumPy
 onefile
 optiSLang
 parm
 performant
 PMLs
+POIN
 Poisson
 postprocessor
 Prasanna
@@ -134,6 +145,7 @@ trian
 UCnvrg
 uncompress
 unconverged
+unpause
 UNSYM
 unsymmetric
 UPF

@@ -1,6 +1,8 @@
 # Importing logging
 import logging
 import os
+import sys
+from warnings import warn
 
 import platformdirs
 
@@ -10,6 +12,33 @@ USER_DATA_PATH = platformdirs.user_data_dir(
 )
 if not os.path.exists(USER_DATA_PATH):  # pragma: no cover
     os.makedirs(USER_DATA_PATH)
+
+DEPRECATING_MINIMUM_PYTHON_VERSION = True
+MINIMUM_PYTHON_VERSION = (3, 8)
+
+first_time_file = os.path.join(USER_DATA_PATH, ".firstime")
+if not os.path.exists(first_time_file):  # pragma: no cover
+    py_ver = f"{sys.version_info[0]}.{sys.version_info[1]}"
+    py_ver_min = f"{MINIMUM_PYTHON_VERSION[0]}.{MINIMUM_PYTHON_VERSION[1]}"
+
+    if (
+        sys.version_info[1] == MINIMUM_PYTHON_VERSION[1]
+        and DEPRECATING_MINIMUM_PYTHON_VERSION
+    ):
+        warn(
+            f"Support for Python {py_ver} will be dropped in the next minor " "release."
+        )
+
+    if sys.version_info[1] <= MINIMUM_PYTHON_VERSION[1]:
+        warn(
+            f"Python {py_ver} is not being tested or officially supported. "
+            "It is recommended you use a newer version of Python. "
+            f"The mininimum supported and tested version is {py_ver_min}.\n\n"
+            "**This warning is shown only the first time you run PyMAPDL.**\n"
+        )
+
+    with open(first_time_file, "w") as fid:
+        fid.write("")
 
 EXAMPLES_PATH = os.path.join(USER_DATA_PATH, "examples")
 
@@ -44,14 +73,18 @@ except ModuleNotFoundError:  # pragma: no cover
 
 __version__ = importlib_metadata.version(__name__.replace(".", "-"))
 
-
-from ansys.tools.path.path import (
-    change_default_ansys_path,
-    find_ansys,
-    get_ansys_path,
-    get_available_ansys_installations,
-    save_ansys_path,
-)
+try:
+    from ansys.tools.path.path import (
+        change_default_ansys_path,
+        find_ansys,
+        get_ansys_path,
+        get_available_ansys_installations,
+        save_ansys_path,
+    )
+except:
+    # We don't really use these imports in the library. They are here for
+    # convenience.
+    pass
 
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.convert import convert_apdl_block, convert_script
@@ -70,7 +103,8 @@ from ansys.mapdl.core.theme import MapdlTheme, _apply_default_theme
 
 _HAS_ANSYS = _check_has_ansys()
 
-_apply_default_theme()
+if _HAS_PYVISTA:
+    _apply_default_theme()
 
 BUILDING_GALLERY = False
 RUNNING_TESTS = False

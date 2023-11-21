@@ -16,6 +16,8 @@ For more information on getting a licensed copy of Ansys, visit
    learning
    versioning
    running_mapdl
+   docker
+   macos
    wsl
    using_julia
    faq
@@ -33,7 +35,7 @@ Installation
 Python module
 ~~~~~~~~~~~~~
 The ``ansys.mapdl.core`` package currently supports Python 3.9 through
-Python 3.11 on Windows, Mac OS, and Linux.
+Python 3.12 on Windows, Mac OS, and Linux.
 
 Install the latest release from 
 `PyPi <pymapdl_pypi_>`_ with:
@@ -47,14 +49,14 @@ Alternatively, install the latest from
 
 .. code:: console
 
-   pip install git+https://github.com/pyansys/pymapdl.git
+   pip install git+https://github.com/ansys/pymapdl.git
 
 
 For a local *development* version, install with:
 
 .. code:: console
 
-   git clone https://github.com/pyansys/pymapdl.git
+   git clone https://github.com/ansys/pymapdl.git
    cd pymapdl
    pip install -e .
 

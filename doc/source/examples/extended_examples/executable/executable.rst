@@ -210,7 +210,7 @@ using this approach (non-tested):
 
       steps:
          - name: "Install Git and check out project"
-           uses: actions/checkout@v3
+           uses: actions/checkout@v4
 
          - name: "Set up Python"
            uses: actions/setup-python@v4
@@ -227,7 +227,7 @@ using this approach (non-tested):
            run: |
             python rotor.py 4 --density 7000
 
-         - name: "Postprocess images"
+         - name: "Postprocessing images"
            run: |
               COMPOSITE=/usr/bin/composite
               mogrify -mattecolor #f1ce80 -frame 10x10 volume.jpg

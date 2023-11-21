@@ -6,7 +6,12 @@ import shutil
 import urllib.request
 import zipfile
 
-import requests
+try:
+    import requests
+
+    _HAS_REQUESTS = True
+except ModuleNotFoundError:
+    _HAS_REQUESTS = False
 
 from ansys.mapdl import core as pymapdl
 
@@ -50,12 +55,15 @@ def _decompress(filename):
 def _get_file_url(filename, directory=None):
     if directory:
         return (
-            f"https://github.com/pyansys/example-data/raw/master/{directory}/{filename}"
+            f"https://github.com/ansys/example-data/raw/master/{directory}/{filename}"
         )
-    return f"https://github.com/pyansys/example-data/raw/master/{filename}"
+    return f"https://github.com/ansys/example-data/raw/master/{filename}"
 
 
 def _check_url_exist(url):
+    if not _HAS_REQUESTS:
+        raise ModuleNotFoundError("Examples module requires request module")
+
     response = requests.get(url)
     if response.status_code == 200:
         return [True]
@@ -124,7 +132,7 @@ def download_vtk_rotor():
     return _download_file("rotor.vtk", "geometry")[0]
 
 
-def _download_rotor_tech_demo_plot():
+def _download_rotor_tech_demo_vtk():
     """Download the rotor surface VTK file."""
     return _download_file("rotor2.vtk", "geometry")[0]
 

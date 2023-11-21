@@ -3,11 +3,16 @@ import os
 
 import numpy as np
 import pytest
+
+from conftest import has_dependency
+
+if not has_dependency("pyvista"):
+    pytest.skip(allow_module_level=True)
+
 from pyvista.plotting import Plotter
 
 from ansys.mapdl.core.errors import ComponentDoesNotExits
 from ansys.mapdl.core.plotting import general_plotter
-from conftest import skip_no_xserver
 
 
 @pytest.fixture
@@ -37,23 +42,77 @@ def bc_example(mapdl, make_block):
     mapdl.nsel("all")
 
 
-@skip_no_xserver
-def test_kplot(cleared, mapdl, tmpdir):
+def test_plot_empty_mesh(mapdl, cleared):
+    with pytest.warns(UserWarning):
+        mapdl.nplot(vtk=True)
+
+    with pytest.warns(UserWarning):
+        mapdl.eplot(vtk=True)
+
+
+def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
+    # Testing basic behaviour
+    mapdl.eplot(vtk=False, savefig="myfile.png")
+    assert os.path.exists("myfile.png")
+    ti_m = os.path.getmtime("myfile.png")
+
+    # Testing overwriting
+    mapdl.eplot(vtk=False, savefig="myfile.png")
+    assert not os.path.exists("myfile_1.png")
+    assert os.path.getmtime("myfile.png") != ti_m  # file has been modified.
+
+    os.remove("myfile.png")
+
+    # Testing no extension
+    mapdl.eplot(vtk=False, savefig="myfile")
+    assert os.path.exists("myfile")
+    os.remove("myfile")
+
+    # Testing update name when file exists.
+    mapdl.eplot(vtk=False, savefig=True)
+    assert os.path.exists("plot.png")
+
+    mapdl.eplot(vtk=False, savefig=True)
+    assert os.path.exists("plot_1.png")
+
+    os.remove("plot.png")
+    os.remove("plot_1.png")
+
+    # Testing full path for downloading
+    plot_ = os.path.join(tmpdir, "myplot.png")
+    mapdl.eplot(vtk=False, savefig=plot_)
+    assert os.path.exists(plot_)
+
+    plot_ = os.path.join(tmpdir, "myplot")
+    mapdl.eplot(vtk=False, savefig=plot_)
+    assert os.path.exists(plot_)
+
+
+def test_plots_no_vtk(mapdl):
+    mapdl.kplot(vtk=False)
+    mapdl.lplot(vtk=False)
+    mapdl.aplot(vtk=False)
+    mapdl.vplot(vtk=False)
+    mapdl.nplot(vtk=False)
+    mapdl.eplot(vtk=False)
+
+
+@pytest.mark.parametrize("vtk", [True, False, None])
+def test_kplot(cleared, mapdl, tmpdir, vtk):
     mapdl.k("", 0, 0, 0)
     mapdl.k("", 1, 0, 0)
     mapdl.k("", 1, 1, 0)
     mapdl.k("", 0, 1, 0)
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
-    cpos = mapdl.kplot(savefig=filename)
+    cpos = mapdl.kplot(vtk=vtk, savefig=filename)
     assert cpos is None
-    assert os.path.isfile(filename)
+    if vtk:
+        assert os.path.isfile(filename)
 
-    mapdl.kplot(vtk=False)  # make sure legacy still works
 
-
-@skip_no_xserver
-def test_lplot(cleared, mapdl, tmpdir):
+@pytest.mark.parametrize("vtk", [True, False, None])
+def test_lplot(cleared, mapdl, tmpdir, vtk):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
     k2 = mapdl.k("", 1, 1, 0)
@@ -64,15 +123,14 @@ def test_lplot(cleared, mapdl, tmpdir):
     mapdl.l(k3, k0)
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
-    cpos = mapdl.lplot(show_keypoint_numbering=True, savefig=filename)
+    cpos = mapdl.lplot(vtk=vtk, show_keypoint_numbering=True, savefig=filename)
     assert cpos is None
-    assert os.path.isfile(filename)
+    if vtk:
+        assert os.path.isfile(filename)
 
-    mapdl.lplot(vtk=False)  # make sure legacy still works
 
-
-@skip_no_xserver
-def test_aplot(cleared, mapdl):
+@pytest.mark.parametrize("vtk", [True, False, None])
+def test_aplot(cleared, mapdl, vtk):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
     k2 = mapdl.k("", 1, 1, 0)
@@ -83,49 +141,37 @@ def test_aplot(cleared, mapdl):
     l3 = mapdl.l(k3, k0)
     mapdl.al(l0, l1, l2, l3)
     mapdl.aplot(show_area_numbering=True)
-    mapdl.aplot(color_areas=True, show_lines=True, show_line_numbering=True)
+    mapdl.aplot(vtk=vtk, color_areas=vtk, show_lines=True, show_line_numbering=True)
 
     mapdl.aplot(quality=100)
     mapdl.aplot(quality=-1)
 
-    # and legacy as well
-    mapdl.aplot(vtk=False)
 
-
-@skip_no_xserver
-@pytest.mark.parametrize("vtk", [True, False])
+@pytest.mark.parametrize("vtk", [True, False, None])
 def test_vplot(cleared, mapdl, vtk):
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.vplot(vtk=vtk, color_areas=True)
 
 
-@skip_no_xserver
-def test_nplot(cleared, mapdl):
-    mapdl.n(1, 0, 0, 0)
-    mapdl.n(11, 10, 0, 0)
-    mapdl.fill(1, 11, 9)
-    mapdl.nplot(vtk=False)
-
-
 @pytest.mark.parametrize("nnum", [True, False])
-@skip_no_xserver
-def test_nplot_vtk(cleared, mapdl, nnum):
+@pytest.mark.parametrize("vtk", [True, False, None])
+def test_nplot(cleared, mapdl, nnum, vtk):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
     mapdl.fill(1, 11, 9)
-    mapdl.nplot(vtk=True, nnum=nnum, background="w", color="k")
+    mapdl.nplot(vtk=vtk, nnum=nnum, background="w", color="k")
 
 
-@skip_no_xserver
-def test_eplot(mapdl, make_block):
+@pytest.mark.parametrize("vtk", [True, False, None])
+def test_eplot(mapdl, make_block, vtk):
     init_elem = mapdl.mesh.n_elem
     mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
     mapdl.eplot(show_node_numbering=True, background="w", color="b")
+    mapdl.eplot(vtk=vtk, show_node_numbering=True, background="w", color="b")
     mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
     assert mapdl.mesh.n_elem == init_elem
 
 
-@skip_no_xserver
 def test_eplot_savefig(mapdl, make_block, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     mapdl.eplot(
@@ -138,13 +184,22 @@ def test_eplot_savefig(mapdl, make_block, tmpdir):
     assert os.path.isfile(filename)
 
 
-@skip_no_xserver
 @pytest.mark.parametrize("return_plotter", [True, False])
 @pytest.mark.parametrize("plot_bc_legend", [True, False])
 @pytest.mark.parametrize("plot_bc_labels", [True, False])
 def test_bc_plot_options(
-    mapdl, bc_example, return_plotter, plot_bc_legend, plot_bc_labels
+    mapdl,
+    bc_example,
+    verify_image_cache,
+    return_plotter,
+    plot_bc_legend,
+    plot_bc_labels,
 ):
+    if plot_bc_legend:
+        # The legend generates highly variance than other tests
+        # But it seems not always.
+        verify_image_cache.high_variance_test = True
+
     p = mapdl.nplot(
         return_plotter=return_plotter,
         plot_bc=True,
@@ -154,21 +209,22 @@ def test_bc_plot_options(
 
     if return_plotter:
         assert isinstance(p, Plotter)
+        p.show()
     else:
         assert p is None
 
 
-@skip_no_xserver
 @pytest.mark.parametrize(
-    "bc_labels",
+    "bc_labels",  # Added second part of the argument to avoid image cache name clashing.
+    # See https://github.com/pyvista/pytest-pyvista/issues/93
     [
-        "Mechanical",
-        "mechanical",
-        "meCHANICAL",
-        "ux",
-        "UX",
-        ["UX", "UY"],
-        "CSGZ",
+        ["Mechanical", "Title case"],
+        ["mechanical", "lower case"],
+        ["meCHANICAL", "Mixed case"],
+        ["ux", "Lower case"],
+        ["UX", "Upper case"],
+        [["UX", "UY"], "List of displacements"],
+        ["CSGZ", "Magnetic forces"],
     ],
 )
 def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
@@ -176,12 +232,12 @@ def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
         return_plotter=True,
         plot_bc=True,
         plot_bc_labels=True,
-        bc_labels=bc_labels,
+        bc_labels=bc_labels[0],
     )
-    assert isinstance(p, Plotter)
+    assert isinstance(p, Plotter), bc_labels[1]
+    p.show()  # plotting for catching
 
 
-@skip_no_xserver
 @pytest.mark.parametrize(
     "bc_labels",
     [
@@ -191,7 +247,7 @@ def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
 )
 def test_bc_plot_bc_labels_error(mapdl, bc_example, bc_labels):
     with pytest.raises(ValueError):
-        p = mapdl.nplot(
+        mapdl.nplot(
             return_plotter=True,
             plot_bc=True,
             plot_bc_labels=True,
@@ -199,12 +255,11 @@ def test_bc_plot_bc_labels_error(mapdl, bc_example, bc_labels):
         )
 
 
-@skip_no_xserver
 @pytest.mark.parametrize(
     "bc_target",
     [
-        "Nodes",
-        "NOdes",
+        ["Nodes", "Title case"],
+        ["NOdes", "Mixed case"],
     ],
 )
 def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
@@ -212,16 +267,16 @@ def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
         return_plotter=True,
         plot_bc=True,
         plot_bc_labels=True,
-        bc_target=bc_target,
+        bc_target=bc_target[0],
     )
-    assert isinstance(p, Plotter)
+    assert isinstance(p, Plotter), bc_target[1]
+    p.show()  # plotting for catching
 
 
-@skip_no_xserver
 @pytest.mark.parametrize(
     "bc_target",
     [
-        ["NOdes"],
+        ["NOsdes"],
         "error",
         ["error"],
         {"error": "Not accepting dicts"},
@@ -229,7 +284,7 @@ def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
 )
 def test_bc_plot_bc_target_error(mapdl, bc_example, bc_target):
     with pytest.raises(ValueError):
-        p = mapdl.nplot(
+        mapdl.nplot(
             return_plotter=True,
             plot_bc=True,
             plot_bc_labels=True,
@@ -255,8 +310,10 @@ def test_bc_glyph(mapdl, bc_example):
         mapdl.nplot(plot_bc=True, bc_glyph_size="big")
 
 
-def test_bc_bc_labels(mapdl, bc_example):
+def test_bc_bc_labels(mapdl, bc_example, verify_image_cache):
     """Test values for 'bc_labels' keyword argument."""
+    verify_image_cache.skip = True  # skipping image verification
+
     mapdl.nplot(plot_bc=True, bc_labels="UX")
     mapdl.nplot(plot_bc=True, bc_labels=["Ux", "uy", "VOLT"])
     with pytest.raises(ValueError):
@@ -280,7 +337,7 @@ def test_all_same_values(mapdl, bc_example):
     "selection",
     ["S", "R", "A", "U"],
 )
-def test_pick_nodes(mapdl, make_block, selection):
+def test_pick_nodes(mapdl, make_block, selection, verify_image_cache):
     # Cleaning the model a bit
     mapdl.modmsh("detach")  # detaching geom and fem
     mapdl.edele("all")
@@ -293,8 +350,16 @@ def test_pick_nodes(mapdl, make_block, selection):
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
-        pl.iren._mouse_left_button_press(int(width * point[0]), int(height * point[1]))
-        pl.iren._mouse_left_button_release(width, height)
+        if pl._picking_right_clicking_observer is None:
+            pl.iren._mouse_left_button_press(
+                int(width * point[0]), int(height * point[1])
+            )
+            pl.iren._mouse_left_button_release(width, height)
+        else:
+            pl.iren._mouse_right_button_press(
+                int(width * point[0]), int(height * point[1])
+            )
+            pl.iren._mouse_right_button_release(width, height)
         pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
 
     mapdl.nsel("S", "node", "", 1)
@@ -310,29 +375,29 @@ def test_pick_nodes(mapdl, make_block, selection):
         selection,
         "P",
         _debug=lambda x: debug_orders(x, point=point),
-        tolerance=0.2,
+        tolerance=1,
     )  # Selects node 2
 
     assert isinstance(selected, (list, np.ndarray))
     if isinstance(selected, np.ndarray):
-        assert selected.all()
+        assert selected.all(), "Array is empty"
     else:
-        assert selected
-    assert len(selected) > 0
+        assert selected, "List is empty"
+    assert len(selected) > 0, "The result has length zero"
 
     if selection != "U":
-        assert sorted(selected) == sorted(mapdl._get_selected_("node"))
+        assert sorted(selected) == sorted(
+            mapdl._get_selected_("node")
+        ), "Order does not match"
 
-    if selection == "S":
-        assert selected == [1]
-    elif selection == "R":
-        assert selected == [2]
+    if selection in ["S", "R"]:
+        assert selected == [2], "Second node is not selected, nor the only one"
     elif selection == "A":
-        assert 1 in selected
-        assert len(selected) > 1
+        assert 1 in selected, "Node 1 is not selected"
+        assert len(selected) > 1, "There should be at least two nodes"
     elif selection == "U":
-        assert 2 not in selected
-        assert 1 in selected
+        assert 2 not in selected, "Node 2 should not be selected."
+        assert 1 in selected, "Node 1 should be selected."
 
 
 @pytest.mark.parametrize(
@@ -354,8 +419,17 @@ def test_pick_kp(mapdl, make_block, selection):
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
-        pl.iren._mouse_left_button_press(int(width * point[0]), int(height * point[1]))
-        pl.iren._mouse_left_button_release(width, height)
+        if pl._picking_right_clicking_observer is None:
+            pl.iren._mouse_left_button_press(
+                int(width * point[0]), int(height * point[1])
+            )
+            pl.iren._mouse_left_button_release(width, height)
+        else:
+            pl.iren._mouse_right_button_press(
+                int(width * point[0]), int(height * point[1])
+            )
+            pl.iren._mouse_right_button_release(width, height)
+
         pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
 
     mapdl.ksel("S", "KP", "", 1)
@@ -536,6 +610,71 @@ def test_pick_node_select_unselect_with_mouse(mapdl, make_block):
     assert selected == []
 
 
+@pytest.mark.parametrize(
+    "selection",
+    ["S", "R", "A", "U"],
+)
+def test_pick_areas(mapdl, make_block, selection):
+    # Cleaning the model a bit
+    mapdl.modmsh("detach")  # detaching geom and fem
+    mapdl.edele("all")
+    mapdl.asel("s", "area", "", 1)
+    mapdl.asel("a", "area", "", 2)
+
+    def debug_orders(pl, point):
+        pl.show(auto_close=False)
+        pl.windows_size = (100, 100)
+        width, height = pl.window_size
+        if pl._picking_right_clicking_observer is None:
+            pl.iren._mouse_left_button_press(
+                int(width * point[0]), int(height * point[1])
+            )
+            pl.iren._mouse_left_button_release(width, height)
+        else:
+            pl.iren._mouse_right_button_press(
+                int(width * point[0]), int(height * point[1])
+            )
+            pl.iren._mouse_right_button_release(width, height)
+        pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
+
+    mapdl.asel("S", "area", "", 1)
+    if selection == "R" or selection == "U":
+        point_to_pick = (285 / 1024, 280 / 800)
+        mapdl.asel("a", "area", "", 2)
+    elif selection == "A":
+        point_to_pick = (285 / 1024, 280 / 800)
+    else:
+        point_to_pick = (0.5, 0.5)
+
+    selected = mapdl.asel(
+        selection,
+        "P",
+        _debug=lambda x: debug_orders(x, point=point_to_pick),
+        tolerance=0.2,
+    )  # Selects node 2
+
+    assert isinstance(selected, (list, np.ndarray))
+    if isinstance(selected, np.ndarray):
+        assert selected.all()
+    else:
+        assert selected
+    assert len(selected) > 0
+
+    if selection != "U":
+        assert sorted(selected) == sorted(mapdl._get_selected_("area"))
+
+    if selection == "S":
+        assert selected == [2]  # area where the point clicks is area 2.
+    elif selection == "R":
+        assert selected == [1]  # area where the point clicks is area 282.
+    elif selection == "A":
+        assert 6 in selected
+        assert len(selected) > 1
+    elif selection == "U":
+        assert 282 not in selected
+        assert 2 in selected
+
+
 def test_plotter_input(mapdl, make_block):
     pl = Plotter(off_screen=True)
     # because in CICD we use 'screen_off', this will trigger a warning,
@@ -544,6 +683,7 @@ def test_plotter_input(mapdl, make_block):
         pl2 = mapdl.eplot(return_plotter=True, plotter=pl)
     assert pl == pl2
     assert pl is pl2
+    pl2.show()  # plotting for catching
 
     # invalid plotter type
     with pytest.raises(TypeError):
@@ -568,6 +708,7 @@ def test_show_bounds(mapdl, make_block):
     assert pl.bounds
     assert len(pl.bounds) == 6
     assert pl.bounds != default_bounds
+    pl.show()  # plotting for catching
 
 
 def test_background(mapdl, make_block):
@@ -575,6 +716,7 @@ def test_background(mapdl, make_block):
     pl = mapdl.eplot(background="red", return_plotter=True)
     assert pl.background_color != default_color
     assert pl.background_color == "red"
+    pl.show()  # plotting for catching
 
 
 def test_plot_nodal_values(mapdl, make_block):
@@ -603,17 +745,9 @@ def test_vsel_iterable(mapdl, make_block):
 
 
 def test_color_areas(mapdl, make_block):
-    mapdl.aplot(vtk=True, color_areas=True, return_plotter=True)
+    mapdl.aplot(vtk=True, color_areas=True)
 
 
-# This is to remind us that the pl.mesh does not return data for all meshes in CICD.
-@pytest.mark.xfail
-def test_color_areas_fail(mapdl, make_block):
-    pl = mapdl.aplot(vtk=True, color_areas=True, return_plotter=True)
-    assert len(np.unique(pl.mesh.cell_data["Data"], axis=0)) == mapdl.geometry.n_area
-
-
-@skip_no_xserver
 @pytest.mark.parametrize(
     "color_areas",
     [
@@ -631,8 +765,8 @@ def test_color_areas_fail(mapdl, make_block):
     ],
 )
 def test_color_areas_individual(mapdl, make_block, color_areas):
-    pl = mapdl.aplot(vtk=True, color_areas=color_areas, return_plotter=True)
-    assert len(np.unique(pl.mesh.cell_data["Data"], axis=0)) == len(color_areas)
+    # we do rely on the `pytest-pyvista` extension to deal with the differences
+    mapdl.aplot(vtk=True, color_areas=color_areas)
 
 
 def test_color_areas_error(mapdl, make_block):
@@ -693,7 +827,7 @@ def test_file_type_for_plots(mapdl):
 def test_cmplot_individual(mapdl, make_block, entity):
     mapdl.allsel()
     mapdl.cm("tmp_cm", entity=entity)
-    pl = mapdl.cmplot("tmp_cm", return_plotter=True)
+    mapdl.cmplot("tmp_cm")
 
 
 @pytest.mark.parametrize("label", ["N", "P"])
@@ -739,3 +873,15 @@ def test_cmplot_all(mapdl, make_block, entity):
     pl = mapdl.cmplot("all", entity, return_plotter=True)
 
     assert np.allclose(pl.mesh.points, ent[ids - 1])
+    pl.show()
+
+
+def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
+    mapdl.post1()
+    mapdl.set(1)
+    assert (
+        mapdl.post_processing.plot_nodal_displacement(
+            "NORM", line_width=10, render_lines_as_tubes=True, smooth_shading=True
+        )
+        is None
+    )

@@ -6,18 +6,22 @@ import re
 import shutil
 import time
 
-from ansys.mapdl.reader import examples
-from ansys.mapdl.reader.rst import Result
 import grpc
 import numpy as np
 import psutil
 import pytest
-from pyvista import MultiBlock
+
+from conftest import has_dependency
+
+if has_dependency("pyvista"):
+    from pyvista import MultiBlock
+
+if has_dependency("ansys-mapdl-reader"):
+    from ansys.mapdl.reader.rst import Result
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
-    DifferentSessionConnectionError,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlConnectionError,
@@ -26,12 +30,11 @@ from ansys.mapdl.core.errors import (
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string
-from conftest import (
-    skip_if_not_local,
-    skip_if_on_cicd,
-    skip_no_xserver,
-    skip_on_windows,
-)
+from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
+
+# Path to files needed for examples
+PATH = os.path.dirname(os.path.abspath(__file__))
+test_files = os.path.join(PATH, "test_files")
 
 CMD_BLOCK = """/prep7
 ! Mat
@@ -154,7 +157,7 @@ def warns_in_cdread_error_log(mapdl, tmpdir):
         return any(warns)
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_internal_name_grpc(mapdl):
     assert str(mapdl._ip) in mapdl.name
     assert str(mapdl._port) in mapdl.name
@@ -179,7 +182,7 @@ def test_jobname(mapdl, cleared):
     assert mapdl.jobname == other_jobname
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_server_version(mapdl):
     if mapdl.version == 20.2:
         assert mapdl._server_version == (0, 0, 0)
@@ -194,7 +197,7 @@ def test_server_version(mapdl):
         assert mapdl._server_version[0] >= 0
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_global_mute(mapdl):
     mapdl.mute = True
     assert mapdl.mute is True
@@ -216,7 +219,7 @@ def test_parsav_parres(mapdl, cleared, tmpdir):
     assert np.allclose(mapdl.parameters["MYARR"], arr)
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_no_results(mapdl, cleared, tmpdir):
     pth = str(tmpdir.mkdir("tmpdir"))
     mapdl.jobname = random_string()
@@ -304,7 +307,8 @@ def test_allow_ignore(mapdl):
     mapdl.allow_ignore = True
     assert mapdl.allow_ignore is True
     mapdl.k()
-    assert mapdl.geometry.n_keypoint == 0
+    with pytest.raises(ValueError, match="There are no KEYPOINTS defined"):
+        mapdl.get_value("KP", 0, "count")
     mapdl.allow_ignore = False
 
 
@@ -345,7 +349,7 @@ def test_ignore_error(mapdl):
     assert mapdl.ignore_error is False
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_list(mapdl, tmpdir):
     """Added for backwards compatibility"""
     fname = "tmp.txt"
@@ -359,51 +363,10 @@ def test_list(mapdl, tmpdir):
     assert output == txt
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_invalid_input(mapdl):
     with pytest.raises(FileNotFoundError):
         mapdl.input("thisisnotafile")
-
-
-@skip_no_xserver
-@pytest.mark.parametrize("vtk", [True, False, None])
-def test_kplot(cleared, mapdl, tmpdir, vtk):
-    mapdl.k("", 0, 0, 0)
-    mapdl.k("", 1, 0, 0)
-    mapdl.k("", 1, 1, 0)
-    mapdl.k("", 0, 1, 0)
-
-    filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
-    cpos = mapdl.kplot(vtk=vtk, savefig=filename)
-    assert cpos is None
-    if vtk:
-        assert os.path.isfile(filename)
-
-
-@skip_no_xserver
-@pytest.mark.parametrize("vtk", [True, False, None])
-def test_aplot(cleared, mapdl, vtk):
-    k0 = mapdl.k("", 0, 0, 0)
-    k1 = mapdl.k("", 1, 0, 0)
-    k2 = mapdl.k("", 1, 1, 0)
-    k3 = mapdl.k("", 0, 1, 0)
-    l0 = mapdl.l(k0, k1)
-    l1 = mapdl.l(k1, k2)
-    l2 = mapdl.l(k2, k3)
-    l3 = mapdl.l(k3, k0)
-    mapdl.al(l0, l1, l2, l3)
-    mapdl.aplot(show_area_numbering=True)
-    mapdl.aplot(color_areas=vtk, show_lines=True, show_line_numbering=True)
-
-    mapdl.aplot(quality=100)
-    mapdl.aplot(quality=-1)
-
-
-@skip_no_xserver
-@pytest.mark.parametrize("vtk", [True, False, None])
-def test_vplot(cleared, mapdl, vtk):
-    mapdl.block(0, 1, 0, 1, 0, 1)
-    mapdl.vplot(vtk=vtk, color_areas=True)
 
 
 def test_keypoints(cleared, mapdl):
@@ -417,11 +380,14 @@ def test_keypoints(cleared, mapdl):
         knum.append(i + 1)
 
     assert mapdl.geometry.n_keypoint == 4
-    assert isinstance(mapdl.geometry.keypoints, MultiBlock)
-    assert np.allclose(kps, mapdl.geometry.get_keypoints(return_as_array=True))
     assert np.allclose(knum, mapdl.geometry.knum)
 
+    if has_dependency("pyvista"):
+        assert isinstance(mapdl.geometry.keypoints, MultiBlock)
+        assert np.allclose(kps, mapdl.geometry.get_keypoints(return_as_array=True))
 
+
+@requires("pyvista")
 def test_lines(cleared, mapdl):
     assert mapdl.geometry.n_line == 0
 
@@ -435,35 +401,20 @@ def test_lines(cleared, mapdl):
     l3 = mapdl.l(k3, k0)
 
     lines = mapdl.geometry.lines
-    assert isinstance(lines, MultiBlock)
     assert np.allclose(mapdl.geometry.lnum, [l0, l1, l2, l3])
     assert mapdl.geometry.n_line == 4
 
-
-@skip_no_xserver
-@pytest.mark.parametrize("vtk", [True, False, None])
-def test_lplot(cleared, mapdl, tmpdir, vtk):
-    k0 = mapdl.k("", 0, 0, 0)
-    k1 = mapdl.k("", 1, 0, 0)
-    k2 = mapdl.k("", 1, 1, 0)
-    k3 = mapdl.k("", 0, 1, 0)
-    mapdl.l(k0, k1)
-    mapdl.l(k1, k2)
-    mapdl.l(k2, k3)
-    mapdl.l(k3, k0)
-
-    filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
-    cpos = mapdl.lplot(vtk=vtk, show_keypoint_numbering=True, savefig=filename)
-    assert cpos is None
-    if vtk:
-        assert os.path.isfile(filename)
+    if has_dependency("pyvista"):
+        assert isinstance(lines, MultiBlock)
 
 
-@skip_if_not_local
+@requires("local")
 def test_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
-    mapdl = launch_mapdl(start_timeout=30, log_apdl=filename)
+    mapdl = launch_mapdl(
+        start_timeout=30, log_apdl=filename, additional_switches=QUICK_LAUNCH_SWITCHES
+    )
 
     mapdl.prep7()
     mapdl.run("!comment test")
@@ -617,24 +568,6 @@ def test_enum(mapdl, make_block):
     assert np.allclose(mapdl.mesh.enum, range(1, mapdl.mesh.n_elem + 1))
 
 
-@pytest.mark.parametrize("nnum", [True, False])
-@pytest.mark.parametrize("vtk", [True, False, None])
-@skip_no_xserver
-def test_nplot_vtk(cleared, mapdl, nnum, vtk):
-    mapdl.n(1, 0, 0, 0)
-    mapdl.n(11, 10, 0, 0)
-    mapdl.fill(1, 11, 9)
-    mapdl.nplot(vtk=vtk, nnum=nnum, background="w", color="k")
-
-
-@skip_no_xserver
-def test_nplot(cleared, mapdl):
-    mapdl.n(1, 0, 0, 0)
-    mapdl.n(11, 10, 0, 0)
-    mapdl.fill(1, 11, 9)
-    mapdl.nplot(vtk=False)
-
-
 def test_elements(cleared, mapdl):
     mapdl.et(1, 185)
 
@@ -756,30 +689,6 @@ def test_builtin_parameters(mapdl, cleared):
     assert mapdl.parameters.real == 1
 
 
-@skip_no_xserver
-@pytest.mark.parametrize("vtk", [True, False, None])
-def test_eplot(mapdl, make_block, vtk):
-    init_elem = mapdl.mesh.n_elem
-    mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
-    mapdl.eplot(show_node_numbering=True, background="w", color="b")
-    mapdl.eplot(vtk=vtk, show_node_numbering=True, background="w", color="b")
-    mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
-    assert mapdl.mesh.n_elem == init_elem
-
-
-@skip_no_xserver
-def test_eplot_savefig(mapdl, make_block, tmpdir):
-    filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
-    mapdl.eplot(
-        background="w",
-        show_edges=True,
-        smooth_shading=True,
-        window_size=[1920, 1080],
-        savefig=filename,
-    )
-    assert os.path.isfile(filename)
-
-
 def test_partial_mesh_nnum(mapdl, make_block):
     allsel_nnum_old = mapdl.mesh.nnum
     mapdl.nsel("S", "NODE", vmin=100, vmax=200)
@@ -790,6 +699,7 @@ def test_partial_mesh_nnum(mapdl, make_block):
     assert np.allclose(allsel_nnum_old, mapdl.mesh.nnum)
 
 
+@requires("pyvista")
 def test_partial_mesh_nnum2(mapdl, make_block):
     mapdl.nsel("S", "NODE", vmin=1, vmax=10)
     mapdl.esel("S", "ELEM", vmin=10, vmax=20)
@@ -800,7 +710,7 @@ def test_cyclic_solve(mapdl, cleared):
     # build the cyclic model
     mapdl.prep7()
     mapdl.shpp("off")
-    mapdl.cdread("db", examples.sector_archive_file)
+    mapdl.cdread("db", os.path.join(test_files, "sector.cdb"))
     mapdl.prep7()
     time.sleep(1.0)
     mapdl.cyclic()
@@ -883,7 +793,7 @@ def test_load_array_failure_types(mapdl, array):
     assert mapdl.parameters["myarr"].ndim == array.ndim + 1
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_lssolve(mapdl, cleared):
     mapdl.mute = True
 
@@ -979,7 +889,7 @@ def test_cdread(mapdl, cleared):
         mapdl.cdread("test", "model2", "cdb")
 
 
-@skip_if_on_cicd
+@requires("local")
 def test_cdread_different_location(mapdl, cleared, tmpdir):
     random_letters = mapdl.directory.split("/")[0][-3:0]
     dirname = "tt" + random_letters
@@ -1125,7 +1035,7 @@ def test_inval_commands_silent(mapdl, tmpdir, cleared):
     mapdl._run("/gopr")  # getting settings back
 
 
-@skip_if_on_cicd
+@requires("local")
 def test_path_without_spaces(mapdl, path_tests):
     old_path = mapdl.directory
     try:
@@ -1135,7 +1045,7 @@ def test_path_without_spaces(mapdl, path_tests):
         mapdl.directory = old_path
 
 
-@skip_if_on_cicd
+@requires("local")
 def test_path_with_spaces(mapdl, path_tests):
     old_path = mapdl.directory
     try:
@@ -1145,7 +1055,7 @@ def test_path_with_spaces(mapdl, path_tests):
         mapdl.directory = old_path
 
 
-@skip_if_on_cicd
+@requires("local")
 def test_path_with_single_quote(mapdl, path_tests):
     with pytest.raises(MapdlRuntimeError):
         mapdl.cwd(path_tests.path_with_single_quote)
@@ -1175,7 +1085,8 @@ def test_cwd(mapdl, tmpdir):
         mapdl.cwd(old_path)
 
 
-@skip_if_on_cicd
+@requires("nocicd")
+@requires("local")
 def test_inquire(mapdl):
     # Testing basic functions (First block: Functions)
     assert "apdl" in mapdl.inquire("", "apdl").lower()
@@ -1208,6 +1119,7 @@ def test_ksel(mapdl, cleared):
     mapdl.prep7()
     assert "SELECTED" in mapdl.ksel("S", "KP", vmin=1, return_mapdl_output=True)
     assert "SELECTED" in mapdl.ksel("S", "KP", "", 1, return_mapdl_output=True)
+
     assert 1 in mapdl.ksel("S", "KP", vmin=1)
 
 
@@ -1402,7 +1314,10 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     captured = capsys.readouterr()  # To flush it
     output = mapdl.mpread(fname, ext)
     captured = capsys.readouterr()
-    assert f"Uploading {fname}.{ext}:" in captured.err
+    if has_dependency("tqdm"):
+        # Printing uploading requires tqdm
+        assert f"Uploading {fname}.{ext}:" in captured.err
+
     assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
     assert "TEMPERATURE TABLE ERASED." in output
     assert "0.4000000" in output
@@ -1446,14 +1361,6 @@ def test_mapdl_str(mapdl):
     assert "MAPDL Version" in out
 
 
-def test_plot_empty_mesh(mapdl, cleared):
-    with pytest.warns(UserWarning):
-        mapdl.nplot(vtk=True)
-
-    with pytest.warns(UserWarning):
-        mapdl.eplot(vtk=True)
-
-
 def test_equal_in_comments_and_title(mapdl):
     mapdl.com("=====")
     mapdl.title("This is = ")
@@ -1465,7 +1372,7 @@ def test_result_file(mapdl, solved_box):
     assert isinstance(mapdl.result_file, str)
 
 
-@skip_if_on_cicd
+@requires("local")
 def test_file_command_local(mapdl, cube_solve, tmpdir):
     rst_file = mapdl.result_file
 
@@ -1528,7 +1435,7 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
     assert "DATA FILE CHANGED TO FILE" in output
 
 
-@skip_on_windows
+@requires("linux")
 def test_lgwrite(mapdl, cleared, tmpdir):
     filename = str(tmpdir.join("file.txt"))
 
@@ -1599,7 +1506,7 @@ def test_non_interactive(mapdl, cleared):
         mapdl.k(1, 1, 1, 1)
         mapdl.k(2, 2, 2, 2)
 
-    assert len(mapdl.geometry.keypoints) == 2
+    assert mapdl.get_value("KP", 0, "count") == 2
 
 
 def test_ignored_command(mapdl, cleared):
@@ -1684,7 +1591,7 @@ def test_set_list(mapdl, cube_solve):
 
 
 def test_mode(mapdl):
-    assert mapdl.mode == "grpc"
+    assert mapdl.connection == "grpc"
     assert mapdl.is_grpc
     assert not mapdl.is_corba
     assert not mapdl.is_console
@@ -1826,7 +1733,7 @@ def test_get_file_name(mapdl):
     )
 
 
-@skip_if_not_local
+@requires("local")
 def test_cache_pids(mapdl):
     assert mapdl._pids
     mapdl._cache_pids()  # Recache pids
@@ -1835,7 +1742,7 @@ def test_cache_pids(mapdl):
         assert "ansys" in "".join(psutil.Process(each).cmdline())
 
 
-@skip_if_not_local
+@requires("local")
 def test_process_is_alive(mapdl):
     assert mapdl.process_is_alive
 
@@ -1891,18 +1798,6 @@ def test_session_id(mapdl, running_test):
     mapdl._session_id_ = id_
 
 
-def test_session_id_different(mapdl, running_test):
-    # Assert it works
-    with running_test():
-        assert mapdl.prep7()
-
-    mapdl._run(f"{SESSION_ID_NAME}='1234'")
-
-    with running_test():
-        with pytest.raises(DifferentSessionConnectionError):
-            mapdl.prep7()
-
-
 def test_check_empty_session_id(mapdl):
     # it should run normal
     mapdl._session_id_ = None
@@ -1911,6 +1806,7 @@ def test_check_empty_session_id(mapdl):
     assert mapdl.prep7()
 
 
+@requires("requests")  # Requires 'requests' package
 def test_igesin_whitespace(mapdl, cleared, tmpdir):
     bracket_file = pymapdl.examples.download_bracket()
     assert os.path.isfile(bracket_file)
@@ -1928,21 +1824,13 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
     assert int(n_ent[0]) > 0
 
 
-def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
-    mapdl.post1()
-    mapdl.set(1)
-    assert (
-        mapdl.post_processing.plot_nodal_displacement(
-            "NORM", line_width=10, render_lines_as_tubes=True, smooth_shading=True
-        )
-        is None
-    )
-
-
-@skip_if_not_local
+@requires("local")
 def test_save_on_exit(mapdl, cleared):
-    mapdl2 = launch_mapdl(license_server_check=False)
-    mapdl2.parameters["my_par"] = "asdf"
+    mapdl2 = launch_mapdl(
+        license_server_check=False, additional_switches=QUICK_LAUNCH_SWITCHES
+    )
+    mapdl2.parameters["my_par"] = "initial_value"
+
     db_name = mapdl2.jobname + ".db"
     db_dir = mapdl2.directory
     db_path = os.path.join(db_dir, db_name)
@@ -1950,22 +1838,31 @@ def test_save_on_exit(mapdl, cleared):
     mapdl2.save(db_name)
     assert os.path.exists(db_path)
 
-    mapdl2.parameters["my_par"] = "qwerty"
+    mapdl2.parameters["my_par"] = "final_value"
     mapdl2.exit()
 
-    mapdl2 = launch_mapdl(license_server_check=False)
+    mapdl2 = launch_mapdl(
+        license_server_check=False, additional_switches=QUICK_LAUNCH_SWITCHES
+    )
     mapdl2.resume(db_path)
-    assert mapdl2.parameters["my_par"] == "qwerty"
+    if mapdl.version >= 24.1:
+        assert mapdl2.parameters["my_par"] == "initial_value"
+    else:
+        # This fails in earlier versions of MAPDL
+        assert mapdl2.parameters["my_par"] != "initial_value"
+        assert mapdl2.parameters["my_par"] == "final_value"
 
-    mapdl2.parameters["my_par"] = "zxcv"
+    mapdl2.parameters["my_par"] = "new_initial_value"
     db_name = mapdl2.jobname + ".db"  # reupdating db path
     db_dir = mapdl2.directory
     db_path = os.path.join(db_dir, db_name)
     mapdl2.exit(save=True)
 
-    mapdl2 = launch_mapdl(license_server_check=False)
+    mapdl2 = launch_mapdl(
+        license_server_check=False, additional_switches=QUICK_LAUNCH_SWITCHES
+    )
     mapdl2.resume(db_path)
-    assert mapdl2.parameters["my_par"] == "zxcv"
+    assert mapdl2.parameters["my_par"] == "new_initial_value"
     mapdl2.exit()
 
 
@@ -2025,6 +1922,7 @@ def test_rlblock_rlblock_num(mapdl):
     assert [1, 2, 4] == mapdl.mesh.rlblock_num
 
 
+@requires("ansys-mapdl-reader")
 def test_download_results_non_local(mapdl, cube_solve):
     assert mapdl.result is not None
     assert isinstance(mapdl.result, Result)
@@ -2041,48 +1939,188 @@ def test__flush_stored(mapdl):
     assert not mapdl._stored_commands
 
 
-def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
-    # Testing basic behaviour
-    mapdl.eplot(vtk=False, savefig="myfile.png")
-    assert os.path.exists("myfile.png")
-    ti_m = os.path.getmtime("myfile.png")
-
-    # Testing overwriting
-    mapdl.eplot(vtk=False, savefig="myfile.png")
-    assert not os.path.exists("myfile_1.png")
-    assert os.path.getmtime("myfile.png") != ti_m  # file has been modified.
-
-    os.remove("myfile.png")
-
-    # Testing no extension
-    mapdl.eplot(vtk=False, savefig="myfile")
-    assert os.path.exists("myfile")
-    os.remove("myfile")
-
-    # Testing update name when file exists.
-    mapdl.eplot(vtk=False, savefig=True)
-    assert os.path.exists("plot.png")
-
-    mapdl.eplot(vtk=False, savefig=True)
-    assert os.path.exists("plot_1.png")
-
-    os.remove("plot.png")
-    os.remove("plot_1.png")
-
-    # Testing full path for downloading
-    plot_ = os.path.join(tmpdir, "myplot.png")
-    mapdl.eplot(vtk=False, savefig=plot_)
-    assert os.path.exists(plot_)
-
-    plot_ = os.path.join(tmpdir, "myplot")
-    mapdl.eplot(vtk=False, savefig=plot_)
-    assert os.path.exists(plot_)
+def test_exited(mapdl):
+    assert mapdl.exited == mapdl._exited
+    assert isinstance(mapdl.exited, bool)
 
 
-def test_plots_no_vtk(mapdl):
-    mapdl.kplot(vtk=False)
-    mapdl.lplot(vtk=False)
-    mapdl.aplot(vtk=False)
-    mapdl.vplot(vtk=False)
-    mapdl.nplot(vtk=False)
-    mapdl.eplot(vtk=False)
+def test_exiting(mapdl):
+    assert mapdl.exiting == mapdl._exiting
+    assert isinstance(mapdl.exiting, bool)
+
+
+def test_check_status(mapdl):
+    assert mapdl.check_status == "OK"
+
+    mapdl._exited = True
+    assert mapdl.exited
+    assert mapdl.check_status == "exited"
+    mapdl._exited = False
+
+    mapdl._exiting = True
+    assert mapdl.exiting
+    assert mapdl.check_status == "exiting"
+    mapdl._exiting = False
+
+
+def test_ip(mapdl):
+    assert mapdl._ip == mapdl.ip
+    assert isinstance(mapdl.ip, str)
+
+
+def test_port(mapdl):
+    assert mapdl.port == mapdl._port
+    assert isinstance(mapdl.port, int)
+
+
+def test_distributed(mapdl):
+    if ON_CI and IS_SMP and not ON_LOCAL:
+        assert not mapdl._distributed
+    else:
+        assert mapdl._distributed
+
+
+def test_non_used_kwargs(mapdl):
+    with pytest.warns(UserWarning):
+        mapdl.prep7(non_valid_argument=2)
+
+    with pytest.warns(UserWarning):
+        mapdl.run("/prep7", True, False, unvalid_argument=2)
+
+    kwarg = {"unvalid_argument": 2}
+    with pytest.warns(UserWarning):
+        mapdl.run("/prep7", True, None, **kwarg)
+
+
+def test_non_valid_kwarg(mapdl):
+    mapdl.prep7()
+    mapdl.blc4(0, 0, 1, 1, 1)
+
+    with pytest.warns(UserWarning):
+        mapdl.cdwrite(options="DB", fname="test1", ext="cdb")
+
+
+def test_check_parameter_names(mapdl):
+    with pytest.raises(ValueError):
+        mapdl.parameters["_dummy"] = 1
+
+    mapdl.check_parameter_names = False
+    mapdl.parameters["_dummy"] = 1
+    mapdl.check_parameter_names = True  # returning to default
+
+
+@requires("pyvista")
+def test_components_selection_keep_between_plots(mapdl, cube_solve):
+    mapdl.cm("mycm", "volu")
+    assert "MYCM" in mapdl.cmlist()
+    assert "mycm" in mapdl.components
+
+    mapdl.vplot()
+
+    assert "MYCM" in mapdl.cmlist()
+    assert "mycm" in mapdl.components
+
+
+def test_saving_selection_context(mapdl, cube_solve):
+    mapdl.allsel()
+
+    for i in range(1, 4):
+        mapdl.nsel("s", "", "", i)
+        mapdl.cm(f"nod_selection_{i}", "node")
+
+    for i in range(1, 4):
+        mapdl.esel("s", "", "", i)
+        mapdl.cm(f"elem_selection_{i}", "elem")
+
+    mapdl.cmsel("s", "nod_selection_1")
+    assert "nod_selection_1".upper() in mapdl.cmlist()
+    assert "nod_selection_1" in mapdl.components
+
+    mapdl.cmsel("a", "elem_selection_1")
+    assert "elem_selection_1".upper() in mapdl.cmlist()
+    assert "elem_selection_1" in mapdl.components
+    assert "nod_selection_1".upper() in mapdl.cmlist()
+    assert "nod_selection_1" in mapdl.components
+
+    with mapdl.save_selection:
+        mapdl.cmsel("a", "nod_selection_2")
+        assert "nod_selection_2".upper() in mapdl.cmlist()
+        assert "nod_selection_2" in mapdl.components
+
+        mapdl.cmsel("a", "elem_selection_2")
+        assert "nod_selection_2".upper() in mapdl.cmlist()
+        assert "nod_selection_2" in mapdl.components
+        assert "elem_selection_2".upper() in mapdl.cmlist()
+        assert "elem_selection_2" in mapdl.components
+
+        assert "elem_selection_1".upper() in mapdl.cmlist()
+        assert "elem_selection_1" in mapdl.components
+        assert "nod_selection_1".upper() in mapdl.cmlist()
+        assert "nod_selection_1" in mapdl.components
+
+        mapdl.nsel("s", "", "", 4)
+        mapdl.cm("nod_selection_4", "node")
+
+        with mapdl.save_selection:
+            mapdl.cmsel("s", "nod_selection_3")
+            assert "nod_selection_3".upper() in mapdl.cmlist()
+            assert "nod_selection_3" in mapdl.components
+
+            mapdl.cmsel("a", "elem_selection_3")
+            assert "elem_selection_3".upper() in mapdl.cmlist()
+            assert "elem_selection_3" in mapdl.components
+            assert "nod_selection_3".upper() in mapdl.cmlist()
+            assert "nod_selection_3" in mapdl.components
+
+            # Erased because the previous cmsel("s")
+            assert "nod_selection_4".upper() not in mapdl.cmlist()
+            assert "nod_selection_4" not in mapdl.components
+
+            assert "nod_selection_2".upper() not in mapdl.cmlist()
+            assert "nod_selection_2" not in mapdl.components
+            assert "elem_selection_2".upper() not in mapdl.cmlist()
+            assert "elem_selection_2" not in mapdl.components
+
+            assert "elem_selection_1".upper() not in mapdl.cmlist()
+            assert "elem_selection_1" not in mapdl.components
+            assert "nod_selection_1".upper() not in mapdl.cmlist()
+            assert "nod_selection_1" not in mapdl.components
+
+        # Checking correctly exiting contexts
+        assert "nod_selection_2".upper() in mapdl.cmlist()
+        assert "nod_selection_2" in mapdl.components
+        assert "elem_selection_2".upper() in mapdl.cmlist()
+        assert "elem_selection_2" in mapdl.components
+
+        assert "elem_selection_3".upper() not in mapdl.cmlist()
+        assert "elem_selection_3" not in mapdl.components
+        assert "nod_selection_3".upper() not in mapdl.cmlist()
+        assert "nod_selection_3" not in mapdl.components
+
+        assert "nod_selection_4".upper() in mapdl.cmlist()
+        assert "nod_selection_4" in mapdl.components
+
+    assert "elem_selection_1".upper() in mapdl.cmlist()
+    assert "elem_selection_1" in mapdl.components
+    assert "nod_selection_1".upper() in mapdl.cmlist()
+    assert "nod_selection_1" in mapdl.components
+
+    assert "nod_selection_2".upper() not in mapdl.cmlist()
+    assert "nod_selection_2" not in mapdl.components
+    assert "nod_selection_2".upper() not in mapdl.cmlist()
+    assert "nod_selection_2" not in mapdl.components
+
+    assert "elem_selection_3".upper() not in mapdl.cmlist()
+    assert "elem_selection_3" not in mapdl.components
+    assert "nod_selection_3".upper() not in mapdl.cmlist()
+    assert "nod_selection_3" not in mapdl.components
+
+    assert "nod_selection_4".upper() not in mapdl.cmlist()
+    assert "nod_selection_4" not in mapdl.components
+
+
+def test_get_array_non_interactive(mapdl, solved_box):
+    mapdl.allsel()
+    with pytest.raises(MapdlRuntimeError):
+        with mapdl.non_interactive:
+            mapdl.get_array("asdf", "2")

@@ -162,11 +162,35 @@ You can even plot directly from the Python environment with:
 
     Element plot from MAPDL using ``PyMAPDL`` and ``vtk``
 
-For a full listing of PyMAPDL features, see the
-:ref:`ref_user_guide`.
+Documentation and issues
+------------------------
+Documentation for the latest stable release of PyMAPDL is hosted at `PyMAPDL documentation
+<https://mapdl.docs.pyansys.com/version/stable/>`_.
+The same documentation is also `available as PDF <pymapdl_latest_pdf_doc_>`_ in the `Assets` section in the
+`latest GitHub package release <pymapdl_latest_github_release_>`_.
+
+In the upper right corner of the documentation's title bar, there is an option for switching from
+viewing the documentation for the latest stable release to viewing the documentation for the
+development version or previously released versions.
+
+You can also `view <https://cheatsheets.docs.pyansys.com/pymapdl_cheat_sheet.png>`_ or
+`download <https://cheatsheets.docs.pyansys.com/pymapdl_cheat_sheet.pdf>`_ the
+PyMAPDL cheat sheet. This one-page reference provides syntax rules and commands
+for using PyMAPDL. 
+
+On the `PyMAPDL Issues <https://github.com/ansys/pymapdl/issues>`_ page,
+you can create issues to report bugs and request new features. On the `PyMAPDL Discussions
+<https://github.com/ansys/pymapdl/discussions>`_ page or the `Discussions <https://discuss.ansys.com/>`_
+page on the Ansys Developer portal, you can post questions, share ideas, and get community feedback. 
+
+To reach the PyAnsys project support team, email `PyAnsys Core team <pyansys.core@ansys.com>`_.
+Unfortunately no specific library questions or issues are answered through this email.
+Please refer to `PyMAPDL Issues <pymapdl_issues_>`_,
+or `PyMAPDL Discussions <pymapdl_discussions_>`_ for raising issues,
+request new features, or asking questions.
 
 
 Project index
-*************
+-------------
 
 * :ref:`genindex`

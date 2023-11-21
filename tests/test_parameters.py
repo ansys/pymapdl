@@ -422,3 +422,8 @@ def test_parameter_contains(mapdl, cleared):
     mapdl.parameters["mypar"] = 9876
 
     assert "mypar" in mapdl.parameters
+
+
+def test_non_existing_parameter(mapdl, cleared):
+    with pytest.raises(KeyError):
+        mapdl.parameters["A"]

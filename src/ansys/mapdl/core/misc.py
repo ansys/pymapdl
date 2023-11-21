@@ -13,10 +13,17 @@ import string
 import sys
 import tempfile
 from threading import Thread
+from typing import Union
 from warnings import warn
 import weakref
 
-from ansys.tools.path import get_available_ansys_installations
+try:
+    from ansys.tools.path import get_available_ansys_installations
+
+    _HAS_ATP = True
+except ModuleNotFoundError:
+    _HAS_ATP = False
+
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
@@ -197,14 +204,22 @@ class Plain_Report:
         # List installed Ansys
         lines = ["", "Ansys Environment Report", "-" * 79]
         lines = ["\n", "Ansys Installation", "******************"]
-        mapdl_install = get_available_ansys_installations()
-        if not mapdl_install:
-            lines.append("Unable to locate any Ansys installations")
+        if _HAS_ATP:
+            mapdl_install = get_available_ansys_installations()
+
+            if not mapdl_install:
+                lines.append("Unable to locate any Ansys installations")
+            else:
+                lines.append("Version   Location")
+                lines.append("------------------")
+                for key in sorted(mapdl_install.keys()):
+                    lines.append(f"{abs(key)}       {mapdl_install[key]}")
         else:
-            lines.append("Version   Location")
-            lines.append("------------------")
-            for key in sorted(mapdl_install.keys()):
-                lines.append(f"{abs(key)}       {mapdl_install[key]}")
+            mapdl_install = None
+            lines.append(
+                "Unable to locate any Ansys installations because 'ansys-tools-path is not installed."
+            )
+
         install_info = "\n".join(lines)
 
         env_info_lines = [
@@ -467,29 +482,37 @@ def last_created(filenames):
     return filenames[idx]
 
 
-def create_temp_dir(tmpdir=None):
+def create_temp_dir(tmpdir=None, name=None):
     """Create a new unique directory at a given temporary directory"""
     if tmpdir is None:
         tmpdir = tempfile.gettempdir()
     elif not os.path.isdir(tmpdir):
         os.makedirs(tmpdir)
 
+    if not name:
+        random_name = True
+        letters_ = string.ascii_lowercase.replace("n", "")
+        name = random_string(10, letters_)
+    else:
+        random_name = False
+
     # running into a rare issue with MAPDL on Windows with "\n" being
     # treated literally.
-    letters = string.ascii_lowercase.replace("n", "")
-    path = os.path.join(tmpdir, random_string(10, letters))
+    path = os.path.join(tmpdir, name)
 
-    # in the *rare* case of a duplicate path
-    while os.path.isdir(path):
-        path = os.path.join(tempfile.gettempdir(), random_string(10, letters))
+    if random_name:
+        # in the *rare* case of a duplicate path
+        while os.path.isdir(path):
+            path = os.path.join(tempfile.gettempdir(), name)
 
-    try:
-        os.mkdir(path)
-    except:
-        raise MapdlRuntimeError(
-            "Unable to create temporary working "
-            "directory %s\n" % path + "Please specify run_location="
-        )
+    if not os.path.exists(path):
+        try:
+            os.mkdir(path)
+        except:
+            raise MapdlRuntimeError(
+                "Unable to create temporary working "
+                f"directory {path}\nPlease specify 'run_location' argument"
+            )
 
     return path
 
@@ -1058,7 +1081,7 @@ class Information:
         return self._get_between(init_, end_string)
 
 
-def write_array(filename, array):
+def write_array(filename: Union[str, bytes], array: np.ndarray):
     """
     Write an array to a file.
 
@@ -1072,6 +1095,8 @@ def write_array(filename, array):
     array : numpy.ndarray
         Array.
     """
+    if isinstance(filename, bytes):
+        filename = filename.decode()
     np.savetxt(filename, array, fmt="%20.12f")
 
 
@@ -1124,18 +1149,19 @@ def _get_args_xsel(*args, **kwargs):
     return type_, item, comp, vmin, vmax, vinc, kabs, kwargs
 
 
-def allow_pickable_points(entity="node", plot_function="nplot"):
+def allow_pickable_entities(entity="node", plot_function="nplot"):
     """
     This wrapper opens a window with the NPLOT or KPLOT, and get the selected points (Nodes or kp),
     and feed them as a list to the NSEL.
     """
 
-    def decorator(orig_nsel):
-        @wraps(orig_nsel)
+    def decorator(orig_entity_sel_function):
+        @wraps(orig_entity_sel_function)
         def wrapper(self, *args, **kwargs):
             type_, item, comp, vmin, vmax, vinc, kabs, kwargs = _get_args_xsel(
                 *args, **kwargs
             )
+            from ansys.mapdl.core.plotting import POINT_SIZE
 
             if item == "P" and _HAS_PYVISTA:
                 if type_ not in ["S", "R", "A", "U"]:
@@ -1143,35 +1169,43 @@ def allow_pickable_points(entity="node", plot_function="nplot"):
                         f"The 'item_' argument ('{item}') together with the 'type_' argument ('{type_}') are not allowed."
                     )
 
-                previous_picked_points = set(self._get_selected_(entity))
+                previous_picked_entities = set(self._get_selected_(entity))
 
                 if type_ in ["S", "A"]:  # selecting all the entities
-                    orig_nsel(self, "all")
+                    orig_entity_sel_function(self, "all")
 
                 plotting_function = getattr(self, plot_function)
-                pl = plotting_function(return_plotter=True)
+                if entity == "area":
+                    # To overwrite the quality argument
+                    pl = plotting_function(return_plotter=True, quality=1)
+                elif entity in ["node", "nodes", "kp"]:
+                    pl = plotting_function(return_plotter=True, point_size=POINT_SIZE)
+                else:
+                    pl = plotting_function(return_plotter=True)
 
-                vmin = self._pick_points(
-                    entity, pl, type_, previous_picked_points, **kwargs
+                vmin = self._enable_picking_entities(
+                    entity, pl, type_, previous_picked_entities, **kwargs
                 )
 
                 if len(vmin) == 0:
                     # aborted picking
-                    orig_nsel(self, "S", entity, "", previous_picked_points, **kwargs)
+                    orig_entity_sel_function(
+                        self, "S", entity, "", previous_picked_entities, **kwargs
+                    )
                     return []
 
                 item = entity
                 comp = ""
 
-                # to make return the array of points when using P
+                # to make return the array of entity when using P
                 kwargs["Used_P"] = True
 
-                return orig_nsel(
+                return orig_entity_sel_function(
                     self, "S", item, comp, vmin, vmax, vinc, kabs, **kwargs
                 )
 
             else:
-                return orig_nsel(
+                return orig_entity_sel_function(
                     self, type_, item, comp, vmin, vmax, vinc, kabs, **kwargs
                 )
 
@@ -1180,7 +1214,7 @@ def allow_pickable_points(entity="node", plot_function="nplot"):
     return decorator
 
 
-def wrap_point_SEL(entity="node"):
+def allow_iterables_vmin(entity="node"):
     def decorator(original_sel_func):
         """
         This function wraps a NSEL or KSEL function to allow using a list/tuple/array for vmin argument.
@@ -1232,13 +1266,13 @@ def wrap_point_SEL(entity="node"):
             else:
                 return original_sel_func(
                     self,
-                    type_=type_,
-                    item=item,
-                    comp=comp,
-                    vmin=vmin,
-                    vmax=vmax,
-                    vinc=vinc,
-                    kabs=kabs,
+                    type_,
+                    item,
+                    comp,
+                    vmin,
+                    vmax,
+                    vinc,
+                    kabs,  # ksel, esel, nsel uses kabs, but lsel, asel, vsel uses kswp
                     **kwargs,
                 )
 

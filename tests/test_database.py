@@ -1,4 +1,3 @@
-import os
 import re
 
 from ansys.tools.versioning import server_meets_version
@@ -9,10 +8,7 @@ import pytest
 from ansys.mapdl.core.database import MINIMUM_MAPDL_VERSION, DBDef, MapdlDb
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import random_string
-
-ON_CI = "ON_CI" in os.environ or (
-    "PYMAPDL_START_INSTANCE" in os.environ and "PYMAPDL_PORT" in os.environ
-)
+from conftest import ON_CI
 
 
 @pytest.fixture(scope="session")
@@ -31,10 +27,16 @@ def db(mapdl):
             f"This MAPDL version ({mapdl_version}) is not compatible with the Database module."
         )
 
+    ## Exceptions
     # Exception for 22.2
     if mapdl_version == "22.2" and ON_CI:
         pytest.skip(
             f"This MAPDL version ({mapdl_version}) docker image seems to not support DB, but local does."
+        )
+
+    if mapdl_version == "24.1":
+        pytest.skip(
+            f"This MAPDL version ({mapdl_version}) does not support PyMAPDL Database."
         )
 
     if mapdl._server_version < (0, 4, 1):  # 2021R2
@@ -44,6 +46,7 @@ def db(mapdl):
         )
 
     mapdl.clear()
+    mapdl.db.start()
     return mapdl.db
 
 
@@ -125,7 +128,8 @@ def test_clear(db):
     db._mapdl.prep7()
     db._mapdl.k(1, 1, 1, 1)
     db.clear()
-    assert db._mapdl.geometry.n_keypoint == 0
+    with pytest.raises(ValueError, match="There are no KEYPOINTS defined."):
+        db._mapdl.get_value("KP", 0, "count")
 
 
 def test_nodes_repr(nodes):

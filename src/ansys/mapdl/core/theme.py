@@ -1,16 +1,30 @@
 """Store parameters for a PyMAPDL-specific theme for pyvista"""
-from matplotlib.colors import ListedColormap
+
 import numpy as np
+
+try:
+    from matplotlib.colors import ListedColormap
+
+    _HAS_MATPLOTLIB = True
+except ModuleNotFoundError:
+    _HAS_MATPLOTLIB = False
+
 
 from ansys.mapdl.core import _HAS_PYVISTA
 
 if _HAS_PYVISTA:
     from pyvista.plotting.colors import get_cycler
 
-    try:  # new in pyvista 0.40
-        from pyvista.themes import Theme
+    try:
+        from pyvista.plotting.themes import Theme
+
     except ImportError:
-        from pyvista.themes import DefaultTheme as Theme
+        from pyvista import __version__ as pyvista_version
+
+        if "0.40" in pyvista_version:
+            from pyvista.themes import Theme
+        else:  # older versions
+            from pyvista.themes import DefaultTheme as Theme
 
     base_class = Theme
 
@@ -40,7 +54,16 @@ MAPDL_colorbar = (
     / 255
 )
 
-PyMAPDL_cmap: ListedColormap = ListedColormap(MAPDL_colorbar, name="PyMAPDL", N=255)
+if _HAS_MATPLOTLIB:
+    PyMAPDL_cmap: ListedColormap = ListedColormap(MAPDL_colorbar, name="PyMAPDL", N=255)
+
+
+def get_ansys_colors(N=9):
+    if not _HAS_MATPLOTLIB:
+        raise ModuleNotFoundError(
+            "'matplotlib' package is needed for 'get_ansys_colors'."
+        )
+    return np.array([PyMAPDL_cmap(i) for i in range(N)])
 
 
 class MapdlTheme(base_class):
@@ -83,20 +106,22 @@ class MapdlTheme(base_class):
         self.background = "paraview"
         self.interactive = True
 
-        self.cmap = PyMAPDL_cmap
+        if _HAS_MATPLOTLIB:
+            self.cmap = PyMAPDL_cmap
 
-        self.font.size = 18
-        self.font.title_size = 18
-        self.font.label_size = 18
-        self.font.color = "black"
+            self.font.size = 18
+            self.font.title_size = 18
+            self.font.label_size = 18
+            self.font.color = "black"
+
+            self.axes.x_color = "tomato"
+            self.axes.y_color = "seagreen"
+            self.axes.z_color = "blue"
+
         self.show_edges = False
         self.color = "lightblue"
         self.outline_color = "black"
         self.edge_color = "black"
-
-        self.axes.x_color = "tomato"
-        self.axes.y_color = "seagreen"
-        self.axes.z_color = "blue"
 
         self.color_cycler = get_cycler(MAPDL_colorbar.tolist())
         self.render_points_as_spheres = True

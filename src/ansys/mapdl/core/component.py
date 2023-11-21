@@ -17,8 +17,8 @@ import weakref
 import numpy as np
 from numpy.typing import NDArray
 
+from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import ComponentDoesNotExits, ComponentIsNotSelected
-from ansys.mapdl.core.mapdl import _MapdlCore
 
 if TYPE_CHECKING:  # pragma: no cover
     import logging
@@ -108,6 +108,13 @@ class Component(tuple):
     [1, 2, 3]
     """
 
+    def __init__(self, *args, **kwargs):
+        """Component object"""
+        # Using tuple init because using object.__init__
+        # For more information visit:
+        # https://stackoverflow.com/questions/47627298/how-is-tuple-init-different-from-super-init-in-a-subclass-of-tuple
+        tuple.__init__(*args, **kwargs)
+
     def __new__(
         cls,
         type_: ENTITIES_TYP,
@@ -134,6 +141,11 @@ class Component(tuple):
     def type(self) -> ENTITIES_TYP:
         """Return the type of the component. For instance "NODES", "KP", etc."""
         return self._type
+
+    @property
+    def items(self) -> tuple:
+        """Return the ids of the entities in the component."""
+        return tuple(self)
 
 
 class ComponentManager:
@@ -168,15 +180,17 @@ class ComponentManager:
     Set a component without specifying the type, by default it is ``NODE``:
 
     >>> mapdl.components["mycomp4"] = (1, 2, 3)
+    /Users/german.ayuso/pymapdl/src/ansys/mapdl/core/component.py:282: UserWarning: Assuming a NODES selection.
+    It is recommended you use the following notation to avoid this warning:
+    \>\>\> mapdl.components['mycomp3'] = 'NODES' (1, 2, 3)
+    Alternatively, you disable this warning using:
+    > mapdl.components.default_entity_warning=False
+    warnings.warn(
 
     You can change the default type by changing
     :attr:`Mapdl.components.default_entity <ansys.mapdl.core.Mapdl.components.default_entity>`
 
     >>> mapdl.component.default_entity = "KP"
-        /Users/german.ayuso/pymapdl/src/ansys/mapdl/core/component.py:282: UserWarning: Assuming a NODES selection.
-        It is recommended you use the following notation to avoid this warning:
-        \>\>\> mapdl.components['mycomp3'] = 'NODES' (1, 2, 3)
-        Alternatively, you disable this warning using
     >>> mapdl.component["mycomp] = [1, 2, 3]
     >>> mapdl.component["mycomp"].type
     'KP'
@@ -195,11 +209,23 @@ class ComponentManager:
     Component(type='KP', items=(1, 2, 3))
     """
 
-    def __init__(self, mapdl: _MapdlCore) -> None:
+    def __init__(self, mapdl: Mapdl) -> None:
+        """Component Manager.
+
+        Component manager of an
+        :class:`Mapdl instance <ansys.mapdl.core.Mapdl>` instance.
+
+        Parameters
+        ----------
+        mapdl : ansys.mapdl.core.Mapdl
+            Mapdl instance which this class references to.
+        """
+        from ansys.mapdl.core.mapdl import _MapdlCore
+
         if not isinstance(mapdl, _MapdlCore):
             raise TypeError("Must be implemented from MAPDL class")
 
-        self._mapdl_weakref: weakref.ReferenceType[_MapdlCore] = weakref.ref(mapdl)
+        self._mapdl_weakref: weakref.ReferenceType[Mapdl] = weakref.ref(mapdl)
         self.__comp: UNDERLYING_DICT = {}
         self._update_always: bool = True
         self._autoselect_components: bool = False  # if True, PyMAPDL will try to select the CM first if it does not appear in the CMLIST output.
@@ -230,7 +256,7 @@ class ComponentManager:
         self._default_entity_warning = value
 
     @property
-    def _mapdl(self) -> _MapdlCore:
+    def _mapdl(self) -> Mapdl:
         """Return the weakly referenced instance of mapdl"""
         return self._mapdl_weakref()
 
@@ -255,7 +281,6 @@ class ComponentManager:
         self.__comp = value
 
     def __getitem__(self, key: str) -> ITEMS_VALUES:
-        self._comp = self._mapdl._parse_cmlist()
         forced_to_select = False
 
         if key.upper() not in self._comp and self._autoselect_components:
@@ -369,19 +394,17 @@ class ComponentManager:
 
         _check_valid_pyobj_to_entities(cmitems)
 
-        # Save current selection
-        self._mapdl.cm("__temp__", cmtype)
+        # Using context manager to proper save the selections (including CM)
+        with self._mapdl.save_selection:
+            # Select the cmitems entities
+            func = getattr(self._mapdl, ENTITIES_MAPPING[cmtype].lower())
+            func(type_="S", vmin=cmitems)
 
-        # Select the cmitems entities
-        func = getattr(self._mapdl, ENTITIES_MAPPING[cmtype].lower())
-        func(type_="S", vmin=cmitems)
+            # create component
+            self._mapdl.cm(cmname, cmtype)
 
-        # create component
-        self._mapdl.cm(cmname, cmtype)
-
-        # reselecting previous selection
-        self._mapdl.cmsel("S", "__temp__")
-        self._mapdl.cmdele("__temp__")
+        # adding newly created selection
+        self._mapdl.cmsel("A", cmname)
 
     def __repr__(self) -> str:
         """Return the current components in a pretty format"""
@@ -422,7 +445,8 @@ class ComponentManager:
         """
         yield from self._comp.keys()
 
-    def list(self):
+    @property
+    def names(self):
         """
         Return a tuple that contains the components.
 
@@ -434,6 +458,7 @@ class ComponentManager:
         """
         return tuple(self._comp.keys())
 
+    @property
     def types(self):
         """
         Return the types of the components.
@@ -457,3 +482,35 @@ class ComponentManager:
 
         """
         return self._comp.items()
+
+    def select(self, names: Union[str, list[str], tuple[str]], mute=False) -> None:
+        """Select Select components given their names
+
+        Select components given their names.
+
+        Parameters
+        ----------
+        names : Union[str, list[str], tuple[str]]
+            Name(s) of the components
+        mute : bool, optional
+            Whether to mute the `/CMSEL` command output or not, by default False.
+        """
+        if isinstance(names, str):
+            names = [names]
+
+        for i, each_name in enumerate(names):
+            if i == 0:
+                self._mapdl.cmsel("S", each_name, mute=mute)
+            else:
+                self._mapdl.cmsel("A", each_name, mute=mute)
+
+    def _get_all_components_type(self, type_: ENTITIES_TYP):
+        """Returns a dict with all the components which type matches the entity type"""
+        dict_ = {}
+        for each_comp in self._comp:
+            item = self.__getitem__(each_comp)
+            i_type_ = item.type
+            i_items = item.items
+            if i_type_ == type_:
+                dict_[each_comp] = i_items
+        return dict_

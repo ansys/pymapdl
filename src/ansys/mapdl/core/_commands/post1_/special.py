@@ -1748,6 +1748,7 @@ class Special:
         stabval="",
         keyallfreq="",
         keynegfreq="",
+        keywhirl="",
         **kwargs,
     ):
         """Prints Campbell diagram data for applications involving rotating
@@ -1768,19 +1769,18 @@ class Special:
         slope
             The slope of the line to be printed. This value must be positive.
 
-            SLOPE > 0  - The line represents the number of excitations per revolution of the rotor. For
-                         example, SLOPE = 1 represents one excitation per
-                         revolution, usually resulting from unbalance.
+            SLOPE > 0  - The line represents the number of excitations per
+            revolution of the rotor. For example, SLOPE = 1 represents one
+            excitation per revolution, usually resulting from unbalance.
 
-            SLOPE = 0  - The line represents the stability threshold for stability values or logarithmic
-                         decrements printout (STABVAL = 1 or 2)
+            SLOPE = 0  - The line represents the stability threshold for stability
+            values or logarithmic decrements printout (STABVAL = 1 or 2)
 
         unit
             Specifies the unit of measurement for rotational angular
             velocities:
 
-            RDS - Rotational angular velocities in radians per second (rad/s). This value is the
-                  default.
+            RDS - Rotational angular velocities in radians per second (rad/s). This value is the default.
 
             RPM - Rotational angular velocities in revolutions per minute (RPMs).
 
@@ -1794,8 +1794,8 @@ class Special:
         stabval
             Flag to print the stability values:
 
-            0 (OFF or NO) - Print the frequencies (the imaginary parts of the eigenvalues in Hz). This
-                            value is the default.
+            0 (OFF or NO) - Print the frequencies (the imaginary parts of the
+            eigenvalues in Hz). This value is the default.
 
             1 (ON or YES) - Print the stability values (the real parts of the eigenvalues in Hz).
 
@@ -1804,9 +1804,8 @@ class Special:
         keyallfreq
             Key to specify if all frequencies above FREQB are printed out:
 
-            0 (OFF or NO) - A maximum of 10 frequencies are printed out. They correspond to the frequencies
-                            displayed via the PLCAMP command. This value is the
-                            default.
+            0 (OFF or NO) - A maximum of 10 frequencies are printed out. They
+            correspond to the frequencies displayed via the PLCAMP command. This value is the default.
 
             1 (ON or YES) - All frequencies are printed out.
 
@@ -1818,6 +1817,12 @@ class Special:
             0 (OFF or NO) - Only positive frequencies are printed out. This value is the default.
 
             1 (ON or YES) - Negative and positive frequencies are printed out.
+
+        keywhirl
+            Flag to print the whirl and instability keys for each load step:
+
+            0 (OFF or NO) - Print the whirl for the last load step. This value is the default.
+            1 (ON or YES) - Print the whirl and instability keys for each load step.
 
         Notes
         -----

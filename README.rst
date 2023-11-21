@@ -12,11 +12,11 @@ PyMAPDL
 .. |PyPIact| image:: https://img.shields.io/pypi/dm/ansys-mapdl-core.svg?label=PyPI%20downloads
    :target: https://pypi.org/project/ansys-mapdl-core/
 
-.. |codecov| image:: https://codecov.io/gh/pyansys/pymapdl/branch/main/graph/badge.svg
-   :target: https://codecov.io/gh/pyansys/pymapdl
+.. |codecov| image:: https://codecov.io/gh/ansys/pymapdl/branch/main/graph/badge.svg
+   :target: https://codecov.io/gh/ansys/pymapdl
 
-.. |GH-CI| image:: https://github.com/pyansys/pymapdl/actions/workflows/ci.yml/badge.svg
-   :target: https://github.com/pyansys/pymapdl/actions/workflows/ci.yml
+.. |GH-CI| image:: https://github.com/ansys/pymapdl/actions/workflows/ci.yml/badge.svg
+   :target: https://github.com/ansys/pymapdl/actions/workflows/ci.yml
 
 .. |zenodo| image:: https://zenodo.org/badge/70696039.svg
    :target: https://zenodo.org/badge/latestdoi/70696039
@@ -28,12 +28,13 @@ PyMAPDL
   :target: https://github.com/psf/black
   :alt: black
 
-.. |pre-commit| image:: https://results.pre-commit.ci/badge/github/pyansys/pymapdl/main.svg
-   :target: https://results.pre-commit.ci/latest/github/pyansys/pymapdl/main
+.. |pre-commit| image:: https://results.pre-commit.ci/badge/github/ansys/pymapdl/main.svg
+   :target: https://results.pre-commit.ci/latest/github/ansys/pymapdl/main
    :alt: pre-commit.ci status
 
 Overview
 --------
+
 The PyMAPDL project supports Pythonic access to MAPDL to be able to
 communicate with the MAPDL process directly from Python. The latest
 ``ansys-mapdl-core`` package enables a more comprehensive interface with
@@ -49,21 +50,38 @@ MAPDL and supports:
 
 Here's a quick demo of PyMAPDL within Visual Studio Code:
 
-.. image:: https://github.com/pyansys/pymapdl/raw/main/doc/landing_page_demo.gif
+.. image:: https://github.com/ansys/pymapdl/raw/main/doc/landing_page_demo.gif
 
 PyMAPDL works within Jupyter Notebooks, the standard Python console,
 or in batch mode on Windows, Linux, and even Mac OS.
 
 Documentation and issues
 ------------------------
-For more information, see the `Documentation <https://mapdl.docs.pyansys.com>`_ page.
-For some examples, see the `Examples gallery <https://mapdl.docs.pyansys.com/version/stable/examples/index.html>`_.
+Documentation for the latest stable release of PyMAPDL is hosted at `PyMAPDL Documentation
+<https://mapdl.docs.pyansys.com>`_.
 
-Feel free to post issues and other questions at `PyMAPDL Issues
-<https://github.com/pyansys/pymapdl/issues>`_.  This is the best place
-to post questions and code.
+In the upper right corner of the documentation's title bar, there is an option for switching from
+viewing the documentation for the latest stable release to viewing the documentation for the
+development version or previously released versions.
 
+You can also `view <https://cheatsheets.docs.pyansys.com/pymapdl_cheat_sheet.png>`_ or
+`download <https://cheatsheets.docs.pyansys.com/pymapdl_cheat_sheet.pdf>`_ the
+PyMAPDL cheat sheet. This one-page reference provides syntax rules and commands
+for using PyMAPDL. 
 
+For troubleshooting, visit
+`Troubleshooting PyMAPDL <https://mapdl.docs.pyansys.com/version/stable/user_guide/troubleshoot.html#troubleshooting-pymapdl>`_
+
+On the `PyMAPDL Issues <https://github.com/ansys/pymapdl/issues>`_ page,
+you can create issues to report bugs and request new features. On the `PyMAPDL Discussions
+<https://github.com/ansys/pymapdl/discussions>`_ page or the `Discussions <https://discuss.ansys.com/>`_
+page on the Ansys Developer portal, you can post questions, share ideas, and get community feedback. 
+
+To reach the project support team, email `PyAnsys Core team <pyansys.core@ansys.com>`_.
+Unfortunately, this team cannot answer specific library questions or issues. You must
+use the `PyMAPDL Issues <https://github.com/ansys/pymapdl/issues>`_
+and `PyMAPDL Discussions <https://github.com/ansys/pymapdl/discussions>`_ pages
+for raising issues, request new features, and asking questions.
 
 Project transition - legacy support
 -----------------------------------
@@ -81,166 +99,12 @@ many steps have been taken to ensure compatibility with legacy code
 while supporting new features.  The original python module has been
 split up into the following projects and modules:
 
-- `ansys.mapdl.core <https://github.com/pyansys/pymapdl>`_
-- `ansys.mapdl.reader <https://github.com/pyansys/pymapdl-reader>`_
-- `ansys.mapdl.corba <https://github.com/pyansys/pymapdl-corba>`_
+- `ansys.mapdl.core <https://github.com/ansys/pymapdl>`_
+- `ansys.mapdl.reader <https://github.com/ansys/pymapdl-reader>`_
+- `ansys.mapdl.corba <https://github.com/ansys/pymapdl-corba>`_
 
 For more information on each project, visit their GitHub pages.
 
-
-Installation
-------------
-The ``ansys-mapdl-core`` package currently supports Python 3.9 through
-Python 3.11 on Windows, Mac OS, and Linux.
-
-Install the latest release from `PyPi
-<https://pypi.org/project/ansys-mapdl-core/>`_ with:
-
-.. code:: console
-
-   pip install ansys-mapdl-core
-
-Alternatively, install the latest from `PyMAPDL GitHub
-<https://github.com/pyansys/pymapdl/issues>`_ via:
-
-.. code:: console
-
-   pip install git+https://github.com/pyansys/pymapdl.git
-
-
-For a local "development" version, install with (requires pip >= 22.0):
-
-.. code:: console
-
-   git clone https://github.com/pyansys/pymapdl.git
-   cd pymapdl
-   pip install -e .
-
-
-Offline installation
-~~~~~~~~~~~~~~~~~~~~
-If you lack an internet connection on your install machine, the recommended way
-of installing PyMAPDL is downloading the wheelhouse archive from the `Releases
-Page <https://github.com/pyansys/pymapdl/releases>`_ for your corresponding
-machine architecture.
-
-Each wheelhouse archive contains all the python wheels necessary to install
-PyMAPDL from scratch on Windows and Linux for Python 3.9 and 3.11. You can install
-this on an isolated system with a fresh python or on a virtual environment.
-
-For example, on Linux Ubuntu with Python 3.10, unzip it and install it with the following:
-
-.. code:: console
-
-   unzip ansys-mapdl-core-v0.65.0-wheelhouse-ubuntu-latest-3.10.zip
- wheelhouse
-   pip install ansys-mapdl-core -f wheelhouse --no-index --upgrade --ignore-installed
-
-If you're on Windows with Python 3.10, unzip manually to a ``wheelhouse`` directory and
-install using the same command as above.
-
-Consider installing using a `virtual environment
-<https://docs.python.org/3/library/venv.html>`_.
-
-
-Dependencies
-------------
-You must have a local licenced copy of Ansys to run MAPDL prior and
-including 2021R1.  If you have the latest version of 2021R1 you do
-not need MAPDL installed locally and can connect to a remote instance.
-
-
-Getting started
----------------
-
-Launch MAPDL locally
-~~~~~~~~~~~~~~~~~~~~
-You can launch MAPDL locally directly from Python using ``launch_mapdl``:
-
-.. code:: python
-
-    from ansys.mapdl.core import launch_mapdl
-
-    mapdl = launch_mapdl()
-
-This automatically searches for the latest local version of MAPDL,
-launches it as a background process, and immediately connects to it.
-You can then start sending python commands to MAPDL.
-
-
-Launching manually or connecting to a remote instance
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-If you want to connect to a session of MAPDL on a remote computer
-(either locally the LAN or through the internet), first ensure you
-have MAPDL started in gRPC server mode.  This example assumes that you
-are launching an instance locally from Windows, but it can be easily
-adapted to run from Linux, or the LAN provided the necessary ports are
-open. This example specifies the port with ``-port 50052``, but this
-option can be left out if you plan on using the default port 50052.
-
-.. code:: pwsh-session
-
-    start "MAPDL" "%ANSYS211_DIR%\bin\winx64\ANSYS211.exe" -port 50052 -grpc
-
-Next, connect to the instance of MAPDL from python with:
-
-.. code:: pycon
-
-    >>> from ansys.mapdl.core import Mapdl
-    >>> ip = "127.0.0.1"
-    >>> mapdl = Mapdl(ip=ip, port=50052, start_instance=False)
-    >>> print(mapdl)
-
-
-A successful connection returns:
-
-.. code:: output
-
-    Product:             ANSYS Mechanical Enterprise
-    MAPDL Version:       RELEASE  2020 R2           BUILD 20.2TEST  UPDATE 20200601
-    ansys.mapdl.core Version: 0.57.0
-
-
-Should you want to connect to this instance of MAPDL from a remote
-computer, you substitute ``ip=`` with the LAN or WAN address of the
-computer you wish to connect to.  Depending on your network settings,
-you may have to open local ports or enable port redirection across the
-WAN.
-
-
-Basic usage
-~~~~~~~~~~~
-You run MAPDL commands via:
-
-.. code:: python
-
-    mapdl.run("/PREP7")
-
-
-Nearly all the built-in MAPDL commands have an associated pythonic
-method mapped to it.  For example, `/PREP7` is:
-
-.. code:: python
-
-    mapdl.prep7()
-
-
-There are also non-mapdl commands such as ``mapdl.eplot`` which plot
-elements using ``vtk`` and ``pyvista`` rather than relying on MAPDL's
-graphics server.  Another is ``mapdl.vget``, which leverages gRPC to
-rapidly exchange binary arrays from MAPDL to Python rather than
-relying on file IO to exchange data.
-
-Additionally, there are the ``post_processing``, ``geometry``, and
-``mesh`` properties, which you can use to perform remote (or local)
-post processing without result file exchange, display geometry
-properties, or view mesh statistics.  Additionally, there's the
-``parameters`` property which shows the active MAPDL parameters, and
-you can use to send or receive arrays between MAPDL and Python.
-
-For more information, see the full documentation at `PyMAPDL Documentation
-<https://mapdl.docs.pyansys.com>`_.
 
 Citing this module
 -------------------
@@ -270,7 +134,7 @@ the most recent citation.
 License and acknowledgments
 ---------------------------
 ``PyMAPDL`` is licensed under
-`the MIT license <https://github.com/pyansys/pymapdl/blob/main/LICENSE>`_.
+`the MIT license <https://github.com/ansys/pymapdl/blob/main/LICENSE>`_.
 
 ``ansys-mapdl-core`` package makes no commercial claim over Ansys
 whatsoever.  This tool extends the functionality of ``MAPDL`` by

@@ -1,19 +1,30 @@
 """This module is for threaded implementations of the mapdl interface"""
-
 import os
 import shutil
+import tempfile
 import time
 from typing import Any, Dict, List, Optional
 import warnings
 
-from ansys.mapdl.core import LOG, get_ansys_path, launch_mapdl
+from ansys.mapdl.core import LOG, launch_mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
-from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT, port_in_use, version_from_path
+from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT, port_in_use
 from ansys.mapdl.core.mapdl_grpc import _HAS_TQDM
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
 
+try:
+    from ansys.tools.path import get_ansys_path, version_from_path
+
+    _HAS_ATP = True
+except ModuleNotFoundError:
+    _HAS_ATP = False
+
 if _HAS_TQDM:
     from tqdm import tqdm
+
+    DEFAULT_PROGRESS_BAR = True
+else:
+    DEFAULT_PROGRESS_BAR = False
 
 
 def available_ports(n_ports: int, starting_port: int = MAPDL_DEFAULT_PORT) -> List[int]:
@@ -56,7 +67,7 @@ class LocalMapdlPool:
         Base directory to create additional directories for each MAPDL
         instance.  Defaults to a temporary working directory.
 
-    starting_port : int, optional
+    port : int, optional
         Starting port for the MAPDL instances.  Defaults to 50052.
 
     progress_bar : bool, optional
@@ -72,6 +83,14 @@ class LocalMapdlPool:
         ``tempfile.gettempdir()``, for MAPDL files. When this parameter is
         ``True``, this directory will be deleted when MAPDL is exited. Default
         ``False``.
+
+    names : str, Callable, optional
+        You can specify the names of the directories where the instances are
+        created. A string or a function (callable) that accepts an integer and
+        return an string can be used.
+        If you use a string, "_{i}" is appended to that string, where "i" is
+        the index of each instance in the pool.
+        By default, the instances directories are named as "Instances_{i}".
 
     **kwargs : dict, optional
         See :func:`ansys.mapdl.core.launch_mapdl` for a complete
@@ -114,25 +133,51 @@ class LocalMapdlPool:
         wait: bool = True,
         run_location: Optional[str] = None,
         port: int = MAPDL_DEFAULT_PORT,
-        progress_bar: bool = True,
+        progress_bar: bool = DEFAULT_PROGRESS_BAR,
         restart_failed: bool = True,
         remove_temp_files: bool = True,
+        names: Optional[str] = None,
+        override=True,
         **kwargs,
     ) -> None:
         """Initialize several instances of mapdl"""
         self._instances: List[None] = []
+
+        if run_location is None:
+            run_location = tempfile.gettempdir()
         self._root_dir: str = run_location
+
         kwargs["remove_temp_files"] = remove_temp_files
         kwargs["mode"] = "grpc"
         self._spawn_kwargs: Dict[str, Any] = kwargs
         self._spawning_i: int = 0
         self._exiting_i: int = 0
+        self._override = override
+
+        if not names:
+            names = "Instance"
+
+        if isinstance(names, str):
+            self._names = lambda i: names + "_" + str(i)
+        elif callable(names):
+            self._names = names
+        else:
+            raise ValueError(
+                "Only strings or functions are allowed in the argument 'name'."
+            )
 
         # verify that mapdl is 2021R1 or newer
         if "exec_file" in kwargs:
             exec_file = kwargs["exec_file"]
         else:  # get default executable
-            exec_file = get_ansys_path()
+            if _HAS_ATP:
+                exec_file = get_ansys_path()
+            else:
+                raise ValueError(
+                    "Please use 'exec_file' argument to specify the location of the ansys installation.\n"
+                    "Alternatively, PyMAPDL can detect your ansys installation if you install 'ansys-tools-path' library."
+                )
+
             if exec_file is None:
                 raise FileNotFoundError(
                     "Invalid exec_file path or cannot load cached "
@@ -140,8 +185,9 @@ class LocalMapdlPool:
                     "exec_file=<path to executable>"
                 )
 
-        if version_from_path("mapdl", exec_file) < 211:
-            raise VersionError("LocalMapdlPool requires MAPDL 2021R1 or later.")
+        if _HAS_ATP:
+            if version_from_path("mapdl", exec_file) < 211:
+                raise VersionError("LocalMapdlPool requires MAPDL 2021R1 or later.")
 
         # grab available ports
         ports = available_ports(n_instances, port)
@@ -172,7 +218,7 @@ class LocalMapdlPool:
 
         # threaded spawn
         threads = [
-            self._spawn_mapdl(i, ports[i], pbar, name=f"Instance {i}")
+            self._spawn_mapdl(i, ports[i], pbar, name=self._names(i))
             for i in range(n_instances)
         ]
         if wait:
@@ -218,7 +264,7 @@ class LocalMapdlPool:
         self,
         func,
         iterable=None,
-        progress_bar=True,
+        progress_bar=DEFAULT_PROGRESS_BAR,
         close_when_finished=False,
         timeout=None,
         wait=True,
@@ -412,7 +458,7 @@ class LocalMapdlPool:
         self,
         files,
         clear_at_start=True,
-        progress_bar=True,
+        progress_bar=DEFAULT_PROGRESS_BAR,
         close_when_finished=False,
         timeout=None,
         wait=True,
@@ -481,7 +527,14 @@ class LocalMapdlPool:
                 mapdl.clear(mute=True)
             return mapdl.input(input_file)
 
-        return self.map(run_file, files, progress_bar=progress_bar)
+        return self.map(
+            run_file,
+            files,
+            progress_bar=progress_bar,
+            timeout=timeout,
+            wait=wait,
+            close_when_finished=close_when_finished,
+        )
 
     def next_available(self, return_index=False):
         """Wait until an instance of mapdl is available and return that instance.
@@ -612,10 +665,20 @@ class LocalMapdlPool:
         # create a new temporary directory for each instance
         self._spawning_i += 1
 
-        run_location = create_temp_dir(self._root_dir)
+        run_location = create_temp_dir(self._root_dir, name=name)
+
         self._instances[index] = launch_mapdl(
-            run_location=run_location, port=port, **self._spawn_kwargs
+            run_location=run_location,
+            port=port,
+            override=self._override,
+            **self._spawn_kwargs,
         )
+
+        # Waiting for the instance being fully initialized.
+        # This is introduce to mitigate #2173
+        while self._instances[index] is None:
+            time.sleep(0.1)
+
         # LOG.debug("Spawned instance %d. Name '%s'", index, name)
         if pbar is not None:
             pbar.update(1)

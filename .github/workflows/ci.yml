@@ -3,6 +3,12 @@ name: CI
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      run_all_tests:
+        description: 'Run all extended MAPDL build tests'
+        required: true
+        type: boolean
+    
   push:
     tags:
       - "*"     
@@ -14,10 +20,12 @@ on:
 
 env:
   PROJECT_NAME: 'PyMAPDL'
-  MAIN_PYTHON_VERSION: '3.9'
+  MAIN_PYTHON_VERSION: '3.10'
   PACKAGE_NAME: 'ansys-mapdl-core'
   PACKAGE_NAMESPACE: 'ansys.mapdl.core'
   DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
+  MEILISEARCH_API_KEY: ${{ secrets.MEILISEARCH_API_KEY }}
+  MEILISEARCH_PUBLIC_API_KEY: ${{ secrets.MEILISEARCH_PUBLIC_API_KEY }}
   PYANSYS_OFF_SCREEN: True
   DPF_START_SERVER: False
   DPF_PORT: 21002
@@ -39,10 +47,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 defaults:
   run:
     shell: bash
+
+permissions:
+  contents: write
+  packages: read
+  pull-requests: write
 
 jobs:
 
@@ -54,6 +66,7 @@ jobs:
         uses: ansys/actions/doc-style@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          version: 2.29.6
 
   smoke-tests:
     name: "Build and smoke tests"
@@ -64,7 +77,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.9', '3.10', '3.11']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
         # Only perform wheelhouse builds for macOS when releasing
         should-release: 
           - ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
@@ -76,15 +89,23 @@ jobs:
         uses: ansys/actions/build-wheelhouse@v4
         with:
           library-name: ${{ env.PACKAGE_NAME }}
-          library-namespace: ${{ env.PACKAGE_NAMESPACE }}
           operating-system: ${{ matrix.os }}
           python-version: ${{ matrix.python-version }}
+      
+      - name: "Importing library"
+        run: |
+          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+      
+      - name: "Checking plotting support"
+        run:
+          python -c "from pyvista.plotting import system_supports_plotting; print('System support plotting ' + str(system_supports_plotting()))"
+
 
   docs-build:
     name: "Build documentation"
     runs-on: ubuntu-latest
     needs: doc-style
-    timeout-minutes: 35
+    timeout-minutes: 60
     outputs:
       PYMAPDL_VERSION: ${{ steps.version.outputs.PYMAPDL_VERSION }}
     env:
@@ -94,7 +115,7 @@ jobs:
       ON_DOCUMENTATION: TRUE
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: "Setup Python"
         uses: actions/setup-python@v4
@@ -105,7 +126,7 @@ jobs:
       - name: "Install OS packages"
         run: |
           sudo apt update 
-          sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz
+          sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex
 
       - name: "Test virtual framebuffer"
         run: |
@@ -118,7 +139,7 @@ jobs:
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: "Login in Github container registry"
-        uses: docker/login-action@v2.1.0
+        uses: docker/login-action@v3.0.0
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USERNAME }}
@@ -243,25 +264,17 @@ jobs:
         if: always()
         run: cat log.txt
 
-      - name: "List main files"
-        if: always()
-        run: |
-          if compgen -G 'doc/_build/latex/*.log' > /dev/null ;then for f in doc/_build/latex/*.log; do echo "::group:: Output latex log file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to show Output latex log files"
-          if compgen -G './logs-build-docs/*.err' > /dev/null ;then for f in ./logs-build-docs/*.err; do echo "::group:: Error file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to show Error files"
-          if compgen -G './logs-build-docs/*.log' > /dev/null ;then for f in ./logs-build-docs/*.log; do echo "::group:: Log file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to show Log files"
-          if compgen -G './logs-build-docs/*.out' > /dev/null ;then for f in ./logs-build-docs/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to show Output files"
-
   build-test:
-    name: "Remote: Build and unit testing"
+    name: "Remote: Build & test"
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main'
-    timeout-minutes: 20
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix:
-        mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu', 'v23.1.0', 'v23.2.0']
+        mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu', 'v23.1.0', 'v23.2.0', 'v24.1.0']
         extended_testing:
-          - ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
+          - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
         exclude:
           - extended_testing: false
             mapdl-version: 'v21.1.1'
@@ -280,9 +293,12 @@ jobs:
       ON_LOCAL: FALSE
       ON_UBUNTU: FALSE
 
+    outputs:
+      DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
+
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: "Setup Python"
         uses: actions/setup-python@v4
@@ -309,11 +325,22 @@ jobs:
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: "Login in Github container registry"
-        uses: docker/login-action@v2.1.0
+        uses: docker/login-action@v3.0.0
         with:
           registry: ghcr.io
           username: ${{ secrets.GH_USERNAME }}
           password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Getting SMP/DMP mode"
+        id: distributed_mode
+        run: |
+          image=${{ matrix.mapdl-version }}
+          export distributed_mode="smp"
+          if [[ $image == *".1."* ]]; then
+          export distributed_mode="dmp";
+          fi
+          echo "Distributed mode: $distributed_mode"
+          echo "distributed_mode=$(echo $distributed_mode)" >> $GITHUB_OUTPUT
 
       - name: "Pull, launch, and validate MAPDL service"
         run: .ci/start_mapdl.sh
@@ -321,6 +348,7 @@ jobs:
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
           MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
+          DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
 
       - name: "Pull, launch, and validate Ubuntu MAPDL service from private"
         run: .ci/start_mapdl_ubuntu.sh
@@ -328,6 +356,7 @@ jobs:
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
           MAPDL_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
+          DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
 
       - name: "Unit testing requirements installation"
         run: |
@@ -339,15 +368,19 @@ jobs:
           docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
 
       - name: "Unit testing"
+        env:
+          DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
         run: |
           if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then export ON_UBUNTU=true;fi
           xvfb-run pytest \
             ${{ env.PYTEST_ARGUMENTS }} \
+            --ignore_image_cache \
             --cov-report=xml:centos-${{ matrix.mapdl-version }}-remote.xml
 
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           name: centos-${{ matrix.mapdl-version }}-remote.xml
           flags: centos,remote,${{ matrix.mapdl-version }}
 
@@ -427,23 +460,32 @@ jobs:
           if compgen -G './logs-${{ matrix.mapdl-version }}/*.out' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to display the 'log' files."
 
   build-test-ubuntu:
-    name: "Local: Build and unit testing on Ubuntu"
+    name: "Local: Build & test on Ubuntu"
     runs-on: ubuntu-latest
-    if: github.ref != 'refs/heads/main'
-    timeout-minutes: 40
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 55
+    outputs:
+      pushed: ${{ steps.attatch-to-pr.outputs.pushed }}
+      committed: ${{ steps.attatch-to-pr.outputs.committed }}
+      commit_long_sha: ${{ steps.attatch-to-pr.outputs.commit_long_sha }}
     container:
       image: ghcr.io/ansys/mapdl:v22.2-ubuntu
-      options: "-u=0:0 --entrypoint /bin/bash"
+      options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
+      PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
 
       - name: "Setup Python"
         uses: actions/setup-python@v4
@@ -456,11 +498,11 @@ jobs:
           python -m pip install --upgrade pip
           python -m venv ./.venv
           source ./.venv/bin/activate
- 
+
       - name: "Install OS packages"
         run: |
           apt update
-          apt install -y libgl1-mesa-glx xvfb
+          apt install -y libgl1-mesa-glx xvfb libgomp1
 
       - name: "Test virtual framebuffer"
         run: |
@@ -489,13 +531,48 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
           export AWP_ROOT222=/ansys_inc
-          xvfb-run pytest -k "not test_database and not test_dpf" \
+          xvfb-run pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
+            --reset_only_failed --add_missing_images \
             --cov-report=xml:ubuntu-v22.2.0-local.xml
+
+      - name: "Adding the directory as safe directory for later step"
+        run: |
+          git config --global --add safe.directory $GITHUB_WORKSPACE
+
+      - name: "Attaching modified files to PR"
+        id: attatch-to-pr
+        uses: EndBug/add-and-commit@v9
+        with:
+          message: Update the image cache
+          committer_name: GitHub Actions
+          committer_email: actions@github.com
+          add: './tests/.image_cache/*.png'
+
+      - name: "PR comment with reactions"
+        if: ${{ steps.attatch-to-pr.outputs.pushed == 'true' }}
+        uses: thollander/actions-comment-pull-request@v2
+        with:
+          message: |
+            Hello!  :wave:
+            
+            Your PR is changing the image cache. So I am attaching the new image cache
+            in a new [commit](https://github.com/ansys/pymapdl/commit/${{ steps.attatch-to-pr.outputs.commit_long_sha }}).
+
+            This commit does not re-run the CICD workflows (since no changes are made in the codebase) therefore
+            you will see the actions showing in their status `Expected — Waiting for status to be reported`. Do not worry.
+            You commit workflow is still running [here](https://github.com/ansys/pymapdl/pull/${{ github.event.pull_request.number }}/checks?sha=${{ github.event.pull_request.head.sha }}) :smile:
+            
+            You might want to rerun the test to make sure that everything is passing. You can retrigger the CICD sending an empty commit `git commit -m "Empty comment to trigger CICD" --allow-empty`.
+
+            You will see this message everytime your commit changes the image cache but you are not attaching the updated cache. :nerd_face:
+
+          reactions: rocket
 
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           root_dir: ${{ github.workspace }}
           name: ubuntu-v22.2.0-local.xml
           flags: ubuntu,local,v22.2.0
@@ -505,17 +582,94 @@ jobs:
         with:
           name: ubuntu-v22.2.0-local.xml
           path: ./ubuntu-v22.2.0-local.xml
+      
+      - name: 'Upload minimal requirements file'
+        uses: actions/upload-artifact@v3
+        with:
+          name: minimum_requirements.txt
+          path: ./minimum_requirements.txt
+
+  build-test-ubuntu-minimal:
+    name: "Local: Build & test minimal package on Ubuntu"
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 55
+    container:
+      image: ghcr.io/ansys/mapdl:v22.2-ubuntu
+      options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
+      credentials:
+        username: ${{ secrets.GH_USERNAME }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      ON_LOCAL: true
+      ON_UBUNTU: true
+      # Because there is no 'ansys-tools-path' we need to input the executable path.
+      PYMAPDL_MAPDL_EXEC: /ansys_inc/v222/ansys/bin/ansys222
+
+    steps:
+      - name: "Install Git and checkout project"
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: "Setup Python"
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+
+      - name: "Checking Python"
+        run: |
+          python --version
+          python -m pip install --upgrade pip
+
+      - name: "Install ansys-mapdl-core"
+        run: |
+          python -m pip install . --no-deps
+          python -m pip install -r minimum_requirements.txt
+          python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
+
+      - name: "Installing missing package"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgomp1
+
+      - name: "Unit testing requirements installation"
+        run: |
+          python -m pip install pytest pytest-rerunfailures pytest-cov
+
+      - name: "Unit testing"
+        run: |
+          unset PYMAPDL_START_INSTANCE
+          export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
+          pytest -k "not test_dpf" \
+            ${{ env.PYTEST_ARGUMENTS }} \
+            --cov-report=xml:ubuntu-v22.2.0-local-minimal.xml
+        
+      - uses: codecov/codecov-action@v3
+        name: "Upload coverage to Codecov"
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          root_dir: ${{ github.workspace }}
+          name: ubuntu-v22.2.0-local-minimal.xml
+          flags: ubuntu,local,v22.2.0,minimal
+
+      - name: 'Upload coverage artifacts'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-v22.2.0-local-minimal.xml
+          path: ./ubuntu-v22.2.0-local-minimal.xml
 
   test-windows:
     if: github.repository == ''
-    name: "Local: Build and unit testing on Windows"
+    name: "Local: Build & test on Windows"
     runs-on: [self-hosted, Windows, pymapdl]
     timeout-minutes: 30
     env:
       ON_LOCAL: TRUE
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # Skipping because it is installed locally.
       # - name: Setup Python
@@ -527,7 +681,7 @@ jobs:
         shell: powershell
         run: |
           python -m pip install --upgrade pip
-      
+
       - name: "Creating python venv"
         shell: powershell
         run: |
@@ -560,11 +714,13 @@ jobs:
           set PYMAPDL_START_INSTANCE=
           python -m pytest -k "not test_database and not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
+            --ignore_image_cache \
             --cov-report=xml:windows-v22.2.0-local.xml
 
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
+          token: ${{ secrets.CODECOV_TOKEN }}
           name: windows-v22.2.0-local.xml
           flags: windows,local,v22.2.0
 
@@ -598,6 +754,7 @@ jobs:
             ./**/*.tar.gz
             ./**/*pymapdl-Documentation-*.pdf
             ./**/ansys-mapdl-core*.zip
+            ./minimum_requirements.txt
 
       - name: Upload to Public PyPi
         env:
@@ -634,6 +791,34 @@ jobs:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
           render-last: '5'
 
+  doc-index-stable:
+    name: "Deploy stable docs index"
+    runs-on: ubuntu-latest
+    needs: upload-docs-release
+    steps:
+      - name: "Install Git and clone project"
+        uses: actions/checkout@v4
+
+      - name: "Install the package requirements"
+        run: pip install -e .
+
+      - name: "Get the version to PyMeilisearch"
+        run: |
+          VERSION=$(python -c "from ansys.mapdl.core import __version__; print('.'.join(__version__.split('.')[:2]))")
+          VERSION_MEILI=$(python -c "from ansys.mapdl.core import __version__; print('-'.join(__version__.split('.')[:2]))")
+          echo "Calculated VERSION: $VERSION"
+          echo "Calculated VERSION_MEILI: $VERSION_MEILI"
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "VERSION_MEILI=$VERSION_MEILI" >> $GITHUB_ENV
+
+      - name: "Deploy the latest documentation index"
+        uses: ansys/actions/doc-deploy-index@v4
+        with:
+          cname: ${{ env.DOCUMENTATION_CNAME }}/version/${{ env.VERSION }}
+          index-name: pymapdl-v${{ env.VERSION_MEILI }}
+          host-url: ${{ vars.MEILISEARCH_HOST_URL }}
+          api-key: ${{ env.MEILISEARCH_API_KEY }}
+
   upload-dev-docs:
     name: Upload dev documentation
     if: github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags')
@@ -645,3 +830,29 @@ jobs:
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  doc-index-dev:
+    name: "Deploy dev index docs"
+    runs-on: ubuntu-latest
+    needs: upload-dev-docs
+    steps:
+      - name: "Deploy the latest documentation index"
+        uses: ansys/actions/doc-deploy-index@v4
+        with:
+          cname: ${{ env.DOCUMENTATION_CNAME }}/version/dev
+          index-name: pymapdl-vdev
+          host-url: ${{ vars.MEILISEARCH_HOST_URL }}
+          api-key: ${{ env.MEILISEARCH_API_KEY }}
+  
+  notify:
+    name: Notify failed build
+    needs: [upload-dev-docs]
+    if: failure() && github.event.pull_request == null
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open issue
+        uses: jayqi/failed-build-issue-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          title-template: "Failed scheduled build"
+          label-name: "Nightly build failed"

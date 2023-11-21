@@ -1,4 +1,4 @@
-"""gRPC specific class and methods for the MAPDL gRPC client """
+"""A gRPC specific class and methods for the MAPDL gRPC client """
 
 import fnmatch
 from functools import wraps
@@ -30,7 +30,7 @@ Please make sure you have the latest updated version using:
 'pip install ansys-api-mapdl' or 'pip install --upgrade ansys-api-mapdl'
 
 If this does not solve it, please reinstall 'ansys.mapdl.core'
-or contact Technical Support at 'https://github.com/pyansys/pymapdl'."""
+or contact Technical Support at 'https://github.com/ansys/pymapdl'."""
 
 from ansys.mapdl import core as pymapdl
 
@@ -49,7 +49,6 @@ from ansys.mapdl.core.common_grpc import (
     parse_chunks,
 )
 from ansys.mapdl.core.errors import (
-    DifferentSessionConnectionError,
     MapdlConnectionError,
     MapdlExitedError,
     MapdlRuntimeError,
@@ -61,7 +60,6 @@ from ansys.mapdl.core.misc import (
     check_valid_ip,
     last_created,
     random_string,
-    requires_package,
     run_as_prep7,
     supress_logging,
 )
@@ -82,7 +80,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.platform.instancemanagement import Instance as PIM_Instance
 
     from ansys.mapdl.core.database import MapdlDb
-    from ansys.mapdl.core.mesh_grpc import MeshGrpc
     from ansys.mapdl.core.xpl import ansXpl
 
 TMP_VAR = "__tmpvar__"
@@ -420,12 +417,9 @@ class MapdlGrpc(_MapdlCore):
         # initialize mesh, post processing, and file explorer interfaces
         self._mesh_rep: Optional["MeshGrpc"] = None
 
-        try:
-            from ansys.mapdl.core.mesh_grpc import MeshGrpc
+        from ansys.mapdl.core.mesh_grpc import MeshGrpc
 
-            self._mesh_rep = MeshGrpc(self)
-        except ModuleNotFoundError:  # pragma: no cover
-            self._mesh_rep = None
+        self._mesh_rep = MeshGrpc(self)
 
         # Run at connect
         self._run_at_connect()
@@ -873,6 +867,8 @@ class MapdlGrpc(_MapdlCore):
             self.numvar(200, mute=True)
 
         self.show(self._file_type_for_plots)
+        self.version  # Caching version
+        self.file_type_for_plots  # Setting /show,png and caching it.
 
     def _reset_cache(self):
         """Reset cached items."""
@@ -883,7 +879,6 @@ class MapdlGrpc(_MapdlCore):
             self._geometry._reset_cache()
 
     @property
-    @requires_package("pyvista")
     def _mesh(self):
         return self._mesh_rep
 
@@ -942,8 +937,23 @@ class MapdlGrpc(_MapdlCore):
 
     @property
     def busy(self):
-        """True when MAPDL gRPC server is executing a command"""
+        """True when MAPDL gRPC server is executing a command."""
         return self._busy
+
+    @property
+    def exiting(self):
+        """Returns true if the MAPDL instance is exiting."""
+        return self._exiting
+
+    @property
+    def port(self):
+        """Returns the MAPDL gRPC instance port."""
+        return self._port
+
+    @property
+    def ip(self):
+        """Return the MAPDL gRPC instance IP."""
+        return self._ip
 
     @protect_grpc
     def _send_command(self, cmd: str, mute: bool = False) -> Optional[str]:
@@ -1101,7 +1111,12 @@ class MapdlGrpc(_MapdlCore):
 
         """
         self._log.debug("Killing MAPDL server")
-        self._ctrl("EXIT")
+        if (
+            self._version >= 24.2
+        ):  # We can't use the non-cached version because of recursion error.
+            self.run("/EXIT,NOSAVE,,,,,SERVER")
+        else:
+            self._ctrl("EXIT")
 
     def _kill_process(self):
         """Kill process stored in self._mapdl_process"""
@@ -1791,11 +1806,6 @@ class MapdlGrpc(_MapdlCore):
             if not self._apdl_log.closed:
                 self._apdl_log.write(tmp_dat)
 
-        # Escaping early if inside non_interactive context
-        if self._store_commands:
-            self._stored_commands.append(tmp_dat.splitlines()[1])
-            return None
-
         if self._local:
             local_path = self.directory
             tmp_name_path = os.path.join(local_path, tmp_name)
@@ -1803,6 +1813,11 @@ class MapdlGrpc(_MapdlCore):
                 f.write(tmp_dat)
         else:
             self._upload_raw(tmp_dat.encode(), tmp_name)
+
+        # Escaping early if inside non_interactive context
+        if self._store_commands:
+            self._stored_commands.append(tmp_dat.splitlines()[1])
+            return None
 
         request = pb_types.InputFileRequest(filename=tmp_name)
 
@@ -1876,8 +1891,12 @@ class MapdlGrpc(_MapdlCore):
             if os.path.isfile(fname):
                 # And it exists
                 filename = os.path.join(os.getcwd(), fname)
-            elif fname in self.list_files():
+            elif not self._store_commands and fname in self.list_files():
                 # It exists in the Mapdl working directory
+                filename = os.path.join(self.directory, fname)
+            elif self._store_commands:
+                # Assuming that in non_interactive we have uploaded the file
+                # manually.
                 filename = os.path.join(self.directory, fname)
             else:
                 # Finally
@@ -1889,8 +1908,13 @@ class MapdlGrpc(_MapdlCore):
                 self.upload(ffullpath, progress_bar=progress_bar)
                 filename = fname
 
-            elif fname in self.list_files():
+            elif not self._store_commands and fname in self.list_files():
                 # It exists in the Mapdl working directory
+                filename = fname
+
+            elif self._store_commands:
+                # Assuming that in non_interactive, the file exists already in
+                # the Mapdl working directory
                 filename = fname
 
             else:
@@ -2016,8 +2040,10 @@ class MapdlGrpc(_MapdlCore):
 
         if self._store_commands:
             raise MapdlRuntimeError(
-                "Cannot use gRPC enabled ``GET`` when in non_interactive mode. "
-                "Exit non_interactive mode before using this method."
+                "Cannot use `mapdl.get_value` when in `non_interactive` mode. "
+                "Exit non_interactive mode before using this method.\n\n"
+                "Alternatively you can use `mapdl.get` to specify the name of "
+                "the MAPDL parameter where to store the retrieved value.\n"
             )
 
         cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3}, {it3num}, {item4}, {it4num}"
@@ -2163,7 +2189,7 @@ class MapdlGrpc(_MapdlCore):
 
         >>> mapdl.download('file*')
 
-        Download every single file in the MAPDL workind directory:
+        Download every single file in the MAPDL working directory:
 
         >>> mapdl.download('*.*')
 
@@ -2408,7 +2434,7 @@ class MapdlGrpc(_MapdlCore):
             )
 
     @protect_grpc
-    def upload(self, file_name: str, progress_bar: bool = True) -> str:
+    def upload(self, file_name: str, progress_bar: bool = _HAS_TQDM) -> str:
         """Upload a file to the grpc instance
 
         file_name : str
@@ -2453,7 +2479,7 @@ class MapdlGrpc(_MapdlCore):
         kloop="",
         **kwargs,
     ):
-        """gRPC VGET request.
+        """Do a gRPC VGET request.
 
         Send a vget request, receive a bytes stream, and return it as
         a numpy array.
@@ -2827,31 +2853,6 @@ class MapdlGrpc(_MapdlCore):
 
         return self._download_as_raw(error_file).decode("latin-1")
 
-    @wraps(_MapdlCore.igesin)
-    def igesin(self, fname="", ext="", **kwargs):
-        """Wrap the IGESIN command to handle the remote case."""
-
-        fname = self._get_file_name(fname=fname, ext=ext)
-        filename = self._get_file_path(fname, progress_bar=False)
-
-        if " " in fname:
-            # Bug in reading file paths with whitespaces.
-            # https://github.com/pyansys/pymapdl/issues/1601
-
-            msg_ = f"Applying \\IGESIN whitespace patch.\nSee #1601 issue in PyMAPDL repository.\nReading file {fname}"
-            self.input_strings("\n".join([f"! {each}" for each in msg_.splitlines()]))
-            self._log.debug(msg_)
-
-            cmd = f"*dim,__iges_file__,string,248\n*set,__iges_file__(1), '{filename}'"
-            self.input_strings(cmd)
-
-            out = super().igesin(fname="__iges_file__(1)", **kwargs)
-            self.run("__iges_file__ =")  # cleaning array.
-            self.run("! Ending \\IGESIN whitespace patch.")
-            return out
-        else:
-            return super().igesin(fname=filename, **kwargs)
-
     @wraps(_MapdlCore.cmatrix)
     def cmatrix(
         self,
@@ -3022,8 +3023,9 @@ class MapdlGrpc(_MapdlCore):
         fname = self._get_file_name(fname, ext, "cdb")
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
         file_, ext_, _ = self._decompose_fname(fname)
+        fname = fname[: -len(ext_) - 1]  # Removing extension. -1 for the dot.
         if self._local:
-            return self._file(filename=fname, **kwargs)
+            return self._file(filename=fname, extension=ext_, **kwargs)
         else:
             return self._file(filename=file_, extension=ext_)
 
@@ -3038,7 +3040,8 @@ class MapdlGrpc(_MapdlCore):
     ) -> NDArray[np.float64]:
         """Wraps VGET"""
         super().vget(par=par, ir=ir, tstrt=tstrt, kcplx=kcplx, **kwargs)
-        return self.parameters[par]
+        if not self._store_commands:
+            return self.parameters[par]
 
     def get_variable(
         self,
@@ -3095,7 +3098,7 @@ class MapdlGrpc(_MapdlCore):
             comp=comp,
             name=name,
             sector=sector,
-            kwargs=kwargs,
+            **kwargs,
         )
         return self.vget("_temp", nvar)
 
@@ -3118,7 +3121,7 @@ class MapdlGrpc(_MapdlCore):
             item=item,
             comp=comp,
             name=name,
-            kwargs=kwargs,
+            **kwargs,
         )
         return self.vget("_temp", nvar)
 
@@ -3188,7 +3191,7 @@ class MapdlGrpc(_MapdlCore):
             comp=comp,
             name=name,
             sector=sector,
-            kwargs=kwargs,
+            **kwargs,
         )
 
     def get_esol(
@@ -3302,7 +3305,7 @@ class MapdlGrpc(_MapdlCore):
             comp=comp,
             name=name,
             sector=sector,
-            kwargs=kwargs,
+            **kwargs,
         )
         # Using get_variable because it deletes the intermediate parameter after using it.
         return self.get_variable(VAR_IR, tstrt=tstrt, kcplx=kcplx)
@@ -3340,9 +3343,6 @@ class MapdlGrpc(_MapdlCore):
         elif pymapdl.RUNNING_TESTS or self._strict_session_id_check:
             if pymapdl_session_id != self._mapdl_session_id:
                 self._log.error("The session ids do not match")
-                raise DifferentSessionConnectionError(
-                    f"Local MAPDL session ID '{pymapdl_session_id}' is different from MAPDL session ID '{self._mapdl_session_id}."
-                )
 
             else:
                 self._log.debug("The session ids match")
@@ -3362,3 +3362,144 @@ class MapdlGrpc(_MapdlCore):
         if parameter:
             return parameter[SESSION_ID_NAME]["value"]
         return None
+
+    @wraps(_MapdlCore.igesin)
+    def igesin(self, fname, ext="", **kwargs):
+        """Wrap the IGESIN command to handle the remote case."""
+
+        fname = self._get_file_name(fname=fname, ext=ext)
+        filename = self._get_file_path(fname, progress_bar=False)
+
+        # Entering aux15 preprocessor
+        self.aux15()
+
+        if " " in fname:
+            # Bug in reading file paths with whitespaces.
+            # https://github.com/ansys/pymapdl/issues/1601
+
+            msg_ = f"Applying \\IGESIN whitespace patch.\nSee #1601 issue in PyMAPDL repository.\nReading file {fname}"
+            self.input_strings("\n".join([f"! {each}" for each in msg_.splitlines()]))
+            self._log.debug(msg_)
+
+            cmd = f"*dim,__iges_file__,string,248\n*set,__iges_file__(1), '{filename}'"
+            self.input_strings(cmd)
+
+            out = super().igesin(fname="__iges_file__(1)", **kwargs)
+            self.run("__iges_file__ =")  # cleaning array.
+            self.run("! Ending \\IGESIN whitespace patch.")
+            return out
+        else:
+            return super().igesin(fname=filename, **kwargs)
+
+    @wraps(_MapdlCore.satin)
+    def satin(
+        self,
+        name,
+        extension="",
+        path="",
+        entity="",
+        fmt="",
+        nocl="",
+        noan="",
+        **kwargs,
+    ):
+        """Wraps ~SATIN command"""
+        fname = name
+        if path:
+            fname = os.path.join(path, name)
+        fname = self._get_file_name(fname, extension, "sat")
+        fname = self._get_file_path(fname, False)
+        name, extension, path = self._decompose_fname(fname)
+
+        if path == path.parent:
+            path = ""
+        else:
+            path = str(path)
+
+        # wrapping path in single quotes because of #2286
+        path = f"'{path}'"
+        return super().satin(
+            name=name,
+            extension=extension,
+            path=path,
+            entity=entity,
+            fmt=fmt,
+            nocl=nocl,
+            noan=noan,
+            **kwargs,
+        )
+
+    @wraps(_MapdlCore.cat5in)
+    def cat5in(
+        self,
+        name,
+        extension="",
+        path="",
+        entity="",
+        fmt="",
+        nocl="",
+        noan="",
+        **kwargs,
+    ):
+        """Wraps ~cat5in command"""
+        fname = name
+        if path:
+            fname = os.path.join(path, name)
+        fname = self._get_file_name(fname, extension, "CATPart")
+        fname = self._get_file_path(fname, False)
+        name, extension, path = self._decompose_fname(fname)
+
+        if path == path.parent:
+            path = ""
+        else:
+            path = str(path)
+
+        # wrapping path in single quotes because of #2286
+        path = f"'{path}'"
+        self.finish()
+        return super().cat5in(
+            name=name,
+            extension=extension,
+            path=path,
+            entity=entity,
+            fmt=fmt,
+            nocl=nocl,
+            noan=noan,
+            **kwargs,
+        )
+
+    @wraps(_MapdlCore.parain)
+    def parain(
+        self,
+        name,
+        extension="",
+        path="",
+        entity="",
+        fmt="",
+        scale="",
+        **kwargs,
+    ):
+        """Wraps ~parain command"""
+        fname = name
+        if path:
+            fname = os.path.join(path, name)
+        fname = self._get_file_name(fname, extension, "x_t")
+        fname = self._get_file_path(fname, False)
+        name, extension, path = self._decompose_fname(fname)
+
+        if path == path.parent:
+            path = ""
+        else:
+            path = str(path)
+
+        # wrapping path in single quotes because of #2286
+        path = f"'{path}'"
+        return super().parain(
+            name=name,
+            extension=extension,
+            path=path,
+            entity=entity,
+            fmt=fmt,
+            scale=scale,
+            **kwargs,
+        )
