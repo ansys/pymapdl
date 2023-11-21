@@ -220,9 +220,9 @@ class ComponentManager:
         mapdl : ansys.mapdl.core.Mapdl
             Mapdl instance which this class references to.
         """
-        from ansys.mapdl.core.mapdl import _MapdlCore
+        from ansys.mapdl.core.mapdl import MapdlBase
 
-        if not isinstance(mapdl, _MapdlCore):
+        if not isinstance(mapdl, MapdlBase):
             raise TypeError("Must be implemented from MAPDL class")
 
         self._mapdl_weakref: weakref.ReferenceType[Mapdl] = weakref.ref(mapdl)

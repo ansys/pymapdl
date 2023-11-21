@@ -1,20 +1,21 @@
 from functools import wraps
+import os
+import pathlib
+import tempfile
+from typing import Union
+import warnings
 
-from numpy.typing import DTypeLike, NDArray
+import numpy as np
 
+from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import _HAS_PYVISTA
-from ansys.mapdl.core.errors import ComponentDoesNotExits, IncorrectWorkingDirectory
-from ansys.mapdl.core.mapdl_core import _MapdlCore
-from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
-from ansys.mapdl.core.misc import (
-    allow_iterables_vmin,
-    allow_pickable_entities,
-    load_file,
-)
-from ansys.mapdl.core.theme import get_ansys_colors
+from ansys.mapdl.core.commands import CommandListingOutput
+from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.mapdl_types import MapdlFloat
+from ansys.mapdl.core.misc import random_string, supress_logging
 
 if _HAS_PYVISTA:
-    from ansys.mapdl.core.plotting import general_plotter
+    from ansys.mapdl.core.plotting import get_meshes_from_plotter
 
 
 class _MapdlCommandExtended(_MapdlCore):
@@ -1235,7 +1236,7 @@ class _MapdlCommandExtended(_MapdlCore):
             self._create_session()
         self.run("/CLE,NOSTART", mute=True)
 
-    @wraps(Commands.cmplot)
+    @wraps(_MapdlCore.cmplot)
     def cmplot(self, label: str = "", entity: str = "", keyword: str = "", **kwargs):
         """Wraps cmplot"""
 
@@ -1299,7 +1300,7 @@ class _MapdlCommandExtended(_MapdlCore):
         self.components.select(cmps_names)
         return output
 
-    @wraps(Commands.inquire)
+    @wraps(_MapdlCore.inquire)
     def inquire(self, strarray="", func="", arg1="", arg2=""):
         """Wraps original INQUIRE function"""
         func_options = [
@@ -1351,7 +1352,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
         return response.split("=")[1].strip()
 
-    @wraps(Commands.parres)
+    @wraps(_MapdlCore.parres)
     def parres(self, lab="", fname="", ext="", **kwargs):
         """Wraps the original /PARRES function"""
         if not fname:
@@ -1366,7 +1367,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
         return self.input(filename)
 
-    @wraps(Commands.lgwrite)
+    @wraps(_MapdlCore.lgwrite)
     def lgwrite(self, fname="", ext="", kedit="", remove_grpc_extra=True, **kwargs):
         """Wraps original /LGWRITE"""
 
@@ -1400,7 +1401,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
         return output
 
-    @wraps(Commands.vwrite)
+    @wraps(_MapdlCore.vwrite)
     def vwrite(
         self,
         par1="",
@@ -1456,7 +1457,7 @@ class _MapdlCommandExtended(_MapdlCore):
             **kwargs,
         )
 
-    @wraps(Commands.nrm)
+    @wraps(_MapdlCore.nrm)
     def nrm(self, name="", normtype="", parr="", normalize="", **kwargs):
         """Wraps *NRM"""
         if not parr:
@@ -1466,7 +1467,7 @@ class _MapdlCommandExtended(_MapdlCore):
         )
         return self.parameters[parr]
 
-    @wraps(Commands.com)
+    @wraps(_MapdlCore.com)
     def com(self, comment="", **kwargs):
         """Wraps /COM"""
         if self.print_com and not self.mute and not kwargs.get("mute", False):
@@ -1474,14 +1475,14 @@ class _MapdlCommandExtended(_MapdlCore):
 
         return super().com(comment=comment, **kwargs)
 
-    @wraps(Commands.lssolve)
+    @wraps(_MapdlCore.lssolve)
     def lssolve(self, lsmin="", lsmax="", lsinc="", **kwargs):
         """Wraps LSSOLVE"""
         with self.non_interactive:
             super().lssolve(lsmin=lsmin, lsmax=lsmax, lsinc=lsinc, **kwargs)
         return self.last_response
 
-    @wraps(Commands.get)
+    @wraps(_MapdlCore.get)
     def get(
         self,
         par: str = "__floatparameter__",

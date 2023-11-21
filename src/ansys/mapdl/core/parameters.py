@@ -15,7 +15,7 @@ except ModuleNotFoundError:  # pragma: no cover
 import numpy as np
 
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from ansys.mapdl.core.mapdl import _MapdlCore
+from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.misc import supress_logging
 
 ROUTINE_MAP = {
@@ -77,7 +77,7 @@ class Parameters:
 
     """
 
-    def __init__(self, mapdl: _MapdlCore):
+    def __init__(self, mapdl: MapdlBase):
         """Parameters manager
 
         Class to help to manage parameters in an
@@ -88,7 +88,7 @@ class Parameters:
         mapdl : ansys.mapdl.core.Mapdl
             Mapdl instance which this class references to.
         """
-        if not isinstance(mapdl, _MapdlCore):
+        if not isinstance(mapdl, MapdlBase):
             raise TypeError("Must be implemented from MAPDL class")
         self._mapdl_weakref = weakref.ref(mapdl)
         self.show_leading_underscore_parameters = False

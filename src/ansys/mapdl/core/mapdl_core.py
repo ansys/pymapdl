@@ -54,7 +54,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.reader import Archive
 
     from ansys.mapdl.core.component import ComponentManager
-    from ansys.mapdl.core.mapdl import _MapdlCore
+    from ansys.mapdl.core.mapdl import MapdlBase
     from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
     from ansys.mapdl.core.parameters import Parameters
     from ansys.mapdl.core.solution import Solution
@@ -458,7 +458,7 @@ class _MapdlCore(Commands):
         None
 
         In case the directory does not exist or it is not
-        accessible, ``cwd`` (:func:`_MapdlCore.cwd`) will raise
+        accessible, ``cwd`` (:func:`MapdlBase.cwd`) will raise
         a warning.
         """
         # always attempt to cache the path
@@ -1720,7 +1720,7 @@ class _MapdlCore(Commands):
     class WithInterativePlotting:
         """Allows to redirect plots to MAPDL plots."""
 
-        def __init__(self, parent: "_MapdlCore", pixel_res: int) -> None:
+        def __init__(self, parent: "MapdlBase", pixel_res: int) -> None:
             self._parent = weakref.ref(parent)
             self._pixel_res = pixel_res
 
@@ -2812,8 +2812,8 @@ class _MapdlCore(Commands):
     class _force_output:
         """Allows user to enter commands that need to run with forced text output."""
 
-        def __init__(self, parent: "_MapdlCore"):
-            self._parent: "_MapdlCore" = weakref.ref(parent)
+        def __init__(self, parent: "MapdlBase"):
+            self._parent: "MapdlBase" = weakref.ref(parent)
 
         def __enter__(self):
             self._parent()._log.debug("Entering force-output mode")

@@ -37,7 +37,7 @@ from ansys.mapdl.core.errors import (
     VersionError,
 )
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
-from ansys.mapdl.core.mapdl import _ALLOWED_START_PARM
+from ansys.mapdl.core.mapdl_core import _ALLOWED_START_PARM
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import (
     check_valid_ip,
@@ -670,7 +670,7 @@ def launch_remote_mapdl(
 
     Returns
     -------
-    ansys.mapdl.core.mapdl._MapdlCore
+    ansys.mapdl.core.mapdl.MapdlBase
         An instance of Mapdl.
     """
     if not _HAS_PIM:  # pragma: no cover

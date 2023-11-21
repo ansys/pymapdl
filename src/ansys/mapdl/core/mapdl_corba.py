@@ -9,7 +9,7 @@ import warnings
 import weakref
 
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
-from ansys.mapdl.core.mapdl import _MapdlCore
+from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.misc import random_string, requires_package, threaded
 
 if sys.version_info[1] > 8:
@@ -146,7 +146,7 @@ def launch_corba(
     return open(keyfile).read(), process
 
 
-class MapdlCorba(_MapdlCore):
+class MapdlCorba(MapdlBase):
     """CORBA implementation of the MAPDL interface
 
     Parameters

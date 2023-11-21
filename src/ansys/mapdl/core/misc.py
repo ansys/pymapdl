@@ -716,9 +716,9 @@ class Information:
 
     def __init__(self, mapdl):
         """Class Initializer"""
-        from ansys.mapdl.core.mapdl import _MapdlCore  # lazy import to avoid circular
+        from ansys.mapdl.core.mapdl import MapdlBase  # lazy import to avoid circular
 
-        if not isinstance(mapdl, _MapdlCore):  # pragma: no cover
+        if not isinstance(mapdl, MapdlBase):  # pragma: no cover
             raise TypeError("Must be implemented from MAPDL class")
 
         self._mapdl_weakref = weakref.ref(mapdl)
