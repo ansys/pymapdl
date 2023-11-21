@@ -2191,3 +2191,22 @@ def test_get_array_non_interactive(mapdl, solved_box):
     with pytest.raises(MapdlRuntimeError):
         with mapdl.non_interactive:
             mapdl.get_array("asdf", "2")
+
+
+def test_default_file_type_for_plots(mapdl):
+    assert mapdl.default_file_type_for_plots
+
+    with pytest.raises(ValueError):
+        mapdl.default_file_type_for_plots = "dummy"
+
+    mapdl.default_file_type_for_plots = "PNG"
+
+
+def test_use_vtk(mapdl):
+    assert isinstance(mapdl.use_vtk, bool)
+
+    prev = mapdl.use_vtk
+    mapdl.use_vtk = False
+    mapdl.eplot()
+
+    mapdl.use_vtk = prev
