@@ -3,12 +3,10 @@
 import os
 import tempfile
 
-# CORBA and console available versions
 from ansys.tools.path import get_available_ansys_installations
 import pytest
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS as versions
 from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.launcher import (
     _check_license_argument,
