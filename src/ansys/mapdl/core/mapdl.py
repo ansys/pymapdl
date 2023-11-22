@@ -826,19 +826,9 @@ class _MapdlCore(Commands):
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
+            self._parent()._log.debug("Exiting non-interactive mode")
+            self._parent()._flush_stored()
             self._parent()._store_commands = False
-
-            if args[0] is not None:
-                # An exception was raised, let's exit now without flushing
-                self._parent()._log.debug(
-                    "An exception was found in the `non_interactive` environment. "
-                    "Hence the commands are not flushed."
-                )
-                return None
-            else:
-                # No exception so let's flush.
-                self._parent()._log.debug("Exiting non-interactive mode")
-                self._parent()._flush_stored()
 
     class _save_selection:
         """Save the selection and returns to it when exiting"""
@@ -2870,10 +2860,9 @@ class _MapdlCore(Commands):
 
         value = response.split("=")[-1].strip()
         if item3:
-            if len(value.splitlines()) > 1:
-                self._log.info(
-                    f"The command '{command}' is showing the next message: '{value.splitlines()[1].strip()}'"
-                )
+            self._log.info(
+                f"The command '{command}' is showing the next message: '{value.splitlines()[1].strip()}'"
+            )
             value = value.splitlines()[0]
 
         try:  # always either a float or string
@@ -3837,20 +3826,7 @@ class _MapdlCore(Commands):
                -0.00178402, -0.01234851,  0.01234851, -0.01234851])
 
         """
-        parm_name = kwargs.get("parm", None)
-
-        if self._store_commands:
-            raise MapdlRuntimeError(
-                "Cannot use `mapdl.get_array` when in `non_interactive` mode, "
-                "since it does not return anything until the `non_interactive` context "
-                "manager is finished.\n"
-                "Exit `non_interactive` mode before using this method.\n\n"
-                "Alternatively you can use `mapdl.vget` to specify the name of the MAPDL parameter where to store the retrieved value."
-            )
-
-        arr = self._get_array(
-            entity, entnum, item1, it1num, item2, it2num, kloop, **kwargs
-        )
+        arr = self._get_array(entity, entnum, item1, it1num, item2, it2num, kloop)
 
         # edge case where corba refuses to return the array
         ntry = 0
@@ -3876,16 +3852,6 @@ class _MapdlCore(Commands):
         """Uses the VGET command to get an array from ANSYS"""
         parm_name = kwargs.pop("parm", None)
 
-        if self._store_commands and not parm_name:
-            raise MapdlRuntimeError(
-                "Cannot use `mapdl._get_array` when in `non_interactive` mode, "
-                "since it does not return anything until the `non_interactive` context "
-                "manager is finished.\n"
-                "Exit `non_interactive` mode before using this method.\n\n"
-                "Alternatively you can use `mapdl.vget` or use the `parm` kwarg in "
-                "`mapdl._get_array` to specify the name of the MAPDL parameter where to store the retrieved value. In any case, this function will return `None`"
-            )
-
         if parm_name is None:
             parm_name = "__vget_tmp_%d__" % self._vget_arr_counter
             self._vget_arr_counter += 1
@@ -3901,10 +3867,6 @@ class _MapdlCore(Commands):
             kloop,
             mute=False,
         )
-
-        if self._store_commands:
-            # Return early
-            return None
 
         # check if empty array
         if "the dimension number 1 is 0" in out:
@@ -4953,19 +4915,12 @@ class _MapdlCore(Commands):
         if not cmlist:
             cmlist = self.cmlist()
 
-        if "NAME" in cmlist and "SUBCOMPONENTS" in cmlist:
-            # header
-            #  "NAME                            TYPE      SUBCOMPONENTS"
-            blocks = re.findall(
-                r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
-                cmlist,
-                flags=re.DOTALL,
-            )
-        elif "LIST ALL SELECTED COMPONENTS":
-            blocks = cmlist.splitlines()[1:]
-        else:
-            raise ValueError("The format of the CMLIST output is not recognaised.")
-
+        header = "NAME                            TYPE      SUBCOMPONENTS"
+        blocks = re.findall(
+            r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+            cmlist,
+            flags=re.DOTALL,
+        )
         cmlist = "\n".join(blocks)
 
         def extract(each_line, ind):
@@ -4983,15 +4938,9 @@ class _MapdlCore(Commands):
         if not cmlist:
             cmlist = self.cmlist(cmname, 1)
         # Capturing blocks
-        if "NAME" in cmlist and "SUBCOMPONENTS" in cmlist:
-            header = r"NAME\s+TYPE\s+SUBCOMPONENTS"
-
-        elif "LIST COMPONENT" in cmlist:
-            header = ""
-
         cmlist = "\n\n".join(
             re.findall(
-                r"(?s)" + header + r"\s+(.*?)\s*(?=\n\s*\n|\Z)",
+                r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
                 cmlist,
                 flags=re.DOTALL,
             )

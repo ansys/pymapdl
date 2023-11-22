@@ -351,7 +351,7 @@ class PostProcessing:
         Returns
         -------
         numpy.ndarray
-            Numpy array containing the requested element values for a
+            Numpy array containing the requested element values for ta
             given item and component.
 
         Notes
@@ -632,63 +632,27 @@ class PostProcessing:
 
         surf = self._mapdl.mesh._surf
 
-        # as ``disp`` returns the result for all nodes/elems, we need all node/elem numbers
+        # as ``disp`` returns the result for all nodes, we need all node numbers
         # and to index to the output node numbers
         if hasattr(self._mapdl.mesh, "enum_all"):
-            enum = self._mapdl.mesh.enum_all
+            enum = self._mapdl.mesh.enum
         else:
             enum = self._all_enum
 
-        #######################################################################
-        # Bool operations
-        # ===============
-        # I'm going to explain this clearly because it can be confusing for the
-        # future developers (me).
-        # This explanation is based in scalars (`element_values`) NOT having the
-        # full elements (selected and not selected) size.
-        #
-        # First, it's possible that there are duplicated element numbers,
-        # in the surf object returned by Pyvista.
-        # Therefore we need to get the unique values and a reverse index, to
-        # later convert the MAPDL values to Pyvista values.
+        # it's possible that there are duplicated element numbers,
+        # therefore we need to get the unique values and a reverse index
         uni, ridx = np.unique(surf["ansys_elem_num"], return_inverse=True)
-        # which means that, uni is the id of mapdl elements in the polydata
-        # object. These elements does not need to be in order, and there can be
-        # duplicated!
-        # Hence:
-        # uni[ridx] = surf["ansys_elem_num"]
-        #
-        # Let's notice that:
-        # * enum[self.selected_elements] is mapdl selected elements ids in MAPDL notation.
-        #
-        # Theoretical approach
-        # --------------------
-        # The theoretical approach will be using an intermediate array of the
-        # size of the MAPDL total number of elements (we do not care about selected).
-        #
-        values = np.zeros(enum.shape)
-        #
-        # Then assign the MAPDL values for the selected element (scalars)
-        #
-        values[self.selected_elements] = scalars
-        #
-        # Because values are in order, but with python notation, then we can do:
-        #
-        surf_values = values[
-            uni - 1
-        ]  # -1 to set MAPDL element indexing to python indexing
-        #
-        # Then to account for the original Pyvista object:
-        #
-        surf_values = surf_values[ridx]
-        #
-        #######################################################################
+        mask = np.isin(enum, uni, assume_unique=True)
+
+        if scalars.size != mask.size:
+            scalars = scalars[self.selected_elements]
+        scalars = scalars[mask][ridx]
 
         meshes = [
             {
                 "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
                 "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
-                "scalars": surf_values,
+                "scalars": scalars,
             }
         ]
 

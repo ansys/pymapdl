@@ -10,7 +10,7 @@ documented UPF subroutines support the Python UPF capability. For more informati
 see `Supported UPF subroutines`_).
 
 You must install a Python distribution before using this feature. Python 3.8
-through Python 3.12 are supported.
+through Python 3.11 are supported.
 
 Python UPFs are only supported on Linux.
 

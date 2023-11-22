@@ -104,6 +104,7 @@ class MeshGrpc:
             self._cached_elements = None  # cached list of elements
             self._chunk_size = None
             self._elem = None
+            self._elem_comps = {}
             self._elem_off = None
             self._enum = None  # cached element numbering
             self._esys = None  # cached element coordinate system
@@ -116,6 +117,7 @@ class MeshGrpc:
             self._mtype = None  # cached ansys material type
             self._nnum = None
             self._node_angles = None  # cached node angles
+            self._node_comps = {}
             self._node_coord = None  # cached node coordinates
             self._rcon = None  # cached ansys element real constant
             self._rdat = None
@@ -323,7 +325,7 @@ class MeshGrpc:
         array of MAPDL element numbers corresponding to the element
         component.  The keys are element component names.
         """
-        return self._mapdl.components._get_all_components_type("ELEM")
+        return self._elem_comps
 
     @property
     def node_components(self):
@@ -333,7 +335,7 @@ class MeshGrpc:
         array of MAPDL node numbers corresponding to the node
         component.  The keys are node component names.
         """
-        return self._mapdl.components._get_all_components_type("NODE")
+        return self._node_comps
 
     @property
     @requires_model()

@@ -427,15 +427,3 @@ def test_parameter_contains(mapdl, cleared):
 def test_non_existing_parameter(mapdl, cleared):
     with pytest.raises(KeyError):
         mapdl.parameters["A"]
-
-
-def test_non_interactive(mapdl):
-    mapdl.parameters["asdf"] = 2
-    with pytest.raises(MapdlRuntimeError):
-        with mapdl.non_interactive:
-            par = mapdl.parameters["asdf"]
-
-    with mapdl.non_interactive:
-        mapdl.parameters["qwer"] = 3
-
-    assert mapdl.parameters["qwer"] == 3

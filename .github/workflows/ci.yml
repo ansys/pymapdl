@@ -77,7 +77,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.8', '3.9', '3.10', '3.11']
         # Only perform wheelhouse builds for macOS when releasing
         should-release: 
           - ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
@@ -470,15 +470,13 @@ jobs:
       commit_long_sha: ${{ steps.attatch-to-pr.outputs.commit_long_sha }}
     container:
       image: ghcr.io/ansys/mapdl:v22.2-ubuntu
-      options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
+      options: "-u=0:0 --entrypoint /bin/bash"
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
-      P_SCHEMA: "/ansys_inc/v222/ansys/ac4/schema"
-      PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
 
     steps:
       - name: "Install Git and checkout project"
@@ -503,7 +501,7 @@ jobs:
       - name: "Install OS packages"
         run: |
           apt update
-          apt install -y libgl1-mesa-glx xvfb libgomp1
+          apt install -y libgl1-mesa-glx xvfb
 
       - name: "Test virtual framebuffer"
         run: |
@@ -597,7 +595,7 @@ jobs:
     timeout-minutes: 55
     container:
       image: ghcr.io/ansys/mapdl:v22.2-ubuntu
-      options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
+      options: "-u=0:0 --entrypoint /bin/bash"
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -629,11 +627,12 @@ jobs:
           python -m pip install . --no-deps
           python -m pip install -r minimum_requirements.txt
           python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
-
-      - name: "Installing missing package"
+      
+      - name: "Running some verification manual examples"
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libgomp1
+          unset PYMAPDL_START_INSTANCE
+          export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
+          python .ci/run_vms.py
 
       - name: "Unit testing requirements installation"
         run: |
@@ -645,6 +644,7 @@ jobs:
           export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
           pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
+            --skip-regression-check \
             --cov-report=xml:ubuntu-v22.2.0-local-minimal.xml
         
       - uses: codecov/codecov-action@v3

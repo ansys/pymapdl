@@ -1,12 +1,10 @@
 [aA]nsys
 [Bb]ooleans
 [Cc]ommand [Pp]rompt
-[Dd]ocker
 [Ee]igensolver
 [Hh]yperelasticity
 [Kk]eypoints
 [Mm]atplotlib
-[Mm]ulti-[Ff]ield
 [Nn]umpy
 [Pp]ostprocess
 [Pp]ostprocessing
@@ -16,8 +14,6 @@
 [Pp]yansys
 [Pp]ythonic
 [Pp]ythonically
-[Rs]ST
-[Ss]ubsystem
 [Ss]uperelements
 [Vv]on Mises
 2D
@@ -50,6 +46,8 @@ Chao
 container_layout
 datas
 delet
+docker
+Docker
 dof
 ect
 eigenfrequency
@@ -71,8 +69,8 @@ GPa
 GUI
 hexahedral
 hostname
-HTML
-Image[Mm]agick
+Imagemagick
+ImageMagick
 imagin
 importlib
 ist
@@ -95,6 +93,7 @@ midside
 Mises
 mkdir
 MSc
+Multi-[Ff]ield
 multipoint
 nce
 Newton-Raphson
@@ -127,6 +126,7 @@ Radiosity
 Rao
 righ
 RNNN
+RST
 singl
 smal
 sord
@@ -134,6 +134,7 @@ spotweld
 struc
 subselected
 substep
+Subsystem
 sur
 tablet
 thermomechanical

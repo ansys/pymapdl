@@ -400,10 +400,6 @@ def test__verify_version_pass(version):
     assert min(versions.keys()) <= ver <= max(versions.keys())
 
 
-def test__verify_version_latest():
-    assert _verify_version("latest") is None
-
-
 @requires("ansys-tools-path")
 @requires("local")
 def test_find_ansys(mapdl):

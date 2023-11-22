@@ -36,3 +36,5 @@ PyMAPDL, see :ref:`ref_mapdl_commands`.
    Pyansys Math <https://math.docs.pyansys.com/version/stable/>
    solution
    xpl
+   building_example
+   unit_testing
