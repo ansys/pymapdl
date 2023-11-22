@@ -23,6 +23,7 @@ help:
 
 # customized clean due to examples gallery
 clean:
+	@echo "Cleaning everything."
 	rm -rf $(BUILDDIR)/*
 	rm -rf images/auto-generated
 	rm -rf source/examples/gallery_examples
@@ -30,11 +31,13 @@ clean:
 
 # customized clean due to examples gallery
 clean-except-examples:
+	@echo "Cleaning everything except the examples."
 	rm -rf $(BUILDDIR)/*
 	find . -type d -name "_autosummary" -exec rm -rf {} +
 
 # clean only examples
 clean-examples:
+	@echo "Cleaning only the examples."
 	rm -rf source/examples/gallery_examples
 
 # customized to build the pdf rather than using latexpdf due to various issues
@@ -51,6 +54,7 @@ linkcheck:
 	@echo "Check finished. Report is in $(LINKCHECKDIR)."
 
 html-noexamples:
-	@$(SPHINXBUILD) -D plot_gallery=0 -b html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	@echo "Building gallery without running examples."
+	@$(SPHINXBUILD) -D plot_gallery=0 -b html "$(SOURCEDIR)" "$(BUILDDIR)/html" $(SPHINXOPTS) $(O)
 	@echo
-	@echo "Build finished. The HTML pages are in $(BUILDDIR)."
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."

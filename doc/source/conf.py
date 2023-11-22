@@ -86,6 +86,7 @@ extensions = [
     "sphinx.ext.graphviz",
     "sphinx_reredirects",
     "ansys_sphinx_theme.extension.linkcode",
+    "sphinx_design",
 ]
 
 # Intersphinx mapping
@@ -180,6 +181,8 @@ with open("links.rst") as f:
     rst_epilog += f.read()
 
 rst_epilog = rst_epilog.replace("%%VERSION%%", "v231")
+rst_epilog = rst_epilog.replace("%%PYMAPDLVERSION%%", release)
+
 
 # Read link all substitutions from file
 with open("substitutions.rst") as f:
@@ -243,6 +246,7 @@ sphinx_gallery_conf = {
     "thumbnail_size": (350, 350),
     "remove_config_comments": True,
     "default_thumb_file": pyansys_logo_white,
+    "show_signature": False,
 }
 # ---
 
@@ -258,6 +262,7 @@ html_theme_options = {
     "show_breadcrumbs": True,
     "collapse_navigation": True,
     "use_edit_page_button": True,
+    "navigation_with_keys": False,
     "additional_breadcrumbs": [
         ("PyAnsys", "https://docs.pyansys.com/"),
     ],

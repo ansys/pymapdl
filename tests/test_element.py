@@ -4,6 +4,7 @@ import pytest
 
 from ansys.mapdl.core import examples
 from ansys.mapdl.core._commands.parse import parse_e, parse_et
+from conftest import requires
 
 
 @pytest.fixture
@@ -33,7 +34,7 @@ def test_et(mapdl, cleared):
     assert n_plane183 == 17
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_ewrite(mapdl, cleared):
     mapdl.et("", 183)
     n0 = mapdl.n("", 0, 0, 0)

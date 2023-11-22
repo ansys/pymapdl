@@ -20,7 +20,12 @@ try:
 except ModuleNotFoundError:  # pragma: no cover
     _HAS_PIM = False
 
-from ansys.tools.path import find_ansys, get_ansys_path, version_from_path
+try:
+    from ansys.tools.path import find_ansys, get_ansys_path, version_from_path
+
+    _HAS_ATP = True
+except ModuleNotFoundError:
+    _HAS_ATP = False
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG
@@ -32,6 +37,7 @@ from ansys.mapdl.core.errors import (
     VersionError,
 )
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
+from ansys.mapdl.core.mapdl import _ALLOWED_START_PARM
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import (
     check_valid_ip,
@@ -412,8 +418,9 @@ def launch_grpc(
         raise IOError('Unable to write to ``run_location`` "%s"' % run_location)
 
     # verify version
-    if version_from_path("mapdl", exec_file) < 202:
-        raise VersionError("The MAPDL gRPC interface requires MAPDL 20.2 or later")
+    if _HAS_ATP:
+        if version_from_path("mapdl", exec_file) < 202:
+            raise VersionError("The MAPDL gRPC interface requires MAPDL 20.2 or later")
 
     # verify lock file does not exist
     check_lock_file(run_location, jobname, override)
@@ -862,20 +869,32 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
 
     """
     # Converting additional_switches to lower case to avoid mismatches.
-    add_sw = add_sw.lower()
+    add_sw_lower_case = add_sw.lower()
 
     # known issues with distributed memory parallel (DMP)
-    if "smp" not in add_sw:  # pragma: no cover
+    if "smp" not in add_sw_lower_case:  # pragma: no cover
         # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
         if _is_ubuntu():
             LOG.debug("Ubuntu system detected. Adding 'I_MPI_SHM_LMT' env var.")
             os.environ["I_MPI_SHM_LMT"] = "shm"
 
-        if (
-            os.name == "nt"
-            and not force_intel
-            and (222 > version_from_path("mapdl", exec_path) >= 210)
-        ):
+        if _HAS_ATP:
+            condition = (
+                os.name == "nt"
+                and not force_intel
+                and (222 > version_from_path("mapdl", exec_path) >= 210)
+            )
+        else:
+            if os.name == "nt":
+                warnings.warn(
+                    "Because 'ansys-tools-path' is not installed, PyMAPDL cannot check\n"
+                    "if this Ansys version requires the MPI fix, so if you are on Windows,\n"
+                    "the fix is applied by default.\n"
+                    "Use 'force_intel=True' to not apply the fix."
+                )
+            condition = os.name == "nt" and not force_intel
+
+        if condition:
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
             # recent windows version and using VPN.
             # This is due to the intel compiler, and only affects versions between
@@ -887,13 +906,13 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
             # change for each client/person using the VPN.
             #
             # Adding '-mpi msmpi' to the launch parameter fix it.
-            if "intelmpi" in add_sw:
+            if "intelmpi" in add_sw_lower_case:
                 LOG.debug(
                     "Intel MPI flag detected. Removing it, if you want to enforce it, use ``force_intel`` keyword argument."
                 )
                 # Remove intel flag.
                 regex = "(-mpi)( *?)(intelmpi)"
-                add_sw = re.sub(regex, "", add_sw)
+                add_sw = re.sub(regex, "", add_sw, flags=re.IGNORECASE)
                 warnings.warn(INTEL_MSG)
 
             LOG.debug("Forcing Microsoft MPI (MSMPI) to avoid VPN issues.")
@@ -919,10 +938,12 @@ def _force_smp_student_version(add_sw, exec_path):
 
     """
     # Converting additional_switches to lower case to avoid mismatches.
-    add_sw = add_sw.lower()
+    add_sw_lower_case = add_sw.lower()
 
     if (
-        "-mpi" not in add_sw and "-dmp" not in add_sw and "-smp" not in add_sw
+        "-mpi" not in add_sw_lower_case
+        and "-dmp" not in add_sw_lower_case
+        and "-smp" not in add_sw_lower_case
     ):  # pragma: no cover
         if "student" in exec_path.lower():
             add_sw += " -smp"
@@ -1077,14 +1098,14 @@ def launch_mapdl(
         ``log_apdl='pymapdl_log.txt'``). By default this is disabled.
 
     remove_temp_files : bool, optional
-        .. deprecated:: 0.64.0
-           Use argument ``remove_temp_dir_on_exit`` instead.
-
         When ``run_location`` is ``None``, this launcher creates a new MAPDL
         working directory within the user temporary directory, obtainable with
         ``tempfile.gettempdir()``. When this parameter is
         ``True``, this directory will be deleted when MAPDL is exited. Default
         ``False``.
+
+        .. deprecated:: 0.64.0
+           Use argument ``remove_temp_dir_on_exit`` instead.
 
     remove_temp_dir_on_exit : bool, optional
         When ``run_location`` is ``None``, this launcher creates a new MAPDL
@@ -1353,6 +1374,15 @@ def launch_mapdl(
     # Extract arguments:
     force_intel = kwargs.pop("force_intel", False)
     broadcast = kwargs.pop("log_broadcast", False)
+    use_vtk = kwargs.pop("use_vtk", None)
+
+    # Transferring MAPDL arguments to start_parameters:
+    start_parm = {}
+
+    kwargs_keys = list(kwargs.keys())
+    for each_par in kwargs_keys:
+        if each_par in _ALLOWED_START_PARM:
+            start_parm[each_par] = kwargs.pop(each_par)
 
     # Raising error if using non-allowed arguments
     if kwargs:
@@ -1405,8 +1435,6 @@ def launch_mapdl(
     if version is None:
         version = os.getenv("PYMAPDL_MAPDL_VERSION", None)
 
-    version = _verify_version(version)  # return a int version or none
-
     # Start MAPDL with PyPIM if the environment is configured for it
     # and the user did not pass a directive on how to launch it.
     if _HAS_PIM and exec_file is None and pypim.is_configured():
@@ -1417,6 +1445,8 @@ def launch_mapdl(
             version = None
 
         return launch_remote_mapdl(cleanup_on_exit=cleanup_on_exit, version=version)
+
+    version = _verify_version(version)  # return a int version or none
 
     # connect to an existing instance if enabled
     if start_instance is None:
@@ -1447,6 +1477,7 @@ def launch_mapdl(
                     cleanup_on_exit=False,
                     loglevel=loglevel,
                     set_no_abort=set_no_abort,
+                    **start_parm,
                 )
                 GALLERY_INSTANCE[0] = {"ip": mapdl._ip, "port": mapdl._port}
                 return mapdl
@@ -1459,6 +1490,8 @@ def launch_mapdl(
                     cleanup_on_exit=False,
                     loglevel=loglevel,
                     set_no_abort=set_no_abort,
+                    use_vtk=use_vtk,
+                    **start_parm,
                 )
                 if clear_on_connect:
                     mapdl.clear()
@@ -1472,6 +1505,8 @@ def launch_mapdl(
                     cleanup_on_exit=False,
                     loglevel=loglevel,
                     set_no_abort=set_no_abort,
+                    use_vtk=use_vtk,
+                    **start_parm,
                 )
             if clear_on_connect:
                 mapdl.clear()
@@ -1487,6 +1522,8 @@ def launch_mapdl(
             loglevel=loglevel,
             set_no_abort=set_no_abort,
             log_apdl=log_apdl,
+            use_vtk=use_vtk,
+            **start_parm,
         )
         if clear_on_connect:
             mapdl.clear()
@@ -1497,6 +1534,11 @@ def launch_mapdl(
         exec_file = os.getenv("PYMAPDL_MAPDL_EXEC", None)
 
     if exec_file is None:
+        if not _HAS_ATP:
+            raise ModuleNotFoundError(
+                "If you don't have 'ansys-tools-path' library installed, you need to input the executable path ('exec_path')."
+            )
+
         LOG.debug("Using default executable.")
         # Load cached path
         exec_file = get_ansys_path(version=version)
@@ -1540,8 +1582,11 @@ def launch_mapdl(
     # verify no lock file and the mode is valid
     check_lock_file(run_location, jobname, override)
 
-    mode = check_mode(mode, version_from_path("mapdl", exec_file))
-    LOG.debug("Using mode %s", mode)
+    if _HAS_ATP:
+        mode = check_mode(mode, version_from_path("mapdl", exec_file))
+        LOG.debug("Using mode %s", mode)
+    else:
+        mode = "grpc"
 
     # Setting SMP by default if student version is used.
     additional_switches = _force_smp_student_version(additional_switches, exec_file)
@@ -1554,14 +1599,16 @@ def launch_mapdl(
     additional_switches = _check_license_argument(license_type, additional_switches)
     LOG.debug(f"Using additional switches {additional_switches}.")
 
-    start_parm = {
-        "exec_file": exec_file,
-        "run_location": run_location,
-        "additional_switches": additional_switches,
-        "jobname": jobname,
-        "nproc": nproc,
-        "print_com": print_com,
-    }
+    start_parm.update(
+        {
+            "exec_file": exec_file,
+            "run_location": run_location,
+            "additional_switches": additional_switches,
+            "jobname": jobname,
+            "nproc": nproc,
+            "print_com": print_com,
+        }
+    )
 
     if mode in ["console", "corba"]:
         start_parm["start_timeout"] = start_timeout
@@ -1583,7 +1630,9 @@ def launch_mapdl(
         if mode == "console":
             from ansys.mapdl.core.mapdl_console import MapdlConsole
 
-            mapdl = MapdlConsole(loglevel=loglevel, log_apdl=log_apdl, **start_parm)
+            mapdl = MapdlConsole(
+                loglevel=loglevel, log_apdl=log_apdl, use_vtk=use_vtk, **start_parm
+            )
         elif mode == "corba":
             try:
                 # pending deprecation to ansys-mapdl-corba
@@ -1599,6 +1648,7 @@ def launch_mapdl(
                 log_apdl=log_apdl,
                 log_broadcast=broadcast,
                 verbose=verbose_mapdl,
+                use_vtk=use_vtk,
                 **start_parm,
             )
         elif mode == "grpc":
@@ -1619,10 +1669,14 @@ def launch_mapdl(
                 remove_temp_dir_on_exit=remove_temp_dir_on_exit,
                 log_apdl=log_apdl,
                 process=process,
+                use_vtk=use_vtk,
                 **start_parm,
             )
             if run_location is None:
                 mapdl._path = actual_run_location
+
+        # Setting launched property
+        mapdl._launched = True
 
     except Exception as exception:
         # Failed to launch for some reason.  Check if failure was due
@@ -1637,9 +1691,6 @@ def launch_mapdl(
     if license_server_check:
         LOG.debug("Stopping license server check.")
         lic_check.is_connected = True
-
-    # Setting launched property
-    mapdl._launched = True
 
     return mapdl
 
@@ -1831,7 +1882,10 @@ def _verify_version(version):
         version = int(version * 10)
 
     if isinstance(version, str):
-        if version.upper().strip() in [
+        if version.lower().strip() == "latest":
+            return None  # Default behaviour is latest
+
+        elif version.upper().strip() in [
             str(each) for each in SUPPORTED_ANSYS_VERSIONS.keys()
         ]:
             version = int(version)

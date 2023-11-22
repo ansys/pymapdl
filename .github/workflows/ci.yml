@@ -47,23 +47,26 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-
 defaults:
   run:
     shell: bash
+
+permissions:
+  contents: write
+  packages: read
+  pull-requests: write
 
 jobs:
 
   doc-style:
     name: "Documentation style check"
     runs-on: ubuntu-latest
-    #Skipping until 2394 is fixed
-    if:  github.ref == 'Skip for now'
     steps:
       - name: "Ansys documentation style checks"
         uses: ansys/actions/doc-style@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          version: 2.29.6
 
   smoke-tests:
     name: "Build and smoke tests"
@@ -74,7 +77,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11']
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
         # Only perform wheelhouse builds for macOS when releasing
         should-release: 
           - ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
@@ -88,6 +91,15 @@ jobs:
           library-name: ${{ env.PACKAGE_NAME }}
           operating-system: ${{ matrix.os }}
           python-version: ${{ matrix.python-version }}
+      
+      - name: "Importing library"
+        run: |
+          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+      
+      - name: "Checking plotting support"
+        run:
+          python -c "from pyvista.plotting import system_supports_plotting; print('System support plotting ' + str(system_supports_plotting()))"
+
 
   docs-build:
     name: "Build documentation"
@@ -253,7 +265,7 @@ jobs:
         run: cat log.txt
 
   build-test:
-    name: "Remote: Build and unit testing"
+    name: "Remote: Build & test"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 35
@@ -448,7 +460,7 @@ jobs:
           if compgen -G './logs-${{ matrix.mapdl-version }}/*.out' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to display the 'log' files."
 
   build-test-ubuntu:
-    name: "Local: Build and unit testing on Ubuntu"
+    name: "Local: Build & test on Ubuntu"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 55
@@ -458,13 +470,15 @@ jobs:
       commit_long_sha: ${{ steps.attatch-to-pr.outputs.commit_long_sha }}
     container:
       image: ghcr.io/ansys/mapdl:v22.2-ubuntu
-      options: "-u=0:0 --entrypoint /bin/bash"
+      options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
         username: ${{ secrets.GH_USERNAME }}
         password: ${{ secrets.GITHUB_TOKEN }}
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
+      P_SCHEMA: "/ansys_inc/v222/ansys/ac4/schema"
+      PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
 
     steps:
       - name: "Install Git and checkout project"
@@ -472,6 +486,7 @@ jobs:
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
+
 
       - name: "Setup Python"
         uses: actions/setup-python@v4
@@ -488,7 +503,7 @@ jobs:
       - name: "Install OS packages"
         run: |
           apt update
-          apt install -y libgl1-mesa-glx xvfb
+          apt install -y libgl1-mesa-glx xvfb libgomp1
 
       - name: "Test virtual framebuffer"
         run: |
@@ -568,10 +583,87 @@ jobs:
         with:
           name: ubuntu-v22.2.0-local.xml
           path: ./ubuntu-v22.2.0-local.xml
+      
+      - name: 'Upload minimal requirements file'
+        uses: actions/upload-artifact@v3
+        with:
+          name: minimum_requirements.txt
+          path: ./minimum_requirements.txt
+
+  build-test-ubuntu-minimal:
+    name: "Local: Build & test minimal package on Ubuntu"
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    timeout-minutes: 55
+    container:
+      image: ghcr.io/ansys/mapdl:v22.2-ubuntu
+      options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
+      credentials:
+        username: ${{ secrets.GH_USERNAME }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      ON_LOCAL: true
+      ON_UBUNTU: true
+      # Because there is no 'ansys-tools-path' we need to input the executable path.
+      PYMAPDL_MAPDL_EXEC: /ansys_inc/v222/ansys/bin/ansys222
+
+    steps:
+      - name: "Install Git and checkout project"
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: "Setup Python"
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+
+      - name: "Checking Python"
+        run: |
+          python --version
+          python -m pip install --upgrade pip
+
+      - name: "Install ansys-mapdl-core"
+        run: |
+          python -m pip install . --no-deps
+          python -m pip install -r minimum_requirements.txt
+          python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
+
+      - name: "Installing missing package"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgomp1
+
+      - name: "Unit testing requirements installation"
+        run: |
+          python -m pip install pytest pytest-rerunfailures pytest-cov
+
+      - name: "Unit testing"
+        run: |
+          unset PYMAPDL_START_INSTANCE
+          export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
+          pytest -k "not test_dpf" \
+            ${{ env.PYTEST_ARGUMENTS }} \
+            --cov-report=xml:ubuntu-v22.2.0-local-minimal.xml
+        
+      - uses: codecov/codecov-action@v3
+        name: "Upload coverage to Codecov"
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          root_dir: ${{ github.workspace }}
+          name: ubuntu-v22.2.0-local-minimal.xml
+          flags: ubuntu,local,v22.2.0,minimal
+
+      - name: 'Upload coverage artifacts'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-v22.2.0-local-minimal.xml
+          path: ./ubuntu-v22.2.0-local-minimal.xml
 
   test-windows:
     if: github.repository == ''
-    name: "Local: Build and unit testing on Windows"
+    name: "Local: Build & test on Windows"
     runs-on: [self-hosted, Windows, pymapdl]
     timeout-minutes: 30
     env:
@@ -663,6 +755,7 @@ jobs:
             ./**/*.tar.gz
             ./**/*pymapdl-Documentation-*.pdf
             ./**/ansys-mapdl-core*.zip
+            ./minimum_requirements.txt
 
       - name: Upload to Public PyPi
         env:

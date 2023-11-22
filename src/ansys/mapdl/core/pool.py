@@ -6,14 +6,25 @@ import time
 from typing import Any, Dict, List, Optional
 import warnings
 
-from ansys.mapdl.core import LOG, get_ansys_path, launch_mapdl
+from ansys.mapdl.core import LOG, launch_mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
-from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT, port_in_use, version_from_path
+from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT, port_in_use
 from ansys.mapdl.core.mapdl_grpc import _HAS_TQDM
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
 
+try:
+    from ansys.tools.path import get_ansys_path, version_from_path
+
+    _HAS_ATP = True
+except ModuleNotFoundError:
+    _HAS_ATP = False
+
 if _HAS_TQDM:
     from tqdm import tqdm
+
+    DEFAULT_PROGRESS_BAR = True
+else:
+    DEFAULT_PROGRESS_BAR = False
 
 
 def available_ports(n_ports: int, starting_port: int = MAPDL_DEFAULT_PORT) -> List[int]:
@@ -82,8 +93,8 @@ class LocalMapdlPool:
         By default, the instances directories are named as "Instances_{i}".
 
     **kwargs : dict, optional
-        See :func:`ansys.mapdl.core.launch_mapdl` for a complete
-        listing of all additional keyword arguments.
+        Additional keyword arguments. For a complete listing, see the description for the
+        :func:`ansys.mapdl.core.launcher.launch_mapdl` method.
 
     Examples
     --------
@@ -122,7 +133,7 @@ class LocalMapdlPool:
         wait: bool = True,
         run_location: Optional[str] = None,
         port: int = MAPDL_DEFAULT_PORT,
-        progress_bar: bool = True,
+        progress_bar: bool = DEFAULT_PROGRESS_BAR,
         restart_failed: bool = True,
         remove_temp_files: bool = True,
         names: Optional[str] = None,
@@ -159,7 +170,14 @@ class LocalMapdlPool:
         if "exec_file" in kwargs:
             exec_file = kwargs["exec_file"]
         else:  # get default executable
-            exec_file = get_ansys_path()
+            if _HAS_ATP:
+                exec_file = get_ansys_path()
+            else:
+                raise ValueError(
+                    "Please use 'exec_file' argument to specify the location of the ansys installation.\n"
+                    "Alternatively, PyMAPDL can detect your ansys installation if you install 'ansys-tools-path' library."
+                )
+
             if exec_file is None:
                 raise FileNotFoundError(
                     "Invalid exec_file path or cannot load cached "
@@ -167,8 +185,9 @@ class LocalMapdlPool:
                     "exec_file=<path to executable>"
                 )
 
-        if version_from_path("mapdl", exec_file) < 211:
-            raise VersionError("LocalMapdlPool requires MAPDL 2021R1 or later.")
+        if _HAS_ATP:
+            if version_from_path("mapdl", exec_file) < 211:
+                raise VersionError("LocalMapdlPool requires MAPDL 2021R1 or later.")
 
         # grab available ports
         ports = available_ports(n_instances, port)
@@ -245,7 +264,7 @@ class LocalMapdlPool:
         self,
         func,
         iterable=None,
-        progress_bar=True,
+        progress_bar=DEFAULT_PROGRESS_BAR,
         close_when_finished=False,
         timeout=None,
         wait=True,
@@ -439,7 +458,7 @@ class LocalMapdlPool:
         self,
         files,
         clear_at_start=True,
-        progress_bar=True,
+        progress_bar=DEFAULT_PROGRESS_BAR,
         close_when_finished=False,
         timeout=None,
         wait=True,
@@ -538,9 +557,9 @@ class LocalMapdlPool:
         --------
         >>> mapdl = pool.next_available()
         >>> print(mapdl)
-        Product:         ANSYS Mechanical Enterprise
-        MAPDL Version:   RELEASE                    BUILD  0.0      UPDATE        0
-        PyANSYS Version: 0.55.1
+        Product:             Ansys Mechanical Enterprise
+        MAPDL Version:       24.1
+        ansys.mapdl Version: 0.68.dev0
         """
 
         # loop until the next instance is available

@@ -15,19 +15,11 @@ from ansys.mapdl.core.launcher import (
     _parse_ip_route,
     _validate_MPI,
     _verify_version,
-    find_ansys,
-    get_default_ansys,
     launch_mapdl,
     update_env_vars,
-    version_from_path,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from conftest import (
-    QUICK_LAUNCH_SWITCHES,
-    skip_if_not_local,
-    skip_on_linux,
-    skip_on_windows,
-)
+from conftest import QUICK_LAUNCH_SWITCHES, requires
 
 try:
     import ansys_corba  # noqa: F401
@@ -36,17 +28,27 @@ try:
 except:
     HAS_CORBA = False
 
-# CORBA and console available versions
-from ansys.tools.path import get_available_ansys_installations
+try:
+    from ansys.tools.path import (
+        find_ansys,
+        get_available_ansys_installations,
+        version_from_path,
+    )
+
+    from ansys.mapdl.core.launcher import get_default_ansys
+
+    installed_mapdl_versions = list(get_available_ansys_installations().keys())
+    try:
+        V150_EXEC = find_ansys("150")[0]
+    except ValueError:
+        V150_EXEC = ""
+except:
+    from conftest import MAPDL_VERSION
+
+    installed_mapdl_versions = [MAPDL_VERSION]
+    V150_EXEC = ""
 
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS as versions
-
-valid_versions = list(get_available_ansys_installations().keys())
-
-try:
-    V150_EXEC = find_ansys("150")[0]
-except ValueError:
-    V150_EXEC = ""
 
 paths = [
     ("/usr/dir_v2019.1/slv/ansys_inc/v211/ansys/bin/ansys211", 211),
@@ -69,8 +71,8 @@ def fake_local_mapdl(mapdl):
     mapdl._local = False
 
 
-@skip_if_not_local
-@skip_on_linux
+@requires("local")
+@requires("windows")
 def test_validate_sw():
     # ensure that windows adds msmpi
     # fake windows path
@@ -81,22 +83,28 @@ def test_validate_sw():
     add_sw = _validate_MPI("-mpi intelmpi", exec_path)
     assert "msmpi" in add_sw and "intelmpi" not in add_sw
 
+    add_sw = _validate_MPI("-mpi INTELMPI", exec_path)
+    assert "msmpi" in add_sw and "INTELMPI" not in add_sw
 
-@skip_if_not_local
+
+@requires("ansys-tools-path")
+@requires("local")
 @pytest.mark.parametrize("path_data", paths)
 def test_version_from_path(path_data):
     exec_file, version = path_data
     assert version_from_path("mapdl", exec_file) == version
 
 
-@skip_if_not_local
+@requires("ansys-tools-path")
+@requires("local")
 def test_catch_version_from_path():
     with pytest.raises(RuntimeError):
         version_from_path("mapdl", "abc")
 
 
-@skip_if_not_local
-@skip_on_windows
+@requires("ansys-tools-path")
+@requires("local")
+@requires("linux")
 def test_find_ansys_linux():
     # assuming ansys is installed, should be able to find it on linux
     # without env var
@@ -105,14 +113,16 @@ def test_find_ansys_linux():
     assert isinstance(ver, float)
 
 
-@skip_if_not_local
+@requires("ansys-tools-path")
+@requires("local")
 def test_invalid_mode():
     with pytest.raises(ValueError):
-        exec_file = find_ansys(valid_versions[0])[0]
+        exec_file = find_ansys(installed_mapdl_versions[0])[0]
         pymapdl.launch_mapdl(exec_file, mode="notamode", start_timeout=start_timeout)
 
 
-@skip_if_not_local
+@requires("ansys-tools-path")
+@requires("local")
 @pytest.mark.skipif(not os.path.isfile(V150_EXEC), reason="Requires v150")
 def test_old_version():
     exec_file = find_ansys("150")[0]
@@ -120,28 +130,31 @@ def test_old_version():
         pymapdl.launch_mapdl(exec_file, mode="corba", start_timeout=start_timeout)
 
 
-@skip_if_not_local
-@skip_on_windows
-@pytest.mark.console
+@requires("ansys-tools-path")
+@requires("local")
+@requires("linux")
+@requires("console")
 def test_failed_console():
-    exec_file = find_ansys(valid_versions[0])[0]
+    exec_file = find_ansys(installed_mapdl_versions[0])[0]
     with pytest.raises(ValueError):
         pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
 
-@skip_if_not_local
-@pytest.mark.parametrize("version", valid_versions)
-@pytest.mark.console
-@skip_on_windows
+@requires("ansys-tools-path")
+@requires("local")
+@requires("console")
+@requires("linux")
+@pytest.mark.parametrize("version", installed_mapdl_versions)
 def test_launch_console(version):
     exec_file = find_ansys(version)[0]
     mapdl = pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
     assert mapdl.version == int(version) / 10
 
 
-@skip_if_not_local
-@pytest.mark.corba
-@pytest.mark.parametrize("version", valid_versions)
+@requires("ansys-tools-path")
+@requires("local")
+@requires("corba")
+@pytest.mark.parametrize("version", installed_mapdl_versions)
 def test_launch_corba(version):
     mapdl = pymapdl.launch_mapdl(
         find_ansys(version)[0], mode="corba", start_timeout=start_timeout
@@ -155,7 +168,7 @@ def test_launch_corba(version):
     assert mapdl_ref() is None
 
 
-@skip_if_not_local
+@requires("local")
 def test_license_type_keyword():
     checks = []
     for license_name, license_description in LICENSES.items():
@@ -173,7 +186,7 @@ def test_license_type_keyword():
     assert any(checks)
 
 
-@skip_if_not_local
+@requires("local")
 def test_license_type_keyword_names():
     # This test might became a way to check available licenses, which is not the purpose.
 
@@ -195,7 +208,7 @@ def test_license_type_keyword_names():
     assert successful_check  # if at least one license is ok, this should be true.
 
 
-@skip_if_not_local
+@requires("local")
 def test_license_type_additional_switch():
     # This test might became a way to check available licenses, which is not the purpose.
     successful_check = False
@@ -214,7 +227,8 @@ def test_license_type_additional_switch():
     assert successful_check  # if at least one license is ok, this should be true.
 
 
-@skip_if_not_local
+@requires("ansys-tools-path")
+@requires("local")
 def test_license_type_dummy():
     dummy_license_type = "dummy"
     with pytest.raises(LicenseServerConnectionError):
@@ -224,7 +238,7 @@ def test_license_type_dummy():
         )
 
 
-@skip_if_not_local
+@requires("local")
 def test_remove_temp_files():
     """Ensure the working directory is removed when run_location is not set."""
     mapdl = launch_mapdl(
@@ -245,7 +259,7 @@ def test_remove_temp_files():
         assert os.path.isdir(path)
 
 
-@skip_if_not_local
+@requires("local")
 def test_remove_temp_files_fail(tmpdir):
     """Ensure the working directory is not removed when the cwd is changed."""
     mapdl = launch_mapdl(
@@ -331,9 +345,9 @@ def test__force_smp_student_version():
     exec_path = r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe"
     assert "-smp" not in _force_smp_student_version(add_sw, exec_path)
 
-    add_sw = "-smp"
+    add_sw = "-SMP"
     exec_path = r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe"
-    assert "-smp" in _force_smp_student_version(add_sw, exec_path)
+    assert "-SMP" in _force_smp_student_version(add_sw, exec_path)
 
 
 @pytest.mark.parametrize(
@@ -371,22 +385,27 @@ def test_license_product_argument_p_arg_warning():
         assert "qwer -p asdf" in _check_license_argument(None, "qwer -p asdf")
 
 
-valid_versions = []
-valid_versions.extend(list(versions.keys()))
-valid_versions.extend([each / 10 for each in versions.keys()])
-valid_versions.extend([str(each) for each in list(versions.keys())])
-valid_versions.extend([str(each / 10) for each in versions.keys()])
-valid_versions.extend(list(versions.values()))
+installed_mapdl_versions = []
+installed_mapdl_versions.extend(list(versions.keys()))
+installed_mapdl_versions.extend([each / 10 for each in versions.keys()])
+installed_mapdl_versions.extend([str(each) for each in list(versions.keys())])
+installed_mapdl_versions.extend([str(each / 10) for each in versions.keys()])
+installed_mapdl_versions.extend(list(versions.values()))
 
 
-@pytest.mark.parametrize("version", valid_versions)
+@pytest.mark.parametrize("version", installed_mapdl_versions)
 def test__verify_version_pass(version):
     ver = _verify_version(version)
     assert isinstance(ver, int)
     assert min(versions.keys()) <= ver <= max(versions.keys())
 
 
-@skip_if_not_local
+def test__verify_version_latest():
+    assert _verify_version("latest") is None
+
+
+@requires("ansys-tools-path")
+@requires("local")
 def test_find_ansys(mapdl):
     assert find_ansys() is not None
 
@@ -402,7 +421,7 @@ def test_find_ansys(mapdl):
         assert find_ansys(version="11")
 
 
-@skip_if_not_local
+@requires("local")
 def test_version(mapdl):
     version = int(10 * mapdl.version)
     mapdl_ = launch_mapdl(
@@ -413,7 +432,7 @@ def test_version(mapdl):
     mapdl_.exit()
 
 
-@skip_if_not_local
+@requires("local")
 def test_raise_exec_path_and_version_launcher():
     with pytest.raises(ValueError):
         launch_mapdl(
@@ -424,13 +443,14 @@ def test_raise_exec_path_and_version_launcher():
         )
 
 
-@skip_on_windows
-@skip_if_not_local
+@requires("linux")
+@requires("local")
 def test_is_ubuntu():
     assert _is_ubuntu()
 
 
-@skip_if_not_local
+@requires("ansys-tools-path")
+@requires("local")
 def test_get_default_ansys():
     assert get_default_ansys() is not None
 
