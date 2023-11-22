@@ -5109,16 +5109,19 @@ class _MapdlCore(Commands):
         if func == "":
             func = "DIRECTORY"
 
+        if strarray.upper() not in func_options and func.upper() not in func_options:
+            raise ValueError(
+                f"The arguments (strarray='{strarray}', func='{func}') are not valid."
+            )
+
         response = self.run(f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False)
         if func.upper() in [
             "ENV",
             "TITLE",
         ]:  # the output is multiline, we just need the last line.
             response = response.splitlines()[-1]
-        if "=" in response:
-            return response.split("=")[1].strip()
 
-        return ""
+        return response.split("=")[1].strip()
 
     @wraps(Commands.parres)
     def parres(self, lab="", fname="", ext="", **kwargs):
@@ -5130,34 +5133,8 @@ class _MapdlCore(Commands):
             fname=fname, ext=ext, default_extension="parm"
         )  # Although documentation says `PARM`
 
-        if self._mode == "grpc":  # grpc mode
-            if self.is_local:
-                # It must be a file!
-                if os.path.isfile(fname):
-                    # And it exist!
-                    filename = os.path.join(os.getcwd(), fname)
-                elif fname in self.list_files():  #
-                    # It exists in the Mapdl working directory
-                    filename = os.path.join(self.directory, fname)
-                elif os.path.dirname(fname):
-                    raise ValueError(
-                        f"'{fname}' appears to be an incomplete directory path rather than a filename."
-                    )
-                else:
-                    # Finally
-                    raise FileNotFoundError(f"Unable to locate filename '{fname}'")
-
-            else:
-                if not os.path.dirname(fname):
-                    # might be trying to run a local file.  Check if the
-                    # file exists remotely.
-                    if fname not in self.list_files():
-                        self.upload(fname, progress_bar=False)
-                else:
-                    self.upload(fname, progress_bar=False)
-                filename = os.path.basename(fname)
-        else:
-            filename = fname
+        # Getting the path for local/remote
+        filename = self._get_file_path(fname, progress_bar=False)
 
         return self.input(filename)
 
