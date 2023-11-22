@@ -37,7 +37,7 @@ skip_requires_194 = pytest.mark.skipif(
     not os.path.isfile(MAPDL194PATH), reason="Requires MAPDL 194"
 )
 
-TWAIT = 90
+TWAIT = 100
 NPROC = 1
 
 
@@ -88,7 +88,7 @@ def test_invalid_exec():
         )
 
 
-@pytest.mark.xfail(strict=False, reason="Flaky test. See #2435")
+# @pytest.mark.xfail(strict=False, reason="Flaky test. See #2435")
 @requires("local")
 def test_heal(pool):
     pool_sz = len(pool)
