@@ -478,7 +478,6 @@ jobs:
       ON_LOCAL: true
       ON_UBUNTU: true
       P_SCHEMA: "/ansys_inc/v222/ansys/ac4/schema"
-      PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
 
     steps:
       - name: "Install Git and checkout project"
