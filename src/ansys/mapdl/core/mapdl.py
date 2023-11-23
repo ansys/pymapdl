@@ -5120,8 +5120,10 @@ class _MapdlCore(Commands):
             "TITLE",
         ]:  # the output is multiline, we just need the last line.
             response = response.splitlines()[-1]
+        if "=" in response:
+            return response.split("=")[1].strip()
 
-        return response.split("=")[1].strip()
+        return response.strip()
 
     @wraps(Commands.parres)
     def parres(self, lab="", fname="", ext="", **kwargs):
