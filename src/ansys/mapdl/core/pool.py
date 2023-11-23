@@ -704,12 +704,18 @@ class LocalMapdlPool:
                 name = self._names[index]
                 if not instance:  # encountered placeholder
                     continue
+
                 if instance._exited:
                     try:
                         # use the next port after the current available port
                         self._spawning_i += 1
                         port = max(self._ports) + 1
-                        self._spawn_mapdl(index, port=port, name=name).join()
+                        self._spawn_mapdl(
+                            index,
+                            port=port,
+                            name=name,
+                            thread_name=name,
+                        ).join()
                     except Exception as e:
                         LOG.error(e, exc_info=True)
                         self._spawning_i -= 1
