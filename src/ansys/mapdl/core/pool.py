@@ -686,6 +686,9 @@ class LocalMapdlPool:
         while self._instances[index] is None:
             time.sleep(0.1)
 
+        assert not self._instances[index].exited
+        self._instances[index].prep7()
+
         # LOG.debug("Spawned instance %d. Name '%s'", index, name)
         if pbar is not None:
             pbar.update(1)
@@ -716,6 +719,7 @@ class LocalMapdlPool:
                             name=name,
                             thread_name=name,
                         ).join()
+
                     except Exception as e:
                         LOG.error(e, exc_info=True)
                         self._spawning_i -= 1

@@ -66,7 +66,7 @@ def pool(tmpdir_factory):
     while len(mapdl_pool) != 0:
         time.sleep(0.1)
         if time.time() > timeout:
-            raise TimeoutError(f"Failed to restart instance in {TWAIT} seconds")
+            raise TimeoutError(f"Failed to kill instance in {TWAIT} seconds")
 
     assert len(mapdl_pool) == 0
 
@@ -131,10 +131,12 @@ def test_map_timeout(pool):
 
     timeout = 2
     times = np.array([0, 1, 3, 4])
-    output = pool.map(func, times, timeout=timeout)
+    output = pool.map(func, times, timeout=timeout, wait=True)
+
     assert len(output) == (times < timeout).sum()
 
-    # wait for the pool to heal before continuing
+    # the timeout option kills the MAPDL instance when we reach the timeout.
+    # Let's wait for the pool to heal before continuing
     timeout = time.time() + TWAIT
     while len(pool) < pool_sz:
         time.sleep(0.1)
