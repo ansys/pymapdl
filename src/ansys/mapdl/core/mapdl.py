@@ -5253,7 +5253,7 @@ class _MapdlCore(Commands):
             super().lssolve(lsmin=lsmin, lsmax=lsmax, lsinc=lsinc, **kwargs)
         return self.last_response
 
-    @wraps(Mapdl.edasmp)
+    @wraps(Commands.edasmp)
     def edasmp(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5261,7 +5261,7 @@ class _MapdlCore(Commands):
             )
         super().edasmp(*args, **kwargs)
 
-    @wraps(Mapdl.edbound)
+    @wraps(Commands.edbound)
     def edbound(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5269,7 +5269,7 @@ class _MapdlCore(Commands):
             )
         super().edbound(*args, **kwargs)
 
-    @wraps(Mapdl.edbx)
+    @wraps(Commands.edbx)
     def edbx(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5277,7 +5277,7 @@ class _MapdlCore(Commands):
             )
         super().edbx(*args, **kwargs)
 
-    @wraps(Mapdl.edcgen)
+    @wraps(Commands.edcgen)
     def edcgen(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5285,7 +5285,7 @@ class _MapdlCore(Commands):
             )
         super().edcgen(*args, **kwargs)
 
-    @wraps(Mapdl.edclist)
+    @wraps(Commands.edclist)
     def edclist(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5293,7 +5293,7 @@ class _MapdlCore(Commands):
             )
         super().edclist(*args, **kwargs)
 
-    @wraps(Mapdl.edcmore)
+    @wraps(Commands.edcmore)
     def edcmore(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5301,7 +5301,7 @@ class _MapdlCore(Commands):
             )
         super().edcmore(*args, **kwargs)
 
-    @wraps(Mapdl.edcnstr)
+    @wraps(Commands.edcnstr)
     def edcnstr(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5309,7 +5309,7 @@ class _MapdlCore(Commands):
             )
         super().edcnstr(*args, **kwargs)
 
-    @wraps(Mapdl.edcontact)
+    @wraps(Commands.edcontact)
     def edcontact(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5317,7 +5317,7 @@ class _MapdlCore(Commands):
             )
         super().edcontact(*args, **kwargs)
 
-    @wraps(Mapdl.edcrb)
+    @wraps(Commands.edcrb)
     def edcrb(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5325,7 +5325,7 @@ class _MapdlCore(Commands):
             )
         super().edcrb(*args, **kwargs)
 
-    @wraps(Mapdl.edcurve)
+    @wraps(Commands.edcurve)
     def edcurve(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5333,7 +5333,7 @@ class _MapdlCore(Commands):
             )
         super().edcurve(*args, **kwargs)
 
-    @wraps(Mapdl.eddbl)
+    @wraps(Commands.eddbl)
     def eddbl(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5341,7 +5341,7 @@ class _MapdlCore(Commands):
             )
         super().eddbl(*args, **kwargs)
 
-    @wraps(Mapdl.eddc)
+    @wraps(Commands.eddc)
     def eddc(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5349,7 +5349,7 @@ class _MapdlCore(Commands):
             )
         super().eddc(*args, **kwargs)
 
-    @wraps(Mapdl.edipart)
+    @wraps(Commands.edipart)
     def edipart(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5357,7 +5357,7 @@ class _MapdlCore(Commands):
             )
         super().edipart(*args, **kwargs)
 
-    @wraps(Mapdl.edlcs)
+    @wraps(Commands.edlcs)
     def edlcs(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5365,7 +5365,7 @@ class _MapdlCore(Commands):
             )
         super().edlcs(*args, **kwargs)
 
-    @wraps(Mapdl.edmp)
+    @wraps(Commands.edmp)
     def edmp(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5373,7 +5373,7 @@ class _MapdlCore(Commands):
             )
         super().edmp(*args, **kwargs)
 
-    @wraps(Mapdl.ednb)
+    @wraps(Commands.ednb)
     def ednb(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5381,7 +5381,7 @@ class _MapdlCore(Commands):
             )
         super().ednb(*args, **kwargs)
 
-    @wraps(Mapdl.edndtsd)
+    @wraps(Commands.edndtsd)
     def edndtsd(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5389,7 +5389,7 @@ class _MapdlCore(Commands):
             )
         super().edndtsd(*args, **kwargs)
 
-    @wraps(Mapdl.ednrot)
+    @wraps(Commands.ednrot)
     def ednrot(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5397,7 +5397,7 @@ class _MapdlCore(Commands):
             )
         super().ednrot(*args, **kwargs)
 
-    @wraps(Mapdl.edpart)
+    @wraps(Commands.edpart)
     def edpart(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5405,7 +5405,7 @@ class _MapdlCore(Commands):
             )
         super().edpart(*args, **kwargs)
 
-    @wraps(Mapdl.edpc)
+    @wraps(Commands.edpc)
     def edpc(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5413,7 +5413,7 @@ class _MapdlCore(Commands):
             )
         super().edpc(*args, **kwargs)
 
-    @wraps(Mapdl.edsp)
+    @wraps(Commands.edsp)
     def edsp(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5421,7 +5421,7 @@ class _MapdlCore(Commands):
             )
         super().edsp(*args, **kwargs)
 
-    @wraps(Mapdl.edweld)
+    @wraps(Commands.edweld)
     def edweld(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5429,7 +5429,7 @@ class _MapdlCore(Commands):
             )
         super().edweld(*args, **kwargs)
 
-    @wraps(Mapdl.edadapt)
+    @wraps(Commands.edadapt)
     def edadapt(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5437,7 +5437,7 @@ class _MapdlCore(Commands):
             )
         super().edadapt(*args, **kwargs)
 
-    @wraps(Mapdl.edale)
+    @wraps(Commands.edale)
     def edale(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5445,7 +5445,7 @@ class _MapdlCore(Commands):
             )
         super().edale(*args, **kwargs)
 
-    @wraps(Mapdl.edbvis)
+    @wraps(Commands.edbvis)
     def edbvis(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5453,7 +5453,7 @@ class _MapdlCore(Commands):
             )
         super().edbvis(*args, **kwargs)
 
-    @wraps(Mapdl.edcadapt)
+    @wraps(Commands.edcadapt)
     def edcadapt(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5461,7 +5461,7 @@ class _MapdlCore(Commands):
             )
         super().edcadapt(*args, **kwargs)
 
-    @wraps(Mapdl.edcpu)
+    @wraps(Commands.edcpu)
     def edcpu(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5469,7 +5469,7 @@ class _MapdlCore(Commands):
             )
         super().edcpu(*args, **kwargs)
 
-    @wraps(Mapdl.edcsc)
+    @wraps(Commands.edcsc)
     def edcsc(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5477,7 +5477,7 @@ class _MapdlCore(Commands):
             )
         super().edcsc(*args, **kwargs)
 
-    @wraps(Mapdl.edcts)
+    @wraps(Commands.edcts)
     def edcts(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5485,7 +5485,7 @@ class _MapdlCore(Commands):
             )
         super().edcts(*args, **kwargs)
 
-    @wraps(Mapdl.eddamp)
+    @wraps(Commands.eddamp)
     def eddamp(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5493,7 +5493,7 @@ class _MapdlCore(Commands):
             )
         super().eddamp(*args, **kwargs)
 
-    @wraps(Mapdl.eddrelax)
+    @wraps(Commands.eddrelax)
     def eddrelax(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5501,7 +5501,7 @@ class _MapdlCore(Commands):
             )
         super().eddrelax(*args, **kwargs)
 
-    @wraps(Mapdl.eddump)
+    @wraps(Commands.eddump)
     def eddump(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5509,7 +5509,7 @@ class _MapdlCore(Commands):
             )
         super().eddump(*args, **kwargs)
 
-    @wraps(Mapdl.edenergy)
+    @wraps(Commands.edenergy)
     def edenergy(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5517,7 +5517,7 @@ class _MapdlCore(Commands):
             )
         super().edenergy(*args, **kwargs)
 
-    @wraps(Mapdl.edfplot)
+    @wraps(Commands.edfplot)
     def edfplot(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5525,7 +5525,7 @@ class _MapdlCore(Commands):
             )
         super().edfplot(*args, **kwargs)
 
-    @wraps(Mapdl.edgcale)
+    @wraps(Commands.edgcale)
     def edgcale(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5533,7 +5533,7 @@ class _MapdlCore(Commands):
             )
         super().edgcale(*args, **kwargs)
 
-    @wraps(Mapdl.edhgls)
+    @wraps(Commands.edhgls)
     def edhgls(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5541,7 +5541,7 @@ class _MapdlCore(Commands):
             )
         super().edhgls(*args, **kwargs)
 
-    @wraps(Mapdl.edhist)
+    @wraps(Commands.edhist)
     def edhist(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5549,7 +5549,7 @@ class _MapdlCore(Commands):
             )
         super().edhist(*args, **kwargs)
 
-    @wraps(Mapdl.edhtime)
+    @wraps(Commands.edhtime)
     def edhtime(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5557,7 +5557,7 @@ class _MapdlCore(Commands):
             )
         super().edhtime(*args, **kwargs)
 
-    @wraps(Mapdl.edint)
+    @wraps(Commands.edint)
     def edint(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5565,7 +5565,7 @@ class _MapdlCore(Commands):
             )
         super().edint(*args, **kwargs)
 
-    @wraps(Mapdl.edis)
+    @wraps(Commands.edis)
     def edis(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5573,7 +5573,7 @@ class _MapdlCore(Commands):
             )
         super().edis(*args, **kwargs)
 
-    @wraps(Mapdl.edload)
+    @wraps(Commands.edload)
     def edload(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5581,7 +5581,7 @@ class _MapdlCore(Commands):
             )
         super().edload(*args, **kwargs)
 
-    @wraps(Mapdl.edopt)
+    @wraps(Commands.edopt)
     def edopt(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5589,7 +5589,7 @@ class _MapdlCore(Commands):
             )
         super().edopt(*args, **kwargs)
 
-    @wraps(Mapdl.edout)
+    @wraps(Commands.edout)
     def edout(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5597,7 +5597,7 @@ class _MapdlCore(Commands):
             )
         super().edout(*args, **kwargs)
 
-    @wraps(Mapdl.edpl)
+    @wraps(Commands.edpl)
     def edpl(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5605,7 +5605,7 @@ class _MapdlCore(Commands):
             )
         super().edpl(*args, **kwargs)
 
-    @wraps(Mapdl.edpvel)
+    @wraps(Commands.edpvel)
     def edpvel(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5613,7 +5613,7 @@ class _MapdlCore(Commands):
             )
         super().edpvel(*args, **kwargs)
 
-    @wraps(Mapdl.edrc)
+    @wraps(Commands.edrc)
     def edrc(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5621,7 +5621,7 @@ class _MapdlCore(Commands):
             )
         super().edrc(*args, **kwargs)
 
-    @wraps(Mapdl.edrd)
+    @wraps(Commands.edrd)
     def edrd(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5629,7 +5629,7 @@ class _MapdlCore(Commands):
             )
         super().edrd(*args, **kwargs)
 
-    @wraps(Mapdl.edri)
+    @wraps(Commands.edri)
     def edri(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5637,7 +5637,7 @@ class _MapdlCore(Commands):
             )
         super().edri(*args, **kwargs)
 
-    @wraps(Mapdl.edrst)
+    @wraps(Commands.edrst)
     def edrst(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5645,7 +5645,7 @@ class _MapdlCore(Commands):
             )
         super().edrst(*args, **kwargs)
 
-    @wraps(Mapdl.edrun)
+    @wraps(Commands.edrun)
     def edrun(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5653,7 +5653,7 @@ class _MapdlCore(Commands):
             )
         super().edrun(*args, **kwargs)
 
-    @wraps(Mapdl.edshell)
+    @wraps(Commands.edshell)
     def edshell(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5661,7 +5661,7 @@ class _MapdlCore(Commands):
             )
         super().edshell(*args, **kwargs)
 
-    @wraps(Mapdl.edsolv)
+    @wraps(Commands.edsolv)
     def edsolv(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5669,7 +5669,7 @@ class _MapdlCore(Commands):
             )
         super().edsolv(*args, **kwargs)
 
-    @wraps(Mapdl.edstart)
+    @wraps(Commands.edstart)
     def edstart(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5677,7 +5677,7 @@ class _MapdlCore(Commands):
             )
         super().edstart(*args, **kwargs)
 
-    @wraps(Mapdl.edterm)
+    @wraps(Commands.edterm)
     def edterm(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5685,7 +5685,7 @@ class _MapdlCore(Commands):
             )
         super().edterm(*args, **kwargs)
 
-    @wraps(Mapdl.edtp)
+    @wraps(Commands.edtp)
     def edtp(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5693,7 +5693,7 @@ class _MapdlCore(Commands):
             )
         super().edtp(*args, **kwargs)
 
-    @wraps(Mapdl.edvel)
+    @wraps(Commands.edvel)
     def edvel(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5701,7 +5701,7 @@ class _MapdlCore(Commands):
             )
         super().edvel(*args, **kwargs)
 
-    @wraps(Mapdl.edwrite)
+    @wraps(Commands.edwrite)
     def edwrite(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
@@ -5709,7 +5709,7 @@ class _MapdlCore(Commands):
             )
         super().edwrite(*args, **kwargs)
 
-    @wraps(Mapdl.rexport)
+    @wraps(Commands.rexport)
     def rexport(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
