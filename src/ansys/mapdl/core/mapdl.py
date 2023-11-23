@@ -826,9 +826,19 @@ class _MapdlCore(Commands):
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
-            self._parent()._log.debug("Exiting non-interactive mode")
-            self._parent()._flush_stored()
             self._parent()._store_commands = False
+
+            if args[0] is not None:
+                # An exception was raised, let's exit now without flushing
+                self._parent()._log.debug(
+                    "An exception was found in the `non_interactive` environment. "
+                    "Hence the commands are not flushed."
+                )
+                return None
+            else:
+                # No exception so let's flush.
+                self._parent()._log.debug("Exiting non-interactive mode")
+                self._parent()._flush_stored()
 
     class _save_selection:
         """Save the selection and returns to it when exiting"""
@@ -2860,9 +2870,10 @@ class _MapdlCore(Commands):
 
         value = response.split("=")[-1].strip()
         if item3:
-            self._log.info(
-                f"The command '{command}' is showing the next message: '{value.splitlines()[1].strip()}'"
-            )
+            if len(value.splitlines()) > 1:
+                self._log.info(
+                    f"The command '{command}' is showing the next message: '{value.splitlines()[1].strip()}'"
+                )
             value = value.splitlines()[0]
 
         try:  # always either a float or string
@@ -3826,7 +3837,20 @@ class _MapdlCore(Commands):
                -0.00178402, -0.01234851,  0.01234851, -0.01234851])
 
         """
-        arr = self._get_array(entity, entnum, item1, it1num, item2, it2num, kloop)
+        parm_name = kwargs.get("parm", None)
+
+        if self._store_commands:
+            raise MapdlRuntimeError(
+                "Cannot use `mapdl.get_array` when in `non_interactive` mode, "
+                "since it does not return anything until the `non_interactive` context "
+                "manager is finished.\n"
+                "Exit `non_interactive` mode before using this method.\n\n"
+                "Alternatively you can use `mapdl.vget` to specify the name of the MAPDL parameter where to store the retrieved value."
+            )
+
+        arr = self._get_array(
+            entity, entnum, item1, it1num, item2, it2num, kloop, **kwargs
+        )
 
         # edge case where corba refuses to return the array
         ntry = 0
@@ -3852,6 +3876,16 @@ class _MapdlCore(Commands):
         """Uses the VGET command to get an array from ANSYS"""
         parm_name = kwargs.pop("parm", None)
 
+        if self._store_commands and not parm_name:
+            raise MapdlRuntimeError(
+                "Cannot use `mapdl._get_array` when in `non_interactive` mode, "
+                "since it does not return anything until the `non_interactive` context "
+                "manager is finished.\n"
+                "Exit `non_interactive` mode before using this method.\n\n"
+                "Alternatively you can use `mapdl.vget` or use the `parm` kwarg in "
+                "`mapdl._get_array` to specify the name of the MAPDL parameter where to store the retrieved value. In any case, this function will return `None`"
+            )
+
         if parm_name is None:
             parm_name = "__vget_tmp_%d__" % self._vget_arr_counter
             self._vget_arr_counter += 1
@@ -3867,6 +3901,10 @@ class _MapdlCore(Commands):
             kloop,
             mute=False,
         )
+
+        if self._store_commands:
+            # Return early
+            return None
 
         # check if empty array
         if "the dimension number 1 is 0" in out:
@@ -4915,12 +4953,19 @@ class _MapdlCore(Commands):
         if not cmlist:
             cmlist = self.cmlist()
 
-        header = "NAME                            TYPE      SUBCOMPONENTS"
-        blocks = re.findall(
-            r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
-            cmlist,
-            flags=re.DOTALL,
-        )
+        if "NAME" in cmlist and "SUBCOMPONENTS" in cmlist:
+            # header
+            #  "NAME                            TYPE      SUBCOMPONENTS"
+            blocks = re.findall(
+                r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+                cmlist,
+                flags=re.DOTALL,
+            )
+        elif "LIST ALL SELECTED COMPONENTS":
+            blocks = cmlist.splitlines()[1:]
+        else:
+            raise ValueError("The format of the CMLIST output is not recognaised.")
+
         cmlist = "\n".join(blocks)
 
         def extract(each_line, ind):
@@ -4938,9 +4983,15 @@ class _MapdlCore(Commands):
         if not cmlist:
             cmlist = self.cmlist(cmname, 1)
         # Capturing blocks
+        if "NAME" in cmlist and "SUBCOMPONENTS" in cmlist:
+            header = r"NAME\s+TYPE\s+SUBCOMPONENTS"
+
+        elif "LIST COMPONENT" in cmlist:
+            header = ""
+
         cmlist = "\n\n".join(
             re.findall(
-                r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+                r"(?s)" + header + r"\s+(.*?)\s*(?=\n\s*\n|\Z)",
                 cmlist,
                 flags=re.DOTALL,
             )
@@ -5058,6 +5109,11 @@ class _MapdlCore(Commands):
         if func == "":
             func = "DIRECTORY"
 
+        if strarray.upper() not in func_options and func.upper() not in func_options:
+            raise ValueError(
+                f"The arguments (strarray='{strarray}', func='{func}') are not valid."
+            )
+
         response = self.run(f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False)
         if func.upper() in [
             "ENV",
@@ -5067,7 +5123,7 @@ class _MapdlCore(Commands):
         if "=" in response:
             return response.split("=")[1].strip()
 
-        return ""
+        return response.strip()
 
     @wraps(Commands.parres)
     def parres(self, lab="", fname="", ext="", **kwargs):
@@ -5079,34 +5135,8 @@ class _MapdlCore(Commands):
             fname=fname, ext=ext, default_extension="parm"
         )  # Although documentation says `PARM`
 
-        if self._mode == "grpc":  # grpc mode
-            if self.is_local:
-                # It must be a file!
-                if os.path.isfile(fname):
-                    # And it exist!
-                    filename = os.path.join(os.getcwd(), fname)
-                elif fname in self.list_files():  #
-                    # It exists in the Mapdl working directory
-                    filename = os.path.join(self.directory, fname)
-                elif os.path.dirname(fname):
-                    raise ValueError(
-                        f"'{fname}' appears to be an incomplete directory path rather than a filename."
-                    )
-                else:
-                    # Finally
-                    raise FileNotFoundError(f"Unable to locate filename '{fname}'")
-
-            else:
-                if not os.path.dirname(fname):
-                    # might be trying to run a local file.  Check if the
-                    # file exists remotely.
-                    if fname not in self.list_files():
-                        self.upload(fname, progress_bar=False)
-                else:
-                    self.upload(fname, progress_bar=False)
-                filename = os.path.basename(fname)
-        else:
-            filename = fname
+        # Getting the path for local/remote
+        filename = self._get_file_path(fname, progress_bar=False)
 
         return self.input(filename)
 

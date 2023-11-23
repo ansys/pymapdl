@@ -14,15 +14,15 @@ This section provides a general overview of PyMAPDL and how you use it.
    :maxdepth: 1
    :hidden:
 
-   launcher
    mapdl
-   mapdl_examples
-   plotting
-   mesh_geometry
-   post
-   parameters
-   database
    convert
+   mesh_geometry
+   plotting
+   parameters
+   components
+   post
+   mapdl_examples
+   database
    math
    pool
    xpl
@@ -33,18 +33,18 @@ This section provides a general overview of PyMAPDL and how you use it.
 
 PyMAPDL overview
 ================
-The :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` function
+The :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function
 within the ``ansys-mapdl-core`` library creates an instance of the
 :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class in the background and sends
-commands to that service. Errors and warnings are processed
+commands to that instance. Errors and warnings are processed
 Pythonically, letting you develop a script in real time, without
 worrying about it functioning correctly when deployed in batch
 mode.
 
 MAPDL can be started from Python in gRPC mode using the
-:func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` method. This starts
+:func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` method. This starts
 MAPDL in a temporary directory by default. You can change this to
-your current directory with:
+your current directory with this code:
 
 .. code:: python
 
@@ -54,7 +54,7 @@ your current directory with:
     path = os.getcwd()
     mapdl = launch_mapdl(run_location=path)
 
-MAPDL is now active, and you can send commands to it as a genuine a
+MAPDL is now active, and you can send commands to it as a genuine
 Python class. For example, if you wanted to create a surface using
 key points, you could run:
 
@@ -131,16 +131,16 @@ Additionally, exceptions are caught and handled within Python.
 
    >>> mapdl.run("AL, 1, 2, 3")
 
-   xception: 
-   L, 1, 2, 3
+   Exception: 
+   AL, 1, 2, 3
 
-   EFINE AREA BY LIST OF LINES
-   INE LIST =     1    2    3
-   TRAVERSED IN SAME DIRECTION AS LINE     1)
+   DEFINE AREA BY LIST OF LINES
+   LINE LIST =     1    2    3
+   (TRAVERSED IN SAME DIRECTION AS LINE     1)
 
-   ** ERROR ***                           CP =       0.338   TIME= 09:45:36
-   eypoint 1 is referenced by only one line.  Improperly connected line   
-   et for AL command.                                                     
+   *** ERROR ***                           CP =       0.338   TIME= 09:45:36
+   Keypoint 1 is referenced by only one line.  Improperly connected line   
+   set for AL command.                                                     
 
 
 For longer scripts, instead of sending commands to MAPDL as in the
