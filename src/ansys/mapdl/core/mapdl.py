@@ -5257,7 +5257,7 @@ class _MapdlCore(Commands):
     def edasmp(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edasmp' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edasmp()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edasmp(*args, **kwargs)
 
@@ -5265,7 +5265,7 @@ class _MapdlCore(Commands):
     def edbound(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edbound' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edbound()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edbound(*args, **kwargs)
 
@@ -5273,7 +5273,7 @@ class _MapdlCore(Commands):
     def edbx(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edbx' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edbx()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edbx(*args, **kwargs)
 
@@ -5281,7 +5281,7 @@ class _MapdlCore(Commands):
     def edcgen(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edcgen' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edcgen()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edcgen(*args, **kwargs)
 
@@ -5289,7 +5289,7 @@ class _MapdlCore(Commands):
     def edclist(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edclist' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edclist()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edclist(*args, **kwargs)
 
@@ -5297,7 +5297,7 @@ class _MapdlCore(Commands):
     def edcmore(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edcmore' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edcmore()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edcmore(*args, **kwargs)
 
@@ -5305,7 +5305,7 @@ class _MapdlCore(Commands):
     def edcnstr(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edcnstr' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edcnstr()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edcnstr(*args, **kwargs)
 
@@ -5313,7 +5313,7 @@ class _MapdlCore(Commands):
     def edcontact(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edcontact' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edcontact()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edcontact(*args, **kwargs)
 
@@ -5321,7 +5321,7 @@ class _MapdlCore(Commands):
     def edcrb(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edcrb' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edcrb()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edcrb(*args, **kwargs)
 
@@ -5329,7 +5329,7 @@ class _MapdlCore(Commands):
     def edcurve(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edcurve' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edcurve()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edcurve(*args, **kwargs)
 
@@ -5337,7 +5337,7 @@ class _MapdlCore(Commands):
     def eddbl(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'eddbl' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.eddbl()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().eddbl(*args, **kwargs)
 
@@ -5345,7 +5345,7 @@ class _MapdlCore(Commands):
     def eddc(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'eddc' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.eddc()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().eddc(*args, **kwargs)
 
@@ -5353,7 +5353,7 @@ class _MapdlCore(Commands):
     def edipart(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edipart' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edipart()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edipart(*args, **kwargs)
 
@@ -5361,7 +5361,7 @@ class _MapdlCore(Commands):
     def edlcs(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edlcs' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edlcs()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edlcs(*args, **kwargs)
 
@@ -5369,7 +5369,7 @@ class _MapdlCore(Commands):
     def edmp(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edmp' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edmp()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edmp(*args, **kwargs)
 
@@ -5377,7 +5377,7 @@ class _MapdlCore(Commands):
     def ednb(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'ednb' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.ednb()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().ednb(*args, **kwargs)
 
@@ -5385,7 +5385,7 @@ class _MapdlCore(Commands):
     def edndtsd(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edndtsd' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edndtsd()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edndtsd(*args, **kwargs)
 
@@ -5393,7 +5393,7 @@ class _MapdlCore(Commands):
     def ednrot(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'ednrot' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.ednrot()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().ednrot(*args, **kwargs)
 
@@ -5401,7 +5401,7 @@ class _MapdlCore(Commands):
     def edpart(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edpart' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edpart()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edpart(*args, **kwargs)
 
@@ -5409,7 +5409,7 @@ class _MapdlCore(Commands):
     def edpc(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edpc' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edpc()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edpc(*args, **kwargs)
 
@@ -5417,7 +5417,7 @@ class _MapdlCore(Commands):
     def edsp(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edsp' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edsp()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edsp(*args, **kwargs)
 
@@ -5425,7 +5425,7 @@ class _MapdlCore(Commands):
     def edweld(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edweld' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edweld()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edweld(*args, **kwargs)
 
@@ -5433,7 +5433,7 @@ class _MapdlCore(Commands):
     def edadapt(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edadapt' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edadapt()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edadapt(*args, **kwargs)
 
@@ -5441,7 +5441,7 @@ class _MapdlCore(Commands):
     def edale(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edale' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edale()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edale(*args, **kwargs)
 
@@ -5449,7 +5449,7 @@ class _MapdlCore(Commands):
     def edbvis(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edbvis' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edbvis()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edbvis(*args, **kwargs)
 
@@ -5457,7 +5457,7 @@ class _MapdlCore(Commands):
     def edcadapt(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edcadapt' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edcadapt()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edcadapt(*args, **kwargs)
 
@@ -5465,7 +5465,7 @@ class _MapdlCore(Commands):
     def edcpu(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edcpu' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edcpu()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edcpu(*args, **kwargs)
 
@@ -5473,7 +5473,7 @@ class _MapdlCore(Commands):
     def edcsc(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edcsc' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edcsc()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edcsc(*args, **kwargs)
 
@@ -5481,7 +5481,7 @@ class _MapdlCore(Commands):
     def edcts(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edcts' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edcts()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edcts(*args, **kwargs)
 
@@ -5489,7 +5489,7 @@ class _MapdlCore(Commands):
     def eddamp(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'eddamp' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.eddamp()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().eddamp(*args, **kwargs)
 
@@ -5497,7 +5497,7 @@ class _MapdlCore(Commands):
     def eddrelax(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'eddrelax' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.eddrelax()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().eddrelax(*args, **kwargs)
 
@@ -5505,7 +5505,7 @@ class _MapdlCore(Commands):
     def eddump(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'eddump' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.eddump()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().eddump(*args, **kwargs)
 
@@ -5513,7 +5513,7 @@ class _MapdlCore(Commands):
     def edenergy(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edenergy' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edenergy()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edenergy(*args, **kwargs)
 
@@ -5521,7 +5521,7 @@ class _MapdlCore(Commands):
     def edfplot(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edfplot' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edfplot()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edfplot(*args, **kwargs)
 
@@ -5529,7 +5529,7 @@ class _MapdlCore(Commands):
     def edgcale(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edgcale' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edgcale()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edgcale(*args, **kwargs)
 
@@ -5537,7 +5537,7 @@ class _MapdlCore(Commands):
     def edhgls(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edhgls' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edhgls()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edhgls(*args, **kwargs)
 
@@ -5545,7 +5545,7 @@ class _MapdlCore(Commands):
     def edhist(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edhist' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edhist()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edhist(*args, **kwargs)
 
@@ -5553,7 +5553,7 @@ class _MapdlCore(Commands):
     def edhtime(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edhtime' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edhtime()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edhtime(*args, **kwargs)
 
@@ -5561,7 +5561,7 @@ class _MapdlCore(Commands):
     def edint(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edint' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edint()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edint(*args, **kwargs)
 
@@ -5569,7 +5569,7 @@ class _MapdlCore(Commands):
     def edis(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edis' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edis()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edis(*args, **kwargs)
 
@@ -5577,7 +5577,7 @@ class _MapdlCore(Commands):
     def edload(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edload' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edload()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edload(*args, **kwargs)
 
@@ -5585,7 +5585,7 @@ class _MapdlCore(Commands):
     def edopt(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edopt' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edopt()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edopt(*args, **kwargs)
 
@@ -5593,7 +5593,7 @@ class _MapdlCore(Commands):
     def edout(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edout' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edout()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edout(*args, **kwargs)
 
@@ -5601,7 +5601,7 @@ class _MapdlCore(Commands):
     def edpl(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edpl' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edpl()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edpl(*args, **kwargs)
 
@@ -5609,7 +5609,7 @@ class _MapdlCore(Commands):
     def edpvel(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edpvel' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edpvel()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edpvel(*args, **kwargs)
 
@@ -5617,7 +5617,7 @@ class _MapdlCore(Commands):
     def edrc(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edrc' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edrc()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edrc(*args, **kwargs)
 
@@ -5625,7 +5625,7 @@ class _MapdlCore(Commands):
     def edrd(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edrd' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edrd()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edrd(*args, **kwargs)
 
@@ -5633,7 +5633,7 @@ class _MapdlCore(Commands):
     def edri(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edri' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edri()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edri(*args, **kwargs)
 
@@ -5641,7 +5641,7 @@ class _MapdlCore(Commands):
     def edrst(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edrst' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edrst()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edrst(*args, **kwargs)
 
@@ -5649,7 +5649,7 @@ class _MapdlCore(Commands):
     def edrun(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edrun' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edrun()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edrun(*args, **kwargs)
 
@@ -5657,7 +5657,7 @@ class _MapdlCore(Commands):
     def edshell(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edshell' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edshell()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edshell(*args, **kwargs)
 
@@ -5665,7 +5665,7 @@ class _MapdlCore(Commands):
     def edsolv(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edsolv' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edsolv()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edsolv(*args, **kwargs)
 
@@ -5673,7 +5673,7 @@ class _MapdlCore(Commands):
     def edstart(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edstart' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edstart()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edstart(*args, **kwargs)
 
@@ -5681,7 +5681,7 @@ class _MapdlCore(Commands):
     def edterm(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edterm' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edterm()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edterm(*args, **kwargs)
 
@@ -5689,7 +5689,7 @@ class _MapdlCore(Commands):
     def edtp(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edtp' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edtp()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edtp(*args, **kwargs)
 
@@ -5697,7 +5697,7 @@ class _MapdlCore(Commands):
     def edvel(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edvel' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edvel()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edvel(*args, **kwargs)
 
@@ -5705,7 +5705,7 @@ class _MapdlCore(Commands):
     def edwrite(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'edwrite' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.edwrite()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().edwrite(*args, **kwargs)
 
@@ -5713,6 +5713,6 @@ class _MapdlCore(Commands):
     def rexport(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
-                "The command 'rexport' for explicit analysis was deprecated in Ansys 19.1"
+                "The command 'Mapdl.rexport()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().rexport(*args, **kwargs)
