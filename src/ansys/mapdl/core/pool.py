@@ -677,7 +677,7 @@ class LocalMapdlPool:
         self._instances[index] = launch_mapdl(
             run_location=run_location,
             port=port,
-            override=self._override,
+            override=True,
             **self._spawn_kwargs,
         )
 
