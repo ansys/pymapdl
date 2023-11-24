@@ -487,11 +487,13 @@ default via 172.23.112.1 dev eth0 proto kernel
 @pytest.fixture
 def run_cli():
     def do_run(*args):
-        args = ["pymapdl_convert_script"] + list(args)
+        args = ["launch_mapdl"] + list(args)
         proc = subprocess.Popen(
             args,
-            shell=True,
+            shell=os.name != "nt",
+            stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
         )
         return proc.stdout.read().decode().lower()
 
