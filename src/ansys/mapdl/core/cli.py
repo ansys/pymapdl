@@ -159,118 +159,148 @@ if _HAS_CLICK:
     @click.option(
         "--exec_file",
         default=None,
+        type=str,
         help="The location of the MAPDL executable.  Will use the cached location when left at the default ``None`` and no environment variable is set. The executable path can be also set through the environment variable ``PYMAPDL_MAPDL_EXEC``.",
     )
     @click.option(
         "--run_location",
         default=None,
+        type=str,
         help="MAPDL working directory.  Defaults to a temporary working directory.  If directory doesn't exist, one is created.",
     )
     @click.option(
-        "--jobname", default="", help="MAPDL jobname.  Defaults to ``'file'``."
+        "--jobname",
+        default="",
+        type=str,
+        help="MAPDL jobname.  Defaults to ``'file'``.",
     )
-    @click.option("--nproc", default=2, help="Number of processors.  Defaults to 2.")
+    @click.option(
+        "--nproc", type=int, default=2, help="Number of processors.  Defaults to 2."
+    )
     @click.option(
         "--ram",
         default=None,
+        type=int,
         help="Fixed amount of memory to request for MAPDL.  If ``None``, then MAPDL will use as much as available on the host machine.",
     )
     @click.option(
-        "--mode", default=None, help="Argument not allowed in CLI. It will be ignored."
+        "--mode",
+        type=str,
+        default=None,
+        help="Argument not allowed in CLI. It will be ignored.",
     )
     @click.option(
         "--override",
         default=False,
+        type=bool,
         help="Attempts to delete the lock file at the ``run_location``. Useful when a prior MAPDL session has exited prematurely and the lock file has not been deleted.",
     )
     @click.option(
         "--loglevel",
         default="",
+        type=str,
         help="Argument not allowed in CLI. It will be ignored.",
     )
     @click.option(
         "--additional_switches",
         default="",
+        type=str,
         help="Additional switches for MAPDL, for example ``'aa_r'``, the academic research license. Avoid adding switches like ``-i``, ``-o`` or ``-b`` as these are already included to start up the MAPDL server.",
     )
     @click.option(
         "--start_timeout",
         default=45,
+        type=int,
         help="Maximum allowable time to connect to the MAPDL server.",
     )
     @click.option(
         "--port",
         default=None,
+        type=int,
         help="Port to launch MAPDL gRPC on.  Final port will be the first port available after (or including) this port.  Defaults to 50052. You can also override the port default with the environment variable ``PYMAPDL_PORT=<VALID PORT>`` This argument has priority over the environment variable.",
     )
     @click.option(
         "--cleanup_on_exit",
         default=False,
+        type=bool,
         help="Argument not allowed in CLI. It will be ignored.",
     )
     @click.option(
         "--start_instance",
         default=None,
+        type=bool,
         help="Argument not allowed in CLI. It will be ignored.",
     )
     @click.option(
         "--ip",
         default=None,
+        type=str,
         help="Used only when ``start_instance`` is ``False``. If provided, it will force ``start_instance`` to be ``False``. Specify the IP address of the MAPDL instance to connect to. You can also provide a hostname as an alternative to an IP address. Defaults to ``'127.0.0.1'``. You can also override the default behavior of this keyword argument with the environment variable ``PYMAPDL_IP=<IP>``. This argument has priority over the environment variable.",
     )
     @click.option(
         "--clear_on_connect",
         default=True,
+        type=bool,
         help="Defaults to ``True``, giving you a fresh environment when connecting to MAPDL. When if ``start_instance`` is specified it defaults to ``False``.",
     )
     @click.option(
         "--log_apdl",
         default=None,
+        type=str,
         help="Argument not allowed in CLI. It will be ignored.",
     )
     @click.option(
         "--remove_temp_files",
         default=None,
+        type=str,
         help="Argument not allowed in CLI. It will be ignored.",
     )
     @click.option(
         "--remove_temp_dir_on_exit",
         default=False,
+        type=str,
         help="Argument not allowed in CLI. It will be ignored.",
     )
     @click.option(
         "--verbose_mapdl",
         default=None,
+        type=str,
         help="Argument not allowed in CLI. It will be ignored.",
     )
     @click.option(
         "--license_server_check",
         default=True,
+        type=bool,
         help="Check if the license server is available if MAPDL fails to start.  Only available on ``mode='grpc'``. Defaults ``True``.",
     )
     @click.option(
         "--license_type",
         default=None,
+        type=str,
         help="Enable license type selection. You can input a string for its license name (for example ``'meba'`` or ``'ansys'``) or its description ('enterprise solver' or 'enterprise' respectively). You can also use legacy licenses (for example ``'aa_t_a'``) but it will also raise a warning. If it is not used (``None``), no specific license will be requested, being up to the license server to provide a specific license type. Default is ``None``.",
     )
     @click.option(
         "--print_com",
         default=False,
+        type=str,
         help="Argument not allowed in CLI. It will be ignored.",
     )
     @click.option(
         "--add_env_vars",
         default=None,
-        help="The provided dictionary will be used to extend the MAPDL process environment variables. If you want to control all of the environment variables, use the argument ``replace_env_vars``. Defaults to ``None``.",
+        type=str,
+        help="Argument not allowed in CLI. It will be ignored.",
     )
     @click.option(
         "--replace_env_vars",
         default=None,
-        help="The provided dictionary will be used to replace all the MAPDL process environment variables. It replace the system environment variables which otherwise would be used in the process. To just add some environment variables to the MAPDL process, use ``add_env_vars``. Defaults to ``None``.",
+        type=str,
+        help="Argument not allowed in CLI. It will be ignored.",
     )
     @click.option(
         "--version",
         default=None,
+        type=str,
         help="Version of MAPDL to launch. If ``None``, the latest version is used. Versions can be provided as integers (i.e. ``version=222``) or floats (i.e. ``version=22.2``). To retrieve the available installed versions, use the function :meth:`ansys.tools.path.path.get_available_ansys_installations`.",
     )
     def launch_mapdl(
@@ -296,8 +326,6 @@ if _HAS_CLICK:
         license_server_check,
         license_type,
         print_com,
-        add_env_vars,
-        replace_env_vars,
         version,
     ):
         from ansys.mapdl.core.launcher import launch_mapdl
