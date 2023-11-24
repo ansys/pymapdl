@@ -1,9 +1,11 @@
 """Test the mapdl launcher"""
 
 import os
+import subprocess
 import tempfile
 import weakref
 
+import psutil
 import pytest
 
 from ansys.mapdl import core as pymapdl
@@ -480,3 +482,34 @@ default via 172.23.112.1 dev eth0 proto kernel
 172.23.112.0/20 dev eth0 proto kernel scope link src 172.23.121.145"""
 
     assert "172.23.112.1" == _parse_ip_route(output)
+
+
+@pytest.fixture
+def run_cli():
+    def do_run(*args):
+        args = ["pymapdl_convert_script"] + list(args)
+        proc = subprocess.Popen(
+            args,
+            shell=True,
+            stdout=subprocess.PIPE,
+        )
+        return proc.stdout.read().decode().lower()
+
+    return do_run
+
+
+@requires("click")
+def test_launch_mapdl_cli(run_cli):
+    output = run_cli("")
+
+    if os.environ.get("PYMAPDL_START_INSTANCE", "TRUE") == "FALSE":
+        # In remote
+        assert "There is an existing MAPDL instance at:" in output
+    else:
+        # In local
+        assert "Launched an MAPDL instance at" in output
+
+        # grab ips and port
+        pid = int(output.splitlines()[1].split(":")[1].strip())
+        p = psutil.Process(pid)
+        p.kill()
