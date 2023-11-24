@@ -499,17 +499,14 @@ def run_cli():
 
 
 @requires("click")
+@requires("local")
 def test_launch_mapdl_cli(run_cli):
     output = run_cli("")
 
-    if os.environ.get("PYMAPDL_START_INSTANCE", "TRUE") == "FALSE":
-        # In remote
-        assert "There is an existing MAPDL instance at:" in output
-    else:
-        # In local
-        assert "Launched an MAPDL instance at" in output
+    # In local
+    assert "Launched an MAPDL instance at" in output
 
-        # grab ips and port
-        pid = int(output.splitlines()[1].split(":")[1].strip())
-        p = psutil.Process(pid)
-        p.kill()
+    # grab ips and port
+    pid = int(output.splitlines()[1].split(":")[1].strip())
+    p = psutil.Process(pid)
+    p.kill()
