@@ -154,7 +154,9 @@ if _HAS_CLICK:
 
     @click.command(
         short_help="Launch MAPDL instances.",
-        help="For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.",
+        help="""This command aims to replicate the behavior of :func:`ansys.mapdl.core.launcher.launch_mapdl`
+
+For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
     )
     @click.option(
         "--exec_file",
