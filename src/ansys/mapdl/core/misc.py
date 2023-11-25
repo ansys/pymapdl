@@ -697,13 +697,13 @@ class Information:
     --------
     >>> mapdl.info
     Product:             Ansys Mechanical Enterprise
-    MAPDL Version:       21.2
-    ansys.mapdl Version: 0.62.dev0
+    MAPDL Version:       24.1
+    ansys.mapdl Version: 0.68.0
 
     >>> print(mapdl)
     Product:             Ansys Mechanical Enterprise
-    MAPDL Version:       21.2
-    ansys.mapdl Version: 0.62.dev0
+    MAPDL Version:       24.1
+    ansys.mapdl Version: 0.68.0
 
     >>> mapdl.info.product
     'Ansys Mechanical Enterprise'
@@ -844,7 +844,7 @@ class Information:
 
     @title.setter
     def title(self, title):
-        return self._mapdl.title(title)
+        return self._mapdl.run(f"/TITLE, {title}")
 
     @property
     @update_information_first(True)

@@ -4768,7 +4768,11 @@ class _MapdlCore(Commands):
 
         # Update arg because the path is no longer needed
         args = (base_name, *args[1:])
-        return super().use(*args, **kwargs)
+
+        with self.non_interactive:
+            super().use(*args, **kwargs)
+
+        return self._response  # returning last response
 
     @wraps(Commands.set)
     def set(
@@ -5066,3 +5070,187 @@ class _MapdlCore(Commands):
         self.cmsel("s", "__tmp_cm__", entity=entity)
         self.components.select(cmps_names)
         return output
+
+    @wraps(Commands.inquire)
+    def inquire(self, strarray="", func="", arg1="", arg2=""):
+        """Wraps original INQUIRE function"""
+        func_options = [
+            "LOGIN",
+            "DOCU",
+            "APDL",
+            "PROG",
+            "AUTH",
+            "USER",
+            "DIRECTORY",
+            "JOBNAME",
+            "RSTDIR",
+            "RSTFILE",
+            "RSTEXT",
+            "OUTPUT",
+            "ENVNAME",
+            "TITLE",
+            "EXIST",
+            "DATE",
+            "SIZE",
+            "WRITE",
+            "READ",
+            "EXEC",
+            "LINES",
+        ]
+
+        if strarray.upper() in func_options and func.upper() not in func_options:
+            # Likely you are using the old ``_Mapdl.inquire`` implementation.
+            raise ValueError(
+                "Arguments of this method have changed. `Mapdl.inquire` now includes the optional `strarray` parameter "
+                f"as the first argument. Either use `inquire(func={strarray})`, or `inquire("
+                ", {strarray})`"
+            )
+
+        if func == "":
+            func = "DIRECTORY"
+
+        if strarray.upper() not in func_options and func.upper() not in func_options:
+            raise ValueError(
+                f"The arguments (strarray='{strarray}', func='{func}') are not valid."
+            )
+
+        response = self.run(f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False)
+        if func.upper() in [
+            "ENV",
+            "TITLE",
+        ]:  # the output is multiline, we just need the last line.
+            response = response.splitlines()[-1]
+        if "=" in response:
+            return response.split("=")[1].strip()
+
+        return response.strip()
+
+    @wraps(Commands.parres)
+    def parres(self, lab="", fname="", ext="", **kwargs):
+        """Wraps the original /PARRES function"""
+        if not fname:
+            fname = self.jobname
+
+        fname = self._get_file_name(
+            fname=fname, ext=ext, default_extension="parm"
+        )  # Although documentation says `PARM`
+
+        # Getting the path for local/remote
+        filename = self._get_file_path(fname, progress_bar=False)
+
+        return self.input(filename)
+
+    @wraps(Commands.lgwrite)
+    def lgwrite(self, fname="", ext="", kedit="", remove_grpc_extra=True, **kwargs):
+        """Wraps original /LGWRITE"""
+
+        # always add extension to fname
+        if ext:
+            fname = fname + f".{ext}"
+
+        # seamlessly deal with remote instances in gRPC mode
+        target_dir = None
+        is_grpc = "Grpc" in type(self).__name__
+        if is_grpc and fname:
+            if not self._local and os.path.basename(fname) != fname:
+                target_dir, fname = os.path.dirname(fname), os.path.basename(fname)
+
+        # generate the log and download if necessary
+        output = super().lgwrite(fname=fname, kedit=kedit, **kwargs)
+
+        if not fname:
+            # defaults to <jobname>.lgw
+            fname = self.jobname + ".lgw"
+        if target_dir is not None:
+            self.download(fname, target_dir=target_dir)
+
+        # remove extra grpc /OUT commands
+        if remove_grpc_extra and is_grpc and target_dir:
+            filename = os.path.join(target_dir, fname)
+            with open(filename, "r") as fid:
+                lines = [line for line in fid if not line.startswith("/OUT")]
+            with open(filename, "w") as fid:
+                fid.writelines(lines)
+
+        return output
+
+    @wraps(Commands.vwrite)
+    def vwrite(
+        self,
+        par1="",
+        par2="",
+        par3="",
+        par4="",
+        par5="",
+        par6="",
+        par7="",
+        par8="",
+        par9="",
+        par10="",
+        par11="",
+        par12="",
+        par13="",
+        par14="",
+        par15="",
+        par16="",
+        par17="",
+        par18="",
+        par19="",
+        **kwargs,
+    ):
+        """Wrapping *VWRITE"""
+
+        # cannot be run in interactive mode
+        if not self._store_commands:
+            raise MapdlRuntimeError(
+                "VWRTIE cannot run interactively.  \n\nPlease use "
+                "``with mapdl.non_interactive:``"
+            )
+
+        return super().vwrite(
+            par1=par1,
+            par2=par2,
+            par3=par3,
+            par4=par4,
+            par5=par5,
+            par6=par6,
+            par7=par7,
+            par8=par8,
+            par9=par9,
+            par10=par10,
+            par11=par11,
+            par12=par12,
+            par13=par13,
+            par14=par14,
+            par15=par15,
+            par16=par16,
+            par17=par17,
+            par18=par18,
+            par19=par19,
+            **kwargs,
+        )
+
+    @wraps(Commands.nrm)
+    def nrm(self, name="", normtype="", parr="", normalize="", **kwargs):
+        """Wraps *NRM"""
+        if not parr:
+            parr = "__temp_par__"
+        super().nrm(
+            name=name, normtype=normtype, parr=parr, normalize=normalize, **kwargs
+        )
+        return self.parameters[parr]
+
+    @wraps(Commands.com)
+    def com(self, comment="", **kwargs):
+        """Wraps /COM"""
+        if self.print_com and not self.mute and not kwargs.get("mute", False):
+            print("/COM,%s" % (str(comment)))
+
+        return super().com(comment=comment, **kwargs)
+
+    @wraps(Commands.lssolve)
+    def lssolve(self, lsmin="", lsmax="", lsinc="", **kwargs):
+        """Wraps LSSOLVE"""
+        with self.non_interactive:
+            super().lssolve(lsmin=lsmin, lsmax=lsmax, lsinc=lsinc, **kwargs)
+        return self.last_response
