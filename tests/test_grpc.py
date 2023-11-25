@@ -246,6 +246,35 @@ def test_no_get_value_non_interactive(mapdl):
             mapdl.get_value("ACTIVE", item1="CSYS")
 
 
+def test__vwrite_wrapper(mapdl, tmpdir):
+    """Write a temporary file with apostrophes from MAPDL with wrapper."""
+    with mapdl.non_interactive:
+        # with wrapper
+        mapdl.run("/out,test_vwrite1.txt")
+        mapdl.vwrite("'dummy_file'")
+        mapdl.run("(1X, A8)")
+        mapdl.run("/out")
+
+        # only VWRITE
+        mapdl.run("/out,test_vwrite2.txt")
+        mapdl.run(f"*VWRITE,dummy_file")
+        mapdl.run("(1X, A8)")
+        mapdl.run("/out")
+
+        # only VWRITE, "'"
+        mapdl.run("/out,test_vwrite3.txt")
+        mapdl.run(f"*VWRITE,'dummy_file'")
+        mapdl.run("(1X, A8)")
+        mapdl.run("/out")
+
+    output1 = mapdl.input("test_vwrite1", "txt")
+    output2 = mapdl.input("test_vwrite2", "txt")
+    output3 = mapdl.input("test_vwrite3", "txt")
+
+    assert output1 == output2
+    assert output1 != output3
+
+
 def test__download(mapdl, tmpdir):
     # Creating temp file
     write_tmp_in_mapdl_instance(mapdl, "myfile0")

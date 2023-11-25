@@ -3043,6 +3043,16 @@ class MapdlGrpc(_MapdlCore):
         if not self._store_commands:
             return self.parameters[par]
 
+    @wraps(_MapdlCore.vwrite)
+    def vwrite(self, *args, **kwargs):
+        args = tuple(
+            [
+                each[1:-1] if (each.startswith("'") and each.endswith("'")) else each
+                for each in args
+            ]
+        )
+        return super().vwrite(*args, **kwargs)
+
     def get_variable(
         self,
         ir: MapdlInt = "",

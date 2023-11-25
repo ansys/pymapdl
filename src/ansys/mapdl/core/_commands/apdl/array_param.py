@@ -1486,29 +1486,5 @@ class ArrayParam:
                 "``with mapdl.non_interactive:``"
             )
 
-        command = f"*VWRITE," + ",".join(
-            par[1:-1] if (par.startswith("'") and par.endswith("'")) else par
-            for par in [
-                par1,
-                par2,
-                par3,
-                par4,
-                par5,
-                par6,
-                par7,
-                par8,
-                par9,
-                par10,
-                par11,
-                par12,
-                par13,
-                par14,
-                par15,
-                par16,
-                par17,
-                par18,
-                par19,
-            ]
-        )
-
+        command = f"*VWRITE,{par1},{par2},{par3},{par4},{par5},{par6},{par7},{par8},{par9},{par10},{par11},{par12},{par13},{par14},{par15},{par16},{par17},{par18},{par19}"
         return self.run(command, **kwargs)
