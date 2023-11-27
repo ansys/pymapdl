@@ -909,3 +909,21 @@ def test_vplot_multi_numbering(mapdl, make_block):
     mapdl.vplot(
         show_area_numbering=True, show_line_numbering=True, show_volume_numbering=True
     )
+
+
+def test_vplot_color(mapdl, make_block):
+    mapdl.vplot(color="gray")
+
+
+def test_vplot_color(mapdl, make_block):
+    mapdl.vplot(cpos="xy")
+
+
+def test_vplot_multiargs(mapdl, make_block):
+    mapdl.vplot(
+        color="gray",
+        cpos="xy",
+        show_volume_numbering=True,
+        show_line_numbering=False,
+        show_area_numbering=True,
+    )
