@@ -1755,8 +1755,14 @@ class _MapdlCore(Commands):
             quality of the mesh to display.  Varies between 1 (worst)
             to 10 (best).  Applicable when ``vtk=True``.
 
-        show_numbering : bool, optional
-            Display line and keypoint numbers when ``vtk=True``.
+        show_volume_numbering : bool, optional
+            Display volume numbers when ``vtk=True``.
+
+        show_area_numbering : bool, optional
+            Display area numbers when ``vtk=True``.
+
+        show_line_numbering : bool, optional
+            Display line numbers when ``vtk=True``.
 
         **kwargs
             See :meth:`ansys.mapdl.core.plotting.general_plotter` for
@@ -1815,6 +1821,9 @@ class _MapdlCore(Commands):
 
                     for each_mesh in meshes_:
                         each_mesh.cell_data["entity_num"] = int(each_volu)
+
+                    if show_volume_numbering:
+                        label.append(int(each_volu))
 
                     meshes.extend(meshes_)
 

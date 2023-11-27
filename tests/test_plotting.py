@@ -890,4 +890,9 @@ def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
 @pytest.mark.parametrize("background", ["white", "black", "green", "red"])
 def test_labels_colors_background(mapdl, make_block, background):
     # Test if the labels change color according background
-    pl = mapdl.nplot(background=background, nnum=True, return_plotter=True)
+    mapdl.nplot(background=background, nnum=True)
+
+
+def test_vplot_show_volume_numbering(mapdl, make_block, background):
+    # Test if the labels change color according background
+    mapdl.vplot(show_volume_numbering=True)
