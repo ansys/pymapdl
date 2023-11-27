@@ -1427,8 +1427,6 @@ def launch_mapdl(
     if version is None:
         version = os.getenv("PYMAPDL_MAPDL_VERSION", None)
 
-    version = _verify_version(version)  # return a int version or none
-
     # Start MAPDL with PyPIM if the environment is configured for it
     # and the user did not pass a directive on how to launch it.
     if _HAS_PIM and exec_file is None and pypim.is_configured():
@@ -1439,6 +1437,8 @@ def launch_mapdl(
             version = None
 
         return launch_remote_mapdl(cleanup_on_exit=cleanup_on_exit, version=version)
+
+    version = _verify_version(version)  # return a int version or none
 
     # connect to an existing instance if enabled
     if start_instance is None:
@@ -1851,7 +1851,10 @@ def _verify_version(version):
         version = int(version * 10)
 
     if isinstance(version, str):
-        if version.upper().strip() in [
+        if version.lower().strip() == "latest":
+            return None  # Default behaviour is latest
+
+        elif version.upper().strip() in [
             str(each) for each in SUPPORTED_ANSYS_VERSIONS.keys()
         ]:
             version = int(version)

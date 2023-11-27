@@ -710,11 +710,8 @@ class MatrixOP:
         to the L1 norm and is applicable to vectors only. The NRMINF option is
         the maximum norm and is applicable to either vectors or matrices.
         """
-        if not parr:
-            parr = "__temp_par__"
         command = f"*NRM,{name},{normtype},{parr},{normalize}"
-        self.run(command, **kwargs)
-        return self.parameters[parr]
+        return self.run(command, **kwargs)
 
     def remove(self, name="", val1="", val2="", val3="", **kwargs):
         """Suppresses rows or columns of a dense matrix or a vector.

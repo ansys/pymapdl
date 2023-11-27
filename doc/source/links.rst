@@ -22,6 +22,7 @@
 .. _dev_guide_pyansys: https://dev.docs.pyansys.com
 .. _dev_guide_contributing: https://dev.docs.pyansys.com/how-to/contributing.html
 .. _dev_guide_coding_style: https://dev.docs.pyansys.com/coding-style/index.html
+.. _dev_guide_setup_your_environment: https://dev.docs.pyansys.com/how-to/setting-up.html
 
 .. #Other libraries
 .. _pyvista_docs: https://docs.pyvista.org/version/stable/
@@ -108,6 +109,13 @@
 .. _tds_article_web_app_1: https://towardsdatascience.com/ansys-in-a-python-web-app-part-1-post-processing-with-pydpf-44d2fbaa6135
 .. _tds_article_web_app_2: https://towardsdatascience.com/ansys-in-a-python-web-app-part-2-pre-processing-solving-with-pymapdl-50428c18f8e7
 .. _paraview_question_read_rst: https://discourse.paraview.org/t/reading-ansys-apdl-rst-results-in-paraview/9706
+.. _python_context_manager: https://docs.python.org/3/reference/datamodel.html#with-statement-context-managers
+.. _miktex: https://miktex.org
+.. _numpydoc: https://numpydoc.readthedocs.io/en/latest/
+.. _sphinx: https://www.sphinx-doc.org/en/master/
+.. _vale: https://www.vale.sh
+.. _vale_installation: https://vale.sh/docs/vale-cli/installation/
+
 
 .. #Github links:
 .. _gh_creating_pat: https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token
@@ -148,9 +156,15 @@
 .. _pymapdl_discussion_differences_mapdl_pymapdl: https://github.com/ansys/pymapdl-reader/issues/185
 .. _cartpole_example_notebook: https://cartpole.mapdl.docs.pyansys.com/ml-rl-notebook.html
 .. _wsl_launching_mapdl: https://github.com/ansys/pymapdl/issues/2315
+.. _pymapdl_examples_gallery: https://mapdl.docs.pyansys.com/version/stable/examples/index.html
+.. _pymapdl_latest_github_release: https://github.com/ansys/pymapdl/releases/latest
+.. _pymapdl_latest_pdf_doc: https://github.com/ansys/pymapdl/releases/download/v%%PYMAPDLVERSION%%.0/pymapdl-Documentation-%%PYMAPDLVERSION%%.0.pdf
+.. _pymapdl_conf_file: https://github.com/ansys/pymapdl/blob/main/doc/source/conf.py
 .. _pymapdl_search_issues_pr: https://github.com/ansys/pymapdl/issues?q=
 .. _pymapdl_latest_github_release: https://github.com/ansys/pymapdl/releases/latest
 .. _pymapdl_latest_pdf_doc: https://github.com/ansys/pymapdl/releases/download/v%%PYMAPDLVERSION%%.0/pymapdl-Documentation-%%PYMAPDLVERSION%%.0.pdf
+.. _pymapdl_discussion_speed_pymapdl_mapdl: https://github.com/ansys/pymapdl/discussions/757
+
 
 .. #Python
 .. _using_venv: https://docs.python.org/3/library/venv.html
