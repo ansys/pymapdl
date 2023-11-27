@@ -894,5 +894,18 @@ def test_labels_colors_background(mapdl, make_block, background):
 
 
 def test_vplot_show_volume_numbering(mapdl, make_block):
-    # Test if the labels change color according background
     mapdl.vplot(show_volume_numbering=True)
+
+
+def test_vplot_area_numbering(mapdl, make_block):
+    mapdl.vplot(show_area_numbering=True)
+
+
+def test_vplot_line_numbering(mapdl, make_block):
+    mapdl.vplot(show_line_numbering=True)
+
+
+def test_vplot_multi_numbering(mapdl, make_block):
+    mapdl.vplot(
+        show_area_numbering=True, show_line_numbering=True, show_volume_numbering=True
+    )
