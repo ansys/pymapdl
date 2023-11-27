@@ -1818,12 +1818,18 @@ class _MapdlCore(Commands):
                     )
 
                     meshes_ = get_meshes_from_plotter(pl)
+                    center_volumes = pl.center
 
                     for each_mesh in meshes_:
                         each_mesh.cell_data["entity_num"] = int(each_volu)
 
                     if show_volume_numbering:
-                        label.append(int(each_volu))
+                        labels.append(
+                            {
+                                "points": np.array(center_volumes),
+                                "labels": [int(each_volu)],
+                            }
+                        )
 
                     meshes.extend(meshes_)
 
