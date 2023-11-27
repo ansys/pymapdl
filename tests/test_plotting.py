@@ -893,6 +893,6 @@ def test_labels_colors_background(mapdl, make_block, background):
     mapdl.nplot(background=background, nnum=True)
 
 
-def test_vplot_show_volume_numbering(mapdl, make_block, background):
+def test_vplot_show_volume_numbering(mapdl, make_block):
     # Test if the labels change color according background
     mapdl.vplot(show_volume_numbering=True)
