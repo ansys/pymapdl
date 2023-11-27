@@ -1,8 +1,7 @@
 """Module to support MAPDL CAD geometry"""
-import re
 from functools import wraps
-from typing import (TYPE_CHECKING, Any, Iterable, List, Optional, Sequence,
-                    Tuple, Union)
+import re
+from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from numpy.typing import NDArray
@@ -16,15 +15,17 @@ if _HAS_PYVISTA:
 if TYPE_CHECKING:  # pragma: no cover
     from pyiges import Iges
 
-from ansys.mapdl.core.misc import (requires_package, run_as_prep7,
-                                   supress_logging)
+from ansys.mapdl.core.misc import requires_package, run_as_prep7, supress_logging
 from ansys.mapdl.core.theme import MapdlTheme
 
 VALID_SELECTION_TYPE = ["S", "R", "A", "U"]
 VALID_SELECTION_ENTYTY = ["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
 
-from ansys.mapdl.core.mapdl import (DEBUG_LEVELS, VALID_SELECTION_ENTITY_TP,
-                                    VALID_SELECTION_TYPE_TP)
+from ansys.mapdl.core.mapdl import (
+    DEBUG_LEVELS,
+    VALID_SELECTION_ENTITY_TP,
+    VALID_SELECTION_TYPE_TP,
+)
 
 FLST_LOOKUP = {
     "NODE": 1,  # node numbers

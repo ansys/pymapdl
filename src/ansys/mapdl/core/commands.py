@@ -1,11 +1,29 @@
-import re
 from functools import wraps
+import re
 
 import numpy as np
 
-from ._commands import (apdl, aux2_, aux3_, aux12_, aux15_, conn, database,
-                        display_, graphics_, hidden, inq_func, map_cmd, misc,
-                        post1_, post26_, preproc, reduced, session, solution)
+from ._commands import (
+    apdl,
+    aux2_,
+    aux3_,
+    aux12_,
+    aux15_,
+    conn,
+    database,
+    display_,
+    graphics_,
+    hidden,
+    inq_func,
+    map_cmd,
+    misc,
+    post1_,
+    post26_,
+    preproc,
+    reduced,
+    session,
+    solution,
+)
 
 # compiled regular expressions used for parsing tablular outputs
 REG_LETTERS = re.compile(r"[a-df-zA-DF-Z]+")  # all except E or e

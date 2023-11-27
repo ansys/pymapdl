@@ -1,6 +1,6 @@
+from logging import Logger, StreamHandler
 import os
 import re
-from logging import Logger, StreamHandler
 from warnings import warn
 
 from ansys.mapdl.core import __version__

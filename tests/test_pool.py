@@ -1,9 +1,10 @@
 import os
-import time
 from pathlib import Path
+import time
 
 import numpy as np
 import pytest
+
 from conftest import has_dependency
 
 if has_dependency("ansys-tools-path"):
@@ -17,10 +18,9 @@ else:
 if not EXEC_FILE:
     pytest.skip(allow_module_level=True)
 
-from conftest import QUICK_LAUNCH_SWITCHES, requires
-
 from ansys.mapdl.core import LocalMapdlPool, examples
 from ansys.mapdl.core.errors import VersionError
+from conftest import QUICK_LAUNCH_SWITCHES, requires
 
 # skip entire module unless HAS_GRPC
 pytestmark = requires("grpc")

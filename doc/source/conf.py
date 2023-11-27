@@ -1,12 +1,16 @@
 """Sphinx documentation configuration file."""
+from datetime import datetime
 import os
 import warnings
-from datetime import datetime
 
+from ansys_sphinx_theme import (
+    ansys_favicon,
+    get_version_match,
+    pyansys_logo_black,
+    pyansys_logo_white,
+)
 import numpy as np
 import pyvista
-from ansys_sphinx_theme import (ansys_favicon, get_version_match,
-                                pyansys_logo_black, pyansys_logo_white)
 from sphinx.application import Sphinx
 from sphinx_gallery.sorting import FileNameSortKey
 

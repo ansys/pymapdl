@@ -7,6 +7,7 @@ import os
 import time
 
 import pytest
+
 from conftest import has_dependency, requires
 
 # skip entire module unless --console is enabled

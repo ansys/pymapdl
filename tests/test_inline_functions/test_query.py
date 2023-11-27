@@ -1,7 +1,7 @@
 import pytest
-from conftest import requires
 
 from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
+from conftest import requires
 
 
 class TestParseParameter:
