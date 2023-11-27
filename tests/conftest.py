@@ -1,26 +1,15 @@
+import os
 from collections import namedtuple
 from importlib import import_module
-import os
 from pathlib import Path
 from sys import platform
 
-from _pytest.terminal import TerminalReporter  # for terminal customization
 import pytest
-
-from common import (
-    Element,
-    Node,
-    get_details_of_elements,
-    get_details_of_nodes,
-    has_dpf,
-    has_grpc,
-    is_on_ci,
-    is_on_local,
-    is_on_ubuntu,
-    is_smp,
-    support_plotting,
-    testing_minimal,
-)
+from _pytest.terminal import TerminalReporter  # for terminal customization
+from common import (Element, Node, get_details_of_elements,
+                    get_details_of_nodes, has_dpf, has_grpc, is_on_ci,
+                    is_on_local, is_on_ubuntu, is_smp, support_plotting,
+                    testing_minimal)
 
 ################################################################
 #

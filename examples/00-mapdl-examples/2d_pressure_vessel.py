@@ -39,7 +39,6 @@ Problem Figure
 """
 
 import matplotlib.pyplot as plt
-
 ###############################################################################
 # Launch MAPDL
 # ~~~~~~~~~~~~

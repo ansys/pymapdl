@@ -4,28 +4,21 @@ import os
 import tempfile
 
 import pytest
+from conftest import QUICK_LAUNCH_SWITCHES, requires
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import LicenseServerConnectionError
-from ansys.mapdl.core.launcher import (
-    _check_license_argument,
-    _force_smp_student_version,
-    _is_ubuntu,
-    _parse_ip_route,
-    _validate_MPI,
-    _verify_version,
-    launch_mapdl,
-    update_env_vars,
-)
+from ansys.mapdl.core.launcher import (_check_license_argument,
+                                       _force_smp_student_version, _is_ubuntu,
+                                       _parse_ip_route, _validate_MPI,
+                                       _verify_version, launch_mapdl,
+                                       update_env_vars)
 from ansys.mapdl.core.licensing import LICENSES
-from conftest import QUICK_LAUNCH_SWITCHES, requires
 
 try:
-    from ansys.tools.path import (
-        find_ansys,
-        get_available_ansys_installations,
-        version_from_path,
-    )
+    from ansys.tools.path import (find_ansys,
+                                  get_available_ansys_installations,
+                                  version_from_path)
 
     from ansys.mapdl.core.launcher import get_default_ansys
 
