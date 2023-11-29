@@ -634,6 +634,12 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgomp1
+      
+      - name: "Testing MAPDL launching"
+        run: |
+            echo -e "/prep7\n/com Hello!" > input.inp
+            ansys -b -i input.inp -o output.out
+            cat output.out
 
       - name: "Unit testing requirements installation"
         run: |
