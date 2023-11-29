@@ -614,6 +614,21 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 
+      - name: "Test"
+        run: |
+          cat /proc/cpuinfo
+
+      - name: "Installing missing package"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgomp1
+      
+      - name: "Testing MAPDL launching"
+        run: |
+            echo -e "/prep7\n/com Hello!" > input.inp
+            ansys -b -i input.inp -o output.out
+            cat output.out
+
       - name: "Setup Python"
         uses: actions/setup-python@v4
         with:
@@ -629,17 +644,6 @@ jobs:
           python -m pip install . --no-deps
           python -m pip install -r minimum_requirements.txt
           python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
-
-      - name: "Installing missing package"
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgomp1
-      
-      - name: "Testing MAPDL launching"
-        run: |
-            echo -e "/prep7\n/com Hello!" > input.inp
-            ansys -b -i input.inp -o output.out
-            cat output.out
 
       - name: "Unit testing requirements installation"
         run: |
