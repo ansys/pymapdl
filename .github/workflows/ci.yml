@@ -614,10 +614,6 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: "Test"
-        run: |
-          cat /proc/cpuinfo
-
       - name: "Installing missing package"
         run: |
           sudo apt-get update
@@ -626,7 +622,9 @@ jobs:
       - name: "Testing MAPDL launching"
         run: |
             echo -e "/prep7\n/com Hello!" > input.inp
-            ansys -b -i input.inp -o output.out
+            ansys -b -i input.inp -o output.out || echo "Run done"
+            cat output.out | grep "RUN COMPLETED"
+            cat output.out | grep "Hello!"
             cat output.out
 
       - name: "Setup Python"
