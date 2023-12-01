@@ -915,7 +915,7 @@ def test_vplot_color(mapdl, make_block):
     mapdl.vplot(color="gray")
 
 
-def test_vplot_color(mapdl, make_block):
+def test_vplot_cpos(mapdl, make_block):
     mapdl.vplot(cpos="xy")
 
 
