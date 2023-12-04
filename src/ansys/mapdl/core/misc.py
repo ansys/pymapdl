@@ -10,7 +10,6 @@ import random
 import re
 import socket
 import string
-import sys
 import tempfile
 from threading import Thread
 from typing import Union
@@ -118,9 +117,6 @@ class Plain_Report:
 
         if os.name == "posix":
             self.core.extend(["pexpect"])
-
-        if self.optional is not None and sys.version_info[1] < 9:
-            self.optional.append("ansys_corba")
 
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.
