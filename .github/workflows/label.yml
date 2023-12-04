@@ -34,7 +34,7 @@ jobs:
 
     # Label based on modified files
     - name: Label based on changed files
-      uses: actions/labeler@v4
+      uses: actions/labeler@v5
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
         sync-labels: ''
