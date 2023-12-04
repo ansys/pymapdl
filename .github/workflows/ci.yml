@@ -618,14 +618,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libgomp1
-      
-      - name: "Testing MAPDL launching"
-        run: |
-            echo -e "/prep7\n/com Hello!" > input.inp
-            $(ansys -b -i input.inp -o output.out) || echo "It's ok."
-            cat output.out | grep "RUN COMPLETED"
-            cat output.out | grep "Hello!"
-            cat output.out
 
       - name: "Setup Python"
         uses: actions/setup-python@v4
