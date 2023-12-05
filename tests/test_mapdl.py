@@ -469,11 +469,11 @@ def test_apdl_logging_start(tmpdir):
     assert "K,4,0,1,0" in text
 
 
-@requires("corba")
-def test_corba_apdl_logging_start(tmpdir):
+@requires("console")
+def test_console_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
-    mapdl = pymapdl.launch_mapdl(mode="CORBA", log_apdl=filename)
+    mapdl = launch_mapdl(log_apdl=filename, mode="console")
 
     mapdl.prep7()
     mapdl.run("!comment test")
