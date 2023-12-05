@@ -3047,7 +3047,9 @@ class MapdlGrpc(_MapdlCore):
     def vwrite(self, *args, **kwargs):
         args = tuple(
             [
-                each[1:-1] if (each.startswith("'") and each.endswith("'")) else each
+                f"'{each}'"
+                if (not each.startswith("'") and not each.endswith("'"))
+                else each
                 for each in args
             ]
         )
