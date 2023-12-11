@@ -149,7 +149,7 @@ mapdl.allsel(mute=True)
 # Solve the Static Problem
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 # Solve the static analysis
-mapdl.run("/SOLU")
+mapdl.solution()
 mapdl.antype("STATIC")
 output = mapdl.solve()
 mapdl.finish()
@@ -314,7 +314,7 @@ def compute_stress_con(ratio):
 
     # Solve the Static Problem
     # ~~~~~~~~~~~~~~~~~~~~~~~~
-    mapdl.run("/SOLU")
+    mapdl.solution()
     mapdl.antype("STATIC")
     mapdl.solve()
     mapdl.finish()
