@@ -152,6 +152,7 @@ mapdl.allsel(mute=True)
 mapdl.run("/SOLU")
 mapdl.antype("STATIC")
 output = mapdl.solve()
+mapdl.finish()
 print(output)
 
 ###############################################################################
@@ -316,6 +317,7 @@ def compute_stress_con(ratio):
     mapdl.run("/SOLU")
     mapdl.antype("STATIC")
     mapdl.solve()
+    mapdl.finish()
 
     # Post-Processing
     # ~~~~~~~~~~~~~~~
