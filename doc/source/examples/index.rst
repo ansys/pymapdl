@@ -1,5 +1,6 @@
-.. _ref_examples:
 
+
+.. _ref_examples:
 
 .. toctree::
     :hidden:
