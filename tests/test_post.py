@@ -10,6 +10,7 @@ from conftest import has_dependency, requires
 if has_dependency("pyvista"):
     from pyvista import Plotter
     from pyvista.plotting.renderer import CameraPosition
+    from ansys.mapdl.core.theme import PyMAPDL_cmap
 
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.post import (
@@ -158,7 +159,10 @@ def test_disp_norm_all(mapdl, static_solve):
 @requires("pyvista")
 def test_disp_plot(mapdl, static_solve, comp):
     assert (
-        mapdl.post_processing.plot_nodal_displacement(comp, smooth_shading=True) is None
+        mapdl.post_processing.plot_nodal_displacement(
+            comp, smooth_shading=True, cmap=PyMAPDL_cmap
+        )
+        is None
     )
 
 
