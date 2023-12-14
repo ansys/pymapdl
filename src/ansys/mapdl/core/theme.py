@@ -55,7 +55,7 @@ MAPDL_colorbar = (
 )
 
 if _HAS_MATPLOTLIB:
-    PyMAPDL_cmap: ListedColormap = ListedColormap(MAPDL_colorbar, name="PyMAPDL")
+    PyMAPDL_cmap: ListedColormap = ListedColormap(MAPDL_colorbar, name="PyMAPDL", N=255)
 
 
 def get_ansys_colors(N=9):

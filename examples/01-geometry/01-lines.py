@@ -44,7 +44,7 @@ k0 = mapdl.k("", 0, 0, 0)
 k1 = mapdl.k("", 1, 1, 0)
 k2 = mapdl.k("", 0, 1, 0)
 lnum = mapdl.larc(k0, k1, k2, 2)
-mapdl.lplot(background="w", color="y", line_width=5, cpos="xy")
+mapdl.lplot(background="w", color="k", line_width=5, cpos="xy")
 
 
 ###############################################################################
