@@ -32,7 +32,7 @@ env:
   DOCKER_PACKAGE: ghcr.io/ansys/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v23.1.0
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=10 --reruns 7 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
+  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=1 --reruns 1 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
 
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
@@ -77,7 +77,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
         # Only perform wheelhouse builds for macOS when releasing
         should-release: 
           - ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
@@ -118,7 +118,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: "Setup Python"
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           cache: 'pip'
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
@@ -272,7 +272,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu', 'v23.1.0', 'v23.2.0', 'v24.1.0']
+        mapdl-version: ['v22.2.1', 'v22.2-ubuntu', 'v23.1.0', 'v23.2.0', 'v24.1.0']
         extended_testing:
           - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
         exclude:
@@ -301,7 +301,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: "Setup Python"
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           cache: 'pip'
           cache-dependency-path: pyproject.toml
@@ -489,7 +489,7 @@ jobs:
 
 
       - name: "Setup Python"
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
@@ -614,8 +614,13 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 
+      - name: "Installing missing package"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgomp1
+
       - name: "Setup Python"
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
@@ -629,11 +634,6 @@ jobs:
           python -m pip install . --no-deps
           python -m pip install -r minimum_requirements.txt
           python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
-
-      - name: "Installing missing package"
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgomp1
 
       - name: "Unit testing requirements installation"
         run: |
@@ -674,7 +674,7 @@ jobs:
 
       # Skipping because it is installed locally.
       # - name: Setup Python
-      #   uses: actions/setup-python@v4
+      #   uses: actions/setup-python@v5
       #   with:
       #     python-version: 3.9
 
@@ -738,7 +738,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.9
 

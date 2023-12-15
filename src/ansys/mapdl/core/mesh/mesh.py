@@ -156,6 +156,7 @@ def _parse_vtk(
     # Store original ANSYS element and node information
     try:
         grid.point_data["ansys_node_num"] = nnum
+
     except ValueError:
         grid.point_data["ansys_node_num"] = (
             mesh._mapdl.nlist(kinternal="internal").to_array()[:, 0].astype(np.int32)
@@ -166,17 +167,6 @@ def _parse_vtk(
     grid.cell_data["ansys_material_type"] = mesh.material_type
     grid.cell_data["ansys_etype"] = mesh._ans_etype
     grid.cell_data["ansys_elem_type_num"] = mesh.etype
-
-    # add components
-    # Add element components to unstructured grid
-    for key, item in mesh.element_components.items():
-        mask = np.in1d(mesh.enum, item, assume_unique=True)
-        grid.cell_data[key] = mask
-
-    # Add node components to unstructured grid
-    for key, item in mesh.node_components.items():
-        mask = np.in1d(nnum, item, assume_unique=True)
-        grid.point_data[key] = mask
 
     # store node angles
     if angles is not None:

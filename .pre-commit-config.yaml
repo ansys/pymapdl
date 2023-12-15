@@ -3,7 +3,7 @@ fail_fast: True
 repos:
 
 - repo: https://github.com/pycqa/isort
-  rev: 5.12.0
+  rev: 5.13.0
   hooks:
   - id: isort
 
@@ -60,6 +60,6 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.27.1
+  rev: 0.27.3
   hooks:
     - id: check-github-workflows
