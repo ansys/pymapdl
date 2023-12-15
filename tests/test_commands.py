@@ -713,6 +713,8 @@ def test_nlist_to_array(mapdl, beam_solve):
 
 
 def test_cmlist(mapdl):
+    mapdl.clear()
+
     mapdl.prep7()
     # setup the full file
     mapdl.block(0, 1, 0, 1, 0, 1)
