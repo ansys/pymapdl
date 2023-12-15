@@ -22,6 +22,7 @@ if has_dependency("ansys-mapdl-reader"):
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
+    CommandDeprecated,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlConnectionError,
@@ -35,6 +36,67 @@ from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 # Path to files needed for examples
 PATH = os.path.dirname(os.path.abspath(__file__))
 test_files = os.path.join(PATH, "test_files")
+
+DEPRECATED_COMMANDS = [
+    "edasmp",
+    "edbound",
+    "edbx",
+    "edcgen",
+    "edclist",
+    "edcmore",
+    "edcnstr",
+    "edcontact",
+    "edcrb",
+    "edcurve",
+    "eddbl",
+    "eddc",
+    "edipart",
+    "edlcs",
+    "edmp",
+    "ednb",
+    "edndtsd",
+    "ednrot",
+    "edpart",
+    "edpc",
+    "edsp",
+    "edweld",
+    "edadapt",
+    "edale",
+    "edbvis",
+    "edcadapt",
+    "edcpu",
+    "edcsc",
+    "edcts",
+    "eddamp",
+    "eddrelax",
+    "eddump",
+    "edenergy",
+    "edfplot",
+    "edgcale",
+    "edhgls",
+    "edhist",
+    "edhtime",
+    "edint",
+    "edis",
+    "edload",
+    "edopt",
+    "edout",
+    "edpl",
+    "edpvel",
+    "edrc",
+    "edrd",
+    "edri",
+    "edrst",
+    "edrun",
+    "edshell",
+    "edsolv",
+    "edstart",
+    "edterm",
+    "edtp",
+    "edvel",
+    "edwrite",
+    "rexport",
+]
 
 CMD_BLOCK = """/prep7
 ! Mat
@@ -155,6 +217,13 @@ def warns_in_cdread_error_log(mapdl, tmpdir):
             or (warn_cdread_3 in error_log)
         )
         return any(warns)
+
+
+@pytest.mark.parametrize("command", DEPRECATED_COMMANDS)
+def test_deprecated_commands(mapdl, command):
+    with pytest.raises(CommandDeprecated):
+        method = getattr(mapdl, command)
+        method()
 
 
 @requires("grpc")
