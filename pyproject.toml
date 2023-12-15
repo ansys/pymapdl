@@ -83,7 +83,7 @@ doc = [
     "ansys-sphinx-theme==0.12.5",
     "grpcio==1.51.1",
     "imageio-ffmpeg==0.4.9",
-    "imageio==2.33.0",
+    "imageio==2.33.1",
     "jupyter_sphinx==0.4.0",
     "jupyterlab>=3.2.8",
     "matplotlib==3.8.2",
