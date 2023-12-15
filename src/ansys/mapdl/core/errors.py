@@ -264,3 +264,10 @@ class ComponentDoesNotExits(MapdlException):
 
     def __init__(self, msg=""):
         MapdlException.__init__(self, msg)
+
+
+class CommandDeprecated(MapdlException):
+    """Raised when a command is deprecated"""
+
+    def __init__(self, msg=""):
+        MapdlException.__init__(self, msg)
