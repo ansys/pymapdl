@@ -4965,62 +4965,22 @@ class _MapdlCore(Commands):
         return const_
 
     def _parse_cmlist(self, cmlist: Optional[str] = None) -> Dict[str, Any]:
+        from ansys.mapdl.core.component import _parse_cmlist
+
         if not cmlist:
             cmlist = self.cmlist()
 
-        if "NAME" in cmlist and "SUBCOMPONENTS" in cmlist:
-            # header
-            #  "NAME                            TYPE      SUBCOMPONENTS"
-            blocks = re.findall(
-                r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
-                cmlist,
-                flags=re.DOTALL,
-            )
-        elif "LIST ALL SELECTED COMPONENTS":
-            blocks = cmlist.splitlines()[1:]
-        else:
-            raise ValueError("The format of the CMLIST output is not recognaised.")
-
-        cmlist = "\n".join(blocks)
-
-        def extract(each_line, ind):
-            return each_line.split()[ind].strip()
-
-        return {
-            extract(each_line, 0): extract(each_line, 1)
-            for each_line in cmlist.splitlines()
-            if each_line
-        }
+        return _parse_cmlist(cmlist)
 
     def _parse_cmlist_indiv(
         self, cmname: str, cmtype: str, cmlist: Optional[str] = None
     ) -> List[int]:
+        from ansys.mapdl.core.component import _parse_cmlist_indiv
+
         if not cmlist:
             cmlist = self.cmlist(cmname, 1)
-        # Capturing blocks
-        if "NAME" in cmlist and "SUBCOMPONENTS" in cmlist:
-            header = r"NAME\s+TYPE\s+SUBCOMPONENTS"
 
-        elif "LIST COMPONENT" in cmlist:
-            header = ""
-
-        cmlist = "\n\n".join(
-            re.findall(
-                r"(?s)" + header + r"\s+(.*?)\s*(?=\n\s*\n|\Z)",
-                cmlist,
-                flags=re.DOTALL,
-            )
-        )
-
-        # Capturing items in each block
-        rg = cmname.upper() + r"\s+" + cmtype.upper() + r"\s+(.*?)\s*(?=\n\s*\n|\Z)"
-        items = "\n".join(re.findall(rg, cmlist, flags=re.DOTALL))
-
-        # Joining them together and giving them format.
-        items = items.replace("\n", "  ").split()
-        items = [int(each) for each in items]
-
-        return items
+        return _parse_cmlist_indiv(cmname, cmtype, cmlist)
 
     @wraps(Commands.cmplot)
     def cmplot(self, label: str = "", entity: str = "", keyword: str = "", **kwargs):
@@ -5733,3 +5693,9 @@ class _MapdlCore(Commands):
                 "The command 'Mapdl.rexport()' for explicit analysis was deprecated in Ansys 19.1"
             )
         super().rexport(*args, **kwargs)
+
+    @wraps(Commands.cmlist)
+    def cmlist(self, *args, **kwargs):
+        from ansys.mapdl.core.commands import ComponentListing
+
+        return ComponentListing(super().cmlist(*args, **kwargs))
