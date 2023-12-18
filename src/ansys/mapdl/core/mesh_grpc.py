@@ -1,7 +1,9 @@
 """Module to manage downloading and parsing the FEM from the MAPDL gRPC server."""
 from functools import wraps
 import os
+import re
 import time
+from typing import Dict
 import weakref
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
@@ -361,12 +363,12 @@ class MeshGrpc:
     @property
     def rlblock(self):
         """Real constant data from the RLBLOCK."""
-        return self._mapdl._parse_rlist()
+        return self._parse_rlist()
 
     @property
     def rlblock_num(self):
         """Indices from the real constant data"""
-        return list(self._mapdl._parse_rlist().keys())
+        return list(self._parse_rlist().keys())
 
     @property
     def nnum(self) -> np.ndarray:
@@ -788,3 +790,37 @@ class MeshGrpc:
             fix_midside,
             additional_checking,
         )
+
+    def _parse_rlist(self) -> Dict[int, float]:
+        # mapdl.rmore(*list)
+        with self._mapdl.force_output:
+            rlist = self._mapdl.rlist()
+
+        # removing ueless part
+        rlist = rlist.replace(
+            """   *****MAPDL VERIFICATION RUN ONLY*****
+     DO NOT USE RESULTS FOR PRODUCTION
+""",
+            "",
+        )
+        constants_ = re.findall(
+            r"REAL CONSTANT SET.*?\n\n", rlist + "\n\n", flags=re.DOTALL
+        )
+
+        const_ = {}
+        for each in constants_:
+            values = [0 for i in range(18)]
+            set_ = int(re.match(r"REAL CONSTANT SET\s+(\d+)\s+", each).groups()[0])
+            limits = (
+                int(re.match(r".*ITEMS\s+(\d+)\s+", each).groups()[0]),
+                int(re.match(r".*TO\s+(\d+)\s*", each).groups()[0]),
+            )
+            values_ = [float(i) for i in each.strip().splitlines()[1].split()]
+
+            if not set_ in const_:
+                const_[set_] = values
+
+            for i, jlimit in enumerate(range(limits[0] - 1, limits[1])):
+                const_[set_][jlimit] = values_[i]
+
+        return const_

@@ -52,9 +52,9 @@ def test_repr(mapdl, cube_geom_and_mesh):
 
 
 def test_mapdl(mapdl):
-    from ansys.mapdl.core.mapdl import _MapdlCore
+    from ansys.mapdl.core.mapdl import MapdlBase
 
-    assert isinstance(mapdl.mesh._mapdl, _MapdlCore)
+    assert isinstance(mapdl.mesh._mapdl, MapdlBase)
 
 
 def test_local(mapdl):

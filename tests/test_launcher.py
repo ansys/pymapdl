@@ -18,7 +18,7 @@ from ansys.mapdl.core.launcher import (
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from conftest import QUICK_LAUNCH_SWITCHES, requires
+from conftest import ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 
 try:
     from ansys.tools.path import (
@@ -455,3 +455,10 @@ default via 172.23.112.1 dev eth0 proto kernel
 172.23.112.0/20 dev eth0 proto kernel scope link src 172.23.121.145"""
 
     assert "172.23.112.1" == _parse_ip_route(output)
+
+
+def test_launched(mapdl):
+    if ON_LOCAL:
+        assert mapdl.launched
+    else:
+        assert not mapdl.launched

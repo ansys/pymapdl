@@ -13,6 +13,7 @@ if has_dependency("pyvista"):
     from ansys.mapdl.core.theme import PyMAPDL_cmap
 
 from ansys.mapdl.core import examples
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.post import (
     COMPONENT_STRESS_TYPE,
     PRINCIPAL_TYPE,
@@ -940,6 +941,15 @@ def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
         )
         is None
     )
+
+
+def test_exited(mapdl):
+    mapdl._exited = True
+    with pytest.raises(MapdlRuntimeError):
+        mapdl.post_processing.plot_nodal_displacement(
+            "NORM", line_width=10, render_lines_as_tubes=True, smooth_shading=True
+        )
+    mapdl._exited = False
 
 
 ###############################################################################
