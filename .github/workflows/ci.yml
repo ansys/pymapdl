@@ -202,7 +202,7 @@ jobs:
           cd ../../../../../../
 
       - name: "Upload HTML Documentation"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: documentation-html
           path: doc/_build/html
@@ -217,7 +217,7 @@ jobs:
         run: ls _build/latex
 
       - name: "Upload PDF documentation"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: documentation-pdf
           path: doc/_build/latex/pymapdl*.pdf
@@ -385,7 +385,7 @@ jobs:
           flags: centos,remote,${{ matrix.mapdl-version }}
 
       - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: centos-${{ matrix.mapdl-version }}-remote.xml
           path: ./centos-${{ matrix.mapdl-version }}-remote.xml
@@ -396,7 +396,7 @@ jobs:
           twine check dist/*
 
       - name: "Upload wheel and binaries"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: PyMAPDL-packages
           path: dist/
@@ -579,13 +579,13 @@ jobs:
           flags: ubuntu,local,v22.2.0
 
       - name: 'Upload coverage artifacts'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ubuntu-v22.2.0-local.xml
           path: ./ubuntu-v22.2.0-local.xml
       
       - name: 'Upload minimal requirements file'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: minimum_requirements.txt
           path: ./minimum_requirements.txt
@@ -656,7 +656,7 @@ jobs:
           flags: ubuntu,local,v22.2.0,minimal
 
       - name: 'Upload coverage artifacts'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ubuntu-v22.2.0-local-minimal.xml
           path: ./ubuntu-v22.2.0-local-minimal.xml
@@ -726,7 +726,7 @@ jobs:
           flags: windows,local,v22.2.0
 
       - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-v22.2.0-local.xml
           path: ./windows_local.xml
