@@ -9,7 +9,7 @@ One advantage of this approach is that it integrates well with existing MAPDL
 scripting or automation. This approach can also be used on result files generated
 from other programs, including ANSYS Mechanical.
 
-Perhaps one of the biggest advantages of gRPC-based postprocessing is
+One of the biggest advantages of gRPC-based postprocessing is
 that it can be done remotely without any file exchange. Multi gigabyte
 result files can remain remote, with only the necessary data being
 streamed back to the client for review or visualization.
@@ -24,95 +24,6 @@ streamed back to the client for review or visualization.
    but via a Python client.
 
 
-
-Enriched command output
-~~~~~~~~~~~~~~~~~~~~~~~
-All :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class commands output
-a string object that can be parsed to obtain specific data from it.
-
-In certain :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class commands
-the returned string contains some methods to process the output.
-These commands are listed in Table-1_.
-
-.. _Table-1:
-
-**Table 1. Commands with extra processing methods in the output**
-
-+----------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------+
-| Category       | Extra methods available                                                                           | MAPDL commands                                                           |
-+================+===================================================================================================+==========================================================================+
-| **Listing**    | * :class:`cmd.to_list() <ansys.mapdl.core.commands.CommandListingOutput>`                         | **Results listing**                                                      |
-|                | * :class:`cmd.to_array() <ansys.mapdl.core.commands.CommandListingOutput>`                        |                                                                          |
-|                | * :class:`cmd.to_dataframe() <ansys.mapdl.core.commands.CommandListingOutput>`                    | * :func:`Mapdl.prcint() <ansys.mapdl.core.Mapdl.prcint>`                 |
-|                |                                                                                                   | * :func:`Mapdl.prenergy() <ansys.mapdl.core.Mapdl.prenergy>`             |
-|                |                                                                                                   | * :func:`Mapdl.prerr() <ansys.mapdl.core.Mapdl.prerr>`                   |
-|                |                                                                                                   | * :func:`Mapdl.presol() <ansys.mapdl.core.Mapdl.presol>`                 |
-|                |                                                                                                   | * :func:`Mapdl.pretab() <ansys.mapdl.core.Mapdl.pretab>`                 |
-|                |                                                                                                   | * :func:`Mapdl.print() <ansys.mapdl.core.Mapdl.print>`                   |
-|                |                                                                                                   | * :func:`Mapdl.priter() <ansys.mapdl.core.Mapdl.priter>`                 |
-|                |                                                                                                   | * :func:`Mapdl.prjsol() <ansys.mapdl.core.Mapdl.prjsol>`                 |
-|                |                                                                                                   | * :func:`Mapdl.prnld() <ansys.mapdl.core.Mapdl.prnld>`                   |
-|                |                                                                                                   | * :func:`Mapdl.prnsol() <ansys.mapdl.core.Mapdl.prnsol>`                 |
-|                |                                                                                                   | * :func:`Mapdl.prorb() <ansys.mapdl.core.Mapdl.prorb>`                   |
-|                |                                                                                                   | * :func:`Mapdl.prpath() <ansys.mapdl.core.Mapdl.prpath>`                 |
-|                |                                                                                                   | * :func:`Mapdl.prrfor() <ansys.mapdl.core.Mapdl.prrfor>`                 |
-|                |                                                                                                   | * :func:`Mapdl.prrsol() <ansys.mapdl.core.Mapdl.prrsol>`                 |
-|                |                                                                                                   | * :func:`Mapdl.prsect() <ansys.mapdl.core.Mapdl.prsect>`                 |
-|                |                                                                                                   | * :func:`Mapdl.prvect() <ansys.mapdl.core.Mapdl.prvect>`                 |
-|                |                                                                                                   | * :func:`Mapdl.swlist() <ansys.mapdl.core.Mapdl.swlist>`                 |
-|                |                                                                                                   |                                                                          |
-|                |                                                                                                   |  **Other Listing**                                                       |
-|                |                                                                                                   |                                                                          |
-|                |                                                                                                   | * :func:`Mapdl.set("LIST") <ansys.mapdl.core.Mapdl.set>`                 |
-|                |                                                                                                   | * :func:`Mapdl.nlist() <ansys.mapdl.core.Mapdl.nlist>`                   |
-|                |                                                                                                   |                                                                          |
-+----------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------+  
-| **Boundary**   | * :func:`cmd.to_list() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput>`               | * :func:`Mapdl.dlist() <ansys.mapdl.core.Mapdl.dlist>`                   |
-| **Conditions** | * :func:`cmd.to_dataframe() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput>`          | * :func:`Mapdl.flist() <ansys.mapdl.core.Mapdl.flist>`                   |
-| **Listing**    |                                                                                                   |                                                                          |
-+----------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------+
-
-.. warning:: If you use these methods, you might obtain a lower
-   precision than using :class:`Mesh <ansys.mapdl.core.mesh_grpc.MeshGrpc>` methods.
-
-Here's a simple example that demonstrates usage:
-
-.. code:: pycon
-
-    
-    >>> from ansys.mapdl.core import launch_mapdl
-    >>> from ansys.mapdl.core import examples
-
-    >>> mapdl = launch_mapdl()
-    >>> example = examples.vmfiles["vm10"]
-    >>> mapdl.input(example)
-
-    >>> mapdl.slashsolu()
-    >>> mapdl.solve()
-
-    >>> mapdl.post1()
-    >>> cmd = mapdl.prnsol("U", "X")
-
-    # Output as a list.
-
-    >>> cmd.to_list()
-    [['1', '0.0000'], ['2', '0.0000']]
-
-    # Output as array.
-
-    >>> cmd.to_array()
-    array([[1., 0.],
-           [2., 0.]])
-
-    # Output as dataframe.
-
-    >>> cmd.to_dataframe()
-    NODE   UX
-    0      1.0
-    1      2.0
-
-Examples
-~~~~~~~~
 You would typically request nodal results from MAPDL using the
 ``PRNSOL`` command:
 
@@ -168,31 +79,6 @@ You could also plot the nodal displacement with this code:
 
 Selecting entities
 ------------------
-You can select entities such as nodes, or lines using the following methods:
-
-* :func:`Mapdl.nsel() <ansys.mapdl.core.Mapdl.nsel>`
-* :func:`Mapdl.esel() <ansys.mapdl.core.Mapdl.esel>`
-* :func:`Mapdl.ksel() <ansys.mapdl.core.Mapdl.ksel>`
-* :func:`Mapdl.lsel() <ansys.mapdl.core.Mapdl.lsel>`
-* :func:`Mapdl.asel() <ansys.mapdl.core.Mapdl.asel>`
-* :func:`Mapdl.vsel() <ansys.mapdl.core.Mapdl.vsel>`
-
-These methods returns the ids of the selected entities. For example:
-
-.. code:: pycon
-
-    >>> selected_nodes = mapdl.nsel("S", "NODE", vmin=1, vmax=2000)
-    >>> print(selected_nodes)
-    array([   1    2    3 ... 1998 1999 2000])
-
-.. code:: pycon
-
-    >>> mapdl.ksel("all")
-    array([1, 2, 3, ..., 1998, 1999, 2000])
-
-
-Selected nodes
-~~~~~~~~~~~~~~
 
 The MAPDL database processes some results independently if nodes or
 elements are selected. If you have subselected a certain component
@@ -212,3 +98,90 @@ Postprocessing object methods
 ------------------------------
 For a full list of all available postprocessing methods, see
 :ref:`post_processing_api`.
+
+
+Enriched command output
+~~~~~~~~~~~~~~~~~~~~~~~
+All :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class commands output
+a string object that can be parsed to obtain specific data from it.
+
+In certain :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class commands
+the returned string contains some methods to process the output.
+These commands are listed in Table-1_.
+
+.. _Table-1:
+
+**Table 1. Commands with extra processing methods in the output**
+
++----------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------+
+| Category       | Extra methods available                                                                           | MAPDL commands                                                           |
++================+===================================================================================================+==========================================================================+
+| **Listing**    | * :class:`cmd.to_list() <ansys.mapdl.core.commands.CommandListingOutput>`                         | **Results listing**                                                      |
+|                | * :class:`cmd.to_array() <ansys.mapdl.core.commands.CommandListingOutput>`                        |                                                                          |
+|                | * :class:`cmd.to_dataframe() <ansys.mapdl.core.commands.CommandListingOutput>`                    | * :func:`Mapdl.prcint() <ansys.mapdl.core.Mapdl.prcint>`                 |
+|                |                                                                                                   | * :func:`Mapdl.prenergy() <ansys.mapdl.core.Mapdl.prenergy>`             |
+|                |                                                                                                   | * :func:`Mapdl.prerr() <ansys.mapdl.core.Mapdl.prerr>`                   |
+|                |                                                                                                   | * :func:`Mapdl.presol() <ansys.mapdl.core.Mapdl.presol>`                 |
+|                |                                                                                                   | * :func:`Mapdl.pretab() <ansys.mapdl.core.Mapdl.pretab>`                 |
+|                |                                                                                                   | * :func:`Mapdl.print() <ansys.mapdl.core.Mapdl.print>`                   |
+|                |                                                                                                   | * :func:`Mapdl.priter() <ansys.mapdl.core.Mapdl.priter>`                 |
+|                |                                                                                                   | * :func:`Mapdl.prjsol() <ansys.mapdl.core.Mapdl.prjsol>`                 |
+|                |                                                                                                   | * :func:`Mapdl.prnld() <ansys.mapdl.core.Mapdl.prnld>`                   |
+|                |                                                                                                   | * :func:`Mapdl.prnsol() <ansys.mapdl.core.Mapdl.prnsol>`                 |
+|                |                                                                                                   | * :func:`Mapdl.prorb() <ansys.mapdl.core.Mapdl.prorb>`                   |
+|                |                                                                                                   | * :func:`Mapdl.prpath() <ansys.mapdl.core.Mapdl.prpath>`                 |
+|                |                                                                                                   | * :func:`Mapdl.prrfor() <ansys.mapdl.core.Mapdl.prrfor>`                 |
+|                |                                                                                                   | * :func:`Mapdl.prrsol() <ansys.mapdl.core.Mapdl.prrsol>`                 |
+|                |                                                                                                   | * :func:`Mapdl.prsect() <ansys.mapdl.core.Mapdl.prsect>`                 |
+|                |                                                                                                   | * :func:`Mapdl.prvect() <ansys.mapdl.core.Mapdl.prvect>`                 |
+|                |                                                                                                   | * :func:`Mapdl.swlist() <ansys.mapdl.core.Mapdl.swlist>`                 |
+|                |                                                                                                   |                                                                          |
+|                |                                                                                                   |  **Other Listing**                                                       |
+|                |                                                                                                   |                                                                          |
+|                |                                                                                                   | * :func:`Mapdl.set("LIST") <ansys.mapdl.core.Mapdl.set>`                 |
+|                |                                                                                                   | * :func:`Mapdl.nlist() <ansys.mapdl.core.Mapdl.nlist>`                   |
+|                |                                                                                                   |                                                                          |
++----------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------+  
+| **Boundary**   | * :func:`cmd.to_list() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput>`               | * :func:`Mapdl.dlist() <ansys.mapdl.core.Mapdl.dlist>`                   |
+| **Conditions** | * :func:`cmd.to_dataframe() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput>`          | * :func:`Mapdl.flist() <ansys.mapdl.core.Mapdl.flist>`                   |
+| **Listing**    |                                                                                                   |                                                                          |
++----------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------+
+
+.. warning:: If you use these methods (like :func:`Mapdl.nlist() <ansys.mapdl.core.Mapdl.nlist>`) , you might obtain a lower
+   precision than using :class:`Mesh <ansys.mapdl.core.mesh_grpc.MeshGrpc>` methods.
+
+Here's a simple example that demonstrates usage:
+
+.. code:: pycon
+
+    
+    >>> from ansys.mapdl.core import launch_mapdl
+    >>> from ansys.mapdl.core import examples
+
+    >>> mapdl = launch_mapdl()
+    >>> example = examples.vmfiles["vm10"]
+    >>> mapdl.input(example)
+
+    >>> mapdl.slashsolu()
+    >>> mapdl.solve()
+
+    >>> mapdl.post1()
+    >>> cmd = mapdl.prnsol("U", "X")
+
+    # Output as a list.
+
+    >>> cmd.to_list()
+    [['1', '0.0000'], ['2', '0.0000']]
+
+    # Output as array.
+
+    >>> cmd.to_array()
+    array([[1., 0.],
+           [2., 0.]])
+
+    # Output as dataframe.
+
+    >>> cmd.to_dataframe()
+    NODE   UX
+    0      1.0
+    1      2.0
