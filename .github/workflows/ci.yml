@@ -398,7 +398,7 @@ jobs:
       - name: "Upload wheel and binaries"
         uses: actions/upload-artifact@v4
         with:
-          name: PyMAPDL-packages
+          name: PyMAPDL-packages-${{ matrix.mapdl-version }}
           path: dist/
           retention-days: 7
 
