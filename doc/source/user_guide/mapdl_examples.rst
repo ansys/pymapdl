@@ -41,7 +41,7 @@ Here is the beginning of the MAPDL script:
     PRESSURE = FORCE/(H_TIP*2*PI*RADIUS)
 
 Here is the corresponding PyMAPDL script, including the initialization of an
-instance of the :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class:
+instance of the :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class:
 
 .. code:: python
 

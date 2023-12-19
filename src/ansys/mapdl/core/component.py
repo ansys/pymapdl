@@ -1,5 +1,5 @@
 """Component related module"""
-
+import re
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -220,9 +220,9 @@ class ComponentManager:
         mapdl : ansys.mapdl.core.Mapdl
             Mapdl instance which this class references to.
         """
-        from ansys.mapdl.core.mapdl import _MapdlCore
+        from ansys.mapdl.core.mapdl import MapdlBase
 
-        if not isinstance(mapdl, _MapdlCore):
+        if not isinstance(mapdl, MapdlBase):
             raise TypeError("Must be implemented from MAPDL class")
 
         self._mapdl_weakref: weakref.ReferenceType[Mapdl] = weakref.ref(mapdl)
@@ -273,7 +273,7 @@ class ComponentManager:
     def _comp(self) -> UNDERLYING_DICT:
         """Dictionary with components names and types."""
         if self.__comp is None or self._update_always:
-            self.__comp = self._mapdl._parse_cmlist()
+            self.__comp = self._parse_cmlist()
         return self.__comp
 
     @_comp.setter
@@ -308,7 +308,7 @@ class ComponentManager:
                     f"The component named '{key}' does not exist in the MAPDL instance."
                 )
 
-        output = self._mapdl._parse_cmlist_indiv(key, cmtype)
+        output = self._parse_cmlist_indiv(key, cmtype)
         if forced_to_select:
             # Unselect to keep the state of the things as before calling this method.
             self._mapdl.cmsel("U", key)
@@ -514,3 +514,61 @@ class ComponentManager:
             if i_type_ == type_:
                 dict_[each_comp] = i_items
         return dict_
+
+    def _parse_cmlist(self, cmlist: Optional[str] = None) -> Dict[str, Any]:
+        if not cmlist:
+            cmlist = self._mapdl.cmlist()
+
+        if "NAME" in cmlist and "SUBCOMPONENTS" in cmlist:
+            # header
+            #  "NAME                            TYPE      SUBCOMPONENTS"
+            blocks = re.findall(
+                r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+                cmlist,
+                flags=re.DOTALL,
+            )
+        elif "LIST ALL SELECTED COMPONENTS":
+            blocks = cmlist.splitlines()[1:]
+        else:
+            raise ValueError("The format of the CMLIST output is not recognaised.")
+
+        cmlist = "\n".join(blocks)
+
+        def extract(each_line, ind):
+            return each_line.split()[ind].strip()
+
+        return {
+            extract(each_line, 0): extract(each_line, 1)
+            for each_line in cmlist.splitlines()
+            if each_line
+        }
+
+    def _parse_cmlist_indiv(
+        self, cmname: str, cmtype: str, cmlist: Optional[str] = None
+    ) -> List[int]:
+        if not cmlist:
+            cmlist = self._mapdl.cmlist(cmname, 1)
+        # Capturing blocks
+        if "NAME" in cmlist and "SUBCOMPONENTS" in cmlist:
+            header = r"NAME\s+TYPE\s+SUBCOMPONENTS"
+
+        elif "LIST COMPONENT" in cmlist:
+            header = ""
+
+        cmlist = "\n\n".join(
+            re.findall(
+                r"(?s)" + header + r"\s+(.*?)\s*(?=\n\s*\n|\Z)",
+                cmlist,
+                flags=re.DOTALL,
+            )
+        )
+
+        # Capturing items in each block
+        rg = cmname.upper() + r"\s+" + cmtype.upper() + r"\s+(.*?)\s*(?=\n\s*\n|\Z)"
+        items = "\n".join(re.findall(rg, cmlist, flags=re.DOTALL))
+
+        # Joining them together and giving them format.
+        items = items.replace("\n", "  ").split()
+        items = [int(each) for each in items]
+
+        return items

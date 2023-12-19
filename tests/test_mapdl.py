@@ -22,6 +22,7 @@ if has_dependency("ansys-mapdl-reader"):
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
+    CommandDeprecated,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlConnectionError,
@@ -35,6 +36,67 @@ from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 # Path to files needed for examples
 PATH = os.path.dirname(os.path.abspath(__file__))
 test_files = os.path.join(PATH, "test_files")
+
+DEPRECATED_COMMANDS = [
+    "edasmp",
+    "edbound",
+    "edbx",
+    "edcgen",
+    "edclist",
+    "edcmore",
+    "edcnstr",
+    "edcontact",
+    "edcrb",
+    "edcurve",
+    "eddbl",
+    "eddc",
+    "edipart",
+    "edlcs",
+    "edmp",
+    "ednb",
+    "edndtsd",
+    "ednrot",
+    "edpart",
+    "edpc",
+    "edsp",
+    "edweld",
+    "edadapt",
+    "edale",
+    "edbvis",
+    "edcadapt",
+    "edcpu",
+    "edcsc",
+    "edcts",
+    "eddamp",
+    "eddrelax",
+    "eddump",
+    "edenergy",
+    "edfplot",
+    "edgcale",
+    "edhgls",
+    "edhist",
+    "edhtime",
+    "edint",
+    "edis",
+    "edload",
+    "edopt",
+    "edout",
+    "edpl",
+    "edpvel",
+    "edrc",
+    "edrd",
+    "edri",
+    "edrst",
+    "edrun",
+    "edshell",
+    "edsolv",
+    "edstart",
+    "edterm",
+    "edtp",
+    "edvel",
+    "edwrite",
+    "rexport",
+]
 
 CMD_BLOCK = """/prep7
 ! Mat
@@ -157,6 +219,13 @@ def warns_in_cdread_error_log(mapdl, tmpdir):
         return any(warns)
 
 
+@pytest.mark.parametrize("command", DEPRECATED_COMMANDS)
+def test_deprecated_commands(mapdl, command):
+    with pytest.raises(CommandDeprecated):
+        method = getattr(mapdl, command)
+        method()
+
+
 @requires("grpc")
 def test_internal_name_grpc(mapdl):
     assert str(mapdl._ip) in mapdl.name
@@ -212,11 +281,44 @@ def test_global_mute(mapdl):
 
 def test_parsav_parres(mapdl, cleared, tmpdir):
     arr = np.random.random((10, 3))
+
     mapdl.parameters["MYARR"] = arr
-    mapdl.parsav("ALL", "tmp.txt")
+    mapdl.parsav("ALL", "db.txt")
+    mapdl.download("db.txt")
+
+    # Restoring
     mapdl.clear()
-    mapdl.parres("ALL", "tmp.txt")
+    mapdl.parres("ALL", "db.txt")
     assert np.allclose(mapdl.parameters["MYARR"], arr)
+
+    # test no filename
+    mapdl.clear()
+    mapdl.parameters["MYARR"] = arr
+    mapdl.parsav("ALL")
+
+    mapdl.clear()
+    mapdl.parres("ALL")
+    assert np.allclose(mapdl.parameters["MYARR"], arr)
+
+    # Test upload local
+    mapdl.clear()
+    if "db.txt" in mapdl.list_files():
+        mapdl.slashdelete("db.txt")
+
+    mapdl.parres("NEW", "db", "txt")
+    assert np.allclose(mapdl.parameters["MYARR"], arr)
+
+    # Test directory error
+    mapdl.clear()
+    with pytest.raises(FileNotFoundError):
+        mapdl.parres("NEW", os.getcwd())
+
+    # Test non-existing file
+    mapdl.clear()
+    with pytest.raises(FileNotFoundError):
+        mapdl.parres("change", "mydummy", "file")
+
+    os.remove("db.txt")
 
 
 @requires("grpc")
@@ -436,11 +538,11 @@ def test_apdl_logging_start(tmpdir):
     assert "K,4,0,1,0" in text
 
 
-@requires("corba")
-def test_corba_apdl_logging_start(tmpdir):
+@requires("console")
+def test_console_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
-    mapdl = pymapdl.launch_mapdl(mode="CORBA", log_apdl=filename)
+    mapdl = launch_mapdl(log_apdl=filename, mode="console")
 
     mapdl.prep7()
     mapdl.run("!comment test")
@@ -2119,8 +2221,62 @@ def test_saving_selection_context(mapdl, cube_solve):
     assert "nod_selection_4" not in mapdl.components
 
 
+def test_inquire_invalid(mapdl):
+    with pytest.raises(ValueError, match="Arguments of this method have changed"):
+        mapdl.inquire("directory")
+
+    with pytest.raises(ValueError, match="The arguments "):
+        mapdl.inquire("dummy", "hi")
+
+
+def test_inquire_default(mapdl):
+    mapdl.title = "heeeelloo"
+    assert mapdl.directory == mapdl.inquire()
+
+
+def test_vwrite_error(mapdl):
+    with pytest.raises(MapdlRuntimeError):
+        mapdl.vwrite("adf")
+
+
+def test_vwrite(mapdl):
+    with mapdl.non_interactive:
+        mapdl.run("/out,test_vwrite.txt")
+        mapdl.vwrite("'hello'")
+        mapdl.run("(1X, A8)")
+        mapdl.run("/out")
+
+    mapdl.download("test_vwrite.txt")
+
+    with open("test_vwrite.txt", "r") as fid:
+        content = fid.read()
+
+    assert "hello" == content.strip()
+    os.remove("test_vwrite.txt")
+
+
 def test_get_array_non_interactive(mapdl, solved_box):
     mapdl.allsel()
     with pytest.raises(MapdlRuntimeError):
         with mapdl.non_interactive:
             mapdl.get_array("asdf", "2")
+
+
+def test_default_file_type_for_plots(mapdl):
+    assert mapdl.default_file_type_for_plots
+
+    with pytest.raises(ValueError):
+        mapdl.default_file_type_for_plots = "dummy"
+
+    mapdl.default_file_type_for_plots = "PNG"
+
+
+@requires("matplotlib")
+def test_use_vtk(mapdl):
+    assert isinstance(mapdl.use_vtk, bool)
+
+    prev = mapdl.use_vtk
+    mapdl.use_vtk = False
+    mapdl.eplot()
+
+    mapdl.use_vtk = prev

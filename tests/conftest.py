@@ -128,9 +128,6 @@ def requires(requirement: str):
     elif "console" == requirement:
         return pytest.mark.console
 
-    elif "corba" == requirement:
-        return pytest.mark.corba
-
     else:
         return requires_dependency(requirement)
 
@@ -230,9 +227,6 @@ def pytest_configure(config):
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--corba", action="store_true", default=False, help="run CORBA tests"
-    )
-    parser.addoption(
         "--console",
         action="store_true",
         default=False,
@@ -245,22 +239,9 @@ def pytest_addoption(parser):
         default=False,
         help="run only GUI tests",
     )
-    parser.addoption(
-        "--skip-regression-check",
-        action="store_true",
-        default=False,
-        help="Avoid checking the image regression check in all tests",
-    )
 
 
 def pytest_collection_modifyitems(config, items):
-    if not config.getoption("--corba"):
-        # --corba given in cli: run CORBA interface tests
-        skip_corba = pytest.mark.skip(reason="need --corba option to run")
-        for item in items:
-            if "corba" in item.keywords:
-                item.add_marker(skip_corba)
-
     if not config.getoption("--console"):
         # --console given in cli: run console interface tests
         skip_console = pytest.mark.skip(reason="need --console option to run")
@@ -302,13 +283,7 @@ if has_dependency("pytest-pyvista"):
 
     @pytest.fixture(autouse=True)
     def wrapped_verify_image_cache(verify_image_cache, pytestconfig):
-        # Checking if we want to avoid the check using pytest cli.
-        skip_regression_check = pytestconfig.option.skip_regression_check
-        if skip_regression_check:
-            verify_image_cache.skip = True
-
         # Configuration
-        # default check
         verify_image_cache.error_value = 500.0
         verify_image_cache.warning_value = 200.0
 
@@ -383,7 +358,7 @@ def mapdl_console(request):
         )
     ansys_base_paths = get_available_ansys_installations()
 
-    # find a valid version of corba
+    # find a valid version of console
     console_path = None
     for version in ansys_base_paths:
         version = abs(version)
@@ -401,41 +376,6 @@ def mapdl_console(request):
     from ansys.mapdl.core.mapdl_console import MapdlConsole
 
     assert isinstance(mapdl, MapdlConsole)
-    mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
-
-    # using yield rather than return here to be able to test exit
-    yield mapdl
-
-    # verify mapdl exits
-    mapdl.exit()
-    assert mapdl._exited
-    assert "MAPDL exited" in str(mapdl)
-    with pytest.raises(MapdlExitedError):
-        mapdl.prep7()
-
-
-@pytest.fixture(scope="session")
-def mapdl_corba(request):
-    ansys_base_paths = get_available_ansys_installations()
-
-    # find a valid version of corba
-    corba_path = None
-    for version in ansys_base_paths:
-        version = abs(version)
-        if version >= 170 and version < 202:
-            corba_path = find_ansys(str(version))[0]
-
-    if corba_path is None:
-        raise MapdlRuntimeError(
-            '"-corba" testing option unavailable.'
-            "No local CORBA compatible MAPDL installation found.  "
-            "Valid versions are ANSYS 17.0 up to 2020R2."
-        )
-
-    mapdl = launch_mapdl(corba_path)
-    from ansys.mapdl.core.mapdl_corba import MapdlCorba
-
-    assert isinstance(mapdl, MapdlCorba)
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
 
     # using yield rather than return here to be able to test exit

@@ -188,9 +188,7 @@ class LoadStepOperations:
         >>> mapdl.lssolve(1, 2)
 
         """
-        with self.non_interactive:
-            self.run(f"LSSOLVE,{lsmin},{lsmax},{lsinc}", **kwargs)
-        return self.last_response
+        return self.run(f"LSSOLVE,{lsmin},{lsmax},{lsinc}", **kwargs)
 
     def lswrite(self, lsnum="", **kwargs):
         """Writes load and load step option data to a file.

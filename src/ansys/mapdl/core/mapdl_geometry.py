@@ -21,7 +21,7 @@ from ansys.mapdl.core.theme import MapdlTheme
 VALID_SELECTION_TYPE = ["S", "R", "A", "U"]
 VALID_SELECTION_ENTYTY = ["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
 
-from ansys.mapdl.core.mapdl import (
+from ansys.mapdl.core.mapdl_core import (
     DEBUG_LEVELS,
     VALID_SELECTION_ENTITY_TP,
     VALID_SELECTION_TYPE_TP,
@@ -142,9 +142,9 @@ class Geometry:
         mapdl : ansys.mapdl.core.Mapdl
             Mapdl instance which this class references to.
         """
-        from ansys.mapdl.core.mapdl import _MapdlCore
+        from ansys.mapdl.core.mapdl import MapdlBase
 
-        if not isinstance(mapdl, _MapdlCore):
+        if not isinstance(mapdl, MapdlBase):
             raise TypeError("Must be initialized using a gRPC MAPDL class")
 
         self._mapdl = mapdl

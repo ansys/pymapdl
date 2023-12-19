@@ -15,7 +15,7 @@ except ModuleNotFoundError:  # pragma: no cover
 import numpy as np
 
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from ansys.mapdl.core.mapdl import _MapdlCore
+from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.misc import supress_logging
 
 ROUTINE_MAP = {
@@ -77,7 +77,7 @@ class Parameters:
 
     """
 
-    def __init__(self, mapdl: _MapdlCore):
+    def __init__(self, mapdl: MapdlBase):
         """Parameters manager
 
         Class to help to manage parameters in an
@@ -88,7 +88,7 @@ class Parameters:
         mapdl : ansys.mapdl.core.Mapdl
             Mapdl instance which this class references to.
         """
-        if not isinstance(mapdl, _MapdlCore):
+        if not isinstance(mapdl, MapdlBase):
             raise TypeError("Must be implemented from MAPDL class")
         self._mapdl_weakref = weakref.ref(mapdl)
         self.show_leading_underscore_parameters = False
@@ -292,6 +292,10 @@ class Parameters:
     @supress_logging
     def _parm(self):
         """Current MAPDL parameters"""
+        if self._mapdl._store_commands:
+            # in interactive mode
+            return {}
+
         params = interp_star_status(
             self._mapdl.starstatus(avoid_non_interactive=True, mute=False)
         )
@@ -326,8 +330,15 @@ class Parameters:
 
     def __getitem__(self, key):
         """Return a parameter"""
+        if self._mapdl._store_commands:
+            raise MapdlRuntimeError(
+                "Cannot use `mapdl.parameters` to retrieve parameters when in "
+                "`non_interactive` mode. "
+                "Exit `non_interactive` mode before using this method."
+            )
+
         if not isinstance(key, str):
-            raise TypeError("Parameter name must be a string")
+            raise TypeError("Parameter name must be a string.")
         key = key.upper()
 
         with self.full_parameters_output:

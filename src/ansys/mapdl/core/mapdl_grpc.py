@@ -54,7 +54,7 @@ from ansys.mapdl.core.errors import (
     MapdlRuntimeError,
     protect_grpc,
 )
-from ansys.mapdl.core.mapdl import _MapdlCore
+from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat, MapdlInt
 from ansys.mapdl.core.misc import (
     check_valid_ip,
@@ -197,7 +197,7 @@ class RepeatingTimer(threading.Timer):
             self.finished.wait(self.interval)
 
 
-class MapdlGrpc(_MapdlCore):
+class MapdlGrpc(MapdlBase):
     """This class connects to a GRPC MAPDL server and allows commands
     to be passed to a persistent session.
 
@@ -1483,7 +1483,7 @@ class MapdlGrpc(_MapdlCore):
         if hasattr(resp, "response"):
             return resp.response
 
-    @wraps(_MapdlCore.cdread)
+    @wraps(MapdlBase.cdread)
     def cdread(self, option="", fname="", ext="", fnamei="", exti="", **kwargs):
         """Wraps CDREAD"""
         option = option.strip().upper()
@@ -1511,7 +1511,7 @@ class MapdlGrpc(_MapdlCore):
 
         self.input(fname, **kwargs)
 
-    @wraps(_MapdlCore.tbft)
+    @wraps(MapdlBase.tbft)
     def tbft(
         self,
         oper="",
@@ -1525,7 +1525,7 @@ class MapdlGrpc(_MapdlCore):
         option7="",
         **kwargs,
     ):
-        """Wraps ``_MapdlCore.tbft``."""
+        """Wraps ``MapdlBase.tbft``."""
         extra_info = ""
         if oper.lower() == "eadd":
             # Option 2 is a file and option 4 is the directory.
@@ -2853,7 +2853,7 @@ class MapdlGrpc(_MapdlCore):
 
         return self._download_as_raw(error_file).decode("latin-1")
 
-    @wraps(_MapdlCore.cmatrix)
+    @wraps(MapdlBase.cmatrix)
     def cmatrix(
         self,
         symfac="",
@@ -2895,129 +2895,129 @@ class MapdlGrpc(_MapdlCore):
             self.__distributed = self.parameters.numcpu > 1
         return self.__distributed
 
-    @wraps(_MapdlCore.ndinqr)
+    @wraps(MapdlBase.ndinqr)
     def ndinqr(self, node, key, **kwargs):
         """Wrap the ``ndinqr`` method to take advantage of the gRPC methods."""
         super().ndinqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.elmiqr)
+    @wraps(MapdlBase.elmiqr)
     def elmiqr(self, ielem, key, **kwargs):
         """Wrap the ``elmiqr`` method to take advantage of the gRPC methods."""
         super().elmiqr(ielem, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.kpinqr)
+    @wraps(MapdlBase.kpinqr)
     def kpinqr(self, knmi, key, **kwargs):
         """Wrap the ``kpinqr`` method to take advantage of the gRPC methods."""
         super().kpinqr(knmi, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.lsinqr)
+    @wraps(MapdlBase.lsinqr)
     def lsinqr(self, line, key, **kwargs):
         """Wrap the ``lsinqr`` method to take advantage of the gRPC methods."""
         super().lsinqr(line, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.arinqr)
+    @wraps(MapdlBase.arinqr)
     def arinqr(self, anmi, key, **kwargs):
         """Wrap the ``arinqr`` method to take advantage of the gRPC methods."""
         super().arinqr(anmi, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.vlinqr)
+    @wraps(MapdlBase.vlinqr)
     def vlinqr(self, vnmi, key, **kwargs):
         """Wrap the ``vlinqr`` method to take advantage of the gRPC methods."""
         super().vlinqr(vnmi, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.rlinqr)
+    @wraps(MapdlBase.rlinqr)
     def rlinqr(self, nreal, key, **kwargs):
         """Wrap the ``rlinqr`` method to take advantage of the gRPC methods."""
         super().rlinqr(nreal, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.gapiqr)
+    @wraps(MapdlBase.gapiqr)
     def gapiqr(self, ngap, key, **kwargs):
         """Wrap the ``gapiqr`` method to take advantage of the gRPC methods."""
         super().gapiqr(ngap, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.masiqr)
+    @wraps(MapdlBase.masiqr)
     def masiqr(self, node, key, **kwargs):
         """Wrap the ``masiqr`` method to take advantage of the gRPC methods."""
         super().masiqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.ceinqr)
+    @wraps(MapdlBase.ceinqr)
     def ceinqr(self, nce, key, **kwargs):
         """Wrap the ``ceinqr`` method to take advantage of the gRPC methods."""
         super().ceinqr(nce, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.cpinqr)
+    @wraps(MapdlBase.cpinqr)
     def cpinqr(self, ncp, key, **kwargs):
         """Wrap the ``cpinqr`` method to take advantage of the gRPC methods."""
         super().cpinqr(ncp, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.csyiqr)
+    @wraps(MapdlBase.csyiqr)
     def csyiqr(self, ncsy, key, **kwargs):
         """Wrap the ``csyiqr`` method to take advantage of the gRPC methods."""
         super().csyiqr(ncsy, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.etyiqr)
+    @wraps(MapdlBase.etyiqr)
     def etyiqr(self, itype, key, **kwargs):
         """Wrap the ``etyiqr`` method to take advantage of the gRPC methods."""
         super().etyiqr(itype, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.foriqr)
+    @wraps(MapdlBase.foriqr)
     def foriqr(self, node, key, **kwargs):
         """Wrap the ``foriqr`` method to take advantage of the gRPC methods."""
         super().foriqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.sectinqr)
+    @wraps(MapdlBase.sectinqr)
     def sectinqr(self, nsect, key, **kwargs):
         """Wrap the ``sectinqr`` method to take advantage of the gRPC methods."""
         super().sectinqr(nsect, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.mpinqr)
+    @wraps(MapdlBase.mpinqr)
     def mpinqr(self, mat, iprop, key, **kwargs):
         """Wrap the ``mpinqr`` method to take advantage of the gRPC methods."""
         super().mpinqr(mat, iprop, key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.dget)
+    @wraps(MapdlBase.dget)
     def dget(self, node, idf, kcmplx, **kwargs):
         """Wrap the ``dget`` method to take advantage of the gRPC methods."""
         super().dget(node, idf, kcmplx, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.fget)
+    @wraps(MapdlBase.fget)
     def fget(self, node, idf, kcmplx, **kwargs):
         """Wrap the ``fget`` method to take advantage of the gRPC methods."""
         super().fget(node, idf, kcmplx, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.erinqr)
+    @wraps(MapdlBase.erinqr)
     def erinqr(self, key, **kwargs):
         """Wrap the ``erinqr`` method to take advantage of the gRPC methods."""
         super().erinqr(key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.wrinqr)
+    @wraps(MapdlBase.wrinqr)
     def wrinqr(self, key, **kwargs):
         """Wrap the ``wrinqr`` method to take advantage of the gRPC methods."""
         super().wrinqr(key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
-    @wraps(_MapdlCore.file)
+    @wraps(MapdlBase.file)
     def file(self, fname: str = "", ext: str = "", **kwargs) -> str:
-        """Wrap ``_MapdlCore.file`` to take advantage of the gRPC methods."""
+        """Wrap ``MapdlBase.file`` to take advantage of the gRPC methods."""
         # always check if file is present as the grpc and MAPDL errors
         # are unclear
         fname = self._get_file_name(fname, ext, "cdb")
@@ -3029,7 +3029,7 @@ class MapdlGrpc(_MapdlCore):
         else:
             return self._file(filename=file_, extension=ext_)
 
-    @wraps(_MapdlCore.vget)
+    @wraps(MapdlBase.vget)
     def vget(
         self,
         par: str = "",
@@ -3079,7 +3079,7 @@ class MapdlGrpc(_MapdlCore):
         del self.parameters[par]
         return variable
 
-    @wraps(_MapdlCore.nsol)
+    @wraps(MapdlBase.nsol)
     def nsol(
         self,
         nvar: MapdlInt = VAR_IR,
@@ -3102,7 +3102,7 @@ class MapdlGrpc(_MapdlCore):
         )
         return self.vget("_temp", nvar)
 
-    @wraps(_MapdlCore.esol)
+    @wraps(MapdlBase.esol)
     def esol(
         self,
         nvar: MapdlInt = VAR_IR,
@@ -3363,7 +3363,7 @@ class MapdlGrpc(_MapdlCore):
             return parameter[SESSION_ID_NAME]["value"]
         return None
 
-    @wraps(_MapdlCore.igesin)
+    @wraps(MapdlBase.igesin)
     def igesin(self, fname, ext="", **kwargs):
         """Wrap the IGESIN command to handle the remote case."""
 
@@ -3391,7 +3391,7 @@ class MapdlGrpc(_MapdlCore):
         else:
             return super().igesin(fname=filename, **kwargs)
 
-    @wraps(_MapdlCore.satin)
+    @wraps(MapdlBase.satin)
     def satin(
         self,
         name,
@@ -3429,7 +3429,7 @@ class MapdlGrpc(_MapdlCore):
             **kwargs,
         )
 
-    @wraps(_MapdlCore.cat5in)
+    @wraps(MapdlBase.cat5in)
     def cat5in(
         self,
         name,
@@ -3468,7 +3468,7 @@ class MapdlGrpc(_MapdlCore):
             **kwargs,
         )
 
-    @wraps(_MapdlCore.parain)
+    @wraps(MapdlBase.parain)
     def parain(
         self,
         name,

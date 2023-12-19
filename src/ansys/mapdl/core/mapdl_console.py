@@ -7,7 +7,7 @@ import re
 import time
 
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
-from ansys.mapdl.core.mapdl import _MapdlCore
+from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.misc import requires_package
 
 ready_items = [
@@ -77,7 +77,7 @@ def launch_pexpect(
     return process
 
 
-class MapdlConsole(_MapdlCore):
+class MapdlConsole(MapdlBase):
     """Control interaction with an ANSYS shell instance.
 
     Only works on Linux.
