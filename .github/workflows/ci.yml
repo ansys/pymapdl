@@ -443,7 +443,7 @@ jobs:
 
       - name: "Upload logs to GitHub"
         if: always()
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v4
         with:
           name: logs-${{ matrix.mapdl-version }}.tgz
           path: ./logs-${{ matrix.mapdl-version }}.tgz
@@ -585,6 +585,7 @@ jobs:
           path: ./ubuntu-v22.2.0-local.xml
       
       - name: 'Upload minimal requirements file'
+        # To include it in the release
         uses: actions/upload-artifact@v4
         with:
           name: minimum_requirements.txt
