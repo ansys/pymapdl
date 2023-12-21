@@ -8,6 +8,8 @@ would take place within Python because APDL commands
 are less transparent and more difficult to debug.
 
 
+.. _ref_cli_converter:
+
 Command-line interface
 ----------------------
 
