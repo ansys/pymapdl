@@ -15,7 +15,7 @@ jobs:
     steps:
       - uses: marcoroth/dependabot-bump-together-action@main
         with:
-          dependencies: ansys-api-mapdl, ansys-corba, ansys-dpf-core, ansys-mapdl-reader, ansys-math-core, ansys-platform-instancemanagement, ansys-sphinx-theme, ansys-tools-path, autopep8, click, grpcio, imageio, imageio-ffmpeg, importlib-metadata, jupyter_sphinx, jupyterlab, matplotlib, numpy, numpydoc, pandas, pexpect, platformdirs, plotly, protobuf, psutil, pyansys-tools-report, pyansys-tools-versioning, pyiges, pyiges[full], pypandoc, pytest, pytest-cov, pytest-pyvista, pytest-rerunfailures, pytest-sphinx, pythreejs, pyvista, scipy, sphinx, sphinx-autobuild, sphinx-autodoc-typehints, sphinx-copybutton, sphinx-gallery, sphinx-reredirects, sphinxcontrib-websupport, sphinxemoji, tqdm, vtk
+          dependencies: ansys-api-mapdl, ansys-dpf-core, ansys-mapdl-reader, ansys-math-core, ansys-platform-instancemanagement, ansys-sphinx-theme, ansys-tools-path, autopep8, click, grpcio, imageio, imageio-ffmpeg, importlib-metadata, jupyter_sphinx, jupyterlab, matplotlib, numpy, numpydoc, pandas, pexpect, platformdirs, plotly, protobuf, psutil, pyansys-tools-report, pyansys-tools-versioning, pyiges, pyiges[full], pypandoc, pytest, pytest-cov, pytest-pyvista, pytest-rerunfailures, pytest-sphinx, pythreejs, pyvista, scipy, sphinx, sphinx-autobuild, sphinx-autodoc-typehints, sphinx-copybutton, sphinx-gallery, sphinx-reredirects, sphinxcontrib-websupport, sphinxemoji, tqdm, vtk
           package_managers: pip
           directory: /
           branch: main

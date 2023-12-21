@@ -4,7 +4,7 @@ Postprocessing
 ==============
 In an active MAPDL session, you can postprocess using the
 :class:`Mapdl.post_processing <ansys.mapdl.core.post.PostProcessing>` class,
-an attribute of an instance of :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`. 
+an attribute of an instance of :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>`. 
 One advantage of this approach is that it integrates well with existing MAPDL
 scripting or automation. This approach can also be used on result files generated
 from other programs, including ANSYS Mechanical.
@@ -27,10 +27,10 @@ streamed back to the client for review or visualization.
 
 Enriched command output
 ~~~~~~~~~~~~~~~~~~~~~~~
-All :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class commands output
+All :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class commands output
 a string object that can be parsed to obtain specific data from it.
 
-In certain :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class commands
+In certain :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class commands
 the returned string contains some methods to process the output.
 These commands are listed in Table-1_.
 
@@ -143,7 +143,7 @@ You would typically request nodal results from MAPDL using the
      MORE (YES,NO OR CONTINUOUS)=
 
 
-However, using an instance of the :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
+However, using an instance of the :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>`
 class, you can instead request the nodal displacement:
 
 .. code:: pycon

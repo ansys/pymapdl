@@ -5,7 +5,7 @@ PyMAPDL language and usage
 ==========================
 
 This page gives you an overview of the PyMAPDL API for the
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class.
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class.
 For more information, see :ref:`ref_mapdl_api`.
 
 Overview
@@ -121,7 +121,7 @@ Some commands can only be run non-interactively from within a
 script. PyMAPDL gets around this restriction by writing the commands
 to a temporary input file and then reading the input file. To run a
 group of commands that must be run non-interactively, set the
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class to run a series
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class to run a series
 of commands as an input file by using the
 :func:`Mapdl.non_interactive() <ansys.mapdl.core.Mapdl.non_interactive>`
 method. Here is an example:
@@ -532,7 +532,7 @@ APDL session by calling it using Python, it might be necessary to call
 MAPDL again using an input file generated from a PyMAPDL script. This
 is automatically enabled with the ``log_apdl='apdl.log'`` parameter.
 Enabling this parameter causes the
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class to write each
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class to write each
 command run into a log file named ``"apdl.log"`` in the active
 :attr:`Mapdl.directory <ansys.mapdl.core.Mapdl.directory>`. 
 For example:
@@ -571,7 +571,7 @@ entire database command log to a file.
 Interactive breakpoint
 ======================
 In most circumstances, it is necessary or preferable to open up the
-MAPDL GUI. The :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class
+MAPDL GUI. The :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class
 has the :func:`Mapdl.open_gui() <ansys.mapdl.core.Mapdl.open_gui>` method, which
 allows you to seamlessly open up the GUI without losing work or
 having to restart your session. For example:
@@ -786,7 +786,7 @@ would run:
 However, because each command executes individually and returns a
 response, it is much faster to send the commands to be executed by
 MAPDL in groups and have the :class:`Mapdl
-<ansys.mapdl.core.mapdl._MapdlCore>` class handle grouping the commands by
+<ansys.mapdl.core.mapdl.MapdlBase>` class handle grouping the commands by
 using the :attr:`Mapdl.chain_commands <ansys.mapdl.core.Mapdl.chain_commands>` attribute.
 
 .. code:: python
@@ -844,7 +844,7 @@ was a Python dictionary:
 Download a remote MAPDL file
 ----------------------------
 When running MAPDL in gRPC mode, remote MAPDL files can be listed and
-downloaded using the :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
+downloaded using the :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>`
 class with the :func:`Mapdl.download() <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.download>`
 function. For example, the following code lists the remote files and downloads one of them:
 

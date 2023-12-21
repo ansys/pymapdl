@@ -1,6 +1,6 @@
 import weakref
 
-from ansys.mapdl.core.mapdl import _MapdlCore
+from ansys.mapdl.core.mapdl import MapdlBase
 
 
 class Solution:
@@ -31,7 +31,7 @@ class Solution:
     1.0
     """
 
-    def __init__(self, mapdl: _MapdlCore):
+    def __init__(self, mapdl: MapdlBase):
         """Solution manager
 
         Class to help to manage the solution configuration in an
@@ -42,7 +42,7 @@ class Solution:
         mapdl : ansys.mapdl.core.Mapdl
             Mapdl instance which this class references to.
         """
-        if not isinstance(mapdl, _MapdlCore):
+        if not isinstance(mapdl, MapdlBase):
             raise TypeError("Must be implemented from MAPDL class")
         self._mapdl_weakref = weakref.ref(mapdl)
 

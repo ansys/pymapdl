@@ -6,7 +6,7 @@ Setting and retrieving parameters
 *********************************
 
 MAPDL parameters can be retrieved from an instance of 
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>`
 using the :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>`.
 For example, if you want to use MAPDL's
 :func:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` method to

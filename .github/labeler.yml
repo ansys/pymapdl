@@ -1,16 +1,15 @@
 Documentation:
-- doc/source/**/*
-- examples/**/*
+- changed-files:
+  - any-glob-to-any-file: ['doc/source/**/*', 'examples/**/*']
+
 Maintenance:
-- .github/**/*
-- codecov.yml
-- .flake8
-- .coveragerc
-- ignore_words.txt
-- pyproject.toml
+- changed-files:
+  - any-glob-to-any-file: ['.github/**/*', 'codecov.yml', '.flake8', '.coveragerc', 'ignore_words.txt', 'pyproject.toml']
+
 Dependencies:
-- pyproject.toml
+- changed-files:
+  - any-glob-to-any-file: ['pyproject.toml']
+
 CI/CD:
-- docker/**/*
-- .github/**/*
-- .ci/**/*
+- changed-files:
+  - any-glob-to-any-file: ['docker/**/*', '.github/**/*', '.ci/**/*']

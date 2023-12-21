@@ -119,6 +119,13 @@ class DifferentSessionConnectionError(RuntimeError):
         RuntimeError.__init__(self, msg)
 
 
+class DeprecationError(RuntimeError):
+    """Provides the error for deprecated commands, classes, interfaces, etc"""
+
+    def __init__(self, msg=""):
+        RuntimeError.__init__(self, msg)
+
+
 # handler for protect_grpc
 def handler(sig, frame):  # pragma: no cover
     """Pass signal to custom interrupt handler."""
@@ -254,6 +261,13 @@ class ComponentIsNotSelected(MapdlException):
 
 class ComponentDoesNotExits(MapdlException):
     """Raised when the component does not exist"""
+
+    def __init__(self, msg=""):
+        MapdlException.__init__(self, msg)
+
+
+class CommandDeprecated(MapdlException, DeprecationError):
+    """Raised when a command is deprecated"""
 
     def __init__(self, msg=""):
         MapdlException.__init__(self, msg)

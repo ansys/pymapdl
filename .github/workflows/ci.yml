@@ -32,7 +32,7 @@ env:
   DOCKER_PACKAGE: ghcr.io/ansys/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v23.1.0
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=10 --reruns 7 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
+  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=1 --reruns 1 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
 
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
@@ -55,6 +55,7 @@ permissions:
   contents: write
   packages: read
   pull-requests: write
+  issues: write
 
 jobs:
 
@@ -63,7 +64,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Ansys documentation style checks"
-        uses: ansys/actions/doc-style@v4
+        uses: ansys/actions/doc-style@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           version: 2.29.6
@@ -77,7 +78,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+        python-version: ['3.9', '3.10', '3.11', '3.12']
         # Only perform wheelhouse builds for macOS when releasing
         should-release: 
           - ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
@@ -86,7 +87,7 @@ jobs:
             os: macos-latest
     steps:
       - name: "Build wheelhouse and perform smoke test"
-        uses: ansys/actions/build-wheelhouse@v4
+        uses: ansys/actions/build-wheelhouse@v5
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           operating-system: ${{ matrix.os }}
@@ -118,7 +119,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: "Setup Python"
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           cache: 'pip'
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
@@ -202,7 +203,7 @@ jobs:
           cd ../../../../../../
 
       - name: "Upload HTML Documentation"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: documentation-html
           path: doc/_build/html
@@ -217,7 +218,7 @@ jobs:
         run: ls _build/latex
 
       - name: "Upload PDF documentation"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: documentation-pdf
           path: doc/_build/latex/pymapdl*.pdf
@@ -264,6 +265,7 @@ jobs:
         if: always()
         run: cat log.txt
 
+
   build-test:
     name: "Remote: Build & test"
     runs-on: ubuntu-latest
@@ -272,7 +274,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-version: ['v21.1.1', 'v21.2.1', 'v22.1.0', 'v22.2.0', 'v22.2-ubuntu', 'v23.1.0', 'v23.2.0', 'v24.1.0']
+        mapdl-version: ['v22.2.1', 'v22.2-ubuntu', 'v23.1.0', 'v23.2.0', 'v24.1.0']
         extended_testing:
           - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
         exclude:
@@ -301,7 +303,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: "Setup Python"
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           cache: 'pip'
           cache-dependency-path: pyproject.toml
@@ -385,7 +387,7 @@ jobs:
           flags: centos,remote,${{ matrix.mapdl-version }}
 
       - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: centos-${{ matrix.mapdl-version }}-remote.xml
           path: ./centos-${{ matrix.mapdl-version }}-remote.xml
@@ -396,9 +398,9 @@ jobs:
           twine check dist/*
 
       - name: "Upload wheel and binaries"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
-          name: PyMAPDL-packages
+          name: PyMAPDL-packages-${{ matrix.mapdl-version }}
           path: dist/
           retention-days: 7
 
@@ -443,7 +445,7 @@ jobs:
 
       - name: "Upload logs to GitHub"
         if: always()
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v4
         with:
           name: logs-${{ matrix.mapdl-version }}.tgz
           path: ./logs-${{ matrix.mapdl-version }}.tgz
@@ -458,6 +460,7 @@ jobs:
           if compgen -G './logs-${{ matrix.mapdl-version }}/*.err' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.err; do echo "::group:: Error file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to display the 'out' files."
           if compgen -G './logs-${{ matrix.mapdl-version }}/*.log' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.log; do echo "::group:: Log file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to display the 'err' files."
           if compgen -G './logs-${{ matrix.mapdl-version }}/*.out' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to display the 'log' files."
+
 
   build-test-ubuntu:
     name: "Local: Build & test on Ubuntu"
@@ -489,7 +492,7 @@ jobs:
 
 
       - name: "Setup Python"
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
@@ -579,16 +582,18 @@ jobs:
           flags: ubuntu,local,v22.2.0
 
       - name: 'Upload coverage artifacts'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ubuntu-v22.2.0-local.xml
           path: ./ubuntu-v22.2.0-local.xml
       
       - name: 'Upload minimal requirements file'
-        uses: actions/upload-artifact@v3
+        # To include it in the release
+        uses: actions/upload-artifact@v4
         with:
           name: minimum_requirements.txt
           path: ./minimum_requirements.txt
+
 
   build-test-ubuntu-minimal:
     name: "Local: Build & test minimal package on Ubuntu"
@@ -614,8 +619,13 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 
+      - name: "Installing missing package"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgomp1
+
       - name: "Setup Python"
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
@@ -629,11 +639,6 @@ jobs:
           python -m pip install . --no-deps
           python -m pip install -r minimum_requirements.txt
           python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
-
-      - name: "Installing missing package"
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgomp1
 
       - name: "Unit testing requirements installation"
         run: |
@@ -656,10 +661,11 @@ jobs:
           flags: ubuntu,local,v22.2.0,minimal
 
       - name: 'Upload coverage artifacts'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ubuntu-v22.2.0-local-minimal.xml
           path: ./ubuntu-v22.2.0-local-minimal.xml
+
 
   test-windows:
     if: github.repository == ''
@@ -674,7 +680,7 @@ jobs:
 
       # Skipping because it is installed locally.
       # - name: Setup Python
-      #   uses: actions/setup-python@v4
+      #   uses: actions/setup-python@v5
       #   with:
       #     python-version: 3.9
 
@@ -726,7 +732,7 @@ jobs:
           flags: windows,local,v22.2.0
 
       - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-v22.2.0-local.xml
           path: ./windows_local.xml
@@ -738,11 +744,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.9
 
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
 
       - name: Display structure of downloaded files
         run: ls -R
@@ -778,6 +784,7 @@ jobs:
             title: `Release FAILED!`,
             }"
 
+
   upload-docs-release:
     name: "Upload release documentation"
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
@@ -785,12 +792,13 @@ jobs:
     needs: [release]
     steps:
       - name: Deploy the stable documentation
-        uses: ansys/actions/doc-deploy-stable@v4
+        uses: ansys/actions/doc-deploy-stable@v5
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
           render-last: '5'
+
 
   doc-index-stable:
     name: "Deploy stable docs index"
@@ -813,12 +821,13 @@ jobs:
           echo "VERSION_MEILI=$VERSION_MEILI" >> $GITHUB_ENV
 
       - name: "Deploy the latest documentation index"
-        uses: ansys/actions/doc-deploy-index@v4
+        uses: ansys/actions/doc-deploy-index@v5
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}/version/${{ env.VERSION }}
           index-name: pymapdl-v${{ env.VERSION_MEILI }}
           host-url: ${{ vars.MEILISEARCH_HOST_URL }}
           api-key: ${{ env.MEILISEARCH_API_KEY }}
+
 
   upload-dev-docs:
     name: Upload dev documentation
@@ -827,10 +836,11 @@ jobs:
     needs: [docs-build]
     steps:
       - name: Deploy the latest documentation
-        uses: ansys/actions/doc-deploy-dev@v4
+        uses: ansys/actions/doc-deploy-dev@v5
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
+
 
   doc-index-dev:
     name: "Deploy dev index docs"
@@ -838,13 +848,14 @@ jobs:
     needs: upload-dev-docs
     steps:
       - name: "Deploy the latest documentation index"
-        uses: ansys/actions/doc-deploy-index@v4
+        uses: ansys/actions/doc-deploy-index@v5
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}/version/dev
           index-name: pymapdl-vdev
           host-url: ${{ vars.MEILISEARCH_HOST_URL }}
           api-key: ${{ env.MEILISEARCH_API_KEY }}
-  
+
+
   notify:
     name: Notify failed build
     needs: [upload-dev-docs]

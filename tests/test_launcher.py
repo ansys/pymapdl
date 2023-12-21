@@ -4,7 +4,6 @@ import os
 import re
 import subprocess
 import tempfile
-import weakref
 
 import psutil
 import pytest
@@ -22,14 +21,7 @@ from ansys.mapdl.core.launcher import (
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from conftest import QUICK_LAUNCH_SWITCHES, requires
-
-try:
-    import ansys_corba  # noqa: F401
-
-    HAS_CORBA = True
-except:
-    HAS_CORBA = False
+from conftest import ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 
 try:
     from ansys.tools.path import (
@@ -130,7 +122,7 @@ def test_invalid_mode():
 def test_old_version():
     exec_file = find_ansys("150")[0]
     with pytest.raises(ValueError):
-        pymapdl.launch_mapdl(exec_file, mode="corba", start_timeout=start_timeout)
+        pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
 
 @requires("ansys-tools-path")
@@ -152,23 +144,6 @@ def test_launch_console(version):
     exec_file = find_ansys(version)[0]
     mapdl = pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
     assert mapdl.version == int(version) / 10
-
-
-@requires("ansys-tools-path")
-@requires("local")
-@requires("corba")
-@pytest.mark.parametrize("version", installed_mapdl_versions)
-def test_launch_corba(version):
-    mapdl = pymapdl.launch_mapdl(
-        find_ansys(version)[0], mode="corba", start_timeout=start_timeout
-    )
-    assert mapdl.version == int(version) / 10
-    # mapdl.exit() # exit is already tested for in test_mapdl.py.
-    # Instead, test collection
-
-    mapdl_ref = weakref.ref(mapdl)
-    del mapdl
-    assert mapdl_ref() is None
 
 
 @requires("local")
@@ -483,6 +458,13 @@ default via 172.23.112.1 dev eth0 proto kernel
 172.23.112.0/20 dev eth0 proto kernel scope link src 172.23.121.145"""
 
     assert "172.23.112.1" == _parse_ip_route(output)
+
+
+def test_launched(mapdl):
+    if ON_LOCAL:
+        assert mapdl.launched
+    else:
+        assert not mapdl.launched
 
 
 @pytest.fixture
