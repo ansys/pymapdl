@@ -1,10 +1,10 @@
 import os
 
 import psutil
-from tabulate import tabulate
 
 try:
     import click
+    from tabulate import tabulate
 
     _HAS_CLICK = True
 except ModuleNotFoundError:
