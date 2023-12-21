@@ -1659,10 +1659,10 @@ def launch_mapdl(
             )
 
             if just_launch:
-                print(f"Launched an MAPDL instance at: {ip}:{port}")
+                out = [ip, port]
                 if hasattr(process, "pid"):
-                    print(f"MAPDL instance PID: {process.pid}")
-                return
+                    out += [process.pid]
+                return out
 
             mapdl = MapdlGrpc(
                 ip=ip,

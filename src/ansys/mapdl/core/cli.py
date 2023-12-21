@@ -1,5 +1,4 @@
 import os
-from warnings import warn
 
 try:
     import click
@@ -150,8 +149,6 @@ if _HAS_CLICK:
                 f"File {filename_in} successfully converted to {os.path.splitext(filename_in)[0] + '.py'}."
             )
 
-    from ansys.mapdl.core.launcher import launch_mapdl
-
     @click.command(
         short_help="Launch MAPDL instances.",
         help="""This command aims to replicate the behavior of :func:`ansys.mapdl.core.launcher.launch_mapdl`
@@ -172,7 +169,7 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
     )
     @click.option(
         "--jobname",
-        default="",
+        default="file",
         type=str,
         help="MAPDL jobname.  Defaults to ``'file'``.",
     )
@@ -237,13 +234,13 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
         "--ip",
         default=None,
         type=str,
-        help="Used only when ``start_instance`` is ``False``. If provided, it will force ``start_instance`` to be ``False``. Specify the IP address of the MAPDL instance to connect to. You can also provide a hostname as an alternative to an IP address. Defaults to ``'127.0.0.1'``. You can also override the default behavior of this keyword argument with the environment variable ``PYMAPDL_IP=<IP>``. This argument has priority over the environment variable.",
+        help="Argument not allowed in CLI. It will be ignored",
     )
     @click.option(
         "--clear_on_connect",
-        default=True,
+        default=False,
         type=bool,
-        help="Defaults to ``True``, giving you a fresh environment when connecting to MAPDL. When if ``start_instance`` is specified it defaults to ``False``.",
+        help="Argument not allowed in CLI. It will be ignored",
     )
     @click.option(
         "--log_apdl",
@@ -260,7 +257,7 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
     @click.option(
         "--remove_temp_dir_on_exit",
         default=False,
-        type=str,
+        type=bool,
         help="Argument not allowed in CLI. It will be ignored.",
     )
     @click.option(
@@ -271,9 +268,9 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
     )
     @click.option(
         "--license_server_check",
-        default=True,
+        default=False,
         type=bool,
-        help="Check if the license server is available if MAPDL fails to start.  Only available on ``mode='grpc'``. Defaults ``True``.",
+        help="Argument not allowed in CLI. It will be ignored.",
     )
     @click.option(
         "--license_type",
@@ -284,7 +281,7 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
     @click.option(
         "--print_com",
         default=False,
-        type=str,
+        type=bool,
         help="Argument not allowed in CLI. It will be ignored.",
     )
     @click.option(
@@ -311,96 +308,140 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
         jobname,
         nproc,
         ram,
-        mode,
+        mode,  # ignored
         override,
-        loglevel,
+        loglevel,  # ignored
         additional_switches,
         start_timeout,
         port,
-        cleanup_on_exit,
-        start_instance,
+        cleanup_on_exit,  # ignored
+        start_instance,  # ignored
         ip,
-        clear_on_connect,
-        log_apdl,
-        remove_temp_files,
-        remove_temp_dir_on_exit,
-        verbose_mapdl,
-        license_server_check,
+        clear_on_connect,  # ignored
+        log_apdl,  # ignored
+        remove_temp_files,  # ignored
+        remove_temp_dir_on_exit,  # ignored
+        verbose_mapdl,  # ignored
+        license_server_check,  # ignored
         license_type,
-        print_com,
+        print_com,  # ignored
+        add_env_vars,  # ignored
+        replace_env_vars,  # ignored
         version,
     ):
         from ansys.mapdl.core.launcher import launch_mapdl
 
-        if mode and mode != "grpc":
-            warn(
-                "Only gRPC mode is allowed when using CLI to launch MAPDL instances.\nIgnoring argument."
+        if mode:
+            click.echo(
+                click.style("Warn:", fg="yellow")
+                + " The following argument is not allowed in CLI: 'mode'.\nIgnoring argument."
             )
 
         if loglevel:
-            warn(
-                "The following argument is not allowed in CLI: 'loglevel'.\nIgnoring argument."
+            click.echo(
+                click.style("Warn:", fg="yellow")
+                + " The following argument is not allowed in CLI: 'loglevel'.\nIgnoring argument."
             )
 
         if cleanup_on_exit:
-            warn(
-                "The following argument is not allowed in CLI: 'cleanup_on_exit'.\nIgnoring argument."
+            click.echo(
+                click.style("Warn:", fg="yellow")
+                + " The following argument is not allowed in CLI: 'cleanup_on_exit'.\nIgnoring argument."
             )
 
         if start_instance:
-            warn(
-                "The following argument is not allowed in CLI: 'start_instance'.\nIgnoring argument."
+            click.echo(
+                click.style("Warn:", fg="yellow")
+                + " The following argument is not allowed in CLI: 'start_instance'.\nIgnoring argument."
+            )
+
+        if ip:
+            click.echo(
+                click.style("Warn:", fg="yellow")
+                + " The following argument is not allowed in CLI: 'ip'.\nIgnoring argument."
+            )
+
+        if clear_on_connect:
+            click.echo(
+                click.style("Warn:", fg="yellow")
+                + " The following argument is not allowed in CLI: 'clear_on_connect'.\nIgnoring argument."
             )
 
         if log_apdl:
-            warn(
-                "The following argument is not allowed in CLI: 'log_apdl'.\nIgnoring argument."
+            click.echo(
+                click.style("Warn:", fg="yellow")
+                + " The following argument is not allowed in CLI: 'log_apdl'.\nIgnoring argument."
             )
 
         if remove_temp_files:
-            warn(
-                "The following argument is not allowed in CLI: 'remove_temp_files'.\nIgnoring argument."
+            click.echo(
+                click.style("Warn:", fg="yellow")
+                + " The following argument is not allowed in CLI: 'remove_temp_files'.\nIgnoring argument."
             )
 
         if remove_temp_dir_on_exit:
-            warn(
-                "The following argument is not allowed in CLI: 'remove_temp_dir_on_exit'.\nIgnoring argument."
+            click.echo(
+                click.style("Warn:", fg="yellow")
+                + " The following argument is not allowed in CLI: 'remove_temp_dir_on_exit'.\nIgnoring argument."
             )
 
         if verbose_mapdl:
-            warn(
-                "The following argument is not allowed in CLI: 'verbose_mapdl'.\nIgnoring argument."
+            click.echo(
+                click.style("Warn:", fg="yellow")
+                + " The following argument is not allowed in CLI: 'verbose_mapdl'.\nIgnoring argument."
             )
 
         if print_com:
-            warn(
-                "The following argument is not allowed in CLI: 'print_com'.\nIgnoring argument."
+            click.echo(
+                click.style("Warn:", fg="yellow")
+                + " The following argument is not allowed in CLI: 'print_com'.\nIgnoring argument."
             )
 
-        launch_mapdl(
+        if add_env_vars:
+            click.echo(
+                click.style("Warn:", fg="yellow")
+                + " The following argument is not allowed in CLI: 'add_env_vars'.\nIgnoring argument."
+            )
+
+        if replace_env_vars:
+            click.echo(
+                click.style("Warn:", fg="yellow")
+                + " The following argument is not allowed in CLI: 'replace_env_vars'.\nIgnoring argument."
+            )
+
+        if license_server_check:
+            click.echo(
+                click.style("Warn:", fg="yellow")
+                + " The following argument is not allowed in CLI: 'license_server_check'.\nIgnoring argument."
+            )
+
+        out = launch_mapdl(
+            exec_file=exec_file,
             just_launch=True,
             run_location=run_location,
             jobname=jobname,
             nproc=nproc,
             ram=ram,
-            mode=mode,
             override=override,
             additional_switches=additional_switches,
             start_timeout=start_timeout,
             port=port,
-            ip=ip,
-            clear_on_connect=clear_on_connect,
             license_server_check=license_server_check,
             license_type=license_type,
-            add_env_vars=add_env_vars,
-            replace_env_vars=replace_env_vars,
             version=version,
         )
+
+        if len(out) == 3:
+            header = f"Launched an MAPDL instance (PID={out[2]}) at "
+        else:
+            header = "Launched an MAPDL instance at "
+
+        click.echo(click.style("Success: ", fg="green") + header + f"{out[0]}:{out[1]}")
 
 else:
 
     def convert():
-        print("PyMAPDL CLI requires click to be installed.")
+        print("PyMAPDL CLI requires 'click' python package to be installed.")
 
     def launch_mapdl():
-        print("PyMAPDL CLI requires click to be installed.")
+        print("PyMAPDL CLI requires 'click' python package to be installed.")
