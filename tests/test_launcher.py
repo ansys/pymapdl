@@ -1,6 +1,7 @@
 """Test the mapdl launcher"""
 
 import os
+import re
 import subprocess
 import tempfile
 import weakref
@@ -486,8 +487,12 @@ default via 172.23.112.1 dev eth0 proto kernel
 
 @pytest.fixture
 def run_cli():
-    def do_run(*args):
-        args = ["launch_mapdl"] + list(args)
+    def do_run(arguments=""):
+        if arguments:
+            args = ["launch_mapdl"] + list(arguments.split(" "))
+        else:
+            args = ["launch_mapdl"]
+
         proc = subprocess.Popen(
             args,
             shell=os.name != "nt",
@@ -495,7 +500,7 @@ def run_cli():
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
         )
-        return proc.stdout.read().decode().lower()
+        return proc.stdout.read().decode()
 
     return do_run
 
@@ -503,12 +508,59 @@ def run_cli():
 @requires("click")
 @requires("local")
 def test_launch_mapdl_cli(run_cli):
-    output = run_cli("")
+    output = run_cli()
 
     # In local
-    assert "Launched an MAPDL instance at" in output
+    assert "Success: Launched an MAPDL instance " in output
 
     # grab ips and port
     pid = int(output.splitlines()[1].split(":")[1].strip())
     p = psutil.Process(pid)
+    p.kill()
+
+
+@requires("click")
+@requires("local")
+def test_launch_mapdl_cli_config(run_cli):
+    cmds_ = ["--port 50090", "--jobname myjob"]
+    cmd_warnings = [
+        "ip",
+        "license_server_check",
+        "mode",
+        "loglevel",
+        "cleanup_on_exit",
+        "start_instance",
+        "clear_on_connect",
+        "log_apdl",
+        "remove_temp_files",
+        "remove_temp_dir_on_exit",
+        "verbose_mapdl",
+        "print_com",
+        "add_env_vars",
+        "replace_env_vars",
+    ]
+
+    cmd = " ".join(cmds_)
+    cmd_warnings_ = ["--" + each + " True" for each in cmd_warnings]
+
+    cmd = cmd + " " + " ".join(cmd_warnings_)
+
+    output = run_cli(cmd)
+    # In local
+    assert "Launched an MAPDL instance" in output
+    assert "50090" in output
+
+    # assert warnings
+    for each in cmd_warnings:
+        assert (
+            f"The following argument is not allowed in CLI: '{each}'" in output
+        ), f"Warning about '{each}' not printed"
+
+    # grab ips and port
+    pid = int(re.search(r"\(PID=(\d+)\)", output).groups()[0])
+    p = psutil.Process(pid)
+    cmdline = " ".join(p.cmdline())
+
+    assert "50090" in cmdline
+    assert "myjob" in cmdline
     p.kill()
