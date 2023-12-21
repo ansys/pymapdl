@@ -514,15 +514,22 @@ def test_launch_mapdl_cli(run_cli):
     assert "Success: Launched an MAPDL instance " in output
 
     # grab ips and port
-    pid = int(output.splitlines()[1].split(":")[1].strip())
-    p = psutil.Process(pid)
-    p.kill()
+    pid = int(re.search(r"\(PID=(\d+)\)", output).groups()[0])
+
+    output = run_cli(f"stop --pid {pid}")
+
+    try:
+        p = psutil.Process(pid)
+        assert not p.status()
+    except:
+        # An exception means the process is dead?
+        pass
 
 
 @requires("click")
 @requires("local")
 def test_launch_mapdl_cli_config(run_cli):
-    cmds_ = ["--port 50090", "--jobname myjob"]
+    cmds_ = ["start", "--port 50090", "--jobname myjob"]
     cmd_warnings = [
         "ip",
         "license_server_check",
@@ -546,7 +553,7 @@ def test_launch_mapdl_cli_config(run_cli):
     cmd = cmd + " " + " ".join(cmd_warnings_)
 
     output = run_cli(cmd)
-    # In local
+
     assert "Launched an MAPDL instance" in output
     assert "50090" in output
 
@@ -563,4 +570,43 @@ def test_launch_mapdl_cli_config(run_cli):
 
     assert "50090" in cmdline
     assert "myjob" in cmdline
-    p.kill()
+
+    run_cli(f"stop --pid {pid}")
+
+
+@requires("click")
+@requires("local")
+def test_launch_mapdl_cli_list(run_cli):
+    output = run_cli("list")
+    assert "running" in output
+    assert "Is Instance" in output
+    assert len(output.splitlines()) > 2
+    assert "ansys" in output.lower() or "mapdl" in output.lower()
+
+    output = run_cli("list -i")
+    assert "running" in output
+    assert "Is Instance" not in output
+    assert len(output.splitlines()) > 2
+    assert "ansys" in output.lower() or "mapdl" in output.lower()
+
+    output = run_cli("list -c")
+    assert "running" in output
+    assert "Command line" in output
+    assert "Is Instance" in output
+    assert len(output.splitlines()) > 2
+    assert "ansys" in output.lower() or "mapdl" in output.lower()
+
+    output = run_cli("list -cwd")
+    assert "running" in output
+    assert "Command line" not in output
+    assert "Working directory" in output
+    assert "Is Instance" in output
+    assert len(output.splitlines()) > 2
+    assert "ansys" in output.lower() or "mapdl" in output.lower()
+
+    output = run_cli("list -l")
+    assert "running" in output
+    assert "Is Instance" in output
+    assert "Command line" in output
+    assert len(output.splitlines()) > 2
+    assert "ansys" in output.lower() or "mapdl" in output.lower()

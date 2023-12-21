@@ -1,5 +1,8 @@
 import os
 
+import psutil
+from tabulate import tabulate
+
 try:
     import click
 
@@ -149,7 +152,21 @@ if _HAS_CLICK:
                 f"File {filename_in} successfully converted to {os.path.splitext(filename_in)[0] + '.py'}."
             )
 
-    @click.command(
+    class MyGroup(click.Group):
+        def invoke(self, ctx):
+            ctx.obj = tuple(ctx.args)
+            super(MyGroup, self).invoke(ctx)
+
+    @click.group(invoke_without_command=True, cls=MyGroup)
+    @click.pass_context
+    def launch_mapdl(ctx):
+        args = ctx.obj
+        if ctx.invoked_subcommand is None:
+            from ansys.mapdl.core.cli import start
+
+            start(args)
+
+    @launch_mapdl.command(
         short_help="Launch MAPDL instances.",
         help="""This command aims to replicate the behavior of :func:`ansys.mapdl.core.launcher.launch_mapdl`
 
@@ -302,7 +319,7 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
         type=str,
         help="Version of MAPDL to launch. If ``None``, the latest version is used. Versions can be provided as integers (i.e. ``version=222``) or floats (i.e. ``version=22.2``). To retrieve the available installed versions, use the function :meth:`ansys.tools.path.path.get_available_ansys_installations`.",
     )
-    def launch_mapdl(
+    def start(
         exec_file,
         run_location,
         jobname,
@@ -438,10 +455,201 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
 
         click.echo(click.style("Success: ", fg="green") + header + f"{out[0]}:{out[1]}")
 
+    @launch_mapdl.command(
+        short_help="Stop MAPDL instances.",
+        help="""This command stop MAPDL instances running on a given port or with a given process id (PID).
+
+By default, it stops instances running on the port 50052.""",
+    )
+    @click.option(
+        "--port",
+        default=None,
+        type=int,
+        help="Port where the MAPDL instance is running.",
+    )
+    @click.option(
+        "--pid",
+        default=None,
+        type=int,
+        help="Process PID where the MAPDL instance is running.",
+    )
+    @click.option(
+        "--all",
+        is_flag=True,
+        flag_value=True,
+        type=bool,
+        default=False,
+        help="Kill all MAPDL instances",
+    )
+    def stop(port, pid, all):
+        if not pid and not port:
+            port = 50052
+
+        if port or all:
+            killed_ = False
+            for proc in psutil.process_iter():
+                for conns in proc.connections(kind="inet"):
+                    if (conns.laddr.port == port or all) and (
+                        "ansys" in proc.name().lower() or "mapdl" in proc.name().lower()
+                    ):
+                        killed_ = True
+                        try:
+                            proc.kill()
+                        except psutil.NoSuchProcess:
+                            # Cases where the child process has already died.
+                            pass
+            if all:
+                str_ = f""
+            else:
+                str_ = f" running on port {port}"
+
+            if not killed_:
+                click.echo(
+                    click.style("ERROR: ", fg="red")
+                    + f"No Ansys instances"
+                    + str_
+                    + "have been found."
+                )
+            else:
+                click.echo(
+                    click.style("Success: ", fg="green")
+                    + f"Ansys instances"
+                    + str_
+                    + " have been stopped."
+                )
+            return
+
+        if pid:
+            try:
+                pid = int(pid)
+            except ValueError:
+                click.echo(
+                    click.style("ERROR: ", fg="red")
+                    + "PID provided could not be converted to int."
+                )
+
+            p = psutil.Process(pid)
+            for child in p.children(recursive=True):
+                child.kill()
+            p.kill()
+
+            if p.status == "running":
+                click.echo(
+                    click.style("ERROR: ", fg="red")
+                    + f"The process with PID {pid} and its children could not be killed."
+                )
+            else:
+                click.echo(
+                    click.style("Success: ", fg="green")
+                    + f"The process with PID {pid} and its children have been stopped."
+                )
+            return
+
+    @launch_mapdl.command(
+        short_help="List MAPDL instances.",
+        help="""This command list MAPDL instances""",
+    )
+    @click.option(
+        "--instances",
+        "-i",
+        is_flag=True,
+        flag_value=True,
+        type=bool,
+        default=False,
+        help="Print only instances",
+    )
+    @click.option(
+        "--long",
+        "-l",
+        is_flag=True,
+        flag_value=True,
+        type=bool,
+        default=False,
+        help="Print all info.",
+    )
+    @click.option(
+        "--cmd",
+        "-c",
+        is_flag=True,
+        flag_value=True,
+        type=bool,
+        default=False,
+        help="Print cmd",
+    )
+    @click.option(
+        "--location",
+        "-cwd",
+        is_flag=True,
+        flag_value=True,
+        type=bool,
+        default=False,
+        help="Print running location info.",
+    )
+    def list(instances, long, cmd, location):
+        # Assuming all ansys processes have -grpc flag
+        mapdl_instances = []
+        for proc in psutil.process_iter():
+            if (
+                "ansys" in proc.name().lower() or "mapdl" in proc.name().lower()
+            ) and "-grpc" in proc.cmdline():
+                if len(proc.children(recursive=True)) < 2:
+                    proc.ansys_instance = False
+                else:
+                    proc.ansys_instance = True
+                mapdl_instances.append(proc)
+
+        # printing
+        table = []
+
+        if long:
+            cmd = True
+            location = True
+
+        if instances:
+            headers = ["Name", "Status", "gRPC port", "PID"]
+        else:
+            headers = ["Name", "Is Instance", "Status", "gRPC port", "PID"]
+
+        if cmd:
+            headers.append("Command line")
+        if location:
+            headers.append("Working directory")
+
+        def get_port(proc):
+            cmdline = proc.cmdline()
+            ind_grpc = cmdline.index("-port")
+            return cmdline[ind_grpc + 1]
+
+        table = []
+        for each_p in mapdl_instances:
+            if instances and not each_p.ansys_instance:
+                continue
+
+            proc_line = []
+            proc_line.append(each_p.name())
+
+            if not instances:
+                proc_line.append(each_p.ansys_instance)
+
+            proc_line.extend([each_p.status(), get_port(each_p), each_p.pid])
+
+            if cmd:
+                proc_line.append(" ".join(each_p.cmdline()))
+
+            if location:
+                proc_line.append(each_p.cwd())
+
+            table.append(proc_line)
+
+        print(tabulate(table, headers))
+
 else:
 
     def convert():
         print("PyMAPDL CLI requires 'click' python package to be installed.")
 
     def launch_mapdl():
+        print("PyMAPDL CLI requires 'click' python package to be installed.")
+
+    def stop_mapdl():
         print("PyMAPDL CLI requires 'click' python package to be installed.")
