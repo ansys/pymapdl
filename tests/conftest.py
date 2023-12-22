@@ -85,7 +85,7 @@ requires_on_cicd = pytest.mark.skipif(
 )
 
 skip_if_running_student_version = pytest.mark.skipif(
-    not ON_STUDENT,
+    ON_STUDENT,
     reason="This tests does not work on student version. Maybe because license limitations",
 )
 
