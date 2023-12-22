@@ -160,6 +160,7 @@ def test_license_type_keyword():
             mapdl.exit()
             del mapdl
             sleep(2)
+
         except MapdlDidNotStart as e:
             if "ANSYS license not available" in str(e):
                 continue
