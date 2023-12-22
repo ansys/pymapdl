@@ -145,6 +145,7 @@ def test_launch_console(version):
 
 
 @requires("local")
+@requires("nocicd")
 def test_license_type_keyword():
     checks = []
     for license_name, license_description in LICENSES.items():
