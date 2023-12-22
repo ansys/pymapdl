@@ -2,6 +2,7 @@
 
 import os
 import tempfile
+from time import sleep
 
 import pytest
 
@@ -157,6 +158,7 @@ def test_license_type_keyword():
         checks.append(license_description in mapdl.__str__().split("\n")[0])
         mapdl.exit()
         del mapdl
+        sleep(2)
 
     assert any(checks)
 
