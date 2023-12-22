@@ -10,7 +10,6 @@ import random
 import re
 import socket
 import string
-import sys
 import tempfile
 from threading import Thread
 from typing import Union
@@ -118,9 +117,6 @@ class Plain_Report:
 
         if os.name == "posix":
             self.core.extend(["pexpect"])
-
-        if self.optional is not None and sys.version_info[1] < 9:
-            self.optional.append("ansys_corba")
 
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.
@@ -697,13 +693,13 @@ class Information:
     --------
     >>> mapdl.info
     Product:             Ansys Mechanical Enterprise
-    MAPDL Version:       21.2
-    ansys.mapdl Version: 0.62.dev0
+    MAPDL Version:       24.1
+    ansys.mapdl Version: 0.68.0
 
     >>> print(mapdl)
     Product:             Ansys Mechanical Enterprise
-    MAPDL Version:       21.2
-    ansys.mapdl Version: 0.62.dev0
+    MAPDL Version:       24.1
+    ansys.mapdl Version: 0.68.0
 
     >>> mapdl.info.product
     'Ansys Mechanical Enterprise'
@@ -716,9 +712,9 @@ class Information:
 
     def __init__(self, mapdl):
         """Class Initializer"""
-        from ansys.mapdl.core.mapdl import _MapdlCore  # lazy import to avoid circular
+        from ansys.mapdl.core.mapdl import MapdlBase  # lazy import to avoid circular
 
-        if not isinstance(mapdl, _MapdlCore):  # pragma: no cover
+        if not isinstance(mapdl, MapdlBase):  # pragma: no cover
             raise TypeError("Must be implemented from MAPDL class")
 
         self._mapdl_weakref = weakref.ref(mapdl)
@@ -844,7 +840,7 @@ class Information:
 
     @title.setter
     def title(self, title):
-        return self._mapdl.title(title)
+        return self._mapdl.run(f"/TITLE, {title}")
 
     @property
     @update_information_first(True)
@@ -1124,7 +1120,7 @@ def requires_package(package_name, softerror=False):
                     f"To use the method '{function.__name__}', "
                     f"the package '{package_name}' is required.\n"
                     f"Please try to install '{package_name}' with:\n"
-                    f"pip install {package_name.replace('.','-') if 'ansys' in package_name else package_name}"
+                    f"pip install {package_name.replace('.', '-') if 'ansys' in package_name else package_name}"
                 )
 
                 if softerror:

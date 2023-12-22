@@ -74,10 +74,9 @@ Here's a brief example of how PyMAPDL works:
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
     >>> print(mapdl)
-
-    Product:             ANSYS Mechanical Enterprise
-    MAPDL Version:       RELEASE  2021 R1           BUILD 21.0
-    PyMAPDL Version:     Version: 0.57.0
+    Product:             Ansys Mechanical Enterprise
+    MAPDL Version:       24.1
+    ansys.mapdl Version: 0.68.0
 
 MAPDL is now active and you can send commands to it as a genuine
 Python class. For example, if you wanted to create a surface using
@@ -104,7 +103,7 @@ immediately and Pythonically.
 Calling MAPDL Pythonically
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 MAPDL functions can be called directly from a :class:`Mapdl
-<ansys.mapdl.core.mapdl._MapdlCore>` instance in a Pythonic manner. This is to
+<ansys.mapdl.core.mapdl.MapdlBase>` instance in a Pythonic manner. This is to
 simplify calling MAPDL, especially when inputs are variables within
 Python. For example, the following two commands are equivalent:
 

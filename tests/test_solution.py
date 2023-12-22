@@ -1,4 +1,7 @@
 """Test ansys.mapdl.solution.Solution"""
+import pytest
+
+from ansys.mapdl.core.errors import MapdlRuntimeError
 
 
 def time_step_size(mapdl):
@@ -117,3 +120,10 @@ def test_solution_call(mapdl):
     mapdl.finish()
     output = mapdl.solution()
     assert "MAPDL SOLUTION ROUTINE" in output or "ANSYS SOLUTION ROUTINE" in output
+
+
+def test_exited(mapdl):
+    mapdl._exited = True
+    with pytest.raises(MapdlRuntimeError):
+        parm = mapdl.solution.time_step_size
+    mapdl._exited = False

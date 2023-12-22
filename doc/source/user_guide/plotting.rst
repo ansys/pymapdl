@@ -4,7 +4,7 @@ Interactive plotting
 When generating geometry from scratch within MAPDL, it is often
 necessary to plot the geometry, such as key points, lines, areas,
 and volumes. PyMAPDL supports plotting basic CAD using VTK. The
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class leverages the
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class leverages the
 existing MAPDL commands by providing the following functions, which
 transfer the geometry to Python to visualize it:
 
@@ -75,7 +75,7 @@ extrudes it.
 Node and element plotting
 -------------------------
 You can plot nodes and elements directly from the instance of the
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class. This code defines
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class. This code defines
 some element types, performs meshing, and then displays the mesh:
 
 .. code:: pycon

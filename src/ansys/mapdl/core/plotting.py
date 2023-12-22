@@ -406,6 +406,20 @@ def _general_plotter(
     if background:
         plotter.set_background(background)
 
+    # Making sure that labels are visible in dark backgrounds
+    if not text_color and background:
+        bg = plotter.background_color.float_rgb
+        # from: https://graphicdesign.stackexchange.com/a/77747/113009
+        gamma = 2.2
+        threshold = (
+            0.2126 * bg[0] ** gamma + 0.7152 * bg[1] ** gamma + 0.0722 * bg[2] ** gamma
+            > 0.5 * gamma
+        )
+        if threshold:
+            text_color = "black"
+        else:
+            text_color = "white"
+
     for point in points:
         plotter.add_points(
             point["points"],
@@ -878,7 +892,7 @@ def general_plotter(
     if plot_bc:
         if not mapdl:
             raise ValueError(
-                "An instance of `ansys.mapdl.core.mapdl._MapdlCore` "
+                "An instance of `ansys.mapdl.core.mapdl.MapdlBase` "
                 "should be passed using `mapdl` keyword if you are aiming "
                 "to plot the boundary conditions (`plot_bc` is `True`)."
             )
