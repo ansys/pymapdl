@@ -172,6 +172,7 @@ def test_license_type_keyword():
 
 
 @requires("local")
+@requires("nocicd")
 def test_license_type_keyword_names():
     # This test might became a way to check available licenses, which is not the purpose.
 
