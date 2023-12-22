@@ -30,9 +30,9 @@ env:
   DPF_START_SERVER: False
   DPF_PORT: 21002
   DOCKER_PACKAGE: ghcr.io/ansys/mapdl
-  DOCKER_IMAGE_VERSION_DOCS_BUILD: v23.1.0
+  DOCKER_IMAGE_VERSION_DOCS_BUILD: v24.1-ubuntu-student
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=1 --reruns 1 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
+  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=5 --reruns 2 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
 
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
@@ -143,13 +143,12 @@ jobs:
         uses: docker/login-action@v3.0.0
         with:
           registry: ghcr.io
-          username: ${{ secrets.GH_USERNAME }}
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Pull, launch, and validate MAPDL service"
-        run: .ci/start_mapdl.sh
+        run: .ci/start_mapdl_student.sh
         env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
           MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
 
       - name: "Retrieve PyMAPDL version"
@@ -472,15 +471,16 @@ jobs:
       committed: ${{ steps.attatch-to-pr.outputs.committed }}
       commit_long_sha: ${{ steps.attatch-to-pr.outputs.commit_long_sha }}
     container:
-      image: ghcr.io/ansys/mapdl:v22.2-ubuntu
+      image: ghcr.io/ansys/mapdl:v24.1-ubuntu-student
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
-        username: ${{ secrets.GH_USERNAME }}
+        username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
-      P_SCHEMA: "/ansys_inc/v222/ansys/ac4/schema"
+      ON_STUDENT: true
+      P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"
       PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
 
     steps:
@@ -533,12 +533,12 @@ jobs:
         run: |
           unset PYMAPDL_PORT
           unset PYMAPDL_START_INSTANCE
-          export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
+          # export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
           export AWP_ROOT222=/ansys_inc
           xvfb-run pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
             --reset_only_failed --add_missing_images \
-            --cov-report=xml:ubuntu-v22.2.0-local.xml
+            --cov-report=xml:ubuntu-v24.1.0-local.xml
 
       - name: "Adding the directory as safe directory for later step"
         run: |
@@ -578,14 +578,14 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           root_dir: ${{ github.workspace }}
-          name: ubuntu-v22.2.0-local.xml
-          flags: ubuntu,local,v22.2.0
+          name: ubuntu-v24.1.0-local.xml
+          flags: ubuntu,local,v24.1.0
 
       - name: 'Upload coverage artifacts'
         uses: actions/upload-artifact@v4
         with:
-          name: ubuntu-v22.2.0-local.xml
-          path: ./ubuntu-v22.2.0-local.xml
+          name: ubuntu-v24.1.0-local.xml
+          path: ./ubuntu-v24.1.0-local.xml
       
       - name: 'Upload minimal requirements file'
         # To include it in the release
@@ -601,16 +601,17 @@ jobs:
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 55
     container:
-      image: ghcr.io/ansys/mapdl:v22.2-ubuntu
+      image: ghcr.io/ansys/mapdl:v24.1-ubuntu-student
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
-        username: ${{ secrets.GH_USERNAME }}
+        username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
+      ON_STUDENT: true
       # Because there is no 'ansys-tools-path' we need to input the executable path.
-      PYMAPDL_MAPDL_EXEC: /ansys_inc/v222/ansys/bin/ansys222
+      PYMAPDL_MAPDL_EXEC: /ansys_inc/v241/ansys/bin/ansys241
 
     steps:
       - name: "Install Git and checkout project"
@@ -647,24 +648,24 @@ jobs:
       - name: "Unit testing"
         run: |
           unset PYMAPDL_START_INSTANCE
-          export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
+          # export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
           pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
-            --cov-report=xml:ubuntu-v22.2.0-local-minimal.xml
+            --cov-report=xml:ubuntu-v24.1.0-local-minimal.xml
         
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           root_dir: ${{ github.workspace }}
-          name: ubuntu-v22.2.0-local-minimal.xml
-          flags: ubuntu,local,v22.2.0,minimal
+          name: ubuntu-v24.1.0-local-minimal.xml
+          flags: ubuntu,local,v24.1.0,minimal
 
       - name: 'Upload coverage artifacts'
         uses: actions/upload-artifact@v4
         with:
-          name: ubuntu-v22.2.0-local-minimal.xml
-          path: ./ubuntu-v22.2.0-local-minimal.xml
+          name: ubuntu-v24.1.0-local-minimal.xml
+          path: ./ubuntu-v24.1.0-local-minimal.xml
 
 
   test-windows:
