@@ -147,9 +147,8 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Pull, launch, and validate MAPDL service"
-        run: .ci/start_mapdl.sh
+        run: .ci/start_mapdl_student.sh
         env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
           MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
 
       - name: "Retrieve PyMAPDL version"
