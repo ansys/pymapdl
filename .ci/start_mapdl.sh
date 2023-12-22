@@ -12,10 +12,9 @@ docker run \
     -e ANSYS_LOCK="OFF" \
     -p $PYMAPDL_PORT:50052 \
     -p $PYMAPDL_DB_PORT:50055 \
-    --shm-size=1gb \
+    --shm-size=2gb \
     -e I_MPI_SHM_LMT=shm \
     -e P_SCHEMA=/ansys_inc/ansys/ac4/schema \
-    --oom-kill-disable \
     --memory=6656MB  \
     --memory-swap=16896MB \
     $MAPDL_IMAGE \
