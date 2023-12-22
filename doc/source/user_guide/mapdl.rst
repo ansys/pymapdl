@@ -116,7 +116,7 @@ these commands, such as ``"/SOLU"``:
 
 Selecting entities
 ------------------
-You can select entities such as nodes, or lines using the following methods:
+You can select entities such as nodes or lines using these methods:
 
 * :func:`Mapdl.nsel() <ansys.mapdl.core.Mapdl.nsel>`
 * :func:`Mapdl.esel() <ansys.mapdl.core.Mapdl.esel>`
@@ -125,7 +125,7 @@ You can select entities such as nodes, or lines using the following methods:
 * :func:`Mapdl.asel() <ansys.mapdl.core.Mapdl.asel>`
 * :func:`Mapdl.vsel() <ansys.mapdl.core.Mapdl.vsel>`
 
-These methods returns the ids of the selected entities. For example:
+The preceding methods return the IDs of the selected entities. For example:
 
 .. code:: pycon
 

@@ -96,7 +96,7 @@ a mask of the currently selected nodes:
 
 Postprocessing object methods
 ------------------------------
-For a full list of all available postprocessing methods, see
+For a list of all postprocessing methods, see
 :ref:`post_processing_api`.
 
 
@@ -147,7 +147,7 @@ These commands are listed in Table-1_.
 | **Listing**    |                                                                                                   |                                                                          |
 +----------------+---------------------------------------------------------------------------------------------------+--------------------------------------------------------------------------+
 
-.. warning:: If you use these methods (like :func:`Mapdl.nlist() <ansys.mapdl.core.Mapdl.nlist>`) , you might obtain a lower
+.. warning:: If you use methods like :func:`Mapdl.nlist() <ansys.mapdl.core.Mapdl.nlist>` , you might obtain a lower
    precision than using :class:`Mesh <ansys.mapdl.core.mesh_grpc.MeshGrpc>` methods.
 
 Here's a simple example that demonstrates usage:
