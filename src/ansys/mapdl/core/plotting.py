@@ -892,7 +892,7 @@ def general_plotter(
     if plot_bc:
         if not mapdl:
             raise ValueError(
-                "An instance of `ansys.mapdl.core.mapdl._MapdlCore` "
+                "An instance of `ansys.mapdl.core.mapdl.MapdlBase` "
                 "should be passed using `mapdl` keyword if you are aiming "
                 "to plot the boundary conditions (`plot_bc` is `True`)."
             )

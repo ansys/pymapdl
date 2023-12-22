@@ -103,7 +103,7 @@ immediately and Pythonically.
 Calling MAPDL Pythonically
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 MAPDL functions can be called directly from a :class:`Mapdl
-<ansys.mapdl.core.mapdl._MapdlCore>` instance in a Pythonic manner. This is to
+<ansys.mapdl.core.mapdl.MapdlBase>` instance in a Pythonic manner. This is to
 simplify calling MAPDL, especially when inputs are variables within
 Python. For example, the following two commands are equivalent:
 

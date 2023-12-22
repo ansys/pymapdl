@@ -220,9 +220,9 @@ class ComponentManager:
         mapdl : ansys.mapdl.core.Mapdl
             Mapdl instance which this class references to.
         """
-        from ansys.mapdl.core.mapdl import _MapdlCore
+        from ansys.mapdl.core.mapdl import MapdlBase
 
-        if not isinstance(mapdl, _MapdlCore):
+        if not isinstance(mapdl, MapdlBase):
             raise TypeError("Must be implemented from MAPDL class")
 
         self._mapdl_weakref: weakref.ReferenceType[Mapdl] = weakref.ref(mapdl)
@@ -273,7 +273,7 @@ class ComponentManager:
     def _comp(self) -> UNDERLYING_DICT:
         """Dictionary with components names and types."""
         if self.__comp is None or self._update_always:
-            self.__comp = self._mapdl._parse_cmlist()
+            self.__comp = self._parse_cmlist()
         return self.__comp
 
     @_comp.setter
@@ -308,7 +308,7 @@ class ComponentManager:
                     f"The component named '{key}' does not exist in the MAPDL instance."
                 )
 
-        output = self._mapdl._parse_cmlist_indiv(key, cmtype)
+        output = self._parse_cmlist_indiv(key, cmtype)
         if forced_to_select:
             # Unselect to keep the state of the things as before calling this method.
             self._mapdl.cmsel("U", key)

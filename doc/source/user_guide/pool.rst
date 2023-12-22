@@ -2,6 +2,7 @@
 
 Create a pool of MAPDL instances
 ================================
+
 PyMAPDL contains the :class:`LocalMapdlPool <ansys.mapdl.core.pool.LocalMapdlPool>`
 class to simplify creating multiple local instances of the 
 :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
