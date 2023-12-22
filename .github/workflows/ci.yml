@@ -30,7 +30,7 @@ env:
   DPF_START_SERVER: False
   DPF_PORT: 21002
   DOCKER_PACKAGE: ghcr.io/ansys/mapdl
-  DOCKER_IMAGE_VERSION_DOCS_BUILD: v23.1.0
+  DOCKER_IMAGE_VERSION_DOCS_BUILD: v24.1-ubuntu-student
   ON_CI: True
   PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=1 --reruns 1 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
 
@@ -143,7 +143,6 @@ jobs:
         uses: docker/login-action@v3.0.0
         with:
           registry: ghcr.io
-          username: ${{ secrets.GH_USERNAME }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Pull, launch, and validate MAPDL service"
