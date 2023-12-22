@@ -710,3 +710,36 @@ def test_nlist_to_array(mapdl, beam_solve):
     assert len(nlist.to_list()) == len(mapdl.mesh.nodes)
     assert len(nlist.to_array()) == len(mapdl.mesh.nodes)
     assert np.allclose(nlist.to_array()[:, 1:4], mapdl.mesh.nodes)
+
+
+def test_cmlist(mapdl):
+    mapdl.clear()
+
+    mapdl.prep7()
+    # setup the full file
+    mapdl.block(0, 1, 0, 1, 0, 1)
+    mapdl.et(1, 186)
+    mapdl.esize(0.5)
+    mapdl.vmesh("all")
+
+    mapdl.cm("myComp", "node")
+    mapdl.cm("_myComp", "node")
+    mapdl.cm("_myComp_", "node")
+
+    cmlist = mapdl.cmlist()
+    assert "MYCOMP" in cmlist
+
+    cmlist_all = mapdl.cmlist("all")
+    assert "_MYCOMP_" in cmlist_all
+    assert "_MYCOMP" in cmlist_all
+    assert "MYCOMP" in cmlist_all
+
+    assert ["MYCOMP"] == mapdl.cmlist().to_list()
+
+    assert "_MYCOMP_" in cmlist_all.to_list()
+    assert "_MYCOMP" in cmlist_all.to_list()
+    assert "MYCOMP" in cmlist_all.to_list()
+
+    assert len(cmlist_all.to_array()) == len(cmlist_all.to_list())
+    for each_ in cmlist_all.to_list():
+        assert each_ in cmlist_all

@@ -11,7 +11,7 @@ from shutil import copyfile, rmtree
 from subprocess import DEVNULL, call
 import tempfile
 import time
-from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 import warnings
 from warnings import warn
 import weakref
@@ -2831,3 +2831,21 @@ class _MapdlCore(Commands):
             if self._in_nopr:
                 self._parent()._run("/nopr")
             self._parent()._mute = self._previous_mute
+
+    def _parse_cmlist(self, cmlist: Optional[str] = None) -> Dict[str, Any]:
+        from ansys.mapdl.core.component import _parse_cmlist
+
+        if not cmlist:
+            cmlist = self.cmlist()
+
+        return _parse_cmlist(cmlist)
+
+    def _parse_cmlist_indiv(
+        self, cmname: str, cmtype: str, cmlist: Optional[str] = None
+    ) -> List[int]:
+        from ansys.mapdl.core.component import _parse_cmlist_indiv
+
+        if not cmlist:
+            cmlist = self.cmlist(cmname, 1)
+
+        return _parse_cmlist_indiv(cmname, cmtype, cmlist)
