@@ -143,6 +143,7 @@ jobs:
         uses: docker/login-action@v3.0.0
         with:
           registry: ghcr.io
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Pull, launch, and validate MAPDL service"
@@ -474,6 +475,7 @@ jobs:
       image: ghcr.io/ansys/mapdl:v24.1-ubuntu-student
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
+        username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     env:
       ON_LOCAL: true
@@ -602,6 +604,7 @@ jobs:
       image: ghcr.io/ansys/mapdl:v24.1-ubuntu-student
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
+        username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
     env:
       ON_LOCAL: true
