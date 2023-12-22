@@ -2,11 +2,12 @@
 
 import os
 import tempfile
+from time import sleep
 
 import pytest
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.errors import LicenseServerConnectionError
+from ansys.mapdl.core.errors import LicenseServerConnectionError, MapdlDidNotStart
 from ansys.mapdl.core.launcher import (
     _check_license_argument,
     _force_smp_student_version,
@@ -18,7 +19,7 @@ from ansys.mapdl.core.launcher import (
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from conftest import QUICK_LAUNCH_SWITCHES, requires
+from conftest import ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 
 try:
     from ansys.tools.path import (
@@ -144,24 +145,34 @@ def test_launch_console(version):
 
 
 @requires("local")
+@requires("nostudent")
 def test_license_type_keyword():
     checks = []
     for license_name, license_description in LICENSES.items():
-        mapdl = launch_mapdl(
-            license_type=license_name,
-            start_timeout=start_timeout,
-            additional_switches=QUICK_LAUNCH_SWITCHES,
-        )
+        try:
+            mapdl = launch_mapdl(
+                license_type=license_name,
+                start_timeout=start_timeout,
+                additional_switches=QUICK_LAUNCH_SWITCHES,
+            )
 
-        # Using first line to ensure not picking up other stuff.
-        checks.append(license_description in mapdl.__str__().split("\n")[0])
-        mapdl.exit()
-        del mapdl
+            # Using first line to ensure not picking up other stuff.
+            checks.append(license_description in mapdl.__str__().split("\n")[0])
+            mapdl.exit()
+            del mapdl
+            sleep(2)
+
+        except MapdlDidNotStart as e:
+            if "ANSYS license not available" in str(e):
+                continue
+            else:
+                raise e
 
     assert any(checks)
 
 
 @requires("local")
+@requires("nostudent")
 def test_license_type_keyword_names():
     # This test might became a way to check available licenses, which is not the purpose.
 
@@ -184,6 +195,7 @@ def test_license_type_keyword_names():
 
 
 @requires("local")
+@requires("nostudent")
 def test_license_type_additional_switch():
     # This test might became a way to check available licenses, which is not the purpose.
     successful_check = False
@@ -455,3 +467,10 @@ default via 172.23.112.1 dev eth0 proto kernel
 172.23.112.0/20 dev eth0 proto kernel scope link src 172.23.121.145"""
 
     assert "172.23.112.1" == _parse_ip_route(output)
+
+
+def test_launched(mapdl):
+    if ON_LOCAL:
+        assert mapdl.launched
+    else:
+        assert not mapdl.launched

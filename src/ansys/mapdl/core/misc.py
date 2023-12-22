@@ -712,9 +712,9 @@ class Information:
 
     def __init__(self, mapdl):
         """Class Initializer"""
-        from ansys.mapdl.core.mapdl import _MapdlCore  # lazy import to avoid circular
+        from ansys.mapdl.core.mapdl import MapdlBase  # lazy import to avoid circular
 
-        if not isinstance(mapdl, _MapdlCore):  # pragma: no cover
+        if not isinstance(mapdl, MapdlBase):  # pragma: no cover
             raise TypeError("Must be implemented from MAPDL class")
 
         self._mapdl_weakref = weakref.ref(mapdl)
@@ -1120,7 +1120,7 @@ def requires_package(package_name, softerror=False):
                     f"To use the method '{function.__name__}', "
                     f"the package '{package_name}' is required.\n"
                     f"Please try to install '{package_name}' with:\n"
-                    f"pip install {package_name.replace('.','-') if 'ansys' in package_name else package_name}"
+                    f"pip install {package_name.replace('.', '-') if 'ansys' in package_name else package_name}"
                 )
 
                 if softerror:

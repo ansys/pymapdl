@@ -8,7 +8,7 @@
 
 .. currentmodule:: ansys.mapdl.core
 
-.. autoclass:: ansys.mapdl.core.mapdl._MapdlCore
+.. autoclass:: ansys.mapdl.core.mapdl.MapdlBase
 
 .. autosummary::
    :toctree: _autosummary

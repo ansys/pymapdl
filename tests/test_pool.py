@@ -5,7 +5,7 @@ import time
 import numpy as np
 import pytest
 
-from conftest import has_dependency
+from conftest import ON_STUDENT, has_dependency
 
 if has_dependency("ansys-tools-path"):
     from ansys.tools.path import find_ansys
@@ -15,7 +15,7 @@ if has_dependency("ansys-tools-path"):
 else:
     EXEC_FILE = os.environ.get("PYMAPDL_MAPDL_EXEC")
 
-if not EXEC_FILE:
+if not EXEC_FILE or ON_STUDENT:
     pytest.skip(allow_module_level=True)
 
 from ansys.mapdl.core import LocalMapdlPool, examples
