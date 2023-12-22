@@ -32,7 +32,7 @@ env:
   DOCKER_PACKAGE: ghcr.io/ansys/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v24.1-ubuntu-student
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=1 --reruns 1 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
+  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=5 --reruns 2 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
 
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
@@ -479,6 +479,7 @@ jobs:
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
+      ON_STUDENT: true
       P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"
       PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
 
@@ -608,6 +609,7 @@ jobs:
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
+      ON_STUDENT: true
       # Because there is no 'ansys-tools-path' we need to input the executable path.
       PYMAPDL_MAPDL_EXEC: /ansys_inc/v241/ansys/bin/ansys241
 

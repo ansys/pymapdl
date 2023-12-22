@@ -145,7 +145,7 @@ def test_launch_console(version):
 
 
 @requires("local")
-@requires("nocicd")
+@requires("nostudent")
 def test_license_type_keyword():
     checks = []
     for license_name, license_description in LICENSES.items():
@@ -172,7 +172,7 @@ def test_license_type_keyword():
 
 
 @requires("local")
-@requires("nocicd")
+@requires("nostudent")
 def test_license_type_keyword_names():
     # This test might became a way to check available licenses, which is not the purpose.
 
@@ -195,6 +195,7 @@ def test_license_type_keyword_names():
 
 
 @requires("local")
+@requires("nostudent")
 def test_license_type_additional_switch():
     # This test might became a way to check available licenses, which is not the purpose.
     successful_check = False
