@@ -3043,7 +3043,7 @@ class MapdlGrpc(MapdlBase):
         if not self._store_commands:
             return self.parameters[par]
 
-    @wraps(_MapdlCore.vwrite)
+    @wraps(MapdlBase.vwrite)
     def vwrite(self, *args, **kwargs):
         args = tuple(
             [
