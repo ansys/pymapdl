@@ -1927,6 +1927,7 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
 
 
 @requires("local")
+@requires("nostudent")
 def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
         license_server_check=False, additional_switches=QUICK_LAUNCH_SWITCHES

@@ -832,6 +832,15 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
         return df
 
 
+class ComponentListing(CommandListingOutput):
+    @property
+    def _parsed(self):
+        from ansys.mapdl.core.component import _parse_cmlist
+
+        # To keep same API as commands
+        return np.array(list(_parse_cmlist(self).keys()))
+
+
 class StringWithLiteralRepr(str):
     def __repr__(self):
         return self.__str__()
