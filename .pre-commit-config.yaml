@@ -21,7 +21,7 @@ repos:
           )
 
 - repo: https://github.com/psf/black
-  rev: 23.12.1  # IF VERSION CHANGES --> MODIFY "blacken-docs" MANUALLY AS WELL!!
+  rev: 23.12.1  # If version changes --> modify "blacken-docs" manually as well.
   hooks:
   - id: black
     args:
