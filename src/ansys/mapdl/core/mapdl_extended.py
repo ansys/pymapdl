@@ -2002,6 +2002,12 @@ class _MapdlCommandExtended(_MapdlCore):
         except ValueError:
             return value
 
+    @wraps(_MapdlCore.cmlist)
+    def cmlist(self, *args, **kwargs):
+        from ansys.mapdl.core.commands import ComponentListing
+
+        return ComponentListing(super().cmlist(*args, **kwargs))
+
 
 class _MapdlExtended(_MapdlCommandExtended):
     """Extend Mapdl class with new functions"""

@@ -114,6 +114,31 @@ these commands, such as ``"/SOLU"``:
             mapdl.solution()
 
 
+Selecting entities
+------------------
+You can select entities such as nodes or lines using these methods:
+
+* :func:`Mapdl.nsel() <ansys.mapdl.core.Mapdl.nsel>`
+* :func:`Mapdl.esel() <ansys.mapdl.core.Mapdl.esel>`
+* :func:`Mapdl.ksel() <ansys.mapdl.core.Mapdl.ksel>`
+* :func:`Mapdl.lsel() <ansys.mapdl.core.Mapdl.lsel>`
+* :func:`Mapdl.asel() <ansys.mapdl.core.Mapdl.asel>`
+* :func:`Mapdl.vsel() <ansys.mapdl.core.Mapdl.vsel>`
+
+The preceding methods return the IDs of the selected entities. For example:
+
+.. code:: pycon
+
+    >>> selected_nodes = mapdl.nsel("S", "NODE", vmin=1, vmax=2000)
+    >>> print(selected_nodes)
+    array([   1    2    3 ... 1998 1999 2000])
+
+.. code:: pycon
+
+    >>> mapdl.ksel("all")
+    array([1, 2, 3, ..., 1998, 1999, 2000])
+
+
 Running in non-interactive mode
 -------------------------------
 
