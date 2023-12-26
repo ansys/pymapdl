@@ -32,7 +32,7 @@ env:
   DOCKER_PACKAGE: ghcr.io/ansys/mapdl
   DOCKER_IMAGE_VERSION_DOCS_BUILD: v24.1-ubuntu-student
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=5 --reruns 2 --reruns-delay 5 --cov=ansys.mapdl.core --cov-report=html'
+  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=2 --reruns 2 --reruns-delay 1 --cov=ansys.mapdl.core --cov-report=html'
 
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
@@ -273,20 +273,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-version: ['v22.2.1', 'v22.2-ubuntu', 'v23.1.0', 'v23.2.0', 'v24.1.0']
+        mapdl-version: ['v22.2.1', 'v22.2-ubuntu', 'v23.1.0', 'v23.2.0', 'v24.1.0', 'v24.1-ubuntu-student']
         extended_testing:
           - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
         exclude:
           - extended_testing: false
-            mapdl-version: 'v21.1.1'
-          - extended_testing: false
-            mapdl-version: 'v21.2.1'
-          - extended_testing: false
-            mapdl-version: 'v22.1.0'
-          - extended_testing: false
-            mapdl-version: 'v22.2.0'
+            mapdl-version: 'v22.2.1'
           - extended_testing: false
             mapdl-version: 'v22.2-ubuntu'
+          - extended_testing: false
+            mapdl-version: 'v23.1.0'
+          - extended_testing: false
+            mapdl-version: 'v23.2.0'
+          - extended_testing: false
+            mapdl-version: 'v23.1.0'
+          - extended_testing: false
+            mapdl-version: 'v24.1.0'
     env:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
@@ -329,7 +331,7 @@ jobs:
         uses: docker/login-action@v3.0.0
         with:
           registry: ghcr.io
-          username: ${{ secrets.GH_USERNAME }}
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Getting SMP/DMP mode"
@@ -338,26 +340,36 @@ jobs:
           image=${{ matrix.mapdl-version }}
           export distributed_mode="smp"
           if [[ $image == *".1."* ]]; then
-          export distributed_mode="dmp";
+            export distributed_mode="dmp";
           fi
           echo "Distributed mode: $distributed_mode"
           echo "distributed_mode=$(echo $distributed_mode)" >> $GITHUB_OUTPUT
 
       - name: "Pull, launch, and validate MAPDL service"
-        run: .ci/start_mapdl.sh
-        if: ${{ !contains( matrix.mapdl-version, 'ubuntu') }}
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
-          DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
+        run: |
+          export MAPDL_VERSION=${{ matrix.mapdl-version }}
+          export MAPDL_IMAGE=${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
+          export DISTRIBUTED_MODE=${{ steps.distributed_mode.outputs.distributed_mode }}
 
-      - name: "Pull, launch, and validate Ubuntu MAPDL service from private"
-        run: .ci/start_mapdl_ubuntu.sh
-        if: ${{ contains( matrix.mapdl-version, 'ubuntu') }}
-        env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          MAPDL_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
-          DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
+          echo "MAPDL_VERSION: $MAPDL_VERSION"
+          echo "MAPDL_IMAGE:   $MAPDL_IMAGE"
+
+          if [[ $MAPDL_VERSION == *"ubuntu-student"* ]] ; then
+            echo "It is student version (ubuntu-based)."
+            echo "No license server is needed."
+            .ci/start_mapdl_student.sh
+
+          elif [[ $MAPDL_VERSION == *"ubuntu"* ]] ; then
+            echo "It is an ubuntu based image"
+            .ci/start_mapdl_ubuntu.sh
+
+          else
+            echo "It is a CentOS based image"
+            .ci/start_mapdl.sh
+
+          fi;
 
       - name: "Unit testing requirements installation"
         run: |
@@ -381,7 +393,6 @@ jobs:
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           name: centos-${{ matrix.mapdl-version }}-remote.xml
           flags: centos,remote,${{ matrix.mapdl-version }}
 
@@ -533,7 +544,6 @@ jobs:
         run: |
           unset PYMAPDL_PORT
           unset PYMAPDL_START_INSTANCE
-          # export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
           export AWP_ROOT222=/ansys_inc
           xvfb-run pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
@@ -576,7 +586,6 @@ jobs:
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           root_dir: ${{ github.workspace }}
           name: ubuntu-v24.1.0-local.xml
           flags: ubuntu,local,v24.1.0
@@ -648,7 +657,6 @@ jobs:
       - name: "Unit testing"
         run: |
           unset PYMAPDL_START_INSTANCE
-          # export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
           pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
             --cov-report=xml:ubuntu-v24.1.0-local-minimal.xml
@@ -656,7 +664,6 @@ jobs:
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           root_dir: ${{ github.workspace }}
           name: ubuntu-v24.1.0-local-minimal.xml
           flags: ubuntu,local,v24.1.0,minimal
@@ -728,7 +735,6 @@ jobs:
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           name: windows-v22.2.0-local.xml
           flags: windows,local,v22.2.0
 
