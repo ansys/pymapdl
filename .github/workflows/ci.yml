@@ -347,7 +347,7 @@ jobs:
 
       - name: "Pull, launch, and validate MAPDL service"
         run: |
-          export MAPDL_VERSION=${{ mapdl-version }}
+          export MAPDL_VERSION=${{ matrix.mapdl-version }}
           export MAPDL_IMAGE=${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
           export DISTRIBUTED_MODE=${{ steps.distributed_mode.outputs.distributed_mode }}
 
