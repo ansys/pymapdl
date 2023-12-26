@@ -273,20 +273,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-version: ['v22.2.1', 'v22.2-ubuntu', 'v23.1.0', 'v23.2.0', 'v24.1.0']
+        mapdl-version: ['v22.2.1', 'v22.2-ubuntu', 'v23.1.0', 'v23.2.0', 'v24.1.0', 'v24.1-ubuntu-student']
         extended_testing:
           - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
         exclude:
           - extended_testing: false
-            mapdl-version: 'v21.1.1'
-          - extended_testing: false
-            mapdl-version: 'v21.2.1'
-          - extended_testing: false
-            mapdl-version: 'v22.1.0'
-          - extended_testing: false
-            mapdl-version: 'v22.2.0'
+            mapdl-version: 'v22.2.1'
           - extended_testing: false
             mapdl-version: 'v22.2-ubuntu'
+          - extended_testing: false
+            mapdl-version: 'v23.1.0'
+          - extended_testing: false
+            mapdl-version: 'v23.2.0'
+          - extended_testing: false
+            mapdl-version: 'v23.1.0'
+          - extended_testing: false
+            mapdl-version: 'v24.1.0'
     env:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
