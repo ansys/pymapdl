@@ -10,6 +10,7 @@ services:
     image: 'ghcr.io/ansys/mapdl:v24.1-ubuntu-student'
     build:
       dockerfile: Dockerfile
+      context: .
     environment:
       # Env vars for testing
       - ON_CI=true
