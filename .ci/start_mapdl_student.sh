@@ -14,5 +14,5 @@ docker run \
     -u=0:0 \
     --memory=6656MB \
     --memory-swap=16896MB \
-    "$MAPDL_IMAGE" /ansys_inc/v241/ansys/bin/mapdl -grpc -dir /jobs -$DISTRIBUTED_MODE -np 2 > log.txt &
+    "$MAPDL_IMAGE" /ansys_inc/v241/ansys/bin/mapdl -grpc -dir /jobs -"$DISTRIBUTED_MODE" -np 2 > log.txt &
 # grep -q 'Server listening on' <(timeout 60 tail -f log.txt)
