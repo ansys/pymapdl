@@ -2,7 +2,6 @@
 
 import os
 import re
-import subprocess
 import tempfile
 
 import psutil
@@ -470,19 +469,20 @@ def test_launched(mapdl):
 @pytest.fixture
 def run_cli():
     def do_run(arguments=""):
-        if arguments:
-            args = ["launch_mapdl"] + list(arguments.split(" "))
-        else:
-            args = ["launch_mapdl"]
+        from click.testing import CliRunner
 
-        proc = subprocess.Popen(
-            args,
-            shell=os.name != "nt",
-            stdin=subprocess.DEVNULL,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-        )
-        return proc.stdout.read().decode()
+        from ansys.mapdl.core.cli import launch_mapdl
+
+        if arguments:
+            args = list(arguments.split(" "))
+        else:
+            args = []
+
+        runner = CliRunner()
+        result = runner.invoke(launch_mapdl, args)
+
+        assert result.exit_code == 0
+        return result.output
 
     return do_run
 
