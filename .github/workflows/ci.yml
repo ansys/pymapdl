@@ -331,7 +331,7 @@ jobs:
         uses: docker/login-action@v3.0.0
         with:
           registry: ghcr.io
-          username: ${{ secrets.GH_USERNAME }}
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Getting SMP/DMP mode"
@@ -346,20 +346,26 @@ jobs:
           echo "distributed_mode=$(echo $distributed_mode)" >> $GITHUB_OUTPUT
 
       - name: "Pull, launch, and validate MAPDL service"
-        run: .ci/start_mapdl.sh
-        if: ${{ !contains( matrix.mapdl-version, 'ubuntu') }}
-        env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
-          DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
+        run: |
+          export MAPDL_VERSION=${{ mapdl-version }}
+          export MAPDL_IMAGE=${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
+          export DISTRIBUTED_MODE=${{ steps.distributed_mode.outputs.distributed_mode }}
 
-      - name: "Pull, launch, and validate Ubuntu MAPDL service from private"
-        run: .ci/start_mapdl_ubuntu.sh
-        if: ${{ contains( matrix.mapdl-version, 'ubuntu') }}
-        env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          MAPDL_IMAGE: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
-          DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
+          echo "MAPDL_VERSION: $IS_STUDENT"
+          if [ $MAPDL_VERSION == *"ubuntu-student" ] ; then
+            echo "It is student version (ubuntu-based). No license server is needed."
+            .ci/start_mapdl_student.sh
+
+          else if [ $MAPDL_VERSION == *"ubuntu" ] ; then
+            echo "It is an ubuntu based image"
+            export LICENSE_SERVER=${{ secrets.LICENSE_SERVER }}
+            .ci/start_mapdl_ubuntu.sh
+
+          else
+            echo "It is a CentOS based image"
+            export LICENSE_SERVER=${{ secrets.LICENSE_SERVER }}
+            .ci/start_mapdl.sh
+          fi
 
       - name: "Unit testing requirements installation"
         run: |
@@ -383,7 +389,6 @@ jobs:
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           name: centos-${{ matrix.mapdl-version }}-remote.xml
           flags: centos,remote,${{ matrix.mapdl-version }}
 
@@ -535,7 +540,6 @@ jobs:
         run: |
           unset PYMAPDL_PORT
           unset PYMAPDL_START_INSTANCE
-          # export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
           export AWP_ROOT222=/ansys_inc
           xvfb-run pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
@@ -578,7 +582,6 @@ jobs:
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           root_dir: ${{ github.workspace }}
           name: ubuntu-v24.1.0-local.xml
           flags: ubuntu,local,v24.1.0
@@ -650,7 +653,6 @@ jobs:
       - name: "Unit testing"
         run: |
           unset PYMAPDL_START_INSTANCE
-          # export ANSYSLMD_LICENSE_FILE=1055@${{ secrets.LICENSE_SERVER }}
           pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
             --cov-report=xml:ubuntu-v24.1.0-local-minimal.xml
@@ -658,7 +660,6 @@ jobs:
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           root_dir: ${{ github.workspace }}
           name: ubuntu-v24.1.0-local-minimal.xml
           flags: ubuntu,local,v24.1.0,minimal
@@ -730,7 +731,6 @@ jobs:
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           name: windows-v22.2.0-local.xml
           flags: windows,local,v22.2.0
 
