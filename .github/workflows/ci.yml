@@ -356,12 +356,12 @@ jobs:
           echo "MAPDL_VERSION: $MAPDL_VERSION"
           echo "MAPDL_IMAGE:   $MAPDL_IMAGE"
 
-          if [ $MAPDL_VERSION == *"ubuntu-student" ] ; then
+          if [[ $MAPDL_VERSION == *"ubuntu-student"* ]] ; then
             echo "It is student version (ubuntu-based)."
             echo "No license server is needed."
             .ci/start_mapdl_student.sh
 
-          elif [ $MAPDL_VERSION == *"ubuntu" ] ; then
+          elif [[ $MAPDL_VERSION == *"ubuntu"* ]] ; then
             echo "It is an ubuntu based image"
             .ci/start_mapdl_ubuntu.sh
 
