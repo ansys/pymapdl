@@ -18,7 +18,6 @@ docker run \
     -e P_SCHEMA=/ansys_inc/v222/ansys/ac4/schema \
     -w /jobs \
     -u=0:0 \
-    --oom-kill-disable \
     --memory=6656MB \
     --memory-swap=16896MB \
     $MAPDL_IMAGE /ansys_inc/v222/ansys/bin/mapdl -grpc -dir /jobs -$DISTRIBUTED_MODE -np 2 > log.txt &
