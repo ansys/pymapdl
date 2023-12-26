@@ -340,30 +340,33 @@ jobs:
           image=${{ matrix.mapdl-version }}
           export distributed_mode="smp"
           if [[ $image == *".1."* ]]; then
-          export distributed_mode="dmp";
+            export distributed_mode="dmp";
           fi
           echo "Distributed mode: $distributed_mode"
           echo "distributed_mode=$(echo $distributed_mode)" >> $GITHUB_OUTPUT
 
       - name: "Pull, launch, and validate MAPDL service"
+        env:
+          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
         run: |
           export MAPDL_VERSION=${{ matrix.mapdl-version }}
           export MAPDL_IMAGE=${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
           export DISTRIBUTED_MODE=${{ steps.distributed_mode.outputs.distributed_mode }}
 
-          echo "MAPDL_VERSION: $IS_STUDENT"
+          echo "MAPDL_VERSION: $MAPDL_VERSION"
+          echo "MAPDL_IMAGE:   $MAPDL_IMAGE"
+
           if [ $MAPDL_VERSION == *"ubuntu-student" ] ; then
-            echo "It is student version (ubuntu-based). No license server is needed."
+            echo "It is student version (ubuntu-based)."
+            echo "No license server is needed."
             .ci/start_mapdl_student.sh
 
           else if [ $MAPDL_VERSION == *"ubuntu" ] ; then
             echo "It is an ubuntu based image"
-            export LICENSE_SERVER=${{ secrets.LICENSE_SERVER }}
             .ci/start_mapdl_ubuntu.sh
 
           else
             echo "It is a CentOS based image"
-            export LICENSE_SERVER=${{ secrets.LICENSE_SERVER }}
             .ci/start_mapdl.sh
           fi
 
