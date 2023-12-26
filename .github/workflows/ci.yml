@@ -361,14 +361,15 @@ jobs:
             echo "No license server is needed."
             .ci/start_mapdl_student.sh
 
-          else if [ $MAPDL_VERSION == *"ubuntu" ] ; then
+          elif [ $MAPDL_VERSION == *"ubuntu" ] ; then
             echo "It is an ubuntu based image"
             .ci/start_mapdl_ubuntu.sh
 
           else
             echo "It is a CentOS based image"
             .ci/start_mapdl.sh
-          fi
+
+          fi;
 
       - name: "Unit testing requirements installation"
         run: |
