@@ -34,8 +34,8 @@
 				".devcontainer/README.rst"
 			],
 			"extensions": [
-				"ms-python.python",
-			],
+				"ms-python.python"
+			]
 		},
 		// Configure properties specific to VSCode.
 		"vscode": {
@@ -43,8 +43,8 @@
 				".devcontainer/README.rst"
 			],
 			"extensions": [
-				"ms-python.python",
-			],
-		},
+				"ms-python.python"
+			]
+		}
 	}
 }
