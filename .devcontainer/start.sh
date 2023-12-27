@@ -20,6 +20,6 @@ else
     pre-commit install
     echo "Done! Enjoy PyMAPDL!"
 
-    # Setting VEN
+    # Setting VENV
     echo 'source /home/mapdl/pymapdl/.venv/bin/activate' >> ~/.bashrc
 fi
