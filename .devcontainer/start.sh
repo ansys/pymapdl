@@ -1,6 +1,5 @@
 #/bin/bash
 # Script to create the venv, and install the dependencies
-
 mkdir -p /home/mapdl/pymapdl 
 
 
