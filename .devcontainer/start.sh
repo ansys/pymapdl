@@ -21,5 +21,5 @@ else
     echo "Done! Enjoy PyMAPDL!"
 
     # Setting VENV
-    echo 'source /home/mapdl/pymapdl/.venv' >> ~/.bashrc
+    echo 'source /home/mapdl/pymapdl/.venv/bin/activate' >> ~/.bashrc
 fi
