@@ -2,13 +2,15 @@
 # Script to create the venv, and install the dependencies
 mkdir -p /home/mapdl/pymapdl 
 
+export VEN=/home/mapdl/pymapdl/.venv/bin/activate
 
-if [ -f /home/mapdl/pymapdl/.venv/bin/activate ] then
+if [ -f $VEN ]; then
     echo "It seems a venv exists already. Stopping here"
+
 else
     echo "Creating virtual environment..."
     python3.10 -m venv /home/mapdl/pymapdl/.venv
-    source /home/mapdl/pymapdl/.venv/bin/activate
+    source $VEN
 
     echo "Installing PyMAPDL package and dependencies for development"
     pip install -e '.[tests,doc]'
@@ -17,4 +19,7 @@ else
     pip install pre-commit
     pre-commit install
     echo "Done! Enjoy PyMAPDL!"
+
+    # Setting VEN
+    echo 'source /home/mapdl/pymapdl/.venv/bin/activate' >> ~/.bashrc
 fi
