@@ -19,4 +19,7 @@ else
     pip install pre-commit
     pre-commit install
     echo "Done! Enjoy PyMAPDL!"
+
+    # Setting VENV
+    echo 'source /home/mapdl/pymapdl/.venv' >> ~/.bashrc
 fi
