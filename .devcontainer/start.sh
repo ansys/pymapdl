@@ -14,5 +14,8 @@ else
     echo "Installing PyMAPDL package and dependencies for development"
     pip install -e '.[tests,doc]'
 
+    echo "Installing pre-commit..."
+    pip install pre-commit
+    pre-commit install
     echo "Done! Enjoy PyMAPDL!"
 fi
