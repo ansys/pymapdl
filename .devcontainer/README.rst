@@ -112,4 +112,3 @@ This is an easy way to get started with PyMAPDL development.
 
 .. warning:: This method is only applicable and allowed to Ansys employees or collaborators.
    If you are an Ansys employee and wants use this development method, please email `PyAnsys Core team <pyansys_core_>`_.
-
