@@ -47,7 +47,10 @@
 			],
 			"extensions": [
 				"ms-python.python"
-			]
+			],
+			"settings": {
+				"python.defaultInterpreterPath": "/home/mapdl/pymapdl/.venv/bin/python"
+			}
 		}
 	}
 }
