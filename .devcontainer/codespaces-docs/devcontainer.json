@@ -2,7 +2,7 @@
 // https://github.com/microsoft/vscode-dev-containers/tree/v0.245.2/containers/docker-existing-docker-compose
 // If you want to run as a non-root user in the container, see .devcontainer/docker-compose.yml.
 {
-	"name": "PyMAPDL-DevContainer (Local)",
+	"name": "PyMAPDL-Codespaces-Documentation",
 	// Update the 'dockerComposeFile' list if you have more compose files or use different names.
 	// The .devcontainer/docker-compose.yml file contains any overrides you need/want to make.
 	"dockerComposeFile": [
@@ -22,16 +22,16 @@
 	// Uncomment the next line if you want to keep your containers running after VS Code shuts down.
 	// "shutdownAction": "none",
 	// Uncomment the next line to run commands after the container is created - for example installing curl.
-	"postCreateCommand": "/bin/bash ./.devcontainer/start.sh",
+	"postCreateCommand": "/bin/bash ./.devcontainer/codespaces-docs/start.sh",
 
 	// Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
 	"remoteUser": "root",
 	"updateRemoteUserUID": true,
 	"customizations": {
-		// Configure properties specific to VSCode.
-		"vscode": {
+		// Configure properties specific to Codespaces.
+		"codespaces": {
 			"openFiles": [
-				".devcontainer/README.rst"
+				".devcontainer/codespaces-docs/welcome.rst"
 			],
 			"extensions": [
 				"ms-python.python"
@@ -39,6 +39,6 @@
 			"settings": {
 				"python.defaultInterpreterPath": "/home/mapdl/pymapdl/.venv/bin/python"
 			}
-		}
+		},
 	}
 }
