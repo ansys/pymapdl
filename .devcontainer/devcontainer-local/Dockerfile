@@ -23,6 +23,7 @@ RUN mkdir /home/mapdl/pymapdl && \
     . /home/mapdl/pymapdl/.venv/bin/activate && \
     pip install pre-commit && \
     pip install ansys-mapdl-core && \
+    pip install -r .devcontainer/devcontainer-local/requirements.txt && \
     echo -e '\nsource /home/mapdl/pymapdl/.venv/bin/activate' >> ~/.bashrc
 
 USER mapdl
