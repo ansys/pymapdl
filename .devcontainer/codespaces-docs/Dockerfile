@@ -20,10 +20,10 @@ RUN apt-get -qq clean  && rm -rf /var/lib/apt/lists/*
 # Installing Python environment
 RUN mkdir /home/mapdl/pymapdl && \
     python3.10 -m venv /home/mapdl/pymapdl/.venv && \
-    source /home/mapdl/pymapdl/.venv/bin/activate && \
+    . /home/mapdl/pymapdl/.venv/bin/activate && \
     pip install pre-commit && \
-    # Preinstalling pymapdl so we avoid running too long when initialized
     pip install ansys-mapdl-core && \
+    pip install -r requirements.txt && \
     echo -e '\nsource /home/mapdl/pymapdl/.venv/bin/activate' >> ~/.bashrc
 
 USER mapdl
