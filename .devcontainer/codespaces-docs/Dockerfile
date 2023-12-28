@@ -18,12 +18,11 @@ RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
 RUN apt-get -qq clean  && rm -rf /var/lib/apt/lists/*
 
 # Installing Python environment
-RUN mkdir /home/mapdl/pymapdl && \
-    python3.10 -m venv /home/mapdl/pymapdl/.venv && \
-    . /home/mapdl/pymapdl/.venv/bin/activate && \
+RUN python3.10 -m venv ./.venv && \
+    . ./.venv/bin/activate && \
     pip install pre-commit && \
     pip install ansys-mapdl-core && \
-    pip install -r /home/mapdl/pymapdl/.devcontainer/codespaces-docs/requirements.txt && \
-    echo -e '\nsource /home/mapdl/pymapdl/.venv/bin/activate' >> ~/.bashrc
+    pip install -r ./.devcontainer/codespaces-docs/requirements.txt && \
+    echo -e '\nsource ./.venv/bin/activate' >> ~/.bashrc
 
 USER mapdl
