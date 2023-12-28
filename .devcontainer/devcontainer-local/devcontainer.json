@@ -31,7 +31,7 @@
 		// Configure properties specific to VSCode.
 		"vscode": {
 			"openFiles": [
-				".devcontainer/README.rst"
+				".devcontainer/devcontainer-local/welcome.rst"
 			],
 			"extensions": [
 				"ms-python.python"
