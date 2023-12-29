@@ -3,7 +3,7 @@
 echo "Starting Documentation codespaces"
 
 echo "Activating virtual environment..."
-source /home/mapdl/pymapdl/.venv/bin/activate
+source ./.venv/bin/activate
 
 echo "Installing PyMAPDL package and dependencies for development"
 # It should be fast because the image is build with the dependencies installed.
