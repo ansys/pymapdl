@@ -5,10 +5,8 @@ USER root
 # General libraries
 ENV DEBIAN_FRONTEND=noninteractive
 
-RUN apt-get -qq update && apt-get -qq install -y locales && locale-gen "en_US.UTF-8" && update-locale LC_ALL="en_US.UTF-8"
-
 # Installing libs for testing and docs
-RUN apt install -qq -y libgl1-mesa-glx xvfb libgomp1
+RUN apt-get -qq update &&  apt install -qq -y libgl1-mesa-glx xvfb libgomp1
 
 # Setting up locale
 RUN apt-get install -y locales && \
