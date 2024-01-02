@@ -70,7 +70,7 @@ jobs:
           version: 2.29.6
 
   smoke-tests:
-    name: "Build and smoke tests"
+    name: Build and smoke test (${{ matrix.os }} | Python ${{ matrix.python-version }}) (Release=${{ matrix.should-release }})
     runs-on: ${{ matrix.os }}
     if: github.ref != 'refs/heads/main'
     timeout-minutes: 20
@@ -266,7 +266,8 @@ jobs:
 
 
   build-test:
-    name: "Remote: Build & test"
+    
+    name: "Remote: Build & test MAPDL ${{ matrix.mapdl-version }} (Extended testing ${{ matrix.extended_testing }})"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 35
