@@ -18,12 +18,15 @@ RUN apt-get install -y --no-install-recommends locales && \
     echo -e '\nexport LANG=en_US.UTF-8\nexport LANGUAGE=en_US:en\nexport LC_ALL=en_US.UTF-8' >> ~/.bashrc && \
     apt-get -qq clean  && rm -rf /var/lib/apt/lists/*
 
+COPY .devcontainer/codespaces-docs/requirements.txt requirements.txt
+
 # Installing Python environment
 RUN python3.10 -m venv ./.venv && \
     . ./.venv/bin/activate && \
     pip install pre-commit && \
     pip install ansys-mapdl-core && \
-    pip install -r .devcontainer/codespaces-docs/requirements.txt && \
-    echo -e '\nsource ./.venv/bin/activate' >> ~/.bashrc
+    pip install -r requirements.txt && \
+    echo -e '\nsource ./.venv/bin/activate' >> ~/.bashrc && \
+    rm requirements.txt
 
 USER mapdl
