@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class FeSurfaceLoads:
     def sf(self, nlist="", lab="", value="", value2="", **kwargs):
         """Specifies surface loads on nodes.

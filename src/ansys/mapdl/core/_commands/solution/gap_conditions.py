@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class GapConditions:
     def gp(self, node1="", node2="", lab="", stif="", gap="", damp="", **kwargs):
         """Defines a gap condition for transient analyses.

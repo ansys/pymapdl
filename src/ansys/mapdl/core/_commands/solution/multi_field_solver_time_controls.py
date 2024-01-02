@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class MultiFieldSolverTimeControls:
     def mfcalc(self, fnumb="", freq="", **kwargs):
         """Specifies a calculation frequency for a field in an ANSYS Multi-field

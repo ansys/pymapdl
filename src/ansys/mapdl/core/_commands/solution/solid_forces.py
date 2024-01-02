@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class SolidForces:
     def fk(self, kpoi="", lab="", value="", value2="", **kwargs):
         """Defines force loads at keypoints.

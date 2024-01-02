@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Setup:
     def color(self, lab="", clab="", n1="", n2="", ninc="", **kwargs):
         """Specifies the color mapping for various items.

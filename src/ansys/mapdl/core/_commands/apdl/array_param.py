@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class ArrayParam:
     def mfouri(self, oper="", coeff="", mode="", isym="", theta="", curve="", **kwargs):
         """Calculates the coefficients for, or evaluates, a Fourier series.

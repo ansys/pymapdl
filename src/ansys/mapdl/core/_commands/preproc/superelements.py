@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Superelements:
     def se(self, file="", toler="", **kwargs):
         """Defines a superelement.

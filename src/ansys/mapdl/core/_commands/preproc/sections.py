@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Sections:
     def bsax(self, val1="", val2="", t="", **kwargs):
         """Specifies the axial strain and axial force relationship for beam

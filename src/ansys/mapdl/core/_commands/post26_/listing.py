@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Listing:
     def extrem(self, nvar1="", nvar2="", ninc="", **kwargs):
         """Lists the extreme values for variables.

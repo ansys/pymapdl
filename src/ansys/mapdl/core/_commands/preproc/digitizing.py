@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Digitizing:
     def dig(self, node1="", node2="", ninc="", **kwargs):
         """Digitizes nodes to a surface.

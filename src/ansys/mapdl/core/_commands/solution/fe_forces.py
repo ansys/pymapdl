@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class FeForces:
     def f(self, node="", lab="", value="", value2="", nend="", ninc="", **kwargs):
         """Specifies force loads at nodes.

@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Controls:
     def avprin(self, key="", effnu="", **kwargs):
         """Specifies how principal and vector sums are to be calculated.

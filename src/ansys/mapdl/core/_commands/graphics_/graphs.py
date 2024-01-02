@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Graphs:
     def axlab(self, axis="", lab="", **kwargs):
         """Labels the X and Y axes on graph displays.

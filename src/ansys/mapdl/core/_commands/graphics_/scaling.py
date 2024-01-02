@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Scaling:
     def slashdscale(self, wn="", dmult="", **kwargs):
         """Sets the displacement multiplier for displacement displays.

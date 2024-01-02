@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class MiscellaneousLoads:
     def anpres(self, nfram="", delay="", ncycl="", refframe="", **kwargs):
         """Produces an animated sequence of the time-harmonic pressure variation

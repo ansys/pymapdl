@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class ProcessControls:
     def wait(self, dtime="", **kwargs):
         """APDL Command: /WAIT

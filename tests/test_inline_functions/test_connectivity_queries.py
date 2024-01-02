@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class TestConnectivityQueries:
     def test_nelem(self, box_geometry):
         q, kps, areas, nodes = box_geometry

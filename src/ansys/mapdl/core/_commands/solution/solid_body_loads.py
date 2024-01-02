@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class SolidBodyLoads:
     def bfa(self, area="", lab="", val1="", val2="", val3="", val4="", **kwargs):
         """Defines a body force load on an area.

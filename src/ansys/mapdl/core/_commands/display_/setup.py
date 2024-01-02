@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Setup:
     def cmap(self, fname="", ext="", kywrd="", ncntr="", **kwargs):
         """Changes an existing or creates a new color mapping table.

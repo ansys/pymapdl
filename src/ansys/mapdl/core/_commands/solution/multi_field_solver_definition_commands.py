@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class MultiFieldSolverDefinitionCommands:
     def mfcmmand(self, fnumb="", fname="", ext="", **kwargs):
         """Captures field solution options in a command file.
