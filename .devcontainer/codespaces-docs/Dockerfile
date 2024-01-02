@@ -16,7 +16,9 @@ RUN apt-get install -y --no-install-recommends locales && \
     update-locale LC_ALL='en_US.UTF-8' && \
     sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
     locale-gen && \
-    echo -e '\nexport LANG=en_US.UTF-8\nexport LANGUAGE=en_US:en\nexport LC_ALL=en_US.UTF-8' >> ~/.bashrc && \
+    echo 'export LANG=en_US.UTF-8' >> ~/.bashrc && \
+    echo 'export LANGUAGE=en_US:en' >> ~/.bashrc && \
+    echo 'export LC_ALL=en_US.UTF-8' >> ~/.bashrc && \
     apt-get -qq clean  && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt requirements.txt
@@ -27,7 +29,7 @@ RUN python3.10 -m venv ./.venv && \
     pip install pre-commit && \
     pip install ansys-mapdl-core && \
     pip install -r requirements.txt && \
-    echo -e '\nsource ./.venv/bin/activate' >> ~/.bashrc && \
+    echo 'source ./.venv/bin/activate' >> ~/.bashrc && \
     rm requirements.txt
 
 USER mapdl
