@@ -481,15 +481,15 @@ By default, it stops instances running on the port 50052.""",
         default=False,
         help="Kill all MAPDL instances",
     )
-    def stop(port, pid, all):
+    def stop(port, pid, all_ports):
         if not pid and not port:
             port = 50052
 
-        if port or all:
+        if port or all_ports:
             killed_ = False
             for proc in psutil.process_iter():
                 for conns in proc.connections(kind="inet"):
-                    if (conns.laddr.port == port or all) and (
+                    if (conns.laddr.port == port or all_ports) and (
                         "ansys" in proc.name().lower() or "mapdl" in proc.name().lower()
                     ):
                         killed_ = True
@@ -498,22 +498,22 @@ By default, it stops instances running on the port 50052.""",
                         except psutil.NoSuchProcess:
                             # Cases where the child process has already died.
                             pass
-            if all:
-                str_ = f""
+            if all_ports:
+                str_ = ""
             else:
                 str_ = f" running on port {port}"
 
             if not killed_:
                 click.echo(
                     click.style("ERROR: ", fg="red")
-                    + f"No Ansys instances"
+                    + "No Ansys instances"
                     + str_
                     + "have been found."
                 )
             else:
                 click.echo(
                     click.style("Success: ", fg="green")
-                    + f"Ansys instances"
+                    + "Ansys instances"
                     + str_
                     + " have been stopped."
                 )
