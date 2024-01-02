@@ -2074,7 +2074,7 @@ class Elements:
         -----
         The SHSD command creates a shell-solid interface to be used in
         shell-to-solid assemblies, or deletes a previously-created
-        shell-solid interface. “Virtual” shell elements and additional
+        shell-solid interface. "Virtual" shell elements and additional
         CONTA175 elements are created at the contact pair identified by
         RID when Action = CREATE. Set Action = DELETE to remove the
         generated nodes and elements at the contact pair identified by
