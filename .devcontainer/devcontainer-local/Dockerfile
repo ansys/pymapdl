@@ -18,7 +18,7 @@ RUN apt-get install -y --no-install-recommends locales && \
     echo -e '\nexport LANG=en_US.UTF-8\nexport LANGUAGE=en_US:en\nexport LC_ALL=en_US.UTF-8' >> ~/.bashrc && \
     apt-get -qq clean  && rm -rf /var/lib/apt/lists/*
 
-COPY .devcontainer/devcontainer-local/requirements.txt requirements.txt
+COPY requirements.txt requirements.txt
 
 # Installing Python environment
 RUN python3.10 -m venv ./.venv && \
