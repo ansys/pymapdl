@@ -1,6 +1,7 @@
 FROM ghcr.io/ansys/mapdl:v24.1-ubuntu-student
 
 USER root
+WORKDIR /home/mapdl/pymapdl
 
 # General libraries
 ENV DEBIAN_FRONTEND=noninteractive
