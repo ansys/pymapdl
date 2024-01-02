@@ -8,6 +8,7 @@ from conftest import requires
 
 @pytest.fixture
 @requires("click")
+@requires("nostudent")
 def run_cli():
     def do_run(arguments=""):
         from click.testing import CliRunner
@@ -30,6 +31,7 @@ def run_cli():
 
 @requires("click")
 @requires("local")
+@requires("nostudent")
 def test_launch_mapdl_cli(run_cli):
     output = run_cli()
 
@@ -51,6 +53,7 @@ def test_launch_mapdl_cli(run_cli):
 
 @requires("click")
 @requires("local")
+@requires("nostudent")
 def test_launch_mapdl_cli_config(run_cli):
     cmds_ = ["start", "--port 50090", "--jobname myjob"]
     cmd_warnings = [
@@ -99,6 +102,7 @@ def test_launch_mapdl_cli_config(run_cli):
 
 @requires("click")
 @requires("local")
+@requires("nostudent")
 def test_launch_mapdl_cli_list(run_cli):
     output = run_cli("list")
     assert "running" in output
