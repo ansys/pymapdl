@@ -603,7 +603,9 @@ def test_cmd_class_dlist_vm(mapdl, cleared):
         cmds = fid.readlines()
 
     mapdl.finish()
-    mapdl.input_strings("\n".join(cmds[:100]))
+    cmds = "\n".join(cmds)
+    ind = cmds.find("NSEL,ALL") + 1
+    mapdl.input_strings(cmds[:ind])
 
     mapdl.allsel("all")
     out = mapdl.dlist()
