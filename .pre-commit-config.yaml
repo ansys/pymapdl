@@ -4,7 +4,6 @@ repos:
 
 - repo: https://github.com/ansys/pre-commit-hooks
   rev: v0.2.2
-  files: '(src|examples|tests)/.*\.(py)|\.(proto)'
   hooks:
   - id: add-license-headers
 
