@@ -24,7 +24,8 @@ RUN apt-get install -y --no-install-recommends locales && \
 COPY requirements.txt requirements.txt
 
 # Installing Python environment
-RUN cd /home/mapdl && \
+RUN mkdir /home/mapdl/pymapdl && \
+    cd /home/mapdl && \
     python3.10 -m venv ./.venv && \
     . ./.venv/bin/activate && \
     pip install pre-commit && \
