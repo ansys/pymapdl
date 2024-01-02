@@ -1,8 +1,4 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-Functions to download sample datasets from the pyansys data repository.
+"""Functions to download sample datasets from the pyansys data repository.
 """
 from functools import wraps
 import os

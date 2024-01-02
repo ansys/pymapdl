@@ -1,8 +1,4 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-Shared testing module"""
+"""Shared testing module"""
 from collections import namedtuple
 import os
 from typing import Dict

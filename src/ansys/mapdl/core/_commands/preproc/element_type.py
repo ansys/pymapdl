@@ -1,8 +1,4 @@
 """
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-
 These PREP7 commands define the type of elements to be used in the model.
 """
 from typing import Optional, Union

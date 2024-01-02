@@ -1,8 +1,4 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-Module for miscellaneous functions and methods"""
+"""Module for miscellaneous functions and methods"""
 from enum import Enum
 from functools import wraps
 import importlib

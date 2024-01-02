@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class SolidForces:
     def fk(self, kpoi="", lab="", value="", value2="", **kwargs):
         """Defines force loads at keypoints.

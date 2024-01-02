@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class Ocean:
     def ocdata(self, val1="", val2="", val3="", val14="", **kwargs):
         """Defines an ocean load using non-table data.

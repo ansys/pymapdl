@@ -1,8 +1,4 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-Test the PyPIM integration."""
+"""Test the PyPIM integration."""
 import pytest
 
 from conftest import has_dependency

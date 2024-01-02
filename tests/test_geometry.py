@@ -1,8 +1,4 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-Test geometry commands"""
+"""Test geometry commands"""
 import numpy as np
 import pytest
 

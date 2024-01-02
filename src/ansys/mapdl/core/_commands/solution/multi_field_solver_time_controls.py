@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class MultiFieldSolverTimeControls:
     def mfcalc(self, fnumb="", freq="", **kwargs):
         """Specifies a calculation frequency for a field in an ANSYS Multi-field

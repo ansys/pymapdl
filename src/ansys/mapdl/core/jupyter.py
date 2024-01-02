@@ -1,8 +1,4 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-Contains methods used only when running on ANSYS's jupyterhub cluster"""
+"""Contains methods used only when running on ANSYS's jupyterhub cluster"""
 
 try:
     from ansys.jupyterhub import manager

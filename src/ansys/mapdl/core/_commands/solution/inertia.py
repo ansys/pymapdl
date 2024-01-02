@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class Inertia:
     def acel(self, acel_x="", acel_y="", acel_z="", **kwargs):
         """Specifies the linear acceleration of the global Cartesian reference

@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class Special:
     def cvar(self, ir="", ia="", ib="", itype="", datum="", name="", **kwargs):
         """Computes covariance between two quantities.

@@ -1,8 +1,4 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-Common gRPC functions"""
+"""Common gRPC functions"""
 from typing import List, Literal, get_args
 
 import numpy as np

@@ -1,8 +1,4 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-Inquire undocumented functions"""
+"""Inquire undocumented functions"""
 
 
 class inq_function:

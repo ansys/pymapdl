@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class Operations:
     def abs(self, ir="", ia="", name="", facta="", **kwargs):
         """Forms the absolute value of a variable.

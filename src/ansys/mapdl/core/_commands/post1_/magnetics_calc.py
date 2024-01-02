@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class MagneticsCalc:
     def curr2d(self, **kwargs):
         """Calculates current flow in a 2-D conductor.

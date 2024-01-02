@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class SpectrumOptions:
     def addam(self, af="", aa="", ab="", ac="", ad="", amin="", **kwargs):
         """Specifies the acceleration spectrum computation constants for the

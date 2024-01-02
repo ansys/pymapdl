@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class NonLinearOptions:
     def arclen(self, key="", maxarc="", minarc="", **kwargs):
         """Activates the arc-length method.

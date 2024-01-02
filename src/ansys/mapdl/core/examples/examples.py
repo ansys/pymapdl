@@ -1,8 +1,4 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-pymapdl examples"""
+"""pymapdl examples"""
 import os
 
 from ansys.mapdl.core.theme import PyMAPDL_cmap

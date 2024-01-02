@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class Listing:
     def extrem(self, nvar1="", nvar2="", ninc="", **kwargs):
         """Lists the extreme values for variables.

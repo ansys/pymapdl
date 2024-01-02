@@ -1,8 +1,4 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-Module for common class between Archive, and result mesh."""
+"""Module for common class between Archive, and result mesh."""
 from ansys.mapdl.reader import _reader, _relaxmidside
 from ansys.mapdl.reader.elements import ETYPE_MAP
 from ansys.mapdl.reader.misc import unique_rows

@@ -1,8 +1,4 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-Test MAPDL interface"""
+"""Test MAPDL interface"""
 from datetime import datetime
 import os
 from pathlib import Path

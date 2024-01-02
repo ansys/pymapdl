@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class ParameterDefinition:
     def afun(self, lab="", **kwargs):
         """Specifies units for angular functions in parameter expressions.

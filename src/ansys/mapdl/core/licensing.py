@@ -1,8 +1,4 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-Module for licensing and license serve checks."""
+"""Module for licensing and license serve checks."""
 
 import os
 import socket

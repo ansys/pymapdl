@@ -1,8 +1,4 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-Component related module"""
+"""Component related module"""
 import re
 from typing import (
     TYPE_CHECKING,

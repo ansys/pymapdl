@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class Digitizing:
     def dig(self, node1="", node2="", ninc="", **kwargs):
         """Digitizes nodes to a surface.

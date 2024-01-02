@@ -1,8 +1,4 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-Test ansys.mapdl.solution.Solution"""
+"""Test ansys.mapdl.solution.Solution"""
 import pytest
 
 from ansys.mapdl.core.errors import MapdlRuntimeError

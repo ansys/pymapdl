@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class MatrixOP:
     def axpy(self, vr="", vi="", m1="", wr="", wi="", m2="", **kwargs):
         """Performs the matrix operation ``M2= v*M1 + w*M2``.

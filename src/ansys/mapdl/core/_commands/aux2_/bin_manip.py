@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class BinManip:
     def combine(self, filetype="", **kwargs):
         """Combines distributed memory parallel (Distributed ANSYS) files.

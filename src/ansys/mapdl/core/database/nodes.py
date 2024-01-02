@@ -1,8 +1,4 @@
 """
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-
 Contains the Node implementation of the MapdlDb class.
 
 This allows access to the Nodes in the MAPDL DB from Python.

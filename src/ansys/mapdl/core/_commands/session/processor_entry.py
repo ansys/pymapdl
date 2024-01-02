@@ -1,8 +1,4 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-These SESSION commands are used to enter and exit the various
+"""These SESSION commands are used to enter and exit the various
 processors in the program.
 """
 

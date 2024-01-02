@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class FeForces:
     def f(self, node="", lab="", value="", value2="", nend="", ninc="", **kwargs):
         """Specifies force loads at nodes.

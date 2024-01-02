@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class RadiationMat:
     def emis(self, mat="", evalu="", **kwargs):
         """Specifies emissivity as a material property for the Radiation Matrix

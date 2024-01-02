@@ -1,8 +1,4 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-Test the mapdl launcher"""
+"""Test the mapdl launcher"""
 
 import os
 import tempfile

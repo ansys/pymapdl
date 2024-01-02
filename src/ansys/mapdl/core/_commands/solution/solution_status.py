@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class SolutionStatus:
     def atype(self, **kwargs):
         """Specifies "Analysis types" as the subsequent status topic.

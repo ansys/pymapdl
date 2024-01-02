@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class Status:
     def define(self, **kwargs):
         """Specifies "Data definition settings" as the subsequent status topic.

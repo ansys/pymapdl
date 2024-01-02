@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class TestNearestEntityQueries:
     def test_nnear(self, box_geometry):
         q, kps, areas, nodes = box_geometry

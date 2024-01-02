@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class SolidConstraints:
     def da(self, area="", lab="", value1="", value2="", **kwargs):
         """Defines degree-of-freedom constraints on areas.

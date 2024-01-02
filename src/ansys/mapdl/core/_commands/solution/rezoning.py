@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class Rezoning:
     def rezone(self, option="", ldstep="", sbstep="", **kwargs):
         """Initiates the rezoning process, sets rezoning options, and rebuilds the

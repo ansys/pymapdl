@@ -1,8 +1,4 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-
-These DATABASE commands are used to select subsets of database
+"""These DATABASE commands are used to select subsets of database
 entities for further operations.
 """
 

@@ -1,9 +1,3 @@
-"""
-Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
-SPDX-License-Identifier: MIT
-"""
-
-
 class Radiosity:
     def rdec(self, option="", reduc="", nplace="", **kwargs):
         """Defines the decimation parameters.
