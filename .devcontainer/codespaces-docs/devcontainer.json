@@ -37,7 +37,8 @@
 				"ms-python.python"
 			],
 			"settings": {
-				"python.defaultInterpreterPath": "/home/mapdl/pymapdl/.venv/bin/python"
+				"python.defaultInterpreterPath": "/home/mapdl/pymapdl/.venv/bin/python",
+				"terminal.integrated.defaultProfile.linux": "bash"
 			}
 		},
 	}
