@@ -19,20 +19,21 @@ RUN apt-get install -y --no-install-recommends locales && \
     echo 'export LANG=en_US.UTF-8' >> ~/.bashrc && \
     echo 'export LANGUAGE=en_US:en' >> ~/.bashrc && \
     echo 'export LC_ALL=en_US.UTF-8' >> ~/.bashrc && \
-    apt-get -qq clean  && rm -rf /var/lib/apt/lists/*
+    apt-get -qq clean  && rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /home/mapdl/pymapdl
 
 COPY requirements.txt requirements.txt
 
+WORKDIR /home/mapdl/pymapdl
+
 # Installing Python environment
-RUN mkdir /home/mapdl/pymapdl && \
-    cd /home/mapdl && \
+RUN cd /home/mapdl && \
     python3.10 -m venv ./.venv && \
     . ./.venv/bin/activate && \
     pip install pre-commit && \
     pip install ansys-mapdl-core && \
     pip install -r requirements.txt && \
     echo 'source ./.venv/bin/activate' >> ~/.bashrc && \
-    rm requirements.txt && \
-    cd /home/mapdl/pymapdl
+    rm requirements.txt
 
 USER mapdl
