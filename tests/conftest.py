@@ -1,5 +1,4 @@
 from collections import namedtuple
-from importlib import import_module
 import os
 from pathlib import Path
 from sys import platform
@@ -81,6 +80,14 @@ requires_windows = pytest.mark.skipif(
 requires_on_cicd = pytest.mark.skipif(
     not ON_CI, reason="This test requires to be on CICD"
 )
+
+
+def import_module(requirement):
+    from importlib import import_module
+
+    if os.name == "nt":
+        requirement = requirement.replace("-", ".")
+    return import_module(requirement)
 
 
 def has_dependency(requirement):
