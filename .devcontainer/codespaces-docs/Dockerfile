@@ -31,7 +31,7 @@ RUN cd /home/mapdl && \
     pip install ansys-mapdl-core && \
     pip install -r requirements.txt && \
     echo 'source ./.venv/bin/activate' >> ~/.bashrc && \
-    rm requirements.txt &&
+    rm requirements.txt && \
     cd /home/mapdl/pymapdl
 
 USER mapdl
