@@ -28,7 +28,7 @@ RUN python3.10 -m venv ./.venv && \
     pip install pre-commit && \
     pip install ansys-mapdl-core && \
     pip install -r requirements.txt && \
-    echo '\nsource ./.venv/bin/activate' >> ~/.bashrc && \
+    echo 'source ./.venv/bin/activate' >> ~/.bashrc && \
     rm requirements.txt
 
 USER mapdl
