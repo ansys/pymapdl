@@ -3,6 +3,7 @@
 echo "Starting Development codespaces"
 
 echo "Activating virtual environment..."
+ln -s /home/mapdl/.venv /home/mapdl/pymapdl/.venv
 source ./.venv/bin/activate
 
 echo "Installing PyMAPDL package and dependencies for development"
