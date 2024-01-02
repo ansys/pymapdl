@@ -1,4 +1,8 @@
-"""Test legacy MAPDL console interface
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+Test legacy MAPDL console interface
 
 This has been copied from test_mapdl.py
 

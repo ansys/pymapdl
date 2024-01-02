@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class BinDump:
     def dump(self, nstrt="", nstop="", **kwargs):
         """Dumps the contents of a binary file.

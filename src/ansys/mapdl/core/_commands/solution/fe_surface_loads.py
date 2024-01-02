@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class FeSurfaceLoads:
     def sf(self, nlist="", lab="", value="", value2="", **kwargs):
         """Specifies surface loads on nodes.

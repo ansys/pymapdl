@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class DynamicOptions:
     def alphad(self, value="", **kwargs):
         """Defines the mass matrix multiplier for damping.

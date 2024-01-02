@@ -1,4 +1,8 @@
-"""These commands may be run by PyMapdl, but are not supported from a
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+These commands may be run by PyMapdl, but are not supported from a
 user-context.
 
 """

@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class Aux15:
     def igesin(self, fname="", ext="", **kwargs):
         """Transfers IGES data from a file into MAPDL.

@@ -1,4 +1,8 @@
-""""Testing of log module"""
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+"Testing of log module"""
 import logging as deflogging  # Default logging
 import os
 import re

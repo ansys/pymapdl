@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class Controls:
     def avprin(self, key="", effnu="", **kwargs):
         """Specifies how principal and vector sums are to be calculated.

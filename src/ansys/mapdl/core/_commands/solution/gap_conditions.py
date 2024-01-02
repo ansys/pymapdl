@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class GapConditions:
     def gp(self, node1="", node2="", lab="", stif="", gap="", damp="", **kwargs):
         """Defines a gap condition for transient analyses.

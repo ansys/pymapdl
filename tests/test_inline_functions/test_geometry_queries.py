@@ -1,3 +1,7 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
 from collections import namedtuple
 from itertools import combinations
 from math import isclose, pi, sqrt

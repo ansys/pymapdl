@@ -1,4 +1,8 @@
-"""Test xpl functionality"""
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+Test xpl functionality"""
 from ansys.tools.versioning.utils import SemanticVersion
 import numpy as np
 import pytest

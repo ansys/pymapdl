@@ -1,4 +1,8 @@
-"""This module is for threaded implementations of the mapdl interface"""
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+This module is for threaded implementations of the mapdl interface"""
 import os
 import shutil
 import tempfile

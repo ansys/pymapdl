@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class LoadStepOperations:
     def lsclear(self, lab="", **kwargs):
         """Clears loads and load step options from the database.

@@ -1,4 +1,8 @@
-"""A gRPC specific class and methods for the MAPDL gRPC client """
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+A gRPC specific class and methods for the MAPDL gRPC client """
 
 import fnmatch
 from functools import wraps

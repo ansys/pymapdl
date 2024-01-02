@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class Animation:
     def ancntr(self, nfram="", delay="", ncycl="", **kwargs):
         """Produces an animated sequence of a contoured deformed shape.

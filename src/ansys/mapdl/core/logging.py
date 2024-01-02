@@ -1,4 +1,8 @@
-"""Logging module.
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+Logging module.
 
 This module supplies a general framework for logging in Pymapdl.  This module is
 built upon `logging <https://docs.python.org/3/library/logging.html>`_ library

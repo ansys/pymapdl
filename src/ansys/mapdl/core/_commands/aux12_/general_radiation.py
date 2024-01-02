@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class GeneralRadiation:
     def stef(self, value="", **kwargs):
         """Specifies Stefan-Boltzmann radiation constant.

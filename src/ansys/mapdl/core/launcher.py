@@ -1,4 +1,8 @@
-"""Module for launching MAPDL locally or connecting to a remote instance with gRPC."""
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+Module for launching MAPDL locally or connecting to a remote instance with gRPC."""
 
 import atexit
 import os

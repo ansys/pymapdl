@@ -1,4 +1,8 @@
-"""These SESSION commands are for file operations, such as deleting, copying, and listing."""
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+These SESSION commands are for file operations, such as deleting, copying, and listing."""
 
 
 class Files:

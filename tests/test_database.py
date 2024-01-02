@@ -1,3 +1,7 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
 import re
 
 from ansys.tools.versioning import server_meets_version

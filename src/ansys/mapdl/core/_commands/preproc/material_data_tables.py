@@ -1,4 +1,8 @@
 """
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+
 These PREP7 commands create and modify the material data tables (that
 is, to specify and define material models).
 """

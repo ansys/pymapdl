@@ -1,4 +1,8 @@
 """
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+
 These DATABASE commands can be used to initialize the database, save
 it to a file, or annotate it with titles and systems of units.
 """

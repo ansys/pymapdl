@@ -1,4 +1,8 @@
-"""These SESSION commands control the overall characteristics of the
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+These SESSION commands control the overall characteristics of the
 session, including the jobname, Graphical User Interface behavior, and
 file switching.
 """

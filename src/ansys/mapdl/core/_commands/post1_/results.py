@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class Results:
     def nsort(self, item="", comp="", order="", kabs="", numb="", sel="", **kwargs):
         """Sorts nodal data.

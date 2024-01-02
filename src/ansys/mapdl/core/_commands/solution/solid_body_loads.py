@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class SolidBodyLoads:
     def bfa(self, area="", lab="", val1="", val2="", val3="", val4="", **kwargs):
         """Defines a body force load on an area.

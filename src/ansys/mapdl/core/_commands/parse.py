@@ -1,4 +1,8 @@
-"""These commands are used to parse responses from MAPDL"""
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+These commands are used to parse responses from MAPDL"""
 import re
 from typing import Optional
 

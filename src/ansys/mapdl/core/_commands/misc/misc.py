@@ -1,4 +1,8 @@
-"""Miscellaneous methods not covered in the documentation."""
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+Miscellaneous methods not covered in the documentation."""
 
 
 class Misc:

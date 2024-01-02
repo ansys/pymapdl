@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class TestFieldComponentValueGetter:
     def test_temp(self, box_with_fields):
         mapdl = box_with_fields

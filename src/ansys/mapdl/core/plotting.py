@@ -1,4 +1,8 @@
-"""Plotting helper for MAPDL using pyvista"""
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+Plotting helper for MAPDL using pyvista"""
 from typing import Any, Optional
 from warnings import warn
 

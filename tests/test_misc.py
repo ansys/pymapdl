@@ -1,4 +1,8 @@
-"""Small or misc tests that don't fit in other test modules"""
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+Small or misc tests that don't fit in other test modules"""
 import inspect
 import os
 

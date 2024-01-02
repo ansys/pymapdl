@@ -1,4 +1,8 @@
-"""Test element preprocess commands"""
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+Test element preprocess commands"""
 import numpy as np
 import pytest
 

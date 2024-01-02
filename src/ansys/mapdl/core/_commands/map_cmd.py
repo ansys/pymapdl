@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class MapCommand:
     def ftype(self, filetype="", prestype="", **kwargs):
         """Specifies the file type and pressure type for the subsequent import of

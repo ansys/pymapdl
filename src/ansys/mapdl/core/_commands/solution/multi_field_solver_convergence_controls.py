@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class MultiFieldConvergenceControls:
     def mfconv(self, lab="", toler="", minref="", **kwargs):
         """Sets convergence values for an ANSYS Multi-field solver analysis.

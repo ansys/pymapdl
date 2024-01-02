@@ -1,4 +1,8 @@
-"""These DATABASE commands allow selected subsets of entities to be
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+These DATABASE commands allow selected subsets of entities to be
 named as components for easy selection later on.
 """
 from typing import Any, Dict, Literal

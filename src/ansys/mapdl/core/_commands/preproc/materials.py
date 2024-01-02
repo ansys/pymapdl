@@ -1,4 +1,8 @@
 """
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+
 These PREP7 commands are used to define the linear material properties.
 """
 

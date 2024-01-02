@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class Generation:
     def rmalist(self, **kwargs):
         """Lists all defined master nodes for a ROM method.

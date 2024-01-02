@@ -1,4 +1,8 @@
-"""gRPC service specific tests"""
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+gRPC service specific tests"""
 import os
 import re
 import shutil

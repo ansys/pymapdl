@@ -1,4 +1,8 @@
-"""Module to manage downloading and parsing the FEM from the MAPDL gRPC server."""
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+Module to manage downloading and parsing the FEM from the MAPDL gRPC server."""
 from functools import wraps
 import os
 import re

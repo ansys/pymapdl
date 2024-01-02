@@ -1,4 +1,8 @@
-"""Version of ansys-mapdl-core module.
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+Version of ansys-mapdl-core module.
 
 On the ``main`` branch, use 'dev0' to denote a development version.
 For example:

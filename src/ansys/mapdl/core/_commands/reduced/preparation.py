@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class Preparation:
     def rmndisp(self, loadt="", loc="", **kwargs):
         """Extracts neutral plane displacements from a test load or element load

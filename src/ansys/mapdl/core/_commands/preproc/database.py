@@ -1,4 +1,8 @@
 """
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+
 These PREP7 commands are used to read model data into the database,
 list out the database, and control the numbering of entities in the
 database.

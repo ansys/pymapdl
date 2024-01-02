@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class Setup:
     def cmap(self, fname="", ext="", kywrd="", ncntr="", **kwargs):
         """Changes an existing or creates a new color mapping table.

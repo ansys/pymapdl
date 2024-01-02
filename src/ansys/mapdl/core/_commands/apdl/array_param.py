@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class ArrayParam:
     def mfouri(self, oper="", coeff="", mode="", isym="", theta="", curve="", **kwargs):
         """Calculates the coefficients for, or evaluates, a Fourier series.

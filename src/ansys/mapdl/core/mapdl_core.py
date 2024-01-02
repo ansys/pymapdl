@@ -1,4 +1,8 @@
-"""Module to control interaction with MAPDL through Python"""
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+Module to control interaction with MAPDL through Python"""
 
 import atexit
 from functools import wraps

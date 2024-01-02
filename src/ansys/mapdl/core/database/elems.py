@@ -1,4 +1,8 @@
 """
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+
 Contains the element implement of the MAPDL database service.
 
 This allows lower level the access to the elements in the MAPDL database.

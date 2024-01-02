@@ -1,4 +1,8 @@
-"""Contains the MapdlDb classes, allowing the access to MAPDL DB from Python."""
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+Contains the MapdlDb classes, allowing the access to MAPDL DB from Python."""
 from enum import Enum
 from functools import wraps
 import os

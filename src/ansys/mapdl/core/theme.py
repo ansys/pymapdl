@@ -1,4 +1,8 @@
-"""Store parameters for a PyMAPDL-specific theme for pyvista"""
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+Store parameters for a PyMAPDL-specific theme for pyvista"""
 
 import numpy as np
 

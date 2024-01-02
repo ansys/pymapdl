@@ -1,4 +1,8 @@
-"""Post-processing module using MAPDL interface"""
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+Post-processing module using MAPDL interface"""
 import weakref
 
 import numpy as np

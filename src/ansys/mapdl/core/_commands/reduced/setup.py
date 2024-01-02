@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class Setup:
     def rmresume(self, fname="", ext="", **kwargs):
         """Resumes ROM data from a file.

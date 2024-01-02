@@ -1,3 +1,9 @@
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+"""
+
+
 class Setup:
     def color(self, lab="", clab="", n1="", n2="", ninc="", **kwargs):
         """Specifies the color mapping for various items.

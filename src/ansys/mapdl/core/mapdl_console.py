@@ -1,4 +1,8 @@
-"""Module to control interaction with an ANSYS shell instance.
+"""
+Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+SPDX-License-Identifier: MIT
+
+Module to control interaction with an ANSYS shell instance.
 
 Used when launching Mapdl via pexpect on Linux when <= 17.0
 """
