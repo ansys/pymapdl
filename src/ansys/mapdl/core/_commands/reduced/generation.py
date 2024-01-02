@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Generation:
     def rmalist(self, **kwargs):
         """Lists all defined master nodes for a ROM method.

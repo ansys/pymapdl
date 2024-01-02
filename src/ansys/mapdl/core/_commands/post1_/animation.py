@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Animation:
     def ancntr(self, nfram="", delay="", ncycl="", **kwargs):
         """Produces an animated sequence of a contoured deformed shape.

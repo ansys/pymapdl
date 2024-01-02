@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class RadiositySolver:
     def hemiopt(self, hres="", **kwargs):
         """Specifies options for Hemicube view factor calculation.

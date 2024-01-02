@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Views:
     def angle(self, wn="", theta="", axis="", kincr="", **kwargs):
         """Rotates the display about an axis.

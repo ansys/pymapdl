@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class LoadCase:
     def lcabs(self, lcno="", kabs="", **kwargs):
         """Specifies absolute values for load case operations.

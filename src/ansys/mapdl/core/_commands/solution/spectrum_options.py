@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class SpectrumOptions:
     def addam(self, af="", aa="", ab="", ac="", ad="", amin="", **kwargs):
         """Specifies the acceleration spectrum computation constants for the

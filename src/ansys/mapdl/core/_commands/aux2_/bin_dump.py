@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class BinDump:
     def dump(self, nstrt="", nstop="", **kwargs):
         """Dumps the contents of a binary file.

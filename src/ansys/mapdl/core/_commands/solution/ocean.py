@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Ocean:
     def ocdata(self, val1="", val2="", val3="", val14="", **kwargs):
         """Defines an ocean load using non-table data.

@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class MagneticsCalc:
     def curr2d(self, **kwargs):
         """Calculates current flow in a 2-D conductor.

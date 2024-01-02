@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class DynamicOptions:
     def alphad(self, value="", **kwargs):
         """Defines the mass matrix multiplier for damping.

@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Special:
     def cvar(self, ir="", ia="", ib="", itype="", datum="", name="", **kwargs):
         """Computes covariance between two quantities.

@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Display:
     def keep(self, key="", **kwargs):
         """Stores POST26 definitions and data during active session.

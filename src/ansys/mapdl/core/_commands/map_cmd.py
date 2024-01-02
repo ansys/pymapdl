@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class MapCommand:
     def ftype(self, filetype="", prestype="", **kwargs):
         """Specifies the file type and pressure type for the subsequent import of

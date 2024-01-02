@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Preparation:
     def rmndisp(self, loadt="", loc="", **kwargs):
         """Extracts neutral plane displacements from a test load or element load

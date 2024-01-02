@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class BinManip:
     def combine(self, filetype="", **kwargs):
         """Combines distributed memory parallel (Distributed ANSYS) files.

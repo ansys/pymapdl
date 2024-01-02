@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Radiosity:
     def rdec(self, option="", reduc="", nplace="", **kwargs):
         """Defines the decimation parameters.

@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Abbreviations:
     def abbr(self, abbr="", string="", **kwargs):
         """Defines an abbreviation.

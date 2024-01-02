@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Status:
     def define(self, **kwargs):
         """Specifies "Data definition settings" as the subsequent status topic.
