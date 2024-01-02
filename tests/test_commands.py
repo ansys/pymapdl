@@ -596,10 +596,11 @@ def test_cmd_class_prnsol_short():
 def test_cmd_class_dlist_vm(mapdl, cleared):
     # Run only the first 100 lines of VM223
     with open(verif_files.vmfiles["vm223"]) as fid:
-        cmds = fid.readlines()
+        cmds = fid.read()
 
     mapdl.finish()
-    mapdl.input_strings("\n".join(cmds[:100]))
+    ind = cmds.find("NSEL,ALL")
+    mapdl.input_strings(cmds[:ind])
 
     mapdl.allsel("all")
     out = mapdl.dlist()
