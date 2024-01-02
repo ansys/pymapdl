@@ -1,14 +1,14 @@
 FROM ghcr.io/ansys/mapdl:v24.1-ubuntu-student
-
+ENV USERNAME=mapdl
 USER root
-WORKDIR /home/mapdl/pymapdl
 
 # General libraries
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Installing libs for testing and docs
 RUN apt-get -qq update && apt install -qq -y zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex && \
-    apt-get -qq clean  && rm -rf /var/lib/apt/lists/*
+    apt-get -qq clean  && rm -rf /var/lib/apt/lists/* && \
+    usermod -s /bin/bash $USERNAME
 
 # Setting up locales
 RUN apt-get install -y --no-install-recommends locales && \
@@ -20,9 +20,11 @@ RUN apt-get install -y --no-install-recommends locales && \
     echo 'export LANGUAGE=en_US:en' >> ~/.bashrc && \
     echo 'export LC_ALL=en_US.UTF-8' >> ~/.bashrc && \
     apt-get -qq clean  && rm -rf /var/lib/apt/lists/* && \
-    mkdir -p /home/mapdl/pymapdl
+    mkdir -p /home/$USERNAME/pymapdl
 
-WORKDIR /home/mapdl
+WORKDIR /home/$USERNAME
+USER $USERNAME
+
 COPY requirements.txt requirements.txt
 
 # Installing Python environment
@@ -34,5 +36,4 @@ RUN python3.10 -m venv ./.venv && \
     echo 'source ./.venv/bin/activate' >> ~/.bashrc && \
     rm requirements.txt
 
-WORKDIR /home/mapdl/pymapdl
-USER mapdl
+WORKDIR /home/$USERNAME/pymapdl
