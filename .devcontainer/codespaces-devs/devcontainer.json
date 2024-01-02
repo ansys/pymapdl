@@ -39,6 +39,6 @@
 			"settings": {
 				"python.defaultInterpreterPath": "/home/mapdl/pymapdl/.venv/bin/python"
 			}
-		},
+		}
 	}
 }
