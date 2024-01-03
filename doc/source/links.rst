@@ -117,7 +117,6 @@
 .. _vale_installation: https://vale.sh/docs/vale-cli/installation/
 .. _vscode_devcontainers_containers: https://code.visualstudio.com/docs/devcontainers/containers
 .. _vscode: https://code.visualstudio.com
-.. _docker: https://www.docker.com
 .. _vscode_devcontainers_containers_getting_started: https://code.visualstudio.com/docs/devcontainers/containers#_getting-started
 .. _vscode_devcontainers_remote_extension: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack
 .. _ghcr: https://github.com/features/packages
@@ -199,6 +198,7 @@
 .. _docker_cp: https://docs.docker.com/engine/reference/commandline/cp/
 .. _docker_run: https://docs.docker.com/engine/reference/run/
 .. _docker_compose: https://docs.docker.com/compose/
+.. _docker_main: https://www.docker.com
 
 .. # Elements references
 

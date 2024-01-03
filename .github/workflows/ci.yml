@@ -150,6 +150,7 @@ jobs:
         run: .ci/start_mapdl_student.sh
         env:
           MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
+          DISTRIBUTED_MODE: "dmp"
 
       - name: "Retrieve PyMAPDL version"
         id: version
@@ -249,9 +250,9 @@ jobs:
       - name: "Tar logs"
         if: always()
         run: |
-          cp -f doc/_build/latex/*.log ./logs-build-docs/
-          cp log.txt ./logs-build-docs/
-          tar cvzf ./logs-build-docs.tgz ./logs-build-docs
+          cp -f doc/_build/latex/*.log ./logs-build-docs/ || echo "Latex logs couldn't be found."
+          cp log.txt ./logs-build-docs/ || echo "MAPDL log could not be found."
+          tar cvzf ./logs-build-docs.tgz ./logs-build-docs 
 
       - name: "Upload logs to GitHub"
         if: always()
@@ -262,7 +263,7 @@ jobs:
 
       - name: "Display MAPDL Logs"
         if: always()
-        run: cat log.txt
+        run: cat log.txt || echo "MAPDL log not found"
 
 
   build-test:
@@ -451,8 +452,8 @@ jobs:
       - name: "Tar logs"
         if: always()
         run: |
-          cp log.txt ./logs-${{ matrix.mapdl-version }}/log.txt
-          tar cvzf ./logs-${{ matrix.mapdl-version }}.tgz ./logs-${{ matrix.mapdl-version }}
+          cp log.txt ./logs-${{ matrix.mapdl-version }}/log.txt || echo "MAPDL log not found."
+          tar cvzf ./logs-${{ matrix.mapdl-version }}.tgz ./logs-${{ matrix.mapdl-version }} || echo "Failed to compress"
 
       - name: "Upload logs to GitHub"
         if: always()
