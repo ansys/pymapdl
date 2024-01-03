@@ -150,6 +150,7 @@ jobs:
         run: .ci/start_mapdl_student.sh
         env:
           MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
+          DISTRIBUTED_MODE: 'dmp'
 
       - name: "Retrieve PyMAPDL version"
         id: version
