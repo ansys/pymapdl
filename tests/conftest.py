@@ -494,6 +494,17 @@ def cleared(mapdl):
 
 
 @pytest.fixture(scope="function")
+def release_license(mapdl):
+    # Pausing MAPDL license
+    mapdl.pause()
+
+    yield
+
+    # Unpausing MAPDL license
+    mapdl.unpause()
+
+
+@pytest.fixture(scope="function")
 def cube_geom_and_mesh(cleared, mapdl):
     # setup the full file
     mapdl.block(0, 1, 0, 1, 0, 1)

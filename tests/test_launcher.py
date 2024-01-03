@@ -217,8 +217,8 @@ def test_license_type_keyword_names():
 
 
 @requires("local")
-@requires("nostudent")
-def test_license_type_additional_switch():
+# @requires("nostudent")
+def test_license_type_additional_switch(release_license):
     # This test might became a way to check available licenses, which is not the purpose.
     successful_check = False
     for license_name, license_description in LICENSES.items():
