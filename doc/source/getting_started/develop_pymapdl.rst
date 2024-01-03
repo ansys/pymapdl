@@ -50,6 +50,20 @@ If you are going to do testing, you must install the testing dependencies with t
     pip install -e '.[tests]'
 
 
+Developing using Codespaces
+===========================
+
+You can save time by using `GitHub Codespaces <codespaces_>`_, which launches a fully ready
+coding environment based on VSCode. In this environment some the of the above steps are already
+set for your convenience:
+
+* A student MAPDL installation.
+* Git is installed with the latest pymapdl branch cloned.
+* A python environment with all dependencies and pymapdl installed as editable.
+
+For more information, see :ref:`develop_on_codespaces`.
+
+
 Develop PyMAPDL
 ===============
 
