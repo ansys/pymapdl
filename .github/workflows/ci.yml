@@ -451,8 +451,8 @@ jobs:
       - name: "Tar logs"
         if: always()
         run: |
-          cp log.txt ./logs-${{ matrix.mapdl-version }}/log.txt
-          tar cvzf ./logs-${{ matrix.mapdl-version }}.tgz ./logs-${{ matrix.mapdl-version }}
+          cp log.txt ./logs-${{ matrix.mapdl-version }}/log.txt || echo "MAPDL log not found."
+          tar cvzf ./logs-${{ matrix.mapdl-version }}.tgz ./logs-${{ matrix.mapdl-version }} || echo "Failed to compress"
 
       - name: "Upload logs to GitHub"
         if: always()
