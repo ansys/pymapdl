@@ -46,7 +46,7 @@ You must then modify the file
    Be careful to not commit those changes in your PRs.
 
 You can now open the current folder (or PyMAPDL repository) using
-:kbd:`ctr/cmd` + :kbd:`shift` + :kbd:`p` to open the VSCode `Command palette`.
+:kbd:`ctr/cmd` + :kbd:`shift` + :kbd:`p` to open the Visual Code `Command palette`.
 Then select ``Dev Containers: Open Folder in Container``.
 You will be prompted to select one of the multiple devcontainer configurations,
 select `PyMAPDL-DevContainer (Local)`.
@@ -58,7 +58,7 @@ VS Code will automatically launch the MAPDL container with the desired configura
 
 You can now work normally, but you will be, in fact, working from
 inside the container.
-Because VSCode mount the local directory into the docker container,
+Because Visual Code mount the local directory into the docker container,
 you don't lose your changes if accidentally delete your container.
 However, this mounting process might have a significant impact on
 the container performance, especially noticeable if you are using MacOS.

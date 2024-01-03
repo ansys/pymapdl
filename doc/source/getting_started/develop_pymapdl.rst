@@ -54,12 +54,12 @@ Developing using Codespaces
 ===========================
 
 You can save time by using `GitHub Codespaces <codespaces_>`_, which launches a fully ready
-coding environment based on VSCode. In this environment some the of the above steps are already
+coding environment based on Visual Code. In this environment some the of the preceding steps are already
 set for your convenience:
 
 * A student MAPDL installation.
-* Git is installed with the latest pymapdl branch cloned.
-* A python environment with all dependencies and pymapdl installed as editable.
+* Git is installed with the latest PyMAPDL branch cloned.
+* A Python environment with all dependencies and PyMAPDL installed as editable.
 
 For more information, see :ref:`develop_on_codespaces`.
 

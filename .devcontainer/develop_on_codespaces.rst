@@ -45,8 +45,8 @@ Currently, there are 3 main configurations:
   as HTML and PDF.
 * `PyMAPDL-DevContainer (Local)`. This is the configuration for launching
   a development container locally.
-  This container follow similar steps to the above configurations,
-  but it is for use locally together with VSCode, hence
+  This container follow similar steps to the preceding configurations,
+  but it is for use locally together with Visual Code, hence
   you **must not** select it when creating your Codespaces environment.
   To get more information about how to launch a devcontainer locally,
   visit :ref:`develop_on_remote_containers`.
@@ -61,8 +61,8 @@ How to use
 ==========
 
 The usage of a in-browser Codespaces is very simple if you are
-familiar with VSCode.
-You can do almost anything that you can do in a VSCode instance
+familiar with Visual Code.
+You can do almost anything that you can do in a Visual Code instance
 installed locally. Create, edit and delete files, install extensions, etc.
 
 You can connect to your Codespaces from your local IDE, by opening the
