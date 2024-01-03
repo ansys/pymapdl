@@ -10,7 +10,6 @@ Develop on a remote container
    However, you are invited to `create your own docker image <ref_make_container_>`
    and use this file as template for setting your own local development container.
 
-
 To use a `remote container <vscode_devcontainers_containers_>`_, you must install:
 
 * `VS Code <vscode_>`_
