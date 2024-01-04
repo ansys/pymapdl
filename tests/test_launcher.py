@@ -251,6 +251,7 @@ def test_license_type_dummy():
 def test_remove_temp_files():
     """Ensure the working directory is removed when run_location is not set."""
     mapdl = launch_mapdl(
+        port=50053,
         remove_temp_files=True,
         start_timeout=start_timeout,
         additional_switches=QUICK_LAUNCH_SWITCHES,
@@ -272,6 +273,7 @@ def test_remove_temp_files():
 def test_remove_temp_files_fail(tmpdir):
     """Ensure the working directory is not removed when the cwd is changed."""
     mapdl = launch_mapdl(
+        port=50053,
         remove_temp_files=True,
         start_timeout=start_timeout,
         additional_switches=QUICK_LAUNCH_SWITCHES,
