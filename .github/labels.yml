@@ -1,4 +1,11 @@
-
+#############################################################
+# Reason for this file
+# ====================
+#
+# This file is used by labeler to sync the labels (and their colors),
+# and assign a label to the new pull requrest.
+# 
+# Check the yml for more info: .github\workflows\label.yml
 
 #############################################################
 # Main colors (hex)
