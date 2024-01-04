@@ -217,7 +217,7 @@ def port_in_use(port: Union[int, str], host: str = LOCALHOST) -> bool:
     - An attempt was made to access a socket in a way forbidden by its
       access permissions.
     """
-    return port_in_use_using_socket(port, host) and port_in_use_using_psutil(port)
+    return port_in_use_using_socket(port, host) or port_in_use_using_psutil(port)
 
 
 def port_in_use_using_socket(port: Union[int, str], host: str) -> bool:
