@@ -677,7 +677,7 @@ jobs:
         run: |
           # Because there is no 'ansys-tools-path' we need to input the
           # executable path with the env var: PYMAPDL_MAPDL_EXEC.
-          version=echo "${{ matrix.mapdl-image }}" | head -c 5 | tail -c 4 | tr -d '.'
+          version=$(echo "${{ matrix.mapdl-image }}" | head -c 5 | tail -c 4 | tr -d '.')
           echo "$version"
 
           export PYMAPDL_MAPDL_EXEC=/ansys_inc/v"$version"/ansys/bin/ansys"$version"
