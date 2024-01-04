@@ -174,6 +174,11 @@ if _HAS_CLICK:
                 f"File {filename_in} successfully converted to {os.path.splitext(filename_in)[0] + '.py'}."
             )
 
+    def is_ansys_process(proc):
+        return (
+            "ansys" in proc.name().lower() or "mapdl" in proc.name().lower()
+        ) and "-grpc" in proc.cmdline()
+
     class MyGroup(click.Group):
         def invoke(self, ctx):
             ctx.obj = tuple(ctx.args)
@@ -510,16 +515,17 @@ By default, it stops instances running on the port 50052.""",
         if port or all:
             killed_ = False
             for proc in psutil.process_iter():
-                for conns in proc.connections(kind="inet"):
-                    if (conns.laddr.port == port or all) and (
-                        "ansys" in proc.name().lower() or "mapdl" in proc.name().lower()
-                    ):
+                if is_ansys_process(proc):
+                    # Killing "all"
+                    if all:
+                        proc.kill()
                         killed_ = True
-                        try:
+
+                    # Killing by ports
+                    for conns in proc.connections(kind="inet"):
+                        if conns.laddr.port == port:
                             proc.kill()
-                        except psutil.NoSuchProcess:
-                            # Cases where the child process has already died.
-                            pass
+                            killed_ = True
             if all:
                 str_ = ""
             else:
@@ -530,7 +536,7 @@ By default, it stops instances running on the port 50052.""",
                     click.style("ERROR: ", fg="red")
                     + "No Ansys instances"
                     + str_
-                    + "have been found."
+                    + " have been found."
                 )
             else:
                 click.echo(
