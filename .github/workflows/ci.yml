@@ -556,7 +556,7 @@ jobs:
           xvfb-run pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
             --reset_only_failed --add_missing_images \
-            --cov-report=xml:ubuntu-v24.1.0-local.xml
+            --cov-report=xml:${{ matrix.mapdl-image }}-local.xml
 
       - name: "Adding the directory as safe directory for later step"
         run: |
@@ -595,14 +595,14 @@ jobs:
         name: "Upload coverage to Codecov"
         with:
           root_dir: ${{ github.workspace }}
-          name: ubuntu-v24.1.0-local.xml
-          flags: ubuntu,local,v24.1.0
+          name: ${{ matrix.mapdl-image }}-local.xml
+          flags: ubuntu,local,${{ matrix.mapdl-image }}
 
       - name: 'Upload coverage artifacts'
         uses: actions/upload-artifact@v4
         with:
-          name: ubuntu-v24.1.0-local.xml
-          path: ./ubuntu-v24.1.0-local.xml
+          name: ${{ matrix.mapdl-image }}-local.xml
+          path: ./${{ matrix.mapdl-image }}-local.xml
       
       - name: 'Upload minimal requirements file'
         # To include it in the release
@@ -686,20 +686,20 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
-            --cov-report=xml:ubuntu-v24.1.0-local-minimal.xml
+            --cov-report=xml:${{ matrix.mapdl-image }}-local-minimal.xml
         
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
         with:
           root_dir: ${{ github.workspace }}
-          name: ubuntu-v24.1.0-local-minimal.xml
-          flags: ubuntu,local,v24.1.0,minimal
+          name: ${{ matrix.mapdl-image }}-minimal.xml
+          flags: ubuntu,local,${{ matrix.mapdl-image }},minimal
 
       - name: 'Upload coverage artifacts'
         uses: actions/upload-artifact@v4
         with:
-          name: ubuntu-v24.1.0-local-minimal.xml
-          path: ./ubuntu-v24.1.0-local-minimal.xml
+          name: ${{ matrix.mapdl-image }}-minimal.xml
+          path: ./${{ matrix.mapdl-image }}-minimal.xml
 
 
   test-windows:
