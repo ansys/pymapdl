@@ -584,7 +584,7 @@ jobs:
             This commit does not re-run the CICD workflows (since no changes are made in the codebase) therefore
             you will see the actions showing in their status `Expected — Waiting for status to be reported`. Do not worry.
             You commit workflow is still running [here](https://github.com/ansys/pymapdl/pull/${{ github.event.pull_request.number }}/checks?sha=${{ github.event.pull_request.head.sha }}) :smile:
-            
+
             You might want to rerun the test to make sure that everything is passing. You can retrigger the CICD sending an empty commit `git commit -m "Empty comment to trigger CICD" --allow-empty`.
 
             You will see this message everytime your commit changes the image cache but you are not attaching the updated cache. :nerd_face:
@@ -675,7 +675,8 @@ jobs:
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
         run: |
-          # Because there is no 'ansys-tools-path' we need to input the executable path.
+          # Because there is no 'ansys-tools-path' we need to input the
+          # executable path with the env var: PYMAPDL_MAPDL_EXEC.
           version=echo ${{ matrix.mapdl-image }} | head -c 5 | tail -c 4 | tr -d '.'
           echo $version
 
