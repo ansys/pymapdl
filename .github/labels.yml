@@ -1,99 +1,108 @@
+
+#############################################################
+# By priority
+
 - name: BLOCKER
-  description: No further development until this is fixed.
-  color: 000000
+  description: "No further development until this is fixed."
+  color: C0392B # Red
+
+- name: Critical Priority
+  description: "This issue affects almost all users"
+  color: E67E22 # Orange
+
+- name: Major Priority
+  description: "This issue affects some users"
+  color: F4D03F # yellow
+
+- name: Minor Priority
+  description: "It does not affect almost any users"
+  color: F9E79F # light yellow
+
+- name: Future
+  description: "To work on it in the future, since it can be delayed"
+  color: 27AE60  # Green
+
+- name: Won't fix
+  description: "For different reasons, this won't be fixed"
+  color: ffffff # white
+
+#############################################################
+# By Category
 
 - name: BUG
   description: ""
-  color: 994d00
+  color: E67E22
 
-- name: CI/CD
-  description: ""
-  color: b5f226
-
-- name: Critical Priority
-  description: ""
-  color: ff0000
-
-- name: Dependencies
-  description: Dependencies
-  color: a5db76
-
-- name: Discussion
-  description: ""
-  color: bfdec3
-
-- name: DO NOT MERGE
-  description: ""
-  color: 4f18e7
-
-- name: Documentation
-  description: ""
-  color: bdd9db
-
-- name: Duplicate
-  description: ""
-  color: cccccc
-
+- name: New Feature
+  description: Request or proposal for a new feature
+  color: 2E86C1
+  
 - name: Enhancement
   description: Improve any current implemented feature.
-  color: 80b5ea
+  color: 85C1E9
 
 - name: Examples
   description: ""
-  color: bfdec3
+  color: A569BD
 
-- name: Future
-  description: To work on it in the future.
-  color: c2ddf4
-
-- name: Good First Issue
-  description: Good and easy issue to start to work in PyANSYS development.
-  color: f9cfc3
-
-- name: Help wanted
-  description: Tell the developers you need help or guidance.
-  color: 12880c
+- name: Documentation
+  description: ""
+  color: A569BD
 
 - name: Maintenance
   description: Maintenance
-  color: bbd2f1
+  color: 76D7C4
 
-- name: Major Priority
+- name: Discussion
   description: ""
-  color: ff7300
+  color: 76D7C4
+
+- name: Question
+  description: ""
+  color: 76D7C4
+
+#############################################################
+# Context
+
+- name: DO NOT MERGE
+  description: ""
+  color: C0392B
+
+- name: Duplicate
+  description: ""
+  color: E67E22
+
+- name: Good First Issue
+  description: Good and easy issue to start to work in PyANSYS development.
+  color: 27AE60
+
+- name: Help wanted
+  description: Tell the developers you need help or guidance.
+  color: F4D03F
+
+- name: Stale
+  description: Stale issue, it will be closed.
+  color: E67E22
+
+#############################################################
+# For repo maintance
+
+- name: CI/CD
+  description: ""
+  color: F9E79F
+
+- name: Dependencies
+  description: Dependencies
+  color: F9E79F
 
 - name: MAPDL
   description: Requires changes in MAPDL
   color: 000000
 
-- name: Minor Priority
-  description: ""
-  color: ffdd00
-
-- name: New Feature
-  description: Request/proposal for a new feature
-  color: 235370
-
-- name: Question
-  description: ""
-  color: c9317d
-
-- name: Stale
-  description: Stale issue, it will be closed.
-  color: c106be
-
-- name: Support
-  description: ""
-  color: 54afbb
-
-- name: Won't fix
-  description: ""
-  color: ffffff
-
 - name: reminder
   description: "Label for the reminder bot"
-  color: c5def5
+  color: ffffff
 
-- name: Nightly build failed
-  description: "Label for the nightly fails"
-  color: b5f226
+- name: Build failed
+  description: "Label for the build fails"
+  color: E67E22
