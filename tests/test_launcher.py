@@ -248,6 +248,7 @@ def test_license_type_dummy():
 
 
 @requires("local")
+@requires("nostudent")
 def test_remove_temp_files():
     """Ensure the working directory is removed when run_location is not set."""
     mapdl = launch_mapdl(
@@ -270,6 +271,7 @@ def test_remove_temp_files():
 
 
 @requires("local")
+@requires("nostudent")
 def test_remove_temp_files_fail(tmpdir):
     """Ensure the working directory is not removed when the cwd is changed."""
     mapdl = launch_mapdl(
