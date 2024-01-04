@@ -267,7 +267,6 @@ jobs:
 
 
   build-test:
-    
     name: "Remote: Build & test MAPDL ${{ matrix.mapdl-version }} (Extended testing ${{ matrix.extended_testing }})"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -868,7 +867,7 @@ jobs:
 
   notify:
     name: Notify failed build
-    needs: [upload-dev-docs]
+    needs: [smoke-tests, docs-build, build-test, build-test-ubuntu, build-test-ubuntu-minimal]
     if: failure() && github.event.pull_request == null
     runs-on: ubuntu-latest
     steps:
@@ -877,4 +876,4 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           title-template: "Failed scheduled build"
-          label-name: "Nightly build failed"
+          label-name: "Build failed"
