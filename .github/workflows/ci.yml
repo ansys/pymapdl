@@ -483,8 +483,19 @@ jobs:
       pushed: ${{ steps.attatch-to-pr.outputs.pushed }}
       committed: ${{ steps.attatch-to-pr.outputs.committed }}
       commit_long_sha: ${{ steps.attatch-to-pr.outputs.commit_long_sha }}
+    strategy:
+      fail-fast: false
+      matrix:
+        mapdl-image: ['v23.2-ubuntu', 'v24.1-ubuntu', 'v24.1-ubuntu-student']
+        extended_testing:
+          - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
+        exclude:
+          - extended_testing: false
+            mapdl-image: 'v23.2-ubuntu'
+          - extended_testing: false
+            mapdl-image: 'v24.1-ubuntu'
     container:
-      image: ghcr.io/ansys/mapdl:v24.1-ubuntu-student
+      image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-image }}
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
         username: ${{ github.actor }}
