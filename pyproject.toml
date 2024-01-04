@@ -83,7 +83,7 @@ doc = [
     "grpcio==1.60.0",
     "imageio-ffmpeg==0.4.9",
     "imageio==2.33.1",
-    "jupyter_sphinx==0.5.3",
+    "jupyter_sphinx==0.4.0",
     "jupyterlab>=3.2.8",
     "matplotlib==3.8.2",
     "numpydoc==1.6.0",
