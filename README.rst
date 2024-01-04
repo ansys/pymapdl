@@ -96,7 +96,7 @@ interfaces for Ansys's products.  Your contributions to
 The ``pyansys`` project is expanding beyond just MAPDL, and while
 there are many new features and changes to the original Python module,
 many steps have been taken to ensure compatibility with legacy code
-while supporting new features.  The original python module has been
+while supporting new features.  The original Python module has been
 split up into the following projects and modules:
 
 - `ansys.mapdl.core <https://github.com/ansys/pymapdl>`_

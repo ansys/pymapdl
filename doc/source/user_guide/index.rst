@@ -35,7 +35,7 @@ PyMAPDL overview
 ================
 The :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function
 within the ``ansys-mapdl-core`` library creates an instance of the
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class in the background and sends
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class in the background and sends
 commands to that instance. Errors and warnings are processed
 Pythonically, letting you develop a script in real time, without
 worrying about it functioning correctly when deployed in batch
@@ -95,7 +95,7 @@ you can write your MAPDL scripts in Python, run them interactively, and
 then run them as a batch without worrying if the script would run correctly if
 you had instead outputted it to a script file.
 
-The :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class supports much more
+The :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class supports much more
 than just sending text to MAPDL. It includes higher-level wrapping,
 allowing for better scripting and interaction with MAPDL. For an overview of the
 various advanced methods to visualize, script, and interact with MAPDL, see
@@ -105,7 +105,7 @@ various advanced methods to visualize, script, and interact with MAPDL, see
 Calling MAPDL Pythonically
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 MAPDL functions can be called directly from an instance of
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` in a Pythonic manner. This is
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` in a Pythonic manner. This is
 to simplify calling Ansys, especially when inputs are variables within
 Python. For example, the following two commands are equivalent:
 
@@ -165,7 +165,7 @@ area creation example, you can instead run:
     mapdl.al(1, 2, 3, 4)
 
 This approach has some obvious advantages, chiefly that it's a bit
-easier to script as :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
+easier to script as :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>`
 takes care of the string formatting for you. For example, inputting
 points from a numpy array:
 

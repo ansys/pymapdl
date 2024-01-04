@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Module for miscellaneous functions and methods"""
 from enum import Enum
 from functools import wraps
@@ -10,7 +32,6 @@ import random
 import re
 import socket
 import string
-import sys
 import tempfile
 from threading import Thread
 from typing import Union
@@ -118,9 +139,6 @@ class Plain_Report:
 
         if os.name == "posix":
             self.core.extend(["pexpect"])
-
-        if self.optional is not None and sys.version_info[1] < 9:
-            self.optional.append("ansys_corba")
 
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.
@@ -718,9 +736,9 @@ class Information:
 
     def __init__(self, mapdl):
         """Class Initializer"""
-        from ansys.mapdl.core.mapdl import _MapdlCore  # lazy import to avoid circular
+        from ansys.mapdl.core.mapdl import MapdlBase  # lazy import to avoid circular
 
-        if not isinstance(mapdl, _MapdlCore):  # pragma: no cover
+        if not isinstance(mapdl, MapdlBase):  # pragma: no cover
             raise TypeError("Must be implemented from MAPDL class")
 
         self._mapdl_weakref = weakref.ref(mapdl)
@@ -1126,7 +1144,7 @@ def requires_package(package_name, softerror=False):
                     f"To use the method '{function.__name__}', "
                     f"the package '{package_name}' is required.\n"
                     f"Please try to install '{package_name}' with:\n"
-                    f"pip install {package_name.replace('.','-') if 'ansys' in package_name else package_name}"
+                    f"pip install {package_name.replace('.', '-') if 'ansys' in package_name else package_name}"
                 )
 
                 if softerror:

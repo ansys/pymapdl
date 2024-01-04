@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Test MAPDL interface"""
 from datetime import datetime
 import os
@@ -22,6 +44,7 @@ if has_dependency("ansys-mapdl-reader"):
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
+    CommandDeprecated,
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlConnectionError,
@@ -35,6 +58,67 @@ from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 # Path to files needed for examples
 PATH = os.path.dirname(os.path.abspath(__file__))
 test_files = os.path.join(PATH, "test_files")
+
+DEPRECATED_COMMANDS = [
+    "edasmp",
+    "edbound",
+    "edbx",
+    "edcgen",
+    "edclist",
+    "edcmore",
+    "edcnstr",
+    "edcontact",
+    "edcrb",
+    "edcurve",
+    "eddbl",
+    "eddc",
+    "edipart",
+    "edlcs",
+    "edmp",
+    "ednb",
+    "edndtsd",
+    "ednrot",
+    "edpart",
+    "edpc",
+    "edsp",
+    "edweld",
+    "edadapt",
+    "edale",
+    "edbvis",
+    "edcadapt",
+    "edcpu",
+    "edcsc",
+    "edcts",
+    "eddamp",
+    "eddrelax",
+    "eddump",
+    "edenergy",
+    "edfplot",
+    "edgcale",
+    "edhgls",
+    "edhist",
+    "edhtime",
+    "edint",
+    "edis",
+    "edload",
+    "edopt",
+    "edout",
+    "edpl",
+    "edpvel",
+    "edrc",
+    "edrd",
+    "edri",
+    "edrst",
+    "edrun",
+    "edshell",
+    "edsolv",
+    "edstart",
+    "edterm",
+    "edtp",
+    "edvel",
+    "edwrite",
+    "rexport",
+]
 
 CMD_BLOCK = """/prep7
 ! Mat
@@ -155,6 +239,13 @@ def warns_in_cdread_error_log(mapdl, tmpdir):
             or (warn_cdread_3 in error_log)
         )
         return any(warns)
+
+
+@pytest.mark.parametrize("command", DEPRECATED_COMMANDS)
+def test_deprecated_commands(mapdl, command):
+    with pytest.raises(CommandDeprecated):
+        method = getattr(mapdl, command)
+        method()
 
 
 @requires("grpc")
@@ -469,11 +560,11 @@ def test_apdl_logging_start(tmpdir):
     assert "K,4,0,1,0" in text
 
 
-@requires("corba")
-def test_corba_apdl_logging_start(tmpdir):
+@requires("console")
+def test_console_apdl_logging_start(tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
-    mapdl = pymapdl.launch_mapdl(mode="CORBA", log_apdl=filename)
+    mapdl = launch_mapdl(log_apdl=filename, mode="console")
 
     mapdl.prep7()
     mapdl.run("!comment test")
@@ -1858,6 +1949,7 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
 
 
 @requires("local")
+@requires("nostudent")
 def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
         license_server_check=False, additional_switches=QUICK_LAUNCH_SWITCHES
@@ -2191,3 +2283,23 @@ def test_get_array_non_interactive(mapdl, solved_box):
     with pytest.raises(MapdlRuntimeError):
         with mapdl.non_interactive:
             mapdl.get_array("asdf", "2")
+
+
+def test_default_file_type_for_plots(mapdl):
+    assert mapdl.default_file_type_for_plots
+
+    with pytest.raises(ValueError):
+        mapdl.default_file_type_for_plots = "dummy"
+
+    mapdl.default_file_type_for_plots = "PNG"
+
+
+@requires("matplotlib")
+def test_use_vtk(mapdl):
+    assert isinstance(mapdl.use_vtk, bool)
+
+    prev = mapdl.use_vtk
+    mapdl.use_vtk = False
+    mapdl.eplot()
+
+    mapdl.use_vtk = prev

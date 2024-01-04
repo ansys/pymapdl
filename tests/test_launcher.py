@@ -1,13 +1,35 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Test the mapdl launcher"""
 
 import os
 import tempfile
-import weakref
+from time import sleep
 
 import pytest
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.errors import LicenseServerConnectionError
+from ansys.mapdl.core.errors import LicenseServerConnectionError, MapdlDidNotStart
 from ansys.mapdl.core.launcher import (
     _check_license_argument,
     _force_smp_student_version,
@@ -19,14 +41,7 @@ from ansys.mapdl.core.launcher import (
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from conftest import QUICK_LAUNCH_SWITCHES, requires
-
-try:
-    import ansys_corba  # noqa: F401
-
-    HAS_CORBA = True
-except:
-    HAS_CORBA = False
+from conftest import ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 
 try:
     from ansys.tools.path import (
@@ -127,7 +142,7 @@ def test_invalid_mode():
 def test_old_version():
     exec_file = find_ansys("150")[0]
     with pytest.raises(ValueError):
-        pymapdl.launch_mapdl(exec_file, mode="corba", start_timeout=start_timeout)
+        pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
 
 @requires("ansys-tools-path")
@@ -151,42 +166,35 @@ def test_launch_console(version):
     assert mapdl.version == int(version) / 10
 
 
-@requires("ansys-tools-path")
 @requires("local")
-@requires("corba")
-@pytest.mark.parametrize("version", installed_mapdl_versions)
-def test_launch_corba(version):
-    mapdl = pymapdl.launch_mapdl(
-        find_ansys(version)[0], mode="corba", start_timeout=start_timeout
-    )
-    assert mapdl.version == int(version) / 10
-    # mapdl.exit() # exit is already tested for in test_mapdl.py.
-    # Instead, test collection
-
-    mapdl_ref = weakref.ref(mapdl)
-    del mapdl
-    assert mapdl_ref() is None
-
-
-@requires("local")
+@requires("nostudent")
 def test_license_type_keyword():
     checks = []
     for license_name, license_description in LICENSES.items():
-        mapdl = launch_mapdl(
-            license_type=license_name,
-            start_timeout=start_timeout,
-            additional_switches=QUICK_LAUNCH_SWITCHES,
-        )
+        try:
+            mapdl = launch_mapdl(
+                license_type=license_name,
+                start_timeout=start_timeout,
+                additional_switches=QUICK_LAUNCH_SWITCHES,
+            )
 
-        # Using first line to ensure not picking up other stuff.
-        checks.append(license_description in mapdl.__str__().split("\n")[0])
-        mapdl.exit()
-        del mapdl
+            # Using first line to ensure not picking up other stuff.
+            checks.append(license_description in mapdl.__str__().split("\n")[0])
+            mapdl.exit()
+            del mapdl
+            sleep(2)
+
+        except MapdlDidNotStart as e:
+            if "ANSYS license not available" in str(e):
+                continue
+            else:
+                raise e
 
     assert any(checks)
 
 
 @requires("local")
+@requires("nostudent")
 def test_license_type_keyword_names():
     # This test might became a way to check available licenses, which is not the purpose.
 
@@ -209,6 +217,7 @@ def test_license_type_keyword_names():
 
 
 @requires("local")
+@requires("nostudent")
 def test_license_type_additional_switch():
     # This test might became a way to check available licenses, which is not the purpose.
     successful_check = False
@@ -480,3 +489,10 @@ default via 172.23.112.1 dev eth0 proto kernel
 172.23.112.0/20 dev eth0 proto kernel scope link src 172.23.121.145"""
 
     assert "172.23.112.1" == _parse_ip_route(output)
+
+
+def test_launched(mapdl):
+    if ON_LOCAL:
+        assert mapdl.launched
+    else:
+        assert not mapdl.launched

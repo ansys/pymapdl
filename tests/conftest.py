@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from collections import namedtuple
 from importlib import import_module
 import os
@@ -17,6 +39,7 @@ from common import (
     is_on_ci,
     is_on_local,
     is_on_ubuntu,
+    is_running_on_student,
     is_smp,
     support_plotting,
     testing_minimal,
@@ -32,6 +55,7 @@ TESTING_MINIMAL = testing_minimal()
 
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()
+ON_STUDENT = is_running_on_student()
 
 ON_UBUNTU = is_on_ubuntu()  # Tells if MAPDL is running on Ubuntu system or not.
 # Whether PyMAPDL is running on an ubuntu or different machine is irrelevant.
@@ -82,6 +106,11 @@ requires_on_cicd = pytest.mark.skipif(
     not ON_CI, reason="This test requires to be on CICD"
 )
 
+skip_if_running_student_version = pytest.mark.skipif(
+    ON_STUDENT,
+    reason="This tests does not work on student version. Maybe because license limitations",
+)
+
 
 def has_dependency(requirement):
     try:
@@ -125,11 +154,11 @@ def requires(requirement: str):
     elif "nowindows" == requirement:
         return skip_on_windows
 
+    elif "nostudent" == requirement:
+        return skip_if_running_student_version
+
     elif "console" == requirement:
         return pytest.mark.console
-
-    elif "corba" == requirement:
-        return pytest.mark.corba
 
     else:
         return requires_dependency(requirement)
@@ -230,9 +259,6 @@ def pytest_configure(config):
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--corba", action="store_true", default=False, help="run CORBA tests"
-    )
-    parser.addoption(
         "--console",
         action="store_true",
         default=False,
@@ -248,13 +274,6 @@ def pytest_addoption(parser):
 
 
 def pytest_collection_modifyitems(config, items):
-    if not config.getoption("--corba"):
-        # --corba given in cli: run CORBA interface tests
-        skip_corba = pytest.mark.skip(reason="need --corba option to run")
-        for item in items:
-            if "corba" in item.keywords:
-                item.add_marker(skip_corba)
-
     if not config.getoption("--console"):
         # --console given in cli: run console interface tests
         skip_console = pytest.mark.skip(reason="need --console option to run")
@@ -371,7 +390,7 @@ def mapdl_console(request):
         )
     ansys_base_paths = get_available_ansys_installations()
 
-    # find a valid version of corba
+    # find a valid version of console
     console_path = None
     for version in ansys_base_paths:
         version = abs(version)
@@ -389,41 +408,6 @@ def mapdl_console(request):
     from ansys.mapdl.core.mapdl_console import MapdlConsole
 
     assert isinstance(mapdl, MapdlConsole)
-    mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
-
-    # using yield rather than return here to be able to test exit
-    yield mapdl
-
-    # verify mapdl exits
-    mapdl.exit()
-    assert mapdl._exited
-    assert "MAPDL exited" in str(mapdl)
-    with pytest.raises(MapdlExitedError):
-        mapdl.prep7()
-
-
-@pytest.fixture(scope="session")
-def mapdl_corba(request):
-    ansys_base_paths = get_available_ansys_installations()
-
-    # find a valid version of corba
-    corba_path = None
-    for version in ansys_base_paths:
-        version = abs(version)
-        if version >= 170 and version < 202:
-            corba_path = find_ansys(str(version))[0]
-
-    if corba_path is None:
-        raise MapdlRuntimeError(
-            '"-corba" testing option unavailable.'
-            "No local CORBA compatible MAPDL installation found.  "
-            "Valid versions are ANSYS 17.0 up to 2020R2."
-        )
-
-    mapdl = launch_mapdl(corba_path)
-    from ansys.mapdl.core.mapdl_corba import MapdlCorba
-
-    assert isinstance(mapdl, MapdlCorba)
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
 
     # using yield rather than return here to be able to test exit

@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Test post-processing module for ansys.mapdl.core"""
 import inspect
 import re
@@ -10,8 +32,10 @@ from conftest import has_dependency, requires
 if has_dependency("pyvista"):
     from pyvista import Plotter
     from pyvista.plotting.renderer import CameraPosition
+    from ansys.mapdl.core.theme import PyMAPDL_cmap
 
 from ansys.mapdl.core import examples
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.post import (
     COMPONENT_STRESS_TYPE,
     PRINCIPAL_TYPE,
@@ -158,7 +182,10 @@ def test_disp_norm_all(mapdl, static_solve):
 @requires("pyvista")
 def test_disp_plot(mapdl, static_solve, comp):
     assert (
-        mapdl.post_processing.plot_nodal_displacement(comp, smooth_shading=True) is None
+        mapdl.post_processing.plot_nodal_displacement(
+            comp, smooth_shading=True, cmap=PyMAPDL_cmap
+        )
+        is None
     )
 
 
@@ -936,6 +963,15 @@ def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
         )
         is None
     )
+
+
+def test_exited(mapdl):
+    mapdl._exited = True
+    with pytest.raises(MapdlRuntimeError):
+        mapdl.post_processing.plot_nodal_displacement(
+            "NORM", line_width=10, render_lines_as_tubes=True, smooth_shading=True
+        )
+    mapdl._exited = False
 
 
 ###############################################################################

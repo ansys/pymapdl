@@ -1,5 +1,27 @@
-"""Component related module"""
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
+"""Component related module"""
+import re
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -220,9 +242,9 @@ class ComponentManager:
         mapdl : ansys.mapdl.core.Mapdl
             Mapdl instance which this class references to.
         """
-        from ansys.mapdl.core.mapdl import _MapdlCore
+        from ansys.mapdl.core.mapdl import MapdlBase
 
-        if not isinstance(mapdl, _MapdlCore):
+        if not isinstance(mapdl, MapdlBase):
             raise TypeError("Must be implemented from MAPDL class")
 
         self._mapdl_weakref: weakref.ReferenceType[Mapdl] = weakref.ref(mapdl)
@@ -514,3 +536,73 @@ class ComponentManager:
             if i_type_ == type_:
                 dict_[each_comp] = i_items
         return dict_
+
+
+def _parse_cmlist_indiv(
+    cmname: str, cmtype: str, cmlist: Optional[str] = None
+) -> List[int]:
+    # Capturing blocks
+    if "NAME" in cmlist and "SUBCOMPONENTS" in cmlist:
+        header = r"NAME\s+TYPE\s+SUBCOMPONENTS"
+
+    elif "LIST COMPONENT" in cmlist:
+        header = ""
+
+    cmlist = "\n\n".join(
+        re.findall(
+            r"(?s)" + header + r"\s+(.*?)\s*(?=\n\s*\n|\Z)",
+            cmlist,
+            flags=re.DOTALL,
+        )
+    )
+
+    # Capturing items in each block
+    rg = cmname.upper() + r"\s+" + cmtype.upper() + r"\s+(.*?)\s*(?=\n\s*\n|\Z)"
+    items = "\n".join(re.findall(rg, cmlist, flags=re.DOTALL))
+
+    # Joining them together and giving them format.
+    items = items.replace("\n", "  ").split()
+    items = [int(each) for each in items]
+
+    return items
+
+
+def _parse_cmlist(cmlist: Optional[str] = None) -> Dict[str, Any]:
+    include_selection = False
+    if re.search(r"NAME\s+TYPE\s+SUBCOMPONENTS", cmlist):
+        # header
+        #  "NAME                            TYPE      SUBCOMPONENTS"
+        blocks = re.findall(
+            r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+            cmlist,
+            flags=re.DOTALL,
+        )
+    elif re.search(r"NAME\s+SELE\s+TYPE\s+SUBCOMPONENTS", cmlist):
+        blocks = re.findall(
+            r"(?s)NAME\s+SELE\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+            cmlist,
+            flags=re.DOTALL,
+        )
+        # Using `cmlist,all` which also includes selection
+        include_selection = True
+    elif "LIST ALL SELECTED COMPONENTS":
+        blocks = cmlist.splitlines()[1:]
+    else:
+        raise ValueError("The format of the CMLIST output is not recognaised.")
+
+    cmlist = "\n".join(blocks)
+
+    def extract(each_line, ind):
+        return each_line.split()[ind].strip()
+
+    def extract_line(each_line):
+        if include_selection:
+            return [extract(each_line, 1), extract(each_line, 2)]
+        else:
+            return extract(each_line, 1)
+
+    return {
+        extract(each_line, 0): extract_line(each_line)
+        for each_line in cmlist.splitlines()
+        if each_line
+    }
