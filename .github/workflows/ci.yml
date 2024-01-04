@@ -127,14 +127,14 @@ jobs:
 
       - name: "Setup Python with cache"
         uses: actions/setup-python@v5
-        if:  teps.changes.outputs.workflows != 'true'
+        if:  steps.changes.outputs.workflows != 'true'
         with:
           cache: 'pip'
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Setup Python without cache"
         uses: actions/setup-python@v5
-        if: teps.changes.outputs.workflows == 'true'
+        if: steps.changes.outputs.workflows == 'true'
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
