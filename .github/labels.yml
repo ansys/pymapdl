@@ -31,55 +31,55 @@
 # ===========
 
 - name: BLOCKER
-  description: "No further development until this is fixed."
-  color: C0392B # Red
+  description: "No further development until this is fixed"
+  color: C0392B
 
 - name: Critical Priority
   description: "This issue affects almost all users"
-  color: E67E22 # Orange
+  color: E67E22
 
 - name: Major Priority
   description: "This issue affects some users"
-  color: F4D03F # yellow
+  color: F4D03F
 
 - name: Minor Priority
   description: "It does not affect almost any users"
-  color: F9E79F # light yellow
+  color: F9E79F
 
 - name: Future
   description: "To work on it in the future, since it can be delayed"
-  color: 27AE60  # Green
+  color: 27AE60
 
 - name: Won't fix
   description: "For different reasons, this won't be fixed"
-  color: ffffff # white
+  color: ffffff
 
 #############################################################
 # By Category
 # ===========
 
 - name: BUG
-  description: ""
+  description: "Issue, problem or error in PyMAPDL"
   color: E67E22
 
 - name: New Feature
-  description: Request or proposal for a new feature
+  description: "Request or proposal for a new feature"
   color: 2E86C1
   
 - name: Enhancement
-  description: Improve any current implemented feature.
+  description: "Improve any current implemented feature"
   color: 85C1E9
 
 - name: Examples
-  description: ""
+  description: "Publishing PyMAPDL examples"
   color: A569BD
 
 - name: Documentation
-  description: ""
+  description: "Documentation related (improving, adding, etc)"
   color: A569BD
 
 - name: Maintenance
-  description: Maintenance
+  description: "General maintenance of the repo (libraries, cicd, etc)"
   color: 76D7C4
 
 - name: Discussion
@@ -91,49 +91,50 @@
   color: 76D7C4
 
 #############################################################
-# Context
-# =======
-
-- name: DO NOT MERGE
-  description: ""
-  color: C0392B
+# Issue management
+# ================
 
 - name: Duplicate
-  description: ""
+  description: "Duplicated issue"
   color: E67E22
 
 - name: Good First Issue
-  description: Good and easy issue to start to work in PyANSYS development.
+  description: "Best way to start working on PyMAPDL development"
   color: 27AE60
 
-- name: Help wanted
-  description: Tell the developers you need help or guidance.
+- name: Help wanted!
+  description: "Tell the developers you need help or guidance"
   color: F4D03F
 
 - name: Stale
-  description: Stale issue, it will be closed.
+  description: "Stale issue, it will be closed soon"
   color: E67E22
 
 #############################################################
 # For repo maintance
 # ==================
+# (Only maintainers should use them)
+
+- name: DO NOT MERGE
+  description: "Not ready to be merged yet"
+  color: C0392B
 
 - name: CI/CD
-  description: ""
+  description: "Related with CICD, Github Actions, etc"
   color: F9E79F
 
 - name: Dependencies
-  description: Dependencies
+  description: ""
   color: F9E79F
 
 - name: MAPDL
-  description: Requires changes in MAPDL
+  description: "Requires changes in MAPDL"
   color: 000000
 
 - name: reminder
-  description: "Label for the reminder bot"
+  description: "Related to the reminder bot"
   color: ffffff
 
 - name: Build failed
-  description: "Label for the build fails"
+  description: "Schedule build fails"
   color: E67E22
