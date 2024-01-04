@@ -35,6 +35,8 @@ import time
 from typing import TYPE_CHECKING, Tuple, Union
 import warnings
 
+import psutil
+
 try:
     import ansys.platform.instancemanagement as pypim
 
@@ -57,6 +59,8 @@ from ansys.mapdl.core.errors import (
     LockFileException,
     MapdlDidNotStart,
     MapdlRuntimeError,
+    PortAlreadyInUse,
+    PortAlreadyInUseByAnMAPDLInstance,
     VersionError,
 )
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
@@ -212,12 +216,44 @@ def port_in_use(port, host=LOCALHOST):
     - An attempt was made to access a socket in a way forbidden by its
       access permissions.
     """
+    return port_in_use_using_socket(port, host) and port_in_use_using_psutil(port)
+
+
+def port_in_use_using_socket(port, host):
+    """
+    Must actually "bind" the address.  Just checking if we can create
+    a socket is insufficient as it's possible to run into permission
+    errors like:
+
+    - An attempt was made to access a socket in a way forbidden by its
+      access permissions.
+    """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.bind((host, port))
         try:
             sock.bind((host, port))
             return False
         except:
             return True
+
+
+def is_ansys_process(proc):
+    return "ansys" in proc.name().lower() or "mapdl" in proc.name().lower()
+
+
+def get_process_at_port(port):
+    for proc in psutil.process_iter():
+        for conns in proc.connections(kind="inet"):
+            if conns.laddr.port == port:
+                return proc
+    return None
+
+
+def port_in_use_using_psutil(port):
+    if get_process_at_port(port):
+        return True
+    else:
+        return False
 
 
 def launch_grpc(
@@ -457,9 +493,18 @@ def launch_grpc(
             port = max(pymapdl._LOCAL_PORTS) + 1
             LOG.debug(f"Using next available port: {port}")
 
-    while port_in_use(port) or port in pymapdl._LOCAL_PORTS:
-        port += 1
-        LOG.debug(f"Port in use.  Incrementing port number. port={port}")
+        while port_in_use(port) or port in pymapdl._LOCAL_PORTS:
+            port += 1
+            LOG.debug(f"Port in use.  Incrementing port number. port={port}")
+
+    else:
+        if port_in_use(port):
+            proc = get_process_at_port(port)
+            if is_ansys_process(proc):
+                raise PortAlreadyInUseByAnMAPDLInstance
+            else:
+                raise PortAlreadyInUse
+
     pymapdl._LOCAL_PORTS.append(port)
 
     cpu_sw = "-np %d" % nproc

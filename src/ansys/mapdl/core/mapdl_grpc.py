@@ -424,7 +424,7 @@ class MapdlGrpc(MapdlBase):
         except MapdlConnectionError as err:  # pragma: no cover
             self._post_mortem_checks()
             self._log.debug(
-                "The error wasn't catch by the post-mortem checks.\nThe stdout is printed now:"
+                "The error wasn't caught by the post-mortem checks.\nThe stdout is printed now:"
             )
             self._log.debug(self._stdout)
 
