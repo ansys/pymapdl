@@ -1,6 +1,27 @@
 
+
+#############################################################
+# Main colors (hex)
+# =================
+
+# C0392B # Red: International Orange (Golden Gate Bridge)
+# E67E22 # Orange: Vivid Tangelo
+# F4D03F # Yellow: Sandstorm
+# F9E79F # Light yellow: Medium champagne
+# 27AE60 # Green: Green (Crayola)
+# ffffff # white
+# 2E86C1 # Dark blue: Cyan Cornflower Blue
+# 85C1E9 # Light blue: Aero
+# A569BD # Purple: Rich Lavender
+# 76D7C4 # Light green: Pearl Aqua
+# 000000 # Black
+
+# https://htmlcolorcodes.com/ -- For color picking
+# https://www.color-name.com/ -- For colors to names
+
 #############################################################
 # By priority
+# ===========
 
 - name: BLOCKER
   description: "No further development until this is fixed."
@@ -28,6 +49,7 @@
 
 #############################################################
 # By Category
+# ===========
 
 - name: BUG
   description: ""
@@ -63,6 +85,7 @@
 
 #############################################################
 # Context
+# =======
 
 - name: DO NOT MERGE
   description: ""
@@ -86,6 +109,7 @@
 
 #############################################################
 # For repo maintance
+# ==================
 
 - name: CI/CD
   description: ""
