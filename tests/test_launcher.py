@@ -515,6 +515,6 @@ def test_launched(mapdl):
         assert not mapdl.launched
 
 
-def test_launching_on_busy_port():
+def test_launching_on_busy_port(mapdl):
     with pytest.raises(PortAlreadyInUseByAnMAPDLInstance):
-        launch_mapdl(port=50052)
+        launch_mapdl(port=mapdl.port)
