@@ -64,7 +64,7 @@
 
 - name: New Feature
   description: "Request or proposal for a new feature"
-  color: 2E86C1
+  color: 85C1E9
   
 - name: Enhancement
   description: "Improve any current implemented feature"
