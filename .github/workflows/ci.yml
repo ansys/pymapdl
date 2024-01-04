@@ -883,7 +883,7 @@ jobs:
 
   notify:
     name: Notify failed build
-    needs: [upload-dev-docs]
+    needs: [smoke-tests, docs-build, build-test, build-test-ubuntu, build-test-ubuntu-minimal]
     if: failure() && github.event.pull_request == null
     runs-on: ubuntu-latest
     steps:
@@ -892,4 +892,4 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           title-template: "Failed scheduled build"
-          label-name: "Nightly build failed"
+          label-name: "Build failed"
