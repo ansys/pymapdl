@@ -518,8 +518,11 @@ By default, it stops instances running on the port 50052.""",
                 if is_ansys_process(proc):
                     # Killing "all"
                     if all:
-                        proc.kill()
-                        killed_ = True
+                        try:
+                            proc.kill()
+                            killed_ = True
+                        except psutil.NoSuchProcess:
+                            pass
 
                     # Killing by ports
                     for conns in proc.connections(kind="inet"):
