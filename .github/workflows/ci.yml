@@ -506,7 +506,6 @@ jobs:
       P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"
       PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
 
-
     steps:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4
@@ -548,6 +547,8 @@ jobs:
           python -m pip install .[tests]
 
       - name: "Unit testing"
+        env:
+          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
         run: |
           unset PYMAPDL_PORT
           unset PYMAPDL_START_INSTANCE
@@ -637,8 +638,6 @@ jobs:
       ON_LOCAL: true
       ON_UBUNTU: true
       ON_STUDENT: true
-      # Because there is no 'ansys-tools-path' we need to input the executable path.
-      PYMAPDL_MAPDL_EXEC: /ansys_inc/v241/ansys/bin/ansys241
 
     steps:
       - name: "Install Git and checkout project"
@@ -673,7 +672,16 @@ jobs:
           python -m pip install pytest pytest-rerunfailures pytest-cov
 
       - name: "Unit testing"
+        env:
+          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
         run: |
+          # Because there is no 'ansys-tools-path' we need to input the executable path.
+          version=echo ${{ matrix.mapdl-image }} | head -c 5 | tail -c 4 | tr -d '.'
+          echo $version
+
+          export PYMAPDL_MAPDL_EXEC=/ansys_inc/v$version/ansys/bin/ansys$version
+          echo $PYMAPDL_MAPDL_EXEC
+
           unset PYMAPDL_START_INSTANCE
           pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
