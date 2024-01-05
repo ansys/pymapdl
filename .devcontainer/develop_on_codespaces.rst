@@ -14,7 +14,7 @@ through the process of setting up your environment.
    free allowance per month.
    After that, you must pay according to `GitHub pricing <github_pricing_>`_.
    You can check your billing details in your `GitHub account settings` under
-   `Billing and plans` and `Plans and usage`.
+   *Billing and plans* and *Plans and usage*.
 
 
 How to start

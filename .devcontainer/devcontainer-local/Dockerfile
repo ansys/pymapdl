@@ -7,7 +7,7 @@ USER root
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Installing libs for testing and docs
-RUN apt-get -qq update && apt install -qq -y libgl1-mesa-glx xvfb libgomp1 zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex && \
+RUN apt-get -qq update && apt-get install -qq -y libgl1-mesa-glx xvfb libgomp1 zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex && \
     apt-get -qq clean  && rm -rf /var/lib/apt/lists/* && \
     usermod -s /bin/bash $USERNAME
 
