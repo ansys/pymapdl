@@ -1,10 +1,10 @@
 .. _develop_on_containers:
 
 =======================
-Develop on a containers
-=======================
+Develop on containers
+=====================
 
-This guide guides you on how to develop PyMAPDL features or fix bugs using
+This guide describes how to develop PyMAPDL features or fix bugs using
 a `remote container <https://code.visualstudio.com/docs/devcontainers/containers>`_
 or `Codespaces <https://github.com/features/codespaces>`_.
 The files for setting up the container can be found in the 
@@ -32,7 +32,7 @@ This environment variable sets the port and IP address of the license server.
 If you do not have set this environment variable before launching the
 container, you are prompt to enter your license server port and address.
 
-You can set the environment variable :envvar:`ANSYSLMD_LICENSE_FILE`
+You can set the :envvar:`ANSYSLMD_LICENSE_FILE` environment variable 
 from the terminal before launching VS Code.
 For example, if you have a license server at the address ``123.45.67.89``,
 you can set the license on Windows using:

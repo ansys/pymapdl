@@ -5,10 +5,10 @@ Develop on Codespaces
 =====================
 
 `Codespaces <codespaces_>`_ is a virtual development environment provided by GitHub.
-You can launch a container which all the required tools and start to work
+You can launch a container with all the required tools and start to work
 in couple of minutes.
 This is an easy way to get started with PyMAPDL development without going
-through the process of setting your environment.
+through the process of setting up your environment.
 
 .. warning:: `Codespaces <codespaces_>`_  are not free, but they have a generous
    free allowance per month.
@@ -20,43 +20,45 @@ through the process of setting your environment.
 How to start
 ------------
 
-To start a Codespace environment you must go to the repository page
-`PyMAPDL <pymapdl_repo_>`_, and click on the ``<> Code`` green button,
-and select the tab ``Codespaces``.
-There you can click on `+` to open a default Codespace environment.
+To start a Codespace environment, go to the
+`PyMAPDL repository <pymapdl_repo_>`_, click the green **Code** button,
+and select the **Codespaces** tab.
+Then, click the **+** button to open a default Codespace environment.
 
-Alternatively, you can click on the `...` button and then click on
-``New with options``.
-The next window shows you the configuration form. You can choose the ``branch``,
-the ``Dev container configuration``, the ``Region`` and the ``Machine type``.
-The ``branch`` refers to the PyMAPDL Github branch from which the
-configuration is load from.
-The `Dev container configuration` refers to the Codespaces configuration.
-Currently, there are 3 main configurations:
+Alternatively, you can click the menu button and then select
+**New with options**.
+
+The next window shows you the configuration form. You can set these options: **branch**,
+**Dev container configuration**, **Region**, and **Machine type**.
+
+The **branch`` option sets the PyMAPDL GitHub branch to load the configuration from.
+The **Dev container configuration** option sets the Codespaces configuration.
+
+Currently, there are three main configurations:
 
 * **PyMAPDL-Codespaces-Developer**. This is the default configuration.
   It contains the OS and Python dependencies
-  to develop and test PyMAPDL. For instance, it has installed ``xvfb``
-  and ``pytest`` for testing.
+  to develop and test PyMAPDL. For instance, it has ``xvfb``
+  and ``pytest`` packages installed for testing.
 * **PyMAPDL-Codespaces-Documentation**. This configuration is specially
-  set for people working with the documentation or examples, and hence
+  set for people working with the documentation or examples. Thus,
   it includes the appropriate OS and Python dependencies.
-  For instance, it includes ``sphinx`` and ``latex`` to build the documentation
-  as HTML and PDF.
+  For instance, it includes ``sphinx`` and ``latex`` packages for building the documentation
+  as HTML and PDF outputs.
 * **PyMAPDL-DevContainer (Local) [NOT RECOMMENDED]**. This is the
   configuration for launching a development container locally.
-  This container follow similar steps to the preceding configurations,
-  but it is for use locally together with Visual Code, hence
+  This container is similar to the preceding configurations,
+  but it is for use locally together with Visual Studio Code. Thus,
   you **must not** select it when creating your Codespaces environment.
-  To get more information about how to launch a development container locally,
-  visit :ref:`develop_on_remote_containers`.
+  To get more information on how to launch a development container locally,
+  see :ref:`develop_on_remote_containers`.
 
-Lastly, the ``Machine type`` allows you to choose the specifications of
-the machine hosting the Codespace. The more powerful the machine is, the
-more quota of your Codespaces allowance (free or paid) consumes.
+Lastly, the **Machine type** option allows you to choose the specifications of
+the machine hosting the Codespace. The amount of your Codespace allowance
+(free or paid) that consumed is proportional to the power of your machine.
 
-.. warning:: If you choose `New with options`, building the Codespace
-    might take longer (up to 5 minutes) than using the default configuration.
+.. warning:: If you choose **New with options**, building the Codespace
+    might take longer (up to five minutes) than if you choose the default configuration.
 
 How to use
 ==========
@@ -64,31 +66,30 @@ How to use
 The usage of a in-browser Codespaces is very simple if you are
 familiar with Visual Code.
 You can do almost anything that you can do in a Visual Code instance
-installed locally. Create, edit and delete files, install extensions, etc.
+installed locally. For example, you can create, edit, and delete files, or you can install extensions.
 
-You can connect to your Codespaces from your local IDE, by opening the
-``Command palette`` (:kbd:`Ctr/⌘` + :kbd:`Shift` + :kbd:`P`) and selecting
-``Open in`` and the name of your IDE.
-Alternatively, you can also go to the PyMAPDL repository, click on 
-``<> Code`` button, ``Codespaces`` tab and then in the machine you want
-to connect to.
+You can connect to your Codespaces from your local IDE by opening the
+**Command palette** (:kbd:`Ctr/⌘` + :kbd:`Shift` + :kbd:`P`) and selecting
+**Open in** and the name of your IDE.
 
-.. note:: If by mistake you close your browser window, your Codespace is still running.
-    You can access it again from the PyMAPDL repository, by clicking on the ``<> Code``
-    button and then ``Codespaces`` tab. Then you should see a list of your current
-    (active and stopped) Codespaces. Just select the one you want.
+Alternatively, you can go to the PyMAPDL repository, click the **Code** button and **Codespaces** tab,
+and then select the machine that you want to connect to.
+
+.. note:: If you mistakenly close your browser window, your Codespace is still running.
+    You can access it again from the PyMAPDL repository, by clicking the green **Code**
+    button and then the **Codespaces** tab. You should see a list of your current
+    (active and stopped) Codespaces, where you can select the one that you want.
 
 .. warning:: Closing the browser window does not stop the Codespace
-    from running, and hence from billing you.
-    You can stop the Codespace environment from the
-    `Command palette` (:kbd:`Ctr/⌘` + :kbd:`Shift` + :kbd:`P`), and then search
-    for `Stop current Codespace`.
+    from running, which means you contibue to be billed. Stop the Codespace from the
+   **Command palette** (:kbd:`Ctr/⌘` + :kbd:`Shift` + :kbd:`P`) and then search
+    for ``Stop current Codespace``.
 
 Limitations
 ===========
 
-* Codespaces does not allow opening windows for plotting. However you can plot to a file,
-  and open it with the ``File explorer`` tab.
+* Codespaces does not allow opening windows for plotting. However, you can plot to a file
+  and then open it from the **File explorer** tab.
 * When you open a Codespace from your local IDE, you might lose some configuration.
-  For instance, you might find yourself in a different working directory, or that the
-  python virtual environment is not properly activated.
+  For instance, you might find yourself in a different working directory, or you might see that the
+  Python virtual environment is not properly activated.

@@ -1,13 +1,13 @@
-==========================================================
-Welcome to GitHub PyMAPDL Codespaces for Developers!! 🧑‍💻👩‍💻
-==========================================================
+============================================================
+Welcome to GitHub PyMAPDL Codespaces for developers 🧑‍💻👩‍💻
+============================================================
 
 
 🛑 Disclaimer
 =============
 
-You **must use this Codespace only for developing, contributing, documenting and/or
-write examples for PyMAPDL**.
+**You must use this Codespace only for developing, contributing, documenting, and
+writing examples for PyMAPDL**.
 
 Additionally, this Codespace is using an MAPDL Student version which is
 available `here <https://www.ansys.com/academic/students>`_
