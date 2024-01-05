@@ -32,8 +32,10 @@ import subprocess
 import tempfile
 import threading
 import time
-from typing import TYPE_CHECKING, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 import warnings
+
+import psutil
 
 try:
     import ansys.platform.instancemanagement as pypim
@@ -57,6 +59,8 @@ from ansys.mapdl.core.errors import (
     LockFileException,
     MapdlDidNotStart,
     MapdlRuntimeError,
+    PortAlreadyInUse,
+    PortAlreadyInUseByAnMAPDLInstance,
     VersionError,
 )
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
@@ -113,7 +117,7 @@ Be aware of possible errors or unexpected behavior with this configuration.
 GALLERY_INSTANCE = [None]
 
 
-def _cleanup_gallery_instance():  # pragma: no cover
+def _cleanup_gallery_instance() -> None:  # pragma: no cover
     """This cleans up any left over instances of MAPDL from building the gallery."""
     if GALLERY_INSTANCE[0] is not None:
         mapdl = MapdlGrpc(
@@ -126,7 +130,7 @@ def _cleanup_gallery_instance():  # pragma: no cover
 atexit.register(_cleanup_gallery_instance)
 
 
-def _is_ubuntu():
+def _is_ubuntu() -> bool:
     """Determine if running as Ubuntu.
 
     It's a bit complicated because sometimes the distribution is
@@ -157,7 +161,7 @@ def _is_ubuntu():
         return "ubuntu" in platform.platform().lower()
 
 
-def close_all_local_instances(port_range=None):
+def close_all_local_instances(port_range: range = None) -> None:
     """Close all MAPDL instances within a port_range.
 
     This function can be used when cleaning up from a failed pool or
@@ -181,7 +185,8 @@ def close_all_local_instances(port_range=None):
         port_range = range(50000, 50200)
 
     @threaded
-    def close_mapdl(port, name="Closing mapdl thread."):
+    def close_mapdl(port: Union[int, str], name: str = "Closing mapdl thread."):
+        # Name argument is used by the threaded decorator.
         try:
             mapdl = MapdlGrpc(port=port, set_no_abort=False)
             mapdl.exit()
@@ -194,7 +199,7 @@ def close_all_local_instances(port_range=None):
             close_mapdl(port)
 
 
-def check_ports(port_range, ip="localhost"):
+def check_ports(port_range: range, ip: str = "localhost") -> List[int]:
     """Check the state of ports in a port range"""
     ports = {}
     for port in port_range:
@@ -202,8 +207,21 @@ def check_ports(port_range, ip="localhost"):
     return ports
 
 
-def port_in_use(port, host=LOCALHOST):
+def port_in_use(port: Union[int, str], host: str = LOCALHOST) -> bool:
     """Returns True when a port is in use at the given host.
+
+    Must actually "bind" the address.  Just checking if we can create
+    a socket is insufficient as it's possible to run into permission
+    errors like:
+
+    - An attempt was made to access a socket in a way forbidden by its
+      access permissions.
+    """
+    return port_in_use_using_socket(port, host) or port_in_use_using_psutil(port)
+
+
+def port_in_use_using_socket(port: Union[int, str], host: str) -> bool:
+    """Returns True when a port is in use at the given host using socket librry.
 
     Must actually "bind" the address.  Just checking if we can create
     a socket is insufficient as it's possible to run into permission
@@ -220,21 +238,49 @@ def port_in_use(port, host=LOCALHOST):
             return True
 
 
+def is_ansys_process(proc: psutil.Process) -> bool:
+    """Check if the given process is an Ansys MAPDL process"""
+    return (
+        proc.name().lower().startswith(("ansys", "mapdl")) and "-grpc" in proc.cmdline()
+    )
+
+
+def get_process_at_port(port) -> Optional[psutil.Process]:
+    """Get the process (psutil.Process) running at the given port"""
+    for proc in psutil.process_iter():
+        for conns in proc.connections(kind="inet"):
+            if conns.laddr.port == port:
+                return proc
+    return None
+
+
+def port_in_use_using_psutil(port: Union[int, str]) -> bool:
+    """Returns True when a port is in use at the given host using psutil.
+
+    This function iterate over all the process, and their connections until
+    it finds one using the given port.
+    """
+    if get_process_at_port(port):
+        return True
+    else:
+        return False
+
+
 def launch_grpc(
-    exec_file="",
-    jobname="file",
-    nproc=2,
-    ram=None,
-    run_location=None,
-    port=MAPDL_DEFAULT_PORT,
-    ip=LOCALHOST,
-    additional_switches="",
-    override=True,
-    timeout=20,
-    verbose=None,
-    add_env_vars=None,
-    replace_env_vars=None,
-    **kwargs,
+    exec_file: str = "",
+    jobname: str = "file",
+    nproc: int = 2,
+    ram: Optional[int] = None,
+    run_location: str = None,
+    port: int = MAPDL_DEFAULT_PORT,
+    ip: str = LOCALHOST,
+    additional_switches: str = "",
+    override: bool = True,
+    timeout: int = 20,
+    verbose: Optional[bool] = None,
+    add_env_vars: Optional[Dict[str, str]] = None,
+    replace_env_vars: Optional[Dict[str, str]] = None,
+    **kwargs,  # to keep compatibility with corba and console interface.
 ) -> Tuple[int, str, subprocess.Popen]:
     """Start MAPDL locally in gRPC mode.
 
@@ -457,9 +503,18 @@ def launch_grpc(
             port = max(pymapdl._LOCAL_PORTS) + 1
             LOG.debug(f"Using next available port: {port}")
 
-    while port_in_use(port) or port in pymapdl._LOCAL_PORTS:
-        port += 1
-        LOG.debug(f"Port in use.  Incrementing port number. port={port}")
+        while port_in_use(port) or port in pymapdl._LOCAL_PORTS:
+            port += 1
+            LOG.debug(f"Port in use.  Incrementing port number. port={port}")
+
+    else:
+        if port_in_use(port):
+            proc = get_process_at_port(port)
+            if is_ansys_process(proc):
+                raise PortAlreadyInUseByAnMAPDLInstance
+            else:
+                raise PortAlreadyInUse
+
     pymapdl._LOCAL_PORTS.append(port)
 
     cpu_sw = "-np %d" % nproc

@@ -424,7 +424,7 @@ class MapdlGrpc(MapdlBase):
         except MapdlConnectionError as err:  # pragma: no cover
             self._post_mortem_checks()
             self._log.debug(
-                "The error wasn't catch by the post-mortem checks.\nThe stdout is printed now:"
+                "The error wasn't caught by the post-mortem checks.\nThe stdout is printed now:"
             )
             self._log.debug(self._stdout)
 
@@ -1132,7 +1132,13 @@ class MapdlGrpc(MapdlBase):
         a local process.
 
         """
-        self._log.debug("Killing MAPDL server")
+        try:
+            self._log.debug("Killing MAPDL server")
+        except ValueError:
+            # It might throw ValueError: I/O operation on closed file.
+            # if the logger already exited.
+            pass
+
         if (
             self._version >= 24.2
         ):  # We can't use the non-cached version because of recursion error.

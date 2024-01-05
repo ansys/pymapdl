@@ -118,10 +118,25 @@ jobs:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4
 
-      - name: "Setup Python"
+      - name: "Getting files change filters"
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            workflows:
+              - '.github/workflows/**'
+
+      - name: "Setup Python with cache"
         uses: actions/setup-python@v5
+        if:  steps.changes.outputs.workflows != 'true'
         with:
           cache: 'pip'
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+
+      - name: "Setup Python without cache"
+        uses: actions/setup-python@v5
+        if: steps.changes.outputs.workflows == 'true'
+        with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Install OS packages"
@@ -160,6 +175,7 @@ jobs:
 
       - name: "Cache examples"
         uses: actions/cache@v3
+        if: steps.changes.outputs.workflows != 'true'
         with:
           path: doc/source/examples
           key: Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -168,6 +184,7 @@ jobs:
 
       - name: "Cache docs build directory"
         uses: actions/cache@v3
+        if: steps.changes.outputs.workflows != 'true'
         with:
           path: doc/_build
           key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -176,6 +193,7 @@ jobs:
 
       - name: "Cache autosummary"
         uses: actions/cache@v3
+        if: steps.changes.outputs.workflows != 'true'
         with:
           path: doc/source/**/_autosummary/*.rst
           key: autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -306,11 +324,25 @@ jobs:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4
 
-      - name: "Setup Python"
+      - name: "Getting files change filters"
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            workflows:
+              - '.github/workflows/**'
+
+      - name: "Setup Python with cache"
         uses: actions/setup-python@v5
+        if:  steps.changes.outputs.workflows != 'true'
         with:
           cache: 'pip'
-          cache-dependency-path: pyproject.toml
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+
+      - name: "Setup Python without cache"
+        uses: actions/setup-python@v5
+        if: steps.changes.outputs.workflows == 'true'
+        with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
       - name: "Install os packages"
@@ -515,8 +547,24 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: "Setup Python"
+      - name: "Getting files change filters"
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            workflows:
+              - '.github/workflows/**'
+
+      - name: "Setup Python with cache"
         uses: actions/setup-python@v5
+        if:  steps.changes.outputs.workflows != 'true'
+        with:
+          cache: 'pip'
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+
+      - name: "Setup Python without cache"
+        uses: actions/setup-python@v5
+        if: steps.changes.outputs.workflows == 'true'
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
@@ -653,8 +701,24 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgomp1
 
-      - name: "Setup Python"
+      - name: "Getting files change filters"
+        uses: dorny/paths-filter@v2
+        id: changes
+        with:
+          filters: |
+            workflows:
+              - '.github/workflows/**'
+
+      - name: "Setup Python with cache"
         uses: actions/setup-python@v5
+        if:  steps.changes.outputs.workflows != 'true'
+        with:
+          cache: 'pip'
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+
+      - name: "Setup Python without cache"
+        uses: actions/setup-python@v5
+        if: steps.changes.outputs.workflows == 'true'
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
