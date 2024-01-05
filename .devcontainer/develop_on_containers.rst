@@ -14,10 +14,9 @@ To use a `remote container <vscode_devcontainers_containers_>`_, you must instal
 
 * `Visual Studio Code <vscode_>`_
 * `Docker software <docker_main_>`_ or equivalent.
-  It is recommended to use Windows Subsystem Linux (WSL) backend to run Linux
-  docker containers.
-  See `Developing inside a Container Getting started <vscode_devcontainers_containers_getting_started_>`_
-  for more information.
+  To run Linux Docker containers, you should use the Windows Subsystem Linux (WSL) backend. For
+  more information, see `Developing inside a Container - Getting started
+  <vscode_devcontainers_containers_getting_started_>`_.
 * `Remove Development VS Code extension pack <vscode_devcontainers_remote_extension_>`_
 
 As mentioned before, you must have your own Docker image with MAPDL installed
