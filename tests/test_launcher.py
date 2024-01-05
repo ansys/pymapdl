@@ -26,12 +26,14 @@ import os
 import tempfile
 from time import sleep
 
+import psutil
 import pytest
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import (
     LicenseServerConnectionError,
     MapdlDidNotStart,
+    NotEnoughResources,
     PortAlreadyInUseByAnMAPDLInstance,
 )
 from ansys.mapdl.core.launcher import (
@@ -519,3 +521,10 @@ def test_launched(mapdl):
 def test_launching_on_busy_port(mapdl):
     with pytest.raises(PortAlreadyInUseByAnMAPDLInstance):
         launch_mapdl(port=mapdl.port)
+
+
+@requires("local")
+def test_cpu_checks():
+    machine_cores = psutil.cpu_count(logical=False)
+    with pytest.raises(NotEnoughResources):
+        launch_mapdl(nproc=machine_cores + 2)
