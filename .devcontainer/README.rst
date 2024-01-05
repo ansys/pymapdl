@@ -1,6 +1,5 @@
-.. _develop_on_containers:
 
-=======================
+=====================
 Develop on containers
 =====================
 
