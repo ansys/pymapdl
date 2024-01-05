@@ -1,4 +1,5 @@
 FROM ghcr.io/ansys/mapdl:v24.1-ubuntu-student
+
 ENV USERNAME=mapdl
 USER root
 
@@ -36,4 +37,4 @@ RUN python3.10 -m venv ./.venv && \
     echo 'source ./.venv/bin/activate' >> ~/.bashrc && \
     rm requirements.txt
 
-WORKDIR /home/mapdl/pymapdl
+WORKDIR /home/$USERNAME/pymapdl
