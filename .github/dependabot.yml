@@ -16,8 +16,8 @@ updates:
           patterns:
             - "*"
 
-  - package-ecosystem: "pip" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - directory: "/" # Location of package manifests
+    package-ecosystem: "pip" # See documentation for possible values
     insecure-external-code-execution: allow
     schedule:
       interval: "weekly"      
@@ -90,8 +90,8 @@ updates:
             - "ipywidgets"
 
 
-  - package-ecosystem: "pip" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - directory: "/.devcontainer" # Location of package manifests
+    package-ecosystem: "pip" # See documentation for possible values
     insecure-external-code-execution: allow
     schedule:
       interval: "weekly"      
@@ -164,8 +164,8 @@ updates:
             - "ipywidgets"
 
 
-  - package-ecosystem: "pip" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - directory: "/.devcontainer/codespaces-docs" # Location of package manifests
+    package-ecosystem: "pip" # See documentation for possible values
     insecure-external-code-execution: allow
     schedule:
       interval: "weekly"      
@@ -237,8 +237,9 @@ updates:
           patterns:
             - "ipywidgets"
 
-  - package-ecosystem: "pip" # See documentation for possible values
-    directory: "/" # Location of package manifests
+
+  - directory: "/.devcontainer/devcontainer-local" # Location of package manifests
+    package-ecosystem: "pip" # See documentation for possible values
     insecure-external-code-execution: allow
     schedule:
       interval: "weekly"      
