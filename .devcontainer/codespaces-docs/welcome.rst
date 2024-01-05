@@ -44,6 +44,12 @@ which describes the necessary steps.
 You can see the latest documentation on using Codespaces with PyMAPDL in
 `Develop on containers <https://mapdl.docs.pyansys.com/version/dev/getting_started/devcontainer_link.html>`_.
 
+**Extra bonus**
+
+If you want to see the built html pages, you can run a web server from the Codespace,
+and access it from your local browser.
+To do so...
+See `Forwarding ports in your codespace <https://docs.github.com/en/codespaces/developing-in-a-codespace/forwarding-ports-in-your-codespace>`_ for more information.
 
 😊 Finally
 ==========
