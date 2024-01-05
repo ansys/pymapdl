@@ -554,24 +554,8 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: "Getting files change filters"
-        uses: dorny/paths-filter@v2
-        id: changes
-        with:
-          filters: |
-            workflows:
-              - '.github/workflows/**'
-
-      - name: "Setup Python with cache"
+      - name: "Setup Python"
         uses: actions/setup-python@v5
-        if:  steps.changes.outputs.workflows != 'true'
-        with:
-          cache: 'pip'
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
-
-      - name: "Setup Python without cache"
-        uses: actions/setup-python@v5
-        if: steps.changes.outputs.workflows == 'true'
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
@@ -701,24 +685,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libgomp1
 
-      - name: "Getting files change filters"
-        uses: dorny/paths-filter@v2
-        id: changes
-        with:
-          filters: |
-            workflows:
-              - '.github/workflows/**'
-
-      - name: "Setup Python with cache"
+      - name: "Setup Python"
         uses: actions/setup-python@v5
-        if:  steps.changes.outputs.workflows != 'true'
-        with:
-          cache: 'pip'
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
-
-      - name: "Setup Python without cache"
-        uses: actions/setup-python@v5
-        if: steps.changes.outputs.workflows == 'true'
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
