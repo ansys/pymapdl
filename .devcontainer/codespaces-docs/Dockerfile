@@ -4,6 +4,7 @@ USER root
 
 # General libraries
 ENV DEBIAN_FRONTEND=noninteractive
+ENV ON_CODESPACES=true
 
 # Installing libs for testing and docs
 RUN apt-get -qq update && apt install -qq -y zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex && \
