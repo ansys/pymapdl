@@ -1054,7 +1054,7 @@ def launch_mapdl(
     print_com: bool = False,
     add_env_vars: Optional[Dict[str, str]] = None,
     replace_env_vars: Optional[Dict[str, str]] = None,
-    version: Optional[int, str] = None,
+    version: Optional[Union[int, str]] = None,
     **kwargs,
 ) -> Union[MapdlGrpc, "MapdlConsole"]:
     """Start MAPDL locally.
