@@ -97,6 +97,17 @@ class MapdlExitedError(RuntimeError):
         RuntimeError.__init__(self, msg)
 
 
+class NotEnoughResources(MapdlExitedError):
+    """Raised when MAPDL has exited"""
+
+    def __init__(
+        self,
+        msg="MAPDL has exited because there is not enough resources ({resource})",
+        resource="CPUs",
+    ):
+        MapdlExitedError.__init__(self, msg.format(resource=resource))
+
+
 class LockFileException(RuntimeError):
     """Error message when the lockfile has not been removed"""
 
