@@ -533,11 +533,14 @@ def test_lines(cleared, mapdl):
 
 
 @requires("local")
-def test_apdl_logging_start(tmpdir):
+def test_apdl_logging_start(tmpdir, mapdl):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
     mapdl = launch_mapdl(
-        start_timeout=30, log_apdl=filename, additional_switches=QUICK_LAUNCH_SWITCHES
+        port=mapdl.port + 1,
+        start_timeout=30,
+        log_apdl=filename,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
     )
 
     mapdl.prep7()
