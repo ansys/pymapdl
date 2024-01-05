@@ -1,17 +1,18 @@
 #/bin/bash
 # Script to create the venv, and install the dependencies
+echo "Starting local development container"
 
-if [ -f $VEN ]; then
-    echo "It seems a venv exists already. Stopping here"
 
-else
-    echo "Creating virtual environment..."
+echo "Activating virtual environment..."
 
-    echo "Installing PyMAPDL package and dependencies for development"
-    pip install -e '.[tests,doc]'
+ln -s /home/mapdl/.venv /home/mapdl/pymapdl/.venv_pymapdl && echo "Linking venv original dir"
+source ./.venv_pymapdl/bin/activate
 
-    echo "Installing pre-commit..."
-    pre-commit install
-    echo "Done! Enjoy PyMAPDL!"
+echo "Installing PyMAPDL package and dependencies for development"
+# It should be fast because the image is build with the dependencies installed.
+pip install -e '.[tests]'
 
-fi
+echo "Setting pre-commit..."
+pre-commit install
+
+echo "Done! Enjoy PyMAPDL!"
