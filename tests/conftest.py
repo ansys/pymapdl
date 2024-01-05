@@ -114,6 +114,8 @@ skip_if_running_student_version = pytest.mark.skipif(
 
 def has_dependency(requirement):
     try:
+        if os.name == "nt":
+            requirement = requirement.replace("-", ".")
         import_module(requirement)
         return True
     except ModuleNotFoundError:
