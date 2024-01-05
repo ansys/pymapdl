@@ -59,6 +59,7 @@ from ansys.mapdl.core.errors import (
     LockFileException,
     MapdlDidNotStart,
     MapdlRuntimeError,
+    NotEnoughResources,
     PortAlreadyInUse,
     PortAlreadyInUseByAnMAPDLInstance,
     VersionError,
@@ -249,11 +250,13 @@ def get_process_at_port(port) -> Optional[psutil.Process]:
     """Get the process (psutil.Process) running at the given port"""
     for proc in psutil.process_iter():
         try:
-            proc.cmdline()  # just to check if we can access the
+            connections = proc.connections(
+                kind="inet"
+            )  # just to check if we can access the
         except psutil.AccessDenied:
             continue
 
-        for conns in proc.connections(kind="inet"):
+        for conns in connections:
             if conns.laddr.port == port:
                 return proc
 
