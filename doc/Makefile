@@ -58,3 +58,11 @@ html-noexamples:
 	@$(SPHINXBUILD) -D plot_gallery=0 -b html "$(SOURCEDIR)" "$(BUILDDIR)/html" $(SPHINXOPTS) $(O)
 	@echo
 	@echo "Build finished. The HTML pages are in $(BUILDDIR)/html."
+
+start-webserver:
+	@echo "Starting Python server."
+	@(./start_webserver.sh)
+
+stop-webserver:
+	@echo "Stopping webserver"
+	@((pkill -9 -f  'ython -m http.server' && echo "All webservers stopped") || echo "Webserver could not be stopped.")
