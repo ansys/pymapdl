@@ -9,11 +9,12 @@ Welcome to GitHub PyMAPDL Codespaces for developers 🧑‍💻👩‍💻
 **You must use this Codespace only for developing, contributing, documenting, and
 writing examples for PyMAPDL**.
 
-Additionally, this Codespace is using an MAPDL Student version which is
-available `here <https://www.ansys.com/academic/students>`_
-This version has some limitations.
-For more information visit
-`Ansys MAPDL Student <https://www.ansys.com/academic/students/ansys-student>`_
+Additionally, this Codespace is using an MAPDL Student version. For information on how Ansys
+supports your learning Ansys software, see the 
+`Ansys for Students <https://www.ansys.com/academic/students>`_ page on the Ansys website.
+The Ansys Student version has some limitations. For more information, see the
+`Ansys Student - Free Software Download <https://www.ansys.com/academic/students/ansys-student>`_
+page on the Ansys website.
 
 
 📖 Codespace configuration
@@ -25,27 +26,27 @@ for running PyMAPDL.
 
 Some of the available Python dependencies are:
 
-* Numpy
+* NumPy
 * Pandas
-* Pyvista
+* PyVista
 * Pytest
 
 
 🧐 How to
 =========
 
-To start developing PyMAPDL, it is recommended you visit
+To start developing PyMAPDL, see
 `Develop code <https://mapdl.docs.pyansys.com/version/dev/getting_started/develop_pymapdl.html>`_
-where the steps needed are detailed.
+which describes the necessary steps.
 
-You can see the latest documentation regarding using Codespaces with PyMAPDL
+You can see the latest documentation on using Codespaces with PyMAPDL in
 `here <https://mapdl.docs.pyansys.com/version/dev/getting_started/devcontainer_link.html>`_.
 
 
 😊 Finally
 ==========
 
-We hope you enjoyed this Codespace! 
+We hope you enjoy this Codespace.
 
 
 **Happy coding! 💻**

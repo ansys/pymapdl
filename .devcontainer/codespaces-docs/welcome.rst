@@ -11,10 +11,11 @@ Welcome to GitHub PyMAPDL Codespaces for Documentalist!! 📚
 writing examples for PyMAPDL**.
 
 Additionally, this Codespace is using an MAPDL Student version. For information on how Ansys
-supports your learning Ansys software, see the `Ansys for Students <https://www.ansys.com/academic/students>`_ page on the Ansys website.
+supports your learning Ansys software, see the
+`Ansys for Students <https://www.ansys.com/academic/students>`_ page on the Ansys website.
 The Ansys Student version has some limitations. For more information, see the
 `Ansys Student - Free Software Download <https://www.ansys.com/academic/students/ansys-student>`_
- page on the Ansys website.
+page on the Ansys website.
 
 
 📖 Codespace configuration

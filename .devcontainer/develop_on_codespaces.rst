@@ -64,8 +64,8 @@ How to use
 ==========
 
 The usage of a in-browser Codespaces is very simple if you are
-familiar with Visual Code.
-You can do almost anything that you can do in a Visual Code instance
+familiar with Visual Studio Code.
+You can do almost anything that you can do in a Visual Studio Code instance
 installed locally. For example, you can create, edit, and delete files, or you can install extensions.
 
 You can connect to your Codespaces from your local IDE by opening the

@@ -152,7 +152,7 @@ UPF
 UPFs
 viscoplastic
 vise
-Visual Code
+Visual Studio Code
 von
 VTK
 wan
