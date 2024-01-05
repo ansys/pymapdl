@@ -550,7 +550,7 @@ jobs:
 
       - name: "Unit testing"
         env:
-          ANSYSLMD_LICENSE_FILE: 1055@"${{ secrets.LICENSE_SERVER }}"
+          ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
         run: |
           unset PYMAPDL_PORT
           unset PYMAPDL_START_INSTANCE
@@ -675,7 +675,7 @@ jobs:
 
       - name: "Unit testing"
         env:
-          ANSYSLMD_LICENSE_FILE: 1055@"${{ secrets.LICENSE_SERVER }}"
+          ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
         run: |
           # Because there is no 'ansys-tools-path' we need to input the
           # executable path with the env var: PYMAPDL_MAPDL_EXEC.
