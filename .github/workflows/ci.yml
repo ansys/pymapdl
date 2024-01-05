@@ -224,6 +224,13 @@ jobs:
           path: doc/_build/latex/pymapdl*.pdf
           retention-days: 7
 
+      - name: 'Upload minimal requirements file'
+        # To include it in the release
+        uses: actions/upload-artifact@v4
+        with:
+          name: minimum_requirements.txt
+          path: ./minimum_requirements.txt
+
       - name: "Display files structure"
         if: always()
         run: |
@@ -605,13 +612,6 @@ jobs:
         with:
           name: ${{ matrix.mapdl-image }}-local.xml
           path: ./${{ matrix.mapdl-image }}-local.xml
-      
-      - name: 'Upload minimal requirements file'
-        # To include it in the release
-        uses: actions/upload-artifact@v4
-        with:
-          name: minimum_requirements.txt
-          path: ./minimum_requirements.txt
 
 
   build-test-ubuntu-minimal:
