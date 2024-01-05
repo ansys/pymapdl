@@ -121,6 +121,8 @@ def import_module(requirement):
 
 def has_dependency(requirement):
     try:
+        if os.name == "nt":
+            requirement = requirement.replace("-", ".")
         import_module(requirement)
         return True
     except ModuleNotFoundError:
