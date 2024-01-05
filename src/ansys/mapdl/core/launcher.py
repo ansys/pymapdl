@@ -1030,31 +1030,31 @@ def _force_smp_student_version(add_sw, exec_path):
 
 
 def launch_mapdl(
-    exec_file=None,
-    run_location=None,
-    jobname="file",
-    nproc=2,
-    ram=None,
-    mode=None,
-    override=False,
-    loglevel="ERROR",
-    additional_switches="",
-    start_timeout=45,
-    port=None,
-    cleanup_on_exit=True,
-    start_instance=None,
-    ip=None,
-    clear_on_connect=True,
-    log_apdl=None,
-    remove_temp_files=None,
-    remove_temp_dir_on_exit=False,
-    verbose_mapdl=None,
-    license_server_check=True,
-    license_type=None,
-    print_com=False,
-    add_env_vars=None,
-    replace_env_vars=None,
-    version=None,
+    exec_file: Optional[str] = None,
+    run_location: Optional[str] = None,
+    jobname: str = "file",
+    nproc: Optional[int] = None,
+    ram: Optional[Union[int, str]] = None,
+    mode: Optional[str] = None,
+    override: bool = False,
+    loglevel: str = "ERROR",
+    additional_switches: str = "",
+    start_timeout: int = 45,
+    port: Optional[int] = None,
+    cleanup_on_exit: bool = True,
+    start_instance: Optional[bool] = None,
+    ip: Optional[str] = None,
+    clear_on_connect: bool = True,
+    log_apdl: Optional[Union[bool, str]] = None,
+    remove_temp_files: Optional[bool] = None,
+    remove_temp_dir_on_exit: bool = False,
+    verbose_mapdl: Optional[bool] = None,
+    license_server_check: bool = True,
+    license_type: Optional[bool] = None,
+    print_com: bool = False,
+    add_env_vars: Optional[Dict[str, str]] = None,
+    replace_env_vars: Optional[Dict[str, str]] = None,
+    version: Optional[int, str] = None,
     **kwargs,
 ) -> Union[MapdlGrpc, "MapdlConsole"]:
     """Start MAPDL locally.
@@ -1667,6 +1667,17 @@ def launch_mapdl(
 
     additional_switches = _check_license_argument(license_type, additional_switches)
     LOG.debug(f"Using additional switches {additional_switches}.")
+
+    # Setting number of processors
+    machine_cores = psutil.cpu_count(logical=False)
+    if not nproc:
+        if machine_cores < 2:  # default required cores
+            nproc = machine_cores  # to avoid starting issues
+        else:
+            nproc = 2
+    else:
+        if machine_cores < int(nproc):
+            raise NotEnoughResources
 
     start_parm.update(
         {
