@@ -75,4 +75,4 @@ start-webserver:
 
 stop-webserver:
 	@echo "Stopping webserver"
-	@((pkill -9 -f  'ython -m http.server' && echo "All webservers stopped") || echo "Webserver could not be stopped.")
+	@(./stop_webserver.sh)
