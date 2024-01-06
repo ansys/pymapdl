@@ -5,11 +5,13 @@ USER root
 
 # General libraries
 ENV DEBIAN_FRONTEND=noninteractive
+ENV ON_CODESPACES=false
 
 # Installing libs for testing and docs
 RUN apt-get -qq update && apt-get install -qq -y libgl1-mesa-glx xvfb libgomp1 zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex && \
     apt-get -qq clean  && rm -rf /var/lib/apt/lists/* && \
-    usermod -s /bin/bash $USERNAME
+    usermod -s /bin/bash $USERNAME && \
+    usermod -a -G sudo $USERNAME
 
 # Setting up locales
 RUN apt-get install -y --no-install-recommends locales && \
