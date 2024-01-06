@@ -2,12 +2,23 @@
 #
 
 # You can set these variables from the command line.
+
 SPHINXBUILD   = sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = _build
 LINKCHECKDIR  = $(BUILDDIR)/linkcheck
 SPHINXOPTS    = -j auto --color
 LINKCHECKOPTS = -d $(BUILDDIR)/.doctrees -W --keep-going --color
+
+# For codespaces
+ON_CS  = $$(echo $(ON_CODESPACES) | tr A-Z a-z) # to lowercase
+SPHINXBUILD := $(shell [ $(ON_CS) = "true" ] && echo "xvfb-run $(SPHINXBUILD)" || echo "$(SPHINXBUILD)")
+MSG = $(shell [ $(ON_CS) = "true" ] && echo "On codespaces. Using xvfb." || echo "")
+ifeq ($(strip $(MSG)), )
+    # $(info Variable MSG is empty)
+else
+    $(info $(MSG))
+endif
 
 # Put it first so that "make" without argument is like "make help".
 help:
@@ -19,7 +30,6 @@ help:
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-
 
 # customized clean due to examples gallery
 clean:
