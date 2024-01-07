@@ -35,7 +35,7 @@
 			],
 			"extensions": {
 				"recommendations": [
-					"ms-python.python"
+					"ms-python.python" // Installing also in the startup script
 				]
 			},
 			"settings": {
