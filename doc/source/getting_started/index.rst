@@ -9,6 +9,7 @@
    launcher
    learning
    contribution
+   codespaces
    faq
    versioning
    cli
@@ -16,8 +17,8 @@
    macos
    wsl
    using_julia
-   make_container_link
-   devcontainer_link
+   make_container
+   devcontainer
 
 
 ===============

@@ -1,14 +1,17 @@
 FROM ghcr.io/ansys/mapdl:v24.1-ubuntu-student
 
+ENV USERNAME=mapdl
 USER root
-WORKDIR /home/mapdl/pymapdl
 
 # General libraries
 ENV DEBIAN_FRONTEND=noninteractive
+ENV ON_CODESPACES=false
 
 # Installing libs for testing and docs
-RUN apt-get -qq update && apt install -qq -y libgl1-mesa-glx xvfb zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex && \
-    apt-get -qq clean  && rm -rf /var/lib/apt/lists/*
+RUN apt-get -qq update && apt-get install -qq -y libgl1-mesa-glx xvfb libgomp1 zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex && \
+    apt-get -qq clean  && rm -rf /var/lib/apt/lists/* && \
+    usermod -s /bin/bash $USERNAME && \
+    usermod -a -G sudo $USERNAME
 
 # Setting up locales
 RUN apt-get install -y --no-install-recommends locales && \
@@ -19,20 +22,21 @@ RUN apt-get install -y --no-install-recommends locales && \
     echo 'export LANG=en_US.UTF-8' >> ~/.bashrc && \
     echo 'export LANGUAGE=en_US:en' >> ~/.bashrc && \
     echo 'export LC_ALL=en_US.UTF-8' >> ~/.bashrc && \
-    apt-get -qq clean  && rm -rf /var/lib/apt/lists/*
+    apt-get -qq clean  && rm -rf /var/lib/apt/lists/* && \
+    mkdir -p /home/$USERNAME/pymapdl
+
+WORKDIR /home/$USERNAME
+USER $USERNAME
 
 COPY requirements.txt requirements.txt
 
 # Installing Python environment
-RUN mkdir /home/mapdl/pymapdl && \
-    cd /home/mapdl && \
-    python3.10 -m venv ./.venv && \
+RUN python3.10 -m venv ./.venv && \
     . ./.venv/bin/activate && \
     pip install pre-commit && \
     pip install ansys-mapdl-core && \
     pip install -r requirements.txt && \
-    echo 'source ./.venv/bin/activate' >> ~/.bashrc && \
-    rm requirements.txt && \
-    cd /home/mapdl/pymapdl
+    echo 'source /home/mapdl/.venv/bin/activate' >> ~/.bashrc && \
+    rm requirements.txt
 
-USER mapdl
+WORKDIR /home/$USERNAME/pymapdl

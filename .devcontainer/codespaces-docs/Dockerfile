@@ -4,11 +4,15 @@ USER root
 
 # General libraries
 ENV DEBIAN_FRONTEND=noninteractive
+ENV ON_CODESPACES=true
+ENV CODESPACES_MODE=docs
 
 # Installing libs for testing and docs
 RUN apt-get -qq update && apt install -qq -y zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex && \
     apt-get -qq clean  && rm -rf /var/lib/apt/lists/* && \
-    usermod -s /bin/bash $USERNAME
+    usermod -s /bin/bash $USERNAME && \
+    usermod -a -G sudo $USERNAME && \
+    echo '%sudo ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # Setting up locales
 RUN apt-get install -y --no-install-recommends locales && \
