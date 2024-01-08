@@ -159,7 +159,6 @@ this library:
 
 **Awesome library**
 
-
 .. code:: python
 
     def get_report_colors(theme):
@@ -224,7 +223,7 @@ make the code more readable, and easier to reuse.
         assert get_report_colors(theme) == output
 
 
-For further explanations, see the `pytest documentation <pytest_>`_.
+For further explanations, see the `pytest documentation <pytest_>`_ .
 
 Continuous integration and continuous deployment
 ------------------------------------------------
@@ -270,7 +269,6 @@ It is executed upstream of each test and not within all tests.
        # .... more code
 
        return True  # if everything goes ok until here
-
 
 If you do not have MAPDL installed locally but still want to run the
 unit testing, you must set up the following environment variables.
@@ -339,7 +337,6 @@ Here are some examples of how you use ``pytest``:
 
 For further explanations, see the `pytest documentation <pytest_>`_.
 
-
 Code style
 ==========
 
@@ -347,14 +344,14 @@ PyMAPDL follows the PEP8 standard as outlined in the `PyAnsys Development Guide
 <dev_guide_pyansys_>`_ and implements style checking using
 `pre-commit <precommit_>`_.
 
-To ensure your code meets minimum code styling standards, run these commands::
+To ensure your code meets minimum code styling standards, run these commands:
 
 .. code:: console
 
    (.venv) mapdl@machine:~/pymapdl$ pip install pre-commit
    (.venv) mapdl@machine:~/pymapdl$ pre-commit run --all-files
 
-You can also install this as a pre-commit hook by running this command::
+You can also install this as a pre-commit hook by running this command:
 
 .. code:: console
 
@@ -382,7 +379,7 @@ changes several times before commit successfully.
 
    doc/source/getting_started/develop_pymapdl.rst: Rewriting...
 
-This way, it's not possible for you to push code that fails the style checks. For example::
+This way, it's not possible for you to push code that fails the style checks. For example:
 
 .. code:: console
 
