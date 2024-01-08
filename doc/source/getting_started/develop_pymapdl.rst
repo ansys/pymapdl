@@ -146,8 +146,8 @@ To run all the unit tests use the following command:
 
    (.venv) mapdl@machine:~/pymapdl$ pytest
 
-If you are running on a **linux machine without display**, you must install ``xvfb`` OS
-library and run the above command with the ``xvfb-run`` command as prefix. 
+If you are running on a **Linux machine without display**, you must install ``xvfb`` OS
+library and run the preceding command with the ``xvfb-run`` command as prefix. 
 
 .. code:: console
 
