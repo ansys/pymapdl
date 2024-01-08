@@ -47,6 +47,7 @@ centerline
 CentOS
 CentOS7
 Chao
+Codespace
 Codespaces
 container_layout
 datas

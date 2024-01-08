@@ -36,18 +36,18 @@ The **Dev container configuration** option sets the Codespaces configuration.
 
 Currently, there are three main configurations:
 
-* **PyMAPDL-Codespaces-Developer**. This is the default configuration.
-  It contains the OS and Python dependencies
+* `PyMAPDL-Codespaces-Developer <pymapdl_codespaces_welcome_dev_>`_.
+  This is the default configuration. It contains the OS and Python dependencies
   to develop and test PyMAPDL. For instance, it has ``xvfb``
   and ``pytest`` packages installed for testing.
 
-* **PyMAPDL-Codespaces-Documentation**. This configuration is specially
-  set for people working with the documentation or examples. Thus,
+* `PyMAPDL-Codespaces-Documentation <pymapdl_codespaces_welcome_docs_>`_.
+  This configuration is specially set for people working with the documentation or examples. Thus,
   it includes the appropriate OS and Python dependencies.
   For instance, it includes ``sphinx`` and ``latex`` packages for building the documentation
   as HTML and PDF outputs.
 
-* **PyMAPDL-DevContainer (Local) [NOT RECOMMENDED]**. This is the
+* `PyMAPDL-DevContainer (Local) <pymapdl_codespaces_welcome_local_>`_ **[NOT RECOMMENDED]**. This is the
   configuration for launching a development container locally.
   This container is similar to the preceding configurations,
   but it is for use locally together with Visual Studio Code. Thus,

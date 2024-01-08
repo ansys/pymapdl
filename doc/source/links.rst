@@ -176,6 +176,9 @@
 .. _pymapdl_discussion_speed_pymapdl_mapdl: https://github.com/ansys/pymapdl/discussions/757
 .. _pymapdl_devcontainer_configuration: https://github.com/ansys/pymapdl/blob/main/.devcontainer/devcontainer-local/devcontainer.json
 .. _pymapdl_build_docker_compose: https://github.com/ansys/pymapdl/tree/main/.devcontainer/docker-compose.yml
+.. _pymapdl_codespaces_welcome_dev: https://github.com/ansys/pymapdl/blob/main/.devcontainer/welcome.rst
+.. _pymapdl_codespaces_welcome_docs: https://github.com/ansys/pymapdl/blob/main/.devcontainer/codespaces-docs/welcome.rst
+.. _pymapdl_codespaces_welcome_local: https://github.com/ansys/pymapdl/blob/main/.devcontainer/devcontainer-local/welcome.rst
 
 
 .. #Python
