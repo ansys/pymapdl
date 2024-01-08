@@ -515,7 +515,7 @@ By default, it stops instances running on the port 50052.""",
         if port or all:
             killed_ = False
             for proc in psutil.process_iter():
-                if is_ansys_process(proc):
+                if psutil.pid_exists(proc.pid) and is_ansys_process(proc):
                     # Killing "all"
                     if all:
                         try:
@@ -524,11 +524,15 @@ By default, it stops instances running on the port 50052.""",
                         except psutil.NoSuchProcess:
                             pass
 
-                    # Killing by ports
-                    for conns in proc.connections(kind="inet"):
-                        if conns.laddr.port == port:
-                            proc.kill()
-                            killed_ = True
+                    else:
+                        # Killing by ports
+                        if str(port) in proc.cmdline():
+                            try:
+                                proc.kill()
+                                killed_ = True
+                            except psutil.NoSuchProcess:
+                                pass
+
             if all:
                 str_ = ""
             else:
@@ -539,7 +543,8 @@ By default, it stops instances running on the port 50052.""",
                     click.style("ERROR: ", fg="red")
                     + "No Ansys instances"
                     + str_
-                    + " have been found."
+                    + " have been found.\n"
+                    + "If you are sure there are MAPDL "
                 )
             else:
                 click.echo(
