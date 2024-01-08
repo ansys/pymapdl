@@ -94,6 +94,17 @@ To stop all webservers use the following command:
 
 For more information, visit `Forwarding ports in your codespace <https://docs.github.com/en/codespaces/developing-in-a-codespace/forwarding-ports-in-your-codespace>`_.
 
+Issues
+======
+
+For troubleshooting, visit
+`Troubleshooting PyMAPDL <https://mapdl.docs.pyansys.com/version/stable/user_guide/troubleshoot.html#troubleshooting-pymapdl>`_
+
+On the `PyMAPDL Issues <https://github.com/ansys/pymapdl/issues>`_ page,
+you can create issues to report bugs and request new features.
+On the `PyMAPDL Discussions <https://github.com/ansys/pymapdl/discussions>`_ page or
+the `Discussions <https://discuss.ansys.com/>`_ page on the Ansys Developer portal,
+you can post questions, share ideas, and get community feedback. 
 
 😊 Finally
 ==========

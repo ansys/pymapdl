@@ -42,6 +42,39 @@ which describes the necessary steps.
 You can see the latest documentation on using Codespaces with PyMAPDL in
 `here <https://mapdl.docs.pyansys.com/version/dev/getting_started/devcontainer_link.html>`_.
 
+Testing
+-------
+
+To test new features and check their compatibility with the current library,
+you need to implement unit tests.
+Details on how to implement unit tests can be found in
+`Unit testing <https://mapdl.docs.pyansys.com/version/dev/getting_started/develop_pymapdl.html#unit-testing>`_.
+But remember to use ``xvfb-run`` when you call the ``pytest`` library.
+
+.. code:: console
+
+    (.venv) mapdl@machine:~/pymapdl$ xvfb-run pytest
+    =================================================================== test session starts ====================================================================
+    platform linux -- Python 3.10.12, pytest-7.4.4, pluggy-1.3.0
+    rootdir: /home/mapdl/pymapdl
+    configfile: pyproject.toml
+    ...
+
+For more information visit `Develop code <https://mapdl.docs.pyansys.com/version/dev/getting_started/develop_pymapdl.html#develop-pymapdl>`_.
+
+
+Issues
+======
+
+For troubleshooting, visit
+`Troubleshooting PyMAPDL <https://mapdl.docs.pyansys.com/version/stable/user_guide/troubleshoot.html#troubleshooting-pymapdl>`_
+
+On the `PyMAPDL Issues <https://github.com/ansys/pymapdl/issues>`_ page,
+you can create issues to report bugs and request new features.
+On the `PyMAPDL Discussions <https://github.com/ansys/pymapdl/discussions>`_ page or
+the `Discussions <https://discuss.ansys.com/>`_ page on the Ansys Developer portal,
+you can post questions, share ideas, and get community feedback. 
+
 
 😊 Finally
 ==========

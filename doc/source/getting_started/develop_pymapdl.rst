@@ -134,7 +134,8 @@ Unit testing is highly important. The tests verify that code changes are
 consistent with other parts of the code and verify that these changes are
 implemented properly.
 
-Unit tests are in the `tests <pymapdl_tests_>`_ directory in this repository,
+In the PyMAPDL repository, `pytest <pytest_>`_ is used to run tests and the
+unit tests are in the `tests <pymapdl_tests_>`_ directory in this repository,
 along with integration tests. The difference between a unit test and an
 integration test is that the latter tests several units of the code to ensure
 that they all work together.
@@ -157,7 +158,6 @@ To show how the coverage works, assume that you have
 this library:
 
 **Awesome library**
-
 
 .. code:: python
 
@@ -203,6 +203,27 @@ Or, if a method is a bit more complex, you can split the case in different tests
 While the code coverage in either case is 100% for the function, the second case is
 more useful for debugging the function.
 
+You can also use `parametrize (pytest.mark.parametrize) <pytest_parametrize_>`_ to
+make the code more readable, and easier to reuse.
+
+.. code:: python
+
+    @pytest.mark.parametrize(
+        "theme,output",
+        [
+            ["weather", "traffic", "other"],
+            [
+                ["blue", "lightblue", "grey"]["red", "orange", "yellow"][
+                    "red", "blue", "green"
+                ]
+            ],
+        ],
+    )
+    def test_get_report_color(theme, output):
+        assert get_report_colors(theme) == output
+
+
+For further explanations, see the `pytest documentation <pytest_>`_ .
 
 Continuous integration and continuous deployment
 ------------------------------------------------
@@ -217,8 +238,6 @@ providing a comprehensive CI/CD approach.
 
 Creation of a unit test
 -----------------------
-
-In the PyMAPDL repository, `pytest <pytest_>`_ is used to run tests. 
 
 The name of a ``pytest`` file must be in the form ``test_XXX.py``, where ``XXX``
 is either the function, method, or class that you are testing or some other explicative
@@ -251,7 +270,6 @@ It is executed upstream of each test and not within all tests.
 
        return True  # if everything goes ok until here
 
-
 If you do not have MAPDL installed locally but still want to run the
 unit testing, you must set up the following environment variables.
 
@@ -281,8 +299,6 @@ multiple versions of MAPDL are installed).
 
 Example
 --------
-
-.. TO BE MODIFIED
 
 The `test_component.py <pymapdl_test_component_>`_ file contains
 the unit tests and integration tests for the
@@ -321,8 +337,6 @@ Here are some examples of how you use ``pytest``:
 
 For further explanations, see the `pytest documentation <pytest_>`_.
 
-
-
 Code style
 ==========
 
@@ -330,21 +344,67 @@ PyMAPDL follows the PEP8 standard as outlined in the `PyAnsys Development Guide
 <dev_guide_pyansys_>`_ and implements style checking using
 `pre-commit <precommit_>`_.
 
-To ensure your code meets minimum code styling standards, run these commands::
+To ensure your code meets minimum code styling standards, run these commands:
 
-  pip install pre-commit
-  pre-commit run --all-files
+.. code:: console
 
-You can also install this as a pre-commit hook by running this command::
+   (.venv) mapdl@machine:~/pymapdl$ pip install pre-commit
+   (.venv) mapdl@machine:~/pymapdl$ pre-commit run --all-files
 
-  pre-commit install
+You can also install this as a pre-commit hook by running this command:
 
-This way, it's not possible for you to push code that fails the style checks. For example::
+.. code:: console
 
-  $ pre-commit install
-  $ git commit -am "added my cool feature"
-  black....................................................................Passed
-  isort....................................................................Passed
-  flake8...................................................................Passed
-  codespell................................................................Passed
+    (.venv) mapdl@machine:~/pymapdl$ pre-commit install
 
+Since you have installed ``pre-commit`` as a hook, ``git`` automatically
+runs these hooks before committing, failing if it find any
+format issues and making or proposing the necessary changes
+to the commit.
+If this happens, you might need to run commit and edit these
+changes several times before commit successfully.
+
+.. code:: console
+
+   (.venv) mapdl@machine:~/pymapdl$ git commit -m "my commit"
+   [INFO] Stashing unstaged files to /home/mapdl/.cache/pre-commit/patch1704703895-16914.
+   Add License Headers......................................................Passed
+   isort....................................................................Passed
+   numpydoc-validation......................................................Passed
+   black....................................................................Passed
+   blacken-docs.............................................................Failed
+   - hook id: blacken-docs
+   - exit code: 1
+   - files were modified by this hook
+
+   doc/source/getting_started/develop_pymapdl.rst: Rewriting...
+
+This way, it's not possible for you to push code that fails the style checks. For example:
+
+.. code:: console
+
+   (.venv) mapdl@machine:~/pymapdl$ git commit -m "my commit"
+   [WARNING] Unstaged files detected.
+   [INFO] Stashing unstaged files to /home/mapdl/.cache/pre-commit/patch1704703895-16914.
+   Add License Headers..................................(no files to check)Skipped
+   isort................................................(no files to check)Skipped
+   numpydoc-validation..................................(no files to check)Skipped
+   black................................................(no files to check)Skipped
+   blacken-docs.............................................................Passed
+   flake8...............................................(no files to check)Skipped
+   codespell................................................................Passed
+   check for merge conflicts................................................Passed
+   debug statements (python)............................(no files to check)Skipped
+   Validate GitHub Workflows............................(no files to check)Skipped
+   [INFO] Restored changes from /home/mapdl/.cache/pre-commit/patch1704703895-16914.
+   [ci/codespaces-quick-fixes-regarding-welcome-page c0f59f4c] my commit
+   1 file changed, 25 insertions(+)
+   (.venv) mapdl@machine:~/pymapdl$ 
+
+
+First time you run ``pre-commit`` (using ``git commit`` or ``pre-commit``), the command
+might take a bit of time (2-3 minutes) to download the specified hooks and install them.
+After that first time, analysing your commits should take seconds.
+
+``pre-commit`` hooks can also be updated, added or removed. For more information, visit
+`pre-commit <precommit_>`_ website.

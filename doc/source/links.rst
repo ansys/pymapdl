@@ -121,7 +121,7 @@
 .. _vscode_devcontainers_remote_extension: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack
 .. _ghcr: https://github.com/features/packages
 .. _vscode_open_a_repository_in_container: https://code.visualstudio.com/docs/devcontainers/containers#_quick-start-open-a-git-repository-or-github-pr-in-an-isolated-container-volume
-
+.. _pytest_parametrize: https://docs.pytest.org/en/7.3.x/how-to/parametrize.html
 
 
 .. #Github links:
