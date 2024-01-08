@@ -24,6 +24,26 @@ import os
 
 import psutil
 
+PROCESS_OK_STATUS = [
+    # List of all process status, comment out the ones that means that
+    # process is not OK.
+    # If process is OK, it means it can be killed normally.
+    psutil.STATUS_RUNNING,  #
+    psutil.STATUS_SLEEPING,  #
+    psutil.STATUS_DISK_SLEEP,  #
+    # psutil.STATUS_STOPPED, #
+    # psutil.STATUS_TRACING_STOP, #
+    # psutil.STATUS_ZOMBIE, #
+    psutil.STATUS_DEAD,  #
+    # psutil.STATUS_WAKE_KILL, #
+    # psutil.STATUS_WAKING, #
+    psutil.STATUS_PARKED,  # (Linux)
+    psutil.STATUS_IDLE,  # (Linux, macOS, FreeBSD)
+    # psutil.STATUS_LOCKED, # (FreeBSD)
+    # psutil.STATUS_WAITING, # (FreeBSD)
+    # psutil.STATUS_SUSPENDED, # (NetBSD)
+]
+
 try:
     import click
     from tabulate import tabulate
@@ -515,7 +535,11 @@ By default, it stops instances running on the port 50052.""",
         if port or all:
             killed_ = False
             for proc in psutil.process_iter():
-                if psutil.pid_exists(proc.pid) and is_ansys_process(proc):
+                if (
+                    psutil.pid_exists(proc.pid)
+                    and proc.status() in PROCESS_OK_STATUS
+                    and is_ansys_process(proc)
+                ):
                     # Killing "all"
                     if all:
                         try:
@@ -543,8 +567,7 @@ By default, it stops instances running on the port 50052.""",
                     click.style("ERROR: ", fg="red")
                     + "No Ansys instances"
                     + str_
-                    + " have been found.\n"
-                    + "If you are sure there are MAPDL "
+                    + " have been found."
                 )
             else:
                 click.echo(

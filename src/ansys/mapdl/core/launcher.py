@@ -242,7 +242,9 @@ def port_in_use_using_socket(port: Union[int, str], host: str) -> bool:
 def is_ansys_process(proc: psutil.Process) -> bool:
     """Check if the given process is an Ansys MAPDL process"""
     return (
-        proc.name().lower().startswith(("ansys", "mapdl")) and "-grpc" in proc.cmdline()
+        bool(proc)
+        and proc.name().lower().startswith(("ansys", "mapdl"))
+        and "-grpc" in proc.cmdline()
     )
 
 
