@@ -12,8 +12,8 @@ LINKCHECKOPTS = -d $(BUILDDIR)/.doctrees -W --keep-going --color
 
 # For codespaces
 ON_CS  = $$(echo $(ON_CODESPACES) | tr A-Z a-z) # to lowercase
-SPHINXBUILD = $(shell [[ $(ON_CS) = "true" ]] && echo "xvfb-run $(SPHINXBUILDORIG)" || echo "$(SPHINXBUILDORIG)")
-MSG = $(shell [[ $(ON_CS) = "true" ]] && echo "On codespaces. Using xvfb.")
+SPHINXBUILD := $(shell [ $(ON_CS) = "true" ] && echo "xvfb-run $(SPHINXBUILDORIG)" || echo "$(SPHINXBUILDORIG)")
+MSG = $(shell [ $(ON_CS) = "true" ] && echo "On codespaces. Using xvfb.")
 
 # Put it first so that "make" without argument is like "make help".
 help:
