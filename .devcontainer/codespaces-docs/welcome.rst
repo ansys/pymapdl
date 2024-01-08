@@ -56,7 +56,7 @@ To build the documentation as html use the following command:
     Running Sphinx v7.2.6
     Using pandoc version: 3.1.9 to convert rst text blocks to markdown for .ipynb files
     loading pickled environment... done
-    [autosummary] generating autosummary for: 404.rst, api/_autosummary/ansys.mapdl.core.Mapdl.add_file_handler.rst, api/_autosummary/ansys.mapdl.core.Mapdl.aplot.rst, api/_autosummary/ansys.mapdl.core.Mapdl.chain_commands.rst, api/_autosummary/ansys.mapdl.core.Mapdl.directory.rst, api/_autosummary/ansys.mapdl.core.Mapdl.eplot.rst, api/_autosummary/ansys.mapdl.core.Mapdl.file_type_for_plots.rst, api/_autosummary/ansys.mapdl.core.Mapdl.get.rst, api/_autosummary/ansys.mapdl.core.Mapdl.get_array.rst, api/_autosummary/ansys.mapdl.core.Mapdl.get_value.rst, ..., user_guide/mapdl_examples.rst, user_guide/math.rst, user_guide/mesh_geometry.rst, user_guide/parameters.rst, user_guide/plotting.rst, user_guide/pool.rst, user_guide/post.rst, user_guide/troubleshoot.rst, user_guide/upf.rst, user_guide/xpl.rst
+    [autosummary] generating autosummary for: 404.rst, api/_autosummary/ansys.mapdl.core.Mapdl.add_file_handler.rst, api/_autosummary/ansys.mapdl.core.Mapdl.aplot.rst, ...
 
 As you can see, ``Make`` already takes care of using ``xvfb`` before building the documentation.
 Remember you can use ``make clean`` to clear the previous built.
@@ -75,7 +75,10 @@ and access it from your local browser using the following command:
     You can find the webserver log in: /Users/german.ayuso/pymapdl/doc/webserver.log
     The pid of the webserver is 71867
     Starting...
-    Server started
+    Server started at port 8000.
+    If you don't see a pop up with 'Open in browser',
+    you can open the port from the 'PORTS' tab by
+    clicking on the 'world' icon in the port 8000.
 
 This webserver always uses the port 8000. If you have the Python extension, Visual Studio Code should detect
 that available port and offer you to open it in a tab.
