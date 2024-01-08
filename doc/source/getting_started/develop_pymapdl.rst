@@ -140,101 +140,38 @@ along with integration tests. The difference between a unit test and an
 integration test is that the latter tests several units of the code to ensure
 that they all work together.
 
-To verify that all code is properly tested, you must ensure that every piece of
-code is used (covered) in at least one unit test. In this repository, the
-`Codecov <codecov_>`_ tool generates a coverage report of the committed code. It
-indicates how merging a pull request would impact coverage. The generation of this report is one of the
-checks that must run successfully to merge code changes.
+To run all the unit tests use the following command:
 
+.. code:: console
 
-.. figure:: ../images/codecov_increase.png
-    :width: 400pt
+   (.venv) mapdl@machine:~/pymapdl$ pytest
 
+If you are running on a **linux machine without display**, you must install ``xvfb`` OS
+library and run the above command with the ``xvfb-run`` command as prefix. 
 
-Coverage example
-----------------
+.. code:: console
 
-To show how the coverage works, assume that you have
-this library:
+   (.venv) mapdl@machine:~/pymapdl$ xvfb-run pytest
 
-**Awesome library**
+In case you want to run only a certain subset of tests, you can use the ``-k`` argument
+to filter the tests using booleans:
 
-.. code:: python
+.. code:: console
 
-    def get_report_colors(theme):
-        if theme == "weather":
-            colors = ["blue", "lightblue", "grey"]
-        elif theme == "traffic":
-            colors = ["red", "orange", "yellow"]
-        else:
-            colors = ["red", "blue", "green"]
+   (.venv) mapdl@machine:~/pymapdl$ pytest -k "test_nlist_to_array or test_string_with_literal"
+   ==================================================== test session starts ====================================================
+   platform darwin -- Python 3.10.13, pytest-7.4.3, pluggy-1.3.0
+   rootdir: /Users/german.ayuso/pymapdl
+   configfile: pyproject.toml
+   testpaths: tests
+   plugins: timeout-2.2.0, cov-4.1.0, sphinx-0.5.0, rerunfailures-13.0, anyio-4.1.0, pytest_pyvista-0.1.9
+   collected 1468 items / 1466 deselected / 4 skipped / 2 selected
 
-        return colors
+   tests/test_commands.py ..                                                                                             [100%]
 
+   =============================================== PyMAPDL Pytest short summary ================================================
+   ======================================= 2 passed, 4 skipped, 1466 deselected in 2.27s =======================================
 
-**Tests**
-
-You can opt to run the tests with this configuration:
-
-.. code:: python
-
-   def test_get_report_colors():
-       assert get_report_colors("weather") == ["blue", "lightblue", "grey"]
-       assert get_report_colors("traffic") == ["red", "orange", "yellow"]
-       assert get_report_colors("other") == ["red", "blue", "green"]
-
-
-Or, if a method is a bit more complex, you can split the case in different tests:
-
-.. code:: python
-
-    def test_get_report_colors_weather():
-        assert get_report_colors("weather") == ["blue", "lightblue", "grey"]
-
-
-    def test_get_report_colors_traffic():
-        assert get_report_colors("traffic") == ["red", "orange", "yellow"]
-
-
-    def test_get_report_colors_other():
-        assert get_report_colors("other") == ["red", "blue", "green"]
-
-
-While the code coverage in either case is 100% for the function, the second case is
-more useful for debugging the function.
-
-You can also use `parametrize (pytest.mark.parametrize) <pytest_parametrize_>`_ to
-make the code more readable, and easier to reuse.
-
-.. code:: python
-
-    @pytest.mark.parametrize(
-        "theme,output",
-        [
-            ["weather", "traffic", "other"],
-            [
-                ["blue", "lightblue", "grey"]["red", "orange", "yellow"][
-                    "red", "blue", "green"
-                ]
-            ],
-        ],
-    )
-    def test_get_report_color(theme, output):
-        assert get_report_colors(theme) == output
-
-
-For further explanations, see the `pytest documentation <pytest_>`_ .
-
-Continuous integration and continuous deployment
-------------------------------------------------
-
-Unit tests and integration tests are part of continuous integration (CI). 
-The automation of testing, monitoring, and deployment of newly added
-code allows continuous deployment (CD) throughout the app lifecycle,
-providing a comprehensive CI/CD approach.
-
-.. figure:: ../images/cicd.jpg
-    :width: 300pt
 
 Creation of a unit test
 -----------------------
@@ -296,6 +233,16 @@ Additionally, you can use the :envvar:`PYMAPDL_MAPDL_EXEC` and :envvar:`PYMAPDL_
 environment variables to specify the MAPDL executable path and the version to launch (if
 multiple versions of MAPDL are installed).
 
+Continuous integration and continuous deployment
+------------------------------------------------
+
+Unit tests and integration tests are part of continuous integration (CI). 
+The automation of testing, monitoring, and deployment of newly added
+code allows continuous deployment (CD) throughout the app lifecycle,
+providing a comprehensive CI/CD approach.
+
+.. figure:: ../images/cicd.jpg
+    :width: 300pt
 
 Example
 --------
@@ -335,7 +282,95 @@ Here are some examples of how you use ``pytest``:
         assert [("MYCOMP1", "NODE"), ("MYCOMP2", "KP")] == list(mapdl.components.items())
 
 
-For further explanations, see the `pytest documentation <pytest_>`_.
+For further ``pytest`` configuration details, see the `pytest documentation <pytest_>`_.
+
+
+Code coverage
+=============
+
+To verify that all code is properly tested, you must ensure that every piece of
+code is used (covered) in at least one unit test. In this repository, the
+`Codecov <codecov_>`_ tool generates a coverage report of the committed code.
+It indicates how merging a pull request would impact coverage. 
+The generation of this report is one of the checks that must run successfully
+to merge code changes.
+
+.. figure:: ../images/codecov_increase.png
+    :width: 400pt
+
+
+Coverage example
+----------------
+
+To show how the coverage works, assume that you have
+this library:
+
+**Awesome library**
+
+.. code:: python
+
+    def get_report_colors(theme):
+        if theme == "weather":
+            colors = ["blue", "lightblue", "grey"]
+        elif theme == "traffic":
+            colors = ["red", "orange", "yellow"]
+        else:
+            colors = ["red", "blue", "green"]
+
+        return colors
+
+**Tests**
+
+You can opt to run the tests with this configuration:
+
+.. code:: python
+
+   def test_get_report_colors():
+       assert get_report_colors("weather") == ["blue", "lightblue", "grey"]
+       assert get_report_colors("traffic") == ["red", "orange", "yellow"]
+       assert get_report_colors("other") == ["red", "blue", "green"]
+
+
+Or, if a method is a bit more complex, you can split the case in different tests:
+
+.. code:: python
+
+    def test_get_report_colors_weather():
+        assert get_report_colors("weather") == ["blue", "lightblue", "grey"]
+
+
+    def test_get_report_colors_traffic():
+        assert get_report_colors("traffic") == ["red", "orange", "yellow"]
+
+
+    def test_get_report_colors_other():
+        assert get_report_colors("other") == ["red", "blue", "green"]
+
+
+While the code coverage in either case is 100% for the function, the second case is
+more useful for debugging the function.
+
+You can also use `parametrize (pytest.mark.parametrize) <pytest_parametrize_>`_ to
+make the code more readable, and easier to reuse.
+
+.. code:: python
+
+    @pytest.mark.parametrize(
+        "theme,output",
+        [
+            ["weather", "traffic", "other"],
+            [
+                ["blue", "lightblue", "grey"]["red", "orange", "yellow"][
+                    "red", "blue", "green"
+                ]
+            ],
+        ],
+    )
+    def test_get_report_color(theme, output):
+        assert get_report_colors(theme) == output
+
+
+For further explanations, see the `pytest documentation <pytest_>`_ .
 
 Code style
 ==========
