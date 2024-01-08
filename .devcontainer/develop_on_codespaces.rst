@@ -41,11 +41,15 @@ Currently, there are three main configurations:
   to develop and test PyMAPDL. For instance, it has ``xvfb``
   and ``pytest`` packages installed for testing.
 
+  |Open a GitHub Codespaces for developers|
+
 * :ref:`PyMAPDL-Codespaces-Documentation <ref_codespaces_docs_welcome>`.
   This configuration is specially set for people working with the documentation or examples. Thus,
   it includes the appropriate OS and Python dependencies.
   For instance, it includes ``sphinx`` and ``latex`` packages for building the documentation
   as HTML and PDF outputs.
+
+  |Open a GitHub Codespaces for documentation|
 
 * `PyMAPDL-DevContainer (Local) <pymapdl_codespaces_welcome_local_>`_ **[NOT RECOMMENDED]**. This is the
   configuration for launching a development container locally.
@@ -104,3 +108,12 @@ Limitations
 * When you open a Codespace from your local IDE, you might lose some configuration.
   For instance, you might find yourself in a different working directory, or you might see that the
   Python virtual environment is not properly activated.
+
+
+
+.. |Open a GitHub Codespaces for developers| image:: https://github.com/codespaces/badge.svg
+   :target: https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fdevcontainer.json
+
+
+.. |Open a GitHub Codespaces for documentation| image:: https://github.com/codespaces/badge.svg
+   :target: https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fcodespaces-docs%2Fdevcontainer.json

@@ -180,6 +180,11 @@
 .. _pymapdl_codespaces_welcome_docs: https://github.com/ansys/pymapdl/blob/main/.devcontainer/codespaces-docs/welcome.rst
 .. _pymapdl_codespaces_welcome_local: https://github.com/ansys/pymapdl/blob/main/.devcontainer/devcontainer-local/welcome.rst
 .. _pymapdl_devcontainer_directory: https://github.com/ansys/pymapdl/tree/main/.devcontainer
+.. _pymapdl_create_codespace_dev_quick_start: https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fdevcontainer.json
+.. _pymapdl_create_codespace_docs_quick_start: https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fcodespaces-docs%2Fdevcontainer.json
+.. _pymapdl_create_codespace_dev: https://codespaces.new/ansys/pymapdl?devcontainer_path=.devcontainer%2Fdevcontainer.json
+.. _pymapdl_create_codespace_docs: https://codespaces.new/ansys/pymapdl?devcontainer_path=.devcontainer%2Fcodespaces-docs%2Fdevcontainer.json
+
 
 .. #Python
 .. _using_venv: https://docs.python.org/3/library/venv.html
