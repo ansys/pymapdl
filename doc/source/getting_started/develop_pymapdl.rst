@@ -204,8 +204,8 @@ Or, if a method is a bit more complex, you can split the case in different tests
 While the code coverage in either case is 100% for the function, the second case is
 more useful for debugging the function.
 
-You can also make the code more readable, and easiert to reuse by using
-`parametrize (pytest.mark.parametrize) <pytest_parametrize_>`_.
+You can also use `parametrize (pytest.mark.parametrize) <pytest_parametrize_>`_ to
+make the code more readable, and easier to reuse.
 
 .. code:: python
 
@@ -223,6 +223,8 @@ You can also make the code more readable, and easiert to reuse by using
     def test_get_report_color(theme, output):
         assert get_report_colors(theme) == output
 
+
+For further explanations, see the `pytest documentation <pytest_>`_.
 
 Continuous integration and continuous deployment
 ------------------------------------------------
@@ -300,8 +302,6 @@ multiple versions of MAPDL are installed).
 Example
 --------
 
-.. TO BE MODIFIED
-
 The `test_component.py <pymapdl_test_component_>`_ file contains
 the unit tests and integration tests for the
 :class:`ComponentManager <ansys.mapdl.core.component.ComponentManager>` class.
@@ -351,8 +351,8 @@ To ensure your code meets minimum code styling standards, run these commands::
 
 .. code:: console
 
-    (.venv) mapdl@machine:~/pymapdl$ pip install pre-commit
-    (.venv) mapdl@machine:~/pymapdl$ pre-commit run --all-files
+   (.venv) mapdl@machine:~/pymapdl$ pip install pre-commit
+   (.venv) mapdl@machine:~/pymapdl$ pre-commit run --all-files
 
 You can also install this as a pre-commit hook by running this command::
 
@@ -369,40 +369,40 @@ changes several times before commit successfully.
 
 .. code:: console
 
-    (.venv) mapdl@machine:~/pymapdl$ git commit -m "my commit"
-    [INFO] Stashing unstaged files to /home/mapdl/.cache/pre-commit/patch1704703895-16914.
-    Add License Headers......................................................Passed
-    isort....................................................................Passed
-    numpydoc-validation......................................................Passed
-    black....................................................................Passed
-    blacken-docs.............................................................Failed
-    - hook id: blacken-docs
-    - exit code: 1
-    - files were modified by this hook
+   (.venv) mapdl@machine:~/pymapdl$ git commit -m "my commit"
+   [INFO] Stashing unstaged files to /home/mapdl/.cache/pre-commit/patch1704703895-16914.
+   Add License Headers......................................................Passed
+   isort....................................................................Passed
+   numpydoc-validation......................................................Passed
+   black....................................................................Passed
+   blacken-docs.............................................................Failed
+   - hook id: blacken-docs
+   - exit code: 1
+   - files were modified by this hook
 
-    doc/source/getting_started/develop_pymapdl.rst: Rewriting...
+   doc/source/getting_started/develop_pymapdl.rst: Rewriting...
 
 This way, it's not possible for you to push code that fails the style checks. For example::
 
-.. code::
+.. code:: console
 
-    (.venv) mapdl@machine:~/pymapdl$ git commit -m "my commit"
-    [WARNING] Unstaged files detected.
-    [INFO] Stashing unstaged files to /home/mapdl/.cache/pre-commit/patch1704703895-16914.
-    Add License Headers..................................(no files to check)Skipped
-    isort................................................(no files to check)Skipped
-    numpydoc-validation..................................(no files to check)Skipped
-    black................................................(no files to check)Skipped
-    blacken-docs.............................................................Passed
-    flake8...............................................(no files to check)Skipped
-    codespell................................................................Passed
-    check for merge conflicts................................................Passed
-    debug statements (python)............................(no files to check)Skipped
-    Validate GitHub Workflows............................(no files to check)Skipped
-    [INFO] Restored changes from /home/mapdl/.cache/pre-commit/patch1704703895-16914.
-    [ci/codespaces-quick-fixes-regarding-welcome-page c0f59f4c] my commit
-    1 file changed, 25 insertions(+)
-    (.venv) mapdl@machine:~/pymapdl$ 
+   (.venv) mapdl@machine:~/pymapdl$ git commit -m "my commit"
+   [WARNING] Unstaged files detected.
+   [INFO] Stashing unstaged files to /home/mapdl/.cache/pre-commit/patch1704703895-16914.
+   Add License Headers..................................(no files to check)Skipped
+   isort................................................(no files to check)Skipped
+   numpydoc-validation..................................(no files to check)Skipped
+   black................................................(no files to check)Skipped
+   blacken-docs.............................................................Passed
+   flake8...............................................(no files to check)Skipped
+   codespell................................................................Passed
+   check for merge conflicts................................................Passed
+   debug statements (python)............................(no files to check)Skipped
+   Validate GitHub Workflows............................(no files to check)Skipped
+   [INFO] Restored changes from /home/mapdl/.cache/pre-commit/patch1704703895-16914.
+   [ci/codespaces-quick-fixes-regarding-welcome-page c0f59f4c] my commit
+   1 file changed, 25 insertions(+)
+   (.venv) mapdl@machine:~/pymapdl$ 
 
 
 First time you run ``pre-commit`` (using ``git commit`` or ``pre-commit``), the command
