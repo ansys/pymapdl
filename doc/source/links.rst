@@ -131,7 +131,8 @@
 .. _codecov: https://github.com/codecov
 .. _WSL_Windows_Toolbar_Launcher: https://github.com/cascadium/wsl-windows-toolbar-launcher
 .. _disabling_firewall_on_wsl: https://github.com/cascadium/wsl-windows-toolbar-launcher#firewall-rules
-.. _codespaces: https://github.com/features/codespaces
+.. _codespaces_features: https://github.com/features/codespaces
+.. _codespaces: https://github.com/codespaces
 .. _github_pricing: https://github.com/pricing/calculator
 
 .. #PyMAPDL related
