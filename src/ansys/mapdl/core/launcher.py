@@ -327,9 +327,6 @@ def launch_grpc(
         these are already included to start up the MAPDL server.  See
         the notes section for additional details.
 
-    custom_bin : str, optional
-        Path to the MAPDL custom executable.
-
     override : bool, optional
         Attempts to delete the lock file at the run_location.
         Useful when a prior MAPDL session has exited prematurely and
@@ -1142,11 +1139,6 @@ def launch_mapdl(
         environment variable ``PYMAPDL_PORT=<VALID PORT>``
         This argument has priority over the environment variable.
 
-    custom_bin : str, optional
-        Path to the MAPDL custom executable.  On release 2020R2 on
-        Linux, if ``None``, will check to see if you have
-        ``ansys.mapdl_bin`` installed and use that executable.
-
     cleanup_on_exit : bool, optional
         Exit MAPDL when python exits or the mapdl Python instance is
         garbage collected.
@@ -1454,6 +1446,7 @@ def launch_mapdl(
             "Hence this argument is not valid."
         )
     use_vtk = kwargs.pop("use_vtk", None)
+    just_launch = kwargs.pop("just_launch", None)
 
     # Transferring MAPDL arguments to start_parameters:
     start_parm = {}
@@ -1593,6 +1586,10 @@ def launch_mapdl(
 
     if not start_instance:
         LOG.debug("Connecting to an existing instance of MAPDL at %s:%s", ip, port)
+
+        if just_launch:
+            print(f"There is an existing MAPDL instance at: {ip}:{port}")
+            return
 
         mapdl = MapdlGrpc(
             ip=ip,
@@ -1734,6 +1731,13 @@ def launch_mapdl(
                 verbose=verbose_mapdl,
                 **start_parm,
             )
+
+            if just_launch:
+                out = [ip, port]
+                if hasattr(process, "pid"):
+                    out += [process.pid]
+                return out
+
             mapdl = MapdlGrpc(
                 ip=ip,
                 port=port,

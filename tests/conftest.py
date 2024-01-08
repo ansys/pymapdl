@@ -21,7 +21,6 @@
 # SOFTWARE.
 
 from collections import namedtuple
-from importlib import import_module
 import os
 from pathlib import Path
 from sys import platform
@@ -110,6 +109,14 @@ skip_if_running_student_version = pytest.mark.skipif(
     ON_STUDENT,
     reason="This tests does not work on student version. Maybe because license limitations",
 )
+
+
+def import_module(requirement):
+    from importlib import import_module
+
+    if os.name == "nt":
+        requirement = requirement.replace("-", ".")
+    return import_module(requirement)
 
 
 def has_dependency(requirement):
