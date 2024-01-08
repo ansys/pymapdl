@@ -1,8 +1,12 @@
 
+===============
+Getting started
+===============
+
 
 .. toctree::
+   :maxdepth: 1
    :hidden:
-   :maxdepth: 3
 
    install_mapdl
    install_pymapdl
@@ -21,9 +25,6 @@
    devcontainer
 
 
-===============
-Getting started
-===============
 
 To use PyMAPDL you must follow the next three steps:
 

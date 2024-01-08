@@ -131,7 +131,8 @@
 .. _codecov: https://github.com/codecov
 .. _WSL_Windows_Toolbar_Launcher: https://github.com/cascadium/wsl-windows-toolbar-launcher
 .. _disabling_firewall_on_wsl: https://github.com/cascadium/wsl-windows-toolbar-launcher#firewall-rules
-.. _codespaces: https://github.com/features/codespaces
+.. _codespaces_features: https://github.com/features/codespaces
+.. _codespaces: https://github.com/codespaces
 .. _github_pricing: https://github.com/pricing/calculator
 
 .. #PyMAPDL related
@@ -175,6 +176,14 @@
 .. _pymapdl_discussion_speed_pymapdl_mapdl: https://github.com/ansys/pymapdl/discussions/757
 .. _pymapdl_devcontainer_configuration: https://github.com/ansys/pymapdl/blob/main/.devcontainer/devcontainer-local/devcontainer.json
 .. _pymapdl_build_docker_compose: https://github.com/ansys/pymapdl/tree/main/.devcontainer/docker-compose.yml
+.. _pymapdl_codespaces_welcome_dev: https://github.com/ansys/pymapdl/blob/main/.devcontainer/welcome.rst
+.. _pymapdl_codespaces_welcome_docs: https://github.com/ansys/pymapdl/blob/main/.devcontainer/codespaces-docs/welcome.rst
+.. _pymapdl_codespaces_welcome_local: https://github.com/ansys/pymapdl/blob/main/.devcontainer/devcontainer-local/welcome.rst
+.. _pymapdl_devcontainer_directory: https://github.com/ansys/pymapdl/tree/main/.devcontainer
+.. _pymapdl_create_codespace_dev_quick_start: https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fdevcontainer.json
+.. _pymapdl_create_codespace_docs_quick_start: https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fcodespaces-docs%2Fdevcontainer.json
+.. _pymapdl_create_codespace_dev: https://codespaces.new/ansys/pymapdl?devcontainer_path=.devcontainer%2Fdevcontainer.json
+.. _pymapdl_create_codespace_docs: https://codespaces.new/ansys/pymapdl?devcontainer_path=.devcontainer%2Fcodespaces-docs%2Fdevcontainer.json
 
 
 .. #Python

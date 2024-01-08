@@ -1,6 +1,7 @@
-========================================================
-Welcome to GitHub PyMAPDL Codespaces for developers 🧑‍💻👩‍💻
-========================================================
+
+======================================================
+Welcome to GitHub PyMAPDL Codespaces for developers 💻
+======================================================
 
 
 🛑 Disclaimer
@@ -10,7 +11,7 @@ Welcome to GitHub PyMAPDL Codespaces for developers 🧑‍💻👩‍💻
 writing examples for PyMAPDL**.
 
 Additionally, this Codespace is using an MAPDL Student version. For information on how Ansys
-supports your learning Ansys software, see the 
+supports your learning Ansys software, see the
 `Ansys for Students <https://www.ansys.com/academic/students>`_ page on the Ansys website.
 The Ansys Student version has some limitations. For more information, see the
 `Ansys Student - Free Software Download <https://www.ansys.com/academic/students/ansys-student>`_
@@ -36,7 +37,7 @@ Some of the available Python dependencies are:
 =========
 
 To start developing PyMAPDL, see
-`Develop code <https://mapdl.docs.pyansys.com/version/dev/getting_started/develop_pymapdl.html>`_
+`Develop code - Getting started <https://mapdl.docs.pyansys.com/version/dev/getting_started/develop_pymapdl.html>`_
 which describes the necessary steps.
 
 You can see the latest documentation on using Codespaces with PyMAPDL in
@@ -54,7 +55,7 @@ But remember to use ``xvfb-run`` when you call the ``pytest`` library.
 .. code:: console
 
     (.venv) mapdl@machine:~/pymapdl$ xvfb-run pytest
-    =================================================================== test session starts ====================================================================
+    ====================================== test session starts ======================================
     platform linux -- Python 3.10.12, pytest-7.4.4, pluggy-1.3.0
     rootdir: /home/mapdl/pymapdl
     configfile: pyproject.toml
@@ -88,5 +89,6 @@ We hope you enjoy this Codespace.
 See also
 ========
 
-* `Learning PyMAPDL <https://mapdl.docs.pyansys.com/version/dev/getting_started/learning.html>`_. 
+* `Learning PyMAPDL <https://mapdl.docs.pyansys.com/version/dev/getting_started/learning.html>`_
+* `Develop on Codespaces <https://mapdl.docs.pyansys.com/version/dev/getting_started/codespaces.html#develop-on-codespaces>`_
 * `Contributing <https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html#contributing>`_
