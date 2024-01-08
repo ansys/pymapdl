@@ -12,6 +12,7 @@
    codespaces
    faq
    versioning
+   cli
    docker
    macos
    wsl

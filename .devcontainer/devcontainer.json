@@ -33,12 +33,19 @@
 			"openFiles": [
 				".devcontainer/welcome.rst"
 			],
-			"extensions": [
-				"ms-python.python"
-			],
+			"extensions": {
+				"recommendations": [
+					"ms-python.python"
+				]
+			},
 			"settings": {
 				"python.defaultInterpreterPath": "/home/mapdl/pymapdl/.venv/bin/python",
-				"terminal.integrated.defaultProfile.linux": "bash"
+				"terminal.integrated.defaultProfile.linux": "bash",
+				"python.testing.pytestArgs": [
+					"tests"
+				],
+				"python.testing.unittestEnabled": false,
+				"python.testing.pytestEnabled": true
 			}
 		}
 	}
