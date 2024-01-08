@@ -130,5 +130,6 @@ We hope you enjoy this Codespace.
 See also
 ========
 
-* `Learning PyMAPDL <https://mapdl.docs.pyansys.com/version/dev/getting_started/learning.html>`_. 
+* `Learning PyMAPDL <https://mapdl.docs.pyansys.com/version/dev/getting_started/learning.html>`_
+* `Develop on Codespaces <https://mapdl.docs.pyansys.com/version/dev/getting_started/codespaces.html#develop-on-codespaces>`_
 * `Contributing <https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html#contributing>`_
