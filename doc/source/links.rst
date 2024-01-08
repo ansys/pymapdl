@@ -179,7 +179,7 @@
 .. _pymapdl_codespaces_welcome_dev: https://github.com/ansys/pymapdl/blob/main/.devcontainer/welcome.rst
 .. _pymapdl_codespaces_welcome_docs: https://github.com/ansys/pymapdl/blob/main/.devcontainer/codespaces-docs/welcome.rst
 .. _pymapdl_codespaces_welcome_local: https://github.com/ansys/pymapdl/blob/main/.devcontainer/devcontainer-local/welcome.rst
-
+.. _pymapdl_devcontainer_directory: https://github.com/ansys/pymapdl/tree/main/.devcontainer
 
 .. #Python
 .. _using_venv: https://docs.python.org/3/library/venv.html

@@ -80,7 +80,7 @@ and then select the machine that you want to connect to.
 .. note:: If you mistakenly close your browser window, your Codespace is still running.
    You can access it again from the PyMAPDL repository, by clicking the green **Code**
    button and then the **Codespaces** tab. You should see a list of your current
-   (active and stopped) Codespaces, where you can select the one that you want.
+   (active and stopped) Codespace machine, where you can select the one that you want.
 
 .. warning:: **Closing the browser window does not stop the Codespace
    from running**, which means you continue to be billed.
