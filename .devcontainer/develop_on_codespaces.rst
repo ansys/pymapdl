@@ -36,12 +36,12 @@ The **Dev container configuration** option sets the Codespaces configuration.
 
 Currently, there are three main configurations:
 
-* `PyMAPDL-Codespaces-Developer <pymapdl_codespaces_welcome_dev_>`_.
+* :ref:`PyMAPDL-Codespaces-Developer <ref_codespaces_dev_welcome>`.
   This is the default configuration. It contains the OS and Python dependencies
   to develop and test PyMAPDL. For instance, it has ``xvfb``
   and ``pytest`` packages installed for testing.
 
-* `PyMAPDL-Codespaces-Documentation <pymapdl_codespaces_welcome_docs_>`_.
+* :ref:`PyMAPDL-Codespaces-Documentation <ref_codespaces_docs_welcome>`.
   This configuration is specially set for people working with the documentation or examples. Thus,
   it includes the appropriate OS and Python dependencies.
   For instance, it includes ``sphinx`` and ``latex`` packages for building the documentation

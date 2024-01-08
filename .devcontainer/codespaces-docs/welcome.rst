@@ -51,16 +51,28 @@ To build the documentation as html use the following command:
 
 .. code:: console
 
-    $ make html
+    (.venv) mapdl@machine:~/pymapdl$ make html
     On codespaces. Using xvfb.
     Running Sphinx v7.2.6
     Using pandoc version: 3.1.9 to convert rst text blocks to markdown for .ipynb files
     loading pickled environment... done
-    [autosummary] generating autosummary for: 404.rst, api/_autosummary/ansys.mapdl.core.Mapdl.add_file_handler.rst, api/_autosummary/ansys.mapdl.core.Mapdl.aplot.rst, ...
+    [autosummary] generating autosummary for: 404.rst, api/_autosummary/ansys.mapdl.core.Mapdl.aplot.rst, ...
 
 As you can see, ``Make`` already takes care of using ``xvfb`` before building the documentation.
 Remember you can use ``make clean`` to clear the previous built.
 
+Building the full documentation can take quite a long time (up to 20 minutes) because all the examples needs to be run
+so the `gallery of examples <pymapdl_examples_gallery_>`_ can be created.
+If you are not changing these examples or the documentation general format, you can build the HTML documentation
+without building the gallery of examples using the following command:
+
+.. code:: console
+    
+    (.venv) mapdl@machine:~/pymapdl$ make html
+    On codespaces. Using xvfb.
+    Building gallery without running examples.
+    Running Sphinx v7.2.6
+    Using pandoc version: 3.1.9 to convert rst text blocks to markdown for .ipynb files
 
 Preview the built webpages
 --------------------------
@@ -70,7 +82,7 @@ and access it from your local browser using the following command:
 
 .. code:: console
 
-    $ make start-webserver
+    (.venv) mapdl@machine:~/pymapdl$ make start-webserver
     Starting Python server.
     You can find the webserver log in: /Users/german.ayuso/pymapdl/doc/webserver.log
     The pid of the webserver is 71867
@@ -80,15 +92,15 @@ and access it from your local browser using the following command:
     you can open the port from the 'PORTS' tab by
     clicking on the 'world' icon in the port 8000.
 
-This webserver always uses the port 8000. If you have the Python extension, Visual Studio Code should detect
+This webserver always uses the port 8000. Visual Studio Code should detect
 that available port and offer you to open it in a tab.
-If not, you can see the forwarded ports in the *PORTS* terminal tab.
+If not, you can see the forwarded ports in the **PORTS** terminal tab.
 
 To stop all webservers use the following command:
 
 .. code:: console
 
-    $ make stop-webserver
+    (.venv) mapdl@machine:~/pymapdl$ make stop-webserver
     Stopping webserver
     All webservers stopped
 
