@@ -92,6 +92,9 @@ for that time. You can stop the Codespace from the **Command palette**
 When you have finished to work with the Codespace virtual machine and you can delete from 
 your `personal Codespaces page <codespaces_>`_ there, click on the more button (**...**) of
 the machine you want to dispose, and click on **Delete**.
+Alternatively, you can delete them from the **Codespaces** tab under the **Code** button
+in PyMAPDL repository. There you can see the running virtual machines and stop or delete
+the one you prefer.
 
 Limitations
 ===========
