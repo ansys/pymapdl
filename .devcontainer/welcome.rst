@@ -54,7 +54,7 @@ But remember to use ``xvfb-run`` when you call the ``pytest`` library.
 .. code:: console
 
     (.venv) mapdl@machine:~/pymapdl$ xvfb-run pytest
-    =================================================================== test session starts ====================================================================
+    ====================================== test session starts ======================================
     platform linux -- Python 3.10.12, pytest-7.4.4, pluggy-1.3.0
     rootdir: /home/mapdl/pymapdl
     configfile: pyproject.toml
