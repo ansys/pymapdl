@@ -82,8 +82,8 @@ and then select the machine that you want to connect to.
    button and then the **Codespaces** tab. You should see a list of your current
    (active and stopped) Codespaces, where you can select the one that you want.
 
-.. warning:: Closing the browser window does not stop the Codespace
-   from running, which means you continue to be billed.
+.. warning:: **Closing the browser window does not stop the Codespace
+   from running**, which means you continue to be billed.
 
 When you are not working with the Codespace virtual machine, you should stop it so you are not billed
 for that time. You can stop the Codespace from the **Command palette**
