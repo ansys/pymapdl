@@ -53,7 +53,7 @@ If you are going to do testing, you must install the testing dependencies with t
 Developing using Codespaces
 ===========================
 
-You can save time by using `GitHub Codespaces <codespaces_>`_, which launches a fully ready
+You can save time by using `GitHub Codespaces <codespaces_features_>`_, which launches a fully ready
 coding environment based on Visual Studio Code. In this environment, some the of the preceding steps are already
 set for your convenience:
 
