@@ -619,12 +619,9 @@ jobs:
           message: |
             Hello!  :wave:
             
-            Your PR is changing the image cache. So I am attaching the new image cache
-            in a new [commit](https://github.com/ansys/pymapdl/commit/${{ steps.attatch-to-pr.outputs.commit_long_sha }}).
+            Your PR is changing the image cache. So I am attaching the new image cache in a new [commit](https://github.com/ansys/pymapdl/commit/${{ steps.attatch-to-pr.outputs.commit_long_sha }}).
 
-            This commit does not re-run the CICD workflows (since no changes are made in the codebase) therefore
-            you will see the actions showing in their status `Expected — Waiting for status to be reported`. Do not worry.
-            You commit workflow is still running [here](https://github.com/ansys/pymapdl/pull/${{ github.event.pull_request.number }}/checks?sha=${{ github.event.pull_request.head.sha }}) :smile:
+            This commit does not re-run the CICD workflows (since no changes are made in the codebase) therefore you will see the actions showing in their status `Expected — Waiting for status to be reported`. Do not worry. You commit workflow is still running [here](https://github.com/ansys/pymapdl/pull/${{ github.event.pull_request.number }}/checks?sha=${{ github.event.pull_request.head.sha }}) :smile:
 
             You might want to rerun the test to make sure that everything is passing. You can retrigger the CICD sending an empty commit `git commit -m "Empty comment to trigger CICD" --allow-empty`.
 
