@@ -108,7 +108,7 @@ Visual Studio Code automatically launches the MAPDL container with the desired c
 .. note:: The first time that you launch the devcontainer, it might take a long time before it is ready,
    This is because the container image must be pulled from the registry.
 
-You can now work normally, but you will be, in fact, working from
+You can now work normally, but you would be, in fact, working from
 inside the container.
 Because Visual Studio Code mount the local directory into the Docker container,
 you don't lose your changes if you accidentally delete your container.

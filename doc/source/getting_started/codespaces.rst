@@ -10,10 +10,12 @@ in couple of minutes.
 This is an easy way to get started with PyMAPDL development without going
 through the process of setting up your environment.
 
-.. warning:: `Codespaces <codespaces_features_>`_  are not free, but they have a generous
+
+.. warning::
+   `Codespaces <codespaces_features_>`_  are not free, but they have a generous
    free allowance per month.
    After that, you must pay according to `GitHub pricing <github_pricing_>`_.
-   You can check your billing details in your `GitHub account settings` under
+   You can see your billing details in your *GitHub account settings* under
    *Billing and plans* and *Plans and usage*.
 
 
@@ -63,8 +65,10 @@ Lastly, the **Machine type** option allows you to choose the specifications of
 the machine hosting the Codespace. The amount of your Codespace allowance
 (free or paid) that consumed is proportional to the power of your machine.
 
-.. warning:: If you choose **New with options**, building the Codespace
-    might take longer (up to five minutes) than if you choose the default configuration.
+.. warning::
+
+   If you choose **New with options**, building the Codespaces environment
+   might take longer (up to five minutes) than if you choose the default configuration.
 
 How to use
 ==========
@@ -73,13 +77,13 @@ The usage of a in-browser Codespaces is very simple if you are
 familiar with Visual Studio Code.
 For example, you can create, edit, and delete files, or you can install extensions.
 You can do many of the things you can do in a Visual Studio Code instance
-installed locally. However, there are some limitations which are detailed in `Limitations`_.
-
+installed locally. However, there are some limitations which are detailed in
+:ref:`Limitations <codespaces_limitations>`.
 
 .. figure:: ../images/codespaces.png
-    :width: 300pt
+   :width: 300pt
 
-    PyMAPDL GitHub Codespace
+   PyMAPDL GitHub Codespaces environment
 
 
 How to connect to an already existing instance
@@ -110,12 +114,14 @@ for that time. You can stop the Codespace from the **Command palette**
    PyMAPDL Codespace machines, where you can select the one that you want to connect to, stop or delete.
 
 When you have finished to work with the Codespace virtual machine and you want to delete it, you can do it from 
-your `personal Codespaces page <codespaces_personal_page_>`_, clicking on the more button (**...**) of
+your `personal Codespaces page <codespaces_personal_page_>`_, clicking on the more button (**. . .**) of
 the machine you want to dispose, and then clicking on **Delete**.
 Alternatively, you can delete them from the **Codespaces** tab under the **Code** button
 in PyMAPDL repository. There you can see the running virtual machines and stop or delete
 the one you prefer.
 
+
+.. _codespaces_limitations:
 
 Limitations
 ===========
@@ -125,7 +131,7 @@ Limitations
 
 * Rendering HTML pages can be a bit difficult in Codespaces. For that reason,
   :ref:`PyMAPDL-Codespaces-Documentation <ref_codespaces_docs_welcome>` includes some script
-  helpers that start and stop webserver for the built documentation.
+  helpers that start and stop a web server for the built documentation.
   For more information visit, :ref:`PyMAPDL-Codespaces-Documentation <ref_codespaces_docs_welcome>`.
 
 * When you open a Codespace from your local IDE, you might lose some configuration.
