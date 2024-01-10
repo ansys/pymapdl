@@ -1541,7 +1541,7 @@ class _MapdlCore(Commands):
 
         self._apdl_log = open(filename, mode=mode, buffering=1)  # line buffered
         self._apdl_log.write(
-            f"! APDL log script generated using PyMapdl (ansys.mapdl.core {pymapdl.__version__})\n"
+            f"! APDL log script generated using PyMAPDL (ansys.mapdl.core {pymapdl.__version__})\n"
         )
 
     @supress_logging
