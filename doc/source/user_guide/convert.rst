@@ -1,5 +1,5 @@
 Translate scripts
-===================
+=================
 
 The `ansys-mapdl-core <pymapdl_docs_>`_
 library contains a few basic functions to translate existing MAPDL

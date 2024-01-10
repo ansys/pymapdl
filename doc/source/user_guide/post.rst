@@ -95,15 +95,15 @@ a mask of the currently selected nodes:
 
 
 Postprocessing object methods
-------------------------------
+-----------------------------
+
 For a list of all postprocessing methods, see
 :ref:`post_processing_api`.
 
 
 Enriched command output
 ~~~~~~~~~~~~~~~~~~~~~~~
-All :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class commands output
------------------------
+
 All :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class commands output
 a string object that can be parsed to obtain specific data from it.
 
@@ -190,6 +190,7 @@ Here's a simple example that demonstrates usage:
 
 Examples
 --------
+
 You would typically request nodal results from MAPDL using the
 ``PRNSOL`` command:
 
@@ -245,6 +246,7 @@ You could also plot the nodal displacement with this code:
 
 Selecting entities
 ------------------
+
 You can select entities such as nodes, or lines using the following methods:
 
 * :func:`Mapdl.nsel() <ansys.mapdl.core.Mapdl.nsel>`
@@ -286,6 +288,7 @@ a mask of the currently selected nodes:
 
 
 Postprocessing object methods
-------------------------------
+-----------------------------
+
 For a full list of all available postprocessing methods, see
 :ref:`post_processing_api`.

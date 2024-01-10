@@ -16,12 +16,11 @@ This section provides a general overview of PyMAPDL and how you use it.
 
    mapdl
    plotting
+   convert
    mesh_geometry
-   plotting
    parameters
    components
    post
-   mapdl_examples
    database
    math
    pool
