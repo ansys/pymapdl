@@ -47,6 +47,8 @@ centerline
 CentOS
 CentOS7
 Chao
+Codespace
+Codespaces
 container_layout
 datas
 delet
@@ -152,6 +154,7 @@ UPF
 UPFs
 viscoplastic
 vise
+Visual Studio Code
 von
 VTK
 wan

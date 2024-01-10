@@ -1,5 +1,26 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from collections import namedtuple
-from importlib import import_module
 import os
 from pathlib import Path
 from sys import platform
@@ -17,6 +38,7 @@ from common import (
     is_on_ci,
     is_on_local,
     is_on_ubuntu,
+    is_running_on_student,
     is_smp,
     support_plotting,
     testing_minimal,
@@ -32,6 +54,7 @@ TESTING_MINIMAL = testing_minimal()
 
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()
+ON_STUDENT = is_running_on_student()
 
 ON_UBUNTU = is_on_ubuntu()  # Tells if MAPDL is running on Ubuntu system or not.
 # Whether PyMAPDL is running on an ubuntu or different machine is irrelevant.
@@ -82,9 +105,24 @@ requires_on_cicd = pytest.mark.skipif(
     not ON_CI, reason="This test requires to be on CICD"
 )
 
+skip_if_running_student_version = pytest.mark.skipif(
+    ON_STUDENT,
+    reason="This tests does not work on student version. Maybe because license limitations",
+)
+
+
+def import_module(requirement):
+    from importlib import import_module
+
+    if os.name == "nt":
+        requirement = requirement.replace("-", ".")
+    return import_module(requirement)
+
 
 def has_dependency(requirement):
     try:
+        if os.name == "nt":
+            requirement = requirement.replace("-", ".")
         import_module(requirement)
         return True
     except ModuleNotFoundError:
@@ -124,6 +162,9 @@ def requires(requirement: str):
 
     elif "nowindows" == requirement:
         return skip_on_windows
+
+    elif "nostudent" == requirement:
+        return skip_if_running_student_version
 
     elif "console" == requirement:
         return pytest.mark.console

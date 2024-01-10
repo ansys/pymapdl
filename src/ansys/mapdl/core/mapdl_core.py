@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Module to control interaction with MAPDL through Python"""
 
 import atexit
@@ -11,7 +33,7 @@ from shutil import copyfile, rmtree
 from subprocess import DEVNULL, call
 import tempfile
 import time
-from typing import TYPE_CHECKING, Any, Dict, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 import warnings
 from warnings import warn
 import weakref
@@ -2831,3 +2853,21 @@ class _MapdlCore(Commands):
             if self._in_nopr:
                 self._parent()._run("/nopr")
             self._parent()._mute = self._previous_mute
+
+    def _parse_cmlist(self, cmlist: Optional[str] = None) -> Dict[str, Any]:
+        from ansys.mapdl.core.component import _parse_cmlist
+
+        if not cmlist:
+            cmlist = self.cmlist()
+
+        return _parse_cmlist(cmlist)
+
+    def _parse_cmlist_indiv(
+        self, cmname: str, cmtype: str, cmlist: Optional[str] = None
+    ) -> List[int]:
+        from ansys.mapdl.core.component import _parse_cmlist_indiv
+
+        if not cmlist:
+            cmlist = self.cmlist(cmname, 1)
+
+        return _parse_cmlist_indiv(cmname, cmtype, cmlist)

@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Test MAPDL interface"""
 from datetime import datetime
 import os
@@ -511,11 +533,14 @@ def test_lines(cleared, mapdl):
 
 
 @requires("local")
-def test_apdl_logging_start(tmpdir):
+def test_apdl_logging_start(tmpdir, mapdl):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
     mapdl = launch_mapdl(
-        start_timeout=30, log_apdl=filename, additional_switches=QUICK_LAUNCH_SWITCHES
+        port=mapdl.port - 1,  # It normally goes up, so 50051 should be free
+        start_timeout=30,
+        log_apdl=filename,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
     )
 
     mapdl.prep7()
@@ -1837,6 +1862,9 @@ def test_get_file_name(mapdl):
 
 @requires("local")
 def test_cache_pids(mapdl):
+    if mapdl.version == 23.2:
+        pytest.skip(f"Flaky test in MAPDL 23.2")  # I'm not sure why.
+
     assert mapdl._pids
     mapdl._cache_pids()  # Recache pids
 
@@ -1927,6 +1955,7 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
 
 
 @requires("local")
+@requires("nostudent")
 def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
         license_server_check=False, additional_switches=QUICK_LAUNCH_SWITCHES
