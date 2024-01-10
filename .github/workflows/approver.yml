@@ -16,8 +16,19 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
+      - name: "Grab url for GIF"
+        id: image_grabber
+        run: |
+          sudo apt-get install jq
+          export IMG_MSG=$(curl -s 'https://us-central1-lgtm-reloaded.cloudfunctions.net/lgtm' | jq -r '.markdown' | grep -v 'Powered By GIPHY')
+          echo "IMG_MSG=$IMG_MSG" >> $GITHUB_ENV
+
       - uses: hmarr/auto-approve-action@v3
         with:
-          review-message: ":white_check_mark: Approving this PR because [${{ github.event.comment.user.login }}](https://github.com/${{ github.event.comment.user.login }}) said so in [here](${{ github.event.comment.html_url }}) :grimacing:"
+          review-message: |
+            ":white_check_mark: Approving this PR because [${{ github.event.comment.user.login }}](https://github.com/${{ github.event.comment.user.login }}) said so in [here](${{ github.event.comment.html_url }}) :grimacing:"
+
+            ${{ steps.image_grabber.outputs.IMG_MSG }}
+
           pull-request-number: ${{ github.event.issue.number }}
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
