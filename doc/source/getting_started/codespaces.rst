@@ -104,7 +104,7 @@ When you are not working with the Codespace virtual machine, you should stop it 
 for that time. You can stop the Codespace from the **Command palette**
 (:kbd:`Ctr/⌘` + :kbd:`Shift` + :kbd:`P`) and then search for ``Stop current Codespace``.
 
-.. warning:: If you close your browser window (by mistake or not), your Codespace is still running.
+.. warning:: If you close your browser window (by mistake or not), **your Codespace is still running**.
    You can access it again from the PyMAPDL repository, by clicking the green **Code**
    button and then the **Codespaces** tab. You should see a list of your current (active and stopped)
    PyMAPDL Codespace machines, where you can select the one that you want to connect to, stop or delete.
