@@ -630,10 +630,13 @@ def launch_grpc(
             _check_server_is_alive(stdout_queue, run_location, timeout)
 
     except MapdlDidNotStart as e:
+        msg = str(e) + f"\nRun location: {run_location}" + f"\nCommand line used: {cmd}"
+
         terminal_output = "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
-        raise MapdlDidNotStart(
-            str(e) + "\n\n" + "The full terminal output is:\n\n" + terminal_output
-        ) from e
+        if terminal_output.strip():
+            msg = msg + "The full terminal output is:\n\n" + terminal_output
+
+        raise MapdlDidNotStart(msg) from e
 
     # Ending thread
     # Todo: Ending queue thread
@@ -642,9 +645,8 @@ def launch_grpc(
 
 def _check_process_is_alive(process, run_location):
     if process.poll() is not None:  # pragma: no cover
-        raise MapdlDidNotStart(
-            f"MAPDL process died.\nCheck the run location: '{run_location}')."
-        )
+        msg = f"MAPDL process died."
+        raise MapdlDidNotStart(msg)
 
 
 def _check_file_error_created(run_location, timeout):
@@ -663,9 +665,8 @@ def _check_file_error_created(run_location, timeout):
         time.sleep(sleep_time)
 
     if not has_ans:
-        raise MapdlDidNotStart(
-            f"MAPDL failed to start (No err file generated in '{run_location}')."
-        )
+        msg = f"MAPDL failed to start.\nNo error file (.err) generated in working directory."
+        raise MapdlDidNotStart(msg)
 
 
 def _check_server_is_alive(stdout_queue, run_location, timeout):
@@ -693,10 +694,7 @@ def _check_server_is_alive(stdout_queue, run_location, timeout):
             break
 
     else:
-        raise MapdlDidNotStart(
-            f"MAPDL failed to start the gRPC server.\nCheck the run location: '{run_location}').\n"
-            f"The full terminal output is:\n\n" + terminal_output
-        )
+        raise MapdlDidNotStart("MAPDL failed to start the gRPC server")
 
 
 def _get_std_output(std_queue, timeout=1):
