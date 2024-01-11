@@ -41,17 +41,18 @@ commands:
 # ---------------------
 
 from ansys.mapdl.core import launch_mapdl
+from ansys.mapdl.core.examples.downloads import download_example_data
 
 mapdl = launch_mapdl()
 
 ##############################################################################
-# Upload and run an MAPDL script.
+# Download and run an MAPDL script
+# --------------------------------
 
-if mapdl.is_local:
-    mapdl.upload("./spotweld/spot_weld.inp")
-    mapdl.input("spot_weld.inp")
-else:
-    mapdl.input("./spotweld/spot_weld.inp")
+spotweld_data = download_example_data(
+    filename="spotweld.inp", directory="pymapdl/spotweld"
+)
+mapdl.input(spotweld_data)
 
 ######################################################################
 # Displacements

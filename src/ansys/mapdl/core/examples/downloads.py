@@ -175,7 +175,7 @@ def download_manifold_example_data() -> dict:
     Examples
     --------
     Download the manifold geometry, ans file and return the path of the file
-    >>> from ansys.mapdl.core.examples import download_manifold_example_data
+    >>> from ansys.mapdl.core.examples.downloads import download_manifold_example_data
     >>> paths = download_manifold_example_data()
     >>> paths
     {geometry: 'C:\\Users\\user\\AppData\\Local\\ansys_mapdl_core\\ansys_mapdl_core\\examples\\manifold_geometry.anf',
@@ -204,7 +204,7 @@ def download_cfx_mapping_example_data() -> dict:
         Path to the example files.
     Examples
     --------
-    >>> from ansys.mapdl.core.examples import download_cfx_mapping_example_data
+    >>> from ansys.mapdl.core.examples.downloads import download_cfx_mapping_example_data
     >>> paths = download_cfx_mapping_example_data()
     >>> paths
     {data: 'C:\\Users\\user\\AppData\\Local\\ansys_mapdl_core\\ansys_mapdl_core\\examples\\11_blades_mode_1_ND_0.csv',
