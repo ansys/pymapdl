@@ -1,6 +1,20 @@
 name: Approve PRs
 on:
   workflow_dispatch:
+    inputs:
+      user:
+        description: 'Username'
+        required: true
+        type: string
+      html_url:
+        description: 'URL to the comment'
+        required: true
+        type: string
+      pr:
+        description: 'Pull request to approve'
+        required: true
+        type: number
+
   issue_comment:                                     
     types: [created, edited]
 
@@ -8,25 +22,51 @@ jobs:
   autoapprove:
     # This job only runs for pull request comments
     name: PR comment
-    if: github.event.issue.pull_request &&
+    if: (github.event.issue.pull_request &&
         contains(github.event.comment.body, '@pyansys-ci-bot LGTM') && (
+          github.event.comment.user.login == 'germa89'
+        )) || (github.event_name == 'workflow_dispatch' && 
           github.event.comment.user.login == 'germa89'
         )
     permissions:
       pull-requests: write
     runs-on: ubuntu-latest
+
     steps:
+      - name: "Settings"
+        id: settings
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          export event_name=${{ github.event_name }}
+
+          if [[ $event_name == "workflow_dispatch" ]] ; then
+            echo "On workflow dispatch"
+            echo "user=${{ inputs.user }}" >> $GITHUB_OUTPUT
+            echo "html_url=${{ inputs.html_url }}" >> $GITHUB_OUTPUT
+            echo "pull_request=${{ inputs.pr }}" >> $GITHUB_OUTPUT
+
+          else
+            echo "On $event_name"
+            echo "user=${{ github.event.comment.user.login }}" >> $GITHUB_OUTPUT
+            echo "html_url=${{ github.event.comment.html_url }}" >> $GITHUB_OUTPUT
+            echo "pull_request=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+
+          fi;
+
       - name: "Grab url for GIF"
         id: image_grabber
         run: |
           sudo apt-get install jq
           export IMG_MSG=$(curl -s 'https://us-central1-lgtm-reloaded.cloudfunctions.net/lgtm' | jq -r '.markdown' | grep -v 'Powered By GIPHY')
-          echo "IMG_MSG=$IMG_MSG" >> $GITHUB_ENV
+          echo "IMG_MSG=$IMG_MSG" >> $GITHUB_OUTPUT
 
       - uses: hmarr/auto-approve-action@v3
         with:
           review-message: |
-            ":white_check_mark: Approving this PR because [${{ github.event.comment.user.login }}](https://github.com/${{ github.event.comment.user.login }}) said so in [here](${{ github.event.comment.html_url }}) :grimacing:" \r\n ${{ steps.image_grabber.outputs.IMG_MSG }}
+            :white_check_mark: Approving this PR because [${{ steps.settings.outputs.user }}](https://github.com/${{ steps.settings.outputs.user }}) said so in [here](${{ steps.settings.outputs.html_url }}) :grimacing:
 
-          pull-request-number: ${{ github.event.issue.number }}
+            ${{ steps.image_grabber.outputs.IMG_MSG }}
+
+
+          pull-request-number: ${{ steps.settings.outputs.pull_request }}
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
