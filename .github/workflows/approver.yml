@@ -61,8 +61,8 @@ jobs:
       - uses: hmarr/auto-approve-action@v3
         with:
           review-message: |
-            ":white_check_mark: Approving this PR because [${{ steps.settings.outputs.user }}](https://github.com/${{ steps.settings.outputs.user }}) said so in [here](${{ steps.settings.outputs.html_url }}) :grimacing:"
-            
+            :white_check_mark: Approving this PR because [${{ steps.settings.outputs.user }}](https://github.com/${{ steps.settings.outputs.user }}) said so in [here](${{ steps.settings.outputs.html_url }}) :grimacing:
+
             ${{ steps.image_grabber.outputs.IMG_MSG }}
 
           pull-request-number: ${{ steps.settings.outputs.pull_request }}
