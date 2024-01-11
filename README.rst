@@ -1,5 +1,6 @@
 
 .. image:: https://github.com/ansys/pymapdl/raw/main/doc/logo_light.png
+   :alt: PyMAPDL
 
 |pyansys| |pypi| |PyPIact| |GH-CI| |codecov| |zenodo| |MIT| |black| |pre-commit|
 
