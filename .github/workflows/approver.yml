@@ -25,7 +25,9 @@ jobs:
     if: (github.event.issue.pull_request &&
         contains(github.event.comment.body, '@pyansys-ci-bot LGTM') && (
           github.event.comment.user.login == 'germa89'
-        )) || github.event_name == 'workflow_dispatch'
+        )) || (github.event_name == 'workflow_dispatch' && 
+          github.event.comment.user.login == 'germa89'
+        )
     permissions:
       pull-requests: write
     runs-on: ubuntu-latest
