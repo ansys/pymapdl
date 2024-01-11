@@ -2314,7 +2314,7 @@ def test_use_vtk(mapdl):
 
 @requires("local")
 def test__remove_temp_dir_on_exit(tmpdir):
-    path = os.path.join(tempfile.gettempdir(), "ansys_")
+    path = os.path.join(tempfile.gettempdir(), "ansys_" + random_string())
     os.makedirs(path)
     filename = os.path.join(path, "file.txt")
     with open(filename, "w") as f:
