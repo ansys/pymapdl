@@ -3,7 +3,7 @@
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://github.com/ansys/pymapdl/blob/main/doc/source/_static/logo_dark.png">
       <source media="(prefers-color-scheme: light)" srcset="https://github.com/ansys/pymapdl/blob/main/doc/source/_static/logo_light.png">
-      <img alt="pymapdl" src="https://github.com/ansys/pymapdl/blob/main/doc/source/_static/logo_light.png">
+      <img alt="pymapdl" >
     </picture>
 
 
