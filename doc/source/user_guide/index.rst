@@ -6,30 +6,6 @@ User guide
 This section provides a general overview of PyMAPDL and how you use it.
 
 
-..
-   This toctreemust be a top level index to get it to show up in
-   pydata_sphinx_theme
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
-
-   mapdl
-   plotting
-   convert
-   mesh_geometry
-   parameters
-   components
-   post
-   database
-   math
-   pool
-   xpl
-   upf
-   krylov
-   troubleshoot
-
-
 PyMAPDL overview
 ================
 The :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function
@@ -222,3 +198,26 @@ with it. For example:
 
 
 For stability considerations, see :ref:`PyMAPDL stability <ref_pymapdl_stability>`.
+
+
+..
+   This toctreemust be a top level index to get it to show up in
+   pydata_sphinx_theme
+
+.. toctree::
+   :maxdepth: 1
+
+   mapdl
+   plotting
+   convert
+   mesh_geometry
+   parameters
+   components
+   post
+   database
+   math
+   pool
+   xpl
+   upf
+   krylov
+   troubleshoot

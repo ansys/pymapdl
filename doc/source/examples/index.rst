@@ -1,8 +1,7 @@
 
 
 .. toctree::
-    :hidden:
-    :maxdepth: 3
+    :maxdepth: 1
 
     devportal.rst
     Verification Manual <https://examples.mapdl.docs.pyansys.com/verif-manual/index.html>

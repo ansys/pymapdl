@@ -38,6 +38,7 @@ doc/source/examples/gallery_examples/*
 # docs
 _autosummary
 doc/build_errors.txt
+doc/source/images/auto-generated/*
 
 
 # Testing
