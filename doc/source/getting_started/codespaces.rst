@@ -43,7 +43,9 @@ Currently, there are three main configurations:
   to develop and test PyMAPDL. For instance, it has ``xvfb``
   and ``pytest`` packages installed for testing.
 
-  |Open a GitHub Codespaces for developers|
+  |Open a GitHub Codespaces for developers-light|
+  |Open a GitHub Codespaces for developers-dark|
+  
 
 * :ref:`PyMAPDL-Codespaces-Documentation <ref_codespaces_docs_welcome>`.
   This configuration is specially set for people working with the documentation or examples. Thus,
@@ -51,7 +53,8 @@ Currently, there are three main configurations:
   For instance, it includes ``sphinx`` and ``latex`` packages for building the documentation
   as HTML and PDF outputs.
 
-  |Open a GitHub Codespaces for documentation|
+  |Open a GitHub Codespaces for documentation-light|
+  |Open a GitHub Codespaces for documentation-dark|
 
 * `PyMAPDL-DevContainer (Local) <pymapdl_codespaces_welcome_local_>`_ **[NOT RECOMMENDED]**. This is the
   configuration for launching a development container locally.
@@ -140,9 +143,20 @@ Limitations
 
 
 
-.. |Open a GitHub Codespaces for developers| image:: https://github.com/codespaces/badge.svg
+.. Images
+
+.. |Open a GitHub Codespaces for developers-light| image:: https://img.shields.io/badge/-Open%20GitHub%20Codespace-333?style=flat-square&logo=github
    :target: https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fdevcontainer.json
+   :class: only-light
 
+.. |Open a GitHub Codespaces for developers-dark| image:: https://img.shields.io/badge/-Open%20GitHub%20Codespace-ffffff?style=flat-square&logo=github&logoColor=000000
+   :target: https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fdevcontainer.json
+   :class: only-dark
 
-.. |Open a GitHub Codespaces for documentation| image:: https://github.com/codespaces/badge.svg
+.. |Open a GitHub Codespaces for documentation-light| image:: https://img.shields.io/badge/-Open%20GitHub%20Codespace-333?style=flat-square&logo=github
    :target: https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fcodespaces-docs%2Fdevcontainer.json
+   :class: only-light
+
+.. |Open a GitHub Codespaces for documentation-dark| image:: https://img.shields.io/badge/-Open%20GitHub%20Codespace-ffffff?style=flat-square&logo=github&logoColor=000000
+   :target: https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fcodespaces-docs%2Fdevcontainer.json
+   :class: only-dark
