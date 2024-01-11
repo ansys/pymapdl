@@ -65,5 +65,6 @@ jobs:
 
             ${{ steps.image_grabber.outputs.IMG_MSG }}
 
+
           pull-request-number: ${{ steps.settings.outputs.pull_request }}
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
