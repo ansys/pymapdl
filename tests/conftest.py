@@ -461,7 +461,7 @@ def mapdl(request, tmpdir_factory):
     ###########################################################################
     if START_INSTANCE:
         mapdl._local = True
-        mapdl.exit()
+        mapdl.exit(save=True, force=True)
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
 

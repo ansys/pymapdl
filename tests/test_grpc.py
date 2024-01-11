@@ -548,3 +548,13 @@ def test_input_compatibility_api_change(mapdl):
 
     with pytest.raises(ValueError, match="A file name must be supplied."):
         mapdl.input()
+
+
+@requires("grpc")
+@requires("local")
+def test__check_stds(mapdl):
+    """Test that the standard input is checked."""
+
+    mapdl._read_stds()
+    assert mapdl._stdout is not None
+    assert mapdl._stderr is not None

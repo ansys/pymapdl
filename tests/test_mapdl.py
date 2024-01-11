@@ -26,6 +26,7 @@ import os
 from pathlib import Path
 import re
 import shutil
+import tempfile
 import time
 
 import grpc
@@ -2309,3 +2310,18 @@ def test_use_vtk(mapdl):
     mapdl.eplot()
 
     mapdl.use_vtk = prev
+
+
+@requires("local")
+def test__remove_temp_dir_on_exit(tmpdir):
+    path = os.path.join(tempfile.gettempdir(), "ansys_")
+    os.makedirs(path)
+    filename = os.path.join(path, "file.txt")
+    with open(filename, "w") as f:
+        f.write("Hello World")
+    assert os.path.exists(filename)
+
+    mapdl._remove_temp_dir_on_exit(path)
+
+    assert os.path.exists(filename) is False
+    assert os.path.exists(path) is False
