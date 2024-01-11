@@ -429,10 +429,20 @@ def test_download_result(mapdl, cleared, tmpdir):
     assert os.path.exists(os.path.join(target_dir, "file.rst"))
 
     assert not os.path.exists("file.rst")
-    mapdl.download_result()  # with default argument
+    mapdl.download_result(preference="rst")  # with default argument
     assert os.path.exists("file.rst")
 
     os.remove("file.rst")
+
+    mapdl.download_result(preference="rth")
+    try:
+        os.remove("file.rst")
+    except Exception:
+        pass
+    try:
+        os.remove("file.rth")
+    except Exception:
+        pass
 
 
 def test__channel_str(mapdl):

@@ -2313,7 +2313,7 @@ def test_use_vtk(mapdl):
 
 
 @requires("local")
-def test__remove_temp_dir_on_exit(tmpdir):
+def test__remove_temp_dir_on_exit(mapdl, tmpdir):
     path = os.path.join(tempfile.gettempdir(), "ansys_" + random_string())
     os.makedirs(path)
     filename = os.path.join(path, "file.txt")
@@ -2325,3 +2325,7 @@ def test__remove_temp_dir_on_exit(tmpdir):
 
     assert os.path.exists(filename) is False
     assert os.path.exists(path) is False
+
+
+def test_sys(mapdl):
+    assert "hi" in mapdl.sys("echo 'hi'")
