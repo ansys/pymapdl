@@ -26,9 +26,7 @@ jobs:
       - uses: hmarr/auto-approve-action@v3
         with:
           review-message: |
-            ":white_check_mark: Approving this PR because [${{ github.event.comment.user.login }}](https://github.com/${{ github.event.comment.user.login }}) said so in [here](${{ github.event.comment.html_url }}) :grimacing:"
-
-            ${{ steps.image_grabber.outputs.IMG_MSG }}
+            ":white_check_mark: Approving this PR because [${{ github.event.comment.user.login }}](https://github.com/${{ github.event.comment.user.login }}) said so in [here](${{ github.event.comment.html_url }}) :grimacing:" \r\n ${{ steps.image_grabber.outputs.IMG_MSG }}
 
           pull-request-number: ${{ github.event.issue.number }}
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
