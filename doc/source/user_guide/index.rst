@@ -207,12 +207,13 @@ For stability considerations, see :ref:`PyMAPDL stability <ref_pymapdl_stability
    :maxdepth: 1
 
    mapdl
-   plotting
    convert
    mesh_geometry
+   plotting
    parameters
    components
    post
+   cli
    database
    math
    pool

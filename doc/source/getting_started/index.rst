@@ -27,7 +27,6 @@ Additionally, have a look at the following resources for related information:
    devcontainer
    make_container
    versioning
-   cli
    docker
    macos
    wsl
