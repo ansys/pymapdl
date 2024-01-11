@@ -2321,7 +2321,10 @@ def test__remove_temp_dir_on_exit(mapdl, tmpdir):
         f.write("Hello World")
     assert os.path.exists(filename)
 
+    prev = mapdl.__remove_temp_dir_on_exit
+    mapdl.__remove_temp_dir_on_exit = True
     mapdl._remove_temp_dir_on_exit(path)
+    mapdl.__remove_temp_dir_on_exit = prev
 
     assert os.path.exists(filename) is False
     assert os.path.exists(path) is False
