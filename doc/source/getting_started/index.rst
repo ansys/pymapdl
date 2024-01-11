@@ -12,17 +12,16 @@ Getting started
    install_pymapdl
    launcher
    learning
+   faq
    contribution
    codespaces
-   faq
+   devcontainer
+   make_container
    versioning
-   cli
    docker
    macos
    wsl
    using_julia
-   make_container
-   devcontainer
 
 
 
