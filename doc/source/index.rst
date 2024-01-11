@@ -1,7 +1,7 @@
-.. image:: ../logo_dark.png
+.. image:: ../source/_static/logo_dark.png
     :class: only-dark
 
-.. image:: ../logo_light.png
+.. image:: ../source/_static/logo_light.png
     :class: only-light
 
 

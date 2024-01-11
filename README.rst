@@ -1,5 +1,5 @@
 
-.. image:: https://github.com/ansys/pymapdl/raw/main/doc/logo_light.png
+.. image:: https://github.com/ansys/pymapdl/raw/main/doc/source/_static/logo_light.png
    :alt: PyMAPDL
 
 |pyansys| |pypi| |PyPIact| |GH-CI| |codecov| |zenodo| |MIT| |black| |pre-commit|
@@ -52,7 +52,7 @@ MAPDL and supports:
 
 Here's a quick demo of PyMAPDL within Visual Studio Code:
 
-.. image:: https://github.com/ansys/pymapdl/raw/main/doc/landing_page_demo.gif
+.. image:: https://github.com/ansys/pymapdl/raw/main/doc/source/_static/landing_page_demo.gif
 
 PyMAPDL works within Jupyter Notebooks, the standard Python console,
 or in batch mode on Windows, Linux, and even Mac OS.
