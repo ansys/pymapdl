@@ -84,25 +84,25 @@ and access it from your local browser using the following command:
 
     (.venv) mapdl@machine:~/pymapdl$ make start-webserver
     Starting Python server.
-    You can find the webserver log in: /Users/german.ayuso/pymapdl/doc/webserver.log
-    The pid of the webserver is 71867
+    You can find the web server log in: /Users/german.ayuso/pymapdl/doc/webserver.log
+    The pid of the web server is 71867
     Starting...
     Server started at port 8000.
     If you don't see a pop up with 'Open in browser',
     you can open the port from the 'PORTS' tab by
     clicking on the 'world' icon in the port 8000.
 
-This webserver always uses the port 8000. Visual Studio Code should detect
+This web server always uses the port 8000. Visual Studio Code should detect
 that available port and offer you to open it in a tab.
 If not, you can see the forwarded ports in the **PORTS** terminal tab.
 
-To stop all webservers use the following command:
+To stop all web servers use the following command:
 
 .. code:: console
 
     (.venv) mapdl@machine:~/pymapdl$ make stop-webserver
-    Stopping webserver
-    All webservers stopped
+    Stopping web server
+    All web servers stopped
 
 For more information, visit `Forwarding ports in your codespace <https://docs.github.com/en/codespaces/developing-in-a-codespace/forwarding-ports-in-your-codespace>`_.
 

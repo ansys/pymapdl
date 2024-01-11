@@ -3,7 +3,6 @@
 Getting started
 ===============
 
-
 To use PyMAPDL you must follow the next three steps:
 
 * :ref:`ref_using_standard_install`
@@ -22,14 +21,14 @@ Additionally, have a look at the following resources for related information:
    install_pymapdl
    launcher
    learning
+   faq
    contribution
    codespaces
-   faq
+   devcontainer
+   make_container
    versioning
    cli
    docker
    macos
    wsl
    using_julia
-   make_container
-   devcontainer

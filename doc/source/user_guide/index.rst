@@ -199,7 +199,6 @@ with it. For example:
 
 For stability considerations, see :ref:`PyMAPDL stability <ref_pymapdl_stability>`.
 
-
 ..
    This toctreemust be a top level index to get it to show up in
    pydata_sphinx_theme

@@ -89,5 +89,5 @@ start-webserver:
 	@(./start_webserver.sh)
 
 stop-webserver:
-	@echo "Stopping webserver"
+	@echo "Stopping web server"
 	@(./stop_webserver.sh)
