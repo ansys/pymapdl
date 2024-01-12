@@ -9,11 +9,14 @@ ln -s /home/mapdl/.venv /home/mapdl/pymapdl/.venv_pymapdl && echo "Linking venv 
 source ./.venv_pymapdl/bin/activate
 
 echo "Installing PyMAPDL package and dependencies for development"
-# It should be fast because the image is build with the dependencies installed.
+# let's first update everything
+git fetch && git pull
+
+# Installation should be fast because the image is built with the dependencies installed.
 pip install -e '.[tests]'
 
 echo "Setting pre-commit..."
-pre-commit install
+pre-commit install --install-hooks
 
 echo "Installing Visual Studio Code extensions..."
 code --install-extension ms-python.python
