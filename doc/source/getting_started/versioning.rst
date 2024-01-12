@@ -34,6 +34,9 @@ Legacy interfaces
 CORBA interface
 ---------------
 
+.. warning:: This interface has been deprecated with PyMAPDL 0.68.
+
+
 .. vale off
 
 Ansys 17.0 supports the legacy CORBA interface, enabled with the
@@ -49,15 +52,18 @@ MAPDL support specific versions of Windows and Linux.
 For more information on supported platforms, see 
 `Ansys Platform Support <ansys_platform_support_>`_.
     
-The CORBA interface is likely to be phased out from MAPDL at some
-point. The gRPC interface is faster, more stable, and can run in
-both local and remote connection configurations.
+The CORBA interface is an outdate interface, and its usage is not
+recommended. The gRPC interface is recommended since it is faster,
+more stable, and can run in both local and remote connection configurations.
 
 Deprecation of CORBA Interface in PyMAPDL
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Starting from version v0.67 of PyMAPDL library, the CORBA interface
-is set to be deprecated and eventually removed.
+.. warning:: This interface has been deprecated with PyMAPDL 0.68.
+
+Started from version v0.67 of PyMAPDL library, the CORBA interface
+was set to be deprecated and in version v.68, it has been completely
+removed from PyMAPDL.
 This decision is driven by the CORBA library's lack of support
 for Python versions superior to 3.8.
 
@@ -76,7 +82,7 @@ environments, enabling the maintainers to provide better
 features and support in the future.
 
 **When this happen?** The deprecation process is set to start
-with version v0.66 and it should be completed with version v0.67.
+with version v0.66 and it should be completed with version v0.68.
 While the exact timeline for the removal is yet to be determined,
 it is essential to prepare for its eventual deprecation.
 
