@@ -1047,6 +1047,9 @@ class MapdlGrpc(MapdlBase):
         user temporary directory.
 
         """
+        if not self._local:
+            raise Exception("Is local!")
+
         if self.remove_temp_dir_on_exit and self._local:
             path = path or self.directory
             tmp_dir = tempfile.gettempdir()
