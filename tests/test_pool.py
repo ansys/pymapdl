@@ -301,3 +301,28 @@ def test_directory_names_function(tmpdir):
     assert "Other_instance" in dirs_path_pool
 
     pool.exit(block=True)
+
+
+def test_num_instances():
+    with pytest.raises(ValueError, match="least 1 instance"):
+        pool = LocalMapdlPool(
+            0,
+            exec_file=EXEC_FILE,
+            nproc=NPROC,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+        )
+
+
+@requires("local")
+@skip_if_ignore_pool
+def test_only_one_instance():
+    pool = LocalMapdlPool(
+        1,
+        exec_file=EXEC_FILE,
+        nproc=NPROC,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+    )
+    pool_sz = len(pool)
+    _ = pool.map(lambda mapdl: mapdl.prep7())
+    assert len(pool) == pool_sz
+    pool.exit()

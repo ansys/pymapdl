@@ -223,7 +223,7 @@ class LocalMapdlPool:
 
         n_instances = int(n_instances)
         if n_instances < 1:
-            raise ValueError("Must request at least 1 instances to create a pool.")
+            raise ValueError("Must request at least 1 instance to create a pool.")
 
         pbar = None
         if wait and progress_bar:
