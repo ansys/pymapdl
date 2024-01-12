@@ -64,7 +64,6 @@ jobs:
           commentId: ${{ steps.settings.outputs.commentid }} # Optional if the trigger is a comment. Use another action to find this otherwise.
           reaction: "+1" # Optional
 
-
       - name: "Grab url for GIF"
         id: image_grabber
         run: |
@@ -78,7 +77,6 @@ jobs:
             :white_check_mark: Approving this PR because [${{ steps.settings.outputs.user }}](https://github.com/${{ steps.settings.outputs.user }}) said so in [here](${{ steps.settings.outputs.html_url }}) :grimacing:
 
             ${{ steps.image_grabber.outputs.IMG_MSG }}
-
 
           pull-request-number: ${{ steps.settings.outputs.pull_request }}
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
