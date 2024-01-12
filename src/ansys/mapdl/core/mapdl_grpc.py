@@ -543,11 +543,6 @@ class MapdlGrpc(MapdlBase):
     def process_is_alive(self):
         return self._is_alive_subprocess()
 
-    @property
-    def is_local(self):
-        """Check if the instance is running locally or remotely."""
-        return self._local
-
     def _post_mortem_checks(self):
         """Check possible reasons for not having a successful connection."""
         # Check early exit
