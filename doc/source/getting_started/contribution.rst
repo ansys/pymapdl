@@ -5,13 +5,13 @@ Contributing
 ============
 
 
-
 .. toctree::
    :hidden:
    :maxdepth: 3
 
    write_documentation
    develop_pymapdl
+
 
 There are several ways to contribute to PyMAPDL. 
 

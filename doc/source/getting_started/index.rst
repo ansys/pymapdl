@@ -24,6 +24,7 @@ Getting started
    using_julia
 
 
+
 To use PyMAPDL you must follow the next three steps:
 
 * :ref:`ref_using_standard_install`
