@@ -23,8 +23,8 @@
 
 The PyMAPDL project supports Pythonic access to MAPDL to be able to
 communicate with the MAPDL process directly from Python. The latest
-``ansys-mapdl-core`` package enables a more comprehensive interface with
-MAPDL and supports:
+[ansys-mapdl-core](https://pypi.org/project/ansys-mapdl-core/) package
+enables a more comprehensive interface with MAPDL and supports:
 
 - All the features of the original module (for example, Pythonic commands
   and interactive sessions).
@@ -43,7 +43,8 @@ or in batch mode on Windows, Linux, and even Mac OS.
 
 ## Documentation and issues
 
-Documentation for the latest stable release of PyMAPDL is hosted at [PyMAPDL Documentation](https://mapdl.docs.pyansys.com).
+Documentation for the latest stable release of PyMAPDL is hosted at
+[PyMAPDL Documentation](https://mapdl.docs.pyansys.com).
 
 In the upper right corner of the documentation's title bar, there is an option for switching from
 viewing the documentation for the latest stable release to viewing the documentation for the
@@ -54,12 +55,15 @@ You can also [view](https://cheatsheets.docs.pyansys.com/pymapdl_cheat_sheet.png
 PyMAPDL cheat sheet. This one-page reference provides syntax rules and commands
 for using PyMAPDL. 
 
-For troubleshooting, visit [Troubleshooting PyMAPDL](https://mapdl.docs.pyansys.com/version/stable/user_guide/troubleshoot.html#troubleshooting-pymapdl)
+For troubleshooting, visit 
+[Troubleshooting PyMAPDL](https://mapdl.docs.pyansys.com/version/stable/user_guide/troubleshoot.html#troubleshooting-pymapdl)
 
 On the [PyMAPDL Issues](https://github.com/ansys/pymapdl/issues) page,
 you can create issues to report bugs and request new features. On the 
-[PyMAPDL Discussions ](https://github.com/ansys/pymapdl/discussions) page or the  [Discussions](https://discuss.ansys.com/)
-page on the Ansys Developer portal, you can post questions, share ideas, and get community feedback. 
+[PyMAPDL Discussions ](https://github.com/ansys/pymapdl/discussions) page
+or the  [Discussions](https://discuss.ansys.com/) page on the
+[Ansys Developer portal](https://developer.ansys.com),
+you can post questions, share ideas, and get community feedback. 
 
 To reach the project support team, email [PyAnsys Core team](pyansys.core@ansys.com).
 Unfortunately, this team cannot answer specific library questions or issues. You must
@@ -92,24 +96,23 @@ For more information on each project, visit their GitHub pages.
 
 Citing this module
 -------------------
-If you use ``PyMAPDL`` for research and would like to cite the module
-and source, you can visit 
+If you use [PyMAPDL](https://mapdl.docs.pyansys.com/version/stable/) for
+research and would like to cite the module and source, you can visit 
 [pyansys Zenodo](https://zenodo.org/badge/latestdoi/70696039) and generate the
 correct citation.  For example, the BibTex citation is:
 
 ```bibtex
-
-    @software{alexander_kaszynski_2020_4009467,
-      author       = {Alexander Kaszynski},
-      title        = {{pyansys: Python Interface to MAPDL and Associated 
-                       Binary and ASCII Files}},
-      month        = aug,
-      year         = 2020,
-      publisher    = {Zenodo},
-      version      = {0.43.2},
-      doi          = {10.5281/zenodo.4009467},
-      url          = {https://doi.org/10.5281/zenodo.4009467}
-    }
+@software{alexander_kaszynski_2020_4009467,
+  author       = {Alexander Kaszynski},
+  title        = {{pyansys: Python Interface to MAPDL and Associated 
+                    Binary and ASCII Files}},
+  month        = aug,
+  year         = 2020,
+  publisher    = {Zenodo},
+  version      = {0.43.2},
+  doi          = {10.5281/zenodo.4009467},
+  url          = {https://doi.org/10.5281/zenodo.4009467}
+}
 ```
 
 Because the citation here might not be current, visit the link above to obtain
@@ -118,14 +121,14 @@ the most recent citation.
 
 License and acknowledgments
 ---------------------------
-``PyMAPDL`` is licensed under
+[PyMAPDL](https://mapdl.docs.pyansys.com/version/stable/) is licensed under
 [the MIT license](https://github.com/ansys/pymapdl/blob/main/LICENSE).
 
 ``ansys-mapdl-core`` package makes no commercial claim over Ansys
 whatsoever.  This tool extends the functionality of ``MAPDL`` by
 adding a Python interface to the MAPDL service without changing the
 core behavior or license of the original software.  The use of the
-interactive APDL control of ``PyMAPDL`` requires a legally licensed
-local copy of Ansys.
+interactive APDL control of [PyMAPDL](https://mapdl.docs.pyansys.com/version/stable/)
+requires a legally licensed local copy of Ansys.
 
 To get a copy of Ansys, visit [Ansys](https://www.ansys.com/).
