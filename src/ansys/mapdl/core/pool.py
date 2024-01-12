@@ -222,14 +222,14 @@ class LocalMapdlPool:
         self._active = True  # used by pool monitor
 
         n_instances = int(n_instances)
-        if n_instances < 2:
-            raise ValueError("Must request at least 2 instances to create a pool.")
+        if n_instances < 1:
+            raise ValueError("Must request at least 1 instance to create a pool.")
 
         pbar = None
         if wait and progress_bar:
             if not _HAS_TQDM:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package. "
+                    "To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package. "
                     "To avoid this message you can set 'progress_bar=False'."
                 )
 

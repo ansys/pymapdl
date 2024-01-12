@@ -29,6 +29,7 @@
    Mapdl.open_apdl_log
    Mapdl.open_gui
    Mapdl.parameters
+   Mapdl.remove_temp_dir_on_exit
    Mapdl.result
    Mapdl.run
    Mapdl.run_multiline

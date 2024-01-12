@@ -390,6 +390,16 @@ def run_before_and_after_tests(request, mapdl):
         assert False  # this will fail the test
 
 
+@pytest.fixture(autouse=True, scope="function")
+def run_before_and_after_tests_2(request, mapdl):
+    """Make sure we are not changing these properties in tests"""
+    prev = mapdl.is_local
+
+    yield
+
+    assert prev == mapdl.is_local
+
+
 @pytest.fixture(scope="session")
 def mapdl_console(request):
     if os.name != "posix":
@@ -461,7 +471,7 @@ def mapdl(request, tmpdir_factory):
     ###########################################################################
     if START_INSTANCE:
         mapdl._local = True
-        mapdl.exit()
+        mapdl.exit(save=True, force=True)
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
 
