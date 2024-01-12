@@ -641,7 +641,7 @@ class MapdlGrpc(MapdlBase):
             raise MapdlConnectionError(
                 f"A process is already running on the specified port ({self._port}).\n"
                 "Only one usage of each socket address (protocol/network address/port) is normally permitted.\n"
-                f"\nFull error message:\n{errs_message.split('########',1)[0]}"
+                f"\nFull error message:\n{errs_message.split('########', 1)[0]}"
             )
 
         else:
@@ -1053,7 +1053,7 @@ class MapdlGrpc(MapdlBase):
             ans_temp_dir = os.path.join(tmp_dir, "ansys_")
             if path.startswith(ans_temp_dir):
                 self._log.debug("Removing the MAPDL temporary directory %s", path)
-                shutil.rmtree(path, ignore_errors=True)
+                shutil.rmtree(path, ignore_errors=False)
             else:
                 self._log.debug(
                     "MAPDL working directory is not in the temporary directory '%s'"
