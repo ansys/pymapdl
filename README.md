@@ -41,6 +41,7 @@ Here's a quick demo of PyMAPDL within Visual Studio Code:
 PyMAPDL works within Jupyter Notebooks, the standard Python console,
 or in batch mode on Windows, Linux, and even Mac OS.
 
+
 ## Documentation and issues
 
 Documentation for the latest stable release of PyMAPDL is hosted at
@@ -71,8 +72,9 @@ use the [PyMAPDL Issues](https://github.com/ansys/pymapdl/issues)
 and [PyMAPDL Discussions](https://github.com/ansys/pymapdl/discussions) pages
 for raising issues, request new features, and asking questions.
 
-Project transition - legacy support
------------------------------------
+
+## Project transition - legacy support
+
 This project was formerly known as ``pyansys``, and we'd like to thank
 all the early adopters, contributors, and users who submitted issues,
 gave feedback, and contributed code through the years.  The
@@ -94,8 +96,8 @@ split up into the following projects and modules:
 For more information on each project, visit their GitHub pages.
 
 
-Citing this module
--------------------
+## Citing this module
+
 If you use [PyMAPDL](https://mapdl.docs.pyansys.com/version/stable/) for
 research and would like to cite the module and source, you can visit 
 [pyansys Zenodo](https://zenodo.org/badge/latestdoi/70696039) and generate the
@@ -119,8 +121,8 @@ Because the citation here might not be current, visit the link above to obtain
 the most recent citation.
 
 
-License and acknowledgments
----------------------------
+## License and acknowledgments
+
 [PyMAPDL](https://mapdl.docs.pyansys.com/version/stable/) is licensed under
 [the MIT license](https://github.com/ansys/pymapdl/blob/main/LICENSE).
 
