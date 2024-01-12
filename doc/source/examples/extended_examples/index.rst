@@ -28,6 +28,7 @@ with other programs, libraries, and features in development.
 .. _Cart-Pole Simulation: cartpole_example_notebook_
 
 .. toctree::
+    :hidden:
     :maxdepth: 2
 
     Cart-Pole Simulation <http://cartpole.mapdl.docs.pyansys.com/ml-rl-notebook.html>

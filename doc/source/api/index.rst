@@ -15,7 +15,8 @@ PyMAPDL, see :ref:`ref_mapdl_commands`.
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
+   :hidden:
 
    commands
    components

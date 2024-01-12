@@ -5,6 +5,14 @@ Contributing
 ============
 
 
+
+.. toctree::
+   :hidden:
+   :maxdepth: 3
+
+   write_documentation
+   develop_pymapdl
+
 There are several ways to contribute to PyMAPDL. 
 
 * `Answer discussions`_
@@ -63,9 +71,3 @@ When possible, use these issue templates:
 
 If your issue does not fit into one of these categories, click
 `Open a blank issue <pymapdl_new_blank_issue_>`_.
-
-.. toctree::
-   :maxdepth: 3
-
-   write_documentation
-   develop_pymapdl
