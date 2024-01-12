@@ -1062,6 +1062,8 @@ class MapdlGrpc(MapdlBase):
                     ", not removing the MAPDL working directory.",
                     tmp_dir,
                 )
+        else:
+            raise Exception("C")
 
     def _kill_server(self):
         """Call exit(0) on the server.

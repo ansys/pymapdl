@@ -2323,6 +2323,7 @@ def test_remove_temp_dir_on_exit(mapdl, tmpdir):
 
     prev = mapdl.remove_temp_dir_on_exit
     mapdl.remove_temp_dir_on_exit = True
+    assert self._local
     mapdl._remove_temp_dir_on_exit(path)
     mapdl.remove_temp_dir_on_exit = prev
 
