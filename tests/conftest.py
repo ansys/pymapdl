@@ -392,6 +392,7 @@ def run_before_and_after_tests(request, mapdl):
 
 @pytest.fixture(autouse=True, scope="function")
 def run_before_and_after_tests_2(request, mapdl):
+    """Make sure we are not changing these properties in tests"""
     prev = mapdl.is_local
 
     yield
