@@ -1052,9 +1052,11 @@ class MapdlGrpc(MapdlBase):
             tmp_dir = tempfile.gettempdir()
             ans_temp_dir = os.path.join(tmp_dir, "ansys_")
             if path.startswith(ans_temp_dir):
+                raise Exception("A")
                 self._log.debug("Removing the MAPDL temporary directory %s", path)
-                shutil.rmtree(path, ignore_errors=False)
+                shutil.rmtree(path, ignore_errors=True)
             else:
+                raise Exception("b")
                 self._log.debug(
                     "MAPDL working directory is not in the temporary directory '%s'"
                     ", not removing the MAPDL working directory.",
