@@ -528,3 +528,13 @@ def test_cpu_checks():
     machine_cores = psutil.cpu_count(logical=False)
     with pytest.raises(NotEnoughResources):
         launch_mapdl(nproc=machine_cores + 2)
+
+
+def test_fail_channel_port():
+    with pytest.raises(ValueError):
+        launch_mapdl(channel="something", port="something")
+
+
+def test_fail_channel_ip():
+    with pytest.raises(ValueError):
+        launch_mapdl(channel="something", ip="something")

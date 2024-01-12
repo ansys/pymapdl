@@ -16,7 +16,7 @@ on:
        - main
   schedule:
     # * is a special character in YAML so you have to quote this string
-    - cron:  '30 4 * * 1,3,5'
+    - cron:  '30 4 * * *'
 
 env:
   PROJECT_NAME: 'PyMAPDL'
@@ -717,7 +717,7 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
-            --cov-report=xml:${{ matrix.mapdl-image }}-local-minimal.xml
+            --cov-report=xml:${{ matrix.mapdl-image }}-minimal.xml
         
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
@@ -805,7 +805,7 @@ jobs:
 
   release:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-    needs: [smoke-tests, docs-build, build-test, build-test-ubuntu]
+    needs: [smoke-tests, docs-build, build-test, build-test-ubuntu, build-test-ubuntu-minimal]
     runs-on: ubuntu-latest
     steps:
       - name: Set up Python

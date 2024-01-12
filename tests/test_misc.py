@@ -283,9 +283,10 @@ def test_load_file_local(mapdl, tmpdir, file_):
     load_file(mapdl, file_path, priority_mapdl_file=False)
 
     if mapdl._local:
-        with open(os.path.join(mapdl.directory, file_), "r") as fid:
+        file_name__ = os.path.join(mapdl.directory, file_)
+        with open(file_name__, "r") as fid:
             assert "not that empty" in fid.read()
-        os.remove(file_)
+        os.remove(file_name__)
     else:
         mapdl.download(file_)
         with open(os.path.join(file_), "r") as fid:
