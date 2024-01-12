@@ -60,7 +60,7 @@ For troubleshooting, visit
 
 On the [PyMAPDL Issues](https://github.com/ansys/pymapdl/issues) page,
 you can create issues to report bugs and request new features. On the 
-[PyMAPDL Discussions ](https://github.com/ansys/pymapdl/discussions) page
+[PyMAPDL Discussions](https://github.com/ansys/pymapdl/discussions) page
 or the  [Discussions](https://discuss.ansys.com/) page on the
 [Ansys Developer portal](https://developer.ansys.com),
 you can post questions, share ideas, and get community feedback. 
@@ -88,9 +88,7 @@ while supporting new features.  The original Python module has been
 split up into the following projects and modules:
 
 -  [ansys.mapdl.core](https://github.com/ansys/pymapdl)
-
 -  [ansys.mapdl.reader](https://github.com/ansys/pymapdl-reader)
-
 -  [ansys.mapdl.corba](https://github.com/ansys/pymapdl-corba)
 
 For more information on each project, visit their GitHub pages.
