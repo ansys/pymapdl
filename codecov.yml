@@ -29,6 +29,6 @@ codecov:
   notify:
     wait_for_ci: yes
     # do not notify until at least 5 builds have been uploaded from the CI pipeline
-    after_n_builds: 5
+    after_n_builds: 3
   comment:
-    after_n_builds: 5
+    after_n_builds: 3

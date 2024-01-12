@@ -717,7 +717,7 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
-            --cov-report=xml:${{ matrix.mapdl-image }}-local-minimal.xml
+            --cov-report=xml:${{ matrix.mapdl-image }}-minimal.xml
         
       - uses: codecov/codecov-action@v3
         name: "Upload coverage to Codecov"
