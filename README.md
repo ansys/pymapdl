@@ -124,9 +124,10 @@ License and acknowledgments
 [PyMAPDL](https://mapdl.docs.pyansys.com/version/stable/) is licensed under
 [the MIT license](https://github.com/ansys/pymapdl/blob/main/LICENSE).
 
-``ansys-mapdl-core`` package makes no commercial claim over Ansys
-whatsoever.  This tool extends the functionality of ``MAPDL`` by
-adding a Python interface to the MAPDL service without changing the
+[ansys-mapdl-core](https://pypi.org/project/ansys-mapdl-core/) package
+makes no commercial claim over Ansys whatsoever.  
+This tool extends the functionality of ``MAPDL`` by adding a Python
+interface to the MAPDL service without changing the
 core behavior or license of the original software.  The use of the
 interactive APDL control of [PyMAPDL](https://mapdl.docs.pyansys.com/version/stable/)
 requires a legally licensed local copy of Ansys.
