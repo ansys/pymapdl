@@ -1,5 +1,3 @@
-
-
 <p align="center">
    <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://github.com/ansys/pymapdl/blob/main/doc/source/_static/logo_dark.png">
@@ -18,7 +16,6 @@
 [![black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat)](https://github.com/psf/black)
 [![pre-commit](https://results.pre-commit.ci/badge/github/ansys/pymapdl/main.svg)](https://results.pre-commit.ci/latest/github/ansys/pymapdl/main)
 
-
 ## Overview
 
 The PyMAPDL project supports Pythonic access to MAPDL to be able to
@@ -26,13 +23,16 @@ communicate with the MAPDL process directly from Python. The latest
 [ansys-mapdl-core](https://pypi.org/project/ansys-mapdl-core/) package
 enables a more comprehensive interface with MAPDL and supports:
 
-- All the features of the original module (for example, Pythonic commands
-  and interactive sessions).
-- Remote connections to MAPDL from anywhere via gRPC.
-- Direct access to MAPDL arrays, meshes, and geometry as Python
-  objects.
-- Low-level access to the MAPDL solver through APDL math in a SciPy-
-  like interface.
+-  All the features of the original module (for example, Pythonic commands 
+   and interactive sessions).
+
+-  Remote connections to MAPDL from anywhere via gRPC.
+
+-  Direct access to MAPDL arrays, meshes, and geometry as Python
+   objects.
+
+-  Low-level access to the MAPDL solver through APDL math in a SciPy-
+   like interface.
 
 Here's a quick demo of PyMAPDL within Visual Studio Code:
 
@@ -40,7 +40,6 @@ Here's a quick demo of PyMAPDL within Visual Studio Code:
 
 PyMAPDL works within Jupyter Notebooks, the standard Python console,
 or in batch mode on Windows, Linux, and even Mac OS.
-
 
 ## Documentation and issues
 
@@ -72,8 +71,7 @@ use the [PyMAPDL Issues](https://github.com/ansys/pymapdl/issues)
 and [PyMAPDL Discussions](https://github.com/ansys/pymapdl/discussions) pages
 for raising issues, request new features, and asking questions.
 
-
-## Project transition - legacy support
+## Project transition -  legacy support
 
 This project was formerly known as ``pyansys``, and we'd like to thank
 all the early adopters, contributors, and users who submitted issues,
@@ -89,12 +87,13 @@ many steps have been taken to ensure compatibility with legacy code
 while supporting new features.  The original Python module has been
 split up into the following projects and modules:
 
-- [ansys.mapdl.core](https://github.com/ansys/pymapdl)
-- [ansys.mapdl.reader](https://github.com/ansys/pymapdl-reader)
-- [ansys.mapdl.corba](https://github.com/ansys/pymapdl-corba)
+-  [ansys.mapdl.core](https://github.com/ansys/pymapdl)
+
+-  [ansys.mapdl.reader](https://github.com/ansys/pymapdl-reader)
+
+-  [ansys.mapdl.corba](https://github.com/ansys/pymapdl-corba)
 
 For more information on each project, visit their GitHub pages.
-
 
 ## Citing this module
 
@@ -119,7 +118,6 @@ correct citation.  For example, the BibTex citation is:
 
 Because the citation here might not be current, visit the link above to obtain
 the most recent citation.
-
 
 ## License and acknowledgments
 
