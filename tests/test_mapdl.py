@@ -1776,13 +1776,14 @@ def test_deprecation_allow_ignore_errors_mapping(mapdl):
 
 def test_check_stds(mapdl):
     mapdl._stdout = "everything is going ok"
+    mapdl._stderr = ""
+
     mapdl._check_stds()
 
     mapdl._stdout = "one error"
     with pytest.raises(MapdlConnectionError, match="one error"):
         mapdl._check_stds()
 
-    mapdl._stderr = ""
     mapdl._stdout = None  # resetting
     mapdl._check_stds()
 
