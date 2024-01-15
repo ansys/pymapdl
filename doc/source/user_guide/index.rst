@@ -22,7 +22,6 @@ This section provides a general overview of PyMAPDL and how you use it.
    components
    post
    cli
-   mapdl_examples
    database
    math
    pool

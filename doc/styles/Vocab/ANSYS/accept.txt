@@ -93,6 +93,7 @@ Linux
 MacOS
 mapdl
 MAPDL
+mapdl
 mater
 MATLAB
 matricies

@@ -385,7 +385,7 @@ def run_before_and_after_tests(request, mapdl):
     yield  # this is where the testing happens
 
     # Teardown : fill with any logic you want
-    if mapdl._local and mapdl._exited:
+    if mapdl.is_local and mapdl._exited:
         # The test exited MAPDL, so it is fail.
         assert False  # this will fail the test
 
@@ -460,7 +460,7 @@ def mapdl(request, tmpdir_factory):
     if ON_CI:
         mapdl._local = ON_LOCAL  # CI: override for testing
 
-    if mapdl._local:
+    if mapdl.is_local:
         assert Path(mapdl.directory) == Path(run_path)
 
     # using yield rather than return here to be able to test exit

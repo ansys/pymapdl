@@ -85,7 +85,7 @@ try:
 
     _HAS_PYVISTA = True
 except ModuleNotFoundError:  # pragma: no cover
-    LOG.debug("The module 'Pyvista' is not installed.")
+    LOG.debug("The module 'PyVista' is not installed.")
     _HAS_PYVISTA = False
 
 try:
