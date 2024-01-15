@@ -185,7 +185,13 @@ demo the use of the PyMAPDL file translator :func:`convert_script()
     >>> examples.vmfiles["vm1"]
     '.../ansys/mapdl/core/examples/verif/vm1.dat'
 
-This example translates the verification example ``"vm1.dat"``.
+This example translates the verification example ``"vm1.dat"``,
+which can be done with:
+
+.. code:: pycon
+    
+    >>> from ansys.mapdl import core as pymapdl
+    >>> pymapdl.convert_script(examples.vmfiles["vm1"], "vm1.py")
 
 
 .. tab-set::
@@ -312,11 +318,19 @@ This example translates the verification example ``"vm1.dat"``.
             mapdl.exit()
 
 
+Note that some of the commands with ``/`` are not directly translated
+to functions and are instead run as "classic" commands like
+``mapdl.run('/COM')``. Also, note that the ``*VWRITE`` command
+requires a command immediately following it. This normally locks the
+interface, so it's implemented in the background as an input file
+using the :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
+attribute.
+
 Here is the obtained result:
 
 .. code:: output
 
-            ------------------- VM1 RESULTS COMPARISON ---------------------
+    ------------------- VM1 RESULTS COMPARISON ---------------------
     |   TARGET   |   Mechanical APDL   |   RATIO
     /INPUT FILE=    LINE=       0
     R1, lb          900.0       900.0   1.000
@@ -335,17 +349,17 @@ You can verify the reaction forces with:
     [   0.  500.    0.]
     [   0. -900.    0.]]
 
-Note that some of the commands with ``/`` are not directly translated
-to functions and are instead run as "classic" commands like
-``mapdl.run('/COM')``. Also, note that the ``*VWRITE`` command
-requires a command immediately following it. This normally locks the
-interface, so it's implemented in the background as an input file
-using the :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
-attribute.
-
 
 Example: VM7 - plastic compression of a pipe assembly
 -----------------------------------------------------
+
+Convert the verification file with:
+
+.. code:: pycon
+
+    >>> from ansys.mapdl import core as pymapdl
+    >>> pymapdl.convert_script("path/to/vm7.dat", "path/to/output/vm7.py")
+
 
 .. tab-set::
 
