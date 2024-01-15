@@ -824,7 +824,7 @@ jobs:
           files: |
             ./**/*.whl
             ./**/*.tar.gz
-            ./**/*pymapdl-Documentation-*.pdf
+            ./documentation-pdf
             ./**/ansys-mapdl-core*.zip
             ./minimum_requirements.txt
 
