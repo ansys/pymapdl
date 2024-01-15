@@ -104,7 +104,7 @@ For a list of all postprocessing methods, see
 Enriched command output
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-All :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class commands output
+All :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class commands output
 a string object that can be parsed to obtain specific data from it.
 
 In certain :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class commands
