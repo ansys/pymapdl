@@ -1,4 +1,3 @@
-.. _ref_examples:
 
 
 .. toctree::
@@ -10,6 +9,8 @@
     Technology Showcases <https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html>
     extended_examples/index.rst
 
+
+.. _ref_examples:
 
 ========
 Examples

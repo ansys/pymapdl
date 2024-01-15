@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """
 .. _2d_pressure_vessel_example:
 
@@ -73,7 +95,7 @@ def pipe_plane_strain(e, nu, inn_radius, out_radius, press, aesize):
     # We perform plane strain analysis on one quadrant (0deg - 90deg) of the
     # pressure vessel
     mapdl.pcirc(inn_radius, out_radius, theta1=0, theta2=90)
-    mapdl.cm("PIPE_PROFILE", "AREA")
+    mapdl.components["PIPE_PROFILE"] = "AREA"
 
     # Define material properties
     mapdl.mp("EX", 1, e)  # Youngs modulus
@@ -88,14 +110,14 @@ def pipe_plane_strain(e, nu, inn_radius, out_radius, press, aesize):
 
     # Create components for defining loads and constraints
     mapdl.nsel("S", "LOC", "X", 0)  # Select nodes on top left edge
-    mapdl.cm("X_FIXED", "NODES")  # Create nodal component
+    mapdl.components["X_FIXED"] = "NODES"  # Create nodal component
 
     mapdl.nsel("S", "LOC", "Y", 0)  # Select nodes on bottom right edge
-    mapdl.cm("Y_FIXED", "NODES")  # Create nodal component
+    mapdl.components["Y_FIXED"] = "NODES"  # Create nodal component
     mapdl.allsel()
 
     mapdl.lsel("S", "RADIUS", vmin=rad1)  # Select the line along inner radius
-    mapdl.cm("PRESSURE_EDGE", "LINE")  # Create a line component
+    mapdl.components["PRESSURE_EDGE"] = "LINE"  # Create a line component
     mapdl.allsel()
 
     # Define solution controls

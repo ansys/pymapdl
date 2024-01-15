@@ -1,21 +1,33 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from collections import namedtuple
 import os
 from pathlib import Path
 from sys import platform
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
-from ansys.tools.path import get_available_ansys_installations
 import pytest
-import pyvista
 
-import ansys.mapdl.core as pymapdl
-
-pymapdl.RUNNING_TESTS = True
-
-from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
-from ansys.mapdl.core.examples import vmfiles
-from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
-from ansys.mapdl.core.theme import _apply_default_theme
 from common import (
     Element,
     Node,
@@ -26,21 +38,23 @@ from common import (
     is_on_ci,
     is_on_local,
     is_on_ubuntu,
+    is_running_on_student,
     is_smp,
+    support_plotting,
+    testing_minimal,
 )
-
-_apply_default_theme()
 
 ################################################################
 #
 # Setting testing environment
 # ---------------------------
 #
-# Necessary for CI plotting
-pyvista.OFF_SCREEN = True
+
+TESTING_MINIMAL = testing_minimal()
 
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()
+ON_STUDENT = is_running_on_student()
 
 ON_UBUNTU = is_on_ubuntu()  # Tells if MAPDL is running on Ubuntu system or not.
 # Whether PyMAPDL is running on an ubuntu or different machine is irrelevant.
@@ -50,13 +64,10 @@ ON_MACOS = platform == "darwin"
 
 HAS_GRPC = has_grpc()
 HAS_DPF = has_dpf()
-SUPPORT_PLOTTING = pyvista.system_supports_plotting()
+SUPPORT_PLOTTING = support_plotting()
 IS_SMP = is_smp()
 
 QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
-
-# check if the user wants to permit pytest to start MAPDL
-START_INSTANCE = get_start_instance()
 
 ## Skip ifs
 skip_on_windows = pytest.mark.skipif(ON_WINDOWS, reason="Skip on Windows")
@@ -86,6 +97,120 @@ skip_if_no_has_dpf = pytest.mark.skipif(
     reason="""Requires DPF.""",
 )
 
+requires_linux = pytest.mark.skipif(not ON_LINUX, reason="This test requires Linux")
+requires_windows = pytest.mark.skipif(
+    not ON_WINDOWS, reason="This test requires Windows"
+)
+requires_on_cicd = pytest.mark.skipif(
+    not ON_CI, reason="This test requires to be on CICD"
+)
+
+skip_if_running_student_version = pytest.mark.skipif(
+    ON_STUDENT,
+    reason="This tests does not work on student version. Maybe because license limitations",
+)
+
+
+def import_module(requirement):
+    from importlib import import_module
+
+    if os.name == "nt":
+        requirement = requirement.replace("-", ".")
+    return import_module(requirement)
+
+
+def has_dependency(requirement):
+    try:
+        requirement = requirement.replace("-", ".")
+        import_module(requirement)
+        return True
+    except ModuleNotFoundError:
+        return False
+
+
+def requires(requirement: str):
+    """Check requirements"""
+    requirement = requirement.lower()
+
+    if "grpc" == requirement:
+        return skip_if_no_has_grpc
+
+    elif "dpf" == requirement:
+        return skip_if_no_has_dpf
+
+    elif "local" == requirement:
+        return skip_if_not_local
+
+    elif "cicd" == requirement:
+        return skip_if_on_cicd
+
+    elif "nocicd" == requirement:
+        return skip_if_on_cicd
+
+    elif "xserver" == requirement:
+        return skip_no_xserver
+
+    elif "linux" == requirement:
+        return requires_linux
+
+    elif "nolinux" == requirement:
+        return skip_on_linux
+
+    elif "windows" == requirement:
+        return requires_windows
+
+    elif "nowindows" == requirement:
+        return skip_on_windows
+
+    elif "nostudent" == requirement:
+        return skip_if_running_student_version
+
+    elif "console" == requirement:
+        return pytest.mark.console
+
+    else:
+        return requires_dependency(requirement)
+
+
+def requires_dependency(dependency: str):
+    try:
+        import_module(dependency)
+        return pytest.mark.skipif(
+            False, reason="Never skip"
+        )  # faking a null skipif decorator
+
+    except ModuleNotFoundError:
+        # package does not exist
+        return pytest.mark.skip(reason=f"Requires '{dependency}' package")
+
+
+################
+
+if has_dependency("ansys-tools-package"):
+    from ansys.tools.path import get_available_ansys_installations
+
+
+if has_dependency("pyvista"):
+    import pyvista
+
+    from ansys.mapdl.core.theme import _apply_default_theme
+
+    _apply_default_theme()
+
+    # Necessary for CI plotting
+    pyvista.OFF_SCREEN = True
+
+import ansys.mapdl.core as pymapdl
+
+pymapdl.RUNNING_TESTS = True
+
+from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
+from ansys.mapdl.core.examples import vmfiles
+from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+
+# check if the user wants to permit pytest to start MAPDL
+START_INSTANCE = get_start_instance()
+
 ################
 if os.name == "nt":
     os_msg = """SET PYMAPDL_START_INSTANCE=False
@@ -107,6 +232,7 @@ automatically find your Ansys installation.  Email the developer at:
 alexander.kaszynski@ansys.com
 
 """
+MAPDL_VERSION = None  # this is cached by mapdl fixture and used in the minimal testing
 
 if START_INSTANCE and not ON_LOCAL:
     raise MapdlRuntimeError(ERRMSG)
@@ -141,9 +267,6 @@ def pytest_configure(config):
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--corba", action="store_true", default=False, help="run CORBA tests"
-    )
-    parser.addoption(
         "--console",
         action="store_true",
         default=False,
@@ -156,22 +279,9 @@ def pytest_addoption(parser):
         default=False,
         help="run only GUI tests",
     )
-    parser.addoption(
-        "--skip-regression-check",
-        action="store_true",
-        default=False,
-        help="Avoid checking the image regression check in all tests",
-    )
 
 
 def pytest_collection_modifyitems(config, items):
-    if not config.getoption("--corba"):
-        # --corba given in cli: run CORBA interface tests
-        skip_corba = pytest.mark.skip(reason="need --corba option to run")
-        for item in items:
-            if "corba" in item.keywords:
-                item.add_marker(skip_corba)
-
     if not config.getoption("--console"):
         # --console given in cli: run console interface tests
         skip_console = pytest.mark.skip(reason="need --console option to run")
@@ -209,24 +319,19 @@ def pytest_collection_modifyitems(config, items):
 # ---------------------------
 #
 
+if has_dependency("pytest-pyvista"):
 
-@pytest.fixture(autouse=True)
-def wrapped_verify_image_cache(verify_image_cache, pytestconfig):
-    # Checking if we want to avoid the check using pytest cli.
-    skip_regression_check = pytestconfig.option.skip_regression_check
-    if skip_regression_check:
-        verify_image_cache.skip = True
+    @pytest.fixture(autouse=True)
+    def wrapped_verify_image_cache(verify_image_cache, pytestconfig):
+        # Configuration
+        verify_image_cache.error_value = 500.0
+        verify_image_cache.warning_value = 200.0
 
-    # Configuration
-    # default check
-    verify_image_cache.error_value = 500.0
-    verify_image_cache.warning_value = 200.0
+        # High variance test
+        verify_image_cache.var_error_value = 1000.0
+        verify_image_cache.var_warning_value = 1000.0
 
-    # High variance test
-    verify_image_cache.var_error_value = 1000.0
-    verify_image_cache.var_warning_value = 1000.0
-
-    return verify_image_cache
+        return verify_image_cache
 
 
 class Running_test:
@@ -276,12 +381,23 @@ def run_before_and_after_tests(request, mapdl):
         # Restoring the local configuration
         mapdl._local = local_
 
+    mapdl.gopr()
     yield  # this is where the testing happens
 
     # Teardown : fill with any logic you want
-    if mapdl._local and mapdl._exited:
+    if mapdl.is_local and mapdl._exited:
         # The test exited MAPDL, so it is fail.
         assert False  # this will fail the test
+
+
+@pytest.fixture(autouse=True, scope="function")
+def run_before_and_after_tests_2(request, mapdl):
+    """Make sure we are not changing these properties in tests"""
+    prev = mapdl.is_local
+
+    yield
+
+    assert prev == mapdl.is_local
 
 
 @pytest.fixture(scope="session")
@@ -292,7 +408,7 @@ def mapdl_console(request):
         )
     ansys_base_paths = get_available_ansys_installations()
 
-    # find a valid version of corba
+    # find a valid version of console
     console_path = None
     for version in ansys_base_paths:
         version = abs(version)
@@ -324,41 +440,6 @@ def mapdl_console(request):
 
 
 @pytest.fixture(scope="session")
-def mapdl_corba(request):
-    ansys_base_paths = get_available_ansys_installations()
-
-    # find a valid version of corba
-    corba_path = None
-    for version in ansys_base_paths:
-        version = abs(version)
-        if version >= 170 and version < 202:
-            corba_path = find_ansys(str(version))[0]
-
-    if corba_path is None:
-        raise MapdlRuntimeError(
-            '"-corba" testing option unavailable.'
-            "No local CORBA compatible MAPDL installation found.  "
-            "Valid versions are ANSYS 17.0 up to 2020R2."
-        )
-
-    mapdl = launch_mapdl(corba_path)
-    from ansys.mapdl.core.mapdl_corba import MapdlCorba
-
-    assert isinstance(mapdl, MapdlCorba)
-    mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
-
-    # using yield rather than return here to be able to test exit
-    yield mapdl
-
-    # verify mapdl exits
-    mapdl.exit()
-    assert mapdl._exited
-    assert "MAPDL exited" in str(mapdl)
-    with pytest.raises(MapdlExitedError):
-        mapdl.prep7()
-
-
-@pytest.fixture(scope="session")
 def mapdl(request, tmpdir_factory):
     # don't use the default run location as tests run multiple unit testings
     run_path = str(tmpdir_factory.mktemp("ansys"))
@@ -374,11 +455,12 @@ def mapdl(request, tmpdir_factory):
         start_timeout=50,
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
+    MAPDL_VERSION = mapdl.version  # Caching version
 
     if ON_CI:
         mapdl._local = ON_LOCAL  # CI: override for testing
 
-    if mapdl._local:
+    if mapdl.is_local:
         assert Path(mapdl.directory) == Path(run_path)
 
     # using yield rather than return here to be able to test exit
@@ -389,7 +471,7 @@ def mapdl(request, tmpdir_factory):
     ###########################################################################
     if START_INSTANCE:
         mapdl._local = True
-        mapdl.exit()
+        mapdl.exit(save=True, force=True)
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
 

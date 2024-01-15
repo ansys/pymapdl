@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """
 .. _ref_dcb_test_composite_delamination:
 
@@ -145,7 +167,7 @@ areas = mapdl.geometry.anum
 mapdl.geometry.area_select(areas[0], "r")
 mapdl.nsla("r", 1)
 mapdl.nsel("r", "loc", "x", pre_crack, length + pre_crack + eps)
-mapdl.cm("cm_1", "node")
+mapdl.components["cm_1"] = "node"
 
 mapdl.allsel()
 mapdl.asel("s", "loc", "z", 1.7)
@@ -153,11 +175,11 @@ areas = mapdl.geometry.anum
 mapdl.geometry.area_select(areas[1], "r")
 mapdl.nsla("r", 1)
 mapdl.nsel("r", "loc", "x", pre_crack, length + pre_crack + eps)
-mapdl.cm("cm_2", "node")
+mapdl.components["cm_2"] = "node"
 
 # Identify all the elements before generation of TARGE170 elements
 mapdl.allsel()
-mapdl.cm("_elemcm", "elem")
+mapdl.components["_elemcm"] = "elem"
 mapdl.mat(2)
 
 # Assign real constants and key options
@@ -181,7 +203,7 @@ mapdl.keyopt(2, 5, 0)
 
 # Generate TARGE170 elements on top of cm_1
 mapdl.nsel("s", "", "", "cm_1")
-mapdl.cm("_target", "node")
+mapdl.components["_target"] = "node"
 mapdl.type(2)
 mapdl.esln("s", 0)
 mapdl.esurf()
@@ -189,7 +211,7 @@ mapdl.esurf()
 # Generate CONTA174 elements on top of cm_2
 mapdl.cmsel("s", "_elemcm")
 mapdl.nsel("s", "", "", "cm_2")
-mapdl.cm("_contact", "node")
+mapdl.components["_contact"] = "node"
 mapdl.type(3)
 mapdl.esln("s", 0)
 mapdl.esurf()
@@ -211,13 +233,13 @@ mapdl.allsel()
 mapdl.nsel(type_="s", item="loc", comp="x", vmin=0.0, vmax=0.0)
 mapdl.nsel(type_="r", item="loc", comp="z", vmin=2 * height, vmax=2 * height)
 mapdl.d(node="all", lab="uz", value=d)
-mapdl.cm("top_nod", "node")
+mapdl.components["top_nod"] = "node"
 
 mapdl.allsel()
 mapdl.nsel(type_="s", item="loc", comp="x", vmin=0.0, vmax=0.0)
 mapdl.nsel(type_="r", item="loc", comp="z", vmin=0.0, vmax=0.0)
 mapdl.d(node="all", lab="uz", value=-10)
-mapdl.cm("bot_nod", "node")
+mapdl.components["bot_nod"] = "node"
 
 # Apply the fix condition
 mapdl.allsel()

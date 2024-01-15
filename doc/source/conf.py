@@ -80,6 +80,7 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
     "sphinx_autodoc_typehints",
+    "sphinx_design",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
@@ -115,8 +116,8 @@ numpydoc_show_class_members = False
 numpydoc_xref_param_type = True
 numpydoc_validate = True
 numpydoc_validation_checks = {
-    "GL06",  # Found unknown section
-    "GL07",  # Sections are in the wrong order.
+    # "GL06",  # Found unknown section
+    # "GL07",  # Sections are in the wrong order.
     "GL08",  # The object does not have a docstring
     "GL09",  # Deprecation warning should precede extended summary
     "GL10",  # reST directives {directives} must be followed by two colons
@@ -181,6 +182,8 @@ with open("links.rst") as f:
     rst_epilog += f.read()
 
 rst_epilog = rst_epilog.replace("%%VERSION%%", "v231")
+rst_epilog = rst_epilog.replace("%%PYMAPDLVERSION%%", release)
+
 
 # Read link all substitutions from file
 with open("substitutions.rst") as f:

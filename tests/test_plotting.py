@@ -1,8 +1,36 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Unit tests regarding plotting."""
 import os
 
 import numpy as np
 import pytest
+
+from conftest import has_dependency
+
+if not has_dependency("pyvista"):
+    pytest.skip(allow_module_level=True)
+
 from pyvista.plotting import Plotter
 
 from ansys.mapdl.core.errors import ComponentDoesNotExits
@@ -878,4 +906,46 @@ def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
             "NORM", line_width=10, render_lines_as_tubes=True, smooth_shading=True
         )
         is None
+    )
+
+
+@pytest.mark.parametrize("background", ["white", "black", "green", "red"])
+def test_labels_colors_background(mapdl, make_block, background):
+    # Test if the labels change color according background
+    mapdl.nplot(background=background, nnum=True)
+
+
+def test_vplot_show_volume_numbering(mapdl, make_block):
+    mapdl.vplot(show_volume_numbering=True)
+
+
+def test_vplot_area_numbering(mapdl, make_block):
+    mapdl.vplot(show_area_numbering=True)
+
+
+def test_vplot_line_numbering(mapdl, make_block):
+    mapdl.vplot(show_line_numbering=True)
+
+
+def test_vplot_multi_numbering(mapdl, make_block):
+    mapdl.vplot(
+        show_area_numbering=True, show_line_numbering=True, show_volume_numbering=True
+    )
+
+
+def test_vplot_color(mapdl, make_block):
+    mapdl.vplot(color="gray")
+
+
+def test_vplot_cpos(mapdl, make_block):
+    mapdl.vplot(cpos="xy")
+
+
+def test_vplot_multiargs(mapdl, make_block):
+    mapdl.vplot(
+        color="gray",
+        cpos="xy",
+        show_volume_numbering=True,
+        show_line_numbering=False,
+        show_area_numbering=True,
     )

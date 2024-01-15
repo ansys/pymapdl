@@ -34,10 +34,10 @@ jobs:
 
     # Label based on modified files
     - name: Label based on changed files
-      uses: actions/labeler@v4
+      uses: actions/labeler@v5
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
-        sync-labels: ''
+        sync-labels: true
 
     # Label based on branch name
     - uses: actions-ecosystem/action-add-labels@v1
@@ -45,6 +45,7 @@ jobs:
         startsWith(github.event.pull_request.head.ref, 'doc') || 
         startsWith(github.event.pull_request.head.ref, 'docs')
       with:
+        github_token: ${{ secrets.GITHUB_TOKEN}}
         labels: Documentation
 
     - uses: actions-ecosystem/action-add-labels@v1
@@ -53,16 +54,19 @@ jobs:
         startsWith(github.event.pull_request.head.ref, 'no-ci') ||
         startsWith(github.event.pull_request.head.ref, 'ci')
       with:
+        github_token: ${{ secrets.GITHUB_TOKEN}}
         labels: CI/CD
 
     - uses: actions-ecosystem/action-add-labels@v1
       if: startsWith(github.event.pull_request.head.ref, 'maint')
       with:
+        github_token: ${{ secrets.GITHUB_TOKEN}}
         labels: Maintenance
 
     - uses: actions-ecosystem/action-add-labels@v1
       if: startsWith(github.event.pull_request.head.ref, 'feat')
       with:
+        github_token: ${{ secrets.GITHUB_TOKEN}}
         labels: |
           Enhancement
           NEW FEATURE
@@ -72,6 +76,7 @@ jobs:
         startsWith(github.event.pull_request.head.ref, 'fix') ||
         startsWith(github.event.pull_request.head.ref, 'patch')
       with:
+        github_token: ${{ secrets.GITHUB_TOKEN}}
         labels: BUG
 
   commenter:
@@ -83,7 +88,6 @@ jobs:
     - name: Suggest to add labels
       uses: peter-evans/create-or-update-comment@v3
       # Execute only when no labels have been applied to the pull request
-      # if: toJSON(github.event.pull_request.labels.*.name) == '[]'
       if: toJSON(github.event.pull_request.labels.*.name) == '{}' # Empty labels
       with:
         token: ${{ secrets.GITHUB_TOKEN }}

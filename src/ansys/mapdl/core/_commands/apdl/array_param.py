@@ -1,3 +1,26 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class ArrayParam:
     def mfouri(self, oper="", coeff="", mode="", isym="", theta="", curve="", **kwargs):
         """Calculates the coefficients for, or evaluates, a Fourier series.
@@ -1479,12 +1502,5 @@ class ArrayParam:
         This command is valid in any processor.
 
         """
-        # cannot be in interactive mode
-        if not self._store_commands:
-            raise MapdlRuntimeError(
-                "VWRTIE cannot run interactively.  \n\nPlease use "
-                "``with mapdl.non_interactive:``"
-            )
-
         command = f"*VWRITE,{par1},{par2},{par3},{par4},{par5},{par6},{par7},{par8},{par9},{par10},{par11},{par12},{par13},{par14},{par15},{par16},{par17},{par18},{par19}"
         return self.run(command, **kwargs)

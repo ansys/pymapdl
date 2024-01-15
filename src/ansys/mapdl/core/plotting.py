@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Plotting helper for MAPDL using pyvista"""
 from typing import Any, Optional
 from warnings import warn
@@ -405,6 +427,20 @@ def _general_plotter(
 
     if background:
         plotter.set_background(background)
+
+    # Making sure that labels are visible in dark backgrounds
+    if not text_color and background:
+        bg = plotter.background_color.float_rgb
+        # from: https://graphicdesign.stackexchange.com/a/77747/113009
+        gamma = 2.2
+        threshold = (
+            0.2126 * bg[0] ** gamma + 0.7152 * bg[1] ** gamma + 0.0722 * bg[2] ** gamma
+            > 0.5 * gamma
+        )
+        if threshold:
+            text_color = "black"
+        else:
+            text_color = "white"
 
     for point in points:
         plotter.add_points(
@@ -878,7 +914,7 @@ def general_plotter(
     if plot_bc:
         if not mapdl:
             raise ValueError(
-                "An instance of `ansys.mapdl.core.mapdl._MapdlCore` "
+                "An instance of `ansys.mapdl.core.mapdl.MapdlBase` "
                 "should be passed using `mapdl` keyword if you are aiming "
                 "to plot the boundary conditions (`plot_bc` is `True`)."
             )

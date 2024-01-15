@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """This module is for threaded implementations of the mapdl interface"""
 import os
 import shutil
@@ -6,14 +28,25 @@ import time
 from typing import Any, Dict, List, Optional
 import warnings
 
-from ansys.mapdl.core import LOG, get_ansys_path, launch_mapdl
+from ansys.mapdl.core import LOG, launch_mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
-from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT, port_in_use, version_from_path
+from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT, port_in_use
 from ansys.mapdl.core.mapdl_grpc import _HAS_TQDM
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
 
+try:
+    from ansys.tools.path import get_ansys_path, version_from_path
+
+    _HAS_ATP = True
+except ModuleNotFoundError:
+    _HAS_ATP = False
+
 if _HAS_TQDM:
     from tqdm import tqdm
+
+    DEFAULT_PROGRESS_BAR = True
+else:
+    DEFAULT_PROGRESS_BAR = False
 
 
 def available_ports(n_ports: int, starting_port: int = MAPDL_DEFAULT_PORT) -> List[int]:
@@ -82,8 +115,8 @@ class LocalMapdlPool:
         By default, the instances directories are named as "Instances_{i}".
 
     **kwargs : dict, optional
-        See :func:`ansys.mapdl.core.launch_mapdl` for a complete
-        listing of all additional keyword arguments.
+        Additional keyword arguments. For a complete listing, see the description for the
+        :func:`ansys.mapdl.core.launcher.launch_mapdl` method.
 
     Examples
     --------
@@ -122,7 +155,7 @@ class LocalMapdlPool:
         wait: bool = True,
         run_location: Optional[str] = None,
         port: int = MAPDL_DEFAULT_PORT,
-        progress_bar: bool = True,
+        progress_bar: bool = DEFAULT_PROGRESS_BAR,
         restart_failed: bool = True,
         remove_temp_files: bool = True,
         names: Optional[str] = None,
@@ -159,7 +192,14 @@ class LocalMapdlPool:
         if "exec_file" in kwargs:
             exec_file = kwargs["exec_file"]
         else:  # get default executable
-            exec_file = get_ansys_path()
+            if _HAS_ATP:
+                exec_file = get_ansys_path()
+            else:
+                raise ValueError(
+                    "Please use 'exec_file' argument to specify the location of the ansys installation.\n"
+                    "Alternatively, PyMAPDL can detect your ansys installation if you install 'ansys-tools-path' library."
+                )
+
             if exec_file is None:
                 raise FileNotFoundError(
                     "Invalid exec_file path or cannot load cached "
@@ -167,8 +207,9 @@ class LocalMapdlPool:
                     "exec_file=<path to executable>"
                 )
 
-        if version_from_path("mapdl", exec_file) < 211:
-            raise VersionError("LocalMapdlPool requires MAPDL 2021R1 or later.")
+        if _HAS_ATP:
+            if version_from_path("mapdl", exec_file) < 211:
+                raise VersionError("LocalMapdlPool requires MAPDL 2021R1 or later.")
 
         # grab available ports
         ports = available_ports(n_instances, port)
@@ -181,14 +222,14 @@ class LocalMapdlPool:
         self._active = True  # used by pool monitor
 
         n_instances = int(n_instances)
-        if n_instances < 2:
-            raise ValueError("Must request at least 2 instances to create a pool.")
+        if n_instances < 1:
+            raise ValueError("Must request at least 1 instance to create a pool.")
 
         pbar = None
         if wait and progress_bar:
             if not _HAS_TQDM:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package. "
+                    "To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package. "
                     "To avoid this message you can set 'progress_bar=False'."
                 )
 
@@ -199,7 +240,9 @@ class LocalMapdlPool:
 
         # threaded spawn
         threads = [
-            self._spawn_mapdl(i, ports[i], pbar, name=self._names(i))
+            self._spawn_mapdl(
+                i, ports[i], pbar, name=self._names(i), thread_name=self._names(i)
+            )
             for i in range(n_instances)
         ]
         if wait:
@@ -217,7 +260,10 @@ class LocalMapdlPool:
 
         # monitor pool if requested
         if restart_failed:
-            self._pool_monitor_thread = self._monitor_pool(name="Monitoring_Thread")
+            # This name is using the wrapped to specify the thread name
+            self._pool_monitor_thread = self._monitor_pool(
+                thread_name="Monitoring_Thread"
+            )
 
         self._verify_unique_ports()
 
@@ -245,7 +291,7 @@ class LocalMapdlPool:
         self,
         func,
         iterable=None,
-        progress_bar=True,
+        progress_bar=DEFAULT_PROGRESS_BAR,
         close_when_finished=False,
         timeout=None,
         wait=True,
@@ -342,12 +388,12 @@ class LocalMapdlPool:
             pbar = tqdm(total=n, desc="MAPDL Running")
 
         @threaded_daemon
-        def func_wrapper(obj, func, timeout, args=None, name=""):
+        def func_wrapper(obj, func, timeout, args=None):
             """Expect obj to be an instance of Mapdl"""
             complete = [False]
 
             @threaded_daemon
-            def run(name=""):
+            def run():
                 if args is not None:
                     if isinstance(args, (tuple, list)):
                         results.append(func(obj, *args))
@@ -357,7 +403,7 @@ class LocalMapdlPool:
                     results.append(func(obj))
                 complete[0] = True
 
-            run_thread = run(name="map.run")
+            run_thread = run(thread_name="map.run")
             if timeout:
                 tstart = time.time()
                 while not complete[0]:
@@ -402,7 +448,9 @@ class LocalMapdlPool:
                 instance = self.next_available()
                 instance.locked = True
                 threads.append(
-                    func_wrapper(instance, func, timeout, args, name="Map_Thread")
+                    func_wrapper(
+                        instance, func, timeout, args, thread_name="Map_Thread"
+                    )
                 )
 
             if close_when_finished:
@@ -439,7 +487,7 @@ class LocalMapdlPool:
         self,
         files,
         clear_at_start=True,
-        progress_bar=True,
+        progress_bar=DEFAULT_PROGRESS_BAR,
         close_when_finished=False,
         timeout=None,
         wait=True,
@@ -538,9 +586,9 @@ class LocalMapdlPool:
         --------
         >>> mapdl = pool.next_available()
         >>> print(mapdl)
-        Product:         ANSYS Mechanical Enterprise
-        MAPDL Version:   RELEASE                    BUILD  0.0      UPDATE        0
-        PyANSYS Version: 0.55.1
+        Product:             Ansys Mechanical Enterprise
+        MAPDL Version:       24.1
+        ansys.mapdl Version: 0.68.dev0
         """
 
         # loop until the next instance is available
@@ -651,7 +699,7 @@ class LocalMapdlPool:
         self._instances[index] = launch_mapdl(
             run_location=run_location,
             port=port,
-            override=self._override,
+            override=True,
             **self._spawn_kwargs,
         )
 
@@ -660,6 +708,9 @@ class LocalMapdlPool:
         while self._instances[index] is None:
             time.sleep(0.1)
 
+        assert not self._instances[index].exited
+        self._instances[index].prep7()
+
         # LOG.debug("Spawned instance %d. Name '%s'", index, name)
         if pbar is not None:
             pbar.update(1)
@@ -667,22 +718,30 @@ class LocalMapdlPool:
         self._spawning_i -= 1
 
     @threaded_daemon
-    def _monitor_pool(self, refresh=1.0, name=""):
+    def _monitor_pool(self, refresh=1.0):
         """Checks if instances within a pool have exited (failed) and
         restarts them.
+
+
         """
         while self._active:
             for index, instance in enumerate(self._instances):
+                name = self._names[index]
                 if not instance:  # encountered placeholder
                     continue
+
                 if instance._exited:
                     try:
                         # use the next port after the current available port
                         self._spawning_i += 1
                         port = max(self._ports) + 1
                         self._spawn_mapdl(
-                            index, port=port, name=f"Instance {index}"
+                            index,
+                            port=port,
+                            name=name,
+                            thread_name=name,
                         ).join()
+
                     except Exception as e:
                         LOG.error(e, exc_info=True)
                         self._spawning_i -= 1

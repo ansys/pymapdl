@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """PyMAPDL specific errors"""
 
 from functools import wraps
@@ -75,6 +97,17 @@ class MapdlExitedError(RuntimeError):
         RuntimeError.__init__(self, msg)
 
 
+class NotEnoughResources(MapdlExitedError):
+    """Raised when MAPDL has exited"""
+
+    def __init__(
+        self,
+        msg="MAPDL has exited because there is not enough resources ({resource})",
+        resource="CPUs",
+    ):
+        MapdlExitedError.__init__(self, msg.format(resource=resource))
+
+
 class LockFileException(RuntimeError):
     """Error message when the lockfile has not been removed"""
 
@@ -87,6 +120,22 @@ class MapdlDidNotStart(RuntimeError):
 
     def __init__(self, msg=""):
         RuntimeError.__init__(self, msg)
+
+
+class PortAlreadyInUse(MapdlDidNotStart):
+    """Error when the port is already occupied"""
+
+    def __init__(self, msg="The port {port} is already being used.", port=50052):
+        MapdlDidNotStart.__init__(self, msg.format(port=port))
+
+
+class PortAlreadyInUseByAnMAPDLInstance(PortAlreadyInUse):
+    """Error when the port is already occupied"""
+
+    def __init__(
+        self, msg="The port {port} is already used by an MAPDL instance.", port=50052
+    ):
+        PortAlreadyInUse.__init__(self, msg.format(port=port))
 
 
 class MapdlConnectionError(RuntimeError):
@@ -114,6 +163,13 @@ class IncorrectWorkingDirectory(OSError, MapdlRuntimeError):
 
 class DifferentSessionConnectionError(RuntimeError):
     """Provides the error when connecting to the MAPDL instance fails."""
+
+    def __init__(self, msg=""):
+        RuntimeError.__init__(self, msg)
+
+
+class DeprecationError(RuntimeError):
+    """Provides the error for deprecated commands, classes, interfaces, etc"""
 
     def __init__(self, msg=""):
         RuntimeError.__init__(self, msg)
@@ -254,6 +310,13 @@ class ComponentIsNotSelected(MapdlException):
 
 class ComponentDoesNotExits(MapdlException):
     """Raised when the component does not exist"""
+
+    def __init__(self, msg=""):
+        MapdlException.__init__(self, msg)
+
+
+class CommandDeprecated(MapdlException, DeprecationError):
+    """Raised when a command is deprecated"""
 
     def __init__(self, msg=""):
         MapdlException.__init__(self, msg)

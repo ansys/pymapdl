@@ -1,6 +1,28 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Logging module.
 
-This module supplies a general framework for logging in Pymapdl.  This module is
+This module supplies a general framework for logging in PyMAPDL.  This module is
 built upon `logging <https://docs.python.org/3/library/logging.html>`_ library
 and it does not intend to replace it rather provide a way to interact between
 ``logging`` and PyMAPDL.
@@ -77,10 +99,10 @@ To log using this logger, just call the desired method as a normal logger.
 
 Instance Logger
 ~~~~~~~~~~~~~~~
-Every time an instance of :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` is
+Every time an instance of :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` is
 created, a logger is created and stored in two places:
 
-* ``_MapdlCore._log``. For backward compatibility.
+* ``MapdlBase._log``. For backward compatibility.
 * ``LOG._instances``. This field is a ``dict`` where the key is the name of the
   created logger.
 
@@ -128,7 +150,7 @@ from typing import (
 import weakref
 
 if TYPE_CHECKING:  # pragma: no cover
-    from ansys.mapdl.core.mapdl import _MapdlCore
+    from ansys.mapdl.core.mapdl import MapdlBase
 
 ## Default configuration
 LOG_LEVEL = logging.DEBUG
@@ -187,7 +209,7 @@ class PymapdlCustomAdapter(logging.LoggerAdapter):
     file_handler: Optional[logging.FileHandler] = None
     std_out_handler: Optional[logging.StreamHandler] = None
 
-    def __init__(self, logger: logging.Logger, extra: Optional["_MapdlCore"] = None):
+    def __init__(self, logger: logging.Logger, extra: Optional["MapdlBase"] = None):
         self.logger = logger
         if extra is not None:
             self.extra = weakref.proxy(extra)
@@ -300,7 +322,7 @@ class InstanceFilter(logging.Filter):
 
 
 class Logger:
-    """Logger used for each Pymapdl session.
+    """Logger used for each PyMAPDL session.
 
     This class allows you to add handlers to the logger to output to a file or
     standard output.
@@ -350,7 +372,7 @@ class Logger:
         to_stdout: bool = True,
         filename: str = FILE_NAME,
     ):
-        """Customized logger class for Pymapdl.
+        """Customized logger class for PyMAPDL.
 
         Parameters
         ----------
@@ -514,7 +536,7 @@ class Logger:
     def _add_mapdl_instance_logger(
         self,
         name: Optional[str],
-        mapdl_instance: "_MapdlCore",
+        mapdl_instance: "MapdlBase",
         level: Optional[LOG_LEVEL_TYPE],
     ) -> logging.Logger:
         if isinstance(name, str):
@@ -533,7 +555,7 @@ class Logger:
     def add_instance_logger(
         self,
         name: str,
-        mapdl_instance: "_MapdlCore",
+        mapdl_instance: "MapdlBase",
         level: Optional[LOG_LEVEL_TYPE] = None,
     ) -> logging.Logger:
         """Create a logger for a MAPDL instance.
@@ -547,7 +569,7 @@ class Logger:
         ----------
         name : str
             Name for the new logger
-        mapdl_instance : ansys.mapdl.core.mapdl._MapdlCore
+        mapdl_instance : ansys.mapdl.core.mapdl.MapdlBase
             Mapdl instance object. This should contain the attribute ``name``.
 
         Returns

@@ -58,10 +58,10 @@ Course content
 
 
 
-Getting Started with PyMAPDL
+Getting started with PyMAPDL
 ----------------------------
 
-The `Getting Started with PyMAPDL <course_getting_started_pymapdl_>`_ course teaches
+The `Getting started with PyMAPDL <course_getting_started_pymapdl_>`_ course teaches
 you about PyMAPDL, the Pythonic way to access Ansys MAPDL. 
 
 Course content
@@ -76,10 +76,10 @@ Course content
 
 
 
-Intro to Ansys Mechanical APDL Scripting
+Intro to Ansys Mechanical APDL scripting
 ----------------------------------------
 
-The `Intro to Ansys Mechanical APDL Scripting <course_intro_apdl_>`_
+The `Intro to Ansys Mechanical APDL scripting <course_intro_apdl_>`_
 course teaches you how APDL, the Mechanical solver syntax language, works.
 
 Course content
@@ -173,6 +173,5 @@ Recommended articles
 
 .. vale on
 
-
 Feel free to share any educational or learning resources by `opening an issue <pymapdl_issues_>`_
-or `starting a discussion <pymapdl_discussions_>`_ on Github.
+or `starting a discussion <pymapdl_discussions_>`_ on GitHub.
