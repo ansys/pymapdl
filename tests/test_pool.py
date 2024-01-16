@@ -37,7 +37,7 @@ if has_dependency("ansys-tools-path"):
 else:
     EXEC_FILE = os.environ.get("PYMAPDL_MAPDL_EXEC")
 
-if not EXEC_FILE or ON_STUDENT:
+if not EXEC_FILE:
     pytest.skip(allow_module_level=True)
 
 from ansys.mapdl.core import LocalMapdlPool, examples
@@ -62,13 +62,18 @@ skip_requires_194 = pytest.mark.skipif(
 TWAIT = 100
 NPROC = 1
 
+if ON_STUDENT:
+    MAPDL_INSTANCES = 1
+else:
+    MAPDL_INSTANCES = 4
+
 
 @pytest.fixture(scope="module")
 def pool(tmpdir_factory):
     run_path = str(tmpdir_factory.mktemp("ansys_pool"))
 
     mapdl_pool = LocalMapdlPool(
-        4,
+        MAPDL_INSTANCES,
         license_server_check=False,
         run_location=run_path,
         port=50056,
@@ -103,7 +108,7 @@ def pool(tmpdir_factory):
 def test_invalid_exec():
     with pytest.raises(VersionError):
         LocalMapdlPool(
-            4,
+            MAPDL_INSTANCES,
             nproc=NPROC,
             exec_file="/usr/ansys_inc/v194/ansys/bin/mapdl",
             additional_switches=QUICK_LAUNCH_SWITCHES,
@@ -259,7 +264,7 @@ def test_directory_names_default(pool):
 @skip_if_ignore_pool
 def test_directory_names_custom_string(tmpdir):
     pool = LocalMapdlPool(
-        2,
+        min([2, MAPDL_INSTANCES]),  # to not spawn more than necessary
         exec_file=EXEC_FILE,
         run_location=tmpdir,
         nproc=NPROC,
@@ -278,16 +283,20 @@ def test_directory_names_custom_string(tmpdir):
 @requires("local")
 @skip_if_ignore_pool
 def test_directory_names_function(tmpdir):
-    def myfun(i):
-        if i == 0:
-            return "instance_zero"
-        elif i == 1:
-            return "instance_one"
-        else:
-            return "Other_instance"
+    instances_names = [
+        "instance_zero",
+        "instance_one",
+        "Other_instance",
+        "Other_instance",
+        "Other_instance",
+    ]
 
+    def myfun(i):
+        return instances_names[i]
+
+    mapdl_instances = min([3, MAPDL_INSTANCES])
     pool = LocalMapdlPool(
-        3,
+        mapdl_instances,  # to not spawn more than necessary
         exec_file=EXEC_FILE,
         nproc=NPROC,
         names=myfun,
@@ -296,9 +305,8 @@ def test_directory_names_function(tmpdir):
     )
 
     dirs_path_pool = os.listdir(pool._root_dir)
-    assert "instance_zero" in dirs_path_pool
-    assert "instance_one" in dirs_path_pool
-    assert "Other_instance" in dirs_path_pool
+    for each in zip(range(mapdl_instances), instances_names):
+        each in dirs_path_pool
 
     pool.exit(block=True)
 
