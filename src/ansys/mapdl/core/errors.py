@@ -53,48 +53,49 @@ class ANSYSDataTypeError(ValueError):
     """Raised when and invalid data type is sent to APDLMath"""
 
     def __init__(self, msg=TYPE_MSG):
-        ValueError.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class VersionError(ValueError):
     """Raised when MAPDL is the wrong version"""
 
     def __init__(self, msg="Invalid MAPDL version"):
-        ValueError.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class NoDistributedFiles(FileNotFoundError):
     """Unable to find any distributed result files"""
 
     def __init__(self, msg="Unable to find any distributed result files"):
-        FileNotFoundError.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class MapdlRuntimeError(RuntimeError):
     """Raised when MAPDL passes an error"""
 
-    pass
+    def __init__(self, msg=""):
+        super().__init__(self, msg)
 
 
 class MapdlInvalidRoutineError(RuntimeError):
     """Raised when MAPDL is in the wrong routine"""
 
     def __init__(self, msg=""):
-        RuntimeError.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class MapdlCommandIgnoredError(RuntimeError):
     """Raised when MAPDL ignores a command."""
 
     def __init__(self, msg=""):
-        RuntimeError.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class MapdlExitedError(RuntimeError):
     """Raised when MAPDL has exited"""
 
     def __init__(self, msg="MAPDL has exited"):
-        RuntimeError.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class NotEnoughResources(MapdlExitedError):
@@ -105,28 +106,28 @@ class NotEnoughResources(MapdlExitedError):
         msg="MAPDL has exited because there is not enough resources ({resource})",
         resource="CPUs",
     ):
-        MapdlExitedError.__init__(self, msg.format(resource=resource))
+        super().__init__(self, msg.format(resource=resource))
 
 
 class LockFileException(RuntimeError):
     """Error message when the lockfile has not been removed"""
 
     def __init__(self, msg=LOCKFILE_MSG):
-        RuntimeError.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class MapdlDidNotStart(RuntimeError):
     """Error when the MAPDL process does not start"""
 
     def __init__(self, msg=""):
-        RuntimeError.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class PortAlreadyInUse(MapdlDidNotStart):
     """Error when the port is already occupied"""
 
     def __init__(self, msg="The port {port} is already being used.", port=50052):
-        MapdlDidNotStart.__init__(self, msg.format(port=port))
+        super().__init__(self, msg.format(port=port))
 
 
 class PortAlreadyInUseByAnMAPDLInstance(PortAlreadyInUse):
@@ -135,44 +136,43 @@ class PortAlreadyInUseByAnMAPDLInstance(PortAlreadyInUse):
     def __init__(
         self, msg="The port {port} is already used by an MAPDL instance.", port=50052
     ):
-        PortAlreadyInUse.__init__(self, msg.format(port=port))
+        super().__init__(self, msg.format(port=port))
 
 
 class MapdlConnectionError(RuntimeError):
     """Provides the error when connecting to the MAPDL instance fails."""
 
     def __init__(self, msg=""):
-        RuntimeError.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class LicenseServerConnectionError(MapdlDidNotStart):
     """Provides the error when the license server is not available."""
 
     def __init__(self, msg=""):
-        MapdlDidNotStart.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class IncorrectWorkingDirectory(OSError, MapdlRuntimeError):
     """Raised when the MAPDL working directory does not exist."""
 
     # The working directory specified (wrong_path) is not a directory.
-
     def __init__(self, msg=""):
-        MapdlRuntimeError.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class DifferentSessionConnectionError(RuntimeError):
     """Provides the error when connecting to the MAPDL instance fails."""
 
     def __init__(self, msg=""):
-        RuntimeError.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class DeprecationError(RuntimeError):
     """Provides the error for deprecated commands, classes, interfaces, etc"""
 
     def __init__(self, msg=""):
-        RuntimeError.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 # handler for protect_grpc
@@ -240,83 +240,77 @@ def protect_grpc(func):
 
 
 class MapdlException(MapdlRuntimeError):
-
     """General MAPDL exception."""
 
     def __init__(self, msg=""):
-        MapdlRuntimeError.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class MapdlError(MapdlException):
-
     """General MAPDL Error"""
 
     def __init__(self, msg=""):
-        MapdlException.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class MapdlWarning(MapdlException):
-
     """General MAPDL warning"""
 
     def __init__(self, msg=""):
-        MapdlException.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class MapdlNote(MapdlException):
-
     """General MAPDL note"""
 
     def __init__(self, msg=""):
-        MapdlException.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class MapdlInfo(MapdlException):
-
     """General MAPDL info message"""
 
     def __init__(self, msg=""):
-        MapdlException.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class MapdlVersionError(MapdlException):
-
     """Incompatible MAPDL version"""
 
     def __init__(self, msg=""):
-        MapdlException.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class EmptyRecordError(RuntimeError):
     """Raised when a record is empty"""
 
     def __init__(self, msg=""):
-        RuntimeError.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class ComponentNoData(MapdlException):
     """Raised when the component has no data"""
 
     def __init__(self, msg=""):
-        MapdlException.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class ComponentIsNotSelected(MapdlException):
     """Raised when the component is not selected"""
 
     def __init__(self, msg=""):
-        MapdlException.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class ComponentDoesNotExits(MapdlException):
     """Raised when the component does not exist"""
 
     def __init__(self, msg=""):
-        MapdlException.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 class CommandDeprecated(MapdlException, DeprecationError):
     """Raised when a command is deprecated"""
 
     def __init__(self, msg=""):
-        MapdlException.__init__(self, msg)
+        super().__init__(self, msg)
