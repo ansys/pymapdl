@@ -262,7 +262,7 @@ class ComponentDoesNotExits(MapdlException):
         MapdlException.__init__(self, msg)
 
 
-class CommandDeprecated(MapdlException, DeprecationError):
+class CommandDeprecated(DeprecationError):
     """Raised when a command is deprecated"""
 
     def __init__(self, msg=""):
