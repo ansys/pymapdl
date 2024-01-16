@@ -474,14 +474,12 @@ def launch_grpc(
     # disable all MAPDL pop-up errors:
     os.environ["ANS_CMD_NODIAG"] = "TRUE"
 
-    if verbose is not None:
-        warnings.warn(
-            "The ``verbose`` argument is deprecated and will be removed in a future release. "
-            "Use a logger instead. See :ref:`api_logging` for more details.",
-            DeprecationWarning,
+    if verbose:
+        raise DeprecationError(
+            "The ``verbose`` argument is deprecated and will be completely removed in a future release. Use a logger instead. "
+            "See https://mapdl.docs.pyansys.com/version/stable/api/logging.html for more details."
         )
-    elif verbose is None:
-        verbose = False
+        verbose = None
 
     # use temporary directory if run_location is unspecified
     if run_location is None:
@@ -600,9 +598,6 @@ def launch_grpc(
 
     LOG.info(f"Running in {ip}:{port} the following command: '{command}'")
 
-    if verbose:
-        print(command)
-
     LOG.debug("MAPDL starting in background.")
     process = subprocess.Popen(
         command,
@@ -630,7 +625,11 @@ def launch_grpc(
             _check_server_is_alive(stdout_queue, run_location, timeout)
 
     except MapdlDidNotStart as e:
-        msg = str(e) + f"\nRun location: {run_location}" + f"\nCommand line used: {cmd}"
+        msg = (
+            str(e)
+            + f"\nRun location: {run_location}"
+            + f"\nCommand line used: {command}"
+        )
 
         terminal_output = "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
         if terminal_output.strip():
@@ -1427,10 +1426,9 @@ def launch_mapdl(
         remove_temp_files = None
 
     if verbose_mapdl is not None:
-        warnings.warn(
-            "The ``verbose_mapdl`` argument is deprecated and will be removed in a future release. "
-            "Use a logger instead. See :ref:`api_logging` for more details.",
-            DeprecationWarning,
+        raise DeprecationError(
+            "The ``verbose_mapdl`` argument is deprecated and will be completely removed in a future release. Use a logger instead. "
+            "See https://mapdl.docs.pyansys.com/version/stable/api/logging.html for more details."
         )
         verbose_mapdl = False
 
@@ -1728,7 +1726,6 @@ def launch_mapdl(
                 ip=ip,
                 add_env_vars=add_env_vars,
                 replace_env_vars=replace_env_vars,
-                verbose=verbose_mapdl,
                 **start_parm,
             )
 
