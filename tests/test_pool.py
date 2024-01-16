@@ -190,7 +190,9 @@ def test_simple(pool):
 @requires("local")
 @skip_if_ignore_pool
 def test_batch(pool):
-    input_files = [examples.vmfiles["vm%d" % i] for i in range(1, 11)]
+    input_files = [
+        examples.vmfiles["vm%d" % i] for i in range(1, (MAPDL_INSTANCES + 2))
+    ]
     outputs = pool.run_batch(input_files)
     assert len(outputs) == len(input_files)
 
@@ -209,7 +211,9 @@ def test_map(pool):
         completed_indices.append(index)
         return mapdl.parameters.routine
 
-    inputs = [(examples.vmfiles["vm%d" % i], i) for i in range(1, 11)]
+    inputs = [
+        (examples.vmfiles["vm%d" % i], i) for i in range(1, (MAPDL_INSTANCES + 2))
+    ]
     outputs = pool.map(func, inputs, wait=True)
 
     assert len(outputs) == len(inputs)
@@ -226,7 +230,9 @@ def test_abort(pool, tmpdir):
     with open(tmp_file, "w") as f:
         f.write("EXIT")
 
-    input_files = [examples.vmfiles["vm%d" % i] for i in range(1, 11)]
+    input_files = [
+        examples.vmfiles["vm%d" % i] for i in range(1, (MAPDL_INSTANCES + 2))
+    ]
     input_files += [tmp_file]
 
     outputs = pool.run_batch(input_files)
