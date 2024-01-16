@@ -340,7 +340,8 @@ def launch_grpc(
         ``False``.
 
         .. deprecated:: v0.65.0
-           The ``verbose`` argument is deprecated and will be removed in a future release.
+           The ``verbose`` argument is deprecated and will be completely
+           removed in a future release.
            Use a logger instead. See :ref:`api_logging` for more details.
 
     kwargs : dict
@@ -479,7 +480,6 @@ def launch_grpc(
             "The ``verbose`` argument is deprecated and will be completely removed in a future release. Use a logger instead. "
             "See https://mapdl.docs.pyansys.com/version/stable/api/logging.html for more details."
         )
-        verbose = None
 
     # use temporary directory if run_location is unspecified
     if run_location is None:
@@ -1197,7 +1197,8 @@ def launch_mapdl(
         be tracked within pymapdl.  Default ``False``.
 
         .. deprecated:: v0.65.0
-           The ``verbose_mapdl`` argument is deprecated and will be removed in a future release.
+           The ``verbose_mapdl`` argument is deprecated and will be completely
+           removed in a future release.
            Use a logger instead. See :ref:`api_logging` for more details.
 
     license_server_check : bool, optional
@@ -1431,7 +1432,6 @@ def launch_mapdl(
             "The ``verbose_mapdl`` argument is deprecated and will be completely removed in a future release. Use a logger instead. "
             "See https://mapdl.docs.pyansys.com/version/stable/api/logging.html for more details."
         )
-        verbose_mapdl = False
 
     # These parameters are partially used for unit testing
     set_no_abort = kwargs.pop("set_no_abort", True)
