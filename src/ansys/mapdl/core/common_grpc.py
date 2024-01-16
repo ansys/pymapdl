@@ -25,7 +25,7 @@ from typing import List, Literal, get_args
 
 import numpy as np
 
-from ansys.mapdl.core.errors import MapdlConnectionError
+from ansys.mapdl.core.errors import MapdlConnectionError, MapdlRuntimeError
 
 # chunk sizes for streaming and file streaming
 DEFAULT_CHUNKSIZE = 256 * 1024  # 256 kB
@@ -85,11 +85,11 @@ VGET_NODE_ENTITY_TYPES = {
 }
 
 
-class GrpcError(RuntimeError):
+class GrpcError(MapdlRuntimeError):
     """Raised when gRPC fails"""
 
     def __init__(self, msg=""):
-        RuntimeError.__init__(self, msg)
+        MapdlRuntimeError.__init__(self, msg)
 
 
 def check_vget_input(entity: str, item: str, itnum: str) -> str:
