@@ -73,11 +73,6 @@ class MapdlRuntimeError(MapdlException, RuntimeError):
         RuntimeError.__init__(self, msg)
 
 
-class MapdlDeprecationError(MapdlException, DeprecationError):
-    def __init__(self, msg=""):
-        DeprecationError.__init__(self, msg)
-
-
 ## Inheritated
 class ANSYSDataTypeError(MapdlValueError):
     """Raised when and invalid data type is sent to APDLMath"""
