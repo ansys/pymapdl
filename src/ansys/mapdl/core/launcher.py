@@ -628,7 +628,7 @@ def launch_grpc(
         msg = (
             str(e)
             + f"\nRun location: {run_location}"
-            + f"\nCommand line used: {command}"
+            + f"\nCommand line used: {command}\n\n"
         )
 
         terminal_output = "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
