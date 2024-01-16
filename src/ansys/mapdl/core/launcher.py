@@ -1433,11 +1433,11 @@ def launch_mapdl(
         # Unless the env var is false, it will be true.
         ON_SLURM = not (ON_SLURM.lower() == "false")
 
-    # Let's require the following env var to exists to go into slurm mode.
+    # Let's require the following env vars to exists to go into slurm mode.
     ON_SLURM = (
-        bool(os.environ.get("SLURM_JOB_NAME", ""))
-        and bool(os.environ.get("SLURM_NTASKS", ""))
-        and ON_SLURM
+        ON_SLURM and \
+        bool(os.environ.get("SLURM_JOB_NAME", "")) and \
+        bool(os.environ.get("SLURM_NTASKS", ""))
     )
 
     if on_slurm and ON_SLURM:
@@ -1718,14 +1718,17 @@ def launch_mapdl(
 
     # Setting number of processors
     machine_cores = psutil.cpu_count(logical=False)
-    if not nproc:
-        if machine_cores < 2:  # default required cores
-            nproc = machine_cores  # to avoid starting issues
+    if not ON_SLURM:
+        # Bypassing number of processors checks because VDI/VNC might have
+        # different number of processors than the cluster compute nodes.
+        if not nproc:
+            if machine_cores < 2:  # default required cores
+                nproc = machine_cores  # to avoid starting issues
+            else:
+                nproc = 2
         else:
-            nproc = 2
-    else:
-        if machine_cores < int(nproc):
-            raise NotEnoughResources
+            if machine_cores < int(nproc):
+                raise NotEnoughResources(f"The machine has {machine_cores} cores and PyMAPDL is asking for {nproc} cores.")
 
     start_parm.update(
         {
