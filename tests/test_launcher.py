@@ -31,6 +31,7 @@ import pytest
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import (
+    DeprecationError,
     LicenseServerConnectionError,
     MapdlDidNotStart,
     NotEnoughResources,
@@ -538,3 +539,11 @@ def test_fail_channel_port():
 def test_fail_channel_ip():
     with pytest.raises(ValueError):
         launch_mapdl(channel="something", ip="something")
+
+
+def test_deprecate_verbose():
+    with pytest.raises(DeprecationError):
+        launch_mapdl(verbose_mapdl=True)
+
+    with pytest.raises(ValueError):
+        launch_mapdl(verbose=True)
