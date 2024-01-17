@@ -153,18 +153,36 @@ def test_error_handler(mapdl):
 
 @pytest.mark.parametrize(
     # Tests inputs
-    "message,context",
+    "message,condition,context",
     [
-        ("", NullContext()),
-        ("My custom error", NullContext()),
-        pytest.param("my error", pytest.raises(ValueError)),
+        (None, None, NullContext()),
+        ("My custom error", None, NullContext()),
+        ("my error", None, pytest.raises(ValueError)),
+        (None, None, NullContext()),
+        (None, True, NullContext()),
+        (None, False, pytest.raises(ValueError)),
+        ("my error", False, pytest.raises(ValueError)),
+        ("my error", True, pytest.raises(ValueError)),
+        ("My custom error", False, pytest.raises(ValueError)),
+        ("My custom error", True, NullContext()),
     ],
     # Test ids
-    ids=["Match any message", "Match message", "Raises an exception"],
+    ids=[
+        "Match any message. No condition",
+        "Match message. No condition",
+        "Raises an exception. No condition (raise internal exception)",
+        "No message. No condition",
+        "No message. True condition",
+        "No message. False condition (raise internal exception)",
+        "Different error message. False condition (raise internal exception)",
+        "Different error message. True condition (raise internal exception)",
+        "Same error message. False condition (raise internal exception)",
+        "Same error message. True condition",
+    ],
 )
-def test_protect_from(message, context):
+def test_protect_from(message, condition, context):
     class myclass:
-        @protect_from(ValueError, message)
+        @protect_from(ValueError, message, condition)
         def raising(self):
             raise ValueError("My custom error")
 
