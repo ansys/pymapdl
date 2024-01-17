@@ -33,7 +33,9 @@ from ansys.mapdl.core.errors import (
     MapdlRuntimeError,
     MapdlVersionError,
     MapdlWarning,
+    protect_from,
 )
+from conftest import NullContext
 
 error_shape_error_limits = """
 
@@ -147,3 +149,25 @@ def test_error_handler(mapdl):
     text = "*** ERROR ***\n This is my own errorrrr"
     with pytest.raises(MapdlRuntimeError, match="errorrrr"):
         mapdl._raise_errors(text)
+
+
+@pytest.mark.parametrize(
+    # Tests inputs
+    "message,context",
+    [
+        ("", NullContext()),
+        ("My custom error", NullContext()),
+        pytest.param("my error", pytest.raises(ValueError)),
+    ],
+    # Test ids
+    ids=["Match any message", "Match message", "Raises an exception"],
+)
+def test_protect_from(message, context):
+    class myclass:
+        @protect_from(ValueError, message)
+        def raising(self):
+            raise ValueError("My custom error")
+
+    with context:
+        myobj = myclass()
+        myobj.raising()

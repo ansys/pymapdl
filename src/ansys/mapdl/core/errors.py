@@ -314,3 +314,25 @@ def protect_grpc(func):
         return out
 
     return wrapper
+
+
+def protect_from(error, match: str = ""):
+    """Protect the decorated method from raising an exception"""
+
+    def decorator(function):
+        @wraps(function)
+        def wrapper(self, *args, **kwargs):
+            try:
+                return function(self, *args, **kwargs)
+            except error as e:
+                if match:
+                    if match in str(e):
+                        pass
+                    else:
+                        raise e
+                else:
+                    pass
+
+        return wrapper
+
+    return decorator
