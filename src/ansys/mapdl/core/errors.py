@@ -51,17 +51,23 @@ TYPE_MSG = (
 
 ## Abraham class
 class MapdlException(Exception):
+    """MAPDL general exception"""
+
     def __init__(self, msg=""):
         super().__init__(msg)
 
 
 ## Main subclasses
 class MapdlValueError(MapdlException, ValueError):
+    """MAPDL Value error"""
+
     def __init__(self, msg=""):
         super().__init__(msg)
 
 
 class MapdlFileNotFoundError(MapdlException, FileNotFoundError):
+    """Error when file is not found"""
+
     def __init__(self, msg=""):
         super().__init__(msg)
 
@@ -233,7 +239,7 @@ class MapdlVersionError(MapdlException):
         super().__init__(msg)
 
 
-class EmptyRecordError(RuntimeError):
+class EmptyRecordError(MapdlRuntimeError):
     """Raised when a record is empty"""
 
     def __init__(self, msg=""):
