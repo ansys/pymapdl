@@ -75,6 +75,7 @@ def pool(tmpdir_factory, mapdl):
     # Killing MAPDL
     if ON_STUDENT:
         mapdl.exit()
+        mapdl._stopped = True
 
     mapdl_pool = LocalMapdlPool(
         MAPDL_INSTANCES,
@@ -111,6 +112,7 @@ def pool(tmpdir_factory, mapdl):
     if ON_STUDENT:
         run_path = str(tmpdir_factory.mktemp("ansys"))
         mapdl = launch_mapdl_grpc_for_testing(run_path)
+        mapdl._stopped = False
 
 
 @skip_requires_194

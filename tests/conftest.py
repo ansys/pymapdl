@@ -362,7 +362,7 @@ def run_before_and_after_tests(request, mapdl):
         except MapdlExitedError:
             return True
 
-    if START_INSTANCE and is_exited(mapdl):
+    if START_INSTANCE and is_exited(mapdl) and not mapdl._stopped:
         # Backing up the current local configuration
         local_ = mapdl._local
 
@@ -451,6 +451,8 @@ def launch_mapdl_grpc_for_testing(run_path):
         start_timeout=50,
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
+    mapdl._stopped = False  # Used on pool testing
+
     MAPDL_VERSION = mapdl.version  # Caching version
 
     if ON_CI:
