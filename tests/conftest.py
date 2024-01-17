@@ -439,11 +439,7 @@ def mapdl_console(request):
         mapdl.prep7()
 
 
-@pytest.fixture(scope="session")
-def mapdl(request, tmpdir_factory):
-    # don't use the default run location as tests run multiple unit testings
-    run_path = str(tmpdir_factory.mktemp("ansys"))
-
+def launch_mapdl_grpc_for_testing(run_path):
     # don't allow mapdl to exit upon collection unless mapdl is local
     cleanup = START_INSTANCE
 
@@ -459,6 +455,16 @@ def mapdl(request, tmpdir_factory):
 
     if ON_CI:
         mapdl._local = ON_LOCAL  # CI: override for testing
+
+    return mapdl
+
+
+@pytest.fixture(scope="session")
+def mapdl(request, tmpdir_factory):
+    # don't use the default run location as tests run multiple unit testings
+    run_path = str(tmpdir_factory.mktemp("ansys"))
+
+    mapdl = launch_mapdl_grpc_for_testing()
 
     if mapdl.is_local:
         assert Path(mapdl.directory) == Path(run_path)

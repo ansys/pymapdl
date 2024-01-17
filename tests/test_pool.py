@@ -27,7 +27,7 @@ import time
 import numpy as np
 import pytest
 
-from conftest import ON_LOCAL, ON_STUDENT, has_dependency
+from conftest import ON_LOCAL, ON_STUDENT, has_dependency, launch_mapdl_grpc_for_testing
 
 if has_dependency("ansys-tools-path"):
     from ansys.tools.path import find_ansys
@@ -69,8 +69,12 @@ else:
 
 
 @pytest.fixture(scope="module")
-def pool(tmpdir_factory):
+def pool(tmpdir_factory, mapdl):
     run_path = str(tmpdir_factory.mktemp("ansys_pool"))
+
+    # Killing MAPDL
+    if ON_STUDENT:
+        mapdl.exit()
 
     mapdl_pool = LocalMapdlPool(
         MAPDL_INSTANCES,
@@ -102,6 +106,11 @@ def pool(tmpdir_factory):
         pth = mapdl_pool[0].directory
         if mapdl_pool._spawn_kwargs["remove_temp_files"]:
             assert not list(Path(pth).rglob("*.page*"))
+
+    # Restarting MAPDL
+    if ON_STUDENT:
+        run_path = str(tmpdir_factory.mktemp("ansys"))
+        mapdl = launch_mapdl_grpc_for_testing(run_path)
 
 
 @skip_requires_194
