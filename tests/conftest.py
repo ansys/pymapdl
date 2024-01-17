@@ -21,7 +21,6 @@
 # SOFTWARE.
 
 from collections import namedtuple
-from importlib import import_module
 import os
 from pathlib import Path
 from sys import platform
@@ -112,8 +111,17 @@ skip_if_running_student_version = pytest.mark.skipif(
 )
 
 
+def import_module(requirement):
+    from importlib import import_module
+
+    if os.name == "nt":
+        requirement = requirement.replace("-", ".")
+    return import_module(requirement)
+
+
 def has_dependency(requirement):
     try:
+        requirement = requirement.replace("-", ".")
         import_module(requirement)
         return True
     except ModuleNotFoundError:
@@ -377,9 +385,19 @@ def run_before_and_after_tests(request, mapdl):
     yield  # this is where the testing happens
 
     # Teardown : fill with any logic you want
-    if mapdl._local and mapdl._exited:
+    if mapdl.is_local and mapdl._exited:
         # The test exited MAPDL, so it is fail.
         assert False  # this will fail the test
+
+
+@pytest.fixture(autouse=True, scope="function")
+def run_before_and_after_tests_2(request, mapdl):
+    """Make sure we are not changing these properties in tests"""
+    prev = mapdl.is_local
+
+    yield
+
+    assert prev == mapdl.is_local
 
 
 @pytest.fixture(scope="session")
@@ -442,7 +460,7 @@ def mapdl(request, tmpdir_factory):
     if ON_CI:
         mapdl._local = ON_LOCAL  # CI: override for testing
 
-    if mapdl._local:
+    if mapdl.is_local:
         assert Path(mapdl.directory) == Path(run_path)
 
     # using yield rather than return here to be able to test exit
@@ -453,7 +471,7 @@ def mapdl(request, tmpdir_factory):
     ###########################################################################
     if START_INSTANCE:
         mapdl._local = True
-        mapdl.exit()
+        mapdl.exit(save=True, force=True)
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
 

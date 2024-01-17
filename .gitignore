@@ -38,6 +38,7 @@ doc/source/examples/gallery_examples/*
 # docs
 _autosummary
 doc/build_errors.txt
+doc/source/images/auto-generated/*
 
 
 # Testing
@@ -85,6 +86,7 @@ tmp.out
 # virtual environment
 venv/
 .venv/
+.venv
 
 # Visual studio code local settings
 .vscode/
@@ -92,3 +94,10 @@ venv/
 # Pycharm local settings
 .idea/
 /.vs
+
+# Extra
+doc/source/errors.txt
+doc/source/sg_execution_times.rst
+*prin-stresses.html
+doc/webserver.log
+doc/webserver.pid

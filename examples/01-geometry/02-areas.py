@@ -115,8 +115,9 @@ anum
 # Area Geometry
 # ~~~~~~~~~~~~~
 # Get the VTK ``Multiblock`` containing lines. This VTK mesh can be
-# saved or plotted.  For more information, see the `Pyvista documentation <pyvista_docs_>`_
-#
+# saved or plotted.  For more information, see the
+# `PyVista documentation <pyvista_docs_>`_.
+
 areas = mapdl.geometry.areas
 areas
 

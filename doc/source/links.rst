@@ -115,6 +115,13 @@
 .. _sphinx: https://www.sphinx-doc.org/en/master/
 .. _vale: https://www.vale.sh
 .. _vale_installation: https://vale.sh/docs/vale-cli/installation/
+.. _vscode_devcontainers_containers: https://code.visualstudio.com/docs/devcontainers/containers
+.. _vscode: https://code.visualstudio.com
+.. _vscode_devcontainers_containers_getting_started: https://code.visualstudio.com/docs/devcontainers/containers#_getting-started
+.. _vscode_devcontainers_remote_extension: https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.vscode-remote-extensionpack
+.. _ghcr: https://github.com/features/packages
+.. _vscode_open_a_repository_in_container: https://code.visualstudio.com/docs/devcontainers/containers#_quick-start-open-a-git-repository-or-github-pr-in-an-isolated-container-volume
+.. _pytest_parametrize: https://docs.pytest.org/en/7.3.x/how-to/parametrize.html
 
 
 .. #Github links:
@@ -124,16 +131,19 @@
 .. _codecov: https://github.com/codecov
 .. _WSL_Windows_Toolbar_Launcher: https://github.com/cascadium/wsl-windows-toolbar-launcher
 .. _disabling_firewall_on_wsl: https://github.com/cascadium/wsl-windows-toolbar-launcher#firewall-rules
+.. _codespaces_features: https://github.com/features/codespaces
+.. _codespaces_personal_page: https://github.com/codespaces
+.. _github_pricing: https://github.com/pricing/calculator
 
 .. #PyMAPDL related
 .. _pymapdl_main: pymapdl_docs_
+.. _pymapdl_repo: https://github.com/ansys/pymapdl
 .. _pymapdl_pypi: https://pypi.org/project/ansys-mapdl-core/
 .. _pymapdl_releases: https://github.com/ansys/pymapdl/releases
 .. _pymapdl_run_ubuntu: https://mapdl.docs.pyansys.com/version/dev/user_guide/troubleshoot.html#ubuntu
 .. _pymapdl_issues: https://github.com/ansys/pymapdl/issues
 .. _pymapdl_new_issue: https://github.com/ansys/pymapdl/issues/new/choose
 .. _pymapdl_new_blank_issue: https://github.com/ansys/pymapdl/issues/new
-.. _pymapdl_repo: https://github.com/ansys/pymapdl
 .. _pymapdl_docs: https://mapdl.docs.pyansys.com/version/stable/
 .. _pymapdl_dev_docs: https://mapdl.docs.pyansys.com/version/dev/
 .. _pymapdl_discussions: https://github.com/ansys/PyMAPDL/discussions
@@ -164,6 +174,16 @@
 .. _pymapdl_latest_github_release: https://github.com/ansys/pymapdl/releases/latest
 .. _pymapdl_latest_pdf_doc: https://github.com/ansys/pymapdl/releases/download/v%%PYMAPDLVERSION%%.0/pymapdl-Documentation-%%PYMAPDLVERSION%%.0.pdf
 .. _pymapdl_discussion_speed_pymapdl_mapdl: https://github.com/ansys/pymapdl/discussions/757
+.. _pymapdl_devcontainer_configuration: https://github.com/ansys/pymapdl/blob/main/.devcontainer/devcontainer-local/devcontainer.json
+.. _pymapdl_build_docker_compose: https://github.com/ansys/pymapdl/tree/main/.devcontainer/docker-compose.yml
+.. _pymapdl_codespaces_welcome_dev: https://github.com/ansys/pymapdl/blob/main/.devcontainer/welcome.rst
+.. _pymapdl_codespaces_welcome_docs: https://github.com/ansys/pymapdl/blob/main/.devcontainer/codespaces-docs/welcome.rst
+.. _pymapdl_codespaces_welcome_local: https://github.com/ansys/pymapdl/blob/main/.devcontainer/devcontainer-local/welcome.rst
+.. _pymapdl_devcontainer_directory: https://github.com/ansys/pymapdl/tree/main/.devcontainer
+.. _pymapdl_create_codespace_dev_quick_start: https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fdevcontainer.json
+.. _pymapdl_create_codespace_docs_quick_start: https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fcodespaces-docs%2Fdevcontainer.json
+.. _pymapdl_create_codespace_dev: https://codespaces.new/ansys/pymapdl?devcontainer_path=.devcontainer%2Fdevcontainer.json
+.. _pymapdl_create_codespace_docs: https://codespaces.new/ansys/pymapdl?devcontainer_path=.devcontainer%2Fcodespaces-docs%2Fdevcontainer.json
 
 
 .. #Python
@@ -187,6 +207,7 @@
 .. _docker_cp: https://docs.docker.com/engine/reference/commandline/cp/
 .. _docker_run: https://docs.docker.com/engine/reference/run/
 .. _docker_compose: https://docs.docker.com/compose/
+.. _docker_main: https://www.docker.com
 
 .. # Elements references
 

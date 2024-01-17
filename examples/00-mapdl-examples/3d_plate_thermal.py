@@ -23,12 +23,12 @@
 """
 .. _ref_3d_plate_thermal:
 
-Basic Thermal Analysis with pyMAPDL
+Basic Thermal Analysis with PyMAPDL
 -----------------------------------
 
 This example demonstrates how you can use MAPDL to create a plate,
 impose thermal boundary conditions, solve, and plot it all within
-pyMAPDL.
+PyMAPDL.
 
 First, start MAPDL as a service and disable all but error messages.
 """

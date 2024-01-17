@@ -26,10 +26,16 @@ import os
 import tempfile
 from time import sleep
 
+import psutil
 import pytest
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.errors import LicenseServerConnectionError, MapdlDidNotStart
+from ansys.mapdl.core.errors import (
+    LicenseServerConnectionError,
+    MapdlDidNotStart,
+    NotEnoughResources,
+    PortAlreadyInUseByAnMAPDLInstance,
+)
 from ansys.mapdl.core.launcher import (
     _check_license_argument,
     _force_smp_student_version,
@@ -130,19 +136,23 @@ def test_find_ansys_linux():
 
 @requires("ansys-tools-path")
 @requires("local")
-def test_invalid_mode():
+def test_invalid_mode(mapdl):
     with pytest.raises(ValueError):
         exec_file = find_ansys(installed_mapdl_versions[0])[0]
-        pymapdl.launch_mapdl(exec_file, mode="notamode", start_timeout=start_timeout)
+        pymapdl.launch_mapdl(
+            exec_file, port=mapdl.port + 1, mode="notamode", start_timeout=start_timeout
+        )
 
 
 @requires("ansys-tools-path")
 @requires("local")
 @pytest.mark.skipif(not os.path.isfile(V150_EXEC), reason="Requires v150")
-def test_old_version():
+def test_old_version(mapdl):
     exec_file = find_ansys("150")[0]
     with pytest.raises(ValueError):
-        pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
+        pymapdl.launch_mapdl(
+            exec_file, port=mapdl.port + 1, mode="console", start_timeout=start_timeout
+        )
 
 
 @requires("ansys-tools-path")
@@ -238,19 +248,22 @@ def test_license_type_additional_switch(release_license):
 
 @requires("ansys-tools-path")
 @requires("local")
-def test_license_type_dummy():
+def test_license_type_dummy(mapdl):
     dummy_license_type = "dummy"
     with pytest.raises(LicenseServerConnectionError):
         launch_mapdl(
+            port=mapdl.port + 1,
             additional_switches=f" -p {dummy_license_type}" + QUICK_LAUNCH_SWITCHES,
             start_timeout=start_timeout,
         )
 
 
 @requires("local")
-def test_remove_temp_files():
+@requires("nostudent")
+def test_remove_temp_files(mapdl):
     """Ensure the working directory is removed when run_location is not set."""
     mapdl = launch_mapdl(
+        port=mapdl.port + 1,
         remove_temp_files=True,
         start_timeout=start_timeout,
         additional_switches=QUICK_LAUNCH_SWITCHES,
@@ -269,9 +282,11 @@ def test_remove_temp_files():
 
 
 @requires("local")
-def test_remove_temp_files_fail(tmpdir):
+@requires("nostudent")
+def test_remove_temp_files_fail(tmpdir, mapdl):
     """Ensure the working directory is not removed when the cwd is changed."""
     mapdl = launch_mapdl(
+        port=mapdl.port + 1,
         remove_temp_files=True,
         start_timeout=start_timeout,
         additional_switches=QUICK_LAUNCH_SWITCHES,
@@ -434,6 +449,7 @@ def test_find_ansys(mapdl):
 def test_version(mapdl):
     version = int(10 * mapdl.version)
     mapdl_ = launch_mapdl(
+        port=mapdl.port + 1,
         version=version,
         start_timeout=start_timeout,
         additional_switches=QUICK_LAUNCH_SWITCHES,
@@ -442,10 +458,11 @@ def test_version(mapdl):
 
 
 @requires("local")
-def test_raise_exec_path_and_version_launcher():
+def test_raise_exec_path_and_version_launcher(mapdl):
     with pytest.raises(ValueError):
         launch_mapdl(
             exec_file="asdf",
+            port=mapdl.port + 1,
             version="asdf",
             start_timeout=start_timeout,
             additional_switches=QUICK_LAUNCH_SWITCHES,
@@ -464,10 +481,12 @@ def test_get_default_ansys():
     assert get_default_ansys() is not None
 
 
-def test_launch_mapdl_non_recognaised_arguments():
+def test_launch_mapdl_non_recognaised_arguments(mapdl):
     with pytest.raises(ValueError, match="my_fake_argument"):
         launch_mapdl(
-            my_fake_argument="my_fake_value", additional_switches=QUICK_LAUNCH_SWITCHES
+            port=mapdl.port + 1,
+            my_fake_argument="my_fake_value",
+            additional_switches=QUICK_LAUNCH_SWITCHES,
         )
 
 
@@ -496,3 +515,26 @@ def test_launched(mapdl):
         assert mapdl.launched
     else:
         assert not mapdl.launched
+
+
+@requires("local")
+def test_launching_on_busy_port(mapdl):
+    with pytest.raises(PortAlreadyInUseByAnMAPDLInstance):
+        launch_mapdl(port=mapdl.port)
+
+
+@requires("local")
+def test_cpu_checks():
+    machine_cores = psutil.cpu_count(logical=False)
+    with pytest.raises(NotEnoughResources):
+        launch_mapdl(nproc=machine_cores + 2)
+
+
+def test_fail_channel_port():
+    with pytest.raises(ValueError):
+        launch_mapdl(channel="something", port="something")
+
+
+def test_fail_channel_ip():
+    with pytest.raises(ValueError):
+        launch_mapdl(channel="something", ip="something")

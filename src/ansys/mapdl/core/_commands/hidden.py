@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""These commands may be run by PyMapdl, but are not supported from a
+"""These commands may be run by PyMAPDL, but are not supported from a
 user-context.
 
 """

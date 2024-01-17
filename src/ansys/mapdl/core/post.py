@@ -884,8 +884,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -1009,8 +1009,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -1132,8 +1132,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -1590,8 +1590,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -1679,8 +1679,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -1788,8 +1788,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -1885,8 +1885,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -1962,8 +1962,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2058,8 +2058,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2171,8 +2171,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2276,8 +2276,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2357,8 +2357,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2453,8 +2453,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2559,8 +2559,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2661,8 +2661,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2746,8 +2746,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2841,8 +2841,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2952,8 +2952,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -3048,8 +3048,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -3134,8 +3134,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -3236,8 +3236,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -3348,8 +3348,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -3450,8 +3450,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -3536,8 +3536,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -3638,8 +3638,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -3730,8 +3730,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes

@@ -1,5 +1,7 @@
 [aA]nsys
 [Bb]ooleans
+[Cc]odespace
+[Cc]odespaces
 [Cc]ommand [Pp]rompt
 [Dd]ocker
 [Ee]igensolver
@@ -20,6 +22,7 @@
 [Ss]ubsystem
 [Ss]uperelements
 [Vv]on Mises
+[Ww]indows
 2D
 3-D
 3D
@@ -50,6 +53,9 @@ Chao
 container_layout
 datas
 delet
+Dev
+devcontainer
+DevContainer
 dof
 ect
 eigenfrequency
@@ -87,6 +93,7 @@ Linux
 MacOS
 mapdl
 MAPDL
+mapdl
 mater
 MATLAB
 matricies
@@ -151,11 +158,11 @@ UPF
 UPFs
 viscoplastic
 vise
+Visual Studio Code
 von
 VTK
 wan
 WAN
-Windows
 Windows Subsystem
 Windows Subsystem for Linux
 wsl

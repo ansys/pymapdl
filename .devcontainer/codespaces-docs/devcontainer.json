@@ -25,7 +25,7 @@
 	"postCreateCommand": "/bin/bash ./.devcontainer/codespaces-docs/start.sh",
 
 	// Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
-	"remoteUser": "root",
+	// "remoteUser": "root",
 	"updateRemoteUserUID": true,
 	"customizations": {
 		// Configure properties specific to Codespaces.
@@ -33,13 +33,20 @@
 			"openFiles": [
 				".devcontainer/codespaces-docs/welcome.rst"
 			],
-			"extensions": [
-				"ms-python.python"
-			],
+			"extensions": {
+				"recommendations": [
+					"ms-python.python" // Installing also in the startup script
+				]
+			},
 			"settings": {
 				"python.defaultInterpreterPath": "/home/mapdl/pymapdl/.venv/bin/python",
-				"terminal.integrated.defaultProfile.linux": "bash"
+				"terminal.integrated.defaultProfile.linux": "bash",
+				"python.testing.pytestArgs": [
+					"tests"
+				],
+				"python.testing.unittestEnabled": false,
+				"python.testing.pytestEnabled": true
 			}
-		},
+		}
 	}
 }

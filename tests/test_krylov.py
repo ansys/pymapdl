@@ -38,7 +38,7 @@ PATH = os.path.dirname(os.path.abspath(__file__))
 # Krylov Apdl Macro Files
 lib_path = os.path.join(PATH, "test_files")
 
-# Results from APDL Macro to compare with Pymapdl results
+# Results from APDL Macro to compare with PyMAPDL results
 # Case 1 : Model with point load
 
 # Expanded sol
@@ -115,7 +115,7 @@ def test_krylov_with_point_load(mapdl):
     if not server_meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL 2022 R2 or later.")
 
-    # Case1 : Run Krylov Pymapdl
+    # Case1 : Run Krylov PyMAPDL
     mapdl.clear()
     mapdl.jobname = "point_load_py"
 
@@ -148,7 +148,7 @@ def test_krylov_with_pressure_load(mapdl, residual_algorithm):
         pytest.skip("Requires MAPDL 2022 R2 or later.")
 
     # With ramped loading
-    # Case1 : Run Krylov Pymapdl
+    # Case1 : Run Krylov PyMAPDL
     mapdl.clear()
     mapdl.jobname = "pressure_py"
 
@@ -316,7 +316,7 @@ def test_non_valid_inputs_expand(
 
 def test_check_full_file_exist(mapdl, cleared):
     # deleting previous full file.
-    if mapdl._local:
+    if mapdl.is_local:
         full_file = os.path.join(mapdl.directory, mapdl.jobname + ".full")
         if os.path.exists(full_file):
             os.remove(full_file)

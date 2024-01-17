@@ -22,7 +22,7 @@
 
 """Logging module.
 
-This module supplies a general framework for logging in Pymapdl.  This module is
+This module supplies a general framework for logging in PyMAPDL.  This module is
 built upon `logging <https://docs.python.org/3/library/logging.html>`_ library
 and it does not intend to replace it rather provide a way to interact between
 ``logging`` and PyMAPDL.
@@ -322,7 +322,7 @@ class InstanceFilter(logging.Filter):
 
 
 class Logger:
-    """Logger used for each Pymapdl session.
+    """Logger used for each PyMAPDL session.
 
     This class allows you to add handlers to the logger to output to a file or
     standard output.
@@ -372,7 +372,7 @@ class Logger:
         to_stdout: bool = True,
         filename: str = FILE_NAME,
     ):
-        """Customized logger class for Pymapdl.
+        """Customized logger class for PyMAPDL.
 
         Parameters
         ----------

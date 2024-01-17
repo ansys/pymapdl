@@ -1,3 +1,10 @@
+.. image:: ../source/_static/logo_dark.png
+    :class: only-dark
+
+.. image:: ../source/_static/logo_light.png
+    :class: only-light
+
+
 PyMAPDL documentation |version|
 ===============================
 
@@ -10,8 +17,6 @@ PyMAPDL documentation |version|
    mapdl_commands/index
    api/index
    examples/index
-
-
 
 Introduction and purpose
 ------------------------

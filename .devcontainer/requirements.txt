@@ -4,7 +4,7 @@ matplotlib==3.8.2
 scipy==1.11.4
 pandas==2.1.4
 pyiges[full]==0.3.1
-pytest==7.4.3
+pytest==7.4.4
 pytest-cov==4.1.0
 pyvista==0.43.1
 pyansys-tools-report==0.7.0

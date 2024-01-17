@@ -222,14 +222,14 @@ class LocalMapdlPool:
         self._active = True  # used by pool monitor
 
         n_instances = int(n_instances)
-        if n_instances < 2:
-            raise ValueError("Must request at least 2 instances to create a pool.")
+        if n_instances < 1:
+            raise ValueError("Must request at least 1 instance to create a pool.")
 
         pbar = None
         if wait and progress_bar:
             if not _HAS_TQDM:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    f"To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package. "
+                    "To use the keyword argument 'progress_bar', you need to have installed the 'tqdm' package. "
                     "To avoid this message you can set 'progress_bar=False'."
                 )
 
@@ -240,7 +240,9 @@ class LocalMapdlPool:
 
         # threaded spawn
         threads = [
-            self._spawn_mapdl(i, ports[i], pbar, name=self._names(i))
+            self._spawn_mapdl(
+                i, ports[i], pbar, name=self._names(i), thread_name=self._names(i)
+            )
             for i in range(n_instances)
         ]
         if wait:
@@ -258,7 +260,10 @@ class LocalMapdlPool:
 
         # monitor pool if requested
         if restart_failed:
-            self._pool_monitor_thread = self._monitor_pool(name="Monitoring_Thread")
+            # This name is using the wrapped to specify the thread name
+            self._pool_monitor_thread = self._monitor_pool(
+                thread_name="Monitoring_Thread"
+            )
 
         self._verify_unique_ports()
 
@@ -383,12 +388,12 @@ class LocalMapdlPool:
             pbar = tqdm(total=n, desc="MAPDL Running")
 
         @threaded_daemon
-        def func_wrapper(obj, func, timeout, args=None, name=""):
+        def func_wrapper(obj, func, timeout, args=None):
             """Expect obj to be an instance of Mapdl"""
             complete = [False]
 
             @threaded_daemon
-            def run(name=""):
+            def run():
                 if args is not None:
                     if isinstance(args, (tuple, list)):
                         results.append(func(obj, *args))
@@ -398,7 +403,7 @@ class LocalMapdlPool:
                     results.append(func(obj))
                 complete[0] = True
 
-            run_thread = run(name="map.run")
+            run_thread = run(thread_name="map.run")
             if timeout:
                 tstart = time.time()
                 while not complete[0]:
@@ -443,7 +448,9 @@ class LocalMapdlPool:
                 instance = self.next_available()
                 instance.locked = True
                 threads.append(
-                    func_wrapper(instance, func, timeout, args, name="Map_Thread")
+                    func_wrapper(
+                        instance, func, timeout, args, thread_name="Map_Thread"
+                    )
                 )
 
             if close_when_finished:
@@ -692,7 +699,7 @@ class LocalMapdlPool:
         self._instances[index] = launch_mapdl(
             run_location=run_location,
             port=port,
-            override=self._override,
+            override=True,
             **self._spawn_kwargs,
         )
 
@@ -701,6 +708,9 @@ class LocalMapdlPool:
         while self._instances[index] is None:
             time.sleep(0.1)
 
+        assert not self._instances[index].exited
+        self._instances[index].prep7()
+
         # LOG.debug("Spawned instance %d. Name '%s'", index, name)
         if pbar is not None:
             pbar.update(1)
@@ -708,22 +718,30 @@ class LocalMapdlPool:
         self._spawning_i -= 1
 
     @threaded_daemon
-    def _monitor_pool(self, refresh=1.0, name=""):
+    def _monitor_pool(self, refresh=1.0):
         """Checks if instances within a pool have exited (failed) and
         restarts them.
+
+
         """
         while self._active:
             for index, instance in enumerate(self._instances):
+                name = self._names[index]
                 if not instance:  # encountered placeholder
                     continue
+
                 if instance._exited:
                     try:
                         # use the next port after the current available port
                         self._spawning_i += 1
                         port = max(self._ports) + 1
                         self._spawn_mapdl(
-                            index, port=port, name=f"Instance {index}"
+                            index,
+                            port=port,
+                            name=name,
+                            thread_name=name,
                         ).join()
+
                     except Exception as e:
                         LOG.error(e, exc_info=True)
                         self._spawning_i -= 1

@@ -3,7 +3,7 @@ fail_fast: True
 repos:
 
 - repo: https://github.com/ansys/pre-commit-hooks
-  rev: v0.2.2
+  rev: v0.2.6
   hooks:
   - id: add-license-headers
 
@@ -39,7 +39,7 @@ repos:
     additional_dependencies: [black==23.12.1]
 
 - repo: https://github.com/PyCQA/flake8
-  rev: 6.1.0
+  rev: 7.0.0
   hooks:
   - id: flake8
 

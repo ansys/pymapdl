@@ -37,7 +37,7 @@ PHI Learning Pvt. Ltd., 1 Jan 2010.
 from ansys.mapdl.core import launch_mapdl
 
 mapdl = launch_mapdl()
-
+mapdl.fcomp("rst", 0)  # specify compression level
 ###############################################################################
 # Define an I-beam
 mapdl.prep7()

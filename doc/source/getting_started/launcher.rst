@@ -90,6 +90,9 @@ port 50005 with this command:
 
     /usr/ansys_inc/v241/ansys/bin/ansys211 -port 50005 -grpc
 
+From version v0.68, you can use a command line interface to launch, stop, and list
+local MAPDL instances.
+For more information, see :ref:`ref_cli`.
 
 .. _connect_grpc_madpl_session:
 
