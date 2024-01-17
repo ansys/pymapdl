@@ -89,7 +89,7 @@ class GrpcError(MapdlRuntimeError):
     """Raised when gRPC fails"""
 
     def __init__(self, msg=""):
-        MapdlRuntimeError.__init__(self, msg)
+        super().__init__(self, msg)
 
 
 def check_vget_input(entity: str, item: str, itnum: str) -> str:
