@@ -24,15 +24,9 @@ import pytest
 
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
-    MapdlDidNotStart,
-    MapdlError,
     MapdlException,
-    MapdlInfo,
     MapdlInvalidRoutineError,
-    MapdlNote,
     MapdlRuntimeError,
-    MapdlVersionError,
-    MapdlWarning,
 )
 
 error_shape_error_limits = """
@@ -114,24 +108,27 @@ def test_raise_output_errors(mapdl, response, expected_error):
         mapdl._raise_output_errors(response)
 
 
-@pytest.mark.parametrize(
-    "error_class",
-    [
-        MapdlDidNotStart,
-        MapdlException,
-        MapdlError,
-        MapdlWarning,
-        MapdlNote,
-        MapdlInfo,
-        MapdlVersionError,
-        MapdlInvalidRoutineError,
-        MapdlCommandIgnoredError,
-        MapdlRuntimeError,
-    ],
-)
+def get_error_classes():
+    from ansys.mapdl.core import errors
+
+    def is_exception_class(obj):
+        try:
+            return issubclass(obj, MapdlException)
+        except TypeError:
+            return False
+
+    errors_to_tests = []
+    for each in dir(errors):
+        obj = getattr(errors, each)
+        if not each.startswith("_") and is_exception_class(obj):
+            errors_to_tests.append(obj)
+    return errors_to_tests
+
+
+@pytest.mark.parametrize("error_class", get_error_classes())
 def test_exception_classes(error_class):
     message = "Exception message"
-    with pytest.raises(error_class):
+    with pytest.raises(error_class, match=message):
         raise error_class(message)
 
 
