@@ -464,7 +464,7 @@ def mapdl(request, tmpdir_factory):
     # don't use the default run location as tests run multiple unit testings
     run_path = str(tmpdir_factory.mktemp("ansys"))
 
-    mapdl = launch_mapdl_grpc_for_testing()
+    mapdl = launch_mapdl_grpc_for_testing(run_path)
 
     if mapdl.is_local:
         assert Path(mapdl.directory) == Path(run_path)
