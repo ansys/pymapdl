@@ -44,6 +44,7 @@ from ansys.mapdl.core.launcher import (
     _parse_ip_route,
     _validate_MPI,
     _verify_version,
+    launch_grpc,
     launch_mapdl,
     update_env_vars,
 )
@@ -547,3 +548,6 @@ def test_deprecate_verbose():
 
     with pytest.raises(ValueError):
         launch_mapdl(verbose=True)
+
+    with pytest.raises(DeprecationError):
+        launch_grpc(verbose=True)

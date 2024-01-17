@@ -624,7 +624,7 @@ def launch_grpc(
             LOG.debug("Checking if gRPC server is alive.")
             _check_server_is_alive(stdout_queue, run_location, timeout)
 
-    except MapdlDidNotStart as e:
+    except MapdlDidNotStart as e:  # pragma: no cover
         msg = (
             str(e)
             + f"\nRun location: {run_location}"
