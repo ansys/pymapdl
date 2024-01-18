@@ -18,6 +18,8 @@ pip install -e .
 echo "Setting pre-commit..."
 pre-commit install --install-hooks
 
+# copying example
+cp /home/mapdl/pymapdl/.devcontainer/codespaces-notebook/example-bracket_static.ipynb /home/mapdl/
+
 cd /home/mapdl/
-# cp /home/mapdl/pymapdl/.devco
 echo "Done! Enjoy PyMAPDL!"
