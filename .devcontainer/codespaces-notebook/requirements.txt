@@ -1,0 +1,16 @@
+ansys-dpf-core==0.10.1
+ansys-mapdl-reader==0.53.0
+ansys-sphinx-theme==0.13.0
+grpcio==1.60.0
+imageio-ffmpeg==0.4.9
+imageio==2.33.1
+jupyterlab>=3.2.8
+matplotlib==3.8.2
+pandas==2.1.4
+plotly==5.18.0
+pyiges[full]==0.3.1
+pythreejs==2.4.2
+pyvista[jupyter]==0.43.1
+vtk==9.3.0
+ipywidgets==8.1.1
+jupytext==1.16.1  # for converting the python files to jupyter notebooks
