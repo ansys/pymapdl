@@ -5,7 +5,7 @@ echo "Starting local development container"
 echo "Activating virtual environment..."
 
 ln -s /home/mapdl/.venv /home/mapdl/pymapdl/.venv_pymapdl && echo "Linking venv original dir"
-source ./.venv_pymapdl/bin/activate
+source /home/mapdl/.venv/bin/activate
 
 echo "Installing PyMAPDL package and dependencies for development"
 # let's first update everything
@@ -22,4 +22,11 @@ pre-commit install --install-hooks
 cp /home/mapdl/pymapdl/.devcontainer/codespaces-notebook/example-bracket_static.ipynb /home/mapdl/
 
 cd /home/mapdl/
+
+# launching xvfb
+/usr/bin/Xvfb :0 -screen 0 1024x768x24 & 
+export DISPLAY=":0"
+echo 'export DISPLAY=":0"' >> ~/.bashrc
+
+
 echo "Done! Enjoy PyMAPDL!"
