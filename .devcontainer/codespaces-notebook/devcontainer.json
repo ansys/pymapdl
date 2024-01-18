@@ -60,8 +60,9 @@
 					".vscode*": true,
 					".bash*": true,
 					".profile": true,
-					".*": false,
-				}
+					".*": false
+				},
+				"git.autoRepositoryDetection": "openEditors"
 			}
 		  }
 	}
