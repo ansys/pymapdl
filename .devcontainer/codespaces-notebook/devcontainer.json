@@ -64,7 +64,20 @@
 					".ipynb_checkpoints": true,
 					".*": false
 				},
-				"git.autoRepositoryDetection": "openEditors"
+				"git.autoRepositoryDetection": "openEditors",
+				"git.ignoredRepositories": [
+					"/home/mapdl/.ansys",
+					"/home/mapdl/.cache",
+					"/home/mapdl/.ipython",
+					"/home/mapdl/.config",
+					"/home/mapdl/.docker",
+					"/home/mapdl/.local",
+					"/home/mapdl/.vscode",
+					"/home/mapdl/.bash",
+					"/home/mapdl/.profile",
+					"/home/mapdl/.jupyter",
+					"/home/mapdl/.ipynb_checkpoints"
+				]
 			}
 		  }
 	}
