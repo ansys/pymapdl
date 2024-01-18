@@ -83,10 +83,11 @@ docker/mapdl/*.sh
 # temp testing
 tmp.out
 
-# virtual environment
+# virtual environments
 venv/
 .venv/
 .venv
+.venv_pymapdl/
 
 # Visual studio code local settings
 .vscode/
