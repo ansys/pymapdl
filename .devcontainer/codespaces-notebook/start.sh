@@ -24,7 +24,8 @@ cp /home/mapdl/pymapdl/.devcontainer/codespaces-notebook/example-bracket_static.
 cd /home/mapdl/
 
 # launching xvfb
-/usr/bin/Xvfb :0 -screen 0 1024x768x24 & 
+echo "Setting xvfb"
+/usr/bin/Xvfb :0 -screen 0 1024x768x24 &
 export DISPLAY=":0"
 echo 'export DISPLAY=":0"' >> ~/.bashrc
 
