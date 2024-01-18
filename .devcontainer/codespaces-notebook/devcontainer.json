@@ -22,7 +22,7 @@
 	// Uncomment the next line if you want to keep your containers running after VS Code shuts down.
 	// "shutdownAction": "none",
 	// Uncomment the next line to run commands after the container is created - for example installing curl.
-	"postCreateCommand": "/bin/bash ./.devcontainer/codespaces-notebook/start.sh",
+	"postCreateCommand": "/bin/bash /home/mapdl/pymapdl/.devcontainer/codespaces-notebook/start.sh",
 
 	"waitFor": "onCreateCommand",
 	// Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
@@ -32,7 +32,7 @@
 		// Configure properties specific to Codespaces.
 		"codespaces": {
 			"openFiles": [
-				".devcontainer/codespaces-notebook/welcome.rst"
+				"/home/mapdl/pymapdl/.devcontainer/codespaces-notebook/welcome.rst"
 			]
 		},
 		"vscode": {
