@@ -31,6 +31,7 @@ WORKDIR /home/$USERNAME
 USER $USERNAME
 
 COPY requirements.txt requirements.txt
+COPY example-bracket_static.ipynb example-bracket_static.ipynb
 
 # Installing Python environment
 RUN python3.10 -m venv ./.venv && \
