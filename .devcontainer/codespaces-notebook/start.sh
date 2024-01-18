@@ -12,7 +12,7 @@ echo "Installing PyMAPDL package and dependencies for development"
 cd /home/mapdl/pymapdl/
 git fetch && git pull
 
-# copying example
+# Overwriting example
 cp /home/mapdl/pymapdl/.devcontainer/codespaces-notebook/example-bracket_static.ipynb /home/mapdl/
 
 # Installation should be fast because the image is built with the dependencies installed.
