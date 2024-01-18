@@ -16,7 +16,4 @@ pip install -e '.[doc]'
 echo "Setting pre-commit..."
 pre-commit install --install-hooks
 
-echo "Installing Visual Studio Code extensions..."
-code --install-extension ms-python.python
-
 echo "Done! Enjoy PyMAPDL!"
