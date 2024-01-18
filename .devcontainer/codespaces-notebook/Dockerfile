@@ -6,6 +6,7 @@ USER root
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ON_CODESPACES=true
 ENV CODESPACES_MODE=notebook
+ENV DISPLAY=":0"
 
 # Installing libs for testing and docs
 RUN apt-get -qq update &&  apt install -qq -y libgl1-mesa-glx xvfb libgomp1 && \
