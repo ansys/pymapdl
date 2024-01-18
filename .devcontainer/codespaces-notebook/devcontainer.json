@@ -60,6 +60,8 @@
 					".vscode*": true,
 					".bash*": true,
 					".profile": true,
+					".jupyter": true,
+					".ipynb_checkpoints": true,
 					".*": false
 				},
 				"git.autoRepositoryDetection": "openEditors"
