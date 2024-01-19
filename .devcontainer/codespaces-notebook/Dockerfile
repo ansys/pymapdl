@@ -40,6 +40,7 @@ RUN python3.10 -m venv ./.venv && \
     pip install ansys-mapdl-core && \
     pip install -r requirements.txt && \
     echo 'source ./.venv/bin/activate' >> ~/.bashrc && \
+    pip install "trame_jupyter_extension<2" && \
     rm requirements.txt
 
 WORKDIR /home/$USERNAME/pymapdl
