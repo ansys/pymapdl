@@ -1,7 +1,7 @@
 sphinx==7.2.6
 ansys-dpf-core==0.10.1
 ansys-mapdl-reader==0.53.0
-ansys-sphinx-theme==0.13.0
+ansys-sphinx-theme==0.13.1
 grpcio==1.60.0
 imageio-ffmpeg==0.4.9
 imageio==2.33.1
