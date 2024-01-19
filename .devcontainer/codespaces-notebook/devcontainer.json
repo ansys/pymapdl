@@ -23,7 +23,12 @@
 	// "shutdownAction": "none",
 	// Uncomment the next line to run commands after the container is created - for example installing curl.
 	"postCreateCommand": "/bin/bash /home/mapdl/pymapdl/.devcontainer/codespaces-notebook/start.sh",
-
+	"features": {
+		"ghcr.io/devcontainers/features/python:1": {
+			"installJupyterlab": true,
+			"configureJupyterlabAllowOrigin": "",
+		}
+	},
 	"waitFor": "onCreateCommand",
 	// Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
 	// "remoteUser": "root",
@@ -38,7 +43,8 @@
 		"vscode": {
 			"extensions": [
 			  "ms-toolsai.jupyter",
-			  "ms-python.python"
+			  "ms-python.python",
+			  "ms-python.vscode-pylance"
 			],
 			"settings": {
 				"python.defaultInterpreterPath": "/home/mapdl/pymapdl/.venv/bin/python",
