@@ -30,18 +30,31 @@ RUN apt-get install -y --no-install-recommends locales && \
 WORKDIR /home/$USERNAME
 USER $USERNAME
 
+# Copying files needed for installation
 COPY requirements.txt requirements.txt
+
+# Copy example
 COPY example-bracket_static.ipynb example-bracket_static.ipynb
 
 # Installing Python environment
-RUN python3.10 -m venv ./.venv && \
+RUN \
+    # Installing PIPX so we can make jupyter-lab generally available
+    python3 -m pip install --user pipx && \ 
+    export PATH=/home/mapdl/.local/bin:$PATH && \
+    echo 'export PATH=/home/mapdl/.local/bin:$PATH' >> ~/.bashrc && \
+    pipx install jupyterlab && \
+    # creating venv for pymapdl
+    python3.10 -m venv ./.venv && \
     . ./.venv/bin/activate && \
-    pip install pre-commit && \
+    # Installing pymapdl
     pip install ansys-mapdl-core && \
+    # Installing python dependencies
+    pip install pre-commit && \
     pip install -r requirements.txt && \
-    echo 'source ./.venv/bin/activate' >> ~/.bashrc && \
     pip install "trame_jupyter_extension<2" && \
-    mkdir -p /home/mapdl/.local/lib && \
+    # Setting bash profile file
+    echo 'source ./.venv/bin/activate' >> ~/.bashrc && \
+    # Clean up
     rm requirements.txt
 
 USER root
