@@ -43,4 +43,5 @@ RUN python3.10 -m venv ./.venv && \
     pip install "trame_jupyter_extension<2" && \
     rm requirements.txt
 
+USER root
 WORKDIR /home/$USERNAME/pymapdl
