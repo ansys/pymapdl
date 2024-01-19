@@ -41,6 +41,7 @@ RUN python3.10 -m venv ./.venv && \
     pip install -r requirements.txt && \
     echo 'source ./.venv/bin/activate' >> ~/.bashrc && \
     pip install "trame_jupyter_extension<2" && \
+    mkdir -p /home/mapdl/.local/lib && \
     rm requirements.txt
 
 USER root
