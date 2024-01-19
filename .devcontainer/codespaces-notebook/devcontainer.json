@@ -31,7 +31,8 @@
 	},
 	"waitFor": "onCreateCommand",
 	// Uncomment to connect as a non-root user if you've added one. See https://aka.ms/vscode-remote/containers/non-root.
-	// "remoteUser": "root",
+	"remoteUser": "root",
+	"containerUser": "root",
 	"updateRemoteUserUID": true,
 	"customizations": {
 		// Configure properties specific to Codespaces.
