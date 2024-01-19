@@ -49,49 +49,73 @@ TYPE_MSG = (
 )
 
 
-class ANSYSDataTypeError(ValueError):
-    """Raised when and invalid data type is sent to APDLMath"""
+## Abraham class
+class MapdlException(Exception):
+    """MAPDL general exception"""
 
-    def __init__(self, msg=TYPE_MSG):
+    def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class VersionError(ValueError):
-    """Raised when MAPDL is the wrong version"""
+## Main subclasses
+class MapdlValueError(MapdlException, ValueError):
+    """MAPDL Value error"""
 
-    def __init__(self, msg="Invalid MAPDL version"):
+    def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class NoDistributedFiles(FileNotFoundError):
-    """Unable to find any distributed result files"""
+class MapdlFileNotFoundError(MapdlException, FileNotFoundError):
+    """Error when file is not found"""
 
-    def __init__(self, msg="Unable to find any distributed result files"):
+    def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class MapdlRuntimeError(RuntimeError):
+class MapdlRuntimeError(MapdlException, RuntimeError):
     """Raised when MAPDL passes an error"""
 
     def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class MapdlInvalidRoutineError(RuntimeError):
+## Inheritated
+class ANSYSDataTypeError(MapdlValueError):
+    """Raised when and invalid data type is sent to APDLMath"""
+
+    def __init__(self, msg=TYPE_MSG):
+        super().__init__(msg)
+
+
+class VersionError(MapdlValueError):
+    """Raised when MAPDL is the wrong version"""
+
+    def __init__(self, msg="Invalid MAPDL version"):
+        super().__init__(msg)
+
+
+class NoDistributedFiles(MapdlFileNotFoundError):
+    """Unable to find any distributed result files"""
+
+    def __init__(self, msg="Unable to find any distributed result files"):
+        super().__init__(msg)
+
+
+class MapdlInvalidRoutineError(MapdlRuntimeError):
     """Raised when MAPDL is in the wrong routine"""
 
     def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class MapdlCommandIgnoredError(RuntimeError):
+class MapdlCommandIgnoredError(MapdlRuntimeError):
     """Raised when MAPDL ignores a command."""
 
     def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class MapdlExitedError(RuntimeError):
+class MapdlExitedError(MapdlRuntimeError):
     """Raised when MAPDL has exited"""
 
     def __init__(self, msg="MAPDL has exited"):
@@ -109,14 +133,14 @@ class NotEnoughResources(MapdlExitedError):
         super().__init__(msg.format(resource=resource))
 
 
-class LockFileException(RuntimeError):
+class LockFileException(MapdlRuntimeError):
     """Error message when the lockfile has not been removed"""
 
     def __init__(self, msg=LOCKFILE_MSG):
         super().__init__(msg)
 
 
-class MapdlDidNotStart(RuntimeError):
+class MapdlDidNotStart(MapdlRuntimeError):
     """Error when the MAPDL process does not start"""
 
     def __init__(self, msg=""):
@@ -139,7 +163,7 @@ class PortAlreadyInUseByAnMAPDLInstance(PortAlreadyInUse):
         super().__init__(msg.format(port=port))
 
 
-class MapdlConnectionError(RuntimeError):
+class MapdlConnectionError(MapdlRuntimeError):
     """Provides the error when connecting to the MAPDL instance fails."""
 
     def __init__(self, msg=""):
@@ -161,28 +185,22 @@ class IncorrectWorkingDirectory(OSError, MapdlRuntimeError):
         super().__init__(msg)
 
 
-class DifferentSessionConnectionError(RuntimeError):
+class DifferentSessionConnectionError(MapdlRuntimeError):
     """Provides the error when connecting to the MAPDL instance fails."""
 
     def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class DeprecationError(RuntimeError):
+class DeprecationError(MapdlRuntimeError):
     """Provides the error for deprecated commands, classes, interfaces, etc"""
 
     def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class MapdlException(MapdlRuntimeError):
-    """General MAPDL exception."""
-
-    def __init__(self, msg=""):
-        super().__init__(msg)
-
-
 class MapdlError(MapdlException):
+
     """General MAPDL Error"""
 
     def __init__(self, msg=""):
@@ -190,6 +208,7 @@ class MapdlError(MapdlException):
 
 
 class MapdlWarning(MapdlException):
+
     """General MAPDL warning"""
 
     def __init__(self, msg=""):
@@ -197,6 +216,7 @@ class MapdlWarning(MapdlException):
 
 
 class MapdlNote(MapdlException):
+
     """General MAPDL note"""
 
     def __init__(self, msg=""):
@@ -204,6 +224,7 @@ class MapdlNote(MapdlException):
 
 
 class MapdlInfo(MapdlException):
+
     """General MAPDL info message"""
 
     def __init__(self, msg=""):
@@ -211,13 +232,14 @@ class MapdlInfo(MapdlException):
 
 
 class MapdlVersionError(MapdlException):
+
     """Incompatible MAPDL version"""
 
     def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class EmptyRecordError(RuntimeError):
+class EmptyRecordError(MapdlRuntimeError):
     """Raised when a record is empty"""
 
     def __init__(self, msg=""):
@@ -245,7 +267,7 @@ class ComponentDoesNotExits(MapdlException):
         super().__init__(msg)
 
 
-class CommandDeprecated(MapdlException, DeprecationError):
+class CommandDeprecated(DeprecationError):
     """Raised when a command is deprecated"""
 
     def __init__(self, msg=""):
