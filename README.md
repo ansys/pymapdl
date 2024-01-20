@@ -93,7 +93,7 @@ for raising issues, request new features, and asking questions.
 
 You can contribute to PyMAPDL by developing new features, fixing bugs, improving the documentation,
 fixing typos, writing examples, etc.
-To learn to contribute to PyMAPDL, visit [Contributing section](https://mapdl.docs.pyansys.com/version/stable/getting_started/contribution.html).
+To learn how to contribute to PyMAPDL, visit [Contributing section](https://mapdl.docs.pyansys.com/version/stable/getting_started/contribution.html).
 
 
 ## Project transition -  legacy support
