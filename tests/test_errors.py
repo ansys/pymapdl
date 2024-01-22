@@ -27,8 +27,6 @@ from ansys.mapdl.core.errors import (
     MapdlException,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
-    MapdlVersionError,
-    MapdlWarning,
     protect_from,
 )
 from conftest import NullContext
