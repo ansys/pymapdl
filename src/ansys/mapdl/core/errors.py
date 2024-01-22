@@ -25,6 +25,7 @@
 from functools import wraps
 import signal
 import threading
+from typing import Callable, Optional
 
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 
@@ -336,3 +337,52 @@ def protect_grpc(func):
         return out
 
     return wrapper
+
+
+def protect_from(
+    exception, match: Optional[str] = None, condition: Optional[bool] = None
+) -> Callable:
+    """Protect the decorated method from raising an exception of
+    of a given type.
+
+    You can filter the exceptions by using 'match' and/or 'condition'. If both
+    are given, **both** need to be fulfilled. If you only need one or the other,
+    you can use multiple decorators.
+
+    Parameters
+    ----------
+    exception : Exception
+        Exception to catch.
+    match : optional
+        String against to match the exception, by default None
+    condition : optional
+        Condition that needs to be fulfil to catch the exception, by default None
+
+    Returns
+    -------
+    Callable
+        Decorated function
+
+    Raises
+    ------
+    e
+        The given exception if not caught by the internal try.
+    """
+
+    def decorator(function):
+        @wraps(function)
+        def wrapper(self, *args, **kwargs):
+            try:
+                return function(self, *args, **kwargs)
+            except exception as e:
+                if (match is None or match in str(e)) and (
+                    condition is None or condition
+                ):
+                    pass
+                # everything else raises
+                else:
+                    raise e
+
+        return wrapper
+
+    return decorator

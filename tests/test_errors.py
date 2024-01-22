@@ -27,7 +27,9 @@ from ansys.mapdl.core.errors import (
     MapdlException,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
+    protect_from,
 )
+from conftest import NullContext
 
 error_shape_error_limits = """
 
@@ -144,3 +146,43 @@ def test_error_handler(mapdl):
     text = "*** ERROR ***\n This is my own errorrrr"
     with pytest.raises(MapdlRuntimeError, match="errorrrr"):
         mapdl._raise_errors(text)
+
+
+@pytest.mark.parametrize(
+    # Tests inputs
+    "message,condition,context",
+    [
+        (None, None, NullContext()),
+        ("My custom error", None, NullContext()),
+        ("my error", None, pytest.raises(ValueError)),
+        (None, None, NullContext()),
+        (None, True, NullContext()),
+        (None, False, pytest.raises(ValueError)),
+        ("my error", False, pytest.raises(ValueError)),
+        ("my error", True, pytest.raises(ValueError)),
+        ("My custom error", False, pytest.raises(ValueError)),
+        ("My custom error", True, NullContext()),
+    ],
+    # Test ids
+    ids=[
+        "Match any message. No condition",
+        "Match message. No condition",
+        "Raises an exception. No condition (raise internal exception)",
+        "No message. No condition",
+        "No message. True condition",
+        "No message. False condition (raise internal exception)",
+        "Different error message. False condition (raise internal exception)",
+        "Different error message. True condition (raise internal exception)",
+        "Same error message. False condition (raise internal exception)",
+        "Same error message. True condition",
+    ],
+)
+def test_protect_from(message, condition, context):
+    class myclass:
+        @protect_from(ValueError, message, condition)
+        def raising(self):
+            raise ValueError("My custom error")
+
+    with context:
+        myobj = myclass()
+        myobj.raising()

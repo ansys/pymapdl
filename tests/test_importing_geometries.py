@@ -29,7 +29,7 @@ from ansys.mapdl.core.errors import (
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
 )
-from conftest import ON_CI, ON_LOCAL, ON_UBUNTU
+from conftest import ON_CI, ON_LOCAL, ON_UBUNTU, NullContext
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -72,17 +72,6 @@ def clear_wkdir_from_cads(mapdl):
             mapdl.slashdelete(each_file)
         except IOError:
             pass
-
-
-class NullContext:
-    def __enter__(self):
-        pass
-
-    def __exit__(self, *args):
-        pass
-
-    def __init__(self):
-        pass
 
 
 ## IGES
