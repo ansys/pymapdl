@@ -174,7 +174,7 @@ jobs:
           echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
 
       - name: "Cache examples"
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         if: steps.changes.outputs.workflows != 'true'
         with:
           path: doc/source/examples
@@ -183,7 +183,7 @@ jobs:
             Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: "Cache docs build directory"
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         if: steps.changes.outputs.workflows != 'true'
         with:
           path: doc/_build
@@ -192,7 +192,7 @@ jobs:
             doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: "Cache autosummary"
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         if: steps.changes.outputs.workflows != 'true'
         with:
           path: doc/source/**/_autosummary/*.rst
