@@ -57,5 +57,4 @@ RUN \
     # Clean up
     rm requirements.txt
 
-USER root
 WORKDIR /home/$USERNAME/pymapdl
