@@ -75,6 +75,7 @@ tests = [
     "vtk==9.3.0",
     "pytest-rerunfailures==13.0",
     "pytest-pyvista==0.1.9",
+    "pytest-memprof<0.3.0",
 ]
 doc = [
     "sphinx==7.2.6",
