@@ -345,6 +345,17 @@ class Running_test:
         pymapdl.RUNNING_TESTS = not self._state
 
 
+class NullContext:
+    def __enter__(self):
+        pass
+
+    def __exit__(self, *args):
+        pass
+
+    def __init__(self):
+        pass
+
+
 @pytest.fixture(scope="function")
 def running_test():
     return Running_test

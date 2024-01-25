@@ -74,6 +74,7 @@ from ansys.mapdl.core.errors import (
     MapdlConnectionError,
     MapdlExitedError,
     MapdlRuntimeError,
+    protect_from,
     protect_grpc,
 )
 from ansys.mapdl.core.mapdl import MapdlBase
@@ -963,6 +964,7 @@ class MapdlGrpc(MapdlBase):
             except Exception:
                 continue
 
+    @protect_from(ValueError, "I/O operation on closed file.")
     def exit(self, save=False, force=False):
         """Exit MAPDL.
 
