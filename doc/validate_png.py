@@ -3,6 +3,7 @@
 Removes invalid PNGs (probably GIF)
 
 """
+
 from glob import glob
 import os
 

@@ -482,7 +482,6 @@ class Commands(
     map_cmd.MapCommand,
     InqFunctions,
 ):
-
     """Wrapped MAPDL commands"""
 
 
