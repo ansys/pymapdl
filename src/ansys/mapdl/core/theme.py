@@ -152,4 +152,4 @@ class MapdlTheme(base_class):
 def _apply_default_theme():
     import pyvista as pv
 
-    pv.global_theme = MapdlTheme()
+    # pv.global_theme = MapdlTheme()
