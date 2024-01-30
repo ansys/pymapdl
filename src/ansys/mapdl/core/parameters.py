@@ -836,9 +836,9 @@ def interp_star_status(status):
         elif len(items) == 4:
             # it is an array or string array
             if is_array_listing(status):
-                myarray[
-                    int(items[0]) - 1, int(items[1]) - 1, int(items[2]) - 1
-                ] = float(items[3])
+                myarray[int(items[0]) - 1, int(items[1]) - 1, int(items[2]) - 1] = (
+                    float(items[3])
+                )
             elif is_string_array:
                 elements.append(items[-1])
 

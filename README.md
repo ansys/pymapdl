@@ -58,6 +58,9 @@ This environment has already everything in place for you to start using PyMAPDL 
 
 More information can be found in [develop on codespaces](https://mapdl.docs.pyansys.com/version/dev/getting_started/codespaces.html).
 
+You can use this environment to contribute to PyMAPDL. For more information, visit 
+[Contributing](https://mapdl.docs.pyansys.com/version/stable/getting_started/contribution.html).
+
 ## Documentation and issues
 
 Documentation for the latest stable release of PyMAPDL is hosted at
@@ -87,6 +90,11 @@ Unfortunately, this team cannot answer specific library questions or issues. You
 use the [PyMAPDL Issues](https://github.com/ansys/pymapdl/issues)
 and [PyMAPDL Discussions](https://github.com/ansys/pymapdl/discussions) pages
 for raising issues, request new features, and asking questions.
+
+You can contribute to PyMAPDL by developing new features, fixing bugs, improving the documentation,
+fixing typos, writing examples, etc.
+To learn how to contribute to PyMAPDL, visit [Contributing section](https://mapdl.docs.pyansys.com/version/stable/getting_started/contribution.html).
+
 
 ## Project transition -  legacy support
 

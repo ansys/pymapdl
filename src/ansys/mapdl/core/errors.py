@@ -25,6 +25,7 @@
 from functools import wraps
 import signal
 import threading
+from typing import Callable, Optional
 
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
 
@@ -49,49 +50,73 @@ TYPE_MSG = (
 )
 
 
-class ANSYSDataTypeError(ValueError):
-    """Raised when and invalid data type is sent to APDLMath"""
+## Abraham class
+class MapdlException(Exception):
+    """MAPDL general exception"""
 
-    def __init__(self, msg=TYPE_MSG):
+    def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class VersionError(ValueError):
-    """Raised when MAPDL is the wrong version"""
+## Main subclasses
+class MapdlValueError(MapdlException, ValueError):
+    """MAPDL Value error"""
 
-    def __init__(self, msg="Invalid MAPDL version"):
+    def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class NoDistributedFiles(FileNotFoundError):
-    """Unable to find any distributed result files"""
+class MapdlFileNotFoundError(MapdlException, FileNotFoundError):
+    """Error when file is not found"""
 
-    def __init__(self, msg="Unable to find any distributed result files"):
+    def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class MapdlRuntimeError(RuntimeError):
+class MapdlRuntimeError(MapdlException, RuntimeError):
     """Raised when MAPDL passes an error"""
 
     def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class MapdlInvalidRoutineError(RuntimeError):
+## Inheritated
+class ANSYSDataTypeError(MapdlValueError):
+    """Raised when and invalid data type is sent to APDLMath"""
+
+    def __init__(self, msg=TYPE_MSG):
+        super().__init__(msg)
+
+
+class VersionError(MapdlValueError):
+    """Raised when MAPDL is the wrong version"""
+
+    def __init__(self, msg="Invalid MAPDL version"):
+        super().__init__(msg)
+
+
+class NoDistributedFiles(MapdlFileNotFoundError):
+    """Unable to find any distributed result files"""
+
+    def __init__(self, msg="Unable to find any distributed result files"):
+        super().__init__(msg)
+
+
+class MapdlInvalidRoutineError(MapdlRuntimeError):
     """Raised when MAPDL is in the wrong routine"""
 
     def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class MapdlCommandIgnoredError(RuntimeError):
+class MapdlCommandIgnoredError(MapdlRuntimeError):
     """Raised when MAPDL ignores a command."""
 
     def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class MapdlExitedError(RuntimeError):
+class MapdlExitedError(MapdlRuntimeError):
     """Raised when MAPDL has exited"""
 
     def __init__(self, msg="MAPDL has exited"):
@@ -109,14 +134,14 @@ class NotEnoughResources(MapdlExitedError):
         super().__init__(msg.format(resource=resource))
 
 
-class LockFileException(RuntimeError):
+class LockFileException(MapdlRuntimeError):
     """Error message when the lockfile has not been removed"""
 
     def __init__(self, msg=LOCKFILE_MSG):
         super().__init__(msg)
 
 
-class MapdlDidNotStart(RuntimeError):
+class MapdlDidNotStart(MapdlRuntimeError):
     """Error when the MAPDL process does not start"""
 
     def __init__(self, msg=""):
@@ -139,7 +164,7 @@ class PortAlreadyInUseByAnMAPDLInstance(PortAlreadyInUse):
         super().__init__(msg.format(port=port))
 
 
-class MapdlConnectionError(RuntimeError):
+class MapdlConnectionError(MapdlRuntimeError):
     """Provides the error when connecting to the MAPDL instance fails."""
 
     def __init__(self, msg=""):
@@ -161,22 +186,15 @@ class IncorrectWorkingDirectory(OSError, MapdlRuntimeError):
         super().__init__(msg)
 
 
-class DifferentSessionConnectionError(RuntimeError):
+class DifferentSessionConnectionError(MapdlRuntimeError):
     """Provides the error when connecting to the MAPDL instance fails."""
 
     def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class DeprecationError(RuntimeError):
+class DeprecationError(MapdlRuntimeError):
     """Provides the error for deprecated commands, classes, interfaces, etc"""
-
-    def __init__(self, msg=""):
-        super().__init__(msg)
-
-
-class MapdlException(MapdlRuntimeError):
-    """General MAPDL exception."""
 
     def __init__(self, msg=""):
         super().__init__(msg)
@@ -217,7 +235,7 @@ class MapdlVersionError(MapdlException):
         super().__init__(msg)
 
 
-class EmptyRecordError(RuntimeError):
+class EmptyRecordError(MapdlRuntimeError):
     """Raised when a record is empty"""
 
     def __init__(self, msg=""):
@@ -245,7 +263,7 @@ class ComponentDoesNotExits(MapdlException):
         super().__init__(msg)
 
 
-class CommandDeprecated(MapdlException, DeprecationError):
+class CommandDeprecated(DeprecationError):
     """Raised when a command is deprecated"""
 
     def __init__(self, msg=""):
@@ -314,3 +332,52 @@ def protect_grpc(func):
         return out
 
     return wrapper
+
+
+def protect_from(
+    exception, match: Optional[str] = None, condition: Optional[bool] = None
+) -> Callable:
+    """Protect the decorated method from raising an exception of
+    of a given type.
+
+    You can filter the exceptions by using 'match' and/or 'condition'. If both
+    are given, **both** need to be fulfilled. If you only need one or the other,
+    you can use multiple decorators.
+
+    Parameters
+    ----------
+    exception : Exception
+        Exception to catch.
+    match : optional
+        String against to match the exception, by default None
+    condition : optional
+        Condition that needs to be fulfil to catch the exception, by default None
+
+    Returns
+    -------
+    Callable
+        Decorated function
+
+    Raises
+    ------
+    e
+        The given exception if not caught by the internal try.
+    """
+
+    def decorator(function):
+        @wraps(function)
+        def wrapper(self, *args, **kwargs):
+            try:
+                return function(self, *args, **kwargs)
+            except exception as e:
+                if (match is None or match in str(e)) and (
+                    condition is None or condition
+                ):
+                    pass
+                # everything else raises
+                else:
+                    raise e
+
+        return wrapper
+
+    return decorator
