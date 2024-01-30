@@ -1096,13 +1096,13 @@ def bc_nodes_plotter(
 
             for id_, values in zip(bc_num, bc_values):
                 if not bc_point_labels[id_]:
-                    bc_point_labels[
-                        id_
-                    ] = f"Node: {id_}\n{each_label}: {values[0]:6.3f}, {values[1]:6.3f}"
+                    bc_point_labels[id_] = (
+                        f"Node: {id_}\n{each_label}: {values[0]:6.3f}, {values[1]:6.3f}"
+                    )
                 else:
-                    bc_point_labels[
-                        id_
-                    ] = f"{bc_point_labels[id_]}\n{each_label}: {values[0]:6.3f}, {values[1]:6.3f}"
+                    bc_point_labels[id_] = (
+                        f"{bc_point_labels[id_]}\n{each_label}: {values[0]:6.3f}, {values[1]:6.3f}"
+                    )
 
     if plot_bc_labels:
         pcloud = pv.PolyData(nodes_xyz)
