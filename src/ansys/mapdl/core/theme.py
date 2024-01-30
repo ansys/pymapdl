@@ -126,7 +126,7 @@ class MapdlTheme(base_class):
         self.name = "PyMAPDL-Theme"
         self.title = "PyMAPDL"
         self.background = "paraview"
-        self.interactive = True
+        # self.interactive = True
 
         if _HAS_MATPLOTLIB:
             self.cmap = PyMAPDL_cmap
@@ -152,4 +152,4 @@ class MapdlTheme(base_class):
 def _apply_default_theme():
     import pyvista as pv
 
-    # pv.global_theme = MapdlTheme()
+    pv.global_theme = MapdlTheme()
