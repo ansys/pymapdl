@@ -40,7 +40,6 @@ from .database import DBDef, MapdlDb, check_mapdl_db_is_alive
 
 
 class DbNodes:
-
     """
     Abstract mapdl db nodes class.
 

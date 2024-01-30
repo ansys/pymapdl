@@ -201,7 +201,6 @@ class DeprecationError(MapdlRuntimeError):
 
 
 class MapdlError(MapdlException):
-
     """General MAPDL Error"""
 
     def __init__(self, msg=""):
@@ -209,7 +208,6 @@ class MapdlError(MapdlException):
 
 
 class MapdlWarning(MapdlException):
-
     """General MAPDL warning"""
 
     def __init__(self, msg=""):
@@ -217,7 +215,6 @@ class MapdlWarning(MapdlException):
 
 
 class MapdlNote(MapdlException):
-
     """General MAPDL note"""
 
     def __init__(self, msg=""):
@@ -225,7 +222,6 @@ class MapdlNote(MapdlException):
 
 
 class MapdlInfo(MapdlException):
-
     """General MAPDL info message"""
 
     def __init__(self, msg=""):
@@ -233,7 +229,6 @@ class MapdlInfo(MapdlException):
 
 
 class MapdlVersionError(MapdlException):
-
     """Incompatible MAPDL version"""
 
     def __init__(self, msg=""):
