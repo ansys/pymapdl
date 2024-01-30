@@ -110,13 +110,19 @@ def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
     assert os.path.exists(plot_)
 
 
-def test_plots_no_vtk(mapdl):
-    mapdl.kplot(vtk=False)
-    mapdl.lplot(vtk=False)
-    mapdl.aplot(vtk=False)
-    mapdl.vplot(vtk=False)
-    mapdl.nplot(vtk=False)
-    mapdl.eplot(vtk=False)
+@pytest.mark.parametrize(
+    "method",
+    [
+        "kplot",
+        "lplot",
+        "aplot",
+        "vplot",
+        "nplot",
+        "eplot",
+    ],
+)
+def test_plots_no_vtk(mapdl, method):
+    _ = getattr(mapdl, method)(vtk=False)
 
 
 @pytest.mark.parametrize("vtk", [True, False, None])

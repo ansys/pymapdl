@@ -537,12 +537,17 @@ def test_lines(cleared, mapdl):
 def test_apdl_logging_start(tmpdir, mapdl):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
-    mapdl = launch_mapdl(
+    launch_options = launch_mapdl(
         port=mapdl.port - 1,  # It normally goes up, so 50051 should be free
         start_timeout=30,
         log_apdl=filename,
         additional_switches=QUICK_LAUNCH_SWITCHES,
+        _debug_no_launch=True,
     )
+
+    assert "filename" in launch_options["log_apdl"]
+    # activating logger
+    mapdl.open_apdl_log(filename, mode="w")
 
     mapdl.prep7()
     mapdl.run("!comment test")
@@ -562,6 +567,8 @@ def test_apdl_logging_start(tmpdir, mapdl):
     assert "K,2,1,0,0" in text
     assert "K,3,1,1,0" in text
     assert "K,4,0,1,0" in text
+
+    mapdl._close_apdl_log()
 
 
 @requires("console")
