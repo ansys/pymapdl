@@ -1,8 +1,10 @@
 .. image:: ../source/_static/logo_dark.png
     :class: only-dark
+    :align: center
 
 .. image:: ../source/_static/logo_light.png
     :class: only-light
+    :align: center
 
 ===============================
 PyMAPDL documentation |version|
@@ -41,9 +43,14 @@ I want to...
 
             .. image:: ../source/images/main_icons/news-regular-24.png
                 :class: only-dark
+                :width: 48px
+                :align: center
 
             .. image:: ../source/images/main_icons/news-solid-24.png
                 :class: only-light
+                :width: 48px
+                :align: center
+
 
     .. grid-item::
         .. card:: Learn how to use PyMAPDL
@@ -56,9 +63,14 @@ I want to...
 
             .. image:: ../source/images/main_icons/book-reader-regular-24.png
                 :class: only-dark
+                :width: 48px
+                :align: center
 
             .. image:: ../source/images/main_icons/book-reader-solid-24.png
                 :class: only-light
+                :width: 48px
+                :align: center
+
 
     .. grid-item::
         .. card:: Learn how to install and launch PyMAPDL
@@ -69,9 +81,14 @@ I want to...
 
             .. image:: ../source/images/main_icons/terminal-regular-24.png
                 :class: only-dark
+                :width: 48px
+                :align: center
 
             .. image:: ../source/images/main_icons/terminal-solid-24.png
                 :class: only-light
+                :width: 48px
+                :align: center
+
 
     .. grid-item::
         .. card:: See some PyMAPDL usage examples
@@ -84,9 +101,14 @@ I want to...
 
             .. image:: ../source/images/main_icons/slideshow-regular-24.png
                 :class: only-dark
+                :width: 48px
+                :align: center
 
             .. image:: ../source/images/main_icons/slideshow-solid-24.png
                 :class: only-light
+                :width: 48px
+                :align: center
+
 
     .. grid-item::
         .. card:: Use the different library modules
@@ -99,9 +121,14 @@ I want to...
 
             .. image:: ../source/images/main_icons/directions-regular24.png
                 :class: only-dark
+                :width: 48px
+                :align: center
 
             .. image:: ../source/images/main_icons/directions-solid-24.png
                 :class: only-light
+                :width: 48px
+                :align: center
+
 
     .. grid-item::
         .. card:: Help with PyMAPDL
@@ -113,9 +140,13 @@ I want to...
 
             .. image:: ../source/images/main_icons/error-regular-24.png
                 :class: only-dark
+                :width: 48px
+                :align: center
 
             .. image:: ../source/images/main_icons/error-solid-24.png
                 :class: only-light
+                :width: 48px
+                :align: center
 
     .. grid-item::
         .. card::  Contribute to PyMAPDL project
@@ -126,9 +157,13 @@ I want to...
 
             .. image:: ../source/images/main_icons/user-voice-regular-24.png
                 :class: only-dark
+                :width: 48px
+                :align: center
 
             .. image:: ../source/images/main_icons/user-voice-solid-24.png
                 :class: only-light
+                :width: 48px
+                :align: center
 
     .. grid-item::
         .. card::  Develop PyMAPDL
@@ -139,9 +174,14 @@ I want to...
 
             .. image:: ../source/images/main_icons/keyboard-regular-24.png
                 :class: only-dark
+                :width: 48px
+                :align: center
 
             .. image:: ../source/images/main_icons/keyboard-solid-24.png
                 :class: only-light
+                :width: 48px
+                :align: center
+
 
     .. grid-item::
         .. card:: Document or create an example for PyMAPDL
@@ -152,9 +192,14 @@ I want to...
 
             .. image:: ../source/images/main_icons/edit-regular-24.png
                 :class: only-dark
+                :width: 48px
+                :align: center
 
             .. image:: ../source/images/main_icons/edit-solid-24.png
                 :class: only-light
+                :width: 48px
+                :align: center
+
 
     
 
