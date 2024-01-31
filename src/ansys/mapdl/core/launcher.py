@@ -1463,6 +1463,7 @@ def launch_mapdl(
     if ip is None:
         ip = os.environ.get("PYMAPDL_IP", None)
 
+    if ip is None:
         if not ip and ON_WSL:
             ip = _get_windows_host_ip()
             if ip:
