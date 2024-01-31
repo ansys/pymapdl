@@ -1009,9 +1009,13 @@ class Information:
 
     def _get_stitles(self):
         return [
-            re.search(f"SUBTITLE  {i}=(.*)", self._get_titles()).groups(1)[0].strip()
-            if re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
-            else ""
+            (
+                re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
+                .groups(1)[0]
+                .strip()
+                if re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
+                else ""
+            )
             for i in range(1, 5)
         ]
 

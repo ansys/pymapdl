@@ -340,7 +340,8 @@ def launch_grpc(
         ``False``.
 
         .. deprecated:: v0.65.0
-           The ``verbose`` argument is deprecated and will be removed in a future release.
+           The ``verbose`` argument is deprecated and will be completely
+           removed in a future release.
            Use a logger instead. See :ref:`api_logging` for more details.
 
     kwargs : dict
@@ -474,14 +475,11 @@ def launch_grpc(
     # disable all MAPDL pop-up errors:
     os.environ["ANS_CMD_NODIAG"] = "TRUE"
 
-    if verbose is not None:
-        warnings.warn(
-            "The ``verbose`` argument is deprecated and will be removed in a future release. "
-            "Use a logger instead. See :ref:`api_logging` for more details.",
-            DeprecationWarning,
+    if verbose:
+        raise DeprecationError(
+            "The ``verbose`` argument is deprecated and will be completely removed in a future release. Use a logger instead. "
+            "See https://mapdl.docs.pyansys.com/version/stable/api/logging.html for more details."
         )
-    elif verbose is None:
-        verbose = False
 
     # use temporary directory if run_location is unspecified
     if run_location is None:
@@ -600,9 +598,6 @@ def launch_grpc(
 
     LOG.info(f"Running in {ip}:{port} the following command: '{command}'")
 
-    if verbose:
-        print(command)
-
     LOG.debug("MAPDL starting in background.")
     process = subprocess.Popen(
         command,
@@ -629,8 +624,12 @@ def launch_grpc(
             LOG.debug("Checking if gRPC server is alive.")
             _check_server_is_alive(stdout_queue, run_location, timeout)
 
-    except MapdlDidNotStart as e:
-        msg = str(e) + f"\nRun location: {run_location}" + f"\nCommand line used: {cmd}"
+    except MapdlDidNotStart as e:  # pragma: no cover
+        msg = (
+            str(e)
+            + f"\nRun location: {run_location}"
+            + f"\nCommand line used: {command}\n\n"
+        )
 
         terminal_output = "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
         if terminal_output.strip():
@@ -703,7 +702,8 @@ def _get_std_output(std_queue, timeout=1):
     t0 = time.time()
     while (not reach_empty) or (time.time() < (t0 + timeout)):
         try:
-            lines.append(std_queue.get_nowait().decode())
+            message = std_queue.get_nowait().decode(encoding="utf-8", errors="replace")
+            lines.append(message)
         except Empty:
             reach_empty = True
 
@@ -1197,7 +1197,8 @@ def launch_mapdl(
         be tracked within pymapdl.  Default ``False``.
 
         .. deprecated:: v0.65.0
-           The ``verbose_mapdl`` argument is deprecated and will be removed in a future release.
+           The ``verbose_mapdl`` argument is deprecated and will be completely
+           removed in a future release.
            Use a logger instead. See :ref:`api_logging` for more details.
 
     license_server_check : bool, optional
@@ -1427,12 +1428,10 @@ def launch_mapdl(
         remove_temp_files = None
 
     if verbose_mapdl is not None:
-        warnings.warn(
-            "The ``verbose_mapdl`` argument is deprecated and will be removed in a future release. "
-            "Use a logger instead. See :ref:`api_logging` for more details.",
-            DeprecationWarning,
+        raise DeprecationError(
+            "The ``verbose_mapdl`` argument is deprecated and will be completely removed in a future release. Use a logger instead. "
+            "See https://mapdl.docs.pyansys.com/version/stable/api/logging.html for more details."
         )
-        verbose_mapdl = False
 
     # These parameters are partially used for unit testing
     set_no_abort = kwargs.pop("set_no_abort", True)
@@ -1728,7 +1727,6 @@ def launch_mapdl(
                 ip=ip,
                 add_env_vars=add_env_vars,
                 replace_env_vars=replace_env_vars,
-                verbose=verbose_mapdl,
                 **start_parm,
             )
 
