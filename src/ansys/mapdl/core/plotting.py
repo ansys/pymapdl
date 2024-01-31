@@ -509,8 +509,9 @@ def _general_plotter(
 
     for label in labels:
         # verify points are not duplicates
-        _, idx, idx2 = unique_rows(np.atleast_2d(np.array(label["points"])))
-        points = label["points"][idx2][idx]  # Getting back the initial order.
+        points = np.atleast_2d(np.array(label["points"]))
+        _, idx, idx2 = unique_rows(points)
+        points = points[idx2][idx]  # Getting back the initial order.
 
         # Converting python order (0 based)
         labels = list(label["labels"] - 1)
