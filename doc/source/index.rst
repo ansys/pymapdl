@@ -4,7 +4,7 @@
 .. image:: ../source/_static/logo_light.png
     :class: only-light
 
-
+===============================
 PyMAPDL documentation |version|
 ===============================
 
@@ -18,183 +18,146 @@ PyMAPDL documentation |version|
    api/index
    examples/index
 
-Introduction and purpose
-------------------------
-PyMAPDL is part of the larger `PyAnsys <pyansys_>`_
-effort to facilitate the use of Ansys technologies directly from
-Python. Its primary package, ``ansys-mapdl-core``, provides:
 
-- Scripting of MAPDL through both Python and Ansys Parametric Design
-  Language (APDL) syntax.
-- Plotting of MAPDL geometry and meshes using `PyVista
-  <pyvista_docs_>`_ from within a Python script or an
-  interactive `Jupyter notebook <jupyter_>`_.
-- Access to MAPDL arrays as Python objects (for example, nodes, elements,
-  solution matrices, and results).
+Welcome to PyMAPDL documentation!
 
-Thanks to an API that looks familiar to APDL and Python users alike, PyMAPDL
-makes it is easier than ever to integrate the simulation capabilities 
-of the Ansys MAPDL multi-physics solver directly into novel applications.
-The package presents a Python-friendly interface to drive the software
-that manages the submission of low-level APDL commands, while exchanging
-data through high-performance gRPC interfaces.
+This page aims to guide you through the extensive documentation.
 
-Accelerate the preparation of your simulations using PyMAPDL. Combine the
-expressiveness of general-purpose Python code to control the flow in your
-input decks with methods that drive the solver. Explore proof of concept 
-studies or capture knowledge using interactive Jupyter notebooks. Tap
-the solver as the physics engine in your next AI app. PyMAPDL is now open source,
-so enjoy it. Contributions are welcome.
+What do you want to do?
+=======================
 
 
-Background
-----------
-PyMAPDL, based on `gRPC <grpc_>`_, represents an
-improvement over its predecessor based on CORBA. These technologies
-allow the MAPDL solver to function as a server, ready to respond to
-connecting clients.
+I want to...
 
-Google remote procedure calls, or gRPC, are used to establish secure 
-connections so that a client app can directly call methods on 
-a potentially remote MAPDL instance as if it were a local object. The 
-use of HTTP/2 makes it friendly to modern internet infrastructures. 
-This, along with the use of binary transmission formats, favors higher
-performance. Using gRPC, PyMAPDL can convert Python statements into APDL 
-commands that can then be transmitted to an MAPDL instance running anywhere, 
-while producing network footprints that are compact and efficient.
+.. grid:: 3
 
-The following diagram presents a simplified architecture of PyMAPDL.
+    .. grid-item::
+        .. card:: Know what is PyMAPDL
+            :link: ref_project_page
+            :link-type: ref
 
-.. figure:: ./images/architecture_diagram.png
-    :width: 400pt
+            Check our project page :ref:`ref_project_page` where a quick project
+            overview can be found.
 
-    PyMAPDL architecture diagram
+            .. image:: ../source/images/main_icons/news-regular-24.png
+                :class: only-dark
 
-Quick code
-----------
-Here's a brief example of how PyMAPDL works:
+            .. image:: ../source/images/main_icons/news-solid-24.png
+                :class: only-light
 
-.. code:: pycon
+    .. grid-item::
+        .. card:: Learn how to use PyMAPDL
+            :link: ref_learning
+            :link-type: ref
 
-    >>> from ansys.mapdl.core import launch_mapdl
-    >>> mapdl = launch_mapdl()
-    >>> print(mapdl)
-    Product:             Ansys Mechanical Enterprise
-    MAPDL Version:       24.1
-    ansys.mapdl Version: 0.68.0
+            Check our :ref:`ref_learning` section.
+            It is specially recommended you follow the
+            :ref:`ref_pymapdl_course` course.
 
-MAPDL is now active and you can send commands to it as a genuine
-Python class. For example, if you wanted to create a surface using
-key points, you could run:
+            .. image:: ../source/images/main_icons/book-reader-regular-24.png
+                :class: only-dark
 
-.. code:: python
+            .. image:: ../source/images/main_icons/book-reader-solid-24.png
+                :class: only-light
 
-    mapdl.run("/PREP7")
-    mapdl.run("K, 1, 0, 0, 0")
-    mapdl.run("K, 2, 1, 0, 0")
-    mapdl.run("K, 3, 1, 1, 0")
-    mapdl.run("K, 4, 0, 1, 0")
-    mapdl.run("L, 1, 2")
-    mapdl.run("L, 2, 3")
-    mapdl.run("L, 3, 4")
-    mapdl.run("L, 4, 1")
-    mapdl.run("AL, 1, 2, 3, 4")
+    .. grid-item::
+        .. card:: Learn how to install and launch PyMAPDL
+            :link: ref_getting_started
+            :link-type: ref
 
-MAPDL interactively returns the result of each command, which is
-stored to the logging module. The ``print(mapdl.run)`` method can
-also be used to immediately print out the result. Errors are caught
-immediately and Pythonically.
+            Check our :ref:`ref_getting_started` section.
 
-Calling MAPDL Pythonically
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-MAPDL functions can be called directly from a :class:`Mapdl
-<ansys.mapdl.core.mapdl.MapdlBase>` instance in a Pythonic manner. This is to
-simplify calling MAPDL, especially when inputs are variables within
-Python. For example, the following two commands are equivalent:
+            .. image:: ../source/images/main_icons/terminal-regular-24.png
+                :class: only-dark
 
-.. code:: python
+            .. image:: ../source/images/main_icons/terminal-solid-24.png
+                :class: only-light
 
-    mapdl.k(1, 0, 0, 0)
-    mapdl.run("K, 1, 0, 0, 0")
+    .. grid-item::
+        .. card:: See some PyMAPDL usage examples
+            :link: ref_examples
+            :link-type: ref
 
-This approach takes care of the string formatting for you. For
-example, inputting points from a numpy array:
+            In our :ref:`ref_examples` section, you can find a great
+            collection of examples of PyMAPDL which cover many
+            user cases.
 
-.. code:: python
+            .. image:: ../source/images/main_icons/slideshow-regular-24.png
+                :class: only-dark
 
-   # make 10 random keypoints in MAPDL
-   points = np.random.random((10, 3))
-   for i, (x, y, z) in enumerate(points):
-       mapdl.k(i + 1, x, y, z)
+            .. image:: ../source/images/main_icons/slideshow-solid-24.png
+                :class: only-light
 
+    .. grid-item::
+        .. card:: Use the different library modules
+            :link: ref_user_guide
+            :link-type: ref
 
-Advanced features
-~~~~~~~~~~~~~~~~~
-All features available to command line MAPDL can be used within
-PyMAPDL, and there are a variety of new features available through
-gRPC.
+            Check our :ref:`ref_user_guide` chapter.
+            On the right side, a list of main functionalities and modules
+            can be found.
 
-For example, view the current mesh status with:
+            .. image:: ../source/images/main_icons/directions-regular24.png
+                :class: only-dark
 
-.. code:: pycon
+            .. image:: ../source/images/main_icons/directions-solid-24.png
+                :class: only-light
 
-   >>> mapdl.mesh
-    ANSYS Mesh
-      Number of Nodes:              7217
-      Number of Elements:           2080
-      Number of Element Types:      2
-      Number of Node Components:    0
-      Number of Element Components: 0
+    .. grid-item::
+        .. card:: Help with PyMAPDL
+            :link: ref_troubleshooting
+            :link-type: ref
 
-Or save it as a VTK file with:
+            Check our :ref:`ref_troubleshooting` section.
+            Additionally, there are some resources in :ref:`faq`.
 
-.. code:: pycon
+            .. image:: ../source/images/main_icons/error-regular-24.png
+                :class: only-dark
 
-    >>> mapdl.mesh.save("mymesh.vtk")
+            .. image:: ../source/images/main_icons/error-solid-24.png
+                :class: only-light
 
-You can even plot directly from the Python environment with:
+    .. grid-item::
+        .. card::  Contribute to PyMAPDL project
+            :link: ref_contributing
+            :link-type: ref
 
-.. code:: pycon
+            Great!! Check our :ref:`ref_contributing` section.
 
-    >>> mapdl.et(1, "SOLID186")
-    >>> mapdl.vsweep("ALL")
-    >>> mapdl.esize(0.1)
-    >>> mapdl.eplot()
+            .. image:: ../source/images/main_icons/user-voice-regular-24.png
+                :class: only-dark
 
-.. figure:: ./images/eplot_vtk.png
-    :width: 400pt
+            .. image:: ../source/images/main_icons/user-voice-solid-24.png
+                :class: only-light
 
-    Element plot from MAPDL using ``PyMAPDL`` and ``vtk``
+    .. grid-item::
+        .. card::  Develop PyMAPDL
+            :link: developing_pymapdl
+            :link-type: ref
 
-Documentation and issues
-------------------------
-Documentation for the latest stable release of PyMAPDL is hosted at `PyMAPDL documentation
-<https://mapdl.docs.pyansys.com/version/stable/>`_.
-The same documentation is also `available as PDF <pymapdl_latest_pdf_doc_>`_ in the `Assets` section in the
-`latest GitHub package release <pymapdl_latest_github_release_>`_.
+            Check our :ref:`developing_pymapdl` section.
 
-In the upper right corner of the documentation's title bar, there is an option for switching from
-viewing the documentation for the latest stable release to viewing the documentation for the
-development version or previously released versions.
+            .. image:: ../source/images/main_icons/keyboard-regular-24.png
+                :class: only-dark
 
-You can also `view <https://cheatsheets.docs.pyansys.com/pymapdl_cheat_sheet.png>`_ or
-`download <https://cheatsheets.docs.pyansys.com/pymapdl_cheat_sheet.pdf>`_ the
-PyMAPDL cheat sheet. This one-page reference provides syntax rules and commands
-for using PyMAPDL. 
+            .. image:: ../source/images/main_icons/keyboard-solid-24.png
+                :class: only-light
 
-On the `PyMAPDL Issues <https://github.com/ansys/pymapdl/issues>`_ page,
-you can create issues to report bugs and request new features. On the `PyMAPDL Discussions
-<https://github.com/ansys/pymapdl/discussions>`_ page or the `Discussions <https://discuss.ansys.com/>`_
-page on the Ansys Developer portal, you can post questions, share ideas, and get community feedback. 
+    .. grid-item::
+        .. card:: Document or create an example for PyMAPDL
+            :link: write_documentation
+            :link-type: ref
 
-To reach the PyAnsys project support team, email `PyAnsys Core team <pyansys.core@ansys.com>`_.
-Unfortunately no specific library questions or issues are answered through this email.
-Please refer to `PyMAPDL Issues <pymapdl_issues_>`_,
-or `PyMAPDL Discussions <pymapdl_discussions_>`_ for raising issues,
-request new features, or asking questions.
+            Check our :ref:`write_documentation` section.
+
+            .. image:: ../source/images/main_icons/edit-regular-24.png
+                :class: only-dark
+
+            .. image:: ../source/images/main_icons/edit-solid-24.png
+                :class: only-light
+
+    
+
+         
 
 
-Project index
--------------
-
-* :ref:`genindex`
