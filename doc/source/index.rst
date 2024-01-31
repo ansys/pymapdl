@@ -80,11 +80,13 @@ I want to...
 
 
     .. grid-item::
-        .. card:: Learn how to install and launch PyMAPDL
+        .. card:: Learn how to get started
             :link: ref_getting_started
             :link-type: ref
 
-            Check our :ref:`ref_getting_started` section.
+            Check our :ref:`ref_getting_started` section to learn to
+            :ref:`ref_using_standard_install`, :ref:`ref_pymapdl_installation`,
+            and :ref:`ref_launch_pymapdl`
 
             .. image:: ../source/images/main_icons/terminal-regular-24.png
                 :class: only-dark
@@ -126,7 +128,7 @@ I want to...
             On the right side, a list of main functionalities and modules
             can be found.
 
-            .. image:: ../source/images/main_icons/directions-regular24.png
+            .. image:: ../source/images/main_icons/directions-regular-24.png
                 :class: only-dark
                 :width: 48px
                 :align: center
@@ -160,7 +162,7 @@ I want to...
             :link: ref_contributing
             :link-type: ref
 
-            Great!! Check our :ref:`ref_contributing` section.
+            Great!! Check our :ref:`ref_contributing` section to start contribute.
 
             .. image:: ../source/images/main_icons/user-voice-regular-24.png
                 :class: only-dark
@@ -177,9 +179,10 @@ I want to...
             :link: developing_pymapdl
             :link-type: ref
 
-            Check our :ref:`developing_pymapdl` section.
+            Check our :ref:`developing_pymapdl` section to get guidance about setting
+            the project for development.
 
-            .. image:: ../source/images/main_icons/keyboard-regular-24.png
+            .. image:: ../source/images/main_icons/keyboard-solid-24.png
                 :class: only-dark
                 :width: 48px
                 :align: center
