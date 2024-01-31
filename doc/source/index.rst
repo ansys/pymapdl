@@ -21,15 +21,22 @@ PyMAPDL documentation |version|
    examples/index
 
 
+.. vale off
+
 Welcome to PyMAPDL documentation!
+
+.. vale on
 
 This page aims to guide you through the extensive documentation.
 
 What do you want to do?
 =======================
 
+.. vale off
 
 I want to...
+
+.. vale on
 
 .. grid:: 3
 
