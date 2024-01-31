@@ -206,7 +206,7 @@ def test_large_output(mapdl, cleared):
     """Verify we can receive messages over the default 4MB limit."""
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.et(1, 187)
-    mapdl.esize(0.5)
+    mapdl.esize(0.05)
     mapdl.vmesh("all")
     msg = mapdl.nlist()
 

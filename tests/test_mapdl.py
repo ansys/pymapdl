@@ -545,7 +545,7 @@ def test_apdl_logging_start(tmpdir, mapdl):
         _debug_no_launch=True,
     )
 
-    assert "filename" in launch_options["log_apdl"]
+    assert filename in launch_options["log_apdl"]
     # activating logger
     mapdl.open_apdl_log(filename, mode="w")
 
