@@ -49,6 +49,8 @@ I want to...
             where a quick project overview can be found.
             Learn what this project is about!
 
+            +++
+
             .. image:: ../source/images/main_icons/for_dark/news-regular-24.png
                 :class: only-dark
                 :align: center
@@ -66,6 +68,9 @@ I want to...
             Check our :ref:`ref_learning` section.
             It is recommended you follow the
             :ref:`ref_pymapdl_course` course.
+
+            
+            +++
 
             .. image:: ../source/images/main_icons/for_dark/book-reader-regular-24.png
                 :class: only-dark
@@ -85,6 +90,7 @@ I want to...
             :ref:`ref_using_standard_install`, :ref:`ref_pymapdl_installation`,
             and :ref:`ref_launch_pymapdl`.
 
+            +++
 
             .. image:: ../source/images/main_icons/for_dark/terminal-regular-24.png
                 :class: only-dark
@@ -104,6 +110,8 @@ I want to...
             can find a great collection of PyMAPDL
             user cases.
 
+            +++
+
             .. image:: ../source/images/main_icons/for_dark/slideshow-regular-24.png
                 :class: only-dark
                 :align: center
@@ -120,6 +128,8 @@ I want to...
 
             Check our :ref:`ref_user_guide` chapter.
             Don't miss the right side bar with the table content.
+
+            +++
 
             .. image:: ../source/images/main_icons/for_dark/directions-regular-24.png
                 :class: only-dark
@@ -138,6 +148,8 @@ I want to...
             Additionally, there are some helpful
             resources in :ref:`faq`.
 
+            +++
+
             .. image:: ../source/images/main_icons/for_dark/error-regular-24.png
                 :class: only-dark
                 :align: center
@@ -152,6 +164,8 @@ I want to...
             :link-type: ref
 
             Great!! Check our :ref:`ref_contributing` section to start contribute.
+
+            +++
 
             .. image:: ../source/images/main_icons/for_dark/user-voice-regular-24.png
                 :class: only-dark
@@ -169,6 +183,8 @@ I want to...
             Check our :ref:`developing_pymapdl` section to get guidance about setting
             the project for development.
 
+            +++
+
             .. image:: ../source/images/main_icons/for_dark/keyboard-solid-24.png
                 :class: only-dark
                 :align: center
@@ -184,6 +200,8 @@ I want to...
             :link-type: ref
 
             Check our :ref:`write_documentation` section.
+            
+            +++
 
             .. image:: ../source/images/main_icons/for_dark/edit-regular-24.png
                 :class: only-dark
