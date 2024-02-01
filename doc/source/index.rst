@@ -77,7 +77,7 @@ I want to...
             user cases.
 
     .. grid-item::
-        .. card:: :fa:`signs-post` Use the different library modules
+        .. card:: :fa:`book-open-reader` Use the different library modules
             :link: ref_user_guide
             :link-type: ref
 
@@ -85,7 +85,7 @@ I want to...
             Don't miss the right side bar with the table content.
  
     .. grid-item::
-        .. card:: :fa:`circle-question` Help with PyMAPDL
+        .. card:: :fa:`question` Help with PyMAPDL
             :link: ref_troubleshooting
             :link-type: ref
 
@@ -102,6 +102,13 @@ I want to...
             section to start contribute.
 
     .. grid-item::
+        .. card:: :fa:`user-pen` Document or create an example for PyMAPDL
+            :link: write_documentation
+            :link-type: ref
+
+            Check our :ref:`write_documentation` section.
+
+    .. grid-item::
         .. card:: :fa:`keyboard` Develop PyMAPDL
             :link: developing_pymapdl
             :link-type: ref
@@ -110,10 +117,4 @@ I want to...
             to get guidance about setting
             the project for development.
 
-    .. grid-item::
-        .. card:: :fa:`user-pen` Document or create an example for PyMAPDL
-            :link: write_documentation
-            :link-type: ref
-
-            Check our :ref:`write_documentation` section.
 
