@@ -4,10 +4,9 @@ from datetime import datetime
 import os
 import warnings
 
-from ansys_sphinx_theme import (
+from ansys_sphinx_theme import (  # pyansys_logo_black,
     ansys_favicon,
     get_version_match,
-    pyansys_logo_black,
     pyansys_logo_white,
 )
 import numpy as np
@@ -256,7 +255,7 @@ sphinx_gallery_conf = {
 # -- Options for HTML output -------------------------------------------------
 html_short_title = html_title = "PyMAPDL"
 html_theme = "ansys_sphinx_theme"
-html_logo = pyansys_logo_black
+html_logo = "./source/_static/pyansys-logo-black-cropped.png"  # pyansys_logo_black
 html_theme_options = {
     "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
     "github_url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}",
