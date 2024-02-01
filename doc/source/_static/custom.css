@@ -28,5 +28,7 @@ html[data-theme="light"] {
 html[data-theme="dark"] {
 
     /* whatever you want to change */
-    background: rgb(55, 55, 55);
+    background: rgb(35, 35, 35);
+    --pst-color-on-background: rgb(35, 35, 35);
+    --pst-color-background: rgb(35, 35, 35);
 }
