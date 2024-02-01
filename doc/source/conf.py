@@ -259,7 +259,7 @@ sphinx_gallery_conf = {
 # -- Options for HTML output -------------------------------------------------
 html_short_title = html_title = "PyMAPDL"
 html_theme = "ansys_sphinx_theme"
-html_logo = "./source/_static/pyansys-logo-black-cropped.png"  # pyansys_logo_black
+html_logo = "./_static/pyansys-logo-black-cropped.png"  # pyansys_logo_black
 html_theme_options = {
     "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
     "github_url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}",
