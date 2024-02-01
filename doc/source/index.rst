@@ -41,7 +41,7 @@ I want to...
 .. grid:: 3
 
     .. grid-item::
-        .. card:: Know what is PyMAPDL
+        .. card:: :fa:`newspaper` Know what is PyMAPDL
             :link: ref_project_page
             :link-type: ref
 
@@ -49,19 +49,8 @@ I want to...
             where a quick project overview can be found.
             Learn what this project is about!
 
-            +++
-
-            .. image:: ../source/images/main_icons/for_dark/news-regular-24.png
-                :class: only-dark
-                :align: center
-
-            .. image:: ../source/images/main_icons/for_light/news-solid-24.png
-                :class: only-light
-                :align: center
-
-
     .. grid-item::
-        .. card:: Learn how to use PyMAPDL
+        .. card:: :fa:`book` Learn how to use PyMAPDL
             :link: ref_learning
             :link-type: ref
 
@@ -69,20 +58,8 @@ I want to...
             It is recommended you follow the
             :ref:`ref_pymapdl_course` course.
 
-            
-            +++
-
-            .. image:: ../source/images/main_icons/for_dark/book-reader-regular-24.png
-                :class: only-dark
-                :align: center
-
-            .. image:: ../source/images/main_icons/for_light/book-reader-solid-24.png
-                :class: only-light
-                :align: center
-
-
     .. grid-item::
-        .. card:: Learn how to get started
+        .. card:: :fa:`terminal` Learn how to get started
             :link: ref_getting_started
             :link-type: ref
 
@@ -90,19 +67,8 @@ I want to...
             :ref:`ref_using_standard_install`, :ref:`ref_pymapdl_installation`,
             and :ref:`ref_launch_pymapdl`.
 
-            +++
-
-            .. image:: ../source/images/main_icons/for_dark/terminal-regular-24.png
-                :class: only-dark
-                :align: center
-
-            .. image:: ../source/images/main_icons/for_light/terminal-solid-24.png
-                :class: only-light
-                :align: center
-
-
     .. grid-item::
-        .. card:: See some PyMAPDL usage examples
+        .. card:: :fa:`gears` See some PyMAPDL usage examples
             :link: ref_examples
             :link-type: ref
 
@@ -110,37 +76,16 @@ I want to...
             can find a great collection of PyMAPDL
             user cases.
 
-            +++
-
-            .. image:: ../source/images/main_icons/for_dark/slideshow-regular-24.png
-                :class: only-dark
-                :align: center
-
-            .. image:: ../source/images/main_icons/for_light/slideshow-solid-24.png
-                :class: only-light
-                :align: center
-
-
     .. grid-item::
-        .. card:: Use the different library modules
+        .. card:: :fa:`signs-post` Use the different library modules
             :link: ref_user_guide
             :link-type: ref
 
             Check our :ref:`ref_user_guide` chapter.
             Don't miss the right side bar with the table content.
-
-            +++
-
-            .. image:: ../source/images/main_icons/for_dark/directions-regular-24.png
-                :class: only-dark
-                :align: center
-
-            .. image:: ../source/images/main_icons/for_light/directions-solid-24.png
-                :class: only-light
-                :align: center
  
     .. grid-item::
-        .. card:: Help with PyMAPDL
+        .. card:: :fa:`circle-question` Help with PyMAPDL
             :link: ref_troubleshooting
             :link-type: ref
 
@@ -148,65 +93,27 @@ I want to...
             Additionally, there are some helpful
             resources in :ref:`faq`.
 
-            +++
-
-            .. image:: ../source/images/main_icons/for_dark/error-regular-24.png
-                :class: only-dark
-                :align: center
-
-            .. image:: ../source/images/main_icons/for_light/error-solid-24.png
-                :class: only-light
-                :align: center
-
     .. grid-item::
-        .. card::  Contribute to PyMAPDL project
+        .. card:: :fa:`users` Contribute to PyMAPDL project
             :link: ref_contributing
             :link-type: ref
 
-            Great!! Check our :ref:`ref_contributing` section to start contribute.
-
-            +++
-
-            .. image:: ../source/images/main_icons/for_dark/user-voice-regular-24.png
-                :class: only-dark
-                :align: center
-
-            .. image:: ../source/images/main_icons/for_light/user-voice-solid-24.png
-                :class: only-light
-                :align: center
+            Great!! Check our :ref:`ref_contributing`
+            section to start contribute.
 
     .. grid-item::
-        .. card::  Develop PyMAPDL
+        .. card:: :fa:`keyboard` Develop PyMAPDL
             :link: developing_pymapdl
             :link-type: ref
 
-            Check our :ref:`developing_pymapdl` section to get guidance about setting
+            Check our :ref:`developing_pymapdl` section
+            to get guidance about setting
             the project for development.
 
-            +++
-
-            .. image:: ../source/images/main_icons/for_dark/keyboard-solid-24.png
-                :class: only-dark
-                :align: center
-
-            .. image:: ../source/images/main_icons/for_light/keyboard-solid-24.png
-                :class: only-light
-                :align: center
-
-
     .. grid-item::
-        .. card:: Document or create an example for PyMAPDL
+        .. card:: :fa:`user-pen` Document or create an example for PyMAPDL
             :link: write_documentation
             :link-type: ref
 
             Check our :ref:`write_documentation` section.
-            
-            +++
 
-            .. image:: ../source/images/main_icons/for_dark/edit-regular-24.png
-                :class: only-dark
-                :align: center
-
-            .. image:: ../source/images/main_icons/for_light/edit-solid-24.png
-                :class: only-light
-                :align: center
