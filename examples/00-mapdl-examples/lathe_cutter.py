@@ -39,7 +39,7 @@ supporting their design would most often be transient
 thermal-structural. However, for simplicity, this simulation
 example uses a non-uniform load.
 
-.. figure:: ../../../_static/lathe_cutter_model.png
+.. figure:: ../../../images/lathe_cutter_model.png
     :align: center
     :width: 600
     :alt:  Lathe cutter geometry and load description.
