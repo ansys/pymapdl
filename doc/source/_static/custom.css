@@ -15,3 +15,18 @@
 .yellow-text {
     color: yellow;
 }
+
+
+/* anything related to the light theme */
+html[data-theme="light"] {
+
+    /* whatever you want to change */
+    background: white;
+}
+
+/* anything related to the dark theme */
+html[data-theme="dark"] {
+
+    /* whatever you want to change */
+    background: rgb(55, 55, 55);
+}
