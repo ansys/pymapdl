@@ -147,7 +147,10 @@ html_static_path = ["_static"]
 
 html_css_files = [
     "custom.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css",
 ]
+
+panels_add_fontawesome_latex = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
