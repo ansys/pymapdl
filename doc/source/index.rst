@@ -1,3 +1,7 @@
+
+PyMAPDL Documentation
+=====================
+
 .. image:: ../source/_static/logo_dark.png
     :class: only-dark
     :align: center
@@ -22,8 +26,6 @@
 
 .. vale off
 
-PyMAPDL Documentation
-=====================
 
 Welcome to PyMAPDL |version| !
 
