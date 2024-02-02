@@ -3,7 +3,11 @@
 {% block htmltitle %}
 
 {% if meta is mapping %}
-    <title>{{ meta.get("thispagetitle") }}</title>
+    {% if 'thispagetitle' in meta %}
+        <title>{{ meta.get("thispagetitle") }}</title>
+    {% else %}
+        {{ super() }}
+    {% endif %}
 {% else %}
     {{ super() }}
 {% endif %}

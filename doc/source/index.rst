@@ -1,5 +1,5 @@
 
-:thispagetitle: Welcome
+:thispagetitle: Welcome to PyMAPDL
 
 .. meta::
    :keywords: pymapdl mapdl simulation finite elements python
