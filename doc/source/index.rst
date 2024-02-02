@@ -22,6 +22,9 @@
 
 .. vale off
 
+PyMAPDL Documentation
+=====================
+
 Welcome to PyMAPDL |version| !
 
 .. vale on
