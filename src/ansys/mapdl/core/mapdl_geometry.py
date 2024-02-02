@@ -643,6 +643,7 @@ class Geometry:
 
         ninc : int, optional
             Steps to between amin and amax.
+
         """
         with self._mapdl.save_selection:
             orig_anum = self.anum
@@ -1499,7 +1500,7 @@ class LegacyGeometry(Geometry):
         super().__init__(mapdl)
 
     def keypoints(self) -> np.array:  # type: ignore
-        """Keypoint coordinates"""
+        """Keypoint coordinates."""
         return super().get_keypoints(return_as_array=True)
 
     @requires_package("pyvista")

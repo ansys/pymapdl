@@ -583,6 +583,7 @@ class Logger:
         ------
         Exception
             You can only input strings as ``name`` to this method.
+
         """
         count_ = 0
         new_name = name
