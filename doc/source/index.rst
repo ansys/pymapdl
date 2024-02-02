@@ -27,8 +27,7 @@ Welcome to PyMAPDL |version| !
 .. vale on
 
 
-What do you want to do?
-=======================
+**What do you want to do?**
 
 .. vale off
 
