@@ -1,16 +1,8 @@
 
-PyMAPDL Documentation
-=====================
+:thispagetitle: Welcome
 
-.. image:: ../source/_static/logo_dark.png
-    :class: only-dark
-    :align: center
-    :width: 800
-
-.. image:: ../source/_static/logo_light.png
-    :class: only-light
-    :align: center
-    :width: 800
+.. meta::
+   :keywords: pymapdl mapdl simulation finite elements python
 
 
 .. toctree::
@@ -24,19 +16,25 @@ PyMAPDL Documentation
    examples/index
 
 
+.. image:: ../source/_static/logo_dark.png
+    :class: only-dark
+    :width: 800
+    :alt: PyMAPDL Logo
+    :align: center
+
+.. image:: ../source/_static/logo_light.png
+    :class: only-light
+    :width: 800
+    :alt: PyMAPDL Logo
+    :align: center
+
+
 .. vale off
 
 
-Welcome to PyMAPDL |version| !
+.. title is given using the 
 
-.. vale on
-
-
-**What do you want to do?**
-
-.. vale off
-
-I want to...
+**What do you want to do? I want to...**
 
 .. vale on
 
@@ -118,5 +116,3 @@ I want to...
             Check our :ref:`developing_pymapdl` section
             to get guidance about setting
             the project for development.
-
-
