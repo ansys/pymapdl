@@ -1,12 +1,12 @@
 .. image:: ../source/_static/logo_dark.png
     :class: only-dark
     :align: center
+    :width: 800
 
 .. image:: ../source/_static/logo_light.png
     :class: only-light
     :align: center
-
-
+    :width: 800
 
 
 .. toctree::
