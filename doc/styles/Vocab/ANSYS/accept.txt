@@ -92,8 +92,8 @@ levl
 Linux
 MacOS
 mapdl
-MAPDL
 mapdl
+MAPDL
 mater
 MATLAB
 matricies
@@ -145,6 +145,7 @@ sur
 tablet
 thermomechanical
 thermomechanically
+thispagetitle
 Tool-Narayanaswamy
 tread
 trian
