@@ -1,5 +1,8 @@
+.. vale off
 
 :thispagetitle: Welcome to PyMAPDL
+
+.. vale on
 
 .. meta::
    :keywords: pymapdl mapdl simulation finite elements python
