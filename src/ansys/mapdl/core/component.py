@@ -518,6 +518,7 @@ class ComponentManager:
             Name(s) of the components
         mute : bool, optional
             Whether to mute the `/CMSEL` command output or not, by default False.
+
         """
         if isinstance(names, str):
             names = [names]
