@@ -1,4 +1,4 @@
-
+.. _ref_learning:
 
 ================
 Learning PyMAPDL
@@ -57,6 +57,7 @@ Course content
 * Meet the Instructor
 
 
+.. _ref_pymapdl_course:
 
 Getting started with PyMAPDL
 ----------------------------

@@ -54,7 +54,7 @@ material boundaries.
 
 The geometry of the solenoid is given in Figure 1.
 
-.. figure:: ../../../_static/model_solenoid_2d.png
+.. figure:: ../../../images/model_solenoid_2d.png
     :align: center
     :width: 600
     :alt:  Solenoid geometry description
@@ -78,7 +78,7 @@ The MAPDL default contour color style is used so Matplotlib is imported.
 The Power Graphics style plot is then set up via PyVista.
 
 """
-# sphinx_gallery_thumbnail_path = './_static/model_solenoid_2d.png'
+# sphinx_gallery_thumbnail_path = './images/model_solenoid_2d.png'
 
 import numpy as np
 import pyvista as pv
