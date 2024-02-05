@@ -951,8 +951,7 @@ def test_vplot_multiargs(mapdl, make_block):
     )
 
 
-def test_node_numbering_order(mapdl):
-    mapdl.prep7()
+def test_node_numbering_order(mapdl, cleared):
     # create nodes
     for node in range(1, 6):
         mapdl.n(node, (node - 1) * 0.01)  # only need to define the X dimension
