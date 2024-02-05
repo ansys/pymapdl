@@ -1461,32 +1461,13 @@ class Geometry:
             raise ValueError(f'Unable to select "{item_type}"')
 
     def get_elements_per_area(self) -> NDArray[np.int32]:
-        """Get the number of elements meshed for each area given the response
-        from ``AMESH``.
-
-        GENERATE NODES AND ELEMENTS   IN  ALL  SELECTED AREAS
-            ** AREA     1 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-            ** AREA     2 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-            ** AREA     3 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-            ** AREA     4 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-            ** AREA     5 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-            ** AREA     6 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-            ** AREA     7 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-            ** AREA     8 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-            ** AREA     9 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-            ** AREA    10 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-            ** AREA    11 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-            ** AREA    12 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-
-        NUMBER OF AREAS MESHED     =         12
-        MAXIMUM NODE NUMBER        =        772
-        MAXIMUM ELEMENT NUMBER     =        768
+        """Get the number of elements meshed for each area.
 
         Returns
         -------
-        list
-            List of tuples, each containing the area number and number of
-            elements per area.
+        np.ndarray
+            An array with the area id for the first column, and the number of
+            elements per each area on the second column.
 
         """
         anum = self.anum.ravel()
