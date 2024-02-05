@@ -116,11 +116,6 @@ COMMANDS_WITH_EMPTY_ARGS = {
 
 COMMANDS_TO_NOT_BE_CONVERTED = [
     "CMPL",  # CMPLOT default behaviour does not match the `mapdl.cmplot`'s at the moemnt
-    "MODE",  # Until we merge #2431
-    "/LIN",  # Until we merge 2432
-    "/LAR",  # Until we merge 2432
-    "/TYP",  # Until we merge 2432
-    "/DSC",  # Until we merge 2432
     # CDREAD # commented above
 ]
 

@@ -703,3 +703,14 @@ DSCALE,asdf
 mapdl.dscale("asdf")"""
 
     assert pycmd in convert_apdl_block(cmd, only_commands=True)
+
+
+def test_convert_sf_all_inf():
+    cmd = """SF,ALL,INF"""
+    pycmd = """mapdl.sf("ALL", "INF")"""
+
+    assert pycmd in convert_apdl_block(cmd, only_commands=True)
+
+
+def test_convert_slash_typef():
+    assert "mapdl.slashtype()" in convert_apdl_block("/TYPE", only_commands=True)
