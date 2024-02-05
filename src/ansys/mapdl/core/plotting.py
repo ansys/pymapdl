@@ -514,11 +514,11 @@ def _general_plotter(
         points = points[idx2][idx]  # Getting back the initial order.
 
         # Converting python order (0 based)
-        labels = list(label["labels"] - 1)
+        labels_ = list(label["labels"] - 1)
 
         plotter.add_point_labels(
             points,
-            labels,
+            labels_,
             show_points=False,
             shadow=False,
             font_size=font_size,
