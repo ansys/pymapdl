@@ -699,7 +699,7 @@ def test_convert_dscale():
     cmd = """/DSCALE,Arg1,
 DSCALE,asdf
 """
-    pycmd = """mapdl.run("/DSCALE,Arg1")
+    pycmd = """mapdl.slashdscale("Arg1")
 mapdl.dscale("asdf")"""
 
     assert pycmd in convert_apdl_block(cmd, only_commands=True)
