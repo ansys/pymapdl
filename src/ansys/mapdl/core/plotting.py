@@ -509,12 +509,16 @@ def _general_plotter(
 
     for label in labels:
         # verify points are not duplicates
-        points, idx, _ = unique_rows(np.atleast_2d(np.array(label["points"])))
-        labels = np.array(label["labels"])[idx - 1].tolist()
+        points = np.atleast_2d(np.array(label["points"]))
+        _, idx, idx2 = unique_rows(points)
+        points = points[idx2][idx]  # Getting back the initial order.
+
+        # Converting python order (0 based)
+        labels_ = list(label["labels"] - 1)
 
         plotter.add_point_labels(
             points,
-            labels,
+            labels_,
             show_points=False,
             shadow=False,
             font_size=font_size,
@@ -1096,13 +1100,13 @@ def bc_nodes_plotter(
 
             for id_, values in zip(bc_num, bc_values):
                 if not bc_point_labels[id_]:
-                    bc_point_labels[
-                        id_
-                    ] = f"Node: {id_}\n{each_label}: {values[0]:6.3f}, {values[1]:6.3f}"
+                    bc_point_labels[id_] = (
+                        f"Node: {id_}\n{each_label}: {values[0]:6.3f}, {values[1]:6.3f}"
+                    )
                 else:
-                    bc_point_labels[
-                        id_
-                    ] = f"{bc_point_labels[id_]}\n{each_label}: {values[0]:6.3f}, {values[1]:6.3f}"
+                    bc_point_labels[id_] = (
+                        f"{bc_point_labels[id_]}\n{each_label}: {values[0]:6.3f}, {values[1]:6.3f}"
+                    )
 
     if plot_bc_labels:
         pcloud = pv.PolyData(nodes_xyz)

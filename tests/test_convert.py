@@ -693,3 +693,24 @@ def test_vwrite():
     mapdl.run("(///T14,'MODE',T24,'COEFF',T34,'ISYM',/)")"""
 
     assert pycmd in convert_apdl_block(cmd, only_commands=True)
+
+
+def test_convert_dscale():
+    cmd = """/DSCALE,Arg1,
+DSCALE,asdf
+"""
+    pycmd = """mapdl.slashdscale("Arg1")
+mapdl.dscale("asdf")"""
+
+    assert pycmd in convert_apdl_block(cmd, only_commands=True)
+
+
+def test_convert_sf_all_inf():
+    cmd = """SF,ALL,INF"""
+    pycmd = """mapdl.sf("ALL", "INF")"""
+
+    assert pycmd in convert_apdl_block(cmd, only_commands=True)
+
+
+def test_convert_slash_typef():
+    assert "mapdl.slashtype()" in convert_apdl_block("/TYPE", only_commands=True)

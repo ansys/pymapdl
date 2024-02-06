@@ -250,7 +250,9 @@ class ComponentManager:
         self._mapdl_weakref: weakref.ReferenceType[Mapdl] = weakref.ref(mapdl)
         self.__comp: UNDERLYING_DICT = {}
         self._update_always: bool = True
-        self._autoselect_components: bool = False  # if True, PyMAPDL will try to select the CM first if it does not appear in the CMLIST output.
+        self._autoselect_components: bool = (
+            False  # if True, PyMAPDL will try to select the CM first if it does not appear in the CMLIST output.
+        )
 
         self._default_entity: ENTITIES_TYP = "NODES"
         self._default_entity_warning: bool = True

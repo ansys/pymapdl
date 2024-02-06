@@ -36,7 +36,6 @@ from . import DBDef, MapdlDb, check_mapdl_db_is_alive
 
 
 class DbElems:
-
     """
     Abstract mapdl database element class.
 

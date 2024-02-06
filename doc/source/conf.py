@@ -1,14 +1,10 @@
 """Sphinx documentation configuration file."""
+
 from datetime import datetime
 import os
 import warnings
 
-from ansys_sphinx_theme import (
-    ansys_favicon,
-    get_version_match,
-    pyansys_logo_black,
-    pyansys_logo_white,
-)
+from ansys_sphinx_theme import ansys_favicon, get_version_match, pyansys_logo_white
 import numpy as np
 import pyvista
 from sphinx.application import Sphinx
@@ -145,6 +141,13 @@ notfound_urls_prefix = "/../"
 # static path
 html_static_path = ["_static"]
 
+html_css_files = [
+    "custom.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css",
+]
+
+panels_add_fontawesome_latex = True
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
@@ -255,7 +258,7 @@ sphinx_gallery_conf = {
 # -- Options for HTML output -------------------------------------------------
 html_short_title = html_title = "PyMAPDL"
 html_theme = "ansys_sphinx_theme"
-html_logo = pyansys_logo_black
+html_logo = "./_static/pyansys-logo-black-cropped.png"  # pyansys_logo_black
 html_theme_options = {
     "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
     "github_url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}",

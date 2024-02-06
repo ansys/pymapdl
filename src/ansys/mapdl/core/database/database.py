@@ -40,7 +40,6 @@ MINIMUM_MAPDL_VERSION = "21.1"
 
 
 class WithinBeginLevel:
-
     """Context manager to run MAPDL within the being level."""
 
     def __init__(self, mapdl):
@@ -86,7 +85,6 @@ def check_mapdl_db_is_alive(function):
 
 
 class DBDef(Enum):  # From MAPDL ansysdef.inc include file
-
     """Database type definitions."""
 
     DB_SELECTED = 1
@@ -104,7 +102,6 @@ class DBDef(Enum):  # From MAPDL ansysdef.inc include file
 
 
 class MapdlDb:
-
     """
     Abstract mapdl database class.  Created from a ``Mapdl`` instance.
 
