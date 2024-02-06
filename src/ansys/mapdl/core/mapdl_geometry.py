@@ -22,7 +22,6 @@
 
 """Module to support MAPDL CAD geometry"""
 from functools import wraps
-import re
 from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
@@ -101,48 +100,6 @@ if _HAS_PYVISTA:
             afilter.Update()
 
         return pv.wrap(afilter.GetOutput())
-
-
-def get_elements_per_area(resp: str) -> List[List[int]]:
-    """Get the number of elements meshed for each area given the response
-    from ``AMESH``.
-
-    GENERATE NODES AND ELEMENTS   IN  ALL  SELECTED AREAS
-        ** AREA     1 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA     2 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA     3 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA     4 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA     5 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA     6 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA     7 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA     8 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA     9 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA    10 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA    11 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA    12 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-
-     NUMBER OF AREAS MESHED     =         12
-     MAXIMUM NODE NUMBER        =        772
-     MAXIMUM ELEMENT NUMBER     =        768
-
-    Returns
-    -------
-    list
-        List of tuples, each containing the area number and number of
-        elements per area.
-
-    """
-    # MAPDL changed their output at some point.  Check for both output types.
-    reg = re.compile(r"Meshing of area (\d*) completed \*\* (\d*) elements")
-    groups = reg.findall(resp)
-    if groups:
-        groups = [[int(anum), int(nelem)] for anum, nelem in groups]
-    else:
-        reg = re.compile(r"AREA\s*(\d*).*?(\d*)\s*QUADRILATERALS,\s*(\d*) TRIANGLES")
-        groups = reg.findall(resp)
-        groups = [[int(anum), int(nquad) + int(ntri)] for anum, nquad, ntri in groups]
-
-    return groups
 
 
 class Geometry:
@@ -730,7 +687,7 @@ class Geometry:
 
             # Mesh and get the number of elements per area
             resp = self._mapdl.amesh("all")
-            groups = get_elements_per_area(resp)
+            elements_per_area = self.get_elements_per_area()
 
             self._mapdl.esla("S")
             grid = self._mapdl.mesh._grid.linear_copy()
@@ -751,10 +708,10 @@ class Geometry:
 
         # store the area number used for each element
         entity_num = np.empty(grid.n_cells, dtype=np.int32)
-        if grid and groups:
+        if grid and len(elements_per_area) != 0:
             # add anum info
             i = 0
-            for index, (anum, nelem) in enumerate(groups):
+            for index, (anum, nelem) in enumerate(elements_per_area):
                 # have to use original area numbering here as the
                 # duplicated areas numbers are inaccurate
                 entity_num[i : i + nelem] = orig_anum[index]
@@ -1502,6 +1459,23 @@ class Geometry:
             self._mapdl.vsel(sel_type, vmin=items, return_mapdl_output=True)
         else:
             raise ValueError(f'Unable to select "{item_type}"')
+
+    def get_elements_per_area(self) -> NDArray[np.int32]:
+        """Get the number of elements meshed for each area.
+
+        Returns
+        -------
+        np.ndarray
+            An array with the area id for the first column, and the number of
+            elements per each area on the second column.
+
+        """
+        anum = self.anum.ravel()
+        self._mapdl.starvget("elem_per_areas", "area", "", "ATTR", "NELM")
+        elem_per_areas = self._mapdl.parameters["elem_per_areas"]
+        elem_per_areas = elem_per_areas[anum - 1].ravel()
+
+        return np.vstack((anum, elem_per_areas)).T.astype(np.int32)
 
 
 class LegacyGeometry(Geometry):
