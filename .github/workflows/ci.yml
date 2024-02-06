@@ -432,7 +432,7 @@ jobs:
             --ignore_image_cache \
             --cov-report=xml:centos-${{ matrix.mapdl-version }}-remote.xml
 
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
         name: "Upload coverage to Codecov"
         with:
           name: centos-${{ matrix.mapdl-version }}-remote.xml
@@ -629,7 +629,7 @@ jobs:
 
           reactions: rocket
 
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
         name: "Upload coverage to Codecov"
         with:
           root_dir: ${{ github.workspace }}
@@ -719,7 +719,7 @@ jobs:
             ${{ env.PYTEST_ARGUMENTS }} \
             --cov-report=xml:${{ matrix.mapdl-image }}-minimal.xml
         
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
         name: "Upload coverage to Codecov"
         with:
           root_dir: ${{ github.workspace }}
@@ -790,7 +790,7 @@ jobs:
             --ignore_image_cache \
             --cov-report=xml:windows-v22.2.0-local.xml
 
-      - uses: codecov/codecov-action@v3
+      - uses: codecov/codecov-action@v4
         name: "Upload coverage to Codecov"
         with:
           name: windows-v22.2.0-local.xml

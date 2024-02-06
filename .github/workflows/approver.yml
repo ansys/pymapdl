@@ -71,7 +71,7 @@ jobs:
           export IMG_MSG=$(curl -s 'https://us-central1-lgtm-reloaded.cloudfunctions.net/lgtm' | jq -r '.markdown' | grep -v 'Powered By GIPHY')
           echo "IMG_MSG=$IMG_MSG" >> $GITHUB_OUTPUT
 
-      - uses: hmarr/auto-approve-action@v3
+      - uses: hmarr/auto-approve-action@v4
         with:
           review-message: |
             :white_check_mark: Approving this PR because [${{ steps.settings.outputs.user }}](https://github.com/${{ steps.settings.outputs.user }}) said so in [here](${{ steps.settings.outputs.html_url }}) :grimacing:
