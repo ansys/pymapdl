@@ -1065,7 +1065,7 @@ def launch_mapdl(
     add_env_vars: Optional[Dict[str, str]] = None,
     replace_env_vars: Optional[Dict[str, str]] = None,
     version: Optional[Union[int, str]] = None,
-    on_slurm: bool = True,
+    detect_slurm_config: bool = True,
     slurm_multiplier: int = 1,
     **kwargs,
 ) -> Union[MapdlGrpc, "MapdlConsole"]:
@@ -1439,7 +1439,7 @@ def launch_mapdl(
         bool(os.environ.get("SLURM_NTASKS", ""))
     )
 
-    if on_slurm and ON_SLURM:
+    if detect_slurm_config and ON_SLURM:
         LOG.info("On Slurm mode.")
 
         # extracting parameters
@@ -2124,8 +2124,8 @@ def _parse_slurm_options(
         #
         nproc = max(
             [
-                4,  # Fall back option
-                SLURM_CPUS_PER_TASK * SLURM_NTASKS,  # (CPUs)
+                # 4,  # Fall back option
+                # SLURM_CPUS_PER_TASK * SLURM_NTASKS,  # (CPUs)
                 SLURM_NPROCS,  # (CPUs)
                 # SLURM_NTASKS,  # (tasks) Not necessary the number of CPUs,
                 # SLURM_NNODES * SLURM_TASKS_PER_NODE,  # (tasks)
