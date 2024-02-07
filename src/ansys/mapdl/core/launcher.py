@@ -580,12 +580,9 @@ def launch_grpc(
             port_sw,
             grpc_sw,
         ]
-        command = " ".join(command_parm)
 
     else:  # linux
-        command_parm = []
-        command_parm.extend(
-            [
+        command_parm = [
                 '"%s"' % exec_file,
                 job_sw,
                 cpu_sw,
@@ -594,8 +591,9 @@ def launch_grpc(
                 port_sw,
                 grpc_sw,
             ]
-        )
-        command = " ".join(command_parm)
+    
+    command_parm = [each for each in command_parm if command_parm] # cleanning empty args.
+    command = " ".join(command_parm)
 
     LOG.debug(f"Starting MAPDL with command: {command}")
 
