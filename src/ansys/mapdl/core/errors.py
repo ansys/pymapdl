@@ -161,7 +161,7 @@ class PortAlreadyInUseByAnMAPDLInstance(PortAlreadyInUse):
     def __init__(
         self, msg="The port {port} is already used by an MAPDL instance.", port=50052
     ):
-        super().__init__(self, msg.format(port=port))
+        super().__init__(msg.format(port=port))
 
 
 class MapdlConnectionError(MapdlRuntimeError):
