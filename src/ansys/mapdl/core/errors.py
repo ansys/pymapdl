@@ -133,6 +133,7 @@ class NotEnoughResources(MapdlExitedError):
     ):
         super().__init__(msg.format(resource=resource))
 
+
 class NotEnoughResources(MapdlExitedError):
     """Raised when MAPDL has exited"""
 
