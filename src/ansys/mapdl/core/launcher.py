@@ -2155,6 +2155,8 @@ def _parse_slurm_options(
 
     LOG.info(f"Setting RAM to: {ram}")
 
+    # We use "-dis " (with space) to avoid collision with user variables such
+    # as `-distro` or so
     if "-dis " not in additional_switches and not additional_switches.endswith("-dis"):
         additional_switches += " -dis"
 
