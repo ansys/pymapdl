@@ -583,16 +583,18 @@ def launch_grpc(
 
     else:  # linux
         command_parm = [
-                '"%s"' % exec_file,
-                job_sw,
-                cpu_sw,
-                ram_sw,
-                additional_switches,
-                port_sw,
-                grpc_sw,
-            ]
-    
-    command_parm = [each for each in command_parm if command_parm] # cleanning empty args.
+            '"%s"' % exec_file,
+            job_sw,
+            cpu_sw,
+            ram_sw,
+            additional_switches,
+            port_sw,
+            grpc_sw,
+        ]
+
+    command_parm = [
+        each for each in command_parm if command_parm
+    ]  # cleanning empty args.
     command = " ".join(command_parm)
 
     LOG.debug(f"Starting MAPDL with command: {command}")
@@ -1434,9 +1436,9 @@ def launch_mapdl(
 
     # Let's require the following env vars to exists to go into slurm mode.
     ON_SLURM = (
-        ON_SLURM and \
-        bool(os.environ.get("SLURM_JOB_NAME", "")) and \
-        bool(os.environ.get("SLURM_JOB_ID", ""))
+        ON_SLURM
+        and bool(os.environ.get("SLURM_JOB_NAME", ""))
+        and bool(os.environ.get("SLURM_JOB_ID", ""))
     )
 
     if detect_slurm_config and ON_SLURM:
@@ -1726,7 +1728,9 @@ def launch_mapdl(
                 nproc = 2
         else:
             if machine_cores < int(nproc):
-                raise NotEnoughResources(f"The machine has {machine_cores} cores and PyMAPDL is asking for {nproc} cores.")
+                raise NotEnoughResources(
+                    f"The machine has {machine_cores} cores and PyMAPDL is asking for {nproc} cores."
+                )
 
     start_parm.update(
         {
@@ -2123,13 +2127,13 @@ def _parse_slurm_options(
         # - SLURM_CPUS_ON_NODE is a property of the cluster, not of the job.
         #
         options = [
-                # 4,  # Fall back option
-                SLURM_CPUS_PER_TASK * SLURM_NTASKS,  # (CPUs)
-                SLURM_NPROCS,  # (CPUs)
-                # SLURM_NTASKS,  # (tasks) Not necessary the number of CPUs,
-                # SLURM_NNODES * SLURM_TASKS_PER_NODE * SLURM_CPUS_PER_TASK,  # (CPUs)
-                SLURM_CPUS_ON_NODE * SLURM_NNODES,  # (cpus)
-            ]
+            # 4,  # Fall back option
+            SLURM_CPUS_PER_TASK * SLURM_NTASKS,  # (CPUs)
+            SLURM_NPROCS,  # (CPUs)
+            # SLURM_NTASKS,  # (tasks) Not necessary the number of CPUs,
+            # SLURM_NNODES * SLURM_TASKS_PER_NODE * SLURM_CPUS_PER_TASK,  # (CPUs)
+            SLURM_CPUS_ON_NODE * SLURM_NNODES,  # (cpus)
+        ]
         LOG.info(f"On SLURM numer of processors options {options}")
         nproc = max(options)
 
