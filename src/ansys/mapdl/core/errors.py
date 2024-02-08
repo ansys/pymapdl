@@ -134,17 +134,6 @@ class NotEnoughResources(MapdlExitedError):
         super().__init__(msg.format(resource=resource))
 
 
-class NotEnoughResources(MapdlExitedError):
-    """Raised when MAPDL has exited"""
-
-    def __init__(
-        self,
-        msg="MAPDL has exited because there is not enough resources ({resource})",
-        resource="CPUs",
-    ):
-        MapdlExitedError.__init__(self, msg.format(resource=resource))
-
-
 class LockFileException(MapdlRuntimeError):
     """Error message when the lockfile has not been removed"""
 
@@ -166,20 +155,13 @@ class PortAlreadyInUse(MapdlDidNotStart):
         super().__init__(msg.format(port=port))
 
 
-class PortAlreadyInUse(MapdlDidNotStart):
-    """Error when the port is already occupied"""
-
-    def __init__(self, msg="The port {port} is already being used.", port=50052):
-        MapdlDidNotStart.__init__(self, msg.format(port=port))
-
-
 class PortAlreadyInUseByAnMAPDLInstance(PortAlreadyInUse):
     """Error when the port is already occupied"""
 
     def __init__(
         self, msg="The port {port} is already used by an MAPDL instance.", port=50052
     ):
-        PortAlreadyInUse.__init__(self, msg.format(port=port))
+        super().__init__(self, msg.format(port=port))
 
 
 class MapdlConnectionError(MapdlRuntimeError):
@@ -286,20 +268,6 @@ class CommandDeprecated(DeprecationError):
 
     def __init__(self, msg=""):
         super().__init__(msg)
-
-
-class DeprecationError(RuntimeError):
-    """Provides the error for deprecated commands, classes, interfaces, etc"""
-
-    def __init__(self, msg=""):
-        RuntimeError.__init__(self, msg)
-
-
-class CommandDeprecated(MapdlException, DeprecationError):
-    """Raised when a command is deprecated"""
-
-    def __init__(self, msg=""):
-        MapdlException.__init__(self, msg)
 
 
 # handler for protect_grpc
