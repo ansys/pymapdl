@@ -1436,7 +1436,7 @@ def launch_mapdl(
     ON_SLURM = (
         ON_SLURM and \
         bool(os.environ.get("SLURM_JOB_NAME", "")) and \
-        bool(os.environ.get("SLURM_NTASKS", ""))
+        bool(os.environ.get("SLURM_JOB_ID", ""))
     )
 
     if detect_slurm_config and ON_SLURM:
@@ -2122,16 +2122,16 @@ def _parse_slurm_options(
         #
         # - SLURM_CPUS_ON_NODE is a property of the cluster, not of the job.
         #
-        nproc = max(
-            [
+        options = [
                 # 4,  # Fall back option
-                # SLURM_CPUS_PER_TASK * SLURM_NTASKS,  # (CPUs)
+                SLURM_CPUS_PER_TASK * SLURM_NTASKS,  # (CPUs)
                 SLURM_NPROCS,  # (CPUs)
                 # SLURM_NTASKS,  # (tasks) Not necessary the number of CPUs,
-                # SLURM_NNODES * SLURM_TASKS_PER_NODE,  # (tasks)
-                # SLURM_CPUS_ON_NODE * SLURM_NNODES,  # (cpus)
+                # SLURM_NNODES * SLURM_TASKS_PER_NODE * SLURM_CPUS_PER_TASK,  # (CPUs)
+                SLURM_CPUS_ON_NODE * SLURM_NNODES,  # (cpus)
             ]
-        )
+        LOG.info(f"On SLURM numer of processors options {options}")
+        nproc = max(options)
 
     LOG.info(f"Setting number of CPUs to: {nproc}")
 
