@@ -1068,7 +1068,6 @@ def launch_mapdl(
     replace_env_vars: Optional[Dict[str, str]] = None,
     version: Optional[Union[int, str]] = None,
     detect_slurm_config: bool = True,
-    slurm_multiplier: int = 1,
     **kwargs,
 ) -> Union[MapdlGrpc, "MapdlConsole"]:
     """Start MAPDL locally.
@@ -1451,7 +1450,6 @@ def launch_mapdl(
             nproc,
             ram,
             additional_switches,
-            slurm_multiplier,
             **kwargs,
         )
         # To avoid timeouts
@@ -2058,7 +2056,6 @@ def _parse_slurm_options(
     nproc: int,
     ram: Union[str, int],
     additional_switches: str,
-    slurm_multiplier: Union[str, int] = 1,
     **kwargs,
 ):
     ## Getting env vars
