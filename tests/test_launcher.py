@@ -450,13 +450,14 @@ def test_find_ansys(mapdl):
 @requires("local")
 def test_version(mapdl):
     version = int(10 * mapdl.version)
-    mapdl_ = launch_mapdl(
+    launching_arg = launch_mapdl(
         port=mapdl.port + 1,
         version=version,
         start_timeout=start_timeout,
         additional_switches=QUICK_LAUNCH_SWITCHES,
+        _debug_no_launch=True,
     )
-    mapdl_.exit()
+    assert str(version) in launching_arg["start_parm"]["exec_file"]
 
 
 @requires("local")

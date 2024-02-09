@@ -1446,6 +1446,7 @@ def launch_mapdl(
         )
     use_vtk = kwargs.pop("use_vtk", None)
     just_launch = kwargs.pop("just_launch", None)
+    _debug_no_launch = kwargs.pop("_debug_no_launch", None)
 
     # Transferring MAPDL arguments to start_parameters:
     start_parm = {}
@@ -1723,6 +1724,22 @@ def launch_mapdl(
             )
 
         elif mode == "grpc":
+            if _debug_no_launch:
+                # Early exit, just for testing
+                return pack_parameters(
+                    port,
+                    ip,
+                    add_env_vars,
+                    replace_env_vars,
+                    cleanup_on_exit,
+                    loglevel,
+                    set_no_abort,
+                    remove_temp_dir_on_exit,
+                    log_apdl,
+                    use_vtk,
+                    start_parm,
+                )
+
             port, actual_run_location, process = launch_grpc(
                 port=port,
                 ip=ip,
@@ -2004,3 +2021,33 @@ def _parse_ip_route(output):
 
     if match:
         return match[0]
+
+
+def pack_parameters(
+    port,
+    ip,
+    add_env_vars,
+    replace_env_vars,
+    cleanup_on_exit,
+    loglevel,
+    set_no_abort,
+    remove_temp_dir_on_exit,
+    log_apdl,
+    use_vtk,
+    start_parm,
+):
+    # pack all the arguments in a dict for debugging purposes
+    dict_ = {}
+    dict_["port"] = port
+    dict_["ip"] = ip
+    dict_["add_env_vars"] = add_env_vars
+    dict_["replace_env_vars"] = replace_env_vars
+    dict_["cleanup_on_exit"] = cleanup_on_exit
+    dict_["loglevel"] = loglevel
+    dict_["set_no_abort"] = set_no_abort
+    dict_["remove_temp_dir_on_exit"] = remove_temp_dir_on_exit
+    dict_["log_apdl"] = log_apdl
+    dict_["use_vtk"] = use_vtk
+    dict_["start_parm"] = start_parm
+
+    return dict_
