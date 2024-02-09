@@ -1471,8 +1471,8 @@ class Geometry:
 
         """
         anum = self.anum.ravel()
-        self._mapdl.starvget("elem_per_areas", "area", "", "ATTR", "NELM")
-        elem_per_areas = self._mapdl.parameters["elem_per_areas"]
+
+        elem_per_areas = self._mapdl.get_array("area", "", "ATTR", "NELM")
         elem_per_areas = elem_per_areas[anum - 1].ravel()
 
         return np.vstack((anum, elem_per_areas)).T.astype(np.int32)

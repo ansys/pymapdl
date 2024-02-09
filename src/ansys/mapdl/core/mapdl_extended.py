@@ -2355,6 +2355,7 @@ class _MapdlExtended(_MapdlCommandExtended):
         it2num: MapdlFloat = "",
         kloop: MapdlFloat = "",
         dtype: DTypeLike = None,
+        delete_after: bool = True,
         **kwargs,
     ) -> NDArray[np.float64]:
         """Uses the VGET command to get an array from ANSYS"""
@@ -2399,6 +2400,10 @@ class _MapdlExtended(_MapdlCommandExtended):
             self.run("(F20.12)")
 
         array = np.fromstring(self.last_response, sep="\n")
+
+        if delete_after or "__vget_tmp_" in parm_name:
+            self.run(f"{parm_name}=")
+
         if dtype:
             return array.astype(dtype)
         else:
