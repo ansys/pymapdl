@@ -556,8 +556,6 @@ def test_apdl_logging_start(tmpdir, mapdl):
     mapdl.k(3, 1, 1, 0)
     mapdl.k(4, 0, 1, 0)
 
-    mapdl.exit()
-
     with open(filename, "r") as fid:
         text = "".join(fid.readlines())
 
