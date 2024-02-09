@@ -2139,15 +2139,14 @@ def _parse_slurm_options(
     if not ram:
         if SLURM_MEM_PER_NODE:
             # RAM argument is in MB, so we need to convert
+
             if SLURM_MEM_PER_NODE[-1] == "T":  # tera
-                ram = int(SLURM_MEM_PER_NODE[:-1]) * 10**6
+                ram = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** 2
             elif SLURM_MEM_PER_NODE[-1] == "G":  # giga
-                ram = int(SLURM_MEM_PER_NODE[:-1]) * 10**3
-            elif SLURM_MEM_PER_NODE[-1] == "G":  # mega
-                ram = int(SLURM_MEM_PER_NODE[:-1]) * 10**0
-            elif SLURM_MEM_PER_NODE[-1].upper() == "k":  # mega
-                ram = int(SLURM_MEM_PER_NODE[:-1]) * 10 ** (-3)
-            else:
+                ram = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** 1
+            elif SLURM_MEM_PER_NODE[-1].upper() == "k":  # kilo
+                ram = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** (-1)
+            else:  # Mega
                 ram = int(SLURM_MEM_PER_NODE)
 
     LOG.info(f"Setting RAM to: {ram}")
