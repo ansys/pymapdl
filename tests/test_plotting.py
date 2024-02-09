@@ -955,3 +955,15 @@ def test_vplot_multiargs(mapdl, make_block):
         show_line_numbering=False,
         show_area_numbering=True,
     )
+
+
+def test_node_numbering_order(mapdl, cleared):
+    # create nodes
+    for node in range(1, 6):
+        mapdl.n(node, (node - 1) * 0.01)  # only need to define the X dimension
+
+    pl = mapdl.nplot(nnum=True, return_plotter=True, font_size=32)
+    assert np.allclose(mapdl.mesh.nodes, pl.meshes[0].points)
+    # There is no way to retrieve labels from the plotter object. So we cannot
+    # test it.
+    pl.show()

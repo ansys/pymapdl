@@ -70,7 +70,7 @@ tests = [
     "pyiges[full]==0.3.1",
     "pytest==8.0.0",
     "pytest-cov==4.1.0",
-    "pyvista==0.43.2",
+    "pyvista==0.43.3",
     "pyansys-tools-report==0.7.0",
     "vtk==9.3.0",
     "pytest-rerunfailures==13.0",

@@ -1,7 +1,7 @@
 sphinx==7.2.6
 ansys-dpf-core==0.10.1
 ansys-mapdl-reader==0.53.0
-ansys-sphinx-theme==0.13.2
+ansys-sphinx-theme==0.13.3
 grpcio==1.60.1
 imageio-ffmpeg==0.4.9
 imageio==2.33.1
@@ -13,11 +13,11 @@ pandas==2.2.0
 plotly==5.18.0
 pyiges[full]==0.3.1
 pypandoc==1.12
-pytest-sphinx==0.5.0
+pytest-sphinx==0.6.0
 pythreejs==2.4.2
-pyvista[trame]==0.43.2
-sphinx-autobuild==2021.3.14
-sphinx-autodoc-typehints==1.25.3
+pyvista[trame]==0.43.3
+sphinx-autobuild==2024.2.4
+sphinx-autodoc-typehints==2.0.0
 sphinx-copybutton==0.5.2
 sphinx-gallery==0.15.0
 sphinxcontrib-websupport==1.2.7
