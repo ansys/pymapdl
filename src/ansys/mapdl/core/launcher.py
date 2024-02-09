@@ -308,7 +308,7 @@ def launch_grpc(
         Number of processors.  Defaults to 2.
 
     ram : float, optional
-        Specifies the total size of the workspace Workspace (memory) in
+        Specifies the total size of the Workspace (memory) in
         megabytes used for the initial allocation. Specify a negative number to
         force a fixed size throughout the run. If ``None``, then the default is
         2 GB (2048 MB).
