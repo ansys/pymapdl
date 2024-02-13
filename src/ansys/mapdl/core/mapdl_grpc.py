@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """A gRPC specific class and methods for the MAPDL gRPC client """
 
 import fnmatch
@@ -52,6 +74,7 @@ from ansys.mapdl.core.errors import (
     MapdlConnectionError,
     MapdlExitedError,
     MapdlRuntimeError,
+    protect_from,
     protect_grpc,
 )
 from ansys.mapdl.core.mapdl import MapdlBase
@@ -186,15 +209,6 @@ def save_chunks_to_file(
         pbar.close()
 
     return file_size
-
-
-class RepeatingTimer(threading.Timer):
-    """Run a function repeately"""
-
-    def run(self):
-        while not self.finished.is_set():
-            self.function(*self.args, **self.kwargs)
-            self.finished.wait(self.interval)
 
 
 class MapdlGrpc(MapdlBase):
@@ -361,7 +375,7 @@ class MapdlGrpc(MapdlBase):
         self._locked: bool = False  # being used within MapdlPool
         self._stub: Optional[mapdl_grpc.MapdlServiceStub] = None
         self._cleanup: bool = cleanup_on_exit
-        self.__remove_temp_dir_on_exit: bool = remove_temp_dir_on_exit
+        self.remove_temp_dir_on_exit: bool = remove_temp_dir_on_exit
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: str = start_parm.get("run_location", None)
         self._busy: bool = False  # used to check if running a command on the server
@@ -402,7 +416,7 @@ class MapdlGrpc(MapdlBase):
         except MapdlConnectionError as err:  # pragma: no cover
             self._post_mortem_checks()
             self._log.debug(
-                "The error wasn't catch by the post-mortem checks.\nThe stdout is printed now:"
+                "The error wasn't caught by the post-mortem checks.\nThe stdout is printed now:"
             )
             self._log.debug(self._stdout)
 
@@ -628,7 +642,7 @@ class MapdlGrpc(MapdlBase):
             raise MapdlConnectionError(
                 f"A process is already running on the specified port ({self._port}).\n"
                 "Only one usage of each socket address (protocol/network address/port) is normally permitted.\n"
-                f"\nFull error message:\n{errs_message.split('########',1)[0]}"
+                f"\nFull error message:\n{errs_message.split('########', 1)[0]}"
             )
 
         else:
@@ -706,7 +720,7 @@ class MapdlGrpc(MapdlBase):
         info = super().__repr__()
         return info
 
-    def _connect(self, timeout=5, enable_health_check=False):
+    def _connect(self, timeout=5):
         """Establish a gRPC channel to a remote or local MAPDL instance.
 
         Parameters
@@ -738,10 +752,6 @@ class MapdlGrpc(MapdlBase):
             )
             self._timer.daemon = True
             self._timer.start()
-
-        # enable health check
-        if enable_health_check:
-            self._enable_health_check()
 
         return True
 
@@ -777,54 +787,6 @@ class MapdlGrpc(MapdlBase):
         if verstr:
             sver = version_string_as_tuple(verstr)
         return sver
-
-    def _enable_health_check(self):
-        """Places the status of the health check in _health_response_queue"""
-        # lazy imports here to speed up module load
-        from grpc_health.v1 import health_pb2, health_pb2_grpc
-
-        def _consume_responses(response_iterator, response_queue):
-            try:
-                for response in response_iterator:
-                    response_queue.put(response)
-                # NOTE: we're doing absolutely nothing with this as
-                # this point since the server side health check
-                # doesn't change state.
-            except Exception as err:
-                if self._exiting:
-                    return
-                self._exited = True
-                raise MapdlExitedError("Lost connection with MAPDL server") from None
-
-        # enable health check
-        from queue import Queue
-
-        request = health_pb2.HealthCheckRequest()
-        self._health_stub = health_pb2_grpc.HealthStub(self._channel)
-        rendezvous = self._health_stub.Watch(request)
-
-        # health check feature implemented after 2020R2
-        try:
-            status = rendezvous.next()
-        except Exception as err:
-            if err.code().name != "UNIMPLEMENTED":
-                raise err
-            return
-
-        if status.status != health_pb2.HealthCheckResponse.SERVING:
-            raise MapdlRuntimeError(
-                "Unable to enable health check and/or connect to" " the MAPDL server"
-            )
-
-        self._health_response_queue = Queue()
-
-        # allow main process to exit by setting daemon to true
-        thread = threading.Thread(
-            target=_consume_responses,
-            args=(rendezvous, self._health_response_queue),
-            daemon=True,
-        )
-        thread.start()
 
     def _launch(self, start_parm, timeout=10):
         """Launch a local session of MAPDL in gRPC mode.
@@ -1002,6 +964,7 @@ class MapdlGrpc(MapdlBase):
             except Exception:
                 continue
 
+    @protect_from(ValueError, "I/O operation on closed file.")
     def exit(self, save=False, force=False):
         """Exit MAPDL.
 
@@ -1079,15 +1042,15 @@ class MapdlGrpc(MapdlBase):
         if self._local and self._port in _LOCAL_PORTS:
             _LOCAL_PORTS.remove(self._port)
 
-    def _remove_temp_dir_on_exit(self):
+    def _remove_temp_dir_on_exit(self, path=None):
         """Removes the temporary directory created by the launcher.
 
         This only runs if the current working directory of MAPDL is within the
         user temporary directory.
 
         """
-        if self.__remove_temp_dir_on_exit and self._local:
-            path = self.directory
+        if self.remove_temp_dir_on_exit and self._local:
+            path = path or self.directory
             tmp_dir = tempfile.gettempdir()
             ans_temp_dir = os.path.join(tmp_dir, "ansys_")
             if path.startswith(ans_temp_dir):
@@ -1110,7 +1073,13 @@ class MapdlGrpc(MapdlBase):
         a local process.
 
         """
-        self._log.debug("Killing MAPDL server")
+        try:
+            self._log.debug("Killing MAPDL server")
+        except ValueError:
+            # It might throw ValueError: I/O operation on closed file.
+            # if the logger already exited.
+            pass
+
         if (
             self._version >= 24.2
         ):  # We can't use the non-cached version because of recursion error.

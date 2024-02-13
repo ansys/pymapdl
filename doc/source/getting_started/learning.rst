@@ -1,4 +1,4 @@
-
+.. _ref_learning:
 
 ================
 Learning PyMAPDL
@@ -57,6 +57,7 @@ Course content
 * Meet the Instructor
 
 
+.. _ref_pymapdl_course:
 
 Getting started with PyMAPDL
 ----------------------------
@@ -172,7 +173,6 @@ Recommended articles
   `Link to 'Paraview Forum' question <paraview_question_read_rst_>`_.
 
 .. vale on
-
 
 Feel free to share any educational or learning resources by `opening an issue <pymapdl_issues_>`_
 or `starting a discussion <pymapdl_discussions_>`_ on GitHub.

@@ -1,9 +1,8 @@
 
 .. _ref_parameters:
 
-*********************************
 Setting and retrieving parameters
-*********************************
+=================================
 
 MAPDL parameters can be retrieved from an instance of 
 :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>`
@@ -54,10 +53,10 @@ For additional information on PyMAPDL array limitations, see
 .. _ref_special_named_param:
 
 Specially named parameters
-==========================
+--------------------------
 
 Parameters with leading underscores
------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Parameters starting with an underscore (``'_'``) are reserved parameters
 for MAPDL macros and routines. Their use is discouraged, and in PyMAPDL
@@ -93,7 +92,7 @@ to ``True``:
 
 
 Parameters with trailing underscores
-------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Parameters ending with an underscore are recommended for user routines
 and macros. You can set this type of parameter in PyMAPDL, but by default,
@@ -118,7 +117,7 @@ is set to ``True``:
 
 
 Parameters with leading and trailing underscores
-------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Parameters with both leading and trailing underscores are a special type. These parameters
 **CANNOT** be seen in the :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>` attribute

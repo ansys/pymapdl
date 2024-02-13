@@ -1,7 +1,30 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """gRPC service specific tests"""
 import os
 import re
 import shutil
+import sys
 
 import pytest
 
@@ -186,7 +209,8 @@ def test_large_output(mapdl, cleared):
     mapdl.esize(0.05)
     mapdl.vmesh("all")
     msg = mapdl.nlist()
-    assert len(msg) > 4 * 1024**2
+
+    assert sys.getsizeof(msg) > 4 * 1024**2
 
 
 def test__download_missing_file(mapdl, tmpdir):
@@ -360,7 +384,7 @@ def test_download_with_extension(
 
 @requires("local")
 def test_download_recursive(mapdl):
-    if mapdl._local:
+    if mapdl.is_local:
         temp_dir = os.path.join(mapdl.directory, "new_folder")
         os.makedirs(temp_dir, exist_ok=True)
         with open(os.path.join(temp_dir, "file0.txt"), "a") as fid:
@@ -407,10 +431,20 @@ def test_download_result(mapdl, cleared, tmpdir):
     assert os.path.exists(os.path.join(target_dir, "file.rst"))
 
     assert not os.path.exists("file.rst")
-    mapdl.download_result()  # with default argument
+    mapdl.download_result(preference="rst")  # with default argument
     assert os.path.exists("file.rst")
 
     os.remove("file.rst")
+
+    mapdl.download_result(preference="rth")
+    try:
+        os.remove("file.rst")
+    except Exception:
+        pass
+    try:
+        os.remove("file.rth")
+    except Exception:
+        pass
 
 
 def test__channel_str(mapdl):
@@ -526,3 +560,13 @@ def test_input_compatibility_api_change(mapdl):
 
     with pytest.raises(ValueError, match="A file name must be supplied."):
         mapdl.input()
+
+
+@requires("grpc")
+@requires("local")
+def test__check_stds(mapdl):
+    """Test that the standard input is checked."""
+
+    mapdl._read_stds()
+    assert mapdl._stdout is not None
+    assert mapdl._stderr is not None

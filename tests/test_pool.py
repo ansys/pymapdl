@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import os
 from pathlib import Path
 import time
@@ -37,7 +59,7 @@ skip_requires_194 = pytest.mark.skipif(
     not os.path.isfile(MAPDL194PATH), reason="Requires MAPDL 194"
 )
 
-TWAIT = 90
+TWAIT = 100
 NPROC = 1
 
 
@@ -66,7 +88,7 @@ def pool(tmpdir_factory):
     while len(mapdl_pool) != 0:
         time.sleep(0.1)
         if time.time() > timeout:
-            raise TimeoutError(f"Failed to restart instance in {TWAIT} seconds")
+            raise TimeoutError(f"Failed to kill instance in {TWAIT} seconds")
 
     assert len(mapdl_pool) == 0
 
@@ -88,13 +110,14 @@ def test_invalid_exec():
         )
 
 
-@pytest.mark.xfail(strict=False, reason="Flaky test. See #2435")
+# @pytest.mark.xfail(strict=False, reason="Flaky test. See #2435")
 @requires("local")
 def test_heal(pool):
     pool_sz = len(pool)
+    pool_names = pool._names  # copy pool names
+
+    # Killing one instance
     pool[0].exit()
-    pool[1].exit()
-    pool[2].exit()
 
     time.sleep(1)  # wait for shutdown
     timeout = time.time() + TWAIT
@@ -103,6 +126,7 @@ def test_heal(pool):
         if time.time() > timeout:
             raise TimeoutError(f"Failed to restart instance in {TWAIT} seconds")
 
+    assert pool._names == pool_names
     assert len(pool) == pool_sz
     pool._verify_unique_ports()
 
@@ -129,10 +153,12 @@ def test_map_timeout(pool):
 
     timeout = 2
     times = np.array([0, 1, 3, 4])
-    output = pool.map(func, times, timeout=timeout)
+    output = pool.map(func, times, timeout=timeout, wait=True)
+
     assert len(output) == (times < timeout).sum()
 
-    # wait for the pool to heal before continuing
+    # the timeout option kills the MAPDL instance when we reach the timeout.
+    # Let's wait for the pool to heal before continuing
     timeout = time.time() + TWAIT
     while len(pool) < pool_sz:
         time.sleep(0.1)
@@ -275,3 +301,28 @@ def test_directory_names_function(tmpdir):
     assert "Other_instance" in dirs_path_pool
 
     pool.exit(block=True)
+
+
+def test_num_instances():
+    with pytest.raises(ValueError, match="least 1 instance"):
+        pool = LocalMapdlPool(
+            0,
+            exec_file=EXEC_FILE,
+            nproc=NPROC,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+        )
+
+
+@requires("local")
+@skip_if_ignore_pool
+def test_only_one_instance():
+    pool = LocalMapdlPool(
+        1,
+        exec_file=EXEC_FILE,
+        nproc=NPROC,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+    )
+    pool_sz = len(pool)
+    _ = pool.map(lambda mapdl: mapdl.prep7())
+    assert len(pool) == pool_sz
+    pool.exit()

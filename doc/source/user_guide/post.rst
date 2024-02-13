@@ -95,13 +95,15 @@ a mask of the currently selected nodes:
 
 
 Postprocessing object methods
-------------------------------
+-----------------------------
+
 For a list of all postprocessing methods, see
 :ref:`post_processing_api`.
 
 
 Enriched command output
 ~~~~~~~~~~~~~~~~~~~~~~~
+
 All :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class commands output
 a string object that can be parsed to obtain specific data from it.
 

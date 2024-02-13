@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Module for launching MAPDL locally or connecting to a remote instance with gRPC."""
 
 import atexit
@@ -10,8 +32,10 @@ import subprocess
 import tempfile
 import threading
 import time
-from typing import TYPE_CHECKING, Tuple, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 import warnings
+
+import psutil
 
 try:
     import ansys.platform.instancemanagement as pypim
@@ -35,6 +59,9 @@ from ansys.mapdl.core.errors import (
     LockFileException,
     MapdlDidNotStart,
     MapdlRuntimeError,
+    NotEnoughResources,
+    PortAlreadyInUse,
+    PortAlreadyInUseByAnMAPDLInstance,
     VersionError,
 )
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
@@ -91,7 +118,7 @@ Be aware of possible errors or unexpected behavior with this configuration.
 GALLERY_INSTANCE = [None]
 
 
-def _cleanup_gallery_instance():  # pragma: no cover
+def _cleanup_gallery_instance() -> None:  # pragma: no cover
     """This cleans up any left over instances of MAPDL from building the gallery."""
     if GALLERY_INSTANCE[0] is not None:
         mapdl = MapdlGrpc(
@@ -104,7 +131,7 @@ def _cleanup_gallery_instance():  # pragma: no cover
 atexit.register(_cleanup_gallery_instance)
 
 
-def _is_ubuntu():
+def _is_ubuntu() -> bool:
     """Determine if running as Ubuntu.
 
     It's a bit complicated because sometimes the distribution is
@@ -135,7 +162,7 @@ def _is_ubuntu():
         return "ubuntu" in platform.platform().lower()
 
 
-def close_all_local_instances(port_range=None):
+def close_all_local_instances(port_range: range = None) -> None:
     """Close all MAPDL instances within a port_range.
 
     This function can be used when cleaning up from a failed pool or
@@ -159,7 +186,8 @@ def close_all_local_instances(port_range=None):
         port_range = range(50000, 50200)
 
     @threaded
-    def close_mapdl(port, name="Closing mapdl thread."):
+    def close_mapdl(port: Union[int, str], name: str = "Closing mapdl thread."):
+        # Name argument is used by the threaded decorator.
         try:
             mapdl = MapdlGrpc(port=port, set_no_abort=False)
             mapdl.exit()
@@ -172,7 +200,7 @@ def close_all_local_instances(port_range=None):
             close_mapdl(port)
 
 
-def check_ports(port_range, ip="localhost"):
+def check_ports(port_range: range, ip: str = "localhost") -> List[int]:
     """Check the state of ports in a port range"""
     ports = {}
     for port in port_range:
@@ -180,8 +208,21 @@ def check_ports(port_range, ip="localhost"):
     return ports
 
 
-def port_in_use(port, host=LOCALHOST):
+def port_in_use(port: Union[int, str], host: str = LOCALHOST) -> bool:
     """Returns True when a port is in use at the given host.
+
+    Must actually "bind" the address.  Just checking if we can create
+    a socket is insufficient as it's possible to run into permission
+    errors like:
+
+    - An attempt was made to access a socket in a way forbidden by its
+      access permissions.
+    """
+    return port_in_use_using_socket(port, host) or port_in_use_using_psutil(port)
+
+
+def port_in_use_using_socket(port: Union[int, str], host: str) -> bool:
+    """Returns True when a port is in use at the given host using socket librry.
 
     Must actually "bind" the address.  Just checking if we can create
     a socket is insufficient as it's possible to run into permission
@@ -198,21 +239,59 @@ def port_in_use(port, host=LOCALHOST):
             return True
 
 
+def is_ansys_process(proc: psutil.Process) -> bool:
+    """Check if the given process is an Ansys MAPDL process"""
+    return (
+        bool(proc)
+        and proc.name().lower().startswith(("ansys", "mapdl"))
+        and "-grpc" in proc.cmdline()
+    )
+
+
+def get_process_at_port(port) -> Optional[psutil.Process]:
+    """Get the process (psutil.Process) running at the given port"""
+    for proc in psutil.process_iter():
+        try:
+            connections = proc.connections(
+                kind="inet"
+            )  # just to check if we can access the
+        except psutil.AccessDenied:
+            continue
+
+        for conns in connections:
+            if conns.laddr.port == port:
+                return proc
+
+    return None
+
+
+def port_in_use_using_psutil(port: Union[int, str]) -> bool:
+    """Returns True when a port is in use at the given host using psutil.
+
+    This function iterate over all the process, and their connections until
+    it finds one using the given port.
+    """
+    if get_process_at_port(port):
+        return True
+    else:
+        return False
+
+
 def launch_grpc(
-    exec_file="",
-    jobname="file",
-    nproc=2,
-    ram=None,
-    run_location=None,
-    port=MAPDL_DEFAULT_PORT,
-    ip=LOCALHOST,
-    additional_switches="",
-    override=True,
-    timeout=20,
-    verbose=None,
-    add_env_vars=None,
-    replace_env_vars=None,
-    **kwargs,
+    exec_file: str = "",
+    jobname: str = "file",
+    nproc: int = 2,
+    ram: Optional[int] = None,
+    run_location: str = None,
+    port: int = MAPDL_DEFAULT_PORT,
+    ip: str = LOCALHOST,
+    additional_switches: str = "",
+    override: bool = True,
+    timeout: int = 20,
+    verbose: Optional[bool] = None,
+    add_env_vars: Optional[Dict[str, str]] = None,
+    replace_env_vars: Optional[Dict[str, str]] = None,
+    **kwargs,  # to keep compatibility with corba and console interface.
 ) -> Tuple[int, str, subprocess.Popen]:
     """Start MAPDL locally in gRPC mode.
 
@@ -250,9 +329,6 @@ def launch_grpc(
         these are already included to start up the MAPDL server.  See
         the notes section for additional details.
 
-    custom_bin : str, optional
-        Path to the MAPDL custom executable.
-
     override : bool, optional
         Attempts to delete the lock file at the run_location.
         Useful when a prior MAPDL session has exited prematurely and
@@ -264,7 +340,8 @@ def launch_grpc(
         ``False``.
 
         .. deprecated:: v0.65.0
-           The ``verbose`` argument is deprecated and will be removed in a future release.
+           The ``verbose`` argument is deprecated and will be completely
+           removed in a future release.
            Use a logger instead. See :ref:`api_logging` for more details.
 
     kwargs : dict
@@ -398,14 +475,11 @@ def launch_grpc(
     # disable all MAPDL pop-up errors:
     os.environ["ANS_CMD_NODIAG"] = "TRUE"
 
-    if verbose is not None:
-        warnings.warn(
-            "The ``verbose`` argument is deprecated and will be removed in a future release. "
-            "Use a logger instead. See :ref:`api_logging` for more details.",
-            DeprecationWarning,
+    if verbose:
+        raise DeprecationError(
+            "The ``verbose`` argument is deprecated and will be completely removed in a future release. Use a logger instead. "
+            "See https://mapdl.docs.pyansys.com/version/stable/api/logging.html for more details."
         )
-    elif verbose is None:
-        verbose = False
 
     # use temporary directory if run_location is unspecified
     if run_location is None:
@@ -435,9 +509,19 @@ def launch_grpc(
             port = max(pymapdl._LOCAL_PORTS) + 1
             LOG.debug(f"Using next available port: {port}")
 
-    while port_in_use(port) or port in pymapdl._LOCAL_PORTS:
-        port += 1
-        LOG.debug(f"Port in use.  Incrementing port number. port={port}")
+        while port_in_use(port) or port in pymapdl._LOCAL_PORTS:
+            port += 1
+            LOG.debug(f"Port in use.  Incrementing port number. port={port}")
+
+    else:
+        if port_in_use(port):
+            proc = get_process_at_port(port)
+            if proc:
+                if is_ansys_process(proc):
+                    raise PortAlreadyInUseByAnMAPDLInstance
+                else:
+                    raise PortAlreadyInUse
+
     pymapdl._LOCAL_PORTS.append(port)
 
     cpu_sw = "-np %d" % nproc
@@ -514,9 +598,6 @@ def launch_grpc(
 
     LOG.info(f"Running in {ip}:{port} the following command: '{command}'")
 
-    if verbose:
-        print(command)
-
     LOG.debug("MAPDL starting in background.")
     process = subprocess.Popen(
         command,
@@ -543,11 +624,18 @@ def launch_grpc(
             LOG.debug("Checking if gRPC server is alive.")
             _check_server_is_alive(stdout_queue, run_location, timeout)
 
-    except MapdlDidNotStart as e:
+    except MapdlDidNotStart as e:  # pragma: no cover
+        msg = (
+            str(e)
+            + f"\nRun location: {run_location}"
+            + f"\nCommand line used: {command}\n\n"
+        )
+
         terminal_output = "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
-        raise MapdlDidNotStart(
-            str(e) + "\n\n" + "The full terminal output is:\n\n" + terminal_output
-        ) from e
+        if terminal_output.strip():
+            msg = msg + "The full terminal output is:\n\n" + terminal_output
+
+        raise MapdlDidNotStart(msg) from e
 
     # Ending thread
     # Todo: Ending queue thread
@@ -556,9 +644,8 @@ def launch_grpc(
 
 def _check_process_is_alive(process, run_location):
     if process.poll() is not None:  # pragma: no cover
-        raise MapdlDidNotStart(
-            f"MAPDL process died.\nCheck the run location: '{run_location}')."
-        )
+        msg = f"MAPDL process died."
+        raise MapdlDidNotStart(msg)
 
 
 def _check_file_error_created(run_location, timeout):
@@ -577,9 +664,8 @@ def _check_file_error_created(run_location, timeout):
         time.sleep(sleep_time)
 
     if not has_ans:
-        raise MapdlDidNotStart(
-            f"MAPDL failed to start (No err file generated in '{run_location}')."
-        )
+        msg = f"MAPDL failed to start.\nNo error file (.err) generated in working directory."
+        raise MapdlDidNotStart(msg)
 
 
 def _check_server_is_alive(stdout_queue, run_location, timeout):
@@ -607,10 +693,7 @@ def _check_server_is_alive(stdout_queue, run_location, timeout):
             break
 
     else:
-        raise MapdlDidNotStart(
-            f"MAPDL failed to start the gRPC server.\nCheck the run location: '{run_location}').\n"
-            f"The full terminal output is:\n\n" + terminal_output
-        )
+        raise MapdlDidNotStart("MAPDL failed to start the gRPC server")
 
 
 def _get_std_output(std_queue, timeout=1):
@@ -619,7 +702,8 @@ def _get_std_output(std_queue, timeout=1):
     t0 = time.time()
     while (not reach_empty) or (time.time() < (t0 + timeout)):
         try:
-            lines.append(std_queue.get_nowait().decode())
+            message = std_queue.get_nowait().decode(encoding="utf-8", errors="replace")
+            lines.append(message)
         except Empty:
             reach_empty = True
 
@@ -953,31 +1037,31 @@ def _force_smp_student_version(add_sw, exec_path):
 
 
 def launch_mapdl(
-    exec_file=None,
-    run_location=None,
-    jobname="file",
-    nproc=2,
-    ram=None,
-    mode=None,
-    override=False,
-    loglevel="ERROR",
-    additional_switches="",
-    start_timeout=45,
-    port=None,
-    cleanup_on_exit=True,
-    start_instance=None,
-    ip=None,
-    clear_on_connect=True,
-    log_apdl=None,
-    remove_temp_files=None,
-    remove_temp_dir_on_exit=False,
-    verbose_mapdl=None,
-    license_server_check=True,
-    license_type=None,
-    print_com=False,
-    add_env_vars=None,
-    replace_env_vars=None,
-    version=None,
+    exec_file: Optional[str] = None,
+    run_location: Optional[str] = None,
+    jobname: str = "file",
+    nproc: Optional[int] = None,
+    ram: Optional[Union[int, str]] = None,
+    mode: Optional[str] = None,
+    override: bool = False,
+    loglevel: str = "ERROR",
+    additional_switches: str = "",
+    start_timeout: int = 45,
+    port: Optional[int] = None,
+    cleanup_on_exit: bool = True,
+    start_instance: Optional[bool] = None,
+    ip: Optional[str] = None,
+    clear_on_connect: bool = True,
+    log_apdl: Optional[Union[bool, str]] = None,
+    remove_temp_files: Optional[bool] = None,
+    remove_temp_dir_on_exit: bool = False,
+    verbose_mapdl: Optional[bool] = None,
+    license_server_check: bool = True,
+    license_type: Optional[bool] = None,
+    print_com: bool = False,
+    add_env_vars: Optional[Dict[str, str]] = None,
+    replace_env_vars: Optional[Dict[str, str]] = None,
+    version: Optional[Union[int, str]] = None,
     **kwargs,
 ) -> Union[MapdlGrpc, "MapdlConsole"]:
     """Start MAPDL locally.
@@ -1055,11 +1139,6 @@ def launch_mapdl(
         environment variable ``PYMAPDL_PORT=<VALID PORT>``
         This argument has priority over the environment variable.
 
-    custom_bin : str, optional
-        Path to the MAPDL custom executable.  On release 2020R2 on
-        Linux, if ``None``, will check to see if you have
-        ``ansys.mapdl_bin`` installed and use that executable.
-
     cleanup_on_exit : bool, optional
         Exit MAPDL when python exits or the mapdl Python instance is
         garbage collected.
@@ -1118,7 +1197,8 @@ def launch_mapdl(
         be tracked within pymapdl.  Default ``False``.
 
         .. deprecated:: v0.65.0
-           The ``verbose_mapdl`` argument is deprecated and will be removed in a future release.
+           The ``verbose_mapdl`` argument is deprecated and will be completely
+           removed in a future release.
            Use a logger instead. See :ref:`api_logging` for more details.
 
     license_server_check : bool, optional
@@ -1348,12 +1428,10 @@ def launch_mapdl(
         remove_temp_files = None
 
     if verbose_mapdl is not None:
-        warnings.warn(
-            "The ``verbose_mapdl`` argument is deprecated and will be removed in a future release. "
-            "Use a logger instead. See :ref:`api_logging` for more details.",
-            DeprecationWarning,
+        raise DeprecationError(
+            "The ``verbose_mapdl`` argument is deprecated and will be completely removed in a future release. Use a logger instead. "
+            "See https://mapdl.docs.pyansys.com/version/stable/api/logging.html for more details."
         )
-        verbose_mapdl = False
 
     # These parameters are partially used for unit testing
     set_no_abort = kwargs.pop("set_no_abort", True)
@@ -1367,6 +1445,8 @@ def launch_mapdl(
             "Hence this argument is not valid."
         )
     use_vtk = kwargs.pop("use_vtk", None)
+    just_launch = kwargs.pop("just_launch", None)
+    _debug_no_launch = kwargs.pop("_debug_no_launch", None)
 
     # Transferring MAPDL arguments to start_parameters:
     start_parm = {}
@@ -1384,7 +1464,8 @@ def launch_mapdl(
     if ip is None:
         ip = os.environ.get("PYMAPDL_IP", None)
 
-        if not ip and ON_WSL:
+    if ip is None:
+        if ON_WSL:
             ip = _get_windows_host_ip()
             if ip:
                 LOG.debug(
@@ -1507,6 +1588,10 @@ def launch_mapdl(
     if not start_instance:
         LOG.debug("Connecting to an existing instance of MAPDL at %s:%s", ip, port)
 
+        if just_launch:
+            print(f"There is an existing MAPDL instance at: {ip}:{port}")
+            return
+
         mapdl = MapdlGrpc(
             ip=ip,
             port=port,
@@ -1591,6 +1676,17 @@ def launch_mapdl(
     additional_switches = _check_license_argument(license_type, additional_switches)
     LOG.debug(f"Using additional switches {additional_switches}.")
 
+    # Setting number of processors
+    machine_cores = psutil.cpu_count(logical=False)
+    if not nproc:
+        if machine_cores < 2:  # default required cores
+            nproc = machine_cores  # to avoid starting issues
+        else:
+            nproc = 2
+    else:
+        if machine_cores < int(nproc):
+            raise NotEnoughResources
+
     start_parm.update(
         {
             "exec_file": exec_file,
@@ -1628,14 +1724,36 @@ def launch_mapdl(
             )
 
         elif mode == "grpc":
+            if _debug_no_launch:
+                # Early exit, just for testing
+                return pack_parameters(
+                    port,
+                    ip,
+                    add_env_vars,
+                    replace_env_vars,
+                    cleanup_on_exit,
+                    loglevel,
+                    set_no_abort,
+                    remove_temp_dir_on_exit,
+                    log_apdl,
+                    use_vtk,
+                    start_parm,
+                )
+
             port, actual_run_location, process = launch_grpc(
                 port=port,
                 ip=ip,
                 add_env_vars=add_env_vars,
                 replace_env_vars=replace_env_vars,
-                verbose=verbose_mapdl,
                 **start_parm,
             )
+
+            if just_launch:
+                out = [ip, port]
+                if hasattr(process, "pid"):
+                    out += [process.pid]
+                return out
+
             mapdl = MapdlGrpc(
                 ip=ip,
                 port=port,
@@ -1903,3 +2021,33 @@ def _parse_ip_route(output):
 
     if match:
         return match[0]
+
+
+def pack_parameters(
+    port,
+    ip,
+    add_env_vars,
+    replace_env_vars,
+    cleanup_on_exit,
+    loglevel,
+    set_no_abort,
+    remove_temp_dir_on_exit,
+    log_apdl,
+    use_vtk,
+    start_parm,
+):
+    # pack all the arguments in a dict for debugging purposes
+    dict_ = {}
+    dict_["port"] = port
+    dict_["ip"] = ip
+    dict_["add_env_vars"] = add_env_vars
+    dict_["replace_env_vars"] = replace_env_vars
+    dict_["cleanup_on_exit"] = cleanup_on_exit
+    dict_["loglevel"] = loglevel
+    dict_["set_no_abort"] = set_no_abort
+    dict_["remove_temp_dir_on_exit"] = remove_temp_dir_on_exit
+    dict_["log_apdl"] = log_apdl
+    dict_["use_vtk"] = use_vtk
+    dict_["start_parm"] = start_parm
+
+    return dict_

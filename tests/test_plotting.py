@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Unit tests regarding plotting."""
 import os
 
@@ -88,13 +110,19 @@ def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
     assert os.path.exists(plot_)
 
 
-def test_plots_no_vtk(mapdl):
-    mapdl.kplot(vtk=False)
-    mapdl.lplot(vtk=False)
-    mapdl.aplot(vtk=False)
-    mapdl.vplot(vtk=False)
-    mapdl.nplot(vtk=False)
-    mapdl.eplot(vtk=False)
+@pytest.mark.parametrize(
+    "method",
+    [
+        "kplot",
+        "lplot",
+        "aplot",
+        "vplot",
+        "nplot",
+        "eplot",
+    ],
+)
+def test_plots_no_vtk(mapdl, method):
+    _ = getattr(mapdl, method)(vtk=False)
 
 
 @pytest.mark.parametrize("vtk", [True, False, None])
@@ -927,3 +955,15 @@ def test_vplot_multiargs(mapdl, make_block):
         show_line_numbering=False,
         show_area_numbering=True,
     )
+
+
+def test_node_numbering_order(mapdl, cleared):
+    # create nodes
+    for node in range(1, 6):
+        mapdl.n(node, (node - 1) * 0.01)  # only need to define the X dimension
+
+    pl = mapdl.nplot(nnum=True, return_plotter=True, font_size=32)
+    assert np.allclose(mapdl.mesh.nodes, pl.meshes[0].points)
+    # There is no way to retrieve labels from the plotter object. So we cannot
+    # test it.
+    pl.show()
