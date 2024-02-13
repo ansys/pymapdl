@@ -159,7 +159,7 @@ if _HAS_CLICK:
     )
     def convert(
         filename_in: str,
-        output_file: str,
+        o: str,
         filename_out: str,
         loglevel: str,
         auto_exit: bool,
@@ -177,8 +177,8 @@ if _HAS_CLICK:
         """Convert MAPDL code to PyMAPDL"""
         from ansys.mapdl.core.convert import convert_script
 
-        if output_file:
-            filename_out = output_file
+        if o:
+            filename_out = o
 
         convert_script(
             filename_in,
