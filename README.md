@@ -41,26 +41,6 @@ Here's a quick demo of PyMAPDL within Visual Studio Code:
 PyMAPDL works within Jupyter Notebooks, the standard Python console,
 or in batch mode on Windows, Linux, and even Mac OS.
 
-## Try it!
-
-You can try PyMAPDL library by launching a PyMAPDL GitHub Codespace!
-This environment has already everything in place for you to start using PyMAPDL :smile:
-
-<p align="center">
-   <a href="https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fdevcontainer.json">
-   <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/-Open%20GitHub%20Codespace-ffffff?style=flat-square&logo=github&logoColor=000000">
-      <source media="(prefers-color-scheme: light)" srcset="https://img.shields.io/badge/-Open%20GitHub%20Codespace-333?style=flat-square&logo=github">
-      <img alt="PyMAPDL Logo" src="https://github.com/ansys/pymapdl/blob/main/doc/source/_static/logo_light.png" tar>
-   </picture>
-   </a>
-</p>
-
-More information can be found in [develop on codespaces](https://mapdl.docs.pyansys.com/version/dev/getting_started/codespaces.html).
-
-You can use this environment to contribute to PyMAPDL. For more information, visit 
-[Contributing](https://mapdl.docs.pyansys.com/version/stable/getting_started/contribution.html).
-
 ## Documentation and issues
 
 Documentation for the latest stable release of PyMAPDL is hosted at
