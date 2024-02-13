@@ -50,21 +50,6 @@ If you are going to do testing, you must install the testing dependencies with t
     pip install -e '.[tests]'
 
 
-Developing using Codespaces
-===========================
-
-You can save time by using `GitHub Codespaces <codespaces_features_>`_, which launches a fully ready
-coding environment based on Visual Studio Code. In this environment, some the of the preceding steps are already
-set for your convenience:
-
-* An MAPDL Student Edition is installed.
-* Git is installed with the latest PyMAPDL branch cloned.
-* A Python environment is installed with all dependencies.
-* PyMAPDL is installed as editable.
-
-For more information, see :ref:`develop_on_codespaces`.
-
-
 Develop PyMAPDL
 ===============
 
@@ -432,7 +417,7 @@ This way, it's not possible for you to push code that fails the style checks. Fo
    debug statements (python)............................(no files to check)Skipped
    Validate GitHub Workflows............................(no files to check)Skipped
    [INFO] Restored changes from /home/mapdl/.cache/pre-commit/patch1704703895-16914.
-   [ci/codespaces-quick-fixes-regarding-welcome-page c0f59f4c] my commit
+   [ci/mybranch cXXXXXXX] my commit
    1 file changed, 25 insertions(+)
    (.venv) mapdl@machine:~/pymapdl$ 
 
