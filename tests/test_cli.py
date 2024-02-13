@@ -35,7 +35,7 @@ def run_cli():
     def do_run(arguments=""):
         from click.testing import CliRunner
 
-        from ansys.mapdl.core.cli import launch_mapdl
+        from ansys.mapdl.core.cli import main
 
         if arguments:
             args = list(arguments.split(" "))
@@ -43,7 +43,7 @@ def run_cli():
             args = []
 
         runner = CliRunner()
-        result = runner.invoke(launch_mapdl, args)
+        result = runner.invoke(main, args)
 
         assert result.exit_code == 0
         return result.output
