@@ -1411,18 +1411,18 @@ class _MapdlCommandExtended(_MapdlCore):
 
         fname = self._get_file_name(fname=fname, ext=ext, default_extension="lgw")
 
-        if not self.is_local:
+        if self.is_local:
+            fname_ = fname
+        else:
             file_, ext_, _ = self._decompose_fname(fname)
             fname_ = self._get_file_name(fname=file_, ext=ext_)
-        else:
-            fname_ = fname
 
         # generate the log and download if necessary
         output = super().lgwrite(fname=fname_, kedit=kedit, **kwargs)
 
-        if not self.is_local:
-            self._download(fname_, fname)
-            fname_ = fname  # Update path
+        # Let's download the file to the location
+        self._download(fname_, fname)
+        fname_ = fname  # Update path
 
         # remove extra grpc /OUT commands
         REMOVE_LINES = ("/OUT", "/OUT,anstmp")
