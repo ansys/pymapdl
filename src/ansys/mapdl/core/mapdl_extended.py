@@ -1422,6 +1422,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
         if not self.is_local:
             self._download(fname_, fname)
+            fname_ = fname  # Update path
 
         # remove extra grpc /OUT commands
         REMOVE_LINES = ("/OUT", "/OUT,anstmp")
