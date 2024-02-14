@@ -1409,9 +1409,13 @@ class _MapdlCommandExtended(_MapdlCore):
         if not fname:
             fname = self.jobname
 
-        fname_in_mapdl = self._get_file_name(
-            fname=fname, ext=ext, default_extension="lgw"
-        )
+        fname = self._get_file_name(fname=fname, ext=ext, default_extension="lgw")
+
+        if not self.is_local:
+            file_, ext_, _ = self._decompose_fname(fname)
+            fname_in_mapdl = self._get_file_name(fname=file_, ext=ext_)
+        else:
+            fname_in_mapdl = fname
 
         # generate the log and download if necessary
         output = super().lgwrite(fname=fname_in_mapdl, kedit=kedit, **kwargs)
