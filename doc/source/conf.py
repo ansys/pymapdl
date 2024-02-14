@@ -69,8 +69,8 @@ SEARCH_HINTS = ["def", "class"]
 extensions = [
     "jupyter_sphinx",
     "numpydoc",
-    "sphinx.ext.autodoc",
-    "sphinx.ext.autosummary",
+    # "sphinx.ext.autodoc",
+    # "sphinx.ext.autosummary",
     "sphinx.ext.coverage",
     "sphinx.ext.doctest",
     "sphinx.ext.extlinks",
@@ -78,7 +78,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx_design",
     "sphinx_copybutton",
-    "sphinx_gallery.gen_gallery",
+    # "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
     "sphinx_reredirects",
@@ -100,7 +100,8 @@ intersphinx_mapping = {
     "ansys-math-core": ("https://math.docs.pyansys.com/version/stable/", None),
 }
 
-suppress_warnings = ["label.*"]
+suppress_warnings = ["label.*", "design.fa-build"]
+sd_fontawesome_latex = True
 # supress_warnings = ["ref.option"]
 
 # Graphviz diagrams configuration
