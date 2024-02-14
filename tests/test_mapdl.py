@@ -2339,3 +2339,28 @@ def test_remove_temp_dir_on_exit(mapdl, tmpdir):
 
 def test_sys(mapdl):
     assert "hi" in mapdl.sys("echo 'hi'")
+
+
+@pytest.mark.parametrize(
+    "remove_grpc_extra,kedit", ((True, "None"), (True, "comment"), (False, "None"))
+)
+def test_lgwrite(mapdl, cleared, remove_grpc_extra, kedit):
+    mapdl.prep7()
+    mapdl.k(1, 0, 0, 0, mute=True)
+    mapdl.k(2, 2, 0, 0)
+
+    mapdl.lgwrite("check_log.txt", kedit=kedit, remove_grpc_extra=remove_grpc_extra)
+
+    with open("check_log.txt", "r") as fid:
+        content = fid.read()
+
+    if remove_grpc_extra:
+        assert "/OUT" not in content
+        assert "__PYMAPDL_SESSION_ID__" not in content
+        assert "anstmp" not in content
+    else:
+        assert "/OUT" in content
+        assert "__PYMAPDL_SESSION_ID__" in content
+        assert "anstmp" in content
+
+    assert "LGWRITE" in content

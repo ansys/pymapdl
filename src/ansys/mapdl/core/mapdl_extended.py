@@ -1421,7 +1421,11 @@ class _MapdlCommandExtended(_MapdlCore):
 
         # remove extra grpc /OUT commands
         REMOVE_LINES = ("/OUT", "/OUT,anstmp")
-        REMOVE_LINES_STARTING = "*SET,__PYMAPDL_SESSION_ID__"
+        REMOVE_LINES_STARTING = (
+            "*SET,__PYMAPDL_SESSION_ID__",
+            "! *STATUS,__PYMAPDL_SESSION_ID__",
+            "*STATUS,__PYMAPDL_SESSION_ID__",
+        )
 
         if remove_grpc_extra and self.is_grpc:
             with open(fname, "r") as fid:
