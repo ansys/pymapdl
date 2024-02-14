@@ -2356,3 +2356,5 @@ def test_lgwrite(mapdl, cleared, filename, ext, remove_grpc_extra, kedit):
 
     if kedit != "remove":
         assert "LGWRITE" in content
+
+    os.remove(filename_)
