@@ -24,6 +24,7 @@
 import os
 import re
 import shutil
+import sys
 
 import pytest
 
@@ -208,7 +209,8 @@ def test_large_output(mapdl, cleared):
     mapdl.esize(0.05)
     mapdl.vmesh("all")
     msg = mapdl.nlist()
-    assert len(msg) > 4 * 1024**2
+
+    assert sys.getsizeof(msg) > 4 * 1024**2
 
 
 def test__download_missing_file(mapdl, tmpdir):

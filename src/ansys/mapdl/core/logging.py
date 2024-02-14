@@ -371,6 +371,7 @@ class Logger:
         to_file: bool = False,
         to_stdout: bool = True,
         filename: str = FILE_NAME,
+        catch_all_exceptions: bool = False,
     ):
         """Customized logger class for PyMAPDL.
 
@@ -413,7 +414,8 @@ class Logger:
             self.log_to_stdout(level=level)
 
         # Using logger to record unhandled exceptions
-        self.add_handling_uncaught_expections(self.logger)
+        if catch_all_exceptions:
+            self.add_handling_uncaught_expections(self.logger)
 
     def log_to_file(
         self, filename: str = FILE_NAME, level: LOG_LEVEL_TYPE = LOG_LEVEL
@@ -583,6 +585,7 @@ class Logger:
         ------
         Exception
             You can only input strings as ``name`` to this method.
+
         """
         count_ = 0
         new_name = name
