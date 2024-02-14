@@ -59,7 +59,7 @@ else
 endif
 
 	@$(SPHINXBUILD) -M latex "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
-	python validate_png.py  # clean-up GIFs mislabeled as PNG
+	python post_process_tex.py  # post-process latex file after sphinx build and before latex build
 	cd $(BUILDDIR)/latex && latexmk -r latexmkrc -pdf *.tex -interaction=nonstopmode || true
 	(test -f $(BUILDDIR)/latex/pymapdl-Documentation-*.pdf && echo pdf exists) || exit 1
 
