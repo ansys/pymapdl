@@ -6,6 +6,7 @@ Removes invalid PNGs (probably GIF)
 
 from glob import glob
 import os
+from pathlib import Path
 
 from PIL import Image
 
@@ -39,7 +40,15 @@ with open(latex_file, "r") as fid:
     content = fid.read()
 
 for old_file_name, new_file_name in files_to_replace:
-    content = content.replace(old_file_name, new_file_name)
+    old_file_name = os.path.basename(old_file_name)
+    new_file_name = os.path.basename(new_file_name)
+
+    name = Path(new_file_name).stem  # no extension
+
+    old_file_pattern = "{{" + f"{name}" + "}.gif}"  # {{manifold}.gif}
+    new_file_pattern = "{{" + f"{name}" + "}.png}"  # {{manifold}.gif}
+
+    content = content.replace(old_file_pattern, new_file_pattern)
 
 with open(latex_file, "w") as fid:
     fid.write(content)
