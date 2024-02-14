@@ -1413,15 +1413,15 @@ class _MapdlCommandExtended(_MapdlCore):
 
         if not self.is_local:
             file_, ext_, _ = self._decompose_fname(fname)
-            fname_in_mapdl = self._get_file_name(fname=file_, ext=ext_)
+            fname_ = self._get_file_name(fname=file_, ext=ext_)
         else:
-            fname_in_mapdl = fname
+            fname_ = fname
 
         # generate the log and download if necessary
-        output = super().lgwrite(fname=fname_in_mapdl, kedit=kedit, **kwargs)
+        output = super().lgwrite(fname=fname_, kedit=kedit, **kwargs)
 
         if not self.is_local:
-            self._download(fname_in_mapdl, fname)
+            self._download(fname_, fname)
 
         # remove extra grpc /OUT commands
         REMOVE_LINES = ("/OUT", "/OUT,anstmp")
@@ -1432,7 +1432,7 @@ class _MapdlCommandExtended(_MapdlCore):
         )
 
         if remove_grpc_extra and self.is_grpc:
-            with open(fname, "r") as fid:
+            with open(fname_, "r") as fid:
                 lines = [
                     line.strip() + "\n"
                     for line in fid
@@ -1442,7 +1442,7 @@ class _MapdlCommandExtended(_MapdlCore):
                     )
                 ]
 
-            with open(fname, "w") as fid:
+            with open(fname_, "w") as fid:
                 fid.writelines(lines)
 
         return output
