@@ -2340,7 +2340,10 @@ def test_lgwrite(mapdl, cleared, filename, ext, remove_grpc_extra, kedit):
 
     filename_ = f"{filename}.{ext}"
     assert filename_ in mapdl.list_files()
-    assert os.path.exists(filename_)
+    if mapdl.is_local:
+        assert os.path.exists(os.path.join(mapdl.directory, filename_))
+    else:
+        assert os.path.exists(filename_)
 
     with open(filename_, "r") as fid:
         content = fid.read()
