@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """
 .. _ref_solenoid_magnetostatic_2d:
 
@@ -32,7 +54,7 @@ material boundaries.
 
 The geometry of the solenoid is given in Figure 1.
 
-.. figure:: ../../../_static/model_solenoid_2d.png
+.. figure:: ../../../images/model_solenoid_2d.png
     :align: center
     :width: 600
     :alt:  Solenoid geometry description
@@ -56,7 +78,7 @@ The MAPDL default contour color style is used so Matplotlib is imported.
 The Power Graphics style plot is then set up via PyVista.
 
 """
-# sphinx_gallery_thumbnail_path = './_static/model_solenoid_2d.png'
+# sphinx_gallery_thumbnail_path = './images/model_solenoid_2d.png'
 
 import numpy as np
 import pyvista as pv

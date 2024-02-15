@@ -1,9 +1,35 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Test mesh """
 import os
 
 import numpy as np
 import pytest
-import pyvista as pv
+
+from conftest import has_dependency, requires
+
+if has_dependency("pyvista"):
+    import pyvista as pv
 
 from ansys.mapdl.core import examples
 
@@ -48,9 +74,9 @@ def test_repr(mapdl, cube_geom_and_mesh):
 
 
 def test_mapdl(mapdl):
-    from ansys.mapdl.core.mapdl import _MapdlCore
+    from ansys.mapdl.core.mapdl import MapdlBase
 
-    assert isinstance(mapdl.mesh._mapdl, _MapdlCore)
+    assert isinstance(mapdl.mesh._mapdl, MapdlBase)
 
 
 def test_local(mapdl):
@@ -94,9 +120,57 @@ def test_empty_mesh(mapdl, cleared):
     assert not mapdl.mesh._has_nodes
 
     # Others
-    assert mapdl.mesh.grid is None
-    with pytest.raises(ValueError):
-        mapdl.mesh.save("file.vtk")
+    if has_dependency("pyvista"):
+        assert mapdl.mesh.grid is None
+        with pytest.raises(ValueError):
+            mapdl.mesh.save("file.vtk")
+
+
+def test_element_node_components(mapdl, contact_geom_and_mesh):
+    mapdl.allsel()
+    assert not mapdl.mesh.element_components
+    assert "MYELEMCOMP" not in mapdl.mesh.element_components
+
+    assert mapdl.mesh.node_components
+    assert "TN.TGT" in mapdl.mesh.node_components
+    assert "CMNODE" not in mapdl.mesh.node_components
+
+    mapdl.cmsel("NONE")
+    mapdl.cm("CMNODE", "NODE")
+    mapdl.components["MYELEMCOMP"] = "ELEM", (1, 2, 3)
+
+    assert mapdl.mesh.element_components
+    assert "MYELEMCOMP" in mapdl.mesh.element_components
+
+    assert mapdl.mesh.node_components
+    assert "TN.TGT" not in mapdl.mesh.node_components
+    assert "CMNODE" in mapdl.mesh.node_components
+
+    mapdl.cmsel("NONE")
+    assert not mapdl.mesh.element_components
+    assert "MYELEMCOMP" not in mapdl.mesh.element_components
+
+    assert not mapdl.mesh.node_components
+    assert "TN.TGT" not in mapdl.mesh.node_components
+    assert "CMNODE" not in mapdl.mesh.node_components
+
+    mapdl.cmsel("S", "MYELEMCOMP")
+    assert mapdl.mesh.element_components
+    assert "MYELEMCOMP" in mapdl.mesh.element_components
+
+    assert not mapdl.mesh.node_components
+    assert "TN.TGT" not in mapdl.mesh.node_components
+    assert "CMNODE" not in mapdl.mesh.node_components
+
+    mapdl.cmsel("S", "CMNODE")
+    assert mapdl.mesh.node_components
+    assert "CMNODE" in mapdl.mesh.node_components
+    assert "TN.TGT" not in mapdl.mesh.node_components
+
+    mapdl.cmsel("all")
+    assert mapdl.mesh.node_components
+    assert "TN.TGT" in mapdl.mesh.node_components
+    assert "CMNODE" in mapdl.mesh.node_components
 
 
 def test_non_empty_mesh(mapdl, contact_geom_and_mesh):
@@ -129,17 +203,26 @@ def test_non_empty_mesh(mapdl, contact_geom_and_mesh):
     assert mapdl.mesh.tshape_key
     assert len(mapdl.mesh.tshape_key.keys()) > 0
 
-    # assert mapdl.mesh.element_components #Not implemented
-    # assert mapdl.mesh.node_components # Not implemented
+    mapdl.allsel()
+    mapdl.cmsel("all")
+    mapdl.cm("CMNODE", "NODE")
+    mapdl.components["MYELEMCOMP"] = "ELEM", (1, 2, 3)
+
+    assert mapdl.mesh.element_components
+    assert "MYELEMCOMP" in mapdl.mesh.element_components
+    assert mapdl.mesh.node_components
+    assert "CMNODE" in mapdl.mesh.node_components
 
     # bools
     assert mapdl.mesh._has_elements
     assert mapdl.mesh._has_nodes
 
     # Others
-    assert isinstance(mapdl.mesh.grid, pv.UnstructuredGrid)
-    assert mapdl.mesh.grid.n_cells > 0
-    assert mapdl.mesh.grid.n_points > 0
+    if has_dependency("pyvista"):
+        assert isinstance(mapdl.mesh.grid, pv.UnstructuredGrid)
+
+        assert mapdl.mesh.grid.n_cells > 0
+        assert mapdl.mesh.grid.n_points > 0
 
 
 def test_tshape_key(mapdl, contact_geom_and_mesh):
@@ -152,6 +235,7 @@ def test_tshape_key(mapdl, contact_geom_and_mesh):
     assert tshape.size > 0
 
 
+@requires("pyvista")
 def test_save(mapdl, cube_geom_and_mesh):
     # This test seems to fail when parallelized.
     fname = "mesh.vtk"

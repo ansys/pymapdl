@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Module for miscellaneous functions and methods"""
 from enum import Enum
 from functools import wraps
@@ -10,13 +32,19 @@ import random
 import re
 import socket
 import string
-import sys
 import tempfile
 from threading import Thread
+from typing import Union
 from warnings import warn
 import weakref
 
-from ansys.tools.path import get_available_ansys_installations
+try:
+    from ansys.tools.path import get_available_ansys_installations
+
+    _HAS_ATP = True
+except ModuleNotFoundError:
+    _HAS_ATP = False
+
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
@@ -112,9 +140,6 @@ class Plain_Report:
         if os.name == "posix":
             self.core.extend(["pexpect"])
 
-        if self.optional is not None and sys.version_info[1] < 9:
-            self.optional.append("ansys_corba")
-
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.
         if self.kwargs.get("gpu", False) and _HAS_PYVISTA:
@@ -197,14 +222,22 @@ class Plain_Report:
         # List installed Ansys
         lines = ["", "Ansys Environment Report", "-" * 79]
         lines = ["\n", "Ansys Installation", "******************"]
-        mapdl_install = get_available_ansys_installations()
-        if not mapdl_install:
-            lines.append("Unable to locate any Ansys installations")
+        if _HAS_ATP:
+            mapdl_install = get_available_ansys_installations()
+
+            if not mapdl_install:
+                lines.append("Unable to locate any Ansys installations")
+            else:
+                lines.append("Version   Location")
+                lines.append("------------------")
+                for key in sorted(mapdl_install.keys()):
+                    lines.append(f"{abs(key)}       {mapdl_install[key]}")
         else:
-            lines.append("Version   Location")
-            lines.append("------------------")
-            for key in sorted(mapdl_install.keys()):
-                lines.append(f"{abs(key)}       {mapdl_install[key]}")
+            mapdl_install = None
+            lines.append(
+                "Unable to locate any Ansys installations because 'ansys-tools-path is not installed."
+            )
+
         install_info = "\n".join(lines)
 
         env_info_lines = [
@@ -414,7 +447,9 @@ def threaded_daemon(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        name = kwargs.get("name", f"Threaded (with Daemon) `{func.__name__}` function")
+        name = kwargs.pop(
+            "thread_name", f"Threaded (with Daemon) `{func.__name__}` function"
+        )
         thread = Thread(target=func, name=name, args=args, kwargs=kwargs)
         thread.daemon = True
         thread.start()
@@ -682,13 +717,13 @@ class Information:
     --------
     >>> mapdl.info
     Product:             Ansys Mechanical Enterprise
-    MAPDL Version:       21.2
-    ansys.mapdl Version: 0.62.dev0
+    MAPDL Version:       24.1
+    ansys.mapdl Version: 0.68.0
 
     >>> print(mapdl)
     Product:             Ansys Mechanical Enterprise
-    MAPDL Version:       21.2
-    ansys.mapdl Version: 0.62.dev0
+    MAPDL Version:       24.1
+    ansys.mapdl Version: 0.68.0
 
     >>> mapdl.info.product
     'Ansys Mechanical Enterprise'
@@ -701,9 +736,9 @@ class Information:
 
     def __init__(self, mapdl):
         """Class Initializer"""
-        from ansys.mapdl.core.mapdl import _MapdlCore  # lazy import to avoid circular
+        from ansys.mapdl.core.mapdl import MapdlBase  # lazy import to avoid circular
 
-        if not isinstance(mapdl, _MapdlCore):  # pragma: no cover
+        if not isinstance(mapdl, MapdlBase):  # pragma: no cover
             raise TypeError("Must be implemented from MAPDL class")
 
         self._mapdl_weakref = weakref.ref(mapdl)
@@ -829,7 +864,7 @@ class Information:
 
     @title.setter
     def title(self, title):
-        return self._mapdl.title(title)
+        return self._mapdl.run(f"/TITLE, {title}")
 
     @property
     @update_information_first(True)
@@ -974,9 +1009,13 @@ class Information:
 
     def _get_stitles(self):
         return [
-            re.search(f"SUBTITLE  {i}=(.*)", self._get_titles()).groups(1)[0].strip()
-            if re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
-            else ""
+            (
+                re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
+                .groups(1)[0]
+                .strip()
+                if re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
+                else ""
+            )
             for i in range(1, 5)
         ]
 
@@ -1066,7 +1105,7 @@ class Information:
         return self._get_between(init_, end_string)
 
 
-def write_array(filename, array):
+def write_array(filename: Union[str, bytes], array: np.ndarray):
     """
     Write an array to a file.
 
@@ -1080,6 +1119,8 @@ def write_array(filename, array):
     array : numpy.ndarray
         Array.
     """
+    if isinstance(filename, bytes):
+        filename = filename.decode()
     np.savetxt(filename, array, fmt="%20.12f")
 
 
@@ -1107,7 +1148,7 @@ def requires_package(package_name, softerror=False):
                     f"To use the method '{function.__name__}', "
                     f"the package '{package_name}' is required.\n"
                     f"Please try to install '{package_name}' with:\n"
-                    f"pip install {package_name.replace('.','-') if 'ansys' in package_name else package_name}"
+                    f"pip install {package_name.replace('.', '-') if 'ansys' in package_name else package_name}"
                 )
 
                 if softerror:

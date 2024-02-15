@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from logging import Logger, StreamHandler
 import os
 import re
@@ -94,11 +116,6 @@ COMMANDS_WITH_EMPTY_ARGS = {
 
 COMMANDS_TO_NOT_BE_CONVERTED = [
     "CMPL",  # CMPLOT default behaviour does not match the `mapdl.cmplot`'s at the moemnt
-    "MODE",  # Until we merge #2431
-    "/LIN",  # Until we merge 2432
-    "/LAR",  # Until we merge 2432
-    "/TYP",  # Until we merge 2432
-    "/DSC",  # Until we merge 2432
     # CDREAD # commented above
 ]
 
@@ -1201,214 +1218,3 @@ class FileTranslator:
         for each in pymethods:
             if each.startswith(cmd):
                 return each
-
-
-import click
-
-
-@click.command()
-@click.argument("filename_in")
-@click.option("-o", default=None, help="Name of the output Python script.")
-@click.option("--filename_out", default=None, help="Name of the output Python script.")
-@click.option(
-    "--loglevel",
-    default=LOGLEVEL_DEFAULT,
-    help="Logging level of the ansys object within the script.",
-)
-@click.option(
-    "--auto_exit",
-    default=AUTO_EXIT_DEFAULT,
-    help="Adds a line to the end of the script to exit MAPDL. Default ``True``",
-)
-@click.option(
-    "--line_ending",
-    default=LINE_ENDING_DEFAULT,
-    help="When None, automatically is ``\n.``",
-)
-@click.option(
-    "--exec_file",
-    default=EXEC_FILE_DEFAULT,
-    help="Specify the location of the ANSYS executable and include it in the converter output ``launch_mapdl`` call.",
-)
-@click.option(
-    "--macros_as_functions",
-    default=MACROS_AS_FUNCTIONS_DEFAULT,
-    help="Attempt to convert MAPDL macros to python functions.",
-)
-@click.option(
-    "--use_function_names",
-    default=USE_FUNCTION_NAMES_DEFAULT,
-    help="Convert MAPDL functions to ansys.mapdl.core.Mapdl class methods.  When ``True``, the MAPDL command ``K`` will be converted to ``mapdl.k``.  When ``False``, it will be converted to ``mapdl.run('k')``.",
-)
-@click.option(
-    "--show_log",
-    default=SHOW_LOG_DEFAULT,
-    help="Print the converted commands using a logger (from ``logging`` Python module).",
-)
-@click.option(
-    "--add_imports",
-    default=ADD_IMPORTS_DEFAULT,
-    help='If ``True``, add the lines ``from ansys.mapdl.core import launch_mapdl`` and ``mapdl = launch_mapdl(loglevel="WARNING")`` to the beginning of the output file. This option is useful if you are planning to use the output script from another mapdl session. See examples section. This option overrides ``auto_exit``.',
-)
-@click.option(
-    "--comment_solve",
-    default=COMMENT_SOLVE_DEFAULT,
-    help='If ``True``, it will pythonically comment the lines that contain ``"SOLVE"`` or ``"/EOF"``.',
-)
-@click.option(
-    "--cleanup_output",
-    default=CLEANUP_OUTPUT_DEFAULT,
-    help="If ``True`` the output is formatted using ``autopep8`` before writing the file or returning the string. This requires ``autopep8`` to be installed.",
-)
-@click.option(
-    "--header",
-    default=HEADER_DEFAULT,
-    help="If ``True``, the default header is written in the first line of the output. If a string is provided, this string will be used as header.",
-)
-@click.option(
-    "--print_com",
-    default=PRINT_COM_DEFAULT,
-    help="Print command ``/COM`` arguments to python console. Defaults to ``True``.",
-)
-@click.option(
-    "--only_commands",
-    default=ONLY_COMMANDS_DEFAULT,
-    help="""converts only the commands, meaning that header
-        (``header=False``), imports (``add_imports=False``),
-        and exit commands are NOT included (``auto_exit=False``).
-        Overrides ``header``, ``add_imports`` and ``auto_exit``.""",
-)
-@click.option(
-    "--use_vtk",
-    default=USE_VTK_DEFAULT,
-    help="""It sets the `mapdl.use_vtk` argument equals True or False depending on
-        this value.""",
-)
-@click.option(
-    "--clear_at_start",
-    default=CLEAR_AT_START_DEFAULT,
-    help="""Add a `mapdl.clear()` after the Mapdl object initialization. Defaults to
-        `False`.""",
-)
-@click.option(
-    "--check_parameter_names",
-    default=CHECK_PARAMETER_NAMES_DEFAULT,
-    help="""Set MAPDL object to avoid parameter name checks (do not raise leading underscored parameter exceptions). Defaults to `True`.""",
-)
-def cli(
-    filename_in,
-    o,
-    filename_out,
-    loglevel,
-    auto_exit,
-    line_ending,
-    exec_file,
-    macros_as_functions,
-    use_function_names,
-    show_log,
-    add_imports,
-    comment_solve,
-    cleanup_output,
-    header,
-    print_com,
-    only_commands,
-    use_vtk,
-    clear_at_start,
-    check_parameter_names,
-):
-    """PyMAPDL CLI tool for converting MAPDL scripts to PyMAPDL scripts.
-
-    USAGE:
-
-    This example demonstrates the main use of this tool:
-
-        $ pymapdl_convert_script mapdl.dat -o python.py
-
-        File mapdl.dat successfully converted to python.py.
-
-    The output argument is optional, in which case the "py" extension is used:
-
-        $ pymapdl_convert_script mapdl.dat
-
-        File mapdl.dat successfully converted to mapdl.py.
-
-    You can use any option from ``ansys.mapdl.core.convert.convert_script`` function:
-
-        $ pymapdl_convert_script mapdl.dat --auto-exit False
-
-        File mapdl.dat successfully converted to mapdl.py.
-
-        $ pymapdl_convert_script.exe mapdl.dat --filename_out mapdl.out --add_imports False
-
-        File mapdl.dat successfully converted to mapdl.out.
-
-
-    """
-    if o:
-        filename_out = o
-
-    # Parsing commands:
-    loglevel = _parse_cli_command(loglevel, LOGLEVEL_DEFAULT)
-    auto_exit = _parse_cli_command(auto_exit, AUTO_EXIT_DEFAULT)
-    line_ending = _parse_cli_command(line_ending, LINE_ENDING_DEFAULT)
-    exec_file = _parse_cli_command(exec_file, EXEC_FILE_DEFAULT)
-    macros_as_functions = _parse_cli_command(
-        macros_as_functions, MACROS_AS_FUNCTIONS_DEFAULT
-    )
-    use_function_names = _parse_cli_command(
-        use_function_names, USE_FUNCTION_NAMES_DEFAULT
-    )
-    show_log = _parse_cli_command(show_log, SHOW_LOG_DEFAULT)
-    add_imports = _parse_cli_command(add_imports, ADD_IMPORTS_DEFAULT)
-    comment_solve = _parse_cli_command(comment_solve, COMMENT_SOLVE_DEFAULT)
-    cleanup_output = _parse_cli_command(cleanup_output, CLEANUP_OUTPUT_DEFAULT)
-    header = _parse_cli_command(header, HEADER_DEFAULT)
-    print_com = _parse_cli_command(print_com, PRINT_COM_DEFAULT)
-    only_commands = _parse_cli_command(only_commands, ONLY_COMMANDS_DEFAULT)
-    use_vtk = _parse_cli_command(use_vtk, USE_VTK_DEFAULT)
-    clear_at_start = _parse_cli_command(clear_at_start, CLEAR_AT_START_DEFAULT)
-    check_parameter_names = _parse_cli_command(
-        check_parameter_names, CHECK_PARAMETER_NAMES_DEFAULT
-    )
-
-    convert_script(
-        filename_in,
-        filename_out,
-        loglevel,
-        auto_exit,
-        line_ending,
-        exec_file,
-        macros_as_functions,
-        use_function_names,
-        show_log,
-        add_imports,
-        comment_solve,
-        cleanup_output,
-        header,
-        print_com,
-        only_commands,
-        use_vtk,
-        clear_at_start,
-        check_parameter_names,
-    )
-
-    if filename_out:
-        print(f"File {filename_in} successfully converted to {filename_out}.")
-    else:
-        print(
-            f"File {filename_in} successfully converted to {os.path.splitext(filename_in)[0] + '.py'}."
-        )
-
-
-def _parse_cli_command(command, default=None):
-    if isinstance(command, bool):
-        return command
-    if command is None:
-        return
-
-    if command.upper() == "TRUE":
-        return True
-    elif command.upper() == "FALSE":
-        return False
-    else:
-        return default

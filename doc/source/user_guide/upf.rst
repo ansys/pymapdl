@@ -2,7 +2,7 @@
 
 
 Using Python to code UPF subroutines
-------------------------------------
+====================================
 
 As an alternative to compiled languages like C and Fortran, you can use the
 Python language to code user programmable subroutines. A subset of the
@@ -10,7 +10,7 @@ documented UPF subroutines support the Python UPF capability. For more informati
 see `Supported UPF subroutines`_).
 
 You must install a Python distribution before using this feature. Python 3.8
-through Python 3.11 are supported.
+through Python 3.12 are supported.
 
 Python UPFs are only supported on Linux.
 
@@ -28,7 +28,7 @@ These topics are available:
 
 
 Supported UPF subroutines
-^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------
 
 A subset of the entire set of available UPF subroutines supports Python coding. The following
 table lists those that are supported.
@@ -82,7 +82,7 @@ table lists those that are supported.
 
 
 Python UPF methodology
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 
 Coding a Python UPF is different from using a compiled language like C/C++ or Fortran,
 mainly in terms of the API. Because the `gRPC technology <grpc_>`_ is used to handle
@@ -210,7 +210,7 @@ down:
 
 
 Accessing the database from the Python code
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------------------------
 
 Within your UPF routine, you might need to access the Mechanical APDL database in read/write
 mode. 
@@ -280,7 +280,7 @@ The following table describes the exposed functions.
 
 
 Python UPF limitations
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 
 The Python UPF capability has these limitations:
 
@@ -290,7 +290,7 @@ The Python UPF capability has these limitations:
 
 
 Python UPF examples
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 The following Python UPF examples are available in :ref:`python_upf_examples`:
 

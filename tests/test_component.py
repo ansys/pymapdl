@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import re
 import warnings
 
@@ -43,7 +65,7 @@ def test_set_item(mapdl, cube_geom_and_mesh, type_):
     mapdl.components[comp_name] = type_, [1, 2, 3]
 
     cm_ = mapdl.run("cmlist").upper()
-    assert comp_name not in cm_
+    assert comp_name in cm_  # the component should be selected already after creation
 
     mapdl.cmsel("S", comp_name)
     cm_ = mapdl.run("cmlist").upper()
@@ -68,6 +90,7 @@ def test_set_item_no_type(mapdl, cube_geom_and_mesh):
 def test_get_item(mapdl, cube_geom_and_mesh):
     mapdl.components["mycomp"] = "node", [1, 2, 3]
 
+    mapdl.cmsel("NONE")
     with pytest.raises(ComponentIsNotSelected):
         mapdl.components["mycomp"]
 
@@ -83,6 +106,7 @@ def test_get_item(mapdl, cube_geom_and_mesh):
 
 def test_get_item_autoselect_components(mapdl, cube_geom_and_mesh):
     mapdl.components["mycomp"] = "node", [1, 2, 3]
+    mapdl.cmsel("NONE")
 
     mapdl.components._autoselect_components = True
     cm_ = mapdl.run("cmlist").upper()
@@ -119,12 +143,7 @@ def test_contains_entities(mapdl, cube_geom_and_mesh, func, entity, selector, im
     func_ = getattr(mapdl, func)
     func_("S", vmin=1, vmax=imax)
 
-    if entity in ["nodes", "elem"]:
-        count = getattr(mapdl.mesh, selector)
-    else:
-        count = getattr(mapdl.geometry, selector)
-
-    assert len(count) == imax
+    assert mapdl.get_value(entity[:4], 0, "count") == imax
 
     mapdl.cm("mycomp", entity)
 
@@ -264,12 +283,42 @@ def test_dunder_methods_iter(mapdl, basic_components):
 
 
 def test_dunder_methods_keys(mapdl, basic_components):
-    assert ["MYCOMP1", "MYCOMP2"] == list(mapdl.components.list())
+    assert ["MYCOMP1", "MYCOMP2"] == list(mapdl.components.names)
 
 
 def test_dunder_methods_types(mapdl, basic_components):
-    assert ["NODE", "KP"] == list(mapdl.components.types())
+    assert ["NODE", "KP"] == list(mapdl.components.types)
 
 
 def test_dunder_methods_items(mapdl, basic_components):
     assert [("MYCOMP1", "NODE"), ("MYCOMP2", "KP")] == list(mapdl.components.items())
+
+
+def test__get_all_components_type(mapdl, cube_geom_and_mesh):
+    mapdl.allsel()
+    mapdl.esel("s", "", "", 1)
+    mapdl.nsel("s", "", "", 1)
+    mapdl.cm("cmelem", "ELEM")
+    mapdl.cm("cmnodes", "NODE")
+
+    mapdl.nsel("a", "", "", 2)
+    mapdl.esel("a", "", "", 2)
+    mapdl.cm("cmnodes2", "NODE")
+    mapdl.cm("cmelem2", "ELEM")
+
+    comp_elem = mapdl.components._get_all_components_type("ELEM")
+
+    expected_output = {"CMELEM": (1,), "CMELEM2": (1, 2)}
+    assert comp_elem
+    assert comp_elem == expected_output
+    assert "CMNODES" not in comp_elem
+    assert "CMNODES2" not in comp_elem
+
+    # Nodes
+    comp_nodes = mapdl.components._get_all_components_type("NODE")
+
+    expected_output = {"CMNODES": (1,), "CMNODES2": (1, 2)}
+    assert comp_nodes
+    assert comp_nodes == expected_output
+    assert "CMELEM" not in comp_nodes
+    assert "CMELEM2" not in comp_nodes

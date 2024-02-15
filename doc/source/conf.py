@@ -1,14 +1,10 @@
 """Sphinx documentation configuration file."""
+
 from datetime import datetime
 import os
 import warnings
 
-from ansys_sphinx_theme import (
-    ansys_favicon,
-    get_version_match,
-    pyansys_logo_black,
-    pyansys_logo_white,
-)
+from ansys_sphinx_theme import ansys_favicon, get_version_match, pyansys_logo_white
 import numpy as np
 import pyvista
 from pyvista.plotting.utilities.sphinx_gallery import DynamicScraper
@@ -78,12 +74,14 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
     "sphinx_autodoc_typehints",
+    "sphinx_design",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
     "sphinx_reredirects",
     "ansys_sphinx_theme.extension.linkcode",
+    "sphinx_design",
 ]
 
 # Intersphinx mapping
@@ -112,8 +110,8 @@ numpydoc_show_class_members = False
 numpydoc_xref_param_type = True
 numpydoc_validate = True
 numpydoc_validation_checks = {
-    "GL06",  # Found unknown section
-    "GL07",  # Sections are in the wrong order.
+    # "GL06",  # Found unknown section
+    # "GL07",  # Sections are in the wrong order.
     "GL08",  # The object does not have a docstring
     "GL09",  # Deprecation warning should precede extended summary
     "GL10",  # reST directives {directives} must be followed by two colons
@@ -140,6 +138,13 @@ notfound_urls_prefix = "/../"
 
 # static path
 html_static_path = ["_static"]
+
+html_css_files = [
+    "custom.css",
+    "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css",
+]
+
+panels_add_fontawesome_latex = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -178,6 +183,8 @@ with open("links.rst") as f:
     rst_epilog += f.read()
 
 rst_epilog = rst_epilog.replace("%%VERSION%%", "v231")
+rst_epilog = rst_epilog.replace("%%PYMAPDLVERSION%%", release)
+
 
 # Read link all substitutions from file
 with open("substitutions.rst") as f:
@@ -241,6 +248,7 @@ sphinx_gallery_conf = {
     "thumbnail_size": (350, 350),
     "remove_config_comments": True,
     "default_thumb_file": pyansys_logo_white,
+    "show_signature": False,
 }
 # ---
 
@@ -248,7 +256,7 @@ sphinx_gallery_conf = {
 # -- Options for HTML output -------------------------------------------------
 html_short_title = html_title = "PyMAPDL"
 html_theme = "ansys_sphinx_theme"
-html_logo = pyansys_logo_black
+html_logo = "./_static/pyansys-logo-black-cropped.png"  # pyansys_logo_black
 html_theme_options = {
     "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
     "github_url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}",
