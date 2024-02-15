@@ -15,6 +15,7 @@ To learn how to use this library it is recommended you:
 
 * Follow the :ref:`ref_pymapdl_course` course which guides you through PyMAPDL main functionalities.
 * Visit the `Examples gallery <pymapdl_examples_gallery_>`_ and learn from different examples, real life cases, etc.
+  A very good starting point is the `Static analysis of a corner bracket <ref_static_analysis_bracket_>`_ example.
 
 Additionally, to get the best out of PyMAPDL, you should be familiar with:
 
