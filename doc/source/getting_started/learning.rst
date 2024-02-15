@@ -9,22 +9,22 @@ Introduction
 
 .. centered:: _PyMAPDL provides a Pythonic access to Ansys Finite Element Solver MAPDL._
 
-As you can see above, PyMAPDL touches on different technologies such as Python, or Finite Elements, to bring them together
+PyMAPDL touches on different technologies such as Python, or Finite Elements, to bring them together
 and offer you a better user experience by connecting seamlessly Ansys solver and Python ecosystem.
 To learn how to use this library it is recommended you:
 
-* Follow the :ref:`ref_pymapdl_course` course which will guide through PyMAPDL main functionalities.
+* Follow the :ref:`ref_pymapdl_course` course which guides you through PyMAPDL main functionalities.
 * Visit the `Examples gallery <pymapdl_examples_gallery_>`_ and learn from different examples, real life cases, etc.
 
 Additionally, to get the best out of PyMAPDL, you should be familiar with:
 
-* **Python (basic)**. There are many courses, websites, etc availables on the internet for learning Python.
+* **Python (basic)**. There are many courses, websites, etc available on the internet for learning Python.
   Additionally, Ansys provides with an :ref:`ref_python_course` course.
 
 * **Finite Elements (intermediate)**. Since the physical models are solved using finite element methods (FEM), it is convenient
-  for the user to get a good understanding on how these methods work in order to get accurate and adequate solutions.
+  for the user to get a good understanding on how these methods work to get accurate and adequate solutions.
   On the Ansys learning website you can find the `Introduction to Finite Element Methods <course_fem_track_>`_ track,
-  a series of courses and material for you to get familiar with FEMs.
+  a series of courses and material for you to get familiar with finite element methods.
 
 * **Ansys MAPDL (advanced/specific)**. Since PyMAPDL interface with MAPDL through APDL commands, it is very convenient for
   you to get familiar with MAPDL commands and workflows.
