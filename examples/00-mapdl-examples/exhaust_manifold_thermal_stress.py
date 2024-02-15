@@ -34,7 +34,7 @@ Objective
 
 In this example, we will perform an FE analysis to compute the thermal stresses developed in an exhaust manifold. The manifold is made of structural steel and the temperature distribution in it is obtained from a CFD run. We import this data and map it onto FE mesh to define thermal load at each node using Gaussian interpolation kernel.
 
-.. image:: ../../../images/manifold.*
+.. image:: ../../../images/manifold.gif
    :align: center
    :width: 400
    :alt: Exhaust Manifold CFD Results
