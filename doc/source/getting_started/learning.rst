@@ -4,15 +4,38 @@
 Learning PyMAPDL
 ================
 
-Ansys has prepared multiple resources to help you to learn and use PyMAPDL.
-You can access them from the website `Ansys Learning Resources <learning_resources_>`_.
-In this page, you can find a summary of the available resources for MAPDL and PyMAPDL.
+Introduction
+============
+
+.. centered:: _PyMAPDL provides a Pythonic access to Ansys Finite Element Solver MAPDL._
+
+As you can see above, PyMAPDL touches on different technologies such as Python, or Finite Elements, to bring them together
+and offer you a better user experience by connecting seamlessly Ansys solver and Python ecosystem.
+To learn how to use this library it is recommended you:
+
+* Follow the :ref:`ref_pymapdl_course` course which will guide through PyMAPDL main functionalities.
+* Visit the `Examples gallery <pymapdl_examples_gallery_>`_ and learn from different examples, real life cases, etc.
+
+Additionally, to get the best out of PyMAPDL, you should be familiar with:
+
+* **Python (basic)**. There are many courses, websites, etc availables on the internet for learning Python.
+  Additionally, Ansys provides with an :ref:`ref_python_course` course.
+
+* **Finite Elements (intermediate)**. Since the physical models are solved using finite element methods (FEM), it is convenient
+  for the user to get a good understanding on how these methods work in order to get accurate and adequate solutions.
+  On the Ansys learning website you can find the `Introduction to Finite Element Methods <course_fem_track_>`_ track,
+  a series of courses and material for you to get familiar with FEMs.
+
+* **Ansys MAPDL (advanced/specific)**. Since PyMAPDL interface with MAPDL through APDL commands, it is very convenient for
+  you to get familiar with MAPDL commands and workflows.
+  Ansys provides an :ref:`ref_mapdl_course` course for you to get familiarize with APDL commands.
 
 
 
+.. _ref_additional_learning:
 
 Downloads
-===========
+=========
 
 - You can try the Student Version of Ansys products in
   `Ansys Student Versions <ansys_student_version_>`_.
@@ -27,10 +50,12 @@ Downloads
 
 
 Courses
-==============
+=======
 
 Ansys has prepared high quality courses to guide you through the learning process.
 
+
+.. _ref_python_course:
 
 Intro to Python
 ---------------
@@ -75,7 +100,7 @@ Course content
 * Post Completion Survey
 * Meet the Instructors
 
-
+.. _ref_mapdl_course:
 
 Intro to Ansys Mechanical APDL scripting
 ----------------------------------------
@@ -149,6 +174,15 @@ You can find some of the technology showcase examples in PyMAPDL documentation
 showcases, visit `Technology showcase guide <ansys_techdemo_guide_>`_.
 
 **NOTE**: You might need to create a free Ansys account to access these resources.
+
+
+Additional resources
+====================
+
+Ansys has prepared multiple resources to help you to learn and use PyMAPDL.
+You can access them from the website `Ansys Learning Resources <learning_resources_>`_.
+In this page, you can find a summary of the available resources for MAPDL and PyMAPDL.
+
 
 Recommended articles
 ====================
