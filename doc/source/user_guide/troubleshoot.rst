@@ -514,7 +514,6 @@ method lists higher versions first and student versions last.
     information, see :ref:`conflicts_student_version`.
 
 
-
 PyMAPDL usage issues
 --------------------
 
