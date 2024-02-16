@@ -7,38 +7,33 @@ Learning PyMAPDL
 Introduction
 ============
 
-.. centered:: _PyMAPDL provides a Pythonic access to Ansys Finite Element Solver MAPDL._
+.. centered:: _PyMAPDL provides Pythonic access to MAPDL, an Ansys finite element solver._
 
-PyMAPDL touches on different technologies such as Python, or Finite Elements, to bring them together
-and offer you a better user experience by connecting seamlessly Ansys solver and Python ecosystem.
-To learn how to use this library it is recommended you:
+PyMAPDL touches on different technologies such as Python and finite elements, to bring them together
+and offer you a better user experience by seamlessly connecting this Ansys solver and the Python ecosystem.
+To learn how to use this library, you have many resources available:
 
-* Follow the :ref:`ref_pymapdl_course` course which guides you through PyMAPDL main functionalities.
-* Visit the `Examples gallery <pymapdl_examples_gallery_>`_ and learn from different examples, real life cases, etc.
-  A very good starting point is the `Static analysis of a corner bracket <ref_static_analysis_bracket_>`_ example.
-
-Additionally, to get the best out of PyMAPDL, you should be familiar with:
-
-* **Python (basic)**. There are many courses, websites, etc available on the internet for learning Python.
-  Additionally, Ansys provides with an :ref:`ref_python_course` course.
-
-* **Finite Elements (intermediate)**. Since the physical models are solved using finite element methods (FEM), it is convenient
-  for the user to get a good understanding on how these methods work to get accurate and adequate solutions.
-  On the Ansys learning website you can find the `Introduction to Finite Element Methods <course_fem_track_>`_ track,
-  a series of courses and material for you to get familiar with finite element methods.
-
-* **Ansys MAPDL (advanced/specific)**. Since PyMAPDL interface with MAPDL through APDL commands, it is very convenient for
-  you to get familiar with MAPDL commands and workflows.
-  Ansys provides an :ref:`ref_mapdl_course` course for you to get familiarize with APDL commands.
-
-
+* Complete the :ref:`ref_pymapdl_course` course, which guides you through PyMAPDL's
+  main functionalities.
+* Visit the `Examples gallery <pymapdl_examples_gallery_>`_ to learn from practical examples.
+  The `Static analysis of a corner bracket <ref_static_analysis_bracket_>`_ example is a very
+  good starting point.
+* Become familiar with the Python programming language. There are many online courses and
+  websites for learning Python. Additionally, Ansys provides a :ref:`ref_python_course` course.
+* Understand finite element methods (FEMs). Because physical models are solved using FEMs, you
+  need to know how these methods work to get accurate and adequate solutions. The 
+  `Introduction to Finite Element Methods <course_fem_track_>`_ course on the Ansys
+  Learning Resources website offers tracks to help you to get familiar with these methods.
+* Take the Ansys :ref:`ref_mapdl_course` course. Because PyMAPDL interface with MAPDL
+  through APDL commands, you should become familiar with MAPDL commands and
+  workflows.
 
 .. _ref_additional_learning:
 
 Downloads
 =========
 
-- You can try the Student Version of Ansys products in
+- You can try the Student Version of Ansys products. For more information, see
   `Ansys Student Versions <ansys_student_version_>`_.
   These are versions valid during a year and with limited capabilities 
   regarding number of nodes, elements, etc.
@@ -181,8 +176,8 @@ Additional resources
 ====================
 
 Ansys has prepared multiple resources to help you to learn and use PyMAPDL.
-You can access them from the website `Ansys Learning Resources <learning_resources_>`_.
-In this page, you can find a summary of the available resources for MAPDL and PyMAPDL.
+You can access them from the `Ansys Learning Resources <learning_resources_>`_ website.
+In this website, you can find a summary of the available resources for MAPDL and PyMAPDL.
 
 
 Recommended articles

@@ -348,8 +348,8 @@ mapdl.al("ALL")  # Prints the ID of the newly created area
 ###############################################################################
 # Add areas together
 # ~~~~~~~~~~~~~~~~~~
-# Append all areas again with the
-# :meth:`mapdl.aadd() <ansys.mapdl.core.Mapdl.aadd>` command.
+# Append all areas again using the
+# :meth:`mapdl.aadd() <ansys.mapdl.core.Mapdl.aadd>` method.
 # Because you have only the two areas to combine, use the ``'ALL'`` argument.
 #
 
