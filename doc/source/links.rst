@@ -91,7 +91,7 @@
 .. _course_intro_apdl: https://courses.ansys.com/index.php/courses/intro-to-ansys-mechanical-apdl-scripting/
 .. _course_fem_track: https://courses.ansys.com/index.php/learning-track/introduction-to-finite-element-methods/
 
-.. #External linksm
+.. #External links
 .. _padt_post: https://www.padtinc.com/2022/07/18/ansys-scripting-python-p1-solve-post/
 .. _padt_licensing: https://www.padtinc.com/blog/15271-2/
 .. _ansys_python_power_article: https://www.ansys.com/blog/accessing-ansys-from-python
