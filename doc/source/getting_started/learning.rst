@@ -16,7 +16,7 @@ To learn how to use this library, you have many resources available:
 * Complete the :ref:`ref_pymapdl_course` course, which guides you through PyMAPDL's
   main functionalities.
 * Visit the `Examples gallery <pymapdl_examples_gallery_>`_ to learn from practical examples.
-  The `Static analysis of a corner bracket <ref_static_analysis_bracket_>`_ example is a very
+  The `Static analysis of a corner bracket <pymapdl_bracket_static_example_>`_ example is a very
   good starting point.
 * Become familiar with the Python programming language. There are many online courses and
   websites for learning Python. Additionally, Ansys provides a :ref:`ref_python_course` course.
