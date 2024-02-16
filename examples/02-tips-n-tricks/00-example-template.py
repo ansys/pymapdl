@@ -182,7 +182,7 @@ print(mapdl)
 #
 # To include code blocks in RST, use the double colons `::` followed by indentation:
 #
-# .. code:: txt
+# .. code:: rst
 #
 #    .. code:: python
 #
