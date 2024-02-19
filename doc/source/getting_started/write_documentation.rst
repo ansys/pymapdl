@@ -197,7 +197,7 @@ Dynamic examples
 Dynamic examples are based on Python files and must be able to run in under three minutes.
 In the PyMAPDL repository, they are in the `examples <pymapdl_examples_>`_ directory.
 
-One dynamic example is the `MAPDL 2D Plane Stress Concentration Analysis <pymapdl_2d_plate_with_a_hole_>`_
+One dynamic example is the `MAPDL 2D Plane Stress Concentration Analysis <pymapdl_2d_plate_with_a_hole_>`_.
 example.
 The source code can be found in this GitHub `2d_plate_with_a_hole.py <pymapdl_2d_plate_with_a_hole_>`_. 
 This code is then rendered on the 
