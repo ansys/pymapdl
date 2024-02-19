@@ -1406,33 +1406,44 @@ class _MapdlCommandExtended(_MapdlCore):
     @wraps(_MapdlCore.lgwrite)
     def lgwrite(self, fname="", ext="", kedit="", remove_grpc_extra=True, **kwargs):
         """Wraps original /LGWRITE"""
+        if not fname:
+            fname = self.jobname
 
-        # always add extension to fname
-        if ext:
-            fname = fname + f".{ext}"
+        fname = self._get_file_name(fname=fname, ext=ext, default_extension="lgw")
 
-        # seamlessly deal with remote instances in gRPC mode
-        target_dir = None
-        is_grpc = "Grpc" in type(self).__name__
-        if is_grpc and fname:
-            if not self._local and os.path.basename(fname) != fname:
-                target_dir, fname = os.path.dirname(fname), os.path.basename(fname)
+        if self.is_local:
+            fname_ = fname
+        else:
+            file_, ext_, _ = self._decompose_fname(fname)
+            fname_ = self._get_file_name(fname=file_, ext=ext_)
 
         # generate the log and download if necessary
-        output = super().lgwrite(fname=fname, kedit=kedit, **kwargs)
+        output = super().lgwrite(fname=fname_, kedit=kedit, **kwargs)
 
-        if not fname:
-            # defaults to <jobname>.lgw
-            fname = self.jobname + ".lgw"
-        if target_dir is not None:
-            self.download(fname, target_dir=target_dir)
+        # Let's download the file to the location
+        self._download(fname_, fname)
+        fname_ = fname  # Update path
 
         # remove extra grpc /OUT commands
-        if remove_grpc_extra and is_grpc and target_dir:
-            filename = os.path.join(target_dir, fname)
-            with open(filename, "r") as fid:
-                lines = [line for line in fid if not line.startswith("/OUT")]
-            with open(filename, "w") as fid:
+        REMOVE_LINES = ("/OUT", "/OUT,anstmp")
+        REMOVE_LINES_STARTING = (
+            "*SET,__PYMAPDL_SESSION_ID__",
+            "! *STATUS,__PYMAPDL_SESSION_ID__",
+            "*STATUS,__PYMAPDL_SESSION_ID__",
+        )
+
+        if remove_grpc_extra and self.is_grpc:
+            with open(fname_, "r") as fid:
+                lines = [
+                    line.strip() + "\n"
+                    for line in fid
+                    if (
+                        line.strip() not in REMOVE_LINES
+                        and not line.startswith(REMOVE_LINES_STARTING)
+                    )
+                ]
+
+            with open(fname_, "w") as fid:
                 fid.writelines(lines)
 
         return output
