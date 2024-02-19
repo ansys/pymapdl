@@ -56,10 +56,6 @@ except ModuleNotFoundError:
 if _HAS_CLICK:
     ###################################
     # Convert CLI
-    # class MyGroup(click.Group):
-    #     def invoke(self, ctx):
-    #         ctx.obj = tuple(ctx.args)
-    #         super(MyGroup, self).invoke(ctx)
 
     @click.group(invoke_without_command=True)
     @click.pass_context
