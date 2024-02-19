@@ -233,7 +233,7 @@ print(mapdl)
 # It does not matter which character you use, but you need to be consistent
 # through the whole document.
 # For more information, see
-# `RestructuredText Primer<https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#sections>`_
+# `RestructuredText Primer <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#sections>`_
 # in the Sphinx documentation.
 #
 # As in Jupyter notebooks, if code is left unassigned at the end of a code block
