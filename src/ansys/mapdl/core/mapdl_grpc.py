@@ -3293,7 +3293,7 @@ class MapdlGrpc(MapdlBase):
 
     def _check_session_id(self):
         """Verify that the local session ID matches the remote MAPDL session ID."""
-        if self._checking_session_id_:
+        if self._checking_session_id_ or not self._strict_session_id_check:
             # To avoid recursion error
             return
 

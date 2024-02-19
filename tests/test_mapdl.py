@@ -1882,6 +1882,7 @@ def test_force_output(mapdl):
 
 
 def test_session_id(mapdl, running_test):
+    mapdl._strict_session_id_check = True
     assert mapdl._session_id is not None
 
     # already checking version
@@ -1908,6 +1909,7 @@ def test_session_id(mapdl, running_test):
     assert not mapdl._check_session_id()
 
     mapdl._session_id_ = id_
+    mapdl._strict_session_id_check = False
 
 
 def test_check_empty_session_id(mapdl):
