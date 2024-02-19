@@ -24,16 +24,15 @@
 .. _ref_how_to_add_an_example_reference_key:
 
 ============================
-Adding a New Gallery Example
+Adding a new gallery example
 ============================
 
-This example demonstrates how to add new examples as well as being a template
-that can be used in their creation.
+This example is an example itself which demonstrates how to add new examples to the documentation.
 
 Example location and naming
 ===========================
 
-New examples should be added as python scripts to:
+New examples should be added as Python scripts to:
 
 ``PyMAPDL/examples/XY-example-folder-name/``
 
@@ -53,7 +52,7 @@ Where ``XY`` is the number of the example. If there are already three examples n
 
 Initial block of text
 =====================
-At the top of each example there should be a block comment which will contain
+At the top of each example there should be a block comment that contains
 the following parts:
 
 Reference example
@@ -81,9 +80,9 @@ convention, we keep all references all in ``snake_case``.
 
 Example description
 -------------------
-This section should give a brief overview of what the example is about and/or demonstrates.
-The title should be changed to reflect the topic your example covers.
-A well structured example should be divided in several parts.
+This section should give a brief overview of what the example is about or what it demonstrates.
+The title should be changed to reflect the topic that your example covers.
+A well-structured example should be divided in several parts.
 The following lists gives you an idea of this division:
 
 * Problem specification
@@ -117,17 +116,17 @@ print(mapdl)
 #
 
 ###############################################################################
-#  Basic Text Formatting
+#  Basic text formatting
 # ~~~~~~~~~~~~~~~~~~~~~
 #
 # RST provides several ways to format text:
 #
 # - **Bold**: Use double asterisks `**` or double underscores `__` around
-#   the text you want to make bold. For instance `**my bold text**`.
+#   the text that you want to make bold. For example, `**my bold text**`.
 # - *Italic*: Use single asterisks `*` or single underscores `_` around the
-#   text you want to italicize. For instance `_my italic text_`.
-# - `Monospace`: Use single backticks \` around the text you want to display
-#   in monospace font. For instance `\`my monospace text\``.
+#   text that you want to italicize. For example, `_my italic text_`.
+# - `Monospace`: Use single backticks \` around the text that you want to display
+#   in monospace font. For example, `\`my monospace text\``.
 #
 
 ###############################################################################
@@ -153,7 +152,7 @@ print(mapdl)
 #
 
 ###############################################################################
-# Equations and Numbers
+# Equations and numbers
 # ~~~~~~~~~~~~~~~~~~~~~
 #
 # To include equations or numbers, you can use the following syntax:
@@ -177,7 +176,7 @@ print(mapdl)
 #
 
 ###############################################################################
-# Code Blocks
+# Code blocks
 # ~~~~~~~~~~~
 #
 # To include code blocks in RST, use the double colons `::` followed by indentation:
@@ -190,7 +189,7 @@ print(mapdl)
 #            print("Hello, {}!".format(name))
 #
 #
-# This will render as:
+# This renders as:
 #
 # .. code:: python
 #
@@ -199,7 +198,7 @@ print(mapdl)
 #
 
 ###############################################################################
-# Section Title
+# Section title
 # ~~~~~~~~~~~~~
 # Code blocks can be broken up with text "sections" which are interpreted as
 # restructured text.
@@ -208,9 +207,9 @@ print(mapdl)
 # Sections can contain any information you may have regarding the example
 # such as step-by-step comments or notes regarding motivations etc.
 #
-# To create a title and a section just underline its title with appropriate
-# characters likes ``=``, ``*`` or ``~``.
-# For instance:
+# To create a title or a section, underline it with the appropriate
+# characters, such as``=``, ``*``, or ``~``.
+# For example:
 #
 # .. code:: rst
 #
@@ -233,11 +232,12 @@ print(mapdl)
 #
 # It does not matter which character you use, but you need to be consistent
 # through the whole document.
-# More information can be found
-# `here <https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#sections>`_.
+# For more information, see
+# `RestructuredText Primer<https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#sections>`_
+in the Sphinx documentation.
 #
-# As in jupyter notebooks, if code is left unassigned at the end of a code block
-# (as with ``mapdl`` in the previous block) the output will be generated and
+# As in Jupyter notebooks, if code is left unassigned at the end of a code block
+# (as with ``mapdl`` in the previous block), the output is generated and
 # printed to the screen according to its ``__repr__``.
 # Otherwise, you can use ``print()`` to output the ``__str__``.
 
@@ -256,7 +256,7 @@ mapdl.block(0, 1, 0, 1, 0, 1)
 mapdl.vplot()
 
 ###############################################################################
-# Matplotlib plots will also be rendered in the html.
+# Matplotlib plots are also rendered in HTML format.
 #
 
 import matplotlib.pyplot as plt
@@ -292,7 +292,7 @@ plt.show()
 # and `figure <https://docutils.sourceforge.io/docs/ref/rst/directives.html#figure>`_
 
 ###############################################################################
-# Making a Pull Request
+# Making a pull request
 # ~~~~~~~~~~~~~~~~~~~~~
 # Once your example is complete and you've verified builds locally, you can make a pull request (PR).
 # Branches containing examples should be prefixed with `doc/` as per the branch

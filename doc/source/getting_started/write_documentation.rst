@@ -32,8 +32,8 @@ documentation dependencies with this command:
 Build the documentation
 =======================
 
-PyMAPDL documentation is mainly written in reStructuredText (RST)
-format, saved as ``.rst`` files in the ``doc/source`` directory.
+PyMAPDL documentation is mainly written in reStructuredText
+format, saved as RST files in the ``doc/source`` directory.
 The tool used to  build the documentation from these reStructuredText files 
 is `Sphinx <sphinx_>`_.
 
@@ -89,10 +89,11 @@ Here's a short summary of how to write good documentation:
    consistent structure. Use headings, subheadings, and a table of contents if
    necessary to help users navigate your documentation easily.
 
-#. **Use sphinx tool properly**: Sphinx has multiple features and directives. It is
-   recommended you get yourself familiarize with them before starting to write.
-   Useful guidance can be found
-   `here <sphinx_directives_>`_, `here <sphinx_basics_>`_ and `here <docutils_directives_>`_.
+#. **Use Sphinx properly**: Sphinx has multiple features and directives. Before
+   starting to write documentation, you should get familiar with it. For guidance,
+   see these Sphinx and DocUtils topics: `Directives <sphinx_directives_>`_,
+   `reStructuredText Primer<sphinx_basics_>`_ and
+   `reStructuredText Directives<docutils_directives_>`_.
 
 #. **Explain configuration changes**: If you require configuration changes, provide
    clear instructions on how to use this new configuration, along with examples and explanations
@@ -177,10 +178,10 @@ Creating an example is also a good way to get familiar with the tool and
 contribute to its improvement.
 `PyMAPDL gallery <pymapdl_examples_gallery_>`_ contain dozens of examples
 that demonstrate PyMAPDL capabilities and features.
-You can contribute to expand this gallery by creating and sharing your
+You can expand this gallery by creating and sharing your
 own example.
 
-There `example template <pymapdl_examples_template_>`_ shows you how to
+This `example template <pymapdl_examples_template_>`_ shows how to
 write and structure an example.
 
 There are three types of examples: dynamic, static, and semi-static.
@@ -196,11 +197,11 @@ Dynamic examples
 Dynamic examples are based on Python files and must be able to run in under three minutes.
 In the PyMAPDL repository, they are in the `examples <pymapdl_examples_>`_ directory.
 
-One example of a dynamic examples is the `MAPDL 2D Plane Stress Concentration Analysis <pymapdl_2d_plate_with_a_hole_>`_
+One dynamic example is the `MAPDL 2D Plane Stress Concentration Analysis <pymapdl_2d_plate_with_a_hole_>`_
 example.
-The source code can be found in this GitHub `link <pymapdl_2d_plate_with_a_hole_>`_. 
-This code is then rendered in the 
-`MAPDL 2D Plane Stress Concentration Analysis <pymapdl_doc_2d_plate_with_a_hole_>`_ website.
+The source code can be found in this GitHub `2d_plate_with_a_hole.py <pymapdl_2d_plate_with_a_hole_>`_. 
+This code is then rendered on the 
+`MAPDL 2D Plane Stress Concentration Analysis <pymapdl_doc_2d_plate_with_a_hole_>`_ page.
 
 Because dynamic examples must run each time the documentation is built, make sure that they are
 short.
@@ -211,23 +212,20 @@ examples.
 Static examples
 ---------------
 
-Static examples are based on reStructuredText files and hence they do not require to
+Static examples are based on reStructuredText files and do not have to
 be executed or run using Python.
 In the PyMAPDL repository, they are in the `doc\source <pymapdl_doc_source_>`_ directory.
 
-One example of a static example is
-`Harmonic analysis using the frequency-sweep Krylov method <pymapdl_doc_krylov_example_>`_
-example. 
-This example shows how to do an harmonic analysis using Krylov method.
-The source code can be found in the GitHub `link <pymapdl_doc_krylov_example_rst_>`_ and it
-is rendered as HTML in 
-`Harmonic analysis using the frequency-sweep Krylov method <pymapdl_doc_krylov_example_>`_
+One static example is the `Harmonic analysis using the frequency-sweep Krylov method <pymapdl_doc_krylov_example_>`_ example. 
+This example shows how to do an harmonic analysis using the Krylov method.
+The source code can be found in the GitHub `krylov_example.rst <pymapdl_doc_krylov_example_rst_>`_, and it
+is rendered as HTML on the `Harmonic analysis using the frequency-sweep Krylov method <pymapdl_doc_krylov_example_>`_ page.
 
 
 Semi-dynamic examples
 ---------------------
 
-Semi-dynamic examples are RST static files that execute Python code using this RST directive:
+Semi-dynamic examples are static RST files that execute Python code using this RST directive:
 
 .. code:: rst
 
@@ -236,13 +234,13 @@ Semi-dynamic examples are RST static files that execute Python code using this R
 
 
 These examples are also located in `doc\source <pymapdl_doc_source_>`_ directory.
-These type of examples allow to interactive viewing the model.
+These type of examples allow you to view and interact with the model.
 
-One example of semi-dynamic example is 
-`Friction stir welding (FSW) simulation <pymapdl_techdemo_28_>`_.
+One semi-dynamic example is the
+`Friction stir welding (FSW) simulation <pymapdl_techdemo_28_>`_ example.
 In this example, you can interactively explore some of the plots.
 
-The source code can be found in this GitHub `link <pymapdl_techdemo_28_rst_>`_, which
-is then rendered as `Friction Stir Welding (FSW) Simulation <pymapdl_techdemo_28_>`_.
+The source code can be found in this GitHub `ex_28-tecfricstir.rst <pymapdl_techdemo_28_rst_>`_, which
+is then rendered on the `Friction Stir Welding (FSW) Simulation <pymapdl_techdemo_28_>`_ page.
 
 
