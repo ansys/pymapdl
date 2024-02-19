@@ -234,7 +234,7 @@ print(mapdl)
 # through the whole document.
 # For more information, see
 # `RestructuredText Primer<https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html#sections>`_
-in the Sphinx documentation.
+# in the Sphinx documentation.
 #
 # As in Jupyter notebooks, if code is left unassigned at the end of a code block
 # (as with ``mapdl`` in the previous block), the output is generated and
