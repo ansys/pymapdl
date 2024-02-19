@@ -92,8 +92,8 @@ Here's a short summary of how to write good documentation:
 #. **Use Sphinx properly**: Sphinx has multiple features and directives. Before
    starting to write documentation, you should get familiar with it. For guidance,
    see these Sphinx and DocUtils topics: `Directives <sphinx_directives_>`_,
-   `reStructuredText Primer<sphinx_basics_>`_ and
-   `reStructuredText Directives<docutils_directives_>`_.
+   `reStructuredText Primer <sphinx_basics_>`_ and
+   `reStructuredText Directives <docutils_directives_>`_.
 
 #. **Explain configuration changes**: If you require configuration changes, provide
    clear instructions on how to use this new configuration, along with examples and explanations
