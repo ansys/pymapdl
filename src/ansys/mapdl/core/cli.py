@@ -56,7 +56,6 @@ except ModuleNotFoundError:
 if _HAS_CLICK:
     ###################################
     # Convert CLI
-
     @click.group(invoke_without_command=True)
     @click.pass_context
     def main(ctx):
@@ -70,23 +69,23 @@ if _HAS_CLICK:
 
         This example demonstrates the main use of this tool:
 
-            $ pymapdl_convert_script mapdl.dat -o python.py
+            $ pymapdl convert mapdl.dat -o python.py
 
             File mapdl.dat successfully converted to python.py.
 
         The output argument is optional, in which case the "py" extension is used:
 
-            $ pymapdl_convert_script mapdl.dat
+            $ pymapdl convert mapdl.dat
 
             File mapdl.dat successfully converted to mapdl.py.
 
         You can use any option from ``ansys.mapdl.core.convert.convert_script`` function:
 
-            $ pymapdl_convert_script mapdl.dat --auto-exit False
+            $ pymapdl convert mapdl.dat --auto-exit False
 
             File mapdl.dat successfully converted to mapdl.py.
 
-            $ pymapdl_convert_script.exe mapdl.dat --filename_out mapdl.out --add_imports False
+            $ pymapdl convert mapdl.dat --filename_out mapdl.out --add_imports False
 
             File mapdl.dat successfully converted to mapdl.out.""",
     )
@@ -693,6 +692,16 @@ By default, it stops instances running on the port 50052.""",
             table.append(proc_line)
 
         print(tabulate(table, headers))
+
+    def old_pymapdl_convert_script_entry_point():
+        print(
+            """This CLI function has been deprecated. Please use instead:
+
+pymapdl convert input_file.inp -o output_file.out ...
+
+For more information please visit: https://mapdl.docs.pyansys.com/version/dev/user_guide/cli.html
+"""
+        )
 
 else:
 

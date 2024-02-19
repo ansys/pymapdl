@@ -116,7 +116,7 @@ name = "ansys.mapdl.core"
 Source = "https://github.com/ansys/pymapdl"
 
 [project.scripts]
-pymapdl_convert_script = "ansys.mapdl.core.cli:convert"
+pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_point"
 pymapdl = "ansys.mapdl.core.cli:main"
 
 [tool.pytest.ini_options]
