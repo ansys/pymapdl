@@ -83,7 +83,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.xpl import ansXpl
 
 if _HAS_PYVISTA:
-    from ansys.mapdl.core.plotting import get_meshes_from_plotter
+    from ansys.mapdl.core.plotting.plotting import get_meshes_from_plotter
 
 from ansys.mapdl.core.post import PostProcessing
 
@@ -2499,7 +2499,7 @@ class _MapdlCore(Commands):
             return text + f"Current {entity} selection: {picked_entities_str}"
 
         def callback_points(mesh, id_):
-            from ansys.mapdl.core.plotting import POINT_SIZE
+            from ansys.mapdl.core.plotting.plotting import POINT_SIZE
 
             point = mesh.points[id_]
             node_id = selector(

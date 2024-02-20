@@ -34,7 +34,7 @@ if not has_dependency("pyvista"):
 from pyvista.plotting import Plotter
 
 from ansys.mapdl.core.errors import ComponentDoesNotExits
-from ansys.mapdl.core.plotting import general_plotter
+from ansys.mapdl.core.plotting.plotting import general_plotter
 
 
 @pytest.fixture

@@ -29,8 +29,9 @@ from numpy.typing import NDArray
 
 from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core.misc import get_bounding_box, unique_rows
+from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
-from .theme import MapdlTheme
+from ..theme import MapdlTheme
 
 POINT_SIZE = 10
 
@@ -412,9 +413,7 @@ def _general_plotter(
         raise TypeError("The kwarg 'plotter' can only accept pv.Plotter objects.")
 
     if not plotter:
-        plotter = pv.Plotter(
-            off_screen=off_screen, notebook=notebook, theme=theme, **plotter_kwargs
-        )
+        plotter = MapdlPlotter(off_screen=off_screen, notebook=notebook, theme=theme, **plotter_kwargs)
     else:
         if off_screen or notebook or theme:
             warn(
@@ -426,11 +425,11 @@ def _general_plotter(
         cmap = "bwr"
 
     if background:
-        plotter.set_background(background)
+        plotter.pv_interface.scene.set_background(background)
 
     # Making sure that labels are visible in dark backgrounds
     if not text_color and background:
-        bg = plotter.background_color.float_rgb
+        bg = plotter.pv_interface.scene.background_color.float_rgb
         # from: https://graphicdesign.stackexchange.com/a/77747/113009
         gamma = 2.2
         threshold = (
@@ -481,7 +480,7 @@ def _general_plotter(
             mesh_ = [mesh_]
 
         for each_mesh in mesh_:
-            plotter.add_mesh(
+            plotter.add(
                 each_mesh,
                 scalars=scalars,
                 scalar_bar_args=scalar_bar_args,
@@ -516,7 +515,7 @@ def _general_plotter(
         # Converting python order (0 based)
         labels_ = np.array(label["labels"] - 1)[idx]
 
-        plotter.add_point_labels(
+        plotter.add_labels(
             points,
             labels_,
             show_points=False,
@@ -524,17 +523,14 @@ def _general_plotter(
             font_size=font_size,
             font_family=font_family,
             text_color=text_color,
+            always_visible=True,
             **add_point_labels_kwargs,
         )
-
     if cpos:
-        plotter.camera_position = cpos
+        plotter.pv_interface.scene.camera_position = cpos
 
     if show_bounds:
-        plotter.show_bounds()
-
-    if show_axes:
-        plotter.show_axes()
+        plotter.pv_interface.scene.show_bounds()
 
     return plotter
 
@@ -934,7 +930,7 @@ def general_plotter(
         )
 
     if title:  # Added here to avoid labels overlapping title
-        pl.add_title(title, color=text_color)
+        pl.pv_interface.scene.add_title(title, color=text_color)
 
     if return_cpos and return_plotter:
         raise ValueError(
@@ -943,29 +939,29 @@ def general_plotter(
 
     # permit user to save the figure as a screenshot
     if savefig:
-        pl.show(
+        pl.plot(
             title=title,
             auto_close=False,
             window_size=window_size,
             screenshot=True,
         )
-        pl.screenshot(savefig)
+        pl.pv_interface.scene.screenshot(savefig)
 
         # return unclosed plotter
         if return_plotter:
             return pl
 
         # if not returning plotter, close right away
-        pl.close()
+        pl.pv_interface.scene.close()
 
     else:
         if not return_plotter and not plotter:
-            pl.show()
+            pl.plot()
 
     if return_plotter:
-        return pl
+        return pl.pv_interface.scene
     elif return_cpos:
-        return pl.camera_position
+        return pl.pv_interface.scene.camera_position
     else:
         return None
 
@@ -1083,7 +1079,7 @@ def bc_nodes_plotter(
             geom=BC_plot_settings[each_label]["glyph"],
         )
         name_ = f"{each_label}"
-        pl.add_mesh(
+        pl.add(
             glyphs,
             color=BC_plot_settings[each_label]["color"],
             style="surface",
@@ -1111,16 +1107,16 @@ def bc_nodes_plotter(
     if plot_bc_labels:
         pcloud = pv.PolyData(nodes_xyz)
         pcloud["labels"] = list(bc_point_labels.values())
-        pl.add_point_labels(
+        pl.add_labels(
             pcloud.points,
             pcloud["labels"],
             shape_opacity=0.25,
             font_size=bc_labels_font_size,
+            always_visible=True,
         )
 
     if plot_bc_legend:
         pl.add_legend(bcolor=None)
-
     return pl
 
 
