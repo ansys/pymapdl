@@ -51,7 +51,10 @@ from ansys.mapdl.core.misc import (
 from ansys.mapdl.core.theme import get_ansys_colors
 
 if _HAS_PYVISTA:
-    from ansys.mapdl.core.plotting.plotting import general_plotter, get_meshes_from_plotter
+    from ansys.mapdl.core.plotting.plotting import (
+        general_plotter,
+        get_meshes_from_plotter,
+    )
 
 
 class _MapdlCommandExtended(_MapdlCore):
