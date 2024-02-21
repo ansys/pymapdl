@@ -72,6 +72,7 @@ from ansys.mapdl.core.common_grpc import (
 )
 from ansys.mapdl.core.errors import (
     MapdlConnectionError,
+    MapdlError,
     MapdlExitedError,
     MapdlRuntimeError,
     protect_from,
@@ -2031,14 +2032,17 @@ class MapdlGrpc(MapdlBase):
             self._log.debug(
                 "The 'grpc' get method seems to have failed. Trying old implementation for more verbose output."
             )
+
             try:
                 out = self.run("*GET,__temp__," + cmd)
-            except MapdlRuntimeError:
+                return float(out.split("VALUE=")[1].strip())
+
+            except MapdlRuntimeError as e:
                 # Get can thrown some errors, in that case, they are caught in the default run method.
-                raise
-            else:
-                # Here we catch the rest of the errors and warnings
-                raise ValueError(out)
+                raise e
+
+            except (IndexError, ValueError):
+                raise MapdlError("Error when processing '*get' request output.")
 
         if getresponse.type == 1:
             return getresponse.dval
