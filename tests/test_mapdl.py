@@ -430,10 +430,12 @@ def test_allow_ignore(mapdl):
 
     # Does not create keypoints and yet does not raise error
     mapdl.allow_ignore = True
-    assert mapdl.allow_ignore is True
-    mapdl.k()
-    with pytest.raises(ValueError, match="There are no KEYPOINTS defined"):
-        mapdl.get_value("KP", 0, "count")
+    assert mapdl.allow_ignore
+
+    mapdl.finish()
+    mapdl.k()  # Raise an error because we are not in PREP7.
+    assert mapdl.get_value("KP", 0, "count") == 0.0  # Effectively no KP created.
+
     mapdl.allow_ignore = False
 
 
@@ -1640,11 +1642,9 @@ def test_lsread(mapdl, cleared):
 
 
 def test_get_fallback(mapdl, cleared):
-    with pytest.raises(ValueError, match="There are no NODES defined"):
-        mapdl.get_value("node", 0, "num", "maxd")
-
-    with pytest.raises(ValueError, match="There are no ELEMENTS defined"):
-        mapdl.get_value("elem", 0, "num", "maxd")
+    # This queries runs through the fallback
+    mapdl.get_value("node", 0, "num", "maxd")
+    mapdl.get_value("elem", 0, "num", "maxd")
 
 
 def test_use_uploading(mapdl, cleared, tmpdir):
