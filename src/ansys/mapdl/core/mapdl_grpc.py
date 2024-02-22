@@ -1084,7 +1084,8 @@ class MapdlGrpc(MapdlBase):
         if (
             self._version >= 24.2
         ):  # We can't use the non-cached version because of recursion error.
-            self.run("/EXIT,NOSAVE,,,,,SERVER")
+            # self.run("/EXIT,NOSAVE,,,,,SERVER")
+            self._ctrl("EXIT")
         else:
             self._ctrl("EXIT")
 
