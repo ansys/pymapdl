@@ -431,7 +431,6 @@ def _general_plotter(
     else:
         plotter.pv_interface.scene.set_background("paraview")
 
-
     # Making sure that labels are visible in dark backgrounds
     if not text_color and background:
         bg = plotter.pv_interface.scene.background_color.float_rgb
