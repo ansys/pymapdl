@@ -2106,19 +2106,6 @@ class _MapdlCore(Commands):
         >>> mapdl.prep7()
 
         """
-        if self._session_id is not None:
-            self._check_session_id()
-        else:
-            # For some reason the session hasn't been created
-            if self.is_grpc:
-                self._create_session()
-
-        if mute is None:
-            if hasattr(self, "mute"):
-                mute = self.mute
-            else:  # if not gRPC
-                mute = False
-
         # check if multiline
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")
@@ -2146,10 +2133,25 @@ class _MapdlCore(Commands):
                 UserWarning,
             )
 
+        # Early exit if on non-interactive.
         if self._store_commands and not avoid_non_interactive:
             # If you are using NBLOCK on input, you should not strip the string
             self._stored_commands.append(command)
             return
+
+        # Actually sending the message
+        if self._session_id is not None:
+            self._check_session_id()
+        else:
+            # For some reason the session hasn't been created
+            if self.is_grpc:
+                self._create_session()
+
+        if mute is None:
+            if hasattr(self, "mute"):
+                mute = self.mute
+            else:  # if not gRPC
+                mute = False
 
         command = command.strip()
 

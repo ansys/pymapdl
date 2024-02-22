@@ -1568,31 +1568,6 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
     assert "DATA FILE CHANGED TO FILE" in output
 
 
-@requires("linux")
-def test_lgwrite(mapdl, cleared, tmpdir):
-    filename = str(tmpdir.join("file.txt"))
-
-    # include some muted and unmuted commands to ensure all /OUT and
-    # /OUT,anstmp are removed
-    mapdl.prep7(mute=True)
-    mapdl.k(1, 0, 0, 0, mute=True)
-    mapdl.k(2, 2, 0, 0)
-
-    # test the extension
-    mapdl.lgwrite(filename[:-4], "txt", kedit="remove", mute=True)
-
-    with open(filename) as fid:
-        lines = [line.strip() for line in fid.readlines()]
-
-    assert "K,1,0,0,0" in lines
-    for line in lines:
-        assert "OUT" not in line
-
-    # must test with no filename
-    mapdl.lgwrite()
-    assert mapdl.jobname + ".lgw" in mapdl.list_files()
-
-
 @pytest.mark.parametrize("value", [2, np.array([1, 2, 3]), "asdf"])
 def test_parameter_deletion(mapdl, value):
     mapdl.parameters["mypar"] = value
@@ -1907,6 +1882,7 @@ def test_force_output(mapdl):
 
 
 def test_session_id(mapdl, running_test):
+    mapdl._strict_session_id_check = True
     assert mapdl._session_id is not None
 
     # already checking version
@@ -1933,6 +1909,7 @@ def test_session_id(mapdl, running_test):
     assert not mapdl._check_session_id()
 
     mapdl._session_id_ = id_
+    mapdl._strict_session_id_check = False
 
 
 def test_check_empty_session_id(mapdl):
@@ -2339,3 +2316,50 @@ def test_remove_temp_dir_on_exit(mapdl, tmpdir):
 
 def test_sys(mapdl):
     assert "hi" in mapdl.sys("echo 'hi'")
+
+
+@pytest.mark.parametrize(
+    "filename,ext,remove_grpc_extra,kedit",
+    (
+        ("", "", True, "None"),
+        ("", "ext", True, "comment"),
+        ("mylog", "", False, "None"),
+        ("mylog", "ghf", True, "remove"),
+    ),
+)
+def test_lgwrite(mapdl, cleared, filename, ext, remove_grpc_extra, kedit):
+    mapdl.prep7()
+    mapdl.k(1, 0, 0, 0, mute=True)
+    mapdl.k(2, 2, 0, 0)
+
+    mapdl.lgwrite(filename, ext, kedit=kedit, remove_grpc_extra=remove_grpc_extra)
+
+    if not filename:
+        filename = mapdl.jobname
+
+    if not ext:
+        ext = "lgw"
+
+    filename_ = f"{filename}.{ext}"
+    assert filename_ in mapdl.list_files()
+    if mapdl.is_local:
+        assert os.path.exists(os.path.join(mapdl.directory, filename_))
+    else:
+        assert os.path.exists(filename_)
+
+    with open(filename_, "r") as fid:
+        content = fid.read()
+
+    if remove_grpc_extra:
+        assert "/OUT" not in content
+        assert "__PYMAPDL_SESSION_ID__" not in content
+        assert "anstmp" not in content
+    else:
+        assert "/OUT" in content
+        assert "__PYMAPDL_SESSION_ID__" in content
+        assert "anstmp" in content
+
+    if kedit != "remove":
+        assert "LGWRITE" in content
+
+    os.remove(filename_)
