@@ -41,7 +41,7 @@ class MapdlPlotter(PlotterInterface):
     theme : pv.DefaultTheme, optional
         _description_, by default None
     """
-    def __init__(self, use_trame: bool = False, theme: pv.Plotter.Theme = None, **plotter_kwargs):
+    def __init__(self, use_trame: bool = False, theme: pv.Plotter.theme = None, **plotter_kwargs):
         """Initialize the MapdlPlotter class."""
 
         super().__init__(use_trame, plot_picked_names=True, **plotter_kwargs)
@@ -49,7 +49,7 @@ class MapdlPlotter(PlotterInterface):
         if theme is None:
             self._theme = MapdlTheme()        
     
-    def add_labels(self, points: List[float], labels: List[str], **plotting_options) -> None:
+    def add_labels(self, points: Iterable[float], labels: Iterable[str], **plotting_options) -> None:
         """Add labels to the plotter.
 
         Parameters
@@ -61,7 +61,7 @@ class MapdlPlotter(PlotterInterface):
         """
         _ = self.pv_interface.scene.add_point_labels(points, labels, **plotting_options)
     
-    def add_points(self, points: List[float], **plotting_options) -> None:
+    def add_points(self, points: Iterable[float], **plotting_options) -> None:
         """Add points to the plotter.
 
         Parameters

@@ -480,31 +480,58 @@ def _general_plotter(
             mesh_ = [mesh_]
 
         for each_mesh in mesh_:
-            plotter.add(
-                each_mesh,
-                scalars=scalars,
-                scalar_bar_args=scalar_bar_args,
-                color=mesh.get("color", color),
-                style=mesh.get("style", style),
-                show_edges=show_edges,
-                edge_color=edge_color,
-                smooth_shading=smooth_shading,
-                split_sharp_edges=split_sharp_edges,
-                feature_angle=feature_angle,
-                point_size=point_size,
-                line_width=line_width,
-                show_scalar_bar=show_scalar_bar,
-                opacity=opacity,
-                flip_scalars=flip_scalars,
-                lighting=lighting,
-                n_colors=n_colors,
-                interpolate_before_map=interpolate_before_map,
-                cmap=cmap,
-                render_points_as_spheres=render_points_as_spheres,
-                render_lines_as_tubes=render_lines_as_tubes,
-                rgb=rgb,
-                **add_mesh_kwargs,
-            )
+            if isinstance(plotter, MapdlPlotter):
+                plotter.pv_interface.scene.add_mesh(
+                    each_mesh,
+                    scalars=scalars,
+                    scalar_bar_args=scalar_bar_args,
+                    color=mesh.get("color", color),
+                    style=mesh.get("style", style),
+                    show_edges=show_edges,
+                    edge_color=edge_color,
+                    smooth_shading=smooth_shading,
+                    split_sharp_edges=split_sharp_edges,
+                    feature_angle=feature_angle,
+                    point_size=point_size,
+                    line_width=line_width,
+                    show_scalar_bar=show_scalar_bar,
+                    opacity=opacity,
+                    flip_scalars=flip_scalars,
+                    lighting=lighting,
+                    n_colors=n_colors,
+                    interpolate_before_map=interpolate_before_map,
+                    cmap=cmap,
+                    render_points_as_spheres=render_points_as_spheres,
+                    render_lines_as_tubes=render_lines_as_tubes,
+                    rgb=rgb,
+                    **add_mesh_kwargs,
+                )
+            else:
+                plotter.add_mesh(
+                    each_mesh,
+                    scalars=scalars,
+                    scalar_bar_args=scalar_bar_args,
+                    color=mesh.get("color", color),
+                    style=mesh.get("style", style),
+                    show_edges=show_edges,
+                    edge_color=edge_color,
+                    smooth_shading=smooth_shading,
+                    split_sharp_edges=split_sharp_edges,
+                    feature_angle=feature_angle,
+                    point_size=point_size,
+                    line_width=line_width,
+                    show_scalar_bar=show_scalar_bar,
+                    opacity=opacity,
+                    flip_scalars=flip_scalars,
+                    lighting=lighting,
+                    n_colors=n_colors,
+                    interpolate_before_map=interpolate_before_map,
+                    cmap=cmap,
+                    render_points_as_spheres=render_points_as_spheres,
+                    render_lines_as_tubes=render_lines_as_tubes,
+                    rgb=rgb,
+                    **add_mesh_kwargs,
+                )                
 
     for label in labels:
         # verify points are not duplicates
@@ -514,24 +541,40 @@ def _general_plotter(
 
         # Converting python order (0 based)
         labels_ = np.array(label["labels"] - 1)[idx]
-
-        plotter.add_labels(
-            points,
-            labels_,
-            show_points=False,
-            shadow=False,
-            font_size=font_size,
-            font_family=font_family,
-            text_color=text_color,
-            always_visible=True,
-            **add_point_labels_kwargs,
-        )
+        if isinstance(plotter, MapdlPlotter):
+            plotter.add_labels(
+                points,
+                labels_,
+                show_points=False,
+                shadow=False,
+                font_size=font_size,
+                font_family=font_family,
+                text_color=text_color,
+                always_visible=True,
+                **add_point_labels_kwargs,
+            )
+        else:
+            plotter.add_point_labels(
+                points,
+                labels_,
+                show_points=False,
+                shadow=False,
+                font_size=font_size,
+                font_family=font_family,
+                text_color=text_color,
+                always_visible=True,
+                **add_point_labels_kwargs,
+            )
     if cpos:
-        plotter.pv_interface.scene.camera_position = cpos
-
+        if isinstance(plotter, MapdlPlotter):
+            plotter.pv_interface.scene.camera_position = cpos
+        else:
+            plotter.camera_position = cpos
     if show_bounds:
-        plotter.pv_interface.scene.show_bounds()
-
+        if isinstance(plotter, MapdlPlotter):
+            plotter.pv_interface.scene.show_bounds()
+        else:
+            plotter.show_bounds()
     return plotter
 
 
@@ -930,7 +973,10 @@ def general_plotter(
         )
 
     if title:  # Added here to avoid labels overlapping title
-        pl.pv_interface.scene.add_title(title, color=text_color)
+        if isinstance(pl, MapdlPlotter):
+            pl.pv_interface.scene.add_title(title, color=text_color)
+        else:
+            pl.add_title(title, color=text_color)
 
     if return_cpos and return_plotter:
         raise ValueError(
@@ -958,10 +1004,14 @@ def general_plotter(
         if not return_plotter and not plotter:
             pl.plot()
 
-    if return_plotter:
+    if return_plotter and isinstance(pl, MapdlPlotter):
         return pl.pv_interface.scene
-    elif return_cpos:
+    elif return_plotter and isinstance(pl, pv.Plotter):
+        return pl
+    elif return_cpos and isinstance(pl, MapdlPlotter):
         return pl.pv_interface.scene.camera_position
+    elif return_cpos and isinstance(pl, pv.Plotter):
+        return pl.camera_position
     else:
         return None
 
