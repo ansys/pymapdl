@@ -30,7 +30,7 @@ from ansys.mapdl.core.plotting.theme import MapdlTheme
 
 class MapdlPlotter(PlotterInterface):
     """Plotter class for PyMapdl.
-    
+
     This class is an implementation of the PlotterInterface class from the ansys-visualizer package.
     Picker is implemented in PyMAPDL specific classes due to the characteristics of the library.
 
@@ -41,15 +41,20 @@ class MapdlPlotter(PlotterInterface):
     theme : pv.DefaultTheme, optional
         _description_, by default None
     """
-    def __init__(self, use_trame: bool = False, theme: pv.Plotter.theme = None, **plotter_kwargs):
+
+    def __init__(
+        self, use_trame: bool = False, theme: pv.Plotter.theme = None, **plotter_kwargs
+    ):
         """Initialize the MapdlPlotter class."""
 
         super().__init__(use_trame, plot_picked_names=True, **plotter_kwargs)
         self._theme = theme
         if theme is None:
-            self._theme = MapdlTheme()        
-    
-    def add_labels(self, points: Iterable[float], labels: Iterable[str], **plotting_options) -> None:
+            self._theme = MapdlTheme()
+
+    def add_labels(
+        self, points: Iterable[float], labels: Iterable[str], **plotting_options
+    ) -> None:
         """Add labels to the plotter.
 
         Parameters
@@ -60,7 +65,7 @@ class MapdlPlotter(PlotterInterface):
             List of labels to be added.
         """
         _ = self.pv_interface.scene.add_point_labels(points, labels, **plotting_options)
-    
+
     def add_points(self, points: Iterable[float], **plotting_options) -> None:
         """Add points to the plotter.
 
@@ -70,7 +75,7 @@ class MapdlPlotter(PlotterInterface):
             List of points to be added to the plotter.
         """
         _ = self.pv_interface.scene.add_points(points, **plotting_options)
-    
+
     def add_iter(
         self,
         plotting_list: Iterable[Any],
@@ -88,7 +93,7 @@ class MapdlPlotter(PlotterInterface):
         """
         for object in plotting_list:
             _ = self.add(object, filter, **plotting_options)
-            
+
     def add(self, object: Any, filter: str = None, **plotting_options) -> None:
         """Add an object to the plotter.
 

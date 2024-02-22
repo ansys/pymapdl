@@ -413,7 +413,9 @@ def _general_plotter(
         raise TypeError("The kwarg 'plotter' can only accept pv.Plotter objects.")
 
     if not plotter:
-        plotter = MapdlPlotter(off_screen=off_screen, notebook=notebook, theme=theme, **plotter_kwargs)
+        plotter = MapdlPlotter(
+            off_screen=off_screen, notebook=notebook, theme=theme, **plotter_kwargs
+        )
     else:
         if off_screen or notebook or theme:
             warn(
@@ -534,7 +536,7 @@ def _general_plotter(
                     render_lines_as_tubes=render_lines_as_tubes,
                     rgb=rgb,
                     **add_mesh_kwargs,
-                )                
+                )
 
     for label in labels:
         # verify points are not duplicates
