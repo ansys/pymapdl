@@ -834,9 +834,9 @@ jobs:
           files: |
             ./**/artifacts/ansys_mapdl_core-*-py3-none-any.whl
             ./**/artifacts/ansys_mapdl_core-*.tar.gz
+            ./**/artifacts/minimum_requirements.txt
             ./**/pymapdl-Documentation-*.pdf
             ./**/ansys-mapdl-core*wheelhouse*.zip
-            ./**/minimum_requirements.txt
 
       - name: Upload to Public PyPi
         env:
