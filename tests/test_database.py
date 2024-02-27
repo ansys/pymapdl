@@ -150,8 +150,7 @@ def test_clear(db):
     db._mapdl.prep7()
     db._mapdl.k(1, 1, 1, 1)
     db.clear()
-    with pytest.raises(ValueError, match="There are no KEYPOINTS defined."):
-        db._mapdl.get_value("KP", 0, "count")
+    assert db._mapdl.get_value("KP", 0, "count") == 0.0
 
 
 def test_nodes_repr(nodes):
