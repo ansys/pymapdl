@@ -925,7 +925,7 @@ jobs:
   notify:
     name: Notify failed build
     needs: [smoke-tests, docs-build, build-test, build-test-ubuntu, build-test-ubuntu-minimal]
-    if: failure() && github.event.pull_request == null
+    if: failure() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
     steps:
       - name: Open issue
