@@ -828,7 +828,7 @@ jobs:
             ./**/*.tar.gz
             ./**/pymapdl*.pdf
             ./**/ansys-mapdl-core*.zip
-            ./minimum_requirements.txt
+            ./**/minimum_requirements.txt
 
       - name: Upload to Public PyPi
         env:
