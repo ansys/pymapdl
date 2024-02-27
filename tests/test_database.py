@@ -28,7 +28,7 @@ import pytest
 
 ## Checking MAPDL versions
 from ansys.mapdl.core.database import MINIMUM_MAPDL_VERSION, DBDef, MapdlDb
-from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.errors import MapdlError, MapdlRuntimeError
 from ansys.mapdl.core.misc import random_string
 from conftest import ON_CI
 
@@ -150,7 +150,7 @@ def test_clear(db):
     db._mapdl.prep7()
     db._mapdl.k(1, 1, 1, 1)
     db.clear()
-    with pytest.raises(ValueError, match="There are no KEYPOINTS defined."):
+    with pytest.raises(MapdlError, match="There are no KEYPOINTS defined."):
         db._mapdl.get_value("KP", 0, "count")
 
 
