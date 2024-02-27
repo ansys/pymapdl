@@ -274,3 +274,39 @@ argument `--long` or `-l`:
 The converter module has its own command line interface to convert
 MAPDL files to PyMAPDL. For more information, see 
 :ref:`ref_cli_converter`.
+
+
+
+.. _ref_cli_converter:
+
+Convert APDL code
+=================
+
+After you have activated and installed the package as described
+in :ref:`installation`, you can use the converter from your terminal.
+Here is how you use the ``pymapdl convert`` command:
+
+.. code:: console
+
+    $ pymapdl convert mapdl.dat -o python.py
+
+    File mapdl.dat successfully converted to python.py.
+
+To obtain help on converter usage, options, and examples, type this command:
+
+.. code:: console
+
+    $ pymapdl convert --help
+
+    Usage: pymapdl convert [OPTIONS] FILENAME_IN
+
+    PyMAPDL CLI tool for converting MAPDL scripts to PyMAPDL scripts.
+
+    USAGE:
+
+    ...
+
+
+The ``pymapdl convert`` command uses the
+:func:`convert_script() <ansys.mapdl.core.convert_script>` function.
+Hence, this command accepts most of this function's arguments.
