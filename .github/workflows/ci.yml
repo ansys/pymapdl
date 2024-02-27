@@ -816,18 +816,26 @@ jobs:
           python-version: 3.9
 
       - uses: actions/download-artifact@v4
+      
+      - name: Copying files and overwrite same name files
+        # (to avoid upload issue)
+        run: |
+          mkdir artifacts
+          find . -iname 'ansys_mapdl_core-*.tar.gz' -exec cp \{\} ./artifacts/ \;
+          find . -iname 'ansys_mapdl_core-*-py3-none-any.whl' -exec cp \{\} ./artifacts/ \;
+          find . -iname 'minimum_requirements.txt' -exec cp \{\} ./artifacts/ \;
 
       - name: Display structure of downloaded files
-        run: ls -R
+        run: ls -Rla
 
       - name: "Release to GitHub"
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ./**/*.whl
-            ./**/*.tar.gz
-            ./**/pymapdl*.pdf
-            ./**/ansys-mapdl-core*.zip
+            ./**/artifacts/ansys_mapdl_core-*-py3-none-any.whl
+            ./**/artifacts/ansys_mapdl_core-*.tar.gz
+            ./**/pymapdl-Documentation-*.pdf
+            ./**/ansys-mapdl-core*wheelhouse*.zip
             ./**/minimum_requirements.txt
 
       - name: Upload to Public PyPi
