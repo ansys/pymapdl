@@ -125,6 +125,10 @@ jobs:
           filters: |
             workflows:
               - '.github/workflows/**'
+              - 'pyproject.toml'
+            examples:
+              - 'examples/**'
+              - 'pyproject.toml'
 
       - name: "Setup Python with cache"
         uses: actions/setup-python@v5
@@ -143,7 +147,6 @@ jobs:
         run: |
           sudo apt update 
           sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex texlive-fonts-extra qpdf texlive-xetex xindy
-    
 
       - name: "Test virtual framebuffer"
         run: |
@@ -176,7 +179,7 @@ jobs:
 
       - name: "Cache examples"
         uses: actions/cache@v4
-        if: steps.changes.outputs.workflows != 'true'
+        if: steps.changes.outputs.examples != 'true' || (github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags'))
         with:
           path: doc/source/examples
           key: Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -185,7 +188,7 @@ jobs:
 
       - name: "Cache docs build directory"
         uses: actions/cache@v4
-        if: steps.changes.outputs.workflows != 'true'
+        if: steps.changes.outputs.workflows != 'true' || (github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags'))
         with:
           path: doc/_build
           key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -194,7 +197,7 @@ jobs:
 
       - name: "Cache autosummary"
         uses: actions/cache@v4
-        if: steps.changes.outputs.workflows != 'true'
+        if: steps.changes.outputs.workflows != 'true' || (github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags'))
         with:
           path: doc/source/**/_autosummary/*.rst
           key: autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
