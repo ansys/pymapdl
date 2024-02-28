@@ -611,7 +611,7 @@ def test_golden(mapdl_cmd):
 @pytest.fixture
 def run_cli():
     def do_run(*args):
-        args = ["pymapdl_convert_script"] + list(args)
+        args = ["pymapdl convert"] + list(args)
         return os.system(" ".join(args))
 
     return do_run

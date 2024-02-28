@@ -142,7 +142,8 @@ jobs:
       - name: "Install OS packages"
         run: |
           sudo apt update 
-          sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex
+          sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex texlive-fonts-extra qpdf texlive-xetex xindy
+    
 
       - name: "Test virtual framebuffer"
         run: |
@@ -804,6 +805,7 @@ jobs:
 
 
   release:
+    name: "Release"
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
     needs: [smoke-tests, docs-build, build-test, build-test-ubuntu, build-test-ubuntu-minimal]
     runs-on: ubuntu-latest
@@ -814,19 +816,27 @@ jobs:
           python-version: 3.9
 
       - uses: actions/download-artifact@v4
+      
+      - name: Copying files and overwrite same name files
+        # (to avoid upload issue)
+        run: |
+          mkdir artifacts
+          find . -iname 'ansys_mapdl_core-*.tar.gz' -exec cp \{\} ./artifacts/ \;
+          find . -iname 'ansys_mapdl_core-*-py3-none-any.whl' -exec cp \{\} ./artifacts/ \;
+          find . -iname 'minimum_requirements.txt' -exec cp \{\} ./artifacts/ \;
 
       - name: Display structure of downloaded files
-        run: ls -R
+        run: ls -Rla
 
       - name: "Release to GitHub"
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            ./**/*.whl
-            ./**/*.tar.gz
-            ./**/*pymapdl-Documentation-*.pdf
-            ./**/ansys-mapdl-core*.zip
-            ./minimum_requirements.txt
+            ./**/artifacts/ansys_mapdl_core-*-py3-none-any.whl
+            ./**/artifacts/ansys_mapdl_core-*.tar.gz
+            ./**/artifacts/minimum_requirements.txt
+            ./**/pymapdl-Documentation-*.pdf
+            ./**/ansys-mapdl-core*wheelhouse*.zip
 
       - name: Upload to Public PyPi
         env:
@@ -924,7 +934,7 @@ jobs:
   notify:
     name: Notify failed build
     needs: [smoke-tests, docs-build, build-test, build-test-ubuntu, build-test-ubuntu-minimal]
-    if: failure() && github.event.pull_request == null
+    if: failure() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
     steps:
       - name: Open issue

@@ -430,10 +430,12 @@ def test_allow_ignore(mapdl):
 
     # Does not create keypoints and yet does not raise error
     mapdl.allow_ignore = True
-    assert mapdl.allow_ignore is True
-    mapdl.k()
-    with pytest.raises(ValueError, match="There are no KEYPOINTS defined"):
-        mapdl.get_value("KP", 0, "count")
+    assert mapdl.allow_ignore
+
+    mapdl.finish()
+    mapdl.k()  # Raise an error because we are not in PREP7.
+    assert mapdl.get_value("KP", 0, "count") == 0.0  # Effectively no KP created.
+
     mapdl.allow_ignore = False
 
 
@@ -537,12 +539,17 @@ def test_lines(cleared, mapdl):
 def test_apdl_logging_start(tmpdir, mapdl):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
-    mapdl = launch_mapdl(
+    launch_options = launch_mapdl(
         port=mapdl.port - 1,  # It normally goes up, so 50051 should be free
         start_timeout=30,
         log_apdl=filename,
         additional_switches=QUICK_LAUNCH_SWITCHES,
+        _debug_no_launch=True,
     )
+
+    assert filename in launch_options["log_apdl"]
+    # activating logger
+    mapdl.open_apdl_log(filename, mode="w")
 
     mapdl.prep7()
     mapdl.run("!comment test")
@@ -550,8 +557,6 @@ def test_apdl_logging_start(tmpdir, mapdl):
     mapdl.k(2, 1, 0, 0)
     mapdl.k(3, 1, 1, 0)
     mapdl.k(4, 0, 1, 0)
-
-    mapdl.exit()
 
     with open(filename, "r") as fid:
         text = "".join(fid.readlines())
@@ -562,6 +567,8 @@ def test_apdl_logging_start(tmpdir, mapdl):
     assert "K,2,1,0,0" in text
     assert "K,3,1,1,0" in text
     assert "K,4,0,1,0" in text
+
+    mapdl._close_apdl_log()
 
 
 @requires("console")
@@ -1563,31 +1570,6 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
     assert "DATA FILE CHANGED TO FILE" in output
 
 
-@requires("linux")
-def test_lgwrite(mapdl, cleared, tmpdir):
-    filename = str(tmpdir.join("file.txt"))
-
-    # include some muted and unmuted commands to ensure all /OUT and
-    # /OUT,anstmp are removed
-    mapdl.prep7(mute=True)
-    mapdl.k(1, 0, 0, 0, mute=True)
-    mapdl.k(2, 2, 0, 0)
-
-    # test the extension
-    mapdl.lgwrite(filename[:-4], "txt", kedit="remove", mute=True)
-
-    with open(filename) as fid:
-        lines = [line.strip() for line in fid.readlines()]
-
-    assert "K,1,0,0,0" in lines
-    for line in lines:
-        assert "OUT" not in line
-
-    # must test with no filename
-    mapdl.lgwrite()
-    assert mapdl.jobname + ".lgw" in mapdl.list_files()
-
-
 @pytest.mark.parametrize("value", [2, np.array([1, 2, 3]), "asdf"])
 def test_parameter_deletion(mapdl, value):
     mapdl.parameters["mypar"] = value
@@ -1660,11 +1642,9 @@ def test_lsread(mapdl, cleared):
 
 
 def test_get_fallback(mapdl, cleared):
-    with pytest.raises(ValueError, match="There are no NODES defined"):
-        mapdl.get_value("node", 0, "num", "maxd")
-
-    with pytest.raises(ValueError, match="There are no ELEMENTS defined"):
-        mapdl.get_value("elem", 0, "num", "maxd")
+    # This queries runs through the fallback
+    mapdl.get_value("node", 0, "num", "maxd")
+    mapdl.get_value("elem", 0, "num", "maxd")
 
 
 def test_use_uploading(mapdl, cleared, tmpdir):
@@ -1902,6 +1882,7 @@ def test_force_output(mapdl):
 
 
 def test_session_id(mapdl, running_test):
+    mapdl._strict_session_id_check = True
     assert mapdl._session_id is not None
 
     # already checking version
@@ -1928,6 +1909,7 @@ def test_session_id(mapdl, running_test):
     assert not mapdl._check_session_id()
 
     mapdl._session_id_ = id_
+    mapdl._strict_session_id_check = False
 
 
 def test_check_empty_session_id(mapdl):
@@ -2334,3 +2316,50 @@ def test_remove_temp_dir_on_exit(mapdl, tmpdir):
 
 def test_sys(mapdl):
     assert "hi" in mapdl.sys("echo 'hi'")
+
+
+@pytest.mark.parametrize(
+    "filename,ext,remove_grpc_extra,kedit",
+    (
+        ("", "", True, "None"),
+        ("", "ext", True, "comment"),
+        ("mylog", "", False, "None"),
+        ("mylog", "ghf", True, "remove"),
+    ),
+)
+def test_lgwrite(mapdl, cleared, filename, ext, remove_grpc_extra, kedit):
+    mapdl.prep7()
+    mapdl.k(1, 0, 0, 0, mute=True)
+    mapdl.k(2, 2, 0, 0)
+
+    mapdl.lgwrite(filename, ext, kedit=kedit, remove_grpc_extra=remove_grpc_extra)
+
+    if not filename:
+        filename = mapdl.jobname
+
+    if not ext:
+        ext = "lgw"
+
+    filename_ = f"{filename}.{ext}"
+    assert filename_ in mapdl.list_files()
+    if mapdl.is_local:
+        assert os.path.exists(os.path.join(mapdl.directory, filename_))
+    else:
+        assert os.path.exists(filename_)
+
+    with open(filename_, "r") as fid:
+        content = fid.read()
+
+    if remove_grpc_extra:
+        assert "/OUT" not in content
+        assert "__PYMAPDL_SESSION_ID__" not in content
+        assert "anstmp" not in content
+    else:
+        assert "/OUT" in content
+        assert "__PYMAPDL_SESSION_ID__" in content
+        assert "anstmp" in content
+
+    if kedit != "remove":
+        assert "LGWRITE" in content
+
+    os.remove(filename_)

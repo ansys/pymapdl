@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import os
+from typing import Dict, Union
 
 import psutil
 
@@ -55,8 +56,39 @@ except ModuleNotFoundError:
 if _HAS_CLICK:
     ###################################
     # Convert CLI
+    @click.group(invoke_without_command=True)
+    @click.pass_context
+    def main(ctx):
+        pass
 
-    @click.command()
+    @main.command(
+        short_help="Convert APDL code to PyMAPDL code.",
+        help="""PyMAPDL CLI tool for converting MAPDL scripts to PyMAPDL scripts.
+
+        USAGE:
+
+        This example demonstrates the main use of this tool:
+
+            $ pymapdl convert mapdl.dat -o python.py
+
+            File mapdl.dat successfully converted to python.py.
+
+        The output argument is optional, in which case the "py" extension is used:
+
+            $ pymapdl convert mapdl.dat
+
+            File mapdl.dat successfully converted to mapdl.py.
+
+        You can use any option from ``ansys.mapdl.core.convert.convert_script`` function:
+
+            $ pymapdl convert mapdl.dat --auto-exit False
+
+            File mapdl.dat successfully converted to mapdl.py.
+
+            $ pymapdl convert mapdl.dat --filename_out mapdl.out --add_imports False
+
+            File mapdl.dat successfully converted to mapdl.out.""",
+    )
     @click.argument("filename_in")
     @click.option("-o", default=None, help="Name of the output Python script.")
     @click.option(
@@ -121,50 +153,23 @@ if _HAS_CLICK:
         help="Print command ``/COM`` arguments to python console. Defaults to ``True``.",
     )
     def convert(
-        filename_in,
-        o,
-        filename_out,
-        loglevel,
-        auto_exit,
-        line_ending,
-        exec_file,
-        macros_as_functions,
-        use_function_names,
-        show_log,
-        add_imports,
-        comment_solve,
-        cleanup_output,
-        header,
-        print_com,
+        filename_in: str,
+        o: str,
+        filename_out: str,
+        loglevel: str,
+        auto_exit: bool,
+        line_ending: str,
+        exec_file: str,
+        macros_as_functions: bool,
+        use_function_names: bool,
+        show_log: bool,
+        add_imports: bool,
+        comment_solve: bool,
+        cleanup_output: bool,
+        header: str,
+        print_com: bool,
     ):
-        """PyMAPDL CLI tool for converting MAPDL scripts to PyMAPDL scripts.
-
-        USAGE:
-
-        This example demonstrates the main use of this tool:
-
-            $ pymapdl_convert_script mapdl.dat -o python.py
-
-            File mapdl.dat successfully converted to python.py.
-
-        The output argument is optional, in which case the "py" extension is used:
-
-            $ pymapdl_convert_script mapdl.dat
-
-            File mapdl.dat successfully converted to mapdl.py.
-
-        You can use any option from ``ansys.mapdl.core.convert.convert_script`` function:
-
-            $ pymapdl_convert_script mapdl.dat --auto-exit False
-
-            File mapdl.dat successfully converted to mapdl.py.
-
-            $ pymapdl_convert_script.exe mapdl.dat --filename_out mapdl.out --add_imports False
-
-            File mapdl.dat successfully converted to mapdl.out.
-
-
-        """
+        """Convert MAPDL code to PyMAPDL"""
         from ansys.mapdl.core.convert import convert_script
 
         if o:
@@ -199,21 +204,7 @@ if _HAS_CLICK:
             "ansys" in proc.name().lower() or "mapdl" in proc.name().lower()
         ) and "-grpc" in proc.cmdline()
 
-    class MyGroup(click.Group):
-        def invoke(self, ctx):
-            ctx.obj = tuple(ctx.args)
-            super(MyGroup, self).invoke(ctx)
-
-    @click.group(invoke_without_command=True, cls=MyGroup)
-    @click.pass_context
-    def launch_mapdl(ctx):
-        args = ctx.obj
-        if ctx.invoked_subcommand is None:
-            from ansys.mapdl.core.cli import start
-
-            start(args)
-
-    @launch_mapdl.command(
+    @main.command(
         short_help="Launch MAPDL instances.",
         help="""This command aims to replicate the behavior of :func:`ansys.mapdl.core.launcher.launch_mapdl`
 
@@ -367,31 +358,31 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
         help="Version of MAPDL to launch. If ``None``, the latest version is used. Versions can be provided as integers (i.e. ``version=222``) or floats (i.e. ``version=22.2``). To retrieve the available installed versions, use the function :meth:`ansys.tools.path.path.get_available_ansys_installations`.",
     )
     def start(
-        exec_file,
-        run_location,
-        jobname,
-        nproc,
-        ram,
-        mode,  # ignored
-        override,
-        loglevel,  # ignored
-        additional_switches,
-        start_timeout,
-        port,
-        cleanup_on_exit,  # ignored
-        start_instance,  # ignored
-        ip,
-        clear_on_connect,  # ignored
-        log_apdl,  # ignored
-        remove_temp_files,  # ignored
-        remove_temp_dir_on_exit,  # ignored
-        verbose_mapdl,  # ignored
-        license_server_check,  # ignored
-        license_type,
-        print_com,  # ignored
-        add_env_vars,  # ignored
-        replace_env_vars,  # ignored
-        version,
+        exec_file: str,
+        run_location: str,
+        jobname: str,
+        nproc: Union[int, str],
+        ram: Union[int, str],
+        mode: str,  # ignored
+        override: bool,
+        loglevel: str,  # ignored
+        additional_switches: str,
+        start_timeout: Union[int, str],
+        port: Union[int, str],
+        cleanup_on_exit: bool,  # ignored
+        start_instance: bool,  # ignored
+        ip: str,
+        clear_on_connect: bool,  # ignored
+        log_apdl: bool,  # ignored
+        remove_temp_files: bool,  # ignored
+        remove_temp_dir_on_exit: bool,  # ignored
+        verbose_mapdl: bool,  # ignored
+        license_server_check: bool,  # ignored
+        license_type: str,
+        print_com: bool,  # ignored
+        add_env_vars: Dict[str, str],  # ignored
+        replace_env_vars: Dict[str, str],  # ignored
+        version: Union[int, str],
     ):
         from ansys.mapdl.core.launcher import launch_mapdl
 
@@ -502,7 +493,7 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
 
         click.echo(click.style("Success: ", fg="green") + header + f"{out[0]}:{out[1]}")
 
-    @launch_mapdl.command(
+    @main.command(
         short_help="Stop MAPDL instances.",
         help="""This command stop MAPDL instances running on a given port or with a given process id (PID).
 
@@ -604,8 +595,8 @@ By default, it stops instances running on the port 50052.""",
                 )
             return
 
-    @launch_mapdl.command(
-        short_help="List MAPDL instances.",
+    @main.command(
+        short_help="List MAPDL running instances.",
         help="""This command list MAPDL instances""",
     )
     @click.option(
@@ -702,13 +693,17 @@ By default, it stops instances running on the port 50052.""",
 
         print(tabulate(table, headers))
 
+    def old_pymapdl_convert_script_entry_point():
+        print(
+            """This CLI function has been deprecated. Please use instead:
+
+pymapdl convert input_file.inp -o output_file.out ...
+
+For more information please visit: https://mapdl.docs.pyansys.com/version/dev/user_guide/cli.html
+"""
+        )
+
 else:
 
-    def convert():
-        print("PyMAPDL CLI requires 'click' python package to be installed.")
-
-    def launch_mapdl():
-        print("PyMAPDL CLI requires 'click' python package to be installed.")
-
-    def stop_mapdl():
+    def main():
         print("PyMAPDL CLI requires 'click' python package to be installed.")

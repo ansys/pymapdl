@@ -643,6 +643,7 @@ class Geometry:
 
         ninc : int, optional
             Steps to between amin and amax.
+
         """
         with self._mapdl.save_selection:
             orig_anum = self.anum
@@ -1471,8 +1472,8 @@ class Geometry:
 
         """
         anum = self.anum.ravel()
-        self._mapdl.starvget("elem_per_areas", "area", "", "ATTR", "NELM")
-        elem_per_areas = self._mapdl.parameters["elem_per_areas"]
+
+        elem_per_areas = self._mapdl.get_array("area", "", "ATTR", "NELM")
         elem_per_areas = elem_per_areas[anum - 1].ravel()
 
         return np.vstack((anum, elem_per_areas)).T.astype(np.int32)
@@ -1499,7 +1500,7 @@ class LegacyGeometry(Geometry):
         super().__init__(mapdl)
 
     def keypoints(self) -> np.array:  # type: ignore
-        """Keypoint coordinates"""
+        """Keypoint coordinates."""
         return super().get_keypoints(return_as_array=True)
 
     @requires_package("pyvista")

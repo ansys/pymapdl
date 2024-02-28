@@ -5,8 +5,7 @@ Develop on containers
 =====================
 
 This guide describes how to develop PyMAPDL features or fix bugs using
-a `remote container <vscode_devcontainers_containers_>`_
-or `Codespaces <codespaces_features_>`_.
+a `remote container <vscode_devcontainers_containers_>`_.
 The files for setting up the container can be found in the 
 `.devcontainer directory <pymapdl_devcontainer_directory_>`_.
 

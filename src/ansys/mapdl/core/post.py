@@ -1069,13 +1069,6 @@ class PostProcessing:
         numpy.ndarray
             Numpy array with nodal X, Y, Z, or all structural rotations.
 
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the
-        :attr:`selected_nodes <PostProcessing.selected_nodes>` mask to
-        get the currently selected nodes.
-
         Examples
         --------
         Nodal rotation in all dimensions for current result.
@@ -1737,12 +1730,6 @@ class PostProcessing:
             Numpy array containing the nodal component stress for the
             selected ``component``.
 
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
-
         Examples
         --------
         Nodal stress in the X direction for the first result
@@ -1832,12 +1819,6 @@ class PostProcessing:
         -------
         numpy.ndarray
             Numpy array containing the nodal principal stress.
-
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
 
         Examples
         --------
@@ -2115,12 +2096,6 @@ class PostProcessing:
         numpy.ndarray
             Array containing the total nodal component strain.
 
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
-
         Examples
         --------
         Total component strain in the X direction for the first result
@@ -2219,12 +2194,6 @@ class PostProcessing:
         -------
         numpy.ndarray
             Numpy array total nodal principal total strain.
-
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
 
         Examples
         --------
@@ -2505,12 +2474,6 @@ class PostProcessing:
             Component to retrieve.  Must be ``'X'``, ``'Y'``, ``'Z'``,
             ``'XY'``, ``'YZ'``, or ``'XZ'``.
 
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
-
         Examples
         --------
         Elastic component strain in the X direction for the first result
@@ -2605,12 +2568,6 @@ class PostProcessing:
         -------
         numpy.ndarray
             Numpy array of nodal elastic principal elastic strain.
-
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
 
         Examples
         --------
@@ -2898,12 +2855,6 @@ class PostProcessing:
         numpy.ndarray
             Numpy array of the plastic nodal component strain.
 
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
-
         Examples
         --------
         Plastic component strain in the X direction for the first result.
@@ -2993,12 +2944,6 @@ class PostProcessing:
         component : str, optional
             Component to retrieve.  Must be ``'1'``, ``'2'``, or
             ``'3'``
-
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
 
         Examples
         --------
@@ -3294,12 +3239,6 @@ class PostProcessing:
             Numpy array containing the thermal nodal component strain
             for the specified ``component``.
 
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
-
         Examples
         --------
         Thermal component strain in the X direction for the first result.
@@ -3395,12 +3334,6 @@ class PostProcessing:
         numpy.ndarray
             Numpy array containing the nodal thermal principal thermal
             strain for the specified ``component``.
-
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
 
         Examples
         --------

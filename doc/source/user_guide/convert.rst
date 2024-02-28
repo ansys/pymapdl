@@ -8,40 +8,6 @@ would take place within Python because APDL commands
 are less transparent and more difficult to debug.
 
 
-.. _ref_cli_converter:
-
-Command-line interface
-----------------------
-
-In PyMAPDL v0.64.0 and later, you use the converter from the command line.
-After you have activated and installed the package as described
-in :ref:`installation`, you can use the converter from your terminal.
-Here is how you use the ``pymapdl_convert_script`` command:
-
-.. code:: console
-
-    $ pymapdl_convert_script mapdl.dat -o python.py
-
-    File mapdl.dat successfully converted to python.py.
-
-To obtain help on converter usage, options, and examples, type this command:
-
-.. code:: console
-
-    $ pymapdl_convert_script --help
-
-    Usage: pymapdl_convert_script [OPTIONS] FILENAME_IN
-
-    PyMAPDL CLI tool for converting MAPDL scripts to PyMAPDL scripts.
-
-    USAGE:
-
-    ...
-
-The ``pymapdl_convert_script`` command uses the
-:func:`convert_script() <ansys.mapdl.core.convert_script>` function.
-Hence, this command accepts most of this function's arguments.
-
 Usage
 ~~~~~
 
@@ -51,7 +17,7 @@ file to a Python file named ``python.py``:
 
 .. code:: console
     
-    $ pymapdl_convert_script mapdl.dat -o python.py
+    $ pymapdl convert mapdl.dat -o python.py
 
     File mapdl.dat successfully converted to python.py.
 
@@ -60,7 +26,7 @@ the ``py`` extension is used for the file that is outputted:
 
 .. code:: console
 
-    $ pymapdl_convert_script mapdl.dat
+    $ pymapdl convert mapdl.dat
 
     File mapdl.dat successfully converted to mapdl.py.
 
@@ -72,7 +38,7 @@ the script, you can use ``--auto-exit`` argument:
 
 .. code:: console
 
-    $ pymapdl_convert_script mapdl.dat --auto-exit False
+    $ pymapdl convert mapdl.dat --auto-exit False
 
     File mapdl.dat successfully converted to mapdl.py.
 
@@ -81,15 +47,16 @@ to ``False``:
 
 .. code:: console
 
-    $ pymapdl_convert_script mapdl.dat --filename_out mapdl.out --add_imports
+    $ pymapdl convert mapdl.dat --filename_out mapdl.out --add_imports
     False
 
     File mapdl.dat successfully converted to mapdl.out.
 
 For more information about possible options, use the help
-command (``pymapdl_convert_script --help``) or the
+command (``pymapdl convert --help``) or the
 :func:`convert_script() <ansys.mapdl.core.convert_script>` 
 function documentation.
+
 
 Caveats
 ~~~~~~~

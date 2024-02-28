@@ -89,6 +89,7 @@
 .. _course_intro_python: https://courses.ansys.com/index.php/courses/intro-to-python/
 .. _course_getting_started_pymapdl: https://courses.ansys.com/index.php/courses/getting-started-with-pymapdl/
 .. _course_intro_apdl: https://courses.ansys.com/index.php/courses/intro-to-ansys-mechanical-apdl-scripting/
+.. _course_fem_track: https://courses.ansys.com/index.php/learning-track/introduction-to-finite-element-methods/
 
 .. #External links
 .. _padt_post: https://www.padtinc.com/2022/07/18/ansys-scripting-python-p1-solve-post/
@@ -122,6 +123,10 @@
 .. _ghcr: https://github.com/features/packages
 .. _vscode_open_a_repository_in_container: https://code.visualstudio.com/docs/devcontainers/containers#_quick-start-open-a-git-repository-or-github-pr-in-an-isolated-container-volume
 .. _pytest_parametrize: https://docs.pytest.org/en/7.3.x/how-to/parametrize.html
+.. _sphinx_directives: https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html
+.. _docutils_directives: https://docutils.sourceforge.io/docs/ref/rst/directives.html
+.. _sphinx_basics: https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
+
 
 
 .. #Github links:
@@ -155,7 +160,7 @@
 .. _pymapdl_2d_plate_with_a_hole: https://github.com/ansys/pymapdl/blob/main/examples/00-mapdl-examples/2d_plate_with_a_hole.py
 .. _pymapdl_doc_2d_plate_with_a_hole: https://mapdl.docs.pyansys.com/version/stable/examples/gallery_examples/00-mapdl-examples/2d_plate_with_a_hole.html
 .. _pymapdl_doc_krylov_example: https://mapdl.docs.pyansys.com/version/stable/examples/extended_examples/Krylov/krylov_example.html
-.. _pymapdl_doc_krylov_example_rst: https://raw.githubusercontent.com/ansys/pymapdl/main/doc/source/examples/extended_examples/Krylov/krylov_example.rst
+.. _pymapdl_doc_krylov_example_rst: https://github.com/ansys/pymapdl/blob/main/doc/source/examples/extended_examples/Krylov/krylov_example.rst
 .. _pymapdl_doc_source: https://github.com/ansys/pymapdl/tree/main/doc/source
 .. _pymapdl_techdemo_28_rst: https://raw.githubusercontent.com/ansys/pymapdl-examples/main/doc/source/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.rst
 .. _pymapdl_techdemo_28: https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.html
@@ -184,6 +189,8 @@
 .. _pymapdl_create_codespace_docs_quick_start: https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fcodespaces-docs%2Fdevcontainer.json
 .. _pymapdl_create_codespace_dev: https://codespaces.new/ansys/pymapdl?devcontainer_path=.devcontainer%2Fdevcontainer.json
 .. _pymapdl_create_codespace_docs: https://codespaces.new/ansys/pymapdl?devcontainer_path=.devcontainer%2Fcodespaces-docs%2Fdevcontainer.json
+.. _pymapdl_examples_template: https://mapdl.docs.pyansys.com/version/stable/examples/gallery_examples/02-tips-n-tricks/00-example-template.html
+.. _pymapdl_bracket_static_example: https://mapdl.docs.pyansys.com/version/stable/examples/gallery_examples/00-mapdl-examples/bracket_static.html#sphx-glr-examples-gallery-examples-00-mapdl-examples-bracket-static-py
 
 
 .. #Python
