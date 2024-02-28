@@ -5,7 +5,7 @@ build-backend = "flit_core.buildapi"
 [project]
 # Check https://flit.readthedocs.io/en/latest/pyproject_toml.html for all available sections
 name = "ansys-mapdl-core"
-version = "0.68.dev0"
+version = "0.69.dev0"
 description = "A Python wrapper for Ansys MAPDL."
 readme = "README.md"
 requires-python = ">=3.9,<3.13"
