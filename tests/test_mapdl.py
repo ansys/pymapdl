@@ -2365,13 +2365,14 @@ def test_lgwrite(mapdl, cleared, filename, ext, remove_grpc_extra, kedit):
     os.remove(filename_)
 
 
+@requires("matplotlib")
+@requires("grpc")
 def test_screenshot(mapdl, make_block, tmpdir):
     """Test screenshot capabilities"""
     previous_device = mapdl.file_type_for_plots
     mapdl.show("TIFF")
     assert "TIFF" == mapdl.file_type_for_plots
 
-    dest = os.path.join(tmpdir, "myscreenshot.png")
     assert mapdl.screenshot() is None
     assert "TIFF" == mapdl.file_type_for_plots
 
@@ -2384,6 +2385,11 @@ def test_screenshot(mapdl, make_block, tmpdir):
     os.remove(file_name)
 
     file_name = mapdl.screenshot(str(tmpdir))
+    assert "TIFF" == mapdl.file_type_for_plots
+    assert file_name in os.listdir(str(tmpdir))
+
+    dest = os.path.join(tmpdir, "myscreenshot.png")
+    file_name = mapdl.screenshot(dest)
     assert "TIFF" == mapdl.file_type_for_plots
     assert file_name in os.listdir(str(tmpdir))
 
