@@ -3484,7 +3484,7 @@ class MapdlGrpc(MapdlBase):
         Parameters
         ----------
         savefig : Optional[str], optional
-            Specify the name of the screenshot file, by default None
+            Name of the screenshot file. The default is ``None``.
         """
         previous_device = self.file_type_for_plots
         self.show("PNG")
@@ -3508,7 +3508,7 @@ class MapdlGrpc(MapdlBase):
 
             else:
                 raise ValueError(
-                    "Only strings or booleans are valid inputs for 'savefig'."
+                    "Only strings or Booleans are valid inputs for the 'savefig' parameter."
                 )
 
             shutil.copy(file_name, target_dir)
