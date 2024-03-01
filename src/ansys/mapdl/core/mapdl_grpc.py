@@ -3477,3 +3477,39 @@ class MapdlGrpc(MapdlBase):
             scale=scale,
             **kwargs,
         )
+
+    def screenshot(self, savefig: Optional[str] = None):
+        """Screenshot Take an MAPDL screenshot and show it in a popup window.
+
+        Parameters
+        ----------
+        savefig : Optional[str], optional
+            Specify the name of the screenshot file, by default None
+        """
+        previous_device = self.file_type_for_plots
+        self.show("PNG")
+        out_ = self.replot()
+        self.show(previous_device)  # previous device
+        file_name = self._get_plot_name(out_)
+
+        if savefig is None or savefig is False:
+            self._display_plot(file_name)
+
+        else:
+            if isinstance(savefig, bool):
+                if savefig:
+                    # Copying to working directory
+                    target_dir = os.getcwd()
+            elif isinstance(savefig, str):
+                if os.path.exists(os.path.dirname(savefig)):
+                    target_dir = savefig
+                else:
+                    raise FileNotFoundError("The path is not a valid directory.")
+
+            else:
+                raise ValueError(
+                    "Only strings or booleans are valid inputs for 'savefig'."
+                )
+
+            shutil.copy(file_name, target_dir)
+            return os.path.basename(file_name)
