@@ -569,7 +569,7 @@ Ansys installations are normally under:
 
         .. code:: text
 
-        /ansys_inc/vXXX
+            /ansys_inc/vXXX
 
 
 By default, Ansys installer uses the former one (``/usr/ansys_inc``) but also creates a symbolic to later one (``/ansys_inc``).
