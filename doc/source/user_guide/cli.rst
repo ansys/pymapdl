@@ -56,8 +56,8 @@ If you want to specify an argument, for instance the port, then you need to call
             Success: Launched an MAPDL instance (PID=18238) at 127.0.0.1:50054
 
 
-This command ``pymapdl start`` aims to replicate the function
-:func:`ansys.mapdl.core.launcher.launch_mapdl`, hence you can use
+This ``pymapdl start`` command aims to replicate the function
+:func:`ansys.mapdl.core.launcher.launch_mapdl`. Hence, you can use
 some of the arguments which this function allows.
 For instance, you could specify the working directory:
 
@@ -80,8 +80,8 @@ For instance, you could specify the working directory:
             Success: Launched an MAPDL instance (PID=32612) at 127.0.0.1:50052
 
 
-For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`,
-and :func:`ansys.mapdl.core.cli.pymapdl`
+For more information, see :func:`ansys.mapdl.core.launcher.launch_mapdl`,
+and :func:`ansys.mapdl.core.cli.pymapdl`.
 
 
 Stop MAPDL instances
@@ -151,7 +151,7 @@ Or an instance with a given process id (PID):
         .. code:: console
 
             (.venv) user@machine:~$ pymapdl stop --pid 40952
-            Success: The process with PID 40952 and its children have been stopped.
+            Success: The process with PID 40952 and its children has been stopped.
 
 
 Alternatively, you can stop all the running instances by using:
@@ -295,7 +295,7 @@ Here is how you use the ``pymapdl convert`` command:
 
             (.venv) PS C:\Users\user\pymapdl> pymapdl convert mapdl.dat -o python.py
             
-            File mapdl.dat successfully converted to python.py.
+            The ``mapdl.dat`` file is successfully converted to the ``python.py`` file.
 
 
     .. tab-item:: Linux
