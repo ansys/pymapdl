@@ -129,7 +129,6 @@ PyAnsys Math
 PyDPF-Core
 PyDPF-Post
 PyMAPDL
-pymapdl
 Python
 QRDAMP
 Radiosity
