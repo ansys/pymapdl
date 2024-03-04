@@ -86,8 +86,7 @@ and :func:`ansys.mapdl.core.cli.pymapdl`
 
 Stop MAPDL instances
 ====================
-MAPDL instances can be stopped by using `pymapdl stop` command in the following
-way:
+You can use the ``pymapdl stop`` command to stop MAPDL instances like this:
 
 
 .. tab-set::
