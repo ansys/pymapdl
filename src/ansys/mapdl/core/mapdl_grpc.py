@@ -3477,3 +3477,72 @@ class MapdlGrpc(MapdlBase):
             scale=scale,
             **kwargs,
         )
+
+    def screenshot(self, savefig: Optional[str] = None):
+        """Take an MAPDL screenshot and show it in a popup window.
+
+        Parameters
+        ----------
+        savefig : Optional[str], optional
+            Name of or path to the screenshot file.
+            The default is ``None``.
+
+        Returns
+        -------
+        str
+            File name.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the path given in the ``savefig`` parameter is not found or is not consistent.
+        ValueError
+            If given a wrong type for the ``savefig`` parameter.
+        """
+        previous_device = self.file_type_for_plots
+        self.show("PNG")
+        out_ = self.replot()
+        self.show(previous_device)  # previous device
+        file_name = self._get_plot_name(out_)
+
+        def get_file_name(path):
+            """Get a new filename so as not to overwrite an existing one."""
+            target_dir = os.path.join(path, "mapdl_screenshot_0.png")
+            i = 0
+            while os.path.exists(target_dir):
+                # Ensuring file is not overwritten.
+                i += 1
+                target_dir = os.path.join(path, f"mapdl_screenshot_{i}.png")
+            return target_dir
+
+        if savefig is None or savefig is False:
+            self._display_plot(file_name)
+
+        else:
+            if savefig is True:
+                # Copying to working directory
+                target_dir = get_file_name(os.getcwd())
+
+            elif isinstance(savefig, str):
+                if not os.path.dirname(savefig):
+                    # File name given only
+                    target_dir = os.path.join(os.getcwd(), savefig)
+
+                elif os.path.isdir(savefig):
+                    # Given directory path only, but not file name.
+                    target_dir = get_file_name(savefig)
+
+                elif os.path.exists(os.path.dirname(savefig)):
+                    # Only directory is given. Checking if directory exists.
+                    target_dir = savefig
+
+                else:
+                    raise FileNotFoundError("The filename or path is not valid.")
+
+            else:
+                raise ValueError(
+                    "Only strings or Booleans are valid inputs for the 'savefig' parameter."
+                )
+
+            shutil.copy(file_name, target_dir)
+            return os.path.basename(target_dir)
