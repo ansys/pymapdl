@@ -56,7 +56,7 @@ If you want to specify an argument, for instance the port, then you need to call
             Success: Launched an MAPDL instance (PID=18238) at 127.0.0.1:50054
 
 
-This command `pymapdl start` aims to replicate the function
+This command ``pymapdl start`` aims to replicate the function
 :func:`ansys.mapdl.core.launcher.launch_mapdl`, hence you can use
 some of the arguments which this function allows.
 For instance, you could specify the working directory:
