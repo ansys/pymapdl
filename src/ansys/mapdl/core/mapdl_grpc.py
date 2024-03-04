@@ -3495,9 +3495,9 @@ class MapdlGrpc(MapdlBase):
         Raises
         ------
         FileNotFoundError
-            When the path given in `savefig` is not found or is not consistent.
+            If the path given in `savefig` is not found or is not consistent.
         ValueError
-            When given a wrong type for `savefig` parameter.
+            If given a wrong type for `savefig` parameter.
         """
         previous_device = self.file_type_for_plots
         self.show("PNG")
@@ -3506,7 +3506,7 @@ class MapdlGrpc(MapdlBase):
         file_name = self._get_plot_name(out_)
 
         def get_file_name(path):
-            """Get a new file name to not overwrite an existing one"""
+            """Get a new filename so as not to overwrite an existing one."""
             target_dir = os.path.join(path, "mapdl_screenshot_0.png")
             i = 0
             while os.path.exists(target_dir):
@@ -3537,7 +3537,7 @@ class MapdlGrpc(MapdlBase):
                     target_dir = savefig
 
                 else:
-                    raise FileNotFoundError("The filename or path is not a valid.")
+                    raise FileNotFoundError("The filename or path is not valid.")
 
             else:
                 raise ValueError(
