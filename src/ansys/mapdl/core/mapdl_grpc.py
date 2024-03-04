@@ -3484,7 +3484,20 @@ class MapdlGrpc(MapdlBase):
         Parameters
         ----------
         savefig : Optional[str], optional
-            Name of the screenshot file. The default is ``None``.
+            Name of the screenshot file. It can be also a path.
+            The default is ``None``.
+
+        Returns
+        -------
+        str
+            File name.
+
+        Raises
+        ------
+        FileNotFoundError
+            When the path given in `savefig` is not found or is not consistent.
+        ValueError
+            When given a wrong type for `savefig` parameter.
         """
         previous_device = self.file_type_for_plots
         self.show("PNG")
@@ -3492,19 +3505,39 @@ class MapdlGrpc(MapdlBase):
         self.show(previous_device)  # previous device
         file_name = self._get_plot_name(out_)
 
+        def get_file_name(path):
+            """Get a new file name to not overwrite an existing one"""
+            target_dir = os.path.join(path, "mapdl_screenshot_0.png")
+            i = 0
+            while os.path.exists(target_dir):
+                # Making sure we are not overwriting a file.
+                i += 1
+                target_dir = os.path.join(path, f"mapdl_screenshot_{i}.png")
+            return target_dir
+
         if savefig is None or savefig is False:
             self._display_plot(file_name)
 
         else:
-            if isinstance(savefig, bool):
-                if savefig:
-                    # Copying to working directory
-                    target_dir = os.getcwd()
+            if savefig is True:
+                # Copying to working directory
+                target_dir = get_file_name(os.getcwd())
+
             elif isinstance(savefig, str):
-                if os.path.exists(os.path.dirname(savefig)):
+                if not os.path.dirname(savefig):
+                    # File name given only
+                    target_dir = os.path.join(os.getcwd(), savefig)
+
+                elif os.path.isdir(savefig):
+                    # Given directory path only, but not file name.
+                    target_dir = get_file_name(savefig)
+
+                elif os.path.exists(os.path.dirname(savefig)):
+                    # Only directory is given. Checking if directory exists
                     target_dir = savefig
+
                 else:
-                    raise FileNotFoundError("The path is not a valid directory.")
+                    raise FileNotFoundError("The filename or path is not a valid.")
 
             else:
                 raise ValueError(
@@ -3512,4 +3545,4 @@ class MapdlGrpc(MapdlBase):
                 )
 
             shutil.copy(file_name, target_dir)
-            return os.path.basename(file_name)
+            return os.path.basename(target_dir)

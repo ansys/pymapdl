@@ -2380,8 +2380,16 @@ def test_screenshot(mapdl, make_block, tmpdir):
     assert "TIFF" == mapdl.file_type_for_plots
 
     file_name = mapdl.screenshot(True)
+    assert "mapdl_screenshot_0.png" == file_name
     assert "TIFF" == mapdl.file_type_for_plots
     assert file_name in os.listdir(os.getcwd())
+
+    file_name = mapdl.screenshot(True)
+    assert "mapdl_screenshot_1.png" == file_name
+    assert "TIFF" == mapdl.file_type_for_plots
+    assert file_name in os.listdir(os.getcwd())
+
+    os.remove("mapdl_screenshot_0.png")
     os.remove(file_name)
 
     file_name = mapdl.screenshot(str(tmpdir))
@@ -2391,6 +2399,12 @@ def test_screenshot(mapdl, make_block, tmpdir):
     dest = os.path.join(tmpdir, "myscreenshot.png")
     file_name = mapdl.screenshot(dest)
     assert "TIFF" == mapdl.file_type_for_plots
-    assert file_name in os.listdir(str(tmpdir))
+    assert os.path.exists(dest)
+
+    file_name = mapdl.screenshot("myscreenshot.png")
+    assert "TIFF" == mapdl.file_type_for_plots
+    assert os.path.exists(file_name)
+    assert os.path.exists(os.path.join(os.getcwd(), "myscreenshot.png"))
+    os.remove(file_name)
 
     mapdl.file_type_for_plots = previous_device
