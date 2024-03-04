@@ -80,8 +80,7 @@ For instance, you could specify the working directory:
             Success: Launched an MAPDL instance (PID=32612) at 127.0.0.1:50052
 
 
-For more information, see :func:`ansys.mapdl.core.launcher.launch_mapdl`,
-and :func:`ansys.mapdl.core.cli.pymapdl`.
+For more information, see :func:`ansys.mapdl.core.launcher.launch_mapdl`.
 
 
 Stop MAPDL instances
