@@ -3479,7 +3479,7 @@ class MapdlGrpc(MapdlBase):
         )
 
     def screenshot(self, savefig: Optional[str] = None):
-        """Screenshot Take an MAPDL screenshot and show it in a popup window.
+        """Take an MAPDL screenshot and show it in a popup window.
 
         Parameters
         ----------
@@ -3495,9 +3495,9 @@ class MapdlGrpc(MapdlBase):
         Raises
         ------
         FileNotFoundError
-            If the path given in `savefig` is not found or is not consistent.
+            If the path given in the ``savefig`` parameter is not found or is not consistent.
         ValueError
-            If given a wrong type for `savefig` parameter.
+            If given a wrong type for the ``savefig`` parameter.
         """
         previous_device = self.file_type_for_plots
         self.show("PNG")
@@ -3510,7 +3510,7 @@ class MapdlGrpc(MapdlBase):
             target_dir = os.path.join(path, "mapdl_screenshot_0.png")
             i = 0
             while os.path.exists(target_dir):
-                # Making sure we are not overwriting a file.
+                # Ensuring file is not overwritten.
                 i += 1
                 target_dir = os.path.join(path, f"mapdl_screenshot_{i}.png")
             return target_dir
@@ -3533,7 +3533,7 @@ class MapdlGrpc(MapdlBase):
                     target_dir = get_file_name(savefig)
 
                 elif os.path.exists(os.path.dirname(savefig)):
-                    # Only directory is given. Checking if directory exists
+                    # Only directory is given. Checking if directory exists.
                     target_dir = savefig
 
                 else:
