@@ -3484,7 +3484,7 @@ class MapdlGrpc(MapdlBase):
         Parameters
         ----------
         savefig : Optional[str], optional
-            Name of the screenshot file. It can be also a path.
+            Name of or path to the screenshot file.
             The default is ``None``.
 
         Returns
