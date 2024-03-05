@@ -1242,33 +1242,33 @@ class DynamicOptions:
 
                 ON
                     Perform Sturm sequence check.
-            MEMORY
 
+            MEMORY
                 Controls the memory allocation strategy for the Subspace eigensolver.
                 Valid input for Value1 when Option = MEMORY:
 
-                    AUTO
-                        Use the default memory allocation strategy (default).
+                AUTO
+                    Use the default memory allocation strategy (``default``).
 
-                    INCORE
-                        Force the Subspace eigensolver to allocate in-core memory.
+                INCORE
+                    Force the Subspace eigensolver to allocate in-core memory.
 
-                    MIX1
-                        First level of mixed in-core / out-of-core configuration.
+                MIX1
+                    First level of mixed in-core / out-of-core configuration.
 
-                    MIX2
-                        Second level of mixed in-core / out-of-core configuration.
+                MIX2
+                    Second level of mixed in-core / out-of-core configuration.
 
-                    OUTOFCORE
-                        Force the Subspace eigensolver to use scratch files.
+                OUTOFCORE
+                    Force the Subspace eigensolver to use scratch files.
 
             Value1
                 Assigned value for the specified Option (as described above).
 
         Notes
         -----
-        SUBOPT specifies options to be used with the Subspace eigensolver
-        (MODOPT,SUBSP) during a modal analysis.
+        ``SUBOPT`` specifies options to be used with the Subspace eigensolver
+        (``MODOPT,SUBSP``) during a modal analysis.
         """
         command = f"SUBOPT,{option},{value1}"
         return self.run(command, **kwargs)
