@@ -93,9 +93,7 @@ levl
 Linux
 MacOS
 mapdl
-mapdl
 MAPDL
-mapdl
 mater
 MATLAB
 matricies
