@@ -27,7 +27,7 @@ import time
 import numpy as np
 import pytest
 
-from conftest import ON_STUDENT, has_dependency
+from conftest import ON_LOCAL, START_INSTANCE, has_dependency
 
 if has_dependency("ansys-tools-path"):
     from ansys.tools.path import find_ansys
@@ -37,7 +37,7 @@ if has_dependency("ansys-tools-path"):
 else:
     EXEC_FILE = os.environ.get("PYMAPDL_MAPDL_EXEC")
 
-if not EXEC_FILE or ON_STUDENT:
+if not ON_LOCAL:
     pytest.skip(allow_module_level=True)
 
 from ansys.mapdl.core import LocalMapdlPool, examples
@@ -67,11 +67,13 @@ NPROC = 1
 def pool(tmpdir_factory):
     run_path = str(tmpdir_factory.mktemp("ansys_pool"))
 
+    port = os.environ.get("PYMAPDL_PORT", 50056)
+
     mapdl_pool = LocalMapdlPool(
-        4,
+        2,
         license_server_check=False,
         run_location=run_path,
-        port=50056,
+        port=port,
         start_timeout=30,
         exec_file=EXEC_FILE,
         additional_switches=QUICK_LAUNCH_SWITCHES,
@@ -111,7 +113,6 @@ def test_invalid_exec():
 
 
 # @pytest.mark.xfail(strict=False, reason="Flaky test. See #2435")
-@requires("local")
 def test_heal(pool):
     pool_sz = len(pool)
     pool_names = pool._names  # copy pool names
@@ -131,7 +132,6 @@ def test_heal(pool):
     pool._verify_unique_ports()
 
 
-@requires("local")
 @skip_if_ignore_pool
 def test_simple_map(pool):
     pool_sz = len(pool)
@@ -139,7 +139,6 @@ def test_simple_map(pool):
     assert len(pool) == pool_sz
 
 
-@requires("local")
 @skip_if_ignore_pool
 def test_map_timeout(pool):
     pool_sz = len(pool)
@@ -168,7 +167,6 @@ def test_map_timeout(pool):
     assert len(pool) == pool_sz
 
 
-@requires("local")
 @skip_if_ignore_pool
 def test_simple(pool):
     pool_sz = len(pool)
@@ -182,16 +180,14 @@ def test_simple(pool):
 
 
 # fails intermittently
-@requires("local")
 @skip_if_ignore_pool
 def test_batch(pool):
-    input_files = [examples.vmfiles["vm%d" % i] for i in range(1, 11)]
+    input_files = [examples.vmfiles["vm%d" % i] for i in range(1, len(pool) + 3)]
     outputs = pool.run_batch(input_files)
     assert len(outputs) == len(input_files)
 
 
 # fails intermittently
-@requires("local")
 @skip_if_ignore_pool
 def test_map(pool):
     completed_indices = []
@@ -204,14 +200,16 @@ def test_map(pool):
         completed_indices.append(index)
         return mapdl.parameters.routine
 
-    inputs = [(examples.vmfiles["vm%d" % i], i) for i in range(1, 11)]
+    inputs = [(examples.vmfiles["vm%d" % i], i) for i in range(1, len(pool) + 3)]
     outputs = pool.map(func, inputs, wait=True)
 
     assert len(outputs) == len(inputs)
 
 
-@requires("local")
 @skip_if_ignore_pool
+@pytest.mark.skipif(
+    not START_INSTANCE, reason="This test requires the pool to be local"
+)
 def test_abort(pool, tmpdir):
     pool_sz = len(pool)  # initial pool size
 
@@ -245,17 +243,14 @@ def test_abort(pool, tmpdir):
     assert path_deleted
 
 
-@requires("local")
 @skip_if_ignore_pool
 def test_directory_names_default(pool):
     dirs_path_pool = os.listdir(pool._root_dir)
-    assert "Instance_0" in dirs_path_pool
-    assert "Instance_1" in dirs_path_pool
-    assert "Instance_2" in dirs_path_pool
-    assert "Instance_3" in dirs_path_pool
+    for i, _ in enumerate(pool._instances):
+        assert pool._names(i) in dirs_path_pool
+        assert f"Instance_{i}" in dirs_path_pool
 
 
-@requires("local")
 @skip_if_ignore_pool
 def test_directory_names_custom_string(tmpdir):
     pool = LocalMapdlPool(
@@ -275,7 +270,6 @@ def test_directory_names_custom_string(tmpdir):
     pool.exit(block=True)
 
 
-@requires("local")
 @skip_if_ignore_pool
 def test_directory_names_function(tmpdir):
     def myfun(i):
@@ -313,7 +307,6 @@ def test_num_instances():
         )
 
 
-@requires("local")
 @skip_if_ignore_pool
 def test_only_one_instance():
     pool = LocalMapdlPool(
