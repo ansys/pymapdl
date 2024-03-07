@@ -308,13 +308,12 @@ def launch_grpc(
         Number of processors.  Defaults to 2.
 
     ram : float, optional
-        Specifies the total size of the Workspace (memory) in
-        megabytes used for the initial allocation. Specify a negative number to
-        force a fixed size throughout the run. If ``None``, then the default is
-        2 GB (2048 MB).
+        Total size in megabytes of the workspace (memory) used for the initial allocation.
+        The default is ``None``, in which case 2 GB (2048 MB) is used. To force a fixed size
+        throughout the run, specify a negative number.
 
     run_location : str, optional
-        MAPDL working directory.  Defaults to a temporary working
+        MAPDL working directory.  The default is the temporary working
         directory.
 
     port : int
@@ -1099,10 +1098,9 @@ def launch_mapdl(
         Number of processors.  Defaults to 2.
 
     ram : float, optional
-        Specifies the total size of the workspace Workspace (memory) in
-        megabytes used for the initial allocation. Specify a negative number to
-        force a fixed size throughout the run. If ``None``, then the default is
-        2 GB (2048 MB).
+        Total size in megabytes of the workspace (memory) used for the initial allocation.
+        The default is ``None``, in which case 2 GB (2048 MB) is used. To force a fixed size
+        throughout the run, specify a negative number.
 
     mode : str, optional
         Mode to launch MAPDL.  Must be one of the following:
