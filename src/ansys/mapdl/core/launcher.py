@@ -70,7 +70,6 @@ from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import (
     check_valid_ip,
     check_valid_port,
-    check_valid_start_instance,
     create_temp_dir,
     random_string,
     threaded,
@@ -1522,20 +1521,12 @@ def launch_mapdl(
     version = _verify_version(version)  # return a int version or none
 
     # connect to an existing instance if enabled
-    if start_instance is None:
-        if "PYMAPDL_START_INSTANCE" in os.environ:
-            LOG.debug("Using PYMAPDL_START_INSTANCE environment variable.")
+    start_instance = get_start_instance()
+    LOG.debug("Using 'start_instance' equal to %s", start_instance)
 
-        if os.environ.get("PYMAPDL_START_INSTANCE") and os.environ.get(
-            "PYMAPDL_START_INSTANCE"
-        ).lower() not in ["true", "false"]:
-            raise ValueError("PYMAPDL_START_INSTANCE must be either True or False.")
+    if not start_instance:
 
-        start_instance = check_valid_start_instance(
-            os.environ.get("PYMAPDL_START_INSTANCE", True)
-        )
-
-        LOG.debug("Using 'start_instance' equal to %s", start_instance)
+        LOG.debug("Connecting to an existing instance of MAPDL at %s:%s", ip, port)
 
         # special handling when building the gallery outside of CI. This
         # creates an instance of mapdl the first time if PYMAPDL start instance
@@ -1584,9 +1575,6 @@ def launch_mapdl(
             if clear_on_connect:
                 mapdl.clear()
             return mapdl
-
-    if not start_instance:
-        LOG.debug("Connecting to an existing instance of MAPDL at %s:%s", ip, port)
 
         if just_launch:
             print(f"There is an existing MAPDL instance at: {ip}:{port}")
