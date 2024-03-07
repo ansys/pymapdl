@@ -238,10 +238,6 @@ class LocalMapdlPool:
             if isinstance(port, int) or len(port) == 1:
                 ports = available_ports(n_instances, port)
             else:
-                if len(port) != n_instances and start_instance == False:
-                    raise ValueError(
-                        "The number of instances should be the same as the number of ports."
-                    )
                 ports = port
 
             if self._root_dir is not None:
@@ -250,7 +246,13 @@ class LocalMapdlPool:
         else:
             if isinstance(port, int) or len(port) == 1:
                 ports = [port + i for i in range(n_instances)]
+            else:
+                ports = port
 
+        if len(port) != n_instances:
+            raise ValueError(
+                "The number of instances should be the same as the number of ports."
+            )
         LOG.debug(f"Using ports: {ports}")
 
         self._instances = []
@@ -653,8 +655,6 @@ class LocalMapdlPool:
                             return instance, i
                         else:
                             return instance
-                    else:
-                        instance._exited = True
 
     def __del__(self):
         self.exit()
