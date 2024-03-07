@@ -2130,6 +2130,8 @@ def _parse_slurm_options(
     # Checking specific env var
     if not nproc:
         nproc = os.environ.get("PYMAPDL_NPROC", None)
+        if nproc:
+            nproc = int(nproc)
 
     if not nproc:
         ## Attempt to calculate the appropriate number of cores:
