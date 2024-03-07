@@ -37,7 +37,7 @@ from ansys.mapdl.core.misc import (
     check_valid_ip,
     check_valid_port,
     check_valid_routine,
-    check_valid_start_instance,
+    get_start_instance,
     last_created,
     load_file,
     no_return,
@@ -114,7 +114,10 @@ def test_check_valid_port_error(port):
     ],
 )
 def test_check_valid_start_instance(start_instance):
-    check_valid_start_instance(start_instance)
+    if "true" in str(start_instance).lower():
+        assert get_start_instance(start_instance)
+    else:
+        assert not get_start_instance(start_instance)
 
 
 @pytest.mark.parametrize(
@@ -128,7 +131,7 @@ def test_check_valid_start_instance(start_instance):
 )
 def test_check_valid_start_instance_error(start_instance):
     with pytest.raises(ValueError):
-        check_valid_start_instance(start_instance)
+        get_start_instance(start_instance)
 
 
 def test_creation_time(tmpdir):
