@@ -2208,7 +2208,7 @@ def _parse_slurm_options(
 
         except Exception as e:
             LOG.info(
-                f"The machines list cold not be obtained.\nFollowing error happened:\n{str(e)}"
+                f"The machines list could not be obtained.\nFollowing error happened:\n{str(e)}"
             )
 
     return exec_file, jobname, nproc, ram, additional_switches
