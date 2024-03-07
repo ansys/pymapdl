@@ -1524,18 +1524,14 @@ def launch_mapdl(
     start_instance = get_start_instance()
     LOG.debug("Using 'start_instance' equal to %s", start_instance)
 
-    if not start_instance:
-
-        LOG.debug("Connecting to an existing instance of MAPDL at %s:%s", ip, port)
-
+    if start_instance:
         # special handling when building the gallery outside of CI. This
-        # creates an instance of mapdl the first time if PYMAPDL start instance
-        # is False.
+        # creates an instance of mapdl the first time.
         if pymapdl.BUILDING_GALLERY:  # pragma: no cover
             LOG.debug("Building gallery.")
             # launch an instance of pymapdl if it does not already exist and
             # we're allowed to start instances
-            if start_instance and GALLERY_INSTANCE[0] is None:
+            if GALLERY_INSTANCE[0] is None:
                 mapdl = launch_mapdl(
                     start_instance=True,
                     cleanup_on_exit=False,
@@ -1561,24 +1557,15 @@ def launch_mapdl(
                     mapdl.clear()
                 return mapdl
 
-                # finally, if running on CI/CD, connect to the default instance
-            else:
-                mapdl = MapdlGrpc(
-                    ip=ip,
-                    port=port,
-                    cleanup_on_exit=False,
-                    loglevel=loglevel,
-                    set_no_abort=set_no_abort,
-                    use_vtk=use_vtk,
-                    **start_parm,
-                )
-            if clear_on_connect:
-                mapdl.clear()
-            return mapdl
+    else:
+        LOG.debug("Connecting to an existing instance of MAPDL at %s:%s", ip, port)
 
         if just_launch:
             print(f"There is an existing MAPDL instance at: {ip}:{port}")
             return
+
+        if pymapdl.BUILDING_GALLERY:  # pragma: no cover
+            LOG.debug("Building gallery.")
 
         mapdl = MapdlGrpc(
             ip=ip,
@@ -1586,7 +1573,6 @@ def launch_mapdl(
             cleanup_on_exit=False,
             loglevel=loglevel,
             set_no_abort=set_no_abort,
-            log_apdl=log_apdl,
             use_vtk=use_vtk,
             **start_parm,
         )
