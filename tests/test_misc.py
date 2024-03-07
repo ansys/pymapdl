@@ -113,7 +113,7 @@ def test_check_valid_port_error(port):
         False,
     ],
 )
-def test_check_valid_start_instance(start_instance):
+def test_get_start_instance(start_instance):
     if "true" in str(start_instance).lower():
         assert get_start_instance(start_instance)
     else:
@@ -129,7 +129,7 @@ def test_check_valid_start_instance(start_instance):
         1e9,
     ],
 )
-def test_check_valid_start_instance_error(start_instance):
+def test_get_start_instance_error(start_instance):
     with pytest.raises(ValueError):
         get_start_instance(start_instance)
 
