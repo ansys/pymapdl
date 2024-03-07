@@ -44,6 +44,7 @@ from ansys.mapdl.core.launcher import (
     _parse_ip_route,
     _validate_MPI,
     _verify_version,
+    get_start_instance,
     launch_grpc,
     launch_mapdl,
     update_env_vars,
@@ -552,3 +553,34 @@ def test_deprecate_verbose():
 
     with pytest.raises(DeprecationError):
         launch_grpc(verbose=True)
+
+
+@pytest.mark.parametrize(
+    "start_instance",
+    [
+        "true",
+        "TRue",
+        "False",
+        True,
+        False,
+    ],
+)
+def test_get_start_instance(start_instance):
+    if "true" in str(start_instance).lower():
+        assert get_start_instance(start_instance)
+    else:
+        assert not get_start_instance(start_instance)
+
+
+@pytest.mark.parametrize(
+    "start_instance",
+    [
+        "asdf",
+        "2323",
+        1,
+        1e9,
+    ],
+)
+def test_get_start_instance_error(start_instance):
+    with pytest.raises(ValueError):
+        get_start_instance(start_instance)
