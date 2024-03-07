@@ -1520,8 +1520,8 @@ def launch_mapdl(
 
     version = _verify_version(version)  # return a int version or none
 
-    # connect to an existing instance if enabled
-    start_instance = get_start_instance()
+    # Getting "start_instance" using "True" as default.
+    start_instance = get_start_instance(True)
     LOG.debug("Using 'start_instance' equal to %s", start_instance)
 
     if start_instance:
