@@ -777,12 +777,12 @@ def launch_remote_mapdl(
     )
 
 
-def get_start_instance(start_instance_default=True):
+def get_start_instance(start_instance: bool = True):
     """Check if the environment variable ``PYMAPDL_START_INSTANCE`` exists and is valid.
 
     Parameters
     ----------
-    start_instance_default : bool
+    start_instance : bool
         Value to return when ``PYMAPDL_START_INSTANCE`` is unset.
 
     Returns
@@ -790,7 +790,7 @@ def get_start_instance(start_instance_default=True):
     bool
         ``True`` when the ``PYMAPDL_START_INSTANCE`` environment variable is
         true, ``False`` when PYMAPDL_START_INSTANCE is false. If unset,
-        returns ``start_instance_default``.
+        returns ``start_instance``.
 
     Raises
     ------
@@ -799,25 +799,29 @@ def get_start_instance(start_instance_default=True):
         (case independent).
 
     """
-    if "PYMAPDL_START_INSTANCE" in os.environ:
-        if os.environ["PYMAPDL_START_INSTANCE"].lower() not in [
-            "true",
-            "false",
-        ]:
-            val = os.environ["PYMAPDL_START_INSTANCE"]
-            raise OSError(
-                f'Invalid value "{val}" for PYMAPDL_START_INSTANCE\n'
-                'PYMAPDL_START_INSTANCE should be either "TRUE" or "FALSE"'
-            )
-        LOG.debug(
-            f"PYMAPDL_START_INSTANCE is set to {os.environ['PYMAPDL_START_INSTANCE']}"
-        )
-        return os.environ["PYMAPDL_START_INSTANCE"].lower() == "true"
+    if "PYMAPDL_START_INSTANCE" in os.environ and os.environ["PYMAPDL_START_INSTANCE"]:
+        # It should not be empty
+        start_instance = os.environ["PYMAPDL_START_INSTANCE"]
 
-    LOG.debug(
-        f"PYMAPDL_START_INSTANCE is unset, using default value {start_instance_default}"
-    )
-    return start_instance_default
+    if isinstance(start_instance, str):
+        start_instance = start_instance.lower().strip()
+        if start_instance not in ["true", "false"]:
+            raise OSError(
+                f'Invalid value "{start_instance}" for "start_instance" (or "PYMAPDL_START_INSTANCE"\n'
+                '"start_instance" should be either "TRUE" or "FALSE"'
+            )
+
+        LOG.debug(f"PYMAPDL_START_INSTANCE is set to {start_instance}")
+        return start_instance == "true"
+
+    elif isinstance(start_instance, bool):
+        LOG.debug(
+            f"PYMAPDL_START_INSTANCE is unset, using default value {start_instance}"
+        )
+        return start_instance
+
+    else:
+        raise ValueError("Only booleans are allowed as arguments.")
 
 
 def get_default_ansys():

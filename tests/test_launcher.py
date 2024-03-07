@@ -50,7 +50,7 @@ from ansys.mapdl.core.launcher import (
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from conftest import ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
+from conftest import ON_LOCAL, QUICK_LAUNCH_SWITCHES, NullContext, requires
 
 try:
     from ansys.tools.path import (
@@ -556,31 +556,41 @@ def test_deprecate_verbose():
 
 
 @pytest.mark.parametrize(
-    "start_instance",
+    "start_instance,context",
     [
-        "true",
-        "TRue",
-        "False",
-        True,
-        False,
+        pytest.param(True, NullContext(), id="Boolean true"),
+        pytest.param(False, NullContext(), id="Boolean false"),
+        pytest.param("true", NullContext(), id="String true"),
+        pytest.param("TRue", NullContext(), id="String true weird capitalization"),
+        pytest.param("2", pytest.raises(OSError), id="String number"),
+        pytest.param(2, pytest.raises(ValueError), id="Int"),
     ],
 )
-def test_get_start_instance(start_instance):
-    if "true" in str(start_instance).lower():
-        assert get_start_instance(start_instance)
-    else:
-        assert not get_start_instance(start_instance)
+def test_get_start_instance_argument(monkeypatch, start_instance, context):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE")
+    with context:
+        if "true" in str(start_instance).lower():
+            assert get_start_instance(start_instance)
+        else:
+            assert not get_start_instance(start_instance)
 
 
 @pytest.mark.parametrize(
-    "start_instance",
+    "start_instance, context",
     [
-        "asdf",
-        "2323",
-        1,
-        1e9,
+        pytest.param("true", NullContext()),
+        pytest.param("TRue", NullContext()),
+        pytest.param("False", NullContext()),
+        pytest.param("FaLSE", NullContext()),
+        pytest.param("asdf", pytest.raises(OSError)),
+        pytest.param("1", pytest.raises(OSError)),
+        pytest.param("", pytest.raises(OSError)),
     ],
 )
-def test_get_start_instance_error(start_instance):
-    with pytest.raises(ValueError):
-        get_start_instance(start_instance)
+def test_get_start_instance_envvar(monkeypatch, start_instance, context):
+    monkeypatch.setenv("PYMAPDL_START_INSTANCE", start_instance)
+    with context:
+        if "true" in start_instance.lower():
+            assert get_start_instance(start_instance)
+        else:
+            assert not get_start_instance(start_instance)
