@@ -1,5 +1,7 @@
 #!/bin/bash
 echo "MAPDL_VERSION: $MAPDL_VERSION"
+
+export MAPDL_IMAGE="$MAPDL_PACKAGE:$MAPDL_VERSION"
 echo "MAPDL_IMAGE:   $MAPDL_IMAGE"
 docker pull "$MAPDL_IMAGE"
 
