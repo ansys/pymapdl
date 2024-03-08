@@ -409,18 +409,27 @@ jobs:
 
       - name: "DPF server activation"
         run: |
-          docker pull ghcr.io/ansys/dpf-core:22.2dev
-          docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+          $(docker pull ghcr.io/ansys/dpf-core:22.2dev && docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}.") &
 
       - name: "Unit testing"
         env:
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
+          PID: ${{ steps.start_mapdl.outputs.DOCKER_PID }}
         run: |
           if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then export ON_UBUNTU=true;fi
           echo "Waiting for MAPDL service to be up..."
-          while ! nc -z localhost $PYMAPDL_PORT; do   
-            sleep 0.1 # wait for 1/10 of the second before check again
-          done
+          if ps -p $PID > /dev/null
+          then
+            echo "MAPDL is running on PID $PID"
+            echo "Testing port:"
+            nc -v -z localhost $PYMAPDL_PORT
+
+            while ! nc -z localhost $PYMAPDL_PORT; do   
+              sleep 0.1 # wait for 1/10 of the second before check again
+            done
+          else
+            exit 1
+          fi;
           echo "MAPDL service is up!"
           xvfb-run pytest \
             ${{ env.PYTEST_ARGUMENTS }} \
