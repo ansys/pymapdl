@@ -666,6 +666,21 @@ def test_deprecate_verbose():
             {"nproc": 5, "jobname": "myawesomejob"},
             id="Testing PYMAPDL_NPROC and SLURM_JOB_NAME",
         ),
+        pytest.param(
+            {
+                "PYMAPDL_NPROC": 5,
+                "SLURM_JOB_NAME": "myawesomejob",
+                "SLURM_NTASKS": 2,
+                "SLURM_CPUS_PER_TASK": 2,
+                "SLURM_NPROCS": 1,
+                "SLURM_CPUS_ON_NODE": None,
+                "SLURM_MEM_PER_NODE": None,
+                "SLURM_NODELIST": None,
+                "PYMAPDL_MAPDL_EXEC": "asdf/qwer/poiu",
+            },
+            {"nproc": 5, "jobname": "myawesomejob", "exec_file": "asdf/qwer/poiu"},
+            id="Testing PYMAPDL_NPROC and SLURM_JOB_NAME",
+        ),
     ),
     indirect=["set_env_var_context"],
 )
@@ -685,6 +700,9 @@ def test__parse_slurm_options(set_env_var_context, validation):
 
     if jobname != "file":
         assert jobname == validation["jobname"]
+
+    if exec_file:
+        assert exec_file == validation["exec_file"]
 
 
 @pytest.mark.parametrize(
