@@ -361,9 +361,9 @@ jobs:
           MAPDL_VERSION: ${{ matrix.mapdl-version }}
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
         run: |
-          ./script.sh &> mapdl_launch.log & DOCKER_PID=$!
+          ./script.sh &> mapdl_launch.log & export DOCKER_PID=$!
           echo "Launching MAPDL service at PID: $DOCKER_PID"
-          "DOCKER_PID=$(echo $DOCKER_PID)" >> $GITHUB_OUTPUT
+          echo "DOCKER_PID=$(echo $DOCKER_PID)" >> $GITHUB_OUTPUT
 
       - name: "Getting files change filters"
         uses: dorny/paths-filter@v3
