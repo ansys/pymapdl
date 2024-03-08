@@ -41,11 +41,11 @@ docker run \
     -p "$PYMAPDL_DB_PORT":50055 \
     --shm-size=1gb \
     -e I_MPI_SHM_LMT=shm \
-    -e P_SCHEMA=$P_SCHEMA \
+    -e P_SCHEMA="$P_SCHEMA" \
     -w /jobs \
     -u=0:0 \
     --memory=6656MB \
     --memory-swap=16896MB \
-    "$MAPDL_IMAGE" $EXEC_PATH -grpc -dir /jobs -"$DISTRIBUTED_MODE" -np 2 > log.txt &
+    "$MAPDL_IMAGE" "$EXEC_PATH" -grpc -dir /jobs -"$DISTRIBUTED_MODE" -np 2 > log.txt &
 
 grep -q 'Server listening on' <(timeout 60 tail -f log.txt)
