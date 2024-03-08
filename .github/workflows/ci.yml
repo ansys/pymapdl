@@ -422,18 +422,16 @@ jobs:
           if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then export ON_UBUNTU=true;fi
           echo "Waiting for MAPDL service to be up..."
           nc -v -z localhost $PYMAPDL_PORT
-          if ps -p $PID > /dev/null
-          then
-            echo "MAPDL is running on PID $PID"
-            echo "Testing port:"
-            nc -v -z localhost $PYMAPDL_PORT
+          echo "::group:: ps aux Output" && ps aux && echo "::endgroup::" 
 
-            while ! nc -z localhost $PYMAPDL_PORT; do   
-              sleep 0.1 # wait for 1/10 of the second before check again
-            done
-          else
-            exit 1
-          fi;
+          echo "Waiting for MAPDL port is open..."
+          nc -v -z localhost $PYMAPDL_PORT
+          echo "::group:: Waiting for the port to be open..." 
+          while ! nc -z localhost $PYMAPDL_PORT; do
+            sleep 0.1
+          done
+          echo "::endgroup::"
+
           echo "MAPDL service is up!"
           xvfb-run pytest \
             ${{ env.PYTEST_ARGUMENTS }} \
