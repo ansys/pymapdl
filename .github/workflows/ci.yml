@@ -417,9 +417,10 @@ jobs:
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
         run: |
           if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then export ON_UBUNTU=true;fi
-          # Waiting for MAPDL image to be up
           echo "Waiting for MAPDL service to be up..."
-          ./node_modules/.bin/wait-on tcp:$PYMAPDL_PORT
+          while ! nc -z localhost $PYMAPDL_PORT; do   
+            sleep 0.1 # wait for 1/10 of the second before check again
+          done
           echo "MAPDL service is up!"
           xvfb-run pytest \
             ${{ env.PYTEST_ARGUMENTS }} \
