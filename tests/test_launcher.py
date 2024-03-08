@@ -567,7 +567,8 @@ def test_deprecate_verbose():
     ],
 )
 def test_get_start_instance_argument(monkeypatch, start_instance, context):
-    monkeypatch.delenv("PYMAPDL_START_INSTANCE")
+    if "PYMAPDL_START_INSTANCE" in os.environ:
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE")
     with context:
         if "true" in str(start_instance).lower():
             assert get_start_instance(start_instance)
