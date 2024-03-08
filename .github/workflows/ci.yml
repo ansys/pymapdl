@@ -166,7 +166,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Pull, launch, and validate MAPDL service"
-        run: .ci/start_mapdl_student.sh
+        run: .ci/start_mapdl.sh
         env:
           MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
           DISTRIBUTED_MODE: "dmp"
@@ -394,28 +394,10 @@ jobs:
       - name: "Pull, launch, and validate MAPDL service"
         env:
           LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-        run: |
-          export MAPDL_VERSION=${{ matrix.mapdl-version }}
-          export MAPDL_IMAGE=${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
-          export DISTRIBUTED_MODE=${{ steps.distributed_mode.outputs.distributed_mode }}
-
-          echo "MAPDL_VERSION: $MAPDL_VERSION"
-          echo "MAPDL_IMAGE:   $MAPDL_IMAGE"
-
-          if [[ $MAPDL_VERSION == *"ubuntu-student"* ]] ; then
-            echo "It is student version (ubuntu-based)."
-            echo "No license server is needed."
-            .ci/start_mapdl_student.sh
-
-          elif [[ $MAPDL_VERSION == *"ubuntu"* ]] ; then
-            echo "It is an ubuntu based image"
-            .ci/start_mapdl_ubuntu.sh
-
-          else
-            echo "It is a CentOS based image"
-            .ci/start_mapdl.sh
-
-          fi;
+          MAPDL_VERSION: ${{ matrix.mapdl-version }}
+          MAPDL_IMAGE: ${{ env.DOCKER_PACKAGE }}:${{ matrix.mapdl-version }}
+          DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
+        run: .ci/start_mapdl.sh
 
       - name: "Unit testing requirements installation"
         run: |
