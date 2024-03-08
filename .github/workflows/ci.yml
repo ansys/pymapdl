@@ -418,6 +418,8 @@ jobs:
         run: |
           if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then export ON_UBUNTU=true;fi
           echo "Waiting for MAPDL service to be up..."
+          nc -v -z localhost $PYMAPDL_PORT
+          ps
           if ps -p $PID > /dev/null
           then
             echo "MAPDL is running on PID $PID"
