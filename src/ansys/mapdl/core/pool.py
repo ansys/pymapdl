@@ -249,7 +249,7 @@ class LocalMapdlPool:
             else:
                 ports = port
 
-        if len(port) != n_instances:
+        if len(ports) != n_instances:
             raise ValueError(
                 "The number of instances should be the same as the number of ports."
             )
