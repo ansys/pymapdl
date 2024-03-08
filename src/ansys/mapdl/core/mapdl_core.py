@@ -2273,16 +2273,18 @@ class _MapdlCore(Commands):
                     pass
 
     def _get_plot_name(self, text: str) -> str:
-        """ "Obtain the plot filename. It also downloads it if in remote session."""
+        """Obtain the plot filename."""
         self._log.debug(text)
         png_found = PNG_IS_WRITTEN_TO_FILE.findall(text)
 
         if png_found:
             # flush graphics writer
+            previous_device = self.file_type_for_plots
             self.show("CLOSE", mute=True)
             # self.show("PNG", mute=True)
 
             filename = self._screenshot_path()
+            self.show(previous_device)
             self._log.debug(f"Screenshot at: {filename}")
 
             if os.path.isfile(filename):

@@ -2363,3 +2363,48 @@ def test_lgwrite(mapdl, cleared, filename, ext, remove_grpc_extra, kedit):
         assert "LGWRITE" in content
 
     os.remove(filename_)
+
+
+@requires("matplotlib")
+@requires("grpc")
+def test_screenshot(mapdl, make_block, tmpdir):
+    """Test screenshot capabilities"""
+    previous_device = mapdl.file_type_for_plots
+    mapdl.show("TIFF")
+    assert "TIFF" == mapdl.file_type_for_plots
+
+    assert mapdl.screenshot() is None
+    assert "TIFF" == mapdl.file_type_for_plots
+
+    assert mapdl.screenshot(False) is None
+    assert "TIFF" == mapdl.file_type_for_plots
+
+    file_name = mapdl.screenshot(True)
+    assert "mapdl_screenshot_0.png" == file_name
+    assert "TIFF" == mapdl.file_type_for_plots
+    assert file_name in os.listdir(os.getcwd())
+
+    file_name = mapdl.screenshot(True)
+    assert "mapdl_screenshot_1.png" == file_name
+    assert "TIFF" == mapdl.file_type_for_plots
+    assert file_name in os.listdir(os.getcwd())
+
+    os.remove("mapdl_screenshot_0.png")
+    os.remove(file_name)
+
+    file_name = mapdl.screenshot(str(tmpdir))
+    assert "TIFF" == mapdl.file_type_for_plots
+    assert file_name in os.listdir(str(tmpdir))
+
+    dest = os.path.join(tmpdir, "myscreenshot.png")
+    file_name = mapdl.screenshot(dest)
+    assert "TIFF" == mapdl.file_type_for_plots
+    assert os.path.exists(dest)
+
+    file_name = mapdl.screenshot("myscreenshot.png")
+    assert "TIFF" == mapdl.file_type_for_plots
+    assert os.path.exists(file_name)
+    assert os.path.exists(os.path.join(os.getcwd(), "myscreenshot.png"))
+    os.remove(file_name)
+
+    mapdl.file_type_for_plots = previous_device

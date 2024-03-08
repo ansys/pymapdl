@@ -195,21 +195,26 @@ It is executed upstream of each test and not within all tests.
 If you do not have MAPDL installed locally but still want to run the
 unit testing, you must set up the following environment variables.
 
-In Windows, use this code:
+.. tab-set::
 
-.. code:: pwsh-session
+    .. tab-item:: Windows
+        :sync: key1
 
-    SET PYMAPDL_START_INSTANCE=False
-    SET PYMAPDL_PORT=<MAPDL Port> (default 50052)
-    SET PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)
+        .. code:: pwsh-session
 
-In Linux, use this code:
+            SET PYMAPDL_START_INSTANCE=False
+            SET PYMAPDL_PORT=<MAPDL Port> (default 50052)
+            SET PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)
 
-.. code:: console
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
 
-    export PYMAPDL_START_INSTANCE=False
-    export PYMAPDL_PORT=<MAPDL Port> (default 50052)
-    export PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)
+            export PYMAPDL_START_INSTANCE=False
+            export PYMAPDL_PORT=<MAPDL Port> (default 50052)
+            export PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)
+
 
 These environment variables tell PyMAPDL to attempt to connect to the existing
 MAPDL service by default when the ``launch_mapdl`` function is used.

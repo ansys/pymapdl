@@ -70,7 +70,6 @@ from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import (
     check_valid_ip,
     check_valid_port,
-    check_valid_start_instance,
     create_temp_dir,
     random_string,
     threaded,
@@ -778,12 +777,12 @@ def launch_remote_mapdl(
     )
 
 
-def get_start_instance(start_instance_default=True):
+def get_start_instance(start_instance: bool = True):
     """Check if the environment variable ``PYMAPDL_START_INSTANCE`` exists and is valid.
 
     Parameters
     ----------
-    start_instance_default : bool
+    start_instance : bool
         Value to return when ``PYMAPDL_START_INSTANCE`` is unset.
 
     Returns
@@ -791,7 +790,7 @@ def get_start_instance(start_instance_default=True):
     bool
         ``True`` when the ``PYMAPDL_START_INSTANCE`` environment variable is
         true, ``False`` when PYMAPDL_START_INSTANCE is false. If unset,
-        returns ``start_instance_default``.
+        returns ``start_instance``.
 
     Raises
     ------
@@ -800,25 +799,29 @@ def get_start_instance(start_instance_default=True):
         (case independent).
 
     """
-    if "PYMAPDL_START_INSTANCE" in os.environ:
-        if os.environ["PYMAPDL_START_INSTANCE"].lower() not in [
-            "true",
-            "false",
-        ]:
-            val = os.environ["PYMAPDL_START_INSTANCE"]
-            raise OSError(
-                f'Invalid value "{val}" for PYMAPDL_START_INSTANCE\n'
-                'PYMAPDL_START_INSTANCE should be either "TRUE" or "FALSE"'
-            )
-        LOG.debug(
-            f"PYMAPDL_START_INSTANCE is set to {os.environ['PYMAPDL_START_INSTANCE']}"
-        )
-        return os.environ["PYMAPDL_START_INSTANCE"].lower() == "true"
+    if "PYMAPDL_START_INSTANCE" in os.environ and os.environ["PYMAPDL_START_INSTANCE"]:
+        # It should not be empty
+        start_instance = os.environ["PYMAPDL_START_INSTANCE"]
 
-    LOG.debug(
-        f"PYMAPDL_START_INSTANCE is unset, using default value {start_instance_default}"
-    )
-    return start_instance_default
+    if isinstance(start_instance, str):
+        start_instance = start_instance.lower().strip()
+        if start_instance not in ["true", "false"]:
+            raise OSError(
+                f'Invalid value "{start_instance}" for "start_instance" (or "PYMAPDL_START_INSTANCE"\n'
+                '"start_instance" should be either "TRUE" or "FALSE"'
+            )
+
+        LOG.debug(f"PYMAPDL_START_INSTANCE is set to {start_instance}")
+        return start_instance == "true"
+
+    elif isinstance(start_instance, bool):
+        LOG.debug(
+            f"PYMAPDL_START_INSTANCE is unset, using default value {start_instance}"
+        )
+        return start_instance
+
+    else:
+        raise ValueError("Only booleans are allowed as arguments.")
 
 
 def get_default_ansys():
@@ -1521,30 +1524,18 @@ def launch_mapdl(
 
     version = _verify_version(version)  # return a int version or none
 
-    # connect to an existing instance if enabled
-    if start_instance is None:
-        if "PYMAPDL_START_INSTANCE" in os.environ:
-            LOG.debug("Using PYMAPDL_START_INSTANCE environment variable.")
+    # Getting "start_instance" using "True" as default.
+    start_instance = get_start_instance(True)
+    LOG.debug("Using 'start_instance' equal to %s", start_instance)
 
-        if os.environ.get("PYMAPDL_START_INSTANCE") and os.environ.get(
-            "PYMAPDL_START_INSTANCE"
-        ).lower() not in ["true", "false"]:
-            raise ValueError("PYMAPDL_START_INSTANCE must be either True or False.")
-
-        start_instance = check_valid_start_instance(
-            os.environ.get("PYMAPDL_START_INSTANCE", True)
-        )
-
-        LOG.debug("Using 'start_instance' equal to %s", start_instance)
-
+    if start_instance:
         # special handling when building the gallery outside of CI. This
-        # creates an instance of mapdl the first time if PYMAPDL start instance
-        # is False.
+        # creates an instance of mapdl the first time.
         if pymapdl.BUILDING_GALLERY:  # pragma: no cover
             LOG.debug("Building gallery.")
             # launch an instance of pymapdl if it does not already exist and
             # we're allowed to start instances
-            if start_instance and GALLERY_INSTANCE[0] is None:
+            if GALLERY_INSTANCE[0] is None:
                 mapdl = launch_mapdl(
                     start_instance=True,
                     cleanup_on_exit=False,
@@ -1570,27 +1561,15 @@ def launch_mapdl(
                     mapdl.clear()
                 return mapdl
 
-                # finally, if running on CI/CD, connect to the default instance
-            else:
-                mapdl = MapdlGrpc(
-                    ip=ip,
-                    port=port,
-                    cleanup_on_exit=False,
-                    loglevel=loglevel,
-                    set_no_abort=set_no_abort,
-                    use_vtk=use_vtk,
-                    **start_parm,
-                )
-            if clear_on_connect:
-                mapdl.clear()
-            return mapdl
-
-    if not start_instance:
+    else:
         LOG.debug("Connecting to an existing instance of MAPDL at %s:%s", ip, port)
 
         if just_launch:
             print(f"There is an existing MAPDL instance at: {ip}:{port}")
             return
+
+        if pymapdl.BUILDING_GALLERY:  # pragma: no cover
+            LOG.debug("Building gallery.")
 
         mapdl = MapdlGrpc(
             ip=ip,
@@ -1598,7 +1577,6 @@ def launch_mapdl(
             cleanup_on_exit=False,
             loglevel=loglevel,
             set_no_abort=set_no_abort,
-            log_apdl=log_apdl,
             use_vtk=use_vtk,
             **start_parm,
         )
