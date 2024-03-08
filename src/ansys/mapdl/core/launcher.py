@@ -820,6 +820,11 @@ def get_start_instance(start_instance: bool = True):
         )
         return start_instance
 
+    elif start_instance is None:
+        LOG.debug(
+            f"'PYMAPDL_START_INSTANCE' is unset, and there is no supplied value, hence using default value 'True'"
+        )
+        return True  # Default is true
     else:
         raise ValueError("Only booleans are allowed as arguments.")
 
