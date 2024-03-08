@@ -336,6 +336,35 @@ jobs:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4
 
+      - name: "Login in Github container registry"
+        uses: docker/login-action@v3.0.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Getting SMP/DMP mode"
+        id: distributed_mode
+        run: |
+          image=${{ matrix.mapdl-version }}
+          export distributed_mode="smp"
+          if [[ $image == *".1."* ]]; then
+            export distributed_mode="dmp";
+          fi
+          echo "Distributed mode: $distributed_mode"
+          echo "distributed_mode=$(echo $distributed_mode)" >> $GITHUB_OUTPUT
+
+      - name: "Pull, launch, and validate MAPDL service"
+        id: start_mapdl
+        env:
+          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
+          MAPDL_VERSION: ${{ matrix.mapdl-version }}
+          DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
+        run: |
+          ./script.sh &> mapdl_launch.log & DOCKER_PID=$!
+          echo "Launching MAPDL service at PID: $DOCKER_PID"
+          "DOCKER_PID=$(echo $DOCKER_PID)" >> $GITHUB_OUTPUT
+
       - name: "Getting files change filters"
         uses: dorny/paths-filter@v3
         id: changes
@@ -374,31 +403,6 @@ jobs:
           python -m pip install dist/*.whl
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
-      - name: "Login in Github container registry"
-        uses: docker/login-action@v3.0.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: "Getting SMP/DMP mode"
-        id: distributed_mode
-        run: |
-          image=${{ matrix.mapdl-version }}
-          export distributed_mode="smp"
-          if [[ $image == *".1."* ]]; then
-            export distributed_mode="dmp";
-          fi
-          echo "Distributed mode: $distributed_mode"
-          echo "distributed_mode=$(echo $distributed_mode)" >> $GITHUB_OUTPUT
-
-      - name: "Pull, launch, and validate MAPDL service"
-        env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          MAPDL_VERSION: ${{ matrix.mapdl-version }}
-          DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
-        run: .ci/start_mapdl.sh
-
       - name: "Unit testing requirements installation"
         run: |
           python -m pip install .[tests]
@@ -413,6 +417,10 @@ jobs:
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
         run: |
           if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then export ON_UBUNTU=true;fi
+          # Waiting for MAPDL image to be up
+          echo "Waiting for MAPDL service to be up..."
+          ./node_modules/.bin/wait-on tcp:$PYMAPDL_PORT
+          echo "MAPDL service is up!"
           xvfb-run pytest \
             ${{ env.PYTEST_ARGUMENTS }} \
             --ignore_image_cache \
@@ -479,6 +487,7 @@ jobs:
         if: always()
         run: |
           cp log.txt ./logs-${{ matrix.mapdl-version }}/log.txt || echo "MAPDL log not found."
+          cp mapdl_launch.log ./logs-${{ matrix.mapdl-version }}/mapdl_launch.log || echo "MAPDL log not found."
           tar cvzf ./logs-${{ matrix.mapdl-version }}.tgz ./logs-${{ matrix.mapdl-version }} || echo "Failed to compress"
 
       - name: "Upload logs to GitHub"
