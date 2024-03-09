@@ -348,7 +348,8 @@ jobs:
             mapdl-version: 'v24.1.0'
     env:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
-      PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
+      PYMAPDL_PORT2: 21001  # for the pool testing and default won't work on GitHub runners
+      PYMAPDL_DB_PORT: 21002  # default won't work on GitHub runners
       PYMAPDL_START_INSTANCE: FALSE
       ON_LOCAL: FALSE
       ON_UBUNTU: FALSE
@@ -385,9 +386,14 @@ jobs:
           MAPDL_VERSION: ${{ matrix.mapdl-version }}
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
         run: |
-          .ci/start_mapdl.sh &> mapdl_launch.log & export DOCKER_PID=$!
-          echo "Launching MAPDL service at PID: $DOCKER_PID"
-          echo "DOCKER_PID=$(echo $DOCKER_PID)" >> $GITHUB_OUTPUT
+          .ci/start_mapdl.sh &> mapdl_launch.log & export DOCKER_PID_0=$!
+          # Launching a second instance for MAPDL pool testing
+          export PYMAPDL_PORT=${{ env.PYMAPDL_PORT2 }}
+          .ci/start_mapdl.sh &> mapdl_launch_2.log & export DOCKER_PID_1=$!
+          echo "Launching MAPDL service 0 at PID: $DOCKER_PID_0"
+          echo "Launching MAPDL service 1 at PID: $DOCKER_PID_2"
+          echo "DOCKER_PID_0=$(echo $DOCKER_PID_0)" >> $GITHUB_OUTPUT
+          echo "DOCKER_PID_1=$(echo $DOCKER_PID_1)" >> $GITHUB_OUTPUT
 
       - name: "DPF server activation"
         run: |
