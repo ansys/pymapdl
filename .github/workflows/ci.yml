@@ -434,7 +434,7 @@ jobs:
 
       - name: "Test virtual framebuffer"
         run: |
-          pip install -r .ci/requirements_test_xvfb.txt
+          python -m pip install -r .ci/requirements_test_xvfb.txt
           xvfb-run python .ci/display_test.py
 
       - name: Install ansys-mapdl-core
@@ -494,8 +494,8 @@ jobs:
 
       - name: "Check package"
         run: |
-          pip install twine
-          twine check dist/*
+          python -m pip install twine
+          python -m twine check dist/*
 
       - name: "Upload wheel and binaries"
         uses: actions/upload-artifact@v4
