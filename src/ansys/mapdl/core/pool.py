@@ -782,16 +782,11 @@ class LocalMapdlPool:
 
                 if instance._exited:
                     try:
-                        # use the next port after the current available port
                         self._spawning_i += 1
-                        if self._start_instance:
-                            port = max(self._ports) + 1
-                        else:
-                            port = instance.port
 
                         self._spawn_mapdl(
                             index,
-                            port=port,
+                            port=instance.port,
                             name=name,
                             thread_name=name,
                             exec_file=self._exec_file,
