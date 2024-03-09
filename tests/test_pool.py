@@ -37,9 +37,6 @@ if has_dependency("ansys-tools-path"):
 else:
     EXEC_FILE = os.environ.get("PYMAPDL_MAPDL_EXEC")
 
-if not ON_LOCAL:
-    pytest.skip(allow_module_level=True)
-
 from ansys.mapdl.core import LocalMapdlPool, examples
 from ansys.mapdl.core.errors import VersionError
 from conftest import QUICK_LAUNCH_SWITCHES, requires
@@ -69,16 +66,26 @@ def pool(tmpdir_factory):
 
     port = os.environ.get("PYMAPDL_PORT", 50056)
 
-    mapdl_pool = LocalMapdlPool(
-        2,
-        license_server_check=False,
-        run_location=run_path,
-        port=port,
-        start_timeout=30,
-        exec_file=EXEC_FILE,
-        additional_switches=QUICK_LAUNCH_SWITCHES,
-        nproc=NPROC,
-    )
+    if ON_LOCAL:
+        mapdl_pool = LocalMapdlPool(
+            2,
+            license_server_check=False,
+            run_location=run_path,
+            port=port,
+            start_timeout=30,
+            exec_file=EXEC_FILE,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+            nproc=NPROC,
+        )
+    else:
+
+        mapdl_pool = LocalMapdlPool(
+            2,
+            license_server_check=False,
+            start_instance=False,
+            port=[],
+        )
+
     yield mapdl_pool
 
     ##########################################################################
@@ -251,6 +258,7 @@ def test_directory_names_default(pool):
         assert f"Instance_{i}" in dirs_path_pool
 
 
+@requires("local")
 @skip_if_ignore_pool
 def test_directory_names_custom_string(tmpdir):
     pool = LocalMapdlPool(
@@ -270,6 +278,7 @@ def test_directory_names_custom_string(tmpdir):
     pool.exit(block=True)
 
 
+@requires("local")
 @skip_if_ignore_pool
 def test_directory_names_function(tmpdir):
     def myfun(i):

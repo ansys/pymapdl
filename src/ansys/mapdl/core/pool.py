@@ -204,11 +204,13 @@ class LocalMapdlPool:
                 "Only strings or functions are allowed in the argument 'name'."
             )
 
-        # verify that mapdl is 2021R1 or newer
+        # verify executable
+        exec_file = os.getenv("PYMAPDL_MAPDL_EXEC", exec_file)
+
         if start_instance:
-            if "exec_file" in kwargs:
-                exec_file = kwargs["exec_file"]
-            else:  # get default executable
+            exec_file = kwargs.get("exec_file", exec_file)
+
+            if not exec_file:  # get default executable
                 if _HAS_ATP:
                     exec_file = get_ansys_path()
                 else:
@@ -224,12 +226,10 @@ class LocalMapdlPool:
                         "exec_file=<path to executable>"
                     )
 
+            # Checking version
             if _HAS_ATP:
                 if version_from_path("mapdl", exec_file) < 211:
                     raise VersionError("LocalMapdlPool requires MAPDL 2021R1 or later.")
-
-        else:
-            exec_file = None
 
         self._exec_file = exec_file
 
