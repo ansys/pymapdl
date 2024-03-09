@@ -114,6 +114,10 @@ jobs:
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
       PYMAPDL_START_INSTANCE: FALSE
       ON_DOCUMENTATION: TRUE
+    
+    container:
+      image: ghcr.io/sphinx-doc/sphinx-ci
+
     steps:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4
@@ -168,7 +172,7 @@ jobs:
       - name: "Install OS packages"
         run: |
           sudo apt update 
-          sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex texlive-fonts-extra qpdf texlive-xetex xindy
+          sudo apt install zip pandoc libgl1-mesa-glx xvfb  latexmk qpdf xindy
 
       - name: "Test virtual framebuffer"
         run: |
