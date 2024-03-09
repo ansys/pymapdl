@@ -149,6 +149,7 @@ def test_simple_map(pool):
 
 
 @skip_if_ignore_pool
+@requires("local")
 def test_map_timeout(pool):
     pool_sz = len(pool)
 
