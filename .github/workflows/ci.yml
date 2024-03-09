@@ -28,7 +28,7 @@ env:
   MEILISEARCH_PUBLIC_API_KEY: ${{ secrets.MEILISEARCH_PUBLIC_API_KEY }}
   PYANSYS_OFF_SCREEN: True
   DPF_START_SERVER: False
-  DPF_PORT: 21002
+  DPF_PORT: 21004
   MAPDL_PACKAGE: ghcr.io/ansys/mapdl
   MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.1-ubuntu-student
   ON_CI: True
@@ -350,6 +350,7 @@ jobs:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_PORT2: 21001  # for the pool testing and default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21002  # default won't work on GitHub runners
+      PYMAPDL_DB_PORT2: 21003  # default won't work on GitHub runners
       PYMAPDL_START_INSTANCE: FALSE
       ON_LOCAL: FALSE
       ON_UBUNTU: FALSE
@@ -386,9 +387,11 @@ jobs:
           MAPDL_VERSION: ${{ matrix.mapdl-version }}
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
         run: |
+          echo "Launching first MAPDL instance..."
           .ci/start_mapdl.sh &> mapdl_launch.log & export DOCKER_PID_0=$!
-          # Launching a second instance for MAPDL pool testing
+          echo "Launching a second instance for MAPDL pool testing..."
           export PYMAPDL_PORT=${{ env.PYMAPDL_PORT2 }}
+          export PYMAPDL_DB_PORT=${{ env.PYMAPDL_DB_PORT2 }}
           .ci/start_mapdl.sh &> mapdl_launch_2.log & export DOCKER_PID_1=$!
           echo "Launching MAPDL service 0 at PID: $DOCKER_PID_0"
           echo "Launching MAPDL service 1 at PID: $DOCKER_PID_2"
