@@ -180,8 +180,8 @@ jobs:
 
       - name: "Install OS packages"
         run: |
-          sudo apt update
-          sudo apt install zip pandoc libgl1-mesa-glx xvfb latexmk qpdf xindy
+          apt update
+          apt install zip pandoc libgl1-mesa-glx xvfb latexmk qpdf xindy
 
       - name: "Test virtual framebuffer"
         run: |
