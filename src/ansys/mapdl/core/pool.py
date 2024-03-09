@@ -118,14 +118,15 @@ class LocalMapdlPool:
         the index of each instance in the pool.
         By default, the instances directories are named as "Instances_{i}".
 
-    start_instance : bool
+    start_instance : bool, optional
         Set it to ``False`` to make PyMAPDL to connect to remote instances instead
         of launching them. In that case, you need to supply the MAPDL instances
-        ports as a list of ``int``s.
+        ports as a list of ``int`` s.
 
     **kwargs : dict, optional
-        Additional keyword arguments. For a complete listing, see the description for the
-        :func:`ansys.mapdl.core.launcher.launch_mapdl` method.
+        Additional keyword arguments. For a complete listing, see the
+        description for the :func:`ansys.mapdl.core.launcher.launch_mapdl`
+        method.
 
     Examples
     --------
