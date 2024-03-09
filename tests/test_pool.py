@@ -64,8 +64,6 @@ NPROC = 1
 def pool(tmpdir_factory):
     run_path = str(tmpdir_factory.mktemp("ansys_pool"))
 
-    port = os.environ.get("PYMAPDL_PORT", 50056)
-
     if ON_LOCAL:
         mapdl_pool = LocalMapdlPool(
             2,
@@ -78,12 +76,14 @@ def pool(tmpdir_factory):
             nproc=NPROC,
         )
     else:
+        port = os.environ.get("PYMAPDL_PORT", 50056)
+        port2 = os.environ.get("PYMAPDL_PORT2", 50057)
 
         mapdl_pool = LocalMapdlPool(
             2,
             license_server_check=False,
             start_instance=False,
-            port=[],
+            port=[port, port2],
         )
 
     yield mapdl_pool
