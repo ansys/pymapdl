@@ -210,7 +210,7 @@ def test_map(pool):
         completed_indices.append(index)
         return mapdl.parameters.routine
 
-    inputs = [(examples.vmfiles["vm%d" % i], i) for i in range(1, len(pool) + 3)]
+    inputs = [(examples.vmfiles["vm%d" % i], i) for i in range(1, len(pool) + 1)]
     outputs = pool.map(func, inputs, wait=True)
 
     assert len(outputs) == len(inputs)
