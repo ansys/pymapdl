@@ -185,12 +185,12 @@ jobs:
 
       - name: "Test virtual framebuffer"
         run: |
-          pip install -r .ci/requirements_test_xvfb.txt
+          python -m pip install -r .ci/requirements_test_xvfb.txt
           xvfb-run python .ci/display_test.py
 
       - name: "Install ansys-mapdl-core"
         run: |
-          pip install .
+          python -m pip install .
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: "Retrieve PyMAPDL version"
@@ -228,7 +228,7 @@ jobs:
 
       - name: "Install docs build requirements"
         run: |
-          pip install .[doc]
+          python -m pip install .[doc]
 
       - name: "Waiting for the services to be up"
         run: |
@@ -332,7 +332,6 @@ jobs:
       - name: "Display MAPDL Logs"
         if: always()
         run: cat log.txt || echo "MAPDL log could not be found."
-
 
 
   build-test:
