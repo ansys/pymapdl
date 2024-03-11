@@ -783,7 +783,7 @@ jobs:
         run: ls -Rla
 
       - name: "Release to GitHub"
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             ./**/artifacts/ansys_mapdl_core-*-py3-none-any.whl
