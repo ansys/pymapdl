@@ -1,3 +1,4 @@
+#!/bin/bash
 echo "Adding Docker's official GPG key..."
 apt-get update -y
 apt-get install -y ca-certificates curl gnupg
