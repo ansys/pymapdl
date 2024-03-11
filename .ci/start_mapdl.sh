@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "MAPDL Instance name: $INSTANCE_NAME"
 echo "MAPDL_VERSION: $MAPDL_VERSION"
 
 export MAPDL_IMAGE="$MAPDL_PACKAGE:$MAPDL_VERSION"
@@ -28,7 +29,7 @@ echo "P_SCHEMA: $P_SCHEMA"
 
 docker run \
     --entrypoint "/bin/bash" \
-    --name mapdl \
+    --name $INSTANCE_NAME \
     --restart always \
     --health-cmd="ps aux | grep \"[/]ansys_inc/.*ansys\.e.*grpc\" -q && echo 0 || echo 1" \
     --health-interval=0.5s \
