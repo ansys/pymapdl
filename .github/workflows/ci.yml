@@ -67,7 +67,6 @@ jobs:
         uses: ansys/actions/doc-style@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          version: 2.29.6
 
   smoke-tests:
     name: Build and smoke test (${{ matrix.os }} | Python ${{ matrix.python-version }}) (Release=${{ matrix.should-release }})
@@ -231,24 +230,7 @@ jobs:
 
       - name: "Waiting for the services to be up"
         run: |
-          echo "Waiting for the MAPDL service to be up..."
-          nc -v -z localhost $PYMAPDL_PORT
-          echo "::group:: ps aux Output" && ps aux && echo "::endgroup::" 
-
-          echo "Waiting for MAPDL port is open..."
-          echo "::group:: Waiting for the MAPDL port to be open..." 
-          while ! nc -z localhost $PYMAPDL_PORT; do
-            sleep 0.1
-          done
-          echo "::endgroup::"
-          echo "MAPDL service is up!"
-
-          echo "::group:: Waiting for the DPF port to be open..." 
-          while ! nc -z localhost $DPF_PORT; do
-            sleep 0.1
-          done
-          echo "::endgroup::"
-          echo "DPF service is up!"
+          .ci/waiting_services.sh
 
       - name: "Build documentation"
         run: |
@@ -256,10 +238,7 @@ jobs:
 
       - name: "Substitute defective GIF"
         run: |
-          cd doc/_build/html/examples/gallery_examples/00-mapdl-examples
-          cp ../../../../../source/images/dcb.gif ../../../_images/
-          sed -i 's+../../../_images/sphx_glr_composite_dcb_004.gif+../../../_images/dcb.gif+g' composite_dcb.html
-          cd ../../../../../../
+          .ci/substitute_defective_gif.sh
 
       - name: "Upload HTML Documentation"
         uses: actions/upload-artifact@v4
@@ -290,37 +269,14 @@ jobs:
           name: minimum_requirements.txt
           path: ./minimum_requirements.txt
 
-      - name: "Display files structure"
+      - name: "Collect logs on failure"
         if: always()
+        env:
+          MAPDL_VERSION: ${{ env.MAPDL_IMAGE_VERSION_DOCS_BUILD }}
+          MAPDL_INSTANCE: mapdl
+          LOG_NAMES: logs-build-docs
         run: |
-          mkdir logs-build-docs
-          echo "::group:: Display files structure" && ls -R && echo "::endgroup::"
-          ls -R > ./logs-build-docs/files_structure.txt
-
-      - name: "Display Docker files structures"
-        if: always()
-        run: |
-          echo "::group:: Display files structure" && docker exec mapdl /bin/bash -c "ls -R" && echo "::endgroup::" || echo "Failed to display the docker structure."
-          docker exec mapdl /bin/bash -c "ls -R" > ./logs-build-docs/docker_files_structure.txt || echo "Failed to copy the docker structure into a local file"
-
-      - name: "Collect MAPDL logs on failure"
-        if: always()
-        run: |
-          docker exec mapdl /bin/bash -c "mkdir -p /mapdl_logs && echo 'Successfully created directory inside docker container'" || echo "Failed to create a directory inside docker container for logs."
-          docker exec mapdl /bin/bash -c "if compgen -G 'file*.out' > /dev/null ;then cp -f /file*.out /mapdl_logs && echo 'Successfully copied out files.'; fi" || echo "Failed to copy the 'out' files into a local file"
-          docker exec mapdl /bin/bash -c "if compgen -G 'file*.err' > /dev/null ;then cp -f /file*.err /mapdl_logs && echo 'Successfully copied err files.'; fi" || echo "Failed to copy the 'err' files into a local file"
-          docker exec mapdl /bin/bash -c "if compgen -G 'file*.log' > /dev/null ;then cp -f /file*.log /mapdl_logs && echo 'Successfully copied log files.'; fi" || echo "Failed to copy the 'log' files into a local file"
-          docker exec mapdl /bin/bash -c "if compgen -G '*.crash' > /dev/null ;then cp -f /*.crash /mapdl_logs && echo 'Successfully copied crash files.'; fi" || echo "Failed to copy the 'crash' files into a local file"
-          docker cp mapdl:/mapdl_logs/. ./logs-build-docs/. || echo "Failed to copy the 'log-build-docs' files into a local directory"
-
-      - name: "Tar logs"
-        if: always()
-        run: |
-          cp -f doc/_build/latex/*.log ./logs-build-docs/ || echo "Latex logs could not be found."
-
-          cp mapdl_launch.log ./logs-build-docs/mapdl_launch.log || echo "MAPDL log not found."
-          cp log.txt ./logs-build-docs/ || echo "MAPDL log could not be found."
-          tar cvzf ./logs-build-docs.tgz ./logs-build-docs 
+          .ci/collect_mapdl_logs.sh
 
       - name: "Upload logs to GitHub"
         if: always()
@@ -329,10 +285,13 @@ jobs:
           name: logs-build-docs.tgz
           path: ./logs-build-docs.tgz
 
-      - name: "Display MAPDL Logs"
+      - name: "Display files structure"
         if: always()
-        run: cat log.txt || echo "MAPDL log could not be found."
-
+        env:
+          MAPDL_INSTANCE: mapdl
+          LOG_NAMES: logs-build-docs
+        run: |
+          .ci/display_logs.sh
 
   build-test:
     name: "Remote: Build & test MAPDL ${{ matrix.mapdl-version }} (Extended testing ${{ matrix.extended_testing }})"
@@ -449,24 +408,7 @@ jobs:
 
       - name: "Waiting for the services to be up"
         run: |
-          echo "Waiting for the MAPDL service to be up..."
-          nc -v -z localhost $PYMAPDL_PORT
-          echo "::group:: ps aux Output" && ps aux && echo "::endgroup::" 
-
-          echo "Waiting for MAPDL port is open..."
-          echo "::group:: Waiting for the MAPDL port to be open..." 
-          while ! nc -z localhost $PYMAPDL_PORT; do
-            sleep 0.1
-          done
-          echo "::endgroup::"
-          echo "MAPDL service is up!"
-
-          echo "::group:: Waiting for the DPF port to be open..." 
-          while ! nc -z localhost $DPF_PORT; do
-            sleep 0.1
-          done
-          echo "::endgroup::"
-          echo "DPF service is up!"
+          .ci/waiting_services.sh
 
       - name: "Unit testing"
         env:
@@ -503,45 +445,14 @@ jobs:
           path: dist/
           retention-days: 7
 
-      - name: "Display files structure"
+      - name: "Collect logs on failure"
         if: always()
+        env:
+          MAPDL_VERSION: ${{ matrix.mapdl-version }}
+          MAPDL_INSTANCE: mapdl
+          LOG_NAMES: logs-${{ matrix.mapdl-version }}
         run: |
-          mkdir logs-${{ matrix.mapdl-version }} && echo "Successfully generated directory ${{ matrix.mapdl-version }}"
-          echo "::group:: Display files structure" && ls -R && echo "::endgroup::"
-          ls -R > ./logs-${{ matrix.mapdl-version }}/files_structure.txt
-
-      - name: "Display docker files structures"
-        if: always()
-        run: |
-          echo "::group:: Display files structure" && docker exec mapdl /bin/bash -c "ls -R" && echo "::endgroup::"
-          docker exec mapdl /bin/bash -c "ls -R" > ./logs-${{ matrix.mapdl-version }}/docker_files_structure.txt || echo "Failed to copy the docker structure into a local file"
-
-      - name: "Collect MAPDL logs on failure"
-        if: ${{ always() && !contains( matrix.mapdl-version, 'ubuntu') }}
-        run: |
-          docker exec mapdl /bin/bash -c "mkdir -p /mapdl_logs && echo 'Successfully created directory inside docker container'" || echo "Failed to create a directory inside docker container for logs."
-          docker exec mapdl /bin/bash -c "if compgen -G 'file*.out' > /dev/null ;then cp -f /file*.out /mapdl_logs && echo 'Successfully copied out files.'; fi" || echo "Failed to copy the 'out' files into a local file"
-          docker exec mapdl /bin/bash -c "if compgen -G 'file*.err' > /dev/null ;then cp -f /file*.err /mapdl_logs && echo 'Successfully copied err files.'; fi" || echo "Failed to copy the 'err' files into a local file"
-          docker exec mapdl /bin/bash -c "if compgen -G 'file*.log' > /dev/null ;then cp -f /file*.log /mapdl_logs && echo 'Successfully copied log files.'; fi" || echo "Failed to copy the 'log' files into a local file"
-          docker exec mapdl /bin/bash -c "if compgen -G '*.crash' > /dev/null ;then cp -f /*.crash /mapdl_logs && echo 'Successfully copied crash files.'; fi" || echo "Failed to copy the 'crash' files into a local file"
-          docker cp mapdl:/mapdl_logs/. ./logs-${{ matrix.mapdl-version }}/.
-
-      - name: "Collect MAPDL logs on failure for ubuntu image"
-        if: ${{ always() && contains( matrix.mapdl-version,'ubuntu') }}
-        run: |
-          docker exec mapdl /bin/bash -c "mkdir -p /mapdl_logs && echo 'Successfully created directory inside docker container'" || echo "Failed to create a directory inside docker container for logs."
-          docker exec mapdl /bin/bash -c "if compgen -G '/jobs/file*.out' > /dev/null ;then cp -f /jobs/file*.out /mapdl_logs && echo 'Successfully copied out files.'; fi" || echo "Failed to copy the 'out' files into a local file"
-          docker exec mapdl /bin/bash -c "if compgen -G '/jobs/file*.err' > /dev/null ;then cp -f /jobs/file*.err /mapdl_logs && echo 'Successfully copied err files.'; fi" || echo "Failed to copy the 'err' files into a local file"
-          docker exec mapdl /bin/bash -c "if compgen -G '/jobs/file*.log' > /dev/null ;then cp -f /jobs/file*.log /mapdl_logs && echo 'Successfully copied log files.'; fi" || echo "Failed to copy the 'log' files into a local file"
-          docker exec mapdl /bin/bash -c "if compgen -G '/jobs/*.crash' > /dev/null ;then cp -f /jobs/*.crash /mapdl_logs && echo 'Successfully copied crash files.'; fi" || echo "Failed to copy the 'crash' files into a local file"
-          docker cp mapdl:/mapdl_logs/. ./logs-${{ matrix.mapdl-version }}/.
-
-      - name: "Tar logs"
-        if: always()
-        run: |
-          cp log.txt ./logs-${{ matrix.mapdl-version }}/log.txt || echo "MAPDL log not found."
-          cp mapdl_launch.log ./logs-${{ matrix.mapdl-version }}/mapdl_launch.log || echo "MAPDL log not found."
-          tar cvzf ./logs-${{ matrix.mapdl-version }}.tgz ./logs-${{ matrix.mapdl-version }} || echo "Failed to compress"
+          .ci/collect_mapdl_logs.sh
 
       - name: "Upload logs to GitHub"
         if: always()
@@ -550,17 +461,13 @@ jobs:
           name: logs-${{ matrix.mapdl-version }}.tgz
           path: ./logs-${{ matrix.mapdl-version }}.tgz
 
-      - name: "Display MAPDL Logs"
+      - name: "Display files structure"
         if: always()
-        run: cat log.txt
-
-      - name: "List main files"
-        if: always()
+        env:
+          MAPDL_INSTANCE: mapdl
+          LOG_NAMES: logs-${{ matrix.mapdl-version }}
         run: |
-          if compgen -G './logs-${{ matrix.mapdl-version }}/*.err' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.err; do echo "::group:: Error file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to display the 'out' files."
-          if compgen -G './logs-${{ matrix.mapdl-version }}/*.log' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.log; do echo "::group:: Log file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to display the 'err' files."
-          if compgen -G './logs-${{ matrix.mapdl-version }}/*.out' > /dev/null ;then for f in ./logs-${{ matrix.mapdl-version }}/*.out; do echo "::group:: Output file $f" && cat $f && echo "::endgroup::" ; done; fi || echo "Failed to display the 'log' files."
-
+          .ci/display_logs.sh
 
   build-test-ubuntu:
     name: "Local: Build & test on Ubuntu MAPDL ${{ matrix.mapdl-image }} (Extended testing ${{ matrix.extended_testing }})"
@@ -894,18 +801,6 @@ jobs:
           twine upload --skip-existing ./**/*.whl
           twine upload --skip-existing ./**/*.tar.gz
 
-      - name: "Notify if fail"
-        uses: skitionek/notify-microsoft-teams@master
-        if: ${{ failure() }}
-        with:
-          webhook_url: ${{ secrets.TEAM_HOOK }}
-          needs: ${{ toJson(needs) }}
-          job: ${{ toJson(job) }}
-          steps: ${{ toJson(steps) }}
-          overwrite: "{
-            title: `Release FAILED!`,
-            }"
-
 
   upload-docs-release:
     name: "Upload release documentation"
@@ -918,7 +813,6 @@ jobs:
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
           render-last: '5'
 
 
