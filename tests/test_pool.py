@@ -27,7 +27,7 @@ import time
 import numpy as np
 import pytest
 
-from conftest import ON_LOCAL, START_INSTANCE, has_dependency
+from conftest import ON_LOCAL, ON_STUDENT, START_INSTANCE, has_dependency
 
 if has_dependency("ansys-tools-path"):
     from ansys.tools.path import find_ansys
@@ -43,6 +43,10 @@ from conftest import QUICK_LAUNCH_SWITCHES, requires
 
 # skip entire module unless HAS_GRPC
 pytestmark = requires("grpc")
+
+# skipping if ON_STUDENT and ON_LOCAL because we cannot spawn that many instances.
+if ON_STUDENT and ON_LOCAL:
+    pytest.skip(allow_module_level=True)
 
 
 skip_if_ignore_pool = pytest.mark.skipif(
