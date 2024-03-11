@@ -28,11 +28,11 @@ env:
   MEILISEARCH_PUBLIC_API_KEY: ${{ secrets.MEILISEARCH_PUBLIC_API_KEY }}
   PYANSYS_OFF_SCREEN: True
   DPF_START_SERVER: False
-  DPF_PORT: 21002
+  DPF_PORT: 21004
   MAPDL_PACKAGE: ghcr.io/ansys/mapdl
   MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.1-ubuntu-student
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vv --durations=10 --maxfail=3 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html'
+  PYTEST_ARGUMENTS: '-vvv --durations=10 --maxfail=3 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html'
 
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
@@ -143,6 +143,7 @@ jobs:
           MAPDL_VERSION: ${{ env.MAPDL_IMAGE_VERSION_DOCS_BUILD }}
           DISTRIBUTED_MODE: "dmp"
         run: |
+          export INSTANCE_NAME=MAPDL_0
           .ci/start_mapdl.sh &> mapdl_launch.log & export DOCKER_PID=$!
           echo "Launching MAPDL service at PID: $DOCKER_PID"
           echo "DOCKER_PID=$(echo $DOCKER_PID)" >> $GITHUB_OUTPUT
@@ -273,7 +274,7 @@ jobs:
         if: always()
         env:
           MAPDL_VERSION: ${{ env.MAPDL_IMAGE_VERSION_DOCS_BUILD }}
-          MAPDL_INSTANCE: mapdl
+          MAPDL_INSTANCE: MAPDL_0
           LOG_NAMES: logs-build-docs
         run: |
           .ci/collect_mapdl_logs.sh
@@ -319,7 +320,9 @@ jobs:
             mapdl-version: 'v24.1.0'
     env:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
-      PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
+      PYMAPDL_PORT2: 21001  # for the pool testing and default won't work on GitHub runners
+      PYMAPDL_DB_PORT: 21002  # default won't work on GitHub runners
+      PYMAPDL_DB_PORT2: 21003  # default won't work on GitHub runners
       PYMAPDL_START_INSTANCE: FALSE
       ON_LOCAL: FALSE
       ON_UBUNTU: FALSE
@@ -356,9 +359,18 @@ jobs:
           MAPDL_VERSION: ${{ matrix.mapdl-version }}
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
         run: |
-          .ci/start_mapdl.sh &> mapdl_launch.log & export DOCKER_PID=$!
-          echo "Launching MAPDL service at PID: $DOCKER_PID"
-          echo "DOCKER_PID=$(echo $DOCKER_PID)" >> $GITHUB_OUTPUT
+          echo "Launching first MAPDL instance..."
+          export INSTANCE_NAME=MAPDL_0
+          .ci/start_mapdl.sh &> mapdl_launch_0.log & export DOCKER_PID_0=$!
+          echo "Launching a second instance for MAPDL pool testing..."
+          export PYMAPDL_PORT=${{ env.PYMAPDL_PORT2 }}
+          export PYMAPDL_DB_PORT=${{ env.PYMAPDL_DB_PORT2 }}
+          export INSTANCE_NAME=MAPDL_1
+          .ci/start_mapdl.sh &> mapdl_launch_1.log & export DOCKER_PID_1=$!
+          echo "Launching MAPDL service 0 at PID: $DOCKER_PID_0"
+          echo "Launching MAPDL service 1 at PID: $DOCKER_PID_2"
+          echo "DOCKER_PID_0=$(echo $DOCKER_PID_0)" >> $GITHUB_OUTPUT
+          echo "DOCKER_PID_1=$(echo $DOCKER_PID_1)" >> $GITHUB_OUTPUT
 
       - name: "DPF server activation"
         run: |

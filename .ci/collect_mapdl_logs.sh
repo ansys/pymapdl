@@ -17,11 +17,11 @@ mkdir "$LOG_NAMES" && echo "Successfully generated directory $LOG_NAMES"
 ####
 echo "Collecting MAPDL logs..."
 
-docker exec "$MAPDL_INSTANCE" /bin/bash -c "mkdir -p /mapdl_logs && echo 'Successfully created directory inside docker container'" || echo "Failed to create a directory inside docker container for logs."
-docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$FILE*.out' > /dev/null ;then cp -f /file*.out /mapdl_logs && echo 'Successfully copied out files.'; fi" || echo "Failed to copy the 'out' files into a local file"
-docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$FILE*.err' > /dev/null ;then cp -f /file*.err /mapdl_logs && echo 'Successfully copied err files.'; fi" || echo "Failed to copy the 'err' files into a local file"
-docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$FILE*.log' > /dev/null ;then cp -f /file*.log /mapdl_logs && echo 'Successfully copied log files.'; fi" || echo "Failed to copy the 'log' files into a local file"
-docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$WDIR*.crash' > /dev/null ;then cp -f /*.crash /mapdl_logs && echo 'Successfully copied crash files.'; fi" || echo "Failed to copy the 'crash' files into a local file"
+(docker exec "$MAPDL_INSTANCE" /bin/bash -c "mkdir -p /mapdl_logs && echo 'Successfully created directory inside docker container'") || echo "Failed to create a directory inside docker container for logs."
+(docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$FILE*.out' > /dev/null ;then cp -f /file*.out /mapdl_logs && echo 'Successfully copied out files.'; fi") || echo "Failed to copy the 'out' files into a local file"
+(docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$FILE*.err' > /dev/null ;then cp -f /file*.err /mapdl_logs && echo 'Successfully copied err files.'; fi") || echo "Failed to copy the 'err' files into a local file"
+(docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$FILE*.log' > /dev/null ;then cp -f /file*.log /mapdl_logs && echo 'Successfully copied log files.'; fi") || echo "Failed to copy the 'log' files into a local file"
+(docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$WDIR*.crash' > /dev/null ;then cp -f /*.crash /mapdl_logs && echo 'Successfully copied crash files.'; fi") || echo "Failed to copy the 'crash' files into a local file"
 
 docker cp "$MAPDL_INSTANCE":/mapdl_logs/. ./"$LOG_NAMES"/. || echo "Failed to copy the 'log-build-docs' files into a local directory"
 
