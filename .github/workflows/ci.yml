@@ -141,7 +141,6 @@ jobs:
       - name: "Pull, launch, and validate MAPDL service"
         id: start_mapdl
         env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
           MAPDL_VERSION: ${{ env.MAPDL_IMAGE_VERSION_DOCS_BUILD }}
           DISTRIBUTED_MODE: "dmp"
         run: |
