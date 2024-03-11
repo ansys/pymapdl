@@ -316,7 +316,9 @@ def protect_grpc(func):
 
             # Must close unfinished processes
             mapdl._close_process()
-            raise MapdlExitedError("MAPDL server connection terminated") from None
+            raise MapdlExitedError(
+                f"MAPDL server connection terminated with the following error\n{error}"
+            ) from None
 
         if threading.current_thread().__class__.__name__ == "_MainThread":
             received_interrupt = bool(SIGINT_TRACKER)
