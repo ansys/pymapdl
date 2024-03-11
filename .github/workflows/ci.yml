@@ -321,7 +321,6 @@ jobs:
         run: cat log.txt || echo "MAPDL log could not be found."
 
 
-
   build-test:
     name: "Remote: Build & test MAPDL ${{ matrix.mapdl-version }} (Extended testing ${{ matrix.extended_testing }})"
     runs-on: ubuntu-latest
@@ -389,12 +388,12 @@ jobs:
         run: |
           echo "Launching first MAPDL instance..."
           export INSTANCE_NAME=MAPDL_0
-          .ci/start_mapdl.sh &> mapdl_launch.log & export DOCKER_PID_0=$!
+          .ci/start_mapdl.sh &> mapdl_launch_0.log & export DOCKER_PID_0=$!
           echo "Launching a second instance for MAPDL pool testing..."
           export PYMAPDL_PORT=${{ env.PYMAPDL_PORT2 }}
           export PYMAPDL_DB_PORT=${{ env.PYMAPDL_DB_PORT2 }}
           export INSTANCE_NAME=MAPDL_1
-          .ci/start_mapdl.sh &> mapdl_launch_2.log & export DOCKER_PID_1=$!
+          .ci/start_mapdl.sh &> mapdl_launch_1.log & export DOCKER_PID_1=$!
           echo "Launching MAPDL service 0 at PID: $DOCKER_PID_0"
           echo "Launching MAPDL service 1 at PID: $DOCKER_PID_2"
           echo "DOCKER_PID_0=$(echo $DOCKER_PID_0)" >> $GITHUB_OUTPUT
@@ -539,7 +538,8 @@ jobs:
         if: always()
         run: |
           cp log.txt ./logs-${{ matrix.mapdl-version }}/log.txt || echo "MAPDL log not found."
-          cp mapdl_launch.log ./logs-${{ matrix.mapdl-version }}/mapdl_launch.log || echo "MAPDL log not found."
+          cp mapdl_launch_0.log ./logs-${{ matrix.mapdl-version }}/mapdl_launch_0.log || echo "MAPDL launching log not found."
+          cp mapdl_launch_1.log ./logs-${{ matrix.mapdl-version }}/mapdl_launch_1.log || echo "MAPDL launching log not found."
           tar cvzf ./logs-${{ matrix.mapdl-version }}.tgz ./logs-${{ matrix.mapdl-version }} || echo "Failed to compress"
 
       - name: "Upload logs to GitHub"
