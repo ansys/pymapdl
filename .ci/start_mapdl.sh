@@ -29,7 +29,7 @@ echo "P_SCHEMA: $P_SCHEMA"
 
 docker run \
     --entrypoint "/bin/bash" \
-    --name $INSTANCE_NAME \
+    --name "$INSTANCE_NAME" \
     --restart always \
     --health-cmd="ps aux | grep \"[/]ansys_inc/.*ansys\.e.*grpc\" -q && echo 0 || echo 1" \
     --health-interval=0.5s \

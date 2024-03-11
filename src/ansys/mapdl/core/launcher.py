@@ -822,7 +822,7 @@ def get_start_instance(start_instance: bool = True):
 
     elif start_instance is None:
         LOG.debug(
-            f"'PYMAPDL_START_INSTANCE' is unset, and there is no supplied value. Using default, which is 'True'."
+            "'PYMAPDL_START_INSTANCE' is unset, and there is no supplied value. Using default, which is 'True'."
         )
         return True  # Default is true
     else:

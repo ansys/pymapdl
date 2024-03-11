@@ -1143,7 +1143,7 @@ class MapdlGrpc(MapdlBase):
         processes making this method ineffective for a local instance of MAPDL.
 
         """
-        self._log.debug(f"Closing processes")
+        self._log.debug("Closing processes")
         if self._local:
             # killing server process
             self._kill_server()
