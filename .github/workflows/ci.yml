@@ -132,6 +132,7 @@ jobs:
           MAPDL_VERSION: ${{ env.MAPDL_IMAGE_VERSION_DOCS_BUILD }}
           DISTRIBUTED_MODE: "dmp"
         run: |
+          export INSTANCE_NAME=MAPDL_0
           .ci/start_mapdl.sh &> mapdl_launch.log & export DOCKER_PID=$!
           echo "Launching MAPDL service at PID: $DOCKER_PID"
           echo "DOCKER_PID=$(echo $DOCKER_PID)" >> $GITHUB_OUTPUT
