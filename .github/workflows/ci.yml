@@ -519,22 +519,22 @@ jobs:
       - name: "Collect MAPDL logs on failure"
         if: ${{ always() && !contains( matrix.mapdl-version, 'ubuntu') }}
         run: |
-          docker exec MAPDL_0 /bin/bash -c "mkdir -p /mapdl_logs && echo 'Successfully created directory inside docker container'" || echo "Failed to create a directory inside docker container for logs."
-          docker exec MAPDL_0 /bin/bash -c "if compgen -G 'file*.out' > /dev/null ;then cp -f /file*.out /mapdl_logs && echo 'Successfully copied out files.'; fi" || echo "Failed to copy the 'out' files into a local file"
-          docker exec MAPDL_0 /bin/bash -c "if compgen -G 'file*.err' > /dev/null ;then cp -f /file*.err /mapdl_logs && echo 'Successfully copied err files.'; fi" || echo "Failed to copy the 'err' files into a local file"
-          docker exec MAPDL_0 /bin/bash -c "if compgen -G 'file*.log' > /dev/null ;then cp -f /file*.log /mapdl_logs && echo 'Successfully copied log files.'; fi" || echo "Failed to copy the 'log' files into a local file"
-          docker exec MAPDL_0 /bin/bash -c "if compgen -G '*.crash' > /dev/null ;then cp -f /*.crash /mapdl_logs && echo 'Successfully copied crash files.'; fi" || echo "Failed to copy the 'crash' files into a local file"
-          docker cp mapdl:/mapdl_logs/. ./logs-${{ matrix.mapdl-version }}/.
+          (docker exec MAPDL_0 /bin/bash -c "mkdir -p /mapdl_logs && echo 'Successfully created directory inside docker container'") || echo "Failed to create a directory inside docker container for logs."
+          (docker exec MAPDL_0 /bin/bash -c "if compgen -G 'file*.out' > /dev/null ;then cp -f /file*.out /mapdl_logs && echo 'Successfully copied out files.'; fi") || echo "Failed to copy the 'out' files into a local file"
+          (docker exec MAPDL_0 /bin/bash -c "if compgen -G 'file*.err' > /dev/null ;then cp -f /file*.err /mapdl_logs && echo 'Successfully copied err files.'; fi") || echo "Failed to copy the 'err' files into a local file"
+          (docker exec MAPDL_0 /bin/bash -c "if compgen -G 'file*.log' > /dev/null ;then cp -f /file*.log /mapdl_logs && echo 'Successfully copied log files.'; fi") || echo "Failed to copy the 'log' files into a local file"
+          (docker exec MAPDL_0 /bin/bash -c "if compgen -G '*.crash' > /dev/null ;then cp -f /*.crash /mapdl_logs && echo 'Successfully copied crash files.'; fi") || echo "Failed to copy the 'crash' files into a local file"
+          docker cp MAPDL_0:/mapdl_logs/. ./logs-${{ matrix.mapdl-version }}/. || echo "Failed to extract logs from docker image"
 
       - name: "Collect MAPDL logs on failure for ubuntu image"
         if: ${{ always() && contains( matrix.mapdl-version,'ubuntu') }}
         run: |
-          docker exec MAPDL_0 /bin/bash -c "mkdir -p /mapdl_logs && echo 'Successfully created directory inside docker container'" || echo "Failed to create a directory inside docker container for logs."
-          docker exec MAPDL_0 /bin/bash -c "if compgen -G '/jobs/file*.out' > /dev/null ;then cp -f /jobs/file*.out /mapdl_logs && echo 'Successfully copied out files.'; fi" || echo "Failed to copy the 'out' files into a local file"
-          docker exec MAPDL_0 /bin/bash -c "if compgen -G '/jobs/file*.err' > /dev/null ;then cp -f /jobs/file*.err /mapdl_logs && echo 'Successfully copied err files.'; fi" || echo "Failed to copy the 'err' files into a local file"
-          docker exec MAPDL_0 /bin/bash -c "if compgen -G '/jobs/file*.log' > /dev/null ;then cp -f /jobs/file*.log /mapdl_logs && echo 'Successfully copied log files.'; fi" || echo "Failed to copy the 'log' files into a local file"
-          docker exec MAPDL_0 /bin/bash -c "if compgen -G '/jobs/*.crash' > /dev/null ;then cp -f /jobs/*.crash /mapdl_logs && echo 'Successfully copied crash files.'; fi" || echo "Failed to copy the 'crash' files into a local file"
-          docker cp mapdl:/mapdl_logs/. ./logs-${{ matrix.mapdl-version }}/.
+          (docker exec MAPDL_0 /bin/bash -c "mkdir -p /mapdl_logs && echo 'Successfully created directory inside docker container'") || echo "Failed to create a directory inside docker container for logs."
+          (docker exec MAPDL_0 /bin/bash -c "if compgen -G '/jobs/file*.out' > /dev/null ;then cp -f /jobs/file*.out /mapdl_logs && echo 'Successfully copied out files.'; fi") || echo "Failed to copy the 'out' files into a local file"
+          (docker exec MAPDL_0 /bin/bash -c "if compgen -G '/jobs/file*.err' > /dev/null ;then cp -f /jobs/file*.err /mapdl_logs && echo 'Successfully copied err files.'; fi") || echo "Failed to copy the 'err' files into a local file"
+          (docker exec MAPDL_0 /bin/bash -c "if compgen -G '/jobs/file*.log' > /dev/null ;then cp -f /jobs/file*.log /mapdl_logs && echo 'Successfully copied log files.'; fi") || echo "Failed to copy the 'log' files into a local file"
+          (docker exec MAPDL_0 /bin/bash -c "if compgen -G '/jobs/*.crash' > /dev/null ;then cp -f /jobs/*.crash /mapdl_logs && echo 'Successfully copied crash files.'; fi") || echo "Failed to copy the 'crash' files into a local file"
+          docker cp MAPDL_0:/mapdl_logs/. ./logs-${{ matrix.mapdl-version }}/. || echo "Failed to extract logs from docker image"
 
       - name: "Tar logs"
         if: always()
