@@ -12,7 +12,7 @@ echo "::endgroup::"
 echo "MAPDL service is up!"
 
 echo "::group:: Waiting for the DPF port to be open..."
-timeout 5m bash -c "while ! nc -z localhost "$DPF_PORT"; do sleep 1 done"
+timeout 5m bash -c "while ! nc -z localhost $DPF_PORT; do sleep 1 done"
 
 echo "::endgroup::"
 echo "DPF service is up!"
