@@ -318,6 +318,7 @@ jobs:
         run: |
           cp -f doc/_build/latex/*.log ./logs-build-docs/ || echo "Latex logs could not be found."
 
+          cp mapdl_launch.log ./logs-build-docs/mapdl_launch.log || echo "MAPDL log not found."
           cp log.txt ./logs-build-docs/ || echo "MAPDL log could not be found."
           tar cvzf ./logs-build-docs.tgz ./logs-build-docs 
 
