@@ -889,6 +889,7 @@ jobs:
     name: "Test julia implementation"
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         julia-version: ['1.10.2', '1.6.7']
         os: [ubuntu-latest, windows-latest]
@@ -913,6 +914,6 @@ jobs:
           "$PYTHON_PATH" -m pip install -e .
 
       - name: "Starting julia"
-        shell: julia -e {0}
+        shell: julia {0}
         run: |
           using Pkg; Pkg.add("PyCall");using PyCall;pymapdl = pyimport("ansys.mapdl.core");print(pymapdl.__version__)
