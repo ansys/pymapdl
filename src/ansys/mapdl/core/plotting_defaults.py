@@ -32,11 +32,11 @@ class DefaultSymbol:
 
     def __init__(self):
         self._configured = False
-        pass
 
     def __call__(self, name):
         if not self._configured:
             self._set_configuration()
+            self._configured = True
 
         return getattr(self, name)
 
