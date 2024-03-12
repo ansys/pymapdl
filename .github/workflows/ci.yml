@@ -884,3 +884,35 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           title-template: "Failed scheduled build"
           label-name: "Build failed"
+
+  test_julia:
+    name: "Test julia implementation"
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        julia-version: ['1.10.2', '1.6.7']
+        os: [ubuntu-latest, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v1.0.0
+      - name: "Set up Julia"
+        uses: julia-actions/setup-julia@v1
+        with:
+          version: ${{ matrix.julia-version }}
+      
+      - name: "Getting python interpreter"
+        id: get_python
+        run: |
+          pycallpython=$(julia -e 'using Pkg;Pkg.add("PyCall");using PyCall;println(PyCall.python)')
+          echo "pythonpath=$(echo $pycallpython)" >> $GITHUB_OUTPUT
+
+      - name: Installing pymapdl
+        env:
+          PYTHON_PATH: ${{ steps.get_python.outputs.pythonpath }}
+        run: |
+          "$PYTHON_PATH" -m pip install -e .
+
+      - name: "Starting julia"
+        shell: julia -e {0}
+        run: |
+          using Pkg; Pkg.add("PyCall");using PyCall;pymapdl = pyimport("ansys.mapdl.core");print(pymapdl.__version__)
