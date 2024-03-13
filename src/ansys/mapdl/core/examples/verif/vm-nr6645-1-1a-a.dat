@@ -1,0 +1,672 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/verify,vm-nr6645-1-1a-a
+/title,vm-nr6645-1-1a-a,NRC Piping Benchmark Problems,Volume 1,Method 1
+
+/com,****************************************************************************
+/com,
+/com, Reference: Reevaluation of Regulatory Guidance
+/com,            on modal response combination methods
+/com,            for seismic response spectrum analysis
+/com,              NUREG/CR-6645
+/com,        R.Morante, Y.Wang
+/com,        December 1999.
+/com,
+/com, Description:
+/com, Response spectrum analysis on BM3 piping model using 14 modes + missing mass
+/com,
+/com, Elements used: Pipe16, Pipe18,Combin14
+/com,
+/com, Results comparsion:
+/com, The following results are compared against NRC piping benchmark values
+/com, 1. Frequencies obtained from modal solution.
+/com, 2. Reaction forces obtained from spectrum solution. SRSS, 1% damping
+/com,
+/com, Note:
+/com, The reaction moments are not compared since the rotational degrees of
+/com, freedom for curved pipe elements are not included in the lumped mass
+/com, matrix formulation.
+/com,
+/com,****************************************************************************
+
+/out,scratch
+/prep7
+
+youngmodulus = 2.9e+7                   ! Young's modulus
+nu = 0.3                        ! Poisson ratio
+shearmodulus = youngmodulus/(2*(1+nu))          ! Shear modulus
+
+et,1,pipe16                     ! Pipe 16
+r,1,3.500,0.2160                    ! Outer dia, wall thickness
+
+mp,ex,1,youngmodulus                    ! Material properties
+mp,nuxy,1,nu
+mp,gxy,1,shearmodulus
+mp,dens,1,1.043e-3
+
+et,2,pipe16                     ! Pipe 16
+r,2,4.500,0.2370                    ! Outer dia, wall thickness
+
+mp,ex,2,youngmodulus                    ! Material properties
+mp,nuxy,2,nu
+mp,gxy,2,shearmodulus
+mp,dens,2,1.107e-03
+
+et,3,pipe16                     ! Pipe 16
+r,3,8.625,0.3220                    ! Outer dia, wall thickness
+
+mp,ex,3,youngmodulus                    ! Material properties
+mp,nuxy,3,nu
+mp,gxy,3,shearmodulus
+mp,dens,3,1.253e-3
+
+et,4,pipe18                     ! Pipe 18
+r,4,3.500,0.2160,4.500                  ! Outer dia, wall thickness, radius of curvature
+
+mp,ex,4,youngmodulus                    ! Material properties
+mp,nuxy,4,nu
+mp,gxy,4,shearmodulus
+mp,dens,4,1.043e-3
+
+et,5,pipe18                     ! Pipe 18
+r,5,4.500,0.2370,6.000                  ! Outer dia, wall thickness, radius of curvature
+
+mp,ex,5,youngmodulus                    ! Material properties
+mp,nuxy,5,nu
+mp,gxy,5,shearmodulus
+mp,dens,5,1.107e-3
+
+et,6,pipe18                     ! Pipe 18
+r,6,8.625,0.3220,12.000                 ! Outer dia, wall thickness, radius of curvature
+
+mp,ex,6,youngmodulus                    ! Material properties
+mp,nuxy,6,nu
+mp,gxy,6,shearmodulus
+mp,dens,6,1.253e-3
+
+et,7,combin14                       ! COMBIN14 spring-damper element
+keyopt,7,2,1                        ! Longitudinal spring damper element (UX DOF)
+r,7,1.0e+5                      ! Spring constant
+
+et,8,combin14                       ! COMBIN14 spring-damper element
+keyopt,8,2,2                        ! Longitudinal spring damper element (UY DOF)
+r,8,1.0e+8                      ! Spring constant
+
+et,9,combin14                       ! COMBIN14 spring-damper element
+keyopt,9,2,3                        ! Longitudinal spring damper element (Uz DOF)
+r,9,1.0e+11                     ! Spring constant
+
+et,10,combin14                      ! COMBIN14 spring-damper element
+keyopt,10,2,4                       ! Torsional spring damper element (ROTX DOF)
+r,10,1.0e+20                        ! Spring constant
+
+et,11,combin14                      ! COMBIN14 spring-damper element
+keyopt,11,2,5                       ! Torsional spring damper element (ROTY DOF)
+r,11,1.0e+20                        ! Spring constant
+
+et,12,combin14                      ! COMBIN14 spring-damper element
+keyopt,12,2,6                       ! Torsional spring damper element (ROTZ DOF)
+r,12,1.0e+20                        ! Spring constant
+
+
+/com, ********************
+/com,  Nodes
+/com, ********************
+
+
+n,  1,
+n,  2,  15.000,
+n,  3,  19.500,   -4.500
+n,  4,  19.500, -180.000
+n,  5,  19.500, -199.500
+n,  6,  19.500, -204.000,   4.500
+n,  7,  19.500, -204.000, 139.500
+n,  8,  24.000, -204.000, 144.000
+n,  9,  96.000, -204.000, 144.000
+n, 10, 254.000, -204.000, 144.000
+n, 11, 333.000, -204.000, 144.000
+n, 12, 411.000, -204.000, 144.000
+n, 13, 483.000, -204.000, 144.000
+n, 14, 487.500, -204.000, 148.500
+n, 15, 487.500, -204.000, 192.000
+n, 16, 487.500, -204.000, 235.500
+n, 17, 492.000, -204.000, 240.000
+n, 18, 575.000, -204.000, 240.000
+n, 19, 723.000, -204.000, 240.000
+n, 20, 727.500, -208.500, 240.000
+n, 21, 727.500, -264.000, 240.000
+n, 22, 727.500, -264.000, 205.000
+n, 23, 727.500, -264.000, 190.000
+n, 24, 733.500, -264.000, 184.000
+n, 25, 753.500, -264.000, 184.000
+n, 26, 845.500, -264.000, 184.000
+n, 27, 851.500, -264.000, 178.000
+n, 28, 851.500, -264.000, 160.000
+n, 29, 851.500, -264.000, 142.000
+n, 30, 851.500, -270.000, 136.000
+n, 31, 851.500, -360.000, 136.000
+n, 32, 727.500, -264.000, 255.000
+n, 33, 727.500, -264.000, 270.000
+n, 34, 727.500, -264.000, 306.000
+n, 35, 727.500, -264.000, 414.000
+n, 36, 739.500, -264.000, 426.000
+n, 37, 847.500, -264.000, 426.000
+n, 38, 955.500, -264.000, 426.000
+
+/com, ********************
+/com, Nodes for curvature
+/com, ********************
+
+n, 203,  15.000,   -4.500
+n, 506,  19.500, -199.500,   4.500
+n, 708,  24.000, -204.000, 139.500
+n,1314, 483.000, -204.000, 148.500
+n,1617, 492.000, -204.000, 235.500
+n,1920, 723.000, -208.500, 240.000
+n,2324, 733.500, -264.000, 190.000
+n,2627, 845.500, -264.000, 178.000
+n,2930, 851.500, -270.000, 142.000
+n,3536, 739.500, -264.000, 414.000
+
+/com, ***************************
+/com, Nodes for elastic support
+/com, ****************************
+
+dist = 50.0                         ! Visualization
+
+n,10001,        -dist
+n,20001,             ,          dist
+n,30001,             ,              , -dist
+n,10004,  19.500+dist, -180.000
+n,30004,  19.500     , -180.000     , -dist
+n,20007,  19.500     , -204.000+dist, 139.500
+n,20011, 333.000     , -204.000+dist, 144.000
+n,30011, 333.000     , -204.000     , 144.000-dist
+n,10015, 487.500-dist, -204.000     , 192.000
+n,20017, 492.000     , -204.000-dist, 240.000
+n,30017, 492.000     , -204.000     , 240.000-dist
+n,10023, 727.500-dist, -264.000     , 190.000
+n,20023, 727.500     , -264.000+dist, 190.000
+n,10031, 851.500+dist, -360.000     , 136.000
+n,20031, 851.500     , -360.000-dist, 136.000
+n,30031, 851.500     , -360.000     , 136.000-dist
+n,20036, 739.500     , -264.000-dist, 426.000
+n,30036, 739.500     , -264.000     , 426.000-dist
+n,10038, 955.500+dist, -264.000     , 426.000
+n,20038, 955.500     , -264.000-dist, 426.000
+n,30038, 955.500     , -264.000     , 426.000-dist
+
+
+/com, *************************
+/com,  Straight pipe elements
+/com, *************************
+
+type,1
+real,1
+mat,1
+
+e, 1, 2
+e, 3, 4
+e, 4, 5
+e, 6, 7
+e, 8, 9
+e, 9,10
+e,10,11
+e,11,12
+e,12,13
+e,14,15
+e,15,16
+e,17,18
+e,18,19
+e,20,21
+
+type,2
+real,2
+mat,2
+
+e,21,22
+e,22,23
+e,24,25
+e,25,26
+e,27,28
+e,28,29
+e,30,31
+
+type,3
+real,3
+mat,3
+
+e,21,32
+e,32,33
+e,33,34
+e,34,35
+e,36,37
+e,37,38
+
+/com, ********************
+/com, Curved pipe elements
+/com, *********************
+
+type,4
+real,4
+mat,4
+
+e,2,3,203
+e,5,6,506
+e,7,8,708
+e,13,14,1314
+e,16,17,1617
+e,19,20,1920
+
+type,5
+real,5
+mat,5
+
+e,23,24,2324
+e,26,27,2627
+e,29,30,2930
+
+type,6
+real,6
+mat,6
+
+e,35,36,3536
+
+/com, ****************************
+/com, Elastic supports and anchors
+/com, ****************************
+
+type,7
+real,8
+e, 4,10004
+
+real,7
+e,15,10015
+e,23,10023
+
+real,9
+e, 1,10001
+e,31,10031
+e,38,10038
+
+type,8
+real,8
+e, 7,20007
+e,11,20011
+e,17,20017
+e,23,20023
+e,36,20036
+
+real,9
+e, 1,20001
+e,31,20031
+e,38,20038
+
+type,9
+real,8
+e, 4,30004
+
+real,7
+e,11,30011
+e,17,30017
+e,36,30036
+
+real,9
+e, 1,30001
+e,31,30031
+e,38,30038
+
+type,10
+real,10
+e, 1,10001
+e,31,10031
+e,38,10038
+
+type,11
+real,10
+
+e, 1,20001
+e,31,20031
+e,38,20038
+
+type,12
+real,10
+
+e, 1,30001
+e,31,30031
+e,38,30038
+
+
+/com, ***************
+/com, Constraints
+/com, ***************
+
+nsel,s,node,,10000,40000
+d,all,all,0
+allsel,all
+fini
+
+/com, ****************
+/com, Modal analysis
+/com, ****************
+
+/solu
+antype,modal
+modopt,lanb,14
+lumpm,on
+mxpand,14,,,yes
+solve
+save
+
+*dim,label,,14
+*dim,freq_ans,,14               ! Frequencies obtained from Mechanical APDL
+*dim,freq_exp,,14               ! Frequencies obtained from reference
+*dim,freq_err,,14
+
+*do,i,1,14
+label(i) = i
+*enddo
+
+*do,i,1,14
+*get,freq_ans(i),mode,i,freq
+*enddo
+
+*vfill,freq_exp,data,2.91,4.39,5.52,5.70,6.98,7.34,7.88,10.30,11.06,11.23
+*vfill,freq_exp(11),data,11.50,12.43,13.88,16.12
+
+*stat,freq_ans
+*stat,freq_exp
+
+*do,i,1,14
+freq_err(i) = abs(freq_ans(i))/(freq_exp(i))
+*enddo
+
+save,table_1
+fini
+
+/com, **********************
+/com,  Spectrum analysis
+/com, **********************
+
+/solu
+antype,spectrum
+spopt,sprs,,                    ! Single point response spectrum solve
+svtyp,2,386.4                   ! Seismic acceleration response
+srss,0.001,disp                 ! SRSS mode combination, displacement solution
+
+sed,1,0,0                       ! Excitation in X direction
+
+freq    , 0.20, 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90, 1.00
+sv, 0.01, 0.06, 0.13, 0.13, 0.20, 0.35, 0.39, 0.37, 0.41, 0.76
+
+freq    , 1.10, 1.20, 1.30, 1.40, 1.50, 1.60, 1.70, 1.80, 1.90
+sv, 0.01, 0.64, 0.59, 0.91, 1.03, 1.46, 0.95, 0.91, 1.61, 1.92
+
+freq    , 2.00, 2.10, 2.20, 2.30, 2.40, 2.50, 2.60, 2.70, 2.80
+sv, 0.01, 1.57, 1.18, 2.65, 2.85, 3.26, 4.47, 4.75, 5.29, 7.44
+
+freq    , 2.90, 3.00, 3.15, 3.30, 3.45, 3.60, 3.80, 4.00, 4.20
+sv, 0.01, 4.27, 4.61, 4.13, 3.96, 4.05, 2.44, 2.09, 2.29, 1.52
+
+freq    , 4.40, 4.60, 4.80, 5.00, 5.25, 5.50, 5.75, 6.00, 6.25
+sv, 0.01, 1.34, 1.37, 1.36, 1.31, 1.69, 1.27, 1.04, 0.76, 0.76
+
+freq    , 6.50, 6.75, 7.00, 7.25, 7.50, 7.75, 8.00, 8.50, 9.00
+sv, 0.01, 0.69, 0.70, 0.74, 0.70, 0.67, 0.66, 0.61, 0.75, 0.60
+
+freq    , 9.50,10.00,10.50,11.00,11.50,12.00,12.50,13.00,13.50
+sv, 0.01, 0.69, 0.61, 0.70, 0.59, 0.61, 0.56, 0.59, 0.59, 0.59
+
+freq    ,14.00,14.50,15.00,16.00,17.00,18.00,20.00,22.00,25.00
+sv, 0.01, 0.58, 0.59, 0.58, 0.55, 0.56, 0.55, 0.55, 0.55, 0.54
+
+freq    ,28.00,31.00,34.00, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+sv, 0.01, 0.54, 0.54, 0.54, 0.00, 0.00, 0.00, 0.00, 0.00, 0.00
+
+
+mmass,on,0.54                   ! Missing mass with ZPA = 0.54
+solve
+save
+fini
+
+
+/post1
+/input,,mcom
+
+/com, *************************************
+/com,  Reaction forces obtained from Mechanical APDL
+/com, *************************************
+
+*get,rf1_x,node,10001,rf,fx
+*get,rf1_y,node,20001,rf,fy
+*get,rf1_z,node,30001,rf,fz
+*get,rf4_x,node,10004,rf,fx
+*get,rf4_z,node,30004,rf,fz
+*get,rf7_y,node,20007,rf,fy
+*get,rf11_y,node,20011,rf,fy
+*get,rf11_z,node,30011,rf,fz
+*get,rf15_x,node,10015,rf,fx
+*get,rf17_y,node,20017,rf,fy
+*get,rf17_z,node,30017,rf,fz
+*get,rf36_y,node,20036,rf,fy
+*get,rf36_z,node,30036,rf,fz
+*get,rf38_x,node,10038,rf,fx
+*get,rf38_y,node,20038,rf,fy
+*get,rf38_z,node,30038,rf,fz
+*get,rf23_x,node,10023,rf,fx
+*get,rf23_y,node,20023,rf,fy
+*get,rf31_x,node,10031,rf,fx
+*get,rf31_y,node,20031,rf,fy
+*get,rf31_z,node,30031,rf,fz
+
+
+*dim,label,char,1,21
+
+*dim,value,,21,3
+
+label(1,1) = 'fx1'
+label(1,2) = 'fy1'
+label(1,3) = 'fz1'
+label(1,4) = 'fx4'
+label(1,5) = 'fz4'
+label(1,6) = 'fy7'
+label(1,7) = 'fy11'
+label(1,8) = 'fz11'
+label(1,9) = 'fx15'
+label(1,10) = 'fy17'
+label(1,11) = 'fz17'
+label(1,12) = 'fy36'
+label(1,13) = 'fz36'
+label(1,14) = 'fx38'
+label(1,15) = 'fy38'
+label(1,16) = 'fz38'
+label(1,17) = 'fx23'
+label(1,18) = 'fy23'
+label(1,19) = 'fx31'
+label(1,20) = 'fy31'
+label(1,21) = 'fz31'
+
+
+
+/com, ******************************************
+/com,  Reaction forces obtained from NRC
+/com, ******************************************
+
+
+*vfill,value(1,1),data,43.71*1.10
+*vfill,value(2,1),data,4.36*1.26
+*vfill,value(3,1),data,1.60*4.74
+*vfill,value(4,1),data,116.79*0.80
+*vfill,value(5,1),data,20.01*3.77
+*vfill,value(6,1),data,13.27*1.20
+*vfill,value(7,1),data,13.31*1.48
+*vfill,value(8,1),data,81.34*0.99
+*vfill,value(9,1),data,731.47*0.60
+*vfill,value(10,1),data,25.60*1.91
+*vfill,value(11,1),data,65.36*1.22
+*vfill,value(12,1),data,46.69*1.93
+*vfill,value(13,1),data,42.12*2.02
+*vfill,value(14,1),data,732.18*0.89
+*vfill,value(15,1),data,43.44*1.21
+*vfill,value(16,1),data,29.95*1.40
+*vfill,value(17,1),data,259.59*1.02
+*vfill,value(18,1),data,26.08*4.04
+*vfill,value(19,1),data,55.05*0.92
+*vfill,value(20,1),data,14.17*1.75
+*vfill,value(21,1),data,16.08*1.97
+
+
+*vfill,value(1,2),data,rf1_x
+*vfill,value(2,2),data,rf1_y
+*vfill,value(3,2),data,rf1_z
+*vfill,value(4,2),data,rf4_x
+*vfill,value(5,2),data,rf4_z
+*vfill,value(6,2),data,rf7_y
+*vfill,value(7,2),data,rf11_y
+*vfill,value(8,2),data,rf11_z
+*vfill,value(9,2),data,rf15_x
+*vfill,value(10,2),data,rf17_y
+*vfill,value(11,2),data,rf17_z
+*vfill,value(12,2),data,rf36_y
+*vfill,value(13,2),data,rf36_z
+*vfill,value(14,2),data,rf38_x
+*vfill,value(15,2),data,rf38_y
+*vfill,value(16,2),data,rf38_z
+*vfill,value(17,2),data,rf23_x
+*vfill,value(18,2),data,rf23_y
+*vfill,value(19,2),data,rf31_x
+*vfill,value(20,2),data,rf31_y
+*vfill,value(21,2),data,rf31_z
+
+
+
+*vfill,value(1,3),data,abs(rf1_x/(43.71*1.10))
+*vfill,value(2,3),data,abs(rf1_y/(4.36*1.26))
+*vfill,value(3,3),data,abs(rf1_z/(1.60*4.74))
+*vfill,value(4,3),data,abs(rf4_x/(116.79*0.80))
+*vfill,value(5,3),data,abs(rf4_z/(20.01*3.77))
+*vfill,value(6,3),data,abs(rf7_y/(13.27*1.20))
+*vfill,value(7,3),data,abs(rf11_y/(13.31*1.48))
+*vfill,value(8,3),data,abs(rf11_z/(81.34*0.99))
+*vfill,value(9,3),data,abs(rf15_x/(731.47*0.60))
+*vfill,value(10,3),data,abs(rf17_y/(25.60*1.91))
+*vfill,value(11,3),data,abs(rf17_z/(65.36*1.22))
+*vfill,value(12,3),data,abs(rf36_y/(46.69*1.93))
+*vfill,value(13,3),data,abs(rf36_z/(42.12*2.02))
+*vfill,value(14,3),data,abs(rf38_x/(732.18*0.89))
+*vfill,value(15,3),data,abs(rf38_y/(43.44*1.21))
+*vfill,value(16,3),data,abs(rf38_z/(29.95*1.40))
+*vfill,value(17,3),data,abs(rf23_x/(259.59*1.02))
+*vfill,value(18,3),data,abs(rf23_y/(26.08*4.04))
+*vfill,value(19,3),data,abs(rf31_x/(55.05*0.92))
+*vfill,value(20,3),data,abs(rf31_y/(14.17*1.75))
+*vfill,value(21,3),data,abs(rf31_z/(16.08*1.97))
+
+save,table_2
+
+finish
+
+resume,table_1
+/com,
+/out,vm-nr6645-1-1a-a,vrt
+/com,
+/com,
+/com, ----------------------vm-nr6645-1-1a-a Results comparsion-------------------------
+/com,
+/com,
+/com,
+/com,           |  TARGET  |   Mechanical APDL  |  RATIO
+/com,
+/com,
+/com, ==================================
+/com,   Frequencies from Modal analysis
+/com, ==================================
+*vwrite,label(1),freq_exp(1),freq_ans(1),freq_err(1)
+(1x,f3.0,4x,f10.4,4x,f10.4,4x,F5.3)
+/com,
+/com,
+/nopr,
+resume,table_2
+/gopr
+/com,
+/com,
+/com, ==============================================
+/com,  Reaction forces obtained from Spectrum solve
+/com, ==============================================
+/com,
+*vwrite,label(1,1),value(1,1),value(1,2),value(1,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,2),value(2,1),value(2,2),value(2,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,3),value(3,1),value(3,2),value(3,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,4),value(4,1),value(4,2),value(4,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,5),value(5,1),value(5,2),value(5,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,6),value(6,1),value(6,2),value(6,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,7),value(7,1),value(7,2),value(7,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,8),value(8,1),value(8,2),value(8,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,9),value(9,1),value(9,2),value(9,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,10),value(10,1),value(10,2),value(10,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,11),value(11,1),value(11,2),value(11,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,12),value(12,1),value(12,2),value(12,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,13),value(13,1),value(13,2),value(13,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,14),value(14,1),value(14,2),value(14,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,15),value(15,1),value(15,2),value(15,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,16),value(16,1),value(16,2),value(16,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,17),value(17,1),value(17,2),value(17,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,18),value(18,1),value(18,2),value(18,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,19),value(19,1),value(19,2),value(19,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,20),value(20,1),value(20,2),value(20,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label(1,21),value(21,1),value(21,2),value(21,3)
+(1x,a8,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+/nopr,
+/com,
+/com,
+/com, ---------------------------------------------------------------------------
+/out,
+*list,vm-nr6645-1-1a-a,vrt
+finish
+/exit,nosave
+
+
+
+
+

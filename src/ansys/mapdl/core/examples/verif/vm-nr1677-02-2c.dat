@@ -1,0 +1,799 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/verify,vm-nr1677-02-2c
+/title,vm-nr1677-02-2c,NRC piping benchmarks problems,Volume II,Problem 2c
+
+/com, *******************************************************************************
+/com, Reference: Piping benchmark problems,Dynamic analysis independant support
+/com,            motion response spectrum method, P. Bezler, M. Subudhi and
+/com,            M.Hartzman, NUREG/CR--1677-Vol.2, August 1985.
+/com, 
+/com, Elements used: PIPE289, ELBOW290, COMBIN14 and MASS21
+/com,
+/com, Results :
+/com, The following results are outputted
+/com, 1. Frequencies obtained from modal solution.
+/com, 2. Maximum nodal displacements and rotations obtained from spectrum solution.
+/com, 3. Element forces/moments obtained from spectrum solution.
+/com, 4. Reaction forces obtained from spectrum solution.
+/com,
+/com, *******************************************************************************
+
+/out,scratch
+
+/prep7
+
+YoungModulus1 = .240e+8				! Young's Modulus
+Nu = 0.3						! Minor Poisson's Ratio
+ShearModulus1 = YoungModulus1/(2*(1+Nu))	! Shear Modulus
+WMass = 0.001056893				! Density
+WTick = 0.241					! Wall Thickness
+K = 0.71e-5
+						
+OD = 7.288						! Outer Diameter
+RADCUR = 36.30					! Radius of Curvature
+
+temp = 80						! Temperature
+maxm = 25						! No. of Modes to Extract
+
+et,1,pipe289,,,,2					! Element 1 - PIPE289
+et,2,elbow290,,6				! Element 2 - ELBOW290
+
+et,3,combin14					! Element 3 - COMBIN14
+keyopt,3,2,1					! X Degree of Freedom
+et,4,combin14					! Element 4 - COMBIN14
+keyopt,4,2,2					! Y Degree of Freedom
+et,5,combin14					! Element 5 - COMBIN14
+keyopt,5,2,3					! Z Degree of Freedom
+et,6,mass21						! Element 6 - MASS21
+keyopt,6,3,2					! 3D mass without inertia
+
+/com,------------------------------------------------------------------------------------
+
+/com, Real Constants
+/com,****************
+
+sectype,1,PIPE,ctube
+secdata,OD,WTick,24
+
+r,3,0.1e+5
+r,4,0.1e+9
+r,5,0.1e+11
+r,6,1.518
+
+/com,------------------------------------------------------------------------------------
+
+/com, Material Properties
+/com,*********************
+
+mp,ex,  1, YoungModulus1			
+mp,nuxy,1, Nu					
+mp,gxy ,1, ShearModulus1			
+mp,dens,1, WMass					
+mp,kxx,1, K
+
+mp,ex,  2, YoungModulus1			
+mp,nuxy,2, Nu					
+mp,gxy ,2, ShearModulus1			
+mp,dens,2, WMass					
+mp,kxx,2, K
+
+/com,------------------------------------------------------------------------------------
+
+/com, Keypoints
+/com,**********
+
+k,1,0,0,0						
+k,2,0,54.45,0
+k,3,0,108.9,0
+k,4,10.632,134.568,0
+k,5,36.3,145.2,0
+k,6,54.15,145.2,0
+k,7,72.0,145.2,0
+k,8,97.668,145.2,10.632
+k,9,108.3,145.2,36.3
+k,10,108.3,145.2,56.8
+k,11,108.3,145.2,77.3
+k,12,108.3,145.2,97.8
+k,13,108.3,145.2,118.3
+k,14,108.3,145.2,188.8
+k,15,108.3,181.5,225.1
+k,16,108.3,236,225.1
+k,17,108.3,290,225.1
+k,18,148.3,145.2,97.8
+k,19,188.3,145.2,97.8
+k,20,224.6,145.2,61.5
+k,21,224.6,145.2,20
+
+/com,
+/com, Elastic Support Keypoints
+/com,**************************
+
+k,22,1,0,0
+k,23,0,1,0
+k,24,0,0,1
+k,25,72,145.2,-1
+k,26,109.3,145.2,36.3
+k,27,108.3,146.2,77.3
+k,28,108.3,146.2,118.3
+k,29,107.3,182.5,226.5
+k,30,109.3,290,225.1
+k,31,108.3,291,225.1
+k,32,108.3,290,226.1
+k,33,225.6,145.2,20
+k,34,224.6,146.2,20
+k,35,224.6,145.2,21
+
+/com,------------------------------------------------------------------------------------
+
+/com,
+/com, Modeling for Straight Pipe 
+/com,**********************************
+
+l, 1, 2						
+l, 2, 3
+l, 5, 6
+l, 6, 7
+l, 9,10
+l,10,11
+l,11,12
+l,12,13
+l,13,14
+l,15,16
+l,16,17
+l,12,18
+l,18,19
+l,20,21
+
+/com,
+/com, Modeling for Pipe Bend 
+/com,************************
+
+larc, 3, 4, 2, RADCUR
+larc, 4, 5, 6, RADCUR
+larc, 7, 8, 6, RADCUR
+larc, 8, 9,10, RADCUR
+larc,14,15,16, RADCUR
+larc,19,20,18, RADCUR
+
+/com,
+/com, Modeling for Elastic Supports and Anchors
+/com,*******************************************
+
+l,11,27
+l,13,28
+
+l,9,26
+l,15,29
+
+l,7,25
+
+l,1,22
+l,17,30
+l,21,33
+
+l,1,23
+l,17,31
+l,21,34
+
+l,1,24
+l,17,32
+l,21,35
+
+/com, **********************************
+/com, Meshing for Straight pipe
+/com, **********************************
+
+type,1
+secnum,1
+mat,1
+
+lsel,r,,,1,14
+allsel,below,line
+lesize,all,,,2
+lmesh,all
+
+allsel,all,all
+
+type,2
+secnum,1
+mat,2
+
+lsel,r,,,15,20
+allsel,below,line
+lesize,all,,,4
+lmesh,all
+
+allsel,all,all
+
+/com, *****************************************************************
+/com,  Converting some PIPE289 into ELBOW290 using ELBOW command
+/com, *****************************************************************
+
+elbow,on,,,sect
+allsel,all
+
+/com, ****************************
+/com, Elastic supports and anchors
+/com, ****************************
+
+type,3 				!local x
+real,4 				! 0.1e+9
+
+lsel,r,,,23,24
+allsel,below,line
+lesize,all,,,1
+lmesh,all
+
+allsel,all,all
+
+real,5 				! 0.1e+11
+
+lsel,r,,,26,28
+allsel,below,line
+lesize,all,,,1
+lmesh,all
+
+allsel,all,all
+
+type,4 				! local y
+real,3 				! 0.1e+5
+
+lsel,r,,,21,22
+allsel,below,line
+lesize,all,,,1
+lmesh,all
+
+allsel,all,all
+
+real,5
+
+lsel,r,,,29,31
+allsel,below,line
+lesize,all,,,1
+lmesh,all
+
+allsel,all,all
+
+type,5 				!local z
+real,4 				! 0.1e+9
+
+lsel,r,,,25
+allsel,below,line
+lesize,all,,,1
+lmesh,all
+
+allsel,all,all
+
+real,5
+
+lsel,r,,,32,34
+allsel,below,line
+lesize,all,,,1
+lmesh,all
+
+allsel,all,all
+
+
+n1 = 40
+n2 = 107
+n3 = 41
+
+wplane,,nx(n1),ny(n1),nz(n1),nx(n2),ny(n2),nz(n2),nx(n3),ny(n3),nz(n3)
+cswplane,11,0
+nrotat,n1
+nrotat,n2
+csys,0
+
+/com
+/com, Mass Elements
+/com,***************
+
+type,6
+real,6
+e,49
+
+/com,------------------------------------------------------------------------------------
+
+/com,
+/com, Constraints
+/com,*************
+
+nsel,,node,,106,119
+d,all,all
+allsel
+d,1,rotx,,,,,roty,rotz
+d,58,rotx,,,,,roty,rotz
+
+allsel,all
+finish
+
+/com,------------------------------------------------------------------------------------
+
+/com,
+/com,=============
+/com,	Modal Solve
+/com,=============
+/com,
+
+/solution
+antype,modal				! Perform Modal Analysis
+modopt,lanb,maxm				
+lumpm,on					! Use Lumped Mass Matrix Approximation
+mxpand,maxm,,,yes				! Expand Solutions with Element Calculations ON
+solve
+finish
+
+/post1
+/out,
+/com, *******************************************
+/com,  Frequencies obtained from modal solution
+/com, ********************************************
+set,list
+finish
+
+
+/com,------------------------------------------------------------------------------------
+
+/com,
+/com,================
+/com,	Spectrum Solve
+/com,================
+/com,
+
+/out,scratch
+/solution
+antype,spectr					! Perform Spectrum Analysis
+spopt,mprs,maxm					! Multi Point Excitation Response Spectrum
+
+gval = 386.4
+
+/com,------------------------------------------------------------------------------------
+
+/com,
+/com, spectrum 1 (group 1 - X)
+/com,**************************
+
+spunit,1,accg, gval
+
+spfrq,1,0.4,0.719942405,0.900090009,1.099989,1.350074254,1.800180018,2.200220022
+spval,1,, 0.13,0.22,0.57,0.57,0.38,0.63,0.63
+
+spfrq,1,2.699784017,3.51000351,4.679457183,5.720823799,6.600660066,8.576329331,11.00110011
+spval,1,, 0.75,1.15,1.42,1.42,1.29,0.85,0.42
+
+spfrq,1,33.00330033,34.96503497,39.0625
+spval,1,,0.25,0.22,0.22
+
+/com,
+/com, spectrum 2 (group 1 - Y)
+/com,**************************
+
+spunit,2,accg, gval
+spfrq,2,0.4,0.639795266,0.900090009,1.099989,1.43000143,1.649892757,1.800180018
+spval,2,,0.18,0.18,0.995,0.995,0.715,0.35,0.42,
+
+spfrq,2, 3.500175009,4.500450045,5.500550055,6.600660066,8.703220191,9.35453695,15.40832049
+spval,2,,0.77,0.998,0.998,0.9,0.68,0.42,0.22
+
+spfrq,2,16,28.49002849,31.94888179,39.0625
+spval,2,,0.205,0.205,0.19,0.19
+
+/com,
+/com, spectrum 3 (group 1 - Z)
+/com,**************************
+
+spunit,3,accg, gval
+
+spfrq,3,0.4,0.599880024,1.124985938,1.374948439,1.539882969,2.200220022,2.5
+spval,3,, 0.17,0.17,1.6,1.6,0.78,0.3,0.3  
+
+spfrq,3,3.599712023,4.500450045,5.500550055,8.051529791,14.30615165,21.97802198,25.97402597
+spval,3,,0.51,0.63,0.63,0.47,0.24,0.2,0.17
+
+spfrq,3,39.0625
+spval,3,,0.17
+
+/com,
+/com, spectrum 4 (group 2 - X)
+/com,**************************
+
+spunit,4,accg, gval
+
+spfrq,4,0.4,0.480076812,0.539956803,1.17000117,1.43000143,1.649892757,2
+spval,4,,0.17,0.17,0.23,2.25,2.25,1.07,0.75
+
+spfrq,4,3.300330033,17.6056338,21.97802198,39.0625
+spval,4,,0.38,0.03,0.23,0.23
+
+/com,
+/com, spectrum 5 (group 2 - Y)
+/com,**************************
+
+spunit,5,accg, gval
+
+spfrq,5,0.4,0.610128127,1.124985938,1.374948439,1.759943682,2.474634991,4.500450045
+spval,5,,0.17,0.3,2.87,2.87,1.5,0.9,0.85
+
+spfrq,5,5.500550055,8,15.50387597,39.0625
+spval,5,,0.85,0.65,0.37,0.37
+
+/com,
+/com, spectrum 6 (group 2 - Z)
+/com,**************************
+
+spunit,6,accg, gval
+
+spfrq,6,0.4,0.5,0.599880024,1.124985938,1.374948439,1.700102006,2.699784017
+spval,6,,0.2,0.2,0.362,3.55,3.55,1.95,1.08
+
+spfrq,6,4.500450045,5.500550055,6.501950585,7.974481659,13.00390117,17.51313485,39.0625
+spval,6,,1.38,1.38,1.3,1,0.65,0.55,0.55
+
+/com,
+/com, spectrum 7 (group 3 - X)
+/com,**************************
+
+spunit,7,accg, gval
+
+spfrq,7,0.4,0.60204696,1.124985938,1.374948439,1.705029838,2.420135528,2.750275028
+spval,7,,0.18,0.42,4.15,4.15,2.4,1.7,1.46
+
+spfrq,7,3.41997264,4.679457183,5.720823799,6.600660066,9.900990099,15.12859304,16.50165017
+spval,7,,1.6,2.05,2.05,1.75,0.9,0.77,0.65
+
+spfrq,7,39.0625
+spval,7,,0.65
+
+/com,
+/com, spectrum 8 (group 3 - Y)
+/com,**************************
+
+spunit,8,accg, gval
+
+spfrq,8,0.4,0.576036866,0.704225352,0.900090009,1.080030241,1.800180018,2.610284521
+spval,8,,0.14,0.28,0.28,0.17,0.28,0.53,0.56
+
+spfrq,8,5.399568035,6.600660066,8.802816901,11.00110011,24.75247525,27.47252747,40
+spval,8,,1.32,1.32,0.73,0.42,0.25,0.23,0.23
+
+/com,
+/com, spectrum 9 (group 3 - Z)
+/com,**************************
+
+spunit,9,accg, gval
+
+spfrq,9,0.4,0.603136309,0.736919676,0.934579439,1.099989,1.374948439,1.425110446
+spval,9,,0.224,0.535,0.535,0.498,0.25,0.195,0.125   
+
+spfrq,9,1.619957881,2.66028199,3.599712023,5.399568035,6.600660066,8.802816901,14.02524544
+spval,9,,0.17,0.214,0.33,0.55,0.55,0.346,0.18
+
+spfrq,9,17.00680272,28.65329513,31.94888179,39.0625
+spval,9,,0.135,0.125,0.112,0.112
+
+/com,
+/com, spectrum 10 (group 4 - X)
+/com,***************************
+
+spunit,10,accg, gval
+
+spfrq,10,0.4,0.630119723,0.765110941,0.934579439,1.319957761,2.035002035,2.699784017
+spval,10,, 0.27,0.814,0.85,0.85,0.536,0.335,0.265
+
+spfrq,10,5.399568035,6.600660066,8.802816901,14.85884101,18.01801802,39.0625
+spval,10,, 0.31,0.31,0.215,0.14,0.126,0.126
+
+/com,
+/com, spectrum 11 (group 4 - Y)
+/com,***************************
+
+spunit,11,accg, gval
+
+spfrq,11,0.4,0.765110941,0.934579439,1.374948439,1.665001665,2.035002035,4.319654428
+spval,11,,0.34,1.2,1.2,0.85,0.68,0.68,0.85
+
+spfrq,11,5.399568035,6.600660066,8.250825083,9.68054211,14.85884101,18.48428835,28.01120448
+spval,11,,1.02,1.02,0.73,0.42,0.36,0.26,0.21
+
+spfrq,11,39.0625
+spval,11,,0.21
+
+/com,
+/com, spectrum 12 (group 4 - Z)
+/com,***************************
+
+spunit,12,accg, gval
+
+spfrq,12,0.4,0.765110941,0.934579439,1.374948439,1.665001665,2.035002035,4.319654428
+spval,12,,0.34,1.2,1.2,0.85,0.68,0.68,0.85  
+
+spfrq,12,5.399568035,6.600660066,8.250825083,9.68054211,14.85884101,18.48428835,28.01120448
+spval,12,,1.02,1.02,0.73,0.42,0.36,0.26,0.21
+
+spfrq,12,39.0625
+spval,12,,0.21
+
+/com,
+/com, node components for excitation points
+/com,***************************************
+
+nsel,s,node,,108
+nsel,a,node,,113
+nsel,a,node,,117
+cm,gp1,node
+allsel,all,all
+
+nsel,s,node,,116
+nsel,a,node,,106,107
+nsel,a,node,,111,112
+cm,gp2,node
+allsel,all,all
+
+nsel,s,node,,109
+nsel,a,node,,114
+nsel,a,node,,118
+cm,gp3,node
+allsel,all,all
+
+nsel,s,node,,110
+nsel,a,node,,115
+nsel,a,node,,119
+cm,gp4,node
+allsel,all,all
+
+/com,------------------------------------------------------------------------------------
+
+! -- level #1 - spectrum 1 (Along X - Direction)
+
+sed,1,,,gp1
+pfact,1
+sed,0,,,gp1
+
+! -- level #1 - spectrum 2 (Along Y - Direction)
+
+sed,,1,,gp1
+pfact,2
+sed,,0,,gp1
+
+! -- level #1 - spectrum 3 (Along Z - Direction)
+
+sed,,,1,gp1
+pfact,3
+sed,,,0,gp1
+
+! -- level #2 - spectrum 4 (Along X - Direction)
+
+sed,1,,,gp2
+pfact,4
+sed,0,,,gp2
+
+! -- level #2 - spectrum 5 (Along Y - Direction)
+
+sed,,1,,gp2
+pfact,5
+sed,,0,,gp2
+
+! -- level #2 - spectrum 6 (Along Z - Direction)
+
+sed,,,1,gp2
+pfact,6
+sed,,,0,gp2
+
+! -- level #3 - spectrum 7 (Along X - Direction)
+
+sed,1,,,gp3
+pfact,7
+sed,0,,,gp3
+
+! -- level #3 - spectrum 8 (Along Y - Direction)
+
+sed,,1,,gp3
+pfact,8
+sed,,0,,gp3
+
+! -- level #3 - spectrum 9 (Along Z - Direction)
+
+sed,,,1,gp3
+pfact,9
+sed,,,0,gp3
+
+! -- level #4 - spectrum 10 (Along X - Direction)
+
+sed,1,,,gp4
+pfact,10
+sed,0,,,gp4
+
+! -- level #4 - spectrum 11 (Along Y - Direction)
+
+sed,,1,,gp4
+pfact,11
+sed,,0,,gp4
+
+! -- level #4 - spectrum 12 (Along Z - Direction)
+
+sed,,,1,gp4
+pfact,12
+sed,,,0,gp4
+
+srss,0.0,,YES	! activate Absolute Sum for MPRS
+
+solve
+
+finish
+
+/com,------------------------------------------------------------------------------------
+
+/post1
+/input,,mcom
+
+
+/out,
+/com,
+/com,===============================================================
+/com, Maximum nodal displacements and rotations from spectrum solution
+/com,===============================================================
+/com,
+
+/out,scratch
+
+*GET,AdisX,NODE,95,U,X
+*GET,AdisY,NODE,84,U,Y
+*GET,AdisZ,NODE,40,U,Z
+*GET,ArotX,NODE,6,ROT,X
+*GET,ArotY,NODE,79,ROT,Y
+*GET,ArotZ,NODE,45,ROT,Z
+
+/out,
+*stat,AdisX
+*stat,AdisY
+*stat,AdisZ
+*stat,ArotX
+*stat,ArotY
+*stat,ArotZ
+
+/com,==============================================================
+/com, Element Forces and Moments obtained from spectrum solution
+/com,==============================================================
+
+/out,scratch
+
+/com,==========
+/com,	 Node I
+/com,==========
+
+/com, Element #1 (Pipe289 element)
+/com,************************
+
+
+esel,s,elem,,1
+etable,pxi_1,smisc,1
+etable,vyi_1,smisc,6
+etable,vzi_1,smisc,5
+etable,txi_1,smisc,4
+etable,myi_1,smisc,2
+etable,mzi_1,smisc,3
+esel,all
+
+/out,
+/com, ************************************************
+/com,  Element forces and moments at element1, node i
+/com, ************************************************
+
+pretab,pxi_1,vyi_1,vzi_1,txi_1,myi_1,mzi_1
+
+
+/out,scratch
+/com,==========
+/com,  Node J
+/com,==========
+
+/com, Element #1 (Pipe289 element)  
+/com,************************
+
+esel,s,elem,,1
+etable,pxj_1,smisc,14
+etable,vyj_1,smisc,19
+etable,vzj_1,smisc,18
+etable,txj_1,smisc,17
+etable,myj_1,smisc,15
+etable,mzj_1,smisc,16
+esel,all
+
+/out,
+/com, **********************************************
+/com,  Element forces and moments at element1, node j
+/com, ************************************************
+
+pretab,pxj_1,vyj_1,vzj_1,txj_1,myj_1,mzj_1
+
+
+
+/out,scratch
+
+
+/com,==========
+/com,  Node I
+/com,==========
+
+/com, Element #41 (Elbow 290 element)
+/com,*************************
+
+esel,s,elem,,41
+etable,pxi_41,smisc,1
+etable,vyi_41,smisc,6
+etable,vzi_41,smisc,5
+etable,txi_41,smisc,4
+etable,myi_41,smisc,2
+etable,mzi_41,smisc,3
+esel,all
+
+/out,
+/com, *************************************************
+/com,  Element forces and moments at element 41, node i
+/com, ************************************************
+
+pretab,pxi_41,vyi_41,vzi_41,txi_41,myi_41,mzi_41
+
+
+/out,scratch
+/com,==========
+/com,  Node J
+/com,==========
+
+
+
+/com, Element #41 (Elbow290 element)
+/com,********************************
+esel,s,elem,,41
+
+etable,pxj_41,smisc,36
+etable,vyj_41,smisc,41
+etable,vzj_41,smisc,40
+etable,txj_41,smisc,39
+etable,myj_41,smisc,37
+etable,mzj_41,smisc,38
+esel,all
+
+allsel,all
+
+/out,
+/com, **********************************************
+/com,  Element forces and moments at element 41, node j
+/com, ************************************************
+
+pretab,pxj_41,vyj_41,vzj_41,txj_41,myj_41,mzj_41
+
+
+
+/com,----------------------------------------------------------------------------
+
+/com, ***************************************
+/com,  Reaction forces from spectrum solution
+/com, ****************************************
+
+prrsol
+
+finish
+/exit,nosave

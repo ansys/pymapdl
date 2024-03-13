@@ -1,0 +1,131 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/verify,vmr031-t3-181
+/TITLE,vmr031-t3-181,THREE-LAYER SANDWICH SHELL UNDER NORMAL PRESSURE LOADING
+/COM, REFERENCE: PROBLEM NO 3 FROM NAFEMS: R0031
+/COM,
+
+C*** USING SHELL181 
+/PREP7  
+ET,1,SHELL181   
+
+KEYOPT,1,1,0
+KEYOPT,1,3,2		!FULL INTEGRATION
+KEYOPT,1,8,2		!STORES DATA FOR TOP,BOTTOM AND MID FOR ALL LAYERS
+KEYOPT,1,9,0
+
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,EX,1,,1e7
+MPDATA,EY,1,,4e6
+MPDATA,EZ,1,,4e6
+MPDATA,PRXY,1,,0.3  
+MPDATA,PRYZ,1,,0.4  
+MPDATA,PRXZ,1,,0.3  
+MPDATA,GXY,1,,1.875e6   
+MPDATA,GYZ,1,,1.425e6   
+MPDATA,GXZ,1,,1.875e6   
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,EX,2,,1e-6   
+MPDATA,EY,2,,1e-6   
+MPDATA,EZ,2,,1e-6   
+MPDATA,PRXY,2,,0.3  
+MPDATA,PRYZ,2,,0.3  
+MPDATA,PRXZ,2,,0.3  
+MPDATA,GXY,2,,1e-6  
+MPDATA,GYZ,2,,1.2e4 
+MPDATA,GXZ,2,,3e4   
+SECT,1,SHELL,,  
+SECDATA, 0.028,1,0.0,3  
+SECDATA, 0.75,2,0.0,3   
+SECDATA, 0.028,1,0.0,3  
+SECOFFSET,MID   
+SECCONTROL,,,, , , ,
+RECTNG,,5,,5,   
+
+LESIZE,ALL,,,4
+AMESH,1
+ALLSEL,ALL
+
+DL,1,1,ux,0 
+DL,1,1,uz,0 
+DL,1,1,roty,0   
+DL,2,1,ux,0 
+DL,2,1,roty,0   
+DL,3,1,uy,0 
+DL,3,1,rotx,0   
+DL,4,1,uy,0 
+DL,4,1,uz,0 
+DL,4,1,rotx,0   
+SFE,ALL,2,PRESS,,100 
+ALLSEL,ALL  
+FINI
+
+/SOLUTION   
+SOLVE   
+FINISH
+
+/POST1  
+SET,LAST
+LAYER,1 
+SHELL,TOP   
+*SET,n1,node(5,5,0) 
+*GET,uz,node,n1,u,z 
+*STAT,uz 
+*GET,sx,node,n1,s,x 
+*STAT,sx
+*GET,sy,node,n1,s,y 
+*STAT,sy
+*SET,n2,node(2.5,2.5,0) 
+*GET,sxy,node,n2,s,xy   
+*STAT,sxy  
+
+*DIM,LABEL,CHAR,4,5
+*DIM,VALUE,,4,3
+LABEL(1,1) = 'CENTRAL ','SIGMAxx','SIGMAyy','TAUxy AT'
+LABEL(1,2) = 'TRANSVER','AT THE C','AT THE C',' QUARTER'
+LABEL(1,3) = 'SE DISPL','ENTRE OF ','ENTRE OF',' OF TOP '
+LABEL(1,4) = 'ACEMENT',' TOP SHE',' TOP SHE','SHEET'
+LABEL(1,5) = ' in','ET psi','ET psi',' psi'
+*VFILL,VALUE(1,1),DATA,-0.123,34449,13350,-5067.5
+*VFILL,VALUE(1,2),DATA,uz,sx,sy,sxy
+*VFILL,VALUE(1,3),DATA,ABS((uz)/(-0.123)),ABS((sx)/(34449)),ABS((sy)/(13350)),ABS((sxy)/(-5067.5))
+/NOPR
+/COM
+/OUT,vmr031-t3-181,vrt
+/COM,------------------- VMr031-t3-181 RESULTS COMPARISON ---------------------
+/COM,
+/COM,               		  |   TARGET   |   Mechanical APDL   |   RATIO
+/COM,
+/COM,USING SHELL181 
+/COM,
+*VWRITE,LABEL(1,1),LABEL(1,2),LABEL(1,3),LABEL(1,4),LABEL(1,5),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,A8,A8,A8,A8'   ',F10.3,'  ',F12.3,'   ',1F10.3)
+/COM, 
+/COM,   
+/OUT
+FINISH
+*list,vmr031-t3-181,vrt 
+/EXIT,NOSAVE

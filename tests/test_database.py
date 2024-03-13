@@ -1,4 +1,25 @@
-import os
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import re
 
 from ansys.tools.versioning import server_meets_version
@@ -9,10 +30,7 @@ import pytest
 from ansys.mapdl.core.database import MINIMUM_MAPDL_VERSION, DBDef, MapdlDb
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import random_string
-
-ON_CI = "ON_CI" in os.environ or (
-    "PYMAPDL_START_INSTANCE" in os.environ and "PYMAPDL_PORT" in os.environ
-)
+from conftest import ON_CI
 
 
 @pytest.fixture(scope="session")
@@ -31,10 +49,16 @@ def db(mapdl):
             f"This MAPDL version ({mapdl_version}) is not compatible with the Database module."
         )
 
+    ## Exceptions
     # Exception for 22.2
     if mapdl_version == "22.2" and ON_CI:
         pytest.skip(
             f"This MAPDL version ({mapdl_version}) docker image seems to not support DB, but local does."
+        )
+
+    if mapdl_version == "24.1":
+        pytest.skip(
+            f"This MAPDL version ({mapdl_version}) does not support PyMAPDL Database."
         )
 
     if mapdl._server_version < (0, 4, 1):  # 2021R2
@@ -43,6 +67,8 @@ def db(mapdl):
             f"This version of MAPDL gRPC API version ('ansys.api.mapdl' == {ver_}) is not compatible with 'database' module."
         )
 
+    mapdl.clear()
+    mapdl.db.start()
     return mapdl.db
 
 
@@ -124,7 +150,7 @@ def test_clear(db):
     db._mapdl.prep7()
     db._mapdl.k(1, 1, 1, 1)
     db.clear()
-    assert db._mapdl.geometry.n_keypoint == 0
+    assert db._mapdl.get_value("KP", 0, "count") == 0.0
 
 
 def test_nodes_repr(nodes):

@@ -1,0 +1,180 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/VERIFY, VMR029-T9-181
+/TITLE, VMR029-T9-181,LARGE ELASTIC DEFLECTION OF A PINCHED HEMISPHERICAL SHELL
+/COM, REF. NAFEMS ASSEMBLY BENCHMARK TESTS FOR 3D BEAMS AND SHELLS
+/COM,       TEST 3DNLG-9
+/SHOW,JPEG
+JPGPRF,500,100,1
+/PREP7
+RM=10.00
+T=0.04
+THETA=18
+F=100.0
+ET,1,181
+R,1,0.04,0.04,0.04,0.04
+MP,EX,1,6.825E7
+MP,NUXY,1,0.3
+K,1,
+K,2,,RM
+PCIRC,RM,RM+T,0,90-THETA,
+AROTAT,3, , , , , ,1,2,-90, ,
+LESIZE,ALL,,,8
+AMESH,2
+NSEL,S,LOC,Z,RM
+NSEL,R,LOC,X,0
+NSEL,R,LOC,Y,0
+D,ALL,UY,0.0
+CSYS,2
+NSEL,S,LOC,X,RM
+NSEL,R,LOC,Y,0
+NSEL,R,LOC,Z,0
+F,ALL,FX,F
+NSEL,S,LOC,X,RM
+NSEL,R,LOC,Y,0
+NSEL,R,LOC,Z,90
+F,ALL,FX,-1*F
+NSEL,S,LOC,Z,0
+NSEL,R,LOC,Y,0,90
+DSYM,SYMM,Z,2
+NSEL,S,LOC,Y,90
+NSEL,R,LOC,Z,0,91
+DSYM,SYMM,Y,2
+NSEL,S,LOC,Y,0
+NSEL,R,LOC,Z,90
+DSYM,SYMM,Z,2
+ALLSEL,ALL
+FINISH
+/SOLU
+NLGEOM,ON
+AUTOTS,ON
+NSUBST,100,100000,40
+OUTRES,ALL,ALL
+/OUT,SCRATCH
+SOLVE
+FINISH
+/POST26
+*DIM,XA,TABLE,11,1
+*DIM,YA,TABLE,11,1
+XA(  1,1)= 0
+YA(  1,1)= 0
+XA(  2,1)= 10
+YA(  2,1)= 1.0
+XA(  3,1)= 20
+YA(  3,1)= 1.75
+XA(  4,1)= 30
+YA(  4,1)= 2.625
+XA(  5,1)= 40
+YA(  5,1)= 3.23
+XA(  6,1)= 50
+YA(  6,1)= 3.875
+XA(  7,1)= 60
+YA(  7,1)= 4.29
+XA(  8,1)= 70
+YA(  8,1)= 4.815
+XA(  9,1)= 80
+YA(  9,1)= 5.185
+XA( 10,1)= 90
+YA( 10,1)= 5.52
+XA( 11,1)= 100
+YA( 11,1)= 5.875
+/XRANGE,0,100
+/YRANGE,0,6
+/AXLAB,X,LOAD
+/AXLAB,Y,RADIAL DISPLACEMENT
+/COLOR,CURVE,YGRE
+/GCOLUMN,1,REF,
+*VPLOT,XA(1,1),YA(1,1)
+/NOERASE
+/OUT,
+NSOL,2,2,U,X,UR_A
+PROD,3,2, , ,'   URATA', , ,-1.0,0,0,
+PROD,7,1, , ,LOAD, , ,100.0,0,0,
+/COLOR,CURVE,MRED
+XVAR,7
+PLVAR,3
+/NOERASE
+*DIM,XB,TABLE,11,1
+*DIM,YB,TABLE,11,1
+XB(  1,1)= 0
+YB(  1,1)= 0
+XB(  2,1)= 10
+YB(  2,1)= 0.88
+XB(  3,1)= 20
+YB(  3,1)= 1.5
+XB(  4,1)= 30
+YB(  4,1)= 2
+XB(  5,1)= 40
+YB(  5,1)= 2.30
+XB(  6,1)= 50
+YB(  6,1)= 2.63
+XB(  7,1)= 60
+YB(  7,1)= 2.82
+XB(  8,1)= 70
+YB(  8,1)= 3
+XB(  9,1)= 80
+YB(  9,1)= 3.16
+XB( 10,1)= 90
+YB( 10,1)= 3.30
+XB( 11,1)= 100
+YB( 11,1)= 3.42
+/COLOR,CURVE,YGRE
+/GCOLUMN,1,REF,
+*VPLOT,XB(1,1),YB(1,1)
+/NOERASE
+NSOL,5,1,U,X,'   URATB'
+/COLOR,CURVE,MRED
+XVAR,7
+PLVAR,5
+FINISH
+/POST1
+NSEL,ALL
+SET,1,42
+*GET,UB,NODE,1,U,X
+*GET,UA,NODE,2,U,Z
+RA=UA/(-5.9)
+RB=UB/3.42
+*DIM,VALUE3,,2,2
+*DIM,LABEL2,CHAR,2
+*DIM,LABEL4,CHAR,2
+*DIM,LABEL5,CHAR,2
+LABEL2(1) = 'NODE A','NODE B',
+LABEL4(1) = 'vmr029-','vmr029-'
+LABEL5(1) = 't9-181','t9-181'
+*VFILL,VALUE3(1,1),DATA,UA,UB
+*VFILL,VALUE3(1,2),DATA,RA,RB
+/OUT,vmr029-t9-181,vrt
+/COM
+/COM,-------------- VMR029-T9 RESULTS COMPARISON ---------------
+/COM,
+/COM,          |    Mechanical APDL    |   RATIO   |      INPUT      |
+/COM,
+/COM,SHELL181
+*VWRITE,LABEL2(1),VALUE3(1,1),VALUE3(1,2),LABEL4(1),LABEL5(1)
+(1X,A6,'       ',F12.4,'      ',F13.4,'      ',A7,A8)
+/COM,
+/COM,----------------------------------------------------------------
+/OUT
+FINISH
+*LIST,vmr029-t9-181,vrt

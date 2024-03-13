@@ -1,10 +1,10 @@
-********************
+====================
 Interactive plotting
-********************
+====================
 When generating geometry from scratch within MAPDL, it is often
 necessary to plot the geometry, such as key points, lines, areas,
 and volumes. PyMAPDL supports plotting basic CAD using VTK. The
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class leverages the
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class leverages the
 existing MAPDL commands by providing the following functions, which
 transfer the geometry to Python to visualize it:
 
@@ -19,7 +19,7 @@ using the :func:`open_gui() <ansys.mapdl.core.Mapdl.open_gui>` method.
 
 
 Line plotting
-~~~~~~~~~~~~~
+-------------
 You plot lines within Python using the :func:`Mapdl.lplot() <ansys.mapdl.core.Mapdl.lplot>` method:
 
 .. code:: pycon
@@ -50,11 +50,11 @@ You plot lines within Python using the :func:`Mapdl.lplot() <ansys.mapdl.core.Ma
 
 
 Area and volume plotting
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 You can using Boolean operations to obtain more complex geometry and
-visualize them using the :func:`Mapdl.vplot()
-<ansys.mapdl.core.Mapdl.vplot>` method. This example cuts the initial
-area with the eight circles and then extrudes it.
+visualize them using the :func:`Mapdl.vplot() <ansys.mapdl.core.Mapdl.vplot>`
+method. This example cuts the initial area with the eight circles and then
+extrudes it.
 
 .. code:: pycon
 
@@ -73,9 +73,9 @@ area with the eight circles and then extrudes it.
 
 
 Node and element plotting
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 You can plot nodes and elements directly from the instance of the
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class. This code defines
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class. This code defines
 some element types, performs meshing, and then displays the mesh:
 
 .. code:: pycon
@@ -88,7 +88,7 @@ some element types, performs meshing, and then displays the mesh:
 .. figure:: ../images/eplot_vtk.png
     :width: 400pt
 
-    Element Plot from MAPDL using PyMAPDL and `Pyvista <pyvista_docs_>`_
+    Element Plot from MAPDL using PyMAPDL and `PyVista <pyvista_docs_>`_
 
 
 Plotting non-interactively using MAPDL
@@ -151,7 +151,7 @@ For more information on plotting functions, see :ref:`ref_plotting_api`.
 
 
 Plotting keyword options
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 When ``vtk=True``, which is the default, all MAPDL plotting
 methods allow you to enter in additional keyword arguments to better
 control the plot. For example, you can automatically generate a
@@ -175,7 +175,7 @@ For all general plotting options, see the
 
 
 Plotting boundary conditions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 .. warning::
    This feature is beta so its functionalities and stability are
@@ -202,8 +202,8 @@ method:
 
 .. note::
     Because boundary conditions can only target nodes, you can
-    only use ``plot_bc`` as an argument in the :func:`Mapdl.nplot()
-    <ansys.mapdl.core.Mapdl.nplot>` method.
+    only use ``plot_bc`` as an argument in the
+    :func:`Mapdl.nplot() <ansys.mapdl.core.Mapdl.nplot>` method.
 
 
 

@@ -24,7 +24,7 @@ body:
         required: true
       - label: I am using a [Python virtual environment](https://docs.python.org/3/library/venv.html).
         required: true
-      - label: I am using the [latest version of PyMAPDL](https://github.com/ansys/pymapdl/releases) and its dependencies (fully updated virtual environment). You can update them using ``pip install --upgrade --upgrade-strategy eager ansys-mapdl-core``.
+      - label: I am using the [latest version of PyMAPDL](https://github.com/ansys/pymapdl/releases) and its dependencies (fully updated virtual environment). You can update them using ``pip install --upgrade --upgrade-strategy eager ansys-mapdl-core`` in your activated virtual environment.
         required: true
 
   - type: textarea
@@ -40,34 +40,19 @@ body:
     attributes:
       label: 🕵️ Steps To Reproduce
       description: |
-        Please write the steps in a list form e.g.:
-        * Install this package...
-        * Run this input file (Please attach it) and/or
-        * Run the following commands:
+        Please write the python commands you used:
         ```py
+        from ansys.mapdl.core import launch_mapdl
+        mapdl = launch_mapdl()
+
         mapdl.command1()
         mapdl.command2()
         ...
         ```
-        * Check obtained error...
-
         Use the following text box:
 
-      value: |
-        Steps:
-          * First I did...
-          * ...
-
-        And I ran the following code:
-
-        ```py
-
-        from ansys.mapdl.core import launch_mapdl
-        mapdl = launch_mapdl()
-
-        # Insert your code here
-
-        ```
+      value: The log will automatically be formatted as Python code! No need to type backticks.
+      render: Python
 
     validations:
       required: true
@@ -95,10 +80,10 @@ body:
       description: Run `python --version` to verify your Python version
       multiple: false
       options:
-       - '3.8'
        - '3.9'
        - '3.10'
        - '3.11'
+       - '3.12'
     validations:
       required: false
 

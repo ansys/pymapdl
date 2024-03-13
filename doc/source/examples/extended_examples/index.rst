@@ -11,7 +11,7 @@ with other programs, libraries, and features in development.
 +----------------------------+--------------------------------------------------------------------------------------------+
 | `Cart-Pole Simulation`_    | Demonstrates a reinforcement machine learning example using MAPDL through PyMAPDL.         |
 +----------------------------+--------------------------------------------------------------------------------------------+
-| :ref:`extended_example01`  | Demonstrates the interoperability between PyMAPDL and the `gmsh <gmsh_>`_ meshing library. |
+| :ref:`extended_example01`  | Demonstrates the interoperability between PyMAPDL and the `Gmsh <gmsh_>`_ meshing library. |
 +----------------------------+--------------------------------------------------------------------------------------------+
 | :ref:`python_upf_examples` | Demonstrates the interoperability between user-programmable functions in MAPDL and Python. |
 +----------------------------+--------------------------------------------------------------------------------------------+

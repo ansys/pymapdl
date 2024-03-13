@@ -14,9 +14,12 @@ version: '3.3'
 # USAGE:
 # ======
 #
-# 1. You need an environment variable called ANSYSLMD_LICENSE_FILE which points to the license server. For example:
+# 1. You need two environment variables. One called ``DOCKER_IMAGE`` which contains the path to the
+# docker image, and another one called ``ANSYSLMD_LICENSE_FILE`` which points to the license server.
+# For example:
 #
 #     export ANSYSLMD_LICENSE_FILE=1055@mylicensehost
+#     export DOCKER_IMAGE=myregistry.com/myimage:mytag
 # 
 # 2. Run the following command:
 # 
@@ -28,15 +31,8 @@ version: '3.3'
 # NOTES:
 # ======
 #
-# - The docker image is based on the MAPDL Ubuntu docker image from ANSYS.
 # - 'AWP_ROOT222' is where Ansys is installed.
-# - The entrypoint is defined in the docker image.
-# - If you need to run a license server, please have a look at 'docker-compose.license_server.yml' file. 
-#   In that case, the command would be:
-#
-#    docker-compose -f docker-compose.yml -f docker-compose.license_server.yml up
-#
-#
+# - The entrypoint must be defined in the docker image.
 # - If you want to mount the local directory, please add the 'volumes' section to the 'mapdl' service.
 # 
 #      volumes:
@@ -56,7 +52,7 @@ services:
     ports:
       - '50052:50052'
       - '50055:50055'
-    image: 'ghcr.io/pyansys/mapdl:v22.2-ubuntu'
+    image: ${DOCKER_IMAGE}
     user: "0:0"
     entrypoint: "/bin/bash ansys -grpc"
   

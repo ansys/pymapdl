@@ -21,6 +21,12 @@ Ansys 2020 R1 and later support the latest `gRPC interface <grpc_>`_, allowing
 for remote management of MAPDL with rapid streaming of mesh, results,
 and files from the MAPDL service.
 
+This interface also works with a Docker image.
+If you have the applicable license, you can install and use 
+MAPDL within Docker, enabling you
+to run and solve even on officially unsupported platforms like Mac
+OS. For more information, see :ref:`pymapdl_docker`.
+
 
 Legacy interfaces
 =================
@@ -28,10 +34,13 @@ Legacy interfaces
 CORBA interface
 ---------------
 
+.. warning:: This interface has been deprecated with PyMAPDL 0.68.
+
+
 .. vale off
 
 Ansys 17.0 supports the legacy CORBA interface, enabled with the
-`ansys.mapdl.corba <https://github.com/pyansys/pymapdl-corba>`_ module.
+`ansys.mapdl.corba <https://github.com/ansys/pymapdl-corba>`_ module.
 
 .. vale on
 
@@ -42,11 +51,48 @@ allows you to control a local instance of MAPDL. These versions of
 MAPDL support specific versions of Windows and Linux.
 For more information on supported platforms, see 
 `Ansys Platform Support <ansys_platform_support_>`_.
+    
+The CORBA interface is an outdate interface, and its usage is not
+recommended. The gRPC interface is recommended since it is faster,
+more stable, and can run in both local and remote connection configurations.
 
-The CORBA interface is likely to be phased out from MAPDL at some
-point. The gRPC interface is faster, more stable, and can run in
-both local and remote connection configurations.
+Deprecation of CORBA Interface in PyMAPDL
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. warning:: This interface has been deprecated with PyMAPDL 0.68.
+
+Started from version v0.67 of PyMAPDL library, the CORBA interface
+was set to be deprecated and in version v.68, it has been completely
+removed from PyMAPDL.
+This decision is driven by the CORBA library's lack of support
+for Python versions superior to 3.8.
+
+**Action Required:** If you currently rely on the CORBA interface,
+it is recommend planning for its replacement as you migrate to
+PyMAPDL v0.67 or later versions. Specifying a different mode when
+launching MAPDL should suffice. PyMAPDL maintainers understand that
+this change may impact some users, and apologize for any inconvenience it
+may cause.
+
+**Why is this happening?** As the Python ecosystem evolves,
+maintaining compatibility with outdated libraries becomes
+increasingly challenging. By removing the CORBA interface,
+PyMAPDL remains compatible with modern Python
+environments, enabling the maintainers to provide better
+features and support in the future.
+
+**When this happen?** The deprecation process is set to start
+with version v0.66 and it should be completed with version v0.68.
+While the exact timeline for the removal is yet to be determined,
+it is essential to prepare for its eventual deprecation.
+
+**Alternative Solutions:** For users requiring a similar feature,
+it is recommended exploring alternative interfaces available in PyMAPDL.
+
+PyMAPDL maintainers greatly appreciate your support and understanding
+during this transition.
+If you have any questions or concerns regarding this change,
+post them on the `PyMAPDL Discussions <pymapdl_discussions_>`_ page.
 
 Console interface
 -----------------
@@ -57,7 +103,6 @@ and from the Ansys instance.
 
 Because console-specific support is to be depreciated at some point, you should
 shift to a modern version of Ansys to continue to use PyMAPDL.
-
 
 
 Compatibility between MAPDL and interfaces
@@ -123,3 +168,12 @@ Where:
 * |:heavy_check_mark:| means that the interface is supported and recommended.
 * |:heavy_minus_sign:| means that the interface is supported, but not recommended. Their support might be dropped in the future.
 * |:x:| means that the interface is not supported.
+
+
+MAPDL-supported operative systems
+=================================
+
+You can obtain the list of MAPDL-supported operative systems on the
+`Platform Support <ansys_platform_support_>`_ page of the Ansys website.
+
+Or, you can `download <ansys_current_supported_os_>`_ the list for the current release. 

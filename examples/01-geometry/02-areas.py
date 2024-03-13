@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """
 .. _ref_basic-geometry-areas:
 
@@ -92,20 +114,24 @@ anum
 ###############################################################################
 # Area Geometry
 # ~~~~~~~~~~~~~
-# Get the VTK ``PolyData`` containing lines.  This VTK mesh can be
-# saved or plotted.  For more details, visit `Pyvista documentation <pyvista_docs_>`_
-#
-# Note that this is a method so you can select the quality of the
-# areas (mesh density), and if you would like a merged output or
-# individual meshes.
-areas = mapdl.geometry.areas(quality=3)
+# Get the VTK ``Multiblock`` containing lines. This VTK mesh can be
+# saved or plotted.  For more information, see the
+# `PyVista documentation <pyvista_docs_>`_.
+
+areas = mapdl.geometry.areas
 areas
 
 
 ###############################################################################
 # Merged Area Geometry
 # ~~~~~~~~~~~~~~~~~~~~
-area = mapdl.geometry.areas(quality=3, merge=True)
+# You can also obtain the areas as ``pyvista.PolyData`` objects.
+#
+# Note that this is a method. You can select the quality of the
+# areas (mesh density) and whether you want a merged output or
+# individual meshes.
+
+area = mapdl.geometry.get_areas(quality=3)
 area
 
 # optionally save the area, or plot it

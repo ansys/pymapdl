@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Module for licensing and license serve checks."""
 
 import os
@@ -8,6 +30,15 @@ import time
 from ansys.mapdl.core import LOG
 from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.misc import threaded_daemon
+
+try:
+    from ansys.tools.path import get_ansys_path, version_from_path
+
+    _HAS_ATP = True
+
+except ModuleNotFoundError:
+    _HAS_ATP = False
+
 
 LOCALHOST = "127.0.0.1"
 LIC_PATH_ENVAR = "ANSYSLIC_DIR"
@@ -97,10 +128,10 @@ class LicenseChecker:
             self._license_file_success = False
             self._license_file_msg.append(str(error))
         else:
-            self._license_file_success = True  # pragma: no cover
+            self._license_file_success = True
 
     @threaded_daemon
-    def checkout_license(self, host=None):  # pragma: no cover
+    def checkout_license(self, host=None):
         try:
             self._check_mech_license_available(host)
         except Exception as error:
@@ -121,7 +152,7 @@ class LicenseChecker:
             disabled.
 
         """
-        if license_file:
+        if license_file and _HAS_ATP:
             self._lic_file_thread = self.check_license_file()
         if checkout_license:
             self._checkout_thread = self.checkout_license()
@@ -463,8 +494,6 @@ def get_ansys_license_debug_file_name():  # pragma: no cover
     # Licdebug name convention:
     # - For version 22.1 and above: `licdebug.$hostname.$appname.$version.out`
     # - For version 21.2 and below: `licdebug.$appname.$version.out`
-
-    from ansys.mapdl.core.launcher import get_ansys_path, version_from_path
 
     name = "licdebug"
     hostname = socket.gethostname()

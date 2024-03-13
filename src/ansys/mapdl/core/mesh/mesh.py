@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Module for common class between Archive, and result mesh."""
 from ansys.mapdl.reader import _reader, _relaxmidside
 from ansys.mapdl.reader.elements import ETYPE_MAP
@@ -36,7 +58,7 @@ SHAPE_MAP = {  # from ELIST definition
     7: "QUAD",
     8: "TRI6",
     9: "QUA8",
-    10: "POIN",
+    10: "POIN",  # codespell-ignore
     11: "CIRC",
     12: "",
     13: "",
@@ -156,6 +178,7 @@ def _parse_vtk(
     # Store original ANSYS element and node information
     try:
         grid.point_data["ansys_node_num"] = nnum
+
     except ValueError:
         grid.point_data["ansys_node_num"] = (
             mesh._mapdl.nlist(kinternal="internal").to_array()[:, 0].astype(np.int32)
@@ -166,17 +189,6 @@ def _parse_vtk(
     grid.cell_data["ansys_material_type"] = mesh.material_type
     grid.cell_data["ansys_etype"] = mesh._ans_etype
     grid.cell_data["ansys_elem_type_num"] = mesh.etype
-
-    # add components
-    # Add element components to unstructured grid
-    for key, item in mesh.element_components.items():
-        mask = np.in1d(mesh.enum, item, assume_unique=True)
-        grid.cell_data[key] = mask
-
-    # Add node components to unstructured grid
-    for key, item in mesh.node_components.items():
-        mask = np.in1d(nnum, item, assume_unique=True)
-        grid.point_data[key] = mask
 
     # store node angles
     if angles is not None:

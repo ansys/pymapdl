@@ -160,7 +160,9 @@ The **Preprocessing** tab contains input fields for Poisson's ratio, Young modul
 Add a PyVista plotting frame in the window
 ==========================================
 
-Start by importing the `QtInteractor <https://qtdocs.pyvista.org/api_reference.html#qtinteractor>`_ class from the ``pyvistaqt`` package and the :class:`MapdlTheme <ansys.mapdl.core.theme.MapdlTheme>` class from the ``ansys-mapdl-core`` package:
+Start by importing the `QtInteractor <https://qtdocs.pyvista.org/api_reference.html#qtinteractor>`_
+class from the ``pyvistaqt`` package and the :class:`MapdlTheme <ansys.mapdl.core.theme.MapdlTheme>`
+class from the ``ansys-mapdl-core`` package:
 
 .. code:: python
 

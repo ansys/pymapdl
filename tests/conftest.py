@@ -1,111 +1,217 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from collections import namedtuple
 import os
 from pathlib import Path
-import signal
+from sys import platform
 
+from _pytest.terminal import TerminalReporter  # for terminal customization
 import pytest
 
-from common import Element, Node, get_details_of_elements, get_details_of_nodes
+from common import (
+    Element,
+    Node,
+    get_details_of_elements,
+    get_details_of_nodes,
+    has_dpf,
+    has_grpc,
+    is_on_ci,
+    is_on_local,
+    is_on_ubuntu,
+    is_running_on_student,
+    is_smp,
+    support_plotting,
+    testing_minimal,
+)
 
-pytest_plugins = ["pytester"]
+################################################################
+#
+# Setting testing environment
+# ---------------------------
+#
 
-from ansys.tools.path import find_ansys, get_available_ansys_installations
-import pyvista
+TESTING_MINIMAL = testing_minimal()
 
-from ansys.mapdl import core as pymapdl
+ON_LOCAL = is_on_local()
+ON_CI = is_on_ci()
+ON_STUDENT = is_running_on_student()
+
+ON_UBUNTU = is_on_ubuntu()  # Tells if MAPDL is running on Ubuntu system or not.
+# Whether PyMAPDL is running on an ubuntu or different machine is irrelevant.
+ON_WINDOWS = platform == "win32"
+ON_LINUX = platform == "linux" or platform == "linux2"
+ON_MACOS = platform == "darwin"
+
+HAS_GRPC = has_grpc()
+HAS_DPF = has_dpf()
+SUPPORT_PLOTTING = support_plotting()
+IS_SMP = is_smp()
+
+QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
+
+## Skip ifs
+skip_on_windows = pytest.mark.skipif(ON_WINDOWS, reason="Skip on Windows")
+skip_on_linux = pytest.mark.skipif(ON_LINUX, reason="Skip on Linux")
+
+skip_no_xserver = pytest.mark.skipif(
+    not SUPPORT_PLOTTING, reason="Requires active X Server"
+)
+
+skip_if_not_local = pytest.mark.skipif(
+    not ON_LOCAL,
+    reason="Skipping because not on local. ",
+)
+
+skip_if_on_cicd = pytest.mark.skipif(
+    ON_CI,
+    reason="""Skip if on CI/CD.""",
+)
+
+skip_if_no_has_grpc = pytest.mark.skipif(
+    not HAS_GRPC,
+    reason="""Requires gRPC.""",
+)
+
+skip_if_no_has_dpf = pytest.mark.skipif(
+    not HAS_DPF,
+    reason="""Requires DPF.""",
+)
+
+requires_linux = pytest.mark.skipif(not ON_LINUX, reason="This test requires Linux")
+requires_windows = pytest.mark.skipif(
+    not ON_WINDOWS, reason="This test requires Windows"
+)
+requires_on_cicd = pytest.mark.skipif(
+    not ON_CI, reason="This test requires to be on CICD"
+)
+
+skip_if_running_student_version = pytest.mark.skipif(
+    ON_STUDENT,
+    reason="This tests does not work on student version. Maybe because license limitations",
+)
+
+
+def import_module(requirement):
+    from importlib import import_module
+
+    if os.name == "nt":
+        requirement = requirement.replace("-", ".")
+    return import_module(requirement)
+
+
+def has_dependency(requirement):
+    try:
+        requirement = requirement.replace("-", ".")
+        import_module(requirement)
+        return True
+    except ModuleNotFoundError:
+        return False
+
+
+def requires(requirement: str):
+    """Check requirements"""
+    requirement = requirement.lower()
+
+    if "grpc" == requirement:
+        return skip_if_no_has_grpc
+
+    elif "dpf" == requirement:
+        return skip_if_no_has_dpf
+
+    elif "local" == requirement:
+        return skip_if_not_local
+
+    elif "cicd" == requirement:
+        return skip_if_on_cicd
+
+    elif "nocicd" == requirement:
+        return skip_if_on_cicd
+
+    elif "xserver" == requirement:
+        return skip_no_xserver
+
+    elif "linux" == requirement:
+        return requires_linux
+
+    elif "nolinux" == requirement:
+        return skip_on_linux
+
+    elif "windows" == requirement:
+        return requires_windows
+
+    elif "nowindows" == requirement:
+        return skip_on_windows
+
+    elif "nostudent" == requirement:
+        return skip_if_running_student_version
+
+    elif "console" == requirement:
+        return pytest.mark.console
+
+    else:
+        return requires_dependency(requirement)
+
+
+def requires_dependency(dependency: str):
+    try:
+        import_module(dependency)
+        return pytest.mark.skipif(
+            False, reason="Never skip"
+        )  # faking a null skipif decorator
+
+    except ModuleNotFoundError:
+        # package does not exist
+        return pytest.mark.skip(reason=f"Requires '{dependency}' package")
+
+
+################
+
+if has_dependency("ansys-tools-package"):
+    from ansys.tools.path import get_available_ansys_installations
+
+
+if has_dependency("pyvista"):
+    import pyvista
+
+    from ansys.mapdl.core.theme import _apply_default_theme
+
+    _apply_default_theme()
+
+    # Necessary for CI plotting
+    pyvista.OFF_SCREEN = True
+
+import ansys.mapdl.core as pymapdl
+
+pymapdl.RUNNING_TESTS = True
+
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
-from ansys.mapdl.core.launcher import (
-    MAPDL_DEFAULT_PORT,
-    get_start_instance,
-    launch_mapdl,
-)
-
-# Necessary for CI plotting
-pyvista.OFF_SCREEN = True
-
-SpacedPaths = namedtuple(
-    "SpacedPaths",
-    ["path_without_spaces", "path_with_spaces", "path_with_single_quote"],
-)
-
-
-class Running_test:
-    def __init__(self) -> None:
-        pass
-
-    def __enter__(self):
-        pymapdl.RUNNING_TESTS = True
-
-    def __exit__(self, *args):
-        pymapdl.RUNNING_TESTS = False
-
-
-@pytest.fixture(scope="session")
-def running_test():
-    return Running_test()
-
-
-from _pytest.terminal import TerminalReporter
-
-
-## Changing report line length
-class MyReporter(TerminalReporter):
-    def short_test_summary(self):
-        # your own impl goes here, for example:
-        self.write_sep("=", "PyMAPDL Pytest short summary")
-
-        failed = self.stats.get("failed", [])
-        for rep in failed:
-            # breakpoint()
-            self.write_line(
-                f"[FAILED] {rep.head_line} - {rep.longreprtext.splitlines()[-3]}"
-            )
-
-        errored = self.stats.get("error", [])
-        for rep in errored:
-            # breakpoint()
-            self.write_line(
-                f"[ERROR] {rep.head_line} - {rep.longreprtext.splitlines()[-3]}"
-            )
-
-
-@pytest.mark.trylast
-def pytest_configure(config):
-    vanilla_reporter = config.pluginmanager.getplugin("terminalreporter")
-    my_reporter = MyReporter(config)
-    config.pluginmanager.unregister(vanilla_reporter)
-    config.pluginmanager.register(my_reporter, "terminalreporter")
-
-
-# Cache if gRPC MAPDL is installed.
-#
-# minimum version on linux.  Windows is v202, but using v211 for consistency
-# Override this if running on CI/CD and PYMAPDL_PORT has been specified
-ON_CI = "PYMAPDL_START_INSTANCE" in os.environ and "PYMAPDL_PORT" in os.environ
-
-# Check if MAPDL is installed
-# NOTE: checks in this order to get the newest installed version
-
-from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
-
-valid_rver = SUPPORTED_ANSYS_VERSIONS.keys()
-
-EXEC_FILE, rver = find_ansys()
-if rver:
-    rver = int(rver * 10)
-    HAS_GRPC = int(rver) >= 211 or ON_CI
-else:
-    # assuming remote with gRPC
-    HAS_GRPC = True
-
-# determine if we can launch an instance of MAPDL locally
-# start with ``False`` and always assume the remote case
-LOCAL = [False]
+from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 
 # check if the user wants to permit pytest to start MAPDL
 START_INSTANCE = get_start_instance()
 
+################
 if os.name == "nt":
     os_msg = """SET PYMAPDL_START_INSTANCE=False
 SET PYMAPDL_PORT=<MAPDL Port> (default 50052)
@@ -126,68 +232,40 @@ automatically find your Ansys installation.  Email the developer at:
 alexander.kaszynski@ansys.com
 
 """
+MAPDL_VERSION = None  # this is cached by mapdl fixture and used in the minimal testing
 
-if START_INSTANCE and EXEC_FILE is None:
+if START_INSTANCE and not ON_LOCAL:
     raise MapdlRuntimeError(ERRMSG)
 
 
-def is_exited(mapdl):
-    try:
-        _ = mapdl._ctrl("VERSION")
-        return False
-    except MapdlExitedError:
-        return True
+## Changing report line length
+class MyReporter(TerminalReporter):
+    def short_test_summary(self):
+        # your own impl goes here, for example:
+        self.write_sep("=", "PyMAPDL Pytest short summary")
+
+        failed = self.stats.get("failed", [])
+        for rep in failed:
+            self.write_line(
+                f"[FAILED] {rep.head_line} - {rep.longreprtext.splitlines()[-3]}"
+            )
+
+        errored = self.stats.get("error", [])
+        for rep in errored:
+            self.write_line(
+                f"[ERROR] {rep.head_line} - {rep.longreprtext.splitlines()[-3]}"
+            )
 
 
-@pytest.fixture(autouse=True, scope="function")
-def run_before_and_after_tests(request, mapdl):
-    """Fixture to execute asserts before and after a test is run"""
-    # Setup: fill with any logic you want
-    if START_INSTANCE and is_exited(mapdl):
-        # Backing up the current local configuration
-        local_ = mapdl._local
-
-        # Relaunching MAPDL
-        mapdl_ = launch_mapdl(
-            EXEC_FILE,
-            port=mapdl._port,
-            override=True,
-            run_location=mapdl._path,
-            cleanup_on_exit=mapdl._cleanup,
-        )
-
-        # Cloning the new mapdl instance channel into the old one.
-        mapdl._channel = mapdl_._channel
-        mapdl._multi_connect(timeout=mapdl._timeout, set_no_abort=True)
-
-        # Restoring the local configuration
-        mapdl._local = local_
-
-    yield  # this is where the testing happens
-
-    # Teardown : fill with any logic you want
-    if mapdl._local and mapdl._exited:
-        # The test exited MAPDL, so it is fail.
-        assert False  # this will fail the test
-
-
-def check_pid(pid):
-    """Check For the existence of a pid."""
-    try:
-        # There are two main options:
-        # - Termination signal (SIGTERM) int=15. Soft termination (Recommended)
-        # - Kill signal (KILLTER). int=9. Hard termination
-        os.kill(pid, signal.SIGTERM)
-    except OSError:
-        return False
-    else:
-        return True
+@pytest.mark.trylast
+def pytest_configure(config):
+    vanilla_reporter = config.pluginmanager.getplugin("terminalreporter")
+    my_reporter = MyReporter(config)
+    config.pluginmanager.unregister(vanilla_reporter)
+    config.pluginmanager.register(my_reporter, "terminalreporter")
 
 
 def pytest_addoption(parser):
-    parser.addoption(
-        "--corba", action="store_true", default=False, help="run CORBA tests"
-    )
     parser.addoption(
         "--console",
         action="store_true",
@@ -204,13 +282,6 @@ def pytest_addoption(parser):
 
 
 def pytest_collection_modifyitems(config, items):
-    if not config.getoption("--corba"):
-        # --corba given in cli: run CORBA interface tests
-        skip_corba = pytest.mark.skip(reason="need --corba option to run")
-        for item in items:
-            if "corba" in item.keywords:
-                item.add_marker(skip_corba)
-
     if not config.getoption("--console"):
         # --console given in cli: run console interface tests
         skip_console = pytest.mark.skip(reason="need --console option to run")
@@ -219,7 +290,9 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(skip_console)
 
     if not HAS_GRPC:
-        skip_grpc = pytest.mark.skip(reason="requires at least v211 to run")
+        skip_grpc = pytest.mark.skip(
+            reason="Requires gRPC connection (at least v211 to run)"
+        )
         for item in items:
             if "skip_grpc" in item.keywords:
                 item.add_marker(skip_grpc)
@@ -240,6 +313,104 @@ def pytest_collection_modifyitems(config, items):
                 item.add_marker(skip_gui)
 
 
+################################################################
+#
+# Setting fixtures
+# ---------------------------
+#
+
+if has_dependency("pytest-pyvista"):
+
+    @pytest.fixture(autouse=True)
+    def wrapped_verify_image_cache(verify_image_cache, pytestconfig):
+        # Configuration
+        verify_image_cache.error_value = 500.0
+        verify_image_cache.warning_value = 200.0
+
+        # High variance test
+        verify_image_cache.var_error_value = 1000.0
+        verify_image_cache.var_warning_value = 1000.0
+
+        return verify_image_cache
+
+
+class Running_test:
+    def __init__(self, active: bool = True) -> None:
+        self._state = active
+
+    def __enter__(self) -> None:
+        pymapdl.RUNNING_TESTS = self._state
+
+    def __exit__(self, *args) -> None:
+        pymapdl.RUNNING_TESTS = not self._state
+
+
+class NullContext:
+    def __enter__(self):
+        pass
+
+    def __exit__(self, *args):
+        pass
+
+    def __init__(self):
+        pass
+
+
+@pytest.fixture(scope="function")
+def running_test():
+    return Running_test
+
+
+@pytest.fixture(autouse=True, scope="function")
+def run_before_and_after_tests(request, mapdl):
+    """Fixture to execute asserts before and after a test is run"""
+
+    # Setup: fill with any logic you want
+    def is_exited(mapdl):
+        try:
+            _ = mapdl._ctrl("VERSION")
+            return False
+        except MapdlExitedError:
+            return True
+
+    if START_INSTANCE and is_exited(mapdl):
+        # Backing up the current local configuration
+        local_ = mapdl._local
+
+        # Relaunching MAPDL
+        mapdl_ = launch_mapdl(
+            port=mapdl._port,
+            override=True,
+            run_location=mapdl._path,
+            cleanup_on_exit=mapdl._cleanup,
+        )
+
+        # Cloning the new mapdl instance channel into the old one.
+        mapdl._channel = mapdl_._channel
+        mapdl._multi_connect(timeout=mapdl._timeout)
+
+        # Restoring the local configuration
+        mapdl._local = local_
+
+    mapdl.gopr()
+    yield  # this is where the testing happens
+
+    # Teardown : fill with any logic you want
+    if mapdl.is_local and mapdl._exited:
+        # The test exited MAPDL, so it is fail.
+        assert False  # this will fail the test
+
+
+@pytest.fixture(autouse=True, scope="function")
+def run_before_and_after_tests_2(request, mapdl):
+    """Make sure we are not changing these properties in tests"""
+    prev = mapdl.is_local
+
+    yield
+
+    assert prev == mapdl.is_local
+
+
 @pytest.fixture(scope="session")
 def mapdl_console(request):
     if os.name != "posix":
@@ -248,7 +419,7 @@ def mapdl_console(request):
         )
     ansys_base_paths = get_available_ansys_installations()
 
-    # find a valid version of corba
+    # find a valid version of console
     console_path = None
     for version in ansys_base_paths:
         version = abs(version)
@@ -280,41 +451,6 @@ def mapdl_console(request):
 
 
 @pytest.fixture(scope="session")
-def mapdl_corba(request):
-    ansys_base_paths = get_available_ansys_installations()
-
-    # find a valid version of corba
-    corba_path = None
-    for version in ansys_base_paths:
-        version = abs(version)
-        if version >= 170 and version < 202:
-            corba_path = find_ansys(str(version))[0]
-
-    if corba_path is None:
-        raise MapdlRuntimeError(
-            '"-corba" testing option unavailable.'
-            "No local CORBA compatible MAPDL installation found.  "
-            "Valid versions are ANSYS 17.0 up to 2020R2."
-        )
-
-    mapdl = launch_mapdl(corba_path)
-    from ansys.mapdl.core.mapdl_corba import MapdlCorba
-
-    assert isinstance(mapdl, MapdlCorba)
-    mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
-
-    # using yield rather than return here to be able to test exit
-    yield mapdl
-
-    # verify mapdl exits
-    mapdl.exit()
-    assert mapdl._exited
-    assert "MAPDL exited" in str(mapdl)
-    with pytest.raises(MapdlExitedError):
-        mapdl.prep7()
-
-
-@pytest.fixture(scope="session", params=LOCAL)
 def mapdl(request, tmpdir_factory):
     # don't use the default run location as tests run multiple unit testings
     run_path = str(tmpdir_factory.mktemp("ansys"))
@@ -322,29 +458,21 @@ def mapdl(request, tmpdir_factory):
     # don't allow mapdl to exit upon collection unless mapdl is local
     cleanup = START_INSTANCE
 
-    if request.param:
-        # usage of a just closed channel on same port causes connectivity issues
-        port = MAPDL_DEFAULT_PORT + 10
-    else:
-        port = MAPDL_DEFAULT_PORT
-
     mapdl = launch_mapdl(
-        EXEC_FILE,
         override=True,
         run_location=run_path,
         cleanup_on_exit=cleanup,
         license_server_check=False,
-        additional_switches="-smp",
         start_timeout=50,
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
+    MAPDL_VERSION = mapdl.version  # Caching version
 
-    if HAS_GRPC:
-        mapdl._local = request.param  # CI: override for testing
+    if ON_CI:
+        mapdl._local = ON_LOCAL  # CI: override for testing
 
-    if mapdl._local:
+    if mapdl.is_local:
         assert Path(mapdl.directory) == Path(run_path)
-        assert mapdl._distributed
 
     # using yield rather than return here to be able to test exit
     yield mapdl
@@ -354,7 +482,7 @@ def mapdl(request, tmpdir_factory):
     ###########################################################################
     if START_INSTANCE:
         mapdl._local = True
-        mapdl.exit()
+        mapdl.exit(save=True, force=True)
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
 
@@ -368,6 +496,12 @@ def mapdl(request, tmpdir_factory):
                 mapdl._send_command("/PREP7")
             with pytest.raises(MapdlExitedError):
                 mapdl._send_command_stream("/PREP7")
+
+
+SpacedPaths = namedtuple(
+    "SpacedPaths",
+    ["path_without_spaces", "path_with_spaces", "path_with_single_quote"],
+)
 
 
 @pytest.fixture
@@ -389,7 +523,7 @@ def cleared(mapdl):
 
 
 @pytest.fixture(scope="function")
-def cube_solve(cleared, mapdl):
+def cube_geom_and_mesh(cleared, mapdl):
     # setup the full file
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.et(1, 186)
@@ -401,6 +535,9 @@ def cube_solve(cleared, mapdl):
     mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
     mapdl.mp("NUXY", 1, 0.3)  # Poisson's Ratio
 
+
+@pytest.fixture(scope="function")
+def cube_solve(cleared, mapdl, cube_geom_and_mesh):
     # solve first 10 non-trivial modes
     out = mapdl.modal_analysis(nmode=10, freqb=1)
 
@@ -561,11 +698,12 @@ def coupled_example(mapdl, cleared):
     mapdl_code = mapdl_code.replace(
         "SOLVE", "SOLVE\n/COM Ending script after first simulation\n/EOF"
     )
+    mapdl.finish()
     mapdl.input_strings(mapdl_code)
 
 
 @pytest.fixture(scope="function")
-def contact_solve(mapdl):
+def contact_geom_and_mesh(mapdl):
     mapdl.mute = True
     mapdl.finish()
     mapdl.clear()
@@ -586,7 +724,10 @@ def contact_solve(mapdl):
     fwgt = 0.95  # weight factor for distribution of heat b/w tool
     # & workpiece
     fplw = 0.8  # Fraction of plastic work converted to heat
+
+    # this is also modified in the dependent fixture
     uz1 = t / 4000  # Depth of penetration,m
+
     # ==========================================================
     # * Material properties
     # ==========================================================
@@ -669,7 +810,6 @@ def contact_solve(mapdl):
     mapdl.vsweep("all")
     mapdl.allsel("all")
 
-    # mapdl.eplot()
     # ==========================================================
     # * Contact Pairs
     # ==========================================================
@@ -711,12 +851,10 @@ def contact_solve(mapdl):
     mapdl.mat(1)
     mapdl.asel("s", "", "", 5)
     mapdl.nsla("", 1)
-    # mapdl.nplot()
     mapdl.cm("tn.cnt", "node")  # Creating component on weld side of plate1
 
     mapdl.asel("s", "", "", 12)
     mapdl.nsla("", 1)
-    # mapdl.nplot()
     mapdl.cm("tn.tgt", "node")  # Creating component on weld side of plate2
 
     mapdl.allsel("all")
@@ -728,7 +866,6 @@ def contact_solve(mapdl):
     # for welding, 'C
     mapdl.real(6)
     mapdl.cmsel("s", "tn.cnt")
-    # mapdl.nplot()
     mapdl.esurf()
     mapdl.type(7)
     mapdl.real(6)
@@ -842,11 +979,18 @@ def contact_solve(mapdl):
     mapdl.d(1, "all")
     mapdl.ddele(1, "temp")
     mapdl.allsel("all")
+    mapdl.mute = False
 
-    # mapdl.eplot()
+
+@pytest.fixture(scope="function")
+def contact_solve(mapdl, contact_geom_and_mesh):
     # ==========================================================
     # * Solution
     # ==========================================================
+    # from precedent fixture
+    uz1 = 3.18e-03 / 4000
+
+    mapdl.mute = False
     mapdl.run("/solu")
     mapdl.antype(4)  # Transient analysis
     mapdl.lnsrch("on")
@@ -898,7 +1042,6 @@ def cuadratic_beam_problem(mapdl):
 
     mapdl.mp("EX", 1, 30e6)
     mapdl.mp("PRXY", 1, 0.3)
-    print(mapdl.mplist())
 
     w_f = 1.048394965
     w_w = 0.6856481
@@ -913,17 +1056,8 @@ def cuadratic_beam_problem(mapdl):
     # Define one node for the orientation of the beam cross-section.
     orient_node = mapdl.n(6, 60, 1)
 
-    # Print the list of the created nodes.
-    print(mapdl.nlist())
-
     for elem_num in range(1, 5):
         mapdl.e(elem_num, elem_num + 1, orient_node)
-
-    # Print the list of the created elements.
-    print(mapdl.elist())
-
-    # Display elements with their nodes numbers.
-    mapdl.eplot(show_node_numbering=True, line_width=5, cpos="xy", font_size=40)
 
     # BC for the beams seats
     mapdl.d(2, "UX", lab2="UY")

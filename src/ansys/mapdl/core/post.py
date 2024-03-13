@@ -1,8 +1,31 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Post-processing module using MAPDL interface"""
 import weakref
 
 import numpy as np
 
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import supress_logging
 from ansys.mapdl.core.plotting import general_plotter
 
@@ -99,9 +122,9 @@ class PostProcessing:
 
     def __init__(self, mapdl):
         """Initialize postprocessing instance"""
-        from ansys.mapdl.core.mapdl import _MapdlCore
+        from ansys.mapdl.core.mapdl import MapdlBase
 
-        if not isinstance(mapdl, _MapdlCore):  # pragma: no cover
+        if not isinstance(mapdl, MapdlBase):  # pragma: no cover
             raise TypeError("Must be initialized using Mapdl instance")
         self._mapdl_weakref = weakref.ref(mapdl)
         self._set_loaded = False
@@ -113,11 +136,11 @@ class PostProcessing:
 
     @property
     def _log(self):
-        """alias for mapdl log"""
+        """Alias for mapdl log"""
         return self._mapdl._log
 
     def _set_log_level(self, level):
-        """alias for mapdl._set_log_level"""
+        """Alias for mapdl._set_log_level"""
         return self._mapdl._set_log_level(level)
 
     @supress_logging
@@ -350,7 +373,7 @@ class PostProcessing:
         Returns
         -------
         numpy.ndarray
-            Numpy array containing the requested element values for ta
+            Numpy array containing the requested element values for a
             given item and component.
 
         Notes
@@ -631,27 +654,63 @@ class PostProcessing:
 
         surf = self._mapdl.mesh._surf
 
-        # as ``disp`` returns the result for all nodes, we need all node numbers
+        # as ``disp`` returns the result for all nodes/elems, we need all node/elem numbers
         # and to index to the output node numbers
         if hasattr(self._mapdl.mesh, "enum_all"):
-            enum = self._mapdl.mesh.enum
+            enum = self._mapdl.mesh.enum_all
         else:
             enum = self._all_enum
 
-        # it's possible that there are duplicated element numbers,
-        # therefore we need to get the unique values and a reverse index
+        #######################################################################
+        # Bool operations
+        # ===============
+        # I'm going to explain this clearly because it can be confusing for the
+        # future developers (me).
+        # This explanation is based in scalars (`element_values`) NOT having the
+        # full elements (selected and not selected) size.
+        #
+        # First, it's possible that there are duplicated element numbers,
+        # in the surf object returned by Pyvista.
+        # Therefore we need to get the unique values and a reverse index, to
+        # later convert the MAPDL values to Pyvista values.
         uni, ridx = np.unique(surf["ansys_elem_num"], return_inverse=True)
-        mask = np.isin(enum, uni, assume_unique=True)
-
-        if scalars.size != mask.size:
-            scalars = scalars[self.selected_elements]
-        scalars = scalars[mask][ridx]
+        # which means that, uni is the id of mapdl elements in the polydata
+        # object. These elements does not need to be in order, and there can be
+        # duplicated!
+        # Hence:
+        # uni[ridx] = surf["ansys_elem_num"]
+        #
+        # Let's notice that:
+        # * enum[self.selected_elements] is mapdl selected elements ids in MAPDL notation.
+        #
+        # Theoretical approach
+        # --------------------
+        # The theoretical approach will be using an intermediate array of the
+        # size of the MAPDL total number of elements (we do not care about selected).
+        #
+        values = np.zeros(enum.shape)
+        #
+        # Then assign the MAPDL values for the selected element (scalars)
+        #
+        values[self.selected_elements] = scalars
+        #
+        # Because values are in order, but with python notation, then we can do:
+        #
+        surf_values = values[
+            uni - 1
+        ]  # -1 to set MAPDL element indexing to python indexing
+        #
+        # Then to account for the original Pyvista object:
+        #
+        surf_values = surf_values[ridx]
+        #
+        #######################################################################
 
         meshes = [
             {
                 "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
                 "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
-                "scalars": scalars,
+                "scalars": surf_values,
             }
         ]
 
@@ -669,27 +728,27 @@ class PostProcessing:
     @property
     @supress_logging
     def _all_nnum(self):
-        self._mapdl.cm("__TMP_NODE__", "NODE")
-        self._mapdl.allsel()
-        nnum = self._mapdl.get_array("NODE", item1="NLIST")
-
-        # rerun if encountered weird edge case of negative first index.
-        if nnum[0] == -1:
+        with self._mapdl.save_selection:
+            self._mapdl.allsel()
             nnum = self._mapdl.get_array("NODE", item1="NLIST")
-        self._mapdl.cmsel("S", "__TMP_NODE__", "NODE")
+
+            # rerun if encountered weird edge case of negative first index.
+            if nnum[0] == -1:
+                nnum = self._mapdl.get_array("NODE", item1="NLIST")
+
         return nnum.astype(np.int32, copy=False)
 
     @property
     @supress_logging
     def _all_enum(self):
-        self._mapdl.cm("__TMP_ELEM__", "ELEM")
-        self._mapdl.allsel()
-        enum = self._mapdl.get_array("ELEM", item1="ELIST")
-
-        # rerun if encountered weird edge case of negative first index.
-        if enum[0] == -1:
+        with self._mapdl.save_selection:
+            self._mapdl.allsel()
             enum = self._mapdl.get_array("ELEM", item1="ELIST")
-        self._mapdl.cmsel("S", "__TMP_ELEM__", "ELEM")
+
+            # rerun if encountered weird edge case of negative first index.
+            if enum[0] == -1:
+                enum = self._mapdl.get_array("ELEM", item1="ELIST")
+
         return enum.astype(np.int32, copy=False)
 
     @property
@@ -825,8 +884,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -950,8 +1009,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -1010,13 +1069,6 @@ class PostProcessing:
         numpy.ndarray
             Numpy array with nodal X, Y, Z, or all structural rotations.
 
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the
-        :attr:`selected_nodes <PostProcessing.selected_nodes>` mask to
-        get the currently selected nodes.
-
         Examples
         --------
         Nodal rotation in all dimensions for current result.
@@ -1073,8 +1125,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -1346,6 +1398,7 @@ class PostProcessing:
         **kwargs : dict, optional
             Keyword arguments passed to :func:`general_plotter
             <ansys.mapdl.core.plotting.general_plotter>`
+
         Returns
         -------
         pyvista.plotting.renderer.CameraPosition
@@ -1530,8 +1583,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -1619,8 +1672,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -1677,12 +1730,6 @@ class PostProcessing:
             Numpy array containing the nodal component stress for the
             selected ``component``.
 
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
-
         Examples
         --------
         Nodal stress in the X direction for the first result
@@ -1728,8 +1775,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -1772,12 +1819,6 @@ class PostProcessing:
         -------
         numpy.ndarray
             Numpy array containing the nodal principal stress.
-
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
 
         Examples
         --------
@@ -1825,8 +1866,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -1902,8 +1943,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -1998,8 +2039,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2055,12 +2096,6 @@ class PostProcessing:
         numpy.ndarray
             Array containing the total nodal component strain.
 
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
-
         Examples
         --------
         Total component strain in the X direction for the first result
@@ -2111,8 +2146,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2159,12 +2194,6 @@ class PostProcessing:
         -------
         numpy.ndarray
             Numpy array total nodal principal total strain.
-
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
 
         Examples
         --------
@@ -2216,8 +2245,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2297,8 +2326,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2393,8 +2422,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2445,12 +2474,6 @@ class PostProcessing:
             Component to retrieve.  Must be ``'X'``, ``'Y'``, ``'Z'``,
             ``'XY'``, ``'YZ'``, or ``'XZ'``.
 
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
-
         Examples
         --------
         Elastic component strain in the X direction for the first result
@@ -2499,8 +2522,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2545,12 +2568,6 @@ class PostProcessing:
         -------
         numpy.ndarray
             Numpy array of nodal elastic principal elastic strain.
-
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
 
         Examples
         --------
@@ -2601,8 +2618,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2686,8 +2703,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2781,8 +2798,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2838,12 +2855,6 @@ class PostProcessing:
         numpy.ndarray
             Numpy array of the plastic nodal component strain.
 
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
-
         Examples
         --------
         Plastic component strain in the X direction for the first result.
@@ -2892,8 +2903,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -2933,12 +2944,6 @@ class PostProcessing:
         component : str, optional
             Component to retrieve.  Must be ``'1'``, ``'2'``, or
             ``'3'``
-
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
 
         Examples
         --------
@@ -2988,8 +2993,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -3074,8 +3079,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -3176,8 +3181,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -3234,12 +3239,6 @@ class PostProcessing:
             Numpy array containing the thermal nodal component strain
             for the specified ``component``.
 
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
-
         Examples
         --------
         Thermal component strain in the X direction for the first result.
@@ -3288,8 +3287,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -3335,12 +3334,6 @@ class PostProcessing:
         numpy.ndarray
             Numpy array containing the nodal thermal principal thermal
             strain for the specified ``component``.
-
-        Notes
-        -----
-        This command always returns all nodal rotations regardless of
-        if the nodes are selected or not.  Use the ``selected_nodes``
-        mask to get the currently selected nodes.
 
         Examples
         --------
@@ -3390,8 +3383,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -3476,8 +3469,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -3578,8 +3571,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes
@@ -3670,8 +3663,8 @@ class PostProcessing:
             Only returned when ``return_cpos`` is ``True``.
 
         pyvista.Plotter
-            Pyvista Plotter. In this case, the plotter is shown yet, so
-            you can still edit it using Pyvista Plotter methods.
+            PyVista Plotter. In this case, the plotter is shown yet, so
+            you can still edit it using PyVista Plotter methods.
             Only when ``return_plotter`` kwarg is ``True``.
 
         Notes

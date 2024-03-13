@@ -1,11 +1,32 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import os
 import weakref
 
 import numpy as np
 
+from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
-
-from .mapdl_grpc import MapdlGrpc
 
 
 class KrylovSolver:
@@ -46,9 +67,19 @@ class KrylovSolver:
 
     """
 
-    def __init__(self, mapdl):
-        if not isinstance(mapdl, MapdlGrpc):  # pragma: no cover
-            raise TypeError("``mapdl`` must be a MapdlGrpc instance")
+    def __init__(self, mapdl: Mapdl):
+        """Krylov analysis
+
+        Abstract mapdl krylov class.  Created from an
+        :class:`Mapdl instance <ansys.mapdl.core.Mapdl>` instance.
+
+        Parameters
+        ----------
+        mapdl : ansys.mapdl.core.Mapdl
+            Mapdl instance which this class references to.
+        """
+        if not isinstance(mapdl, Mapdl):  # pragma: no cover
+            raise TypeError("``mapdl`` must be an Mapdl class instance")
         self._mapdl_weakref = weakref.ref(mapdl)
         self.mm = self._mapdl.math
         self.jobname = self._mapdl.jobname
@@ -77,7 +108,7 @@ class KrylovSolver:
             self.full_file = full_file
 
         # Checking if the full file exists.
-        if self._mapdl._local:  # pragma: no cover
+        if self._mapdl._local:
             if not os.path.exists(os.path.join(current_dir, self.full_file)):
                 raise FileNotFoundError(
                     f"The file '{self.full_file}' could not be found in local directory '{current_dir}'."
@@ -244,7 +275,7 @@ class KrylovSolver:
 
         Returns
         -------
-        AnsMat
+        AnsMath
             Krylov subspace.
 
         Notes
@@ -396,7 +427,7 @@ class KrylovSolver:
 
         Returns
         -------
-        AnsMat
+        AnsMath
             Reduced solution over the frequency range.
 
         Notes

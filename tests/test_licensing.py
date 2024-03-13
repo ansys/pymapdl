@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Test PyMAPDL license.py module."""
 
 import os
@@ -7,9 +29,9 @@ import types
 import pytest
 
 from ansys.mapdl.core import errors, launch_mapdl, licensing
-from ansys.mapdl.core.launcher import check_valid_ansys, get_start_instance
 from ansys.mapdl.core.misc import threaded
-from conftest import LOCAL as IS_LOCAL
+from conftest import ON_LOCAL as IS_LOCAL
+from conftest import QUICK_LAUNCH_SWITCHES, requires
 
 try:
     LIC_INSTALLED = os.path.isfile(licensing.get_ansys_license_utility_path())
@@ -19,11 +41,6 @@ except:
 skip_no_lic_bin = pytest.mark.skipif(
     not (LIC_INSTALLED and IS_LOCAL),
     reason="Requires being in 'local' mode and have license utilities binaries.",
-)
-
-skip_launch_mapdl = pytest.mark.skipif(
-    not get_start_instance() and check_valid_ansys(),
-    reason="Must be able to launch MAPDL locally",
 )
 
 
@@ -146,7 +163,7 @@ def test_get_ansys_license_debug_file_tail(tmpdir, license_checker):
     assert "CHECKOUT" in line
 
 
-@skip_launch_mapdl
+@requires("local")
 @skip_no_lic_bin
 def test_check_license_file_fail(license_checker):
     with pytest.raises(TimeoutError):
@@ -163,7 +180,7 @@ def test_license_checker(tmpdir, license_checker):
     assert license_checker.check()
 
 
-@skip_launch_mapdl
+@requires("local")
 @skip_no_lic_bin
 def test_check_license_file(tmpdir):
     timeout = 15
@@ -172,7 +189,11 @@ def test_check_license_file(tmpdir):
     checker.start(checkout_license=False)
 
     try:
-        mapdl = launch_mapdl(license_server_check=False, start_timeout=timeout)
+        mapdl = launch_mapdl(
+            license_server_check=False,
+            start_timeout=timeout,
+            additional_switches=QUICK_LAUNCH_SWITCHES,
+        )
         assert mapdl._local
         mapdl.exit()
     except IOError:  # MAPDL never started
@@ -239,6 +260,7 @@ def test_check_license_file_exception(license_checker):
         license_checker._check_license_file(0.01)
 
 
+@requires("ansys-tools-path")
 def test_license_wait():
     license_checker = licensing.LicenseChecker()
     assert not license_checker._lic_file_thread
@@ -273,6 +295,7 @@ def test_license_check():
         license_checker.check()
 
 
+@requires("ansys-tools-path")
 def test_stop_license_checker():
     license_checker = licensing.LicenseChecker()
 
@@ -285,6 +308,7 @@ def test_stop_license_checker():
     assert not license_checker._lic_file_thread.is_alive()
 
 
+@requires("ansys-tools-path")
 def test_is_connected_license_checker():
     license_checker = licensing.LicenseChecker()
 

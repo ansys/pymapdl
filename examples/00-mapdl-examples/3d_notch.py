@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """
 .. _ref_3d_plane_stress_concentration:
 
@@ -5,9 +27,10 @@
 ----------------------------------------------------
 
 This tutorial is the 3D corollary to the 2D plane example
-:ref:`ref_plane_stress_concentration`, but This example verifies the
+:ref:`ref_plane_stress_concentration`.
+However, this example verifies the
 stress concentration factor :math:`K-t` when modeling opposite single
-notches in a finite width thin plate
+notches in a finite width thin plate.
 
 First, start MAPDL as a service and disable all but error messages.
 """
@@ -245,7 +268,7 @@ max_stress = np.nanmax(von_mises)
 # We use nanmean here because mid-side nodes have no stress
 mask = result.mesh.nodes[:, 0] == length
 far_field_stress = np.nanmean(von_mises[mask])
-print("Far field von mises stress: %e" % far_field_stress)
+print("Far field von Mises stress: %e" % far_field_stress)
 # Which almost exactly equals the analytical value of 10000000.0 Pa
 
 

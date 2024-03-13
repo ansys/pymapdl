@@ -1,13 +1,14 @@
 
 .. _ref_parameters:
 
-*********************************
 Setting and retrieving parameters
-*********************************
-APDL parameters can be retrieved from and instance of :class:`Mapdl
-<ansys.mapdl.core.mapdl._MapdlCore>` using the :attr:`Mapdl.parameters
-<ansys.mapdl.core.Mapdl.parameters>`.  For example, if you want to use
-MAPDL's :func:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` method to
+=================================
+
+MAPDL parameters can be retrieved from an instance of 
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>`
+using the :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>`.
+For example, if you want to use MAPDL's
+:func:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` method to
 populate a parameter, you can then access the parameter with code:
 
 .. code:: pycon
@@ -46,15 +47,16 @@ ROUT``, you can access it with this code:
 For a full list of the methods and attributes available to the
 ``Parameters`` class, see :ref:`ref_parameters_api`.
 
-For additional information on PyMAPDL array limitations, see :ref:`ref_numpy_arrays_in_mapdl`.
+For additional information on PyMAPDL array limitations, see
+:ref:`Issues when importing and exporting numpy arrays in MAPDL <ref_issues_np_mapdl>`.
 
 .. _ref_special_named_param:
 
 Specially named parameters
-==========================
+--------------------------
 
 Parameters with leading underscores
------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Parameters starting with an underscore (``'_'``) are reserved parameters
 for MAPDL macros and routines. Their use is discouraged, and in PyMAPDL
@@ -90,7 +92,7 @@ to ``True``:
 
 
 Parameters with trailing underscores
-------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Parameters ending with an underscore are recommended for user routines
 and macros. You can set this type of parameter in PyMAPDL, but by default,
@@ -115,7 +117,7 @@ is set to ``True``:
 
 
 Parameters with leading and trailing underscores
-------------------------------------------------
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Parameters with both leading and trailing underscores are a special type. These parameters
 **CANNOT** be seen in the :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>` attribute

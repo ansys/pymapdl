@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Contains the ansXpl class."""
 import json
 import pathlib
@@ -6,7 +28,6 @@ import string
 import weakref
 
 from ansys.api.mapdl.v0 import mapdl_pb2
-from ansys.math.core.math import AnsMath
 import numpy as np
 
 from .common_grpc import ANSYS_VALUE_TYPE
@@ -361,9 +382,8 @@ class ansXpl:
         self._check_ignored(response)
         return response
 
-    def extract(self, recordname, sets="ALL", asarray=False):  # pragma: no cover
-        """
-        Import a Matrix/Vector from a MAPDL result file.
+    def extract(self, recordname, sets="ALL", asarray=False):
+        """Import a Matrix/Vector from a MAPDL result file.
 
         At the moment, this only supports reading the displacement vectors from
         a result file.
@@ -378,14 +398,14 @@ class ansXpl:
             Number of sets. Can be ``"ALL"`` or the number of sets to load.
 
         asarray : bool, optional
-            Return a :class:`numpy.ndarray` rather than a :class:`AnsMat
-            <ansy.math.core.math.AnsMat>`. Default ``False``.
+            Return a :class:`numpy.ndarray` rather than a :class:`AnsMath
+            <ansy.math.core.math.AnsMath>`. Default ``False``.
 
         Returns
         -------
-        numpy.ndarray or ansys.math.core.math.AnsMat
-            A :class:`numpy.ndarray` or :class:`AnsMat
-            <ansys.math.core.math.AnsMat>` of the displacement vectors,
+        numpy.ndarray or ansys.math.core.math.AnsMath
+            A :class:`numpy.ndarray` or :class:`AnsMath
+            <ansys.math.core.math.AnsMath>` of the displacement vectors,
             depending on the value of ``asarray``.
 
         Notes
@@ -421,6 +441,8 @@ class ansXpl:
                  1.20642736e-02,  2.58299321e-11,  9.14504940e-04]])
 
         """
+        from ansys.math.core.math import AnsMath
+
         if recordname.upper() != "NSL":
             raise ValueError("Currently, the only supported recordname is 'NSL'")
 
@@ -456,12 +478,12 @@ class ansXpl:
 
         Returns
         -------
-        ansys.mapdl.AnsMat or ansys.mapdl.AnsVec
+        ansys.mapdl.AnsMath or ansys.mapdl.AnsVec
             A handle to the APDLMath object.
 
         asarray : bool, optional
-            Return a :class:`numpy.ndarray` rather than a :class:`AnsMat
-            <ansys.math.core.math.AnsMat>`. Default ``False``.
+            Return a :class:`numpy.ndarray` rather than a :class:`AnsMath
+            <ansys.math.core.math.AnsMath>`. Default ``False``.
 
         Examples
         --------
@@ -473,13 +495,15 @@ class ansXpl:
         array([ 4,  7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43,
                46, 49, 52, 55, 58,  1], dtype=int32)
         """
+        from ansys.math.core.math import AnsMath
+
         rand_name = id_generator()
         response = self._mapdl.run(f"*XPL,READ,{recordname},{rand_name}")
         self._check_ignored(response)
         data_info = self._mapdl._data_info(rand_name)
 
         dtype = ANSYS_VALUE_TYPE[data_info.stype]
-        if dtype is None:  # pragma: no cover
+        if dtype is None:
             raise ValueError("Unknown MAPDL data type")
 
         # return either vector or matrix type

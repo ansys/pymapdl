@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Module for miscellaneous functions and methods"""
 from enum import Enum
 from functools import wraps
@@ -10,13 +32,19 @@ import random
 import re
 import socket
 import string
-import sys
 import tempfile
 from threading import Thread
+from typing import Union
 from warnings import warn
 import weakref
 
-from ansys.tools.path import get_available_ansys_installations
+try:
+    from ansys.tools.path import get_available_ansys_installations
+
+    _HAS_ATP = True
+except ModuleNotFoundError:
+    _HAS_ATP = False
+
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
@@ -112,13 +140,17 @@ class Plain_Report:
         if os.name == "posix":
             self.core.extend(["pexpect"])
 
-        if self.optional is not None and sys.version_info[1] < 9:
-            self.optional.append("ansys_corba")
-
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.
         if self.kwargs.get("gpu", False) and _HAS_PYVISTA:
-            from pyvista.utilities.errors import GPUInfo
+            from pyvista import PyVistaDeprecationWarning
+
+            try:
+                from pyvista.utilities.errors import (
+                    GPUInfo,  # deprecated in pyvista 0.40.0
+                )
+            except (PyVistaDeprecationWarning, ImportError):
+                from pyvista.report import GPUInfo
 
             try:
                 self.kwargs["extra_meta"] = [(t[1], t[0]) for t in GPUInfo().get_info()]
@@ -190,14 +222,22 @@ class Plain_Report:
         # List installed Ansys
         lines = ["", "Ansys Environment Report", "-" * 79]
         lines = ["\n", "Ansys Installation", "******************"]
-        mapdl_install = get_available_ansys_installations()
-        if not mapdl_install:
-            lines.append("Unable to locate any Ansys installations")
-        else:  # pragma: no cover
-            lines.append("Version   Location")
-            lines.append("------------------")
-            for key in sorted(mapdl_install.keys()):
-                lines.append(f"{abs(key)}       {mapdl_install[key]}")
+        if _HAS_ATP:
+            mapdl_install = get_available_ansys_installations()
+
+            if not mapdl_install:
+                lines.append("Unable to locate any Ansys installations")
+            else:
+                lines.append("Version   Location")
+                lines.append("------------------")
+                for key in sorted(mapdl_install.keys()):
+                    lines.append(f"{abs(key)}       {mapdl_install[key]}")
+        else:
+            mapdl_install = None
+            lines.append(
+                "Unable to locate any Ansys installations because 'ansys-tools-path is not installed."
+            )
+
         install_info = "\n".join(lines)
 
         env_info_lines = [
@@ -365,7 +405,7 @@ def supress_logging(func):
     return wrapper
 
 
-def run_as_prep7(func):  # Pragma: no cover
+def run_as_prep7(func):
     """Run a MAPDL method at PREP7 and always revert to the prior processor"""
 
     @wraps(func)
@@ -407,7 +447,9 @@ def threaded_daemon(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        name = kwargs.get("name", f"Threaded (with Daemon) `{func.__name__}` function")
+        name = kwargs.pop(
+            "thread_name", f"Threaded (with Daemon) `{func.__name__}` function"
+        )
         thread = Thread(target=func, name=name, args=args, kwargs=kwargs)
         thread.daemon = True
         thread.start()
@@ -460,29 +502,37 @@ def last_created(filenames):
     return filenames[idx]
 
 
-def create_temp_dir(tmpdir=None):
+def create_temp_dir(tmpdir=None, name=None):
     """Create a new unique directory at a given temporary directory"""
     if tmpdir is None:
         tmpdir = tempfile.gettempdir()
     elif not os.path.isdir(tmpdir):
         os.makedirs(tmpdir)
 
+    if not name:
+        random_name = True
+        letters_ = string.ascii_lowercase.replace("n", "")
+        name = random_string(10, letters_)
+    else:
+        random_name = False
+
     # running into a rare issue with MAPDL on Windows with "\n" being
     # treated literally.
-    letters = string.ascii_lowercase.replace("n", "")
-    path = os.path.join(tmpdir, random_string(10, letters))
+    path = os.path.join(tmpdir, name)
 
-    # in the *rare* case of a duplicate path
-    while os.path.isdir(path):
-        path = os.path.join(tempfile.gettempdir(), random_string(10, letters))
+    if random_name:
+        # in the *rare* case of a duplicate path
+        while os.path.isdir(path):
+            path = os.path.join(tempfile.gettempdir(), name)
 
-    try:
-        os.mkdir(path)
-    except:
-        raise MapdlRuntimeError(
-            "Unable to create temporary working "
-            "directory %s\n" % path + "Please specify run_location="
-        )
+    if not os.path.exists(path):
+        try:
+            os.mkdir(path)
+        except:
+            raise MapdlRuntimeError(
+                "Unable to create temporary working "
+                f"directory {path}\nPlease specify 'run_location' argument"
+            )
 
     return path
 
@@ -553,7 +603,7 @@ def load_file(mapdl, fname, priority_mapdl_file=None):
             f"nor in the MAPDL working directory ('{mapdl.directory}')."
         )
 
-    elif os.path.exists(fname) and base_fname in mapdl.list_files():  # pragma: no cover
+    elif os.path.exists(fname) and base_fname in mapdl.list_files():
         if priority_mapdl_file is None:
             warn(
                 f"The file '{base_fname}' is present in both, the python working directory ('{os.getcwd()}') "
@@ -570,9 +620,7 @@ def load_file(mapdl, fname, priority_mapdl_file=None):
         mapdl._log.debug("File is in the Python working directory, uploading.")
         mapdl.upload(fname)
 
-    elif (
-        not os.path.exists(fname) and base_fname in mapdl.list_files()
-    ):  # pragma: no cover
+    elif not os.path.exists(fname) and base_fname in mapdl.list_files():
         mapdl._log.debug("File is already in the MAPDL working directory")
 
     # Simplifying name for MAPDL reads it.
@@ -596,36 +644,6 @@ def check_valid_port(port, lower_bound=1000, high_bound=60000):
         raise ValueError(
             f"'port' values should be between {lower_bound} and {high_bound}."
         )
-
-
-def check_valid_start_instance(start_instance):
-    """
-    Checks if the value obtained from the environmental variable is valid.
-
-    Parameters
-    ----------
-    start_instance : str
-        Value obtained from the corresponding environment variable.
-
-    Returns
-    -------
-    bool
-        Returns ``True`` if ``start_instance`` is ``True`` or ``"True"``,
-        ``False`` if otherwise.
-
-    """
-    if not isinstance(start_instance, (str, bool)):
-        raise ValueError("The value 'start_instance' should be an string or a boolean.")
-
-    if isinstance(start_instance, bool):
-        return start_instance
-
-    if start_instance.lower() not in ["true", "false"]:
-        raise ValueError(
-            f"The value 'start_instance' should be equal to 'True' or 'False' (case insensitive)."
-        )
-
-    return start_instance.lower() == "true"
 
 
 def update_information_first(update=False):
@@ -669,13 +687,13 @@ class Information:
     --------
     >>> mapdl.info
     Product:             Ansys Mechanical Enterprise
-    MAPDL Version:       21.2
-    ansys.mapdl Version: 0.62.dev0
+    MAPDL Version:       24.1
+    ansys.mapdl Version: 0.68.0
 
     >>> print(mapdl)
     Product:             Ansys Mechanical Enterprise
-    MAPDL Version:       21.2
-    ansys.mapdl Version: 0.62.dev0
+    MAPDL Version:       24.1
+    ansys.mapdl Version: 0.68.0
 
     >>> mapdl.info.product
     'Ansys Mechanical Enterprise'
@@ -688,9 +706,9 @@ class Information:
 
     def __init__(self, mapdl):
         """Class Initializer"""
-        from ansys.mapdl.core.mapdl import _MapdlCore  # lazy import to avoid circular
+        from ansys.mapdl.core.mapdl import MapdlBase  # lazy import to avoid circular
 
-        if not isinstance(mapdl, _MapdlCore):  # pragma: no cover
+        if not isinstance(mapdl, MapdlBase):  # pragma: no cover
             raise TypeError("Must be implemented from MAPDL class")
 
         self._mapdl_weakref = weakref.ref(mapdl)
@@ -723,7 +741,7 @@ class Information:
         self._mapdl._log.debug("Information class: Updated")
 
     def __repr__(self):
-        if not self._stats:  # pragma: no cover
+        if not self._stats:
             self._update()
 
         return "\n".join(
@@ -816,7 +834,7 @@ class Information:
 
     @title.setter
     def title(self, title):
-        return self._mapdl.title(title)
+        return self._mapdl.run(f"/TITLE, {title}")
 
     @property
     @update_information_first(True)
@@ -961,9 +979,13 @@ class Information:
 
     def _get_stitles(self):
         return [
-            re.search(f"SUBTITLE  {i}=(.*)", self._get_titles()).groups(1)[0].strip()
-            if re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
-            else ""
+            (
+                re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
+                .groups(1)[0]
+                .strip()
+                if re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
+                else ""
+            )
             for i in range(1, 5)
         ]
 
@@ -1053,7 +1075,7 @@ class Information:
         return self._get_between(init_, end_string)
 
 
-def write_array(filename, array):
+def write_array(filename: Union[str, bytes], array: np.ndarray):
     """
     Write an array to a file.
 
@@ -1067,7 +1089,9 @@ def write_array(filename, array):
     array : numpy.ndarray
         Array.
     """
-    np.savetxt(filename, array, fmt="%20.12f")  # pragma: no cover
+    if isinstance(filename, bytes):
+        filename = filename.decode()
+    np.savetxt(filename, array, fmt="%20.12f")
 
 
 def requires_package(package_name, softerror=False):
@@ -1094,7 +1118,7 @@ def requires_package(package_name, softerror=False):
                     f"To use the method '{function.__name__}', "
                     f"the package '{package_name}' is required.\n"
                     f"Please try to install '{package_name}' with:\n"
-                    f"pip install {package_name.replace('.','-') if 'ansys' in package_name else package_name}"
+                    f"pip install {package_name.replace('.', '-') if 'ansys' in package_name else package_name}"
                 )
 
                 if softerror:
@@ -1119,18 +1143,19 @@ def _get_args_xsel(*args, **kwargs):
     return type_, item, comp, vmin, vmax, vinc, kabs, kwargs
 
 
-def allow_pickable_points(entity="node", plot_function="nplot"):
+def allow_pickable_entities(entity="node", plot_function="nplot"):
     """
     This wrapper opens a window with the NPLOT or KPLOT, and get the selected points (Nodes or kp),
     and feed them as a list to the NSEL.
     """
 
-    def decorator(orig_nsel):
-        @wraps(orig_nsel)
+    def decorator(orig_entity_sel_function):
+        @wraps(orig_entity_sel_function)
         def wrapper(self, *args, **kwargs):
             type_, item, comp, vmin, vmax, vinc, kabs, kwargs = _get_args_xsel(
                 *args, **kwargs
             )
+            from ansys.mapdl.core.plotting import POINT_SIZE
 
             if item == "P" and _HAS_PYVISTA:
                 if type_ not in ["S", "R", "A", "U"]:
@@ -1138,35 +1163,43 @@ def allow_pickable_points(entity="node", plot_function="nplot"):
                         f"The 'item_' argument ('{item}') together with the 'type_' argument ('{type_}') are not allowed."
                     )
 
-                previous_picked_points = set(self._get_selected_(entity))
+                previous_picked_entities = set(self._get_selected_(entity))
 
                 if type_ in ["S", "A"]:  # selecting all the entities
-                    orig_nsel(self, "all")
+                    orig_entity_sel_function(self, "all")
 
                 plotting_function = getattr(self, plot_function)
-                pl = plotting_function(return_plotter=True)
+                if entity == "area":
+                    # To overwrite the quality argument
+                    pl = plotting_function(return_plotter=True, quality=1)
+                elif entity in ["node", "nodes", "kp"]:
+                    pl = plotting_function(return_plotter=True, point_size=POINT_SIZE)
+                else:
+                    pl = plotting_function(return_plotter=True)
 
-                vmin = self._pick_points(
-                    entity, pl, type_, previous_picked_points, **kwargs
+                vmin = self._enable_picking_entities(
+                    entity, pl, type_, previous_picked_entities, **kwargs
                 )
 
                 if len(vmin) == 0:
                     # aborted picking
-                    orig_nsel(self, "S", entity, "", previous_picked_points, **kwargs)
+                    orig_entity_sel_function(
+                        self, "S", entity, "", previous_picked_entities, **kwargs
+                    )
                     return []
 
                 item = entity
                 comp = ""
 
-                # to make return the array of points when using P
+                # to make return the array of entity when using P
                 kwargs["Used_P"] = True
 
-                return orig_nsel(
+                return orig_entity_sel_function(
                     self, "S", item, comp, vmin, vmax, vinc, kabs, **kwargs
                 )
 
             else:
-                return orig_nsel(
+                return orig_entity_sel_function(
                     self, type_, item, comp, vmin, vmax, vinc, kabs, **kwargs
                 )
 
@@ -1175,7 +1208,7 @@ def allow_pickable_points(entity="node", plot_function="nplot"):
     return decorator
 
 
-def wrap_point_SEL(entity="node"):
+def allow_iterables_vmin(entity="node"):
     def decorator(original_sel_func):
         """
         This function wraps a NSEL or KSEL function to allow using a list/tuple/array for vmin argument.
@@ -1227,13 +1260,13 @@ def wrap_point_SEL(entity="node"):
             else:
                 return original_sel_func(
                     self,
-                    type_=type_,
-                    item=item,
-                    comp=comp,
-                    vmin=vmin,
-                    vmax=vmax,
-                    vinc=vinc,
-                    kabs=kabs,
+                    type_,
+                    item,
+                    comp,
+                    vmin,
+                    vmax,
+                    vinc,
+                    kabs,  # ksel, esel, nsel uses kabs, but lsel, asel, vsel uses kswp
                     **kwargs,
                 )
 

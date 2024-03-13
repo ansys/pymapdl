@@ -1,3 +1,26 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class SpecialPurpose:
     def aerocoeff(
         self,
@@ -969,7 +992,9 @@ class SpecialPurpose:
         command = f"SSTATE,{action},{cm_name},{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9}"
         return self.run(command, **kwargs)
 
-    def xfdata(self, enrichmentid="", elemnum="", nodenum="", phi="", **kwargs):
+    def xfdata(
+        self, enrichmentid="", lsm="", elemnum="", nodenum="", phi="", psi="", **kwargs
+    ):
         """Defines a crack in the model by specifying nodal level set values
 
         APDL Command: XFDATA
@@ -993,6 +1018,10 @@ class SpecialPurpose:
         phi
             Signed normal distance of the node from the crack.
 
+        psi
+            Signed normal distance of the node from the crack tip (or crack front).
+            Used only in the singularity- based XFEM method.
+
         Notes
         -----
         Issue the XFDATA command multiple times as needed to specify nodal
@@ -1000,10 +1029,19 @@ class SpecialPurpose:
 
         This command is valid in PREP7 (/PREP7) only.
         """
-        command = f"XFDATA,{enrichmentid},{elemnum},{nodenum},{phi}"
+        command = f"XFDATA,{enrichmentid},{lsm},{elemnum},{nodenum},{phi},{psi}"
         return self.run(command, **kwargs)
 
-    def xfenrich(self, enrichmentid="", compname="", matid="", **kwargs):
+    def xfenrich(
+        self,
+        enrichmentid="",
+        compname="",
+        matid="",
+        method="",
+        radius="",
+        snaptoler="",
+        **kwargs,
+    ):
         """Defines parameters associated with crack propagation using XFEM
 
         APDL Command: XFENRICH
@@ -1025,6 +1063,19 @@ class SpecialPurpose:
             the initial crack. If 0 or not specified, the initial crack is
             assumed to be free of cohesive zone behavior.
 
+        method
+            PHAN -- Use phantom-node-based XFEM (default).
+            SING -- Use singularity-based XFEM.
+
+        radius
+            Radius defining the region around the crack tip encompassing the
+            set of elements to be influenced by the crack-tip singularity effects.
+            Default = 0.0. Used only in singularity-based XFEM.
+
+        snaptoler
+            Snap tolerance to snap the crack tip to the closest crack face along
+            the extension direction. Default = 1.0E-6. Used only in singularity-based XFEM.
+
         Notes
         -----
         If MatID is specified, the cohesive zone behavior is described by the
@@ -1032,7 +1083,7 @@ class SpecialPurpose:
 
         This command is valid in PREP7 (/PREP7) only.
         """
-        command = f"XFENRICH,{enrichmentid},{compname},{matid}"
+        command = f"XFENRICH,{enrichmentid},{compname},{matid}, {method}, {radius}, {snaptoler}"
         return self.run(command, **kwargs)
 
     def xflist(self, enrichmentid="", **kwargs):

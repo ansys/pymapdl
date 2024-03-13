@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from typing import Optional, Union
 
 from ansys.mapdl.core._commands.parse import parse_e
@@ -1241,7 +1263,7 @@ class Elements:
         APDL Command: EPLOT
 
         Notes
-        ------
+        -----
         Produces an element display of the selected elements. In full
         graphics, only those elements faces with all of their corresponding
         nodes selected are plotted. In PowerGraphics, all element faces of the selected
@@ -2074,7 +2096,7 @@ class Elements:
         -----
         The SHSD command creates a shell-solid interface to be used in
         shell-to-solid assemblies, or deletes a previously-created
-        shell-solid interface. “Virtual” shell elements and additional
+        shell-solid interface. "Virtual" shell elements and additional
         CONTA175 elements are created at the contact pair identified by
         RID when Action = CREATE. Set Action = DELETE to remove the
         generated nodes and elements at the contact pair identified by
