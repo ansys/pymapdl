@@ -802,6 +802,10 @@ def get_start_instance(start_instance: bool = True):
     if "PYMAPDL_START_INSTANCE" in os.environ and os.environ["PYMAPDL_START_INSTANCE"]:
         # It should not be empty
         start_instance = os.environ["PYMAPDL_START_INSTANCE"]
+    else:
+        LOG.debug(
+            f"PYMAPDL_START_INSTANCE is unset. Using default value {start_instance}."
+        )
 
     if isinstance(start_instance, str):
         start_instance = start_instance.lower().strip()
@@ -815,9 +819,6 @@ def get_start_instance(start_instance: bool = True):
         return start_instance == "true"
 
     elif isinstance(start_instance, bool):
-        LOG.debug(
-            f"PYMAPDL_START_INSTANCE is unset, using default value {start_instance}"
-        )
         return start_instance
 
     elif start_instance is None:
@@ -1530,8 +1531,8 @@ def launch_mapdl(
     version = _verify_version(version)  # return a int version or none
 
     # Getting "start_instance" using "True" as default.
-    start_instance = get_start_instance(True)
-    LOG.debug("Using 'start_instance' equal to %s", start_instance)
+    start_instance = get_start_instance(start_instance=start_instance)
+    LOG.debug("Using 'start_instance' equal to %s.", start_instance)
 
     if start_instance:
         # special handling when building the gallery outside of CI. This
@@ -1576,6 +1577,23 @@ def launch_mapdl(
         if pymapdl.BUILDING_GALLERY:  # pragma: no cover
             LOG.debug("Building gallery.")
 
+        if _debug_no_launch:
+            return pack_parameters(
+                port,
+                ip,
+                add_env_vars,
+                replace_env_vars,
+                cleanup_on_exit,
+                loglevel,
+                set_no_abort,
+                remove_temp_dir_on_exit,
+                log_apdl,
+                use_vtk,
+                start_parm,
+                start_instance,
+                version,
+            )
+
         mapdl = MapdlGrpc(
             ip=ip,
             port=port,
@@ -1601,7 +1619,7 @@ def launch_mapdl(
 
         LOG.debug("Using default executable.")
         # Load cached path
-        exec_file = get_ansys_path(version=version)
+        exec_file = get_ansys_path(version=version) if not _debug_no_launch else ""
         if exec_file is None:
             raise FileNotFoundError(
                 "Invalid exec_file path or cannot load cached "
@@ -1642,7 +1660,7 @@ def launch_mapdl(
     # verify no lock file and the mode is valid
     check_lock_file(run_location, jobname, override)
 
-    if _HAS_ATP:
+    if _HAS_ATP and not _debug_no_launch:
         mode = check_mode(mode, version_from_path("mapdl", exec_file))
         LOG.debug("Using mode %s", mode)
     else:
@@ -1721,6 +1739,8 @@ def launch_mapdl(
                     log_apdl,
                     use_vtk,
                     start_parm,
+                    start_instance,
+                    version,
                 )
 
             port, actual_run_location, process = launch_grpc(
@@ -2018,6 +2038,8 @@ def pack_parameters(
     log_apdl,
     use_vtk,
     start_parm,
+    start_instance,
+    version,
 ):
     # pack all the arguments in a dict for debugging purposes
     dict_ = {}
@@ -2032,5 +2054,6 @@ def pack_parameters(
     dict_["log_apdl"] = log_apdl
     dict_["use_vtk"] = use_vtk
     dict_["start_parm"] = start_parm
-
+    dict_["start_instance"] = start_instance
+    dict_["version"] = version
     return dict_
