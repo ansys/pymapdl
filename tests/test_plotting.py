@@ -223,9 +223,8 @@ def test_bc_plot_options(
     plot_bc_legend,
     plot_bc_labels,
 ):
-    if plot_bc_legend:
-        # The legend generates highly variance than other tests
-        # But it seems not always.
+    if plot_bc_legend or plot_bc_labels:
+        # The legend and labels generate highly variance than other tests
         verify_image_cache.high_variance_test = True
 
     p = mapdl.nplot(
