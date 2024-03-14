@@ -880,7 +880,9 @@ class MapdlGrpc(MapdlBase):
             mute = self._mute
 
         if self._exited:
-            raise MapdlExitedError
+            raise MapdlExitedError(
+                f"The MAPDL instance has been exited before running the command: {cmd}"
+            )
 
         # don't allow empty commands
         if not cmd.strip():
@@ -1141,6 +1143,7 @@ class MapdlGrpc(MapdlBase):
         processes making this method ineffective for a local instance of MAPDL.
 
         """
+        self._log.debug("Closing processes")
         if self._local:
             # killing server process
             self._kill_server()

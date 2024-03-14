@@ -66,99 +66,12 @@ BCS.extend(BC_F)
 # Allowed entities to plot their boundary conditions
 ALLOWED_TARGETS = ["NODES"]
 
-
 if _HAS_PYVISTA:
     import pyvista as pv
 
-    # Symbols for constrains
-    TEMP = pv.Sphere(center=(0, 0, 0), radius=0.5)
+    from ansys.mapdl.core.plotting_defaults import DefaultSymbol
 
-    UX = pv.Arrow(
-        start=(-1, 0, 0),
-        direction=(1, 0, 0),
-        tip_length=1,
-        tip_radius=0.5,
-        scale=1.0,
-    )
-    UY = pv.Arrow(
-        start=(0, -1, 0),
-        direction=(0, 1, 0),
-        tip_length=1,
-        tip_radius=0.5,
-        scale=1.0,
-    )
-
-    UZ = pv.Arrow(
-        start=(0, 0, -1),
-        direction=(0, 0, 1),
-        tip_length=1,
-        tip_radius=0.5,
-        scale=1.0,
-    )
-
-    FX = pv.Arrow(
-        start=(-1, 0, 0),
-        direction=(1, 0, 0),
-        tip_length=0.5,
-        tip_radius=0.25,
-        scale=1.0,
-    )
-    FY = pv.Arrow(
-        start=(0, -1, 0),
-        direction=(0, 1, 0),
-        tip_length=0.5,
-        tip_radius=0.25,
-        scale=1.0,
-    )
-
-    FZ = pv.Arrow(
-        start=(0, 0, -1),
-        direction=(0, 0, 1),
-        tip_length=0.5,
-        tip_radius=0.25,
-        scale=1.0,
-    )
-
-    def get_VOLT():
-        model_a = pv.Cylinder(
-            center=(0, 0, 0), direction=(1, 0, 0), radius=0.2, height=2
-        ).triangulate()
-
-        model_b = pv.Cylinder(
-            center=(0, 0, 0), direction=(0, 1, 0), radius=0.2, height=2
-        ).triangulate()
-
-        model_c = pv.Cylinder(
-            center=(0, 0, 0), direction=(0, 0, 1), radius=0.2, height=2
-        ).triangulate()
-
-        result = model_a.merge(model_b).triangulate()
-        result = result.merge(model_c)
-
-        result.rotate_z(45.0, inplace=True)
-        result.rotate_vector(
-            vector=(1, -1, 0), angle=-45, point=(0, 0, 0), inplace=True
-        )
-
-        return result
-
-    VOLT = get_VOLT()
-
-    HEAT = pv.Cube(center=(0, 0, 0), x_length=1.0, y_length=1.0, z_length=1.0)
-
-    BC_plot_settings = {
-        "TEMP": {"color": "orange", "glyph": TEMP},
-        "HEAT": {"color": "red", "glyph": HEAT},
-        "UX": {"color": "red", "glyph": UX},
-        "UY": {"color": "green", "glyph": UY},
-        "UZ": {"color": "blue", "glyph": UZ},
-        "VOLT": {"color": "yellow", "glyph": VOLT},
-        "FX": {"color": "red", "glyph": FX},
-        "FY": {"color": "green", "glyph": FY},
-        "FZ": {"color": "blue", "glyph": FZ},
-        "AMPS": {"color": "grey", "glyph": VOLT},
-        "CHRGS": {"color": "grey", "glyph": VOLT},
-    }
+    BC_plot_settings = DefaultSymbol()
 
 
 # Using * to force all the following arguments to be keyword only.
@@ -1080,15 +993,15 @@ def bc_nodes_plotter(
             orient=False,
             scale="scale",
             # tolerance=0.05,
-            geom=BC_plot_settings[each_label]["glyph"],
+            geom=BC_plot_settings(each_label)["glyph"],
         )
         name_ = f"{each_label}"
         pl.add_mesh(
             glyphs,
-            color=BC_plot_settings[each_label]["color"],
+            color=BC_plot_settings(each_label)["color"],
             style="surface",
             # style='wireframe',
-            # edge_color=BC_plot_settings[each_label]['color'],
+            # edge_color=BC_plot_settings(each_label)['color'],
             # line_width=3,
             name=name_,
             label=name_,
