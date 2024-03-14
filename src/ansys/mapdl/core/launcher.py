@@ -1591,6 +1591,7 @@ def launch_mapdl(
                 use_vtk,
                 start_parm,
                 start_instance,
+                version,
             )
 
         mapdl = MapdlGrpc(
@@ -1739,6 +1740,7 @@ def launch_mapdl(
                     use_vtk,
                     start_parm,
                     start_instance,
+                    version,
                 )
 
             port, actual_run_location, process = launch_grpc(
@@ -2037,6 +2039,7 @@ def pack_parameters(
     use_vtk,
     start_parm,
     start_instance,
+    version,
 ):
     # pack all the arguments in a dict for debugging purposes
     dict_ = {}
@@ -2052,5 +2055,5 @@ def pack_parameters(
     dict_["use_vtk"] = use_vtk
     dict_["start_parm"] = start_parm
     dict_["start_instance"] = start_instance
-
+    dict_["version"] = version
     return dict_
