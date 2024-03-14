@@ -804,7 +804,7 @@ def get_start_instance(start_instance: bool = True):
         start_instance = os.environ["PYMAPDL_START_INSTANCE"]
     else:
         LOG.debug(
-            f"PYMAPDL_START_INSTANCE is unset, using default value {start_instance}"
+            f"PYMAPDL_START_INSTANCE is unset. Using default value {start_instance}."
         )
 
     if isinstance(start_instance, str):
@@ -1532,7 +1532,7 @@ def launch_mapdl(
 
     # Getting "start_instance" using "True" as default.
     start_instance = get_start_instance(start_instance=start_instance)
-    LOG.debug("Using 'start_instance' equal to %s", start_instance)
+    LOG.debug("Using 'start_instance' equal to %s.", start_instance)
 
     if start_instance:
         # special handling when building the gallery outside of CI. This
