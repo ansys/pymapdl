@@ -458,7 +458,7 @@ def test_version(mapdl):
         additional_switches=QUICK_LAUNCH_SWITCHES,
         _debug_no_launch=True,
     )
-    assert str(version) in launching_arg["version"]
+    assert str(version) in str(launching_arg["version"])
 
 
 @requires("local")
