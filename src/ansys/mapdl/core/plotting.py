@@ -922,10 +922,11 @@ def bc_plotter(
         bc_glyph_size = get_bounding_box(mapdl.mesh.nodes)
         bc_glyph_size = bc_glyph_size[bc_glyph_size != 0]
 
+        ratio = 0.075  # Because a glyph of 1 is too big.
         if bc_glyph_size.size != 0:
-            bc_glyph_size = bc_glyph_size.mean() * 0.75 / 10
+            bc_glyph_size = bc_glyph_size.mean() * ratio
         else:  # Case were there is only one node
-            bc_glyph_size = 1
+            bc_glyph_size = ratio
 
     if not isinstance(bc_glyph_size, (int, float)):
         raise ValueError("The 'bc_glyph_size' parameter can be only an int or float.")
@@ -1059,6 +1060,8 @@ def bc_nodes_plotter(
                     value = [BC_plot_settings("UY")["glyph"], label_, value[2]]
                 elif "F" in label_:
                     value = [BC_plot_settings("FX")["glyph"], label_, value[2]]
+                elif label_ in FIELDS["ELECTRICAL"]:
+                    value = [BC_plot_settings("VOLT")["glyph"], label_, value[2]]
 
                 if symbol == value[1]:
                     sorted_dict[key] = value

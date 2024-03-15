@@ -139,15 +139,15 @@ class DefaultSymbol:
     @staticmethod
     def cross_cylinders_3d():
         model_a = pv.Cylinder(
-            center=(0, 0, 0), direction=(1, 0, 0), radius=0.2, height=2
+            center=(0, 0, 0), direction=(1, 0, 0), radius=0.2, height=1.5
         ).triangulate()
 
         model_b = pv.Cylinder(
-            center=(0, 0, 0), direction=(0, 1, 0), radius=0.2, height=2
+            center=(0, 0, 0), direction=(0, 1, 0), radius=0.2, height=1.5
         ).triangulate()
 
         model_c = pv.Cylinder(
-            center=(0, 0, 0), direction=(0, 0, 1), radius=0.2, height=2
+            center=(0, 0, 0), direction=(0, 0, 1), radius=0.2, height=1.5
         ).triangulate()
 
         result = model_a.merge(model_b).triangulate()
