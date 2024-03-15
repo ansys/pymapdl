@@ -38,28 +38,51 @@ from ansys.mapdl.core.plotting import general_plotter
 
 
 @pytest.fixture
-def bc_example(mapdl, make_block):
+def bc_example(mapdl):
     mapdl.prep7()
+    mapdl.et("", 189)
+
+    mapdl.n(1, 0, 0, 0)
+    mapdl.n(2, 1, 0, 0)
+    mapdl.n(3, 2, 0, 0)
+    mapdl.n(4, 0, 0, 1)
+    mapdl.n(5, 1, 0, 1)
+    mapdl.n(6, 2, 0, 1)
 
     mapdl.nsel("s", "node", "", 1)
     mapdl.f("all", "FX", 0)
+    mapdl.nsel("s", "node", "", 2)
     mapdl.f("all", "FY", 0)
+    mapdl.nsel("s", "node", "", 3)
     mapdl.f("all", "FZ", 0)
 
-    mapdl.nsel("s", "node", "", 2)
-    mapdl.f("all", "FX", 100)
-    mapdl.f("all", "FY", 200)
-    mapdl.f("all", "FZ", 100)
-
-    mapdl.nsel("s", "node", "", 3)
+    mapdl.nsel("s", "node", "", 4)
     mapdl.d("all", "UX", 0)
+    mapdl.nsel("s", "node", "", 5)
     mapdl.d("all", "UY", 0)
+    mapdl.nsel("s", "node", "", 6)
     mapdl.d("all", "UZ", 0)
 
-    mapdl.nsel("s", "node", "", 4)
-    mapdl.d("all", "UX", 1)
-    mapdl.d("all", "UY", 2)
-    mapdl.d("all", "UZ", 3)
+    mapdl.n(7, 0, 1, 0)
+    mapdl.n(8, 1, 1, 0)
+    mapdl.n(9, 2, 1, 0)
+    mapdl.n(10, 0, 2, 0)
+    mapdl.n(11, 1, 2, 0)
+    mapdl.n(12, 2, 2, 0)
+
+    mapdl.nsel("s", "node", "", 7)
+    mapdl.f("all", "FX", 10)
+    mapdl.nsel("s", "node", "", 8)
+    mapdl.f("all", "FY", 20)
+    mapdl.nsel("s", "node", "", 9)
+    mapdl.f("all", "FZ", 30)
+
+    mapdl.nsel("s", "node", "", 10)
+    mapdl.d("all", "UX", 20)
+    mapdl.nsel("s", "node", "", 11)
+    mapdl.d("all", "UY", 20)
+    mapdl.nsel("s", "node", "", 12)
+    mapdl.d("all", "UZ", 20)
 
     mapdl.nsel("all")
 
@@ -212,6 +235,25 @@ def test_eplot_savefig(mapdl, make_block, tmpdir):
     assert os.path.isfile(filename)
 
 
+@pytest.mark.parametrize("field", ["UX", "UY", "UZ", "FX", "FY", "FZ"])
+@pytest.mark.parametrize("magnitude", [0, 50, 500])
+def test_single_glyph(mapdl, field, magnitude, verify_image_cache):
+    mapdl.clear()
+    mapdl.prep7()
+    mapdl.et("", 189)
+    mapdl.n(1, 0, 0, 0)
+
+    if "U" in field:
+        mapdl.d(1, field, magnitude)
+    else:
+        mapdl.f(1, field, magnitude)
+
+    mapdl.allsel()
+    p = mapdl.nplot(
+        plot_bc=True, point_size=max(magnitude, 10), render_points_as_spheres=True
+    )
+
+
 @pytest.mark.parametrize("return_plotter", [True, False])
 @pytest.mark.parametrize("plot_bc_legend", [True, False])
 @pytest.mark.parametrize("plot_bc_labels", [True, False])
@@ -222,6 +264,7 @@ def test_bc_plot_options(
     return_plotter,
     plot_bc_legend,
     plot_bc_labels,
+    bc_labels_font_size=50,
 ):
     if plot_bc_legend or plot_bc_labels:
         # The legend and labels generate highly variance than other tests

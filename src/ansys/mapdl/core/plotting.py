@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Plotting helper for MAPDL using pyvista"""
+from collections import OrderedDict
 from typing import Any, Optional
 from warnings import warn
 
@@ -57,6 +58,10 @@ FIELDS = {
     "THERMAL": ["TEMP", "HEAT"],
     "ELECTRICAL": ["VOLT", "CHRGS", "AMPS"],
 }
+
+FIELDS_ORDERED_LABELS = FIELDS["MECHANICAL"].copy()
+FIELDS_ORDERED_LABELS.extend(FIELDS["THERMAL"])
+FIELDS_ORDERED_LABELS.extend(FIELDS["ELECTRICAL"])
 
 
 # All boundary conditions:
@@ -1005,6 +1010,7 @@ def bc_nodes_plotter(
             # line_width=3,
             name=name_,
             label=name_,
+            opacity=0.50,
         )
 
         if plot_bc_labels:
@@ -1032,6 +1038,25 @@ def bc_nodes_plotter(
         )
 
     if plot_bc_legend:
+        # Reorder labels to keep a consistent order
+        sorted_dict = OrderedDict()
+        labels_ = pl.renderer._labels.copy()
+
+        # sorting the keys
+        for symbol in FIELDS_ORDERED_LABELS:
+            for key, value in labels_.items():
+                if symbol == value[1]:
+                    sorted_dict[key] = value
+
+        # moving the not added labels (just in case)
+        for key, value in labels_.items():
+            if value[1] not in FIELDS_ORDERED_LABELS:
+                sorted_dict[key] = value
+
+        assert sorted_dict == labels_
+
+        # overwriting labels
+        pl.renderer._labels = sorted_dict
         pl.add_legend(bcolor=None)
 
     return pl
