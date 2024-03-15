@@ -90,7 +90,7 @@ doc = [
     "matplotlib==3.8.3",
     "numpydoc==1.6.0",
     "pandas==2.2.1",
-    "plotly==5.19.0",
+    "plotly==5.20.0",
     "pyiges[full]==0.3.1",
     "pypandoc==1.13",
     "pytest-sphinx==0.6.0",
