@@ -21,10 +21,48 @@
 # SOFTWARE.
 
 import pyvista as pv
+from pyvista.core import _vtk_core as _vtk
+from pyvista.core.utilities import translate
+from pyvista.core.utilities.helpers import wrap
+from pyvista.core.utilities.misc import no_new_attr
+
+# I dont want to have to fix a very recent lower bound for pyvista.
+# Hence I'm copying what I need from there.
+# copied from pyvista source code:
+# https://github.com/pyvista/pyvista/blob/35396c2e7645a6b57ad30d25ac1893f2141aab95/pyvista/core/utilities/geometric_sources.py#L2254
+
+
+@no_new_attr
+class ArrowSource(_vtk.vtkArrowSource):
+    def __init__(
+        self,
+        tip_length=0.25,
+        tip_radius=0.1,
+        tip_resolution=20,
+        shaft_radius=0.05,
+        shaft_resolution=20,
+    ):
+        """Initialize source."""
+        self.SetTipLength(tip_length)
+        self.SetTipRadius(tip_radius)
+        self.SetTipResolution(tip_resolution)
+        self.SetShaftResolution(shaft_resolution)
+        self.SetShaftRadius(shaft_radius)
+
+    @property
+    def output(self):
+        """Get the output data object for a port on this algorithm.
+
+        Returns
+        -------
+        pyvista.PolyData
+            Plane mesh.
+        """
+        self.Update()
+        return wrap(self.GetOutput())
+
 
 # Symbols for constrains
-
-
 class DefaultSymbol:
     # Class to store the symbols because of https://github.com/ansys/pymapdl/issues/2872
     # To solve that issue, we avoid having to load the pyvista attributes when the module is load.
@@ -54,8 +92,6 @@ class DefaultSymbol:
             shaft_resolution=20,
             invert=True,
         ):
-            from pyvista.core.utilities import ArrowSource, translate
-
             arrow = ArrowSource(
                 tip_length=tip_length,
                 tip_radius=tip_radius,
