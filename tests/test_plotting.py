@@ -97,9 +97,8 @@ def boundary_conditions_example(mapdl):
 def block_example_coupled(mapdl):
     mapdl.clear()
     mapdl.prep7()
-    mapdl.block(0, 1, 0, 1, 0, 1)
 
-    mapdl.et(1, 227)
+    mapdl.et(1, 226)
     mapdl.keyopt(1, 1, 1011)  # Thermal-Piezoelectric
 
     # Disp
@@ -109,9 +108,9 @@ def block_example_coupled(mapdl):
     # Force
     # FX, FY, FZ,
     # HEAT, CHRG
-
-    mapdl.esize(0.5)
-    mapdl.vmesh("ALL")
+    mapdl.n(1, 0, 0, 0)
+    mapdl.n(2, 1, 0, 0)
+    mapdl.n(3, 2, 0, 0)
 
 
 def test_plot_empty_mesh(mapdl, cleared):
@@ -262,24 +261,38 @@ def test_eplot_savefig(mapdl, make_block, tmpdir):
     assert os.path.isfile(filename)
 
 
-@pytest.mark.parametrize("field", ["UX", "UY", "UZ", "FX", "FY", "FZ"])
+@pytest.mark.parametrize(
+    "field", ["UX", "UY", "UZ", "FX", "FY", "FZ", "TEMP", "HEAT", "VOLT", "CHRG"]
+)
 @pytest.mark.parametrize("magnitude", [0, 50, 500])
 def test_single_glyph(mapdl, field, magnitude, verify_image_cache):
     mapdl.clear()
     mapdl.prep7()
-    mapdl.et("", 189)
+    mapdl.et(1, 226)
+    mapdl.keyopt(1, 1, 1011)  # Thermal-Piezoelectric
     mapdl.n(1, 0, 0, 0)
 
-    if "U" in field:
-        mapdl.d(1, field, magnitude)
+    if field in [x for group in DISPL_LABELS for x in group]:
+        func = getattr(mapdl, "d")
     else:
-        mapdl.f(1, field, magnitude)
+        func = getattr(mapdl, "f")
+
+    func(1, field, magnitude)
+
+    if magnitude > 0:
+        mapdl.n(2, 1, 0, 0)
+        func(2, field, magnitude * 2)
+
+    if magnitude > 50:
+        mapdl.n(3, 2, 0, 0)
+        func(3, field, magnitude * 10)
 
     mapdl.allsel()
+
     p = mapdl.nplot(
         plot_bc=True,
-        point_size=max(magnitude, 10),
-        render_points_as_spheres=True,
+        # point_size=max(magnitude, 10),
+        # render_points_as_spheres=True,
         plot_bc_legend=True,
         plot_bc_labels=True,
     )
