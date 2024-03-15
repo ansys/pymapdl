@@ -2410,7 +2410,7 @@ def test_screenshot(mapdl, make_block, tmpdir):
     mapdl.file_type_for_plots = previous_device
 
 
-def test_force_command_ignored_not_active_set(mapdl):
+def test_force_command_ignored_not_active_set(mapdl, cleared):
     mapdl.prep7()
     mapdl.et("", 227)
     mapdl.keyopt(1, 1)  # Thermal-Piezoelectric
@@ -2420,7 +2420,7 @@ def test_force_command_ignored_not_active_set(mapdl):
         mapdl.f(1, "CHRG", 10)
 
 
-def test_force_command_when_no_nodes(mapdl):
+def test_force_command_when_no_nodes(mapdl, cleared):
     mapdl.prep7()
     mapdl.et(1, 189)
     with pytest.raises(MapdlCommandIgnoredError, match="No nodes defined"):
