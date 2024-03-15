@@ -1,5 +1,5 @@
 sphinx==7.2.6
-ansys-dpf-core==0.11.0
+ansys-dpf-core==0.10.1
 ansys-mapdl-reader==0.53.0
 ansys-sphinx-theme==0.14.1
 grpcio==1.62.1
@@ -17,7 +17,7 @@ pytest-sphinx==0.6.0
 pythreejs==2.4.2
 pyvista[trame]==0.43.4
 sphinx-autobuild==2024.2.4
-sphinx-autodoc-typehints==2.0.0
+sphinx-autodoc-typehints==1.25.2
 sphinx-copybutton==0.5.2
 sphinx-gallery==0.15.0
 sphinxcontrib-websupport==1.2.7
