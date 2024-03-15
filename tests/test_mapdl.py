@@ -2425,3 +2425,11 @@ def test_force_command_when_no_nodes(mapdl):
     mapdl.et(1, 189)
     with pytest.raises(MapdlCommandIgnoredError, match="No nodes defined"):
         mapdl.f(1, "CHRG", 0)
+
+
+def test_not_correct_et_element(mapdl):
+    mapdl.clear()
+    mapdl.prep7()
+    mapdl.et(1, 227)
+    with pytest.warns(UserWarning, match="is normal behavior when a CDB file is used"):
+        mapdl.keyopt(1, 222)
