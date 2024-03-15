@@ -97,8 +97,8 @@ class DefaultSymbol:
 
         self.VOLT = {"color": "yellow", "glyph": self.cross_cylinders_3d()}
 
-        self.AMPS = {"color": "grey", "glyph": self.cross_cylinders_3d()}
-        self.CHRGS = {"color": "grey", "glyph": self.cross_cylinders_3d()}
+        self.AMPS = {"color": "red", "glyph": self.cross_cylinders_3d()}
+        self.CHRG = {"color": "red", "glyph": self.cross_cylinders_3d()}
 
     @staticmethod
     def cross_cylinders_3d():
