@@ -78,7 +78,6 @@ class DefaultSymbol:
                 direction=direction,
                 tip_length=1,
                 tip_radius=0.5,
-                invert=True,
             )
 
         self.TEMP = {
@@ -88,13 +87,13 @@ class DefaultSymbol:
 
         self.HEAT = {"color": "red", "glyph": self._cube}
 
-        self.UX = {"color": "red", "glyph": _cone(direction=(1, 0, 0))}
-        self.UY = {"color": "green", "glyph": _cone(direction=(0, 1, 0))}
-        self.UZ = {"color": "blue", "glyph": _cone(direction=(0, 0, 1))}
+        self.UX = {"color": "red", "glyph": _cone(direction=(-1, 0, 0))}
+        self.UY = {"color": "green", "glyph": _cone(direction=(0, -1, 0))}
+        self.UZ = {"color": "blue", "glyph": _cone(direction=(0, 0, -1))}
 
-        self.FX = {"color": "red", "glyph": _arrow(direction=(1, 0, 0))}
-        self.FY = {"color": "green", "glyph": _arrow(direction=(0, 1, 0))}
-        self.FZ = {"color": "blue", "glyph": _arrow(direction=(0, 0, 1))}
+        self.FX = {"color": "red", "glyph": _arrow(direction=(-1, 0, 0))}
+        self.FY = {"color": "green", "glyph": _arrow(direction=(0, -1, 0))}
+        self.FZ = {"color": "blue", "glyph": _arrow(direction=(0, 0, -1))}
 
         self.VOLT = {"color": "yellow", "glyph": self.cross_cylinders_3d()}
 
