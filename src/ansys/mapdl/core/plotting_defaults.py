@@ -41,109 +41,86 @@ class DefaultSymbol:
         return getattr(self, name)
 
     def _set_configuration(self):
-        # Setting the
-        self.TEMP = {
-            "color": "orange",
-            "glyph": pv.Sphere(center=(0, 0, 0), radius=0.5),
-        }
+        self._point = pv.Sphere(center=(0, 0, 0), radius=0.5)
+        self._cube = pv.Cube(center=(0, 0, 0), x_length=1, y_length=1, z_length=1)
 
-        self.HEAT = {
-            "color": "red",
-            "glyph": pv.Arrow(
-                start=(-1, 0, 0),
-                direction=(1, 0, 0),
+        def _basic_arrow(
+            start=(0.0, 0.0, 0.0),
+            direction=(1.0, 0.0, 0.0),
+            tip_length=0.5,
+            tip_radius=0.25,
+            tip_resolution=20,
+            shaft_radius=0.05,
+            shaft_resolution=20,
+            invert=True,
+        ):
+            from pyvista.core.utilities import ArrowSource, translate
+
+            arrow = ArrowSource(
+                tip_length=tip_length,
+                tip_radius=tip_radius,
+                tip_resolution=tip_resolution,
+                shaft_radius=shaft_radius,
+                shaft_resolution=shaft_resolution,
+            )
+            arrow.SetInvert(invert)
+            surf = arrow.output
+
+            translate(surf, start, direction)
+            return surf
+
+        def _arrow(*args, **kwargs):
+            return _basic_arrow(*args, **kwargs)
+
+        def _cone(start=(0, 0, 0), direction=None):
+            return _basic_arrow(
+                start=start,
+                direction=direction,
                 tip_length=1,
                 tip_radius=0.5,
-                scale=1.0,
-            ),
-        }
-
-        self.UX = {
-            "color": "red",
-            "glyph": pv.Arrow(
-                start=(0, -1, 0),
-                direction=(0, 1, 0),
-                tip_length=1,
-                tip_radius=0.5,
-                scale=1.0,
-            ),
-        }
-
-        self.UY = {
-            "color": "green",
-            "glyph": pv.Arrow(
-                start=(0, 0, -1),
-                direction=(0, 0, 1),
-                tip_length=1,
-                tip_radius=0.5,
-                scale=1.0,
-            ),
-        }
-
-        self.UZ = {
-            "color": "blue",
-            "glyph": pv.Arrow(
-                start=(-1, 0, 0),
-                direction=(1, 0, 0),
-                tip_length=0.5,
-                tip_radius=0.25,
-                scale=1.0,
-            ),
-        }
-
-        self.VOLT = {
-            "color": "yellow",
-            "glyph": pv.Arrow(
-                start=(0, -1, 0),
-                direction=(0, 1, 0),
-                tip_length=0.5,
-                tip_radius=0.25,
-                scale=1.0,
-            ),
-        }
-
-        self.FX = {
-            "color": "red",
-            "glyph": pv.Arrow(
-                start=(0, 0, -1),
-                direction=(0, 0, 1),
-                tip_length=0.5,
-                tip_radius=0.25,
-                scale=1.0,
-            ),
-        }
-
-        def get_VOLT():
-            model_a = pv.Cylinder(
-                center=(0, 0, 0), direction=(1, 0, 0), radius=0.2, height=2
-            ).triangulate()
-
-            model_b = pv.Cylinder(
-                center=(0, 0, 0), direction=(0, 1, 0), radius=0.2, height=2
-            ).triangulate()
-
-            model_c = pv.Cylinder(
-                center=(0, 0, 0), direction=(0, 0, 1), radius=0.2, height=2
-            ).triangulate()
-
-            result = model_a.merge(model_b).triangulate()
-            result = result.merge(model_c)
-
-            result.rotate_z(45.0, inplace=True)
-            result.rotate_vector(
-                vector=(1, -1, 0), angle=-45, point=(0, 0, 0), inplace=True
+                invert=True,
             )
 
-            return result
-
-        self.FY = {"color": "green", "glyph": get_VOLT()}
-
-        self.FZ = {
-            "color": "blue",
-            "glyph": pv.Cube(
-                center=(0, 0, 0), x_length=1.0, y_length=1.0, z_length=1.0
-            ),
+        self.TEMP = {
+            "color": "orange",
+            "glyph": self._point,
         }
 
-        self.AMPS = {"color": "grey", "glyph": get_VOLT()}
-        self.CHRGS = {"color": "grey", "glyph": get_VOLT()}
+        self.HEAT = {"color": "red", "glyph": self._cube}
+
+        self.UX = {"color": "red", "glyph": _cone(direction=(1, 0, 0))}
+        self.UY = {"color": "green", "glyph": _cone(direction=(0, 1, 0))}
+        self.UZ = {"color": "blue", "glyph": _cone(direction=(0, 0, 1))}
+
+        self.FX = {"color": "red", "glyph": _arrow(direction=(1, 0, 0))}
+        self.FY = {"color": "green", "glyph": _arrow(direction=(0, 1, 0))}
+        self.FZ = {"color": "blue", "glyph": _arrow(direction=(0, 0, 1))}
+
+        self.VOLT = {"color": "yellow", "glyph": self.cross_cylinders_3d()}
+
+        self.AMPS = {"color": "grey", "glyph": self.cross_cylinders_3d()}
+        self.CHRGS = {"color": "grey", "glyph": self.cross_cylinders_3d()}
+
+    @staticmethod
+    def cross_cylinders_3d():
+        model_a = pv.Cylinder(
+            center=(0, 0, 0), direction=(1, 0, 0), radius=0.2, height=2
+        ).triangulate()
+
+        model_b = pv.Cylinder(
+            center=(0, 0, 0), direction=(0, 1, 0), radius=0.2, height=2
+        ).triangulate()
+
+        model_c = pv.Cylinder(
+            center=(0, 0, 0), direction=(0, 0, 1), radius=0.2, height=2
+        ).triangulate()
+
+        result = model_a.merge(model_b).triangulate()
+        result = result.merge(model_c)
+
+        result.rotate_z(45.0, inplace=True)
+        result.rotate_vector(
+            vector=(1, -1, 0), angle=-45, point=(0, 0, 0), inplace=True
+        )
+
+        return result
