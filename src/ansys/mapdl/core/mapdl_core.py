@@ -2696,6 +2696,14 @@ class _MapdlCore(Commands):
             text += base_error_msg
             raise ComponentNoData(text)
 
+        if "is not part of the currently active set." in flat_text:
+            text += base_error_msg
+            raise MapdlCommandIgnoredError(text)
+
+        if "No nodes defined." in flat_text:
+            text += base_error_msg
+            raise MapdlCommandIgnoredError(text)
+
         # flag errors
         if "*** ERROR ***" in flat_text:
             self._raise_output_errors(text)
