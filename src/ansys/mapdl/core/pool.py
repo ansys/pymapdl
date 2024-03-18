@@ -71,7 +71,7 @@ def available_ports(n_ports: int, starting_port: int = MAPDL_DEFAULT_PORT) -> Li
     return ports
 
 
-class LocalMapdlPool:
+class MapdlPool:
     """Create a pool of MAPDL instances.
 
     .. note::
@@ -133,8 +133,8 @@ class LocalMapdlPool:
     Simply create a pool of 10 instances to run in the temporary
     directory.
 
-    >>> from ansys.mapdl.core import LocalMapdlPool
-    >>> pool = LocalMapdlPool(10)
+    >>> from ansys.mapdl.core import MapdlPool
+    >>> pool = MapdlPool(10)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     Create several instances with 1 CPU each running at the current
@@ -142,19 +142,19 @@ class LocalMapdlPool:
 
     >>> import os
     >>> my_path = os.getcmd()
-    >>> pool = LocalMapdlPool(10, nproc=1, run_location=my_path)
+    >>> pool = MapdlPool(10, nproc=1, run_location=my_path)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     Create a pool while specifying the MAPDL executable in Windows.
 
     >>> exec_file = 'C:/Program Files/ANSYS Inc/v212/ansys/bin/winx64/ANSYS212.exe'
-    >>> pool = LocalMapdlPool(10, exec_file=exec_file)
+    >>> pool = MapdlPool(10, exec_file=exec_file)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     Create a pool while specifying the MAPDL executable in Linux.
 
     >>> exec_file = '/ansys_inc/v211/ansys/bin/ansys211'
-    >>> pool = LocalMapdlPool(10, exec_file=exec_file)
+    >>> pool = MapdlPool(10, exec_file=exec_file)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     """
@@ -230,7 +230,7 @@ class LocalMapdlPool:
             # Checking version
             if _HAS_ATP:
                 if version_from_path("mapdl", exec_file) < 211:
-                    raise VersionError("LocalMapdlPool requires MAPDL 2021R1 or later.")
+                    raise VersionError("MapdlPool requires MAPDL 2021R1 or later.")
 
         self._exec_file = exec_file
 
