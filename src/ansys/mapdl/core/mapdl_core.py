@@ -2696,6 +2696,20 @@ class _MapdlCore(Commands):
             text += base_error_msg
             raise ComponentNoData(text)
 
+        if "is not part of the currently active set." in flat_text:
+            text += base_error_msg
+            raise MapdlCommandIgnoredError(text)
+
+        if "No nodes defined." in flat_text:
+            text += base_error_msg
+            raise MapdlCommandIgnoredError(text)
+
+        if "For element type = " in flat_text and "is invalid." in flat_text:
+            if "is normal behavior when a CDB file is used." in flat_text:
+                warn(text)
+            else:
+                raise MapdlCommandIgnoredError(text)
+
         # flag errors
         if "*** ERROR ***" in flat_text:
             self._raise_output_errors(text)
