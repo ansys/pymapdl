@@ -85,14 +85,7 @@ def get_ansys_colors(N=9):
 
 
 class MapdlTheme(Theme):
-    """PyMAPDL-specific theme for pyvista.
-
-    Theme includes the following defaults:
-
-    - ``'jet'`` (rainbow) colormap
-    - Interactive plots
-    - ``'Courier'`` for the font family
-    - ``'PyMAPDL'`` as the plot title
+    """PyMAPDL-specific theme for Pyvista.
 
     Examples
     --------
@@ -127,14 +120,15 @@ class MapdlTheme(Theme):
         if _HAS_MATPLOTLIB:
             self.cmap = PyMAPDL_cmap
 
-            self.font.size = 18
-            self.font.title_size = 18
-            self.font.label_size = 18
-            self.font.color = "black"
+        self.font.size = 18
+        self.font.title_size = 18
+        self.font.label_size = 18
+        self.font.color = "black"
+        self.font.family = "arial"
 
-            self.axes.x_color = "tomato"
-            self.axes.y_color = "seagreen"
-            self.axes.z_color = "blue"
+        self.axes.x_color = "tomato"
+        self.axes.y_color = "seagreen"
+        self.axes.z_color = "blue"
 
         self.show_edges = False
         self.color = "lightblue"
