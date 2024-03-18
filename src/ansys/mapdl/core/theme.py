@@ -48,14 +48,10 @@ if _HAS_PYVISTA:
         else:  # older versions
             from pyvista.themes import DefaultTheme as Theme
 
-    base_class = Theme
-
 else:  # pragma: no cover
 
-    class myEmptyClass:
+    class Theme:
         pass
-
-    base_class = myEmptyClass
 
 
 MAPDL_colorbar = (
@@ -88,7 +84,7 @@ def get_ansys_colors(N=9):
     return np.array([PyMAPDL_cmap(i) for i in range(N)])
 
 
-class MapdlTheme(base_class):
+class MapdlTheme(Theme):
     """PyMAPDL-specific theme for pyvista.
 
     Theme includes the following defaults:
