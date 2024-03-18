@@ -1054,14 +1054,15 @@ def bc_nodes_plotter(
         # sorting the keys
         for symbol in FIELDS_ORDERED_LABELS:
             for key, value in labels_.items():
-                # taking advantage and overriding the legend glyph with something it can be seen properly in the legend
+                # taking advantage and overriding the legend glyph with
+                # something it can be seen properly in the legend
                 label_ = value[1]
                 if "U" in label_:
                     value = [BC_plot_settings("UY")["glyph"], label_, value[2]]
                 elif "F" in label_:
                     value = [BC_plot_settings("FX")["glyph"], label_, value[2]]
-                elif label_ in FIELDS["ELECTRICAL"]:
-                    value = [BC_plot_settings("VOLT")["glyph"], label_, value[2]]
+                else:
+                    value = [BC_plot_settings(label_)["glyph"], label_, value[2]]
 
                 if symbol == value[1]:
                     sorted_dict[key] = value
