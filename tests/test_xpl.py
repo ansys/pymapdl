@@ -80,6 +80,9 @@ def test_read_asarray(xpl):
 
 
 def test_save(xpl):
+    if xpl._mapdl.version == 24.2:
+        pytest.xfail("There is a bug on v242 which makes saving using XPL to fail.")
+
     xpl.save()
     with pytest.raises(MapdlCommandIgnoredError):
         xpl.list()
