@@ -459,7 +459,7 @@ def test_version(mapdl):
         additional_switches=QUICK_LAUNCH_SWITCHES,
         _debug_no_launch=True,
     )
-    assert str(version) in launching_arg["start_parm"]["exec_file"]
+    assert str(version) in str(launching_arg["version"])
 
 
 @requires("local")
@@ -745,3 +745,11 @@ def test_get_start_instance_envvar(monkeypatch, start_instance, context):
             assert get_start_instance(start_instance)
         else:
             assert not get_start_instance(start_instance)
+
+
+@pytest.mark.parametrize("start_instance", [True, False])
+def test_launcher_start_instance(monkeypatch, start_instance):
+    if "PYMAPDL_START_INSTANCE" in os.environ:
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE")
+    options = launch_mapdl(start_instance=start_instance, _debug_no_launch=True)
+    assert start_instance == options["start_instance"]

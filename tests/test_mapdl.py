@@ -2408,3 +2408,28 @@ def test_screenshot(mapdl, make_block, tmpdir):
     os.remove(file_name)
 
     mapdl.file_type_for_plots = previous_device
+
+
+def test_force_command_ignored_not_active_set(mapdl, cleared):
+    mapdl.prep7()
+    mapdl.et("", 227)
+    mapdl.keyopt(1, 1)  # Thermal-Piezoelectric
+    mapdl.n(1, 0, 0, 0)
+
+    with pytest.raises(MapdlCommandIgnoredError):
+        mapdl.f(1, "CHRG", 10)
+
+
+def test_force_command_when_no_nodes(mapdl, cleared):
+    mapdl.prep7()
+    mapdl.et(1, 189)
+    with pytest.raises(MapdlCommandIgnoredError, match="No nodes defined"):
+        mapdl.f(1, "CHRG", 0)
+
+
+def test_not_correct_et_element(mapdl):
+    mapdl.clear()
+    mapdl.prep7()
+    mapdl.et(1, 227)
+    with pytest.warns(UserWarning, match="is normal behavior when a CDB file is used"):
+        mapdl.keyopt(1, 222)
