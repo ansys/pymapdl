@@ -49,14 +49,14 @@ BC_F = [
     "FY",
     "FZ",
     "AMPS",
-    "CHRGS",
+    "CHRG",
     # "FLUX",
     "CSGZ",
 ]  # TODO: Add moments MX, MY, MZ
 FIELDS = {
     "MECHANICAL": ["UX", "UY", "UZ", "FX", "FY", "FZ"],
     "THERMAL": ["TEMP", "HEAT"],
-    "ELECTRICAL": ["VOLT", "CHRGS", "AMPS"],
+    "ELECTRICAL": ["VOLT", "CHRG", "AMPS"],
 }
 
 FIELDS_ORDERED_LABELS = FIELDS["MECHANICAL"].copy()
@@ -668,7 +668,7 @@ def general_plotter(
 
         * **'electrical'**
           To plot the following electrical boundary conditions:
-          'VOLT', 'CHRGS', and 'AMPS'.
+          'VOLT', 'CHRG', and 'AMPS'.
 
         Defaults to all the allowed boundary conditions present
         in the responses of :func:`ansys.mapdl.core.Mapdl.dlist`
@@ -745,7 +745,7 @@ def general_plotter(
     +------------+--------------------------------------+
     | THERMAL    | ["TEMP", "HEAT"]                     |
     +------------+--------------------------------------+
-    | ELECTRICAL | ["VOLT", "CHRGS", "AMPS"]            |
+    | ELECTRICAL | ["VOLT", "CHRG", "AMPS"]             |
     +------------+--------------------------------------+
 
     Examples
@@ -903,6 +903,9 @@ def bc_plotter(
     else:
         bc_labels = _bc_labels_default(mapdl)
 
+    if not bc_labels:
+        return pl
+
     if bc_target:
         bc_target = _bc_target_checker(bc_target)
     else:
@@ -919,10 +922,11 @@ def bc_plotter(
         bc_glyph_size = get_bounding_box(mapdl.mesh.nodes)
         bc_glyph_size = bc_glyph_size[bc_glyph_size != 0]
 
+        ratio = 0.075  # Because a glyph of 1 is too big.
         if bc_glyph_size.size != 0:
-            bc_glyph_size = bc_glyph_size.mean() * 0.75 / 10
+            bc_glyph_size = bc_glyph_size.mean() * ratio
         else:  # Case were there is only one node
-            bc_glyph_size = 1
+            bc_glyph_size = ratio
 
     if not isinstance(bc_glyph_size, (int, float)):
         raise ValueError("The 'bc_glyph_size' parameter can be only an int or float.")
@@ -1035,6 +1039,11 @@ def bc_nodes_plotter(
             pcloud["labels"],
             shape_opacity=0.25,
             font_size=bc_labels_font_size,
+            # There is a conflict here. See
+            # To do not hide the labels, even when the underlying nodes
+            # are hidden, we set "always_visible"
+            always_visible=True,
+            show_points=False,  # to not have node duplicity
         )
 
     if plot_bc_legend:
@@ -1045,15 +1054,23 @@ def bc_nodes_plotter(
         # sorting the keys
         for symbol in FIELDS_ORDERED_LABELS:
             for key, value in labels_.items():
+                # taking advantage and overriding the legend glyph with
+                # something it can be seen properly in the legend
+                label_ = value[1]
+                if "U" in label_:
+                    value = [BC_plot_settings("UY")["glyph"], label_, value[2]]
+                elif "F" in label_:
+                    value = [BC_plot_settings("FX")["glyph"], label_, value[2]]
+                else:
+                    value = [BC_plot_settings(label_)["glyph"], label_, value[2]]
+
                 if symbol == value[1]:
                     sorted_dict[key] = value
 
         # moving the not added labels (just in case)
         for key, value in labels_.items():
-            if value[1] not in FIELDS_ORDERED_LABELS:
+            if label_ not in FIELDS_ORDERED_LABELS:
                 sorted_dict[key] = value
-
-        assert sorted_dict == labels_
 
         # overwriting labels
         pl.renderer._labels = sorted_dict
