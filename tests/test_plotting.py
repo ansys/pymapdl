@@ -295,6 +295,7 @@ def test_single_glyph(mapdl, field, magnitude, verify_image_cache):
         # render_points_as_spheres=True,
         plot_bc_legend=True,
         plot_bc_labels=True,
+        title="",
     )
 
 
@@ -320,6 +321,7 @@ def test_bc_plot_options(
         plot_bc=True,
         plot_bc_legend=plot_bc_legend,
         plot_bc_labels=plot_bc_labels,
+        title="",
     )
 
     if return_plotter:
@@ -350,6 +352,7 @@ def test_bc_plot_options_fields(
         plot_bc=True,
         plot_bc_legend=True,
         plot_bc_labels=True,
+        title="",
     )
 
     assert p is None
@@ -374,6 +377,7 @@ def test_bc_plot_bc_labels(mapdl, boundary_conditions_example, bc_labels):
         plot_bc=True,
         plot_bc_labels=True,
         bc_labels=bc_labels[0],
+        title="",
     )
     assert isinstance(p, Plotter), bc_labels[1]
     p.show()  # plotting for catching
@@ -393,6 +397,7 @@ def test_bc_plot_bc_labels_error(mapdl, boundary_conditions_example, bc_labels):
             plot_bc=True,
             plot_bc_labels=True,
             bc_labels=bc_labels,
+            title="",
         )
 
 
@@ -409,6 +414,7 @@ def test_bc_plot_bc_target(mapdl, boundary_conditions_example, bc_target):
         plot_bc=True,
         plot_bc_labels=True,
         bc_target=bc_target[0],
+        title="",
     )
     assert isinstance(p, Plotter), bc_target[1]
     p.show()  # plotting for catching
@@ -430,6 +436,7 @@ def test_bc_plot_bc_target_error(mapdl, boundary_conditions_example, bc_target):
             plot_bc=True,
             plot_bc_labels=True,
             bc_target=bc_target,
+            title="",
         )
 
 
@@ -442,13 +449,20 @@ def test_bc_no_mapdl(mapdl):
 
 def test_bc_only_one_node(mapdl, boundary_conditions_example):
     mapdl.nsel("s", "node", "", 1)
-    mapdl.nplot(plot_bc=True)
+    mapdl.nplot(
+        plot_bc=True,
+        title="",
+    )
 
 
 def test_bc_glyph(mapdl, boundary_conditions_example):
     mapdl.nplot(plot_bc=True, bc_glyph_size=19)
     with pytest.raises(ValueError):
-        mapdl.nplot(plot_bc=True, bc_glyph_size="big")
+        mapdl.nplot(
+            plot_bc=True,
+            bc_glyph_size="big",
+            title="",
+        )
 
 
 def test_bc_bc_labels(mapdl, boundary_conditions_example, verify_image_cache):
@@ -457,6 +471,7 @@ def test_bc_bc_labels(mapdl, boundary_conditions_example, verify_image_cache):
 
     mapdl.nplot(plot_bc=True, bc_labels="UX")
     mapdl.nplot(plot_bc=True, bc_labels=["Ux", "uy", "VOLT"])
+
     with pytest.raises(ValueError):
         mapdl.nplot(plot_bc=True, bc_labels=["big"])
 
@@ -471,7 +486,11 @@ def test_all_same_values(mapdl, boundary_conditions_example):
     """Test the BC glyph size when all the BC have same magnitude."""
     mapdl.nsel("all")
     mapdl.f("all", "FX", 0)
-    mapdl.nplot(plot_bc=True, bc_labels="FX")
+    mapdl.nplot(
+        plot_bc=True,
+        bc_labels="FX",
+        title="",
+    )
 
 
 @pytest.mark.parametrize(
