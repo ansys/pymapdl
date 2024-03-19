@@ -164,7 +164,8 @@ def test_download_tech_demo_data(running_test):
 
 @requires("requests")
 def test_detach_examples_submodule():
-    cmd = """
+    cmd = (
+        """
 import sys
 
 assert 'ansys.mapdl.core' not in sys.modules
@@ -183,12 +184,10 @@ assert 'ansys.mapdl.core.examples' in sys.modules
 assert 'requests' in sys.modules
 
 print('Everything went well')
-""".strip().replace(
-        "\n", ";"
+""".strip()
+        .replace("\n", ";")
+        .replace(";;", ";")
     )
-
-    if "nt" in os.name:
-        cmd = cmd.replace(";;", ";")
 
     cmd_line = f"""python -c "{cmd}" """
 
