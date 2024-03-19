@@ -212,6 +212,8 @@ linkcheck_ignore = [
     "https://mapdl.docs.pyansys.com/*",
     "https://ansysaccount.b2clogin.com/*",  # behind payfirewall
     "https://ansyshelp.ansys.com/*",  # behind payfirewall
+    "https://forum.ansys.com/forums/*",  # It is detected as broken
+    "https://courses.ansys.com/*",  # It is detected as broken
 ]
 linkcheck_anchors_ignore = [
     # these anchors are picked by linkcheck as broken but they are not.
