@@ -28,7 +28,7 @@
 
 Mesh and geometry
 =================
-The :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class allows you to access
+The :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class allows you to access
 the mesh and geometry without writing to an intermediate file or
 interpreting the text output from various MAPDL commands. For
 example, to access the nodes and elements of a model, normally you
@@ -53,7 +53,7 @@ software:
 
 However, with the :attr:`Mapdl.mesh <ansys.mapdl.core.mesh_grpc.MeshGrpc>` class,
 you can interface with a current instance of the 
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class and access the current nodes coordinates
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class and access the current nodes coordinates
 with this code:
 
 .. code:: pycon
@@ -235,7 +235,8 @@ One of the most important is that you no longer need to call the entities like y
      Y Bounds:	0.000e+00, 1.974e+00
      Z Bounds:	5.500e-01, 5.500e-01
      N Arrays:	4,
-   ...
+    ...
+
 
 **New API**
 

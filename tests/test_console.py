@@ -1,3 +1,25 @@
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Test legacy MAPDL console interface
 
 This has been copied from test_mapdl.py
@@ -6,17 +28,24 @@ This has been copied from test_mapdl.py
 import os
 import time
 
-from ansys.mapdl.reader import examples
+import pytest
+
+from conftest import has_dependency, requires
+
+# skip entire module unless --console is enabled
+pytestmark = requires("console")
+
 import numpy as np
 import pytest
-import pyvista
+
+if has_dependency("pyvista"):
+    import pyvista
+
+if has_dependency("ansys-mapdl-reader"):
+    from ansys.mapdl.reader import examples
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from conftest import skip_no_xserver
-
-# skip entire module unless --console is enabled
-pytestmark = pytest.mark.console
 
 
 @pytest.fixture(scope="function")
@@ -198,7 +227,7 @@ def test_invalid_area(mapdl_console):
 # mapdl_console.input('thisisnotafile')
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_kplot(cleared, mapdl_console, tmpdir):
     with pytest.raises(MapdlRuntimeError):
         mapdl_console.kplot(vtk=True)
@@ -216,7 +245,7 @@ def test_kplot(cleared, mapdl_console, tmpdir):
     mapdl_console.kplot(knum=True, vtk=False)  # make sure legacy still works
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_aplot(cleared, mapdl_console):
     k0 = mapdl_console.k("", 0, 0, 0)
     k1 = mapdl_console.k("", 1, 0, 0)
@@ -237,7 +266,7 @@ def test_aplot(cleared, mapdl_console):
     mapdl_console.aplot(vtk=False)
 
 
-@skip_no_xserver
+@requires("xserver")
 @pytest.mark.parametrize("vtk", [True, False])
 def test_vplot(cleared, mapdl_console, vtk):
     mapdl_console.block(0, 1, 0, 1, 0, 1)
@@ -278,7 +307,7 @@ def test_lines(cleared, mapdl_console):
     assert mapdl_console.geometry.n_line == 4
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_lplot(cleared, mapdl_console, tmpdir):
     with pytest.raises(MapdlRuntimeError):
         mapdl_console.lplot(vtk=True)
@@ -353,7 +382,7 @@ def test_enum(mapdl_console, make_block):
 
 
 @pytest.mark.parametrize("knum", [True, False])
-@skip_no_xserver
+@requires("xserver")
 def test_nplot_vtk(cleared, mapdl_console, knum):
     with pytest.raises(MapdlRuntimeError):
         mapdl_console.nplot()
@@ -364,7 +393,7 @@ def test_nplot_vtk(cleared, mapdl_console, knum):
     mapdl_console.nplot(vtk=True, knum=knum, background="w", color="k")
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_nplot(cleared, mapdl_console):
     mapdl_console.n(1, 0, 0, 0)
     mapdl_console.n(11, 10, 0, 0)
@@ -483,7 +512,7 @@ def test_eplot_fail(mapdl_console):
         mapdl_console.eplot()
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_eplot(mapdl_console, make_block):
     init_elem = mapdl_console.mesh.n_elem
     mapdl_console.aplot()  # check aplot and verify it doesn't mess up the element plotting
@@ -492,7 +521,7 @@ def test_eplot(mapdl_console, make_block):
     assert mapdl_console.mesh.n_elem == init_elem
 
 
-@skip_no_xserver
+@requires("xserver")
 def test_eplot_screenshot(mapdl_console, make_block, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     mapdl_console.eplot(
@@ -582,7 +611,7 @@ def test_load_table(mapdl_console):
     assert np.allclose(mapdl_console.parameters["my_conv"], my_conv[:, -1])
 
 
-def test_mode_corba(mapdl_console):
+def test_mode_console(mapdl_console):
     assert mapdl_console.mode == "console"
     assert not mapdl_console.is_grpc
     assert not mapdl_console.is_corba

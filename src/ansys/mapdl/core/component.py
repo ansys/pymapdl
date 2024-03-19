@@ -1,5 +1,27 @@
-"""Component related module"""
+# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
+"""Component related module"""
+import re
 from typing import (
     TYPE_CHECKING,
     Any,
@@ -142,6 +164,11 @@ class Component(tuple):
         """Return the type of the component. For instance "NODES", "KP", etc."""
         return self._type
 
+    @property
+    def items(self) -> tuple:
+        """Return the ids of the entities in the component."""
+        return tuple(self)
+
 
 class ComponentManager:
     """Collection of MAPDL components.
@@ -175,15 +202,17 @@ class ComponentManager:
     Set a component without specifying the type, by default it is ``NODE``:
 
     >>> mapdl.components["mycomp4"] = (1, 2, 3)
+    /Users/german.ayuso/pymapdl/src/ansys/mapdl/core/component.py:282: UserWarning: Assuming a NODES selection.
+    It is recommended you use the following notation to avoid this warning:
+    \>\>\> mapdl.components['mycomp3'] = 'NODES' (1, 2, 3)
+    Alternatively, you disable this warning using:
+    > mapdl.components.default_entity_warning=False
+    warnings.warn(
 
     You can change the default type by changing
     :attr:`Mapdl.components.default_entity <ansys.mapdl.core.Mapdl.components.default_entity>`
 
     >>> mapdl.component.default_entity = "KP"
-        /Users/german.ayuso/pymapdl/src/ansys/mapdl/core/component.py:282: UserWarning: Assuming a NODES selection.
-        It is recommended you use the following notation to avoid this warning:
-        \>\>\> mapdl.components['mycomp3'] = 'NODES' (1, 2, 3)
-        Alternatively, you disable this warning using
     >>> mapdl.component["mycomp] = [1, 2, 3]
     >>> mapdl.component["mycomp"].type
     'KP'
@@ -213,15 +242,17 @@ class ComponentManager:
         mapdl : ansys.mapdl.core.Mapdl
             Mapdl instance which this class references to.
         """
-        from ansys.mapdl.core.mapdl import _MapdlCore
+        from ansys.mapdl.core.mapdl import MapdlBase
 
-        if not isinstance(mapdl, _MapdlCore):
+        if not isinstance(mapdl, MapdlBase):
             raise TypeError("Must be implemented from MAPDL class")
 
         self._mapdl_weakref: weakref.ReferenceType[Mapdl] = weakref.ref(mapdl)
         self.__comp: UNDERLYING_DICT = {}
         self._update_always: bool = True
-        self._autoselect_components: bool = False  # if True, PyMAPDL will try to select the CM first if it does not appear in the CMLIST output.
+        self._autoselect_components: bool = (
+            False  # if True, PyMAPDL will try to select the CM first if it does not appear in the CMLIST output.
+        )
 
         self._default_entity: ENTITIES_TYP = "NODES"
         self._default_entity_warning: bool = True
@@ -274,7 +305,6 @@ class ComponentManager:
         self.__comp = value
 
     def __getitem__(self, key: str) -> ITEMS_VALUES:
-        self._comp = self._mapdl._parse_cmlist()
         forced_to_select = False
 
         if key.upper() not in self._comp and self._autoselect_components:
@@ -388,19 +418,17 @@ class ComponentManager:
 
         _check_valid_pyobj_to_entities(cmitems)
 
-        # Save current selection
-        self._mapdl.cm("__temp__", cmtype)
+        # Using context manager to proper save the selections (including CM)
+        with self._mapdl.save_selection:
+            # Select the cmitems entities
+            func = getattr(self._mapdl, ENTITIES_MAPPING[cmtype].lower())
+            func(type_="S", vmin=cmitems)
 
-        # Select the cmitems entities
-        func = getattr(self._mapdl, ENTITIES_MAPPING[cmtype].lower())
-        func(type_="S", vmin=cmitems)
+            # create component
+            self._mapdl.cm(cmname, cmtype)
 
-        # create component
-        self._mapdl.cm(cmname, cmtype)
-
-        # reselecting previous selection
-        self._mapdl.cmsel("S", "__temp__")
-        self._mapdl.cmdele("__temp__")
+        # adding newly created selection
+        self._mapdl.cmsel("A", cmname)
 
     def __repr__(self) -> str:
         """Return the current components in a pretty format"""
@@ -441,7 +469,8 @@ class ComponentManager:
         """
         yield from self._comp.keys()
 
-    def list(self):
+    @property
+    def names(self):
         """
         Return a tuple that contains the components.
 
@@ -453,6 +482,7 @@ class ComponentManager:
         """
         return tuple(self._comp.keys())
 
+    @property
     def types(self):
         """
         Return the types of the components.
@@ -476,3 +506,106 @@ class ComponentManager:
 
         """
         return self._comp.items()
+
+    def select(self, names: Union[str, list[str], tuple[str]], mute=False) -> None:
+        """Select Select components given their names
+
+        Select components given their names.
+
+        Parameters
+        ----------
+        names : Union[str, list[str], tuple[str]]
+            Name(s) of the components
+        mute : bool, optional
+            Whether to mute the `/CMSEL` command output or not, by default False.
+
+        """
+        if isinstance(names, str):
+            names = [names]
+
+        for i, each_name in enumerate(names):
+            if i == 0:
+                self._mapdl.cmsel("S", each_name, mute=mute)
+            else:
+                self._mapdl.cmsel("A", each_name, mute=mute)
+
+    def _get_all_components_type(self, type_: ENTITIES_TYP):
+        """Returns a dict with all the components which type matches the entity type"""
+        dict_ = {}
+        for each_comp in self._comp:
+            item = self.__getitem__(each_comp)
+            i_type_ = item.type
+            i_items = item.items
+            if i_type_ == type_:
+                dict_[each_comp] = i_items
+        return dict_
+
+
+def _parse_cmlist_indiv(
+    cmname: str, cmtype: str, cmlist: Optional[str] = None
+) -> List[int]:
+    # Capturing blocks
+    if "NAME" in cmlist and "SUBCOMPONENTS" in cmlist:
+        header = r"NAME\s+TYPE\s+SUBCOMPONENTS"
+
+    elif "LIST COMPONENT" in cmlist:
+        header = ""
+
+    cmlist = "\n\n".join(
+        re.findall(
+            r"(?s)" + header + r"\s+(.*?)\s*(?=\n\s*\n|\Z)",
+            cmlist,
+            flags=re.DOTALL,
+        )
+    )
+
+    # Capturing items in each block
+    rg = cmname.upper() + r"\s+" + cmtype.upper() + r"\s+(.*?)\s*(?=\n\s*\n|\Z)"
+    items = "\n".join(re.findall(rg, cmlist, flags=re.DOTALL))
+
+    # Joining them together and giving them format.
+    items = items.replace("\n", "  ").split()
+    items = [int(each) for each in items]
+
+    return items
+
+
+def _parse_cmlist(cmlist: Optional[str] = None) -> Dict[str, Any]:
+    include_selection = False
+    if re.search(r"NAME\s+TYPE\s+SUBCOMPONENTS", cmlist):
+        # header
+        #  "NAME                            TYPE      SUBCOMPONENTS"
+        blocks = re.findall(
+            r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+            cmlist,
+            flags=re.DOTALL,
+        )
+    elif re.search(r"NAME\s+SELE\s+TYPE\s+SUBCOMPONENTS", cmlist):
+        blocks = re.findall(
+            r"(?s)NAME\s+SELE\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+            cmlist,
+            flags=re.DOTALL,
+        )
+        # Using `cmlist,all` which also includes selection
+        include_selection = True
+    elif "LIST ALL SELECTED COMPONENTS":
+        blocks = cmlist.splitlines()[1:]
+    else:
+        raise ValueError("The format of the CMLIST output is not recognaised.")
+
+    cmlist = "\n".join(blocks)
+
+    def extract(each_line, ind):
+        return each_line.split()[ind].strip()
+
+    def extract_line(each_line):
+        if include_selection:
+            return [extract(each_line, 1), extract(each_line, 2)]
+        else:
+            return extract(each_line, 1)
+
+    return {
+        extract(each_line, 0): extract_line(each_line)
+        for each_line in cmlist.splitlines()
+        if each_line
+    }
