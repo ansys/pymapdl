@@ -1266,6 +1266,7 @@ def test_get_file_path(mapdl, tmpdir):
     assert fobject not in mapdl.list_files()
     assert fobject not in os.listdir()
 
+    prev = mapdl._local
     mapdl._local = True
     fname_ = mapdl._get_file_path(fobject)
     assert fname in fname_
@@ -1276,6 +1277,8 @@ def test_get_file_path(mapdl, tmpdir):
     fname_ = mapdl._get_file_path(fobject)
     # If we are not in local, now it should have been uploaded
     assert fname in mapdl.list_files()
+
+    mapdl._local = prev
 
 
 @pytest.mark.parametrize(
