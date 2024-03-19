@@ -120,7 +120,7 @@ else:
 
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc as Mapdl
 from ansys.mapdl.core.misc import Information, Report, _check_has_ansys
-from ansys.mapdl.core.pool import LocalMapdlPool
+from ansys.mapdl.core.pool import MapdlPool
 from ansys.mapdl.core.theme import MapdlTheme, _apply_default_theme
 
 _HAS_ANSYS = _check_has_ansys()
