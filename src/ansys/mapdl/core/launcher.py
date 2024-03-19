@@ -802,6 +802,11 @@ def get_start_instance(start_instance: bool = True):
     """
     if "PYMAPDL_START_INSTANCE" in os.environ and os.environ["PYMAPDL_START_INSTANCE"]:
         # It should not be empty
+        if isinstance(start_instance, bool):
+            warnings.warn(
+                "The environment variable 'PYMAPDL_START_INSTANCE' is set, "
+                "hence the argument 'start_instance' is overwritten."
+            )
         start_instance = os.environ["PYMAPDL_START_INSTANCE"]
     else:
         LOG.debug(
@@ -1475,6 +1480,10 @@ def launch_mapdl(
     # Getting IP from env var
     ip_env_var = os.environ.get("PYMAPDL_IP", "")
     if ip_env_var != "":
+        if ip:
+            warnings.warn(
+                "The env var 'PYMAPDL_IP' is set, hence the 'ip' argument is overwritten."
+            )
         ip = ip_env_var
         LOG.debug(f"An IP ({ip}) has been set using 'PYMAPDL_IP' env var.")
 
