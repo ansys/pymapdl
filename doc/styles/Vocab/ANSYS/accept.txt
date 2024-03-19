@@ -1,14 +1,10 @@
 [aA]nsys
 [Bb]ooleans
-[Cc]odespace
-[Cc]odespaces
 [Cc]ommand [Pp]rompt
-[Dd]ocker
 [Ee]igensolver
 [Hh]yperelasticity
 [Kk]eypoints
 [Mm]atplotlib
-[Mm]ulti-[Ff]ield
 [Nn]umpy
 [Pp]ostprocess
 [Pp]ostprocessing
@@ -18,14 +14,9 @@
 [Pp]yansys
 [Pp]ythonic
 [Pp]ythonically
-[Rs]ST
-[Ss]ubsystem
 [Ss]uperelements
 [Vv]on Mises
-[Ww]indows
-2D
 3-D
-3D
 aadd
 aas
 AAS
@@ -34,7 +25,6 @@ ALIS
 AMLs
 ans
 ANSYS
-Ansys Mechanical APDL
 APDL Math
 APDLMath
 APIs
@@ -53,9 +43,8 @@ Chao
 container_layout
 datas
 delet
-Dev
-devcontainer
-DevContainer
+docker
+Docker
 dof
 ect
 eigenfrequency
@@ -68,20 +57,19 @@ env
 Eser
 ethernet
 extrem
-FEMs
 filname
 Fortran
 FSW
-GitHub
+Getting Started with PyMAPDL
 Gmsh
-GPa
 GUI
 hexahedral
 hostname
-HTML
-Image[Mm]agick
+Imagemagick
+ImageMagick
 imagin
 importlib
+Intro to Ansys Mechanical APDL Scripting
 ist
 Julia
 Krylov
@@ -92,8 +80,6 @@ LDHI
 levl
 Linux
 MacOS
-mapdl
-mapdl
 MAPDL
 mater
 MATLAB
@@ -129,13 +115,13 @@ PyAnsys Math
 PyDPF-Core
 PyDPF-Post
 PyMAPDL
-pymapdl
 Python
 QRDAMP
 Radiosity
 Rao
 righ
 RNNN
+RST
 singl
 smal
 sord
@@ -143,29 +129,28 @@ spotweld
 struc
 subselected
 substep
+Subsystem
 sur
 tablet
 thermomechanical
 thermomechanically
-thispagetitle
 Tool-Narayanaswamy
 tread
 trian
 UCnvrg
 uncompress
 unconverged
-unpause
 UNSYM
 unsymmetric
 UPF
 UPFs
 viscoplastic
 vise
-Visual Studio Code
 von
 VTK
 wan
 WAN
+Windows
 Windows Subsystem
 Windows Subsystem for Linux
 wsl

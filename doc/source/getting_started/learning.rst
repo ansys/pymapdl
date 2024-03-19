@@ -1,39 +1,20 @@
-.. _ref_learning:
+
 
 ================
 Learning PyMAPDL
 ================
 
-Introduction
-============
+Ansys has prepared multiple resources to help you to learn and use PyMAPDL.
+You can access them from the website `Ansys Learning Resources <learning_resources_>`_.
+In this page, you can find a summary of the available resources for MAPDL and PyMAPDL.
 
-.. centered:: _PyMAPDL provides Pythonic access to MAPDL, an Ansys finite element solver._
 
-PyMAPDL touches on different technologies such as Python and finite elements, to bring them together
-and offer you a better user experience by seamlessly connecting this Ansys solver and the Python ecosystem.
-To learn how to use this library, you have many resources available:
 
-* Complete the :ref:`ref_pymapdl_course` course, which guides you through PyMAPDL's
-  main functionalities.
-* Visit the `Examples gallery <pymapdl_examples_gallery_>`_ to learn from practical examples.
-  The `Static analysis of a corner bracket <pymapdl_bracket_static_example_>`_ example is a very
-  good starting point.
-* Become familiar with the Python programming language. There are many online courses and
-  websites for learning Python. Additionally, Ansys provides a :ref:`ref_python_course` course.
-* Understand finite element methods (FEMs). Because physical models are solved using FEMs, you
-  need to know how these methods work to get accurate and adequate solutions. The 
-  `Introduction to Finite Element Methods <course_fem_track_>`_ course on the Ansys
-  Learning Resources website offers tracks to help you to get familiar with these methods.
-* Take the Ansys :ref:`ref_mapdl_course` course. Because PyMAPDL interface with MAPDL
-  through APDL commands, you should become familiar with MAPDL commands and
-  workflows.
-
-.. _ref_additional_learning:
 
 Downloads
-=========
+===========
 
-- You can try the Student Version of Ansys products. For more information, see
+- You can try the Student Version of Ansys products in
   `Ansys Student Versions <ansys_student_version_>`_.
   These are versions valid during a year and with limited capabilities 
   regarding number of nodes, elements, etc.
@@ -46,12 +27,10 @@ Downloads
 
 
 Courses
-=======
+==============
 
 Ansys has prepared high quality courses to guide you through the learning process.
 
-
-.. _ref_python_course:
 
 Intro to Python
 ---------------
@@ -78,12 +57,11 @@ Course content
 * Meet the Instructor
 
 
-.. _ref_pymapdl_course:
 
-Getting started with PyMAPDL
+Getting Started with PyMAPDL
 ----------------------------
 
-The `Getting started with PyMAPDL <course_getting_started_pymapdl_>`_ course teaches
+The `Getting Started with PyMAPDL <course_getting_started_pymapdl_>`_ course teaches
 you about PyMAPDL, the Pythonic way to access Ansys MAPDL. 
 
 Course content
@@ -96,12 +74,12 @@ Course content
 * Post Completion Survey
 * Meet the Instructors
 
-.. _ref_mapdl_course:
 
-Intro to Ansys Mechanical APDL scripting
+
+Intro to Ansys Mechanical APDL Scripting
 ----------------------------------------
 
-The `Intro to Ansys Mechanical APDL scripting <course_intro_apdl_>`_
+The `Intro to Ansys Mechanical APDL Scripting <course_intro_apdl_>`_
 course teaches you how APDL, the Mechanical solver syntax language, works.
 
 Course content
@@ -171,15 +149,6 @@ showcases, visit `Technology showcase guide <ansys_techdemo_guide_>`_.
 
 **NOTE**: You might need to create a free Ansys account to access these resources.
 
-
-Additional resources
-====================
-
-Ansys has prepared multiple resources to help you to learn and use PyMAPDL.
-You can access them from the `Ansys Learning Resources <learning_resources_>`_ website.
-In this website, you can find a summary of the available resources for MAPDL and PyMAPDL.
-
-
 Recommended articles
 ====================
 
@@ -204,5 +173,6 @@ Recommended articles
 
 .. vale on
 
-Feel free to share any educational or learning resources by `opening an issue <pymapdl_issues_>`_
-or `starting a discussion <pymapdl_discussions_>`_ on GitHub.
+
+Feel free to email any educational or learning resource to
+`PyAnsys Core team <pyansys_core_>`_.

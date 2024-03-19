@@ -1,25 +1,3 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
-# SPDX-License-Identifier: MIT
-#
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 """Contains the ansXpl class."""
 import json
 import pathlib
@@ -28,6 +6,7 @@ import string
 import weakref
 
 from ansys.api.mapdl.v0 import mapdl_pb2
+from ansys.math.core.math import AnsMath
 import numpy as np
 
 from .common_grpc import ANSYS_VALUE_TYPE
@@ -441,8 +420,6 @@ class ansXpl:
                  1.20642736e-02,  2.58299321e-11,  9.14504940e-04]])
 
         """
-        from ansys.math.core.math import AnsMath
-
         if recordname.upper() != "NSL":
             raise ValueError("Currently, the only supported recordname is 'NSL'")
 
@@ -495,8 +472,6 @@ class ansXpl:
         array([ 4,  7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43,
                46, 49, 52, 55, 58,  1], dtype=int32)
         """
-        from ansys.math.core.math import AnsMath
-
         rand_name = id_generator()
         response = self._mapdl.run(f"*XPL,READ,{recordname},{rand_name}")
         self._check_ignored(response)

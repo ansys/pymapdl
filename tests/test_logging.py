@@ -1,25 +1,3 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
-# SPDX-License-Identifier: MIT
-#
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 """"Testing of log module"""
 import logging as deflogging  # Default logging
 import os
@@ -29,7 +7,7 @@ import pytest
 
 from ansys.mapdl.core import LOG  # Global logger
 from ansys.mapdl.core import logging
-from conftest import requires
+from conftest import skip_if_no_has_grpc
 
 ## Notes
 # Use the next fixtures for:
@@ -194,7 +172,7 @@ def test_global_logger_debug_levels(caplog):
                     )
 
 
-@requires("grpc")
+@skip_if_no_has_grpc
 def test_global_logger_format():
     # Since we cannot read the format of our logger, because pytest just dont show the console output or
     # if it does, it formats the logger with its own formatter, we are going to check the logger handlers
@@ -217,7 +195,7 @@ def test_global_logger_format():
     assert "This is a message" in log
 
 
-@requires("grpc")
+@skip_if_no_has_grpc
 def test_instance_logger_format(mapdl):
     # Since we cannot read the format of our logger, because pytest just dont show the console output or
     # if it does, it formats the logger with its own formatter, we are going to check the logger handlers

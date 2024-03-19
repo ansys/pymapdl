@@ -1,25 +1,3 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
-# SPDX-License-Identifier: MIT
-#
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 import inspect
 
 import numpy as np
@@ -36,10 +14,14 @@ from ansys.mapdl.core.commands import (
     StringWithLiteralRepr,
 )
 from ansys.mapdl.core.examples import verif_files
-from conftest import has_dependency, requires
 
-if has_dependency("pandas"):
+try:
     import pandas as pd
+
+    HAS_PANDAS = True
+
+except ModuleNotFoundError:
+    HAS_PANDAS = False
 
 LIST_OF_INQUIRE_FUNCTIONS = [
     "ndinqr",
@@ -588,7 +570,7 @@ def test_cmd_class_prnsol_short():
     assert out_list
     assert isinstance(out_array, np.ndarray) and out_array.size != 0
 
-    if has_dependency("pandas"):
+    if HAS_PANDAS:
         out_df = out.to_dataframe()
         assert isinstance(out_df, pd.DataFrame) and not out_df.empty
 
@@ -596,11 +578,10 @@ def test_cmd_class_prnsol_short():
 def test_cmd_class_dlist_vm(mapdl, cleared):
     # Run only the first 100 lines of VM223
     with open(verif_files.vmfiles["vm223"]) as fid:
-        cmds = fid.read()
+        cmds = fid.readlines()
 
     mapdl.finish()
-    ind = cmds.find("NSEL,ALL")
-    mapdl.input_strings(cmds[:ind])
+    mapdl.input_strings("\n".join(cmds[:100]))
 
     mapdl.allsel("all")
     out = mapdl.dlist()
@@ -650,7 +631,7 @@ def test_output_listing(mapdl, plastic_solve, func, args):
     assert isinstance(out_list, list) and out_list
     assert isinstance(out_array, np.ndarray) and out_array.size != 0
 
-    if has_dependency("pandas"):
+    if HAS_PANDAS:
         out_df = out.to_dataframe()
         assert isinstance(out_df, pd.DataFrame) and not out_df.empty
 
@@ -667,7 +648,7 @@ def test_bclist(mapdl, beam_solve, func):
     with pytest.raises(ValueError):
         out.to_array()
 
-    if has_dependency("pandas"):
+    if HAS_PANDAS:
         out_df = out.to_dataframe()
         assert isinstance(out_df, pd.DataFrame) and not out_df.empty
 
@@ -698,7 +679,6 @@ def test_string_with_literal():
     assert len(output.split()) == 2
 
 
-@requires("pandas")
 @pytest.mark.parametrize("output,last_element", [(set_list_0, 9), (set_list_1, 15)])
 def test_magicwords(output, last_element):
     magicwords = ["SET"]
@@ -733,36 +713,3 @@ def test_nlist_to_array(mapdl, beam_solve):
     assert len(nlist.to_list()) == len(mapdl.mesh.nodes)
     assert len(nlist.to_array()) == len(mapdl.mesh.nodes)
     assert np.allclose(nlist.to_array()[:, 1:4], mapdl.mesh.nodes)
-
-
-def test_cmlist(mapdl):
-    mapdl.clear()
-
-    mapdl.prep7()
-    # setup the full file
-    mapdl.block(0, 1, 0, 1, 0, 1)
-    mapdl.et(1, 186)
-    mapdl.esize(0.5)
-    mapdl.vmesh("all")
-
-    mapdl.cm("myComp", "node")
-    mapdl.cm("_myComp", "node")
-    mapdl.cm("_myComp_", "node")
-
-    cmlist = mapdl.cmlist()
-    assert "MYCOMP" in cmlist
-
-    cmlist_all = mapdl.cmlist("all")
-    assert "_MYCOMP_" in cmlist_all
-    assert "_MYCOMP" in cmlist_all
-    assert "MYCOMP" in cmlist_all
-
-    assert ["MYCOMP"] == mapdl.cmlist().to_list()
-
-    assert "_MYCOMP_" in cmlist_all.to_list()
-    assert "_MYCOMP" in cmlist_all.to_list()
-    assert "MYCOMP" in cmlist_all.to_list()
-
-    assert len(cmlist_all.to_array()) == len(cmlist_all.to_list())
-    for each_ in cmlist_all.to_list():
-        assert each_ in cmlist_all

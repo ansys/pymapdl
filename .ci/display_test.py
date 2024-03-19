@@ -1,5 +1,4 @@
 """Quickly check if VTK off screen plotting works."""
-
 import pyvista
 from pyvista.plotting import system_supports_plotting
 

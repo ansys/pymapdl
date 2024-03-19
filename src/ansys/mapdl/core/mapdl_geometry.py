@@ -1,34 +1,15 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
-# SPDX-License-Identifier: MIT
-#
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 """Module to support MAPDL CAD geometry"""
+import contextlib
 from functools import wraps
+import re
 from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
 from numpy.typing import NDArray
+import pyvista as pv
 
 from ansys.mapdl.core import _HAS_PYVISTA, Mapdl
-from ansys.mapdl.core.errors import VersionError
+from ansys.mapdl.core.errors import ComponentNoData, VersionError
 
 if _HAS_PYVISTA:
     import pyvista as pv
@@ -36,13 +17,13 @@ if _HAS_PYVISTA:
 if TYPE_CHECKING:  # pragma: no cover
     from pyiges import Iges
 
-from ansys.mapdl.core.misc import requires_package, run_as_prep7, supress_logging
+from ansys.mapdl.core.misc import run_as_prep7, supress_logging
 from ansys.mapdl.core.theme import MapdlTheme
 
 VALID_SELECTION_TYPE = ["S", "R", "A", "U"]
 VALID_SELECTION_ENTYTY = ["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
 
-from ansys.mapdl.core.mapdl_core import (
+from ansys.mapdl.core.mapdl import (
     DEBUG_LEVELS,
     VALID_SELECTION_ENTITY_TP,
     VALID_SELECTION_TYPE_TP,
@@ -76,30 +57,70 @@ For more information, see `Mesh and geometry <https://mapdl.docs.pyansys.com/ver
 """
 
 
-if _HAS_PYVISTA:
+class Multiblock(pv.MultiBlock):
+    def __call__(self, *args, **kwargs):
+        raise VersionError(VERSION_ERROR)
 
-    class Multiblock(pv.MultiBlock):
-        def __call__(self, *args, **kwargs):
-            raise VersionError(VERSION_ERROR)
+    @wraps(pv.MultiBlock.plot)
+    def plot(self, *args, **kwargs):
+        color = kwargs.pop("color", "white")
+        return super().plot(*args, color=color, theme=MapdlTheme(), **kwargs)
 
-        @wraps(pv.MultiBlock.plot)
-        def plot(self, *args, **kwargs):
-            color = kwargs.pop("color", "white")
-            return super().plot(*args, color=color, theme=MapdlTheme(), **kwargs)
 
-    @requires_package("pyvista")
-    def merge_polydata(items: Iterable["pv.PolyData"]) -> "pv.PolyData":
-        """Merge list of polydata or unstructured grids"""
+def merge_polydata(items: Iterable["pv.PolyData"]) -> "pv.PolyData":
+    """Merge list of polydata or unstructured grids"""
 
-        # lazy import here for faster module loading
-        from vtkmodules.vtkFiltersCore import vtkAppendPolyData
+    # lazy import here for faster module loading
+    from vtkmodules.vtkFiltersCore import vtkAppendPolyData
 
-        afilter = vtkAppendPolyData()
-        for item in items:
-            afilter.AddInputData(item)
-            afilter.Update()
+    afilter = vtkAppendPolyData()
+    for item in items:
+        afilter.AddInputData(item)
+        afilter.Update()
 
-        return pv.wrap(afilter.GetOutput())
+    return pv.wrap(afilter.GetOutput())
+
+
+def get_elements_per_area(resp: str) -> List[List[int]]:
+    """Get the number of elements meshed for each area given the response
+    from ``AMESH``.
+
+    GENERATE NODES AND ELEMENTS   IN  ALL  SELECTED AREAS
+        ** AREA     1 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA     2 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA     3 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA     4 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA     5 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA     6 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA     7 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA     8 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA     9 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA    10 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA    11 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+        ** AREA    12 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
+
+     NUMBER OF AREAS MESHED     =         12
+     MAXIMUM NODE NUMBER        =        772
+     MAXIMUM ELEMENT NUMBER     =        768
+
+    Returns
+    -------
+    list
+        List of tuples, each containing the area number and number of
+        elements per area.
+
+    """
+    # MAPDL changed their output at some point.  Check for both output types.
+    reg = re.compile(r"Meshing of area (\d*) completed \*\* (\d*) elements")
+    groups = reg.findall(resp)
+    if groups:
+        groups = [[int(anum), int(nelem)] for anum, nelem in groups]
+    else:
+        reg = re.compile(r"AREA\s*(\d*).*?(\d*)\s*QUADRILATERALS,\s*(\d*) TRIANGLES")
+        groups = reg.findall(resp)
+        groups = [[int(anum), int(nquad) + int(ntri)] for anum, nquad, ntri in groups]
+
+    return groups
 
 
 class Geometry:
@@ -121,9 +142,9 @@ class Geometry:
         mapdl : ansys.mapdl.core.Mapdl
             Mapdl instance which this class references to.
         """
-        from ansys.mapdl.core.mapdl import MapdlBase
+        from ansys.mapdl.core.mapdl import _MapdlCore
 
-        if not isinstance(mapdl, MapdlBase):
+        if not isinstance(mapdl, _MapdlCore):
             raise TypeError("Must be initialized using a gRPC MAPDL class")
 
         self._mapdl = mapdl
@@ -134,7 +155,6 @@ class Geometry:
     def _set_log_level(self, level: DEBUG_LEVELS) -> None:
         return self._mapdl.set_log_level(level)
 
-    @requires_package("pyiges")
     def _load_iges(self) -> "Iges":
         """Loads the iges file from MAPDL as a pyiges class"""
         # Lazy import here for speed and stability
@@ -154,7 +174,6 @@ class Geometry:
     def __setitem__(self, key: Any, value: Any):
         raise NotImplementedError("This method has not been implemented yet")
 
-    @requires_package("pyvista")
     def __getitem__(self, name: str):
         name = name.lower()
         if "kp" in name:
@@ -171,7 +190,6 @@ class Geometry:
             )
 
     @property
-    @requires_package("pyiges")
     def _keypoints(self) -> Tuple[NDArray, NDArray]:
         """Returns keypoints cache"""
         if self._keypoints_cache is None:
@@ -179,8 +197,7 @@ class Geometry:
         return self._keypoints_cache
 
     @property
-    @requires_package("pyvista")
-    def keypoints(self) -> "pv.MultiBlock":
+    def keypoints(self) -> pv.MultiBlock:
         """Obtain the keypoints geometry.
 
         Obtain the selected keypoints as a :class:`pyvista.MultiBlock` object.
@@ -239,13 +256,12 @@ class Geometry:
             mb.set_block_name(index=ind, name=f"kp {mapdl_index}")
         return mb
 
-    @requires_package("pyvista")
     def get_keypoints(
         self,
         return_as_list: bool = False,
         return_as_array: bool = False,
         return_ids_in_array: bool = False,
-    ) -> Union[NDArray[Any], "pv.PolyData", List["pv.PolyData"]]:
+    ) -> Union[NDArray[Any], pv.PolyData, List[pv.PolyData]]:
         """Obtain the keypoints geometry.
 
         Obtain the selected keypoints as a :class:`pyvista.PolyData` object or
@@ -341,15 +357,14 @@ class Geometry:
             return keypoints_pd
 
     @property
-    def _lines(self) -> List["pv.PolyData"]:
+    def _lines(self) -> List[pv.PolyData]:
         """Cache of the lines."""
         if self._lines_cache is None:
             self._lines_cache = self._load_lines()
         return self._lines_cache
 
     @property
-    @requires_package("pyvista")
-    def lines(self) -> "pv.MultiBlock":
+    def lines(self) -> pv.MultiBlock:
         """Geometry of the lines.
 
         Obtain the selected lines as a :class:`pyvista.MultiBlock` object.
@@ -421,10 +436,9 @@ class Geometry:
             mb.set_block_name(index=ind, name=f"line {mapdl_index}")
         return mb
 
-    @requires_package("pyvista")
     def get_lines(
         self, return_as_list: bool = False
-    ) -> Union["pv.PolyData", List["pv.PolyData"]]:
+    ) -> Union[pv.PolyData, List[pv.PolyData]]:
         """Obtain line geometry
 
         Obtain the active lines as a :class:`pyvista.PolyData` object or
@@ -468,8 +482,7 @@ class Geometry:
             return merge_polydata(self._lines)
 
     @property
-    @requires_package("pyvista")
-    def areas(self) -> "pv.MultiBlock":
+    def areas(self) -> pv.MultiBlock:
         """Geometry of the areas.
 
         Obtain the selected areas as a :class:`pyvista.MultiBlock` object.
@@ -538,10 +551,9 @@ class Geometry:
             mb.set_block_name(index=ind, name=f"area {mapdl_index}")
         return mb
 
-    @requires_package("pyvista")
     def get_areas(
         self, quality: int = 1, return_as_list: Optional[bool] = False
-    ) -> Union[List["pv.UnstructuredGrid"], "pv.PolyData"]:
+    ) -> Union[List[pv.UnstructuredGrid], pv.PolyData]:
         """Get active areas from MAPDL represented as :class:`pyvista.PolyData` or a list of :class:`pyvista.UnstructuredGrid`.
 
         Parameters
@@ -616,14 +628,13 @@ class Geometry:
 
     @supress_logging
     @run_as_prep7
-    @requires_package("pyvista")
     def generate_surface(
         self,
         density: int = 4,
         amin: Optional[int] = None,
         amax: Optional[int] = None,
         ninc: Optional[int] = None,
-    ) -> "pv.PolyData":
+    ) -> pv.PolyData:
         """
         Generate an all-triangular surface of the active surfaces.
 
@@ -643,76 +654,83 @@ class Geometry:
 
         ninc : int, optional
             Steps to between amin and amax.
-
         """
-        with self._mapdl.save_selection:
-            orig_anum = self.anum
+        # store initially selected areas and elements
+        with contextlib.suppress(ComponentNoData):
+            # avoiding empty components exceptions
+            with self._mapdl.non_interactive:
+                self._mapdl.cm("__tmp_elem__", "ELEM")
+                self._mapdl.cm("__tmp_area__", "AREA")
 
-            # reselect from existing selection to mimic APDL behavior
-            if amin or amax:
-                if amax is None:
-                    amax = amin
+        orig_anum = self.anum
 
-                if amin is None:  # amax is non-zero
-                    amin = 1
+        # reselect from existing selection to mimic APDL behavior
+        if amin or amax:
+            if amax is None:
+                amax = amin
 
-                if ninc is None:
-                    ninc = ""
+            if amin is None:  # amax is non-zero
+                amin = 1
 
-                self._mapdl.asel("R", "AREA", vmin=amin, vmax=amax, vinc=ninc)
+            if ninc is None:
+                ninc = ""
 
-            # duplicate areas to avoid affecting existing areas
-            a_num = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
-            self._mapdl.numstr("AREA", a_num, mute=True)
-            self._mapdl.agen(2, "ALL", noelem=1, mute=True)
-            a_max = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
+            self._mapdl.asel("R", "AREA", vmin=amin, vmax=amax, vinc=ninc)
 
-            self._mapdl.asel("S", "AREA", vmin=a_num + 1, vmax=a_max, mute=True)
-            # necessary to reset element/area meshing association
-            self._mapdl.aatt(mute=True)
+        # duplicate areas to avoid affecting existing areas
+        a_num = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
+        self._mapdl.numstr("AREA", a_num, mute=True)
+        self._mapdl.agen(2, "ALL", noelem=1, mute=True)
+        a_max = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
 
-            # create a temporary etype
-            etype_max = int(self._mapdl.get(entity="ETYP", item1="NUM", it1num="MAX"))
-            etype_old = self._mapdl.parameters.type
-            etype_tmp = etype_max + 1
+        self._mapdl.asel("S", "AREA", vmin=a_num + 1, vmax=a_max, mute=True)
+        # necessary to reset element/area meshing association
+        self._mapdl.aatt(mute=True)
 
-            old_routine = self._mapdl.parameters.routine
+        # create a temporary etype
+        etype_max = int(self._mapdl.get(entity="ETYP", item1="NUM", it1num="MAX"))
+        etype_old = self._mapdl.parameters.type
+        etype_tmp = etype_max + 1
 
-            self._mapdl.et(etype_tmp, "MESH200", 6, mute=True)
-            self._mapdl.shpp("off", mute=True)
-            self._mapdl.smrtsize(density, mute=True)
-            self._mapdl.type(etype_tmp, mute=True)
+        old_routine = self._mapdl.parameters.routine
 
-            if old_routine != "PREP7":
-                self._mapdl.prep7(mute=True)
+        self._mapdl.et(etype_tmp, "MESH200", 6, mute=True)
+        self._mapdl.shpp("off", mute=True)
+        self._mapdl.smrtsize(density, mute=True)
+        self._mapdl.type(etype_tmp, mute=True)
 
-            # Mesh and get the number of elements per area
-            resp = self._mapdl.amesh("all")
-            elements_per_area = self.get_elements_per_area()
+        if old_routine != "PREP7":
+            self._mapdl.prep7(mute=True)
 
-            self._mapdl.esla("S")
-            grid = self._mapdl.mesh._grid.linear_copy()
-            pd = pv.PolyData(grid.points, grid.cells, n_faces=grid.n_cells)
+        # Mesh and get the number of elements per area
+        resp = self._mapdl.amesh("all")
+        groups = get_elements_per_area(resp)
 
-            # pd['ansys_node_num'] = grid['ansys_node_num']
-            # pd['vtkOriginalPointIds'] = grid['vtkOriginalPointIds']
-            # pd.clean(inplace=True)  # OPTIONAL
+        self._mapdl.esla("S")
+        grid = self._mapdl.mesh._grid.linear_copy()
+        pd = pv.PolyData(grid.points, grid.cells, n_faces=grid.n_cells)
 
-            # delete all temporary meshes and clean up settings
-            self._mapdl.aclear("ALL", mute=True)
-            self._mapdl.adele("ALL", kswp=1, mute=True)
-            self._mapdl.numstr("AREA", 1, mute=True)
-            self._mapdl.type(etype_old, mute=True)
-            self._mapdl.etdele(etype_tmp, mute=True)
-            self._mapdl.shpp("ON", mute=True)
-            self._mapdl.smrtsize("OFF", mute=True)
+        # pd['ansys_node_num'] = grid['ansys_node_num']
+        # pd['vtkOriginalPointIds'] = grid['vtkOriginalPointIds']
+        # pd.clean(inplace=True)  # OPTIONAL
+
+        # delete all temporary meshes and clean up settings
+        self._mapdl.aclear("ALL", mute=True)
+        self._mapdl.adele("ALL", kswp=1, mute=True)
+        self._mapdl.numstr("AREA", 1, mute=True)
+        self._mapdl.type(etype_old, mute=True)
+        self._mapdl.etdele(etype_tmp, mute=True)
+        self._mapdl.shpp("ON", mute=True)
+        self._mapdl.smrtsize("OFF", mute=True)
+        self._mapdl.cmsel("S", "__tmp_area__", "AREA", mute=True)
+        self._mapdl.cmsel("S", "__tmp_elem__", "ELEM", mute=True)
 
         # store the area number used for each element
         entity_num = np.empty(grid.n_cells, dtype=np.int32)
-        if grid and len(elements_per_area) != 0:
+        if grid and groups:
             # add anum info
             i = 0
-            for index, (anum, nelem) in enumerate(elements_per_area):
+            for index, (anum, nelem) in enumerate(groups):
                 # have to use original area numbering here as the
                 # duplicated areas numbers are inaccurate
                 entity_num[i : i + nelem] = orig_anum[index]
@@ -845,18 +863,24 @@ class Geometry:
         return self._mapdl.get_array("VOLU", item1="VLIST").astype(np.int32)
 
     @supress_logging
-    @requires_package("pyvista")
-    @requires_package("pyiges")
-    def _load_lines(self) -> List["pv.PolyData"]:
+    def _load_lines(self) -> List[pv.PolyData]:
         """Load lines from MAPDL using IGES"""
         # ignore volumes
-        with self._mapdl.save_selection:
-            self._mapdl.ksel("ALL", mute=True)
-            self._mapdl.lsel("ALL", mute=True)
-            self._mapdl.asel("ALL", mute=True)
-            self._mapdl.vsel("NONE", mute=True)
+        self._mapdl.cm("__tmp_volu__", "VOLU", mute=True)
+        self._mapdl.cm("__tmp_line__", "LINE", mute=True)
+        self._mapdl.cm("__tmp_area__", "AREA", mute=True)
+        self._mapdl.cm("__tmp_keyp__", "KP", mute=True)
+        self._mapdl.ksel("ALL", mute=True)
+        self._mapdl.lsel("ALL", mute=True)
+        self._mapdl.asel("ALL", mute=True)
+        self._mapdl.vsel("NONE", mute=True)
 
-            iges = self._load_iges()
+        iges = self._load_iges()
+
+        self._mapdl.cmsel("S", "__tmp_volu__", "VOLU", mute=True)
+        self._mapdl.cmsel("S", "__tmp_area__", "AREA", mute=True)
+        self._mapdl.cmsel("S", "__tmp_line__", "LINE", mute=True)
+        self._mapdl.cmsel("S", "__tmp_keyp__", "KP", mute=True)
 
         selected_lnum = self.lnum
         lines = []
@@ -887,15 +911,21 @@ class Geometry:
 
         return lines_
 
-    @requires_package("pyiges")
     def _load_keypoints(self) -> Tuple[NDArray, NDArray]:
         """Load keypoints from MAPDL using IGES."""
         # write only keypoints
-        with self._mapdl.save_selection:
-            self._mapdl.vsel("NONE", mute=True)
-            self._mapdl.asel("NONE", mute=True)
-            self._mapdl.lsel("NONE", mute=True)
-            iges = self._load_iges()
+        self._mapdl.cm("__tmp_volu__", "VOLU", mute=True)
+        self._mapdl.cm("__tmp_area__", "AREA", mute=True)
+        self._mapdl.cm("__tmp_line__", "LINE", mute=True)
+        self._mapdl.vsel("NONE", mute=True)
+        self._mapdl.asel("NONE", mute=True)
+        self._mapdl.lsel("NONE", mute=True)
+
+        iges = self._load_iges()
+
+        self._mapdl.cmsel("S", "__tmp_volu__", "VOLU", mute=True)
+        self._mapdl.cmsel("S", "__tmp_area__", "AREA", mute=True)
+        self._mapdl.cmsel("S", "__tmp_line__", "LINE", mute=True)
 
         keypoints = []
         kp_num = []
@@ -1161,8 +1191,7 @@ class Geometry:
             return self.anum
 
     @property
-    @requires_package("pyvista")
-    def volumes(self) -> "pv.MultiBlock":
+    def volumes(self) -> pv.MultiBlock:
         """Obtain the volumes geometry
 
         Obtain the selected volumes as a :class:`pyvista.MultiBlock` object.
@@ -1233,10 +1262,9 @@ class Geometry:
             mb.set_block_name(index=ind, name=f"volume {mapdl_index}")
         return mb
 
-    @requires_package("pyvista")
     def get_volumes(
         self, return_as_list: bool = False, quality: int = 4
-    ) -> Union[List["pv.PolyData"], "pv.PolyData"]:
+    ) -> Union[List[pv.PolyData], pv.PolyData]:
         """Get active volumes from MAPDL represented as a :class:`pyvista.PolyData` object
         or a list of :class:`pyvista.UnstructuredGrid` objects.
 
@@ -1301,15 +1329,22 @@ class Geometry:
             return surf
 
         # Cache current selection
-        with self._mapdl.save_selection:
-            area_num = surf["entity_num"].astype(int)
+        with contextlib.suppress(ComponentNoData):
+            # avoiding empty components exceptions
+            self._mapdl.cm("__temp_volu__", "volu")
+            self._mapdl.cm("__temp_area__", "area")
 
-            for each_volu in self.vnum:
-                self._mapdl.vsel("S", vmin=each_volu)
-                self._mapdl.aslv("S")
-                unstruct = surf.extract_cells(np.in1d(area_num, self.anum))
-                unstruct.entity_num = int(each_volu)
-                volumes_.append(unstruct)
+        area_num = surf["entity_num"].astype(int)
+
+        for each_volu in self.vnum:
+            self._mapdl.vsel("S", vmin=each_volu)
+            self._mapdl.aslv("S")
+            unstruct = surf.extract_cells(np.in1d(area_num, self.anum))
+            unstruct.entity_num = int(each_volu)
+            volumes_.append(unstruct)
+
+        self._mapdl.cmsel("S", "__temp_volu__")
+        self._mapdl.cmsel("S", "__temp_area__")
 
         return volumes_
 
@@ -1461,23 +1496,6 @@ class Geometry:
         else:
             raise ValueError(f'Unable to select "{item_type}"')
 
-    def get_elements_per_area(self) -> NDArray[np.int32]:
-        """Get the number of elements meshed for each area.
-
-        Returns
-        -------
-        np.ndarray
-            An array with the area id for the first column, and the number of
-            elements per each area on the second column.
-
-        """
-        anum = self.anum.ravel()
-
-        elem_per_areas = self._mapdl.get_array("area", "", "ATTR", "NELM")
-        elem_per_areas = elem_per_areas[anum - 1].ravel()
-
-        return np.vstack((anum, elem_per_areas)).T.astype(np.int32)
-
 
 class LegacyGeometry(Geometry):
     """Legacy Pythonic representation of the MAPDL CAD geometry.
@@ -1500,18 +1518,16 @@ class LegacyGeometry(Geometry):
         super().__init__(mapdl)
 
     def keypoints(self) -> np.array:  # type: ignore
-        """Keypoint coordinates."""
+        """Keypoint coordinates"""
         return super().get_keypoints(return_as_array=True)
 
-    @requires_package("pyvista")
-    def lines(self) -> "pv.PolyData":
+    def lines(self) -> pv.PolyData:
         """Active lines as a ``pyvista.PolyData`` object."""
         return super().get_lines()  # type: ignore
 
-    @requires_package("pyvista")
     def areas(
         self, quality=1, merge=False
-    ) -> Union["pv.PolyData", List["pv.UnstructuredGrid"]]:
+    ) -> Union[pv.PolyData, List[pv.UnstructuredGrid]]:
         """List of areas from MAPDL represented as a ``pyvista.PolyData`` object.
 
         Parameters

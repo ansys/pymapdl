@@ -1,0 +1,38 @@
+# Requirements
+# ------------
+# 
+# You should have a valid `ANSYSLMD_LICENSE_FILE` env var. For example:
+# 
+# $ ANSYSLMD_LICENSE_FILE=1055@myserver
+#
+# This env var will be copied to the container `.bashrc` file so it will
+# be available in the future runs.
+# If you do not have a valid env var when starting the container, you will
+# be prompted through the terminal to input a valid port and IP for the
+# license server.
+
+version: '3.3'
+services:
+  mapdldev:
+    restart: always
+    shm_size: '8gb'  # Increase the shared memory directory
+    # to avoid running issues. By Default this is very small (64MB)
+    container_name: mapdldev
+    mem_reservation: 8g
+    environment:
+      - ANSYS_LOCK=OFF  # Avoid lock file creation.
+      - AWP_ROOT222=/ansys_inc  # Specifying the installation directory
+      - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE} # License server env var
+      - PYANSYS_OFF_SCREEN=true  # To avoid plotting.
+    ports:
+      - '50042:50052'  # For the gRPC server
+      - '50045:50055'  # For the DB server
+    image: 'ghcr.io/ansys/mapdl:v22.2-ubuntu'
+    user: "0:0"
+    volumes:
+      # Update this to wherever you want VS Code to mount the folder of your project inside the container.
+      - ../:/local:cached
+
+    # Overrides default command so things don't shut down after the process ends.
+    entrypoint: /bin/bash -c "echo 'Container is ready. You can now attach to it at the port 50042'; while sleep 10000; do :; done"
+

@@ -1,31 +1,7 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
-# SPDX-License-Identifier: MIT
-#
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 """Module to manage downloading and parsing the FEM from the MAPDL gRPC server."""
 from functools import wraps
 import os
-import re
 import time
-from typing import Dict
 import weakref
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
@@ -33,7 +9,7 @@ import numpy as np
 
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE, parse_chunks
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
-from ansys.mapdl.core.misc import requires_package, supress_logging, threaded
+from ansys.mapdl.core.misc import supress_logging, threaded
 
 TMP_NODE_CM = "__NODE__"
 
@@ -128,6 +104,7 @@ class MeshGrpc:
             self._cached_elements = None  # cached list of elements
             self._chunk_size = None
             self._elem = None
+            self._elem_comps = {}
             self._elem_off = None
             self._enum = None  # cached element numbering
             self._esys = None  # cached element coordinate system
@@ -140,6 +117,7 @@ class MeshGrpc:
             self._mtype = None  # cached ansys material type
             self._nnum = None
             self._node_angles = None  # cached node angles
+            self._node_comps = {}
             self._node_coord = None  # cached node coordinates
             self._rcon = None  # cached ansys element real constant
             self._rdat = None
@@ -156,33 +134,33 @@ class MeshGrpc:
         """
         self.logger.debug("Updating cache")
         # elements must have their underlying nodes selected to avoid
-        # VTK segfaul
-        with self._mapdl.save_selection:
-            self._mapdl.nsle("S", mute=True)
+        # VTK segfault
+        self._mapdl.cm(TMP_NODE_CM, "NODE", mute=True)
+        self._mapdl.nsle("S", mute=True)
 
-            # not thread safe
-            self._update_cache_elem()
+        # not thread safe
+        self._update_cache_elem()
 
-            threads = [
-                self._update_cache_element_desc(),
-                self._update_cache_nnum(),
-                self._update_node_coord(),
-            ]
+        threads = [
+            self._update_cache_element_desc(),
+            self._update_cache_nnum(),
+            self._update_node_coord(),
+        ]
 
-            for thread in threads:
-                thread.join()
+        for thread in threads:
+            thread.join()
 
-            # must occur after read
-            self._ignore_cache_reset = True
+        # must occur after read
+        self._ignore_cache_reset = True
 
-            # somehow requesting path seems to help windows avoid an
-            # outright segfault prior to running CMSEL
-            if os.name == "nt":
-                _ = self._mapdl.path
+        # somehow requesting path seems to help windows avoid an
+        # outright segfault prior to running CMSEL
+        if os.name == "nt":
+            _ = self._mapdl.path
 
-            # TODO: flaky
-            time.sleep(0.05)
-
+        # TODO: flaky
+        time.sleep(0.05)
+        self._mapdl.cmsel("S", TMP_NODE_CM, "NODE", mute=True)
         self._ignore_cache_reset = False
 
     @threaded
@@ -347,7 +325,7 @@ class MeshGrpc:
         array of MAPDL element numbers corresponding to the element
         component.  The keys are element component names.
         """
-        return self._mapdl.components._get_all_components_type("ELEM")
+        return self._elem_comps
 
     @property
     def node_components(self):
@@ -357,7 +335,7 @@ class MeshGrpc:
         array of MAPDL node numbers corresponding to the node
         component.  The keys are node component names.
         """
-        return self._mapdl.components._get_all_components_type("NODE")
+        return self._node_comps
 
     @property
     @requires_model()
@@ -385,12 +363,12 @@ class MeshGrpc:
     @property
     def rlblock(self):
         """Real constant data from the RLBLOCK."""
-        return self._parse_rlist()
+        return self._mapdl._parse_rlist()
 
     @property
     def rlblock_num(self):
         """Indices from the real constant data"""
-        return list(self._parse_rlist().keys())
+        return list(self._mapdl._parse_rlist().keys())
 
     @property
     def nnum(self) -> np.ndarray:
@@ -413,15 +391,16 @@ class MeshGrpc:
         array([    1,     2,     3, ..., 19998, 19999, 20000])
         """
         self._ignore_cache_reset = True
-        with self._mapdl.save_selection:
-            self._mapdl.nsel("all", mute=True)
+        self._mapdl.cm(TMP_NODE_CM, "NODE", mute=True)
+        self._mapdl.nsel("all", mute=True)
 
-            nnum = self._mapdl.get_array("NODE", item1="NLIST")
-            nnum = nnum.astype(np.int32)
-            if nnum.size == 1:
-                if nnum[0] == 0:
-                    nnum = np.empty(0, np.int32)
+        nnum = self._mapdl.get_array("NODE", item1="NLIST")
+        nnum = nnum.astype(np.int32)
+        if nnum.size == 1:
+            if nnum[0] == 0:
+                nnum = np.empty(0, np.int32)
 
+        self._mapdl.cmsel("S", TMP_NODE_CM, "NODE", mute=True)
         self._ignore_cache_reset = False
 
         return nnum
@@ -436,16 +415,18 @@ class MeshGrpc:
         array([    1,     2,     3, ..., 19998, 19999, 20000])
         """
         self._ignore_cache_reset = True
-        with self._mapdl.save_selection:
-            self._mapdl.esel("all", mute=True)
+        self._mapdl.cm("__ELEM__", "ELEM", mute=True)
+        self._mapdl.esel("all", mute=True)
 
-            enum = self._mapdl.get_array("ELEM", item1="ELIST")
-            enum = enum.astype(np.int32)
-            if enum.size == 1:
-                if enum[0] == 0:
-                    enum = np.empty(0, np.int32)
+        enum = self._mapdl.get_array("ELEM", item1="ELIST")
+        enum = enum.astype(np.int32)
+        if enum.size == 1:
+            if enum[0] == 0:
+                enum = np.empty(0, np.int32)
 
+        self._mapdl.cmsel("S", "__ELEM__", "ELEM", mute=True)
         self._ignore_cache_reset = False
+
         return enum
 
     @property
@@ -733,7 +714,6 @@ class MeshGrpc:
         return self._grid
 
     @property
-    @requires_package("pyvista")
     def _grid(self):
         if self._grid_cache is None:
             self._update_cache()
@@ -812,37 +792,3 @@ class MeshGrpc:
             fix_midside,
             additional_checking,
         )
-
-    def _parse_rlist(self) -> Dict[int, float]:
-        # mapdl.rmore(*list)
-        with self._mapdl.force_output:
-            rlist = self._mapdl.rlist()
-
-        # removing ueless part
-        rlist = rlist.replace(
-            """   *****MAPDL VERIFICATION RUN ONLY*****
-     DO NOT USE RESULTS FOR PRODUCTION
-""",
-            "",
-        )
-        constants_ = re.findall(
-            r"REAL CONSTANT SET.*?\n\n", rlist + "\n\n", flags=re.DOTALL
-        )
-
-        const_ = {}
-        for each in constants_:
-            values = [0 for i in range(18)]
-            set_ = int(re.match(r"REAL CONSTANT SET\s+(\d+)\s+", each).groups()[0])
-            limits = (
-                int(re.match(r".*ITEMS\s+(\d+)\s+", each).groups()[0]),
-                int(re.match(r".*TO\s+(\d+)\s*", each).groups()[0]),
-            )
-            values_ = [float(i) for i in each.strip().splitlines()[1].split()]
-
-            if not set_ in const_:
-                const_[set_] = values
-
-            for i, jlimit in enumerate(range(limits[0] - 1, limits[1])):
-                const_[set_][jlimit] = values_[i]
-
-        return const_

@@ -1,42 +1,17 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
-# SPDX-License-Identifier: MIT
-#
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 """Small or misc tests that don't fit in other test modules"""
 import inspect
 import os
 
 import numpy as np
 import pytest
-
-from conftest import has_dependency, requires
-
-if has_dependency("pyvista"):
-    from pyvista.plotting import system_supports_plotting
+from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.misc import (
     check_valid_ip,
     check_valid_port,
     check_valid_routine,
+    check_valid_start_instance,
     last_created,
     load_file,
     no_return,
@@ -45,7 +20,6 @@ from ansys.mapdl.core.misc import (
 )
 
 
-@requires("pyvista")
 def test_report():
     report = pymapdl.Report(
         additional=["matplotlib", "pyvista", "pyiges", "tqdm"],
@@ -100,6 +74,34 @@ def test_check_valid_port(port):
 def test_check_valid_port_error(port):
     with pytest.raises(ValueError):
         check_valid_port(port)
+
+
+@pytest.mark.parametrize(
+    "start_instance",
+    [
+        "true",
+        "TRue",
+        "False",
+        True,
+        False,
+    ],
+)
+def test_check_valid_start_instance(start_instance):
+    check_valid_start_instance(start_instance)
+
+
+@pytest.mark.parametrize(
+    "start_instance",
+    [
+        "asdf",
+        "2323",
+        1,
+        1e9,
+    ],
+)
+def test_check_valid_start_instance_error(start_instance):
+    with pytest.raises(ValueError):
+        check_valid_start_instance(start_instance)
 
 
 def test_creation_time(tmpdir):
@@ -217,7 +219,7 @@ def test_load_file_local(mapdl, tmpdir, file_):
 
     assert os.path.exists(file_path)
 
-    if mapdl.is_local:
+    if mapdl._local:
         pth = os.path.join(mapdl.directory, file_)
         assert not os.path.exists(pth)
     else:
@@ -228,7 +230,7 @@ def test_load_file_local(mapdl, tmpdir, file_):
     # File is in both, the python working directory and MAPDL directory
     assert os.path.exists(file_path)
 
-    if mapdl.is_local:
+    if mapdl._local:
         pth = os.path.join(mapdl.directory, file_)
         assert os.path.exists(pth)
 
@@ -253,11 +255,10 @@ def test_load_file_local(mapdl, tmpdir, file_):
 
     load_file(mapdl, file_path, priority_mapdl_file=False)
 
-    if mapdl.is_local:
-        file_name__ = os.path.join(mapdl.directory, file_)
-        with open(file_name__, "r") as fid:
+    if mapdl._local:
+        with open(os.path.join(mapdl.directory, file_), "r") as fid:
             assert "not that empty" in fid.read()
-        os.remove(file_name__)
+        os.remove(file_)
     else:
         mapdl.download(file_)
         with open(os.path.join(file_), "r") as fid:
@@ -290,21 +291,7 @@ def test_plain_report():
 
     # There should be only one package not found ("ger")
     assert "Package not found" in rep_str
-    not_found_packages = 1
-
-    # Plus the not additional packages
-    if not has_dependency("pyvista"):
-        not_found_packages += 1
-    if not has_dependency("tqdm"):
-        not_found_packages += 1
-    if not has_dependency("ansys.mapdl.reader"):
-        not_found_packages += 1
-    if not has_dependency("scipy"):
-        not_found_packages += 1
-    if not has_dependency("pexpect"):
-        not_found_packages += 1
-
-    _rep_str = rep_str.replace("Package not found", "", not_found_packages)
+    _rep_str = rep_str.replace("Package not found", "", 1)
     assert "Package not found" not in _rep_str
 
     assert "\n" in rep_str

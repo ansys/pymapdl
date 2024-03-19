@@ -122,8 +122,8 @@ Finally, after restarting Julia, you can import PyMAPDL using the same procedure
     julia> mapdl = pymapdl.launch_mapdl()
     julia> print(mapdl.__str__())
     Product:             Ansys Mechanical Enterprise
-    MAPDL Version:       24.1
-    ansys.mapdl Version: 0.68.0
+    MAPDL Version:       21.2
+    ansys.mapdl Version: 0.60.6
     
 .. note::
     If you experience errors when using PyCall, you can try to rebuild the package by pressing ``"]"`` to go to the package manager and typing:

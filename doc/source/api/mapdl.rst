@@ -8,7 +8,7 @@
 
 .. currentmodule:: ansys.mapdl.core
 
-.. autoclass:: ansys.mapdl.core.mapdl.MapdlBase
+.. autoclass:: ansys.mapdl.core.mapdl._MapdlCore
 
 .. autosummary::
    :toctree: _autosummary
@@ -29,7 +29,6 @@
    Mapdl.open_apdl_log
    Mapdl.open_gui
    Mapdl.parameters
-   Mapdl.remove_temp_dir_on_exit
    Mapdl.result
    Mapdl.run
    Mapdl.run_multiline

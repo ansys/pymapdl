@@ -1,26 +1,3 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
-# SPDX-License-Identifier: MIT
-#
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
-
 class MatrixOP:
     def axpy(self, vr="", vi="", m1="", wr="", wi="", m2="", **kwargs):
         """Performs the matrix operation ``M2= v*M1 + w*M2``.
@@ -733,8 +710,11 @@ class MatrixOP:
         to the L1 norm and is applicable to vectors only. The NRMINF option is
         the maximum norm and is applicable to either vectors or matrices.
         """
+        if not parr:
+            parr = "__temp_par__"
         command = f"*NRM,{name},{normtype},{parr},{normalize}"
-        return self.run(command, **kwargs)
+        self.run(command, **kwargs)
+        return self.parameters[parr]
 
     def remove(self, name="", val1="", val2="", val3="", **kwargs):
         """Suppresses rows or columns of a dense matrix or a vector.

@@ -1,35 +1,17 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
-# SPDX-License-Identifier: MIT
-#
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 import pytest
 
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
+    MapdlDidNotStart,
+    MapdlError,
     MapdlException,
+    MapdlInfo,
     MapdlInvalidRoutineError,
+    MapdlNote,
     MapdlRuntimeError,
-    protect_from,
+    MapdlVersionError,
+    MapdlWarning,
 )
-from conftest import NullContext
 
 error_shape_error_limits = """
 
@@ -110,27 +92,24 @@ def test_raise_output_errors(mapdl, response, expected_error):
         mapdl._raise_output_errors(response)
 
 
-def get_error_classes():
-    from ansys.mapdl.core import errors
-
-    def is_exception_class(obj):
-        try:
-            return issubclass(obj, MapdlException)
-        except TypeError:
-            return False
-
-    errors_to_tests = []
-    for each in dir(errors):
-        obj = getattr(errors, each)
-        if not each.startswith("_") and is_exception_class(obj):
-            errors_to_tests.append(obj)
-    return errors_to_tests
-
-
-@pytest.mark.parametrize("error_class", get_error_classes())
+@pytest.mark.parametrize(
+    "error_class",
+    [
+        MapdlDidNotStart,
+        MapdlException,
+        MapdlError,
+        MapdlWarning,
+        MapdlNote,
+        MapdlInfo,
+        MapdlVersionError,
+        MapdlInvalidRoutineError,
+        MapdlCommandIgnoredError,
+        MapdlRuntimeError,
+    ],
+)
 def test_exception_classes(error_class):
     message = "Exception message"
-    with pytest.raises(error_class, match=message):
+    with pytest.raises(error_class):
         raise error_class(message)
 
 
@@ -146,43 +125,3 @@ def test_error_handler(mapdl):
     text = "*** ERROR ***\n This is my own errorrrr"
     with pytest.raises(MapdlRuntimeError, match="errorrrr"):
         mapdl._raise_errors(text)
-
-
-@pytest.mark.parametrize(
-    # Tests inputs
-    "message,condition,context",
-    [
-        (None, None, NullContext()),
-        ("My custom error", None, NullContext()),
-        ("my error", None, pytest.raises(ValueError)),
-        (None, None, NullContext()),
-        (None, True, NullContext()),
-        (None, False, pytest.raises(ValueError)),
-        ("my error", False, pytest.raises(ValueError)),
-        ("my error", True, pytest.raises(ValueError)),
-        ("My custom error", False, pytest.raises(ValueError)),
-        ("My custom error", True, NullContext()),
-    ],
-    # Test ids
-    ids=[
-        "Match any message. No condition",
-        "Match message. No condition",
-        "Raises an exception. No condition (raise internal exception)",
-        "No message. No condition",
-        "No message. True condition",
-        "No message. False condition (raise internal exception)",
-        "Different error message. False condition (raise internal exception)",
-        "Different error message. True condition (raise internal exception)",
-        "Same error message. False condition (raise internal exception)",
-        "Same error message. True condition",
-    ],
-)
-def test_protect_from(message, condition, context):
-    class myclass:
-        @protect_from(ValueError, message, condition)
-        def raising(self):
-            raise ValueError("My custom error")
-
-    with context:
-        myobj = myclass()
-        myobj.raising()

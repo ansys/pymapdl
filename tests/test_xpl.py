@@ -1,35 +1,12 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
-# SPDX-License-Identifier: MIT
-#
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 """Test xpl functionality"""
 from ansys.tools.versioning.utils import SemanticVersion
 import numpy as np
 import pytest
 
 from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
-from conftest import requires
 
 # skip entire module unless HAS_GRPC
-pytestmark = requires("grpc")
+pytestmark = pytest.mark.skip_grpc
 
 
 @pytest.fixture(scope="module")
@@ -56,7 +33,6 @@ def test_xpl_str(xpl):
     assert "file.full" in str(xpl)
 
 
-@requires("ansys-math-core")
 def test_read_int32(xpl):
     vec = xpl.read("MASS")
     arr = vec.asarray()
@@ -64,7 +40,6 @@ def test_read_int32(xpl):
     assert arr.dtype == np.int32
 
 
-@requires("ansys-math-core")
 def test_read_double(xpl):
     vec = xpl.read("DIAGK")
     arr = vec.asarray()
@@ -72,7 +47,6 @@ def test_read_double(xpl):
     assert arr.dtype == np.double
 
 
-@requires("ansys-math-core")
 def test_read_asarray(xpl):
     vec1 = xpl.read("MASS", asarray=True)
     vec2 = xpl.read("MASS")
@@ -80,11 +54,6 @@ def test_read_asarray(xpl):
 
 
 def test_save(xpl):
-    if xpl._mapdl.version == 24.2:
-        pytest.xfail(
-            "There is a bug (977113) on v242 which makes saving using XPL to fail."
-        )
-
     xpl.save()
     with pytest.raises(MapdlCommandIgnoredError):
         xpl.list()
@@ -140,7 +109,6 @@ def test_goto(xpl):
     assert "Current Location : FULL::MASS" in xpl.where()
 
 
-@requires("ansys-math-core")
 @pytest.mark.usefixtures("check_supports_extract")
 def test_extract(xpl):
     # expecting fixture to already have a non-result file open

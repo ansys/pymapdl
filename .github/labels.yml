@@ -1,140 +1,99 @@
-#############################################################
-# Reason for this file
-# ====================
-#
-# This file is used by labeler to sync the labels (and their colors),
-# and assign a label to the new pull requrest.
-# 
-# Check the yml for more info: .github\workflows\label.yml
-
-#############################################################
-# Main colors (hex)
-# =================
-
-# C0392B # Red: International Orange (Golden Gate Bridge)
-# E67E22 # Orange: Vivid Tangelo
-# F4D03F # Yellow: Sandstorm
-# F9E79F # Light yellow: Medium champagne
-# 27AE60 # Green: Green (Crayola)
-# ffffff # White
-# 2E86C1 # Dark blue: Cyan Cornflower Blue
-# 85C1E9 # Light blue: Aero
-# A569BD # Purple: Rich Lavender
-# 76D7C4 # Light green: Pearl Aqua
-# 000000 # Black
-
-# https://htmlcolorcodes.com/ -- For color picking
-# https://www.color-name.com/ -- For colors to names
-
-#############################################################
-# By priority
-# ===========
-
 - name: BLOCKER
-  description: "No further development until this is fixed"
-  color: C0392B
-
-- name: Critical Priority
-  description: "This issue affects almost all users"
-  color: E67E22
-
-- name: Major Priority
-  description: "This issue affects some users"
-  color: F4D03F
-
-- name: Minor Priority
-  description: "It does not affect almost any users"
-  color: F9E79F
-
-- name: Future
-  description: "To work on it in the future, since it can be delayed"
-  color: 27AE60
-
-- name: Won't fix
-  description: "For different reasons, this won't be fixed"
-  color: ffffff
-
-#############################################################
-# By Category
-# ===========
+  description: No further development until this is fixed.
+  color: 000000
 
 - name: BUG
-  description: "Issue, problem or error in PyMAPDL"
-  color: E67E22
+  description: ""
+  color: 994d00
 
-- name: New Feature
-  description: "Request or proposal for a new feature"
-  color: 85C1E9
-  
-- name: Enhancement
-  description: "Improve any current implemented feature"
-  color: 85C1E9
+- name: CI/CD
+  description: ""
+  color: b5f226
 
-- name: Examples
-  description: "Publishing PyMAPDL examples"
-  color: A569BD
+- name: Critical Priority
+  description: ""
+  color: ff0000
 
-- name: Documentation
-  description: "Documentation related (improving, adding, etc)"
-  color: A569BD
-
-- name: Maintenance
-  description: "General maintenance of the repo (libraries, cicd, etc)"
-  color: 76D7C4
+- name: Dependencies
+  description: Dependencies
+  color: a5db76
 
 - name: Discussion
   description: ""
-  color: 76D7C4
+  color: bfdec3
+
+- name: DO NOT MERGE
+  description: ""
+  color: 4f18e7
+
+- name: Documentation
+  description: ""
+  color: bdd9db
+
+- name: Duplicate
+  description: ""
+  color: cccccc
+
+- name: Enhancement
+  description: Improve any current implemented feature.
+  color: 80b5ea
+
+- name: Examples
+  description: ""
+  color: bfdec3
+
+- name: Future
+  description: To work on it in the future.
+  color: c2ddf4
+
+- name: Good First Issue
+  description: Good and easy issue to start to work in PyANSYS development.
+  color: f9cfc3
+
+- name: Help wanted
+  description: Tell the developers you need help or guidance.
+  color: 12880c
+
+- name: Maintenance
+  description: Maintenance
+  color: bbd2f1
+
+- name: Major Priority
+  description: ""
+  color: ff7300
+
+- name: MAPDL
+  description: Requires changes in MAPDL
+  color: 000000
+
+- name: Minor Priority
+  description: ""
+  color: ffdd00
+
+- name: New Feature
+  description: Request/proposal for a new feature
+  color: 235370
 
 - name: Question
   description: ""
-  color: 76D7C4
-
-#############################################################
-# Issue management
-# ================
-
-- name: Duplicate
-  description: "Duplicated issue"
-  color: E67E22
-
-- name: Good First Issue
-  description: "Best way to start working on PyMAPDL development"
-  color: 27AE60
-
-- name: Help wanted!
-  description: "Tell the developers you need help or guidance"
-  color: F4D03F
+  color: c9317d
 
 - name: Stale
-  description: "Stale issue, it will be closed soon"
-  color: E67E22
+  description: Stale issue, it will be closed.
+  color: c106be
 
-#############################################################
-# For repo maintance
-# ==================
-# (Only maintainers should use them)
-
-- name: DO NOT MERGE
-  description: "Not ready to be merged yet"
-  color: C0392B
-
-- name: CI/CD
-  description: "Related with CICD, Github Actions, etc"
-  color: F9E79F
-
-- name: Dependencies
+- name: Support
   description: ""
-  color: F9E79F
+  color: 54afbb
 
-- name: MAPDL
-  description: "Requires changes in MAPDL"
-  color: 000000
-
-- name: reminder
-  description: "Related to the reminder bot"
+- name: Won't fix
+  description: ""
   color: ffffff
 
-- name: Build failed
-  description: "Schedule build fails"
-  color: E67E22
+- name: reminder
+  description: "Label for the reminder bot"
+  color: c5def5
+
+- name: Nightly build failed
+  description: "Label for the nightly fails"
+  color: b5f226

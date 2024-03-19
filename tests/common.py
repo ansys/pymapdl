@@ -1,29 +1,9 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
-# SPDX-License-Identifier: MIT
-#
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 """Shared testing module"""
 from collections import namedtuple
 import os
 from typing import Dict
+
+from ansys.tools.path import find_mapdl
 
 from ansys.mapdl.core.launcher import _is_ubuntu
 
@@ -55,8 +35,6 @@ def is_on_local():
             os.environ.get("PYMAPDL_START_INSTANCE", "").lower() != "false"
         )  # default is false
 
-    from ansys.tools.path import find_mapdl
-
     _, rver = find_mapdl()
 
     if rver:
@@ -81,19 +59,6 @@ def is_on_ubuntu():
 
 
 def has_grpc():
-    envvar = os.environ.get("HAS_GRPC", None)
-
-    if envvar is not None:
-        return envvar.lower().strip() == "true"
-
-    if testing_minimal():
-        return True
-
-    try:
-        from ansys.tools.path import find_mapdl
-    except ModuleNotFoundError:
-        return True
-
     _, rver = find_mapdl()
 
     if rver:
@@ -109,32 +74,6 @@ def has_dpf():
 
 def is_smp():
     return os.environ.get("DISTRIBUTED_MODE", "smp").lower().strip() == "smp"
-
-
-def support_plotting():
-    envvar = os.environ.get("SUPPORT_PLOTTING", None)
-
-    if envvar is not None:
-        return envvar.lower().strip() == "true"
-
-    if testing_minimal():
-        return False
-
-    try:
-        import pyvista
-
-        return pyvista.system_supports_plotting()
-
-    except ModuleNotFoundError:
-        return False
-
-
-def is_running_on_student():
-    return os.environ.get("ON_STUDENT", "NO").upper().strip() in ["YES", "TRUE"]
-
-
-def testing_minimal():
-    return os.environ.get("TESTING_MINIMAL", "NO").upper().strip() in ["YES", "TRUE"]
 
 
 def is_float(s: str) -> bool:

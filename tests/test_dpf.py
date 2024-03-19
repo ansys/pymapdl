@@ -1,43 +1,25 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
-# SPDX-License-Identifier: MIT
-#
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 """Test the DPF implementation"""
 import os
 
 import pytest
 
-from conftest import HAS_DPF, has_dependency, requires
+from conftest import skip_if_no_has_dpf
 
-if not has_dependency("ansys-dpf-core") or not HAS_DPF:
-    pytest.skip(allow_module_level=True)
+try:
+    from ansys.dpf import core as dpf
+    from ansys.dpf.core.server_types import DPF_DEFAULT_PORT
+except ImportError:
+    skip_if_no_has_dpf = pytest.mark.skipif(
+        True,
+        reason="""DPF couldn't be imported.""",
+    )
+    DPF_DEFAULT_PORT = None
 
-from ansys.dpf import core as dpf
-from ansys.dpf.core.server_types import DPF_DEFAULT_PORT
 
 DPF_PORT = os.environ.get("DPF_PORT", DPF_DEFAULT_PORT)  # Set in ci.yaml
 
 
-@requires("dpf")
-@requires("ansys-dpf-core")
+@skip_if_no_has_dpf
 def test_dpf_connection():
     # uses 127.0.0.1 and port 50054 by default
     try:
@@ -48,8 +30,7 @@ def test_dpf_connection():
         assert False
 
 
-@requires("dpf")
-@requires("ansys-dpf-core")
+@skip_if_no_has_dpf
 def test_upload(mapdl, solved_box, tmpdir):
     # Download RST file
     rst_path = mapdl.download_result(str(tmpdir.mkdir("tmpdir")))

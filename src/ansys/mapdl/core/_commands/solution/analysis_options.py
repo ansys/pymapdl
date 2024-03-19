@@ -1,25 +1,3 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
-# SPDX-License-Identifier: MIT
-#
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in all
-# copies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
 from typing import Optional
 
 from ansys.mapdl.core.mapdl_types import MapdlInt
@@ -1127,27 +1105,25 @@ class AnalysisOptions:
         command = f"CUTCONTROL,{lab},{value},{option}"
         return self.run(command, **kwargs)
 
-    def ddoption(self, decomp="", nprocpersol="", numsolforlp="", **kwargs):
+    def ddoption(self, decomp="", **kwargs):
         """Sets domain decomposer option for Distributed ANSYS.
 
         APDL Command: DDOPTION
 
         Parameters
         ----------
-        Decomp
+        decomp
             Controls which domain decomposition algorithm to use.
 
-            * AUTO - Automatically selects the optimal domain decomposition method (default).
-            * MESH - Decompose the FEA mesh.
-            * FREQ - Decompose the frequency domain for harmonic analyses.
-            * CYCHI -Decompose the harmonic indices for cyclic symmetry modal analyses.
+            AUTO
+                Use the default domain decomposition algorithm when splitting the model into
+                domains for Distributed ANSYS (default).
 
-        nprocpersol
-            Number of processes to be used for mesh-based decomposition in conjunction with each frequency solution (`Decomp = FREQ`) or harmonic index solution (`Decomp = CYCHI`). Defaults to 1. This field
-            is ignored when `Decomp = MESH`.
+            GREEDY
+                Use the "greedy" domain decomposition algorithm.
 
-        numsolforlp
-            Number of frequency or harmonic index solutions in a subsequent linear perturbation harmonic or linear perturbation cyclic modal analysis. This field is ignored when `Decomp = MESH`
+            METIS
+                Use the METIS graph partitioning domain decomposition algorithm.
 
         Notes
         -----
@@ -2040,7 +2016,7 @@ class AnalysisOptions:
         command = f"ESSOLV,{electit},{strutit},{dimn},{morphopt},{mcomp},{xcomp},{electol},{strutol},{mxloop},,{ruseky},{restky},{eiscomp}"
         return self.run(command, **kwargs)
 
-    def expass(self, key="", keystat="", **kwargs):
+    def expass(self, key="", **kwargs):
         """Specifies an expansion pass of an analysis.
 
         APDL Command: EXPASS
@@ -2049,13 +2025,10 @@ class AnalysisOptions:
         ----------
         key
             Expansion pass key:
-            * OFF - No expansion pass will be performed (default).
-            * ON - An expansion pass will be performed.
 
-        keystat
-            Static correction vectors key:
-            * ON - Include static correction vectors in the expanded displacements (default).
-            * OFF - Do not include static correction vectors in the expanded displacements.
+            OFF - No expansion pass will be performed (default).
+
+            ON - An expansion pass will be performed.
 
         Notes
         -----
@@ -2067,7 +2040,7 @@ class AnalysisOptions:
 
         This command is also valid in PREP7.
         """
-        command = f"EXPASS,{key},,,{keystat}"
+        command = f"EXPASS,{key}"
         return self.run(command, **kwargs)
 
     def gauge(self, opt="", freq="", **kwargs):
