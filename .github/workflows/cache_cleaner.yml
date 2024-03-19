@@ -34,7 +34,7 @@ jobs:
                 gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm && echo "Deleting cache with key: $cacheKey"
             done
           
-            cacheKeysForPR=$(gh actions-cache list -R $REPO | cut -f 1 )
+            cacheKeysForPR=$(gh actions-cache list -R $REPO -B $BRANCH | cut -f 1 )
           done
           echo "Done"
         env:
