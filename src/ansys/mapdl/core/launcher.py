@@ -1619,7 +1619,15 @@ def launch_mapdl(
 
         LOG.debug("Using default executable.")
         # Load cached path
-        exec_file = get_ansys_path(version=version) if not _debug_no_launch else ""
+        try:
+            exec_file = get_ansys_path(version=version)
+        except RuntimeError as e:
+            if _debug_no_launch:
+                # For debugging purposes, we just go ahead
+                exec_file = ""
+            else:
+                raise e
+
         if exec_file is None:
             raise FileNotFoundError(
                 "Invalid exec_file path or cannot load cached "
