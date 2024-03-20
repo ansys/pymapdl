@@ -52,6 +52,8 @@ from ansys.mapdl.core.launcher import (
 from ansys.mapdl.core.licensing import LICENSES
 from conftest import ON_LOCAL, QUICK_LAUNCH_SWITCHES, NullContext, requires
 
+PORT_TEST = 50053
+
 try:
     from ansys.tools.path import (
         find_ansys,
@@ -188,6 +190,7 @@ def test_license_type_keyword():
             mapdl = launch_mapdl(
                 license_type=license_name,
                 start_timeout=start_timeout,
+                port=PORT_TEST,
                 additional_switches=QUICK_LAUNCH_SWITCHES,
             )
 
@@ -216,6 +219,7 @@ def test_license_type_keyword_names():
         mapdl = launch_mapdl(
             license_type=license_name,
             start_timeout=start_timeout,
+            port=PORT_TEST,
             additional_switches=QUICK_LAUNCH_SWITCHES,
         )
 
@@ -238,6 +242,7 @@ def test_license_type_additional_switch():
         mapdl = launch_mapdl(
             additional_switches=QUICK_LAUNCH_SWITCHES + " -p " + license_name,
             start_timeout=start_timeout,
+            port=PORT_TEST,
         )
 
         # Using first line to ensure not picking up other stuff.
@@ -255,7 +260,7 @@ def test_license_type_dummy(mapdl):
     dummy_license_type = "dummy"
     with pytest.raises(LicenseServerConnectionError):
         launch_mapdl(
-            port=mapdl.port + 1,
+            port=PORT_TEST,
             additional_switches=f" -p {dummy_license_type}" + QUICK_LAUNCH_SWITCHES,
             start_timeout=start_timeout,
         )
@@ -266,7 +271,7 @@ def test_license_type_dummy(mapdl):
 def test_remove_temp_files(mapdl):
     """Ensure the working directory is removed when run_location is not set."""
     mapdl = launch_mapdl(
-        port=mapdl.port + 1,
+        port=PORT_TEST,
         remove_temp_files=True,
         start_timeout=start_timeout,
         additional_switches=QUICK_LAUNCH_SWITCHES,
@@ -289,7 +294,7 @@ def test_remove_temp_files(mapdl):
 def test_remove_temp_files_fail(tmpdir, mapdl):
     """Ensure the working directory is not removed when the cwd is changed."""
     mapdl = launch_mapdl(
-        port=mapdl.port + 1,
+        port=PORT_TEST,
         remove_temp_files=True,
         start_timeout=start_timeout,
         additional_switches=QUICK_LAUNCH_SWITCHES,
