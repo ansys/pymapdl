@@ -1484,6 +1484,7 @@ def launch_mapdl(
             warnings.warn(
                 "The env var 'PYMAPDL_IP' is set, hence the 'ip' argument is overwritten."
             )
+
         ip = ip_env_var
         LOG.debug(f"An IP ({ip}) has been set using 'PYMAPDL_IP' env var.")
 
