@@ -221,7 +221,7 @@ def port_in_use(port: Union[int, str], host: str = LOCALHOST) -> bool:
 
 
 def port_in_use_using_socket(port: Union[int, str], host: str) -> bool:
-    """Returns True when a port is in use at the given host using socket librry.
+    """Returns True when a port is in use at the given host using socket library.
 
     Must actually "bind" the address.  Just checking if we can create
     a socket is insufficient as it's possible to run into permission
@@ -283,7 +283,6 @@ def launch_grpc(
     ram: Optional[int] = None,
     run_location: str = None,
     port: int = MAPDL_DEFAULT_PORT,
-    ip: str = LOCALHOST,
     additional_switches: str = "",
     override: bool = True,
     timeout: int = 20,
@@ -595,7 +594,9 @@ def launch_grpc(
 
     env_vars = update_env_vars(add_env_vars, replace_env_vars)
 
-    LOG.info(f"Running in {ip}:{port} the following command: '{command}'")
+    LOG.info(
+        f"Running a local instance at port {port} the following command: '{command}'"
+    )
 
     LOG.debug("MAPDL starting in background.")
     process = subprocess.Popen(
@@ -798,9 +799,19 @@ def get_start_instance(start_instance: bool = True):
         Raised when ``PYMAPDL_START_INSTANCE`` is not either true or false
         (case independent).
 
+    Notes
+    -----
+    If the environment variable ``PYMAPDL_START_INSTANCE`` is set,
+    hence the argument ``start_instance`` is overwritten.
+
     """
     if "PYMAPDL_START_INSTANCE" in os.environ and os.environ["PYMAPDL_START_INSTANCE"]:
         # It should not be empty
+        if isinstance(start_instance, bool):
+            warnings.warn(
+                "The environment variable 'PYMAPDL_START_INSTANCE' is set, "
+                "hence the argument 'start_instance' is overwritten."
+            )
         start_instance = os.environ["PYMAPDL_START_INSTANCE"]
     else:
         LOG.debug(
@@ -1161,13 +1172,14 @@ def launch_mapdl(
 
     ip : bool, optional
         Used only when ``start_instance`` is ``False``. If provided,
-        it will force ``start_instance`` to be ``False``.
+        and ``start_instance`` (or its correspondent environment variable
+        ``PYMAPDL_START_INSTANCE``) is ``True`` then, an exception is raised.
         Specify the IP address of the MAPDL instance to connect to.
         You can also provide a hostname as an alternative to an IP address.
         Defaults to ``'127.0.0.1'``. You can also override the
         default behavior of this keyword argument with the
-        environment variable ``PYMAPDL_IP=<IP>``.
-        This argument has priority over the environment variable.
+        environment variable ``PYMAPDL_IP=<IP>``. If this environment variable
+        is empty, it is as it is not set.
 
     clear_on_connect : bool, optional
         Defaults to ``True``, giving you a fresh environment when
@@ -1470,8 +1482,28 @@ def launch_mapdl(
         ms_ = ", ".join([f"'{each}'" for each in kwargs.keys()])
         raise ValueError(f"The following arguments are not recognized: {ms_}")
 
-    if ip is None:
-        ip = os.environ.get("PYMAPDL_IP", None)
+    # Getting IP from env var
+    ip_env_var = os.environ.get("PYMAPDL_IP", "")
+    if ip_env_var != "":
+        if ip:
+            warnings.warn(
+                "The env var 'PYMAPDL_IP' is set, hence the 'ip' argument is overwritten."
+            )
+
+        ip = ip_env_var
+        LOG.debug(f"An IP ({ip}) has been set using 'PYMAPDL_IP' env var.")
+
+    ip = None if ip == "" else ip  # Making sure the variable is not empty
+
+    # Getting "start_instance" using "True" as default.
+    if (ip is not None) and (start_instance is None):
+        # An IP has been supplied. By default, 'start_instance' is equal
+        # false, unless it is set through the env vars.
+        start_instance = get_start_instance(start_instance=False)
+    else:
+        start_instance = get_start_instance(start_instance=start_instance)
+
+    LOG.debug("Using 'start_instance' equal to %s.", start_instance)
 
     if ip is None:
         if ON_WSL:
@@ -1481,8 +1513,9 @@ def launch_mapdl(
                     f"On WSL: Using the following IP address for the Windows OS host: {ip}"
                 )
             else:
-                LOG.debug(
-                    "PyMAPDL could not find the IP address of the Windows host machine."
+                raise MapdlDidNotStart(
+                    "You seems to be working from WSL.\n"
+                    "Unfortunately, PyMAPDL could not find the IP address of the Windows host machine."
                 )
 
         if not ip:
@@ -1496,10 +1529,17 @@ def launch_mapdl(
             "Because 'PYMAPDL_IP' is not None, an attempt is made to connect to"
             " a remote session ('START_INSTANCE' is set to 'False')."
         )
-        if not ON_WSL:
-            start_instance = False
-        else:
+        if ON_WSL:
             LOG.debug("On WSL: Allowing 'start_instance' and 'ip' arguments together.")
+        else:
+            if start_instance is True:
+                raise ValueError(
+                    "When providing a value for the argument 'ip', the argument "
+                    "'start_instance' cannot be 'True'.\n"
+                    "Make sure the corresponding environment variables are not setting "
+                    "those argument values.\n"
+                    "For more information visit https://github.com/ansys/pymapdl/issues/2910"
+                )
 
         ip = socket.gethostbyname(ip)  # Converting ip or hostname to ip
 
@@ -1529,10 +1569,6 @@ def launch_mapdl(
         return launch_remote_mapdl(cleanup_on_exit=cleanup_on_exit, version=version)
 
     version = _verify_version(version)  # return a int version or none
-
-    # Getting "start_instance" using "True" as default.
-    start_instance = get_start_instance(start_instance=start_instance)
-    LOG.debug("Using 'start_instance' equal to %s.", start_instance)
 
     if start_instance:
         # special handling when building the gallery outside of CI. This
@@ -1753,7 +1789,6 @@ def launch_mapdl(
 
             port, actual_run_location, process = launch_grpc(
                 port=port,
-                ip=ip,
                 add_env_vars=add_env_vars,
                 replace_env_vars=replace_env_vars,
                 **start_parm,

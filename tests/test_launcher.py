@@ -25,6 +25,7 @@
 import os
 import tempfile
 from time import sleep
+import warnings
 
 import psutil
 import pytest
@@ -38,6 +39,7 @@ from ansys.mapdl.core.errors import (
     PortAlreadyInUseByAnMAPDLInstance,
 )
 from ansys.mapdl.core.launcher import (
+    LOCALHOST,
     _check_license_argument,
     _force_smp_student_version,
     _is_ubuntu,
@@ -606,3 +608,82 @@ def test_launcher_start_instance(monkeypatch, start_instance):
         monkeypatch.delenv("PYMAPDL_START_INSTANCE")
     options = launch_mapdl(start_instance=start_instance, _debug_no_launch=True)
     assert start_instance == options["start_instance"]
+
+
+@pytest.mark.parametrize("start_instance", [None, True, False])
+@pytest.mark.parametrize("start_instance_envvar", [None, True, False])
+@pytest.mark.parametrize("ip", [None, "", "123.1.1.1"])
+@pytest.mark.parametrize("ip_envvar", [None, "", "123.1.1.1"])
+def test_ip_and_start_instance(
+    monkeypatch, start_instance, start_instance_envvar, ip, ip_envvar
+):
+    # start_instance=False
+    # start_instance_envvar=True
+    # ip=""
+    # ip_envvar="123.1.1.1"
+
+    # For more information, visit https://github.com/ansys/pymapdl/issues/2910
+    if "PYMAPDL_START_INSTANCE" in os.environ:
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE")
+
+    if start_instance_envvar is not None:
+        monkeypatch.setenv("PYMAPDL_START_INSTANCE", str(start_instance_envvar))
+    if ip_envvar is not None:
+        monkeypatch.setenv("PYMAPDL_IP", str(ip_envvar))
+
+    start_instance_is_true = start_instance_envvar is True or (
+        start_instance_envvar is None and (start_instance is True)
+    )
+
+    ip_is_true = bool(ip_envvar) or (
+        (ip_envvar is None or ip_envvar == "") and bool(ip)
+    )
+
+    exceptions = start_instance_envvar is None and start_instance is None and ip_is_true
+
+    if (start_instance_is_true and ip_is_true) and not exceptions:
+        with pytest.raises(
+            ValueError,
+            match="When providing a value for the argument 'ip', the argument ",
+        ):
+            options = launch_mapdl(
+                start_instance=start_instance, ip=ip, _debug_no_launch=True
+            )
+
+        return  # Exit
+
+    if (
+        isinstance(start_instance_envvar, bool) and isinstance(start_instance, bool)
+    ) or (ip_envvar and ip):
+        with pytest.warns(UserWarning):
+            options = launch_mapdl(
+                start_instance=start_instance, ip=ip, _debug_no_launch=True
+            )
+    else:
+        with warnings.catch_warnings():
+            options = launch_mapdl(
+                start_instance=start_instance, ip=ip, _debug_no_launch=True
+            )
+
+    if start_instance_envvar is True:
+        assert options["start_instance"] is True
+    elif start_instance_envvar is False:
+        assert options["start_instance"] is False
+    else:
+        if start_instance is None:
+            if ip_envvar or bool(ip):
+                assert not options["start_instance"]
+            else:
+                assert options["start_instance"]
+        elif start_instance is True:
+            assert options["start_instance"]
+        else:
+            assert not options["start_instance"]
+
+    if ip_envvar:
+        assert options["ip"] == ip_envvar
+    else:
+        if ip:
+            assert options["ip"] == ip
+        else:
+            assert options["ip"] in (LOCALHOST, "0.0.0.0")

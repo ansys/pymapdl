@@ -470,6 +470,10 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
                 + " The following argument is not allowed in CLI: 'license_server_check'.\nIgnoring argument."
             )
 
+        # Ignoring env var if using CLI
+        if "PYMAPDL_START_INSTANCE" in os.environ:
+            os.environ.pop("PYMAPDL_START_INSTANCE")
+
         out = launch_mapdl(
             exec_file=exec_file,
             just_launch=True,
