@@ -55,7 +55,7 @@ def run_cli():
 @requires("local")
 @requires("nostudent")
 def test_launch_mapdl_cli(run_cli):
-    output = run_cli()
+    output = run_cli("start")
 
     # In local
     assert "Success: Launched an MAPDL instance " in output
