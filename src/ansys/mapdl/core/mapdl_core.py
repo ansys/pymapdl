@@ -34,7 +34,6 @@ from subprocess import DEVNULL, call
 import tempfile
 import time
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
-import warnings
 from warnings import warn
 import weakref
 
@@ -1977,7 +1976,7 @@ class _MapdlCore(Commands):
 
         """
 
-        warnings.warn(
+        warn(
             "'run_multiline()' is being deprecated in future versions.\n Please use 'input_strings'.",
             DeprecationWarning,
         )
@@ -2709,6 +2708,10 @@ class _MapdlCore(Commands):
                 warn(text)
             else:
                 raise MapdlCommandIgnoredError(text)
+
+        if "Cannot create another with the same name" in flat_text:
+            # When overriding constitutive models. See 'test_tbft'
+            warn(flat_text)
 
         # flag errors
         if "*** ERROR ***" in flat_text:

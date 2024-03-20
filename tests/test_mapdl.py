@@ -1308,12 +1308,16 @@ def test_tbft(mapdl, tmpdir, option2, option3, option4):
     else:
         option2 = os.path.join(dirpath, option2)
 
-    mapdl.prep7(mute=True)
+    mapdl.prep7()
     mat_id = mapdl.get_value("MAT", 0, "NUM", "MAX") + 1
-    mapdl.tbft("FADD", mat_id, "HYPER", "MOONEY", "3", mute=True)
-    mapdl.tbft("EADD", mat_id, "UNIA", option2, option3, option4, "", "", "", mute=True)
+    output = mapdl.tbft("FADD", mat_id, "HYPER", "MOONEY", "3")
+    assert "Successfully Constructed Material Model" in output
+    output = mapdl.tbft("EADD", mat_id, "UNIA", option2, option3, option4, "", "", "")
+    assert "Successfully Constructed Material Model" in output
 
-    assert fname in mapdl.list_files()
+    with pytest.warns(UserWarning, match="Cannot create another with the same name"):
+        # checking warning if overwriting
+        mapdl.tbft("FADD", mat_id, "HYPER", "MOONEY", "3")
 
 
 def test_tbft_not_found(mapdl):
