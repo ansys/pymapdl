@@ -1523,7 +1523,7 @@ def test_file_command_local(mapdl, cube_solve, tmpdir):
     with pytest.raises(FileNotFoundError):
         mapdl.file("potato")
 
-    assert rst_file in mapdl.list_files()
+    assert os.path.basename(rst_file) in mapdl.list_files()
     rst_fpath = os.path.join(mapdl.directory, rst_file)
 
     # change directory
