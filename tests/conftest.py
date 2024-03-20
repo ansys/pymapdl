@@ -204,7 +204,12 @@ import ansys.mapdl.core as pymapdl
 
 pymapdl.RUNNING_TESTS = True
 
-from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
+from ansys.mapdl.core import Mapdl
+from ansys.mapdl.core.errors import (
+    MapdlConnectionError,
+    MapdlExitedError,
+    MapdlRuntimeError,
+)
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 
@@ -376,18 +381,23 @@ def run_before_and_after_tests(request, mapdl):
     if START_INSTANCE and is_exited(mapdl):
         # Backing up the current local configuration
         local_ = mapdl._local
+        channel = mapdl._channel
+        try:
+            # to connect
+            mapdl = Mapdl(channel=channel)
 
-        # Relaunching MAPDL
-        mapdl_ = launch_mapdl(
-            port=mapdl._port,
-            override=True,
-            run_location=mapdl._path,
-            cleanup_on_exit=mapdl._cleanup,
-        )
+        except MapdlConnectionError:
+            # we cannot connect.
+            # Kill the instance
+            mapdl.exit()
 
-        # Cloning the new mapdl instance channel into the old one.
-        mapdl._channel = mapdl_._channel
-        mapdl._multi_connect(timeout=mapdl._timeout)
+            # Relaunching MAPDL
+            mapdl_ = launch_mapdl(
+                port=mapdl._port,
+                override=True,
+                run_location=mapdl._path,
+                cleanup_on_exit=mapdl._cleanup,
+            )
 
         # Restoring the local configuration
         mapdl._local = local_
