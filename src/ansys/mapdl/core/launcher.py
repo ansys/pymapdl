@@ -799,6 +799,11 @@ def get_start_instance(start_instance: bool = True):
         Raised when ``PYMAPDL_START_INSTANCE`` is not either true or false
         (case independent).
 
+    Notes
+    -----
+    If the environment variable ``PYMAPDL_START_INSTANCE`` is set,
+    hence the argument ``start_instance`` is overwritten.
+      
     """
     if "PYMAPDL_START_INSTANCE" in os.environ and os.environ["PYMAPDL_START_INSTANCE"]:
         # It should not be empty
