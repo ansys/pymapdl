@@ -54,7 +54,13 @@ def run_cli():
 @requires("click")
 @requires("local")
 @requires("nostudent")
-def test_launch_mapdl_cli(run_cli):
+@pytest.mark.parametrize("start_instance", [None, True, False])
+def test_launch_mapdl_cli(monkeypatch, run_cli, start_instance):
+    if start_instance is not None:
+        monkeypatch.setenv("PYMAPDL_START_INSTANCE", str(start_instance))
+    else:
+        monkeypatch.unset("PYMAPDL_START_INSTANCE")
+
     output = run_cli()
 
     # In local
