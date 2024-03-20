@@ -803,7 +803,7 @@ def get_start_instance(start_instance: bool = True):
     -----
     If the environment variable ``PYMAPDL_START_INSTANCE`` is set,
     hence the argument ``start_instance`` is overwritten.
-      
+
     """
     if "PYMAPDL_START_INSTANCE" in os.environ and os.environ["PYMAPDL_START_INSTANCE"]:
         # It should not be empty
