@@ -408,7 +408,6 @@ def run_before_and_after_tests_2(request, mapdl):
 
     yield
 
-    mapdl.run("/GOPR")
     assert prev == mapdl.is_local
 
 
