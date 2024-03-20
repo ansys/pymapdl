@@ -25,6 +25,7 @@
 import os
 import tempfile
 from time import sleep
+import warnings
 
 import psutil
 import pytest
@@ -648,7 +649,18 @@ def test_ip_and_start_instance(
 
         return  # Exit
 
-    options = launch_mapdl(start_instance=start_instance, ip=ip, _debug_no_launch=True)
+    if (
+        isinstance(start_instance_envvar, bool) and isinstance(start_instance, bool)
+    ) or (ip_envvar and ip):
+        with pytest.warns(UserWarning):
+            options = launch_mapdl(
+                start_instance=start_instance, ip=ip, _debug_no_launch=True
+            )
+    else:
+        with warnings.catch_warnings():
+            options = launch_mapdl(
+                start_instance=start_instance, ip=ip, _debug_no_launch=True
+            )
 
     if start_instance_envvar is True:
         assert options["start_instance"] is True
