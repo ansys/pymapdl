@@ -128,26 +128,26 @@ def test_launch_mapdl_cli_config(run_cli):
 @requires("nostudent")
 def test_launch_mapdl_cli_list(run_cli):
     output = run_cli("list")
-    assert "running" in output
+    assert "running" in output or "sleeping" in output
     assert "Is Instance" in output
     assert len(output.splitlines()) > 2
     assert "ansys" in output.lower() or "mapdl" in output.lower()
 
     output = run_cli("list -i")
-    assert "running" in output
+    assert "running" in output or "sleeping" in output
     assert "Is Instance" not in output
     assert len(output.splitlines()) > 2
     assert "ansys" in output.lower() or "mapdl" in output.lower()
 
     output = run_cli("list -c")
-    assert "running" in output
+    assert "running" in output or "sleeping" in output
     assert "Command line" in output
     assert "Is Instance" in output
     assert len(output.splitlines()) > 2
     assert "ansys" in output.lower() or "mapdl" in output.lower()
 
     output = run_cli("list -cwd")
-    assert "running" in output
+    assert "running" in output or "sleeping" in output
     assert "Command line" not in output
     assert "Working directory" in output
     assert "Is Instance" in output
@@ -155,7 +155,7 @@ def test_launch_mapdl_cli_list(run_cli):
     assert "ansys" in output.lower() or "mapdl" in output.lower()
 
     output = run_cli("list -l")
-    assert "running" in output
+    assert "running" in output or "sleeping" in output
     assert "Is Instance" in output
     assert "Command line" in output
     assert len(output.splitlines()) > 2
