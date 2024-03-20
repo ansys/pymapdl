@@ -55,10 +55,11 @@ def run_cli():
 @requires("local")
 @requires("nostudent")
 def test_launch_mapdl_cli(run_cli):
-    output = run_cli("start")
+    # Setting a port so it does not collide with the already running instance for testing
+    output = run_cli("start --port 50053")
 
-    # In local
     assert "Success: Launched an MAPDL instance " in output
+    assert "50053" in output
 
     # grab ips and port
     pid = int(re.search(r"\(PID=(\d+)\)", output).groups()[0])
