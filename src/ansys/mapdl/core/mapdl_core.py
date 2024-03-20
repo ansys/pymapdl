@@ -56,6 +56,7 @@ from ansys.mapdl.core.commands import (
 from ansys.mapdl.core.errors import (
     ComponentNoData,
     MapdlCommandIgnoredError,
+    MapdlFileNotFoundError,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
 )
@@ -2677,7 +2678,13 @@ class _MapdlCore(Commands):
     def _raise_errors(self, text):
         # to make sure the following error messages are caught even if a breakline is in between.
         flat_text = " ".join([each.strip() for each in text.splitlines()])
-        base_error_msg = "\n\nIgnore these messages by setting 'ignore_errors'=True"
+        base_error_msg = "\n\nIgnore these messages by setting 'ignore_errors'=True.\n"
+
+        if "unable to open file" in flat_text or (
+            "unable to open" in flat_text and "file" in flat_text
+        ):
+            text += base_error_msg
+            raise MapdlFileNotFoundError(text)
 
         if "is not a recognized" in flat_text:
             text = text.replace("This command will be ignored.", "")
@@ -2707,6 +2714,7 @@ class _MapdlCore(Commands):
             if "is normal behavior when a CDB file is used." in flat_text:
                 warn(text)
             else:
+                text += base_error_msg
                 raise MapdlCommandIgnoredError(text)
 
         if "Cannot create another with the same name" in flat_text:

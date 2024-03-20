@@ -1492,8 +1492,9 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
         mapdl.mpread(fname="dummy", ext="dummy", lib="something")
 
     # Test suppliying a dir path when in remote
-    with pytest.raises(IOError):
-        mapdl.mpwrite("/test_dir/test", "mp")
+    if not ON_LOCAL:
+        with pytest.raises(FileNotFoundError):
+            mapdl.mpwrite("/test_dir/test", "mp")
 
 
 def test_mapdl_str(mapdl):
@@ -1858,7 +1859,7 @@ def test_cache_pids(mapdl):
     mapdl._cache_pids()  # Recache pids
 
     for each in mapdl._pids:
-        assert "ansys" in "".join(psutil.Process(each).cmdline())
+        assert "ansys" in "".join(psutil.Process(each).cmdline()).lower()
 
 
 @requires("local")
@@ -1949,7 +1950,9 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
 @requires("nostudent")
 def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
-        license_server_check=False, additional_switches=QUICK_LAUNCH_SWITCHES
+        license_server_check=False,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+        port=mapdl.port + 1,
     )
     mapdl2.parameters["my_par"] = "initial_value"
 
@@ -1964,7 +1967,9 @@ def test_save_on_exit(mapdl, cleared):
     mapdl2.exit()
 
     mapdl2 = launch_mapdl(
-        license_server_check=False, additional_switches=QUICK_LAUNCH_SWITCHES
+        license_server_check=False,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+        port=mapdl.port + 1,
     )
     mapdl2.resume(db_path)
     if mapdl.version >= 24.1:
@@ -1981,7 +1986,9 @@ def test_save_on_exit(mapdl, cleared):
     mapdl2.exit(save=True)
 
     mapdl2 = launch_mapdl(
-        license_server_check=False, additional_switches=QUICK_LAUNCH_SWITCHES
+        license_server_check=False,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+        port=mapdl.port + 1,
     )
     mapdl2.resume(db_path)
     assert mapdl2.parameters["my_par"] == "new_initial_value"
