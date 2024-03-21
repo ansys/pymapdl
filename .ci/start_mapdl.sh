@@ -40,7 +40,7 @@ docker run \
     -e ANSYS_LOCK="OFF" \
     -p "$PYMAPDL_PORT":50052 \
     -p "$PYMAPDL_DB_PORT":50055 \
-    --shm-size=1gb \
+    --shm-size=2gb \
     -e I_MPI_SHM_LMT=shm \
     -e P_SCHEMA="$P_SCHEMA" \
     -w /jobs \
