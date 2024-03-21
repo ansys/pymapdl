@@ -56,7 +56,7 @@ def db(mapdl):
             f"This MAPDL version ({mapdl_version}) docker image seems to not support DB, but local does."
         )
 
-    if mapdl_version == ["24.1", "24.2"]:
+    if mapdl_version == "24.1" or mapdl_version == "24.2":
         pytest.skip(
             f"This MAPDL version ({mapdl_version}) does not support PyMAPDL Database."
         )
