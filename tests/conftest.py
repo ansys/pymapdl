@@ -415,11 +415,14 @@ def run_before_and_after_tests(request, mapdl):
         # Backing up the current local configuration
         local_ = mapdl._local
         channel = mapdl._channel
+        ip = mapdl.ip
+        port = mapdl.port
         try:
             # to connect
-            mapdl = Mapdl(channel=channel)
+            mapdl = Mapdl(port=port, ip=ip)
 
-        except MapdlConnectionError:
+        except MapdlConnectionError as err:
+            LOG.info(f"Connecting to MAPDL failed:\n{str(err)}")
             # we cannot connect.
             # Kill the instance
             mapdl.exit()
