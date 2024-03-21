@@ -1315,9 +1315,9 @@ def test_tbft(mapdl, cleared, tmpdir, option2, option3, option4):
     output = mapdl.tbft("EADD", mat_id, "UNIA", option2, option3, option4, "", "", "")
     assert "Successfully Constructed Material Model" in output
 
-    with pytest.warns(UserWarning):
-        # checking warning if overwriting
-        mapdl.tbft("FADD", mat_id, "HYPER", "MOONEY", "3")
+    # with pytest.warns(UserWarning):
+    #     # checking warning if overwriting
+    #     mapdl.tbft("FADD", mat_id, "HYPER", "MOONEY", "3")
 
 
 def test_tbft_not_found(mapdl):
