@@ -411,7 +411,7 @@ def run_before_and_after_tests(request, mapdl):
         except MapdlExitedError:
             return True
 
-    if START_INSTANCE and is_exited(mapdl):
+    if START_INSTANCE and (is_exited(mapdl) or mapdl._exited):
         # Backing up the current local configuration
         local_ = mapdl._local
         channel = mapdl._channel
