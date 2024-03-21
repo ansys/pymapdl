@@ -1660,7 +1660,7 @@ def launch_mapdl(
 
         LOG.debug("Using default executable.")
         # Load cached path
-        if _debug_no_launch and not start_instance:
+        if _debug_no_launch:
             exec_file = ""
         else:
             exec_file = get_ansys_path(version=version)
