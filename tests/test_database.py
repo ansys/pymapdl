@@ -28,7 +28,7 @@ import pytest
 
 ## Checking MAPDL versions
 from ansys.mapdl.core.database import MINIMUM_MAPDL_VERSION, DBDef, MapdlDb
-from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlVersionError
 from ansys.mapdl.core.misc import random_string
 from conftest import ON_CI
 
@@ -70,6 +70,14 @@ def db(mapdl):
     mapdl.clear()
     mapdl.db.start()
     return mapdl.db
+
+
+def test_failure_on_non_allowed_versions(mapdl):
+    if str(mapdl.version) in ["24.1", "24.2"]:
+        with pytest.raises(MapdlVersionError):
+            mapdl.db.start()
+    else:
+        pytest.skip(f"Should run only on MAPDL 24.1 and 24.2")
 
 
 @pytest.fixture(scope="session")

@@ -237,8 +237,10 @@ class MapdlDb:
 
         ## Checking MAPDL versions
         mapdl_version = self._mapdl.version
-        if not server_meets_version(
-            str(mapdl_version), MINIMUM_MAPDL_VERSION
+        if (
+            not server_meets_version(str(mapdl_version), MINIMUM_MAPDL_VERSION)
+            or mapdl_version == "24.1"
+            or mapdl_version == "24.2"
         ):  # pragma: no cover
             from ansys.mapdl.core.errors import MapdlVersionError
 
