@@ -1611,9 +1611,6 @@ def launch_mapdl(
             print(f"There is an existing MAPDL instance at: {ip}:{port}")
             return
 
-        if pymapdl.BUILDING_GALLERY:  # pragma: no cover
-            LOG.debug("Building gallery.")
-
         if _debug_no_launch:
             return pack_parameters(
                 port,
