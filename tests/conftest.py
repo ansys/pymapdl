@@ -422,13 +422,12 @@ def run_before_and_after_tests(request, mapdl):
             mapdl = Mapdl(port=port, ip=ip)
 
         except MapdlConnectionError as err:
-            LOG.info(f"Connecting to MAPDL failed:\n{str(err)}")
             # we cannot connect.
             # Kill the instance
             mapdl.exit()
 
             # Relaunching MAPDL
-            mapdl_ = launch_mapdl(
+            mapdl = launch_mapdl(
                 port=mapdl._port,
                 override=True,
                 run_location=mapdl._path,
@@ -438,7 +437,6 @@ def run_before_and_after_tests(request, mapdl):
         # Restoring the local configuration
         mapdl._local = local_
 
-    mapdl.gopr()
     yield  # this is where the testing happens
 
     # Teardown : fill with any logic you want
