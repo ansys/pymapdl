@@ -1578,6 +1578,7 @@ def launch_mapdl(
             # launch an instance of pymapdl if it does not already exist and
             # we're allowed to start instances
             if GALLERY_INSTANCE[0] is None:
+                GALLERY_INSTANCE[0] = "Loading..."
                 mapdl = launch_mapdl(
                     start_instance=True,
                     cleanup_on_exit=False,
@@ -1588,8 +1589,8 @@ def launch_mapdl(
                 GALLERY_INSTANCE[0] = {"ip": mapdl._ip, "port": mapdl._port}
                 return mapdl
 
-                # otherwise, connect to the existing gallery instance if available
-            elif GALLERY_INSTANCE[0] is not None:
+            # otherwise, connect to the existing gallery instance if available, but it needs to be fully loaded.
+            elif GALLERY_INSTANCE[0] != "Loading...":
                 mapdl = MapdlGrpc(
                     ip=GALLERY_INSTANCE[0]["ip"],
                     port=GALLERY_INSTANCE[0]["port"],
