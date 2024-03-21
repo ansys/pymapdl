@@ -28,6 +28,7 @@ import pytest
 
 ## Checking MAPDL versions
 from ansys.mapdl.core.database import MINIMUM_MAPDL_VERSION, DBDef, MapdlDb
+from ansys.mapdl.core.database.database import FAILING_DATABASE_MAPDL
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlVersionError
 from ansys.mapdl.core.misc import random_string
 from conftest import ON_CI
@@ -115,6 +116,11 @@ def test_database_start_stop(mapdl):
     if mapdl_version == "22.2" and ON_CI:
         pytest.skip(
             f"This MAPDL version ({mapdl_version}) docker image seems to not support DB, but local does."
+        )
+
+    if mapdl_version in FAILING_DATABASE_MAPDL:
+        pytest.skip(
+            f"This MAPDL version ({mapdl_version}) docker image does not support Database module."
         )
 
     # verify it can be created twice
