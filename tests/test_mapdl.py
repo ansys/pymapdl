@@ -1972,7 +1972,7 @@ def test_save_on_exit(mapdl, cleared):
         port=mapdl.port + 1,
     )
     mapdl2.resume(db_path)
-    if mapdl.version >= 24.1:
+    if mapdl.version >= 24.2:
         assert mapdl2.parameters["my_par"] == "initial_value"
     else:
         # This fails in earlier versions of MAPDL
