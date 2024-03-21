@@ -1493,7 +1493,7 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
 
     # Test suppliying a dir path when in remote
     if not ON_LOCAL:
-        with pytest.raises(FileNotFoundError):
+        with pytest.raises(IOError):
             mapdl.mpwrite("/test_dir/test", "mp")
 
 
