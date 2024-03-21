@@ -2712,14 +2712,14 @@ class _MapdlCore(Commands):
 
         if "For element type = " in flat_text and "is invalid." in flat_text:
             if "is normal behavior when a CDB file is used." in flat_text:
-                warn(text)
+                warn(text, UserWarning)
             else:
                 text += base_error_msg
                 raise MapdlCommandIgnoredError(text)
 
         if "Cannot create another with the same name" in flat_text:
             # When overriding constitutive models. See 'test_tbft'
-            warn(flat_text)
+            warn(text, UserWarning)
 
         # flag errors
         if "*** ERROR ***" in flat_text:

@@ -1289,7 +1289,7 @@ def test_get_file_path(mapdl, tmpdir):
         ("expdata", "dat", "DIR"),
     ],
 )
-def test_tbft(mapdl, tmpdir, option2, option3, option4):
+def test_tbft(mapdl, cleared, tmpdir, option2, option3, option4):
     fname = "expdata.dat"
     dirpath = tmpdir.mkdir("tmpdir")
     fpath = dirpath.join(fname)
