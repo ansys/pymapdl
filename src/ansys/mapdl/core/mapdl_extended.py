@@ -332,7 +332,7 @@ class _MapdlCommandExtended(_MapdlCore):
         fname_ = fname + "." + ext
         if not self._local:
             if os.path.dirname(fname_):
-                raise IOError(
+                raise FileNotFoundError(
                     "Only writing files to the MAPDL working directory is allowed. "
                     f"The supplied path {fname_} is not allowed."
                 )
