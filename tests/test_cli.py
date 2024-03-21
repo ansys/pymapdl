@@ -59,7 +59,7 @@ def test_launch_mapdl_cli(monkeypatch, run_cli, start_instance):
     if start_instance is not None:
         monkeypatch.setenv("PYMAPDL_START_INSTANCE", str(start_instance))
     else:
-        monkeypatch.unset("PYMAPDL_START_INSTANCE")
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
 
     # Setting a port so it does not collide with the already running instance for testing
     output = run_cli("start --port 50053")
