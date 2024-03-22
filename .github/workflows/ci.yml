@@ -290,10 +290,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-version: ['v22.2.1', 'v22.2-ubuntu', 'v23.1.0', 'v23.2.0', 'v24.1.0', 'v24.1-ubuntu-student']
+        mapdl-version: [
+          'v22.2.1',
+          'v22.2-ubuntu',
+          'v23.1.0',
+          'v23.1-ubuntu',
+          'v23.2.0',
+          'v23.2-ubuntu',
+          'v24.1.0',
+          'v24.1-ubuntu',
+          'v24.1-ubuntu-student',
+          'v24.2.0',
+          'latest-ubuntu',
+          'latest-ubuntu-student',
+          ]
         extended_testing:
           - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
         exclude:
+          # In PRs skipping all MAPDL version except student ones (commented out).
           - extended_testing: false
             mapdl-version: 'v22.2.1'
           - extended_testing: false
@@ -301,11 +315,24 @@ jobs:
           - extended_testing: false
             mapdl-version: 'v23.1.0'
           - extended_testing: false
+            mapdl-version: 'v23.1-ubuntu'
+          - extended_testing: false
             mapdl-version: 'v23.2.0'
           - extended_testing: false
-            mapdl-version: 'v23.1.0'
+            mapdl-version: 'v23.2-ubuntu'
           - extended_testing: false
             mapdl-version: 'v24.1.0'
+          - extended_testing: false
+            mapdl-version: 'v24.1-ubuntu'
+          # - extended_testing: false
+          #   mapdl-version: 'v24.1-ubuntu-student'
+          - extended_testing: false
+            mapdl-version: 'v24.2.0'
+          - extended_testing: false
+            mapdl-version: 'latest-ubuntu'
+          # - extended_testing: false
+          #   mapdl-version: 'latest-ubuntu-student'
+
     env:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_PORT2: 21001  # for the pool testing and default won't work on GitHub runners
@@ -482,7 +509,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-image: ['v23.2-ubuntu', 'v24.1-ubuntu', 'v24.1-ubuntu-student']
+        mapdl-image: [
+          'v23.2-ubuntu', 
+          'v24.1-ubuntu', 
+          'v24.1-ubuntu-student',
+          'latest-ubuntu',
+          'latest-ubuntu-student',
+          ]
         extended_testing:
           - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
         exclude:
@@ -490,6 +523,8 @@ jobs:
             mapdl-image: 'v23.2-ubuntu'
           - extended_testing: false
             mapdl-image: 'v24.1-ubuntu'
+          - extended_testing: false
+            mapdl-image: 'latest-ubuntu'
     container:
       image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-image }}
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
@@ -608,7 +643,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-image: ['v23.2-ubuntu', 'v24.1-ubuntu', 'v24.1-ubuntu-student']
+        mapdl-image: [
+          'v23.2-ubuntu',
+          'v24.1-ubuntu',
+          'v24.1-ubuntu-student',
+          'latest-ubuntu',
+          'latest-ubuntu-student',
+          ]
         extended_testing:
           - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
         exclude:
@@ -616,6 +657,8 @@ jobs:
             mapdl-image: 'v23.2-ubuntu'
           - extended_testing: false
             mapdl-image: 'v24.1-ubuntu'
+          - extended_testing: false
+            mapdl-image: 'latest-ubuntu'
     container:
       image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-image }}
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
@@ -665,7 +708,13 @@ jobs:
         run: |
           # Because there is no 'ansys-tools-path' we need to input the
           # executable path with the env var: PYMAPDL_MAPDL_EXEC.
-          version=$(echo "${{ matrix.mapdl-image }}" | head -c 5 | tail -c 4 | tr -d '.')
+
+          if [[ "${{ matrix.mapdl-image }}" == *"latest-ubuntu"* ]] ; then
+            version="242"
+          else
+            version=$(echo "${{ matrix.mapdl-image }}" | head -c 5 | tail -c 4 | tr -d '.')
+          fi;
+
           echo "$version"
 
           export PYMAPDL_MAPDL_EXEC=/ansys_inc/v"$version"/ansys/bin/ansys"$version"
@@ -692,6 +741,7 @@ jobs:
 
 
   test-windows:
+    # Skipped
     if: github.repository == ''
     name: "Local: Build & test on Windows"
     runs-on: [self-hosted, Windows, pymapdl]
