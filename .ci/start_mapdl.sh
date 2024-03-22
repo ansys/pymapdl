@@ -18,6 +18,11 @@ if [[ $MAPDL_VERSION == *"ubuntu"* ]] ; then
     export EXEC_PATH=/ansys_inc/v$VERSION/ansys/bin/mapdl
     export P_SCHEMA=/ansys_inc/v$VERSION/ansys/ac4/schema
 
+elif [[ $MAPDL_VERSION == *"latest-ubuntu"* ]]; then
+    echo "It is latest-ubuntu. Using 'ansys' script to launch"
+    export EXEC_PATH=ansys
+    # export P_SCHEMA=/ansys_inc/ansys/ac4/schema
+
 else
     echo "It is a CentOS based image"
     export EXEC_PATH=/ansys_inc/ansys/bin/mapdl
