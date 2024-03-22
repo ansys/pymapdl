@@ -37,7 +37,7 @@ if has_dependency("ansys-tools-path"):
 else:
     EXEC_FILE = os.environ.get("PYMAPDL_MAPDL_EXEC")
 
-from ansys.mapdl.core import LocalMapdlPool, examples
+from ansys.mapdl.core import MapdlPool, examples
 from ansys.mapdl.core.errors import VersionError
 from conftest import QUICK_LAUNCH_SWITCHES, requires
 
@@ -72,7 +72,7 @@ def pool(tmpdir_factory):
 
     if ON_LOCAL:
 
-        mapdl_pool = LocalMapdlPool(
+        mapdl_pool = MapdlPool(
             2,
             license_server_check=False,
             run_location=run_path,
@@ -85,7 +85,7 @@ def pool(tmpdir_factory):
     else:
         port2 = os.environ.get("PYMAPDL_PORT2", 50057)
 
-        mapdl_pool = LocalMapdlPool(
+        mapdl_pool = MapdlPool(
             2,
             license_server_check=False,
             start_instance=False,
@@ -117,7 +117,7 @@ def pool(tmpdir_factory):
 @skip_requires_194
 def test_invalid_exec():
     with pytest.raises(VersionError):
-        LocalMapdlPool(
+        MapdlPool(
             4,
             nproc=NPROC,
             exec_file="/usr/ansys_inc/v194/ansys/bin/mapdl",
@@ -268,7 +268,7 @@ def test_directory_names_default(pool):
 @requires("local")
 @skip_if_ignore_pool
 def test_directory_names_custom_string(tmpdir):
-    pool = LocalMapdlPool(
+    pool = MapdlPool(
         2,
         exec_file=EXEC_FILE,
         run_location=tmpdir,
@@ -296,7 +296,7 @@ def test_directory_names_function(tmpdir):
         else:
             return "Other_instance"
 
-    pool = LocalMapdlPool(
+    pool = MapdlPool(
         3,
         exec_file=EXEC_FILE,
         nproc=NPROC,
@@ -315,7 +315,7 @@ def test_directory_names_function(tmpdir):
 
 def test_num_instances():
     with pytest.raises(ValueError, match="least 1 instance"):
-        pool = LocalMapdlPool(
+        pool = MapdlPool(
             0,
             exec_file=EXEC_FILE,
             nproc=NPROC,
@@ -325,7 +325,7 @@ def test_num_instances():
 
 @skip_if_ignore_pool
 def test_only_one_instance():
-    pool = LocalMapdlPool(
+    pool = MapdlPool(
         1,
         exec_file=EXEC_FILE,
         nproc=NPROC,

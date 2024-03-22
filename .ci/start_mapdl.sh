@@ -13,7 +13,12 @@ export VERSION="$MAJOR$MINOR"
 echo "MAPDL VERSION: $VERSION"
 
 
-if [[ $MAPDL_VERSION == *"ubuntu"* ]] ; then
+if [[ $MAPDL_VERSION == *"latest-ubuntu"* ]]; then
+    echo "It is latest-ubuntu. Using 'ansys' script to launch"
+    export EXEC_PATH=ansys
+    # export P_SCHEMA=/ansys_inc/ansys/ac4/schema
+
+elif [[ $MAPDL_VERSION == *"ubuntu"* ]] ; then
     echo "It is an ubuntu based image"
     export EXEC_PATH=/ansys_inc/v$VERSION/ansys/bin/mapdl
     export P_SCHEMA=/ansys_inc/v$VERSION/ansys/ac4/schema
@@ -40,7 +45,7 @@ docker run \
     -e ANSYS_LOCK="OFF" \
     -p "$PYMAPDL_PORT":50052 \
     -p "$PYMAPDL_DB_PORT":50055 \
-    --shm-size=1gb \
+    --shm-size=2gb \
     -e I_MPI_SHM_LMT=shm \
     -e P_SCHEMA="$P_SCHEMA" \
     -w /jobs \

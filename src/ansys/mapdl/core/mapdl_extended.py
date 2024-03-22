@@ -1352,7 +1352,7 @@ class _MapdlCommandExtended(_MapdlCore):
             "RSTFILE",
             "RSTEXT",
             "OUTPUT",
-            "ENVNAME",
+            "ENV",
             "TITLE",
             "EXIST",
             "DATE",

@@ -34,7 +34,6 @@ from subprocess import DEVNULL, call
 import tempfile
 import time
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
-import warnings
 from warnings import warn
 import weakref
 
@@ -57,6 +56,7 @@ from ansys.mapdl.core.commands import (
 from ansys.mapdl.core.errors import (
     ComponentNoData,
     MapdlCommandIgnoredError,
+    MapdlFileNotFoundError,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
 )
@@ -1977,7 +1977,7 @@ class _MapdlCore(Commands):
 
         """
 
-        warnings.warn(
+        warn(
             "'run_multiline()' is being deprecated in future versions.\n Please use 'input_strings'.",
             DeprecationWarning,
         )
@@ -2678,7 +2678,13 @@ class _MapdlCore(Commands):
     def _raise_errors(self, text):
         # to make sure the following error messages are caught even if a breakline is in between.
         flat_text = " ".join([each.strip() for each in text.splitlines()])
-        base_error_msg = "\n\nIgnore these messages by setting 'ignore_errors'=True"
+        base_error_msg = "\n\nIgnore these messages by setting 'ignore_errors'=True.\n"
+
+        if "unable to open file" in flat_text or (
+            "unable to open" in flat_text and "file" in flat_text
+        ):
+            text += base_error_msg
+            raise MapdlFileNotFoundError(text)
 
         if "is not a recognized" in flat_text:
             text = text.replace("This command will be ignored.", "")
@@ -2706,9 +2712,14 @@ class _MapdlCore(Commands):
 
         if "For element type = " in flat_text and "is invalid." in flat_text:
             if "is normal behavior when a CDB file is used." in flat_text:
-                warn(text)
+                warn(text, UserWarning)
             else:
+                text += base_error_msg
                 raise MapdlCommandIgnoredError(text)
+
+        if "Cannot create another with the same name" in flat_text:
+            # When overriding constitutive models. See 'test_tbft'
+            warn(text, UserWarning)
 
         # flag errors
         if "*** ERROR ***" in flat_text:
