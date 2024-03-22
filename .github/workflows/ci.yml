@@ -524,7 +524,7 @@ jobs:
           - extended_testing: false
             mapdl-image: 'v24.1-ubuntu'
           - extended_testing: false
-            mapdl-image: 'v24.2-ubuntu'
+            mapdl-image: 'latest-ubuntu'
     container:
       image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-image }}
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
@@ -658,7 +658,7 @@ jobs:
           - extended_testing: false
             mapdl-image: 'v24.1-ubuntu'
           - extended_testing: false
-            mapdl-image: 'v24.2-ubuntu'
+            mapdl-image: 'latest-ubuntu'
     container:
       image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-image }}
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
