@@ -183,20 +183,21 @@ def test_launch_console(version):
 
 @requires("local")
 @requires("nostudent")
-def test_license_type_keyword():
+def test_license_type_keyword(mapdl):
     checks = []
     for license_name, license_description in LICENSES.items():
         try:
-            mapdl = launch_mapdl(
+            mapdl_ = launch_mapdl(
                 license_type=license_name,
                 start_timeout=start_timeout,
+                port=mapdl.port + 1,
                 additional_switches=QUICK_LAUNCH_SWITCHES,
             )
 
             # Using first line to ensure not picking up other stuff.
-            checks.append(license_description in mapdl.__str__().split("\n")[0])
-            mapdl.exit()
-            del mapdl
+            checks.append(license_description in mapdl_.__str__().split("\n")[0])
+            mapdl_.exit()
+            del mapdl_
             sleep(2)
 
         except MapdlDidNotStart as e:
@@ -210,43 +211,45 @@ def test_license_type_keyword():
 
 @requires("local")
 @requires("nostudent")
-def test_license_type_keyword_names():
+def test_license_type_keyword_names(mapdl):
     # This test might became a way to check available licenses, which is not the purpose.
 
     successful_check = False
     for license_name, license_description in LICENSES.items():
-        mapdl = launch_mapdl(
+        mapdl_ = launch_mapdl(
             license_type=license_name,
             start_timeout=start_timeout,
+            port=mapdl.port + 1,
             additional_switches=QUICK_LAUNCH_SWITCHES,
         )
 
         # Using first line to ensure not picking up other stuff.
         successful_check = (
-            license_description in mapdl.__str__().split("\n")[0] or successful_check
+            license_description in mapdl_.__str__().split("\n")[0] or successful_check
         )
-        assert license_description in mapdl.__str__().split("\n")[0]
-        mapdl.exit()
+        assert license_description in mapdl_.__str__().split("\n")[0]
+        mapdl_.exit()
 
     assert successful_check  # if at least one license is ok, this should be true.
 
 
 @requires("local")
 @requires("nostudent")
-def test_license_type_additional_switch():
+def test_license_type_additional_switch(mapdl):
     # This test might became a way to check available licenses, which is not the purpose.
     successful_check = False
     for license_name, license_description in LICENSES.items():
-        mapdl = launch_mapdl(
+        mapdl_ = launch_mapdl(
             additional_switches=QUICK_LAUNCH_SWITCHES + " -p " + license_name,
             start_timeout=start_timeout,
+            port=mapdl.port + 1,
         )
 
         # Using first line to ensure not picking up other stuff.
         successful_check = (
-            license_description in mapdl.__str__().split("\n")[0] or successful_check
+            license_description in mapdl_.__str__().split("\n")[0] or successful_check
         )
-        mapdl.exit()
+        mapdl_.exit()
 
     assert successful_check  # if at least one license is ok, this should be true.
 
@@ -267,7 +270,7 @@ def test_license_type_dummy(mapdl):
 @requires("nostudent")
 def test_remove_temp_files(mapdl):
     """Ensure the working directory is removed when run_location is not set."""
-    mapdl = launch_mapdl(
+    mapdl_ = launch_mapdl(
         port=mapdl.port + 1,
         remove_temp_files=True,
         start_timeout=start_timeout,
@@ -275,8 +278,8 @@ def test_remove_temp_files(mapdl):
     )
 
     # possible MAPDL is installed but running in "remote" mode
-    path = mapdl.directory
-    mapdl.exit()
+    path = mapdl_.directory
+    mapdl_.exit()
 
     tmp_dir = tempfile.gettempdir()
     ans_temp_dir = os.path.join(tmp_dir, "ansys_")
@@ -290,17 +293,17 @@ def test_remove_temp_files(mapdl):
 @requires("nostudent")
 def test_remove_temp_files_fail(tmpdir, mapdl):
     """Ensure the working directory is not removed when the cwd is changed."""
-    mapdl = launch_mapdl(
+    mapdl_ = launch_mapdl(
         port=mapdl.port + 1,
         remove_temp_files=True,
         start_timeout=start_timeout,
         additional_switches=QUICK_LAUNCH_SWITCHES,
     )
-    old_path = mapdl.directory
+    old_path = mapdl_.directory
     assert os.path.isdir(str(tmpdir))
-    mapdl.cwd(str(tmpdir))
-    path = mapdl.directory
-    mapdl.exit()
+    mapdl_.cwd(str(tmpdir))
+    path = mapdl_.directory
+    mapdl_.exit()
     assert os.path.isdir(path)
 
     # Checking no changes in the old path
