@@ -513,8 +513,8 @@ jobs:
           'v23.2-ubuntu', 
           'v24.1-ubuntu', 
           'v24.1-ubuntu-student',
-          'v24.2-ubuntu', 
-          'v24.2-ubuntu-student',
+          'latest-ubuntu',
+          'latest-ubuntu-student',
           ]
         extended_testing:
           - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
@@ -647,8 +647,8 @@ jobs:
           'v23.2-ubuntu',
           'v24.1-ubuntu',
           'v24.1-ubuntu-student',
-          'v24.2-ubuntu',
-          'v24.2-ubuntu-student'
+          'latest-ubuntu',
+          'latest-ubuntu-student',
           ]
         extended_testing:
           - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
@@ -735,6 +735,7 @@ jobs:
 
 
   test-windows:
+    # Skipped
     if: github.repository == ''
     name: "Local: Build & test on Windows"
     runs-on: [self-hosted, Windows, pymapdl]
