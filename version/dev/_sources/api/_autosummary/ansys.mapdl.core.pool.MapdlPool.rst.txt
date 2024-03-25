@@ -1,0 +1,34 @@
+﻿MapdlPool
+=========
+
+.. currentmodule:: ansys.mapdl.core.pool
+
+.. autoclass:: MapdlPool
+
+   
+
+   
+   .. rubric:: Methods
+
+   .. autosummary::
+      :toctree:
+   
+      
+      
+      MapdlPool.exit
+      
+      
+      MapdlPool.map
+      
+      
+      MapdlPool.next_available
+      
+      
+      MapdlPool.run_batch
+      
+   
+   
+
+   
+   
+   

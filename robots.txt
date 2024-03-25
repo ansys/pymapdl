@@ -1,0 +1,6 @@
+User-agent: *
+Disallow: / # Disallow everything under the current directory
+Allow: /version/stable/
+Allow: /sitemap.xml
+
+Sitemap: https://mapdl.docs.pyansys.com/sitemap.xml
