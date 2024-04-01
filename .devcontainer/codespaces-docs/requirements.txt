@@ -8,7 +8,7 @@ imageio==2.34.0
 jupyter_sphinx==0.5.3
 jupyterlab>=3.2.8
 matplotlib==3.8.3
-numpydoc==1.6.0
+numpydoc==1.7.0
 pandas==2.2.1
 plotly==5.20.0
 pyiges[full]==0.3.1
