@@ -532,7 +532,7 @@ class Parameters:
         """
         escaped = False
         for each_format_number in [20, 30, 40, 64, 100]:
-            format_str = f"(1F{each_format_number}.12)"
+            format_str = f"(1E{each_format_number}.12)"
             with self._mapdl.non_interactive:
                 # use C ordering
                 self._mapdl.mwrite(parm_name.upper(), label="kji")
