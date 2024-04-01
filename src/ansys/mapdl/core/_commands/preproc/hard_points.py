@@ -39,7 +39,7 @@ class HardPoints:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Type of entity on which the hard point will be created.
 
             LINE - Hard point will be created on a line.

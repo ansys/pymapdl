@@ -1141,7 +1141,8 @@ class ArrayParam:
               First derivative:
 
               .. math::
-                 \dfrac{\mathrm{d}(\mathrm{Par1})}{\mathrm{d}(\mathrm{Par2})}
+
+                 \\dfrac{\\mathrm{d}(\\mathrm{Par1})}{\\mathrm{d}(\\mathrm{Par2})}
 
               The derivative at a point is determined over points
               half way between the previous and next points
