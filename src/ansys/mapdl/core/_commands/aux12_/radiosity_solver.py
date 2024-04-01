@@ -88,18 +88,18 @@ class RadiositySolver:
             specified solver type:
 
             0
-                If the FULL solver is specified (THOPT,FULL), convergence
+                If the FULL solver is specified (``THOPT,FULL``), convergence
                 criteria are monitored and iterations are performed until
                 convergence occurs. If the QUASI solver is specified
-                (THOPT,QUASI), convergence criteria are ignored and one
+                (``THOPT,QUASI``), convergence criteria are ignored and one
                 iteration is performed. This value is the default.
 
             1, 2, 3, ...N
-                If the FULL solver is specified (THOPT,FULL), convergence
+                If the FULL solver is specified (``THOPT,FULL``), convergence
                 criteria are monitored and iterations are performed until
                 convergence occurs, or until the specified number of iterations
                 has been completed, whichever comes first. If the QUASI solver
-                is specified (THOPT,QUASI), convergence criteria are ignored and
+                is specified (``THOPT,QUASI``), convergence criteria are ignored and
                 the specified number of iterations are completed.
 
         Notes

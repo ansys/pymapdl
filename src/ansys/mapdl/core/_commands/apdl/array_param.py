@@ -34,7 +34,7 @@ class ArrayParam:
 
             FIT
               Calculate Fourier coefficients COEFF from MODE, ISYM,
-            THETA, and CURVE.
+              THETA, and CURVE.
 
             EVAL
               Evaluate the Fourier curve CURVE from
@@ -187,10 +187,10 @@ class ArrayParam:
               Square matrix invert: Inverts the ``n`` x ``n`` matrix in ``Par1``
               into ``ParR``. The matrix must be well conditioned.
 
-              ..warning::
+              .. warning::
 
-                Non-independent or ill-conditioned equations can
-                cause erroneous results.
+                 Non-independent or ill-conditioned equations can
+                 cause erroneous results.
 
               For large matrices, use the
               APDL Math operation ``*LSFACTOR`` for efficiency (see APDL
