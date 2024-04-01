@@ -1302,96 +1302,96 @@ def launch_mapdl(
     running MAPDL as a service via gRPC.  Excluded switches such as
     ``"-j"`` either not applicable or are set via keyword arguments.
 
-    \-acc <device>
+    \\-acc <device>
         Enables the use of GPU hardware.  See GPU
         Accelerator Capability in the Parallel Processing Guide for more
         information.
 
-    \-amfg
+    \\-amfg
         Enables the additive manufacturing capability.  Requires
         an additive manufacturing license. For general information about
         this feature, see AM Process Simulation in ANSYS Workbench.
 
-    \-ansexe <executable>
+    \\-ansexe <executable>
         Activates a custom mechanical APDL executable.
         In the ANSYS Workbench environment, activates a custom
         Mechanical APDL executable.
 
-    \-custom <executable>
+    \\-custom <executable>
         Calls a custom Mechanical APDL executable
         See Running Your Custom Executable in the Programmer's Reference
         for more information.
 
-    \-db value
+    \\-db value
         Initial memory allocation
         Defines the portion of workspace (memory) to be used as the
         initial allocation for the database. The default is 1024
         MB. Specify a negative number to force a fixed size throughout
         the run; useful on small memory systems.
 
-    \-dis
+    \\-dis
         Enables Distributed ANSYS
         See the Parallel Processing Guide for more information.
 
-    \-dvt
+    \\-dvt
         Enables ANSYS DesignXplorer advanced task (add-on).
         Requires DesignXplorer.
 
-    \-l <language>
+    \\-l <language>
         Specifies a language file to use other than English
         This option is valid only if you have a translated message file
         in an appropriately named subdirectory in
         ``/ansys_inc/v201/ansys/docu`` or
         ``Program Files\\ANSYS\\Inc\\V201\\ANSYS\\docu``
 
-    \-m <workspace>
+    \\-m <workspace>
         Specifies the total size of the workspace
         Workspace (memory) in megabytes used for the initial
         allocation. If you omit the ``-m`` option, the default is 2 GB
         (2048 MB). Specify a negative number to force a fixed size
         throughout the run.
 
-    \-machines <IP>
+    \\-machines <IP>
         Specifies the distributed machines
         Machines on which to run a Distributed ANSYS analysis. See
         Starting Distributed ANSYS in the Parallel Processing Guide for
         more information.
 
-    \-mpi <value>
+    \\-mpi <value>
         Specifies the type of MPI to use.
         See the Parallel Processing Guide for more information.
 
-    \-mpifile <appfile>
+    \\-mpifile <appfile>
         Specifies an existing MPI file
         Specifies an existing MPI file (appfile) to be used in a
         Distributed ANSYS run. See Using MPI Files in the Parallel
         Processing Guide for more information.
 
-    \-na <value>
+    \\-na <value>
         Specifies the number of GPU accelerator devices
         Number of GPU devices per machine or compute node when running
         with the GPU accelerator feature. See GPU Accelerator Capability
         in the Parallel Processing Guide for more information.
 
-    \-name <value>
+    \\-name <value>
         Defines Mechanical APDL parameters
         Set mechanical APDL parameters at program start-up. The parameter
         name must be at least two characters long. For details about
         parameters, see the ANSYS Parametric Design Language Guide.
 
-    \-p <productname>
+    \\-p <productname>
         ANSYS session product
         Defines the ANSYS session product that will run during the
         session. For more detailed information about the ``-p`` option,
         see Selecting an ANSYS Product via the Command Line.
 
-    \-ppf <license feature name>
+    \\-ppf <license feature name>
         HPC license
         Specifies which HPC license to use during a parallel processing
         run. See HPC Licensing in the Parallel Processing Guide for more
         information.
 
-    \-smp
+    \\-smp
         Enables shared-memory parallelism.
         See the Parallel Processing Guide for more information.
 

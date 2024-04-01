@@ -65,7 +65,7 @@ class ParameterDefinition:
             Name of parameter to be dimensioned.  See ``*SET`` for name
             restrictions.
 
-        type\_
+        type\\_
             Array type:
 
             Arrays are similar to standard FORTRAN arrays (indices are
@@ -261,7 +261,7 @@ class ParameterDefinition:
         Parameters
         ----------
         par : str, optional
-            The name of the resulting parameter. See \*SET for name
+            The name of the resulting parameter. See \\*SET for name
             restrictions.
 
         entity
