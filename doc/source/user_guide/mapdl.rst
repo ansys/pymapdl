@@ -1172,3 +1172,6 @@ These are described in the following table:
 |                                       |                                                                     |
 |                                       | Only for developing purposes.                                       |
 +---------------------------------------+---------------------------------------------------------------------+
+| :envvar:`PYMAPDL_ON_SLURM`            | With this environment variable set to ``FALSE``, you can avoid      |
+|                                       | PyMAPDL to detect that it is running on a SLURM HPC cluster.        |
++---------------------------------------+---------------------------------------------------------------------+
