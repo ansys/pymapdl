@@ -204,6 +204,7 @@ mapdl.block(0, 1, 0, 1, 0, 1)"""
     )
 
 
+@requires("click")
 def test_convert_pipe():
     cmd = """echo "/prep7" | pymapdl convert """
 
