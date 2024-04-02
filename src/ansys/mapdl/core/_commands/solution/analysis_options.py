@@ -2619,7 +2619,7 @@ class AnalysisOptions:
 
             LOADSTEP - At the beginning of each load step.
 
-        set\_
+        set\\_
             Set of equations:
 
             All - Check for overconstraint between all constraint equations (default).
@@ -2781,7 +2781,7 @@ class AnalysisOptions:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Type of linear perturbation analysis to be performed:
 
             STATIC - Perform a linear perturbation static analysis.

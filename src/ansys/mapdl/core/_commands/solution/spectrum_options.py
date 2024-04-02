@@ -824,7 +824,7 @@ class SpectrumOptions:
         tblno
             Input table number.
 
-        type\_
+        type\\_
             Label identifying the type of spectrum:
 
             DISP - Displacement spectrum (in terms of displacement2/Hz ).
@@ -1340,7 +1340,7 @@ class SpectrumOptions:
         tblno
             Input table number.
 
-        type\_
+        type\\_
             Label identifying the type of spectrum:
 
             DISP   - Displacement spectrum (SPVAL values interpreted as displacements with units of

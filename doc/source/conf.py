@@ -4,7 +4,12 @@ from datetime import datetime
 import os
 import warnings
 
-from ansys_sphinx_theme import ansys_favicon, get_version_match, pyansys_logo_white
+from ansys_sphinx_theme import (
+    ansys_favicon,
+    get_version_match,
+    pyansys_logo_black,
+    pyansys_logo_white,
+)
 import numpy as np
 import pyvista
 from sphinx.application import Sphinx
@@ -45,7 +50,7 @@ warnings.filterwarnings(
 
 # -- Project information -----------------------------------------------------
 
-project = "ansys.mapdl.core"
+project = "ansys-mapdl-core"
 copyright = f"(c) {datetime.now().year} ANSYS, Inc. All rights reserved"
 author = "ANSYS Inc."
 
@@ -83,7 +88,6 @@ extensions = [
     "sphinx.ext.graphviz",
     "sphinx_reredirects",
     "ansys_sphinx_theme.extension.linkcode",
-    "sphinx_design",
 ]
 
 # Intersphinx mapping
@@ -138,6 +142,7 @@ html_favicon = ansys_favicon
 # notfound.extension
 notfound_template = "404.rst"
 notfound_urls_prefix = "/../"
+html_baseurl = f"https://{cname}/version/stable"
 
 # static path
 html_static_path = ["_static"]
@@ -208,6 +213,8 @@ linkcheck_ignore = [
     "https://mapdl.docs.pyansys.com/*",
     "https://ansysaccount.b2clogin.com/*",  # behind payfirewall
     "https://ansyshelp.ansys.com/*",  # behind payfirewall
+    "https://forum.ansys.com/forums/*",  # It is detected as broken
+    "https://courses.ansys.com/*",  # It is detected as broken
 ]
 linkcheck_anchors_ignore = [
     # these anchors are picked by linkcheck as broken but they are not.
@@ -259,7 +266,7 @@ sphinx_gallery_conf = {
 # -- Options for HTML output -------------------------------------------------
 html_short_title = html_title = "PyMAPDL"
 html_theme = "ansys_sphinx_theme"
-html_logo = "./_static/pyansys-logo-black-cropped.png"  # pyansys_logo_black
+html_logo = pyansys_logo_black
 html_theme_options = {
     "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
     "github_url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}",

@@ -54,11 +54,18 @@ def run_cli():
 @requires("click")
 @requires("local")
 @requires("nostudent")
-def test_launch_mapdl_cli(run_cli):
-    output = run_cli()
+@pytest.mark.parametrize("start_instance", [None, True, False])
+def test_launch_mapdl_cli(monkeypatch, run_cli, start_instance):
+    if start_instance is not None:
+        monkeypatch.setenv("PYMAPDL_START_INSTANCE", str(start_instance))
+    else:
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
 
-    # In local
+    # Setting a port so it does not collide with the already running instance for testing
+    output = run_cli("start --port 50053")
+
     assert "Success: Launched an MAPDL instance " in output
+    assert "50053" in output
 
     # grab ips and port
     pid = int(re.search(r"\(PID=(\d+)\)", output).groups()[0])
@@ -127,26 +134,26 @@ def test_launch_mapdl_cli_config(run_cli):
 @requires("nostudent")
 def test_launch_mapdl_cli_list(run_cli):
     output = run_cli("list")
-    assert "running" in output
+    assert "running" in output or "sleeping" in output
     assert "Is Instance" in output
     assert len(output.splitlines()) > 2
     assert "ansys" in output.lower() or "mapdl" in output.lower()
 
     output = run_cli("list -i")
-    assert "running" in output
+    assert "running" in output or "sleeping" in output
     assert "Is Instance" not in output
     assert len(output.splitlines()) > 2
     assert "ansys" in output.lower() or "mapdl" in output.lower()
 
     output = run_cli("list -c")
-    assert "running" in output
+    assert "running" in output or "sleeping" in output
     assert "Command line" in output
     assert "Is Instance" in output
     assert len(output.splitlines()) > 2
     assert "ansys" in output.lower() or "mapdl" in output.lower()
 
     output = run_cli("list -cwd")
-    assert "running" in output
+    assert "running" in output or "sleeping" in output
     assert "Command line" not in output
     assert "Working directory" in output
     assert "Is Instance" in output
@@ -154,7 +161,7 @@ def test_launch_mapdl_cli_list(run_cli):
     assert "ansys" in output.lower() or "mapdl" in output.lower()
 
     output = run_cli("list -l")
-    assert "running" in output
+    assert "running" in output or "sleeping" in output
     assert "Is Instance" in output
     assert "Command line" in output
     assert len(output.splitlines()) > 2

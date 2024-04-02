@@ -41,6 +41,7 @@ __version__ = importlib_metadata.version("ansys-mapdl-core")
 
 # In descending order
 SUPPORTED_ANSYS_VERSIONS = {
+    242: "2024R2",
     241: "2024R1",
     232: "2023R2",
     231: "2023R1",

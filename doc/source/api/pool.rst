@@ -8,4 +8,4 @@ Local MAPDL pool
 .. autosummary::
    :toctree: _autosummary
 
-   pool.LocalMapdlPool
+   pool.MapdlPool

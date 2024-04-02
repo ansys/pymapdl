@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Plotting helper for MAPDL using pyvista"""
+from collections import OrderedDict
 from typing import Any, Optional
 from warnings import warn
 
@@ -48,15 +49,19 @@ BC_F = [
     "FY",
     "FZ",
     "AMPS",
-    "CHRGS",
+    "CHRG",
     # "FLUX",
     "CSGZ",
 ]  # TODO: Add moments MX, MY, MZ
 FIELDS = {
     "MECHANICAL": ["UX", "UY", "UZ", "FX", "FY", "FZ"],
     "THERMAL": ["TEMP", "HEAT"],
-    "ELECTRICAL": ["VOLT", "CHRGS", "AMPS"],
+    "ELECTRICAL": ["VOLT", "CHRG", "AMPS"],
 }
+
+FIELDS_ORDERED_LABELS = FIELDS["MECHANICAL"].copy()
+FIELDS_ORDERED_LABELS.extend(FIELDS["THERMAL"])
+FIELDS_ORDERED_LABELS.extend(FIELDS["ELECTRICAL"])
 
 
 # All boundary conditions:
@@ -66,99 +71,12 @@ BCS.extend(BC_F)
 # Allowed entities to plot their boundary conditions
 ALLOWED_TARGETS = ["NODES"]
 
-
 if _HAS_PYVISTA:
     import pyvista as pv
 
-    # Symbols for constrains
-    TEMP = pv.Sphere(center=(0, 0, 0), radius=0.5)
+    from ansys.mapdl.core.plotting_defaults import DefaultSymbol
 
-    UX = pv.Arrow(
-        start=(-1, 0, 0),
-        direction=(1, 0, 0),
-        tip_length=1,
-        tip_radius=0.5,
-        scale=1.0,
-    )
-    UY = pv.Arrow(
-        start=(0, -1, 0),
-        direction=(0, 1, 0),
-        tip_length=1,
-        tip_radius=0.5,
-        scale=1.0,
-    )
-
-    UZ = pv.Arrow(
-        start=(0, 0, -1),
-        direction=(0, 0, 1),
-        tip_length=1,
-        tip_radius=0.5,
-        scale=1.0,
-    )
-
-    FX = pv.Arrow(
-        start=(-1, 0, 0),
-        direction=(1, 0, 0),
-        tip_length=0.5,
-        tip_radius=0.25,
-        scale=1.0,
-    )
-    FY = pv.Arrow(
-        start=(0, -1, 0),
-        direction=(0, 1, 0),
-        tip_length=0.5,
-        tip_radius=0.25,
-        scale=1.0,
-    )
-
-    FZ = pv.Arrow(
-        start=(0, 0, -1),
-        direction=(0, 0, 1),
-        tip_length=0.5,
-        tip_radius=0.25,
-        scale=1.0,
-    )
-
-    def get_VOLT():
-        model_a = pv.Cylinder(
-            center=(0, 0, 0), direction=(1, 0, 0), radius=0.2, height=2
-        ).triangulate()
-
-        model_b = pv.Cylinder(
-            center=(0, 0, 0), direction=(0, 1, 0), radius=0.2, height=2
-        ).triangulate()
-
-        model_c = pv.Cylinder(
-            center=(0, 0, 0), direction=(0, 0, 1), radius=0.2, height=2
-        ).triangulate()
-
-        result = model_a.merge(model_b).triangulate()
-        result = result.merge(model_c)
-
-        result.rotate_z(45.0, inplace=True)
-        result.rotate_vector(
-            vector=(1, -1, 0), angle=-45, point=(0, 0, 0), inplace=True
-        )
-
-        return result
-
-    VOLT = get_VOLT()
-
-    HEAT = pv.Cube(center=(0, 0, 0), x_length=1.0, y_length=1.0, z_length=1.0)
-
-    BC_plot_settings = {
-        "TEMP": {"color": "orange", "glyph": TEMP},
-        "HEAT": {"color": "red", "glyph": HEAT},
-        "UX": {"color": "red", "glyph": UX},
-        "UY": {"color": "green", "glyph": UY},
-        "UZ": {"color": "blue", "glyph": UZ},
-        "VOLT": {"color": "yellow", "glyph": VOLT},
-        "FX": {"color": "red", "glyph": FX},
-        "FY": {"color": "green", "glyph": FY},
-        "FZ": {"color": "blue", "glyph": FZ},
-        "AMPS": {"color": "grey", "glyph": VOLT},
-        "CHRGS": {"color": "grey", "glyph": VOLT},
-    }
+    BC_plot_settings = DefaultSymbol()
 
 
 # Using * to force all the following arguments to be keyword only.
@@ -750,7 +668,7 @@ def general_plotter(
 
         * **'electrical'**
           To plot the following electrical boundary conditions:
-          'VOLT', 'CHRGS', and 'AMPS'.
+          'VOLT', 'CHRG', and 'AMPS'.
 
         Defaults to all the allowed boundary conditions present
         in the responses of :func:`ansys.mapdl.core.Mapdl.dlist`
@@ -827,7 +745,7 @@ def general_plotter(
     +------------+--------------------------------------+
     | THERMAL    | ["TEMP", "HEAT"]                     |
     +------------+--------------------------------------+
-    | ELECTRICAL | ["VOLT", "CHRGS", "AMPS"]            |
+    | ELECTRICAL | ["VOLT", "CHRG", "AMPS"]             |
     +------------+--------------------------------------+
 
     Examples
@@ -985,6 +903,9 @@ def bc_plotter(
     else:
         bc_labels = _bc_labels_default(mapdl)
 
+    if not bc_labels:
+        return pl
+
     if bc_target:
         bc_target = _bc_target_checker(bc_target)
     else:
@@ -1001,10 +922,11 @@ def bc_plotter(
         bc_glyph_size = get_bounding_box(mapdl.mesh.nodes)
         bc_glyph_size = bc_glyph_size[bc_glyph_size != 0]
 
+        ratio = 0.075  # Because a glyph of 1 is too big.
         if bc_glyph_size.size != 0:
-            bc_glyph_size = bc_glyph_size.mean() * 0.75 / 10
+            bc_glyph_size = bc_glyph_size.mean() * ratio
         else:  # Case were there is only one node
-            bc_glyph_size = 1
+            bc_glyph_size = ratio
 
     if not isinstance(bc_glyph_size, (int, float)):
         raise ValueError("The 'bc_glyph_size' parameter can be only an int or float.")
@@ -1080,18 +1002,19 @@ def bc_nodes_plotter(
             orient=False,
             scale="scale",
             # tolerance=0.05,
-            geom=BC_plot_settings[each_label]["glyph"],
+            geom=BC_plot_settings(each_label)["glyph"],
         )
         name_ = f"{each_label}"
         pl.add_mesh(
             glyphs,
-            color=BC_plot_settings[each_label]["color"],
+            color=BC_plot_settings(each_label)["color"],
             style="surface",
             # style='wireframe',
-            # edge_color=BC_plot_settings[each_label]['color'],
+            # edge_color=BC_plot_settings(each_label)['color'],
             # line_width=3,
             name=name_,
             label=name_,
+            opacity=0.50,
         )
 
         if plot_bc_labels:
@@ -1116,9 +1039,41 @@ def bc_nodes_plotter(
             pcloud["labels"],
             shape_opacity=0.25,
             font_size=bc_labels_font_size,
+            # There is a conflict here. See
+            # To do not hide the labels, even when the underlying nodes
+            # are hidden, we set "always_visible"
+            always_visible=True,
+            show_points=False,  # to not have node duplicity
         )
 
     if plot_bc_legend:
+        # Reorder labels to keep a consistent order
+        sorted_dict = OrderedDict()
+        labels_ = pl.renderer._labels.copy()
+
+        # sorting the keys
+        for symbol in FIELDS_ORDERED_LABELS:
+            for key, value in labels_.items():
+                # taking advantage and overriding the legend glyph with
+                # something it can be seen properly in the legend
+                label_ = value[1]
+                if "U" in label_:
+                    value = [BC_plot_settings("UY")["glyph"], label_, value[2]]
+                elif "F" in label_:
+                    value = [BC_plot_settings("FX")["glyph"], label_, value[2]]
+                else:
+                    value = [BC_plot_settings(label_)["glyph"], label_, value[2]]
+
+                if symbol == value[1]:
+                    sorted_dict[key] = value
+
+        # moving the not added labels (just in case)
+        for key, value in labels_.items():
+            if label_ not in FIELDS_ORDERED_LABELS:
+                sorted_dict[key] = value
+
+        # overwriting labels
+        pl.renderer._labels = sorted_dict
         pl.add_legend(bcolor=None)
 
     return pl

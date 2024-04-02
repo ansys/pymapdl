@@ -164,28 +164,33 @@ def test_download_tech_demo_data(running_test):
 
 @requires("requests")
 def test_detach_examples_submodule():
-    cmd = """
+    cmd = (
+        """
 import sys
 
-assert "ansys.mapdl.core" not in sys.modules
-assert "requests" not in sys.modules
-assert "ansys.mapdl.core.examples" not in sys.modules
+assert 'ansys.mapdl.core' not in sys.modules
+assert 'requests' not in sys.modules
+assert 'ansys.mapdl.core.examples' not in sys.modules
 
 from ansys.mapdl import core as pymapdl
 
-assert "ansys.mapdl.core" in sys.modules
-assert "ansys.mapdl.core.examples" not in sys.modules
-assert "requests" not in sys.modules
+assert 'ansys.mapdl.core' in sys.modules
+assert 'ansys.mapdl.core.examples' not in sys.modules
+assert 'requests' not in sys.modules
 
 from ansys.mapdl.core.examples import vmfiles
 
-assert "ansys.mapdl.core.examples" in sys.modules
-assert "requests" in sys.modules
+assert 'ansys.mapdl.core.examples' in sys.modules
+assert 'requests' in sys.modules
 
-print("Everything went well")
-"""
+print('Everything went well')
+""".strip()
+        .replace("\n", ";")
+        .replace(";;", ";")
+    )
 
-    cmd_line = f"""python -c '{cmd}' """
+    cmd_line = f"""python -c "{cmd}" """
+
     p = Popen(cmd_line, shell=True, stdout=PIPE, stderr=STDOUT)
     out = p.communicate()[0].decode()
 

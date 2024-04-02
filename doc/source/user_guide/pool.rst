@@ -3,7 +3,7 @@
 Create a pool of MAPDL instances
 ================================
 
-PyMAPDL contains the :class:`LocalMapdlPool <ansys.mapdl.core.pool.LocalMapdlPool>`
+PyMAPDL contains the :class:`MapdlPool <ansys.mapdl.core.pool.MapdlPool>`
 class to simplify creating multiple local instances of the 
 :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
 class for batch processing. This can be used for the batch processing of a
@@ -14,8 +14,8 @@ This code creates a pool:
 
 .. code:: pycon
 
-    >>> from ansys.mapdl.core import LocalMapdlPool
-    >>> pool = LocalMapdlPool(10)
+    >>> from ansys.mapdl.core import MapdlPool
+    >>> pool = MapdlPool(10)
     'MAPDL Pool with 10 active instances'
     >>> pool.exit(block=True)
 
@@ -27,7 +27,7 @@ at the current directory within their own isolated directories:
 
     >>> import os
     >>> my_path = os.getcmd()
-    >>> pool = LocalMapdlPool(10, nproc=1, run_location=my_path)
+    >>> pool = MapdlPool(10, nproc=1, run_location=my_path)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
 You can access each individual MAPDL instance with this code:
@@ -46,7 +46,7 @@ Run a set of input files
 ------------------------
 
 You can use the pool to run a set of pre-generated input files using the
-:func:`run_batch <ansys.mapdl.core.LocalMapdlPool.run_batch>` method. For
+:func:`run_batch <ansys.mapdl.core.MapdlPool.run_batch>` method. For
 example, this code would run the first set of 20 verification files:
 
 .. code:: pycon
@@ -63,7 +63,7 @@ Run a user function
 
 You can use the pool to run a custom user function on each MAPDL
 instance over a set of inputs. As in the example for the
-:func:`run_batch <ansys.mapdl.core.LocalMapdlPool.run_batch>` function,
+:func:`run_batch <ansys.mapdl.core.MapdlPool.run_batch>` function,
 the following code uses a set of verification files. However, it implements
 it as a function and outputs the final routine instead of the text
 output from MAPDL.
@@ -103,7 +103,7 @@ Close the PyMAPDL pool
 ----------------------
 
 You can close the PyMAPDL pool with the
-:meth:`pool.exit() <ansys.mapdl.core.LocalMapdlPool.exit>` command.
+:meth:`pool.exit() <ansys.mapdl.core.MapdlPool.exit>` command.
 
 .. code:: pycon
     

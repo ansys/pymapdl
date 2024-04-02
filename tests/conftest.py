@@ -23,6 +23,7 @@
 from collections import namedtuple
 import os
 from pathlib import Path
+from shutil import get_terminal_size
 from sys import platform
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
@@ -204,7 +205,12 @@ import ansys.mapdl.core as pymapdl
 
 pymapdl.RUNNING_TESTS = True
 
-from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
+from ansys.mapdl.core import Mapdl
+from ansys.mapdl.core.errors import (
+    MapdlConnectionError,
+    MapdlExitedError,
+    MapdlRuntimeError,
+)
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 
@@ -236,6 +242,38 @@ MAPDL_VERSION = None  # this is cached by mapdl fixture and used in the minimal 
 
 if START_INSTANCE and not ON_LOCAL:
     raise MapdlRuntimeError(ERRMSG)
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_report_header(config, start_path, startdir):
+    text = []
+    text += ["Testing variables".center(get_terminal_size()[0], "-")]
+    text += [
+        f"Session dependent: ON_CI ({ON_CI}), TESTING_MINIMAL ({TESTING_MINIMAL}), SUPPORT_PLOTTING ({SUPPORT_PLOTTING})"
+    ]
+    text += [
+        f"OS dependent: ON_LINUX ({ON_LINUX}), ON_UBUNTU ({ON_UBUNTU}), ON_WINDOWS ({ON_WINDOWS}), ON_MACOS )({ON_MACOS})"
+    ]
+    text += [
+        f"MAPDL dependent: ON_LOCAL ({ON_LOCAL}), ON_STUDENT ({ON_STUDENT}), HAS_GRPC ({HAS_GRPC}), HAS_DPF ({HAS_DPF}), IS_SMP ({IS_SMP})"
+    ]
+
+    text += ["Environment variables".center(get_terminal_size()[0], "-")]
+    line = ""
+    for env_var in [
+        "PYMAPDL_START_INSTANCE",
+        "PYMAPDL_PORT",
+        "PYMAPDL_DB_PORT",
+        "PYMAPDL_IP",
+        "DPF_PORT",
+        "DPF_START_SERVER",
+    ]:
+        env_var_value = os.environ.get(env_var, None)
+        if env_var_value is not None:
+            line += f"{env_var} ('{env_var_value}'), "
+    text += [line]
+    text += ["Pytest configuration".center(get_terminal_size()[0], "-")]
+    return "\n".join(text)
 
 
 ## Changing report line length
@@ -373,26 +411,32 @@ def run_before_and_after_tests(request, mapdl):
         except MapdlExitedError:
             return True
 
-    if START_INSTANCE and is_exited(mapdl):
+    if START_INSTANCE and (is_exited(mapdl) or mapdl._exited):
         # Backing up the current local configuration
         local_ = mapdl._local
+        channel = mapdl._channel
+        ip = mapdl.ip
+        port = mapdl.port
+        try:
+            # to connect
+            mapdl = Mapdl(port=port, ip=ip)
 
-        # Relaunching MAPDL
-        mapdl_ = launch_mapdl(
-            port=mapdl._port,
-            override=True,
-            run_location=mapdl._path,
-            cleanup_on_exit=mapdl._cleanup,
-        )
+        except MapdlConnectionError as err:
+            # we cannot connect.
+            # Kill the instance
+            mapdl.exit()
 
-        # Cloning the new mapdl instance channel into the old one.
-        mapdl._channel = mapdl_._channel
-        mapdl._multi_connect(timeout=mapdl._timeout)
+            # Relaunching MAPDL
+            mapdl = launch_mapdl(
+                port=mapdl._port,
+                override=True,
+                run_location=mapdl._path,
+                cleanup_on_exit=mapdl._cleanup,
+            )
 
         # Restoring the local configuration
         mapdl._local = local_
 
-    mapdl.gopr()
     yield  # this is where the testing happens
 
     # Teardown : fill with any logic you want

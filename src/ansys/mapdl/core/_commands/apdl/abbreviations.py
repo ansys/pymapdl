@@ -77,8 +77,12 @@ class Abbreviations:
         lab
             Label that specifies the read operation:
 
-            Replace current abbreviation set with these abbreviations (default). - Extend current abbreviation set with these abbreviations, replacing any of the
-                              same name that already exist.
+            NEW
+                Replace current abbreviation set with these abbreviations (default).
+
+            CHANGE
+                Extend current abbreviation set with these abbreviations, replacing any of the
+                same name that already exist.
 
         fname
             File name and directory path (248 characters maximum, including the
