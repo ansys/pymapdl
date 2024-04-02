@@ -23,31 +23,8 @@
 import os
 from typing import Dict, Union
 
-import psutil
-
-PROCESS_OK_STATUS = [
-    # List of all process status, comment out the ones that means that
-    # process is not OK.
-    # If process is OK, it means it can be killed normally.
-    psutil.STATUS_RUNNING,  #
-    psutil.STATUS_SLEEPING,  #
-    psutil.STATUS_DISK_SLEEP,  #
-    # psutil.STATUS_STOPPED, #
-    # psutil.STATUS_TRACING_STOP, #
-    # psutil.STATUS_ZOMBIE, #
-    psutil.STATUS_DEAD,  #
-    # psutil.STATUS_WAKE_KILL, #
-    # psutil.STATUS_WAKING, #
-    psutil.STATUS_PARKED,  # (Linux)
-    psutil.STATUS_IDLE,  # (Linux, macOS, FreeBSD)
-    # psutil.STATUS_LOCKED, # (FreeBSD)
-    # psutil.STATUS_WAITING, # (FreeBSD)
-    # psutil.STATUS_SUSPENDED, # (NetBSD)
-]
-
 try:
     import click
-    from tabulate import tabulate
 
     _HAS_CLICK = True
 except ModuleNotFoundError:
@@ -524,6 +501,28 @@ By default, it stops instances running on the port 50052.""",
         help="Kill all MAPDL instances",
     )
     def stop(port, pid, all):
+        import psutil
+
+        PROCESS_OK_STATUS = [
+            # List of all process status, comment out the ones that means that
+            # process is not OK.
+            # If process is OK, it means it can be killed normally.
+            psutil.STATUS_RUNNING,  #
+            psutil.STATUS_SLEEPING,  #
+            psutil.STATUS_DISK_SLEEP,  #
+            # psutil.STATUS_STOPPED, #
+            # psutil.STATUS_TRACING_STOP, #
+            # psutil.STATUS_ZOMBIE, #
+            psutil.STATUS_DEAD,  #
+            # psutil.STATUS_WAKE_KILL, #
+            # psutil.STATUS_WAKING, #
+            psutil.STATUS_PARKED,  # (Linux)
+            psutil.STATUS_IDLE,  # (Linux, macOS, FreeBSD)
+            # psutil.STATUS_LOCKED, # (FreeBSD)
+            # psutil.STATUS_WAITING, # (FreeBSD)
+            # psutil.STATUS_SUSPENDED, # (NetBSD)
+        ]
+
         if not pid and not port:
             port = 50052
 
@@ -640,6 +639,9 @@ By default, it stops instances running on the port 50052.""",
         help="Print running location info.",
     )
     def list(instances, long, cmd, location):
+        import psutil
+        from tabulate import tabulate
+
         # Assuming all ansys processes have -grpc flag
         mapdl_instances = []
         for proc in psutil.process_iter():
