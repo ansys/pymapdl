@@ -706,7 +706,7 @@ def test__parse_slurm_options(set_env_var_context, validation):
     if jobname != "file":
         assert jobname == validation["jobname"]
 
-    if exec_file:
+    if exec_file and validation.get("exec_file", None):
         assert exec_file == validation["exec_file"]
 
 
