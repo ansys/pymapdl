@@ -106,9 +106,11 @@ class Aux3:
         ktitle
             Indicates if the set title should be modified.
 
-            0 - Keep the original title.
+            0
+                Keep the original title.
 
-            1 - Change the title to the title specified with the most current /TITLE command.
+            1
+                Change the title to the title specified with the most current /TITLE command.
 
         Notes
         -----
@@ -135,10 +137,12 @@ class Aux3:
         option
             Specifies which sets are to be removed from the selected sets.
 
-            SET - Specifies one or more particular sets in the results file that are to be
-                  removed from the group of sets selected for deletion.
+            SET
+                Specifies one or more particular sets in the results file that are to be
+                removed from the group of sets selected for deletion.
 
-            ALL - Removes all selected sets that are currently selected for deletion.
+            ALL
+                Removes all selected sets that are currently selected for deletion.
 
         nstart
             The first set to be removed from the set selected for deletion.
