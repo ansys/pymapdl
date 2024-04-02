@@ -409,7 +409,7 @@ class Special:
 
         Parameters
         ----------
-        type\_
+        type\\_
             The type of operation requested:
 
             DISP - Calculate the maximum and minimum possible displacement at each node in the

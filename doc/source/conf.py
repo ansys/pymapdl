@@ -142,6 +142,7 @@ html_favicon = ansys_favicon
 # notfound.extension
 notfound_template = "404.rst"
 notfound_urls_prefix = "/../"
+html_baseurl = f"https://{cname}/version/stable"
 
 # static path
 html_static_path = ["_static"]

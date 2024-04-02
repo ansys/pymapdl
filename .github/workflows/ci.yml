@@ -863,7 +863,9 @@ jobs:
     needs: [release]
     steps:
       - name: Deploy the stable documentation
-        uses: ansys/actions/doc-deploy-stable@v5
+        # TODO: testing SEO improvements. This branch avoids creating a
+        # sitemap.xml pages in opposite to v5.
+        uses: ansys/actions/doc-deploy-stable@feat/seo-improvements
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -906,7 +908,8 @@ jobs:
     needs: [docs-build]
     steps:
       - name: Deploy the latest documentation
-        uses: ansys/actions/doc-deploy-dev@v5
+        # TODO: testing SEO improvements. This branch reuses the "index.html" from the stable version
+        uses: ansys/actions/doc-deploy-dev@feat/seo-improvements
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -951,7 +954,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.2
       - name: "Set up Julia"
-        uses: julia-actions/setup-julia@v1
+        uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.julia-version }}
       

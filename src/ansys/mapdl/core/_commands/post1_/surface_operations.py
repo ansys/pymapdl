@@ -439,7 +439,7 @@ class SurfaceOperations:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
             S - Selects a new set (default).

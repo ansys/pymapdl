@@ -118,7 +118,7 @@ class Results:
 
             FRONT - Plots CINT quantities distribution along the crack front.
 
-        id\_
+        id\\_
             Crack ID number.
 
         node
@@ -558,7 +558,7 @@ class Results:
 
         Parameters
         ----------
-        id\_
+        id\\_
             Crack ID number.
 
         node
