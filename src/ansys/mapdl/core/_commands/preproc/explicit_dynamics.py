@@ -1516,11 +1516,11 @@ class ExplicitDynamics:
 
         Parameters
         ----------
-        min\_
+        min\\_
             Minimum contact entity number to be selected and plotted (default
             = 1).
 
-        max\_
+        max\\_
             Maximum contact entity number to be selected and plotted (default =
             MIN).
 
@@ -1567,11 +1567,11 @@ class ExplicitDynamics:
 
             LIST   - List current setting for penetration checking.
 
-        min\_
+        min\\_
             Minimum contact entity number for which to turn on/off small
             penetration check (default = 1).
 
-        max\_
+        max\\_
             Maximum contact entity number for which to turn on/off small
             penetration check (defaults to MIN).
 

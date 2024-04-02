@@ -360,7 +360,7 @@ class RadiositySolver:
         ext
             Filename extension for view factor matrix. Default = .vf.
 
-        dir\_
+        dir\\_
             Directory path for view factor matrix. If you do not specify a
             directory path, it will default to your working directory.
 

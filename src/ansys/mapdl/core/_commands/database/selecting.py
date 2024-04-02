@@ -99,7 +99,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of area select:
 
             S - Select a new set (default).
@@ -152,7 +152,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
             S - Select a new set (default)
@@ -272,7 +272,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of area select:
 
             S - Select a new set (default).
@@ -306,7 +306,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
             S - Select a new set of labels.
@@ -393,7 +393,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
             - S - Select a new set (default).
@@ -694,7 +694,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
             S
@@ -808,7 +808,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of keypoint select:
 
             S - Select a new set (default).
@@ -833,7 +833,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of keypoint select:
 
             S - Select a new set (default).
@@ -883,7 +883,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
             S - Select a new set (default).
@@ -995,7 +995,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of line select:
 
             S - Select a new set (default).
@@ -1020,7 +1020,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of line select:
 
             S - Select a new set (default).
@@ -1074,7 +1074,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
             S - Select a new set (default).
@@ -1235,7 +1235,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of node select:
 
             S - Select a new set (default).
@@ -1282,7 +1282,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of node select:
 
             S - Select a new set (default).
@@ -1345,7 +1345,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of node select:
 
             S - Select a new set (default).
@@ -1374,7 +1374,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of node select:
 
             S - Select a new set (default).
@@ -1411,7 +1411,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of node select:
 
             S - Select a new set (default).
@@ -1447,7 +1447,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying type of select. Because PARTSEL is a command
             macro, the label must be enclosed in single quotes.
 
@@ -1536,7 +1536,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of volume select:
 
             S - Select a new set (default).
@@ -1633,7 +1633,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of volume select:
 
             S - Select a new set (default).
