@@ -1165,13 +1165,13 @@ These are described in the following table:
 |                                       |    export PYMAPDL_MAPDL_VERSION=22.2                                |
 |                                       |                                                                     |
 +---------------------------------------+---------------------------------------------------------------------+
+| :envvar:`PYMAPDL_ON_SLURM`            | With this environment variable set to ``FALSE``, you can avoid      |
+|                                       | PyMAPDL to detect that it is running on a SLURM HPC cluster.        |
++---------------------------------------+---------------------------------------------------------------------+
 | :envvar:`PYMAPDL_MAX_MESSAGE_LENGTH`  | Maximum gRPC message length. If your                                |
 |                                       | connection terminates when running                                  |
 |                                       | PRNSOL or NLIST, raise this. In bytes,                              |
 |                                       | defaults to 256 MB.                                                 |
 |                                       |                                                                     |
 |                                       | Only for developing purposes.                                       |
-+---------------------------------------+---------------------------------------------------------------------+
-| :envvar:`PYMAPDL_ON_SLURM`            | With this environment variable set to ``FALSE``, you can avoid      |
-|                                       | PyMAPDL to detect that it is running on a SLURM HPC cluster.        |
 +---------------------------------------+---------------------------------------------------------------------+
