@@ -220,7 +220,7 @@ class MapCommand:
             while it is read. Default = 0. NSKIP is ignored for FileType =
             CFXTBR or CFDPOST on the FTYPE command.
 
-        format\_
+        format\\_
             For FileType = FORMATTED on the FTYPE command, Format is the read
             format in the FORTRAN FORMAT convention enclosed in parentheses;
             for example: (3e10.0,10x,e10.0,70x,e10.0)

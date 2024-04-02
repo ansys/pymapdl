@@ -1164,7 +1164,8 @@ class ArrayParam:
               First derivative:
 
               .. math::
-                 \dfrac{\mathrm{d}(\mathrm{Par1})}{\mathrm{d}(\mathrm{Par2})}
+
+                 \\dfrac{\\mathrm{d}(\\mathrm{Par1})}{\\mathrm{d}(\\mathrm{Par2})}
 
               The derivative at a point is determined over points
               half way between the previous and next points
@@ -1177,7 +1178,8 @@ class ArrayParam:
               Second derivative:
 
               .. math::
-                 \dfrac{\mathrm{d}^2(\mathrm{Par1})}{\mathrm{d}(\mathrm{Par2})^2}
+
+                 \\dfrac{\\mathrm{d}^2(\\mathrm{Par1})}{\\mathrm{d}(\\mathrm{Par2})^2}
 
               See also ``DER1``.
 
@@ -1186,7 +1188,7 @@ class ArrayParam:
 
               .. math::
 
-                 \int Par1 \, d(Par2)
+                 \\int Par1 \\, d(Par2)
 
               where ``CON1`` is the integration constant.
               The integral at a point is
@@ -1198,7 +1200,7 @@ class ArrayParam:
 
               .. math::
 
-                 \iint Par1 \, d(Par2)
+                 \\iint Par1 \\, d(Par2)
 
               where ``CON1`` is the integration constant of the first
               integral and ``CON2`` is the integration constant

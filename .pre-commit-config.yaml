@@ -13,7 +13,7 @@ repos:
   - id: isort
 
 - repo: https://github.com/numpy/numpydoc
-  rev: v1.7.0rc0
+  rev: v1.7.0
   hooks:
     - id: numpydoc-validation
       exclude: |
@@ -65,6 +65,6 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.28.0
+  rev: 0.28.1
   hooks:
     - id: check-github-workflows

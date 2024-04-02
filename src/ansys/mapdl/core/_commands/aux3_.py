@@ -88,13 +88,13 @@ class Aux3:
 
         Parameters
         ----------
-        set\_
+        set\\_
             Set of data in results file to be modified.
 
         lstep
             The new load step number.
 
-        iter\_
+        iter\\_
             The new load substep number.
 
         cumit

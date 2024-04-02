@@ -108,7 +108,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of area select:
 
             S
@@ -167,7 +167,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
             S
@@ -300,7 +300,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of area select:
 
             S
@@ -338,7 +338,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
             S
@@ -430,7 +430,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
             S
@@ -765,7 +765,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
             S
@@ -882,7 +882,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of keypoint select:
 
             S
@@ -911,7 +911,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of keypoint select:
 
             S
@@ -965,7 +965,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
             S
@@ -1088,7 +1088,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of line select:
 
             S
@@ -1117,7 +1117,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of line select:
 
             S
@@ -1177,7 +1177,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
             S
@@ -1346,7 +1346,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of node select:
 
             S
@@ -1399,7 +1399,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of node select:
 
             S
@@ -1473,7 +1473,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of node select:
 
             S
@@ -1506,7 +1506,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of node select:
 
             S
@@ -1549,7 +1549,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of node select:
 
             S
@@ -1589,7 +1589,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying type of select. Because PARTSEL is a command
             macro, the label must be enclosed in single quotes.
 
@@ -1685,7 +1685,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of volume select:
 
             S
@@ -1792,7 +1792,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of volume select:
 
             S

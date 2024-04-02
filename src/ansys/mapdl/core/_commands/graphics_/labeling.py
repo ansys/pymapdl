@@ -443,13 +443,13 @@ class Labelling:
             2
                 Plot value next to symbol.
 
-        min\_
+        min\\_
             Minimum value in a range of values plotted on screen.
 
-        max\_
+        max\\_
             Maximum value in a range of values plotted on screen.
 
-        abs\_
+        abs\\_
             Absolute number.  If KEY = 2 and ABS = 0, a number falling between
             the MIN and MAX is displayed.  If ABS is not specified, it defaults
             to 0.  If KEY = 2 and ABS = 1, an absolute value falling between

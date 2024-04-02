@@ -954,7 +954,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4.1.2
       - name: "Set up Julia"
-        uses: julia-actions/setup-julia@v1
+        uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.julia-version }}
       

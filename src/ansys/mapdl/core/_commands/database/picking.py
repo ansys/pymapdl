@@ -95,7 +95,7 @@ class Picking:
         narg
             Number of items in the picked list.
 
-        type\_
+        type\\_
             Type of items picked:
 
             1

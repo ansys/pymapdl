@@ -422,7 +422,8 @@ class Components:
 
         Parameters
         ----------
-        type\\_
+        type_
+
             Label identifying the type of select:
 
             S

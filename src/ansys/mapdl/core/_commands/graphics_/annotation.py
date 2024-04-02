@@ -171,7 +171,7 @@ class Annotation:
             number is available; ANSYS will substitute the lowest available
             number in place of any user-specified higher number.
 
-        type\_
+        type\\_
             Annotation internal type number.  If TYPE = DELE, delete annotation
             NUM.
 
