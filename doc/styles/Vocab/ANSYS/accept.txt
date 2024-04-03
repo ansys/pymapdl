@@ -171,3 +171,4 @@ Windows Subsystem for Linux
 wsl
 WSL
 Zhu
+SLURM
