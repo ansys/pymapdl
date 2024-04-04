@@ -26,8 +26,11 @@ Basic concepts
 ==============
 
 - **Nodes**: Individual computing servers within the cluster.
-- **Compute node**: A type of node used only for running processes. It is not accessible from outside the cluster.
-- **Login nodes**: A type of node which is used only for login and job submission. No computation should be performed on it. It is sometimes referred to as 'virtual desktop infrastructure' (VDI).
+- **Compute node**: A type of node used only for running processes.
+  It is not accessible from outside the cluster.
+- **Login nodes**: A type of node which is used only for login and job submission.
+  No computation should be performed on it. It is sometimes referred to as
+  'virtual desktop infrastructure' (VDI).
 - **Partition**: A logical grouping of nodes with similar characteristics
   (for example CPU architecture, memory size). 
 - **Job**: A task submitted to SLURM for execution. 
@@ -72,10 +75,12 @@ job parameters and commands to execute. Here's a basic example:
     echo "Hello, SLURM!"
     srun my_executable
 
-Notice how the job configuration is detailed through comments in the file prefixed with ``#SBATCH``.
+Notice how the job configuration is detailed through comments in the
+file prefixed with ``#SBATCH``.
 
-For more information regarding the possible ``srun`` and ``sbatch`` arguments visit
-`Slurm Workload Manager - srun <slurm_srun_>`_ and `Slurm Workload Manager - sbatch <slurm_sbatch_>`_.
+For more information regarding the possible ``srun`` and ``sbatch``
+arguments visit `Slurm Workload Manager - srun <slurm_srun_>`_ and
+`Slurm Workload Manager - sbatch <slurm_sbatch_>`_.
 
 Submitting a Job
 ----------------
@@ -98,22 +103,30 @@ You can specify each job configuration using the command line. For example:
 
     user@machine:~$ srun --nodes=2 my_script.sh
 
-The command line arguments do **NOT** overwrite the equivalent arguments written in the bash file.
-Hence, make sure that the argument you want to pass using the command line is not present already in
-the bash file.
+The command line arguments do **NOT** overwrite the equivalent arguments written
+in the bash file.
+Hence, make sure that the argument you want to pass using the command line is
+not present already in the bash file.
 
 Submit a PyMAPDL job
 ====================
 
 Using PyMAPDL in a HPC environment managed by SLURM scheduler involves a few key steps
-to ensure efficient job execution and resource utilization. Below is a guide
-outlining the process:
+to ensure efficient job execution and resource utilization.
 
+There are certain requirements to be meet:
+
+* An ANSYS installation available or reachable from the compute nodes. This normally implies that
+  the ANSYS installation directory is in a shared drive or directory. Your HPC cluster administrator
+  should provide you with the path to the ANSYS directory.
+
+* A Python installation available or reachable from the compute nodes.
 
 Install PyMAPDL
 ---------------
 
-PyMAPDL Python package (``ansys-mapdl-core``) needs to be installed in a virtual environment which is accessible from the compute nodes.
+PyMAPDL Python package (``ansys-mapdl-core``) needs to be installed in a virtual
+environment which is accessible from the compute nodes.
 
 To do that you can find where your Python distribution is installed using:
 
@@ -149,10 +162,13 @@ the directory ``/home/user/.venv`` or wherever you prefer:
 
     user@machine:~$ python3 -m venv /home/user/.venv
 
+It is assumed, that the directory ``/home/user`` is available to all the HPC nodes.
+This is the default for most of the HPC configurations.
+
 .. warning::
     It is always recommended you use a supported Python version, so you can install
     the latest PyMAPDL package. For more information regarding the supported Python versions,
-    visit `Install PyMAPDL - PyMAPDL <ref_pymapdl_installation_>`_.
+    visit :ref:`ref_pymapdl_installation`.
 
 Then you can install PyMAPDL after activating the virtual environment:
 
@@ -199,45 +215,7 @@ The console output should show:
     Testing Python!
     PyMAPDL version 0.68.1 was successfully imported!
 
-If you see an error in the output, it means that the Python environment is not accessible to the compute nodes.
-For example, in the following output, PyMAPDL could not be found, meaning that the script
-is not using the virtual environment ``/home/user/.venv``:
-
-.. code-block:: console
-
-    user@machine:~$ srun test.sh
-    Testing Python!
-    Traceback (most recent call last):
-    File "<string>", line 1, in <module>
-    ImportError: No module named ansys.mapdl
-
-This could be for a number of reasons. One of them is that the system Python distribution
-used to create the virtual environment is not accessible from the compute nodes.
-For example, you might be creating the virtual environment using Python 3.10, but only
-Python 3.8 is available from the compute nodes.
-You can test which Python executable the cluster by starting an interactive session in
-a compute node using:
-
-.. code-block:: console
-
-    user@machine:~$ srun --pty /bin/bash
-    user@compute_node_01:~$ compgen -c | grep python # List all commands starting with python
-
-.. warning::
-    If the Python virtual environment is not accessible from the compute nodes,
-    request to your HPC cluster administrator to have Python available in all the compute
-    nodes. You might want to specify which version of Python you want to have available.
-
-
-.. the approach to solve this comes from:
-   https://stackoverflow.com/questions/64188693/problem-with-python-environment-and-slurm-srun-sbatch
-
-Many HPC infrastructure uses environment managers to load and unload software package using modules
-and environment variables. 
-Hence you might want to make sure that the correct module is loaded in your script.
-Two of the most common environment managers are `Environment modules - Modules documentation <modules_docs_>`_ and `Lmod documentation <lmod_docs_>`_.
-Check your cluster documentation to know which environment manager is using, and how to load Python with
-it. If you find any issue, you should contact your cluster administrator.
+If you see an error in the output, visit `ref_python_venv_not_accesible`_.
 
 Submit a PyMAPDL job
 --------------------
@@ -304,6 +282,7 @@ instead of ``srun``, but in that case, the bash file is needed:
 .. code-block:: console
 
     user@machine:~$ sbatch job.sh
+    Submitted batch job 1
 
 The expected output of the job should be:
 
@@ -393,12 +372,14 @@ It's a versatile tool for managing jobs, nodes, partitions, and more.
 **Common Options:**
 
 - ``--name=jobname``: Cancels all jobs with a specific name.
-- ``--state=pending``: Cancels all jobs in a specific state, for example, pending jobs.
+- ``--state=pending``: Cancels all jobs in a specific state,
+  for example, pending jobs.
 
 ``sacct`` - Accounting Information
 ----------------------------------
 
-``sacct`` is used to report job or job step accounting information about active or completed jobs.
+``sacct`` is used to report job or job step accounting information
+about active or completed jobs.
 
 **Basic Usage:**
 
@@ -421,10 +402,14 @@ It's a versatile tool for managing jobs, nodes, partitions, and more.
 
 **Common Options:**
 
-- ``--format``: Specifies which fields to display, for example, ``--format=JobID,JobName,State``.
-- ``-S`` and ``-E``: Set the start and end time for the report, for example, ``-S 2023-01-01 -E 2023-01-31``.
+- ``--format``: Specifies which fields to display,
+  for example, ``--format=JobID,JobName,State``.
+- ``-S`` and ``-E``: Set the start and end time for the report,
+  for example, ``-S 2023-01-01 -E 2023-01-31``.
 
-For more detailed information, refer to the official SLURM documentation or use the `man` command (for example, `man squeue`) to explore all available options and their usage.
+For more detailed information, refer to the official SLURM documentation
+or use the `man` command (for example, `man squeue`) to explore all available
+options and their usage.
 
 
 Best Practices
@@ -445,14 +430,131 @@ Debugging Jobs
 
 - Check SLURM logs for error messages and debugging information.
 
-Using ANSYS provided Python installation
-========================================
 
-In 
+.. _ref_python_venv_not_accesible:
+
+Python virtual environment is not accessible
+--------------------------------------------
+If there is an error while testing the Python installation, it might mean 
+that the Python environment is not accessible to the compute nodes.
+For example, in the following output, PyMAPDL could not be found, meaning that the script
+is not using the virtual environment ``/home/user/.venv``:
+
+.. code-block:: console
+
+    user@machine:~$ srun test.sh
+    Testing Python!
+    Traceback (most recent call last):
+    File "<string>", line 1, in <module>
+    ImportError: No module named ansys.mapdl
+
+This could be for a number of reasons. One of them is that the system **Python distribution
+used to create the virtual environment is not accessible from the compute nodes**.
+Either because the virtual environment has been created in a directory which is not accessible
+from the nodes or because the virtual environment has been created from a Python executable
+which is not available to the compute nodes, hence the virtual environment is not activated.
+For example, you might be creating the virtual environment using Python 3.10, but only
+Python 3.8 is available from the compute nodes.
+
+You can test which Python executable the cluster is using by starting an interactive session in
+a compute node using:
+
+.. code-block:: console
+
+    user@machine:~$ srun --pty /bin/bash
+    user@compute_node_01:~$ compgen -c | grep python # List all commands starting with python
+
+.. the approach to solve this comes from:
+   https://stackoverflow.com/questions/64188693/problem-with-python-environment-and-slurm-srun-sbatch
+
+Many HPC infrastructure uses environment managers to load and unload software package using modules
+and environment variables. 
+Hence you might want to make sure that the correct module is loaded in your script.
+Two of the most common environment managers are
+`Environment modules - Modules documentation <modules_docs_>`_ and `Lmod documentation <lmod_docs_>`_.
+Check your cluster documentation to know which environment manager is using, and how to
+load Python with it. If you find any issue, you should contact your cluster administrator.
+
+If there is not a suitable Python version accessible from the compute nodes, you might need
+request to your HPC cluster administrator to have installed in all the compute
+nodes a suitable Python version.
+
+
+Using ANSYS provided Python installation
+----------------------------------------
+
+**For development purposes only**
+
+In certain HPC environments the possibility of installing a different Python version
+which can be available to the compute nodes is limited for security reasons.
+
+In those cases, the Python distribution shipped with the ANSYS products could be used.
+This Python distribution is a customized Python (CPython) version for ANSYS products use only, and
+its usage is **discouraged** except for very advance users and user cases.
+
+This Python distribution is in:
+
+.. code:: console
+
+    /ansys_inc/v%MAPDL_VERSION%/commonfiles/CPython/3_10/linx64/Release/python
+
+whereas ``%MAPDL_VERSION%`` is the 3 digits ANSYS version. For instance for ANSYS 2024R2:
+
+.. code:: text
+
+    /ansys_inc/v242/commonfiles/CPython/3_10/linx64/Release/python
+
+
+From ANSYS 2024R1, the Python version included in the unified installer is CPython 3.10.
+Previous versions were including CPython 3.7 (``/commonfiles/CPython/3_7/linx64/Release/python``).
+
+Because ANSYS installation needs to be available to all the compute nodes to run simulations using them,
+this Python distribution is normally also available to the compute nodes.
+Hence you can use it to create your own virtual environment.
+
+Due to the particularities of this Python distribution, you need to follow the following steps to create
+a virtual environment accessible to the compute nodes.
+
+1. Set needed environment variables:
+
+    .. code:: console
+
+        user@machine:~$ export PY_PATH=/ansys_inc/v241/commonfiles/CPython/3_10/linx64/Release/python
+        user@machine:~$ PATH=$PY_PATH/bin:$PATH # Patching path
+        user@machine:~$ LD_LIBRARY_PATH=$PY_PATH/lib:$LD_LIBRARY_PATH  # Patching LD_LIBRARY_PATH
+
+2. Then, on the same terminal, you can proceed to create your own virtual environment and activate it:
+
+    .. code:: console
+
+        user@machine:~$ $PY_PATH -m venv /home/user/.venv
+        user@machine:~$ source /home/user/.venv
+
+3. Install PyMAPDL:
+
+    .. code:: console 
+
+        (.venv) user@machine:~$ python -m pip install ansys-mapdl-core
+
+4. Use it to launch simulations, using ``srun``:
+
+    .. code:: console
+
+        (.venv) user@machine:~$ srun pymapdl_script.py
+   
+   or ``sbatch``:
+
+    .. code:: console
+
+        (.venv) user@machine:~$ sbatch job.sh
+        Submitted batch job 1
 
 
 Advanced configuration
 ======================
+
+In this section, some advance ideas are drafted for you to explore when using
+PyMAPDL on HPC clusters.
 
 Advanced Job Management
 -----------------------
