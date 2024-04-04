@@ -126,6 +126,7 @@
 .. _sphinx_directives: https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html
 .. _docutils_directives: https://docutils.sourceforge.io/docs/ref/rst/directives.html
 .. _sphinx_basics: https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
+.. _slurm_docs: https://slurm.schedmd.com
 .. _slurm_srun: https://slurm.schedmd.com/srun.html
 .. _slurm_sbatch: https://slurm.schedmd.com/sbatch.html
 .. _modules_docs: https://modules.readthedocs.io/en/latest/
