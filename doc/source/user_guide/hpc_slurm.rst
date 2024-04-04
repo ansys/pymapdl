@@ -107,7 +107,7 @@ You can specify each job setting using the command line. For example:
     user@machine:~$ srun --nodes=2 my_script.sh
 
 .. warning:: **Command line arguments vs In-file arguments**:
-    The command line arguments do NOT overwrite the equivalent arguments written
+    The command line arguments do **NOT** overwrite the equivalent arguments written
     in the bash file.
     Hence, make sure that the argument you want to pass using the command line is
     not present already in the bash file.
@@ -161,7 +161,8 @@ to find out:
     $ which python3.10
     /usr/bin/python3.10
 
-Remember you should use a Python version which is compatible with PyMAPDL. For more information visit :ref:`ref_pymapdl_installation`.
+Remember you should use a Python version which is compatible with PyMAPDL.
+For more information visit :ref:`ref_pymapdl_installation`.
 
 The ``which`` command returns the path where the Python executable is installed.
 You can use that executable to create your own Python virtual environment in a directory
@@ -218,7 +219,8 @@ The console output should show:
     Testing Python!
     PyMAPDL version 0.68.1 was successfully imported!
 
-If you see an error in the output, visit :ref:`ref_hpc_troubleshooting`, especially :ref:`ref_python_venv_not_accesible`.
+If you see an error in the output, visit :ref:`ref_hpc_troubleshooting`, especially
+:ref:`ref_python_venv_not_accesible`.
 
 Submit a PyMAPDL job
 --------------------
@@ -472,8 +474,8 @@ a compute node using:
 .. the approach to solve this comes from:
    https://stackoverflow.com/questions/64188693/problem-with-python-environment-and-slurm-srun-sbatch
 
-Many HPC infrastructure uses environment managers to load and unload software package using modules
-and environment variables. 
+Many HPC infrastructure uses environment managers to load and unload software package
+using modules and environment variables. 
 Hence you might want to make sure that the correct module is loaded in your script.
 Two of the most common environment managers are
 `Modules documentation <modules_docs_>`_ and `Lmod documentation <lmod_docs_>`_.
@@ -493,11 +495,11 @@ Using ANSYS provided Python installation
 **For development purposes only**
 
 In certain HPC environments the possibility of installing a different Python version
-which can be available to the compute nodes is limited for security reasons.
+is limited for security reasons.
 
-In those cases, the Python distribution shipped with the ANSYS products could be used.
+In those cases, the Python distribution available within the ANSYS installation can be used.
 This Python distribution is a customized Python (CPython) version for ANSYS products use only, and
-its usage is **discouraged** except for very advance users and user cases.
+its usage is **discouraged** except for very advanced users and user cases.
 
 This Python distribution is in:
 
@@ -517,7 +519,7 @@ Previous versions were including CPython 3.7 (``/commonfiles/CPython/3_7/linx64/
 
 Because ANSYS installation needs to be available to all the compute nodes to run simulations using them,
 this Python distribution is normally also available to the compute nodes.
-Hence you can use it to create your own virtual environment.
+Hence, you can use it to create your own virtual environment.
 
 Due to the particularities of this Python distribution, you need to follow the following steps to create
 a virtual environment accessible to the compute nodes.
@@ -566,7 +568,7 @@ a virtual environment accessible to the compute nodes.
 Advanced configuration
 ======================
 
-In this section, some advance ideas are drafted for you to explore when using
+In this section, some advanced ideas are drafted for you to explore when using
 PyMAPDL on HPC clusters.
 
 Advanced Job Management
