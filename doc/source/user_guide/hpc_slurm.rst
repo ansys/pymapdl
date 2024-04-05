@@ -44,6 +44,8 @@ Basic concepts
 Regular job submission workflow
 ===============================
 
+.. _ref_hpc_login:
+
 Login into the cluster
 ----------------------
 
@@ -111,6 +113,8 @@ You can specify each job setting using the command line. For example:
     in the bash file.
     Hence, make sure that the argument you want to pass using the command line is
     not present already in the bash file.
+
+.. _ref_hpc_pymapdl_job:
 
 Submit a PyMAPDL job
 ====================
@@ -295,6 +299,12 @@ The expected output of the job should be:
 
     Number of CPUs: 10.0
 
+
+Examples
+========
+
+In :ref:`hpc_ml_ga_example` an example which uses machine learning genetic algorithm in
+an HPC system managed by SLURM scheduler can be found.
 
 Monitoring Jobs
 ===============

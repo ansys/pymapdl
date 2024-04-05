@@ -23,6 +23,8 @@ with other programs, libraries, and features in development.
 +----------------------------+--------------------------------------------------------------------------------------------+
 | :ref:`gui_example`         |  Demonstrates how to create your own GUI app with Python and PySide6                       |
 +----------------------------+--------------------------------------------------------------------------------------------+
+| :ref:`hpc_ml_ga_example`   |  Demonstrates how to use PyMAPDL in a high performance computing system managed by SLURM.  |
++----------------------------+--------------------------------------------------------------------------------------------+
 
 
 .. _Cart-Pole Simulation: cartpole_example_notebook_
@@ -38,3 +40,4 @@ with other programs, libraries, and features in development.
     dash/dash_example.rst
     executable/executable.rst
     gui/executable.rst
+    hpc/hpc_ml_ga.rst
