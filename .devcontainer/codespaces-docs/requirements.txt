@@ -13,11 +13,11 @@ pandas==2.2.1
 plotly==5.20.0
 pyiges[full]==0.3.1
 pypandoc==1.13
-pytest-sphinx==0.6.0
+pytest-sphinx==0.6.2
 pythreejs==2.4.2
 pyvista[trame]==0.43.5
 sphinx-autobuild==2024.2.4
-sphinx-autodoc-typehints==1.25.2
+sphinx-autodoc-typehints==1.25.3
 sphinx-copybutton==0.5.2
 sphinx-gallery==0.15.0
 sphinxcontrib-websupport==1.2.7
