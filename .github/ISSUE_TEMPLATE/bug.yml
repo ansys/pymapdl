@@ -91,7 +91,7 @@ body:
     id: mapdl-version
     attributes:
       label: 💾 Which MAPDL version are you using?
-      placeholder: ex. 24.1
+      placeholder: ex. 24.1 or 2024R1
     validations:
       required: true
 
