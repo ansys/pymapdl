@@ -437,9 +437,9 @@ the mentioned script.
 
 5. Run the bash script using `sbatch <slurm_sbatch_>`_ command:
 
-   .. code-block::
+   .. code-block:: console
     
-      sbatch --nodes=1 --ntasks-per-node=10
+      sbatch --nodes=1 --ntasks-per-node=10 job.sh
 
    The preceding command allocates 10 cores for the job.
    For optimal performance, this value should be higher than the number
