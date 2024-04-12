@@ -224,6 +224,8 @@ linkcheck_anchors_ignore = [
     "pyvista.Plotter.show",
 ]
 
+user_agent = """curl https://www.ansys.com -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.3"""
+
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
 
