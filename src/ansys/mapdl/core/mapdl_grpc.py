@@ -1411,7 +1411,7 @@ class MapdlGrpc(MapdlBase):
         return os.path.join(path, jobname + "0." + preference)
 
     @protect_grpc
-    def _ctrl(self, cmd):
+    def _ctrl(self, cmd: str, opt1: str = ""):
         """Issue control command to the mapdl server
 
         Available commands:
@@ -1421,6 +1421,7 @@ class MapdlGrpc(MapdlBase):
 
         - 'set_verb'
             Enables verbose mode on the server.
+            In this case, the verbosity level is set using `opt1` argument.
 
         - 'VERSION'
             Returns version string in of the server in the form
@@ -1441,8 +1442,8 @@ class MapdlGrpc(MapdlBase):
             To be added
 
         """
-        self._log.debug('Issuing CtrlRequest "%s"', cmd)
-        request = anskernel.CtrlRequest(ctrl=cmd)
+        self._log.debug(f'Issuing CtrlRequest "{cmd}" with option "{opt1}".', cmd)
+        request = anskernel.CtrlRequest(ctrl=str(cmd), opt1=str(opt1))
 
         # handle socket closing upon exit
         if cmd.lower() == "exit":
