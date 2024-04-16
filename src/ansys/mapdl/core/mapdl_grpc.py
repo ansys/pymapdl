@@ -1442,7 +1442,7 @@ class MapdlGrpc(MapdlBase):
             To be added
 
         """
-        self._log.debug(f'Issuing CtrlRequest "{cmd}" with option "{opt1}".', cmd)
+        self._log.debug(f'Issuing CtrlRequest "{cmd}" with option "{opt1}".')
         request = anskernel.CtrlRequest(ctrl=str(cmd), opt1=str(opt1))
 
         # handle socket closing upon exit
