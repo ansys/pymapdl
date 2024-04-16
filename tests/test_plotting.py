@@ -36,32 +36,81 @@ from pyvista.plotting import Plotter
 from ansys.mapdl.core.errors import ComponentDoesNotExits
 from ansys.mapdl.core.plotting import general_plotter
 
+FORCE_LABELS = [["FX", "FY", "FZ"], ["HEAT"], ["CHRG"]]
+DISPL_LABELS = [["UX", "UY", "UZ"], ["TEMP"], ["VOLT"]]
+ALL_LABELS = FORCE_LABELS.copy()
+ALL_LABELS.extend(DISPL_LABELS)
+
 
 @pytest.fixture
-def bc_example(mapdl, make_block):
+def boundary_conditions_example(mapdl):
+    mapdl.clear()
     mapdl.prep7()
+    mapdl.et("", 189)
+
+    mapdl.n(1, 0, 0, 0)
+    mapdl.n(2, 1, 0, 0)
+    mapdl.n(3, 2, 0, 0)
+    mapdl.n(4, 0, 0, 1)
+    mapdl.n(5, 1, 0, 1)
+    mapdl.n(6, 2, 0, 1)
 
     mapdl.nsel("s", "node", "", 1)
     mapdl.f("all", "FX", 0)
+    mapdl.nsel("s", "node", "", 2)
     mapdl.f("all", "FY", 0)
+    mapdl.nsel("s", "node", "", 3)
     mapdl.f("all", "FZ", 0)
 
-    mapdl.nsel("s", "node", "", 2)
-    mapdl.f("all", "FX", 100)
-    mapdl.f("all", "FY", 200)
-    mapdl.f("all", "FZ", 100)
-
-    mapdl.nsel("s", "node", "", 3)
+    mapdl.nsel("s", "node", "", 4)
     mapdl.d("all", "UX", 0)
+    mapdl.nsel("s", "node", "", 5)
     mapdl.d("all", "UY", 0)
+    mapdl.nsel("s", "node", "", 6)
     mapdl.d("all", "UZ", 0)
 
-    mapdl.nsel("s", "node", "", 4)
-    mapdl.d("all", "UX", 1)
-    mapdl.d("all", "UY", 2)
-    mapdl.d("all", "UZ", 3)
+    mapdl.n(7, 0, 1, 0)
+    mapdl.n(8, 1, 1, 0)
+    mapdl.n(9, 2, 1, 0)
+    mapdl.n(10, 0, 2, 0)
+    mapdl.n(11, 1, 2, 0)
+    mapdl.n(12, 2, 2, 0)
+
+    mapdl.nsel("s", "node", "", 7)
+    mapdl.f("all", "FX", 10)
+    mapdl.nsel("s", "node", "", 8)
+    mapdl.f("all", "FY", 20)
+    mapdl.nsel("s", "node", "", 9)
+    mapdl.f("all", "FZ", 30)
+
+    mapdl.nsel("s", "node", "", 10)
+    mapdl.d("all", "UX", 20)
+    mapdl.nsel("s", "node", "", 11)
+    mapdl.d("all", "UY", 20)
+    mapdl.nsel("s", "node", "", 12)
+    mapdl.d("all", "UZ", 20)
 
     mapdl.nsel("all")
+
+
+@pytest.fixture
+def block_example_coupled(mapdl):
+    mapdl.clear()
+    mapdl.prep7()
+
+    mapdl.et(1, 226)
+    mapdl.keyopt(1, 1, 1011)  # Thermal-Piezoelectric
+
+    # Disp
+    # UX, UY, UZ,
+    # TEMP, VOLT
+
+    # Force
+    # FX, FY, FZ,
+    # HEAT, CHRG
+    mapdl.n(1, 0, 0, 0)
+    mapdl.n(2, 1, 0, 0)
+    mapdl.n(3, 2, 0, 0)
 
 
 def test_plot_empty_mesh(mapdl, cleared):
@@ -212,20 +261,59 @@ def test_eplot_savefig(mapdl, make_block, tmpdir):
     assert os.path.isfile(filename)
 
 
+@pytest.mark.parametrize(
+    "field", ["UX", "UY", "UZ", "FX", "FY", "FZ", "TEMP", "HEAT", "VOLT", "CHRG"]
+)
+@pytest.mark.parametrize("magnitude", [0, 50, 500])
+def test_single_glyph(mapdl, field, magnitude, verify_image_cache):
+    mapdl.clear()
+    mapdl.prep7()
+    mapdl.et(1, 226)
+    mapdl.keyopt(1, 1, 1011)  # Thermal-Piezoelectric
+    mapdl.n(1, 0, 0, 0)
+
+    if field in [x for group in DISPL_LABELS for x in group]:
+        func = getattr(mapdl, "d")
+    else:
+        func = getattr(mapdl, "f")
+
+    func(1, field, magnitude)
+
+    if magnitude > 0:
+        mapdl.n(2, 1, 0, 0)
+        func(2, field, magnitude * 2)
+
+    if magnitude > 50:
+        mapdl.n(3, 2, 0, 0)
+        func(3, field, magnitude * 10)
+
+    mapdl.allsel()
+
+    p = mapdl.nplot(
+        plot_bc=True,
+        # point_size=max(magnitude, 10),
+        # render_points_as_spheres=True,
+        plot_bc_legend=True,
+        plot_bc_labels=True,
+        title="",
+    )
+
+
 @pytest.mark.parametrize("return_plotter", [True, False])
 @pytest.mark.parametrize("plot_bc_legend", [True, False])
 @pytest.mark.parametrize("plot_bc_labels", [True, False])
 def test_bc_plot_options(
     mapdl,
-    bc_example,
+    boundary_conditions_example,
     verify_image_cache,
     return_plotter,
     plot_bc_legend,
     plot_bc_labels,
+    bc_labels_font_size=50,
 ):
-    if plot_bc_legend:
-        # The legend generates highly variance than other tests
-        # But it seems not always.
+
+    if plot_bc_legend or plot_bc_labels:
+        # The legend and labels generate highly variance than other tests
         verify_image_cache.high_variance_test = True
 
     p = mapdl.nplot(
@@ -233,6 +321,7 @@ def test_bc_plot_options(
         plot_bc=True,
         plot_bc_legend=plot_bc_legend,
         plot_bc_labels=plot_bc_labels,
+        title="",
     )
 
     if return_plotter:
@@ -240,6 +329,33 @@ def test_bc_plot_options(
         p.show()
     else:
         assert p is None
+
+
+@pytest.mark.parametrize("field", ALL_LABELS)
+@pytest.mark.parametrize(
+    "loads", [[0, 0, 0], [10, 10, 10], [10, 20, 30], [10, 100, 1000]]
+)
+def test_bc_plot_options_fields(
+    mapdl, block_example_coupled, verify_image_cache, field, loads
+):
+    mapdl.prep7()
+    for i in range(len(field)):
+        mapdl.nsel("s", "node", "", i + 1)
+        if field[i] in [x for group in FORCE_LABELS for x in group]:
+            mapdl.f("all", field[i], loads[i])
+        else:
+            mapdl.d("all", field[i], loads[i])
+
+    mapdl.nsel("s", "node", "", 1, 3)
+
+    p = mapdl.nplot(
+        plot_bc=True,
+        plot_bc_legend=True,
+        plot_bc_labels=True,
+        title="",
+    )
+
+    assert p is None
 
 
 @pytest.mark.parametrize(
@@ -255,12 +371,13 @@ def test_bc_plot_options(
         ["CSGZ", "Magnetic forces"],
     ],
 )
-def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
+def test_bc_plot_bc_labels(mapdl, boundary_conditions_example, bc_labels):
     p = mapdl.nplot(
         return_plotter=True,
         plot_bc=True,
         plot_bc_labels=True,
         bc_labels=bc_labels[0],
+        title="",
     )
     assert isinstance(p, Plotter), bc_labels[1]
     p.show()  # plotting for catching
@@ -273,13 +390,14 @@ def test_bc_plot_bc_labels(mapdl, bc_example, bc_labels):
         ["UX", "error"],
     ],
 )
-def test_bc_plot_bc_labels_error(mapdl, bc_example, bc_labels):
+def test_bc_plot_bc_labels_error(mapdl, boundary_conditions_example, bc_labels):
     with pytest.raises(ValueError):
         mapdl.nplot(
             return_plotter=True,
             plot_bc=True,
             plot_bc_labels=True,
             bc_labels=bc_labels,
+            title="",
         )
 
 
@@ -290,12 +408,13 @@ def test_bc_plot_bc_labels_error(mapdl, bc_example, bc_labels):
         ["NOdes", "Mixed case"],
     ],
 )
-def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
+def test_bc_plot_bc_target(mapdl, boundary_conditions_example, bc_target):
     p = mapdl.nplot(
         return_plotter=True,
         plot_bc=True,
         plot_bc_labels=True,
         bc_target=bc_target[0],
+        title="",
     )
     assert isinstance(p, Plotter), bc_target[1]
     p.show()  # plotting for catching
@@ -310,13 +429,14 @@ def test_bc_plot_bc_target(mapdl, bc_example, bc_target):
         {"error": "Not accepting dicts"},
     ],
 )
-def test_bc_plot_bc_target_error(mapdl, bc_example, bc_target):
+def test_bc_plot_bc_target_error(mapdl, boundary_conditions_example, bc_target):
     with pytest.raises(ValueError):
         mapdl.nplot(
             return_plotter=True,
             plot_bc=True,
             plot_bc_labels=True,
             bc_target=bc_target,
+            title="",
         )
 
 
@@ -327,23 +447,31 @@ def test_bc_no_mapdl(mapdl):
         )  # mapdl should be an argument if plotting BC
 
 
-def test_bc_only_one_node(mapdl, bc_example):
+def test_bc_only_one_node(mapdl, boundary_conditions_example):
     mapdl.nsel("s", "node", "", 1)
-    mapdl.nplot(plot_bc=True)
+    mapdl.nplot(
+        plot_bc=True,
+        title="",
+    )
 
 
-def test_bc_glyph(mapdl, bc_example):
+def test_bc_glyph(mapdl, boundary_conditions_example):
     mapdl.nplot(plot_bc=True, bc_glyph_size=19)
     with pytest.raises(ValueError):
-        mapdl.nplot(plot_bc=True, bc_glyph_size="big")
+        mapdl.nplot(
+            plot_bc=True,
+            bc_glyph_size="big",
+            title="",
+        )
 
 
-def test_bc_bc_labels(mapdl, bc_example, verify_image_cache):
+def test_bc_bc_labels(mapdl, boundary_conditions_example, verify_image_cache):
     """Test values for 'bc_labels' keyword argument."""
     verify_image_cache.skip = True  # skipping image verification
 
     mapdl.nplot(plot_bc=True, bc_labels="UX")
     mapdl.nplot(plot_bc=True, bc_labels=["Ux", "uy", "VOLT"])
+
     with pytest.raises(ValueError):
         mapdl.nplot(plot_bc=True, bc_labels=["big"])
 
@@ -354,11 +482,15 @@ def test_bc_bc_labels(mapdl, bc_example, verify_image_cache):
         mapdl.nplot(plot_bc=True, bc_labels=["UX", {"not": "valid"}])
 
 
-def test_all_same_values(mapdl, bc_example):
+def test_all_same_values(mapdl, boundary_conditions_example):
     """Test the BC glyph size when all the BC have same magnitude."""
     mapdl.nsel("all")
     mapdl.f("all", "FX", 0)
-    mapdl.nplot(plot_bc=True, bc_labels="FX")
+    mapdl.nplot(
+        plot_bc=True,
+        bc_labels="FX",
+        title="",
+    )
 
 
 @pytest.mark.parametrize(

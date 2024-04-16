@@ -646,36 +646,6 @@ def check_valid_port(port, lower_bound=1000, high_bound=60000):
         )
 
 
-def check_valid_start_instance(start_instance):
-    """
-    Checks if the value obtained from the environmental variable is valid.
-
-    Parameters
-    ----------
-    start_instance : str
-        Value obtained from the corresponding environment variable.
-
-    Returns
-    -------
-    bool
-        Returns ``True`` if ``start_instance`` is ``True`` or ``"True"``,
-        ``False`` if otherwise.
-
-    """
-    if not isinstance(start_instance, (str, bool)):
-        raise ValueError("The value 'start_instance' should be an string or a boolean.")
-
-    if isinstance(start_instance, bool):
-        return start_instance
-
-    if start_instance.lower() not in ["true", "false"]:
-        raise ValueError(
-            f"The value 'start_instance' should be equal to 'True' or 'False' (case insensitive)."
-        )
-
-    return start_instance.lower() == "true"
-
-
 def update_information_first(update=False):
     """
     Decorator to wrap :class:`Information <ansys.mapdl.core.misc.Information>`

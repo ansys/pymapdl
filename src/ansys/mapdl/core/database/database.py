@@ -37,6 +37,7 @@ from ansys.mapdl.core.errors import MapdlConnectionError
 from ..mapdl_grpc import MapdlGrpc
 
 MINIMUM_MAPDL_VERSION = "21.1"
+FAILING_DATABASE_MAPDL = ["24.1", "24.2"]
 
 
 class WithinBeginLevel:
@@ -236,9 +237,10 @@ class MapdlDb:
             )
 
         ## Checking MAPDL versions
-        mapdl_version = self._mapdl.version
-        if not server_meets_version(
-            str(mapdl_version), MINIMUM_MAPDL_VERSION
+        mapdl_version = str(self._mapdl.version)
+        if (
+            not server_meets_version(mapdl_version, MINIMUM_MAPDL_VERSION)
+            or mapdl_version in FAILING_DATABASE_MAPDL
         ):  # pragma: no cover
             from ansys.mapdl.core.errors import MapdlVersionError
 

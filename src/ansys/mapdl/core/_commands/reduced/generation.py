@@ -186,10 +186,10 @@ class Generation:
 
             DOMINANT - Dominant mode
 
-        min\_
+        min\\_
             Lower bound for fit range of mode.
 
-        max\_
+        max\\_
             Upper bound for fit range of mode.
 
         nstep
@@ -339,7 +339,7 @@ class Generation:
             capacitance reference name previously defined by means of RMCAP
             command for the electrostatic domain.
 
-        type\_
+        type\\_
             Type of fitting function to be applied for regression analysis.
             Valid types are:
 
@@ -376,7 +376,7 @@ class Generation:
             definition, previously defined by means of the RMCAP command, for
             the electrostatic domain.
 
-        type\_
+        type\\_
             Type of data to be plotted. Valid types are:
 
             FUNC - Response surface (default)

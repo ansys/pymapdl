@@ -121,7 +121,7 @@ class Areas:
             The real constant set number to be associated with selected,
             unmeshed areas.
 
-        type\_
+        type\\_
             The type number to be associated with selected, unmeshed areas.
 
         esys

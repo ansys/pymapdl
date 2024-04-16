@@ -46,27 +46,44 @@ The documentation can be built as HTML files or a single PDF file.
 
 To build the documentation as HTML files, you only need to run a single command.
 
-On Linux:
 
+.. tab-set::
 
-.. code:: console
+    .. tab-item:: Windows
+        :sync: key1
 
-   make -C doc html
+        .. code:: pwsh-session
 
-On Windows: 
+            (.venv) PS C:\Users\user\pymapdl> doc\make.bat html
 
-.. code:: pwsh-session
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
 
-    doc\make.bat html
+            (.venv) user@machine:~$ make -C doc html
+    
 
 The HTML files for the documentation are written to the ``doc/_build/html`` directory.
 
 If you want to build the PDF documentation, you must first install
 a LaTeX distribution like `MikTeX <miktex_>`_. You can then run this command:
 
-.. code:: console
+.. tab-set::
 
-   make -C doc pdf
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> doc\make.bat pdf
+
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
+
+            (.venv) user@machine:~$ make -C doc pdf
 
 Running the command to build either HTML files or a PDF file runs the Python files in ``./examples`` in the repository root directory to generate the `examples gallery <pymapdl_examples_gallery_>`_.
 The result of running these examples is cached so that the only the changed files
