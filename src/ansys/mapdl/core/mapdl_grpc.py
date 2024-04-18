@@ -1421,7 +1421,7 @@ class MapdlGrpc(MapdlBase):
 
         - ``set_verb``
             Enables verbose mode on the server.
-            In this case, the verbosity level is set using `opt1` argument.
+            In this case, the verbosity level is set using ``opt1`` argument.
 
         - ``VERSION``
             Returns version string in of the server in the form
