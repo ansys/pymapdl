@@ -1412,7 +1412,7 @@ class MapdlGrpc(MapdlBase):
 
     @protect_grpc
     def _ctrl(self, cmd: str, opt1: str = ""):
-        """Issue control command to the mapdl server
+        """Issue control command to the MAPDL server.
 
         Available commands:
 
