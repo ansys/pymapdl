@@ -296,10 +296,11 @@ class SpecialPurpose:
                 AMPLITUDE (or n ≥ 360)
                     The amplitude is reported, except for the following
                     circumstances where the amplitude solution is not valid:
-                        * non-component results (such as equivalent stress)
-                        * modal analyses (no amplitude is calculated, and the
-                          expanded modal results are printed or displayed at a
-                          phase angle of 360º).
+
+                    * non-component results (such as equivalent stress)
+                    * modal analyses (no amplitude is calculated, and the
+                      expanded modal results are printed or displayed at a
+                      phase angle of 360º).
 
                 SWEEP
                     For a mode-superposition harmonic solution, the maximum
@@ -359,7 +360,7 @@ class SpecialPurpose:
         expansion using ``/CYCEXPAND``.
 
         To learn more about analyzing a cyclically symmetric structure, see the
-        Cyclic Symmetry Analysis Guide.
+        *Cyclic Symmetry Analysis Guide*.
         """
         command = f"/CYCEXPAND, {wn}, {option}, {value1}, {value2}"
         return self.run(command, **kwargs)
