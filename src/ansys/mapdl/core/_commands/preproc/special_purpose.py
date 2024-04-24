@@ -321,8 +321,8 @@ class SpecialPurpose:
         For the print nodal solution (``PRNSOL``) operation, the command expands
         the printed output of displacements or stresses on a sector-by-sector
         basis. To learn more about specific ``PRNSOL`` behaviors in cyclic
-        analyses, see Using the ``/CYCEXPAND`` Command in the Cyclic Symmetry
-        Analysis Guide.
+        analyses, see Using the ``/CYCEXPAND`` Command in the *Cyclic Symmetry
+        Analysis Guide*.
 
         Use of the ``/CYCEXPAND`` command does not change the database. The
         command does not modify the geometry, nodal displacements or element
@@ -342,8 +342,8 @@ class SpecialPurpose:
         using the previous settings (if any) or the default settings.
 
         The command requires PowerGraphics and will turn PowerGraphics on
-        (/GRAPHICS,POWER) if not already active. Any setting which bypasses
-        PowerGraphics (for example, /PBF) also bypasses cyclic expansion; in
+        (``/GRAPHICS,POWER``) if not already active. Any setting which bypasses
+        PowerGraphics (for example, ``/PBF``) also bypasses cyclic expansion; in
         such cases, the ``/CYCEXPAND`` command displays unprocessed real and
         imaginary results.
 
