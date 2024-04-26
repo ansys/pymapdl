@@ -4,7 +4,7 @@ ansys-mapdl-reader==0.53.0
 ansys-sphinx-theme==0.15.2
 grpcio==1.62.2
 imageio-ffmpeg==0.4.9
-imageio==2.34.0
+imageio==2.34.1
 jupyter_sphinx==0.5.3
 jupyterlab>=3.2.8
 matplotlib==3.8.4
