@@ -3,13 +3,11 @@
 
 
 ===============================
-High performance clusters (HPC)
+High performance computing (HPC)
 ===============================
 
-In this page, an overview on how to use PyMAPDL in HPC clusters is presented.
-At the moment, only SLURM scheduler is considered.
-However, many of the assumptions for this scheduler might apply to other schedulers
-like PBS, SGE, or LSF.
+This page provides an overview on how to use PyMAPDL in HPC clusters.
+While it only considers the SLURM scheduler, many of the assumptions for this scheduler might apply to other schedulers, such as PBS, SGE, or LSF.
 
 
 .. include:: hpc_slurm.rst
