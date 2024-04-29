@@ -67,6 +67,7 @@ jobs:
         uses: ansys/actions/doc-style@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          vale-version: "3.4.1"
 
   smoke-tests:
     name: Build and smoke test (${{ matrix.os }} | Python ${{ matrix.python-version }}) (Release=${{ matrix.should-release }})
