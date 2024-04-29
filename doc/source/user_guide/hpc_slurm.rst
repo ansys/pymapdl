@@ -200,9 +200,9 @@ run this ``test.sh`` bash script:
     # Commands to run
     echo "Testing Python!"
     source /home/user/.venv/bin/activate
-    python -c "from ansys.mapdl import core;print(f'PyMAPDL version {core.__version__} was successfully imported!')"
+    python -c "from ansys.mapdl import core;print(f'PyMAPDL version {core.__version__} was successfully imported.')"
 
-using: 
+then you can run that script using: 
 
 .. code-block:: console
 
@@ -215,7 +215,7 @@ On the console, you should see this output:
 .. code-block:: text
 
     Testing Python!
-    PyMAPDL version 0.68.1 was successfully imported!
+    PyMAPDL version 0.68.1 was successfully imported.
 
 If you see an error in the output, see :ref:`ref_hpc_troubleshooting`, especially
 :ref:`ref_python_venv_not_accesible`.
@@ -298,7 +298,7 @@ Here is the expected output of the job:
 Monitoring jobs
 ===============
 
-``squeue`` - View Job Queue
+View the job queue
 ---------------------------
 
 The ``squeue`` command displays information about jobs that are currently queued or
@@ -575,8 +575,8 @@ the compute nodes:
 Advanced configuration
 ======================
 
-In this section, some advanced ideas are drafted for you to explore when using
-PyMAPDL on HPC clusters.
+The following topics provide some advanced ideas for you to
+explore when using PyMAPDL on HPC clusters.
 
 Advanced job management
 -----------------------
