@@ -105,9 +105,8 @@ intersphinx_mapping = {
     "ansys-math-core": ("https://math.docs.pyansys.com/version/stable/", None),
 }
 
-suppress_warnings = ["label.*", "design.fa-build"]
+suppress_warnings = ["label.*", "design.fa-build", "config.cache"]
 sd_fontawesome_latex = True
-# supress_warnings = ["ref.option"]
 
 # Graphviz diagrams configuration
 graphviz_output_format = "png"
