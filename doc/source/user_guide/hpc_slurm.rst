@@ -50,7 +50,8 @@ Log in to the cluster
 ---------------------
 
 You need access credentials and permissions to log in and submit jobs on the HPC cluster.
-Depending on the login node configuration, you can log in using Virtual Network Computing (VNC) applications or a terminal.
+Depending on the login node configuration, you can log in using Virtual Network
+Computing (VNC) applications or a terminal.
 
 For example, you can log in to a login node using the terminal:
 
@@ -149,7 +150,8 @@ To print the version of Python you have available, use this code:
     Python 3.9.16
 
 You should be aware that your machine might have installed other Python versions.
-To find out if those installations are already in the ``PATH`` environment variable, you can press the **Tab** key to use autocomplete:
+To find out if those installations are already in the ``PATH`` environment variable,
+you can press the **Tab** key to use autocomplete:
 
 .. code-block:: console
 
@@ -279,7 +281,8 @@ and you pass all the environment variables to the job:
 
 
 The ``--export=ALL`` argument might not be needed, depending on the cluster configuration.
-Furthermore, you can omit the Python call in the preceding command if you include the Python shebang (``#!/usr/bin/python3``) in the first line of the ``pymapdl_script.py`` script.
+Furthermore, you can omit the Python call in the preceding command if you include the
+Python shebang (``#!/usr/bin/python3``) in the first line of the ``pymapdl_script.py`` script.
 
 .. code-block:: console
 
@@ -305,7 +308,7 @@ Monitoring jobs
 ===============
 
 View the job queue
----------------------------
+------------------
 
 The ``squeue`` command displays information about jobs that are currently queued or
 running on the system.
@@ -461,7 +464,8 @@ is not using the virtual environment (``/home/user/.venv``):
     ImportError: No module named ansys.mapdl
 
 This could be for a number of reasons. One of them is that the system Python distribution
-used to create the virtual environment is not accessible from the compute nodes due to one of these reasons:
+used to create the virtual environment is not accessible from the compute nodes
+due to one of these reasons:
 
 - The virtual environment has been created in a
   directory that is not accessible from the nodes.
@@ -506,12 +510,14 @@ Using the Ansys-provided Python installation
 **For development purposes only**
 
 In certain HPC environments the possibility of installing a different Python version
-is limited for security reasons. In such cases, the Python distribution available in the Ansys installation can be used.
+is limited for security reasons. In such cases, the Python distribution available in
+the Ansys installation can be used.
 This Python distribution is a customized Python (CPython)
 version for Ansys products use only. Its use is **discouraged**
 except for very advanced users and special use cases.
 
-This Python distribution is in the following directory, where ``%MAPDL_VERSION%`` is the three-digit Ansys version:
+This Python distribution is in the following directory, where
+``%MAPDL_VERSION%`` is the three-digit Ansys version:
 
 .. code-block:: text
 
@@ -543,7 +549,8 @@ the compute nodes:
 
       user@machine:~$ export PY_PATH=/ansys_inc/v241/commonfiles/CPython/3_10/linx64/Release/Python
 
-#. For only Ansys 2024 R1 and earlier, patch the ``PATH`` and ``LD_LIBRARY_PATH`` environment variables:
+#. For only Ansys 2024 R1 and earlier, patch the ``PATH`` and ``LD_LIBRARY_PATH``
+   environment variables:
 
    .. code-block:: console
 
