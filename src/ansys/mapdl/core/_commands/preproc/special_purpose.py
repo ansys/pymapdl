@@ -244,6 +244,7 @@ class SpecialPurpose:
                 Value2
                     The number of repetitions. The default is the total number
                     of sectors in 360 degrees.
+
                 or
 
                 Value1
