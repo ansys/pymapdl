@@ -128,8 +128,8 @@ Using PyMAPDL in an HPC environment managed by SLURM scheduler has certain requi
 Additionally, you must perform a few key steps to ensure efficient job
 execution and resource utilization. Subsequent topics describe these steps.
 
-Install PyMAPDL
----------------
+Check the Python installation
+-----------------------------
 
 The PyMAPDL Python package (``ansys-mapdl-core``) must be installed in a virtual
 environment that is accessible from the compute nodes.
@@ -172,7 +172,13 @@ You can then create the virtual environment in the ``/home/user/.venv`` director
 
     user@machine:~$ python3 -m venv /home/user/.venv
 
-After activating the virtual environment, you can install PyMAPDL:
+After activating the virtual environment, you can install PyMAPDL.
+
+
+Install PyMAPDL
+---------------
+
+To install PyMAPDL on the activated virtual environment, run the following commands:
 
 .. code-block:: console
 
