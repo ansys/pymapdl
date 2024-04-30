@@ -515,7 +515,7 @@ class MapdlPool:
             else:
                 # wait for all threads to complete
                 if wait:
-                    c
+                    [thread.join() for thread in threads]
 
         else:  # simply apply to all
             for instance in self._instances:
