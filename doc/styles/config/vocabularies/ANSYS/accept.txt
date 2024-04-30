@@ -75,6 +75,7 @@ FSW
 GitHub
 Gmsh
 GPa
+GPUs
 GUI
 hexahedral
 hostname
@@ -128,18 +129,23 @@ PyAnsys
 PyAnsys Math
 PyDPF-Core
 PyDPF-Post
-PyMAPDL
 pymapdl
+PyMAPDL
 Python
 QRDAMP
 Radiosity
 Rao
 righ
 RNNN
+sbatch
 singl
+Slurm
+SLURM
 smal
 sord
 spotweld
+squeue
+srun
 struc
 subselected
 substep
