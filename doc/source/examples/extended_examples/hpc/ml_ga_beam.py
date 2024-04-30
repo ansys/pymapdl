@@ -112,7 +112,7 @@ print(f"Setting target to {target_displacement} for force {force}")
 # Set a genetic algorithm
 # =======================
 
-# Setting GA model
+# Set GA model
 sol_per_pop = 20
 num_generations = 10
 num_parents_mating = 20
