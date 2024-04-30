@@ -123,10 +123,11 @@ This context manager is particularly interesting when using it with threads.
     from ansys.mapdl.core import MapdlPool
     from threading import Thread
 
-    loads = [1E6, 2E6, 3E6]
+    loads = [1e6, 2e6, 3e6]
     solutions = {each_load: None for each_load in loads}
 
     pool = MapdlPool(2)
+
 
     def calculate_model(mapdl, load):
         mapdl.prep7()
@@ -160,17 +161,19 @@ This context manager is particularly interesting when using it with threads.
         mapdl.nsel("S", "LOC", "Z", 30)
         solutions[load] = mapdl.post_processing.nodal_displacement("X").max()
 
+
     def threaded_function(load):
         with pool.next() as mapdl:
             value = calculate_model(mapdl, load)
 
+
     if __name__ == "__main__":
         threads = []
         for load in loads:
-            t = Thread(target = threaded_function, args = [load])
+            t = Thread(target=threaded_function, args=[load])
             t.start()
             threads.append(t)
-        
+
         for thread in threads:
             thread.join()
 
@@ -194,7 +197,7 @@ you need to manage the :meth:`Mapdl.locked <ansys.mapdl.core.mapdl._MapdlCore.lo
     # More code...
     # ...
     #
-    mapdl.locked = False # Important for the instance to be seen as available.
+    mapdl.locked = False  # Important for the instance to be seen as available.
 
 
 Close the PyMAPDL pool
