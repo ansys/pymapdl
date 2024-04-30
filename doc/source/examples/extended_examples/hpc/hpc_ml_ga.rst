@@ -175,13 +175,13 @@ To configure the genetic algorithm, the following code is used:
     mutation_probability = 0.5
 
 
-From the above code, the most import parameters are:
+In the preceding code, the most import parameters are:
 
-* **sol_per_pop**: Number of solutions (chromosomes) within the population.
-* **num_generations**:  Number of genes in the solution/chromosome.
-  In this case, because only one parameter is the simulated (deflection Z at node 12),
+* ``sol_per_pop``: Number of solutions (chromosomes) within the population.
+* ``num_generations``:  Number of genes in the solution/chromosome.
+  In this case, because only one parameter is simulated (deflection Z at node 12),
   this value is 1.
-* **num_parents_mating**: Number of solutions to be selected as parents.
+* ``num_parents_mating``: Number of solutions to select as parents.
 * **parent_selection_type**: The parent selection type. In this example, the ``rws`` type
   (for roulette wheel selection) is used. For more information regarding parent selection type,
   visit `Genetic algorithms with PyGAD: selection, crossover, mutation by Lucy Linder <ga_article_>`_ article.
