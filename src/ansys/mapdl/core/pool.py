@@ -616,7 +616,7 @@ class MapdlPool:
         entering, and unset those when exiting.
         """
 
-        def __init__(self, parent: MapdlPool, return_index: bool = False):
+        def __init__(self, parent: "MapdlPool", return_index: bool = False):
             self._parent = weakref.ref(parent)
             self._instance = None
             self._return_index = return_index
