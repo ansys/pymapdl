@@ -335,3 +335,24 @@ def test_only_one_instance():
     _ = pool.map(lambda mapdl: mapdl.prep7())
     assert len(pool) == pool_sz
     pool.exit()
+
+
+def test_ip(monkeypatch):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+    monkeypatch.delenv("PYMAPDL_IP", raising=False)
+
+    ips = ["127.0.0.1", "127.0.0.2", "127.0.0.3"]
+    ports = [50083, 50100, 50898]
+    pool_ = MapdlPool(
+        3,
+        ip=ips,
+        exec_file=EXEC_FILE,
+        nproc=NPROC,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+        _debug_no_launch=True,
+    )
+    args = pool_._debug_no_launch
+
+    assert not args["start_instance"]  # Because of ip
+    assert args["ips"] == ips
+    # assert args["ports"] == ports

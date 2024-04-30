@@ -23,6 +23,7 @@
 """This module is for threaded implementations of the mapdl interface"""
 import os
 import shutil
+import socket
 import tempfile
 import time
 from typing import Any, Dict, List, Optional, Union
@@ -31,7 +32,9 @@ import warnings
 from ansys.mapdl.core import LOG, launch_mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
 from ansys.mapdl.core.launcher import (
+    LOCALHOST,
     MAPDL_DEFAULT_PORT,
+    check_valid_ip,
     get_start_instance,
     port_in_use,
 )
@@ -172,10 +175,14 @@ class MapdlPool:
         override=True,
         start_instance: bool = None,
         exec_file: Optional[str] = None,
+        ip: Optional[str] = None,
         **kwargs,
     ) -> None:
         """Initialize several instances of mapdl"""
         self._instances: List[None] = []
+
+        # Getting debug arguments
+        _debug_no_launch = kwargs.pop("_debug_no_launch", None)
 
         if run_location is None:
             run_location = tempfile.gettempdir()
@@ -188,8 +195,40 @@ class MapdlPool:
         self._exiting_i: int = 0
         self._override = override
 
-        # Getting start_instance
-        start_instance = get_start_instance(start_instance)
+        # Getting IP from env var
+        ip_env_var = os.environ.get("PYMAPDL_IP", "")
+        if ip_env_var != "":
+            if ip:
+                warnings.warn(
+                    "The env var 'PYMAPDL_IP' is set, hence the 'ip' argument is overwritten."
+                )
+
+            ip = ip_env_var
+            LOG.debug(f"An IP ({ip}) has been set using 'PYMAPDL_IP' env var.")
+
+        ip = None if ip == "" else ip  # Making sure the variable is not empty
+
+        if ip is None:
+            ips = LOCALHOST
+
+        else:
+            if not isinstance(ip, (tuple, list)):
+                ips = [ip]
+            else:
+                ips = ip
+
+            # Converting ip or hostname to ip
+            ips = [socket.gethostbyname(each) for each in ips]
+            _ = [check_valid_ip(each) for each in ips]  # double check
+
+        # Getting "start_instance" using "True" as default.
+        if (ip is not None) and (start_instance is None):
+            # An IP has been supplied. By default, 'start_instance' is equal
+            # false, unless it is set through the env vars.
+            start_instance = get_start_instance(start_instance=False)
+        else:
+            start_instance = get_start_instance(start_instance=start_instance)
+
         self._start_instance = start_instance
         LOG.debug(f"'start_instance' equals to '{start_instance}'")
 
@@ -254,6 +293,15 @@ class MapdlPool:
             raise ValueError(
                 "The number of instances should be the same as the number of ports."
             )
+
+        if ips == LOCALHOST:
+            ips = [LOCALHOST for each in ports]
+
+        if len(ports) != len(ips):
+            raise ValueError(
+                "The number of ips should be the same as the number of ports."
+            )
+
         LOG.debug(f"Using ports: {ports}")
 
         self._instances = []
@@ -277,6 +325,17 @@ class MapdlPool:
         self._instances = [None for _ in range(n_instances)]
 
         # threaded spawn
+        if _debug_no_launch:
+            self._debug_no_launch = {
+                "ports": ports,
+                "ips": ips,
+                "names": self._names,
+                "start_instance": start_instance,
+                "exec_file": exec_file,
+                "n_instances": n_instances,
+            }
+            return
+
         threads = [
             self._spawn_mapdl(
                 i,
