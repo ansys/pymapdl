@@ -254,6 +254,10 @@ class MapdlGrpc(MapdlBase):
         Print the command ``/COM`` arguments to the standard output.
         The default is ``False``.
 
+    disable_run_at_connect: bool, optional
+        Disable the house-keeping commands when connecting.
+        The default is ``False``
+
     channel : grpc.Channel, optional
         gRPC channel to use for the connection. Can be used as an
         alternative to the ``ip`` and ``port`` parameters.
@@ -316,6 +320,7 @@ class MapdlGrpc(MapdlBase):
         remove_temp_files: Optional[bool] = None,
         remove_temp_dir_on_exit: bool = False,
         print_com: bool = False,
+        disable_run_at_connect = False,
         channel: Optional[grpc.Channel] = None,
         remote_instance: Optional["PIM_Instance"] = None,
         **start_parm,
@@ -437,7 +442,8 @@ class MapdlGrpc(MapdlBase):
         self._mesh_rep = MeshGrpc(self)
 
         # Run at connect
-        self._run_at_connect()
+        if not disable_run_at_connect:
+            self._run_at_connect()
 
         # HOUSEKEEPING:
         # Set to not abort after encountering errors.  Otherwise, many
