@@ -30,8 +30,9 @@ at the current directory within their own isolated directories:
     >>> pool = MapdlPool(10, nproc=1, run_location=my_path)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
-Additionally, you can group already running MAPDL instances by connecting to
-them by specifying their ports when creating the pool.
+Additionally, you can group already running MAPDL instances into an
+:class:`MapdlPool <ansys.mapdl.core.pool.MapdlPool>` by specifying
+their ports when creating the pool.
 
 .. code:: pycon
 
