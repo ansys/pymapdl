@@ -346,6 +346,7 @@ def test_ip(monkeypatch):
     pool_ = MapdlPool(
         3,
         ip=ips,
+        port=ports,
         exec_file=EXEC_FILE,
         nproc=NPROC,
         additional_switches=QUICK_LAUNCH_SWITCHES,
@@ -355,4 +356,4 @@ def test_ip(monkeypatch):
 
     assert not args["start_instance"]  # Because of ip
     assert args["ips"] == ips
-    # assert args["ports"] == ports
+    assert args["ports"] == ports
