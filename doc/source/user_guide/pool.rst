@@ -63,7 +63,7 @@ Run a user function
 
 You can use the pool to run a custom user function on each MAPDL
 instance over a set of inputs. As in the example for the
-:meth:`MapdlPool.run_batch <ansys.mapdl.core.MapdlPool.run_batch>` function,
+:meth:`MapdlPool.run_batch <ansys.mapdl.core.MapdlPool.run_batch>` method,
 the following code uses a set of verification files. However, it implements
 it as a function and outputs the final routine instead of the text
 output from MAPDL.
@@ -103,8 +103,8 @@ Using next available instances
 ------------------------------
 
 When working with many multiple instances, it might be more convenient to use
-:class:`MapdlPool <ansys.mapdl.core.pool.MapdlPool>` within a context manager.
-This can be accomplished using :meth:`MapdlPool.next() <ansys.mapdl.core.MapdlPool.next>`
+the :class:`MapdlPool <ansys.mapdl.core.pool.MapdlPool>` class within a context manager.
+This can be accomplished using the :meth:`MapdlPool.next() <ansys.mapdl.core.MapdlPool.next>` method
 as follows:
 
 .. code:: python
@@ -123,10 +123,11 @@ This context manager is particularly interesting when using it with threads.
     from ansys.mapdl.core import MapdlPool
     from threading import Thread
 
-    loads = [1E6, 2E6, 3E6]
+    loads = [1e6, 2e6, 3e6]
     solutions = {each_load: None for each_load in loads}
 
     pool = MapdlPool(2)
+
 
     def calculate_model(mapdl, load):
         mapdl.prep7()
@@ -156,21 +157,23 @@ This context manager is particularly interesting when using it with threads.
         mapdl.solve()
         mapdl.finish()
 
-        # Getting maximum displacement in the X direction on the top surface.
+        # Get maximum displacement in the X direction on the top surface.
         mapdl.nsel("S", "LOC", "Z", 30)
         solutions[load] = mapdl.post_processing.nodal_displacement("X").max()
+
 
     def threaded_function(load):
         with pool.next() as mapdl:
             value = calculate_model(mapdl, load)
 
+
     if __name__ == "__main__":
         threads = []
         for load in loads:
-            t = Thread(target = threaded_function, args = [load])
+            t = Thread(target=threaded_function, args=[load])
             t.start()
             threads.append(t)
-        
+
         for thread in threads:
             thread.join()
 
@@ -178,9 +181,9 @@ This context manager is particularly interesting when using it with threads.
             print(f"Load: {k:5.2f}\tDisplacement: {v:8.6f}")
 
 
-You can also use :meth:`MapdlPool.next_available() <ansys.mapdl.core.MapdlPool.next_available>`
-to obtain on :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` instance, but in that case,
-you need to manage the :meth:`Mapdl.locked <ansys.mapdl.core.mapdl._MapdlCore.locked>` lock.
+You can also use the :meth:`MapdlPool.next_available() <ansys.mapdl.core.MapdlPool.next_available>` method
+to obtain an available :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` instance, but in that case,
+you must manage the lock with the :meth:`Mapdl.locked <ansys.mapdl.core.mapdl._MapdlCore.locked>` method.
 
 .. code:: python
 
@@ -194,7 +197,7 @@ you need to manage the :meth:`Mapdl.locked <ansys.mapdl.core.mapdl._MapdlCore.lo
     # More code...
     # ...
     #
-    mapdl.locked = False # Important for the instance to be seen as available.
+    mapdl.locked = False  # Important for the instance to be seen as available.
 
 
 Close the PyMAPDL pool

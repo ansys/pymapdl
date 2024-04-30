@@ -611,10 +611,10 @@ class MapdlPool:
         )
 
     class _mapdl_pool_ctx:
-        """Context manager for MapdlPool class.
+        """Provides the context manager for the ``MapdlPool`` class.
 
-        This context manager set the Mapdl instance as busy and locked when
-        entering, and unset those when exiting.
+        This context manager sets the MAPDL instance as ``busy`` and ``locked`` when
+        entering and then unsets the instance state when exiting.
         """
 
         def __init__(self, parent: "MapdlPool", return_index: bool = False):
@@ -645,25 +645,25 @@ class MapdlPool:
             mapdl._busy = False
 
     def next(self, return_index: bool = False):
-        """Return a context manager which returns available instances.
+        """Return a context manager that returns available instances.
 
-        It manages the instance state (`locked` and `busy`) when the code enters
+        This method manages the instance state (`locked` and `busy`) when the code enters
         and exits the code block.
 
         Parameters
         ----------
         return_index : bool, optional
-            Return the index along with the instance.  Default ``False``.
+            Whether to return the index along with the instance.  The default is ``False``.
 
         Returns
         -------
         ctx
-            Context manager to manage MapdlPool instances.
+            Context manager to manage ``MapdlPool`` instances.
         """
         return self._mapdl_pool_ctx(self, return_index)
 
     def next_available(self, return_index: bool = False, as_ctx: bool = False):
-        """Wait until an instance of mapdl is available and return that instance.
+        """Wait until an instance of MAPDL is available and return that instance.
 
         Parameters
         ----------
