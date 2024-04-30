@@ -609,7 +609,59 @@ class MapdlPool:
             close_when_finished=close_when_finished,
         )
 
-    def next_available(self, return_index=False):
+    class _mapdl_pool_ctx:
+        """Context manager for MapdlPool class.
+
+        This context manager set the Mapdl instance as busy and locked when
+        entering, and unset those when exiting.
+        """
+
+        def __init__(self, parent: MapdlPool, return_index: bool = False):
+            self._parent = weakref.ref(parent)
+            self._instance = None
+            self._return_index = return_index
+
+        def __enter__(self):
+            if self._return_index:
+                mapdl, i = self._parent().next_available(return_index=True)
+                self._index = i
+
+            else:
+                mapdl = self._parent().next_available(return_index=False)
+
+            self._instance = mapdl
+            mapdl.locked = True
+            mapdl._busy = True
+
+            if self._return_index:
+                return mapdl, i
+            else:
+                return mapdl
+
+        def __exit__(self, *args):
+            mapdl = self._instance
+            mapdl.locked = False
+            mapdl._busy = False
+
+    def next(self, return_index: bool = False):
+        """Return a context manager which returns available instances.
+
+        It manages the instance state (`locked` and `busy`) when the code enters
+        and exits the code block.
+
+        Parameters
+        ----------
+        return_index : bool, optional
+            Return the index along with the instance.  Default ``False``.
+
+        Returns
+        -------
+        ctx
+            Context manager to manage MapdlPool instances.
+        """
+        return self._mapdl_pool_ctx(self, return_index)
+
+    def next_available(self, return_index: bool = False, as_ctx: bool = False):
         """Wait until an instance of mapdl is available and return that instance.
 
         Parameters
@@ -619,7 +671,7 @@ class MapdlPool:
 
         Returns
         -------
-        pyansys.MapdlGrpc
+        MapdlGrpc
             Instance of MAPDL.
 
         int
@@ -634,7 +686,12 @@ class MapdlPool:
         MAPDL Version:       24.1
         ansys.mapdl Version: 0.68.dev0
         """
+        if as_ctx:
+            return self.next(return_index)
+        else:
+            return self._next_available(return_index)
 
+    def _next_available(self, return_index: bool = False):
         # loop until the next instance is available
         while True:
             for i, instance in enumerate(self._instances):
