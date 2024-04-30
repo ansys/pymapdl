@@ -316,6 +316,13 @@ Here is the expected output of the job:
     Number of CPUs: 10.0
 
 
+Examples
+========
+
+For an example that uses a machine learning genetic algorithm in
+an HPC system managed by SLURM scheduler, see :ref:`hpc_ml_ga_example`.
+
+
 Monitoring jobs
 ===============
 
