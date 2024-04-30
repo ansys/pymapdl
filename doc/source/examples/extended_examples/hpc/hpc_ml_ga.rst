@@ -1,15 +1,15 @@
 .. _hpc_ml_ga_example:
 
 ==============================
-Genetic Algorithms and PyMAPDL
+Genetic algorithms and PyMAPDL
 ==============================
 
-This example aims also to show how to use PyMAPDL in an HPC cluster, to 
+This example shows how to use PyMAPDL in an HPC cluster to 
 take advantage of multiple MAPDL instances to calculate each of the
-genetic algorithm population solution.
-To manage multiple MAPDL instances, it is recommended to use the
-:py:class:`~ansys.mapdl.core.pool.MapdlPool` class which allows you
-to run multiple jobs on the background.
+genetic algorithm population solutions.
+To manage multiple MAPDL instances, you should use the
+:py:class:`~ansys.mapdl.core.pool.MapdlPool` class, which allows you
+to run multiple jobs in the background.
 
 Introduction
 ============
@@ -29,15 +29,15 @@ applications in various fields, including engineering, economics, biology, and c
 Problem definition
 ==================
 
-In this example, a generic algorithm is used to calculate the force
-required for a double clamped beam to deform a specific amount in its
+This example shows how to use a generic algorithm to calculate the force
+required for a double-clamped beam to deform a specific amount in its
 center.
 
 The beam model is the same as :ref:`ref_mapdl_beam`.
-It is made of ``BEAM188`` elements which span for 2.2 meters,
+It is made of ``BEAM188`` elements that span for 2.2 meters,
 and it fully clamped at both ends.
 
-The PyMAPDL beam model is defined in ``calculate_beam`` as follows:
+The PyMAPDL beam model is defined in the ``calculate_beam()`` function as follows:
 
 .. code-block:: python
 
@@ -93,18 +93,18 @@ The PyMAPDL beam model is defined in ``calculate_beam`` as follows:
 
         return UZ_node_12
 
-As it can be seen, this function returns the control parameter for this model, which is the displacement at the Z-direction on the node 12 (``UZ_node_12``).
+This function returns the control parameter for the model, which is the displacement at the Z-direction on the node 12 (``UZ_node_12``).
 
 
 Setting MAPDL pool
 ==================
 
-The genetic algorithms are expensive regarding the amount of calculation needed to reach an optimal solution. As seen before, many simulations must be performed to select, crossover, and mutate
+Genetic algorithms are expensive in regard to the amount of calculations needed to reach an optimal solution. As shown earlier, many simulations must be performed to select, cross over, and mutate
 all the chromosomes across all the populations.
 For this reason, to speed up the process, it is desirable to have as many MAPDL instances as possible, so
 each one can calculate one chromosome fit function.
 
-To manage multiple MAPDL instances, the best approach is to use :py:class:`~ansys.mapdl.core.pool.MapdlPool` class.
+To manage multiple MAPDL instances, the best approach is to use the :py:class:`~ansys.mapdl.core.pool.MapdlPool` class.
 
 .. code-block:: python
 
@@ -121,7 +121,7 @@ Define deflection target
 ========================
 
 Because this is a demonstration example, the target displacement is calculated 
-using the beam function itself using a force of 22840 :math:`N/cm^2`.
+using the beam function itself with a force of 22840 :math:`N/cm^2`.
 
 .. code-block:: python
 
@@ -138,9 +138,9 @@ Genetic algorithm model
 Introduction
 ------------
 
-The library `PyGAD <pygad_docs_>`_ is used to configure the genetic algorithm.::
+You use the `PyGAD <pygad_docs_>`_ library to configure the genetic algorithm.::
 
-    PyGAD is an open-source Python library for building the genetic algorithm and optimizing machine learning algorithms.
+    PyGAD is an open source Python library for building the genetic algorithm and optimizing machine learning algorithms.
 
     PyGAD supports different types of crossover, mutation, and parent selection operators.
     PyGAD allows different types of problems to be optimized using the genetic algorithm
