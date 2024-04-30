@@ -22,14 +22,14 @@
 
 """
 ==============================
-Genetic Algorithms and PyMAPDL
+Genetic algorithms and PyMAPDL
 ==============================
 
-This example aims also to show how to use PyMAPDL in an HPC cluster, to
+This example shows how to use PyMAPDL in an HPC cluster to
 take advantage of multiple MAPDL instances to calculate each of the
-genetic algorithm population solution.
-To manage multiple MAPDL instances, it is recommended to use the
-MapdlPool class which allows you to run multiple jobs on the background.
+genetic algorithm population solutions.
+To manage multiple MAPDL instances, you should use the
+``MapdlPool`` class, which lets you run multiple jobs in the background.
 
 """
 
@@ -56,7 +56,7 @@ def calculate_beam(mapdl, force):
     mapdl.secoffset("CENT")
     mapdl.secdata(15, 15, 29, 2, 2, 1)  # dimensions are in centimeters
 
-    # Setting FEM model
+    # Set FEM model
     mapdl.n(1, 0, 0, 0)
     mapdl.n(12, 110, 0, 0)
     mapdl.n(23, 220, 0, 0)
@@ -71,31 +71,31 @@ def calculate_beam(mapdl, force):
     for const in ["UX", "UY", "ROTX", "ROTZ"]:
         mapdl.d("all", const)
 
-    # constrain just nodes 1 and 23 in the Z direction
+    # Constrain only nodes 1 and 23 in the Z direction
     mapdl.d(1, "UZ")
     mapdl.d(23, "UZ")
 
-    # apply a -Z force at node 12
+    # Apply a -Z force at node 12
     mapdl.f(12, "FZ", force[0])
 
-    # run the static analysis
+    # Run the static analysis
     mapdl.run("/solu")
     mapdl.antype("static")
     mapdl.solve()
 
-    # Extracting data
+    # Extract data
     UZ = mapdl.post_processing.nodal_displacement("Z")
     UZ_node_12 = UZ[12]
 
     return UZ_node_12
 
 
-# Setting MAPDL pool
-# ==================
+# Set an MAPDL pool
+# =================
 
 from ansys.mapdl.core import MapdlPool
 
-# Starting pool
+# Start pool
 # Number of instances should be equal to number of CPUs
 # as set later in the ``sbatch`` command
 pool = MapdlPool(n_instances=10)
@@ -109,8 +109,8 @@ force = 22840  # N/cm2
 target_displacement = calculate_beam(pool[0], [force])
 print(f"Setting target to {target_displacement} for force {force}")
 
-# Setting genetic algorithm
-# =========================
+# Set a genetic algorithm
+# =======================
 
 # Setting GA model
 sol_per_pop = 20
@@ -144,16 +144,16 @@ def calculate_fitness_criteria(model_output):
     )
 
 
-# To calculate the error in the model solution with respect to the target displacement.
+# To calculate the error in the model solution with respect to the target displacement
 def calculate_error(model_output):
-    # Just for visualization purposes.
+    # Only for visualization purposes
     return 100.0 * (model_output - target_displacement) / target_displacement
 
 
 # This function is executed at the end of the fitness stage (all chromosomes are calculated),
-# and it is used to do some pretty printing.
+# and it is used to do some printing.
 def on_fitness(pyga_instance, solution):
-    # This attribute does not exist. It will be created after the GA class has been initialized.
+    # This attribute does not exist. It is created after the GA class has been initialized.
     pyga_instance.igen += 1
     print(f"\nGENERATION {pyga_instance.igen}")
     print("=============")
@@ -163,7 +163,7 @@ def on_fitness(pyga_instance, solution):
 
 
 def fitness_func(ga_instance, solution, solution_idx):
-    # Querying a free MAPDL instance
+    # Query a free MAPDL instance
     mapdl, i = pool.next_available(return_index=True)
     mapdl.locked = True
     mapdl._busy = True
@@ -179,8 +179,8 @@ def fitness_func(ga_instance, solution, solution_idx):
     error_ = calculate_error(model_output)
     fitness_criteria = calculate_fitness_criteria(model_output)
 
-    # Pretty print at each chromosome solution
-    # The 'port' is printed so it can be observed how the GA is using all MAPDL instances
+    # Print at each chromosome solution
+    # Print the port to observe how the GA is using all MAPDL instances
     print(
         f"MAPDL instance {i}(port: {mapdl.port})\tInput: {solution[0]:0.1f}\tOutputs: {model_output:0.7f}\tError: {error_:0.3f}%\tFitness criteria: {fitness_criteria:0.6f}"
     )
@@ -261,18 +261,18 @@ print(f"Parameters of the best solution : {solution[0]}")
 print(f"Fitness value of the best solution = {solution_fitness}")
 
 
-# Storing the model result
-# ========================
+# Store the model result
+# ======================
 
 from datetime import datetime
 
-# Saving the GA instance.
-# The filename to which the instance is saved. The name is without extension.
+# Save the GA instance.
+# In the filename to save the instance to, do not specify the extension.
 formatted_date = datetime.now().strftime("%d-%m-%y")
 filename = f"ml_ga_beam_{formatted_date}"
 ga_instance.save(filename=filename)
 
-# Loading the saved GA instance.
+# Load the saved GA instance.
 loaded_ga_instance = pygad.load(filename=filename)
 
 # Plot fitness function again

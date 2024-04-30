@@ -23,7 +23,7 @@ with other programs, libraries, and features in development.
 +----------------------------+--------------------------------------------------------------------------------------------+
 | :ref:`gui_example`         |  Demonstrates how to create your own GUI app with Python and PySide6                       |
 +----------------------------+--------------------------------------------------------------------------------------------+
-| :ref:`hpc_ml_ga_example`   |  Demonstrates how to use PyMAPDL in a high performance computing system managed by SLURM.  |
+| :ref:`hpc_ml_ga_example`   |  Demonstrates how to use PyMAPDL in a high-performance computing system managed by SLURM.  |
 +----------------------------+--------------------------------------------------------------------------------------------+
 
 
