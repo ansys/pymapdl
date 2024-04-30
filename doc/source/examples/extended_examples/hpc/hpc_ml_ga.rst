@@ -445,4 +445,4 @@ this script.
    The preceding command allocates 10 cores for the job.
    For optimal performance, this value should be higher than the number
    of MAPDL instances that the
-   :py:class:`~ansys.mapdl.core.pool.MapdlPool` instance is creating.
+   :class:`~ansys.mapdl.core.pool.MapdlPool` instance is creating.
