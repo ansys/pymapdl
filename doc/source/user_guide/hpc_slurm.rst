@@ -18,7 +18,7 @@ SLURM on HPC clusters.
 What is SLURM?
 ==============
 
-SLURM is an open-source workload manager and job scheduler designed for Linux
+SLURM is an open source workload manager and job scheduler designed for Linux
 clusters of all sizes. It efficiently allocates resources (compute nodes, CPU
 cores, memory, GPUs) to jobs submitted by users.
 
@@ -29,7 +29,7 @@ Basic concepts
 - **Compute node**: A type of node used only for running processes. It is not accessible from outside the cluster.
 - **Login nodes**: A type of node which is used only for login and job submission. No computation should be performed on it. It is sometimes referred to as 'virtual desktop infrastructure' (VDI).
 - **Partition**: A logical grouping of nodes with similar characteristics
-  (e.g., CPU architecture, memory size). 
+  (for example CPU architecture, memory size). 
 - **Job**: A task submitted to SLURM for execution. 
 - **Queue**: A waiting area where jobs are held until resources become available. 
 - **Scheduler**: The component responsible for deciding which job gets executed
@@ -60,7 +60,7 @@ job parameters and commands to execute. Here's a basic example:
 
 **my_script.sh**
 
-.. code:: bash
+.. code-block:: bash
     
     #!/bin/bash
     #SBATCH --job-name=myjob
@@ -115,14 +115,14 @@ Install PyMAPDL
 
 PyMAPDL Python package (``ansys-mapdl-core``) needs to be installed in a virtual environment which is accessible from the compute nodes.
 
-To do that you can find where your python distribution is installed using:
+To do that you can find where your Python distribution is installed using:
 
 .. code-block:: console
 
     user@machine:~$ which python3
     /usr/bin/python3
 
-You can check which version of Python you have by doing:
+You can print the version of Python you have available by doing:
 
 .. code-block:: console
 
@@ -171,7 +171,7 @@ Then you can install PyMAPDL after activating the virtual environment:
 You can test if this virtual environment is accessible from the compute nodes by
 running the following bash script ``test.sh``:
 
-.. code:: bash
+.. code-block:: bash
 
     #!/bin/bash
     #SBATCH --job-name=myjob
@@ -194,7 +194,7 @@ This command might take around 1-2 minutes to complete depending on the amount o
 resources available in the cluster.
 The console output should show:
 
-.. code:: text
+.. code-block:: text
 
     Testing Python!
     PyMAPDL version 0.68.1 was successfully imported!
@@ -234,7 +234,7 @@ a compute node using:
 
 Many HPC infrastructure uses environment managers to load and unload software package using modules
 and environment variables. 
-You should check that the correct module is loaded in your script.
+Hence you might want to make sure that the correct module is loaded in your script.
 Two of the most common environment managers are `Environment modules - Modules documentation <modules_docs_>`_ and `Lmod documentation <lmod_docs_>`_.
 Check your cluster documentation to know which environment manager is using, and how to load Python with
 it. If you find any issue, you should contact your cluster administrator.
@@ -248,7 +248,7 @@ and call the Python script.
 
 **Python script:** ``pymapdl_script.py``
 
-.. code:: python
+.. code-block:: python
 
     from ansys.mapdl.core import launch_mapdl
 
@@ -265,7 +265,7 @@ and call the Python script.
 
 **Bash script:** ``job.sh``
 
-.. code:: bash
+.. code-block:: bash
 
     source /home/user/.venv/bin/activate
     python pymapdl_script.py
@@ -290,7 +290,8 @@ and you pass all the environment variables to the job:
 
 
 The ``--export=ALL`` might not be needed, depending on the cluster configuration.
-Furthermore, you can omit the ``python`` call in the above command, if there is the Python sheabag (``#!/usr/bin/python3``) in the ``pymapdl_script.py`` script first line.
+Furthermore, you can omit the ``python`` call in the preceding command, if there is
+the Python shebang (``#!/usr/bin/python3``) in the ``pymapdl_script.py`` script first line.
 
 .. code-block:: console
 
@@ -306,7 +307,7 @@ instead of ``srun``, but in that case, the bash file is needed:
 
 The expected output of the job should be:
 
-.. code:: text
+.. code-block:: text
 
     Number of CPUs: 10.0
 
@@ -392,7 +393,7 @@ It's a versatile tool for managing jobs, nodes, partitions, and more.
 **Common Options:**
 
 - ``--name=jobname``: Cancels all jobs with a specific name.
-- ``--state=pending``: Cancels all jobs in a specific state, e.g., pending jobs.
+- ``--state=pending``: Cancels all jobs in a specific state, for example, pending jobs.
 
 ``sacct`` - Accounting Information
 ----------------------------------
@@ -420,10 +421,10 @@ It's a versatile tool for managing jobs, nodes, partitions, and more.
 
 **Common Options:**
 
-- ``--format``: Specifies which fields to display, e.g., ``--format=JobID,JobName,State``.
-- ``-S`` and ``-E``: Set the start and end time for the report, e.g., ``-S 2023-01-01 -E 2023-01-31``.
+- ``--format``: Specifies which fields to display, for example, ``--format=JobID,JobName,State``.
+- ``-S`` and ``-E``: Set the start and end time for the report, for example, ``-S 2023-01-01 -E 2023-01-31``.
 
-For more detailed information, refer to the official SLURM documentation or use the `man` command (e.g., `man squeue`) to explore all available options and their usage.
+For more detailed information, refer to the official SLURM documentation or use the `man` command (for example, `man squeue`) to explore all available options and their usage.
 
 
 Best Practices
@@ -484,7 +485,7 @@ resources such as number of nodes, CPU cores, memory, and time limit.
 Requesting Resources
 ~~~~~~~~~~~~~~~~~~~~
 Use the `--constraint` flag to request specific hardware
-configurations (e.g., CPU architecture) or the `--gres` flag for requesting generic
+configurations (for example, CPU architecture) or the `--gres` flag for requesting generic
 resources like GPUs.
 
 Resource Limits
