@@ -360,7 +360,7 @@ It's a versatile tool for managing jobs, nodes, partitions, and more.
 - To release a job on hold: ``scontrol release <jobID>``
 
 Cancel jobs
-------------
+-----------
 
 The ``scancel`` command cancels a running or pending job.
 
@@ -389,7 +389,7 @@ The ``scancel`` command cancels a running or pending job.
   such as all pending jobs as shown.
 
 Report accounting Information
-------------------------------
+-----------------------------
 
 The ``sacct`` account reports job or job step accounting information
 about active or completed jobs.
@@ -505,7 +505,7 @@ If this is not an option, see :ref:`ref_ansys_provided_python`.
 .. _ref_ansys_provided_python:
 
 Using the Ansys-provided Python installation
-----------------------------------------
+--------------------------------------------
 
 **For development purposes only**
 
