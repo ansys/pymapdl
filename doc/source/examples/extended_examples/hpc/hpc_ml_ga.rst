@@ -182,16 +182,17 @@ In the preceding code, the most import parameters are:
   In this case, because only one parameter is simulated (deflection Z at node 12),
   this value is 1.
 * ``num_parents_mating``: Number of solutions to select as parents.
-* **parent_selection_type**: The parent selection type. In this example, the ``rws`` type
-  (for roulette wheel selection) is used. For more information regarding parent selection type,
-  visit `Genetic algorithms with PyGAD: selection, crossover, mutation by Lucy Linder <ga_article_>`_ article.
-* **parallel_processing**: This parameter set the number of parallel workers for the genetic
-  algorithm and how these workers are created. They could be created as a ``"thread"`` or ``"process"``. In our example, these workers are created as thread and their amount is equal to the number of instances.
+* ``parent_selection_type``:  Parent selection type. This example uses the ``rws`` type
+  (for roulette wheel selection). For more information on parent selection type,
+  see `Genetic algorithms with PyGAD: selection, crossover, mutation <ga_article_>`_
+  by Lucy Linder.
+* ``parallel_processing``: Number of parallel workers for the genetic
+  algorithm and how these workers are created. They can be created as a ``"thread"`` or ``"process"``. The example creates the workers as threads, and the amount is equal to the number of instances.
 
 Helper functions
 ----------------
 
-Additionally, for printing purposes, several helper functions are going to be defined:
+Additionally, for printing purposes, several helper functions are defined:
 
 .. code-block:: python
 
@@ -200,7 +201,7 @@ Additionally, for printing purposes, several helper functions are going to be de
 
     # To calculate the fitness criteria model solution and target displacement
     def calculate_fitness_criteria(model_output):
-        # we add a constant (target/1E8) here to avoid dividing by zero
+        # Add a constant (target/1E8) here to avoid dividing by zero
         return 1.0 / (
             1 * (np.abs(model_output - target_displacement) + target_displacement / 1e10)
         )
@@ -213,9 +214,9 @@ Additionally, for printing purposes, several helper functions are going to be de
 
 
     # This function is executed at the end of the fitness stage (all chromosomes are calculated),
-    # and it is used to do some pretty printing.
+    # and it is used to do some printing.
     def on_fitness(pyga_instance, solution):
-        # This attribute does not exist. It will be created after the GA class has been initialized.
+        # This attribute does not exist. It is created after the genetic algorithm (GA) class has been initialized.
         pyga_instance.igen += 1
         print(f"\nGENERATION {pyga_instance.igen}")
         print("=============")
@@ -224,7 +225,7 @@ Additionally, for printing purposes, several helper functions are going to be de
 Fitness function
 ----------------
 
-Now all the helper functions are defined, the fitness function can be defined:
+after all helper functions are defined, the fitness function can be defined:
 
 .. code-block:: python
 
@@ -237,7 +238,7 @@ Now all the helper functions are defined, the fitness function can be defined:
         # Perform chromosome simulation
         model_output = calculate_beam(mapdl, solution)
 
-        # Releasing MAPDL instance
+        # Release MAPDL instance
         mapdl.locked = False
         mapdl._busy = False
 
@@ -245,27 +246,27 @@ Now all the helper functions are defined, the fitness function can be defined:
         error_ = calculate_error(model_output)
         fitness_criteria = calculate_fitness_criteria(model_output)
 
-        # Pretty print at each chromosome solution
-        # The 'port' is printed so it can be observed how the GA is using all MAPDL instances
+        # Print at each chromosome solution
+        # Print the port to observe how the GA is using all MAPDL instances
         print(
             f"MAPDL instance {i}(port: {mapdl.port})\tInput: {solution[0]:0.1f}\tOutputs: {model_output:0.7f}\tError: {error_:0.3f}%\tFitness criteria: {fitness_criteria:0.6f}"
         )
 
         return fitness_criteria
 
-PyMAPDL and PyGAD evaluate each chromosome using this function in order to
-evaluate how fit is it, and assign survival probability.
+PyMAPDL and PyGAD evaluate each chromosome using this function to
+evaluate how fit is it and assign survival probability.
 
 Mutation function
 -----------------
 
-To further demonstrate `PyGAD <pygad_docs_>`_ capabilities, in this example a custom mutation
-function is used.
+To further demonstrate `PyGAD <pygad_docs_>`_ capabilities, this example uses a custom mutation
+function.
 
 This custom mutation function does two things:
 
-* **To each chromosomes** add a random value between the maximum and minimum of the population.
-* **To two random chromosomes** additionally add a random percentage of the mean across all the
+* **To each chromosomes**, it adds a random value between the maximum and minimum of the population.
+* **To two random chromosomes**, it additionally adds a random percentage of the mean across all the
   population between -10% and 10%. The random chromosomes are selected independently.
   This is to reduce the possibility of the function to converge to a local minimal.
 
@@ -289,11 +290,11 @@ This custom mutation function does two things:
         return offspring
 
 
-Assembling model
-----------------
+Assemble model
+--------------
 
 Finally, the GA class is used to assemble all the parameters and functions
-created to run the simulation
+created to run the simulation:
 
 .. code-block:: python
 
@@ -329,7 +330,7 @@ created to run the simulation
 Run simulation
 ==============
 
-Once the model is set, the simulation can be started by using ``run()`` method:
+Once the model is set, use the ``run()`` method to start the simulation:
 
 .. code-block:: python
 
@@ -360,8 +361,8 @@ Plot convergence
     print(f"Fitness value of the best solution = {solution_fitness}")
 
 
-Storing the model result
-========================
+Store the model result
+======================
 
 The model can be stored in a file for later reuse:
 
@@ -369,17 +370,17 @@ The model can be stored in a file for later reuse:
 
     from datetime import datetime
 
-    # Saving the GA instance.
-    # The filename to which the instance is saved. The name is without extension.
+    # Save the GA instance.
+    # In the filename to save the instance to, do not specify the extension.
     formatted_date = datetime.now().strftime("%d-%m-%y")
     filename = f"ml_ga_beam_{formatted_date}"
     ga_instance.save(filename=filename)
 
-Use the following code to load the model:
+Load the model:
 
 .. code-block:: python
 
-    # Loading the saved GA instance.
+    # Load the saved GA instance.
     loaded_ga_instance = pygad.load(filename=filename)
 
     # Plot fitness function again
@@ -389,18 +390,18 @@ Use the following code to load the model:
 Run the simulation on an HPC cluster using SLURM
 ================================================
 
-In the previous steps, the PyMAPDL script has been created.
-The final file can be found in this link
+The previous steps create the PyMAPDL script.
+To see the file. you can click this link
 :download:`ml_ga_beam.py <ml_ga_beam.py>`.
 
-To run the above script in an HPC environment, you need to
-create a Python environment, install the packages and run
-the mentioned script.
+To run the preceding script in an HPC environment, you must
+create a Python environment, install the packages, and the run
+this script.
 
-1. Login into your HPC cluster.
-   For more information visit :ref:`ref_hpc_login`
+1. Log into your HPC cluster.
+   For more information, see :ref:`ref_hpc_login`
 
-2. Create a virtual environment which is accessible from
+2. Create a virtual environment that is accessible from
    the compute nodes.
 
    .. code-block:: console
@@ -409,10 +410,10 @@ the mentioned script.
 
    If you have problems when creating the virtual environment
    or accessing it from the compute nodes,
-   visit :ref:`ref_hpc_pymapdl_job`.
+   see :ref:`ref_hpc_pymapdl_job`.
 
 3. Install the requirements for this example given in
-   :download:`requirements.txt <requirements.txt>`.
+   :download:`requirements.txt <requirements.txt>` file.
 
 4. Create the bash script ``job.sh``:
 
@@ -435,7 +436,7 @@ the mentioned script.
    Remember to replace ``%your_partition_name%`` with your cluster
    partition.
 
-5. Run the bash script using `sbatch <slurm_sbatch_>`_ command:
+5. Run the bash script using the `sbatch <slurm_sbatch_>`_ command:
 
    .. code-block:: console
     
@@ -443,5 +444,5 @@ the mentioned script.
 
    The preceding command allocates 10 cores for the job.
    For optimal performance, this value should be higher than the number
-   of MAPDL instances that
-   :py:class:`~ansys.mapdl.core.pool.MapdlPool` is creating.
+   of MAPDL instances that the
+   :py:class:`~ansys.mapdl.core.pool.MapdlPool` instance is creating.
