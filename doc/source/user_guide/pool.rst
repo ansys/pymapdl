@@ -30,6 +30,13 @@ at the current directory within their own isolated directories:
     >>> pool = MapdlPool(10, nproc=1, run_location=my_path)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
+You can also specify a list of IPs to connect to: 
+
+.. code:: pycon
+
+    >>> pool = MapdlPool(ip=["127.0.0.2", "127.0.0.3", "127.0.0.4"])
+    Creating Pool: 100%|########| 3/3 [00:01<00:00,  1.43it/s]
+
 You can access each individual MAPDL instance with this code:
 
 .. code:: pycon
