@@ -360,7 +360,7 @@ def test_next_with_returns_index(pool):
         assert not each_instance.locked
         assert not each_instance._busy
 
-    with pool.next(return_index=True) as mapdl, index:
+    with pool.next(return_index=True) as (mapdl, index):
         assert isinstance(mapdl, Mapdl)
         assert isinstance(index, int)
 
