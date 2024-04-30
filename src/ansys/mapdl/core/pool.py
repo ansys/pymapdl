@@ -27,6 +27,7 @@ import tempfile
 import time
 from typing import Any, Dict, List, Optional, Union
 import warnings
+import weakref
 
 from ansys.mapdl.core import LOG, launch_mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
@@ -514,7 +515,7 @@ class MapdlPool:
             else:
                 # wait for all threads to complete
                 if wait:
-                    [thread.join() for thread in threads]
+                    c
 
         else:  # simply apply to all
             for instance in self._instances:
