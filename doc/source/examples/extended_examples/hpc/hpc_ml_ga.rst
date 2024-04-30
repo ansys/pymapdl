@@ -8,7 +8,7 @@ This example shows how to use PyMAPDL in an HPC cluster to
 take advantage of multiple MAPDL instances to calculate each of the
 genetic algorithm population solutions.
 To manage multiple MAPDL instances, you should use the
-:py:class:`~ansys.mapdl.core.pool.MapdlPool` class, which allows you
+:class:`~ansys.mapdl.core.pool.MapdlPool` class, which allows you
 to run multiple jobs in the background.
 
 Introduction
@@ -104,7 +104,7 @@ all the chromosomes across all the populations.
 For this reason, to speed up the process, it is desirable to have as many MAPDL instances as possible, so
 each one can calculate one chromosome fit function.
 
-To manage multiple MAPDL instances, the best approach is to use the :py:class:`~ansys.mapdl.core.pool.MapdlPool` class.
+To manage multiple MAPDL instances, the best approach is to use the :class:`~ansys.mapdl.core.pool.MapdlPool` class.
 
 .. code-block:: python
 
@@ -391,7 +391,7 @@ Run the simulation on an HPC cluster using SLURM
 ================================================
 
 The previous steps create the PyMAPDL script.
-To see the file. you can click this link
+To see the file, you can click this link
 :download:`ml_ga_beam.py <ml_ga_beam.py>`.
 
 To run the preceding script in an HPC environment, you must
@@ -410,7 +410,7 @@ this script.
 
    If you have problems when creating the virtual environment
    or accessing it from the compute nodes,
-   see :ref:`ref_hpc_pymapdl_job`.
+   see :ref:`ref_hpc_troubleshooting`.
 
 3. Install the requirements for this example given in
    :download:`requirements.txt <requirements.txt>` file.
@@ -445,4 +445,4 @@ this script.
    The preceding command allocates 10 cores for the job.
    For optimal performance, this value should be higher than the number
    of MAPDL instances that the
-   :py:class:`~ansys.mapdl.core.pool.MapdlPool` instance is creating.
+   :class:`~ansys.mapdl.core.pool.MapdlPool` instance is creating.

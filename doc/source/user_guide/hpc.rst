@@ -58,6 +58,8 @@ Descriptions follow of basic terms.
 Regular job submission workflow
 ===============================
 
+.. _ref_hpc_login:
+
 Log in to the cluster
 ---------------------
 
