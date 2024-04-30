@@ -30,6 +30,16 @@ at the current directory within their own isolated directories:
     >>> pool = MapdlPool(10, nproc=1, run_location=my_path)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
+Additionally, you can group already running MAPDL instances by connecting to
+them by specifying their ports when creating the pool.
+
+.. code:: pycon
+
+    >>> from ansys.mapdl.core import MapdlPool
+    >>> pool = MapdlPool(port=[50082, 50083, 50084, 50085, 50086])
+    'MAPDL Pool with 5 active instances'
+    >>> pool.exit(block=True)
+
 You can access each individual MAPDL instance with this code:
 
 .. code:: pycon
