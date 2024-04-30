@@ -320,7 +320,7 @@ class MapdlGrpc(MapdlBase):
         remove_temp_files: Optional[bool] = None,
         remove_temp_dir_on_exit: bool = False,
         print_com: bool = False,
-        disable_run_at_connect=False,
+        disable_run_at_connect: bool = False,
         channel: Optional[grpc.Channel] = None,
         remote_instance: Optional["PIM_Instance"] = None,
         **start_parm,
