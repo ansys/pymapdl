@@ -391,7 +391,7 @@ Run the simulation on an HPC cluster using SLURM
 ================================================
 
 The previous steps create the PyMAPDL script.
-To see the file, you can click this link
+To see the file. you can click this link
 :download:`ml_ga_beam.py <ml_ga_beam.py>`.
 
 To run the preceding script in an HPC environment, you must
@@ -410,7 +410,7 @@ this script.
 
    If you have problems when creating the virtual environment
    or accessing it from the compute nodes,
-   see :ref:`ref_hpc_troubleshooting`.
+   see :ref:`ref_hpc_pymapdl_job`.
 
 3. Install the requirements for this example given in
    :download:`requirements.txt <requirements.txt>` file.
@@ -445,4 +445,4 @@ this script.
    The preceding command allocates 10 cores for the job.
    For optimal performance, this value should be higher than the number
    of MAPDL instances that the
-   :class:`~ansys.mapdl.core.pool.MapdlPool` instance is creating.
+   :py:class:`~ansys.mapdl.core.pool.MapdlPool` instance is creating.
