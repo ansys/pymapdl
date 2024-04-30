@@ -30,7 +30,7 @@ at the current directory within their own isolated directories:
     >>> pool = MapdlPool(10, nproc=1, run_location=my_path)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
-You can also specify a list of IPs to connect to: 
+You can also specify a list of IP addresses to connect to: 
 
 .. code:: pycon
 
