@@ -104,9 +104,8 @@ intersphinx_mapping = {
     "ansys-math-core": ("https://math.docs.pyansys.com/version/stable/", None),
 }
 
-suppress_warnings = ["label.*", "design.fa-build"]
+suppress_warnings = ["label.*", "design.fa-build", "config.cache"]
 sd_fontawesome_latex = True
-# supress_warnings = ["ref.option"]
 
 # Graphviz diagrams configuration
 graphviz_output_format = "png"
@@ -223,6 +222,8 @@ linkcheck_anchors_ignore = [
     "pyvista.UnstructuredGrid",
     "pyvista.Plotter.show",
 ]
+
+user_agent = """curl https://www.ansys.com -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.3"""
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"

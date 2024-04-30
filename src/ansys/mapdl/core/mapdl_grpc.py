@@ -1411,18 +1411,19 @@ class MapdlGrpc(MapdlBase):
         return os.path.join(path, jobname + "0." + preference)
 
     @protect_grpc
-    def _ctrl(self, cmd):
-        """Issue control command to the mapdl server
+    def _ctrl(self, cmd: str, opt1: str = ""):
+        """Issue control command to the MAPDL server.
 
         Available commands:
 
-        - 'EXIT'
+        - ``EXIT``
             Calls exit(0) on the server.
 
-        - 'set_verb'
+        - ``set_verb``
             Enables verbose mode on the server.
+            In this case, the verbosity level is set using ``opt1`` argument.
 
-        - 'VERSION'
+        - ``VERSION``
             Returns version string in of the server in the form
             "MAJOR.MINOR.PATCH".  E.g. "0.3.0".  Known versions
             include:
@@ -1433,16 +1434,16 @@ class MapdlGrpc(MapdlBase):
 
         Unavailable/Flaky:
 
-        - 'time_stats'
+        - ``time_stats``
             Prints a table for time stats on the server.
             This command appears to be disabled/broken.
 
-        - 'mem-stats'
+        - ``mem-stats``
             To be added
 
         """
-        self._log.debug('Issuing CtrlRequest "%s"', cmd)
-        request = anskernel.CtrlRequest(ctrl=cmd)
+        self._log.debug(f'Issuing CtrlRequest "{cmd}" with option "{opt1}".')
+        request = anskernel.CtrlRequest(ctrl=str(cmd), opt1=str(opt1))
 
         # handle socket closing upon exit
         if cmd.lower() == "exit":
