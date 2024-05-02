@@ -255,12 +255,12 @@ class MapdlGrpc(MapdlBase):
         The default is ``False``.
 
     disable_run_at_connect: bool, optional
-        Disable the house-keeping commands when connecting.
-        The default is ``False``
+        Whether to disable the house-keeping commands when connecting.
+        The default is ``False``.
 
     channel : grpc.Channel, optional
-        gRPC channel to use for the connection. Can be used as an
-        alternative to the ``ip`` and ``port`` parameters.
+        gRPC channel to use for the connection. This parameter can be
+        used as an alternative to the ``ip`` and ``port`` parameters.
 
     remote_instance : ansys.platform.instancemanagement.Instance
         The corresponding remote instance when MAPDL is launched through
