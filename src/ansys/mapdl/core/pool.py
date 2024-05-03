@@ -28,6 +28,7 @@ import tempfile
 import time
 from typing import Any, Dict, List, Optional, Union
 import warnings
+import weakref
 
 from ansys.mapdl.core import LOG, launch_mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
@@ -668,8 +669,60 @@ class MapdlPool:
             close_when_finished=close_when_finished,
         )
 
-    def next_available(self, return_index=False):
-        """Wait until an instance of mapdl is available and return that instance.
+    class _mapdl_pool_ctx:
+        """Provides the context manager for the ``MapdlPool`` class.
+
+        This context manager sets the MAPDL instance as ``busy`` and ``locked`` when
+        entering and then unsets the instance state when exiting.
+        """
+
+        def __init__(self, parent: "MapdlPool", return_index: bool = False):
+            self._parent = weakref.ref(parent)
+            self._instance = None
+            self._return_index = return_index
+
+        def __enter__(self):
+            if self._return_index:
+                mapdl, i = self._parent().next_available(return_index=True)
+                self._index = i
+
+            else:
+                mapdl = self._parent().next_available(return_index=False)
+
+            self._instance = mapdl
+            mapdl.locked = True
+            mapdl._busy = True
+
+            if self._return_index:
+                return mapdl, i
+            else:
+                return mapdl
+
+        def __exit__(self, *args):
+            mapdl = self._instance
+            mapdl.locked = False
+            mapdl._busy = False
+
+    def next(self, return_index: bool = False):
+        """Return a context manager that returns available instances.
+
+        This method manages the instance state (`locked` and `busy`) when the code enters
+        and exits the code block.
+
+        Parameters
+        ----------
+        return_index : bool, optional
+            Whether to return the index along with the instance.  The default is ``False``.
+
+        Returns
+        -------
+        ctx
+            Context manager to manage ``MapdlPool`` instances.
+        """
+        return self._mapdl_pool_ctx(self, return_index)
+
+    def next_available(self, return_index: bool = False, as_ctx: bool = False):
+        """Wait until an instance of MAPDL is available and return that instance.
 
         Parameters
         ----------
@@ -678,7 +731,7 @@ class MapdlPool:
 
         Returns
         -------
-        pyansys.MapdlGrpc
+        MapdlGrpc
             Instance of MAPDL.
 
         int
@@ -693,7 +746,12 @@ class MapdlPool:
         MAPDL Version:       24.1
         ansys.mapdl Version: 0.68.dev0
         """
+        if as_ctx:
+            return self.next(return_index)
+        else:
+            return self._next_available(return_index)
 
+    def _next_available(self, return_index: bool = False):
         # loop until the next instance is available
         while True:
             for i, instance in enumerate(self._instances):
