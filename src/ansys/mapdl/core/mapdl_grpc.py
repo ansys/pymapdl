@@ -255,7 +255,7 @@ class MapdlGrpc(MapdlBase):
         The default is ``False``.
 
     disable_run_at_connect: bool, optional
-        Whether to disable the house-keeping commands when connecting.
+        Whether to disable the housekeeping commands when connecting.
         The default is ``False``.
 
     channel : grpc.Channel, optional
