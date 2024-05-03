@@ -41,6 +41,13 @@ their ports when creating the pool.
     'MAPDL Pool with 5 active instances'
     >>> pool.exit(block=True)
 
+You can also specify a list of IP addresses to connect to: 
+
+.. code:: pycon
+
+    >>> pool = MapdlPool(ip=["127.0.0.2", "127.0.0.3", "127.0.0.4"])
+    Creating Pool: 100%|########| 3/3 [00:01<00:00,  1.43it/s]
+
 You can access each individual MAPDL instance with this code:
 
 .. code:: pycon
