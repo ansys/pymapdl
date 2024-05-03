@@ -37,7 +37,7 @@ if has_dependency("ansys-tools-path"):
 else:
     EXEC_FILE = os.environ.get("PYMAPDL_MAPDL_EXEC")
 
-from ansys.mapdl.core import MapdlPool, examples
+from ansys.mapdl.core import Mapdl, MapdlPool, examples
 from ansys.mapdl.core.errors import VersionError
 from conftest import QUICK_LAUNCH_SWITCHES, requires
 
@@ -335,3 +335,41 @@ def test_only_one_instance():
     _ = pool.map(lambda mapdl: mapdl.prep7())
     assert len(pool) == pool_sz
     pool.exit()
+
+
+def test_next(pool):
+    # Check the instances are free
+    for each_instance in pool:
+        assert not each_instance.locked
+        assert not each_instance._busy
+
+    with pool.next() as mapdl:
+        assert isinstance(mapdl, Mapdl)
+        assert mapdl.locked
+        assert mapdl._busy
+        mapdl.prep7()
+
+    for each_instance in pool:
+        assert not each_instance.locked
+        assert not each_instance._busy
+
+
+def test_next_with_returns_index(pool):
+    # Check the instances are free
+    for each_instance in pool:
+        assert not each_instance.locked
+        assert not each_instance._busy
+
+    with pool.next(return_index=True) as (mapdl, index):
+        assert isinstance(mapdl, Mapdl)
+        assert isinstance(index, int)
+
+        assert mapdl.locked
+        assert mapdl._busy
+        mapdl.prep7()
+
+        assert mapdl == pool[index]
+
+    for each_instance in pool:
+        assert not each_instance.locked
+        assert not each_instance._busy
