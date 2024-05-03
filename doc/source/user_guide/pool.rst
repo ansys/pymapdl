@@ -31,7 +31,7 @@ at the current directory within their own isolated directories:
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
 Additionally, you can group already running MAPDL instances into an
-:class:`MapdlPool <ansys.mapdl.core.pool.MapdlPool>` by specifying
+:class:`MapdlPool <ansys.mapdl.core.pool.MapdlPool>` instance by specifying
 their ports when creating the pool.
 
 .. code:: pycon
