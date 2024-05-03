@@ -162,7 +162,7 @@ class MapdlPool:
 
     def __init__(
         self,
-        n_instances: int,
+        n_instances: int = None,
         wait: bool = True,
         run_location: Optional[str] = None,
         port: Union[int, List[int]] = MAPDL_DEFAULT_PORT,
@@ -241,6 +241,7 @@ class MapdlPool:
                 ports = available_ports(n_instances, port)
             else:
                 ports = port
+                n_instances = len(ports)
 
             if self._root_dir is not None:
                 if not os.path.isdir(self._root_dir):
@@ -250,6 +251,7 @@ class MapdlPool:
                 ports = [port + i for i in range(n_instances)]
             else:
                 ports = port
+                n_instances = len(ports)
 
         if len(ports) != n_instances:
             raise ValueError(
