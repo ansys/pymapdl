@@ -37,7 +37,7 @@ if has_dependency("ansys-tools-path"):
 else:
     EXEC_FILE = os.environ.get("PYMAPDL_MAPDL_EXEC")
 
-from ansys.mapdl.core import MapdlPool, examples
+from ansys.mapdl.core import Mapdl, MapdlPool, examples
 from ansys.mapdl.core.errors import VersionError
 from conftest import QUICK_LAUNCH_SWITCHES, requires
 
@@ -335,3 +335,63 @@ def test_only_one_instance():
     _ = pool.map(lambda mapdl: mapdl.prep7())
     assert len(pool) == pool_sz
     pool.exit()
+
+
+def test_ip(monkeypatch):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+    monkeypatch.delenv("PYMAPDL_IP", raising=False)
+
+    ips = ["127.0.0.1", "127.0.0.2", "127.0.0.3"]
+    ports = [50083, 50100, 50898]
+    pool_ = MapdlPool(
+        3,
+        ip=ips,
+        port=ports,
+        exec_file=EXEC_FILE,
+        nproc=NPROC,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+        _debug_no_launch=True,
+    )
+    args = pool_._debug_no_launch
+
+    assert not args["start_instance"]  # Because of ip
+    assert args["ips"] == ips
+    assert args["ports"] == ports
+
+
+def test_next(pool):
+    # Check the instances are free
+    for each_instance in pool:
+        assert not each_instance.locked
+        assert not each_instance._busy
+
+    with pool.next() as mapdl:
+        assert isinstance(mapdl, Mapdl)
+        assert mapdl.locked
+        assert mapdl._busy
+        mapdl.prep7()
+
+    for each_instance in pool:
+        assert not each_instance.locked
+        assert not each_instance._busy
+
+
+def test_next_with_returns_index(pool):
+    # Check the instances are free
+    for each_instance in pool:
+        assert not each_instance.locked
+        assert not each_instance._busy
+
+    with pool.next(return_index=True) as (mapdl, index):
+        assert isinstance(mapdl, Mapdl)
+        assert isinstance(index, int)
+
+        assert mapdl.locked
+        assert mapdl._busy
+        mapdl.prep7()
+
+        assert mapdl == pool[index]
+
+    for each_instance in pool:
+        assert not each_instance.locked
+        assert not each_instance._busy

@@ -434,7 +434,7 @@ class RadiositySolver:
         command = f"VFOPT,{opt},{filename},{ext},{dir_},{filetype},{fileformat}"
         return self.run(command, **kwargs)
 
-    def vfquery(self, srcelem="", tarelem="", **kwargs):
+    def vfquery(self, srcelem="", tarelem="", wropt="", **kwargs):
         """Queries and prints element Hemicube view factors and average view
 
         APDL Command: VFQUERY
@@ -471,5 +471,5 @@ class RadiositySolver:
         When resuming a database, issue the command VFOPT,READ before issuing
         the VFQUERY command.
         """
-        command = f"VFQUERY,{srcelem},{tarelem}"
+        command = f"VFQUERY,{srcelem},{tarelem},,{wropt}"
         return self.run(command, **kwargs)

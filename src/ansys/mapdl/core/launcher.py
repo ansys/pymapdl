@@ -1170,7 +1170,7 @@ def launch_mapdl(
         override the default behavior of this keyword argument with
         the environment variable ``PYMAPDL_START_INSTANCE=FALSE``.
 
-    ip : bool, optional
+    ip : str, optional
         Used only when ``start_instance`` is ``False``. If provided,
         and ``start_instance`` (or its correspondent environment variable
         ``PYMAPDL_START_INSTANCE``) is ``True`` then, an exception is raised.

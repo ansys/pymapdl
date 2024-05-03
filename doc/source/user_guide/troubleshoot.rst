@@ -602,9 +602,9 @@ If you want to see which Ansys installations PyMAPDL has detected, use:
 
     >>> from ansys.mapdl.core import get_available_ansys_installations
     >>> get_available_ansys_installations()
-    {222: 'C:\\Program Files\\ANSYS Inc\\v241',
+    {222: 'C:\\Program Files\\ANSYS Inc\\v222',
     212: 'C:\\Program Files\\ANSYS Inc\\v212',
-    -222: 'C:\\Program Files\\ANSYS Inc\\ANSYS Student\\v241'}
+    -222: 'C:\\Program Files\\ANSYS Inc\\ANSYS Student\\v222'}
 
 Student versions are provided as **negative** versions because the Python dictionary
 does not accept two equal keys. The result of the
