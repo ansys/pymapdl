@@ -63,7 +63,7 @@ SOURCE_PATH = Path(__file__).parent.resolve().absolute()
 DOC_PATH = SOURCE_PATH.parent.absolute()
 REPO_PATH = str(DOC_PATH.parent.absolute())
 
-GALLERY_EXAMPLES_PATH = str(os.path.join(SOURCE_PATH, "examples", "gallery_examples"))
+GALLERY_EXAMPLES_PATH = str(os.path.join(str(SOURCE_PATH), "examples", "gallery_examples"))
 
 EXAMPLES_ROOT = "examples"
 EXAMPLES_PATH_FOR_DOCS = f"../../{EXAMPLES_ROOT}/"
