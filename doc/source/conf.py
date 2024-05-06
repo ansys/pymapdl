@@ -71,10 +71,10 @@ EXAMPLES_PATH_FOR_DOCS = str(os.path.join(REPO_PATH, EXAMPLES_ROOT))
 SEARCH_HINTS = ["def", "class"]
 
 pyansys_light_mode_logo = str(
-    os.path.join(SOURCE_PATH, "_static", "pyansys-logo-black-cropped.png")
+    os.path.join(SOURCE_PATH, "_static", "pyansys-logo-light_mode.png")
 )
 pyansys_dark_mode_logo = str(
-    os.path.join(SOURCE_PATH, "_static", "pyansys-logo-white-cropped.png")
+    os.path.join(SOURCE_PATH, "_static", "pyansys-logo-dark_mode.png")
 )
 
 # -- General configuration ---------------------------------------------------
