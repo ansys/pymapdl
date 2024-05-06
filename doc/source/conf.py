@@ -2,6 +2,7 @@
 
 from datetime import datetime
 import os
+from pathlib import Path
 import warnings
 
 from ansys_sphinx_theme import ansys_favicon, get_version_match
@@ -57,13 +58,16 @@ REPOSITORY_NAME = "pymapdl"
 USERNAME = "ansys"
 BRANCH = "main"
 
-
 DEFAULT_EXAMPLE_EXTENSION = "py"
-GALLERY_EXAMPLES_PATH = os.path.join("examples", "gallery_examples")
-SEARCH_HINTS = ["def", "class"]
+SOURCE_PATH = Path(__file__).parent.resolve().absolute()
+DOC_PATH = SOURCE_PATH.parent.absolute()
+REPO_PATH = str(DOC_PATH.parent.absolute())
+
+GALLERY_EXAMPLES_PATH = str(os.path.join(SOURCE_PATH, "examples", "gallery_examples"))
+
 EXAMPLES_ROOT = "examples"
-EXAMPLES_PATH_FOR_DOCS = f"../../{EXAMPLES_ROOT}/"
-DOC_PATH = os.path.join("doc", "source")
+EXAMPLES_PATH_FOR_DOCS = str(os.path.join(REPO_PATH, EXAMPLES_ROOT))
+
 SEARCH_HINTS = ["def", "class"]
 
 pyansys_light_mode_logo = str(os.path.join(DOC_PATH, "_static", "logo_light.png"))
@@ -199,7 +203,8 @@ with open("substitutions.rst") as f:
 
 # Setting redicts
 redirects = {
-    # old linK: https://dev.mapdl.docs.pyansys.com/user_guide/krylov.html
+    #
+    # Old link: https://dev.mapdl.docs.pyansys.com/user_guide/krylov.html
     "user_guide/krylov": "examples/extended_examples/Krylov/krylov_example"
 }
 
@@ -307,7 +312,7 @@ html_context = {
     "github_user": USERNAME,
     "github_repo": REPOSITORY_NAME,
     "github_version": BRANCH,
-    "doc_path": DOC_PATH,
+    "doc_path": str(DOC_PATH),
     "source_path": "src",
 }
 html_show_sourcelink = False
