@@ -158,10 +158,7 @@ def on_fitness(pyga_instance, solution):
     print("=============")
 
 
-# End helper functions
-
 # Fitness function
-
 
 def fitness_func(ga_instance, solution, solution_idx):
     # Query a free MAPDL instance

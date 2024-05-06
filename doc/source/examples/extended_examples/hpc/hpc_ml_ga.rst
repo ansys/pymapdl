@@ -127,7 +127,7 @@ Additionally, for printing purposes, several helper functions are defined:
 .. literalinclude:: ml_ga_beam.py
     :language: python
     :start-at: import numpy as np
-    :end-before: # End helper functions
+    :end-at: print("=============")
 
 Fitness function
 ----------------
@@ -141,7 +141,7 @@ After all helper functions are defined, the fitness function can be defined:
     :end-at: return fitness_criteria
 
 
-PyMAPDL and PyGAD evaluate each chromosome using this function to
+`PyMAPDL <pymapdl_main_>`_ and `PyGAD <pygad_docs_>`_ evaluate each chromosome using this function to
 evaluate how fit is it and assign survival probability.
 
 Mutation function
