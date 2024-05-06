@@ -64,7 +64,7 @@
 .. _ansys_installation_and_licensing: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/prod_page.html?pn=Installation%20and%20Licensing&pid=InstallationAndLicensing&lang=en
 .. _ansys_parallel_computing_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_dan/dantoc.html
 .. _ansys_verification_manual: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_vm/Hlp_V_VMTOC.html
-.. _ansys_tutorials_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v231/en/ans_tut/Hlp_UI_Tutorials.html
+.. _ansys_tutorials_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_tut/Hlp_UI_Tutorials.html
 
 .. # Ansys introductory tutorials
 .. _ansys_introtut: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_tut/Hlp_UI_Tutorials.html
@@ -224,4 +224,4 @@
 
 .. # Elements references
 
-.. _elem_plane183: https://ansyshelp.ansys.com/account/Secured?returnurl=/Views/Secured/corp/v231/en/ans_elem/Hlp_E_PLANE183.html
+.. _elem_plane183: https://ansyshelp.ansys.com/account/Secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_elem/Hlp_E_PLANE183.html

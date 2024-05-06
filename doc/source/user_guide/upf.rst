@@ -186,7 +186,7 @@ During the Mechanical APDL process, you see this Python printout:
 
 .. code:: output
 
-    RUN SETUP PROCEDURE FROM FILE= /ansys_inc/v212/ansys/apdl/start.ans
+    RUN SETUP PROCEDURE FROM FILE= /ansys_inc/v241/ansys/apdl/start.ans
     =======================================
     >> Inside the PYTHON UAnBeg routine  <<
     =======================================
