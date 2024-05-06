@@ -102,9 +102,8 @@ from ansys.mapdl.core import MapdlPool
 pool = MapdlPool(n_instances=10)
 print(pool)
 
-
 ## Define deflection target
-mapdl = pool[0]
+mapdl = pool[0]  # Getting the first MAPDL instance in the pool
 force = 22840  # N/cm2
 target_displacement = calculate_beam(pool[0], [force])
 print(f"Setting target to {target_displacement} for force {force}")
@@ -259,8 +258,8 @@ print(f"Fitness value of the best solution = {solution_fitness}")
 
 # Model storage
 # =============
-# To save the model data:
 
+# To save the model data:
 from datetime import datetime
 
 # Save the GA instance

@@ -193,7 +193,7 @@ Plot convergence
 
 .. literalinclude:: ml_ga_beam.py
     :language: python
-    :start-at: To plot the convergence:
+    :start-at: import os
     :end-at: print(f"Fitness value of the best solution = {solution_fitness}")
 
 
