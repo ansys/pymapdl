@@ -104,7 +104,6 @@ To configure the genetic algorithm, the following code is used:
     :start-at: Set GA model
     :end-at: mutation_probability = 0.5
 
-
 In the preceding code, the most import parameters are:
 
 * ``sol_per_pop``: Number of solutions (chromosomes) within the population.
@@ -117,7 +116,10 @@ In the preceding code, the most import parameters are:
   see `Genetic algorithms with PyGAD: selection, crossover, mutation <ga_article_>`_
   by Lucy Linder.
 * ``parallel_processing``: Number of parallel workers for the genetic
-  algorithm and how these workers are created. They can be created as a ``"thread"`` or ``"process"``. The example creates the workers as threads, and the amount is equal to the number of instances.
+  algorithm and how these workers are created. They can be created as a ``"thread"``
+  or ``"process"``. The example creates the workers as threads, and the amount is
+  equal to the number of instances.
+
 
 Helper functions
 ----------------
@@ -129,20 +131,20 @@ Additionally, for printing purposes, several helper functions are defined:
     :start-at: import numpy as np
     :end-at: print("=============")
 
+
 Fitness function
 ----------------
 
 After all helper functions are defined, the fitness function can be defined:
-
 
 .. literalinclude:: ml_ga_beam.py
     :language: python
     :start-at: def fitness_func(ga_instance, solution, solution_idx):
     :end-at: return fitness_criteria
 
-
 `PyMAPDL <pymapdl_main_>`_ and `PyGAD <pygad_docs_>`_ evaluate each chromosome using this function to
 evaluate how fit is it and assign survival probability.
+
 
 Mutation function
 -----------------
@@ -157,11 +159,11 @@ This custom mutation function does two things:
   population between -10% and 10%. The random chromosomes are selected independently.
   This is to reduce the possibility of the function converging to a local minimal.
 
-
 .. literalinclude:: ml_ga_beam.py
     :language: python
     :start-at: def mutation_func(offspring, ga_instance):
     :end-at: return offspring
+
 
 Model assembly
 --------------
@@ -173,6 +175,7 @@ created to run the simulation:
     :language: python
     :start-at: ga_instance = pygad.GA(
     :end-at: To count the number of generations
+
 
 Simulation
 ==========
@@ -192,6 +195,7 @@ Plot convergence
     :language: python
     :start-at: To plot the convergence:
     :end-at: print(f"Fitness value of the best solution = {solution_fitness}")
+
 
 Model storage
 ==============
@@ -270,3 +274,4 @@ this script.
    For optimal performance, this value should be higher than the number
    of MAPDL instances that the
    :class:`~ansys.mapdl.core.pool.MapdlPool` instance is creating.
+
