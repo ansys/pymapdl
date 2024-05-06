@@ -59,17 +59,15 @@ USERNAME = "ansys"
 BRANCH = "main"
 
 DEFAULT_EXAMPLE_EXTENSION = "py"
-SOURCE_PATH = Path(__file__).parent.resolve().absolute()
-DOC_PATH = SOURCE_PATH.parent.absolute()
-REPO_PATH = str(DOC_PATH.parent.absolute())
 
-GALLERY_EXAMPLES_PATH = str(os.path.join(SOURCE_PATH, "examples", "gallery_examples"))
-
+DOC_PATH = "doc/source"
+GALLERY_EXAMPLES_PATH = "examples/gallery_examples"
 EXAMPLES_ROOT = "examples"
 EXAMPLES_PATH_FOR_DOCS = f"../../{EXAMPLES_ROOT}/"
 
 SEARCH_HINTS = ["def", "class"]
 
+SOURCE_PATH = Path(__file__).parent.resolve().absolute()
 pyansys_light_mode_logo = str(
     os.path.join(SOURCE_PATH, "_static", "pyansys-logo-light_mode.png")
 )
