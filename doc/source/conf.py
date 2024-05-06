@@ -66,7 +66,7 @@ REPO_PATH = str(DOC_PATH.parent.absolute())
 GALLERY_EXAMPLES_PATH = str(os.path.join(SOURCE_PATH, "examples", "gallery_examples"))
 
 EXAMPLES_ROOT = "examples"
-EXAMPLES_PATH_FOR_DOCS = str(os.path.join(REPO_PATH, EXAMPLES_ROOT))
+EXAMPLES_PATH_FOR_DOCS = f"../../{EXAMPLES_ROOT}/"
 
 SEARCH_HINTS = ["def", "class"]
 
@@ -322,6 +322,7 @@ html_context = {
 html_show_sourcelink = False
 
 html_sidebars = {
+    "mapdl_commands/**/**": [],
     "mapdl_commands/index": [],
 }
 
