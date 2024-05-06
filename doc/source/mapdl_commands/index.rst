@@ -1,5 +1,21 @@
 .. _ref_mapdl_commands:
 
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :glob:
+
+   *
+
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :glob:
+
+   *
+
+
 ==============
 MAPDL commands
 ==============
