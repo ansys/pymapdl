@@ -66,6 +66,9 @@ EXAMPLES_PATH_FOR_DOCS = f"../../{EXAMPLES_ROOT}/"
 DOC_PATH = os.path.join("doc", "source")
 SEARCH_HINTS = ["def", "class"]
 
+pyansys_light_mode_logo = str(os.path.join(DOC_PATH, "_static", "logo_light.png"))
+pyansys_dark_mode_logo = str(os.path.join(DOC_PATH, "_static", "logo_dark.png"))
+
 # -- General configuration ---------------------------------------------------
 extensions = [
     "jupyter_sphinx",
@@ -254,7 +257,7 @@ sphinx_gallery_conf = {
     "ignore_pattern": "flycheck*",
     "thumbnail_size": (350, 350),
     "remove_config_comments": True,
-    "default_thumb_file": os.path.join(DOC_PATH, "_static", "logo_light.png"),
+    "default_thumb_file": pyansys_light_mode_logo,
     "show_signature": False,
 }
 # ---
@@ -263,7 +266,7 @@ sphinx_gallery_conf = {
 # -- Options for HTML output -------------------------------------------------
 html_short_title = html_title = "PyMAPDL"
 html_theme = "ansys_sphinx_theme"
-html_logo = os.path.join(DOC_PATH, "_static", "logo_dark.png")
+html_logo = pyansys_dark_mode_logo
 html_theme_options = {
     "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
     "github_url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}",
@@ -310,8 +313,7 @@ html_context = {
 html_show_sourcelink = False
 
 html_sidebars = {
-    "mapdl_commands/index": ["localtoc.html"],
-    "mapdl_commands/*": ["localtoc.html", "relations.html"],
+    "mapdl_commands/index": [],
 }
 
 # -- Options for HTMLHelp output ---------------------------------------------
