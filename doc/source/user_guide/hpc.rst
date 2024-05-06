@@ -127,6 +127,9 @@ You can specify each job setting using the command line. For example:
     written in the bash file. Hence, you must ensure that the argument that you 
     want to pass using the command line is not already present in the bash file.
 
+
+.. _ref_hpc_pymapdl_job:
+
 Submit a PyMAPDL job
 ====================
 
@@ -247,8 +250,8 @@ Submit a PyMAPDL job
 
 To submit a PyMAPDL job, you must create two files:
 
- - Python script with the PyMAPDL code
- - Bash script that activates the virtual environment and calls the Python script
+- Python script with the PyMAPDL code
+- Bash script that activates the virtual environment and calls the Python script
 
 **Python script:** ``pymapdl_script.py``
 

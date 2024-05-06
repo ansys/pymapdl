@@ -39,59 +39,10 @@ and it fully clamped at both ends.
 
 The PyMAPDL beam model is defined in the ``calculate_beam()`` function as follows:
 
-.. code-block:: python
-
-    def calculate_beam(mapdl, force):
-        # Initialize
-        mapdl.clear()
-        mapdl.prep7()
-
-        # Define an I-beam
-        mapdl.et(1, "BEAM188")
-        mapdl.keyopt(1, 4, 1)  # transverse shear stress output
-
-        # Material properties
-        mapdl.mp("EX", 1, 2e7)  # N/cm2
-        mapdl.mp("PRXY", 1, 0.27)  # Poisson's ratio
-
-        # Beam properties in centimeters
-        sec_num = 1
-        mapdl.sectype(sec_num, "BEAM", "I", "ISection", 3)
-        mapdl.secoffset("CENT")
-        mapdl.secdata(15, 15, 29, 2, 2, 1)  # dimensions are in centimeters
-
-        # Set FEM model
-        mapdl.n(1, 0, 0, 0)
-        mapdl.n(12, 110, 0, 0)
-        mapdl.n(23, 220, 0, 0)
-        mapdl.fill(1, 12, 10)
-        mapdl.fill(12, 23, 10)
-
-        for node in mapdl.mesh.nnum[:-1]:
-            mapdl.e(node, node + 1)
-
-        # Define the boundary conditions
-        # Allow movement only in the X and Z direction
-        for const in ["UX", "UY", "ROTX", "ROTZ"]:
-            mapdl.d("all", const)
-
-        # Constrain only nodes 1 and 23 in the Z direction
-        mapdl.d(1, "UZ")
-        mapdl.d(23, "UZ")
-
-        # apply a -Z force at node 12
-        mapdl.f(12, "FZ", force[0])
-
-        # Run the static analysis
-        mapdl.run("/solu")
-        mapdl.antype("static")
-        mapdl.solve()
-
-        # Extract data
-        UZ = mapdl.post_processing.nodal_displacement("Z")
-        UZ_node_12 = UZ[12]
-
-        return UZ_node_12
+.. literalinclude:: ml_ga_beam.py
+    :language: python
+    :start-at: def calculate_beam(mapdl, force):
+    :end-at: return UZ_node_12
 
 This function returns the control parameter for the model, which is the displacement at the Z-direction on the node 12 (``UZ_node_12``).
 
@@ -105,15 +56,10 @@ For this reason, to speed up the process, it is desirable to have as many MAPDL 
 
 To manage multiple MAPDL instances, the best approach is to use the :class:`~ansys.mapdl.core.pool.MapdlPool` class.
 
-.. code-block:: python
-
-    from ansys.mapdl.core import MapdlPool
-
-    # Start pool
-    # Number of instances should be equal to number of CPUs
-    # as set later in the ``sbatch`` command
-    pool = MapdlPool(n_instances=10)
-    print(pool)
+.. literalinclude:: ml_ga_beam.py
+    :language: python
+    :start-at: Importing packages
+    :end-at: print(pool)
 
 
 Deflection target
@@ -122,13 +68,10 @@ Deflection target
 Because this is a demonstration example, the target displacement is calculated 
 using the beam function itself with a force of 22840 :math:`N/cm^2`.
 
-.. code-block:: python
-
-    # Calculate target displacement
-    mapdl = pool[0]
-    force = 22840  # N/cm2
-    target_displacement = calculate_beam(pool[0], [force])
-    print(f"Setting target to {target_displacement} for force {force}")
+.. literalinclude:: ml_ga_beam.py
+    :language: python
+    :start-at: ## Define deflection target
+    :end-at: print(f"Setting target to {target_displacement} for force {force}")
 
 
 Genetic algorithm model
@@ -137,7 +80,9 @@ Genetic algorithm model
 Introduction
 ------------
 
-You use the `PyGAD <pygad_docs_>`_ library to configure the genetic algorithm.::
+You use the `PyGAD <pygad_docs_>`_ library to configure the genetic algorithm.
+
+.. epigraph::
 
     PyGAD is an open source Python library for building the genetic algorithm and optimizing machine learning algorithms.
 
@@ -146,32 +91,18 @@ You use the `PyGAD <pygad_docs_>`_ library to configure the genetic algorithm.::
     by customizing the fitness function. It works with both single-objective and
     multi-objective optimization problems.
 
+    From PyGAD - Python Genetic Algorithm! - https://pygad.readthedocs.io/en/latest/
+
 
 Configuration
 -------------
 
 To configure the genetic algorithm, the following code is used:
 
-.. code-block:: python
-
-    # Setting GA model
-    sol_per_pop = 20
-    num_generations = 10
-    num_parents_mating = 20
-    num_genes = 1  # equal to the size of inputs/outputs.
-    parallel_processing = ["thread", len(pool)]  # Number of parallel workers
-
-    # Initial guess limits
-    init_range_low = 10000
-    init_range_high = 30000
-    gene_type = int  # limit to ints
-
-    # Extra configuration
-    # https://blog.derlin.ch/genetic-algorithms-with-pygad
-    parent_selection_type = "rws"
-    keep_parents = 0  # No keeping parents.
-    mutation_percent_genes = 30
-    mutation_probability = 0.5
+.. literalinclude:: ml_ga_beam.py
+    :language: python
+    :start-at: Set GA model
+    :end-at: mutation_probability = 0.5
 
 
 In the preceding code, the most import parameters are:
@@ -193,65 +124,22 @@ Helper functions
 
 Additionally, for printing purposes, several helper functions are defined:
 
-.. code-block:: python
-
-    import numpy as np
-
-
-    # To calculate the fitness criteria model solution and target displacement
-    def calculate_fitness_criteria(model_output):
-        # Add a constant (target/1E8) here to avoid dividing by zero
-        return 1.0 / (
-            1 * (np.abs(model_output - target_displacement) + target_displacement / 1e10)
-        )
-
-
-    # To calculate the error in the model solution with respect to the target displacement.
-    def calculate_error(model_output):
-        # Just for visualization purposes.
-        return 100.0 * (model_output - target_displacement) / target_displacement
-
-
-    # This function is executed at the end of the fitness stage (all chromosomes are calculated),
-    # and it is used to do some printing.
-    def on_fitness(pyga_instance, solution):
-        # This attribute does not exist. It is created after the genetic algorithm (GA) class has been initialized.
-        pyga_instance.igen += 1
-        print(f"\nGENERATION {pyga_instance.igen}")
-        print("=============")
-
+.. literalinclude:: ml_ga_beam.py
+    :language: python
+    :start-at: import numpy as np
+    :end-before: # End helper functions
 
 Fitness function
 ----------------
 
 After all helper functions are defined, the fitness function can be defined:
 
-.. code-block:: python
 
-    def fitness_func(ga_instance, solution, solution_idx):
-        # Querying a free MAPDL instance
-        mapdl, i = pool.next_available(return_index=True)
-        mapdl.locked = True
-        mapdl._busy = True
+.. literalinclude:: ml_ga_beam.py
+    :language: python
+    :start-at: def fitness_func(ga_instance, solution, solution_idx):
+    :end-at: return fitness_criteria
 
-        # Perform chromosome simulation
-        model_output = calculate_beam(mapdl, solution)
-
-        # Release MAPDL instance
-        mapdl.locked = False
-        mapdl._busy = False
-
-        # Calculate errors and criteria
-        error_ = calculate_error(model_output)
-        fitness_criteria = calculate_fitness_criteria(model_output)
-
-        # Print at each chromosome solution
-        # Print the port to observe how the GA is using all MAPDL instances
-        print(
-            f"MAPDL instance {i}(port: {mapdl.port})\tInput: {solution[0]:0.1f}\tOutputs: {model_output:0.7f}\tError: {error_:0.3f}%\tFitness criteria: {fitness_criteria:0.6f}"
-        )
-
-        return fitness_criteria
 
 PyMAPDL and PyGAD evaluate each chromosome using this function to
 evaluate how fit is it and assign survival probability.
@@ -269,25 +157,11 @@ This custom mutation function does two things:
   population between -10% and 10%. The random chromosomes are selected independently.
   This is to reduce the possibility of the function converging to a local minimal.
 
-.. code-block:: python
 
-    def mutation_func(offspring, ga_instance):
-        average = offspring.mean()
-        max_value = offspring.max() - average
-        min_value = offspring.min() - average
-
-        min_value = min([min_value, max_value, -1])
-        max_value = max([min_value, max_value, +1])
-
-        offspring[:, 0] += np.random.randint(min_value, high=max_value, size=offspring.size)
-
-        for i in range(2):
-            random_spring_idx = np.random.choice(range(offspring.shape[1]))
-            sign = np.random.choice([-1, 1])
-            offspring[random_spring_idx, 0] += sign * average * (0.1 * np.random.random())
-
-        return offspring
-
+.. literalinclude:: ml_ga_beam.py
+    :language: python
+    :start-at: def mutation_func(offspring, ga_instance):
+    :end-at: return offspring
 
 Model assembly
 --------------
@@ -295,95 +169,46 @@ Model assembly
 Use the GA class to assemble all the parameters and functions
 created to run the simulation:
 
-.. code-block:: python
-
-    ga_instance = pygad.GA(
-        # Main options
-        sol_per_pop=sol_per_pop,
-        num_generations=num_generations,
-        num_parents_mating=num_parents_mating,
-        num_genes=num_genes,
-        fitness_func=fitness_func,
-        parallel_processing=parallel_processing,
-        random_seed=2,  # to get reproducible results
-        #
-        # Mutation
-        mutation_percent_genes=mutation_percent_genes,
-        mutation_type=mutation_func,
-        mutation_probability=mutation_probability,
-        #
-        # Parents
-        keep_parents=keep_parents,
-        parent_selection_type=parent_selection_type,
-        #
-        # Helpers
-        on_fitness=on_fitness,
-        gene_type=gene_type,
-        init_range_low=init_range_low,
-        init_range_high=init_range_high,
-    )
-
-    ga_instance.igen = 0  # To count the number of generations
-
+.. literalinclude:: ml_ga_beam.py
+    :language: python
+    :start-at: ga_instance = pygad.GA(
+    :end-at: To count the number of generations
 
 Simulation
 ==========
 
 Once the model is set, use the ``run()`` method to start the simulation:
 
-.. code-block:: python
-
-    import time
-
-    t0 = time.perf_counter()
-
-    ga_instance.run()
-
-    t1 = time.perf_counter()
-    print(f"Time spent (minutes): {(t1-t0)/60}")
+.. literalinclude:: ml_ga_beam.py
+    :language: python
+    :start-at: import time
+    :end-at: print(f"Time spent (minutes): {(t1-t0)/60}")
 
 
 Plot convergence
 ================
 
-.. code-block:: python
-
-    import os
-
-    ga_instance.plot_fitness(label=["Applied force"], save_dir=os.getcwd())
-
-    solution, solution_fitness, solution_idx = ga_instance.best_solution(
-        ga_instance.last_generation_fitness
-    )
-
-    print(f"Parameters of the best solution : {solution[0]}")
-    print(f"Fitness value of the best solution = {solution_fitness}")
-
+.. literalinclude:: ml_ga_beam.py
+    :language: python
+    :start-at: To plot the convergence:
+    :end-at: print(f"Fitness value of the best solution = {solution_fitness}")
 
 Model storage
 ==============
 
 You can store the model in a file for later reuse:
 
-.. code-block:: python
-
-    from datetime import datetime
-
-    # Save the GA instance.
-    # In the filename to save the instance to, do not specify the extension.
-    formatted_date = datetime.now().strftime("%d-%m-%y")
-    filename = f"ml_ga_beam_{formatted_date}"
-    ga_instance.save(filename=filename)
+.. literalinclude:: ml_ga_beam.py
+    :language: python
+    :start-at: # To save the model data:
+    :end-at: ga_instance.save(filename=filename)
 
 Load the model:
 
-.. code-block:: python
-
-    # Load the saved GA instance.
-    loaded_ga_instance = pygad.load(filename=filename)
-
-    # Plot fitness function again
-    loaded_ga_instance.plot_fitness()
+.. literalinclude:: ml_ga_beam.py
+    :language: python
+    :start-at: # Load the saved GA instance
+    :end-at: loaded_ga_instance.plot_fitness()
 
 
 Simulation on an HPC cluster using SLURM

@@ -37,6 +37,7 @@ To manage multiple MAPDL instances, you should use the
 # ==================
 
 
+# Calculate beam function
 def calculate_beam(mapdl, force):
     # Initialize
     mapdl.clear()
@@ -92,7 +93,7 @@ def calculate_beam(mapdl, force):
 
 # MAPDL pool setup
 # =================
-
+# Importing packages
 from ansys.mapdl.core import MapdlPool
 
 # Start pool
@@ -103,7 +104,6 @@ print(pool)
 
 
 ## Define deflection target
-# Calculate target displacement
 mapdl = pool[0]
 force = 22840  # N/cm2
 target_displacement = calculate_beam(pool[0], [force])
@@ -132,7 +132,6 @@ mutation_percent_genes = 30
 mutation_probability = 0.5
 
 # Helper functions
-
 import numpy as np
 
 
@@ -159,31 +158,28 @@ def on_fitness(pyga_instance, solution):
     print("=============")
 
 
+# End helper functions
+
 # Fitness function
 
 
 def fitness_func(ga_instance, solution, solution_idx):
     # Query a free MAPDL instance
-    mapdl, i = pool.next_available(return_index=True)
-    mapdl.locked = True
-    mapdl._busy = True
 
-    # Perform chromosome simulation
-    model_output = calculate_beam(mapdl, solution)
+    with pool.next(return_index=True) as (mapdl, i):
 
-    # Releasing MAPDL instance
-    mapdl.locked = False
-    mapdl._busy = False
+        # Perform chromosome simulation
+        model_output = calculate_beam(mapdl, solution)
 
-    # Calculate errors and criteria
-    error_ = calculate_error(model_output)
-    fitness_criteria = calculate_fitness_criteria(model_output)
+        # Calculate errors and criteria
+        error_ = calculate_error(model_output)
+        fitness_criteria = calculate_fitness_criteria(model_output)
 
-    # Print at each chromosome solution
-    # Print the port to observe how the GA is using all MAPDL instances
-    print(
-        f"MAPDL instance {i}(port: {mapdl.port})\tInput: {solution[0]:0.1f}\tOutputs: {model_output:0.7f}\tError: {error_:0.3f}%\tFitness criteria: {fitness_criteria:0.6f}"
-    )
+        # Print at each chromosome solution
+        # Print the port to observe how the GA is using all MAPDL instances
+        print(
+            f"MAPDL instance {i}(port: {mapdl.port})\tInput: {solution[0]:0.1f}\tOutputs: {model_output:0.7f}\tError: {error_:0.3f}%\tFitness criteria: {fitness_criteria:0.6f}"
+        )
 
     return fitness_criteria
 
@@ -237,7 +233,7 @@ ga_instance.igen = 0  # To count the number of generations
 
 # Simulation
 # ==========
-
+# Measuring time
 import time
 
 t0 = time.perf_counter()
@@ -250,6 +246,8 @@ print(f"Time spent (minutes): {(t1-t0)/60}")
 
 # Convergence plot
 # ================
+# To plot the convergence:
+import os
 
 ga_instance.plot_fitness(label=["Applied force"], save_dir=os.getcwd())
 
@@ -263,6 +261,7 @@ print(f"Fitness value of the best solution = {solution_fitness}")
 
 # Model storage
 # =============
+# To save the model data:
 
 from datetime import datetime
 
