@@ -21,7 +21,7 @@ with other programs, libraries, and features in development.
 +----------------------------+--------------------------------------------------------------------------------------------+
 | :ref:`executable_example`  |  Demonstrates how to create your own Python app with a command-line interface.             |
 +----------------------------+--------------------------------------------------------------------------------------------+
-| :ref:`gui_example`         |  Demonstrates how to create your own GUI app with Python and PySide6                       |
+| :ref:`gui_example`         |  Demonstrates how to create your own GUI app with Python and PySide6.                      |
 +----------------------------+--------------------------------------------------------------------------------------------+
 | :ref:`hpc_ml_ga_example`   |  Demonstrates how to use PyMAPDL in a high-performance computing system managed by SLURM.  |
 +----------------------------+--------------------------------------------------------------------------------------------+

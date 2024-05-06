@@ -42,7 +42,7 @@ The PyMAPDL beam model is defined in the ``calculate_beam()`` function as follow
 .. code-block:: python
 
     def calculate_beam(mapdl, force):
-        # Initializing
+        # Initialize
         mapdl.clear()
         mapdl.prep7()
 
@@ -60,7 +60,7 @@ The PyMAPDL beam model is defined in the ``calculate_beam()`` function as follow
         mapdl.secoffset("CENT")
         mapdl.secdata(15, 15, 29, 2, 2, 1)  # dimensions are in centimeters
 
-        # Setting FEM model
+        # Set FEM model
         mapdl.n(1, 0, 0, 0)
         mapdl.n(12, 110, 0, 0)
         mapdl.n(23, 220, 0, 0)
@@ -75,19 +75,19 @@ The PyMAPDL beam model is defined in the ``calculate_beam()`` function as follow
         for const in ["UX", "UY", "ROTX", "ROTZ"]:
             mapdl.d("all", const)
 
-        # constrain just nodes 1 and 23 in the Z direction
+        # Constrain only nodes 1 and 23 in the Z direction
         mapdl.d(1, "UZ")
         mapdl.d(23, "UZ")
 
         # apply a -Z force at node 12
         mapdl.f(12, "FZ", force[0])
 
-        # run the static analysis
+        # Run the static analysis
         mapdl.run("/solu")
         mapdl.antype("static")
         mapdl.solve()
 
-        # Extracting data
+        # Extract data
         UZ = mapdl.post_processing.nodal_displacement("Z")
         UZ_node_12 = UZ[12]
 
@@ -96,13 +96,12 @@ The PyMAPDL beam model is defined in the ``calculate_beam()`` function as follow
 This function returns the control parameter for the model, which is the displacement at the Z-direction on the node 12 (``UZ_node_12``).
 
 
-Setting MAPDL pool
-==================
+MAPDL pool setup
+================
 
 Genetic algorithms are expensive in regard to the amount of calculations needed to reach an optimal solution. As shown earlier, many simulations must be performed to select, cross over, and mutate
 all the chromosomes across all the populations.
-For this reason, to speed up the process, it is desirable to have as many MAPDL instances as possible, so
-each one can calculate one chromosome fit function.
+For this reason, to speed up the process, it is desirable to have as many MAPDL instances as possible so that each one can calculate one chromosome fit function.
 
 To manage multiple MAPDL instances, the best approach is to use the :class:`~ansys.mapdl.core.pool.MapdlPool` class.
 
@@ -110,15 +109,15 @@ To manage multiple MAPDL instances, the best approach is to use the :class:`~ans
 
     from ansys.mapdl.core import MapdlPool
 
-    # Starting pool
+    # Start pool
     # Number of instances should be equal to number of CPUs
     # as set later in the ``sbatch`` command
     pool = MapdlPool(n_instances=10)
     print(pool)
 
 
-Define deflection target
-========================
+Deflection target
+=================
 
 Because this is a demonstration example, the target displacement is calculated 
 using the beam function itself with a force of 22840 :math:`N/cm^2`.
@@ -225,7 +224,7 @@ Additionally, for printing purposes, several helper functions are defined:
 Fitness function
 ----------------
 
-after all helper functions are defined, the fitness function can be defined:
+After all helper functions are defined, the fitness function can be defined:
 
 .. code-block:: python
 
@@ -268,7 +267,7 @@ This custom mutation function does two things:
 * **To each chromosomes**, it adds a random value between the maximum and minimum of the population.
 * **To two random chromosomes**, it additionally adds a random percentage of the mean across all the
   population between -10% and 10%. The random chromosomes are selected independently.
-  This is to reduce the possibility of the function to converge to a local minimal.
+  This is to reduce the possibility of the function converging to a local minimal.
 
 .. code-block:: python
 
@@ -290,10 +289,10 @@ This custom mutation function does two things:
         return offspring
 
 
-Assemble model
+Model assembly
 --------------
 
-Finally, the GA class is used to assemble all the parameters and functions
+Use the GA class to assemble all the parameters and functions
 created to run the simulation:
 
 .. code-block:: python
@@ -327,8 +326,8 @@ created to run the simulation:
     ga_instance.igen = 0  # To count the number of generations
 
 
-Run simulation
-==============
+Simulation
+==========
 
 Once the model is set, use the ``run()`` method to start the simulation:
 
@@ -361,10 +360,10 @@ Plot convergence
     print(f"Fitness value of the best solution = {solution_fitness}")
 
 
-Store the model result
-======================
+Model storage
+==============
 
-The model can be stored in a file for later reuse:
+You can store the model in a file for later reuse:
 
 .. code-block:: python
 
@@ -387,15 +386,15 @@ Load the model:
     loaded_ga_instance.plot_fitness()
 
 
-Run the simulation on an HPC cluster using SLURM
-================================================
+Simulation on an HPC cluster using SLURM
+========================================
 
 The previous steps create the PyMAPDL script.
-To see the file. you can click this link
+To see the file, you can click this link
 :download:`ml_ga_beam.py <ml_ga_beam.py>`.
 
 To run the preceding script in an HPC environment, you must
-create a Python environment, install the packages, and the run
+create a Python environment, install the packages, and then run
 this script.
 
 1. Log into your HPC cluster.
@@ -412,7 +411,7 @@ this script.
    or accessing it from the compute nodes,
    see :ref:`ref_hpc_pymapdl_job`.
 
-3. Install the requirements for this example given in
+3. Install the requirements for this example from the
    :download:`requirements.txt <requirements.txt>` file.
 
 4. Create the bash script ``job.sh``:

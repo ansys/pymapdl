@@ -38,7 +38,7 @@ To manage multiple MAPDL instances, you should use the
 
 
 def calculate_beam(mapdl, force):
-    # Initializing
+    # Initialize
     mapdl.clear()
     mapdl.prep7()
 
@@ -90,7 +90,7 @@ def calculate_beam(mapdl, force):
     return UZ_node_12
 
 
-# Set an MAPDL pool
+# MAPDL pool setup
 # =================
 
 from ansys.mapdl.core import MapdlPool
@@ -109,7 +109,7 @@ force = 22840  # N/cm2
 target_displacement = calculate_beam(pool[0], [force])
 print(f"Setting target to {target_displacement} for force {force}")
 
-# Set a genetic algorithm
+# Genetic algorithm setup
 # =======================
 
 # Set GA model
@@ -235,8 +235,8 @@ ga_instance = pygad.GA(
 ga_instance.igen = 0  # To count the number of generations
 
 
-# Run simulation
-# ==============
+# Simulation
+# ==========
 
 import time
 
@@ -248,7 +248,7 @@ t1 = time.perf_counter()
 print(f"Time spent (minutes): {(t1-t0)/60}")
 
 
-# Plot convergence
+# Convergence plot
 # ================
 
 ga_instance.plot_fitness(label=["Applied force"], save_dir=os.getcwd())
@@ -261,18 +261,18 @@ print(f"Parameters of the best solution : {solution[0]}")
 print(f"Fitness value of the best solution = {solution_fitness}")
 
 
-# Store the model result
-# ======================
+# Model storage
+# =============
 
 from datetime import datetime
 
-# Save the GA instance.
+# Save the GA instance
 # In the filename to save the instance to, do not specify the extension.
 formatted_date = datetime.now().strftime("%d-%m-%y")
 filename = f"ml_ga_beam_{formatted_date}"
 ga_instance.save(filename=filename)
 
-# Load the saved GA instance.
+# Load the saved GA instance
 loaded_ga_instance = pygad.load(filename=filename)
 
 # Plot fitness function again

@@ -60,8 +60,8 @@ Regular job submission workflow
 
 .. _ref_hpc_login:
 
-Log in to the cluster
----------------------
+Log into the cluster
+--------------------
 
 You need access credentials and permissions to log in and submit jobs on the HPC cluster.
 Depending on the login node configuration, you can log in using Virtual Network
