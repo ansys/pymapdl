@@ -91,7 +91,7 @@ You use the `PyGAD <pygad_docs_>`_ library to configure the genetic algorithm.
     by customizing the fitness function. It works with both single-objective and
     multi-objective optimization problems.
 
-    From PyGAD - Python Genetic Algorithm! - https://pygad.readthedocs.io/en/latest/
+    From PyGAD - Python Genetic Algorithm - https://pygad.readthedocs.io/en/latest/
 
 
 Configuration
