@@ -4,12 +4,7 @@ from datetime import datetime
 import os
 import warnings
 
-from ansys_sphinx_theme import (
-    ansys_favicon,
-    get_version_match,
-    pyansys_logo_black,
-    pyansys_logo_white,
-)
+from ansys_sphinx_theme import ansys_favicon, get_version_match
 import numpy as np
 import pyvista
 from sphinx.application import Sphinx
@@ -64,10 +59,11 @@ BRANCH = "main"
 
 
 DEFAULT_EXAMPLE_EXTENSION = "py"
-GALLERY_EXAMPLES_PATH = "examples/gallery_examples"
+GALLERY_EXAMPLES_PATH = os.path.join("examples", "gallery_examples")
+SEARCH_HINTS = ["def", "class"]
 EXAMPLES_ROOT = "examples"
 EXAMPLES_PATH_FOR_DOCS = f"../../{EXAMPLES_ROOT}/"
-DOC_PATH = "doc/source"
+DOC_PATH = os.path.join("doc", "source")
 SEARCH_HINTS = ["def", "class"]
 
 # -- General configuration ---------------------------------------------------
@@ -258,7 +254,7 @@ sphinx_gallery_conf = {
     "ignore_pattern": "flycheck*",
     "thumbnail_size": (350, 350),
     "remove_config_comments": True,
-    "default_thumb_file": pyansys_logo_white,
+    "default_thumb_file": os.path.join(DOC_PATH, "_static", "logo_light.png"),
     "show_signature": False,
 }
 # ---
@@ -267,7 +263,7 @@ sphinx_gallery_conf = {
 # -- Options for HTML output -------------------------------------------------
 html_short_title = html_title = "PyMAPDL"
 html_theme = "ansys_sphinx_theme"
-html_logo = pyansys_logo_black
+html_logo = os.path.join(DOC_PATH, "_static", "logo_dark.png")
 html_theme_options = {
     "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
     "github_url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}",
@@ -312,6 +308,11 @@ html_context = {
     "source_path": "src",
 }
 html_show_sourcelink = False
+
+html_sidebars = {
+    "mapdl_commands/index": ["localtoc.html"],
+    "mapdl_commands/*": ["localtoc.html", "relations.html"],
+}
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
