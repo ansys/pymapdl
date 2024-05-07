@@ -131,6 +131,8 @@
 .. _slurm_sbatch: https://slurm.schedmd.com/sbatch.html
 .. _modules_docs: https://modules.readthedocs.io/en/latest/
 .. _lmod_docs: https://lmod.readthedocs.io/en/latest/
+.. _pygad_docs: https://pygad.readthedocs.io/en/latest/
+.. _ga_article: https://blog.derlin.ch/genetic-algorithms-with-pygad
 
 
 .. #Github links:
