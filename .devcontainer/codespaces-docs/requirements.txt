@@ -15,7 +15,7 @@ pyiges[full]==0.3.1
 pypandoc==1.13
 pytest-sphinx==0.6.3
 pythreejs==2.4.2
-pyvista[trame]==0.43.6
+pyvista[trame]==0.43.7
 sphinx-autobuild==2024.4.16
 sphinx-autodoc-typehints==1.25.2
 sphinx-copybutton==0.5.2
