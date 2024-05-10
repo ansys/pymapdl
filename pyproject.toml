@@ -62,7 +62,7 @@ jupyter = [
 ]
 
 tests = [
-    "ansys-dpf-core==0.10.1",
+    "ansys-dpf-core==0.12.1",
     "autopep8==2.1.0",
     "matplotlib==3.8.4",
     "scipy==1.13.0",
@@ -79,7 +79,7 @@ tests = [
 ]
 doc = [
     "sphinx==7.3.7",
-    "ansys-dpf-core==0.10.1",
+    "ansys-dpf-core==0.12.1",
     "ansys-mapdl-reader==0.53.0",
     "ansys-sphinx-theme==0.15.2",
     "grpcio==1.63.0",
