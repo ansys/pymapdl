@@ -254,9 +254,13 @@ class MapdlGrpc(MapdlBase):
         Print the command ``/COM`` arguments to the standard output.
         The default is ``False``.
 
+    disable_run_at_connect: bool, optional
+        Whether to disable the housekeeping commands when connecting.
+        The default is ``False``.
+
     channel : grpc.Channel, optional
-        gRPC channel to use for the connection. Can be used as an
-        alternative to the ``ip`` and ``port`` parameters.
+        gRPC channel to use for the connection. This parameter can be
+        used as an alternative to the ``ip`` and ``port`` parameters.
 
     remote_instance : ansys.platform.instancemanagement.Instance
         The corresponding remote instance when MAPDL is launched through
@@ -316,6 +320,7 @@ class MapdlGrpc(MapdlBase):
         remove_temp_files: Optional[bool] = None,
         remove_temp_dir_on_exit: bool = False,
         print_com: bool = False,
+        disable_run_at_connect: bool = False,
         channel: Optional[grpc.Channel] = None,
         remote_instance: Optional["PIM_Instance"] = None,
         **start_parm,
@@ -437,7 +442,8 @@ class MapdlGrpc(MapdlBase):
         self._mesh_rep = MeshGrpc(self)
 
         # Run at connect
-        self._run_at_connect()
+        if not disable_run_at_connect:
+            self._run_at_connect()
 
         # HOUSEKEEPING:
         # Set to not abort after encountering errors.  Otherwise, many
@@ -1411,18 +1417,19 @@ class MapdlGrpc(MapdlBase):
         return os.path.join(path, jobname + "0." + preference)
 
     @protect_grpc
-    def _ctrl(self, cmd):
-        """Issue control command to the mapdl server
+    def _ctrl(self, cmd: str, opt1: str = ""):
+        """Issue control command to the MAPDL server.
 
         Available commands:
 
-        - 'EXIT'
+        - ``EXIT``
             Calls exit(0) on the server.
 
-        - 'set_verb'
+        - ``set_verb``
             Enables verbose mode on the server.
+            In this case, the verbosity level is set using ``opt1`` argument.
 
-        - 'VERSION'
+        - ``VERSION``
             Returns version string in of the server in the form
             "MAJOR.MINOR.PATCH".  E.g. "0.3.0".  Known versions
             include:
@@ -1433,16 +1440,16 @@ class MapdlGrpc(MapdlBase):
 
         Unavailable/Flaky:
 
-        - 'time_stats'
+        - ``time_stats``
             Prints a table for time stats on the server.
             This command appears to be disabled/broken.
 
-        - 'mem-stats'
+        - ``mem-stats``
             To be added
 
         """
-        self._log.debug('Issuing CtrlRequest "%s"', cmd)
-        request = anskernel.CtrlRequest(ctrl=cmd)
+        self._log.debug(f'Issuing CtrlRequest "{cmd}" with option "{opt1}".')
+        request = anskernel.CtrlRequest(ctrl=str(cmd), opt1=str(opt1))
 
         # handle socket closing upon exit
         if cmd.lower() == "exit":

@@ -1152,7 +1152,7 @@ These are described in the following table:
 |                                       |                                                                     |
 |                                       | .. code:: console                                                   |
 |                                       |                                                                     |
-|                                       |    export PYMAPDL_MAPDL_EXEC=/ansys_inc/v222/ansys/bin/mapdl        |
+|                                       |    export PYMAPDL_MAPDL_EXEC=/ansys_inc/v241/ansys/bin/mapdl        |
 |                                       |                                                                     |
 +---------------------------------------+---------------------------------------------------------------------+
 | :envvar:`PYMAPDL_MAPDL_VERSION`       | Default MAPDL version to launch in case there                       |

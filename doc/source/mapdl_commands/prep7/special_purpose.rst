@@ -13,6 +13,7 @@ These PREP7 commands are used for special-purpose operations.
 
    Mapdl.aerocoeff
    Mapdl.cint
+   Mapdl.cycexpand
    Mapdl.cycfreq
    Mapdl.cyclic
    Mapdl.cycopt
