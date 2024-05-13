@@ -39,6 +39,7 @@ if _HAS_CLICK:
         pass
 
     from ansys.mapdl.core.cli.convert import convert
+    from ansys.mapdl.core.cli.hpc import submit
     from ansys.mapdl.core.cli.list_instances import list_instances
     from ansys.mapdl.core.cli.start import start
     from ansys.mapdl.core.cli.stop import stop
@@ -47,6 +48,12 @@ if _HAS_CLICK:
     main.add_command(start)
     main.add_command(stop)
     main.add_command(list_instances, name="list")
+
+    # HPC commands
+    # pymapdl hpc submit
+    # pymapdl hpc list
+    # pymapdl hpc stop
+    main.add_command(submit)
 
     def old_pymapdl_convert_script_entry_point():
         print(
