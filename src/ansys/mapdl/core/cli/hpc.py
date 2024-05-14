@@ -30,6 +30,8 @@ import click
 
 from ansys.mapdl.core.cli import main
 
+logger = logging.getLogger()
+
 
 @main.command(
     short_help="Submit jobs to an HPC cluster using PyHPS package.",
@@ -191,13 +193,13 @@ def submit(
     )
 
     if debug:
-        logger = logging.getLogger()
         logging.basicConfig(
             format="[%(asctime)s | %(levelname)s] %(message)s", level=logging.DEBUG
         )
 
     if config_file is None:
         config_file = os.path.join(os.getcwd(), "hps_config.json")
+        logger.debug(f"Using default hps configuration file: {config_file}")
 
     url = get_value_from_json_or_default(url, config_file, "url", None)
     user = get_value_from_json_or_default(user, config_file, "user", None)
@@ -217,7 +219,7 @@ def submit(
         max_execution_time, config_file, "max_execution_time", 0
     )
 
-    proj, project_api = create_pymapdl_pyhps_job(
+    proj, _ = create_pymapdl_pyhps_job(
         main_file=main_file,
         name=name,
         url=url,
@@ -249,6 +251,10 @@ def submit(
             "exclusive": exclusive,
             "max_execution_time": max_execution_time,
         }
+
+        logger.debug(
+            f"Saving the following configuration to the config file ({config_file}):\n{config}"
+        )
         with open(config_file, "w") as fid:
             json.dump(config, fid)
 

@@ -24,6 +24,7 @@
 import json
 import logging
 import os
+import time
 from typing import Any, Optional, Union
 from warnings import warn
 
@@ -218,7 +219,7 @@ def create_job_definition(
 
 def create_jobs(project_api, job_def):
     jobs = [
-        Job(name=f"Job", values={}, eval_status="pending", job_definition_id=job_def.id)
+        Job(name="Job", values={}, eval_status="pending", job_definition_id=job_def.id)
     ]
     logger.debug(f"jobs: {jobs}")
     return project_api.create_jobs(jobs)
@@ -240,7 +241,7 @@ def wait_for_completion(project_api, evaluated=True, failed=False, running=False
     if running:
         eval_status.append("running")
 
-    log.debug(f"Waiting on project {proj.id} with criteria: {eval_status}")
+    logger.debug(f"Waiting on project {proj.id} with criteria: {eval_status}")
     while not project_api.get_jobs(eval_status=eval_status):
         time.sleep(2)
 
@@ -249,11 +250,11 @@ def create_tmp_file(file_name, content):
     import tempfile
     import uuid
 
-    dir = tempfile.gettempdir()
+    dir_ = tempfile.gettempdir()
     sub_dir = str(uuid.uuid4())
 
-    tmp_file = os.path.join(dir, sub_dir, file_name)
-    os.makedirs(os.path.join(dir, sub_dir))
+    tmp_file = os.path.join(dir_, sub_dir, file_name)
+    os.makedirs(os.path.join(dir_, sub_dir))
 
     with open(tmp_file, "w") as fid:
         fid.write(content)
@@ -366,7 +367,7 @@ python {os.path.basename(main_file)}
         project_api, task_def, input_params, output_params, param_mappings
     )
     jobs = create_jobs(project_api, job_def)
-
+    logger.debug(f"Jobs: {jobs}")
     logger.debug("Project submitted.")
 
     return proj, project_api
