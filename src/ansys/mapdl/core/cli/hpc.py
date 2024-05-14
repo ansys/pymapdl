@@ -68,7 +68,7 @@ run the python file. By default it uses python3 (default in cluster).""",
     "--output_files",
     default=None,
     type=str,
-    help="""Set the output files to be monitored. This is optional.""",
+    help="""Set the output files to be monitored.""",
 )
 @click.option(
     "--shell_file",
@@ -85,7 +85,7 @@ it is not used.""",
     help="""If provided, the created virtual environment is installed with the
 libraries specified in this file. If not, the activated virtual environment is
 cloned through a temporary 'pip list' file. If you are using editable package,
-it is recommended you attach your own requirement file. """,
+it is recommended you attach your own requirement file using ``pip freeze`` """,
 )
 @click.option(
     "--extra_files",
@@ -136,7 +136,9 @@ it is recommended you attach your own requirement file. """,
     "--wait",
     default=None,
     type=str,
-    help="""If True, the terminal waits for job completion before return the control to the user. """,
+    is_flag=False,
+    flag_value=True,
+    help="""Set the terminal to wait for job completion before return the control to the user. """,
 )
 @click.option(
     "--save_config_file",
@@ -144,9 +146,9 @@ it is recommended you attach your own requirement file. """,
     type=bool,
     is_flag=False,
     flag_value=True,
-    help="""If true, it also write the configuration to the config file, after successfully
-submit the job.
-It overwrites the configuration.""",
+    help="""Writes the configuration to the config file, after successfully
+submit the job. It overwrites the configuration file.
+The configuration file path is given using ``config_file`` argument.""",
 )
 @click.option(
     "--debug",
@@ -154,7 +156,7 @@ It overwrites the configuration.""",
     type=bool,
     is_flag=False,
     flag_value=True,
-    help="""If true, it prints the debug logging to the console output.""",
+    help="""Set PyMAPDL to prints the debug logging to the console output.""",
 )
 def submit(
     main_file: str,
