@@ -21,8 +21,10 @@
 # SOFTWARE.
 
 """PyHPS interface to HPC clusters"""
+import json
+import logging
 import os
-from typing import Optional, Union
+from typing import Any, Optional, Union
 from warnings import warn
 
 from ansys.hps.client import Client
@@ -39,22 +41,23 @@ from ansys.hps.client.jms import (
     TaskDefinition,
 )
 
+logger = logging.getLogger()
+
 
 def get_value_from_json_or_default(
     arg: str, json_file: str, key: str, default_value: Optional[Union[str, Any]] = None
 ):
     if arg is not None:
-        print(f"{arg}")
+        logger.debug(f"Using '{arg}' for {key}")
         return arg
 
     if os.path.exists(json_file):
-        with open(config_file, "r") as fid:
-            content = fid.read()
+        if os.path.getsize(json_file) > 0:
+            with open(json_file, "r") as fid:
+                config = json.load(fid)
 
-        if content:
-            config = json.load(content)
             if key in config:
-                print(config[key])
+                logger.debug(f"Using '{config[key]}' for {key}")
                 return config[key]
 
     if default_value is None:
@@ -62,7 +65,7 @@ def get_value_from_json_or_default(
             f"The argument {arg} is not given through the CLI or config file"
         )
 
-    print(default_value)
+    logger.debug(f"Using '{default_value}' for {key}")
     return default_value
 
 
@@ -78,13 +81,18 @@ def create_project(
 
 def add_files(project_api: ProjectApi, input_files: list, output_files: list):
 
+    # Checks:
+    if not all([os.path.exists(each) for each in input_files]):
+        raise ValueError("One or more input files does not exist.")
+
     input_files_ = [os.path.basename(each) for each in input_files]
 
     input_files = [
         File(
             name=os.path.basename(each_file),
-            evaluation_path=each_file,
+            evaluation_path=os.path.basename(each_file),
             type="text/plain",
+            src=each_file,
         )
         for each_file in input_files
     ]
@@ -92,7 +100,7 @@ def add_files(project_api: ProjectApi, input_files: list, output_files: list):
     output_files = [
         File(
             name=os.path.basename(each_file),
-            evaluation_path=each_file,
+            evaluation_path=os.path.basename(each_file),
             type="text/plain",
             collect=True,
             monitor=True,
@@ -101,6 +109,10 @@ def add_files(project_api: ProjectApi, input_files: list, output_files: list):
     ]
 
     files = input_files + output_files
+
+    for each in files:
+        logger.debug(each)
+
     files = project_api.create_files(files)
 
     f_inp = {}
@@ -111,6 +123,8 @@ def add_files(project_api: ProjectApi, input_files: list, output_files: list):
         else:
             f_out[f.name] = f.id
 
+    logger.debug(f"Input files ids: {f_inp}")
+    logger.debug(f"Output files ids: {f_out}")
     return f_inp, f_out
 
 
@@ -119,6 +133,7 @@ def create_input_parameters(project_api, input_params=None):
         raise NotImplementedError("'Input_parameters' is not implemented")
     else:
         input_params = []
+        logger.debug("Setting empty input parameters")
     return project_api.create_parameter_definitions(input_params)
 
 
@@ -127,6 +142,7 @@ def create_output_parameters(project_api, output_params=None):
         raise NotImplementedError("'Output_parameters' is not implemented")
     else:
         output_params = []
+        logger.debug("Setting empty output parameters")
     return project_api.create_parameter_definitions(output_params)
 
 
@@ -135,6 +151,7 @@ def create_param_mappings(project_api, param_mappings=None):
         raise NotImplementedError("'param_mappings' is not implemented")
     else:
         param_mappings = []
+        logger.debug("Setting empty parameter mappings")
     return project_api.create_parameter_mappings(param_mappings)
 
 
@@ -152,6 +169,7 @@ def create_task(
 
     software = Software(name="Bash", version="0.1")  # Overwriting
     execution_command = f"%executable% %file:{os.path.basename(main_file)}%"
+    logger.debug(f"Using executable: '{execution_command}'")
 
     # Process step
     task_def = TaskDefinition(
@@ -159,19 +177,19 @@ def create_task(
         software_requirements=[software],
         execution_command=execution_command,
         resource_requirements=ResourceRequirements(
-            num_cores=num_cores,
-            memory=memory * 1024 * 1024,
-            disk_space=disk_space * 1024 * 1024,
+            num_cores=int(num_cores),
+            memory=int(memory) * 1024 * 1024,
+            disk_space=int(disk_space) * 1024 * 1024,
             # distributed=True,
             hpc_resources=HpcResources(exclusive=exclusive),
         ),
         max_execution_time=max_execution_time,
         execution_level=0,
         num_trials=1,
-        input_file_ids=file_input_ids,
-        output_file_ids=file_output_ids,
+        input_file_ids=list(file_input_ids.values()),
+        output_file_ids=list(file_output_ids.values()),
     )
-    print(task_def)
+    logger.debug(f"Task definition: {task_def}")
 
     return project_api.create_task_definitions([task_def])[0]
 
@@ -190,6 +208,7 @@ def create_job_definition(
     job_def.parameter_definition_ids = [pd.id for pd in params]
     job_def.parameter_mapping_ids = [pm.id for pm in param_mappings]
 
+    logger.debug(f"Job definition: {job_def}")
     job_def = project_api.create_job_definitions([job_def])[0]
 
     # Refresh the parameters
@@ -201,6 +220,7 @@ def create_jobs(project_api, job_def):
     jobs = [
         Job(name=f"Job", values={}, eval_status="pending", job_definition_id=job_def.id)
     ]
+    logger.debug(f"jobs: {jobs}")
     return project_api.create_jobs(jobs)
 
 
@@ -263,6 +283,11 @@ def create_pymapdl_pyhps_job(
     if python not in [2.7, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 3.12]:
         warn("Version of Python might not be supported by the cluster")
 
+    if not os.path.exists(main_file):
+        raise ValueError(f"The python file {main_file} must exists.")
+
+    logger.debug(f"Main python file in: {main_file}")
+
     if not requirements_file:
         import pkg_resources
 
@@ -270,6 +295,7 @@ def create_pymapdl_pyhps_job(
             [str(p.as_requirement()) for p in pkg_resources.working_set]
         )
         requirements_file = create_tmp_file("requirements.txt", content)
+        logger.debug(f"Requirements file in: {requirements_file}")
 
     if not shell_file:
         content = f"""
@@ -287,6 +313,7 @@ python {os.path.basename(main_file)}
     """
 
         shell_file = create_tmp_file("main.sh", content)
+        logger.debug(f"Shell file in: {shell_file}")
 
     if isinstance(extra_files, str):
         extra_files = extra_files.split(",")
@@ -309,20 +336,22 @@ python {os.path.basename(main_file)}
     # Login
     client = Client(url=url, username=user, password=password)
 
-    # Setting
+    # Setting project
     proj = create_project(client, name)
-
     project_api = get_project_api(client, proj)
 
+    # Setting files
     file_input_ids, file_output_ids = add_files(project_api, input_files, output_files)
 
+    # Setting parameters
     input_params = create_input_parameters(project_api)
     output_params = create_output_parameters(project_api)
     param_mappings = create_param_mappings(project_api)
 
+    # Setting tasks
     task_def = create_task(
         project_api,
-        main_file,
+        shell_file,
         file_input_ids,
         file_output_ids,
         num_cores,
@@ -332,8 +361,12 @@ python {os.path.basename(main_file)}
         max_execution_time,
     )
 
+    # Setting jobs
     job_def = create_job_definition(
         project_api, task_def, input_params, output_params, param_mappings
     )
+    jobs = create_jobs(project_api, job_def)
 
-    return proj
+    logger.debug("Project submitted.")
+
+    return proj, project_api

@@ -30,11 +30,6 @@ import click
 
 from ansys.mapdl.core.cli import main
 
-logger = logging.getLogger()
-logging.basicConfig(
-    format="[%(asctime)s | %(levelname)s] %(message)s", level=logging.DEBUG
-)
-
 
 @main.command(
     short_help="Submit jobs to an HPC cluster using PyHPS package.",
@@ -73,7 +68,7 @@ run the python file. By default it uses python3 (default in cluster).""",
     "--output_files",
     default=None,
     type=str,
-    help="""Set the output files to be monitored. This is optional. """,
+    help="""Set the output files to be monitored. This is optional.""",
 )
 @click.option(
     "--shell_file",
@@ -109,37 +104,39 @@ it is recommended you attach your own requirement file. """,
     "--num_cores",
     default=None,
     type=str,
-    help=""" """,
+    help="""Set the amount of CPU cores reserved for the job. By default it is 1 CPU.""",
 )
 @click.option(
     "--memory",
     default=None,
     type=str,
-    help=""" """,
+    help="""Set the amount of memory RAM in MB reserved for the job. By default it is 100 MB.""",
 )
 @click.option(
     "--disk_space",
     default=None,
     type=str,
-    help=""" """,
+    help="""Set the amount of hard drive space in MB reserved for the job. By default it is 100 MB.""",
 )
 @click.option(
     "--exclusive",
     default=None,
     type=str,
-    help=""" """,
+    is_flag=False,
+    flag_value=True,
+    help="""Set the job to run in a machine exclusively, without sharing it with other jobs. By default it is False""",
 )
 @click.option(
     "--max_execution_time",
     default=None,
     type=str,
-    help=""" """,
+    help="""Set the maximum execution time for the job. By default it is zero (unlimited).""",
 )
 @click.option(
     "--wait",
     default=None,
     type=str,
-    help=""" """,
+    help="""If True, the terminal waits for job completion before return the control to the user. """,
 )
 @click.option(
     "--save_config_file",
@@ -150,6 +147,14 @@ it is recommended you attach your own requirement file. """,
     help="""If true, it also write the configuration to the config file, after successfully
 submit the job.
 It overwrites the configuration.""",
+)
+@click.option(
+    "--debug",
+    default=False,
+    type=bool,
+    is_flag=False,
+    flag_value=True,
+    help="""If true, it prints the debug logging to the console output.""",
 )
 def submit(
     main_file: str,
@@ -170,6 +175,7 @@ def submit(
     max_execution_time: int = None,
     wait: bool = False,
     save_config_file: bool = False,
+    debug: bool = False,
 ):
     """Example code:
     pymapdl submit my_file.sh my_file_01.py my_file_02  --name="my job" --url="https://10.231.106.91:3000/hps" --user=repuser --password=repuser --python=3.9
@@ -181,6 +187,12 @@ def submit(
         get_value_from_json_or_default,
         wait_for_completion,
     )
+
+    if debug:
+        logger = logging.getLogger()
+        logging.basicConfig(
+            format="[%(asctime)s | %(levelname)s] %(message)s", level=logging.DEBUG
+        )
 
     if config_file is None:
         config_file = os.path.join(os.getcwd(), "hps_config.json")
@@ -200,10 +212,10 @@ def submit(
         exclusive, config_file, "exclusive", False
     )
     max_execution_time = get_value_from_json_or_default(
-        max_execution_time, config_file, "max_execution_time", 1000
+        max_execution_time, config_file, "max_execution_time", 0
     )
 
-    proj = create_pymapdl_pyhps_job(
+    proj, project_api = create_pymapdl_pyhps_job(
         main_file=main_file,
         name=name,
         url=url,
@@ -239,7 +251,7 @@ def submit(
             json.dump(config, fid)
 
     if wait:
-        print(f"Waiting for project {name} to be completed...")
+        print(f"Waiting for project {name} (id: {proj.id}) to be completed...")
         wait_for_completion(proj, evaluated=True, failed=True)
 
 
