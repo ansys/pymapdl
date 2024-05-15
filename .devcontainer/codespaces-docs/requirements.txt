@@ -1,5 +1,5 @@
 sphinx==7.3.7
-ansys-dpf-core==0.10.1
+ansys-dpf-core==0.12.1
 ansys-mapdl-reader==0.53.0
 ansys-sphinx-theme==0.15.2
 grpcio==1.63.0
