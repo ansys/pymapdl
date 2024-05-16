@@ -63,7 +63,7 @@ def get_value_from_json_or_default(
 
     if default_value is None:
         raise ValueError(
-            f"The argument {arg} is not given through the CLI or config file"
+            f"The argument {arg} is not given through the CLI or config file."
         )
 
     logger.debug(f"Using '{default_value}' for {key}")
@@ -84,7 +84,7 @@ def add_files(project_api: ProjectApi, input_files: list, output_files: list):
 
     # Checks:
     if not all([os.path.exists(each) for each in input_files]):
-        raise ValueError("One or more input files does not exist.")
+        raise ValueError("One or more input files do not exist.")
 
     input_files_ = [os.path.basename(each) for each in input_files]
 
@@ -124,35 +124,35 @@ def add_files(project_api: ProjectApi, input_files: list, output_files: list):
         else:
             f_out[f.name] = f.id
 
-    logger.debug(f"Input files ids: {f_inp}")
-    logger.debug(f"Output files ids: {f_out}")
+    logger.debug(f"Input files IDs: {f_inp}")
+    logger.debug(f"Output files IDs: {f_out}")
     return f_inp, f_out
 
 
 def create_input_parameters(project_api, input_params=None):
     if input_params is not None:
-        raise NotImplementedError("'Input_parameters' is not implemented")
+        raise NotImplementedError("'Input_parameters' is not implemented.")
     else:
         input_params = []
-        logger.debug("Setting empty input parameters")
+        logger.debug("Setting empty input parameters.")
     return project_api.create_parameter_definitions(input_params)
 
 
 def create_output_parameters(project_api, output_params=None):
     if output_params is not None:
-        raise NotImplementedError("'Output_parameters' is not implemented")
+        raise NotImplementedError("'Output_parameters' is not implemented.")
     else:
         output_params = []
-        logger.debug("Setting empty output parameters")
+        logger.debug("Setting empty output parameters.")
     return project_api.create_parameter_definitions(output_params)
 
 
 def create_param_mappings(project_api, param_mappings=None):
     if param_mappings is not None:
-        raise NotImplementedError("'param_mappings' is not implemented")
+        raise NotImplementedError("'param_mappings' is not implemented.")
     else:
         param_mappings = []
-        logger.debug("Setting empty parameter mappings")
+        logger.debug("Setting empty parameter mappings.")
     return project_api.create_parameter_mappings(param_mappings)
 
 
@@ -282,12 +282,12 @@ def create_pymapdl_pyhps_job(
 ):
 
     if python not in [2.7, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 3.12]:
-        warn("Version of Python might not be supported by the cluster")
+        warn("Version of Python might not be supported by the cluster.")
 
     if not os.path.exists(main_file):
-        raise ValueError(f"The python file {main_file} must exists.")
+        raise ValueError(f"The Python file {main_file} must exist.")
 
-    logger.debug(f"Main python file in: {main_file}")
+    logger.debug(f"Main Python file is in: {main_file}.")
 
     if not requirements_file:
         import pkg_resources
@@ -302,14 +302,14 @@ def create_pymapdl_pyhps_job(
         content = f"""
 echo "Starting"
 
-# Starting venv
+# Start venv
 python{python} -m venv .venv
 source .venv/bin/activate
 
-# Installing requirements
+# Install requirements
 pip install -r {os.path.basename(requirements_file)}
 
-# Running script
+# Run script
 python {os.path.basename(main_file)}
     """
 
@@ -334,7 +334,7 @@ python {os.path.basename(main_file)}
     elif isinstance(output_files, str):
         output_files = output_files.split(",")
 
-    # Login
+    # Log in
     client = Client(url=url, username=user, password=password)
 
     # Setting project
@@ -344,12 +344,12 @@ python {os.path.basename(main_file)}
     # Setting files
     file_input_ids, file_output_ids = add_files(project_api, input_files, output_files)
 
-    # Setting parameters
+    # Set parameters
     input_params = create_input_parameters(project_api)
     output_params = create_output_parameters(project_api)
     param_mappings = create_param_mappings(project_api)
 
-    # Setting tasks
+    # Set tasks
     task_def = create_task(
         project_api,
         shell_file,
@@ -362,7 +362,7 @@ python {os.path.basename(main_file)}
         max_execution_time,
     )
 
-    # Setting jobs
+    # Set jobs
     job_def = create_job_definition(
         project_api, task_def, input_params, output_params, param_mappings
     )

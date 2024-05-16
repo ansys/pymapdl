@@ -34,15 +34,15 @@ logger = logging.getLogger()
 
 
 @main.command(
-    short_help="Submit jobs to an HPC cluster using PyHPS package.",
-    help="""Submit jobs to an HPC cluster using PyHPS package.""",
+    short_help="Submit jobs to an HPC cluster using PyHPS.",
+    help="""Submit jobs to an HPC cluster using PyHPS.""",
 )
 @click.argument("main_file")
 @click.option(
     "--name",
     default=None,
     type=str,
-    help="""Name of the PyHPS project to be created.""",
+    help="""Name of the PyHPS project to create.""",
 )
 @click.option(
     "--url",
@@ -57,68 +57,68 @@ logger = logging.getLogger()
     "--password",
     default=None,
     type=str,
-    help="Password used to login into the HPC cluster.",
+    help="Password for logging into the HPC cluster.",
 )
 @click.option(
     "--python",
     default=None,
     type=str,
-    help="""Set python version to be used to create the virtual environment and
-run the python file. By default it uses python3 (default in cluster).""",
+    help="""Python version to use to create the virtual environment and
+run the Python file. Python3 is used by default in the cluster.""",
 )
 @click.option(
     "--output_files",
     default=None,
     type=str,
-    help="""Set the output files to be monitored.""",
+    help="""Output files to monitor.""",
 )
 @click.option(
     "--shell_file",
     default=None,
     type=str,
-    help="""If desired, you can provide a shell script to execute instead of
-the python file. You can call your python file from it if you wish. By default,
-it is not used.""",
+    help="""Optional shell script to execute instead of
+the Python file. You can call your Python file from it if you want. By default,
+this option is not used.""",
 )
 @click.option(
     "--requirements_file",
     default=None,
     type=str,
-    help="""If provided, the created virtual environment is installed with the
-libraries specified in this file. If not, the activated virtual environment is
-cloned through a temporary 'pip list' file. If you are using editable package,
-it is recommended you attach your own requirement file using ``pip freeze`` """,
+    help="""Optional created virtual environment to install with the
+libraries specified in this requirements file. If not, the activated virtual environment is
+cloned through a temporary ``pip list`` file. If you are using an editable package,
+you should attach your own requirement file using ``pip freeze`` """,
 )
 @click.option(
     "--extra_files",
     default=None,
     type=str,
-    help="""To upload extra files which can be called from your main python file
+    help="""Extra files to upload that can be called from your main Python file
 (or from the shell file).""",
 )
 @click.option(
     "--config_file",
     default=None,
     type=str,
-    help="""To load job configuration from a file.""",
+    help="""File to load the job configuration from.""",
 )
 @click.option(
     "--num_cores",
     default=None,
     type=str,
-    help="""Set the amount of CPU cores reserved for the job. By default it is 1 CPU.""",
+    help="""Number of CPU cores reserved for the job. The default is ``1``""",
 )
 @click.option(
     "--memory",
     default=None,
     type=str,
-    help="""Set the amount of memory RAM in MB reserved for the job. By default it is 100 MB.""",
+    help="""Amount of memory (RAM) in MB reserved for the job. The default is ``100 MB``.""",
 )
 @click.option(
     "--disk_space",
     default=None,
     type=str,
-    help="""Set the amount of hard drive space in MB reserved for the job. By default it is 100 MB.""",
+    help="""Amount of hard drive space in MB reserved for the job. The default is ``100 MB``.""",
 )
 @click.option(
     "--exclusive",
@@ -126,13 +126,13 @@ it is recommended you attach your own requirement file using ``pip freeze`` """,
     type=str,
     is_flag=False,
     flag_value=True,
-    help="""Set the job to run in a machine exclusively, without sharing it with other jobs. By default it is False""",
+    help=""Whether the job is to run on a machine that is running no other jobs running. The default is ``False``.""",
 )
 @click.option(
     "--max_execution_time",
     default=None,
     type=str,
-    help="""Set the maximum execution time for the job. By default it is zero (unlimited).""",
+    help="""Maximum execution time for the job. The default is zero (unlimited).""",
 )
 @click.option(
     "--wait",
@@ -140,7 +140,7 @@ it is recommended you attach your own requirement file using ``pip freeze`` """,
     type=str,
     is_flag=False,
     flag_value=True,
-    help="""Set the terminal to wait for job completion before return the control to the user. """,
+    help="""Whether the terminal is to wait for job completion before returning control to the user. """,
 )
 @click.option(
     "--save_config_file",
@@ -148,9 +148,9 @@ it is recommended you attach your own requirement file using ``pip freeze`` """,
     type=bool,
     is_flag=False,
     flag_value=True,
-    help="""Writes the configuration to the config file, after successfully
-submit the job. It overwrites the configuration file.
-The configuration file path is given using ``config_file`` argument.""",
+    help="""Whether to write the configuration to the configuration file after successfully
+submitting the job. The default is ``False``. If ``True``, the configuration file is overwritten.
+You use the ``config_file`` argument to give the path for the configuration file.""",
 )
 @click.option(
     "--debug",
@@ -158,7 +158,7 @@ The configuration file path is given using ``config_file`` argument.""",
     type=bool,
     is_flag=False,
     flag_value=True,
-    help="""Set PyMAPDL to prints the debug logging to the console output.""",
+    help="""Whether PyMAPDL is to print debug logging to the console output.""",
 )
 def submit(
     main_file: str,
@@ -199,7 +199,7 @@ def submit(
 
     if config_file is None:
         config_file = os.path.join(os.getcwd(), "hps_config.json")
-        logger.debug(f"Using default hps configuration file: {config_file}")
+        logger.debug(f"Using default HPS configuration file: {config_file}")
 
     url = get_value_from_json_or_default(url, config_file, "url", None)
     user = get_value_from_json_or_default(user, config_file, "user", None)
@@ -259,7 +259,7 @@ def submit(
             json.dump(config, fid)
 
     if wait:
-        print(f"Waiting for project {name} (id: {proj.id}) to be completed...")
+        print(f"Waiting for project {name} (id: {proj.id}) evaluation to complete...")
         wait_for_completion(proj, evaluated=True, failed=True)
 
 

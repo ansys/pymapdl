@@ -57,7 +57,7 @@ if _HAS_CLICK:
 
     def old_pymapdl_convert_script_entry_point():
         print(
-            """This CLI function has been deprecated. Please use instead:
+            """This CLI function has been deprecated. Use the following instead:
 
 pymapdl convert input_file.inp -o output_file.out ...
 
