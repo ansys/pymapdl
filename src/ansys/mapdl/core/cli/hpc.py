@@ -131,7 +131,7 @@ you should attach your own requirement file using ``pip freeze`` """,
 @click.option(
     "--max_execution_time",
     default=None,
-    type=str,
+    type=int,
     help="""Maximum execution time for the job. The default is zero (unlimited).""",
 )
 @click.option(
