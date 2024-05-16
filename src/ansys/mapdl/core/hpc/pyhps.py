@@ -246,7 +246,7 @@ def wait_for_completion(project_api, evaluated=True, failed=False, running=False
         time.sleep(2)
 
 
-def create_tmp_file(file_name, content):
+def _create_tmp_file(file_name, content):
     import tempfile
     import uuid
 
@@ -295,7 +295,7 @@ def create_pymapdl_pyhps_job(
         content = "\n".join(
             [str(p.as_requirement()) for p in pkg_resources.working_set]
         )
-        requirements_file = create_tmp_file("requirements.txt", content)
+        requirements_file = _create_tmp_file("requirements.txt", content)
         logger.debug(f"Requirements file in: {requirements_file}")
 
     if not shell_file:
@@ -313,7 +313,7 @@ pip install -r {os.path.basename(requirements_file)}
 python {os.path.basename(main_file)}
     """
 
-        shell_file = create_tmp_file("main.sh", content)
+        shell_file = _create_tmp_file("main.sh", content)
         logger.debug(f"Shell file in: {shell_file}")
 
     if isinstance(extra_files, str):

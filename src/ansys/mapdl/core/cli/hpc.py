@@ -35,7 +35,13 @@ logger = logging.getLogger()
 
 @main.command(
     short_help="Submit jobs to an HPC cluster using PyHPS.",
-    help="""Submit jobs to an HPC cluster using PyHPS.""",
+    help="""Submit jobs to an HPC cluster using PyHPS.
+
+Example
+-------
+
+$ pymapdl submit my_file_01.py --requirements_file=requirements.txt --shell_file=main.sh --name="my job" --url="https://123.456.789.101:3000/hps" --user=user --password=password --python=3.9
+""",
 )
 @click.argument("main_file")
 @click.option(
@@ -126,7 +132,7 @@ you should attach your own requirement file using ``pip freeze`` """,
     type=str,
     is_flag=False,
     flag_value=True,
-    help=""Whether the job is to run on a machine that is running no other jobs running. The default is ``False``.""",
+    help="""Whether the job is to run on a machine that is running no other jobs running. The default is ``False``.""",
 )
 @click.option(
     "--max_execution_time",
@@ -181,9 +187,6 @@ def submit(
     save_config_file: bool = False,
     debug: bool = False,
 ):
-    """Example code:
-    pymapdl submit my_file.sh my_file_01.py my_file_02  --name="my job" --url="https://10.231.106.91:3000/hps" --user=repuser --password=repuser --python=3.9
-    """
     import json
 
     from ansys.mapdl.core.hpc.pyhps import (
