@@ -35,12 +35,13 @@ logger = logging.getLogger()
 
 @main.command(
     short_help="Submit jobs to an HPC cluster using PyHPS.",
-    help="""Submit jobs to an HPC cluster using PyHPS.
+    help="""
+    Submit jobs to an HPC cluster using PyHPS.
+
 
 Example
--------
 
-$ pymapdl submit my_file_01.py --requirements_file=requirements.txt --shell_file=main.sh --name="my job" --url="https://123.456.789.101:3000/hps" --user=user --password=password --python=3.9
+$ pymapdl submit my_file_01.py --requirements_file=requirements.txt --shell_file=main.sh --name="my job" --user=user --password=password --url="https://123.456.789.101:3000/hps"
 """,
 )
 @click.argument("main_file")
@@ -73,10 +74,25 @@ $ pymapdl submit my_file_01.py --requirements_file=requirements.txt --shell_file
 run the Python file. Python3 is used by default in the cluster.""",
 )
 @click.option(
+    "--inputs",
+    default=None,
+    type=str,
+    help="""
+    Input arguments for the simulation. You can specify several arguments by joining them with commas, therefore, strings defined this way cannot contain commas.
+    PyMAPDL will try to convert, whenever possible, these inputs to ints or floats, otherwise, they remind as strings. These arguments can be changed in the HPS website. For example: --inputs="force=123,value='mystring'"
+    """,
+)
+@click.option(
+    "--outputs",
+    default=None,
+    type=str,
+    help="""Output parameters. You can specify several arguments by joining them with commas. For example: --outputs="displacements,nodes".""",
+)
+@click.option(
     "--output_files",
     default=None,
     type=str,
-    help="""Output files to monitor.""",
+    help="""Output files to monitor. They can be specified as comma separated file names (so their names cannot contain commas). For example: --output_files="results.out,data.xls". """,
 )
 @click.option(
     "--shell_file",
@@ -173,6 +189,8 @@ def submit(
     user: str = None,
     password: str = None,
     python: Optional[float] = None,
+    inputs: Optional[str] = None,
+    outputs: Optional[str] = None,
     output_files: Optional[Union[str, list]] = None,
     shell_file: str = None,
     requirements_file: str = None,
@@ -229,6 +247,8 @@ def submit(
         user=user,
         password=password,
         python=python,
+        inputs=inputs,
+        outputs=outputs,
         output_files=output_files,
         shell_file=shell_file,
         requirements_file=requirements_file,

@@ -31,14 +31,17 @@ from warnings import warn
 from ansys.hps.client import Client
 from ansys.hps.client.jms import (
     File,
+    FloatParameterDefinition,
     HpcResources,
     JmsApi,
     Job,
     JobDefinition,
+    ParameterMapping,
     Project,
     ProjectApi,
     ResourceRequirements,
     Software,
+    StringParameterDefinition,
     TaskDefinition,
 )
 
@@ -129,31 +132,85 @@ def add_files(project_api: ProjectApi, input_files: list, output_files: list):
     return f_inp, f_out
 
 
-def create_input_parameters(project_api, input_params=None):
-    if input_params is not None:
-        raise NotImplementedError("'Input_parameters' is not implemented.")
-    else:
-        input_params = []
+def create_parameters(
+    project_api,
+    inputs: Optional[list[str]] = None,
+    input_file_id: str = None,
+    outputs: Optional[list[str]] = None,
+    output_file_id: str = None,
+):
+    if inputs is None:
+        inputs = []
         logger.debug("Setting empty input parameters.")
-    return project_api.create_parameter_definitions(input_params)
 
+    def is_float(num):
+        try:
+            float(num)
+            return True
+        except ValueError:
+            return False
 
-def create_output_parameters(project_api, output_params=None):
-    if output_params is not None:
-        raise NotImplementedError("'Output_parameters' is not implemented.")
-    else:
-        output_params = []
-        logger.debug("Setting empty output parameters.")
-    return project_api.create_parameter_definitions(output_params)
+    input_params = []
+    param_mappings = []
 
+    for each_input_parm in inputs:
+        name, value = each_input_parm.split("=")
+        if is_float(value):
+            parm = FloatParameterDefinition(
+                name=name,
+                display_text=name,
+                default=value,
+            )
+        else:
+            parm = StringParameterDefinition(
+                name=name,
+                display_text=name,
+                default=value,
+            )
 
-def create_param_mappings(project_api, param_mappings=None):
-    if param_mappings is not None:
-        raise NotImplementedError("'param_mappings' is not implemented.")
-    else:
-        param_mappings = []
-        logger.debug("Setting empty parameter mappings.")
-    return project_api.create_parameter_mappings(param_mappings)
+        # Mapping
+        param_map = ParameterMapping(
+            key_string=name,
+            tokenizer="=",
+            parameter_definition_id=parm.id,
+            file_id=input_file_id,
+        )
+
+        logger.debug(f"Output parameter: {name}\n{parm}\nMapping: {param_map}")
+        input_params.append(parm)
+        param_mappings.append(param_map)
+
+    logger.debug(f"Input parameters:\n{input_params}")
+    input_params = project_api.create_parameter_definitions(input_params)
+
+    output_params = []
+    for each_output_parm in outputs:
+        # output
+        name = each_output_parm
+        outparm = StringParameterDefinition(name=name, display_text=name)
+
+        output_params.append(outparm)
+
+    logger.debug(f"Output parameters:\n{output_params}")
+    output_params = project_api.create_parameter_definitions(output_params)
+
+    for each_output_parm, outparm in zip(outputs, output_params):
+        name = each_output_parm
+        # mapping
+        parm_map = ParameterMapping(
+            key_string=name,
+            tokenizer="=",
+            parameter_definition_id=outparm.id,
+            file_id=output_file_id,
+        )
+        logger.debug(f"Output parameter: {name}\n{outparm}\nMapping: {parm_map}")
+
+        param_mappings.append(parm_map)
+
+    logger.debug(f"Mapping parameters:\n{param_mappings}")
+    param_mappings = project_api.create_parameter_mappings(param_mappings)
+
+    return input_params, output_params, param_mappings
 
 
 def create_task(
@@ -269,6 +326,8 @@ def create_pymapdl_pyhps_job(
     user: str = None,
     password: str = None,
     python: float = None,
+    inputs: str = None,
+    outputs: str = None,
     output_files: Optional[Union[str, list]] = None,
     shell_file: str = None,
     requirements_file: str = None,
@@ -288,6 +347,60 @@ def create_pymapdl_pyhps_job(
         raise ValueError(f"The Python file {main_file} must exist.")
 
     logger.debug(f"Main Python file is in: {main_file}.")
+
+    if inputs is None:
+        inputs = []
+    if outputs is None:
+        outputs = []
+
+    input_file = None
+    if inputs:
+        if isinstance(inputs, str):
+            inputs = inputs.split(",")
+
+        if inputs:
+            input_file = "input.inp"
+
+            content = "\n".join(inputs)
+            input_file = _create_tmp_file(input_file, content)
+            logger.debug(f"Input file in: {input_file}")
+
+    output_parms_file = None
+    if outputs:
+        output_parms_file = "output.out"
+        if isinstance(outputs, str):
+            outputs = outputs.split(",")
+
+    executed_pyscript = os.path.basename(main_file)
+
+    if inputs or outputs:
+        wrapper_file = "main_execution.py"
+        executed_pyscript = wrapper_file
+        content = ""
+
+        if inputs:
+            content += f"""
+# Reading inputs
+exec(open("{os.path.basename(input_file)}").read())
+"""
+
+        content += f"""
+# Executing main file
+exec(open("{os.path.basename(main_file)}").read())
+"""
+
+        if outputs:
+            content += f"""
+with open("{output_parms_file}", "w") as fid:
+"""
+            b0 = "{"
+            b1 = "}"
+
+            for each in outputs:
+                content += f"""    fid.write(f"{each}={b0}{each}{b1}")\n"""
+
+        wrapper_file = _create_tmp_file(wrapper_file, content)
+        logger.debug(f"Wrapper file in: {wrapper_file}")
 
     if not requirements_file:
         import pkg_resources
@@ -310,7 +423,7 @@ source .venv/bin/activate
 pip install -r {os.path.basename(requirements_file)}
 
 # Run script
-python {os.path.basename(main_file)}
+python {executed_pyscript}
     """
 
         shell_file = _create_tmp_file("main.sh", content)
@@ -321,6 +434,11 @@ python {os.path.basename(main_file)}
     elif extra_files is None:
         extra_files = []
 
+    if not output_files:
+        output_files = []
+    elif isinstance(output_files, str):
+        output_files = output_files.split(",")
+
     if extra_files and not all([os.path.exists(each) for each in extra_files]):
         raise ValueError("One or more extra files does not exist.")
 
@@ -329,10 +447,14 @@ python {os.path.basename(main_file)}
     input_files.append(shell_file)
     input_files.append(main_file)
 
-    if not output_files:
-        output_files = []
-    elif isinstance(output_files, str):
-        output_files = output_files.split(",")
+    if inputs:
+        input_files.append(input_file)
+
+    if outputs:
+        output_files.append(output_parms_file)
+
+    if inputs or outputs:
+        input_files.append(wrapper_file)
 
     # Log in
     client = Client(url=url, username=user, password=password, verify=False)
@@ -344,10 +466,24 @@ python {os.path.basename(main_file)}
     # Setting files
     file_input_ids, file_output_ids = add_files(project_api, input_files, output_files)
 
+    if inputs:
+        input_file_id = file_input_ids[os.path.basename(input_file)]
+    else:
+        input_file_id = None
+
+    if outputs:
+        output_parms_file_id = file_output_ids[os.path.basename(output_parms_file)]
+    else:
+        output_parms_file_id = None
+
     # Set parameters
-    input_params = create_input_parameters(project_api)
-    output_params = create_output_parameters(project_api)
-    param_mappings = create_param_mappings(project_api)
+    input_params, output_params, param_mappings = create_parameters(
+        project_api,
+        inputs=inputs,
+        input_file_id=input_file_id,
+        outputs=outputs,
+        output_file_id=output_parms_file_id,
+    )
 
     # Set tasks
     task_def = create_task(
