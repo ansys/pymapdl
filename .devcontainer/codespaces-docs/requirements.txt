@@ -1,13 +1,13 @@
 sphinx==7.3.7
 ansys-dpf-core==0.10.1
 ansys-mapdl-reader==0.53.0
-ansys-sphinx-theme==0.15.2
+ansys-sphinx-theme==0.16.0
 grpcio==1.63.0
 imageio-ffmpeg==0.4.9
 imageio==2.34.1
 jupyter_sphinx==0.5.3
 jupyterlab>=3.2.8
-matplotlib==3.8.4
+matplotlib==3.9.0
 numpydoc==1.7.0
 pandas==2.2.2
 plotly==5.22.0
