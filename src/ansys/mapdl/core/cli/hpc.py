@@ -68,7 +68,7 @@ $ pymapdl submit my_file_01.py --requirements_file=requirements.txt --shell_file
 @click.option(
     "--python",
     default=None,
-    type=str,
+    type=float,
     help="""Python version to use to create the virtual environment and
 run the Python file. Python3 is used by default in the cluster.""",
 )
@@ -172,7 +172,7 @@ def submit(
     url: str = None,
     user: str = None,
     password: str = None,
-    python: float = 3.9,
+    python: Optional[float] = None,
     output_files: Optional[Union[str, list]] = None,
     shell_file: str = None,
     requirements_file: str = None,
@@ -260,6 +260,10 @@ def submit(
         )
         with open(config_file, "w") as fid:
             json.dump(config, fid)
+
+    print(
+        f"You can check your project by visiting: {url}/projects#/projects/{proj.id}/jobs"
+    )
 
     if wait:
         print(f"Waiting for project {name} (id: {proj.id}) evaluation to complete...")

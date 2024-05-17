@@ -281,8 +281,8 @@ def create_pymapdl_pyhps_job(
     max_execution_time: int = None,
 ):
 
-    if python not in [2.7, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 3.12]:
-        warn("Version of Python might not be supported by the cluster.")
+    if python not in [2, 2.7, 3, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 3.12]:
+        warn(f"Version of Python {python} might not be supported by the cluster.")
 
     if not os.path.exists(main_file):
         raise ValueError(f"The Python file {main_file} must exist.")
@@ -335,7 +335,7 @@ python {os.path.basename(main_file)}
         output_files = output_files.split(",")
 
     # Log in
-    client = Client(url=url, username=user, password=password)
+    client = Client(url=url, username=user, password=password, verify=False)
 
     # Setting project
     proj = create_project(client, name)
