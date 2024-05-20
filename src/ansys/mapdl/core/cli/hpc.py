@@ -125,6 +125,16 @@ you should attach your own requirement file using ``pip freeze`` """,
     help="""File to load the job configuration from.""",
 )
 @click.option(
+    "--save_config_file",
+    default=False,
+    type=bool,
+    is_flag=False,
+    flag_value=True,
+    help="""
+Whether to write the configuration to the configuration file (specified using ``config_file`` argument) after the job has been successfully submitted.
+The default is ``False``. If ``True``, and the file already exists, the configuration file is overwritten.""",
+)
+@click.option(
     "--num_cores",
     default=None,
     type=str,
@@ -165,16 +175,6 @@ you should attach your own requirement file using ``pip freeze`` """,
     help="""Whether the terminal is to wait for job completion before returning control to the user. """,
 )
 @click.option(
-    "--save_config_file",
-    default=False,
-    type=bool,
-    is_flag=False,
-    flag_value=True,
-    help="""Whether to write the configuration to the configuration file after successfully
-submitting the job. The default is ``False``. If ``True``, the configuration file is overwritten.
-You use the ``config_file`` argument to give the path for the configuration file.""",
-)
-@click.option(
     "--debug",
     default=False,
     type=bool,
@@ -196,13 +196,13 @@ def submit(
     requirements_file: str = None,
     extra_files: Optional[Union[str, list]] = None,
     config_file: str = None,
+    save_config_file: bool = False,
     num_cores: int = None,
     memory: int = None,
     disk_space: int = None,
     exclusive: bool = None,
     max_execution_time: int = None,
     wait: bool = False,
-    save_config_file: bool = False,
     debug: bool = False,
 ):
     import json
