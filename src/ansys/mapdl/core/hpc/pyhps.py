@@ -215,6 +215,7 @@ def create_parameters(
 
 def create_task(
     project_api,
+    mode,
     main_file,
     file_input_ids,
     file_output_ids,
@@ -225,13 +226,19 @@ def create_task(
     max_execution_time,
 ):
 
-    software = Software(name="Bash", version="0.1")  # Overwriting
+    if mode == "apdl":
+        software = Software(name="Ansys Mechanical APDL", version="2024 R2")
+        name = "MAPDL Task"
+    else:
+        software = Software(name="Bash", version="0.1")  # Overwriting
+        name = "PyMAPDL Task"
+
     execution_command = f"%executable% %file:{os.path.basename(main_file)}%"
     logger.debug(f"Using executable: '{execution_command}'")
 
     # Process step
     task_def = TaskDefinition(
-        name="PyMAPDL_task",
+        name=name,
         software_requirements=[software],
         execution_command=execution_command,
         resource_requirements=ResourceRequirements(
@@ -339,14 +346,34 @@ def create_pymapdl_pyhps_job(
     exclusive: bool = None,
     max_execution_time: int = None,
 ):
+    """
+    Workflow
+        + APDL mode: main_file
+        + Others: shell_file
+            + Wrapper
+                + main_file
 
+    """
     if python not in [2, 2.7, 3, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 3.12]:
         warn(f"Version of Python {python} might not be supported by the cluster.")
 
     if not os.path.exists(main_file):
-        raise ValueError(f"The Python file {main_file} must exist.")
+        raise ValueError(f"The file {main_file} must exist.")
 
-    logger.debug(f"Main Python file is in: {main_file}.")
+    logger.debug(f"Main file is in: {main_file}.")
+
+    _, file_extension = os.path.splitext(main_file)
+
+    if file_extension.lower() in [".sh"]:
+        mode = "shell"
+    elif file_extension.lower() in [".py"]:
+        mode = "python"
+    elif file_extension.lower() in [".inp", ".mac"]:
+        mode = "apdl"
+    else:
+        raise Exception("File type not supported.")
+
+    logger.debug(f"Mode '{mode}' because of main file ({main_file}) extension.")
 
     if inputs is None:
         inputs = []
@@ -355,11 +382,14 @@ def create_pymapdl_pyhps_job(
 
     input_file = None
     if inputs:
+        if mode == "apdl":
+            raise ValueError("Inputs are not supported when using APDL files.")
+
         if isinstance(inputs, str):
             inputs = inputs.split(",")
 
         if inputs:
-            input_file = "input.inp"
+            input_file = "input.inputs"
 
             content = "\n".join(inputs)
             input_file = _create_tmp_file(input_file, content)
@@ -367,7 +397,9 @@ def create_pymapdl_pyhps_job(
 
     output_parms_file = None
     if outputs:
-        output_parms_file = "output.out"
+        if mode == "apdl":
+            raise ValueError("Outputs are not supported when using APDL files.")
+        output_parms_file = "output.output"
         if isinstance(outputs, str):
             outputs = outputs.split(",")
 
@@ -391,6 +423,7 @@ exec(open("{os.path.basename(main_file)}").read())
 
         if outputs:
             content += f"""
+# Writing output data
 with open("{output_parms_file}", "w") as fid:
 """
             b0 = "{"
@@ -402,7 +435,7 @@ with open("{output_parms_file}", "w") as fid:
         wrapper_file = _create_tmp_file(wrapper_file, content)
         logger.debug(f"Wrapper file in: {wrapper_file}")
 
-    if not requirements_file:
+    if not requirements_file and mode != "apdl":
         import pkg_resources
 
         content = "\n".join(
@@ -411,7 +444,7 @@ with open("{output_parms_file}", "w") as fid:
         requirements_file = _create_tmp_file("requirements.txt", content)
         logger.debug(f"Requirements file in: {requirements_file}")
 
-    if not shell_file:
+    if not shell_file and mode != "apdl":
         content = f"""
 echo "Starting"
 
@@ -443,8 +476,13 @@ python {executed_pyscript}
         raise ValueError("One or more extra files does not exist.")
 
     input_files = extra_files
-    input_files.append(requirements_file)
-    input_files.append(shell_file)
+    if mode != "apdl":
+        input_files.append(requirements_file)
+        input_files.append(shell_file)
+    else:
+        # we are going to refer to this from now on
+        shell_file = main_file
+
     input_files.append(main_file)
 
     if inputs:
@@ -488,6 +526,7 @@ python {executed_pyscript}
     # Set tasks
     task_def = create_task(
         project_api,
+        mode,
         shell_file,
         file_input_ids,
         file_output_ids,
