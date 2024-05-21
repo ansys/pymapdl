@@ -345,6 +345,7 @@ def create_pymapdl_pyhps_job(
     disk_space: int = None,
     exclusive: bool = None,
     max_execution_time: int = None,
+    mode: Optional[Union["python", "shell", "apdl"]] = None,
 ):
     """
     Workflow
@@ -364,14 +365,16 @@ def create_pymapdl_pyhps_job(
 
     _, file_extension = os.path.splitext(main_file)
 
-    if file_extension.lower() in [".sh"]:
-        mode = "shell"
-    elif file_extension.lower() in [".py"]:
-        mode = "python"
-    elif file_extension.lower() in [".inp", ".mac"]:
-        mode = "apdl"
+    if mode is None:
+        if file_extension.lower() in [".sh"]:
+            mode = "shell"
+        elif file_extension.lower() in [".py"]:
+            mode = "python"
+        elif file_extension.lower() in [".inp", ".mac"]:
+            mode = "apdl"
     else:
-        raise Exception("File type not supported.")
+        if mode.lower() not in ["python", "shell", "apdl"]:
+            raise Exception("File type not supported.")
 
     logger.debug(f"Mode '{mode}' because of main file ({main_file}) extension.")
 
@@ -435,7 +438,7 @@ with open("{output_parms_file}", "w") as fid:
         wrapper_file = _create_tmp_file(wrapper_file, content)
         logger.debug(f"Wrapper file in: {wrapper_file}")
 
-    if not requirements_file and mode != "apdl":
+    if not requirements_file and mode == "python":
         import pkg_resources
 
         content = "\n".join(
@@ -444,7 +447,7 @@ with open("{output_parms_file}", "w") as fid:
         requirements_file = _create_tmp_file("requirements.txt", content)
         logger.debug(f"Requirements file in: {requirements_file}")
 
-    if not shell_file and mode != "apdl":
+    if not shell_file and mode == "python":
         content = f"""
 echo "Starting"
 
@@ -462,6 +465,14 @@ python {executed_pyscript}
         shell_file = _create_tmp_file("main.sh", content)
         logger.debug(f"Shell file in: {shell_file}")
 
+    elif shell_file and mode == "shell":
+        raise ValueError(
+            "Using a shell file and specifying a shell file as main file is not compatible. Avoid specifying the argument '--shell_file'"
+        )
+
+    elif not shell_file and mode == "shell":
+        shell_file = main_file
+
     if isinstance(extra_files, str):
         extra_files = extra_files.split(",")
     elif extra_files is None:
@@ -476,7 +487,7 @@ python {executed_pyscript}
         raise ValueError("One or more extra files does not exist.")
 
     input_files = extra_files
-    if mode != "apdl":
+    if mode == "python":
         input_files.append(requirements_file)
         input_files.append(shell_file)
     else:

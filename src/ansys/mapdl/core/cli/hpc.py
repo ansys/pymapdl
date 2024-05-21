@@ -175,6 +175,16 @@ submitting the job. The default is ``False``. If ``True``, the configuration fil
 You use the ``config_file`` argument to give the path for the configuration file.""",
 )
 @click.option(
+    "--mode",
+    default=None,
+    type=str,
+    help="""
+Force the job submission to behave as if the main file was a python,
+shell or APDL file, regardless of its extension type. Allowed values are: "python", "shell", and "apdl".
+By default, PyMAPDL detects the type of file from its extension.
+""",
+)
+@click.option(
     "--debug",
     default=False,
     type=bool,
@@ -204,6 +214,7 @@ def submit(
     wait: bool = False,
     save_config_file: bool = False,
     debug: bool = False,
+    mode: Optional[Union["python", "shell", "apdl"]] = None,
 ):
     import json
 
@@ -259,6 +270,7 @@ def submit(
         disk_space=disk_space,
         exclusive=exclusive,
         max_execution_time=max_execution_time,
+        mode=mode,
     )
 
     if save_config_file:
