@@ -239,7 +239,7 @@ def submit(
     import json
 
     from ansys.mapdl.core.hpc.pyhps import (
-        create_pymapdl_pyhps_job,
+        PyMAPDLJobSubmission,
         get_value_from_json_or_default,
         wait_for_completion,
     )
@@ -271,27 +271,28 @@ def submit(
         max_execution_time, config_file, "max_execution_time", 0
     )
 
-    proj, _ = create_pymapdl_pyhps_job(
-        main_file=main_file,
-        name=name,
+    job = PyMAPDLJobSubmission(
         url=url,
         user=user,
         password=password,
-        python=python,
+        main_file=main_file,
+        mode=mode,
         inputs=inputs,
         outputs=outputs,
-        output_files=output_files,
-        shell_file=shell_file,
         requirements_file=requirements_file,
+        shell_file=shell_file,
         extra_files=extra_files,
-        config_file=config_file,
+        output_files=output_files,
+        python=python,
         num_cores=num_cores,
         memory=memory,
         disk_space=disk_space,
         exclusive=exclusive,
         max_execution_time=max_execution_time,
-        mode=mode,
+        name=name,
     )
+
+    job.submit()
 
     if save_config_file:
         config = {
@@ -313,6 +314,7 @@ def submit(
         with open(config_file, "w") as fid:
             json.dump(config, fid)
 
+    proj = job._proj
     print(
         f"You can check your project by visiting: {url}/projects#/projects/{proj.id}/jobs"
     )

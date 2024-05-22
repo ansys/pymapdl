@@ -159,12 +159,12 @@ class JobSubmission:
         password,
         main_file,
         mode: Optional[str] = None,
-        inputs: Optional[Union[List[str]]] = None,
-        outputs: Optional[Union[List[str]]] = None,
+        inputs: Optional[Union[list[str]]] = None,
+        outputs: Optional[Union[list[str]]] = None,
         requirements_file: Optional[str] = None,
         shell_file: Optional[str] = None,
-        extra_files: Optional[Union[List[str]]] = None,
-        output_files: Optional[Union[List[str]]] = None,
+        extra_files: Optional[Union[list[str]]] = None,
+        output_files: Optional[Union[list[str]]] = None,
         python: Optional[float] = None,
         num_cores: Optional[int] = None,
         memory: Optional[int] = None,
@@ -184,8 +184,8 @@ class JobSubmission:
         self._wrapper_python_file = "python_wrapper.py"
         self.input_files = []
 
-        self._task_definition = None
-        self._job_definition = None
+        self._task_definitions = None
+        self._job_definitions = None
         self._jobs = None
 
         # Pre-populating
@@ -224,7 +224,7 @@ class JobSubmission:
         return self._inputs
 
     @inputs.setter
-    def inputs(self, inputs: Union[str, List[str]]):
+    def inputs(self, inputs: Union[str, list[str]]):
         self._inputs = self._validate_inputs(inputs)
 
     @property
@@ -232,7 +232,7 @@ class JobSubmission:
         return self._outputs
 
     @outputs.setter
-    def outputs(self, outputs: Union[str, List[str]]):
+    def outputs(self, outputs: Union[str, list[str]]):
         self._outputs = self._validate_outputs(outputs)
 
     @property
@@ -333,20 +333,20 @@ class JobSubmission:
 
     ## To bypass implemented tasks, job definitions and jobs.
     @property
-    def task_definition(self):
-        return self._task_definition
+    def task_definitions(self):
+        return self._task_definitions
 
-    @task_definition.setter
-    def task_definition(self, task_definition: TaskDefinition):
-        self._task_definition = task_definition
+    @task_definitions.setter
+    def task_definitions(self, task_definitions: list[TaskDefinition]):
+        self._task_definitions = task_definitions
 
     @property
-    def job_definition(self):
-        return self._job_definition
+    def job_definitions(self):
+        return self._job_definitions
 
-    @job_definition.setter
-    def job_definition(self, job_definition: JobDefinition):
-        self._job_definition = job_definition
+    @job_definitions.setter
+    def job_definitions(self, job_definitions: list[JobDefinition]):
+        self._job_definitions = job_definitions
 
     @property
     def jobs(self):
@@ -355,6 +355,22 @@ class JobSubmission:
     @jobs.setter
     def jobs(self, jobs: list[JobDefinition]):
         self._jobs = jobs
+
+    @property
+    def project(self):
+        return self._proj
+
+    @project.setter
+    def project(self, proj: Project):
+        self._proj = proj
+
+    @property
+    def project_api(self):
+        return self._project_api
+
+    @project_api.setter
+    def project_api(self, project_api: ProjectApi):
+        self._project_api = project_api
 
     ## Validate inputs
     def _validate_inputs(self, inputs):
@@ -496,7 +512,9 @@ class JobSubmission:
             if mode.lower() not in ["python", "shell", "apdl"]:
                 raise Exception("File type is not supported.")
 
-        logger.debug(f"Mode '{mode}' because of main file ({main_file}) extension.")
+        logger.debug(
+            f"Mode '{mode}' because of main file ({self.main_file}) extension."
+        )
 
         return mode
 
@@ -576,11 +594,11 @@ class JobSubmission:
             )
         )
 
-        self._task_def = self._create_task(file_input_ids, file_output_ids)
+        self._create_task(file_input_ids, file_output_ids)
 
         # Set jobs
-        self._job_def = self._create_job_definition()
-        self._jobs = self._create_jobs()
+        self._create_job_definition()
+        self._create_jobs()
         logger.debug(f"Jobs: {self._jobs}")
         logger.debug("Project submitted.")
 
@@ -593,33 +611,34 @@ class JobSubmission:
                     name="Job",
                     values={},
                     eval_status="pending",
-                    job_definition_id=self._job_def.id,
+                    job_definition_id=self.job_definitions[0].id,
                 )
             ]
-        logger.debug(f"jobs: {jobs}")
-        return self._project_api.create_jobs(jobs)
+
+        logger.debug(f"jobs: {self.jobs}")
+        self.jobs = self._project_api.create_jobs(self.jobs)
 
     def _create_job_definition(self):
-        if not self.job_definition:
-            self.job_definition = JobDefinition(name="JobDefinition.1", active=True)
-        params = self._input_params + self._output_params
+        if not self.job_definitions:
+            self.job_definitions = [JobDefinition(name="JobDefinition.1", active=True)]
+            params = self._input_params + self._output_params
 
-        self.job_definition.task_definition_ids = [self.task_definition.id]
-        self.job_definition.parameter_definition_ids = [pd.id for pd in params]
-        self.job_definition.parameter_mapping_ids = [
-            pm.id for pm in self._param_mappings
-        ]
+            self.job_definitions[0].task_definition_ids = [self.task_definitions[0].id]
+            self.job_definitions[0].parameter_definition_ids = [pd.id for pd in params]
+            self.job_definitions[0].parameter_mapping_ids = [
+                pm.id for pm in self._param_mappings
+            ]
 
-        logger.debug(f"Job definition: {self.job_definition}")
-        self.job_definition = self._project_api.create_job_definitions(
-            [self.job_definition]
-        )[0]
+            self.job_definitions = self._project_api.create_job_definitions(
+                self.job_definitions
+            )
 
-        # Refresh the parameters
-        params = self._project_api.get_parameter_definitions(
-            id=job_def.parameter_definition_ids
-        )
-        return job_def
+            # Refresh the parameters
+            params = self._project_api.get_parameter_definitions(
+                id=self.job_definitions[0].parameter_definition_ids
+            )
+
+        logger.debug(f"Job definition: {self.job_definitions}")
 
     def _create_task(self, file_input_ids, file_output_ids):
 
@@ -634,25 +653,29 @@ class JobSubmission:
         logger.debug(f"Using executable: '{execution_command}'")
 
         # Process step
-        if not self.task_definition:
-            self.task_definition = task_class(
-                execution_command=execution_command,
-                resource_requirements=ResourceRequirements(
-                    num_cores=self.num_cores,
-                    memory=self.memory * 1024 * 1024,
-                    disk_space=self.disk_space * 1024 * 1024,
-                    # distributed=True,
-                    hpc_resources=HpcResources(exclusive=self.exclusive),
-                ),
-                max_execution_time=self.max_execution_time,
-                execution_level=0,
-                num_trials=1,
-                input_file_ids=list(file_input_ids.values()),
-                output_file_ids=list(file_output_ids.values()),
-            )
+        if not self.task_definitions:
+            self.task_definitions = [
+                task_class(
+                    execution_command=execution_command,
+                    resource_requirements=ResourceRequirements(
+                        num_cores=self.num_cores,
+                        memory=self.memory * 1024 * 1024,
+                        disk_space=self.disk_space * 1024 * 1024,
+                        # distributed=True,
+                        hpc_resources=HpcResources(exclusive=self.exclusive),
+                    ),
+                    max_execution_time=self.max_execution_time,
+                    execution_level=0,
+                    num_trials=1,
+                    input_file_ids=list(file_input_ids.values()),
+                    output_file_ids=list(file_output_ids.values()),
+                )
+            ]
 
-        logger.debug(f"Task definition: {self.task_definition }")
-        return self._project_api.create_task_definitions([self.task_definition])[0]
+        logger.debug(f"Task definition: {self.task_definitions }")
+        self.task_definitions = self._project_api.create_task_definitions(
+            self.task_definitions
+        )
 
     def _create_parameters(
         self,
