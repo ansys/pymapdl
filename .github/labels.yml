@@ -110,6 +110,10 @@
   description: "Stale issue, it will be closed soon"
   color: E67E22
 
+- name: Waiting doc review
+  description: "This PR is waiting for its documentation to be reviewed."
+  color: 27AE60
+
 #############################################################
 # For repo maintance
 # ==================
