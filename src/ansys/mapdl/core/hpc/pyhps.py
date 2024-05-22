@@ -374,7 +374,7 @@ def create_pymapdl_pyhps_job(
             mode = "apdl"
     else:
         if mode.lower() not in ["python", "shell", "apdl"]:
-            raise Exception("File type not supported.")
+            raise Exception("File type is not supported.")
 
     logger.debug(f"Mode '{mode}' because of main file ({main_file}) extension.")
 
@@ -467,7 +467,7 @@ python {executed_pyscript}
 
     elif shell_file and mode == "shell":
         raise ValueError(
-            "Using a shell file and specifying a shell file as main file is not compatible. Avoid specifying the argument '--shell_file'"
+            "You cannot use a shell file and specify a shell file as a main file. Avoid specifying the '--shell_file' argument."
         )
 
     elif not shell_file and mode == "shell":
@@ -484,7 +484,7 @@ python {executed_pyscript}
         output_files = output_files.split(",")
 
     if extra_files and not all([os.path.exists(each) for each in extra_files]):
-        raise ValueError("One or more extra files does not exist.")
+        raise ValueError("One or more extra files do not exist.")
 
     input_files = extra_files
     if mode == "python":

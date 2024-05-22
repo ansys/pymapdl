@@ -189,8 +189,9 @@ You use the ``config_file`` argument to give the path for the configuration file
     default=None,
     type=str,
     help="""
-Force the job submission to behave as if the main file was a python,
-shell or APDL file, regardless of its extension type. Allowed values are: "python", "shell", and "apdl".
+Force the job submission to behave as if the main file was a Python,
+shell, or APDL file, regardless of its extension type. Allowed values are
+``"python"``, ``"shell"``, and ``"apdl"``.
 By default, PyMAPDL detects the type of file from its extension.
 """,
 )
