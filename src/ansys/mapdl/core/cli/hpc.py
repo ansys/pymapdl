@@ -99,7 +99,7 @@ For example, ``--outputs="displacements,nodes"``.""",
     default=None,
     type=str,
     help="""Output files to monitor. Because you use commas to separate
-the file names, the names cannot contain commas. For example, 
+the file names, the names cannot contain commas. For example,
 ``--output_files="results.out,data.xls"``.""",
 )
 @click.option(
