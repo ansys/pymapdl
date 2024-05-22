@@ -377,8 +377,8 @@ class JobSubmission:
         if self.mode != "python":
             raise warn(
                 f"""Outputs are not directly supported when using APDL or shell files.
-                However you can still write the parameters you want to the
-                file {self._output_parms_file} using the python format
+                However, you can still write the parameters you want to the
+                file {self._output_parms_file} using the Python format
                 ('PARAMETER=VALUE')."""
             )
 
@@ -391,7 +391,7 @@ class JobSubmission:
         return outputs
 
     def _validate_main_file(self, main_file):
-        """Validate main_file input"""
+        """Validate the main file."""
 
         if not os.path.exists(main_file):
             raise ValueError(f"The file {main_file} must exist.")
@@ -400,23 +400,23 @@ class JobSubmission:
         return main_file
 
     def _validate_shell_file(self, shell_file):
-        """Validate shell_file input"""
+        """Validate the shell file."""
         return shell_file
 
     def _validate_extra_files(self, extra_files):
-        """Validate extra_files input"""
+        """Validate all extra files."""
         if isinstance(extra_files, str):
             extra_files = extra_files.split(",")
         elif extra_files is None:
             extra_files = []
 
         if extra_files and not all([os.path.exists(each) for each in extra_files]):
-            raise ValueError("One or more extra files does not exist.")
+            raise ValueError("One or more extra files do not exist.")
 
         return extra_files
 
     def _validate_output_files(self, output_files):
-        """Validate output_files input"""
+        """Validate output files."""
         if not output_files:
             output_files = []
         elif isinstance(output_files, str):
@@ -425,13 +425,13 @@ class JobSubmission:
         return output_files
 
     def _validate_requirements_file(self, requirements_file):
-        """Validate requirements_file input"""
+        """Validate the requirements file."""
         return requirements_file
 
     def _validate_python(self, python):
-        """Validate python inputs"""
+        """Validate Python version."""
         if python not in [2, 2.7, 3, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 3.12]:
-            warn(f"Version of Python {python} might not be supported by the cluster.")
+            warn(f"Python {python} might not be supported by the cluster.")
         return python
 
     def _validate_num_cores(self, num_cores: int):
@@ -442,7 +442,7 @@ class JobSubmission:
         return int(num_cores)
 
     def _validate_memory(self, memory: int):
-        """Validate memory inputs"""
+        """Validate the memory."""
         if not memory:
             memory = 0
 
@@ -456,21 +456,21 @@ class JobSubmission:
         return float(disk_space)
 
     def _validate_exclusive(self, exclusive: bool):
-        """Validate exclusive inputs"""
+        """Validate exclusive argument."""
         if exclusive is None:
             exclusive = False
 
         return bool(exclusive)
 
     def _validate_max_execution_time(self, max_execution_time):
-        """Validate max_execution_time inputs"""
+        """Validate inputs for the maximum execution time."""
         if not max_execution_time:
             max_execution_time = 0
 
         return float(max_execution_time)
 
     def _validate_name(self, name):
-        """Validate name inputs"""
+        """Validate name"""
         if name is None:
             if self.mode == "python":
                 name = "My PyMAPDL project"
@@ -494,7 +494,7 @@ class JobSubmission:
                 mode = "apdl"
         else:
             if mode.lower() not in ["python", "shell", "apdl"]:
-                raise Exception("File type not supported.")
+                raise Exception("File type is not supported.")
 
         logger.debug(f"Mode '{mode}' because of main file ({main_file}) extension.")
 
@@ -506,7 +506,7 @@ class JobSubmission:
 
         self._executed_pyscript = os.path.basename(self.main_file)
 
-        # Prepare python wrapper file for input/output injection/extraction
+        # Prepare Python wrapper file for input/output injection/extraction
         if self.inputs or self.outputs:
             self._executed_pyscript = self._wrapper_python_file
             self._prepare_python_wrapper()
@@ -516,9 +516,9 @@ class JobSubmission:
             self._prepare_requirements_file()
         elif self.mode != "python" and self.requirements_file:
             raise ValueError(
-                """Using a requirement file when the main file is
-                    not a Python file is not compatible.
-                    Avoid specifying the argument '--requirement_file'."""
+                """You can use a requirement file only when the main file is
+                    a Python file.
+                    Avoid specifying the '--requirement_file' argument."""
             )
 
         # Prepare shell file
@@ -529,8 +529,8 @@ class JobSubmission:
         elif self.mode == "shell":
             if self.shell_file:
                 raise ValueError(
-                    """Using a shell file and specifying a shell file as main file is not compatible.
-                    Avoid specifying the argument '--shell_file'."""
+                    """You cannot use a shell file and specify a shell file as the main file.
+                    Avoid specifying the '--shell_file' argument."""
                 )
             else:
                 self.shell_file = self.main_file
@@ -546,11 +546,11 @@ class JobSubmission:
             url=self.url, username=self.user, password=self.password, verify=False
         )
 
-        # Initializing project
+        # Initialize project
         self._proj = self._create_project()
         self._project_api = self._get_project_api()
 
-        # Setting files
+        # Set files
         file_input_ids, file_output_ids = self._add_files_to_project()
 
         if self.inputs:
@@ -790,8 +790,8 @@ class JobSubmission:
             else:
                 f_out[f.name] = f.id
 
-        logger.debug(f"Input files IDs: {f_inp}")
-        logger.debug(f"Output files IDs: {f_out}")
+        logger.debug(f"Input file IDs: {f_inp}")
+        logger.debug(f"Output file IDs: {f_out}")
         return f_inp, f_out
 
     def _get_project_api(self):
@@ -849,7 +849,7 @@ python {self._executed_pyscript}
             [str(p.as_requirement()) for p in pkg_resources.working_set]
         )
         self.requirements_file = self._create_tmp_file("requirements.txt", content)
-        logger.debug(f"Requirements file in: {self.requirements_file}")
+        logger.debug(f"Requirements file is in: {self.requirements_file}")
 
     def _prepare_python_wrapper(self):
 
@@ -857,12 +857,12 @@ python {self._executed_pyscript}
 
         if self.inputs:
             content += f"""
-# Reading inputs
+# Read inputs
 exec(open("{os.path.basename(self._input_file)}").read())
 """
 
         content += f"""
-# Executing main file
+# Execute main file
 exec(open("{os.path.basename(self.main_file)}").read())
 """
 
