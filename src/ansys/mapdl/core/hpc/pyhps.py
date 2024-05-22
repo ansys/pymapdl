@@ -376,7 +376,9 @@ def create_pymapdl_pyhps_job(
         if mode.lower() not in ["python", "shell", "apdl"]:
             raise Exception("File type is not supported.")
 
-    logger.debug(f"Mode '{mode}' because of main file ({main_file}) extension.")
+    logger.debug(
+        f"Submission mode set to '{mode}' because of main file ({main_file}) extension."
+    )
 
     if inputs is None:
         inputs = []
@@ -415,18 +417,18 @@ def create_pymapdl_pyhps_job(
 
         if inputs:
             content += f"""
-# Reading inputs
+# Read inputs
 exec(open("{os.path.basename(input_file)}").read())
 """
 
         content += f"""
-# Executing main file
+# Execute main file
 exec(open("{os.path.basename(main_file)}").read())
 """
 
         if outputs:
             content += f"""
-# Writing output data
+# Write output data
 with open("{output_parms_file}", "w") as fid:
 """
             b0 = "{"
@@ -512,7 +514,7 @@ python {executed_pyscript}
     proj = create_project(client, name)
     project_api = get_project_api(client, proj)
 
-    # Setting files
+    # Set files
     file_input_ids, file_output_ids = add_files(project_api, input_files, output_files)
 
     if inputs:
