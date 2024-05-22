@@ -185,6 +185,8 @@ class JobSubmission:
         self.input_files = []
 
         self._task_definition = None
+        self._job_definition = None
+        self._jobs = None
 
         # Pre-populating
         self._inputs = self._validate_inputs(inputs)
@@ -329,6 +331,7 @@ class JobSubmission:
     def name(self, name: str):
         self._name = self._validate_name(name)
 
+    ## To bypass implemented tasks, job definitions and jobs.
     @property
     def task_definition(self):
         return self._task_definition
@@ -337,6 +340,23 @@ class JobSubmission:
     def task_definition(self, task_definition: TaskDefinition):
         self._task_definition = task_definition
 
+    @property
+    def job_definition(self):
+        return self._job_definition
+
+    @job_definition.setter
+    def job_definition(self, job_definition: JobDefinition):
+        self._job_definition = job_definition
+
+    @property
+    def jobs(self):
+        return self._jobs
+
+    @jobs.setter
+    def jobs(self, jobs: list[JobDefinition]):
+        self._jobs = jobs
+
+    ## Validate inputs
     def _validate_inputs(self, inputs):
         """Validate inputs inputs"""
 
@@ -481,7 +501,6 @@ class JobSubmission:
         return mode
 
     def submit(self):
-
         if self.inputs:
             self._prepare_input_file()
 
@@ -568,27 +587,33 @@ class JobSubmission:
         return None
 
     def _create_jobs(self):
-        jobs = [
-            Job(
-                name="Job",
-                values={},
-                eval_status="pending",
-                job_definition_id=self._job_def.id,
-            )
-        ]
+        if not self.jobs:
+            self.jobs = [
+                Job(
+                    name="Job",
+                    values={},
+                    eval_status="pending",
+                    job_definition_id=self._job_def.id,
+                )
+            ]
         logger.debug(f"jobs: {jobs}")
         return self._project_api.create_jobs(jobs)
 
     def _create_job_definition(self):
-        job_def = JobDefinition(name="JobDefinition.1", active=True)
+        if not self.job_definition:
+            self.job_definition = JobDefinition(name="JobDefinition.1", active=True)
         params = self._input_params + self._output_params
 
-        job_def.task_definition_ids = [self._task_def.id]
-        job_def.parameter_definition_ids = [pd.id for pd in params]
-        job_def.parameter_mapping_ids = [pm.id for pm in self._param_mappings]
+        self.job_definition.task_definition_ids = [self.task_definition.id]
+        self.job_definition.parameter_definition_ids = [pd.id for pd in params]
+        self.job_definition.parameter_mapping_ids = [
+            pm.id for pm in self._param_mappings
+        ]
 
-        logger.debug(f"Job definition: {job_def}")
-        job_def = self._project_api.create_job_definitions([job_def])[0]
+        logger.debug(f"Job definition: {self.job_definition}")
+        self.job_definition = self._project_api.create_job_definitions(
+            [self.job_definition]
+        )[0]
 
         # Refresh the parameters
         params = self._project_api.get_parameter_definitions(
