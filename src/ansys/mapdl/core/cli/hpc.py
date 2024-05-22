@@ -35,12 +35,13 @@ logger = logging.getLogger()
 
 @main.command(
     short_help="Submit jobs to an HPC cluster using PyHPS.",
-    help="""Submit jobs to an HPC cluster using PyHPS.
+    help="""
+    Submit jobs to an HPC cluster using PyHPS.
+
 
 Example
--------
 
-$ pymapdl submit my_file_01.py --requirements_file=requirements.txt --shell_file=main.sh --name="my job" --url="https://123.456.789.101:3000/hps" --user=user --password=password --python=3.9
+$ pymapdl submit my_file_01.py --requirements_file=requirements.txt --shell_file=main.sh --name="my job" --user=user --password=password --url="https://123.456.789.101:3000/hps"
 """,
 )
 @click.argument("main_file")
@@ -73,10 +74,33 @@ $ pymapdl submit my_file_01.py --requirements_file=requirements.txt --shell_file
 run the Python file. Python3 is used by default in the cluster.""",
 )
 @click.option(
+    "--inputs",
+    default=None,
+    type=str,
+    help="""
+Input arguments for the simulation. You can specify several arguments by
+joining them with commas. Thus, strings defined in this way cannot contain
+commas. Only integers, floats and strings are allowed.
+PyMAPDL converts these inputs to integer or float values when possible.
+Otherwise, they remain as strings. You can change these arguments on the
+HPS website. For example, ``--inputs="force=123,value='mystring'"``.
+    """,
+)
+@click.option(
+    "--outputs",
+    default=None,
+    type=str,
+    help="""Output parameters. You can specify several arguments
+by joining them with commas.
+For example, ``--outputs="displacements,nodes"``.""",
+)
+@click.option(
     "--output_files",
     default=None,
     type=str,
-    help="""Output files to monitor.""",
+    help="""Output files to monitor. Because you use commas to separate
+the file names, the names cannot contain commas. For example,
+``--output_files="results.out,data.xls"``.""",
 )
 @click.option(
     "--shell_file",
@@ -107,6 +131,17 @@ you should attach your own requirement file using ``pip freeze`` """,
     default=None,
     type=str,
     help="""File to load the job configuration from.""",
+)
+@click.option(
+    "--save_config_file",
+    default=False,
+    type=bool,
+    is_flag=False,
+    flag_value=True,
+    help="""
+Whether to write the configuration to the configuration file (specified
+using the ``config_file`` argument) after the job has been successfully submitted.
+The default is ``False``. If ``True``, and the file already exists, the configuration file is overwritten.""",
 )
 @click.option(
     "--num_cores",
@@ -149,16 +184,6 @@ you should attach your own requirement file using ``pip freeze`` """,
     help="""Whether the terminal is to wait for job completion before returning control to the user. """,
 )
 @click.option(
-    "--save_config_file",
-    default=False,
-    type=bool,
-    is_flag=False,
-    flag_value=True,
-    help="""Whether to write the configuration to the configuration file after successfully
-submitting the job. The default is ``False``. If ``True``, the configuration file is overwritten.
-You use the ``config_file`` argument to give the path for the configuration file.""",
-)
-@click.option(
     "--debug",
     default=False,
     type=bool,
@@ -173,18 +198,20 @@ def submit(
     user: str = None,
     password: str = None,
     python: Optional[float] = None,
+    inputs: Optional[str] = None,
+    outputs: Optional[str] = None,
     output_files: Optional[Union[str, list]] = None,
     shell_file: str = None,
     requirements_file: str = None,
     extra_files: Optional[Union[str, list]] = None,
     config_file: str = None,
+    save_config_file: bool = False,
     num_cores: int = None,
     memory: int = None,
     disk_space: int = None,
     exclusive: bool = None,
     max_execution_time: int = None,
     wait: bool = False,
-    save_config_file: bool = False,
     debug: bool = False,
 ):
     import json
@@ -229,6 +256,8 @@ def submit(
         user=user,
         password=password,
         python=python,
+        inputs=inputs,
+        outputs=outputs,
         output_files=output_files,
         shell_file=shell_file,
         requirements_file=requirements_file,
