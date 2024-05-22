@@ -78,21 +78,29 @@ run the Python file. Python3 is used by default in the cluster.""",
     default=None,
     type=str,
     help="""
-    Input arguments for the simulation. You can specify several arguments by joining them with commas, therefore, strings defined this way cannot contain commas.
-    PyMAPDL will try to convert, whenever possible, these inputs to ints or floats, otherwise, they remind as strings. These arguments can be changed in the HPS website. For example: --inputs="force=123,value='mystring'"
+Input arguments for the simulation. You can specify several arguments by
+joining them with commas. Thus, strings defined in this way cannot contain
+commas. Only integers, floats and strings are allowed.
+PyMAPDL converts these inputs to integer or float values when possible.
+Otherwise, they remain as strings. You can change these arguments on the
+HPS website. For example, ``--inputs="force=123,value='mystring'"``.
     """,
 )
 @click.option(
     "--outputs",
     default=None,
     type=str,
-    help="""Output parameters. You can specify several arguments by joining them with commas. For example: --outputs="displacements,nodes".""",
+    help="""Output parameters. You can specify several arguments
+by joining them with commas.
+For example, ``--outputs="displacements,nodes"``.""",
 )
 @click.option(
     "--output_files",
     default=None,
     type=str,
-    help="""Output files to monitor. They can be specified as comma separated file names (so their names cannot contain commas). For example: --output_files="results.out,data.xls". """,
+    help="""Output files to monitor. Because you use commas to separate
+the file names, the names cannot contain commas. For example,
+``--output_files="results.out,data.xls"``.""",
 )
 @click.option(
     "--shell_file",
@@ -123,6 +131,17 @@ you should attach your own requirement file using ``pip freeze`` """,
     default=None,
     type=str,
     help="""File to load the job configuration from.""",
+)
+@click.option(
+    "--save_config_file",
+    default=False,
+    type=bool,
+    is_flag=False,
+    flag_value=True,
+    help="""
+Whether to write the configuration to the configuration file (specified
+using the ``config_file`` argument) after the job has been successfully submitted.
+The default is ``False``. If ``True``, and the file already exists, the configuration file is overwritten.""",
 )
 @click.option(
     "--num_cores",
@@ -165,14 +184,15 @@ you should attach your own requirement file using ``pip freeze`` """,
     help="""Whether the terminal is to wait for job completion before returning control to the user. """,
 )
 @click.option(
-    "--save_config_file",
-    default=False,
-    type=bool,
-    is_flag=False,
-    flag_value=True,
-    help="""Whether to write the configuration to the configuration file after successfully
-submitting the job. The default is ``False``. If ``True``, the configuration file is overwritten.
-You use the ``config_file`` argument to give the path for the configuration file.""",
+    "--mode",
+    default=None,
+    type=str,
+    help="""
+Force the job submission to behave as if the main file was a Python,
+shell, or APDL file, regardless of its extension type. Allowed values are
+``"python"``, ``"shell"``, and ``"apdl"``.
+By default, PyMAPDL detects the type of file from its extension.
+""",
 )
 @click.option(
     "--mode",
@@ -206,13 +226,13 @@ def submit(
     requirements_file: str = None,
     extra_files: Optional[Union[str, list]] = None,
     config_file: str = None,
+    save_config_file: bool = False,
     num_cores: int = None,
     memory: int = None,
     disk_space: int = None,
     exclusive: bool = None,
     max_execution_time: int = None,
     wait: bool = False,
-    save_config_file: bool = False,
     debug: bool = False,
     mode: Optional[Union["python", "shell", "apdl"]] = None,
 ):
