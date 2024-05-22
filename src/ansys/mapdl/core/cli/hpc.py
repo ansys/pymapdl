@@ -184,6 +184,17 @@ The default is ``False``. If ``True``, and the file already exists, the configur
     help="""Whether the terminal is to wait for job completion before returning control to the user. """,
 )
 @click.option(
+    "--mode",
+    default=None,
+    type=str,
+    help="""
+Force the job submission to behave as if the main file was a Python,
+shell, or APDL file, regardless of its extension type. Allowed values are
+``"python"``, ``"shell"``, and ``"apdl"``.
+By default, PyMAPDL detects the type of file from its extension.
+""",
+)
+@click.option(
     "--debug",
     default=False,
     type=bool,
@@ -213,6 +224,7 @@ def submit(
     max_execution_time: int = None,
     wait: bool = False,
     debug: bool = False,
+    mode: Optional[Union["python", "shell", "apdl"]] = None,
 ):
     import json
 
@@ -268,6 +280,7 @@ def submit(
         disk_space=disk_space,
         exclusive=exclusive,
         max_execution_time=max_execution_time,
+        mode=mode,
     )
 
     if save_config_file:
