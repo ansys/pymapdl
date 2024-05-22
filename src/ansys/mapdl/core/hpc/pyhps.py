@@ -380,12 +380,12 @@ def create_pymapdl_pyhps_job(
 
         if inputs:
             content += f"""
-# Reading inputs
+# Read inputs
 exec(open("{os.path.basename(input_file)}").read())
 """
 
         content += f"""
-# Executing main file
+# Execute main file
 exec(open("{os.path.basename(main_file)}").read())
 """
 
@@ -440,7 +440,7 @@ python {executed_pyscript}
         output_files = output_files.split(",")
 
     if extra_files and not all([os.path.exists(each) for each in extra_files]):
-        raise ValueError("One or more extra files does not exist.")
+        raise ValueError("One or more extra files do not exist.")
 
     input_files = extra_files
     input_files.append(requirements_file)
@@ -463,7 +463,7 @@ python {executed_pyscript}
     proj = create_project(client, name)
     project_api = get_project_api(client, proj)
 
-    # Setting files
+    # Set files
     file_input_ids, file_output_ids = add_files(project_api, input_files, output_files)
 
     if inputs:

@@ -78,21 +78,29 @@ run the Python file. Python3 is used by default in the cluster.""",
     default=None,
     type=str,
     help="""
-    Input arguments for the simulation. You can specify several arguments by joining them with commas, therefore, strings defined this way cannot contain commas.
-    PyMAPDL will try to convert, whenever possible, these inputs to ints or floats, otherwise, they remind as strings. These arguments can be changed in the HPS website. For example: --inputs="force=123,value='mystring'"
+Input arguments for the simulation. You can specify several arguments by
+joining them with commas. Thus, strings defined in this way cannot contain
+commas. Only integers, floats and strings are allowed.
+PyMAPDL converts these inputs to integer or float values when possible.
+Otherwise, they remain as strings. You can change these arguments on the
+HPS website. For example, ``--inputs="force=123,value='mystring'"``.
     """,
 )
 @click.option(
     "--outputs",
     default=None,
     type=str,
-    help="""Output parameters. You can specify several arguments by joining them with commas. For example: --outputs="displacements,nodes".""",
+    help="""Output parameters. You can specify several arguments
+by joining them with commas.
+For example, ``--outputs="displacements,nodes"``.""",
 )
 @click.option(
     "--output_files",
     default=None,
     type=str,
-    help="""Output files to monitor. They can be specified as comma separated file names (so their names cannot contain commas). For example: --output_files="results.out,data.xls". """,
+    help="""Output files to monitor. Because you use commas to separate
+the file names, the names cannot contain commas. For example, 
+``--output_files="results.out,data.xls"``.""",
 )
 @click.option(
     "--shell_file",
@@ -131,7 +139,8 @@ you should attach your own requirement file using ``pip freeze`` """,
     is_flag=False,
     flag_value=True,
     help="""
-Whether to write the configuration to the configuration file (specified using ``config_file`` argument) after the job has been successfully submitted.
+Whether to write the configuration to the configuration file (specified
+using the ``config_file`` argument) after the job has been successfully submitted.
 The default is ``False``. If ``True``, and the file already exists, the configuration file is overwritten.""",
 )
 @click.option(
