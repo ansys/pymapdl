@@ -73,23 +73,7 @@ def get_value_from_json_or_default(
     return default_value
 
 
-def wait_for_completion(project_api, evaluated=True, failed=False, running=False):
-    eval_status = []
-
-    if evaluated:
-        eval_status.append("evaluated")
-
-    if failed:
-        eval_status.append("evaluated")
-
-    if running:
-        eval_status.append("running")
-
-    logger.debug(f"Waiting on project {proj.id} with criteria: {eval_status}")
-    while not project_api.get_jobs(eval_status=eval_status):
-        time.sleep(2)
-
-
+# consider not using inheritance
 class PythonTask(TaskDefinition):
     def __init__(self, *args, **kwargs):
         # Get the names of the parameters of the TaskDefinition __init__ method
@@ -104,7 +88,10 @@ class PythonTask(TaskDefinition):
             kwargs[param_names[i]] = arg
 
         kwargs["name"] = "Python Task"
-        kwargs["software"] = [Software(name="Bash", version="0.1")]
+        kwargs["software_requirements"] = [
+            Software(name="Bash", version="0.1"),
+            Software(name="Python", version="3.9"),
+        ]
 
         # Call the parent constructor with the updated kwargs
         super().__init__(**kwargs)
@@ -124,7 +111,9 @@ class APDLTask(TaskDefinition):
             kwargs[param_names[i]] = arg
 
         kwargs["name"] = "APDL Task"
-        kwargs["software"] = [Software(name="Ansys Mechanical APDL", version="2024 R2")]
+        kwargs["software_requirements"] = [
+            Software(name="Ansys Mechanical APDL", version="2024 R2")
+        ]
 
         # Call the parent constructor with the updated kwargs
         super().__init__(**kwargs)
@@ -144,7 +133,7 @@ class ShellTask(TaskDefinition):
             kwargs[param_names[i]] = arg
 
         kwargs["name"] = "Shell Task"
-        kwargs["software"] = [Software(name="Bash", version="0.1")]
+        kwargs["software_requirements"] = [Software(name="Bash", version="0.1")]
 
         # Call the parent constructor with the updated kwargs
         super().__init__(**kwargs)
@@ -187,6 +176,7 @@ class JobSubmission:
         self._task_definitions = None
         self._job_definitions = None
         self._jobs = None
+        self._output_values = None
 
         # Pre-populating
         self._inputs = self._validate_inputs(inputs)
@@ -372,6 +362,13 @@ class JobSubmission:
     def project_api(self, project_api: ProjectApi):
         self._project_api = project_api
 
+    @property
+    def output_values(self):
+        if not self._output_values and self.outputs:
+            self._load_results()
+
+        return self._output_values
+
     ## Validate inputs
     def _validate_inputs(self, inputs):
         """Validate inputs inputs"""
@@ -425,6 +422,9 @@ class JobSubmission:
             extra_files = extra_files.split(",")
         elif extra_files is None:
             extra_files = []
+
+        # Expanding real path
+        extra_files = [os.path.realpath(each) for each in extra_files]
 
         if extra_files and not all([os.path.exists(each) for each in extra_files]):
             raise ValueError("One or more extra files do not exist.")
@@ -560,9 +560,7 @@ class JobSubmission:
             self.shell_file = self.main_file
 
         # Log in
-        self._client = Client(
-            url=self.url, username=self.user, password=self.password, verify=False
-        )
+        self._connect_client()
 
         # Initialize project
         self._proj = self._create_project()
@@ -572,7 +570,7 @@ class JobSubmission:
         file_input_ids, file_output_ids = self._add_files_to_project()
 
         if self.inputs:
-            self._input_file_id = file_input_ids[os.path.basename(self.input_file)]
+            self._input_file_id = file_input_ids[os.path.basename(self._input_file)]
         else:
             self._input_file_id = None
 
@@ -644,12 +642,15 @@ class JobSubmission:
 
         if self.mode == "apdl":
             task_class = APDLTask
+            executable = self.main_file
         elif self.mode == "python":
             task_class = PythonTask
+            executable = self.shell_file
         else:
             task_class = ShellTask
+            executable = self.shell_file
 
-        execution_command = f"%executable% %file:{os.path.basename(self.main_file)}%"
+        execution_command = f"%executable% %file:{os.path.basename(executable)}%"
         logger.debug(f"Using executable: '{execution_command}'")
 
         # Process step
@@ -907,7 +908,7 @@ with open("{self._output_parms_file}", "w") as fid:
 
     def _prepare_input_file(self):
         if self.inputs:
-            content = "\n".join(inputs)
+            content = "\n".join(self.inputs)
             self._input_file = self._create_tmp_file(self._input_file, content)
             logger.debug(f"Input file in: {self._input_file}")
 
@@ -925,6 +926,41 @@ with open("{self._output_parms_file}", "w") as fid:
             fid.write(content)
 
         return tmp_file
+
+    def wait_for_completion(self, evaluated=True, failed=False, running=False):
+        eval_status = []
+
+        if evaluated:
+            eval_status.append("evaluated")
+
+        if failed:
+            eval_status.append("failed")
+
+        if running:
+            eval_status.append("running")
+
+        logger.debug(
+            f"Waiting on project {self.project.id} with criteria: {eval_status}"
+        )
+        while not self.project_api.get_jobs(eval_status=eval_status):
+            time.sleep(2)
+
+    def _load_results(self):
+        self._connect_client()
+
+        jobs = self.project_api.get_jobs(eval_status=["evaluated"])
+
+        if not jobs:
+            return None
+
+        self._output_values = []
+        for each_job in jobs:
+            self._output_values.append(each_job.values)
+
+    def _connect_client(self):
+        self._client: Client = Client(
+            url=self.url, username=self.user, password=self.password, verify=False
+        )
 
 
 class PyMAPDLJobSubmission(JobSubmission):

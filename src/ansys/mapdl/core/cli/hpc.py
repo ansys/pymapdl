@@ -195,14 +195,12 @@ By default, PyMAPDL detects the type of file from its extension.
 """,
 )
 @click.option(
-    "--mode",
+    "--output_to_json",
     default=None,
     type=str,
-    help="""
-Force the job submission to behave as if the main file was a python,
-shell or APDL file, regardless of its extension type. Allowed values are: "python", "shell", and "apdl".
-By default, PyMAPDL detects the type of file from its extension.
-""",
+    is_flag=False,
+    flag_value=True,
+    help="""Print the output values to the terminal as json. It requires to use ``--wait`` value too. """,
 )
 @click.option(
     "--debug",
@@ -235,13 +233,13 @@ def submit(
     wait: bool = False,
     debug: bool = False,
     mode: Optional[Union["python", "shell", "apdl"]] = None,
+    output_to_json: Optional[bool] = False,
 ):
     import json
 
     from ansys.mapdl.core.hpc.pyhps import (
         PyMAPDLJobSubmission,
         get_value_from_json_or_default,
-        wait_for_completion,
     )
 
     if debug:
@@ -314,14 +312,24 @@ def submit(
         with open(config_file, "w") as fid:
             json.dump(config, fid)
 
-    proj = job._proj
-    print(
-        f"You can check your project by visiting: {url}/projects#/projects/{proj.id}/jobs"
-    )
+    proj = job.project
+    if not output_to_json:
+        print(
+            f"You can check your project by visiting: {url}/projects#/projects/{proj.id}/jobs"
+        )
 
     if wait:
-        print(f"Waiting for project {name} (id: {proj.id}) evaluation to complete...")
-        wait_for_completion(proj, evaluated=True, failed=True)
+        if not output_to_json:
+            print(
+                f"Waiting for project {name} (id: {proj.id}) evaluation to complete..."
+            )
+        job.wait_for_completion(evaluated=True, failed=True)
+
+    if output_to_json and wait:
+        if len(job.outputs) == 1:
+            print(job.output_values[0][job.outputs[0]])
+        else:
+            print(json.dumps(job.output_values))
 
 
 def list_jobs():
