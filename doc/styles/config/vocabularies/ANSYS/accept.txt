@@ -178,3 +178,7 @@ Windows Subsystem for Linux
 wsl
 WSL
 Zhu
+THIRDPARTY
+askin
+Hashin
+WHIT
