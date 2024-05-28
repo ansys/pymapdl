@@ -25,6 +25,7 @@
 import os
 import tempfile
 from time import sleep
+import warnings
 
 import psutil
 import pytest
@@ -38,6 +39,7 @@ from ansys.mapdl.core.errors import (
     PortAlreadyInUseByAnMAPDLInstance,
 )
 from ansys.mapdl.core.launcher import (
+    LOCALHOST,
     _check_license_argument,
     _force_smp_student_version,
     _is_ubuntu,
@@ -181,20 +183,21 @@ def test_launch_console(version):
 
 @requires("local")
 @requires("nostudent")
-def test_license_type_keyword():
+def test_license_type_keyword(mapdl):
     checks = []
     for license_name, license_description in LICENSES.items():
         try:
-            mapdl = launch_mapdl(
+            mapdl_ = launch_mapdl(
                 license_type=license_name,
                 start_timeout=start_timeout,
+                port=mapdl.port + 1,
                 additional_switches=QUICK_LAUNCH_SWITCHES,
             )
 
             # Using first line to ensure not picking up other stuff.
-            checks.append(license_description in mapdl.__str__().split("\n")[0])
-            mapdl.exit()
-            del mapdl
+            checks.append(license_description in mapdl_.__str__().split("\n")[0])
+            mapdl_.exit()
+            del mapdl_
             sleep(2)
 
         except MapdlDidNotStart as e:
@@ -208,43 +211,45 @@ def test_license_type_keyword():
 
 @requires("local")
 @requires("nostudent")
-def test_license_type_keyword_names():
+def test_license_type_keyword_names(mapdl):
     # This test might became a way to check available licenses, which is not the purpose.
 
     successful_check = False
     for license_name, license_description in LICENSES.items():
-        mapdl = launch_mapdl(
+        mapdl_ = launch_mapdl(
             license_type=license_name,
             start_timeout=start_timeout,
+            port=mapdl.port + 1,
             additional_switches=QUICK_LAUNCH_SWITCHES,
         )
 
         # Using first line to ensure not picking up other stuff.
         successful_check = (
-            license_description in mapdl.__str__().split("\n")[0] or successful_check
+            license_description in mapdl_.__str__().split("\n")[0] or successful_check
         )
-        assert license_description in mapdl.__str__().split("\n")[0]
-        mapdl.exit()
+        assert license_description in mapdl_.__str__().split("\n")[0]
+        mapdl_.exit()
 
     assert successful_check  # if at least one license is ok, this should be true.
 
 
 @requires("local")
 @requires("nostudent")
-def test_license_type_additional_switch():
+def test_license_type_additional_switch(mapdl):
     # This test might became a way to check available licenses, which is not the purpose.
     successful_check = False
     for license_name, license_description in LICENSES.items():
-        mapdl = launch_mapdl(
+        mapdl_ = launch_mapdl(
             additional_switches=QUICK_LAUNCH_SWITCHES + " -p " + license_name,
             start_timeout=start_timeout,
+            port=mapdl.port + 1,
         )
 
         # Using first line to ensure not picking up other stuff.
         successful_check = (
-            license_description in mapdl.__str__().split("\n")[0] or successful_check
+            license_description in mapdl_.__str__().split("\n")[0] or successful_check
         )
-        mapdl.exit()
+        mapdl_.exit()
 
     assert successful_check  # if at least one license is ok, this should be true.
 
@@ -265,7 +270,7 @@ def test_license_type_dummy(mapdl):
 @requires("nostudent")
 def test_remove_temp_files(mapdl):
     """Ensure the working directory is removed when run_location is not set."""
-    mapdl = launch_mapdl(
+    mapdl_ = launch_mapdl(
         port=mapdl.port + 1,
         remove_temp_files=True,
         start_timeout=start_timeout,
@@ -273,8 +278,8 @@ def test_remove_temp_files(mapdl):
     )
 
     # possible MAPDL is installed but running in "remote" mode
-    path = mapdl.directory
-    mapdl.exit()
+    path = mapdl_.directory
+    mapdl_.exit()
 
     tmp_dir = tempfile.gettempdir()
     ans_temp_dir = os.path.join(tmp_dir, "ansys_")
@@ -288,17 +293,17 @@ def test_remove_temp_files(mapdl):
 @requires("nostudent")
 def test_remove_temp_files_fail(tmpdir, mapdl):
     """Ensure the working directory is not removed when the cwd is changed."""
-    mapdl = launch_mapdl(
+    mapdl_ = launch_mapdl(
         port=mapdl.port + 1,
         remove_temp_files=True,
         start_timeout=start_timeout,
         additional_switches=QUICK_LAUNCH_SWITCHES,
     )
-    old_path = mapdl.directory
+    old_path = mapdl_.directory
     assert os.path.isdir(str(tmpdir))
-    mapdl.cwd(str(tmpdir))
-    path = mapdl.directory
-    mapdl.exit()
+    mapdl_.cwd(str(tmpdir))
+    path = mapdl_.directory
+    mapdl_.exit()
     assert os.path.isdir(path)
 
     # Checking no changes in the old path
@@ -603,3 +608,82 @@ def test_launcher_start_instance(monkeypatch, start_instance):
         monkeypatch.delenv("PYMAPDL_START_INSTANCE")
     options = launch_mapdl(start_instance=start_instance, _debug_no_launch=True)
     assert start_instance == options["start_instance"]
+
+
+@pytest.mark.parametrize("start_instance", [None, True, False])
+@pytest.mark.parametrize("start_instance_envvar", [None, True, False])
+@pytest.mark.parametrize("ip", [None, "", "123.1.1.1"])
+@pytest.mark.parametrize("ip_envvar", [None, "", "123.1.1.1"])
+def test_ip_and_start_instance(
+    monkeypatch, start_instance, start_instance_envvar, ip, ip_envvar
+):
+    # start_instance=False
+    # start_instance_envvar=True
+    # ip=""
+    # ip_envvar="123.1.1.1"
+
+    # For more information, visit https://github.com/ansys/pymapdl/issues/2910
+    if "PYMAPDL_START_INSTANCE" in os.environ:
+        monkeypatch.delenv("PYMAPDL_START_INSTANCE")
+
+    if start_instance_envvar is not None:
+        monkeypatch.setenv("PYMAPDL_START_INSTANCE", str(start_instance_envvar))
+    if ip_envvar is not None:
+        monkeypatch.setenv("PYMAPDL_IP", str(ip_envvar))
+
+    start_instance_is_true = start_instance_envvar is True or (
+        start_instance_envvar is None and (start_instance is True)
+    )
+
+    ip_is_true = bool(ip_envvar) or (
+        (ip_envvar is None or ip_envvar == "") and bool(ip)
+    )
+
+    exceptions = start_instance_envvar is None and start_instance is None and ip_is_true
+
+    if (start_instance_is_true and ip_is_true) and not exceptions:
+        with pytest.raises(
+            ValueError,
+            match="When providing a value for the argument 'ip', the argument ",
+        ):
+            options = launch_mapdl(
+                start_instance=start_instance, ip=ip, _debug_no_launch=True
+            )
+
+        return  # Exit
+
+    if (
+        isinstance(start_instance_envvar, bool) and isinstance(start_instance, bool)
+    ) or (ip_envvar and ip):
+        with pytest.warns(UserWarning):
+            options = launch_mapdl(
+                start_instance=start_instance, ip=ip, _debug_no_launch=True
+            )
+    else:
+        with warnings.catch_warnings():
+            options = launch_mapdl(
+                start_instance=start_instance, ip=ip, _debug_no_launch=True
+            )
+
+    if start_instance_envvar is True:
+        assert options["start_instance"] is True
+    elif start_instance_envvar is False:
+        assert options["start_instance"] is False
+    else:
+        if start_instance is None:
+            if ip_envvar or bool(ip):
+                assert not options["start_instance"]
+            else:
+                assert options["start_instance"]
+        elif start_instance is True:
+            assert options["start_instance"]
+        else:
+            assert not options["start_instance"]
+
+    if ip_envvar:
+        assert options["ip"] == ip_envvar
+    else:
+        if ip:
+            assert options["ip"] == ip
+        else:
+            assert options["ip"] in (LOCALHOST, "0.0.0.0")

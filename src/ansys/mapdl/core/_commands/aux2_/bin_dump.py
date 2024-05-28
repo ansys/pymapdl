@@ -79,11 +79,14 @@ class BinDump:
         lab
             Format:
 
-            RECO - Basic record description only (minimum output) (default).
+            RECO
+                Basic record description only (minimum output) (default).
 
-            TEN - Same as RECO plus the first ten words of each record.
+            TEN
+                Same as RECO plus the first ten words of each record.
 
-            LONG - Same as RECO plus all words of each record.
+            LONG
+                Same as RECO plus all words of each record.
 
         Notes
         -----

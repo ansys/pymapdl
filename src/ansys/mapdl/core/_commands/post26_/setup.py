@@ -144,7 +144,7 @@ class Setup:
             Arbitrary reference number or name assigned to this variable.
             Number must be >1 but </= NUMVAR.
 
-        id\_
+        id\\_
             Crack ID number.
 
         node

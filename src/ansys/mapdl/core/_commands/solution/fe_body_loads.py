@@ -708,7 +708,7 @@ class FeBodyLoads:
             DYNA - Get initial stresses from an earlier explicit
             (ANSYS LS-DYNA) run (default).
 
-        type\_
+        type\\_
             Type of data imported.  Note that this is an ANSYS-defined
             field; the only valid value is STRESS.
 

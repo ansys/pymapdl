@@ -64,9 +64,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Ansys documentation style checks"
-        uses: ansys/actions/doc-style@v5
+        uses: ansys/actions/doc-style@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          vale-version: "3.4.1"
 
   smoke-tests:
     name: Build and smoke test (${{ matrix.os }} | Python ${{ matrix.python-version }}) (Release=${{ matrix.should-release }})
@@ -86,7 +87,7 @@ jobs:
             os: macos-latest
     steps:
       - name: "Build wheelhouse and perform smoke test"
-        uses: ansys/actions/build-wheelhouse@v5
+        uses: ansys/actions/build-wheelhouse@v6
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           operating-system: ${{ matrix.os }}
@@ -115,10 +116,10 @@ jobs:
       ON_DOCUMENTATION: TRUE
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.6
 
       - name: "Login in Github container registry"
-        uses: docker/login-action@v3.0.0
+        uses: docker/login-action@v3.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -290,10 +291,24 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-version: ['v22.2.1', 'v22.2-ubuntu', 'v23.1.0', 'v23.2.0', 'v24.1.0', 'v24.1-ubuntu-student']
+        mapdl-version: [
+          'v22.2.1',
+          'v22.2-ubuntu',
+          'v23.1.0',
+          'v23.1-ubuntu',
+          'v23.2.0',
+          'v23.2-ubuntu',
+          'v24.1.0',
+          'v24.1-ubuntu',
+          'v24.1-ubuntu-student',
+          'v24.2.0',
+          'latest-ubuntu',
+          'latest-ubuntu-student',
+          ]
         extended_testing:
           - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
         exclude:
+          # In PRs skipping all MAPDL version except student ones (commented out).
           - extended_testing: false
             mapdl-version: 'v22.2.1'
           - extended_testing: false
@@ -301,11 +316,24 @@ jobs:
           - extended_testing: false
             mapdl-version: 'v23.1.0'
           - extended_testing: false
+            mapdl-version: 'v23.1-ubuntu'
+          - extended_testing: false
             mapdl-version: 'v23.2.0'
           - extended_testing: false
-            mapdl-version: 'v23.1.0'
+            mapdl-version: 'v23.2-ubuntu'
           - extended_testing: false
             mapdl-version: 'v24.1.0'
+          - extended_testing: false
+            mapdl-version: 'v24.1-ubuntu'
+          # - extended_testing: false
+          #   mapdl-version: 'v24.1-ubuntu-student'
+          - extended_testing: false
+            mapdl-version: 'v24.2.0'
+          - extended_testing: false
+            mapdl-version: 'latest-ubuntu'
+          # - extended_testing: false
+          #   mapdl-version: 'latest-ubuntu-student'
+
     env:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_PORT2: 21001  # for the pool testing and default won't work on GitHub runners
@@ -320,10 +348,10 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.6
 
       - name: "Login in Github container registry"
-        uses: docker/login-action@v3.0.0
+        uses: docker/login-action@v3.1.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -482,7 +510,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-image: ['v23.2-ubuntu', 'v24.1-ubuntu', 'v24.1-ubuntu-student']
+        mapdl-image: [
+          'v23.2-ubuntu', 
+          'v24.1-ubuntu', 
+          'v24.1-ubuntu-student',
+          'latest-ubuntu',
+          'latest-ubuntu-student',
+          ]
         extended_testing:
           - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
         exclude:
@@ -490,6 +524,8 @@ jobs:
             mapdl-image: 'v23.2-ubuntu'
           - extended_testing: false
             mapdl-image: 'v24.1-ubuntu'
+          - extended_testing: false
+            mapdl-image: 'latest-ubuntu'
     container:
       image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-image }}
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
@@ -505,7 +541,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.6
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -608,7 +644,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-image: ['v23.2-ubuntu', 'v24.1-ubuntu', 'v24.1-ubuntu-student']
+        mapdl-image: [
+          'v23.2-ubuntu',
+          'v24.1-ubuntu',
+          'v24.1-ubuntu-student',
+          'latest-ubuntu',
+          'latest-ubuntu-student',
+          ]
         extended_testing:
           - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
         exclude:
@@ -616,6 +658,8 @@ jobs:
             mapdl-image: 'v23.2-ubuntu'
           - extended_testing: false
             mapdl-image: 'v24.1-ubuntu'
+          - extended_testing: false
+            mapdl-image: 'latest-ubuntu'
     container:
       image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-image }}
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
@@ -629,7 +673,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.6
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -665,7 +709,13 @@ jobs:
         run: |
           # Because there is no 'ansys-tools-path' we need to input the
           # executable path with the env var: PYMAPDL_MAPDL_EXEC.
-          version=$(echo "${{ matrix.mapdl-image }}" | head -c 5 | tail -c 4 | tr -d '.')
+
+          if [[ "${{ matrix.mapdl-image }}" == *"latest-ubuntu"* ]] ; then
+            version="242"
+          else
+            version=$(echo "${{ matrix.mapdl-image }}" | head -c 5 | tail -c 4 | tr -d '.')
+          fi;
+
           echo "$version"
 
           export PYMAPDL_MAPDL_EXEC=/ansys_inc/v"$version"/ansys/bin/ansys"$version"
@@ -692,6 +742,7 @@ jobs:
 
 
   test-windows:
+    # Skipped
     if: github.repository == ''
     name: "Local: Build & test on Windows"
     runs-on: [self-hosted, Windows, pymapdl]
@@ -700,7 +751,7 @@ jobs:
       ON_LOCAL: TRUE
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.1.6
 
       # Skipping because it is installed locally.
       # - name: Setup Python
@@ -813,7 +864,9 @@ jobs:
     needs: [release]
     steps:
       - name: Deploy the stable documentation
-        uses: ansys/actions/doc-deploy-stable@v5
+        # TODO: testing SEO improvements. This branch avoids creating a
+        # sitemap.xml pages in opposite to v5.
+        uses: ansys/actions/doc-deploy-stable@feat/seo-improvements
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -826,7 +879,7 @@ jobs:
     needs: upload-docs-release
     steps:
       - name: "Install Git and clone project"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.6
 
       - name: "Install the package requirements"
         run: pip install -e .
@@ -841,7 +894,7 @@ jobs:
           echo "VERSION_MEILI=$VERSION_MEILI" >> $GITHUB_ENV
 
       - name: "Deploy the latest documentation index"
-        uses: ansys/actions/doc-deploy-index@v5
+        uses: ansys/actions/doc-deploy-index@v6
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}/version/${{ env.VERSION }}
           index-name: pymapdl-v${{ env.VERSION_MEILI }}
@@ -856,7 +909,8 @@ jobs:
     needs: [docs-build]
     steps:
       - name: Deploy the latest documentation
-        uses: ansys/actions/doc-deploy-dev@v5
+        # TODO: testing SEO improvements. This branch reuses the "index.html" from the stable version
+        uses: ansys/actions/doc-deploy-dev@feat/seo-improvements
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -868,7 +922,7 @@ jobs:
     needs: upload-dev-docs
     steps:
       - name: "Deploy the latest documentation index"
-        uses: ansys/actions/doc-deploy-index@v5
+        uses: ansys/actions/doc-deploy-index@v6
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}/version/dev
           index-name: pymapdl-vdev
@@ -899,9 +953,9 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v1.0.0
+      - uses: actions/checkout@v4.1.6
       - name: "Set up Julia"
-        uses: julia-actions/setup-julia@v1
+        uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.julia-version }}
       

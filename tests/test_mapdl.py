@@ -1266,6 +1266,7 @@ def test_get_file_path(mapdl, tmpdir):
     assert fobject not in mapdl.list_files()
     assert fobject not in os.listdir()
 
+    prev = mapdl._local
     mapdl._local = True
     fname_ = mapdl._get_file_path(fobject)
     assert fname in fname_
@@ -1277,6 +1278,8 @@ def test_get_file_path(mapdl, tmpdir):
     # If we are not in local, now it should have been uploaded
     assert fname in mapdl.list_files()
 
+    mapdl._local = prev
+
 
 @pytest.mark.parametrize(
     "option2,option3,option4",
@@ -1286,7 +1289,7 @@ def test_get_file_path(mapdl, tmpdir):
         ("expdata", "dat", "DIR"),
     ],
 )
-def test_tbft(mapdl, tmpdir, option2, option3, option4):
+def test_tbft(mapdl, cleared, tmpdir, option2, option3, option4):
     fname = "expdata.dat"
     dirpath = tmpdir.mkdir("tmpdir")
     fpath = dirpath.join(fname)
@@ -1305,12 +1308,16 @@ def test_tbft(mapdl, tmpdir, option2, option3, option4):
     else:
         option2 = os.path.join(dirpath, option2)
 
-    mapdl.prep7(mute=True)
+    mapdl.prep7()
     mat_id = mapdl.get_value("MAT", 0, "NUM", "MAX") + 1
-    mapdl.tbft("FADD", mat_id, "HYPER", "MOONEY", "3", mute=True)
-    mapdl.tbft("EADD", mat_id, "UNIA", option2, option3, option4, "", "", "", mute=True)
+    output = mapdl.tbft("FADD", mat_id, "HYPER", "MOONEY", "3")
+    assert "Successfully Constructed Material Model" in output
+    output = mapdl.tbft("EADD", mat_id, "UNIA", option2, option3, option4, "", "", "")
+    assert "Successfully Constructed Material Model" in output
 
-    assert fname in mapdl.list_files()
+    # with pytest.warns(UserWarning):
+    #     # checking warning if overwriting
+    #     mapdl.tbft("FADD", mat_id, "HYPER", "MOONEY", "3")
 
 
 def test_tbft_not_found(mapdl):
@@ -1485,8 +1492,9 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
         mapdl.mpread(fname="dummy", ext="dummy", lib="something")
 
     # Test suppliying a dir path when in remote
-    with pytest.raises(IOError):
-        mapdl.mpwrite("/test_dir/test", "mp")
+    if not ON_LOCAL:
+        with pytest.raises(IOError):
+            mapdl.mpwrite("/test_dir/test", "mp")
 
 
 def test_mapdl_str(mapdl):
@@ -1515,7 +1523,7 @@ def test_file_command_local(mapdl, cube_solve, tmpdir):
     with pytest.raises(FileNotFoundError):
         mapdl.file("potato")
 
-    assert rst_file in mapdl.list_files()
+    assert os.path.basename(rst_file) in mapdl.list_files()
     rst_fpath = os.path.join(mapdl.directory, rst_file)
 
     # change directory
@@ -1851,7 +1859,7 @@ def test_cache_pids(mapdl):
     mapdl._cache_pids()  # Recache pids
 
     for each in mapdl._pids:
-        assert "ansys" in "".join(psutil.Process(each).cmdline())
+        assert "ansys" in "".join(psutil.Process(each).cmdline()).lower()
 
 
 @requires("local")
@@ -1942,7 +1950,9 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
 @requires("nostudent")
 def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
-        license_server_check=False, additional_switches=QUICK_LAUNCH_SWITCHES
+        license_server_check=False,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+        port=mapdl.port + 1,
     )
     mapdl2.parameters["my_par"] = "initial_value"
 
@@ -1957,10 +1967,12 @@ def test_save_on_exit(mapdl, cleared):
     mapdl2.exit()
 
     mapdl2 = launch_mapdl(
-        license_server_check=False, additional_switches=QUICK_LAUNCH_SWITCHES
+        license_server_check=False,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+        port=mapdl.port + 1,
     )
     mapdl2.resume(db_path)
-    if mapdl.version >= 24.1:
+    if mapdl.version >= 24.2:
         assert mapdl2.parameters["my_par"] == "initial_value"
     else:
         # This fails in earlier versions of MAPDL
@@ -1974,7 +1986,9 @@ def test_save_on_exit(mapdl, cleared):
     mapdl2.exit(save=True)
 
     mapdl2 = launch_mapdl(
-        license_server_check=False, additional_switches=QUICK_LAUNCH_SWITCHES
+        license_server_check=False,
+        additional_switches=QUICK_LAUNCH_SWITCHES,
+        port=mapdl.port + 1,
     )
     mapdl2.resume(db_path)
     assert mapdl2.parameters["my_par"] == "new_initial_value"
@@ -2244,7 +2258,7 @@ def test_inquire_invalid(mapdl):
 
 def test_inquire_default(mapdl):
     mapdl.title = "heeeelloo"
-    assert mapdl.directory == mapdl.inquire()
+    assert Path(mapdl.directory) == Path(mapdl.inquire())
 
 
 def test_vwrite_error(mapdl):
@@ -2433,3 +2447,8 @@ def test_not_correct_et_element(mapdl):
     mapdl.et(1, 227)
     with pytest.warns(UserWarning, match="is normal behavior when a CDB file is used"):
         mapdl.keyopt(1, 222)
+
+
+def test_ctrl(mapdl):
+    mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
+    mapdl._ctrl("set_verb", 0)  # Returning to non-verbose

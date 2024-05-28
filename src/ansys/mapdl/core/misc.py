@@ -63,6 +63,19 @@ except ModuleNotFoundError:  # pragma: no cover
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
 
 
+ANSYS_ENV_VARS = [
+    "PYMAPDL_START_INSTANCE",
+    "PYMAPDL_PORT",
+    "PYMAPDL_IP",
+    "PYMAPDL_MAPDL_EXEC",
+    "PYMAPDL_MAPDL_VERSION",
+    "PYMAPDL_MAX_MESSAGE_LENGTH",
+    "ON_CI",
+    "ON_LOCAL",
+    "P_SCHEMA",
+]
+
+
 class ROUTINES(Enum):
     """MAPDL routines."""
 
@@ -274,7 +287,7 @@ class Report(base_report_class):
         text_width=80,
         sort=False,
         gpu=True,
-        ansys_vars=None,
+        ansys_vars=ANSYS_ENV_VARS,
         ansys_libs=None,
     ):
         """Generate a :class:`scooby.Report` instance.

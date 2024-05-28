@@ -304,7 +304,7 @@ class DynamicOptions:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Specifies how to include ocean wave information in a harmonic
             analysis:
 

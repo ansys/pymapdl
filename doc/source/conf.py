@@ -2,14 +2,10 @@
 
 from datetime import datetime
 import os
+from pathlib import Path
 import warnings
 
-from ansys_sphinx_theme import (
-    ansys_favicon,
-    get_version_match,
-    pyansys_logo_black,
-    pyansys_logo_white,
-)
+from ansys_sphinx_theme import ansys_favicon, get_version_match
 import numpy as np
 import pyvista
 from sphinx.application import Sphinx
@@ -62,13 +58,22 @@ REPOSITORY_NAME = "pymapdl"
 USERNAME = "ansys"
 BRANCH = "main"
 
-
 DEFAULT_EXAMPLE_EXTENSION = "py"
+
+DOC_PATH = "doc/source"
 GALLERY_EXAMPLES_PATH = "examples/gallery_examples"
 EXAMPLES_ROOT = "examples"
 EXAMPLES_PATH_FOR_DOCS = f"../../{EXAMPLES_ROOT}/"
-DOC_PATH = "doc/source"
+
 SEARCH_HINTS = ["def", "class"]
+
+SOURCE_PATH = Path(__file__).parent.resolve().absolute()
+pyansys_light_mode_logo = str(
+    os.path.join(SOURCE_PATH, "_static", "pyansys-logo-light_mode.png")
+)
+pyansys_dark_mode_logo = str(
+    os.path.join(SOURCE_PATH, "_static", "pyansys-logo-dark_mode.png")
+)
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -104,9 +109,8 @@ intersphinx_mapping = {
     "ansys-math-core": ("https://math.docs.pyansys.com/version/stable/", None),
 }
 
-suppress_warnings = ["label.*", "design.fa-build"]
+suppress_warnings = ["label.*", "design.fa-build", "config.cache"]
 sd_fontawesome_latex = True
-# supress_warnings = ["ref.option"]
 
 # Graphviz diagrams configuration
 graphviz_output_format = "png"
@@ -142,6 +146,7 @@ html_favicon = ansys_favicon
 # notfound.extension
 notfound_template = "404.rst"
 notfound_urls_prefix = "/../"
+html_baseurl = f"https://{cname}/version/stable"
 
 # static path
 html_static_path = ["_static"]
@@ -200,7 +205,8 @@ with open("substitutions.rst") as f:
 
 # Setting redicts
 redirects = {
-    # old linK: https://dev.mapdl.docs.pyansys.com/user_guide/krylov.html
+    #
+    # Old link: https://dev.mapdl.docs.pyansys.com/user_guide/krylov.html
     "user_guide/krylov": "examples/extended_examples/Krylov/krylov_example"
 }
 
@@ -212,6 +218,8 @@ linkcheck_ignore = [
     "https://mapdl.docs.pyansys.com/*",
     "https://ansysaccount.b2clogin.com/*",  # behind payfirewall
     "https://ansyshelp.ansys.com/*",  # behind payfirewall
+    "https://forum.ansys.com/forums/*",  # It is detected as broken
+    "https://courses.ansys.com/*",  # It is detected as broken
 ]
 linkcheck_anchors_ignore = [
     # these anchors are picked by linkcheck as broken but they are not.
@@ -220,6 +228,8 @@ linkcheck_anchors_ignore = [
     "pyvista.UnstructuredGrid",
     "pyvista.Plotter.show",
 ]
+
+user_agent = """curl https://www.ansys.com -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.3"""
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -254,7 +264,7 @@ sphinx_gallery_conf = {
     "ignore_pattern": "flycheck*",
     "thumbnail_size": (350, 350),
     "remove_config_comments": True,
-    "default_thumb_file": pyansys_logo_white,
+    "default_thumb_file": pyansys_light_mode_logo,
     "show_signature": False,
 }
 # ---
@@ -263,7 +273,7 @@ sphinx_gallery_conf = {
 # -- Options for HTML output -------------------------------------------------
 html_short_title = html_title = "PyMAPDL"
 html_theme = "ansys_sphinx_theme"
-html_logo = pyansys_logo_black
+html_logo = pyansys_dark_mode_logo
 html_theme_options = {
     "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
     "github_url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}",
@@ -304,10 +314,15 @@ html_context = {
     "github_user": USERNAME,
     "github_repo": REPOSITORY_NAME,
     "github_version": BRANCH,
-    "doc_path": DOC_PATH,
+    "doc_path": str(DOC_PATH),
     "source_path": "src",
 }
 html_show_sourcelink = False
+
+html_sidebars = {
+    "mapdl_commands/**/**": [],
+    "mapdl_commands/index": [],
+}
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
