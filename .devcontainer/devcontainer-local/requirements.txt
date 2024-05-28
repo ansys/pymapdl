@@ -1,7 +1,7 @@
 ansys-dpf-core==0.10.1
 autopep8==2.1.1
 matplotlib==3.9.0
-scipy==1.13.0
+scipy==1.13.1
 pandas==2.2.2
 pyiges[full]==0.3.1
 pytest==8.2.1
