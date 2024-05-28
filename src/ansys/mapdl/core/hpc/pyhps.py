@@ -90,7 +90,9 @@ class PythonTask(TaskDefinition):
         kwargs["name"] = "Python Task"
         kwargs["software_requirements"] = [
             Software(name="Bash", version="0.1"),
-            Software(name="Python", version="3.9"),
+            Software(
+                name="Python", version="3.9"
+            ),  # this should be adapted to the python version used in the class
         ]
 
         # Call the parent constructor with the updated kwargs
@@ -446,14 +448,16 @@ class JobSubmission:
 
     def _validate_python(self, python):
         """Validate Python version."""
-        if python not in [2, 2.7, 3, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 3.12]:
+        if python is None:
+            return 3
+        elif python not in [2, 2.7, 3, 3.5, 3.6, 3.7, 3.8, 3.9, 3.10, 3.11, 3.12]:
             warn(f"Python {python} might not be supported by the cluster.")
         return python
 
     def _validate_num_cores(self, num_cores: int):
         """Validate num_cores inputs"""
         if not num_cores:
-            num_cores = 0
+            num_cores = 1
 
         return int(num_cores)
 
@@ -663,7 +667,10 @@ class JobSubmission:
                         memory=self.memory * 1024 * 1024,
                         disk_space=self.disk_space * 1024 * 1024,
                         # distributed=True,
-                        hpc_resources=HpcResources(exclusive=self.exclusive),
+                        hpc_resources=HpcResources(
+                            exclusive=self.exclusive,
+                            # queue="qlarge"
+                        ),
                     ),
                     max_execution_time=self.max_execution_time,
                     execution_level=0,
