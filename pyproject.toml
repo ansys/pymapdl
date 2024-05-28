@@ -82,7 +82,7 @@ doc = [
     "ansys-dpf-core==0.10.1",
     "ansys-mapdl-reader==0.53.0",
     "ansys-sphinx-theme==0.16.0",
-    "grpcio==1.63.0",
+    "grpcio==1.64.0",
     "imageio-ffmpeg==0.4.9",
     "imageio==2.34.1",
     "jupyter_sphinx==0.5.3",
