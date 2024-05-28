@@ -74,71 +74,32 @@ def get_value_from_json_or_default(
 
 
 # consider not using inheritance
-class PythonTask(TaskDefinition):
-    def __init__(self, *args, **kwargs):
-        # Get the names of the parameters of the TaskDefinition __init__ method
-        param_names = list(
-            TaskDefinition.__init__.__code__.co_varnames[
-                1 : TaskDefinition.__init__.__code__.co_argcount
-            ]
-        )
-
-        # Convert positional arguments to keyword arguments
-        for i, arg in enumerate(args):
-            kwargs[param_names[i]] = arg
-
-        kwargs["name"] = "Python Task"
-        kwargs["software_requirements"] = [
-            Software(name="Bash", version="0.1"),
-            Software(
-                name="Python", version="3.9"
-            ),  # this should be adapted to the python version used in the class
-        ]
-
-        # Call the parent constructor with the updated kwargs
-        super().__init__(**kwargs)
+PYTHONTASK = {
+    "name": "Python Task",
+    "software_requirements": [
+        Software(name="Bash", version="0.1"),
+        Software(
+            name="Python", version="3.9"
+        ),  # this should be adapted to the python version used in the class
+    ],
+    "execution_command": "%executable% %file:{executable}%",
+}
 
 
-class APDLTask(TaskDefinition):
-    def __init__(self, *args, **kwargs):
-        # Get the names of the parameters of the TaskDefinition __init__ method
-        param_names = list(
-            TaskDefinition.__init__.__code__.co_varnames[
-                1 : TaskDefinition.__init__.__code__.co_argcount
-            ]
-        )
-
-        # Convert positional arguments to keyword arguments
-        for i, arg in enumerate(args):
-            kwargs[param_names[i]] = arg
-
-        kwargs["name"] = "APDL Task"
-        kwargs["software_requirements"] = [
-            Software(name="Ansys Mechanical APDL", version="2024 R2")
-        ]
-
-        # Call the parent constructor with the updated kwargs
-        super().__init__(**kwargs)
+APDLTASK = {
+    "name": "APDL Task",
+    "software_requirements": [
+        Software(name="Ansys Mechanical APDL", version="2024 R2")
+    ],
+    "execution_command": "%executable% -b -i {executable} -o apdl_output.out",
+}
 
 
-class ShellTask(TaskDefinition):
-    def __init__(self, *args, **kwargs):
-        # Get the names of the parameters of the TaskDefinition __init__ method
-        param_names = list(
-            TaskDefinition.__init__.__code__.co_varnames[
-                1 : TaskDefinition.__init__.__code__.co_argcount
-            ]
-        )
-
-        # Convert positional arguments to keyword arguments
-        for i, arg in enumerate(args):
-            kwargs[param_names[i]] = arg
-
-        kwargs["name"] = "Shell Task"
-        kwargs["software_requirements"] = [Software(name="Bash", version="0.1")]
-
-        # Call the parent constructor with the updated kwargs
-        super().__init__(**kwargs)
+SHELLTASK = {
+    "name": "Shell Task",
+    "software_requirements": [Software(name="Bash", version="0.1")],
+    "execution_command": "%executable% %file:{executable}%",
+}
 
 
 class JobSubmission:
@@ -375,7 +336,7 @@ class JobSubmission:
     def _validate_inputs(self, inputs):
         """Validate inputs inputs"""
 
-        if self.mode != "python":
+        if inputs and self.mode != "python":
             raise ValueError("Inputs are not supported when using APDL or shell files.")
 
         if inputs is None:
@@ -389,12 +350,13 @@ class JobSubmission:
     def _validate_outputs(self, outputs):
         """Validate outputs inputs"""
 
-        if self.mode != "python":
-            raise warn(
+        if outputs and self.mode != "python":
+            warn(
                 f"""Outputs are not directly supported when using APDL or shell files.
                 However, you can still write the parameters you want to the
                 file {self._output_parms_file} using the Python format
-                ('PARAMETER=VALUE')."""
+                ('PARAMETER=VALUE').""",
+                UserWarning,
             )
 
         if outputs is None:
@@ -482,14 +444,14 @@ class JobSubmission:
 
         return bool(exclusive)
 
-    def _validate_max_execution_time(self, max_execution_time):
+    def _validate_max_execution_time(self, max_execution_time: float):
         """Validate inputs for the maximum execution time."""
         if not max_execution_time:
-            max_execution_time = 0
+            return None
 
         return float(max_execution_time)
 
-    def _validate_name(self, name):
+    def _validate_name(self, name: str):
         """Validate name"""
         if name is None:
             if self.mode == "python":
@@ -502,7 +464,7 @@ class JobSubmission:
                 name = "My project"
         return name
 
-    def _validate_mode(self, mode):
+    def _validate_mode(self, mode: str):
         _, file_extension = os.path.splitext(self._main_file)
 
         if mode is None:
@@ -529,7 +491,7 @@ class JobSubmission:
         self._executed_pyscript = os.path.basename(self.main_file)
 
         # Prepare Python wrapper file for input/output injection/extraction
-        if self.inputs or self.outputs:
+        if self.mode == "python" and (self.inputs or self.outputs):
             self._executed_pyscript = self._wrapper_python_file
             self._prepare_python_wrapper()
 
@@ -645,22 +607,28 @@ class JobSubmission:
     def _create_task(self, file_input_ids, file_output_ids):
 
         if self.mode == "apdl":
-            task_class = APDLTask
+            task_class = APDLTASK
             executable = self.main_file
         elif self.mode == "python":
-            task_class = PythonTask
+            task_class = PYTHONTASK
             executable = self.shell_file
         else:
-            task_class = ShellTask
+            task_class = SHELLTASK
             executable = self.shell_file
 
-        execution_command = f"%executable% %file:{os.path.basename(executable)}%"
+        task_class_ = task_class.copy()
+
+        execution_command = task_class_.pop("execution_command").format(
+            executable=os.path.basename(executable)
+        )
+
+        print(f"Using executable: '{execution_command}'")
         logger.debug(f"Using executable: '{execution_command}'")
 
         # Process step
         if not self.task_definitions:
             self.task_definitions = [
-                task_class(
+                TaskDefinition(
                     execution_command=execution_command,
                     resource_requirements=ResourceRequirements(
                         num_cores=self.num_cores,
@@ -677,6 +645,7 @@ class JobSubmission:
                     num_trials=1,
                     input_file_ids=list(file_input_ids.values()),
                     output_file_ids=list(file_output_ids.values()),
+                    **task_class_,
                 )
             ]
 
@@ -741,7 +710,8 @@ class JobSubmission:
         for each_output_parm in outputs:
             # output
             name = each_output_parm
-            outparm = StringParameterDefinition(name=name, display_text=name)
+            # outparm = StringParameterDefinition(name=name, display_text=name)
+            outparm = FloatParameterDefinition(name=name, display_text=name)
 
             output_params.append(outparm)
 
@@ -756,6 +726,7 @@ class JobSubmission:
                 tokenizer="=",
                 parameter_definition_id=outparm.id,
                 file_id=output_file_id,
+                # string_quote="'",
             )
             logger.debug(f"Output parameter: {name}\n{outparm}\nMapping: {parm_map}")
 
@@ -767,7 +738,6 @@ class JobSubmission:
         return input_params, output_params, param_mappings
 
     def _add_files_to_project(self):
-
         # Checks:
         if not all([os.path.exists(each) for each in self.input_files]):
             raise ValueError("One or more input files do not exist.")
@@ -849,8 +819,11 @@ class JobSubmission:
             self.input_files.append(self.requirements_file)
             self.input_files.append(self.shell_file)
 
-        if self.inputs or self.outputs:
+        if self.mode == "python" and (self.inputs or self.outputs):
             self.input_files.append(self._wrapper_python_file)
+
+        if self.mode == "apdl":
+            self.output_files.append("apdl_output.out")
 
         if self.extra_files:
             self.input_files.extend(self.extra_files)
