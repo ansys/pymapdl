@@ -942,6 +942,9 @@ with open("{self._output_parms_file}", "w") as fid:
             url=self.url, username=self.user, password=self.password, verify=False
         )
 
+    def close_client(self):
+        self._client.session.close()
+
 
 class PyMAPDLJobSubmission(JobSubmission):
     pass
