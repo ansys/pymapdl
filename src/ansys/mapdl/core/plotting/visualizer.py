@@ -31,10 +31,10 @@ from ansys.mapdl.core.plotting.theme import MapdlTheme
 
 class MapdlPlotterBackend(PyVistaBackendInterface):
     """Plotter class for PyMapdl.
-    
+
     This class is an implementation of the PlotterInterface class from the ansys-visualizer package.
     Picker is implemented in PyMAPDL specific classes due to the characteristics of the library.
-    
+
     Parameters
     ----------
     use_trame : bool, optional
@@ -42,10 +42,14 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
     theme : pv.DefaultTheme, optional
         _description_, by default None1
     """
-    
-    def __init__(self, use_trame: bool = False, plot_picked_names: bool = True, **plotter_kwargs):
+
+    def __init__(
+        self, use_trame: bool = False, plot_picked_names: bool = True, **plotter_kwargs
+    ):
         """Initialize the MapdlPlotter class."""
-        super().__init__(use_trame=use_trame, plot_picked_names=plot_picked_names, **plotter_kwargs)
+        super().__init__(
+            use_trame=use_trame, plot_picked_names=plot_picked_names, **plotter_kwargs
+        )
 
     def plot_iter(
         self,
@@ -68,10 +72,17 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
     def plot(self, object: Any, filter: str = None, **plotting_options):
         self.pv_interface.plot(object, filter, **plotting_options)
 
-    def show(self, object: Any = None, screenshot: str = None, filter: bool = None, **plotting_options):
+    def show(
+        self,
+        object: Any = None,
+        screenshot: str = None,
+        filter: bool = None,
+        **plotting_options,
+    ):
         if object is not None:
             self.plot(object, filter, **plotting_options)
         self.pv_interface.show(screenshot=screenshot, **plotting_options)
+
 
 class MapdlPlotter(Plotter):
     """Plotter class for PyMapdl.
@@ -109,7 +120,9 @@ class MapdlPlotter(Plotter):
         labels : List[str]
             List of labels to be added.
         """
-        _ = self._backend.pv_interface.scene.add_point_labels(points, labels, **plotting_options)
+        _ = self._backend.pv_interface.scene.add_point_labels(
+            points, labels, **plotting_options
+        )
 
     def add_points(self, points: Iterable[float], **plotting_options) -> None:
         """Add points to the plotter.
