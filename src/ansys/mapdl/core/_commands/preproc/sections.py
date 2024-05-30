@@ -1082,7 +1082,7 @@ class Sections:
         secid
             Section identification number.
 
-        type\_
+        type\\_
             BEAM
 
             BEAM - Defines a beam section.
@@ -1298,7 +1298,7 @@ class Sections:
 
             GROUP - If a section calls other sections, this option lists those sections too.
 
-        type\_
+        type\\_
             The section type. Valid arguments are ALL (the default) and the
             types available on the SECTYPE command.
 

@@ -204,7 +204,7 @@ def get_section_indentation(section_name, docstring):
 def inject_before(section, indentation, indented_doc_inject, docstring):
     return re.sub(
         section + r"\n\s*-*",
-        f"{indented_doc_inject.strip()}\n\n{indentation}\g<0>",
+        f"{indented_doc_inject.strip()}\n\n{indentation}" + r"\g<0>",
         docstring,
         flags=re.IGNORECASE,
     )
@@ -278,7 +278,7 @@ def check_valid_output(func):
         if (
             "*** WARNING ***" in output or "*** ERROR ***" in output
         ):  # Error should be caught in mapdl.run.
-            err_type = re.findall("\*\*\* (.*) \*\*\*", output)[0]
+            err_type = re.findall(r"*** (.*) ***", output)[0]
             msg = f"Unable to parse because of next {err_type.title()}" + "\n".join(
                 output.splitlines()[-2:]
             )

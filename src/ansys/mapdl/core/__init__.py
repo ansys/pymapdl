@@ -36,7 +36,7 @@ if not os.path.exists(USER_DATA_PATH):  # pragma: no cover
     os.makedirs(USER_DATA_PATH)
 
 DEPRECATING_MINIMUM_PYTHON_VERSION = True
-MINIMUM_PYTHON_VERSION = (3, 8)
+MINIMUM_PYTHON_VERSION = (3, 9)
 
 first_time_file = os.path.join(USER_DATA_PATH, ".firstime")
 if not os.path.exists(first_time_file):  # pragma: no cover
@@ -120,7 +120,7 @@ else:
 
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc as Mapdl
 from ansys.mapdl.core.misc import Information, Report, _check_has_ansys
-from ansys.mapdl.core.pool import LocalMapdlPool
+from ansys.mapdl.core.pool import MapdlPool
 from ansys.mapdl.core.theme import MapdlTheme, _apply_default_theme
 
 _HAS_ANSYS = _check_has_ansys()

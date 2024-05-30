@@ -63,6 +63,19 @@ except ModuleNotFoundError:  # pragma: no cover
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
 
 
+ANSYS_ENV_VARS = [
+    "PYMAPDL_START_INSTANCE",
+    "PYMAPDL_PORT",
+    "PYMAPDL_IP",
+    "PYMAPDL_MAPDL_EXEC",
+    "PYMAPDL_MAPDL_VERSION",
+    "PYMAPDL_MAX_MESSAGE_LENGTH",
+    "ON_CI",
+    "ON_LOCAL",
+    "P_SCHEMA",
+]
+
+
 class ROUTINES(Enum):
     """MAPDL routines."""
 
@@ -274,7 +287,7 @@ class Report(base_report_class):
         text_width=80,
         sort=False,
         gpu=True,
-        ansys_vars=None,
+        ansys_vars=ANSYS_ENV_VARS,
         ansys_libs=None,
     ):
         """Generate a :class:`scooby.Report` instance.
@@ -644,36 +657,6 @@ def check_valid_port(port, lower_bound=1000, high_bound=60000):
         raise ValueError(
             f"'port' values should be between {lower_bound} and {high_bound}."
         )
-
-
-def check_valid_start_instance(start_instance):
-    """
-    Checks if the value obtained from the environmental variable is valid.
-
-    Parameters
-    ----------
-    start_instance : str
-        Value obtained from the corresponding environment variable.
-
-    Returns
-    -------
-    bool
-        Returns ``True`` if ``start_instance`` is ``True`` or ``"True"``,
-        ``False`` if otherwise.
-
-    """
-    if not isinstance(start_instance, (str, bool)):
-        raise ValueError("The value 'start_instance' should be an string or a boolean.")
-
-    if isinstance(start_instance, bool):
-        return start_instance
-
-    if start_instance.lower() not in ["true", "false"]:
-        raise ValueError(
-            f"The value 'start_instance' should be equal to 'True' or 'False' (case insensitive)."
-        )
-
-    return start_instance.lower() == "true"
 
 
 def update_information_first(update=False):

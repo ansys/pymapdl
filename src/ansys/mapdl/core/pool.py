@@ -23,14 +23,22 @@
 """This module is for threaded implementations of the mapdl interface"""
 import os
 import shutil
+import socket
 import tempfile
 import time
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 import warnings
+import weakref
 
 from ansys.mapdl.core import LOG, launch_mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
-from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT, port_in_use
+from ansys.mapdl.core.launcher import (
+    LOCALHOST,
+    MAPDL_DEFAULT_PORT,
+    check_valid_ip,
+    get_start_instance,
+    port_in_use,
+)
 from ansys.mapdl.core.mapdl_grpc import _HAS_TQDM
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
 
@@ -67,7 +75,7 @@ def available_ports(n_ports: int, starting_port: int = MAPDL_DEFAULT_PORT) -> Li
     return ports
 
 
-class LocalMapdlPool:
+class MapdlPool:
     """Create a pool of MAPDL instances.
 
     .. note::
@@ -114,17 +122,23 @@ class LocalMapdlPool:
         the index of each instance in the pool.
         By default, the instances directories are named as "Instances_{i}".
 
+    start_instance : bool, optional
+        Set it to ``False`` to make PyMAPDL to connect to remote instances instead
+        of launching them. In that case, you need to supply the MAPDL instances
+        ports as a list of ``int`` s.
+
     **kwargs : dict, optional
-        Additional keyword arguments. For a complete listing, see the description for the
-        :func:`ansys.mapdl.core.launcher.launch_mapdl` method.
+        Additional keyword arguments. For a complete listing, see the
+        description for the :func:`ansys.mapdl.core.launcher.launch_mapdl`
+        method.
 
     Examples
     --------
     Simply create a pool of 10 instances to run in the temporary
     directory.
 
-    >>> from ansys.mapdl.core import LocalMapdlPool
-    >>> pool = LocalMapdlPool(10)
+    >>> from ansys.mapdl.core import MapdlPool
+    >>> pool = MapdlPool(10)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     Create several instances with 1 CPU each running at the current
@@ -132,38 +146,44 @@ class LocalMapdlPool:
 
     >>> import os
     >>> my_path = os.getcmd()
-    >>> pool = LocalMapdlPool(10, nproc=1, run_location=my_path)
+    >>> pool = MapdlPool(10, nproc=1, run_location=my_path)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     Create a pool while specifying the MAPDL executable in Windows.
 
     >>> exec_file = 'C:/Program Files/ANSYS Inc/v212/ansys/bin/winx64/ANSYS212.exe'
-    >>> pool = LocalMapdlPool(10, exec_file=exec_file)
+    >>> pool = MapdlPool(10, exec_file=exec_file)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     Create a pool while specifying the MAPDL executable in Linux.
 
     >>> exec_file = '/ansys_inc/v211/ansys/bin/ansys211'
-    >>> pool = LocalMapdlPool(10, exec_file=exec_file)
+    >>> pool = MapdlPool(10, exec_file=exec_file)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
     """
 
     def __init__(
         self,
-        n_instances: int,
+        n_instances: int = None,
         wait: bool = True,
         run_location: Optional[str] = None,
-        port: int = MAPDL_DEFAULT_PORT,
+        port: Union[int, List[int]] = MAPDL_DEFAULT_PORT,
         progress_bar: bool = DEFAULT_PROGRESS_BAR,
         restart_failed: bool = True,
         remove_temp_files: bool = True,
         names: Optional[str] = None,
         override=True,
+        start_instance: bool = None,
+        exec_file: Optional[str] = None,
+        ip: Optional[str] = None,
         **kwargs,
     ) -> None:
         """Initialize several instances of mapdl"""
         self._instances: List[None] = []
+
+        # Getting debug arguments
+        _debug_no_launch = kwargs.pop("_debug_no_launch", None)
 
         if run_location is None:
             run_location = tempfile.gettempdir()
@@ -175,6 +195,43 @@ class LocalMapdlPool:
         self._spawning_i: int = 0
         self._exiting_i: int = 0
         self._override = override
+
+        # Getting IP from env var
+        ip_env_var = os.environ.get("PYMAPDL_IP", "")
+        if ip_env_var != "":
+            if ip:
+                warnings.warn(
+                    "The env var 'PYMAPDL_IP' is set, hence the 'ip' argument is overwritten."
+                )
+
+            ip = ip_env_var
+            LOG.debug(f"An IP ({ip}) has been set using 'PYMAPDL_IP' env var.")
+
+        ip = None if ip == "" else ip  # Making sure the variable is not empty
+
+        if ip is None:
+            ips = LOCALHOST
+
+        else:
+            if not isinstance(ip, (tuple, list)):
+                ips = [ip]
+            else:
+                ips = ip
+
+            # Converting ip or hostname to ip
+            ips = [socket.gethostbyname(each) for each in ips]
+            _ = [check_valid_ip(each) for each in ips]  # double check
+
+        # Getting "start_instance" using "True" as default.
+        if (ip is not None) and (start_instance is None):
+            # An IP has been supplied. By default, 'start_instance' is equal
+            # false, unless it is set through the env vars.
+            start_instance = get_start_instance(start_instance=False)
+        else:
+            start_instance = get_start_instance(start_instance=start_instance)
+
+        self._start_instance = start_instance
+        LOG.debug(f"'start_instance' equals to '{start_instance}'")
 
         if not names:
             names = "Instance"
@@ -188,35 +245,67 @@ class LocalMapdlPool:
                 "Only strings or functions are allowed in the argument 'name'."
             )
 
-        # verify that mapdl is 2021R1 or newer
-        if "exec_file" in kwargs:
-            exec_file = kwargs["exec_file"]
-        else:  # get default executable
+        # verify executable
+        exec_file = os.getenv("PYMAPDL_MAPDL_EXEC", exec_file)
+
+        if start_instance:
+            exec_file = kwargs.get("exec_file", exec_file)
+
+            if not exec_file:  # get default executable
+                if _HAS_ATP:
+                    exec_file = get_ansys_path()
+                else:
+                    raise ValueError(
+                        "Please use 'exec_file' argument to specify the location of the ansys installation.\n"
+                        "Alternatively, PyMAPDL can detect your ansys installation if you install 'ansys-tools-path' library."
+                    )
+
+                if exec_file is None:
+                    raise FileNotFoundError(
+                        "Invalid exec_file path or cannot load cached "
+                        "ansys path.  Enter one manually using "
+                        "exec_file=<path to executable>"
+                    )
+
+            # Checking version
             if _HAS_ATP:
-                exec_file = get_ansys_path()
-            else:
-                raise ValueError(
-                    "Please use 'exec_file' argument to specify the location of the ansys installation.\n"
-                    "Alternatively, PyMAPDL can detect your ansys installation if you install 'ansys-tools-path' library."
-                )
+                if version_from_path("mapdl", exec_file) < 211:
+                    raise VersionError("MapdlPool requires MAPDL 2021R1 or later.")
 
-            if exec_file is None:
-                raise FileNotFoundError(
-                    "Invalid exec_file path or cannot load cached "
-                    "ansys path.  Enter one manually using "
-                    "exec_file=<path to executable>"
-                )
-
-        if _HAS_ATP:
-            if version_from_path("mapdl", exec_file) < 211:
-                raise VersionError("LocalMapdlPool requires MAPDL 2021R1 or later.")
+        self._exec_file = exec_file
 
         # grab available ports
-        ports = available_ports(n_instances, port)
+        if start_instance:
+            if isinstance(port, int) or len(port) == 1:
+                ports = available_ports(n_instances, port)
+            else:
+                ports = port
+                n_instances = len(ports)
 
-        if self._root_dir is not None:
-            if not os.path.isdir(self._root_dir):
-                os.makedirs(self._root_dir)
+            if self._root_dir is not None:
+                if not os.path.isdir(self._root_dir):
+                    os.makedirs(self._root_dir)
+        else:
+            if isinstance(port, int) or len(port) == 1:
+                ports = [port + i for i in range(n_instances)]
+            else:
+                ports = port
+                n_instances = len(ports)
+
+        if len(ports) != n_instances:
+            raise ValueError(
+                "The number of instances should be the same as the number of ports."
+            )
+
+        if ips == LOCALHOST:
+            ips = [LOCALHOST for each in ports]
+
+        if len(ports) != len(ips):
+            raise ValueError(
+                "The number of ips should be the same as the number of ports."
+            )
+
+        LOG.debug(f"Using ports: {ports}")
 
         self._instances = []
         self._active = True  # used by pool monitor
@@ -239,9 +328,26 @@ class LocalMapdlPool:
         self._instances = [None for _ in range(n_instances)]
 
         # threaded spawn
+        if _debug_no_launch:
+            self._debug_no_launch = {
+                "ports": ports,
+                "ips": ips,
+                "names": self._names,
+                "start_instance": start_instance,
+                "exec_file": exec_file,
+                "n_instances": n_instances,
+            }
+            return
+
         threads = [
             self._spawn_mapdl(
-                i, ports[i], pbar, name=self._names(i), thread_name=self._names(i)
+                i,
+                ports[i],
+                pbar,
+                name=self._names(i),
+                thread_name=self._names(i),
+                start_instance=start_instance,
+                exec_file=exec_file,
             )
             for i in range(n_instances)
         ]
@@ -565,8 +671,60 @@ class LocalMapdlPool:
             close_when_finished=close_when_finished,
         )
 
-    def next_available(self, return_index=False):
-        """Wait until an instance of mapdl is available and return that instance.
+    class _mapdl_pool_ctx:
+        """Provides the context manager for the ``MapdlPool`` class.
+
+        This context manager sets the MAPDL instance as ``busy`` and ``locked`` when
+        entering and then unsets the instance state when exiting.
+        """
+
+        def __init__(self, parent: "MapdlPool", return_index: bool = False):
+            self._parent = weakref.ref(parent)
+            self._instance = None
+            self._return_index = return_index
+
+        def __enter__(self):
+            if self._return_index:
+                mapdl, i = self._parent().next_available(return_index=True)
+                self._index = i
+
+            else:
+                mapdl = self._parent().next_available(return_index=False)
+
+            self._instance = mapdl
+            mapdl.locked = True
+            mapdl._busy = True
+
+            if self._return_index:
+                return mapdl, i
+            else:
+                return mapdl
+
+        def __exit__(self, *args):
+            mapdl = self._instance
+            mapdl.locked = False
+            mapdl._busy = False
+
+    def next(self, return_index: bool = False):
+        """Return a context manager that returns available instances.
+
+        This method manages the instance state (`locked` and `busy`) when the code enters
+        and exits the code block.
+
+        Parameters
+        ----------
+        return_index : bool, optional
+            Whether to return the index along with the instance.  The default is ``False``.
+
+        Returns
+        -------
+        ctx
+            Context manager to manage ``MapdlPool`` instances.
+        """
+        return self._mapdl_pool_ctx(self, return_index)
+
+    def next_available(self, return_index: bool = False, as_ctx: bool = False):
+        """Wait until an instance of MAPDL is available and return that instance.
 
         Parameters
         ----------
@@ -575,7 +733,7 @@ class LocalMapdlPool:
 
         Returns
         -------
-        pyansys.MapdlGrpc
+        MapdlGrpc
             Instance of MAPDL.
 
         int
@@ -590,7 +748,12 @@ class LocalMapdlPool:
         MAPDL Version:       24.1
         ansys.mapdl Version: 0.68.dev0
         """
+        if as_ctx:
+            return self.next(return_index)
+        else:
+            return self._next_available(return_index)
 
+    def _next_available(self, return_index: bool = False):
         # loop until the next instance is available
         while True:
             for i, instance in enumerate(self._instances):
@@ -612,8 +775,6 @@ class LocalMapdlPool:
                             return instance, i
                         else:
                             return instance
-                    else:
-                        instance._exited = True
 
     def __del__(self):
         self.exit()
@@ -688,7 +849,13 @@ class LocalMapdlPool:
 
     @threaded_daemon
     def _spawn_mapdl(
-        self, index: int, port: int = None, pbar: Optional[bool] = None, name: str = ""
+        self,
+        index: int,
+        port: int = None,
+        pbar: Optional[bool] = None,
+        name: str = "",
+        start_instance=True,
+        exec_file=None,
     ):
         """Spawn a mapdl instance at an index"""
         # create a new temporary directory for each instance
@@ -697,9 +864,11 @@ class LocalMapdlPool:
         run_location = create_temp_dir(self._root_dir, name=name)
 
         self._instances[index] = launch_mapdl(
+            exec_file=exec_file,
             run_location=run_location,
             port=port,
             override=True,
+            start_instance=start_instance,
             **self._spawn_kwargs,
         )
 
@@ -726,20 +895,21 @@ class LocalMapdlPool:
         """
         while self._active:
             for index, instance in enumerate(self._instances):
-                name = self._names[index]
+                name = self._names(index)
                 if not instance:  # encountered placeholder
                     continue
 
                 if instance._exited:
                     try:
-                        # use the next port after the current available port
                         self._spawning_i += 1
-                        port = max(self._ports) + 1
+
                         self._spawn_mapdl(
                             index,
-                            port=port,
+                            port=instance.port,
                             name=name,
                             thread_name=name,
+                            exec_file=self._exec_file,
+                            start_instance=self._start_instance,
                         ).join()
 
                     except Exception as e:

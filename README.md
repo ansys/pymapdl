@@ -108,14 +108,13 @@ correct citation.  For example, the BibTex citation is:
 ```bibtex
 @software{alexander_kaszynski_2020_4009467,
   author       = {Alexander Kaszynski},
-  title        = {{pyansys: Python Interface to MAPDL and Associated 
-                    Binary and ASCII Files}},
-  month        = aug,
-  year         = 2020,
+  title        = {{pyansys: Pythonic interface to MAPDL}},
+  month        = nov,
+  year         = 2021,
   publisher    = {Zenodo},
-  version      = {0.43.2},
-  doi          = {10.5281/zenodo.4009467},
-  url          = {https://doi.org/10.5281/zenodo.4009467}
+  version      = {0.60.3},
+  doi          = {10.5281/zenodo.4009466},
+  url          = {https://doi.org/10.5281/zenodo.4009466}
 }
 ```
 

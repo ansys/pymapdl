@@ -906,7 +906,7 @@ class PathOperations:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
             S - Select a new path.

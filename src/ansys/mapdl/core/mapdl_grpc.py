@@ -254,9 +254,13 @@ class MapdlGrpc(MapdlBase):
         Print the command ``/COM`` arguments to the standard output.
         The default is ``False``.
 
+    disable_run_at_connect: bool, optional
+        Whether to disable the housekeeping commands when connecting.
+        The default is ``False``.
+
     channel : grpc.Channel, optional
-        gRPC channel to use for the connection. Can be used as an
-        alternative to the ``ip`` and ``port`` parameters.
+        gRPC channel to use for the connection. This parameter can be
+        used as an alternative to the ``ip`` and ``port`` parameters.
 
     remote_instance : ansys.platform.instancemanagement.Instance
         The corresponding remote instance when MAPDL is launched through
@@ -316,6 +320,7 @@ class MapdlGrpc(MapdlBase):
         remove_temp_files: Optional[bool] = None,
         remove_temp_dir_on_exit: bool = False,
         print_com: bool = False,
+        disable_run_at_connect: bool = False,
         channel: Optional[grpc.Channel] = None,
         remote_instance: Optional["PIM_Instance"] = None,
         **start_parm,
@@ -437,7 +442,8 @@ class MapdlGrpc(MapdlBase):
         self._mesh_rep = MeshGrpc(self)
 
         # Run at connect
-        self._run_at_connect()
+        if not disable_run_at_connect:
+            self._run_at_connect()
 
         # HOUSEKEEPING:
         # Set to not abort after encountering errors.  Otherwise, many
@@ -880,7 +886,9 @@ class MapdlGrpc(MapdlBase):
             mute = self._mute
 
         if self._exited:
-            raise MapdlExitedError
+            raise MapdlExitedError(
+                f"The MAPDL instance has been exited before running the command: {cmd}"
+            )
 
         # don't allow empty commands
         if not cmd.strip():
@@ -1082,7 +1090,7 @@ class MapdlGrpc(MapdlBase):
             pass
 
         if (
-            self._version >= 24.2
+            self._version and self._version >= 24.2
         ):  # We can't use the non-cached version because of recursion error.
             # self.run("/EXIT,NOSAVE,,,,,SERVER")
             self._ctrl("EXIT")
@@ -1141,6 +1149,7 @@ class MapdlGrpc(MapdlBase):
         processes making this method ineffective for a local instance of MAPDL.
 
         """
+        self._log.debug("Closing processes")
         if self._local:
             # killing server process
             self._kill_server()
@@ -1408,18 +1417,19 @@ class MapdlGrpc(MapdlBase):
         return os.path.join(path, jobname + "0." + preference)
 
     @protect_grpc
-    def _ctrl(self, cmd):
-        """Issue control command to the mapdl server
+    def _ctrl(self, cmd: str, opt1: str = ""):
+        """Issue control command to the MAPDL server.
 
         Available commands:
 
-        - 'EXIT'
+        - ``EXIT``
             Calls exit(0) on the server.
 
-        - 'set_verb'
+        - ``set_verb``
             Enables verbose mode on the server.
+            In this case, the verbosity level is set using ``opt1`` argument.
 
-        - 'VERSION'
+        - ``VERSION``
             Returns version string in of the server in the form
             "MAJOR.MINOR.PATCH".  E.g. "0.3.0".  Known versions
             include:
@@ -1430,16 +1440,16 @@ class MapdlGrpc(MapdlBase):
 
         Unavailable/Flaky:
 
-        - 'time_stats'
+        - ``time_stats``
             Prints a table for time stats on the server.
             This command appears to be disabled/broken.
 
-        - 'mem-stats'
+        - ``mem-stats``
             To be added
 
         """
-        self._log.debug('Issuing CtrlRequest "%s"', cmd)
-        request = anskernel.CtrlRequest(ctrl=cmd)
+        self._log.debug(f'Issuing CtrlRequest "{cmd}" with option "{opt1}".')
+        request = anskernel.CtrlRequest(ctrl=str(cmd), opt1=str(opt1))
 
         # handle socket closing upon exit
         if cmd.lower() == "exit":
@@ -3477,3 +3487,72 @@ class MapdlGrpc(MapdlBase):
             scale=scale,
             **kwargs,
         )
+
+    def screenshot(self, savefig: Optional[str] = None):
+        """Take an MAPDL screenshot and show it in a popup window.
+
+        Parameters
+        ----------
+        savefig : Optional[str], optional
+            Name of or path to the screenshot file.
+            The default is ``None``.
+
+        Returns
+        -------
+        str
+            File name.
+
+        Raises
+        ------
+        FileNotFoundError
+            If the path given in the ``savefig`` parameter is not found or is not consistent.
+        ValueError
+            If given a wrong type for the ``savefig`` parameter.
+        """
+        previous_device = self.file_type_for_plots
+        self.show("PNG")
+        out_ = self.replot()
+        self.show(previous_device)  # previous device
+        file_name = self._get_plot_name(out_)
+
+        def get_file_name(path):
+            """Get a new filename so as not to overwrite an existing one."""
+            target_dir = os.path.join(path, "mapdl_screenshot_0.png")
+            i = 0
+            while os.path.exists(target_dir):
+                # Ensuring file is not overwritten.
+                i += 1
+                target_dir = os.path.join(path, f"mapdl_screenshot_{i}.png")
+            return target_dir
+
+        if savefig is None or savefig is False:
+            self._display_plot(file_name)
+
+        else:
+            if savefig is True:
+                # Copying to working directory
+                target_dir = get_file_name(os.getcwd())
+
+            elif isinstance(savefig, str):
+                if not os.path.dirname(savefig):
+                    # File name given only
+                    target_dir = os.path.join(os.getcwd(), savefig)
+
+                elif os.path.isdir(savefig):
+                    # Given directory path only, but not file name.
+                    target_dir = get_file_name(savefig)
+
+                elif os.path.exists(os.path.dirname(savefig)):
+                    # Only directory is given. Checking if directory exists.
+                    target_dir = savefig
+
+                else:
+                    raise FileNotFoundError("The filename or path is not valid.")
+
+            else:
+                raise ValueError(
+                    "Only strings or Booleans are valid inputs for the 'savefig' parameter."
+                )
+
+            shutil.copy(file_name, target_dir)
+            return os.path.basename(target_dir)

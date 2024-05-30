@@ -34,7 +34,6 @@ from subprocess import DEVNULL, call
 import tempfile
 import time
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
-import warnings
 from warnings import warn
 import weakref
 
@@ -57,6 +56,7 @@ from ansys.mapdl.core.commands import (
 from ansys.mapdl.core.errors import (
     ComponentNoData,
     MapdlCommandIgnoredError,
+    MapdlFileNotFoundError,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
 )
@@ -1977,7 +1977,7 @@ class _MapdlCore(Commands):
 
         """
 
-        warnings.warn(
+        warn(
             "'run_multiline()' is being deprecated in future versions.\n Please use 'input_strings'.",
             DeprecationWarning,
         )
@@ -2273,16 +2273,18 @@ class _MapdlCore(Commands):
                     pass
 
     def _get_plot_name(self, text: str) -> str:
-        """ "Obtain the plot filename. It also downloads it if in remote session."""
+        """Obtain the plot filename."""
         self._log.debug(text)
         png_found = PNG_IS_WRITTEN_TO_FILE.findall(text)
 
         if png_found:
             # flush graphics writer
+            previous_device = self.file_type_for_plots
             self.show("CLOSE", mute=True)
             # self.show("PNG", mute=True)
 
             filename = self._screenshot_path()
+            self.show(previous_device)
             self._log.debug(f"Screenshot at: {filename}")
 
             if os.path.isfile(filename):
@@ -2676,7 +2678,13 @@ class _MapdlCore(Commands):
     def _raise_errors(self, text):
         # to make sure the following error messages are caught even if a breakline is in between.
         flat_text = " ".join([each.strip() for each in text.splitlines()])
-        base_error_msg = "\n\nIgnore these messages by setting 'ignore_errors'=True"
+        base_error_msg = "\n\nIgnore these messages by setting 'ignore_errors'=True.\n"
+
+        if "unable to open file" in flat_text or (
+            "unable to open" in flat_text and "file" in flat_text
+        ):
+            text += base_error_msg
+            raise MapdlFileNotFoundError(text)
 
         if "is not a recognized" in flat_text:
             text = text.replace("This command will be ignored.", "")
@@ -2693,6 +2701,25 @@ class _MapdlCore(Commands):
         ):
             text += base_error_msg
             raise ComponentNoData(text)
+
+        if "is not part of the currently active set." in flat_text:
+            text += base_error_msg
+            raise MapdlCommandIgnoredError(text)
+
+        if "No nodes defined." in flat_text:
+            text += base_error_msg
+            raise MapdlCommandIgnoredError(text)
+
+        if "For element type = " in flat_text and "is invalid." in flat_text:
+            if "is normal behavior when a CDB file is used." in flat_text:
+                warn(text, UserWarning)
+            else:
+                text += base_error_msg
+                raise MapdlCommandIgnoredError(text)
+
+        if "Cannot create another with the same name" in flat_text:
+            # When overriding constitutive models. See 'test_tbft'
+            warn(text, UserWarning)
 
         # flag errors
         if "*** ERROR ***" in flat_text:
@@ -2794,7 +2821,7 @@ class _MapdlCore(Commands):
 
         if self.platform == "linux":
             self.sys(
-                "if grep -sq 'docker\|lxc' /proc/1/cgroup; then echo 'true' > __outputcmd__.txt; else echo 'false' > __outputcmd__.txt;fi;"
+                r"if grep -sq 'docker\|lxc' /proc/1/cgroup; then echo 'true' > __outputcmd__.txt; else echo 'false' > __outputcmd__.txt;fi;"
             )
         elif self.platform == "windows":  # pragma: no cover
             return False  # TODO: check if it is running a windows docker container. So far it is not supported.
