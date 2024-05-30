@@ -21,14 +21,59 @@
 # SOFTWARE.
 
 """Module for the MapdlPlotter class."""
-from ansys.visualizer import MeshObjectPlot, PlotterInterface
+from ansys.tools.visualization_interface import Plotter
+from ansys.tools.visualization_interface.backends.pyvista import PyVistaBackendInterface
 from beartype.typing import Any, Iterable
 import pyvista as pv
 
 from ansys.mapdl.core.plotting.theme import MapdlTheme
 
 
-class MapdlPlotter(PlotterInterface):
+class MapdlPlotterBackend(PyVistaBackendInterface):
+    """Plotter class for PyMapdl.
+    
+    This class is an implementation of the PlotterInterface class from the ansys-visualizer package.
+    Picker is implemented in PyMAPDL specific classes due to the characteristics of the library.
+    
+    Parameters
+    ----------
+    use_trame : bool, optional
+        Whether to use the trame interface or not, by default False.
+    theme : pv.DefaultTheme, optional
+        _description_, by default None1
+    """
+    
+    def __init__(self, use_trame: bool = False, plot_picked_names: bool = True, **plotter_kwargs):
+        """Initialize the MapdlPlotter class."""
+        super().__init__(use_trame=use_trame, plot_picked_names=plot_picked_names, **plotter_kwargs)
+
+    def plot_iter(
+        self,
+        plotting_list: Iterable[Any],
+        filter: str = None,
+        **plotting_options,
+    ) -> None:
+        """Add a list of objects to the plotter.
+
+        Parameters
+        ----------
+        plotting_list : Iterable[Any]
+            Iterable of objects to be added to the plotter.
+        filter : str, optional
+            Filter to be applied to the objects, by default None.
+        """
+        for object in plotting_list:
+            _ = self.plot(object, filter, **plotting_options)
+
+    def plot(self, object: Any, filter: str = None, **plotting_options):
+        self.pv_interface.plot(object, filter, **plotting_options)
+
+    def show(self, object: Any = None, screenshot: str = None, filter: bool = None, **plotting_options):
+        if object is not None:
+            self.plot(object, filter, **plotting_options)
+        self.pv_interface.show(screenshot=screenshot, **plotting_options)
+
+class MapdlPlotter(Plotter):
     """Plotter class for PyMapdl.
 
     This class is an implementation of the PlotterInterface class from the ansys-visualizer package.
@@ -39,15 +84,15 @@ class MapdlPlotter(PlotterInterface):
     use_trame : bool, optional
         Whether to use the trame interface or not, by default False.
     theme : pv.DefaultTheme, optional
-        _description_, by default None
+        _description_, by default None1
     """
 
     def __init__(
         self, use_trame: bool = False, theme: pv.Plotter.theme = None, **plotter_kwargs
     ):
         """Initialize the MapdlPlotter class."""
-
-        super().__init__(use_trame, plot_picked_names=True, **plotter_kwargs)
+        self._backend = MapdlPlotterBackend(use_trame=use_trame, **plotter_kwargs)
+        super().__init__(backend=self._backend)
         self._theme = theme
         if theme is None:
             self._theme = MapdlTheme()
@@ -64,7 +109,7 @@ class MapdlPlotter(PlotterInterface):
         labels : List[str]
             List of labels to be added.
         """
-        _ = self.pv_interface.scene.add_point_labels(points, labels, **plotting_options)
+        _ = self._backend.pv_interface.scene.add_point_labels(points, labels, **plotting_options)
 
     def add_points(self, points: Iterable[float], **plotting_options) -> None:
         """Add points to the plotter.
@@ -74,9 +119,9 @@ class MapdlPlotter(PlotterInterface):
         points : List[float]
             List of points to be added to the plotter.
         """
-        _ = self.pv_interface.scene.add_points(points, **plotting_options)
+        _ = self._backend.pv_interface.scene.add_points(points, **plotting_options)
 
-    def add_iter(
+    def plot_iter(
         self,
         plotting_list: Iterable[Any],
         filter: str = None,
@@ -92,9 +137,9 @@ class MapdlPlotter(PlotterInterface):
             Filter to be applied to the objects, by default None.
         """
         for object in plotting_list:
-            _ = self.add(object, filter, **plotting_options)
+            _ = self.plot(object, filter, **plotting_options)
 
-    def add(self, object: Any, filter: str = None, **plotting_options) -> None:
+    def plot(self, object: Any, filter: str = None, **plotting_options) -> None:
         """Add an object to the plotter.
 
         Parameters
@@ -104,4 +149,4 @@ class MapdlPlotter(PlotterInterface):
         filter : str, optional
             Filter to be applied to the object, by default None.
         """
-        self.pv_interface.add(object, filter, **plotting_options)
+        self._backend.plot(object, filter, **plotting_options)

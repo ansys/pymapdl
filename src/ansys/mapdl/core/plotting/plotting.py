@@ -427,13 +427,13 @@ def _general_plotter(
         cmap = "bwr"
 
     if background:
-        plotter.pv_interface.scene.set_background(background)
+        plotter._backend.pv_interface.scene.set_background(background)
     else:
-        plotter.pv_interface.scene.set_background("paraview")
+        plotter._backend.pv_interface.scene.set_background("paraview")
 
     # Making sure that labels are visible in dark backgrounds
     if not text_color and background:
-        bg = plotter.pv_interface.scene.background_color.float_rgb
+        bg = plotter._backend.pv_interface.scene.background_color.float_rgb
         # from: https://graphicdesign.stackexchange.com/a/77747/113009
         gamma = 2.2
         threshold = (
@@ -485,7 +485,7 @@ def _general_plotter(
 
         for each_mesh in mesh_:
             if isinstance(plotter, MapdlPlotter):
-                plotter.pv_interface.scene.add_mesh(
+                plotter._backend.pv_interface.scene.add_mesh(
                     each_mesh,
                     scalars=scalars,
                     scalar_bar_args=scalar_bar_args,
@@ -571,12 +571,12 @@ def _general_plotter(
             )
     if cpos:
         if isinstance(plotter, MapdlPlotter):
-            plotter.pv_interface.scene.camera_position = cpos
+            plotter._backend.pv_interface.scene.camera_position = cpos
         else:
             plotter.camera_position = cpos
     if show_bounds:
         if isinstance(plotter, MapdlPlotter):
-            plotter.pv_interface.scene.show_bounds()
+            plotter._backend.pv_interface.scene.show_bounds()
         else:
             plotter.show_bounds()
     return plotter
@@ -978,7 +978,7 @@ def general_plotter(
 
     if title:  # Added here to avoid labels overlapping title
         if isinstance(pl, MapdlPlotter):
-            pl.pv_interface.scene.add_title(title, color=text_color)
+            pl._backend.pv_interface.scene.add_title(title, color=text_color)
         else:
             pl.add_title(title, color=text_color)
 
@@ -995,7 +995,7 @@ def general_plotter(
             window_size=window_size,
             screenshot=True,
         )
-        pl.pv_interface.scene.screenshot(savefig)
+        pl._backend.pv_interface.scene.screenshot(savefig)
 
         # return unclosed plotter
         if return_plotter:
@@ -1006,14 +1006,14 @@ def general_plotter(
 
     else:
         if not return_plotter and not plotter:
-            pl.plot()
+            pl.show()
 
     if return_plotter and isinstance(pl, MapdlPlotter):
-        return pl.pv_interface.scene
+        return pl._backend.pv_interface.scene
     elif return_plotter and isinstance(pl, pv.Plotter):
         return pl
     elif return_cpos and isinstance(pl, MapdlPlotter):
-        return pl.pv_interface.scene.camera_position
+        return pl._backend.pv_interface.scene.camera_position
     elif return_cpos and isinstance(pl, pv.Plotter):
         return pl.camera_position
     else:
@@ -1133,7 +1133,7 @@ def bc_nodes_plotter(
             geom=BC_plot_settings[each_label]["glyph"],
         )
         name_ = f"{each_label}"
-        pl.add(
+        pl.plot(
             glyphs,
             color=BC_plot_settings[each_label]["color"],
             style="surface",
