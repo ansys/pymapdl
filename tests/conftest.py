@@ -27,8 +27,8 @@ from shutil import get_terminal_size
 from sys import platform
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
-import pytest
 import ansys.tools.visualization_interface as viz_interface
+import pytest
 
 from common import (
     Element,
