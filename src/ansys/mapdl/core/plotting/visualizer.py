@@ -30,22 +30,26 @@ from ansys.mapdl.core.plotting.theme import MapdlTheme
 
 
 class MapdlPlotterBackend(PyVistaBackendInterface):
-    """Plotter class for PyMapdl.
-    
-    This class is an implementation of the PlotterInterface class from the ansys-visualizer package.
-    Picker is implemented in PyMAPDL specific classes due to the characteristics of the library.
-    
+    """Provides the plotter for PyMAPDL.
+
+    This class is an implementation of the ``PlotterInterface`` class from the ``ansys-visualizer`` package.
+    Picker is implemented in PyMAPDL-specific classes due to the characteristics of the library.
+
     Parameters
     ----------
     use_trame : bool, optional
-        Whether to use the trame interface or not, by default False.
+        Whether to use the Trame interface or not. The default is ``False``.
     theme : pv.DefaultTheme, optional
         _description_, by default None1
     """
-    
-    def __init__(self, use_trame: bool = False, plot_picked_names: bool = True, **plotter_kwargs):
-        """Initialize the MapdlPlotter class."""
-        super().__init__(use_trame=use_trame, plot_picked_names=plot_picked_names, **plotter_kwargs)
+
+    def __init__(
+        self, use_trame: bool = False, plot_picked_names: bool = True, **plotter_kwargs
+    ):
+        """Initialize the ``MapdlPlotter`` class."""
+        super().__init__(
+            use_trame=use_trame, plot_picked_names=plot_picked_names, **plotter_kwargs
+        )
 
     def plot_iter(
         self,
@@ -68,10 +72,17 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
     def plot(self, object: Any, filter: str = None, **plotting_options):
         self.pv_interface.plot(object, filter, **plotting_options)
 
-    def show(self, object: Any = None, screenshot: str = None, filter: bool = None, **plotting_options):
+    def show(
+        self,
+        object: Any = None,
+        screenshot: str = None,
+        filter: bool = None,
+        **plotting_options,
+    ):
         if object is not None:
             self.plot(object, filter, **plotting_options)
         self.pv_interface.show(screenshot=screenshot, **plotting_options)
+
 
 class MapdlPlotter(Plotter):
     """Plotter class for PyMapdl.
@@ -107,9 +118,11 @@ class MapdlPlotter(Plotter):
         points : List[float]
             List of points of the labels.
         labels : List[str]
-            List of labels to be added.
+            List of labels to add.
         """
-        _ = self._backend.pv_interface.scene.add_point_labels(points, labels, **plotting_options)
+        _ = self._backend.pv_interface.scene.add_point_labels(
+            points, labels, **plotting_options
+        )
 
     def add_points(self, points: Iterable[float], **plotting_options) -> None:
         """Add points to the plotter.
@@ -117,7 +130,7 @@ class MapdlPlotter(Plotter):
         Parameters
         ----------
         points : List[float]
-            List of points to be added to the plotter.
+            List of points to add to the plotter.
         """
         _ = self._backend.pv_interface.scene.add_points(points, **plotting_options)
 
@@ -132,9 +145,9 @@ class MapdlPlotter(Plotter):
         Parameters
         ----------
         plotting_list : Iterable[Any]
-            Iterable of objects to be added to the plotter.
+            Iterable of objects to add to the plotter.
         filter : str, optional
-            Filter to be applied to the objects, by default None.
+            Filter to apply to the objects. The default is ``None``.
         """
         for object in plotting_list:
             _ = self.plot(object, filter, **plotting_options)
@@ -145,8 +158,8 @@ class MapdlPlotter(Plotter):
         Parameters
         ----------
         object : Any
-            Object to be added to the plotter.
+            Object add to the plotter.
         filter : str, optional
-            Filter to be applied to the object, by default None.
+            Filter to apply to the object. The default is ``None``.
         """
         self._backend.plot(object, filter, **plotting_options)
