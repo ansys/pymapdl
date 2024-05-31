@@ -14,6 +14,10 @@ from sphinx_gallery.sorting import FileNameSortKey
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
 
+import ansys.tools.visualization_interface as viz_interface
+
+viz_interface.DOCUMENTATION_BUILD = True
+
 # Manage errors
 pyvista.set_error_output_file("errors.txt")
 

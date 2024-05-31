@@ -28,6 +28,7 @@ from sys import platform
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
 import pytest
+import ansys.tools.visualization_interface as viz_interface
 
 from common import (
     Element,
@@ -52,6 +53,7 @@ from common import (
 #
 
 TESTING_MINIMAL = testing_minimal()
+viz_interface.TESTING_MODE = True
 
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()
