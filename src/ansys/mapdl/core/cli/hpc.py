@@ -195,6 +195,14 @@ By default, PyMAPDL detects the type of file from its extension.
 """,
 )
 @click.option(
+    "--output_to_json",
+    default=None,
+    type=str,
+    is_flag=False,
+    flag_value=True,
+    help="""Print the output values to the terminal as json. It requires to use ``--wait`` value too. """,
+)
+@click.option(
     "--debug",
     default=False,
     type=bool,
@@ -225,13 +233,13 @@ def submit(
     wait: bool = False,
     debug: bool = False,
     mode: Optional[Union["python", "shell", "apdl"]] = None,
+    output_to_json: Optional[bool] = False,
 ):
     import json
 
     from ansys.mapdl.core.hpc.pyhps import (
-        create_pymapdl_pyhps_job,
+        PyMAPDLJobSubmission,
         get_value_from_json_or_default,
-        wait_for_completion,
     )
 
     if debug:
@@ -261,27 +269,28 @@ def submit(
         max_execution_time, config_file, "max_execution_time", 0
     )
 
-    proj, _ = create_pymapdl_pyhps_job(
-        main_file=main_file,
-        name=name,
+    job = PyMAPDLJobSubmission(
         url=url,
         user=user,
         password=password,
-        python=python,
+        main_file=main_file,
+        mode=mode,
         inputs=inputs,
         outputs=outputs,
-        output_files=output_files,
-        shell_file=shell_file,
         requirements_file=requirements_file,
+        shell_file=shell_file,
         extra_files=extra_files,
-        config_file=config_file,
+        output_files=output_files,
+        python=python,
         num_cores=num_cores,
         memory=memory,
         disk_space=disk_space,
         exclusive=exclusive,
         max_execution_time=max_execution_time,
-        mode=mode,
+        name=name,
     )
+
+    job.submit()
 
     if save_config_file:
         config = {
@@ -303,13 +312,24 @@ def submit(
         with open(config_file, "w") as fid:
             json.dump(config, fid)
 
-    print(
-        f"You can check your project by visiting: {url}/projects#/projects/{proj.id}/jobs"
-    )
+    proj = job.project
+    if not output_to_json:
+        print(
+            f"You can check your project by visiting: {url}/projects#/projects/{proj.id}/jobs"
+        )
 
     if wait:
-        print(f"Waiting for project {name} (id: {proj.id}) evaluation to complete...")
-        wait_for_completion(proj, evaluated=True, failed=True)
+        if not output_to_json:
+            print(
+                f"Waiting for project {name} (id: {proj.id}) evaluation to complete..."
+            )
+        job.wait_for_completion(evaluated=True, failed=True)
+
+    if output_to_json and wait:
+        if len(job.outputs) == 1:
+            print(job.output_values[0][job.outputs[0]])
+        else:
+            print(json.dumps(job.output_values))
 
 
 def list_jobs():
