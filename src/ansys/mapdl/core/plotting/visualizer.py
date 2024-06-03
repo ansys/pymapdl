@@ -67,20 +67,20 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
             Filter to be applied to the objects, by default None.
         """
         for object in plotting_list:
-            _ = self.plot(object, filter, **plotting_options)
+            self.plot(object, filter, **plotting_options)
 
-    def plot(self, object: Any, filter: str = None, **plotting_options):
-        self.pv_interface.plot(object, filter, **plotting_options)
+    def plot(self, plottable_object: Any, name_filter: str = None, **plotting_options):
+        self.pv_interface.plot(plottable_object, name_filter, **plotting_options)
 
     def show(
         self,
-        object: Any = None,
+        plottable_object: Any = None,
         screenshot: str = None,
-        filter: bool = None,
+        name_filter: bool = None,
         **plotting_options,
     ):
         if object is not None:
-            self.plot(object, filter, **plotting_options)
+            self.plot(plottable_object, name_filter, **plotting_options)
         self.pv_interface.show(screenshot=screenshot, **plotting_options)
 
 
@@ -150,9 +150,9 @@ class MapdlPlotter(Plotter):
             Filter to apply to the objects. The default is ``None``.
         """
         for object in plotting_list:
-            _ = self.plot(object, filter, **plotting_options)
+            self.plot(object, filter, **plotting_options)
 
-    def plot(self, object: Any, filter: str = None, **plotting_options) -> None:
+    def plot(self, plottable_object: Any, name_filter: str = None, **plotting_options) -> None:
         """Add an object to the plotter.
 
         Parameters
@@ -162,4 +162,4 @@ class MapdlPlotter(Plotter):
         filter : str, optional
             Filter to apply to the object. The default is ``None``.
         """
-        self._backend.plot(object, filter, **plotting_options)
+        self._backend.plot(plottable_object, name_filter, **plotting_options)
