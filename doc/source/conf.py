@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import warnings
 
+import ansys.tools.visualization_interface as viz_interface
 from ansys_sphinx_theme import ansys_favicon, get_version_match
 import numpy as np
 import pyvista
@@ -13,8 +14,6 @@ from sphinx_gallery.sorting import FileNameSortKey
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
-
-import ansys.tools.visualization_interface as viz_interface
 
 viz_interface.DOCUMENTATION_BUILD = True
 
