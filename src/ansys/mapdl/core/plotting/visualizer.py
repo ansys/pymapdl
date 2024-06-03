@@ -152,7 +152,9 @@ class MapdlPlotter(Plotter):
         for object in plotting_list:
             self.plot(object, filter, **plotting_options)
 
-    def plot(self, plottable_object: Any, name_filter: str = None, **plotting_options) -> None:
+    def plot(
+        self, plottable_object: Any, name_filter: str = None, **plotting_options
+    ) -> None:
         """Add an object to the plotter.
 
         Parameters
