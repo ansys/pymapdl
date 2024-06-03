@@ -111,6 +111,7 @@ name = "ansys.mapdl.core"
 Source = "https://github.com/ansys/pymapdl"
 Issues = "https://github.com/ansys/pymapdl/issues"
 Documentation = "https://mapdl.docs.pyansys.com"
+Tracker = "https://github.com/ansys/pymapdl/issues"
 
 [project.scripts]
 pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_point"
