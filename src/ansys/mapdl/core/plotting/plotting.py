@@ -409,8 +409,8 @@ def _general_plotter(
     if theme is None:
         theme = MapdlTheme()
 
-    if not (plotter is None or isinstance(plotter, pv.Plotter)):
-        raise TypeError("The kwarg 'plotter' can only accept pv.Plotter objects.")
+    if not (plotter is None or isinstance(plotter, MapdlPlotter)):
+        raise TypeError("The kwarg 'plotter' can only accept MapdlPlotter objects.")
 
     if not plotter:
         plotter = MapdlPlotter(
@@ -1001,7 +1001,7 @@ def general_plotter(
         if return_plotter:
             return pl
 
-        # if not returning plotter, close right away
+        # ifplotter._backend.pv_interface.scene.set_background("paraview") not returning plotter, close right away
         pl._backend.pv_interface.scene.close()
 
     else:
@@ -1079,7 +1079,7 @@ def bc_plotter(
 
 def bc_nodes_plotter(
     mapdl,
-    pl,
+    pl: MapdlPlotter,
     bc_labels,
     plot_bc_labels=False,
     bc_glyph_size=1,
@@ -1170,7 +1170,7 @@ def bc_nodes_plotter(
         )
 
     if plot_bc_legend:
-        pl.add_legend(bcolor=None)
+        pl._backend.pv_interface.scene.add_legend(bcolor=None)
     return pl
 
 
