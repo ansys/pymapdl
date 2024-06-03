@@ -837,6 +837,7 @@ def test_pick_areas(mapdl, make_block, selection):
 
 def test_plotter_input(mapdl, make_block):
     from ansys.mapdl.core.plotting import MapdlPlotter
+
     pl = MapdlPlotter(off_screen=True)
     pl_pv = pl._backend.pv_interface.scene
     # because in CICD we use 'screen_off', this will trigger a warning,
