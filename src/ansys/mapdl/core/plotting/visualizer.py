@@ -70,7 +70,7 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
             self.plot(object, filter, **plotting_options)
 
     def plot(self, plottable_object: Any, name_filter: str = None, **plotting_options):
-        self.pv_interface.plot(plottable_object, name_filter, **plotting_options)
+        self.pv_interface.plot(object=plottable_object, filter=name_filter, **plotting_options)
 
     def show(
         self,
