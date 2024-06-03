@@ -989,7 +989,7 @@ def general_plotter(
 
     # permit user to save the figure as a screenshot
     if savefig:
-        pl.plot(
+        pl._backend.pv_interface.scene.show(
             title=title,
             auto_close=False,
             window_size=window_size,
@@ -1002,7 +1002,7 @@ def general_plotter(
             return pl
 
         # if not returning plotter, close right away
-        pl.pv_interface.scene.close()
+        pl._backend.pv_interface.scene.close()
 
     else:
         if not return_plotter and not plotter:
