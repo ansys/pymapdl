@@ -10,12 +10,8 @@ description = "A Python wrapper for Ansys MAPDL."
 readme = "README.md"
 requires-python = ">=3.9,<3.13"  # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
 license = {file = "LICENSE"}
-authors = [
-    {name = "Ansys, Inc.", email = "pyansys.maintainers@ansys.com"},
-]
-maintainers = [
-    {name = "PyAnsys developers", email = "pyansys.maintainers@ansys.com"},
-]
+authors = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
+maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 dependencies = [
     "ansys-api-mapdl==0.5.1",  # supports at least 2020R2 - 2022R1
     "ansys-mapdl-reader>=0.51.7",
@@ -113,6 +109,8 @@ name = "ansys.mapdl.core"
 
 [project.urls]
 Source = "https://github.com/ansys/pymapdl"
+Issues = "https://github.com/ansys/pymapdl/issues"
+Documentation = "https://mapdl.docs.pyansys.com"
 
 [project.scripts]
 pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_point"
@@ -142,7 +140,6 @@ force_sort_within_sections = true
 default_section = "THIRDPARTY"
 skip_glob = ["__init__.py"]
 src_paths = ["doc", "src", "tests"]
-
 
 [tool.coverage.run]
 source = ["ansys/pymapdl"]
