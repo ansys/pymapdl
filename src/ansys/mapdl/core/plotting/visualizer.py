@@ -71,7 +71,7 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
 
     def plot(self, plottable_object: Any, name_filter: str = None, **plotting_options):
         self.pv_interface.plot(
-            object=plottable_object, filter=name_filter, **plotting_options
+            plottable_object=plottable_object, name_filter=name_filter, **plotting_options
         )
 
     def show(
@@ -83,7 +83,7 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
     ):
         if object is not None:
             self.plot(plottable_object, name_filter, **plotting_options)
-        self.pv_interface.show(screenshot=screenshot, **plotting_options)
+        self.pv_interface.show(screenshot=screenshot)
 
 
 class MapdlPlotter(Plotter):
