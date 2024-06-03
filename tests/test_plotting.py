@@ -836,13 +836,15 @@ def test_pick_areas(mapdl, make_block, selection):
 
 
 def test_plotter_input(mapdl, make_block):
-    pl = Plotter(off_screen=True)
+    from ansys.mapdl.core.plotting import MapdlPlotter
+    pl = MapdlPlotter(off_screen=True)
+    pl_pv = pl._backend.pv_interface.scene
     # because in CICD we use 'screen_off', this will trigger a warning,
     # since using 'plotter' will overwrite this kwarg.
     with pytest.warns(UserWarning):
         pl2 = mapdl.eplot(return_plotter=True, plotter=pl)
-    assert pl == pl2
-    assert pl is pl2
+    assert pl_pv == pl2
+    assert pl_pv is pl2
     pl2.show()  # plotting for catching
 
     # invalid plotter type

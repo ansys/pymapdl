@@ -36,6 +36,7 @@ if has_dependency("pyvista"):
 
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.plotting import MapdlPlotter
 from ansys.mapdl.core.post import (
     COMPONENT_STRESS_TYPE,
     PRINCIPAL_TYPE,
@@ -887,7 +888,7 @@ def test_general_plotter_returns(mapdl, static_solve, verify_image_cache):
         return_cpos=False,
         return_plotter=True,
     )
-    assert isinstance(p, Plotter)
+    assert isinstance(p, MapdlPlotter)
 
 
 def test_time_frequency_values(mapdl, contact_solve):
