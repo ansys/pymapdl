@@ -1158,7 +1158,7 @@ def bc_nodes_plotter(
                         f"{bc_point_labels[id_]}\n{each_label}: {values[0]:6.3f}, {values[1]:6.3f}"
                     )
 
-    if plot_bc_labels:
+    if plot_bc_labels and bc_point_labels is not None:
         pcloud = pv.PolyData(nodes_xyz)
         pcloud["labels"] = list(bc_point_labels.values())
         pl.add_labels(
@@ -1169,7 +1169,7 @@ def bc_nodes_plotter(
             always_visible=True,
         )
 
-    if plot_bc_legend:
+    if plot_bc_legend and bc_point_labels is not None:
         pl._backend.pv_interface.scene.add_legend(bcolor=None)
     return pl
 
