@@ -403,9 +403,6 @@ def _general_plotter(
     >>> mapdl.eplot(background='w', show_edges=True, plotter_kwargs = {"polygon_smoothing": False})
 
     """
-    # Lazy import
-    import pyvista as pv
-
     if theme is None:
         theme = MapdlTheme()
 
