@@ -1,7 +1,0 @@
-# Repository codeowners
-# 
-# Reference: https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
-
-/.ci/               @ansys/pymapdl-maintainers
-/.github/           @ansys/pymapdl-maintainers
-pyproject.toml      @ansys/pymapdl-maintainers
