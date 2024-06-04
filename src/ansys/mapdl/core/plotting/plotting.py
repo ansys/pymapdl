@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Plotting helper for MAPDL using pyvista"""
+from collections import OrderedDict
 from typing import Any, Optional
 from warnings import warn
 
@@ -59,6 +60,9 @@ FIELDS = {
     "ELECTRICAL": ["VOLT", "CHRGS", "AMPS"],
 }
 
+FIELDS_ORDERED_LABELS = FIELDS["MECHANICAL"].copy()
+FIELDS_ORDERED_LABELS.extend(FIELDS["THERMAL"])
+FIELDS_ORDERED_LABELS.extend(FIELDS["ELECTRICAL"])
 
 # All boundary conditions:
 BCS = BC_D.copy()
@@ -68,98 +72,13 @@ BCS.extend(BC_F)
 ALLOWED_TARGETS = ["NODES"]
 
 
+
 if _HAS_PYVISTA:
     import pyvista as pv
 
-    # Symbols for constrains
-    TEMP = pv.Sphere(center=(0, 0, 0), radius=0.5)
+    from ansys.mapdl.core.plotting_defaults import DefaultSymbol
 
-    UX = pv.Arrow(
-        start=(-1, 0, 0),
-        direction=(1, 0, 0),
-        tip_length=1,
-        tip_radius=0.5,
-        scale=1.0,
-    )
-    UY = pv.Arrow(
-        start=(0, -1, 0),
-        direction=(0, 1, 0),
-        tip_length=1,
-        tip_radius=0.5,
-        scale=1.0,
-    )
-
-    UZ = pv.Arrow(
-        start=(0, 0, -1),
-        direction=(0, 0, 1),
-        tip_length=1,
-        tip_radius=0.5,
-        scale=1.0,
-    )
-
-    FX = pv.Arrow(
-        start=(-1, 0, 0),
-        direction=(1, 0, 0),
-        tip_length=0.5,
-        tip_radius=0.25,
-        scale=1.0,
-    )
-    FY = pv.Arrow(
-        start=(0, -1, 0),
-        direction=(0, 1, 0),
-        tip_length=0.5,
-        tip_radius=0.25,
-        scale=1.0,
-    )
-
-    FZ = pv.Arrow(
-        start=(0, 0, -1),
-        direction=(0, 0, 1),
-        tip_length=0.5,
-        tip_radius=0.25,
-        scale=1.0,
-    )
-
-    def get_VOLT():
-        model_a = pv.Cylinder(
-            center=(0, 0, 0), direction=(1, 0, 0), radius=0.2, height=2
-        ).triangulate()
-
-        model_b = pv.Cylinder(
-            center=(0, 0, 0), direction=(0, 1, 0), radius=0.2, height=2
-        ).triangulate()
-
-        model_c = pv.Cylinder(
-            center=(0, 0, 0), direction=(0, 0, 1), radius=0.2, height=2
-        ).triangulate()
-
-        result = model_a.merge(model_b).triangulate()
-        result = result.merge(model_c)
-
-        result.rotate_z(45.0, inplace=True)
-        result.rotate_vector(
-            vector=(1, -1, 0), angle=-45, point=(0, 0, 0), inplace=True
-        )
-
-        return result
-
-    VOLT = get_VOLT()
-
-    HEAT = pv.Cube(center=(0, 0, 0), x_length=1.0, y_length=1.0, z_length=1.0)
-
-    BC_plot_settings = {
-        "TEMP": {"color": "orange", "glyph": TEMP},
-        "HEAT": {"color": "red", "glyph": HEAT},
-        "UX": {"color": "red", "glyph": UX},
-        "UY": {"color": "green", "glyph": UY},
-        "UZ": {"color": "blue", "glyph": UZ},
-        "VOLT": {"color": "yellow", "glyph": VOLT},
-        "FX": {"color": "red", "glyph": FX},
-        "FY": {"color": "green", "glyph": FY},
-        "FZ": {"color": "blue", "glyph": FZ},
-        "AMPS": {"color": "grey", "glyph": VOLT},
-        "CHRGS": {"color": "grey", "glyph": VOLT},
-    }
+    BC_plot_settings = DefaultSymbol()
 
 
 # Using * to force all the following arguments to be keyword only.
@@ -1127,12 +1046,12 @@ def bc_nodes_plotter(
             orient=False,
             scale="scale",
             # tolerance=0.05,
-            geom=BC_plot_settings[each_label]["glyph"],
+            geom=BC_plot_settings(each_label)["glyph"],
         )
         name_ = f"{each_label}"
-        pl.plot(
+        pl._backend.pv_interface.scene.add_mesh(
             glyphs,
-            color=BC_plot_settings[each_label]["color"],
+            color=BC_plot_settings(each_label)["color"],
             style="surface",
             # style='wireframe',
             # edge_color=BC_plot_settings[each_label]['color'],
@@ -1167,6 +1086,33 @@ def bc_nodes_plotter(
         )
 
     if plot_bc_legend and bc_point_labels is not None:
+        # Reorder labels to keep a consistent order
+        sorted_dict = OrderedDict()
+        labels_ = pl._backend.pv_interface.scene.renderer._labels.copy()
+
+        # sorting the keys
+        for symbol in FIELDS_ORDERED_LABELS:
+            for key, value in labels_.items():
+                # taking advantage and overriding the legend glyph with
+                # something it can be seen properly in the legend
+                label_ = value[1]
+                if "U" in label_:
+                    value = [BC_plot_settings("UY")["glyph"], label_, value[2]]
+                elif "F" in label_:
+                    value = [BC_plot_settings("FX")["glyph"], label_, value[2]]
+                else:
+                    value = [BC_plot_settings(label_)["glyph"], label_, value[2]]
+
+                if symbol == value[1]:
+                    sorted_dict[key] = value
+
+        # moving the not added labels (just in case)
+        for key, value in labels_.items():
+            if label_ not in FIELDS_ORDERED_LABELS:
+                sorted_dict[key] = value
+
+        # overwriting labels
+        pl._backend.pv_interface.scene.renderer._labels = sorted_dict
         pl._backend.pv_interface.scene.add_legend(bcolor=None)
     return pl
 

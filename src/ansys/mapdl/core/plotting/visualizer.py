@@ -71,9 +71,8 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
 
     def plot(self, plottable_object: Any, name_filter: str = None, **plotting_options):
         self.pv_interface.plot(
-            plottable_object=plottable_object,
-            name_filter=name_filter,
-            **plotting_options,
+            object=plottable_object,
+            filter=name_filter,
         )
 
     def show(
@@ -124,9 +123,14 @@ class MapdlPlotter(Plotter):
         labels : List[str]
             List of labels to add.
         """
-        _ = self._backend.pv_interface.scene.add_point_labels(
+        self._backend.pv_interface.scene.add_point_labels(
             points, labels, **plotting_options
         )
+
+    def add_legend(self, **plotting_options) -> None:
+        """Add a legend to the plotter."""
+
+        pl.add_legend(bcolor=None)
 
     def add_points(self, points: Iterable[float], **plotting_options) -> None:
         """Add points to the plotter.
