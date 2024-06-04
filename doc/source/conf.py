@@ -21,7 +21,7 @@ viz_interface.DOCUMENTATION_BUILD = True
 pyvista.set_error_output_file("errors.txt")
 
 # Ensure that offscreen rendering is used for docs generation
-pyvista.OFF_SCREEN = True
+# pyvista.OFF_SCREEN = True
 
 # must be less than or equal to the XVFB window size
 try:
