@@ -58,8 +58,10 @@ Descriptions follow of basic terms.
 Regular job submission workflow
 ===============================
 
-Log in to the cluster
----------------------
+.. _ref_hpc_login:
+
+Log into the cluster
+--------------------
 
 You need access credentials and permissions to log in and submit jobs on the HPC cluster.
 Depending on the login node configuration, you can log in using Virtual Network
@@ -124,6 +126,9 @@ You can specify each job setting using the command line. For example:
     Command line arguments do **NOT** overwrite the equivalent arguments
     written in the bash file. Hence, you must ensure that the argument that you 
     want to pass using the command line is not already present in the bash file.
+
+
+.. _ref_hpc_pymapdl_job:
 
 Submit a PyMAPDL job
 ====================
@@ -245,8 +250,8 @@ Submit a PyMAPDL job
 
 To submit a PyMAPDL job, you must create two files:
 
- - Python script with the PyMAPDL code
- - Bash script that activates the virtual environment and calls the Python script
+- Python script with the PyMAPDL code
+- Bash script that activates the virtual environment and calls the Python script
 
 **Python script:** ``pymapdl_script.py``
 
@@ -314,6 +319,13 @@ Here is the expected output of the job:
 .. code-block:: text
 
     Number of CPUs: 10.0
+
+
+Examples
+========
+
+For an example that uses a machine learning genetic algorithm in
+an HPC system managed by SLURM scheduler, see :ref:`hpc_ml_ga_example`.
 
 
 Monitoring jobs
