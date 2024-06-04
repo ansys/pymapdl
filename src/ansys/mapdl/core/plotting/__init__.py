@@ -20,4 +20,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core.plotting.plotting import MapdlPlotter
+from ansys.mapdl.core.plotting.plotting import *
