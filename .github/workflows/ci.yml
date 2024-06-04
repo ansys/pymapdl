@@ -72,6 +72,28 @@ jobs:
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
 
+
+  branch-name:
+    # Only if the event is a pull request and the branch name is not from the pre-commit-ci bot
+    if: github.event_name == 'pull_request' && github.head_ref != 'pre-commit-ci-update-config'
+    name: Check the name of the branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name
+        uses: ansys/actions/branch-name-style@v6
+
+
+  commit-name:
+    if: github.event_name == 'pull_request'
+    name: Check the name of the commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check commit name
+        uses: ansys/actions/commit-style@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+
   doc-style:
     name: "Documentation style check"
     runs-on: ubuntu-latest
@@ -81,6 +103,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           vale-version: "3.4.1"
+
 
   smoke-tests:
     name: Build and smoke test (${{ matrix.os }} | Python ${{ matrix.python-version }}) (Release=${{ matrix.should-release }})
