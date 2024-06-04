@@ -72,7 +72,6 @@ BCS.extend(BC_F)
 ALLOWED_TARGETS = ["NODES"]
 
 
-
 if _HAS_PYVISTA:
     import pyvista as pv
 
