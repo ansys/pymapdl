@@ -47,6 +47,8 @@ from ansys.hps.client.jms import (
 
 logger = logging.getLogger()
 
+LOCK = [False]
+
 
 def get_value_from_json_or_default(
     arg: str, json_file: str, key: str, default_value: Optional[Union[str, Any]] = None
@@ -124,6 +126,7 @@ class JobSubmission:
         exclusive: Optional[bool] = None,
         max_execution_time: Optional[int] = None,
         name: Optional[str] = None,
+        job_name: Optional[str] = None,
     ):
         self._url = url
         self._user = user
@@ -140,6 +143,8 @@ class JobSubmission:
         self._job_definitions = None
         self._jobs = None
         self._output_values = None
+
+        self._job_name = job_name
 
         # Pre-populating
         self._inputs = self._validate_inputs(inputs)
@@ -283,6 +288,14 @@ class JobSubmission:
     @name.setter
     def name(self, name: str):
         self._name = self._validate_name(name)
+
+    @property
+    def job_name(self):
+        return self._job_name
+
+    @job_name.setter
+    def job_name(self, job_name: str):
+        self._job_name = self._validate_job_name(job_name)
 
     ## To bypass implemented tasks, job definitions and jobs.
     @property
@@ -464,6 +477,19 @@ class JobSubmission:
                 name = "My project"
         return name
 
+    def _validate_job_name(self, job_name: str):
+        """Validate job_name"""
+        if job_name is None:
+            if self.mode == "python":
+                job_name = "My PyMAPDL job"
+            elif self.mode == "apdl":
+                job_name = "My APDL job"
+            elif self.mode == "shell":
+                job_name = "My shell job"
+            else:
+                job_name = "My job"
+        return job_name
+
     def _validate_mode(self, mode: str):
         _, file_extension = os.path.splitext(self._main_file)
 
@@ -530,7 +556,6 @@ class JobSubmission:
 
         # Initialize project
         self._proj = self._create_project()
-        self._project_api = self._get_project_api()
 
         # Set files
         file_input_ids, file_output_ids = self._add_files_to_project()
@@ -572,7 +597,7 @@ class JobSubmission:
         if not self.jobs:
             self.jobs = [
                 Job(
-                    name="Job",
+                    name=self.job_name,
                     values={},
                     eval_status="pending",
                     job_definition_id=self.job_definitions[0].id,
@@ -622,7 +647,6 @@ class JobSubmission:
             executable=os.path.basename(executable)
         )
 
-        print(f"Using executable: '{execution_command}'")
         logger.debug(f"Using executable: '{execution_command}'")
 
         # Process step
@@ -711,23 +735,38 @@ class JobSubmission:
             # output
             name = each_output_parm
             # outparm = StringParameterDefinition(name=name, display_text=name)
-            outparm = FloatParameterDefinition(name=name, display_text=name)
+            if "ip" in name.lower() and False:
+                outparm = StringParameterDefinition(name=name, display_text=name)
+                type_ = "string"
+            else:
+                outparm = FloatParameterDefinition(name=name, display_text=name)
+                type_ = "float"
 
-            output_params.append(outparm)
+            output_params.append((outparm, type_))
 
         logger.debug(f"Output parameters:\n{output_params}")
         output_params = project_api.create_parameter_definitions(output_params)
 
-        for each_output_parm, outparm in zip(outputs, output_params):
+        for each_output_parm, (outparm, type_) in zip(outputs, output_params):
             name = each_output_parm
+
             # mapping
-            parm_map = ParameterMapping(
-                key_string=name,
-                tokenizer="=",
-                parameter_definition_id=outparm.id,
-                file_id=output_file_id,
-                # string_quote="'",
-            )
+            if type_ == "string":
+                parm_map = ParameterMapping(
+                    key_string=name,
+                    tokenizer="=",
+                    parameter_definition_id=outparm.id,
+                    file_id=output_file_id,
+                    string_quote="'",
+                )
+            elif type_ == "float":
+                parm_map = ParameterMapping(
+                    key_string=name,
+                    tokenizer="=",
+                    parameter_definition_id=outparm.id,
+                    file_id=output_file_id,
+                )
+
             logger.debug(f"Output parameter: {name}\n{outparm}\nMapping: {parm_map}")
 
             param_mappings.append(parm_map)
@@ -799,9 +838,38 @@ class JobSubmission:
         return ProjectApi(self._client, self._proj.id)
 
     def _create_project(self) -> Project:
+
+        # Acquire lock
+        if LOCK[0] is False:
+            LOCK[0] = True
+
+        else:
+            time.sleep(1)
+
+        proj = self._create_load_project()
+
+        if LOCK[0] is True:
+            LOCK[0] = False
+
+        return proj
+
+    def _create_load_project(self) -> Project:
+
         jms_api = JmsApi(self._client)
-        proj = Project(name=self.name, priority=1, active=True)
-        return jms_api.create_project(proj)
+        project = jms_api.get_project_by_name(name=self.name)
+
+        if project:
+            self._project_api = ProjectApi(self._client, project.id)
+            logger.debug(f"Project '{self.name}' already exists.")
+            self._attached = True
+            return project
+        else:
+            proj = Project(name=self.name, priority=1, active=True)
+            proj = jms_api.create_project(proj)
+            self._project_api = ProjectApi(self._client, proj.id)
+            logger.debug(f"Project '{self.name}' does not exists. Creating it.")
+            self._attached = False
+            return proj
 
     def _add_files(self):
         # Reset
@@ -922,13 +990,18 @@ with open("{self._output_parms_file}", "w") as fid:
         logger.debug(
             f"Waiting on project {self.project.id} with criteria: {eval_status}"
         )
-        while not self.project_api.get_jobs(eval_status=eval_status):
+
+        job = self.project_api.get_jobs(id=self.jobs[0].id)[0]
+
+        while job.eval_status not in eval_status:
             time.sleep(2)
+            job = self.project_api.get_jobs(id=self.jobs[0].id)[0]
 
     def _load_results(self):
         self._connect_client()
 
-        jobs = self.project_api.get_jobs(eval_status=["evaluated"])
+        last_job_id = self.jobs[0].id
+        jobs = self.project_api.get_jobs(id=last_job_id)
 
         if not jobs:
             return None
