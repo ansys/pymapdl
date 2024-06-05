@@ -201,7 +201,7 @@ The preceding code generates this input for MAPDL:
     NSEL,ALL   
     NSEL,R,LOC,Z,10
 
-This MAPLD input is executed with a :meth:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>` method call.
+This MAPDL input is executed with a :meth:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>` method call.
 
 Because of the non-interactive context not running all the commands until the end,
 you might find issues interacting inside it, with Python for instance.
