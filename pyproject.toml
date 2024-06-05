@@ -10,12 +10,8 @@ description = "A Python wrapper for Ansys MAPDL."
 readme = "README.md"
 requires-python = ">=3.9,<3.13"  # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
 license = {file = "LICENSE"}
-authors = [
-    {name = "Ansys, Inc.", email = "pyansys.maintainers@ansys.com"},
-]
-maintainers = [
-    {name = "PyAnsys developers", email = "pyansys.maintainers@ansys.com"},
-]
+authors = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
+maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 dependencies = [
     "ansys-api-mapdl==0.5.1",  # supports at least 2020R2 - 2022R1
     "ansys-mapdl-reader>=0.51.7",
@@ -115,6 +111,9 @@ name = "ansys.mapdl.core"
 
 [project.urls]
 Source = "https://github.com/ansys/pymapdl"
+Issues = "https://github.com/ansys/pymapdl/issues"
+Documentation = "https://mapdl.docs.pyansys.com"
+Tracker = "https://github.com/ansys/pymapdl/issues"
 
 [project.scripts]
 pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_point"
@@ -145,7 +144,6 @@ default_section = "THIRDPARTY"
 skip_glob = ["__init__.py"]
 src_paths = ["doc", "src", "tests"]
 
-
 [tool.coverage.run]
 source = ["ansys/pymapdl"]
 omit = [
@@ -161,9 +159,9 @@ show_missing = true
 
 [tool.codespell]
 skip = '*.pyc,*.txt,*.gif,*.png,*.jpg,*.js,*.html,*.doctree,*.ttf,*.woff,*.woff2,*.eot,*.mp4,*.inv,*.pickle,*.ipynb,flycheck*,./.git/*,./.hypothesis/*,*.yml,./doc/build/*,./doc/images/*,./dist/*,*~,.hypothesis*,./doc/source/examples/*,*cover,*.dat,*.mac,*.cdb,*.CDB,build,./docker/mapdl/v*,./factory/*,./ansys/mapdl/core/mapdl_functions.py,PKG-INFO,*.mypy_cache/*,./docker/mapdl/*,./_unused/*'
-ignore-words = "doc/styles/config/vocabularies/ANSYS/accept.txt"
 quiet-level = 3
 ignore-regex=".*codespell-ignore$|NORML|POIN"
+ignore-words = "doc/styles/config/vocabularies/ANSYS/accept.txt"
 
 [tool.numpydoc_validation]
 checks = [
