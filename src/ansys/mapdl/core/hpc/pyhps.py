@@ -45,6 +45,7 @@ from ansys.hps.client.jms import (
     TaskDefinition,
 )
 
+# logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger()
 
 LOCK = [False]
@@ -127,6 +128,7 @@ class JobSubmission:
         max_execution_time: Optional[int] = None,
         name: Optional[str] = None,
         job_name: Optional[str] = None,
+        exec_script: Optional[str] = None,
     ):
         self._url = url
         self._user = user
@@ -145,6 +147,7 @@ class JobSubmission:
         self._output_values = None
 
         self._job_name = job_name
+        self._exec_script = exec_script
 
         # Pre-populating
         self._inputs = self._validate_inputs(inputs)
@@ -345,6 +348,14 @@ class JobSubmission:
 
         return self._output_values
 
+    @property
+    def exec_script(self):
+        return self._exec_script
+
+    @exec_script.setter
+    def exec_script(self, exec_script: str):
+        self._exec_script = self._validate_exec_script(exec_script)
+
     ## Validate inputs
     def _validate_inputs(self, inputs):
         """Validate inputs inputs"""
@@ -510,6 +521,10 @@ class JobSubmission:
 
         return mode
 
+    def _validate_exec_script(self, exec_script: str):
+        """Validate exec_script"""
+        return exec_script
+
     def submit(self):
         if self.inputs:
             self._prepare_input_file()
@@ -558,15 +573,17 @@ class JobSubmission:
         self._proj = self._create_project()
 
         # Set files
-        file_input_ids, file_output_ids = self._add_files_to_project()
+        self._file_input_ids, self._file_output_ids = self._add_files_to_project()
 
         if self.inputs:
-            self._input_file_id = file_input_ids[os.path.basename(self._input_file)]
+            self._input_file_id = self._file_input_ids[
+                os.path.basename(self._input_file)
+            ]
         else:
             self._input_file_id = None
 
         if self.outputs:
-            self._output_parms_file_id = file_output_ids[
+            self._output_parms_file_id = self._file_output_ids[
                 os.path.basename(self._output_parms_file)
             ]
         else:
@@ -583,7 +600,7 @@ class JobSubmission:
             )
         )
 
-        self._create_task(file_input_ids, file_output_ids)
+        self._create_task(self._file_input_ids, self._file_output_ids)
 
         # Set jobs
         self._create_job_definition()
@@ -649,29 +666,38 @@ class JobSubmission:
 
         logger.debug(f"Using executable: '{execution_command}'")
 
+        if self.exec_script:
+            logger.debug(f"Using exec_script: '{self.exec_script}'")
+            # exec_script_file = self._project_api.copy_default_execution_script(
+            #     self.exec_script
+            # )
+            logger.debug(f"Attached 'exec_script': {self.exec_script}")
+            task_class_["use_execution_script"] = True
+            task_class_["execution_script_id"] = self._file_input_ids[self.exec_script]
+
         # Process step
         if not self.task_definitions:
-            self.task_definitions = [
-                TaskDefinition(
-                    execution_command=execution_command,
-                    resource_requirements=ResourceRequirements(
-                        num_cores=self.num_cores,
-                        memory=self.memory * 1024 * 1024,
-                        disk_space=self.disk_space * 1024 * 1024,
-                        # distributed=True,
-                        hpc_resources=HpcResources(
-                            exclusive=self.exclusive,
-                            # queue="qlarge"
-                        ),
+            task_ = TaskDefinition(
+                execution_command=execution_command,
+                resource_requirements=ResourceRequirements(
+                    num_cores=self.num_cores,
+                    memory=self.memory * 1024 * 1024,
+                    disk_space=self.disk_space * 1024 * 1024,
+                    # distributed=True,
+                    hpc_resources=HpcResources(
+                        exclusive=self.exclusive,
+                        # queue="qlarge"
                     ),
-                    max_execution_time=self.max_execution_time,
-                    execution_level=0,
-                    num_trials=1,
-                    input_file_ids=list(file_input_ids.values()),
-                    output_file_ids=list(file_output_ids.values()),
-                    **task_class_,
-                )
-            ]
+                ),
+                max_execution_time=self.max_execution_time,
+                execution_level=0,
+                num_trials=1,
+                input_file_ids=list(file_input_ids.values()),
+                output_file_ids=list(file_output_ids.values()),
+                **task_class_,
+            )
+
+            self.task_definitions = [task_]
 
         logger.debug(f"Task definition: {self.task_definitions }")
         self.task_definitions = self._project_api.create_task_definitions(
@@ -731,23 +757,26 @@ class JobSubmission:
         input_params = project_api.create_parameter_definitions(input_params)
 
         output_params = []
+        type_output_params = []
         for each_output_parm in outputs:
             # output
             name = each_output_parm
             # outparm = StringParameterDefinition(name=name, display_text=name)
-            if "ip" in name.lower() and False:
+            if "ip" in name.lower():
                 outparm = StringParameterDefinition(name=name, display_text=name)
-                type_ = "string"
+                type_output_params.append("string")
             else:
                 outparm = FloatParameterDefinition(name=name, display_text=name)
-                type_ = "float"
+                type_output_params.append("float")
 
-            output_params.append((outparm, type_))
+            output_params.append(outparm)
 
         logger.debug(f"Output parameters:\n{output_params}")
         output_params = project_api.create_parameter_definitions(output_params)
 
-        for each_output_parm, (outparm, type_) in zip(outputs, output_params):
+        for each_output_parm, outparm, type_ in zip(
+            outputs, output_params, type_output_params
+        ):
             name = each_output_parm
 
             # mapping
@@ -879,6 +908,9 @@ class JobSubmission:
 
         if self.inputs:
             self.input_files.append(self._input_file)
+
+        if self.exec_script:
+            self.input_files.append(self.exec_script)
 
         if self.outputs:
             self.output_files.append(self._output_parms_file)
