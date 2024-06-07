@@ -79,7 +79,7 @@ doc = [
     "ansys-mapdl-reader==0.53.0",
     "ansys-sphinx-theme==0.16.5",
     "grpcio==1.64.1",
-    "imageio-ffmpeg==0.4.9",
+    "imageio-ffmpeg==0.5.1",
     "imageio==2.34.1",
     "jupyter_sphinx==0.5.3",
     "jupyterlab>=3.2.8",
