@@ -127,11 +127,6 @@ class MapdlPlotter(Plotter):
             points, labels, **plotting_options
         )
 
-    def add_legend(self, **plotting_options) -> None:
-        """Add a legend to the plotter."""
-
-        pl.add_legend(bcolor=None)
-
     def add_points(self, points: Iterable[float], **plotting_options) -> None:
         """Add points to the plotter.
 
@@ -173,3 +168,7 @@ class MapdlPlotter(Plotter):
             Filter to apply to the object. The default is ``None``.
         """
         self._backend.plot(plottable_object, name_filter, **plotting_options)
+
+    def show(self) -> None:
+        """Show the plotter."""
+        self._backend.show()
