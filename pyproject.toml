@@ -17,7 +17,7 @@ dependencies = [
     "ansys-mapdl-reader>=0.51.7",
     "ansys-math-core>=0.1.2",
     "ansys-platform-instancemanagement~=1.0",
-    "ansys-tools-visualization-interface>=0.2.2",
+    "ansys-tools-visualization-interface@git+https://github.com/ansys/ansys-tools-visualization-interface@fix/off-screen-issues"
     "platformdirs>=3.6.0",
     "click>=8.1.3", # for CLI interface
     "tabulate>=0.8.0", # for cli plotting

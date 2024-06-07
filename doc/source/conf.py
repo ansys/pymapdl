@@ -16,6 +16,8 @@ from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
 
 viz_interface.DOCUMENTATION_BUILD = True
+pyvista.BUILDING_GALLERY = True
+pyvista.OFF_SCREEN = True
 
 # Manage errors
 pyvista.set_error_output_file("errors.txt")

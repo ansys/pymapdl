@@ -24,7 +24,7 @@
 from collections import OrderedDict
 from typing import Any, Optional
 from warnings import warn
-
+import pyvista as pv
 import numpy as np
 from numpy.typing import NDArray
 
@@ -324,13 +324,15 @@ def _general_plotter(
     if theme is None:
         theme = MapdlTheme()
 
-    if not (plotter is None or isinstance(plotter, MapdlPlotter)):
+    if not (plotter is None or isinstance(plotter, MapdlPlotter) or isinstance(plotter, pv.Plotter)):
         raise TypeError("The kwarg 'plotter' can only accept MapdlPlotter objects.")
 
     if not plotter:
         plotter = MapdlPlotter(
             off_screen=off_screen, notebook=notebook, theme=theme, **plotter_kwargs
         )
+    if isinstance(plotter, pv.Plotter):
+        plotter = MapdlPlotter(pv_interface=plotter)
     else:
         if off_screen or notebook or theme:
             warn(
