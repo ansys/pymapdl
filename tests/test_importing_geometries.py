@@ -23,13 +23,11 @@
 import os
 
 import pytest
-
-from ansys.mapdl.core.errors import (
-    MapdlCommandIgnoredError,
-    MapdlInvalidRoutineError,
-    MapdlRuntimeError,
-)
 from conftest import ON_CI, ON_LOCAL, ON_UBUNTU, NullContext
+
+from ansys.mapdl.core.errors import (MapdlCommandIgnoredError,
+                                     MapdlInvalidRoutineError,
+                                     MapdlRuntimeError)
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 

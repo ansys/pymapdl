@@ -26,10 +26,10 @@ import os
 import re
 
 import pytest
+from conftest import requires
 
 from ansys.mapdl.core import LOG  # Global logger
 from ansys.mapdl.core import logging
-from conftest import requires
 
 ## Notes
 # Use the next fixtures for:

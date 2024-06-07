@@ -26,12 +26,9 @@ import warnings
 import numpy as np
 import pytest
 
-from ansys.mapdl.core.component import (
-    Component,
-    ComponentDoesNotExits,
-    ComponentIsNotSelected,
-    ComponentManager,
-)
+from ansys.mapdl.core.component import (Component, ComponentDoesNotExits,
+                                        ComponentIsNotSelected,
+                                        ComponentManager)
 from ansys.mapdl.core.errors import ComponentNoData
 
 

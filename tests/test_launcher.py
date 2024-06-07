@@ -24,42 +24,30 @@
 
 import os
 import tempfile
-from time import sleep
 import warnings
+from time import sleep
 
 import psutil
 import pytest
-
-from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.errors import (
-    DeprecationError,
-    LicenseServerConnectionError,
-    MapdlDidNotStart,
-    NotEnoughResources,
-    PortAlreadyInUseByAnMAPDLInstance,
-)
-from ansys.mapdl.core.launcher import (
-    LOCALHOST,
-    _check_license_argument,
-    _force_smp_student_version,
-    _is_ubuntu,
-    _parse_ip_route,
-    _validate_MPI,
-    _verify_version,
-    get_start_instance,
-    launch_grpc,
-    launch_mapdl,
-    update_env_vars,
-)
-from ansys.mapdl.core.licensing import LICENSES
 from conftest import ON_LOCAL, QUICK_LAUNCH_SWITCHES, NullContext, requires
 
+from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core.errors import (DeprecationError,
+                                     LicenseServerConnectionError,
+                                     MapdlDidNotStart, NotEnoughResources,
+                                     PortAlreadyInUseByAnMAPDLInstance)
+from ansys.mapdl.core.launcher import (LOCALHOST, _check_license_argument,
+                                       _force_smp_student_version, _is_ubuntu,
+                                       _parse_ip_route, _validate_MPI,
+                                       _verify_version, get_start_instance,
+                                       launch_grpc, launch_mapdl,
+                                       update_env_vars)
+from ansys.mapdl.core.licensing import LICENSES
+
 try:
-    from ansys.tools.path import (
-        find_ansys,
-        get_available_ansys_installations,
-        version_from_path,
-    )
+    from ansys.tools.path import (find_ansys,
+                                  get_available_ansys_installations,
+                                  version_from_path)
 
     from ansys.mapdl.core.launcher import get_default_ansys
 

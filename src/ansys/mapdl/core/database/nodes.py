@@ -28,9 +28,9 @@ This allows access to the Nodes in the MAPDL DB from Python.
 """
 import weakref
 
+import numpy as np
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 from ansys.api.mapdl.v0 import mapdl_db_pb2
-import numpy as np
 from numpy.lib import recfunctions
 
 from ansys.mapdl.core.errors import MapdlRuntimeError

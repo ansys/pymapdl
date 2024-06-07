@@ -25,7 +25,6 @@ import os
 
 import numpy as np
 import pytest
-
 from conftest import has_dependency
 
 if not has_dependency("pyvista"):

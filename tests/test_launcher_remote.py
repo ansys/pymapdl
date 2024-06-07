@@ -22,7 +22,6 @@
 
 """Test the PyPIM integration."""
 import pytest
-
 from conftest import has_dependency
 
 if not has_dependency("ansys-platform-instancemanagement"):
@@ -32,10 +31,10 @@ from unittest.mock import create_autospec
 
 import ansys.platform.instancemanagement as pypim
 import grpc
+from conftest import QUICK_LAUNCH_SWITCHES
 
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH
-from conftest import QUICK_LAUNCH_SWITCHES
 
 
 def test_launch_remote_instance(monkeypatch, mapdl):

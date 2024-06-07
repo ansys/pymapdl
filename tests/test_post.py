@@ -26,7 +26,6 @@ import re
 
 import numpy as np
 import pytest
-
 from conftest import has_dependency, requires
 
 if has_dependency("pyvista"):
@@ -37,12 +36,8 @@ if has_dependency("pyvista"):
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.plotting import MapdlPlotter
-from ansys.mapdl.core.post import (
-    COMPONENT_STRESS_TYPE,
-    PRINCIPAL_TYPE,
-    STRESS_TYPES,
-    PostProcessing,
-)
+from ansys.mapdl.core.post import (COMPONENT_STRESS_TYPE, PRINCIPAL_TYPE,
+                                   STRESS_TYPES, PostProcessing)
 
 
 @pytest.fixture(scope="module")

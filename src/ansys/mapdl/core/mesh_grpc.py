@@ -21,15 +21,15 @@
 # SOFTWARE.
 
 """Module to manage downloading and parsing the FEM from the MAPDL gRPC server."""
-from functools import wraps
 import os
 import re
 import time
-from typing import Dict
 import weakref
+from functools import wraps
+from typing import Dict
 
-from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 import numpy as np
+from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
 
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE, parse_chunks
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc

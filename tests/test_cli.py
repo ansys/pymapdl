@@ -25,7 +25,6 @@ import subprocess
 
 import psutil
 import pytest
-
 from conftest import requires
 
 
