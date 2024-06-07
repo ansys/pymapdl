@@ -64,7 +64,7 @@ tests = [
     "scipy==1.13.1",
     "pandas==2.2.2",
     "pyiges[full]==0.3.1",
-    "pytest==8.2.1",
+    "pytest==8.2.2",
     "pytest-cov==5.0.0",
     "pyvista==0.43.9",
     "pyansys-tools-report==0.7.3",
