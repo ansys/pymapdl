@@ -70,10 +70,10 @@ These additional packages are imported for use:
 import os
 import tempfile
 
-from ansys.dpf import core as dpf
 import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
+from ansys.dpf import core as dpf
 
 from ansys.mapdl import core as pymapdl
 

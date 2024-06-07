@@ -26,23 +26,16 @@ import os
 
 import numpy as np
 import pytest
-
 from conftest import has_dependency, requires
 
 if has_dependency("pyvista"):
     from pyvista.plotting import system_supports_plotting
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core.misc import (
-    check_valid_ip,
-    check_valid_port,
-    check_valid_routine,
-    last_created,
-    load_file,
-    no_return,
-    requires_package,
-    run_as_prep7,
-)
+from ansys.mapdl.core.misc import (check_valid_ip, check_valid_port,
+                                   check_valid_routine, last_created,
+                                   load_file, no_return, requires_package,
+                                   run_as_prep7)
 
 
 @requires("pyvista")

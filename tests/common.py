@@ -21,8 +21,8 @@
 # SOFTWARE.
 
 """Shared testing module"""
-from collections import namedtuple
 import os
+from collections import namedtuple
 from typing import Dict
 
 from ansys.mapdl.core.launcher import _is_ubuntu

@@ -22,11 +22,11 @@
 
 """Functions to download sample datasets from the pyansys data repository.
 """
-from functools import wraps
 import os
 import shutil
 import urllib.request
 import zipfile
+from functools import wraps
 
 try:
     import requests

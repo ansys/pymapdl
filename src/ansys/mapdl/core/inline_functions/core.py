@@ -20,9 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import warnings
 from enum import IntEnum
 from typing import Union
-import warnings
 
 from ansys.mapdl.core.errors import MapdlRuntimeError
 

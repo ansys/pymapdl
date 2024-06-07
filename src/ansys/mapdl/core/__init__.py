@@ -96,13 +96,10 @@ except ModuleNotFoundError:  # pragma: no cover
 __version__ = importlib_metadata.version(__name__.replace(".", "-"))
 
 try:
-    from ansys.tools.path.path import (
-        change_default_ansys_path,
-        find_ansys,
-        get_ansys_path,
-        get_available_ansys_installations,
-        save_ansys_path,
-    )
+    from ansys.tools.path.path import (change_default_ansys_path, find_ansys,
+                                       get_ansys_path,
+                                       get_available_ansys_installations,
+                                       save_ansys_path)
 except:
     # We don't really use these imports in the library. They are here for
     # convenience.
@@ -114,7 +111,8 @@ from ansys.mapdl.core.launcher import close_all_local_instances
 
 # override default launcher when on pyansys.com
 if "ANSJUPHUB_VER" in os.environ:  # pragma: no cover
-    from ansys.mapdl.core.jupyter import launch_mapdl_on_cluster as launch_mapdl
+    from ansys.mapdl.core.jupyter import \
+        launch_mapdl_on_cluster as launch_mapdl
 else:
     from ansys.mapdl.core.launcher import launch_mapdl
 

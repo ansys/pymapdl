@@ -130,24 +130,14 @@ you would do in any other script.  There shall no be conflicts between
 these loggers.
 
 """
-from copy import copy
-from datetime import datetime
 import logging
 import sys
-from types import TracebackType
-from typing import (
-    TYPE_CHECKING,
-    Any,
-    Dict,
-    Literal,
-    Mapping,
-    MutableMapping,
-    Optional,
-    Type,
-    Union,
-    cast,
-)
 import weakref
+from copy import copy
+from datetime import datetime
+from types import TracebackType
+from typing import (TYPE_CHECKING, Any, Dict, Literal, Mapping, MutableMapping,
+                    Optional, Type, Union, cast)
 
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl import MapdlBase

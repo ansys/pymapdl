@@ -20,8 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import Optional, Union
 import warnings
+from typing import Optional, Union
 
 from ansys.mapdl.core.mapdl_types import MapdlInt
 

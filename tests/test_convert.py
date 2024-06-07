@@ -23,15 +23,12 @@
 import os
 
 import pytest
+from conftest import requires
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import examples
-from ansys.mapdl.core.convert import (
-    COMMANDS_TO_NOT_BE_CONVERTED,
-    FileTranslator,
-    convert_apdl_block,
-)
-from conftest import requires
+from ansys.mapdl.core.convert import (COMMANDS_TO_NOT_BE_CONVERTED,
+                                      FileTranslator, convert_apdl_block)
 
 nblock = """nblock,3,,326253
 (1i9,3e20.9e3)

@@ -20,31 +20,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from collections import namedtuple
 import os
+from collections import namedtuple
 from pathlib import Path
 from shutil import get_terminal_size
 from sys import platform
 
-from _pytest.terminal import TerminalReporter  # for terminal customization
 import ansys.tools.visualization_interface as viz_interface
 import pytest
-
-from common import (
-    Element,
-    Node,
-    get_details_of_elements,
-    get_details_of_nodes,
-    has_dpf,
-    has_grpc,
-    is_on_ci,
-    is_on_local,
-    is_on_ubuntu,
-    is_running_on_student,
-    is_smp,
-    support_plotting,
-    testing_minimal,
-)
+from _pytest.terminal import TerminalReporter  # for terminal customization
+from common import (Element, Node, get_details_of_elements,
+                    get_details_of_nodes, has_dpf, has_grpc, is_on_ci,
+                    is_on_local, is_on_ubuntu, is_running_on_student, is_smp,
+                    support_plotting, testing_minimal)
 
 ################################################################
 #
@@ -208,11 +196,8 @@ import ansys.mapdl.core as pymapdl
 pymapdl.RUNNING_TESTS = True
 
 from ansys.mapdl.core import Mapdl
-from ansys.mapdl.core.errors import (
-    MapdlConnectionError,
-    MapdlExitedError,
-    MapdlRuntimeError,
-)
+from ansys.mapdl.core.errors import (MapdlConnectionError, MapdlExitedError,
+                                     MapdlRuntimeError)
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 

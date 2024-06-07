@@ -21,19 +21,18 @@
 # SOFTWARE.
 
 """Test MAPDL interface"""
-from datetime import datetime
 import os
-from pathlib import Path
 import re
 import shutil
 import tempfile
 import time
+from datetime import datetime
+from pathlib import Path
 
 import grpc
 import numpy as np
 import psutil
 import pytest
-
 from conftest import has_dependency
 
 if has_dependency("pyvista"):
@@ -42,19 +41,17 @@ if has_dependency("pyvista"):
 if has_dependency("ansys-mapdl-reader"):
     from ansys.mapdl.reader.rst import Result
 
+from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
+
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.commands import CommandListingOutput
-from ansys.mapdl.core.errors import (
-    CommandDeprecated,
-    IncorrectWorkingDirectory,
-    MapdlCommandIgnoredError,
-    MapdlConnectionError,
-    MapdlRuntimeError,
-)
+from ansys.mapdl.core.errors import (CommandDeprecated,
+                                     IncorrectWorkingDirectory,
+                                     MapdlCommandIgnoredError,
+                                     MapdlConnectionError, MapdlRuntimeError)
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string
-from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 
 # Path to files needed for examples
 PATH = os.path.dirname(os.path.abspath(__file__))

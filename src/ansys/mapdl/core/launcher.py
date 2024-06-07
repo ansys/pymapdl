@@ -25,15 +25,15 @@
 import atexit
 import os
 import platform
-from queue import Empty, Queue
 import re
 import socket
 import subprocess
 import tempfile
 import threading
 import time
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 import warnings
+from queue import Empty, Queue
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 import psutil
 
@@ -54,26 +54,16 @@ except ModuleNotFoundError:
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
-from ansys.mapdl.core.errors import (
-    DeprecationError,
-    LockFileException,
-    MapdlDidNotStart,
-    MapdlRuntimeError,
-    NotEnoughResources,
-    PortAlreadyInUse,
-    PortAlreadyInUseByAnMAPDLInstance,
-    VersionError,
-)
+from ansys.mapdl.core.errors import (DeprecationError, LockFileException,
+                                     MapdlDidNotStart, MapdlRuntimeError,
+                                     NotEnoughResources, PortAlreadyInUse,
+                                     PortAlreadyInUseByAnMAPDLInstance,
+                                     VersionError)
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl_core import _ALLOWED_START_PARM
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
-from ansys.mapdl.core.misc import (
-    check_valid_ip,
-    check_valid_port,
-    create_temp_dir,
-    random_string,
-    threaded,
-)
+from ansys.mapdl.core.misc import (check_valid_ip, check_valid_port,
+                                   create_temp_dir, random_string, threaded)
 
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl_console import MapdlConsole

@@ -21,22 +21,22 @@
 # SOFTWARE.
 
 """Module for miscellaneous functions and methods"""
-from enum import Enum
-from functools import wraps
 import importlib
 import inspect
 import os
-from pathlib import Path
 import platform
 import random
 import re
 import socket
 import string
 import tempfile
+import weakref
+from enum import Enum
+from functools import wraps
+from pathlib import Path
 from threading import Thread
 from typing import Union
 from warnings import warn
-import weakref
 
 try:
     from ansys.tools.path import get_available_ansys_installations
@@ -159,9 +159,8 @@ class Plain_Report:
             from pyvista import PyVistaDeprecationWarning
 
             try:
-                from pyvista.utilities.errors import (
-                    GPUInfo,  # deprecated in pyvista 0.40.0
-                )
+                from pyvista.utilities.errors import \
+                    GPUInfo  # deprecated in pyvista 0.40.0
             except (PyVistaDeprecationWarning, ImportError):
                 from pyvista.report import GPUInfo
 
@@ -719,7 +718,8 @@ class Information:
 
     def __init__(self, mapdl):
         """Class Initializer"""
-        from ansys.mapdl.core.mapdl import MapdlBase  # lazy import to avoid circular
+        from ansys.mapdl.core.mapdl import \
+            MapdlBase  # lazy import to avoid circular
 
         if not isinstance(mapdl, MapdlBase):  # pragma: no cover
             raise TypeError("Must be implemented from MAPDL class")
