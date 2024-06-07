@@ -59,7 +59,7 @@ jupyter = [
 
 tests = [
     "ansys-dpf-core==0.10.1",
-    "ansys-tools-visualization-interface==0.2.2",
+    "ansys-tools-visualization-interface@git+https://github.com/ansys/ansys-tools-visualization-interface@fix/off-screen-issues",
     "autopep8==2.2.0",
     "matplotlib==3.9.0",
     "scipy==1.13.1",
@@ -78,7 +78,7 @@ doc = [
     "sphinx==7.3.7",
     "ansys-dpf-core==0.10.1",
     "ansys-mapdl-reader==0.53.0",
-    "ansys-tools-visualization-interface==0.2.2",
+    "ansys-tools-visualization-interface@git+https://github.com/ansys/ansys-tools-visualization-interface@fix/off-screen-issues",
     "ansys-sphinx-theme==0.16.4",
     "grpcio==1.64.0",
     "imageio-ffmpeg==0.4.9",
