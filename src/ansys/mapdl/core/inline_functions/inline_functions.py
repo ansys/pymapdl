@@ -20,18 +20,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .component_queries import (_ComponentQueries,
-                                _DisplacementComponentQueries,
-                                _InverseGetComponentQueries)
+from .component_queries import (
+    _ComponentQueries,
+    _DisplacementComponentQueries,
+    _InverseGetComponentQueries,
+)
 from .connectivity_queries import _ConnectivityQueries
 from .geometry_queries import _AngleQueries, _AreaQueries, _DistanceQueries
-from .line_queries import (_LineFractionCoordinateQueries,
-                           _LineFractionSlopeQueries)
+from .line_queries import _LineFractionCoordinateQueries, _LineFractionSlopeQueries
 from .nearest_queries import _EntityNearestEntityQueries
 from .normals_queries import _KeypointNormalQueries, _NodeNormalQueries
 from .scalar_queries import _ScalarQueries
-from .selection_queries import (_NextSelectedEntityQueries,
-                                _SelectionStatusQueries)
+from .selection_queries import _NextSelectedEntityQueries, _SelectionStatusQueries
 
 
 class Query(

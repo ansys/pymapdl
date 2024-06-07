@@ -21,11 +21,15 @@
 # SOFTWARE.
 
 import pytest
-from conftest import NullContext
 
-from ansys.mapdl.core.errors import (MapdlCommandIgnoredError, MapdlException,
-                                     MapdlInvalidRoutineError,
-                                     MapdlRuntimeError, protect_from)
+from ansys.mapdl.core.errors import (
+    MapdlCommandIgnoredError,
+    MapdlException,
+    MapdlInvalidRoutineError,
+    MapdlRuntimeError,
+    protect_from,
+)
+from conftest import NullContext
 
 error_shape_error_limits = """
 

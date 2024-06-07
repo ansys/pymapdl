@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import pytest
+
 from conftest import has_dependency
 
 if not has_dependency("pyvista"):

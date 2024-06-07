@@ -22,16 +22,16 @@
 
 import re
 
+from ansys.tools.versioning import server_meets_version
 import numpy as np
 import pytest
-from ansys.tools.versioning import server_meets_version
-from conftest import ON_CI
 
 ## Checking MAPDL versions
 from ansys.mapdl.core.database import MINIMUM_MAPDL_VERSION, DBDef, MapdlDb
 from ansys.mapdl.core.database.database import FAILING_DATABASE_MAPDL
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlVersionError
 from ansys.mapdl.core.misc import random_string
+from conftest import ON_CI
 
 
 @pytest.fixture(scope="session")

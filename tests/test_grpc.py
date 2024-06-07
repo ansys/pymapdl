@@ -30,8 +30,11 @@ import pytest
 
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
-from ansys.mapdl.core.errors import (MapdlCommandIgnoredError,
-                                     MapdlExitedError, MapdlRuntimeError)
+from ansys.mapdl.core.errors import (
+    MapdlCommandIgnoredError,
+    MapdlExitedError,
+    MapdlRuntimeError,
+)
 from ansys.mapdl.core.misc import random_string
 
 PATH = os.path.dirname(os.path.abspath(__file__))

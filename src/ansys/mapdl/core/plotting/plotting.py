@@ -26,8 +26,8 @@ from typing import Any, Optional
 from warnings import warn
 
 import numpy as np
-import pyvista as pv
 from numpy.typing import NDArray
+import pyvista as pv
 
 from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core.misc import get_bounding_box, unique_rows

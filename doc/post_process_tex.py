@@ -4,8 +4,8 @@ Removes invalid PNGs (probably GIF)
 
 """
 
-import os
 from glob import glob
+import os
 from pathlib import Path
 
 from PIL import Image

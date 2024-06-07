@@ -23,9 +23,10 @@
 """Tests comparing results of krylov pymadl function with apdl macro"""
 import os
 
+from ansys.tools.versioning.utils import server_meets_version
 import numpy as np
 import pytest
-from ansys.tools.versioning.utils import server_meets_version
+
 from conftest import has_dependency
 
 if not has_dependency("ansys-math-core"):

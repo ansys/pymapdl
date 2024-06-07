@@ -24,14 +24,19 @@ import inspect
 
 import numpy as np
 import pytest
-from conftest import has_dependency, requires
 
 from ansys.mapdl.core import examples
-from ansys.mapdl.core.commands import (CMD_BC_LISTING, CMD_LISTING,
-                                       BoundaryConditionsListingOutput,
-                                       CommandListingOutput, CommandOutput,
-                                       Commands, StringWithLiteralRepr)
+from ansys.mapdl.core.commands import (
+    CMD_BC_LISTING,
+    CMD_LISTING,
+    BoundaryConditionsListingOutput,
+    CommandListingOutput,
+    CommandOutput,
+    Commands,
+    StringWithLiteralRepr,
+)
 from ansys.mapdl.core.examples import verif_files
+from conftest import has_dependency, requires
 
 if has_dependency("pandas"):
     import pandas as pd
