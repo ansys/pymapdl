@@ -24,6 +24,7 @@
 import os
 
 import pytest
+
 from conftest import HAS_DPF, has_dependency, requires
 
 if not has_dependency("ansys-dpf-core") or not HAS_DPF:

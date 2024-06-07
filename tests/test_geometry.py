@@ -23,6 +23,7 @@
 """Test geometry commands"""
 import numpy as np
 import pytest
+
 from conftest import has_dependency, requires
 
 if has_dependency("pyvista"):

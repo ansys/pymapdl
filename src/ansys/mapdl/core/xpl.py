@@ -27,8 +27,8 @@ import random
 import string
 import weakref
 
-import numpy as np
 from ansys.api.mapdl.v0 import mapdl_pb2
+import numpy as np
 
 from .common_grpc import ANSYS_VALUE_TYPE
 from .errors import MapdlRuntimeError

@@ -26,15 +26,19 @@ import shutil
 import socket
 import tempfile
 import time
+from typing import Any, Dict, List, Optional, Union
 import warnings
 import weakref
-from typing import Any, Dict, List, Optional, Union
 
 from ansys.mapdl.core import LOG, launch_mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
-from ansys.mapdl.core.launcher import (LOCALHOST, MAPDL_DEFAULT_PORT,
-                                       check_valid_ip, get_start_instance,
-                                       port_in_use)
+from ansys.mapdl.core.launcher import (
+    LOCALHOST,
+    MAPDL_DEFAULT_PORT,
+    check_valid_ip,
+    get_start_instance,
+    port_in_use,
+)
 from ansys.mapdl.core.mapdl_grpc import _HAS_TQDM
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
 

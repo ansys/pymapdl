@@ -21,11 +21,12 @@
 # SOFTWARE.
 
 import os
-import time
 from pathlib import Path
+import time
 
 import numpy as np
 import pytest
+
 from conftest import ON_LOCAL, ON_STUDENT, START_INSTANCE, has_dependency
 
 if has_dependency("ansys-tools-path"):
@@ -36,10 +37,9 @@ if has_dependency("ansys-tools-path"):
 else:
     EXEC_FILE = os.environ.get("PYMAPDL_MAPDL_EXEC")
 
-from conftest import QUICK_LAUNCH_SWITCHES, requires
-
 from ansys.mapdl.core import Mapdl, MapdlPool, examples
 from ansys.mapdl.core.errors import VersionError
+from conftest import QUICK_LAUNCH_SWITCHES, requires
 
 # skip entire module unless HAS_GRPC
 pytestmark = requires("grpc")

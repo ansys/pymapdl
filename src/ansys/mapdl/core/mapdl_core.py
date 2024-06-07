@@ -23,41 +23,54 @@
 """Module to control interaction with MAPDL through Python"""
 
 import atexit
+from functools import wraps
 import glob
 import logging
 import os
 import pathlib
 import re
-import tempfile
-import time
-import weakref
-from functools import wraps
 from shutil import copyfile, rmtree
 from subprocess import DEVNULL, call
-from typing import (TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple,
-                    Union)
+import tempfile
+import time
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 from warnings import warn
+import weakref
 
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core.commands import (CMD_BC_LISTING, CMD_LISTING, CMD_XSEL,
-                                       XSEL_DOCSTRING_INJECTION,
-                                       BoundaryConditionsListingOutput,
-                                       CommandListingOutput, Commands,
-                                       StringWithLiteralRepr, inject_docs)
-from ansys.mapdl.core.errors import (ComponentNoData, MapdlCommandIgnoredError,
-                                     MapdlFileNotFoundError,
-                                     MapdlInvalidRoutineError,
-                                     MapdlRuntimeError)
+from ansys.mapdl.core import _HAS_PYVISTA
+from ansys.mapdl.core.commands import (
+    CMD_BC_LISTING,
+    CMD_LISTING,
+    CMD_XSEL,
+    XSEL_DOCSTRING_INJECTION,
+    BoundaryConditionsListingOutput,
+    CommandListingOutput,
+    Commands,
+    StringWithLiteralRepr,
+    inject_docs,
+)
+from ansys.mapdl.core.errors import (
+    ComponentNoData,
+    MapdlCommandIgnoredError,
+    MapdlFileNotFoundError,
+    MapdlInvalidRoutineError,
+    MapdlRuntimeError,
+)
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.mapdl_types import MapdlFloat
-from ansys.mapdl.core.misc import (Information, check_valid_routine,
-                                   last_created, random_string,
-                                   requires_package, run_as_prep7,
-                                   supress_logging)
+from ansys.mapdl.core.misc import (
+    Information,
+    check_valid_routine,
+    last_created,
+    random_string,
+    requires_package,
+    run_as_prep7,
+    supress_logging,
+)
 
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.reader import Archive

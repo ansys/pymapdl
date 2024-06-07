@@ -23,28 +23,28 @@
 """A gRPC specific class and methods for the MAPDL gRPC client """
 
 import fnmatch
+from functools import wraps
 import glob
 import io
 import os
 import pathlib
 import re
 import shutil
+from subprocess import Popen
 import tempfile
 import threading
 import time
-import weakref
-from functools import wraps
-from subprocess import Popen
 from typing import TYPE_CHECKING, List, Literal, Optional, Tuple, Union
 from uuid import uuid4
 from warnings import warn
+import weakref
 
-import grpc
-import numpy as np
-import psutil
 from ansys.tools.versioning.utils import version_string_as_tuple
+import grpc
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
+import numpy as np
 from numpy.typing import NDArray
+import psutil
 
 MSG_IMPORT = """There was a problem importing the ANSYS MAPDL API module `ansys-api-mapdl`.
 Please make sure you have the latest updated version using:
@@ -64,16 +64,29 @@ except ImportError:  # pragma: no cover
     raise ImportError(MSG_IMPORT)
 
 from ansys.mapdl.core import _LOCAL_PORTS, __version__
-from ansys.mapdl.core.common_grpc import (ANSYS_VALUE_TYPE, DEFAULT_CHUNKSIZE,
-                                          DEFAULT_FILE_CHUNK_SIZE,
-                                          parse_chunks)
-from ansys.mapdl.core.errors import (MapdlConnectionError, MapdlError,
-                                     MapdlExitedError, MapdlRuntimeError,
-                                     protect_from, protect_grpc)
+from ansys.mapdl.core.common_grpc import (
+    ANSYS_VALUE_TYPE,
+    DEFAULT_CHUNKSIZE,
+    DEFAULT_FILE_CHUNK_SIZE,
+    parse_chunks,
+)
+from ansys.mapdl.core.errors import (
+    MapdlConnectionError,
+    MapdlError,
+    MapdlExitedError,
+    MapdlRuntimeError,
+    protect_from,
+    protect_grpc,
+)
 from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat, MapdlInt
-from ansys.mapdl.core.misc import (check_valid_ip, last_created, random_string,
-                                   run_as_prep7, supress_logging)
+from ansys.mapdl.core.misc import (
+    check_valid_ip,
+    last_created,
+    random_string,
+    run_as_prep7,
+    supress_logging,
+)
 from ansys.mapdl.core.parameters import interp_star_status
 
 # Checking if tqdm is installed.
@@ -451,8 +464,9 @@ class MapdlGrpc(MapdlBase):
         self._create_session()
 
     def _create_process_stds_queue(self, process=None):
-        from ansys.mapdl.core.launcher import \
-            _create_queue_for_std  # Avoid circular import error
+        from ansys.mapdl.core.launcher import (
+            _create_queue_for_std,  # Avoid circular import error
+        )
 
         if not process:
             process = self._mapdl_process
@@ -551,8 +565,9 @@ class MapdlGrpc(MapdlBase):
 
     def _read_stds(self):
         """Read the stdout and stderr from the subprocess."""
-        from ansys.mapdl.core.launcher import \
-            _get_std_output  # Avoid circular import error
+        from ansys.mapdl.core.launcher import (
+            _get_std_output,  # Avoid circular import error
+        )
 
         if self._mapdl_process is None:
             return

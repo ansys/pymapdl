@@ -22,9 +22,9 @@
 
 """PyMAPDL specific errors"""
 
+from functools import wraps
 import signal
 import threading
-from functools import wraps
 from typing import Callable, Optional
 
 from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous

@@ -21,12 +21,12 @@
 # SOFTWARE.
 
 """Test xpl functionality"""
+from ansys.tools.versioning.utils import SemanticVersion
 import numpy as np
 import pytest
-from ansys.tools.versioning.utils import SemanticVersion
-from conftest import requires
 
 from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
+from conftest import requires
 
 # skip entire module unless HAS_GRPC
 pytestmark = requires("grpc")

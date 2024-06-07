@@ -20,5 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from . import (abbreviations, array_param, macro_files, matrix_op,
-               parameter_definition, process_controls)
+from . import (
+    abbreviations,
+    array_param,
+    macro_files,
+    matrix_op,
+    parameter_definition,
+    process_controls,
+)

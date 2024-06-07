@@ -34,8 +34,8 @@ Run a modal analysis on a mesh generated from pyvista within MAPDL.
 import os
 import tempfile
 
-import pyvista as pv
 from ansys.mapdl.reader import save_as_archive
+import pyvista as pv
 
 from ansys.mapdl.core import launch_mapdl
 

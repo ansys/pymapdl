@@ -23,6 +23,7 @@
 # Script to calculate the first natural frequency of a rotor for a given set of
 # properties
 import click
+
 # Import packages
 import numpy as np
 

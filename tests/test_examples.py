@@ -25,14 +25,22 @@ import re
 from subprocess import PIPE, STDOUT, Popen
 
 import pytest
-from conftest import requires
 
 from ansys.mapdl.core import EXAMPLES_PATH, examples
 from ansys.mapdl.core.examples.downloads import (
-    _download_file, _download_rotor_tech_demo_vtk, check_directory_exist,
-    delete_downloads, download_bracket, download_cfx_mapping_example_data,
-    download_example_data, download_manifold_example_data,
-    download_tech_demo_data, download_vtk_rotor, get_ext)
+    _download_file,
+    _download_rotor_tech_demo_vtk,
+    check_directory_exist,
+    delete_downloads,
+    download_bracket,
+    download_cfx_mapping_example_data,
+    download_example_data,
+    download_manifold_example_data,
+    download_tech_demo_data,
+    download_vtk_rotor,
+    get_ext,
+)
+from conftest import requires
 
 
 def test_check_directory_exist(tmpdir):

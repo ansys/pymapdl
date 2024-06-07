@@ -21,11 +21,10 @@
 # SOFTWARE.
 
 """Module for the MapdlPlotter class."""
-import pyvista as pv
 from ansys.tools.visualization_interface import Plotter
-from ansys.tools.visualization_interface.backends.pyvista import \
-    PyVistaBackendInterface
+from ansys.tools.visualization_interface.backends.pyvista import PyVistaBackendInterface
 from beartype.typing import Any, Iterable
+import pyvista as pv
 
 from ansys.mapdl.core.plotting.theme import MapdlTheme
 
