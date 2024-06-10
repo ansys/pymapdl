@@ -584,6 +584,8 @@ class FileTranslator:
             + list(self._enum_block_commands)
         )
 
+        self._chained_commands = 0
+        self.chained_commands = False
         self._block_count = 0
         self._block_count_target = 0
         self._in_block = False
@@ -684,6 +686,17 @@ class FileTranslator:
 
     def translate_line(self, line):
         """Converts a single line from an ANSYS APDL script"""
+
+        if "$" in line:
+            # these are chained commands.
+            lines = line.split("$")
+            self.start_chained_commands()
+            for each_line in lines:
+                self.translate_line(each_line)
+
+            self.end_chained_commands()
+            return
+
         self.comment = ""
         original_line = line.replace("\r\n", "").replace(
             "\n", ""
@@ -1132,6 +1145,21 @@ class FileTranslator:
         if self._non_interactive_level <= 0:
             self.indent = self.indent[4:]
             self.non_interactive = False
+
+    def start_chained_commands(self):
+        self._chained_commands += 1
+        if self.chained_commands:
+            return
+        line = f"{self.indent}with {self.obj_name}.chain_commands:"
+        self.lines.append(line)
+        self.chained_commands = True
+        self.indent = self.indent + "    "
+
+    def end_chained_commands(self):
+        self._chained_commands -= 1
+        if self._chained_commands <= 0:
+            self.indent = self.indent[4:]
+            self.chained_commands = False
 
     def output_to_file(self, line):
         """Return if an APDL line is redirecting to a file."""
