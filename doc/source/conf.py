@@ -86,9 +86,9 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
     "sphinx_autodoc_typehints",
+    "sphinx_jinja",
     "sphinx_design",
     "sphinx_copybutton",
-    "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
     "sphinx_reredirects",
@@ -186,6 +186,24 @@ exclude_patterns = [
     "links.rst",
     "substitutions.rst",
 ]
+
+BUILD_API = True if os.environ.get("BUILD_API", "true") == "true" else False
+if not BUILD_API:
+    exclude_patterns.extend(["api/**", "mapdl_commands/**", "api.rst"])
+
+BUILD_EXAMPLES = True if os.environ.get("BUILD_EXAMPLES", "true") == "true" else False
+if not BUILD_EXAMPLES:
+    exclude_patterns.extend(["examples/index.rst", "examples/**", "examples/**/**"])
+    suppress_warnings.append("ref.*")
+else:
+    extensions.append("sphinx_gallery.gen_gallery")
+
+jinja_contexts = {
+    "main_toctree": {
+        "build_api": BUILD_API,
+        "build_examples": BUILD_EXAMPLES,
+    },
+}
 
 # make rst_epilog a variable, so you can add other epilog parts to it
 rst_epilog = ""

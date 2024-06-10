@@ -5,16 +5,21 @@
 .. meta::
    :keywords: pymapdl mapdl simulation finite elements python
 
+.. jinja:: main_toctree
+    
+    .. toctree::
+       :hidden:
+       :maxdepth: 3
 
-.. toctree::
-   :hidden:
-   :maxdepth: 3
-
-   getting_started/index
-   user_guide/index
-   mapdl_commands/index
-   api/index
-   examples/index
+       getting_started/index
+       user_guide/index
+       {% if build_api %}
+       mapdl_commands/index
+       api/index
+       {% endif %}
+       {% if build_examples %}
+       examples/index
+       {% endif %}
 
 
 .. image:: ../source/_static/logo_dark.png
