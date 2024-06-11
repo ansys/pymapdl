@@ -189,7 +189,7 @@ exclude_patterns = [
 
 BUILD_API = True if os.environ.get("BUILD_API", "true") == "true" else False
 if not BUILD_API:
-    exclude_patterns.extend(["api/**", "mapdl_commands/**", "api.rst"])
+    exclude_patterns.extend(["api/**", "mapdl_commands/**"])
 
 BUILD_EXAMPLES = True if os.environ.get("BUILD_EXAMPLES", "true") == "true" else False
 if not BUILD_EXAMPLES:
