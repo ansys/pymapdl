@@ -197,6 +197,31 @@ if not BUILD_EXAMPLES:
     suppress_warnings.append("ref.*")
 else:
     extensions.append("sphinx_gallery.gen_gallery")
+    # -- Sphinx Gallery Options ---------------------------------------------------
+    sphinx_gallery_conf = {
+        # convert rst to md for ipynb
+        "pypandoc": True,
+        # path to your examples scripts
+        "examples_dirs": [EXAMPLES_PATH_FOR_DOCS],
+        # path where to save gallery generated examples
+        "gallery_dirs": [GALLERY_EXAMPLES_PATH],
+        # Pattern to search for example files
+        "filename_pattern": r"\." + DEFAULT_EXAMPLE_EXTENSION,
+        # Remove the "Download all examples" button from the top level gallery
+        "download_all_examples": False,
+        # Sort gallery example by file name instead of number of lines (default)
+        "within_subsection_order": FileNameSortKey,
+        # directory where function granular galleries are stored
+        "backreferences_dir": None,
+        # Modules for which function level galleries are created.  In
+        "doc_module": "ansys-mapdl-core",
+        "image_scrapers": ("pyvista", "matplotlib"),
+        "ignore_pattern": "flycheck*",
+        "thumbnail_size": (350, 350),
+        "remove_config_comments": True,
+        "default_thumb_file": pyansys_light_mode_logo,
+        "show_signature": False,
+    }
 
 jinja_contexts = {
     "main_toctree": {
@@ -223,7 +248,6 @@ with open("substitutions.rst") as f:
 
 # Setting redicts
 redirects = {
-    #
     # Old link: https://dev.mapdl.docs.pyansys.com/user_guide/krylov.html
     "user_guide/krylov": "examples/extended_examples/Krylov/krylov_example"
 }
@@ -259,34 +283,6 @@ todo_include_todos = False
 # exclude traditional Python prompts from the copied code
 copybutton_prompt_text = r">>> ?|\.\.\. "
 copybutton_prompt_is_regexp = True
-
-# -- Sphinx Gallery Options ---------------------------------------------------
-sphinx_gallery_conf = {
-    # convert rst to md for ipynb
-    "pypandoc": True,
-    # path to your examples scripts
-    "examples_dirs": [EXAMPLES_PATH_FOR_DOCS],
-    # path where to save gallery generated examples
-    "gallery_dirs": [GALLERY_EXAMPLES_PATH],
-    # Pattern to search for example files
-    "filename_pattern": r"\." + DEFAULT_EXAMPLE_EXTENSION,
-    # Remove the "Download all examples" button from the top level gallery
-    "download_all_examples": False,
-    # Sort gallery example by file name instead of number of lines (default)
-    "within_subsection_order": FileNameSortKey,
-    # directory where function granular galleries are stored
-    "backreferences_dir": None,
-    # Modules for which function level galleries are created.  In
-    "doc_module": "ansys-mapdl-core",
-    "image_scrapers": ("pyvista", "matplotlib"),
-    "ignore_pattern": "flycheck*",
-    "thumbnail_size": (350, 350),
-    "remove_config_comments": True,
-    "default_thumb_file": pyansys_light_mode_logo,
-    "show_signature": False,
-}
-# ---
-
 
 # -- Options for HTML output -------------------------------------------------
 html_short_title = html_title = "PyMAPDL"
