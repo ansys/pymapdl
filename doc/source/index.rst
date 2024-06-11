@@ -72,13 +72,17 @@
         :ref:`ref_using_standard_install`, :ref:`ref_pymapdl_installation`,
         and :ref:`ref_launch_pymapdl`.
 
-    .. grid-item-card:: :fa:`gears` See some PyMAPDL usage examples
-        :link: ref_examples
-        :link-type: ref
+    .. jinja:: main_toctree
 
-        In our :ref:`ref_examples` section, you
-        can find a great collection of PyMAPDL
-        user cases.
+        {% if build_examples %}
+        .. grid-item-card:: :fa:`gears` See some PyMAPDL usage examples
+            :link: ref_examples
+            :link-type: ref
+
+            In our :ref:`ref_examples` section, you
+            can find a great collection of PyMAPDL
+            user cases.
+        {% endif %}
 
     .. grid-item-card:: :fa:`book-open-reader` Use the different library modules
         :link: ref_user_guide
