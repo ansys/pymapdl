@@ -229,7 +229,7 @@ override_SS05 = [  # override SS05 to allow docstrings starting with these words
 ]
 
 [tool.towncrier]
-package = "ansys.math.core"
+package = "ansys.mapdl.core"
 directory = "doc/changelog.d"
 filename = "doc/source/changelog.rst"
 template = "doc/changelog.d/changelog_template.jinja"
