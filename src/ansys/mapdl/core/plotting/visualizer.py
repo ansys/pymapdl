@@ -154,8 +154,8 @@ class MapdlPlotter(Plotter):
         name_filter : str, optional
             Filter to apply to the objects. The default is ``None``.
         """
-        for object in plotting_list:
-            self.plot(object, name_filter, **plotting_options)
+        for plottable_object in plotting_list:
+            self.plot(plottable_object, name_filter, **plotting_options)
 
     def plot(
         self, plottable_object: Any, name_filter: str = None, **plotting_options
