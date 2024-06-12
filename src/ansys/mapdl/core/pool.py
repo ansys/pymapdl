@@ -210,7 +210,7 @@ class MapdlPool:
         ip = None if ip == "" else ip  # Making sure the variable is not empty
 
         if ip is None:
-            ips = LOCALHOST
+            ips = [LOCALHOST]
 
         else:
             if not isinstance(ip, (tuple, list)):
@@ -222,12 +222,7 @@ class MapdlPool:
             ips = [socket.gethostbyname(each) for each in ips]
             _ = [check_valid_ip(each) for each in ips]  # double check
 
-        if n_instances and (ips and len(ips) != 1):
-            raise Exception(
-                "If using 'ip' argument, it is not needed to use 'n_instances'."
-            )
-        else:
-            n_instances = len(ips)
+        n_instances = len(ips)
 
         # Getting "start_instance" using "True" as default.
         if (ip is not None) and (start_instance is None):
