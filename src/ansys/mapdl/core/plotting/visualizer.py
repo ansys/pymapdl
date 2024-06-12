@@ -68,7 +68,7 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
         **plotting_options
             Additional plotting options.
         """
-        for object in plotting_list:
+        for plottable_object in plotting_list:
             self.plot(object, filter, **plotting_options)
 
     def plot(self, plottable_object: Any, name_filter: str = None, **plotting_options):
