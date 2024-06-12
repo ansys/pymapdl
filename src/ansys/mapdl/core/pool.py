@@ -168,6 +168,7 @@ class MapdlPool:
         n_instances: int = None,
         wait: bool = True,
         run_location: Optional[str] = None,
+        ip: Optional[Union[str, List[str]]] = None,
         port: Union[int, List[int]] = MAPDL_DEFAULT_PORT,
         progress_bar: bool = DEFAULT_PROGRESS_BAR,
         restart_failed: bool = True,
@@ -176,7 +177,6 @@ class MapdlPool:
         override=True,
         start_instance: bool = None,
         exec_file: Optional[str] = None,
-        ip: Optional[str] = None,
         **kwargs,
     ) -> None:
         """Initialize several instances of mapdl"""
@@ -221,6 +221,13 @@ class MapdlPool:
             # Converting ip or hostname to ip
             ips = [socket.gethostbyname(each) for each in ips]
             _ = [check_valid_ip(each) for each in ips]  # double check
+
+        if n_instances and (ips and len(ips) != 1):
+            raise Exception(
+                "If using 'ip' argument, it is not needed to use 'n_instances'."
+            )
+        else:
+            n_instances = len(ips)
 
         # Getting "start_instance" using "True" as default.
         if (ip is not None) and (start_instance is None):
@@ -286,8 +293,11 @@ class MapdlPool:
                 if not os.path.isdir(self._root_dir):
                     os.makedirs(self._root_dir)
         else:
-            if isinstance(port, int) or len(port) == 1:
-                ports = [port + i for i in range(n_instances)]
+            if isinstance(port, int) or (isinstance(port, list) and len(port) == 1):
+                if len(ip) > 1:
+                    ports = [port for i in range(n_instances)]
+                else:  # in local using port + i
+                    ports = [port + i for i in range(n_instances)]
             else:
                 ports = port
                 n_instances = len(ports)
@@ -342,8 +352,9 @@ class MapdlPool:
         threads = [
             self._spawn_mapdl(
                 i,
-                ports[i],
-                pbar,
+                ip=ips[i],
+                port=ports[i],
+                pbar=pbar,
                 name=self._names(i),
                 thread_name=self._names(i),
                 start_instance=start_instance,
@@ -851,6 +862,7 @@ class MapdlPool:
     def _spawn_mapdl(
         self,
         index: int,
+        ip: str = None,
         port: int = None,
         pbar: Optional[bool] = None,
         name: str = "",
@@ -867,6 +879,7 @@ class MapdlPool:
             exec_file=exec_file,
             run_location=run_location,
             port=port,
+            ip=ip,
             override=True,
             start_instance=start_instance,
             **self._spawn_kwargs,
