@@ -75,16 +75,6 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
             filter=name_filter,
         )
 
-    def show(
-        self,
-        plottable_object: Any = None,
-        screenshot: str = None,
-        name_filter: bool = None,
-        **plotting_options,
-    ):
-        if object is not None:
-            self.plot(plottable_object, name_filter, **plotting_options)
-        self.pv_interface.show(screenshot=screenshot)
 
 
 class MapdlPlotter(Plotter):
