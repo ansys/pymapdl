@@ -22,6 +22,7 @@
 
 import os
 from pathlib import Path
+import socket
 import time
 
 import numpy as np
@@ -395,3 +396,23 @@ def test_next_with_returns_index(pool):
     for each_instance in pool:
         assert not each_instance.locked
         assert not each_instance._busy
+
+
+def test_multiple_ips():
+    ips = [
+        "123.45.67.01",
+        "123.45.67.02",
+        "123.45.67.03",
+        "123.45.67.04",
+        "123.45.67.05",
+    ]
+
+    conf = MapdlPool(ip=ips, _debug_no_launch=True)._debug_no_launch
+
+    ips = [socket.gethostbyname(each) for each in ips]
+
+    assert conf["ips"] == ips
+    assert conf["ports"] == [50052 for i in range(len(ips))]
+    assert conf["start_instance"] is False
+    assert conf["exec_file"] is None
+    assert conf["n_instances"] == len(ips)
