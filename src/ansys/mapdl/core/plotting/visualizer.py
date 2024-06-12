@@ -69,7 +69,7 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
             Additional plotting options.
         """
         for plottable_object in plotting_list:
-            self.plot(object, filter, **plotting_options)
+            self.plot(plottable_object, name_filter, **plotting_options)
 
     def plot(self, plottable_object: Any, name_filter: str = None, **plotting_options):
         """Add an object to the plotter.
