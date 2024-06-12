@@ -54,7 +54,7 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
     def plot_iter(
         self,
         plotting_list: Iterable[Any],
-        filter: str = None,
+        name_filter: str = None,
         **plotting_options,
     ) -> None:
         """Add a list of objects to the plotter.
@@ -63,18 +63,30 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
         ----------
         plotting_list : Iterable[Any]
             Iterable of objects to be added to the plotter.
-        filter : str, optional
+        name_filter : str, optional
             Filter to be applied to the objects, by default None.
+        **plotting_options
+            Additional plotting options.
         """
         for object in plotting_list:
             self.plot(object, filter, **plotting_options)
 
     def plot(self, plottable_object: Any, name_filter: str = None, **plotting_options):
-        self.pv_interface.plot(
-            object=plottable_object,
-            filter=name_filter,
-        )
+        """Add an object to the plotter.
 
+        Parameters
+        ----------
+        plottable_object : Any
+            Object to be added to the plotter.
+        name_filter : str, optional
+            Filter to be applied to the object, by default None.
+        **plotting_options
+            Additional plotting options.
+        """
+        self.pv_interface.plot(
+            plottable_object=plottable_object,
+            name_filter=name_filter,
+        )
 
 
 class MapdlPlotter(Plotter):
@@ -130,7 +142,7 @@ class MapdlPlotter(Plotter):
     def plot_iter(
         self,
         plotting_list: Iterable[Any],
-        filter: str = None,
+        name_filter: str = None,
         **plotting_options,
     ) -> None:
         """Add a list of objects to the plotter.
@@ -139,11 +151,11 @@ class MapdlPlotter(Plotter):
         ----------
         plotting_list : Iterable[Any]
             Iterable of objects to add to the plotter.
-        filter : str, optional
+        name_filter : str, optional
             Filter to apply to the objects. The default is ``None``.
         """
         for object in plotting_list:
-            self.plot(object, filter, **plotting_options)
+            self.plot(object, name_filter, **plotting_options)
 
     def plot(
         self, plottable_object: Any, name_filter: str = None, **plotting_options
@@ -154,7 +166,7 @@ class MapdlPlotter(Plotter):
         ----------
         object : Any
             Object add to the plotter.
-        filter : str, optional
+        name_filter : str, optional
             Filter to apply to the object. The default is ``None``.
         """
         self._backend.plot(plottable_object, name_filter, **plotting_options)

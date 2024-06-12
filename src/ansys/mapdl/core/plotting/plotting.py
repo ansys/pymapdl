@@ -325,7 +325,11 @@ def _general_plotter(
     if theme is None:
         theme = MapdlTheme()
 
-    if not (plotter is None or isinstance(plotter, MapdlPlotter) or isinstance(plotter, pv.Plotter)):
+    if not (
+        plotter is None
+        or isinstance(plotter, MapdlPlotter)
+        or isinstance(plotter, pv.Plotter)
+    ):
         raise TypeError("The kwarg 'plotter' can only accept MapdlPlotter objects.")
 
     if not plotter:
