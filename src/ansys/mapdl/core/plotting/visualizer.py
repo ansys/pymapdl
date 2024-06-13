@@ -40,7 +40,7 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
     use_trame : bool, optional
         Whether to use the Trame interface or not. The default is ``False``.
     theme : pv.DefaultTheme, optional
-        _description_, by default None1
+        Theme to use for the plotter. The default is ``None``.
     """
 
     def __init__(
@@ -100,7 +100,7 @@ class MapdlPlotter(Plotter):
     use_trame : bool, optional
         Whether to use the Trame visualizer. The default is ``False``.
     theme : pv.DefaultTheme, optional
-        _description_, by default None1
+        Theme to use for the plotter. The default is ``None``.
     """
 
     def __init__(
@@ -121,7 +121,7 @@ class MapdlPlotter(Plotter):
         Parameters
         ----------
         points : List[float]
-            List of points of the labels.
+            List of points for the labels.
         labels : List[str]
             List of labels to add.
         """
