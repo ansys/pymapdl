@@ -62,9 +62,9 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
         Parameters
         ----------
         plotting_list : Iterable[Any]
-            Iterable of objects to be added to the plotter.
+            Iterable of objects to add to the plotter.
         name_filter : str, optional
-            Filter to be applied to the objects, by default None.
+            Filter to apply to the objects. The default is ``None``.
         **plotting_options
             Additional plotting options.
         """
@@ -77,9 +77,9 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
         Parameters
         ----------
         plottable_object : Any
-            Object to be added to the plotter.
+            Object to add to the plotter.
         name_filter : str, optional
-            Filter to be applied to the object, by default None.
+            Filter to apply to the object. The default is ``None``.
         **plotting_options
             Additional plotting options.
         """
@@ -90,15 +90,15 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
 
 
 class MapdlPlotter(Plotter):
-    """Plotter class for PyMapdl.
+    """Plotter class for PyMAPDL.
 
-    This class is an implementation of the PlotterInterface class from the ansys-visualizer package.
-    Picker is implemented in PyMAPDL specific classes due to the characteristics of the library.
+    This class is an implementation of the ``PlotterInterface`` class from the `Visualization Interface Tool <https://github.com/ansys/ansys-tools-visualization-interface>`_.
+    The picker is implemented in PyMAPDL-specific classes due to the characteristics of the library.
 
     Parameters
     ----------
     use_trame : bool, optional
-        Whether to use the trame interface or not, by default False.
+        Whether to use the Trame visualizer. The default is ``False``.
     theme : pv.DefaultTheme, optional
         _description_, by default None1
     """
@@ -106,7 +106,7 @@ class MapdlPlotter(Plotter):
     def __init__(
         self, use_trame: bool = False, theme: pv.Plotter.theme = None, **plotter_kwargs
     ):
-        """Initialize the MapdlPlotter class."""
+        """Initialize the ``MapdlPlotter`` class."""
         self._backend = MapdlPlotterBackend(use_trame=use_trame, **plotter_kwargs)
         super().__init__(backend=self._backend)
         self._theme = theme
@@ -165,7 +165,7 @@ class MapdlPlotter(Plotter):
         Parameters
         ----------
         object : Any
-            Object add to the plotter.
+            Object to add to the plotter.
         name_filter : str, optional
             Filter to apply to the object. The default is ``None``.
         """
