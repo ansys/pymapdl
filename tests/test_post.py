@@ -36,7 +36,7 @@ if has_dependency("pyvista"):
 
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from ansys.mapdl.core.plotting import MapdlPlotter
+from ansys.mapdl.core.plotting.plotting import MapdlPlotter
 from ansys.mapdl.core.post import (
     COMPONENT_STRESS_TYPE,
     PRINCIPAL_TYPE,
