@@ -289,7 +289,7 @@ class MapdlPool:
                     os.makedirs(self._root_dir)
         else:
             if isinstance(port, int) or (isinstance(port, list) and len(port) == 1):
-                if len(ip) > 1:
+                if len(ips) > 1:
                     ports = [port for i in range(n_instances)]
                 else:  # in local using port + i
                     ports = [port + i for i in range(n_instances)]
