@@ -1,21 +1,21 @@
 version: '3.3'
 
-# This is a docker-compose file which launch a remote MAPDL instance in a dockerized environment.
-# You can connect to this instance throught the port 50052 and 50055 (for the database feature).
+# This is a docker-compose file which launches a remote MAPDL instance in a dockerized environment.
+# You can connect to this instance through port 50052 and 50055 (for the database feature).
 #
 # For the license, you need to provide the hostname of the license server.
 #
 # REQUIREMENTS:
 # =============
 #
-# - docker
-# - docker images from ghcr.io (you might need to do 'docker login ghcr.io' first)
+# - Docker
+# - Docker images from ghcr.io (you might need to do 'docker login ghcr.io' first)
 #
 # USAGE:
 # ======
 #
-# 1. You need two environment variables. One called ``DOCKER_IMAGE`` which contains the path to the
-# docker image, and another one called ``ANSYSLMD_LICENSE_FILE`` which points to the license server.
+# 1. You need two environment variables. One called `DOCKER_IMAGE` which contains the path to the
+# Docker image, and another one called `ANSYSLMD_LICENSE_FILE` which points to the license server.
 # For example:
 #
 #     export ANSYSLMD_LICENSE_FILE=1055@mylicensehost
@@ -25,14 +25,14 @@ version: '3.3'
 # 
 #     docker-compose up
 #
-# Optionally you can specify the '-d' flag for detaching mode (the container will run in the background).
+# Optionally, you can specify the '-d' flag for detached mode (the container will run in the background).
 #
 #
 # NOTES:
 # ======
 #
-# - 'AWP_ROOT222' is where Ansys is installed.
-# - The entrypoint must be defined in the docker image.
+# - `AWP_ROOT222` is where Ansys is installed.
+# - The entrypoint must be defined in the Docker image.
 # - If you want to mount the local directory, please add the 'volumes' section to the 'mapdl' service.
 # 
 #      volumes:
@@ -56,14 +56,13 @@ services:
     user: "0:0"
     entrypoint: "/bin/bash ansys -grpc"
 
-## To be executed after license server
-# 
-# You need an env var which points to the docker dpf image:
-# 
-#        export DPF_DOCKER_IMAGE=ghcr.io/ansys/dpf-core:22.2dev
-# 
-# As well as the `ANSYSLMD_LICENSE_FILE` env var.
-#
+  # To be executed after license server
+  # You need an env var which points to the docker dpf image:
+  # 
+  #        export DPF_DOCKER_IMAGE=ghcr.io/ansys/dpf-core:22.2dev
+  # 
+  # As well as the `ANSYSLMD_LICENSE_FILE` env var.
+  #
 
   dpf:
     image: ${DPF_DOCKER_IMAGE}
@@ -73,40 +72,39 @@ services:
     environment:
       - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
 
-# DESCRIPTION
-# ===========
-#
-# This docker-compose file extends the 'base' docker-compose file to run the docker in such a way that
-# you can then attach your VSCode instance and work locally.
-#
-# It is said to be running as 'local' because it will mount the current directory in '/local' 
-# inside the container (presumably you will have the cloned repository in the current directory),
-# and it will override the entrypoint to run the 'bash' command.
-#
-#
-# USAGE
-# =====
-#
-# 1. You need to have the 'base' docker-compose file in the same directory as this file, and fullfil
-# its requirements (license server env var).
-#
-# 2. Once you have done this, you can start the service by running:
-#
-#      docker-compose -f docker-compose.yml -f docker-compose.local.yml up
-#
-# NOTES
-# =====
-#
-# - If you need to run a license server, please have a look at 'docker-compose.license_server.yml'
-# file. In that case, the command to launch everything is:
-# 
-#      docker-compose -f docker-compose.yml -f docker-compose.license-server.yml -f docker-compose.local.yml up
-#
+  # DESCRIPTION
+  # ===========
+  #
+  # This docker-compose file extends the 'base' docker-compose file to run the docker in such a way that
+  # you can then attach your VSCode instance and work locally.
+  #
+  # It is said to be running as 'local' because it will mount the current directory in '/local' 
+  # inside the container (presumably you will have the cloned repository in the current directory),
+  # and it will override the entrypoint to run the 'bash' command.
+  #
+  #
+  # USAGE
+  # =====
+  #
+  # 1. You need to have the 'base' docker-compose file in the same directory as this file, and fulfill
+  # its requirements (license server env var).
+  #
+  # 2. Once you have done this, you can start the service by running:
+  #
+  #      docker-compose -f docker-compose.yml -f docker-compose.local.yml up
+  #
+  # NOTES
+  # =====
+  #
+  # - If you need to run a license server, please have a look at 'docker-compose.license_server.yml'
+  # file. In that case, the command to launch everything is:
+  # 
+  #      docker-compose -f docker-compose.yml -f docker-compose.license-server.yml -f docker-compose.local.yml up
+  #
 
   mapdl-local:
     user: "0:0"
     volumes:
-      - ../:/local:cached
+      - ./:/local:cached
     # Overwriting entrypoint
     entrypoint: /bin/sh -c "echo 'Container is ready. You can now attach to it.'; while sleep 1000; do :; done"
-  
