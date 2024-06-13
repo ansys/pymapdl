@@ -331,19 +331,17 @@ def _general_plotter(
         or isinstance(plotter, pv.Plotter)
     ):
         raise TypeError("The kwarg 'plotter' can only accept MapdlPlotter objects.")
-
+    if (off_screen or notebook or theme) and plotter:
+        warn(
+            "The kwargs 'off_screen', 'notebook' and 'theme' are ignored when using 'plotter' kwarg.",
+            UserWarning,
+        )
     if not plotter:
         plotter = MapdlPlotter(
             off_screen=off_screen, notebook=notebook, theme=theme, **plotter_kwargs
         )
     if isinstance(plotter, pv.Plotter):
         plotter = MapdlPlotter(pv_interface=plotter)
-    else:
-        if off_screen or notebook or theme:
-            warn(
-                "The kwargs 'off_screen', 'notebook' and 'theme' are ignored when using 'plotter' kwarg.",
-                UserWarning,
-            )
 
     if not cmap:
         cmap = "bwr"
@@ -406,58 +404,31 @@ def _general_plotter(
             mesh_ = [mesh_]
 
         for each_mesh in mesh_:
-            if isinstance(plotter, MapdlPlotter):
-                plotter._backend.pv_interface.scene.add_mesh(
-                    each_mesh,
-                    scalars=scalars,
-                    scalar_bar_args=scalar_bar_args,
-                    color=mesh.get("color", color),
-                    style=mesh.get("style", style),
-                    show_edges=show_edges,
-                    edge_color=edge_color,
-                    smooth_shading=smooth_shading,
-                    split_sharp_edges=split_sharp_edges,
-                    feature_angle=feature_angle,
-                    point_size=point_size,
-                    line_width=line_width,
-                    show_scalar_bar=show_scalar_bar,
-                    opacity=opacity,
-                    flip_scalars=flip_scalars,
-                    lighting=lighting,
-                    n_colors=n_colors,
-                    interpolate_before_map=interpolate_before_map,
-                    cmap=cmap,
-                    render_points_as_spheres=render_points_as_spheres,
-                    render_lines_as_tubes=render_lines_as_tubes,
-                    rgb=rgb,
-                    **add_mesh_kwargs,
-                )
-            else:
-                plotter.add_mesh(
-                    each_mesh,
-                    scalars=scalars,
-                    scalar_bar_args=scalar_bar_args,
-                    color=mesh.get("color", color),
-                    style=mesh.get("style", style),
-                    show_edges=show_edges,
-                    edge_color=edge_color,
-                    smooth_shading=smooth_shading,
-                    split_sharp_edges=split_sharp_edges,
-                    feature_angle=feature_angle,
-                    point_size=point_size,
-                    line_width=line_width,
-                    show_scalar_bar=show_scalar_bar,
-                    opacity=opacity,
-                    flip_scalars=flip_scalars,
-                    lighting=lighting,
-                    n_colors=n_colors,
-                    interpolate_before_map=interpolate_before_map,
-                    cmap=cmap,
-                    render_points_as_spheres=render_points_as_spheres,
-                    render_lines_as_tubes=render_lines_as_tubes,
-                    rgb=rgb,
-                    **add_mesh_kwargs,
-                )
+            plotter._backend.pv_interface.scene.add_mesh(
+                each_mesh,
+                scalars=scalars,
+                scalar_bar_args=scalar_bar_args,
+                color=mesh.get("color", color),
+                style=mesh.get("style", style),
+                show_edges=show_edges,
+                edge_color=edge_color,
+                smooth_shading=smooth_shading,
+                split_sharp_edges=split_sharp_edges,
+                feature_angle=feature_angle,
+                point_size=point_size,
+                line_width=line_width,
+                show_scalar_bar=show_scalar_bar,
+                opacity=opacity,
+                flip_scalars=flip_scalars,
+                lighting=lighting,
+                n_colors=n_colors,
+                interpolate_before_map=interpolate_before_map,
+                cmap=cmap,
+                render_points_as_spheres=render_points_as_spheres,
+                render_lines_as_tubes=render_lines_as_tubes,
+                rgb=rgb,
+                **add_mesh_kwargs,
+            )
 
     for label in labels:
         # verify points are not duplicates
@@ -467,30 +438,18 @@ def _general_plotter(
 
         # Converting python order (0 based)
         labels_ = np.array(label["labels"] - 1)[idx]
-        if isinstance(plotter, MapdlPlotter):
-            plotter.add_labels(
-                points,
-                labels_,
-                show_points=False,
-                shadow=False,
-                font_size=font_size,
-                font_family=font_family,
-                text_color=text_color,
-                always_visible=True,
-                **add_point_labels_kwargs,
-            )
-        else:
-            plotter.add_point_labels(
-                points,
-                labels_,
-                show_points=False,
-                shadow=False,
-                font_size=font_size,
-                font_family=font_family,
-                text_color=text_color,
-                always_visible=True,
-                **add_point_labels_kwargs,
-            )
+        plotter.add_labels(
+            points,
+            labels_,
+            show_points=False,
+            shadow=False,
+            font_size=font_size,
+            font_family=font_family,
+            text_color=text_color,
+            always_visible=True,
+            **add_point_labels_kwargs,
+        )
+
     if cpos:
         if isinstance(plotter, MapdlPlotter):
             plotter._backend.pv_interface.scene.camera_position = cpos
