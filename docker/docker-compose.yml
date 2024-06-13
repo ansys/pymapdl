@@ -55,4 +55,28 @@ services:
     image: ${DOCKER_IMAGE}
     user: "0:0"
     entrypoint: "/bin/bash ansys -grpc"
+
+## To be executed after license server
+# 
+# You need an env var which points to the docker dpf image:
+# 
+#        export DPF_DOCKER_IMAGE=ghcr.io/ansys/dpf-core:22.2dev
+# 
+# As well as the `ANSYSLMD_LICENSE_FILE` env var.
+#
+
+  dpf:
+    image: ${DPF_DOCKER_IMAGE}
+    ports:
+      - '50056:50052'
+    restart: always
+    environment:
+      - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
+
+  mapdl-local:
+    user: "0:0"
+    volumes:
+      - ../:/local:cached
+    # Overwriting entrypoint
+    entrypoint: /bin/sh -c "echo 'Container is ready. You can now attach to it.'; while sleep 1000; do :; done"
   
