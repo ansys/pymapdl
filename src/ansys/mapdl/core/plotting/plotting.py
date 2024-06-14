@@ -29,7 +29,6 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ansys.mapdl.core.misc import get_bounding_box, unique_rows
-from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
 from ..theme import MapdlTheme
 
@@ -74,9 +73,8 @@ from ansys.mapdl.core import _HAS_PYVISTA
 
 if _HAS_PYVISTA:
     import pyvista as pv
-
+    from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
     from ansys.mapdl.core.plotting_defaults import DefaultSymbol
-
     BC_plot_settings = DefaultSymbol()
 
 
