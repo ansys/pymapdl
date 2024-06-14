@@ -27,7 +27,6 @@ from warnings import warn
 
 import numpy as np
 from numpy.typing import NDArray
-import pyvista as pv
 
 from ansys.mapdl.core.misc import get_bounding_box, unique_rows
 from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
