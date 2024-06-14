@@ -57,7 +57,8 @@ version: '3.3'
 #
 #      docker-compose -f d mapdl-local
 #
-# 3. you can run together by `
+# 3. you can run together by :
+# 
 #     docker-compose -up -d mapdl mapdl-local
 #
 # NOTES
