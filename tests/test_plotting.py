@@ -26,7 +26,7 @@ import os
 import numpy as np
 import pytest
 
-from conftest import has_dependency
+from conftest import has_dependency, requires
 
 if not has_dependency("pyvista"):
     pytest.skip(allow_module_level=True)
@@ -835,6 +835,7 @@ def test_pick_areas(mapdl, make_block, selection):
         assert 2 in selected
 
 
+@requires("pyvista")
 def test_plotter_input(mapdl, make_block):
     from ansys.mapdl.core.plotting.plotting import MapdlPlotter
 

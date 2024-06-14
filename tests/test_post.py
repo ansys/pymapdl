@@ -34,9 +34,12 @@ if has_dependency("pyvista"):
     from pyvista.plotting.renderer import CameraPosition
     from ansys.mapdl.core.theme import PyMAPDL_cmap
 
-from ansys.mapdl.core import examples
+from ansys.mapdl.core import _HAS_PYVISTA, examples
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from ansys.mapdl.core.plotting.plotting import MapdlPlotter
+
+if _HAS_PYVISTA:
+    from ansys.mapdl.core.plotting.plotting import MapdlPlotter
+
 from ansys.mapdl.core.post import (
     COMPONENT_STRESS_TYPE,
     PRINCIPAL_TYPE,
