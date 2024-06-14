@@ -957,7 +957,7 @@ def bc_plotter(
 
 def bc_nodes_plotter(
     mapdl,
-    pl: MapdlPlotter,
+    pl,
     bc_labels,
     plot_bc_labels=False,
     bc_glyph_size=1,
