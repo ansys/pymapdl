@@ -73,6 +73,7 @@ from ansys.mapdl.core import _HAS_PYVISTA
 
 if _HAS_PYVISTA:
     import pyvista as pv
+
     from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
     from ansys.mapdl.core.plotting_defaults import DefaultSymbol
     BC_plot_settings = DefaultSymbol()
