@@ -71,6 +71,7 @@ BCS.extend(BC_F)
 # Allowed entities to plot their boundary conditions
 ALLOWED_TARGETS = ["NODES"]
 
+from ansys.mapdl.core import _HAS_PYVISTA
 
 if _HAS_PYVISTA:
     import pyvista as pv
