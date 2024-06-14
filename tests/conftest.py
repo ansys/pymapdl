@@ -27,7 +27,12 @@ from shutil import get_terminal_size
 from sys import platform
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
-import ansys.tools.visualization_interface as viz_interface
+
+from ansys.mapdl.core import _HAS_PYVISTA
+
+if _HAS_PYVISTA:
+    import ansys.tools.visualization_interface as viz_interface
+
 import pytest
 
 from common import (
@@ -53,7 +58,8 @@ from common import (
 #
 
 TESTING_MINIMAL = testing_minimal()
-viz_interface.TESTING_MODE = True
+if _HAS_PYVISTA:
+    viz_interface.TESTING_MODE = True
 
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()
