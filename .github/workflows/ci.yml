@@ -856,32 +856,6 @@ jobs:
   #           ./**/ansys-mapdl-core*wheelhouse*.zip
 
 
-  release-dry-run:
-    # TO BE REMOVED: This is a temporary step to test the release process
-    name: Release project
-    needs: [package]
-    runs-on: ubuntu-latest
-    # Specifying a GitHub environment is optional, but strongly encouraged
-    environment: release
-    permissions:
-      id-token: write
-      contents: write
-    steps:
-      - name: Release to the public PyPI repository
-        uses: ansys/actions/release-pypi-public@v6
-        with:
-          library-name: ${{ env.PACKAGE_NAME }}
-          use-trusted-publisher: true
-          dry-run: true
-  
-      - name: Release to GitHub
-        uses: ansys/actions/release-github@v6
-        with:
-          library-name: ${{ env.PACKAGE_NAME }}
-          additional-artifacts: "minimum_requirements.txt"
-          dry-run: true
-
-
   release:
     name: Release project
     if: ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
