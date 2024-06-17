@@ -13,7 +13,3 @@ Dependencies:
 CI/CD:
 - changed-files:
   - any-glob-to-any-file: ['docker/**/*', '.github/**/*', '.ci/**/*']
-
-Testing:
-- changed-files:
-  - any-glob-to-any-file: ['tests/*', 'tests/**/*']
