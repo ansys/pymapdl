@@ -287,6 +287,7 @@ jobs:
     name: "Remote: Build & test MAPDL ${{ matrix.mapdl-version }} (Extended testing ${{ matrix.extended_testing }})"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: [smoke-tests]
     timeout-minutes: 35
     strategy:
       fail-fast: false
@@ -502,6 +503,7 @@ jobs:
     name: "Local: Build & test on Ubuntu MAPDL ${{ matrix.mapdl-image }} (Extended testing ${{ matrix.extended_testing }})"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: [smoke-tests]
     timeout-minutes: 55
     outputs:
       pushed: ${{ steps.attatch-to-pr.outputs.pushed }}
@@ -640,6 +642,7 @@ jobs:
     name: "Local: Build & test minimal setup on Ubuntu MAPDL ${{ matrix.mapdl-image }} (Extended testing ${{ matrix.extended_testing }})"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: [smoke-tests]
     timeout-minutes: 55
     strategy:
       fail-fast: false
@@ -812,49 +815,95 @@ jobs:
           name: windows-v22.2.0-local.xml
           path: ./windows_local.xml
 
-
-  release:
-    name: "Release"
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-    needs: [smoke-tests, docs-build, build-test, build-test-ubuntu, build-test-ubuntu-minimal]
+  package:
+    name: Package library
+    needs: [build-test, build-test-ubuntu, build-test-ubuntu-minimal, docs-build]
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Build library source and wheel artifacts
+        uses: ansys/actions/build-library@v6
         with:
-          python-version: 3.9
+          library-name: ${{ env.PACKAGE_NAME }}
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
-      - uses: actions/download-artifact@v4
+
+  # release-bis:
+  #   name: "Release"
+  #   if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+  #   needs: [docs-build, build-test, build-test-ubuntu, build-test-ubuntu-minimal]
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Set up Python
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: 3.9
+
+  #     - uses: actions/download-artifact@v4
       
-      - name: Copying files and overwrite same name files
-        # (to avoid upload issue)
-        run: |
-          mkdir artifacts
-          find . -iname 'ansys_mapdl_core-*.tar.gz' -exec cp \{\} ./artifacts/ \;
-          find . -iname 'ansys_mapdl_core-*-py3-none-any.whl' -exec cp \{\} ./artifacts/ \;
-          find . -iname 'minimum_requirements.txt' -exec cp \{\} ./artifacts/ \;
+  #     - name: Copying files and overwrite same name files
+  #       # (to avoid upload issue)
+  #       run: |
+  #         mkdir artifacts
 
-      - name: Display structure of downloaded files
-        run: ls -Rla
+  #     - name: Display structure of downloaded files
+  #       run: ls -Rla
 
-      - name: "Release to GitHub"
-        uses: softprops/action-gh-release@v2
+  #     - name: "Release to GitHub"
+  #       uses: softprops/action-gh-release@v2
+  #       with:
+  #         files: |
+  #           ./**/pymapdl-Documentation-*.pdf
+  #           ./**/ansys-mapdl-core*wheelhouse*.zip
+
+
+  release-dry-run:
+    # TO BE REMOVED: This is a temporary step to test the release process
+    name: Release project
+    needs: [package]
+    runs-on: ubuntu-latest
+    # Specifying a GitHub environment is optional, but strongly encouraged
+    environment: release
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Release to the public PyPI repository
+        uses: ansys/actions/release-pypi-public@v6
         with:
-          files: |
-            ./**/artifacts/ansys_mapdl_core-*-py3-none-any.whl
-            ./**/artifacts/ansys_mapdl_core-*.tar.gz
-            ./**/artifacts/minimum_requirements.txt
-            ./**/pymapdl-Documentation-*.pdf
-            ./**/ansys-mapdl-core*wheelhouse*.zip
+          library-name: ${{ env.PACKAGE_NAME }}
+          use-trusted-publisher: true
+          dry-run: true
+  
+      - name: Release to GitHub
+        uses: ansys/actions/release-github@v6
+        with:
+          library-name: ${{ env.PACKAGE_NAME }}
+          additional-artifacts: "minimum_requirements.txt"
+          dry-run: true
 
-      - name: Upload to Public PyPi
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        run: |
-          pip install twine
-          twine upload --skip-existing ./**/*.whl
-          twine upload --skip-existing ./**/*.tar.gz
+
+  release:
+    name: Release project
+    if: ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
+    needs: [package]
+    runs-on: ubuntu-latest
+    # Specifying a GitHub environment is optional, but strongly encouraged
+    environment: release
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: Release to the public PyPI repository
+        uses: ansys/actions/release-pypi-public@v6
+        with:
+          library-name: ${{ env.PACKAGE_NAME }}
+          use-trusted-publisher: true
+
+      - name: Release to GitHub
+        uses: ansys/actions/release-github@v6
+        with:
+          library-name: ${{ env.PACKAGE_NAME }}
+          additional-artifacts: "minimum_requirements.txt"
 
 
   upload-docs-release:
