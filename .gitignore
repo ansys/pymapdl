@@ -78,7 +78,6 @@ docker/mapdl/v211
 docker/mapdl/v212
 docker/mapdl/_old
 docker/mapdl/*.sh
-distributions/
 
 
 # temp testing
