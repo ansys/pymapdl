@@ -5,10 +5,11 @@
 **Please mention the issue number or describe the problem this pull request addresses.**
 
 ## Checklist
-- [ ] I have tested my changes locally.
-- [ ] I have added necessary documentation or updated existing documentation.
-- [ ] I have followed the coding style guidelines of this project.
-- [ ] I have added appropriate unit tests.
+- [ ] I have visited and read [Develop PyMAPDL](https://mapdl.docs.pyansys.com/version/stable/getting_started/develop_pymapdl.html#develop-pymapdl).
+- [ ] I have [tested my changes locally](https://mapdl.docs.pyansys.com/version/stable/getting_started/develop_pymapdl.html#unit-testing)
+- [ ] I have added necessary [documentation or updated existing documentation](https://mapdl.docs.pyansys.com/version/stable/getting_started/write_documentation.html#id2).
+- [ ] I have followed the [PyMAPDL coding style guidelines](https://mapdl.docs.pyansys.com/version/stable/getting_started/develop_pymapdl.html#code-style).
+- [ ] I have added appropriate [unit tests](https://mapdl.docs.pyansys.com/version/stable/getting_started/develop_pymapdl.html#unit-testing) that also ensure the [minimal coverage criteria](https://mapdl.docs.pyansys.com/version/stable/getting_started/develop_pymapdl.html#code-coverage).
 - [ ] I have reviewed my changes before submitting this pull request.
 - [ ] I have linked the issue or issues that are solved to the PR if any.
 - [ ] I have assigned this PR to myself.
