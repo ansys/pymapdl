@@ -58,35 +58,35 @@
 # By Category
 # ===========
 
-- name: BUG
+- name: bug
   description: "Issue, problem or error in PyMAPDL"
   color: E67E22
 
-- name: New Feature
+- name: new Feature
   description: "Request or proposal for a new feature"
   color: 85C1E9
   
-- name: Enhancement
+- name: enhancement
   description: "Improve any current implemented feature"
   color: 85C1E9
 
-- name: Examples
+- name: examples
   description: "Publishing PyMAPDL examples"
   color: A569BD
 
-- name: Documentation
+- name: documentation
   description: "Documentation related (improving, adding, etc)"
   color: A569BD
 
-- name: Maintenance
+- name: maintenance
   description: "General maintenance of the repo (libraries, cicd, etc)"
   color: 76D7C4
 
-- name: Discussion
+- name: discussion
   description: ""
   color: 76D7C4
 
-- name: Question
+- name: question
   description: ""
   color: 76D7C4
 
@@ -127,7 +127,7 @@
   description: "Related with CICD, Github Actions, etc"
   color: F9E79F
 
-- name: Dependencies
+- name: dependencies
   description: ""
   color: F9E79F
 
