@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  mapdl-container:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - VERSION=${VERSION}
+      - USERNAME=mapdl
+      - USER_UID=1000
+      - LICENSE_SERVER=${LICENSE_SERVER}
+      - AWP_ROOT222=/ansys_inc
+      - WORKING_DIRECTORY=/jobs
+      - HOME=/home/mapdl
+      - ANSYSLMD_LICENSE_FILE=1055@${LICENSE_SERVER}
+    ports:
+      - "50052:50052"
+    volumes:
+      - ./distributions:/tmp/distributions 
+    command: bash -c "/ansys_inc/v${VERSION}/ansys/bin/mapdl -grpc -dir /jobs"
+
