@@ -60,14 +60,14 @@ jupyter = [
 tests = [
     "ansys-dpf-core==0.10.1",
     "ansys-tools-visualization-interface==0.2.6",
-    "autopep8==2.2.0",
+    "autopep8==2.3.0",
     "matplotlib==3.9.0",
     "scipy==1.13.1",
     "pandas==2.2.2",
     "pyiges[full]==0.3.1",
     "pytest==8.2.2",
     "pytest-cov==5.0.0",
-    "pyvista==0.43.9",
+    "pyvista==0.43.10",
     "pyansys-tools-report==0.7.3",
     "vtk==9.3.0",
     "pytest-rerunfailures==14.0",
@@ -229,3 +229,37 @@ override_SS05 = [  # override SS05 to allow docstrings starting with these words
     # '^Assess ',
     # '^Access ',
 ]
+
+[tool.towncrier]
+package = "ansys.mapdl.core"
+directory = "doc/changelog.d"
+filename = "doc/source/changelog.rst"
+template = "doc/changelog.d/changelog_template.jinja"
+start_string = ".. towncrier release notes start\n"
+title_format = "`{version} <https://github.com/ansys/pymapdl/releases/tag/v{version}>`_ - {project_date}"
+issue_format = "`#{issue} <https://github.com/ansys/pymapdl/pull/{issue}>`_"
+
+[[tool.towncrier.type]]
+directory = "added"
+name = "Added"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "changed"
+name = "Changed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "fixed"
+name = "Fixed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "dependencies"
+name = "Dependencies"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "miscellaneous"
+name = "Miscellaneous"
+showcontent = true

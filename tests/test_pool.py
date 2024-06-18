@@ -22,6 +22,7 @@
 
 import os
 from pathlib import Path
+import socket
 import time
 
 import numpy as np
@@ -39,7 +40,8 @@ else:
 
 from ansys.mapdl.core import Mapdl, MapdlPool, examples
 from ansys.mapdl.core.errors import VersionError
-from conftest import QUICK_LAUNCH_SWITCHES, requires
+from ansys.mapdl.core.launcher import LOCALHOST, MAPDL_DEFAULT_PORT
+from conftest import QUICK_LAUNCH_SWITCHES, NullContext, requires
 
 # skip entire module unless HAS_GRPC
 pytestmark = requires("grpc")
@@ -395,3 +397,371 @@ def test_next_with_returns_index(pool):
     for each_instance in pool:
         assert not each_instance.locked
         assert not each_instance._busy
+
+
+def test_multiple_ips():
+    ips = [
+        "123.45.67.01",
+        "123.45.67.02",
+        "123.45.67.03",
+        "123.45.67.04",
+        "123.45.67.05",
+    ]
+
+    conf = MapdlPool(ip=ips, _debug_no_launch=True)._debug_no_launch
+
+    ips = [socket.gethostbyname(each) for each in ips]
+
+    assert conf["ips"] == ips
+    assert conf["ports"] == [50052 for i in range(len(ips))]
+    assert conf["start_instance"] is False
+    assert conf["exec_file"] is None
+    assert conf["n_instances"] == len(ips)
+
+
+@pytest.mark.parametrize(
+    "n_instances,ip,port,exp_n_instances,exp_ip,exp_port,context",
+    [
+        ## n_instances not set
+        pytest.param(
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            pytest.raises(
+                ValueError, match="The number of instances could not be inferred "
+            ),
+        ),
+        pytest.param(
+            None,
+            [],
+            None,
+            None,
+            None,
+            None,
+            pytest.raises(
+                ValueError, match="The number of instances could not be inferred "
+            ),
+        ),
+        pytest.param(
+            None,
+            [],
+            [],
+            None,
+            None,
+            None,
+            pytest.raises(
+                ValueError, match="The number of instances could not be inferred "
+            ),
+        ),
+        pytest.param(None, [], 50052, 1, [LOCALHOST], [50052], NullContext()),
+        pytest.param(
+            None,
+            None,
+            [50052, 50053],
+            2,
+            [LOCALHOST, LOCALHOST],
+            [50052, 50053],
+            NullContext(),
+        ),
+        pytest.param(
+            None,
+            None,
+            set(),
+            None,
+            None,
+            None,
+            pytest.raises(TypeError, match="Argument 'port' does not support"),
+        ),
+        pytest.param(
+            None,
+            "123.0.0.1",
+            [50052, 50053, 50055],
+            3,
+            ["123.0.0.1", "123.0.0.1", "123.0.0.1"],
+            [50052, 50053, 50055],
+            NullContext(),
+        ),
+        pytest.param(
+            None,
+            "123.0.0.1",
+            [],
+            None,
+            None,
+            None,
+            pytest.raises(
+                ValueError, match="The number of ports should be higher than"
+            ),
+        ),
+        pytest.param(
+            None,
+            ["123.0.0.1", "123.0.0.2", "123.0.0.3"],
+            None,
+            3,
+            ["123.0.0.1", "123.0.0.2", "123.0.0.3"],
+            [50052, 50052, 50052],
+            NullContext(),
+        ),
+        pytest.param(
+            None,
+            ["123.0.0.1", "123.0.0.2", "123.0.0.3"],
+            50053,
+            3,
+            ["123.0.0.1", "123.0.0.2", "123.0.0.3"],
+            [50053, 50053, 50053],
+            NullContext(),
+        ),
+        pytest.param(
+            None,
+            ["123.0.0.1", "123.0.0.2", "123.0.0.3"],
+            [50052, 50053],
+            None,
+            None,
+            None,
+            pytest.raises(ValueError, match="should be the same as the number of IPs"),
+        ),
+        pytest.param(
+            None,
+            ["123.0.0.1", "123.0.0.2", "123.0.0.3"],
+            [50052, 50053, 50053],
+            3,
+            ["123.0.0.1", "123.0.0.2", "123.0.0.3"],
+            [50052, 50053, 50053],
+            NullContext(),
+        ),
+        pytest.param(
+            None,
+            set(),
+            None,
+            None,
+            None,
+            None,
+            pytest.raises(TypeError, match="Argument 'ip' does not support"),
+        ),
+        ## n_instances set
+        # ip is none
+        pytest.param(
+            {},
+            None,
+            None,
+            None,
+            None,
+            None,
+            pytest.raises(
+                TypeError, match="Only integers are allowed for 'n_instances'"
+            ),
+        ),
+        pytest.param(
+            0,
+            None,
+            None,
+            None,
+            None,
+            None,
+            pytest.raises(
+                ValueError, match="Must request at least 1 instance to create"
+            ),
+        ),
+        pytest.param(
+            2,
+            None,
+            None,
+            2,
+            [LOCALHOST, LOCALHOST],
+            [MAPDL_DEFAULT_PORT, MAPDL_DEFAULT_PORT + 1],
+            NullContext(),
+        ),
+        pytest.param(
+            3,
+            None,
+            None,
+            3,
+            [LOCALHOST, LOCALHOST, LOCALHOST],
+            [MAPDL_DEFAULT_PORT, MAPDL_DEFAULT_PORT + 1, MAPDL_DEFAULT_PORT + 2],
+            NullContext(),
+        ),
+        pytest.param(
+            3,
+            None,
+            50053,
+            3,
+            [LOCALHOST, LOCALHOST, LOCALHOST],
+            [50053, 50053 + 1, 50053 + 2],
+            NullContext(),
+        ),
+        pytest.param(
+            3,
+            None,
+            [50052, 50053],
+            None,
+            None,
+            None,
+            pytest.raises(
+                ValueError,
+                match="If using 'n_instances' and 'port' without multiple 'ip'",
+            ),
+        ),
+        pytest.param(
+            3,
+            None,
+            [50052, 50053, 50054],
+            3,
+            [LOCALHOST, LOCALHOST, LOCALHOST],
+            [50052, 50053, 50054],
+            NullContext(),
+        ),
+        pytest.param(
+            3,
+            None,
+            set(),
+            None,
+            None,
+            None,
+            pytest.raises(
+                TypeError,
+                match="Argument 'port' does not support this type of argument",
+            ),
+        ),
+        # ip is string
+        pytest.param(
+            3,
+            "123.0.0.1",
+            None,
+            None,
+            None,
+            None,
+            pytest.raises(ValueError, match="If using 'n_instances' and only one 'ip'"),
+        ),
+        pytest.param(
+            3,
+            "123.0.0.1",
+            50053,
+            None,
+            None,
+            None,
+            pytest.raises(ValueError, match="If using 'n_instances' and only one 'ip'"),
+        ),
+        pytest.param(
+            3,
+            "123.0.0.1",
+            [50053, 50052],
+            None,
+            None,
+            None,
+            pytest.raises(ValueError, match="If using 'n_instances' and only one 'ip'"),
+        ),
+        pytest.param(
+            3,
+            "123.0.0.1",
+            [50053, 50052, 50054],
+            3,
+            ["123.0.0.1", "123.0.0.1", "123.0.0.1"],
+            [50053, 50052, 50054],
+            NullContext(),
+        ),
+        # ip is list
+        pytest.param(
+            3,
+            ["123.0.0.1", "123.0.0.2", "123.0.0.3", "123.0.0.4"],
+            None,
+            None,
+            None,
+            None,
+            pytest.raises(
+                ValueError, match="should be the same as the number of instances"
+            ),
+        ),
+        pytest.param(
+            4,
+            ["123.0.0.1", "123.0.0.2", "123.0.0.3", "123.0.0.4"],
+            None,
+            4,
+            ["123.0.0.1", "123.0.0.2", "123.0.0.3", "123.0.0.4"],
+            [
+                MAPDL_DEFAULT_PORT,
+                MAPDL_DEFAULT_PORT,
+                MAPDL_DEFAULT_PORT,
+                MAPDL_DEFAULT_PORT,
+            ],
+            NullContext(),
+        ),
+        pytest.param(
+            4,
+            ["123.0.0.1", "123.0.0.2", "123.0.0.3", "123.0.0.4"],
+            50053,
+            4,
+            ["123.0.0.1", "123.0.0.2", "123.0.0.3", "123.0.0.4"],
+            [50053, 50053, 50053, 50053],
+            NullContext(),
+        ),
+        pytest.param(
+            4,
+            ["123.0.0.1", "123.0.0.2", "123.0.0.3", "123.0.0.4"],
+            [50053, 50054],
+            None,
+            None,
+            None,
+            pytest.raises(
+                ValueError,
+                match="you should provide as many ports as number of instances",
+            ),
+        ),
+        pytest.param(
+            4,
+            ["123.0.0.1", "123.0.0.2", "123.0.0.3", "123.0.0.4"],
+            [50055] * 4,
+            4,
+            ["123.0.0.1", "123.0.0.2", "123.0.0.3", "123.0.0.4"],
+            [50055] * 4,
+            NullContext(),
+        ),
+        pytest.param(
+            4,
+            ["123.0.0.1", "123.0.0.2", "123.0.0.3", "123.0.0.4"],
+            set(),
+            None,
+            None,
+            None,
+            pytest.raises(
+                TypeError, match="Argument 'port' does not support this type of"
+            ),
+        ),
+        # ip type is not allowed
+        pytest.param(
+            4,
+            set(),
+            None,
+            None,
+            None,
+            None,
+            pytest.raises(
+                TypeError, match="Argument 'ip' does not support this type of"
+            ),
+        ),
+    ],
+)
+def test_ip_port_n_instance(
+    monkeypatch, n_instances, ip, port, exp_n_instances, exp_ip, exp_port, context
+):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
+    monkeypatch.delenv("PYMAPDL_IP", raising=False)
+    monkeypatch.setenv(
+        "PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222"
+    )  # to avoid trying to find it.
+
+    with context:
+        conf = MapdlPool(
+            n_instances=n_instances, ip=ip, port=port, _debug_no_launch=True
+        )._debug_no_launch
+
+        if exp_ip:
+            exp_ip = [socket.gethostbyname(each) for each in exp_ip]
+
+        assert conf["n_instances"] == exp_n_instances
+        assert len(conf["ips"]) == exp_n_instances
+        assert len(conf["ports"]) == exp_n_instances
+        assert conf["ips"] == exp_ip
+        assert conf["ports"] == exp_port
+        assert conf["exec_file"] == "/ansys_inc/v222/ansys/bin/ansys222"
