@@ -6,7 +6,7 @@ updates:
     schedule:
       interval: "weekly"
     labels:
-      - "maintenance"
+      - "Maintenance"
     assignees:
       - "ansys/pymapdl-maintainers"
     commit-message:
