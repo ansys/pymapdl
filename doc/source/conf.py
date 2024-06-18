@@ -53,6 +53,7 @@ author = "ANSYS Inc."
 # The short X.Y version
 release = version = __version__
 cname = os.getenv("DOCUMENTATION_CNAME", "mapdl.docs.pyansys.com")
+switcher_version = get_version_match(__version__)
 
 REPOSITORY_NAME = "pymapdl"
 USERNAME = "ansys"
@@ -271,6 +272,13 @@ linkcheck_anchors_ignore = [
     "pyvista.Plotter.show",
 ]
 
+# If we are on a release, we have to ignore the "release" URLs, since it is not
+# available until the release is published.
+if switcher_version != "dev":
+    linkcheck_ignore.append(
+        f"https://github.com/ansys/pymapdl/releases/tag/v{__version__}"
+    )
+
 user_agent = """curl https://www.ansys.com -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.3"""
 
 # The name of the Pygments (syntax highlighting) style to use.
@@ -313,12 +321,12 @@ html_theme_options = {
     ],
     "switcher": {
         "json_url": f"https://{cname}/versions.json",
-        "version_match": get_version_match(__version__),
+        "version_match": switcher_version,
     },
     "use_meilisearch": {
         "api_key": os.getenv("MEILISEARCH_PUBLIC_API_KEY", ""),
         "index_uids": {
-            f"pymapdl-v{get_version_match(__version__).replace('.', '-')}": "PyMAPDL",
+            f"pymapdl-v{switcher_version.replace('.', '-')}": "PyMAPDL",
         },
     },
 }

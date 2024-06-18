@@ -10,7 +10,7 @@ updates:
     assignees:
       - "ansys/pymapdl-maintainers"
     commit-message:
-      prefix: "MAINT"
+      prefix: "ci"
     groups:
        actions:
           patterns:
@@ -29,7 +29,7 @@ updates:
     assignees:
       - "ansys/pymapdl-maintainers"
     commit-message:
-      prefix: "MAINT"
+      prefix: "build"
     groups:
        minimal:
           patterns:
