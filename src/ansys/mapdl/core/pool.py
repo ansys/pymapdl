@@ -60,7 +60,7 @@ else:
 def available_ports(n_ports: int, starting_port: int = MAPDL_DEFAULT_PORT) -> List[int]:
     """Return a list the first ``n_ports`` ports starting from ``starting_port``."""
 
-    port = MAPDL_DEFAULT_PORT
+    port = starting_port
     ports: List[int] = []
     while port < 65536 and len(ports) < n_ports:
         if not port_in_use(port):
@@ -83,11 +83,10 @@ class MapdlPool:
 
     Parameters
     ----------
-    n_instance : int
-        Number of instances to create.
-
-    restart_failed : bool, optional
-        Restarts failed instances.  Defaults to ``True``.
+    n_instances : int, optional
+        Number of instances to create. This argument can be optional if the
+        number of instances can be inferred from the ``ip`` and/or ``port``
+        arguments. See these arguments documentation for more information.
 
     wait : bool, optional
         Wait for pool to be initialized.  Otherwise, pool will start
@@ -97,15 +96,35 @@ class MapdlPool:
         Base directory to create additional directories for each MAPDL
         instance.  Defaults to a temporary working directory.
 
-    port : int, optional
-        Starting port for the MAPDL instances.  Defaults to 50052.
+    ip : str, list[str], optional
+        IP address(es) to connect to where the MAPDL instances are running. You
+        can use one IP, if you have multiple instances running on it, but in
+        that case you must specify all the ports using the argument `port`.
+        If using a list of IPs, the number of ports in 'port' argument should
+        match the number of IPs.
+
+    port : int, list[int], optional
+        The ports where the MAPDL instances are started on or can be connected to.
+        If you are connecting to a single remote instance (only one IP in ``ip``
+        argument), you must specify a number of ports equal to the number of
+        instances you want to connect to.
+        If you are connecting to multiple instances (multiple IPs in ``ip``
+        argument), the amount of ports, should match the number of IPs.
+
+        If only one port is specified and you are starting the MAPDL instances
+        locally (``start_instance`` is ``True``), this port is the port for the
+        first instance. The rest of the instances ports are unitarian increments of
+        port, as long as these ports are free from other processes usage.
+        If you are not starting the MAPDL instances local, PyMAPDL does not check
+        whether these ports are busy or not.
+        Defaults to 50052.
 
     progress_bar : bool, optional
         Show a progress bar when starting the pool.  Defaults to
         ``True``.  Will not be shown when ``wait=False``.
 
     restart_failed : bool, optional
-        Restarts any failed instances in the pool.
+        Restarts any failed instances in the pool. Defaults to ``True``.
 
     remove_temp_files : bool, optional
         This launcher creates a new MAPDL working directory for each instance
@@ -122,10 +141,19 @@ class MapdlPool:
         the index of each instance in the pool.
         By default, the instances directories are named as "Instances_{i}".
 
+    override: bool, optional
+        Attempts to delete the lock file at the run_location.
+        Useful when a prior MAPDL session has exited prematurely and
+        the lock file has not been deleted.
+
     start_instance : bool, optional
         Set it to ``False`` to make PyMAPDL to connect to remote instances instead
         of launching them. In that case, you need to supply the MAPDL instances
         ports as a list of ``int`` s.
+
+    exec_file: str, optional
+        The location of the MAPDL executable.  Will use the cached
+        location when left at the default ``None``.
 
     **kwargs : dict, optional
         Additional keyword arguments. For a complete listing, see the
@@ -161,6 +189,11 @@ class MapdlPool:
     >>> pool = MapdlPool(10, exec_file=exec_file)
     Creating Pool: 100%|########| 10/10 [00:01<00:00,  1.43it/s]
 
+    Create a pool of instances in multiple instances and with different ports:
+
+    >>> pool = MapdlPool(ip=["123.0.0.1", "123.0.0.2", "123.0.0.3", "123.0.0.4"], port=[50052, 50053, 50055, 50060])
+    Creating Pool: 100%|########| 4/4 [00:01<00:00,  1.23it/s]
+
     """
 
     def __init__(
@@ -168,6 +201,7 @@ class MapdlPool:
         n_instances: int = None,
         wait: bool = True,
         run_location: Optional[str] = None,
+        ip: Optional[Union[str, List[str]]] = None,
         port: Union[int, List[int]] = MAPDL_DEFAULT_PORT,
         progress_bar: bool = DEFAULT_PROGRESS_BAR,
         restart_failed: bool = True,
@@ -176,7 +210,6 @@ class MapdlPool:
         override=True,
         start_instance: bool = None,
         exec_file: Optional[str] = None,
-        ip: Optional[str] = None,
         **kwargs,
     ) -> None:
         """Initialize several instances of mapdl"""
@@ -209,19 +242,6 @@ class MapdlPool:
 
         ip = None if ip == "" else ip  # Making sure the variable is not empty
 
-        if ip is None:
-            ips = LOCALHOST
-
-        else:
-            if not isinstance(ip, (tuple, list)):
-                ips = [ip]
-            else:
-                ips = ip
-
-            # Converting ip or hostname to ip
-            ips = [socket.gethostbyname(each) for each in ips]
-            _ = [check_valid_ip(each) for each in ips]  # double check
-
         # Getting "start_instance" using "True" as default.
         if (ip is not None) and (start_instance is None):
             # An IP has been supplied. By default, 'start_instance' is equal
@@ -232,6 +252,16 @@ class MapdlPool:
 
         self._start_instance = start_instance
         LOG.debug(f"'start_instance' equals to '{start_instance}'")
+
+        n_instances, ips, ports = self._set_n_instance_ip_port_args(
+            n_instances, ip, port
+        )
+
+        # Converting ip or hostname to ip
+        ips = [socket.gethostbyname(each) for each in ips]
+        _ = [check_valid_ip(each) for each in ips]  # double check
+
+        self._ips = ips
 
         if not names:
             names = "Instance"
@@ -275,44 +305,17 @@ class MapdlPool:
         self._exec_file = exec_file
 
         # grab available ports
-        if start_instance:
-            if isinstance(port, int) or len(port) == 1:
-                ports = available_ports(n_instances, port)
-            else:
-                ports = port
-                n_instances = len(ports)
-
-            if self._root_dir is not None:
-                if not os.path.isdir(self._root_dir):
-                    os.makedirs(self._root_dir)
-        else:
-            if isinstance(port, int) or len(port) == 1:
-                ports = [port + i for i in range(n_instances)]
-            else:
-                ports = port
-                n_instances = len(ports)
-
-        if len(ports) != n_instances:
-            raise ValueError(
-                "The number of instances should be the same as the number of ports."
-            )
-
-        if ips == LOCALHOST:
-            ips = [LOCALHOST for each in ports]
-
-        if len(ports) != len(ips):
-            raise ValueError(
-                "The number of ips should be the same as the number of ports."
-            )
+        if (
+            start_instance
+            and self._root_dir is not None
+            and not os.path.isdir(self._root_dir)
+        ):
+            os.makedirs(self._root_dir)
 
         LOG.debug(f"Using ports: {ports}")
 
         self._instances = []
         self._active = True  # used by pool monitor
-
-        n_instances = int(n_instances)
-        if n_instances < 1:
-            raise ValueError("Must request at least 1 instance to create a pool.")
 
         pbar = None
         if wait and progress_bar:
@@ -342,14 +345,15 @@ class MapdlPool:
         threads = [
             self._spawn_mapdl(
                 i,
-                ports[i],
-                pbar,
+                ip=ip,
+                port=port,
+                pbar=pbar,
                 name=self._names(i),
                 thread_name=self._names(i),
                 start_instance=start_instance,
                 exec_file=exec_file,
             )
-            for i in range(n_instances)
+            for i, (ip, port) in enumerate(zip(ips, ports))
         ]
         if wait:
             [thread.join() for thread in threads]
@@ -851,6 +855,7 @@ class MapdlPool:
     def _spawn_mapdl(
         self,
         index: int,
+        ip: str = None,
         port: int = None,
         pbar: Optional[bool] = None,
         name: str = "",
@@ -867,6 +872,7 @@ class MapdlPool:
             exec_file=exec_file,
             run_location=run_location,
             port=port,
+            ip=ip,
             override=True,
             start_instance=start_instance,
             **self._spawn_kwargs,
@@ -924,3 +930,137 @@ class MapdlPool:
 
     def __repr__(self):
         return "MAPDL Pool with %d active instances" % len(self)
+
+    def _set_n_instance_ip_port_args(self, n_instances, ip, port):
+        if n_instances is None:
+            if ip is None or (isinstance(ip, list) and len(ip) == 0):
+                if port is None or (isinstance(port, list) and len(port) < 1):
+                    raise ValueError(
+                        "The number of instances could not be inferred "
+                        "from arguments 'n_instances', 'ip' nor 'port'."
+                    )
+
+                elif isinstance(port, int):
+                    n_instances = 1
+                    ports = [port]
+                    ips = [LOCALHOST]
+
+                elif isinstance(port, list):
+                    n_instances = len(port)
+                    ports = port
+                    ips = [LOCALHOST for i in range(n_instances)]
+                else:
+                    raise TypeError(
+                        "Argument 'port' does not support this type of argument."
+                    )
+
+            elif isinstance(ip, str):
+                # only one IP
+                if isinstance(port, list):
+                    if len(port) > 0:
+                        n_instances = len(port)
+                        ports = port
+                        ips = [ip for each in range(n_instances)]
+                    else:
+                        raise ValueError(
+                            "The number of ports should be higher than"
+                            " zero if using only one IP address."
+                        )
+
+            elif isinstance(ip, list):
+                n_instances = len(ip)
+                ips = ip
+
+                if self._start_instance:
+                    raise ValueError(
+                        "If using 'start_instance', 'ip' cannot be"
+                        "a list of IPs since PyMAPDL cannot start instances remotely."
+                    )
+
+                if port is None or isinstance(port, int):
+                    ports = [port or MAPDL_DEFAULT_PORT for i in range(n_instances)]
+
+                elif isinstance(port, list):
+                    if len(port) != len(ips):
+                        raise ValueError(
+                            f"The number of ports ({len(port)}) should be the same as the number of IPs ({len(ips)})."
+                        )
+                    ports = port
+
+                else:
+                    raise TypeError(
+                        "Argument 'port' does not support this type of argument."
+                    )
+            else:
+                raise TypeError("Argument 'ip' does not support this type of argument.")
+
+        else:
+
+            if not isinstance(n_instances, int):
+                raise TypeError("Only integers are allowed for 'n_instances' argument.")
+
+            if n_instances < 1:
+                raise ValueError("Must request at least 1 instance to create a pool.")
+
+            if ip is None:
+                ips = [LOCALHOST for i in range(n_instances)]
+
+                if port is None or isinstance(port, int):
+                    port = port or MAPDL_DEFAULT_PORT
+                    if self._start_instance:
+                        ports = available_ports(n_instances, port)
+                    else:
+                        ports = [port + i for i in range(n_instances)]
+
+                elif isinstance(port, list) and len(port) != n_instances:
+                    raise ValueError(
+                        "If using 'n_instances' and 'port' without multiple 'ip', "
+                        "you should provide as many ports as number of instances requested."
+                    )
+                elif isinstance(port, list):
+                    ports = port
+                else:
+                    raise TypeError(
+                        "Argument 'port' does not support this type of argument."
+                    )
+
+            elif isinstance(ip, str):
+                ips = [ip for i in range(n_instances)]
+                if (
+                    port is None
+                    or isinstance(port, int)
+                    or (isinstance(port, list) and len(port) != n_instances)
+                ):
+                    raise ValueError(
+                        "If using 'n_instances' and only one 'ip', "
+                        "you should provide as many ports as number of instances requested."
+                    )
+                else:
+                    ports = port
+
+            elif isinstance(ip, list):
+                if len(ip) != n_instances:
+                    raise ValueError(
+                        f"The number of IPs ({len(ip)}) should be the same as the number of instances ({n_instances})."
+                    )
+
+                ips = ip
+                if port is None or isinstance(port, int):
+                    ports = [port or MAPDL_DEFAULT_PORT for i in range(n_instances)]
+
+                elif isinstance(port, list):
+                    if len(port) != n_instances:
+                        raise ValueError(
+                            "If using 'n_instances', and multiple ips and ports, "
+                            "you should provide as many ports as number of instances requested."
+                        )
+                    ports = port
+                else:
+                    raise TypeError(
+                        "Argument 'port' does not support this type of argument."
+                    )
+
+            else:
+                raise TypeError("Argument 'ip' does not support this type of argument.")
+
+        return n_instances, ips, ports
