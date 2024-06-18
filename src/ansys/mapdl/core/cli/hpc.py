@@ -195,7 +195,7 @@ By default, PyMAPDL detects the type of file from its extension.
 """,
 )
 @click.option(
-    "--output_to_json",
+    "--to_json",
     default=None,
     type=str,
     is_flag=False,
@@ -233,9 +233,14 @@ def submit(
     wait: bool = False,
     debug: bool = False,
     mode: Optional[Union["python", "shell", "apdl"]] = None,
-    output_to_json: Optional[bool] = False,
+    to_json: Optional[bool] = False,
 ):
     import json
+
+    if to_json:
+        import json
+
+        wait = True
 
     from ansys.mapdl.core.hpc.pyhps import (
         PyMAPDLJobSubmission,
@@ -313,19 +318,19 @@ def submit(
             json.dump(config, fid)
 
     proj = job.project
-    if not output_to_json:
+    if not to_json:
         print(
             f"You can check your project by visiting: {url}/projects#/projects/{proj.id}/jobs"
         )
 
     if wait:
-        if not output_to_json:
+        if not to_json:
             print(
                 f"Waiting for project {name} (id: {proj.id}) evaluation to complete..."
             )
         job.wait_for_completion(evaluated=True, failed=True)
 
-    if output_to_json and wait:
+    if to_json:
         if len(job.outputs) == 1:
             print(job.output_values[0][job.outputs[0]])
         else:
