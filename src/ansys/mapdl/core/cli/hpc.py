@@ -200,7 +200,7 @@ By default, PyMAPDL detects the type of file from its extension.
     type=str,
     is_flag=False,
     flag_value=True,
-    help="""Print the output values to the terminal as json. It requires to use ``--wait`` value too. """,
+    help="""Print the output values to the terminal as json. It automatically set ``--wait`` to ``True``.""",
 )
 @click.option(
     "--debug",
