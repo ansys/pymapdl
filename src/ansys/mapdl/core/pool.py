@@ -273,18 +273,18 @@ class MapdlPool:
 
         if n_instances is None:
             if ip is None or (isinstance(ip, list) and len(ip) == 0):
-                if (
-                    port is None
-                    or isinstance(port, int)
-                    or (isinstance(port, list) and len(port) < 1)
-                ):
+                if port is None or (isinstance(port, list) and len(port) < 1):
                     raise ValueError(
                         "The number of instances could not be inferred "
                         "from arguments 'n_instances', 'ip' nor 'port'."
                     )
 
+                elif isinstance(port, int):
+                    n_instances = 1
+                    ports = [port]
+                    ips = [LOCALHOST]
+
                 elif isinstance(port, list):
-                    # This we could get
                     n_instances = len(port)
                     ports = port
                     ips = [LOCALHOST]
@@ -333,7 +333,7 @@ class MapdlPool:
         else:
 
             if not isinstance(n_instances, int):
-                raise TypeError("Only integers are allowed for 'n_instances' argument")
+                raise TypeError("Only integers are allowed for 'n_instances' argument.")
 
             if n_instances < 1:
                 raise ValueError("Must request at least 1 instance to create a pool.")
