@@ -204,7 +204,7 @@ To install PyMAPDL on the activated virtual environment, run the following comma
     user@machine:~$ source /home/user/.venv/bin/activate
     (.venv) user@machine:~$ pip install ansys-mapdl-core
     Collecting ansys-mapdl-core
-    Downloading ansys_mapdl_core-0.68.1-py3-none-any.whl (26.9 MB)
+    Downloading ansys_mapdl_core-0.68.2-py3-none-any.whl (26.9 MB)
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 26.9/26.9 MB 37.3 MB/s eta 0:00:00
     Collecting pexpect>=4.8.0
     Using cached pexpect-4.9.0-py2.py3-none-any.whl (63 kB)
@@ -240,7 +240,7 @@ On the console, you should see this output:
 .. code-block:: text
 
     Testing Python!
-    PyMAPDL version 0.68.1 was successfully imported.
+    PyMAPDL version 0.68.2 was successfully imported.
 
 If you see an error in the output, see :ref:`ref_hpc_troubleshooting`, especially
 :ref:`ref_python_venv_not_accesible`.
