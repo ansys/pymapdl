@@ -20,7 +20,7 @@
        {% if build_examples %}
        examples/index
        {% endif %}
-
+       changelog
 
 .. image:: ../source/_static/logo_dark.png
     :class: only-dark
