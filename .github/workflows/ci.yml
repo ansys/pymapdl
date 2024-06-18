@@ -106,7 +106,7 @@ jobs:
 
 
   smoke-tests:
-    name: Build and smoke test (${{ matrix.os }} | Python ${{ matrix.python-version }}) (Release=${{ matrix.should-release }})
+    name: "Build and smoke test (${{ matrix.os }} | Python ${{ matrix.python-version }}) (Release=${{ matrix.should-release }})"
     runs-on: ${{ matrix.os }}
     if: github.ref != 'refs/heads/main'
     timeout-minutes: 20
@@ -288,7 +288,7 @@ jobs:
           path: doc/_build/latex/pymapdl*.pdf
           retention-days: 7
 
-      - name: 'Upload minimal requirements file'
+      - name: "Upload minimal requirements file"
         # To include it in the release
         uses: actions/upload-artifact@v4
         with:
@@ -323,6 +323,7 @@ jobs:
     name: "Remote: Build & test MAPDL ${{ matrix.mapdl-version }} (Extended testing ${{ matrix.extended_testing }})"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: [smoke-tests]
     timeout-minutes: 35
     strategy:
       fail-fast: false
@@ -538,6 +539,7 @@ jobs:
     name: "Local: Build & test on Ubuntu MAPDL ${{ matrix.mapdl-image }} (Extended testing ${{ matrix.extended_testing }})"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: [smoke-tests]
     timeout-minutes: 55
     outputs:
       pushed: ${{ steps.attatch-to-pr.outputs.pushed }}
@@ -665,7 +667,7 @@ jobs:
           name: ${{ matrix.mapdl-image }}-local.xml
           flags: ubuntu,local,${{ matrix.mapdl-image }}
 
-      - name: 'Upload coverage artifacts'
+      - name: "Upload coverage artifacts"
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.mapdl-image }}-local.xml
@@ -676,6 +678,7 @@ jobs:
     name: "Local: Build & test minimal setup on Ubuntu MAPDL ${{ matrix.mapdl-image }} (Extended testing ${{ matrix.extended_testing }})"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: [smoke-tests]
     timeout-minutes: 55
     strategy:
       fail-fast: false
@@ -770,7 +773,7 @@ jobs:
           name: ${{ matrix.mapdl-image }}-minimal.xml
           flags: ubuntu,local,${{ matrix.mapdl-image }},minimal
 
-      - name: 'Upload coverage artifacts'
+      - name: "Upload coverage artifacts"
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.mapdl-image }}-minimal.xml
@@ -795,7 +798,7 @@ jobs:
       #   with:
       #     python-version: 3.9
 
-      - name: "Checking python_"
+      - name: "Checking Python"
         shell: powershell
         run: |
           python -m pip install --upgrade pip
@@ -842,55 +845,50 @@ jobs:
           name: windows-v22.2.0-local.xml
           flags: windows,local,v22.2.0
 
-      - name: Upload coverage artifacts
+      - name: "Upload coverage artifacts"
         uses: actions/upload-artifact@v4
         with:
           name: windows-v22.2.0-local.xml
           path: ./windows_local.xml
 
 
-  release:
-    name: "Release"
-    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-    needs: [smoke-tests, docs-build, build-test, build-test-ubuntu, build-test-ubuntu-minimal, update-changelog]
+  package:
+    name: "Package library"
+    needs: [build-test, build-test-ubuntu, build-test-ubuntu-minimal, docs-build]
     runs-on: ubuntu-latest
     steps:
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: "Build library source and wheel artifacts"
+        uses: ansys/actions/build-library@v6
         with:
-          python-version: 3.9
+          library-name: ${{ env.PACKAGE_NAME }}
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
-      - uses: actions/download-artifact@v4
-      
-      - name: Copying files and overwrite same name files
-        # (to avoid upload issue)
-        run: |
-          mkdir artifacts
-          find . -iname 'ansys_mapdl_core-*.tar.gz' -exec cp \{\} ./artifacts/ \;
-          find . -iname 'ansys_mapdl_core-*-py3-none-any.whl' -exec cp \{\} ./artifacts/ \;
-          find . -iname 'minimum_requirements.txt' -exec cp \{\} ./artifacts/ \;
 
-      - name: Display structure of downloaded files
-        run: ls -Rla
+  release:
+    name: "Release project"
+    if: ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
+    needs: [package, update-changelog]
+    runs-on: ubuntu-latest
+    # Specifying a GitHub environment is optional, but strongly encouraged
+    environment: release
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - name: "Release to the public PyPI repository"
+        uses: ansys/actions/release-pypi-public@v6
+        with:
+          library-name: ${{ env.PACKAGE_NAME }}
+          use-trusted-publisher: true
 
       - name: "Release to GitHub"
-        uses: softprops/action-gh-release@v2
+        uses: ansys/actions/release-github@v6
         with:
-          files: |
-            ./**/artifacts/ansys_mapdl_core-*-py3-none-any.whl
-            ./**/artifacts/ansys_mapdl_core-*.tar.gz
-            ./**/artifacts/minimum_requirements.txt
-            ./**/pymapdl-Documentation-*.pdf
-            ./**/ansys-mapdl-core*wheelhouse*.zip
+          library-name: ${{ env.PACKAGE_NAME }}
+          additional-artifacts: "minimum_requirements.txt"
 
-      - name: Upload to Public PyPi
-        env:
-          TWINE_USERNAME: __token__
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-        run: |
-          pip install twine
-          twine upload --skip-existing ./**/*.whl
-          twine upload --skip-existing ./**/*.tar.gz
+      - name: "Display structure of downloaded files"
+        run: ls -Rla
 
 
   upload-docs-release:
@@ -899,7 +897,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [release]
     steps:
-      - name: Deploy the stable documentation
+      - name: "Deploy the stable documentation"
         # TODO: testing SEO improvements. This branch avoids creating a
         # sitemap.xml pages in opposite to v5.
         uses: ansys/actions/doc-deploy-stable@feat/seo-improvements
@@ -939,12 +937,12 @@ jobs:
 
 
   upload-dev-docs:
-    name: Upload dev documentation
+    name: "Upload dev documentation"
     if: github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags')
     runs-on: ubuntu-latest
     needs: [docs-build]
     steps:
-      - name: Deploy the latest documentation
+      - name: "Deploy the latest documentation"
         # TODO: testing SEO improvements. This branch reuses the "index.html" from the stable version
         uses: ansys/actions/doc-deploy-dev@feat/seo-improvements
         with:
@@ -967,17 +965,18 @@ jobs:
 
 
   notify:
-    name: Notify failed build
+    name: "Notify failed build"
     needs: [smoke-tests, docs-build, build-test, build-test-ubuntu, build-test-ubuntu-minimal]
     if: failure() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
     steps:
-      - name: Open issue
+      - name: "Open issue"
         uses: jayqi/failed-build-issue-action@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           title-template: "Failed scheduled build"
           label-name: "Build failed"
+
 
   test_julia:
     name: "Test julia implementation"
@@ -1001,13 +1000,13 @@ jobs:
           pycallpython=$(julia -e 'using Pkg;Pkg.add("PyCall");using PyCall;println(PyCall.python)')
           echo "pythonpath=$(echo $pycallpython)" >> $GITHUB_OUTPUT
 
-      - name: Installing pymapdl
+      - name: "Installing PyMAPDL"
         env:
           PYTHON_PATH: ${{ steps.get_python.outputs.pythonpath }}
         run: |
           "$PYTHON_PATH" -m pip install -e .
 
-      - name: "Starting julia"
+      - name: "Starting Julia"
         shell: julia {0}
         run: |
           using Pkg; Pkg.add("PyCall");using PyCall;pymapdl = pyimport("ansys.mapdl.core");print(pymapdl.__version__)
