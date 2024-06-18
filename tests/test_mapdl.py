@@ -2447,3 +2447,8 @@ def test_not_correct_et_element(mapdl):
     mapdl.et(1, 227)
     with pytest.warns(UserWarning, match="is normal behavior when a CDB file is used"):
         mapdl.keyopt(1, 222)
+
+
+def test_ctrl(mapdl):
+    mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
+    mapdl._ctrl("set_verb", 0)  # Returning to non-verbose

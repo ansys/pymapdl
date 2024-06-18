@@ -194,7 +194,7 @@ If you want to list MAPDL process, just use the following command:
             ------------  -------------  --------  -----------  -----
             ANSYS.exe     False          running         50052  35360
             ANSYS.exe     False          running         50052  37116
-            ANSYS222.exe  True           running         50052  41644
+            ANSYS241.exe  True           running         50052  41644
 
     .. tab-item:: Linux
         :sync: key1
@@ -206,7 +206,7 @@ If you want to list MAPDL process, just use the following command:
             ------------  -------------  --------  -----------  -----
             ANSYS.exe     False          running         50052  35360
             ANSYS.exe     False          running         50052  37116
-            ANSYS222.exe  True           running         50052  41644
+            ANSYS241.exe  True           running         50052  41644
 
 
 If you want, to just list the instances (avoiding listing children MAPDL
@@ -223,7 +223,7 @@ processes), just type:
             (.venv) PS C:\Users\user\pymapdl> pymapdl list -i
             Name          Status      gRPC port    PID
             ------------  --------  -----------  -----
-            ANSYS222.exe  running         50052  41644
+            ANSYS241.exe  running         50052  41644
 
     .. tab-item:: Linux
         :sync: key1
@@ -233,7 +233,7 @@ processes), just type:
             (.venv) user@machine:~$ pymapdl list -i
             Name          Status      gRPC port    PID
             ------------  --------  -----------  -----
-            ANSYS222.exe  running         50052  41644
+            ANSYS241.exe  running         50052  41644
 
 
 You can also print other fields like the working directory (using `--cwd`)
@@ -252,9 +252,9 @@ argument `--long` or `-l`:
             (.venv) PS C:\Users\user\pymapdl> pymapdl list -l
             Name          Is Instance    Status      gRPC port    PID  Command line                                                                                                                      Working directory
             ------------  -------------  --------  -----------  -----  --------------------------------------------------------------------------------------------------------------------------------  ---------------------------------------------------
-            ANSYS.exe     False          running         50052  35360  C:\Program Files\ANSYS Inc\v222\ANSYS\bin\winx64\ANSYS.EXE -j file -b -i .__tmp__.inp -o .__tmp__.out -port 50052 -grpc           C:\Users\User\AppData\Local\Temp\ansys_ahmfaliakp
-            ANSYS.exe     False          running         50052  37116  C:\Program Files\ANSYS Inc\v222\ANSYS\bin\winx64\ANSYS.EXE -j file -b -i .__tmp__.inp -o .__tmp__.out -port 50052 -grpc           C:\Users\User\AppData\Local\Temp\ansys_ahmfaliakp
-            ANSYS222.exe  True           running         50052  41644  C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ansys222.exe -j file -np 2 -b -i .__tmp__.inp -o .__tmp__.out -port 50052 -grpc  C:\Users\User\AppData\Local\Temp\ansys_ahmfaliakp
+            ANSYS.exe     False          running         50052  35360  C:\Program Files\ANSYS Inc\v241\ANSYS\bin\winx64\ANSYS.EXE -j file -b -i .__tmp__.inp -o .__tmp__.out -port 50052 -grpc           C:\Users\User\AppData\Local\Temp\ansys_ahmfaliakp
+            ANSYS.exe     False          running         50052  37116  C:\Program Files\ANSYS Inc\v241\ANSYS\bin\winx64\ANSYS.EXE -j file -b -i .__tmp__.inp -o .__tmp__.out -port 50052 -grpc           C:\Users\User\AppData\Local\Temp\ansys_ahmfaliakp
+            ANSYS241.exe  True           running         50052  41644  C:\Program Files\ANSYS Inc\v241\ansys\bin\winx64\ansys241.exe -j file -np 2 -b -i .__tmp__.inp -o .__tmp__.out -port 50052 -grpc  C:\Users\User\AppData\Local\Temp\ansys_ahmfaliakp
 
     .. tab-item:: Linux
         :sync: key1
@@ -264,9 +264,9 @@ argument `--long` or `-l`:
             (.venv) user@machine:~$ pymapdl list -l
             Name          Is Instance    Status      gRPC port    PID  Command line                                                               Working directory
             ------------  -------------  --------  -----------  -----  -------------------------------------------------------------------------  --------------------------------
-            ANSYS         False          running         50052  35360  /ansys_inc/v222/ansys/bin/linx64/ansys -j file -port 50052 -grpc           /home/user/temp/ansys_ahmfaliakp
-            ANSYS         False          running         50052  37116  /ansys_inc/v222/ansys/bin/linx64/ansys -j file -port 50052 -grpc           /home/user/temp/ansys_ahmfaliakp
-            ANSYS222      True           running         50052  41644  /ansys_inc/v222/ansys/bin/linx64/ansys222 -j file -np 2 -port 50052 -grpc  /home/user/temp/ansys_ahmfaliakp
+            ANSYS         False          running         50052  35360  /ansys_inc/v241/ansys/bin/linx64/ansys -j file -port 50052 -grpc           /home/user/temp/ansys_ahmfaliakp
+            ANSYS         False          running         50052  37116  /ansys_inc/v241/ansys/bin/linx64/ansys -j file -port 50052 -grpc           /home/user/temp/ansys_ahmfaliakp
+            ANSYS241      True           running         50052  41644  /ansys_inc/v241/ansys/bin/linx64/ansys241 -j file -np 2 -port 50052 -grpc  /home/user/temp/ansys_ahmfaliakp
 
 
 The converter module has its own command line interface to convert
