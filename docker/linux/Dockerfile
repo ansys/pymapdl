@@ -113,17 +113,15 @@ ENV OMPI_ALLOW_RUN_AS_ROOT=1
 ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
 # Adding alias to ansys executable
-RUN printf '#!/bin/bash\n/ansys_inc "$@"' > /usr/bin/ansys && \
+RUN printf '#!/bin/bash\n/ansys_inc/v$ANSYS_VERSION/ansys/bin/mapdl "$@"' > /usr/bin/ansys && \
     chmod +x /usr/bin/ansys
-RUN printf '#!/bin/bash\n/ansys_inc -grpc "$@"' > /usr/bin/ansysgrpc && \
+RUN printf '#!/bin/bash\n/ansys_inc/v$ANSYS_VERSION/ansys/bin/mapdl -grpc "$@"' > /usr/bin/ansysgrpc && \
     chmod +x /usr/bin/ansysgrpc
 
 # Setting user
 USER $USERNAME
 WORKDIR /home/$USERNAME/$WORKING_DIRECTORY
 
-# Expose port
-EXPOSE 50052
-
 # Setting entrypoint
-ENTRYPOINT [ "/ansys_inc", "-grpc", "-dir", "/home/$USERNAME/$WORKING_DIRECTORY" ]
+EXPOSE 50052
+ENTRYPOINT [ "bash", "-c", "/ansys_inc/v${ANSYS_VERSION}/ansys/bin/mapdl -grpc -dir ${WORKING_DIRECTORY}"]
