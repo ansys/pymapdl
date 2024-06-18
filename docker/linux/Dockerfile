@@ -56,11 +56,9 @@ ARG USER_UID=1000
 ARG USER_GID=$USER_UID
 ARG LICENSE_SERVER
 
-ENV LICENSE_SERVER=$LICENSE_SERVER
-
 
 # install the product
-RUN /ansys_inc/INSTALL -silent -install_dir /ansys_inc -lic_server $LICENSE_SERVER
+RUN /ansys_inc/INSTALL -silent -install_dir /ansys_inc -licserverinfo $LICENSE_SERVER
 
 
 # Storing version in an env var
