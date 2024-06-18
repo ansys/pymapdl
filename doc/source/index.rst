@@ -15,6 +15,7 @@
    mapdl_commands/index
    api/index
    examples/index
+   changelog
 
 
 .. image:: ../source/_static/logo_dark.png

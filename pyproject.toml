@@ -91,7 +91,7 @@ doc = [
     "pypandoc==1.13",
     "pytest-sphinx==0.6.3",
     "pythreejs==2.4.2",
-    "pyvista[trame]==0.43.8",
+    "pyvista[trame]==0.43.9",
     "sphinx-autobuild==2024.4.16",
     "sphinx-autodoc-typehints==1.25.2",
     "sphinx-copybutton==0.5.2",
@@ -227,3 +227,37 @@ override_SS05 = [  # override SS05 to allow docstrings starting with these words
     # '^Assess ',
     # '^Access ',
 ]
+
+[tool.towncrier]
+package = "ansys.mapdl.core"
+directory = "doc/changelog.d"
+filename = "doc/source/changelog.rst"
+template = "doc/changelog.d/changelog_template.jinja"
+start_string = ".. towncrier release notes start\n"
+title_format = "`{version} <https://github.com/ansys/pymapdl/releases/tag/v{version}>`_ - {project_date}"
+issue_format = "`#{issue} <https://github.com/ansys/pymapdl/pull/{issue}>`_"
+
+[[tool.towncrier.type]]
+directory = "added"
+name = "Added"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "changed"
+name = "Changed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "fixed"
+name = "Fixed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "dependencies"
+name = "Dependencies"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "miscellaneous"
+name = "Miscellaneous"
+showcontent = true
