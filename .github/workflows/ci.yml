@@ -59,6 +59,41 @@ permissions:
 
 jobs:
 
+
+  update-changelog:
+    name: "Update CHANGELOG (on release)"
+    if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: ansys/actions/doc-deploy-changelog@v6
+        with:
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+
+
+  branch-name:
+    # Only if the event is a pull request and the branch name is not from the pre-commit-ci bot
+    if: github.event_name == 'pull_request' && github.head_ref != 'pre-commit-ci-update-config'
+    name: Check the name of the branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check branch name
+        uses: ansys/actions/branch-name-style@v6
+
+
+  commit-name:
+    if: github.event_name == 'pull_request'
+    name: Check the name of the commit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check commit name
+        uses: ansys/actions/commit-style@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+
   doc-style:
     name: "Documentation style check"
     runs-on: ubuntu-latest
@@ -68,6 +103,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           vale-version: "3.4.1"
+
 
   smoke-tests:
     name: "Build and smoke test (${{ matrix.os }} | Python ${{ matrix.python-version }}) (Release=${{ matrix.should-release }})"
@@ -116,7 +152,7 @@ jobs:
       ON_DOCUMENTATION: TRUE
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.1.6
+        uses: actions/checkout@v4.1.7
 
       - name: "Login in Github container registry"
         uses: docker/login-action@v3.2.0
@@ -349,7 +385,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.1.6
+        uses: actions/checkout@v4.1.7
 
       - name: "Login in Github container registry"
         uses: docker/login-action@v3.2.0
@@ -543,7 +579,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.1.6
+        uses: actions/checkout@v4.1.7
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -676,7 +712,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.1.6
+        uses: actions/checkout@v4.1.7
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -754,7 +790,7 @@ jobs:
       ON_LOCAL: TRUE
 
     steps:
-      - uses: actions/checkout@v4.1.6
+      - uses: actions/checkout@v4.1.7
 
       # Skipping because it is installed locally.
       # - name: Setup Python
@@ -815,6 +851,7 @@ jobs:
           name: windows-v22.2.0-local.xml
           path: ./windows_local.xml
 
+
   package:
     name: "Package library"
     needs: [build-test, build-test-ubuntu, build-test-ubuntu-minimal, docs-build]
@@ -830,7 +867,7 @@ jobs:
   release:
     name: "Release project"
     if: ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
-    needs: [package]
+    needs: [package, update-changelog]
     runs-on: ubuntu-latest
     # Specifying a GitHub environment is optional, but strongly encouraged
     environment: release
@@ -852,6 +889,7 @@ jobs:
 
       - name: "Display structure of downloaded files"
         run: ls -Rla
+
 
   upload-docs-release:
     name: "Upload release documentation"
@@ -875,7 +913,7 @@ jobs:
     needs: upload-docs-release
     steps:
       - name: "Install Git and clone project"
-        uses: actions/checkout@v4.1.6
+        uses: actions/checkout@v4.1.7
 
       - name: "Install the package requirements"
         run: pip install -e .
@@ -939,6 +977,7 @@ jobs:
           title-template: "Failed scheduled build"
           label-name: "Build failed"
 
+
   test_julia:
     name: "Test julia implementation"
     runs-on: ${{ matrix.os }}
@@ -949,7 +988,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v4.1.6
+      - uses: actions/checkout@v4.1.7
       - name: "Set up Julia"
         uses: julia-actions/setup-julia@v2
         with:
