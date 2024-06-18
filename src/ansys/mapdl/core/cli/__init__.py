@@ -61,7 +61,7 @@ if _HAS_CLICK:
 
 pymapdl convert input_file.inp -o output_file.out ...
 
-For more information please visit: https://mapdl.docs.pyansys.com/version/dev/user_guide/cli.html
+For more information, see `PyMAPDL command line interface <https://mapdl.docs.pyansys.com/version/dev/user_guide/cli.html>`_.
 """
         )
 

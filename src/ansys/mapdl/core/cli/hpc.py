@@ -58,7 +58,7 @@ $ pymapdl submit my_file_01.py --requirements_file=requirements.txt --shell_file
     help="""URL where the HPS cluster is deployed. For example: "https://myserver:3000/hps" """,
 )
 @click.option(
-    "--user", default=None, type=str, help="Username to login into the HPC cluster."
+    "--user", default=None, type=str, help="Username for logging into the HPC cluster."
 )
 @click.option(
     "--password",
@@ -78,9 +78,9 @@ run the Python file. Python3 is used by default in the cluster.""",
     default=None,
     type=str,
     help="""
-Input arguments for the simulation. You can specify several arguments by
-joining them with commas. Thus, strings defined in this way cannot contain
-commas. Only integers, floats and strings are allowed.
+Input arguments for the simulation. Because you can specify several arguments by
+joining them with commas, strings defined in this way cannot contain
+commas. Only integers, floats, and strings are allowed.
 PyMAPDL converts these inputs to integer or float values when possible.
 Otherwise, they remain as strings. You can change these arguments on the
 HPS website. For example, ``--inputs="force=123,value='mystring'"``.
@@ -99,7 +99,7 @@ For example, ``--outputs="displacements,nodes"``.""",
     default=None,
     type=str,
     help="""Output files to monitor. Because you use commas to separate
-the file names, the names cannot contain commas. For example,
+filenames, the names cannot contain commas. For example,
 ``--output_files="results.out,data.xls"``.""",
 )
 @click.option(
@@ -117,7 +117,7 @@ this option is not used.""",
     help="""Optional created virtual environment to install with the
 libraries specified in this requirements file. If not, the activated virtual environment is
 cloned through a temporary ``pip list`` file. If you are using an editable package,
-you should attach your own requirement file using ``pip freeze`` """,
+you should attach your own requirement file using ``pip freeze``.""",
 )
 @click.option(
     "--extra_files",
@@ -208,7 +208,7 @@ By default, PyMAPDL detects the type of file from its extension.
     type=bool,
     is_flag=False,
     flag_value=True,
-    help="""Whether PyMAPDL is to print debug logging to the console output.""",
+    help="""Whether PyMAPDL is to print debug logging to the console.""",
 )
 def submit(
     main_file: str,
@@ -307,7 +307,7 @@ def submit(
         }
 
         logger.debug(
-            f"Saving the following configuration to the config file ({config_file}):\n{config}"
+            f"Saving the following configuration to the config file ({config_file}):\n{config}."
         )
         with open(config_file, "w") as fid:
             json.dump(config, fid)
