@@ -8,10 +8,10 @@ on:
         description: 'Run all extended MAPDL build tests'
         required: true
         type: boolean
-    
+
   push:
     tags:
-      - "*"     
+      - "v*"
     branches:
        - main
   schedule:
@@ -128,11 +128,11 @@ jobs:
           library-name: ${{ env.PACKAGE_NAME }}
           operating-system: ${{ matrix.os }}
           python-version: ${{ matrix.python-version }}
-      
+
       - name: "Importing library"
         run: |
           python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
-      
+
       - name: "Checking plotting support"
         run:
           python -c "from pyvista.plotting import system_supports_plotting; print('System support plotting ' + str(system_supports_plotting()))"
@@ -428,7 +428,7 @@ jobs:
       - name: "DPF server activation"
         run: |
           $(docker pull ghcr.io/ansys/dpf-core:22.2dev && docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}.") &
-  
+
       - name: "Getting files change filters"
         uses: dorny/paths-filter@v3
         id: changes
@@ -648,7 +648,7 @@ jobs:
         with:
           message: |
             Hello!  :wave:
-            
+
             Your PR is changing the image cache. So I am attaching the new image cache in a new [commit](https://github.com/ansys/pymapdl/commit/${{ steps.attatch-to-pr.outputs.commit_long_sha }}).
 
             This commit does not re-run the CICD workflows (since no changes are made in the codebase) therefore you will see the actions showing in their status `Expected — Waiting for status to be reported`. Do not worry. You commit workflow is still running [here](https://github.com/ansys/pymapdl/pull/${{ github.event.pull_request.number }}/checks?sha=${{ github.event.pull_request.head.sha }}) :smile:
@@ -764,7 +764,7 @@ jobs:
           pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
             --cov-report=xml:${{ matrix.mapdl-image }}-minimal.xml
-        
+
       - uses: codecov/codecov-action@v4
         name: "Upload coverage to Codecov"
         with:
@@ -993,7 +993,7 @@ jobs:
         uses: julia-actions/setup-julia@v2
         with:
           version: ${{ matrix.julia-version }}
-      
+
       - name: "Getting python interpreter"
         id: get_python
         run: |
