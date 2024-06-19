@@ -86,7 +86,7 @@ tmp.out
 # virtual environment
 venv/
 .venv/
-.venv
+.venv*
 
 # Visual studio code local settings
 .vscode/
