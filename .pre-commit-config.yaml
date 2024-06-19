@@ -2,6 +2,13 @@ fail_fast: True
 
 repos:
 
+- repo: https://github.com/compilerla/conventional-pre-commit
+  rev: v3.2.0
+  hooks:
+    - id: conventional-pre-commit
+      stages: [commit-msg]
+      args: [--strict, feat, fix, chore, test, custom, ci]
+
 - repo: https://github.com/ansys/pre-commit-hooks
   rev: v0.3.1
   hooks:
