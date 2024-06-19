@@ -7,7 +7,7 @@ repos:
   hooks:
     - id: conventional-pre-commit
       stages: [commit-msg]
-      args: [--strict, feat, fix, chore, test, custom, ci]
+      args: [--strict, fix, feat, docs, style, refactor, perf, test, build, ci, chore, revert]
 
 - repo: https://github.com/ansys/pre-commit-hooks
   rev: v0.3.1
