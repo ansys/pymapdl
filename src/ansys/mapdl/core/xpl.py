@@ -36,7 +36,9 @@ from .errors import MapdlRuntimeError
 
 def id_generator(size=6, chars=string.ascii_uppercase):
     """Generate a random string using only uppercase letters."""
-    return "".join(random.choice(chars) for _ in range(size))
+    import secrets
+    
+    return "".join(secrets.choice(chars) for _ in range(size))
 
 
 MYCTYPE = {

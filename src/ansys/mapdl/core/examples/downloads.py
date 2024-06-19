@@ -25,16 +25,8 @@
 from functools import wraps
 import os
 import shutil
-import urllib.request
 import zipfile
-
-try:
-    import requests
-
-    _HAS_REQUESTS = True
-except ModuleNotFoundError:
-    _HAS_REQUESTS = False
-
+import requests
 from ansys.mapdl import core as pymapdl
 
 
@@ -83,10 +75,7 @@ def _get_file_url(filename, directory=None):
 
 
 def _check_url_exist(url):
-    if not _HAS_REQUESTS:
-        raise ModuleNotFoundError("Examples module requires request module")
-
-    response = requests.get(url)
+    response = requests.get(url, timeout=10)  # 10 seconds timeout
     if response.status_code == 200:
         return [True]
     else:
@@ -106,8 +95,11 @@ def _retrieve_file(url, filename, _test=False):
         return local_path_no_zip, None
 
     # Perform download
-    saved_file, resp = urllib.request.urlretrieve(url)
-    shutil.move(saved_file, local_path)
+    file_content = requests.get(url, timeout=10).text
+    
+    with open(local_path, "wb") as f:
+        f.write(file_content)
+    
     if get_ext(local_path) in [".zip"]:
         _decompress(local_path)
         local_path = local_path[:-4]

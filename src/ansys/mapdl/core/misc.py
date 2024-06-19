@@ -378,7 +378,9 @@ def is_float(input_string):
 
 def random_string(stringLength=10, letters=string.ascii_lowercase):
     """Generate a random string of fixed length"""
-    return "".join(random.choice(letters) for i in range(stringLength))
+    import secrets 
+    
+    return "".join(secrets.choice(letters) for _ in range(stringLength))
 
 
 def _check_has_ansys():
