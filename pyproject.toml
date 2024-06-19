@@ -253,6 +253,11 @@ name = "Fixed"
 showcontent = true
 
 [[tool.towncrier.type]]
+directory = "documentation"
+name = "Documentation"
+showcontent = true
+
+[[tool.towncrier.type]]
 directory = "dependencies"
 name = "Dependencies"
 showcontent = true
