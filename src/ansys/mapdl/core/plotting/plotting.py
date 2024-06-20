@@ -1047,6 +1047,9 @@ def bc_nodes_plotter(
             shape_opacity=0.25,
             font_size=bc_labels_font_size,
             always_visible=True,
+            # There is a conflict here. See
+            # To do not hide the labels, even when the underlying nodes
+            # are hidden, we set "always_visible"
         )
 
     if plot_bc_legend and bc_point_labels is not None:
