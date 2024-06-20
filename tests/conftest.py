@@ -28,10 +28,9 @@ from sys import platform
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
 
-from ansys.mapdl.core import _HAS_PYVISTA
-
-if _HAS_PYVISTA:
+if has_dependency("pyvista"):
     import ansys.tools.visualization_interface as viz_interface
+    viz_interface.TESTING_MODE = True
 
 import pytest
 
