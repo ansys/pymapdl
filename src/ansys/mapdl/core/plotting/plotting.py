@@ -1021,6 +1021,7 @@ def bc_nodes_plotter(
             # line_width=3,
             name=name_,
             label=name_,
+            opacity=0.50,
         )
 
         if plot_bc_labels:
