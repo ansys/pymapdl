@@ -47,7 +47,7 @@ BC_F = [
     "FY",
     "FZ",
     "AMPS",
-    "CHRGS",
+    "CHRG",
     # "FLUX",
     "CSGZ",
 ]  # TODO: Add moments MX, MY, MZ
@@ -925,15 +925,16 @@ def bc_plotter(
     # This might create very small points in cases there are a concentration of points.
     #
     # Later can find a way to plot them and keep their size constant independent of the zoom.
-
+    
+    ratio = 0.075  # Because a glyph of 1 is too big.
     if bc_glyph_size is None:
         bc_glyph_size = get_bounding_box(mapdl.mesh.nodes)
         bc_glyph_size = bc_glyph_size[bc_glyph_size != 0]
 
         if bc_glyph_size.size != 0:
-            bc_glyph_size = bc_glyph_size.mean() * 0.075
+            bc_glyph_size = bc_glyph_size.mean() * ratio
         else:  # Case were there is only one node
-            bc_glyph_size = 1
+            bc_glyph_size = ratio
 
     if not isinstance(bc_glyph_size, (int, float)):
         raise ValueError("The 'bc_glyph_size' parameter can be only an int or float.")
