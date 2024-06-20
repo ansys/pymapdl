@@ -932,7 +932,7 @@ def bc_plotter(
         bc_glyph_size = bc_glyph_size[bc_glyph_size != 0]
 
         if bc_glyph_size.size != 0:
-            bc_glyph_size = bc_glyph_size.mean() * 0.75 / 10
+            bc_glyph_size = bc_glyph_size.mean() * 0.075
         else:  # Case were there is only one node
             bc_glyph_size = 1
 
