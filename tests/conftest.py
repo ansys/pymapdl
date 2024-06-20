@@ -30,6 +30,7 @@ from _pytest.terminal import TerminalReporter  # for terminal customization
 
 if has_dependency("pyvista"):
     import ansys.tools.visualization_interface as viz_interface
+
     viz_interface.TESTING_MODE = True
 
 import pytest

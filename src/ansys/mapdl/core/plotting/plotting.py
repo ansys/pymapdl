@@ -29,7 +29,6 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ansys.mapdl.core.misc import get_bounding_box, unique_rows
-
 from ansys.mapdl.core.plotting.theme import MapdlTheme
 
 POINT_SIZE = 10
