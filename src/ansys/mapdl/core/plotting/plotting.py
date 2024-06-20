@@ -1018,7 +1018,6 @@ def bc_nodes_plotter(
             color=BC_plot_settings(each_label)["color"],
             style="surface",
             # style='wireframe',
-            # edge_color=BC_plot_settings[each_label]['color'],
             # line_width=3,
             name=name_,
             label=name_,
