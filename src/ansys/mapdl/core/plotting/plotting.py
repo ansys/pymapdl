@@ -925,7 +925,7 @@ def bc_plotter(
     # This might create very small points in cases there are a concentration of points.
     #
     # Later can find a way to plot them and keep their size constant independent of the zoom.
-    
+
     ratio = 0.075  # Because a glyph of 1 is too big.
     if bc_glyph_size is None:
         bc_glyph_size = get_bounding_box(mapdl.mesh.nodes)
