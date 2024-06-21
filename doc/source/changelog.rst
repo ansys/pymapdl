@@ -9,6 +9,14 @@ This document contains the release notes for the project.
 
 .. towncrier release notes start
 
+`0.68.3 <https://github.com/ansys/pymapdl/releases/tag/v0.68.3>`_ - 2024-06-21
+==============================================================================
+
+Added
+^^^^^
+
+- feat: Add an inprocess backend to pymapdl `#3198 <https://github.com/ansys/pymapdl/pull/3198>`_
+
 `0.68.2 <https://github.com/ansys/pymapdl/releases/tag/v0.68.2>`_ - 2024-06-18
 ==============================================================================
 
