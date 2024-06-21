@@ -57,7 +57,7 @@ class MapdlInProcess(MapdlBase):
     def name(self, name) -> None:
         self._name = name
 
-    def _check_session_id() -> None:
+    def _check_session_id(self) -> None:
         pass
 
     def __repr__(self):
