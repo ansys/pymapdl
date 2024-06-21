@@ -28,13 +28,11 @@ from ansys.mapdl.core.mapdl import MapdlBase
 class _Backend(Protocol):
     def run_command(self) -> str: ...
 
+
 class MapdlInProcess(MapdlBase):
     def __init__(self, backend: _Backend):
         super().__init__(
-            loglevel="WARNING",
-            use_vtk=False,
-            log_apdl=None,
-            print_com=False
+            loglevel="WARNING", use_vtk=False, log_apdl=None, print_com=False
         )
         self._backend = backend
         self._cleanup: bool = True
@@ -42,7 +40,7 @@ class MapdlInProcess(MapdlBase):
         self._session_id: Optional[str] = None
         self._mute: bool = False
 
-    def _run(self, command: str, verbose: bool=False, mute: bool=False) -> str:
+    def _run(self, command: str, verbose: bool = False, mute: bool = False) -> str:
         if not command.strip():
             raise ValueError("Empty commands not allowed")
 
