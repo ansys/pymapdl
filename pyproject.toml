@@ -24,7 +24,7 @@ dependencies = [
     "importlib-metadata>=4.0",
     "matplotlib>=3.0.0",  # for colormaps for pyvista
     "numpy>=1.14.0,<1.25.0; python_version < '3.9'",
-    "numpy>=1.14.0,<2.0.0; python_version >= '3.9'",
+    "numpy>=1.14.0,<3.0.0; python_version >= '3.9'",
     "pexpect>=4.8.0 ; platform_system=='Linux'",
     "protobuf>=3.12.2",  # minimum required based on latest ansys-grpc-mapdl
     "psutil>=5.9.4",
