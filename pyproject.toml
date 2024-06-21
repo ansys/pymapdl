@@ -150,6 +150,8 @@ omit = [
     # ignore legacy interfaces
     "ansys/mapdl/core/mapdl_console.py",
     "ansys/mapdl/core/jupyter.py",
+    # ignore non exposed interfaces
+    "ansys/mapdl/core/mapdl_inprocess.py",
 ]
 
 [tool.coverage.report]
