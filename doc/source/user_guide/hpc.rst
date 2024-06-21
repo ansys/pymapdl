@@ -47,11 +47,11 @@ Descriptions follow of basic terms.
 - **Login node**: A type of node used only for login and job submission.
   No computation should be performed on it. It is sometimes referred to as
   *virtual desktop infrastructure* (VDI).
-- **Partition**: A logical grouping of nodes with similar characteristics (for 
-  example, CPU architecture and memory size). 
-- **Job**: A task submitted to SLURM for execution. 
-- **Queue**: A waiting area where jobs are held until resources become available. 
-- **Scheduler**: The component responsible for deciding which job gets 
+- **Partition**: A logical grouping of nodes with similar characteristics (for
+  example, CPU architecture and memory size).
+- **Job**: A task submitted to SLURM for execution.
+- **Queue**: A waiting area where jobs are held until resources become available.
+- **Scheduler**: The component responsible for deciding which job gets
   executed and when and where it gets executed.
 
 
@@ -83,7 +83,7 @@ job parameters and commands to execute. Here's a basic example:
 **my_script.sh**
 
 .. code-block:: bash
-    
+
     #!/bin/bash
     #SBATCH --job-name=myjob
     #SBATCH --nodes=1
@@ -107,13 +107,13 @@ To submit a job, use the ``srun`` command followed by the name of
 the batch script:
 
 .. code-block:: console
-    
+
     user@machine:~$ srun my_script.sh
 
 If you prefer to submit a batch job, you can use the ``sbatch`` command:
 
 .. code-block:: console
-    
+
     user@machine:~$ sbatch my_script.sh
 
 You can specify each job setting using the command line. For example:
@@ -124,7 +124,7 @@ You can specify each job setting using the command line. For example:
 
 .. warning:: **Command line arguments versus in-file arguments**:
     Command line arguments do **NOT** overwrite the equivalent arguments
-    written in the bash file. Hence, you must ensure that the argument that you 
+    written in the bash file. Hence, you must ensure that the argument that you
     want to pass using the command line is not already present in the bash file.
 
 
@@ -173,8 +173,8 @@ you can press the **Tab** key to use autocomplete:
 .. code-block:: console
 
     user@machine:~$ which python3[TAB]
-    python3             python3-intel64     python3.10-config   python3.11          python3.12          python3.8           python3.8-intel64   python3.9-config  
-    python3-config      python3.10          python3.10-intel64  python3.11-config   python3.12-config   python3.8-config    python3.9 
+    python3             python3-intel64     python3.10-config   python3.11          python3.12          python3.8           python3.8-intel64   python3.9-config
+    python3-config      python3.10          python3.10-intel64  python3.11-config   python3.12-config   python3.8-config    python3.9
     $ which python3.10
     /usr/bin/python3.10
 
@@ -204,7 +204,7 @@ To install PyMAPDL on the activated virtual environment, run the following comma
     user@machine:~$ source /home/user/.venv/bin/activate
     (.venv) user@machine:~$ pip install ansys-mapdl-core
     Collecting ansys-mapdl-core
-    Downloading ansys_mapdl_core-0.68.2-py3-none-any.whl (26.9 MB)
+    Downloading ansys_mapdl_core-0.68.3-py3-none-any.whl (26.9 MB)
         ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 26.9/26.9 MB 37.3 MB/s eta 0:00:00
     Collecting pexpect>=4.8.0
     Using cached pexpect-4.9.0-py2.py3-none-any.whl (63 kB)
@@ -227,7 +227,7 @@ run this ``test.sh`` bash script:
     source /home/user/.venv/bin/activate
     python -c "from ansys.mapdl import core;print(f'PyMAPDL version {core.__version__} was successfully imported.')"
 
-then you can run that script using: 
+then you can run that script using:
 
 .. code-block:: console
 
@@ -240,7 +240,7 @@ On the console, you should see this output:
 .. code-block:: text
 
     Testing Python!
-    PyMAPDL version 0.68.2 was successfully imported.
+    PyMAPDL version 0.68.3 was successfully imported.
 
 If you see an error in the output, see :ref:`ref_hpc_troubleshooting`, especially
 :ref:`ref_python_venv_not_accesible`.
@@ -454,7 +454,7 @@ Best practices
 - Optimize resource usage to minimize job wait times and maximize cluster efficiency.
 - Regularly monitor job queues and system resources to identify potential bottlenecks.
 - Follow naming conventions for batch scripts and job names to maintain organization.
-- Keep batch scripts and job submissions concise and well-documented 
+- Keep batch scripts and job submissions concise and well-documented
   for reproducibility and troubleshooting.
 
 .. _ref_hpc_troubleshooting:
@@ -465,7 +465,7 @@ Troubleshooting
 Debugging jobs
 --------------
 - Use ``--output`` and ``--error`` directives in batch scripts to capture
-  standard output and error messages. 
+  standard output and error messages.
 
 - Check SLURM logs for error messages and debugging information.
 
@@ -474,7 +474,7 @@ Debugging jobs
 
 Python virtual environment is not accessible
 --------------------------------------------
-If there is an error while testing the Python installation, it might mean 
+If there is an error while testing the Python installation, it might mean
 that the Python environment is not accessible to the compute nodes.
 For example, in the following output, PyMAPDL could not be found, meaning that the script
 is not using the virtual environment (``/home/user/.venv``):
@@ -512,7 +512,7 @@ a compute node with this code:
    https://stackoverflow.com/questions/64188693/problem-with-python-environment-and-slurm-srun-sbatch
 
 Many HPC infrastructures use environment managers to load and unload
-software packages using modules and environment variables. 
+software packages using modules and environment variables.
 Hence, you might want to make sure that the correct module is loaded in your script.
 For information on two of the most common environment managers, see the
 `Modules documentation <modules_docs_>`_ and `Lmod documentation <lmod_docs_>`_.
@@ -591,7 +591,7 @@ the compute nodes:
 
 4. Install PyMAPDL:
 
-   .. code-block:: console 
+   .. code-block:: console
 
       (.venv) user@machine:~$ python -m pip install ansys-mapdl-core
 
