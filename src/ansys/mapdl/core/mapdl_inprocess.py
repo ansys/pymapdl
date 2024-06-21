@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core.mapdl import MapdlBase
 from typing import Optional, Protocol
+
+from ansys.mapdl.core.mapdl import MapdlBase
+
 
 class _Backend(Protocol):
     def run_command(self) -> str: ...
