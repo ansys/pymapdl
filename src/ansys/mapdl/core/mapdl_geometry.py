@@ -37,7 +37,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from pyiges import Iges
 
 from ansys.mapdl.core.misc import requires_package, run_as_prep7, supress_logging
-from ansys.mapdl.core.theme import MapdlTheme
+from ansys.mapdl.core.plotting.theme import MapdlTheme
 
 VALID_SELECTION_TYPE = ["S", "R", "A", "U"]
 VALID_SELECTION_ENTYTY = ["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]

@@ -48,7 +48,7 @@ from ansys.mapdl.core.misc import (
     random_string,
     supress_logging,
 )
-from ansys.mapdl.core.theme import get_ansys_colors
+from ansys.mapdl.core.plotting.theme import get_ansys_colors
 
 if _HAS_PYVISTA:
     from ansys.mapdl.core.plotting.plotting import (

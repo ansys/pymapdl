@@ -88,6 +88,10 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
             name_filter=name_filter,
         )
 
+    @property
+    def scene(self):
+        """Return the scene."""
+        return self.pv_interface.scene
 
 class MapdlPlotter(Plotter):
     """Plotter class for PyMAPDL.
@@ -125,7 +129,7 @@ class MapdlPlotter(Plotter):
         labels : List[str]
             List of labels to add.
         """
-        self._backend.pv_interface.scene.add_point_labels(
+        self.scene.add_point_labels(
             points, labels, **plotting_options
         )
 
@@ -137,7 +141,7 @@ class MapdlPlotter(Plotter):
         points : List[float]
             List of points to add to the plotter.
         """
-        _ = self._backend.pv_interface.scene.add_points(points, **plotting_options)
+        _ = self.scene.add_points(points, **plotting_options)
 
     def plot_iter(
         self,
@@ -174,3 +178,8 @@ class MapdlPlotter(Plotter):
     def show(self) -> None:
         """Show the plotter."""
         self._backend.show()
+    
+    @property
+    def scene(self):
+        """Return the scene."""
+        return self._backend.scene

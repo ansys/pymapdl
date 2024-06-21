@@ -345,13 +345,13 @@ def _general_plotter(
         cmap = "bwr"
 
     if background:
-        plotter._backend.pv_interface.scene.set_background(background)
+        plotter.scene.set_background(background)
     else:
-        plotter._backend.pv_interface.scene.set_background("paraview")
+        plotter.scene.set_background("paraview")
 
     # Making sure that labels are visible in dark backgrounds
     if not text_color and background:
-        bg = plotter._backend.pv_interface.scene.background_color.float_rgb
+        bg = plotter.scene.background_color.float_rgb
         # from: https://graphicdesign.stackexchange.com/a/77747/113009
         gamma = 2.2
         threshold = (
@@ -402,7 +402,7 @@ def _general_plotter(
             mesh_ = [mesh_]
 
         for each_mesh in mesh_:
-            plotter._backend.pv_interface.scene.add_mesh(
+            plotter.scene.add_mesh(
                 each_mesh,
                 scalars=scalars,
                 scalar_bar_args=scalar_bar_args,
@@ -450,12 +450,12 @@ def _general_plotter(
 
     if cpos:
         if isinstance(plotter, MapdlPlotter):
-            plotter._backend.pv_interface.scene.camera_position = cpos
+            plotter.scene.camera_position = cpos
         else:
             plotter.camera_position = cpos
     if show_bounds:
         if isinstance(plotter, MapdlPlotter):
-            plotter._backend.pv_interface.scene.show_bounds()
+            plotter.scene.show_bounds()
         else:
             plotter.show_bounds()
     return plotter
@@ -857,7 +857,7 @@ def general_plotter(
 
     if title:  # Added here to avoid labels overlapping title
         if isinstance(pl, MapdlPlotter):
-            pl._backend.pv_interface.scene.add_title(title, color=text_color)
+            pl.scene.add_title(title, color=text_color)
         else:
             pl.add_title(title, color=text_color)
 
@@ -868,31 +868,31 @@ def general_plotter(
 
     # permit user to save the figure as a screenshot
     if savefig:
-        pl._backend.pv_interface.scene.show(
+        pl.scene.show(
             title=title,
             auto_close=False,
             window_size=window_size,
             screenshot=True,
         )
-        pl._backend.pv_interface.scene.screenshot(savefig)
+        pl.scene.screenshot(savefig)
 
         # return unclosed plotter
         if return_plotter:
             return pl
 
-        # ifplotter._backend.pv_interface.scene.set_background("paraview") not returning plotter, close right away
-        pl._backend.pv_interface.scene.close()
+        # ifplotter.scene.set_background("paraview") not returning plotter, close right away
+        pl.scene.close()
 
     else:
         if not return_plotter and not plotter:
             pl.show()
 
     if return_plotter and isinstance(pl, MapdlPlotter):
-        return pl._backend.pv_interface.scene
+        return pl.scene
     elif return_plotter and isinstance(pl, pv.Plotter):
         return pl
     elif return_cpos and isinstance(pl, MapdlPlotter):
-        return pl._backend.pv_interface.scene.camera_position
+        return pl.scene.camera_position
     elif return_cpos and isinstance(pl, pv.Plotter):
         return pl.camera_position
     else:
@@ -1013,7 +1013,7 @@ def bc_nodes_plotter(
             geom=BC_plot_settings(each_label)["glyph"],
         )
         name_ = f"{each_label}"
-        pl._backend.pv_interface.scene.add_mesh(
+        pl.scene.add_mesh(
             glyphs,
             color=BC_plot_settings(each_label)["color"],
             style="surface",
@@ -1046,16 +1046,17 @@ def bc_nodes_plotter(
             pcloud["labels"],
             shape_opacity=0.25,
             font_size=bc_labels_font_size,
-            always_visible=True,
             # There is a conflict here. See
             # To do not hide the labels, even when the underlying nodes
             # are hidden, we set "always_visible"
+            always_visible=True,
+            show_points=False,  # to not have node duplicity
         )
 
     if plot_bc_legend and bc_point_labels is not None:
         # Reorder labels to keep a consistent order
         sorted_dict = OrderedDict()
-        labels_ = pl._backend.pv_interface.scene.renderer._labels.copy()
+        labels_ = pl.scene.renderer._labels.copy()
 
         # sorting the keys
         for symbol in FIELDS_ORDERED_LABELS:
@@ -1079,8 +1080,8 @@ def bc_nodes_plotter(
                 sorted_dict[key] = value
 
         # overwriting labels
-        pl._backend.pv_interface.scene.renderer._labels = sorted_dict
-        pl._backend.pv_interface.scene.add_legend(bcolor=None)
+        pl.scene.renderer._labels = sorted_dict
+        pl.scene.add_legend(bcolor=None)
     return pl
 
 

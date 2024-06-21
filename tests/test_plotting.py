@@ -840,7 +840,7 @@ def test_plotter_input(mapdl, make_block):
     from ansys.mapdl.core.plotting.plotting import MapdlPlotter
 
     pl = MapdlPlotter(off_screen=True)
-    pl_pv = pl._backend.pv_interface.scene
+    pl_pv = pl.scene
     # because in CICD we use 'screen_off', this will trigger a warning,
     # since using 'plotter' will overwrite this kwarg.
     with pytest.warns(UserWarning):

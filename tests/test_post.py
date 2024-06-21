@@ -32,7 +32,7 @@ from conftest import has_dependency, requires
 if has_dependency("pyvista"):
     from pyvista import Plotter
     from pyvista.plotting.renderer import CameraPosition
-    from ansys.mapdl.core.theme import PyMAPDL_cmap
+    from ansys.mapdl.core.plotting.theme import PyMAPDL_cmap
 
 from ansys.mapdl.core import _HAS_PYVISTA, examples
 from ansys.mapdl.core.errors import MapdlRuntimeError

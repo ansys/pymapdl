@@ -3,7 +3,7 @@ fail_fast: True
 repos:
 
 - repo: https://github.com/ansys/pre-commit-hooks
-  rev: v0.3.1
+  rev: v0.3.2
   hooks:
   - id: add-license-headers
 
