@@ -28,12 +28,12 @@ from typing import Optional, Union
 
 import click
 
-from ansys.mapdl.core.cli import main
+from ansys.mapdl.core.hpc.login import access, get_default_url
 
 logger = logging.getLogger()
 
 
-@main.command(
+@click.command(
     short_help="Submit jobs to an HPC cluster using PyHPS.",
     help="""
     Submit jobs to an HPC cluster using PyHPS.
@@ -256,9 +256,17 @@ def submit(
         config_file = os.path.join(os.getcwd(), "hps_config.json")
         logger.debug(f"Using default HPS configuration file: {config_file}")
 
-    url = get_value_from_json_or_default(url, config_file, "url", None)
+    # Getting cluster login configuration from CLI or file
+    url = get_value_from_json_or_default(
+        url, config_file, "url", None, raise_if_none=False
+    )
+    url = url or get_default_url()  # using default URL stored.
     user = get_value_from_json_or_default(user, config_file, "user", None)
-    password = get_value_from_json_or_default(password, config_file, "password", None)
+
+    # Getting access token
+    token = access(url, user, password)
+
+    # Getting other configuration from CLI or file
     python = get_value_from_json_or_default(python, config_file, "python", 3)
     name = get_value_from_json_or_default(name, config_file, "name", "My PyMAPDL job")
 
@@ -276,8 +284,7 @@ def submit(
 
     job = PyMAPDLJobSubmission(
         url=url,
-        user=user,
-        password=password,
+        token=token,
         main_file=main_file,
         mode=mode,
         inputs=inputs,

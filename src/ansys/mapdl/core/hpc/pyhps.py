@@ -49,7 +49,11 @@ logger = logging.getLogger()
 
 
 def get_value_from_json_or_default(
-    arg: str, json_file: str, key: str, default_value: Optional[Union[str, Any]] = None
+    arg: str,
+    json_file: str,
+    key: str,
+    default_value: Optional[Union[str, Any]] = None,
+    raise_if_none: Optional[bool] = True,
 ):
     if arg is not None:
         logger.debug(f"Using '{arg}' for {key}")
@@ -64,7 +68,7 @@ def get_value_from_json_or_default(
                 logger.debug(f"Using '{config[key]}' for {key}")
                 return config[key]
 
-    if default_value is None:
+    if default_value is None and raise_if_none:
         raise ValueError(
             f"The argument {arg} is not given through the CLI or config file."
         )
@@ -106,10 +110,11 @@ class JobSubmission:
 
     def __init__(
         self,
-        url,
-        user,
-        password,
         main_file,
+        url,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
+        token: Optional[str] = None,
         mode: Optional[str] = None,
         inputs: Optional[Union[list[str]]] = None,
         outputs: Optional[Union[list[str]]] = None,
@@ -125,9 +130,15 @@ class JobSubmission:
         max_execution_time: Optional[int] = None,
         name: Optional[str] = None,
     ):
+
+        if not token and (not user or not password):
+            raise ValueError("An access token or an user-password pair must be used.")
+
         self._url = url
         self._user = user
         self._password = password
+        self._token = token
+
         self._main_file = self._validate_main_file(main_file)
         self._mode = self._validate_mode(mode)
 
@@ -938,9 +949,12 @@ with open("{self._output_parms_file}", "w") as fid:
             self._output_values.append(each_job.values)
 
     def _connect_client(self):
-        self._client: Client = Client(
-            url=self.url, username=self.user, password=self.password, verify=False
-        )
+        from ansys.mapdl.core.hpc.login import access
+
+        if not self._token:
+            self._token = access(url=self.url, user=self.user, password=self.password)
+
+        self._client: Client = Client(access_token=self._token, verify=False)
 
     def close_client(self):
         self._client.session.close()
