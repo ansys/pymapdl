@@ -33,10 +33,6 @@ Changed
 ^^^^^^^
 
 - refactor: refactoring CLI `#2960 <https://github.com/ansys/pymapdl/pull/2960>`_
-- ci: having only one set of Dependabot rules `#3107 <https://github.com/ansys/pymapdl/pull/3107>`_
-- ci: adding tag for doc review `#3118 <https://github.com/ansys/pymapdl/pull/3118>`_
-- ci: remove OS package duplicate `#3147 <https://github.com/ansys/pymapdl/pull/3147>`_
-- ci: using trusted publisher release process `#3171 <https://github.com/ansys/pymapdl/pull/3171>`_
 
 
 Fixed
@@ -72,5 +68,9 @@ Miscellaneous
 ^^^^^^^^^^^^^
 
 - chore: removing cdb files `#3036 <https://github.com/ansys/pymapdl/pull/3036>`_
+- ci: having only one set of Dependabot rules `#3107 <https://github.com/ansys/pymapdl/pull/3107>`_
+- ci: adding tag for doc review `#3118 <https://github.com/ansys/pymapdl/pull/3118>`_
+- ci: remove OS package duplicate `#3147 <https://github.com/ansys/pymapdl/pull/3147>`_
+- ci: using trusted publisher release process `#3171 <https://github.com/ansys/pymapdl/pull/3171>`_
 
 .. vale on
