@@ -249,6 +249,12 @@ Using the `docker-compose.yml <pymapdl_docker_compose_base_>`_ file is recommend
 This is the *base* configuration file for launching an instance of MAPDL that you can connect
 to remotely.
 
+you can use the following command to launch MAPDL:
+
+.. code:: bash
+
+    docker-compose -f docker-compose.yml up -d mapdl
+
 
 .. _pymapdl_connect_to_MAPDL_container:
 
