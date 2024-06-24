@@ -49,7 +49,7 @@ jobs:
         startsWith(github.event.pull_request.head.ref, 'docs')
       with:
         github_token: ${{ secrets.GITHUB_TOKEN}}
-        labels: Documentation
+        labels: documentation
 
     - uses: actions-ecosystem/action-add-labels@v1
       if: |
@@ -64,15 +64,15 @@ jobs:
       if: startsWith(github.event.pull_request.head.ref, 'maint')
       with:
         github_token: ${{ secrets.GITHUB_TOKEN}}
-        labels: Maintenance
+        labels: maintenance
 
     - uses: actions-ecosystem/action-add-labels@v1
       if: startsWith(github.event.pull_request.head.ref, 'feat')
       with:
         github_token: ${{ secrets.GITHUB_TOKEN}}
         labels: |
-          Enhancement
-          NEW FEATURE
+          enhancement
+          new feature
 
     - uses: actions-ecosystem/action-add-labels@v1
       if: |
@@ -80,7 +80,7 @@ jobs:
         startsWith(github.event.pull_request.head.ref, 'patch')
       with:
         github_token: ${{ secrets.GITHUB_TOKEN}}
-        labels: BUG
+        labels: bug
 
   commenter:
     runs-on: ubuntu-latest
@@ -97,12 +97,12 @@ jobs:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
           Please add one of the following labels to add this contribution to the Release Notes :point_down:
-          - [BUG](https://github.com/ansys/pymapdl/pulls?q=label%3Abug+)
-          - [NEW FEATURE](https://github.com/ansys/pymapdl/pulls?q=label%3A"NEW%20FEATURE"+)
-          - [Enhancement](https://github.com/ansys/pymapdl/pulls?q=label%3Aenhancement+)
-          - [Documentation](https://github.com/ansys/pymapdl/pulls?q=label%3Adocumentation+)
-          - [Examples](https://github.com/ansys/pymapdl/pulls?q=label%3Aexamples+)
-          - [Maintenance](https://github.com/ansys/pymapdl/pulls?q=label%3Amaintenance+)
+          - [bug](https://github.com/ansys/pymapdl/pulls?q=label%3Abug+)
+          - [new feature](https://github.com/ansys/pymapdl/pulls?q=label%3A"new%20feature"+)
+          - [enhancement](https://github.com/ansys/pymapdl/pulls?q=label%3Aenhancement+)
+          - [documentation](https://github.com/ansys/pymapdl/pulls?q=label%3Adocumentation+)
+          - [examples](https://github.com/ansys/pymapdl/pulls?q=label%3Aexamples+)
+          - [maintenance](https://github.com/ansys/pymapdl/pulls?q=label%3Amaintenance+)
           - [CI/CD](https://github.com/ansys/pymapdl/pulls?q=label%3Aci%2Fcd+)
 
   changelog-fragment:
