@@ -63,7 +63,7 @@ def get_input_source(ctx, param, value):
 
         File mapdl.dat successfully converted to mapdl.out.""",
 )
-@click.argument("filename_in", callback=get_input_source, required=False)
+@click.argument("filename_in", callback=get_input_source, required=True)
 @click.option("-o", default=None, help="Name of the output Python script.")
 @click.option("--filename_out", default=None, help="Name of the output Python script.")
 @click.option(
