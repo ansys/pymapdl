@@ -95,13 +95,18 @@ jobs:
 
 
   doc-style:
-    name: "Documentation style check"
+    name: "Documentation style ${{ matrix.folder }}"
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        folder: ["doc", "examples"]
     steps:
       - name: "Ansys documentation style checks"
         uses: ansys/actions/doc-style@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          files: ${{ matrix.folder }}
+          vale-config: ${{ matrix.folder }}/.vale.ini
           vale-version: "3.4.1"
 
 
