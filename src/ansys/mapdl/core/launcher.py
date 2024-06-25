@@ -1532,14 +1532,15 @@ def launch_mapdl(
         if ON_WSL:
             LOG.debug("On WSL: Allowing 'start_instance' and 'ip' arguments together.")
         else:
-            if start_instance is True:
-                raise ValueError(
-                    "When providing a value for the argument 'ip', the argument "
-                    "'start_instance' cannot be 'True'.\n"
-                    "Make sure the corresponding environment variables are not setting "
-                    "those argument values.\n"
-                    "For more information visit https://github.com/ansys/pymapdl/issues/2910"
-                )
+            # if start_instance is True:
+            #     raise ValueError(
+            #         "When providing a value for the argument 'ip', the argument "
+            #         "'start_instance' cannot be 'True'.\n"
+            #         "Make sure the corresponding environment variables are not setting "
+            #         "those argument values.\n"
+            #         "For more information visit https://github.com/ansys/pymapdl/issues/2910"
+            #     )
+            pass
 
         ip = socket.gethostbyname(ip)  # Converting ip or hostname to ip
 
