@@ -59,7 +59,7 @@ jupyter = [
 
 tests = [
     "ansys-dpf-core==0.10.1",
-    "autopep8==2.3.0",
+    "autopep8==2.3.1",
     "matplotlib==3.9.0",
     "scipy==1.14.0",
     "pandas==2.2.2",
