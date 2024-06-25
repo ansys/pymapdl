@@ -1,5 +1,5 @@
 ansys-api-mapdl==0.5.1
-importlib-metadata==7.2.0
+importlib-metadata==7.2.1
 numpy==1.26.4
 platformdirs==4.2.2
 psutil==6.0.0
