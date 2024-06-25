@@ -344,6 +344,7 @@ jobs:
           'v24.1-ubuntu',
           'v24.1-ubuntu-student',
           'v24.2.0',
+          'v25.1.0',
           'latest-ubuntu',
           'latest-ubuntu-student',
           ]
@@ -371,6 +372,8 @@ jobs:
           #   mapdl-version: 'v24.1-ubuntu-student'
           - extended_testing: false
             mapdl-version: 'v24.2.0'
+          - extended_testing: false
+            mapdl-version: 'v25.1.0'
           - extended_testing: false
             mapdl-version: 'latest-ubuntu'
           # - extended_testing: false
