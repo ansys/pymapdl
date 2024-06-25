@@ -795,9 +795,10 @@ class _MapdlCommandExtended(_MapdlCore):
 
                 for surf in surfs:
                     anum = np.unique(surf["entity_num"])
-                    assert (
-                        len(anum) == 1
-                    ), f"The pv.Unstructured from the entity {anum[0]} contains entities from other entities {anum}"  # Sanity check
+                    if len(anum) != 1:
+                        raise ValueError(
+                            f"The pv.Unstructured from the entity {anum[0]} contains entities from other entities {anum}"  # Sanity check
+                        )
 
                     area = surf.extract_cells(surf["entity_num"] == anum)
                     centers.append(area.center)

@@ -106,7 +106,9 @@ try:
 except:
     # We don't really use these imports in the library. They are here for
     # convenience.
-    pass
+    raise ImportError(
+        "The module 'ansys-tools-path' is not installed.  Install with 'pip install ansys-tools'"
+    )
 
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.convert import convert_apdl_block, convert_script

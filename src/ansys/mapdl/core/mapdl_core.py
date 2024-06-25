@@ -488,8 +488,8 @@ class _MapdlCore(Commands):
         while (not self._path and i > 5) or i == 0:
             try:
                 self._path = self.inquire("", "DIRECTORY")
-            except Exception:  # pragma: no cover
-                pass
+            except Exception as e:  # pragma: no cover
+                logger.warning(f"Failed to get the directory due to the following error: {e}")
             i += 1
             if not self._path:  # pragma: no cover
                 time.sleep(0.1)
@@ -661,7 +661,7 @@ class _MapdlCore(Commands):
         try:
             self._jobname = self.inquire("", "JOBNAME")
         except Exception:
-            pass
+            logger.warning(f"Failed to get the jobname due to the following error: {e}")
         return self._jobname
 
     @jobname.setter
@@ -2269,8 +2269,8 @@ class _MapdlCore(Commands):
                 try:  # logger might be closed
                     if self._log is not None:
                         self._log.error("exit: %s", str(e))
-                except Exception:
-                    pass
+                except Exception as e:
+                    logger.warning(f"Unable to exit the MAPDL session.")
 
     def _get_plot_name(self, text: str) -> str:
         """Obtain the plot filename."""

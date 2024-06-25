@@ -530,7 +530,7 @@ class MapdlPool:
                     try:
                         obj.exit()
                     except:
-                        pass
+                        LOG.warning(f"Unable to delete the object {obj}")
 
                     # ensure that the directory is cleaned up
                     if obj._cleanup:
@@ -540,11 +540,7 @@ class MapdlPool:
                             try:
                                 shutil.rmtree(obj.directory)
                             except Exception as e:
-                                LOG.warning(
-                                    "Unable to remove directory at %s:\n%s",
-                                    obj.directory,
-                                    str(e),
-                                )
+                                LOG.warning(f"Unable to remove directory at {obj.directory}:\n{e}")
 
             obj.locked = False
             if pbar:
@@ -804,7 +800,7 @@ class MapdlPool:
                 try:
                     instance.exit()
                 except:
-                    pass
+                    LOG.warning(f"Unable to exit instance {index}.")
                 self._instances[index] = None
                 # LOG.debug("Exited instance: %s", str(instance))
                 self._exiting_i -= 1
@@ -883,7 +879,8 @@ class MapdlPool:
         while self._instances[index] is None:
             time.sleep(0.1)
 
-        assert not self._instances[index].exited
+        if self._instances[index].exited == False:
+            raise MapdlRuntimeError(f"MAPDL instance {index} has exited.")
         self._instances[index].prep7()
 
         # LOG.debug("Spawned instance %d. Name '%s'", index, name)
