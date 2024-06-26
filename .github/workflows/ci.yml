@@ -986,10 +986,11 @@ jobs:
   test_julia:
     name: "Test julia implementation"
     runs-on: ${{ matrix.os }}
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
       matrix:
-        julia-version: ['1.10.2']  # '1.6.7'
+        julia-version: ['1.10.3', '1.10.4']
         os: [ubuntu-latest, windows-latest]
 
     steps:
