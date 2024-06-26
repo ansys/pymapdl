@@ -52,7 +52,6 @@ except ModuleNotFoundError:
 Please install them using "pip install 'ansys-mapdl-core[hps]"."""
     )
 
-
 logger = logging.getLogger()
 
 
@@ -968,9 +967,11 @@ with open("{self._output_parms_file}", "w") as fid:
     def _connect_client(self):
         if not self._token:
             logger.debug("Getting a valid token")
-            from ansys.mapdl.core.hpc.login import access
+            from ansys.mapdl.core.hpc.login import get_token_access
 
-            self._token = access(url=self.url, user=self.user, password=self.password)
+            self._token = get_token_access(
+                url=self.url, user=self.user, password=self.password
+            )
 
         logger.debug("Using a token to authenticate the user.")
         self._client: Client = Client(

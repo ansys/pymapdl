@@ -252,7 +252,7 @@ def submit(
     mode: Optional[Union["python", "shell", "apdl"]] = None,
     to_json: Optional[bool] = False,
 ):
-    from ansys.mapdl.core.hpc.login import access, get_default_url
+    from ansys.mapdl.core.hpc.login import get_default_url, get_token_access
 
     if to_json:
         import json
@@ -287,7 +287,7 @@ def submit(
     )
 
     # Getting access token
-    token = access(url, user, password)
+    token = get_token_access(url, user, password)
 
     # Getting other configuration from CLI or file
     python = get_value_from_json_or_default(python, config_file, "python", 3)
