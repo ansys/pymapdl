@@ -54,4 +54,3 @@ class MapdlInProcess(MapdlBase):
 
     def _check_session_id(self) -> None:
         pass
-
