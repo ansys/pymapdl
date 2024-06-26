@@ -55,16 +55,35 @@ $ pymapdl submit my_file_01.py --requirements_file=requirements.txt --shell_file
     "--url",
     default=None,
     type=str,
-    help="""URL where the HPS cluster is deployed. For example: "https://myserver:3000/hps" """,
+    help="""URL where the HPS cluster is deployed. For example: "https://myserver:3000/hps".
+If it is not input, there is a chain of places where PyMAPDL looks for an URL.
+First, it checks if the URL is given in the file specified by the argument ``--config_file``.
+If that file does not have an URL or does not exist, then it checks the default user credentials stored with ``pymapdl login --default`` CLI command.
+If no URL is found, an exception is raised.""",
 )
 @click.option(
-    "--user", default=None, type=str, help="Username for logging into the HPC cluster."
+    "--user",
+    default=None,
+    type=str,
+    help="""Username for logging into the HPC cluster.
+If it is not input, there is a chain of places where PyMAPDL looks for an username.
+First, it checks if the username is given in the file specified by the argument ``--config_file``.
+If that file does not have an username or does not exist, then it checks the username configured using ``pymapdl login`` CLI command, for the given HPS cluster URL.
+If there is no user credential stored for that HPS cluster URL, then it checks the default user credentials stored with ``pymapdl login --default`` CLI command.
+If no user is found, an exception is raised.
+""",
 )
 @click.option(
     "--password",
     default=None,
     type=str,
-    help="Password for logging into the HPC cluster.",
+    help="""Password for logging into the HPC cluster.
+If it is not input, there is a chain of places where PyMAPDL looks for a password.
+First, it checks if the password is given in the file specified by the argument ``--config_file``.
+If that file does not have a password or does not exist, then it checks the password configured using ``pymapdl login`` CLI command, for the given HPS cluster URL.
+If there is no user credential stored for that HPS cluster URL, then it checks the default user credentials stored with ``pymapdl login --default`` CLI command.
+If no password is found, an exception is raised.
+""",
 )
 @click.option(
     "--python",
@@ -254,6 +273,8 @@ def submit(
 
     if config_file is None:
         config_file = os.path.join(os.getcwd(), "hps_config.json")
+        if not os.path.exists(config_file):
+            config_file = None
         logger.debug(f"Using default HPS configuration file: {config_file}")
 
     # Getting cluster login configuration from CLI or file
@@ -261,7 +282,11 @@ def submit(
         url, config_file, "url", None, raise_if_none=False
     )
     url = url or get_default_url()  # using default URL stored.
-    user = get_value_from_json_or_default(user, config_file, "user", None)
+
+    # allow retrieving user from the configuration
+    user = get_value_from_json_or_default(
+        user, config_file, "user", raise_if_none=False
+    )
 
     # Getting access token
     token = access(url, user, password)
