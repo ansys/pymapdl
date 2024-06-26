@@ -104,6 +104,11 @@ doc = [
     "vtk==9.3.0",
 ]
 
+hps =[
+    "ansys-hps-client==0.8.0",
+    "keyring==25.2.1",
+]
+
 [tool.flit.module]
 name = "ansys.mapdl.core"
 
