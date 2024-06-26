@@ -20,6 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import logging
+import time
+
 from ansys.hps.client import AuthApi, Client
 from ansys.hps.client.authenticate import authenticate
 import keyring
@@ -29,8 +32,28 @@ DEFAULT_IDENTIFIER = "defaultconfig"
 SERVICE_NAME = "pymapdl-pyhps"
 EXPIRATION_TIME = 4 * 24 * 60  # 2 days in minutes
 
+logger = logging.getLogger()
+# logging.basicConfig(
+#     level=logging.DEBUG,
+#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+#     # handlers=[
+#     #     logging.FileHandler("pymapdl.log"),
+#     #     logging.StreamHandler()
+#     # ]
+# )
 
-def login(user, password, url):
+
+def get_password(*args, **kwargs):
+    logger.debug(f"Getting password from service '{args[0]}' and key '{args[1]}'")
+    return keyring.get_password(*args, **kwargs)
+
+
+def set_password(*args, **kwargs):
+    logger.debug(f"Setting password from service '{args[0]}' and key '{args[1]}'")
+    return keyring.set_password(*args, **kwargs)
+
+
+def login_in_cluster(user, password, url):
     """
     Authenticate with the server and return the access token.
 
@@ -48,6 +71,7 @@ def login(user, password, url):
     str
         Access token.
     """
+    logger.debug(f"Authenticating on cluster '{url}' using user '{user}'.")
     access_token = authenticate(
         url=url, username=user, password=password, scope="openid", verify=False
     )["access_token"]
@@ -81,6 +105,7 @@ def store_credentials(
         identifier = DEFAULT_IDENTIFIER
     else:
         identifier = url
+    logger.debug(f"Using identifier: '{identifier}'")
 
     if not default and (not url or not user or not password):
         raise ValueError(
@@ -88,17 +113,17 @@ def store_credentials(
         )
 
     if url:
-        keyring.set_password(SERVICE_NAME, f"{identifier}_url", url)
+        set_password(SERVICE_NAME, f"{identifier}_url", url)
     if user:
-        keyring.set_password(SERVICE_NAME, f"{identifier}_user", user)
+        set_password(SERVICE_NAME, f"{identifier}_user", user)
     if password:
-        keyring.set_password(SERVICE_NAME, f"{identifier}_password", password)
+        set_password(SERVICE_NAME, f"{identifier}_password", password)
     if expiration_time:
-        keyring.set_password(
+        set_password(
             SERVICE_NAME, f"{identifier}_expiration_time", str(expiration_time)
         )
 
-    keyring.set_password(SERVICE_NAME, f"{identifier}_timestamp", str(time.time()))
+    set_password(SERVICE_NAME, f"{identifier}_timestamp", str(time.time()))
 
 
 def get_stored_credentials(identifier):
@@ -108,20 +133,21 @@ def get_stored_credentials(identifier):
     Returns:
     tuple: (user, password, timestamp) or (None, None, None) if not found
     """
-
-    url = keyring.get_password(SERVICE_NAME, f"{identifier}_url")
-    user = keyring.get_password(SERVICE_NAME, f"{identifier}_user")
-    password = keyring.get_password(SERVICE_NAME, f"{identifier}_password")
-    timestamp = keyring.get_password(SERVICE_NAME, f"{identifier}_timestamp")
-    expiration_time = keyring.get_password(
-        SERVICE_NAME, f"{identifier}_expiration_time"
-    )
+    logger.debug(f"Retrieving info for '{identifier}'")
+    url = get_password(SERVICE_NAME, f"{identifier}_url")
+    user = get_password(SERVICE_NAME, f"{identifier}_user")
+    password = get_password(SERVICE_NAME, f"{identifier}_password")
+    timestamp = get_password(SERVICE_NAME, f"{identifier}_timestamp")
+    expiration_time = get_password(SERVICE_NAME, f"{identifier}_expiration_time")
 
     if timestamp:
         timestamp = float(timestamp)
     if expiration_time:
         expiration_time = float(expiration_time)
 
+    logger.debug(
+        f"Retrieved info for '{identifier}': {url}, {user}, {password}, {timestamp}, {expiration_time} "
+    )
     return url, user, password, timestamp, expiration_time
 
 
@@ -138,7 +164,12 @@ def credentials_expired(timestamp, expiration_time: float = EXPIRATION_TIME):
     return time.time() - timestamp > expiration_time * 60
 
 
-def delete_credentials(identifier):
+def delete_credentials(identifier=None):
+    if not identifier:
+        identifier = DEFAULT_IDENTIFIER
+
+    logger.debug(f"Deleting credentials for identifier: {identifier}")
+
     keyring.delete_password(SERVICE_NAME, f"{identifier}_url")
     keyring.delete_password(SERVICE_NAME, f"{identifier}_user")
     keyring.delete_password(SERVICE_NAME, f"{identifier}_password")
@@ -146,8 +177,8 @@ def delete_credentials(identifier):
     keyring.delete_password(SERVICE_NAME, f"{identifier}_expiration_time")
 
 
-def token_is_valid(token):
-    client = Client(access_token=token, verify=False)
+def token_is_valid(url, token):
+    client = Client(url=url, access_token=token, verify=False)
     auth_api = AuthApi(client)
 
     try:
@@ -194,7 +225,7 @@ def access(url: str = None, user: str = None, password: str = None):
             )
 
     if not user:
-        if user:
+        if user_default:
             user = user_default
         else:
             raise ValueError(
@@ -209,9 +240,14 @@ def access(url: str = None, user: str = None, password: str = None):
                 f"No 'password' is given nor stored for '{identifier}'. You must input one."
             )
 
-    return login(user=user, password=password, url=url)
+    return login_in_cluster(user=user, password=password, url=url)
 
 
 def get_default_url():
     """Return the default URL"""
-    return keyring.get_password(SERVICE_NAME, f"{DEFAULT_IDENTIFIER}_url")
+    return get_password(SERVICE_NAME, f"{DEFAULT_IDENTIFIER}_url")
+
+
+def get_token(url: str = None, user: str = None, password: str = None):
+    """Wrapper around `access`` function"""
+    return access(url=url, user=user, password=password)

@@ -23,10 +23,20 @@
 """Login into a PyHPS cluster"""
 from getpass import getpass
 import logging
+from typing import Optional
 
 import click
 
 logger = logging.getLogger()
+
+# logging.basicConfig(
+#     level=logging.DEBUG,
+#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+#     # handlers=[
+#     #     logging.FileHandler("pymapdl.log"),
+#     #     logging.StreamHandler()
+#     # ]
+# )
 
 
 @click.command(
@@ -63,7 +73,22 @@ If you want to change any credential, just issue the command again with the new 
     flag_value=True,
     help="""Test if the token is valid. This argument is ignored if '--default' argument is ``True``.""",
 )
-def login(user, password, url, default, test_token):
+@click.option(
+    "--quiet",
+    default=False,
+    type=bool,
+    is_flag=False,
+    flag_value=True,
+    help="""Suppress al console printout.""",
+)
+def login(
+    user: Optional[str] = None,
+    password: Optional[str] = None,
+    url: Optional[str] = None,
+    default: bool = False,
+    test_token: bool = False,
+    quiet: bool = False,
+):
     """
     Command Line Interface for logging in and getting an access token.
 
@@ -72,34 +97,55 @@ def login(user, password, url, default, test_token):
     password (str): Password for login
     default (bool): If used, the input data is set as default and it will be used for any login which does not specify the url, user or password.
     """
-    if not default:
-        logger.debug("Storing non-default credentials.")
-        if not user and not click.prompt("Username: "):
+    from ansys.mapdl.core.hpc.login import login_in_cluster, store_credentials
+
+    if quiet:
+        import urllib3
+
+        urllib3.disable_warnings()
+
+    logger.debug("Storing non-default credentials.")
+    if not user:
+        user = click.prompt("Username")
+
+        if not user:
             raise ValueError("No user was provided.")
 
-        if not password and not getpass("Password: "):
+    if not password:
+        password = getpass("Password: ")
+        if not password:
             raise ValueError("No password was provided.")
 
-        if not url and not click.prompt("HPS cluster URL: "):
+    if not default and not url:
+        url = click.prompt("HPS cluster URL")
+        if not url:
             raise ValueError("No password was provided.")
 
-        try:
-            token = login(user, password, url)
-            click.echo(f"Login successful")
-        except Exception as e:
-            click.echo(f"Login failed: {str(e)}")
+    token = login_in_cluster(user, password, url)
+    logger.debug(f"Login successful")
 
-        if test_token:
-            logger.debug("Testing token")
-            from requests import ConnectionError
+    if test_token:
+        logger.debug("Testing token")
+        from requests import ConnectionError
 
-            from ansys.mapdl.core.hpc.login import token_is_valid
+        from ansys.mapdl.core.hpc.login import token_is_valid
 
-            if not token_is_valid(token):
-                raise ConnectionError("The retrieved token is not valid.")
+        if not token_is_valid(url, token):
+            raise ConnectionError("The retrieved token is not valid.")
+        else:
+            if not quiet:
+                click.echo("Token has been verified with the HPC cluster.")
 
     logger.info(f"Stored credentials: {user}, {password}, {url}")
-    store_credentials(user, password, url)
+    store_credentials(user, password, url, default=default)
+
+    if not quiet:
+        if default:
+            click.echo("Stored default credentials.")
+        else:
+            click.echo(
+                f"Stored credentials:\n  User        : '{user}'\n  Cluster URL : '{url}'"
+            )
 
 
 @click.command(
@@ -112,10 +158,9 @@ It deletes credentials stored on the system.
 )
 @click.option(
     "--url",
-    prompt="HPS cluster URL",
-    help="The HPS cluster URL. For instance 'https://10.231.106.1:3000/hps'.",
     default=None,
     type=str,
+    help="The HPS cluster URL. For instance 'https://10.231.106.1:3000/hps'.",
 )
 @click.option(
     "--default",
@@ -123,13 +168,15 @@ It deletes credentials stored on the system.
     type=bool,
     is_flag=False,
     flag_value=True,
-    help="""Whether PyMAPDL is to print debug logging to the console.""",
+    help="""Deletes the default login configuration.""",
 )
 def logout(url, default):
 
     # TODO: keyrings library seems to not being able to list the credentials
     # under a service name. We might need to keep track of those in a file or
     # something.
+
+    import keyring
 
     from ansys.mapdl.core.hpc.login import delete_credentials
 
@@ -140,7 +187,29 @@ def logout(url, default):
         raise ValueError("The argument '--default' cannot be used with an URL.")
 
     if default:
-        url = "default"
+        logger.debug("Deleting credentials for the default profile.")
+        url = None
 
-    delete_credentials(url)
-    click.echo(f"The credentials for '{url}' have been deleted.")
+    try:
+        delete_credentials(url)
+    except keyring.errors.PasswordDeleteError:
+        click.echo("The default credentials do not exist.")
+        return
+
+    if default:
+        click.echo(f"The default credentials have been deleted.")
+    else:
+        click.echo(f"The credentials for the HPS cluster '{url}' have been deleted.")
+
+
+if __name__ == "__main__":
+    # login(default=True)
+    # user, password, url, default, test_token, quiet
+    login(
+        user="repuser",
+        password="repuser",
+        url="https://10.231.106.32:3000/hps",
+        default=False,
+        test_token=True,
+        quiet=True,
+    )
