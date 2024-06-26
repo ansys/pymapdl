@@ -38,7 +38,6 @@ class MapdlInProcess(MapdlBase):
         self._cleanup: bool = True
         self._name: str = "MapdlInProcess"
         self._session_id: Optional[str] = None
-        self._mute: bool = False
 
     def _run(self, command: str, verbose: bool = False, mute: bool = False) -> str:
         if not command.strip():
@@ -53,13 +52,6 @@ class MapdlInProcess(MapdlBase):
     def name(self) -> str:
         return self._name
 
-    @name.setter
-    def name(self, name) -> None:
-        self._name = name
-
     def _check_session_id(self) -> None:
         pass
 
-    def __repr__(self):
-        info = super().__repr__()
-        return info

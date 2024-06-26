@@ -235,7 +235,7 @@ class _MapdlCore(Commands):
     ):
         """Initialize connection with MAPDL."""
         atexit.register(self.__del__)  # registering to exit properly
-        self._name = None  # For naming the instance.
+        self._name: Optional[str] = None  # For naming the instance.
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited: bool = False
@@ -252,6 +252,7 @@ class _MapdlCore(Commands):
         self._file_type_for_plots = file_type_for_plots
         self._default_file_type_for_plots = file_type_for_plots
         self._version = None  # cached version
+        self._mute = False
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
