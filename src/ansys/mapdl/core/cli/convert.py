@@ -63,7 +63,7 @@ def get_input_source(ctx, param, value):
 
         File mapdl.dat successfully converted to mapdl.out.""",
 )
-@click.argument("filename_in", callback=get_input_source, required=True)
+@click.argument("filename_in", callback=get_input_source, required=False)
 @click.option("-o", default=None, help="Name of the output Python script.")
 @click.option("--filename_out", default=None, help="Name of the output Python script.")
 @click.option(
@@ -212,6 +212,9 @@ def convert(
         )
 
     else:
+        if not filename_in:
+            raise ValueError("A file path must be provided.")
+
         convert_script(
             filename_in,
             filename_out,
