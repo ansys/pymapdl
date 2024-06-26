@@ -50,7 +50,7 @@ logger = logging.getLogger()
 
 def get_value_from_json_or_default(
     arg: str,
-    json_file: str,
+    json_file: Optional[str],
     key: str,
     default_value: Optional[Union[str, Any]] = None,
     raise_if_none: Optional[bool] = True,
@@ -59,7 +59,7 @@ def get_value_from_json_or_default(
         logger.debug(f"Using '{arg}' for {key}")
         return arg
 
-    if os.path.exists(json_file):
+    if json_file and os.path.exists(json_file):
         if os.path.getsize(json_file) > 0:
             with open(json_file, "r") as fid:
                 config = json.load(fid)
@@ -633,7 +633,6 @@ class JobSubmission:
             executable=os.path.basename(executable)
         )
 
-        print(f"Using executable: '{execution_command}'")
         logger.debug(f"Using executable: '{execution_command}'")
 
         # Process step
@@ -642,6 +641,7 @@ class JobSubmission:
                 TaskDefinition(
                     execution_command=execution_command,
                     resource_requirements=ResourceRequirements(
+                        platform="linux",
                         num_cores=self.num_cores,
                         memory=self.memory * 1024 * 1024,
                         disk_space=self.disk_space * 1024 * 1024,
@@ -827,7 +827,8 @@ class JobSubmission:
             self.output_files.append(self._output_parms_file)
 
         if self.mode == "python":
-            self.input_files.append(self.requirements_file)
+            if self._requirements_file is not False:
+                self.input_files.append(self.requirements_file)
             self.input_files.append(self.shell_file)
 
         if self.mode == "python" and (self.inputs or self.outputs):
@@ -842,14 +843,18 @@ class JobSubmission:
     def _prepare_shell_file(self):
         content = f"""
 echo "Starting"
+"""
 
+        if self._requirements_file:
+            content += f"""
 # Start venv
 python{self.python} -m venv .venv
 source .venv/bin/activate
 
 # Install requirements
 pip install -r {os.path.basename(self.requirements_file)}
-
+"""
+        content += f"""
 # Run script
 python {self._executed_pyscript}
     """
@@ -858,6 +863,10 @@ python {self._executed_pyscript}
         logger.debug(f"Shell file in: {self.shell_file}")
 
     def _prepare_requirements_file(self):
+
+        if self._requirements_file is False:
+            return
+
         import pkg_resources
 
         content = "\n".join(
@@ -949,12 +958,16 @@ with open("{self._output_parms_file}", "w") as fid:
             self._output_values.append(each_job.values)
 
     def _connect_client(self):
-        from ansys.mapdl.core.hpc.login import access
-
         if not self._token:
+            logger.debug("Getting a valid token")
+            from ansys.mapdl.core.hpc.login import access
+
             self._token = access(url=self.url, user=self.user, password=self.password)
 
-        self._client: Client = Client(access_token=self._token, verify=False)
+        logger.debug("Using a token to authenticate the user.")
+        self._client: Client = Client(
+            url=self._url, access_token=self._token, verify=False
+        )
 
     def close_client(self):
         self._client.session.close()
