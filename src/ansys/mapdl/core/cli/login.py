@@ -27,16 +27,10 @@ from typing import Optional
 
 import click
 
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
 logger = logging.getLogger()
-
-# logging.basicConfig(
-#     level=logging.DEBUG,
-#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-#     # handlers=[
-#     #     logging.FileHandler("pymapdl.log"),
-#     #     logging.StreamHandler()
-#     # ]
-# )
 
 
 @click.command(
@@ -47,6 +41,41 @@ logger = logging.getLogger()
 It does store credentials (cluster url, password and username) in the OS credential manager.
 If you want to change any credential, just issue the command again with the new values.
 
+Examples
+--------
+
+Prompt the values for user, password and HPC cluster URL:
+
+$ pymapdl login
+Username: myuser
+Password: mypassword
+HPS cluster URL: https://123.456.789.1:3000/hps
+Stored credentials:
+  User        : 'user'
+  Cluster URL : 'https://123.456.789.1:3000/hps'
+
+Use the CLI arguments to supply the values
+
+$ pymapdl login --user myuser --password mypassword --url "https://123.456.789.1:3000/hps"
+Stored credentials:
+  User        : 'user'
+  Cluster URL : 'https://123.456.789.1:3000/hps'
+
+Set the defaults user, password and URL. They will be used when one of them is
+missing.
+
+$ pymapdl login --default --user myuser --password mypassword --url "https://123.456.789.1:3000/hps"
+Stored default credentials.
+
+It is possible to input some arguments using the CLI arguments, and other using
+the prompt:
+
+$ pymapdl login --user myuser --url "https://123.456.789.1:3000/hps"
+Password: mypassword
+Stored credentials:
+  User        : 'user'
+  Cluster URL : 'https://123.456.789.1:3000/hps'
+
 """,
 )
 @click.option("--user", default=None, type=str, help="The username to login.")
@@ -55,7 +84,7 @@ If you want to change any credential, just issue the command again with the new 
     "--url",
     default=None,
     type=str,
-    help="The HPS cluster URL. For instance 'https://10.231.106.1:3000/hps'.",
+    help="The HPS cluster URL. For instance 'https://123.456.789.1:3000/hps'.",
 )
 @click.option(
     "--default",
@@ -63,7 +92,7 @@ If you want to change any credential, just issue the command again with the new 
     type=bool,
     is_flag=False,
     flag_value=True,
-    help="""Set the default user, password and URL. These credentials are not tested.""",
+    help="""Set the default user, password and URL. These credentials are not tested against any HPC.""",
 )
 @click.option(
     "--test_token",
@@ -79,7 +108,15 @@ If you want to change any credential, just issue the command again with the new 
     type=bool,
     is_flag=False,
     flag_value=True,
-    help="""Suppress al console printout.""",
+    help="""Suppress all console printout.""",
+)
+@click.option(
+    "--debug",
+    default=False,
+    type=bool,
+    is_flag=False,
+    flag_value=True,
+    help="""Activate debugging printout. It might show the input password!""",
 )
 def login(
     user: Optional[str] = None,
@@ -88,16 +125,12 @@ def login(
     default: bool = False,
     test_token: bool = False,
     quiet: bool = False,
+    debug: bool = False,
 ):
-    """
-    Command Line Interface for logging in and getting an access token.
-
-    Parameters
-    user (str): Username for login
-    password (str): Password for login
-    default (bool): If used, the input data is set as default and it will be used for any login which does not specify the url, user or password.
-    """
     from ansys.mapdl.core.hpc.login import login_in_cluster, store_credentials
+
+    if debug:
+        logger.setLevel(logging.DEBUG)
 
     if quiet:
         import urllib3
@@ -154,6 +187,24 @@ def login(
 
 It deletes credentials stored on the system.
 
+Examples
+--------
+
+Delete the credentials associated to an specific URL
+
+$ pymapdl logout --url "https://123.456.789.1:3000/hps"
+The HPS cluster 'https://123.456.789.1:3000/hps' credentials have been deleted.
+
+Delete the default credentials.
+
+$ pymapdl logout --default
+The default credentials have been deleted.
+
+Notes
+-----
+- If the credentials do not exist, the CLI notifies and exits cleanly.
+  No exception is raised. If you want to raise an exception (exit 1), then pass
+  the argument ``--strict``.
 """,
 )
 @click.option(
@@ -170,7 +221,31 @@ It deletes credentials stored on the system.
     flag_value=True,
     help="""Deletes the default login configuration.""",
 )
-def logout(url, default):
+@click.option(
+    "--quiet",
+    default=False,
+    type=bool,
+    is_flag=False,
+    flag_value=True,
+    help="""Suppress all console printout.""",
+)
+@click.option(
+    "--debug",
+    default=False,
+    type=bool,
+    is_flag=False,
+    flag_value=True,
+    help="""Activate debugging printout.""",
+)
+@click.option(
+    "--strict",
+    default=False,
+    type=bool,
+    is_flag=False,
+    flag_value=True,
+    help="""Raise an issue if the credentials do not exist.""",
+)
+def logout(url, default, quiet, debug, strict):
 
     # TODO: keyrings library seems to not being able to list the credentials
     # under a service name. We might need to keep track of those in a file or
@@ -179,6 +254,9 @@ def logout(url, default):
     import keyring
 
     from ansys.mapdl.core.hpc.login import delete_credentials
+
+    if debug:
+        logger.setLevel(logging.DEBUG)
 
     if not url and not default:
         raise ValueError("An URL needs to be used.")
@@ -192,24 +270,15 @@ def logout(url, default):
 
     try:
         delete_credentials(url)
+        success_message = "The {0} credentials have been deleted.".format(
+            "default" if default else f"HPS cluster '{url}'"
+        )
     except keyring.errors.PasswordDeleteError:
-        click.echo("The default credentials do not exist.")
-        return
+        success_message = "The {0} credentials do not exist.".format(
+            "default" if default else f"HPS cluster '{url}'"
+        )
+        if strict:
+            raise keyring.errors.PasswordDeleteError(success_message)
 
-    if default:
-        click.echo(f"The default credentials have been deleted.")
-    else:
-        click.echo(f"The credentials for the HPS cluster '{url}' have been deleted.")
-
-
-if __name__ == "__main__":
-    # login(default=True)
-    # user, password, url, default, test_token, quiet
-    login(
-        user="repuser",
-        password="repuser",
-        url="https://10.231.106.32:3000/hps",
-        default=False,
-        test_token=True,
-        quiet=True,
-    )
+    if not quiet:
+        click.echo(success_message)

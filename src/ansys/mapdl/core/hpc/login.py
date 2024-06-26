@@ -22,6 +22,7 @@
 
 import logging
 import time
+from typing import Optional
 
 try:
     from ansys.hps.client import AuthApi, Client
@@ -39,14 +40,6 @@ SERVICE_NAME = "pymapdl-pyhps"
 EXPIRATION_TIME = 4 * 24 * 60  # 2 days in minutes
 
 logger = logging.getLogger()
-# logging.basicConfig(
-#     level=logging.DEBUG,
-#     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-#     # handlers=[
-#     #     logging.FileHandler("pymapdl.log"),
-#     #     logging.StreamHandler()
-#     # ]
-# )
 
 
 def get_password(*args, **kwargs):
@@ -132,12 +125,19 @@ def store_credentials(
     set_password(SERVICE_NAME, f"{identifier}_timestamp", str(time.time()))
 
 
-def get_stored_credentials(identifier):
+def get_stored_credentials(identifier: str):
     """
-    Retrieve stored credentials and timestamp from the keyring.
+    Retrieve stored credentials, timestamp and expiration time from the keyring.
 
-    Returns:
-    tuple: (user, password, timestamp) or (None, None, None) if not found
+    Parameters
+    ----------
+    identifier: str
+        Identifier for the credentials
+
+    Returns
+    -------
+    tuple
+        (user, password, timestamp) or (None, None, None) if not found
     """
     logger.debug(f"Retrieving info for '{identifier}'")
     url = get_password(SERVICE_NAME, f"{identifier}_url")
@@ -157,20 +157,40 @@ def get_stored_credentials(identifier):
     return url, user, password, timestamp, expiration_time
 
 
-def credentials_expired(timestamp, expiration_time: float = EXPIRATION_TIME):
+def credentials_expired(timestamp: float, expiration_time: float = EXPIRATION_TIME):
     """
     Check if the stored credentials have expired.
 
-    Parameters:
-    timestamp (float): Timestamp of when the credentials were stored
+    Parameters
+    ----------
+    timestamp, float
+        Timestamp of when the credentials were stored
 
-    Returns:
-    bool: True if credentials have expired, False otherwise
+    expiration_time float
+        Amount of time before the credentials expires.
+
+    Returns
+    -------
+    bool
+        True if credentials have expired, False otherwise
     """
     return time.time() - timestamp > expiration_time * 60
 
 
-def delete_credentials(identifier=None):
+def delete_credentials(identifier: Optional[str] = None):
+    """
+    Delete stored credentials.
+
+    Parameters
+    ----------
+    identifier: str, Optional
+        Identifier for the credentials. If it is ``None``, the
+        default credentials are deleted.
+
+    Returns
+    -------
+    None
+    """
     if not identifier:
         identifier = DEFAULT_IDENTIFIER
 
@@ -184,6 +204,22 @@ def delete_credentials(identifier=None):
 
 
 def token_is_valid(url, token):
+    """Check if a token is valid.
+
+    The validation is performed by requesting the number of users to the HPS cluster.
+
+    Parameters
+    ----------
+    url : str
+        HPS cluster URL.
+    token : str
+        Authentication token.
+
+    Returns
+    -------
+    bool
+        Whether the token is valid or not.
+    """
     client = Client(url=url, access_token=token, verify=False)
     auth_api = AuthApi(client)
 
@@ -196,8 +232,66 @@ def token_is_valid(url, token):
         raise e
 
 
-def access(url: str = None, user: str = None, password: str = None):
+def get_token_access(url: str = None, user: str = None, password: str = None):
+    """
+    Access an HPS cluster by logging in with the provided or stored credentials.
 
+    This function attempts to log in to a cluster using the provided URL, username,
+    and password.
+    If any of these parameters are not provided, it attempts to retrieve stored
+    credentials associated with the given URL.
+    If no URL is provided, then it retrieves the default credentials.
+
+    If the credentials are expired or not found, appropriate errors are raised.
+
+    Parameters
+    ----------
+    url : str, optional
+        The URL of the cluster to log in to. If not provided, a stored URL
+        associated with the default or given identifier is used.
+    user : str, optional
+        The username for logging in. If not provided, a stored username associated
+        with the default or given identifier is used.
+    password : str, optional
+        The password for logging in. If not provided, a stored password associated
+        with the default or given identifier is used.
+
+    Returns
+    -------
+    str
+        It returns the authentication token for the session.
+
+    Raises
+    ------
+    ConnectionError
+        If there are no stored credentials for the given identifier, or if the stored credentials
+        are expired.
+    ValueError
+        If a URL, username, or password is not provided and cannot be found in the stored
+        credentials.
+
+    Notes
+    -----
+    - If credentials are expired, they are deleted from storage.
+    - The credentials can be stored using ``pymapdl login`` CLI.
+
+    Examples
+    --------
+    Using url, user and password:
+
+    >>> get_token_access(url='https://cluster.example.com', user='admin', password='securepass')
+    'eyJhbGciOiJSUzI1NiIsI...'
+
+    Using the stored credential for that URL. If those credentials do not exists,
+    the default credentials are used.
+
+    >>> get_token_access(url='https://cluster.example.com')
+    'bGciOiJSeyJhUzI1NiIsI...'
+
+    Login using the default stored credentials:
+    >>> get_token_access()
+    'iJSeyJhUzI1bGciONiIsI...'
+    """
     if not url or not user or not password:
         if not url:
             identifier = DEFAULT_IDENTIFIER
@@ -250,10 +344,5 @@ def access(url: str = None, user: str = None, password: str = None):
 
 
 def get_default_url():
-    """Return the default URL"""
+    """Return the default credentials URL"""
     return get_password(SERVICE_NAME, f"{DEFAULT_IDENTIFIER}_url")
-
-
-def get_token(url: str = None, user: str = None, password: str = None):
-    """Wrapper around `access`` function"""
-    return access(url=url, user=user, password=password)
