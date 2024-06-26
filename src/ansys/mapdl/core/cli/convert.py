@@ -212,6 +212,9 @@ def convert(
         )
 
     else:
+        if not filename_in:
+            raise ValueError("A file path must be provided.")
+
         convert_script(
             filename_in,
             filename_out,

@@ -28,34 +28,45 @@ import time
 from typing import Any, Optional, Union
 from warnings import warn
 
-from ansys.hps.client import Client
-from ansys.hps.client.jms import (
-    File,
-    FloatParameterDefinition,
-    HpcResources,
-    JmsApi,
-    Job,
-    JobDefinition,
-    ParameterMapping,
-    Project,
-    ProjectApi,
-    ResourceRequirements,
-    Software,
-    StringParameterDefinition,
-    TaskDefinition,
-)
+try:
+    from ansys.hps.client import Client
+    from ansys.hps.client.jms import (
+        File,
+        FloatParameterDefinition,
+        HpcResources,
+        JmsApi,
+        Job,
+        JobDefinition,
+        ParameterMapping,
+        Project,
+        ProjectApi,
+        ResourceRequirements,
+        Software,
+        StringParameterDefinition,
+        TaskDefinition,
+    )
+
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(
+        """Some of the dependencies required for submit jobs into an HPS cluster are not installed.
+Please install them using "pip install 'ansys-mapdl-core[hps]"."""
+    )
 
 logger = logging.getLogger()
 
 
 def get_value_from_json_or_default(
-    arg: str, json_file: str, key: str, default_value: Optional[Union[str, Any]] = None
+    arg: str,
+    json_file: Optional[str],
+    key: str,
+    default_value: Optional[Union[str, Any]] = None,
+    raise_if_none: Optional[bool] = True,
 ):
     if arg is not None:
         logger.debug(f"Using '{arg}' for {key}")
         return arg
 
-    if os.path.exists(json_file):
+    if json_file and os.path.exists(json_file):
         if os.path.getsize(json_file) > 0:
             with open(json_file, "r") as fid:
                 config = json.load(fid)
@@ -64,7 +75,7 @@ def get_value_from_json_or_default(
                 logger.debug(f"Using '{config[key]}' for {key}")
                 return config[key]
 
-    if default_value is None:
+    if default_value is None and raise_if_none:
         raise ValueError(
             f"The argument {arg} is not given through the CLI or config file."
         )
@@ -106,10 +117,11 @@ class JobSubmission:
 
     def __init__(
         self,
-        url,
-        user,
-        password,
         main_file,
+        url,
+        user: Optional[str] = None,
+        password: Optional[str] = None,
+        token: Optional[str] = None,
         mode: Optional[str] = None,
         inputs: Optional[Union[list[str]]] = None,
         outputs: Optional[Union[list[str]]] = None,
@@ -125,9 +137,15 @@ class JobSubmission:
         max_execution_time: Optional[int] = None,
         name: Optional[str] = None,
     ):
+
+        if not token and (not user or not password):
+            raise ValueError("An access token or an user-password pair must be used.")
+
         self._url = url
         self._user = user
         self._password = password
+        self._token = token
+
         self._main_file = self._validate_main_file(main_file)
         self._mode = self._validate_mode(mode)
 
@@ -622,7 +640,6 @@ class JobSubmission:
             executable=os.path.basename(executable)
         )
 
-        print(f"Using executable: '{execution_command}'")
         logger.debug(f"Using executable: '{execution_command}'")
 
         # Process step
@@ -631,6 +648,7 @@ class JobSubmission:
                 TaskDefinition(
                     execution_command=execution_command,
                     resource_requirements=ResourceRequirements(
+                        platform="linux",
                         num_cores=self.num_cores,
                         memory=self.memory * 1024 * 1024,
                         disk_space=self.disk_space * 1024 * 1024,
@@ -816,7 +834,8 @@ class JobSubmission:
             self.output_files.append(self._output_parms_file)
 
         if self.mode == "python":
-            self.input_files.append(self.requirements_file)
+            if self._requirements_file is not False:
+                self.input_files.append(self.requirements_file)
             self.input_files.append(self.shell_file)
 
         if self.mode == "python" and (self.inputs or self.outputs):
@@ -831,14 +850,18 @@ class JobSubmission:
     def _prepare_shell_file(self):
         content = f"""
 echo "Starting"
+"""
 
+        if self._requirements_file:
+            content += f"""
 # Start venv
 python{self.python} -m venv .venv
 source .venv/bin/activate
 
 # Install requirements
 pip install -r {os.path.basename(self.requirements_file)}
-
+"""
+        content += f"""
 # Run script
 python {self._executed_pyscript}
     """
@@ -847,6 +870,10 @@ python {self._executed_pyscript}
         logger.debug(f"Shell file in: {self.shell_file}")
 
     def _prepare_requirements_file(self):
+
+        if self._requirements_file is False:
+            return
+
         import pkg_resources
 
         content = "\n".join(
@@ -938,8 +965,17 @@ with open("{self._output_parms_file}", "w") as fid:
             self._output_values.append(each_job.values)
 
     def _connect_client(self):
+        if not self._token:
+            logger.debug("Getting a valid token")
+            from ansys.mapdl.core.hpc.login import get_token_access
+
+            self._token = get_token_access(
+                url=self.url, user=self.user, password=self.password
+            )
+
+        logger.debug("Using a token to authenticate the user.")
         self._client: Client = Client(
-            url=self.url, username=self.user, password=self.password, verify=False
+            url=self._url, access_token=self._token, verify=False
         )
 
     def close_client(self):
