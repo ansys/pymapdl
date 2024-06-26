@@ -155,7 +155,7 @@ def login(
             raise ValueError("No password was provided.")
 
     token = login_in_cluster(user, password, url)
-    logger.debug(f"Login successful")
+    logger.debug("Login successful")
 
     if test_token:
         logger.debug("Testing token")
