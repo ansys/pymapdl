@@ -28,8 +28,6 @@ from typing import Optional, Union
 
 import click
 
-from ansys.mapdl.core.hpc.login import access, get_default_url
-
 logger = logging.getLogger()
 
 
@@ -254,7 +252,7 @@ def submit(
     mode: Optional[Union["python", "shell", "apdl"]] = None,
     to_json: Optional[bool] = False,
 ):
-    import json
+    from ansys.mapdl.core.hpc.login import access, get_default_url
 
     if to_json:
         import json

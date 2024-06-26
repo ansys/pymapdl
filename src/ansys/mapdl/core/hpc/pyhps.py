@@ -28,22 +28,30 @@ import time
 from typing import Any, Optional, Union
 from warnings import warn
 
-from ansys.hps.client import Client
-from ansys.hps.client.jms import (
-    File,
-    FloatParameterDefinition,
-    HpcResources,
-    JmsApi,
-    Job,
-    JobDefinition,
-    ParameterMapping,
-    Project,
-    ProjectApi,
-    ResourceRequirements,
-    Software,
-    StringParameterDefinition,
-    TaskDefinition,
-)
+try:
+    from ansys.hps.client import Client
+    from ansys.hps.client.jms import (
+        File,
+        FloatParameterDefinition,
+        HpcResources,
+        JmsApi,
+        Job,
+        JobDefinition,
+        ParameterMapping,
+        Project,
+        ProjectApi,
+        ResourceRequirements,
+        Software,
+        StringParameterDefinition,
+        TaskDefinition,
+    )
+
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(
+        """Some of the dependencies required for submit jobs into an HPS cluster are not installed.
+Please install them using "pip install 'ansys-mapdl-core[hps]"."""
+    )
+
 
 logger = logging.getLogger()
 

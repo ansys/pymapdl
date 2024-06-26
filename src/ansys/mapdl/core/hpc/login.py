@@ -23,10 +23,16 @@
 import logging
 import time
 
-from ansys.hps.client import AuthApi, Client
-from ansys.hps.client.authenticate import authenticate
-import keyring
-from requests import ConnectionError
+try:
+    from ansys.hps.client import AuthApi, Client
+    from ansys.hps.client.authenticate import authenticate
+    import keyring
+    from requests import ConnectionError
+except ModuleNotFoundError:
+    raise ModuleNotFoundError(
+        """Some of the dependencies required for login into an HPS cluster are not installed.
+Please install them using "pip install 'ansys-mapdl-core[hps]"."""
+    )
 
 DEFAULT_IDENTIFIER = "defaultconfig"
 SERVICE_NAME = "pymapdl-pyhps"

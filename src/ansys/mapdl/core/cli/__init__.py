@@ -29,6 +29,13 @@ except ModuleNotFoundError:
     _HAS_CLICK = False
 
 
+try:
+    from ansys.hps.client import Client
+
+    _HAS_HPS = True
+except ModuleNotFoundError:
+    _HAS_HPS = False
+
 if _HAS_CLICK:
     ###################################
     # PyMAPDL CLI
@@ -53,12 +60,14 @@ if _HAS_CLICK:
     # pymapdl (hpc) submit
     # pymapdl (hpc) list #To be implemented
     # pymapdl (hpc) stop #To be implemented
-    from ansys.mapdl.core.cli.hpc import submit
-    from ansys.mapdl.core.cli.login import login, logout
 
-    main.add_command(login)
-    main.add_command(submit)
-    main.add_command(logout)
+    if _HAS_HPS:
+        from ansys.mapdl.core.cli.hpc import submit
+        from ansys.mapdl.core.cli.login import login, logout
+
+        main.add_command(login)
+        main.add_command(submit)
+        main.add_command(logout)
 
     def old_pymapdl_convert_script_entry_point():
         print(
