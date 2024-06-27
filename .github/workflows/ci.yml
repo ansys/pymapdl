@@ -413,10 +413,27 @@ jobs:
       - name: "Get if running on Ubuntu"
         id: ubuntu_check
         run: |
-          if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then export ON_UBUNTU=true; else export ON_UBUNTU=false; fi
+          if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]];
+            then export ON_UBUNTU=true; export TAG_UBUNTU="ubuntu";
+            else export ON_UBUNTU=false; export TAG_UBUNTU="centos";
+          fi
           echo "ON_UBUNTU: $ON_UBUNTU"
+          echo "TAG_UBUNTU: $TAG_UBUNTU"
           echo "ON_UBUNTU=$(echo $ON_UBUNTU)" >> $GITHUB_OUTPUT
+          echo "TAG_UBUNTU=$(echo $TAG_UBUNTU)" >> $GITHUB_OUTPUT
 
+      - name: "Get if running student version"
+        id: student_check
+        run: |
+          if [[ "${{ matrix.mapdl-version }}" == *"student"* ]]; 
+            then export ON_STUDENT=true; export TAG_STUDENT="student";
+            else export ON_STUDENT=false; export TAG_STUDENT="non-student";
+          fi
+          echo "ON_STUDENT: $ON_STUDENT"
+          echo "TAG_STUDENT: $TAG_STUDENT"
+          echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
+          echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
+          
       - name: "Pull, launch, and validate MAPDL service"
         id: start_mapdl
         env:
@@ -491,8 +508,10 @@ jobs:
         env:
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
           ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
+          ON_STUDENT: ${{ steps.ubuntu_check.outputs.ON_STUDENT }}
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
+          echo "ON_STUDENT: $ON_STUDENT"
           xvfb-run pytest \
             ${{ env.PYTEST_ARGUMENTS }} \
             --ignore_image_cache \
@@ -503,7 +522,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # required
           name: ${{ matrix.mapdl-version }}-remote.xml
-          flags: remote,${{ steps.ubuntu_check.outputs.ON_UBUNTU }},${{ matrix.mapdl-version }},${{ steps.distributed_mode.outputs.distributed_mode }}
+          flags: remote,${{ steps.ubuntu_check.outputs.TAG_UBUNTU }},${{ matrix.mapdl-version }},${{ steps.distributed_mode.outputs.distributed_mode }},${{ steps.ubuntu_check.outputs.TAG_STUDENT }}
 
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4
