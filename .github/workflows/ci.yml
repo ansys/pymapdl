@@ -410,6 +410,13 @@ jobs:
           echo "Distributed mode: $distributed_mode"
           echo "distributed_mode=$(echo $distributed_mode)" >> $GITHUB_OUTPUT
 
+      - name: "Get if running on Ubuntu"
+        id: ubuntu_check
+        run: |
+          if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then export ON_UBUNTU=true; else export ON_UBUNTU=false; fi
+          echo "ON_UBUNTU: $ON_UBUNTU"
+          echo "ON_UBUNTU=$(echo $ON_UBUNTU)" >> $GITHUB_OUTPUT
+
       - name: "Pull, launch, and validate MAPDL service"
         id: start_mapdl
         env:
@@ -483,26 +490,26 @@ jobs:
       - name: "Unit testing"
         env:
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
+          ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
         run: |
-          if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then export ON_UBUNTU=true; else export ON_UBUNTU=false; fi
           echo "ON_UBUNTU: $ON_UBUNTU"
           xvfb-run pytest \
             ${{ env.PYTEST_ARGUMENTS }} \
             --ignore_image_cache \
-            --cov-report=xml:centos-${{ matrix.mapdl-version }}-remote.xml
+            --cov-report=xml:${{ matrix.mapdl-version }}-remote.xml
 
       - uses: codecov/codecov-action@v4
         name: "Upload coverage to Codecov"
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # required
-          name: centos-${{ matrix.mapdl-version }}-remote.xml
-          flags: centos,remote,${{ matrix.mapdl-version }}
+          name: ${{ matrix.mapdl-version }}-remote.xml
+          flags: remote,${{ steps.ubuntu_check.outputs.ON_UBUNTU }},${{ matrix.mapdl-version }},${{ steps.distributed_mode.outputs.distributed_mode }}
 
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: centos-${{ matrix.mapdl-version }}-remote.xml
-          path: ./centos-${{ matrix.mapdl-version }}-remote.xml
+          name: ${{ matrix.mapdl-version }}-remote.xml
+          path: ./${{ matrix.mapdl-version }}-remote.xml
 
       - name: "Check package"
         run: |
