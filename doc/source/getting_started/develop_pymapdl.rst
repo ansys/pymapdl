@@ -62,11 +62,36 @@ guidelines for developing code in a repository:
 
 #. **Use branches**: Create branches for different features, bug fixes, or
    experiments. This keeps changes isolated and facilitates parallel
-   development.
+   development. The CI/CD checks that the branch name is compliant, for example,
+   the branch name must start with a prefix and a backslash.
+   The allowed prefixes are:
+
+   - `fix/` - Bug fixes.
+   - `feat/` - Changes that introduce a new feature or significant addition.
+   - `maint/` - General maintenance of the repository. For instance, improving the CI/CD workflows.
+   - `docs/` - Improves documentation and examples.
+   - `no-ci/` - (Not applicable to PyMAPDL) In some repositories, branches with this prefix do not trigger CI/CD.
+   - `test/` - Improvements or changes to testing.
+   - `testing/` - For testing and debugging. It should not be used for branches that are going to be merged to ``main``.
+   - `release/` - Contain the released versions changes.
+   - `dependabot/` - Created by Dependabot.
+   - `junk/` - Other purposes. It should not be used for branches that are going to be merged to ``main``.
 
 #. **Write descriptive commit messages**: Provide clear and concise commit
    messages that explain the purpose and context of the changes. Follow a
    consistent style.
+
+   - `fix:` - Bug fixes.
+   - `feat:` - Changes that introduce a new feature or significant addition.
+   - `docs:` - Changes pertaining only to documentation.
+   - `style:` - Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc.).
+   - `refactor:` - A code change that neither fixes a bug nor adds a feature.
+   - `perf:` - A code change that improves performance.
+   - `test:` - Improvements or changes to testing.
+   - `build:` - Changes that affect the build system or external dependencies (example scopes: pip, make).
+   - `ci:` - Changes to the CI/CD configuration files and scripts.
+   - `chore:` - Other changes that don't modify the code (example scopes: release, versioning, etc.).
+   - `revert:` - Reverts a previous commit.
 
 #. **Commit frequently**: Make small, meaningful commits frequently. Avoid
    making a large number of unrelated changes in a single commit.
@@ -77,6 +102,20 @@ guidelines for developing code in a repository:
 
 #. **Use pull requests (PRs)**: Use PRs to submit your changes for review.
    This allows for discussion and validation before merging into the main branch.
+   Pull requests must follow the same convention as the commit messages.
+   The following prefixes are allowed in the pull request names:
+
+   - `fix:` - Bug fixes.
+   - `feat:` - Changes that introduce a new feature or significant addition.
+   - `docs:` - Changes pertaining only to documentation.
+   - `style:` - Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc.).
+   - `refactor:` - A code change that neither fixes a bug nor adds a feature.
+   - `perf:` - A code change that improves performance.
+   - `test:` - Improvements or changes to testing.
+   - `build:` - Changes that affect the build system or external dependencies (example scopes: pip, make).
+   - `ci:` - Changes to the CI/CD configuration files and scripts.
+   - `chore:` - Other changes that don't modify the code (example scopes: release, versioning, etc.).
+   - `revert:` - Reverts a previous pull request.
 
 #. **Write good documentation**: Maintain clear and up-to-date documentation for your
    contribution or changes, including comments in code, and relevant project
