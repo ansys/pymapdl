@@ -547,15 +547,14 @@ jobs:
         run: .ci/build_matrix.sh
 
   build-test-ubuntu-local:
-    name: "Local: Build & test ${{ matrix.mapdl-image }})"
+    name: "Local: Build & test on ${{ matrix.mapdl-image }}"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [smoke-tests, build-test-local-minimal-matrix]
     timeout-minutes: 55
     strategy:
       fail-fast: false
-      matrix:
-        matrix: ${{fromJson(needs.build-test-local-minimal-matrix.outputs.matrix)}}
+      matrix: ${{fromJson(needs.build-test-local-minimal-matrix.outputs.matrix)}}
 
     container:
       image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-image }}
@@ -668,7 +667,7 @@ jobs:
 
 
   build-test-ubuntu-minimal:
-    name: "Local: Build & test minimal setup on Ubuntu MAPDL ${{ matrix.mapdl-image }} (Extended testing ${{ matrix.extended_testing }})"
+    name: "Local-minimal: Build & test on ${{ matrix.mapdl-image }}"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [smoke-tests, build-test-local-minimal-matrix]
