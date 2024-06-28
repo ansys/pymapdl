@@ -541,8 +541,13 @@ jobs:
 
       - id: set-matrix
         env:
+          ONLY_UBUNTU: true
           LIMIT_VERSIONS: 3
-          extended_testing: ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
+          ON_SCHEDULE: ${{ github.event_name == 'schedule' }}
+          ON_WORKFLOW_DISPATCH: ${{ github.event_name == 'workflow_dispatch' }}
+          RUN_ALL_TEST: ${{ inputs.run_all_tests }}
+          ON_PUSH: ${{ github.event_name == 'push' }}
+          HAS_TAG: ${{ contains(github.ref, 'refs/tags') }}
           auth_user: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
         run: .ci/build_matrix.sh
 

@@ -20,6 +20,9 @@ versions=(
 
 LATEST=2 # for 'latest-ubuntu' and 'latest-ubuntu-student'
 
+# Run only ubuntu jobs
+ONLY_UBUNTU="${ONLY_UBUNTU:-false}"
+
 # Do not process more than the $AUTH_USER_LIMIT_VERSIONS versions in above list
 AUTH_USER_LIMIT_VERSIONS="${AUTH_USER_LIMIT_VERSIONS:-3}"
 AUTH_USER_LIMIT=$(($LATEST+$AUTH_USER_LIMIT_VERSIONS*3)) 
@@ -28,13 +31,23 @@ AUTH_USER_LIMIT=$(($LATEST+$AUTH_USER_LIMIT_VERSIONS*3))
 NON_AUTH_USER_LIMIT_VERSIONS="${NON_AUTH_USER_LIMIT_VERSIONS:-2}"
 NON_AUTH_USER_LIMIT=$(($LATEST+$NON_AUTH_USER_LIMIT_VERSIONS*3))
 
+# Hard limit version. Generally do not process more than $HARD_LIMIT_VERSION
 LIMIT_VERSIONS="${LIMIT_VERSIONS:-0}"
 HARD_LIMIT_VERSION=$(($LATEST+$LIMIT_VERSIONS*3))
 
-## Started
-JSON="{\"include\":["
+# Checking if extended testing must be done
+# 
 
+if [[ $ON_SCHEDULE || ( $ON_WORKFLOW_DISPATCH && $RUN_ALL_TEST ) || ( $ON_PUSH && $HAS_TAG ) ]]; then
+    extended_testing=true
+else
+    extended_testing=false
+fi
+
+## Start
+JSON="{\"include\":["
 counter=0
+
 # Loop through each version
 for version in "${versions[@]}"; do
     
@@ -47,6 +60,7 @@ for version in "${versions[@]}"; do
         break
     fi
 
+    # checking version config
     if [[ "$version" == *"ubuntu"* ]]; then
         ON_UBUNTU=true;
     else 
@@ -59,6 +73,7 @@ for version in "${versions[@]}"; do
         ON_STUDENT=false;
     fi
 
+    # Printing
     echo "Processing $counter"
     echo "  - Version: $version"
     echo "  - extended_testing: $extended_testing"
@@ -66,6 +81,13 @@ for version in "${versions[@]}"; do
     echo "  - Student: $ON_STUDENT"
     echo "  - Ubuntu: $ON_UBUNTU"
 
+    # Early exiting if on Ubuntu only
+    if [[ "$ON_UBUNTU" != "true" && "$ONLY_UBUNTU" == "true" ]]; then
+        echo "Skipping non-ubuntu versions"
+        continue
+    fi
+
+    # main logic
     if [[ "$auth_user" == "true" ]]; then
         if [[ "$extended_testing" == "true" ]]; then
             # runs everything 
@@ -87,6 +109,7 @@ for version in "${versions[@]}"; do
         fi
     fi
 
+    # Add line to json
     if [[ "$add_line" == "true" ]]; then
         JSONline="{\"mapdl-version\": \"$version\"},"
 
@@ -100,7 +123,7 @@ for version in "${versions[@]}"; do
         echo "NOT added line"
     fi
     echo ""
-    
+
 done
 
 # Remove last "," and add closing brackets
