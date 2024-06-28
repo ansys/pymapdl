@@ -332,9 +332,6 @@ jobs:
     steps:
       - id: set-matrix
         run: .ci/build_matrix.sh
-      
-    
-  
 
   build-test:
     name: "Remote: Build & test MAPDL ${{ matrix.mapdl-version }} (Extended testing ${{ matrix.extended_testing }})"
