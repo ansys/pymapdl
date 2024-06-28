@@ -51,7 +51,7 @@
   color: F4D03F
 
 - name: minor priority
-  description: "It does not affect almost any users"
+  description: "This issue affects few users"
   color: F9E79F
 
 - name: future
@@ -115,7 +115,7 @@
   color: F4D03F
 
 - name: stale
-  description: "Stale issue, it will be closed soon"
+  description: "Stale issue likely to be closed soon"
   color: E67E22
 
 - name: waiting doc review

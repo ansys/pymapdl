@@ -62,7 +62,7 @@ guidelines for developing code in a repository:
 
 #. **Use branches**: Create branches for different features, bug fixes, or
    experiments. This keeps changes isolated and facilitates parallel
-   development. The CI/CD checks that the branch name is compliant, for example,
+   development. The CI/CD checks that the branch name is compliant. For example,
    the branch name must start with a prefix and a backslash.
    The allowed prefixes are:
 
@@ -73,7 +73,7 @@ guidelines for developing code in a repository:
    - `no-ci/` - (Not applicable to PyMAPDL) In some repositories, branches with this prefix do not trigger CI/CD.
    - `test/` - Improvements or changes to testing.
    - `testing/` - For testing and debugging. It should not be used for branches that are going to be merged to ``main``.
-   - `release/` - Contain the released versions changes.
+   - `release/` - Contains the released versions changes.
    - `dependabot/` - Created by Dependabot.
    - `junk/` - Other purposes. It should not be used for branches that are going to be merged to ``main``.
 
@@ -84,13 +84,13 @@ guidelines for developing code in a repository:
    - `fix:` - Bug fixes.
    - `feat:` - Changes that introduce a new feature or significant addition.
    - `docs:` - Changes pertaining only to documentation.
-   - `style:` - Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc.).
+   - `style:` - Changes that do not affect the meaning of the code (such as white space, formatting, and missing semicolons).
    - `refactor:` - A code change that neither fixes a bug nor adds a feature.
    - `perf:` - A code change that improves performance.
    - `test:` - Improvements or changes to testing.
-   - `build:` - Changes that affect the build system or external dependencies (example scopes: pip, make).
+   - `build:` - Changes that affect the build system or external dependencies (such as to ``pip`` or ``make``).
    - `ci:` - Changes to the CI/CD configuration files and scripts.
-   - `chore:` - Other changes that don't modify the code (example scopes: release, versioning, etc.).
+   - `chore:` - Other changes that don't modify the code (such as releasing and versioning).
    - `revert:` - Reverts a previous commit.
 
 #. **Commit frequently**: Make small, meaningful commits frequently. Avoid
@@ -108,13 +108,13 @@ guidelines for developing code in a repository:
    - `fix:` - Bug fixes.
    - `feat:` - Changes that introduce a new feature or significant addition.
    - `docs:` - Changes pertaining only to documentation.
-   - `style:` - Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc.).
+   - `style:` - Changes that do not affect the meaning of the code (such as white space, formatting, and missing semicolons).
    - `refactor:` - A code change that neither fixes a bug nor adds a feature.
    - `perf:` - A code change that improves performance.
    - `test:` - Improvements or changes to testing.
-   - `build:` - Changes that affect the build system or external dependencies (example scopes: pip, make).
+   - `build:` - Changes that affect the build system or external dependencies (such as to ``pip`` or ``make``).
    - `ci:` - Changes to the CI/CD configuration files and scripts.
-   - `chore:` - Other changes that don't modify the code (example scopes: release, versioning, etc.).
+   - `chore:` - Other changes that don't modify the code (such as releasing and versioning).
    - `revert:` - Reverts a previous pull request.
 
    The pull requests can also be labeled for easier repository maintenance.
