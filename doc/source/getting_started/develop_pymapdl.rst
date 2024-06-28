@@ -117,6 +117,11 @@ guidelines for developing code in a repository:
    - `chore:` - Other changes that don't modify the code (example scopes: release, versioning, etc.).
    - `revert:` - Reverts a previous pull request.
 
+   The pull requests can also be labeled for easier repository maintenance.
+   The CI/CD automatically labels each pull request based on the pull requests prefix and
+   the modified files, but you can also add extra labels as long as they are already defined
+   in the repository.
+
 #. **Write good documentation**: Maintain clear and up-to-date documentation for your
    contribution or changes, including comments in code, and relevant project
    documentation in rST or Markdown files.
