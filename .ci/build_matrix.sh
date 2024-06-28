@@ -1,6 +1,7 @@
 # List of versions
 versions=(
-    'latest-ubuntu'
+    # if added more "latest", change "$LATEST"
+    'latest-ubuntu' 
     'latest-ubuntu-student'
     'v24.2.0'
     'v24.2-ubuntu'
@@ -17,15 +18,14 @@ versions=(
 )
 
 
-
 LATEST=2 # for 'latest-ubuntu' and 'latest-ubuntu-student'
 
-# Do not process more than the $CUTOUT versions in above list
-UTH_USER_LIMIT_VERSIONS=3
-AUTH_USER_LIMIT=$(($LATEST+$UTH_USER_LIMIT_VERSIONS*3)) 
+# Do not process more than the $AUTH_USER_LIMIT_VERSIONS versions in above list
+AUTH_USER_LIMIT_VERSIONS="${AUTH_USER_LIMIT_VERSIONS:-3}"
+AUTH_USER_LIMIT=$(($LATEST+$AUTH_USER_LIMIT_VERSIONS*3)) 
 
-# Students licenses only last a year, hence $LIMIT_VERSIONS cannot be more than 2.
-NON_AUTH_USER_LIMIT_VERSIONS=2 # Must be 2
+# Students licenses only last a year, hence $NON_AUTH_USER_LIMIT_VERSIONS cannot be more than 2.
+NON_AUTH_USER_LIMIT_VERSIONS="${NON_AUTH_USER_LIMIT_VERSIONS:-2}"
 NON_AUTH_USER_LIMIT=$(($LATEST+$NON_AUTH_USER_LIMIT_VERSIONS*3))
 
 LIMIT_VERSIONS="${LIMIT_VERSIONS:-0}"
