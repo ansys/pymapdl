@@ -16,11 +16,23 @@ versions=(
     'v22.2-ubuntu'
 )
 
-JSON="{\"include\":["
 
-MINIMAL_VERSIONS=2
+
 LATEST=2 # for 'latest-ubuntu' and 'latest-ubuntu-student'
-CUTOUT=$(($LATEST+$MINIMAL_VERSIONS*3)) # do not process more than the $CUTOUT versions in above file
+
+# Do not process more than the $CUTOUT versions in above list
+UTH_USER_LIMIT_VERSIONS=3
+AUTH_USER_LIMIT=$(($LATEST+$UTH_USER_LIMIT_VERSIONS*3)) 
+
+# Students licenses only last a year, hence $LIMIT_VERSIONS cannot be more than 2.
+NON_AUTH_USER_LIMIT_VERSIONS=2 # Must be 2
+NON_AUTH_USER_LIMIT=$(($LATEST+$NON_AUTH_USER_LIMIT_VERSIONS*3))
+
+LIMIT_VERSIONS="${LIMIT_VERSIONS:-0}"
+HARD_LIMIT_VERSION=$(($LATEST+$LIMIT_VERSIONS*3))
+
+## Started
+JSON="{\"include\":["
 
 counter=0
 # Loop through each version
@@ -28,6 +40,12 @@ for version in "${versions[@]}"; do
     
     # 1 based counter
     ((counter++))
+
+    # Checking hardlimit
+    if [[ $LIMIT_VERSIONS -ne 0 && $counter -gt $HARD_LIMIT_VERSION ]]; then
+        echo "Reached limit."
+        break
+    fi
 
     if [[ "$version" == *"ubuntu"* ]]; then
         ON_UBUNTU=true;
@@ -54,15 +72,15 @@ for version in "${versions[@]}"; do
             add_line="true";
         else
             # Runs only "latest" and last two versions.
-            # Last 6 registries in list above.
-            if [[ $counter -le $CUTOUT ]]; then
+            # Last 6 entries in the list above.
+            if [[ $counter -le $AUTH_USER_LIMIT ]]; then
                 add_line="true";
             else
                 add_line="false";
             fi
         fi
     else
-        if [[ $ON_STUDENT == "true" &&  $counter -le $CUTOUT ]]; then
+        if [[ $ON_STUDENT == "true" &&  $counter -le $NON_AUTH_USER_LIMIT ]]; then
             add_line="true";
         else
             add_line="false";
