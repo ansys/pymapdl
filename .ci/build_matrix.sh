@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # List of versions
 versions=(
     # if added more "latest", change "$LATEST"
@@ -17,7 +19,6 @@ versions=(
     'v22.2-ubuntu'
 )
 
-
 LATEST=2 # for 'latest-ubuntu' and 'latest-ubuntu-student'
 
 # Run only ubuntu jobs
@@ -25,15 +26,15 @@ ONLY_UBUNTU="${ONLY_UBUNTU:-false}"
 
 # Do not process more than the $AUTH_USER_LIMIT_VERSIONS versions in above list
 AUTH_USER_LIMIT_VERSIONS="${AUTH_USER_LIMIT_VERSIONS:-3}"
-AUTH_USER_LIMIT=$(($LATEST+$AUTH_USER_LIMIT_VERSIONS*3)) 
+AUTH_USER_LIMIT=$((LATEST+AUTH_USER_LIMIT_VERSIONS*3)) 
 
 # Students licenses only last a year, hence $NON_AUTH_USER_LIMIT_VERSIONS cannot be more than 2.
 NON_AUTH_USER_LIMIT_VERSIONS="${NON_AUTH_USER_LIMIT_VERSIONS:-2}"
-NON_AUTH_USER_LIMIT=$(($LATEST+$NON_AUTH_USER_LIMIT_VERSIONS*3))
+NON_AUTH_USER_LIMIT=$((LATEST+NON_AUTH_USER_LIMIT_VERSIONS*3))
 
 # Hard limit version. Generally do not process more than $HARD_LIMIT_VERSION
 LIMIT_VERSIONS="${LIMIT_VERSIONS:-0}"
-HARD_LIMIT_VERSION=$(($LATEST+$LIMIT_VERSIONS*3))
+HARD_LIMIT_VERSION=$((LATEST+LIMIT_VERSIONS*3))
 
 # Checking if extended testing must be done
 # 
@@ -131,7 +132,7 @@ if [[ $JSON == *, ]]; then
     JSON="${JSON%?}"
 fi
 JSON="$JSON]}"
-echo $JSON
+echo "$JSON"
 
 # Set output
 echo "matrix=$( echo "$JSON" )" >> $GITHUB_OUTPUT
