@@ -3,6 +3,8 @@ versions=(
     'latest-ubuntu'
     'latest-ubuntu-student'
     'v24.2.0'
+    'v24.2-ubuntu'
+    'v24.2-ubuntu-student'
     'v24.1.0'
     'v24.1-ubuntu'
     'v24.1-ubuntu-student'
@@ -16,6 +18,10 @@ versions=(
 
 JSON="{\"include\":["
 
+MINIMAL_VERSIONS=2
+LATEST=2 # for 'latest-ubuntu' and 'latest-ubuntu-student'
+CUTOUT=$(($LATEST+$MINIMAL_VERSIONS*3)) # do not process more than the $CUTOUT versions in above file
+
 counter=0
 # Loop through each version
 for version in "${versions[@]}"; do
@@ -23,16 +29,16 @@ for version in "${versions[@]}"; do
     # 1 based counter
     ((counter++))
 
-    if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then
-        export ON_UBUNTU=true;
+    if [[ "$version" == *"ubuntu"* ]]; then
+        ON_UBUNTU=true;
     else 
-        export ON_UBUNTU=false;
+        ON_UBUNTU=false;
     fi
 
-    if [[ "${{ matrix.mapdl-version }}" == *"student"* ]]; then
-        export ON_STUDENT=true;
+    if [[ "$version" == *"student"* ]]; then
+        ON_STUDENT=true;
     else 
-        export ON_STUDENT=false;
+        ON_STUDENT=false;
     fi
 
     echo "Processing $counter"
@@ -41,29 +47,29 @@ for version in "${versions[@]}"; do
     echo "  - auth_user: $auth_user"
     echo "  - Student: $ON_STUDENT"
     echo "  - Ubuntu: $ON_UBUNTU"
-    echo ""
 
-    if [[ $auth_user == "true"]]; then
-        if [[ $extended_testing == "true" ]]; then
+    if [[ "$auth_user" == "true" ]]; then
+        if [[ "$extended_testing" == "true" ]]; then
             # runs everything 
-            add_line="true"
+            add_line="true";
         else
             # Runs only "latest" and last two versions.
             # Last 6 registries in list above.
-            if [[ $counter -le 6 ]]; then
-                add_line="true"
+            if [[ $counter -le $CUTOUT ]]; then
+                add_line="true";
             else
-                add_line="false"
+                add_line="false";
             fi
         fi
     else
-        if [[ $ON_STUDENT == "true" ]]; then
-            add_line="true"
+        if [[ $ON_STUDENT == "true" &&  $counter -le $CUTOUT ]]; then
+            add_line="true";
         else
-            add_line="false"
-    fi;
+            add_line="false";
+        fi
+    fi
 
-    if [["$add_line" == "true" ]]; then
+    if [[ "$add_line" == "true" ]]; then
         JSONline="{\"mapdl-version\": \"$version\"},"
 
         echo "ADDED line: $JSONline"
@@ -75,6 +81,7 @@ for version in "${versions[@]}"; do
     else
         echo "NOT added line"
     fi
+    echo ""
     
 done
 

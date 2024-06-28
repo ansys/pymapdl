@@ -345,7 +345,7 @@ jobs:
       - id: set-matrix
         env:
           extended_testing: ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
-          auth_user: ${{ steps.is_organization_member.outputs.result == 'false' }}
+          auth_user: ${{ steps.is_organization_member.outputs.result == 'true' }}
         run: .ci/build_matrix.sh
 
   build-test:
