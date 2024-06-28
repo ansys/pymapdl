@@ -330,6 +330,8 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
+      - name: "Install Git and checkout project"
+        uses: actions/checkout@v4.1.7
       - id: set-matrix
         run: .ci/build_matrix.sh
 
