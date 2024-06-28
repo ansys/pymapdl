@@ -55,6 +55,7 @@ ci
 container_layout
 datas
 delet
+Dependabot
 Dev
 devcontainer
 DevContainer
