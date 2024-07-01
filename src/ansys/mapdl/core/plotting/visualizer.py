@@ -22,11 +22,10 @@
 
 """Module for the MapdlPlotter class."""
 from collections import OrderedDict
-from typing import Any, Optional
+from typing import Any, Iterable, Optional
 
 from ansys.tools.visualization_interface import Plotter
 from ansys.tools.visualization_interface.backends.pyvista import PyVistaBackendInterface
-from beartype.typing import Any, Iterable
 import numpy as np
 from numpy.typing import NDArray
 import pyvista as pv
