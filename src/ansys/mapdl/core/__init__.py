@@ -70,9 +70,6 @@ LOG = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
 LOG.debug("Loaded logging module as LOG")
 
 
-BUILDING_GALLERY = False
-RUNNING_TESTS = False
-
 if RUNNING_TESTS:  # pragma: no cover
     LOG.debug("Running tests on Pytest")
 
