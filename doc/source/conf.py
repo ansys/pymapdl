@@ -29,7 +29,7 @@ plt.rcParams.update(
 
 from ansys.mapdl.core.theme import MapdlTheme
 
-pv.global_theme = MapdlTheme()
+pyvista.global_theme = MapdlTheme()
 
 # Manage errors
 pyvista.set_error_output_file("errors.txt")
