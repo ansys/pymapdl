@@ -16,9 +16,7 @@ from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
 
 ## Setting theming
-background_color = plt.rcParams["figure.facecolor"]
-background_color = list(background_color)
-background_color[-1] = 0.0
+background_color = (1.0, 1.0, 1.0, 0.0)
 
 plt.rcParams.update(
     {
