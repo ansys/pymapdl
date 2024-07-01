@@ -13,6 +13,7 @@ from sphinx.application import Sphinx
 from sphinx_gallery.sorting import FileNameSortKey
 
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl import reader as pymapdlreader  # noqa: F401
 from ansys.mapdl.core import __version__
 
 ## Setting theming
