@@ -6,6 +6,7 @@ from pathlib import Path
 import warnings
 
 from ansys_sphinx_theme import ansys_favicon, get_version_match
+import matplotlib.pyplot as plt
 import numpy as np
 import pyvista
 from sphinx.application import Sphinx
@@ -13,6 +14,23 @@ from sphinx_gallery.sorting import FileNameSortKey
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
+
+## Setting theming
+background_color = plt.rcParams["figure.facecolor"]
+background_color = list(background_color)
+background_color[-1] = 0.0
+
+plt.rcParams.update(
+    {
+        "figure.facecolor": background_color,
+        "axes.facecolor": background_color,
+        "savefig.facecolor": background_color,
+    }
+)
+
+from ansys.mapdl.core.theme import MapdlTheme
+
+pv.global_theme = MapdlTheme()
 
 # Manage errors
 pyvista.set_error_output_file("errors.txt")
