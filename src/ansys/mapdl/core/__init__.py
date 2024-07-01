@@ -128,10 +128,6 @@ _HAS_ANSYS = _check_has_ansys()
 if _HAS_PYVISTA:
     _apply_default_theme()
 
-BUILDING_GALLERY = False
-RUNNING_TESTS = False
-
-
 VERSION_MAP = {
     (0, 0, 0): "2020R2",
     (0, 3, 0): "2021R1",

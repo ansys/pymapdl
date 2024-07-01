@@ -6,13 +6,30 @@ from pathlib import Path
 import warnings
 
 from ansys_sphinx_theme import ansys_favicon, get_version_match
+import matplotlib.pyplot as plt
 import numpy as np
 import pyvista
 from sphinx.application import Sphinx
 from sphinx_gallery.sorting import FileNameSortKey
 
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl import reader as pymapdlreader  # noqa: F401
 from ansys.mapdl.core import __version__
+
+## Setting theming
+background_color = (1.0, 1.0, 1.0, 0.0)
+
+plt.rcParams.update(
+    {
+        "figure.facecolor": background_color,
+        "axes.facecolor": background_color,
+        "savefig.facecolor": background_color,
+    }
+)
+
+from ansys.mapdl.core.theme import MapdlTheme
+
+pyvista.global_theme = MapdlTheme()
 
 # Manage errors
 pyvista.set_error_output_file("errors.txt")
@@ -23,9 +40,12 @@ pyvista.OFF_SCREEN = True
 # must be less than or equal to the XVFB window size
 try:
     pyvista.global_theme.window_size = np.array([1024, 768])
+    pyvista.global_theme.transparent_background = True
+
 except AttributeError:
     # for compatibility with pyvista < 0.40
     pyvista.rcParams["window_size"] = np.array([1024, 768])
+    pyvista.rcParams["transparent_background"] = True
 
 # Save figures in specified directory
 pyvista.FIGURE_PATH = os.path.join(os.path.abspath("./images/"), "auto-generated/")
