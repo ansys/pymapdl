@@ -1121,7 +1121,7 @@ class _MapdlCommandExtended(_MapdlCore):
                 labels = [{"points": pcloud.points, "labels": pcloud["labels"]}]
             points = [{"points": self.mesh.nodes}]
             pl = MapdlPlotter()
-            pl.plot([], points, labels, **kwargs)
+            pl.plot([], points, labels, mapdl=self, **kwargs)
             return pl.show(**kwargs)
 
         # otherwise, use the built-in nplot

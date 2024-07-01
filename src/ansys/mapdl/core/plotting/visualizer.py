@@ -522,9 +522,8 @@ class MapdlPlotter(Plotter):
 
         if "NODES" in bc_target:
             self.bc_nodes_plot(
-                self,
-                mapdl,
-                bc_labels,
+                mapdl=mapdl,
+                bc_labels=bc_labels,
                 plot_bc_labels=plot_bc_labels,
                 bc_glyph_size=bc_glyph_size,
                 plot_bc_legend=plot_bc_legend,
