@@ -710,6 +710,7 @@ class MapdlPlotter(Plotter):
         add_mesh_kwargs={},
         add_point_labels_kwargs={},
         plotter_kwargs={},
+        **kwargs,
     ) -> None:
         """Add an object to the plotter.
 
