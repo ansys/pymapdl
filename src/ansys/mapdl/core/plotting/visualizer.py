@@ -778,12 +778,11 @@ class MapdlPlotter(Plotter):
             self._off_screen = True
             self._notebook = False
         # permit user to save the figure as a screenshot
-        if self._savefig:
+        if self._savefig or savefig:
             self._backend.show(
-                title=self._title,
                 auto_close=False,
                 window_size=window_size,
-                screenshot=True,
+                screenshot=savefig,
                 **kwargs,
             )
             self.scene.screenshot(self._savefig)
