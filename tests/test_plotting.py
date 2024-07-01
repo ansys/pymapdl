@@ -840,8 +840,8 @@ def test_plotter_input(mapdl, make_block):
 
     pl = MapdlPlotter(off_screen=False)
     pl_pv = pl.scene
-    assert pl_pv == pl2
-    assert pl_pv is pl2
+    pl2 = mapdl.eplot(return_plotter=True, plotter=pl)
+    assert pl is pl2
     pl2.show()  # plotting for catching
 
     # invalid plotter type

@@ -1237,10 +1237,17 @@ class _MapdlCommandExtended(_MapdlCore):
         if vtk:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
+            if "plotter" not in kwargs:
+                pl = MapdlPlotter()
+            else:
+                pl = kwargs.pop("plotter")
+                if not isinstance(pl, MapdlPlotter):
+                    raise TypeError(
+                        f"Expected a MapdlPlotter instance, but got {type(pl)}"
+                    )
             kwargs.setdefault("title", "MAPDL Element Plot")
             if not self._mesh.n_elem:
                 warnings.warn("There are no elements to plot.")
-                pl = MapdlPlotter()
                 pl.plot([], [], [], mapdl=self, **kwargs)
                 return pl.show(**kwargs)
 
@@ -1253,7 +1260,6 @@ class _MapdlCommandExtended(_MapdlCore):
             if show_node_numbering:
                 labels = [{"points": esurf.points, "labels": esurf["ansys_node_num"]}]
 
-            pl = MapdlPlotter()
             pl.plot(
                 [{"mesh": esurf, "style": kwargs.pop("style", "surface")}],
                 [],
