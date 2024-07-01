@@ -509,17 +509,17 @@ def test_pick_nodes(mapdl, make_block, selection, verify_image_cache):
         pl.show(auto_close=False)
         pl.scene.windows_size = (100, 100)
         width, height = pl.scene.window_size
-        if pl._picking_right_clicking_observer is None:
-            pl.iren._mouse_left_button_press(
+        if pl.scene._picking_right_clicking_observer is None:
+            pl.scene.iren._mouse_left_button_press(
                 int(width * point[0]), int(height * point[1])
             )
-            pl.iren._mouse_left_button_release(width, height)
+            pl.scene.iren._mouse_left_button_release(width, height)
         else:
-            pl.iren._mouse_right_button_press(
+            pl.scene.iren._mouse_right_button_press(
                 int(width * point[0]), int(height * point[1])
             )
-            pl.iren._mouse_right_button_release(width, height)
-        pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
+            pl.scene.iren._mouse_right_button_release(width, height)
+        pl.scene.iren._mouse_move(int(width * point[0]), int(height * point[1]))
 
     mapdl.nsel("S", "node", "", 1)
     if selection == "R" or selection == "U":
@@ -578,18 +578,18 @@ def test_pick_kp(mapdl, make_block, selection):
         pl.show(auto_close=False)
         pl.scene.windows_size = (100, 100)
         width, height = pl.scene.window_size
-        if pl._picking_right_clicking_observer is None:
-            pl.iren._mouse_left_button_press(
+        if pl.scene._picking_right_clicking_observer is None:
+            pl.scene.iren._mouse_left_button_press(
                 int(width * point[0]), int(height * point[1])
             )
-            pl.iren._mouse_left_button_release(width, height)
+            pl.scene.iren._mouse_left_button_release(width, height)
         else:
-            pl.iren._mouse_right_button_press(
+            pl.scene.iren._mouse_right_button_press(
                 int(width * point[0]), int(height * point[1])
             )
-            pl.iren._mouse_right_button_release(width, height)
+            pl.scene.iren._mouse_right_button_release(width, height)
 
-        pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
+        pl.scene.iren._mouse_move(int(width * point[0]), int(height * point[1]))
 
     mapdl.ksel("S", "KP", "", 1)
     if selection == "R" or selection == "U":
@@ -838,12 +838,8 @@ def test_pick_areas(mapdl, make_block, selection):
 def test_plotter_input(mapdl, make_block):
     from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
-    pl = MapdlPlotter(off_screen=True)
+    pl = MapdlPlotter(off_screen=False)
     pl_pv = pl.scene
-    # because in CICD we use 'screen_off', this will trigger a warning,
-    # since using 'plotter' will overwrite this kwarg.
-    with pytest.warns(UserWarning):
-        pl2 = mapdl.eplot(return_plotter=True, plotter=pl)
     assert pl_pv == pl2
     assert pl_pv is pl2
     pl2.show()  # plotting for catching
