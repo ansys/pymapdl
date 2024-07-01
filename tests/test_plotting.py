@@ -31,8 +31,6 @@ from conftest import has_dependency, requires
 if not has_dependency("pyvista"):
     pytest.skip(allow_module_level=True)
 
-from pyvista.plotting import Plotter
-
 from ansys.mapdl.core.errors import ComponentDoesNotExits
 from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
@@ -379,7 +377,7 @@ def test_bc_plot_bc_labels(mapdl, boundary_conditions_example, bc_labels):
         bc_labels=bc_labels[0],
         title="",
     )
-    assert isinstance(p, Plotter), bc_labels[1]
+    assert isinstance(p, MapdlPlotter), bc_labels[1]
     p.show()  # plotting for catching
 
 
@@ -416,7 +414,7 @@ def test_bc_plot_bc_target(mapdl, boundary_conditions_example, bc_target):
         bc_target=bc_target[0],
         title="",
     )
-    assert isinstance(p, Plotter), bc_target[1]
+    assert isinstance(p, MapdlPlotter), bc_target[1]
     p.show()  # plotting for catching
 
 
@@ -509,8 +507,8 @@ def test_pick_nodes(mapdl, make_block, selection, verify_image_cache):
 
     def debug_orders(pl, point):
         pl.show(auto_close=False)
-        pl.windows_size = (100, 100)
-        width, height = pl.window_size
+        pl.scene.windows_size = (100, 100)
+        width, height = pl.scene.window_size
         if pl._picking_right_clicking_observer is None:
             pl.iren._mouse_left_button_press(
                 int(width * point[0]), int(height * point[1])
@@ -578,8 +576,8 @@ def test_pick_kp(mapdl, make_block, selection):
 
     def debug_orders(pl, point):
         pl.show(auto_close=False)
-        pl.windows_size = (100, 100)
-        width, height = pl.window_size
+        pl.scene.windows_size = (100, 100)
+        width, height = pl.scene.window_size
         if pl._picking_right_clicking_observer is None:
             pl.iren._mouse_left_button_press(
                 int(width * point[0]), int(height * point[1])
@@ -698,9 +696,9 @@ def test_pick_node_special_cases(mapdl, make_block):
     # we pick nothing
     def debug_orders_0(pl, point):
         pl.show(auto_close=False)
-        pl.windows_size = (100, 100)
-        width, height = pl.window_size
-        pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
+        pl.scene.windows_size = (100, 100)
+        width, height = pl.scene.window_size
+        pl.scene.iren._mouse_move(int(width * point[0]), int(height * point[1]))
 
     mapdl.nsel("S", "node", "", 1)
     point = (285 / 1024, 280 / 800)
@@ -715,8 +713,8 @@ def test_pick_node_special_cases(mapdl, make_block):
     # we just make sure the number is not repeated and there is no error.
     def debug_orders_1(pl, point):
         pl.show(auto_close=False)
-        pl.windows_size = (100, 100)
-        width, height = pl.window_size
+        pl.scene.windows_size = (100, 100)
+        width, height = pl.scene.window_size
         # First click
         pl.iren._mouse_left_button_press(int(width * point[0]), int(height * point[1]))
         pl.iren._mouse_left_button_release(width, height)
@@ -747,8 +745,8 @@ def test_pick_node_select_unselect_with_mouse(mapdl, make_block):
     # we just make sure the number is not repeated and there is no error.
     def debug_orders_1(pl, point):
         pl.show(auto_close=False)
-        pl.windows_size = (100, 100)
-        width, height = pl.window_size
+        pl.scene.windows_size = (100, 100)
+        width, height = pl.scene.window_size
         # First click- selecting
         pl.iren._mouse_left_button_press(int(width * point[0]), int(height * point[1]))
         pl.iren._mouse_left_button_release(width, height)
@@ -784,19 +782,19 @@ def test_pick_areas(mapdl, make_block, selection):
 
     def debug_orders(pl, point):
         pl.show(auto_close=False)
-        pl.windows_size = (100, 100)
-        width, height = pl.window_size
-        if pl._picking_right_clicking_observer is None:
-            pl.iren._mouse_left_button_press(
+        pl.scene.windows_size = (100, 100)
+        width, height = pl.scene.window_size
+        if pl.scene._picking_right_clicking_observer is None:
+            pl.scene.iren._mouse_left_button_press(
                 int(width * point[0]), int(height * point[1])
             )
-            pl.iren._mouse_left_button_release(width, height)
+            pl.scene.iren._mouse_left_button_release(width, height)
         else:
-            pl.iren._mouse_right_button_press(
+            pl.scene.iren._mouse_right_button_press(
                 int(width * point[0]), int(height * point[1])
             )
-            pl.iren._mouse_right_button_release(width, height)
-        pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
+            pl.scene.iren._mouse_right_button_release(width, height)
+        pl.scene.iren._mouse_move(int(width * point[0]), int(height * point[1]))
 
     mapdl.asel("S", "area", "", 1)
     if selection == "R" or selection == "U":
@@ -870,17 +868,17 @@ def test_show_bounds(mapdl, make_block):
     default_bounds = [-1.0, 1.0, -1.0, 1.0, -1.0, 1.0]
     pl = mapdl.eplot(show_bounds=True, return_plotter=True)
 
-    assert pl.bounds
-    assert len(pl.bounds) == 6
-    assert pl.bounds != default_bounds
+    assert pl.scene.bounds
+    assert len(pl.scene.bounds) == 6
+    assert pl.scene.bounds != default_bounds
     pl.show()  # plotting for catching
 
 
 def test_background(mapdl, make_block):
     default_color = "#4c4c4cff"
     pl = mapdl.eplot(background="red", return_plotter=True)
-    assert pl.background_color != default_color
-    assert pl.background_color == "red"
+    assert pl.scene.background_color != default_color
+    assert pl.scene.background_color == "red"
     pl.show()  # plotting for catching
 
 
@@ -1037,7 +1035,7 @@ def test_cmplot_all(mapdl, make_block, entity):
 
     pl = mapdl.cmplot("all", entity, return_plotter=True)
 
-    assert np.allclose(pl.mesh.points, ent[ids - 1])
+    assert np.allclose(pl.meshes[0].points, ent[ids - 1])
     pl.show()
 
 

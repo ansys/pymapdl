@@ -115,6 +115,11 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
         """Return the scene."""
         return self.pv_interface.scene
 
+    @property
+    def meshes(self):
+        """Return the meshes."""
+        return self.scene.meshes
+
 
 class MapdlPlotter(Plotter):
     """Plotter class for PyMAPDL.
@@ -809,3 +814,8 @@ class MapdlPlotter(Plotter):
     def scene(self):
         """Return the scene."""
         return self._backend.scene
+
+    @property
+    def meshes(self):
+        """Return the meshes."""
+        return self.scene.meshes
