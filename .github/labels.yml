@@ -6,6 +6,14 @@
 # and assign a label to the new pull requrest.
 # 
 # Check the yml for more info: .github\workflows\label.yml
+#
+
+#############################################################
+# NOTES
+# =====
+#
+# If the labels names are change, the file ``./.github/release.yml`` should be also updated!
+#
 
 #############################################################
 # Main colors (hex)
@@ -62,7 +70,7 @@
   description: "Issue, problem or error in PyMAPDL"
   color: E67E22
 
-- name: new Feature
+- name: new feature
   description: "Request or proposal for a new feature"
   color: 85C1E9
   
