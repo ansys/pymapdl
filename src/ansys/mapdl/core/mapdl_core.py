@@ -2498,7 +2498,7 @@ class _MapdlCore(Commands):
             return text + f"Current {entity} selection: {picked_entities_str}"
 
         def callback_points(mesh, id_):
-            from ansys.mapdl.core.plotting.visualizer import POINT_SIZE
+            from ansys.mapdl.core.plotting.consts import POINT_SIZE
 
             point = mesh.points[id_]
             node_id = selector(
