@@ -30,46 +30,18 @@ import numpy as np
 from numpy.typing import NDArray
 import pyvista as pv
 
-from ansys.mapdl.core.misc import get_bounding_box, unique_rows
-from ansys.mapdl.core.plotting.theme import MapdlTheme
-
-POINT_SIZE = 10
-
-# Supported labels
-BC_D = [
-    "TEMP",
-    "UX",
-    "UY",
-    "UZ",
-    "VOLT",  # "MAG"
-]
-BC_F = [
-    "HEAT",
-    "FX",
-    "FY",
-    "FZ",
-    "AMPS",
-    "CHRG",
-    # "FLUX",
-    "CSGZ",
-]  # TODO: Add moments MX, MY, MZ
-FIELDS = {
-    "MECHANICAL": ["UX", "UY", "UZ", "FX", "FY", "FZ"],
-    "THERMAL": ["TEMP", "HEAT"],
-    "ELECTRICAL": ["VOLT", "CHRGS", "AMPS"],
-}
-
-FIELDS_ORDERED_LABELS = FIELDS["MECHANICAL"].copy()
-FIELDS_ORDERED_LABELS.extend(FIELDS["THERMAL"])
-FIELDS_ORDERED_LABELS.extend(FIELDS["ELECTRICAL"])
-
-# All boundary conditions:
-BCS = BC_D.copy()
-BCS.extend(BC_F)
-
-# Allowed entities to plot their boundary conditions
-ALLOWED_TARGETS = ["NODES"]
 from ansys.mapdl.core import _HAS_PYVISTA
+from ansys.mapdl.core.misc import get_bounding_box, unique_rows
+from ansys.mapdl.core.plotting.consts import (
+    ALLOWED_TARGETS,
+    BC_D,
+    BC_F,
+    BCS,
+    FIELDS,
+    FIELDS_ORDERED_LABELS,
+    POINT_SIZE,
+)
+from ansys.mapdl.core.plotting.theme import MapdlTheme
 
 if _HAS_PYVISTA:
     import pyvista as pv
