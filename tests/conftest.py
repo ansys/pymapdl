@@ -27,12 +27,6 @@ from shutil import get_terminal_size
 from sys import platform
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
-
-if has_dependency("pyvista"):
-    import ansys.tools.visualization_interface as viz_interface
-
-    viz_interface.TESTING_MODE = True
-
 import pytest
 
 from common import (
@@ -58,8 +52,6 @@ from common import (
 #
 
 TESTING_MINIMAL = testing_minimal()
-if _HAS_PYVISTA:
-    viz_interface.TESTING_MODE = True
 
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()
@@ -221,6 +213,11 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+
+if has_dependency("pyvista"):
+    import ansys.tools.visualization_interface as viz_interface
+
+    viz_interface.TESTING_MODE = True
 
 # check if the user wants to permit pytest to start MAPDL
 START_INSTANCE = get_start_instance()

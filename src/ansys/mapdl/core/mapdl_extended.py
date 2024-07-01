@@ -48,8 +48,6 @@ from ansys.mapdl.core.misc import (
     random_string,
     supress_logging,
 )
-from ansys.mapdl.core.plotting.theme import get_ansys_colors
-from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
 
 class _MapdlCommandExtended(_MapdlCore):
@@ -446,6 +444,8 @@ class _MapdlCommandExtended(_MapdlCore):
                     "Using the keyword argument 'vtk' requires having Pyvista installed."
                 )
         if vtk:
+            from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
             pl = MapdlPlotter()
 
             kwargs.setdefault("title", "MAPDL Keypoint Plot")
@@ -531,6 +531,9 @@ class _MapdlCommandExtended(_MapdlCore):
                 )
 
         if vtk:
+            from ansys.mapdl.core.plotting.theme import get_ansys_colors
+            from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
             kwargs.setdefault("show_scalar_bar", False)
             kwargs.setdefault("title", "MAPDL Line Plot")
             if not self.geometry.n_line:
@@ -713,6 +716,9 @@ class _MapdlCommandExtended(_MapdlCore):
 
         if vtk:
             from matplotlib.colors import to_rgba
+
+            from ansys.mapdl.core.plotting.theme import get_ansys_colors
+            from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
             kwargs.setdefault("show_scalar_bar", False)
             kwargs.setdefault("title", "MAPDL Area Plot")
@@ -913,6 +919,8 @@ class _MapdlCommandExtended(_MapdlCore):
                 )
 
         if vtk:
+            from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
             kwargs.setdefault("title", "MAPDL Volume Plot")
             if not self.geometry.n_volu:
                 warnings.warn(
@@ -1094,6 +1102,8 @@ class _MapdlCommandExtended(_MapdlCore):
             raise ValueError("`knum` keyword deprecated.  Please use `nnum` instead.")
 
         if vtk:
+            from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
             kwargs.setdefault("title", "MAPDL Node Plot")
             if not self.mesh.n_node:
                 warnings.warn("There are no nodes to plot.")
@@ -1225,6 +1235,8 @@ class _MapdlCommandExtended(_MapdlCore):
                 )
 
         if vtk:
+            from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
             kwargs.setdefault("title", "MAPDL Element Plot")
             if not self._mesh.n_elem:
                 warnings.warn("There are no elements to plot.")
