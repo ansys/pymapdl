@@ -125,6 +125,8 @@ from ansys.mapdl.core.pool import MapdlPool
 _HAS_ANSYS = _check_has_ansys()
 
 if _HAS_PYVISTA:
+    from ansys.mapdl.core.plotting.theme import _apply_default_theme
+
     _apply_default_theme()
 
 BUILDING_GALLERY = False
