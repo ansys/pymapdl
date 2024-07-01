@@ -82,9 +82,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.solution import Solution
     from ansys.mapdl.core.xpl import ansXpl
 
-if _HAS_PYVISTA:
-    from ansys.mapdl.core.plotting.plotting import get_meshes_from_plotter
-
 from ansys.mapdl.core.post import PostProcessing
 
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -2467,7 +2464,7 @@ class _MapdlCore(Commands):
             pass
 
         # adding selection inversor
-        pl._inver_mouse_click_selection = False
+        pl.scene._inver_mouse_click_selection = False
 
         selection_text = {
             "S": "New selection",
@@ -2501,7 +2498,7 @@ class _MapdlCore(Commands):
             return text + f"Current {entity} selection: {picked_entities_str}"
 
         def callback_points(mesh, id_):
-            from ansys.mapdl.core.plotting.plotting import POINT_SIZE
+            from ansys.mapdl.core.plotting.visualizer import POINT_SIZE
 
             point = mesh.points[id_]
             node_id = selector(

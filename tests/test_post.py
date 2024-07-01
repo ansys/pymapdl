@@ -38,7 +38,7 @@ from ansys.mapdl.core import _HAS_PYVISTA, examples
 from ansys.mapdl.core.errors import MapdlRuntimeError
 
 if _HAS_PYVISTA:
-    from ansys.mapdl.core.plotting.plotting import MapdlPlotter
+    from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
 from ansys.mapdl.core.post import (
     COMPONENT_STRESS_TYPE,

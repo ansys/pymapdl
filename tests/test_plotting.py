@@ -34,7 +34,7 @@ if not has_dependency("pyvista"):
 from pyvista.plotting import Plotter
 
 from ansys.mapdl.core.errors import ComponentDoesNotExits
-from ansys.mapdl.core.plotting.plotting import general_plotter
+from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
 FORCE_LABELS = [["FX", "FY", "FZ"], ["HEAT"], ["CHRG"]]
 DISPL_LABELS = [["UX", "UY", "UZ"], ["TEMP"], ["VOLT"]]
@@ -442,9 +442,10 @@ def test_bc_plot_bc_target_error(mapdl, boundary_conditions_example, bc_target):
 
 def test_bc_no_mapdl(mapdl):
     with pytest.raises(ValueError):
-        general_plotter(
-            [], [], [], plot_bc=True
-        )  # mapdl should be an argument if plotting BC
+        pl = MapdlPlotter()
+        pl.plot([], [], [], plot_bc=True)
+        pl.show()
+        # mapdl should be an argument if plotting BC
 
 
 def test_bc_only_one_node(mapdl, boundary_conditions_example):
@@ -837,7 +838,7 @@ def test_pick_areas(mapdl, make_block, selection):
 
 @requires("pyvista")
 def test_plotter_input(mapdl, make_block):
-    from ansys.mapdl.core.plotting.plotting import MapdlPlotter
+    from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
     pl = MapdlPlotter(off_screen=True)
     pl_pv = pl.scene

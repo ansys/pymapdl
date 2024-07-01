@@ -30,7 +30,7 @@ from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import supress_logging
 
 if _HAS_PYVISTA:
-    from ansys.mapdl.core.plotting.plotting import general_plotter
+    from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
 COMPONENT_STRESS_TYPE = ["X", "Y", "Z", "XY", "YZ", "XZ"]
 PRINCIPAL_TYPE = ["1", "2", "3"]
@@ -644,7 +644,9 @@ class PostProcessing:
         if show_node_numbering:
             labels = [{"points": surf.points, "labels": surf["ansys_node_num"]}]
         if _HAS_PYVISTA:
-            return general_plotter(meshes, [], labels, mapdl=self, **kwargs)
+            pl = MapdlPlotter()
+            pl.plot(meshes, [], labels, mapdl=self, **kwargs)
+            return pl.show(**kwargs)
 
     def _plot_cell_scalars(self, scalars, show_elem_numbering=False, **kwargs):
         """Plot cell scalars."""
@@ -726,7 +728,9 @@ class PostProcessing:
                 }
             ]
         if _HAS_PYVISTA:
-            return general_plotter(meshes, [], labels, mapdl=self, **kwargs)
+            pl = MapdlPlotter()
+            pl.plot(meshes, [], labels, mapdl=self, **kwargs)
+            return pl.show(**kwargs)
 
     @property
     @supress_logging

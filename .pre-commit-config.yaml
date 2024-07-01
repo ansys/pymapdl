@@ -2,11 +2,6 @@ fail_fast: True
 
 repos:
 
-- repo: https://github.com/ansys/pre-commit-hooks
-  rev: v0.3.2
-  hooks:
-  - id: add-license-headers
-
 - repo: https://github.com/pycqa/isort
   rev: 5.13.2
   hooks:

@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 from ansys.mapdl.core import _HAS_PYVISTA
-from ansys.mapdl.core.plotting.plotting import (
+from ansys.mapdl.core.plotting.visualizer import (
     ALLOWED_TARGETS,
     BC_D,
     BC_F,
@@ -31,4 +31,4 @@ from ansys.mapdl.core.plotting.plotting import (
 )
 
 if _HAS_PYVISTA:
-    from ansys.mapdl.core.plotting.plotting import *
+    from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
