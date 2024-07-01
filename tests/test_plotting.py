@@ -325,7 +325,7 @@ def test_bc_plot_options(
     )
 
     if return_plotter:
-        assert isinstance(p, Plotter)
+        assert isinstance(p, MapdlPlotter)
         p.show()
     else:
         assert p is None
