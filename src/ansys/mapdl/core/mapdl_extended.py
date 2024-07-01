@@ -1241,7 +1241,7 @@ class _MapdlCommandExtended(_MapdlCore):
             if not self._mesh.n_elem:
                 warnings.warn("There are no elements to plot.")
                 pl = MapdlPlotter()
-                pl.add_mesh([], [], [], mapdl=self, **kwargs)
+                pl.plot([], [], [], mapdl=self, **kwargs)
                 return pl.show(**kwargs)
 
             # TODO: Consider caching the surface
