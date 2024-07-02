@@ -31,4 +31,5 @@ from ansys.mapdl.core.plotting.consts import (
 )
 
 if _HAS_PYVISTA:
+    from ansys.mapdl.core.plotting.theme import MapdlTheme
     from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
