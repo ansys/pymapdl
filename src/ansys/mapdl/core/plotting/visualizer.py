@@ -72,43 +72,6 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
             use_trame=use_trame, plot_picked_names=plot_picked_names, **plotter_kwargs
         )
 
-    def plot_iter(
-        self,
-        plotting_list: Iterable[Any],
-        name_filter: str = None,
-        **plotting_options,
-    ) -> None:
-        """Add a list of objects to the plotter.
-
-        Parameters
-        ----------
-        plotting_list : Iterable[Any]
-            Iterable of objects to add to the plotter.
-        name_filter : str, optional
-            Filter to apply to the objects. The default is ``None``.
-        **plotting_options
-            Additional plotting options.
-        """
-        for plottable_object in plotting_list:
-            self.plot(plottable_object, name_filter, **plotting_options)
-
-    def plot(self, plottable_object: Any, name_filter: str = None, **plotting_options):
-        """Add an object to the plotter.
-
-        Parameters
-        ----------
-        plottable_object : Any
-            Object to add to the plotter.
-        name_filter : str, optional
-            Filter to apply to the object. The default is ``None``.
-        **plotting_options
-            Additional plotting options.
-        """
-        self.pv_interface.plot(
-            plottable_object=plottable_object,
-            name_filter=name_filter,
-        )
-
     @property
     def scene(self):
         """Return the scene."""
