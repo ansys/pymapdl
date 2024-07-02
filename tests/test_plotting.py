@@ -507,19 +507,19 @@ def test_pick_nodes(mapdl, make_block, selection, verify_image_cache):
 
     def debug_orders(pl, point):
         pl.show(auto_close=False)
-        pl.scene.windows_size = (100, 100)
-        width, height = pl.scene.window_size
-        if pl.scene._picking_right_clicking_observer is None:
-            pl.scene.iren._mouse_left_button_press(
+        pl.windows_size = (100, 100)
+        width, height = pl.window_size
+        if pl._picking_right_clicking_observer is None:
+            pl.iren._mouse_left_button_press(
                 int(width * point[0]), int(height * point[1])
             )
-            pl.scene.iren._mouse_left_button_release(width, height)
+            pl.iren._mouse_left_button_release(width, height)
         else:
-            pl.scene.iren._mouse_right_button_press(
+            pl.iren._mouse_right_button_press(
                 int(width * point[0]), int(height * point[1])
             )
-            pl.scene.iren._mouse_right_button_release(width, height)
-        pl.scene.iren._mouse_move(int(width * point[0]), int(height * point[1]))
+            pl.iren._mouse_right_button_release(width, height)
+        pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
 
     mapdl.nsel("S", "node", "", 1)
     if selection == "R" or selection == "U":
@@ -576,20 +576,20 @@ def test_pick_kp(mapdl, make_block, selection):
 
     def debug_orders(pl, point):
         pl.show(auto_close=False)
-        pl.scene.windows_size = (100, 100)
-        width, height = pl.scene.window_size
-        if pl.scene._picking_right_clicking_observer is None:
-            pl.scene.iren._mouse_left_button_press(
+        pl.windows_size = (100, 100)
+        width, height = pl.window_size
+        if pl._picking_right_clicking_observer is None:
+            pl.iren._mouse_left_button_press(
                 int(width * point[0]), int(height * point[1])
             )
-            pl.scene.iren._mouse_left_button_release(width, height)
+            pl.iren._mouse_left_button_release(width, height)
         else:
-            pl.scene.iren._mouse_right_button_press(
+            pl.iren._mouse_right_button_press(
                 int(width * point[0]), int(height * point[1])
             )
-            pl.scene.iren._mouse_right_button_release(width, height)
+            pl.iren._mouse_right_button_release(width, height)
 
-        pl.scene.iren._mouse_move(int(width * point[0]), int(height * point[1]))
+        pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
 
     mapdl.ksel("S", "KP", "", 1)
     if selection == "R" or selection == "U":
@@ -696,9 +696,9 @@ def test_pick_node_special_cases(mapdl, make_block):
     # we pick nothing
     def debug_orders_0(pl, point):
         pl.show(auto_close=False)
-        pl.scene.windows_size = (100, 100)
-        width, height = pl.scene.window_size
-        pl.scene.iren._mouse_move(int(width * point[0]), int(height * point[1]))
+        pl.windows_size = (100, 100)
+        width, height = pl.window_size
+        pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
 
     mapdl.nsel("S", "node", "", 1)
     point = (285 / 1024, 280 / 800)
@@ -713,8 +713,8 @@ def test_pick_node_special_cases(mapdl, make_block):
     # we just make sure the number is not repeated and there is no error.
     def debug_orders_1(pl, point):
         pl.show(auto_close=False)
-        pl.scene.windows_size = (100, 100)
-        width, height = pl.scene.window_size
+        pl.windows_size = (100, 100)
+        width, height = pl.window_size
         # First click
         pl.iren._mouse_left_button_press(int(width * point[0]), int(height * point[1]))
         pl.iren._mouse_left_button_release(width, height)
@@ -745,8 +745,8 @@ def test_pick_node_select_unselect_with_mouse(mapdl, make_block):
     # we just make sure the number is not repeated and there is no error.
     def debug_orders_1(pl, point):
         pl.show(auto_close=False)
-        pl.scene.windows_size = (100, 100)
-        width, height = pl.scene.window_size
+        pl.windows_size = (100, 100)
+        width, height = pl.window_size
         # First click- selecting
         pl.iren._mouse_left_button_press(int(width * point[0]), int(height * point[1]))
         pl.iren._mouse_left_button_release(width, height)
@@ -782,19 +782,19 @@ def test_pick_areas(mapdl, make_block, selection):
 
     def debug_orders(pl, point):
         pl.show(auto_close=False)
-        pl.scene.windows_size = (100, 100)
-        width, height = pl.scene.window_size
-        if pl.scene._picking_right_clicking_observer is None:
-            pl.scene.iren._mouse_left_button_press(
+        pl.windows_size = (100, 100)
+        width, height = pl.window_size
+        if pl._picking_right_clicking_observer is None:
+            pl.iren._mouse_left_button_press(
                 int(width * point[0]), int(height * point[1])
             )
-            pl.scene.iren._mouse_left_button_release(width, height)
+            pl.iren._mouse_left_button_release(width, height)
         else:
-            pl.scene.iren._mouse_right_button_press(
+            pl.iren._mouse_right_button_press(
                 int(width * point[0]), int(height * point[1])
             )
-            pl.scene.iren._mouse_right_button_release(width, height)
-        pl.scene.iren._mouse_move(int(width * point[0]), int(height * point[1]))
+            pl.iren._mouse_right_button_release(width, height)
+        pl.iren._mouse_move(int(width * point[0]), int(height * point[1]))
 
     mapdl.asel("S", "area", "", 1)
     if selection == "R" or selection == "U":
