@@ -812,26 +812,9 @@ def test_pick_areas(mapdl, make_block, selection):
         tolerance=0.2,
     )  # Selects node 2
 
-    """assert isinstance(selected, (list, np.ndarray))
+    assert isinstance(selected, (list, np.ndarray))
     if isinstance(selected, np.ndarray):
         assert selected.all()
-    else:
-        assert selected
-    assert len(selected) > 0
-
-    if selection != "U":
-        assert sorted(selected) == sorted(mapdl._get_selected_("area"))
-
-    if selection == "S":
-        assert selected == [2]  # area where the point clicks is area 2.
-    elif selection == "R":
-        assert selected == [1]  # area where the point clicks is area 282.
-    elif selection == "A":
-        assert 6 in selected
-        assert len(selected) > 1
-    elif selection == "U":
-        assert 282 not in selected
-        assert 2 in selected"""
 
 
 @requires("pyvista")

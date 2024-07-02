@@ -399,7 +399,7 @@ class MapdlPlotter(Plotter):
                 cmap=cmap,
                 render_points_as_spheres=render_points_as_spheres,
                 render_lines_as_tubes=render_lines_as_tubes,
-                **add_points_kwargs,
+                **(add_points_kwargs or {}),
             )
 
         for mesh in meshes:
@@ -423,7 +423,6 @@ class MapdlPlotter(Plotter):
             for each_mesh in mesh_:
                 self.scene.add_mesh(
                     each_mesh,
-                    # name_filter=None,
                     scalars=scalars,
                     scalar_bar_args=scalar_bar_args,
                     color=mesh.get("color", color),
@@ -445,7 +444,7 @@ class MapdlPlotter(Plotter):
                     render_points_as_spheres=render_points_as_spheres,
                     render_lines_as_tubes=render_lines_as_tubes,
                     rgb=rgb,
-                    **add_mesh_kwargs,
+                    **(add_mesh_kwargs or {}),
                 )
 
         for label in labels:
