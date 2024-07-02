@@ -327,7 +327,7 @@ class MapdlPlotter(Plotter):
         cmap=None,
         render_points_as_spheres=False,
         render_lines_as_tubes=False,
-        scalar_bar_args={},
+        scalar_bar_args=None,
         smooth_shading=None,
         feature_angle=30.0,
         show_scalar_bar=None,
@@ -337,10 +337,10 @@ class MapdlPlotter(Plotter):
         font_family=None,
         text_color=None,
         theme=None,
-        add_points_kwargs={},
-        add_mesh_kwargs={},
-        add_point_labels_kwargs={},
-        plotter_kwargs={},
+        add_points_kwargs=None,
+        add_mesh_kwargs=None,
+        add_point_labels_kwargs=None,
+        plotter_kwargs=None,
     ):
         """Adds a mesh to the plotter.
 
@@ -702,7 +702,7 @@ class MapdlPlotter(Plotter):
         cmap=None,
         render_points_as_spheres=False,
         render_lines_as_tubes=False,
-        scalar_bar_args={},
+        scalar_bar_args=None,
         smooth_shading=None,
         show_scalar_bar=None,
         split_sharp_edges=None,
@@ -721,10 +721,10 @@ class MapdlPlotter(Plotter):
         bc_target=None,
         bc_glyph_size=None,
         bc_labels_font_size=16,
-        add_points_kwargs={},
-        add_mesh_kwargs={},
-        add_point_labels_kwargs={},
-        plotter_kwargs={},
+        add_points_kwargs=None,
+        add_mesh_kwargs=None,
+        add_point_labels_kwargs=None,
+        plotter_kwargs=None,
         **kwargs,
     ) -> None:
         """Add an object to the plotter.
