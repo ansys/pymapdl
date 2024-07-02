@@ -28,7 +28,6 @@ from ansys.tools.visualization_interface import Plotter
 from ansys.tools.visualization_interface.backends.pyvista import PyVistaBackendInterface
 import numpy as np
 from numpy.typing import NDArray
-import pyvista as pv
 
 from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core.misc import get_bounding_box, unique_rows

@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 from ansys.mapdl.core import _HAS_PYVISTA
-from ansys.mapdl.core.plotting.consts import (
+from ansys.mapdl.core.plotting.consts import (  # noqa: F401
     ALLOWED_TARGETS,
     BC_D,
     BC_F,
@@ -31,5 +31,5 @@ from ansys.mapdl.core.plotting.consts import (
 )
 
 if _HAS_PYVISTA:
-    from ansys.mapdl.core.plotting.theme import MapdlTheme
-    from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+    from ansys.mapdl.core.plotting.theme import MapdlTheme  # noqa: F401
+    from ansys.mapdl.core.plotting.visualizer import MapdlPlotter  # noqa: F401
