@@ -387,6 +387,6 @@ def test_create_temp_dir():
 
     path = pathlib.Path(path)
     parent = path.parent
-    dir = path.parts[-1]
+    dir_ = path.parts[-1]
 
     assert str(path) != create_temp_dir(parent, dir)

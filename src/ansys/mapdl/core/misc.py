@@ -535,7 +535,7 @@ def create_temp_dir(tmpdir=None, name=None):
 
     try:
         os.mkdir(path)
-    except:
+    except:  #pragma: no cover
         raise MapdlRuntimeError(
             "Unable to create temporary working "
             f"directory {path}\nPlease specify 'run_location' argument"
