@@ -30,16 +30,12 @@ import pytest
 from conftest import has_dependency, requires
 
 if has_dependency("pyvista"):
-    from pyvista import Plotter
     from pyvista.plotting.renderer import CameraPosition
     from ansys.mapdl.core.plotting.theme import PyMAPDL_cmap
-
-from ansys.mapdl.core import _HAS_PYVISTA, examples
-from ansys.mapdl.core.errors import MapdlRuntimeError
-
-if _HAS_PYVISTA:
     from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
+from ansys.mapdl.core import examples
+from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.post import (
     COMPONENT_STRESS_TYPE,
     PRINCIPAL_TYPE,
@@ -854,7 +850,7 @@ def test_general_plotter_returns(mapdl, static_solve, verify_image_cache):
     p = mapdl.post_processing.plot_nodal_displacement(
         "X", smooth_shading=True, return_plotter=True
     )
-    assert isinstance(p, Plotter)
+    assert isinstance(p, MapdlPlotter)
     p.show()
 
     with pytest.raises(ValueError):
