@@ -242,6 +242,13 @@ class MapdlPlotter(Plotter):
         return flist + dlist
 
     def get_meshes_from_plotter(self):
+        """Get the meshes plotted in the plotter.
+
+        Returns
+        -------
+        list[pv.PolyData]
+            Plotted meshes.
+        """
         datasets = []
         for actor in self.scene.actors.values():
             if hasattr(actor, "mapper"):
@@ -335,6 +342,19 @@ class MapdlPlotter(Plotter):
         add_point_labels_kwargs={},
         plotter_kwargs={},
     ):
+        """Adds a mesh to the plotter.
+
+        Parameters
+        ----------
+        meshes : pv.PolyData
+            The mesh to add to the plotter.
+        points : pv.PolyData
+            The points to add to the plotter.
+        labels : pv.PolyData
+            The labels to add to the plotter.
+        plotter_kwargs : dict, optional
+            Extra kwargs, by default {}
+        """
         if theme is None:
             theme = MapdlTheme()
 
@@ -464,6 +484,25 @@ class MapdlPlotter(Plotter):
         bc_glyph_size=None,
         bc_labels_font_size=16,
     ):
+        """Plot boundary conditions.
+
+        Parameters
+        ----------
+        mapdl : Mapdl, optional
+            Mapdl instance, by default None
+        bc_labels : optional
+            Labels to plot, by default None
+        bc_target : optional
+            Targets to plot, by default None
+        plot_bc_labels : bool, optional
+            Whether to plot the labels or not, by default False
+        plot_bc_legend : optional
+            Legend to plot, by default None
+        bc_glyph_size : optional
+            Size of the gliph, by default None
+        bc_labels_font_size : int, optional
+            Size of the labels font, by default 16
+        """
         if bc_labels:
             bc_labels = self._bc_labels_checker(bc_labels)
         else:
