@@ -272,7 +272,7 @@ class MapdlPlotter(Plotter):
         labels : List[str]
             List of labels to add.
         """
-        self.scene.add_point_labels(points, labels, **plotting_options)
+        self.scene.add_point_labels(points, labels, **(plotting_options or {}))
 
     def add_points(self, points: Iterable[float], **plotting_options) -> None:
         """Add points to the plotter.
@@ -282,7 +282,7 @@ class MapdlPlotter(Plotter):
         points : List[float]
             List of points to add to the plotter.
         """
-        _ = self.scene.add_points(points, **plotting_options)
+        _ = self.scene.add_points(points, **(plotting_options or {}))
 
     def plot_iter(
         self,
@@ -300,7 +300,7 @@ class MapdlPlotter(Plotter):
             Filter to apply to the objects. The default is ``None``.
         """
         for plottable_object in plotting_list:
-            self.plot(plottable_object, name_filter, **plotting_options)
+            self.plot(plottable_object, name_filter, **(plotting_options or {}))
 
     def add_mesh(
         self,
