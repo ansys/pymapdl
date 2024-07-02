@@ -214,7 +214,7 @@ from ansys.mapdl.core.errors import (
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 
-if has_dependency("pyvista"):
+if has_dependency("ansys-tools-visualization-interface"):
     import ansys.tools.visualization_interface as viz_interface
 
     viz_interface.TESTING_MODE = True
