@@ -23,6 +23,7 @@
 """Small or misc tests that don't fit in other test modules"""
 import inspect
 import os
+import pathlib
 
 import numpy as np
 import pytest
@@ -37,6 +38,7 @@ from ansys.mapdl.core.misc import (
     check_valid_ip,
     check_valid_port,
     check_valid_routine,
+    create_temp_dir,
     last_created,
     load_file,
     no_return,
@@ -376,3 +378,15 @@ def test_check_valid_routine():
     assert check_valid_routine("begin level")
     with pytest.raises(ValueError, match="Invalid routine"):
         check_valid_routine("invalid")
+
+
+@requires("local")
+def test_create_temp_dir():
+
+    path = create_temp_dir()
+
+    path = pathlib.Path(path)
+    parent = path.parent
+    dir_ = path.parts[-1]
+
+    assert str(path) != create_temp_dir(parent, dir)

@@ -24,7 +24,6 @@
 import os
 import shutil
 import socket
-import tempfile
 import time
 from typing import Any, Dict, List, Optional, Union
 import warnings
@@ -219,7 +218,7 @@ class MapdlPool:
         _debug_no_launch = kwargs.pop("_debug_no_launch", None)
 
         if run_location is None:
-            run_location = tempfile.gettempdir()
+            run_location = create_temp_dir()
         self._root_dir: str = run_location
 
         kwargs["remove_temp_files"] = remove_temp_files

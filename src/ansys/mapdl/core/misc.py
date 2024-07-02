@@ -519,33 +519,27 @@ def create_temp_dir(tmpdir=None, name=None):
     """Create a new unique directory at a given temporary directory"""
     if tmpdir is None:
         tmpdir = tempfile.gettempdir()
-    elif not os.path.isdir(tmpdir):
-        os.makedirs(tmpdir)
 
-    if not name:
-        random_name = True
-        letters_ = string.ascii_lowercase.replace("n", "")
-        name = random_string(10, letters_)
-    else:
-        random_name = False
+    # Possible letters
+    letters_ = string.ascii_lowercase.replace("n", "")
 
-    # running into a rare issue with MAPDL on Windows with "\n" being
-    # treated literally.
+    def get_name():
+        return random_string(10, letters_)
+
+    name = name or get_name()
+    while os.path.exists(os.path.join(tmpdir, name)):
+        name = get_name()
+
+    # create dir:
     path = os.path.join(tmpdir, name)
 
-    if random_name:
-        # in the *rare* case of a duplicate path
-        while os.path.isdir(path):
-            path = os.path.join(tempfile.gettempdir(), name)
-
-    if not os.path.exists(path):
-        try:
-            os.mkdir(path)
-        except:
-            raise MapdlRuntimeError(
-                "Unable to create temporary working "
-                f"directory {path}\nPlease specify 'run_location' argument"
-            )
+    try:
+        os.mkdir(path)
+    except:  # pragma: no cover
+        raise MapdlRuntimeError(
+            "Unable to create temporary working "
+            f"directory {path}\nPlease specify 'run_location' argument"
+        )
 
     return path
 
