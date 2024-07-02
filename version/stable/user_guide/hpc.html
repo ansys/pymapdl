@@ -1,0 +1,1319 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+
+
+    
+        
+    <title>High performance computing (HPC) &#8212; PyMAPDL</title>
+    
+
+
+
+
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/bootstrap.css?digest=5b4479735964841361fd" rel="stylesheet" />
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=5b4479735964841361fd" rel="stylesheet" />
+
+  
+  <link href="../_static/vendor/fontawesome/6.1.2/css/all.min.css?digest=5b4479735964841361fd" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=fa44fd50" />
+    <link rel="stylesheet" type="text/css" href="../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/graphviz.css?v=fd3f3429" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery.css?v=61a4c737" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/ansys_sphinx_theme.css?v=a362721a" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx-design.min.css?v=87e54e7c" />
+    <link rel="stylesheet" type="text/css" href="../_static/custom.css?v=91007d66" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd" />
+<link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd" />
+  <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=5b4479735964841361fd"></script>
+ 
+<link href="../_static/css/breadcrumbs.css" rel="stylesheet" />
+
+    <script src="../_static/documentation_options.js?v=f1844525"></script>
+    <script src="../_static/doctools.js?v=9a2dae69"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/thebelab-helper.js"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="../_static/js/table.js?v=b64f5182"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'user_guide/hpc';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.14.4';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.68';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="File explorer overview" href="xpl.html" />
+    <link rel="prev" title="Create a pool of MAPDL instances" href="pool.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/user_guide/hpc.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>
+    Back to top
+  </button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__primary"
+          id="__primary"/>
+  <label class="overlay overlay-primary" for="__primary"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          name="__secondary"
+          id="__secondary"/>
+  <label class="overlay overlay-secondary" for="__secondary"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container"><!-- Debugging: html_theme_options =  -->
+ 
+<!-- Include the MeiliSearch CSS stylesheet only if theme present -->
+<link href="../_static/css/meilisearch.css" rel="stylesheet" />
+
+<!-- Create a search bar form with a text input and a dropdown selector for the search index -->
+<form
+  class="bd-search d-flex align-items-center"
+  action="../search.html"
+  method="get"
+>
+  <i class="fa fa-search" aria-hidden="true" id="search-icon"></i>
+  <input
+    type="search"
+    placeholder="Search"
+    class="form-control"
+    id="search-bar-input"
+    autofocus
+  />
+  <span class="search-button__kbd-shortcut"
+    ><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span
+  >
+  <style>
+    .bd-search .search-button__kbd-shortcut {
+      right: 33%;
+    }
+  </style>
+  
+  <select id="indexUidSelector" class="index-select">
+    
+    <option value="pymapdl-v0-68">PyMAPDL</option>
+    
+  </select>
+  
+  <!-- Include the MeiliSearch JavaScript library for the search bar -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+
+    
+  <script>
+    var HOST_URL = "https://backend.search.pyansys.com/";
+    var API_KEY = "9fbccc76c147935ce2b562a9ee0c6669276987572dc1f22491cea72e9e99f35d";
+    var indexUid = "pymapdl-v0-68";
+  </script>
+
+  <script src="../_static/js/meilisearch_theme_wrap.js"></script>
+</form>
+</div>
+  </div>
+   
+    <nav class="bd-header navbar navbar-expand-lg bd-navbar">
+<div class="bd-header__inner bd-page-width">
+  <label class="sidebar-toggle primary-toggle" for="__primary">
+    <span class="fa-solid fa-bars"></span>
+  </label>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../_static/pyansys-logo-dark_mode.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <script>document.write(`<img src="../_static/pyansys-logo-dark_mode.png" class="logo__image only-dark" alt="PyMAPDL - Home"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../mapdl_commands/index.html">
+                        MAPDL commands
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../examples/index.html">
+                        Examples
+                      </a>
+                    </li>
+                
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../changelog.html">
+                        Release notes
+                      </a>
+                    </li>
+                
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-wrench fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+ <script>
+ document.write(`
+   <button class="btn navbar-btn search-button-field search-button__button" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <span class="search-button__default-text">Search</span>
+    <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+   </button>
+ `);
+ </script>
+    </div>
+  
+
+  
+    <label class="sidebar-toggle secondary-toggle" for="__secondary" tabindex="0">
+      <span class="fa-solid fa-outdent"></span>
+    </label>
+  
+</div>
+
+    </nav>
+    <div id="announcement_msg"></div>
+<script>
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(
+      (text) => (document.getElementById("announcement_msg").innerHTML = text),
+    )
+    .catch((error) => console.error(`Fetch problem: ${error.message}`));
+</script>  
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          <div class="navbar-item">
+<nav class="navbar-nav">
+  <p class="sidebar-header-items__title"
+     role="heading"
+     aria-level="1"
+     aria-label="Site Navigation">
+    Site Navigation
+  </p>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../getting_started/index.html">
+                        Getting started
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item current active">
+                      <a class="nav-link nav-internal" href="index.html">
+                        User guide
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../mapdl_commands/index.html">
+                        MAPDL commands
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../api/index.html">
+                        API reference
+                      </a>
+                    </li>
+                
+
+                    <li class="nav-item">
+                      <a class="nav-link nav-internal" href="../examples/index.html">
+                        Examples
+                      </a>
+                    </li>
+                
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links-2">
+                    More
+                </button>
+                <ul id="pst-nav-more-links-2" class="dropdown-menu">
+                    
+                    <li class="nav-item">
+                      <a class="nav-link dropdown-item nav-internal" href="../changelog.html">
+                        Release notes
+                      </a>
+                    </li>
+                
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm navbar-btn dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm navbar-btn theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <span class="theme-switch nav-link" data-mode="light"><i class="fa-solid fa-sun fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="dark"><i class="fa-solid fa-moon fa-lg"></i></span>
+    <span class="theme-switch nav-link" data-mode="auto"><i class="fa-solid fa-circle-half-stroke fa-lg"></i></span>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links navbar-nav"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><span><i class="fa fa-wrench fa-lg" aria-hidden="true"></i></span>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1"><a class="reference internal" href="mapdl.html">PyMAPDL language and usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="convert.html">Translate scripts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mesh_geometry.html">Mesh and geometry</a></li>
+<li class="toctree-l1"><a class="reference internal" href="plotting.html">Interactive plotting</a></li>
+<li class="toctree-l1"><a class="reference internal" href="parameters.html">Setting and retrieving parameters</a></li>
+<li class="toctree-l1"><a class="reference internal" href="components.html">Managing components</a></li>
+<li class="toctree-l1"><a class="reference internal" href="post.html">Postprocessing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">PyMAPDL command line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="database.html">Access MAPDL database</a></li>
+<li class="toctree-l1"><a class="reference internal" href="math.html">PyAnsys Math overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="pool.html">Create a pool of MAPDL instances</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">High performance computing (HPC)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="xpl.html">File explorer overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upf.html">Using Python to code UPF subroutines</a></li>
+<li class="toctree-l1"><a class="reference internal" href="krylov.html">Harmonic analysis using the Krylov method</a></li>
+<li class="toctree-l1"><a class="reference internal" href="troubleshoot.html">Troubleshooting PyMAPDL</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="index.html" class="nav-link">User guide</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page">High performance computing (HPC)</li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article" role="main">
+                  
+  <section id="high-performance-computing-hpc">
+<span id="ref-hpc"></span><h1>High performance computing (HPC)<a class="headerlink" href="#high-performance-computing-hpc" title="Link to this heading">#</a></h1>
+<p>This page provides an overview on how to use PyMAPDL in HPC clusters.
+While it only considers the SLURM scheduler, many of the assumptions for this scheduler might apply to other schedulers, such as PBS, SGE, or LSF.</p>
+<section id="slurm-hpc-cluster">
+<span id="ref-hpc-slurm"></span><h2>SLURM HPC cluster<a class="headerlink" href="#slurm-hpc-cluster" title="Link to this heading">#</a></h2>
+<section id="introduction">
+<h3>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">#</a></h3>
+<p>High performance computing (HPC) clusters are powerful systems designed to handle
+computationally intensive tasks efficiently. SLURM (Simple Linux Utility for Resource
+Management) is one of the most widely used job schedulers in HPC environments. This
+page provides an overview of job submission using PyMAPDL and
+SLURM on HPC clusters.</p>
+</section>
+<section id="what-is-slurm">
+<h3>What is SLURM?<a class="headerlink" href="#what-is-slurm" title="Link to this heading">#</a></h3>
+<p>SLURM is an open source workload manager and job scheduler designed for Linux
+clusters of all sizes. It efficiently allocates resources (compute nodes, CPU
+cores, memory, and GPUs) to jobs submitted by users.</p>
+<p>For more information on SLURM, see the <a class="reference external" href="https://slurm.schedmd.com">SLURM documentation</a>.</p>
+</section>
+<section id="basic-terms">
+<h3>Basic terms<a class="headerlink" href="#basic-terms" title="Link to this heading">#</a></h3>
+<p>Descriptions follow of basic terms.</p>
+<ul class="simple">
+<li><p><strong>Nodes</strong>: Individual computing servers within the cluster.</p></li>
+<li><p><strong>Compute node</strong>: A type of node used only for running processes.
+It is not accessible from outside the cluster.</p></li>
+<li><p><strong>Login node</strong>: A type of node used only for login and job submission.
+No computation should be performed on it. It is sometimes referred to as
+<em>virtual desktop infrastructure</em> (VDI).</p></li>
+<li><p><strong>Partition</strong>: A logical grouping of nodes with similar characteristics (for
+example, CPU architecture and memory size).</p></li>
+<li><p><strong>Job</strong>: A task submitted to SLURM for execution.</p></li>
+<li><p><strong>Queue</strong>: A waiting area where jobs are held until resources become available.</p></li>
+<li><p><strong>Scheduler</strong>: The component responsible for deciding which job gets
+executed and when and where it gets executed.</p></li>
+</ul>
+</section>
+<section id="regular-job-submission-workflow">
+<h3>Regular job submission workflow<a class="headerlink" href="#regular-job-submission-workflow" title="Link to this heading">#</a></h3>
+<section id="log-into-the-cluster">
+<span id="ref-hpc-login"></span><h4>Log into the cluster<a class="headerlink" href="#log-into-the-cluster" title="Link to this heading">#</a></h4>
+<p>You need access credentials and permissions to log in and submit jobs on the HPC cluster.
+Depending on the login node configuration, you can log in using Virtual Network
+Computing (VNC) applications or a terminal.</p>
+<p>For example, you can log in to a login node using the terminal:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span>ssh<span class="w"> </span>username@login-node-hostname
+</pre></div>
+</div>
+</section>
+<section id="writing-a-slurm-batch-script">
+<h4>Writing a SLURM batch script<a class="headerlink" href="#writing-a-slurm-batch-script" title="Link to this heading">#</a></h4>
+<p>A SLURM batch script is a shell script that specifies
+job parameters and commands to execute. Here’s a basic example:</p>
+<p><strong>my_script.sh</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="c1">#SBATCH --job-name=myjob</span>
+<span class="c1">#SBATCH --nodes=1</span>
+<span class="c1">#SBATCH --ntasks-per-node=4</span>
+<span class="c1">#SBATCH --time=01:00:00</span>
+
+<span class="c1"># Commands to run</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Hello, SLURM!&quot;</span>
+srun<span class="w"> </span>my_executable
+</pre></div>
+</div>
+<p>This script is run using <code class="docutils literal notranslate"><span class="pre">srun</span></code> and <code class="docutils literal notranslate"><span class="pre">sbatch</span></code>.
+Notice how comments in the file prefixed with <code class="docutils literal notranslate"><span class="pre">#SBATCH</span></code> describe the job configuration.
+For more information on available <code class="docutils literal notranslate"><span class="pre">srun</span></code> and <code class="docutils literal notranslate"><span class="pre">sbatch</span></code>
+arguments, see <a class="reference external" href="https://slurm.schedmd.com/srun.html">Slurm Workload Manager - srun</a> and
+<a class="reference external" href="https://slurm.schedmd.com/sbatch.html">Slurm Workload Manager - sbatch</a>.</p>
+</section>
+<section id="submitting-a-job">
+<h4>Submitting a job<a class="headerlink" href="#submitting-a-job" title="Link to this heading">#</a></h4>
+<p>To submit a job, use the <code class="docutils literal notranslate"><span class="pre">srun</span></code> command followed by the name of
+the batch script:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span>srun<span class="w"> </span>my_script.sh
+</pre></div>
+</div>
+<p>If you prefer to submit a batch job, you can use the <code class="docutils literal notranslate"><span class="pre">sbatch</span></code> command:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span>sbatch<span class="w"> </span>my_script.sh
+</pre></div>
+</div>
+<p>You can specify each job setting using the command line. For example:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span>srun<span class="w"> </span>--nodes<span class="o">=</span><span class="m">2</span><span class="w"> </span>my_script.sh
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><strong>Command line arguments versus in-file arguments</strong>:
+Command line arguments do <strong>NOT</strong> overwrite the equivalent arguments
+written in the bash file. Hence, you must ensure that the argument that you
+want to pass using the command line is not already present in the bash file.</p>
+</div>
+</section>
+</section>
+<section id="submit-a-pymapdl-job">
+<span id="ref-hpc-pymapdl-job"></span><h3>Submit a PyMAPDL job<a class="headerlink" href="#submit-a-pymapdl-job" title="Link to this heading">#</a></h3>
+<p>Using PyMAPDL in an HPC environment managed by SLURM scheduler has certain requirements:</p>
+<ul class="simple">
+<li><p><strong>An Ansys installation must be accessible from all the compute nodes</strong>.
+This normally implies that the <code class="docutils literal notranslate"><span class="pre">ANSYS</span></code> installation directory is in a
+shared drive or directory. Your HPC cluster administrator
+should provide you with the path to the <code class="docutils literal notranslate"><span class="pre">ANSYS</span></code> directory.</p></li>
+<li><p><strong>A compatible Python installation must be accessible from all the compute nodes</strong>.
+For compatible Python versions, see <a class="reference internal" href="../getting_started/install_pymapdl.html#ref-pymapdl-installation"><span class="std std-ref">Install PyMAPDL</span></a>.</p></li>
+</ul>
+<p>Additionally, you must perform a few key steps to ensure efficient job
+execution and resource utilization. Subsequent topics describe these steps.</p>
+<section id="check-the-python-installation">
+<h4>Check the Python installation<a class="headerlink" href="#check-the-python-installation" title="Link to this heading">#</a></h4>
+<p>The PyMAPDL Python package (<code class="docutils literal notranslate"><span class="pre">ansys-mapdl-core</span></code>) must be installed in a virtual
+environment that is accessible from the compute nodes.</p>
+<p>To see where your Python distribution is installed, use this code:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span>which<span class="w"> </span>python3
+<span class="go">/usr/bin/python3</span>
+</pre></div>
+</div>
+<p>To print the version of Python you have available, use this code:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span>python3<span class="w"> </span>--version
+<span class="go">Python 3.9.16</span>
+</pre></div>
+</div>
+<p>You should be aware that your machine might have installed other Python versions.
+To find out if those installations are already in the <code class="docutils literal notranslate"><span class="pre">PATH</span></code> environment variable,
+you can press the <strong>Tab</strong> key to use autocomplete:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span>which<span class="w"> </span>python3<span class="o">[</span>TAB<span class="o">]</span>
+<span class="go">python3             python3-intel64     python3.10-config   python3.11          python3.12          python3.8           python3.8-intel64   python3.9-config</span>
+<span class="go">python3-config      python3.10          python3.10-intel64  python3.11-config   python3.12-config   python3.8-config    python3.9</span>
+<span class="gp">$ </span>which<span class="w"> </span>python3.10
+<span class="go">/usr/bin/python3.10</span>
+</pre></div>
+</div>
+<p>You should use a Python version that is compatible with PyMAPDL.
+For more information, see:ref:<cite>ref_pymapdl_installation</cite>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">which</span></code> command returns the path where the Python executable is installed.
+You can use that executable to create your own Python virtual environment in a directory
+that is accessible from all the compute nodes.
+For most HPC clusters, the <code class="docutils literal notranslate"><span class="pre">/home/$user</span></code> directory is generally available to all nodes.
+You can then create the virtual environment in the <code class="docutils literal notranslate"><span class="pre">/home/user/.venv</span></code> directory:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span>python3<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>/home/user/.venv
+</pre></div>
+</div>
+<p>After activating the virtual environment, you can install PyMAPDL.</p>
+</section>
+<section id="install-pymapdl">
+<h4>Install PyMAPDL<a class="headerlink" href="#install-pymapdl" title="Link to this heading">#</a></h4>
+<p>To install PyMAPDL on the activated virtual environment, run the following commands:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span><span class="nb">source</span><span class="w"> </span>/home/user/.venv/bin/activate
+<span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">user@machine:~$ </span>pip<span class="w"> </span>install<span class="w"> </span>ansys-mapdl-core
+<span class="go">Collecting ansys-mapdl-core</span>
+<span class="go">Downloading ansys_mapdl_core-0.68.3-py3-none-any.whl (26.9 MB)</span>
+<span class="go">    ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 26.9/26.9 MB 37.3 MB/s eta 0:00:00</span>
+<span class="go">Collecting pexpect&gt;=4.8.0</span>
+<span class="go">Using cached pexpect-4.9.0-py2.py3-none-any.whl (63 kB)</span>
+<span class="go">Collecting click&gt;=8.1.3</span>
+<span class="go">...</span>
+</pre></div>
+</div>
+<p>To test if this virtual environment is accessible from the compute nodes,
+run this <code class="docutils literal notranslate"><span class="pre">test.sh</span></code> bash script:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="ch">#!/bin/bash</span>
+<span class="c1">#SBATCH --job-name=myjob</span>
+<span class="c1">#SBATCH --nodes=1</span>
+<span class="c1">#SBATCH --ntasks-per-node=4</span>
+<span class="c1">#SBATCH --time=01:00:00</span>
+
+<span class="c1"># Commands to run</span>
+<span class="nb">echo</span><span class="w"> </span><span class="s2">&quot;Testing Python!&quot;</span>
+<span class="nb">source</span><span class="w"> </span>/home/user/.venv/bin/activate
+python<span class="w"> </span>-c<span class="w"> </span><span class="s2">&quot;from ansys.mapdl import core;print(f&#39;PyMAPDL version {core.__version__} was successfully imported.&#39;)&quot;</span>
+</pre></div>
+</div>
+<p>then you can run that script using:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span>srun<span class="w"> </span>test.sh
+</pre></div>
+</div>
+<p>This command might take a minute or two to complete, depending on the amount of free
+resources available in the cluster.
+On the console, you should see this output:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Testing Python!
+PyMAPDL version 0.68.3 was successfully imported.
+</pre></div>
+</div>
+<p>If you see an error in the output, see <a class="reference internal" href="#ref-hpc-troubleshooting"><span class="std std-ref">Troubleshooting</span></a>, especially
+<a class="reference internal" href="#ref-python-venv-not-accesible"><span class="std std-ref">Python virtual environment is not accessible</span></a>.</p>
+</section>
+<section id="id1">
+<h4>Submit a PyMAPDL job<a class="headerlink" href="#id1" title="Link to this heading">#</a></h4>
+<p>To submit a PyMAPDL job, you must create two files:</p>
+<ul class="simple">
+<li><p>Python script with the PyMAPDL code</p></li>
+<li><p>Bash script that activates the virtual environment and calls the Python script</p></li>
+</ul>
+<p><strong>Python script:</strong> <code class="docutils literal notranslate"><span class="pre">pymapdl_script.py</span></code></p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">ansys.mapdl.core</span> <span class="kn">import</span> <span class="n">launch_mapdl</span>
+
+<span class="c1"># Number of processors must be lower than the</span>
+<span class="c1"># number of CPUs allocated for the job.</span>
+<span class="n">mapdl</span> <span class="o">=</span> <span class="n">launch_mapdl</span><span class="p">(</span><span class="n">nproc</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="n">mapdl</span><span class="o">.</span><span class="n">prep7</span><span class="p">()</span>
+<span class="n">n_proc</span> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">get_value</span><span class="p">(</span><span class="s2">&quot;ACTIVE&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;NUMCPU&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Number of CPUs: </span><span class="si">{</span><span class="n">n_proc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">mapdl</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><strong>Bash script:</strong> <code class="docutils literal notranslate"><span class="pre">job.sh</span></code></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">source</span><span class="w"> </span>/home/user/.venv/bin/activate
+python<span class="w"> </span>pymapdl_script.py
+</pre></div>
+</div>
+<p>To start the simulation, you use this code:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span>srun<span class="w"> </span>job.sh
+</pre></div>
+</div>
+<p>The bash script allows you to customize the environment before running the Python script.
+This bash script performs such tasks as creating environment variables, moving to
+different directories, and printing to ensure your configuration is correct. However,
+this bash script is not mandatory.
+You can avoid having the <code class="docutils literal notranslate"><span class="pre">job.sh</span></code> bash script if the virtual environment is activated
+and you pass all the environment variables to the job:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span><span class="nb">source</span><span class="w"> </span>/home/user/.venv/bin/activate
+<span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">user@machine:~$ </span>srun<span class="w"> </span>python<span class="w"> </span>pymapdl_script.py<span class="w"> </span>--export<span class="o">=</span>ALL
+</pre></div>
+</div>
+<p>The <code class="docutils literal notranslate"><span class="pre">--export=ALL</span></code> argument might not be needed, depending on the cluster configuration.
+Furthermore, you can omit the Python call in the preceding command if you include the
+Python shebang (<code class="docutils literal notranslate"><span class="pre">#!/usr/bin/python3</span></code>) in the first line of the <code class="docutils literal notranslate"><span class="pre">pymapdl_script.py</span></code> script.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span><span class="nb">source</span><span class="w"> </span>/home/user/.venv/bin/activate
+<span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">user@machine:~$ </span>srun<span class="w"> </span>pymapdl_script.py<span class="w"> </span>--export<span class="o">=</span>ALL
+</pre></div>
+</div>
+<p>If you prefer to run the job in the background, you can use the <code class="docutils literal notranslate"><span class="pre">sbatch</span></code>
+command instead of the <code class="docutils literal notranslate"><span class="pre">srun</span></code> command. However, in this case, the Bash file is needed:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span>sbatch<span class="w"> </span>job.sh
+<span class="go">Submitted batch job 1</span>
+</pre></div>
+</div>
+<p>Here is the expected output of the job:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>Number of CPUs: 10.0
+</pre></div>
+</div>
+</section>
+</section>
+<section id="examples">
+<h3>Examples<a class="headerlink" href="#examples" title="Link to this heading">#</a></h3>
+<p>For an example that uses a machine learning genetic algorithm in
+an HPC system managed by SLURM scheduler, see <a class="reference internal" href="../examples/extended_examples/hpc/hpc_ml_ga.html#hpc-ml-ga-example"><span class="std std-ref">Genetic algorithms and PyMAPDL</span></a>.</p>
+</section>
+<section id="monitoring-jobs">
+<h3>Monitoring jobs<a class="headerlink" href="#monitoring-jobs" title="Link to this heading">#</a></h3>
+<section id="view-the-job-queue">
+<h4>View the job queue<a class="headerlink" href="#view-the-job-queue" title="Link to this heading">#</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">squeue</span></code> command displays information about jobs that are currently queued or
+running on the system.</p>
+<p><strong>Basic usage:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>squeue
+</pre></div>
+</div>
+<p><strong>To see jobs from a specific user:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>squeue<span class="w"> </span>-u<span class="w"> </span>username
+</pre></div>
+</div>
+<p><strong>To filter jobs by partition:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>squeue<span class="w"> </span>-p<span class="w"> </span>partition_name
+</pre></div>
+</div>
+<p><strong>Common options:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">-l</span></code> or <code class="docutils literal notranslate"><span class="pre">--long</span></code>: Displays detailed information about each job.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--start</span></code>: Predicts and shows the start times for pending jobs.</p></li>
+</ul>
+</section>
+<section id="control-the-jobs-and-configuration">
+<h4>Control the jobs and configuration<a class="headerlink" href="#control-the-jobs-and-configuration" title="Link to this heading">#</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">scontrol</span></code> command provides a way to view and modify the SLURM configuration and state.
+It’s a versatile tool for managing jobs, nodes, partitions, and more.</p>
+<p><strong>Show information about a job:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scontrol<span class="w"> </span>show<span class="w"> </span>job<span class="w"> </span>&lt;jobID&gt;
+</pre></div>
+</div>
+<p><strong>Show information about a node:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scontrol<span class="w"> </span>show<span class="w"> </span>node<span class="w"> </span>nodename
+</pre></div>
+</div>
+<p><strong>Hold and release jobs:</strong></p>
+<ul class="simple">
+<li><p>To hold a job (stop it from starting): <code class="docutils literal notranslate"><span class="pre">scontrol</span> <span class="pre">hold</span> <span class="pre">&lt;jobID&gt;</span></code></p></li>
+<li><p>To release a job on hold: <code class="docutils literal notranslate"><span class="pre">scontrol</span> <span class="pre">release</span> <span class="pre">&lt;jobID&gt;</span></code></p></li>
+</ul>
+</section>
+<section id="cancel-jobs">
+<h4>Cancel jobs<a class="headerlink" href="#cancel-jobs" title="Link to this heading">#</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">scancel</span></code> command cancels a running or pending job.</p>
+<p><strong>Cancel a specific job:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scancel<span class="w"> </span>&lt;jobID&gt;
+</pre></div>
+</div>
+<p><strong>Cancel all jobs of a specific user:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scancel<span class="w"> </span>-u<span class="w"> </span>username
+</pre></div>
+</div>
+<p><strong>Cancel jobs by partition:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>scancel<span class="w"> </span>-p<span class="w"> </span>partition_name
+</pre></div>
+</div>
+<p><strong>Common options:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--name=jobname</span></code>: Cancels all jobs with a specific name.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">--state=pending</span></code>: Cancels all jobs in a specific state,
+such as all pending jobs as shown.</p></li>
+</ul>
+</section>
+<section id="report-accounting-information">
+<h4>Report accounting Information<a class="headerlink" href="#report-accounting-information" title="Link to this heading">#</a></h4>
+<p>The <code class="docutils literal notranslate"><span class="pre">sacct</span></code> account reports job or job step accounting information
+about active or completed jobs.</p>
+<p><strong>Basic usage:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sacct
+</pre></div>
+</div>
+<p><strong>To see information about jobs from a specific user:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sacct<span class="w"> </span>-u<span class="w"> </span>username
+</pre></div>
+</div>
+<p><strong>To show information about a specific job or job range:</strong></p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>sacct<span class="w"> </span>-j<span class="w"> </span>&lt;jobID&gt;
+sacct<span class="w"> </span>-j<span class="w"> </span>&lt;jobID_1&gt;,&lt;jobID_2&gt;
+</pre></div>
+</div>
+<p><strong>Common options:</strong></p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">--format</span></code>: Specifies which fields to display.
+For example, <code class="docutils literal notranslate"><span class="pre">--format=JobID,JobName,State</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">-S</span></code> and <code class="docutils literal notranslate"><span class="pre">-E</span></code>: Sets the start and end times for the report.
+For example, <code class="docutils literal notranslate"><span class="pre">-S</span> <span class="pre">2023-01-01</span> <span class="pre">-E</span> <span class="pre">2023-01-31</span></code>.</p></li>
+</ul>
+<p>For more information, see the SLURM documentation
+or use the <code class="docutils literal notranslate"><span class="pre">man</span></code> command (for example, <code class="docutils literal notranslate"><span class="pre">man</span> <span class="pre">squeue</span></code>) to explore all available
+options and their usage.</p>
+</section>
+</section>
+<section id="best-practices">
+<h3>Best practices<a class="headerlink" href="#best-practices" title="Link to this heading">#</a></h3>
+<ul class="simple">
+<li><p>Optimize resource usage to minimize job wait times and maximize cluster efficiency.</p></li>
+<li><p>Regularly monitor job queues and system resources to identify potential bottlenecks.</p></li>
+<li><p>Follow naming conventions for batch scripts and job names to maintain organization.</p></li>
+<li><p>Keep batch scripts and job submissions concise and well-documented
+for reproducibility and troubleshooting.</p></li>
+</ul>
+</section>
+<section id="troubleshooting">
+<span id="ref-hpc-troubleshooting"></span><h3>Troubleshooting<a class="headerlink" href="#troubleshooting" title="Link to this heading">#</a></h3>
+<section id="debugging-jobs">
+<h4>Debugging jobs<a class="headerlink" href="#debugging-jobs" title="Link to this heading">#</a></h4>
+<ul class="simple">
+<li><p>Use <code class="docutils literal notranslate"><span class="pre">--output</span></code> and <code class="docutils literal notranslate"><span class="pre">--error</span></code> directives in batch scripts to capture
+standard output and error messages.</p></li>
+<li><p>Check SLURM logs for error messages and debugging information.</p></li>
+</ul>
+</section>
+<section id="python-virtual-environment-is-not-accessible">
+<span id="ref-python-venv-not-accesible"></span><h4>Python virtual environment is not accessible<a class="headerlink" href="#python-virtual-environment-is-not-accessible" title="Link to this heading">#</a></h4>
+<p>If there is an error while testing the Python installation, it might mean
+that the Python environment is not accessible to the compute nodes.
+For example, in the following output, PyMAPDL could not be found, meaning that the script
+is not using the virtual environment (<code class="docutils literal notranslate"><span class="pre">/home/user/.venv</span></code>):</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span>srun<span class="w"> </span>test.sh
+<span class="go">Testing Python!</span>
+<span class="go">Traceback (most recent call last):</span>
+<span class="go">File &quot;&lt;string&gt;&quot;, line 1, in &lt;module&gt;</span>
+<span class="go">ImportError: No module named ansys.mapdl</span>
+</pre></div>
+</div>
+<p>This could be for a number of reasons. One of them is that the system Python distribution
+used to create the virtual environment is not accessible from the compute nodes
+due to one of these reasons:</p>
+<ul class="simple">
+<li><p>The virtual environment has been created in a
+directory that is not accessible from the nodes.</p></li>
+<li><p>The virtual environment has been created from a Python
+executable that is not available to the compute nodes.
+Hence, the virtual environment is not activated. For
+example, you might be creating the virtual environment
+using Python 3.10, but only Python 3.8 is available
+from the compute nodes.</p></li>
+</ul>
+<p>You can test which Python executable the cluster is using by starting an interactive session in
+a compute node with this code:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span>srun<span class="w"> </span>--pty<span class="w"> </span>/bin/bash
+<span class="gp">user@compute_node_01:~$ </span><span class="nb">compgen</span><span class="w"> </span>-c<span class="w"> </span><span class="p">|</span><span class="w"> </span>grep<span class="w"> </span>python<span class="w"> </span><span class="c1"># List all commands starting with python</span>
+</pre></div>
+</div>
+<p>Many HPC infrastructures use environment managers to load and unload
+software packages using modules and environment variables.
+Hence, you might want to make sure that the correct module is loaded in your script.
+For information on two of the most common environment managers, see the
+<a class="reference external" href="https://modules.readthedocs.io/en/latest/">Modules documentation</a> and <a class="reference external" href="https://lmod.readthedocs.io/en/latest/">Lmod documentation</a>.
+Check your cluster documentation to know which environment
+manager is being using and how to load Python with it.
+If you find any issue, you should contact your cluster administrator.</p>
+<p>If there is not a suitable Python version accessible from the
+compute nodes, you might have to request your HPC cluster
+administrator to have a suitable Python version installed on all
+compute nodes.
+If this is not an option, see <a class="reference internal" href="#ref-ansys-provided-python"><span class="std std-ref">Using the Ansys-provided Python installation</span></a>.</p>
+</section>
+<section id="using-the-ansys-provided-python-installation">
+<span id="ref-ansys-provided-python"></span><h4>Using the Ansys-provided Python installation<a class="headerlink" href="#using-the-ansys-provided-python-installation" title="Link to this heading">#</a></h4>
+<p><strong>For development purposes only</strong></p>
+<p>In certain HPC environments the possibility of installing a different Python version
+is limited for security reasons. In such cases, the Python distribution available in
+the Ansys installation can be used.
+This Python distribution is a customized Python (CPython)
+version for Ansys products use only. Its use is <strong>discouraged</strong>
+except for very advanced users and special use cases.</p>
+<p>This Python distribution is in the following directory, where
+<code class="docutils literal notranslate"><span class="pre">%MAPDL_VERSION%</span></code> is the three-digit Ansys version:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/ansys_inc/v%MAPDL_VERSION%/commonfiles/CPython/3_10/linx64/Release/python
+</pre></div>
+</div>
+<p>For example, here is the directory for Ansys 2024 R2:</p>
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>/ansys_inc/v242/commonfiles/CPython/3_10/linx64/Release/python
+</pre></div>
+</div>
+<p>In Ansys 2024 R1 and later, the unified installer includes CPython 3.10.
+Earlier versions include CPython 3.7 (<code class="docutils literal notranslate"><span class="pre">/commonfiles/CPython/3_7/linx64/Release/python</span></code>).</p>
+<p>Because the Ansys installation must be available to all
+the compute nodes to run simulations using them, this
+Python distribution is normally also available to the
+compute nodes. Hence, you can use it to create your
+own virtual environment.</p>
+<p>Due to the particularities of this Python distribution, you must
+follow these steps to create a virtual environment accessible to
+the compute nodes:</p>
+<ol class="arabic">
+<li><p>Set the Python path environment variable:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ </span><span class="nb">export</span><span class="w"> </span><span class="nv">PY_PATH</span><span class="o">=</span>/ansys_inc/v241/commonfiles/CPython/3_10/linx64/Release/Python
+</pre></div>
+</div>
+</li>
+<li><p>For only Ansys 2024 R1 and earlier, patch the <code class="docutils literal notranslate"><span class="pre">PATH</span></code> and <code class="docutils literal notranslate"><span class="pre">LD_LIBRARY_PATH</span></code>
+environment variables:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ PATH=$PY_PATH/bin:$PATH  # </span>Patching<span class="w"> </span>path
+<span class="gp">user@machine:~$ LD_LIBRARY_PATH=$PY_PATH/lib:$LD_LIBRARY_PATH  # </span>Patching<span class="w"> </span>LD_LIBRARY_PATH
+</pre></div>
+</div>
+</li>
+<li><p>On the same terminal, create your own virtual
+environment and activate it:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">user@machine:~$ $</span>PY_PATH<span class="w"> </span>-m<span class="w"> </span>venv<span class="w"> </span>/home/user/.venv
+<span class="gp">user@machine:~$ </span><span class="nb">source</span><span class="w"> </span>/home/user/.venv
+</pre></div>
+</div>
+</li>
+</ol>
+<ol class="arabic" start="4">
+<li><p>Install PyMAPDL:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">user@machine:~$ </span>python<span class="w"> </span>-m<span class="w"> </span>pip<span class="w"> </span>install<span class="w"> </span>ansys-mapdl-core
+</pre></div>
+</div>
+</li>
+<li><p>Use it to launch simulations, using <code class="docutils literal notranslate"><span class="pre">srun</span></code>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">user@machine:~$ </span>srun<span class="w"> </span>pymapdl_script.py
+</pre></div>
+</div>
+<p>or <code class="docutils literal notranslate"><span class="pre">sbatch</span></code>:</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp gp-VirtualEnv">(.venv)</span> <span class="gp">user@machine:~$ </span>sbatch<span class="w"> </span>job.sh
+<span class="go">Submitted batch job 1</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+</section>
+<section id="advanced-configuration">
+<h3>Advanced configuration<a class="headerlink" href="#advanced-configuration" title="Link to this heading">#</a></h3>
+<p>The following topics provide some advanced ideas for you to
+explore when using PyMAPDL on HPC clusters.</p>
+<section id="advanced-job-management">
+<h4>Advanced job management<a class="headerlink" href="#advanced-job-management" title="Link to this heading">#</a></h4>
+<section id="job-dependencies">
+<h5>Job dependencies<a class="headerlink" href="#job-dependencies" title="Link to this heading">#</a></h5>
+<p>Specify dependencies between jobs using the <code class="docutils literal notranslate"><span class="pre">--dependency</span></code> flag.
+Jobs can depend on completion, failure, or other criteria of previously submitted jobs.</p>
+</section>
+<section id="array-jobs">
+<h5>Array jobs<a class="headerlink" href="#array-jobs" title="Link to this heading">#</a></h5>
+<p>Submit multiple jobs as an array using the <code class="docutils literal notranslate"><span class="pre">--array</span></code> flag. Each array
+element corresponds to a separate job, allowing for parallel execution of similar tasks.</p>
+</section>
+<section id="job-arrays-with-dependencies">
+<h5>Job arrays with dependencies<a class="headerlink" href="#job-arrays-with-dependencies" title="Link to this heading">#</a></h5>
+<p>Combine array jobs with dependencies for complex job
+scheduling requirements. This allows for parallel execution while maintaining dependencies
+between individual tasks.</p>
+</section>
+</section>
+<section id="resource-allocation-and-request">
+<h4>Resource allocation and request<a class="headerlink" href="#resource-allocation-and-request" title="Link to this heading">#</a></h4>
+<section id="specify-resources">
+<h5>Specify resources<a class="headerlink" href="#specify-resources" title="Link to this heading">#</a></h5>
+<p>Use SLURM directives in batch scripts to specify required
+resources such as number of nodes, CPU cores, memory, and time limit.</p>
+</section>
+<section id="request-resources">
+<h5>Request resources<a class="headerlink" href="#request-resources" title="Link to this heading">#</a></h5>
+<p>Use the <code class="docutils literal notranslate"><span class="pre">--constraint</span></code> flag to request specific hardware
+configurations (for example, CPU architecture) or the <code class="docutils literal notranslate"><span class="pre">--gres</span></code> flag for requesting generic
+resources like GPUs.</p>
+</section>
+<section id="resource-limits">
+<h5>Resource Limits<a class="headerlink" href="#resource-limits" title="Link to this heading">#</a></h5>
+<p>Set resource limits for individual jobs using directives such as
+<code class="docutils literal notranslate"><span class="pre">--cpus-per-task</span></code>, <code class="docutils literal notranslate"><span class="pre">--mem</span></code>, and <code class="docutils literal notranslate"><span class="pre">--time</span></code>.</p>
+</section>
+</section>
+</section>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+  <div class="sidebar-secondary-item">
+
+  <div class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#slurm-hpc-cluster">SLURM HPC cluster</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#introduction">Introduction</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#what-is-slurm">What is SLURM?</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#basic-terms">Basic terms</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#regular-job-submission-workflow">Regular job submission workflow</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#log-into-the-cluster">Log into the cluster</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#writing-a-slurm-batch-script">Writing a SLURM batch script</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#submitting-a-job">Submitting a job</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#submit-a-pymapdl-job">Submit a PyMAPDL job</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#check-the-python-installation">Check the Python installation</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#install-pymapdl">Install PyMAPDL</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#id1">Submit a PyMAPDL job</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#examples">Examples</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#monitoring-jobs">Monitoring jobs</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#view-the-job-queue">View the job queue</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#control-the-jobs-and-configuration">Control the jobs and configuration</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#cancel-jobs">Cancel jobs</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#report-accounting-information">Report accounting Information</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#best-practices">Best practices</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#troubleshooting">Troubleshooting</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#debugging-jobs">Debugging jobs</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#python-virtual-environment-is-not-accessible">Python virtual environment is not accessible</a></li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#using-the-ansys-provided-python-installation">Using the Ansys-provided Python installation</a></li>
+</ul>
+</li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-configuration">Advanced configuration</a><ul class="nav section-nav flex-column">
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#advanced-job-management">Advanced job management</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#job-dependencies">Job dependencies</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#array-jobs">Array jobs</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#job-arrays-with-dependencies">Job arrays with dependencies</a></li>
+</ul>
+</li>
+<li class="toc-h4 nav-item toc-entry"><a class="reference internal nav-link" href="#resource-allocation-and-request">Resource allocation and request</a><ul class="nav section-nav flex-column">
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#specify-resources">Specify resources</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#request-resources">Request resources</a></li>
+<li class="toc-h5 nav-item toc-entry"><a class="reference internal nav-link" href="#resource-limits">Resource Limits</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item"> 
+<div class="tocsection editthispage">
+  <a href="https://github.com/ansys/pymapdl/edit/main/doc/source/user_guide/hpc.rst">
+    <i class="fa-solid fa-pencil"></i>
+       Edit
+    on GitHub  
+  </a>
+</div>
+
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/bootstrap.js?digest=5b4479735964841361fd"></script>
+<script src="../_static/scripts/pydata-sphinx-theme.js?digest=5b4479735964841361fd"></script>
+
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.68.3 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          0.16.6. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>
