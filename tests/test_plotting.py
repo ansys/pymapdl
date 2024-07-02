@@ -836,10 +836,8 @@ def test_pick_areas(mapdl, make_block, selection):
 
 @requires("pyvista")
 def test_plotter_input(mapdl, make_block):
-    from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
     pl = MapdlPlotter(off_screen=False)
-    pl_pv = pl.scene
     pl2 = mapdl.eplot(return_plotter=True, plotter=pl)
     assert pl is pl2
     pl2.show()  # plotting for catching
