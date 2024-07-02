@@ -194,7 +194,7 @@ if has_dependency("ansys-tools-package"):
 if has_dependency("pyvista"):
     import pyvista
 
-    from ansys.mapdl.core.theme import _apply_default_theme
+    from ansys.mapdl.core.plotting.theme import _apply_default_theme
 
     _apply_default_theme()
 
@@ -213,6 +213,11 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+
+if has_dependency("ansys-tools-visualization-interface"):
+    import ansys.tools.visualization_interface as viz_interface
+
+    viz_interface.TESTING_MODE = True
 
 # check if the user wants to permit pytest to start MAPDL
 START_INSTANCE = get_start_instance()

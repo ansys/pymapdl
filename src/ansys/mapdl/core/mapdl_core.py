@@ -82,9 +82,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.solution import Solution
     from ansys.mapdl.core.xpl import ansXpl
 
-if _HAS_PYVISTA:
-    from ansys.mapdl.core.plotting import get_meshes_from_plotter
-
 from ansys.mapdl.core.post import PostProcessing
 
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -2450,6 +2447,7 @@ class _MapdlCore(Commands):
         self, entity, pl, type_, previous_picked_entities, **kwargs
     ):
         """Show a plot and get the selected entity."""
+        pl = pl.scene
         _debug = kwargs.pop("_debug", False)  # for testing purposes
         previous_picked_entities = set(previous_picked_entities)
 
@@ -2501,7 +2499,7 @@ class _MapdlCore(Commands):
             return text + f"Current {entity} selection: {picked_entities_str}"
 
         def callback_points(mesh, id_):
-            from ansys.mapdl.core.plotting import POINT_SIZE
+            from ansys.mapdl.core.plotting.consts import POINT_SIZE
 
             point = mesh.points[id_]
             node_id = selector(
@@ -2531,7 +2529,7 @@ class _MapdlCore(Commands):
                 name="_entity_picking_message",
             )
             if picked_ids:
-                pl.add_mesh(
+                pl.plot(
                     mesh.points[picked_ids],
                     color="red",
                     point_size=POINT_SIZE + 10,
@@ -2549,7 +2547,7 @@ class _MapdlCore(Commands):
             mesh_id = get_entnum(mesh)
 
             # Getting meshes with that entity_num.
-            meshes = get_meshes_from_plotter(pl)
+            meshes = pl.get_meshes_from_plotter()
 
             meshes = [each for each in meshes if get_entnum(each) == mesh_id]
 
@@ -2558,7 +2556,7 @@ class _MapdlCore(Commands):
                 if mesh_id not in picked_entities:
                     picked_entities.append(mesh_id)
                     for i, each in enumerate(meshes):
-                        pl.add_mesh(
+                        pl.plot(
                             each,
                             color="red",
                             point_size=10,
@@ -2590,7 +2588,7 @@ class _MapdlCore(Commands):
 
         if entity in ["kp", "node"]:
             lines_pl = self.lplot(return_plotter=True, color="w")
-            lines_meshes = get_meshes_from_plotter(lines_pl)
+            lines_meshes = lines_pl.get_meshes_from_plotter()
 
             for each_mesh in lines_meshes:
                 pl.add_mesh(

@@ -25,9 +25,12 @@ import weakref
 
 import numpy as np
 
+from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import supress_logging
-from ansys.mapdl.core.plotting import general_plotter
+
+if _HAS_PYVISTA:
+    from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
 COMPONENT_STRESS_TYPE = ["X", "Y", "Z", "XY", "YZ", "XZ"]
 PRINCIPAL_TYPE = ["1", "2", "3"]
@@ -640,8 +643,10 @@ class PostProcessing:
         labels = []
         if show_node_numbering:
             labels = [{"points": surf.points, "labels": surf["ansys_node_num"]}]
-
-        return general_plotter(meshes, [], labels, mapdl=self, **kwargs)
+        if _HAS_PYVISTA:
+            pl = MapdlPlotter()
+            pl.plot(meshes, [], labels, mapdl=self, **kwargs)
+            return pl.show(**kwargs)
 
     def _plot_cell_scalars(self, scalars, show_elem_numbering=False, **kwargs):
         """Plot cell scalars."""
@@ -722,8 +727,10 @@ class PostProcessing:
                     "labels": surf["ansys_elem_num"],
                 }
             ]
-
-        return general_plotter(meshes, [], labels, mapdl=self, **kwargs)
+        if _HAS_PYVISTA:
+            pl = MapdlPlotter()
+            pl.plot(meshes, [], labels, mapdl=self, **kwargs)
+            return pl.show(**kwargs)
 
     @property
     @supress_logging

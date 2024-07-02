@@ -23,7 +23,7 @@
 """pymapdl examples"""
 import os
 
-from ansys.mapdl.core.theme import PyMAPDL_cmap
+from ansys.mapdl.core.plotting.theme import PyMAPDL_cmap
 
 # get location of this folder and the example files
 dir_path = os.path.dirname(os.path.realpath(__file__))

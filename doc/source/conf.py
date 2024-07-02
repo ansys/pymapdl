@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import warnings
 
+import ansys.tools.visualization_interface as viz_interface
 from ansys_sphinx_theme import ansys_favicon, get_version_match
 import numpy as np
 import pyvista
@@ -14,11 +15,14 @@ from sphinx_gallery.sorting import FileNameSortKey
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
 
+viz_interface.DOCUMENTATION_BUILD = True
+pyvista.BUILDING_GALLERY = True
+pyvista.OFF_SCREEN = True
+
 # Manage errors
 pyvista.set_error_output_file("errors.txt")
 
 # Ensure that offscreen rendering is used for docs generation
-pyvista.OFF_SCREEN = True
 
 # must be less than or equal to the XVFB window size
 try:

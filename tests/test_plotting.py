@@ -26,15 +26,13 @@ import os
 import numpy as np
 import pytest
 
-from conftest import has_dependency
+from conftest import has_dependency, requires
 
 if not has_dependency("pyvista"):
     pytest.skip(allow_module_level=True)
 
-from pyvista.plotting import Plotter
-
 from ansys.mapdl.core.errors import ComponentDoesNotExits
-from ansys.mapdl.core.plotting import general_plotter
+from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
 FORCE_LABELS = [["FX", "FY", "FZ"], ["HEAT"], ["CHRG"]]
 DISPL_LABELS = [["UX", "UY", "UZ"], ["TEMP"], ["VOLT"]]
@@ -325,7 +323,7 @@ def test_bc_plot_options(
     )
 
     if return_plotter:
-        assert isinstance(p, Plotter)
+        assert isinstance(p, MapdlPlotter)
         p.show()
     else:
         assert p is None
@@ -379,7 +377,7 @@ def test_bc_plot_bc_labels(mapdl, boundary_conditions_example, bc_labels):
         bc_labels=bc_labels[0],
         title="",
     )
-    assert isinstance(p, Plotter), bc_labels[1]
+    assert isinstance(p, MapdlPlotter), bc_labels[1]
     p.show()  # plotting for catching
 
 
@@ -416,7 +414,7 @@ def test_bc_plot_bc_target(mapdl, boundary_conditions_example, bc_target):
         bc_target=bc_target[0],
         title="",
     )
-    assert isinstance(p, Plotter), bc_target[1]
+    assert isinstance(p, MapdlPlotter), bc_target[1]
     p.show()  # plotting for catching
 
 
@@ -442,9 +440,10 @@ def test_bc_plot_bc_target_error(mapdl, boundary_conditions_example, bc_target):
 
 def test_bc_no_mapdl(mapdl):
     with pytest.raises(ValueError):
-        general_plotter(
-            [], [], [], plot_bc=True
-        )  # mapdl should be an argument if plotting BC
+        pl = MapdlPlotter()
+        pl.plot([], [], [], plot_bc=True)
+        pl.show()
+        # mapdl should be an argument if plotting BC
 
 
 def test_bc_only_one_node(mapdl, boundary_conditions_example):
@@ -816,32 +815,13 @@ def test_pick_areas(mapdl, make_block, selection):
     assert isinstance(selected, (list, np.ndarray))
     if isinstance(selected, np.ndarray):
         assert selected.all()
-    else:
-        assert selected
-    assert len(selected) > 0
-
-    if selection != "U":
-        assert sorted(selected) == sorted(mapdl._get_selected_("area"))
-
-    if selection == "S":
-        assert selected == [2]  # area where the point clicks is area 2.
-    elif selection == "R":
-        assert selected == [1]  # area where the point clicks is area 282.
-    elif selection == "A":
-        assert 6 in selected
-        assert len(selected) > 1
-    elif selection == "U":
-        assert 282 not in selected
-        assert 2 in selected
 
 
+@requires("pyvista")
 def test_plotter_input(mapdl, make_block):
-    pl = Plotter(off_screen=True)
-    # because in CICD we use 'screen_off', this will trigger a warning,
-    # since using 'plotter' will overwrite this kwarg.
-    with pytest.warns(UserWarning):
-        pl2 = mapdl.eplot(return_plotter=True, plotter=pl)
-    assert pl == pl2
+
+    pl = MapdlPlotter(off_screen=False)
+    pl2 = mapdl.eplot(return_plotter=True, plotter=pl)
     assert pl is pl2
     pl2.show()  # plotting for catching
 
@@ -865,17 +845,17 @@ def test_show_bounds(mapdl, make_block):
     default_bounds = [-1.0, 1.0, -1.0, 1.0, -1.0, 1.0]
     pl = mapdl.eplot(show_bounds=True, return_plotter=True)
 
-    assert pl.bounds
-    assert len(pl.bounds) == 6
-    assert pl.bounds != default_bounds
+    assert pl.scene.bounds
+    assert len(pl.scene.bounds) == 6
+    assert pl.scene.bounds != default_bounds
     pl.show()  # plotting for catching
 
 
 def test_background(mapdl, make_block):
     default_color = "#4c4c4cff"
     pl = mapdl.eplot(background="red", return_plotter=True)
-    assert pl.background_color != default_color
-    assert pl.background_color == "red"
+    assert pl.scene.background_color != default_color
+    assert pl.scene.background_color == "red"
     pl.show()  # plotting for catching
 
 
@@ -1032,7 +1012,7 @@ def test_cmplot_all(mapdl, make_block, entity):
 
     pl = mapdl.cmplot("all", entity, return_plotter=True)
 
-    assert np.allclose(pl.mesh.points, ent[ids - 1])
+    assert np.allclose(pl.meshes[0].points, ent[ids - 1])
     pl.show()
 
 

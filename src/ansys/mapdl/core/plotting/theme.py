@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Store parameters for a PyMAPDL-specific theme for pyvista"""
+"""Store parameters for a PyMAPDL-specific theme for PyVista"""
 
 import numpy as np
 
@@ -48,10 +48,14 @@ if _HAS_PYVISTA:
         else:  # older versions
             from pyvista.themes import DefaultTheme as Theme
 
+    base_class = Theme
+
 else:  # pragma: no cover
 
-    class Theme:
+    class myEmptyClass:
         pass
+
+    base_class = myEmptyClass
 
 
 MAPDL_colorbar = (
@@ -84,12 +88,18 @@ def get_ansys_colors(N=9):
     return np.array([PyMAPDL_cmap(i) for i in range(N)])
 
 
-class MapdlTheme(Theme):
-    """PyMAPDL-specific theme for Pyvista.
+class MapdlTheme(base_class):
+    """Provides the PyMAPDL-specific theme for PyVista.
+
+    The theme includes these defaults:
+
+    - ``'jet'`` for the (rainbow) colormap.
+    - ``'Courier'`` font family for an interactive plot
+    - ``'PyMAPDL'`` for the title of an interactive plot
 
     Examples
     --------
-    Create a custom theme with unique parameters from the base MapdlTheme.
+    Create a custom theme with unique parameters from the ``MapdlTheme`` base.
 
     >>> from ansys.mapdl import core as pymapdl
     >>> my_theme = pymapdl.MapdlTheme()
@@ -120,15 +130,14 @@ class MapdlTheme(Theme):
         if _HAS_MATPLOTLIB:
             self.cmap = PyMAPDL_cmap
 
-        self.font.size = 18
-        self.font.title_size = 18
-        self.font.label_size = 18
-        self.font.color = "black"
-        self.font.family = "arial"
+            self.font.size = 18
+            self.font.title_size = 18
+            self.font.label_size = 18
+            self.font.color = "black"
 
-        self.axes.x_color = "tomato"
-        self.axes.y_color = "seagreen"
-        self.axes.z_color = "blue"
+            self.axes.x_color = "tomato"
+            self.axes.y_color = "seagreen"
+            self.axes.z_color = "blue"
 
         self.show_edges = False
         self.color = "lightblue"

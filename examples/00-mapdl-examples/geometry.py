@@ -42,6 +42,7 @@ import numpy as np
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import examples
+from ansys.mapdl.core.plotting import MapdlTheme
 
 mapdl = pymapdl.launch_mapdl()
 
@@ -88,7 +89,7 @@ mapdl.lplot(
 # multiple plots.  These theme parameters override any unset keyword
 # arguments.  For example:
 
-my_theme = pymapdl.MapdlTheme()
+my_theme = MapdlTheme()
 my_theme.background = "white"
 my_theme.cmap = "jet"  # colormap
 my_theme.axes.show = False

@@ -161,7 +161,7 @@ Add a PyVista plotting frame in the window
 ==========================================
 
 Start by importing the `QtInteractor <https://qtdocs.pyvista.org/api_reference.html#qtinteractor>`_
-class from the ``pyvistaqt`` package and the :class:`MapdlTheme <ansys.mapdl.core.theme.MapdlTheme>`
+class from the ``pyvistaqt`` package and the :class:`MapdlTheme <ansys.mapdl.core.plotting.theme.MapdlTheme>`
 class from the ``ansys-mapdl-core`` package:
 
 .. code:: python
