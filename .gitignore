@@ -101,3 +101,7 @@ doc/source/sg_execution_times.rst
 *prin-stresses.html
 doc/webserver.log
 doc/webserver.pid
+
+
+# Ignore any distributions directory to prevent accidental publications
+distributions/
