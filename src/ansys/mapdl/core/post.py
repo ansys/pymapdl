@@ -27,7 +27,7 @@ import numpy as np
 
 from ansys.mapdl.core import _HAS_PYVISTA
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from ansys.mapdl.core.misc import supress_logging
+from ansys.mapdl.core.misc import requires_package, supress_logging
 
 if _HAS_PYVISTA:
     from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
@@ -613,6 +613,7 @@ class PostProcessing:
             **kwargs,
         )
 
+    @requires_package("ansys-tools-visualization-interface")
     def _plot_point_scalars(self, scalars, show_node_numbering=False, **kwargs):
         """Plot point scalars"""
         if not scalars.size:
@@ -643,11 +644,11 @@ class PostProcessing:
         labels = []
         if show_node_numbering:
             labels = [{"points": surf.points, "labels": surf["ansys_node_num"]}]
-        if _HAS_PYVISTA:
-            pl = MapdlPlotter()
-            pl.plot(meshes, [], labels, mapdl=self, **kwargs)
-            return pl.show(**kwargs)
+        pl = MapdlPlotter()
+        pl.plot(meshes, [], labels, mapdl=self, **kwargs)
+        return pl.show(**kwargs)
 
+    @requires_package("ansys-tools-visualization-interface")
     def _plot_cell_scalars(self, scalars, show_elem_numbering=False, **kwargs):
         """Plot cell scalars."""
         if not scalars.size:
@@ -727,10 +728,9 @@ class PostProcessing:
                     "labels": surf["ansys_elem_num"],
                 }
             ]
-        if _HAS_PYVISTA:
-            pl = MapdlPlotter()
-            pl.plot(meshes, [], labels, mapdl=self, **kwargs)
-            return pl.show(**kwargs)
+        pl = MapdlPlotter()
+        pl.plot(meshes, [], labels, mapdl=self, **kwargs)
+        return pl.show(**kwargs)
 
     @property
     @supress_logging
