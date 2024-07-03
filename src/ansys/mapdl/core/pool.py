@@ -875,6 +875,7 @@ class MapdlPool:
             ip=ip,
             override=True,
             start_instance=start_instance,
+            on_pool=True,
             **self._spawn_kwargs,
         )
 
