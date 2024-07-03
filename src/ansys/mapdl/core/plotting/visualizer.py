@@ -606,6 +606,7 @@ class MapdlPlotter(Plotter):
                 # are hidden, we set "always_visible"
                 always_visible=True,
                 show_points=False,  # to not have node duplicity
+                font_family="arial",
             )
 
         if plot_bc_legend and bc_point_labels is not None:
