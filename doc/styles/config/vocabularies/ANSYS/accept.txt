@@ -99,7 +99,6 @@ Linder
 Linux
 MacOS
 mapdl
-mapdl
 MAPDL
 mater
 MATLAB
