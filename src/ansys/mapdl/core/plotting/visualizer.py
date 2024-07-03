@@ -72,6 +72,14 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
             use_trame=use_trame, plot_picked_names=plot_picked_names, **plotter_kwargs
         )
 
+    def plot_iter(
+        self, plottable_object: Any, name_filter: str = None, **plotting_options
+    ):
+        pass
+
+    def plot(self, plottable_object: Any, name_filter: str = None, **plotting_options):
+        pass
+
     @property
     def scene(self):
         """Return the scene."""
