@@ -311,7 +311,7 @@ def protect_grpc(func):
 
             # trying to get "cmd" argument:
             cmd = args[1] if len(args) >= 2 else ""
-            cmd = kwargs("cmd", cmd)
+            cmd = kwargs.get("cmd", cmd)
 
             caller = func.__name__
 
