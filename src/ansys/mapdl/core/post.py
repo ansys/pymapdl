@@ -613,7 +613,7 @@ class PostProcessing:
             **kwargs,
         )
 
-    @requires_package("ansys-tools-visualization-interface")
+    @requires_package("ansys.tools.visualization_interface")
     def _plot_point_scalars(self, scalars, show_node_numbering=False, **kwargs):
         """Plot point scalars"""
         if not scalars.size:
@@ -648,7 +648,7 @@ class PostProcessing:
         pl.plot(meshes, [], labels, mapdl=self, **kwargs)
         return pl.show(**kwargs)
 
-    @requires_package("ansys-tools-visualization-interface")
+    @requires_package("ansys.tools.visualization_interface")
     def _plot_cell_scalars(self, scalars, show_elem_numbering=False, **kwargs):
         """Plot cell scalars."""
         if not scalars.size:
