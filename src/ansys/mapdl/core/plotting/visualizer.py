@@ -601,7 +601,7 @@ class MapdlPlotter(Plotter):
                             f"{bc_point_labels[id_]}\n{each_label}: {values[0]:6.3f}, {values[1]:6.3f}"
                         )
 
-        if plot_bc_labels and bc_point_labels is not None:
+        if plot_bc_labels:
             pcloud = pv.PolyData(nodes_xyz)
             pcloud["labels"] = list(bc_point_labels.values())
             self.add_labels(
@@ -617,7 +617,7 @@ class MapdlPlotter(Plotter):
                 font_family="arial",
             )
 
-        if plot_bc_legend and bc_point_labels is not None:
+        if plot_bc_legend:
             # Reorder labels to keep a consistent order
             sorted_dict = OrderedDict()
             labels_ = self.scene.renderer._labels.copy()
