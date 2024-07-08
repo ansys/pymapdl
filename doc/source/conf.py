@@ -87,9 +87,9 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
     "sphinx_autodoc_typehints",
+    "sphinx_jinja",
     "sphinx_design",
     "sphinx_copybutton",
-    "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
     "sphinx_reredirects",
@@ -110,7 +110,7 @@ intersphinx_mapping = {
     "ansys-math-core": ("https://math.docs.pyansys.com/version/stable/", None),
 }
 
-suppress_warnings = ["label.*", "design.fa-build", "config.cache"]
+suppress_warnings = ["label.*", "design.fa-build", "config.cache", "design.grid"]
 sd_fontawesome_latex = True
 
 # Graphviz diagrams configuration
@@ -188,6 +188,49 @@ exclude_patterns = [
     "substitutions.rst",
 ]
 
+BUILD_API = True if os.environ.get("BUILD_API", "true") == "true" else False
+if not BUILD_API:
+    exclude_patterns.extend(["api/**", "mapdl_commands/**"])
+
+BUILD_EXAMPLES = True if os.environ.get("BUILD_EXAMPLES", "true") == "true" else False
+if not BUILD_EXAMPLES:
+    exclude_patterns.extend(["examples/index.rst", "examples/**", "examples/**/**"])
+    suppress_warnings.append("ref.*")
+else:
+    extensions.append("sphinx_gallery.gen_gallery")
+    # -- Sphinx Gallery Options ---------------------------------------------------
+    sphinx_gallery_conf = {
+        # convert rst to md for ipynb
+        "pypandoc": True,
+        # path to your examples scripts
+        "examples_dirs": [EXAMPLES_PATH_FOR_DOCS],
+        # path where to save gallery generated examples
+        "gallery_dirs": [GALLERY_EXAMPLES_PATH],
+        # Pattern to search for example files
+        "filename_pattern": r"\." + DEFAULT_EXAMPLE_EXTENSION,
+        # Remove the "Download all examples" button from the top level gallery
+        "download_all_examples": False,
+        # Sort gallery example by file name instead of number of lines (default)
+        "within_subsection_order": FileNameSortKey,
+        # directory where function granular galleries are stored
+        "backreferences_dir": None,
+        # Modules for which function level galleries are created.  In
+        "doc_module": "ansys-mapdl-core",
+        "image_scrapers": ("pyvista", "matplotlib"),
+        "ignore_pattern": "flycheck*",
+        "thumbnail_size": (350, 350),
+        "remove_config_comments": True,
+        "default_thumb_file": pyansys_light_mode_logo,
+        "show_signature": False,
+    }
+
+jinja_contexts = {
+    "main_toctree": {
+        "build_api": BUILD_API,
+        "build_examples": BUILD_EXAMPLES,
+    },
+}
+
 # make rst_epilog a variable, so you can add other epilog parts to it
 rst_epilog = ""
 
@@ -206,7 +249,6 @@ with open("substitutions.rst") as f:
 
 # Setting redicts
 redirects = {
-    #
     # Old link: https://dev.mapdl.docs.pyansys.com/user_guide/krylov.html
     "user_guide/krylov": "examples/extended_examples/Krylov/krylov_example"
 }
@@ -249,34 +291,6 @@ todo_include_todos = False
 # exclude traditional Python prompts from the copied code
 copybutton_prompt_text = r">>> ?|\.\.\. "
 copybutton_prompt_is_regexp = True
-
-# -- Sphinx Gallery Options ---------------------------------------------------
-sphinx_gallery_conf = {
-    # convert rst to md for ipynb
-    "pypandoc": True,
-    # path to your examples scripts
-    "examples_dirs": [EXAMPLES_PATH_FOR_DOCS],
-    # path where to save gallery generated examples
-    "gallery_dirs": [GALLERY_EXAMPLES_PATH],
-    # Pattern to search for example files
-    "filename_pattern": r"\." + DEFAULT_EXAMPLE_EXTENSION,
-    # Remove the "Download all examples" button from the top level gallery
-    "download_all_examples": False,
-    # Sort gallery example by file name instead of number of lines (default)
-    "within_subsection_order": FileNameSortKey,
-    # directory where function granular galleries are stored
-    "backreferences_dir": None,
-    # Modules for which function level galleries are created.  In
-    "doc_module": "ansys-mapdl-core",
-    "image_scrapers": ("pyvista", "matplotlib"),
-    "ignore_pattern": "flycheck*",
-    "thumbnail_size": (350, 350),
-    "remove_config_comments": True,
-    "default_thumb_file": pyansys_light_mode_logo,
-    "show_signature": False,
-}
-# ---
-
 
 # -- Options for HTML output -------------------------------------------------
 html_short_title = html_title = "PyMAPDL"

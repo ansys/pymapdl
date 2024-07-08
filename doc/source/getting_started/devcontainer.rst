@@ -67,7 +67,7 @@ Develop on a remote container
    The Docker image listed in the 
    `repository development container configuration files <pymapdl_devcontainer_configuration_>`_ 
    is not for public use due to licensing issues.
-   However, you can `create your own Docker image <ref_make_container_>`
+   However, you can `create your own Docker image <ref_make_container>`_
    and use this file as a template for setting your own local development container.
 
 To use a `remote container <vscode_devcontainers_containers_>`_, you must install this software:
