@@ -1952,7 +1952,7 @@ def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
         license_server_check=False,
         additional_switches=QUICK_LAUNCH_SWITCHES,
-        port=mapdl.port + 1,
+        port=mapdl.port + 2,
     )
     mapdl2.parameters["my_par"] = "initial_value"
 
@@ -1969,7 +1969,7 @@ def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
         license_server_check=False,
         additional_switches=QUICK_LAUNCH_SWITCHES,
-        port=mapdl.port + 1,
+        port=mapdl.port + 2,
     )
     mapdl2.resume(db_path)
     if mapdl.version >= 24.2:
@@ -2330,15 +2330,19 @@ def test__remove_temp_dir_on_exit(mapdl, tmpdir):
 
 @requires("local")
 @requires("nostudent")
-def test_remove_temp_dir_on_exit():
+def test_remove_temp_dir_on_exit(mapdl):
 
-    mapdl = launch_mapdl(remove_temp_dir_on_exit=True)
-    path_ = mapdl.directory
+    mapdl_2 = launch_mapdl(remove_temp_dir_on_exit=True, port=mapdl.port + 21)
+    path_ = mapdl_2.directory
     assert os.path.exists(path_)
+    assert all([psutil.pid_exists(pid) for pid in mapdl_2._pids])
 
-    mapdl.exit()
+    mapdl_2.exit()
     time.sleep(1.0)
     assert not os.path.exists(path_)
+    assert not all([psutil.pid_exists(pid) for pid in mapdl_2._pids])
+
+    # checking also pids
 
 
 def test_sys(mapdl):
