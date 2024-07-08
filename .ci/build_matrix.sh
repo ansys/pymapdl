@@ -20,7 +20,7 @@ versions=(
     'v22.2-ubuntu'
 )
 
-LATEST=2 # for 'latest-ubuntu' and 'latest-ubuntu-student'
+LATEST=3 # for 'latest-ubuntu' and 'latest-ubuntu-student'
 
 # Run only ubuntu jobs
 ONLY_UBUNTU="${ONLY_UBUNTU:-false}"
