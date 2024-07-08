@@ -1952,7 +1952,7 @@ def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
         license_server_check=False,
         additional_switches=QUICK_LAUNCH_SWITCHES,
-        port=mapdl.port + 3,
+        port=mapdl.port + 2,
     )
     mapdl2.parameters["my_par"] = "initial_value"
 
@@ -1969,7 +1969,7 @@ def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
         license_server_check=False,
         additional_switches=QUICK_LAUNCH_SWITCHES,
-        port=mapdl.port + 3,
+        port=mapdl.port + 2,
     )
     mapdl2.resume(db_path)
     if mapdl.version >= 24.2:
