@@ -2328,6 +2328,7 @@ def test__remove_temp_dir_on_exit(mapdl, tmpdir):
     assert os.path.exists(path) is False
 
 
+@requires("local")
 @requires("nostudent")
 def test_remove_temp_dir_on_exit():
 
