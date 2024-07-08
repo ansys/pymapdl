@@ -320,8 +320,6 @@ def protect_grpc(func):
             else:
                 msg_ = f"calling:{caller}\nwith the following arguments:\nargs: {list(*args)}\nkwargs: {list(**kwargs_)}"
 
-            func_name = func.__name__
-
             if class_name == "MapdlGrpc":
                 mapdl = args[0]
             elif hasattr(args[0], "_mapdl"):
