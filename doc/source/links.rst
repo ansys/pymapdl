@@ -23,6 +23,8 @@
 .. _dev_guide_contributing: https://dev.docs.pyansys.com/how-to/contributing.html
 .. _dev_guide_coding_style: https://dev.docs.pyansys.com/coding-style/index.html
 .. _dev_guide_setup_your_environment: https://dev.docs.pyansys.com/how-to/setting-up.html
+.. _dev_guide_branch_names: https://dev.docs.pyansys.com/how-to/contributing.html#branch-naming-conventions
+.. _dev_guide_commit_names: https://dev.docs.pyansys.com/how-to/contributing.html#commit-naming-conventions
 
 .. #Other libraries
 .. _pyvista_docs: https://docs.pyvista.org/version/stable/

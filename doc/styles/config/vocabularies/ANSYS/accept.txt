@@ -42,6 +42,7 @@ appen
 Apple Silicon
 argparse
 Arruda-Boyce
+askin
 BCs
 Block Lanzos
 Boyce
@@ -50,9 +51,11 @@ centerline
 CentOS
 CentOS7
 Chao
+ci
 container_layout
 datas
 delet
+Dependabot
 Dev
 devcontainer
 DevContainer
@@ -77,6 +80,7 @@ Gmsh
 GPa
 GPUs
 GUI
+Hashin
 hexahedral
 hostname
 HTML
@@ -115,6 +119,7 @@ NumPy
 onefile
 optiSLang
 parm
+perf
 performant
 PMLs
 POIN
@@ -154,6 +159,7 @@ sur
 tablet
 thermomechanical
 thermomechanically
+THIRDPARTY
 thispagetitle
 Tool-Narayanaswamy
 tread
@@ -173,6 +179,7 @@ von
 VTK
 wan
 WAN
+WHIT
 Windows Subsystem
 Windows Subsystem for Linux
 wsl
