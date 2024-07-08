@@ -72,12 +72,6 @@ def list_instances(instances, long, cmd, location):
     # Assuming all ansys processes have -grpc flag
     mapdl_instances = []
 
-    NON_ALLOWED_STATUS = [
-        psutil.STATUS_DEAD,
-        psutil.STATUS_STOPPED,
-        psutil.STATUS_ZOMBIE,
-    ]
-
     def is_valid_process(proc):
         # probably we are being redundant in h
         valid_status = proc.status == psutil.STATUS_RUNNING
