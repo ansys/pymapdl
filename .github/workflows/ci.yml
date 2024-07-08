@@ -334,8 +334,7 @@ jobs:
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
-    permissions:
-      discussions: read
+
     steps:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.1.7
@@ -569,7 +568,7 @@ jobs:
           username: ${{ github.actor }}
           organization: ansys
           team: 'pymapdl-developers'
-          GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN_TEAMS_USER_READ }}
 
       - id: set-matrix
         env:
