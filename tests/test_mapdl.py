@@ -1952,7 +1952,7 @@ def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
         license_server_check=False,
         additional_switches=QUICK_LAUNCH_SWITCHES,
-        port=mapdl.port + 2,
+        port=mapdl.port + 3,
     )
     mapdl2.parameters["my_par"] = "initial_value"
 
@@ -1964,12 +1964,12 @@ def test_save_on_exit(mapdl, cleared):
     assert os.path.exists(db_path)
 
     mapdl2.parameters["my_par"] = "final_value"
-    mapdl2.exit()
+    mapdl2.exit(force=True)
 
     mapdl2 = launch_mapdl(
         license_server_check=False,
         additional_switches=QUICK_LAUNCH_SWITCHES,
-        port=mapdl.port + 2,
+        port=mapdl.port + 3,
     )
     mapdl2.resume(db_path)
     if mapdl.version >= 24.2:
@@ -1983,16 +1983,16 @@ def test_save_on_exit(mapdl, cleared):
     db_name = mapdl2.jobname + ".db"  # reupdating db path
     db_dir = mapdl2.directory
     db_path = os.path.join(db_dir, db_name)
-    mapdl2.exit(save=True)
+    mapdl2.exit(save=True, force=True)
 
     mapdl2 = launch_mapdl(
         license_server_check=False,
         additional_switches=QUICK_LAUNCH_SWITCHES,
-        port=mapdl.port + 1,
+        port=mapdl.port + 2,
     )
     mapdl2.resume(db_path)
     assert mapdl2.parameters["my_par"] == "new_initial_value"
-    mapdl2.exit()
+    mapdl2.exit(force=True)
 
 
 def test_input_strings_inside_non_interactive(mapdl, cleared):
