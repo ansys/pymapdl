@@ -2332,7 +2332,7 @@ def test__remove_temp_dir_on_exit(mapdl, tmpdir):
 @requires("nostudent")
 def test_remove_temp_dir_on_exit(mapdl):
 
-    mapdl_2 = launch_mapdl(remove_temp_dir_on_exit=True, port=mapdl.port + 21)
+    mapdl_2 = launch_mapdl(remove_temp_dir_on_exit=True, port=mapdl.port + 2)
     path_ = mapdl_2.directory
     assert os.path.exists(path_)
     assert all([psutil.pid_exists(pid) for pid in mapdl_2._pids])
