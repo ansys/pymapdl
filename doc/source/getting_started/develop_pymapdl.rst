@@ -275,11 +275,11 @@ The automation of testing, monitoring, and deployment of newly added
 code allows continuous deployment (CD) throughout the app lifecycle,
 providing a comprehensive CI/CD approach.
 
-.. image:: ../images/cicd_dark_theme.jpg
+.. image:: ../images/cicd_dark_theme.png
     :class: only-dark
     :width: 300pt
 
-.. image:: ../images/cicd_light_theme.jpg
+.. image:: ../images/cicd_light_theme.png
     :class: only-light
     :width: 300pt
 

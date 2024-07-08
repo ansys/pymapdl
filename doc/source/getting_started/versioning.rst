@@ -120,15 +120,15 @@ The following table shows the supported versions of Ansys and the recommended in
 |                           |                        +-----------------------+-----------------------+-----------------------+
 |                           |                        | gRPC                  | CORBA                 | Console (Only Linux)  |
 +===========================+========================+=======================+=======================+=======================+
-| Ansys 2023 R1             | gRPC                   | |:white_check_mark:|  | |:exclamation:|  | |:exclamation:|  |
+| Ansys 2023 R1             | gRPC                   | |:white_check_mark:|  | |:exclamation:|       | |:exclamation:|       |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 2022 R2             | gRPC                   | |:white_check_mark:|  | |:exclamation:|  | |:exclamation:|  |
+| Ansys 2022 R2             | gRPC                   | |:white_check_mark:|  | |:exclamation:|       | |:exclamation:|       |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 2022 R1             | gRPC                   | |:white_check_mark:|  | |:exclamation:|  | |:exclamation:|  |
+| Ansys 2022 R1             | gRPC                   | |:white_check_mark:|  | |:exclamation:|       | |:exclamation:|       |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 2021 R2             | gRPC                   | |:white_check_mark:|  | |:white_check_mark:|  | |:exclamation:|  |
+| Ansys 2021 R2             | gRPC                   | |:white_check_mark:|  | |:white_check_mark:|  | |:exclamation:|       |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 2021 R1             | gRPC                   | |:white_check_mark:|  | |:white_check_mark:|  | |:exclamation:|  |
+| Ansys 2021 R1             | gRPC                   | |:white_check_mark:|  | |:white_check_mark:|  | |:exclamation:|       |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
 | Ansys 2020 R2             | CORBA                  | |:x:|                 | |:white_check_mark:|  | |:white_check_mark:|  |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
