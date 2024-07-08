@@ -389,4 +389,4 @@ def test_create_temp_dir():
     parent = path.parent
     dir_ = path.parts[-1]
 
-    assert str(path) != create_temp_dir(parent, dir)
+    assert str(path) != create_temp_dir(parent, dir_)
