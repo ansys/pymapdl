@@ -334,6 +334,8 @@ jobs:
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
+    permissions:
+      discussions: read
     steps:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.1.7
