@@ -2342,6 +2342,7 @@ def test_remove_temp_dir_on_exit(mapdl):
     assert not os.path.exists(path_)
     assert not all([psutil.pid_exists(pid) for pid in mapdl_2._pids])
 
+
 def test_sys(mapdl):
     assert "hi" in mapdl.sys("echo 'hi'")
 
