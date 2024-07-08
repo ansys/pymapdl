@@ -12,7 +12,7 @@ transfer the geometry to Python to visualize it:
 - :func:`Mapdl.vplot() <ansys.mapdl.core.Mapdl.vplot>`
 - :func:`Mapdl.eplot() <ansys.mapdl.core.Mapdl.eplot>`). 
 
-These methods rely on the :class:`ansys.mapdl.core.visualizer.MapdlPlotter`
+These methods rely on the :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter`
 method. Combined with the MAPDL geometry commands, you can
 generate and visualize geometry from scratch without opening the GUI
 using the :func:`open_gui() <ansys.mapdl.core.Mapdl.open_gui>` method.
@@ -171,7 +171,7 @@ to view the XY plane with ``cpos='xy'``.
     >>> mapdl.eplot(cpos="xy")
 
 For all general plotting options, see the
-:class:`ansys.mapdl.core.visualizer.MapdlPlotter` method.
+:class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` method.
 
 
 Plotting boundary conditions

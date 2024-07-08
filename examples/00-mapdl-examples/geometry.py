@@ -69,7 +69,7 @@ print(mapdl.geometry)
 # remotable (with 2021R1 and newer) interactive plotting.  The common
 # plotting methods (``kplot``, ``lplot``, ``aplot``, ``eplot``, etc.)
 # all have compatible commands that use the
-# :class:`ansys.mapdl.core.visualizer.MapdlPlotter` function.  You can
+# :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` function.  You can
 # configure this method with a variety of keyword arguments.  For example:
 
 mapdl.lplot(

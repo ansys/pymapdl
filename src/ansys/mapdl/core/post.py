@@ -505,7 +505,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
 
         Returns
         -------
@@ -518,9 +518,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -577,7 +577,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
 
         Returns
         -------
@@ -590,9 +590,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -880,7 +880,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -898,9 +898,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1005,7 +1005,7 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -1023,9 +1023,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1121,7 +1121,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -1139,9 +1139,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1260,7 +1260,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -1273,9 +1273,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1404,7 +1404,7 @@ class PostProcessing:
             Plot the element numbers of the elements.
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
 
         Returns
         -------
@@ -1417,9 +1417,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1514,7 +1514,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
 
         Returns
         -------
@@ -1527,9 +1527,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1579,7 +1579,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -1597,9 +1597,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1668,7 +1668,7 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -1686,9 +1686,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1771,7 +1771,7 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -1789,9 +1789,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1862,7 +1862,7 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -1880,9 +1880,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1939,7 +1939,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -1957,9 +1957,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2035,7 +2035,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2053,9 +2053,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2142,7 +2142,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2160,9 +2160,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2241,7 +2241,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2259,9 +2259,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2322,7 +2322,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2340,9 +2340,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2418,7 +2418,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2436,9 +2436,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2518,7 +2518,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2536,9 +2536,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2614,7 +2614,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2632,9 +2632,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2699,7 +2699,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2717,9 +2717,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2794,7 +2794,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2812,9 +2812,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2899,7 +2899,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2917,9 +2917,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2989,7 +2989,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -3007,9 +3007,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -3075,7 +3075,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -3093,9 +3093,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -3177,7 +3177,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -3195,9 +3195,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -3283,7 +3283,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -3301,9 +3301,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -3379,7 +3379,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -3397,9 +3397,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -3465,7 +3465,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -3483,9 +3483,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -3567,7 +3567,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -3585,9 +3585,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -3659,7 +3659,7 @@ class PostProcessing:
 
         **kwargs : dict, optional
             Keyword arguments passed to :class:`MapdlPlotter
-            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
+            <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -3677,9 +3677,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples

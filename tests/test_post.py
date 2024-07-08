@@ -933,7 +933,7 @@ def test_meta_post_plot_docstrings():
             assert (
                 len(
                     re.findall(
-                        ":class:`MapdlPlotter <ansys.mapdl.core.visualizer.MapdlPlotter>`",
+                        ":class:`MapdlPlotter <ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`",
                         docstring,
                     )
                 )
@@ -942,7 +942,7 @@ def test_meta_post_plot_docstrings():
             assert (
                 len(
                     re.findall(
-                        "<ansys.mapdl.core.visualizer.MapdlPlotter>`",
+                        "<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`",
                         docstring,
                     )
                 )
