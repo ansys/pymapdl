@@ -60,7 +60,7 @@ jupyter = [
 tests = [
     "ansys-dpf-core==0.10.1",
     "autopep8==2.3.1",
-    "matplotlib==3.9.0",
+    "matplotlib==3.9.1",
     "pandas==2.2.2",
     "pyansys-tools-report==0.7.3",
     "pyiges[full]==0.3.1",
@@ -71,7 +71,7 @@ tests = [
     "pytest==8.2.2",
     "pyvista==0.43.10",
     "scipy==1.14.0",
-    "vtk==9.3.0",
+    "vtk==9.3.1",
 ]
 doc = [
     "ansys-dpf-core==0.10.1",
@@ -82,7 +82,7 @@ doc = [
     "imageio==2.34.2",
     "jupyter_sphinx==0.5.3",
     "jupyterlab>=3.2.8",
-    "matplotlib==3.9.0",
+    "matplotlib==3.9.1",
     "numpydoc==1.7.0",
     "pandas==2.2.2",
     "plotly==5.22.0",
@@ -97,11 +97,10 @@ doc = [
     "sphinx-design==0.6.0",
     "sphinx-gallery==0.16.0",
     "sphinx-notfound-page==1.0.2",
-    "sphinx-reredirects==0.1.4",
     "sphinx==7.3.7",
     "sphinxcontrib-websupport==1.2.7",
     "sphinxemoji==0.3.1",
-    "vtk==9.3.0",
+    "vtk==9.3.1",
 ]
 
 [tool.flit.module]
