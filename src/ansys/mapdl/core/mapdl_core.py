@@ -2530,7 +2530,7 @@ class _MapdlCore(Commands):
                 name="_entity_picking_message",
             )
             if picked_ids:
-                pl.scene.plot(
+                pl.scene.add_mesh(
                     mesh.points[picked_ids],
                     color="red",
                     point_size=POINT_SIZE + 10,

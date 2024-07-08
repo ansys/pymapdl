@@ -129,6 +129,7 @@ class MapdlTheme(base_class):
 
         if _HAS_MATPLOTLIB:
             self.cmap = PyMAPDL_cmap
+            self.font.family = "arial"
 
             self.font.size = 18
             self.font.title_size = 18

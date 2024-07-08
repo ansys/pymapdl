@@ -966,7 +966,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
             pl = MapdlPlotter()
             pl.plot(meshes, points, labels, **kwargs)
-            return pl.show(**kwargs)
+            return pl.show(return_plotter=return_plotter, **kwargs)
 
         else:
             with self._enable_interactive_plotting():

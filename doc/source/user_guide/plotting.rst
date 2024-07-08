@@ -171,7 +171,7 @@ to view the XY plane with ``cpos='xy'``.
     >>> mapdl.eplot(cpos="xy")
 
 For all general plotting options, see the
-:class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` method.
+:class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` class.
 
 
 Plotting boundary conditions
