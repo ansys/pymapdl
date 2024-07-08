@@ -73,7 +73,6 @@ def list_instances(instances, long, cmd, location):
     mapdl_instances = []
 
     def is_valid_process(proc):
-        # probably we are being redundant in h
         valid_status = proc.status == psutil.STATUS_RUNNING
         valid_ansys_process = ("ansys" in proc.name().lower()) or (
             "mapdl" in proc.name().lower()
