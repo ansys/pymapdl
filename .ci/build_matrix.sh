@@ -85,6 +85,7 @@ for version in "${versions[@]}"; do
     # Early exiting if on Ubuntu only
     if [[ "$ON_UBUNTU" != "true" && "$ONLY_UBUNTU" == "true" ]]; then
         echo "Skipping non-ubuntu versions"
+        echo ""
         continue
     fi
 
