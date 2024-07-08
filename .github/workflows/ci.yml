@@ -346,7 +346,7 @@ jobs:
           username: ${{ github.actor }}
           organization: ansys
           team: 'pymapdl-developers'
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN_TEAMS_USER_READ }}
 
       - id: set-matrix
         env:
