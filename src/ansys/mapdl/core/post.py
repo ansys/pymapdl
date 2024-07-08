@@ -504,8 +504,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`
 
         Returns
         -------
@@ -518,9 +518,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -576,8 +576,8 @@ class PostProcessing:
             Plot the element numbers of the elements.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`
 
         Returns
         -------
@@ -590,9 +590,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -879,8 +879,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -898,9 +898,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1004,8 +1004,8 @@ class PostProcessing:
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -1023,9 +1023,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1120,8 +1120,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -1139,9 +1139,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1259,8 +1259,8 @@ class PostProcessing:
             Plot the element numbers of the elements.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -1273,9 +1273,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1403,8 +1403,8 @@ class PostProcessing:
         show_elem_numbering : bool, optional
             Plot the element numbers of the elements.
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`
 
         Returns
         -------
@@ -1417,9 +1417,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1513,8 +1513,8 @@ class PostProcessing:
             Plot the element numbers of the elements.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`
 
         Returns
         -------
@@ -1527,9 +1527,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1578,8 +1578,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -1597,9 +1597,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1667,8 +1667,8 @@ class PostProcessing:
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -1686,9 +1686,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1770,8 +1770,8 @@ class PostProcessing:
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -1789,9 +1789,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1861,8 +1861,8 @@ class PostProcessing:
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -1880,9 +1880,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -1938,8 +1938,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -1957,9 +1957,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2034,8 +2034,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2053,9 +2053,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2141,8 +2141,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2160,9 +2160,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2240,8 +2240,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2259,9 +2259,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2321,8 +2321,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2340,9 +2340,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2417,8 +2417,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2436,9 +2436,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2517,8 +2517,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2536,9 +2536,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2613,8 +2613,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2632,9 +2632,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2698,8 +2698,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2717,9 +2717,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2793,8 +2793,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2812,9 +2812,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2898,8 +2898,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -2917,9 +2917,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -2988,8 +2988,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -3007,9 +3007,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -3074,8 +3074,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -3093,9 +3093,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -3176,8 +3176,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -3195,9 +3195,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -3282,8 +3282,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -3301,9 +3301,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -3378,8 +3378,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -3397,9 +3397,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -3464,8 +3464,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes. Defaults to False
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -3483,9 +3483,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -3566,8 +3566,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -3585,9 +3585,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples
@@ -3658,8 +3658,8 @@ class PostProcessing:
             Plot the node numbers of surface nodes.
 
         **kwargs : dict, optional
-            Keyword arguments passed to :func:`general_plotter
-            <ansys.mapdl.core.plotting.general_plotter>`.
+            Keyword arguments passed to :class:`MapdlPlotter
+            <ansys.mapdl.core.visualizer.MapdlPlotter>`.
 
         Returns
         -------
@@ -3677,9 +3677,9 @@ class PostProcessing:
         Notes
         -----
         If ``vkt=True`` (default), this function uses
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>`
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>`
         You can pass key arguments to
-        :func:`general_plotter <ansys.mapdl.core.plotting.general_plotter>` using
+        :class:`MapdlPlotter<ansys.mapdl.core.visualizer.MapdlPlotter>` using
         ``kwargs`` argument. For example, ``show_axes`` , ``background``, etc.
 
         Examples

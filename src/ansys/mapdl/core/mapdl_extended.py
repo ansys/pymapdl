@@ -506,7 +506,7 @@ class _MapdlCommandExtended(_MapdlCore):
             Number keypoints.  Only valid when ``show_keypoints=True``
 
         **kwargs
-            See :meth:`ansys.mapdl.core.plotting.general_plotter` for
+            See :class:`ansys.mapdl.core.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
             ``vtk=True``.
 
@@ -680,7 +680,7 @@ class _MapdlCommandExtended(_MapdlCore):
             with ``line_width=``
 
         **kwargs
-            See :meth:`ansys.mapdl.core.plotting.general_plotter` for
+            See :class:`ansys.mapdl.core.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
             ``vtk=True``.
 
@@ -899,7 +899,7 @@ class _MapdlCommandExtended(_MapdlCore):
             Display line and keypoint numbers when ``vtk=True``.
 
         **kwargs
-            See :meth:`ansys.mapdl.core.plotting.general_plotter` for
+            See :class:`ansys.mapdl.core.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
             ``vtk=True``.
 
@@ -1204,7 +1204,7 @@ class _MapdlCommandExtended(_MapdlCore):
             By default it is 16.
 
         **kwargs
-            See ``help(ansys.mapdl.core.plotter.general_plotter)`` for more
+            See ``help(ansys.mapdl.core.visualizer.MapdlPlotter)`` for more
             keyword arguments related to visualizing using ``vtk``.
 
         Examples
