@@ -2332,11 +2332,12 @@ def test__remove_temp_dir_on_exit(mapdl, tmpdir):
 @requires("nostudent")
 def test_remove_temp_dir_on_exit():
 
-    mapdl = launch_mapdl()
+    mapdl = launch_mapdl(remove_temp_dir_on_exit=True)
     path_ = mapdl.directory
     assert os.path.exists(path_)
 
     mapdl.exit()
+    time.sleep(1.0)
     assert not os.path.exists(path_)
 
 
