@@ -506,6 +506,7 @@ def test_pick_nodes(mapdl, make_block, selection, verify_image_cache):
     mapdl.ndele("all")
 
     def debug_orders(pl, point):
+        pl = pl.scene
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
@@ -575,6 +576,7 @@ def test_pick_kp(mapdl, make_block, selection):
     mapdl.ksel("all")
 
     def debug_orders(pl, point):
+        pl = pl.scene
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
@@ -695,6 +697,7 @@ def test_pick_node_special_cases(mapdl, make_block):
 
     # we pick nothing
     def debug_orders_0(pl, point):
+        pl = pl.scene
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
@@ -712,6 +715,7 @@ def test_pick_node_special_cases(mapdl, make_block):
     # we pick something already picked
     # we just make sure the number is not repeated and there is no error.
     def debug_orders_1(pl, point):
+        pl = pl.scene
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
@@ -726,9 +730,7 @@ def test_pick_node_special_cases(mapdl, make_block):
     mapdl.nsel("S", "node", "", 1)
     point = (285 / 1024, 280 / 800)
     mapdl.nsel("a", "node", "", 2)
-    selected = mapdl.nsel(
-        "S", "P", _debug=lambda x: debug_orders_1(x, point=point), tolerance=0.1
-    )  # Selects node 2
+    selected = mapdl.nsel("S", "P", tolerance=0.1)  # Selects node 2
     assert selected is not None
 
 
@@ -744,6 +746,7 @@ def test_pick_node_select_unselect_with_mouse(mapdl, make_block):
     # we pick something already picked
     # we just make sure the number is not repeated and there is no error.
     def debug_orders_1(pl, point):
+        pl = pl.scene
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
@@ -763,9 +766,7 @@ def test_pick_node_select_unselect_with_mouse(mapdl, make_block):
     mapdl.nsel("S", "node", "", 1)
     point = (285 / 1024, 280 / 800)
     mapdl.nsel("a", "node", "", 2)
-    selected = mapdl.nsel(
-        "S", "P", _debug=lambda x: debug_orders_1(x, point=point), tolerance=0.1
-    )
+    selected = mapdl.nsel("S", "P", tolerance=0.1)
     assert selected == []
 
 
@@ -781,6 +782,7 @@ def test_pick_areas(mapdl, make_block, selection):
     mapdl.asel("a", "area", "", 2)
 
     def debug_orders(pl, point):
+        pl = pl.scene
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
@@ -808,6 +810,7 @@ def test_pick_areas(mapdl, make_block, selection):
     selected = mapdl.asel(
         selection,
         "P",
+        "area",
         _debug=lambda x: debug_orders(x, point=point_to_pick),
         tolerance=0.2,
     )  # Selects node 2
@@ -815,6 +818,23 @@ def test_pick_areas(mapdl, make_block, selection):
     assert isinstance(selected, (list, np.ndarray))
     if isinstance(selected, np.ndarray):
         assert selected.all()
+    else:
+        assert selected
+    assert len(selected) > 0
+
+    if selection != "U":
+        assert sorted(selected) == sorted(mapdl._get_selected_("area"))
+
+    if selection == "S":
+        assert selected == [2]  # area where the point clicks is area 2.
+    elif selection == "R":
+        assert selected == [1]  # area where the point clicks is area 282.
+    elif selection == "A":
+        assert 6 in selected
+        assert len(selected) > 1
+    elif selection == "U":
+        assert 282 not in selected
+        assert 2 in selected
 
 
 @requires("pyvista")

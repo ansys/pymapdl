@@ -2447,7 +2447,6 @@ class _MapdlCore(Commands):
         self, entity, pl, type_, previous_picked_entities, **kwargs
     ):
         """Show a plot and get the selected entity."""
-        pl = pl.scene
         _debug = kwargs.pop("_debug", False)  # for testing purposes
         previous_picked_entities = set(previous_picked_entities)
 
@@ -2465,7 +2464,7 @@ class _MapdlCore(Commands):
             pass
 
         # adding selection inversor
-        pl._inver_mouse_click_selection = False
+        pl.scene._inver_mouse_click_selection = False
 
         selection_text = {
             "S": "New selection",
@@ -2476,7 +2475,9 @@ class _MapdlCore(Commands):
 
         def gen_text(picked_entities=None):
             """Generate helpful text for the render window."""
-            sel_ = "Unselecting" if pl._inver_mouse_click_selection else "Selecting"
+            sel_ = (
+                "Unselecting" if pl.scene._inver_mouse_click_selection else "Selecting"
+            )
             type_text = selection_text[type_]
             button_ = "left" if PICKING_USING_LEFT_CLICKING else "right"
             text = (
@@ -2506,7 +2507,7 @@ class _MapdlCore(Commands):
                 point[0], point[1], point[2]
             )  # This will only return one node. Fine for now.
 
-            if not pl._inver_mouse_click_selection:
+            if not pl.scene._inver_mouse_click_selection:
                 # Updating MAPDL entity mapping
                 if node_id not in picked_entities:
                     picked_entities.append(node_id)
@@ -2522,14 +2523,14 @@ class _MapdlCore(Commands):
                     picked_ids.remove(id_)
 
             # remov etitle and update text
-            pl.remove_actor("title")
-            pl._picking_text = pl.add_text(
+            pl.scene.remove_actor("title")
+            pl.scene._picking_text = pl.scene.add_text(
                 gen_text(picked_entities),
                 font_size=GUI_FONT_SIZE,
                 name="_entity_picking_message",
             )
             if picked_ids:
-                pl.plot(
+                pl.scene.plot(
                     mesh.points[picked_ids],
                     color="red",
                     point_size=POINT_SIZE + 10,
@@ -2538,7 +2539,7 @@ class _MapdlCore(Commands):
                     reset_camera=False,
                 )
             else:
-                pl.remove_actor("_picked_entities")
+                pl.scene.remove_actor("_picked_entities")
 
         def callback_mesh(mesh):
             def get_entnum(mesh):
@@ -2551,12 +2552,12 @@ class _MapdlCore(Commands):
 
             meshes = [each for each in meshes if get_entnum(each) == mesh_id]
 
-            if not pl._inver_mouse_click_selection:
+            if not pl.scene._inver_mouse_click_selection:
                 # Updating MAPDL entity mapping
                 if mesh_id not in picked_entities:
                     picked_entities.append(mesh_id)
                     for i, each in enumerate(meshes):
-                        pl.plot(
+                        pl.scene.add_mesh(
                             each,
                             color="red",
                             point_size=10,
@@ -2571,14 +2572,14 @@ class _MapdlCore(Commands):
                     picked_entities.remove(mesh_id)
 
                     for i, each in enumerate(meshes):
-                        pl.remove_actor(f"_picked_entity_{mesh_id}_{i}")
+                        pl.scene.remove_actor(f"_picked_entity_{mesh_id}_{i}")
 
             # Removing only-first time actors
-            pl.remove_actor("title")
-            pl.remove_actor("_point_picking_message")
+            pl.scene.remove_actor("title")
+            pl.scene.remove_actor("_point_picking_message")
 
             if "_entity_picking_message" in pl.actors:
-                pl.remove_actor("_entity_picking_message")
+                pl.scene.remove_actor("_entity_picking_message")
 
             pl._picking_text = pl.add_text(
                 gen_text(picked_entities),
@@ -2591,7 +2592,7 @@ class _MapdlCore(Commands):
             lines_meshes = lines_pl.get_meshes_from_plotter()
 
             for each_mesh in lines_meshes:
-                pl.add_mesh(
+                pl.scene.add_mesh(
                     each_mesh,
                     pickable=False,
                     color="w",
@@ -2599,7 +2600,7 @@ class _MapdlCore(Commands):
                 )
 
             # Picking points
-            pl.enable_point_picking(
+            pl.scene.enable_point_picking(
                 callback=callback_points,
                 use_mesh=True,
                 show_message=gen_text(),
@@ -2610,7 +2611,7 @@ class _MapdlCore(Commands):
             )
         else:
             # Picking meshes
-            pl.enable_mesh_picking(
+            pl.scene.enable_mesh_picking(
                 callback=callback_mesh,
                 use_mesh=True,
                 show=False,  # This should be false to avoid a warning.
@@ -2621,19 +2622,19 @@ class _MapdlCore(Commands):
 
         def callback_u():
             # inverting bool
-            pl._inver_mouse_click_selection = not pl._inver_mouse_click_selection
-            pl.remove_actor("_entity_picking_message")
+            pl.scene._inver_mouse_click_selection = not pl._inver_mouse_click_selection
+            pl.scene.remove_actor("_entity_picking_message")
 
-            pl._picking_text = pl.add_text(
+            pl.scene._picking_text = pl.add_text(
                 gen_text(picked_entities),
                 font_size=GUI_FONT_SIZE,
                 name="_entity_picking_message",
             )
 
-        pl.add_key_event("u", callback_u)
+        pl.scene.add_key_event("u", callback_u)
 
         if not _debug:  # pragma: no cover
-            pl.show()
+            pl.scene.show()
         else:
             _debug(pl)
 
