@@ -243,9 +243,7 @@ class MapdlPlotter(Plotter):
         labels : List[str]
             List of labels to add.
         """
-        self.scene.add_point_labels(
-            points, labels, font_family="arial", **plotting_options
-        )
+        self.scene.add_point_labels(points, labels, **plotting_options)
 
     def add_points(self, points: Iterable[float], **plotting_options) -> None:
         """Add points to the plotter.
@@ -616,6 +614,7 @@ class MapdlPlotter(Plotter):
                 # are hidden, we set "always_visible"
                 always_visible=True,
                 show_points=False,  # to not have node duplicity
+                font_family="arial",
             )
 
         if plot_bc_legend:
