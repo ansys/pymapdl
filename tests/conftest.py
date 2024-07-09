@@ -462,6 +462,15 @@ def run_before_and_after_tests_2(request, mapdl):
     """Make sure we leave no MAPDL running behind"""
     from ansys.mapdl.core.cli.stop import is_ansys_process
 
+    PROCESS_OK_STATUS = [
+        psutil.STATUS_RUNNING,  #
+        psutil.STATUS_SLEEPING,  #
+        psutil.STATUS_DISK_SLEEP,
+        psutil.STATUS_DEAD,
+        psutil.STATUS_PARKED,  # (Linux)
+        psutil.STATUS_IDLE,  # (Linux, macOS, FreeBSD)
+    ]
+
     yield
 
     for proc in psutil.process_iter():
