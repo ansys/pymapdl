@@ -339,13 +339,26 @@ jobs:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.1.7
 
-      - name: View PR author
-        run: echo "This PR is opened by ${{ github.event.pull_request.user.login }} ."
+      - name: Get event type and user to check permissions.
+        id: get_user
+        env:
+          type_event: ${{ github.event.issue.pull_request }}
+        run: |
+          echo "This PR has been opened by: ${{ github.event.issue.pull_request }}"
+          echo "Event type: $type_event"
+          if [[ $type_event ]]; then
+            export user=${{ github.event.pull_request.user.login }}
+          else
+            export user=${{ github.actor }}
+          fi
+          echo "user: $user"
+          echo "user=$( echo "$user" )" >> $GITHUB_OUTPUT
+          echo "event_type=$( echo "$type_event" )" >> $GITHUB_OUTPUT
 
       - uses: tspascoal/get-user-teams-membership@v3
         id: is_organization_member
         with:
-          username: ${{ github.actor }}
+          username: ${{ steps.get_user.outputs.user }}
           organization: ansys
           team: 'pymapdl-developers'
           GITHUB_TOKEN: ${{ secrets.TOKEN_TEAMS_USER_READ }}
