@@ -70,7 +70,6 @@ tests = [
     "pytest-pyvista==0.1.9",
     "pytest-rerunfailures==14.0",
     "pytest==8.2.2",
-    "pyvista==0.43.10",
     "scipy==1.14.0",
     "vtk==9.3.1",
 ]
