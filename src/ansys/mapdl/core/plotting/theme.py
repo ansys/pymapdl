@@ -125,16 +125,16 @@ class MapdlTheme(Theme):
 
         if _HAS_MATPLOTLIB:
             self.cmap = PyMAPDL_cmap
-            self.font.family = "arial"
+        self.font.family = "arial"
 
-            self.font.size = 18
-            self.font.title_size = 18
-            self.font.label_size = 18
-            self.font.color = "black"
+        self.font.size = 18
+        self.font.title_size = 18
+        self.font.label_size = 18
+        self.font.color = "black"
 
-            self.axes.x_color = "tomato"
-            self.axes.y_color = "seagreen"
-            self.axes.z_color = "blue"
+        self.axes.x_color = "tomato"
+        self.axes.y_color = "seagreen"
+        self.axes.z_color = "blue"
 
         self.show_edges = False
         self.color = "lightblue"
