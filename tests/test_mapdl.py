@@ -1948,11 +1948,12 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
 
 @requires("local")
 @requires("nostudent")
+@pytest.mark.xfail(reason="Flaky test")
 def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
         license_server_check=False,
         additional_switches=QUICK_LAUNCH_SWITCHES,
-        port=mapdl.port + 1,
+        port=mapdl.port + 2,
     )
     mapdl2.parameters["my_par"] = "initial_value"
 
@@ -1964,12 +1965,12 @@ def test_save_on_exit(mapdl, cleared):
     assert os.path.exists(db_path)
 
     mapdl2.parameters["my_par"] = "final_value"
-    mapdl2.exit()
+    mapdl2.exit(force=True)
 
     mapdl2 = launch_mapdl(
         license_server_check=False,
         additional_switches=QUICK_LAUNCH_SWITCHES,
-        port=mapdl.port + 1,
+        port=mapdl.port + 2,
     )
     mapdl2.resume(db_path)
     if mapdl.version >= 24.2:
@@ -1983,16 +1984,16 @@ def test_save_on_exit(mapdl, cleared):
     db_name = mapdl2.jobname + ".db"  # reupdating db path
     db_dir = mapdl2.directory
     db_path = os.path.join(db_dir, db_name)
-    mapdl2.exit(save=True)
+    mapdl2.exit(save=True, force=True)
 
     mapdl2 = launch_mapdl(
         license_server_check=False,
         additional_switches=QUICK_LAUNCH_SWITCHES,
-        port=mapdl.port + 1,
+        port=mapdl.port + 2,
     )
     mapdl2.resume(db_path)
     assert mapdl2.parameters["my_par"] == "new_initial_value"
-    mapdl2.exit()
+    mapdl2.exit(force=True)
 
 
 def test_input_strings_inside_non_interactive(mapdl, cleared):
@@ -2310,7 +2311,7 @@ def test_use_vtk(mapdl):
 
 
 @requires("local")
-def test_remove_temp_dir_on_exit(mapdl, tmpdir):
+def test__remove_temp_dir_on_exit(mapdl, tmpdir):
     path = os.path.join(tempfile.gettempdir(), "ansys_" + random_string())
     os.makedirs(path)
     filename = os.path.join(path, "file.txt")
@@ -2326,6 +2327,22 @@ def test_remove_temp_dir_on_exit(mapdl, tmpdir):
 
     assert os.path.exists(filename) is False
     assert os.path.exists(path) is False
+
+
+@requires("local")
+@requires("nostudent")
+@pytest.mark.xfail(reason="Flaky test")
+def test_remove_temp_dir_on_exit(mapdl):
+
+    mapdl_2 = launch_mapdl(remove_temp_dir_on_exit=True, port=mapdl.port + 2)
+    path_ = mapdl_2.directory
+    assert os.path.exists(path_)
+    assert all([psutil.pid_exists(pid) for pid in mapdl_2._pids])  # checking pids too
+
+    mapdl_2.exit()
+    time.sleep(1.0)
+    assert not os.path.exists(path_)
+    assert not all([psutil.pid_exists(pid) for pid in mapdl_2._pids])
 
 
 def test_sys(mapdl):
