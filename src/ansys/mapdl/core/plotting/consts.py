@@ -43,7 +43,7 @@ BC_F = [
 FIELDS = {
     "MECHANICAL": ["UX", "UY", "UZ", "FX", "FY", "FZ"],
     "THERMAL": ["TEMP", "HEAT"],
-    "ELECTRICAL": ["VOLT", "CHRGS", "AMPS"],
+    "ELECTRICAL": ["VOLT", "CHRG", "AMPS"],
 }
 
 FIELDS_ORDERED_LABELS = FIELDS["MECHANICAL"].copy()
