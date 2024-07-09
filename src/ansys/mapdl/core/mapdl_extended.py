@@ -446,8 +446,14 @@ class _MapdlCommandExtended(_MapdlCore):
         if vtk:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
-            pl = MapdlPlotter()
-
+            if "plotter" not in kwargs:
+                pl = MapdlPlotter()
+            else:
+                pl = kwargs.pop("plotter")
+                if not isinstance(pl, MapdlPlotter):
+                    raise TypeError(
+                        f"Expected a MapdlPlotter instance, but got {type(pl)}"
+                    )
             kwargs.setdefault("title", "MAPDL Keypoint Plot")
             if not self.geometry.n_keypoint:
                 warnings.warn(
@@ -921,6 +927,15 @@ class _MapdlCommandExtended(_MapdlCore):
         if vtk:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
+            if "plotter" not in kwargs:
+                pl = MapdlPlotter()
+            else:
+                pl = kwargs.pop("plotter")
+                if not isinstance(pl, MapdlPlotter):
+                    raise TypeError(
+                        f"Expected a MapdlPlotter instance, but got {type(pl)}"
+                    )
+
             kwargs.setdefault("title", "MAPDL Volume Plot")
             if not self.geometry.n_volu:
                 warnings.warn(
@@ -944,7 +959,7 @@ class _MapdlCommandExtended(_MapdlCore):
                     self.vsel("S", vmin=each_volu)
                     self.aslv("S", mute=True)  # select areas attached to active volumes
 
-                    pl = self.aplot(
+                    pl_aplot = self.aplot(
                         vtk=True,
                         color_areas=color_areas,
                         quality=quality,
@@ -955,7 +970,7 @@ class _MapdlCommandExtended(_MapdlCore):
                         **kwargs,
                     )
 
-                    meshes_ = pl.get_meshes_from_plotter()
+                    meshes_ = pl_aplot.get_meshes_from_plotter()
 
                     for each_mesh in meshes_:
                         each_mesh.cell_data["entity_num"] = int(each_volu)
@@ -964,7 +979,6 @@ class _MapdlCommandExtended(_MapdlCore):
 
                 meshes = [{"mesh": meshes}]
 
-            pl = MapdlPlotter()
             pl.plot(meshes, points, labels, **kwargs)
             return pl.show(return_plotter=return_plotter, **kwargs)
 
@@ -1104,10 +1118,17 @@ class _MapdlCommandExtended(_MapdlCore):
         if vtk:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
+            if "plotter" not in kwargs:
+                pl = MapdlPlotter()
+            else:
+                pl = kwargs.pop("plotter")
+                if not isinstance(pl, MapdlPlotter):
+                    raise TypeError(
+                        f"Expected a MapdlPlotter instance, but got {type(pl)}"
+                    )
             kwargs.setdefault("title", "MAPDL Node Plot")
             if not self.mesh.n_node:
                 warnings.warn("There are no nodes to plot.")
-                pl = MapdlPlotter()
                 pl.plot([], [], [], **kwargs)
                 return pl.show(**kwargs)
 
@@ -1120,7 +1141,6 @@ class _MapdlCommandExtended(_MapdlCore):
 
                 labels = [{"points": pcloud.points, "labels": pcloud["labels"]}]
             points = [{"points": self.mesh.nodes}]
-            pl = MapdlPlotter()
             pl.plot([], points, labels, mapdl=self, **kwargs)
             return pl.show(**kwargs)
 
