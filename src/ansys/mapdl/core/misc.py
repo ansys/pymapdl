@@ -525,7 +525,7 @@ def create_temp_dir(tmpdir=None, name=None):
     if not name:
         random_name = True
         letters_ = string.ascii_lowercase.replace("n", "")
-        name = random_string(10, letters_)
+        name = "ansys_" + random_string(10, letters_)
     else:
         random_name = False
 
