@@ -339,6 +339,9 @@ jobs:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.1.7
 
+      - name: View PR author
+        run: echo "This PR is opened by ${{ github.event.pull_request.user.login }} ."
+
       - uses: tspascoal/get-user-teams-membership@v3
         id: is_organization_member
         with:
