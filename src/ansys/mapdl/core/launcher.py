@@ -514,9 +514,9 @@ def launch_grpc(
             proc = get_process_at_port(port)
             if proc:
                 if is_ansys_process(proc):
-                    raise PortAlreadyInUseByAnMAPDLInstance
+                    raise PortAlreadyInUseByAnMAPDLInstance(port)
                 else:
-                    raise PortAlreadyInUse
+                    raise PortAlreadyInUse(port)
 
     pymapdl._LOCAL_PORTS.append(port)
 

@@ -1,4 +1,4 @@
-ansys-api-mapdl==0.5.1
+ansys-api-mapdl==0.5.2
 importlib-metadata==8.0.0
 numpy==1.26.4
 platformdirs==4.2.2
