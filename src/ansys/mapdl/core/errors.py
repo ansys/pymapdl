@@ -151,7 +151,7 @@ class MapdlDidNotStart(MapdlRuntimeError):
 class PortAlreadyInUse(MapdlDidNotStart):
     """Error when the port is already occupied"""
 
-    def __init__(self, msg="The port {port} is already being used.", port=50052):
+    def __init__(self, port=50052, msg="The port {port} is already being used."):
         super().__init__(msg.format(port=port))
 
 
@@ -159,7 +159,7 @@ class PortAlreadyInUseByAnMAPDLInstance(PortAlreadyInUse):
     """Error when the port is already occupied"""
 
     def __init__(
-        self, msg="The port {port} is already used by an MAPDL instance.", port=50052
+        self, port=50052, msg="The port {port} is already used by an MAPDL instance."
     ):
         super().__init__(msg.format(port=port))
 

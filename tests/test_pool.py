@@ -83,6 +83,7 @@ def pool(tmpdir_factory):
             exec_file=EXEC_FILE,
             additional_switches=QUICK_LAUNCH_SWITCHES,
             nproc=NPROC,
+            wait=True,  # make sure that the pool is ready before testing
         )
     else:
         port2 = os.environ.get("PYMAPDL_PORT2", 50057)
@@ -92,6 +93,7 @@ def pool(tmpdir_factory):
             license_server_check=False,
             start_instance=False,
             port=[port, port2],
+            wait=True,
         )
 
     yield mapdl_pool
