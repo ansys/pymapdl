@@ -473,22 +473,23 @@ def run_before_and_after_tests_2(request, mapdl):
 
     yield
 
-    for proc in psutil.process_iter():
-        if (
-            psutil.pid_exists(proc.pid)
-            and proc.status() in PROCESS_OK_STATUS
-            and is_ansys_process(proc)
-        ):
-            # Killing by ports
-            connections = proc.connections()
-            to_kill = True
+    if ON_LOCAL:
+        for proc in psutil.process_iter():
+            if (
+                psutil.pid_exists(proc.pid)
+                and proc.status() in PROCESS_OK_STATUS
+                and is_ansys_process(proc)
+            ):
+                # Killing by ports
+                connections = proc.connections()
+                to_kill = True
 
-            for each_connection in connections:
-                if each_connection.local_address[1] in VALID_PORTS:
-                    to_kill = False
+                for each_connection in connections:
+                    if each_connection.local_address[1] in VALID_PORTS:
+                        to_kill = False
 
-            if to_kill:
-                raise Exception("MAPDL instances are alive after test")
+                if to_kill:
+                    raise Exception("MAPDL instances are alive after test")
 
 
 @pytest.fixture(scope="session")
