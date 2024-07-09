@@ -156,7 +156,7 @@ class Ocean:
         the wave amplitude is large relative to the water depth, such that
         significant wave-current interaction exists.
         """
-        command = f"OCDATA,{val1},{val2},{val3},{val14}"
+        command = f"OCDATA,{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12},{val13},{val14}"
         return self.run(command, **kwargs)
 
     def ocdelete(self, datatype="", zonename="", **kwargs):
