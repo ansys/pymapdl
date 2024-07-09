@@ -69,6 +69,7 @@ SUPPORT_PLOTTING = support_plotting()
 IS_SMP = is_smp()
 
 QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
+VALID_PORTS = []
 
 ## Skip ifs
 skip_on_windows = pytest.mark.skipif(ON_WINDOWS, reason="Skip on Windows")
@@ -455,6 +456,31 @@ def run_before_and_after_tests_2(request, mapdl):
     assert prev == mapdl.is_local
 
 
+@pytest.fixture(autouse=True, scope="function")
+def run_before_and_after_tests_2(request, mapdl):
+    """Make sure we leave no MAPDL running behind"""
+    from ansys.mapdl.core.cli.stop import is_ansys_process
+
+    yield
+
+    for proc in psutil.process_iter():
+        if (
+            psutil.pid_exists(proc.pid)
+            and proc.status() in PROCESS_OK_STATUS
+            and is_ansys_process(proc)
+        ):
+            # Killing by ports
+            connections = proc.connections()
+            to_kill = True
+
+            for each_connection in connections:
+                if each_connection.local_address[1] in VALID_PORTS:
+                    to_kill = False
+
+            if to_kill:
+                raise Exception("MAPDL instances are alive after test")
+
+
 @pytest.fixture(scope="session")
 def mapdl_console(request):
     if os.name != "posix":
@@ -512,6 +538,8 @@ def mapdl(request, tmpdir_factory):
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
     MAPDL_VERSION = mapdl.version  # Caching version
 
+    VALID_PORTS.append(mapdl.port)
+
     if ON_CI:
         mapdl._local = ON_LOCAL  # CI: override for testing
 
@@ -521,6 +549,7 @@ def mapdl(request, tmpdir_factory):
     # using yield rather than return here to be able to test exit
     yield mapdl
 
+    VALID_PORTS.remove(mapdl.port)
     ###########################################################################
     # test exit: only when allowed to start PYMAPDL
     ###########################################################################

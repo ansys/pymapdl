@@ -41,7 +41,7 @@ else:
 from ansys.mapdl.core import Mapdl, MapdlPool, examples
 from ansys.mapdl.core.errors import VersionError
 from ansys.mapdl.core.launcher import LOCALHOST, MAPDL_DEFAULT_PORT
-from conftest import QUICK_LAUNCH_SWITCHES, NullContext, requires
+from conftest import QUICK_LAUNCH_SWITCHES, VALID_PORTS, NullContext, requires
 
 # skip entire module unless HAS_GRPC
 pytestmark = requires("grpc")
@@ -96,7 +96,12 @@ def pool(tmpdir_factory):
             wait=True,
         )
 
+    VALID_PORTS.extend(mapdl_pool._ports)
+
     yield mapdl_pool
+
+    for each in mapdl_pool._ports:
+        VALID_PORTS.remove(each)
 
     ##########################################################################
     # test exit
