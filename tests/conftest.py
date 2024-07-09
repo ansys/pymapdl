@@ -27,6 +27,7 @@ from shutil import get_terminal_size
 from sys import platform
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
+import psutil
 import pytest
 
 from common import (
