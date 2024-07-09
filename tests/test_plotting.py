@@ -730,7 +730,9 @@ def test_pick_node_special_cases(mapdl, make_block):
     mapdl.nsel("S", "node", "", 1)
     point = (285 / 1024, 280 / 800)
     mapdl.nsel("a", "node", "", 2)
-    selected = mapdl.nsel("S", "P", tolerance=0.1)  # Selects node 2
+    selected = mapdl.nsel(
+        "S", "P", _debug=lambda x: debug_orders_1(x, point=point), tolerance=0.1
+    )  # Selects node 2
     assert selected is not None
 
 
@@ -766,7 +768,9 @@ def test_pick_node_select_unselect_with_mouse(mapdl, make_block):
     mapdl.nsel("S", "node", "", 1)
     point = (285 / 1024, 280 / 800)
     mapdl.nsel("a", "node", "", 2)
-    selected = mapdl.nsel("S", "P", tolerance=0.1)
+    selected = mapdl.nsel(
+        "S", "P", _debug=lambda x: debug_orders_1(x, point=point), tolerance=0.1
+    )  # Selects node 2
     assert selected == []
 
 
