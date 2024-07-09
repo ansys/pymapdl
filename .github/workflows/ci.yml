@@ -344,16 +344,15 @@ jobs:
         env:
           type_event: ${{ github.event.issue.pull_request }}
         run: |
-          echo "This PR has been opened by: ${{ github.event.issue.pull_request }}"
-          echo "Event type: $type_event"
           if [[ $type_event ]]; then
+            echo "Event type: $type_event"
+            echo "event_type=$( echo "$type_event" )" >> $GITHUB_OUTPUT
             export user=${{ github.event.pull_request.user.login }}
           else
             export user=${{ github.actor }}
           fi
-          echo "user: $user"
+          echo "This PR has been opened by: $user"
           echo "user=$( echo "$user" )" >> $GITHUB_OUTPUT
-          echo "event_type=$( echo "$type_event" )" >> $GITHUB_OUTPUT
 
       - uses: tspascoal/get-user-teams-membership@v3
         id: is_organization_member
