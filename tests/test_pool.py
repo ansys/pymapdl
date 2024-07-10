@@ -423,11 +423,11 @@ def test_next_with_returns_index(pool):
 
 def test_multiple_ips(monkeypatch):
     ips = [
-        "123.45.67.01",
-        "123.45.67.02",
-        "123.45.67.03",
-        "123.45.67.04",
-        "123.45.67.05",
+        "123.45.67.1",
+        "123.45.67.2",
+        "123.45.67.3",
+        "123.45.67.4",
+        "123.45.67.5",
     ]
 
     monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", raising=False)
