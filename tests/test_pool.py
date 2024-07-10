@@ -595,7 +595,7 @@ def test_multiple_ips(monkeypatch):
             None,
             2,
             [LOCALHOST, LOCALHOST],
-            [MAPDL_DEFAULT_PORT, MAPDL_DEFAULT_PORT + 1],
+            [MAPDL_DEFAULT_PORT + 1, MAPDL_DEFAULT_PORT + 2],
             NullContext(),
         ),
         pytest.param(
@@ -604,7 +604,7 @@ def test_multiple_ips(monkeypatch):
             None,
             3,
             [LOCALHOST, LOCALHOST, LOCALHOST],
-            [MAPDL_DEFAULT_PORT, MAPDL_DEFAULT_PORT + 1, MAPDL_DEFAULT_PORT + 2],
+            [MAPDL_DEFAULT_PORT + 1, MAPDL_DEFAULT_PORT + 2, MAPDL_DEFAULT_PORT + 3],
             NullContext(),
         ),
         pytest.param(
@@ -773,9 +773,7 @@ def test_ip_port_n_instance(
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
     monkeypatch.delenv("PYMAPDL_IP", raising=False)
     monkeypatch.delenv("PYMAPDL_PORT", raising=False)
-    monkeypatch.setenv(
-        "PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222"
-    )  # to avoid trying to find it.
+    monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
 
     with context:
         conf = MapdlPool(
