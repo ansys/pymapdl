@@ -96,6 +96,8 @@ def pool(tmpdir_factory):
             wait=True,
         )
 
+    assert len(mapdl_pool) == 2
+
     yield mapdl_pool
 
     ##########################################################################

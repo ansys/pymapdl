@@ -31,7 +31,7 @@ import warnings
 import weakref
 
 from ansys.mapdl.core import LOG, launch_mapdl
-from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
+from ansys.mapdl.core.errors import MapdlDidNotStart, MapdlRuntimeError, VersionError
 from ansys.mapdl.core.launcher import (
     LOCALHOST,
     MAPDL_DEFAULT_PORT,
@@ -358,13 +358,9 @@ class MapdlPool:
         if wait:
             [thread.join() for thread in threads]
 
-            # check if all clients connected have connected
-            if len(self) != n_instances:
-                n_connected = len(self)
-                warnings.warn(
-                    f"Only %d clients connected out of %d requested"
-                    % (n_connected, n_instances)
-                )
+            # make sure everything is ready
+            assert len(self) == n_instances
+
             if pbar is not None:
                 pbar.close()
 
@@ -861,6 +857,7 @@ class MapdlPool:
         name: str = "",
         start_instance=True,
         exec_file=None,
+        timeout: int = 30,
     ):
         """Spawn a mapdl instance at an index"""
         # create a new temporary directory for each instance
@@ -880,11 +877,21 @@ class MapdlPool:
 
         # Waiting for the instance being fully initialized.
         # This is introduce to mitigate #2173
-        while self._instances[index] is None:
-            time.sleep(0.1)
+        timeout = time.time() + timeout
 
-        assert not self._instances[index].exited
-        self._instances[index].prep7()
+        while timeout > time.time():
+            if self._instances[index] is not None:
+                if self._instances[index].exited:
+                    raise MapdlRuntimeError("The instance is already exited!")
+                if "PREP" not in self._instances[index].prep7().upper():
+                    MapdlDidNotStart("Error while processing PREP7 signal.")
+
+                break
+            time.sleep(0.1)
+        else:
+            raise TimeoutError(
+                f"The instance running at {ip}:{port} could not be started."
+            )
 
         # LOG.debug("Spawned instance %d. Name '%s'", index, name)
         if pbar is not None:
