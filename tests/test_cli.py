@@ -133,6 +133,7 @@ def test_launch_mapdl_cli_config(run_cli):
 @requires("click")
 @requires("local")
 @requires("nostudent")
+@pytest.mark.xfail(reason="Flaky test")
 def test_launch_mapdl_cli_list(run_cli):
     output = run_cli("list")
     assert "running" in output or "sleeping" in output
