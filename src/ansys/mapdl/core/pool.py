@@ -210,6 +210,7 @@ class MapdlPool:
         override=True,
         start_instance: bool = None,
         exec_file: Optional[str] = None,
+        timeout: int = 30,
         **kwargs,
     ) -> None:
         """Initialize several instances of mapdl"""
@@ -359,7 +360,17 @@ class MapdlPool:
             [thread.join() for thread in threads]
 
             # make sure everything is ready
-            assert len(self) == n_instances
+            timeout = time.time() + timeout
+
+            while timeout > time.time():
+                if sum([each is not None for each in self._instances]) == n_instances:
+                    # Loaded
+                    break
+                time.sleep(0.1)
+            else:
+                raise TimeoutError(
+                    f"Only {len(self._instances)} of {n_instances} could be started."
+                )
 
             if pbar is not None:
                 pbar.close()
