@@ -348,9 +348,10 @@ def test_num_instances():
 
 
 @skip_if_ignore_pool
-def test_only_one_instance():
+def test_only_one_instance(mapdl):
     pool = MapdlPool(
         1,
+        port=mapdl.port + 1,
         exec_file=EXEC_FILE,
         nproc=NPROC,
         additional_switches=QUICK_LAUNCH_SWITCHES,
