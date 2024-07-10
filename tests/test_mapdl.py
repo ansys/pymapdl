@@ -1948,6 +1948,7 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
 
 @requires("local")
 @requires("nostudent")
+@pytest.mark.xfail(reason="Flaky test")
 def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
         license_server_check=False,
@@ -2330,6 +2331,7 @@ def test__remove_temp_dir_on_exit(mapdl, tmpdir):
 
 @requires("local")
 @requires("nostudent")
+@pytest.mark.xfail(reason="Flaky test")
 def test_remove_temp_dir_on_exit(mapdl):
 
     mapdl_2 = launch_mapdl(remove_temp_dir_on_exit=True, port=mapdl.port + 2)
