@@ -39,7 +39,7 @@ else:
     EXEC_FILE = os.environ.get("PYMAPDL_MAPDL_EXEC")
 
 from ansys.mapdl.core import Mapdl, MapdlPool, examples
-from ansys.mapdl.core.errors import VersionError
+from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
 from ansys.mapdl.core.launcher import LOCALHOST, MAPDL_DEFAULT_PORT
 from conftest import QUICK_LAUNCH_SWITCHES, NullContext, requires
 
@@ -67,7 +67,7 @@ NPROC = 1
 
 
 @pytest.fixture(scope="module")
-def pool(tmpdir_factory):
+def pool_creator(tmpdir_factory):
     run_path = str(tmpdir_factory.mktemp("ansys_pool"))
 
     port = os.environ.get("PYMAPDL_PORT", 50056)
@@ -118,6 +118,24 @@ def pool(tmpdir_factory):
         pth = mapdl_pool[0].directory
         if mapdl_pool._spawn_kwargs["remove_temp_files"]:
             assert not list(Path(pth).rglob("*.page*"))
+
+
+@pytest.fixture
+def pool(pool_creator):
+    # Checks whether the pool is fine before testing
+    timeout = time.time() + 30
+
+    while timeout > time.time():
+        n_instances_ready = sum([each is not None for each in pool_creator._instances])
+
+        if n_instances_ready == pool_creator._n_instances:
+            # Loaded
+            break
+        time.sleep(0.1)
+    else:
+        raise MapdlRuntimeError(f"Some MAPDL instances died unexpectedly.")
+
+    return pool_creator
 
 
 @skip_requires_194
@@ -194,7 +212,7 @@ def test_simple(pool):
     def func(mapdl):
         mapdl.clear()
 
-    outs = pool.map(func)
+    outs = pool.map(func, wait=True)
     assert len(outs) == len(pool)
     assert len(pool) == pool_sz
 
@@ -403,7 +421,7 @@ def test_next_with_returns_index(pool):
         assert not each_instance._busy
 
 
-def test_multiple_ips():
+def test_multiple_ips(monkeypatch):
     ips = [
         "123.45.67.01",
         "123.45.67.02",
@@ -411,6 +429,8 @@ def test_multiple_ips():
         "123.45.67.04",
         "123.45.67.05",
     ]
+
+    monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", raising=False)
 
     conf = MapdlPool(ip=ips, _debug_no_launch=True)._debug_no_launch
 
@@ -751,6 +771,7 @@ def test_ip_port_n_instance(
 ):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
     monkeypatch.delenv("PYMAPDL_IP", raising=False)
+    monkeypatch.delenv("PYMAPDL_PORT", raising=False)
     monkeypatch.setenv(
         "PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222"
     )  # to avoid trying to find it.
