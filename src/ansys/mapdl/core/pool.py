@@ -491,10 +491,10 @@ class MapdlPool:
 
         results = []
 
-        if iterable is not None:
-            n = len(iterable)
-        else:
+        if iterable is None:
             n = len(self)
+        else:
+            n = len(iterable)
 
         pbar = None
         if progress_bar:
@@ -560,7 +560,19 @@ class MapdlPool:
                 pbar.update(1)
 
         threads = []
-        if iterable is not None:
+        if iterable is None:
+            # simply apply to all
+            for instance in self._instances:
+                if instance:
+                    threads.append(func_wrapper(instance, func, timeout))
+
+            # wait for all threads to complete
+            if wait:
+                [thread.join() for thread in threads]
+
+                wait_for(results, n, 30)  # wait for completion
+
+        else:
             threads = []
             for args in iterable:
                 # grab the next available instance of mapdl
@@ -590,15 +602,6 @@ class MapdlPool:
                 # wait for all threads to complete
                 if wait:
                     [thread.join() for thread in threads]
-
-        else:  # simply apply to all
-            for instance in self._instances:
-                if instance:
-                    threads.append(func_wrapper(instance, func, timeout))
-
-            # wait for all threads to complete
-            if wait:
-                [thread.join() for thread in threads]
 
         return results
 
@@ -1083,3 +1086,13 @@ class MapdlPool:
                 raise TypeError("Argument 'ip' does not support this type of argument.")
 
         return n_instances, ips, ports
+
+
+def wait_for(object, limit, timeout: int = 30):
+    timeout = time.time() + timeout
+    while timeout > time.time():
+        if sum([each is not None for each in object]) == limit:
+            break
+        time.sleep(0.1)
+    else:
+        raise TimeoutError(f"Reached time limit while waiting for {object}")
