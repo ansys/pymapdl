@@ -506,11 +506,13 @@ class MapdlPool:
 
             pbar = tqdm(total=n, desc="MAPDL Running")
 
+        # monitor thread
         @threaded_daemon
         def func_wrapper(obj, func, timeout, args=None):
             """Expect obj to be an instance of Mapdl"""
             complete = [False]
 
+            # execution thread.
             @threaded_daemon
             def run():
                 if args is not None:
@@ -569,7 +571,6 @@ class MapdlPool:
             # wait for all threads to complete
             if wait:
                 [thread.join() for thread in threads]
-
                 wait_for(results, n, 30)  # wait for completion
 
         else:
