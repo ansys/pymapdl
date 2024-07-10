@@ -779,6 +779,13 @@ class MapdlPlotter(Plotter):
             )
 
     def switch_scene(self, pl: pv.Plotter):
+        """Switches the backend scene to the given plotter.
+
+        Parameters
+        ----------
+        pl : pv.Plotter
+            Plotter to change the scene to.
+        """
         self._backend.scene = pl
         self._backend.enable_widgets()
 
