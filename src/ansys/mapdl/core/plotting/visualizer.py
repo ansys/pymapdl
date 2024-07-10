@@ -650,6 +650,7 @@ class MapdlPlotter(Plotter):
 
             # overwriting labels
             self.scene.renderer._labels = sorted_dict
+            self.scene.theme.font.family = "arial"
             self.scene.add_legend(bcolor=None)
 
     def plot(
