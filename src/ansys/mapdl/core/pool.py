@@ -214,6 +214,7 @@ class MapdlPool:
     ) -> None:
         """Initialize several instances of mapdl"""
         self._instances: List[None] = []
+        self._n_instances = n_instances
 
         # Getting debug arguments
         _debug_no_launch = kwargs.pop("_debug_no_launch", None)
@@ -256,10 +257,6 @@ class MapdlPool:
         n_instances, ips, ports = self._set_n_instance_ip_port_args(
             n_instances, ip, port
         )
-
-        # Converting ip or hostname to ip
-        ips = [socket.gethostbyname(each) for each in ips]
-        _ = [check_valid_ip(each) for each in ips]  # double check
 
         self._ips = ips
 
@@ -342,6 +339,10 @@ class MapdlPool:
             }
             return
 
+        # Converting ip or hostname to ip
+        self._ips = [socket.gethostbyname(each) for each in self._ips]
+        _ = [check_valid_ip(each) for each in self._ips]  # double check
+
         threads = [
             self._spawn_mapdl(
                 i,
@@ -362,13 +363,15 @@ class MapdlPool:
             timeout = time.time() + timeout
 
             while timeout > time.time():
-                if sum([each is not None for each in self._instances]) == n_instances:
+                n_instances_ready = sum([each is not None for each in self._instances])
+
+                if n_instances_ready == n_instances:
                     # Loaded
                     break
                 time.sleep(0.1)
             else:
                 raise TimeoutError(
-                    f"Only {len(self._instances)} of {n_instances} could be started."
+                    f"Only {n_instances_ready} of {n_instances} could be started."
                 )
 
             if pbar is not None:
@@ -914,8 +917,6 @@ class MapdlPool:
     def _monitor_pool(self, refresh=1.0):
         """Checks if instances within a pool have exited (failed) and
         restarts them.
-
-
         """
         while self._active:
             for index, instance in enumerate(self._instances):
