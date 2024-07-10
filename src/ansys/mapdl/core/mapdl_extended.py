@@ -450,10 +450,14 @@ class _MapdlCommandExtended(_MapdlCore):
                 pl = MapdlPlotter()
             else:
                 pl = kwargs.pop("plotter")
-                if not isinstance(pl, MapdlPlotter):
+                if not (isinstance(pl, MapdlPlotter) or isinstance(pl, pv.Plotter)):
                     raise TypeError(
                         f"Expected a MapdlPlotter instance, but got {type(pl)}"
                     )
+                elif isinstance(pl, pv.Plotter):
+                    mapdl_pl = MapdlPlotter()
+                    mapdl_pl.switch_scene(pl)
+                    pl = mapdl_pl
             kwargs.setdefault("title", "MAPDL Keypoint Plot")
             if not self.geometry.n_keypoint:
                 warnings.warn(
@@ -931,10 +935,14 @@ class _MapdlCommandExtended(_MapdlCore):
                 pl = MapdlPlotter()
             else:
                 pl = kwargs.pop("plotter")
-                if not isinstance(pl, MapdlPlotter):
+                if not (isinstance(pl, MapdlPlotter) or isinstance(pl, pv.Plotter)):
                     raise TypeError(
                         f"Expected a MapdlPlotter instance, but got {type(pl)}"
                     )
+                elif isinstance(pl, pv.Plotter):
+                    mapdl_pl = MapdlPlotter()
+                    mapdl_pl.switch_scene(pl)
+                    pl = mapdl_pl
 
             kwargs.setdefault("title", "MAPDL Volume Plot")
             if not self.geometry.n_volu:
@@ -1122,10 +1130,14 @@ class _MapdlCommandExtended(_MapdlCore):
                 pl = MapdlPlotter()
             else:
                 pl = kwargs.pop("plotter")
-                if not isinstance(pl, MapdlPlotter):
+                if not (isinstance(pl, MapdlPlotter) or isinstance(pl, pv.Plotter)):
                     raise TypeError(
                         f"Expected a MapdlPlotter instance, but got {type(pl)}"
                     )
+                elif isinstance(pl, pv.Plotter):
+                    mapdl_pl = MapdlPlotter()
+                    mapdl_pl.switch_scene(pl)
+                    pl = mapdl_pl
             kwargs.setdefault("title", "MAPDL Node Plot")
             if not self.mesh.n_node:
                 warnings.warn("There are no nodes to plot.")
@@ -1255,16 +1267,23 @@ class _MapdlCommandExtended(_MapdlCore):
                 )
 
         if vtk:
+            import pyvista as pv
+
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
             if "plotter" not in kwargs:
                 pl = MapdlPlotter()
             else:
                 pl = kwargs.pop("plotter")
-                if not isinstance(pl, MapdlPlotter):
+                if not (isinstance(pl, MapdlPlotter) or isinstance(pl, pv.Plotter)):
                     raise TypeError(
                         f"Expected a MapdlPlotter instance, but got {type(pl)}"
                     )
+                elif isinstance(pl, pv.Plotter):
+                    mapdl_pl = MapdlPlotter()
+                    mapdl_pl.switch_scene(pl)
+                    pl = mapdl_pl
+
             kwargs.setdefault("title", "MAPDL Element Plot")
             if not self._mesh.n_elem:
                 warnings.warn("There are no elements to plot.")

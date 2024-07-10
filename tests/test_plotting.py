@@ -843,6 +843,7 @@ def test_pick_areas(mapdl, make_block, selection):
 
 @requires("pyvista")
 def test_plotter_input(mapdl, make_block):
+    import pyvista as pv
 
     pl = MapdlPlotter(off_screen=False)
     pl2 = mapdl.eplot(return_plotter=True, plotter=pl)
@@ -852,6 +853,11 @@ def test_plotter_input(mapdl, make_block):
     # invalid plotter type
     with pytest.raises(TypeError):
         pl2 = mapdl.eplot(return_plotter=True, plotter=[])
+
+    pl_pv = pv.Plotter()
+    pl3 = mapdl.eplot(return_plotter=True, plotter=pl_pv)
+    assert pl3.scene is pl_pv
+    pl3.show()
 
 
 def test_cpos_input(mapdl, make_block):

@@ -85,6 +85,11 @@ class MapdlPlotterBackend(PyVistaBackendInterface):
         """Return the scene."""
         return self.pv_interface.scene
 
+    @scene.setter
+    def scene(self, scene):
+        """Set the scene."""
+        self.pv_interface._scene = scene
+
     @property
     def meshes(self):
         """Return the meshes."""
@@ -771,6 +776,10 @@ class MapdlPlotter(Plotter):
             raise ValueError(
                 "'return_cpos' and 'return_plotter' cannot be both 'True' at the same time."
             )
+
+    def switch_scene(self, pl: pv.Plotter):
+        self._backend.scene = pl
+        self._backend.enable_widgets()
 
     def show(
         self,
