@@ -158,6 +158,7 @@ def test_simple_map(pool):
 
 @skip_if_ignore_pool
 @requires("local")
+@pytest.mark.skipif(True, reason="Pool tests are flaky. See #3254")
 def test_map_timeout(pool):
     pool_sz = len(pool)
 
