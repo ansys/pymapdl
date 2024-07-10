@@ -45,7 +45,7 @@ Fixed
 - ci: Fix missing labels format in dependabot file `#3204 <https://github.com/ansys/pymapdl/pull/3204>`_
 - ci: wrong tagging on the coverage artifacts `#3225 <https://github.com/ansys/pymapdl/pull/3225>`_
 - fix: avoid inspecting suspended processes `#3227 <https://github.com/ansys/pymapdl/pull/3227>`_
-- fix: not deleting temporary file when ``remove_temp_dir_on_exit``=True `#3247 <https://github.com/ansys/pymapdl/pull/3247>`_
+- fix: not deleting temporary file when ``remove_temp_dir_on_exit`` =True `#3247 <https://github.com/ansys/pymapdl/pull/3247>`_
 - fix: local tests always running as student `#3251 <https://github.com/ansys/pymapdl/pull/3251>`_
 - fix: incorrect env vars section `#3252 <https://github.com/ansys/pymapdl/pull/3252>`_
 
