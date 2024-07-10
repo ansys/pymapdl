@@ -149,7 +149,6 @@ def test_invalid_exec():
         )
 
 
-# @pytest.mark.xfail(strict=False, reason="Flaky test. See #2435")
 def test_heal(pool):
     pool_sz = len(pool)
     pool_names = pool._names  # copy pool names
@@ -213,6 +212,7 @@ def test_simple(pool):
         mapdl.clear()
 
     outs = pool.map(func, wait=True)
+
     assert len(outs) == len(pool)
     assert len(pool) == pool_sz
 
