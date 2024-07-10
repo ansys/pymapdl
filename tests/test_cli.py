@@ -72,13 +72,9 @@ def test_launch_mapdl_cli(monkeypatch, run_cli, start_instance):
     pid = int(re.search(r"\(PID=(\d+)\)", output).groups()[0])
 
     output = run_cli(f"stop --pid {pid}")
-
-    try:
-        p = psutil.Process(pid)
-        assert not p.status()
-    except:
-        # An exception means the process is dead?
-        pass
+    p = psutil.Process(pid)
+    time.time(1)
+    assert not p.status()
 
 
 @requires("click")

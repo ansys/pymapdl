@@ -28,7 +28,7 @@ import time
 import numpy as np
 import pytest
 
-from conftest import ON_LOCAL, ON_STUDENT, START_INSTANCE, has_dependency
+from conftest import ON_LOCAL, ON_STUDENT, has_dependency
 
 if has_dependency("ansys-tools-path"):
     from ansys.tools.path import find_ansys
@@ -41,7 +41,7 @@ else:
 from ansys.mapdl.core import Mapdl, MapdlPool, examples
 from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
 from ansys.mapdl.core.launcher import LOCALHOST, MAPDL_DEFAULT_PORT
-from conftest import QUICK_LAUNCH_SWITCHES, NullContext, requires
+from conftest import QUICK_LAUNCH_SWITCHES, VALID_PORTS, NullContext, requires
 
 # skip entire module unless HAS_GRPC
 pytestmark = requires("grpc")
@@ -96,13 +96,16 @@ def pool_creator(tmpdir_factory):
             wait=True,
         )
 
-    assert len(mapdl_pool) == 2
+    VALID_PORTS.extend(mapdl_pool._ports)
 
     yield mapdl_pool
 
+    for each in mapdl_pool._ports:
+        VALID_PORTS.remove(each)
+
     ##########################################################################
     # test exit
-    mapdl_pool.exit()
+    mapdl_pool.exit(block=True)
 
     timeout = time.time() + TWAIT
 
@@ -217,7 +220,6 @@ def test_simple(pool):
     assert len(pool) == pool_sz
 
 
-# fails intermittently
 @skip_if_ignore_pool
 def test_batch(pool):
     input_files = [examples.vmfiles["vm%d" % i] for i in range(1, len(pool) + 3)]
@@ -225,7 +227,6 @@ def test_batch(pool):
     assert len(outputs) == len(input_files)
 
 
-# fails intermittently
 @skip_if_ignore_pool
 def test_map(pool):
     completed_indices = []
@@ -245,9 +246,7 @@ def test_map(pool):
 
 
 @skip_if_ignore_pool
-@pytest.mark.skipif(
-    not START_INSTANCE, reason="This test requires the pool to be local"
-)
+@requires("local")
 def test_abort(pool, tmpdir):
     pool_sz = len(pool)  # initial pool size
 
