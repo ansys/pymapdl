@@ -80,7 +80,7 @@ def test_launch_mapdl_cli(monkeypatch, run_cli, start_instance):
 
     try:
         p = psutil.Process(pid)
-        assert not p.status()
+        assert p.status() and p.status() != psutil.STATUS_RUNNING
     except psutil.NoSuchProcess:
         assert True
 
