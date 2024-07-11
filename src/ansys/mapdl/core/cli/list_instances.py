@@ -77,6 +77,10 @@ def list_instances(instances, long, cmd, location):
         valid_ansys_process = ("ansys" in proc.name().lower()) or (
             "mapdl" in proc.name().lower()
         )
+        # Early exit to avoid checking 'cmdline' of a protected process (raises psutil.AccessDenied)
+        if not valid_ansys_process:
+            return False
+
         grpc_is_active = "-grpc" in proc.cmdline()
         return valid_status and valid_ansys_process and grpc_is_active
 
