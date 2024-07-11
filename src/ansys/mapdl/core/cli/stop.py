@@ -23,12 +23,6 @@
 import click
 
 
-def is_ansys_process(proc):
-    return (
-        "ansys" in proc.name().lower() or "mapdl" in proc.name().lower()
-    ) and "-grpc" in proc.cmdline()
-
-
 @click.command(
     short_help="Stop MAPDL instances.",
     help="""This command stop MAPDL instances running on a given port or with a given process id (PID).
@@ -57,6 +51,8 @@ By default, it stops instances running on the port 50052.""",
 )
 def stop(port, pid, all):
     import psutil
+
+    from ansys.mapdl.core.launcher import is_ansys_process
 
     PROCESS_OK_STATUS = [
         # List of all process status, comment out the ones that means that

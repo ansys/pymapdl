@@ -458,9 +458,9 @@ def run_before_and_after_tests_2(request, mapdl):
 
 
 @pytest.fixture(autouse=True, scope="function")
-def run_before_and_after_tests_2(request, mapdl):
+def run_before_and_after_tests_3(request, mapdl):
     """Make sure we leave no MAPDL running behind"""
-    from ansys.mapdl.core.cli.stop import is_ansys_process
+    from ansys.mapdl.core.launcher import is_ansys_process
 
     PROCESS_OK_STATUS = [
         psutil.STATUS_RUNNING,  #
