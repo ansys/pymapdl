@@ -486,9 +486,10 @@ def run_before_and_after_tests_3(request, mapdl):
                     port = int(cmdline[cmdline.index("-port") + 1])
 
                     if port not in VALID_PORTS:
+                        cmdline_ = " ".join([f'"{each}"' for each in cmdline])
                         raise Exception(
                             f"The following MAPDL instance running at port {port} is alive after the test.\n"
-                            f"Only ports {VALID_PORTS} are allowed.\nCMD: {''.join(cmdline)}"
+                            f"Only ports {VALID_PORTS} are allowed.\nCMD: {cmdline_}"
                         )
             except psutil.NoSuchProcess:
                 continue

@@ -112,28 +112,32 @@ def test_launch_mapdl_cli_config(run_cli):
 
     cmd = cmd + " " + " ".join(cmd_warnings_)
 
-    output = run_cli(cmd)
+    try:
+        output = run_cli(cmd)
 
-    assert "Launched an MAPDL instance" in output
-    assert str(PORT1) in output
+        assert "Launched an MAPDL instance" in output
+        assert str(PORT1) in output
 
-    # assert warnings
-    for each in cmd_warnings:
+        # assert warnings
+        for each in cmd_warnings:
+            assert (
+                f"The following argument is not allowed in CLI: '{each}'" in output
+            ), f"Warning about '{each}' not printed"
+
+        # grab ips and port
+        pid = int(re.search(r"\(PID=(\d+)\)", output).groups()[0])
+        p = psutil.Process(pid)
+        cmdline = " ".join(p.cmdline())
+
+        assert str(PORT1) in cmdline
+        assert "myjob" in cmdline
+
+    finally:
+        output = run_cli(f"stop --pid {pid}")
+        assert "Success" in output
         assert (
-            f"The following argument is not allowed in CLI: '{each}'" in output
-        ), f"Warning about '{each}' not printed"
-
-    # grab ips and port
-    pid = int(re.search(r"\(PID=(\d+)\)", output).groups()[0])
-    p = psutil.Process(pid)
-    cmdline = " ".join(p.cmdline())
-
-    assert str(PORT1) in cmdline
-    assert "myjob" in cmdline
-
-    output = run_cli(f"stop --pid {pid}")
-    assert "Success" in output
-    assert f"The process with PID {pid} and its children have been stopped" in output
+            f"The process with PID {pid} and its children have been stopped" in output
+        )
 
 
 @requires("click")
