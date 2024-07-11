@@ -24,7 +24,9 @@ from collections import namedtuple
 import os
 from pathlib import Path
 from shutil import get_terminal_size
+import subprocess
 from sys import platform
+import time
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
 import psutil
@@ -487,6 +489,8 @@ def run_before_and_after_tests_3(request, mapdl):
 
                     if port not in VALID_PORTS:
                         cmdline_ = " ".join([f'"{each}"' for each in cmdline])
+                        subprocess.run(["pymapdl", "stop", f"{port}"])
+                        time.sleep(1)
                         raise Exception(
                             f"The following MAPDL instance running at port {port} is alive after the test.\n"
                             f"Only ports {VALID_PORTS} are allowed.\nCMD: {cmdline_}"
