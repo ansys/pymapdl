@@ -86,14 +86,18 @@ def list_instances(instances, long, cmd, location):
 
     for proc in psutil.process_iter():
         # Check if the process is running and not suspended
-        if is_valid_process(proc):
-            # Checking the number of children we infer if the process is the main process,
-            # or one of the main process thread.
-            if len(proc.children(recursive=True)) < 2:
-                proc.ansys_instance = False
-            else:
-                proc.ansys_instance = True
-            mapdl_instances.append(proc)
+        try:
+            if is_valid_process(proc):
+                # Checking the number of children we infer if the process is the main process,
+                # or one of the main process thread.
+                if len(proc.children(recursive=True)) < 2:
+                    proc.ansys_instance = False
+                else:
+                    proc.ansys_instance = True
+                mapdl_instances.append(proc)
+
+        except (psutil.NoSuchProcess, psutil.ZombieProcess) as e:
+            continue
 
     # printing
     table = []
