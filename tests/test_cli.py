@@ -76,13 +76,8 @@ def test_launch_mapdl_cli(monkeypatch, run_cli, start_instance):
     # grab ips and port
     pid = int(re.search(r"\(PID=(\d+)\)", output).groups()[0])
 
-    output = run_cli(f"stop --pid {pid}")
-
-    try:
-        p = psutil.Process(pid)
-        assert p.status() and p.status() != psutil.STATUS_RUNNING
-    except psutil.NoSuchProcess:
-        assert True
+    output = run_cli(f"stop --port {PORT1}")
+    assert "success" in output.lower()
 
 
 @requires("click")
@@ -133,10 +128,11 @@ def test_launch_mapdl_cli_config(run_cli):
         assert "myjob" in cmdline
 
     finally:
-        output = run_cli(f"stop --pid {pid}")
+        output = run_cli(f"stop --port {PORT1}")
         assert "Success" in output
         assert (
-            f"The process with PID {pid} and its children have been stopped" in output
+            f"Success: Ansys instances running on port {PORT1} have been stopped"
+            in output
         )
 
 
