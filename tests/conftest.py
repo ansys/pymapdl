@@ -480,16 +480,15 @@ def run_before_and_after_tests_2(request, mapdl):
                 and proc.status() in PROCESS_OK_STATUS
                 and is_ansys_process(proc)
             ):
-                # Killing by ports
-                connections = proc.connections()
-                to_kill = True
 
-                for each_connection in connections:
-                    if each_connection.local_address[1] in VALID_PORTS:
-                        to_kill = False
+                cmdline = proc.cmdline()
+                port = int(cmdline[cmdline.index("-port") + 1])
 
-                if to_kill:
-                    raise Exception("MAPDL instances are alive after test")
+                if port not in VALID_PORTS:
+                    raise Exception(
+                        f"The following MAPDL instance running at port {port} is alive after the test.\n"
+                        f"Only ports {VALID_PORTS} are allowed.\nCMD: {''.join(cmdline)}"
+                    )
 
 
 @pytest.fixture(scope="session")
