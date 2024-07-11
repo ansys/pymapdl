@@ -475,20 +475,23 @@ def run_before_and_after_tests_2(request, mapdl):
 
     if ON_LOCAL:
         for proc in psutil.process_iter():
-            if (
-                psutil.pid_exists(proc.pid)
-                and proc.status() in PROCESS_OK_STATUS
-                and is_ansys_process(proc)
-            ):
+            try:
+                if (
+                    psutil.pid_exists(proc.pid)
+                    and proc.status() in PROCESS_OK_STATUS
+                    and is_ansys_process(proc)
+                ):
 
-                cmdline = proc.cmdline()
-                port = int(cmdline[cmdline.index("-port") + 1])
+                    cmdline = proc.cmdline()
+                    port = int(cmdline[cmdline.index("-port") + 1])
 
-                if port not in VALID_PORTS:
-                    raise Exception(
-                        f"The following MAPDL instance running at port {port} is alive after the test.\n"
-                        f"Only ports {VALID_PORTS} are allowed.\nCMD: {''.join(cmdline)}"
-                    )
+                    if port not in VALID_PORTS:
+                        raise Exception(
+                            f"The following MAPDL instance running at port {port} is alive after the test.\n"
+                            f"Only ports {VALID_PORTS} are allowed.\nCMD: {''.join(cmdline)}"
+                        )
+            except psutil.NoSuchProcess:
+                continue
 
 
 @pytest.fixture(scope="session")
