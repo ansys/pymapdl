@@ -72,9 +72,12 @@ def test_launch_mapdl_cli(monkeypatch, run_cli, start_instance):
     pid = int(re.search(r"\(PID=(\d+)\)", output).groups()[0])
 
     output = run_cli(f"stop --pid {pid}")
-    p = psutil.Process(pid)
-    time.time(1)
-    assert not p.status()
+
+    try:
+        p = psutil.Process(pid)
+        assert not p.status()
+    except psutil.NoSuchProcess:
+        assert True
 
 
 @requires("click")
@@ -129,7 +132,6 @@ def test_launch_mapdl_cli_config(run_cli):
 @requires("click")
 @requires("local")
 @requires("nostudent")
-@pytest.mark.xfail(reason="Flaky test")
 def test_launch_mapdl_cli_list(run_cli):
     output = run_cli("list")
     assert "running" in output or "sleeping" in output
@@ -203,7 +205,7 @@ mapdl.block(0, 1, 0, 1, 0, 1)"""
 
 @requires("click")
 def test_convert_pipe():
-    cmd = """echo "/prep7" | pymapdl convert """
+    cmd = """echo /prep7 | pymapdl convert """
 
     out = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
     stdout = out.stdout.read().decode()
