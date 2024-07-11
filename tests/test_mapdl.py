@@ -1992,7 +1992,10 @@ def test_save_on_exit(mapdl, cleared):
     )
     mapdl2.resume(db_path)
     assert mapdl2.parameters["my_par"] == "new_initial_value"
+
+    # cleaning up
     mapdl2.exit(force=True)
+    time.sleep(2)
 
 
 def test_input_strings_inside_non_interactive(mapdl, cleared):
@@ -2335,12 +2338,13 @@ def test_remove_temp_dir_on_exit(mapdl):
     mapdl_2 = launch_mapdl(remove_temp_dir_on_exit=True, port=mapdl.port + 2)
     path_ = mapdl_2.directory
     assert os.path.exists(path_)
-    assert all([psutil.pid_exists(pid) for pid in mapdl_2._pids])  # checking pids too
+
+    pids = mapdl_2._pids
+    assert all([psutil.pid_exists(pid) for pid in pids])  # checking pids too
 
     mapdl_2.exit()
-    time.sleep(1.0)
     assert not os.path.exists(path_)
-    assert not all([psutil.pid_exists(pid) for pid in mapdl_2._pids])
+    assert not all([psutil.pid_exists(pid) for pid in pids])
 
 
 def test_sys(mapdl):
