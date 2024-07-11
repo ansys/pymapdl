@@ -26,7 +26,12 @@ import subprocess
 import psutil
 import pytest
 
-from conftest import requires
+from conftest import VALID_PORTS, requires
+
+if VALID_PORTS:
+    PORT1 = max(VALID_PORTS) + 1
+else:
+    PORT1 = 50090
 
 
 @pytest.fixture
@@ -63,10 +68,10 @@ def test_launch_mapdl_cli(monkeypatch, run_cli, start_instance):
         monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
 
     # Setting a port so it does not collide with the already running instance for testing
-    output = run_cli("start --port 50053")
+    output = run_cli(f"start --port {PORT1}")
 
     assert "Success: Launched an MAPDL instance " in output
-    assert "50053" in output
+    assert str(PORT1) in output
 
     # grab ips and port
     pid = int(re.search(r"\(PID=(\d+)\)", output).groups()[0])
@@ -84,7 +89,7 @@ def test_launch_mapdl_cli(monkeypatch, run_cli, start_instance):
 @requires("local")
 @requires("nostudent")
 def test_launch_mapdl_cli_config(run_cli):
-    cmds_ = ["start", "--port 50090", "--jobname myjob"]
+    cmds_ = ["start", f"--port {PORT1}", "--jobname myjob"]
     cmd_warnings = [
         "ip",
         "license_server_check",
@@ -110,7 +115,7 @@ def test_launch_mapdl_cli_config(run_cli):
     output = run_cli(cmd)
 
     assert "Launched an MAPDL instance" in output
-    assert "50090" in output
+    assert str(PORT1) in output
 
     # assert warnings
     for each in cmd_warnings:
@@ -123,16 +128,24 @@ def test_launch_mapdl_cli_config(run_cli):
     p = psutil.Process(pid)
     cmdline = " ".join(p.cmdline())
 
-    assert "50090" in cmdline
+    assert str(PORT1) in cmdline
     assert "myjob" in cmdline
 
-    run_cli(f"stop --pid {pid}")
+    output = run_cli(f"stop --pid {pid}")
+    assert "Success" in output
+    assert f"The process with PID {pid} and its children have been stopped" in output
 
 
 @requires("click")
 @requires("local")
 @requires("nostudent")
 def test_launch_mapdl_cli_list(run_cli):
+
+    output = run_cli(f"start --port {PORT1}")
+
+    assert "Success: Launched an MAPDL instance " in output
+    assert str(PORT1) in output
+
     output = run_cli("list")
     assert "running" in output or "sleeping" in output
     assert "Is Instance" in output
@@ -166,6 +179,13 @@ def test_launch_mapdl_cli_list(run_cli):
     assert "Command line" in output
     assert len(output.splitlines()) > 2
     assert "ansys" in output.lower() or "mapdl" in output.lower()
+
+    output = run_cli(f"stop --port {PORT1}")
+    assert "Success" in output
+    assert str(PORT1) in output
+    assert (
+        f"Success: Ansys instances running on port {PORT1} have been stopped" in output
+    )
 
 
 @requires("click")
