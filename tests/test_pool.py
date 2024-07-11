@@ -39,7 +39,7 @@ else:
     EXEC_FILE = os.environ.get("PYMAPDL_MAPDL_EXEC")
 
 from ansys.mapdl.core import Mapdl, MapdlPool, examples
-from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
+from ansys.mapdl.core.errors import VersionError
 from ansys.mapdl.core.launcher import LOCALHOST, MAPDL_DEFAULT_PORT
 from conftest import QUICK_LAUNCH_SWITCHES, VALID_PORTS, NullContext, requires
 
@@ -126,18 +126,7 @@ def pool_creator(tmpdir_factory):
 @pytest.fixture
 def pool(pool_creator):
     # Checks whether the pool is fine before testing
-    timeout = time.time() + 30
-
-    while timeout > time.time():
-        n_instances_ready = sum([each is not None for each in pool_creator._instances])
-
-        if n_instances_ready == pool_creator._n_instances:
-            # Loaded
-            break
-        time.sleep(0.1)
-    else:
-        raise MapdlRuntimeError(f"Some MAPDL instances died unexpectedly.")
-
+    pool_creator.wait_for_ready()
     return pool_creator
 
 
@@ -198,12 +187,7 @@ def test_map_timeout(pool):
 
     # the timeout option kills the MAPDL instance when we reach the timeout.
     # Let's wait for the pool to heal before continuing
-    timeout = time.time() + TWAIT
-    while len(pool) < pool_sz:
-        time.sleep(0.1)
-        if time.time() > timeout:
-            raise TimeoutError(f"Failed to restart instance in {TWAIT} seconds")
-
+    pool.wait_for_ready(TWAIT)
     assert len(pool) == pool_sz
 
 
@@ -213,6 +197,7 @@ def test_simple(pool):
 
     def func(mapdl):
         mapdl.clear()
+        return 1
 
     outs = pool.map(func, wait=True)
 
@@ -222,7 +207,7 @@ def test_simple(pool):
 
 @skip_if_ignore_pool
 def test_batch(pool):
-    input_files = [examples.vmfiles["vm%d" % i] for i in range(1, len(pool) + 3)]
+    input_files = [examples.vmfiles["vm%d" % i] for i in range(1, len(pool) + 1)]
     outputs = pool.run_batch(input_files)
     assert len(outputs) == len(input_files)
 
@@ -282,6 +267,17 @@ def test_abort(pool, tmpdir):
 
 @skip_if_ignore_pool
 def test_directory_names_default(pool):
+    dirs_path_pool = os.listdir(pool._root_dir)
+    for i, _ in enumerate(pool._instances):
+        assert pool._names(i) in dirs_path_pool
+        assert f"Instance_{i}" in dirs_path_pool
+
+
+@skip_if_ignore_pool
+def test_directory_names_default_with_restart(pool):
+    pool[1].exit()
+    pool.wait_for_ready()
+
     dirs_path_pool = os.listdir(pool._root_dir)
     for i, _ in enumerate(pool._instances):
         assert pool._names(i) in dirs_path_pool
