@@ -33,7 +33,7 @@ env:
   MAPDL_PACKAGE: ghcr.io/ansys/mapdl
   MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.1-ubuntu-student
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vvv -ra --durations=10 --maxfail=3 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html'
+  PYTEST_ARGUMENTS: '-vvv -ra --durations=10 --maxfail=3 --reruns 0 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html'
 
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
