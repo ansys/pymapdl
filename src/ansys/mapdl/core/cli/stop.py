@@ -84,27 +84,31 @@ def stop(port, pid, all):
     if port or all:
         killed_ = False
         for proc in psutil.process_iter():
-            if (
-                psutil.pid_exists(proc.pid)
-                and proc.status() in PROCESS_OK_STATUS
-                and is_ansys_process(proc)
-            ):
-                # Killing "all"
-                if all:
-                    try:
-                        proc.kill()
-                        killed_ = True
-                    except psutil.NoSuchProcess:
-                        pass
-
-                else:
-                    # Killing by ports
-                    if str(port) in proc.cmdline():
+            try:
+                if (
+                    psutil.pid_exists(proc.pid)
+                    and proc.status() in PROCESS_OK_STATUS
+                    and is_ansys_process(proc)
+                ):
+                    # Killing "all"
+                    if all:
                         try:
                             proc.kill()
                             killed_ = True
                         except psutil.NoSuchProcess:
                             pass
+
+                    else:
+                        # Killing by ports
+                        if str(port) in proc.cmdline():
+                            try:
+                                proc.kill()
+                                killed_ = True
+                            except psutil.NoSuchProcess:
+                                pass
+
+            except psutil.NoSuchProcess:
+                continue
 
         if all:
             str_ = ""
