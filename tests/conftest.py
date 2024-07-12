@@ -26,6 +26,7 @@ from pathlib import Path
 from shutil import get_terminal_size
 import subprocess
 from sys import platform
+import time
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
 import psutil
