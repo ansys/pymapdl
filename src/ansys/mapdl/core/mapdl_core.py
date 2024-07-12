@@ -2263,6 +2263,15 @@ class _MapdlCore(Commands):
     def __del__(self):
         """Clean up when complete"""
         if self._cleanup:
+            # removing logging handlers if they are closed to avoid I/O errors
+            # when exiting after the logger file has been closed.
+            logger = self._log
+
+            if logger.hasHandlers:
+                for each_handler in logger.handlers:
+                    if each_handler.stream.closed:
+                        logger.removeHandler(each_handler)
+
             try:
                 self.exit()
             except Exception as e:
