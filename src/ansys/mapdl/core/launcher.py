@@ -256,6 +256,9 @@ def get_process_at_port(port) -> Optional[psutil.Process]:
             )  # just to check if we can access the
         except psutil.AccessDenied:
             continue
+        except psutil.NoSuchProcess:
+            # process already died
+            continue
 
         for conns in connections:
             if conns.laddr.port == port:
@@ -1467,6 +1470,7 @@ def launch_mapdl(
         )
     use_vtk = kwargs.pop("use_vtk", None)
     just_launch = kwargs.pop("just_launch", None)
+    on_pool = kwargs.pop("on_pool", False)
     _debug_no_launch = kwargs.pop("_debug_no_launch", None)
 
     # Transferring MAPDL arguments to start_parameters:
@@ -1532,7 +1536,7 @@ def launch_mapdl(
         if ON_WSL:
             LOG.debug("On WSL: Allowing 'start_instance' and 'ip' arguments together.")
         else:
-            if start_instance is True:
+            if start_instance is True and not on_pool:
                 raise ValueError(
                     "When providing a value for the argument 'ip', the argument "
                     "'start_instance' cannot be 'True'.\n"
