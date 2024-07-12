@@ -59,6 +59,7 @@ else:
 def available_ports(n_ports: int, starting_port: int = MAPDL_DEFAULT_PORT) -> List[int]:
     """Return a list the first ``n_ports`` ports starting from ``starting_port``."""
 
+    LOG.debug(f"Getting {n_ports} available ports starting from {starting_port}.")
     port = starting_port
     ports: List[int] = []
     while port < 65536 and len(ports) < n_ports:
@@ -71,6 +72,7 @@ def available_ports(n_ports: int, starting_port: int = MAPDL_DEFAULT_PORT) -> Li
             f"There are not {n_ports} available ports between {starting_port} and 65536"
         )
 
+    LOG.debug(f"Retrieved the following available ports: {ports}")
     return ports
 
 
@@ -259,6 +261,8 @@ class MapdlPool:
         )
 
         self._ips = ips
+        LOG.debug(f"Using ports: {ports}")
+        LOG.debug(f"Using IPs: {ips}")
 
         if not names:
             names = "Instance"
@@ -301,15 +305,12 @@ class MapdlPool:
 
         self._exec_file = exec_file
 
-        # grab available ports
         if (
             start_instance
             and self._root_dir is not None
             and not os.path.isdir(self._root_dir)
         ):
             os.makedirs(self._root_dir)
-
-        LOG.debug(f"Using ports: {ports}")
 
         self._instances = []
         self._active = True  # used by pool monitor
@@ -982,6 +983,7 @@ class MapdlPool:
         return "MAPDL Pool with %d active instances" % len(self)
 
     def _set_n_instance_ip_port_args(self, n_instances, ip, port):
+        LOG.debug(f"Input n_instances ({n_instances}), ip ({ip}), and port ({port})")
         if n_instances is None:
             if ip is None or (isinstance(ip, list) and len(ip) == 0):
                 if port is None or (isinstance(port, list) and len(port) < 1):
