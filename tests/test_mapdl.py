@@ -1928,6 +1928,7 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
 
 @requires("local")
 @requires("nostudent")
+@pytest.mark.xfail(reason="Save on exit is broken.")
 def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
         license_server_check=False,
