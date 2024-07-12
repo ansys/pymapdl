@@ -2314,6 +2314,7 @@ def test__remove_temp_dir_on_exit(mapdl, tmpdir):
 
 @requires("local")
 @requires("nostudent")
+@pytest.mark.xfail(reason="Flaky test. See #2435")
 def test_remove_temp_dir_on_exit(mapdl):
 
     mapdl_2 = launch_mapdl(remove_temp_dir_on_exit=True, port=PORT1)
