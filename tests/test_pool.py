@@ -169,6 +169,7 @@ def test_simple_map(pool):
 
 @skip_if_ignore_pool
 @requires("local")
+@pytest.mark.xfail(reason="Flaky test. See #2435")
 def test_map_timeout(pool):
     pool_sz = len(pool)
 

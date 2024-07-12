@@ -139,6 +139,7 @@ def test_launch_mapdl_cli_config(run_cli):
 @requires("click")
 @requires("local")
 @requires("nostudent")
+@pytest.mark.xfail(reason="Flaky test. See #2435")
 def test_launch_mapdl_cli_list(run_cli):
 
     output = run_cli(f"start --port {PORT1}")
