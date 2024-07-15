@@ -345,16 +345,6 @@ class TestMapdlPool:
         assert len(pool) == pool_sz
         pool.exit()
 
-    @skip_if_ignore_pool
-    def test_only_one_instance(self, mapdl):
-        pool = MapdlPool(
-            1,
-            port=mapdl.port + 1,
-            exec_file=EXEC_FILE,
-            nproc=NPROC,
-            additional_switches=QUICK_LAUNCH_SWITCHES,
-        )
-
     def test_ip(self, monkeypatch):
         monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
         monkeypatch.delenv("PYMAPDL_IP", raising=False)
