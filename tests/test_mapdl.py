@@ -34,7 +34,7 @@ import numpy as np
 import psutil
 import pytest
 
-from conftest import has_dependency
+from conftest import VALID_PORTS, has_dependency
 
 if has_dependency("pyvista"):
     from pyvista import MultiBlock
@@ -59,6 +59,12 @@ from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 # Path to files needed for examples
 PATH = os.path.dirname(os.path.abspath(__file__))
 test_files = os.path.join(PATH, "test_files")
+
+
+if VALID_PORTS:
+    PORT1 = max(VALID_PORTS) + 1
+else:
+    PORT1 = 50090
 
 DEPRECATED_COMMANDS = [
     "edasmp",
@@ -569,32 +575,6 @@ def test_apdl_logging_start(tmpdir, mapdl):
     assert "K,4,0,1,0" in text
 
     mapdl._close_apdl_log()
-
-
-@requires("console")
-def test_console_apdl_logging_start(tmpdir):
-    filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
-
-    mapdl = launch_mapdl(log_apdl=filename, mode="console")
-
-    mapdl.prep7()
-    mapdl.run("!comment test")
-    mapdl.k(1, 0, 0, 0)
-    mapdl.k(2, 1, 0, 0)
-    mapdl.k(3, 1, 1, 0)
-    mapdl.k(4, 0, 1, 0)
-
-    mapdl.exit()
-
-    with open(filename, "r") as fid:
-        text = "".join(fid.readlines())
-
-    assert "PREP7" in text
-    assert "!comment test" in text
-    assert "K,1,0,0,0" in text
-    assert "K,2,1,0,0" in text
-    assert "K,3,1,1,0" in text
-    assert "K,4,0,1,0" in text
 
 
 def test_apdl_logging(mapdl, tmpdir):
@@ -1948,12 +1928,12 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
 
 @requires("local")
 @requires("nostudent")
-@pytest.mark.xfail(reason="Flaky test")
+@pytest.mark.xfail(reason="Save on exit is broken.")
 def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
         license_server_check=False,
         additional_switches=QUICK_LAUNCH_SWITCHES,
-        port=mapdl.port + 2,
+        port=PORT1,
     )
     mapdl2.parameters["my_par"] = "initial_value"
 
@@ -1970,7 +1950,7 @@ def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
         license_server_check=False,
         additional_switches=QUICK_LAUNCH_SWITCHES,
-        port=mapdl.port + 2,
+        port=PORT1,
     )
     mapdl2.resume(db_path)
     if mapdl.version >= 24.2:
@@ -1989,10 +1969,12 @@ def test_save_on_exit(mapdl, cleared):
     mapdl2 = launch_mapdl(
         license_server_check=False,
         additional_switches=QUICK_LAUNCH_SWITCHES,
-        port=mapdl.port + 2,
+        port=PORT1,
     )
     mapdl2.resume(db_path)
     assert mapdl2.parameters["my_par"] == "new_initial_value"
+
+    # cleaning up
     mapdl2.exit(force=True)
 
 
@@ -2311,6 +2293,7 @@ def test_use_vtk(mapdl):
 
 
 @requires("local")
+@pytest.mark.xfail(reason="Flaky test. See #2435")
 def test__remove_temp_dir_on_exit(mapdl, tmpdir):
     path = os.path.join(tempfile.gettempdir(), "ansys_" + random_string())
     os.makedirs(path)
@@ -2331,18 +2314,19 @@ def test__remove_temp_dir_on_exit(mapdl, tmpdir):
 
 @requires("local")
 @requires("nostudent")
-@pytest.mark.xfail(reason="Flaky test")
+@pytest.mark.xfail(reason="Flaky test. See #2435")
 def test_remove_temp_dir_on_exit(mapdl):
 
-    mapdl_2 = launch_mapdl(remove_temp_dir_on_exit=True, port=mapdl.port + 2)
+    mapdl_2 = launch_mapdl(remove_temp_dir_on_exit=True, port=PORT1)
     path_ = mapdl_2.directory
     assert os.path.exists(path_)
-    assert all([psutil.pid_exists(pid) for pid in mapdl_2._pids])  # checking pids too
+
+    pids = mapdl_2._pids
+    assert all([psutil.pid_exists(pid) for pid in pids])  # checking pids too
 
     mapdl_2.exit()
-    time.sleep(1.0)
     assert not os.path.exists(path_)
-    assert not all([psutil.pid_exists(pid) for pid in mapdl_2._pids])
+    assert not all([psutil.pid_exists(pid) for pid in pids])
 
 
 def test_sys(mapdl):

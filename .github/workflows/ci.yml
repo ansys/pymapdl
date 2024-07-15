@@ -24,13 +24,14 @@ env:
   PACKAGE_NAME: 'ansys-mapdl-core'
   PACKAGE_NAMESPACE: 'ansys.mapdl.core'
   DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
+  LATEST_VERSION: "242"
+  MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.2-ubuntu-student
   MEILISEARCH_API_KEY: ${{ secrets.MEILISEARCH_API_KEY }}
   MEILISEARCH_PUBLIC_API_KEY: ${{ secrets.MEILISEARCH_PUBLIC_API_KEY }}
   PYANSYS_OFF_SCREEN: True
   DPF_START_SERVER: False
   DPF_PORT: 21004
   MAPDL_PACKAGE: ghcr.io/ansys/mapdl
-  MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.1-ubuntu-student
   ON_CI: True
   PYTEST_ARGUMENTS: '-vvv -ra --durations=10 --maxfail=3 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html'
 
@@ -339,10 +340,25 @@ jobs:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.1.7
 
+      - name: Get event type and user to check permissions.
+        id: get_user
+        env:
+          type_event: ${{ github.event.issue.pull_request }}
+        run: |
+          if [[ $type_event ]]; then
+            echo "Event type: $type_event"
+            echo "event_type=$( echo "$type_event" )" >> $GITHUB_OUTPUT
+            export user=${{ github.event.pull_request.user.login }}
+          else
+            export user=${{ github.actor }}
+          fi
+          echo "This PR has been opened by: $user"
+          echo "user=$( echo "$user" )" >> $GITHUB_OUTPUT
+
       - uses: tspascoal/get-user-teams-membership@v3
         id: is_organization_member
         with:
-          username: ${{ github.actor }}
+          username: ${{ steps.get_user.outputs.user }}
           organization: ansys
           team: 'pymapdl-developers'
           GITHUB_TOKEN: ${{ secrets.TOKEN_TEAMS_USER_READ }}
@@ -792,7 +808,7 @@ jobs:
           # executable path with the env var: PYMAPDL_MAPDL_EXEC.
 
           if [[ "${{ matrix.mapdl-version }}" == *"latest-ubuntu"* ]] ; then
-            version="242"
+            version=${{ env.LATEST_VERSION }}
           else
             version=$(echo "${{ matrix.mapdl-version }}" | head -c 5 | tail -c 4 | tr -d '.')
           fi;
