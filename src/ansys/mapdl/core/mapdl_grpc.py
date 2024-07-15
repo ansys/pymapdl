@@ -1059,9 +1059,12 @@ class MapdlGrpc(MapdlBase):
 
         """
         if self.remove_temp_dir_on_exit and self._local:
-            path = path or self.directory
+            from pathlib import Path
+
+            path = str(Path(path or self.directory))
             tmp_dir = tempfile.gettempdir()
-            ans_temp_dir = os.path.join(tmp_dir, "ansys_")
+            ans_temp_dir = str(Path(os.path.join(tmp_dir, "ansys_")))
+
             if path.startswith(ans_temp_dir):
                 self._log.debug("Removing the MAPDL temporary directory %s", path)
                 shutil.rmtree(path, ignore_errors=True)
