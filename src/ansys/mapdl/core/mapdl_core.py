@@ -2283,7 +2283,7 @@ class _MapdlCore(Commands):
 
         if logger.hasHandlers():
             for each_handler in logger.logger.handlers:
-                if not each_handler.stream.closed:
+                if each_handler.stream and not each_handler.stream.closed:
                     logger.logger.removeHandler(each_handler)
 
         if logger.file_handler:
