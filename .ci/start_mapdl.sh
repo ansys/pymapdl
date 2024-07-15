@@ -49,7 +49,7 @@ docker run \
     -e I_MPI_SHM_LMT=shm \
     -e P_SCHEMA="$P_SCHEMA" \
     -w /jobs \
-    -u=0:0 \
+    -u="$(id -u):$(id -g)" \
     --memory=6656MB \
     --memory-swap=16896MB \
     "$MAPDL_IMAGE" "$EXEC_PATH" -grpc -dir /jobs -"$DISTRIBUTED_MODE" -np 2 > log.txt &
