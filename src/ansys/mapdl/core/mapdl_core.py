@@ -2279,7 +2279,7 @@ class _MapdlCore(Commands):
     def _cleanup_loggers(self):
         """Clean up all the loggers"""
         # Detached from ``__del__`` for easier testing
-        logger = self._log
+        logger = self.logger
 
         if logger.hasHandlers():
             for each_handler in logger.logger.handlers:
