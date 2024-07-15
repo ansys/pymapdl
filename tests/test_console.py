@@ -616,3 +616,29 @@ def test_mode_console(mapdl_console):
     assert not mapdl_console.is_grpc
     assert not mapdl_console.is_corba
     assert mapdl_console.is_console
+
+
+@requires("console")
+def test_console_apdl_logging_start(tmpdir):
+    filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
+
+    mapdl = pymapdl.launch_mapdl(log_apdl=filename, mode="console")
+
+    mapdl.prep7()
+    mapdl.run("!comment test")
+    mapdl.k(1, 0, 0, 0)
+    mapdl.k(2, 1, 0, 0)
+    mapdl.k(3, 1, 1, 0)
+    mapdl.k(4, 0, 1, 0)
+
+    mapdl.exit()
+
+    with open(filename, "r") as fid:
+        text = "".join(fid.readlines())
+
+    assert "PREP7" in text
+    assert "!comment test" in text
+    assert "K,1,0,0,0" in text
+    assert "K,2,1,0,0" in text
+    assert "K,3,1,1,0" in text
+    assert "K,4,0,1,0" in text

@@ -256,6 +256,9 @@ def get_process_at_port(port) -> Optional[psutil.Process]:
             )  # just to check if we can access the
         except psutil.AccessDenied:
             continue
+        except psutil.NoSuchProcess:
+            # process already died
+            continue
 
         for conns in connections:
             if conns.laddr.port == port:

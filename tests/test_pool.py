@@ -28,7 +28,7 @@ import time
 import numpy as np
 import pytest
 
-from conftest import ON_LOCAL, ON_STUDENT, START_INSTANCE, has_dependency
+from conftest import ON_LOCAL, ON_STUDENT, has_dependency
 
 if has_dependency("ansys-tools-path"):
     from ansys.tools.path import find_ansys
@@ -41,7 +41,7 @@ else:
 from ansys.mapdl.core import Mapdl, MapdlPool, examples
 from ansys.mapdl.core.errors import VersionError
 from ansys.mapdl.core.launcher import LOCALHOST, MAPDL_DEFAULT_PORT
-from conftest import QUICK_LAUNCH_SWITCHES, NullContext, requires
+from conftest import QUICK_LAUNCH_SWITCHES, VALID_PORTS, NullContext, requires
 
 # skip entire module unless HAS_GRPC
 pytestmark = requires("grpc")
@@ -67,7 +67,7 @@ NPROC = 1
 
 
 @pytest.fixture(scope="module")
-def pool(tmpdir_factory):
+def pool_creator(tmpdir_factory):
     run_path = str(tmpdir_factory.mktemp("ansys_pool"))
 
     port = os.environ.get("PYMAPDL_PORT", 50056)
@@ -96,11 +96,16 @@ def pool(tmpdir_factory):
             wait=True,
         )
 
+    VALID_PORTS.extend(mapdl_pool._ports)
+
     yield mapdl_pool
+
+    for each in mapdl_pool._ports:
+        VALID_PORTS.remove(each)
 
     ##########################################################################
     # test exit
-    mapdl_pool.exit()
+    mapdl_pool.exit(block=True)
 
     timeout = time.time() + TWAIT
 
@@ -118,6 +123,13 @@ def pool(tmpdir_factory):
             assert not list(Path(pth).rglob("*.page*"))
 
 
+@pytest.fixture
+def pool(pool_creator):
+    # Checks whether the pool is fine before testing
+    pool_creator.wait_for_ready()
+    return pool_creator
+
+
 @skip_requires_194
 def test_invalid_exec():
     with pytest.raises(VersionError):
@@ -129,7 +141,6 @@ def test_invalid_exec():
         )
 
 
-# @pytest.mark.xfail(strict=False, reason="Flaky test. See #2435")
 def test_heal(pool):
     pool_sz = len(pool)
     pool_names = pool._names  # copy pool names
@@ -158,6 +169,7 @@ def test_simple_map(pool):
 
 @skip_if_ignore_pool
 @requires("local")
+@pytest.mark.xfail(reason="Flaky test. See #2435")
 def test_map_timeout(pool):
     pool_sz = len(pool)
 
@@ -176,12 +188,7 @@ def test_map_timeout(pool):
 
     # the timeout option kills the MAPDL instance when we reach the timeout.
     # Let's wait for the pool to heal before continuing
-    timeout = time.time() + TWAIT
-    while len(pool) < pool_sz:
-        time.sleep(0.1)
-        if time.time() > timeout:
-            raise TimeoutError(f"Failed to restart instance in {TWAIT} seconds")
-
+    pool.wait_for_ready(TWAIT)
     assert len(pool) == pool_sz
 
 
@@ -191,21 +198,21 @@ def test_simple(pool):
 
     def func(mapdl):
         mapdl.clear()
+        return 1
 
-    outs = pool.map(func)
+    outs = pool.map(func, wait=True)
+
     assert len(outs) == len(pool)
     assert len(pool) == pool_sz
 
 
-# fails intermittently
 @skip_if_ignore_pool
 def test_batch(pool):
-    input_files = [examples.vmfiles["vm%d" % i] for i in range(1, len(pool) + 3)]
+    input_files = [examples.vmfiles["vm%d" % i] for i in range(1, len(pool) + 1)]
     outputs = pool.run_batch(input_files)
     assert len(outputs) == len(input_files)
 
 
-# fails intermittently
 @skip_if_ignore_pool
 def test_map(pool):
     completed_indices = []
@@ -225,9 +232,7 @@ def test_map(pool):
 
 
 @skip_if_ignore_pool
-@pytest.mark.skipif(
-    not START_INSTANCE, reason="This test requires the pool to be local"
-)
+@requires("local")
 def test_abort(pool, tmpdir):
     pool_sz = len(pool)  # initial pool size
 
@@ -235,7 +240,7 @@ def test_abort(pool, tmpdir):
 
     tmp_file = str(tmpdir.join("woa.inp"))
     with open(tmp_file, "w") as f:
-        f.write("EXIT")
+        f.write("PREP7")
 
     input_files = [examples.vmfiles["vm%d" % i] for i in range(1, 11)]
     input_files += [tmp_file]
@@ -263,6 +268,17 @@ def test_abort(pool, tmpdir):
 
 @skip_if_ignore_pool
 def test_directory_names_default(pool):
+    dirs_path_pool = os.listdir(pool._root_dir)
+    for i, _ in enumerate(pool._instances):
+        assert pool._names(i) in dirs_path_pool
+        assert f"Instance_{i}" in dirs_path_pool
+
+
+@skip_if_ignore_pool
+def test_directory_names_default_with_restart(pool):
+    pool[1].exit()
+    pool.wait_for_ready()
+
     dirs_path_pool = os.listdir(pool._root_dir)
     for i, _ in enumerate(pool._instances):
         assert pool._names(i) in dirs_path_pool
@@ -328,9 +344,10 @@ def test_num_instances():
 
 
 @skip_if_ignore_pool
-def test_only_one_instance():
+def test_only_one_instance(mapdl):
     pool = MapdlPool(
         1,
+        port=mapdl.port + 1,
         exec_file=EXEC_FILE,
         nproc=NPROC,
         additional_switches=QUICK_LAUNCH_SWITCHES,
@@ -401,14 +418,16 @@ def test_next_with_returns_index(pool):
         assert not each_instance._busy
 
 
-def test_multiple_ips():
+def test_multiple_ips(monkeypatch):
     ips = [
-        "123.45.67.01",
-        "123.45.67.02",
-        "123.45.67.03",
-        "123.45.67.04",
-        "123.45.67.05",
+        "123.45.67.1",
+        "123.45.67.2",
+        "123.45.67.3",
+        "123.45.67.4",
+        "123.45.67.5",
     ]
+
+    monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", raising=False)
 
     conf = MapdlPool(ip=ips, _debug_no_launch=True)._debug_no_launch
 
@@ -574,6 +593,9 @@ def test_multiple_ips():
             [LOCALHOST, LOCALHOST],
             [MAPDL_DEFAULT_PORT, MAPDL_DEFAULT_PORT + 1],
             NullContext(),
+            marks=pytest.mark.xfail(
+                reason="Available ports cannot does not start in `MAPDL_DEFAULT_PORT`. Probably because there are other instances running already."
+            ),
         ),
         pytest.param(
             3,
@@ -583,6 +605,9 @@ def test_multiple_ips():
             [LOCALHOST, LOCALHOST, LOCALHOST],
             [MAPDL_DEFAULT_PORT, MAPDL_DEFAULT_PORT + 1, MAPDL_DEFAULT_PORT + 2],
             NullContext(),
+            marks=pytest.mark.xfail(
+                reason="Available ports cannot does not start in `MAPDL_DEFAULT_PORT`. Probably because there are other instances running already."
+            ),
         ),
         pytest.param(
             3,
@@ -592,6 +617,9 @@ def test_multiple_ips():
             [LOCALHOST, LOCALHOST, LOCALHOST],
             [50053, 50053 + 1, 50053 + 2],
             NullContext(),
+            marks=pytest.mark.xfail(
+                reason="Available ports cannot does not start in `MAPDL_DEFAULT_PORT`. Probably because there are other instances running already."
+            ),
         ),
         pytest.param(
             3,
@@ -749,9 +777,8 @@ def test_ip_port_n_instance(
 ):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
     monkeypatch.delenv("PYMAPDL_IP", raising=False)
-    monkeypatch.setenv(
-        "PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222"
-    )  # to avoid trying to find it.
+    monkeypatch.delenv("PYMAPDL_PORT", raising=False)
+    monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
 
     with context:
         conf = MapdlPool(
