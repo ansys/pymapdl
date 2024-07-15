@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# **** REMEMBER *****
+# Remember to update the env var ``LATEST_VERSION`` in ci.yml
+#
+
 # List of versions
 versions=(
     # if added more "latest", change "$LATEST"
