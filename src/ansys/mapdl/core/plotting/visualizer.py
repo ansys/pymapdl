@@ -803,7 +803,6 @@ class MapdlPlotter(Plotter):
             raise TypeError(
                 f"Expected a ``MapdlPlotter`` or ``pv.Plotter`` instance, but got {type(pl)}"
             )
-            return None
 
     def show(
         self,
