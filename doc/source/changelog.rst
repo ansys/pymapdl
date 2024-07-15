@@ -9,6 +9,40 @@ This document contains the release notes for the project.
 
 .. towncrier release notes start
 
+`0.68.4 <https://github.com/ansys/pymapdl/releases/tag/v0.68.4>`_ - 2024-07-15
+==============================================================================
+
+Added
+^^^^^
+
+- ci: run extended array based on the person who open the PR `#3256 <https://github.com/ansys/pymapdl/pull/3256>`_
+
+
+Changed
+^^^^^^^
+
+- build: bump zipp from 3.17.0 to 3.19.1 in /doc/source/examples/extended_examples/hpc `#3261 <https://github.com/ansys/pymapdl/pull/3261>`_
+
+
+Fixed
+^^^^^
+
+- fix: missing arguments on ``OCDATA`` command `#3226 <https://github.com/ansys/pymapdl/pull/3226>`_
+- fix: Raising `ValueError` when using ips within pool library `#3240 <https://github.com/ansys/pymapdl/pull/3240>`_
+- fix: pool issues `#3266 <https://github.com/ansys/pymapdl/pull/3266>`_
+
+
+Dependencies
+^^^^^^^^^^^^
+
+- build: bump grpcio from 1.64.1 to 1.65.0 in the grpc-deps group `#3270 <https://github.com/ansys/pymapdl/pull/3270>`_
+
+
+Miscellaneous
+^^^^^^^^^^^^^
+
+- feat: refactoring `create_temp_dir` `#3239 <https://github.com/ansys/pymapdl/pull/3239>`_
+
 `0.68.4 <https://github.com/ansys/pymapdl/releases/tag/v0.68.4>`_ - 2024-07-10
 ==============================================================================
 No significant changes.
