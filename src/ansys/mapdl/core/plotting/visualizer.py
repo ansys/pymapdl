@@ -22,7 +22,7 @@
 
 """Module for the MapdlPlotter class."""
 from collections import OrderedDict
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable, Optional, Union
 
 from ansys.tools.visualization_interface import Plotter
 from ansys.tools.visualization_interface.backends.pyvista import PyVistaBackendInterface
@@ -778,16 +778,32 @@ class MapdlPlotter(Plotter):
                 "'return_cpos' and 'return_plotter' cannot be both 'True' at the same time."
             )
 
-    def switch_scene(self, pl: pv.Plotter):
+    def switch_scene(self, pl: Union["pv.Plotter", "MapdlPlotter"]) -> "MapdlPlotter":
         """Switches the backend scene to the given plotter.
 
         Parameters
         ----------
-        pl : pv.Plotter
+        pl : Union["pv.Plotter", "MapdlPlotter"]
             Plotter to change the scene to.
+
+        Returns
+        -------
+        MapdlPlotter
+            The MapdlPlotter instance.
         """
-        self._backend.scene = pl
-        self._backend.enable_widgets()
+        if isinstance(pl, pv.Plotter):
+            self._backend.scene = pl
+            self._backend.enable_widgets()
+            return self
+        elif isinstance(pl, MapdlPlotter):
+            return pl
+        elif pl is None:
+            return self
+        else:
+            raise TypeError(
+                f"Expected a ``MapdlPlotter`` or ``pv.Plotter`` instance, but got {type(pl)}"
+            )
+            return None
 
     def show(
         self,
