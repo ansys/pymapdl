@@ -1,10 +1,15 @@
 #!/bin/bash
 
+# **** REMEMBER *****
+# Remember to update the env var ``LATEST_VERSION`` in ci.yml
+#
+
 # List of versions
 versions=(
     # if added more "latest", change "$LATEST"
     'latest-ubuntu' 
     'latest-ubuntu-student'
+    'v25.1.0'
     'v24.2.0'
     'v24.2-ubuntu'
     'v24.2-ubuntu-student'
@@ -19,7 +24,7 @@ versions=(
     'v22.2-ubuntu'
 )
 
-LATEST=2 # for 'latest-ubuntu' and 'latest-ubuntu-student'
+LATEST=3 # for 'latest-ubuntu' and 'latest-ubuntu-student'
 
 # Run only ubuntu jobs
 ONLY_UBUNTU="${ONLY_UBUNTU:-false}"
@@ -85,6 +90,7 @@ for version in "${versions[@]}"; do
     # Early exiting if on Ubuntu only
     if [[ "$ON_UBUNTU" != "true" && "$ONLY_UBUNTU" == "true" ]]; then
         echo "Skipping non-ubuntu versions"
+        echo ""
         continue
     fi
 

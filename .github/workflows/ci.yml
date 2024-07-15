@@ -24,15 +24,16 @@ env:
   PACKAGE_NAME: 'ansys-mapdl-core'
   PACKAGE_NAMESPACE: 'ansys.mapdl.core'
   DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
+  LATEST_VERSION: "242"
+  MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.2-ubuntu-student
   MEILISEARCH_API_KEY: ${{ secrets.MEILISEARCH_API_KEY }}
   MEILISEARCH_PUBLIC_API_KEY: ${{ secrets.MEILISEARCH_PUBLIC_API_KEY }}
   PYANSYS_OFF_SCREEN: True
   DPF_START_SERVER: False
   DPF_PORT: 21004
   MAPDL_PACKAGE: ghcr.io/ansys/mapdl
-  MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.1-ubuntu-student
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vvv --durations=10 --maxfail=3 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html'
+  PYTEST_ARGUMENTS: '-vvv -ra --durations=10 --maxfail=3 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html'
 
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
@@ -339,10 +340,25 @@ jobs:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.1.7
 
+      - name: Get event type and user to check permissions.
+        id: get_user
+        env:
+          type_event: ${{ github.event.issue.pull_request }}
+        run: |
+          if [[ $type_event ]]; then
+            echo "Event type: $type_event"
+            echo "event_type=$( echo "$type_event" )" >> $GITHUB_OUTPUT
+            export user=${{ github.event.pull_request.user.login }}
+          else
+            export user=${{ github.actor }}
+          fi
+          echo "This PR has been opened by: $user"
+          echo "user=$( echo "$user" )" >> $GITHUB_OUTPUT
+
       - uses: tspascoal/get-user-teams-membership@v3
         id: is_organization_member
         with:
-          username: ${{ github.actor }}
+          username: ${{ steps.get_user.outputs.user }}
           organization: ansys
           team: 'pymapdl-developers'
           GITHUB_TOKEN: ${{ secrets.TOKEN_TEAMS_USER_READ }}
@@ -494,7 +510,7 @@ jobs:
         env:
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
           ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
-          ON_STUDENT: ${{ steps.ubuntu_check.outputs.ON_STUDENT }}
+          ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
           echo "ON_STUDENT: $ON_STUDENT"
@@ -508,7 +524,7 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # required
           name: ${{ matrix.mapdl-version }}-remote.xml
-          flags: remote,${{ steps.ubuntu_check.outputs.TAG_UBUNTU }},${{ matrix.mapdl-version }},${{ steps.distributed_mode.outputs.distributed_mode }},${{ steps.ubuntu_check.outputs.TAG_STUDENT }}
+          flags: remote,${{ steps.ubuntu_check.outputs.TAG_UBUNTU }},${{ matrix.mapdl-version }},${{ steps.distributed_mode.outputs.distributed_mode }},${{ steps.student_check.outputs.TAG_STUDENT }}
 
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4
@@ -601,7 +617,6 @@ jobs:
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
-      ON_STUDENT: true
       P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"
       PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
 
@@ -611,6 +626,19 @@ jobs:
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: "Get if running student version"
+        id: student_check
+        run: |
+          if [[ "${{ matrix.mapdl-version }}" == *"student"* ]]; 
+            then export ON_STUDENT=true; export TAG_STUDENT="student";
+            else export ON_STUDENT=false; export TAG_STUDENT="non-student";
+          fi
+
+          echo "ON_STUDENT: $ON_STUDENT"
+          echo "TAG_STUDENT: $TAG_STUDENT"
+          echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
+          echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
 
       - name: "Setup Python"
         uses: actions/setup-python@v5
@@ -648,10 +676,12 @@ jobs:
       - name: "Unit testing"
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
+          ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
         run: |
+          echo "ON_UBUNTU: $ON_UBUNTU"
+          echo "ON_STUDENT: $ON_STUDENT"
           unset PYMAPDL_PORT
           unset PYMAPDL_START_INSTANCE
-          export AWP_ROOT222=/ansys_inc
           xvfb-run pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
             --reset_only_failed --add_missing_images \
@@ -693,7 +723,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }} # required
           root_dir: ${{ github.workspace }}
           name: ${{ matrix.mapdl-version }}-local.xml
-          flags: ubuntu,local,${{ matrix.mapdl-version }}
+          flags: ubuntu,local,${{ matrix.mapdl-version }},${{ steps.student_check.outputs.TAG_STUDENT }},dmp
 
       - name: "Upload coverage artifacts"
         uses: actions/upload-artifact@v4
@@ -720,7 +750,6 @@ jobs:
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
-      ON_STUDENT: true
 
     steps:
       - name: "Install Git and checkout project"
@@ -728,6 +757,19 @@ jobs:
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: "Get if running student version"
+        id: student_check
+        run: |
+          if [[ "${{ matrix.mapdl-version }}" == *"student"* ]]; 
+            then export ON_STUDENT=true; export TAG_STUDENT="student";
+            else export ON_STUDENT=false; export TAG_STUDENT="non-student";
+          fi
+
+          echo "ON_STUDENT: $ON_STUDENT"
+          echo "TAG_STUDENT: $TAG_STUDENT"
+          echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
+          echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
 
       - name: "Installing missing package"
         run: |
@@ -757,17 +799,21 @@ jobs:
       - name: "Unit testing"
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
+          ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
         run: |
+          echo "ON_UBUNTU: $ON_UBUNTU"
+          echo "ON_STUDENT: $ON_STUDENT"
+
           # Because there is no 'ansys-tools-path' we need to input the
           # executable path with the env var: PYMAPDL_MAPDL_EXEC.
 
           if [[ "${{ matrix.mapdl-version }}" == *"latest-ubuntu"* ]] ; then
-            version="242"
+            version=${{ env.LATEST_VERSION }}
           else
             version=$(echo "${{ matrix.mapdl-version }}" | head -c 5 | tail -c 4 | tr -d '.')
           fi;
 
-          echo "$version"
+          echo "Version: $version"
 
           export PYMAPDL_MAPDL_EXEC=/ansys_inc/v"$version"/ansys/bin/ansys"$version"
           echo "$PYMAPDL_MAPDL_EXEC"
@@ -783,7 +829,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }} # required
           root_dir: ${{ github.workspace }}
           name: ${{ matrix.mapdl-version }}-minimal.xml
-          flags: ubuntu,local,${{ matrix.mapdl-version }},minimal
+          flags: ubuntu,local,${{ matrix.mapdl-version }},minimal,${{ steps.student_check.outputs.TAG_STUDENT }},dmp
 
       - name: "Upload coverage artifacts"
         uses: actions/upload-artifact@v4

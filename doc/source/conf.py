@@ -92,7 +92,6 @@ extensions = [
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
-    "sphinx_reredirects",
     "ansys_sphinx_theme.extension.linkcode",
 ]
 
@@ -108,6 +107,7 @@ intersphinx_mapping = {
     "pypim": ("https://pypim.docs.pyansys.com/version/dev/", None),
     "ansys-dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
     "ansys-math-core": ("https://math.docs.pyansys.com/version/stable/", None),
+    "ansys-tools-path": ("https://path.tools.docs.pyansys.com/version/stable/", None),
 }
 
 suppress_warnings = ["label.*", "design.fa-build", "config.cache"]
@@ -202,14 +202,6 @@ rst_epilog = rst_epilog.replace("%%PYMAPDLVERSION%%", release)
 # Read link all substitutions from file
 with open("substitutions.rst") as f:
     rst_epilog += f.read()
-
-
-# Setting redicts
-redirects = {
-    #
-    # Old link: https://dev.mapdl.docs.pyansys.com/user_guide/krylov.html
-    "user_guide/krylov": "examples/extended_examples/Krylov/krylov_example"
-}
 
 # Broken anchors:
 linkcheck_exclude_documents = ["index"]
