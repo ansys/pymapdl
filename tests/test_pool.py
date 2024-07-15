@@ -263,7 +263,8 @@ class TestMapdlPool:
             assert f"Instance_{i}" in dirs_path_pool
 
     @skip_if_ignore_pool
-    def test_directory_names_default_with_restart(pool):
+    def test_directory_names_default_with_restart(self, pool):
+
         pool[1].exit()
         pool.wait_for_ready()
 
