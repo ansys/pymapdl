@@ -113,7 +113,7 @@ SHELLTASK = {
 }
 
 
-class JobSubmission:
+class JobSubmissionDefinition:
 
     def __init__(
         self,
@@ -982,7 +982,7 @@ with open("{self._output_parms_file}", "w") as fid:
         self._client.session.close()
 
 
-class PyMAPDLJobSubmission(JobSubmission):
+class PyMAPDLJobSubmissionDefinition(JobSubmissionDefinition):
     pass
 
 
@@ -992,10 +992,10 @@ if __name__ == "__main__":
         format="[%(asctime)s | %(levelname)s] %(message)s", level=logging.DEBUG
     )
 
-    # from ansys.mapdl.core.hpc import PyMAPDLJobSubmission
+    # from ansys.mapdl.core.hpc import PyMAPDLJobSubmissionDefinition
     # Test 1
     main_file = "/Users/german.ayuso/pymapdl/src/ansys/mapdl/core/hpc/main.py"
-    job = PyMAPDLJobSubmission(
+    job = PyMAPDLJobSubmissionDefinition(
         url="https://10.231.106.91:3000/hps",
         user="repuser",
         password="repuser",
@@ -1010,7 +1010,7 @@ if __name__ == "__main__":
     # Test2
 
     # main_file = "main.py"
-    # job1 = PyMAPDLJobSubmission(
+    # job1 = PyMAPDLJobSubmissionDefinition(
     #     url="https://10.231.106.91:3000/hps",
     #     user="repuser",
     #     password="repuser",
