@@ -32,6 +32,8 @@ fi;
 echo "EXEC_PATH: $EXEC_PATH"
 echo "P_SCHEMA: $P_SCHEMA"
 
+export user_id=$(id -u)
+export group_id=$(id -g)
 docker run \
     --entrypoint "/bin/bash" \
     --name "$INSTANCE_NAME" \
@@ -49,7 +51,7 @@ docker run \
     -e I_MPI_SHM_LMT=shm \
     -e P_SCHEMA="$P_SCHEMA" \
     -w /jobs \
-    -u="$(id -u):$(id -g)" \
+    -u="$user_id:$group_id" \
     --memory=6656MB \
     --memory-swap=16896MB \
     "$MAPDL_IMAGE" "$EXEC_PATH" -grpc -dir /jobs -"$DISTRIBUTED_MODE" -np 2 > log.txt &
