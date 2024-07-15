@@ -333,6 +333,7 @@ class TestMapdlPool:
             )
 
     @skip_if_ignore_pool
+    @requires("local")
     def test_only_one_instance(self):
         pool = MapdlPool(
             1,
