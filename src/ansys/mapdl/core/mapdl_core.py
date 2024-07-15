@@ -2279,7 +2279,10 @@ class _MapdlCore(Commands):
     def _cleanup_loggers(self):
         """Clean up all the loggers"""
         # Detached from ``__del__`` for easier testing
-        logger = self.logger
+        if not hasattr(self, "_log"):
+            return  # Early exit if logger has been already cleaned.
+
+        logger = self._log
 
         if logger.hasHandlers():
             for each_handler in logger.logger.handlers:
