@@ -2463,9 +2463,6 @@ def test_cleanup_loggers(mapdl):
     mapdl._cleanup_loggers()
 
     assert mapdl.logger is not None
-    for each_handler in mapdl.logger.logger.handlers:
-        assert not each_handler
-
     assert not mapdl.logger.logger.handlers
     assert mapdl.logger.std_out_handler is None
     assert mapdl.logger.file_handler is None
