@@ -63,7 +63,7 @@ If no URL is found, an exception is raised.""",
     "--user",
     default=None,
     type=str,
-    help="""Username for logging into the HPC cluster.
+    help="""Username for logging into the HPS cluster.
 If it is not input, there is a chain of places where PyMAPDL looks for an username.
 First, it checks if the username is given in the file specified by the argument ``--config_file``.
 If that file does not have an username or does not exist, then it checks the username configured using ``pymapdl login`` CLI command, for the given HPS cluster URL.
@@ -75,12 +75,20 @@ If no user is found, an exception is raised.
     "--password",
     default=None,
     type=str,
-    help="""Password for logging into the HPC cluster.
+    help="""Password for logging into the HPS cluster.
 If it is not input, there is a chain of places where PyMAPDL looks for a password.
 First, it checks if the password is given in the file specified by the argument ``--config_file``.
 If that file does not have a password or does not exist, then it checks the password configured using ``pymapdl login`` CLI command, for the given HPS cluster URL.
 If there is no user credential stored for that HPS cluster URL, then it checks the default user credentials stored with ``pymapdl login --default`` CLI command.
 If no password is found, an exception is raised.
+""",
+)
+@click.option(
+    "--token",
+    default=None,
+    type=str,
+    help="""Authentication token for logging into the HPS cluster.
+If used, it bypasses the ``user`` and ``password`` arguments.
 """,
 )
 @click.option(
@@ -156,9 +164,15 @@ you should attach your own requirement file using ``pip freeze``.""",
     is_flag=False,
     flag_value=True,
     help="""
+**WARNING:** This option stores the password un-cyphered on a file!
+
 Whether to write the configuration to the configuration file (specified
 using the ``config_file`` argument) after the job has been successfully submitted.
-The default is ``False``. If ``True``, and the file already exists, the configuration file is overwritten.""",
+The default is ``False``. If ``True``, and the file already exists, the configuration
+file is overwritten.
+You can always delete from the configuration file the fields you are not interested
+in storing them, for instance the password and username.
+""",
 )
 @click.option(
     "--num_cores",
@@ -233,6 +247,7 @@ def submit(
     url: str = None,
     user: str = None,
     password: str = None,
+    token: str = None,
     python: Optional[float] = None,
     inputs: Optional[str] = None,
     outputs: Optional[str] = None,
@@ -275,19 +290,23 @@ def submit(
             config_file = None
         logger.debug(f"Using default HPS configuration file: {config_file}")
 
-    # Getting cluster login configuration from CLI or file
-    url = get_value_from_json_or_default(
-        url, config_file, "url", None, raise_if_none=False
-    )
-    url = url or get_default_url()  # using default URL stored.
+    if not token:
+        # Getting cluster login configuration from CLI or file
+        url = get_value_from_json_or_default(
+            url, config_file, "url", None, raise_if_none=False
+        )
+        url = url or get_default_url()  # using default URL stored.
 
-    # allow retrieving user from the configuration
-    user = get_value_from_json_or_default(
-        user, config_file, "user", raise_if_none=False
-    )
+        # allow retrieving user from the configuration
+        user = get_value_from_json_or_default(
+            user, config_file, "user", raise_if_none=False
+        )
 
-    # Getting access token
-    token = get_token_access(url, user, password)
+        # Getting access token
+        token = get_token_access(url, user, password)
+        logger.debug(f"Token retrieved from {url}, using '{user}' user.")
+    else:
+        logger.debug(f"Using token supplied by the command line: '{token}'")
 
     # Getting other configuration from CLI or file
     python = get_value_from_json_or_default(python, config_file, "python", 3)
@@ -344,6 +363,7 @@ def submit(
         logger.debug(
             f"Saving the following configuration to the config file ({config_file}):\n{config}."
         )
+        logger.warn(f"The password is stored un-cyphered in {config_file}")
         with open(config_file, "w") as fid:
             json.dump(config, fid)
 
