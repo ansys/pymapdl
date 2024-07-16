@@ -96,7 +96,7 @@ doc = [
     "sphinx-design==0.6.0",
     "sphinx-gallery==0.16.0",
     "sphinx-notfound-page==1.0.2",
-    "sphinx==7.3.7",
+    "sphinx==7.4.4",
     "sphinxcontrib-websupport==1.2.7",
     "sphinxemoji==0.3.1",
     "vtk==9.3.1",
