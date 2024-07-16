@@ -1876,34 +1876,37 @@ class _MapdlCore(Commands):
 
         """
         self._log.debug("Flushing stored commands")
-        tmp_out = tempfile.NamedTemporaryFile(
+        with tempfile.NamedTemporaryFile(
             prefix="tmp_", suffix=".out", delete=False
-        ).name
+        ) as tmp_out:
 
-        self._stored_commands.insert(0, "/OUTPUT, f'{tmp_out}'")
-        self._stored_commands.append("/OUTPUT")
-        commands = "\n".join(self._stored_commands)
-        if self._apdl_log:
-            self._apdl_log.write(commands + "\n")
+            self._stored_commands.insert(0, f"/OUTPUT, {tmp_out.name()}")
+            self._stored_commands.append("/OUTPUT")
+            commands = "\n".join(self._stored_commands)
+            if self._apdl_log:
+                self._apdl_log.write(commands + "\n")
 
-        # write to a temporary input file
-        tmp_inp = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.inp")
-        self._log.debug(
-            "Writing the following commands to a temporary " "apdl input file:\n%s",
-            commands,
-        )
+            self._store_commands = False
+            self._stored_commands = []
 
-        with open(tmp_inp, "w") as f:
-            f.writelines(commands)
+            # write to a temporary input file
+            self._log.debug(
+                "Writing the following commands to a temporary " "apdl input file:\n%s",
+                commands,
+            )
 
-        self._store_commands = False
-        self._stored_commands = []
+            with tempfile.NamedTemporaryFile(
+                prefix="tmp_", suffix=".inp", delete=False
+            ) as tmp_inp:
+                with open(tmp_inp, "w") as f:
+                    f.writelines(commands)
 
-        # interactive result
-        _ = self.input(tmp_inp, write_to_log=False)
-        time.sleep(0.1)  # allow MAPDL to close the file
-        if os.path.isfile(tmp_out):
-            self._response = "\n" + open(tmp_out).read()
+                # interactive result
+                _ = self.input(tmp_inp, write_to_log=False)
+
+            time.sleep(0.1)  # allow MAPDL to close the file
+            if os.path.isfile(tmp_out):
+                self._response = "\n" + open(tmp_out).read()
 
         if self._response is None:  # pragma: no cover
             self._log.warning("Unable to read response from flushed commands")

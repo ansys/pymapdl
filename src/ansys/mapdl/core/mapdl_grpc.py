@@ -1964,9 +1964,12 @@ class MapdlGrpc(MapdlBase):
 
         # write to a temporary input file
         def build_rand_tmp():
-            return tempfile.NamedTemporaryFile(
+            with tempfile.NamedTemporaryFile(
                 prefix="tmp_", suffix=".inp", delete=False
-            ).name
+            ) as file_:
+                name = file_.name()
+
+            return name
 
         # rare case of duplicated tmpfile (birthday problem)
         tmp_filename = build_rand_tmp()
