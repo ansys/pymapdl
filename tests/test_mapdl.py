@@ -2453,3 +2453,15 @@ def test_not_correct_et_element(mapdl):
 def test_ctrl(mapdl):
     mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
     mapdl._ctrl("set_verb", 0)  # Returning to non-verbose
+
+
+def test_cleanup_loggers(mapdl):
+    assert mapdl.logger is not None
+    assert mapdl.logger.hasHandlers()
+    assert mapdl.logger.logger.handlers
+
+    mapdl._cleanup_loggers()
+
+    assert mapdl.logger is not None
+    assert mapdl.logger.std_out_handler is None
+    assert mapdl.logger.file_handler is None
