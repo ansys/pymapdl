@@ -274,6 +274,17 @@ def get_token_access(url: str = None, user: str = None, password: str = None):
     -----
     - If credentials are expired, they are deleted from storage.
     - The credentials can be stored using ``pymapdl login`` CLI.
+      Alternatively you can use ``store_credentials`` as:
+
+      .. code:: py
+
+         from ansys.mapdl.core.hpc.login import store_credentials
+
+         user = "myuser"
+         password = "mypass"
+         url = "https://cluster.example.com"
+         store_credentials(user, password, url)
+
 
     Examples
     --------
