@@ -24,15 +24,16 @@ env:
   PACKAGE_NAME: 'ansys-mapdl-core'
   PACKAGE_NAMESPACE: 'ansys.mapdl.core'
   DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
+  LATEST_VERSION: "242"
+  MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.2-ubuntu-student
   MEILISEARCH_API_KEY: ${{ secrets.MEILISEARCH_API_KEY }}
   MEILISEARCH_PUBLIC_API_KEY: ${{ secrets.MEILISEARCH_PUBLIC_API_KEY }}
   PYANSYS_OFF_SCREEN: True
   DPF_START_SERVER: False
   DPF_PORT: 21004
   MAPDL_PACKAGE: ghcr.io/ansys/mapdl
-  MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.1-ubuntu-student
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vvv --durations=10 --maxfail=3 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html'
+  PYTEST_ARGUMENTS: '-vvv -ra --durations=10 --maxfail=3 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html'
 
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
@@ -95,20 +96,25 @@ jobs:
 
 
   doc-style:
-    name: "Documentation style check"
+    name: "Documentation style ${{ matrix.folder }}"
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        folder: ["doc", "examples"]
     steps:
       - name: "Ansys documentation style checks"
         uses: ansys/actions/doc-style@v6
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          files: ${{ matrix.folder }}
+          vale-config: ${{ matrix.folder }}/.vale.ini
           vale-version: "3.4.1"
 
 
   smoke-tests:
-    name: "Build and smoke test (${{ matrix.os }} | Python ${{ matrix.python-version }}) (Release=${{ matrix.should-release }})"
+    name: "${{ matrix.os }} | Py ${{ matrix.python-version }} | Rel ${{ matrix.should-release }}"
     runs-on: ${{ matrix.os }}
-    if: github.ref != 'refs/heads/main'
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     timeout-minutes: 20
     strategy:
       fail-fast: false
@@ -188,6 +194,10 @@ jobs:
             examples:
               - 'examples/**'
               - 'pyproject.toml'
+            documentation:
+              - 'examples/**'
+              - 'doc/**'
+              - 'pyproject.toml'
 
       - name: "Setup Python with cache"
         uses: actions/setup-python@v5
@@ -225,7 +235,7 @@ jobs:
 
       - name: "Cache examples"
         uses: actions/cache@v4
-        if: steps.changes.outputs.examples != 'true' || (github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags'))
+        if: steps.changes.outputs.documentation == 'false' || (github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags'))
         with:
           path: doc/source/examples
           key: Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -234,7 +244,7 @@ jobs:
 
       - name: "Cache docs build directory"
         uses: actions/cache@v4
-        if: steps.changes.outputs.workflows != 'true' || (github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags'))
+        if: steps.changes.outputs.documentation == 'false' || (github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags'))
         with:
           path: doc/_build
           key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -243,7 +253,7 @@ jobs:
 
       - name: "Cache autosummary"
         uses: actions/cache@v4
-        if: steps.changes.outputs.workflows != 'true' || (github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags'))
+        if: steps.changes.outputs.documentation == 'false' || (github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags'))
         with:
           path: doc/source/**/_autosummary/*.rst
           key: autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -319,57 +329,54 @@ jobs:
         run: |
           .ci/display_logs.sh
 
-  build-test:
-    name: "Remote: Build & test MAPDL ${{ matrix.mapdl-version }} (Extended testing ${{ matrix.extended_testing }})"
+  build-test-remote-matrix:
+    name: "Build remote test matrix"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    needs: [smoke-tests]
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+
+    steps:
+      - name: "Install Git and checkout project"
+        uses: actions/checkout@v4.1.7
+
+      - name: Get event type and user to check permissions.
+        id: get_user
+        env:
+          type_event: ${{ github.event.issue.pull_request }}
+        run: |
+          if [[ $type_event ]]; then
+            echo "Event type: $type_event"
+            echo "event_type=$( echo "$type_event" )" >> $GITHUB_OUTPUT
+            export user=${{ github.event.pull_request.user.login }}
+          else
+            export user=${{ github.actor }}
+          fi
+          echo "This PR has been opened by: $user"
+          echo "user=$( echo "$user" )" >> $GITHUB_OUTPUT
+
+      - uses: tspascoal/get-user-teams-membership@v3
+        id: is_organization_member
+        with:
+          username: ${{ steps.get_user.outputs.user }}
+          organization: ansys
+          team: 'pymapdl-developers'
+          GITHUB_TOKEN: ${{ secrets.TOKEN_TEAMS_USER_READ }}
+
+      - id: set-matrix
+        env:
+          extended_testing: ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
+          auth_user: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
+        run: .ci/build_matrix.sh
+
+  build-test-remote:
+    name: "Remote: ${{ matrix.mapdl-version }}"
+    runs-on: ubuntu-latest
+    needs: [smoke-tests, build-test-remote-matrix]
     timeout-minutes: 35
     strategy:
       fail-fast: false
-      matrix:
-        mapdl-version: [
-          'v22.2.1',
-          'v22.2-ubuntu',
-          'v23.1.0',
-          'v23.1-ubuntu',
-          'v23.2.0',
-          'v23.2-ubuntu',
-          'v24.1.0',
-          'v24.1-ubuntu',
-          'v24.1-ubuntu-student',
-          'v24.2.0',
-          'latest-ubuntu',
-          'latest-ubuntu-student',
-          ]
-        extended_testing:
-          - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
-        exclude:
-          # In PRs skipping all MAPDL version except student ones (commented out).
-          - extended_testing: false
-            mapdl-version: 'v22.2.1'
-          - extended_testing: false
-            mapdl-version: 'v22.2-ubuntu'
-          - extended_testing: false
-            mapdl-version: 'v23.1.0'
-          - extended_testing: false
-            mapdl-version: 'v23.1-ubuntu'
-          - extended_testing: false
-            mapdl-version: 'v23.2.0'
-          - extended_testing: false
-            mapdl-version: 'v23.2-ubuntu'
-          - extended_testing: false
-            mapdl-version: 'v24.1.0'
-          - extended_testing: false
-            mapdl-version: 'v24.1-ubuntu'
-          # - extended_testing: false
-          #   mapdl-version: 'v24.1-ubuntu-student'
-          - extended_testing: false
-            mapdl-version: 'v24.2.0'
-          - extended_testing: false
-            mapdl-version: 'latest-ubuntu'
-          # - extended_testing: false
-          #   mapdl-version: 'latest-ubuntu-student'
+      matrix: ${{ fromJson(needs.build-test-remote-matrix.outputs.matrix) }}
 
     env:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
@@ -405,6 +412,30 @@ jobs:
           echo "Distributed mode: $distributed_mode"
           echo "distributed_mode=$(echo $distributed_mode)" >> $GITHUB_OUTPUT
 
+      - name: "Get if running on Ubuntu"
+        id: ubuntu_check
+        run: |
+          if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]];
+            then export ON_UBUNTU=true; export TAG_UBUNTU="ubuntu";
+            else export ON_UBUNTU=false; export TAG_UBUNTU="centos";
+          fi
+          echo "ON_UBUNTU: $ON_UBUNTU"
+          echo "TAG_UBUNTU: $TAG_UBUNTU"
+          echo "ON_UBUNTU=$(echo $ON_UBUNTU)" >> $GITHUB_OUTPUT
+          echo "TAG_UBUNTU=$(echo $TAG_UBUNTU)" >> $GITHUB_OUTPUT
+
+      - name: "Get if running student version"
+        id: student_check
+        run: |
+          if [[ "${{ matrix.mapdl-version }}" == *"student"* ]]; 
+            then export ON_STUDENT=true; export TAG_STUDENT="student";
+            else export ON_STUDENT=false; export TAG_STUDENT="non-student";
+          fi
+          echo "ON_STUDENT: $ON_STUDENT"
+          echo "TAG_STUDENT: $TAG_STUDENT"
+          echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
+          echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
+          
       - name: "Pull, launch, and validate MAPDL service"
         id: start_mapdl
         env:
@@ -478,26 +509,28 @@ jobs:
       - name: "Unit testing"
         env:
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
+          ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
+          ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
         run: |
-          if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]]; then export ON_UBUNTU=true; else export ON_UBUNTU=false; fi
           echo "ON_UBUNTU: $ON_UBUNTU"
+          echo "ON_STUDENT: $ON_STUDENT"
           xvfb-run pytest \
             ${{ env.PYTEST_ARGUMENTS }} \
             --ignore_image_cache \
-            --cov-report=xml:centos-${{ matrix.mapdl-version }}-remote.xml
+            --cov-report=xml:${{ matrix.mapdl-version }}-remote.xml
 
       - uses: codecov/codecov-action@v4
         name: "Upload coverage to Codecov"
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # required
-          name: centos-${{ matrix.mapdl-version }}-remote.xml
-          flags: centos,remote,${{ matrix.mapdl-version }}
+          name: ${{ matrix.mapdl-version }}-remote.xml
+          flags: remote,${{ steps.ubuntu_check.outputs.TAG_UBUNTU }},${{ matrix.mapdl-version }},${{ steps.distributed_mode.outputs.distributed_mode }},${{ steps.student_check.outputs.TAG_STUDENT }}
 
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: centos-${{ matrix.mapdl-version }}-remote.xml
-          path: ./centos-${{ matrix.mapdl-version }}-remote.xml
+          name: ${{ matrix.mapdl-version }}-remote.xml
+          path: ./${{ matrix.mapdl-version }}-remote.xml
 
       - name: "Check package"
         run: |
@@ -535,37 +568,48 @@ jobs:
         run: |
           .ci/display_logs.sh
 
-  build-test-ubuntu:
-    name: "Local: Build & test on Ubuntu MAPDL ${{ matrix.mapdl-image }} (Extended testing ${{ matrix.extended_testing }})"
+  build-test-local-minimal-matrix:
+    name: "Build test matrix for minimal and local"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    needs: [smoke-tests]
-    timeout-minutes: 55
     outputs:
-      pushed: ${{ steps.attatch-to-pr.outputs.pushed }}
-      committed: ${{ steps.attatch-to-pr.outputs.committed }}
-      commit_long_sha: ${{ steps.attatch-to-pr.outputs.commit_long_sha }}
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - name: "Install Git and checkout project"
+        uses: actions/checkout@v4.1.7
+
+      - uses: tspascoal/get-user-teams-membership@v3
+        id: is_organization_member
+        with:
+          username: ${{ github.actor }}
+          organization: ansys
+          team: 'pymapdl-developers'
+          GITHUB_TOKEN: ${{ secrets.TOKEN_TEAMS_USER_READ }}
+
+      - id: set-matrix
+        env:
+          ONLY_UBUNTU: true
+          LIMIT_VERSIONS: 3
+          ON_SCHEDULE: ${{ github.event_name == 'schedule' }}
+          ON_WORKFLOW_DISPATCH: ${{ github.event_name == 'workflow_dispatch' }}
+          RUN_ALL_TEST: ${{ inputs.run_all_tests }}
+          ON_PUSH: ${{ github.event_name == 'push' }}
+          HAS_TAG: ${{ contains(github.ref, 'refs/tags') }}
+          auth_user: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
+        run: .ci/build_matrix.sh
+
+  build-test-ubuntu-local:
+    name: "Local: ${{ matrix.mapdl-version }}"
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: [smoke-tests, build-test-local-minimal-matrix]
+    timeout-minutes: 75
     strategy:
       fail-fast: false
-      matrix:
-        mapdl-image: [
-          'v23.2-ubuntu', 
-          'v24.1-ubuntu', 
-          'v24.1-ubuntu-student',
-          'latest-ubuntu',
-          'latest-ubuntu-student',
-          ]
-        extended_testing:
-          - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
-        exclude:
-          - extended_testing: false
-            mapdl-image: 'v23.2-ubuntu'
-          - extended_testing: false
-            mapdl-image: 'v24.1-ubuntu'
-          - extended_testing: false
-            mapdl-image: 'latest-ubuntu'
+      matrix: ${{fromJson(needs.build-test-local-minimal-matrix.outputs.matrix)}}
+
     container:
-      image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-image }}
+      image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
         username: ${{ github.actor }}
@@ -573,7 +617,6 @@ jobs:
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
-      ON_STUDENT: true
       P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"
       PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
 
@@ -583,6 +626,19 @@ jobs:
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: "Get if running student version"
+        id: student_check
+        run: |
+          if [[ "${{ matrix.mapdl-version }}" == *"student"* ]]; 
+            then export ON_STUDENT=true; export TAG_STUDENT="student";
+            else export ON_STUDENT=false; export TAG_STUDENT="non-student";
+          fi
+
+          echo "ON_STUDENT: $ON_STUDENT"
+          echo "TAG_STUDENT: $TAG_STUDENT"
+          echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
+          echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
 
       - name: "Setup Python"
         uses: actions/setup-python@v5
@@ -620,14 +676,16 @@ jobs:
       - name: "Unit testing"
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
+          ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
         run: |
+          echo "ON_UBUNTU: $ON_UBUNTU"
+          echo "ON_STUDENT: $ON_STUDENT"
           unset PYMAPDL_PORT
           unset PYMAPDL_START_INSTANCE
-          export AWP_ROOT222=/ansys_inc
           xvfb-run pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
             --reset_only_failed --add_missing_images \
-            --cov-report=xml:${{ matrix.mapdl-image }}-local.xml
+            --cov-report=xml:${{ matrix.mapdl-version }}-local.xml
 
       - name: "Adding the directory as safe directory for later step"
         run: |
@@ -664,43 +722,27 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # required
           root_dir: ${{ github.workspace }}
-          name: ${{ matrix.mapdl-image }}-local.xml
-          flags: ubuntu,local,${{ matrix.mapdl-image }}
+          name: ${{ matrix.mapdl-version }}-local.xml
+          flags: ubuntu,local,${{ matrix.mapdl-version }},${{ steps.student_check.outputs.TAG_STUDENT }},dmp
 
       - name: "Upload coverage artifacts"
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.mapdl-image }}-local.xml
-          path: ./${{ matrix.mapdl-image }}-local.xml
+          name: ${{ matrix.mapdl-version }}-local.xml
+          path: ./${{ matrix.mapdl-version }}-local.xml
 
 
   build-test-ubuntu-minimal:
-    name: "Local: Build & test minimal setup on Ubuntu MAPDL ${{ matrix.mapdl-image }} (Extended testing ${{ matrix.extended_testing }})"
+    name: "Local-min: ${{ matrix.mapdl-version }}"
     runs-on: ubuntu-latest
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    needs: [smoke-tests]
+    needs: [smoke-tests, build-test-local-minimal-matrix]
     timeout-minutes: 55
     strategy:
       fail-fast: false
-      matrix:
-        mapdl-image: [
-          'v23.2-ubuntu',
-          'v24.1-ubuntu',
-          'v24.1-ubuntu-student',
-          'latest-ubuntu',
-          'latest-ubuntu-student',
-          ]
-        extended_testing:
-          - ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
-        exclude:
-          - extended_testing: false
-            mapdl-image: 'v23.2-ubuntu'
-          - extended_testing: false
-            mapdl-image: 'v24.1-ubuntu'
-          - extended_testing: false
-            mapdl-image: 'latest-ubuntu'
+      matrix: ${{fromJson(needs.build-test-local-minimal-matrix.outputs.matrix)}}
     container:
-      image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-image }}
+      image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
         username: ${{ github.actor }}
@@ -708,7 +750,6 @@ jobs:
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
-      ON_STUDENT: true
 
     steps:
       - name: "Install Git and checkout project"
@@ -716,6 +757,19 @@ jobs:
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: "Get if running student version"
+        id: student_check
+        run: |
+          if [[ "${{ matrix.mapdl-version }}" == *"student"* ]]; 
+            then export ON_STUDENT=true; export TAG_STUDENT="student";
+            else export ON_STUDENT=false; export TAG_STUDENT="non-student";
+          fi
+
+          echo "ON_STUDENT: $ON_STUDENT"
+          echo "TAG_STUDENT: $TAG_STUDENT"
+          echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
+          echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
 
       - name: "Installing missing package"
         run: |
@@ -745,17 +799,21 @@ jobs:
       - name: "Unit testing"
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
+          ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
         run: |
+          echo "ON_UBUNTU: $ON_UBUNTU"
+          echo "ON_STUDENT: $ON_STUDENT"
+
           # Because there is no 'ansys-tools-path' we need to input the
           # executable path with the env var: PYMAPDL_MAPDL_EXEC.
 
-          if [[ "${{ matrix.mapdl-image }}" == *"latest-ubuntu"* ]] ; then
-            version="242"
+          if [[ "${{ matrix.mapdl-version }}" == *"latest-ubuntu"* ]] ; then
+            version=${{ env.LATEST_VERSION }}
           else
-            version=$(echo "${{ matrix.mapdl-image }}" | head -c 5 | tail -c 4 | tr -d '.')
+            version=$(echo "${{ matrix.mapdl-version }}" | head -c 5 | tail -c 4 | tr -d '.')
           fi;
 
-          echo "$version"
+          echo "Version: $version"
 
           export PYMAPDL_MAPDL_EXEC=/ansys_inc/v"$version"/ansys/bin/ansys"$version"
           echo "$PYMAPDL_MAPDL_EXEC"
@@ -763,21 +821,21 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
-            --cov-report=xml:${{ matrix.mapdl-image }}-minimal.xml
+            --cov-report=xml:${{ matrix.mapdl-version }}-minimal.xml
 
       - uses: codecov/codecov-action@v4
         name: "Upload coverage to Codecov"
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # required
           root_dir: ${{ github.workspace }}
-          name: ${{ matrix.mapdl-image }}-minimal.xml
-          flags: ubuntu,local,${{ matrix.mapdl-image }},minimal
+          name: ${{ matrix.mapdl-version }}-minimal.xml
+          flags: ubuntu,local,${{ matrix.mapdl-version }},minimal,${{ steps.student_check.outputs.TAG_STUDENT }},dmp
 
       - name: "Upload coverage artifacts"
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.mapdl-image }}-minimal.xml
-          path: ./${{ matrix.mapdl-image }}-minimal.xml
+          name: ${{ matrix.mapdl-version }}-minimal.xml
+          path: ./${{ matrix.mapdl-version }}-minimal.xml
 
 
   test-windows:
@@ -854,7 +912,7 @@ jobs:
 
   package:
     name: "Package library"
-    needs: [build-test, build-test-ubuntu, build-test-ubuntu-minimal, docs-build]
+    needs: [build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal, docs-build]
     runs-on: ubuntu-latest
     steps:
       - name: "Build library source and wheel artifacts"
@@ -966,7 +1024,7 @@ jobs:
 
   notify:
     name: "Notify failed build"
-    needs: [smoke-tests, docs-build, build-test, build-test-ubuntu, build-test-ubuntu-minimal]
+    needs: [smoke-tests, docs-build, build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal]
     if: failure() && github.event_name == 'schedule'
     runs-on: ubuntu-latest
     steps:
@@ -979,12 +1037,13 @@ jobs:
 
 
   test_julia:
-    name: "Test julia implementation"
+    name: "Julia ${{ matrix.julia-version }} | ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     strategy:
       fail-fast: false
       matrix:
-        julia-version: ['1.10.2']  # '1.6.7'
+        julia-version: ['1.10.3', '1.10.4']
         os: [ubuntu-latest, windows-latest]
 
     steps:
