@@ -610,7 +610,7 @@ jobs:
 
     container:
       image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
-      options: -u 1001:1001 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
+      options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
@@ -743,7 +743,7 @@ jobs:
       matrix: ${{fromJson(needs.build-test-local-minimal-matrix.outputs.matrix)}}
     container:
       image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
-      options: -u 1001:1001 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
+      options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
         username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
