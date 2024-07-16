@@ -20,19 +20,39 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import pytest
+POINT_SIZE = 10
 
-from conftest import has_dependency
+# Supported labels
+BC_D = [
+    "TEMP",
+    "UX",
+    "UY",
+    "UZ",
+    "VOLT",  # "MAG"
+]
+BC_F = [
+    "HEAT",
+    "FX",
+    "FY",
+    "FZ",
+    "AMPS",
+    "CHRG",
+    # "FLUX",
+    "CSGZ",
+]  # TODO: Add moments MX, MY, MZ
+FIELDS = {
+    "MECHANICAL": ["UX", "UY", "UZ", "FX", "FY", "FZ"],
+    "THERMAL": ["TEMP", "HEAT"],
+    "ELECTRICAL": ["VOLT", "CHRG", "AMPS"],
+}
 
-if not has_dependency("pyvista"):
-    pytest.skip(allow_module_level=True)
+FIELDS_ORDERED_LABELS = FIELDS["MECHANICAL"].copy()
+FIELDS_ORDERED_LABELS.extend(FIELDS["THERMAL"])
+FIELDS_ORDERED_LABELS.extend(FIELDS["ELECTRICAL"])
 
-from ansys.mapdl.core.plotting.theme import MapdlTheme, _apply_default_theme
+# All boundary conditions:
+BCS = BC_D.copy()
+BCS.extend(BC_F)
 
-
-def test_load_theme():
-    MapdlTheme()
-
-
-def test_apply_default_theme():
-    _apply_default_theme()
+# Allowed entities to plot their boundary conditions
+ALLOWED_TARGETS = ["NODES"]

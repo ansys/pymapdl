@@ -19,20 +19,17 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+from ansys.mapdl.core import _HAS_PYVISTA
+from ansys.mapdl.core.plotting.consts import (  # noqa: F401
+    ALLOWED_TARGETS,
+    BC_D,
+    BC_F,
+    BCS,
+    FIELDS,
+    FIELDS_ORDERED_LABELS,
+    POINT_SIZE,
+)
 
-import pytest
-
-from conftest import has_dependency
-
-if not has_dependency("pyvista"):
-    pytest.skip(allow_module_level=True)
-
-from ansys.mapdl.core.plotting.theme import MapdlTheme, _apply_default_theme
-
-
-def test_load_theme():
-    MapdlTheme()
-
-
-def test_apply_default_theme():
-    _apply_default_theme()
+if _HAS_PYVISTA:
+    from ansys.mapdl.core.plotting.theme import MapdlTheme  # noqa: F401
+    from ansys.mapdl.core.plotting.visualizer import MapdlPlotter  # noqa: F401
