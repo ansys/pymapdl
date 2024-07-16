@@ -113,10 +113,10 @@ SHELLTASK = {
 }
 
 
-class JobSubmissionDefinition:
-    """JobSubmissionDefinition Create a JobSubmission class.
+class SubmissionDefinition:
+    """SubmissionDefinition
 
-    Create a JobSubmission class used to submit Python, APDL or Shell jobs
+    Create a JobSubmission object used to submit Python, APDL or Shell projects/jobs
     to an HPS cluster.
 
     Parameters
@@ -148,7 +148,7 @@ class JobSubmissionDefinition:
     requirements_file : Optional[str], optional
         File path to the requirements file. Only used if ``mode`` is ``python``.
         If using ``False``, then no virtual environment is generated. This is
-        useful when the job requires no libraries but the already included by
+        useful when the submission requires no libraries but the already included by
         the Python installation.
         By default is ``None``, then a requirements file is generated on-the-fly
         with the packages installed on the activated virtual environment.
@@ -160,25 +160,25 @@ class JobSubmissionDefinition:
         instance create the virtual environments and/or run the Python script.
         This argument bypass the ``mode`` selected. By default ``None``.
     extra_files : Optional[Union[str, list[str]]], optional
-        To include extra files as part of the job. It support relative paths which it is replicated on the server side. By default ``None``.
+        To include extra files as part of the submission. It support relative paths which it is replicated on the server side. By default ``None``.
     output_files : Optional[Union[str, list[str]]], optional
         Specify which files are considered output by HPS. by default ``None``.
     python : Optional[float], optional
         Specify which minor version of python to use. If using Python ``mode``, the virtual environment is generated using this Python version., by default ``None``.
     num_cores : Optional[int], optional
-        Number of cores used for the job, by default ``None`` which means that
+        Number of cores used for the submission, by default ``None`` which means that
         this configuration is set by the server.
     memory : Optional[int], optional
-        Amount of memory RAM used for the job, by default ``None`` which means
+        Amount of memory RAM used for the submission, by default ``None`` which means
         that this configuration is set by the server.
     disk_space : Optional[int], optional
-        Amount of disk space reserved for the job, by default ``None`` which
+        Amount of disk space reserved for the submission, by default ``None`` which
         means that this configuration is set by the server.
     exclusive : Optional[bool], optional
-        Use the machines exclusively for this job, by default ``None`` which
+        Use the machines exclusively for this submission, by default ``None`` which
         means that this configuration is set by the server.
     max_execution_time : Optional[int], optional
-        Set a time limit for the job to run, by default ``None`` which means
+        Set a time limit for the submission to run, by default ``None`` which means
         that this configuration is set by the server.
     name : Optional[str], optional
         Name of the project in HPS, by default ``None`` which means that
@@ -190,20 +190,20 @@ class JobSubmissionDefinition:
     **Simplest case:** Submit a python file to be executed and wait for it
     to finish.
 
-    >>> from ansys.mapdl.core.hpc.pyhps import PyMAPDLJobSubmissionDefinition
-    >>> job = PyMAPDLJobSubmissionDefinition(
+    >>> from ansys.mapdl.core.hpc.pyhps import PyMAPDLSubmissionDefinition
+    >>> submission = PyMAPDLSubmissionDefinition(
                 name="My Python submission",
                 url="https://myhpscluster:3000/hps",
                 user="myuser",
                 password="mypass",
                 main_file="my_python_file.py"
                 )
-    >>> job.submit()
-    >>> job.wait_for_completion()
+    >>> submission.submit()
+    >>> submission.wait_for_completion()
 
     **Specifying inputs and outputs:** Submit a python file with inputs and outputs.
 
-    >>> job = PyMAPDLJobSubmissionDefinition(
+    >>> submission = PyMAPDLSubmissionDefinition(
                 name="My Python submission",
                 url="https://myhpscluster:3000/hps",
                 user="myuser",
@@ -212,7 +212,7 @@ class JobSubmissionDefinition:
                 inputs=["radius=0.4", "EX=100000000", "nu=0.3"]
                 outputs="stress_max,strain_max"
                 )
-    >>> job.submit()
+    >>> submission.submit()
 
     where ``my_python_file.py`` file looks like:
 
@@ -232,14 +232,15 @@ class JobSubmissionDefinition:
     on the HPS cluster job working directory. Additionally, the output can be read
     in the script using:
 
-    >>> job_results = output_values[0] # result set for the first job in our submission.
-    >>> job.outputs[0] #
-    >>> output = float(job.output_values[0][job.outputs[0]])
+    >>> job_results = submission.output_values[0] # result set for the first job
+    >>> output_key = submission.outputs[0] # "stress_max"
+    >>> output = float(job_results[output_key])
+    1.345E9
 
     **Setting the number of cores and amount of memory:** Setting the number of
     cores to 4, reserving 1Gb of RAM, and using Python3.11.
 
-    >>> job = PyMAPDLJobSubmissionDefinition(
+    >>> submission = PyMAPDLSubmissionDefinition(
                 name="My Python submission",
                 url="https://myhpscluster:3000/hps",
                 user="myuser",
@@ -249,11 +250,11 @@ class JobSubmissionDefinition:
                 memory=1024, #mb
                 python=3.11
                 )
-    >>> job.submit()
+    >>> submission.submit()
 
-    **Running a shell job:** Our shell script can be anything, and does not need
+    **Running a shell submission:** Our shell script can be anything, and does not need
     to call Python or MAPDL. Executing a shell script can be useful on many scenarios,
-    for instance copy files to another location after finalizing the job.
+    for instance copy files to another location after finalizing the submission.
     This file can look like:
 
     .. code:: bash
@@ -273,7 +274,7 @@ class JobSubmissionDefinition:
 
     Then you can run that shell script using:
 
-    >>> job = PyMAPDLJobSubmissionDefinition(
+    >>> submission = PyMAPDLSubmissionDefinition(
                 name="My shell script submission",
                 url="https://myhpscluster:3000/hps",
                 user="myuser",
@@ -282,20 +283,20 @@ class JobSubmissionDefinition:
                 extra_files = ['my_python_script.py'],
                 python=3.10
                 )
-    >>> job.submit()
+    >>> submission.submit()
 
-    **Run an MAPDL job**. Run an MAPDL input deck and use a token to authenticate. The credentials must been previously stored using ``pymapdl login`` CLI.
+    **Run an MAPDL submission**. Run an MAPDL input deck and use a token to authenticate. The credentials must been previously stored using ``pymapdl login`` CLI.
 
     >>> from ansys.mapdl.core.hpc.login import get_token_access
     >>> token = get_token_access()
-    >>> job = PyMAPDLJobSubmissionDefinition(
+    >>> submission = PyMAPDLSubmissionDefinition(
                 name="My APDL input submission",
                 url="https://myhpscluster:3000/hps",
                 user="myuser",
                 password="mypass",
                 main_file="my_apdl_code.inp",
                 )
-    >>> job.submit()
+    >>> submission.submit()
 
     """
 
@@ -1166,7 +1167,7 @@ with open("{self._output_parms_file}", "w") as fid:
         self._client.session.close()
 
 
-class PyMAPDLJobSubmissionDefinition(JobSubmissionDefinition):
+class PyMAPDLSubmissionDefinition(SubmissionDefinition):
     pass
 
 
@@ -1176,10 +1177,10 @@ if __name__ == "__main__":
         format="[%(asctime)s | %(levelname)s] %(message)s", level=logging.DEBUG
     )
 
-    # from ansys.mapdl.core.hpc import PyMAPDLJobSubmissionDefinition
+    # from ansys.mapdl.core.hpc import PyMAPDLSubmissionDefinition
     # Test 1
     main_file = "/Users/german.ayuso/pymapdl/src/ansys/mapdl/core/hpc/main.py"
-    job = PyMAPDLJobSubmissionDefinition(
+    job = PyMAPDLSubmissionDefinition(
         url="https://10.231.106.91:3000/hps",
         user="repuser",
         password="repuser",
@@ -1194,7 +1195,7 @@ if __name__ == "__main__":
     # Test2
 
     # main_file = "main.py"
-    # job1 = PyMAPDLJobSubmissionDefinition(
+    # job1 = PyMAPDLSubmissionDefinition(
     #     url="https://10.231.106.91:3000/hps",
     #     user="repuser",
     #     password="repuser",
