@@ -288,12 +288,11 @@ class SubmissionDefinition:
     **Run an MAPDL submission**. Run an MAPDL input deck and use a token to authenticate. The credentials must been previously stored using ``pymapdl login`` CLI.
 
     >>> from ansys.mapdl.core.hpc.login import get_token_access
-    >>> token = get_token_access()
+    >>> token = get_token_access(url='https://cluster.example.com', user='admin', password='securepass')
     >>> submission = PyMAPDLSubmissionDefinition(
                 name="My APDL input submission",
                 url="https://myhpscluster:3000/hps",
-                user="myuser",
-                password="mypass",
+                token=token,
                 main_file="my_apdl_code.inp",
                 )
     >>> submission.submit()
