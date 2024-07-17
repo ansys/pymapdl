@@ -68,11 +68,6 @@ NPROC = 1
 
 class TestMapdlPool:
 
-    def __del__(self):
-        # making sure we are deleting everything
-        for each_mapdl in self.pool._instances:
-            each_mapdl.exit(force=True)
-
     @pytest.fixture(scope="class")
     def pool_creator(self, tmpdir_factory):
         run_path = str(tmpdir_factory.mktemp("ansys_pool"))
