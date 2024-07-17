@@ -2198,9 +2198,10 @@ class _MapdlExtended(_MapdlCommandExtended):
         # skip the first line its a header we wrote in np.savetxt
         self.tread(name, filename, nskip=1, mute=True)
 
-        if self._local:
-            os.remove(filename)
-        else:
+        # skip the first line its a header we wrote in np.savetxt
+        self.tread(name, filename, nskip=1, mute=True)
+
+        if not self._local:
             self.slashdelete(filename)
 
     def load_array(self, name, array):

@@ -1884,24 +1884,25 @@ class _MapdlCore(Commands):
         if self._apdl_log:
             self._apdl_log.write(commands + "\n")
 
-        # write to a temporary input file
-        tmp_inp = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.inp")
-        self._log.debug(
-            "Writing the following commands to a temporary " "apdl input file:\n%s",
-            commands,
-        )
+            self._store_commands = False
+            self._stored_commands = []
 
-        with open(tmp_inp, "w") as f:
-            f.writelines(commands)
+            # write to a temporary input file
+            self._log.debug(
+                "Writing the following commands to a temporary " "apdl input file:\n%s",
+                commands,
+            )
 
-        self._store_commands = False
-        self._stored_commands = []
+            tmp_inp = os.path.join(tempfile.gettempdir(), f"tmp_{random_string()}.inp")
+            with open(tmp_inp, "w") as f:
+                f.writelines(commands)
 
-        # interactive result
-        _ = self.input(tmp_inp, write_to_log=False)
-        time.sleep(0.1)  # allow MAPDL to close the file
-        if os.path.isfile(tmp_out):
-            self._response = "\n" + open(tmp_out).read()
+            # interactive result
+            _ = self.input(tmp_inp, write_to_log=False)
+
+            time.sleep(0.1)  # allow MAPDL to close the file
+            if os.path.isfile(tmp_out):
+                self._response = "\n" + open(tmp_out).read()
 
         if self._response is None:  # pragma: no cover
             self._log.warning("Unable to read response from flushed commands")
