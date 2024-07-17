@@ -1967,7 +1967,7 @@ class MapdlGrpc(MapdlBase):
             with tempfile.NamedTemporaryFile(
                 prefix="tmp_", suffix=".inp", delete=False
             ) as file_:
-                name = file_.name()
+                name = file_.name
 
             return name
 
