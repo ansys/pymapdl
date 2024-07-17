@@ -70,7 +70,7 @@ class TestMapdlPool:
 
     def __del__(self):
         # making sure we are deleting everything
-        for each_mapdl in self.pool._instances:
+        for each_mapdl in self._pool._instances:
             each_mapdl.exit(force=True)
 
     @pytest.fixture(scope="class")
@@ -102,7 +102,7 @@ class TestMapdlPool:
                 wait=True,
             )
 
-        self.pool = mapdl_pool
+        self._pool = mapdl_pool
         VALID_PORTS.extend(mapdl_pool._ports)
 
         yield mapdl_pool
