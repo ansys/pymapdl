@@ -29,6 +29,7 @@ from queue import Empty, Queue
 import re
 import socket
 import subprocess
+import tempfile
 import threading
 import time
 from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
@@ -70,6 +71,7 @@ from ansys.mapdl.core.misc import (
     check_valid_ip,
     check_valid_port,
     create_temp_dir,
+    random_string,
     threaded,
 )
 
@@ -1683,7 +1685,8 @@ def launch_mapdl(
     # verify run location
     if run_location is None:
         LOG.debug("Using default run location.")
-        run_location = create_temp_dir()
+        temp_dir = tempfile.gettempdir()
+        run_location = os.path.join(temp_dir, "ansys_%s" % random_string(10))
         if not os.path.isdir(run_location):
             try:
                 os.mkdir(run_location)

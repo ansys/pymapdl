@@ -1876,15 +1876,13 @@ class _MapdlCore(Commands):
 
         """
         self._log.debug("Flushing stored commands")
-        with tempfile.NamedTemporaryFile(
-            prefix="tmp_", suffix=".out", delete=False
-        ) as tmp_out:
-
-            self._stored_commands.insert(0, f"/OUTPUT, {tmp_out.name()}")
-            self._stored_commands.append("/OUTPUT")
-            commands = "\n".join(self._stored_commands)
-            if self._apdl_log:
-                self._apdl_log.write(commands + "\n")
+        rnd_str = random_string()
+        tmp_out = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.out")
+        self._stored_commands.insert(0, "/OUTPUT, f'{tmp_out}'")
+        self._stored_commands.append("/OUTPUT")
+        commands = "\n".join(self._stored_commands)
+        if self._apdl_log:
+            self._apdl_log.write(commands + "\n")
 
             self._store_commands = False
             self._stored_commands = []
@@ -1895,14 +1893,12 @@ class _MapdlCore(Commands):
                 commands,
             )
 
-            with tempfile.NamedTemporaryFile(
-                prefix="tmp_", suffix=".inp", delete=False
-            ) as tmp_inp:
-                with open(tmp_inp, "w") as f:
-                    f.writelines(commands)
+            tmp_inp = os.path.join(tempfile.gettempdir(), f"tmp_{random_string()}.inp")
+            with open(tmp_inp, "w") as f:
+                f.writelines(commands)
 
-                # interactive result
-                _ = self.input(tmp_inp, write_to_log=False)
+            # interactive result
+            _ = self.input(tmp_inp, write_to_log=False)
 
             time.sleep(0.1)  # allow MAPDL to close the file
             if os.path.isfile(tmp_out):

@@ -2294,11 +2294,10 @@ def test_use_vtk(mapdl):
 
 @requires("local")
 @pytest.mark.xfail(reason="Flaky test. See #2435")
-def test__remove_temp_dir_on_exit(mapdl, tmpdir):
-    path = tempfile.mkdtemp(prefix="ansys_")
+def test_remove_temp_dir_on_exit(mapdl, tmpdir):
+    path = os.path.join(tempfile.gettempdir(), "ansys_" + random_string())
     os.makedirs(path)
     filename = os.path.join(path, "file.txt")
-
     with open(filename, "w") as f:
         f.write("Hello World")
     assert os.path.exists(filename)

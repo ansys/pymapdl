@@ -49,7 +49,7 @@ import numpy as np
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import _HAS_PYVISTA, LOG
-from ansys.mapdl.core.errors import MapdlExitedError
+from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 
 try:
     import ansys.tools.report as pyansys_report
@@ -517,11 +517,29 @@ def last_created(filenames):
 
 def create_temp_dir(tmpdir=None, name=None):
     """Create a new unique directory at a given temporary directory"""
-    path = tempfile.mkdtemp(prefix="ansys_", dir=tmpdir)
+    if tmpdir is None:
+        tmpdir = tempfile.gettempdir()
 
-    if name:
-        path = os.path.join(path, name)
+    # Possible letters
+    letters_ = string.ascii_lowercase.replace("n", "")
+
+    def get_name():
+        return random_string(10, letters_)
+
+    name = name or get_name()
+    while os.path.exists(os.path.join(tmpdir, name)):
+        name = get_name()
+
+    # create dir:
+    path = os.path.join(tmpdir, name)
+
+    try:
         os.mkdir(path)
+    except:  # pragma: no cover
+        raise MapdlRuntimeError(
+            "Unable to create temporary working "
+            f"directory {path}\nPlease specify 'run_location' argument"
+        )
 
     return path
 
