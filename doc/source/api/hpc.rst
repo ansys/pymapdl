@@ -1,6 +1,6 @@
 .. _ref_hpc_api:
 
-.. currentmodule:: ansys.mapdl.core.hpc
+.. currentmodule:: ansys.mapdl.core.hpc.pyhps
 
 HPC Submissions
 ===============
@@ -8,8 +8,11 @@ HPC Submissions
 .. autosummary::
    :toctree: _autosummary
 
-   pyhps.SubmissionDefinition
+   SubmissionDefinition
 
+
+
+.. currentmodule:: ansys.mapdl.core.hpc.login
 
 HPC login
 =========
@@ -17,6 +20,6 @@ HPC login
 .. autosummary::
    :toctree: _autosummary
 
-   login.get_token_access
+   get_token_access
 
 
