@@ -41,11 +41,21 @@ composite materials. PyDPF modules are also used for the postprocessing of the r
 
 Problem figure
 ~~~~~~~~~~~~~~
-.. figure:: ../../../images/dcb_test.png
-   :width: 400
-   :alt: DCB experimental test setup
 
-   **Source**: https://www.wikiwand.com/en/Delamination
+.. figure:: ../../../images/dcb_test_dark_theme.png
+    :figclass: only-dark
+    :width: 400pt
+    :alt: DCB experimental test setup
+
+    **Source**: https://www.wikiwand.com/en/Delamination
+
+
+.. figure:: ../../../images/dcb_test_light_theme.png
+    :figclass: only-light
+    :width: 400pt
+    :alt: DCB experimental test setup
+
+    **Source**: https://www.wikiwand.com/en/Delamination
 
 Procedure
 ~~~~~~~~~

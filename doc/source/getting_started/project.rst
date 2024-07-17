@@ -51,10 +51,21 @@ while producing network footprints that are compact and efficient.
 
 The following diagram presents a simplified architecture of PyMAPDL.
 
-.. figure:: ../images/architecture_diagram.png
+.. figure:: ../images/architecture_diagram_dark_theme.png
+    :figclass: only-dark
     :width: 400pt
+    :alt: PyMAPDL architecture diagram
 
     PyMAPDL architecture diagram
+
+
+.. figure:: ../images/architecture_diagram_light_theme.png
+    :figclass: only-light
+    :width: 400pt
+    :alt: PyMAPDL architecture diagram
+
+    PyMAPDL architecture diagram
+
 
 Quick code
 ----------

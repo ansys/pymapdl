@@ -53,7 +53,7 @@ updates:
             - "matplotlib"
             - "pexpect"
             - "pyiges"
-            - "pyvista"
+            - "ansys-tools-visualization-interface"
             - "scipy"
             - "tqdm"
             - "vtk"

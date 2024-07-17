@@ -9,7 +9,7 @@ Various PyMAPDL specific plotting commands.
 .. autosummary::
    :toctree: _autosummary
 
-   plotting.general_plotter
+   plotting.MapdlPlotter
    plotting.MapdlTheme
    Mapdl.aplot
    Mapdl.eplot
