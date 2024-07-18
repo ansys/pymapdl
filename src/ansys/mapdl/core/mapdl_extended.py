@@ -1550,7 +1550,6 @@ class _MapdlCommandExtended(_MapdlCore):
             )
 
         return super().mwrite(
-            self,
             parr=parr,
             fname=fname,
             ext=ext,
