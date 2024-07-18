@@ -30,7 +30,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 from ansys.mapdl.core import _HAS_PYVISTA
-from ansys.mapdl.core.misc import get_bounding_box, unique_rows
+from ansys.mapdl.core.misc import get_bounding_box
 from ansys.mapdl.core.plotting.consts import (
     ALLOWED_TARGETS,
     BC_D,
@@ -424,28 +424,12 @@ class MapdlPlotter(Plotter):
                 )
 
         for label in labels:
-            # Not sure at what point, the
-            # ``mapdl.mesh._grid.linear_copy().extract_surface().clean()`` line
-            # is removing duplicated points.
-            #
-            # Since we still need to plot all the labels:
-            # TODO: we should plot only the points that belong to lines.
-
-            # verify points are not duplicates
-            points = np.atleast_2d(label["points"])
-            with self.mapdl.save_selection:
-                self.mapdl.allsel()
-                all_points = self.mapdl.geometry.get_keypoints().points
-
-            _, idx, idx2 = unique_rows(points)
-            points = points[idx2][idx]  # Getting back the initial order.
-
-            # Getting order
-            labels_ = np.array(label["labels"])[idx]
+            # Pyvista does not support plotting two labels with the same point.
+            # It does handle that case by keeping only the first label.
 
             self.add_labels(
-                points,
-                labels_,
+                label["points"],
+                label["labels"],
                 show_points=False,
                 shadow=False,
                 font_size=font_size,
