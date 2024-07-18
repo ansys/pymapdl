@@ -1243,6 +1243,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
             pl = kwargs.get("plotter", None)
             pl = MapdlPlotter().switch_scene(pl)
+            pl.mapdl = self
 
             kwargs.setdefault("title", "MAPDL Element Plot")
             if not self._mesh.n_elem:

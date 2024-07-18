@@ -424,13 +424,25 @@ class MapdlPlotter(Plotter):
                 )
 
         for label in labels:
+            # Not sure at what point, the
+            # ``mapdl.mesh._grid.linear_copy().extract_surface().clean()`` line
+            # is removing duplicated points.
+            #
+            # Since we still need to plot all the labels:
+            # TODO: we should plot only the points that belong to lines.
+
             # verify points are not duplicates
-            points = np.atleast_2d(np.array(label["points"]))
+            points = np.atleast_2d(label["points"])
+            with self.mapdl.save_selection:
+                self.mapdl.allsel()
+                all_points = self.mapdl.geometry.get_keypoints().points
+
             _, idx, idx2 = unique_rows(points)
             points = points[idx2][idx]  # Getting back the initial order.
 
-            # Converting python order (0 based)
-            labels_ = np.array(label["labels"] - 1)[idx]
+            # Getting order
+            labels_ = np.array(label["labels"])[idx]
+
             self.add_labels(
                 points,
                 labels_,
