@@ -51,6 +51,7 @@ LICENSES = {
     "meba": "Ansys Mechanical Enterprise Solver",
     "mech_2": "Ansys Mechanical Premium",
     "mech_1": "Ansys Mechanical Pro",
+    "preppost": "Mechanical Enterprise PrepPost",
 }
 ALLOWABLE_LICENSES = list(LICENSES)
 
