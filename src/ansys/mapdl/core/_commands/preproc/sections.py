@@ -622,6 +622,8 @@ class Sections:
         val10="",
         val11="",
         val12="",
+        val13="",
+        val14="",
         **kwargs,
     ):
         """Describes the geometry of a section.
@@ -681,7 +683,7 @@ class Sections:
 
         Type: BEAM, Subtype: HATS
         """
-        command = f"SECDATA,{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12}"
+        command = f"SECDATA,{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12},{val13},{val14}"
         return self.run(command, **kwargs)
 
     def secjoint(
