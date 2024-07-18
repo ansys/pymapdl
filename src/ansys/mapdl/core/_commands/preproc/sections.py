@@ -632,7 +632,7 @@ class Sections:
 
         Parameters
         ----------
-        val1, val2, val3, . . . , val12
+        val1, val2, val3, . . . , val14
             Values, such as thickness or the length of a side or the numbers of
             cells along the width, that describe the geometry of a section. The
             terms VAL1, VAL2, etc. are specialized for each type of cross-
