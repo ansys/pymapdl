@@ -2,7 +2,7 @@ version: 2
 updates:
 
   - package-ecosystem: "github-actions"
-    directory: "/"
+    directory: "**/*"
     schedule:
       interval: "weekly"
     labels:
@@ -16,8 +16,8 @@ updates:
           patterns:
             - "*"
 
-  - directory: "/" # Location of package manifests
-    package-ecosystem: "pip" # See documentation for possible values
+  - package-ecosystem: "pip" # See documentation for possible values
+    directory: "**/*" # Location of package manifests
     insecure-external-code-execution: allow
     schedule:
       interval: "weekly"      
