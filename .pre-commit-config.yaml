@@ -6,6 +6,8 @@ repos:
   rev: v0.3.1
   hooks:
   - id: add-license-headers
+  args:
+    - --start_year=2016
 
 - repo: https://github.com/pycqa/isort
   rev: 5.13.2
