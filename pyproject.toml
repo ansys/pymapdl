@@ -68,7 +68,7 @@ tests = [
     "pytest-memprof<0.3.0",
     "pytest-pyvista==0.1.9",
     "pytest-rerunfailures==14.0",
-    "pytest==8.2.2",
+    "pytest==8.3.2",
     "scipy==1.14.0",
     "vtk==9.3.1",
 ]
