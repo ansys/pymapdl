@@ -3,7 +3,7 @@ fail_fast: True
 repos:
 
 - repo: https://github.com/ansys/pre-commit-hooks
-  rev: v0.4.1
+  rev: v0.3.1
   hooks:
   - id: add-license-headers
     args:
@@ -15,7 +15,7 @@ repos:
   - id: isort
 
 - repo: https://github.com/numpy/numpydoc
-  rev: v1.7.0
+  rev: v1.8.0rc2
   hooks:
     - id: numpydoc-validation
       exclude: |
@@ -67,6 +67,6 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.29.0
+  rev: 0.29.1
   hooks:
     - id: check-github-workflows
