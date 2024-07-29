@@ -1878,7 +1878,7 @@ class _MapdlCore(Commands):
         self._log.debug("Flushing stored commands")
         rnd_str = random_string()
         tmp_out = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.out")
-        self._stored_commands.insert(0, "/OUTPUT, f'{tmp_out}'")
+        self._stored_commands.insert(0, f"/OUTPUT, {tmp_out}")
         self._stored_commands.append("/OUTPUT")
         commands = "\n".join(self._stored_commands)
         if self._apdl_log:
