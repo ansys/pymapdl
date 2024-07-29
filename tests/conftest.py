@@ -272,10 +272,13 @@ def pytest_report_header(config, start_path, startdir):
     for env_var in [
         "PYMAPDL_START_INSTANCE",
         "PYMAPDL_PORT",
+        "PYMAPDL_PORT2",
         "PYMAPDL_DB_PORT",
         "PYMAPDL_IP",
+        "PYMAPDL_IP2",
         "DPF_PORT",
         "DPF_START_SERVER",
+        "IGNORE_POOL",
     ]:
         env_var_value = os.environ.get(env_var, None)
         if env_var_value is not None:
