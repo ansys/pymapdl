@@ -1131,7 +1131,7 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
 
 
 @pytest.mark.parametrize(
-    "each_cmd", ["*END", "*vwrite", "/eof", "cmatrix", "*REpeAT", "lSread", "mwrite"]
+    "each_cmd", ["*END", "*vwrite", "/eof", "cmatrix", "*REpeAT", "lSread", "*mwrite"]
 )
 def test_inval_commands(mapdl, cleared, each_cmd):
     """Test the output of invalid commands"""
