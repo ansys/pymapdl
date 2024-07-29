@@ -104,20 +104,22 @@ PNG_IS_WRITTEN_TO_FILE = re.compile(
     "WRITTEN TO FILE"
 )  # getting the file name is buggy.
 
-VWRITE_REPLACEMENT = """
-Cannot use *VWRITE directly as a command in MAPDL
+VWRITE_MWRITE_REPLACEMENT = """
+Cannot use *VWRITE/*MWRITE directly as a command in MAPDL
 service mode.  Instead, run it as ``non_interactive``.
 
-For example:
+For example, in the *VWRITE case:
 
 with self.non_interactive:
     self.vwrite('%s(1)' % parm_name)
     self.run('(F20.12)')
+
 """
 
 ## Invalid commands in interactive mode.
 INVAL_COMMANDS = {
-    "*VWR": VWRITE_REPLACEMENT,
+    "*VWR": VWRITE_MWRITE_REPLACEMENT,
+    "*MWR": VWRITE_MWRITE_REPLACEMENT,
     "*CFO": "Run CFOPEN as ``non_interactive``",
     "*CRE": "Create a function within python or run as non_interactive",
     "*END": "Create a function within python or run as non_interactive",

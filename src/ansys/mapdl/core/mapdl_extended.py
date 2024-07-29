@@ -1509,7 +1509,7 @@ class _MapdlCommandExtended(_MapdlCore):
         # cannot be run in interactive mode
         if not self._store_commands:
             raise MapdlRuntimeError(
-                "VWRTIE cannot run interactively.  \n\nPlease use "
+                "*VWRITE cannot run interactively.  \n\nPlease use "
                 "``with mapdl.non_interactive:``"
             )
 
@@ -1533,6 +1533,30 @@ class _MapdlCommandExtended(_MapdlCore):
             par17=par17,
             par18=par18,
             par19=par19,
+            **kwargs,
+        )
+
+    @wraps(_MapdlCore.mwrite)
+    def mwrite(
+        self, parr="", fname="", ext="", label="", n1="", n2="", n3="", **kwargs
+    ):
+        """Wrapping *MWRITE"""
+
+        # cannot be run in interactive mode
+        if not self._store_commands:
+            raise MapdlRuntimeError(
+                "*MWRITE cannot run interactively.  \n\nPlease use "
+                "``with mapdl.non_interactive:``"
+            )
+
+        return super().mwrite(
+            parr=parr,
+            fname=fname,
+            ext=ext,
+            label=label,
+            n1=n1,
+            n2=n2,
+            n3=n3,
             **kwargs,
         )
 

@@ -353,6 +353,10 @@ class ArrayParam:
 
         APDL Command: ``*MWRITE``
 
+        .. warning::
+           This command cannot be run interactively.  See
+           :func:`non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`.
+
         Parameters
         ----------
         parr
