@@ -270,6 +270,13 @@ class CommandDeprecated(DeprecationError):
         super().__init__(msg)
 
 
+class MapdlgRPCError(MapdlRuntimeError):
+    """Raised when gRPC issues are found"""
+
+    def __init__(self, msg=""):
+        super().__init__(msg)
+
+
 # handler for protect_grpc
 def handler(sig, frame):  # pragma: no cover
     """Pass signal to custom interrupt handler."""
@@ -316,7 +323,7 @@ def protect_grpc(func):
             caller = func.__name__
 
             if cmd:
-                msg_ = f"running:\n{cmd}\ncalled by:\n{caller}"
+                msg_ = f"running:\n\t{cmd}\ncalled by:\n\t{caller}\n"
             else:
                 msg_ = f"calling:{caller}\nwith the following arguments:\nargs: {list(*args)}\nkwargs: {list(**kwargs_)}"
 
@@ -325,11 +332,35 @@ def protect_grpc(func):
             elif hasattr(args[0], "_mapdl"):
                 mapdl = args[0]._mapdl
 
-            # Must close unfinished processes
-            mapdl._close_process()
-            raise MapdlExitedError(
-                f"MAPDL server connection terminated unexpectedly while {msg_}\nwith the following error\n{error}"
-            ) from None
+            if "Received message larger than max" in error.details():
+                try:
+                    lim_ = int(error.details().split("(")[1].split("vs")[0])
+                except IndexError:
+                    lim_ = int(512 * 1024**2)
+
+                raise MapdlgRPCError(
+                    f"{error.details()}. "
+                    "You can try to increase the gRPC message length size using 'PYMAPDL_MAX_MESSAGE_LENGTH'"
+                    " environment variable. For instance:\n\n"
+                    f"$ export PYMAPDL_MAX_MESSAGE_LENGTH={lim_}"
+                )
+
+            else:
+                # Generic error
+                msg = (
+                    f"MAPDL server connection terminated unexpectedly while {msg_}\n"
+                    "Error:\n"
+                    f"\t{error.details()}\n"
+                    f"Full error:\n{error}"
+                )
+                # Test if MAPDL is alive or not.
+                if mapdl.is_alive:
+                    raise MapdlRuntimeError(msg)
+
+                else:
+                    # Must close unfinished processes
+                    mapdl._close_process()
+                    raise MapdlExitedError(msg)
 
         if threading.current_thread().__class__.__name__ == "_MainThread":
             received_interrupt = bool(SIGINT_TRACKER)
