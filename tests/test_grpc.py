@@ -144,9 +144,9 @@ def test_clear_multiple(mapdl):
 def test_invalid_get_bug(mapdl):
     # versions before 24.1 should raise an error
     if mapdl.version < 24.1:
-        context = pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError))
+        context = pytest.raises(MapdlCommandIgnoredError)
     else:
-        context = NullContext
+        context = pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError))
 
     with context:
         mapdl.get_value("ACTIVE", item1="SET", it1num="invalid")
