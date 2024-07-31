@@ -277,6 +277,9 @@ class MapdlDb:
                     f"Invalid port '{db_port_str}' specified in the env var PYMAPDL_DB_PORT"
                 )
 
+        if not self._ip:
+            self._ip = self._mapdl.ip
+
         self._server = {"ip": self._ip, "port": db_port}
         self._channel_str = f"{self._ip}:{db_port}"
 
