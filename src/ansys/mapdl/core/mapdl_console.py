@@ -315,7 +315,7 @@ class MapdlConsole(MapdlBase):
                     self._log.warning("Unable to kill process %d", self._process.pid)
                 self._log.debug("Killed process %d", self._process.pid)
 
-    @property
+    @MapdlBase.name.getter
     def name(self):
         """Instance unique identifier."""
         if not self._name:
