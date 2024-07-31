@@ -25,6 +25,7 @@ from enum import Enum
 from functools import wraps
 import os
 import time
+from typing import Optional
 from warnings import warn
 import weakref
 
@@ -157,7 +158,7 @@ class MapdlDb:
         # database server must be run from the "BEGIN" level
         self._mapdl._log.debug("Starting MAPDL server")
         self._mapdl._cache_routine()
-        with self._mapdl.run_as_routine("finish"):
+        with self._mapdl.run_as_routine("Begin level"):
             self._mapdl.run(f"/DBS,SERVER,START,{port}")
 
         if not port:
@@ -283,13 +284,13 @@ class MapdlDb:
 
         if not self._state._matured:  # pragma: no cover
             raise MapdlConnectionError(
-                "Unable to establish connection to MAPDL database server"
+                f"Unable to establish connection to MAPDL database server {self._channel_str}"
             )
         self._mapdl._log.debug("Established connection to MAPDL database server")
 
     def _stop(self):
         """Stop the MAPDL database service."""
-        with self._mapdl.run_as_routine("finish"):
+        with self._mapdl.run_as_routine("Begin level"):
             return self._mapdl.run("/DBS,SERVER,STOP")
 
     def stop(self):
@@ -326,7 +327,7 @@ class MapdlDb:
          DB Server is NOT currently running ..
         """
         # Need to use the health check here
-        with self._mapdl.run_as_routine("finish"):
+        with self._mapdl.run_as_routine("Begin level"):
             return self._mapdl.run("/DBS,SERVER,STATUS")
 
     def load(self, fname, progress_bar=False):
