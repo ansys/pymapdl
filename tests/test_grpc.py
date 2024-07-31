@@ -579,18 +579,18 @@ def test_exception_message_length(monkeypatch, mapdl):
     channel = grpc.insecure_channel(
         mapdl._channel_str,
         options=[
-            ("grpc.max_receive_message_length", int(1 * 1024)),
+            ("grpc.max_receive_message_length", int(0.5 * 1024)),
         ],
     )
     mapdl2 = MapdlGrpc(channel=channel)
     assert mapdl2.is_alive
 
-    with pytest.raises(MapdlgRPCError, match="Received message larger than max"):
-        mapdl2.prep7()
-        mapdl2.dim("myarr", "", 1e4)
-        mapdl2.vfill("myarr", "rand", 0, 1)  # filling array with random numbers
+    mapdl2.prep7()
+    mapdl2.dim("myarr", "", 1e5)
+    mapdl2.vfill("myarr", "rand", 0, 1)  # filling array with random numbers
 
-        # Retrieving
+    # Retrieving
+    with pytest.raises(MapdlgRPCError, match="Received message larger than max"):
         values = mapdl2.parameters["myarr"]
 
     assert mapdl2.is_alive
