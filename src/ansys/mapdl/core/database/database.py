@@ -42,25 +42,6 @@ FAILING_DATABASE_MAPDL = ["24.1", "24.2"]
 DEFAULT_DB_PORT = 50055
 
 
-class WithinBeginLevel:
-    """Context manager to run MAPDL within the being level."""
-
-    def __init__(self, mapdl):
-        """Initialize this context manager."""
-        self._mapdl = mapdl
-
-    def __enter__(self):
-        """Enter the begin level and cache the current routine."""
-        self._mapdl._cache_routine()
-        if "BEGIN" not in self._mapdl._cached_routine.upper():
-            self._mapdl.finish()
-
-    def __exit__(self, *args, **kwargs):
-        """Exit the begin level and reload the previous routine."""
-        if "BEGIN" not in self._mapdl._cached_routine.upper():
-            self._mapdl._resume_routine()
-
-
 def check_mapdl_db_is_alive(function):
     """
     Decorator to check that the MAPDL.DB has started.
@@ -176,7 +157,7 @@ class MapdlDb:
         # database server must be run from the "BEGIN" level
         self._mapdl._log.debug("Starting MAPDL server")
         self._mapdl._cache_routine()
-        with WithinBeginLevel(self._mapdl):
+        with self._mapdl.run_as_routine("finish"):
             self._mapdl.run(f"/DBS,SERVER,START,{port}")
 
         if not port:
@@ -308,7 +289,7 @@ class MapdlDb:
 
     def _stop(self):
         """Stop the MAPDL database service."""
-        with WithinBeginLevel(self._mapdl):
+        with self._mapdl.run_as_routine("finish"):
             return self._mapdl.run("/DBS,SERVER,STOP")
 
     def stop(self):
@@ -345,7 +326,7 @@ class MapdlDb:
          DB Server is NOT currently running ..
         """
         # Need to use the health check here
-        with WithinBeginLevel(self._mapdl):
+        with self._mapdl.run_as_routine("finish"):
             return self._mapdl.run("/DBS,SERVER,STATUS")
 
     def load(self, fname, progress_bar=False):
