@@ -462,6 +462,18 @@ class MapdlGrpc(MapdlBase):
 
         self._create_session()
 
+    def _after_run(self, command: str) -> None:
+        if command[:4].upper() == "/CLE":
+            # We have reset the database, so we need to create a new session id
+            self._create_session()
+
+    def _before_run(self, _command: str) -> None:
+        if self._session_id is not None:
+            self._check_session_id()
+        else:
+            # For some reason the session hasn't been created
+            self._create_session()
+
     def _create_process_stds_queue(self, process=None):
         from ansys.mapdl.core.launcher import (
             _create_queue_for_std,  # Avoid circular import error

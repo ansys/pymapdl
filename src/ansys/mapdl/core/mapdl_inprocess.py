@@ -37,7 +37,6 @@ class MapdlInProcess(MapdlBase):
         self._in_process_backend = in_process_backend
         self._cleanup: bool = True
         self._name: str = "MapdlInProcess"
-        self._session_id: Optional[str] = None
 
     def _run(self, command: str, verbose: bool = False, mute: bool = False) -> str:
         if not command.strip():
