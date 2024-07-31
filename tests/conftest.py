@@ -87,6 +87,11 @@ skip_if_not_local = pytest.mark.skipif(
     reason="Skipping because not on local. ",
 )
 
+skip_if_not_remote = pytest.mark.skipif(
+    ON_LOCAL,
+    reason="Skipping because not on remote. ",
+)
+
 skip_if_on_cicd = pytest.mark.skipif(
     ON_CI,
     reason="""Skip if on CI/CD.""",
@@ -145,6 +150,9 @@ def requires(requirement: str):
 
     elif "local" == requirement:
         return skip_if_not_local
+
+    elif "remote" == requirement:
+        return skip_if_not_remote
 
     elif "cicd" == requirement:
         return skip_if_on_cicd

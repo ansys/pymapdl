@@ -578,7 +578,9 @@ def test__check_stds(mapdl):
     assert mapdl._stderr is not None
 
 
-def test_exception_message_length(monkeypatch, mapdl):
+@requires("remote")
+def test_exception_message_length(mapdl):
+    # This test does not fail if running on local
     channel = grpc.insecure_channel(
         mapdl._channel_str,
         options=[
