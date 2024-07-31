@@ -27,7 +27,9 @@ from ansys.mapdl.core.mapdl import MapdlBase
 
 class _Backend(Protocol):
     def run_command(self, command: str, verbose: bool, mute: bool) -> str: ...
-    def input_file(self, filename: str, extension: str, dir: str, line: int, log: int, mute: bool) -> str: ...
+    def input_file(
+        self, filename: str, extension: str, dir: str, line: int, log: int, mute: bool
+    ) -> str: ...
 
 
 class MapdlInProcess(MapdlBase):
@@ -47,8 +49,19 @@ class MapdlInProcess(MapdlBase):
 
         return self._in_process_backend.run_command(command, verbose, mute).strip()
 
-    def input(self, filename: str="", extension: str="", directory: str="", line: str="", log: str="", mute: bool = False, **_):
-        return self._in_process_backend.input_file(filename, extension, directory, int(line or 0), int(log or 0), mute)
+    def input(
+        self,
+        filename: str = "",
+        extension: str = "",
+        directory: str = "",
+        line: str = "",
+        log: str = "",
+        mute: bool = False,
+        **_,
+    ):
+        return self._in_process_backend.input_file(
+            filename, extension, directory, int(line or 0), int(log or 0), mute
+        )
 
     @MapdlBase.name.getter
     def name(self) -> str:

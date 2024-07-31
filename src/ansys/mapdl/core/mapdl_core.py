@@ -763,8 +763,7 @@ class _MapdlCore(ABC, Commands):
 
     @property
     @abstractmethod
-    def name(self) -> str:
-        ...
+    def name(self) -> str: ...
 
     @name.setter
     def name(self, _name) -> None:
