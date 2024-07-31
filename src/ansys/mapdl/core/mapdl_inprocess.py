@@ -20,13 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import Optional, Protocol
+from typing import Protocol
 
 from ansys.mapdl.core.mapdl import MapdlBase
 
 
 class _Backend(Protocol):
-    def run_command(self) -> str: ...
+    def run_command(self, command: str, verbose: bool, mute: bool) -> str: ...
+    def input_file(self, filename: str, extension: str, dir: str, line: int, log: int, mute: bool) -> str: ...
 
 
 class MapdlInProcess(MapdlBase):
@@ -36,7 +37,6 @@ class MapdlInProcess(MapdlBase):
         )
         self._in_process_backend = in_process_backend
         self._cleanup: bool = True
-        self._name: str = "MapdlInProcess"
 
     def _run(self, command: str, verbose: bool = False, mute: bool = False) -> str:
         if not command.strip():
@@ -47,9 +47,9 @@ class MapdlInProcess(MapdlBase):
 
         return self._in_process_backend.run_command(command, verbose, mute).strip()
 
-    @property
-    def name(self) -> str:
-        return self._name
+    def input(self, filename: str="", extension: str="", directory: str="", line: str="", log: str="", mute: bool = False, **_):
+        return self._in_process_backend.input_file(filename, extension, directory, int(line or 0), int(log or 0), mute)
 
-    def _check_session_id(self) -> None:
-        pass
+    @MapdlBase.name.getter
+    def name(self) -> str:
+        return "MapdlInProcess"
