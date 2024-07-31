@@ -141,11 +141,14 @@ def test_clear_multiple(mapdl):
         mapdl.run("/CLEAR")
 
 
-@pytest.mark.xfail(
-    reason="MAPDL bug 867421", raises=(MapdlExitedError, UnicodeDecodeError)
-)
 def test_invalid_get_bug(mapdl):
-    with pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError)):
+    # versions before 24.1 should raise an error
+    if mapdl.version < 24.1:
+        context = pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError))
+    else:
+        context = NullContext
+
+    with context:
         mapdl.get_value("ACTIVE", item1="SET", it1num="invalid")
 
 
@@ -579,7 +582,7 @@ def test_exception_message_length(monkeypatch, mapdl):
     channel = grpc.insecure_channel(
         mapdl._channel_str,
         options=[
-            ("grpc.max_receive_message_length", int(0.5 * 1024)),
+            ("grpc.max_receive_message_length", int(1024)),
         ],
     )
     mapdl2 = MapdlGrpc(channel=channel)
@@ -597,7 +600,7 @@ def test_exception_message_length(monkeypatch, mapdl):
 
     # Deleting generated mapdl instance and channel.
     channel.close()
-    mapdl._exited = True  # To avoid side effects.
+    mapdl2._exited = True  # To avoid side effects.
     mapdl2.exit()
 
 
