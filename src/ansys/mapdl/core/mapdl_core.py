@@ -1458,7 +1458,7 @@ class _MapdlCore(Commands):
 
         @property
         def _cached_routine(self):
-            return self._mapdl._cached_routine
+            return self.parent()._cached_routine
 
     def run_as_routine(self, routine):
         """
