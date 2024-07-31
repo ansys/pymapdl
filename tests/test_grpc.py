@@ -582,18 +582,23 @@ def test_exception_message_length(monkeypatch, mapdl):
             ("grpc.max_receive_message_length", int(1 * 1024)),
         ],
     )
-    mapdl = MapdlGrpc(channel=channel)
-    assert mapdl.is_alive
+    mapdl2 = MapdlGrpc(channel=channel)
+    assert mapdl2.is_alive
 
     with pytest.raises(MapdlgRPCError, match="Received message larger than max"):
-        mapdl.prep7()
-        mapdl.dim("myarr", "", 1e4)
-        mapdl.vfill("myarr", "rand", 0, 1)  # filling array with random numbers
+        mapdl2.prep7()
+        mapdl2.dim("myarr", "", 1e4)
+        mapdl2.vfill("myarr", "rand", 0, 1)  # filling array with random numbers
 
         # Retrieving
-        values = mapdl.parameters["myarr"]
+        values = mapdl2.parameters["myarr"]
 
-    assert mapdl.is_alive
+    assert mapdl2.is_alive
+
+    # Deleting generated mapdl instance and channel.
+    channel.close()
+    mapdl._exited = True  # To avoid side effects.
+    mapdl2.exit()
 
 
 def test_generic_grpc_exception(monkeypatch, grpc_channel):
