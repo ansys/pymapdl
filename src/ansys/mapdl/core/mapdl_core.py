@@ -1454,7 +1454,7 @@ class _MapdlCore(Commands):
         def __exit__(self, *args):
             """Restore the original routine."""
             self._parent()._log.debug(f"Restoring routine '{self._cached_routine}'")
-            self._mapdl._resume_routine()
+            self._parent()._resume_routine()
 
         @property
         def _cached_routine(self):
