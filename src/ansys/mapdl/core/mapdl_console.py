@@ -117,6 +117,7 @@ class MapdlConsole(MapdlBase):
         self._auto_continue = True
         self._continue_on_error = False
         self._process = None
+        self._name = None
         self._launch(start_parm)
         super().__init__(
             loglevel=loglevel,

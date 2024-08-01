@@ -336,6 +336,7 @@ class MapdlGrpc(MapdlBase):
             remove_temp_dir_on_exit = remove_temp_files
             remove_temp_files = None
 
+        self._name: Optional[str] = None
         self._session_id_: Optional[str] = None
         self._checking_session_id_: bool = False
         self.__distributed: Optional[bool] = None
