@@ -51,16 +51,16 @@ class MapdlInProcess(MapdlBase):
 
     def input(
         self,
-        filename: str = "",
-        extension: str = "",
-        directory: str = "",
+        fname: str = "",
+        ext: str = "",
+        dir: str = "",
         line: str = "",
         log: str = "",
         mute: bool = False,
         **_,
     ):
         return self._in_process_backend.input_file(
-            filename, extension, directory, int(line or 0), int(log or 0), mute
+            fname, ext, dir, int(line or 0), int(log or 0), mute
         )
 
     @MapdlBase.name.getter

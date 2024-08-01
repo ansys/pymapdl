@@ -43,7 +43,6 @@ from typing import (
     Optional,
     Tuple,
     Union,
-    final,
 )
 from warnings import warn
 import weakref
