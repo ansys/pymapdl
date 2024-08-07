@@ -27,6 +27,7 @@ from ansys.mapdl.core.mapdl import MapdlBase
 
 class _Backend(Protocol):
     def run_command(self, command: str, verbose: bool, mute: bool) -> str: ...
+
     def input_file(
         self,
         filename: str,
