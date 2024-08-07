@@ -755,7 +755,7 @@ class _MapdlCore(Commands):
         raise NotImplementedError("Implemented by child classes.")
 
     @name.setter
-    def name(self, _name) -> None:
+    def name(self, name) -> None:
         raise AttributeError("The name of an instance cannot be changed.")
 
     @property
