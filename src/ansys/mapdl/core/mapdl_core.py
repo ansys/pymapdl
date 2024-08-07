@@ -22,7 +22,6 @@
 
 """Module to control interaction with MAPDL through Python"""
 
-from abc import ABC, abstractmethod
 import atexit
 from functools import wraps
 import glob
@@ -220,7 +219,7 @@ def _sanitize_start_parm(start_parm):
             raise ValueError(f"The argument '{each_key}' is not recognaised.")
 
 
-class _MapdlCore(ABC, Commands):
+class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
     def __init__(
@@ -752,8 +751,8 @@ class _MapdlCore(ABC, Commands):
         return self._mesh
 
     @property
-    @abstractmethod
-    def name(self) -> str: ...
+    def name(self) -> str:
+        raise NotImplementedError("Implemented by child classes.")
 
     @name.setter
     def name(self, _name) -> None:
