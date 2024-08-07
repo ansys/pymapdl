@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -151,7 +151,7 @@ class MapdlDidNotStart(MapdlRuntimeError):
 class PortAlreadyInUse(MapdlDidNotStart):
     """Error when the port is already occupied"""
 
-    def __init__(self, msg="The port {port} is already being used.", port=50052):
+    def __init__(self, port=50052, msg="The port {port} is already being used."):
         super().__init__(msg.format(port=port))
 
 
@@ -159,7 +159,7 @@ class PortAlreadyInUseByAnMAPDLInstance(PortAlreadyInUse):
     """Error when the port is already occupied"""
 
     def __init__(
-        self, msg="The port {port} is already used by an MAPDL instance.", port=50052
+        self, port=50052, msg="The port {port} is already used by an MAPDL instance."
     ):
         super().__init__(msg.format(port=port))
 
@@ -309,6 +309,17 @@ def protect_grpc(func):
             except:
                 class_name = ""
 
+            # trying to get "cmd" argument:
+            cmd = args[1] if len(args) >= 2 else ""
+            cmd = kwargs.get("cmd", cmd)
+
+            caller = func.__name__
+
+            if cmd:
+                msg_ = f"running:\n{cmd}\ncalled by:\n{caller}"
+            else:
+                msg_ = f"calling:{caller}\nwith the following arguments:\nargs: {list(*args)}\nkwargs: {list(**kwargs_)}"
+
             if class_name == "MapdlGrpc":
                 mapdl = args[0]
             elif hasattr(args[0], "_mapdl"):
@@ -317,7 +328,7 @@ def protect_grpc(func):
             # Must close unfinished processes
             mapdl._close_process()
             raise MapdlExitedError(
-                f"MAPDL server connection terminated with the following error\n{error}"
+                f"MAPDL server connection terminated unexpectedly while {msg_}\nwith the following error\n{error}"
             ) from None
 
         if threading.current_thread().__class__.__name__ == "_MainThread":

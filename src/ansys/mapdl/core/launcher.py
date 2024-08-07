@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -255,6 +255,9 @@ def get_process_at_port(port) -> Optional[psutil.Process]:
                 kind="inet"
             )  # just to check if we can access the
         except psutil.AccessDenied:
+            continue
+        except psutil.NoSuchProcess:
+            # process already died
             continue
 
         for conns in connections:
@@ -516,9 +519,9 @@ def launch_grpc(
             proc = get_process_at_port(port)
             if proc:
                 if is_ansys_process(proc):
-                    raise PortAlreadyInUseByAnMAPDLInstance
+                    raise PortAlreadyInUseByAnMAPDLInstance(port)
                 else:
-                    raise PortAlreadyInUse
+                    raise PortAlreadyInUse(port)
 
     pymapdl._LOCAL_PORTS.append(port)
 
@@ -1170,7 +1173,7 @@ def launch_mapdl(
         override the default behavior of this keyword argument with
         the environment variable ``PYMAPDL_START_INSTANCE=FALSE``.
 
-    ip : bool, optional
+    ip : str, optional
         Used only when ``start_instance`` is ``False``. If provided,
         and ``start_instance`` (or its correspondent environment variable
         ``PYMAPDL_START_INSTANCE``) is ``True`` then, an exception is raised.
@@ -1467,6 +1470,7 @@ def launch_mapdl(
         )
     use_vtk = kwargs.pop("use_vtk", None)
     just_launch = kwargs.pop("just_launch", None)
+    on_pool = kwargs.pop("on_pool", False)
     _debug_no_launch = kwargs.pop("_debug_no_launch", None)
 
     # Transferring MAPDL arguments to start_parameters:
@@ -1532,7 +1536,7 @@ def launch_mapdl(
         if ON_WSL:
             LOG.debug("On WSL: Allowing 'start_instance' and 'ip' arguments together.")
         else:
-            if start_instance is True:
+            if start_instance is True and not on_pool:
                 raise ValueError(
                     "When providing a value for the argument 'ip', the argument "
                     "'start_instance' cannot be 'True'.\n"

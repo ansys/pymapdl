@@ -42,6 +42,7 @@ appen
 Apple Silicon
 argparse
 Arruda-Boyce
+askin
 BCs
 Block Lanzos
 Boyce
@@ -50,9 +51,11 @@ centerline
 CentOS
 CentOS7
 Chao
+ci
 container_layout
 datas
 delet
+Dependabot
 Dev
 devcontainer
 DevContainer
@@ -75,7 +78,9 @@ FSW
 GitHub
 Gmsh
 GPa
+GPUs
 GUI
+Hashin
 hexahedral
 hostname
 HTML
@@ -90,6 +95,7 @@ Lanzos
 larg
 LDHI
 levl
+Linder
 Linux
 MacOS
 mapdl
@@ -113,6 +119,7 @@ NumPy
 onefile
 optiSLang
 parm
+perf
 performant
 PMLs
 POIN
@@ -128,18 +135,23 @@ PyAnsys
 PyAnsys Math
 PyDPF-Core
 PyDPF-Post
-PyMAPDL
 pymapdl
+PyMAPDL
 Python
 QRDAMP
 Radiosity
 Rao
 righ
 RNNN
+sbatch
 singl
+Slurm
+SLURM
 smal
 sord
 spotweld
+squeue
+srun
 struc
 subselected
 substep
@@ -147,6 +159,7 @@ sur
 tablet
 thermomechanical
 thermomechanically
+THIRDPARTY
 thispagetitle
 Tool-Narayanaswamy
 tread
@@ -166,6 +179,7 @@ von
 VTK
 wan
 WAN
+WHIT
 Windows Subsystem
 Windows Subsystem for Linux
 wsl

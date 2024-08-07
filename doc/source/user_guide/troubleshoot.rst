@@ -95,7 +95,7 @@ In some cases, it may be necessary to run the launch command manually from the c
 .. tab-set::
 
     .. tab-item:: Windows
-        :sync: key1
+        :sync: oskey
 
         Open up a command prompt and run the version-dependent command:
 
@@ -106,7 +106,7 @@ In some cases, it may be necessary to run the launch command manually from the c
         .. note:: PowerShell users can run the preceding command without quotes.
 
     .. tab-item:: Linux
-        :sync: key1
+        :sync: oskey
         
         Run the version-dependent command:
 
@@ -124,7 +124,7 @@ You can specify a directory by launching MAPDL from the temporary directory:
 .. tab-set::
 
     .. tab-item:: Windows
-        :sync: key1
+        :sync: oskey
 
         .. code:: pwsh-session
 
@@ -141,7 +141,7 @@ You can specify a directory by launching MAPDL from the temporary directory:
 
 
     .. tab-item:: Linux
-        :sync: key1
+        :sync: oskey
                 
         .. code:: console
 
@@ -164,7 +164,7 @@ If this command doesn't launch MAPDL, look at the command output:
 .. tab-set::
 
     .. tab-item:: Windows
-        :sync: key1
+        :sync: oskey
 
         .. code:: pwsh-session
 
@@ -176,7 +176,7 @@ If this command doesn't launch MAPDL, look at the command output:
             variable to OFF.
 
     .. tab-item:: Linux
-        :sync: key1
+        :sync: oskey
                 
         .. code:: console
 
@@ -199,7 +199,7 @@ In such cases, you might see output **similar** to:
 .. tab-set::
 
     .. tab-item:: Windows
-        :sync: key1
+        :sync: oskey
 
         .. code:: pwsh-session
 
@@ -219,7 +219,7 @@ In such cases, you might see output **similar** to:
             FlexNet Licensing error:-5,357
 
     .. tab-item:: Linux
-        :sync: key1
+        :sync: oskey
                 
         .. code:: console
 
@@ -256,7 +256,7 @@ either Windows or Linux.
 .. tab-set::
 
     .. tab-item:: Windows
-        :sync: key1
+        :sync: oskey
 
         .. code:: pwsh-session
 
@@ -264,7 +264,7 @@ either Windows or Linux.
             1055@1.1.1.1
 
     .. tab-item:: Linux
-        :sync: key1
+        :sync: oskey
                 
         .. code:: console
 
@@ -319,7 +319,7 @@ dependencies.
 
 .. tab-set::
 
-    .. tab-item:: CentOS 7
+    .. tab-item:: CentOS 7 and Rocky 8
 
         On CentOS 7, you can install missing dependencies with:
 
@@ -429,7 +429,7 @@ reference to the student version: ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``, and
 Visit `Incorrect environment variables`_ for information on how to set these environment variables
 to the correct location.
 
-.. note:: Launching MAPDL Student Version
+.. note::
    By default if a student version is detected, PyMAPDL launches the MAPDL instance in
    ``SMP`` mode, unless another MPI option is specified.
 
@@ -440,31 +440,102 @@ If you are using a non-standard install, you might need to manually set the
 environment variables ``ANSYSXXX_DIR``, ``AWP_ROOTXXX``, and
 ``CADOE_LIBDIRXXX`` to the correct location. 
 The three-digit MAPDL version appears where ``XXX`` is
-shown. For Ansys MAPDL 2022 R2, ``222`` appears where ``XXX`` is shown.
+shown. For Ansys MAPDL 2024 R2, ``242`` appears where ``XXX`` is shown.
 
 
 .. vale off
 
-.. code:: pwsh-session
 
-    PS echo $env:AWP_ROOT222
-    C:\Program Files\ANSYS Inc\ANSYS Student\v241
-    PS $env:AWP_ROOT222 = "C:\Program Files\ANSYS Inc\v241"  # This overwrites the env var for the terminal session only.
-    PS [System.Environment]::SetEnvironmentVariable('AWP_ROOT222','C:\Program Files\ANSYS Inc\v241',[System.EnvironmentVariableTarget]::User)  # This changes the env var permanently.
-    PS echo $env:AWP_ROOT222
-    C:\Program Files\ANSYS Inc\v241
+.. tab-set::
 
-    PS echo $env:ANSYS241_DIR
-    C:\Program Files\ANSYS Inc\ANSYS Student\v241\ANSYS
-    PS [System.Environment]::SetEnvironmentVariable('ANSYS241_DIR','C:\Program Files\ANSYS Inc\v241\ANSYS',[System.EnvironmentVariableTarget]::User)
-    PS echo $env:ANSYS241_DIR
-    C:\Program Files\ANSYS Inc\v241\ANSYS
+    .. tab-item:: AWP_ROOT242
+        :sync: envvarskey
 
-    PS echo $env:CADOE_LIBDIR222
-    C:\Program Files\ANSYS Inc\ANSYS Student\v241\CommonFiles\Language\en-us
-    PS [System.Environment]::SetEnvironmentVariable('CADOE_LIBDIR222','C:\Program Files\ANSYS Inc\v241\CommonFiles\Language\en-us',[System.EnvironmentVariableTarget]::User)
-    PS echo $env:CADOE_LIBDIR222
-    C:\Program Files\ANSYS Inc\v241\CommonFiles\Language\en-us
+        .. code:: pwsh-session
+
+           PS echo $env:AWP_ROOT242
+           C:\Program Files\ANSYS Inc\ANSYS Student\v242
+
+    .. tab-item:: ANSYS242_DIR
+        :sync: envvarskey
+
+        .. code:: pwsh-session
+
+           PS echo $env:ANSYS242_DIR
+           C:\Program Files\ANSYS Inc\ANSYS Student\v242\ANSYS
+
+    .. tab-item:: CADOE_LIBDIR242
+        :sync: envvarskey
+
+        .. code:: pwsh-session
+
+           PS echo $env:CADOE_LIBDIR242
+           C:\Program Files\ANSYS Inc\ANSYS Student\v242\CommonFiles\Language\en-us
+
+
+Set these environment variables to custom values for the terminal session:
+
+.. tab-set::
+
+    .. tab-item:: AWP_ROOT242
+        :sync: envvarskey
+
+        .. code:: pwsh-session
+
+           PS $env:AWP_ROOT242 = "C:\Program Files\ANSYS Inc\v242"
+           PS echo $env:AWP_ROOT242
+           C:\Program Files\ANSYS Inc\v242
+
+    .. tab-item:: ANSYS242_DIR
+        :sync: envvarskey
+
+        .. code:: pwsh-session
+
+           PS $env:ANSYS242_DIR = "C:\Program Files\ANSYS Inc\v242\ANSYS"
+           PS echo $env:ANSYS242_DIR
+           C:\Program Files\ANSYS Inc\v242\ANSYS
+
+    .. tab-item:: CADOE_LIBDIR242
+        :sync: envvarskey
+
+        .. code:: pwsh-session
+
+           PS $env:CADOE_LIBDIR242 = "C:\Program Files\ANSYS Inc\v242\CommonFiles\Language\en-us"
+           PS echo $env:CADOE_LIBDIR242
+           C:\Program Files\ANSYS Inc\v242\CommonFiles\Language\en-us
+
+
+If you want these changes to be permanent then:
+
+
+.. tab-set::
+
+    .. tab-item:: AWP_ROOT242
+        :sync: envvarskey
+
+        .. code:: pwsh-session
+
+           PS [System.Environment]::SetEnvironmentVariable('AWP_ROOT242','C:\Program Files\ANSYS Inc\v242',[System.EnvironmentVariableTarget]::User)
+           PS echo $env:AWP_ROOT242
+           C:\Program Files\ANSYS Inc\v242
+
+    .. tab-item:: ANSYS242_DIR
+        :sync: envvarskey
+
+        .. code:: pwsh-session
+
+           PS [System.Environment]::SetEnvironmentVariable('ANSYS242_DIR','C:\Program Files\ANSYS Inc\v242\ANSYS',[System.EnvironmentVariableTarget]::User)
+           PS echo $env:ANSYS242_DIR
+           C:\Program Files\ANSYS Inc\v242\ANSYS
+
+    .. tab-item:: CADOE_LIBDIR242
+        :sync: envvarskey
+
+        .. code:: pwsh-session
+
+           PS [System.Environment]::SetEnvironmentVariable('CADOE_LIBDIR242','C:\Program Files\ANSYS Inc\v242\CommonFiles\Language\en-us',[System.EnvironmentVariableTarget]::User)
+           PS echo $env:CADOE_LIBDIR242
+           C:\Program Files\ANSYS Inc\v242\CommonFiles\Language\en-us
 
 .. vale on
 
@@ -487,9 +558,9 @@ Firewall settings
 MAPDL and Python should have the correct firewall settings to allow communication between the two.
 If you are using a firewall, you should allow MAPDL to receive inbound connections to the following ports:
 
-* 50052 (TCP) for gRPC connection.
-* 50053+ (TCP) for extra gRPC connection.
-* 50055 (TCP) for gRPC connection to the MAPDL database.
+* ``50052`` (TCP) for gRPC connection.
+* ``50053+`` (TCP) for extra gRPC connection.
+* ``50055`` (TCP) for gRPC connection to the MAPDL database.
 
 Python process must be allowed to connect to the mentioned ports (outbound connections).
 
@@ -497,10 +568,10 @@ Normally most of the firewall rules focus on the inbound connections, so you sho
 configure the outbound connections. However, if you are experiencing problems, you should make sure
 that the firewall is not blocking the outbound connections on the following ports:
 
-* 5005X (TCP) for gRPC connections.
-* 50055 (TCP) for gRPC connection to the MAPDL database.
-* 1055 (TCP) for licensing connections.
-* 2325 (TCP) for licensing connections.
+* ``5005X`` (TCP) for gRPC connections.
+* ``50055`` (TCP) for gRPC connection to the MAPDL database.
+* ``1055`` (TCP) for licensing connections.
+* ``2325`` (TCP) for licensing connections.
 
 For more information on how to **configure your firewall on Windows**, please refer to the following
 link in `Ansys forum-Licensing 2022 R2 Linux Ubuntu (and also Windows) <af_licensing_windows_ubuntu_>`_.
@@ -520,22 +591,26 @@ your MAPDL installation. If this is the case, provide the location of MAPDL
 as the first parameter to the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
 method.
 
-**On Windows**
 
-.. code:: pycon
+.. tab-set::
 
-    >>> from ansys.mapdl.core import launch_mapdl
-    >>> exec_loc = "C:/Program Files/ANSYS Inc/v241/ansys/bin/winx64/ANSYS241.exe"
-    >>> mapdl = launch_mapdl(exec_loc)
+    .. tab-item:: Windows
+        :sync: oskey
 
-**On Linux**
+        .. code:: pycon
 
-.. code:: pycon
+            >>> from ansys.mapdl.core import launch_mapdl
+            >>> exec_loc = "C:/Program Files/ANSYS Inc/v241/ansys/bin/winx64/ANSYS241.exe"
+            >>> mapdl = launch_mapdl(exec_loc)
 
-    >>> from ansys.mapdl.core import launch_mapdl
-    >>> exec_loc = "/usr/ansys_inc/v241/ansys/bin/ansys241"
-    >>> mapdl = launch_mapdl(exec_loc)
+    .. tab-item:: Linux
+        :sync: oskey
+                
+        .. code:: pycon
 
+            >>> from ansys.mapdl.core import launch_mapdl
+            >>> exec_loc = "/usr/ansys_inc/v241/ansys/bin/ansys241"
+            >>> mapdl = launch_mapdl(exec_loc)
 
 
 Default location of the executable file
@@ -552,14 +627,14 @@ Ansys installations are normally under:
 .. tab-set::
 
     .. tab-item:: Windows
-        :sync: key1
+        :sync: oskey
 
         .. code:: text
 
             C:/Program Files/ANSYS Inc/vXXX
 
     .. tab-item:: Linux
-        :sync: key1
+        :sync: oskey
                 
         .. code:: text
 
@@ -602,13 +677,13 @@ If you want to see which Ansys installations PyMAPDL has detected, use:
 
     >>> from ansys.mapdl.core import get_available_ansys_installations
     >>> get_available_ansys_installations()
-    {222: 'C:\\Program Files\\ANSYS Inc\\v241',
-    212: 'C:\\Program Files\\ANSYS Inc\\v212',
-    -222: 'C:\\Program Files\\ANSYS Inc\\ANSYS Student\\v241'}
+    {242: 'C:\\Program Files\\ANSYS Inc\\v242',
+    241: 'C:\\Program Files\\ANSYS Inc\\v241',
+    -242: 'C:\\Program Files\\ANSYS Inc\\ANSYS Student\\v242'}
 
 Student versions are provided as **negative** versions because the Python dictionary
 does not accept two equal keys. The result of the
-:func:`get_available_ansys_installations() <ansys.mapdl.core.get_available_ansys_installations>`
+:func:`get_available_ansys_installations() <ansys.tools.path.get_available_ansys_installations>`
 method lists higher versions first and student versions last.
 
 .. warning::
@@ -692,7 +767,7 @@ Use ``mute`` to improve stability
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 When possible, pass ``mute=True`` to individual MAPDL commands or
-set it globally with the :func:`Mapdl.mute <ansys.mapdl.core.mapdl_grpc.MapdlGrpc>`
+set it globally with the :func:`Mapdl.mute <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.mute>`
 method. This disables streaming back the response from MAPDL for each command
 and marginally improves performance and stability. Consider having a debug flag in
 your program or script so that you can turn on and off logging and
@@ -705,7 +780,7 @@ Known Issues
 * MAPDL 2021 R1 has a stability issue with the :
   :func:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>`
   method. Avoid using input files if possible. Attempt to use the
-  :func:`Mapdl.upload() <ansys.mapdl.core.Mapdl.upload>` method to upload
+  :func:`Mapdl.upload() <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.upload>` method to upload
   nodes and elements and read them in via the
   :func:`Mapdl.nread() <ansys.mapdl.core.Mapdl.nread>` and
   :func:`Mapdl.eread() <ansys.mapdl.core.Mapdl.eread>` methods.

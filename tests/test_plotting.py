@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -26,15 +26,13 @@ import os
 import numpy as np
 import pytest
 
-from conftest import has_dependency
+from conftest import has_dependency, requires
 
 if not has_dependency("pyvista"):
     pytest.skip(allow_module_level=True)
 
-from pyvista.plotting import Plotter
-
 from ansys.mapdl.core.errors import ComponentDoesNotExits
-from ansys.mapdl.core.plotting import general_plotter
+from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
 FORCE_LABELS = [["FX", "FY", "FZ"], ["HEAT"], ["CHRG"]]
 DISPL_LABELS = [["UX", "UY", "UZ"], ["TEMP"], ["VOLT"]]
@@ -325,7 +323,7 @@ def test_bc_plot_options(
     )
 
     if return_plotter:
-        assert isinstance(p, Plotter)
+        assert isinstance(p, MapdlPlotter)
         p.show()
     else:
         assert p is None
@@ -379,7 +377,7 @@ def test_bc_plot_bc_labels(mapdl, boundary_conditions_example, bc_labels):
         bc_labels=bc_labels[0],
         title="",
     )
-    assert isinstance(p, Plotter), bc_labels[1]
+    assert isinstance(p, MapdlPlotter), bc_labels[1]
     p.show()  # plotting for catching
 
 
@@ -416,7 +414,7 @@ def test_bc_plot_bc_target(mapdl, boundary_conditions_example, bc_target):
         bc_target=bc_target[0],
         title="",
     )
-    assert isinstance(p, Plotter), bc_target[1]
+    assert isinstance(p, MapdlPlotter), bc_target[1]
     p.show()  # plotting for catching
 
 
@@ -442,9 +440,10 @@ def test_bc_plot_bc_target_error(mapdl, boundary_conditions_example, bc_target):
 
 def test_bc_no_mapdl(mapdl):
     with pytest.raises(ValueError):
-        general_plotter(
-            [], [], [], plot_bc=True
-        )  # mapdl should be an argument if plotting BC
+        pl = MapdlPlotter()
+        pl.plot([], [], [], plot_bc=True)
+        pl.show()
+        # mapdl should be an argument if plotting BC
 
 
 def test_bc_only_one_node(mapdl, boundary_conditions_example):
@@ -507,6 +506,7 @@ def test_pick_nodes(mapdl, make_block, selection, verify_image_cache):
     mapdl.ndele("all")
 
     def debug_orders(pl, point):
+        pl = pl.scene
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
@@ -576,6 +576,7 @@ def test_pick_kp(mapdl, make_block, selection):
     mapdl.ksel("all")
 
     def debug_orders(pl, point):
+        pl = pl.scene
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
@@ -696,6 +697,7 @@ def test_pick_node_special_cases(mapdl, make_block):
 
     # we pick nothing
     def debug_orders_0(pl, point):
+        pl = pl.scene
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
@@ -713,6 +715,7 @@ def test_pick_node_special_cases(mapdl, make_block):
     # we pick something already picked
     # we just make sure the number is not repeated and there is no error.
     def debug_orders_1(pl, point):
+        pl = pl.scene
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
@@ -745,6 +748,7 @@ def test_pick_node_select_unselect_with_mouse(mapdl, make_block):
     # we pick something already picked
     # we just make sure the number is not repeated and there is no error.
     def debug_orders_1(pl, point):
+        pl = pl.scene
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
@@ -766,7 +770,7 @@ def test_pick_node_select_unselect_with_mouse(mapdl, make_block):
     mapdl.nsel("a", "node", "", 2)
     selected = mapdl.nsel(
         "S", "P", _debug=lambda x: debug_orders_1(x, point=point), tolerance=0.1
-    )
+    )  # Selects node 2
     assert selected == []
 
 
@@ -782,6 +786,7 @@ def test_pick_areas(mapdl, make_block, selection):
     mapdl.asel("a", "area", "", 2)
 
     def debug_orders(pl, point):
+        pl = pl.scene
         pl.show(auto_close=False)
         pl.windows_size = (100, 100)
         width, height = pl.window_size
@@ -809,6 +814,7 @@ def test_pick_areas(mapdl, make_block, selection):
     selected = mapdl.asel(
         selection,
         "P",
+        "area",
         _debug=lambda x: debug_orders(x, point=point_to_pick),
         tolerance=0.2,
     )  # Selects node 2
@@ -835,19 +841,23 @@ def test_pick_areas(mapdl, make_block, selection):
         assert 2 in selected
 
 
+@requires("pyvista")
 def test_plotter_input(mapdl, make_block):
-    pl = Plotter(off_screen=True)
-    # because in CICD we use 'screen_off', this will trigger a warning,
-    # since using 'plotter' will overwrite this kwarg.
-    with pytest.warns(UserWarning):
-        pl2 = mapdl.eplot(return_plotter=True, plotter=pl)
-    assert pl == pl2
+    import pyvista as pv
+
+    pl = MapdlPlotter(off_screen=False)
+    pl2 = mapdl.eplot(return_plotter=True, plotter=pl)
     assert pl is pl2
     pl2.show()  # plotting for catching
 
     # invalid plotter type
     with pytest.raises(TypeError):
         pl2 = mapdl.eplot(return_plotter=True, plotter=[])
+
+    pl_pv = pv.Plotter()
+    pl3 = mapdl.eplot(return_plotter=True, plotter=pl_pv)
+    assert pl3.scene is pl_pv
+    pl3.show()
 
 
 def test_cpos_input(mapdl, make_block):
@@ -865,17 +875,17 @@ def test_show_bounds(mapdl, make_block):
     default_bounds = [-1.0, 1.0, -1.0, 1.0, -1.0, 1.0]
     pl = mapdl.eplot(show_bounds=True, return_plotter=True)
 
-    assert pl.bounds
-    assert len(pl.bounds) == 6
-    assert pl.bounds != default_bounds
+    assert pl.scene.bounds
+    assert len(pl.scene.bounds) == 6
+    assert pl.scene.bounds != default_bounds
     pl.show()  # plotting for catching
 
 
 def test_background(mapdl, make_block):
     default_color = "#4c4c4cff"
     pl = mapdl.eplot(background="red", return_plotter=True)
-    assert pl.background_color != default_color
-    assert pl.background_color == "red"
+    assert pl.scene.background_color != default_color
+    assert pl.scene.background_color == "red"
     pl.show()  # plotting for catching
 
 
@@ -1032,7 +1042,7 @@ def test_cmplot_all(mapdl, make_block, entity):
 
     pl = mapdl.cmplot("all", entity, return_plotter=True)
 
-    assert np.allclose(pl.mesh.points, ent[ids - 1])
+    assert np.allclose(pl.meshes[0].points, ent[ids - 1])
     pl.show()
 
 

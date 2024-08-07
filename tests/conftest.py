@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -24,9 +24,12 @@ from collections import namedtuple
 import os
 from pathlib import Path
 from shutil import get_terminal_size
+import subprocess
 from sys import platform
+import time
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
+import psutil
 import pytest
 
 from common import (
@@ -69,6 +72,7 @@ SUPPORT_PLOTTING = support_plotting()
 IS_SMP = is_smp()
 
 QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
+VALID_PORTS = []
 
 ## Skip ifs
 skip_on_windows = pytest.mark.skipif(ON_WINDOWS, reason="Skip on Windows")
@@ -194,7 +198,7 @@ if has_dependency("ansys-tools-package"):
 if has_dependency("pyvista"):
     import pyvista
 
-    from ansys.mapdl.core.theme import _apply_default_theme
+    from ansys.mapdl.core.plotting.theme import _apply_default_theme
 
     _apply_default_theme()
 
@@ -213,6 +217,11 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+
+if has_dependency("ansys-tools-visualization-interface"):
+    import ansys.tools.visualization_interface as viz_interface
+
+    viz_interface.TESTING_MODE = True
 
 # check if the user wants to permit pytest to start MAPDL
 START_INSTANCE = get_start_instance()
@@ -252,7 +261,7 @@ def pytest_report_header(config, start_path, startdir):
         f"Session dependent: ON_CI ({ON_CI}), TESTING_MINIMAL ({TESTING_MINIMAL}), SUPPORT_PLOTTING ({SUPPORT_PLOTTING})"
     ]
     text += [
-        f"OS dependent: ON_LINUX ({ON_LINUX}), ON_UBUNTU ({ON_UBUNTU}), ON_WINDOWS ({ON_WINDOWS}), ON_MACOS )({ON_MACOS})"
+        f"OS dependent: ON_LINUX ({ON_LINUX}), ON_UBUNTU ({ON_UBUNTU}), ON_WINDOWS ({ON_WINDOWS}), ON_MACOS ({ON_MACOS})"
     ]
     text += [
         f"MAPDL dependent: ON_LOCAL ({ON_LOCAL}), ON_STUDENT ({ON_STUDENT}), HAS_GRPC ({HAS_GRPC}), HAS_DPF ({HAS_DPF}), IS_SMP ({IS_SMP})"
@@ -263,10 +272,13 @@ def pytest_report_header(config, start_path, startdir):
     for env_var in [
         "PYMAPDL_START_INSTANCE",
         "PYMAPDL_PORT",
+        "PYMAPDL_PORT2",
         "PYMAPDL_DB_PORT",
         "PYMAPDL_IP",
+        "PYMAPDL_IP2",
         "DPF_PORT",
         "DPF_START_SERVER",
+        "IGNORE_POOL",
     ]:
         env_var_value = os.environ.get(env_var, None)
         if env_var_value is not None:
@@ -455,6 +467,46 @@ def run_before_and_after_tests_2(request, mapdl):
     assert prev == mapdl.is_local
 
 
+@pytest.fixture(autouse=True, scope="function")
+def run_before_and_after_tests_3(request, mapdl):
+    """Make sure we leave no MAPDL running behind"""
+    from ansys.mapdl.core.launcher import is_ansys_process
+
+    PROCESS_OK_STATUS = [
+        psutil.STATUS_RUNNING,  #
+        psutil.STATUS_SLEEPING,  #
+        psutil.STATUS_DISK_SLEEP,
+        psutil.STATUS_DEAD,
+        psutil.STATUS_PARKED,  # (Linux)
+        psutil.STATUS_IDLE,  # (Linux, macOS, FreeBSD)
+    ]
+
+    yield
+
+    if ON_LOCAL:
+        for proc in psutil.process_iter():
+            try:
+                if (
+                    psutil.pid_exists(proc.pid)
+                    and proc.status() in PROCESS_OK_STATUS
+                    and is_ansys_process(proc)
+                ):
+
+                    cmdline = proc.cmdline()
+                    port = int(cmdline[cmdline.index("-port") + 1])
+
+                    if port not in VALID_PORTS:
+                        cmdline_ = " ".join([f'"{each}"' for each in cmdline])
+                        subprocess.run(["pymapdl", "stop", "--port", f"{port}"])
+                        time.sleep(1)
+                        # raise Exception(
+                        #     f"The following MAPDL instance running at port {port} is alive after the test.\n"
+                        #     f"Only ports {VALID_PORTS} are allowed.\nCMD: {cmdline_}"
+                        # )
+            except psutil.NoSuchProcess:
+                continue
+
+
 @pytest.fixture(scope="session")
 def mapdl_console(request):
     if os.name != "posix":
@@ -512,6 +564,8 @@ def mapdl(request, tmpdir_factory):
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
     MAPDL_VERSION = mapdl.version  # Caching version
 
+    VALID_PORTS.append(mapdl.port)
+
     if ON_CI:
         mapdl._local = ON_LOCAL  # CI: override for testing
 
@@ -521,6 +575,7 @@ def mapdl(request, tmpdir_factory):
     # using yield rather than return here to be able to test exit
     yield mapdl
 
+    VALID_PORTS.remove(mapdl.port)
     ###########################################################################
     # test exit: only when allowed to start PYMAPDL
     ###########################################################################

@@ -23,6 +23,8 @@
 .. _dev_guide_contributing: https://dev.docs.pyansys.com/how-to/contributing.html
 .. _dev_guide_coding_style: https://dev.docs.pyansys.com/coding-style/index.html
 .. _dev_guide_setup_your_environment: https://dev.docs.pyansys.com/how-to/setting-up.html
+.. _dev_guide_branch_names: https://dev.docs.pyansys.com/how-to/contributing.html#branch-naming-conventions
+.. _dev_guide_commit_names: https://dev.docs.pyansys.com/how-to/contributing.html#commit-naming-conventions
 
 .. #Other libraries
 .. _pyvista_docs: https://docs.pyvista.org/version/stable/
@@ -64,7 +66,7 @@
 .. _ansys_installation_and_licensing: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/prod_page.html?pn=Installation%20and%20Licensing&pid=InstallationAndLicensing&lang=en
 .. _ansys_parallel_computing_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_dan/dantoc.html
 .. _ansys_verification_manual: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_vm/Hlp_V_VMTOC.html
-.. _ansys_tutorials_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v231/en/ans_tut/Hlp_UI_Tutorials.html
+.. _ansys_tutorials_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_tut/Hlp_UI_Tutorials.html
 
 .. # Ansys introductory tutorials
 .. _ansys_introtut: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_tut/Hlp_UI_Tutorials.html
@@ -126,7 +128,13 @@
 .. _sphinx_directives: https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html
 .. _docutils_directives: https://docutils.sourceforge.io/docs/ref/rst/directives.html
 .. _sphinx_basics: https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
-
+.. _slurm_docs: https://slurm.schedmd.com
+.. _slurm_srun: https://slurm.schedmd.com/srun.html
+.. _slurm_sbatch: https://slurm.schedmd.com/sbatch.html
+.. _modules_docs: https://modules.readthedocs.io/en/latest/
+.. _lmod_docs: https://lmod.readthedocs.io/en/latest/
+.. _pygad_docs: https://pygad.readthedocs.io/en/latest/
+.. _ga_article: https://blog.derlin.ch/genetic-algorithms-with-pygad
 
 
 .. #Github links:
@@ -218,4 +226,4 @@
 
 .. # Elements references
 
-.. _elem_plane183: https://ansyshelp.ansys.com/account/Secured?returnurl=/Views/Secured/corp/v231/en/ans_elem/Hlp_E_PLANE183.html
+.. _elem_plane183: https://ansyshelp.ansys.com/account/Secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_elem/Hlp_E_PLANE183.html

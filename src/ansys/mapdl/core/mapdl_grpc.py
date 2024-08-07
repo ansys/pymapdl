@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -254,9 +254,13 @@ class MapdlGrpc(MapdlBase):
         Print the command ``/COM`` arguments to the standard output.
         The default is ``False``.
 
+    disable_run_at_connect: bool, optional
+        Whether to disable the housekeeping commands when connecting.
+        The default is ``False``.
+
     channel : grpc.Channel, optional
-        gRPC channel to use for the connection. Can be used as an
-        alternative to the ``ip`` and ``port`` parameters.
+        gRPC channel to use for the connection. This parameter can be
+        used as an alternative to the ``ip`` and ``port`` parameters.
 
     remote_instance : ansys.platform.instancemanagement.Instance
         The corresponding remote instance when MAPDL is launched through
@@ -316,6 +320,7 @@ class MapdlGrpc(MapdlBase):
         remove_temp_files: Optional[bool] = None,
         remove_temp_dir_on_exit: bool = False,
         print_com: bool = False,
+        disable_run_at_connect: bool = False,
         channel: Optional[grpc.Channel] = None,
         remote_instance: Optional["PIM_Instance"] = None,
         **start_parm,
@@ -437,7 +442,8 @@ class MapdlGrpc(MapdlBase):
         self._mesh_rep = MeshGrpc(self)
 
         # Run at connect
-        self._run_at_connect()
+        if not disable_run_at_connect:
+            self._run_at_connect()
 
         # HOUSEKEEPING:
         # Set to not abort after encountering errors.  Otherwise, many
@@ -1053,9 +1059,12 @@ class MapdlGrpc(MapdlBase):
 
         """
         if self.remove_temp_dir_on_exit and self._local:
-            path = path or self.directory
+            from pathlib import Path
+
+            path = str(Path(path or self.directory))
             tmp_dir = tempfile.gettempdir()
-            ans_temp_dir = os.path.join(tmp_dir, "ansys_")
+            ans_temp_dir = str(Path(os.path.join(tmp_dir, "ansys_")))
+
             if path.startswith(ans_temp_dir):
                 self._log.debug("Removing the MAPDL temporary directory %s", path)
                 shutil.rmtree(path, ignore_errors=True)
