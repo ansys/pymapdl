@@ -2559,13 +2559,17 @@ class MapdlGrpc(MapdlBase):
     @property
     def is_alive(self) -> bool:
         """True when there is an active connect to the gRPC server"""
+        if self.channel_state not in ["IDLE", "READE"]:
+            return False
+
         if self._exited:
             return False
         if self.busy:
             return True
+
         try:
-            return bool(self.inquire("", "JOBNAME"))
-        except:
+            return bool(self._ctrl("VERSION"))
+        except Exception:
             return False
 
     @property
