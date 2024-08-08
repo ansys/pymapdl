@@ -350,7 +350,7 @@ def handle_generic_grpc_error(error, func, args, kwargs):
     # can't use isinstance here due to circular imports
     try:
         class_name = args[0].__class__.__name__
-    except:
+    except (IndexError, AttributeError):
         class_name = ""
 
     # trying to get "cmd" argument:
@@ -360,9 +360,9 @@ def handle_generic_grpc_error(error, func, args, kwargs):
     caller = func.__name__
 
     if cmd:
-        msg_ = f"running:\n\t{cmd}\ncalled by:\n\t{caller}\n"
+        msg_ = f"running:\n  {cmd}\ncalled by:\n  {caller}\n"
     else:
-        msg_ = f"calling:{caller}\nwith the following arguments:\nargs: {list(*args)}\nkwargs: {list(**kwargs_)}"
+        msg_ = f"calling:{caller}\nwith the following arguments:\n  args: {args}\n  kwargs: {kwargs}"
 
     if class_name == "MapdlGrpc":
         mapdl = args[0]
@@ -370,9 +370,9 @@ def handle_generic_grpc_error(error, func, args, kwargs):
         mapdl = args[0]._mapdl
 
     msg = (
-        f"MAPDL server connection terminated unexpectedly while {msg_}\n"
+        f"Error:\nMAPDL server connection terminated unexpectedly while {msg_}\n"
         "Error:\n"
-        f"\t{error.details()}\n"
+        f"  {error.details()}\n"
         f"Full error:\n{error}"
     )
 
