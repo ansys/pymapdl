@@ -26,6 +26,7 @@ import re
 import shutil
 import sys
 
+import grpc
 import pytest
 
 from ansys.mapdl.core import examples
@@ -570,3 +571,20 @@ def test__check_stds(mapdl):
     mapdl._read_stds()
     assert mapdl._stdout is not None
     assert mapdl._stderr is not None
+
+
+def test_subscribe_to_channel(mapdl):
+    assert mapdl.channel_state in [
+        "IDLE",
+        "CONNECTING",
+        "READY",
+        "TRANSIENT_FAILURE",
+        "SHUTDOWN",
+    ]
+    assert mapdl._channel_state in [
+        grpc.ChannelConnectivity.IDLE,
+        grpc.ChannelConnectivity.CONNECTING,
+        grpc.ChannelConnectivity.READY,
+        grpc.ChannelConnectivity.TRANSIENT_FAILURE,
+        grpc.ChannelConnectivity.SHUTDOWN,
+    ]

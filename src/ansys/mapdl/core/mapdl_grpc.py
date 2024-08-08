@@ -397,6 +397,9 @@ class MapdlGrpc(MapdlBase):
         self._state: Optional[grpc.Future] = None
         self._timeout: int = timeout
         self._pids: List[Union[int, None]] = []
+        self._channel_state: grpc.ChannelConnectivity = (
+            grpc.ChannelConnectivity.CONNECTING
+        )
 
         if channel is None:
             self._log.debug("Creating channel to %s:%s", ip, port)
@@ -404,6 +407,9 @@ class MapdlGrpc(MapdlBase):
         else:
             self._log.debug("Using provided channel")
             self._channel: grpc.Channel = channel
+
+        # Subscribe to channel for channel state updates
+        self._subscribe_to_channel()
 
         # connect and validate to the channel
         self._mapdl_process: Popen = start_parm.pop("process", None)
@@ -486,6 +492,31 @@ class MapdlGrpc(MapdlBase):
                 ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
             ],
         )
+
+    def _subscribe_to_channel(self):
+        """Subscribe to channel status and store the value in 'mapdl._channel_state'"""
+
+        # Callback function to monitor state changes
+        def connectivity_callback(connectivity):
+            self._log.debug(f"Channel connectivity changed to: {connectivity}")
+            self._channel_state = connectivity
+
+        # Subscribe to channel state changes
+        self._channel.subscribe(connectivity_callback, try_to_connect=True)
+
+    @property
+    def channel_state(self) -> str:
+        """Returns the gRPC channel state.
+
+        The possible values are:
+
+        - 0 - 'IDLE'
+        - 1 - 'CONNECTING'
+        - 2 - 'READY'
+        - 3 - 'TRANSIENT_FAILURE'
+        - 4 - 'SHUTDOWN'
+        """
+        return self._channel_state.name
 
     def _multi_connect(self, n_attempts=5, timeout=15):
         """Try to connect over a series of attempts to the channel.
