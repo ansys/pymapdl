@@ -2559,17 +2559,35 @@ class MapdlGrpc(MapdlBase):
     @property
     def is_alive(self) -> bool:
         """True when there is an active connect to the gRPC server"""
-        if self.channel_state not in ["IDLE", "READE"]:
+        if self.channel_state not in ["IDLE", "READY"]:
+            self._log.debug(
+                "MAPDL instance is not alive because the channel is not 'IDLE' o 'READY'."
+            )
             return False
 
         if self._exited:
+            self._log.debug("MAPDL instance is not alive because it is exited.")
             return False
         if self.busy:
+            self._log.debug("MAPDL instance is alive because it is busy.")
             return True
 
         try:
-            return bool(self._ctrl("VERSION"))
-        except Exception:
+            check = bool(self._ctrl("VERSION"))
+            if check:
+                self._log.debug(
+                    "MAPDL instance is alive because version was retrieved."
+                )
+            else:
+                self._log.debug(
+                    "MAPDL instance is not alive because version was not retrieved. Maybe output is muted?."
+                )
+            return check
+
+        except Exception as error:
+            self._log.debug(
+                f"MAPDL instance is not alive because retrieving version failed with:\n{error}"
+            )
             return False
 
     @property
