@@ -26,7 +26,7 @@ scipy==1.14.0
 sphinx-autobuild==2024.4.16
 sphinx-autodoc-typehints==1.25.2
 sphinx-copybutton==0.5.2
-sphinx-design==0.6.0
+sphinx-design==0.6.1
 sphinx-gallery==0.16.0
 sphinx-notfound-page==1.0.2
 sphinx-reredirects==0.1.4

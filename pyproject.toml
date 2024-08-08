@@ -58,7 +58,7 @@ jupyter = [
 
 tests = [
     "ansys-dpf-core==0.10.1",
-    "ansys-tools-visualization-interface==0.3.0",
+    "ansys-tools-visualization-interface==0.4.0",
     "autopep8==2.3.1",
     "matplotlib==3.9.1",
     "pandas==2.2.2",
@@ -75,9 +75,9 @@ tests = [
 doc = [
     "ansys-dpf-core==0.10.1",
     "ansys-mapdl-reader==0.53.0",
-    "ansys-tools-visualization-interface==0.3.0",
+    "ansys-tools-visualization-interface==0.4.0",
     "ansys-sphinx-theme==0.16.6",
-    "grpcio==1.65.1",
+    "grpcio==1.65.2",
     "imageio-ffmpeg==0.5.1",
     "imageio==2.34.2",
     "jupyter_sphinx==0.5.3",
@@ -93,11 +93,11 @@ doc = [
     "sphinx-autobuild==2024.4.16",
     "sphinx-autodoc-typehints==1.25.2",
     "sphinx-copybutton==0.5.2",
-    "sphinx-design==0.6.0",
+    "sphinx-design==0.6.1",
     "sphinx-gallery==0.17.0",
-    "sphinx-notfound-page==1.0.2",
-    "sphinx==7.4.7",
-    "sphinxcontrib-websupport==1.2.7",
+    "sphinx-notfound-page==1.0.4",
+    "sphinx==8.0.2",
+    "sphinxcontrib-websupport==2.0.0",
     "sphinxemoji==0.3.1",
     "vtk==9.3.1",
 ]
