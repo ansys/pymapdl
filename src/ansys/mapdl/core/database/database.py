@@ -33,8 +33,7 @@ from ansys.tools.versioning import server_meets_version
 import grpc
 
 from ansys.mapdl.core.errors import MapdlConnectionError
-
-from ..mapdl_grpc import MapdlGrpc
+from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 
 MINIMUM_MAPDL_VERSION = "21.1"
 FAILING_DATABASE_MAPDL = ["24.1", "24.2"]
@@ -280,7 +279,12 @@ class MapdlDb:
         self._server = {"ip": self._ip, "port": db_port}
         self._channel_str = f"{self._ip}:{db_port}"
 
-        self._channel = grpc.insecure_channel(self._channel_str)
+        self._channel = grpc.insecure_channel(
+            self._channel_str,
+            options=[
+                ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+            ],
+        )
         self._state = grpc.channel_ready_future(self._channel)
         self._stub = mapdl_db_pb2_grpc.MapdlDbServiceStub(self._channel)
 
