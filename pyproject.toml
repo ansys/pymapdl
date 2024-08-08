@@ -116,6 +116,7 @@ pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_
 pymapdl = "ansys.mapdl.core.cli:main"
 
 [tool.pytest.ini_options]
+addopts = "-ra -vvv"
 junit_family = "legacy"
 filterwarnings = [
     "ignore::FutureWarning",
