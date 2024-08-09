@@ -336,11 +336,11 @@ def protect_grpc(func):
                     mapdl._log.debug(
                         f"Re-connection attempt {i_attemps} after waiting {wait:0.3f} seconds"
                     )
+
                     connected = mapdl._connect(timeout=wait)
 
-                    if connected:
-                        # Retry again
-                        continue
+                    # Retry again
+                    continue
 
                 # Custom errors
                 reason = ""
