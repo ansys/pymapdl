@@ -160,6 +160,7 @@ VALID_SELECTION_TYPE_TP = Literal["S", "R", "A", "U"]
 VALID_SELECTION_ENTITY_TP = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
 
 GUI_FONT_SIZE = 15
+LOG_APDL_DEFAULT_FILE_NAME = "apdl.log"
 
 
 def parse_to_short_cmd(command):
@@ -310,6 +311,9 @@ class _MapdlCore(Commands):
         from ansys.mapdl.core.component import ComponentManager
 
         self._componentmanager: ComponentManager = ComponentManager(self)
+
+        if isinstance(log_apdl, bool) and log_apdl:
+            log_apdl = LOG_APDL_DEFAULT_FILE_NAME
 
         if log_apdl:
             self.open_apdl_log(log_apdl, mode="w")
