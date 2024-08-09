@@ -308,6 +308,9 @@ def protect_grpc(func):
 
         # Capture gRPC exceptions
         n_attempts = 3
+        initial_backoff = 0.05
+        multiplier_backoff = 3
+
         i_attemps = 0
 
         while True:
@@ -322,17 +325,22 @@ def protect_grpc(func):
                 mapdl = retrieve_mapdl_from_args(args)
 
                 i_attemps += 1
-                if i_attemps < n_attempts:
+                if i_attemps <= n_attempts:
 
-                    wait = 0.05 * 3**i_attemps  # Exponential backoff
+                    wait = (
+                        initial_backoff * multiplier_backoff**i_attemps
+                    )  # Exponential backoff
                     sleep(wait)
-                    # reconnect
-                    mapdl._multi_connect(wait)
 
+                    # reconnect
                     mapdl._log.debug(
-                        f"Retrying gRPC call after waiting {wait:0.3f} seconds to reconnect."
+                        f"Re-connection attempt {i_attemps} after waiting {wait:0.3f} seconds"
                     )
-                    continue
+                    connected = mapdl._connect(timeout=wait)
+
+                    if connected:
+                        # Retry again
+                        continue
 
                 # Custom errors
                 reason = ""
@@ -356,7 +364,7 @@ def protect_grpc(func):
                     error
                 ):
                     # Very likely the MAPDL server has died.
-                    suggestion = "MAPDL *might* have died because it ran out of memory.\nCheck the MAPDL command output for more details.\nOpen an issue on GitHub if you need assistance: https://github.com/ansys/pymapdl/issues"
+                    suggestion = "  MAPDL *might* have died because it ran out of memory.\n  Check the MAPDL command output for more details.\n  Open an issue on GitHub if you need assistance: https://github.com/ansys/pymapdl/issues"
 
                 # Generic error
                 handle_generic_grpc_error(error, func, args, kwargs, reason, suggestion)
@@ -413,10 +421,10 @@ def handle_generic_grpc_error(error, func, args, kwargs, reason="", suggestion="
         msg_ = f"calling:{caller}\nwith the following arguments:\n  args: {args}\n  kwargs: {kwargs}"
 
     if reason:
-        reason = f"Possible reason:\n  {reason}\n"
+        reason = f"Possible reason:\n{reason}\n"
 
     if suggestion:
-        suggestion = f"Suggestions:\n  {suggestion}\n"
+        suggestion = f"Suggestions:\n{suggestion}\n"
 
     msg = (
         f"Error:\nMAPDL server connection terminated unexpectedly while {msg_}\n"
@@ -427,18 +435,18 @@ def handle_generic_grpc_error(error, func, args, kwargs, reason="", suggestion="
         f"Full error:\n{error}"
     )
 
-    # MAPDL gRPC is unavailable.
-    if error.code() == grpc.StatusCode.UNAVAILABLE:
-        raise MapdlExitedError(msg)
-
     # Generic error
     # Test if MAPDL is alive or not.
     if mapdl.is_alive:
         raise MapdlRuntimeError(msg)
 
     else:
+        # Making sure we do not keep executing gRPC calls.
+        mapdl._exited = True
+
         # Must close unfinished processes
         mapdl._close_process()
+
         raise MapdlExitedError(msg)
 
 
