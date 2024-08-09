@@ -360,11 +360,14 @@ def protect_grpc(func):
                             f"$ export PYMAPDL_MAX_MESSAGE_LENGTH={lim_}"
                         )
 
-                if error.code() == grpc.StatusCode.UNAVAILABLE and "FD shutdown" in str(
-                    error
-                ):
+                if error.code() == grpc.StatusCode.UNAVAILABLE:
                     # Very likely the MAPDL server has died.
-                    suggestion = "  MAPDL *might* have died because it ran out of memory.\n  Check the MAPDL command output for more details.\n  Open an issue on GitHub if you need assistance: https://github.com/ansys/pymapdl/issues"
+                    suggestion = (
+                        "  MAPDL *might* have died because it executed a not-allowed command or ran out of memory.\n"
+                        "  Check the MAPDL command output for more details.\n"
+                        "  Open an issue on GitHub if you need assistance: "
+                        "https://github.com/ansys/pymapdl/issues"
+                    )
 
                 # Generic error
                 handle_generic_grpc_error(error, func, args, kwargs, reason, suggestion)
@@ -446,7 +449,6 @@ def handle_generic_grpc_error(error, func, args, kwargs, reason="", suggestion="
 
         # Must close unfinished processes
         mapdl._close_process()
-
         raise MapdlExitedError(msg)
 
 
