@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 from collections import namedtuple
+from collections.abc import Generator
 import os
 from pathlib import Path
 from shutil import get_terminal_size
@@ -32,6 +33,7 @@ from _pytest.terminal import TerminalReporter  # for terminal customization
 import psutil
 import pytest
 
+from ansys.mapdl.core.launcher import is_ansys_process
 from common import (
     Element,
     Node,
@@ -44,6 +46,7 @@ from common import (
     is_on_ubuntu,
     is_running_on_student,
     is_smp,
+    log_apdl,
     support_plotting,
     testing_minimal,
 )
@@ -70,6 +73,7 @@ HAS_GRPC = has_grpc()
 HAS_DPF = has_dpf()
 SUPPORT_PLOTTING = support_plotting()
 IS_SMP = is_smp()
+LOG_APDL = log_apdl()
 
 QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
 VALID_PORTS = []
@@ -119,6 +123,16 @@ skip_if_running_student_version = pytest.mark.skipif(
     ON_STUDENT,
     reason="This tests does not work on student version. Maybe because license limitations",
 )
+
+
+PROCESS_OK_STATUS = [
+    psutil.STATUS_RUNNING,  #
+    psutil.STATUS_SLEEPING,  #
+    psutil.STATUS_DISK_SLEEP,
+    psutil.STATUS_DEAD,
+    psutil.STATUS_PARKED,  # (Linux)
+    psutil.STATUS_IDLE,  # (Linux, macOS, FreeBSD)
+]
 
 
 def import_module(requirement):
@@ -420,11 +434,41 @@ def running_test():
 
 
 @pytest.fixture(autouse=True, scope="function")
-def run_before_and_after_tests(request, mapdl):
+def run_before_and_after_tests(
+    request: pytest.FixtureRequest, mapdl: Mapdl
+) -> Generator[Mapdl]:
     """Fixture to execute asserts before and after a test is run"""
 
-    # Setup: fill with any logic you want
-    def is_exited(mapdl):
+    # Relaunching MAPDL if dead
+    mapdl = restart_mapdl(mapdl)
+
+    # Write test info to log_apdl
+    if LOG_APDL:
+        log_test_start(mapdl)
+
+    # check if the local/remote state has changed or not
+    prev = mapdl.is_local
+
+    yield  # this is where the testing happens
+
+    assert prev == mapdl.is_local
+
+    make_sure_not_instances_are_left_open()
+
+    # Teardown
+    if mapdl.is_local and mapdl._exited:
+        # The test exited MAPDL, so it has failed.
+        test_name = os.environ.get(
+            "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
+        )
+
+        assert (
+            False
+        ), f"Test {test_name} failed at the teardown."  # this will fail the test
+
+
+def restart_mapdl(mapdl: Mapdl) -> Mapdl:
+    def is_exited(mapdl: Mapdl):
         try:
             _ = mapdl._ctrl("VERSION")
             return False
@@ -452,44 +496,43 @@ def run_before_and_after_tests(request, mapdl):
                 override=True,
                 run_location=mapdl._path,
                 cleanup_on_exit=mapdl._cleanup,
+                log_apdl=LOG_APDL,
             )
 
         # Restoring the local configuration
         mapdl._local = local_
 
-    yield  # this is where the testing happens
-
-    # Teardown : fill with any logic you want
-    if mapdl.is_local and mapdl._exited:
-        # The test exited MAPDL, so it is fail.
-        assert False  # this will fail the test
+    return mapdl
 
 
-@pytest.fixture(autouse=True, scope="function")
-def run_before_and_after_tests_2(request, mapdl):
-    """Make sure we are not changing these properties in tests"""
-    prev = mapdl.is_local
+def log_test_start(mapdl: Mapdl) -> None:
+    test_name = os.environ.get(
+        "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
+    )
 
-    yield
+    mapdl.run("!")
+    mapdl.run(f"! PyMAPDL running test: {test_name}")
+    mapdl.run("!")
 
-    assert prev == mapdl.is_local
+    # To see it also in MAPDL terminal output
+    if len(test_name) > 75:
+        # terminal output is limited to 75 characters
+        test_name = test_name.split("::")
+        if len(test_name) > 2:
+            types_ = ["File path", "Test class", "Method"]
+        else:
+            types_ = ["File path", "Test function"]
+
+        mapdl._run("/com,Running test in:", mute=True)
+        for type_, name_ in zip(types_, test_name):
+            mapdl._run(f"/com,    {type_}: {name_}", mute=True)
+
+    else:
+        mapdl._run(f"/com,Running test: {test_name}", mute=True)
 
 
-@pytest.fixture(autouse=True, scope="function")
-def run_before_and_after_tests_3(request, mapdl):
+def make_sure_not_instances_are_left_open() -> None:
     """Make sure we leave no MAPDL running behind"""
-    from ansys.mapdl.core.launcher import is_ansys_process
-
-    PROCESS_OK_STATUS = [
-        psutil.STATUS_RUNNING,  #
-        psutil.STATUS_SLEEPING,  #
-        psutil.STATUS_DISK_SLEEP,
-        psutil.STATUS_DEAD,
-        psutil.STATUS_PARKED,  # (Linux)
-        psutil.STATUS_IDLE,  # (Linux, macOS, FreeBSD)
-    ]
-
-    yield
 
     if ON_LOCAL:
         for proc in psutil.process_iter():
@@ -537,7 +580,7 @@ def mapdl_console(request):
             "Valid versions are up to 2020R2."
         )
 
-    mapdl = launch_mapdl(console_path)
+    mapdl = launch_mapdl(console_path, log_apdl=LOG_APDL)
     from ansys.mapdl.core.mapdl_console import MapdlConsole
 
     assert isinstance(mapdl, MapdlConsole)
@@ -568,6 +611,7 @@ def mapdl(request, tmpdir_factory):
         cleanup_on_exit=cleanup,
         license_server_check=False,
         start_timeout=50,
+        log_apdl=LOG_APDL,
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
     MAPDL_VERSION = mapdl.version  # Caching version
