@@ -578,6 +578,23 @@ def test__check_stds(mapdl):
     assert mapdl._stderr is not None
 
 
+def test_subscribe_to_channel(mapdl):
+    assert mapdl.channel_state in [
+        "IDLE",
+        "CONNECTING",
+        "READY",
+        "TRANSIENT_FAILURE",
+        "SHUTDOWN",
+    ]
+    assert mapdl._channel_state in [
+        grpc.ChannelConnectivity.IDLE,
+        grpc.ChannelConnectivity.CONNECTING,
+        grpc.ChannelConnectivity.READY,
+        grpc.ChannelConnectivity.TRANSIENT_FAILURE,
+        grpc.ChannelConnectivity.SHUTDOWN,
+    ]
+
+
 @requires("remote")
 def test_exception_message_length(mapdl):
     # This test does not fail if running on local
