@@ -534,9 +534,9 @@ class MapdlGrpc(MapdlBase):
         attempt_timeout = int(timeout / n_attempts)
 
         max_time = time.time() + timeout
-        i = 0
+        i = 1
         while time.time() < max_time and i <= n_attempts:
-            self._log.debug("Connection attempt %d", i + 1)
+            self._log.debug("Connection attempt %d", i)
             connected = self._connect(timeout=attempt_timeout)
             i += 1
             if connected:
@@ -564,7 +564,7 @@ class MapdlGrpc(MapdlBase):
                     else ""
                 )
                 raise MapdlConnectionError(
-                    msg + f"The MAPDL process has died{pid_msg}."
+                    msg + f" The MAPDL process has died{pid_msg}."
                 )
 
         self._exited = False
@@ -1193,6 +1193,11 @@ class MapdlGrpc(MapdlBase):
 
             # Killing child processes
             self._kill_child_processes(timeout=timeout)
+
+        if self.is_alive:
+            raise MapdlRuntimeError("MAPDL could not be exited.")
+        else:
+            self._exited = True
 
     def _cache_pids(self):
         """Store the process IDs used when launching MAPDL.
