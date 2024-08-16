@@ -702,7 +702,7 @@ def box_with_fields(cleared, mapdl):
     mapdl.mp("murx", 1, 1)
     if mapdl.version >= 25.1:
         mapdl.tb("pm", 1, "", "", "perm")
-        mapdl.tbdat("", 0)
+        mapdl.tbdata("", 0)
 
     mapdl.et(1, "SOLID70")
     mapdl.et(2, "CPT215")
