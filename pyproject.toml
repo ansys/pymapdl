@@ -62,7 +62,7 @@ tests = [
     "autopep8==2.3.1",
     "matplotlib==3.9.1.post1",
     "pandas==2.2.2",
-    "pyansys-tools-report==0.7.3",
+    "pyansys-tools-report==0.8.0",
     "pyiges[full]==0.3.1",
     "pytest-cov==5.0.0",
     "pytest-memprof<0.3.0",
