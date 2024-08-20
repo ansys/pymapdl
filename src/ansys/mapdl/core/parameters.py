@@ -548,7 +548,7 @@ class Parameters:
         if not escaped:  # pragma: no cover
             raise MapdlRuntimeError(
                 f"The array '{parm_name}' has a number format "
-                "that could not be read using '{format_str}'."
+                f"that could not be read using '{format_str}'."
             )
 
         arr_flat = np.fromstring(output, sep="\n").reshape(shape)

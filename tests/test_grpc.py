@@ -26,6 +26,7 @@ import re
 import shutil
 import sys
 
+import grpc
 import pytest
 
 from ansys.mapdl.core import examples
@@ -33,8 +34,10 @@ from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
     MapdlExitedError,
+    MapdlgRPCError,
     MapdlRuntimeError,
 )
+from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import random_string
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -100,20 +103,20 @@ def setup_for_cmatrix(mapdl, cleared):
     mapdl.run("/solu")
 
 
-def test_connect_via_channel(mapdl):
-    """Validate MapdlGrpc can be created directly from a channel."""
-
-    import grpc
-
-    from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
-
+@pytest.fixture(scope="function")
+def grpc_channel(mapdl):
     channel = grpc.insecure_channel(
         mapdl._channel_str,
         options=[
             ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
         ],
     )
-    mapdl = MapdlGrpc(channel=channel)
+    return channel
+
+
+def test_connect_via_channel(grpc_channel):
+    """Validate MapdlGrpc can be created directly from a channel."""
+    mapdl = MapdlGrpc(channel=grpc_channel)
     assert mapdl.is_alive
 
 
@@ -138,11 +141,14 @@ def test_clear_multiple(mapdl):
         mapdl.run("/CLEAR")
 
 
-@pytest.mark.xfail(
-    reason="MAPDL bug 867421", raises=(MapdlExitedError, UnicodeDecodeError)
-)
 def test_invalid_get_bug(mapdl):
-    with pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError)):
+    # versions before 24.1 should raise an error
+    if mapdl.version < 24.1:
+        context = pytest.raises(MapdlCommandIgnoredError)
+    else:
+        context = pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError))
+
+    with context:
         mapdl.get_value("ACTIVE", item1="SET", it1num="invalid")
 
 
@@ -570,3 +576,77 @@ def test__check_stds(mapdl):
     mapdl._read_stds()
     assert mapdl._stdout is not None
     assert mapdl._stderr is not None
+
+
+def test_subscribe_to_channel(mapdl):
+    assert mapdl.channel_state in [
+        "IDLE",
+        "CONNECTING",
+        "READY",
+        "TRANSIENT_FAILURE",
+        "SHUTDOWN",
+    ]
+    assert mapdl._channel_state in [
+        grpc.ChannelConnectivity.IDLE,
+        grpc.ChannelConnectivity.CONNECTING,
+        grpc.ChannelConnectivity.READY,
+        grpc.ChannelConnectivity.TRANSIENT_FAILURE,
+        grpc.ChannelConnectivity.SHUTDOWN,
+    ]
+
+
+@requires("remote")
+def test_exception_message_length(mapdl):
+    # This test does not fail if running on local
+    channel = grpc.insecure_channel(
+        mapdl._channel_str,
+        options=[
+            ("grpc.max_receive_message_length", int(1024)),
+        ],
+    )
+    mapdl2 = MapdlGrpc(channel=channel)
+    assert mapdl2.is_alive
+
+    mapdl2.prep7()
+    mapdl2.dim("myarr", "", 1e5)
+    mapdl2.vfill("myarr", "rand", 0, 1)  # filling array with random numbers
+
+    # Retrieving
+    with pytest.raises(MapdlgRPCError, match="Received message larger than max"):
+        values = mapdl2.parameters["myarr"]
+
+    assert mapdl2.is_alive
+
+    # Deleting generated mapdl instance and channel.
+    channel.close()
+    mapdl2._exited = True  # To avoid side effects.
+    mapdl2.exit()
+
+
+def test_generic_grpc_exception(monkeypatch, grpc_channel):
+    mapdl = MapdlGrpc(channel=grpc_channel)
+    assert mapdl.is_alive
+
+    class UnavailableError(grpc.RpcError):
+        def __init__(self, message="Service is temporarily unavailable."):
+            self._message = message
+            self._code = grpc.StatusCode.UNAVAILABLE
+            super().__init__(message)
+
+        def code(self):
+            return self._code
+
+        def details(self):
+            return self._message
+
+    def _raise_error_code(args, **kwargs):
+        raise UnavailableError()
+
+    monkeypatch.setattr(mapdl._stub, "SendCommand", _raise_error_code)
+
+    with pytest.raises(
+        MapdlExitedError, match="MAPDL server connection terminated unexpectedly while"
+    ):
+        mapdl.prep7()
+
+    assert mapdl.is_alive

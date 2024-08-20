@@ -127,6 +127,6 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-    - uses: ansys/actions/doc-changelog@v6
+    - uses: ansys/actions/doc-changelog@v7
       with:
         token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
