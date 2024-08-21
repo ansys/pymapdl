@@ -2113,7 +2113,7 @@ class _MapdlCore(Commands):
         """
         if self.exited:
             raise MapdlExitedError(
-                f"The MAPDL instance has been exited before running the command: {cmd}"
+                f"The MAPDL instance has been exited before running the command: {command}"
             )
 
         # check if multiline
