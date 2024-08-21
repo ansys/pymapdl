@@ -1769,9 +1769,20 @@ class MapdlGrpc(MapdlBase):
             fname = tmp_modified_file
 
         # Running method
-        # always check if file is present as the grpc and MAPDL errors
-        # are unclear
-        filename = self._get_file_path(fname, progress_bar)
+        #
+        if "CDRE" in orig_cmd.upper():
+            # CDREAD already uploads the file, and since the priority in
+            # `_get_file_path` is for the files in the python working directory,
+            # we skip that function here.
+            self._log.debug(
+                f"Avoid uploading the file {fname} because `CDREAD` should have upload it already."
+            )
+            filename = fname
+
+        else:
+            # Always check if file is present as the grpc and MAPDL errors
+            # are unclear
+            filename = self._get_file_path(fname, progress_bar)
 
         if time_step_stream is not None:
             if time_step_stream <= 0:
