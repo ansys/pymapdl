@@ -36,6 +36,7 @@ from ansys.mapdl.core.errors import (
     MapdlExitedError,
     MapdlgRPCError,
     MapdlRuntimeError,
+    protect_grpc,
 )
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import random_string
@@ -639,14 +640,26 @@ def test_generic_grpc_exception(monkeypatch, grpc_channel):
         def details(self):
             return self._message
 
-    def _raise_error_code(args, **kwargs):
+    @protect_grpc
+    def _raise_error_code(*args, **kwargs):
         raise UnavailableError()
 
-    monkeypatch.setattr(mapdl._stub, "SendCommand", _raise_error_code)
+    monkeypatch.setattr(mapdl, "prep7", _raise_error_code)
 
+    with pytest.raises(
+        MapdlRuntimeError, match="MAPDL server connection terminated unexpectedly while"
+    ):
+        mapdl.prep7(
+            mapdl
+        )  # passing mapdl to simulate the function `_raise_error_code` to be a method.
+
+    assert mapdl.is_alive
+
+    # faking exiting MAPDL
+    mapdl._exited = True
     with pytest.raises(
         MapdlExitedError, match="MAPDL server connection terminated unexpectedly while"
     ):
-        mapdl.prep7()
+        mapdl.prep7(mapdl)
 
-    assert mapdl.is_alive
+    mapdl._exited = False
