@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -82,9 +82,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.solution import Solution
     from ansys.mapdl.core.xpl import ansXpl
 
-if _HAS_PYVISTA:
-    from ansys.mapdl.core.plotting import get_meshes_from_plotter
-
 from ansys.mapdl.core.post import PostProcessing
 
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -107,20 +104,22 @@ PNG_IS_WRITTEN_TO_FILE = re.compile(
     "WRITTEN TO FILE"
 )  # getting the file name is buggy.
 
-VWRITE_REPLACEMENT = """
-Cannot use *VWRITE directly as a command in MAPDL
+VWRITE_MWRITE_REPLACEMENT = """
+Cannot use *VWRITE/*MWRITE directly as a command in MAPDL
 service mode.  Instead, run it as ``non_interactive``.
 
-For example:
+For example, in the *VWRITE case:
 
 with self.non_interactive:
     self.vwrite('%s(1)' % parm_name)
     self.run('(F20.12)')
+
 """
 
 ## Invalid commands in interactive mode.
 INVAL_COMMANDS = {
-    "*VWR": VWRITE_REPLACEMENT,
+    "*VWR": VWRITE_MWRITE_REPLACEMENT,
+    "*MWR": VWRITE_MWRITE_REPLACEMENT,
     "*CFO": "Run CFOPEN as ``non_interactive``",
     "*CRE": "Create a function within python or run as non_interactive",
     "*END": "Create a function within python or run as non_interactive",
@@ -161,6 +160,7 @@ VALID_SELECTION_TYPE_TP = Literal["S", "R", "A", "U"]
 VALID_SELECTION_ENTITY_TP = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
 
 GUI_FONT_SIZE = 15
+LOG_APDL_DEFAULT_FILE_NAME = "apdl.log"
 
 
 def parse_to_short_cmd(command):
@@ -286,7 +286,7 @@ class _MapdlCore(Commands):
         self.check_parameter_names = start_parm.get("check_parameter_names", True)
 
         # Setting up loggers
-        self._log: logging.Logger = logger.add_instance_logger(
+        self._log: logger = logger.add_instance_logger(
             self.name, self, level=loglevel
         )  # instance logger
         # adding a file handler to the logger
@@ -311,6 +311,9 @@ class _MapdlCore(Commands):
         from ansys.mapdl.core.component import ComponentManager
 
         self._componentmanager: ComponentManager = ComponentManager(self)
+
+        if isinstance(log_apdl, bool) and log_apdl:
+            log_apdl = LOG_APDL_DEFAULT_FILE_NAME
 
         if log_apdl:
             self.open_apdl_log(log_apdl, mode="w")
@@ -1887,30 +1890,31 @@ class _MapdlCore(Commands):
         self._log.debug("Flushing stored commands")
         rnd_str = random_string()
         tmp_out = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.out")
-        self._stored_commands.insert(0, "/OUTPUT, f'{tmp_out}'")
+        self._stored_commands.insert(0, f"/OUTPUT, {tmp_out}")
         self._stored_commands.append("/OUTPUT")
         commands = "\n".join(self._stored_commands)
         if self._apdl_log:
             self._apdl_log.write(commands + "\n")
 
-        # write to a temporary input file
-        tmp_inp = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.inp")
-        self._log.debug(
-            "Writing the following commands to a temporary " "apdl input file:\n%s",
-            commands,
-        )
+            self._store_commands = False
+            self._stored_commands = []
 
-        with open(tmp_inp, "w") as f:
-            f.writelines(commands)
+            # write to a temporary input file
+            self._log.debug(
+                "Writing the following commands to a temporary " "apdl input file:\n%s",
+                commands,
+            )
 
-        self._store_commands = False
-        self._stored_commands = []
+            tmp_inp = os.path.join(tempfile.gettempdir(), f"tmp_{random_string()}.inp")
+            with open(tmp_inp, "w") as f:
+                f.writelines(commands)
 
-        # interactive result
-        _ = self.input(tmp_inp, write_to_log=False)
-        time.sleep(0.1)  # allow MAPDL to close the file
-        if os.path.isfile(tmp_out):
-            self._response = "\n" + open(tmp_out).read()
+            # interactive result
+            _ = self.input(tmp_inp, write_to_log=False)
+
+            time.sleep(0.1)  # allow MAPDL to close the file
+            if os.path.isfile(tmp_out):
+                self._response = "\n" + open(tmp_out).read()
 
         if self._response is None:  # pragma: no cover
             self._log.warning("Unable to read response from flushed commands")
@@ -2261,6 +2265,10 @@ class _MapdlCore(Commands):
     def __del__(self):
         """Clean up when complete"""
         if self._cleanup:
+            # removing logging handlers if they are closed to avoid I/O errors
+            # when exiting after the logger file has been closed.
+            self._cleanup_loggers()
+
             try:
                 self.exit()
             except Exception as e:
@@ -2269,6 +2277,27 @@ class _MapdlCore(Commands):
                         self._log.error("exit: %s", str(e))
                 except Exception:
                     pass
+
+    def _cleanup_loggers(self):
+        """Clean up all the loggers"""
+        # Detached from ``__del__`` for easier testing
+        if not hasattr(self, "_log"):
+            return  # Early exit if logger has been already cleaned.
+
+        logger = self._log
+
+        if logger.hasHandlers():
+            for each_handler in logger.logger.handlers:
+                if each_handler.stream and not each_handler.stream.closed:
+                    logger.logger.removeHandler(each_handler)
+
+        if logger.file_handler:
+            logger.file_handler.close()
+            logger.file_handler = None
+
+        if logger.std_out_handler:
+            logger.std_out_handler.close()
+            logger.std_out_handler = None
 
     def _get_plot_name(self, text: str) -> str:
         """Obtain the plot filename."""
@@ -2465,7 +2494,7 @@ class _MapdlCore(Commands):
             pass
 
         # adding selection inversor
-        pl._inver_mouse_click_selection = False
+        pl.scene._inver_mouse_click_selection = False
 
         selection_text = {
             "S": "New selection",
@@ -2476,7 +2505,9 @@ class _MapdlCore(Commands):
 
         def gen_text(picked_entities=None):
             """Generate helpful text for the render window."""
-            sel_ = "Unselecting" if pl._inver_mouse_click_selection else "Selecting"
+            sel_ = (
+                "Unselecting" if pl.scene._inver_mouse_click_selection else "Selecting"
+            )
             type_text = selection_text[type_]
             button_ = "left" if PICKING_USING_LEFT_CLICKING else "right"
             text = (
@@ -2499,14 +2530,14 @@ class _MapdlCore(Commands):
             return text + f"Current {entity} selection: {picked_entities_str}"
 
         def callback_points(mesh, id_):
-            from ansys.mapdl.core.plotting import POINT_SIZE
+            from ansys.mapdl.core.plotting.consts import POINT_SIZE
 
             point = mesh.points[id_]
             node_id = selector(
                 point[0], point[1], point[2]
             )  # This will only return one node. Fine for now.
 
-            if not pl._inver_mouse_click_selection:
+            if not pl.scene._inver_mouse_click_selection:
                 # Updating MAPDL entity mapping
                 if node_id not in picked_entities:
                     picked_entities.append(node_id)
@@ -2522,14 +2553,14 @@ class _MapdlCore(Commands):
                     picked_ids.remove(id_)
 
             # remov etitle and update text
-            pl.remove_actor("title")
-            pl._picking_text = pl.add_text(
+            pl.scene.remove_actor("title")
+            pl.scene._picking_text = pl.scene.add_text(
                 gen_text(picked_entities),
                 font_size=GUI_FONT_SIZE,
                 name="_entity_picking_message",
             )
             if picked_ids:
-                pl.add_mesh(
+                pl.scene.add_mesh(
                     mesh.points[picked_ids],
                     color="red",
                     point_size=POINT_SIZE + 10,
@@ -2538,7 +2569,7 @@ class _MapdlCore(Commands):
                     reset_camera=False,
                 )
             else:
-                pl.remove_actor("_picked_entities")
+                pl.scene.remove_actor("_picked_entities")
 
         def callback_mesh(mesh):
             def get_entnum(mesh):
@@ -2547,16 +2578,16 @@ class _MapdlCore(Commands):
             mesh_id = get_entnum(mesh)
 
             # Getting meshes with that entity_num.
-            meshes = get_meshes_from_plotter(pl)
+            meshes = pl.get_meshes_from_plotter()
 
             meshes = [each for each in meshes if get_entnum(each) == mesh_id]
 
-            if not pl._inver_mouse_click_selection:
+            if not pl.scene._inver_mouse_click_selection:
                 # Updating MAPDL entity mapping
                 if mesh_id not in picked_entities:
                     picked_entities.append(mesh_id)
                     for i, each in enumerate(meshes):
-                        pl.add_mesh(
+                        pl.scene.add_mesh(
                             each,
                             color="red",
                             point_size=10,
@@ -2571,14 +2602,14 @@ class _MapdlCore(Commands):
                     picked_entities.remove(mesh_id)
 
                     for i, each in enumerate(meshes):
-                        pl.remove_actor(f"_picked_entity_{mesh_id}_{i}")
+                        pl.scene.remove_actor(f"_picked_entity_{mesh_id}_{i}")
 
             # Removing only-first time actors
-            pl.remove_actor("title")
-            pl.remove_actor("_point_picking_message")
+            pl.scene.remove_actor("title")
+            pl.scene.remove_actor("_point_picking_message")
 
             if "_entity_picking_message" in pl.actors:
-                pl.remove_actor("_entity_picking_message")
+                pl.scene.remove_actor("_entity_picking_message")
 
             pl._picking_text = pl.add_text(
                 gen_text(picked_entities),
@@ -2588,10 +2619,10 @@ class _MapdlCore(Commands):
 
         if entity in ["kp", "node"]:
             lines_pl = self.lplot(return_plotter=True, color="w")
-            lines_meshes = get_meshes_from_plotter(lines_pl)
+            lines_meshes = lines_pl.get_meshes_from_plotter()
 
             for each_mesh in lines_meshes:
-                pl.add_mesh(
+                pl.scene.add_mesh(
                     each_mesh,
                     pickable=False,
                     color="w",
@@ -2599,7 +2630,7 @@ class _MapdlCore(Commands):
                 )
 
             # Picking points
-            pl.enable_point_picking(
+            pl.scene.enable_point_picking(
                 callback=callback_points,
                 use_mesh=True,
                 show_message=gen_text(),
@@ -2610,7 +2641,7 @@ class _MapdlCore(Commands):
             )
         else:
             # Picking meshes
-            pl.enable_mesh_picking(
+            pl.scene.enable_mesh_picking(
                 callback=callback_mesh,
                 use_mesh=True,
                 show=False,  # This should be false to avoid a warning.
@@ -2621,19 +2652,19 @@ class _MapdlCore(Commands):
 
         def callback_u():
             # inverting bool
-            pl._inver_mouse_click_selection = not pl._inver_mouse_click_selection
-            pl.remove_actor("_entity_picking_message")
+            pl.scene._inver_mouse_click_selection = not pl._inver_mouse_click_selection
+            pl.scene.remove_actor("_entity_picking_message")
 
-            pl._picking_text = pl.add_text(
+            pl.scene._picking_text = pl.add_text(
                 gen_text(picked_entities),
                 font_size=GUI_FONT_SIZE,
                 name="_entity_picking_message",
             )
 
-        pl.add_key_event("u", callback_u)
+        pl.scene.add_key_event("u", callback_u)
 
         if not _debug:  # pragma: no cover
-            pl.show()
+            pl.scene.show()
         else:
             _debug(pl)
 

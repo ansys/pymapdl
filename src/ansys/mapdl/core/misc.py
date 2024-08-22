@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -538,7 +538,7 @@ def create_temp_dir(tmpdir=None, name=None):
     except:  # pragma: no cover
         raise MapdlRuntimeError(
             "Unable to create temporary working "
-            f"directory {path}.\nSpecify 'run_location' argument"
+            f"directory {path}\nPlease specify 'run_location' argument"
         )
 
     return path
@@ -1162,7 +1162,7 @@ def allow_pickable_entities(entity="node", plot_function="nplot"):
             type_, item, comp, vmin, vmax, vinc, kabs, kwargs = _get_args_xsel(
                 *args, **kwargs
             )
-            from ansys.mapdl.core.plotting import POINT_SIZE
+            from ansys.mapdl.core.plotting.consts import POINT_SIZE
 
             if item == "P" and _HAS_PYVISTA:
                 if type_ not in ["S", "R", "A", "U"]:

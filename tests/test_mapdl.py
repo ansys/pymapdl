@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -1131,7 +1131,7 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
 
 
 @pytest.mark.parametrize(
-    "each_cmd", ["*END", "*vwrite", "/eof", "cmatrix", "*REpeAT", "lSread"]
+    "each_cmd", ["*END", "*vwrite", "/eof", "cmatrix", "*REpeAT", "lSread", "*mwrite"]
 )
 def test_inval_commands(mapdl, cleared, each_cmd):
     """Test the output of invalid commands"""
@@ -2249,6 +2249,11 @@ def test_vwrite_error(mapdl):
         mapdl.vwrite("adf")
 
 
+def test_mwrite_error(mapdl):
+    with pytest.raises(MapdlRuntimeError):
+        mapdl.mwrite("adf")
+
+
 def test_vwrite(mapdl):
     with mapdl.non_interactive:
         mapdl.run("/out,test_vwrite.txt")
@@ -2294,7 +2299,7 @@ def test_use_vtk(mapdl):
 
 @requires("local")
 @pytest.mark.xfail(reason="Flaky test. See #2435")
-def test__remove_temp_dir_on_exit(mapdl, tmpdir):
+def test_remove_temp_dir_on_exit(mapdl, tmpdir):
     path = os.path.join(tempfile.gettempdir(), "ansys_" + random_string())
     os.makedirs(path)
     filename = os.path.join(path, "file.txt")
@@ -2453,3 +2458,15 @@ def test_not_correct_et_element(mapdl):
 def test_ctrl(mapdl):
     mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
     mapdl._ctrl("set_verb", 0)  # Returning to non-verbose
+
+
+def test_cleanup_loggers(mapdl):
+    assert mapdl.logger is not None
+    assert mapdl.logger.hasHandlers()
+    assert mapdl.logger.logger.handlers
+
+    mapdl._cleanup_loggers()
+
+    assert mapdl.logger is not None
+    assert mapdl.logger.std_out_handler is None
+    assert mapdl.logger.file_handler is None

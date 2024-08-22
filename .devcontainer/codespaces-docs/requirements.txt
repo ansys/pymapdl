@@ -1,6 +1,7 @@
 ansys-dpf-core==0.10.1
 ansys-mapdl-reader==0.53.0
 ansys-sphinx-theme==0.16.6
+ansys-tools-visualization-interface==0.2.6
 grpcio==1.64.1
 imageio-ffmpeg==0.5.1
 imageio==2.34.2
@@ -14,12 +15,10 @@ pyiges[full]==0.3.1
 pypandoc==1.13
 pytest-sphinx==0.6.3
 pythreejs==2.4.2
-pyvista[trame]==0.43.10
 sphinx-autobuild==2024.4.16
 sphinx-autodoc-typehints==1.25.2
 sphinx-copybutton==0.5.2
-sphinx-design==0.6.0
-sphinx-design==0.6.0
+sphinx-design==0.6.1
 sphinx-gallery==0.16.0
 sphinx-notfound-page==1.0.2
 sphinx-reredirects==0.1.4
