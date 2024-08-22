@@ -372,9 +372,6 @@ def protect_grpc(func):
                 # Generic error
                 handle_generic_grpc_error(error, func, args, kwargs, reason, suggestion)
 
-                # Break
-                break
-
         # No exceptions
         if threading.current_thread().__class__.__name__ == "_MainThread":
             received_interrupt = bool(SIGINT_TRACKER)
