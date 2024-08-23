@@ -76,8 +76,8 @@ example, this code would run the first set of 20 verification files:
     20
 
 
-Run a user function
--------------------
+Run an user function
+--------------------
 
 You can use the pool to run a custom user function on each MAPDL
 instance over a set of inputs. As in the example for the

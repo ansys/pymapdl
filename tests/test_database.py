@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -57,7 +57,7 @@ def db(mapdl):
             f"This MAPDL version ({mapdl_version}) docker image seems to not support DB, but local does."
         )
 
-    if mapdl_version == "24.1" or mapdl_version == "24.2":
+    if mapdl_version in ["24.1", "24.2", "25.1"]:
         pytest.skip(
             f"This MAPDL version ({mapdl_version}) does not support PyMAPDL Database."
         )

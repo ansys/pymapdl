@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -71,15 +71,37 @@ def list_instances(instances, long, cmd, location):
 
     # Assuming all ansys processes have -grpc flag
     mapdl_instances = []
+
+    def is_valid_process(proc):
+        valid_status = proc.status() in [
+            psutil.STATUS_RUNNING,
+            psutil.STATUS_IDLE,
+            psutil.STATUS_SLEEPING,
+        ]
+        valid_ansys_process = ("ansys" in proc.name().lower()) or (
+            "mapdl" in proc.name().lower()
+        )
+        # Early exit to avoid checking 'cmdline' of a protected process (raises psutil.AccessDenied)
+        if not valid_ansys_process:
+            return False
+
+        grpc_is_active = "-grpc" in proc.cmdline()
+        return valid_status and valid_ansys_process and grpc_is_active
+
     for proc in psutil.process_iter():
-        if (
-            "ansys" in proc.name().lower() or "mapdl" in proc.name().lower()
-        ) and "-grpc" in proc.cmdline():
-            if len(proc.children(recursive=True)) < 2:
-                proc.ansys_instance = False
-            else:
-                proc.ansys_instance = True
-            mapdl_instances.append(proc)
+        # Check if the process is running and not suspended
+        try:
+            if is_valid_process(proc):
+                # Checking the number of children we infer if the process is the main process,
+                # or one of the main process thread.
+                if len(proc.children(recursive=True)) < 2:
+                    proc.ansys_instance = False
+                else:
+                    proc.ansys_instance = True
+                mapdl_instances.append(proc)
+
+        except (psutil.NoSuchProcess, psutil.ZombieProcess) as e:
+            continue
 
     # printing
     table = []
