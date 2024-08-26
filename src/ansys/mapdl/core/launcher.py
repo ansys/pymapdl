@@ -1959,7 +1959,10 @@ def _check_license_argument(license_type, additional_switches):
         # In older versions probably it might raise an error. But not sure.
         license_type = license_type.lower().strip()
 
-        if "enterprise" in license_type and "solver" not in license_type:
+        if "preppost" in license_type:
+            license_type = "preppost"
+
+        elif "enterprise" in license_type and "solver" not in license_type:
             license_type = "ansys"
 
         elif "enterprise" in license_type and "solver" in license_type:
