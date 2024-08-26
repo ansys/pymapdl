@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -104,20 +104,22 @@ PNG_IS_WRITTEN_TO_FILE = re.compile(
     "WRITTEN TO FILE"
 )  # getting the file name is buggy.
 
-VWRITE_REPLACEMENT = """
-Cannot use *VWRITE directly as a command in MAPDL
+VWRITE_MWRITE_REPLACEMENT = """
+Cannot use *VWRITE/*MWRITE directly as a command in MAPDL
 service mode.  Instead, run it as ``non_interactive``.
 
-For example:
+For example, in the *VWRITE case:
 
 with self.non_interactive:
     self.vwrite('%s(1)' % parm_name)
     self.run('(F20.12)')
+
 """
 
 ## Invalid commands in interactive mode.
 INVAL_COMMANDS = {
-    "*VWR": VWRITE_REPLACEMENT,
+    "*VWR": VWRITE_MWRITE_REPLACEMENT,
+    "*MWR": VWRITE_MWRITE_REPLACEMENT,
     "*CFO": "Run CFOPEN as ``non_interactive``",
     "*CRE": "Create a function within python or run as non_interactive",
     "*END": "Create a function within python or run as non_interactive",
@@ -158,6 +160,7 @@ VALID_SELECTION_TYPE_TP = Literal["S", "R", "A", "U"]
 VALID_SELECTION_ENTITY_TP = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
 
 GUI_FONT_SIZE = 15
+LOG_APDL_DEFAULT_FILE_NAME = "apdl.log"
 
 
 def parse_to_short_cmd(command):
@@ -308,6 +311,9 @@ class _MapdlCore(Commands):
         from ansys.mapdl.core.component import ComponentManager
 
         self._componentmanager: ComponentManager = ComponentManager(self)
+
+        if isinstance(log_apdl, bool) and log_apdl:
+            log_apdl = LOG_APDL_DEFAULT_FILE_NAME
 
         if log_apdl:
             self.open_apdl_log(log_apdl, mode="w")
@@ -1878,7 +1884,7 @@ class _MapdlCore(Commands):
         self._log.debug("Flushing stored commands")
         rnd_str = random_string()
         tmp_out = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.out")
-        self._stored_commands.insert(0, "/OUTPUT, f'{tmp_out}'")
+        self._stored_commands.insert(0, f"/OUTPUT, {tmp_out}")
         self._stored_commands.append("/OUTPUT")
         commands = "\n".join(self._stored_commands)
         if self._apdl_log:

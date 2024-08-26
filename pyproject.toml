@@ -8,7 +8,7 @@ name = "ansys-mapdl-core"
 version = "0.69.dev0"
 description = "A Python wrapper for Ansys MAPDL."
 readme = "README.md"
-requires-python = ">=3.9,<3.13"  # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
+requires-python = ">=3.10,<3.13"  # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
 license = {file = "LICENSE"}
 authors = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
@@ -58,34 +58,34 @@ jupyter = [
 
 tests = [
     "ansys-dpf-core==0.10.1",
-    "ansys-tools-visualization-interface==0.2.6",
+    "ansys-tools-visualization-interface==0.4.0",
     "autopep8==2.3.1",
-    "matplotlib==3.9.1",
+    "matplotlib==3.9.2",
     "pandas==2.2.2",
-    "pyansys-tools-report==0.7.3",
+    "pyansys-tools-report==0.8.0",
     "pyiges[full]==0.3.1",
     "pytest-cov==5.0.0",
     "pytest-memprof<0.3.0",
     "pytest-pyvista==0.1.9",
     "pytest-rerunfailures==14.0",
-    "pytest==8.2.2",
+    "pytest==8.3.2",
     "scipy==1.14.0",
     "vtk==9.3.1",
 ]
 doc = [
     "ansys-dpf-core==0.10.1",
     "ansys-mapdl-reader==0.53.0",
-    "ansys-tools-visualization-interface==0.2.6",
-    "ansys-sphinx-theme==0.16.6",
-    "grpcio==1.65.0",
+    "ansys-tools-visualization-interface==0.4.0",
+    "ansys-sphinx-theme==1.0.5",
+    "grpcio==1.65.4",
     "imageio-ffmpeg==0.5.1",
-    "imageio==2.34.2",
+    "imageio==2.35.1",
     "jupyter_sphinx==0.5.3",
     "jupyterlab>=3.2.8",
-    "matplotlib==3.9.1",
-    "numpydoc==1.7.0",
+    "matplotlib==3.9.2",
+    "numpydoc==1.8.0",
     "pandas==2.2.2",
-    "plotly==5.22.0",
+    "plotly==5.23.0",
     "pyiges[full]==0.3.1",
     "pypandoc==1.13",
     "pytest-sphinx==0.6.3",
@@ -93,11 +93,11 @@ doc = [
     "sphinx-autobuild==2024.4.16",
     "sphinx-autodoc-typehints==1.25.2",
     "sphinx-copybutton==0.5.2",
-    "sphinx-design==0.6.0",
-    "sphinx-gallery==0.16.0",
-    "sphinx-notfound-page==1.0.2",
-    "sphinx==7.4.4",
-    "sphinxcontrib-websupport==1.2.7",
+    "sphinx-design==0.6.1",
+    "sphinx-gallery==0.17.1",
+    "sphinx-notfound-page==1.0.4",
+    "sphinx==8.0.2",
+    "sphinxcontrib-websupport==2.0.0",
     "sphinxemoji==0.3.1",
     "vtk==9.3.1",
 ]
@@ -116,6 +116,7 @@ pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_
 pymapdl = "ansys.mapdl.core.cli:main"
 
 [tool.pytest.ini_options]
+addopts = "-ra -vvv"
 junit_family = "legacy"
 filterwarnings = [
     "ignore::FutureWarning",
@@ -260,4 +261,18 @@ showcontent = true
 [[tool.towncrier.type]]
 directory = "miscellaneous"
 name = "Miscellaneous"
+showcontent = true
+[[tool.towncrier.type]]
+directory = "documentation"
+name = "Documentation"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "maintenance"
+name = "Maintenance"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "test"
+name = "Test"
 showcontent = true

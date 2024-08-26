@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -46,13 +46,16 @@ from conftest import QUICK_LAUNCH_SWITCHES, VALID_PORTS, NullContext, requires
 # skip entire module unless HAS_GRPC
 pytestmark = requires("grpc")
 
+# Check env var
+IGNORE_POOL = os.environ.get("IGNORE_POOL", "").upper() == "TRUE"
+
 # skipping if ON_STUDENT and ON_LOCAL because we cannot spawn that many instances.
 if ON_STUDENT and ON_LOCAL:
     pytest.skip(allow_module_level=True)
 
 
 skip_if_ignore_pool = pytest.mark.skipif(
-    os.environ.get("IGNORE_POOL", "").upper() == "TRUE",
+    IGNORE_POOL,
     reason="Ignoring Pool tests.",
 )
 
@@ -140,6 +143,7 @@ class TestMapdlPool:
                 additional_switches=QUICK_LAUNCH_SWITCHES,
             )
 
+    @skip_if_ignore_pool
     def test_heal(self, pool):
         pool_sz = len(pool)
         pool_names = pool._names  # copy pool names
@@ -362,6 +366,7 @@ class TestMapdlPool:
         assert args["ips"] == ips
         assert args["ports"] == ports
 
+    @skip_if_ignore_pool
     def test_next(self, pool):
         # Check the instances are free
         for each_instance in pool:
@@ -378,6 +383,7 @@ class TestMapdlPool:
             assert not each_instance.locked
             assert not each_instance._busy
 
+    @skip_if_ignore_pool
     def test_next_with_returns_index(self, pool):
         # Check the instances are free
         for each_instance in pool:

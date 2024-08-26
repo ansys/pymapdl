@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -1131,7 +1131,7 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
 
 
 @pytest.mark.parametrize(
-    "each_cmd", ["*END", "*vwrite", "/eof", "cmatrix", "*REpeAT", "lSread"]
+    "each_cmd", ["*END", "*vwrite", "/eof", "cmatrix", "*REpeAT", "lSread", "*mwrite"]
 )
 def test_inval_commands(mapdl, cleared, each_cmd):
     """Test the output of invalid commands"""
@@ -2247,6 +2247,11 @@ def test_inquire_default(mapdl):
 def test_vwrite_error(mapdl):
     with pytest.raises(MapdlRuntimeError):
         mapdl.vwrite("adf")
+
+
+def test_mwrite_error(mapdl):
+    with pytest.raises(MapdlRuntimeError):
+        mapdl.mwrite("adf")
 
 
 def test_vwrite(mapdl):
