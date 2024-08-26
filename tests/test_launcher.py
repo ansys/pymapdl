@@ -643,7 +643,7 @@ def test_deprecate_verbose():
             id="Testing NPROCS only",
         ),
         pytest.param(
-            # This test does not do probably a good memory mapping between
+            # This test probably does not do a good memory mapping between
             # MEM_PER_NODE and "ram"
             {
                 "SLURM_NNODES": 4,

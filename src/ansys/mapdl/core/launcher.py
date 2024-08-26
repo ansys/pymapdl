@@ -1455,7 +1455,7 @@ def launch_mapdl(
         # Unless the env var is false, it will be true.
         ON_SLURM = not (ON_SLURM.lower() == "false")
 
-    # Let's require the following env vars to exists to go into slurm mode.
+    # Let's require the following env vars to exist to go into slurm mode.
     ON_SLURM = (
         ON_SLURM
         and bool(os.environ.get("SLURM_JOB_NAME", ""))
@@ -1483,7 +1483,7 @@ def launch_mapdl(
 
     if remove_temp_files is not None:
         warnings.warn(
-            "The option ``remove_temp_files`` is being deprecated and it will be removed by PyMAPDL version 0.66.0.\n"
+            "The ``remove_temp_files`` option is being deprecated. It is to be removed in PyMAPDL version 0.66.0.\n"
             "Please use ``remove_temp_dir_on_exit`` instead.",
             DeprecationWarning,
             stacklevel=2,
@@ -1779,7 +1779,7 @@ def launch_mapdl(
         else:
             if machine_cores < int(nproc):
                 raise NotEnoughResources(
-                    f"The machine has {machine_cores} cores and PyMAPDL is asking for {nproc} cores."
+                    f"The machine has {machine_cores} cores. PyMAPDL is asking for {nproc} cores."
                 )
 
     start_parm.update(
@@ -2274,7 +2274,7 @@ def _parse_slurm_options(
 
         except Exception as e:
             LOG.info(
-                f"The machines list could not be obtained.\nFollowing error happened:\n{str(e)}"
+                f"The machines list could not be obtained.\nThis error occurred:\n{str(e)}"
             )
 
     return exec_file, jobname, nproc, ram, additional_switches
