@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -80,11 +80,6 @@ def test_read_asarray(xpl):
 
 
 def test_save(xpl):
-    if xpl._mapdl.version == 24.2:
-        pytest.xfail(
-            "There is a bug (977113) on v242 which makes saving using XPL to fail."
-        )
-
     xpl.save()
     with pytest.raises(MapdlCommandIgnoredError):
         xpl.list()

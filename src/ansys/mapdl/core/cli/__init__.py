@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -48,17 +48,19 @@ if _HAS_CLICK:
     main.add_command(stop)
     main.add_command(list_instances, name="list")
 
-    def old_pymapdl_convert_script_entry_point():
-        print(
-            """This CLI function has been deprecated. Please use instead:
-
-pymapdl convert input_file.inp -o output_file.out ...
-
-For more information please visit: https://mapdl.docs.pyansys.com/version/dev/user_guide/cli.html
-"""
-        )
 
 else:
 
     def main():
-        print("PyMAPDL CLI requires 'click' python package to be installed.")
+        print("PyMAPDL CLI requires 'click' Python package to be installed.")
+
+
+def old_pymapdl_convert_script_entry_point():
+    print(
+        """This CLI function has been deprecated. Use the following instead:
+
+pymapdl convert input_file.inp -o output_file.out ...
+
+Go to https://mapdl.docs.pyansys.com/version/dev/user_guide/cli.html for more information.
+"""
+    )

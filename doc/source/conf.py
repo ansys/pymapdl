@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 import warnings
 
+import ansys.tools.visualization_interface as viz_interface
 from ansys_sphinx_theme import ansys_favicon, get_version_match
 import numpy as np
 import pyvista
@@ -14,11 +15,14 @@ from sphinx_gallery.sorting import FileNameSortKey
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
 
+viz_interface.DOCUMENTATION_BUILD = True
+pyvista.BUILDING_GALLERY = True
+pyvista.OFF_SCREEN = True
+
 # Manage errors
 pyvista.set_error_output_file("errors.txt")
 
 # Ensure that offscreen rendering is used for docs generation
-pyvista.OFF_SCREEN = True
 
 # must be less than or equal to the XVFB window size
 try:
@@ -53,6 +57,7 @@ author = "ANSYS Inc."
 # The short X.Y version
 release = version = __version__
 cname = os.getenv("DOCUMENTATION_CNAME", "mapdl.docs.pyansys.com")
+switcher_version = get_version_match(__version__)
 
 REPOSITORY_NAME = "pymapdl"
 USERNAME = "ansys"
@@ -91,7 +96,6 @@ extensions = [
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
-    "sphinx_reredirects",
     "ansys_sphinx_theme.extension.linkcode",
 ]
 
@@ -107,6 +111,7 @@ intersphinx_mapping = {
     "pypim": ("https://pypim.docs.pyansys.com/version/dev/", None),
     "ansys-dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
     "ansys-math-core": ("https://math.docs.pyansys.com/version/stable/", None),
+    "ansys-tools-path": ("https://path.tools.docs.pyansys.com/version/stable/", None),
 }
 
 suppress_warnings = ["label.*", "design.fa-build", "config.cache"]
@@ -202,14 +207,6 @@ rst_epilog = rst_epilog.replace("%%PYMAPDLVERSION%%", release)
 with open("substitutions.rst") as f:
     rst_epilog += f.read()
 
-
-# Setting redicts
-redirects = {
-    #
-    # Old link: https://dev.mapdl.docs.pyansys.com/user_guide/krylov.html
-    "user_guide/krylov": "examples/extended_examples/Krylov/krylov_example"
-}
-
 # Broken anchors:
 linkcheck_exclude_documents = ["index"]
 linkcheck_anchors_ignore_for_url = ["https://docs.pyvista.org/api/*"]
@@ -228,6 +225,13 @@ linkcheck_anchors_ignore = [
     "pyvista.UnstructuredGrid",
     "pyvista.Plotter.show",
 ]
+
+# If we are on a release, we have to ignore the "release" URLs, since it is not
+# available until the release is published.
+if switcher_version != "dev":
+    linkcheck_ignore.append(
+        f"https://github.com/ansys/pymapdl/releases/tag/v{__version__}"
+    )
 
 user_agent = """curl https://www.ansys.com -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.3"""
 
@@ -299,12 +303,12 @@ html_theme_options = {
     ],
     "switcher": {
         "json_url": f"https://{cname}/versions.json",
-        "version_match": get_version_match(__version__),
+        "version_match": switcher_version,
     },
     "use_meilisearch": {
         "api_key": os.getenv("MEILISEARCH_PUBLIC_API_KEY", ""),
         "index_uids": {
-            f"pymapdl-v{get_version_match(__version__).replace('.', '-')}": "PyMAPDL",
+            f"pymapdl-v{switcher_version.replace('.', '-')}": "PyMAPDL",
         },
     },
 }
