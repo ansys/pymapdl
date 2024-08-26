@@ -22,7 +22,7 @@
 
 
 class RadiositySolver:
-    def hemiopt(self, hres="", **kwargs):
+    def hemiopt(self, hres="", tolerance="", **kwargs):
         """Specifies options for Hemicube view factor calculation.
 
         APDL Command: HEMIOPT
