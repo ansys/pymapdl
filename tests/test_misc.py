@@ -372,13 +372,17 @@ def test_requires_package_decorator():
         assert myclass.myotherfun2 is None
 
 
-def test_check_valid_routine():
-    assert check_valid_routine("prep7")
-    assert check_valid_routine("PREP7")
-    assert check_valid_routine("/PREP7")
-    assert check_valid_routine("begin level")
+@pytest.mark.parametrize(
+    "routine", ["prep7", "PREP7", "/PREP7", "begin level", "BEGIN LEVEL"]
+)
+def test_check_valid_routine(routine):
+    assert check_valid_routine(routine)
+
+
+@pytest.mark.parametrize("routine", ["invalid", "invalid routine", "prep78"])
+def test_check_valid_routine_invalid(routine):
     with pytest.raises(ValueError, match="Invalid routine"):
-        check_valid_routine("invalid")
+        check_valid_routine(routine)
 
 
 @requires("local")
