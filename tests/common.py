@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -135,6 +135,19 @@ def is_running_on_student():
 
 def testing_minimal():
     return os.environ.get("TESTING_MINIMAL", "NO").upper().strip() in ["YES", "TRUE"]
+
+
+def log_apdl() -> bool:
+    if "PYMAPDL_LOG_APDL" in os.environ and os.environ.get("PYMAPDL_LOG_APDL", ""):
+        log_apdl = os.environ.get("PYMAPDL_LOG_APDL")
+
+        if log_apdl.lower() in ["true", "false", "yes", "no"]:
+            return log_apdl.lower() in ["true", "yes"]
+        else:
+            return log_apdl
+
+    else:
+        return False
 
 
 def is_float(s: str) -> bool:

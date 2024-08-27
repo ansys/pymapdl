@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -26,6 +26,7 @@ import fnmatch
 from functools import wraps
 import glob
 import io
+import json
 import os
 import pathlib
 import re
@@ -116,6 +117,25 @@ VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26
 
 
 SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
+
+# Retry policy for gRPC calls.
+SERVICE_DEFAULT_CONFIG = {
+    # see https://github.com/grpc/proposal/blob/master/A6-client-retries.md#retry-policy-capabilities
+    "methodConfig": [
+        {
+            # Match all packages and services.
+            # Otherwise: "name": [{"service": "<package>.<service>"}],
+            "name": [{}],
+            "retryPolicy": {
+                "maxAttempts": 5,
+                "initialBackoff": "0.01s",
+                "maxBackoff": "3s",
+                "backoffMultiplier": 3,
+                "retryableStatusCodes": ["UNAVAILABLE", "RESOURCE_EXHAUSTED"],
+            },
+        }
+    ]
+}
 
 
 def chunk_raw(raw, save_as):
@@ -397,6 +417,9 @@ class MapdlGrpc(MapdlBase):
         self._state: Optional[grpc.Future] = None
         self._timeout: int = timeout
         self._pids: List[Union[int, None]] = []
+        self._channel_state: grpc.ChannelConnectivity = (
+            grpc.ChannelConnectivity.CONNECTING
+        )
 
         if channel is None:
             self._log.debug("Creating channel to %s:%s", ip, port)
@@ -404,6 +427,9 @@ class MapdlGrpc(MapdlBase):
         else:
             self._log.debug("Using provided channel")
             self._channel: grpc.Channel = channel
+
+        # Subscribe to channel for channel state updates
+        self._subscribe_to_channel()
 
         # connect and validate to the channel
         self._mapdl_process: Popen = start_parm.pop("process", None)
@@ -484,8 +510,34 @@ class MapdlGrpc(MapdlBase):
             channel_str,
             options=[
                 ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+                ("grpc.service_config", json.dumps(SERVICE_DEFAULT_CONFIG)),
             ],
         )
+
+    def _subscribe_to_channel(self):
+        """Subscribe to channel status and store the value in 'mapdl._channel_state'"""
+
+        # Callback function to monitor state changes
+        def connectivity_callback(connectivity):
+            self._log.debug(f"Channel connectivity changed to: {connectivity}")
+            self._channel_state = connectivity
+
+        # Subscribe to channel state changes
+        self._channel.subscribe(connectivity_callback, try_to_connect=True)
+
+    @property
+    def channel_state(self) -> str:
+        """Returns the gRPC channel state.
+
+        The possible values are:
+
+        - 0 - 'IDLE'
+        - 1 - 'CONNECTING'
+        - 2 - 'READY'
+        - 3 - 'TRANSIENT_FAILURE'
+        - 4 - 'SHUTDOWN'
+        """
+        return self._channel_state.name
 
     def _multi_connect(self, n_attempts=5, timeout=15):
         """Try to connect over a series of attempts to the channel.
@@ -503,9 +555,9 @@ class MapdlGrpc(MapdlBase):
         attempt_timeout = int(timeout / n_attempts)
 
         max_time = time.time() + timeout
-        i = 0
+        i = 1
         while time.time() < max_time and i <= n_attempts:
-            self._log.debug("Connection attempt %d", i + 1)
+            self._log.debug("Connection attempt %d", i)
             connected = self._connect(timeout=attempt_timeout)
             i += 1
             if connected:
@@ -533,7 +585,7 @@ class MapdlGrpc(MapdlBase):
                     else ""
                 )
                 raise MapdlConnectionError(
-                    msg + f"The MAPDL process has died{pid_msg}."
+                    msg + f" The MAPDL process has died{pid_msg}."
                 )
 
         self._exited = False
@@ -1163,6 +1215,11 @@ class MapdlGrpc(MapdlBase):
             # Killing child processes
             self._kill_child_processes(timeout=timeout)
 
+        if self.is_alive:
+            raise MapdlRuntimeError("MAPDL could not be exited.")
+        else:
+            self._exited = True
+
     def _cache_pids(self):
         """Store the process IDs used when launching MAPDL.
 
@@ -1733,9 +1790,20 @@ class MapdlGrpc(MapdlBase):
             fname = tmp_modified_file
 
         # Running method
-        # always check if file is present as the grpc and MAPDL errors
-        # are unclear
-        filename = self._get_file_path(fname, progress_bar)
+        #
+        if "CDRE" in orig_cmd.upper():
+            # CDREAD already uploads the file, and since the priority in
+            # `_get_file_path` is for the files in the python working directory,
+            # we skip that function here.
+            self._log.debug(
+                f"Avoid uploading the file {fname} because `CDREAD` should have upload it already."
+            )
+            filename = fname
+
+        else:
+            # Always check if file is present as the grpc and MAPDL errors
+            # are unclear
+            filename = self._get_file_path(fname, progress_bar)
 
         if time_step_stream is not None:
             if time_step_stream <= 0:
@@ -2528,13 +2596,35 @@ class MapdlGrpc(MapdlBase):
     @property
     def is_alive(self) -> bool:
         """True when there is an active connect to the gRPC server"""
+        if self.channel_state not in ["IDLE", "READY"]:
+            self._log.debug(
+                "MAPDL instance is not alive because the channel is not 'IDLE' o 'READY'."
+            )
+            return False
+
         if self._exited:
+            self._log.debug("MAPDL instance is not alive because it is exited.")
             return False
         if self.busy:
+            self._log.debug("MAPDL instance is alive because it is busy.")
             return True
+
         try:
-            return bool(self.inquire("", "JOBNAME"))
-        except:
+            check = bool(self._ctrl("VERSION"))
+            if check:
+                self._log.debug(
+                    "MAPDL instance is alive because version was retrieved."
+                )
+            else:
+                self._log.debug(
+                    "MAPDL instance is not alive because version was not retrieved. Maybe output is muted?."
+                )
+            return check
+
+        except Exception as error:
+            self._log.debug(
+                f"MAPDL instance is not alive because retrieving version failed with:\n{error}"
+            )
             return False
 
     @property

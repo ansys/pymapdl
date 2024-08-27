@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -1109,3 +1109,20 @@ def test_node_numbering_order(mapdl, cleared):
     # There is no way to retrieve labels from the plotter object. So we cannot
     # test it.
     pl.show()
+
+
+def test_lplot_line(mapdl, cleared):
+    mapdl.prep7()
+
+    # Create keypoints 3 keypoints
+    mapdl.k(1, 0, 0, 0)
+    mapdl.k(2, 1, 0, 0)
+    mapdl.k(3, 1, 1, 0)
+
+    # Create line connecting keypoints 1 and 2
+    mapdl.l(1, 2)
+
+    # Plot the geometry
+    mapdl.lplot(
+        show_line_numbering=False, show_keypoint_numbering=True, color_lines=True
+    )

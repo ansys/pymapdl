@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -1243,6 +1243,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
             pl = kwargs.get("plotter", None)
             pl = MapdlPlotter().switch_scene(pl)
+            pl.mapdl = self
 
             kwargs.setdefault("title", "MAPDL Element Plot")
             if not self._mesh.n_elem:
@@ -1509,7 +1510,7 @@ class _MapdlCommandExtended(_MapdlCore):
         # cannot be run in interactive mode
         if not self._store_commands:
             raise MapdlRuntimeError(
-                "VWRTIE cannot run interactively.  \n\nPlease use "
+                "*VWRITE cannot run interactively.  \n\nPlease use "
                 "``with mapdl.non_interactive:``"
             )
 
@@ -1533,6 +1534,30 @@ class _MapdlCommandExtended(_MapdlCore):
             par17=par17,
             par18=par18,
             par19=par19,
+            **kwargs,
+        )
+
+    @wraps(_MapdlCore.mwrite)
+    def mwrite(
+        self, parr="", fname="", ext="", label="", n1="", n2="", n3="", **kwargs
+    ):
+        """Wrapping *MWRITE"""
+
+        # cannot be run in interactive mode
+        if not self._store_commands:
+            raise MapdlRuntimeError(
+                "*MWRITE cannot run interactively.  \n\nPlease use "
+                "``with mapdl.non_interactive:``"
+            )
+
+        return super().mwrite(
+            parr=parr,
+            fname=fname,
+            ext=ext,
+            label=label,
+            n1=n1,
+            n2=n2,
+            n3=n3,
             **kwargs,
         )
 
@@ -2198,9 +2223,10 @@ class _MapdlExtended(_MapdlCommandExtended):
         # skip the first line its a header we wrote in np.savetxt
         self.tread(name, filename, nskip=1, mute=True)
 
-        if self._local:
-            os.remove(filename)
-        else:
+        # skip the first line its a header we wrote in np.savetxt
+        self.tread(name, filename, nskip=1, mute=True)
+
+        if not self._local:
             self.slashdelete(filename)
 
     def load_array(self, name, array):
