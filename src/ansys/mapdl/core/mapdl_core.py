@@ -56,6 +56,7 @@ from ansys.mapdl.core.commands import (
 from ansys.mapdl.core.errors import (
     ComponentNoData,
     MapdlCommandIgnoredError,
+    MapdlExitedError,
     MapdlFileNotFoundError,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
@@ -434,7 +435,7 @@ class _MapdlCore(Commands):
 
         >>> mapdl.solution.converged
         """
-        if self._exited:  # pragma: no cover
+        if self.exited:  # pragma: no cover
             raise MapdlRuntimeError("MAPDL exited.")
         return self._componentmanager
 
@@ -844,7 +845,7 @@ class _MapdlCore(Commands):
         array([1.07512979e-04, 8.59137773e-05, 5.70690047e-05, ...,
                5.70333124e-05, 8.58600402e-05, 1.07445726e-04])
         """
-        if self._exited:
+        if self.exited:
             raise MapdlRuntimeError(
                 "MAPDL exited.\n\nCan only postprocess a live " "MAPDL instance."
             )
@@ -963,7 +964,7 @@ class _MapdlCore(Commands):
 
         >>> mapdl.solution.converged
         """
-        if self._exited:
+        if self.exited:
             raise MapdlRuntimeError("MAPDL exited.")
         return self._solution
 
@@ -2110,6 +2111,11 @@ class _MapdlCore(Commands):
         >>> mapdl.prep7()
 
         """
+        if self.exited:
+            raise MapdlExitedError(
+                f"The MAPDL instance has been exited before running the command: {command}"
+            )
+
         # check if multiline
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")

@@ -36,6 +36,7 @@ from ansys.mapdl.core.errors import (
     MapdlExitedError,
     MapdlgRPCError,
     MapdlRuntimeError,
+    protect_grpc,
 )
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import random_string
@@ -46,6 +47,19 @@ from conftest import has_dependency, requires
 
 # skip entire module unless HAS_GRPC installed or connecting to server
 pytestmark = requires("grpc")
+
+
+class UnavailableError(grpc.RpcError):
+    def __init__(self, message="Service is temporarily unavailable."):
+        self._message = message
+        self._code = grpc.StatusCode.UNAVAILABLE
+        super().__init__(message)
+
+    def code(self):
+        return self._code
+
+    def details(self):
+        return self._message
 
 
 def write_tmp_in_mapdl_instance(mapdl, filename, ext="txt"):
@@ -627,26 +641,45 @@ def test_generic_grpc_exception(monkeypatch, grpc_channel):
     mapdl = MapdlGrpc(channel=grpc_channel)
     assert mapdl.is_alive
 
-    class UnavailableError(grpc.RpcError):
-        def __init__(self, message="Service is temporarily unavailable."):
-            self._message = message
-            self._code = grpc.StatusCode.UNAVAILABLE
-            super().__init__(message)
-
-        def code(self):
-            return self._code
-
-        def details(self):
-            return self._message
-
-    def _raise_error_code(args, **kwargs):
+    @protect_grpc
+    def _raise_error_code(*args, **kwargs):
         raise UnavailableError()
 
-    monkeypatch.setattr(mapdl._stub, "SendCommand", _raise_error_code)
+    # Monkey patch to raise the same issue.
+    monkeypatch.setattr(mapdl, "prep7", _raise_error_code)
+
+    with pytest.raises(
+        MapdlRuntimeError, match="MAPDL server connection terminated unexpectedly while"
+    ):
+        # passing mapdl to simulate the function `_raise_error_code` to be a method.
+        mapdl.prep7(mapdl)
+
+    assert mapdl.is_alive
+
+
+def test_generic_grpc_exception_exited(monkeypatch, grpc_channel):
+    mapdl = MapdlGrpc(channel=grpc_channel)
+    assert mapdl.is_alive
+
+    @protect_grpc
+    def _raise_error_code(*args, **kwargs):
+        raise UnavailableError()
+
+    def _null_close_process():
+        return None
+
+    # faking exiting MAPDL
+    mapdl._exited = True
+
+    # Monkey patch to raise the same issue.
+    monkeypatch.setattr(mapdl, "prep7", _raise_error_code)
+
+    # monkey patch `_close_process` so MAPDL does not exit when
+    monkeypatch.setattr(mapdl, "_close_process", _null_close_process)
 
     with pytest.raises(
         MapdlExitedError, match="MAPDL server connection terminated unexpectedly while"
     ):
-        mapdl.prep7()
+        mapdl.prep7(mapdl)
 
-    assert mapdl.is_alive
+    mapdl._exited = False  # Restoring
