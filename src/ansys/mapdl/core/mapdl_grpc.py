@@ -26,6 +26,7 @@ import fnmatch
 from functools import wraps
 import glob
 import io
+import json
 import os
 import pathlib
 import re
@@ -116,6 +117,25 @@ VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26
 
 
 SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
+
+# Retry policy for gRPC calls.
+SERVICE_DEFAULT_CONFIG = {
+    # see https://github.com/grpc/proposal/blob/master/A6-client-retries.md#retry-policy-capabilities
+    "methodConfig": [
+        {
+            # Match all packages and services.
+            # Otherwise: "name": [{"service": "<package>.<service>"}],
+            "name": [{}],
+            "retryPolicy": {
+                "maxAttempts": 5,
+                "initialBackoff": "0.01s",
+                "maxBackoff": "3s",
+                "backoffMultiplier": 3,
+                "retryableStatusCodes": ["UNAVAILABLE", "RESOURCE_EXHAUSTED"],
+            },
+        }
+    ]
+}
 
 
 def chunk_raw(raw, save_as):
@@ -490,6 +510,7 @@ class MapdlGrpc(MapdlBase):
             channel_str,
             options=[
                 ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+                ("grpc.service_config", json.dumps(SERVICE_DEFAULT_CONFIG)),
             ],
         )
 
