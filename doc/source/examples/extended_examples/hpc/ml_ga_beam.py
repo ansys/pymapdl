@@ -225,6 +225,7 @@ ga_instance = pygad.GA(
     gene_type=gene_type,
     init_range_low=init_range_low,
     init_range_high=init_range_high,
+    save_solutions=True,
 )
 
 ga_instance.igen = 0  # To count the number of generations
@@ -249,6 +250,8 @@ print(f"Time spent (minutes): {(t1-t0)/60}")
 import os
 
 ga_instance.plot_fitness(label=["Applied force"], save_dir=os.getcwd())
+
+ga_instance.plot_genes(solutions="all")
 
 solution, solution_fitness, solution_idx = ga_instance.best_solution(
     ga_instance.last_generation_fitness
