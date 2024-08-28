@@ -26,6 +26,7 @@ import fnmatch
 from functools import wraps
 import glob
 import io
+import json
 import os
 import pathlib
 import re
@@ -116,6 +117,25 @@ VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26
 
 
 SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
+
+# Retry policy for gRPC calls.
+SERVICE_DEFAULT_CONFIG = {
+    # see https://github.com/grpc/proposal/blob/master/A6-client-retries.md#retry-policy-capabilities
+    "methodConfig": [
+        {
+            # Match all packages and services.
+            # Otherwise: "name": [{"service": "<package>.<service>"}],
+            "name": [{}],
+            "retryPolicy": {
+                "maxAttempts": 5,
+                "initialBackoff": "0.01s",
+                "maxBackoff": "3s",
+                "backoffMultiplier": 3,
+                "retryableStatusCodes": ["UNAVAILABLE", "RESOURCE_EXHAUSTED"],
+            },
+        }
+    ]
+}
 
 
 def chunk_raw(raw, save_as):
@@ -502,6 +522,7 @@ class MapdlGrpc(MapdlBase):
             channel_str,
             options=[
                 ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+                ("grpc.service_config", json.dumps(SERVICE_DEFAULT_CONFIG)),
             ],
         )
 
@@ -546,9 +567,9 @@ class MapdlGrpc(MapdlBase):
         attempt_timeout = int(timeout / n_attempts)
 
         max_time = time.time() + timeout
-        i = 0
+        i = 1
         while time.time() < max_time and i <= n_attempts:
-            self._log.debug("Connection attempt %d", i + 1)
+            self._log.debug("Connection attempt %d", i)
             connected = self._connect(timeout=attempt_timeout)
             i += 1
             if connected:
@@ -576,7 +597,7 @@ class MapdlGrpc(MapdlBase):
                     else ""
                 )
                 raise MapdlConnectionError(
-                    msg + f"The MAPDL process has died{pid_msg}."
+                    msg + f" The MAPDL process has died{pid_msg}."
                 )
 
         self._exited = False
@@ -1205,6 +1226,11 @@ class MapdlGrpc(MapdlBase):
 
             # Killing child processes
             self._kill_child_processes(timeout=timeout)
+
+        if self.is_alive:
+            raise MapdlRuntimeError("MAPDL could not be exited.")
+        else:
+            self._exited = True
 
     def _cache_pids(self):
         """Store the process IDs used when launching MAPDL.

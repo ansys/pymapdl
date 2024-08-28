@@ -655,6 +655,31 @@ SpacedPaths = namedtuple(
 )
 
 
+@pytest.fixture(scope="function")
+def set_env_var(request, monkeypatch):
+    """Set an environment variable from given requests, this fixture must be used with `parametrize`"""
+    env_var_name = request.param[0]
+    env_var_value = request.param[1]
+    monkeypatch.setenv(f"{env_var_name}", f"{env_var_value}")
+    yield request.param
+
+
+@pytest.fixture(scope="function")
+def set_env_var_context(request, monkeypatch):
+    """Set MY_VARIABLE environment variable, this fixture must be used with `parametrize`"""
+    if not isinstance(request.param, (tuple, list)):
+        request_param = [request.param]
+    else:
+        request_param = request.param
+
+    for each_dict in request_param:
+        for each_key, each_value in each_dict.items():
+            if each_value is not None:
+                monkeypatch.setenv(f"{each_key}", f"{each_value}")
+
+    yield request.param
+
+
 @pytest.fixture
 def path_tests(tmpdir):
     p1 = tmpdir.mkdir("./temp/")

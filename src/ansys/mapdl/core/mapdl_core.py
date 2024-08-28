@@ -56,6 +56,7 @@ from ansys.mapdl.core.commands import (
 from ansys.mapdl.core.errors import (
     ComponentNoData,
     MapdlCommandIgnoredError,
+    MapdlExitedError,
     MapdlFileNotFoundError,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
@@ -440,7 +441,7 @@ class _MapdlCore(Commands):
 
         >>> mapdl.solution.converged
         """
-        if self._exited:  # pragma: no cover
+        if self.exited:  # pragma: no cover
             raise MapdlRuntimeError("MAPDL exited.")
         return self._componentmanager
 
@@ -850,7 +851,7 @@ class _MapdlCore(Commands):
         array([1.07512979e-04, 8.59137773e-05, 5.70690047e-05, ...,
                5.70333124e-05, 8.58600402e-05, 1.07445726e-04])
         """
-        if self._exited:
+        if self.exited:
             raise MapdlRuntimeError(
                 "MAPDL exited.\n\nCan only postprocess a live " "MAPDL instance."
             )
@@ -969,7 +970,7 @@ class _MapdlCore(Commands):
 
         >>> mapdl.solution.converged
         """
-        if self._exited:
+        if self.exited:
             raise MapdlRuntimeError("MAPDL exited.")
         return self._solution
 
@@ -1448,29 +1449,27 @@ class _MapdlCore(Commands):
 
         def __init__(self, parent, routine):
             self._parent = weakref.ref(parent)
-
-            # check the routine is valid since we're muting the output
-            check_valid_routine(routine)
             self._requested_routine = routine
 
         def __enter__(self):
             """Store the current routine and enter the requested routine."""
-            self._cached_routine = self._parent().parameters.routine
-            self._parent()._log.debug("Caching routine %s", self._cached_routine)
-            if self._requested_routine.lower() != self._cached_routine.lower():
-                self._enter_routine(self._requested_routine)
+            self._parent()._cache_routine()
+            self._parent()._log.debug(f"Caching routine {self._cached_routine}")
+
+            if (
+                self._requested_routine.lower().strip()
+                != self._cached_routine.lower().strip()
+            ):
+                self._parent()._enter_routine(self._requested_routine)
 
         def __exit__(self, *args):
             """Restore the original routine."""
-            self._parent()._log.debug("Restoring routine %s", self._cached_routine)
-            self._enter_routine(self._cached_routine)
+            self._parent()._log.debug(f"Restoring routine '{self._cached_routine}'")
+            self._parent()._resume_routine()
 
-        def _enter_routine(self, routine):
-            """Enter a routine."""
-            if routine.lower() == "begin level":
-                self._parent().finish(mute=True)
-            else:
-                self._parent().run(f"/{routine}", mute=True)
+        @property
+        def _cached_routine(self):
+            return self._parent()._cached_routine
 
     def run_as_routine(self, routine):
         """
@@ -1712,6 +1711,18 @@ class _MapdlCore(Commands):
         # restore remove tmp state
         self._remove_tmp = remove_tmp
 
+    def _enter_routine(self, routine):
+        # check the routine is valid since we're muting the output
+        check_valid_routine(routine)
+
+        if routine.lower() in ["begin level", "finish"]:
+            self.finish(mute=True)
+        else:
+            if not routine.startswith("/"):
+                routine = f"/{routine}"
+
+            self.run(f"{routine}", mute=True)
+
     def _cache_routine(self):
         """Cache the current routine."""
         self._cached_routine = self.parameters.routine
@@ -1719,10 +1730,7 @@ class _MapdlCore(Commands):
     def _resume_routine(self):
         """Resume the cached routine."""
         if self._cached_routine is not None:
-            if "BEGIN" not in self._cached_routine:
-                self.run(f"/{self._cached_routine}", mute=True)
-            else:
-                self.finish(mute=True)
+            self._enter_routine(self._cached_routine)
             self._cached_routine = None
 
     def _launch(self, *args, **kwargs):  # pragma: no cover
@@ -2116,6 +2124,11 @@ class _MapdlCore(Commands):
         >>> mapdl.prep7()
 
         """
+        if self.exited:
+            raise MapdlExitedError(
+                f"The MAPDL instance has been exited before running the command: {command}"
+            )
+
         # check if multiline
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")

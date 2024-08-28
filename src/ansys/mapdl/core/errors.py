@@ -24,6 +24,7 @@
 from functools import wraps
 import signal
 import threading
+from time import sleep
 from typing import Callable, Optional
 
 import grpc
@@ -306,26 +307,70 @@ def protect_grpc(func):
                 old_handler = signal.signal(signal.SIGINT, handler)
 
         # Capture gRPC exceptions
-        try:
-            out = func(*args, **kwargs)
-        except grpc.RpcError as error:
-            # Custom errors
-            if error.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:
-                if "Received message larger than max" in error.details():
-                    try:
-                        lim_ = int(error.details().split("(")[1].split("vs")[0])
-                    except IndexError:
-                        lim_ = int(512 * 1024**2)
+        n_attempts = 3
+        initial_backoff = 0.05
+        multiplier_backoff = 3
 
-                    raise MapdlgRPCError(
-                        f"RESOURCE_EXHAUSTED: {error.details()}. "
-                        "You can try to increase the gRPC message length size using 'PYMAPDL_MAX_MESSAGE_LENGTH'"
-                        " environment variable. For instance:\n\n"
-                        f"$ export PYMAPDL_MAX_MESSAGE_LENGTH={lim_}"
+        i_attemps = 0
+
+        while True:
+            try:
+                out = func(*args, **kwargs)
+
+                # Exit while-loop if success
+                break
+
+            except grpc.RpcError as error:
+
+                mapdl = retrieve_mapdl_from_args(args)
+
+                i_attemps += 1
+                if i_attemps <= n_attempts:
+
+                    wait = (
+                        initial_backoff * multiplier_backoff**i_attemps
+                    )  # Exponential backoff
+                    sleep(wait)
+
+                    # reconnect
+                    mapdl._log.debug(
+                        f"Re-connection attempt {i_attemps} after waiting {wait:0.3f} seconds"
                     )
 
-            # Generic error
-            handle_generic_grpc_error(error, func, args, kwargs)
+                    connected = mapdl._connect(timeout=wait)
+
+                    # Retry again
+                    continue
+
+                # Custom errors
+                reason = ""
+                suggestion = ""
+
+                if error.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:
+                    if "Received message larger than max" in error.details():
+                        try:
+                            lim_ = int(error.details().split("(")[1].split("vs")[0])
+                        except IndexError:
+                            lim_ = int(512 * 1024**2)
+
+                        raise MapdlgRPCError(
+                            f"RESOURCE_EXHAUSTED: {error.details()}. "
+                            "You can try to increase the gRPC message length size using 'PYMAPDL_MAX_MESSAGE_LENGTH'"
+                            " environment variable. For instance:\n\n"
+                            f"$ export PYMAPDL_MAX_MESSAGE_LENGTH={lim_}"
+                        )
+
+                if error.code() == grpc.StatusCode.UNAVAILABLE:
+                    # Very likely the MAPDL server has died.
+                    suggestion = (
+                        "  MAPDL *might* have died because it executed a not-allowed command or ran out of memory.\n"
+                        "  Check the MAPDL command output for more details.\n"
+                        "  Open an issue on GitHub if you need assistance: "
+                        "https://github.com/ansys/pymapdl/issues"
+                    )
+
+                # Generic error
+                handle_generic_grpc_error(error, func, args, kwargs, reason, suggestion)
 
         # No exceptions
         if threading.current_thread().__class__.__name__ == "_MainThread":
@@ -344,14 +389,25 @@ def protect_grpc(func):
     return wrapper
 
 
-def handle_generic_grpc_error(error, func, args, kwargs):
-    """Handle non-custom gRPC errors"""
-
+def retrieve_mapdl_from_args(args):
     # can't use isinstance here due to circular imports
     try:
         class_name = args[0].__class__.__name__
     except (IndexError, AttributeError):
         class_name = ""
+
+    if class_name == "MapdlGrpc":
+        mapdl = args[0]
+    elif hasattr(args[0], "_mapdl"):
+        mapdl = args[0]._mapdl
+
+    return mapdl
+
+
+def handle_generic_grpc_error(error, func, args, kwargs, reason="", suggestion=""):
+    """Handle non-custom gRPC errors"""
+
+    mapdl = retrieve_mapdl_from_args(args)
 
     # trying to get "cmd" argument:
     cmd = args[1] if len(args) >= 2 else ""
@@ -364,21 +420,20 @@ def handle_generic_grpc_error(error, func, args, kwargs):
     else:
         msg_ = f"calling:{caller}\nwith the following arguments:\n  args: {args}\n  kwargs: {kwargs}"
 
-    if class_name == "MapdlGrpc":
-        mapdl = args[0]
-    elif hasattr(args[0], "_mapdl"):
-        mapdl = args[0]._mapdl
+    if reason:
+        reason = f"Possible reason:\n{reason}\n"
+
+    if suggestion:
+        suggestion = f"Suggestions:\n{suggestion}\n"
 
     msg = (
         f"Error:\nMAPDL server connection terminated unexpectedly while {msg_}\n"
+        f"{reason}"
+        f"{suggestion}"
         "Error:\n"
         f"  {error.details()}\n"
         f"Full error:\n{error}"
     )
-
-    # MAPDL gRPC is unavailable.
-    if error.code() == grpc.StatusCode.UNAVAILABLE:
-        raise MapdlExitedError(msg)
 
     # Generic error
     # Test if MAPDL is alive or not.
@@ -386,6 +441,9 @@ def handle_generic_grpc_error(error, func, args, kwargs):
         raise MapdlRuntimeError(msg)
 
     else:
+        # Making sure we do not keep executing gRPC calls.
+        mapdl._exited = True
+
         # Must close unfinished processes
         mapdl._close_process()
         raise MapdlExitedError(msg)
