@@ -199,6 +199,8 @@ def mutation_func(offspring, ga_instance):
     return offspring
 
 
+import pygad
+
 ga_instance = pygad.GA(
     # Main options
     sol_per_pop=sol_per_pop,

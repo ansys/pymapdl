@@ -173,7 +173,7 @@ created to run the simulation:
 
 .. literalinclude:: ml_ga_beam.py
     :language: python
-    :start-at: ga_instance = pygad.GA(
+    :start-at: import pygad
     :end-at: To count the number of generations
 
 
