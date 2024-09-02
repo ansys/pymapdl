@@ -51,15 +51,9 @@ def db(mapdl):
         )
 
     ## Exceptions
-    # Exception for 22.2
-    if mapdl_version == "22.2" and ON_CI:
+    if mapdl_version in ["22.2", "23.1", "23.2", "25.1"] and ON_CI:  # "24.1", "24.2",
         pytest.skip(
             f"This MAPDL version ({mapdl_version}) docker image seems to not support DB, but local does."
-        )
-
-    if mapdl_version in ["24.1", "24.2", "25.1"]:
-        pytest.skip(
-            f"This MAPDL version ({mapdl_version}) does not support PyMAPDL Database."
         )
 
     if mapdl._server_version < (0, 4, 1):  # 2021R2
