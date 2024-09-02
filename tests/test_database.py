@@ -43,7 +43,6 @@ def db(mapdl):
         pytest.skip("Requires 'ansys.api.mapdl' package to at least v0.5.1.")
 
     ## Checking MAPDL versions
-
     mapdl_version = str(mapdl.version)
     if not server_meets_version(mapdl_version, MINIMUM_MAPDL_VERSION):
         pytest.skip(
@@ -51,7 +50,7 @@ def db(mapdl):
         )
 
     ## Exceptions
-    if mapdl_version in ["22.2", "23.1", "23.2", "25.1"] and ON_CI:  # "24.1", "24.2",
+    if mapdl_version in ["22.2", "23.1", "23.2", "24.1", "24.2", "25.1"] and ON_CI:
         pytest.skip(
             f"This MAPDL version ({mapdl_version}) docker image seems to not support DB, but local does."
         )
