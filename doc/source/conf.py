@@ -76,9 +76,6 @@ SOURCE_PATH = Path(__file__).parent.resolve().absolute()
 pyansys_light_mode_logo = str(
     os.path.join(SOURCE_PATH, "_static", "pyansys-logo-light_mode.png")
 )
-pyansys_dark_mode_logo = str(
-    os.path.join(SOURCE_PATH, "_static", "pyansys-logo-dark_mode.png")
-)
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -277,8 +274,8 @@ sphinx_gallery_conf = {
 # -- Options for HTML output -------------------------------------------------
 html_short_title = html_title = "PyMAPDL"
 html_theme = "ansys_sphinx_theme"
-html_logo = pyansys_dark_mode_logo
 html_theme_options = {
+    "logo": "pyansys",
     "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
     "github_url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}",
     "show_prev_next": False,

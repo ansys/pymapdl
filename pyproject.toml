@@ -76,7 +76,7 @@ doc = [
     "ansys-dpf-core==0.10.1",
     "ansys-mapdl-reader==0.54.0",
     "ansys-tools-visualization-interface==0.4.0",
-    "ansys-sphinx-theme==1.0.5",
+    "ansys-sphinx-theme==1.0.7",
     "grpcio==1.66.1",
     "imageio-ffmpeg==0.5.1",
     "imageio==2.35.1",
