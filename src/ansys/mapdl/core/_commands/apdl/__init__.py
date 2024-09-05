@@ -22,9 +22,10 @@
 
 from . import (
     abbreviations,
-    array_param,
+    array_parameters,
+    encryption_decryption,
     macro_files,
-    matrix_op,
-    parameter_definition,
+    matrix_operations,
+    parameters,
     process_controls,
 )
