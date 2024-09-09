@@ -1,5 +1,5 @@
 
-:thispagetitle: Welcome to PyMAPDL
+.. title:: Welcome to PyMAPDL
 
 
 .. meta::
