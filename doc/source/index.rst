@@ -3,7 +3,7 @@
 
 
 .. meta::
-   :keywords: pymapdl mapdl simulation finite elements python
+   :keywords: pymapdl, mapdl, simulation, finite elements, python
 
 
 .. toctree::
