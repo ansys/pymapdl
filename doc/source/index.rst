@@ -1,9 +1,9 @@
 
-:thispagetitle: Welcome to PyMAPDL
+.. title:: Welcome to PyMAPDL
 
 
 .. meta::
-   :keywords: pymapdl mapdl simulation finite elements python
+   :keywords: pymapdl, mapdl, simulation, finite elements, python
 
 
 .. toctree::
