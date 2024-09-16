@@ -236,7 +236,6 @@ class _MapdlCore(Commands):
     ):
         """Initialize connection with MAPDL."""
         atexit.register(self.__del__)  # registering to exit properly
-        self._name = None  # For naming the instance.
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited: bool = False
@@ -253,6 +252,7 @@ class _MapdlCore(Commands):
         self._file_type_for_plots = file_type_for_plots
         self._default_file_type_for_plots = file_type_for_plots
         self._version = None  # cached version
+        self._mute = False
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -330,6 +330,9 @@ class _MapdlCore(Commands):
 
         self._info = Information(self)
 
+    def _after_run(self, _command: str) -> None:
+        pass
+
     @property
     def allow_ignore(self):
         """Invalid commands will be ignored rather than exceptions
@@ -372,6 +375,9 @@ class _MapdlCore(Commands):
             DeprecationWarning,
         )
         self._ignore_errors = bool(value)
+
+    def _before_run(self, _command: str) -> None:
+        pass
 
     @property
     def chain_commands(self):
@@ -2156,14 +2162,6 @@ class _MapdlCore(Commands):
             self._stored_commands.append(command)
             return
 
-        # Actually sending the message
-        if self._session_id is not None:
-            self._check_session_id()
-        else:
-            # For some reason the session hasn't been created
-            if self.is_grpc:
-                self._create_session()
-
         if mute is None:
             if hasattr(self, "mute"):
                 mute = self.mute
@@ -2225,6 +2223,8 @@ class _MapdlCore(Commands):
                 # Edge case. `\title, 'par=1234' `
                 self._check_parameter_name(param_name)
 
+        self._before_run(command)
+
         short_cmd = parse_to_short_cmd(command)
         text = self._run(command, verbose=verbose, mute=mute)
 
@@ -2236,9 +2236,7 @@ class _MapdlCore(Commands):
             self.show(self.default_file_type_for_plots)
             text = self._run(command, verbose=verbose, mute=mute)
 
-        if command[:4].upper() == "/CLE" and self.is_grpc:
-            # We have reset the database, so we need to create a new session id
-            self._create_session()
+        self._after_run(command)
 
         if mute:
             return
