@@ -800,6 +800,7 @@ class Test_bc_cmdlist_solid:
         mapdl.keyopt(1, 6, 0)
         mapdl.r(1, 0.01)
 
+    @requires("pandas")
     def test_dklist(self, mapdl):
 
         df_dk = pd.DataFrame(
@@ -820,6 +821,7 @@ class Test_bc_cmdlist_solid:
         assert not dklist_result.empty
         assert dklist_result.compare(df_dk).empty
 
+    @requires("pandas")
     def test_dllist(self, mapdl):
 
         df_dl = pd.DataFrame(
@@ -840,6 +842,7 @@ class Test_bc_cmdlist_solid:
         assert not dllist_result.empty
         assert dllist_result.compare(df_dl).empty
 
+    @requires("pandas")
     def test_dalist(self, mapdl):
 
         df_da = pd.DataFrame(
@@ -859,6 +862,7 @@ class Test_bc_cmdlist_solid:
         assert not dalist_result.empty
         assert dalist_result.compare(df_da).empty
 
+    @requires("pandas")
     def test_fklist(self, mapdl):
 
         df_fk = pd.DataFrame(
@@ -879,6 +883,7 @@ class Test_bc_cmdlist_solid:
         assert not fklist_result.empty
         assert fklist_result.compare(df_fk).empty
 
+    @requires("pandas")
     def test_sfllist(self, mapdl):
 
         df_sfl = pd.DataFrame(
@@ -899,6 +904,7 @@ class Test_bc_cmdlist_solid:
         assert not sfllist_result.empty
         assert sfllist_result.compare(df_sfl).empty
 
+    @requires("pandas")
     def test_bfklist(self, mapdl):
 
         df_bfk = pd.DataFrame(
@@ -917,6 +923,7 @@ class Test_bc_cmdlist_solid:
         assert not bfklist_result.empty
         assert bfklist_result.compare(df_bfk).empty
 
+    @requires("pandas")
     def test_bfllist(self, mapdl):
 
         df_bfl = pd.DataFrame(
@@ -935,6 +942,7 @@ class Test_bc_cmdlist_solid:
         assert not bfllist_result.empty
         assert bfllist_result.compare(df_bfl).empty
 
+    @requires("pandas")
     def test_bfalist(self, mapdl):
 
         df_bfa = pd.DataFrame(
@@ -996,6 +1004,7 @@ class Test_bc_cmdlist_model:
         mapdl.mshkey(0)
         mapdl.amesh(1, 1, 1)
 
+    @requires("pandas")
     def test_dlist(self, mapdl):
 
         df_d = pd.DataFrame(
@@ -1016,6 +1025,7 @@ class Test_bc_cmdlist_model:
         assert not dlist_result.empty
         assert dlist_result.compare(df_d).empty
 
+    @requires("pandas")
     def test_flist(self, mapdl):
 
         df_f = pd.DataFrame(
