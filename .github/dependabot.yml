@@ -24,8 +24,8 @@ updates:
       day: "friday"
       time: "00:00"
     labels:
-      - "Maintenance"
-      - "Dependencies"
+      - "maintenance"
+      - "dependencies"
     assignees:
       - "ansys/pymapdl-maintainers"
     commit-message:
@@ -48,15 +48,16 @@ updates:
 
        core:
           patterns:
-            - "*ansys*"
+            - "ansys*"
             - "click"
             - "matplotlib"
             - "pexpect"
             - "pyiges"
-            - "pyvista"
+            - "ansys-tools-visualization-interface"
             - "scipy"
             - "tqdm"
             - "vtk"
+            - "tabulate"
 
           exclude-patterns:
             - "ansys-api-mapdl"

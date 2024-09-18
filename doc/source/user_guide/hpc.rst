@@ -614,6 +614,8 @@ Advanced configuration
 
 The following topics provide some advanced ideas for you to
 explore when using PyMAPDL on HPC clusters.
+In this section, these topics are just briefly described so
+you can use online resources such as `SLURM documentation <slurm_docs_>`_.
 
 Advanced job management
 -----------------------

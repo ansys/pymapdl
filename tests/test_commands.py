@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -766,3 +766,282 @@ def test_cmlist(mapdl):
     assert len(cmlist_all.to_array()) == len(cmlist_all.to_list())
     for each_ in cmlist_all.to_list():
         assert each_ in cmlist_all
+
+
+class Test_bc_cmdlist_solid:
+
+    def solid_model(self, mapdl):
+        # Solid model (Geometry)
+
+        mapdl.clear()
+
+        mapdl.prep7()
+
+        # Define keypoints, lines and area
+        # --------------------
+        mapdl.k(1, 0, 0)
+        mapdl.k(2, 1, 0)
+        mapdl.k(3, 1, 1)
+        mapdl.l(1, 2)
+        mapdl.l(2, 3)
+        mapdl.l(3, 1)
+        mapdl.a(1, 2, 3)
+
+        # Define a material
+        # --------------------
+        mapdl.mp("EX", 1, 30e6)
+        mapdl.mp("NUXY", 1, 0.25)  # Poisson's Ratio
+
+        # Define section
+        # --------------------
+        mapdl.et(1, "PLANE183")
+        mapdl.keyopt(1, 1, 0)
+        mapdl.keyopt(1, 3, 3)
+        mapdl.keyopt(1, 6, 0)
+        mapdl.r(1, 0.01)
+
+    @requires("pandas")
+    def test_dklist(self, mapdl):
+
+        df_dk = pd.DataFrame(
+            {
+                "KEYPOINT": [1],
+                "LABEL": ["UX"],
+                "REAL": [0.0],
+                "IMAG": [0.0],
+                "EXP KEY": ["0"],
+            }
+        )
+
+        self.solid_model(mapdl)
+        mapdl.dk(1, "UX", 0)
+
+        dklist_result = mapdl.dklist().to_dataframe()
+
+        assert not dklist_result.empty
+        assert dklist_result.compare(df_dk).empty
+
+    @requires("pandas")
+    def test_dllist(self, mapdl):
+
+        df_dl = pd.DataFrame(
+            {
+                "LINE": [2, 2],
+                "LABEL": ["UX", "UY"],
+                "REAL": [0.0, 0.0],
+                "IMAG": [0.0, 0.0],
+                "NAREA": ["0", "0"],
+            }
+        )
+
+        self.solid_model(mapdl)
+        mapdl.dl(2, 1, "ALL", 0)
+
+        dllist_result = mapdl.dllist().to_dataframe()
+
+        assert not dllist_result.empty
+        assert dllist_result.compare(df_dl).empty
+
+    @requires("pandas")
+    def test_dalist(self, mapdl):
+
+        df_da = pd.DataFrame(
+            {
+                "AREA": [1],
+                "LABEL": ["UZ"],
+                "REAL": [0.0],
+                "IMAG": [0.0],
+            }
+        )
+
+        self.solid_model(mapdl)
+        mapdl.da(1, "UZ", 0)
+
+        dalist_result = mapdl.dalist().to_dataframe()
+
+        assert not dalist_result.empty
+        assert dalist_result.compare(df_da).empty
+
+    @requires("pandas")
+    def test_fklist(self, mapdl):
+
+        df_fk = pd.DataFrame(
+            {
+                "KEYPOINT": [2, 3],
+                "LABEL": ["FY", "FY"],
+                "REAL": [200.0, 100.0],
+                "IMAG": [0.0, 0.0],
+            }
+        )
+
+        self.solid_model(mapdl)
+        mapdl.fk(2, "FY", 200)
+        mapdl.fk(3, "FY", 100)
+
+        fklist_result = mapdl.fklist().to_dataframe()
+
+        assert not fklist_result.empty
+        assert fklist_result.compare(df_fk).empty
+
+    @requires("pandas")
+    def test_sfllist(self, mapdl):
+
+        df_sfl = pd.DataFrame(
+            {
+                "LINE": [2, 3],
+                "LABEL": ["PRES", "PRES"],
+                "VALI": [50.0, 50.0],
+                "VALJ": [500.0, 500.0],
+            }
+        )
+
+        self.solid_model(mapdl)
+        mapdl.sfl(2, "PRES", 50, 500)
+        mapdl.sfl(3, "PRES", 50, 500)
+
+        sfllist_result = mapdl.sfllist().to_dataframe()
+
+        assert not sfllist_result.empty
+        assert sfllist_result.compare(df_sfl).empty
+
+    @requires("pandas")
+    def test_bfklist(self, mapdl):
+
+        df_bfk = pd.DataFrame(
+            {
+                "KEYPOINT": [2],
+                "LABEL": ["TEMP"],
+                "VALUE": [10.0],
+            }
+        )
+
+        self.solid_model(mapdl)
+        mapdl.bfk(2, "TEMP", 10)
+
+        bfklist_result = mapdl.bfklist().to_dataframe()
+
+        assert not bfklist_result.empty
+        assert bfklist_result.compare(df_bfk).empty
+
+    @requires("pandas")
+    def test_bfllist(self, mapdl):
+
+        df_bfl = pd.DataFrame(
+            {
+                "LINE": [3],
+                "LABEL": ["TEMP"],
+                "VALUE": [15.0],
+            }
+        )
+
+        self.solid_model(mapdl)
+        mapdl.bfl(3, "TEMP", 15)
+
+        bfllist_result = mapdl.bfllist().to_dataframe()
+
+        assert not bfllist_result.empty
+        assert bfllist_result.compare(df_bfl).empty
+
+    @requires("pandas")
+    def test_bfalist(self, mapdl):
+
+        df_bfa = pd.DataFrame(
+            {
+                "AREA": [1],
+                "LABEL": ["TEMP"],
+                "VALUE": [20.0],
+            }
+        )
+
+        self.solid_model(mapdl)
+        mapdl.bfa(1, "TEMP", 20)
+
+        bfalist_result = mapdl.bfalist().to_dataframe()
+
+        assert not bfalist_result.empty
+        assert bfalist_result.compare(df_bfa).empty
+
+
+class Test_bc_cmdlist_model:
+
+    def solid_model(self, mapdl):
+        # Solid model (Geometry)
+
+        mapdl.clear()
+
+        mapdl.prep7()
+
+        # Define keypoints, lines and area
+        # --------------------
+        mapdl.k(1, 0, 0)
+        mapdl.k(2, 1, 0)
+        mapdl.k(3, 1, 1)
+        mapdl.l(1, 2)
+        mapdl.l(2, 3)
+        mapdl.l(3, 1)
+        mapdl.a(1, 2, 3)
+
+        # Define a material
+        # --------------------
+        mapdl.mp("EX", 1, 30e6)
+        mapdl.mp("NUXY", 1, 0.25)  # Poisson's Ratio
+
+        # Define section
+        # --------------------
+        mapdl.et(1, "PLANE183")
+        mapdl.keyopt(1, 1, 0)
+        mapdl.keyopt(1, 3, 3)
+        mapdl.keyopt(1, 6, 0)
+        mapdl.r(1, 0.01)
+
+    def fe_model(self, mapdl):
+        # FE model (Mesh)
+
+        self.solid_model(mapdl)
+
+        mapdl.esize(0.02)
+        mapdl.mshape(0, "2D")
+        mapdl.mshkey(0)
+        mapdl.amesh(1, 1, 1)
+
+    @requires("pandas")
+    def test_dlist(self, mapdl):
+
+        df_d = pd.DataFrame(
+            {
+                "NODE": [2, 2],
+                "LABEL": ["UX", "UY"],
+                "REAL": [0.0, 0.0],
+                "IMAG": [0.0, 0.0],
+            }
+        )
+
+        self.fe_model(mapdl)
+        mapdl.d(2, "UX", 0)
+        mapdl.d(2, "UY", 0)
+
+        dlist_result = mapdl.dlist().to_dataframe()
+
+        assert not dlist_result.empty
+        assert dlist_result.compare(df_d).empty
+
+    @requires("pandas")
+    def test_flist(self, mapdl):
+
+        df_f = pd.DataFrame(
+            {
+                "NODE": [4, 4],
+                "LABEL": ["FX", "FY"],
+                "REAL": [10.0, 20.0],
+                "IMAG": [0.0, 0.0],
+            }
+        )
+
+        self.fe_model(mapdl)
+        mapdl.f(4, "FX", 10)
+        mapdl.f(4, "FY", 20)
+
+        flist_result = mapdl.flist().to_dataframe()
+
+        assert not flist_result.empty
+        assert flist_result.compare(df_f).empty
