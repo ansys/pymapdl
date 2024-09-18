@@ -240,7 +240,7 @@ def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
     unique_nodes, idx_a, idx_b = unique_rows(temp_nodes[nnodes:])
 
     # rewrite node numbers
-    cells[mask] = idx_b + nnodes
+    cells[mask] = (idx_b + nnodes).ravel()
     nextra = idx_a.shape[0]  # extra unique nodes
     nodes_new = nodes_new[: nnodes + nextra]
     nodes_new[nnodes:] = unique_nodes
