@@ -650,24 +650,25 @@ class Geometry:
 
             # reselect from existing selection to mimic APDL behavior
             if amin or amax:
-                if amax is None:
-                    amax = amin
-
-                if amin is None:  # amax is non-zero
-                    amin = 1
-
-                if ninc is None:
-                    ninc = ""
+                amax = amax or amin
+                amin = amin or 1
+                ninc = ninc or ""
 
                 self._mapdl.asel("R", "AREA", vmin=amin, vmax=amax, vinc=ninc)
 
+            ## Duplication
             # duplicate areas to avoid affecting existing areas
+            # Getting the maximum area ID
             a_num = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
+            # Setting the new areas ID starting number
             self._mapdl.numstr("AREA", a_num, mute=True)
+            # Generating new areas
             self._mapdl.agen(2, "ALL", noelem=1, mute=True)
-            a_max = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
 
+            # Getting the new maximum area ID
+            a_max = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
             self._mapdl.asel("S", "AREA", vmin=a_num + 1, vmax=a_max, mute=True)
+
             # necessary to reset element/area meshing association
             self._mapdl.aatt(mute=True)
 
@@ -687,7 +688,7 @@ class Geometry:
                 self._mapdl.prep7(mute=True)
 
             # Mesh and get the number of elements per area
-            resp = self._mapdl.amesh("all")
+            self._mapdl.amesh("all", mute=True)
             elements_per_area = self.get_elements_per_area()
 
             self._mapdl.esla("S")
