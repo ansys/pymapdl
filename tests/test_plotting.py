@@ -255,7 +255,7 @@ def test_aplot(cleared, mapdl, vtk):
     mapdl.aplot(show_area_numbering=True)
     mapdl.aplot(vtk=vtk, color_areas=vtk, show_lines=True, show_line_numbering=True)
 
-    mapdl.aplot(quality=100)
+    mapdl.aplot(quality=10)
     mapdl.aplot(quality=-1)
 
 
@@ -1243,3 +1243,12 @@ def test_xplot_not_changing_geo_selection_components(
 
     plot_func = getattr(mapdl, plot_func)
     check_geometry(mapdl, plot_func)
+
+
+@pytest.mark.parametrize("quality", [101, -2, 0, "as"])
+def test_aplot_quality_fail(mapdl, block, quality):
+    with pytest.raises(
+        ValueError,
+        match="The argument 'quality' can only be a integer between 1 and 10 (included both)",
+    ):
+        mapdl.aplot(quality=quality)
