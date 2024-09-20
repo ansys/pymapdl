@@ -688,7 +688,7 @@ class Geometry:
                 self._mapdl.prep7(mute=True)
 
             # Mesh and get the number of elements per area
-            self._mapdl.amesh("all", mute=True)
+            resp = self._mapdl.amesh("all")
             elements_per_area = self.get_elements_per_area()
 
             self._mapdl.esla("S")
