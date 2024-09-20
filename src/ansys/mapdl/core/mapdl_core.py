@@ -253,6 +253,7 @@ class _MapdlCore(Commands):
         self._default_file_type_for_plots = file_type_for_plots
         self._version = None  # cached version
         self._mute = False
+        self._save_selection_obj = None
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -954,7 +955,9 @@ class _MapdlCore(Commands):
         when exit returns to that selection.
 
         """
-        return self._save_selection(self)
+        if self._save_selection_obj is None:
+            self._save_selection_obj = self._save_selection(self)
+        return self._save_selection_obj
 
     @property
     def solution(self) -> "Solution":
@@ -1415,6 +1418,13 @@ class _MapdlCore(Commands):
 
             mapdl = self._parent()
 
+            # Restore first the components, and later entities; so the entities
+            # selection can be overwritten but the components still activated.
+
+            # Mute to avoid getting issues when the component wasn't created in
+            # first place because there was no entities.
+            self._parent().components.select(last_selection_cmps, mute=True)
+
             # probably this is redundant
             prev_ier = mapdl.ignore_errors
             mapdl.ignore_errors = True
@@ -1424,10 +1434,6 @@ class _MapdlCore(Commands):
                 mapdl.cmdele(cmp_name)
 
             mapdl.ignore_errors = prev_ier
-
-            # mute to avoid getting issues when the component wasn't created in
-            # first place because there was no entities.
-            self._parent().components.select(last_selection_cmps, mute=True)
 
     class _chain_commands:
         """Store MAPDL commands and send one chained command."""
@@ -1440,7 +1446,7 @@ class _MapdlCore(Commands):
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
-            self._parent()._log.debug("Entering chained command mode")
+            self._parent()._log.debug("Exiting chained command mode")
             self._parent()._chain_stored()
             self._parent()._store_commands = False
 
