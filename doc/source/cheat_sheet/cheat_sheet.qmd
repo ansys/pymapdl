@@ -1,16 +1,25 @@
 ---
-title: Your title here
+title: PyMAPDL cheat sheet
 format: cheat_sheet-pdf
-version: Your version here
-footer: Your footer here
+version: main
+footer: PyMAPDL
 footerlinks:
-  - urls: Your URL here
-    text: Your text here
-  - urls: Your URL here
-    text: Your text here
-# Uncomment the following line to not evaluate code cells
-# execute:
-#     eval: false # Set to true to evaluate code cells
+  - urls: 'https://mapdl.docs.pyansys.com/version/stable/'
+    text: Documentation
+  - urls: 'https://mapdl.docs.pyansys.com/version/stable/getting_started/index.html'
+    text: Getting started
+  - urls: 'https://mapdl.docs.pyansys.com/version/stable/examples.html'
+    text: Examples
+  - urls: 'https://mapdl.docs.pyansys.com/version/stable/api/index.html'
+    text: API reference
+  - urls: 'https://github.com/ansys/pymapdl/discussions'
+    text: Discussions
+  - urls: 'https://github.com/ansys/pmapdl/issues'
+    text: 'Issues'
+execute:
+    output: false
+
+latex-clean: true
 jupyter:
   jupytext:
     text_representation:
@@ -24,103 +33,10 @@ jupyter:
     name: python3
 ---
 
-# General section
+# Verify your installation
 
-Description of the first section goes here.
-
+## Check your PyMAPDL version
 ```{python}
-import os
+from ansys.mapdl.core import __version__
+print(f"PyMAPDL version: {__version__}")
 ```
-
-# Section with code output
-
-Description of the second section goes here.
-
-```{python}
-print("Hello, world!")
-```
-
-# Section with code evaluation but no results included
-
-This section is evaluated but execution results are not included in the output.
-```{python}
-#| output: false
-print("Hello, world!")
-```
-
-# Section with code evaluation but no results included
-
-This section is evaluated but execution results are not included in the output.
-
-```{python}
-#| output: false
-print(os.getcwd())
-```
-
-# Section with code evaluation and results included
-
-This section is evaluated and execution results are included in the output.
-
-```{python}
-print(os.getcwd())
-```
-
-# Section without code evaluation
-```{python}
-#| eval: false
-print(os.getcwd())
-```
-
-If there is no evaluation, the code cell is not executed.
-Thus, no execution results are included in the output.
-
-# Section without code echo
-
-This section is not evaluated, and the code cell is not shown in
-the rendered document. However, the output is included in the
-rendered document.
-
-```{python}
-#| echo: false
-print("Hello, world!")
-```
-
-# Section without code echo and output
-This section is not evaluated, and the code cell is not shown in
-the rendered document. The output is also not included in the
-rendered document.
-
-```{python}
-#| echo: false
-#| output: false
-print("Hello, world!")
-```
-
-# Use of variables
-
-## Styles of text
-
-**Bold text**
-
-*Italic text*
-
-***Bold and italic text***
-
-## Lists and images
-1. Numbered list
-2. Numbered list
-3. Numbered list
-
-- Bulleted list
-- Bulleted list
-- Bulleted list
-
-## Subsection
-
-- Add subsections as needed.
-- Add more subsections as needed.
-- Add more subsections as needed.
-
-- [link](https://www.google.com)
-- [link](https://www.google.com)
-- [link](https://www.google.com)
