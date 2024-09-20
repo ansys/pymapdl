@@ -111,6 +111,43 @@ def block_example_coupled(mapdl):
     mapdl.n(3, 2, 0, 0)
 
 
+def check_geometry(mapdl, function):
+    prev_knum = mapdl.geometry.knum
+    prev_lnum = mapdl.geometry.lnum
+    prev_anum = mapdl.geometry.anum
+    prev_kps = mapdl.geometry.get_keypoints(
+        return_as_array=True, return_ids_in_array=True
+    )
+    prev_lines = mapdl.geometry.get_lines(return_as_list=True)
+    prev_areas = mapdl.geometry.get_areas(return_as_list=True)
+
+    out = function()
+
+    new_knum = mapdl.geometry.knum
+    new_lnum = mapdl.geometry.lnum
+    new_anum = mapdl.geometry.anum
+    new_kps = mapdl.geometry.get_keypoints(
+        return_as_array=True, return_ids_in_array=True
+    )
+    new_lines = mapdl.geometry.get_lines(return_as_list=True)
+    new_areas = mapdl.geometry.get_areas(return_as_list=True)
+
+    assert np.allclose(prev_knum, new_knum)
+    assert np.allclose(prev_lnum, new_lnum)
+    assert np.allclose(prev_anum, new_anum)
+    assert len(prev_kps) == len(new_kps)
+    assert len(prev_lines) == len(new_lines)
+    assert len(prev_areas) == len(new_areas)
+    assert all([each in new_kps for each in prev_kps])
+    assert all([each in new_lines for each in prev_lines])
+    assert all([each in new_areas for each in prev_areas])
+    assert all([each in prev_kps for each in new_kps])
+    assert all([each in prev_lines for each in new_lines])
+    assert all([each in prev_areas for each in new_areas])
+
+    return out
+
+
 def test_plot_empty_mesh(mapdl, cleared):
     with pytest.warns(UserWarning):
         mapdl.nplot(vtk=True)
@@ -1126,3 +1163,83 @@ def test_lplot_line(mapdl, cleared):
     mapdl.lplot(
         show_line_numbering=False, show_keypoint_numbering=True, color_lines=True
     )
+
+
+@pytest.mark.parametrize(
+    "func,entity",
+    [("vplot", "VOLU"), ("aplot", "AREA"), ("lplot", "LINE"), ("kplot", "KP")],
+)
+@pytest.mark.parametrize("partial", [True, False])
+def test_xplot_not_changing_geo_selection(mapdl, cleared, func, entity, partial):
+    mapdl.prep7()
+    mapdl.block(0, 1, 0, 1, 0, 1)
+    mapdl.block(1, 2, 1, 2, 1, 2)
+    mapdl.block(2, 3, 2, 3, 2, 3)
+
+    mapdl.geometry._select_items(1, entity, "S")
+    mapdl.cm("selection1", entity)
+    mapdl.cmsel("u", "selection1")
+
+    mapdl.geometry._select_items(2, entity, "S")
+    mapdl.cm("selection2", entity)
+
+    if not partial:
+        mapdl.allsel()
+        mapdl.cmsel("all")
+
+    fn = getattr(mapdl, func)
+    check_geometry(mapdl, fn)
+
+
+def test_xplot_not_changing_geo_selection2(mapdl, cleared):
+    mapdl.prep7()
+    mapdl.rectng(0, 1, 0, 1)
+    mapdl.cm("area1", "area")
+    mapdl.cmsel("u", "area1")
+    mapdl.rectng(2, 4, -1, 1)
+    mapdl.cm("area2", "area")
+    mapdl.allsel()
+    mapdl.cmsel("all")
+
+    check_geometry(mapdl, mapdl.aplot)
+
+
+@pytest.mark.parametrize(
+    "plot_func,entity,gen_func,arg1,arg2",
+    [
+        ("vplot", "VOLU", "block", (0, 1, 0, 1, 0, 1), (1, 2, 1, 2, 1, 2)),
+        ("aplot", "AREA", "rectng", (0, 1, 0, 1), (1, 2, 1, 2)),
+        ("lplot", "LINE", "slashline", (1, 1, 1), (1, -1, 1)),
+        ("kplot", "KP", "k", ("", 0, 0, 0), ("", 1, 1, 1)),
+    ],
+)
+def test_xplot_not_changing_geo_selection_components(
+    mapdl, cleared, plot_func, entity, gen_func, arg1, arg2
+):
+    mapdl.prep7()
+    gen_func = getattr(mapdl, gen_func)
+
+    if entity == "LINE":
+        l0 = mapdl.k("", (0, 0, 0, 0))
+        l1 = mapdl.k("", *arg1)
+        mapdl.l(l0, l1)
+    else:
+        gen_func(*arg1)
+
+    mapdl.cm("select1", entity)
+    mapdl.cmsel("u", "select1")
+
+    if entity == "LINE":
+        l0 = mapdl.k("", (0, 0, 0, 0))
+        l1 = mapdl.k("", *arg2)
+        mapdl.l(l0, l1)
+    else:
+        gen_func(*arg2)
+
+    mapdl.cm("select2", entity)
+
+    mapdl.allsel()
+    mapdl.cmsel("all")
+
+    plot_func = getattr(mapdl, plot_func)
+    check_geometry(mapdl, plot_func)
