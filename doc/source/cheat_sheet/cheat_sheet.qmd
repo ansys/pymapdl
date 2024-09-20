@@ -1,0 +1,126 @@
+---
+title: Your title here
+format: cheat_sheet-pdf
+version: Your version here
+footer: Your footer here
+footerlinks:
+  - urls: Your URL here
+    text: Your text here
+  - urls: Your URL here
+    text: Your text here
+# Uncomment the following line to not evaluate code cells
+# execute:
+#     eval: false # Set to true to evaluate code cells
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.16.1
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
+---
+
+# General section
+
+Description of the first section goes here.
+
+```{python}
+import os
+```
+
+# Section with code output
+
+Description of the second section goes here.
+
+```{python}
+print("Hello, world!")
+```
+
+# Section with code evaluation but no results included
+
+This section is evaluated but execution results are not included in the output.
+```{python}
+#| output: false
+print("Hello, world!")
+```
+
+# Section with code evaluation but no results included
+
+This section is evaluated but execution results are not included in the output.
+
+```{python}
+#| output: false
+print(os.getcwd())
+```
+
+# Section with code evaluation and results included
+
+This section is evaluated and execution results are included in the output.
+
+```{python}
+print(os.getcwd())
+```
+
+# Section without code evaluation
+```{python}
+#| eval: false
+print(os.getcwd())
+```
+
+If there is no evaluation, the code cell is not executed.
+Thus, no execution results are included in the output.
+
+# Section without code echo
+
+This section is not evaluated, and the code cell is not shown in
+the rendered document. However, the output is included in the
+rendered document.
+
+```{python}
+#| echo: false
+print("Hello, world!")
+```
+
+# Section without code echo and output
+This section is not evaluated, and the code cell is not shown in
+the rendered document. The output is also not included in the
+rendered document.
+
+```{python}
+#| echo: false
+#| output: false
+print("Hello, world!")
+```
+
+# Use of variables
+
+## Styles of text
+
+**Bold text**
+
+*Italic text*
+
+***Bold and italic text***
+
+## Lists and images
+1. Numbered list
+2. Numbered list
+3. Numbered list
+
+- Bulleted list
+- Bulleted list
+- Bulleted list
+
+## Subsection
+
+- Add subsections as needed.
+- Add more subsections as needed.
+- Add more subsections as needed.
+
+- [link](https://www.google.com)
+- [link](https://www.google.com)
+- [link](https://www.google.com)

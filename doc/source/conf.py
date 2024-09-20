@@ -9,11 +9,16 @@ import ansys.tools.visualization_interface as viz_interface
 from ansys_sphinx_theme import ansys_favicon, get_version_match
 import numpy as np
 import pyvista
+import sphinx
 from sphinx.application import Sphinx
+from sphinx.util import logging
 from sphinx_gallery.sorting import FileNameSortKey
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
+
+# Convert notebooks into Python scripts and include them in the output files
+logger = logging.getLogger(__name__)
 
 viz_interface.DOCUMENTATION_BUILD = True
 pyvista.BUILDING_GALLERY = True
@@ -308,6 +313,10 @@ html_theme_options = {
             f"pymapdl-v{switcher_version.replace('.', '-')}": "PyMAPDL",
         },
     },
+    "cheatsheet": {
+        "file": "cheat_sheet/cheat_sheet.qmd",
+        "title": "PyMAPDL cheat sheet",
+    },
 }
 
 html_context = {
@@ -420,3 +429,32 @@ def setup(app: Sphinx):
 
     # Julia lexer
     app.add_lexer("julia", JuliaLexer)
+
+
+# -- Configurations for PyMAPDL cheat seet -----------------------------------
+
+
+def replace_version_in_qmd(file_path: Path, search, replace):
+    """Update the version in cheatsheet."""
+    with file_path.open("r") as file:
+        content = file.read()
+
+    logger.info(f"replace_version_in_qmd: replacing {search} with {replace}")
+    content = content.replace(f"version: {search}", f"version: {replace}")
+
+    with file_path.open("w") as file:
+        file.write(content)
+
+
+def update_qmd_mod(app: sphinx.application.Sphinx):
+    """Update the version in cheatsheet."""
+    cheathseet_path = Path(__file__).parent / "cheatsheet" / "cheat_sheet.qmd"
+    logger.info(f"Changing {cheathseet_path}")
+    replace_version_in_qmd(cheathseet_path, "main", version)
+
+
+def revert_qmd_mod(app: sphinx.application.Sphinx, exception):
+    """Revert the version in cheatsheet that was modified."""
+    cheathseet_path = Path(__file__).parent / "cheatsheet" / "cheat_sheet.qmd"
+    logger.info(f"Reverting {cheathseet_path}")
+    replace_version_in_qmd(cheathseet_path, version, "main")

@@ -267,6 +267,16 @@ jobs:
       - name: "Waiting for the services to be up"
         run: |
           .ci/waiting_services.sh
+      
+      - name: Install Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          tinytex: true
+
+      - name: Check Quarto Version
+        shell: bash
+        run: |
+          quarto --version
 
       - name: "Build documentation"
         run: |
