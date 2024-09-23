@@ -182,7 +182,7 @@ mapdl.components["cm_1"] = "node"
 mapdl.allsel()
 mapdl.asel("s", "loc", "z", 1.7)
 areas = mapdl.geometry.anum
-mapdl.geometry.area_select(areas[1], "r")
+mapdl.asel("r", vmin=areas[1])
 mapdl.nsla("r", 1)
 mapdl.nsel("r", "loc", "x", pre_crack, length + pre_crack + eps)
 mapdl.components["cm_2"] = "node"
