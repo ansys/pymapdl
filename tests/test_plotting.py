@@ -256,7 +256,7 @@ def test_aplot(cleared, mapdl, vtk):
     mapdl.aplot(vtk=vtk, color_areas=vtk, show_lines=True, show_line_numbering=True)
 
     mapdl.aplot(quality=10)
-    mapdl.aplot(quality=-1)
+    mapdl.aplot(quality=1)
 
 
 @pytest.mark.parametrize("vtk", [True, False, None])
