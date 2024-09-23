@@ -1220,7 +1220,7 @@ def test_xplot_not_changing_geo_selection_components(
     gen_func = getattr(mapdl, gen_func)
 
     if entity == "LINE":
-        l0 = mapdl.k("", (0, 0, 0, 0))
+        l0 = mapdl.k("", 0, 0, 0)
         l1 = mapdl.k("", *arg1)
         mapdl.l(l0, l1)
     else:
@@ -1230,7 +1230,7 @@ def test_xplot_not_changing_geo_selection_components(
     mapdl.cmsel("u", "select1")
 
     if entity == "LINE":
-        l0 = mapdl.k("", (0, 0, 0, 0))
+        l0 = mapdl.k("", 0, 0, 0)
         l1 = mapdl.k("", *arg2)
         mapdl.l(l0, l1)
     else:
