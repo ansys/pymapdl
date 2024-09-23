@@ -1246,7 +1246,7 @@ def test_xplot_not_changing_geo_selection_components(
 
 
 @pytest.mark.parametrize("quality", [101, -2, 0, "as"])
-def test_aplot_quality_fail(mapdl, block, quality):
+def test_aplot_quality_fail(mapdl, make_block, quality):
     with pytest.raises(
         ValueError,
         match="The argument 'quality' can only be a integer between 1 and 10 (included both)",
