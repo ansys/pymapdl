@@ -594,10 +594,9 @@ class Geometry:
         ...
 
         """
-        quality = int(quality)
-        if quality > 10:
+        if not isinstance(quality, int) or (quality > 10 or quality < 1):
             raise ValueError(
-                "The ``quality`` parameter must be a value between 0 and 10."
+                f"The argument 'quality' can only be an integer between 1 and 10 (both included)."
             )
 
         surf = self.generate_surface(11 - quality)
