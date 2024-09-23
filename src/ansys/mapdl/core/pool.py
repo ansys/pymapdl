@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -24,14 +24,13 @@
 import os
 import shutil
 import socket
-import tempfile
 import time
 from typing import Any, Dict, List, Optional, Union
 import warnings
 import weakref
 
 from ansys.mapdl.core import LOG, launch_mapdl
-from ansys.mapdl.core.errors import MapdlRuntimeError, VersionError
+from ansys.mapdl.core.errors import MapdlDidNotStart, MapdlRuntimeError, VersionError
 from ansys.mapdl.core.launcher import (
     LOCALHOST,
     MAPDL_DEFAULT_PORT,
@@ -60,6 +59,7 @@ else:
 def available_ports(n_ports: int, starting_port: int = MAPDL_DEFAULT_PORT) -> List[int]:
     """Return a list the first ``n_ports`` ports starting from ``starting_port``."""
 
+    LOG.debug(f"Getting {n_ports} available ports starting from {starting_port}.")
     port = starting_port
     ports: List[int] = []
     while port < 65536 and len(ports) < n_ports:
@@ -72,6 +72,7 @@ def available_ports(n_ports: int, starting_port: int = MAPDL_DEFAULT_PORT) -> Li
             f"There are not {n_ports} available ports between {starting_port} and 65536"
         )
 
+    LOG.debug(f"Retrieved the following available ports: {ports}")
     return ports
 
 
@@ -210,16 +211,18 @@ class MapdlPool:
         override=True,
         start_instance: bool = None,
         exec_file: Optional[str] = None,
+        timeout: int = 30,
         **kwargs,
     ) -> None:
         """Initialize several instances of mapdl"""
         self._instances: List[None] = []
+        self._n_instances = n_instances
 
         # Getting debug arguments
         _debug_no_launch = kwargs.pop("_debug_no_launch", None)
 
         if run_location is None:
-            run_location = tempfile.gettempdir()
+            run_location = create_temp_dir()
         self._root_dir: str = run_location
 
         kwargs["remove_temp_files"] = remove_temp_files
@@ -257,11 +260,9 @@ class MapdlPool:
             n_instances, ip, port
         )
 
-        # Converting ip or hostname to ip
-        ips = [socket.gethostbyname(each) for each in ips]
-        _ = [check_valid_ip(each) for each in ips]  # double check
-
         self._ips = ips
+        LOG.debug(f"Using ports: {ports}")
+        LOG.debug(f"Using IPs: {ips}")
 
         if not names:
             names = "Instance"
@@ -304,15 +305,12 @@ class MapdlPool:
 
         self._exec_file = exec_file
 
-        # grab available ports
         if (
             start_instance
             and self._root_dir is not None
             and not os.path.isdir(self._root_dir)
         ):
             os.makedirs(self._root_dir)
-
-        LOG.debug(f"Using ports: {ports}")
 
         self._instances = []
         self._active = True  # used by pool monitor
@@ -342,6 +340,10 @@ class MapdlPool:
             }
             return
 
+        # Converting ip or hostname to ip
+        self._ips = [socket.gethostbyname(each) for each in self._ips]
+        _ = [check_valid_ip(each) for each in self._ips]  # double check
+
         threads = [
             self._spawn_mapdl(
                 i,
@@ -358,13 +360,21 @@ class MapdlPool:
         if wait:
             [thread.join() for thread in threads]
 
-            # check if all clients connected have connected
-            if len(self) != n_instances:
-                n_connected = len(self)
-                warnings.warn(
-                    f"Only %d clients connected out of %d requested"
-                    % (n_connected, n_instances)
+            # make sure everything is ready
+            timeout = time.time() + timeout
+
+            while timeout > time.time():
+                n_instances_ready = sum([each is not None for each in self._instances])
+
+                if n_instances_ready == n_instances:
+                    # Loaded
+                    break
+                time.sleep(0.1)
+            else:
+                raise TimeoutError(
+                    f"Only {n_instances_ready} of {n_instances} could be started."
                 )
+
             if pbar is not None:
                 pbar.close()
 
@@ -392,6 +402,26 @@ class MapdlPool:
         # with counters instead of a bool.
 
         return self._exiting_i != 0
+
+    @property
+    def ready(self) -> bool:
+        """Return true if all the instances are ready (not exited)"""
+        return (
+            sum([each is not None and not each._exited for each in self._instances])
+            == self._n_instances
+        )
+
+    def wait_for_ready(self, timeout: Optional[int] = 180) -> bool:
+        """Wait until pool is ready."""
+        timeout_ = time.time() + timeout
+        while time.time() < timeout_:
+            if self.ready:
+                break
+            time.sleep(0.1)
+        else:
+            raise TimeoutError(
+                f"MapdlPool is not ready after waiting {timeout} seconds."
+            )
 
     def _verify_unique_ports(self) -> None:
         if len(self._ports) != len(self):
@@ -482,10 +512,10 @@ class MapdlPool:
 
         results = []
 
-        if iterable is not None:
-            n = len(iterable)
-        else:
+        if iterable is None:
             n = len(self)
+        else:
+            n = len(iterable)
 
         pbar = None
         if progress_bar:
@@ -497,11 +527,13 @@ class MapdlPool:
 
             pbar = tqdm(total=n, desc="MAPDL Running")
 
+        # monitor thread
         @threaded_daemon
         def func_wrapper(obj, func, timeout, args=None):
             """Expect obj to be an instance of Mapdl"""
             complete = [False]
 
+            # execution thread.
             @threaded_daemon
             def run():
                 if args is not None:
@@ -547,7 +579,17 @@ class MapdlPool:
                 pbar.update(1)
 
         threads = []
-        if iterable is not None:
+        if iterable is None:
+            # simply apply to all
+            for instance in self._instances:
+                if instance:
+                    threads.append(func_wrapper(instance, func, timeout))
+
+            # wait for all threads to complete
+            if wait:
+                [thread.join() for thread in threads]
+
+        else:
             threads = []
             for args in iterable:
                 # grab the next available instance of mapdl
@@ -577,15 +619,6 @@ class MapdlPool:
                 # wait for all threads to complete
                 if wait:
                     [thread.join() for thread in threads]
-
-        else:  # simply apply to all
-            for instance in self._instances:
-                if instance:
-                    threads.append(func_wrapper(instance, func, timeout))
-
-            # wait for all threads to complete
-            if wait:
-                [thread.join() for thread in threads]
 
         return results
 
@@ -857,12 +890,15 @@ class MapdlPool:
         name: str = "",
         start_instance=True,
         exec_file=None,
+        timeout: int = 30,
+        run_location: Optional[str] = None,
     ):
         """Spawn a mapdl instance at an index"""
         # create a new temporary directory for each instance
         self._spawning_i += 1
 
-        run_location = create_temp_dir(self._root_dir, name=name)
+        if not run_location:
+            run_location = create_temp_dir(self._root_dir, name=name)
 
         self._instances[index] = launch_mapdl(
             exec_file=exec_file,
@@ -871,17 +907,32 @@ class MapdlPool:
             ip=ip,
             override=True,
             start_instance=start_instance,
+            on_pool=True,
             **self._spawn_kwargs,
         )
 
         # Waiting for the instance being fully initialized.
         # This is introduce to mitigate #2173
-        while self._instances[index] is None:
-            time.sleep(0.1)
+        timeout = time.time() + timeout
 
-        if self._instances[index].exited == False:
-            raise MapdlRuntimeError(f"MAPDL instance {index} has exited.")
-        self._instances[index].prep7()
+        def initialized(index):
+            if self._instances[index] is not None:
+                if self._instances[index].exited:
+                    raise MapdlRuntimeError("The instance is already exited!")
+                if "PREP" not in self._instances[index].prep7().upper():
+                    raise MapdlDidNotStart("Error while processing PREP7 signal.")
+                return True
+            return False
+
+        while timeout > time.time():
+            if initialized(index):
+                break
+            time.sleep(0.1)
+        else:
+            if not initialized:
+                raise TimeoutError(
+                    f"The instance running at {ip}:{port} could not be started."
+                )
 
         # LOG.debug("Spawned instance %d. Name '%s'", index, name)
         if pbar is not None:
@@ -893,8 +944,6 @@ class MapdlPool:
     def _monitor_pool(self, refresh=1.0):
         """Checks if instances within a pool have exited (failed) and
         restarts them.
-
-
         """
         while self._active:
             for index, instance in enumerate(self._instances):
@@ -913,6 +962,7 @@ class MapdlPool:
                             thread_name=name,
                             exec_file=self._exec_file,
                             start_instance=self._start_instance,
+                            run_location=instance._path,
                         ).join()
 
                     except Exception as e:
@@ -929,6 +979,7 @@ class MapdlPool:
         return "MAPDL Pool with %d active instances" % len(self)
 
     def _set_n_instance_ip_port_args(self, n_instances, ip, port):
+        LOG.debug(f"Input n_instances ({n_instances}), ip ({ip}), and port ({port})")
         if n_instances is None:
             if ip is None or (isinstance(ip, list) and len(ip) == 0):
                 if port is None or (isinstance(port, list) and len(port) < 1):

@@ -288,9 +288,9 @@ which can be done with:
 
 Note that some of the commands with ``/`` are not directly translated
 to functions and are instead run as "classic" commands like
-``mapdl.run('/COM')``. Also, note that the ``*VWRITE`` command
-requires a command immediately following it. This normally locks the
-interface, so it's implemented in the background as an input file
+``mapdl.run('/COM')``. Also, note that the ``*VWRITE`` and ``*MWRITE`` commands
+require a command immediately following it with the desire output format.
+This normally locks the interface, so it's implemented in the background as an input file
 using the :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
 attribute.
 

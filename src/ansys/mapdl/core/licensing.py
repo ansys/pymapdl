@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -51,6 +51,7 @@ LICENSES = {
     "meba": "Ansys Mechanical Enterprise Solver",
     "mech_2": "Ansys Mechanical Premium",
     "mech_1": "Ansys Mechanical Pro",
+    "preppost": "Mechanical Enterprise PrepPost",
 }
 ALLOWABLE_LICENSES = list(LICENSES)
 

@@ -45,42 +45,56 @@ jobs:
     # Label based on branch name
     - uses: actions-ecosystem/action-add-labels@v1
       if: |
-        startsWith(github.event.pull_request.head.ref, 'doc') || 
-        startsWith(github.event.pull_request.head.ref, 'docs')
+        startsWith(github.event.pull_request.title, 'fix') || 
+        startsWith(github.event.pull_request.title, 'bug') ||
+        startsWith(github.event.pull_request.title, 'patch')
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN}}
+        labels: bug
+
+    - uses: actions-ecosystem/action-add-labels@v1
+      if: |
+        startsWith(github.event.pull_request.title, 'feat')
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN}}
+        labels: new feature
+
+    - uses: actions-ecosystem/action-add-labels@v1
+      if: |
+        startsWith(github.event.pull_request.title, 'style') ||
+        startsWith(github.event.pull_request.title, 'refactor') ||
+        startsWith(github.event.pull_request.title, 'perf') ||
+        startsWith(github.event.pull_request.title, 'test') ||
+        startsWith(github.event.pull_request.title, 'chore')
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN}}
+        labels: enhancement
+
+    - uses: actions-ecosystem/action-add-labels@v1
+      if: |
+        startsWith(github.event.pull_request.title, 'build') ||
+        startsWith(github.event.pull_request.title, 'revert') ||
+        startsWith(github.event.pull_request.title, 'maint')
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN}}
+        labels: maintenance
+      
+    - uses: actions-ecosystem/action-add-labels@v1
+      if: |
+        startsWith(github.event.pull_request.title, 'doc') || 
+        startsWith(github.event.pull_request.title, 'docs')
       with:
         github_token: ${{ secrets.GITHUB_TOKEN}}
         labels: documentation
 
     - uses: actions-ecosystem/action-add-labels@v1
       if: |
-        startsWith(github.event.pull_request.head.ref, 'docker') ||
-        startsWith(github.event.pull_request.head.ref, 'no-ci') ||
-        startsWith(github.event.pull_request.head.ref, 'ci')
+        startsWith(github.event.pull_request.title, 'docker') ||
+        startsWith(github.event.pull_request.title, 'no-ci') ||
+        startsWith(github.event.pull_request.title, 'ci')
       with:
         github_token: ${{ secrets.GITHUB_TOKEN}}
         labels: CI/CD
-
-    - uses: actions-ecosystem/action-add-labels@v1
-      if: startsWith(github.event.pull_request.head.ref, 'maint')
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN}}
-        labels: maintenance
-
-    - uses: actions-ecosystem/action-add-labels@v1
-      if: startsWith(github.event.pull_request.head.ref, 'feat')
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN}}
-        labels: |
-          enhancement
-          new feature
-
-    - uses: actions-ecosystem/action-add-labels@v1
-      if: |
-        startsWith(github.event.pull_request.head.ref, 'fix') ||
-        startsWith(github.event.pull_request.head.ref, 'patch')
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN}}
-        labels: bug
 
   commenter:
     runs-on: ubuntu-latest
@@ -113,6 +127,6 @@ jobs:
       pull-requests: write
     runs-on: ubuntu-latest
     steps:
-    - uses: ansys/actions/doc-changelog@v6
+    - uses: ansys/actions/doc-changelog@v7
       with:
         token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}

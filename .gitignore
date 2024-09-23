@@ -84,7 +84,7 @@ docker/mapdl/*.sh
 tmp.out
 
 # virtual environment
-venv/
+venv*
 .venv/
 .venv*
 

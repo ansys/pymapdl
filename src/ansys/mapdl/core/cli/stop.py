@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,12 +21,6 @@
 # SOFTWARE.
 
 import click
-
-
-def is_ansys_process(proc):
-    return (
-        "ansys" in proc.name().lower() or "mapdl" in proc.name().lower()
-    ) and "-grpc" in proc.cmdline()
 
 
 @click.command(
@@ -58,6 +52,8 @@ By default, it stops instances running on the port 50052.""",
 def stop(port, pid, all):
     import psutil
 
+    from ansys.mapdl.core.launcher import is_ansys_process
+
     PROCESS_OK_STATUS = [
         # List of all process status, comment out the ones that means that
         # process is not OK.
@@ -84,27 +80,31 @@ def stop(port, pid, all):
     if port or all:
         killed_ = False
         for proc in psutil.process_iter():
-            if (
-                psutil.pid_exists(proc.pid)
-                and proc.status() in PROCESS_OK_STATUS
-                and is_ansys_process(proc)
-            ):
-                # Killing "all"
-                if all:
-                    try:
-                        proc.kill()
-                        killed_ = True
-                    except psutil.NoSuchProcess:
-                        pass
-
-                else:
-                    # Killing by ports
-                    if str(port) in proc.cmdline():
+            try:
+                if (
+                    psutil.pid_exists(proc.pid)
+                    and proc.status() in PROCESS_OK_STATUS
+                    and is_ansys_process(proc)
+                ):
+                    # Killing "all"
+                    if all:
                         try:
                             proc.kill()
                             killed_ = True
                         except psutil.NoSuchProcess:
                             pass
+
+                    else:
+                        # Killing by ports
+                        if str(port) in proc.cmdline():
+                            try:
+                                proc.kill()
+                                killed_ = True
+                            except psutil.NoSuchProcess:
+                                pass
+
+            except psutil.NoSuchProcess:
+                continue
 
         if all:
             str_ = ""

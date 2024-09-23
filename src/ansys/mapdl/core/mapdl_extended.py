@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -48,10 +48,6 @@ from ansys.mapdl.core.misc import (
     random_string,
     supress_logging,
 )
-from ansys.mapdl.core.theme import get_ansys_colors
-
-if _HAS_PYVISTA:
-    from ansys.mapdl.core.plotting import general_plotter, get_meshes_from_plotter
 
 
 class _MapdlCommandExtended(_MapdlCore):
@@ -447,8 +443,12 @@ class _MapdlCommandExtended(_MapdlCore):
                 raise ModuleNotFoundError(
                     "Using the keyword argument 'vtk' requires having Pyvista installed."
                 )
-
         if vtk:
+            from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
+            pl = kwargs.get("plotter", None)
+            pl = MapdlPlotter().switch_scene(pl)
+
             kwargs.setdefault("title", "MAPDL Keypoint Plot")
             if not self.geometry.n_keypoint:
                 warnings.warn(
@@ -456,7 +456,8 @@ class _MapdlCommandExtended(_MapdlCore):
                     "selected or there are no keypoints in "
                     "the database."
                 )
-                return general_plotter([], [], [], **kwargs)
+                pl.plot([], [], [], **kwargs)
+                return pl.show(**kwargs)
 
             keypoints = self.geometry.get_keypoints(return_as_array=True)
             points = [{"points": keypoints}]
@@ -464,9 +465,8 @@ class _MapdlCommandExtended(_MapdlCore):
             labels = []
             if show_keypoint_numbering:
                 labels.append({"points": keypoints, "labels": self.geometry.knum})
-
-            return general_plotter([], points, labels, **kwargs)
-
+            pl.plot([], points, labels, **kwargs)
+            return pl.show(**kwargs)
         # otherwise, use the legacy plotter
         with self._enable_interactive_plotting():
             return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
@@ -507,7 +507,7 @@ class _MapdlCommandExtended(_MapdlCore):
             Number keypoints.  Only valid when ``show_keypoints=True``
 
         **kwargs
-            See :meth:`ansys.mapdl.core.plotting.general_plotter` for
+            See :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
             ``vtk=True``.
 
@@ -532,13 +532,18 @@ class _MapdlCommandExtended(_MapdlCore):
                 )
 
         if vtk:
+            from ansys.mapdl.core.plotting.theme import get_ansys_colors
+            from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
             kwargs.setdefault("show_scalar_bar", False)
             kwargs.setdefault("title", "MAPDL Line Plot")
             if not self.geometry.n_line:
                 warnings.warn(
                     "Either no lines have been selected or there is nothing to plot."
                 )
-                return general_plotter([], [], [], **kwargs)
+                pl = MapdlPlotter()
+                pl.plot([], [], [], **kwargs)
+                return pl.show(**kwargs)
 
             lines = self.geometry.get_lines(return_as_list=True)
             meshes = []
@@ -594,8 +599,9 @@ class _MapdlCommandExtended(_MapdlCore):
                         "labels": self.geometry.knum,
                     }
                 )
-
-            return general_plotter(meshes, [], labels, **kwargs)
+            pl = MapdlPlotter()
+            pl.plot(meshes, [], labels, **kwargs)
+            return pl.show(**kwargs)
         else:
             with self._enable_interactive_plotting():
                 return super().lplot(nl1=nl1, nl2=nl2, ninc=ninc, **kwargs)
@@ -675,7 +681,7 @@ class _MapdlCommandExtended(_MapdlCore):
             with ``line_width=``
 
         **kwargs
-            See :meth:`ansys.mapdl.core.plotting.general_plotter` for
+            See :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
             ``vtk=True``.
 
@@ -712,6 +718,9 @@ class _MapdlCommandExtended(_MapdlCore):
         if vtk:
             from matplotlib.colors import to_rgba
 
+            from ansys.mapdl.core.plotting.theme import get_ansys_colors
+            from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
             kwargs.setdefault("show_scalar_bar", False)
             kwargs.setdefault("title", "MAPDL Area Plot")
             kwargs.setdefault("scalar_bar_args", {"title": "Scalar Bar Title"})
@@ -720,7 +729,9 @@ class _MapdlCommandExtended(_MapdlCore):
                 warnings.warn(
                     "Either no areas have been selected or there is nothing to plot."
                 )
-                return general_plotter([], [], [], **kwargs)
+                pl = MapdlPlotter()
+                pl.plot([], [], [], **kwargs)
+                return pl.show(**kwargs)
 
             if quality > 10:
                 quality = 10
@@ -824,8 +835,9 @@ class _MapdlCommandExtended(_MapdlCore):
                             "labels": lines["entity_num"],
                         }
                     )
-
-            return general_plotter(meshes, [], labels, **kwargs)
+            pl = MapdlPlotter()
+            pl.plot(meshes, [], labels, **kwargs)
+            return pl.show(**kwargs)
 
         with self._enable_interactive_plotting():
             return super().aplot(
@@ -889,7 +901,7 @@ class _MapdlCommandExtended(_MapdlCore):
             Display line and keypoint numbers when ``vtk=True``.
 
         **kwargs
-            See :meth:`ansys.mapdl.core.plotting.general_plotter` for
+            See :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
             ``vtk=True``.
 
@@ -909,12 +921,19 @@ class _MapdlCommandExtended(_MapdlCore):
                 )
 
         if vtk:
+            from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
+            pl = kwargs.get("plotter", None)
+            pl = MapdlPlotter().switch_scene(pl)
+
             kwargs.setdefault("title", "MAPDL Volume Plot")
             if not self.geometry.n_volu:
                 warnings.warn(
                     "Either no volumes have been selected or there is nothing to plot."
                 )
-                return general_plotter([], [], [], **kwargs)
+                pl = MapdlPlotter()
+                pl.plot([], [], [], **kwargs)
+                return pl.show(**kwargs)
 
             # Storing entities selection
             with self.save_selection:
@@ -930,7 +949,7 @@ class _MapdlCommandExtended(_MapdlCore):
                     self.vsel("S", vmin=each_volu)
                     self.aslv("S", mute=True)  # select areas attached to active volumes
 
-                    pl = self.aplot(
+                    pl_aplot = self.aplot(
                         vtk=True,
                         color_areas=color_areas,
                         quality=quality,
@@ -941,7 +960,7 @@ class _MapdlCommandExtended(_MapdlCore):
                         **kwargs,
                     )
 
-                    meshes_ = get_meshes_from_plotter(pl)
+                    meshes_ = pl_aplot.get_meshes_from_plotter()
 
                     for each_mesh in meshes_:
                         each_mesh.cell_data["entity_num"] = int(each_volu)
@@ -950,9 +969,8 @@ class _MapdlCommandExtended(_MapdlCore):
 
                 meshes = [{"mesh": meshes}]
 
-            return general_plotter(
-                meshes, points, labels, return_plotter=return_plotter, **kwargs
-            )
+            pl.plot(meshes, points, labels, **kwargs)
+            return pl.show(return_plotter=return_plotter, **kwargs)
 
         else:
             with self._enable_interactive_plotting():
@@ -1088,10 +1106,16 @@ class _MapdlCommandExtended(_MapdlCore):
             raise ValueError("`knum` keyword deprecated.  Please use `nnum` instead.")
 
         if vtk:
+            from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
+            pl = kwargs.get("plotter", None)
+            pl = MapdlPlotter().switch_scene(pl)
+
             kwargs.setdefault("title", "MAPDL Node Plot")
             if not self.mesh.n_node:
                 warnings.warn("There are no nodes to plot.")
-                return general_plotter([], [], [], mapdl=self, **kwargs)
+                pl.plot([], [], [], **kwargs)
+                return pl.show(**kwargs)
 
             labels = []
             if nnum:
@@ -1102,7 +1126,8 @@ class _MapdlCommandExtended(_MapdlCore):
 
                 labels = [{"points": pcloud.points, "labels": pcloud["labels"]}]
             points = [{"points": self.mesh.nodes}]
-            return general_plotter([], points, labels, mapdl=self, **kwargs)
+            pl.plot([], points, labels, mapdl=self, **kwargs)
+            return pl.show(**kwargs)
 
         # otherwise, use the built-in nplot
         if isinstance(nnum, bool):
@@ -1184,7 +1209,7 @@ class _MapdlCommandExtended(_MapdlCore):
             By default it is 16.
 
         **kwargs
-            See ``help(ansys.mapdl.core.plotter.general_plotter)`` for more
+            See ``help(ansys.mapdl.core.plotting.visualizer.MapdlPlotter)`` for more
             keyword arguments related to visualizing using ``vtk``.
 
         Examples
@@ -1215,10 +1240,17 @@ class _MapdlCommandExtended(_MapdlCore):
                 )
 
         if vtk:
+            from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
+            pl = kwargs.get("plotter", None)
+            pl = MapdlPlotter().switch_scene(pl)
+            pl.mapdl = self
+
             kwargs.setdefault("title", "MAPDL Element Plot")
             if not self._mesh.n_elem:
                 warnings.warn("There are no elements to plot.")
-                return general_plotter([], [], [], mapdl=self, **kwargs)
+                pl.plot([], [], [], mapdl=self, **kwargs)
+                return pl.show(**kwargs)
 
             # TODO: Consider caching the surface
             esurf = self.mesh._grid.linear_copy().extract_surface().clean()
@@ -1229,13 +1261,14 @@ class _MapdlCommandExtended(_MapdlCore):
             if show_node_numbering:
                 labels = [{"points": esurf.points, "labels": esurf["ansys_node_num"]}]
 
-            return general_plotter(
+            pl.plot(
                 [{"mesh": esurf, "style": kwargs.pop("style", "surface")}],
                 [],
                 labels,
                 mapdl=self,
                 **kwargs,
             )
+            return pl.show(**kwargs)
 
         # otherwise, use MAPDL plotter
         with self._enable_interactive_plotting():
@@ -1478,7 +1511,7 @@ class _MapdlCommandExtended(_MapdlCore):
         # cannot be run in interactive mode
         if not self._store_commands:
             raise MapdlRuntimeError(
-                "VWRTIE cannot run interactively.  \n\nPlease use "
+                "*VWRITE cannot run interactively.  \n\nPlease use "
                 "``with mapdl.non_interactive:``"
             )
 
@@ -1502,6 +1535,30 @@ class _MapdlCommandExtended(_MapdlCore):
             par17=par17,
             par18=par18,
             par19=par19,
+            **kwargs,
+        )
+
+    @wraps(_MapdlCore.mwrite)
+    def mwrite(
+        self, parr="", fname="", ext="", label="", n1="", n2="", n3="", **kwargs
+    ):
+        """Wrapping *MWRITE"""
+
+        # cannot be run in interactive mode
+        if not self._store_commands:
+            raise MapdlRuntimeError(
+                "*MWRITE cannot run interactively.  \n\nPlease use "
+                "``with mapdl.non_interactive:``"
+            )
+
+        return super().mwrite(
+            parr=parr,
+            fname=fname,
+            ext=ext,
+            label=label,
+            n1=n1,
+            n2=n2,
+            n3=n3,
             **kwargs,
         )
 
@@ -2167,9 +2224,10 @@ class _MapdlExtended(_MapdlCommandExtended):
         # skip the first line its a header we wrote in np.savetxt
         self.tread(name, filename, nskip=1, mute=True)
 
-        if self._local:
-            os.remove(filename)
-        else:
+        # skip the first line its a header we wrote in np.savetxt
+        self.tread(name, filename, nskip=1, mute=True)
+
+        if not self._local:
             self.slashdelete(filename)
 
     def load_array(self, name, array):

@@ -8,31 +8,31 @@ name = "ansys-mapdl-core"
 version = "0.69.dev0"
 description = "A Python wrapper for Ansys MAPDL."
 readme = "README.md"
-requires-python = ">=3.9,<3.13"  # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
+requires-python = ">=3.10,<3.13"  # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
 license = {file = "LICENSE"}
 authors = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 dependencies = [
-    "ansys-api-mapdl==0.5.1",  # supports at least 2020R2 - 2022R1
+    "ansys-api-mapdl==0.5.2",  # supports at least 2020R2 - 2022R1
     "ansys-mapdl-reader>=0.51.7",
     "ansys-math-core>=0.1.2",
     "ansys-platform-instancemanagement~=1.0",
-    "platformdirs>=3.6.0",
+    "ansys-tools-visualization-interface>=0.2.6",
+    "ansys-tools-path>=0.3.1",
     "click>=8.1.3", # for CLI interface
-    "tabulate>=0.8.0", # for cli plotting
     "grpcio>=1.30.0",  # tested up to grpcio==1.35
     "importlib-metadata>=4.0",
     "matplotlib>=3.0.0",  # for colormaps for pyvista
     "numpy>=1.14.0,<1.25.0; python_version < '3.9'",
-    "numpy>=1.14.0,<2.0.0; python_version >= '3.9'",
+    "numpy>=1.14.0,<3.0.0; python_version >= '3.9'",
     "pexpect>=4.8.0 ; platform_system=='Linux'",
+    "platformdirs>=3.6.0",
     "protobuf>=3.12.2",  # minimum required based on latest ansys-grpc-mapdl
     "psutil>=5.9.4",
     "pyansys-tools-versioning>=0.3.3",
-    "ansys-tools-path>=0.3.1",
     "pyiges[full]>=0.3.1", # Since v0.3.0, the 'full' flag is needed in order to install 'geomdl'
-    "pyvista>=0.38.1",
     "scipy>=1.3.0",  # for sparse (consider optional?)
+    "tabulate>=0.8.0", # for cli plotting
     "tqdm>=4.45.0",
     "vtk>=9.0.0",
 ]
@@ -54,54 +54,52 @@ classifiers = [
 jupyter = [
     "jupyterlab>=3",
     "ipywidgets",
-    "pyvista[jupyter]",
 ]
 
 tests = [
     "ansys-dpf-core==0.10.1",
-    "autopep8==2.3.0",
-    "matplotlib==3.9.0",
-    "scipy==1.13.1",
+    "ansys-tools-visualization-interface==0.4.4",
+    "autopep8==2.3.1",
+    "matplotlib==3.9.2",
     "pandas==2.2.2",
+    "pyansys-tools-report==0.8.0",
     "pyiges[full]==0.3.1",
-    "pytest==8.2.2",
     "pytest-cov==5.0.0",
-    "pyvista==0.43.10",
-    "pyansys-tools-report==0.7.3",
-    "vtk==9.3.0",
-    "pytest-rerunfailures==14.0",
-    "pytest-pyvista==0.1.9",
     "pytest-memprof<0.3.0",
+    "pytest-pyvista==0.1.9",
+    "pytest-rerunfailures==14.0",
+    "pytest==8.3.3",
+    "scipy==1.14.1",
+    "vtk==9.3.1",
 ]
 doc = [
-    "sphinx==7.3.7",
     "ansys-dpf-core==0.10.1",
-    "ansys-mapdl-reader==0.53.0",
-    "ansys-sphinx-theme==0.16.6",
-    "grpcio==1.64.1",
+    "ansys-mapdl-reader==0.54.1",
+    "ansys-tools-visualization-interface==0.4.4",
+    "ansys-sphinx-theme==1.0.11",
+    "grpcio==1.66.1",
     "imageio-ffmpeg==0.5.1",
-    "imageio==2.34.1",
+    "imageio==2.35.1",
     "jupyter_sphinx==0.5.3",
     "jupyterlab>=3.2.8",
-    "matplotlib==3.9.0",
-    "numpydoc==1.7.0",
+    "matplotlib==3.9.2",
+    "numpydoc==1.8.0",
     "pandas==2.2.2",
-    "plotly==5.22.0",
+    "plotly==5.24.1",
     "pyiges[full]==0.3.1",
     "pypandoc==1.13",
     "pytest-sphinx==0.6.3",
     "pythreejs==2.4.2",
-    "pyvista[trame]==0.43.10",
-    "sphinx-autobuild==2024.4.16",
+    "sphinx-autobuild==2024.9.19",
     "sphinx-autodoc-typehints==1.25.2",
     "sphinx-copybutton==0.5.2",
-    "sphinx-design==0.6.0",
-    "sphinx-gallery==0.16.0",
-    "sphinx-notfound-page==1.0.2",
-    "sphinxcontrib-websupport==1.2.7",
+    "sphinx-design==0.6.1",
+    "sphinx-gallery==0.17.1",
+    "sphinx-notfound-page==1.0.4",
+    "sphinx==8.0.2",
+    "sphinxcontrib-websupport==2.0.0",
     "sphinxemoji==0.3.1",
-    "sphinx-reredirects==0.1.3",
-    "vtk==9.3.0",
+    "vtk==9.3.1",
 ]
 
 [tool.flit.module]
@@ -118,6 +116,7 @@ pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_
 pymapdl = "ansys.mapdl.core.cli:main"
 
 [tool.pytest.ini_options]
+addopts = "-ra -vvv"
 junit_family = "legacy"
 filterwarnings = [
     "ignore::FutureWarning",
@@ -262,4 +261,18 @@ showcontent = true
 [[tool.towncrier.type]]
 directory = "miscellaneous"
 name = "Miscellaneous"
+showcontent = true
+[[tool.towncrier.type]]
+directory = "documentation"
+name = "Documentation"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "maintenance"
+name = "Maintenance"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "test"
+name = "Test"
 showcontent = true

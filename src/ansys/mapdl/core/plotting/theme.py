@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Store parameters for a PyMAPDL-specific theme for pyvista"""
+"""Store parameters for a PyMAPDL-specific theme for PyVista"""
 
 import numpy as np
 
@@ -85,11 +85,17 @@ def get_ansys_colors(N=9):
 
 
 class MapdlTheme(Theme):
-    """PyMAPDL-specific theme for Pyvista.
+    """Provides the PyMAPDL-specific theme for PyVista.
+
+    The theme includes these defaults:
+
+    - ``'jet'`` for the (rainbow) colormap.
+    - ``'Courier'`` font family for an interactive plot
+    - ``'PyMAPDL'`` for the title of an interactive plot
 
     Examples
     --------
-    Create a custom theme with unique parameters from the base MapdlTheme.
+    Create a custom theme with unique parameters from the ``MapdlTheme`` base.
 
     >>> from ansys.mapdl import core as pymapdl
     >>> my_theme = pymapdl.MapdlTheme()
@@ -119,12 +125,12 @@ class MapdlTheme(Theme):
 
         if _HAS_MATPLOTLIB:
             self.cmap = PyMAPDL_cmap
+        self.font.family = "arial"
 
         self.font.size = 18
         self.font.title_size = 18
         self.font.label_size = 18
         self.font.color = "black"
-        self.font.family = "arial"
 
         self.axes.x_color = "tomato"
         self.axes.y_color = "seagreen"

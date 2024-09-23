@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -28,7 +28,6 @@ import pytest
 
 ## Checking MAPDL versions
 from ansys.mapdl.core.database import MINIMUM_MAPDL_VERSION, DBDef, MapdlDb
-from ansys.mapdl.core.database.database import FAILING_DATABASE_MAPDL
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlVersionError
 from ansys.mapdl.core.misc import random_string
 from conftest import ON_CI
@@ -43,7 +42,6 @@ def db(mapdl):
         pytest.skip("Requires 'ansys.api.mapdl' package to at least v0.5.1.")
 
     ## Checking MAPDL versions
-
     mapdl_version = str(mapdl.version)
     if not server_meets_version(mapdl_version, MINIMUM_MAPDL_VERSION):
         pytest.skip(
@@ -51,15 +49,9 @@ def db(mapdl):
         )
 
     ## Exceptions
-    # Exception for 22.2
-    if mapdl_version == "22.2" and ON_CI:
+    if mapdl_version in ["22.2", "23.1", "23.2", "24.1", "24.2", "25.1"] and ON_CI:
         pytest.skip(
             f"This MAPDL version ({mapdl_version}) docker image seems to not support DB, but local does."
-        )
-
-    if mapdl_version == "24.1" or mapdl_version == "24.2":
-        pytest.skip(
-            f"This MAPDL version ({mapdl_version}) does not support PyMAPDL Database."
         )
 
     if mapdl._server_version < (0, 4, 1):  # 2021R2
@@ -112,15 +104,10 @@ def test_database_start_stop(mapdl):
             f"This MAPDL version ({mapdl_version}) is not compatible with the Database module."
         )
 
-    # Exception for 22.2
-    if mapdl_version == "22.2" and ON_CI:
+    # Exceptions
+    if mapdl_version in ["22.2", "23.1", "23.2", "24.1", "24.2", "25.1"] and ON_CI:
         pytest.skip(
             f"This MAPDL version ({mapdl_version}) docker image seems to not support DB, but local does."
-        )
-
-    if mapdl_version in FAILING_DATABASE_MAPDL:
-        pytest.skip(
-            f"This MAPDL version ({mapdl_version}) docker image does not support Database module."
         )
 
     # verify it can be created twice
