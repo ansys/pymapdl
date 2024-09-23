@@ -324,7 +324,7 @@ jobs:
       - name: "Display files structure"
         if: always()
         env:
-          MAPDL_INSTANCE: mapdl
+          MAPDL_INSTANCE: MAPDL_0
           LOG_NAMES: logs-build-docs
         run: |
           .ci/display_logs.sh
@@ -548,8 +548,8 @@ jobs:
         if: always()
         env:
           MAPDL_VERSION: ${{ matrix.mapdl-version }}
-          MAPDL_INSTANCE: mapdl
-          LOG_NAMES: logs-${{ matrix.mapdl-version }}
+          MAPDL_INSTANCE: MAPDL_0
+          LOG_NAMES: logs-remote-${{ matrix.mapdl-version }}
         run: |
           .ci/collect_mapdl_logs.sh
 
@@ -557,14 +557,14 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: logs-${{ matrix.mapdl-version }}.tgz
+          name: logs-remote-${{ matrix.mapdl-version }}.tgz
           path: ./logs-${{ matrix.mapdl-version }}.tgz
 
       - name: "Display files structure"
         if: always()
         env:
-          MAPDL_INSTANCE: mapdl
-          LOG_NAMES: logs-${{ matrix.mapdl-version }}
+          MAPDL_INSTANCE: MAPDL_0
+          LOG_NAMES: logs-remote-${{ matrix.mapdl-version }}
         run: |
           .ci/display_logs.sh
 
