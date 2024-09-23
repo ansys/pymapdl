@@ -22,7 +22,6 @@
 
 import os
 from pathlib import Path
-import socket
 import time
 
 import numpy as np
@@ -276,7 +275,6 @@ class TestMapdlPool:
             assert pool._names(i) in dirs_path_pool
             assert f"Instance_{i}" in dirs_path_pool
 
-    @requires("local")
     @skip_if_ignore_pool
     def test_directory_names_custom_string(self, tmpdir):
         pool = MapdlPool(
@@ -287,6 +285,7 @@ class TestMapdlPool:
             names="my_instance",
             port=50056,
             additional_switches=QUICK_LAUNCH_SWITCHES,
+            _debug_no_launch=True,
         )
 
         dirs_path_pool = os.listdir(pool._root_dir)
@@ -295,7 +294,6 @@ class TestMapdlPool:
 
         pool.exit(block=True)
 
-    @requires("local")
     @skip_if_ignore_pool
     def test_directory_names_function(self, tmpdir):
         def myfun(i):
@@ -313,6 +311,7 @@ class TestMapdlPool:
             names=myfun,
             run_location=tmpdir,
             additional_switches=QUICK_LAUNCH_SWITCHES,
+            _debug_no_launch=True,
         )
 
         dirs_path_pool = os.listdir(pool._root_dir)
@@ -416,8 +415,6 @@ class TestMapdlPool:
         monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", raising=False)
 
         conf = MapdlPool(ip=ips, _debug_no_launch=True)._debug_no_launch
-
-        ips = [socket.gethostbyname(each) for each in ips]
 
         assert conf["ips"] == ips
         assert conf["ports"] == [50052 for i in range(len(ips))]
@@ -785,9 +782,6 @@ class TestMapdlPool:
             conf = MapdlPool(
                 n_instances=n_instances, ip=ip, port=port, _debug_no_launch=True
             )._debug_no_launch
-
-            if exp_ip:
-                exp_ip = [socket.gethostbyname(each) for each in exp_ip]
 
             assert conf["n_instances"] == exp_n_instances
             assert len(conf["ips"]) == exp_n_instances
