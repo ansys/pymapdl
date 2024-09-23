@@ -2277,9 +2277,6 @@ class _MapdlCore(Commands):
 
     def __del__(self):
         """Clean up when complete"""
-        # Disable logging at exiting using __del__
-        self._log.setLevel(logging.CRITICAL + 1)
-
         if self._cleanup:
             # removing logging handlers if they are closed to avoid I/O errors
             # when exiting after the logger file has been closed.
@@ -2297,10 +2294,11 @@ class _MapdlCore(Commands):
     def _cleanup_loggers(self):
         """Clean up all the loggers"""
         # Detached from ``__del__`` for easier testing
-        if not hasattr(self, "_log"):
-            return  # Early exit if logger has been already cleaned.
+        # if not hasattr(self, "_log"):
+        #     return  # Early exit if logger has been already cleaned.
 
         logger = self._log
+        logger.setLevel(logging.CRITICAL + 1)
 
         if logger.hasHandlers():
             for each_handler in logger.logger.handlers:
