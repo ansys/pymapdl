@@ -2280,7 +2280,8 @@ class _MapdlCore(Commands):
         if self._cleanup:
             # removing logging handlers if they are closed to avoid I/O errors
             # when exiting after the logger file has been closed.
-            self._cleanup_loggers()
+            # self._cleanup_loggers()
+            logging.disable(logging.CRITICAL)
 
             try:
                 self.exit()
