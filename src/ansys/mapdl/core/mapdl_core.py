@@ -2277,6 +2277,9 @@ class _MapdlCore(Commands):
 
     def __del__(self):
         """Clean up when complete"""
+        # Disable logging at exiting using __del__
+        self._log.setLevel(logging.CRITICAL + 1)
+
         if self._cleanup:
             # removing logging handlers if they are closed to avoid I/O errors
             # when exiting after the logger file has been closed.
