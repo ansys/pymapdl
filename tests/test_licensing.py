@@ -303,23 +303,16 @@ def test_stop_license_checker():
     license_checker.start()
     time.sleep(1)
 
+    prev_stop = license_checker.stop
+    prev_is_connected = license_checker.is_connected
+
     license_checker.stop = True  # Overwriting the connect attribute
     # so the thread is killed right after.
     time.sleep(2)
+
     assert not license_checker._lic_file_thread.is_alive()
-
-
-@requires("ansys-tools-path")
-def test_is_connected_license_checker():
-    license_checker = licensing.LicenseChecker()
-
-    license_checker.start()
-    time.sleep(1)
-
-    license_checker.is_connected = True  # Overwriting the connect attribute
-    # so the thread is killed right after.
-    time.sleep(2)
-    assert not license_checker._lic_file_thread.is_alive()
+    assert not prev_stop
+    assert not prev_is_connected
 
 
 @skip_no_lic_bin
