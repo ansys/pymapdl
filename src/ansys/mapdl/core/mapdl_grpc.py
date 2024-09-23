@@ -1069,8 +1069,6 @@ class MapdlGrpc(MapdlBase):
         elif self._exited:
             # Already exited.
             return
-        else:
-            mapdl_path = self.directory
 
         if save:
             self._log.debug("Saving MAPDL database")
@@ -1095,6 +1093,7 @@ class MapdlGrpc(MapdlBase):
         self._log.debug("Exiting MAPDL")
 
         if self._local:
+            mapdl_path = self.directory
             self._cache_pids()  # Recache processes
 
             if os.name == "nt":
