@@ -283,6 +283,7 @@ class _MapdlCore(Commands):
         self._start_parm: Dict[str, Any] = start_parm
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
+        self._path_cache = None  # Cache
         self._print_com: bool = print_com  # print the command /COM input.
         self.check_parameter_names = start_parm.get("check_parameter_names", True)
 
@@ -510,10 +511,14 @@ class _MapdlCore(Commands):
             # new line to fix path issue, see #416
             self._path = repr(self._path)[1:-1]
         else:  # pragma: no cover
-            raise IOError(
-                f"The directory returned by /INQUIRE is not valid ('{self._path}')."
-            )
+            if self._path_cache:
+                return self._path_cache
+            else:
+                raise IOError(
+                    f"The directory returned by /INQUIRE is not valid ('{self._path}')."
+                )
 
+        self._path_cache = self._path # update
         return self._path
 
     @directory.setter
