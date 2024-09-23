@@ -1663,21 +1663,7 @@ def launch_mapdl(
             return
 
         if _debug_no_launch:
-            return pack_parameters(
-                port,
-                ip,
-                add_env_vars,
-                replace_env_vars,
-                cleanup_on_exit,
-                loglevel,
-                set_no_abort,
-                remove_temp_dir_on_exit,
-                log_apdl,
-                use_vtk,
-                start_parm,
-                start_instance,
-                version,
-            )  # type: ignore
+            return pack_parameters(locals())  # type: ignore
 
         mapdl = MapdlGrpc(
             ip=ip,
@@ -1821,21 +1807,7 @@ def launch_mapdl(
         elif mode == "grpc":
             if _debug_no_launch:
                 # Early exit, just for testing
-                return pack_parameters(
-                    port,
-                    ip,
-                    add_env_vars,
-                    replace_env_vars,
-                    cleanup_on_exit,
-                    loglevel,
-                    set_no_abort,
-                    remove_temp_dir_on_exit,
-                    log_apdl,
-                    use_vtk,
-                    start_parm,
-                    start_instance,
-                    version,
-                )  # type: ignore
+                return pack_parameters(locals())  # type: ignore
 
             port, actual_run_location, process = launch_grpc(
                 port=port,
@@ -2283,34 +2255,22 @@ def _parse_slurm_options(
     return exec_file, jobname, nproc, ram, additional_switches
 
 
-def pack_parameters(
-    port,
-    ip,
-    add_env_vars,
-    replace_env_vars,
-    cleanup_on_exit,
-    loglevel,
-    set_no_abort,
-    remove_temp_dir_on_exit,
-    log_apdl,
-    use_vtk,
-    start_parm,
-    start_instance,
-    version,
-):
+def pack_parameters(locals_var):
     # pack all the arguments in a dict for debugging purposes
+    # We prefer to explicitly output the desired output
     dict_ = {}
-    dict_["port"] = port
-    dict_["ip"] = ip
-    dict_["add_env_vars"] = add_env_vars
-    dict_["replace_env_vars"] = replace_env_vars
-    dict_["cleanup_on_exit"] = cleanup_on_exit
-    dict_["loglevel"] = loglevel
-    dict_["set_no_abort"] = set_no_abort
-    dict_["remove_temp_dir_on_exit"] = remove_temp_dir_on_exit
-    dict_["log_apdl"] = log_apdl
-    dict_["use_vtk"] = use_vtk
-    dict_["start_parm"] = start_parm
-    dict_["start_instance"] = start_instance
-    dict_["version"] = version
+    dict_["port"] = locals_var["port"]
+    dict_["ip"] = locals_var["ip"]
+    dict_["add_env_vars"] = locals_var["add_env_vars"]
+    dict_["replace_env_vars"] = locals_var["replace_env_vars"]
+    dict_["cleanup_on_exit"] = locals_var["cleanup_on_exit"]
+    dict_["loglevel"] = locals_var["loglevel"]
+    dict_["set_no_abort"] = locals_var["set_no_abort"]
+    dict_["remove_temp_dir_on_exit"] = locals_var["remove_temp_dir_on_exit"]
+    dict_["log_apdl"] = locals_var["log_apdl"]
+    dict_["use_vtk"] = locals_var["use_vtk"]
+    dict_["start_parm"] = locals_var["start_parm"]
+    dict_["start_instance"] = locals_var["start_instance"]
+    dict_["version"] = locals_var["version"]
+    dict_["additional_switches"] = locals_var["additional_switches"]
     return dict_
