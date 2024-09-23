@@ -518,7 +518,7 @@ class _MapdlCore(Commands):
                     f"The directory returned by /INQUIRE is not valid ('{self._path}')."
                 )
 
-        self._path_cache = self._path # update
+        self._path_cache = self._path  # update
         return self._path
 
     @directory.setter
