@@ -40,3 +40,9 @@ jupyter:
 from ansys.mapdl.core import __version__
 print(f"PyMAPDL version: {__version__}")
 ```
+
+## Launch PyMAPDL
+```{python}
+from ansys.mapdl.core import mapdl_launch
+mapdl = mapdl_launch()
+```
