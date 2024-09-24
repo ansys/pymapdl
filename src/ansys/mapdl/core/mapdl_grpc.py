@@ -1039,7 +1039,7 @@ class MapdlGrpc(MapdlBase):
                 continue
 
     @protect_from(ValueError, "I/O operation on closed file.")
-    def exit(self, save=False, force=False):
+    def exit(self, save=False, force=False, **kwargs):
         """Exit MAPDL.
 
         Parameters
@@ -1093,18 +1093,21 @@ class MapdlGrpc(MapdlBase):
         self._exiting = True
         self._log.debug("Exiting MAPDL")
 
-        if self._local:
-            mapdl_path = self.directory
-            self._cache_pids()  # Recache processes
+        if not kwargs.pop("fake_exit", False):
+            # This cannot should not be faked
+            if self._local:
+                mapdl_path = self.directory
+                self._cache_pids()  # Recache processes
 
-            if os.name == "nt":
+                if os.name == "nt":
+                    self._kill_server()
+                self._close_process()
+                self._remove_lock_file(mapdl_path)
+            else:
                 self._kill_server()
-            self._close_process()
-            self._remove_lock_file(mapdl_path)
-        else:
-            self._kill_server()
 
         self._exited = True
+        self._exiting = False
 
         if self._remote_instance:  # pragma: no cover
             # No cover: The CI is working with a single MAPDL instance
