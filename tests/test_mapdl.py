@@ -1928,24 +1928,28 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
 
 def test_save_on_exit(mapdl, cleared):
     with mapdl.non_interactive:
-        mapdl.exit(save=True)
+        mapdl.exit(save=True, fake_exit=True)
+        mapdl._exited = False  # avoiding set exited on the class.
 
         lines = "\n".join(mapdl._stored_commands.copy())
         assert "SAVE" in lines.upper()
 
-        mapdl._stored_commands = [""]  # resetting
-        mapdl.prep7()
+        mapdl._stored_commands = []  # resetting
+
+    mapdl.prep7()
 
 
 def test_save_on_exit_not(mapdl, cleared):
     with mapdl.non_interactive:
-        mapdl.exit(save=False)
+        mapdl.exit(save=False, fake_exit=True)
+        mapdl._exited = False  # avoiding set exited on the class.
 
         lines = "\n".join(mapdl._stored_commands.copy())
         assert "SAVE" not in lines.upper()
 
-        mapdl._stored_commands = [""]  # resetting
-        mapdl.prep7()
+        mapdl._stored_commands = []  # resetting
+
+    mapdl.prep7()
 
 
 def test_input_strings_inside_non_interactive(mapdl, cleared):
