@@ -278,6 +278,12 @@ jobs:
         shell: bash
         run: |
           quarto --version
+      
+      - name: "Install Poppler for PDF to PNG conversion"
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
 
       - name: "Build documentation"
         run: |
