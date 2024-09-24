@@ -356,6 +356,7 @@ class MapdlGrpc(MapdlBase):
             remove_temp_dir_on_exit = remove_temp_files
             remove_temp_files = None
 
+        self._name: Optional[str] = None
         self._session_id_: Optional[str] = None
         self._checking_session_id_: bool = False
         self.__distributed: Optional[bool] = None
@@ -411,7 +412,6 @@ class MapdlGrpc(MapdlBase):
         self._health_response_queue: Optional["Queue"] = None
         self._exiting: bool = False
         self._exited: Optional[bool] = None
-        self._mute: bool = False
         self._db: Optional[MapdlDb] = None
         self.__server_version: Optional[str] = None
         self._state: Optional[grpc.Future] = None
@@ -488,6 +488,18 @@ class MapdlGrpc(MapdlBase):
             self._cache_pids()
 
         self._create_session()
+
+    def _after_run(self, command: str) -> None:
+        if command[:4].upper() == "/CLE":
+            # We have reset the database, so we need to create a new session id
+            self._create_session()
+
+    def _before_run(self, _command: str) -> None:
+        if self._session_id is not None:
+            self._check_session_id()
+        else:
+            # For some reason the session hasn't been created
+            self._create_session()
 
     def _create_process_stds_queue(self, process=None):
         from ansys.mapdl.core.launcher import (
@@ -2955,7 +2967,7 @@ class MapdlGrpc(MapdlBase):
         # non-interactive and there's no output to return
         super().cmatrix(symfac, condname, numcond, grndkey, capname, **kwargs)
 
-    @property
+    @MapdlBase.name.getter
     def name(self) -> str:
         """Instance unique identifier."""
         if not self._name:
