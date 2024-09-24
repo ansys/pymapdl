@@ -1900,6 +1900,9 @@ class _MapdlCore(Commands):
         Overridden by gRPC.
 
         """
+        if not self._stored_commands:
+            return  # Early exit in case it is empty
+
         self._log.debug("Flushing stored commands")
         rnd_str = random_string()
         tmp_out = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.out")
