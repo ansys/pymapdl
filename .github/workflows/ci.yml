@@ -558,7 +558,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: logs-remote-${{ matrix.mapdl-version }}.tgz
-          path: ./logs-${{ matrix.mapdl-version }}.tgz
+          path: ./logs-remote-${{ matrix.mapdl-version }}.tgz
 
       - name: "Display files structure"
         if: always()
