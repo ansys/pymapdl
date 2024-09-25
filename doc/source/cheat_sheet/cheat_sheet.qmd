@@ -258,7 +258,7 @@ and storing it in the underlying UnstructuredGrid object:
 from pyvista import Plotter
 pl = Plotter()
 pl0 = mapdl.post_processing.plot_nodal_temperature(return_plotter=True)
-pl.add(pl0.meshes[0])
+pl.add_mesh(pl0.meshes[0])
 pl.show()
 ```
 
