@@ -70,6 +70,7 @@ mapdl = launch_mapdl(start_instance=False, ip='192.168.1.30', port=50001)
 
 Create and exit a pool of instances:
 ```{python}
+#| eval: false
 # Create a pool of 10 instances
 from ansys.mapdl.core import pool
 mapdl_pool = pool.MapdlPool(5)
