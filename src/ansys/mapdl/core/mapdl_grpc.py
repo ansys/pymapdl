@@ -2034,6 +2034,11 @@ class MapdlGrpc(MapdlBase):
         """Writes stored commands to an input file and runs the input
         file.  Used with non_interactive.
         """
+        if not self._stored_commands:
+            self._log.debug("There is no commands to be flushed.")
+            self._store_commands = False
+            return
+
         self._log.debug("Flushing stored commands")
 
         commands = "\n".join(self._stored_commands)
