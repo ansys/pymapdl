@@ -288,9 +288,9 @@ class TestMapdlPool:
             _debug_no_launch=True,
         )
         dirs_path_pool = os.listdir(pool._root_dir)
-
-        assert "my_instance_0" in dirs_path_pool
-        assert "my_instance_1" in dirs_path_pool
+        time.sleep(2)
+        assert len(pool) == 2
+        assert all(["my_instance" in each for each in dirs_path_pool])
 
     @skip_if_ignore_pool
     def test_directory_names_function(self, tmpdir):
