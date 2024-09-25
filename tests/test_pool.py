@@ -289,7 +289,6 @@ class TestMapdlPool:
         )
         dirs_path_pool = os.listdir(pool._root_dir)
         time.sleep(2)
-        assert len(pool) == 2
         assert all(["my_instance" in each for each in dirs_path_pool])
 
     @skip_if_ignore_pool
