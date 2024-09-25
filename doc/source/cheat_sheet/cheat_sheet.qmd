@@ -18,6 +18,7 @@ footerlinks:
     text: 'Issues'
 execute:
     output: false
+    eval: true
 
 latex-clean: true
 latex-auto-install: true
@@ -36,14 +37,245 @@ jupyter:
 
 # Verify your installation
 
-## Check your PyMAPDL version
+Check your PyMAPDL version
 ```{python}
 from ansys.mapdl.core import __version__
 print(f"PyMAPDL version: {__version__}")
 ```
 
-## Launch PyMAPDL
+# Launch PyMAPDL
+
+Launch a PyMAPDL session and exit it
 ```{python}
-from ansys.mapdl.core import mapdl_launch
-mapdl = mapdl_launch()
+from ansys.mapdl.core import launch_mapdl
+# Launch the PyMAPDL session
+mapdl = launch_mapdl()
+# Exit it
+mapdl.exit()
+```
+
+Specify a job name, number of processors, and working directory:
+```{python}
+#| eval: false
+jname = 'user_jobname'
+path = 'path_to_working_directory'
+mapdl = launch_mapdl(nproc=2, run_location=path, jobname=jname)
+```
+
+Connect to an existing instance of MAPDL at IP address ``192.168.1.30`` and port ``50001``:
+```{python}
+#| eval: false
+mapdl = launch_mapdl(start_instance=False, ip='192.168.1.30', port=50001)
+```
+
+Create and exit a pool of instances:
+```{python}
+# Create a pool of 10 instances
+from ansys.mapdl.core import pool
+mapdl_pool = pool.MapdlPool(5)
+# Exit the pool
+mapdl_pool.exit()
+```
+
+# PyMAPDL commands
+
+PyMAPDL commands are Python statements that act as a
+wrapper for APDL commands. For example: ``ESEL,s,type,1`` 
+is translated as
+```{python}
+#| echo: false
+mapdl = launch_mapdl()
+```
+```{python}
+mapdl.esel('s', 'type', vmin=1)
+```
+```{python}
+#| echo: false
+mapdl.exit()
+```
+
+Commands that start with \* or \/ have these characters
+removed:
+```{python}
+#| eval: false
+mapdl.prep7() # /PREP7
+mapdl.get() # *GET
+```
+
+In cases where removing * or / causes conflicts with other
+commands, a prefix "slash" or "star" is added:
+```{python}
+#| eval: false
+mapdl.solu() # SOLU
+mapdl.slashsolu() # /SOLU
+
+mapdl.vget() # VGET
+mapdl.starvget() # *VGET
+``` 
+
+Convert an existing APDL script to PyMAPDL format:
+```{python}
+#| eval: false
+inputfile = 'ansys_inputfile.inp'
+pyscript = 'pyscript.py'
+mapdl.convert_script(inputfile, pyscript)
+```
+
+# MAPDL class
+
+Load a table from Python to MAPDL:
+```{python}
+#| echo: false
+mapdl = launch_mapdl()
+```
+```{python}
+import numpy as np
+np_array = np.array([[1,2,3], [4,5,6]])
+mapdl.load_table("table_name", np_array)
+```
+
+Write parameters or access from or  to the MAPDL database:
+```{python}
+# Create a parameter from a NumPy array
+mapdl.parameters['my_np_param'] = np_array
+# Save a parameter to a NumPy array
+saved_np_array = mapdl.parameters['my_np_param']
+```
+
+```{python}
+#| echo: false
+mapdl.exit()
+```
+
+```{python}
+#| echo: False
+###############################################################################
+# Hidden example for testing purpose (3d_plate_thermal.py)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+mapdl = launch_mapdl()
+
+# Create a simple beam, specify the material properties, and mesh it.
+mapdl.prep7()
+mapdl.mp("kxx", 1, 45)
+mapdl.et(1, 90)
+mapdl.block(-0.3, 0.3, -0.46, 1.34, -0.2, -0.2 + 0.02)
+mapdl.vsweep(1)
+
+# Set the thermal boundary conditions
+mapdl.asel("S", vmin=3)
+mapdl.nsla()
+mapdl.d("all", "temp", 5)
+mapdl.asel("S", vmin=4)
+mapdl.nsla()
+mapdl.d("all", "temp", 100)
+out = mapdl.allsel()
+
+mapdl.vsweep(1)
+```
+
+Access information using *GET and *VGET and store it in
+NumPy arrays:
+```{python}
+# Run *GET command and return a Python value
+mapdl.get_value(entity='NODE', item1='COUNT')
+# Run *VGET command and return a Python array
+mapdl.get_array(entity='NODE', item1='NLIST')
+```
+
+# Mesh class
+
+Store the finite element mesh as a VTK UnstructuredGrid
+data object:
+```{python}
+grid = mapdl.mesh.grid
+```
+
+Save element and node numbers to Python arrays:
+
+```{python}
+# Get an array of the nodal coordinates
+nodes = mapdl.mesh.nodes
+
+# Save node numbers of selected nodes to an array
+node_num = mapdl.mesh.nnum
+# Save node numbers of all nodes to an array
+node_num_all = mapdl.mesh.nnum_all
+
+# Get element numbers of currently selected elements
+elem_num = mapdl.mesh.enum
+# Get all element numbers, including those not selected
+elem_num_all = mapdl.mesh.enum_all
+```
+
+# Solve
+
+```{python}
+# Solve the thermal static analysis and print the results
+mapdl.slashsolu()
+mapdl.solve()
+out = mapdl.finish()
+```
+
+# Post-processing class
+The ``PostProcessing`` class is used for plotting and saving
+results to NumPy arrays.
+
+```{python}
+from ansys.mapdl.core.post import PostProcessing
+mapdl.post1()
+mapdl.set(1, 1)
+
+# Plot the nodal temperatures
+mapdl.post_processing.plot_nodal_temperature()
+
+# Save nodal temperatures to a Python array
+nodal_temp= PostProcessing.nodal_temperature()
+
+# Plot contour legend using dictionary
+mapdl.allsel()
+sbar_kwargs = {"color": "black",
+"title": "Temperatures",
+"vertical": False,
+"n_labels": 6}
+PostProcessing.plot_nodal_temperature(
+  cpos='xy',
+  background='white',
+  edge_color='black',
+  show_edges=True,
+  scalar_bar_args=sbar_kwargs,
+  n_colors=9
+)
+```
+
+# Plotting class
+
+Use PyVista to interpolate data, saving the resulting temperatures
+and storing it in the underlying UnstructuredGrid object:
+
+```{python}
+from pyvista import Plotter
+pl = Plotter()
+pl0 = post_processing.plot_nodal_temperature(return_plotter=True)
+pl.add(pl0.mesh)
+pl.show()
+```
+
+```{python}
+# Plot currently selected elements
+mapdl.eplot(show_node_numbering, vtk)
+# Plot selected volumes
+mapdl.vplot(nv1, nv2, ninc, degen, scale, ...)
+# Display selected areas
+mapdl.aplot(na1, na2, ninc, degen, scale, ...)
+# Display selected lines without MAPDL plot symbols
+mapdl.lplot(vtk=True, cpos='xy', line_width=10)
+# Save PNG file of line plot with MAPDL coordinate symbol
+mapdl.psymb('CS', 1)
+mapdl.lplot(vtk=False)
+```
+
+```{python}
+#| echo: false
+mapdl.exit()
 ```
