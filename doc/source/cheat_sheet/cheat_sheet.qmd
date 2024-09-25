@@ -149,7 +149,7 @@ mapdl.exit()
 ```
 
 ```{python}
-#| echo: False
+#| echo: false
 ###############################################################################
 # Hidden example for testing purpose (3d_plate_thermal.py)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
