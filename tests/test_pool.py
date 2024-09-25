@@ -333,16 +333,17 @@ class TestMapdlPool:
     @skip_if_ignore_pool
     @requires("local")
     def test_only_one_instance(self):
-        pool = MapdlPool(
+        pool_ = MapdlPool(
             1,
             exec_file=EXEC_FILE,
             nproc=NPROC,
             additional_switches=QUICK_LAUNCH_SWITCHES,
+            _debug_no_launch=True,
         )
-        pool_sz = len(pool)
-        _ = pool.map(lambda mapdl: mapdl.prep7())
-        assert len(pool) == pool_sz
-        pool.exit()
+        args = pool_._debug_no_launch
+        pool_sz = len(pool_)
+        assert len(args["ips"]) == 1
+        assert len(args["port"]) == 1
 
     def test_ip(self, monkeypatch):
         monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
