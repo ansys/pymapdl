@@ -231,7 +231,7 @@ mapdl.set(1, 1)
 mapdl.post_processing.plot_nodal_temperature()
 
 # Save nodal temperatures to a Python array
-nodal_temp= PostProcessing.nodal_temperature()
+nodal_temp= mapdl.post_processing.nodal_temperature()
 
 # Plot contour legend using dictionary
 mapdl.allsel()
@@ -239,7 +239,7 @@ sbar_kwargs = {"color": "black",
 "title": "Temperatures",
 "vertical": False,
 "n_labels": 6}
-PostProcessing.plot_nodal_temperature(
+mapdl.post_processing.plot_nodal_temperature(
   cpos='xy',
   background='white',
   edge_color='black',
@@ -257,18 +257,18 @@ and storing it in the underlying UnstructuredGrid object:
 ```{python}
 from pyvista import Plotter
 pl = Plotter()
-pl0 = post_processing.plot_nodal_temperature(return_plotter=True)
-pl.add(pl0.mesh)
+pl0 = mapdl.post_processing.plot_nodal_temperature(return_plotter=True)
+pl.add(pl0.meshes[0])
 pl.show()
 ```
 
 ```{python}
 # Plot currently selected elements
-mapdl.eplot(show_node_numbering, vtk)
+mapdl.eplot()
 # Plot selected volumes
-mapdl.vplot(nv1, nv2, ninc, degen, scale, ...)
+mapdl.vplot()
 # Display selected areas
-mapdl.aplot(na1, na2, ninc, degen, scale, ...)
+mapdl.aplot()
 # Display selected lines without MAPDL plot symbols
 mapdl.lplot(vtk=True, cpos='xy', line_width=10)
 # Save PNG file of line plot with MAPDL coordinate symbol
