@@ -287,12 +287,10 @@ class TestMapdlPool:
             additional_switches=QUICK_LAUNCH_SWITCHES,
             _debug_no_launch=True,
         )
-
         dirs_path_pool = os.listdir(pool._root_dir)
+
         assert "my_instance_0" in dirs_path_pool
         assert "my_instance_1" in dirs_path_pool
-
-        pool.exit(block=True)
 
     @skip_if_ignore_pool
     def test_directory_names_function(self, tmpdir):
@@ -343,7 +341,7 @@ class TestMapdlPool:
         args = pool_._debug_no_launch
         pool_sz = len(pool_)
         assert len(args["ips"]) == 1
-        assert len(args["port"]) == 1
+        assert len(args["ports"]) == 1
 
     def test_ip(self, monkeypatch):
         monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
