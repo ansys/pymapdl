@@ -1900,7 +1900,13 @@ class _MapdlCore(Commands):
         Overridden by gRPC.
 
         """
+        if not self._stored_commands:
+            self._log.debug("There is no commands to be flushed.")
+            self._store_commands = False
+            return
+
         self._log.debug("Flushing stored commands")
+
         rnd_str = random_string()
         tmp_out = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.out")
         self._stored_commands.insert(0, f"/OUTPUT, {tmp_out}")
@@ -1909,25 +1915,25 @@ class _MapdlCore(Commands):
         if self._apdl_log:
             self._apdl_log.write(commands + "\n")
 
-            self._store_commands = False
-            self._stored_commands = []
+        self._store_commands = False
+        self._stored_commands = []
 
-            # write to a temporary input file
-            self._log.debug(
-                "Writing the following commands to a temporary " "apdl input file:\n%s",
-                commands,
-            )
+        # write to a temporary input file
+        self._log.debug(
+            "Writing the following commands to a temporary " "apdl input file:\n%s",
+            commands,
+        )
 
-            tmp_inp = os.path.join(tempfile.gettempdir(), f"tmp_{random_string()}.inp")
-            with open(tmp_inp, "w") as f:
-                f.writelines(commands)
+        tmp_inp = os.path.join(tempfile.gettempdir(), f"tmp_{random_string()}.inp")
+        with open(tmp_inp, "w") as f:
+            f.writelines(commands)
 
-            # interactive result
-            _ = self.input(tmp_inp, write_to_log=False)
+        # interactive result
+        _ = self.input(tmp_inp, write_to_log=False)
 
-            time.sleep(0.1)  # allow MAPDL to close the file
-            if os.path.isfile(tmp_out):
-                self._response = "\n" + open(tmp_out).read()
+        time.sleep(0.1)  # allow MAPDL to close the file
+        if os.path.isfile(tmp_out):
+            self._response = "\n" + open(tmp_out).read()
 
         if self._response is None:  # pragma: no cover
             self._log.warning("Unable to read response from flushed commands")

@@ -1935,6 +1935,7 @@ def test_save_on_exit(mapdl, cleared):
         assert "SAVE" in lines.upper()
 
         mapdl._stored_commands = []  # resetting
+        mapdl.prep7()
 
     mapdl.prep7()
 
@@ -1948,6 +1949,7 @@ def test_save_on_exit_not(mapdl, cleared):
         assert "SAVE" not in lines.upper()
 
         mapdl._stored_commands = []  # resetting
+        mapdl.prep7()
 
     mapdl.prep7()
 
@@ -2444,3 +2446,14 @@ def test_cleanup_loggers(mapdl):
     assert mapdl.logger is not None
     assert mapdl.logger.std_out_handler is None
     assert mapdl.logger.file_handler is None
+
+
+def test_no_flush_stored(mapdl):
+    assert not mapdl._store_commands
+    mapdl._store_commands = True
+    mapdl._stored_commands = []
+
+    mapdl._flush_stored()
+
+    assert not mapdl._store_commands
+    assert mapdl._stored_commands == []
