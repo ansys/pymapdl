@@ -57,9 +57,7 @@ mapdl.exit()
 Specify a job name, number of processors, and working directory:
 ```{python}
 #| eval: false
-jname = 'user_jobname'
-path = 'path_to_working_directory'
-mapdl = launch_mapdl(nproc=2, run_location=path, jobname=jname)
+mapdl = launch_mapdl(nproc=2, run_location="path_to_working_directory", jobname="user_jobname")
 ```
 
 Connect to an existing instance of MAPDL at IP address ``192.168.1.30`` and port ``50001``:
@@ -117,9 +115,7 @@ mapdl.starvget() # *VGET
 Convert an existing APDL script to PyMAPDL format:
 ```{python}
 #| eval: false
-inputfile = 'ansys_inputfile.inp'
-pyscript = 'pyscript.py'
-mapdl.convert_script(inputfile, pyscript)
+mapdl.convert_script("ansys_inputfile.inp", "pyscript.py")
 ```
 
 # MAPDL class
