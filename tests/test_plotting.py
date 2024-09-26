@@ -1212,7 +1212,7 @@ def test_xplot_not_changing_geo_selection2(mapdl, cleared):
         # alive. See #3421
         # ("aplot", "AREA", "rectng", (0, 1, 0, 1), (1, 2, 1, 2)),
         # ("lplot", "LINE", "l", (1, 1, 1), (1, -1, 1)),
-        ("kplot", "KP", "k", ("", 0, 0, 0), ("", 1, 1, 1)),
+        # ("kplot", "KP", "k", ("", 0, 0, 0), ("", 1, 1, 1)),
     ],
 )
 def test_xplot_not_changing_geo_selection_components(
