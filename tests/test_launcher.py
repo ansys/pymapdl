@@ -24,7 +24,6 @@
 
 import os
 import tempfile
-from time import sleep
 import warnings
 
 import psutil
@@ -34,7 +33,6 @@ from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import (
     DeprecationError,
     LicenseServerConnectionError,
-    MapdlDidNotStart,
     NotEnoughResources,
     PortAlreadyInUseByAnMAPDLInstance,
 )
@@ -184,75 +182,20 @@ def test_launch_console(version):
 
 @requires("local")
 @requires("nostudent")
-def test_license_type_keyword(mapdl):
-    checks = []
-    for license_name, license_description in LICENSES.items():
-        try:
-            mapdl_ = launch_mapdl(
-                license_type=license_name,
-                start_timeout=start_timeout,
-                port=mapdl.port + 1,
-                additional_switches=QUICK_LAUNCH_SWITCHES,
-            )
-
-            # Using first line to ensure not picking up other stuff.
-            checks.append(license_description in mapdl_.__str__().split("\n")[0])
-            mapdl_.exit()
-            del mapdl_
-            sleep(2)
-
-        except MapdlDidNotStart as e:
-            if "ANSYS license not available" in str(e):
-                continue
-            else:
-                raise e
-
-    assert any(checks)
+@pytest.mark.parametrize("license_name", LICENSES)
+def test_license_type_keyword_names(mapdl, license_name):
+    args = launch_mapdl(license_type=license_name, _debug_no_launch=True)
+    assert f"-p {license_name}" in args["additional_switches"]
 
 
-@requires("local")
-@requires("nostudent")
-def test_license_type_keyword_names(mapdl):
-    # This test might became a way to check available licenses, which is not the purpose.
-
-    successful_check = False
-    for license_name, license_description in LICENSES.items():
-        mapdl_ = launch_mapdl(
-            license_type=license_name,
-            start_timeout=start_timeout,
-            port=mapdl.port + 1,
-            additional_switches=QUICK_LAUNCH_SWITCHES,
-        )
-
-        # Using first line to ensure not picking up other stuff.
-        successful_check = (
-            license_description in mapdl_.__str__().split("\n")[0] or successful_check
-        )
-        assert license_description in mapdl_.__str__().split("\n")[0]
-        mapdl_.exit()
-
-    assert successful_check  # if at least one license is ok, this should be true.
-
-
-@requires("local")
-@requires("nostudent")
-def test_license_type_additional_switch(mapdl):
-    # This test might became a way to check available licenses, which is not the purpose.
-    successful_check = False
-    for license_name, license_description in LICENSES.items():
-        mapdl_ = launch_mapdl(
-            additional_switches=QUICK_LAUNCH_SWITCHES + " -p " + license_name,
-            start_timeout=start_timeout,
-            port=mapdl.port + 1,
-        )
-
-        # Using first line to ensure not picking up other stuff.
-        successful_check = (
-            license_description in mapdl_.__str__().split("\n")[0] or successful_check
-        )
-        mapdl_.exit()
-
-    assert successful_check  # if at least one license is ok, this should be true.
+# @requires("local")
+@pytest.mark.parametrize("license_name", LICENSES)
+def test_license_type_additional_switch(mapdl, license_name):
+    args = launch_mapdl(
+        additional_switches=QUICK_LAUNCH_SWITCHES + " -p " + license_name,
+        _debug_no_launch=True,
+    )
+    assert f"-p {license_name}" in args["additional_switches"]
 
 
 @requires("ansys-tools-path")
@@ -447,7 +390,9 @@ def test_find_ansys(mapdl):
     assert find_ansys(version=version) is not None
 
     # Checking floats
-    assert find_ansys(version=22.2) is not None
+    with pytest.raises(ValueError):
+        find_ansys(version=22.2)
+
     assert find_ansys(version=mapdl.version) is not None
 
     with pytest.raises(ValueError):

@@ -84,12 +84,12 @@ jobs:
         uses: ansys/actions/branch-name-style@v7
 
 
-  commit-name:
+  pull-request-name:
     if: github.event_name == 'pull_request'
-    name: Check the name of the commit
+    name: Check the name of the pull-request
     runs-on: ubuntu-latest
     steps:
-      - name: Check commit name
+      - name: Check pull-request name
         uses: ansys/actions/commit-style@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
