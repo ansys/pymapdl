@@ -41,7 +41,7 @@ Launch and connect to MAPDL. You can specify the version you want to use with
 ``version`` argument.
 ```{python}
 from ansys.mapdl.core import launch_mapdl
-mapdl = launch_mapdl(version=232)
+mapdl = launch_mapdl(version=242)
 ```
 
 Exit a session
