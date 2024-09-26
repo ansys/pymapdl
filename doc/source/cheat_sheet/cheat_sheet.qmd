@@ -35,35 +35,31 @@ jupyter:
     name: python3
 ---
 
-# Verify your installation
+# Connect to MAPDL remote session
 
-Check your PyMAPDL version
-```{python}
-from ansys.mapdl.core import __version__
-print(f"PyMAPDL version: {__version__}")
-```
-
-# Launch PyMAPDL
-
-Launch a PyMAPDL session and exit it
+Launch and connect to MAPDL. You can specify the version you want to use with
+``version`` argument.
 ```{python}
 from ansys.mapdl.core import launch_mapdl
-# Launch the PyMAPDL session
-mapdl = launch_mapdl()
+mapdl = launch_mapdl(version=232)
+```
+
+Exit a session
+```{python}
 # Exit it
 mapdl.exit()
 ```
 
-Specify a job name, number of processors, and working directory:
-```{python}
-#| eval: false
-mapdl = launch_mapdl(nproc=2, run_location="path_to_working_directory", jobname="user_jobname")
-```
-
-Connect to an existing instance of MAPDL at IP address ``192.168.1.30`` and port ``50001``:
+Connect to an existing instance at IP address ``192.168.1.30`` and port ``50001``:
 ```{python}
 #| eval: false
 mapdl = launch_mapdl(start_instance=False, ip='192.168.1.30', port=50001)
+```
+
+Access MAPDL instance status through CLI
+```{bash}
+#| eval: false
+pymapdl list
 ```
 
 Create and exit a pool of instances:
@@ -76,7 +72,7 @@ mapdl_pool = pool.MapdlPool(5)
 mapdl_pool.exit()
 ```
 
-# PyMAPDL commands
+# Send commands to MAPDL
 
 PyMAPDL commands are Python statements that act as a
 wrapper for APDL commands. For example: ``ESEL,s,type,1`` 
@@ -118,8 +114,6 @@ Convert an existing APDL script to PyMAPDL format:
 mapdl.convert_script("ansys_inputfile.inp", "pyscript.py")
 ```
 
-# MAPDL class
-
 Load a table from Python to MAPDL:
 ```{python}
 #| echo: false
@@ -144,9 +138,14 @@ saved_np_array = mapdl.parameters['my_np_param']
 mapdl.exit()
 ```
 
+# Mesh a model
+
+Store the finite element mesh as a VTK UnstructuredGrid
+data object:
+
 ```{python}
 #| echo: false
-###############################################################################
+#####################################################################
 # Hidden example for testing purpose (3d_plate_thermal.py)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -171,19 +170,6 @@ out = mapdl.allsel()
 mapdl.vsweep(1)
 ```
 
-Access information using *GET and *VGET and store it in
-NumPy arrays:
-```{python}
-# Run *GET command and return a Python value
-mapdl.get_value(entity='NODE', item1='COUNT')
-# Run *VGET command and return a Python array
-mapdl.get_array(entity='NODE', item1='NLIST')
-```
-
-# Mesh class
-
-Store the finite element mesh as a VTK UnstructuredGrid
-data object:
 ```{python}
 grid = mapdl.mesh.grid
 ```
@@ -205,71 +191,58 @@ elem_num = mapdl.mesh.enum
 elem_num_all = mapdl.mesh.enum_all
 ```
 
-# Solve
+# Solve an analysis
 
 ```{python}
-# Solve the thermal static analysis and print the results
 mapdl.slashsolu()
 mapdl.solve()
-out = mapdl.finish()
+mapdl.finish()
 ```
 
-# Post-processing class
-The ``PostProcessing`` class is used for plotting and saving
-results to NumPy arrays.
+# Post-process results
+
+The
+[PostProcessing](https://mapdl.docs.pyansys.com/version/stable/api/_autosummary/ansys.mapdl.core.post.PostProcessing.html#ansys.mapdl.core.post.PostProcessing)
+class is used for plotting and saving results to NumPy arrays.
 
 ```{python}
-from ansys.mapdl.core.post import PostProcessing
 mapdl.post1()
 mapdl.set(1, 1)
+mapdl.allsel()
 
-# Plot the nodal temperatures
+# Plot nodal temperatures
 mapdl.post_processing.plot_nodal_temperature()
 
 # Save nodal temperatures to a Python array
 nodal_temp= mapdl.post_processing.nodal_temperature()
-
-# Plot contour legend using dictionary
-mapdl.allsel()
-sbar_kwargs = {"color": "black",
-"title": "Temperatures",
-"vertical": False,
-"n_labels": 6}
-mapdl.post_processing.plot_nodal_temperature(
-  cpos='xy',
-  background='white',
-  edge_color='black',
-  show_edges=True,
-  scalar_bar_args=sbar_kwargs,
-  n_colors=9
-)
 ```
 
-# Plotting class
+# Create nice plots
 
-Use PyVista to interpolate data, saving the resulting temperatures
-and storing it in the underlying UnstructuredGrid object:
+Use [PyVista](https://docs.pyvista.org/) to interpolate data, save results
+and store them in the underlying
+[UnstructuredGrid](https://docs.pyvista.org/api/core/_autosummary/pyvista.unstructuredgrid#)
+object:
 
 ```{python}
 from pyvista import Plotter
 pl = Plotter()
-pl0 = mapdl.post_processing.plot_nodal_temperature(return_plotter=True)
+pl0 = mapdl.post_processing.plot_nodal_temperature(
+  return_plotter=True
+)
 pl.add_mesh(pl0.meshes[0])
 pl.show()
 ```
 
 ```{python}
-# Plot currently selected elements
+# Plot selected elements
 mapdl.eplot()
 # Plot selected volumes
 mapdl.vplot()
-# Display selected areas
+# Plot selected areas
 mapdl.aplot()
-# Display selected lines without MAPDL plot symbols
-mapdl.lplot(vtk=True, cpos='xy', line_width=10)
-# Save PNG file of line plot with MAPDL coordinate symbol
-mapdl.psymb('CS', 1)
-mapdl.lplot(vtk=False)
+# Plot selected lines
+mapdl.lplot()
 ```
 
 ```{python}
