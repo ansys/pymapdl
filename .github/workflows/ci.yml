@@ -695,7 +695,7 @@ jobs:
         id: attatch-to-pr
         uses: EndBug/add-and-commit@v9
         with:
-          message: Update the image cache
+          message: "chore: update the image cache"
           committer_name: GitHub Actions
           committer_email: actions@github.com
           add: './tests/.image_cache/*.png'
