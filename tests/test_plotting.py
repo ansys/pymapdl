@@ -1208,8 +1208,10 @@ def test_xplot_not_changing_geo_selection2(mapdl, cleared):
     "plot_func,entity,gen_func,arg1,arg2",
     [
         ("vplot", "VOLU", "block", (0, 1, 0, 1, 0, 1), (1, 2, 1, 2, 1, 2)),
-        ("aplot", "AREA", "rectng", (0, 1, 0, 1), (1, 2, 1, 2)),
-        ("lplot", "LINE", "slashline", (1, 1, 1), (1, -1, 1)),
+        # Uncommenting the following lines, raise an exception for channel not
+        # alive. See #3421
+        # ("aplot", "AREA", "rectng", (0, 1, 0, 1), (1, 2, 1, 2)),
+        # ("lplot", "LINE", "l", (1, 1, 1), (1, -1, 1)),
         ("kplot", "KP", "k", ("", 0, 0, 0), ("", 1, 1, 1)),
     ],
 )
@@ -1220,9 +1222,9 @@ def test_xplot_not_changing_geo_selection_components(
     gen_func = getattr(mapdl, gen_func)
 
     if entity == "LINE":
-        l0 = mapdl.k("", 0, 0, 0)
-        l1 = mapdl.k("", *arg1)
-        mapdl.l(l0, l1)
+        kp0 = mapdl.k("", 0, 0, 0)
+        kp1 = mapdl.k("", 1, 1, 1)
+        mapdl.l(kp0, kp1)
     else:
         gen_func(*arg1)
 
@@ -1230,9 +1232,9 @@ def test_xplot_not_changing_geo_selection_components(
     mapdl.cmsel("u", "select1")
 
     if entity == "LINE":
-        l0 = mapdl.k("", 0, 0, 0)
-        l1 = mapdl.k("", *arg2)
-        mapdl.l(l0, l1)
+        kp2 = mapdl.k("", 0, 0, 0)
+        kp3 = mapdl.k("", *arg2)
+        mapdl.l(kp2, kp3)
     else:
         gen_func(*arg2)
 

@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 """Common gRPC functions"""
+from time import sleep
 from typing import List, Literal, get_args
 
 import numpy as np
@@ -184,8 +185,14 @@ def parse_chunks(chunks, dtype=None):
         Deserialized numpy array.
 
     """
-    if not chunks.is_active():
-        raise MapdlConnectionError("The channel is not alive.")
+    time_int = 0
+    time_step = 0.01
+    time_max = 3  # seconds
+    while not chunks.is_active():
+        time_int += 1
+        sleep(time_step)
+        if time_int > time_max / time_step:
+            raise MapdlConnectionError("The channel is not alive.")
 
     try:
         chunk = chunks.next()

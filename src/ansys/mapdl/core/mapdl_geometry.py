@@ -692,7 +692,7 @@ class Geometry:
 
             self._mapdl.esla("S")
             grid = self._mapdl.mesh._grid.linear_copy()
-            pd = pv.PolyData(grid.points, grid.cells, n_faces=grid.n_cells)
+            pd = pv.PolyData(grid.points, grid.cells)
 
             # pd['ansys_node_num'] = grid['ansys_node_num']
             # pd['vtkOriginalPointIds'] = grid['vtkOriginalPointIds']
