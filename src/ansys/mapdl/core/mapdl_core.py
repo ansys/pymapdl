@@ -253,6 +253,7 @@ class _MapdlCore(Commands):
         self._default_file_type_for_plots = file_type_for_plots
         self._version = None  # cached version
         self._mute = False
+        self._save_selection_obj = None
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -959,7 +960,9 @@ class _MapdlCore(Commands):
         when exit returns to that selection.
 
         """
-        return self._save_selection(self)
+        if self._save_selection_obj is None:
+            self._save_selection_obj = self._save_selection(self)
+        return self._save_selection_obj
 
     @property
     def solution(self) -> "Solution":
@@ -1395,44 +1398,40 @@ class _MapdlCore(Commands):
 
         def __init__(self, parent):
             self._parent = weakref.ref(parent)
-            self.selection_sets = []
-            self.selection_sets_comps = []
+            self.selection = []
 
         def __enter__(self):
             self._parent()._log.debug("Entering saving selection context")
-
-            selection_set_name = random_string(10)
-            self.selection_sets.append(selection_set_name)
-            self.selection_sets_comps.append(self._parent().components.names)
-
             mapdl = self._parent()
 
-            prev_ier = mapdl.ignore_errors
-            mapdl.ignore_errors = True
-            for entity in ["kp", "lines", "area", "volu", "node", "elem"]:
-                mapdl.cm(f"_{selection_set_name}_{entity}_", f"{entity}", mute=True)
-            mapdl.ignore_errors = prev_ier
+            # Storing components
+            selection = {
+                "cmsel": mapdl.components.names,
+                # "components_type": mapdl.components.types,
+                "nsel": mapdl.mesh.nnum,
+                "esel": mapdl.mesh.enum,
+                "ksel": mapdl.geometry.knum,
+                "lsel": mapdl.geometry.lnum,
+                "asel": mapdl.geometry.anum,
+                "vsel": mapdl.geometry.vnum,
+            }
+
+            self.selection.append(selection)
 
         def __exit__(self, *args):
             self._parent()._log.debug("Exiting saving selection context")
-            last_selection_name = self.selection_sets.pop()
-            last_selection_cmps = self.selection_sets_comps.pop()
-
+            selection = self.selection.pop()
             mapdl = self._parent()
 
-            # probably this is redundant
-            prev_ier = mapdl.ignore_errors
-            mapdl.ignore_errors = True
-            for entity in ["kp", "lines", "area", "volu", "node", "elem"]:
-                cmp_name = f"_{last_selection_name}_{entity}_"
-                mapdl.cmsel("s", cmp_name, f"{entity}", mute=True)
-                mapdl.cmdele(cmp_name)
+            cmps = selection.pop("cmsel")
 
-            mapdl.ignore_errors = prev_ier
+            if cmps:
+                mapdl.components.select(cmps)
 
-            # mute to avoid getting issues when the component wasn't created in
-            # first place because there was no entities.
-            self._parent().components.select(last_selection_cmps, mute=True)
+            for select_cmd, ids in selection.items():
+                if ids.size > 0:
+                    func = getattr(mapdl, select_cmd)
+                    func(vmin=ids)
 
     class _chain_commands:
         """Store MAPDL commands and send one chained command."""
@@ -1445,7 +1444,7 @@ class _MapdlCore(Commands):
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
-            self._parent()._log.debug("Entering chained command mode")
+            self._parent()._log.debug("Exiting chained command mode")
             self._parent()._chain_stored()
             self._parent()._store_commands = False
 
@@ -2713,22 +2712,17 @@ class _MapdlCore(Commands):
         self, entity, selection_function, type_, item, comp, vmin, kabs
     ):
         """Select entities using CM, and the supplied selection function."""
-        self.cm(f"__temp_{entity}s__", f"{entity}")  # Saving previous selection
-
         # Getting new selection
         for id_, each_ in enumerate(vmin):
-            selection_function(
-                self, "S" if id_ == 0 else "A", item, comp, each_, "", "", kabs
-            )
+            if type_ == "S" or not type_:
+                type__ = "S" if id_ == 0 else "A"
+            # R is an issue, because first iteration will clean up the rest.
+            elif type_ == "R":
+                raise NotImplementedError("Mode R is not supported.")
+            else:
+                type__ = type_
 
-        self.cm(f"__temp_{entity}s_1__", f"{entity}")
-
-        self.cmsel("S", f"__temp_{entity}s__")
-        self.cmsel(type_, f"__temp_{entity}s_1__")
-
-        # Cleaning
-        self.cmdele(f"__temp_{entity}s__")
-        self.cmdele(f"__temp_{entity}s_1__")
+            selection_function(self, type__, item, comp, each_, "", "", kabs)
 
     def _raise_errors(self, text):
         # to make sure the following error messages are caught even if a breakline is in between.

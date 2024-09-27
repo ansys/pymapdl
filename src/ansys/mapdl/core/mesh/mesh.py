@@ -112,7 +112,7 @@ def _parse_vtk(
     """
     if not mesh._has_nodes or not mesh._has_elements:
         # warnings.warn('Missing nodes or elements.  Unable to parse to vtk')
-        return
+        return pv.UnstructuredGrid()
 
     etype_map = ETYPE_MAP
     if allowable_types is not None:
