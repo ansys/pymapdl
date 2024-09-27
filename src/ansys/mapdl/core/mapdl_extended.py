@@ -733,10 +733,6 @@ class _MapdlCommandExtended(_MapdlCore):
                 pl.plot([], [], [], **kwargs)
                 return pl.show(**kwargs)
 
-            if quality > 10:
-                quality = 10
-            if quality < 1:
-                quality = 1
             surfs = self.geometry.get_areas(return_as_list=True, quality=quality)
             meshes = []
             labels = []

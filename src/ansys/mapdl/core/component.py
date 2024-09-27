@@ -177,8 +177,8 @@ class ComponentManager:
     -----
 
     **Components need to be selected** using
-    :attr:`Mapdl.cmsel() <ansys.mapdl.core.Mapdl.cmsel>` before
-    being listed in :attr:`Mapdl.components <ansys.mapdl.core.Mapdl.components>`
+    :attr:`Mapdl.cmsel() <ansys.mapdl.core.Mapdl.cmsel>` before being listed in
+    :class:`Mapdl.components <ansys.mapdl.core.component.ComponentManager>`
 
     Examples
     --------
@@ -507,7 +507,9 @@ class ComponentManager:
         """
         return self._comp.items()
 
-    def select(self, names: Union[str, list[str], tuple[str]], mute=False) -> None:
+    def select(
+        self, names: Union[str, list[str], tuple[str]], mute: bool = False
+    ) -> None:
         """Select Select components given their names
 
         Select components given their names.
