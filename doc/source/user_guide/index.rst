@@ -10,26 +10,46 @@ This section provides a general overview of PyMAPDL and how you use it.
    This toctreemust be a top level index to get it to show up in
    pydata_sphinx_theme
 
+
 .. toctree::
    :maxdepth: 1
    :hidden:
 
+   troubleshoot
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Basic
+
    mapdl
-   convert
    mesh_geometry
    plotting
    parameters
    components
    post
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Intermediate
+
    cli
+   convert
    database
    math
    pool
+
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Advanced
+
    hpc/index.rst
    xpl
    upf
    krylov
-   troubleshoot
 
 
 PyMAPDL overview
