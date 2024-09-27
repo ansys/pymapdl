@@ -156,6 +156,7 @@ jobs:
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
       PYMAPDL_START_INSTANCE: FALSE
       ON_DOCUMENTATION: TRUE
+      GRPC_ENABLE_FORK_SUPPORT: false
     steps:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.1.7
