@@ -56,12 +56,6 @@ Connect to an existing instance at IP address ``192.168.1.30`` and port ``50001`
 mapdl = launch_mapdl(start_instance=False, ip='192.168.1.30', port=50001)
 ```
 
-Access MAPDL instance status through CLI
-```{bash}
-#| eval: false
-pymapdl list
-```
-
 Create and exit a pool of instances:
 ```{python}
 #| eval: false
@@ -72,7 +66,20 @@ mapdl_pool = pool.MapdlPool(5)
 mapdl_pool.exit()
 ```
 
-# Send commands to MAPDL
+# PyMAPDL CLI
+
+Access MAPDL instances through CLI
+```{python}
+#| eval: false
+# Start an MAPDL instance at port ``50051``
+pymapdl start --port 50051
+# List the current MAPDL instances and processes
+pymapdl list
+# Stop all the MAPDL instances
+pymapdl stop --all
+```
+
+# PyMAPDL commands
 
 PyMAPDL commands are Python statements that act as a
 wrapper for APDL commands. For example: ``ESEL,s,type,1`` 
@@ -84,12 +91,18 @@ mapdl = launch_mapdl()
 ```{python}
 mapdl.esel('s', 'type', vmin=1)
 ```
+
+Help for the MAPDL class functions is accessible with:
+```{python}
+help(mapdl.esel)
+```
+
 ```{python}
 #| echo: false
 mapdl.exit()
 ```
 
-Commands that start with \* or \/ have these characters
+Most of the time, commands that start with \* or \/ have these characters
 removed:
 ```{python}
 #| eval: false
@@ -98,7 +111,7 @@ mapdl.get() # *GET
 ```
 
 In cases where removing * or / causes conflicts with other
-commands, a prefix "slash" or "star" is added:
+commands, a prefix ``slash`` or ``star`` is added:
 ```{python}
 #| eval: false
 mapdl.solu() # SOLU
@@ -107,12 +120,6 @@ mapdl.slashsolu() # /SOLU
 mapdl.vget() # VGET
 mapdl.starvget() # *VGET
 ``` 
-
-Convert an existing APDL script to PyMAPDL format:
-```{python}
-#| eval: false
-mapdl.convert_script("ansys_inputfile.inp", "pyscript.py")
-```
 
 Load a table from Python to MAPDL:
 ```{python}
@@ -125,7 +132,7 @@ np_array = np.array([[1,2,3], [4,5,6]])
 mapdl.load_table("table_name", np_array)
 ```
 
-Write parameters or access from or  to the MAPDL database:
+Write parameters and access from or  to the MAPDL database:
 ```{python}
 # Create a parameter from a NumPy array
 mapdl.parameters['my_np_param'] = np_array
@@ -138,10 +145,30 @@ saved_np_array = mapdl.parameters['my_np_param']
 mapdl.exit()
 ```
 
+# Convert APDL script to Python files
+
+An existing APDL script can be converted to PyMAPDL format
+with the following commands:
+```{python}
+#| eval: false
+import ansys.mapdl.core as pymapdl
+pymapdl.convert_script(
+  "mapdl_script.dat", "pymapdl_script.py"
+)
+```
+
+It can also be converted using PyMAPDL CLI:
+```{python}
+#| eval: false
+pymapdl convert mapdl_script.dat 
+-o pymapdl_script.py
+```
+
 # Mesh a model
 
-Store the finite element mesh as a VTK UnstructuredGrid
-data object:
+Store the finite element mesh as a 
+[VTK UnstructuredGrid data](https://vtk.org/doc/nightly/html/classvtkUnstructuredGrid.html)
+object:
 
 ```{python}
 #| echo: false
@@ -179,12 +206,10 @@ Save element and node numbers to Python arrays:
 ```{python}
 # Get an array of the nodal coordinates
 nodes = mapdl.mesh.nodes
-
 # Save node numbers of selected nodes to an array
 node_num = mapdl.mesh.nnum
 # Save node numbers of all nodes to an array
 node_num_all = mapdl.mesh.nnum_all
-
 # Get element numbers of currently selected elements
 elem_num = mapdl.mesh.enum
 # Get all element numbers, including those not selected
@@ -212,7 +237,6 @@ mapdl.allsel()
 
 # Plot nodal temperatures
 mapdl.post_processing.plot_nodal_temperature()
-
 # Save nodal temperatures to a Python array
 nodal_temp= mapdl.post_processing.nodal_temperature()
 ```
@@ -227,10 +251,10 @@ object:
 ```{python}
 from pyvista import Plotter
 pl = Plotter()
-pl0 = mapdl.post_processing.plot_nodal_temperature(
-  return_plotter=True
+pm = mapdl.post_processing.plot_element_stress(
+  "X", return_plotter=True
 )
-pl.add_mesh(pl0.meshes[0])
+pl.add_mesh(pm.meshes[0])
 pl.show()
 ```
 
