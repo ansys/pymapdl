@@ -38,6 +38,8 @@ class _Backend(Protocol):
         mute: bool,
     ) -> str: ...
 
+    def exit(self) -> None: ...
+
 
 class MapdlInProcess(MapdlBase):
     def __init__(self, in_process_backend: _Backend):
@@ -69,6 +71,10 @@ class MapdlInProcess(MapdlBase):
         return self._in_process_backend.input_file(
             fname, ext, dir_, int(line or 0), int(log or 0), mute
         )
+
+    def exit(self) -> None:
+        if hasattr(self._backend, "exit"):
+            self._in_process_backend.exit()
 
     @MapdlBase.name.getter
     def name(self) -> str:
