@@ -4,7 +4,6 @@
     :hidden:
     :maxdepth: 3
 
-    gallery_examples/index.rst
     gallery_examples/00-mapdl-examples/index.rst
     gallery_examples/01-geometry/index.rst
     gallery_examples/02-tips-n-tricks/index.rst
@@ -59,7 +58,7 @@ Here are a series of examples using MAPDL with the ``ansys-mapdl-core`` library.
 
 
     .. grid-item-card:: Academic finite element examples
-        :link: sphx_glr_examples_gallery_examples_03
+        :link: sphx_glr_examples_gallery_examples_03-general-fea
         :link-type: ref
         :img-top: ../images/examples_main_page/academic.png
 
