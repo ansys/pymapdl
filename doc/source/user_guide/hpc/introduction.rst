@@ -1,13 +1,10 @@
 
 .. _ref_hpc_slurm:
 
-=================
-SLURM HPC cluster
-=================
+=====================
+Introduction to SLURM
+=====================
 
-
-Introduction
-============
 
 High performance computing (HPC) clusters are powerful systems designed to handle
 computationally intensive tasks efficiently. SLURM (Simple Linux Utility for Resource

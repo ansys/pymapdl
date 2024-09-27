@@ -14,12 +14,6 @@ This section provides a general overview of PyMAPDL and how you use it.
 .. toctree::
    :maxdepth: 1
    :hidden:
-
-   troubleshoot
-
-.. toctree::
-   :maxdepth: 1
-   :hidden:
    :caption: Basic
 
    mapdl
@@ -28,6 +22,7 @@ This section provides a general overview of PyMAPDL and how you use it.
    parameters
    components
    post
+   troubleshoot
 
 .. toctree::
    :maxdepth: 1
@@ -46,10 +41,18 @@ This section provides a general overview of PyMAPDL and how you use it.
    :hidden:
    :caption: Advanced
 
-   hpc/index.rst
    xpl
    upf
    krylov
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: High performance computing
+
+   hpc/introduction
+   hpc/pymapdl
+   hpc/troubleshooting
 
 
 PyMAPDL overview
