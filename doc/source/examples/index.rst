@@ -87,33 +87,6 @@ Here are a series of examples using MAPDL with the ``ansys-mapdl-core`` library.
 
         
 
-.. === EXAMPLES Gallery ===
-
-..
-   We have to include this rather than include it in a tree.
-
-.. .. include:: gallery_examples/index.rst
-..    :start-line: 2
-
-
-.. === Developer Portal examples ==
-
-.. .. include:: devportal.rst
-..    :start-line: 2
-
-
-.. === PyMAPDL examples ===
-
-.. .. include:: pymapdl_examples_repo/index.rst
-..    :start-line: 2
-
-.. === Extended examples ===
-
-.. .. include:: extended_examples/index.rst
-..    :start-line: 2
-..    :end-line: 29
-
-
 .. === DOWNLOAD EXAMPLES ===
 
 .. _ref_download_files:
