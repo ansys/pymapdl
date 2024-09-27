@@ -25,7 +25,7 @@ This section provides a general overview of PyMAPDL and how you use it.
    database
    math
    pool
-   hpc
+   hpc/index.rst
    xpl
    upf
    krylov
