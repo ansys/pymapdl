@@ -341,7 +341,7 @@ jobs:
       - name: "Display files structure"
         if: always()
         env:
-          MAPDL_INSTANCE: mapdl
+          MAPDL_INSTANCE: MAPDL_0
           LOG_NAMES: logs-build-docs
         run: |
           .ci/display_logs.sh
@@ -565,8 +565,8 @@ jobs:
         if: always()
         env:
           MAPDL_VERSION: ${{ matrix.mapdl-version }}
-          MAPDL_INSTANCE: mapdl
-          LOG_NAMES: logs-${{ matrix.mapdl-version }}
+          MAPDL_INSTANCE: MAPDL_0
+          LOG_NAMES: logs-remote-${{ matrix.mapdl-version }}
         run: |
           .ci/collect_mapdl_logs.sh
 
@@ -574,14 +574,14 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: logs-${{ matrix.mapdl-version }}.tgz
-          path: ./logs-${{ matrix.mapdl-version }}.tgz
+          name: logs-remote-${{ matrix.mapdl-version }}.tgz
+          path: ./logs-remote-${{ matrix.mapdl-version }}.tgz
 
       - name: "Display files structure"
         if: always()
         env:
-          MAPDL_INSTANCE: mapdl
-          LOG_NAMES: logs-${{ matrix.mapdl-version }}
+          MAPDL_INSTANCE: MAPDL_0
+          LOG_NAMES: logs-remote-${{ matrix.mapdl-version }}
         run: |
           .ci/display_logs.sh
 
@@ -712,7 +712,7 @@ jobs:
         id: attatch-to-pr
         uses: EndBug/add-and-commit@v9
         with:
-          message: Update the image cache
+          message: "chore: update the image cache"
           committer_name: GitHub Actions
           committer_email: actions@github.com
           add: './tests/.image_cache/*.png'
@@ -728,7 +728,7 @@ jobs:
 
             This commit does not re-run the CICD workflows (since no changes are made in the codebase) therefore you will see the actions showing in their status `Expected — Waiting for status to be reported`. Do not worry. You commit workflow is still running [here](https://github.com/ansys/pymapdl/pull/${{ github.event.pull_request.number }}/checks?sha=${{ github.event.pull_request.head.sha }}) :smile:
 
-            You might want to rerun the test to make sure that everything is passing. You can retrigger the CICD sending an empty commit `git commit -m "Empty comment to trigger CICD" --allow-empty`.
+            You might want to rerun the test to make sure that everything is passing. You can retrigger the CICD sending an empty commit `git commit -m "chore: empty comment to trigger CICD" --allow-empty`.
 
             You will see this message everytime your commit changes the image cache but you are not attaching the updated cache. :nerd_face:
 
