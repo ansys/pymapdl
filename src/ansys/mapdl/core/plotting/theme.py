@@ -77,7 +77,7 @@ if _HAS_MATPLOTLIB:
     PyMAPDL_cmap: ListedColormap = ListedColormap(MAPDL_colorbar, name="PyMAPDL")
 
 
-def get_ansys_cmap(N: int = 9) -> LinearSegmentedColormap:
+def get_ansys_cmap(N: int = 9) -> "LinearSegmentedColormap":
     """Returns a Matplotlib colormap of given length.
 
     Returns a Matplotlib colormap which is the result of interpolate the MAPDL
