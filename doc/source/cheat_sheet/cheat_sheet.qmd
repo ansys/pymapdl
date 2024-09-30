@@ -234,7 +234,7 @@ nodal_temp= mapdl.post_processing.nodal_temperature()
 You can store the command output following the 
 [Postprocessing object methods](https://mapdl.docs.pyansys.com/version/stable/user_guide/post.html#postprocessing-object-methods):
 ```{python}
-cmd = mapdl.prnsol("U", "X")
+cmd = mapdl.prnsol("TEMP")
 cmd.to_list()
 ```
 
