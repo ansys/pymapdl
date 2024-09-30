@@ -46,6 +46,7 @@ mapdl = launch_mapdl(version=242)
 
 Exit a session
 ```{python}
+#| eval: false
 mapdl.exit()
 ```
 
@@ -85,7 +86,7 @@ wrapper for APDL commands. For example: ``ESEL,s,type,1``
 is translated as
 ```{python}
 #| echo: false
-mapdl = launch_mapdl()
+mapdl.clear()
 ```
 ```{python}
 mapdl.esel('s', 'type', vmin=1)
@@ -94,11 +95,6 @@ mapdl.esel('s', 'type', vmin=1)
 Help for the MAPDL class functions is accessible with:
 ```{python}
 help(mapdl.esel)
-```
-
-```{python}
-#| echo: false
-mapdl.exit()
 ```
 
 Most of the time, commands that start with \* or \/ have these characters
@@ -112,7 +108,7 @@ mapdl.get() # *GET
 Load arrays from Python to MAPDL:
 ```{python}
 #| echo: false
-mapdl = launch_mapdl()
+mapdl.clear()
 ```
 ```{python}
 import numpy as np
@@ -135,11 +131,6 @@ Access to specific model entity values with ``get_array`` and
 mapdl.get_array('NODE', item1='NLIST')
 # Get the number of selected nodes
 total_node = mapdl.get_value(entity='node', item1='count')
-```
-
-```{python}
-#| echo: false
-mapdl.exit()
 ```
 
 # Convert APDL script to Python files
@@ -166,7 +157,7 @@ object:
 # Hidden example for testing purpose (3d_plate_thermal.py)
 # ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-mapdl = launch_mapdl()
+mapdl.clear()
 
 # Create a simple beam, specify the material properties, and mesh it.
 mapdl.prep7()
