@@ -247,6 +247,7 @@ pl.show()
 ```
 
 ```{python}
+#| eval: false
 # Plot selected elements
 mapdl.eplot()
 # Plot selected volumes
@@ -255,6 +256,12 @@ mapdl.vplot()
 mapdl.aplot()
 # Plot selected lines
 mapdl.lplot()
+```
+
+```{python}
+#| eval: false
+# Testing one of the above plotting
+mapdl.eplot()
 ```
 
 ```{python}
