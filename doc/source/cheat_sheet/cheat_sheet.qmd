@@ -69,7 +69,7 @@ mapdl_pool.exit()
 # PyMAPDL CLI
 
 Access MAPDL instances through CLI
-```{python}
+```{console}
 #| eval: false
 # Start an MAPDL instance at port ``50051``
 pymapdl start --port 50051
@@ -77,7 +77,6 @@ pymapdl start --port 50051
 pymapdl list
 # Stop all the MAPDL instances
 pymapdl stop --all
-```
 
 # PyMAPDL commands
 
@@ -219,7 +218,7 @@ elem_num_all = mapdl.mesh.enum_all
 # Solve an analysis
 
 ```{python}
-mapdl.slashsolu()
+mapdl.solution()
 mapdl.solve()
 mapdl.finish()
 ```
