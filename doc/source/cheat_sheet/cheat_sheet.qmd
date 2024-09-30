@@ -46,7 +46,6 @@ mapdl = launch_mapdl(version=242)
 
 Exit a session
 ```{python}
-# Exit it
 mapdl.exit()
 ```
 
@@ -77,6 +76,7 @@ pymapdl start --port 50051
 pymapdl list
 # Stop all the MAPDL instances
 pymapdl stop --all
+```
 
 # PyMAPDL commands
 
@@ -109,18 +109,7 @@ mapdl.prep7() # /PREP7
 mapdl.get() # *GET
 ```
 
-In cases where removing * or / causes conflicts with other
-commands, a prefix ``slash`` or ``star`` is added:
-```{python}
-#| eval: false
-mapdl.solu() # SOLU
-mapdl.slashsolu() # /SOLU
-
-mapdl.vget() # VGET
-mapdl.starvget() # *VGET
-``` 
-
-Load a table from Python to MAPDL:
+Load arrays from Python to MAPDL:
 ```{python}
 #| echo: false
 mapdl = launch_mapdl()
@@ -128,7 +117,7 @@ mapdl = launch_mapdl()
 ```{python}
 import numpy as np
 np_array = np.array([[1,2,3], [4,5,6]])
-mapdl.load_table("table_name", np_array)
+mapdl.load_array("array_name", np_array)
 ```
 
 Write parameters and access from or  to the MAPDL database:
@@ -137,6 +126,15 @@ Write parameters and access from or  to the MAPDL database:
 mapdl.parameters['my_np_param'] = np_array
 # Save a parameter to a NumPy array
 saved_np_array = mapdl.parameters['my_np_param']
+```
+
+Access to specific model entity values with ``get_array`` and 
+`` get_value``.
+```{python}
+# List the current selected node numbers
+mapdl.get_array('NODE', item1='NLIST')
+# Get the number of selected nodes
+total_node = mapdl.get_value(entity='node', item1='count')
 ```
 
 ```{python}
@@ -156,14 +154,7 @@ pymapdl.convert_script(
 )
 ```
 
-It can also be converted using PyMAPDL CLI:
-```{python}
-#| eval: false
-pymapdl convert mapdl_script.dat 
--o pymapdl_script.py
-```
-
-# Mesh a model
+# Mesh and geometry of a model
 
 Store the finite element mesh as a 
 [VTK UnstructuredGrid data](https://vtk.org/doc/nightly/html/classvtkUnstructuredGrid.html)
@@ -200,19 +191,19 @@ mapdl.vsweep(1)
 grid = mapdl.mesh.grid
 ```
 
-Save element and node numbers to Python arrays:
+Save element and node numbers to Python arrays with
+the ``mapdl.mesh`` and the ``mapdl.geometry`` classes.
+
 
 ```{python}
 # Get an array of the nodal coordinates
 nodes = mapdl.mesh.nodes
 # Save node numbers of selected nodes to an array
 node_num = mapdl.mesh.nnum
-# Save node numbers of all nodes to an array
-node_num_all = mapdl.mesh.nnum_all
-# Get element numbers of currently selected elements
-elem_num = mapdl.mesh.enum
-# Get all element numbers, including those not selected
-elem_num_all = mapdl.mesh.enum_all
+# Save volume numbers of selected nodes to an array
+volum_numbers = mapdl.geometry.vnum
+# Save keypoint numbers of selected nodes to an array
+keypoints = mapdl.geometry.keypoints
 ```
 
 # Solve an analysis
@@ -238,6 +229,13 @@ mapdl.allsel()
 mapdl.post_processing.plot_nodal_temperature()
 # Save nodal temperatures to a Python array
 nodal_temp= mapdl.post_processing.nodal_temperature()
+```
+
+You can store the command output following the 
+[Postprocessing object methods](https://mapdl.docs.pyansys.com/version/stable/user_guide/post.html#postprocessing-object-methods):
+```{python}
+cmd = mapdl.prnsol("U", "X")
+cmd.to_list()
 ```
 
 # Create nice plots

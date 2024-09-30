@@ -2784,13 +2784,13 @@ class _MapdlExtended(_MapdlCommandExtended):
         --------
         Retrieve the number of nodes.
 
-        >>> value = ansys.get_value('node', '', 'count')
+        >>> value = mapdl.get_value('node', '', 'count')
         >>> value
         3003
 
         Retrieve the number of nodes using keywords.
 
-        >>> value = ansys.get_value(entity='node', item1='count')
+        >>> value = mapdl.get_value(entity='node', item1='count')
         >>> value
         3003
         """
