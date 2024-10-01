@@ -48,7 +48,7 @@ class HideObject(Directive):
         elif "id" in self.options:
             selecting = "id"
         else:
-            self.error(f"Directive arguments are not given. See {self.lineno}.")
+            raise ValueError(f"Directive 'hideobject' has not enough arguments.")
 
         selector = self.options.get(selecting).lower()
 
