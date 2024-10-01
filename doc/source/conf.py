@@ -431,8 +431,8 @@ def setup(app: Sphinx):
 
     # Julia lexer
     app.add_lexer("julia", JuliaLexer)
-    
-    
+
+
 jinja_contexts = {
     "pdf_guide": {"version": switcher_version},
 }
