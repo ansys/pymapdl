@@ -8,17 +8,31 @@ Getting started
 .. toctree::
    :maxdepth: 1
    :hidden:
+   :caption: Introduction
 
    project
    install_mapdl
    install_pymapdl
    launcher
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Resources
+
    learning
    faq
+   versioning
+
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Contribute
+
    contribution
    devcontainer
    make_container
-   versioning
    docker
    macos
    wsl
