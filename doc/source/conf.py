@@ -316,6 +316,8 @@ html_theme_options = {
     "cheatsheet": {
         "file": "cheat_sheet/cheat_sheet.qmd",
         "title": "PyMAPDL cheat sheet",
+        # "version": f"{version}",
+        "pages": ["index", "getting_started/learning"],
     },
 }
 
@@ -429,7 +431,11 @@ def setup(app: Sphinx):
 
     # Julia lexer
     app.add_lexer("julia", JuliaLexer)
-
+    
+    
+jinja_contexts = {
+    "pdf_guide": {"version": switcher_version},
+}
 
 # -- Configurations for PyMAPDL cheat seet -----------------------------------
 

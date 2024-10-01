@@ -1,6 +1,8 @@
 ---
 title: PyMAPDL cheat sheet
 format: cheat_sheet-pdf
+# params:
+#   version: "tests"
 version: main
 footer: PyMAPDL
 footerlinks:
