@@ -38,7 +38,7 @@ Downloads
   These are versions valid during a year and with limited capabilities 
   regarding number of nodes, elements, etc.
 
-- View and download :download:`PyMAPDL cheatsheet <Cheat_Sheet_PyMAPDL.pdf>` to help
+- View and download :download:`PyMAPDL cheatsheet <pymapdl_cheat_sheet>` to help
   you to learn PyMAPDL.
 
 - Visit :ref:`ref_examples` to learn how PyMAPDL can be
