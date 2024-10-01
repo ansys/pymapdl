@@ -42,6 +42,7 @@ jupyter:
 Launch and connect to MAPDL. You can specify the version you want to use with
 ``version`` argument.
 ```{python}
+#| eval: false
 from ansys.mapdl.core import launch_mapdl
 mapdl = launch_mapdl(version=242)
 ```
@@ -56,6 +57,12 @@ Connect to an existing instance at IP address ``192.168.1.30`` and port ``50001`
 ```{python}
 #| eval: false
 mapdl = launch_mapdl(start_instance=False, ip='192.168.1.30', port=50001)
+```
+
+```{python}
+#| echo: false
+from ansys.mapdl.core import launch_mapdl
+mapdl = launch_mapdl()
 ```
 
 Create and exit a pool of instances:
