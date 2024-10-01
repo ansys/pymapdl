@@ -1,9 +1,9 @@
 
 .. title:: Welcome to PyMAPDL
 
-
 .. meta::
    :keywords: pymapdl, mapdl, simulation, finite elements, python
+   :description: Welcome to PyMAPDL documentation.
 
 
 .. toctree::
@@ -32,6 +32,13 @@
 
 
 .. vale off
+
+.. let's hide the `Edit on GitHub` link in this page...
+.. and the whole sidebar with it.
+.. hideobject::
+    :class: bd-sidebar-secondary bd-toc
+    :remove: true
+    :adjustmargin: true
 
 
 .. title is given using the 
