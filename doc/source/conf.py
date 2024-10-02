@@ -316,7 +316,7 @@ html_theme_options = {
     "cheatsheet": {
         "file": "cheat_sheet/cheat_sheet.qmd",
         "title": "PyMAPDL cheat sheet",
-        # "version": f"{version}",
+        "version": f"v{version}",
         "pages": ["index", "getting_started/learning"],
     },
 }
@@ -436,31 +436,3 @@ def setup(app: Sphinx):
 jinja_contexts = {
     "pdf_guide": {"version": switcher_version},
 }
-
-# -- Configurations for PyMAPDL cheat seet -----------------------------------
-
-
-def replace_version_in_qmd(file_path: Path, search, replace):
-    """Update the version in cheatsheet."""
-    with file_path.open("r") as file:
-        content = file.read()
-
-    logger.info(f"replace_version_in_qmd: replacing {search} with {replace}")
-    content = content.replace(f"version: {search}", f"version: {replace}")
-
-    with file_path.open("w") as file:
-        file.write(content)
-
-
-def update_qmd_mod(app: sphinx.application.Sphinx):
-    """Update the version in cheatsheet."""
-    cheathseet_path = Path(__file__).parent / "cheatsheet" / "cheat_sheet.qmd"
-    logger.info(f"Changing {cheathseet_path}")
-    replace_version_in_qmd(cheathseet_path, "main", version)
-
-
-def revert_qmd_mod(app: sphinx.application.Sphinx, exception):
-    """Revert the version in cheatsheet that was modified."""
-    cheathseet_path = Path(__file__).parent / "cheatsheet" / "cheat_sheet.qmd"
-    logger.info(f"Reverting {cheathseet_path}")
-    replace_version_in_qmd(cheathseet_path, version, "main")
