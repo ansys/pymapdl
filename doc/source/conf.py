@@ -434,5 +434,5 @@ def setup(app: Sphinx):
 
 
 jinja_contexts = {
-    "pdf_guide": {"version": switcher_version},
+    "cheat_sheet": {"version": switcher_version},
 }
