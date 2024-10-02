@@ -3,7 +3,6 @@ title: PyMAPDL cheat sheet
 format: cheat_sheet-pdf
 params:
   version: main
-version: main
 footer: PyMAPDL
 footerlinks:
   - urls: 'https://mapdl.docs.pyansys.com/version/stable/'
@@ -19,8 +18,8 @@ footerlinks:
   - urls: 'https://github.com/ansys/pmapdl/issues'
     text: 'Issues'
 execute:
-    output: false
-    eval: true
+  output: false
+  eval: true
 
 latex-clean: true
 latex-auto-install: true
