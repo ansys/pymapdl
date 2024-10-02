@@ -26,7 +26,7 @@ documentation dependencies with this command:
 
 .. code:: console
 
-    pip install -e '.[doc]'
+    pip install -e .[doc]
 
 
 Build the documentation
