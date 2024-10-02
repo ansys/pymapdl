@@ -70,7 +70,7 @@ Create and exit a pool of instances:
 #| eval: false
 # Create a pool of 10 instances
 from ansys.mapdl.core import pool
-mapdl_pool = pool.MapdlPool(5)
+mapdl_pool = pool.MapdlPool(10)
 # Exit the pool
 mapdl_pool.exit()
 ```
@@ -125,7 +125,7 @@ np_array = np.array([[1,2,3], [4,5,6]])
 mapdl.load_array("array_name", np_array)
 ```
 
-Write parameters and access from or  to the MAPDL database:
+Write parameters and access from or to the MAPDL database:
 ```{python}
 # Create a parameter from a NumPy array
 mapdl.parameters['my_np_param'] = np_array
