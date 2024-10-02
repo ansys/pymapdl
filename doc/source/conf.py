@@ -436,7 +436,7 @@ def setup(app: Sphinx):
 
     # Julia lexer
     app.add_lexer("julia", JuliaLexer)
-    
+
     # Setting custom directive
     from helpers import HideObject
 
