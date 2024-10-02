@@ -3,6 +3,7 @@
 from datetime import datetime
 import os
 from pathlib import Path
+import sys
 import warnings
 
 import ansys.tools.visualization_interface as viz_interface
@@ -46,6 +47,9 @@ warnings.filterwarnings(
     category=UserWarning,
     message="Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.",
 )
+
+# To allow using 'helper' python file as a module
+sys.path.append(os.path.dirname(__file__))
 
 
 # -- Project information -----------------------------------------------------
@@ -420,3 +424,8 @@ def setup(app: Sphinx):
 
     # Julia lexer
     app.add_lexer("julia", JuliaLexer)
+
+    # Setting custom directive
+    from helpers import HideObject
+
+    app.add_directive("hideobject", HideObject)
