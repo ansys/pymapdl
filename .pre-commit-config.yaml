@@ -1,5 +1,16 @@
 fail_fast: True
 
+ci:
+  # Commit name when auto fixing PRs.
+  autofix_commit_msg: |
+    ci: auto fixes from pre-commit.com hooks.
+
+    for more information, see https://pre-commit.ci
+
+  # PR name when autoupdate
+  autoupdate_commit_msg: 'ci: pre-commit autoupdate'
+
+
 repos:
 
 - repo: https://github.com/ansys/pre-commit-hooks
