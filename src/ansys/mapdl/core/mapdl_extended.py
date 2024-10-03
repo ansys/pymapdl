@@ -464,7 +464,9 @@ class _MapdlCommandExtended(_MapdlCore):
 
             labels = []
             if show_keypoint_numbering:
-                labels.append({"points": keypoints, "labels": self.geometry.knum})
+                labels.append(
+                    {"points": keypoints, "labels": self.geometry.knum.astype(int)}
+                )
             pl.plot([], points, labels, **kwargs)
             return pl.show(**kwargs)
         # otherwise, use the legacy plotter
@@ -505,6 +507,9 @@ class _MapdlCommandExtended(_MapdlCore):
 
         show_keypoint_numbering : bool, optional
             Number keypoints.  Only valid when ``show_keypoints=True``
+
+        color_lines : bool, optional
+            Color each line with a different color.
 
         **kwargs
             See :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` for
@@ -588,7 +593,7 @@ class _MapdlCommandExtended(_MapdlCore):
                     labels.append(
                         {
                             "points": line.points[len(line.points) // 2],
-                            "labels": line["entity_num"],
+                            "labels": line["entity_num"].astype(int),
                         }
                     )
 
@@ -596,7 +601,7 @@ class _MapdlCommandExtended(_MapdlCore):
                 labels.append(
                     {
                         "points": self.geometry.get_keypoints(return_as_array=True),
-                        "labels": self.geometry.knum,
+                        "labels": self.geometry.knum.astype(int),
                     }
                 )
             pl = MapdlPlotter()
@@ -809,7 +814,9 @@ class _MapdlCommandExtended(_MapdlCore):
                     area = surf.extract_cells(surf["entity_num"] == anum)
                     centers.append(area.center)
 
-                labels.append({"points": np.array(centers), "labels": anums})
+                labels.append(
+                    {"points": np.array(centers), "labels": anums.astype(int)}
+                )
 
             if show_lines or show_line_numbering:
                 kwargs.setdefault("line_width", 2)
@@ -827,7 +834,7 @@ class _MapdlCommandExtended(_MapdlCore):
                     labels.append(
                         {
                             "points": lines.points[50::101],
-                            "labels": lines["entity_num"],
+                            "labels": lines["entity_num"].astype(int),
                         }
                     )
             pl = MapdlPlotter()
@@ -1119,7 +1126,9 @@ class _MapdlCommandExtended(_MapdlCore):
                 pcloud["labels"] = self.mesh.nnum
                 pcloud.clean(inplace=True)
 
-                labels = [{"points": pcloud.points, "labels": pcloud["labels"]}]
+                labels = [
+                    {"points": pcloud.points, "labels": pcloud["labels"].astype(int)}
+                ]
             points = [{"points": self.mesh.nodes}]
             pl.plot([], points, labels, mapdl=self, **kwargs)
             return pl.show(**kwargs)
@@ -1254,7 +1263,12 @@ class _MapdlCommandExtended(_MapdlCore):
             # if show_node_numbering:
             labels = []
             if show_node_numbering:
-                labels = [{"points": esurf.points, "labels": esurf["ansys_node_num"]}]
+                labels = [
+                    {
+                        "points": esurf.points,
+                        "labels": esurf["ansys_node_num"].astype(int),
+                    }
+                ]
 
             pl.plot(
                 [{"mesh": esurf, "style": kwargs.pop("style", "surface")}],
