@@ -11,10 +11,14 @@ from ansys_sphinx_theme import ansys_favicon, get_version_match
 import numpy as np
 import pyvista
 from sphinx.application import Sphinx
+from sphinx.util import logging
 from sphinx_gallery.sorting import FileNameSortKey
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
+
+# Convert notebooks into Python scripts and include them in the output files
+logger = logging.getLogger(__name__)
 
 viz_interface.DOCUMENTATION_BUILD = True
 pyvista.BUILDING_GALLERY = True
@@ -93,6 +97,7 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx_autodoc_typehints",
     "sphinx_design",
+    "sphinx_jinja",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
@@ -107,7 +112,7 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "pandas": ("https://pandas.pydata.org/docs/", None),
-    "pyvista": ("https://docs.pyvista.org/version/stable/", None),
+    "pyvista": ("https://docs.pyvista.org", None),
     "grpc": ("https://grpc.github.io/grpc/python/", None),
     "pypim": ("https://pypim.docs.pyansys.com/version/dev/", None),
     "ansys-dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
@@ -306,11 +311,11 @@ html_theme_options = {
         "json_url": f"https://{cname}/versions.json",
         "version_match": switcher_version,
     },
-    "use_meilisearch": {
-        "api_key": os.getenv("MEILISEARCH_PUBLIC_API_KEY", ""),
-        "index_uids": {
-            f"pymapdl-v{switcher_version.replace('.', '-')}": "PyMAPDL",
-        },
+    "cheatsheet": {
+        "file": "cheat_sheet/cheat_sheet.qmd",
+        "title": "PyMAPDL cheat sheet",
+        "version": f"v{version}",
+        "pages": ["getting_started/learning"],
     },
 }
 
@@ -429,3 +434,8 @@ def setup(app: Sphinx):
     from helpers import HideObject
 
     app.add_directive("hideobject", HideObject)
+
+
+jinja_contexts = {
+    "cheat_sheet": {"version": switcher_version},
+}

@@ -40,9 +40,9 @@ env:
   # You should go up in number, if you go down (or repeat a previous value)
   # you might end up reusing a previous cache if it haven't been deleted already.
   # It applies 7 days retention policy by default.
-  RESET_EXAMPLES_CACHE: 2
-  RESET_DOC_BUILD_CACHE: 2
-  RESET_AUTOSUMMARY_CACHE: 2
+  RESET_EXAMPLES_CACHE: 0
+  RESET_DOC_BUILD_CACHE: 0
+  RESET_AUTOSUMMARY_CACHE: 0
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -263,11 +263,28 @@ jobs:
 
       - name: "Install docs build requirements"
         run: |
+          pip uninstall ansys-sphinx-theme
           pip install .[doc]
 
       - name: "Waiting for the services to be up"
         run: |
           .ci/waiting_services.sh
+      
+      - name: Install Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          tinytex: true
+
+      - name: Check Quarto Version
+        shell: bash
+        run: |
+          quarto --version
+      
+      - name: "Install Poppler for PDF to PNG conversion"
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
 
       - name: "Build documentation"
         run: |
