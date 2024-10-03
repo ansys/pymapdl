@@ -311,17 +311,11 @@ html_theme_options = {
         "json_url": f"https://{cname}/versions.json",
         "version_match": switcher_version,
     },
-    # "use_meilisearch": {
-    #     "api_key": os.getenv("MEILISEARCH_PUBLIC_API_KEY", ""),
-    #     "index_uids": {
-    #         f"pymapdl-v{switcher_version.replace('.', '-')}": "PyMAPDL",
-    #     },
-    # },
     "cheatsheet": {
         "file": "cheat_sheet/cheat_sheet.qmd",
         "title": "PyMAPDL cheat sheet",
         "version": f"v{version}",
-        "pages": ["index", "getting_started/learning"],
+        "pages": ["getting_started/learning"],
     },
 }
 
