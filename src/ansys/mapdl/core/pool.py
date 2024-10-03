@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -219,7 +219,7 @@ class MapdlPool:
         self._n_instances = n_instances
 
         # Getting debug arguments
-        _debug_no_launch = kwargs.pop("_debug_no_launch", None)
+        _debug_no_launch = kwargs.get("_debug_no_launch", None)
 
         if run_location is None:
             run_location = create_temp_dir()
@@ -338,7 +338,6 @@ class MapdlPool:
                 "exec_file": exec_file,
                 "n_instances": n_instances,
             }
-            return
 
         # Converting ip or hostname to ip
         self._ips = [socket.gethostbyname(each) for each in self._ips]
@@ -357,6 +356,11 @@ class MapdlPool:
             )
             for i, (ip, port) in enumerate(zip(ips, ports))
         ]
+
+        # Early exit due to debugging
+        if _debug_no_launch:
+            return
+
         if wait:
             [thread.join() for thread in threads]
 

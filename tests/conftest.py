@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 from collections import namedtuple
+from collections.abc import Generator
 import os
 from pathlib import Path
 from shutil import get_terminal_size
@@ -32,6 +33,7 @@ from _pytest.terminal import TerminalReporter  # for terminal customization
 import psutil
 import pytest
 
+from ansys.mapdl.core.launcher import is_ansys_process
 from common import (
     Element,
     Node,
@@ -44,6 +46,7 @@ from common import (
     is_on_ubuntu,
     is_running_on_student,
     is_smp,
+    log_apdl,
     support_plotting,
     testing_minimal,
 )
@@ -70,6 +73,7 @@ HAS_GRPC = has_grpc()
 HAS_DPF = has_dpf()
 SUPPORT_PLOTTING = support_plotting()
 IS_SMP = is_smp()
+LOG_APDL = log_apdl()
 
 QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
 VALID_PORTS = []
@@ -85,6 +89,11 @@ skip_no_xserver = pytest.mark.skipif(
 skip_if_not_local = pytest.mark.skipif(
     not ON_LOCAL,
     reason="Skipping because not on local. ",
+)
+
+skip_if_not_remote = pytest.mark.skipif(
+    ON_LOCAL,
+    reason="Skipping because not on remote. ",
 )
 
 skip_if_on_cicd = pytest.mark.skipif(
@@ -116,6 +125,16 @@ skip_if_running_student_version = pytest.mark.skipif(
 )
 
 
+PROCESS_OK_STATUS = [
+    psutil.STATUS_RUNNING,  #
+    psutil.STATUS_SLEEPING,  #
+    psutil.STATUS_DISK_SLEEP,
+    psutil.STATUS_DEAD,
+    psutil.STATUS_PARKED,  # (Linux)
+    psutil.STATUS_IDLE,  # (Linux, macOS, FreeBSD)
+]
+
+
 def import_module(requirement):
     from importlib import import_module
 
@@ -145,6 +164,9 @@ def requires(requirement: str):
 
     elif "local" == requirement:
         return skip_if_not_local
+
+    elif "remote" == requirement:
+        return skip_if_not_remote
 
     elif "cicd" == requirement:
         return skip_if_on_cicd
@@ -178,13 +200,11 @@ def requires(requirement: str):
 
 
 def requires_dependency(dependency: str):
-    try:
-        import_module(dependency)
+    if has_dependency(dependency):
         return pytest.mark.skipif(
-            False, reason="Never skip"
+            False, reason=f"Required package ('{dependency}') is installed"
         )  # faking a null skipif decorator
-
-    except ModuleNotFoundError:
+    else:
         # package does not exist
         return pytest.mark.skip(reason=f"Requires '{dependency}' package")
 
@@ -198,12 +218,13 @@ if has_dependency("ansys-tools-package"):
 if has_dependency("pyvista"):
     import pyvista
 
-    from ansys.mapdl.core.theme import _apply_default_theme
+    from ansys.mapdl.core.plotting.theme import _apply_default_theme
 
     _apply_default_theme()
 
     # Necessary for CI plotting
     pyvista.OFF_SCREEN = True
+    pyvista.global_theme.allow_empty_mesh = True
 
 import ansys.mapdl.core as pymapdl
 
@@ -217,6 +238,11 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+
+if has_dependency("ansys-tools-visualization-interface"):
+    import ansys.tools.visualization_interface as viz_interface
+
+    viz_interface.TESTING_MODE = True
 
 # check if the user wants to permit pytest to start MAPDL
 START_INSTANCE = get_start_instance()
@@ -267,10 +293,13 @@ def pytest_report_header(config, start_path, startdir):
     for env_var in [
         "PYMAPDL_START_INSTANCE",
         "PYMAPDL_PORT",
+        "PYMAPDL_PORT2",
         "PYMAPDL_DB_PORT",
         "PYMAPDL_IP",
+        "PYMAPDL_IP2",
         "DPF_PORT",
         "DPF_START_SERVER",
+        "IGNORE_POOL",
     ]:
         env_var_value = os.environ.get(env_var, None)
         if env_var_value is not None:
@@ -404,11 +433,41 @@ def running_test():
 
 
 @pytest.fixture(autouse=True, scope="function")
-def run_before_and_after_tests(request, mapdl):
+def run_before_and_after_tests(
+    request: pytest.FixtureRequest, mapdl: Mapdl
+) -> Generator[Mapdl]:
     """Fixture to execute asserts before and after a test is run"""
 
-    # Setup: fill with any logic you want
-    def is_exited(mapdl):
+    # Relaunching MAPDL if dead
+    mapdl = restart_mapdl(mapdl)
+
+    # Write test info to log_apdl
+    if LOG_APDL:
+        log_test_start(mapdl)
+
+    # check if the local/remote state has changed or not
+    prev = mapdl.is_local
+
+    yield  # this is where the testing happens
+
+    assert prev == mapdl.is_local
+
+    make_sure_not_instances_are_left_open()
+
+    # Teardown
+    if mapdl.is_local and mapdl._exited:
+        # The test exited MAPDL, so it has failed.
+        test_name = os.environ.get(
+            "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
+        )
+
+        assert (
+            False
+        ), f"Test {test_name} failed at the teardown."  # this will fail the test
+
+
+def restart_mapdl(mapdl: Mapdl) -> Mapdl:
+    def is_exited(mapdl: Mapdl):
         try:
             _ = mapdl._ctrl("VERSION")
             return False
@@ -436,44 +495,43 @@ def run_before_and_after_tests(request, mapdl):
                 override=True,
                 run_location=mapdl._path,
                 cleanup_on_exit=mapdl._cleanup,
+                log_apdl=LOG_APDL,
             )
 
         # Restoring the local configuration
         mapdl._local = local_
 
-    yield  # this is where the testing happens
-
-    # Teardown : fill with any logic you want
-    if mapdl.is_local and mapdl._exited:
-        # The test exited MAPDL, so it is fail.
-        assert False  # this will fail the test
+    return mapdl
 
 
-@pytest.fixture(autouse=True, scope="function")
-def run_before_and_after_tests_2(request, mapdl):
-    """Make sure we are not changing these properties in tests"""
-    prev = mapdl.is_local
+def log_test_start(mapdl: Mapdl) -> None:
+    test_name = os.environ.get(
+        "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
+    )
 
-    yield
+    mapdl.run("!")
+    mapdl.run(f"! PyMAPDL running test: {test_name}")
+    mapdl.run("!")
 
-    assert prev == mapdl.is_local
+    # To see it also in MAPDL terminal output
+    if len(test_name) > 75:
+        # terminal output is limited to 75 characters
+        test_name = test_name.split("::")
+        if len(test_name) > 2:
+            types_ = ["File path", "Test class", "Method"]
+        else:
+            types_ = ["File path", "Test function"]
+
+        mapdl._run("/com,Running test in:", mute=True)
+        for type_, name_ in zip(types_, test_name):
+            mapdl._run(f"/com,    {type_}: {name_}", mute=True)
+
+    else:
+        mapdl._run(f"/com,Running test: {test_name}", mute=True)
 
 
-@pytest.fixture(autouse=True, scope="function")
-def run_before_and_after_tests_3(request, mapdl):
+def make_sure_not_instances_are_left_open() -> None:
     """Make sure we leave no MAPDL running behind"""
-    from ansys.mapdl.core.launcher import is_ansys_process
-
-    PROCESS_OK_STATUS = [
-        psutil.STATUS_RUNNING,  #
-        psutil.STATUS_SLEEPING,  #
-        psutil.STATUS_DISK_SLEEP,
-        psutil.STATUS_DEAD,
-        psutil.STATUS_PARKED,  # (Linux)
-        psutil.STATUS_IDLE,  # (Linux, macOS, FreeBSD)
-    ]
-
-    yield
 
     if ON_LOCAL:
         for proc in psutil.process_iter():
@@ -521,7 +579,7 @@ def mapdl_console(request):
             "Valid versions are up to 2020R2."
         )
 
-    mapdl = launch_mapdl(console_path)
+    mapdl = launch_mapdl(console_path, log_apdl=LOG_APDL)
     from ansys.mapdl.core.mapdl_console import MapdlConsole
 
     assert isinstance(mapdl, MapdlConsole)
@@ -552,6 +610,7 @@ def mapdl(request, tmpdir_factory):
         cleanup_on_exit=cleanup,
         license_server_check=False,
         start_timeout=50,
+        log_apdl=LOG_APDL,
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
     MAPDL_VERSION = mapdl.version  # Caching version
@@ -593,6 +652,31 @@ SpacedPaths = namedtuple(
     "SpacedPaths",
     ["path_without_spaces", "path_with_spaces", "path_with_single_quote"],
 )
+
+
+@pytest.fixture(scope="function")
+def set_env_var(request, monkeypatch):
+    """Set an environment variable from given requests, this fixture must be used with `parametrize`"""
+    env_var_name = request.param[0]
+    env_var_value = request.param[1]
+    monkeypatch.setenv(f"{env_var_name}", f"{env_var_value}")
+    yield request.param
+
+
+@pytest.fixture(scope="function")
+def set_env_var_context(request, monkeypatch):
+    """Set MY_VARIABLE environment variable, this fixture must be used with `parametrize`"""
+    if not isinstance(request.param, (tuple, list)):
+        request_param = [request.param]
+    else:
+        request_param = request.param
+
+    for each_dict in request_param:
+        for each_key, each_value in each_dict.items():
+            if each_value is not None:
+                monkeypatch.setenv(f"{each_key}", f"{each_value}")
+
+    yield request.param
 
 
 @pytest.fixture
@@ -640,6 +724,10 @@ def box_with_fields(cleared, mapdl):
     mapdl.mp("ex", 1, 2e10)
     mapdl.mp("perx", 1, 1)
     mapdl.mp("murx", 1, 1)
+    if mapdl.version >= 25.1:
+        mapdl.tb("pm", 1, "", "", "perm")
+        mapdl.tbdata("", 0)
+
     mapdl.et(1, "SOLID70")
     mapdl.et(2, "CPT215")
     mapdl.keyopt(2, 12, 1)  # Activating PRES DOF

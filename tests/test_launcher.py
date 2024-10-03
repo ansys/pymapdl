@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -24,7 +24,6 @@
 
 import os
 import tempfile
-from time import sleep
 import warnings
 
 import psutil
@@ -34,7 +33,6 @@ from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import (
     DeprecationError,
     LicenseServerConnectionError,
-    MapdlDidNotStart,
     NotEnoughResources,
     PortAlreadyInUseByAnMAPDLInstance,
 )
@@ -44,6 +42,7 @@ from ansys.mapdl.core.launcher import (
     _force_smp_student_version,
     _is_ubuntu,
     _parse_ip_route,
+    _parse_slurm_options,
     _validate_MPI,
     _verify_version,
     get_start_instance,
@@ -183,75 +182,20 @@ def test_launch_console(version):
 
 @requires("local")
 @requires("nostudent")
-def test_license_type_keyword(mapdl):
-    checks = []
-    for license_name, license_description in LICENSES.items():
-        try:
-            mapdl_ = launch_mapdl(
-                license_type=license_name,
-                start_timeout=start_timeout,
-                port=mapdl.port + 1,
-                additional_switches=QUICK_LAUNCH_SWITCHES,
-            )
-
-            # Using first line to ensure not picking up other stuff.
-            checks.append(license_description in mapdl_.__str__().split("\n")[0])
-            mapdl_.exit()
-            del mapdl_
-            sleep(2)
-
-        except MapdlDidNotStart as e:
-            if "ANSYS license not available" in str(e):
-                continue
-            else:
-                raise e
-
-    assert any(checks)
+@pytest.mark.parametrize("license_name", LICENSES)
+def test_license_type_keyword_names(mapdl, license_name):
+    args = launch_mapdl(license_type=license_name, _debug_no_launch=True)
+    assert f"-p {license_name}" in args["additional_switches"]
 
 
-@requires("local")
-@requires("nostudent")
-def test_license_type_keyword_names(mapdl):
-    # This test might became a way to check available licenses, which is not the purpose.
-
-    successful_check = False
-    for license_name, license_description in LICENSES.items():
-        mapdl_ = launch_mapdl(
-            license_type=license_name,
-            start_timeout=start_timeout,
-            port=mapdl.port + 1,
-            additional_switches=QUICK_LAUNCH_SWITCHES,
-        )
-
-        # Using first line to ensure not picking up other stuff.
-        successful_check = (
-            license_description in mapdl_.__str__().split("\n")[0] or successful_check
-        )
-        assert license_description in mapdl_.__str__().split("\n")[0]
-        mapdl_.exit()
-
-    assert successful_check  # if at least one license is ok, this should be true.
-
-
-@requires("local")
-@requires("nostudent")
-def test_license_type_additional_switch(mapdl):
-    # This test might became a way to check available licenses, which is not the purpose.
-    successful_check = False
-    for license_name, license_description in LICENSES.items():
-        mapdl_ = launch_mapdl(
-            additional_switches=QUICK_LAUNCH_SWITCHES + " -p " + license_name,
-            start_timeout=start_timeout,
-            port=mapdl.port + 1,
-        )
-
-        # Using first line to ensure not picking up other stuff.
-        successful_check = (
-            license_description in mapdl_.__str__().split("\n")[0] or successful_check
-        )
-        mapdl_.exit()
-
-    assert successful_check  # if at least one license is ok, this should be true.
+# @requires("local")
+@pytest.mark.parametrize("license_name", LICENSES)
+def test_license_type_additional_switch(mapdl, license_name):
+    args = launch_mapdl(
+        additional_switches=QUICK_LAUNCH_SWITCHES + " -p " + license_name,
+        _debug_no_launch=True,
+    )
+    assert f"-p {license_name}" in args["additional_switches"]
 
 
 @requires("ansys-tools-path")
@@ -446,7 +390,9 @@ def test_find_ansys(mapdl):
     assert find_ansys(version=version) is not None
 
     # Checking floats
-    assert find_ansys(version=22.2) is not None
+    with pytest.raises(ValueError):
+        find_ansys(version=22.2)
+
     assert find_ansys(version=mapdl.version) is not None
 
     with pytest.raises(ValueError):
@@ -558,6 +504,155 @@ def test_deprecate_verbose():
 
     with pytest.raises(DeprecationError):
         launch_grpc(verbose=True)
+
+
+@pytest.mark.parametrize(
+    "set_env_var_context,validation",
+    (
+        pytest.param(
+            {
+                "SLURM_NNODES": None,
+                "SLURM_NTASKS": None,
+                "SLURM_CPUS_PER_TASK": None,
+                "SLURM_NPROCS": None,
+                "SLURM_CPUS_ON_NODE": None,
+                "SLURM_MEM_PER_NODE": None,
+                "SLURM_NODELIST": None,
+            },
+            {"nproc": 1},
+            id="No parameters supplied",
+        ),
+        pytest.param(
+            {
+                "SLURM_NNODES": 5,
+                "SLURM_NTASKS": 1,
+                "SLURM_CPUS_PER_TASK": 1,
+                "SLURM_NPROCS": 1,
+                "SLURM_CPUS_ON_NODE": 1,
+                "SLURM_MEM_PER_NODE": None,
+                "SLURM_NODELIST": None,
+            },
+            {"nproc": 5},
+            id="Testing NNODE only",
+        ),
+        pytest.param(
+            {
+                "SLURM_NNODES": 5,
+                "SLURM_NTASKS": 1,
+                "SLURM_CPUS_PER_TASK": 1,
+                "SLURM_NPROCS": 1,
+                "SLURM_CPUS_ON_NODE": 2,
+                "SLURM_MEM_PER_NODE": None,
+                "SLURM_NODELIST": None,
+            },
+            {"nproc": 10},
+            id="Testing NNODE and CPUS_ON_NODE only",
+        ),
+        pytest.param(
+            {
+                "SLURM_NNODES": 1,
+                "SLURM_NTASKS": 5,
+                "SLURM_CPUS_PER_TASK": 1,
+                "SLURM_NPROCS": 1,
+                "SLURM_CPUS_ON_NODE": 1,
+                "SLURM_MEM_PER_NODE": None,
+                "SLURM_NODELIST": None,
+            },
+            {"nproc": 5},
+            id="Testing NTASKS only",
+        ),
+        pytest.param(
+            {
+                "SLURM_NNODES": 1,
+                "SLURM_NTASKS": 5,
+                "SLURM_CPUS_PER_TASK": 2,
+                "SLURM_NPROCS": 1,
+                "SLURM_CPUS_ON_NODE": 1,
+                "SLURM_MEM_PER_NODE": None,
+                "SLURM_NODELIST": None,
+            },
+            {"nproc": 10},
+            id="Testing NTASKS only",
+        ),
+        pytest.param(
+            {
+                "SLURM_NNODES": 2,
+                "SLURM_NTASKS": 2,
+                "SLURM_CPUS_PER_TASK": 2,
+                "SLURM_NPROCS": 18,
+                "SLURM_CPUS_ON_NODE": None,
+                "SLURM_MEM_PER_NODE": None,
+                "SLURM_NODELIST": None,
+            },
+            {"nproc": 18},
+            id="Testing NPROCS only",
+        ),
+        pytest.param(
+            # This test probably does not do a good memory mapping between
+            # MEM_PER_NODE and "ram"
+            {
+                "SLURM_NNODES": 4,
+                "SLURM_NTASKS": 2,
+                "SLURM_CPUS_PER_TASK": 2,
+                "SLURM_NPROCS": None,
+                "SLURM_CPUS_ON_NODE": None,
+                "SLURM_MEM_PER_NODE": "1000",
+                "SLURM_NODELIST": None,
+            },
+            {"nproc": 4, "ram": 1000},
+            id="Testing NNODES and MEM_PER_NODE",
+        ),
+        pytest.param(
+            {
+                "PYMAPDL_NPROC": 5,
+                "SLURM_JOB_NAME": "myawesomejob",
+                "SLURM_NTASKS": 2,
+                "SLURM_CPUS_PER_TASK": 2,
+                "SLURM_NPROCS": 1,
+                "SLURM_CPUS_ON_NODE": None,
+                "SLURM_MEM_PER_NODE": None,
+                "SLURM_NODELIST": None,
+            },
+            {"nproc": 5, "jobname": "myawesomejob"},
+            id="Testing PYMAPDL_NPROC and SLURM_JOB_NAME",
+        ),
+        pytest.param(
+            {
+                "PYMAPDL_NPROC": 5,
+                "SLURM_JOB_NAME": "myawesomejob",
+                "SLURM_NTASKS": 2,
+                "SLURM_CPUS_PER_TASK": 2,
+                "SLURM_NPROCS": 1,
+                "SLURM_CPUS_ON_NODE": None,
+                "SLURM_MEM_PER_NODE": None,
+                "SLURM_NODELIST": None,
+                "PYMAPDL_MAPDL_EXEC": "asdf/qwer/poiu",
+            },
+            {"nproc": 5, "jobname": "myawesomejob", "exec_file": "asdf/qwer/poiu"},
+            id="Testing PYMAPDL_NPROC and SLURM_JOB_NAME",
+        ),
+    ),
+    indirect=["set_env_var_context"],
+)
+def test__parse_slurm_options(set_env_var_context, validation):
+    """test slurm env vars"""
+    for each_key, each_value in set_env_var_context.items():
+        if each_value:
+            assert os.environ.get(each_key) == str(each_value)
+
+    exec_file, jobname, nproc, ram, additional_switches = _parse_slurm_options(
+        exec_file=None, jobname="", nproc=None, ram=None, additional_switches=""
+    )
+    assert nproc == validation["nproc"]
+
+    if ram:
+        assert ram == validation["ram"]
+
+    if jobname != "file":
+        assert jobname == validation["jobname"]
+
+    if exec_file and validation.get("exec_file", None):
+        assert exec_file == validation["exec_file"]
 
 
 @pytest.mark.parametrize(

@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -117,6 +117,7 @@ class MapdlConsole(MapdlBase):
         self._auto_continue = True
         self._continue_on_error = False
         self._process = None
+        self._name = None
         self._launch(start_parm)
         super().__init__(
             loglevel=loglevel,
@@ -315,7 +316,7 @@ class MapdlConsole(MapdlBase):
                     self._log.warning("Unable to kill process %d", self._process.pid)
                 self._log.debug("Killed process %d", self._process.pid)
 
-    @property
+    @MapdlBase.name.getter
     def name(self):
         """Instance unique identifier."""
         if not self._name:

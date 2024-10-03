@@ -12,7 +12,7 @@ transfer the geometry to Python to visualize it:
 - :func:`Mapdl.vplot() <ansys.mapdl.core.Mapdl.vplot>`
 - :func:`Mapdl.eplot() <ansys.mapdl.core.Mapdl.eplot>`). 
 
-These methods rely on the :func:`ansys.mapdl.core.plotting.general_plotter`
+These methods rely on the :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter`
 method. Combined with the MAPDL geometry commands, you can
 generate and visualize geometry from scratch without opening the GUI
 using the :func:`open_gui() <ansys.mapdl.core.Mapdl.open_gui>` method.
@@ -25,21 +25,19 @@ You plot lines within Python using the :func:`Mapdl.lplot() <ansys.mapdl.core.Ma
 .. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
+    >>> import numpy as np
     >>> mapdl = launch_mapdl()
 
-    Create a rectangle with a few holes
-
+    # Create a rectangle with a few holes
     >>> mapdl.prep7()
     >>> rect_anum = mapdl.blc4(width=1, height=0.2)
 
-    Create several circles in the middle in the rectangle
-
+    # Create several circles in the middle in the rectangle
     >>> for x in np.linspace(0.1, 0.9, 8):
     ...     mapdl.cyl4(x, 0.1, 0.025)
     ...
 
-    Generate a line plot
-
+    # Generate a line plot
     >>> mapdl.lplot(color_lines=True, cpos="xy")
 
 
@@ -60,8 +58,7 @@ extrudes it.
 
     >>> plate_holes = mapdl.asba(rect_anum, "all")
 
-    Extrude this area
-
+    # Extrude this area
     >>> mapdl.vext(plate_holes, dz=0.1)
     >>> mapdl.vplot()
 
@@ -171,7 +168,7 @@ to view the XY plane with ``cpos='xy'``.
     >>> mapdl.eplot(cpos="xy")
 
 For all general plotting options, see the
-:func:`ansys.mapdl.core.plotting.general_plotter` method.
+:class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` class.
 
 
 Plotting boundary conditions

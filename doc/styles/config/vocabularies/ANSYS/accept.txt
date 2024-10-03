@@ -99,7 +99,6 @@ Linder
 Linux
 MacOS
 mapdl
-mapdl
 MAPDL
 mater
 MATLAB
@@ -160,7 +159,6 @@ tablet
 thermomechanical
 thermomechanically
 THIRDPARTY
-thispagetitle
 Tool-Narayanaswamy
 tread
 trian

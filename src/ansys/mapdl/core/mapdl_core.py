@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -56,6 +56,7 @@ from ansys.mapdl.core.commands import (
 from ansys.mapdl.core.errors import (
     ComponentNoData,
     MapdlCommandIgnoredError,
+    MapdlExitedError,
     MapdlFileNotFoundError,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
@@ -82,9 +83,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.solution import Solution
     from ansys.mapdl.core.xpl import ansXpl
 
-if _HAS_PYVISTA:
-    from ansys.mapdl.core.plotting import get_meshes_from_plotter
-
 from ansys.mapdl.core.post import PostProcessing
 
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
@@ -107,20 +105,22 @@ PNG_IS_WRITTEN_TO_FILE = re.compile(
     "WRITTEN TO FILE"
 )  # getting the file name is buggy.
 
-VWRITE_REPLACEMENT = """
-Cannot use *VWRITE directly as a command in MAPDL
+VWRITE_MWRITE_REPLACEMENT = """
+Cannot use *VWRITE/*MWRITE directly as a command in MAPDL
 service mode.  Instead, run it as ``non_interactive``.
 
-For example:
+For example, in the *VWRITE case:
 
 with self.non_interactive:
     self.vwrite('%s(1)' % parm_name)
     self.run('(F20.12)')
+
 """
 
 ## Invalid commands in interactive mode.
 INVAL_COMMANDS = {
-    "*VWR": VWRITE_REPLACEMENT,
+    "*VWR": VWRITE_MWRITE_REPLACEMENT,
+    "*MWR": VWRITE_MWRITE_REPLACEMENT,
     "*CFO": "Run CFOPEN as ``non_interactive``",
     "*CRE": "Create a function within python or run as non_interactive",
     "*END": "Create a function within python or run as non_interactive",
@@ -161,6 +161,7 @@ VALID_SELECTION_TYPE_TP = Literal["S", "R", "A", "U"]
 VALID_SELECTION_ENTITY_TP = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
 
 GUI_FONT_SIZE = 15
+LOG_APDL_DEFAULT_FILE_NAME = "apdl.log"
 
 
 def parse_to_short_cmd(command):
@@ -235,7 +236,6 @@ class _MapdlCore(Commands):
     ):
         """Initialize connection with MAPDL."""
         atexit.register(self.__del__)  # registering to exit properly
-        self._name = None  # For naming the instance.
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited: bool = False
@@ -252,6 +252,8 @@ class _MapdlCore(Commands):
         self._file_type_for_plots = file_type_for_plots
         self._default_file_type_for_plots = file_type_for_plots
         self._version = None  # cached version
+        self._mute = False
+        self._save_selection_obj = None
 
         if _HAS_PYVISTA:
             if use_vtk is not None:  # pragma: no cover
@@ -282,11 +284,12 @@ class _MapdlCore(Commands):
         self._start_parm: Dict[str, Any] = start_parm
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
+        self._path_cache = None  # Cache
         self._print_com: bool = print_com  # print the command /COM input.
         self.check_parameter_names = start_parm.get("check_parameter_names", True)
 
         # Setting up loggers
-        self._log: logging.Logger = logger.add_instance_logger(
+        self._log: logger = logger.add_instance_logger(
             self.name, self, level=loglevel
         )  # instance logger
         # adding a file handler to the logger
@@ -312,6 +315,9 @@ class _MapdlCore(Commands):
 
         self._componentmanager: ComponentManager = ComponentManager(self)
 
+        if isinstance(log_apdl, bool) and log_apdl:
+            log_apdl = LOG_APDL_DEFAULT_FILE_NAME
+
         if log_apdl:
             self.open_apdl_log(log_apdl, mode="w")
 
@@ -325,6 +331,9 @@ class _MapdlCore(Commands):
         self._wrap_xsel_commands()
 
         self._info = Information(self)
+
+    def _after_run(self, _command: str) -> None:
+        pass
 
     @property
     def allow_ignore(self):
@@ -368,6 +377,9 @@ class _MapdlCore(Commands):
             DeprecationWarning,
         )
         self._ignore_errors = bool(value)
+
+    def _before_run(self, _command: str) -> None:
+        pass
 
     @property
     def chain_commands(self):
@@ -431,7 +443,7 @@ class _MapdlCore(Commands):
 
         >>> mapdl.solution.converged
         """
-        if self._exited:  # pragma: no cover
+        if self.exited:  # pragma: no cover
             raise MapdlRuntimeError("MAPDL exited.")
         return self._componentmanager
 
@@ -500,10 +512,14 @@ class _MapdlCore(Commands):
             # new line to fix path issue, see #416
             self._path = repr(self._path)[1:-1]
         else:  # pragma: no cover
-            raise IOError(
-                f"The directory returned by /INQUIRE is not valid ('{self._path}')."
-            )
+            if self._path_cache:
+                return self._path_cache
+            else:
+                raise IOError(
+                    f"The directory returned by /INQUIRE is not valid ('{self._path}')."
+                )
 
+        self._path_cache = self._path  # update
         return self._path
 
     @directory.setter
@@ -841,7 +857,7 @@ class _MapdlCore(Commands):
         array([1.07512979e-04, 8.59137773e-05, 5.70690047e-05, ...,
                5.70333124e-05, 8.58600402e-05, 1.07445726e-04])
         """
-        if self._exited:
+        if self.exited:
             raise MapdlRuntimeError(
                 "MAPDL exited.\n\nCan only postprocess a live " "MAPDL instance."
             )
@@ -944,7 +960,9 @@ class _MapdlCore(Commands):
         when exit returns to that selection.
 
         """
-        return self._save_selection(self)
+        if self._save_selection_obj is None:
+            self._save_selection_obj = self._save_selection(self)
+        return self._save_selection_obj
 
     @property
     def solution(self) -> "Solution":
@@ -960,7 +978,7 @@ class _MapdlCore(Commands):
 
         >>> mapdl.solution.converged
         """
-        if self._exited:
+        if self.exited:
             raise MapdlRuntimeError("MAPDL exited.")
         return self._solution
 
@@ -1380,44 +1398,40 @@ class _MapdlCore(Commands):
 
         def __init__(self, parent):
             self._parent = weakref.ref(parent)
-            self.selection_sets = []
-            self.selection_sets_comps = []
+            self.selection = []
 
         def __enter__(self):
             self._parent()._log.debug("Entering saving selection context")
-
-            selection_set_name = random_string(10)
-            self.selection_sets.append(selection_set_name)
-            self.selection_sets_comps.append(self._parent().components.names)
-
             mapdl = self._parent()
 
-            prev_ier = mapdl.ignore_errors
-            mapdl.ignore_errors = True
-            for entity in ["kp", "lines", "area", "volu", "node", "elem"]:
-                mapdl.cm(f"_{selection_set_name}_{entity}_", f"{entity}", mute=True)
-            mapdl.ignore_errors = prev_ier
+            # Storing components
+            selection = {
+                "cmsel": mapdl.components.names,
+                # "components_type": mapdl.components.types,
+                "nsel": mapdl.mesh.nnum,
+                "esel": mapdl.mesh.enum,
+                "ksel": mapdl.geometry.knum,
+                "lsel": mapdl.geometry.lnum,
+                "asel": mapdl.geometry.anum,
+                "vsel": mapdl.geometry.vnum,
+            }
+
+            self.selection.append(selection)
 
         def __exit__(self, *args):
             self._parent()._log.debug("Exiting saving selection context")
-            last_selection_name = self.selection_sets.pop()
-            last_selection_cmps = self.selection_sets_comps.pop()
-
+            selection = self.selection.pop()
             mapdl = self._parent()
 
-            # probably this is redundant
-            prev_ier = mapdl.ignore_errors
-            mapdl.ignore_errors = True
-            for entity in ["kp", "lines", "area", "volu", "node", "elem"]:
-                cmp_name = f"_{last_selection_name}_{entity}_"
-                mapdl.cmsel("s", cmp_name, f"{entity}", mute=True)
-                mapdl.cmdele(cmp_name)
+            cmps = selection.pop("cmsel")
 
-            mapdl.ignore_errors = prev_ier
+            if cmps:
+                mapdl.components.select(cmps)
 
-            # mute to avoid getting issues when the component wasn't created in
-            # first place because there was no entities.
-            self._parent().components.select(last_selection_cmps, mute=True)
+            for select_cmd, ids in selection.items():
+                if ids.size > 0:
+                    func = getattr(mapdl, select_cmd)
+                    func(vmin=ids)
 
     class _chain_commands:
         """Store MAPDL commands and send one chained command."""
@@ -1430,7 +1444,7 @@ class _MapdlCore(Commands):
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
-            self._parent()._log.debug("Entering chained command mode")
+            self._parent()._log.debug("Exiting chained command mode")
             self._parent()._chain_stored()
             self._parent()._store_commands = False
 
@@ -1439,29 +1453,27 @@ class _MapdlCore(Commands):
 
         def __init__(self, parent, routine):
             self._parent = weakref.ref(parent)
-
-            # check the routine is valid since we're muting the output
-            check_valid_routine(routine)
             self._requested_routine = routine
 
         def __enter__(self):
             """Store the current routine and enter the requested routine."""
-            self._cached_routine = self._parent().parameters.routine
-            self._parent()._log.debug("Caching routine %s", self._cached_routine)
-            if self._requested_routine.lower() != self._cached_routine.lower():
-                self._enter_routine(self._requested_routine)
+            self._parent()._cache_routine()
+            self._parent()._log.debug(f"Caching routine {self._cached_routine}")
+
+            if (
+                self._requested_routine.lower().strip()
+                != self._cached_routine.lower().strip()
+            ):
+                self._parent()._enter_routine(self._requested_routine)
 
         def __exit__(self, *args):
             """Restore the original routine."""
-            self._parent()._log.debug("Restoring routine %s", self._cached_routine)
-            self._enter_routine(self._cached_routine)
+            self._parent()._log.debug(f"Restoring routine '{self._cached_routine}'")
+            self._parent()._resume_routine()
 
-        def _enter_routine(self, routine):
-            """Enter a routine."""
-            if routine.lower() == "begin level":
-                self._parent().finish(mute=True)
-            else:
-                self._parent().run(f"/{routine}", mute=True)
+        @property
+        def _cached_routine(self):
+            return self._parent()._cached_routine
 
     def run_as_routine(self, routine):
         """
@@ -1703,6 +1715,18 @@ class _MapdlCore(Commands):
         # restore remove tmp state
         self._remove_tmp = remove_tmp
 
+    def _enter_routine(self, routine):
+        # check the routine is valid since we're muting the output
+        check_valid_routine(routine)
+
+        if routine.lower() in ["begin level", "finish"]:
+            self.finish(mute=True)
+        else:
+            if not routine.startswith("/"):
+                routine = f"/{routine}"
+
+            self.run(f"{routine}", mute=True)
+
     def _cache_routine(self):
         """Cache the current routine."""
         self._cached_routine = self.parameters.routine
@@ -1710,10 +1734,7 @@ class _MapdlCore(Commands):
     def _resume_routine(self):
         """Resume the cached routine."""
         if self._cached_routine is not None:
-            if "BEGIN" not in self._cached_routine:
-                self.run(f"/{self._cached_routine}", mute=True)
-            else:
-                self.finish(mute=True)
+            self._enter_routine(self._cached_routine)
             self._cached_routine = None
 
     def _launch(self, *args, **kwargs):  # pragma: no cover
@@ -1878,30 +1899,37 @@ class _MapdlCore(Commands):
         Overridden by gRPC.
 
         """
+        if not self._stored_commands:
+            self._log.debug("There is no commands to be flushed.")
+            self._store_commands = False
+            return
+
         self._log.debug("Flushing stored commands")
+
         rnd_str = random_string()
         tmp_out = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.out")
-        self._stored_commands.insert(0, "/OUTPUT, f'{tmp_out}'")
+        self._stored_commands.insert(0, f"/OUTPUT, {tmp_out}")
         self._stored_commands.append("/OUTPUT")
         commands = "\n".join(self._stored_commands)
         if self._apdl_log:
             self._apdl_log.write(commands + "\n")
 
+        self._store_commands = False
+        self._stored_commands = []
+
         # write to a temporary input file
-        tmp_inp = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.inp")
         self._log.debug(
             "Writing the following commands to a temporary " "apdl input file:\n%s",
             commands,
         )
 
+        tmp_inp = os.path.join(tempfile.gettempdir(), f"tmp_{random_string()}.inp")
         with open(tmp_inp, "w") as f:
             f.writelines(commands)
 
-        self._store_commands = False
-        self._stored_commands = []
-
         # interactive result
         _ = self.input(tmp_inp, write_to_log=False)
+
         time.sleep(0.1)  # allow MAPDL to close the file
         if os.path.isfile(tmp_out):
             self._response = "\n" + open(tmp_out).read()
@@ -2106,6 +2134,11 @@ class _MapdlCore(Commands):
         >>> mapdl.prep7()
 
         """
+        if self.exited:
+            raise MapdlExitedError(
+                f"The MAPDL instance has been exited before running the command: {command}"
+            )
+
         # check if multiline
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")
@@ -2138,14 +2171,6 @@ class _MapdlCore(Commands):
             # If you are using NBLOCK on input, you should not strip the string
             self._stored_commands.append(command)
             return
-
-        # Actually sending the message
-        if self._session_id is not None:
-            self._check_session_id()
-        else:
-            # For some reason the session hasn't been created
-            if self.is_grpc:
-                self._create_session()
 
         if mute is None:
             if hasattr(self, "mute"):
@@ -2208,6 +2233,8 @@ class _MapdlCore(Commands):
                 # Edge case. `\title, 'par=1234' `
                 self._check_parameter_name(param_name)
 
+        self._before_run(command)
+
         short_cmd = parse_to_short_cmd(command)
         text = self._run(command, verbose=verbose, mute=mute)
 
@@ -2219,9 +2246,7 @@ class _MapdlCore(Commands):
             self.show(self.default_file_type_for_plots)
             text = self._run(command, verbose=verbose, mute=mute)
 
-        if command[:4].upper() == "/CLE" and self.is_grpc:
-            # We have reset the database, so we need to create a new session id
-            self._create_session()
+        self._after_run(command)
 
         if mute:
             return
@@ -2263,6 +2288,11 @@ class _MapdlCore(Commands):
     def __del__(self):
         """Clean up when complete"""
         if self._cleanup:
+            # removing logging handlers if they are closed to avoid I/O errors
+            # when exiting after the logger file has been closed.
+            # self._cleanup_loggers()
+            logging.disable(logging.CRITICAL)
+
             try:
                 self.exit()
             except Exception as e:
@@ -2271,6 +2301,28 @@ class _MapdlCore(Commands):
                         self._log.error("exit: %s", str(e))
                 except Exception:
                     pass
+
+    def _cleanup_loggers(self):
+        """Clean up all the loggers"""
+        # Detached from ``__del__`` for easier testing
+        # if not hasattr(self, "_log"):
+        #     return  # Early exit if logger has been already cleaned.
+
+        logger = self._log
+        logger.setLevel(logging.CRITICAL + 1)
+
+        if logger.hasHandlers():
+            for each_handler in logger.logger.handlers:
+                if each_handler.stream and not each_handler.stream.closed:
+                    logger.logger.removeHandler(each_handler)
+
+        if logger.file_handler:
+            logger.file_handler.close()
+            logger.file_handler = None
+
+        if logger.std_out_handler:
+            logger.std_out_handler.close()
+            logger.std_out_handler = None
 
     def _get_plot_name(self, text: str) -> str:
         """Obtain the plot filename."""
@@ -2467,7 +2519,7 @@ class _MapdlCore(Commands):
             pass
 
         # adding selection inversor
-        pl._inver_mouse_click_selection = False
+        pl.scene._inver_mouse_click_selection = False
 
         selection_text = {
             "S": "New selection",
@@ -2478,7 +2530,9 @@ class _MapdlCore(Commands):
 
         def gen_text(picked_entities=None):
             """Generate helpful text for the render window."""
-            sel_ = "Unselecting" if pl._inver_mouse_click_selection else "Selecting"
+            sel_ = (
+                "Unselecting" if pl.scene._inver_mouse_click_selection else "Selecting"
+            )
             type_text = selection_text[type_]
             button_ = "left" if PICKING_USING_LEFT_CLICKING else "right"
             text = (
@@ -2501,14 +2555,14 @@ class _MapdlCore(Commands):
             return text + f"Current {entity} selection: {picked_entities_str}"
 
         def callback_points(mesh, id_):
-            from ansys.mapdl.core.plotting import POINT_SIZE
+            from ansys.mapdl.core.plotting.consts import POINT_SIZE
 
             point = mesh.points[id_]
             node_id = selector(
                 point[0], point[1], point[2]
             )  # This will only return one node. Fine for now.
 
-            if not pl._inver_mouse_click_selection:
+            if not pl.scene._inver_mouse_click_selection:
                 # Updating MAPDL entity mapping
                 if node_id not in picked_entities:
                     picked_entities.append(node_id)
@@ -2524,14 +2578,14 @@ class _MapdlCore(Commands):
                     picked_ids.remove(id_)
 
             # remov etitle and update text
-            pl.remove_actor("title")
-            pl._picking_text = pl.add_text(
+            pl.scene.remove_actor("title")
+            pl.scene._picking_text = pl.scene.add_text(
                 gen_text(picked_entities),
                 font_size=GUI_FONT_SIZE,
                 name="_entity_picking_message",
             )
             if picked_ids:
-                pl.add_mesh(
+                pl.scene.add_mesh(
                     mesh.points[picked_ids],
                     color="red",
                     point_size=POINT_SIZE + 10,
@@ -2540,7 +2594,7 @@ class _MapdlCore(Commands):
                     reset_camera=False,
                 )
             else:
-                pl.remove_actor("_picked_entities")
+                pl.scene.remove_actor("_picked_entities")
 
         def callback_mesh(mesh):
             def get_entnum(mesh):
@@ -2549,16 +2603,16 @@ class _MapdlCore(Commands):
             mesh_id = get_entnum(mesh)
 
             # Getting meshes with that entity_num.
-            meshes = get_meshes_from_plotter(pl)
+            meshes = pl.get_meshes_from_plotter()
 
             meshes = [each for each in meshes if get_entnum(each) == mesh_id]
 
-            if not pl._inver_mouse_click_selection:
+            if not pl.scene._inver_mouse_click_selection:
                 # Updating MAPDL entity mapping
                 if mesh_id not in picked_entities:
                     picked_entities.append(mesh_id)
                     for i, each in enumerate(meshes):
-                        pl.add_mesh(
+                        pl.scene.add_mesh(
                             each,
                             color="red",
                             point_size=10,
@@ -2573,14 +2627,14 @@ class _MapdlCore(Commands):
                     picked_entities.remove(mesh_id)
 
                     for i, each in enumerate(meshes):
-                        pl.remove_actor(f"_picked_entity_{mesh_id}_{i}")
+                        pl.scene.remove_actor(f"_picked_entity_{mesh_id}_{i}")
 
             # Removing only-first time actors
-            pl.remove_actor("title")
-            pl.remove_actor("_point_picking_message")
+            pl.scene.remove_actor("title")
+            pl.scene.remove_actor("_point_picking_message")
 
             if "_entity_picking_message" in pl.actors:
-                pl.remove_actor("_entity_picking_message")
+                pl.scene.remove_actor("_entity_picking_message")
 
             pl._picking_text = pl.add_text(
                 gen_text(picked_entities),
@@ -2590,10 +2644,10 @@ class _MapdlCore(Commands):
 
         if entity in ["kp", "node"]:
             lines_pl = self.lplot(return_plotter=True, color="w")
-            lines_meshes = get_meshes_from_plotter(lines_pl)
+            lines_meshes = lines_pl.get_meshes_from_plotter()
 
             for each_mesh in lines_meshes:
-                pl.add_mesh(
+                pl.scene.add_mesh(
                     each_mesh,
                     pickable=False,
                     color="w",
@@ -2601,7 +2655,7 @@ class _MapdlCore(Commands):
                 )
 
             # Picking points
-            pl.enable_point_picking(
+            pl.scene.enable_point_picking(
                 callback=callback_points,
                 use_mesh=True,
                 show_message=gen_text(),
@@ -2612,7 +2666,7 @@ class _MapdlCore(Commands):
             )
         else:
             # Picking meshes
-            pl.enable_mesh_picking(
+            pl.scene.enable_mesh_picking(
                 callback=callback_mesh,
                 use_mesh=True,
                 show=False,  # This should be false to avoid a warning.
@@ -2623,19 +2677,19 @@ class _MapdlCore(Commands):
 
         def callback_u():
             # inverting bool
-            pl._inver_mouse_click_selection = not pl._inver_mouse_click_selection
-            pl.remove_actor("_entity_picking_message")
+            pl.scene._inver_mouse_click_selection = not pl._inver_mouse_click_selection
+            pl.scene.remove_actor("_entity_picking_message")
 
-            pl._picking_text = pl.add_text(
+            pl.scene._picking_text = pl.add_text(
                 gen_text(picked_entities),
                 font_size=GUI_FONT_SIZE,
                 name="_entity_picking_message",
             )
 
-        pl.add_key_event("u", callback_u)
+        pl.scene.add_key_event("u", callback_u)
 
         if not _debug:  # pragma: no cover
-            pl.show()
+            pl.scene.show()
         else:
             _debug(pl)
 
@@ -2658,22 +2712,17 @@ class _MapdlCore(Commands):
         self, entity, selection_function, type_, item, comp, vmin, kabs
     ):
         """Select entities using CM, and the supplied selection function."""
-        self.cm(f"__temp_{entity}s__", f"{entity}")  # Saving previous selection
-
         # Getting new selection
         for id_, each_ in enumerate(vmin):
-            selection_function(
-                self, "S" if id_ == 0 else "A", item, comp, each_, "", "", kabs
-            )
+            if type_ == "S" or not type_:
+                type__ = "S" if id_ == 0 else "A"
+            # R is an issue, because first iteration will clean up the rest.
+            elif type_ == "R":
+                raise NotImplementedError("Mode R is not supported.")
+            else:
+                type__ = type_
 
-        self.cm(f"__temp_{entity}s_1__", f"{entity}")
-
-        self.cmsel("S", f"__temp_{entity}s__")
-        self.cmsel(type_, f"__temp_{entity}s_1__")
-
-        # Cleaning
-        self.cmdele(f"__temp_{entity}s__")
-        self.cmdele(f"__temp_{entity}s_1__")
+            selection_function(self, type__, item, comp, each_, "", "", kabs)
 
     def _raise_errors(self, text):
         # to make sure the following error messages are caught even if a breakline is in between.

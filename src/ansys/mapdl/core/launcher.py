@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -32,7 +32,7 @@ import subprocess
 import tempfile
 import threading
 import time
-from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 import warnings
 
 import psutil
@@ -309,11 +309,12 @@ def launch_grpc(
         Number of processors.  Defaults to 2.
 
     ram : float, optional
-        Fixed amount of memory to request for MAPDL.  If ``None``,
-        then MAPDL will use as much as available on the host machine.
+        Total size in megabytes of the workspace (memory) used for the initial allocation.
+        The default is ``None``, in which case 2 GB (2048 MB) is used. To force a fixed size
+        throughout the run, specify a negative number.
 
     run_location : str, optional
-        MAPDL working directory.  Defaults to a temporary working
+        MAPDL working directory.  The default is the temporary working
         directory.
 
     port : int
@@ -525,6 +526,9 @@ def launch_grpc(
 
     pymapdl._LOCAL_PORTS.append(port)
 
+    if not nproc:
+        nproc = 2
+
     cpu_sw = "-np %d" % nproc
 
     if ram:
@@ -576,22 +580,22 @@ def launch_grpc(
             port_sw,
             grpc_sw,
         ]
-        command = " ".join(command_parm)
 
     else:  # linux
-        command_parm = []
-        command_parm.extend(
-            [
-                '"%s"' % exec_file,
-                job_sw,
-                cpu_sw,
-                ram_sw,
-                additional_switches,
-                port_sw,
-                grpc_sw,
-            ]
-        )
-        command = " ".join(command_parm)
+        command_parm = [
+            '"%s"' % exec_file,
+            job_sw,
+            cpu_sw,
+            ram_sw,
+            additional_switches,
+            port_sw,
+            grpc_sw,
+        ]
+
+    command_parm = [
+        each for each in command_parm if command_parm
+    ]  # cleaning empty args.
+    command = " ".join(command_parm)
 
     LOG.debug(f"Starting MAPDL with command: {command}")
 
@@ -1085,7 +1089,8 @@ def launch_mapdl(
     add_env_vars: Optional[Dict[str, str]] = None,
     replace_env_vars: Optional[Dict[str, str]] = None,
     version: Optional[Union[int, str]] = None,
-    **kwargs,
+    detect_slurm_config: bool = True,
+    **kwargs: Dict[str, Any],
 ) -> Union[MapdlGrpc, "MapdlConsole"]:
     """Start MAPDL locally.
 
@@ -1116,8 +1121,9 @@ def launch_mapdl(
         Number of processors.  Defaults to 2.
 
     ram : float, optional
-        Fixed amount of memory to request for MAPDL.  If ``None``,
-        then MAPDL will use as much as available on the host machine.
+        Total size in megabytes of the workspace (memory) used for the initial allocation.
+        The default is ``None``, in which case 2 GB (2048 MB) is used. To force a fixed size
+        throughout the run, specify a negative number.
 
     mode : str, optional
         Mode to launch MAPDL.  Must be one of the following:
@@ -1441,9 +1447,43 @@ def launch_mapdl(
         "ANSYSLMD_LICENSE_FILE":"1055@MYSERVER"}
     >>> mapdl = launch_mapdl(replace_env_vars=my_env_vars)
     """
+    # By default
+    ON_SLURM = os.environ.get("PYMAPDL_ON_SLURM", None)
+    if ON_SLURM is None:
+        ON_SLURM = True
+    else:
+        # Unless the env var is false, it will be true.
+        ON_SLURM = not (ON_SLURM.lower() == "false")
+
+    # Let's require the following env vars to exist to go into slurm mode.
+    ON_SLURM = (
+        ON_SLURM
+        and bool(os.environ.get("SLURM_JOB_NAME", ""))
+        and bool(os.environ.get("SLURM_JOB_ID", ""))
+    )
+
+    if detect_slurm_config and ON_SLURM:
+        LOG.info("On Slurm mode.")
+
+        # extracting parameters
+        exec_file, jobname, nproc, ram, additional_switches = _parse_slurm_options(
+            exec_file,
+            jobname,
+            nproc,
+            ram,
+            additional_switches,
+            **kwargs,
+        )
+        # To avoid timeouts
+        license_server_check = False
+        start_timeout = 2 * start_timeout
+        ON_SLURM = True  # Using this as main variable
+    else:
+        ON_SLURM = False
+
     if remove_temp_files is not None:
         warnings.warn(
-            "The option ``remove_temp_files`` is being deprecated and it will be removed by PyMAPDL version 0.66.0.\n"
+            "The ``remove_temp_files`` option is being deprecated. It is to be removed in PyMAPDL version 0.66.0.\n"
             "Please use ``remove_temp_dir_on_exit`` instead.",
             DeprecationWarning,
             stacklevel=2,
@@ -1623,21 +1663,7 @@ def launch_mapdl(
             return
 
         if _debug_no_launch:
-            return pack_parameters(
-                port,
-                ip,
-                add_env_vars,
-                replace_env_vars,
-                cleanup_on_exit,
-                loglevel,
-                set_no_abort,
-                remove_temp_dir_on_exit,
-                log_apdl,
-                use_vtk,
-                start_parm,
-                start_instance,
-                version,
-            )
+            return pack_parameters(locals())  # type: ignore
 
         mapdl = MapdlGrpc(
             ip=ip,
@@ -1646,6 +1672,7 @@ def launch_mapdl(
             loglevel=loglevel,
             set_no_abort=set_no_abort,
             use_vtk=use_vtk,
+            log_apdl=log_apdl,
             **start_parm,
         )
         if clear_on_connect:
@@ -1726,16 +1753,20 @@ def launch_mapdl(
     additional_switches = _check_license_argument(license_type, additional_switches)
     LOG.debug(f"Using additional switches {additional_switches}.")
 
-    # Setting number of processors
-    machine_cores = psutil.cpu_count(logical=False)
-    if not nproc:
-        if machine_cores < 2:  # default required cores
-            nproc = machine_cores  # to avoid starting issues
+    # Bypassing number of processors checks because VDI/VNC might have
+    # different number of processors than the cluster compute nodes.
+    if not ON_SLURM:
+        # Setting number of processors
+        machine_cores = psutil.cpu_count(logical=False)
+
+        if not nproc:
+            # Some machines only have 1 core
+            nproc = machine_cores if machine_cores < 2 else 2
         else:
-            nproc = 2
-    else:
-        if machine_cores < int(nproc):
-            raise NotEnoughResources
+            if machine_cores < int(nproc):
+                raise NotEnoughResources(
+                    f"The machine has {machine_cores} cores. PyMAPDL is asking for {nproc} cores."
+                )
 
     start_parm.update(
         {
@@ -1776,21 +1807,7 @@ def launch_mapdl(
         elif mode == "grpc":
             if _debug_no_launch:
                 # Early exit, just for testing
-                return pack_parameters(
-                    port,
-                    ip,
-                    add_env_vars,
-                    replace_env_vars,
-                    cleanup_on_exit,
-                    loglevel,
-                    set_no_abort,
-                    remove_temp_dir_on_exit,
-                    log_apdl,
-                    use_vtk,
-                    start_parm,
-                    start_instance,
-                    version,
-                )
+                return pack_parameters(locals())  # type: ignore
 
             port, actual_run_location, process = launch_grpc(
                 port=port,
@@ -1958,7 +1975,10 @@ def _check_license_argument(license_type, additional_switches):
         # In older versions probably it might raise an error. But not sure.
         license_type = license_type.lower().strip()
 
-        if "enterprise" in license_type and "solver" not in license_type:
+        if "preppost" in license_type:
+            license_type = "preppost"
+
+        elif "enterprise" in license_type and "solver" not in license_type:
             license_type = "ansys"
 
         elif "enterprise" in license_type and "solver" in license_type:
@@ -2074,34 +2094,183 @@ def _parse_ip_route(output):
         return match[0]
 
 
-def pack_parameters(
-    port,
-    ip,
-    add_env_vars,
-    replace_env_vars,
-    cleanup_on_exit,
-    loglevel,
-    set_no_abort,
-    remove_temp_dir_on_exit,
-    log_apdl,
-    use_vtk,
-    start_parm,
-    start_instance,
-    version,
+def _parse_slurm_options(
+    exec_file: Optional[str],
+    jobname: str,
+    nproc: Optional[int],
+    ram: Optional[Union[str, int]],
+    additional_switches: str,
+    **kwargs: Dict[str, Any],
 ):
+    def get_value(
+        variable: str,
+        kwargs: Dict[str, Any],
+        default: Optional[Union[str, int, float]] = 1,
+        astype: Optional[Callable[[Any], Any]] = int,
+    ):
+        value_from_env_vars = os.environ.get(variable, None)
+        value_from_kwargs = kwargs.pop(variable, None)
+        value = value_from_kwargs or value_from_env_vars or default
+        if astype and value:
+            return astype(value)
+        else:
+            return value
+
+    ## Getting env vars
+    SLURM_NNODES = get_value("SLURM_NNODES", kwargs)
+    LOG.info(f"SLURM_NNODES: {SLURM_NNODES}")
+    # ntasks is for mpi
+    SLURM_NTASKS = get_value("SLURM_NTASKS", kwargs)
+    LOG.info(f"SLURM_NTASKS: {SLURM_NTASKS}")
+    # Sharing tasks acrros multiple nodes (DMP)
+    # the format of this envvar is a bit tricky. Avoiding it for the moment.
+    # SLURM_TASKS_PER_NODE = int(
+    #     kwargs.pop(
+    #         "SLURM_TASKS_PER_NODE", os.environ.get("SLURM_TASKS_PER_NODE", 1)
+    #     )
+    # )
+
+    # cpus-per-task is for multithreading,
+    # sharing tasks across multiple CPUs in same node (SMP)
+    SLURM_CPUS_PER_TASK = get_value("SLURM_CPUS_PER_TASK", kwargs)
+    LOG.info(f"SLURM_CPUS_PER_TASK: {SLURM_CPUS_PER_TASK}")
+
+    # Set to value of the --ntasks option, if specified. See SLURM_NTASKS. Included for backwards compatibility.
+    SLURM_NPROCS = get_value("SLURM_NPROCS", kwargs)
+    LOG.info(f"SLURM_NPROCS: {SLURM_NPROCS}")
+
+    # Number of CPUs allocated to the batch step.
+    SLURM_CPUS_ON_NODE = get_value("SLURM_CPUS_ON_NODE", kwargs)
+    LOG.info(f"SLURM_CPUS_ON_NODE: {SLURM_CPUS_ON_NODE}")
+
+    SLURM_MEM_PER_NODE = get_value(
+        "SLURM_MEM_PER_NODE", kwargs, default=None, astype=None
+    )
+    LOG.info(f"SLURM_MEM_PER_NODE: {SLURM_MEM_PER_NODE}")
+
+    SLURM_NODELIST = get_value(
+        "SLURM_NODELIST", kwargs, default="", astype=None
+    ).lower()
+    LOG.info(f"SLURM_NODELIST: {SLURM_NODELIST}")
+
+    if not exec_file:
+        exec_file = os.environ.get("PYMAPDL_MAPDL_EXEC", None)
+
+    if not exec_file:
+        # We should probably make a way to find it.
+        # We will use the module thing
+        pass
+    LOG.info(f"Using MAPDL executable in: {exec_file}")
+
+    if not jobname:
+        jobname = os.environ.get("SLURM_JOB_NAME", "file")
+    LOG.info(f"Using jobname: {jobname}")
+
+    # Checking specific env var
+    if not nproc:
+        nproc = os.environ.get("PYMAPDL_NPROC", None)
+        if nproc:
+            nproc = int(nproc)
+
+    if not nproc:
+        ## Attempt to calculate the appropriate number of cores:
+        # Reference: https://stackoverflow.com/a/51141287/6650211
+        # I'm assuming the env var makes sense.
+        #
+        # - SLURM_CPUS_ON_NODE is a property of the cluster, not of the job.
+        #
+        options = [
+            # 4,  # Fall back option
+            SLURM_CPUS_PER_TASK * SLURM_NTASKS,  # (CPUs)
+            SLURM_NPROCS,  # (CPUs)
+            # SLURM_NTASKS,  # (tasks) Not necessary the number of CPUs,
+            # SLURM_NNODES * SLURM_TASKS_PER_NODE * SLURM_CPUS_PER_TASK,  # (CPUs)
+            SLURM_CPUS_ON_NODE * SLURM_NNODES,  # (cpus)
+        ]
+        LOG.info(f"On SLURM number of processors options {options}")
+        nproc = max(options)
+
+    LOG.info(f"Setting number of CPUs to: {nproc}")
+
+    if not ram:
+        if SLURM_MEM_PER_NODE:
+            # RAM argument is in MB, so we need to convert
+
+            if SLURM_MEM_PER_NODE[-1] == "T":  # tera
+                ram = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** 2
+            elif SLURM_MEM_PER_NODE[-1] == "G":  # giga
+                ram = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** 1
+            elif SLURM_MEM_PER_NODE[-1].upper() == "k":  # kilo
+                ram = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** (-1)
+            else:  # Mega
+                ram = int(SLURM_MEM_PER_NODE)
+
+    LOG.info(f"Setting RAM to: {ram}")
+
+    # We use "-dis " (with space) to avoid collision with user variables such
+    # as `-distro` or so
+    if "-dis " not in additional_switches and not additional_switches.endswith("-dis"):
+        additional_switches += " -dis"
+
+    ## Getting the node list
+    machines = ""
+    # parsing nodes to list
+    if SLURM_NODELIST:
+        try:
+            p = subprocess.Popen(
+                ["scontrol", "show", "hostnames", f"{SLURM_NODELIST}"],
+                stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE,
+            )
+            stderr = p.stderr.read().decode()
+            stdout = p.stdout.read().decode()
+
+            if "Invalid hostlist" in stderr:
+                raise ValueError(
+                    "The node list is invalid, or it could not be parsed.\n",
+                    "Are you passing the nodes correctly?\n",
+                    f"Nodes list: {SLURM_NODELIST}",
+                )
+            if stderr:
+                raise RuntimeError(stderr)
+            nodes = stdout.strip().splitlines()
+
+            machines = ":".join([f"{each_node}" for each_node in nodes])
+
+            # The following code creates the cmd line bit for MAPDL. It seems it
+            # is not needed in slurm.
+            # machines = " -machines " + ":".join([
+            #     f"{each_node}:{SLURM_CPUS_ON_NODE}" for each_node in nodes
+            # ])
+
+            # We do not need to inject the machines in MAPDL command line.
+            # additional_switches += machines
+            LOG.info(f"Using nodes configuration: {machines}")
+
+        except Exception as e:
+            LOG.info(
+                f"The machines list could not be obtained.\nThis error occurred:\n{str(e)}"
+            )
+
+    return exec_file, jobname, nproc, ram, additional_switches
+
+
+def pack_parameters(locals_var):
     # pack all the arguments in a dict for debugging purposes
+    # We prefer to explicitly output the desired output
     dict_ = {}
-    dict_["port"] = port
-    dict_["ip"] = ip
-    dict_["add_env_vars"] = add_env_vars
-    dict_["replace_env_vars"] = replace_env_vars
-    dict_["cleanup_on_exit"] = cleanup_on_exit
-    dict_["loglevel"] = loglevel
-    dict_["set_no_abort"] = set_no_abort
-    dict_["remove_temp_dir_on_exit"] = remove_temp_dir_on_exit
-    dict_["log_apdl"] = log_apdl
-    dict_["use_vtk"] = use_vtk
-    dict_["start_parm"] = start_parm
-    dict_["start_instance"] = start_instance
-    dict_["version"] = version
+    dict_["port"] = locals_var["port"]
+    dict_["ip"] = locals_var["ip"]
+    dict_["add_env_vars"] = locals_var["add_env_vars"]
+    dict_["replace_env_vars"] = locals_var["replace_env_vars"]
+    dict_["cleanup_on_exit"] = locals_var["cleanup_on_exit"]
+    dict_["loglevel"] = locals_var["loglevel"]
+    dict_["set_no_abort"] = locals_var["set_no_abort"]
+    dict_["remove_temp_dir_on_exit"] = locals_var["remove_temp_dir_on_exit"]
+    dict_["log_apdl"] = locals_var["log_apdl"]
+    dict_["use_vtk"] = locals_var["use_vtk"]
+    dict_["start_parm"] = locals_var["start_parm"]
+    dict_["start_instance"] = locals_var["start_instance"]
+    dict_["version"] = locals_var["version"]
+    dict_["additional_switches"] = locals_var["additional_switches"]
     return dict_
