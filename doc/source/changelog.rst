@@ -90,7 +90,7 @@ Miscellaneous
 
 - feat/adding missing argument `#3293 <https://github.com/ansys/pymapdl/pull/3293>`_
 - feat/adding preppost license to allowed `#3294 <https://github.com/ansys/pymapdl/pull/3294>`_
-- docs: adding warning about *mwrite. Update *vwrite warning to include *mwrite `#3296 <https://github.com/ansys/pymapdl/pull/3296>`_
+- docs: adding warning about \*mwrite. Update \*vwrite warning to include \*mwrite `#3296 <https://github.com/ansys/pymapdl/pull/3296>`_
 - [pre-commit.ci] pre-commit autoupdate `#3316 <https://github.com/ansys/pymapdl/pull/3316>`_, `#3330 <https://github.com/ansys/pymapdl/pull/3330>`_, `#3351 <https://github.com/ansys/pymapdl/pull/3351>`_
 - feat: adding more descriptive errors `#3319 <https://github.com/ansys/pymapdl/pull/3319>`_
 - feat: database module improvements `#3320 <https://github.com/ansys/pymapdl/pull/3320>`_
