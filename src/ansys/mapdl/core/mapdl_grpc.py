@@ -64,7 +64,7 @@ try:
 except ImportError:  # pragma: no cover
     raise ImportError(MSG_IMPORT)
 
-from ansys.mapdl.core import _LOCAL_PORTS, __version__
+from ansys.mapdl.core import _LOCAL_PORTS, __version__, LOG
 from ansys.mapdl.core.common_grpc import (
     ANSYS_VALUE_TYPE,
     DEFAULT_CHUNKSIZE,
@@ -1061,6 +1061,7 @@ class MapdlGrpc(MapdlBase):
         >>> mapdl.exit()
         """
         # check if permitted to start (and hence exit) instances
+        LOG.info(f"MAPDL instance ({self.ip}:{self.port}) on '{self._path}' is exiting.")
 
         if self._exited is None:
             return  # Some edge cases the class object is not completely initialized but the __del__ method
@@ -1094,7 +1095,7 @@ class MapdlGrpc(MapdlBase):
         self._log.debug("Exiting MAPDL")
 
         if not kwargs.pop("fake_exit", False):
-            # This cannot should not be faked
+            # This cannot/should not be faked
             if self._local:
                 mapdl_path = self.directory
                 self._cache_pids()  # Recache processes
@@ -1152,6 +1153,10 @@ class MapdlGrpc(MapdlBase):
         a local process.
 
         """
+        if self._exited:
+            self._log.debug("MAPDL server already exited")
+            return
+
         try:
             self._log.debug("Killing MAPDL server")
         except ValueError:
@@ -1233,6 +1238,7 @@ class MapdlGrpc(MapdlBase):
         if self.is_alive:
             raise MapdlRuntimeError("MAPDL could not be exited.")
         else:
+            self._log.debug("All MAPDL processes exited")
             self._exited = True
 
     def _cache_pids(self):
@@ -1243,6 +1249,7 @@ class MapdlGrpc(MapdlBase):
         processes.
 
         """
+        self._log.debug("Caching PIDs")
         self._pids = []
 
         for filename in self.list_files():
@@ -1264,10 +1271,14 @@ class MapdlGrpc(MapdlBase):
             try:
                 parent = psutil.Process(parent_pid)
             except psutil.NoSuchProcess:
+                self._log.debug(f"Parent process does not exist.")
                 return
+
             children = parent.children(recursive=True)
 
             self._pids = [parent_pid] + [each.pid for each in children]
+
+        self._log.debug(f"Recaching PIDs: {self._pids}")
 
     def _remove_lock_file(self, mapdl_path=None):
         """Removes the lock file.
@@ -2625,6 +2636,7 @@ class MapdlGrpc(MapdlBase):
         if self._exited:
             self._log.debug("MAPDL instance is not alive because it is exited.")
             return False
+
         if self.busy:
             self._log.debug("MAPDL instance is alive because it is busy.")
             return True
@@ -2642,6 +2654,9 @@ class MapdlGrpc(MapdlBase):
             return check
 
         except Exception as error:
+            if self._exited:
+                return False
+
             self._log.debug(
                 f"MAPDL instance is not alive because retrieving version failed with:\n{error}"
             )

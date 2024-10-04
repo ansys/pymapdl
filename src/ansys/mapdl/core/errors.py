@@ -323,6 +323,8 @@ def protect_grpc(func):
             except grpc.RpcError as error:
 
                 mapdl = retrieve_mapdl_from_args(args)
+                if mapdl._exited:
+                    return
 
                 i_attemps += 1
                 if i_attemps <= n_attempts:
