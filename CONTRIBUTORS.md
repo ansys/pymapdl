@@ -14,3 +14,4 @@
 * [Maxime Rey](https://github.com/MaxJPRey)
 * [Revathy Venugopal](https://github.com/Revathyvenugopal162)
 * [Roberto Pastor](https://github.com/RobPasMue)
+* [Mohamed Koubaa](https://github.com/koubaa)
