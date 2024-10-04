@@ -1768,6 +1768,18 @@ def launch_mapdl(
                     f"The machine has {machine_cores} cores. PyMAPDL is asking for {nproc} cores."
                 )
 
+    # Setting env vars
+    env_vars = update_env_vars(add_env_vars, replace_env_vars)
+
+    if ON_SLURM:
+        if not env_vars:
+            env_vars = {}
+
+        env_vars.setdefault("ANS_CMD_NODIAG", "TRUE")
+        # Passing env vars for MAPDL run on multiple nodes
+        env_vars.setdefault("ANS_MULTIPLE_NODES", "1")
+        env_vars.setdefault("HYDRA_BOOTSTRAP", "slurm")
+
     start_parm.update(
         {
             "exec_file": exec_file,
