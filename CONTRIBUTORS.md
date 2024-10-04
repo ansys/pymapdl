@@ -2,7 +2,7 @@
 
 ## Project Lead
 
-*   [German Martinez Ayuso](https://github.com/germa89)
+* [German Martinez Ayuso](https://github.com/germa89)
 
 ## Individual Contributors
 
