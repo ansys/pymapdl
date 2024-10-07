@@ -256,7 +256,8 @@ def test_remove_temp_files_fail(tmpdir, mapdl):
 
 
 def test_env_injection():
-    assert update_env_vars(None, None) is None
+    no_inject = update_env_vars(None, None)
+    assert no_inject == os.environ.copy()  # return os.environ
 
     assert "myenvvar" in update_env_vars({"myenvvar": "True"}, None)
 
