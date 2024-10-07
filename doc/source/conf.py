@@ -327,13 +327,17 @@ html_theme_options = {
         "json_url": f"https://{cname}/versions.json",
         "version_match": switcher_version,
     },
-    "cheatsheet": {
+}
+
+BUILD_CHEATSHEET = os.environ.get("BUILD_CHEATSHEET", "false").lower() == "true"
+
+if BUILD_CHEATSHEET:
+    html_theme_options["cheatsheet"] = {
         "file": "cheat_sheet/cheat_sheet.qmd",
         "title": "PyMAPDL cheat sheet",
         "version": f"v{version}",
         "pages": ["getting_started/learning"],
-    },
-}
+    }
 
 html_context = {
     "display_github": True,  # Integrate GitHub
