@@ -701,7 +701,9 @@ def _check_server_is_alive(stdout_queue, run_location, timeout):
             break
 
     else:
-        LOG.debug(f"MAPDL gRPC server didn't print any valid output:\n{terminal_output}")
+        LOG.debug(
+            f"MAPDL gRPC server didn't print any valid output:\n{terminal_output}"
+        )
         raise MapdlDidNotStart("MAPDL failed to start the gRPC server")
 
 
