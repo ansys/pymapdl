@@ -24,7 +24,7 @@ Currently, the supported configurations are:
 * `Submit a PyMAPDL batch job to the cluster from the entrypoint node`
 
 
-Since v0.68.5, PyMAPDL can take advantage of the tigh integration
+Since v0.68.5, PyMAPDL can take advantage of the tight integration
 between the scheduler and MAPDL to read the job configuration and
 launch an MAPDL instance that can use all the resources allocated
 to that job.
