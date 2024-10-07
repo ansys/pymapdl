@@ -1089,7 +1089,7 @@ def launch_mapdl(
     add_env_vars: Optional[Dict[str, str]] = None,
     replace_env_vars: Optional[Dict[str, str]] = None,
     version: Optional[Union[int, str]] = None,
-    detect_slurm_config: bool = True,
+    detect_HPC: bool = True,
     **kwargs: Dict[str, Any],
 ) -> Union[MapdlGrpc, "MapdlConsole"]:
     """Start MAPDL locally.
@@ -1118,12 +1118,15 @@ def launch_mapdl(
         MAPDL jobname.  Defaults to ``'file'``.
 
     nproc : int, optional
-        Number of processors.  Defaults to 2.
+        Number of processors.  Defaults to 2. If running on an HPC cluster,
+        this value is adjusted to the number of CPUs allocated to the job,
+        unless ``detect_HPC`` is set to "false".
 
     ram : float, optional
-        Total size in megabytes of the workspace (memory) used for the initial allocation.
-        The default is ``None``, in which case 2 GB (2048 MB) is used. To force a fixed size
-        throughout the run, specify a negative number.
+        Total size in megabytes of the workspace (memory) used for the initial
+        allocation. The default is ``None``, in which case 2 GB (2048 MB) is
+        used. To force a fixed size throughout the run, specify a negative
+        number.
 
     mode : str, optional
         Mode to launch MAPDL.  Must be one of the following:
@@ -1275,6 +1278,13 @@ def launch_mapdl(
            .. code:: console
 
               export PYMAPDL_MAPDL_VERSION=22.2
+
+    detect_HPC: bool, optional
+        Whether detect if PyMAPDL is running on an HPC cluster or not. Currently
+        only SLURM clusters are supported. By detaul, it is set to true.
+        This option can be bypassed if the environment variable
+        ``PYMAPDL_ON_SLURM`` is set to "true". For more information visit
+        :ref:`ref_hpc_slurm`.
 
     kwargs : dict, optional
         These keyword arguments are interface specific or for
@@ -1447,6 +1457,12 @@ def launch_mapdl(
         "ANSYSLMD_LICENSE_FILE":"1055@MYSERVER"}
     >>> mapdl = launch_mapdl(replace_env_vars=my_env_vars)
     """
+    # Checking specific env var
+    if not nproc:
+        nproc = os.environ.get("PYMAPDL_NPROC", None)
+        if nproc:
+            nproc = int(nproc)
+
     # By default
     ON_SLURM = os.environ.get("PYMAPDL_ON_SLURM", None)
     if ON_SLURM is None:
@@ -1462,7 +1478,7 @@ def launch_mapdl(
         and bool(os.environ.get("SLURM_JOB_ID", ""))
     )
 
-    if detect_slurm_config and ON_SLURM:
+    if detect_HPC and ON_SLURM:
         LOG.info("On Slurm mode.")
 
         # extracting parameters
@@ -2134,7 +2150,7 @@ def _parse_slurm_options(
     # ntasks is for mpi
     SLURM_NTASKS = get_value("SLURM_NTASKS", kwargs)
     LOG.info(f"SLURM_NTASKS: {SLURM_NTASKS}")
-    # Sharing tasks acrros multiple nodes (DMP)
+    # Sharing tasks across multiple nodes (DMP)
     # the format of this envvar is a bit tricky. Avoiding it for the moment.
     # SLURM_TASKS_PER_NODE = int(
     #     kwargs.pop(
@@ -2177,12 +2193,6 @@ def _parse_slurm_options(
     if not jobname:
         jobname = os.environ.get("SLURM_JOB_NAME", "file")
     LOG.info(f"Using jobname: {jobname}")
-
-    # Checking specific env var
-    if not nproc:
-        nproc = os.environ.get("PYMAPDL_NPROC", None)
-        if nproc:
-            nproc = int(nproc)
 
     if not nproc:
         ## Attempt to calculate the appropriate number of cores:
