@@ -31,7 +31,7 @@ import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core import _HAS_PYVISTA
+from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
@@ -425,7 +425,7 @@ class _MapdlCommandExtended(_MapdlCore):
             HPT - Plots only those keypoints that are hard points.
 
         vtk : bool, optional
-            Plot the currently selected lines using ``pyvista``.
+            Plot the currently selected lines using ``ansys-tools-visualization_interface``.
 
         show_keypoint_numbering : bool, optional
             Display keypoint numbers when ``vtk=True``.
@@ -439,9 +439,9 @@ class _MapdlCommandExtended(_MapdlCore):
         if vtk is None:
             vtk = self._use_vtk
         elif vtk is True:
-            if not _HAS_PYVISTA:  # pragma: no cover
+            if not _HAS_VISUALIZER:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
                 )
         if vtk:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
@@ -500,7 +500,7 @@ class _MapdlCommandExtended(_MapdlCore):
             NINC are ignored and display all selected lines [LSEL].
 
         vtk : bool, optional
-            Plot the currently selected lines using ``pyvista``.
+            Plot the currently selected lines using ``ansys-tools-visualization_interface``.
 
         show_line_numbering : bool, optional
             Display line and keypoint numbers when ``vtk=True``.
@@ -531,9 +531,9 @@ class _MapdlCommandExtended(_MapdlCore):
         if vtk is None:
             vtk = self._use_vtk
         elif vtk is True:
-            if not _HAS_PYVISTA:  # pragma: no cover
+            if not _HAS_VISUALIZER:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
                 )
 
         if vtk:
@@ -658,8 +658,8 @@ class _MapdlCommandExtended(_MapdlCore):
             when ``vtk=True``.
 
         vtk : bool, optional
-            Plot the currently selected areas using ``pyvista``.  As
-            this creates a temporary surface mesh, this may have a
+            Plot the currently selected areas using ``ansys-tools-visualization_interface``.
+            As this creates a temporary surface mesh, this may have a
             long execution time for large meshes.
 
         quality : int, optional
@@ -715,9 +715,9 @@ class _MapdlCommandExtended(_MapdlCore):
         if vtk is None:
             vtk = self._use_vtk
         elif vtk is True:
-            if not _HAS_PYVISTA:  # pragma: no cover
+            if not _HAS_VISUALIZER:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
                 )
 
         if vtk:
@@ -891,8 +891,8 @@ class _MapdlCommandExtended(_MapdlCore):
             to .075).  Ignored when ``vtk=True``.
 
         vtk : bool, optional
-            Plot the currently selected volumes using ``pyvista``.  As
-            this creates a temporary surface mesh, this may have a
+            Plot the currently selected volumes using ``ansys-tools-visualization_interface``.
+            As this creates a temporary surface mesh, this may have a
             long execution time for large meshes.
 
         quality : int, optional
@@ -917,9 +917,9 @@ class _MapdlCommandExtended(_MapdlCore):
         if vtk is None:
             vtk = self._use_vtk
         elif vtk is True:
-            if not _HAS_PYVISTA:  # pragma: no cover
+            if not _HAS_VISUALIZER:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
                 )
 
         if vtk:
@@ -1096,12 +1096,12 @@ class _MapdlCommandExtended(_MapdlCore):
             vtk = self._use_vtk
 
         if vtk is True:
-            if _HAS_PYVISTA:
+            if _HAS_VISUALIZER:
                 # lazy import here to avoid top level import
                 import pyvista as pv
             else:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
                 )
 
         if "knum" in kwargs:
@@ -1152,7 +1152,7 @@ class _MapdlCommandExtended(_MapdlCore):
         Parameters
         ----------
         vtk : bool, optional
-            Plot the currently selected elements using ``pyvista``.
+            Plot the currently selected elements using ``ansys-tools-visualization_interface``.
             Defaults to current ``use_vtk`` setting.
 
         show_node_numbering : bool, optional
@@ -1238,9 +1238,9 @@ class _MapdlCommandExtended(_MapdlCore):
         if vtk is None:
             vtk = self._use_vtk
         elif vtk is True:
-            if not _HAS_PYVISTA:  # pragma: no cover
+            if not _HAS_VISUALIZER:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
                 )
 
         if vtk:

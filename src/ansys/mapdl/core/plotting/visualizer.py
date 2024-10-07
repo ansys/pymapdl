@@ -29,7 +29,7 @@ from ansys.tools.visualization_interface.backends.pyvista import PyVistaBackendI
 import numpy as np
 from numpy.typing import NDArray
 
-from ansys.mapdl.core import _HAS_PYVISTA
+from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.misc import get_bounding_box
 from ansys.mapdl.core.plotting.consts import (
     ALLOWED_TARGETS,
@@ -42,7 +42,7 @@ from ansys.mapdl.core.plotting.consts import (
 )
 from ansys.mapdl.core.plotting.theme import MapdlTheme
 
-if _HAS_PYVISTA:
+if _HAS_VISUALIZER:
     import pyvista as pv
 
     from ansys.mapdl.core.plotting.plotting_defaults import DefaultSymbol
