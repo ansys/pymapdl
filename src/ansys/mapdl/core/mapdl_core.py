@@ -41,7 +41,7 @@ import numpy as np
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core import _HAS_PYVISTA
+from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
     CMD_LISTING,
@@ -255,7 +255,7 @@ class _MapdlCore(Commands):
         self._mute = False
         self._save_selection_obj = None
 
-        if _HAS_PYVISTA:
+        if _HAS_VISUALIZER:
             if use_vtk is not None:  # pragma: no cover
                 self._use_vtk = use_vtk
             else:
@@ -263,7 +263,7 @@ class _MapdlCore(Commands):
         else:  # pragma: no cover
             if use_vtk:
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'use_vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'use_vtk' requires having 'ansys-tools-visualization_interface' installed."
                 )
             else:
                 self._use_vtk = False
@@ -1142,7 +1142,6 @@ class _MapdlCore(Commands):
     def _mesh(self) -> "Archive":
         """Write entire archive to ASCII and read it in as an
         ``ansys.mapdl.core.Archive``"""
-        # lazy import here to avoid loading pyvista and vtk
         from ansys.mapdl.reader import Archive
 
         if self._archive_cache is None:
