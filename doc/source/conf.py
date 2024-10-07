@@ -99,7 +99,7 @@ extensions = [
     "sphinx_design",
     "sphinx_jinja",
     "sphinx_copybutton",
-    # "sphinx_gallery.gen_gallery",
+    "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
     "ansys_sphinx_theme.extension.linkcode",
@@ -313,7 +313,9 @@ html_theme_options = {
     },
 }
 
-BUILD_CHEATSHEET = True if os.environ.get("BUILD_CHEATSHEET", "true") == "true" else False
+BUILD_CHEATSHEET = (
+    True if os.environ.get("BUILD_CHEATSHEET", "true") == "true" else False
+)
 
 if BUILD_CHEATSHEET:
     html_theme_options["cheatsheet"] = {
@@ -322,8 +324,6 @@ if BUILD_CHEATSHEET:
         "version": f"v{version}",
         "pages": ["getting_started/learning"],
     }
-    
-
 
 html_context = {
     "display_github": True,  # Integrate GitHub
