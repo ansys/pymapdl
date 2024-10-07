@@ -321,8 +321,7 @@ if BUILD_CHEATSHEET:
         "title": "PyMAPDL cheat sheet",
         "version": f"v{version}",
         "pages": ["getting_started/learning"],
-    },
-}
+    }
 
 html_context = {
     "display_github": True,  # Integrate GitHub
