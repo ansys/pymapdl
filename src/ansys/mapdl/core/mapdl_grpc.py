@@ -64,7 +64,7 @@ try:
 except ImportError:  # pragma: no cover
     raise ImportError(MSG_IMPORT)
 
-from ansys.mapdl.core import _LOCAL_PORTS, __version__, LOG
+from ansys.mapdl.core import _LOCAL_PORTS, __version__
 from ansys.mapdl.core.common_grpc import (
     ANSYS_VALUE_TYPE,
     DEFAULT_CHUNKSIZE,
@@ -1061,15 +1061,19 @@ class MapdlGrpc(MapdlBase):
         >>> mapdl.exit()
         """
         # check if permitted to start (and hence exit) instances
-        LOG.info(f"MAPDL instance ({self.ip}:{self.port}) on '{self._path}' is exiting.")
+        self._log.debug(
+            f"Exiting MAPLD gRPC instance {self.ip}:{self.port} on '{self._path}'."
+        )
 
         if self._exited is None:
+            self._log.debug("'self._exited' is none.")
             return  # Some edge cases the class object is not completely initialized but the __del__ method
             # is called when exiting python. So, early exit here instead an error in the following
             # self.directory command.
             # See issue #1796
         elif self._exited:
             # Already exited.
+            self._log.debug("Already exited")
             return
 
         if save:
@@ -1092,7 +1096,6 @@ class MapdlGrpc(MapdlBase):
                 return
 
         self._exiting = True
-        self._log.debug("Exiting MAPDL")
 
         if not kwargs.pop("fake_exit", False):
             # This cannot/should not be faked
@@ -2640,6 +2643,11 @@ class MapdlGrpc(MapdlBase):
         if self.busy:
             self._log.debug("MAPDL instance is alive because it is busy.")
             return True
+
+        if self._exiting:
+            # It should be exiting so we should not issue gRPC calls
+            self._log.debug("MAPDL instance is expected to be exiting")
+            return False
 
         try:
             check = bool(self._ctrl("VERSION"))

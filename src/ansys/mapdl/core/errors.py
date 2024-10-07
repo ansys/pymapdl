@@ -323,7 +323,8 @@ def protect_grpc(func):
             except grpc.RpcError as error:
 
                 mapdl = retrieve_mapdl_from_args(args)
-                if mapdl._exited:
+                mapdl._log.debug("A gRPC error has been detected.")
+                if mapdl._exited or mapdl._exiting:
                     return
 
                 i_attemps += 1
@@ -445,9 +446,11 @@ def handle_generic_grpc_error(error, func, args, kwargs, reason="", suggestion="
     else:
         # Making sure we do not keep executing gRPC calls.
         mapdl._exited = True
+        mapdl._exiting = True
 
         # Must close unfinished processes
         mapdl._close_process()
+        mapdl._exiting = False
         raise MapdlExitedError(msg)
 
 
