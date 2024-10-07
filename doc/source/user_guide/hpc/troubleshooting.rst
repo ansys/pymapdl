@@ -70,13 +70,13 @@ due to one of these reasons:
      Testing Python!
      bash: .venv/bin/activate: No such file or directory
 
-  Depending on your terminal configuration, the above error might be sufficient
-  to exit the terminal process, or not. 
-  If not, the execution will continue, and the subsequent ``python`` call will
-  be executed using the default python executable.
+  Depending on your terminal configuration, the preceding error might be
+  sufficient to exit the terminal process, or not. 
+  If not, the execution continues, and the subsequent ``python`` call is
+  executed using the default python executable.
   It is very likely that the default ``python`` executable does not have
-  PyMAPDL installed, hence the ``ImportError`` error showed above might appear
-  too.
+  PyMAPDL installed, hence the ``ImportError`` error showed preceding might
+  appear too.
 
 - The virtual environment has been created from a Python executable that is
   not available to the compute nodes. Hence, the virtual environment is not
@@ -95,7 +95,7 @@ due to one of these reasons:
 .. the approach to solve this comes from:
    https://stackoverflow.com/questions/64188693/problem-with-python-environment-and-slurm-srun-sbatch
 
-It should be noticed the above approach assumes that all the nodes have similar
+It should be noticed the preceding approach assumes that all the nodes have similar
 configuration, hence all of them should have the same Python installations
 available.
 

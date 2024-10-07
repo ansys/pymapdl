@@ -29,9 +29,9 @@ between the scheduler and MAPDL to read the job configuration and
 launch an MAPDL instance that can use all the resources allocated
 to that job.
 For instance, if a SLURM job has allocated 8 nodes with 4 cores each,
-then PyMAPDL will launch an MAPDL instance which will use 32 cores
+then PyMAPDL launches an MAPDL instance which uses 32 cores
 spawning across those 8 nodes.
-This behaviour can disabled if passing the environment variable
+This behaviour can turn off if passing the environment variable
 :envvar:`PYMAPDL_ON_SLURM` or passing the argument `detect_HPC=False`
 to :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`.
 
@@ -73,7 +73,7 @@ For instance, to launch the following Python script ``main.py``:
     mapdl = launch_mapdl(run_location="/home/ubuntu/tmp/tmp/mapdl", loglevel="debug")
 
     print(mapdl.prep7())
-    print(f'Number of CPUs: {mapdl.get_value("ACTIVE", 0, "NUMCPU")}')
+    print(f'Number of CPU: {mapdl.get_value("ACTIVE", 0, "NUMCPU")}')
 
     mapdl.exit()
 
@@ -90,7 +90,7 @@ Python executable call:
 
     (venv) user@entrypoint-machine:~$ sbatch python main.py
 
-Additionally, you can can change the amount of cores used in your
+Additionally, you can change the amount of cores used in your
 job, by setting the :envvar:`PYMAPDL_NPROC` to the desired value.
 
 .. code-block:: console
@@ -105,7 +105,7 @@ You can also add ``sbatch`` options to the command:
 
 
 For instance, to launch a PyMAPDL job which start a four cores MAPDL instance
-on a 10 CPUs SLURM job, you can use:
+on a 10 CPU SLURM job, you can use:
 
 .. code-block:: bash
 
@@ -129,12 +129,12 @@ In this case, you must create two files:
     from ansys.mapdl.core import launch_mapdl
 
     # Number of processors must be lower than the
-    # number of CPUs allocated for the job.
+    # number of CPU allocated for the job.
     mapdl = launch_mapdl(nproc=10)
 
     mapdl.prep7()
     n_proc = mapdl.get_value("ACTIVE", 0, "NUMCPU")
-    print(f"Number of CPUs: {n_proc}")
+    print(f"Number of CPU: {n_proc}")
 
     mapdl.exit()
 
@@ -158,7 +158,7 @@ The expected output of the job is
 
 .. code-block:: text
 
-    Number of CPUs: 10.0
+    Number of CPU: 10.0
 
 
 The bash script allows you to customize the environment before running the
