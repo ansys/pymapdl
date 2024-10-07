@@ -1770,6 +1770,9 @@ def launch_mapdl(
                     f"The machine has {machine_cores} cores. PyMAPDL is asking for {nproc} cores."
                 )
 
+    # Setting env vars
+    env_vars = update_env_vars(add_env_vars, replace_env_vars)
+
     start_parm.update(
         {
             "exec_file": exec_file,
