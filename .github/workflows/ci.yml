@@ -34,15 +34,16 @@ env:
   MAPDL_PACKAGE: ghcr.io/ansys/mapdl
   ON_CI: True
   PYTEST_ARGUMENTS: '-vvv -ra --durations=10 --maxfail=3 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html'
+  BUILD_CHEATSHEET: True
 
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
   # You should go up in number, if you go down (or repeat a previous value)
   # you might end up reusing a previous cache if it haven't been deleted already.
   # It applies 7 days retention policy by default.
-  RESET_EXAMPLES_CACHE: 2
-  RESET_DOC_BUILD_CACHE: 2
-  RESET_AUTOSUMMARY_CACHE: 2
+  RESET_EXAMPLES_CACHE: 0
+  RESET_DOC_BUILD_CACHE: 0
+  RESET_AUTOSUMMARY_CACHE: 0
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -84,12 +85,12 @@ jobs:
         uses: ansys/actions/branch-name-style@v7
 
 
-  commit-name:
+  pull-request-name:
     if: github.event_name == 'pull_request'
-    name: Check the name of the commit
+    name: Check the name of the pull-request
     runs-on: ubuntu-latest
     steps:
-      - name: Check commit name
+      - name: Check pull-request name
         uses: ansys/actions/commit-style@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -156,9 +157,10 @@ jobs:
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
       PYMAPDL_START_INSTANCE: FALSE
       ON_DOCUMENTATION: TRUE
+      GRPC_ENABLE_FORK_SUPPORT: false  # See #3434
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.0
 
       - name: "Login in Github container registry"
         uses: docker/login-action@v3.3.0
@@ -262,11 +264,28 @@ jobs:
 
       - name: "Install docs build requirements"
         run: |
+          pip uninstall ansys-sphinx-theme
           pip install .[doc]
 
       - name: "Waiting for the services to be up"
         run: |
           .ci/waiting_services.sh
+      
+      - name: Install Quarto
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          tinytex: true
+
+      - name: Check Quarto Version
+        shell: bash
+        run: |
+          quarto --version
+      
+      - name: "Install Poppler for PDF to PNG conversion"
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
 
       - name: "Build documentation"
         run: |
@@ -324,7 +343,7 @@ jobs:
       - name: "Display files structure"
         if: always()
         env:
-          MAPDL_INSTANCE: mapdl
+          MAPDL_INSTANCE: MAPDL_0
           LOG_NAMES: logs-build-docs
         run: |
           .ci/display_logs.sh
@@ -338,7 +357,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.0
 
       - name: Get event type and user to check permissions.
         id: get_user
@@ -392,7 +411,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.0
 
       - name: "Login in Github container registry"
         uses: docker/login-action@v3.3.0
@@ -548,8 +567,8 @@ jobs:
         if: always()
         env:
           MAPDL_VERSION: ${{ matrix.mapdl-version }}
-          MAPDL_INSTANCE: mapdl
-          LOG_NAMES: logs-${{ matrix.mapdl-version }}
+          MAPDL_INSTANCE: MAPDL_0
+          LOG_NAMES: logs-remote-${{ matrix.mapdl-version }}
         run: |
           .ci/collect_mapdl_logs.sh
 
@@ -557,14 +576,14 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: logs-${{ matrix.mapdl-version }}.tgz
-          path: ./logs-${{ matrix.mapdl-version }}.tgz
+          name: logs-remote-${{ matrix.mapdl-version }}.tgz
+          path: ./logs-remote-${{ matrix.mapdl-version }}.tgz
 
       - name: "Display files structure"
         if: always()
         env:
-          MAPDL_INSTANCE: mapdl
-          LOG_NAMES: logs-${{ matrix.mapdl-version }}
+          MAPDL_INSTANCE: MAPDL_0
+          LOG_NAMES: logs-remote-${{ matrix.mapdl-version }}
         run: |
           .ci/display_logs.sh
 
@@ -576,7 +595,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.0
 
       - uses: tspascoal/get-user-teams-membership@v3
         id: is_organization_member
@@ -622,7 +641,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.0
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -695,7 +714,7 @@ jobs:
         id: attatch-to-pr
         uses: EndBug/add-and-commit@v9
         with:
-          message: Update the image cache
+          message: "chore: update the image cache"
           committer_name: GitHub Actions
           committer_email: actions@github.com
           add: './tests/.image_cache/*.png'
@@ -711,7 +730,7 @@ jobs:
 
             This commit does not re-run the CICD workflows (since no changes are made in the codebase) therefore you will see the actions showing in their status `Expected — Waiting for status to be reported`. Do not worry. You commit workflow is still running [here](https://github.com/ansys/pymapdl/pull/${{ github.event.pull_request.number }}/checks?sha=${{ github.event.pull_request.head.sha }}) :smile:
 
-            You might want to rerun the test to make sure that everything is passing. You can retrigger the CICD sending an empty commit `git commit -m "Empty comment to trigger CICD" --allow-empty`.
+            You might want to rerun the test to make sure that everything is passing. You can retrigger the CICD sending an empty commit `git commit -m "chore: empty comment to trigger CICD" --allow-empty`.
 
             You will see this message everytime your commit changes the image cache but you are not attaching the updated cache. :nerd_face:
 
@@ -753,7 +772,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.0
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -848,7 +867,7 @@ jobs:
       ON_LOCAL: TRUE
 
     steps:
-      - uses: actions/checkout@v4.1.7
+      - uses: actions/checkout@v4.2.0
 
       # Skipping because it is installed locally.
       # - name: Setup Python
@@ -971,7 +990,7 @@ jobs:
     needs: upload-docs-release
     steps:
       - name: "Install Git and clone project"
-        uses: actions/checkout@v4.1.7
+        uses: actions/checkout@v4.2.0
 
       - name: "Install the package requirements"
         run: pip install -e .
@@ -1047,7 +1066,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v4.1.7
+      - uses: actions/checkout@v4.2.0
       - name: "Set up Julia"
         uses: julia-actions/setup-julia@v2
         with:

@@ -79,14 +79,22 @@ if RUNNING_TESTS:  # pragma: no cover
 _LOCAL_PORTS = []
 
 
-# Per contract with Sphinx-Gallery, this method must be available at top level
 try:
-    import pyvista
+    from ansys.tools.visualization_interface import Plotter
+
+    _HAS_VISUALIZER = True
+except ModuleNotFoundError:  # pragma: no cover
+    LOG.debug("The module 'ansys-tools-visualization_interface' is not installed.")
+    _HAS_VISUALIZER = False
+
+try:
+    import pyvista as pv
 
     _HAS_PYVISTA = True
 except ModuleNotFoundError:  # pragma: no cover
-    LOG.debug("The module 'PyVista' is not installed.")
+    LOG.debug("The module 'pyvista' is not installed.")
     _HAS_PYVISTA = False
+
 
 try:
     import importlib.metadata as importlib_metadata
@@ -126,7 +134,7 @@ from ansys.mapdl.core.pool import MapdlPool
 
 _HAS_ANSYS = _check_has_ansys()
 
-if _HAS_PYVISTA:
+if _HAS_VISUALIZER:
     from ansys.mapdl.core.plotting.theme import _apply_default_theme
 
     _apply_default_theme()

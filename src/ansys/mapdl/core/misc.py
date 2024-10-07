@@ -336,10 +336,18 @@ class Report(base_report_class):
             "ansys.api.mapdl.v0",  # ansys-api-mapdl-v0
             "ansys.mapdl.reader",  # ansys-mapdl-reader
             "google.protobuf",  # protobuf library
+            "ansys-math-core",
         ]
 
         # Optional packages
-        optional = ["matplotlib", "pyvista", "pyiges", "tqdm"]
+        optional = [
+            "matplotlib",
+            "pyvista",
+            "pyiges",
+            "tqdm",
+            "ansys-tools-visualization_interface",
+            "pandas",
+        ]
 
         if _HAS_PYANSYS_REPORT:
             #  Combine all packages into one
