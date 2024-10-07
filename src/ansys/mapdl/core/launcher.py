@@ -2295,4 +2295,5 @@ def pack_parameters(locals_var):
     dict_["start_instance"] = locals_var["start_instance"]
     dict_["version"] = locals_var["version"]
     dict_["additional_switches"] = locals_var["additional_switches"]
+    dict_["nproc"] = locals_var["nproc"]
     return dict_

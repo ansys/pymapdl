@@ -604,7 +604,6 @@ def test_deprecate_verbose():
         ),
         pytest.param(
             {
-                "PYMAPDL_NPROC": 5,
                 "SLURM_JOB_NAME": "myawesomejob",
                 "SLURM_NTASKS": 2,
                 "SLURM_CPUS_PER_TASK": 2,
@@ -613,12 +612,11 @@ def test_deprecate_verbose():
                 "SLURM_MEM_PER_NODE": None,
                 "SLURM_NODELIST": None,
             },
-            {"nproc": 5, "jobname": "myawesomejob"},
-            id="Testing PYMAPDL_NPROC and SLURM_JOB_NAME",
+            {"nproc": 4, "jobname": "myawesomejob"},
+            id="Testing SLURM_JOB_NAME",
         ),
         pytest.param(
             {
-                "PYMAPDL_NPROC": 5,
                 "SLURM_JOB_NAME": "myawesomejob",
                 "SLURM_NTASKS": 2,
                 "SLURM_CPUS_PER_TASK": 2,
@@ -628,8 +626,8 @@ def test_deprecate_verbose():
                 "SLURM_NODELIST": None,
                 "PYMAPDL_MAPDL_EXEC": "asdf/qwer/poiu",
             },
-            {"nproc": 5, "jobname": "myawesomejob", "exec_file": "asdf/qwer/poiu"},
-            id="Testing PYMAPDL_NPROC and SLURM_JOB_NAME",
+            {"nproc": 4, "jobname": "myawesomejob", "exec_file": "asdf/qwer/poiu"},
+            id="Testing PYMAPDL_MAPDL_EXEC and SLURM_JOB_NAME",
         ),
     ),
     indirect=["set_env_var_context"],
@@ -782,3 +780,16 @@ def test_ip_and_start_instance(
             assert options["ip"] == ip
         else:
             assert options["ip"] in (LOCALHOST, "0.0.0.0")
+
+
+def test_nproc_envvar(monkeypatch):
+    monkeypatch.setenv("PYMAPDL_NPROC", 10)
+    args = launch_mapdl(_debug_no_launch=True)
+    assert args["nproc"] == 10
+
+
+@pytest.mark.parametrize("nproc,result", [[None, 2], [5, 5]])
+def test_nproc(monkeypatch, nproc, result):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE")
+    args = launch_mapdl(nproc=nproc, _debug_no_launch=True)
+    assert args["nproc"] == result
