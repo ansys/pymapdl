@@ -22,6 +22,26 @@ Debugging jobs
       python /home/user/pymapdl.py
 
 - Check SLURM logs for error messages and debugging information.
+- It is also good idea to print the environment variables in your bash script, using 
+  ``printenv``. Additionally, you can filter them using ``grep``.
+
+  .. code-block:: bash
+
+      #!/bin/bash
+      #SBATCH --job-name=ansys_job            # Job name
+      #SBATCH --partition=qsmall              # Specify the queue/partition name
+      #SBATCH --output=ansys_job.out          # Standard output file
+      #SBATCH --error=ansys_job.err           # Standard error file
+
+      printenv | grep "PYMAPDL"  # Print env vars which contains 'PYMAPDL'
+      printenv | grep "SLURM"  # Print env vars which contains 'SLURM'
+      source /home/user/pymapdl/.venv/bin/activate
+      python /home/user/pymapdl.py
+
+- Use PyMAPDL logging to printout valuable information. To activate this, see
+  :ref:`ref_debug_pymapdl`.
+
+- In case you need more help, visit :ref:`ref_troubleshooting`.
 
 
 .. _ref_python_venv_not_accesible:
@@ -49,8 +69,10 @@ The following output is shown after running in the terminal:
     ImportError: No module named ansys.mapdl
 
 As the output shows, PyMAPDL could not be found, meaning that either:
+
 * The virtual environment does not have PyMAPDL installed.
   See :ref:`ref_install_pymapdl_on_hpc`.
+
 * Or the script did not activate properly the virtual environment
   (``/home/user/.venv``).
 
@@ -59,10 +81,9 @@ One of them is that the system Python distribution used to create
 the virtual environment is not accessible from the compute nodes
 due to one of these reasons:
 
-- The virtual environment has been created in a
-  directory that is not accessible from the nodes.
-  In this case, your terminal might also show that the
-  ``activate`` file could not be found.
+- The virtual environment has been created in a directory that is
+  not accessible from the nodes. In this case, your terminal might
+  also show that the ``activate`` file could not be found.
 
   .. code-block:: console
 
@@ -175,6 +196,8 @@ the compute nodes:
    .. code-block:: console
 
       user@machine:~$ export PY_PATH=/ansys_inc/v241/commonfiles/CPython/3_10/linx64/Release/Python
+
+   This path needs to be adapted to where Ansys is installed and also which version is used.
 
 #. For only Ansys 2024 R1 and earlier, patch the ``PATH`` and ``LD_LIBRARY_PATH``
    environment variables:
