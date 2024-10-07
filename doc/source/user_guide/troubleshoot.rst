@@ -8,6 +8,7 @@ Troubleshooting PyMAPDL
 To help you resolve any problems that you might have when using PyMAPDL,
 some of the most common problems and frequently asked questions are posted here.
 
+.. _ref_debug_pymapdl:
 
 Debug in PyMAPDL
 ----------------
