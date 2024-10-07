@@ -2,7 +2,7 @@
 
 ## Project Lead
 
-*   [German Martinez Ayuso](https://github.com/germa89)
+* [German Martinez Ayuso](https://github.com/germa89)
 
 ## Individual Contributors
 
@@ -14,3 +14,4 @@
 * [Maxime Rey](https://github.com/MaxJPRey)
 * [Revathy Venugopal](https://github.com/Revathyvenugopal162)
 * [Roberto Pastor](https://github.com/RobPasMue)
+* [Mohamed Koubaa](https://github.com/koubaa)

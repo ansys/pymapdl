@@ -200,13 +200,11 @@ def requires(requirement: str):
 
 
 def requires_dependency(dependency: str):
-    try:
-        import_module(dependency)
+    if has_dependency(dependency):
         return pytest.mark.skipif(
-            False, reason="Never skip"
+            False, reason=f"Required package ('{dependency}') is installed"
         )  # faking a null skipif decorator
-
-    except ModuleNotFoundError:
+    else:
         # package does not exist
         return pytest.mark.skip(reason=f"Requires '{dependency}' package")
 
@@ -226,6 +224,7 @@ if has_dependency("pyvista"):
 
     # Necessary for CI plotting
     pyvista.OFF_SCREEN = True
+    pyvista.global_theme.allow_empty_mesh = True
 
 import ansys.mapdl.core as pymapdl
 

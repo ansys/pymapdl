@@ -356,6 +356,7 @@ class MapdlGrpc(MapdlBase):
             remove_temp_dir_on_exit = remove_temp_files
             remove_temp_files = None
 
+        self._name: Optional[str] = None
         self._session_id_: Optional[str] = None
         self._checking_session_id_: bool = False
         self.__distributed: Optional[bool] = None
@@ -411,7 +412,6 @@ class MapdlGrpc(MapdlBase):
         self._health_response_queue: Optional["Queue"] = None
         self._exiting: bool = False
         self._exited: Optional[bool] = None
-        self._mute: bool = False
         self._db: Optional[MapdlDb] = None
         self.__server_version: Optional[str] = None
         self._state: Optional[grpc.Future] = None
@@ -488,6 +488,18 @@ class MapdlGrpc(MapdlBase):
             self._cache_pids()
 
         self._create_session()
+
+    def _after_run(self, command: str) -> None:
+        if command[:4].upper() == "/CLE":
+            # We have reset the database, so we need to create a new session id
+            self._create_session()
+
+    def _before_run(self, _command: str) -> None:
+        if self._session_id is not None:
+            self._check_session_id()
+        else:
+            # For some reason the session hasn't been created
+            self._create_session()
 
     def _create_process_stds_queue(self, process=None):
         from ansys.mapdl.core.launcher import (
@@ -887,6 +899,7 @@ class MapdlGrpc(MapdlBase):
         with self.run_as_routine("POST26"):
             self.numvar(200, mute=True)
 
+        self.inquire("", "DIRECTORY")
         self.show(self._file_type_for_plots)
         self.version  # Caching version
         self.file_type_for_plots  # Setting /show,png and caching it.
@@ -1026,7 +1039,7 @@ class MapdlGrpc(MapdlBase):
                 continue
 
     @protect_from(ValueError, "I/O operation on closed file.")
-    def exit(self, save=False, force=False):
+    def exit(self, save=False, force=False, **kwargs):
         """Exit MAPDL.
 
         Parameters
@@ -1057,8 +1070,6 @@ class MapdlGrpc(MapdlBase):
         elif self._exited:
             # Already exited.
             return
-        else:
-            mapdl_path = self.directory
 
         if save:
             self._log.debug("Saving MAPDL database")
@@ -1082,17 +1093,21 @@ class MapdlGrpc(MapdlBase):
         self._exiting = True
         self._log.debug("Exiting MAPDL")
 
-        if self._local:
-            self._cache_pids()  # Recache processes
+        if not kwargs.pop("fake_exit", False):
+            # This cannot should not be faked
+            if self._local:
+                mapdl_path = self.directory
+                self._cache_pids()  # Recache processes
 
-            if os.name == "nt":
+                if os.name == "nt":
+                    self._kill_server()
+                self._close_process()
+                self._remove_lock_file(mapdl_path)
+            else:
                 self._kill_server()
-            self._close_process()
-            self._remove_lock_file(mapdl_path)
-        else:
-            self._kill_server()
 
         self._exited = True
+        self._exiting = False
 
         if self._remote_instance:  # pragma: no cover
             # No cover: The CI is working with a single MAPDL instance
@@ -2019,6 +2034,11 @@ class MapdlGrpc(MapdlBase):
         """Writes stored commands to an input file and runs the input
         file.  Used with non_interactive.
         """
+        if not self._stored_commands:
+            self._log.debug("There is no commands to be flushed.")
+            self._store_commands = False
+            return
+
         self._log.debug("Flushing stored commands")
 
         commands = "\n".join(self._stored_commands)
@@ -2955,7 +2975,7 @@ class MapdlGrpc(MapdlBase):
         # non-interactive and there's no output to return
         super().cmatrix(symfac, condname, numcond, grndkey, capname, **kwargs)
 
-    @property
+    @MapdlBase.name.getter
     def name(self) -> str:
         """Instance unique identifier."""
         if not self._name:

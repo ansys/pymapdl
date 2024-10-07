@@ -3,6 +3,7 @@
 from datetime import datetime
 import os
 from pathlib import Path
+import sys
 import warnings
 
 import ansys.tools.visualization_interface as viz_interface
@@ -10,10 +11,14 @@ from ansys_sphinx_theme import ansys_favicon, get_version_match
 import numpy as np
 import pyvista
 from sphinx.application import Sphinx
+from sphinx.util import logging
 from sphinx_gallery.sorting import FileNameSortKey
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
+
+# Convert notebooks into Python scripts and include them in the output files
+logger = logging.getLogger(__name__)
 
 viz_interface.DOCUMENTATION_BUILD = True
 pyvista.BUILDING_GALLERY = True
@@ -47,6 +52,9 @@ warnings.filterwarnings(
     message="Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.",
 )
 
+# To allow using 'helper' python file as a module
+sys.path.append(os.path.dirname(__file__))
+
 
 # -- Project information -----------------------------------------------------
 
@@ -76,9 +84,6 @@ SOURCE_PATH = Path(__file__).parent.resolve().absolute()
 pyansys_light_mode_logo = str(
     os.path.join(SOURCE_PATH, "_static", "pyansys-logo-light_mode.png")
 )
-pyansys_dark_mode_logo = str(
-    os.path.join(SOURCE_PATH, "_static", "pyansys-logo-dark_mode.png")
-)
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -93,6 +98,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "sphinx_jinja",
     "sphinx_design",
+    "sphinx_jinja",
     "sphinx_copybutton",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
@@ -106,7 +112,7 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "pandas": ("https://pandas.pydata.org/docs/", None),
-    "pyvista": ("https://docs.pyvista.org/version/stable/", None),
+    "pyvista": ("https://docs.pyvista.org", None),
     "grpc": ("https://grpc.github.io/grpc/python/", None),
     "pypim": ("https://pypim.docs.pyansys.com/version/dev/", None),
     "ansys-dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
@@ -293,8 +299,8 @@ copybutton_prompt_is_regexp = True
 # -- Options for HTML output -------------------------------------------------
 html_short_title = html_title = "PyMAPDL"
 html_theme = "ansys_sphinx_theme"
-html_logo = pyansys_dark_mode_logo
 html_theme_options = {
+    "logo": "pyansys",
     "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
     "github_url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}",
     "show_prev_next": False,
@@ -321,11 +327,11 @@ html_theme_options = {
         "json_url": f"https://{cname}/versions.json",
         "version_match": switcher_version,
     },
-    "use_meilisearch": {
-        "api_key": os.getenv("MEILISEARCH_PUBLIC_API_KEY", ""),
-        "index_uids": {
-            f"pymapdl-v{switcher_version.replace('.', '-')}": "PyMAPDL",
-        },
+    "cheatsheet": {
+        "file": "cheat_sheet/cheat_sheet.qmd",
+        "title": "PyMAPDL cheat sheet",
+        "version": f"v{version}",
+        "pages": ["getting_started/learning"],
     },
 }
 
@@ -439,3 +445,13 @@ def setup(app: Sphinx):
 
     # Julia lexer
     app.add_lexer("julia", JuliaLexer)
+
+    # Setting custom directive
+    from helpers import HideObject
+
+    app.add_directive("hideobject", HideObject)
+
+
+jinja_contexts = {
+    "cheat_sheet": {"version": switcher_version},
+}

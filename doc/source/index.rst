@@ -1,9 +1,9 @@
 
-:thispagetitle: Welcome to PyMAPDL
-
+.. title:: Welcome to PyMAPDL
 
 .. meta::
-   :keywords: pymapdl mapdl simulation finite elements python
+   :keywords: pymapdl, mapdl, simulation, finite elements, python
+   :description: Welcome to PyMAPDL documentation.
 
 .. jinja:: main_toctree
     
@@ -37,6 +37,13 @@
 
 .. vale off
 
+.. let's hide the `Edit on GitHub` link in this page...
+.. and the whole sidebar with it.
+.. hideobject::
+    :class: bd-sidebar-secondary bd-toc
+    :remove: true
+    :adjustmargin: true
+
 
 .. title is given using the 
 
@@ -44,9 +51,9 @@
 
 .. vale on
 
-.. grid:: 3
-    :gutter: 2 2 3 4
-    :margin: 2 2 3 4
+.. grid:: 2 2 3 3
+    :gutter: 1 2 3 3
+    :padding: 1 2 3 3
 
     .. grid-item-card:: :fa:`newspaper` Know what is PyMAPDL
         :link: ref_project_page
@@ -81,7 +88,7 @@
 
             In our :ref:`ref_examples` section, you
             can find a great collection of PyMAPDL
-            user cases.
+            user cases..
         {% endif %}
 
     .. grid-item-card:: :fa:`book-open-reader` Use the different library modules

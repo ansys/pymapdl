@@ -111,6 +111,9 @@ def check_valid_routine(routine):
         Raised when a routine is invalid.
 
     """
+    if routine.lower().startswith("/"):
+        routine = routine[1:]
+
     if routine.lower().startswith("begin"):
         return True
     if not hasattr(ROUTINES, routine.upper()):

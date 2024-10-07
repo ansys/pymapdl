@@ -50,8 +50,7 @@ In the upper right corner of the documentation's title bar, there is an option f
 viewing the documentation for the latest stable release to viewing the documentation for the
 development version or previously released versions.
 
-You can also [view](https://cheatsheets.docs.pyansys.com/pymapdl_cheat_sheet.png) or
-[download](https://cheatsheets.docs.pyansys.com/pymapdl_cheat_sheet.pdf) the
+You can also [download](https://mapdl.docs.pyansys.com/version/stable/_static/cheat_sheet.pdf) the
 PyMAPDL cheat sheet. This one-page reference provides syntax rules and commands
 for using PyMAPDL. 
 
