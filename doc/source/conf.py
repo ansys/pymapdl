@@ -313,9 +313,7 @@ html_theme_options = {
     },
 }
 
-BUILD_CHEATSHEET = (
-    os.environ.get("BUILD_CHEATSHEET", "true").lower() == "true"
-)
+BUILD_CHEATSHEET = os.environ.get("BUILD_CHEATSHEET", "true").lower() == "true"
 
 if BUILD_CHEATSHEET:
     html_theme_options["cheatsheet"] = {
