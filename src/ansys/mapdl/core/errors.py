@@ -324,8 +324,6 @@ def protect_grpc(func):
 
                 mapdl = retrieve_mapdl_from_args(args)
                 mapdl._log.debug("A gRPC error has been detected.")
-                if mapdl._exited or mapdl._exiting:
-                    return
 
                 i_attemps += 1
                 if i_attemps <= n_attempts:
