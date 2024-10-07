@@ -602,7 +602,7 @@ def launch_grpc(
     env_vars = update_env_vars(add_env_vars, replace_env_vars)
 
     LOG.info(
-        f"Running a local instance at port {port} the following command: '{command}'"
+        f"Running a local instance in {run_location} at port {port} the following command: '{command}'"
     )
 
     LOG.debug("MAPDL starting in background.")
@@ -681,6 +681,7 @@ def _check_server_is_alive(stdout_queue, run_location, timeout):
     empty_i = 0
     terminal_output = ""
 
+    LOG.debug(f"Checking if MAPDL server is alive")
     while time.time() < (t0 + timeout):
         terminal_output += "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
 
@@ -700,6 +701,9 @@ def _check_server_is_alive(stdout_queue, run_location, timeout):
             break
 
     else:
+        LOG.debug(
+            f"MAPDL gRPC server didn't print any valid output:\n{terminal_output}"
+        )
         raise MapdlDidNotStart("MAPDL failed to start the gRPC server")
 
 
@@ -1768,6 +1772,9 @@ def launch_mapdl(
                     f"The machine has {machine_cores} cores. PyMAPDL is asking for {nproc} cores."
                 )
 
+    # Setting env vars
+    env_vars = update_env_vars(add_env_vars, replace_env_vars)
+
     start_parm.update(
         {
             "exec_file": exec_file,
@@ -1811,8 +1818,7 @@ def launch_mapdl(
 
             port, actual_run_location, process = launch_grpc(
                 port=port,
-                add_env_vars=add_env_vars,
-                replace_env_vars=replace_env_vars,
+                replace_env_vars=env_vars,
                 **start_parm,
             )
 
@@ -1917,7 +1923,7 @@ def check_mode(mode, version):
     return mode
 
 
-def update_env_vars(add_env_vars, replace_env_vars):
+def update_env_vars(add_env_vars: dict, replace_env_vars: dict) -> dict:
     """
     Update environment variables for the MAPDL process.
 
@@ -1939,6 +1945,8 @@ def update_env_vars(add_env_vars, replace_env_vars):
     """
 
     # Expanding/replacing env variables for the process.
+    envvars = os.environ.copy()
+
     if add_env_vars and replace_env_vars:
         raise ValueError(
             "'add_env_vars' and 'replace_env_vars' are incompatible. Please provide only one."
@@ -1950,9 +1958,8 @@ def update_env_vars(add_env_vars, replace_env_vars):
                 "The variable 'add_env_vars' should be a dict with env vars."
             )
 
-        add_env_vars.update(os.environ)
+        envvars.update(add_env_vars)
         LOG.debug(f"Updating environment variables with: {add_env_vars}")
-        return add_env_vars
 
     elif replace_env_vars:
         if not isinstance(replace_env_vars, dict):
@@ -1960,7 +1967,9 @@ def update_env_vars(add_env_vars, replace_env_vars):
                 "The variable 'replace_env_vars' should be a dict with env vars."
             )
         LOG.debug(f"Replacing environment variables with: {replace_env_vars}")
-        return replace_env_vars
+        envvars = replace_env_vars
+
+    return envvars
 
 
 def _check_license_argument(license_type, additional_switches):
