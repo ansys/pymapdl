@@ -51,7 +51,9 @@ This section provides a general overview of PyMAPDL and how you use it.
    :caption: High performance computing
 
    hpc/introduction
+   hpc/settings
    hpc/pymapdl
+   hpc/examples
    hpc/troubleshooting
 
 

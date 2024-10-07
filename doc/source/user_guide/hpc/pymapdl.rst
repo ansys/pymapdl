@@ -1,138 +1,130 @@
-.. _ref_hpc_pymapdl:
-
-
-=============================
-PyMAPDL on SLURM HPC clusters
-=============================
 
 .. _ref_hpc_pymapdl_job:
 
-Submit a PyMAPDL job
-====================
+=======================
+PyMAPDL on HPC Clusters
+=======================
 
-Using PyMAPDL in an HPC environment managed by SLURM scheduler has certain requirements:
 
-* **An Ansys installation must be accessible from all the compute nodes**.
-  This normally implies that the ``ANSYS`` installation directory is in a
-  shared drive or directory. Your HPC cluster administrator
-  should provide you with the path to the ``ANSYS`` directory.
+Introduction
+============
 
-* **A compatible Python installation must be accessible from all the compute nodes**.
-  For compatible Python versions, see :ref:`ref_pymapdl_installation`.
+PyMAPDL communicates with MAPDL using the gRPC protocol.
+This protocol offers many advantages and features, for more information
+see :ref:`ref_project_page`.
+One of these features is that it is not required to have both,
+PyMAPDL and MAPDL processes, running on the same machine.
+This possibility open the door to many configurations, depending
+on whether you run them both or not on the HPC compute nodes.
+Additionally, you might to be able interact with them (``interactive`` mode)
+or not (``batch`` mode).
 
-Additionally, you must perform a few key steps to ensure efficient job
-execution and resource utilization. Subsequent topics describe these steps.
+Currently, the supported configurations are:
 
-Check the Python installation
------------------------------
+* `Submit a PyMAPDL batch job to the cluster from the entrypoint node`
 
-The PyMAPDL Python package (``ansys-mapdl-core``) must be installed in a virtual
-environment that is accessible from the compute nodes.
 
-To see where your Python distribution is installed, use this code:
+Since v0.68.5, PyMAPDL can take advantage of the tigh integration
+between the scheduler and MAPDL to read the job configuration and
+launch an MAPDL instance that can use all the resources allocated
+to that job.
+For instance, if a SLURM job has allocated 8 nodes with 4 cores each,
+then PyMAPDL will launch an MAPDL instance which will use 32 cores
+spawning across those 8 nodes.
+This behaviour can disabled if passing the environment variable
+:envvar:`PYMAPDL_ON_SLURM` or passing the argument `detect_HPC=False`
+to :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`.
 
-.. code-block:: console
 
-    user@machine:~$ which python3
-    /usr/bin/python3
 
-To print the version of Python you have available, use this code:
+Submit a PyMAPDL batch job to the cluster from the entrypoint node
+==================================================================
 
-.. code-block:: console
+Many HPC clusters allow their users to login in a machine using
+``ssh``, ``vnc``, ``rdp``, or similar technologies and submit a job
+to the cluster from there.
+This entrypoint machine, sometimes known as *head node* or *entrypoint node*,
+might be a virtual machine (VDI/VM).
 
-    user@machine:~$ python3 --version
-    Python 3.9.16
+In such cases, once the Python virtual environment with PyMAPDL is already
+set and is accessible to all the compute nodes, launching a
+PyMAPDL job is very easy to do using ``sbatch`` command.
+No changes are needed on a PyMAPDL script to run it on an SLURM cluster.
 
-You should be aware that your machine might have installed other Python versions.
-To find out if those installations are already in the ``PATH`` environment variable,
-you can press the **Tab** key to use autocomplete:
-
-.. code-block:: console
-
-    user@machine:~$ which python3[TAB]
-    python3             python3-intel64     python3.10-config   python3.11          python3.12          python3.8           python3.8-intel64   python3.9-config  
-    python3-config      python3.10          python3.10-intel64  python3.11-config   python3.12-config   python3.8-config    python3.9 
-    $ which python3.10
-    /usr/bin/python3.10
-
-You should use a Python version that is compatible with PyMAPDL.
-For more information, see :ref:`ref_pymapdl_installation`.
-
-The ``which`` command returns the path where the Python executable is installed.
-You can use that executable to create your own Python virtual environment in a directory
-that is accessible from all the compute nodes.
-For most HPC clusters, the ``/home/$user`` directory is generally available to all nodes.
-You can then create the virtual environment in the ``/home/user/.venv`` directory:
+First the virtual environment must be activated in the current terminal.
 
 .. code-block:: console
 
-    user@machine:~$ python3 -m venv /home/user/.venv
+    user@entrypoint-machine:~$ export VENV_PATH=/my/path/to/the/venv
+    user@entrypoint-machine:~$ source $VENV_PATH/bin/activate
 
-After activating the virtual environment, you can install PyMAPDL.
+Once the virtual environment has been activated, you can launch any Python
+script if they do have the proper Python shebang (``#!/usr/bin/env python3``).
 
+For instance, to launch the following Python script ``main.py``:
 
-Install PyMAPDL
----------------
+.. code-block:: python
+    :caption: ``main.py`` file
 
-To install PyMAPDL on the activated virtual environment, run the following commands:
+    #!/usr/bin/env python3
+
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(run_location="/home/ubuntu/tmp/tmp/mapdl", loglevel="debug")
+
+    print(mapdl.prep7())
+    print(f'Number of CPUs: {mapdl.get_value("ACTIVE", 0, "NUMCPU")}')
+
+    mapdl.exit()
+
+You can just run in your console:
 
 .. code-block:: console
 
-    user@machine:~$ source /home/user/.venv/bin/activate
-    (.venv) user@machine:~$ pip install ansys-mapdl-core
-    Collecting ansys-mapdl-core
-    Downloading ansys_mapdl_core-0.68.1-py3-none-any.whl (26.9 MB)
-        ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 26.9/26.9 MB 37.3 MB/s eta 0:00:00
-    Collecting pexpect>=4.8.0
-    Using cached pexpect-4.9.0-py2.py3-none-any.whl (63 kB)
-    Collecting click>=8.1.3
-    ...
+    (venv) user@entrypoint-machine:~$ sbatch main.py
 
-To test if this virtual environment is accessible from the compute nodes,
-run this ``test.sh`` bash script:
+Alternatively, you can remove the shebang from the python file and use a
+Python executable call:
+
+.. code-block:: console
+
+    (venv) user@entrypoint-machine:~$ sbatch python main.py
+
+Additionally, you can can change the amount of cores used in your
+job, by setting the :envvar:`PYMAPDL_NPROC` to the desired value.
+
+.. code-block:: console
+
+    (venv) user@entrypoint-machine:~$ PYMAPDL_NPROC=4 sbatch main.py
+
+You can also add ``sbatch`` options to the command:
+
+.. code-block:: console
+
+    (venv) user@entrypoint-machine:~$ PYMAPDL_NPROC=4 sbatch  main.py
+
+
+For instance, to launch a PyMAPDL job which start a four cores MAPDL instance
+on a 10 CPUs SLURM job, you can use:
 
 .. code-block:: bash
 
-    #!/bin/bash
-    #SBATCH --job-name=myjob
-    #SBATCH --nodes=1
-    #SBATCH --ntasks-per-node=4
-    #SBATCH --time=01:00:00
+    (venv) user@entrypoint-machine:~$ PYMAPDL_NPROC=4 sbatch --partition=qsmall --nodes=10 --ntasks-per-node=1 main.py
 
-    # Commands to run
-    echo "Testing Python!"
-    source /home/user/.venv/bin/activate
-    python -c "from ansys.mapdl import core;print(f'PyMAPDL version {core.__version__} was successfully imported.')"
 
-then you can run that script using: 
+Using a submission script
+-------------------------
 
-.. code-block:: console
-
-    user@machine:~$ srun test.sh
-
-This command might take a minute or two to complete, depending on the amount of free
-resources available in the cluster.
-On the console, you should see this output:
-
-.. code-block:: text
-
-    Testing Python!
-    PyMAPDL version 0.68.1 was successfully imported.
-
-If you see an error in the output, see :ref:`ref_hpc_troubleshooting`, especially
-:ref:`ref_python_venv_not_accesible`.
-
-Submit a PyMAPDL job
---------------------
-
-To submit a PyMAPDL job, you must create two files:
+In case you need to customize more your job, you can create a SLURM
+submission script to submit a PyMAPDL job.
+In this case, you must create two files:
 
 - Python script with the PyMAPDL code
-- Bash script that activates the virtual environment and calls the Python script
-
-**Python script:** ``pymapdl_script.py``
+- Bash script that activates the virtual environment and calls the
+  Python script.
 
 .. code-block:: python
+    :caption: ``main.py`` python script
 
     from ansys.mapdl.core import launch_mapdl
 
@@ -147,59 +139,30 @@ To submit a PyMAPDL job, you must create two files:
     mapdl.exit()
 
 
-**Bash script:** ``job.sh``
-
 .. code-block:: bash
+   :caption: ``job.sh`` execution script 
 
-    source /home/user/.venv/bin/activate
-    python pymapdl_script.py
+   source /home/user/.venv/bin/activate
+   python main.py
 
 To start the simulation, you use this code:
 
 .. code-block:: console
 
-    user@machine:~$ srun job.sh
-
-
-The bash script allows you to customize the environment before running the Python script.
-This bash script performs such tasks as creating environment variables, moving to
-different directories, and printing to ensure your configuration is correct. However,
-this bash script is not mandatory.
-You can avoid having the ``job.sh`` bash script if the virtual environment is activated
-and you pass all the environment variables to the job:
-
-.. code-block:: console
-
-    user@machine:~$ source /home/user/.venv/bin/activate
-    (.venv) user@machine:~$ srun python pymapdl_script.py --export=ALL
-
-
-The ``--export=ALL`` argument might not be needed, depending on the cluster configuration.
-Furthermore, you can omit the Python call in the preceding command if you include the
-Python shebang (``#!/usr/bin/python3``) in the first line of the ``pymapdl_script.py`` script.
-
-.. code-block:: console
-
-    user@machine:~$ source /home/user/.venv/bin/activate
-    (.venv) user@machine:~$ srun pymapdl_script.py --export=ALL
-
-If you prefer to run the job in the background, you can use the ``sbatch``
-command instead of the ``srun`` command. However, in this case, the Bash file is needed:
-
-.. code-block:: console
-
     user@machine:~$ sbatch job.sh
-    Submitted batch job 1
 
-Here is the expected output of the job:
+In this case, the Python virtual environment does not need to be activated
+before submission since it is activated later in the script.
+
+The expected output of the job is
 
 .. code-block:: text
 
     Number of CPUs: 10.0
 
 
-Examples
-========
-
-For an example that uses a machine learning genetic algorithm in
-an HPC system managed by SLURM scheduler, see :ref:`hpc_ml_ga_example`.
+The bash script allows you to customize the environment before running the
+Python script.
+This bash script performs tasks such as creating environment variables,
+moving files to different directories, and printing to ensure your
+configuration is correct.
