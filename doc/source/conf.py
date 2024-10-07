@@ -99,7 +99,7 @@ extensions = [
     "sphinx_design",
     "sphinx_jinja",
     "sphinx_copybutton",
-    "sphinx_gallery.gen_gallery",
+    # "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
     "ansys_sphinx_theme.extension.linkcode",
@@ -311,13 +311,19 @@ html_theme_options = {
         "json_url": f"https://{cname}/versions.json",
         "version_match": switcher_version,
     },
-    "cheatsheet": {
+}
+
+BUILD_CHEATSHEET = True if os.environ.get("BUILD_CHEATSHEET", "true") == "true" else False
+
+if BUILD_CHEATSHEET:
+    html_theme_options["cheatsheet"] = {
         "file": "cheat_sheet/cheat_sheet.qmd",
         "title": "PyMAPDL cheat sheet",
         "version": f"v{version}",
         "pages": ["getting_started/learning"],
-    },
-}
+    }
+    
+
 
 html_context = {
     "display_github": True,  # Integrate GitHub
