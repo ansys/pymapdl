@@ -21,7 +21,7 @@ or not (``batch`` mode).
 
 Currently, the supported configurations are:
 
-* `Submit a PyMAPDL batch job to the cluster from the entrypoint node`
+* :ref:`ref_pymapdl_batch_in_cluster_hpc`
 
 
 Since v0.68.5, PyMAPDL can take advantage of the tigh integration
@@ -36,6 +36,7 @@ This behaviour can turn off if passing the environment variable
 to :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`.
 
 
+.. _ref_pymapdl_batch_in_cluster_hpc:
 
 Submit a PyMAPDL batch job to the cluster from the entrypoint node
 ==================================================================
@@ -64,7 +65,7 @@ script if they do have the proper Python shebang (``#!/usr/bin/env python3``).
 For instance, to launch the following Python script ``main.py``:
 
 .. code-block:: python
-    :caption: ``main.py`` file
+    :caption: main.py
 
     #!/usr/bin/env python3
 
@@ -107,7 +108,7 @@ You can also add ``sbatch`` options to the command:
 For instance, to launch a PyMAPDL job which start a four cores MAPDL instance
 on a 10 CPU SLURM job, you can use:
 
-.. code-block:: bash
+.. code-block:: console
 
     (venv) user@entrypoint-machine:~$ PYMAPDL_NPROC=4 sbatch --partition=qsmall --nodes=10 --ntasks-per-node=1 main.py
 
@@ -124,7 +125,7 @@ In this case, you must create two files:
   Python script.
 
 .. code-block:: python
-    :caption: ``main.py`` python script
+    :caption: main.py
 
     from ansys.mapdl.core import launch_mapdl
 
@@ -140,7 +141,7 @@ In this case, you must create two files:
 
 
 .. code-block:: bash
-   :caption: ``job.sh`` execution script 
+   :caption: job.sh
 
    source /home/user/.venv/bin/activate
    python main.py
