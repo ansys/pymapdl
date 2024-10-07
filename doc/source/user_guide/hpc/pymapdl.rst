@@ -49,7 +49,9 @@ might be a virtual machine (VDI/VM).
 
 In such cases, once the Python virtual environment with PyMAPDL is already
 set and is accessible to all the compute nodes, launching a
-PyMAPDL job is very easy to do using ``sbatch`` command.
+PyMAPDL job from the entrypoint is very easy to do using ``sbatch`` command.
+Using ``sbatch`` command, the PyMAPDL runs and launches an MAPDL instance in
+the compute nodes.
 No changes are needed on a PyMAPDL script to run it on an SLURM cluster.
 
 First the virtual environment must be activated in the current terminal.
