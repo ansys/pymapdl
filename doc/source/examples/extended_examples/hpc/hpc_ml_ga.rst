@@ -251,7 +251,7 @@ this script.
 
    If you have problems when creating the virtual environment
    or accessing it from the compute nodes,
-   see :ref:`ref_hpc_pymapdl_job`.
+   see :ref:`ref_hpc_troubleshooting`.
 
 3. Install the requirements for this example from the
    :download:`requirements.txt <requirements.txt>` file.
