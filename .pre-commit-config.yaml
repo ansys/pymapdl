@@ -49,7 +49,7 @@ repos:
   rev: 1.19.0
   hooks:
   - id: blacken-docs
-    additional_dependencies: [black==24.8.0]
+    additional_dependencies: [black==24.10.0]
 
 - repo: https://github.com/PyCQA/flake8
   rev: 7.1.1
