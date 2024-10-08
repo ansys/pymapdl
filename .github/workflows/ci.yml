@@ -70,7 +70,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: ansys/actions/doc-deploy-changelog@v7
+      - uses: ansys/actions/doc-deploy-changelog@v8
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
 
@@ -82,7 +82,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check branch name
-        uses: ansys/actions/branch-name-style@v7
+        uses: ansys/actions/branch-name-style@v8
 
 
   pull-request-name:
@@ -91,7 +91,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check pull-request name
-        uses: ansys/actions/commit-style@v7
+        uses: ansys/actions/commit-style@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -104,7 +104,7 @@ jobs:
         folder: ["doc", "examples"]
     steps:
       - name: "Ansys documentation style checks"
-        uses: ansys/actions/doc-style@v7
+        uses: ansys/actions/doc-style@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: ${{ matrix.folder }}
@@ -130,7 +130,7 @@ jobs:
             os: macos-latest
     steps:
       - name: "Build wheelhouse and perform smoke test"
-        uses: ansys/actions/build-wheelhouse@v7
+        uses: ansys/actions/build-wheelhouse@v8
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           operating-system: ${{ matrix.os }}
@@ -160,7 +160,7 @@ jobs:
       GRPC_ENABLE_FORK_SUPPORT: false  # See #3434
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v4.2.1
 
       - name: "Login in Github container registry"
         uses: docker/login-action@v3.3.0
@@ -357,7 +357,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v4.2.1
 
       - name: Get event type and user to check permissions.
         id: get_user
@@ -412,7 +412,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v4.2.1
 
       - name: "Login in Github container registry"
         uses: docker/login-action@v3.3.0
@@ -596,7 +596,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v4.2.1
 
       - uses: tspascoal/get-user-teams-membership@v3
         id: is_organization_member
@@ -643,7 +643,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v4.2.1
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -774,7 +774,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v4.2.1
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -869,7 +869,7 @@ jobs:
       ON_LOCAL: TRUE
 
     steps:
-      - uses: actions/checkout@v4.2.0
+      - uses: actions/checkout@v4.2.1
 
       # Skipping because it is installed locally.
       # - name: Setup Python
@@ -937,7 +937,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Build library source and wheel artifacts"
-        uses: ansys/actions/build-library@v7
+        uses: ansys/actions/build-library@v8
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
@@ -955,13 +955,13 @@ jobs:
       contents: write
     steps:
       - name: "Release to the public PyPI repository"
-        uses: ansys/actions/release-pypi-public@v7
+        uses: ansys/actions/release-pypi-public@v8
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           use-trusted-publisher: true
 
       - name: "Release to GitHub"
-        uses: ansys/actions/release-github@v7
+        uses: ansys/actions/release-github@v8
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           additional-artifacts: "minimum_requirements.txt"
@@ -992,7 +992,7 @@ jobs:
     needs: upload-docs-release
     steps:
       - name: "Install Git and clone project"
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v4.2.1
 
       - name: "Install the package requirements"
         run: pip install -e .
@@ -1007,7 +1007,7 @@ jobs:
           echo "VERSION_MEILI=$VERSION_MEILI" >> $GITHUB_ENV
 
       - name: "Deploy the latest documentation index"
-        uses: ansys/actions/doc-deploy-index@v7
+        uses: ansys/actions/doc-deploy-index@v8
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}/version/${{ env.VERSION }}
           index-name: pymapdl-v${{ env.VERSION_MEILI }}
@@ -1035,7 +1035,7 @@ jobs:
     needs: upload-dev-docs
     steps:
       - name: "Deploy the latest documentation index"
-        uses: ansys/actions/doc-deploy-index@v7
+        uses: ansys/actions/doc-deploy-index@v8
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}/version/dev
           index-name: pymapdl-vdev
@@ -1068,7 +1068,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v4.2.0
+      - uses: actions/checkout@v4.2.1
       - name: "Set up Julia"
         uses: julia-actions/setup-julia@v2
         with:
