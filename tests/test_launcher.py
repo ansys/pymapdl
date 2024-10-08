@@ -641,19 +641,25 @@ def test__parse_slurm_options(set_env_var_context, validation):
         if each_value:
             assert os.environ.get(each_key) == str(each_value)
 
-    exec_file, jobname, nproc, ram, additional_switches = _parse_slurm_options(
-        exec_file=None, jobname="", nproc=None, ram=None, additional_switches=""
-    )
-    assert nproc == validation["nproc"]
+    args = {
+        "exec_file": None,
+        "jobname": "",
+        "nproc": None,
+        "ram": None,
+        "additional_switches": "",
+    }
+    kwargs = {}
+    _parse_slurm_options(args, kwargs)
+    assert args["nproc"] == validation["nproc"]
 
-    if ram:
-        assert ram == validation["ram"]
+    if args["ram"]:
+        assert args["ram"] == validation["ram"]
 
-    if jobname != "file":
-        assert jobname == validation["jobname"]
+    if args["jobname"] != "file":
+        assert args["jobname"] == validation["jobname"]
 
-    if exec_file and validation.get("exec_file", None):
-        assert exec_file == validation["exec_file"]
+    if args["exec_file"] and validation.get("exec_file", None):
+        assert args["exec_file"] == validation["exec_file"]
 
 
 @pytest.mark.parametrize(
