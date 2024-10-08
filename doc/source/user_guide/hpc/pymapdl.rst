@@ -145,7 +145,20 @@ In this case, you must create two files:
 .. code-block:: bash
    :caption: job.sh
 
+   #!/bin/bash
+   # Set SLURM options
+   #SBATCH --job-name=ansys_job            # Job name
+   #SBATCH --partition=qsmall              # Specify the queue/partition name                  
+   #SBATCH --nodes=5                       # Number of nodes
+   #SBATCH --ntasks-per-node=2             # Number of tasks (cores) per node
+   #SBATCH --time=04:00:00                 # Set a time limit for the job (optional but recommended)
+
+   # Set env vars
+   export MY_ENV_VAR=VALUE
+
+   # Activating Python virtual environment
    source /home/user/.venv/bin/activate
+   # Calling Python script
    python main.py
 
 To start the simulation, you use this code:
