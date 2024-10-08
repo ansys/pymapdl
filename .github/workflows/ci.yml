@@ -73,16 +73,8 @@ jobs:
       - uses: ansys/actions/doc-deploy-changelog@v8
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-
-
-  branch-name:
-    # Only if the event is a pull request and the branch name is not from the pre-commit-ci bot
-    if: github.event_name == 'pull_request' && github.head_ref != 'pre-commit-ci-update-config'
-    name: Check the name of the branch
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check branch name
-        uses: ansys/actions/branch-name-style@v8
+          bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
+          bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
 
 
   pull-request-name:
@@ -91,7 +83,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check pull-request name
-        uses: ansys/actions/commit-style@v8
+        uses: ansys/actions/check-pr-title@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -977,42 +969,13 @@ jobs:
     needs: [release]
     steps:
       - name: "Deploy the stable documentation"
-        # TODO: testing SEO improvements. This branch avoids creating a
-        # sitemap.xml pages in opposite to v5.
-        uses: ansys/actions/doc-deploy-stable@feat/seo-improvements
+        uses: ansys/actions/doc-deploy-stable@v8
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
           render-last: '5'
-
-
-  doc-index-stable:
-    name: "Deploy stable docs index"
-    runs-on: ubuntu-latest
-    needs: upload-docs-release
-    steps:
-      - name: "Install Git and clone project"
-        uses: actions/checkout@v4.2.1
-
-      - name: "Install the package requirements"
-        run: pip install -e .
-
-      - name: "Get the version to PyMeilisearch"
-        run: |
-          VERSION=$(python -c "from ansys.mapdl.core import __version__; print('.'.join(__version__.split('.')[:2]))")
-          VERSION_MEILI=$(python -c "from ansys.mapdl.core import __version__; print('-'.join(__version__.split('.')[:2]))")
-          echo "Calculated VERSION: $VERSION"
-          echo "Calculated VERSION_MEILI: $VERSION_MEILI"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "VERSION_MEILI=$VERSION_MEILI" >> $GITHUB_ENV
-
-      - name: "Deploy the latest documentation index"
-        uses: ansys/actions/doc-deploy-index@v8
-        with:
-          cname: ${{ env.DOCUMENTATION_CNAME }}/version/${{ env.VERSION }}
-          index-name: pymapdl-v${{ env.VERSION_MEILI }}
-          host-url: ${{ vars.MEILISEARCH_HOST_URL }}
-          api-key: ${{ env.MEILISEARCH_API_KEY }}
+          bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
+          bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
 
 
   upload-dev-docs:
@@ -1022,25 +985,12 @@ jobs:
     needs: [docs-build]
     steps:
       - name: "Deploy the latest documentation"
-        # TODO: testing SEO improvements. This branch reuses the "index.html" from the stable version
-        uses: ansys/actions/doc-deploy-dev@feat/seo-improvements
+        uses: ansys/actions/doc-deploy-dev@v8
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
-
-
-  doc-index-dev:
-    name: "Deploy dev index docs"
-    runs-on: ubuntu-latest
-    needs: upload-dev-docs
-    steps:
-      - name: "Deploy the latest documentation index"
-        uses: ansys/actions/doc-deploy-index@v8
-        with:
-          cname: ${{ env.DOCUMENTATION_CNAME }}/version/dev
-          index-name: pymapdl-vdev
-          host-url: ${{ vars.MEILISEARCH_HOST_URL }}
-          api-key: ${{ env.MEILISEARCH_API_KEY }}
+          bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
+          bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
 
 
   notify:
