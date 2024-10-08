@@ -93,6 +93,32 @@ if not os.path.isdir(SETTINGS_DIR):
 CONFIG_FILE = os.path.join(SETTINGS_DIR, "config.txt")
 ALLOWABLE_MODES = ["console", "grpc"]
 
+ALLOWABLE_LAUNCH_ARGS = [
+    "nproc",
+    "ram",
+    "mode",
+    "override",
+    "loglevel",
+    "additional_switches",
+    "start_timeout",
+    "port",
+    "cleanup_on_exit",
+    "start_instance",
+    "ip",
+    "clear_on_connect",
+    "log_apdl",
+    "remove_temp_files",
+    "remove_temp_dir_on_exit",
+    "verbose_mapdl",
+    "license_server_check",
+    "license_type",
+    "print_com",
+    "add_env_vars",
+    "replace_env_vars",
+    "version",
+    "detect_slurm_config",
+]
+
 ON_WSL = os.name == "posix" and (
     bool(os.environ.get("WSL_DISTRO_NAME", None))
     or bool(os.environ.get("WSL_INTEROP", None))
@@ -1071,6 +1097,7 @@ def launch_mapdl(
     exec_file: Optional[str] = None,
     run_location: Optional[str] = None,
     jobname: str = "file",
+    *,
     nproc: Optional[int] = None,
     ram: Optional[Union[int, str]] = None,
     mode: Optional[str] = None,
@@ -1429,39 +1456,21 @@ def launch_mapdl(
         "ANSYSLMD_LICENSE_FILE":"1055@MYSERVER"}
     >>> mapdl = launch_mapdl(replace_env_vars=my_env_vars)
     """
-    # By default
-    ON_SLURM = os.environ.get("PYMAPDL_ON_SLURM", None)
-    if ON_SLURM is None:
-        ON_SLURM = True
-    else:
-        # Unless the env var is false, it will be true.
-        ON_SLURM = not (ON_SLURM.lower() == "false")
+    config = {}
 
-    # Let's require the following env vars to exist to go into slurm mode.
-    ON_SLURM = (
-        ON_SLURM
-        and bool(os.environ.get("SLURM_JOB_NAME", ""))
-        and bool(os.environ.get("SLURM_JOB_ID", ""))
-    )
+    # packing arguments
+    args = pack_arguments(locals())
 
-    if detect_slurm_config and ON_SLURM:
+    # SLURM settings
+    if is_on_slurm(args, config):
         LOG.info("On Slurm mode.")
 
         # extracting parameters
-        exec_file, jobname, nproc, ram, additional_switches = _parse_slurm_options(
-            exec_file,
-            jobname,
-            nproc,
-            ram,
-            additional_switches,
-            **kwargs,
-        )
+        _parse_slurm_options(args, kwargs)
+
         # To avoid timeouts
-        license_server_check = False
-        start_timeout = 2 * start_timeout
-        ON_SLURM = True  # Using this as main variable
-    else:
-        ON_SLURM = False
+        config["license_server_check"] = False
+        args["start_timeout"] = 2 * args["start_timeout"]
 
     # These parameters are partially used for unit testing
     set_no_abort = kwargs.pop("set_no_abort", True)
@@ -1623,7 +1632,7 @@ def launch_mapdl(
             return
 
         if _debug_no_launch:
-            return pack_parameters(locals())  # type: ignore
+            return _pack_parameters_debug(locals())  # type: ignore
 
         mapdl = MapdlGrpc(
             ip=ip,
@@ -1770,7 +1779,7 @@ def launch_mapdl(
         elif mode == "grpc":
             if _debug_no_launch:
                 # Early exit, just for testing
-                return pack_parameters(locals())  # type: ignore
+                return _pack_parameters_debug(locals())  # type: ignore
 
             port, actual_run_location, process = launch_grpc(
                 port=port,
@@ -2053,12 +2062,8 @@ def _parse_ip_route(output):
 
 
 def _parse_slurm_options(
-    exec_file: Optional[str],
-    jobname: str,
-    nproc: Optional[int],
-    ram: Optional[Union[str, int]],
-    additional_switches: str,
-    **kwargs: Dict[str, Any],
+    args: Dict[str, Any],
+    kwargs: Dict[str, Any],
 ):
     def get_value(
         variable: str,
@@ -2111,124 +2116,99 @@ def _parse_slurm_options(
     ).lower()
     LOG.info(f"SLURM_NODELIST: {SLURM_NODELIST}")
 
-    if not exec_file:
-        exec_file = os.environ.get("PYMAPDL_MAPDL_EXEC", None)
+    if not args["exec_file"]:
+        args["exec_file"] = os.environ.get("PYMAPDL_MAPDL_EXEC", None)
 
-    if not exec_file:
+    if not args["exec_file"]:
         # We should probably make a way to find it.
         # We will use the module thing
         pass
-    LOG.info(f"Using MAPDL executable in: {exec_file}")
+    LOG.info(f"Using MAPDL executable in: {args['exec_file']}")
 
-    if not jobname:
-        jobname = os.environ.get("SLURM_JOB_NAME", "file")
-    LOG.info(f"Using jobname: {jobname}")
+    if not args["jobname"]:
+        args["jobname"] = os.environ.get("SLURM_JOB_NAME", "file")
+    LOG.info(f"Using jobname: {args['jobname']}")
 
     # Checking specific env var
-    if not nproc:
-        nproc = os.environ.get("PYMAPDL_NPROC", None)
-        if nproc:
-            nproc = int(nproc)
-
-    if not nproc:
+    if not args["nproc"]:
         ## Attempt to calculate the appropriate number of cores:
         # Reference: https://stackoverflow.com/a/51141287/6650211
         # I'm assuming the env var makes sense.
         #
         # - SLURM_CPUS_ON_NODE is a property of the cluster, not of the job.
         #
-        options = [
-            # 4,  # Fall back option
-            SLURM_CPUS_PER_TASK * SLURM_NTASKS,  # (CPUs)
-            SLURM_NPROCS,  # (CPUs)
-            # SLURM_NTASKS,  # (tasks) Not necessary the number of CPUs,
-            # SLURM_NNODES * SLURM_TASKS_PER_NODE * SLURM_CPUS_PER_TASK,  # (CPUs)
-            SLURM_CPUS_ON_NODE * SLURM_NNODES,  # (cpus)
-        ]
+        options = max(
+            [
+                # 4,  # Fall back option
+                SLURM_CPUS_PER_TASK * SLURM_NTASKS,  # (CPUs)
+                SLURM_NPROCS,  # (CPUs)
+                # SLURM_NTASKS,  # (tasks) Not necessary the number of CPUs,
+                # SLURM_NNODES * SLURM_TASKS_PER_NODE * SLURM_CPUS_PER_TASK,  # (CPUs)
+                SLURM_CPUS_ON_NODE * SLURM_NNODES,  # (cpus)
+            ]
+        )
         LOG.info(f"On SLURM number of processors options {options}")
-        nproc = max(options)
 
-    LOG.info(f"Setting number of CPUs to: {nproc}")
+        args["nproc"] = int(os.environ.get("PYMAPDL_NPROC", options))
 
-    if not ram:
+    LOG.info(f"Setting number of CPUs to: {args['nproc']}")
+
+    if not args["ram"]:
         if SLURM_MEM_PER_NODE:
             # RAM argument is in MB, so we need to convert
 
             if SLURM_MEM_PER_NODE[-1] == "T":  # tera
-                ram = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** 2
+                args["ram"] = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** 2
             elif SLURM_MEM_PER_NODE[-1] == "G":  # giga
-                ram = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** 1
+                args["ram"] = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** 1
             elif SLURM_MEM_PER_NODE[-1].upper() == "k":  # kilo
-                ram = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** (-1)
+                args["ram"] = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** (-1)
             else:  # Mega
-                ram = int(SLURM_MEM_PER_NODE)
+                args["ram"] = int(SLURM_MEM_PER_NODE)
 
-    LOG.info(f"Setting RAM to: {ram}")
+    LOG.info(f"Setting RAM to: {args['ram']}")
 
     # We use "-dis " (with space) to avoid collision with user variables such
     # as `-distro` or so
-    if "-dis " not in additional_switches and not additional_switches.endswith("-dis"):
-        additional_switches += " -dis"
+    if "-dis " not in args["additional_switches"] and not args[
+        "additional_switches"
+    ].endswith("-dis"):
+        args["additional_switches"] += " -dis"
 
-    ## Getting the node list
-    machines = ""
-    # parsing nodes to list
-    if SLURM_NODELIST:
-        try:
-            p = subprocess.Popen(
-                ["scontrol", "show", "hostnames", f"{SLURM_NODELIST}"],
-                stderr=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-            )
-            stderr = p.stderr.read().decode()
-            stdout = p.stdout.read().decode()
-
-            if "Invalid hostlist" in stderr:
-                raise ValueError(
-                    "The node list is invalid, or it could not be parsed.\n",
-                    "Are you passing the nodes correctly?\n",
-                    f"Nodes list: {SLURM_NODELIST}",
-                )
-            if stderr:
-                raise RuntimeError(stderr)
-            nodes = stdout.strip().splitlines()
-
-            machines = ":".join([f"{each_node}" for each_node in nodes])
-
-            # The following code creates the cmd line bit for MAPDL. It seems it
-            # is not needed in slurm.
-            # machines = " -machines " + ":".join([
-            #     f"{each_node}:{SLURM_CPUS_ON_NODE}" for each_node in nodes
-            # ])
-
-            # We do not need to inject the machines in MAPDL command line.
-            # additional_switches += machines
-            LOG.info(f"Using nodes configuration: {machines}")
-
-        except Exception as e:
-            LOG.info(
-                f"The machines list could not be obtained.\nThis error occurred:\n{str(e)}"
-            )
-
-    return exec_file, jobname, nproc, ram, additional_switches
+    return args
 
 
-def pack_parameters(locals_var):
+def _pack_parameters_debug(locals_var):
     # pack all the arguments in a dict for debugging purposes
     # We prefer to explicitly output the desired output
-    dict_ = {}
-    dict_["port"] = locals_var["port"]
-    dict_["ip"] = locals_var["ip"]
-    dict_["add_env_vars"] = locals_var["add_env_vars"]
-    dict_["replace_env_vars"] = locals_var["replace_env_vars"]
-    dict_["cleanup_on_exit"] = locals_var["cleanup_on_exit"]
-    dict_["loglevel"] = locals_var["loglevel"]
-    dict_["set_no_abort"] = locals_var["set_no_abort"]
-    dict_["remove_temp_dir_on_exit"] = locals_var["remove_temp_dir_on_exit"]
-    dict_["log_apdl"] = locals_var["log_apdl"]
-    dict_["use_vtk"] = locals_var["use_vtk"]
-    dict_["start_parm"] = locals_var["start_parm"]
-    dict_["start_instance"] = locals_var["start_instance"]
-    dict_["version"] = locals_var["version"]
-    dict_["additional_switches"] = locals_var["additional_switches"]
-    return dict_
+    config = pack_arguments(locals_var)
+
+    # Non-argument values
+    config["set_no_abort"] = locals_var["set_no_abort"]
+    config["use_vtk"] = locals_var["use_vtk"]
+    config["start_parm"] = locals_var["start_parm"]
+    return config
+
+
+def pack_arguments(locals_):
+    args = {}
+    for each in ALLOWABLE_LAUNCH_ARGS:
+        args[each] = locals_[each]
+
+    return args
+
+
+def is_on_slurm(args: Dict[str, Any], config: Dict[str, Any]) -> bool:
+
+    config["ON_SLURM"] = os.environ.get("PYMAPDL_ON_SLURM", "True")
+
+    is_flag_false = config["ON_SLURM"].lower() == "false"
+
+    # Let's require the following env vars to exist to go into slurm mode.
+    config["ON_SLURM"] = (
+        args["detect_slurm_config"]
+        and not is_flag_false  # default is true
+        and bool(os.environ.get("SLURM_JOB_NAME", ""))
+        and bool(os.environ.get("SLURM_JOB_ID", ""))
+    )
+    return config["ON_SLURM"]
