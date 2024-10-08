@@ -376,6 +376,7 @@ jobs:
 
       - uses: tspascoal/get-user-teams-membership@v3
         id: is_organization_member
+        if: ${{ github.actor != 'dependabot[bot]' }}
         with:
           username: ${{ steps.get_user.outputs.user }}
           organization: ansys
@@ -385,7 +386,7 @@ jobs:
       - id: set-matrix
         env:
           extended_testing: ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
-          auth_user: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
+          auth_user: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' || github.actor == 'dependabot[bot]'  }}
         run: .ci/build_matrix.sh
 
   build-test-remote:
@@ -599,6 +600,7 @@ jobs:
 
       - uses: tspascoal/get-user-teams-membership@v3
         id: is_organization_member
+        if: ${{ github.actor != 'dependabot[bot]' }}
         with:
           username: ${{ github.actor }}
           organization: ansys
@@ -614,7 +616,7 @@ jobs:
           RUN_ALL_TEST: ${{ inputs.run_all_tests }}
           ON_PUSH: ${{ github.event_name == 'push' }}
           HAS_TAG: ${{ contains(github.ref, 'refs/tags') }}
-          auth_user: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
+          auth_user: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' || github.actor == 'dependabot[bot]'  }}
         run: .ci/build_matrix.sh
 
   build-test-ubuntu-local:
