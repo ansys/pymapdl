@@ -31,7 +31,6 @@ import pytest
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import (
-    DeprecationError,
     LicenseServerConnectionError,
     NotEnoughResources,
     PortAlreadyInUseByAnMAPDLInstance,
@@ -46,7 +45,6 @@ from ansys.mapdl.core.launcher import (
     _validate_MPI,
     _verify_version,
     get_start_instance,
-    launch_grpc,
     launch_mapdl,
     update_env_vars,
 )
@@ -216,7 +214,7 @@ def test_remove_temp_files(mapdl):
     """Ensure the working directory is removed when run_location is not set."""
     mapdl_ = launch_mapdl(
         port=mapdl.port + 1,
-        remove_temp_files=True,
+        remove_temp_dir_on_exit=True,
         start_timeout=start_timeout,
         additional_switches=QUICK_LAUNCH_SWITCHES,
     )
@@ -239,7 +237,7 @@ def test_remove_temp_files_fail(tmpdir, mapdl):
     """Ensure the working directory is not removed when the cwd is changed."""
     mapdl_ = launch_mapdl(
         port=mapdl.port + 1,
-        remove_temp_files=True,
+        remove_temp_dir_on_exit=True,
         start_timeout=start_timeout,
         additional_switches=QUICK_LAUNCH_SWITCHES,
     )
@@ -494,17 +492,6 @@ def test_fail_channel_port():
 def test_fail_channel_ip():
     with pytest.raises(ValueError):
         launch_mapdl(channel="something", ip="something")
-
-
-def test_deprecate_verbose():
-    with pytest.raises(DeprecationError):
-        launch_mapdl(verbose_mapdl=True)
-
-    with pytest.raises(ValueError):
-        launch_mapdl(verbose=True)
-
-    with pytest.raises(DeprecationError):
-        launch_grpc(verbose=True)
 
 
 @pytest.mark.parametrize(
