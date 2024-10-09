@@ -28,6 +28,7 @@ from ansys.mapdl.core.cli import main
 @main.command(
     short_help="List MAPDL running instances.",
     help="""This command list MAPDL instances""",
+    name="list",
 )
 @click.option(
     "--instances",
