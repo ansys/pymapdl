@@ -210,7 +210,7 @@ def test_license_type_dummy(mapdl):
 
 @requires("local")
 @requires("nostudent")
-def test_remove_temp_files(mapdl):
+def test_remove_temp_dir_on_exit(mapdl):
     """Ensure the working directory is removed when run_location is not set."""
     mapdl_ = launch_mapdl(
         port=mapdl.port + 1,
@@ -233,7 +233,7 @@ def test_remove_temp_files(mapdl):
 
 @requires("local")
 @requires("nostudent")
-def test_remove_temp_files_fail(tmpdir, mapdl):
+def test_remove_temp_dir_on_exit_fail(tmpdir, mapdl):
     """Ensure the working directory is not removed when the cwd is changed."""
     mapdl_ = launch_mapdl(
         port=mapdl.port + 1,

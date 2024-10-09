@@ -123,7 +123,7 @@ class TestMapdlPool:
         # check it's been cleaned up
         if mapdl_pool[0] is not None:
             pth = mapdl_pool[0].directory
-            if mapdl_pool._spawn_kwargs["remove_temp_files"]:
+            if mapdl_pool._spawn_kwargs["remove_temp_dir_on_exit"]:
                 assert not list(Path(pth).rglob("*.page*"))
 
     @pytest.fixture
