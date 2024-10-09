@@ -228,13 +228,14 @@ mapdl.block(0, 1, 0, 1, 0, 1)"""
 def test_convert_pipe():
     cmd = ["echo", "/prep7"]
     cmd2 = ["pymapdl", "convert"]
-    
+
     process_echo = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-    process_pymapdl = subprocess.Popen(cmd2, stdin=process_echo.stdout,
-                                       stdout=subprocess.PIPE)
-    
+    process_pymapdl = subprocess.Popen(
+        cmd2, stdin=process_echo.stdout, stdout=subprocess.PIPE
+    )
+
     process_echo.stdout.close()
-    
+
     stdout = process_pymapdl.stdout.read().decode()
 
     assert "mapdl.prep7" in stdout
