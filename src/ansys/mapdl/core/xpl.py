@@ -23,7 +23,6 @@
 """Contains the ansXpl class."""
 import json
 import pathlib
-import random
 import string
 import weakref
 
