@@ -127,12 +127,14 @@ class MapdlPool:
     restart_failed : bool, optional
         Restarts any failed instances in the pool. Defaults to ``True``.
 
-    remove_temp_files : bool, optional
-        This launcher creates a new MAPDL working directory for each instance
-        of MAPDL within the temporary user directory, obtainable with
-        ``tempfile.gettempdir()``, for MAPDL files. When this parameter is
+    remove_temp_dir_on_exit : bool, optional
+        When ``run_location`` is ``None``, this launcher creates a new MAPDL
+        working directory within the user temporary directory, obtainable with
+        ``tempfile.gettempdir()``. When this parameter is
         ``True``, this directory will be deleted when MAPDL is exited. Default
         ``False``.
+        If you change the working directory, PyMAPDL does not delete the original
+        working directory nor the new one.
 
     names : str, Callable, optional
         You can specify the names of the directories where the instances are
@@ -206,7 +208,7 @@ class MapdlPool:
         port: Union[int, List[int]] = MAPDL_DEFAULT_PORT,
         progress_bar: bool = DEFAULT_PROGRESS_BAR,
         restart_failed: bool = True,
-        remove_temp_files: bool = True,
+        remove_temp_dir_on_exit: bool = True,
         names: Optional[str] = None,
         override=True,
         start_instance: bool = None,
@@ -225,7 +227,7 @@ class MapdlPool:
             run_location = create_temp_dir()
         self._root_dir: str = run_location
 
-        kwargs["remove_temp_files"] = remove_temp_files
+        kwargs["remove_temp_dir_on_exit"] = remove_temp_dir_on_exit
         kwargs["mode"] = "grpc"
         self._spawn_kwargs: Dict[str, Any] = kwargs
         self._spawning_i: int = 0
