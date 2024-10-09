@@ -606,7 +606,8 @@ def launch_grpc(
 
     LOG.debug("MAPDL starting in background.")
     process = subprocess.Popen(
-        command_parm,
+        command,
+        shell=os.name != "nt",
         cwd=run_location,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
