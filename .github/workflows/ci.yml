@@ -70,19 +70,11 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: ansys/actions/doc-deploy-changelog@v7
+      - uses: ansys/actions/doc-deploy-changelog@v8
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-
-
-  branch-name:
-    # Only if the event is a pull request and the branch name is not from the pre-commit-ci bot
-    if: github.event_name == 'pull_request' && github.head_ref != 'pre-commit-ci-update-config'
-    name: Check the name of the branch
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check branch name
-        uses: ansys/actions/branch-name-style@v7
+          bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
+          bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
 
 
   pull-request-name:
@@ -91,7 +83,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check pull-request name
-        uses: ansys/actions/commit-style@v7
+        uses: ansys/actions/check-pr-title@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -104,7 +96,7 @@ jobs:
         folder: ["doc", "examples"]
     steps:
       - name: "Ansys documentation style checks"
-        uses: ansys/actions/doc-style@v7
+        uses: ansys/actions/doc-style@v8
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: ${{ matrix.folder }}
@@ -130,7 +122,7 @@ jobs:
             os: macos-latest
     steps:
       - name: "Build wheelhouse and perform smoke test"
-        uses: ansys/actions/build-wheelhouse@v7
+        uses: ansys/actions/build-wheelhouse@v8
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           operating-system: ${{ matrix.os }}
@@ -160,7 +152,7 @@ jobs:
       GRPC_ENABLE_FORK_SUPPORT: false  # See #3434
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v4.2.1
 
       - name: "Login in Github container registry"
         uses: docker/login-action@v3.3.0
@@ -357,7 +349,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v4.2.1
 
       - name: Get event type and user to check permissions.
         id: get_user
@@ -376,6 +368,7 @@ jobs:
 
       - uses: tspascoal/get-user-teams-membership@v3
         id: is_organization_member
+        if: ${{ github.actor != 'dependabot[bot]' }}
         with:
           username: ${{ steps.get_user.outputs.user }}
           organization: ansys
@@ -385,7 +378,7 @@ jobs:
       - id: set-matrix
         env:
           extended_testing: ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
-          auth_user: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
+          auth_user: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' || github.actor == 'dependabot[bot]'  }}
         run: .ci/build_matrix.sh
 
   build-test-remote:
@@ -411,7 +404,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v4.2.1
 
       - name: "Login in Github container registry"
         uses: docker/login-action@v3.3.0
@@ -595,10 +588,11 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v4.2.1
 
       - uses: tspascoal/get-user-teams-membership@v3
         id: is_organization_member
+        if: ${{ github.actor != 'dependabot[bot]' }}
         with:
           username: ${{ github.actor }}
           organization: ansys
@@ -614,7 +608,7 @@ jobs:
           RUN_ALL_TEST: ${{ inputs.run_all_tests }}
           ON_PUSH: ${{ github.event_name == 'push' }}
           HAS_TAG: ${{ contains(github.ref, 'refs/tags') }}
-          auth_user: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
+          auth_user: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' || github.actor == 'dependabot[bot]'  }}
         run: .ci/build_matrix.sh
 
   build-test-ubuntu-local:
@@ -641,7 +635,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v4.2.1
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -772,7 +766,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.0
+        uses: actions/checkout@v4.2.1
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -867,7 +861,7 @@ jobs:
       ON_LOCAL: TRUE
 
     steps:
-      - uses: actions/checkout@v4.2.0
+      - uses: actions/checkout@v4.2.1
 
       # Skipping because it is installed locally.
       # - name: Setup Python
@@ -935,7 +929,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Build library source and wheel artifacts"
-        uses: ansys/actions/build-library@v7
+        uses: ansys/actions/build-library@v8
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
@@ -953,13 +947,13 @@ jobs:
       contents: write
     steps:
       - name: "Release to the public PyPI repository"
-        uses: ansys/actions/release-pypi-public@v7
+        uses: ansys/actions/release-pypi-public@v8
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           use-trusted-publisher: true
 
       - name: "Release to GitHub"
-        uses: ansys/actions/release-github@v7
+        uses: ansys/actions/release-github@v8
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           additional-artifacts: "minimum_requirements.txt"
@@ -975,42 +969,13 @@ jobs:
     needs: [release]
     steps:
       - name: "Deploy the stable documentation"
-        # TODO: testing SEO improvements. This branch avoids creating a
-        # sitemap.xml pages in opposite to v5.
-        uses: ansys/actions/doc-deploy-stable@feat/seo-improvements
+        uses: ansys/actions/doc-deploy-stable@v8
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
           render-last: '5'
-
-
-  doc-index-stable:
-    name: "Deploy stable docs index"
-    runs-on: ubuntu-latest
-    needs: upload-docs-release
-    steps:
-      - name: "Install Git and clone project"
-        uses: actions/checkout@v4.2.0
-
-      - name: "Install the package requirements"
-        run: pip install -e .
-
-      - name: "Get the version to PyMeilisearch"
-        run: |
-          VERSION=$(python -c "from ansys.mapdl.core import __version__; print('.'.join(__version__.split('.')[:2]))")
-          VERSION_MEILI=$(python -c "from ansys.mapdl.core import __version__; print('-'.join(__version__.split('.')[:2]))")
-          echo "Calculated VERSION: $VERSION"
-          echo "Calculated VERSION_MEILI: $VERSION_MEILI"
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "VERSION_MEILI=$VERSION_MEILI" >> $GITHUB_ENV
-
-      - name: "Deploy the latest documentation index"
-        uses: ansys/actions/doc-deploy-index@v7
-        with:
-          cname: ${{ env.DOCUMENTATION_CNAME }}/version/${{ env.VERSION }}
-          index-name: pymapdl-v${{ env.VERSION_MEILI }}
-          host-url: ${{ vars.MEILISEARCH_HOST_URL }}
-          api-key: ${{ env.MEILISEARCH_API_KEY }}
+          bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
+          bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
 
 
   upload-dev-docs:
@@ -1020,25 +985,12 @@ jobs:
     needs: [docs-build]
     steps:
       - name: "Deploy the latest documentation"
-        # TODO: testing SEO improvements. This branch reuses the "index.html" from the stable version
-        uses: ansys/actions/doc-deploy-dev@feat/seo-improvements
+        uses: ansys/actions/doc-deploy-dev@v8
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
-
-
-  doc-index-dev:
-    name: "Deploy dev index docs"
-    runs-on: ubuntu-latest
-    needs: upload-dev-docs
-    steps:
-      - name: "Deploy the latest documentation index"
-        uses: ansys/actions/doc-deploy-index@v7
-        with:
-          cname: ${{ env.DOCUMENTATION_CNAME }}/version/dev
-          index-name: pymapdl-vdev
-          host-url: ${{ vars.MEILISEARCH_HOST_URL }}
-          api-key: ${{ env.MEILISEARCH_API_KEY }}
+          bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
+          bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
 
 
   notify:
@@ -1066,7 +1018,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v4.2.0
+      - uses: actions/checkout@v4.2.1
       - name: "Set up Julia"
         uses: julia-actions/setup-julia@v2
         with:
