@@ -115,7 +115,7 @@ except:
     # We don't really use these imports in the library. They are here for
     # convenience.
     raise ImportError(
-        "The module 'ansys-tools-path' is not installed.  Install with 'pip install ansys-tools'"
+        "The module 'ansys-tools-path' is not installed.  Install with 'pip install ansys-tools-path'"
     )
 
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
