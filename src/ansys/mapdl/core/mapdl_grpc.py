@@ -337,7 +337,6 @@ class MapdlGrpc(MapdlBase):
         cleanup_on_exit: bool = False,
         log_apdl: Optional[str] = None,
         set_no_abort: bool = True,
-        remove_temp_files: Optional[bool] = None,
         remove_temp_dir_on_exit: bool = False,
         print_com: bool = False,
         disable_run_at_connect: bool = False,
@@ -346,16 +345,6 @@ class MapdlGrpc(MapdlBase):
         **start_parm,
     ):
         """Initialize connection to the mapdl server"""
-        if remove_temp_files is not None:  # pragma: no cover
-            warn(
-                "The option ``remove_temp_files`` is being deprecated and it will be removed by PyMAPDL version 0.66.0.\n"
-                "Please use ``remove_temp_dir_on_exit`` instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            remove_temp_dir_on_exit = remove_temp_files
-            remove_temp_files = None
-
         self._name: Optional[str] = None
         self._session_id_: Optional[str] = None
         self._checking_session_id_: bool = False
