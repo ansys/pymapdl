@@ -28,10 +28,10 @@ import os
 import re
 import time
 
+from ansys.mapdl.core import LOG
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.misc import requires_package
-from ansys.mapdl.core import LOG
 
 ready_items = [
     rb"BEGIN:",
