@@ -143,8 +143,7 @@ def _is_ubuntu() -> bool:
         return False
 
     proc = subprocess.Popen(
-        "awk -F= '/^NAME/{print $2}' /etc/os-release",
-        shell=True,
+        ["awk", "-F=", "'/^NAME/{print $2}'", "/etc/os-release"],
         stdout=subprocess.PIPE,
     )
     if "ubuntu" in proc.stdout.read().decode().lower():
@@ -607,8 +606,7 @@ def launch_grpc(
 
     LOG.debug("MAPDL starting in background.")
     process = subprocess.Popen(
-        command,
-        shell=os.name != "nt",
+        command_parm,
         cwd=run_location,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
