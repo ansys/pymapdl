@@ -576,7 +576,9 @@ class MapdlPool:
                             try:
                                 shutil.rmtree(obj.directory)
                             except Exception as e:
-                                LOG.warning(f"Unable to remove directory at {obj.directory}:\n{e}")
+                                LOG.warning(
+                                    f"Unable to remove directory at {obj.directory}:\n{e}"
+                                )
 
             obj.locked = False
             if pbar:

@@ -389,8 +389,8 @@ def is_float(input_string):
 
 def random_string(stringLength=10, letters=string.ascii_lowercase):
     """Generate a random string of fixed length"""
-    import secrets 
-    
+    import secrets
+
     return "".join(secrets.choice(letters) for _ in range(stringLength))
 
 

@@ -98,10 +98,10 @@ def _retrieve_file(url, filename, _test=False):
 
     # Perform download
     file_content = requests.get(url, timeout=10).text
-    
+
     with open(local_path, "wb") as f:
         f.write(file_content)
-    
+
     if get_ext(local_path) in [".zip"]:
         _decompress(local_path)
         local_path = local_path[:-4]

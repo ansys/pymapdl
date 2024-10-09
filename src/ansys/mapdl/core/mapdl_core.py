@@ -501,7 +501,9 @@ class _MapdlCore(Commands):
             try:
                 self._path = self.inquire("", "DIRECTORY")
             except Exception as e:  # pragma: no cover
-                logger.warning(f"Failed to get the directory due to the following error: {e}")
+                logger.warning(
+                    f"Failed to get the directory due to the following error: {e}"
+                )
             i += 1
             if not self._path:  # pragma: no cover
                 time.sleep(0.1)
