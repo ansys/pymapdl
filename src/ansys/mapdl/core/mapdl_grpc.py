@@ -865,11 +865,16 @@ class MapdlGrpc(MapdlBase):
 
         # may need to wait for viable connection in open_gui case
         tmax = time.time() + timeout
+        success = False
         while time.time() < tmax:
             try:
                 self.prep7()
+                success = True
                 break
             except:
+                warn("PyMAPDL is taking longer than expected to connect to the server.")
+            
+            if not success:
                 raise MapdlConnectionError("Unable to reconnect to MAPDL")
 
     @supress_logging
