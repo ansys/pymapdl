@@ -566,7 +566,6 @@ def launch_grpc(
 
         # must start in batch mode on windows to hide APDL window
         command_parm = [
-            '"%s"' % exec_file,
             job_sw,
             cpu_sw,
             ram_sw,
@@ -582,7 +581,6 @@ def launch_grpc(
 
     else:  # linux
         command_parm = [
-            '"%s"' % exec_file,
             job_sw,
             cpu_sw,
             ram_sw,
@@ -594,6 +592,11 @@ def launch_grpc(
     command_parm = [
         each for each in command_parm if command_parm
     ]  # cleaning empty args.
+
+    # removing spaces in cells
+    command = " ".join(command_parm)
+    command_parm = command.split()
+    command_parm.insert(0, f'"{exec_file}"')
     command = " ".join(command_parm)
 
     LOG.debug(f"Starting MAPDL with command: {command}")
