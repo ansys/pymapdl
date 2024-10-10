@@ -77,7 +77,7 @@ mapdl_pool.exit()
 # PyMAPDL CLI
 
 Access MAPDL instances through CLI
-```{console}
+```{python}
 #| eval: false
 # Start an MAPDL instance at port ``50051``
 pymapdl start --port 50051
