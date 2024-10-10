@@ -142,21 +142,21 @@ def download_bracket():
 def download_tech_demo_data(example, filename):
     """Download Tech Demos external data."""
     example = "tech_demos/" + example
-    return _download_file(filename=filename, directory=example)[0]
+    return _download_file(filename=filename, directory=example)
 
 
 def download_vtk_rotor():
     """Download rotor vtk file."""
-    return _download_file("rotor.vtk", "geometry")[0]
+    return _download_file("rotor.vtk", "geometry")
 
 
 def _download_rotor_tech_demo_vtk():
     """Download the rotor surface VTK file."""
-    return _download_file("rotor2.vtk", "geometry")[0]
+    return _download_file("rotor2.vtk", "geometry")
 
 
 def download_example_data(filename, directory=None):
-    return _download_file(filename, directory=directory)[0]
+    return _download_file(filename, directory=directory)
 
 
 def download_manifold_example_data() -> dict:
@@ -182,10 +182,10 @@ def download_manifold_example_data() -> dict:
     return {
         "geometry": _download_file(
             filename="manifold_geometry.anf", directory=files_dir
-        )[0],
+        ),
         "mapping_data": _download_file(
             filename="manifold_cht-final_temp.csv", directory=files_dir
-        )[0],
+        ),
     }
 
 
@@ -211,6 +211,6 @@ def download_cfx_mapping_example_data() -> dict:
     return {
         "data": _download_file(
             filename="11_blades_mode_1_ND_0.csv", directory=files_dir
-        )[0],
-        "model": _download_file(filename="ExampleMapping.db", directory=files_dir)[0],
+        ),
+        "model": _download_file(filename="ExampleMapping.db", directory=files_dir),
     }
