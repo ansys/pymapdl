@@ -37,15 +37,15 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.launcher import (
     LOCALHOST,
-    _check_license_argument,
-    _force_smp_student_version,
     _is_ubuntu,
     _parse_ip_route,
-    _parse_slurm_options,
-    _validate_MPI,
-    _verify_version,
+    force_smp_in_student,
+    get_slurm_options,
     get_start_instance,
+    get_version,
     launch_mapdl,
+    set_license_switch,
+    set_MPI_additional_switches,
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
@@ -100,13 +100,13 @@ def test_validate_sw():
     # ensure that windows adds msmpi
     # fake windows path
     exec_path = "C:/Program Files/ANSYS Inc/v211/ansys/bin/win64/ANSYS211.exe"
-    add_sw = _validate_MPI("", exec_path)
+    add_sw = set_MPI_additional_switches("", exec_path)
     assert "msmpi" in add_sw
 
-    add_sw = _validate_MPI("-mpi intelmpi", exec_path)
+    add_sw = set_MPI_additional_switches("-mpi intelmpi", exec_path)
     assert "msmpi" in add_sw and "intelmpi" not in add_sw
 
-    add_sw = _validate_MPI("-mpi INTELMPI", exec_path)
+    add_sw = set_MPI_additional_switches("-mpi INTELMPI", exec_path)
     assert "msmpi" in add_sw and "INTELMPI" not in add_sw
 
 
@@ -205,6 +205,7 @@ def test_license_type_dummy(mapdl):
             port=mapdl.port + 1,
             additional_switches=f" -p {dummy_license_type}" + QUICK_LAUNCH_SWITCHES,
             start_timeout=start_timeout,
+            license_server_check=True,
         )
 
 
@@ -297,32 +298,32 @@ def test_open_gui(
     mapdl.open_gui(inplace=inplace, include_result=include_result)
 
 
-def test__force_smp_student_version():
+def test_force_smp_in_student():
     add_sw = ""
     exec_path = (
         r"C:\Program Files\ANSYS Inc\ANSYS Student\v222\ansys\bin\winx64\ANSYS222.exe"
     )
-    assert "-smp" in _force_smp_student_version(add_sw, exec_path)
+    assert "-smp" in force_smp_in_student(add_sw, exec_path)
 
     add_sw = "-mpi"
     exec_path = (
         r"C:\Program Files\ANSYS Inc\ANSYS Student\v222\ansys\bin\winx64\ANSYS222.exe"
     )
-    assert "-smp" not in _force_smp_student_version(add_sw, exec_path)
+    assert "-smp" not in force_smp_in_student(add_sw, exec_path)
 
     add_sw = "-dmp"
     exec_path = (
         r"C:\Program Files\ANSYS Inc\ANSYS Student\v222\ansys\bin\winx64\ANSYS222.exe"
     )
-    assert "-smp" not in _force_smp_student_version(add_sw, exec_path)
+    assert "-smp" not in force_smp_in_student(add_sw, exec_path)
 
     add_sw = ""
     exec_path = r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe"
-    assert "-smp" not in _force_smp_student_version(add_sw, exec_path)
+    assert "-smp" not in force_smp_in_student(add_sw, exec_path)
 
     add_sw = "-SMP"
     exec_path = r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe"
-    assert "-SMP" in _force_smp_student_version(add_sw, exec_path)
+    assert "-SMP" in force_smp_in_student(add_sw, exec_path)
 
 
 @pytest.mark.parametrize(
@@ -330,19 +331,19 @@ def test__force_smp_student_version():
     [[each_key, each_value] for each_key, each_value in LICENSES.items()],
 )
 def test_license_product_argument(license_short, license_name):
-    additional_switches = _check_license_argument(license_name, "qwer")
+    additional_switches = set_license_switch(license_name, "qwer")
     assert f"qwer -p {license_short}" in additional_switches
 
 
 @pytest.mark.parametrize("unvalid_type", [1, {}, ()])
 def test_license_product_argument_type_error(unvalid_type):
     with pytest.raises(TypeError):
-        _check_license_argument(unvalid_type, "")
+        set_license_switch(unvalid_type, "")
 
 
 def test_license_product_argument_warning():
     with pytest.warns(UserWarning):
-        assert "-p asdf" in _check_license_argument("asdf", "qwer")
+        assert "-p asdf" in set_license_switch("asdf", "qwer")
 
 
 @pytest.mark.parametrize(
@@ -350,14 +351,14 @@ def test_license_product_argument_warning():
     [[each_key, each_value] for each_key, each_value in LICENSES.items()],
 )
 def test_license_product_argument_p_arg(license_short, license_name):
-    assert f"qw1234 -p {license_short}" == _check_license_argument(
+    assert f"qw1234 -p {license_short}" == set_license_switch(
         None, f"qw1234 -p {license_short}"
     )
 
 
 def test_license_product_argument_p_arg_warning():
     with pytest.warns(UserWarning):
-        assert "qwer -p asdf" in _check_license_argument(None, "qwer -p asdf")
+        assert "qwer -p asdf" in set_license_switch(None, "qwer -p asdf")
 
 
 installed_mapdl_versions = []
@@ -370,13 +371,13 @@ installed_mapdl_versions.extend(list(versions.values()))
 
 @pytest.mark.parametrize("version", installed_mapdl_versions)
 def test__verify_version_pass(version):
-    ver = _verify_version(version)
+    ver = get_version(version)
     assert isinstance(ver, int)
     assert min(versions.keys()) <= ver <= max(versions.keys())
 
 
 def test__verify_version_latest():
-    assert _verify_version("latest") is None
+    assert get_version("latest") is None
 
 
 @requires("ansys-tools-path")
@@ -414,13 +415,7 @@ def test_version(mapdl):
 @requires("local")
 def test_raise_exec_path_and_version_launcher(mapdl):
     with pytest.raises(ValueError):
-        launch_mapdl(
-            exec_file="asdf",
-            port=mapdl.port + 1,
-            version="asdf",
-            start_timeout=start_timeout,
-            additional_switches=QUICK_LAUNCH_SWITCHES,
-        )
+        get_version("asdf", "asdf")
 
 
 @requires("linux")
@@ -622,25 +617,32 @@ def test_fail_channel_ip():
     ),
     indirect=["set_env_var_context"],
 )
-def test__parse_slurm_options(set_env_var_context, validation):
+def test_get_slurm_options(set_env_var_context, validation):
     """test slurm env vars"""
     for each_key, each_value in set_env_var_context.items():
         if each_value:
             assert os.environ.get(each_key) == str(each_value)
 
-    exec_file, jobname, nproc, ram, additional_switches = _parse_slurm_options(
-        exec_file=None, jobname="", nproc=None, ram=None, additional_switches=""
-    )
-    assert nproc == validation["nproc"]
+    args = {
+        "exec_file": None,
+        "jobname": "",
+        "nproc": None,
+        "ram": None,
+        "additional_switches": "",
+        "start_timeout": 45,
+    }
+    kwargs = {}
+    get_slurm_options(args, kwargs)
+    assert args["nproc"] == validation["nproc"]
 
-    if ram:
-        assert ram == validation["ram"]
+    if args["ram"]:
+        assert args["ram"] == validation["ram"]
 
-    if jobname != "file":
-        assert jobname == validation["jobname"]
+    if args["jobname"] != "file":
+        assert args["jobname"] == validation["jobname"]
 
-    if exec_file and validation.get("exec_file", None):
-        assert exec_file == validation["exec_file"]
+    if args["exec_file"] and validation.get("exec_file", None):
+        assert args["exec_file"] == validation["exec_file"]
 
 
 @pytest.mark.parametrize(
@@ -700,20 +702,22 @@ def test_launcher_start_instance(monkeypatch, start_instance):
 def test_ip_and_start_instance(
     monkeypatch, start_instance, start_instance_envvar, ip, ip_envvar
 ):
-    # start_instance=False
-    # start_instance_envvar=True
-    # ip=""
-    # ip_envvar="123.1.1.1"
-
     # For more information, visit https://github.com/ansys/pymapdl/issues/2910
+
+    ###################
+    # Removing env var coming from CICD.
     if "PYMAPDL_START_INSTANCE" in os.environ:
         monkeypatch.delenv("PYMAPDL_START_INSTANCE")
 
+    ###################
+    # Injecting env vars for the test
     if start_instance_envvar is not None:
         monkeypatch.setenv("PYMAPDL_START_INSTANCE", str(start_instance_envvar))
     if ip_envvar is not None:
         monkeypatch.setenv("PYMAPDL_IP", str(ip_envvar))
 
+    ###################
+    # helper variables
     start_instance_is_true = start_instance_envvar is True or (
         start_instance_envvar is None and (start_instance is True)
     )
@@ -722,8 +726,9 @@ def test_ip_and_start_instance(
         (ip_envvar is None or ip_envvar == "") and bool(ip)
     )
 
+    ###################
+    # Exception case: start_instance and ip are passed as args.
     exceptions = start_instance_envvar is None and start_instance is None and ip_is_true
-
     if (start_instance_is_true and ip_is_true) and not exceptions:
         with pytest.raises(
             ValueError,
@@ -732,9 +737,10 @@ def test_ip_and_start_instance(
             options = launch_mapdl(
                 start_instance=start_instance, ip=ip, _debug_no_launch=True
             )
+        return  # Exit early the test
 
-        return  # Exit
-
+    ###################
+    # Faking MAPDL launching and returning args.
     if (
         isinstance(start_instance_envvar, bool) and isinstance(start_instance, bool)
     ) or (ip_envvar and ip):
@@ -748,25 +754,36 @@ def test_ip_and_start_instance(
                 start_instance=start_instance, ip=ip, _debug_no_launch=True
             )
 
+    ###################
+    # Checking logic
+    # The start instance env var has precedence over args
     if start_instance_envvar is True:
         assert options["start_instance"] is True
     elif start_instance_envvar is False:
         assert options["start_instance"] is False
     else:
-        if start_instance is None:
-            if ip_envvar or bool(ip):
+        # No start_instance env var exists, checking arg:
+        if start_instance is True:
+            assert options["start_instance"]
+        elif start_instance is False:
+            assert not options["start_instance"]
+
+        else:
+            # start_instance is None.
+            # No IP env var or arg:
+            if (ip_envvar and ip_envvar != "") or (ip and ip != ""):
+                # the ip is given either using the env var or the arg:
                 assert not options["start_instance"]
             else:
                 assert options["start_instance"]
-        elif start_instance is True:
-            assert options["start_instance"]
-        else:
-            assert not options["start_instance"]
 
     if ip_envvar:
+        # Getting IP from env var
         assert options["ip"] == ip_envvar
     else:
+        # From argument
         if ip:
             assert options["ip"] == ip
         else:
-            assert options["ip"] in (LOCALHOST, "0.0.0.0")
+            # Using default
+            assert options["ip"] in (LOCALHOST, "0.0.0.0", "127.0.0.1")

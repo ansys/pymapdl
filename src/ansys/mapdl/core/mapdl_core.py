@@ -163,6 +163,23 @@ VALID_SELECTION_ENTITY_TP = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"
 GUI_FONT_SIZE = 15
 LOG_APDL_DEFAULT_FILE_NAME = "apdl.log"
 
+_ALLOWED_START_PARM = [
+    "additional_switches",
+    "check_parameter_names",
+    "exec_file",
+    "ip",
+    "jobname",
+    "nproc",
+    "override",
+    "port",
+    "print_com",
+    "process",
+    "ram",
+    "run_location",
+    "start_timeout",
+    "timeout",
+]
+
 
 def parse_to_short_cmd(command):
     """Takes any MAPDL command and returns the first 4 characters of
@@ -193,25 +210,6 @@ def setup_logger(loglevel="INFO", log_file=True, mapdl_instance=None):
         setup_logger.log = logger.add_instance_logger("MAPDL", mapdl_instance)
 
     return setup_logger.log
-
-
-_ALLOWED_START_PARM = [
-    "additional_switches",
-    "exec_file",
-    "ip",
-    "jobname",
-    "local",
-    "nproc",
-    "override",
-    "port",
-    "print_com",
-    "process",
-    "ram",
-    "run_location",
-    "start_timeout",
-    "timeout",
-    "check_parameter_names",
-]
 
 
 def _sanitize_start_parm(start_parm):
@@ -263,7 +261,8 @@ class _MapdlCore(Commands):
         else:  # pragma: no cover
             if use_vtk:
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'use_vtk' requires having 'ansys-tools-visualization_interface' installed."
+                    "Using the keyword argument 'use_vtk' requires having "
+                    "'ansys-tools-visualization_interface' installed."
                 )
             else:
                 self._use_vtk = False
@@ -279,13 +278,14 @@ class _MapdlCore(Commands):
         self._krylov = None
         self._on_docker = None
         self._platform = None
+        self._path_cache = None  # Cache
+        self._print_com: bool = print_com  # print the command /COM input.
 
+        # Start_parameters
         _sanitize_start_parm(start_parm)
         self._start_parm: Dict[str, Any] = start_parm
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
-        self._path_cache = None  # Cache
-        self._print_com: bool = print_com  # print the command /COM input.
         self.check_parameter_names = start_parm.get("check_parameter_names", True)
 
         # Setting up loggers
