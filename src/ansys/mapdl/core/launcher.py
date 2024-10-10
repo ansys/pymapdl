@@ -29,10 +29,9 @@ from queue import Empty, Queue
 import re
 import socket
 import subprocess
-import tempfile
 import threading
 import time
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 import warnings
 
 import psutil
@@ -70,7 +69,6 @@ from ansys.mapdl.core.misc import (
     check_valid_ip,
     check_valid_port,
     create_temp_dir,
-    random_string,
     threaded,
 )
 
@@ -314,22 +312,15 @@ def port_in_use_using_psutil(port: Union[int, str]) -> bool:
         return False
 
 
-def launch_grpc(
+def generate_mapdl_launch_command(
     exec_file: str = "",
     jobname: str = "file",
     nproc: int = 2,
     ram: Optional[int] = None,
-    run_location: str = None,
     port: int = MAPDL_DEFAULT_PORT,
     additional_switches: str = "",
-    override: bool = True,
-    timeout: int = 20,
-    verbose: Optional[bool] = None,
-    add_env_vars: Optional[Dict[str, str]] = None,
-    replace_env_vars: Optional[Dict[str, str]] = None,
-    **kwargs,  # to keep compatibility with console interface.
-) -> Tuple[int, str, subprocess.Popen]:
-    """Start MAPDL locally in gRPC mode.
+) -> str:
+    """Generate the command line to start MAPDL in gRPC mode.
 
     Parameters
     ----------
@@ -348,10 +339,6 @@ def launch_grpc(
         The default is ``None``, in which case 2 GB (2048 MB) is used. To force a fixed size
         throughout the run, specify a negative number.
 
-    run_location : str, optional
-        MAPDL working directory.  The default is the temporary working
-        directory.
-
     port : int
         Port to launch MAPDL gRPC on.  Final port will be the first
         port available after (or including) this port.
@@ -366,195 +353,17 @@ def launch_grpc(
         these are already included to start up the MAPDL server.  See
         the notes section for additional details.
 
-    override : bool, optional
-        Attempts to delete the lock file at the run_location.
-        Useful when a prior MAPDL session has exited prematurely and
-        the lock file has not been deleted.
-
-    verbose : bool, optional
-        Print all output when launching and running MAPDL.  Not
-        recommended unless debugging the MAPDL start.  Default
-        ``False``.
-
-        .. deprecated:: v0.65.0
-           The ``verbose`` argument is deprecated and will be completely
-           removed in a future release.
-           Use a logger instead. See :ref:`api_logging` for more details.
-
-    kwargs : dict
-        Not used. Added to keep compatibility between Mapdl_grpc and
-        launcher_grpc ``start_parm``s.
 
     Returns
     -------
-    int
-        Returns the port number that the gRPC instance started on.
-
-    Notes
-    -----
-    If ``PYMAPDL_START_INSTANCE`` is set to FALSE, this ``launch_mapdl`` will
-    look for an existing instance of MAPDL at ``PYMAPDL_IP`` on port
-    ``PYMAPDL_PORT``, with defaults 127.0.0.1 and 50052 if unset. This is
-    typically used for automated documentation and testing.
-
-    These are the MAPDL switch options as of 2020R2 applicable for
-    running MAPDL as a service via gRPC.  Excluded switches such as
-    ``"-j"`` either not applicable or are set via keyword arguments.
-
-    -acc <device>
-        Enables the use of GPU hardware.  See GPU
-        Accelerator Capability in the Parallel Processing Guide for more
-        information.
-
-    -amfg
-        Enables the additive manufacturing capability.  Requires
-        an additive manufacturing license. For general information about
-        this feature, see AM Process Simulation in ANSYS Workbench.
-
-    -ansexe <executable>
-         Activates a custom mechanical APDL executable.
-        In the ANSYS Workbench environment, activates a custom
-        Mechanical APDL executable.
-
-    -custom <executable>
-        Calls a custom Mechanical APDL executable
-        See Running Your Custom Executable in the Programmer's Reference
-        for more information.
-
-    -db value
-        Initial memory allocation
-        Defines the portion of workspace (memory) to be used as the
-        initial allocation for the database. The default is 1024
-        MB. Specify a negative number to force a fixed size throughout
-        the run; useful on small memory systems.
-
-    -dis
-        Enables Distributed ANSYS
-        See the Parallel Processing Guide for more information.
-
-    -dvt
-        Enables ANSYS DesignXplorer advanced task (add-on).
-        Requires DesignXplorer.
-
-    -l <language>
-        Specifies a language file to use other than English
-        This option is valid only if you have a translated message file
-        in an appropriately named subdirectory in
-        ``/ansys_inc/v201/ansys/docu`` or
-        ``Program Files\\ANSYS\\Inc\\V201\\ANSYS\\docu``
-
-    -m <workspace>
-        Specifies the total size of the workspace
-        Workspace (memory) in megabytes used for the initial
-        allocation. If you omit the ``-m`` option, the default is 2 GB
-        (2048 MB). Specify a negative number to force a fixed size
-        throughout the run.
-
-    -machines <IP>
-        Specifies the distributed machines
-        Machines on which to run a Distributed ANSYS analysis. See
-        Starting Distributed ANSYS in the Parallel Processing Guide for
-        more information.
-
-    -mpi <value>
-        Specifies the type of MPI to use.
-        See the Parallel Processing Guide for more information.
-
-    -mpifile <appfile>
-        Specifies an existing MPI file
-        Specifies an existing MPI file (appfile) to be used in a
-        Distributed ANSYS run. See Using MPI Files in the Parallel
-        Processing Guide for more information.
-
-    -na <value>
-        Specifies the number of GPU accelerator devices
-        Number of GPU devices per machine or compute node when running
-        with the GPU accelerator feature. See GPU Accelerator Capability
-        in the Parallel Processing Guide for more information.
-
-    -name <value>
-        Defines Mechanical APDL parameters
-        Set mechanical APDL parameters at program start-up. The parameter
-        name must be at least two characters long. For details about
-        parameters, see the ANSYS Parametric Design Language Guide.
-
-    -p <productname>
-        ANSYS session product
-        Defines the ANSYS session product that will run during the
-        session. For more detailed information about the ``-p`` option,
-        see Selecting an ANSYS Product via the Command Line.
-
-    -ppf <license feature name>
-        HPC license
-        Specifies which HPC license to use during a parallel processing
-        run. See HPC Licensing in the Parallel Processing Guide for more
-        information.
-
-    -smp
-        Enables shared-memory parallelism.
-        See the Parallel Processing Guide for more information.
-
-    Examples
-    --------
-    Launch MAPDL using the default configuration.
-
-    >>> from ansys.mapdl.core import launch_mapdl
-    >>> mapdl = launch_mapdl()
-
-    Run MAPDL with shared memory parallel and specify the location of
-    the ansys binary.
-
-    >>> exec_file = 'C:/Program Files/ANSYS Inc/v202/ansys/bin/winx64/ANSYS202.exe'
-    >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
+    str
+        Command
 
     """
-    LOG.debug("Starting 'launch_mapdl'.")
-
-    # use temporary directory if run_location is unspecified
-    if run_location is None:
-        run_location = create_temp_dir()
-        LOG.debug(f"Using temporary directory for MAPDL run location: {run_location}")
-    elif not os.path.isdir(run_location):
-        os.mkdir(run_location)
-        LOG.debug(f"Creating directory for MAPDL run location: {run_location}")
-
-    if not os.access(run_location, os.W_OK):
-        raise IOError('Unable to write to ``run_location`` "%s"' % run_location)
-
     # verify version
     if _HAS_ATP:
         if version_from_path("mapdl", exec_file) < 202:
             raise VersionError("The MAPDL gRPC interface requires MAPDL 20.2 or later")
-
-    # verify lock file does not exist
-    check_lock_file(run_location, jobname, override)
-
-    # get the next available port
-    if port is None:
-        if not pymapdl._LOCAL_PORTS:
-            port = MAPDL_DEFAULT_PORT
-            LOG.debug(f"Using default port: {port}")
-        else:
-            port = max(pymapdl._LOCAL_PORTS) + 1
-            LOG.debug(f"Using next available port: {port}")
-
-        while port_in_use(port) or port in pymapdl._LOCAL_PORTS:
-            port += 1
-            LOG.debug(f"Port in use.  Incrementing port number. port={port}")
-
-    else:
-        if port_in_use(port):
-            proc = get_process_at_port(port)
-            if proc:
-                if is_ansys_process(proc):
-                    raise PortAlreadyInUseByAnMAPDLInstance(port)
-                else:
-                    raise PortAlreadyInUse(port)
-
-    pymapdl._LOCAL_PORTS.append(port)
-
-    if not nproc:
-        nproc = 2
 
     cpu_sw = "-np %d" % nproc
 
@@ -567,23 +376,6 @@ def launch_grpc(
     job_sw = "-j %s" % jobname
     port_sw = "-port %d" % port
     grpc_sw = "-grpc"
-
-    # remove any temporary error files at the run location.  This is
-    # important because we need to know if MAPDL is already running
-    # here and because we're looking for any temporary files that are
-    # created to tell when the process has started
-    for filename in os.listdir(run_location):
-        if ".err" == filename[-4:] and jobname in filename:
-            if os.path.isfile(filename):
-                try:
-                    os.remove(filename)
-                    LOG.debug(f"Removing temporary error file: {filename}")
-                except:
-                    raise IOError(
-                        f"Unable to remove {filename}.  There might be "
-                        "an instance of MAPDL running at running at "
-                        f'"{run_location}"'
-                    )
 
     # Windows will spawn a new window, special treatment
     if os.name == "nt":
@@ -624,21 +416,44 @@ def launch_grpc(
     ]  # cleaning empty args.
     command = " ".join(command_parm)
 
-    LOG.debug(f"Starting MAPDL with command: {command}")
+    LOG.debug(f"Generated command: {command}")
+    return command
 
-    env_vars = update_env_vars(add_env_vars, replace_env_vars)
 
+def launch_grpc(
+    cmd: str,
+    run_location: str = None,
+    env_vars: Optional[Dict[str, str]] = None,
+) -> subprocess.Popen:
+    """Start MAPDL locally in gRPC mode.
+
+    Parameters
+    ----------
+    cmd: str
+        Command to use to launch the MAPDL instance.
+
+    run_location : str, optional
+        MAPDL working directory.  The default is the temporary working
+        directory.
+
+    env_vars: dict, optional
+        Dictionary with the environment variables to inject in the process.
+
+    Returns
+    -------
+    subprocess.Popen
+        Process object
+    """
     # disable all MAPDL pop-up errors:
     env_vars.setdefault("ANS_CMD_NODIAG", "TRUE")
-    os.environ["ANS_CMD_NODIAG"] = "TRUE"
 
     LOG.info(
-        f"Running a local instance in {run_location} at port {port} the following command: '{command}'"
+        f"Running a local instance in {run_location} with the following command: '{command}'"
     )
 
     LOG.debug("MAPDL starting in background.")
     process = subprocess.Popen(
-        command,
+        cmd,
         shell=os.name != "nt",
         cwd=run_location,
         stdin=subprocess.DEVNULL,
@@ -647,6 +462,41 @@ def launch_grpc(
         env=env_vars,
     )
 
+    # Ending thread
+    # Todo: Ending queue thread
+    return process
+
+
+def check_mapdl_launch(
+    process: subprocess.Popen, run_location: str, timeout: int, cmd: str
+) -> None:
+    """Check MAPDL launching process.
+
+    Check several things to confirm MAPDL has been launched:
+
+    * MAPDL process:
+      Check process is alive still.
+    * File error:
+      Check if error file has been created.
+    * [On linux, but not WSL] Check if server is alive.
+      Read stdout looking for 'Server listening on' string.
+
+    Parameters
+    ----------
+    process : subprocess.Popen
+        MAPDL process object coming from 'launch_grpc'
+    run_location : str
+        MAPDL path.
+    timeout : int
+        Timeout
+    cmd : str
+        Command line used to launch MAPDL. Just for error printing.
+
+    Raises
+    ------
+    MapdlDidNotStart
+        MAPDL did not start.
+    """
     LOG.debug("Generating queue object for stdout")
     stdout_queue, _ = _create_queue_for_std(process.stdout)
 
@@ -674,10 +524,6 @@ def launch_grpc(
             msg = msg + "The full terminal output is:\n\n" + terminal_output
 
         raise MapdlDidNotStart(msg) from e
-
-    # Ending thread
-    # Todo: Ending queue thread
-    return port, run_location, process
 
 
 def _check_process_is_alive(process, run_location):
@@ -1491,13 +1337,21 @@ def launch_mapdl(
 
     get_run_location(args)
 
-    if args["start_instance"] and _HAS_ATP and not args["_debug_no_launch"]:
-        args["mode"] = check_mode(
-            args["mode"], version_from_path("mapdl", args["exec_file"])
-        )
-        LOG.debug(f"Using mode {args['mode']}")
+    if args["start_instance"]:
+        # verify lock file does not exist
+        check_lock_file(args["run_location"], args["jobname"], args["override"])
+
+        # remove err file so we can track its creation
+        # (as way to check if MAPDL started or not)
+        remove_err_files(args["run_location"])
+
+        if _HAS_ATP and not args["_debug_no_launch"]:
+            version = version_from_path("mapdl", args["exec_file"])
+            args["mode"] = check_mode(args["mode"], version)
     else:
         args["mode"] = "grpc"
+
+    LOG.debug(f"Using mode {args['mode']}")
 
     # Setting SMP by default if student version is used.
     args["additional_switches"] = force_smp_in_student(
@@ -1526,6 +1380,11 @@ def launch_mapdl(
             cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
         )
 
+    # Early exit for debugging.
+    if args["_debug_no_launch"]:
+        # Early exit, just for testing
+        return args  # type: ignore
+
     if not args["start_instance"]:
         LOG.debug(
             f"Connecting to an existing instance of MAPDL at {args['ip']}:{args['port']}"
@@ -1536,9 +1395,6 @@ def launch_mapdl(
                 f"There is an existing MAPDL instance at: {args['ip']}:{args['port']}"
             )
             return
-
-        if args["_debug_no_launch"]:
-            return args  # type: ignore
 
         mapdl = MapdlGrpc(
             cleanup_on_exit=False,
@@ -1565,11 +1421,6 @@ def launch_mapdl(
         lic_check = LicenseChecker(timeout=args["start_timeout"])
         lic_check.start()
 
-    # Early exit for debugging.
-    if args["_debug_no_launch"]:
-        # Early exit, just for testing
-        return args  # type: ignore
-
     try:
         LOG.debug("Starting MAPDL")
         if args["mode"] == "console":
@@ -1584,11 +1435,23 @@ def launch_mapdl(
 
         elif args["mode"] == "grpc":
 
-            port, actual_run_location, process = launch_grpc(
+            cmd = generate_mapdl_launch_command(
+                exec_file=args["exec_file"],
+                jobname=args["jobname"],
+                nproc=args["nproc"],
+                ram=args["ram"],
+                port=args["port"],
+                additional_switches=args["additional_switches"],
+            )
+
+            process = launch_grpc(
+                cmd,
                 port=args["port"],
                 replace_env_vars=env_vars,
                 **start_parm,
             )
+
+            check_mapdl_launch(process, actual_run_location, timeout, cmd)
 
             if args["just_launch"]:
                 out = [args["ip"], args["port"]]
@@ -2156,10 +2019,37 @@ def get_port(port: Optional[int]) -> int:
     int
         Port
     """
-    if port is None:
-        port = int(os.environ.get("PYMAPDL_PORT", MAPDL_DEFAULT_PORT))
-        check_valid_port(port)
-        LOG.debug(f"Using default port {port}")
+    port_env_var = os.environ.get("PYMAPDL_PORT", "")
+
+    if port_env_var:
+        port = int(port_env_var)
+
+    else:
+        if port is None:
+            if not pymapdl._LOCAL_PORTS:
+                port = int(os.environ.get("PYMAPDL_PORT", MAPDL_DEFAULT_PORT))
+                LOG.debug(f"Using default port: {port}")
+            else:
+                port = max(pymapdl._LOCAL_PORTS) + 1
+                LOG.debug(f"Using next available port: {port}")
+
+            while port_in_use(port) or port in pymapdl._LOCAL_PORTS:
+                port += 1
+                LOG.debug(f"Port in use.  Incrementing port number. port={port}")
+
+        else:
+            if port_in_use(port):
+                proc = get_process_at_port(port)
+                if proc:
+                    if is_ansys_process(proc):
+                        raise PortAlreadyInUseByAnMAPDLInstance(port)
+                    else:
+                        raise PortAlreadyInUse(port)
+
+    pymapdl._LOCAL_PORTS.append(port)
+
+    check_valid_port(port)
+    LOG.debug(f"Using default port {port}")
 
     return port
 
@@ -2335,7 +2225,9 @@ def get_exec_file(args: Dict[str, Any]) -> None:
 
 
 def get_run_location(args: Dict[str, Any]) -> None:
-    """Get run_location argument
+    """Get run_location argument.
+
+    It can change 'remove_temp_dir_on_exit' argument's value.
 
     Parameters
     ----------
@@ -2348,18 +2240,17 @@ def get_run_location(args: Dict[str, Any]) -> None:
         _description_
     """
     if args["run_location"] is None:
-        LOG.debug("Using default run location.")
-        temp_dir = tempfile.gettempdir()
-        args["run_location"] = os.path.join(temp_dir, f"ansys_{random_string(10)}")
-        if not os.path.isdir(args["run_location"]):
-            os.makedirs(args["run_location"], exist_ok=True)
-            LOG.debug(f"Created run location at {args['run_location']}")
+        args["run_location"] = create_temp_dir()
+        LOG.debug(
+            f"Using default temporary directory for MAPDL run location: {args['run_location']}"
+        )
 
-    else:
-        if not os.path.isdir(args["run_location"]):
-            raise FileNotFoundError(
-                f"""The directory "{args['run_location']}" is not valid."""
-            )
+    elif not os.access(args["run_location"], os.W_OK):
+        raise IOError(f'Unable to write to ``run_location``: {args["run_location"]}')
+
+    elif not os.path.isdir(args["run_location"]):
+        os.makedirs(args["run_location"], exist_ok=True)
+        LOG.debug(f"Creating directory for MAPDL run location: {args['run_location']}")
 
         if args["remove_temp_dir_on_exit"]:
             LOG.info(
@@ -2425,3 +2316,22 @@ def get_cpus(args: Dict[str, Any]):
             raise NotEnoughResources(
                 f"The machine has {machine_cores} cores. PyMAPDL is asking for {args['nproc']} cores."
             )
+
+
+def remove_err_files(run_location):
+    # remove any temporary error files at the run location.  This is
+    # important because we need to know if MAPDL is already running
+    # here and because we're looking for any temporary files that are
+    # created to tell when the process has started
+    for filename in os.listdir(run_location):
+        if ".err" == filename[-4:] and jobname in filename:
+            if os.path.isfile(filename):
+                try:
+                    os.remove(filename)
+                    LOG.debug(f"Removing temporary error file: {filename}")
+                except:
+                    raise IOError(
+                        f"Unable to remove {filename}.  There might be "
+                        "an instance of MAPDL running at running at "
+                        f'"{run_location}"'
+                    )
