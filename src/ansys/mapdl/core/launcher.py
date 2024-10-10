@@ -41,6 +41,7 @@ try:
     import ansys.platform.instancemanagement as pypim
 
     _HAS_PIM = True
+
 except ModuleNotFoundError:  # pragma: no cover
     _HAS_PIM = False
 
@@ -1488,9 +1489,18 @@ def launch_mapdl(
 
     get_ip(args)
 
-    get_port(args)
+    args["port"] = get_port(args["port"])
 
-    get_version(args)
+    args["version"] = get_version(args["version"], args["exec_file"])
+
+    if _HAS_PIM and args["exec_file"] is None and pypim.is_configured():
+        # Start MAPDL with PyPIM if the environment is configured for it
+        # and the user did not pass a directive on how to launch it.
+        LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
+
+        return launch_remote_mapdl(
+            cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
+        )
 
     if args["start_instance"]:
         # special handling when building the gallery outside of CI. This
@@ -1834,38 +1844,6 @@ def _check_license_argument(license_type, additional_switches):
     return additional_switches
 
 
-def _verify_version(version):
-    """Verify the MAPDL version is valid."""
-    if isinstance(version, float):
-        version = int(version * 10)
-
-    if isinstance(version, str):
-        if version.lower().strip() == "latest":
-            return None  # Default behaviour is latest
-
-        elif version.upper().strip() in [
-            str(each) for each in SUPPORTED_ANSYS_VERSIONS.keys()
-        ]:
-            version = int(version)
-        elif version.upper().strip() in [
-            str(each / 10) for each in SUPPORTED_ANSYS_VERSIONS.keys()
-        ]:
-            version = int(float(version) * 10)
-        elif version.upper().strip() in SUPPORTED_ANSYS_VERSIONS.values():
-            version = [
-                key
-                for key, value in SUPPORTED_ANSYS_VERSIONS.items()
-                if value == version.upper().strip()
-            ][0]
-
-    if version is not None and version not in SUPPORTED_ANSYS_VERSIONS.keys():
-        raise ValueError(
-            f"MAPDL version must be one of the following: {list(SUPPORTED_ANSYS_VERSIONS.keys())}"
-        )
-
-    return version
-
-
 def _get_windows_host_ip():
     output = _run_ip_route()
     if output:
@@ -2192,44 +2170,87 @@ def get_start_instance_arg(args: Dict[str, Any]) -> None:
     LOG.debug(f"Using 'start_instance' equal to {args['start_instance']}")
 
 
-def get_port(args: Dict[str, Any]) -> None:
-    if args["port"] is None:
-        args["port"] = int(os.environ.get("PYMAPDL_PORT", MAPDL_DEFAULT_PORT))
-        check_valid_port(args["port"])
-        LOG.debug(f"Using default port {args['port']}")
+def get_port(port: Optional[int]) -> int:
+    """Get port argument.
+
+    Parameters
+    ----------
+    port : Optional[int]
+        Port given as argument.
+
+    Returns
+    -------
+    int
+        Port
+    """
+    if port is None:
+        port = int(os.environ.get("PYMAPDL_PORT", MAPDL_DEFAULT_PORT))
+        check_valid_port(port)
+        LOG.debug(f"Using default port {port}")
+
+    return port
 
 
-def get_version(args: Dict[str, Any]) -> None:
+def get_version(
+    version: Optional[Union[str, int]] = None, exec_file: Optional[str] = None
+) -> Optional[int]:
     """Get MAPDL version
 
     Parameters
     ----------
-    args : Dict[str, Any]
-        Arguments dict
+    version : Optional[Union[str, int]], optional
+        Version argument, by default None
+    exec_file : Optional[str], optional
+        'exec_file' argument, by default None
+
+    Returns
+    -------
+    Optional[int]
+        The version as XYZ or None.
 
     Raises
     ------
     ValueError
         Cannot specify both ``exec_file`` and ``version``.
+    ValueError
+        MAPDL version must be one of the following
     """
-    if args["exec_file"] and args["version"]:
+    if exec_file and version:
         raise ValueError("Cannot specify both ``exec_file`` and ``version``.")
 
-    args["version"] = os.getenv("PYMAPDL_MAPDL_VERSION", args["version"])
+    if version is not None:
+        version = str(version)
 
-    # Start MAPDL with PyPIM if the environment is configured for it
-    # and the user did not pass a directive on how to launch it.
-    if _HAS_PIM and args["exec_file"] is None and pypim.is_configured():
-        LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
+    version = os.getenv("PYMAPDL_MAPDL_VERSION", version)
 
-        if args["version"] is not None:
-            args["version"] = str(args["version"])
+    if isinstance(version, float):
+        version = int(version * 10)
 
-        return launch_remote_mapdl(
-            cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
+    if isinstance(version, str):
+        if version.lower().strip() == "latest":
+            return None  # Default behaviour is latest
+
+        elif version.upper().strip() in [
+            str(each) for each in SUPPORTED_ANSYS_VERSIONS.keys()
+        ]:
+            version = int(version)
+        elif version.upper().strip() in [
+            str(each / 10) for each in SUPPORTED_ANSYS_VERSIONS.keys()
+        ]:
+            version = int(float(version) * 10)
+        elif version.upper().strip() in SUPPORTED_ANSYS_VERSIONS.values():
+            version = [
+                key
+                for key, value in SUPPORTED_ANSYS_VERSIONS.items()
+                if value == version.upper().strip()
+            ][0]
+
+    if version is not None and version not in SUPPORTED_ANSYS_VERSIONS.keys():
+        raise ValueError(
+            f"MAPDL version must be one of the following: {list(SUPPORTED_ANSYS_VERSIONS.keys())}"
         )
 
-    args["version"] = _verify_version(args["version"])  # return a int version or none
+    return version  # return a int version or none
 
 
 def create_gallery_instances(

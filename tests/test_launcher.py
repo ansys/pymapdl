@@ -43,8 +43,8 @@ from ansys.mapdl.core.launcher import (
     _parse_ip_route,
     _parse_slurm_options,
     _validate_MPI,
-    _verify_version,
     get_start_instance,
+    get_version,
     launch_mapdl,
     update_env_vars,
 )
@@ -370,13 +370,13 @@ installed_mapdl_versions.extend(list(versions.values()))
 
 @pytest.mark.parametrize("version", installed_mapdl_versions)
 def test__verify_version_pass(version):
-    ver = _verify_version(version)
+    ver = get_version(version)
     assert isinstance(ver, int)
     assert min(versions.keys()) <= ver <= max(versions.keys())
 
 
 def test__verify_version_latest():
-    assert _verify_version("latest") is None
+    assert get_version("latest") is None
 
 
 @requires("ansys-tools-path")
