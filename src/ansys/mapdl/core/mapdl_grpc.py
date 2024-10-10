@@ -860,7 +860,21 @@ class MapdlGrpc(MapdlBase):
         from ansys.mapdl.core.launcher import launch_grpc
 
         self._exited = False  # reset exit state
-        process = launch_grpc(**start_parm)
+
+        args = self._start_parm
+        cmd = generate_mapdl_launch_command(
+            exec_file=args["exec_file"],
+            jobname=args["jobname"],
+            nproc=args["nproc"],
+            ram=args["ram"],
+            port=args["port"],
+            additional_switches=args["additional_switches"],
+        )
+
+        process = launch_grpc(
+            cmd=cmd, run_location=args["run_location"], env_vars=self._env_vars or None
+        )
+
         self._connect(port)
 
         # may need to wait for viable connection in open_gui case

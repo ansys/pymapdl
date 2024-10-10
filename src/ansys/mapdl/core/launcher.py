@@ -1445,10 +1445,7 @@ def launch_mapdl(
             )
 
             process = launch_grpc(
-                cmd=cmd,
-                run_location=args["run_location"],
-                env_vars=env_vars,
-                **start_parm,
+                cmd=cmd, run_location=args["run_location"], env_vars=env_vars
             )
 
             check_mapdl_launch(process, actual_run_location, timeout, cmd)
@@ -1476,6 +1473,7 @@ def launch_mapdl(
 
         # Setting launched property
         mapdl._launched = True
+        mapdl._env_vars = env_vars
 
     except Exception as exception:
         # Failed to launch for some reason.  Check if failure was due
