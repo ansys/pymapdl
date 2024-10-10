@@ -97,7 +97,7 @@ def _retrieve_file(url, filename, _test=False):
         return local_path_no_zip, None
 
     # Perform download
-    file_content = requests.get(url, timeout=10).text
+    file_content = requests.get(url, timeout=10).content
 
     with open(local_path, "wb") as f:
         f.write(file_content)
@@ -105,7 +105,7 @@ def _retrieve_file(url, filename, _test=False):
     if get_ext(local_path) in [".zip"]:
         _decompress(local_path)
         local_path = local_path[:-4]
-    return local_path, resp
+    return local_path
 
 
 def _download_file(filename, directory=None, _test=False):
@@ -134,7 +134,7 @@ def download_bracket():
     '/home/user/.local/share/ansys_mapdl_core/examples/bracket.iges'
 
     """
-    return _download_file("bracket.iges", "geometry")[0]
+    return _download_file("bracket.iges", "geometry")
 
 
 def download_tech_demo_data(example, filename):
