@@ -2170,9 +2170,9 @@ def get_port(port: Optional[int]) -> int:
 
 
 def get_version(
-    version: Optional[Union[str, ALLOWABLE_VERSION_INT]] = None,
+    version: Optional[Union[str, int]] = None,
     exec_file: Optional[str] = None,
-) -> Optional[ALLOWABLE_VERSION_INT]:
+) -> Optional[int]:
     """Get MAPDL version
 
     Parameters
