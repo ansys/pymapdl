@@ -448,7 +448,7 @@ def launch_grpc(
     env_vars.setdefault("ANS_CMD_NODIAG", "TRUE")
 
     LOG.info(
-        f"Running a local instance in {run_location} with the following command: '{command}'"
+        f"Running a local instance in {run_location} with the following command: '{cmd}'"
     )
 
     LOG.debug("MAPDL starting in background.")
@@ -516,7 +516,7 @@ def check_mapdl_launch(
         msg = (
             str(e)
             + f"\nRun location: {run_location}"
-            + f"\nCommand line used: {command}\n\n"
+            + f"\nCommand line used: {cmd}\n\n"
         )
 
         terminal_output = "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
@@ -1448,7 +1448,7 @@ def launch_mapdl(
                 cmd=cmd, run_location=args["run_location"], env_vars=env_vars
             )
 
-            check_mapdl_launch(process, actual_run_location, timeout, cmd)
+            check_mapdl_launch(process, args["run_location"], args["start_timeout"], cmd)
 
             if args["just_launch"]:
                 out = [args["ip"], args["port"]]
