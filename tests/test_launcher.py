@@ -37,15 +37,15 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.launcher import (
     LOCALHOST,
-    _check_license_argument,
-    _force_smp_student_version,
     _is_ubuntu,
     _parse_ip_route,
-    _parse_slurm_options,
-    _validate_MPI,
+    force_smp_in_student,
+    get_slurm_options,
     get_start_instance,
     get_version,
     launch_mapdl,
+    set_license_switch,
+    set_MPI_additional_switches,
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
@@ -100,13 +100,13 @@ def test_validate_sw():
     # ensure that windows adds msmpi
     # fake windows path
     exec_path = "C:/Program Files/ANSYS Inc/v211/ansys/bin/win64/ANSYS211.exe"
-    add_sw = _validate_MPI("", exec_path)
+    add_sw = set_MPI_additional_switches("", exec_path)
     assert "msmpi" in add_sw
 
-    add_sw = _validate_MPI("-mpi intelmpi", exec_path)
+    add_sw = set_MPI_additional_switches("-mpi intelmpi", exec_path)
     assert "msmpi" in add_sw and "intelmpi" not in add_sw
 
-    add_sw = _validate_MPI("-mpi INTELMPI", exec_path)
+    add_sw = set_MPI_additional_switches("-mpi INTELMPI", exec_path)
     assert "msmpi" in add_sw and "INTELMPI" not in add_sw
 
 
@@ -298,32 +298,32 @@ def test_open_gui(
     mapdl.open_gui(inplace=inplace, include_result=include_result)
 
 
-def test__force_smp_student_version():
+def test_force_smp_in_student():
     add_sw = ""
     exec_path = (
         r"C:\Program Files\ANSYS Inc\ANSYS Student\v222\ansys\bin\winx64\ANSYS222.exe"
     )
-    assert "-smp" in _force_smp_student_version(add_sw, exec_path)
+    assert "-smp" in force_smp_in_student(add_sw, exec_path)
 
     add_sw = "-mpi"
     exec_path = (
         r"C:\Program Files\ANSYS Inc\ANSYS Student\v222\ansys\bin\winx64\ANSYS222.exe"
     )
-    assert "-smp" not in _force_smp_student_version(add_sw, exec_path)
+    assert "-smp" not in force_smp_in_student(add_sw, exec_path)
 
     add_sw = "-dmp"
     exec_path = (
         r"C:\Program Files\ANSYS Inc\ANSYS Student\v222\ansys\bin\winx64\ANSYS222.exe"
     )
-    assert "-smp" not in _force_smp_student_version(add_sw, exec_path)
+    assert "-smp" not in force_smp_in_student(add_sw, exec_path)
 
     add_sw = ""
     exec_path = r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe"
-    assert "-smp" not in _force_smp_student_version(add_sw, exec_path)
+    assert "-smp" not in force_smp_in_student(add_sw, exec_path)
 
     add_sw = "-SMP"
     exec_path = r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe"
-    assert "-SMP" in _force_smp_student_version(add_sw, exec_path)
+    assert "-SMP" in force_smp_in_student(add_sw, exec_path)
 
 
 @pytest.mark.parametrize(
@@ -331,19 +331,19 @@ def test__force_smp_student_version():
     [[each_key, each_value] for each_key, each_value in LICENSES.items()],
 )
 def test_license_product_argument(license_short, license_name):
-    additional_switches = _check_license_argument(license_name, "qwer")
+    additional_switches = set_license_switch(license_name, "qwer")
     assert f"qwer -p {license_short}" in additional_switches
 
 
 @pytest.mark.parametrize("unvalid_type", [1, {}, ()])
 def test_license_product_argument_type_error(unvalid_type):
     with pytest.raises(TypeError):
-        _check_license_argument(unvalid_type, "")
+        set_license_switch(unvalid_type, "")
 
 
 def test_license_product_argument_warning():
     with pytest.warns(UserWarning):
-        assert "-p asdf" in _check_license_argument("asdf", "qwer")
+        assert "-p asdf" in set_license_switch("asdf", "qwer")
 
 
 @pytest.mark.parametrize(
@@ -351,14 +351,14 @@ def test_license_product_argument_warning():
     [[each_key, each_value] for each_key, each_value in LICENSES.items()],
 )
 def test_license_product_argument_p_arg(license_short, license_name):
-    assert f"qw1234 -p {license_short}" == _check_license_argument(
+    assert f"qw1234 -p {license_short}" == set_license_switch(
         None, f"qw1234 -p {license_short}"
     )
 
 
 def test_license_product_argument_p_arg_warning():
     with pytest.warns(UserWarning):
-        assert "qwer -p asdf" in _check_license_argument(None, "qwer -p asdf")
+        assert "qwer -p asdf" in set_license_switch(None, "qwer -p asdf")
 
 
 installed_mapdl_versions = []
@@ -623,7 +623,7 @@ def test_fail_channel_ip():
     ),
     indirect=["set_env_var_context"],
 )
-def test__parse_slurm_options(set_env_var_context, validation):
+def test_get_slurm_options(set_env_var_context, validation):
     """test slurm env vars"""
     for each_key, each_value in set_env_var_context.items():
         if each_value:
@@ -637,7 +637,7 @@ def test__parse_slurm_options(set_env_var_context, validation):
         "additional_switches": "",
     }
     kwargs = {}
-    _parse_slurm_options(args, kwargs)
+    get_slurm_options(args, kwargs)
     assert args["nproc"] == validation["nproc"]
 
     if args["ram"]:
