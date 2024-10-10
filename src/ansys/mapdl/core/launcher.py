@@ -994,7 +994,9 @@ def check_lock_file(path, jobname, override):
                 )
 
 
-def _validate_MPI(add_sw, exec_path, force_intel=False):
+def set_MPI_additional_switches(
+    add_sw: str, exec_path: str, force_intel: bool = False
+) -> str:
     """Validate MPI configuration.
 
     Enforce Microsoft MPI in version 21.0 or later, to fix a
@@ -1068,7 +1070,7 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
     return add_sw
 
 
-def _force_smp_student_version(add_sw, exec_path):
+def force_smp_in_student(add_sw, exec_path):
     """Force SMP in student version.
 
     Parameters
@@ -1471,28 +1473,9 @@ def launch_mapdl(
         LOG.info("On Slurm mode.")
 
         # extracting parameters
-        _parse_slurm_options(args, kwargs)
+        get_slurm_options(args, kwargs)
 
-        # To avoid timeouts
-        args["license_server_check"] = False
-        args["start_timeout"] = 2 * args["start_timeout"]
-
-    else:
-        # Bypassing number of processors checks because VDI/VNC might have
-        # different number of processors than the cluster compute nodes.
-        # Setting number of processors
-        machine_cores = psutil.cpu_count(logical=False)
-
-        if not args["nproc"]:
-            # Some machines only have 1 core
-            args["nproc"] = machine_cores if machine_cores < 2 else 2
-        else:
-            if machine_cores < int(args["nproc"]):
-                raise NotEnoughResources(
-                    f"The machine has {machine_cores} cores. PyMAPDL is asking for {args['nproc']} cores."
-                )
-
-    start_parm = generate_start_parameters(args)
+    get_cpus(args)
 
     get_ip_env_var(args)
 
@@ -1502,7 +1485,37 @@ def launch_mapdl(
 
     args["port"] = get_port(args["port"])
 
+    get_exec_file(args)
+
     args["version"] = get_version(args["version"], args["exec_file"])
+
+    get_run_location(args)
+
+    if args["start_instance"] and _HAS_ATP and not args["_debug_no_launch"]:
+        args["mode"] = check_mode(
+            args["mode"], version_from_path("mapdl", args["exec_file"])
+        )
+        LOG.debug(f"Using mode {args['mode']}")
+    else:
+        args["mode"] = "grpc"
+
+    # Setting SMP by default if student version is used.
+    args["additional_switches"] = force_smp_in_student(
+        args["additional_switches"], args["exec_file"]
+    )
+
+    args["additional_switches"] = set_MPI_additional_switches(
+        args["additional_switches"], args["exec_file"], force_intel=args["force_intel"]
+    )
+
+    args["additional_switches"] = set_license_switch(
+        args["license_type"], args["additional_switches"]
+    )
+    LOG.debug(f"Using additional switches {args['additional_switches']}.")
+
+    env_vars = update_env_vars(args["add_env_vars"], args["replace_env_vars"])
+
+    start_parm = generate_start_parameters(args)
 
     if _HAS_PIM and args["exec_file"] is None and pypim.is_configured():
         # Start MAPDL with PyPIM if the environment is configured for it
@@ -1546,36 +1559,6 @@ def launch_mapdl(
         if args["clear_on_connect"]:
             mapdl.clear()
         return mapdl
-
-    get_exec_file(args)
-
-    get_run_location(args)
-
-    if _HAS_ATP and not args["_debug_no_launch"]:
-        args["mode"] = check_mode(
-            args["mode"], version_from_path("mapdl", args["exec_file"])
-        )
-        LOG.debug(f"Using mode {args['mode']}")
-    else:
-        args["mode"] = "grpc"
-
-    # Setting SMP by default if student version is used.
-    args["additional_switches"] = _force_smp_student_version(
-        args["additional_switches"], args["exec_file"]
-    )
-
-    args["additional_switches"] = _validate_MPI(
-        args["additional_switches"], args["exec_file"], force_intel=args["force_intel"]
-    )
-
-    args["additional_switches"] = _check_license_argument(
-        args["license_type"], args["additional_switches"]
-    )
-    LOG.debug(f"Using additional switches {args['additional_switches']}.")
-
-    env_vars = update_env_vars(args["add_env_vars"], args["replace_env_vars"])
-
-    start_parm = update_start_parm(start_parm, args)
 
     # Check the license server
     if args["license_server_check"]:
@@ -1751,7 +1734,7 @@ def update_env_vars(add_env_vars: dict, replace_env_vars: dict) -> dict:
     return envvars
 
 
-def _check_license_argument(license_type, additional_switches):
+def set_license_switch(license_type, additional_switches):
     if isinstance(license_type, str):
         # In newer license server versions an invalid license name just get discarded and produces no effect or warning.
         # For example:
@@ -1850,7 +1833,7 @@ def _parse_ip_route(output):
         return match[0]
 
 
-def _parse_slurm_options(
+def get_slurm_options(
     args: Dict[str, Any],
     kwargs: Dict[str, Any],
 ):
@@ -1964,6 +1947,10 @@ def _parse_slurm_options(
     ].endswith("-dis"):
         args["additional_switches"] += " -dis"
 
+    # Finally set to avoid timeouts
+    args["license_server_check"] = False
+    args["start_timeout"] = 2 * args["start_timeout"]
+
     return args
 
 
@@ -2051,6 +2038,15 @@ def generate_start_parameters(args: Dict[str, Any]) -> Dict[str, Any]:
         if each_par in args["kwargs"]:
             start_parm[each_par] = args[each_par]
 
+    if args["mode"] == "console":
+        start_parm["start_timeout"] = args["start_timeout"]
+
+    else:
+        start_parm["ram"] = args["ram"]
+        start_parm["override"] = args["override"]
+        start_parm["timeout"] = args["start_timeout"]
+
+    LOG.debug(f"Using start parameters {start_parm}")
     return start_parm
 
 
@@ -2304,6 +2300,11 @@ def get_exec_file(args: Dict[str, Any]) -> None:
 
     args["exec_file"] = os.getenv("PYMAPDL_MAPDL_EXEC", args["exec_file"])
 
+    if not args["start_instance"] and args["exec_file"] is None:
+        # 'exec_file' is not needed if the instance is not going to be launch
+        args["exec_file"] = ""
+        return
+
     if args["exec_file"] is None:
         if not _HAS_ATP:
             raise ModuleNotFoundError(
@@ -2395,41 +2396,33 @@ def check_kwargs(args: Dict[str, Any]):
         raise ValueError(f"The following arguments are not recognized: {ms_}")
 
 
-def update_start_parm(
-    start_parm: Dict[str, Any], args: Dict[str, Any]
-) -> Dict[str, Any]:
-    """Update start parameters.
+def get_cpus(args: Dict[str, Any]):
+    """Get number of CPUs
 
     Parameters
     ----------
-    start_parm : Dict[str, Any]
-        Current start parameters dict
     args : Dict[str, Any]
-        Arguments
+        Arguments dict
 
-    Returns
-    -------
-    Dict[str, Any]
-        Updated start parameters.
+    Raises
+    ------
+    NotEnoughResources
+        When requesting more CPUs than available.
     """
-    start_parm.update(
-        {
-            "exec_file": args["exec_file"],
-            "run_location": args["run_location"],
-            "additional_switches": args["additional_switches"],
-            "jobname": args["jobname"],
-            "nproc": args["nproc"],
-            "print_com": args["print_com"],
-        }
-    )
 
-    if args["mode"] == "console":
-        start_parm["start_timeout"] = args["start_timeout"]
+    # Bypassing number of processors checks because VDI/VNC might have
+    # different number of processors than the cluster compute nodes.
+    if args["ON_SLURM"]:
+        return
 
+    # Setting number of processors
+    machine_cores = psutil.cpu_count(logical=False)
+
+    if not args["nproc"]:
+        # Some machines only have 1 core
+        args["nproc"] = machine_cores if machine_cores < 2 else 2
     else:
-        start_parm["ram"] = args["ram"]
-        start_parm["override"] = args["override"]
-        start_parm["timeout"] = args["start_timeout"]
-
-    LOG.debug(f"Using start parameters {start_parm}")
-    return start_parm
+        if machine_cores < int(args["nproc"]):
+            raise NotEnoughResources(
+                f"The machine has {machine_cores} cores. PyMAPDL is asking for {args['nproc']} cores."
+            )
