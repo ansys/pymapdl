@@ -111,11 +111,11 @@ try:
         get_available_ansys_installations,
         save_ansys_path,
     )
-except:
+except ImportError:
     # We don't really use these imports in the library. They are here for
     # convenience.
-    raise ImportError(
-        "The module 'ansys-tools-path' is not installed.  Install with 'pip install ansys-tools-path'"
+    logging.warning(
+        "The module 'ansys-tools-path' is not installed.  Install it with 'pip install ansys-tools-path'"
     )
 
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
