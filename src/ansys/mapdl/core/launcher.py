@@ -1448,7 +1448,9 @@ def launch_mapdl(
                 cmd=cmd, run_location=args["run_location"], env_vars=env_vars
             )
 
-            check_mapdl_launch(process, args["run_location"], args["start_timeout"], cmd)
+            check_mapdl_launch(
+                process, args["run_location"], args["start_timeout"], cmd
+            )
 
             if args["just_launch"]:
                 out = [args["ip"], args["port"]]
