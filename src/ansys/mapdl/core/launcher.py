@@ -91,6 +91,7 @@ if not os.path.isdir(SETTINGS_DIR):
 
 CONFIG_FILE = os.path.join(SETTINGS_DIR, "config.txt")
 ALLOWABLE_MODES = ["console", "grpc"]
+ALLOWABLE_VERSION_INT = tuple(SUPPORTED_ANSYS_VERSIONS.keys())
 
 ALLOWABLE_LAUNCH_MAPDL_ARGS = [
     "exec_file",
@@ -1582,6 +1583,11 @@ def launch_mapdl(
         lic_check = LicenseChecker(timeout=args["start_timeout"])
         lic_check.start()
 
+    # Early exit for debugging.
+    if args["_debug_no_launch"]:
+        # Early exit, just for testing
+        return args  # type: ignore
+
     try:
         LOG.debug("Starting MAPDL")
         if args["mode"] == "console":
@@ -1595,9 +1601,6 @@ def launch_mapdl(
             )
 
         elif args["mode"] == "grpc":
-            if args["_debug_no_launch"]:
-                # Early exit, just for testing
-                return args  # type: ignore
 
             port, actual_run_location, process = launch_grpc(
                 port=args["port"],
@@ -1646,7 +1649,7 @@ def launch_mapdl(
     return mapdl
 
 
-def check_mode(mode, version):
+def check_mode(mode: ALLOWABLE_MODES, version: ALLOWABLE_VERSION_INT):
     """Check if the MAPDL server mode matches the allowable version
 
     If ``None``, the newest mode will be selected.
@@ -2167,8 +2170,9 @@ def get_port(port: Optional[int]) -> int:
 
 
 def get_version(
-    version: Optional[Union[str, int]] = None, exec_file: Optional[str] = None
-) -> Optional[int]:
+    version: Optional[Union[str, ALLOWABLE_VERSION_INT]] = None,
+    exec_file: Optional[str] = None,
+) -> Optional[ALLOWABLE_VERSION_INT]:
     """Get MAPDL version
 
     Parameters
@@ -2205,12 +2209,10 @@ def get_version(
         if version.lower().strip() == "latest":
             return None  # Default behaviour is latest
 
-        elif version.upper().strip() in [
-            str(each) for each in SUPPORTED_ANSYS_VERSIONS.keys()
-        ]:
+        elif version.upper().strip() in [str(each) for each in ALLOWABLE_VERSION_INT]:
             version = int(version)
         elif version.upper().strip() in [
-            str(each / 10) for each in SUPPORTED_ANSYS_VERSIONS.keys()
+            str(each / 10) for each in ALLOWABLE_VERSION_INT
         ]:
             version = int(float(version) * 10)
         elif version.upper().strip() in SUPPORTED_ANSYS_VERSIONS.values():
@@ -2220,9 +2222,9 @@ def get_version(
                 if value == version.upper().strip()
             ][0]
 
-    if version is not None and version not in SUPPORTED_ANSYS_VERSIONS.keys():
+    if version is not None and version not in ALLOWABLE_VERSION_INT:
         raise ValueError(
-            f"MAPDL version must be one of the following: {list(SUPPORTED_ANSYS_VERSIONS.keys())}"
+            f"MAPDL version must be one of the following: {list(ALLOWABLE_VERSION_INT)}"
         )
 
     return version  # return a int version or none
@@ -2277,7 +2279,7 @@ def create_gallery_instances(
             use_vtk=args["use_vtk"],
             **start_parm,
         )
-        if clear_on_connect:
+        if args["clear_on_connect"]:
             mapdl.clear()
         return mapdl
 
