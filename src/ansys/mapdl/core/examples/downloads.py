@@ -99,7 +99,7 @@ def _retrieve_file(url, filename, _test=False):
     # Perform download
     requested_file = requests.get(url, timeout=10)
     requested_file.raise_for_status()
-    file_content= requested_file.content
+    file_content = requested_file.content
 
     with open(local_path, "wb") as f:
         f.write(file_content)
