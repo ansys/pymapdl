@@ -872,10 +872,10 @@ class MapdlGrpc(MapdlBase):
                 success = True
                 break
             except:
-                pass
+                warn("PyMAPDL is taking longer than expected to connect to the server.")
 
-        if not success:
-            raise MapdlConnectionError("Unable to reconnect to MAPDL")
+            if not success:
+                raise MapdlConnectionError("Unable to reconnect to MAPDL")
 
     @supress_logging
     def _set_no_abort(self):
@@ -1012,7 +1012,7 @@ class MapdlGrpc(MapdlBase):
         return "".join(response)
 
     def _threaded_heartbeat(self):
-        """To be called from a thread to verify mapdl instance is alive"""
+        """To be called from a thread to verify MAPDL instance is alive"""
         self._initialised.set()
         while True:
             if self._exited:

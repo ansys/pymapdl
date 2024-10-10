@@ -143,8 +143,7 @@ def _is_ubuntu() -> bool:
         return False
 
     proc = subprocess.Popen(
-        "awk -F= '/^NAME/{print $2}' /etc/os-release",
-        shell=True,
+        ["awk", "-F=", "'/^NAME/{print $2}'", "/etc/os-release"],
         stdout=subprocess.PIPE,
     )
     if "ubuntu" in proc.stdout.read().decode().lower():
@@ -567,7 +566,6 @@ def launch_grpc(
 
         # must start in batch mode on windows to hide APDL window
         command_parm = [
-            '"%s"' % exec_file,
             job_sw,
             cpu_sw,
             ram_sw,
@@ -583,7 +581,6 @@ def launch_grpc(
 
     else:  # linux
         command_parm = [
-            '"%s"' % exec_file,
             job_sw,
             cpu_sw,
             ram_sw,
@@ -595,6 +592,11 @@ def launch_grpc(
     command_parm = [
         each for each in command_parm if command_parm
     ]  # cleaning empty args.
+
+    # removing spaces in cells
+    command = " ".join(command_parm)
+    command_parm = command.split()
+    command_parm.insert(0, f'"{exec_file}"')
     command = " ".join(command_parm)
 
     LOG.debug(f"Starting MAPDL with command: {command}")
@@ -607,8 +609,7 @@ def launch_grpc(
 
     LOG.debug("MAPDL starting in background.")
     process = subprocess.Popen(
-        command,
-        shell=os.name != "nt",
+        command_parm,
         cwd=run_location,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
