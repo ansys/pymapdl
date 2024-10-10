@@ -719,20 +719,22 @@ def test_launcher_start_instance(monkeypatch, start_instance):
 def test_ip_and_start_instance(
     monkeypatch, start_instance, start_instance_envvar, ip, ip_envvar
 ):
-    # start_instance=False
-    # start_instance_envvar=True
-    # ip=""
-    # ip_envvar="123.1.1.1"
-
     # For more information, visit https://github.com/ansys/pymapdl/issues/2910
+
+    ###################
+    # Removing env var coming from CICD.
     if "PYMAPDL_START_INSTANCE" in os.environ:
         monkeypatch.delenv("PYMAPDL_START_INSTANCE")
 
+    ###################
+    # Injecting env vars for the test
     if start_instance_envvar is not None:
         monkeypatch.setenv("PYMAPDL_START_INSTANCE", str(start_instance_envvar))
     if ip_envvar is not None:
         monkeypatch.setenv("PYMAPDL_IP", str(ip_envvar))
 
+    ###################
+    # helper variables
     start_instance_is_true = start_instance_envvar is True or (
         start_instance_envvar is None and (start_instance is True)
     )
@@ -741,8 +743,9 @@ def test_ip_and_start_instance(
         (ip_envvar is None or ip_envvar == "") and bool(ip)
     )
 
+    ###################
+    # Exception case: start_instance and ip are passed as args.
     exceptions = start_instance_envvar is None and start_instance is None and ip_is_true
-
     if (start_instance_is_true and ip_is_true) and not exceptions:
         with pytest.raises(
             ValueError,
@@ -751,9 +754,10 @@ def test_ip_and_start_instance(
             options = launch_mapdl(
                 start_instance=start_instance, ip=ip, _debug_no_launch=True
             )
+        return  # Exit early the test
 
-        return  # Exit
-
+    ###################
+    # Faking MAPDL launching and returning args.
     if (
         isinstance(start_instance_envvar, bool) and isinstance(start_instance, bool)
     ) or (ip_envvar and ip):
@@ -767,25 +771,36 @@ def test_ip_and_start_instance(
                 start_instance=start_instance, ip=ip, _debug_no_launch=True
             )
 
+    ###################
+    # Checking logic
+    # The start instance env var has precedence over args
     if start_instance_envvar is True:
         assert options["start_instance"] is True
     elif start_instance_envvar is False:
         assert options["start_instance"] is False
     else:
-        if start_instance is None:
-            if ip_envvar or bool(ip):
+        # No start_instance env var exists, checking arg:
+        if start_instance is True:
+            assert options["start_instance"]
+        elif start_instance is False:
+            assert not options["start_instance"]
+
+        else:
+            # start_instance is None.
+            # No IP env var or arg:
+            if (ip_envvar and ip_envvar != "") or (ip and ip != ""):
+                # the ip is given either using the env var or the arg:
                 assert not options["start_instance"]
             else:
                 assert options["start_instance"]
-        elif start_instance is True:
-            assert options["start_instance"]
-        else:
-            assert not options["start_instance"]
 
     if ip_envvar:
+        # Getting IP from env var
         assert options["ip"] == ip_envvar
     else:
+        # From argument
         if ip:
             assert options["ip"] == ip
         else:
-            assert options["ip"] in (LOCALHOST, "0.0.0.0")
+            # Using default
+            assert options["ip"] in (LOCALHOST, "0.0.0.0", "127.0.0.1")
