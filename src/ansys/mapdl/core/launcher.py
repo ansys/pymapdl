@@ -1445,9 +1445,9 @@ def launch_mapdl(
             )
 
             process = launch_grpc(
-                cmd,
-                port=args["port"],
-                replace_env_vars=env_vars,
+                cmd=cmd,
+                run_location=args["run_location"],
+                env_vars=env_vars,
                 **start_parm,
             )
 
