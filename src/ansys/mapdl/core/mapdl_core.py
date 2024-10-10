@@ -678,7 +678,7 @@ class _MapdlCore(Commands):
         """
         try:
             self._jobname = self.inquire("", "JOBNAME")
-        except Exception:
+        except Exception as e:
             logger.warning(f"Failed to get the jobname due to the following error: {e}")
         return self._jobname
 

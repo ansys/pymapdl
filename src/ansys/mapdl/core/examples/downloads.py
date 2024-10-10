@@ -94,10 +94,12 @@ def _retrieve_file(url, filename, _test=False):
     local_path = os.path.join(pymapdl.EXAMPLES_PATH, os.path.basename(filename))
     local_path_no_zip = local_path.replace(".zip", "")
     if os.path.isfile(local_path_no_zip) or os.path.isdir(local_path_no_zip):
-        return local_path_no_zip, None
+        return local_path_no_zip
 
     # Perform download
-    file_content = requests.get(url, timeout=10).content
+    requested_file = requests.get(url, timeout=10)
+    requested_file.raise_for_status()
+    file_content= requested_file.content
 
     with open(local_path, "wb") as f:
         f.write(file_content)
@@ -112,8 +114,8 @@ def _download_file(filename, directory=None, _test=False):
     url = _get_file_url(filename, directory)
     try:
         return _retrieve_file(url, filename, _test)
-    except Exception as e:  # Genering exception
-        raise RuntimeError(
+    except requests.exceptions.HTTPError as e:
+        raise ValueError(
             "For the reason mentioned below, retrieving the file from internet failed.\n"
             "You can download this file from:\n"
             f"{url}\n"
