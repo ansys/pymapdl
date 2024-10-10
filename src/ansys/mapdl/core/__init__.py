@@ -114,7 +114,7 @@ try:
 except ImportError:
     # We don't really use these imports in the library. They are here for
     # convenience.
-    logging.warning(
+    warn(
         "The module 'ansys-tools-path' is not installed.  Install it with 'pip install ansys-tools-path'"
     )
 
