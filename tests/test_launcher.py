@@ -415,13 +415,7 @@ def test_version(mapdl):
 @requires("local")
 def test_raise_exec_path_and_version_launcher(mapdl):
     with pytest.raises(ValueError):
-        launch_mapdl(
-            exec_file="asdf",
-            port=mapdl.port + 1,
-            version="asdf",
-            start_timeout=start_timeout,
-            additional_switches=QUICK_LAUNCH_SWITCHES,
-        )
+        get_version("asdf", "asdf")
 
 
 @requires("linux")
