@@ -1526,13 +1526,7 @@ def launch_mapdl(
             cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
         )
 
-    if args["start_instance"]:
-        # special handling when building the gallery outside of CI. This
-        # creates an instance of mapdl the first time.
-        if pymapdl.BUILDING_GALLERY:  # pragma: no cover
-            return create_gallery_instances(args, start_parm)
-
-    else:
+    if not args["start_instance"]:
         LOG.debug(
             f"Connecting to an existing instance of MAPDL at {args['ip']}:{args['port']}"
         )
@@ -1559,6 +1553,11 @@ def launch_mapdl(
         if args["clear_on_connect"]:
             mapdl.clear()
         return mapdl
+
+    # special handling when building the gallery outside of CI. This
+    # creates an instance of mapdl the first time.
+    if pymapdl.BUILDING_GALLERY:  # pragma: no cover
+        return create_gallery_instances(args, start_parm)
 
     # Check the license server
     if args["license_server_check"]:
