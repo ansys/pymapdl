@@ -635,6 +635,7 @@ def test_get_slurm_options(set_env_var_context, validation):
         "nproc": None,
         "ram": None,
         "additional_switches": "",
+        "start_timeout": 45,
     }
     kwargs = {}
     get_slurm_options(args, kwargs)
