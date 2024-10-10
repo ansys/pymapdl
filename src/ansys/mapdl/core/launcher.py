@@ -56,7 +56,6 @@ from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.errors import (
-    DeprecationError,
     LockFileException,
     MapdlDidNotStart,
     NotEnoughResources,
@@ -509,14 +508,6 @@ def launch_grpc(
 
     """
     LOG.debug("Starting 'launch_mapdl'.")
-    # disable all MAPDL pop-up errors:
-    os.environ["ANS_CMD_NODIAG"] = "TRUE"
-
-    if verbose:
-        raise DeprecationError(
-            "The ``verbose`` argument is deprecated and will be completely removed in a future release. Use a logger instead. "
-            "See https://mapdl.docs.pyansys.com/version/stable/api/logging.html for more details."
-        )
 
     # use temporary directory if run_location is unspecified
     if run_location is None:
@@ -635,6 +626,10 @@ def launch_grpc(
     LOG.debug(f"Starting MAPDL with command: {command}")
 
     env_vars = update_env_vars(add_env_vars, replace_env_vars)
+
+    # disable all MAPDL pop-up errors:
+    env_vars.setdefault("ANS_CMD_NODIAG", "TRUE")
+    os.environ["ANS_CMD_NODIAG"] = "TRUE"
 
     LOG.info(
         f"Running a local instance in {run_location} at port {port} the following command: '{command}'"
@@ -1481,6 +1476,21 @@ def launch_mapdl(
         args["license_server_check"] = False
         args["start_timeout"] = 2 * args["start_timeout"]
 
+    else:
+        # Bypassing number of processors checks because VDI/VNC might have
+        # different number of processors than the cluster compute nodes.
+        # Setting number of processors
+        machine_cores = psutil.cpu_count(logical=False)
+
+        if not args["nproc"]:
+            # Some machines only have 1 core
+            args["nproc"] = machine_cores if machine_cores < 2 else 2
+        else:
+            if machine_cores < int(args["nproc"]):
+                raise NotEnoughResources(
+                    f"The machine has {machine_cores} cores. PyMAPDL is asking for {args['nproc']} cores."
+                )
+
     start_parm = generate_start_parameters(args)
 
     get_ip_env_var(args)
@@ -1562,44 +1572,9 @@ def launch_mapdl(
     )
     LOG.debug(f"Using additional switches {args['additional_switches']}.")
 
-    # Bypassing number of processors checks because VDI/VNC might have
-    # different number of processors than the cluster compute nodes.
-    if not args["ON_SLURM"]:
-        # Setting number of processors
-        machine_cores = psutil.cpu_count(logical=False)
-
-        if not args["nproc"]:
-            # Some machines only have 1 core
-            args["nproc"] = machine_cores if machine_cores < 2 else 2
-        else:
-            if machine_cores < int(args["nproc"]):
-                raise NotEnoughResources(
-                    f"The machine has {machine_cores} cores. PyMAPDL is asking for {args['nproc']} cores."
-                )
-
-    # Setting env vars
     env_vars = update_env_vars(args["add_env_vars"], args["replace_env_vars"])
 
-    start_parm.update(
-        {
-            "exec_file": args["exec_file"],
-            "run_location": args["run_location"],
-            "additional_switches": args["additional_switches"],
-            "jobname": args["jobname"],
-            "nproc": args["nproc"],
-            "print_com": args["print_com"],
-        }
-    )
-
-    if args["mode"] == "console":
-        start_parm["start_timeout"] = args["start_timeout"]
-
-    else:
-        start_parm["ram"] = args["ram"]
-        start_parm["override"] = args["override"]
-        start_parm["timeout"] = args["start_timeout"]
-
-    LOG.debug(f"Using start parameters {start_parm}")
+    start_parm = update_start_parm(start_parm, args)
 
     # Check the license server
     if args["license_server_check"]:
@@ -2416,3 +2391,43 @@ def check_kwargs(args: Dict[str, Any]):
     if kwargs:
         ms_ = ", ".join([f"'{each}'" for each in args["kwargs"].keys()])
         raise ValueError(f"The following arguments are not recognized: {ms_}")
+
+
+def update_start_parm(
+    start_parm: Dict[str, Any], args: Dict[str, Any]
+) -> Dict[str, Any]:
+    """Update start parameters.
+
+    Parameters
+    ----------
+    start_parm : Dict[str, Any]
+        Current start parameters dict
+    args : Dict[str, Any]
+        Arguments
+
+    Returns
+    -------
+    Dict[str, Any]
+        Updated start parameters.
+    """
+    start_parm.update(
+        {
+            "exec_file": args["exec_file"],
+            "run_location": args["run_location"],
+            "additional_switches": args["additional_switches"],
+            "jobname": args["jobname"],
+            "nproc": args["nproc"],
+            "print_com": args["print_com"],
+        }
+    )
+
+    if args["mode"] == "console":
+        start_parm["start_timeout"] = args["start_timeout"]
+
+    else:
+        start_parm["ram"] = args["ram"]
+        start_parm["override"] = args["override"]
+        start_parm["timeout"] = args["start_timeout"]
+
+    LOG.debug(f"Using start parameters {start_parm}")
+    return start_parm
