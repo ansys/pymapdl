@@ -451,6 +451,7 @@ def run_before_and_after_tests(
     yield  # this is where the testing happens
 
     assert prev == mapdl.is_local
+    assert not mapdl.exited
 
     make_sure_not_instances_are_left_open()
 
@@ -500,6 +501,7 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
 
         # Restoring the local configuration
         mapdl._local = local_
+        mapdl._exited = False
 
     return mapdl
 
@@ -632,6 +634,7 @@ def mapdl(request, tmpdir_factory):
     ###########################################################################
     if START_INSTANCE:
         mapdl._local = True
+        mapdl._exited = False
         mapdl.exit(save=True, force=True)
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
