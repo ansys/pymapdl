@@ -292,7 +292,7 @@ def launch_grpc(
     verbose: Optional[bool] = None,
     add_env_vars: Optional[Dict[str, str]] = None,
     replace_env_vars: Optional[Dict[str, str]] = None,
-    **kwargs,  # to keep compatibility with corba and console interface.
+    **kwargs,  # to keep compatibility with console interface.
 ) -> Tuple[int, str, subprocess.Popen]:
     """Start MAPDL locally in gRPC mode.
 
@@ -602,7 +602,7 @@ def launch_grpc(
     env_vars = update_env_vars(add_env_vars, replace_env_vars)
 
     LOG.info(
-        f"Running a local instance at port {port} the following command: '{command}'"
+        f"Running a local instance in {run_location} at port {port} the following command: '{command}'"
     )
 
     LOG.debug("MAPDL starting in background.")
@@ -681,6 +681,7 @@ def _check_server_is_alive(stdout_queue, run_location, timeout):
     empty_i = 0
     terminal_output = ""
 
+    LOG.debug(f"Checking if MAPDL server is alive")
     while time.time() < (t0 + timeout):
         terminal_output += "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
 
@@ -700,6 +701,9 @@ def _check_server_is_alive(stdout_queue, run_location, timeout):
             break
 
     else:
+        LOG.debug(
+            f"MAPDL gRPC server didn't print any valid output:\n{terminal_output}"
+        )
         raise MapdlDidNotStart("MAPDL failed to start the gRPC server")
 
 
@@ -1080,9 +1084,7 @@ def launch_mapdl(
     ip: Optional[str] = None,
     clear_on_connect: bool = True,
     log_apdl: Optional[Union[bool, str]] = None,
-    remove_temp_files: Optional[bool] = None,
     remove_temp_dir_on_exit: bool = False,
-    verbose_mapdl: Optional[bool] = None,
     license_server_check: bool = True,
     license_type: Optional[bool] = None,
     print_com: bool = False,
@@ -1202,16 +1204,6 @@ def launch_mapdl(
         PyMAPDL. This argument is the path of the output file (e.g.
         ``log_apdl='pymapdl_log.txt'``). By default this is disabled.
 
-    remove_temp_files : bool, optional
-        When ``run_location`` is ``None``, this launcher creates a new MAPDL
-        working directory within the user temporary directory, obtainable with
-        ``tempfile.gettempdir()``. When this parameter is
-        ``True``, this directory will be deleted when MAPDL is exited. Default
-        ``False``.
-
-        .. deprecated:: 0.64.0
-           Use argument ``remove_temp_dir_on_exit`` instead.
-
     remove_temp_dir_on_exit : bool, optional
         When ``run_location`` is ``None``, this launcher creates a new MAPDL
         working directory within the user temporary directory, obtainable with
@@ -1220,16 +1212,6 @@ def launch_mapdl(
         ``False``.
         If you change the working directory, PyMAPDL does not delete the original
         working directory nor the new one.
-
-    verbose_mapdl : bool, optional
-        Enable printing of all output when launching and running
-        MAPDL.  This should be used for debugging only as output can
-        be tracked within pymapdl.  Default ``False``.
-
-        .. deprecated:: v0.65.0
-           The ``verbose_mapdl`` argument is deprecated and will be completely
-           removed in a future release.
-           Use a logger instead. See :ref:`api_logging` for more details.
 
     license_server_check : bool, optional
         Check if the license server is available if MAPDL fails to
@@ -1481,33 +1463,11 @@ def launch_mapdl(
     else:
         ON_SLURM = False
 
-    if remove_temp_files is not None:
-        warnings.warn(
-            "The ``remove_temp_files`` option is being deprecated. It is to be removed in PyMAPDL version 0.66.0.\n"
-            "Please use ``remove_temp_dir_on_exit`` instead.",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        remove_temp_dir_on_exit = remove_temp_files
-        remove_temp_files = None
-
-    if verbose_mapdl is not None:
-        raise DeprecationError(
-            "The ``verbose_mapdl`` argument is deprecated and will be completely removed in a future release. Use a logger instead. "
-            "See https://mapdl.docs.pyansys.com/version/stable/api/logging.html for more details."
-        )
-
     # These parameters are partially used for unit testing
     set_no_abort = kwargs.pop("set_no_abort", True)
 
     # Extract arguments:
     force_intel = kwargs.pop("force_intel", False)
-    broadcast = kwargs.pop("log_broadcast", False)
-    if broadcast:
-        raise ValueError(
-            "The CORBA interface has been deprecated from 0.67."
-            "Hence this argument is not valid."
-        )
     use_vtk = kwargs.pop("use_vtk", None)
     just_launch = kwargs.pop("just_launch", None)
     on_pool = kwargs.pop("on_pool", False)
@@ -1768,6 +1728,9 @@ def launch_mapdl(
                     f"The machine has {machine_cores} cores. PyMAPDL is asking for {nproc} cores."
                 )
 
+    # Setting env vars
+    env_vars = update_env_vars(add_env_vars, replace_env_vars)
+
     start_parm.update(
         {
             "exec_file": exec_file,
@@ -1811,8 +1774,7 @@ def launch_mapdl(
 
             port, actual_run_location, process = launch_grpc(
                 port=port,
-                add_env_vars=add_env_vars,
-                replace_env_vars=replace_env_vars,
+                replace_env_vars=env_vars,
                 **start_parm,
             )
 
@@ -1874,13 +1836,6 @@ def check_mode(mode, version):
                     )
                 elif os.name == "posix":
                     raise VersionError("gRPC mode requires MAPDL 2021R1 or newer.")
-        elif mode == "corba":
-            raise DeprecationError(
-                "The CORBA interface has been deprecated with the"
-                " v0.67 release. Please use the gRPC interface instead.\n"
-                "For more information visit: "
-                "https://mapdl.docs.pyansys.com/version/0.66/getting_started/versioning.html#corba-interface"
-            )
 
         elif mode == "console":
             if os.name == "nt":
@@ -1917,7 +1872,7 @@ def check_mode(mode, version):
     return mode
 
 
-def update_env_vars(add_env_vars, replace_env_vars):
+def update_env_vars(add_env_vars: dict, replace_env_vars: dict) -> dict:
     """
     Update environment variables for the MAPDL process.
 
@@ -1939,6 +1894,8 @@ def update_env_vars(add_env_vars, replace_env_vars):
     """
 
     # Expanding/replacing env variables for the process.
+    envvars = os.environ.copy()
+
     if add_env_vars and replace_env_vars:
         raise ValueError(
             "'add_env_vars' and 'replace_env_vars' are incompatible. Please provide only one."
@@ -1950,9 +1907,8 @@ def update_env_vars(add_env_vars, replace_env_vars):
                 "The variable 'add_env_vars' should be a dict with env vars."
             )
 
-        add_env_vars.update(os.environ)
+        envvars.update(add_env_vars)
         LOG.debug(f"Updating environment variables with: {add_env_vars}")
-        return add_env_vars
 
     elif replace_env_vars:
         if not isinstance(replace_env_vars, dict):
@@ -1960,7 +1916,9 @@ def update_env_vars(add_env_vars, replace_env_vars):
                 "The variable 'replace_env_vars' should be a dict with env vars."
             )
         LOG.debug(f"Replacing environment variables with: {replace_env_vars}")
-        return replace_env_vars
+        envvars = replace_env_vars
+
+    return envvars
 
 
 def _check_license_argument(license_type, additional_switches):
