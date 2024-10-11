@@ -35,10 +35,10 @@ from ansys.mapdl.core.errors import (
     PortAlreadyInUseByAnMAPDLInstance,
 )
 from ansys.mapdl.core.launcher import (
+    _HAS_ATP,
     LOCALHOST,
     _is_ubuntu,
     _parse_ip_route,
-    find_ansys,
     force_smp_in_student,
     get_slurm_options,
     get_start_instance,
@@ -180,6 +180,7 @@ def test_launch_console(version):
 
 @requires("local")
 @requires("nostudent")
+@requires("ansys-tools-path")
 @pytest.mark.parametrize("license_name", LICENSES)
 def test_license_type_keyword_names(mapdl, monkeypatch, license_name):
     exec_file = find_ansys()[0]
@@ -696,6 +697,7 @@ def test_get_start_instance_envvar(monkeypatch, start_instance, context):
 
 
 @requires("local")
+@requires("ansys-tools-path")
 @pytest.mark.parametrize("start_instance", [True, False])
 def test_launcher_start_instance(monkeypatch, start_instance):
     if "PYMAPDL_START_INSTANCE" in os.environ:
@@ -742,6 +744,9 @@ def test_ip_and_start_instance(
     # Exception case: start_instance and ip are passed as args.
     exceptions = start_instance_envvar is None and start_instance is None and ip_is_true
     if (start_instance_is_true and ip_is_true) and not exceptions:
+        if not _HAS_ATP:
+            pytest.skip("Requires 'ansys-tools-path'. ")
+
         with pytest.raises(
             ValueError,
             match="When providing a value for the argument 'ip', the argument ",
@@ -756,6 +761,9 @@ def test_ip_and_start_instance(
 
     ###################
     # Faking MAPDL launching and returning args.
+    if not _HAS_ATP:
+        pytest.skip("Requires 'ansys-tools-path'. ")
+
     if (
         isinstance(start_instance_envvar, bool) and isinstance(start_instance, bool)
     ) or (ip_envvar and ip):
