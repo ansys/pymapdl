@@ -2222,11 +2222,12 @@ def get_exec_file(args: Dict[str, Any]) -> None:
                 "'PYMAPDL_MAPDL_EXEC' environment variable."
             )
 
+        if args["_debug_no_launch"]:
+            args["exec_file"] = ""
+            return
+
         LOG.debug("Using default executable.")
         args["exec_file"] = get_ansys_path(version=args["version"])
-
-        if args["_debug_no_launch"]:
-            return
 
         if args["exec_file"] is None:
             raise FileNotFoundError(
