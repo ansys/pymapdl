@@ -1348,7 +1348,8 @@ def launch_mapdl(
         if _HAS_ATP and not args["_debug_no_launch"]:
             version = version_from_path("mapdl", args["exec_file"])
             args["mode"] = check_mode(args["mode"], version)
-    else:
+
+    if not args["mode"]:
         args["mode"] = "grpc"
 
     LOG.debug(f"Using mode {args['mode']}")
