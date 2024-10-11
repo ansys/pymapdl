@@ -367,9 +367,8 @@ class MapdlPool:
             [thread.join() for thread in threads]
 
             # make sure everything is ready
-            timeout = time.time() + timeout
-
-            while timeout > time.time():
+            n_instances_ready = 0
+            while time.time() + timeout > time.time():
                 n_instances_ready = sum([each is not None for each in self._instances])
 
                 if n_instances_ready == n_instances:
@@ -378,7 +377,7 @@ class MapdlPool:
                 time.sleep(0.1)
             else:
                 raise TimeoutError(
-                    f"Only {n_instances_ready} of {n_instances} could be started."
+                    f"Only {n_instances_ready} of {n_instances} could be started after {timeout} seconds."
                 )
 
             if pbar is not None:
