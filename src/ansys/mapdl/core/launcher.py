@@ -1420,8 +1420,6 @@ def launch_mapdl(
 
         mapdl = MapdlGrpc(
             cleanup_on_exit=False,
-            ip=args["ip"],
-            port=args["port"],
             loglevel=args["loglevel"],
             set_no_abort=args["set_no_abort"],
             use_vtk=args["use_vtk"],
@@ -2169,6 +2167,8 @@ def create_gallery_instances(
             time.sleep(0.1)
 
         LOG.debug("Connecting to an existing MAPDL instance for gallery building.")
+        start_parm.pop("ip", None)
+        start_parm.pop("port", None)
         mapdl = MapdlGrpc(
             ip=GALLERY_INSTANCE[0]["ip"],
             port=GALLERY_INSTANCE[0]["port"],
