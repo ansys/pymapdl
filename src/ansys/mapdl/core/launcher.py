@@ -1481,8 +1481,6 @@ def launch_mapdl(
                 return out
 
             mapdl = MapdlGrpc(
-                ip=args["ip"],
-                port=args["port"],
                 cleanup_on_exit=args["cleanup_on_exit"],
                 loglevel=args["loglevel"],
                 set_no_abort=args["set_no_abort"],
@@ -1493,7 +1491,7 @@ def launch_mapdl(
                 **start_parm,
             )
             if args["run_location"] is None:
-                mapdl._path = actual_run_location
+                mapdl._path = args["run_location"]
 
         # Setting launched property
         mapdl._launched = True
@@ -1919,7 +1917,7 @@ def generate_start_parameters(args: Dict[str, Any]) -> Dict[str, Any]:
     start_parm = {}
 
     for each_par in _ALLOWED_START_PARM:
-        if each_par in args["kwargs"]:
+        if each_par in args:
             start_parm[each_par] = args[each_par]
 
     if args["mode"] == "console":
