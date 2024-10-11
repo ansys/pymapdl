@@ -335,7 +335,8 @@ class LicenseChecker:
 
         tstart = time.time()
         process = subprocess.Popen(
-            [f'"{ansysli_util_path}"', "-checkout", f"{lic}"],
+            ["-checkout", f"{lic}"],
+            executable=ansysli_util_path,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             env=env,
