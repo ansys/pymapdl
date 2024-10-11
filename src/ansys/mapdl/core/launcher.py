@@ -379,12 +379,8 @@ def generate_mapdl_launch_command(
 
     # Windows will spawn a new window, special treatment
     if os.name == "nt":
-        tmp_inp = ".__tmp__.inp"
-        with open(os.path.join(run_location, tmp_inp), "w") as f:
-            f.write("FINISH\r\n")
-            LOG.debug(f"Writing temporary input file: {tmp_inp} with 'FINISH' command.")
-
         # must start in batch mode on windows to hide APDL window
+        tmp_inp = ".__tmp__.inp"
         command_parm = [
             '"%s"' % exec_file,
             job_sw,
@@ -450,6 +446,13 @@ def launch_grpc(
     LOG.info(
         f"Running a local instance in {run_location} with the following command: '{cmd}'"
     )
+
+    if os.name == "nt":
+        # getting tmp file name
+        tmp_inp = cmd.split()[cmd.split().index("-i") + 1]
+        with open(os.path.join(run_location, tmp_inp), "w") as f:
+            f.write("FINISH\r\n")
+            LOG.debug(f"Writing temporary input file: {tmp_inp} with 'FINISH' command.")
 
     LOG.debug("MAPDL starting in background.")
     process = subprocess.Popen(
@@ -868,11 +871,6 @@ def set_MPI_additional_switches(
 
     # known issues with distributed memory parallel (DMP)
     if "smp" not in add_sw_lower_case:  # pragma: no cover
-        # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
-        if _is_ubuntu():
-            LOG.debug("Ubuntu system detected. Adding 'I_MPI_SHM_LMT' env var.")
-            os.environ["I_MPI_SHM_LMT"] = "shm"
-
         if _HAS_ATP:
             condition = (
                 os.name == "nt"
@@ -914,6 +912,15 @@ def set_MPI_additional_switches(
             add_sw += " -mpi msmpi"
 
     return add_sw
+
+
+def configure_ubuntu(envvars: Dict[str, Any]):
+    # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
+    if _is_ubuntu():
+        LOG.debug("Ubuntu system detected. Adding 'I_MPI_SHM_LMT' env var.")
+        envvars["I_MPI_SHM_LMT"] = "shm"
+
+    return envvars
 
 
 def force_smp_in_student(add_sw, exec_path):
@@ -1343,7 +1350,7 @@ def launch_mapdl(
 
         # remove err file so we can track its creation
         # (as way to check if MAPDL started or not)
-        remove_err_files(args["run_location"])
+        remove_err_files(args["run_location"], args["jobname"])
 
         if _HAS_ATP and not args["_debug_no_launch"]:
             version = version_from_path("mapdl", args["exec_file"])
@@ -1354,21 +1361,33 @@ def launch_mapdl(
 
     LOG.debug(f"Using mode {args['mode']}")
 
-    # Setting SMP by default if student version is used.
-    args["additional_switches"] = force_smp_in_student(
-        args["additional_switches"], args["exec_file"]
-    )
-
-    args["additional_switches"] = set_MPI_additional_switches(
-        args["additional_switches"], args["exec_file"], force_intel=args["force_intel"]
-    )
-
     args["additional_switches"] = set_license_switch(
         args["license_type"], args["additional_switches"]
     )
-    LOG.debug(f"Using additional switches {args['additional_switches']}.")
 
     env_vars = update_env_vars(args["add_env_vars"], args["replace_env_vars"])
+
+    ########################################
+    # Context specific launching adjustments
+    # --------------------------------------
+    #
+    if args["start_instance"]:
+        #
+        env_vars = configure_ubuntu(env_vars)
+
+        # Set SMP by default if student version is used.
+        args["additional_switches"] = force_smp_in_student(
+            args["additional_switches"], args["exec_file"]
+        )
+
+        # Set compatible MPI
+        args["additional_switches"] = set_MPI_additional_switches(
+            args["additional_switches"],
+            args["exec_file"],
+            force_intel=args["force_intel"],
+        )
+
+        LOG.debug(f"Using additional switches {args['additional_switches']}.")
 
     start_parm = generate_start_parameters(args)
 
@@ -2205,11 +2224,14 @@ def get_exec_file(args: Dict[str, Any]) -> None:
 
         LOG.debug("Using default executable.")
 
+        # if args["_debug_no_launch"]:
+        #     args["exec_file"] = ""
+        # else:
+        #     # It can also search for cache version
+        args["exec_file"] = get_ansys_path(version=args["version"])
+
         if args["_debug_no_launch"]:
-            args["exec_file"] = ""
-        else:
-            # It can also search for cache version
-            args["exec_file"] = get_ansys_path(version=args["version"])
+            return
 
         if args["exec_file"] is None:
             raise FileNotFoundError(
@@ -2319,7 +2341,7 @@ def get_cpus(args: Dict[str, Any]):
             )
 
 
-def remove_err_files(run_location):
+def remove_err_files(run_location, jobname):
     # remove any temporary error files at the run location.  This is
     # important because we need to know if MAPDL is already running
     # here and because we're looking for any temporary files that are
