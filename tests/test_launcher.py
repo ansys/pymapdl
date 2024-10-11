@@ -467,7 +467,8 @@ def test_launched(mapdl):
 
 
 @requires("local")
-def test_launching_on_busy_port(mapdl):
+def test_launching_on_busy_port(mapdl, monkeypatch):
+    monkeypatch.delenv("PYMAPDL_PORT")
     with pytest.raises(PortAlreadyInUseByAnMAPDLInstance):
         launch_mapdl(port=mapdl.port)
 
