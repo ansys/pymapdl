@@ -596,7 +596,7 @@ def launch_grpc(
     # removing spaces in cells
     command = " ".join(command_parm)
     command_parm = command.split()
-    command_parm.insert(0, f'"{exec_file}"')
+    command_parm.insert(0, f"{exec_file}")
     command_parm.insert(0, "+x")
     command_parm.insert(0, "chmod")
     command = " ".join(command_parm)
