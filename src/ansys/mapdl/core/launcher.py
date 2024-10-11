@@ -1648,7 +1648,7 @@ def set_license_switch(license_type, additional_switches):
             warn_text = (
                 f"The keyword argument 'license_type' value ('{license_type}') is not a recognized\n"
                 "license name or has been deprecated.\n"
-                "Still PyMAPDL will try to use it but in older versions you might experience\n"
+                "Still PyMAPDL will try to use it but in older MAPDL versions you might experience\n"
                 "problems connecting to the server.\n"
                 f"Recognized license names: {' '.join(allow_lics)}"
             )
@@ -1670,7 +1670,7 @@ def set_license_switch(license_type, additional_switches):
             warn_text = (
                 f"The additional switch product value ('-p {license_type}') is not a recognized\n"
                 "license name or has been deprecated.\n"
-                "Still PyMAPDL will try to use it but in older versions you might experience\n"
+                "Still PyMAPDL will try to use it but in older MAPDL versions you might experience\n"
                 "problems connecting to the server.\n"
                 f"Recognized license names: {' '.join(allow_lics)}"
             )

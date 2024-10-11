@@ -31,7 +31,6 @@ import pytest
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import (
-    LicenseServerConnectionError,
     NotEnoughResources,
     PortAlreadyInUseByAnMAPDLInstance,
 )
@@ -200,10 +199,13 @@ def test_license_type_additional_switch(mapdl, license_name):
 @requires("local")
 def test_license_type_dummy(mapdl):
     dummy_license_type = "dummy"
-    with pytest.raises(LicenseServerConnectionError):
+    with pytest.warns(
+        UserWarning,
+        match="Still PyMAPDL will try to use it but in older MAPDL versions you might experience",
+    ):
         launch_mapdl(
             port=mapdl.port + 1,
-            additional_switches=f" -p {dummy_license_type}" + QUICK_LAUNCH_SWITCHES,
+            additional_switches=f" -p {dummy_license_type} " + QUICK_LAUNCH_SWITCHES,
             start_timeout=start_timeout,
             license_server_check=True,
         )
