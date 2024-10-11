@@ -2039,32 +2039,26 @@ def get_port(port: Optional[int]) -> int:
     int
         Port
     """
-    port_env_var = os.environ.get("PYMAPDL_PORT", "")
+    if port is None:
+        if not pymapdl._LOCAL_PORTS:
+            port = int(os.environ.get("PYMAPDL_PORT", MAPDL_DEFAULT_PORT))
+            LOG.debug(f"Using default port: {port}")
+        else:
+            port = max(pymapdl._LOCAL_PORTS) + 1
+            LOG.debug(f"Using next available port: {port}")
 
-    if port_env_var:
-        port = int(port_env_var)
+        while port_in_use(port) or port in pymapdl._LOCAL_PORTS:
+            port += 1
+            LOG.debug(f"Port in use.  Incrementing port number. port={port}")
 
     else:
-        if port is None:
-            if not pymapdl._LOCAL_PORTS:
-                port = int(os.environ.get("PYMAPDL_PORT", MAPDL_DEFAULT_PORT))
-                LOG.debug(f"Using default port: {port}")
-            else:
-                port = max(pymapdl._LOCAL_PORTS) + 1
-                LOG.debug(f"Using next available port: {port}")
-
-            while port_in_use(port) or port in pymapdl._LOCAL_PORTS:
-                port += 1
-                LOG.debug(f"Port in use.  Incrementing port number. port={port}")
-
-        else:
-            if port_in_use(port):
-                proc = get_process_at_port(port)
-                if proc:
-                    if is_ansys_process(proc):
-                        raise PortAlreadyInUseByAnMAPDLInstance(port)
-                    else:
-                        raise PortAlreadyInUse(port)
+        if port_in_use(port):
+            proc = get_process_at_port(port)
+            if proc:
+                if is_ansys_process(proc):
+                    raise PortAlreadyInUseByAnMAPDLInstance(port)
+                else:
+                    raise PortAlreadyInUse(port)
 
     pymapdl._LOCAL_PORTS.append(port)
 
