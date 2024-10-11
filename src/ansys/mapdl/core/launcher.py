@@ -1342,9 +1342,11 @@ def launch_mapdl(
 
     args["version"] = get_version(args["version"], exec_file)
 
-    get_run_location(args)
-
+    # Only when starting MAPDL (aka Local)
     if args["start_instance"]:
+
+        get_run_location(args)
+
         # verify lock file does not exist
         check_lock_file(args["run_location"], args["jobname"], args["override"])
 
