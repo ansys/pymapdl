@@ -1068,6 +1068,7 @@ class MapdlGrpc(MapdlBase):
             f"Exiting MAPLD gRPC instance {self.ip}:{self.port} on '{self._path}'."
         )
 
+        mapdl_path = self.directory  # caching
         if self._exited is None:
             self._log.debug("'self._exited' is none.")
             return  # Some edge cases the class object is not completely initialized but the __del__ method
@@ -1103,7 +1104,6 @@ class MapdlGrpc(MapdlBase):
         if not kwargs.pop("fake_exit", False):
             # This cannot/should not be faked
             if self._local:
-                mapdl_path = self.directory
                 self._cache_pids()  # Recache processes
 
                 if os.name == "nt":
@@ -1120,7 +1120,7 @@ class MapdlGrpc(MapdlBase):
             # No cover: The CI is working with a single MAPDL instance
             self._remote_instance.delete()
 
-        self._remove_temp_dir_on_exit()
+        self._remove_temp_dir_on_exit(mapdl_path)
 
         if self._local and self._port in _LOCAL_PORTS:
             _LOCAL_PORTS.remove(self._port)
