@@ -1333,7 +1333,7 @@ def launch_mapdl(
 
     get_exec_file(args)
 
-    args["version"] = get_version(args["version"], args["exec_file"])
+    args["version"] = get_version(args["version"], exec_file)
 
     get_run_location(args)
 
