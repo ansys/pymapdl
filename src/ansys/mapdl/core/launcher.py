@@ -2223,11 +2223,6 @@ def get_exec_file(args: Dict[str, Any]) -> None:
             )
 
         LOG.debug("Using default executable.")
-
-        # if args["_debug_no_launch"]:
-        #     args["exec_file"] = ""
-        # else:
-        #     # It can also search for cache version
         args["exec_file"] = get_ansys_path(version=args["version"])
 
         if args["_debug_no_launch"]:
