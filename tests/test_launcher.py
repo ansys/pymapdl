@@ -38,6 +38,7 @@ from ansys.mapdl.core.launcher import (
     LOCALHOST,
     _is_ubuntu,
     _parse_ip_route,
+    find_ansys,
     force_smp_in_student,
     get_slurm_options,
     get_start_instance,
