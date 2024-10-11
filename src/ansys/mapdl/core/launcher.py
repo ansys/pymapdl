@@ -143,7 +143,7 @@ def _is_ubuntu() -> bool:
         return False
 
     proc = subprocess.Popen(
-        ["awk", "-F=", "'/^NAME/{print", "$2}'", "/etc/os-release"],
+        ["awk", "-F=", "'/^NAME/{print $2}'", "/etc/os-release"],
         stdout=subprocess.PIPE,
     )
     if "ubuntu" in proc.stdout.read().decode().lower():
