@@ -857,7 +857,7 @@ class MapdlGrpc(MapdlBase):
             raise MapdlRuntimeError(
                 "Can only launch the GUI with a local instance of MAPDL"
             )
-        from ansys.mapdl.core.launcher import launch_grpc
+        from ansys.mapdl.core.launcher import generate_mapdl_launch_command, launch_grpc
 
         self._exited = False  # reset exit state
 
@@ -875,7 +875,7 @@ class MapdlGrpc(MapdlBase):
             cmd=cmd, run_location=args["run_location"], env_vars=self._env_vars or None
         )
 
-        self._connect(port)
+        self._connect(args["port"])
 
         # may need to wait for viable connection in open_gui case
         tmax = time.time() + timeout
