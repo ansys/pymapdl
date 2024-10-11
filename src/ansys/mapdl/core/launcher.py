@@ -2246,9 +2246,6 @@ def get_run_location(args: Dict[str, Any]) -> None:
             f"Using default temporary directory for MAPDL run location: {args['run_location']}"
         )
 
-    elif not os.access(args["run_location"], os.W_OK):
-        raise IOError(f'Unable to write to ``run_location``: {args["run_location"]}')
-
     elif not os.path.isdir(args["run_location"]):
         os.makedirs(args["run_location"], exist_ok=True)
         LOG.debug(f"Creating directory for MAPDL run location: {args['run_location']}")
@@ -2258,6 +2255,9 @@ def get_run_location(args: Dict[str, Any]) -> None:
                 "The 'run_location' argument is set. Disabling the removal of temporary files."
             )
             args["remove_temp_dir_on_exit"] = False
+
+    elif not os.access(args["run_location"], os.W_OK):
+        raise IOError(f'Unable to write to ``run_location``: {args["run_location"]}')
 
     LOG.debug("Using run location at %s", args["run_location"])
 
