@@ -910,6 +910,9 @@ class MapdlPool:
         if not run_location:
             run_location = create_temp_dir(self._root_dir, name=name)
 
+        if self._spawn_kwargs.get("_debug_no_launch", False):
+            return
+
         self._instances[index] = launch_mapdl(
             exec_file=exec_file,
             run_location=run_location,
@@ -990,6 +993,9 @@ class MapdlPool:
 
     def _set_n_instance_ip_port_args(self, n_instances, ip, port):
         LOG.debug(f"Input n_instances ({n_instances}), ip ({ip}), and port ({port})")
+        if isinstance(port, str):
+            port = int(port)
+
         if n_instances is None:
             if ip is None or (isinstance(ip, list) and len(ip) == 0):
                 if port is None or (isinstance(port, list) and len(port) < 1):
@@ -1050,7 +1056,9 @@ class MapdlPool:
                         "Argument 'port' does not support this type of argument."
                     )
             else:
-                raise TypeError("Argument 'ip' does not support this type of argument.")
+                raise TypeError(
+                    f"Argument 'ip' does not support this type of argument ({type(ip)})."
+                )
 
         else:
 
@@ -1079,7 +1087,7 @@ class MapdlPool:
                     ports = port
                 else:
                     raise TypeError(
-                        "Argument 'port' does not support this type of argument."
+                        f"Argument 'port' does not support this type of argument ({type(port)})."
                     )
 
             elif isinstance(ip, str):
