@@ -180,8 +180,11 @@ def test_launch_console(version):
 @requires("local")
 @requires("nostudent")
 @pytest.mark.parametrize("license_name", LICENSES)
-def test_license_type_keyword_names(mapdl, license_name):
-    args = launch_mapdl(license_type=license_name, _debug_no_launch=True)
+def test_license_type_keyword_names(mapdl, monkeypatch, license_name):
+    exec_file = find_ansys()[0]
+    args = launch_mapdl(
+        exec_file=exec_file, license_type=license_name, _debug_no_launch=True
+    )
     assert f"-p {license_name}" in args["additional_switches"]
 
 
@@ -196,7 +199,6 @@ def test_license_type_additional_switch(mapdl, license_name):
 
 
 @requires("ansys-tools-path")
-@requires("local")
 def test_license_type_dummy(mapdl):
     dummy_license_type = "dummy"
     with pytest.warns(
@@ -204,10 +206,12 @@ def test_license_type_dummy(mapdl):
         match="Still PyMAPDL will try to use it but in older MAPDL versions you might experience",
     ):
         launch_mapdl(
+            start_instance=False,
             port=mapdl.port + 1,
             additional_switches=f" -p {dummy_license_type} " + QUICK_LAUNCH_SWITCHES,
             start_timeout=start_timeout,
-            license_server_check=True,
+            license_server_check=False,
+            _debug_no_launch=True,
         )
 
 
@@ -690,14 +694,18 @@ def test_get_start_instance_envvar(monkeypatch, start_instance, context):
             assert not get_start_instance(start_instance)
 
 
+@requires("local")
 @pytest.mark.parametrize("start_instance", [True, False])
 def test_launcher_start_instance(monkeypatch, start_instance):
     if "PYMAPDL_START_INSTANCE" in os.environ:
         monkeypatch.delenv("PYMAPDL_START_INSTANCE")
-    options = launch_mapdl(start_instance=start_instance, _debug_no_launch=True)
+    options = launch_mapdl(
+        exec_file=find_ansys()[0], start_instance=start_instance, _debug_no_launch=True
+    )
     assert start_instance == options["start_instance"]
 
 
+@requires("local")
 @pytest.mark.parametrize("start_instance", [None, True, False])
 @pytest.mark.parametrize("start_instance_envvar", [None, True, False])
 @pytest.mark.parametrize("ip", [None, "", "123.1.1.1"])
@@ -738,7 +746,10 @@ def test_ip_and_start_instance(
             match="When providing a value for the argument 'ip', the argument ",
         ):
             options = launch_mapdl(
-                start_instance=start_instance, ip=ip, _debug_no_launch=True
+                exec_file=find_ansys()[0],
+                start_instance=start_instance,
+                ip=ip,
+                _debug_no_launch=True,
             )
         return  # Exit early the test
 
@@ -749,12 +760,18 @@ def test_ip_and_start_instance(
     ) or (ip_envvar and ip):
         with pytest.warns(UserWarning):
             options = launch_mapdl(
-                start_instance=start_instance, ip=ip, _debug_no_launch=True
+                exec_file=find_ansys()[0],
+                start_instance=start_instance,
+                ip=ip,
+                _debug_no_launch=True,
             )
     else:
         with warnings.catch_warnings():
             options = launch_mapdl(
-                start_instance=start_instance, ip=ip, _debug_no_launch=True
+                exec_file=find_ansys()[0],
+                start_instance=start_instance,
+                ip=ip,
+                _debug_no_launch=True,
             )
 
     ###################
