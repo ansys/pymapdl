@@ -566,6 +566,7 @@ def launch_grpc(
 
         # must start in batch mode on windows to hide APDL window
         command_parm = [
+            '"%s"' % exec_file,
             job_sw,
             cpu_sw,
             ram_sw,
@@ -581,6 +582,7 @@ def launch_grpc(
 
     else:  # linux
         command_parm = [
+            '"%s"' % exec_file,
             job_sw,
             cpu_sw,
             ram_sw,
