@@ -1025,7 +1025,7 @@ class MapdlGrpc(MapdlBase):
             except ReferenceError:
                 break
             except Exception:
-                continue
+                warn("Checking if MAPDL instance is still alive.")
 
     @protect_from(ValueError, "I/O operation on closed file.")
     def exit(self, save=False, force=False, **kwargs):
