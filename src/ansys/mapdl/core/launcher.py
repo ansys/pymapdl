@@ -979,7 +979,7 @@ def launch_mapdl(
     replace_env_vars: Optional[Dict[str, str]] = None,
     version: Optional[Union[int, str]] = None,
     detect_slurm_config: bool = True,
-    **kwargs: Dict[str, Any],
+    **kwargs,
 ) -> Union[MapdlGrpc, "MapdlConsole"]:
     """Start MAPDL locally.
 
@@ -1336,7 +1336,7 @@ def launch_mapdl(
 
     get_ip(args)
 
-    args["port"] = get_port(args["port"])
+    args["port"] = get_port(args["port"], args["start_instance"])
 
     get_exec_file(args)
 
@@ -2024,7 +2024,7 @@ def get_start_instance_arg(args: Dict[str, Any]) -> None:
     LOG.debug(f"Using 'start_instance' equal to {args['start_instance']}")
 
 
-def get_port(port: Optional[int]) -> int:
+def get_port(port: Optional[int] = None, start_instance: Optional[bool] = None) -> int:
     """Get port argument.
 
     Parameters
@@ -2045,7 +2045,7 @@ def get_port(port: Optional[int]) -> int:
             port = max(pymapdl._LOCAL_PORTS) + 1
             LOG.debug(f"Using next available port: {port}")
 
-        while port_in_use(port) or port in pymapdl._LOCAL_PORTS:
+        while (port_in_use(port) and start_instance) or port in pymapdl._LOCAL_PORTS:
             port += 1
             LOG.debug(f"Port in use.  Incrementing port number. port={port}")
 
