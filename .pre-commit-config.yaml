@@ -20,6 +20,11 @@ repos:
     args:
     - --start_year=2016
 
+- repo: https://github.com/streetsidesoftware/cspell-cli
+  rev: v8.15.1
+  hooks:
+    - id: cspell
+
 - repo: https://github.com/pycqa/isort
   rev: 5.13.2
   hooks:
