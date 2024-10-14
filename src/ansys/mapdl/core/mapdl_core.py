@@ -1695,10 +1695,22 @@ class _MapdlCore(Commands):
                 "MAPDL GUI has been opened using 'inplace' kwarg. "
                 f"The changes you make will overwrite the files in {run_dir}."
             )
+        add_sw = add_sw.split()
+        exec_array = [
+            "cd",
+            run_dir,
+            "&&",
+            exec_file,
+            "-g",
+            "-j",
+            name,
+            "-np",
+            str(nproc),
+            *add_sw,
+        ]
 
         call(
-            f'cd "{run_dir}" && "{exec_file}" -g -j {name} -np {nproc} {add_sw}',
-            shell=True,
+            exec_array,
             stdout=DEVNULL,
         )
 
