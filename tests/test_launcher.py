@@ -708,7 +708,6 @@ def test_launcher_start_instance(monkeypatch, start_instance):
     assert start_instance == options["start_instance"]
 
 
-@requires("local")
 @pytest.mark.parametrize("start_instance", [None, True, False])
 @pytest.mark.parametrize("start_instance_envvar", [None, True, False])
 @pytest.mark.parametrize("ip", [None, "", "123.1.1.1"])
@@ -740,19 +739,30 @@ def test_ip_and_start_instance(
         (ip_envvar is None or ip_envvar == "") and bool(ip)
     )
 
+    # Skip if PyMAPDL cannot detect where MAPDL is installed.
+    if not _HAS_ATP and not os.environ.get("PYMAPDL_MAPDL_EXEC", False):
+        # if start_instance and not ip:
+        with pytest.raises(
+            ModuleNotFoundError,
+            match="If you don't have 'ansys-tools-path' library installed, you need",
+        ):
+            options = launch_mapdl(
+                exec_file=None,
+                start_instance=start_instance,
+                ip=ip,
+                _debug_no_launch=True,
+            )
+
     ###################
     # Exception case: start_instance and ip are passed as args.
     exceptions = start_instance_envvar is None and start_instance is None and ip_is_true
     if (start_instance_is_true and ip_is_true) and not exceptions:
-        if not _HAS_ATP:
-            pytest.skip("Requires 'ansys-tools-path'. ")
 
         with pytest.raises(
             ValueError,
             match="When providing a value for the argument 'ip', the argument ",
         ):
             options = launch_mapdl(
-                exec_file=find_ansys()[0],
                 start_instance=start_instance,
                 ip=ip,
                 _debug_no_launch=True,
@@ -760,16 +770,12 @@ def test_ip_and_start_instance(
         return  # Exit early the test
 
     ###################
-    # Faking MAPDL launching and returning args.
-    if not _HAS_ATP:
-        pytest.skip("Requires 'ansys-tools-path'. ")
-
+    # Faking MAPDL launching and returning args
     if (
         isinstance(start_instance_envvar, bool) and isinstance(start_instance, bool)
     ) or (ip_envvar and ip):
         with pytest.warns(UserWarning):
             options = launch_mapdl(
-                exec_file=find_ansys()[0],
                 start_instance=start_instance,
                 ip=ip,
                 _debug_no_launch=True,
@@ -777,7 +783,6 @@ def test_ip_and_start_instance(
     else:
         with warnings.catch_warnings():
             options = launch_mapdl(
-                exec_file=find_ansys()[0],
                 start_instance=start_instance,
                 ip=ip,
                 _debug_no_launch=True,
