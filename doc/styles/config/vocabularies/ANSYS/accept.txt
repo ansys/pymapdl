@@ -1,28 +1,3 @@
-[aA]nsys
-[Bb]ooleans
-[Cc]odespace
-[Cc]odespaces
-[Cc]ommand [Pp]rompt
-[Dd]ocker
-[Ee]igensolver
-[Hh]yperelasticity
-[Kk]eypoints
-[Mm]atplotlib
-[Mm]ulti-[Ff]ield
-[Nn]umpy
-[Pp]ostprocess
-[Pp]ostprocessing
-[Pp]owerShell
-[Pp]restressed
-[Pp]rony
-[Pp]yansys
-[Pp]ythonic
-[Pp]ythonically
-[Rs]ST
-[Ss]ubsystem
-[Ss]uperelements
-[Vv]on Mises
-[Ww]indows
 2D
 3-D
 3D
@@ -33,6 +8,8 @@ alis
 ALIS
 AMLs
 ans
+ansys
+Ansys
 ANSYS
 Ansys Mechanical APDL
 APDL Math
@@ -45,6 +22,8 @@ Arruda-Boyce
 askin
 BCs
 Block Lanzos
+booleans
+Booleans
 Boyce
 breakpoint
 centerline
@@ -52,6 +31,12 @@ CentOS
 CentOS7
 Chao
 ci
+codespace
+Codespace
+codespaces
+Codespaces
+command
+Command
 container_layout
 datas
 delet
@@ -59,11 +44,15 @@ Dependabot
 Dev
 devcontainer
 DevContainer
+docker
+Docker
 dof
 ect
 eigenfrequency
 eigenproblems
 eigensolution
+eigensolver
+Eigensolver
 eigensolvers
 elastoplastic
 emiss
@@ -84,11 +73,16 @@ Hashin
 hexahedral
 hostname
 HTML
-Image[Mm]agick
+hyperelasticity
+Hyperelasticity
+Imagemagick
+ImageMagick
 imagin
 importlib
 ist
 Julia
+keypoints
+Keypoints
 Krylov
 kwarg
 Lanzos
@@ -102,18 +96,26 @@ mapdl
 MAPDL
 mater
 MATLAB
+matplotlib
+Matplotlib
 matricies
 mesher
 midside
 Mises
 mkdir
 MSc
+multi-field
+multi-Field
+Multi-field
+Multi-Field
 multipoint
 nce
 Newton-Raphson
 nin
 nonlinearities
 NORML
+numpy
+Numpy
 NumPy
 onefile
 optiSLang
@@ -123,13 +125,27 @@ performant
 PMLs
 POIN
 Poisson
+postprocess
+Postprocess
+postprocessing
+Postprocessing
 postprocessor
+powerShell
+PowerShell
 Prasanna
 preprocessor
 pres
+prestressed
+Prestressed
+prompt
+Prompt
+prony
+Prony
 Pseudotime
 Puri
 py
+pyansys
+Pyansys
 PyAnsys
 PyAnsys Math
 PyDPF-Core
@@ -137,11 +153,16 @@ PyDPF-Post
 pymapdl
 PyMAPDL
 Python
+pythonic
+Pythonic
+pythonically
+Pythonically
 QRDAMP
 Radiosity
 Rao
 righ
 RNNN
+RST
 sbatch
 singl
 Slurm
@@ -151,9 +172,14 @@ sord
 spotweld
 squeue
 srun
+sST
 struc
 subselected
 substep
+subsystem
+Subsystem
+superelements
+Superelements
 sur
 tablet
 thermomechanical
@@ -174,10 +200,14 @@ viscoplastic
 vise
 Visual Studio Code
 von
+von Mises
+Von Mises
 VTK
 wan
 WAN
 WHIT
+windows
+Windows
 Windows Subsystem
 Windows Subsystem for Linux
 wsl
