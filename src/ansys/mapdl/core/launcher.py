@@ -566,6 +566,7 @@ def launch_grpc(
 
         # must start in batch mode on windows to hide APDL window
         command_parm = [
+            f"{exec_file}",
             job_sw,
             cpu_sw,
             ram_sw,
@@ -581,6 +582,7 @@ def launch_grpc(
 
     else:  # linux
         command_parm = [
+            f"{exec_file}",
             job_sw,
             cpu_sw,
             ram_sw,
@@ -605,7 +607,6 @@ def launch_grpc(
     LOG.debug("MAPDL starting in background.")
     process = subprocess.Popen(
         command_parm,
-        executable=exec_file,
         cwd=run_location,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
