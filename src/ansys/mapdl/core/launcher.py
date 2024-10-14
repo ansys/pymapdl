@@ -589,9 +589,7 @@ def launch_grpc(
             grpc_sw,
         ]
 
-    command_parm = [
-        each for each in command_parm if command_parm
-    ]  # cleaning empty args.
+    command_parm = [each for each in command_parm if each]  # cleaning empty args.
 
     # removing spaces in cells
     command = " ".join(command_parm)
