@@ -9,6 +9,55 @@ This document contains the release notes for the project.
 
 .. towncrier release notes start
 
+`0.68.6 <https://github.com/ansys/pymapdl/releases/tag/v0.68.6>`_ - 2024-10-11
+==============================================================================
+
+Added
+^^^^^
+
+- chore: update CHANGELOG for v0.68.5 `#3455 <https://github.com/ansys/pymapdl/pull/3455>`_
+- refactor: removing deprecated arguments `#3473 <https://github.com/ansys/pymapdl/pull/3473>`_
+
+
+Fixed
+^^^^^
+
+- fix: contributors file `#3457 <https://github.com/ansys/pymapdl/pull/3457>`_
+- fix: environment variables not being passed to MAPDL process `#3461 <https://github.com/ansys/pymapdl/pull/3461>`_
+- fix: exiting earlier to avoid exceptions from gRPC calls `#3463 <https://github.com/ansys/pymapdl/pull/3463>`_
+- fix: add ``build cheatsheet`` as env variable within doc-build `#3468 <https://github.com/ansys/pymapdl/pull/3468>`_
+
+
+Dependencies
+^^^^^^^^^^^^
+
+- build: bump grpcio from 1.66.1 to 1.66.2 in the grpc-deps group `#3453 <https://github.com/ansys/pymapdl/pull/3453>`_
+- build: bump sphinx-autobuild from 2024.9.19 to 2024.10.3 in the documentation group `#3454 <https://github.com/ansys/pymapdl/pull/3454>`_
+- build: bump ansys-tools-visualization-interface from 0.4.4 to 0.4.5 in the core group `#3477 <https://github.com/ansys/pymapdl/pull/3477>`_
+- build: bump the documentation group with 3 updates `#3478 <https://github.com/ansys/pymapdl/pull/3478>`_
+
+
+Miscellaneous
+^^^^^^^^^^^^^
+
+- feat: having two global flags. One for visualizer and one for pyvista `#3460 <https://github.com/ansys/pymapdl/pull/3460>`_
+
+
+Documentation
+^^^^^^^^^^^^^
+
+- docs: another hpc docs reorg `#3465 <https://github.com/ansys/pymapdl/pull/3465>`_
+- docs: fix cheat sheet rendering `#3469 <https://github.com/ansys/pymapdl/pull/3469>`_
+
+
+Maintenance
+^^^^^^^^^^^
+
+- ci: bump the actions group with 2 updates `#3470 <https://github.com/ansys/pymapdl/pull/3470>`_
+- ci: pre-commit autoupdate `#3471 <https://github.com/ansys/pymapdl/pull/3471>`_
+- ci: bypass team check if it is dependabot `#3472 <https://github.com/ansys/pymapdl/pull/3472>`_
+- build: bump numpy from 2.1.1 to 2.1.2 in the minimal group `#3476 <https://github.com/ansys/pymapdl/pull/3476>`_
+
 `0.68.5 <https://github.com/ansys/pymapdl/releases/tag/v0.68.5>`_ - 2024-10-04
 ==============================================================================
 
