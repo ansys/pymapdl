@@ -1,0 +1,80 @@
+{
+    "version": "0.2",
+    "ignorePaths": [
+        "./src/ansys/mapdl/core/_commands",
+        "./tests",
+        "cspell.json"
+    ],
+    "dictionaryDefinitions": [
+        {
+            "name": "Ansys",
+            "path": "./doc/styles/config/vocabularies/ANSYS/accept.txt",
+            "addWords": false
+        }
+    ],
+    "dictionaries": [
+        "Ansys"
+    ],
+    "words": [
+        "apdl",
+        "APDL",
+        "acrros",
+        "amfg",
+        "ansexe",
+        "ANSYSLMD",
+        "appfile",
+        "astype",
+        "attemps",
+        "autofix",
+        "autoupdate",
+        "behaviour",
+        "codespell",
+        "cpus",
+        "CPUS",
+        "docu",
+        "giga",
+        "hostlist",
+        "hostnames",
+        "instancemanagement",
+        "intelmpi",
+        "INTELMPI",
+        "isort",
+        "jobname",
+        "laddr",
+        "lics",
+        "meba",
+        "mpifile",
+        "msmpi",
+        "MSMPI",
+        "MYSERVER",
+        "NNODES",
+        "NODIAG",
+        "nproc",
+        "NPROCS",
+        "ntasks",
+        "NTASKS",
+        "numpydoc",
+        "preconfigured",
+        "preppost",
+        "productname",
+        "psutil",
+        "pydocstyle",
+        "pypim",
+        "pyproject",
+        "scontrol",
+        "tomli",
+        "winx",
+        "Xplorer",
+        "yoyoyo"
+    ],
+    "ignoreWords": [],
+    "import": [],
+    "enableFiletypes": [
+        "apdl",
+        "markdown",
+        "python",
+        "!toml",
+        "yaml",
+        "yml"
+    ]
+}
