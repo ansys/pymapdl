@@ -702,31 +702,27 @@ def get_start_instance(start_instance: bool = True):
                 "The environment variable 'PYMAPDL_START_INSTANCE' is set, "
                 "hence the argument 'start_instance' is overwritten."
             )
-        start_instance = os.environ["PYMAPDL_START_INSTANCE"]
-    else:
-        LOG.debug(
-            f"PYMAPDL_START_INSTANCE is unset. Using default value {start_instance}."
-        )
 
-    if isinstance(start_instance, str):
-        start_instance = start_instance.lower().strip()
-        if start_instance not in ["true", "false"]:
-            raise OSError(
-                f'Invalid value "{start_instance}" for "start_instance" (or "PYMAPDL_START_INSTANCE"\n'
-                '"start_instance" should be either "TRUE" or "FALSE"'
-            )
-
-        LOG.debug(f"PYMAPDL_START_INSTANCE is set to {start_instance}")
-        return start_instance == "true"
-
-    elif isinstance(start_instance, bool):
+    if isinstance(start_instance, bool):
         return start_instance
 
     elif start_instance is None:
-        LOG.debug(
-            "'PYMAPDL_START_INSTANCE' is unset, and there is no supplied value. Using default, which is 'True'."
-        )
-        return True  # Default is true
+        if os.environ.get("PYMAPDL_START_INSTANCE"):
+            start_instance = os.environ.get("PYMAPDL_START_INSTANCE").lower().strip()
+            if start_instance not in ["true", "false"]:
+                raise OSError(
+                    f'Invalid value "{start_instance}" for "start_instance" (or "PYMAPDL_START_INSTANCE"\n'
+                    '"start_instance" should be either "TRUE" or "FALSE"'
+                )
+
+            LOG.debug(f"'PYMAPDL_START_INSTANCE' is set to: {start_instance}")
+            return start_instance == "true"
+
+        else:
+            LOG.debug(
+                "'PYMAPDL_START_INSTANCE' is unset, and there is no supplied value. Using default, which is 'True'."
+            )
+            return True  # Default is true
     else:
         raise ValueError("Only booleans are allowed as arguments.")
 
