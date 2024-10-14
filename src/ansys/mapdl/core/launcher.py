@@ -668,7 +668,7 @@ def launch_remote_mapdl(
     )
 
 
-def get_start_instance(start_instance: bool = True):
+def get_start_instance(start_instance: Optional[Union[bool, str]] = None) -> bool:
     """Check if the environment variable ``PYMAPDL_START_INSTANCE`` exists and is valid.
 
     Parameters
@@ -695,34 +695,41 @@ def get_start_instance(start_instance: bool = True):
     hence the argument ``start_instance`` is overwritten.
 
     """
-    if os.environ.get("PYMAPDL_START_INSTANCE"):
-        # It should not be empty
-        if start_instance:
-            warnings.warn(
-                "The environment variable 'PYMAPDL_START_INSTANCE' is set, "
-                "hence the argument 'start_instance' is overwritten."
-            )
+
+    def valid_start_instance(start_instance: str) -> bool:
+        return start_instance.lower().strip() in ["true", "false"]
+
+    if start_instance and os.environ.get("PYMAPDL_START_INSTANCE"):
+        warnings.warn(
+            "The environment variable 'PYMAPDL_START_INSTANCE' is "
+            "ignored because 'start_instance' argument is given."
+        )
 
     if isinstance(start_instance, bool):
         return start_instance
 
-    elif start_instance is None:
-        if os.environ.get("PYMAPDL_START_INSTANCE"):
-            start_instance = os.environ.get("PYMAPDL_START_INSTANCE").lower().strip()
-            if start_instance not in ["true", "false"]:
-                raise OSError(
-                    f'Invalid value "{start_instance}" for "start_instance" (or "PYMAPDL_START_INSTANCE"\n'
-                    '"start_instance" should be either "TRUE" or "FALSE"'
+    elif start_instance is None or isinstance(start_instance, str):
+        if start_instance is None:
+            if os.environ.get("PYMAPDL_START_INSTANCE"):
+                start_instance = os.environ.get("PYMAPDL_START_INSTANCE", "")
+                if not valid_start_instance(start_instance):
+                    raise OSError(
+                        f'Invalid value "{start_instance}" for "start_instance" (or "PYMAPDL_START_INSTANCE"\n'
+                        '"start_instance" should be either "TRUE" or "FALSE"'
+                    )
+            else:
+                LOG.debug(
+                    "'PYMAPDL_START_INSTANCE' is unset, and there is no supplied value. Using default, which is 'True'."
                 )
+                return True  # Default is true
 
-            LOG.debug(f"'PYMAPDL_START_INSTANCE' is set to: {start_instance}")
-            return start_instance == "true"
-
-        else:
-            LOG.debug(
-                "'PYMAPDL_START_INSTANCE' is unset, and there is no supplied value. Using default, which is 'True'."
+        if not valid_start_instance(start_instance):
+            raise ValueError(
+                f"The value given for 'start_instance' ({start_instance}) is invalid."
             )
-            return True  # Default is true
+
+        return start_instance.lower().strip() == "true"
+
     else:
         raise ValueError("Only booleans are allowed as arguments.")
 
@@ -1316,6 +1323,8 @@ def launch_mapdl(
 
     check_kwargs(args)  # check if passing wrong arguments
 
+    pre_check_args(args)
+
     # SLURM settings
     if is_on_slurm(args):
         LOG.info("On Slurm mode.")
@@ -1324,8 +1333,6 @@ def launch_mapdl(
         get_slurm_options(args, kwargs)
 
     get_cpus(args)
-
-    get_ip_env_var(args)
 
     get_start_instance_arg(args)
 
@@ -1925,30 +1932,15 @@ def generate_start_parameters(args: Dict[str, Any]) -> Dict[str, Any]:
     return start_parm
 
 
-def get_ip_env_var(args: Dict[str, Any]) -> None:
-    """Get IP from 'PYMAPDL_IP' env var
-
-    _extended_summary_
-
-    Parameters
-    ----------
-    args : Dict[str, Any]
-        _description_
-    """
+def get_ip_env_var() -> str:
+    """Get IP from 'PYMAPDL_IP' env var"""
 
     # Getting IP from env var
     ip_env_var = os.environ.get("PYMAPDL_IP", "")
 
     if ip_env_var != "":
-        # Using env var
-        # if equals to "" it is considered not set.
-        if args["ip"]:
-            warnings.warn(
-                "The env var 'PYMAPDL_IP' is set, hence the 'ip' argument is overwritten."
-            )
-
-        args["ip"] = ip_env_var
-        LOG.debug(f"An IP ({args['ip']}) has been set using 'PYMAPDL_IP' env var.")
+        LOG.debug(f"An IP ({ip_env_var}) has been set using 'PYMAPDL_IP' env var.")
+        return ip_env_var
 
 
 def get_ip(args: Dict[str, Any]) -> None:
@@ -1969,7 +1961,10 @@ def get_ip(args: Dict[str, Any]) -> None:
         'start_instance' and 'ip' arguments are incompatible.
     """
     if args["ip"] in [None, ""]:
-        if ON_WSL:
+
+        args["ip"] = get_ip_env_var()
+
+        if not args["ip"] and ON_WSL:
             args["ip"] = _get_windows_host_ip()
             if args["ip"]:
                 LOG.debug(
@@ -1987,16 +1982,6 @@ def get_ip(args: Dict[str, Any]) -> None:
             )
             args["ip"] = LOCALHOST
 
-    else:
-        if args["start_instance"] is True and not args["on_pool"]:
-            raise ValueError(
-                "When providing a value for the argument 'ip', the argument "
-                "'start_instance' cannot be 'True'.\n"
-                "Make sure the corresponding environment variables are not setting "
-                "those argument values.\n"
-                "For more information visit https://github.com/ansys/pymapdl/issues/2910"
-            )
-
     # Converting ip or hostname to ip
     args["ip"] = socket.gethostbyname(args["ip"])
     check_valid_ip(args["ip"])  # double check
@@ -2010,7 +1995,9 @@ def get_start_instance_arg(args: Dict[str, Any]) -> None:
     args : Dict[str, Any]
         Arguments dict
     """
-    if (args["ip"] not in [None, ""]) and (args["start_instance"] is None):
+    ip_envar = get_ip_env_var() not in ["", None]
+
+    if (args["ip"] not in [None, ""] or ip_envar) and (args["start_instance"] is None):
         # An IP has been supplied. By default, 'start_instance' is equal
         # false, unless it is set through the env vars (which has preference)
         args["start_instance"] = False
@@ -2035,7 +2022,7 @@ def get_port(port: Optional[int] = None, start_instance: Optional[bool] = None) 
     if port is None:
         if os.environ.get("PYMAPDL_PORT"):
             LOG.debug(f"Using port from 'PYMAPDL_PORT' env var: {port}")
-            return os.environ.get("PYMAPDL_PORT")
+            return int(os.environ.get("PYMAPDL_PORT"))
 
         if not pymapdl._LOCAL_PORTS:
             port = MAPDL_DEFAULT_PORT
@@ -2075,8 +2062,6 @@ def get_version(
     ----------
     version : Optional[Union[str, int]], optional
         Version argument, by default None
-    exec_file : Optional[str], optional
-        'exec_file' argument, by default None
 
     Returns
     -------
@@ -2086,13 +2071,8 @@ def get_version(
     Raises
     ------
     ValueError
-        Cannot specify both ``exec_file`` and ``version``.
-    ValueError
         MAPDL version must be one of the following
     """
-    if exec_file and version:
-        raise ValueError("Cannot specify both ``exec_file`` and ``version``.")
-
     if version is not None:
         version = str(version)
 
@@ -2296,6 +2276,20 @@ def check_kwargs(args: Dict[str, Any]):
     if kwargs:
         ms_ = ", ".join([f"'{each}'" for each in args["kwargs"].keys()])
         raise ValueError(f"The following arguments are not recognized: {ms_}")
+
+
+def pre_check_args(args):
+    if args["start_instance"] and args["ip"] and not args["on_pool"]:
+        raise ValueError(
+            "When providing a value for the argument 'ip', the argument "
+            "'start_instance' cannot be 'True'.\n"
+            "Make sure the corresponding environment variables are not setting "
+            "those argument values.\n"
+            "For more information visit https://github.com/ansys/pymapdl/issues/2910"
+        )
+
+    if args["exec_file"] and args["version"]:
+        raise ValueError("Cannot specify both ``exec_file`` and ``version``.")
 
 
 def get_cpus(args: Dict[str, Any]):

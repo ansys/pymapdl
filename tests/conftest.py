@@ -263,9 +263,12 @@ remote server with:
 
 {os_msg}
 
-If you do have Ansys installed, you may have to patch pymapdl to
-automatically find your Ansys installation.  Email the developer at:
-alexander.kaszynski@ansys.com
+If you do have Ansys installed, you may have to patch PyMAPDL to
+automatically find your Ansys installation.
+
+You can request assistance by opening an issue on:
+
+https://github.com/ansys/pymapdl/issues
 
 """
 MAPDL_VERSION = None  # this is cached by mapdl fixture and used in the minimal testing

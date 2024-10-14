@@ -67,7 +67,7 @@ def is_on_local():
 
 # Set if on CI
 def is_on_ci():
-    return os.environ.get("ON_CI").lower() == "true"
+    return os.environ.get("ON_CI", "").lower() == "true"
 
 
 # Set if on ubuntu
