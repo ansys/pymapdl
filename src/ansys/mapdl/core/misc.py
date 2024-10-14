@@ -392,7 +392,7 @@ def random_string(stringLength=10, letters=string.ascii_lowercase):
     return "".join(random.choice(letters) for i in range(stringLength))
 
 
-def _check_has_ansys():
+def _check_has_ansys() -> bool:
     """Safely wraps check_valid_ansys
 
     Returns

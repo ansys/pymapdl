@@ -210,7 +210,7 @@ class MapdlTheme(Theme):
         self.render_points_as_spheres: bool = True
 
 
-def _apply_default_theme():
+def _apply_default_theme() -> None:
     import pyvista as pv
 
     pv.global_theme = MapdlTheme()
