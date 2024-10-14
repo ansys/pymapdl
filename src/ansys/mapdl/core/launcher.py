@@ -2037,8 +2037,12 @@ def get_port(port: Optional[int] = None, start_instance: Optional[bool] = None) 
         Port
     """
     if port is None:
+        if os.environ.get("PYMAPDL_PORT"):
+            LOG.debug(f"Using port from 'PYMAPDL_PORT' env var: {port}")
+            return os.environ.get("PYMAPDL_PORT")
+
         if not pymapdl._LOCAL_PORTS:
-            port = int(os.environ.get("PYMAPDL_PORT", MAPDL_DEFAULT_PORT))
+            port = MAPDL_DEFAULT_PORT
             LOG.debug(f"Using default port: {port}")
         else:
             port = max(pymapdl._LOCAL_PORTS) + 1
