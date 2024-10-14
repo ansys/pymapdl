@@ -126,8 +126,7 @@ ALLOWABLE_LAUNCH_MAPDL_ARGS = [
 ]
 
 ON_WSL = os.name == "posix" and (
-    bool(os.environ.get("WSL_DISTRO_NAME", None))
-    or bool(os.environ.get("WSL_INTEROP", None))
+    os.environ.get("WSL_DISTRO_NAME") or os.environ.get("WSL_INTEROP")
 )
 
 if ON_WSL:
@@ -1723,7 +1722,7 @@ def get_slurm_options(
         default: Optional[Union[str, int, float]] = 1,
         astype: Optional[Callable[[Any], Any]] = int,
     ):
-        value_from_env_vars = os.environ.get(variable, None)
+        value_from_env_vars = os.environ.get(variable)
         value_from_kwargs = kwargs.pop(variable, None)
         value = value_from_kwargs or value_from_env_vars or default
         if astype and value:
@@ -1769,7 +1768,7 @@ def get_slurm_options(
     LOG.info(f"SLURM_NODELIST: {SLURM_NODELIST}")
 
     if not args["exec_file"]:
-        args["exec_file"] = os.environ.get("PYMAPDL_MAPDL_EXEC", None)
+        args["exec_file"] = os.environ.get("PYMAPDL_MAPDL_EXEC")
 
     if not args["exec_file"]:
         # We should probably make a way to find it.
@@ -1884,8 +1883,8 @@ def is_on_slurm(args: Dict[str, Any]) -> bool:
     args["ON_SLURM"] = (
         args["detect_slurm_config"]
         and not is_flag_false  # default is true
-        and bool(os.environ.get("SLURM_JOB_NAME", ""))
-        and bool(os.environ.get("SLURM_JOB_ID", ""))
+        and os.environ.get("SLURM_JOB_NAME")
+        and os.environ.get("SLURM_JOB_ID")
     )
     return args["ON_SLURM"]
 

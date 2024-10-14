@@ -301,7 +301,7 @@ def pytest_report_header(config, start_path, startdir):
         "DPF_START_SERVER",
         "IGNORE_POOL",
     ]:
-        env_var_value = os.environ.get(env_var, None)
+        env_var_value = os.environ.get(env_var)
         if env_var_value is not None:
             line += f"{env_var} ('{env_var_value}'), "
     text += [line]

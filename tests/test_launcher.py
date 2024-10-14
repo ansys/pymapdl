@@ -740,7 +740,7 @@ def test_ip_and_start_instance(
     )
 
     # Skip if PyMAPDL cannot detect where MAPDL is installed.
-    if not _HAS_ATP and not os.environ.get("PYMAPDL_MAPDL_EXEC", False):
+    if not _HAS_ATP and not os.environ.get("PYMAPDL_MAPDL_EXEC"):
         # if start_instance and not ip:
         with pytest.raises(
             ModuleNotFoundError,
