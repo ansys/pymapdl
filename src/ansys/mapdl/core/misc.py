@@ -545,7 +545,7 @@ def create_temp_dir(tmpdir=None, name=None):
     path = os.path.join(tmpdir, name)
 
     if not os.path.isdir(path):
-        os.makedirs(path, exist_ok=True)
+        os.makedirs(path)
         LOG.debug(f"Created run location at {path}")
 
     return path
