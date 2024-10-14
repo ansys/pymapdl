@@ -695,9 +695,9 @@ def get_start_instance(start_instance: bool = True):
     hence the argument ``start_instance`` is overwritten.
 
     """
-    if "PYMAPDL_START_INSTANCE" in os.environ and os.environ["PYMAPDL_START_INSTANCE"]:
+    if os.environ.get("PYMAPDL_START_INSTANCE"):
         # It should not be empty
-        if isinstance(start_instance, bool):
+        if start_instance:
             warnings.warn(
                 "The environment variable 'PYMAPDL_START_INSTANCE' is set, "
                 "hence the argument 'start_instance' is overwritten."
