@@ -1,8 +1,32 @@
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """gRPC service specific tests"""
 import os
 import re
 import shutil
+import sys
 
+import grpc
 import pytest
 
 from ansys.mapdl.core import examples
@@ -10,16 +34,32 @@ from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
     MapdlExitedError,
+    MapdlgRPCError,
     MapdlRuntimeError,
+    protect_grpc,
 )
+from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import random_string
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
-# skip entire module unless HAS_GRPC installed or connecting to server
-pytestmark = pytest.mark.skip_grpc
+from conftest import has_dependency, requires
 
-from conftest import skip_if_not_local
+# skip entire module unless HAS_GRPC installed or connecting to server
+pytestmark = requires("grpc")
+
+
+class UnavailableError(grpc.RpcError):
+    def __init__(self, message="Service is temporarily unavailable."):
+        self._message = message
+        self._code = grpc.StatusCode.UNAVAILABLE
+        super().__init__(message)
+
+    def code(self):
+        return self._code
+
+    def details(self):
+        return self._message
 
 
 def write_tmp_in_mapdl_instance(mapdl, filename, ext="txt"):
@@ -77,20 +117,20 @@ def setup_for_cmatrix(mapdl, cleared):
     mapdl.run("/solu")
 
 
-def test_connect_via_channel(mapdl):
-    """Validate MapdlGrpc can be created directly from a channel."""
-
-    import grpc
-
-    from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
-
+@pytest.fixture(scope="function")
+def grpc_channel(mapdl):
     channel = grpc.insecure_channel(
         mapdl._channel_str,
         options=[
             ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
         ],
     )
-    mapdl = MapdlGrpc(channel=channel)
+    return channel
+
+
+def test_connect_via_channel(grpc_channel):
+    """Validate MapdlGrpc can be created directly from a channel."""
+    mapdl = MapdlGrpc(channel=grpc_channel)
     assert mapdl.is_alive
 
 
@@ -115,11 +155,14 @@ def test_clear_multiple(mapdl):
         mapdl.run("/CLEAR")
 
 
-@pytest.mark.xfail(
-    reason="MAPDL bug 867421", raises=(MapdlExitedError, UnicodeDecodeError)
-)
 def test_invalid_get_bug(mapdl):
-    with pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError)):
+    # versions before 24.1 should raise an error
+    if mapdl.version < 24.1:
+        context = pytest.raises(MapdlCommandIgnoredError)
+    else:
+        context = pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError))
+
+    with context:
         mapdl.get_value("ACTIVE", item1="SET", it1num="invalid")
 
 
@@ -186,7 +229,8 @@ def test_large_output(mapdl, cleared):
     mapdl.esize(0.05)
     mapdl.vmesh("all")
     msg = mapdl.nlist()
-    assert len(msg) > 4 * 1024**2
+
+    assert sys.getsizeof(msg) > 4 * 1024**2
 
 
 def test__download_missing_file(mapdl, tmpdir):
@@ -258,7 +302,10 @@ def test__download(mapdl, tmpdir):
     assert out_file.exists()
 
     out_file = tmpdir.join("out1_" + file_name)
-    mapdl._download(file_name, out_file_name=out_file, progress_bar=True)
+    if has_dependency("tqdm"):
+        mapdl._download(file_name, out_file_name=out_file, progress_bar=True)
+    else:
+        mapdl._download(file_name, out_file_name=out_file)
     assert out_file.exists()
 
     out_file = tmpdir.join("out2_" + file_name)
@@ -355,9 +402,9 @@ def test_download_with_extension(
         os.remove(file)
 
 
-@skip_if_not_local
+@requires("local")
 def test_download_recursive(mapdl):
-    if mapdl._local:
+    if mapdl.is_local:
         temp_dir = os.path.join(mapdl.directory, "new_folder")
         os.makedirs(temp_dir, exist_ok=True)
         with open(os.path.join(temp_dir, "file0.txt"), "a") as fid:
@@ -404,10 +451,20 @@ def test_download_result(mapdl, cleared, tmpdir):
     assert os.path.exists(os.path.join(target_dir, "file.rst"))
 
     assert not os.path.exists("file.rst")
-    mapdl.download_result()  # with default argument
+    mapdl.download_result(preference="rst")  # with default argument
     assert os.path.exists("file.rst")
 
     os.remove("file.rst")
+
+    mapdl.download_result(preference="rth")
+    try:
+        os.remove("file.rst")
+    except Exception:
+        pass
+    try:
+        os.remove("file.rth")
+    except Exception:
+        pass
 
 
 def test__channel_str(mapdl):
@@ -417,8 +474,8 @@ def test__channel_str(mapdl):
     assert re.search("\d{4,6}", mapdl._channel_str)
 
 
-def test_mode_corba(mapdl):
-    assert mapdl.mode == "grpc"
+def test_mode(mapdl):
+    assert mapdl.connection == "grpc"
     assert mapdl.is_grpc
     assert not mapdl.is_corba
     assert not mapdl.is_console
@@ -523,3 +580,106 @@ def test_input_compatibility_api_change(mapdl):
 
     with pytest.raises(ValueError, match="A file name must be supplied."):
         mapdl.input()
+
+
+@requires("grpc")
+@requires("local")
+def test__check_stds(mapdl):
+    """Test that the standard input is checked."""
+
+    mapdl._read_stds()
+    assert mapdl._stdout is not None
+    assert mapdl._stderr is not None
+
+
+def test_subscribe_to_channel(mapdl):
+    assert mapdl.channel_state in [
+        "IDLE",
+        "CONNECTING",
+        "READY",
+        "TRANSIENT_FAILURE",
+        "SHUTDOWN",
+    ]
+    assert mapdl._channel_state in [
+        grpc.ChannelConnectivity.IDLE,
+        grpc.ChannelConnectivity.CONNECTING,
+        grpc.ChannelConnectivity.READY,
+        grpc.ChannelConnectivity.TRANSIENT_FAILURE,
+        grpc.ChannelConnectivity.SHUTDOWN,
+    ]
+
+
+@requires("remote")
+def test_exception_message_length(mapdl):
+    # This test does not fail if running on local
+    channel = grpc.insecure_channel(
+        mapdl._channel_str,
+        options=[
+            ("grpc.max_receive_message_length", int(1024)),
+        ],
+    )
+    mapdl2 = MapdlGrpc(channel=channel)
+    assert mapdl2.is_alive
+
+    mapdl2.prep7()
+    mapdl2.dim("myarr", "", 1e5)
+    mapdl2.vfill("myarr", "rand", 0, 1)  # filling array with random numbers
+
+    # Retrieving
+    with pytest.raises(MapdlgRPCError, match="Received message larger than max"):
+        values = mapdl2.parameters["myarr"]
+
+    assert mapdl2.is_alive
+
+    # Deleting generated mapdl instance and channel.
+    channel.close()
+    mapdl2._exited = True  # To avoid side effects.
+    mapdl2.exit()
+
+
+def test_generic_grpc_exception(monkeypatch, grpc_channel):
+    mapdl = MapdlGrpc(channel=grpc_channel)
+    assert mapdl.is_alive
+
+    @protect_grpc
+    def _raise_error_code(*args, **kwargs):
+        raise UnavailableError()
+
+    # Monkey patch to raise the same issue.
+    monkeypatch.setattr(mapdl, "prep7", _raise_error_code)
+
+    with pytest.raises(
+        MapdlRuntimeError, match="MAPDL server connection terminated unexpectedly while"
+    ):
+        # passing mapdl to simulate the function `_raise_error_code` to be a method.
+        mapdl.prep7(mapdl)
+
+    assert mapdl.is_alive
+
+
+def test_generic_grpc_exception_exited(monkeypatch, grpc_channel):
+    mapdl = MapdlGrpc(channel=grpc_channel)
+    assert mapdl.is_alive
+
+    @protect_grpc
+    def _raise_error_code(*args, **kwargs):
+        raise UnavailableError()
+
+    def _null_close_process():
+        return None
+
+    # faking exiting MAPDL
+    mapdl._exited = True
+
+    # Monkey patch to raise the same issue.
+    monkeypatch.setattr(mapdl, "prep7", _raise_error_code)
+
+    # monkey patch `_close_process` so MAPDL does not exit when
+    monkeypatch.setattr(mapdl, "_close_process", _null_close_process)
+
+    with pytest.raises(
+        MapdlExitedError, match="MAPDL server connection terminated unexpectedly while"
+    ):
+        mapdl.prep7(mapdl)
+
+    mapdl._exited = False  # Restoring

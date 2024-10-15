@@ -13,8 +13,8 @@ set LINKCHECKDIR=\%BUILDDIR%\linkcheck
 
 if "%1" == "" goto help
 if "%1" == "clean" goto clean
-if "%1" == "clean-all" goto clean-all
 if "%1" == "clean-examples" goto clean-examples
+if "%1" == "clean-except-examples" goto clean-except-examples
 if "%1" == "linkcheck" goto linkcheck
 
 
@@ -34,18 +34,23 @@ if errorlevel 9009 (
 %SPHINXBUILD% -M %1 %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 goto end
 
-:clean
+:clean-except-examples
+echo Cleaning everything except examples
 rmdir /s /q %BUILDDIR% > /NUL 2>&1 
+rmdir /s /q images/auto-generated > /NUL 2>&1 
 for /d /r %SOURCEDIR% %%d in (_autosummary) do @if exist "%%d" rmdir /s /q "%%d"
 goto end
 
-:clean-all
+:clean
+echo Cleaning everything
 rmdir /s /q %BUILDDIR% > /NUL 2>&1 
 rmdir /s /q source\examples\gallery_examples > /NUL 2>&1 
 for /d /r %SOURCEDIR% %%d in (_autosummary) do @if exist "%%d" rmdir /s /q "%%d"
+rmdir /s /q images/auto-generated > /NUL 2>&1 
 goto end
 
 :clean-examples
+echo Cleaning examples
 rmdir /s /q source\examples\gallery_examples > /NUL 2>&1
 goto end
 

@@ -5,38 +5,34 @@ build-backend = "flit_core.buildapi"
 [project]
 # Check https://flit.readthedocs.io/en/latest/pyproject_toml.html for all available sections
 name = "ansys-mapdl-core"
-version = "0.66.dev0"
+version = "0.69.dev0"
 description = "A Python wrapper for Ansys MAPDL."
-readme = "README.rst"
-requires-python = ">=3.8"
+readme = "README.md"
+requires-python = ">=3.10,<3.13"  # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
 license = {file = "LICENSE"}
-authors = [
-    {name = "Ansys, Inc.", email = "pyansys.maintainers@ansys.com"},
-]
-maintainers = [
-    {name = "PyAnsys developers", email = "pyansys.maintainers@ansys.com"},
-]
+authors = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
+maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 dependencies = [
-    "ansys-api-mapdl==0.5.1",  # supports at least 2020R2 - 2022R1
-    "ansys-corba; python_version < '3.9'",
+    "ansys-api-mapdl==0.5.2",  # supports at least 2020R2 - 2022R1
     "ansys-mapdl-reader>=0.51.7",
     "ansys-math-core>=0.1.2",
     "ansys-platform-instancemanagement~=1.0",
-    "platformdirs>=3.6.0",
+    "ansys-tools-visualization-interface>=0.2.6",
+    "ansys-tools-path>=0.3.1",
     "click>=8.1.3", # for CLI interface
     "grpcio>=1.30.0",  # tested up to grpcio==1.35
     "importlib-metadata>=4.0",
     "matplotlib>=3.0.0",  # for colormaps for pyvista
     "numpy>=1.14.0,<1.25.0; python_version < '3.9'",
-    "numpy>=1.14.0; python_version >= '3.9'",
+    "numpy>=1.14.0,<3.0.0; python_version >= '3.9'",
     "pexpect>=4.8.0 ; platform_system=='Linux'",
+    "platformdirs>=3.6.0",
     "protobuf>=3.12.2",  # minimum required based on latest ansys-grpc-mapdl
     "psutil>=5.9.4",
     "pyansys-tools-versioning>=0.3.3",
-    "ansys-tools-path>=0.3.1",
     "pyiges[full]>=0.3.1", # Since v0.3.0, the 'full' flag is needed in order to install 'geomdl'
-    "pyvista>=0.33.0",
     "scipy>=1.3.0",  # for sparse (consider optional?)
+    "tabulate>=0.8.0", # for cli plotting
     "tqdm>=4.45.0",
     "vtk>=9.0.0",
 ]
@@ -48,56 +44,65 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX",
     "Operating System :: MacOS",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
 ]
 
 [project.optional-dependencies]
+jupyter = [
+    "jupyterlab>=3",
+    "ipywidgets",
+]
+
 tests = [
-    "ansys-dpf-core==0.9.0",
-    "autopep8==2.0.4",
-    "matplotlib==3.7.3",
-    "scipy==1.10.1; python_version < '3.9'", # to support python 3.8
-    "scipy==1.11.2; python_version > '3.8'",
-    "pandas==2.1.0",
+    "ansys-dpf-core==0.10.1",
+    "ansys-tools-visualization-interface==0.4.5",
+    "autopep8==2.3.1",
+    "matplotlib==3.9.2",
+    "pandas==2.2.3",
+    "pyansys-tools-report==0.8.0",
     "pyiges[full]==0.3.1",
-    "pytest==7.4.2",
-    "pytest-cov==4.1.0",
-    "pyvista==0.42.1",
-    "pyansys-tools-report==0.6.0",
-    "vtk==9.2.6",
-    "pytest-rerunfailures==12.0",
-    "pytest-pyvista==0.1.8",
+    "pytest-cov==5.0.0",
+    "pytest-memprof<0.3.0",
+    "pytest-pyvista==0.1.9",
+    "pytest-rerunfailures==14.0",
+    "pytest==8.3.3",
+    "scipy==1.14.1",
+    "vtk==9.3.1",
 ]
 doc = [
-    "sphinx==7.2.2",
-    "ansys-dpf-core==0.9.0",
-    "ansys-mapdl-reader==0.52.20",
-    "ansys-sphinx-theme==0.11.2",
-    "grpcio==1.51.1",
-    "imageio-ffmpeg==0.4.9",
-    "imageio==2.31.3",
-    "jupyter_sphinx==0.4.0",
+    "ansys-dpf-core==0.10.1",
+    "ansys-mapdl-reader==0.54.1",
+    "ansys-tools-visualization-interface==0.4.5",
+    "ansys-sphinx-theme==1.1.2",
+    "grpcio==1.66.2",
+    "imageio-ffmpeg==0.5.1",
+    "imageio==2.35.1",
+    "jupyter==1.1.1",
+    "jupyter_sphinx==0.5.3",
     "jupyterlab>=3.2.8",
-    "matplotlib==3.7.3",
-    "numpydoc==1.5.0",
-    "pandas==2.1.0",
-    "plotly==5.16.1",
+    "matplotlib==3.9.2",
+    "nbformat==5.10.4",
+    "numpydoc==1.8.0",
+    "pandas==2.2.3",
+    "plotly==5.24.1",
     "pyiges[full]==0.3.1",
-    "pypandoc==1.11",
-    "pytest-sphinx==0.5.0",
+    "pypandoc==1.14",
+    "pytest-sphinx==0.6.3",
     "pythreejs==2.4.2",
-    "pyvista[trame]==0.42.1",
-    "sphinx-autobuild==2021.3.14",
-    "sphinx-autodoc-typehints==1.24.0",
+    "sphinx-autobuild==2024.10.3",
+    "sphinx-autodoc-typehints==1.25.2",
     "sphinx-copybutton==0.5.2",
-    "sphinx-gallery==0.14.0",
-    "sphinxcontrib-websupport==1.2.6",
-    "sphinxemoji==0.2.0",
-    "sphinx-reredirects==0.1.2",
-    "vtk==9.2.6",
+    "sphinx-design==0.6.1",
+    "sphinx-gallery==0.18.0",
+    "sphinx-jinja==2.0.2",
+    "sphinx-notfound-page==1.0.4",
+    "sphinx==8.1.0",
+    "sphinxcontrib-websupport==2.0.0",
+    "sphinxemoji==0.3.1",
+    "vtk==9.3.1",
 ]
 
 [tool.flit.module]
@@ -105,11 +110,16 @@ name = "ansys.mapdl.core"
 
 [project.urls]
 Source = "https://github.com/ansys/pymapdl"
+Issues = "https://github.com/ansys/pymapdl/issues"
+Documentation = "https://mapdl.docs.pyansys.com"
+Tracker = "https://github.com/ansys/pymapdl/issues"
 
 [project.scripts]
-pymapdl_convert_script = "ansys.mapdl.core.convert:cli"
+pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_point"
+pymapdl = "ansys.mapdl.core.cli:main"
 
 [tool.pytest.ini_options]
+addopts = "-ra -vvv"
 junit_family = "legacy"
 filterwarnings = [
     "ignore::FutureWarning",
@@ -122,7 +132,6 @@ filterwarnings = [
 ]
 markers = [
     "skip_grpc: skip tests using grpc",
-    "corba: skip tests using the CORBA interface",
     "gui: skip tests that launch the GUI interface",
 ]
 testpaths = "tests"
@@ -135,23 +144,138 @@ default_section = "THIRDPARTY"
 skip_glob = ["__init__.py"]
 src_paths = ["doc", "src", "tests"]
 
-
 [tool.coverage.run]
 source = ["ansys/pymapdl"]
 omit = [
     # omit commands
     "ansys/mapdl/core/_commands/*",
-
     # ignore legacy interfaces
     "ansys/mapdl/core/mapdl_console.py",
-    "ansys/mapdl/core/mapdl_corba.py",
     "ansys/mapdl/core/jupyter.py",
+    # ignore non exposed interfaces
+    "ansys/mapdl/core/mapdl_inprocess.py",
 ]
 
 [tool.coverage.report]
 show_missing = true
 
 [tool.codespell]
-skip = '*.pyc,*.txt,*.gif,*.png,*.jpg,*.js,*.html,*.doctree,*.ttf,*.woff,*.woff2,*.eot,*.mp4,*.inv,*.pickle,*.ipynb,flycheck*,./.git/*,./.hypothesis/*,*.yml,./doc/build/*,./doc/images/*,./dist/*,*~,.hypothesis*,./doc/source/examples/*,*cover,*.dat,*.mac,build,./docker/mapdl/v*,./factory/*,./ansys/mapdl/core/mapdl_functions.py,PKG-INFO,*.mypy_cache/*,./docker/mapdl/*,./_unused/*'
-ignore-words = "doc/styles/Vocab/ANSYS/accept.txt"
+skip = '*.pyc,*.txt,*.gif,*.png,*.jpg,*.js,*.html,*.doctree,*.ttf,*.woff,*.woff2,*.eot,*.mp4,*.inv,*.pickle,*.ipynb,flycheck*,./.git/*,./.hypothesis/*,*.yml,./doc/build/*,./doc/images/*,./dist/*,*~,.hypothesis*,./doc/source/examples/*,*cover,*.dat,*.mac,*.cdb,*.CDB,build,./docker/mapdl/v*,./factory/*,./ansys/mapdl/core/mapdl_functions.py,PKG-INFO,*.mypy_cache/*,./docker/mapdl/*,./_unused/*'
 quiet-level = 3
+ignore-regex=".*codespell-ignore$|NORML|POIN"
+ignore-words = "doc/styles/config/vocabularies/ANSYS/accept.txt"
+
+[tool.numpydoc_validation]
+checks = [
+    #"all",   # report on all checks, except the below
+  # "GL01", # "Docstring text (summary) should start in the line immediately "
+    # "after the opening quotes (not in the same line, or leaving a "
+    # "blank line in between)",
+  # "GL02", # "Closing quotes should be placed in the line after the last text "
+    # "in the docstring (do not close the quotes in the same line as "
+    # "the text, or leave a blank line between the last text and the "
+    # "quotes)",
+  # "GL03", # "Double line break found; please use only one blank line to "
+    # "separate sections or paragraphs, and do not leave blank lines "
+    # "at the end of docstrings",
+    "GL05", # 'Tabs found at the start of line "{line_with_tabs}", please use '
+    # "whitespace only",
+  # "GL06", # 'Found unknown section "{section}". Allowed sections are: '
+    # "{allowed_sections}",
+  #  "GL07", # "Sections are in the wrong order. Correct order is: {correct_sections}",
+  # "GL08", # "The object does not have a docstring",
+  # "GL09", # "Deprecation warning should precede extended summary",
+    "GL10", # "reST directives {directives} must be followed by two colons",
+  # "SS01", # "No summary found (a short summary in a single line should be "
+    # "present at the beginning of the docstring)",
+    "SS02", # "Summary does not start with a capital letter",
+  # "SS03", # "Summary does not end with a period",
+    "SS04", # "Summary contains heading whitespaces",
+  #  "SS05", # "Summary must start with infinitive verb, not third person "
+    # '(e.g. use "Generate" instead of "Generates")',
+  # "SS06", # "Summary should fit in a single line",
+  # "ES01", # "No extended summary found",
+  # "PR01", # "Parameters {missing_params} not documented",
+  # "PR02", # "Unknown parameters {unknown_params}",
+    "PR03", # "Wrong parameters order. Actual: {actual_params}. "
+    # "Documented: {documented_params}",
+  # "PR04", # 'Parameter "{param_name}" has no type',
+    "PR05", # 'Parameter "{param_name}" type should not finish with "."',
+    "PR06", # 'Parameter "{param_name}" type should use "{right_type}" instead '
+    # 'of "{wrong_type}"',
+    "PR07", # 'Parameter "{param_name}" has no description',
+  # "PR08", # 'Parameter "{param_name}" description should start with a '
+    # "capital letter",
+  # "PR09", # 'Parameter "{param_name}" description should finish with "."',
+  # "PR10", # 'Parameter "{param_name}" requires a space before the colon '
+    # "separating the parameter name and type",
+  # "RT01", # "No Returns section found",
+  # "RT02", # "The first line of the Returns section should contain only the "
+    # "type, unless multiple values are being returned",
+  # "RT03", # "Return value has no description",
+  # "RT04", # "Return value description should start with a capital letter",
+  # "RT05", # 'Return value description should finish with "."',
+    "YD01", # "No Yields section found",
+  # "SA01", # "See Also section not found",
+    "SA02", # "Missing period at end of description for See Also "
+    # '"{reference_name}" reference',
+    "SA03", # "Description should be capitalized for See Also "
+    # '"{reference_name}" reference',
+    "SA04", # 'Missing description for See Also "{reference_name}" reference',
+  # "EX01", # "No examples section found",
+]
+
+
+override_SS05 = [  # override SS05 to allow docstrings starting with these words
+    # '^Process ',
+    # '^Assess ',
+    # '^Access ',
+]
+
+[tool.towncrier]
+package = "ansys.mapdl.core"
+directory = "doc/changelog.d"
+filename = "doc/source/changelog.rst"
+template = "doc/changelog.d/changelog_template.jinja"
+start_string = ".. towncrier release notes start\n"
+title_format = "`{version} <https://github.com/ansys/pymapdl/releases/tag/v{version}>`_ - {project_date}"
+issue_format = "`#{issue} <https://github.com/ansys/pymapdl/pull/{issue}>`_"
+
+[[tool.towncrier.type]]
+directory = "added"
+name = "Added"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "changed"
+name = "Changed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "fixed"
+name = "Fixed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "dependencies"
+name = "Dependencies"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "miscellaneous"
+name = "Miscellaneous"
+showcontent = true
+[[tool.towncrier.type]]
+directory = "documentation"
+name = "Documentation"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "maintenance"
+name = "Maintenance"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "test"
+name = "Test"
+showcontent = true

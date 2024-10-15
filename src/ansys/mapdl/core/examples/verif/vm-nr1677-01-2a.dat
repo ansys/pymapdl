@@ -1,0 +1,401 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/verify,vm-nr1677-01-2a
+/title,vm-nr1677-01-2a,NRC Piping Benchmark Problems,Volume 1,Problem 2
+
+/com,********************************************************************************
+/com,
+/com, Reference: Piping Benchmark Problems
+/com,        NUREC/CR--1677-Vol.1
+/com,                P.Bezier, M.Hartzman, M.Reich
+/com,            August 1980
+/com,
+/com, Elements used: Pipe288, Mass21
+/com,
+/com, Results :
+/com, The following results are outputted
+/com, 1. Frequencies obtained from modal solution.
+/com, 2. Maximum nodal displacements and rotations obtained from spectrum solution.
+/com, 3. Element forces and moments obtained from spectrum solution.
+/com,
+/com,********************************************************************************
+
+/out,scratch
+
+/prep7
+et,1,pipe288,,,3,2                      ! Element 1 - PIPE288 using cubic shape function
+et,2,mass21                             ! Element 2 - MASS21
+
+/com, Real Constants
+/com,****************
+
+sectype,1,pipe
+secdata,2.37500000,0.15400000,14        ! Outer Diameter, Wall Thickness, Cells around the circumference
+
+r,2,0.447000518e-01,0.447000518e-01,0.447000518e-01,0.0,0.0,0.0
+r,3,0.447000518e-01,0.447000518e-01,0.447000518e-01,0.0,0.0,0.0
+r,4,0.447000518e-01,0.447000518e-01,0.447000518e-01,0.0,0.0,0.0
+r,5,0.447000518e-01,0.447000518e-01,0.447000518e-01,0.0,0.0,0.0
+r,6,0.432699275e-01,0.432699275e-01,0.432699275e-01,0.0,0.0,0.0
+r,7,0.893995859e-02,0.893995859e-02,0.893995859e-02,0.0,0.0,0.0
+r,8,0.432699275e-01,0.432699275e-01,0.432699275e-01,0.0,0.0,0.0
+r,9,0.893995859e-02,0.893995859e-02,0.893995859e-02,0.0,0.0,0.0
+r,10,0.893995859e-02,0.893995859e-02,0.893995859e-02,0.0,0.0,0.0
+r,11,0.432699275e-01,0.432699275e-01,0.432699275e-01,0.0,0.0,0.0
+r,12,0.893995859e-02,0.893995859e-02,0.893995859e-02,0.0,0.0,0.0
+r,13,0.432699275e-01,0.432699275e-01,0.432699275e-01,0.0,0.0,0.0
+r,14,0.893995859e-02,0.893995859e-02,0.893995859e-02,0.0,0.0,0.0
+r,15,0.893995859e-02,0.893995859e-02,0.893995859e-02,0.0,0.0,0.0
+
+/com, Nodes
+/com,*******
+
+n,1,0.0,-30.00                          ! Node Numbers, Global Co-ordinates
+n,2,27.25,-30.00
+n,3,27.25,-30.00,17.250
+n,4,0.0,-30.00,17.250
+n,5,0.0,18.625,17.250
+n,6,0.0,18.625,8.625
+n,7,0.0,18.625
+n,8,8.625,18.625,
+n,9,18.625,18.625
+n,10,27.25,18.625
+n,11,27.25,18.625,8.625
+n,12,27.25,18.625,17.250
+n,13,18.625,18.625,17.250
+n,14,8.625,18.625,17.250
+n,15,0.0,-80.00
+n,16,27.25,-80.00
+n,17,27.25,-80.00,17.250
+n,18,0.0,-80.00,17.25
+
+/com, Straight Pipe (Tangent Elements)
+/com,**********************************
+
+mat,1
+type,1
+secnum,1
+
+en,1,15,1
+en,2,1,7
+en,3,7,6
+en,4,6,5
+en,5,5,4
+en,6,4,18
+en,7,16,2
+en,8,2,10
+en,9,10,11
+en,10,11,12
+en,11,12,3
+en,12,3,17
+en,13,12,13
+en,14,13,14
+en,15,14,5
+en,16,7,8
+en,17,8,9
+en,18,9,10
+
+/com, Mass Elements
+/com,***************
+
+mat,1
+type,2
+
+real,2
+en,19,1
+
+real,3
+en,20,2
+
+real,4
+en,21,3
+
+real,5
+en,22,4
+
+real,6
+en,23,5
+
+real,7
+en,24,6
+
+real,8
+en,25,7
+
+real,9
+en,26,8
+
+real,10
+en,27,9
+
+real,11
+en,28,10
+
+real,12
+en,29,11
+
+real,13
+en,30,12
+
+real,14
+en,31,13
+
+real,15
+en,32,14
+
+nsel,s,node,,15
+nsel,a,node,,16
+nsel,a,node,,17
+nsel,a,node,,18
+cm,fixedsu,node
+allsel,all
+
+mp,ex,1,27899996.8
+mp,nuxy,1,0.3
+mp,dens,1,2.587991718e-10
+
+/com, Constraints
+/com,*************
+
+d,15,all,0
+d,16,all,0
+d,17,all,0
+d,18,all,0
+save
+allsel,all
+finish
+
+/com,
+/com,=============
+/com,   Modal Solve
+/com,=============
+/com,
+
+/solution
+antype,modal
+modopt,lanb,5                           ! Use LANB solver
+mxpand,,,,yes
+solve
+save
+finish
+
+/post1
+/out,
+/com, *******************************
+/com,  Frequencies from Modal solve
+/com, *******************************
+set,list
+finish
+
+/com,----------------------------------------------------------------------------
+
+/out,scratch
+/com,
+/com,================
+/com,   Spectrum Solve
+/com,================
+/com,
+
+/solution
+antype,spectr                           ! Perform Spectrum analysis
+spopt,sprs                              ! Single Point Excitation Response Spectrum
+dmprat,0.02                             ! Damping Ratio
+grp,0.001                               ! Group Modes based on Significance Level
+svtyp,2                                 ! Seismic Acceleration Response Loading
+
+sed,1
+freq
+freq,3.1,4,5,5.8,7.1,8.8,11,14.1,17.2
+freq,35,40,588
+sv,0.02,400,871,871,700,1188,1188,440,775,775
+sv,0.02,380,348.6,145
+solve
+
+sed,,1
+freq
+freq,3.1,4,5,5.8,7.1,8.8,11,14.1,17.2
+freq,35,40,588
+sv,0.02,266.7,580.7,580.7,466.7,792,792,293.3333,516.7,516.7
+sv,0.02,253.3,232.4,96.7
+solve
+
+sed,,,1
+freq
+freq,3.1,4,5,5.8,7.1,8.8,11,14.1,17.2
+freq,35,40,588
+sv,0.02,400,871,871,700,1188,1188,440,775,775
+sv,0.02,380,348.6,145
+solve
+fini
+
+/com,----------------------------------------------------------------------------
+
+/post1
+/input,,mcom
+
+
+/out,
+/com, *=================================================================
+/com, * Maximum nodal displacements and rotations from spectrum solve
+/com, *=================================================================
+
+/out,scratch
+
+*GET,AdisX,NODE,6,U,X
+*GET,AdisY,NODE,8,U,Y
+*GET,AdisZ,NODE,8,U,Z
+*GET,ArotX,NODE,1,ROT,X
+*GET,ArotY,NODE,9,ROT,Y
+*GET,ArotZ,NODE,1,ROT,Z
+
+/out,
+*stat,AdisX
+*stat,AdisY
+*stat,AdisZ
+*stat,ArotX
+*stat,ArotY
+*stat,ArotZ
+
+/com, *==========================================================
+/com, * Element Forces and Moments obtained from spectrum solve
+/com, *==========================================================
+
+/out,scratch
+
+/com,==========
+/com,  Node I
+/com,==========
+
+/com, Element #1 (Pipe288 element)
+/com,*******************************
+
+esel,s,elem,,1
+etable,pxi_1,smisc,1
+etable,vyi_1,smisc,6
+etable,vzi_1,smisc,5
+etable,txi_1,smisc,4
+etable,myi_1,smisc,2
+etable,mzi_1,smisc,3
+esel,all
+
+/out,
+/com, **********************************************
+/com,  Element forces and moments at element1, node i
+/com, ************************************************
+
+pretab,pxi_1,vyi_1,vzi_1,txi_1,myi_1,mzi_1
+
+
+/out,scratch
+/com,==========
+/com,  Node J
+/com,==========
+
+/com, Element #1 (Pipe288 element)
+/com,*******************************
+
+esel,s,elem,,1
+etable,pxj_1,smisc,14
+etable,vyj_1,smisc,19
+etable,vzj_1,smisc,18
+etable,txj_1,smisc,17
+etable,myj_1,smisc,15
+etable,mzj_1,smisc,16
+esel,all
+
+/out,
+/com, **********************************************
+/com,  Element forces and moments at element1, node j
+/com, ************************************************
+
+pretab,pxj_1,vyj_1,vzj_1,txj_1,myj_1,mzj_1
+
+
+
+/out,scratch
+
+
+/com,==========
+/com,  Node I
+/com,==========
+
+/com, Element #18 (Pipe288 element)
+/com,********************************
+
+esel,s,elem,,18
+etable,pxi_18,smisc,1
+etable,vyi_18,smisc,6
+etable,vzi_18,smisc,5
+etable,txi_18,smisc,4
+etable,myi_18,smisc,2
+etable,mzi_18,smisc,3
+esel,all
+
+/out,
+/com, ***************************************************
+/com,  Element forces and moments at element18, node i
+/com, ***************************************************
+
+pretab,pxi_18,vyi_18,vzi_18,txi_18,myi_18,mzi_18
+
+
+/out,scratch
+/com,==========
+/com,  Node J
+/com,==========
+
+
+
+/com, Element #18 (Pipe288 element)
+/com,********************************
+esel,s,elem,,18
+
+etable,pxj_18,smisc,14
+etable,vyj_18,smisc,19
+etable,vzj_18,smisc,18
+etable,txj_18,smisc,17
+etable,myj_18,smisc,15
+etable,mzj_18,smisc,16
+esel,all
+
+allsel,all
+
+/out,
+/com, **************************************************
+/com,  Element forces and moments at element18, node j
+/com, **************************************************
+
+pretab,pxj_18,vyj_18,vzj_18,txj_18,myj_18,mzj_18
+
+
+/com,----------------------------------------------------------------------------
+
+/com, ***************************************
+/com,  Reaction forces from spectrum solve
+/com, ****************************************
+
+prrsol
+
+finish
+/exit,nosave

@@ -10,41 +10,67 @@ This section provides a general overview of PyMAPDL and how you use it.
    This toctreemust be a top level index to get it to show up in
    pydata_sphinx_theme
 
+
 .. toctree::
    :maxdepth: 1
    :hidden:
+   :caption: Basic
 
-   launcher
    mapdl
-   mapdl_examples
-   plotting
    mesh_geometry
-   post
+   plotting
    parameters
-   database
+   components
+   post
+   troubleshoot
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Intermediate
+
+   cli
    convert
+   database
    math
    pool
+
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Advanced
+
    xpl
    upf
    krylov
-   troubleshoot
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: High performance computing
+
+   hpc/introduction
+   hpc/settings
+   hpc/pymapdl
+   hpc/examples
+   hpc/troubleshooting
 
 
 PyMAPDL overview
 ================
-The :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` function
+The :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function
 within the ``ansys-mapdl-core`` library creates an instance of the
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class in the background and sends
-commands to that service. Errors and warnings are processed
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class in the background and sends
+commands to that instance. Errors and warnings are processed
 Pythonically, letting you develop a script in real time, without
 worrying about it functioning correctly when deployed in batch
 mode.
 
 MAPDL can be started from Python in gRPC mode using the
-:func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` method. This starts
+:func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` method. This starts
 MAPDL in a temporary directory by default. You can change this to
-your current directory with:
+your current directory with this code:
 
 .. code:: python
 
@@ -54,7 +80,7 @@ your current directory with:
     path = os.getcwd()
     mapdl = launch_mapdl(run_location=path)
 
-MAPDL is now active, and you can send commands to it as a genuine a
+MAPDL is now active, and you can send commands to it as a genuine
 Python class. For example, if you wanted to create a surface using
 key points, you could run:
 
@@ -79,23 +105,23 @@ example, if you input an invalid command:
 
    >>> mapdl.run("AL, 1, 2, 3")
 
-   apdlRuntimeError: 
-   L, 1, 2, 3
+   MapdlRuntimeError: 
+   AL, 1, 2, 3
 
-   EFINE AREA BY LIST OF LINES
-   INE LIST =     1    2    3
+   DEFINE AREA BY LIST OF LINES
+   LINE LIST =     1    2    3
    TRAVERSED IN SAME DIRECTION AS LINE     1)
 
-   ** ERROR ***                           CP =       0.338   TIME= 09:45:36
-   eypoint 1 is referenced by only one line.  Improperly connected line   
-   et for AL command.                                                     
+   *** ERROR ***                           CP =       0.338   TIME= 09:45:36
+   Keypoint 1 is referenced by only one line.  Improperly connected line   
+   set for AL command.                                                     
 
 This ``MapdlRuntimeError`` was caught immediately. This means that
 you can write your MAPDL scripts in Python, run them interactively, and
 then run them as a batch without worrying if the script would run correctly if
 you had instead outputted it to a script file.
 
-The :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class supports much more
+The :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class supports much more
 than just sending text to MAPDL. It includes higher-level wrapping,
 allowing for better scripting and interaction with MAPDL. For an overview of the
 various advanced methods to visualize, script, and interact with MAPDL, see
@@ -105,7 +131,7 @@ various advanced methods to visualize, script, and interact with MAPDL, see
 Calling MAPDL Pythonically
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 MAPDL functions can be called directly from an instance of
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` in a Pythonic manner. This is
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` in a Pythonic manner. This is
 to simplify calling Ansys, especially when inputs are variables within
 Python. For example, the following two commands are equivalent:
 
@@ -131,16 +157,16 @@ Additionally, exceptions are caught and handled within Python.
 
    >>> mapdl.run("AL, 1, 2, 3")
 
-   xception: 
-   L, 1, 2, 3
+   Exception: 
+   AL, 1, 2, 3
 
-   EFINE AREA BY LIST OF LINES
-   INE LIST =     1    2    3
-   TRAVERSED IN SAME DIRECTION AS LINE     1)
+   DEFINE AREA BY LIST OF LINES
+   LINE LIST =     1    2    3
+   (TRAVERSED IN SAME DIRECTION AS LINE     1)
 
-   ** ERROR ***                           CP =       0.338   TIME= 09:45:36
-   eypoint 1 is referenced by only one line.  Improperly connected line   
-   et for AL command.                                                     
+   *** ERROR ***                           CP =       0.338   TIME= 09:45:36
+   Keypoint 1 is referenced by only one line.  Improperly connected line   
+   set for AL command.                                                     
 
 
 For longer scripts, instead of sending commands to MAPDL as in the
@@ -165,7 +191,7 @@ area creation example, you can instead run:
     mapdl.al(1, 2, 3, 4)
 
 This approach has some obvious advantages, chiefly that it's a bit
-easier to script as :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
+easier to script as :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>`
 takes care of the string formatting for you. For example, inputting
 points from a numpy array:
 
@@ -222,4 +248,4 @@ with it. For example:
         recommended.
 
 
-For stability considerations, see :ref:`ref_pymapdl_stability`.
+For stability considerations, see :ref:`PyMAPDL stability <ref_pymapdl_stability>`.

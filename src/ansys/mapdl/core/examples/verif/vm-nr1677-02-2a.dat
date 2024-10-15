@@ -1,0 +1,568 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/verify,vm-nr1677-02-2a
+/title,vm-nr1677-02-2a,NRC piping benchmarks problems,Volume II, Problem 2a
+
+/com, ***************************************************************************
+/com, Reference: Piping benchmark problems,Dynamic analysis independant support
+/com,            motion response spectrum method, P. Bezler, M. Subudhi and
+/com,            M.Hartzman, NUREG/CR--1677-Vol.2, August 1985.
+/com, 
+/com, 
+/com, Elements used: PIPE289, ELBOW290, COMBIN14 and MASS21
+/com,
+/com, Results:
+/com, The following results are outputted
+/com, 1. Frequencies obtained from modal solution.
+/com, 2. Maximum nodal displacements and rotations obtained from spectrum solution.
+/com, 3. Element forces/moments obtained from spectrum solution.
+/com, 4. Reaction forces obtained from spectrum solution.
+/com,
+/com, *******************************************************************************
+
+/out,scratch
+
+/prep7
+
+YoungModulus1 = .240e+8				! Young's Modulus
+Nu = 0.3						! Minor Poisson's Ratio
+ShearModulus1 = YoungModulus1/(2*(1+Nu))	! Shear Modulus
+WMass = 0.001056893				! Density
+WTick = 0.241					! Wall Thickness
+K = 0.71e-5
+						
+OD = 7.288						! Outer Diameter
+RADCUR = 36.30					! Radius of Curvature
+
+temp = 80						! Temperature
+maxm = 25						! No. of Modes to Extract
+
+et,1,pipe289,,,,2					! Element 1 - PIPE289
+et,2,elbow290,,6				! Element 2 - ELBOW290
+
+et,3,combin14					! Element 3 - COMBIN14
+keyopt,3,2,1					! X Degree of Freedom
+et,4,combin14					! Element 4 - COMBIN14
+keyopt,4,2,2					! Y Degree of Freedom
+et,5,combin14					! Element 5 - COMBIN14
+keyopt,5,2,3					! Z Degree of Freedom
+et,6,mass21						! Element 6 - MASS21
+keyopt,6,3,2					! 3D mass without inertia
+
+/com,------------------------------------------------------------------------------------
+
+/com, Real Constants
+/com,****************
+
+sectype,1,PIPE,ctube
+secdata,OD,WTick,24
+
+r,3,0.1e+5
+r,4,0.1e+9
+r,5,0.1e+11
+r,6,1.518
+
+/com,------------------------------------------------------------------------------------
+
+/com, Material Properties
+/com,*********************
+
+mp,ex,  1, YoungModulus1			
+mp,nuxy,1, Nu					
+mp,gxy ,1, ShearModulus1			
+mp,dens,1, WMass					
+mp,kxx,1, K
+
+mp,ex,  2, YoungModulus1			
+mp,nuxy,2, Nu					
+mp,gxy ,2, ShearModulus1			
+mp,dens,2, WMass					
+mp,kxx,2, K
+
+/com,------------------------------------------------------------------------------------
+
+/com, Keypoints
+/com,**********
+
+k,1,0,0,0						
+k,2,0,54.45,0
+k,3,0,108.9,0
+k,4,10.632,134.568,0
+k,5,36.3,145.2,0
+k,6,54.15,145.2,0
+k,7,72.0,145.2,0
+k,8,97.668,145.2,10.632
+k,9,108.3,145.2,36.3
+k,10,108.3,145.2,56.8
+k,11,108.3,145.2,77.3
+k,12,108.3,145.2,97.8
+k,13,108.3,145.2,118.3
+k,14,108.3,145.2,188.8
+k,15,108.3,181.5,225.1
+k,16,108.3,236,225.1
+k,17,108.3,290,225.1
+k,18,148.3,145.2,97.8
+k,19,188.3,145.2,97.8
+k,20,224.6,145.2,61.5
+k,21,224.6,145.2,20
+
+/com,
+/com, Elastic Support Keypoints
+/com,**************************
+
+k,22,1,0,0
+k,23,0,1,0
+k,24,0,0,1
+k,25,72,145.2,-1
+k,26,109.3,145.2,36.3
+k,27,108.3,146.2,77.3
+k,28,108.3,146.2,118.3
+k,29,107.3,182.5,226.5
+k,30,109.3,290,225.1
+k,31,108.3,291,225.1
+k,32,108.3,290,226.1
+k,33,225.6,145.2,20
+k,34,224.6,146.2,20
+k,35,224.6,145.2,21
+
+/com,------------------------------------------------------------------------------------
+
+/com,
+/com, Modeling for Straight Pipe 
+/com,**********************************
+
+l, 1, 2						
+l, 2, 3
+l, 5, 6
+l, 6, 7
+l, 9,10
+l,10,11
+l,11,12
+l,12,13
+l,13,14
+l,15,16
+l,16,17
+l,12,18
+l,18,19
+l,20,21
+
+/com,
+/com, Modeling for Pipe Bend 
+/com,************************
+
+larc, 3, 4, 2, RADCUR
+larc, 4, 5, 6, RADCUR
+larc, 7, 8, 6, RADCUR
+larc, 8, 9,10, RADCUR
+larc,14,15,16, RADCUR
+larc,19,20,18, RADCUR
+
+/com,
+/com, Modeling for Elastic Supports and Anchors
+/com,*******************************************
+
+l,11,27
+l,13,28
+
+l,9,26
+l,15,29
+
+l,7,25
+
+l,1,22
+l,17,30
+l,21,33
+
+l,1,23
+l,17,31
+l,21,34
+
+l,1,24
+l,17,32
+l,21,35
+
+/com, **********************************
+/com, Meshing for Straight pipe
+/com, **********************************
+
+type,1
+secnum,1
+mat,1
+
+lsel,r,,,1,14
+allsel,below,line
+lesize,all,,,2
+lmesh,all
+
+allsel,all,all
+
+type,2
+secnum,1
+mat,2
+
+lsel,r,,,15,20
+allsel,below,line
+lesize,all,,,4
+lmesh,all
+
+allsel,all,all
+
+/com, *****************************************************************
+/com,  Converting some PIPE289 into ELBOW290 using ELBOW command
+/com, *****************************************************************
+
+elbow,on,,,sect
+allsel,all
+
+/com, ****************************
+/com, Elastic supports and anchors
+/com, ****************************
+
+type,3 				!local x
+real,4 				! 0.1e+9
+
+lsel,r,,,23,24
+allsel,below,line
+lesize,all,,,1
+lmesh,all
+
+allsel,all,all
+
+real,5 				! 0.1e+11
+
+lsel,r,,,26,28
+allsel,below,line
+lesize,all,,,1
+lmesh,all
+
+allsel,all,all
+
+type,4 				! local y
+real,3 				! 0.1e+5
+
+lsel,r,,,21,22
+allsel,below,line
+lesize,all,,,1
+lmesh,all
+
+allsel,all,all
+
+real,5
+
+lsel,r,,,29,31
+allsel,below,line
+lesize,all,,,1
+lmesh,all
+
+allsel,all,all
+
+type,5 				!local z
+real,4 				! 0.1e+9
+
+lsel,r,,,25
+allsel,below,line
+lesize,all,,,1
+lmesh,all
+
+allsel,all,all
+
+real,5
+
+lsel,r,,,32,34
+allsel,below,line
+lesize,all,,,1
+lmesh,all
+
+allsel,all,all
+
+
+n1 = 40
+n2 = 107
+n3 = 41
+
+wplane,,nx(n1),ny(n1),nz(n1),nx(n2),ny(n2),nz(n2),nx(n3),ny(n3),nz(n3)
+cswplane,11,0
+nrotat,n1
+nrotat,n2
+csys,0
+
+/com
+/com, Mass Elements
+/com,***************
+
+type,6
+real,6
+e,49
+
+/com,------------------------------------------------------------------------------------
+
+/com,
+/com, Constraints
+/com,*************
+
+nsel,,node,,106,119
+d,all,all
+allsel
+d,1,rotx,,,,,roty,rotz
+d,58,rotx,,,,,roty,rotz
+
+allsel,all
+finish
+
+/com,------------------------------------------------------------------------------------
+
+/com,
+/com,=============
+/com,	Modal Solve
+/com,=============
+/com,
+
+/solution
+antype,modal				! Perform Modal Analysis
+modopt,lanb,maxm				
+lumpm,on					! Use Lumped Mass Matrix Approximation
+mxpand,maxm,,,yes				! Expand Solutions with Element Calculations ON
+solve
+finish
+
+/post1
+/out,
+/com, *******************************************
+/com,  Frequencies obtained from modal solution
+/com, ********************************************
+set,list
+finish
+
+
+/com,------------------------------------------------------------------------------------
+
+/com,
+/com,================
+/com,	Spectrum Solve
+/com,================
+/com,
+/out,scratch
+
+/solution
+antype,spectr					! Perform Spectrum Analysis
+spopt,sprs,maxm					! Single Point Excitation Response Spectrum
+srss,0.0
+
+gval = 386.4
+
+/com,
+/com, spectrum 1 (X)
+/com,****************
+
+svtyp, 2, gval
+freq,0.4,0.630119723,0.64516129,1.124985938,1.374948439,1.705029838,2.420135528,2.750275028,3.41997264
+SV,,2.7,0.814,0.81,4.15,4.15,2.4,1.7,1.46,1.6,
+freq,4.679457183,5.720823799,6.600660066,9.900990099,15.12859304,16.50165017,39.0625
+sv,,2.05,2.05,1.75,0.9,0.77,0.65,0.65,,
+sed,1,0,0						! Excitation in X direction
+solve
+
+/com,
+/com, spectrum 2 (Y) - coef 1
+/com,*************************
+
+svtyp, 2, gval
+freq
+FREQ,0.4,0.740740741,1.124985938,1.374948439,1.759943682,2.474634991,3.571428571,5.399568035,6.600660066
+SV,,0.34,1.15,2.87,2.87,1.5,0.9,0.87,1.32,1.32
+FREQ,8.802816901,10.20408163,15.50387597,39.0625
+Sv,,0.73,0.55,0.37,0.37
+sed,0,1,0						! Excitation in Y direction
+solve
+
+/com
+/com, spectrum 2 (Z) - coef 1
+/com,*************************
+
+svtyp, 2, gval
+freq
+FREQ,0.4,0.689655172,1.124985938,1.374948439,1.766160367,2.699784017,4.500450045,5.500550055,6.501950585
+SV,,0.34,1.06,3.55,3.55,1.95,1.08,1.38,1.38,1.3
+FREQ,7.974481659,13.00390117,17.51313485,39.0625
+SV,,1,0.65,0.55,0.55
+sed,0,0,1						! Excitation in Z direction
+solve
+
+finish
+
+/com,------------------------------------------------------------------------------------
+
+/post1
+/input,,mcom
+
+
+/out,
+
+/com,
+/com,===============================================================
+/com, Maximum nodal displacements and rotations from spectrum solution
+/com,===============================================================
+/com,
+
+/out,scratch
+
+*GET,AdisX,NODE,95,U,X
+*GET,AdisY,NODE,84,U,Y
+*GET,AdisZ,NODE,40,U,Z
+*GET,ArotX,NODE,6,ROT,X
+*GET,ArotY,NODE,79,ROT,Y
+*GET,ArotZ,NODE,45,ROT,Z
+
+/out,
+*stat,AdisX
+*stat,AdisY
+*stat,AdisZ
+*stat,ArotX
+*stat,ArotY
+*stat,ArotZ
+
+/com,==============================================================
+/com, Element Forces and Moments obtained from spectrum solution
+/com,==============================================================
+
+/out,scratch
+
+/com,==========
+/com,	 Node I
+/com,==========
+
+/com, Element #1 (Pipe289 element)
+/com,************************
+
+
+esel,s,elem,,1
+etable,pxi_1,smisc,1
+etable,vyi_1,smisc,6
+etable,vzi_1,smisc,5
+etable,txi_1,smisc,4
+etable,myi_1,smisc,2
+etable,mzi_1,smisc,3
+esel,all
+
+/out,
+/com, ************************************************
+/com,  Element forces and moments at element1, node i
+/com, ************************************************
+
+pretab,pxi_1,vyi_1,vzi_1,txi_1,myi_1,mzi_1
+
+
+/out,scratch
+/com,==========
+/com,  Node J
+/com,==========
+
+/com, Element #1 (Pipe289 element)  
+/com,************************
+
+esel,s,elem,,1
+etable,pxj_1,smisc,14
+etable,vyj_1,smisc,19
+etable,vzj_1,smisc,18
+etable,txj_1,smisc,17
+etable,myj_1,smisc,15
+etable,mzj_1,smisc,16
+esel,all
+
+/out,
+/com, **********************************************
+/com,  Element forces and moments at element1, node j
+/com, ************************************************
+
+pretab,pxj_1,vyj_1,vzj_1,txj_1,myj_1,mzj_1
+
+
+
+/out,scratch
+
+
+/com,==========
+/com,  Node I
+/com,==========
+
+/com, Element #41 (Elbow 290 element)
+/com,*************************
+
+esel,s,elem,,41
+etable,pxi_41,smisc,1
+etable,vyi_41,smisc,6
+etable,vzi_41,smisc,5
+etable,txi_41,smisc,4
+etable,myi_41,smisc,2
+etable,mzi_41,smisc,3
+esel,all
+
+/out,
+/com, *************************************************
+/com,  Element forces and moments at element 41, node i
+/com, ************************************************
+
+pretab,pxi_41,vyi_41,vzi_41,txi_41,myi_41,mzi_41
+
+
+/out,scratch
+/com,==========
+/com,  Node J
+/com,==========
+
+
+
+/com, Element #41 (Elbow290 element)
+/com,********************************
+esel,s,elem,,41
+
+etable,pxj_41,smisc,36
+etable,vyj_41,smisc,41
+etable,vzj_41,smisc,40
+etable,txj_41,smisc,39
+etable,myj_41,smisc,37
+etable,mzj_41,smisc,38
+esel,all
+
+allsel,all
+
+/out,
+/com, **********************************************
+/com,  Element forces and moments at element 41, node j
+/com, ************************************************
+
+pretab,pxj_41,vyj_41,vzj_41,txj_41,myj_41,mzj_41
+
+
+
+/com,----------------------------------------------------------------------------
+
+/com, ***************************************
+/com,  Reaction forces from spectrum solution
+/com, ****************************************
+
+prrsol
+
+finish
+/exit,nosave

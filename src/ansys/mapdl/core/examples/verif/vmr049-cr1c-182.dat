@@ -1,0 +1,119 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/VERIFY,vmr049-cr1c-182
+/TITLE,vmr049-cr1c-182,CONSTANT LOAD CREEP BENCHMARK
+/COM, REFERENCE: TEST CR-1C FROM NAFEMS R0049.
+/SHOW,JPEG
+JPGPRF,500,100,1
+
+/PREP7
+C*** PARAMETRIC INPUT FOR CREEP CONSTANT !(TIME HARDENING)***
+*SET,C1,0.5E-14
+*SET,C2,5
+*SET,C3,-0.5
+*SET,C4,0
+*SET,C5,1E-16
+*SET,C6,5
+*SET,C7,0
+C*** TIME PARAMETER
+*SET,HOUR,200
+C*** ELASTIC CONSTANT
+MP,EX,1,200E3
+MP,NUXY,1,0.3
+TUNIF,HOT
+TOFF,1E-10
+TB,CREEP,1,,,11
+TBDATA,1,C1,C2,C3,C4,C5,C6,C6
+SAVE
+N,1,0,0,0
+N,2,100,0
+N,3,100,50
+N,4,0,50
+N,5,100,100
+N,6,0,100
+ET,1,182
+KEYOPT,1,1,0
+KEYOPT,1,3,0
+E,1,2,3,4
+E,4,3,5,6
+NSEL,S,LOC,X,
+D,ALL,UX,
+NSEL,ALL
+NSEL,S,,,4
+D,ALL,UY,
+NSEL,ALL
+
+/SOLU
+NSEL,S,LOC,X,100
+SF,ALL,PRES,-100
+NSEL,ALL
+RATE, OFF
+DELT,1.0E-8,1.0E-9,1.0E-8
+TIME, 1.0E-8
+SOLVE
+RATE, ON, ON
+DELT,100,99,101
+TIME,1000
+OUTRES,ALL,ALL
+/OUTPUT,SCRATCH
+SOLVE
+/OUT
+FINISH
+
+
+/POST26
+ESOL,2,1,,EPCR,X
+ESOL,3,1,,EPCR,Y
+PRVAR,2,3
+PLVAR,2,3
+*GET,RES1X,VARI,2,RTIME,1000
+*GET,RES1Y,VARI,3,RTIME,1000
+
+*DIM,LABEL1,CHAR,2
+*DIM,VALUE1,,2,3
+LABEL1(1) = ' ECR11X ',' ECR11Y '
+*VFILL,VALUE1(1,1),DATA,4.2691,-4.2691
+*VFILL,VALUE1(1,1),DATA,RES1X,RES1Y
+*VFILL,VALUE1(1,2),DATA,ABS(RES1X/0.0041475),ABS(RES1Y/(-0.002074))
+*DIM,LABEL2,CHAR,2
+LABEL2(1) = 'vmr049-','cr1c-182'
+
+/OUT,vmr049-cr1c-182,vrt
+/COM
+/COM,------------------- vmr049-cr1c RESULTS COMPARISON ---------------------
+/COM,
+/COM,            |   Mechanical APDL   |   RATIO  |         INPUT         |
+/COM,
+/COM, PLANE182
+*VWRITE,LABEL1(1),VALUE1(1,1),VALUE1(1,2),LABEL2(1),LABEL2(2)
+(1X,A8,'      ',F14.4,'      ',F9.4,'     ',A7,A8)
+*VWRITE,LABEL1(2),VALUE1(2,1),VALUE1(2,2),LABEL2(1),LABEL2(2)
+(1X,A8,'      ',F14.4,'      ',F9.4,'     ',A7,A8)
+/COM,
+/COM,----------------------------------------------------------------
+/OUT
+
+FINISH
+*LIST,vmr049-cr1c-182,vrt
+

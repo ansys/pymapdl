@@ -1,0 +1,142 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/VERIFY,vmfebsta-le5-281
+/TITLE,vmfebsta-le5-281, Z-SECTION CANTILEVER SHELL
+/COM, REFERENCE: DAVIES ET AL, SELECTED FE BENCHMARKS IN STRUCTURAL AND 
+/COM,            THERMAL ANALYSIS FEBSTA, AUG 1986,1-7-86/1
+/COM, ORIGINAL TEST NUMBER: LE5
+/OUT,SCRATCH
+/PREP7
+ET,1,SHELL281			! SHELL 281 ELEMENT
+KEYOPT,1,8,2			! STORE DATA FOR ALL LAYERS
+SECTYPE,1,SHELL
+SECDATA,0.1,1,0,5
+
+MP,EX,1,210E9
+MP,NUXY,1,0.3
+
+K,1,0,1,-1
+K,2,0,0,-1
+K,3,0,0,1
+K,4,0,-1,1
+K,5,10,-1,1
+K,6,10,0,1
+K,7,10,0,-1
+K,8,10,1,-1
+
+A,1,2,7,8
+A,2,3,6,7
+A,3,4,5,6
+
+ESIZE,1.25
+AMESH,1
+AMESH,3
+ALLSEL,ALL
+
+LESIZE,6,,,8
+LESIZE,2,,,8
+LESIZE,5,,,1
+LESIZE,7,,,1
+AMESH,2
+ALLSEL,ALL
+NUMMRG,NODE
+
+NSEL,S,LOC,X,0
+D,ALL,ALL,0				! CANTILEVERED STRUCTURE
+NSEL,ALL
+
+ET,2,SURF156    
+KEYOPT,2,2,1            ! APPLY LOADS IN LOCAL COORDINATE SYSTEM
+KEYOPT,2,4,0            ! NO MIDSIDE NODES
+KEYOPT,2,5,1            ! NO ORIENTATION NODE
+KEYOPT,2,7,1            ! USE ORIGINAL AREA
+
+LOCAL,12,0,0,0,0,0,0,0
+CSYS,0
+
+TYPE,2
+ESYS,12
+E,4,20,21
+ALLSEL,ALL
+
+ET,3,SURF156
+KEYOPT,3,2,1        ! APPLY LOADS IN LOCAL COORDINATE SYSTEM
+KEYOPT,3,4,0        ! NO MIDSIDE NODES
+KEYOPT,3,5,1        ! NO ORIENTATION NODE
+KEYOPT,3,7,1        ! USE ORIGINAL AREA
+
+LOCAL,13,0,0,0,0,0,0,0
+CSYS,0
+
+TYPE,3
+ESYS,13
+E,63,47,64
+ESEL,ALL
+
+ESEL,S,TYPE,,2
+SFE,ALL,2,PRES,1,600000
+ESEL,ALL
+
+ESEL,S,TYPE,,3
+SFE,ALL,2,PRES,1,-600000
+ESEL,ALL
+FINI
+
+/SOLU
+ANTYPE,STATIC
+OUTRES,ALL,ALL
+NSUBS,10,10,10
+TIME,1
+SOLVE
+FINI
+
+/POST1
+SET,LAST
+N1=NODE(2.5,-1,1)
+SHELL,BOT			     ! BOTTOM SHELL LAYER
+PRNSOL,S
+*GET,SX1,NODE,N1,S,X	     ! AXIAL STRESS AT NODE 23 IN PA
+/SHOW,JPEG
+/VIEW,1,1,1,1
+PLNSOL,U,SUM
+PLNSOL,S,EQV
+*DIM,LABEL,CHAR,1
+*DIM,VALUE,,1,3
+LABEL(1,1) = 'STRESS-AX'
+*VFILL,VALUE(1,1),DATA,-108  ! REFERENCE STRESS IN MPA		
+*VFILL,VALUE(1,2),DATA,(SX1/1000000)
+*VFILL,VALUE(1,3),DATA,ABS((SX1/1000000)/(-108))
+/OUT,vmfebsta-le5-281,vrt
+/COM,----------------------vmfebsta-le5-281 RESULTS COMPARISON-----------------
+/COM,
+/COM,
+/COM,           |  TARGET  |   Mechanical APDL  |  RATIO
+/COM,
+/COM, 
+*VWRITE,LABEL(1,1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,'   ',F10.4,'  ',F14.4,'   ',F15.3)
+/COM,---------------------------------------------------------------------------
+/OUT,
+FINISH
+*LIST,vmfebsta-le5-281,vrt

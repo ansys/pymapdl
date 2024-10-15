@@ -1,3 +1,25 @@
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 # Importing logging
 import logging
 import os
@@ -14,7 +36,7 @@ if not os.path.exists(USER_DATA_PATH):  # pragma: no cover
     os.makedirs(USER_DATA_PATH)
 
 DEPRECATING_MINIMUM_PYTHON_VERSION = True
-MINIMUM_PYTHON_VERSION = (3, 8)
+MINIMUM_PYTHON_VERSION = (3, 10)
 
 first_time_file = os.path.join(USER_DATA_PATH, ".firstime")
 if not os.path.exists(first_time_file):  # pragma: no cover
@@ -57,14 +79,22 @@ if RUNNING_TESTS:  # pragma: no cover
 _LOCAL_PORTS = []
 
 
-# Per contract with Sphinx-Gallery, this method must be available at top level
 try:
-    import pyvista
+    from ansys.tools.visualization_interface import Plotter
+
+    _HAS_VISUALIZER = True
+except ModuleNotFoundError:  # pragma: no cover
+    LOG.debug("The module 'ansys-tools-visualization_interface' is not installed.")
+    _HAS_VISUALIZER = False
+
+try:
+    import pyvista as pv
 
     _HAS_PYVISTA = True
 except ModuleNotFoundError:  # pragma: no cover
-    LOG.debug("The module 'Pyvista' is not installed.")
+    LOG.debug("The module 'pyvista' is not installed.")
     _HAS_PYVISTA = False
+
 
 try:
     import importlib.metadata as importlib_metadata
@@ -73,14 +103,18 @@ except ModuleNotFoundError:  # pragma: no cover
 
 __version__ = importlib_metadata.version(__name__.replace(".", "-"))
 
-
-from ansys.tools.path.path import (
-    change_default_ansys_path,
-    find_ansys,
-    get_ansys_path,
-    get_available_ansys_installations,
-    save_ansys_path,
-)
+try:
+    from ansys.tools.path.path import (
+        change_default_ansys_path,
+        find_ansys,
+        get_ansys_path,
+        get_available_ansys_installations,
+        save_ansys_path,
+    )
+except:
+    # We don't really use these imports in the library. They are here for
+    # convenience.
+    pass
 
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.convert import convert_apdl_block, convert_script
@@ -94,12 +128,14 @@ else:
 
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc as Mapdl
 from ansys.mapdl.core.misc import Information, Report, _check_has_ansys
-from ansys.mapdl.core.pool import LocalMapdlPool
-from ansys.mapdl.core.theme import MapdlTheme, _apply_default_theme
+from ansys.mapdl.core.pool import MapdlPool
 
 _HAS_ANSYS = _check_has_ansys()
 
-_apply_default_theme()
+if _HAS_VISUALIZER:
+    from ansys.mapdl.core.plotting.theme import _apply_default_theme
+
+    _apply_default_theme()
 
 BUILDING_GALLERY = False
 RUNNING_TESTS = False

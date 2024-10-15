@@ -1,0 +1,334 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/VERIFY,VM319
+/COM,   REF: A. GROLET, F. THOUVEREZ, 2011
+/COM,   "VIBRATION ANALYSIS OF A NONLINEAR SYSTEM WITH CYCLIC SYMMETRY.",
+/COM,   JOURNAL OF ENGINEERING FOR GAS TURBINES AND POWER, ASME, 2011, 133 (2)
+/COM,
+/TITLE, VM319, NONLINEAR HARMONIC ANALYSIS OF A CYCLIC CHAIN OF OSCILLATORS
+/OUT,vm319_scratch
+
+/COM, ***** EXCITATION AMPLITUDE = 1/8
+
+JPGPRF,500,100,1
+
+/COM, MODEL PARAMETERS
+PI           = ACOS(-1)
+SCAL_TO_MM   = 1e3
+
+MASS    = 1.0/SCAL_TO_MM            ! UNIT MASS
+ALP     = 8.7662E3/SCAL_TO_MM
+BET     = 4.6752E7/SCAL_TO_MM**3
+C       = 148.36/SCAL_TO_MM
+OMG0    = SQRT(ALP*SCAL_TO_MM)
+DELTA   = OMG0/200/SCAL_TO_MM
+AF      = 1/8
+
+/COM, MULTISTAGE CYCLIC PARAMETERS
+NSEC    = 6
+ALP_SEC = 360/NSEC
+HI      = 0
+
+/COM, HARMONIC BALANCE METHOD PARAMETERS
+OMGS  = 90
+OMGE  = 100
+FMIN  = OMGS/(2*PI)
+FMAX  = OMGE/(2*PI)
+DS    = 0.20
+DSMIN = DS/100
+DSMAX = 5*DS
+NH    = 3
+
+/COM, CUBIC SPRING USER ELEMENT PARAMETERS
+NNOD        = 2         ! number of nodes
+NDIM        = 3         ! dimension
+NNREAL      = 5         ! number of REAL constants
+NSAVEVARS   = 0         ! number of saved variables (internal)
+NRSLTVAR    = 2         ! number of NMISC items
+KEYANSMAT   = 3         ! element characteristics key: non-linear and working in nodal CS
+K1          = BET
+KP1         = 3
+
+/PREP7
+csys,1
+
+/COM, GEOMETRY AND MESH
+ET,1,MASS21
+KEYO,1,3,2
+R,1,MASS
+
+ET,2,300
+KEYOPT,2,1,2
+TYPE,2
+USRELEM, NNOD, NDIM, LINE, NNREAL, NSAVEVARS, NRSLTVAR, KEYANSMAT
+USRDOF,DEFINE, UY
+R,2,,K1,KP1
+
+ET,3,COMBIN14
+KEYO,3,2,2
+
+R,3,ALP,DELTA
+R,4,2*C         ! MULTIPLIED BY 2 BECAUSE WE HAVE TWO SPRINGS IN A ROW INSTEAD OF ONE
+
+N,1 ,1
+N,2, 1 ,-ALP_SEC/4
+N,3 ,1 ,-ALP_SEC/2
+N,4 ,1 , ALP_SEC/2
+
+NROTAT,ALL
+
+TYPE,1
+REAL,1
+E,1
+
+TYPE,3
+REAL,3
+E, 1, 2
+
+REAL,4
+E, 1,3
+E, 1,4
+
+TYPE,2
+REAL,2
+E, 1, 2
+
+/COM, MULTISTAGE CONSTRAINT EQUATIONS DEFINITION
+NSEL,ALL
+ESEL,ALL
+CM,_STAGE_BASE_NOD,NODE
+CM,_STAGE_BASE_ELM,ELEM
+
+NSEL,S,NODE,,3
+CM,_STAGE_CYCLOW_NOD,NODE
+ALLSEL
+
+NSEL,S,NODE,,4
+CM,_STAGE_CYCHIGH_NOD,NODE
+ALLSEL
+
+MSOPT,NEW,STAGE,NSEC,HI
+CECYCMS
+
+FINISH
+
+SAVE,AMPL_1_8
+
+/SOLU
+ANTYPE,HARMIC
+
+/COM, HBM OPTIONS
+HROPT,HBM,NH
+HARFRQ,FMIN,FMAX
+
+HBMOPT,CONTSET,,DS,DSMIN,DSMAX
+HBMOPT,NR,10
+HBMOPT,AFT,1,32
+
+/COM, BOUNDARY CONDITIONS AND LOADING
+D,1,UX
+D,1,UZ
+D,2,ALL
+
+F,1,FY,AF               ! HARMONIC 1 LOADING
+
+SOLVE
+FINISH
+
+/com, HBM POST-PROCESSING
+
+/POST26
+NUMVAR,40
+
+*GET,JOBN,ACTIVE,,JOBNAM
+
+FILE,%JOBN%_1hi0,rst     ! HARMONIC 1 RESULTS
+NSOL,2,1,U,Y
+STORE
+
+FILE,%JOBN%_3hi0,rst     ! HARMONIC 3 RESULTS
+NSOL,3,1,U,Y
+STORE
+
+ABS,12,2                 ! |A1|
+ABS,13,3                 ! |A3|
+PROD,22,12,12            ! |A1|**2
+PROD,23,13,13            ! |A3|**2
+ADD,30,22,23             ! |A1|**2+|A3|**2
+SQRT,31,30               ! E=SQRT(|A1|**2+|A3|**2)
+
+PROD,11,1,,,,,,2*PI
+XVAR,11
+
+/GMARKER,1,4
+/AXLAB,X,FREQUENCY (RAD/S)
+/AXLAB,Y,RMS AMPLITUDE (MM)
+/XRANGE,90,100
+/YRANGE,0.0,3.0
+/SHOW,JPEG,REV
+    PLVAR,31
+/SHOW,CLOSE
+
+*GET,FMAX   ,VARI,31,EXTREM,TMAX
+*GET,AMPLMAX,VARI,31,EXTREM,VMAX
+OMGMAX = 2*PI*FMAX
+
+*DIM,LABEL,CHAR,1,2
+LABEL(1,1) = 'OMG_MAX'
+LABEL(1,2) = 'AMPL_MAX'
+
+*DIM,VALUE,ARRAY,2,3
+VALUE(1,1) = 95.09          ! REFERENCE VALUES
+VALUE(2,1) =  2.80
+VALUE(1,2) = OMGMAX         ! TEST VALUES
+VALUE(2,2) = AMPLMAX
+VALUE(1,3) = OMGMAX/95.09   ! RATIO
+VALUE(2,3) = AMPLMAX/2.80
+
+FINISH
+
+SAVE,TABLE_1_8
+
+/CLEAR,NOSTART
+/TITLE, VM319, NONLINEAR HARMONIC ANALYSIS OF A CYCLIC CHAIN OF OSCILLATORS
+RESUME,AMPL_1_8
+
+/COM, ***** EXCITATION AMPLITUDE = 1/4
+
+JPGPRF,500,100,1
+
+AF = 1/4
+
+/SOLU
+ANTYPE,HARMIC
+
+/COM, HBM OPTIONS
+HROPT,HBM,NH
+HARFRQ,FMIN,FMAX
+
+HBMOPT,CONTSET,,DS,DSMIN,DSMAX
+HBMOPT,NR,10
+HBMOPT,AFT,1,32
+
+/COM, BOUNDARY CONDITIONS AND LOADING
+D,1,UX
+D,1,UZ
+D,2,ALL
+
+F,1,FY,AF               ! HARMONIC 1 LOADING
+
+SOLVE
+FINISH
+
+/com, HBM POST-PROCESSING
+
+/POST26
+NUMVAR,40
+
+*GET,JOBN,ACTIVE,,JOBNAM
+
+FILE,%JOBN%_1hi0,rst     ! HARMONIC 1 RESULTS
+NSOL,2,1,U,Y
+STORE
+
+FILE,%JOBN%_3hi0,rst     ! HARMONIC 3 RESULTS
+NSOL,3,1,U,Y
+STORE
+
+ABS,12,2                 ! |A1|
+ABS,13,3                 ! |A3|
+PROD,22,12,12            ! |A1|**2
+PROD,23,13,13            ! |A3|**2
+ADD,30,22,23             ! |A1|**2+|A3|**2
+SQRT,31,30               ! E=SQRT(|A1|**2+|A3|**2)
+
+PROD,11,1,,,,,,2*PI
+XVAR,11
+
+/GMARKER,1,4
+/AXLAB,X,FREQUENCY (RAD/S)
+/AXLAB,Y,RMS AMPLITUDE (MM)
+/XRANGE,90,100
+/YRANGE,0.0,6.0
+/SHOW,JPEG,REV
+    PLVAR,31
+/SHOW,CLOSE
+
+*GET,FMAX   ,VARI,31,EXTREM,TMAX
+*GET,AMPLMAX,VARI,31,EXTREM,VMAX
+OMGMAX = 2*PI*FMAX
+
+*DIM,LABEL,CHAR,1,2
+LABEL(1,1) = 'OMG_MAX'
+LABEL(1,2) = 'AMPL_MAX'
+
+*DIM,VALUE,ARRAY,2,3
+VALUE(1,1) = 98.95          ! REFERENCE VALUES
+VALUE(2,1) =  5.41
+VALUE(1,2) = OMGMAX         ! TEST VALUES
+VALUE(2,2) = AMPLMAX
+VALUE(1,3) = OMGMAX/98.95   ! RATIO
+VALUE(2,3) = AMPLMAX/5.41
+
+FINISH
+
+SAVE,TABLE_1_4
+
+/CLEAR,NOSTART
+/NOPR
+/OUT,vm319,vrt
+/COM,------------ VM319 RESULTS COMPARISON --------------
+/COM,
+RESUME,TABLE_1_8
+/COM,
+/COM, ---------------------------------------
+/COM,      EXCITATION AMPLITUDE = 1/8
+/COM, ---------------------------------------
+/COM,
+/COM,        |   TARGET   |   MECHANICAL APDL   |   RATIO
+/COM,
+*VWRITE,LABEL(1,1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,'   ',F10.4,'  ',F14.4,'   ',F15.3)
+*VWRITE,LABEL(1,2),VALUE(2,1),VALUE(2,2),VALUE(2,3)
+(1X,A8,'   ',F10.4,'  ',F14.4,'   ',F15.3)
+/COM, --------------------------------------------------
+/COM,
+/COM,
+RESUME,TABLE_1_4
+/COM,
+/COM, ---------------------------------------
+/COM,      EXCITATION AMPLITUDE = 1/4
+/COM, ---------------------------------------
+/COM,
+/COM,        |   TARGET   |   MECHANICAL APDL   |   RATIO
+/COM,
+*VWRITE,LABEL(1,1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,'   ',F10.4,'  ',F14.4,'   ',F15.3)
+*VWRITE,LABEL(1,2),VALUE(2,1),VALUE(2,2),VALUE(2,3)
+(1X,A8,'   ',F10.4,'  ',F14.4,'   ',F15.3)
+/COM, --------------------------------------------------
+/OUT
+*LIST,vm319,vrt
+
+/EXIT,NOSAVE

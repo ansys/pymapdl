@@ -1,187 +1,223 @@
-/COM,ANSYS MEDIA REL. 140 (11/26/2011) REF. VERIF. MANUAL: REL. 140
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VMC6
 /SHOW
-  /OUT,SCRATCH
-  *DIM,NARAY,TABLE,16,6         ! 2-D NARAY FOR RESULTS INFO
-  *DO,I,1,16
-    *DO,J,1,6
-      NARAY(I,J)=0.             ! INITIALIZE NARAY
-    *ENDDO
-  *ENDDO
-*CREATE,base,
-  PARSAV,ALL
-  /clear, nostart
-  PARRES,CHANGE
-  JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
-  /SHOW,JPEG
-  /PREP7
-smrt,off
-  /TITLE, VMC6, TWO-DIMENSIONAL HEAT TRANSFER WITH CONVECTION
-  /COM,   SEE "SELECTED FE BENCHMARKS IN STRUCTURAL AND THERMAL
-  /COM,   ANALYSIS", NAFEMS REPT. FEBSTA REV. 1, OCT. 1986
-  /COM,   TEST NO. T4
-  ANTYPE,STATIC                 ! THERMAL ANALYSIS
-  ET,1,ARG1                     ! DEFINE ELEMENT TYPE PARAMETRICALLY
-  NARAY(ARG4,1)=ARG1            ! STORE ETYPE
-  MP,KXX,1,52.0                 ! DEFINE CONDUCTIVITY
-  *IF,I,LE,10,THEN
-    K,1                         ! DEFINE KEYPOINTS
-    K,2,.6
-    K,3,.6,1.0
-    K,4,,1.0
-    A,1,2,3,4
-    ESIZE,ARG2                  ! DEFINE ELEMENT SIZE, & SHAPE PARAMETRICALLY
-    ESHAPE,ARG3
-    NARAY(ARG4,2)=ARG2          ! STORE N1 (ELEMENT EDGE LENGTH)
-    NARAY(ARG4,3)=ARG3          ! STORE N2 (ELEMENT SHAPE)
-    AMESH,1                     ! MESH AREA
-  *ELSE
-    G1=(.6/ARG2)+1              ! DEFINE PARAMETERS FOR MESH GENERATION
-    G2=(1/ARG2)+1
-    G3=(G2-1)
-    N,1
-    NGEN,G1,1,ALL,,,ARG2
-    NGEN,G2,G1,ALL,,,,ARG2
-    *IF,ARG1,EQ,77,THEN
-      E,1,2,(G1+2),(G1+2)
-      EGEN,(G1-1),1,ALL
-      E,1,(G1+2),(G1+1),(G1+1)
-      EGEN,(G1-1),1,G1
-      EGEN,G3,G1,ALL
-      NARAY(ARG4,2)=ARG2          ! STORE N1 (ELEMENT EDGE LENGTH)
-      NARAY(ARG4,3)=ARG3          ! STORE N2 (ELEMENT SHAPE)
-    *ELSE
-      E,1,2,(G1+2)
-      EGEN,(G1-1),1,ALL
-      E,1,(G1+2),(G1+1)
-      EGEN,(G1-1),1,G1
-      EGEN,G3,G1,ALL
-      NARAY(ARG4,2)=ARG2          ! STORE N1 (ELEMENT EDGE LENGTH) 
-      NARAY(ARG4,3)=ARG3          ! STORE N2 (ELEMENT SHAPE)
-    *ENDIF
-    *IF,ARG1,NE,55,THEN
-      EMID
-      NARAY(ARG4,2)=ARG2          ! STORE N1 (ELEMENT EDGE LENGTH) 
-      NARAY(ARG4,3)=ARG3          ! STORE N2 (ELEMENT S)
-    *ENDIF
-  *ENDIF
-  *GET,MAXE,ELEM,,NUM,MAX
-  *GET,MAXN,NODE,,NUM,MAX
-  NARAY(ARG4,4)=MAXN*1          ! CALCULATE NO. DEGREES OF FREEDOM
-  T1=NODE(.6,.2,0)              ! GET NODE NUMBER OF INTEREST
-  NSEL,S,LOC,Y,0
-  D,ALL,TEMP,100.               ! SPECIFY EDGE TEMPERATURE
-  NSEL,S,LOC,X,0.6
-  SF,ALL,CONV,750.0,0.0         ! SPECIFY CONVECTION SURFACES
-  NSEL,A,LOC,Y,1.0
-  SF,ALL,CONV,750.0,0.0
-  NSEL,ALL
+/TITLE, VMC6, TWO-DIMENSIONAL HEAT TRANSFER WITH CONVECTION
+/COM,   SEE "SELECTED FE BENCHMARKS IN STRUCTURAL AND THERMAL
+/COM,   ANALYSIS", NAFEMS REPT. FEBSTA REV. 1, OCT. 1986
+/COM,   TEST NO. T4
+/OUT,SCRATCH
+
+
+*DIM,NARAY,TABLE,16,6        ! 2-D NARAY FOR RESULTS INFO
+
+
+*DO,I,1,16                   !LOOP THROUGH ETYPE AND DIFF. MESH PARAMETERS
+	 *IF,I,EQ,1,THEN,
+		 ETYP = 55
+		 ARG1 = 0.2
+		 ARG2 = 0            !MSHAPE = QUAD
+         ARG3 = 1            !MSHKEY = MAPPED MESHING
+		 !QUADRILATERAL MESH (N1 = 0.2)
+     *ELSEIF,I,EQ,2,THEN,
+		 ETYP = 55
+		 ARG1 = 0.1
+		 ARG2 = 0            
+         ARG3 = 1            
+		 !QUADRILATERAL MESH (N1 = 0.1)
+     *ELSEIF,I,EQ,3,THEN,
+		 ETYP = 77
+		 ARG1 = 0.2
+		 ARG2 = 0            
+         ARG3 = 1            
+		 !QUADRILATERAL MESH (N1 = 0.2)
+	 *ELSEIF,I,EQ,4,THEN,
+		 ETYP = 77
+		 ARG1 = 0.1
+		 ARG2 = 0            
+         ARG3 = 1            
+		 !QUADRILATERAL MESH (N1 = 0.1) 
+	 *ELSEIF,I,EQ,5,THEN,
+		 ETYP = 35
+		 ARG1 = 0.2
+		 ARG2 = 1               !MSHAPE = TRI            
+         ARG3 = 0               !MSHKEY = UNMAPPED
+		 !TRIANGLE MESH (N1 = 0.2) 
+	 *ELSEIF,I,EQ,6,THEN,
+		 ETYP = 35
+		 ARG1 = 0.1
+		 ARG2 = 1                           
+         ARG3 = 0               
+		 !TRIANGLE MESH (N1 = 0.1) 
+	 *ELSEIF,I,EQ,7,THEN,
+		 ETYP = 55
+		 ARG1 = 0.2
+		 ARG2 = 1                           
+         ARG3 = 0               
+		 !TRIANGLE MESH (N1 = 0.2) 
+	 *ELSEIF,I,EQ,8,THEN,
+		 ETYP = 55
+		 ARG1 = 0.1
+		 ARG2 = 1                           
+         ARG3 = 0              
+		 !TRIANGLE MESH (N1 = 0.1)
+	 *ELSEIF,I,EQ,9,THEN,
+		 ETYP = 77
+		 ARG1 = 0.2
+		 ARG2 = 1                           
+         ARG3 = 0               
+		 !TRIANGLE MESH (N1 = 0.2)
+	 *ELSEIF,I,EQ,10,THEN,
+		 ETYP = 77
+		 ARG1 = 0.1
+		 ARG2 = 1                           
+         ARG3 = 0               
+		 !TRIANGLE MESH (N1 = 0.1) 
+	 *ELSEIF,I,EQ,11,THEN,
+		 ETYP = 35
+		 ARG1 = 0.2
+		 ARG2 = 1               !MSHAPE = TRI            
+         ARG3 = 1               !MSHKEY = MAPPED
+		 !TRIANGLE MESH (N1 = 0.2) 
+	 *ELSEIF,I,EQ,12,THEN,
+		 ETYP = 35
+		 ARG1 = 0.1
+		 ARG2 = 1                           
+         ARG3 = 1               
+		 !TRIANGLE MESH (N1 = 0.1) 
+	 *ELSEIF,I,EQ,13,THEN,
+		 ETYP = 55
+		 ARG1 = 0.2
+		 ARG2 = 1                           
+         ARG3 = 1               
+		 !TRIANGLE MESH (N1 = 0.2) 
+	 *ELSEIF,I,EQ,14,THEN,
+		 ETYP = 55
+		 ARG1 = 0.1
+		 ARG2 = 1                           
+         ARG3 = 1               
+		 !TRIANGLE MESH (N1 = 0.1)
+	 *ELSEIF,I,EQ,15,THEN,
+		 ETYP = 77
+		 ARG1 = 0.2
+		 ARG2 = 1                           
+         ARG3 = 1               
+		 !TRIANGLE MESH (N1 = 0.2)
+	 *ELSEIF,I,EQ,16,THEN,
+		 ETYP = 77
+		 ARG1 = 0.1
+		 ARG2 = 1                           
+         ARG3 = 1               
+		 !TRIANGLE MESH (N1 = 0.1)
+	 *ENDIF
+	 
+	
+     PARSAV,ALL
+      /clear, nostart
+      PARRES,CHANGE
+     /PREP7
+     SMRT,OFF
+	 
+	 
+	 
+	 !TO SUPPLY TITLES TO THE IMAGES
+  
+	 *IF,I,LE,4,THEN
+		 /TITLE,VMC6 - QUADRILATERAL MESH: (N1 = %ARG1%)	
+	 *ELSEIF,I,GT,4,AND,I,LE,10,THEN
+		 /TITLE,VMC6 - TRIANGLE MESH: (N1 = %ARG1%)
+	 *ELSEIF,I,GT,11,THEN
+		 /TITLE,VMC6 - UNIFORM TRIANGLE MESH: (N1 = %ARG1%)
+	 *ENDIF
+
+
+
+
+     ANTYPE,STATIC                 ! THERMAL ANALYSIS
+     ET,1,ETYP                     ! DEFINE ELEMENT TYPE PARAMETRICALLY
+     NARAY(I,1)= ETYP              ! STORE ETYPE
+     MP,KXX,1,52.0                 ! DEFINE CONDUCTIVITY
+     
+         K,1                       ! DEFINE KEYPOINTS
+         K,2,.6
+         K,3,.6,1.0
+         K,4,,1.0
+         A,1,2,3,4
+         ESIZE,ARG1                ! DEFINE ELEMENT SIZE, & SHAPE PARAMETRICALLY
+         MSHAPE,ARG2
+		 MSHKEY,ARG3
+         NARAY(I,2)=ARG1           ! STORE N1 (ELEMENT EDGE LENGTH)
+         NARAY(I,3)=ARG2           ! STORE N2 (ELEMENT SHAPE)
+         AMESH,1                   ! MESH AREA
+      
+     *GET,MAXE,ELEM,,NUM,MAX
+     *GET,MAXN,NODE,,NUM,MAX
+     NARAY(I,4)=MAXN*1                ! CALCULATE NO. DEGREES OF FREEDOM
+     T1=NODE(.6,.2,0)                 ! GET NODE NUMBER OF INTEREST
+     NSEL,S,LOC,Y,0
+     D,ALL,TEMP,100.                  ! SPECIFY EDGE TEMPERATURE
+     NSEL,S,LOC,X,0.6
+     SF,ALL,CONV,750.0,0.0            ! SPECIFY CONVECTION SURFACES
+     NSEL,A,LOC,Y,1.0
+     SF,ALL,CONV,750.0,0.0
+     NSEL,ALL
 
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   !!  SETUP AND PLOT ELEMENTS FOR DOCUMENTATION !!
   !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  /AUTO,1
-  /VIEW,1,,,1
-  /ANG,1
-  /DEVICE,VECTOR,1
-  /DEVICE,DITHER,1
-  /TYPE,ALL,4
-  /COLOR,NUM,BLUE,1
-  *IF,ARG1,EQ,77,THEN
-   *IF,ARG2,EQ,0.2,THEN
-   *IF,ARG3,EQ,2,THEN
-   /TITLE,VMC6 - QUADRILATERAL MESH (N1 = 0.2)
-   EPLOT
-   *ENDIF
-   *ENDIF
-   *IF,ARG2,EQ,0.1,THEN
-   *IF,ARG3,EQ,2,THEN
-   /TITLE,VMC6 - QUADRILATERAL MESH (N1 = 0.1)
-   EPLOT
-   *ENDIF
-   *ENDIF
-   *IF,ARG2,EQ,0.2,THEN
-   *IF,ARG3,EQ,1,THEN
-   *IF,I,EQ,15,THEN
-   /TITLE,VMC6 - UNIFORM TRIANGLE MESH (N1 = 0.2)
-   EPLOT
-   *ENDIF
-   *ENDIF
-   *ENDIF
-   *IF,ARG2,EQ,0.1,THEN
-   *IF,ARG3,EQ,1,THEN
-   *IF,I,EQ,16,THEN
-   /TITLE,VMC6 - UNIFORM TRIANGLE MESH (N1 = 0.1)
-   EPLOT
-   *ENDIF
-   *ENDIF
-   *ENDIF
-   *IF,ARG2,EQ,0.2,THEN
-   *IF,ARG3,EQ,1,THEN
-   *IF,I,EQ,9,THEN
-   /TITLE,VMC6 - TRIANGLE MESH (N1 = 0.2)
-   EPLOT
-   *ENDIF
-   *ENDIF
-   *ENDIF
-   *IF,ARG2,EQ,0.1,THEN
-   *IF,ARG3,EQ,1,THEN
-   *IF,I,EQ,10,THEN
-   /TITLE,VMC6 - TRIANGLE MESH (N1 = 0.1)
-   EPLOT
-   *ENDIF
-   *ENDIF
-   *ENDIF
-*ENDIF  
+     *IF,ETYP,EQ,55,THEN 
+	     /AUTO,1
+         /VIEW,1,,,1
+         /ANG,1
+         /DEVICE,VECTOR,1
+         /DEVICE,DITHER,1
+         /TYPE,ALL,4
+         /COLOR,NUM,BLUE,1
+		 /SHOW,PNG,REV
+         EPLOT
+         /SHOW,CLOSE
+		 
+	 *ENDIF
+  
 
 
-  FINISH
-  /SOLU
-  SOLVE
-  *GET,NTEM,TEMP,T1             ! GET TEMERATURE AT NODE OF INTEREST
-  NARAY(ARG4,5)=NTEM            ! STORE TEMPERATURE
-  NARAY(ARG4,6)=NTEM/18.3       ! CALCULATE TEMPERATURE RATIO
-  PARSAV,,PARAM
-  FINISH
-*END
-  /COM, COMMENT:  CALL MACRO TO LOOP THROUGH DIFFERENT ELEMENT TYPES, MESHES
-  *DO,I,1,16
-    *IF,I,EQ,1,THEN
-      *USE,base,55,.2,2,I       ! QUAD MESH
-    *ELSEIF,I,EQ,2,THEN
-      *USE,base,55,.1,2,I       ! QUAD MESH
-    *ELSEIF,I,EQ,3,THEN
-      *USE,base,77,.2,2,I       ! QUAD MESH
-    *ELSEIF,I,EQ,4,THEN
-      *USE,base,77,.1,2,I       ! QUAD MESH
-    *ELSEIF,I,EQ,5,THEN
-      *USE,base,35,.2,1,I       ! TRIANGLE MESH
-    *ELSEIF,I,EQ,6,THEN
-      *USE,base,35,.1,1,I       ! TRIANGLE MESH
-    *ELSEIF,I,EQ,7,THEN
-      *USE,base,55,.2,1,I       ! TRIANGLE MESH
-    *ELSEIF,I,EQ,8,THEN
-      *USE,base,55,.1,1,I       ! TRIANGLE MESH
-    *ELSEIF,I,EQ,9,THEN
-      *USE,base,77,.2,1,I       ! TRIANGLE MESH
-    *ELSEIF,I,EQ,10,THEN
-      *USE,base,77,.1,1,I       ! TRIANGLE MESH
-    *ELSEIF,I,EQ,11,THEN
-      *USE,base,35,.2,1,I	! TRIANGLE MESH
-    *ELSEIF,I,EQ,12,THEN
-      *USE,base,35,.1,1,I	! TRIANGLE MESH
-    *ELSEIF,I,EQ,13,THEN
-      *USE,base,55,.2,1,I	! TRIANGLE MESH
-    *ELSEIF,I,EQ,14,THEN
-      *USE,base,55,.1,1,I	! TRIANGLE MESH
-    *ELSEIF,I,EQ,15,THEN
-      *USE,base,77,.2,1,I	! TRIANGLE MESH
-    *ELSEIF,I,EQ,16,THEN
-      *USE,base,77,.1,1,I	! TRIANGLE MESH
-    *ENDIF
-  *ENDDO
+      FINISH
+      /SOLU
+      SOLVE
+      *GET,NTEM,TEMP,T1             ! GET TEMERATURE AT NODE OF INTEREST
+       NARAY(I,5)=NTEM              ! STORE TEMPERATURE
+       NARAY(I,6)=NTEM/18.3         ! CALCULATE TEMPERATURE RATIO
+       PARSAV,,PARAM
+      FINISH
+  
+  
+
+*ENDDO
+
+
   /OUT,
-  !*STAT,NARAY                   ! GET STATUS OF NARAY
+  !*STAT,NARAY                     ! GET STATUS OF NARAY
   *VLEN,4
   *VCOL,6
   /OUT,vmc6,vrt
@@ -216,8 +252,6 @@ smrt,off
 /OUT
 FINISH
 *LIST,vmc6,vrt
-/DELETE,PARAM
-/DELETE,base
+
+
 FINISH
-
-

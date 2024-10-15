@@ -93,8 +93,8 @@ using Mechanical APDL:
     >>> mapdl = launch_mapdl()
     >>> mapdl.prep7()
 
-	# Generate the FEA model (mesh, constraints, loads)
-  # ...
+	  # Generate the FEA model (mesh, constraints, loads)
+    # ...
 
     >>> mapdl.run("/SOLU")
     >>> mapdl.antype("HARMIC")  # HARMONIC ANALYSIS

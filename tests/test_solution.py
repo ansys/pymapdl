@@ -1,4 +1,29 @@
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Test ansys.mapdl.solution.Solution"""
+import pytest
+
+from ansys.mapdl.core.errors import MapdlRuntimeError
 
 
 def time_step_size(mapdl):
@@ -117,3 +142,10 @@ def test_solution_call(mapdl):
     mapdl.finish()
     output = mapdl.solution()
     assert "MAPDL SOLUTION ROUTINE" in output or "ANSYS SOLUTION ROUTINE" in output
+
+
+def test_exited(mapdl):
+    mapdl._exited = True
+    with pytest.raises(MapdlRuntimeError):
+        parm = mapdl.solution.time_step_size
+    mapdl._exited = False

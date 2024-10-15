@@ -11,9 +11,9 @@ concurrency:
 
 env:
   ON_CI: True
-  DOCKER_PACKAGE: ghcr.io/ansys/mapdl
-  DOCKER_IMAGE_VERSION_DOCS_BUILD: v23.1.0
-  MAIN_PYTHON_VERSION: '3.9'
+  MAPDL_PACKAGE: ghcr.io/ansys/mapdl
+  MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.1.0
+  MAIN_PYTHON_VERSION: '3.10'
   PYANSYS_OFF_SCREEN: True
   DPF_START_SERVER: False
   DPF_PORT: 21002
@@ -31,10 +31,33 @@ jobs:
       SHELLOPTS: "errexit:pipefail"
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.1
+
+      - name: "Login in Github container registry"
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GH_USERNAME }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "DPF server activation"
+        run: |
+          $(docker pull ghcr.io/ansys/dpf-core:22.2dev && docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}.") &
+
+      - name: "Pull, launch, and validate MAPDL service"
+        id: start_mapdl
+        env:
+          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
+          MAPDL_VERSION: ${{ env.MAPDL_IMAGE_VERSION_DOCS_BUILD }}
+          DISTRIBUTED_MODE: "dmp"
+        run: |
+          export INSTANCE_NAME=MAPDL
+          .ci/start_mapdl.sh &> mapdl_launch.log & export DOCKER_PID=$!
+          echo "Launching MAPDL service at PID: $DOCKER_PID"
+          echo "DOCKER_PID=$(echo $DOCKER_PID)" >> $GITHUB_OUTPUT
 
       - name: "Setup Python"
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
@@ -53,19 +76,6 @@ jobs:
           pip install .
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
-      - name: "Login in Github container registry"
-        uses: docker/login-action@v2.2.0
-        with:
-          registry: ghcr.io
-          username: ${{ secrets.GH_USERNAME }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: "Pull, launch, and validate MAPDL service"
-        run: .ci/start_mapdl.sh
-        env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          MAPDL_IMAGE: '${{ env.DOCKER_PACKAGE }}:${{ env.DOCKER_IMAGE_VERSION_DOCS_BUILD }}'
-
       - name: "Retrieve PyMAPDL version"
         id: version
         run: |
@@ -76,10 +86,9 @@ jobs:
         run: |
           pip install .[doc]
 
-      - name: "DPF server activation"
+      - name: "Waiting for the services to be up"
         run: |
-          docker pull ghcr.io/ansys/dpf-core:22.2dev
-          docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."  
+          .ci/waiting_services.sh
 
       - name: LinkCheck
         run: |
@@ -91,14 +100,14 @@ jobs:
           echo "::group:: Display linkcher output" && cat doc/*/output.txt && echo "::endgroup::" || echo "Failed to display the output file."
 
       - name: "Upload HTML Documentation"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: documentation-html
           path: doc/_build/html
           retention-days: 7
           
       - name: "Upload artifacts"
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: output

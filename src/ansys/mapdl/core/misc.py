@@ -1,3 +1,25 @@
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Module for miscellaneous functions and methods"""
 from enum import Enum
 from functools import wraps
@@ -10,13 +32,19 @@ import random
 import re
 import socket
 import string
-import sys
 import tempfile
 from threading import Thread
+from typing import Union
 from warnings import warn
 import weakref
 
-from ansys.tools.path import get_available_ansys_installations
+try:
+    from ansys.tools.path import get_available_ansys_installations
+
+    _HAS_ATP = True
+except ModuleNotFoundError:
+    _HAS_ATP = False
+
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
@@ -33,6 +61,19 @@ except ModuleNotFoundError:  # pragma: no cover
 
 # path of this module
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
+
+
+ANSYS_ENV_VARS = [
+    "PYMAPDL_START_INSTANCE",
+    "PYMAPDL_PORT",
+    "PYMAPDL_IP",
+    "PYMAPDL_MAPDL_EXEC",
+    "PYMAPDL_MAPDL_VERSION",
+    "PYMAPDL_MAX_MESSAGE_LENGTH",
+    "ON_CI",
+    "ON_LOCAL",
+    "P_SCHEMA",
+]
 
 
 class ROUTINES(Enum):
@@ -70,6 +111,9 @@ def check_valid_routine(routine):
         Raised when a routine is invalid.
 
     """
+    if routine.lower().startswith("/"):
+        routine = routine[1:]
+
     if routine.lower().startswith("begin"):
         return True
     if not hasattr(ROUTINES, routine.upper()):
@@ -111,9 +155,6 @@ class Plain_Report:
 
         if os.name == "posix":
             self.core.extend(["pexpect"])
-
-        if self.optional is not None and sys.version_info[1] < 9:
-            self.optional.append("ansys_corba")
 
         # Information about the GPU - bare except in case there is a rendering
         # bug that the user is trying to report.
@@ -197,14 +238,22 @@ class Plain_Report:
         # List installed Ansys
         lines = ["", "Ansys Environment Report", "-" * 79]
         lines = ["\n", "Ansys Installation", "******************"]
-        mapdl_install = get_available_ansys_installations()
-        if not mapdl_install:
-            lines.append("Unable to locate any Ansys installations")
+        if _HAS_ATP:
+            mapdl_install = get_available_ansys_installations()
+
+            if not mapdl_install:
+                lines.append("Unable to locate any Ansys installations")
+            else:
+                lines.append("Version   Location")
+                lines.append("------------------")
+                for key in sorted(mapdl_install.keys()):
+                    lines.append(f"{abs(key)}       {mapdl_install[key]}")
         else:
-            lines.append("Version   Location")
-            lines.append("------------------")
-            for key in sorted(mapdl_install.keys()):
-                lines.append(f"{abs(key)}       {mapdl_install[key]}")
+            mapdl_install = None
+            lines.append(
+                "Unable to locate any Ansys installations because 'ansys-tools-path is not installed."
+            )
+
         install_info = "\n".join(lines)
 
         env_info_lines = [
@@ -241,7 +290,7 @@ class Report(base_report_class):
         text_width=80,
         sort=False,
         gpu=True,
-        ansys_vars=None,
+        ansys_vars=ANSYS_ENV_VARS,
         ansys_libs=None,
     ):
         """Generate a :class:`scooby.Report` instance.
@@ -287,10 +336,18 @@ class Report(base_report_class):
             "ansys.api.mapdl.v0",  # ansys-api-mapdl-v0
             "ansys.mapdl.reader",  # ansys-mapdl-reader
             "google.protobuf",  # protobuf library
+            "ansys-math-core",
         ]
 
         # Optional packages
-        optional = ["matplotlib", "pyvista", "pyiges", "tqdm"]
+        optional = [
+            "matplotlib",
+            "pyvista",
+            "pyiges",
+            "tqdm",
+            "ansys-tools-visualization_interface",
+            "pandas",
+        ]
 
         if _HAS_PYANSYS_REPORT:
             #  Combine all packages into one
@@ -414,7 +471,9 @@ def threaded_daemon(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
-        name = kwargs.get("name", f"Threaded (with Daemon) `{func.__name__}` function")
+        name = kwargs.pop(
+            "thread_name", f"Threaded (with Daemon) `{func.__name__}` function"
+        )
         thread = Thread(target=func, name=name, args=args, kwargs=kwargs)
         thread.daemon = True
         thread.start()
@@ -471,33 +530,27 @@ def create_temp_dir(tmpdir=None, name=None):
     """Create a new unique directory at a given temporary directory"""
     if tmpdir is None:
         tmpdir = tempfile.gettempdir()
-    elif not os.path.isdir(tmpdir):
-        os.makedirs(tmpdir)
 
-    if not name:
-        random_name = True
-        letters_ = string.ascii_lowercase.replace("n", "")
-        name = random_string(10, letters_)
-    else:
-        random_name = False
+    # Possible letters
+    letters_ = string.ascii_lowercase.replace("n", "")
 
-    # running into a rare issue with MAPDL on Windows with "\n" being
-    # treated literally.
+    def get_name():
+        return random_string(10, letters_)
+
+    name = name or get_name()
+    while os.path.exists(os.path.join(tmpdir, name)):
+        name = get_name()
+
+    # create dir:
     path = os.path.join(tmpdir, name)
 
-    if random_name:
-        # in the *rare* case of a duplicate path
-        while os.path.isdir(path):
-            path = os.path.join(tempfile.gettempdir(), name)
-
-    if not os.path.exists(path):
-        try:
-            os.mkdir(path)
-        except:
-            raise MapdlRuntimeError(
-                "Unable to create temporary working "
-                f"directory {path}\nPlease specify 'run_location' argument"
-            )
+    try:
+        os.mkdir(path)
+    except:  # pragma: no cover
+        raise MapdlRuntimeError(
+            "Unable to create temporary working "
+            f"directory {path}\nPlease specify 'run_location' argument"
+        )
 
     return path
 
@@ -611,36 +664,6 @@ def check_valid_port(port, lower_bound=1000, high_bound=60000):
         )
 
 
-def check_valid_start_instance(start_instance):
-    """
-    Checks if the value obtained from the environmental variable is valid.
-
-    Parameters
-    ----------
-    start_instance : str
-        Value obtained from the corresponding environment variable.
-
-    Returns
-    -------
-    bool
-        Returns ``True`` if ``start_instance`` is ``True`` or ``"True"``,
-        ``False`` if otherwise.
-
-    """
-    if not isinstance(start_instance, (str, bool)):
-        raise ValueError("The value 'start_instance' should be an string or a boolean.")
-
-    if isinstance(start_instance, bool):
-        return start_instance
-
-    if start_instance.lower() not in ["true", "false"]:
-        raise ValueError(
-            f"The value 'start_instance' should be equal to 'True' or 'False' (case insensitive)."
-        )
-
-    return start_instance.lower() == "true"
-
-
 def update_information_first(update=False):
     """
     Decorator to wrap :class:`Information <ansys.mapdl.core.misc.Information>`
@@ -682,13 +705,13 @@ class Information:
     --------
     >>> mapdl.info
     Product:             Ansys Mechanical Enterprise
-    MAPDL Version:       21.2
-    ansys.mapdl Version: 0.62.dev0
+    MAPDL Version:       24.1
+    ansys.mapdl Version: 0.68.0
 
     >>> print(mapdl)
     Product:             Ansys Mechanical Enterprise
-    MAPDL Version:       21.2
-    ansys.mapdl Version: 0.62.dev0
+    MAPDL Version:       24.1
+    ansys.mapdl Version: 0.68.0
 
     >>> mapdl.info.product
     'Ansys Mechanical Enterprise'
@@ -701,9 +724,9 @@ class Information:
 
     def __init__(self, mapdl):
         """Class Initializer"""
-        from ansys.mapdl.core.mapdl import _MapdlCore  # lazy import to avoid circular
+        from ansys.mapdl.core.mapdl import MapdlBase  # lazy import to avoid circular
 
-        if not isinstance(mapdl, _MapdlCore):  # pragma: no cover
+        if not isinstance(mapdl, MapdlBase):  # pragma: no cover
             raise TypeError("Must be implemented from MAPDL class")
 
         self._mapdl_weakref = weakref.ref(mapdl)
@@ -829,7 +852,7 @@ class Information:
 
     @title.setter
     def title(self, title):
-        return self._mapdl.title(title)
+        return self._mapdl.run(f"/TITLE, {title}")
 
     @property
     @update_information_first(True)
@@ -974,9 +997,13 @@ class Information:
 
     def _get_stitles(self):
         return [
-            re.search(f"SUBTITLE  {i}=(.*)", self._get_titles()).groups(1)[0].strip()
-            if re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
-            else ""
+            (
+                re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
+                .groups(1)[0]
+                .strip()
+                if re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
+                else ""
+            )
             for i in range(1, 5)
         ]
 
@@ -1066,7 +1093,7 @@ class Information:
         return self._get_between(init_, end_string)
 
 
-def write_array(filename, array):
+def write_array(filename: Union[str, bytes], array: np.ndarray):
     """
     Write an array to a file.
 
@@ -1080,6 +1107,8 @@ def write_array(filename, array):
     array : numpy.ndarray
         Array.
     """
+    if isinstance(filename, bytes):
+        filename = filename.decode()
     np.savetxt(filename, array, fmt="%20.12f")
 
 
@@ -1107,7 +1136,7 @@ def requires_package(package_name, softerror=False):
                     f"To use the method '{function.__name__}', "
                     f"the package '{package_name}' is required.\n"
                     f"Please try to install '{package_name}' with:\n"
-                    f"pip install {package_name.replace('.','-') if 'ansys' in package_name else package_name}"
+                    f"pip install {package_name.replace('.', '-') if 'ansys' in package_name else package_name}"
                 )
 
                 if softerror:
@@ -1144,6 +1173,7 @@ def allow_pickable_entities(entity="node", plot_function="nplot"):
             type_, item, comp, vmin, vmax, vinc, kabs, kwargs = _get_args_xsel(
                 *args, **kwargs
             )
+            from ansys.mapdl.core.plotting.consts import POINT_SIZE
 
             if item == "P" and _HAS_PYVISTA:
                 if type_ not in ["S", "R", "A", "U"]:
@@ -1160,6 +1190,8 @@ def allow_pickable_entities(entity="node", plot_function="nplot"):
                 if entity == "area":
                     # To overwrite the quality argument
                     pl = plotting_function(return_plotter=True, quality=1)
+                elif entity in ["node", "nodes", "kp"]:
+                    pl = plotting_function(return_plotter=True, point_size=POINT_SIZE)
                 else:
                     pl = plotting_function(return_plotter=True)
 
@@ -1246,13 +1278,13 @@ def allow_iterables_vmin(entity="node"):
             else:
                 return original_sel_func(
                     self,
-                    type_=type_,
-                    item=item,
-                    comp=comp,
-                    vmin=vmin,
-                    vmax=vmax,
-                    vinc=vinc,
-                    kabs=kabs,
+                    type_,
+                    item,
+                    comp,
+                    vmin,
+                    vmax,
+                    vinc,
+                    kabs,  # ksel, esel, nsel uses kabs, but lsel, asel, vsel uses kswp
                     **kwargs,
                 )
 

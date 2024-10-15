@@ -1,3 +1,25 @@
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import os
 import re
 from subprocess import PIPE, STDOUT, Popen
@@ -7,7 +29,7 @@ import pytest
 from ansys.mapdl.core import EXAMPLES_PATH, examples
 from ansys.mapdl.core.examples.downloads import (
     _download_file,
-    _download_rotor_tech_demo_plot,
+    _download_rotor_tech_demo_vtk,
     check_directory_exist,
     delete_downloads,
     download_bracket,
@@ -18,6 +40,7 @@ from ansys.mapdl.core.examples.downloads import (
     download_vtk_rotor,
     get_ext,
 )
+from conftest import requires
 
 
 def test_check_directory_exist(tmpdir):
@@ -66,6 +89,7 @@ def test_load_verif():
         assert os.path.isfile(filename)
 
 
+@requires("requests")
 def test_bracket(mapdl, cleared, running_test):
     # note that this method just returns a file path
     with running_test(False):  # To force downloading the file
@@ -80,6 +104,7 @@ def test_bracket(mapdl, cleared, running_test):
     assert int(n_ent[0]) > 0
 
 
+@requires("requests")
 def test_download_example_data_true_download():
     path = download_example_data("LatheCutter.anf", "geometry")
     assert os.path.exists(path)
@@ -92,36 +117,43 @@ def test_failed_download(running_test):
             _download_file(filename, directory=None)
 
 
+@requires("requests")
 def test_download_cfx_mapping_example_data(running_test):
     with running_test():
         assert all(download_cfx_mapping_example_data().values())
 
 
+@requires("requests")
 def test_download_manifold_example_data(running_test):
     with running_test():
         assert all(download_manifold_example_data().values())
 
 
+@requires("requests")
 def test_download_bracket(running_test):
     with running_test():
         assert download_bracket() is True
 
 
+@requires("requests")
 def test_download_vtk_rotor(running_test):
     with running_test():
         assert download_vtk_rotor() is True
 
 
-def test__download_rotor_tech_demo_plot(running_test):
+@requires("requests")
+def test__download_rotor_tech_demo_vtk(running_test):
     with running_test():
-        assert _download_rotor_tech_demo_plot() is True
+        assert _download_rotor_tech_demo_vtk() is True
 
 
+@requires("requests")
 def test_download_example_data(running_test):
     with running_test():
         assert download_example_data("LatheCutter.anf", "geometry") is True
 
 
+@requires("requests")
 def test_download_tech_demo_data(running_test):
     with running_test():
         assert (
@@ -130,29 +162,35 @@ def test_download_tech_demo_data(running_test):
         )
 
 
+@requires("requests")
 def test_detach_examples_submodule():
-    cmd = """
+    cmd = (
+        """
 import sys
 
-assert "ansys.mapdl.core" not in sys.modules
-assert "requests" not in sys.modules
-assert "ansys.mapdl.core.examples" not in sys.modules
+assert 'ansys.mapdl.core' not in sys.modules
+assert 'requests' not in sys.modules
+assert 'ansys.mapdl.core.examples' not in sys.modules
 
 from ansys.mapdl import core as pymapdl
 
-assert "ansys.mapdl.core" in sys.modules
-assert "ansys.mapdl.core.examples" not in sys.modules
-assert "requests" not in sys.modules
+assert 'ansys.mapdl.core' in sys.modules
+assert 'ansys.mapdl.core.examples' not in sys.modules
+assert 'requests' not in sys.modules
 
 from ansys.mapdl.core.examples import vmfiles
 
-assert "ansys.mapdl.core.examples" in sys.modules
-assert "requests" in sys.modules
+assert 'ansys.mapdl.core.examples' in sys.modules
+assert 'requests' in sys.modules
 
-print("Everything went well")
-"""
+print('Everything went well')
+""".strip()
+        .replace("\n", ";")
+        .replace(";;", ";")
+    )
 
-    cmd_line = f"""python -c '{cmd}' """
+    cmd_line = f"""python -c "{cmd}" """
+
     p = Popen(cmd_line, shell=True, stdout=PIPE, stderr=STDOUT)
     out = p.communicate()[0].decode()
 

@@ -24,7 +24,7 @@ body:
         required: true
       - label: I am using a [Python virtual environment](https://docs.python.org/3/library/venv.html).
         required: true
-      - label: I am using the [latest version of PyMAPDL](https://github.com/ansys/pymapdl/releases) and its dependencies (fully updated virtual environment). You can update them using ``pip install --upgrade --upgrade-strategy eager ansys-mapdl-core``.
+      - label: I am using the [latest version of PyMAPDL](https://github.com/ansys/pymapdl/releases) and its dependencies (fully updated virtual environment). You can update them using ``pip install --upgrade --upgrade-strategy eager ansys-mapdl-core`` in your activated virtual environment.
         required: true
 
   - type: textarea
@@ -71,7 +71,7 @@ body:
        - 'MacOS'
        - 'Linux'
     validations:
-      required: false
+      required: true
 
   - type: dropdown
     id: python-version
@@ -80,12 +80,20 @@ body:
       description: Run `python --version` to verify your Python version
       multiple: false
       options:
-       - '3.8'
        - '3.9'
        - '3.10'
        - '3.11'
+       - '3.12'
     validations:
-      required: false
+      required: true
+
+  - type: input
+    id: mapdl-version
+    attributes:
+      label: 💾 Which MAPDL version are you using?
+      placeholder: ex. 24.1 or 2024R1
+    validations:
+      required: true
 
   - type: textarea
     id: pymapdl-report

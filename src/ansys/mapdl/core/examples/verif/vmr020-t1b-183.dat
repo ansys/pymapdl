@@ -1,0 +1,270 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/verify,vmr020-t1b-183
+/title,vmr020-t1b-183,Centre Cracked Plate with Quadratic Thermal Distribution
+/com,
+/com, Problem is taken from NAFEMS Publication
+/com, "2D Test Cases in Linear Elastic Fracture Mechanics"
+/com, Test case 1.2
+/com,
+/com, Reference: Hellen T K and Cesari F : On the solution of
+/com, the centre cracked plate with a quadratic thermal gradient
+/com, Engineering Fracture Mechanics, Vol 12, pp 469-478
+/com,
+/com, **********************************************************
+/com, Stress Intensity Factor Calculation using Interaction
+/com, Integral Approach
+/prep7
+
+e=207000		    !youngs modulus
+nu=0.3		    	!poissons ratio
+alp=1.35e-5		    !coefficient of thermal expansion
+k0=514.3		    !critical stress intensity factor from nafems manual
+
+
+et,1,plane183,,,0		!plane183 element
+			
+mp,ex,1,e
+mp,nuxy,1,nu
+mp,alpx,1,alp
+mp,reft,1,0
+
+k,1,10,0
+k,2,100,0
+k,3,100,50
+k,4,100,250
+k,5,0,250
+k,6,0,50
+k,7,0,0
+
+l,1,2
+*rep,6,1,1
+l,7,1
+l,6,3
+
+al,1,2,8,6,7
+al,3,4,5,8
+
+esize,5
+kscon,1,4,1,8,0.75		!mesh near crack tip
+amesh,1
+esize,10
+amesh,2
+finish
+
+
+/solu
+autots,on
+nsubst,10
+outres,all,all
+nsel,s,loc,x,10,100
+nsel,r,loc,y,0
+d,all,uy,0
+nsel,all
+nsel,s,loc,y,0,250
+nsel,r,loc,x,0
+d,all,ux,0
+nsel,all
+
+*get,nn,node,0,count		!quadratic thermal distribution
+ *do,i,1,nn
+  tt=0.01*nx(i)*nx(i)
+  bf,i,temp,tt
+ *enddo
+allsel
+
+nsel,s,loc,x,10
+nsel,r,loc,y,0
+cm,crack1,node
+
+cint,new,1
+cint,type,sifs      ! Calculate stress intensity factor
+cint,ctnc,crack1	!crack ID
+cint,ncon,4		    !number of contours
+cint,symm,on		!symmetry on
+cint,norm,0,2
+cint,list
+allsel,all
+solve
+finish
+   
+/out,scratch
+/post1
+prcint,1,,k1
+
+*get,k1_1,cint,1,ctip,node(10,0,0),,1,dtype,k1
+*get,k1_2,cint,1,ctip,node(10,0,0),,2,dtype,k1
+*get,k1_3,cint,1,ctip,node(10,0,0),,3,dtype,k1
+*get,k1_4,cint,1,ctip,node(10,0,0),,4,dtype,k1
+
+k1=(k1_2+k1_3+k1_4)/3
+*stat,k1
+norm_sif=k1/k0
+/out,
+*stat,norm_sif
+
+*DIM,LABEL,CHAR,1,5
+*DIM,VALUE,,1,3
+LABEL(1,1) = 'KI'
+*VFILL,VALUE(1,1),DATA,1
+*VFILL,VALUE(1,2),DATA,norm_sif
+*VFILL,VALUE(1,3),DATA,ABS(norm_sif/1 ) 
+SAVE,TABLE_1
+FINI
+/CLEAR,NOSTART
+
+/com,*************************************************************
+/com, Using J integral Calculation
+
+
+/prep7
+
+e=207000		    !youngs modulus
+nu=0.3		    	!poissons ratio
+alp=1.35e-5		    !coefficient of thermal expansion
+k0=514.3		    !critical stress intensity factor from nafems manual
+
+
+et,1,plane183,,,0		!plane183 element
+			
+mp,ex,1,e
+mp,nuxy,1,nu
+mp,alpx,1,alp
+mp,reft,1,0
+
+k,1,10,0
+k,2,100,0
+k,3,100,50
+k,4,100,250
+k,5,0,250
+k,6,0,50
+k,7,0,0
+
+l,1,2
+*rep,6,1,1
+l,7,1
+l,6,3
+
+al,1,2,8,6,7
+al,3,4,5,8
+
+esize,5
+kscon,1,4,1,8,0.75	!mesh near crack tip
+amesh,1
+esize,10
+amesh,2
+finish
+
+
+/solu
+autots,on
+nsubst,10
+outres,all,all
+nsel,s,loc,x,10,100
+nsel,r,loc,y,0
+d,all,uy,0
+nsel,all
+nsel,s,loc,y,0,250
+nsel,r,loc,x,0
+d,all,ux,0
+nsel,all
+
+*get,nn,node,0,count		!quadratic thermal distribution
+ *do,i,1,nn
+  tt=0.01*nx(i)*nx(i)
+  bf,i,temp,tt
+ *enddo
+allsel
+
+nsel,s,loc,x,10
+nsel,r,loc,y,0
+cm,crack1,node
+
+cint,new,1
+cint,ctnc,crack1	!crack ID
+cint,ncon,4		    !number of contours
+cint,symm,on		!symmetry on
+cint,norm,0,2
+cint,list
+allsel,all
+solve
+finish
+   
+/out,scratch
+/post1
+prcint,1,,
+
+*get,j1,cint,1,ctip,node(10,0,0),,1,,
+*get,j2,cint,1,ctip,node(10,0,0),,2,,
+*get,j3,cint,1,ctip,node(10,0,0),,3,,
+*get,j4,cint,1,ctip,node(10,0,0),,4,,
+
+j_avg=(abs(j1)+abs(j2)+abs(j3)+abs(j4))/4
+con2 = e
+k1 = ((con2*j_avg)**0.5)
+*stat,k1
+norm_sif=k1/k0
+/out,
+*stat,norm_sif
+
+
+*DIM,LABEL,CHAR,1,5
+*DIM,VALUE,,1,3
+LABEL(1,1) = 'KI'
+*VFILL,VALUE(1,1),DATA,1
+*VFILL,VALUE(1,2),DATA,norm_sif
+*VFILL,VALUE(1,3),DATA,ABS(norm_sif/1 ) 
+SAVE,TABLE_2
+
+
+
+/NOPR
+/COM
+/OUT,vmr020-t1b-183,vrt
+/COM,------------------- vmr020-t1b-183 RESULTS COMPARISON ---------------------
+/COM,
+/COM,              |   TARGET   |   MECHANICAL APDL   |   RATIO
+/COM,
+RESUME,TABLE_1
+/COM,USING STRESS INTENSITY FACTOR CALCULATION 
+*VWRITE,LABEL(1,1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,'   ',F10.3,'  ',F12.3,'   ',1F16.3)
+/COM,
+/COM,
+/COM,
+RESUME,TABLE_2
+/COM,USING J-INTEGRAL APPROACH
+/COM,
+*VWRITE,LABEL(1,1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,'   ',F10.3,'  ',F12.3,'   ',1F16.3)
+/COM,
+/COM,
+/COM,
+/COM,-------------------------------------------------------------------------------
+
+
+/OUT
+FINISH
+*list,vmr020-t1b-183,vrt 
+        

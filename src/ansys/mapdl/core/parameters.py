@@ -1,3 +1,25 @@
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import os
 import re
 import tempfile
@@ -15,7 +37,7 @@ except ModuleNotFoundError:  # pragma: no cover
 import numpy as np
 
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from ansys.mapdl.core.mapdl import _MapdlCore
+from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.misc import supress_logging
 
 ROUTINE_MAP = {
@@ -77,7 +99,7 @@ class Parameters:
 
     """
 
-    def __init__(self, mapdl: _MapdlCore):
+    def __init__(self, mapdl: MapdlBase):
         """Parameters manager
 
         Class to help to manage parameters in an
@@ -88,7 +110,7 @@ class Parameters:
         mapdl : ansys.mapdl.core.Mapdl
             Mapdl instance which this class references to.
         """
-        if not isinstance(mapdl, _MapdlCore):
+        if not isinstance(mapdl, MapdlBase):
             raise TypeError("Must be implemented from MAPDL class")
         self._mapdl_weakref = weakref.ref(mapdl)
         self.show_leading_underscore_parameters = False
@@ -127,7 +149,7 @@ class Parameters:
     def routine(self) -> str:
         """Current routine string as a string.  For example ``"/PREP7"``
 
-        MAPDL Command: \*GET, ACTIVE, 0, ROUT
+        MAPDL Command: \\*GET, ACTIVE, 0, ROUT
 
         Returns
         -------
@@ -292,6 +314,10 @@ class Parameters:
     @supress_logging
     def _parm(self):
         """Current MAPDL parameters"""
+        if self._mapdl._store_commands:
+            # in interactive mode
+            return {}
+
         params = interp_star_status(
             self._mapdl.starstatus(avoid_non_interactive=True, mute=False)
         )
@@ -326,8 +352,15 @@ class Parameters:
 
     def __getitem__(self, key):
         """Return a parameter"""
+        if self._mapdl._store_commands:
+            raise MapdlRuntimeError(
+                "Cannot use `mapdl.parameters` to retrieve parameters when in "
+                "`non_interactive` mode. "
+                "Exit `non_interactive` mode before using this method."
+            )
+
         if not isinstance(key, str):
-            raise TypeError("Parameter name must be a string")
+            raise TypeError("Parameter name must be a string.")
         key = key.upper()
 
         with self.full_parameters_output:
@@ -499,7 +532,7 @@ class Parameters:
         """
         escaped = False
         for each_format_number in [20, 30, 40, 64, 100]:
-            format_str = f"(1F{each_format_number}.12)"
+            format_str = f"(1E{each_format_number}.12)"
             with self._mapdl.non_interactive:
                 # use C ordering
                 self._mapdl.mwrite(parm_name.upper(), label="kji")
@@ -515,7 +548,7 @@ class Parameters:
         if not escaped:  # pragma: no cover
             raise MapdlRuntimeError(
                 f"The array '{parm_name}' has a number format "
-                "that could not be read using '{format_str}'."
+                f"that could not be read using '{format_str}'."
             )
 
         arr_flat = np.fromstring(output, sep="\n").reshape(shape)
@@ -531,15 +564,15 @@ class Parameters:
         """Load a numpy array or python list directly to MAPDL
 
         Writes the numpy array to disk and then reads it in within
-        MAPDL using \*VREAD.
+        MAPDL using \\*VREAD.
 
         Parameters
         ----------
-        arr : np.ndarray or List
-            Array to send to MAPDL.  Maximum of 3 dimensions.
-
         name : str
             Name of the array to write to within MAPDL.
+
+        arr : np.ndarray or List
+            Array to send to MAPDL.  Maximum of 3 dimensions.
 
         Examples
         --------
@@ -718,12 +751,12 @@ def is_array_listing(status):
 
 
 def interp_star_status(status):
-    """Interprets \*STATUS command output from MAPDL
+    """Interprets \\*STATUS command output from MAPDL
 
     Parameters
     ----------
     status : str
-        Output from MAPDL \*STATUS
+        Output from MAPDL \\*STATUS
 
     Returns
     -------
@@ -803,9 +836,9 @@ def interp_star_status(status):
         elif len(items) == 4:
             # it is an array or string array
             if is_array_listing(status):
-                myarray[
-                    int(items[0]) - 1, int(items[1]) - 1, int(items[2]) - 1
-                ] = float(items[3])
+                myarray[int(items[0]) - 1, int(items[1]) - 1, int(items[2]) - 1] = (
+                    float(items[3])
+                )
             elif is_string_array:
                 elements.append(items[-1])
 
