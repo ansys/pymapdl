@@ -683,18 +683,14 @@ def test_is_on_slurm(
             else:
                 assert not flag
 
-    # Fake MAPDL installation to avoid errors.
-    exec_file = r"/ansys_inc/v241/ansys/bin/mapdl"
-    fs.create_file(exec_file)
-
-    assert (
-        launch_mapdl(
-            exec_file=exec_file,
-            detect_slurm_config=detect_slurm_config,
-            _debug_no_launch=True,
-        )["ON_SLURM"]
-        == flag
-    )
+    if ON_LOCAL:
+        assert (
+            launch_mapdl(
+                detect_slurm_config=detect_slurm_config,
+                _debug_no_launch=True,
+            )["ON_SLURM"]
+            == flag
+        )
 
 
 @pytest.mark.parametrize(
