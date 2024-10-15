@@ -715,7 +715,7 @@ jobs:
 
       - name: "PR comment with reactions"
         if: ${{ steps.attatch-to-pr.outputs.pushed == 'true' }}
-        uses: thollander/actions-comment-pull-request@v2
+        uses: thollander/actions-comment-pull-request@v3
         with:
           message: |
             Hello!  :wave:
