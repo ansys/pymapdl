@@ -1318,6 +1318,10 @@ def launch_mapdl(
         "ANSYSLMD_LICENSE_FILE":"1055@MYSERVER"}
     >>> mapdl = launch_mapdl(replace_env_vars=my_env_vars)
     """
+    ########################################
+    # Processing arguments
+    # --------------------
+    #
     # packing arguments
     args = pack_arguments(locals())  # packs args and kwargs
 
@@ -1344,8 +1348,12 @@ def launch_mapdl(
 
     args["version"] = get_version(args["version"], exec_file)
 
-    # Only when starting MAPDL (aka Local)
     if args["start_instance"]:
+        ########################################
+        # Local adjustments
+        # -----------------
+        #
+        # Only when starting MAPDL (aka Local)
 
         get_run_location(args)
 
@@ -1376,7 +1384,6 @@ def launch_mapdl(
     # --------------------------------------
     #
     if args["start_instance"]:
-        #
         env_vars = configure_ubuntu(env_vars)
 
         # Set SMP by default if student version is used.
@@ -1410,6 +1417,10 @@ def launch_mapdl(
         return args  # type: ignore
 
     if not args["start_instance"]:
+        ########################################
+        # Remote launching
+        # ----------------
+        #
         LOG.debug(
             f"Connecting to an existing instance of MAPDL at {args['ip']}:{args['port']}"
         )
@@ -1432,11 +1443,19 @@ def launch_mapdl(
             mapdl.clear()
         return mapdl
 
+    ########################################
+    # Sphinx docs adjustments
+    # -----------------------
+    #
     # special handling when building the gallery outside of CI. This
     # creates an instance of mapdl the first time.
     if pymapdl.BUILDING_GALLERY:  # pragma: no cover
         return create_gallery_instances(args, start_parm)
 
+    ########################################
+    # Local launching
+    # ---------------
+    #
     # Check the license server
     if args["license_server_check"]:
         LOG.debug("Checking license server.")
