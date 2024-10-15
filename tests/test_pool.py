@@ -461,7 +461,7 @@ class TestMapdlPool:
             pytest.param(
                 None,
                 None,
-                [50052, 50053],
+                ["50052", "50053"],
                 2,
                 [LOCALHOST, LOCALHOST],
                 [50052, 50053],
