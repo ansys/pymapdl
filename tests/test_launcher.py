@@ -52,7 +52,7 @@ from ansys.mapdl.core.launcher import (
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from conftest import ON_LOCAL, QUICK_LAUNCH_SWITCHES, NullContext, requires
+from conftest import ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, NullContext, requires
 
 try:
     from ansys.tools.path import (
@@ -684,8 +684,11 @@ def test_is_on_slurm(
                 assert not flag
 
     # Fake MAPDL installation to avoid errors.
-    exec_file = "/ansys_inc/v241/ansys/bin/mapdl"
+    exec_file = r"/ansys_inc/v241/ansys/bin/mapdl"
     fs.create_file(exec_file)
+    if ON_CI:
+        # Error probably from trying to get the number of CPUs
+        fs.add_real_file("/proc/meminfo")
 
     assert (
         launch_mapdl(
