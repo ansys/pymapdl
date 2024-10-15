@@ -1509,8 +1509,6 @@ def launch_mapdl(
                 use_vtk=args["use_vtk"],
                 **start_parm,
             )
-            if args["run_location"] is None:
-                mapdl._path = args["run_location"]
 
         # Setting launched property
         mapdl._launched = True
@@ -1737,7 +1735,7 @@ def _parse_ip_route(output):
 def get_slurm_options(
     args: Dict[str, Any],
     kwargs: Dict[str, Any],
-):
+) -> Dict[str, Any]:
     def get_value(
         variable: str,
         kwargs: Dict[str, Any],
@@ -1780,8 +1778,8 @@ def get_slurm_options(
     LOG.info(f"SLURM_CPUS_ON_NODE: {SLURM_CPUS_ON_NODE}")
 
     SLURM_MEM_PER_NODE = get_value(
-        "SLURM_MEM_PER_NODE", kwargs, default=None, astype=None
-    )
+        "SLURM_MEM_PER_NODE", kwargs, default=None, astype=str
+    ).upper()
     LOG.info(f"SLURM_MEM_PER_NODE: {SLURM_MEM_PER_NODE}")
 
     SLURM_NODELIST = get_value(
@@ -1829,15 +1827,14 @@ def get_slurm_options(
     if not args["ram"]:
         if SLURM_MEM_PER_NODE:
             # RAM argument is in MB, so we need to convert
-
             if SLURM_MEM_PER_NODE[-1] == "T":  # tera
                 args["ram"] = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** 2
             elif SLURM_MEM_PER_NODE[-1] == "G":  # giga
                 args["ram"] = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** 1
-            elif SLURM_MEM_PER_NODE[-1].upper() == "k":  # kilo
+            elif SLURM_MEM_PER_NODE[-1] == "K":  # kilo
                 args["ram"] = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** (-1)
             else:  # Mega
-                args["ram"] = int(SLURM_MEM_PER_NODE)
+                args["ram"] = int(SLURM_MEM_PER_NODE[:-1])
 
     LOG.info(f"Setting RAM to: {args['ram']}")
 
@@ -1853,16 +1850,6 @@ def get_slurm_options(
     args["start_timeout"] = 2 * args["start_timeout"]
 
     return args
-
-
-def _pack_parameters_debug(locals_var):
-    # pack all the arguments in a dict for debugging purposes
-    # We prefer to explicitly output the desired output
-    config = pack_arguments(locals_var)
-
-    # Non-argument values
-    config["start_parm"] = locals_var["start_parm"]
-    return config
 
 
 def pack_arguments(locals_):
@@ -2092,10 +2079,12 @@ def get_version(
     ValueError
         MAPDL version must be one of the following
     """
-    if version is not None:
-        version = str(version)
+    if not version:
+        version = os.getenv("PYMAPDL_MAPDL_VERSION")
 
-    version = os.getenv("PYMAPDL_MAPDL_VERSION", version)
+    if not version:
+        # Early exit
+        return
 
     if isinstance(version, float):
         version = int(version * 10)
@@ -2127,8 +2116,11 @@ def get_version(
 
 def create_gallery_instances(
     args: Dict[str, Any], start_parm: Dict[str, Any]
-) -> MapdlGrpc:
+) -> MapdlGrpc:  # pragma: no cover
     """Create MAPDL instances for the documentation gallery built.
+
+    This function is not tested with Pytest, but it is used during CICD docs
+    building.
 
     Parameters
     ----------
@@ -2260,7 +2252,7 @@ def get_run_location(args: Dict[str, Any]) -> None:
         os.makedirs(args["run_location"], exist_ok=True)
         LOG.debug(f"Creating directory for MAPDL run location: {args['run_location']}")
 
-        if args["remove_temp_dir_on_exit"]:
+        if args.get("remove_temp_dir_on_exit"):
             LOG.info(
                 "The 'run_location' argument is set. Disabling the removal of temporary files."
             )
@@ -2350,13 +2342,15 @@ def remove_err_files(run_location, jobname):
     # created to tell when the process has started
     for filename in os.listdir(run_location):
         if ".err" == filename[-4:] and jobname in filename:
+            filename = os.path.join(run_location, filename)
             if os.path.isfile(filename):
                 try:
                     os.remove(filename)
                     LOG.debug(f"Removing temporary error file: {filename}")
-                except:
-                    raise IOError(
+                except Exception as error:
+                    LOG.debug(
                         f"Unable to remove {filename}.  There might be "
                         "an instance of MAPDL running at running at "
                         f'"{run_location}"'
                     )
+                    raise error

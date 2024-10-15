@@ -42,11 +42,15 @@ from ansys.mapdl.core.launcher import (
     _parse_ip_route,
     force_smp_in_student,
     generate_mapdl_launch_command,
+    generate_start_parameters,
+    get_exec_file,
+    get_run_location,
     get_slurm_options,
     get_start_instance,
     get_version,
     is_on_slurm,
     launch_mapdl,
+    remove_err_files,
     set_license_switch,
     set_MPI_additional_switches,
     update_env_vars,
@@ -373,18 +377,22 @@ def test_license_product_argument_p_arg_warning():
 
 
 installed_mapdl_versions = []
-installed_mapdl_versions.extend(list(versions.keys()))
-installed_mapdl_versions.extend([each / 10 for each in versions.keys()])
+installed_mapdl_versions.extend([int(each) for each in list(versions.keys())])
+installed_mapdl_versions.extend([float(each / 10) for each in versions.keys()])
 installed_mapdl_versions.extend([str(each) for each in list(versions.keys())])
 installed_mapdl_versions.extend([str(each / 10) for each in versions.keys()])
 installed_mapdl_versions.extend(list(versions.values()))
+installed_mapdl_versions.extend([None])
 
 
 @pytest.mark.parametrize("version", installed_mapdl_versions)
 def test__verify_version_pass(version):
     ver = get_version(version)
-    assert isinstance(ver, int)
-    assert min(versions.keys()) <= ver <= max(versions.keys())
+    if version:
+        assert isinstance(ver, int)
+        assert min(versions.keys()) <= ver <= max(versions.keys())
+    else:
+        assert ver is None
 
 
 def test__verify_version_latest():
@@ -657,6 +665,26 @@ def test_get_slurm_options(set_env_var_context, validation):
         assert args["exec_file"] == validation["exec_file"]
 
 
+@pytest.mark.parametrize(
+    "ram,expected", [["2048k", 2], ["10M", 10], ["100G", 100 * 1024], ["1T", 1024**2]]
+)
+def test_slurm_ram(monkeypatch, ram, expected):
+    monkeypatch.setenv("SLURM_MEM_PER_NODE", ram)
+    monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "asdf/qwer/poiu")
+
+    args = {
+        "exec_file": None,
+        "jobname": "",
+        "ram": None,
+        "nproc": None,
+        "additional_switches": "",
+        "start_timeout": 45,
+    }
+
+    args = get_slurm_options(args, {})
+    assert args["ram"] == expected
+
+
 @pytest.mark.parametrize("slurm_env_var", ["True", "false", ""])
 @pytest.mark.parametrize("slurm_job_name", ["True", "false", ""])
 @pytest.mark.parametrize("slurm_job_id", ["True", "false", ""])
@@ -911,3 +939,108 @@ def test_generate_mapdl_launch_command_linux():
 
     assert f" -i .__tmp__.inp " not in cmd
     assert f" -o .__tmp__.out " not in cmd
+
+
+def test_generate_start_parameters_console():
+    args = {"mode": "console", "start_timeout": 90}
+
+    new_args = generate_start_parameters(args)
+    assert "start_timeout" in new_args
+    assert "ram" not in new_args
+    assert "override" not in new_args
+    assert "timeout" not in new_args
+
+
+@patch("ansys.mapdl.core.launcher._HAS_ATP", False)
+def test_get_exec_file(monkeypatch):
+    monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", False)
+
+    args = {"exec_file": None, "start_instance": True}
+
+    with pytest.raises(ModuleNotFoundError):
+        get_exec_file(args)
+
+
+def test_get_exec_file_not_found(monkeypatch):
+    monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", False)
+
+    args = {"exec_file": "my/fake/path", "start_instance": True}
+
+    with pytest.raises(FileNotFoundError):
+        get_exec_file(args)
+
+
+@pytest.mark.parametrize("remove_temp_dir_on_exit", [None, False, True])
+def test_get_run_location(tmpdir, remove_temp_dir_on_exit):
+    new_path = os.path.join(str(tmpdir), "my_new_path")
+    args = {
+        "run_location": new_path,
+        "remove_temp_dir_on_exit": remove_temp_dir_on_exit,
+    }
+
+    get_run_location(args)
+
+    assert os.path.exists(new_path)
+
+    if remove_temp_dir_on_exit:
+        assert "remove_temp_dir_on_exit" in args
+    else:
+        assert "remove_temp_dir_on_exit" not in args
+
+
+def fake_os_access(*args, **kwargs):
+    return False
+
+
+@patch("os.access", lambda *args, **kwargs: False)
+def test_get_run_location_no_access(tmpdir):
+    with pytest.raises(IOError, match="Unable to write to ``run_location``:"):
+        get_run_location({"run_location": str(tmpdir)})
+
+
+@pytest.mark.parametrize(
+    "args,match",
+    [
+        [
+            {"start_instance": True, "ip": True, "on_pool": False},
+            "When providing a value for the argument 'ip', the argument",
+        ],
+        [
+            {"exec_file": True, "version": True},
+            "Cannot specify both ``exec_file`` and ``version``.",
+        ],
+    ],
+)
+def test_pre_check_args(args, match):
+    with pytest.raises(ValueError, match=match):
+        launch_mapdl(**args)
+
+
+def test_remove_err_files(tmpdir):
+    run_location = str(tmpdir)
+    jobname = "jobname"
+    err_file = os.path.join(run_location, f"{jobname}.err")
+    with open(err_file, "w") as fid:
+        fid.write("Dummy")
+
+    assert os.path.isfile(err_file)
+    remove_err_files(run_location, jobname)
+    assert not os.path.isfile(err_file)
+
+
+def myosremove(*args, **kwargs):
+    raise IOError("Generic error")
+
+
+@patch("os.remove", myosremove)
+def test_remove_err_files_fail(tmpdir):
+    run_location = str(tmpdir)
+    jobname = "jobname"
+    err_file = os.path.join(run_location, f"{jobname}.err")
+    with open(err_file, "w") as fid:
+        fid.write("Dummy")
+
+    assert os.path.isfile(err_file)
+    with pytest.raises(IOError):
+        remove_err_files(run_location, jobname)
+    assert os.path.isfile(err_file)
