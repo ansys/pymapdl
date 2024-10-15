@@ -24,6 +24,7 @@
 
 import os
 import tempfile
+from unittest.mock import patch
 import warnings
 
 import psutil
@@ -40,9 +41,11 @@ from ansys.mapdl.core.launcher import (
     _is_ubuntu,
     _parse_ip_route,
     force_smp_in_student,
+    generate_mapdl_launch_command,
     get_slurm_options,
     get_start_instance,
     get_version,
+    is_on_slurm,
     launch_mapdl,
     set_license_switch,
     set_MPI_additional_switches,
@@ -654,6 +657,33 @@ def test_get_slurm_options(set_env_var_context, validation):
         assert args["exec_file"] == validation["exec_file"]
 
 
+@pytest.mark.parametrize("slurm_env_var", ["True", "false", ""])
+@pytest.mark.parametrize("slurm_job_name", ["True", "false", ""])
+@pytest.mark.parametrize("slurm_job_id", ["True", "false", ""])
+@pytest.mark.parametrize("detect_slurm_config", [True, False, None])
+def test_is_on_slurm(
+    monkeypatch, slurm_env_var, slurm_job_name, slurm_job_id, detect_slurm_config
+):
+    monkeypatch.setenv("PYMAPDL_ON_SLURM", slurm_env_var)
+    monkeypatch.setenv("SLURM_JOB_NAME", slurm_job_name)
+    monkeypatch.setenv("SLURM_JOB_ID", slurm_job_id)
+
+    flag = is_on_slurm(args={"detect_slurm_config": detect_slurm_config})
+
+    if detect_slurm_config is not True:
+        assert not flag
+
+    else:
+        if slurm_env_var.lower() == "false":
+            assert not flag
+
+        else:
+            if slurm_job_name != "" and slurm_job_id != "":
+                assert flag
+            else:
+                assert not flag
+
+
 @pytest.mark.parametrize(
     "start_instance,context",
     [
@@ -805,3 +835,65 @@ def test_ip_and_start_instance(
         else:
             # Using default
             assert options["ip"] in (LOCALHOST, "0.0.0.0", "127.0.0.1")
+
+
+@patch("os.name", "nt")
+def test_generate_mapdl_launch_command_windows():
+    assert os.name == "nt"  # Checking mocking is properly done
+
+    exec_file = "C:/Program Files/ANSYS Inc/v242/ansys/bin/winx64/ANSYS242.exe"
+    jobname = "myjob"
+    nproc = 10
+    port = 1000
+    ram = 2
+    additional_switches = "-my_add=switch"
+
+    cmd = generate_mapdl_launch_command(
+        exec_file=exec_file,
+        jobname=jobname,
+        nproc=nproc,
+        port=port,
+        ram=ram,
+        additional_switches=additional_switches,
+    )
+
+    assert f'"{exec_file}" ' in cmd
+    assert f" -j {jobname} " in cmd
+    assert f" -port {port} " in cmd
+    assert f" -m {ram*1024} " in cmd
+    assert f" -np {nproc} " in cmd
+    assert " -grpc" in cmd
+    assert f" {additional_switches} " in cmd
+    assert f" -b -i .__tmp__.inp " in cmd
+    assert f" -o .__tmp__.out " in cmd
+
+
+def test_generate_mapdl_launch_command_linux():
+    assert os.name != "nt"  # Checking mocking is properly done
+
+    exec_file = "/ansys_inc/v242/ansys/bin/ansys242"
+    jobname = "myjob"
+    nproc = 10
+    port = 1000
+    ram = 2
+    additional_switches = "-my_add=switch"
+
+    cmd = generate_mapdl_launch_command(
+        exec_file=exec_file,
+        jobname=jobname,
+        nproc=nproc,
+        port=port,
+        ram=ram,
+        additional_switches=additional_switches,
+    )
+
+    assert f'"{exec_file}" ' in cmd
+    assert f" -j {jobname} " in cmd
+    assert f" -port {port} " in cmd
+    assert f" -m {ram*1024} " in cmd
+    assert f" -np {nproc} " in cmd
+    assert " -grpc" in cmd
+    assert f" {additional_switches} " in cmd
+
+    assert f" -i .__tmp__.inp " not in cmd
+    assert f" -o .__tmp__.out " not in cmd

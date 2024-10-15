@@ -1883,7 +1883,7 @@ def is_on_slurm(args: Dict[str, Any]) -> bool:
     is_flag_false = args["ON_SLURM"].lower() == "false"
 
     # Let's require the following env vars to exist to go into slurm mode.
-    args["ON_SLURM"] = (
+    args["ON_SLURM"] = bool(
         args["detect_slurm_config"]
         and not is_flag_false  # default is true
         and os.environ.get("SLURM_JOB_NAME")
