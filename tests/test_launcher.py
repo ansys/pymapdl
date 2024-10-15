@@ -662,7 +662,7 @@ def test_get_slurm_options(set_env_var_context, validation):
 @pytest.mark.parametrize("slurm_job_id", ["True", "false", ""])
 @pytest.mark.parametrize("detect_slurm_config", [True, False, None])
 def test_is_on_slurm(
-    monkeypatch, fs, slurm_env_var, slurm_job_name, slurm_job_id, detect_slurm_config
+    monkeypatch, slurm_env_var, slurm_job_name, slurm_job_id, detect_slurm_config
 ):
     monkeypatch.setenv("PYMAPDL_ON_SLURM", slurm_env_var)
     monkeypatch.setenv("SLURM_JOB_NAME", slurm_job_name)
