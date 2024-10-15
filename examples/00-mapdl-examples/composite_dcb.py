@@ -294,6 +294,7 @@ mapdl.kbc(key=0)
 mapdl.outres("all", "all")
 
 # Solve
+mapdl.run("/SOLU")
 output = mapdl.solve()
 
 ###############################################################################
