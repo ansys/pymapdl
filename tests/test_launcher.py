@@ -24,9 +24,9 @@
 
 import os
 import tempfile
+from unittest.mock import patch
 import warnings
 
-import psutil
 import pytest
 
 from ansys.mapdl import core as pymapdl
@@ -479,13 +479,6 @@ def test_launching_on_busy_port(mapdl):
         launch_mapdl(port=mapdl.port)
 
 
-@requires("local")
-def test_cpu_checks():
-    machine_cores = psutil.cpu_count(logical=False)
-    with pytest.raises(NotEnoughResources):
-        launch_mapdl(nproc=machine_cores + 2)
-
-
 def test_fail_channel_port():
     with pytest.raises(ValueError):
         launch_mapdl(channel="something", port="something")
@@ -783,14 +776,24 @@ def test_ip_and_start_instance(
             assert options["ip"] in (LOCALHOST, "0.0.0.0")
 
 
+def mycpucount(**kwargs):
+    return 10  # faking 10 cores
+
+
 def test_nproc_envvar(monkeypatch):
     monkeypatch.setenv("PYMAPDL_NPROC", 10)
     args = launch_mapdl(_debug_no_launch=True)
     assert args["nproc"] == 10
 
 
-@pytest.mark.parametrize("nproc,result", [[None, 2], [5, 5]])
-def test_nproc(monkeypatch, nproc, result):
-    monkeypatch.delenv("PYMAPDL_START_INSTANCE")
-    args = launch_mapdl(nproc=nproc, _debug_no_launch=True)
-    assert args["nproc"] == result
+@pytest.mark.parametrize("nproc", [None, 5, 9, 15])
+@patch("psutil.cpu_count", mycpucount)
+def test_nproc(monkeypatch, nproc):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+
+    if nproc and nproc > mycpucount():
+        with pytest.raises(NotEnoughResources):
+            launch_mapdl(nproc=nproc, _debug_no_launch=True)
+    else:
+        args = launch_mapdl(nproc=nproc, _debug_no_launch=True)
+        assert args["nproc"] == (nproc or 2)
