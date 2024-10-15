@@ -984,9 +984,15 @@ def test_get_exec_file_not_found(monkeypatch):
         get_exec_file(args)
 
 
+@pytest.mark.parametrize("run_location", [None, True])
 @pytest.mark.parametrize("remove_temp_dir_on_exit", [None, False, True])
-def test_get_run_location(tmpdir, remove_temp_dir_on_exit):
-    new_path = os.path.join(str(tmpdir), "my_new_path")
+def test_get_run_location(tmpdir, remove_temp_dir_on_exit, run_location):
+    if run_location:
+        new_path = os.path.join(str(tmpdir), "my_new_path")
+        assert not os.path.exists(new_path)
+    else:
+        new_path = None
+
     args = {
         "run_location": new_path,
         "remove_temp_dir_on_exit": remove_temp_dir_on_exit,
@@ -994,12 +1000,16 @@ def test_get_run_location(tmpdir, remove_temp_dir_on_exit):
 
     get_run_location(args)
 
-    assert os.path.exists(new_path)
+    assert os.path.exists(args["run_location"])
 
-    if remove_temp_dir_on_exit:
-        assert "remove_temp_dir_on_exit" in args
+    assert "remove_temp_dir_on_exit" in args
+
+    if run_location:
+        not args["remove_temp_dir_on_exit"]
+    elif remove_temp_dir_on_exit:
+        assert args["remove_temp_dir_on_exit"]
     else:
-        assert "remove_temp_dir_on_exit" not in args
+        assert not args["remove_temp_dir_on_exit"]
 
 
 def fake_os_access(*args, **kwargs):
