@@ -662,7 +662,7 @@ def test_get_slurm_options(set_env_var_context, validation):
 @pytest.mark.parametrize("slurm_job_id", ["True", "false", ""])
 @pytest.mark.parametrize("detect_slurm_config", [True, False, None])
 def test_is_on_slurm(
-    monkeypatch, slurm_env_var, slurm_job_name, slurm_job_id, detect_slurm_config
+    monkeypatch, fs, slurm_env_var, slurm_job_name, slurm_job_id, detect_slurm_config
 ):
     monkeypatch.setenv("PYMAPDL_ON_SLURM", slurm_env_var)
     monkeypatch.setenv("SLURM_JOB_NAME", slurm_job_name)
@@ -682,6 +682,19 @@ def test_is_on_slurm(
                 assert flag
             else:
                 assert not flag
+
+    # Fake MAPDL installation to avoid errors.
+    exec_file = "/ansys_inc/v241/ansys/bin/mapdl"
+    fs.create_file(exec_file)
+
+    assert (
+        launch_mapdl(
+            exec_file=exec_file,
+            detect_slurm_config=detect_slurm_config,
+            _debug_no_launch=True,
+        )["ON_SLURM"]
+        == flag
+    )
 
 
 @pytest.mark.parametrize(
