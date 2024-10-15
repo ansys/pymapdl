@@ -992,9 +992,6 @@ class MapdlPool:
 
     def _set_n_instance_ip_port_args(self, n_instances, ip, port):
         LOG.debug(f"Input n_instances ({n_instances}), ip ({ip}), and port ({port})")
-        if isinstance(port, str):
-            port = int(port)
-
         if n_instances is None:
             if ip is None or (isinstance(ip, list) and len(ip) == 0):
                 if port is None or (isinstance(port, list) and len(port) < 1):
