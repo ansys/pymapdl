@@ -666,9 +666,23 @@ def test_get_slurm_options(set_env_var_context, validation):
 
 
 @pytest.mark.parametrize(
-    "ram,expected", [["2048k", 2], ["10M", 10], ["100G", 100 * 1024], ["1T", 1024**2]]
+    "ram,expected,context",
+    [
+        ["2048k", 2, NullContext()],
+        ["10M", 10, NullContext()],
+        ["100G", 100 * 1024, NullContext()],
+        ["1T", 1024**2, NullContext()],
+        ["100", 100, NullContext()],
+        [
+            "100E",
+            "",
+            pytest.raises(
+                ValueError, match="The memory defined in 'SLURM_MEM_PER_NODE' env var"
+            ),
+        ],
+    ],
 )
-def test_slurm_ram(monkeypatch, ram, expected):
+def test_slurm_ram(monkeypatch, ram, expected, context):
     monkeypatch.setenv("SLURM_MEM_PER_NODE", ram)
     monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "asdf/qwer/poiu")
 
@@ -680,9 +694,9 @@ def test_slurm_ram(monkeypatch, ram, expected):
         "additional_switches": "",
         "start_timeout": 45,
     }
-
-    args = get_slurm_options(args, {})
-    assert args["ram"] == expected
+    with context:
+        args = get_slurm_options(args, {})
+        assert args["ram"] == expected
 
 
 @pytest.mark.parametrize("slurm_env_var", ["True", "false", ""])

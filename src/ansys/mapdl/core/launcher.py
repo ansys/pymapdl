@@ -1778,7 +1778,7 @@ def get_slurm_options(
     LOG.info(f"SLURM_CPUS_ON_NODE: {SLURM_CPUS_ON_NODE}")
 
     SLURM_MEM_PER_NODE = get_value(
-        "SLURM_MEM_PER_NODE", kwargs, default=None, astype=str
+        "SLURM_MEM_PER_NODE", kwargs, default="", astype=str
     ).upper()
     LOG.info(f"SLURM_MEM_PER_NODE: {SLURM_MEM_PER_NODE}")
 
@@ -1827,14 +1827,29 @@ def get_slurm_options(
     if not args["ram"]:
         if SLURM_MEM_PER_NODE:
             # RAM argument is in MB, so we need to convert
-            if SLURM_MEM_PER_NODE[-1] == "T":  # tera
-                args["ram"] = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** 2
-            elif SLURM_MEM_PER_NODE[-1] == "G":  # giga
-                args["ram"] = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** 1
-            elif SLURM_MEM_PER_NODE[-1] == "K":  # kilo
-                args["ram"] = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** (-1)
+            units = None
+            if SLURM_MEM_PER_NODE[-1].isalpha():
+                units = SLURM_MEM_PER_NODE[-1]
+                ram = SLURM_MEM_PER_NODE[:-1]
+            else:
+                units = None
+                ram = SLURM_MEM_PER_NODE
+
+            if not units:
+                args["ram"] = int(ram)
+            elif units == "T":  # tera
+                args["ram"] = int(ram) * (2**10) ** 2
+            elif units == "G":  # giga
+                args["ram"] = int(ram) * (2**10) ** 1
+            elif units == "M":  # mega
+                args["ram"] = int(ram)
+            elif units == "K":  # kilo
+                args["ram"] = int(ram) * (2**10) ** (-1)
             else:  # Mega
-                args["ram"] = int(SLURM_MEM_PER_NODE[:-1])
+                raise ValueError(
+                    "The memory defined in 'SLURM_MEM_PER_NODE' env var("
+                    f"'{SLURM_MEM_PER_NODE}') is not valid."
+                )
 
     LOG.info(f"Setting RAM to: {args['ram']}")
 
