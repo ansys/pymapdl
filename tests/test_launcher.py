@@ -986,12 +986,12 @@ def test_get_exec_file_not_found(monkeypatch):
         get_exec_file(args)
 
 
-def my_get_ansys_path(*args, **kwargs):
+def _get_application_path(*args, **kwargs):
     return None
 
 
-@patch("ansys.mapdl.core.launcher._HAS_ATP", True)
-@patch("ansys.tools.path.path._get_application_path", my_get_ansys_path)
+@requires("ansys-tools-path")
+@patch("ansys.tools.path.path._get_application_path", _get_application_path)
 def test_get_exec_file_not_found_two(monkeypatch):
     monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", False)
     args = {"exec_file": None, "start_instance": True}
