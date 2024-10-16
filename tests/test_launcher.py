@@ -915,6 +915,10 @@ def test_generate_mapdl_launch_command_windows():
         additional_switches=additional_switches,
     )
 
+    assert isinstance(cmd, list)
+    assert all([isinstance(each, str) for each in cmd])
+
+    cmd = " ".join(cmd)
     assert f'"{exec_file}" ' in cmd
     assert f" -j {jobname} " in cmd
     assert f" -port {port} " in cmd
@@ -944,7 +948,10 @@ def test_generate_mapdl_launch_command_linux():
         ram=ram,
         additional_switches=additional_switches,
     )
+    assert isinstance(cmd, list)
+    assert all([isinstance(each, str) for each in cmd])
 
+    cmd = " ".join(cmd)
     assert f'"{exec_file}" ' in cmd
     assert f" -j {jobname} " in cmd
     assert f" -port {port} " in cmd
@@ -1096,17 +1103,17 @@ def fake_subprocess_open(*args, **kwargs):
 @patch("os.name", "nt")
 @patch("subprocess.Popen", fake_subprocess_open)
 def test_launch_grpc(tmpdir):
-    cmd = "ansys.exe -b -i my_input.inp -o my_output.inp"
+    cmd = "ansys.exe -b -i my_input.inp -o my_output.inp".split()
     run_location = str(tmpdir)
     kwags = launch_grpc(cmd, run_location)
 
     inp_file = os.path.join(run_location, "my_input.inp")
+
     assert os.path.exists(inp_file)
     with open(inp_file, "r") as fid:
         assert "FINISH" in fid.read()
 
     assert cmd == kwags["cmd"]
-    assert not kwags["shell"]
     assert "TRUE" == kwags["env"].pop("ANS_CMD_NODIAG")
     assert not kwags["env"]
     assert isinstance(kwags["stdin"], type(subprocess.DEVNULL))

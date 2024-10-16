@@ -411,7 +411,7 @@ def generate_mapdl_launch_command(
     command_parm = " ".join(command_parm).split(" ")
     command_parm.insert(0, f'"{exec_file}"')
 
-    LOG.debug(f"Generated command: {" ".join(command_parm)}")
+    LOG.debug(f"Generated command: {' '.join(command_parm)}")
     return command_parm
 
 
