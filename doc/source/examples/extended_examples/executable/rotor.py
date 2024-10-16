@@ -29,7 +29,7 @@ import numpy as np
 from ansys.mapdl.core import launch_mapdl
 
 # Launch MAPDL
-mapdl = launch_mapdl(port=50052)
+mapdl = launch_mapdl()
 mapdl.clear()
 mapdl.prep7()
 
