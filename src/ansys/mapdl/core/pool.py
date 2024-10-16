@@ -368,7 +368,8 @@ class MapdlPool:
 
             # make sure everything is ready
             n_instances_ready = 0
-            while time.time() + timeout > time.time():
+            time_start = time.time()
+            while time_start + timeout > time.time():
                 n_instances_ready = sum([each is not None for each in self._instances])
 
                 if n_instances_ready == n_instances:
