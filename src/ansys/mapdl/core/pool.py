@@ -367,9 +367,9 @@ class MapdlPool:
             [thread.join() for thread in threads]
 
             # make sure everything is ready
-            timeout = time.time() + timeout
-
-            while timeout > time.time():
+            n_instances_ready = 0
+            time_end = time.time() + timeout
+            while time_end > time.time():
                 n_instances_ready = sum([each is not None for each in self._instances])
 
                 if n_instances_ready == n_instances:
@@ -378,7 +378,7 @@ class MapdlPool:
                 time.sleep(0.1)
             else:
                 raise TimeoutError(
-                    f"Only {n_instances_ready} of {n_instances} could be started."
+                    f"Only {n_instances_ready} of {n_instances} could be started after {timeout} seconds."
                 )
 
             if pbar is not None:
@@ -841,7 +841,9 @@ class MapdlPool:
                 try:
                     instance.exit()
                 except MapdlRuntimeError as e:
-                    LOG.warning(f"Unable to exit instance {index} because of the following reason:\n{str(e)}")
+                    LOG.warning(
+                        f"Unable to exit instance {index} because of the following reason:\n{str(e)}"
+                    )
                 self._instances[index] = None
                 # LOG.debug("Exited instance: %s", str(instance))
                 self._exiting_i -= 1
@@ -907,6 +909,9 @@ class MapdlPool:
 
         if not run_location:
             run_location = create_temp_dir(self._root_dir, name=name)
+
+        if self._spawn_kwargs.get("_debug_no_launch", False):
+            return
 
         self._instances[index] = launch_mapdl(
             exec_file=exec_file,
@@ -1048,7 +1053,9 @@ class MapdlPool:
                         "Argument 'port' does not support this type of argument."
                     )
             else:
-                raise TypeError("Argument 'ip' does not support this type of argument.")
+                raise TypeError(
+                    f"Argument 'ip' does not support this type of argument ({type(ip)})."
+                )
 
         else:
 
@@ -1077,7 +1084,7 @@ class MapdlPool:
                     ports = port
                 else:
                     raise TypeError(
-                        "Argument 'port' does not support this type of argument."
+                        f"Argument 'port' does not support this type of argument ({type(port)})."
                     )
 
             elif isinstance(ip, str):
