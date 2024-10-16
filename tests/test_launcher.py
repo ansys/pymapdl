@@ -23,6 +23,7 @@
 """Test the mapdl launcher"""
 
 import os
+import subprocess
 import tempfile
 from unittest.mock import patch
 import warnings
@@ -49,6 +50,7 @@ from ansys.mapdl.core.launcher import (
     get_start_instance,
     get_version,
     is_on_slurm,
+    launch_grpc,
     launch_mapdl,
     remove_err_files,
     set_license_switch,
@@ -1068,3 +1070,30 @@ def test_remove_err_files_fail(tmpdir):
     with pytest.raises(IOError):
         remove_err_files(run_location, jobname)
     assert os.path.isfile(err_file)
+
+
+# testing on windows to account for temp file
+def fake_subprocess_open(*args, **kwargs):
+    kwargs["cmd"] = args[0]
+    return kwargs
+
+
+@patch("os.name", "nt")
+@patch("subprocess.Popen", fake_subprocess_open)
+def test_launch_grpc(tmpdir):
+    cmd = "ansys.exe -b -i my_input.inp -o my_output.inp"
+    run_location = str(tmpdir)
+    kwags = launch_grpc(cmd, run_location)
+
+    inp_file = os.path.join(run_location, "my_input.inp")
+    assert os.path.exists(inp_file)
+    with open(inp_file, "r") as fid:
+        assert "FINISH" in fid.read()
+
+    assert cmd == kwags["cmd"]
+    assert not kwags["shell"]
+    assert "TRUE" == kwags["env"].pop("ANS_CMD_NODIAG")
+    assert not kwags["env"]
+    assert isinstance(kwags["stdin"], type(subprocess.DEVNULL))
+    assert isinstance(kwags["stdout"], type(subprocess.PIPE))
+    assert isinstance(kwags["stderr"], type(subprocess.PIPE))

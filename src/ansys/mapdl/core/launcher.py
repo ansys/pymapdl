@@ -439,6 +439,9 @@ def launch_grpc(
     subprocess.Popen
         Process object
     """
+    if env_vars is None:
+        env_vars = {}
+
     # disable all MAPDL pop-up errors:
     env_vars.setdefault("ANS_CMD_NODIAG", "TRUE")
 
@@ -464,8 +467,6 @@ def launch_grpc(
         env=env_vars,
     )
 
-    # Ending thread
-    # Todo: Ending queue thread
     return process
 
 
