@@ -317,7 +317,7 @@ def generate_mapdl_launch_command(
     ram: Optional[int] = None,
     port: int = MAPDL_DEFAULT_PORT,
     additional_switches: str = "",
-) -> str:
+) -> List[str]:
     """Generate the command line to start MAPDL in gRPC mode.
 
     Parameters
@@ -354,7 +354,7 @@ def generate_mapdl_launch_command(
 
     Returns
     -------
-    str
+    List[str]
         Command
 
     """
@@ -409,7 +409,7 @@ def generate_mapdl_launch_command(
 
     # removing spaces in cells
     command_parm = " ".join(command_parm).split(" ")
-    command_parm.insert(0, f'"{exec_file}"')
+    command_parm.insert(0, f"{exec_file}")
 
     LOG.debug(f"Generated command: {' '.join(command_parm)}")
     return command_parm
