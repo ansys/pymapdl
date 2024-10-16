@@ -1426,12 +1426,6 @@ def launch_mapdl(
             f"Connecting to an existing instance of MAPDL at {args['ip']}:{args['port']}"
         )
 
-        if args["just_launch"]:
-            print(
-                f"There is an existing MAPDL instance at: {args['ip']}:{args['port']}"
-            )
-            return
-
         mapdl = MapdlGrpc(
             cleanup_on_exit=False,
             loglevel=args["loglevel"],
@@ -2207,7 +2201,7 @@ def get_exec_file(args: Dict[str, Any]) -> None:
         Invalid MAPDL executable
     """
 
-    args["exec_file"] = os.getenv("PYMAPDL_MAPDL_EXEC", args["exec_file"])
+    args["exec_file"] = os.getenv("PYMAPDL_MAPDL_EXEC", args.get("exec_file"))
 
     if not args["start_instance"] and args["exec_file"] is None:
         # 'exec_file' is not needed if the instance is not going to be launch
@@ -2222,13 +2216,14 @@ def get_exec_file(args: Dict[str, Any]) -> None:
                 "'PYMAPDL_MAPDL_EXEC' environment variable."
             )
 
-        if args["_debug_no_launch"]:
+        if args.get("_debug_no_launch", False):
             args["exec_file"] = ""
             return
 
         LOG.debug("Using default executable.")
-        args["exec_file"] = get_ansys_path(version=args["version"])
+        args["exec_file"] = get_ansys_path(version=args.get("version"))
 
+        # Edge case
         if args["exec_file"] is None:
             raise FileNotFoundError(
                 "Invalid exec_file path or cannot load cached "

@@ -986,6 +986,21 @@ def test_get_exec_file_not_found(monkeypatch):
         get_exec_file(args)
 
 
+def my_get_ansys_path(*args, **kwargs):
+    return None
+
+
+@patch("ansys.mapdl.core.launcher._HAS_ATP", True)
+@patch("ansys.tools.path.path._get_application_path", my_get_ansys_path)
+def test_get_exec_file_not_found_two(monkeypatch):
+    monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", False)
+    args = {"exec_file": None, "start_instance": True}
+    with pytest.raises(
+        FileNotFoundError, match="Invalid exec_file path or cannot load cached "
+    ):
+        get_exec_file(args)
+
+
 @pytest.mark.parametrize("run_location", [None, True])
 @pytest.mark.parametrize("remove_temp_dir_on_exit", [None, False, True])
 def test_get_run_location(tmpdir, remove_temp_dir_on_exit, run_location):
