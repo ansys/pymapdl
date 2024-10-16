@@ -590,7 +590,7 @@ def launch_grpc(
         ]
 
     command_parm = [
-        each for each in command_parm if each not in [None, ""]
+        each for each in command_parm if each.strip()
     ]  # cleaning empty args.
 
     # removing spaces in cells
