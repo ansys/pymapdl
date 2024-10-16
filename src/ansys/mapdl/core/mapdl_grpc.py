@@ -891,6 +891,9 @@ class MapdlGrpc(MapdlBase):
         if not success:
             raise MapdlConnectionError("Unable to reconnect to MAPDL")
 
+        # Update process
+        self._mapdl_process = process
+
     @supress_logging
     def _set_no_abort(self):
         """Do not abort MAPDL."""

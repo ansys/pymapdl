@@ -1005,7 +1005,7 @@ def test_get_run_location(tmpdir, remove_temp_dir_on_exit, run_location):
     assert "remove_temp_dir_on_exit" in args
 
     if run_location:
-        not args["remove_temp_dir_on_exit"]
+        assert not args["remove_temp_dir_on_exit"]
     elif remove_temp_dir_on_exit:
         assert args["remove_temp_dir_on_exit"]
     else:
