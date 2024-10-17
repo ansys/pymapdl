@@ -952,7 +952,7 @@ def test_generate_mapdl_launch_command_linux():
     assert all([isinstance(each, str) for each in cmd])
 
     cmd = " ".join(cmd)
-    assert f'"{exec_file}" ' in cmd
+    assert f"{exec_file} " in cmd
     assert f" -j {jobname} " in cmd
     assert f" -port {port} " in cmd
     assert f" -m {ram*1024} " in cmd
