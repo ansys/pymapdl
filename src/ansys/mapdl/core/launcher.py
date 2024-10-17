@@ -2321,20 +2321,24 @@ def get_cpus(args: Dict[str, Any]):
 
     # Bypassing number of processors checks because VDI/VNC might have
     # different number of processors than the cluster compute nodes.
+    # Also the CPUs are set in `get_slurm_options`
     if args["ON_SLURM"]:
         return
 
     # Setting number of processors
     machine_cores = psutil.cpu_count(logical=False)
 
+    # Some machines only have 1 core
+    min_cpus = machine_cores if machine_cores < 2 else 2
+
     if not args["nproc"]:
-        # Some machines only have 1 core
-        args["nproc"] = machine_cores if machine_cores < 2 else 2
-    else:
-        if machine_cores < int(args["nproc"]):
-            raise NotEnoughResources(
-                f"The machine has {machine_cores} cores. PyMAPDL is asking for {args['nproc']} cores."
-            )
+        # Check the env var `PYMAPDL_NPROC`
+        args["nproc"] = int(os.environ.get("PYMAPDL_NPROC", min_cpus))
+
+    if machine_cores < int(args["nproc"]):
+        raise NotEnoughResources(
+            f"The machine has {machine_cores} cores. PyMAPDL is asking for {args['nproc']} cores."
+        )
 
 
 def remove_err_files(run_location, jobname):
