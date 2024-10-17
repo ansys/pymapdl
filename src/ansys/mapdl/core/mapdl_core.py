@@ -167,6 +167,7 @@ _ALLOWED_START_PARM = [
     "additional_switches",
     "check_parameter_names",
     "exec_file",
+    "finish_job_on_exit",
     "hostname",
     "ip",
     "jobid",

@@ -407,7 +407,7 @@ def generate_mapdl_launch_command(
         ]
 
     command_parm = [
-        each for each in command_parm if command_parm
+        each for each in command_parm if each.strip()
     ]  # cleaning empty args.
     command = " ".join(command_parm)
 
@@ -445,8 +445,23 @@ def launch_grpc(
     # disable all MAPDL pop-up errors:
     env_vars.setdefault("ANS_CMD_NODIAG", "TRUE")
 
+    if "sbatch" in cmd:
+        header = "Running an MAPDL instance on the Cluster:"
+        shell = os.name != "nt"
+        cmd_ = " ".join(cmd)
+    else:
+        header = "Running an MAPDL instance"
+        shell = False  # To prevent shell injection
+        cmd_ = cmd
+
     LOG.info(
-        f"Running a local instance in {run_location} with the following command: '{cmd}'"
+        "\n============"
+        "\n============"
+        f"{header}:\nLocation:\n{run_location}\n"
+        f"Command:\n{' '.join(cmd)}\n"
+        f"Env vars:\n{env_vars}"
+        "\n============"
+        "\n============"
     )
 
     if os.name == "nt":
@@ -458,8 +473,8 @@ def launch_grpc(
 
     LOG.debug("MAPDL starting in background.")
     process = subprocess.Popen(
-        cmd,
-        shell=os.name != "nt",
+        cmd_,
+        shell=shell,  # It does not work without shell.
         cwd=run_location,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
@@ -2532,25 +2547,35 @@ def launch_mapdl_on_cluster(
         additional_switches=args["additional_switches"],
     )
 
-    cmd = f"""sbatch --export='ALL' --wrap '{cmd}'"""
+    cmd = generate_sbatch_command(cmd, sbatch_args=args.get("sbatch_args"))
 
+    jobid = None
     try:
         # TODO: wrap the launch_grpc with sbatch
         process = launch_grpc(
             cmd=cmd, run_location=args["run_location"], env_vars=env_vars
         )
 
-        out = process.stdout.read().decode()
-        if "Submitted batch job" not in out:
-            raise MapdlDidNotStart("PyMAPDL failed to submit the sbatch job.")
+        stdout = process.stdout.read().decode()
+        if "Submitted batch job" not in stdout:
+            stderr = process.stderr.read().decode()
+            raise MapdlDidNotStart(
+                f"PyMAPDL failed to submit the sbatch job:\n{stderr}"
+            )
+
+        jobid = get_jobid(stdout)
+        batch_host = get_hostname_host_cluster(jobid)
 
     except Exception as exception:
         LOG.error("An error occurred when launching MAPDL.")
+
+        if start_parm.get("finish_job_on_exit", True) and jobid:
+            LOG.debug(f"Killing HPC job with id: {jobid}")
+            subprocess.Popen(["scancel", str(jobid)])
+
         raise exception
 
     # TODO: A way to check if the job is ready.
-    jobid = get_jobid(out)
-    batch_host = get_hostname_host_cluster(jobid)
     start_parm["ip"] = batch_host
     start_parm["hostname"] = batch_host
     start_parm["jobid"] = jobid
@@ -2594,14 +2619,14 @@ def launch_mapdl_on_cluster(
     return mapdl
 
 
-def get_hostname_host_cluster(job_id):
+def get_hostname_host_cluster(job_id: int) -> str:
     cmd = f"scontrol show jobid -dd {job_id}".split()
     LOG.debug(f"Executing the command '{cmd}'")
 
     ready = False
     time_start = time.time()
     timeout = 30  # second
-
+    counter = 0
     while not ready:
         proc = subprocess.Popen(
             cmd,
@@ -2610,16 +2635,30 @@ def get_hostname_host_cluster(job_id):
         stdout = proc.stdout.read().decode()
 
         if time.time() > time_start + timeout:
-            raise MapdlDidNotStart("The Job didn't start on time.")
+            state = stdout.split("JobState=")[1].split(" ")[0]
+            try:
+                hostname_msg = f"The BatchHost for this job is '{get_hostname_from_scontrol(stdout)}'"
+            except (IndexError, AttributeError):
+                hostname_msg = f"PyMAPDL couldn't get the BatchHost hostname"
+            raise MapdlDidNotStart(
+                f"The HPC job (id: {job_id}) didn't start on time. "
+                f"The job state is '{state}'. "
+                f"{hostname_msg}. "
+                "You can check more information by issuing in your console:\n"
+                f" scontrol show jobid -dd {job_id}"
+            )
 
         if "JobState=RUNNING" not in stdout:
-            LOG.debug("The job is not ready yet. Waiting...")
+            counter += 1
             time.sleep(1)
+            if (counter % 3 + 1) == 0:  # print every 3 seconds. Skipping the first.
+                LOG.debug("The job is not ready yet. Waiting...")
+                print("The job is not ready yet. Waiting...")
         else:
             ready = True
 
     LOG.debug(f"The 'scontrol' command returned:\n{stdout}")
-    batchhost = stdout.split("BatchHost=")[1].splitlines()[0]
+    batchhost = get_hostname_from_scontrol(stdout)
     LOG.debug(f"Batchhost: {batchhost}")
 
     # we should validate
@@ -2629,15 +2668,60 @@ def get_hostname_host_cluster(job_id):
     return batchhost
 
 
-def get_jobid(out: str) -> int:
+def get_jobid(stdout: str) -> int:
     """Extract the jobid from a command output"""
-    job_id = out.strip().split(" ")[-1]
+    job_id = stdout.strip().split(" ")[-1]
 
     try:
         job_id = int(job_id)
     except ValueError:
-        LOG.error(f"The console output does not seems to have a valid jobid:\n{out}")
+        LOG.error(f"The console output does not seems to have a valid jobid:\n{stdout}")
         raise ValueError("PyMAPDL could not retrieve the job id.")
 
     LOG.debug(f"The job id is: {job_id}")
     return job_id
+
+
+def generate_sbatch_command(
+    cmd: Union[str, List[str]], sbatch_args: Optional[Union[str, Dict[str, str]]]
+) -> List[str]:
+    """Generate sbatch command for a given MAPDL launch command."""
+
+    def add_minus(arg: str):
+        if not arg:
+            return ""
+
+        arg = str(arg)
+
+        if not arg.startswith("-"):
+            if len(arg) == 1:
+                arg = f"-{arg}"
+            else:
+                arg = f"--{arg}"
+            return arg
+
+    if sbatch_args:
+        if isinstance(sbatch_args, dict):
+            sbatch_args = " ".join(
+                [f"{add_minus(key)}='{value}'" for key, value in sbatch_args.items()]
+            )
+    else:
+        sbatch_args = ""
+
+    if "wrap" in sbatch_args:
+        raise ValueError(
+            "The sbatch argument 'wrap' is used by PyMAPDL to submit the job."
+            "Hence you cannot use it as sbatch argument."
+        )
+    LOG.debug(f"The additional sbatch arguments are: {sbatch_args}")
+
+    if isinstance(cmd, list):
+        cmd = " ".join(cmd)
+
+    cmd = ["sbatch", sbatch_args, "--wrap", f"'{cmd}'"]
+    cmd = [each for each in cmd if bool(each)]
+    return cmd
+
+
+def get_hostname_from_scontrol(stdout: str) -> str:
+    return stdout.split("BatchHost=")[1].splitlines()[0]
