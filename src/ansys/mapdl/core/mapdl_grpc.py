@@ -107,6 +107,12 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.database import MapdlDb
     from ansys.mapdl.core.xpl import ansXpl
 
+import logging
+
+from ansys.mapdl.core.logging import Logger
+
+LOG = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
+
 TMP_VAR = "__tmpvar__"
 VOID_REQUEST = anskernel.EmptyRequest()
 
@@ -885,11 +891,11 @@ class MapdlGrpc(MapdlBase):
                 self.prep7()
                 success = True
                 break
-            except:
-                pass
+            except MapdlRuntimeError:
+                warn("PyMAPDL is taking longer than expected to connect to the server.")
 
-        if not success:
-            raise MapdlConnectionError("Unable to reconnect to MAPDL")
+            if not success:
+                raise MapdlConnectionError("Unable to reconnect to MAPDL")
 
         # Update process
         self._mapdl_process = process
@@ -1029,7 +1035,7 @@ class MapdlGrpc(MapdlBase):
         return "".join(response)
 
     def _threaded_heartbeat(self):
-        """To be called from a thread to verify mapdl instance is alive"""
+        """To be called from a thread to verify MAPDL instance is alive"""
         self._initialised.set()
         while True:
             if self._exited:
@@ -1042,7 +1048,7 @@ class MapdlGrpc(MapdlBase):
             except ReferenceError:
                 break
             except Exception:
-                continue
+                LOG.debug("Checking if MAPDL instance is still alive.")
 
     @protect_from(ValueError, "I/O operation on closed file.")
     def exit(self, save=False, force=False, **kwargs):

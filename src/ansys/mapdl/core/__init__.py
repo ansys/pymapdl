@@ -111,7 +111,7 @@ try:
         get_available_ansys_installations,
         save_ansys_path,
     )
-except:
+except ModuleNotFoundError:
     # We don't really use these imports in the library. They are here for
     # convenience.
     pass
