@@ -168,10 +168,12 @@ def download_manifold_example_data() -> dict:
     download paths into a dictionary domain id->path.
     Examples files are downloaded to a persistent cache to avoid
     re-downloading the same file twice.
+
     Returns
     -------
     dict[str:str]
         Path to the example files.
+
     Examples
     --------
     Download the manifold geometry, ans file and return the path of the file
@@ -198,10 +200,12 @@ def download_cfx_mapping_example_data() -> dict:
     download paths into a dictionary domain id->path.
     Examples files are downloaded to a persistent cache to avoid
     re-downloading the same file twice.
+
     Returns
     -------
     dict[str:str]
         Path to the example files.
+
     Examples
     --------
     >>> from ansys.mapdl.core.examples.downloads import download_cfx_mapping_example_data

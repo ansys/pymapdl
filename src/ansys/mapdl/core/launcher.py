@@ -29,10 +29,9 @@ from queue import Empty, Queue
 import re
 import socket
 import subprocess
-import tempfile
 import threading
 import time
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 import warnings
 
 import psutil
@@ -41,10 +40,8 @@ from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import _HAS_ATP, _HAS_PIM, LOG
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.errors import (
-    DeprecationError,
     LockFileException,
     MapdlDidNotStart,
-    MapdlRuntimeError,
     NotEnoughResources,
     PortAlreadyInUse,
     PortAlreadyInUseByAnMAPDLInstance,
@@ -57,7 +54,6 @@ from ansys.mapdl.core.misc import (
     check_valid_ip,
     check_valid_port,
     create_temp_dir,
-    random_string,
     threaded,
 )
 
@@ -84,14 +80,49 @@ if not os.path.isdir(SETTINGS_DIR):
 
 CONFIG_FILE = os.path.join(SETTINGS_DIR, "config.txt")
 ALLOWABLE_MODES = ["console", "grpc"]
+ALLOWABLE_VERSION_INT = tuple(SUPPORTED_ANSYS_VERSIONS.keys())
+
+ALLOWABLE_LAUNCH_MAPDL_ARGS = [
+    "exec_file",
+    "run_location",
+    "jobname",
+    "nproc",
+    "ram",
+    "mode",
+    "override",
+    "loglevel",
+    "additional_switches",
+    "start_timeout",
+    "port",
+    "cleanup_on_exit",
+    "start_instance",
+    "ip",
+    "clear_on_connect",
+    "log_apdl",
+    "remove_temp_dir_on_exit",
+    "license_server_check",
+    "license_type",
+    "print_com",
+    "add_env_vars",
+    "replace_env_vars",
+    "version",
+    "detect_slurm_config",
+    "set_no_abort",
+    "force_intel"
+    # Non documented args
+    "use_vtk",
+    "just_launch",
+    "on_pool",
+    "_debug_no_launch",
+]
 
 ON_WSL = os.name == "posix" and (
-    bool(os.environ.get("WSL_DISTRO_NAME", None))
-    or bool(os.environ.get("WSL_INTEROP", None))
+    os.environ.get("WSL_DISTRO_NAME") or os.environ.get("WSL_INTEROP")
 )
 
 if ON_WSL:
     LOG.info("On WSL: Running on WSL detected.")
+    LOG.debug("On WSL: Allowing 'start_instance' and 'ip' arguments together.")
 
 LOCALHOST = "127.0.0.1"
 MAPDL_DEFAULT_PORT = 50052
@@ -271,22 +302,15 @@ def port_in_use_using_psutil(port: Union[int, str]) -> bool:
         return False
 
 
-def launch_grpc(
+def generate_mapdl_launch_command(
     exec_file: str = "",
     jobname: str = "file",
     nproc: int = 2,
     ram: Optional[int] = None,
-    run_location: str = None,
     port: int = MAPDL_DEFAULT_PORT,
     additional_switches: str = "",
-    override: bool = True,
-    timeout: int = 20,
-    verbose: Optional[bool] = None,
-    add_env_vars: Optional[Dict[str, str]] = None,
-    replace_env_vars: Optional[Dict[str, str]] = None,
-    **kwargs,  # to keep compatibility with console interface.
-) -> Tuple[int, str, subprocess.Popen]:
-    """Start MAPDL locally in gRPC mode.
+) -> str:
+    """Generate the command line to start MAPDL in gRPC mode.
 
     Parameters
     ----------
@@ -305,10 +329,6 @@ def launch_grpc(
         The default is ``None``, in which case 2 GB (2048 MB) is used. To force a fixed size
         throughout the run, specify a negative number.
 
-    run_location : str, optional
-        MAPDL working directory.  The default is the temporary working
-        directory.
-
     port : int
         Port to launch MAPDL gRPC on.  Final port will be the first
         port available after (or including) this port.
@@ -323,203 +343,17 @@ def launch_grpc(
         these are already included to start up the MAPDL server.  See
         the notes section for additional details.
 
-    override : bool, optional
-        Attempts to delete the lock file at the run_location.
-        Useful when a prior MAPDL session has exited prematurely and
-        the lock file has not been deleted.
-
-    verbose : bool, optional
-        Print all output when launching and running MAPDL.  Not
-        recommended unless debugging the MAPDL start.  Default
-        ``False``.
-
-        .. deprecated:: v0.65.0
-           The ``verbose`` argument is deprecated and will be completely
-           removed in a future release.
-           Use a logger instead. See :ref:`api_logging` for more details.
-
-    kwargs : dict
-        Not used. Added to keep compatibility between Mapdl_grpc and
-        launcher_grpc ``start_parm``s.
 
     Returns
     -------
-    int
-        Returns the port number that the gRPC instance started on.
-
-    Notes
-    -----
-    If ``PYMAPDL_START_INSTANCE`` is set to FALSE, this ``launch_mapdl`` will
-    look for an existing instance of MAPDL at ``PYMAPDL_IP`` on port
-    ``PYMAPDL_PORT``, with defaults 127.0.0.1 and 50052 if unset. This is
-    typically used for automated documentation and testing.
-
-    These are the MAPDL switch options as of 2020R2 applicable for
-    running MAPDL as a service via gRPC.  Excluded switches such as
-    ``"-j"`` either not applicable or are set via keyword arguments.
-
-    -acc <device>
-        Enables the use of GPU hardware.  See GPU
-        Accelerator Capability in the Parallel Processing Guide for more
-        information.
-
-    -amfg
-        Enables the additive manufacturing capability.  Requires
-        an additive manufacturing license. For general information about
-        this feature, see AM Process Simulation in ANSYS Workbench.
-
-    -ansexe <executable>
-         Activates a custom mechanical APDL executable.
-        In the ANSYS Workbench environment, activates a custom
-        Mechanical APDL executable.
-
-    -custom <executable>
-        Calls a custom Mechanical APDL executable
-        See Running Your Custom Executable in the Programmer's Reference
-        for more information.
-
-    -db value
-        Initial memory allocation
-        Defines the portion of workspace (memory) to be used as the
-        initial allocation for the database. The default is 1024
-        MB. Specify a negative number to force a fixed size throughout
-        the run; useful on small memory systems.
-
-    -dis
-        Enables Distributed ANSYS
-        See the Parallel Processing Guide for more information.
-
-    -dvt
-        Enables ANSYS DesignXplorer advanced task (add-on).
-        Requires DesignXplorer.
-
-    -l <language>
-        Specifies a language file to use other than English
-        This option is valid only if you have a translated message file
-        in an appropriately named subdirectory in
-        ``/ansys_inc/v201/ansys/docu`` or
-        ``Program Files\\ANSYS\\Inc\\V201\\ANSYS\\docu``
-
-    -m <workspace>
-        Specifies the total size of the workspace
-        Workspace (memory) in megabytes used for the initial
-        allocation. If you omit the ``-m`` option, the default is 2 GB
-        (2048 MB). Specify a negative number to force a fixed size
-        throughout the run.
-
-    -machines <IP>
-        Specifies the distributed machines
-        Machines on which to run a Distributed ANSYS analysis. See
-        Starting Distributed ANSYS in the Parallel Processing Guide for
-        more information.
-
-    -mpi <value>
-        Specifies the type of MPI to use.
-        See the Parallel Processing Guide for more information.
-
-    -mpifile <appfile>
-        Specifies an existing MPI file
-        Specifies an existing MPI file (appfile) to be used in a
-        Distributed ANSYS run. See Using MPI Files in the Parallel
-        Processing Guide for more information.
-
-    -na <value>
-        Specifies the number of GPU accelerator devices
-        Number of GPU devices per machine or compute node when running
-        with the GPU accelerator feature. See GPU Accelerator Capability
-        in the Parallel Processing Guide for more information.
-
-    -name <value>
-        Defines Mechanical APDL parameters
-        Set mechanical APDL parameters at program start-up. The parameter
-        name must be at least two characters long. For details about
-        parameters, see the ANSYS Parametric Design Language Guide.
-
-    -p <productname>
-        ANSYS session product
-        Defines the ANSYS session product that will run during the
-        session. For more detailed information about the ``-p`` option,
-        see Selecting an ANSYS Product via the Command Line.
-
-    -ppf <license feature name>
-        HPC license
-        Specifies which HPC license to use during a parallel processing
-        run. See HPC Licensing in the Parallel Processing Guide for more
-        information.
-
-    -smp
-        Enables shared-memory parallelism.
-        See the Parallel Processing Guide for more information.
-
-    Examples
-    --------
-    Launch MAPDL using the default configuration.
-
-    >>> from ansys.mapdl.core import launch_mapdl
-    >>> mapdl = launch_mapdl()
-
-    Run MAPDL with shared memory parallel and specify the location of
-    the ansys binary.
-
-    >>> exec_file = 'C:/Program Files/ANSYS Inc/v202/ansys/bin/winx64/ANSYS202.exe'
-    >>> mapdl = launch_mapdl(exec_file, additional_switches='-smp')
+    str
+        Command
 
     """
-    LOG.debug("Starting 'launch_mapdl'.")
-    # disable all MAPDL pop-up errors:
-    os.environ["ANS_CMD_NODIAG"] = "TRUE"
-
-    if verbose:
-        raise DeprecationError(
-            "The ``verbose`` argument is deprecated and will be completely removed in a future release. Use a logger instead. "
-            "See https://mapdl.docs.pyansys.com/version/stable/api/logging.html for more details."
-        )
-
-    # use temporary directory if run_location is unspecified
-    if run_location is None:
-        run_location = create_temp_dir()
-        LOG.debug(f"Using temporary directory for MAPDL run location: {run_location}")
-    elif not os.path.isdir(run_location):
-        os.mkdir(run_location)
-        LOG.debug(f"Creating directory for MAPDL run location: {run_location}")
-
-    if not os.access(run_location, os.W_OK):
-        raise IOError('Unable to write to ``run_location`` "%s"' % run_location)
-
     # verify version
     if _HAS_ATP:
         if version_from_path("mapdl", exec_file) < 202:
             raise VersionError("The MAPDL gRPC interface requires MAPDL 20.2 or later")
-
-    # verify lock file does not exist
-    check_lock_file(run_location, jobname, override)
-
-    # get the next available port
-    if port is None:
-        if not pymapdl._LOCAL_PORTS:
-            port = MAPDL_DEFAULT_PORT
-            LOG.debug(f"Using default port: {port}")
-        else:
-            port = max(pymapdl._LOCAL_PORTS) + 1
-            LOG.debug(f"Using next available port: {port}")
-
-        while port_in_use(port) or port in pymapdl._LOCAL_PORTS:
-            port += 1
-            LOG.debug(f"Port in use.  Incrementing port number. port={port}")
-
-    else:
-        if port_in_use(port):
-            proc = get_process_at_port(port)
-            if proc:
-                if is_ansys_process(proc):
-                    raise PortAlreadyInUseByAnMAPDLInstance(port)
-                else:
-                    raise PortAlreadyInUse(port)
-
-    pymapdl._LOCAL_PORTS.append(port)
-
-    if not nproc:
-        nproc = 2
 
     cpu_sw = "-np %d" % nproc
 
@@ -533,31 +367,10 @@ def launch_grpc(
     port_sw = "-port %d" % port
     grpc_sw = "-grpc"
 
-    # remove any temporary error files at the run location.  This is
-    # important because we need to know if MAPDL is already running
-    # here and because we're looking for any temporary files that are
-    # created to tell when the process has started
-    for filename in os.listdir(run_location):
-        if ".err" == filename[-4:] and jobname in filename:
-            if os.path.isfile(filename):
-                try:
-                    os.remove(filename)
-                    LOG.debug(f"Removing temporary error file: {filename}")
-                except:
-                    raise IOError(
-                        f"Unable to remove {filename}.  There might be "
-                        "an instance of MAPDL running at running at "
-                        f'"{run_location}"'
-                    )
-
     # Windows will spawn a new window, special treatment
     if os.name == "nt":
-        tmp_inp = ".__tmp__.inp"
-        with open(os.path.join(run_location, tmp_inp), "w") as f:
-            f.write("FINISH\r\n")
-            LOG.debug(f"Writing temporary input file: {tmp_inp} with 'FINISH' command.")
-
         # must start in batch mode on windows to hide APDL window
+        tmp_inp = ".__tmp__.inp"
         command_parm = [
             '"%s"' % exec_file,
             job_sw,
@@ -589,17 +402,54 @@ def launch_grpc(
     ]  # cleaning empty args.
     command = " ".join(command_parm)
 
-    LOG.debug(f"Starting MAPDL with command: {command}")
+    LOG.debug(f"Generated command: {command}")
+    return command
 
-    env_vars = update_env_vars(add_env_vars, replace_env_vars)
+
+def launch_grpc(
+    cmd: str,
+    run_location: str = None,
+    env_vars: Optional[Dict[str, str]] = None,
+) -> subprocess.Popen:
+    """Start MAPDL locally in gRPC mode.
+
+    Parameters
+    ----------
+    cmd: str
+        Command to use to launch the MAPDL instance.
+
+    run_location : str, optional
+        MAPDL working directory.  The default is the temporary working
+        directory.
+
+    env_vars: dict, optional
+        Dictionary with the environment variables to inject in the process.
+
+    Returns
+    -------
+    subprocess.Popen
+        Process object
+    """
+    if env_vars is None:
+        env_vars = {}
+
+    # disable all MAPDL pop-up errors:
+    env_vars.setdefault("ANS_CMD_NODIAG", "TRUE")
 
     LOG.info(
-        f"Running a local instance in {run_location} at port {port} the following command: '{command}'"
+        f"Running a local instance in {run_location} with the following command: '{cmd}'"
     )
+
+    if os.name == "nt":
+        # getting tmp file name
+        tmp_inp = cmd.split()[cmd.split().index("-i") + 1]
+        with open(os.path.join(run_location, tmp_inp), "w") as f:
+            f.write("FINISH\r\n")
+            LOG.debug(f"Writing temporary input file: {tmp_inp} with 'FINISH' command.")
 
     LOG.debug("MAPDL starting in background.")
     process = subprocess.Popen(
-        command,
+        cmd,
         shell=os.name != "nt",
         cwd=run_location,
         stdin=subprocess.DEVNULL,
@@ -608,6 +458,39 @@ def launch_grpc(
         env=env_vars,
     )
 
+    return process
+
+
+def check_mapdl_launch(
+    process: subprocess.Popen, run_location: str, timeout: int, cmd: str
+) -> None:
+    """Check MAPDL launching process.
+
+    Check several things to confirm MAPDL has been launched:
+
+    * MAPDL process:
+      Check process is alive still.
+    * File error:
+      Check if error file has been created.
+    * [On linux, but not WSL] Check if server is alive.
+      Read stdout looking for 'Server listening on' string.
+
+    Parameters
+    ----------
+    process : subprocess.Popen
+        MAPDL process object coming from 'launch_grpc'
+    run_location : str
+        MAPDL path.
+    timeout : int
+        Timeout
+    cmd : str
+        Command line used to launch MAPDL. Just for error printing.
+
+    Raises
+    ------
+    MapdlDidNotStart
+        MAPDL did not start.
+    """
     LOG.debug("Generating queue object for stdout")
     stdout_queue, _ = _create_queue_for_std(process.stdout)
 
@@ -627,7 +510,7 @@ def launch_grpc(
         msg = (
             str(e)
             + f"\nRun location: {run_location}"
-            + f"\nCommand line used: {command}\n\n"
+            + f"\nCommand line used: {cmd}\n\n"
         )
 
         terminal_output = "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
@@ -635,10 +518,6 @@ def launch_grpc(
             msg = msg + "The full terminal output is:\n\n" + terminal_output
 
         raise MapdlDidNotStart(msg) from e
-
-    # Ending thread
-    # Todo: Ending queue thread
-    return port, run_location, process
 
 
 def _check_process_is_alive(process, run_location):
@@ -735,8 +614,8 @@ def _create_queue_for_std(std):
 
 
 def launch_remote_mapdl(
-    version=None,
-    cleanup_on_exit=True,
+    version: str = None,
+    cleanup_on_exit: bool = True,
 ) -> MapdlGrpc:
     """Start MAPDL remotely using the product instance management API.
 
@@ -781,7 +660,7 @@ def launch_remote_mapdl(
     )
 
 
-def get_start_instance(start_instance: bool = True):
+def get_start_instance(start_instance: Optional[Union[bool, str]] = None) -> bool:
     """Check if the environment variable ``PYMAPDL_START_INSTANCE`` exists and is valid.
 
     Parameters
@@ -808,38 +687,41 @@ def get_start_instance(start_instance: bool = True):
     hence the argument ``start_instance`` is overwritten.
 
     """
-    if "PYMAPDL_START_INSTANCE" in os.environ and os.environ["PYMAPDL_START_INSTANCE"]:
-        # It should not be empty
-        if isinstance(start_instance, bool):
-            warnings.warn(
-                "The environment variable 'PYMAPDL_START_INSTANCE' is set, "
-                "hence the argument 'start_instance' is overwritten."
-            )
-        start_instance = os.environ["PYMAPDL_START_INSTANCE"]
-    else:
-        LOG.debug(
-            f"PYMAPDL_START_INSTANCE is unset. Using default value {start_instance}."
+
+    def valid_start_instance(start_instance: str) -> bool:
+        return start_instance.lower().strip() in ["true", "false"]
+
+    if start_instance and os.environ.get("PYMAPDL_START_INSTANCE"):
+        warnings.warn(
+            "The environment variable 'PYMAPDL_START_INSTANCE' is "
+            "ignored because 'start_instance' argument is given."
         )
 
-    if isinstance(start_instance, str):
-        start_instance = start_instance.lower().strip()
-        if start_instance not in ["true", "false"]:
-            raise OSError(
-                f'Invalid value "{start_instance}" for "start_instance" (or "PYMAPDL_START_INSTANCE"\n'
-                '"start_instance" should be either "TRUE" or "FALSE"'
-            )
-
-        LOG.debug(f"PYMAPDL_START_INSTANCE is set to {start_instance}")
-        return start_instance == "true"
-
-    elif isinstance(start_instance, bool):
+    if isinstance(start_instance, bool):
         return start_instance
 
-    elif start_instance is None:
-        LOG.debug(
-            "'PYMAPDL_START_INSTANCE' is unset, and there is no supplied value. Using default, which is 'True'."
-        )
-        return True  # Default is true
+    elif start_instance is None or isinstance(start_instance, str):
+        if start_instance is None:
+            if os.environ.get("PYMAPDL_START_INSTANCE"):
+                start_instance = os.environ.get("PYMAPDL_START_INSTANCE", "")
+                if not valid_start_instance(start_instance):
+                    raise OSError(
+                        f'Invalid value "{start_instance}" for "start_instance" (or "PYMAPDL_START_INSTANCE"\n'
+                        '"start_instance" should be either "TRUE" or "FALSE"'
+                    )
+            else:
+                LOG.debug(
+                    "'PYMAPDL_START_INSTANCE' is unset, and there is no supplied value. Using default, which is 'True'."
+                )
+                return True  # Default is true
+
+        if not valid_start_instance(start_instance):
+            raise ValueError(
+                f"The value given for 'start_instance' ({start_instance}) is invalid."
+            )
+
+        return start_instance.lower().strip() == "true"
+
     else:
         raise ValueError("Only booleans are allowed as arguments.")
 
@@ -955,7 +837,9 @@ def check_lock_file(path, jobname, override):
                 )
 
 
-def _validate_MPI(add_sw, exec_path, force_intel=False):
+def set_MPI_additional_switches(
+    add_sw: str, exec_path: str, force_intel: bool = False
+) -> str:
     """Validate MPI configuration.
 
     Enforce Microsoft MPI in version 21.0 or later, to fix a
@@ -981,11 +865,6 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
 
     # known issues with distributed memory parallel (DMP)
     if "smp" not in add_sw_lower_case:  # pragma: no cover
-        # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
-        if _is_ubuntu():
-            LOG.debug("Ubuntu system detected. Adding 'I_MPI_SHM_LMT' env var.")
-            os.environ["I_MPI_SHM_LMT"] = "shm"
-
         if _HAS_ATP:
             condition = (
                 os.name == "nt"
@@ -1029,7 +908,16 @@ def _validate_MPI(add_sw, exec_path, force_intel=False):
     return add_sw
 
 
-def _force_smp_student_version(add_sw, exec_path):
+def configure_ubuntu(envvars: Dict[str, Any]):
+    # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
+    if _is_ubuntu():
+        LOG.debug("Ubuntu system detected. Adding 'I_MPI_SHM_LMT' env var.")
+        envvars["I_MPI_SHM_LMT"] = "shm"
+
+    return envvars
+
+
+def force_smp_in_student(add_sw, exec_path):
     """Force SMP in student version.
 
     Parameters
@@ -1063,6 +951,7 @@ def launch_mapdl(
     exec_file: Optional[str] = None,
     run_location: Optional[str] = None,
     jobname: str = "file",
+    *,
     nproc: Optional[int] = None,
     ram: Optional[Union[int, str]] = None,
     mode: Optional[str] = None,
@@ -1077,14 +966,14 @@ def launch_mapdl(
     clear_on_connect: bool = True,
     log_apdl: Optional[Union[bool, str]] = None,
     remove_temp_dir_on_exit: bool = False,
-    license_server_check: bool = True,
+    license_server_check: bool = False,
     license_type: Optional[bool] = None,
     print_com: bool = False,
     add_env_vars: Optional[Dict[str, str]] = None,
     replace_env_vars: Optional[Dict[str, str]] = None,
     version: Optional[Union[int, str]] = None,
     detect_slurm_config: bool = True,
-    **kwargs: Dict[str, Any],
+    **kwargs,
 ) -> Union[MapdlGrpc, "MapdlConsole"]:
     """Start MAPDL locally.
 
@@ -1207,7 +1096,7 @@ def launch_mapdl(
 
     license_server_check : bool, optional
         Check if the license server is available if MAPDL fails to
-        start.  Only available on ``mode='grpc'``. Defaults ``True``.
+        start.  Only available on ``mode='grpc'``. Defaults ``False``.
 
     license_type : str, optional
         Enable license type selection. You can input a string for its
@@ -1421,397 +1310,214 @@ def launch_mapdl(
         "ANSYSLMD_LICENSE_FILE":"1055@MYSERVER"}
     >>> mapdl = launch_mapdl(replace_env_vars=my_env_vars)
     """
-    # By default
-    ON_SLURM = os.environ.get("PYMAPDL_ON_SLURM", None)
-    if ON_SLURM is None:
-        ON_SLURM = True
-    else:
-        # Unless the env var is false, it will be true.
-        ON_SLURM = not (ON_SLURM.lower() == "false")
+    ########################################
+    # Processing arguments
+    # --------------------
+    #
+    # packing arguments
+    args = pack_arguments(locals())  # packs args and kwargs
 
-    # Let's require the following env vars to exist to go into slurm mode.
-    ON_SLURM = (
-        ON_SLURM
-        and bool(os.environ.get("SLURM_JOB_NAME", ""))
-        and bool(os.environ.get("SLURM_JOB_ID", ""))
-    )
+    check_kwargs(args)  # check if passing wrong arguments
 
-    if detect_slurm_config and ON_SLURM:
+    pre_check_args(args)
+
+    # SLURM settings
+    if is_on_slurm(args):
         LOG.info("On Slurm mode.")
 
         # extracting parameters
-        exec_file, jobname, nproc, ram, additional_switches = _parse_slurm_options(
-            exec_file,
-            jobname,
-            nproc,
-            ram,
-            additional_switches,
-            **kwargs,
+        get_slurm_options(args, kwargs)
+
+    get_cpus(args)
+
+    get_start_instance_arg(args)
+
+    get_ip(args)
+
+    args["port"] = get_port(args["port"], args["start_instance"])
+
+    get_exec_file(args)
+
+    args["version"] = get_version(args["version"], exec_file)
+
+    if args["start_instance"]:
+        ########################################
+        # Local adjustments
+        # -----------------
+        #
+        # Only when starting MAPDL (aka Local)
+
+        get_run_location(args)
+
+        # verify lock file does not exist
+        check_lock_file(args["run_location"], args["jobname"], args["override"])
+
+        # remove err file so we can track its creation
+        # (as way to check if MAPDL started or not)
+        remove_err_files(args["run_location"], args["jobname"])
+
+        if _HAS_ATP and not args["_debug_no_launch"]:
+            version = version_from_path("mapdl", args["exec_file"])
+            args["mode"] = check_mode(args["mode"], version)
+
+    if not args["mode"]:
+        args["mode"] = "grpc"
+
+    LOG.debug(f"Using mode {args['mode']}")
+
+    args["additional_switches"] = set_license_switch(
+        args["license_type"], args["additional_switches"]
+    )
+
+    env_vars = update_env_vars(args["add_env_vars"], args["replace_env_vars"])
+
+    ########################################
+    # Context specific launching adjustments
+    # --------------------------------------
+    #
+    if args["start_instance"]:
+        env_vars = configure_ubuntu(env_vars)
+
+        # Set SMP by default if student version is used.
+        args["additional_switches"] = force_smp_in_student(
+            args["additional_switches"], args["exec_file"]
         )
-        # To avoid timeouts
-        license_server_check = False
-        start_timeout = 2 * start_timeout
-        ON_SLURM = True  # Using this as main variable
-    else:
-        ON_SLURM = False
 
-    # These parameters are partially used for unit testing
-    set_no_abort = kwargs.pop("set_no_abort", True)
-
-    # Extract arguments:
-    force_intel = kwargs.pop("force_intel", False)
-    use_vtk = kwargs.pop("use_vtk", None)
-    just_launch = kwargs.pop("just_launch", None)
-    on_pool = kwargs.pop("on_pool", False)
-    _debug_no_launch = kwargs.pop("_debug_no_launch", None)
-
-    # Transferring MAPDL arguments to start_parameters:
-    start_parm = {}
-
-    kwargs_keys = list(kwargs.keys())
-    for each_par in kwargs_keys:
-        if each_par in _ALLOWED_START_PARM:
-            start_parm[each_par] = kwargs.pop(each_par)
-
-    # Raising error if using non-allowed arguments
-    if kwargs:
-        ms_ = ", ".join([f"'{each}'" for each in kwargs.keys()])
-        raise ValueError(f"The following arguments are not recognized: {ms_}")
-
-    # Getting IP from env var
-    ip_env_var = os.environ.get("PYMAPDL_IP", "")
-    if ip_env_var != "":
-        if ip:
-            warnings.warn(
-                "The env var 'PYMAPDL_IP' is set, hence the 'ip' argument is overwritten."
-            )
-
-        ip = ip_env_var
-        LOG.debug(f"An IP ({ip}) has been set using 'PYMAPDL_IP' env var.")
-
-    ip = None if ip == "" else ip  # Making sure the variable is not empty
-
-    # Getting "start_instance" using "True" as default.
-    if (ip is not None) and (start_instance is None):
-        # An IP has been supplied. By default, 'start_instance' is equal
-        # false, unless it is set through the env vars.
-        start_instance = get_start_instance(start_instance=False)
-    else:
-        start_instance = get_start_instance(start_instance=start_instance)
-
-    LOG.debug("Using 'start_instance' equal to %s.", start_instance)
-
-    if ip is None:
-        if ON_WSL:
-            ip = _get_windows_host_ip()
-            if ip:
-                LOG.debug(
-                    f"On WSL: Using the following IP address for the Windows OS host: {ip}"
-                )
-            else:
-                raise MapdlDidNotStart(
-                    "You seems to be working from WSL.\n"
-                    "Unfortunately, PyMAPDL could not find the IP address of the Windows host machine."
-                )
-
-        if not ip:
-            LOG.debug(
-                f"No IP address was supplied. Using the default IP address: {LOCALHOST}"
-            )
-            ip = LOCALHOST
-
-    else:
-        LOG.debug(
-            "Because 'PYMAPDL_IP' is not None, an attempt is made to connect to"
-            " a remote session ('START_INSTANCE' is set to 'False')."
+        # Set compatible MPI
+        args["additional_switches"] = set_MPI_additional_switches(
+            args["additional_switches"],
+            args["exec_file"],
+            force_intel=args["force_intel"],
         )
-        if ON_WSL:
-            LOG.debug("On WSL: Allowing 'start_instance' and 'ip' arguments together.")
-        else:
-            if start_instance is True and not on_pool:
-                raise ValueError(
-                    "When providing a value for the argument 'ip', the argument "
-                    "'start_instance' cannot be 'True'.\n"
-                    "Make sure the corresponding environment variables are not setting "
-                    "those argument values.\n"
-                    "For more information visit https://github.com/ansys/pymapdl/issues/2910"
-                )
 
-        ip = socket.gethostbyname(ip)  # Converting ip or hostname to ip
+        LOG.debug(f"Using additional switches {args['additional_switches']}.")
 
-    check_valid_ip(ip)  # double check
+    start_parm = generate_start_parameters(args)
 
-    if port is None:
-        port = int(os.environ.get("PYMAPDL_PORT", MAPDL_DEFAULT_PORT))
-        check_valid_port(port)
-        LOG.debug(f"Using default port {port}")
-
-    # verify version
-    if exec_file and version:
-        raise ValueError("Cannot specify both ``exec_file`` and ``version``.")
-
-    if version is None:
-        version = os.getenv("PYMAPDL_MAPDL_VERSION", None)
-
-    # Start MAPDL with PyPIM if the environment is configured for it
-    # and the user did not pass a directive on how to launch it.
     if _HAS_PIM and exec_file is None and pypim.is_configured():
+        # Start MAPDL with PyPIM if the environment is configured for it
+        # and the user did not pass a directive on how to launch it.
         LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
-        if version:
-            version = str(version)
-        else:
-            version = None
 
-        return launch_remote_mapdl(cleanup_on_exit=cleanup_on_exit, version=version)
+        return launch_remote_mapdl(
+            cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
+        )
 
-    version = _verify_version(version)  # return a int version or none
+    # Early exit for debugging.
+    if args["_debug_no_launch"]:
+        # Early exit, just for testing
+        return args  # type: ignore
 
-    if start_instance:
-        # special handling when building the gallery outside of CI. This
-        # creates an instance of mapdl the first time.
-        if pymapdl.BUILDING_GALLERY:  # pragma: no cover
-            LOG.debug("Building gallery.")
-            # launch an instance of pymapdl if it does not already exist and
-            # we're allowed to start instances
-            if GALLERY_INSTANCE[0] is None:
-                LOG.debug("Loading first MAPDL instance for gallery building.")
-                GALLERY_INSTANCE[0] = "Loading..."
-                mapdl = launch_mapdl(
-                    start_instance=True,
-                    cleanup_on_exit=False,
-                    loglevel=loglevel,
-                    set_no_abort=set_no_abort,
-                    **start_parm,
-                )
-                GALLERY_INSTANCE[0] = {"ip": mapdl._ip, "port": mapdl._port}
-                return mapdl
-
-            # otherwise, connect to the existing gallery instance if available, but it needs to be fully loaded.
-            elif GALLERY_INSTANCE[0] != "Loading...":
-                LOG.debug(
-                    "Connecting to an existing MAPDL instance for gallery building."
-                )
-                mapdl = MapdlGrpc(
-                    ip=GALLERY_INSTANCE[0]["ip"],
-                    port=GALLERY_INSTANCE[0]["port"],
-                    cleanup_on_exit=False,
-                    loglevel=loglevel,
-                    set_no_abort=set_no_abort,
-                    use_vtk=use_vtk,
-                    **start_parm,
-                )
-                if clear_on_connect:
-                    mapdl.clear()
-                return mapdl
-
-            else:
-                LOG.debug("Bypassing Gallery building flag for the first time.")
-
-    else:
-        LOG.debug("Connecting to an existing instance of MAPDL at %s:%s", ip, port)
-
-        if just_launch:
-            print(f"There is an existing MAPDL instance at: {ip}:{port}")
-            return
-
-        if _debug_no_launch:
-            return pack_parameters(locals())  # type: ignore
+    if not args["start_instance"]:
+        ########################################
+        # Remote launching
+        # ----------------
+        #
+        LOG.debug(
+            f"Connecting to an existing instance of MAPDL at {args['ip']}:{args['port']}"
+        )
 
         mapdl = MapdlGrpc(
-            ip=ip,
-            port=port,
             cleanup_on_exit=False,
-            loglevel=loglevel,
-            set_no_abort=set_no_abort,
-            use_vtk=use_vtk,
-            log_apdl=log_apdl,
+            loglevel=args["loglevel"],
+            set_no_abort=args["set_no_abort"],
+            use_vtk=args["use_vtk"],
+            log_apdl=args["log_apdl"],
             **start_parm,
         )
-        if clear_on_connect:
+        if args["clear_on_connect"]:
             mapdl.clear()
         return mapdl
 
-    # verify executable
-    if exec_file is None:
-        exec_file = os.getenv("PYMAPDL_MAPDL_EXEC", None)
-
-    if exec_file is None:
-        if not _HAS_ATP:
-            raise ModuleNotFoundError(
-                "If you don't have 'ansys-tools-path' library installed, you need to input the executable path ('exec_path')."
-            )
-
-        LOG.debug("Using default executable.")
-        # Load cached path
-        if _debug_no_launch:
-            exec_file = ""
-        else:
-            exec_file = get_ansys_path(version=version)
-
-        if exec_file is None:
-            raise FileNotFoundError(
-                "Invalid exec_file path or cannot load cached "
-                "mapdl path.  Enter one manually by specifying "
-                "exec_file="
-            )
-    else:  # verify ansys exists at this location
-        if not os.path.isfile(exec_file):
-            raise FileNotFoundError(
-                f'Invalid MAPDL executable at "{exec_file}"\n'
-                "Enter one manually using exec_file="
-            )
-
-    # verify run location
-    if run_location is None:
-        LOG.debug("Using default run location.")
-        temp_dir = tempfile.gettempdir()
-        run_location = os.path.join(temp_dir, "ansys_%s" % random_string(10))
-        if not os.path.isdir(run_location):
-            try:
-                os.mkdir(run_location)
-                LOG.debug("Created run location at %s", run_location)
-            except:
-                raise MapdlRuntimeError(
-                    "Unable to create the temporary working "
-                    f'directory "{run_location}"\n'
-                    "Please specify run_location="
-                )
-    else:
-        if not os.path.isdir(run_location):
-            raise FileNotFoundError(f'"{run_location}" is not a valid directory')
-        if remove_temp_dir_on_exit:
-            LOG.info("`run_location` set. Disabling the removal of temporary files.")
-            remove_temp_dir_on_exit = False
-
-    LOG.debug("Using run location at %s", run_location)
-
-    # verify no lock file and the mode is valid
-    check_lock_file(run_location, jobname, override)
-
-    if _HAS_ATP and not _debug_no_launch:
-        mode = check_mode(mode, version_from_path("mapdl", exec_file))
-        LOG.debug("Using mode %s", mode)
-    else:
-        mode = "grpc"
-
-    # Setting SMP by default if student version is used.
-    additional_switches = _force_smp_student_version(additional_switches, exec_file)
-
+    ########################################
+    # Sphinx docs adjustments
+    # -----------------------
     #
-    additional_switches = _validate_MPI(
-        additional_switches, exec_file, force_intel=force_intel
-    )
+    # special handling when building the gallery outside of CI. This
+    # creates an instance of mapdl the first time.
+    if pymapdl.BUILDING_GALLERY:  # pragma: no cover
+        return create_gallery_instances(args, start_parm)
 
-    additional_switches = _check_license_argument(license_type, additional_switches)
-    LOG.debug(f"Using additional switches {additional_switches}.")
-
-    # Bypassing number of processors checks because VDI/VNC might have
-    # different number of processors than the cluster compute nodes.
-    if not ON_SLURM:
-        # Setting number of processors
-        machine_cores = psutil.cpu_count(logical=False)
-
-        if not nproc:
-            # Some machines only have 1 core
-            nproc = machine_cores if machine_cores < 2 else 2
-        else:
-            if machine_cores < int(nproc):
-                raise NotEnoughResources(
-                    f"The machine has {machine_cores} cores. PyMAPDL is asking for {nproc} cores."
-                )
-
-    # Setting env vars
-    env_vars = update_env_vars(add_env_vars, replace_env_vars)
-
-    start_parm.update(
-        {
-            "exec_file": exec_file,
-            "run_location": run_location,
-            "additional_switches": additional_switches,
-            "jobname": jobname,
-            "nproc": nproc,
-            "print_com": print_com,
-        }
-    )
-
-    if mode == "console":
-        start_parm["start_timeout"] = start_timeout
-
-    else:
-        start_parm["ram"] = ram
-        start_parm["override"] = override
-        start_parm["timeout"] = start_timeout
-
-    LOG.debug(f"Using start parameters {start_parm}")
-
+    ########################################
+    # Local launching
+    # ---------------
+    #
     # Check the license server
-    if license_server_check:
+    if args["license_server_check"]:
         LOG.debug("Checking license server.")
-        lic_check = LicenseChecker(timeout=start_timeout)
+        lic_check = LicenseChecker(timeout=args["start_timeout"])
         lic_check.start()
 
     try:
         LOG.debug("Starting MAPDL")
-        if mode == "console":
+        if args["mode"] == "console":
             from ansys.mapdl.core.mapdl_console import MapdlConsole
 
             mapdl = MapdlConsole(
-                loglevel=loglevel, log_apdl=log_apdl, use_vtk=use_vtk, **start_parm
-            )
-
-        elif mode == "grpc":
-            if _debug_no_launch:
-                # Early exit, just for testing
-                return pack_parameters(locals())  # type: ignore
-
-            port, actual_run_location, process = launch_grpc(
-                port=port,
-                replace_env_vars=env_vars,
+                loglevel=args["loglevel"],
+                log_apdl=args["log_apdl"],
+                use_vtk=args["use_vtk"],
                 **start_parm,
             )
 
-            if just_launch:
-                out = [ip, port]
+        elif args["mode"] == "grpc":
+
+            cmd = generate_mapdl_launch_command(
+                exec_file=args["exec_file"],
+                jobname=args["jobname"],
+                nproc=args["nproc"],
+                ram=args["ram"],
+                port=args["port"],
+                additional_switches=args["additional_switches"],
+            )
+
+            process = launch_grpc(
+                cmd=cmd, run_location=args["run_location"], env_vars=env_vars
+            )
+
+            check_mapdl_launch(
+                process, args["run_location"], args["start_timeout"], cmd
+            )
+
+            if args["just_launch"]:
+                out = [args["ip"], args["port"]]
                 if hasattr(process, "pid"):
                     out += [process.pid]
                 return out
 
             mapdl = MapdlGrpc(
-                ip=ip,
-                port=port,
-                cleanup_on_exit=cleanup_on_exit,
-                loglevel=loglevel,
-                set_no_abort=set_no_abort,
-                remove_temp_dir_on_exit=remove_temp_dir_on_exit,
-                log_apdl=log_apdl,
+                cleanup_on_exit=args["cleanup_on_exit"],
+                loglevel=args["loglevel"],
+                set_no_abort=args["set_no_abort"],
+                remove_temp_dir_on_exit=args["remove_temp_dir_on_exit"],
+                log_apdl=args["log_apdl"],
                 process=process,
-                use_vtk=use_vtk,
+                use_vtk=args["use_vtk"],
                 **start_parm,
             )
-            if run_location is None:
-                mapdl._path = actual_run_location
 
         # Setting launched property
         mapdl._launched = True
+        mapdl._env_vars = env_vars
 
     except Exception as exception:
         # Failed to launch for some reason.  Check if failure was due
         # to the license check
-        if license_server_check:
+        if args["license_server_check"]:
             LOG.debug("Checking license server.")
             lic_check.check()
 
         raise exception
 
     # Stopping license checker
-    if license_server_check:
+    if args["license_server_check"]:
         LOG.debug("Stopping license server check.")
         lic_check.is_connected = True
 
     return mapdl
 
 
-def check_mode(mode, version):
+def check_mode(mode: ALLOWABLE_MODES, version: ALLOWABLE_VERSION_INT):
     """Check if the MAPDL server mode matches the allowable version
 
     If ``None``, the newest mode will be selected.
@@ -1913,7 +1619,7 @@ def update_env_vars(add_env_vars: dict, replace_env_vars: dict) -> dict:
     return envvars
 
 
-def _check_license_argument(license_type, additional_switches):
+def set_license_switch(license_type, additional_switches):
     if isinstance(license_type, str):
         # In newer license server versions an invalid license name just get discarded and produces no effect or warning.
         # For example:
@@ -1945,7 +1651,7 @@ def _check_license_argument(license_type, additional_switches):
             warn_text = (
                 f"The keyword argument 'license_type' value ('{license_type}') is not a recognized\n"
                 "license name or has been deprecated.\n"
-                "Still PyMAPDL will try to use it but in older versions you might experience\n"
+                "Still PyMAPDL will try to use it but in older MAPDL versions you might experience\n"
                 "problems connecting to the server.\n"
                 f"Recognized license names: {' '.join(allow_lics)}"
             )
@@ -1967,7 +1673,7 @@ def _check_license_argument(license_type, additional_switches):
             warn_text = (
                 f"The additional switch product value ('-p {license_type}') is not a recognized\n"
                 "license name or has been deprecated.\n"
-                "Still PyMAPDL will try to use it but in older versions you might experience\n"
+                "Still PyMAPDL will try to use it but in older MAPDL versions you might experience\n"
                 "problems connecting to the server.\n"
                 f"Recognized license names: {' '.join(allow_lics)}"
             )
@@ -1982,38 +1688,6 @@ def _check_license_argument(license_type, additional_switches):
         raise TypeError("The argument 'license_type' does only accept str or None.")
 
     return additional_switches
-
-
-def _verify_version(version):
-    """Verify the MAPDL version is valid."""
-    if isinstance(version, float):
-        version = int(version * 10)
-
-    if isinstance(version, str):
-        if version.lower().strip() == "latest":
-            return None  # Default behaviour is latest
-
-        elif version.upper().strip() in [
-            str(each) for each in SUPPORTED_ANSYS_VERSIONS.keys()
-        ]:
-            version = int(version)
-        elif version.upper().strip() in [
-            str(each / 10) for each in SUPPORTED_ANSYS_VERSIONS.keys()
-        ]:
-            version = int(float(version) * 10)
-        elif version.upper().strip() in SUPPORTED_ANSYS_VERSIONS.values():
-            version = [
-                key
-                for key, value in SUPPORTED_ANSYS_VERSIONS.items()
-                if value == version.upper().strip()
-            ][0]
-
-    if version is not None and version not in SUPPORTED_ANSYS_VERSIONS.keys():
-        raise ValueError(
-            f"MAPDL version must be one of the following: {list(SUPPORTED_ANSYS_VERSIONS.keys())}"
-        )
-
-    return version
 
 
 def _get_windows_host_ip():
@@ -2044,21 +1718,17 @@ def _parse_ip_route(output):
         return match[0]
 
 
-def _parse_slurm_options(
-    exec_file: Optional[str],
-    jobname: str,
-    nproc: Optional[int],
-    ram: Optional[Union[str, int]],
-    additional_switches: str,
-    **kwargs: Dict[str, Any],
-):
+def get_slurm_options(
+    args: Dict[str, Any],
+    kwargs: Dict[str, Any],
+) -> Dict[str, Any]:
     def get_value(
         variable: str,
         kwargs: Dict[str, Any],
         default: Optional[Union[str, int, float]] = 1,
         astype: Optional[Callable[[Any], Any]] = int,
     ):
-        value_from_env_vars = os.environ.get(variable, None)
+        value_from_env_vars = os.environ.get(variable)
         value_from_kwargs = kwargs.pop(variable, None)
         value = value_from_kwargs or value_from_env_vars or default
         if astype and value:
@@ -2094,8 +1764,8 @@ def _parse_slurm_options(
     LOG.info(f"SLURM_CPUS_ON_NODE: {SLURM_CPUS_ON_NODE}")
 
     SLURM_MEM_PER_NODE = get_value(
-        "SLURM_MEM_PER_NODE", kwargs, default=None, astype=None
-    )
+        "SLURM_MEM_PER_NODE", kwargs, default="", astype=str
+    ).upper()
     LOG.info(f"SLURM_MEM_PER_NODE: {SLURM_MEM_PER_NODE}")
 
     SLURM_NODELIST = get_value(
@@ -2103,124 +1773,586 @@ def _parse_slurm_options(
     ).lower()
     LOG.info(f"SLURM_NODELIST: {SLURM_NODELIST}")
 
-    if not exec_file:
-        exec_file = os.environ.get("PYMAPDL_MAPDL_EXEC", None)
+    if not args["exec_file"]:
+        args["exec_file"] = os.environ.get("PYMAPDL_MAPDL_EXEC")
 
-    if not exec_file:
+    if not args["exec_file"]:
         # We should probably make a way to find it.
         # We will use the module thing
         pass
-    LOG.info(f"Using MAPDL executable in: {exec_file}")
+    LOG.info(f"Using MAPDL executable in: {args['exec_file']}")
 
-    if not jobname:
-        jobname = os.environ.get("SLURM_JOB_NAME", "file")
-    LOG.info(f"Using jobname: {jobname}")
+    if not args["jobname"]:
+        args["jobname"] = os.environ.get("SLURM_JOB_NAME", "file")
+    LOG.info(f"Using jobname: {args['jobname']}")
 
     # Checking specific env var
-    if not nproc:
-        nproc = os.environ.get("PYMAPDL_NPROC", None)
-        if nproc:
-            nproc = int(nproc)
-
-    if not nproc:
+    if not args["nproc"]:
         ## Attempt to calculate the appropriate number of cores:
         # Reference: https://stackoverflow.com/a/51141287/6650211
         # I'm assuming the env var makes sense.
         #
         # - SLURM_CPUS_ON_NODE is a property of the cluster, not of the job.
         #
-        options = [
-            # 4,  # Fall back option
-            SLURM_CPUS_PER_TASK * SLURM_NTASKS,  # (CPUs)
-            SLURM_NPROCS,  # (CPUs)
-            # SLURM_NTASKS,  # (tasks) Not necessary the number of CPUs,
-            # SLURM_NNODES * SLURM_TASKS_PER_NODE * SLURM_CPUS_PER_TASK,  # (CPUs)
-            SLURM_CPUS_ON_NODE * SLURM_NNODES,  # (cpus)
-        ]
+        options = max(
+            [
+                # 4,  # Fall back option
+                SLURM_CPUS_PER_TASK * SLURM_NTASKS,  # (CPUs)
+                SLURM_NPROCS,  # (CPUs)
+                # SLURM_NTASKS,  # (tasks) Not necessary the number of CPUs,
+                # SLURM_NNODES * SLURM_TASKS_PER_NODE * SLURM_CPUS_PER_TASK,  # (CPUs)
+                SLURM_CPUS_ON_NODE * SLURM_NNODES,  # (cpus)
+            ]
+        )
         LOG.info(f"On SLURM number of processors options {options}")
-        nproc = max(options)
 
-    LOG.info(f"Setting number of CPUs to: {nproc}")
+        args["nproc"] = int(os.environ.get("PYMAPDL_NPROC", options))
 
-    if not ram:
+    LOG.info(f"Setting number of CPUs to: {args['nproc']}")
+
+    if not args["ram"]:
         if SLURM_MEM_PER_NODE:
             # RAM argument is in MB, so we need to convert
+            units = None
+            if SLURM_MEM_PER_NODE[-1].isalpha():
+                units = SLURM_MEM_PER_NODE[-1]
+                ram = SLURM_MEM_PER_NODE[:-1]
+            else:
+                units = None
+                ram = SLURM_MEM_PER_NODE
 
-            if SLURM_MEM_PER_NODE[-1] == "T":  # tera
-                ram = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** 2
-            elif SLURM_MEM_PER_NODE[-1] == "G":  # giga
-                ram = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** 1
-            elif SLURM_MEM_PER_NODE[-1].upper() == "k":  # kilo
-                ram = int(SLURM_MEM_PER_NODE[:-1]) * (2**10) ** (-1)
+            if not units:
+                args["ram"] = int(ram)
+            elif units == "T":  # tera
+                args["ram"] = int(ram) * (2**10) ** 2
+            elif units == "G":  # giga
+                args["ram"] = int(ram) * (2**10) ** 1
+            elif units == "M":  # mega
+                args["ram"] = int(ram)
+            elif units == "K":  # kilo
+                args["ram"] = int(ram) * (2**10) ** (-1)
             else:  # Mega
-                ram = int(SLURM_MEM_PER_NODE)
+                raise ValueError(
+                    "The memory defined in 'SLURM_MEM_PER_NODE' env var("
+                    f"'{SLURM_MEM_PER_NODE}') is not valid."
+                )
 
-    LOG.info(f"Setting RAM to: {ram}")
+    LOG.info(f"Setting RAM to: {args['ram']}")
 
     # We use "-dis " (with space) to avoid collision with user variables such
     # as `-distro` or so
-    if "-dis " not in additional_switches and not additional_switches.endswith("-dis"):
-        additional_switches += " -dis"
+    if "-dis " not in args["additional_switches"] and not args[
+        "additional_switches"
+    ].endswith("-dis"):
+        args["additional_switches"] += " -dis"
 
-    ## Getting the node list
-    machines = ""
-    # parsing nodes to list
-    if SLURM_NODELIST:
-        try:
-            p = subprocess.Popen(
-                ["scontrol", "show", "hostnames", f"{SLURM_NODELIST}"],
-                stderr=subprocess.PIPE,
-                stdout=subprocess.PIPE,
-            )
-            stderr = p.stderr.read().decode()
-            stdout = p.stdout.read().decode()
+    # Finally set to avoid timeouts
+    args["license_server_check"] = False
+    args["start_timeout"] = 2 * args["start_timeout"]
 
-            if "Invalid hostlist" in stderr:
-                raise ValueError(
-                    "The node list is invalid, or it could not be parsed.\n",
-                    "Are you passing the nodes correctly?\n",
-                    f"Nodes list: {SLURM_NODELIST}",
+    return args
+
+
+def pack_arguments(locals_):
+    args = {}
+    for each in ALLOWABLE_LAUNCH_MAPDL_ARGS:
+        if each in locals_:
+            args[each] = locals_[each]
+
+    args["kwargs"] = locals_["kwargs"]
+    args.update(locals_["kwargs"])  # attaching kwargs
+
+    args["set_no_abort"] = locals_.get(
+        "set_no_abort", locals_["kwargs"].get("set_no_abort", None)
+    )
+    args["force_intel"] = locals_.get(
+        "force_intel", locals_["kwargs"].get("force_intel", None)
+    )
+    args["broadcast"] = locals_.get(
+        "broadcast", locals_["kwargs"].get("broadcast", None)
+    )
+    args["use_vtk"] = locals_.get("use_vtk", locals_["kwargs"].get("use_vtk", None))
+    args["just_launch"] = locals_.get(
+        "just_launch", locals_["kwargs"].get("just_launch", None)
+    )
+    args["on_pool"] = locals_.get("on_pool", locals_["kwargs"].get("on_pool", None))
+    args["_debug_no_launch"] = locals_.get(
+        "_debug_no_launch", locals_["kwargs"].get("_debug_no_launch", None)
+    )
+
+    return args
+
+
+def is_on_slurm(args: Dict[str, Any]) -> bool:
+
+    args["ON_SLURM"] = os.environ.get("PYMAPDL_ON_SLURM", "True")
+
+    is_flag_false = args["ON_SLURM"].lower() == "false"
+
+    # Let's require the following env vars to exist to go into slurm mode.
+    args["ON_SLURM"] = bool(
+        args["detect_slurm_config"]
+        and not is_flag_false  # default is true
+        and os.environ.get("SLURM_JOB_NAME")
+        and os.environ.get("SLURM_JOB_ID")
+    )
+    return args["ON_SLURM"]
+
+
+def generate_start_parameters(args: Dict[str, Any]) -> Dict[str, Any]:
+    """Generate start parameters
+
+    Generate a dict with the parameters for launching MAPDL.
+
+    Parameters
+    ----------
+    args : Dict[str, Any]
+        Args dictionary
+
+    Returns
+    -------
+    Dict[str, Any]
+        start_param dictionary
+
+    Raises
+    ------
+    ValueError
+        If there are keys in kwargs after inject them all allowed keys, it means
+        a non-allowed key was used.
+    """
+    # Transferring MAPDL arguments to start_parameters:
+    start_parm = {}
+
+    for each_par in _ALLOWED_START_PARM:
+        if each_par in args:
+            start_parm[each_par] = args[each_par]
+
+    if args["mode"] == "console":
+        start_parm["start_timeout"] = args["start_timeout"]
+
+    else:
+        start_parm["ram"] = args["ram"]
+        start_parm["override"] = args["override"]
+        start_parm["timeout"] = args["start_timeout"]
+
+    LOG.debug(f"Using start parameters {start_parm}")
+    return start_parm
+
+
+def get_ip_env_var() -> str:
+    """Get IP from 'PYMAPDL_IP' env var"""
+
+    # Getting IP from env var
+    ip_env_var = os.environ.get("PYMAPDL_IP", "")
+
+    if ip_env_var != "":
+        LOG.debug(f"An IP ({ip_env_var}) has been set using 'PYMAPDL_IP' env var.")
+        return ip_env_var
+
+
+def get_ip(args: Dict[str, Any]) -> None:
+    """Get IP from env var or arguments
+
+    The environment variable value has priority over the argument.
+
+    Parameters
+    ----------
+    args : Dict[str, Any]
+        Arguments dict
+
+    Raises
+    ------
+    MapdlDidNotStart
+        Windows host IP could not be found.
+    ValueError
+        'start_instance' and 'ip' arguments are incompatible.
+    """
+    if args["ip"] in [None, ""]:
+
+        args["ip"] = get_ip_env_var()
+
+        if not args["ip"] and ON_WSL:
+            args["ip"] = _get_windows_host_ip()
+            if args["ip"]:
+                LOG.debug(
+                    f"On WSL: Using the following IP address for the Windows OS host: {args['ip']}"
                 )
-            if stderr:
-                raise RuntimeError(stderr)
-            nodes = stdout.strip().splitlines()
+            else:
+                raise MapdlDidNotStart(
+                    "You seems to be working from WSL.\n"
+                    "Unfortunately, PyMAPDL could not find the IP address of the Windows host machine."
+                )
 
-            machines = ":".join([f"{each_node}" for each_node in nodes])
+        if not args["ip"]:
+            LOG.debug(
+                f"No IP address was supplied. Using the default IP address: {LOCALHOST}"
+            )
+            args["ip"] = LOCALHOST
 
-            # The following code creates the cmd line bit for MAPDL. It seems it
-            # is not needed in slurm.
-            # machines = " -machines " + ":".join([
-            #     f"{each_node}:{SLURM_CPUS_ON_NODE}" for each_node in nodes
-            # ])
+    # Converting ip or hostname to ip
+    args["ip"] = socket.gethostbyname(args["ip"])
+    check_valid_ip(args["ip"])  # double check
 
-            # We do not need to inject the machines in MAPDL command line.
-            # additional_switches += machines
-            LOG.info(f"Using nodes configuration: {machines}")
 
-        except Exception as e:
-            LOG.info(
-                f"The machines list could not be obtained.\nThis error occurred:\n{str(e)}"
+def get_start_instance_arg(args: Dict[str, Any]) -> None:
+    """Get start instance argument
+
+    Parameters
+    ----------
+    args : Dict[str, Any]
+        Arguments dict
+    """
+    ip_envar = get_ip_env_var() not in ["", None]
+
+    if (args["ip"] not in [None, ""] or ip_envar) and (args["start_instance"] is None):
+        # An IP has been supplied. By default, 'start_instance' is equal
+        # false, unless it is set through the env vars (which has preference)
+        args["start_instance"] = False
+
+    args["start_instance"] = get_start_instance(start_instance=args["start_instance"])
+    LOG.debug(f"Using 'start_instance' equal to {args['start_instance']}")
+
+
+def get_port(port: Optional[int] = None, start_instance: Optional[bool] = None) -> int:
+    """Get port argument.
+
+    Parameters
+    ----------
+    port : Optional[int]
+        Port given as argument.
+
+    Returns
+    -------
+    int
+        Port
+    """
+    if port is None:
+        if os.environ.get("PYMAPDL_PORT"):
+            LOG.debug(f"Using port from 'PYMAPDL_PORT' env var: {port}")
+            return int(os.environ.get("PYMAPDL_PORT"))
+
+        if not pymapdl._LOCAL_PORTS:
+            port = MAPDL_DEFAULT_PORT
+            LOG.debug(f"Using default port: {port}")
+        else:
+            port = max(pymapdl._LOCAL_PORTS) + 1
+            LOG.debug(f"Using next available port: {port}")
+
+        while (port_in_use(port) and start_instance) or port in pymapdl._LOCAL_PORTS:
+            port += 1
+            LOG.debug(f"Port in use.  Incrementing port number. port={port}")
+
+    else:
+        if port_in_use(port):
+            proc = get_process_at_port(port)
+            if proc:
+                if is_ansys_process(proc):
+                    raise PortAlreadyInUseByAnMAPDLInstance(port)
+                else:
+                    raise PortAlreadyInUse(port)
+
+    pymapdl._LOCAL_PORTS.append(port)
+
+    check_valid_port(port)
+    LOG.debug(f"Using default port {port}")
+
+    return port
+
+
+def get_version(
+    version: Optional[Union[str, int]] = None,
+    exec_file: Optional[str] = None,
+) -> Optional[int]:
+    """Get MAPDL version
+
+    Parameters
+    ----------
+    version : Optional[Union[str, int]], optional
+        Version argument, by default None
+
+    Returns
+    -------
+    Optional[int]
+        The version as XYZ or None.
+
+    Raises
+    ------
+    ValueError
+        MAPDL version must be one of the following
+    """
+    if not version:
+        version = os.getenv("PYMAPDL_MAPDL_VERSION")
+
+    if not version:
+        # Early exit
+        return
+
+    if isinstance(version, float):
+        version = int(version * 10)
+
+    if isinstance(version, str):
+        if version.lower().strip() == "latest":
+            return None  # Default behaviour is latest
+
+        elif version.upper().strip() in [str(each) for each in ALLOWABLE_VERSION_INT]:
+            version = int(version)
+        elif version.upper().strip() in [
+            str(each / 10) for each in ALLOWABLE_VERSION_INT
+        ]:
+            version = int(float(version) * 10)
+        elif version.upper().strip() in SUPPORTED_ANSYS_VERSIONS.values():
+            version = [
+                key
+                for key, value in SUPPORTED_ANSYS_VERSIONS.items()
+                if value == version.upper().strip()
+            ][0]
+
+    if version is not None and version not in ALLOWABLE_VERSION_INT:
+        raise ValueError(
+            f"MAPDL version must be one of the following: {list(ALLOWABLE_VERSION_INT)}"
+        )
+
+    return version  # return a int version or none
+
+
+def create_gallery_instances(
+    args: Dict[str, Any], start_parm: Dict[str, Any]
+) -> MapdlGrpc:  # pragma: no cover
+    """Create MAPDL instances for the documentation gallery built.
+
+    This function is not tested with Pytest, but it is used during CICD docs
+    building.
+
+    Parameters
+    ----------
+    args : Dict[str, Any]
+        Arguments dict
+    start_parm : Dict[str, Any]
+        MAPDL start parameters
+
+    Returns
+    -------
+    MapdlGrpc
+        MAPDL instance
+    """
+    LOG.debug("Building gallery.")
+    # launch an instance of pymapdl if it does not already exist and
+    # we're allowed to start instances
+    if GALLERY_INSTANCE[0] is None:
+        LOG.debug("Loading first MAPDL instance for gallery building.")
+        GALLERY_INSTANCE[0] = "Loading..."
+        mapdl = launch_mapdl(
+            start_instance=True,
+            cleanup_on_exit=False,
+            loglevel=args["loglevel"],
+            set_no_abort=args["set_no_abort"],
+            **start_parm,
+        )
+        GALLERY_INSTANCE[0] = {"ip": mapdl._ip, "port": mapdl._port}
+        return mapdl
+
+    # otherwise, connect to the existing gallery instance if available, but it needs to be fully loaded.
+    else:
+        while not isinstance(GALLERY_INSTANCE[0], dict):
+            # Waiting for MAPDL instance to be ready
+            time.sleep(0.1)
+
+        LOG.debug("Connecting to an existing MAPDL instance for gallery building.")
+        start_parm.pop("ip", None)
+        start_parm.pop("port", None)
+        mapdl = MapdlGrpc(
+            ip=GALLERY_INSTANCE[0]["ip"],
+            port=GALLERY_INSTANCE[0]["port"],
+            cleanup_on_exit=False,
+            loglevel=args["loglevel"],
+            set_no_abort=args["set_no_abort"],
+            use_vtk=args["use_vtk"],
+            **start_parm,
+        )
+        if args["clear_on_connect"]:
+            mapdl.clear()
+        return mapdl
+
+
+def get_exec_file(args: Dict[str, Any]) -> None:
+    """Get exec file argument
+
+    Parameters
+    ----------
+    args : Dict[str, Any]
+        Arguments dictionary
+
+    Raises
+    ------
+    ModuleNotFoundError
+        'ansys-tools-path' library could not be found
+    FileNotFoundError
+        Invalid exec_file path or cannot load cached MAPDL path.
+    FileNotFoundError
+        Invalid MAPDL executable
+    """
+
+    args["exec_file"] = os.getenv("PYMAPDL_MAPDL_EXEC", args.get("exec_file"))
+
+    if not args["start_instance"] and args["exec_file"] is None:
+        # 'exec_file' is not needed if the instance is not going to be launch
+        args["exec_file"] = ""
+        return
+
+    if args["exec_file"] is None:
+        if not _HAS_ATP:
+            raise ModuleNotFoundError(
+                "If you don't have 'ansys-tools-path' library installed, you need "
+                "to input the executable path ('exec_file' argument) or use the "
+                "'PYMAPDL_MAPDL_EXEC' environment variable."
             )
 
-    return exec_file, jobname, nproc, ram, additional_switches
+        if args.get("_debug_no_launch", False):
+            args["exec_file"] = ""
+            return
+
+        LOG.debug("Using default executable.")
+        args["exec_file"] = get_ansys_path(version=args.get("version"))
+
+        # Edge case
+        if args["exec_file"] is None:
+            raise FileNotFoundError(
+                "Invalid exec_file path or cannot load cached "
+                "MAPDL path. Enter one manually by specifying "
+                "'exec_file' argument."
+            )
+    else:  # verify ansys exists at this location
+        if not os.path.isfile(args["exec_file"]):
+            raise FileNotFoundError(
+                f'Invalid MAPDL executable at "{args["exec_file"]}"\n'
+                "Enter one manually using exec_file="
+            )
 
 
-def pack_parameters(locals_var):
-    # pack all the arguments in a dict for debugging purposes
-    # We prefer to explicitly output the desired output
-    dict_ = {}
-    dict_["port"] = locals_var["port"]
-    dict_["ip"] = locals_var["ip"]
-    dict_["add_env_vars"] = locals_var["add_env_vars"]
-    dict_["replace_env_vars"] = locals_var["replace_env_vars"]
-    dict_["cleanup_on_exit"] = locals_var["cleanup_on_exit"]
-    dict_["loglevel"] = locals_var["loglevel"]
-    dict_["set_no_abort"] = locals_var["set_no_abort"]
-    dict_["remove_temp_dir_on_exit"] = locals_var["remove_temp_dir_on_exit"]
-    dict_["log_apdl"] = locals_var["log_apdl"]
-    dict_["use_vtk"] = locals_var["use_vtk"]
-    dict_["start_parm"] = locals_var["start_parm"]
-    dict_["start_instance"] = locals_var["start_instance"]
-    dict_["version"] = locals_var["version"]
-    dict_["additional_switches"] = locals_var["additional_switches"]
-    return dict_
+def get_run_location(args: Dict[str, Any]) -> None:
+    """Get run_location argument.
+
+    It can change 'remove_temp_dir_on_exit' argument's value.
+
+    Parameters
+    ----------
+    args : Dict[str, Any]
+        Arguments dict
+
+    Raises
+    ------
+    FileNotFoundError
+        _description_
+    """
+    if args["run_location"] is None:
+        args["run_location"] = create_temp_dir()
+        LOG.debug(
+            f"Using default temporary directory for MAPDL run location: {args['run_location']}"
+        )
+
+    elif not os.path.isdir(args["run_location"]):
+        os.makedirs(args["run_location"], exist_ok=True)
+        LOG.debug(f"Creating directory for MAPDL run location: {args['run_location']}")
+
+        if args.get("remove_temp_dir_on_exit"):
+            LOG.info(
+                "The 'run_location' argument is set. Disabling the removal of temporary files."
+            )
+            args["remove_temp_dir_on_exit"] = False
+
+    elif not os.access(args["run_location"], os.W_OK):
+        raise IOError(f'Unable to write to ``run_location``: {args["run_location"]}')
+
+    LOG.debug("Using run location at %s", args["run_location"])
+
+
+def check_kwargs(args: Dict[str, Any]):
+    """Check all the kwargs are valid.
+
+    Parameters
+    ----------
+    args : Dict[str, Any]
+        Arguments dict
+
+    Raises
+    ------
+    ValueError
+        When an argument is not allowed.
+    """
+    kwargs = list(args["kwargs"].keys())
+
+    # Raising error if using non-allowed arguments
+    for each in kwargs.copy():
+        if each in _ALLOWED_START_PARM or each in ALLOWABLE_LAUNCH_MAPDL_ARGS:
+            kwargs.remove(each)
+
+    if kwargs:
+        ms_ = ", ".join([f"'{each}'" for each in args["kwargs"].keys()])
+        raise ValueError(f"The following arguments are not recognized: {ms_}")
+
+
+def pre_check_args(args):
+    if args["start_instance"] and args["ip"] and not args["on_pool"]:
+        raise ValueError(
+            "When providing a value for the argument 'ip', the argument "
+            "'start_instance' cannot be 'True'.\n"
+            "Make sure the corresponding environment variables are not setting "
+            "those argument values.\n"
+            "For more information visit https://github.com/ansys/pymapdl/issues/2910"
+        )
+
+    if args["exec_file"] and args["version"]:
+        raise ValueError("Cannot specify both ``exec_file`` and ``version``.")
+
+
+def get_cpus(args: Dict[str, Any]):
+    """Get number of CPUs
+
+    Parameters
+    ----------
+    args : Dict[str, Any]
+        Arguments dict
+
+    Raises
+    ------
+    NotEnoughResources
+        When requesting more CPUs than available.
+    """
+
+    # Bypassing number of processors checks because VDI/VNC might have
+    # different number of processors than the cluster compute nodes.
+    if args["ON_SLURM"]:
+        return
+
+    # Setting number of processors
+    machine_cores = psutil.cpu_count(logical=False)
+
+    if not args["nproc"]:
+        # Some machines only have 1 core
+        args["nproc"] = machine_cores if machine_cores < 2 else 2
+    else:
+        if machine_cores < int(args["nproc"]):
+            raise NotEnoughResources(
+                f"The machine has {machine_cores} cores. PyMAPDL is asking for {args['nproc']} cores."
+            )
+
+
+def remove_err_files(run_location, jobname):
+    # remove any temporary error files at the run location.  This is
+    # important because we need to know if MAPDL is already running
+    # here and because we're looking for any temporary files that are
+    # created to tell when the process has started
+    for filename in os.listdir(run_location):
+        if ".err" == filename[-4:] and jobname in filename:
+            filename = os.path.join(run_location, filename)
+            if os.path.isfile(filename):
+                try:
+                    os.remove(filename)
+                    LOG.debug(f"Removing temporary error file: {filename}")
+                except Exception as error:
+                    LOG.debug(
+                        f"Unable to remove {filename}.  There might be "
+                        "an instance of MAPDL running at running at "
+                        f'"{run_location}"'
+                    )
+                    raise error

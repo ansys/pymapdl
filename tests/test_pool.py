@@ -49,7 +49,7 @@ pytestmark = requires("grpc")
 IGNORE_POOL = os.environ.get("IGNORE_POOL", "").upper() == "TRUE"
 
 # skipping if ON_STUDENT and ON_LOCAL because we cannot spawn that many instances.
-if ON_STUDENT and ON_LOCAL:
+if not ON_LOCAL or (ON_STUDENT and ON_LOCAL):
     pytest.skip(allow_module_level=True)
 
 

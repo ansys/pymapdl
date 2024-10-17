@@ -1835,11 +1835,14 @@ def test_cache_pids(mapdl):
     if mapdl.version == 23.2:
         pytest.skip(f"Flaky test in MAPDL 23.2")  # I'm not sure why.
 
-    assert mapdl._pids
-    mapdl._cache_pids()  # Recache pids
+    if mapdl.launched:
+        assert mapdl._pids
+        mapdl._cache_pids()  # Recache pids
 
-    for each in mapdl._pids:
-        assert "ansys" in "".join(psutil.Process(each).cmdline()).lower()
+        for each in mapdl._pids:
+            assert "ansys" in "".join(psutil.Process(each).cmdline()).lower()
+    else:
+        pytest.skip(f"MAPDL needs to have been launched by PyMAPDL.")
 
 
 @requires("local")
