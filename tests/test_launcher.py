@@ -694,17 +694,17 @@ def test_slurm_ram(monkeypatch, ram, expected, context):
 @pytest.mark.parametrize("slurm_env_var", ["True", "false", ""])
 @pytest.mark.parametrize("slurm_job_name", ["True", "false", ""])
 @pytest.mark.parametrize("slurm_job_id", ["True", "false", ""])
-@pytest.mark.parametrize("detect_slurm_config", [True, False, None])
+@pytest.mark.parametrize("detect_HPC", [True, False, None])
 def test_is_on_slurm(
-    monkeypatch, slurm_env_var, slurm_job_name, slurm_job_id, detect_slurm_config
+    monkeypatch, slurm_env_var, slurm_job_name, slurm_job_id, detect_HPC
 ):
     monkeypatch.setenv("PYMAPDL_ON_SLURM", slurm_env_var)
     monkeypatch.setenv("SLURM_JOB_NAME", slurm_job_name)
     monkeypatch.setenv("SLURM_JOB_ID", slurm_job_id)
 
-    flag = is_on_slurm(args={"detect_slurm_config": detect_slurm_config})
+    flag = is_on_slurm(args={"detect_HPC": detect_HPC})
 
-    if detect_slurm_config is not True:
+    if detect_HPC is not True:
         assert not flag
 
     else:
@@ -720,7 +720,7 @@ def test_is_on_slurm(
     if ON_LOCAL:
         assert (
             launch_mapdl(
-                detect_slurm_config=detect_slurm_config,
+                detect_HPC=detect_HPC,
                 _debug_no_launch=True,
             )["ON_SLURM"]
             == flag
