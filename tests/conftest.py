@@ -33,6 +33,7 @@ from _pytest.terminal import TerminalReporter  # for terminal customization
 import psutil
 import pytest
 
+from ansys.mapdl.core.helpers import is_installed as has_dependency
 from ansys.mapdl.core.launcher import is_ansys_process
 from common import (
     Element,
@@ -135,23 +136,6 @@ PROCESS_OK_STATUS = [
 ]
 
 
-def import_module(requirement):
-    from importlib import import_module
-
-    if os.name == "nt":
-        requirement = requirement.replace("-", ".")
-    return import_module(requirement)
-
-
-def has_dependency(requirement):
-    try:
-        requirement = requirement.replace("-", ".")
-        import_module(requirement)
-        return True
-    except ModuleNotFoundError:
-        return False
-
-
 def requires(requirement: str):
     """Check requirements"""
     requirement = requirement.lower()
@@ -239,7 +223,7 @@ from ansys.mapdl.core.errors import (
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 
-if has_dependency("ansys-tools-visualization-interface"):
+if has_dependency("ansys-tools-visualization_interface"):
     import ansys.tools.visualization_interface as viz_interface
 
     viz_interface.TESTING_MODE = True

@@ -24,6 +24,7 @@ import importlib.metadata as importlib_metadata
 
 ###############################################################################
 # Imports
+# =======
 #
 import logging
 import os
@@ -35,6 +36,7 @@ from platformdirs import user_data_dir
 
 ###############################################################################
 # Logging
+# =======
 #
 from ansys.mapdl.core.logging import Logger
 
@@ -43,8 +45,9 @@ LOG.debug("Loaded logging module as LOG")
 
 ###############################################################################
 # Globals
+# =======
 #
-from ansys.mapdl.core.helpers import is_installed, run_first_time
+from ansys.mapdl.core.helpers import is_installed, run_every_import, run_first_time
 
 __version__: str = importlib_metadata.version(__name__.replace(".", "-"))
 
@@ -64,37 +67,41 @@ RUNNING_TESTS: bool = False
 DEPRECATING_MINIMUM_PYTHON_VERSION: bool = True
 MINIMUM_PYTHON_VERSION: Tuple[int, int] = (3, 10)
 
+# Import related globals
+_HAS_PYVISTA: bool = is_installed("pyvista")
+_HAS_VISUALIZER: bool = is_installed("ansys.tools.visualization")
+_HAS_ATP: bool = is_installed("ansys.tools.path")
+_HAS_PIM: bool = is_installed("ansys-platform-instancemanagement")
+_HAS_TQDM: bool = is_installed("tqdm")
+_HAS_PYANSYS_REPORT: bool = is_installed("ansys.tools.report")
+
 # Setup directories
 USER_DATA_PATH: str = user_data_dir(appname="ansys_mapdl_core", appauthor="Ansys")
 EXAMPLES_PATH = os.path.join(USER_DATA_PATH, "examples")
 
-
-_HAS_PYVISTA: bool = is_installed("pyvista")
-_HAS_VISUALIZER = is_installed("ansys.tools.visualization")
-
-if _HAS_VISUALIZER:
-    from ansys.tools.visualization_interface import Plotter
-
-    from ansys.mapdl.core.plotting.theme import _apply_default_theme
-
-    _apply_default_theme()
-
-
 # Store local ports
 _LOCAL_PORTS: List[int] = []
 
-
-if RUNNING_TESTS:  # pragma: no cover
-    LOG.debug("Running tests on Pytest")
-
 ###############################################################################
-# One time runs only
+# First time
+# ==========
 #
-# This create the required directories.
+# This function runs only the first time PyMAPDL is importad after it is installed.
+# It creates the required directories and raise Python version related warnings.
+#
 run_first_time()
 
 ###############################################################################
+# Runs every time
+# ===============
+#
+# This function runs every time that PyMAPDL is imported.
+#
+run_every_import()
+
+###############################################################################
 # Library imports
+# ===============
 #
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.convert import convert_apdl_block, convert_script
@@ -112,8 +119,10 @@ from ansys.mapdl.core.pool import MapdlPool
 
 ###############################################################################
 # Convenient imports
+# ==================
 #
-try:
+# For compatibility with other versions or for convenience
+if _HAS_ATP:
     from ansys.tools.path.path import (
         change_default_ansys_path,
         find_ansys,
@@ -121,7 +130,6 @@ try:
         get_available_ansys_installations,
         save_ansys_path,
     )
-except ModuleNotFoundError:
-    # We don't really use these imports in the library.
-    # They are here for convenience.
-    pass
+
+if _HAS_VISUALIZER:
+    from ansys.tools.visualization_interface import Plotter

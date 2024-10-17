@@ -31,6 +31,10 @@ from ansys.mapdl.core import LOG
 
 def is_installed(package_name: str) -> bool:
     """Check if a package is installed"""
+
+    if os.name == "nt":
+        package_name = package_name.replace("-", ".")
+
     try:
         importlib.import_module(package_name)
 
@@ -80,3 +84,18 @@ def run_first_time() -> None:
 
         with open(first_time_file, "w") as fid:
             fid.write("")
+
+
+def run_every_import() -> None:
+    # Run every time we import PyMAPDL
+    from ansys.mapdl.core import _HAS_VISUALIZER, RUNNING_TESTS
+
+    # Apply custom theme
+    if _HAS_VISUALIZER:
+        from ansys.mapdl.core.plotting.theme import _apply_default_theme
+
+        _apply_default_theme()
+
+    # In case we want to do something specific for testing.
+    if RUNNING_TESTS:  # pragma: no cover
+        LOG.debug("Running tests on Pytest")
