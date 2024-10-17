@@ -36,25 +36,17 @@ from threading import Thread
 from typing import Union
 from warnings import warn
 
-try:
-    from ansys.tools.path import get_available_ansys_installations
-
-    _HAS_ATP = True
-except ModuleNotFoundError:
-    _HAS_ATP = False
-
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import _HAS_PYVISTA, LOG
+from ansys.mapdl.core import _HAS_ATP, _HAS_PYANSYS_REPORT, _HAS_PYVISTA, LOG
 
-try:
+if _HAS_ATP:
+    from ansys.tools.path import get_available_ansys_installations
+
+if _HAS_PYANSYS_REPORT:
     import ansys.tools.report as pyansys_report
 
-    _HAS_PYANSYS_REPORT = True
-except ModuleNotFoundError:  # pragma: no cover
-    LOG.debug("The package 'pyansys-tools-report' is not installed.")
-    _HAS_PYANSYS_REPORT = False
 
 # path of this module
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
