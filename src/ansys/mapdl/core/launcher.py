@@ -2357,11 +2357,11 @@ def get_cpus(args: Dict[str, Any]):
     if not args["nproc"]:
         # Check the env var `PYMAPDL_NPROC`
         args["nproc"] = int(os.environ.get("PYMAPDL_NPROC", min_cpus))
-    else:
-        if machine_cores < int(args["nproc"]):
-            raise NotEnoughResources(
-                f"The machine has {machine_cores} cores. PyMAPDL is asking for {args['nproc']} cores."
-            )
+
+    if machine_cores < int(args["nproc"]):
+        raise NotEnoughResources(
+            f"The machine has {machine_cores} cores. PyMAPDL is asking for {args['nproc']} cores."
+        )
 
 
 def remove_err_files(run_location, jobname):
