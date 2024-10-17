@@ -2385,7 +2385,34 @@ def remove_err_files(run_location, jobname):
                     raise error
 
 
-def launch_mapdl_on_cluster():
+def launch_mapdl_on_cluster(
+    exec_file: Optional[str] = None,
+    run_location: Optional[str] = None,
+    jobname: str = "file",
+    *,
+    nproc: Optional[int] = None,
+    ram: Optional[Union[int, str]] = None,
+    mode: Optional[str] = None,
+    override: bool = False,
+    loglevel: str = "ERROR",
+    additional_switches: str = "",
+    start_timeout: int = 90,
+    port: Optional[int] = None,
+    cleanup_on_exit: bool = True,
+    start_instance: Optional[bool] = None,
+    ip: Optional[str] = None,
+    clear_on_connect: bool = True,
+    log_apdl: Optional[Union[bool, str]] = None,
+    remove_temp_dir_on_exit: bool = False,
+    license_server_check: bool = False,
+    license_type: Optional[bool] = None,
+    print_com: bool = False,
+    add_env_vars: Optional[Dict[str, str]] = None,
+    replace_env_vars: Optional[Dict[str, str]] = None,
+    version: Optional[Union[int, str]] = None,
+    detect_HPC: bool = True,
+    **kwargs: Dict[str, Any],
+):
 
     ########################################
     # Processing arguments
@@ -2467,9 +2494,8 @@ def launch_mapdl_on_cluster():
 
     start_parm = generate_start_parameters(args)
 
-    if args["ON_SLURM"]:
-        env_vars.setdefault("ANS_MULTIPLE_NODES", "1")
-        env_vars.setdefault("HYDRA_BOOTSTRAP", "slurm")
+    env_vars.setdefault("ANS_MULTIPLE_NODES", "1")
+    env_vars.setdefault("HYDRA_BOOTSTRAP", "slurm")
 
     # Early exit for debugging.
     if args["_debug_no_launch"]:
@@ -2506,16 +2532,28 @@ def launch_mapdl_on_cluster():
         additional_switches=args["additional_switches"],
     )
 
+    cmd = f"""sbatch --export='ALL' --wrap '{cmd}'"""
+
     try:
         # TODO: wrap the launch_grpc with sbatch
         process = launch_grpc(
             cmd=cmd, run_location=args["run_location"], env_vars=env_vars
         )
+
+        out = process.stdout.read().decode()
+        if "Submitted batch job" not in out:
+            raise MapdlDidNotStart("PyMAPDL failed to submit the sbatch job.")
+
     except Exception as exception:
         LOG.error("An error occurred when launching MAPDL.")
         raise exception
 
     # TODO: A way to check if the job is ready.
+    jobid = get_jobid(out)
+    batch_host = get_hostname_host_cluster(jobid)
+    start_parm["ip"] = batch_host
+    start_parm["hostname"] = batch_host
+    start_parm["jobid"] = jobid
 
     if args["just_launch"]:
         out = [args["ip"], args["port"]]
@@ -2554,3 +2592,52 @@ def launch_mapdl_on_cluster():
         lic_check.is_connected = True
 
     return mapdl
+
+
+def get_hostname_host_cluster(job_id):
+    cmd = f"scontrol show jobid -dd {job_id}".split()
+    LOG.debug(f"Executing the command '{cmd}'")
+
+    ready = False
+    time_start = time.time()
+    timeout = 30  # second
+
+    while not ready:
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+        )
+        stdout = proc.stdout.read().decode()
+
+        if time.time() > time_start + timeout:
+            raise MapdlDidNotStart("The Job didn't start on time.")
+
+        if "JobState=RUNNING" not in stdout:
+            LOG.debug("The job is not ready yet. Waiting...")
+            time.sleep(1)
+        else:
+            ready = True
+
+    LOG.debug(f"The 'scontrol' command returned:\n{stdout}")
+    batchhost = stdout.split("BatchHost=")[1].splitlines()[0]
+    LOG.debug(f"Batchhost: {batchhost}")
+
+    # we should validate
+    batchhost_ip = socket.gethostbyname(batchhost)
+    LOG.debug(f"Batchhost IP: {batchhost_ip}")
+
+    return batchhost
+
+
+def get_jobid(out: str) -> int:
+    """Extract the jobid from a command output"""
+    job_id = out.strip().split(" ")[-1]
+
+    try:
+        job_id = int(job_id)
+    except ValueError:
+        LOG.error(f"The console output does not seems to have a valid jobid:\n{out}")
+        raise ValueError("PyMAPDL could not retrieve the job id.")
+
+    LOG.debug(f"The job id is: {job_id}")
+    return job_id

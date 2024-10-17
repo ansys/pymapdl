@@ -31,11 +31,12 @@ import os
 import pathlib
 import re
 import shutil
+import socket
 from subprocess import Popen
 import tempfile
 import threading
 import time
-from typing import TYPE_CHECKING, List, Literal, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 from uuid import uuid4
 from warnings import warn
 import weakref
@@ -84,6 +85,7 @@ from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat, MapdlInt
 from ansys.mapdl.core.misc import (
     check_valid_ip,
     last_created,
+    only_numbers_and_dots,
     random_string,
     run_as_prep7,
     supress_logging,
@@ -360,16 +362,24 @@ class MapdlGrpc(MapdlBase):
                     "If `channel` is specified, neither `port` nor `ip` can be specified."
                 )
         if ip is None:
-            ip = "127.0.0.1"
+            # We use if here to avoid having ip= ''
+            if start_parm.get("ip"):
+                ip: str = start_parm.pop("ip")
+            else:
+                ip: str = "127.0.0.1"
 
         # port and ip are needed to setup the log
-
         if port is None:
             from ansys.mapdl.core.launcher import MAPDL_DEFAULT_PORT
 
             port = MAPDL_DEFAULT_PORT
 
         self._port: int = int(port)
+
+        if not only_numbers_and_dots(ip):
+            # it is a hostname
+            self._hostname = ip
+            ip = socket.gethostbyname(ip)
 
         check_valid_ip(ip)
         self._ip: str = ip
@@ -393,7 +403,7 @@ class MapdlGrpc(MapdlBase):
         self._cleanup: bool = cleanup_on_exit
         self.remove_temp_dir_on_exit: bool = remove_temp_dir_on_exit
         self._jobname: str = start_parm.get("jobname", "file")
-        self._path: str = start_parm.get("run_location", None)
+        self._path: Optional[str] = start_parm.get("run_location", None)
         self._busy: bool = False  # used to check if running a command on the server
         self._local: bool = ip in ["127.0.0.1", "127.0.1.1", "localhost"]
         if "local" in start_parm:  # pragma: no cover  # allow this to be overridden
@@ -424,9 +434,14 @@ class MapdlGrpc(MapdlBase):
         self._mapdl_process: Popen = start_parm.pop("process", None)
 
         # saving for later use (for example open_gui)
-        start_parm["ip"] = ip
         start_parm["port"] = port
-        self._start_parm = start_parm
+        self._start_parm: Dict[str, Any] = start_parm
+
+        # Storing HPC related stuff
+        self._jobid: int = start_parm.get("jobid")
+        self._hostname: str = start_parm.get("hostname")
+        self._mapdl_on_slurm: bool = bool(self._jobid)
+        self.finish_job_on_exit: bool = start_parm.get("finish_job_on_exit", True)
 
         # Queueing the stds
         if self._mapdl_process:
@@ -997,6 +1012,17 @@ class MapdlGrpc(MapdlBase):
         """Return the MAPDL gRPC instance IP."""
         return self._ip
 
+    @property
+    def hostname(self):
+        """Return the hostname of the machine MAPDL is running in."""
+        return self._hostname
+
+    @property
+    def jobid(self):
+        """Returns the job id where the MAPDL is running in.
+        This is only applicable if MAPDL is running on an HPC cluster."""
+        return self._jobid
+
     @protect_grpc
     def _send_command(self, cmd: str, mute: bool = False) -> Optional[str]:
         """Send a MAPDL command and return the response as a string"""
@@ -1074,9 +1100,10 @@ class MapdlGrpc(MapdlBase):
         mapdl_path = self.directory  # caching
         if self._exited is None:
             self._log.debug("'self._exited' is none.")
-            return  # Some edge cases the class object is not completely initialized but the __del__ method
-            # is called when exiting python. So, early exit here instead an error in the following
-            # self.directory command.
+            return  # Some edge cases the class object is not completely
+            # initialized but the __del__ method
+            # is called when exiting python. So, early exit here instead an
+            # error in the following self.directory command.
             # See issue #1796
         elif self._exited:
             # Already exited.
@@ -1122,6 +1149,10 @@ class MapdlGrpc(MapdlBase):
         if self._remote_instance:  # pragma: no cover
             # No cover: The CI is working with a single MAPDL instance
             self._remote_instance.delete()
+
+        if self._mapdl_on_slurm:
+            self.kill_job(self.jobid)
+            self._log.debug("Job has been cancel.")
 
         self._remove_temp_dir_on_exit(mapdl_path)
 
@@ -3698,3 +3729,15 @@ class MapdlGrpc(MapdlBase):
 
             shutil.copy(file_name, target_dir)
             return os.path.basename(target_dir)
+
+    def kill_job(self, jobid: int) -> None:
+        cmd = ["scancel", f"{jobid}"]
+        # to ensure the job is stopped properly, let's issue the scancel twice.
+        for i in range(2):
+            Popen(cmd)
+
+    def __del__(self):
+        if self._mapdl_on_slurm and self.finish_job_on_exit:
+            self.exit()
+        else:
+            super().__del__()
