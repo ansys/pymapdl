@@ -2383,3 +2383,174 @@ def remove_err_files(run_location, jobname):
                         f'"{run_location}"'
                     )
                     raise error
+
+
+def launch_mapdl_on_cluster():
+
+    ########################################
+    # Processing arguments
+    # --------------------
+    #
+    # packing arguments
+    args = pack_arguments(locals())  # packs args and kwargs
+
+    check_kwargs(args)  # check if passing wrong arguments
+
+    pre_check_args(args)
+
+    # SLURM settings
+    if is_on_slurm(args):
+        LOG.info("On Slurm mode.")
+
+        # extracting parameters
+        get_slurm_options(args, kwargs)
+
+    get_cpus(args)
+
+    get_start_instance_arg(args)
+
+    get_ip(args)
+
+    args["port"] = get_port(args["port"], args["start_instance"])
+
+    get_exec_file(args)
+
+    args["version"] = get_version(args["version"], exec_file)
+
+    if args["start_instance"]:
+        ########################################
+        # Local adjustments
+        # -----------------
+        #
+        # Only when starting MAPDL (aka Local)
+
+        get_run_location(args)
+
+        # verify lock file does not exist
+        check_lock_file(args["run_location"], args["jobname"], args["override"])
+
+        # remove err file so we can track its creation
+        # (as way to check if MAPDL started or not)
+        remove_err_files(args["run_location"], args["jobname"])
+
+        if _HAS_ATP and not args["_debug_no_launch"]:
+            version = version_from_path("mapdl", args["exec_file"])
+            args["mode"] = check_mode(args["mode"], version)
+
+    args["mode"] = "grpc"
+
+    LOG.debug(f"Using mode {args['mode']}")
+
+    args["additional_switches"] = set_license_switch(
+        args["license_type"], args["additional_switches"]
+    )
+
+    env_vars = update_env_vars(args["add_env_vars"], args["replace_env_vars"])
+
+    ########################################
+    # Context specific launching adjustments
+    # --------------------------------------
+    #
+    if args["start_instance"]:
+        # Assuming that if login node is ubuntu, the computation ones
+        # are also ubuntu.
+        env_vars = configure_ubuntu(env_vars)
+
+        # Set compatible MPI
+        args["additional_switches"] = set_MPI_additional_switches(
+            args["additional_switches"],
+            args["exec_file"],
+            force_intel=args["force_intel"],
+        )
+
+        LOG.debug(f"Using additional switches {args['additional_switches']}.")
+
+    start_parm = generate_start_parameters(args)
+
+    if args["ON_SLURM"]:
+        env_vars.setdefault("ANS_MULTIPLE_NODES", "1")
+        env_vars.setdefault("HYDRA_BOOTSTRAP", "slurm")
+
+    # Early exit for debugging.
+    if args["_debug_no_launch"]:
+        # Early exit, just for testing
+        return args  # type: ignore
+
+    ########################################
+    # Sphinx docs adjustments
+    # -----------------------
+    #
+    # special handling when building the gallery outside of CI. This
+    # creates an instance of mapdl the first time.
+    if pymapdl.BUILDING_GALLERY:  # pragma: no cover
+        return create_gallery_instances(args, start_parm)
+
+    ########################################
+    # Local launching
+    # ---------------
+    #
+    # Check the license server
+    if args["license_server_check"]:
+        LOG.debug("Checking license server.")
+        lic_check = LicenseChecker(timeout=args["start_timeout"])
+        lic_check.start()
+
+    LOG.debug("Starting MAPDL")
+
+    cmd = generate_mapdl_launch_command(
+        exec_file=args["exec_file"],
+        jobname=args["jobname"],
+        nproc=args["nproc"],
+        ram=args["ram"],
+        port=args["port"],
+        additional_switches=args["additional_switches"],
+    )
+
+    try:
+        # TODO: wrap the launch_grpc with sbatch
+        process = launch_grpc(
+            cmd=cmd, run_location=args["run_location"], env_vars=env_vars
+        )
+    except Exception as exception:
+        LOG.error("An error occurred when launching MAPDL.")
+        raise exception
+
+    # TODO: A way to check if the job is ready.
+
+    if args["just_launch"]:
+        out = [args["ip"], args["port"]]
+        if hasattr(process, "pid"):
+            out += [process.pid]
+        return out
+
+    try:
+        mapdl = MapdlGrpc(
+            cleanup_on_exit=args["cleanup_on_exit"],
+            loglevel=args["loglevel"],
+            set_no_abort=args["set_no_abort"],
+            remove_temp_dir_on_exit=args["remove_temp_dir_on_exit"],
+            log_apdl=args["log_apdl"],
+            process=process,
+            use_vtk=args["use_vtk"],
+            **start_parm,
+        )
+
+        # Setting launched property
+        mapdl._launched = True
+        mapdl._env_vars = env_vars
+
+    except Exception as exception:
+        # Failed to launch for some reason.  Check if failure was due
+        # to the license check
+        if args["license_server_check"]:
+            LOG.debug("Checking license server.")
+            lic_check.check()
+
+        raise exception
+
+    # Stopping license checker
+    if args["license_server_check"]:
+        LOG.debug("Stopping license server check.")
+        lic_check.is_connected = True
+
+    return mapdl
