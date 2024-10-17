@@ -167,6 +167,7 @@ _ALLOWED_START_PARM = [
     "additional_switches",
     "check_parameter_names",
     "env_vars",
+    "launched",
     "exec_file",
     "finish_job_on_exit",
     "hostname",
@@ -249,7 +250,7 @@ class _MapdlCore(Commands):
         self._response = None
         self._mode = None
         self._mapdl_process = None
-        self._launched: bool = False
+        self._launched: bool = start_parm.get("launched", False)
         self._stderr = None
         self._stdout = None
         self._file_type_for_plots = file_type_for_plots

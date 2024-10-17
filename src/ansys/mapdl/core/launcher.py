@@ -1473,6 +1473,7 @@ def launch_mapdl(
         LOG.debug(
             f"Connecting to an existing instance of MAPDL at {args['ip']}:{args['port']}"
         )
+        start_parm["launched"] = False
 
         mapdl = MapdlGrpc(
             cleanup_on_exit=False,
@@ -1507,6 +1508,10 @@ def launch_mapdl(
 
     LOG.debug("Starting MAPDL")
     if args["mode"] == "console":
+        ########################################
+        # Launch MAPDL on console mode
+        # ----------------------------
+        #
         from ansys.mapdl.core.mapdl_console import MapdlConsole
 
         mapdl = MapdlConsole(
@@ -1517,7 +1522,10 @@ def launch_mapdl(
         )
 
     elif args["mode"] == "grpc":
-
+        ########################################
+        # Launch MAPDL with gRPC
+        # ----------------------
+        #
         cmd = generate_mapdl_launch_command(
             exec_file=args["exec_file"],
             jobname=args["jobname"],
@@ -1528,9 +1536,11 @@ def launch_mapdl(
         )
 
         if args["launch_on_hpc"]:
+            # wrapping command if on HPC
             cmd = generate_sbatch_command(cmd, sbatch_args=args.get("sbatch_args"))
 
         try:
+            #
             process = launch_grpc(
                 cmd=cmd, run_location=args["run_location"], env_vars=env_vars
             )
@@ -1569,6 +1579,10 @@ def launch_mapdl(
                 out += [process.pid]
             return out
 
+        ########################################
+        # Connect to MAPDL using gRPC
+        # ---------------------------
+        #
         try:
             mapdl = MapdlGrpc(
                 cleanup_on_exit=args["cleanup_on_exit"],
@@ -1583,7 +1597,6 @@ def launch_mapdl(
 
             # Setting launched property
             mapdl._launched = True
-            mapdl._env_vars = env_vars
 
         except Exception as exception:
             LOG.error("An error occurred when connecting to MAPDL.")
@@ -2011,6 +2024,8 @@ def generate_start_parameters(args: Dict[str, Any]) -> Dict[str, Any]:
         start_parm["ram"] = args["ram"]
         start_parm["override"] = args["override"]
         start_parm["timeout"] = args["start_timeout"]
+
+    start_parm["launched"] = True
 
     LOG.debug(f"Using start parameters {start_parm}")
     return start_parm
