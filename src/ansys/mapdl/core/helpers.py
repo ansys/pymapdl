@@ -24,6 +24,7 @@
 
 import importlib
 import os
+import sys
 from warnings import warn
 
 from ansys.mapdl.core import LOG
