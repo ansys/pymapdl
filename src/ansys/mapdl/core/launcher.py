@@ -115,7 +115,7 @@ ALLOWABLE_LAUNCH_MAPDL_ARGS = [
     "add_env_vars",
     "replace_env_vars",
     "version",
-    "detect_HPC",
+    "detect_hpc",
     "set_no_abort",
     "force_intel"
     # Non documented args
@@ -996,7 +996,8 @@ def launch_mapdl(
     add_env_vars: Optional[Dict[str, str]] = None,
     replace_env_vars: Optional[Dict[str, str]] = None,
     version: Optional[Union[int, str]] = None,
-    detect_HPC: bool = True,
+    detect_hpc: bool = True,
+    launch_on_hpc: bool = False,
     **kwargs: Dict[str, Any],
 ) -> Union[MapdlGrpc, "MapdlConsole"]:
     """Start MAPDL locally.
@@ -1027,7 +1028,7 @@ def launch_mapdl(
     nproc : int, optional
         Number of processors.  Defaults to 2. If running on an HPC cluster,
         this value is adjusted to the number of CPUs allocated to the job,
-        unless ``detect_HPC`` is set to "false".
+        unless ``detect_hpc`` is set to "false".
 
     ram : float, optional
         Total size in megabytes of the workspace (memory) used for the initial
@@ -1074,9 +1075,10 @@ def launch_mapdl(
     port : int
         Port to launch MAPDL gRPC on.  Final port will be the first
         port available after (or including) this port.  Defaults to
-        50052.  You can also override the port default with the
-        environment variable ``PYMAPDL_PORT=<VALID PORT>``
-        This argument has priority over the environment variable.
+        50052. You can also provide this value through the environment variable
+        :envvar:`PYMAPDL_PORT`. For instance ``PYMAPDL_PORT=50053``.
+        However the argument (if specified) has precedence over the environment
+        variable. If this environment variable is empty, it is as it is not set.
 
     cleanup_on_exit : bool, optional
         Exit MAPDL when python exits or the mapdl Python instance is
@@ -1085,9 +1087,11 @@ def launch_mapdl(
     start_instance : bool, optional
         When False, connect to an existing MAPDL instance at ``ip``
         and ``port``, which default to ip ``'127.0.0.1'`` at port 50052.
-        Otherwise, launch a local instance of MAPDL.  You can also
-        override the default behavior of this keyword argument with
-        the environment variable ``PYMAPDL_START_INSTANCE=FALSE``.
+        Otherwise, launch a local instance of MAPDL. You can also
+        provide this value through the environment variable
+        :envvar:`PYMAPDL_START_INSTANCE`.
+        However the argument (if specified) has precedence over the environment
+        variable. If this environment variable is empty, it is as it is not set.
 
     ip : str, optional
         Used only when ``start_instance`` is ``False``. If provided,
@@ -1095,10 +1099,11 @@ def launch_mapdl(
         ``PYMAPDL_START_INSTANCE``) is ``True`` then, an exception is raised.
         Specify the IP address of the MAPDL instance to connect to.
         You can also provide a hostname as an alternative to an IP address.
-        Defaults to ``'127.0.0.1'``. You can also override the
-        default behavior of this keyword argument with the
-        environment variable ``PYMAPDL_IP=<IP>``. If this environment variable
-        is empty, it is as it is not set.
+        Defaults to ``'127.0.0.1'``.
+        You can also provide this value through the environment variable
+        :envvar:`PYMAPDL_IP`. For instance ``PYMAPDL_IP=123.45.67.89``.
+        However the argument (if specified) has precedence over the environment
+        variable. If this environment variable is empty, it is as it is not set.
 
     clear_on_connect : bool, optional
         Defaults to ``True``, giving you a fresh environment when
@@ -1156,26 +1161,34 @@ def launch_mapdl(
         floats (i.e. ``version=22.2``).
         To retrieve the available installed versions, use the function
         :meth:`ansys.tools.path.path.get_available_ansys_installations`.
+        You can also provide this value through the environment variable
+        :envvar:`PYMAPDL_MAPDL_VERSION`.
+        For instance ``PYMAPDL_MAPDL_VERSION=22.2``.
+        However the argument (if specified) has precedence over the environment
+        variable. If this environment variable is empty, it is as it is not set.
 
-        .. note::
-
-           The default version can be also set through the environment variable
-           ``PYMAPDL_MAPDL_VERSION``. For example:
-
-           .. code:: console
-
-              export PYMAPDL_MAPDL_VERSION=22.2
-
-    detect_HPC: bool, optional
+    detect_hpc: bool, optional
         Whether detect if PyMAPDL is running on an HPC cluster or not. Currently
         only SLURM clusters are supported. By detaul, it is set to true.
         This option can be bypassed if the environment variable
-        ``PYMAPDL_ON_SLURM`` is set to "true". For more information visit
-        :ref:`ref_hpc_slurm`.
+        ``PYMAPDL_RUNNING_ON_HPC`` is set to "false".
+        For more information visit :ref:`ref_hpc_slurm`.
+
+    launch_on_hpc: bool, optional
+        If ``True``, it uses the implemented scheduler (SLURM only) to launch
+        an MAPDL instance on the HPC. In this case you can pass the argument
+        'scheduler_options' to ``launch_mapdl` to specify arguments as a
+        string or as a dictionary.
+        For more information visit :ref:`ref_hpc_slurm`.
 
     kwargs : dict, optional
         These keyword arguments are interface specific or for
         development purposes. See Notes for more details.
+
+        scheduler_options : :class:`str`, :class:`dict`
+          Use it to specify options to the scheduler run command. It can be a
+          string or a dictionary with arguments and its values (both as strings).
+          For more information visit :ref:`ref_hpc_slurm`.
 
         set_no_abort : :class:`bool`
           *(Development use only)*
@@ -1437,7 +1450,7 @@ def launch_mapdl(
             cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
         )
 
-    if args["ON_SLURM"]:
+    if args["RUNNING_ON_HPC"]:
         env_vars.setdefault("ANS_MULTIPLE_NODES", "1")
         env_vars.setdefault("HYDRA_BOOTSTRAP", "slurm")
 
@@ -1923,18 +1936,18 @@ def pack_arguments(locals_):
 
 def is_on_slurm(args: Dict[str, Any]) -> bool:
 
-    args["ON_SLURM"] = os.environ.get("PYMAPDL_ON_SLURM", "True")
+    args["RUNNING_ON_HPC"] = os.environ.get("PYMAPDL_RUNNING_ON_HPC", "True")
 
-    is_flag_false = args["ON_SLURM"].lower() == "false"
+    is_flag_false = args["RUNNING_ON_HPC"].lower() == "false"
 
     # Let's require the following env vars to exist to go into slurm mode.
-    args["ON_SLURM"] = bool(
-        args["detect_HPC"]
+    args["RUNNING_ON_HPC"] = bool(
+        args["detect_hpc"]
         and not is_flag_false  # default is true
         and os.environ.get("SLURM_JOB_NAME")
         and os.environ.get("SLURM_JOB_ID")
     )
-    return args["ON_SLURM"]
+    return args["RUNNING_ON_HPC"]
 
 
 def generate_start_parameters(args: Dict[str, Any]) -> Dict[str, Any]:
@@ -2360,7 +2373,7 @@ def get_cpus(args: Dict[str, Any]):
     # Bypassing number of processors checks because VDI/VNC might have
     # different number of processors than the cluster compute nodes.
     # Also the CPUs are set in `get_slurm_options`
-    if args["ON_SLURM"]:
+    if args["RUNNING_ON_HPC"]:
         return
 
     # Setting number of processors
@@ -2425,7 +2438,7 @@ def launch_mapdl_on_cluster(
     add_env_vars: Optional[Dict[str, str]] = None,
     replace_env_vars: Optional[Dict[str, str]] = None,
     version: Optional[Union[int, str]] = None,
-    detect_HPC: bool = True,
+    detect_hpc: bool = True,
     **kwargs: Dict[str, Any],
 ):
 

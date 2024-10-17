@@ -32,7 +32,8 @@ For instance, if a SLURM job has allocated 8 nodes with 4 cores each,
 then PyMAPDL launches an MAPDL instance which uses 32 cores
 spawning across those 8 nodes.
 This behaviour can turn off if passing the environment variable
-:envvar:`PYMAPDL_ON_SLURM` or passing the argument `detect_HPC=False`
+:envvar:`PYMAPDL_RUNNING_ON_SLURM` with ``'false'`` value
+or passing the argument `detect_hpc=False`
 to :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`.
 
 
