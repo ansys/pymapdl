@@ -41,7 +41,7 @@ import weakref
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import _HAS_ATP, _HAS_PYANSYS_REPORT, _HAS_PYVISTA
+from ansys.mapdl.core import _HAS_ATP, _HAS_PYANSYS_REPORT, _HAS_PYVISTA, LOG
 from ansys.mapdl.core.errors import MapdlExitedError
 
 if _HAS_ATP:
