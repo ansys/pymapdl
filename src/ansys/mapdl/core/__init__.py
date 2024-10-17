@@ -68,12 +68,12 @@ DEPRECATING_MINIMUM_PYTHON_VERSION: bool = True
 MINIMUM_PYTHON_VERSION: Tuple[int, int] = (3, 10)
 
 # Import related globals
-_HAS_PYVISTA: bool = is_installed("pyvista")
-_HAS_VISUALIZER: bool = is_installed("ansys.tools.visualization_interface")
 _HAS_ATP: bool = is_installed("ansys.tools.path")
 _HAS_PIM: bool = is_installed("ansys.platform.instancemanagement")
-_HAS_TQDM: bool = is_installed("tqdm")
 _HAS_PYANSYS_REPORT: bool = is_installed("ansys.tools.report")
+_HAS_PYVISTA: bool = is_installed("pyvista")
+_HAS_TQDM: bool = is_installed("tqdm")
+_HAS_VISUALIZER: bool = is_installed("ansys.tools.visualization_interface")
 
 # Setup directories
 USER_DATA_PATH: str = user_data_dir(appname="ansys_mapdl_core", appauthor="Ansys")
