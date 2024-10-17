@@ -23,6 +23,7 @@
 """Test the mapdl launcher"""
 
 import os
+import subprocess
 import tempfile
 from unittest.mock import patch
 import warnings
@@ -31,23 +32,28 @@ import pytest
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import (
-    DeprecationError,
-    LicenseServerConnectionError,
     NotEnoughResources,
     PortAlreadyInUseByAnMAPDLInstance,
 )
 from ansys.mapdl.core.launcher import (
+    _HAS_ATP,
     LOCALHOST,
-    _check_license_argument,
-    _force_smp_student_version,
     _is_ubuntu,
     _parse_ip_route,
-    _parse_slurm_options,
-    _validate_MPI,
-    _verify_version,
+    force_smp_in_student,
+    generate_mapdl_launch_command,
+    generate_start_parameters,
+    get_exec_file,
+    get_run_location,
+    get_slurm_options,
     get_start_instance,
+    get_version,
+    is_on_slurm,
     launch_grpc,
     launch_mapdl,
+    remove_err_files,
+    set_license_switch,
+    set_MPI_additional_switches,
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
@@ -102,13 +108,13 @@ def test_validate_sw():
     # ensure that windows adds msmpi
     # fake windows path
     exec_path = "C:/Program Files/ANSYS Inc/v211/ansys/bin/win64/ANSYS211.exe"
-    add_sw = _validate_MPI("", exec_path)
+    add_sw = set_MPI_additional_switches("", exec_path)
     assert "msmpi" in add_sw
 
-    add_sw = _validate_MPI("-mpi intelmpi", exec_path)
+    add_sw = set_MPI_additional_switches("-mpi intelmpi", exec_path)
     assert "msmpi" in add_sw and "intelmpi" not in add_sw
 
-    add_sw = _validate_MPI("-mpi INTELMPI", exec_path)
+    add_sw = set_MPI_additional_switches("-mpi INTELMPI", exec_path)
     assert "msmpi" in add_sw and "INTELMPI" not in add_sw
 
 
@@ -182,9 +188,13 @@ def test_launch_console(version):
 
 @requires("local")
 @requires("nostudent")
+@requires("ansys-tools-path")
 @pytest.mark.parametrize("license_name", LICENSES)
-def test_license_type_keyword_names(mapdl, license_name):
-    args = launch_mapdl(license_type=license_name, _debug_no_launch=True)
+def test_license_type_keyword_names(mapdl, monkeypatch, license_name):
+    exec_file = find_ansys()[0]
+    args = launch_mapdl(
+        exec_file=exec_file, license_type=license_name, _debug_no_launch=True
+    )
     assert f"-p {license_name}" in args["additional_switches"]
 
 
@@ -199,24 +209,29 @@ def test_license_type_additional_switch(mapdl, license_name):
 
 
 @requires("ansys-tools-path")
-@requires("local")
 def test_license_type_dummy(mapdl):
     dummy_license_type = "dummy"
-    with pytest.raises(LicenseServerConnectionError):
+    with pytest.warns(
+        UserWarning,
+        match="Still PyMAPDL will try to use it but in older MAPDL versions you might experience",
+    ):
         launch_mapdl(
+            start_instance=False,
             port=mapdl.port + 1,
-            additional_switches=f" -p {dummy_license_type}" + QUICK_LAUNCH_SWITCHES,
+            additional_switches=f" -p {dummy_license_type} " + QUICK_LAUNCH_SWITCHES,
             start_timeout=start_timeout,
+            license_server_check=False,
+            _debug_no_launch=True,
         )
 
 
 @requires("local")
 @requires("nostudent")
-def test_remove_temp_files(mapdl):
+def test_remove_temp_dir_on_exit(mapdl):
     """Ensure the working directory is removed when run_location is not set."""
     mapdl_ = launch_mapdl(
         port=mapdl.port + 1,
-        remove_temp_files=True,
+        remove_temp_dir_on_exit=True,
         start_timeout=start_timeout,
         additional_switches=QUICK_LAUNCH_SWITCHES,
     )
@@ -235,11 +250,11 @@ def test_remove_temp_files(mapdl):
 
 @requires("local")
 @requires("nostudent")
-def test_remove_temp_files_fail(tmpdir, mapdl):
+def test_remove_temp_dir_on_exit_fail(tmpdir, mapdl):
     """Ensure the working directory is not removed when the cwd is changed."""
     mapdl_ = launch_mapdl(
         port=mapdl.port + 1,
-        remove_temp_files=True,
+        remove_temp_dir_on_exit=True,
         start_timeout=start_timeout,
         additional_switches=QUICK_LAUNCH_SWITCHES,
     )
@@ -299,32 +314,32 @@ def test_open_gui(
     mapdl.open_gui(inplace=inplace, include_result=include_result)
 
 
-def test__force_smp_student_version():
+def test_force_smp_in_student():
     add_sw = ""
     exec_path = (
         r"C:\Program Files\ANSYS Inc\ANSYS Student\v222\ansys\bin\winx64\ANSYS222.exe"
     )
-    assert "-smp" in _force_smp_student_version(add_sw, exec_path)
+    assert "-smp" in force_smp_in_student(add_sw, exec_path)
 
     add_sw = "-mpi"
     exec_path = (
         r"C:\Program Files\ANSYS Inc\ANSYS Student\v222\ansys\bin\winx64\ANSYS222.exe"
     )
-    assert "-smp" not in _force_smp_student_version(add_sw, exec_path)
+    assert "-smp" not in force_smp_in_student(add_sw, exec_path)
 
     add_sw = "-dmp"
     exec_path = (
         r"C:\Program Files\ANSYS Inc\ANSYS Student\v222\ansys\bin\winx64\ANSYS222.exe"
     )
-    assert "-smp" not in _force_smp_student_version(add_sw, exec_path)
+    assert "-smp" not in force_smp_in_student(add_sw, exec_path)
 
     add_sw = ""
     exec_path = r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe"
-    assert "-smp" not in _force_smp_student_version(add_sw, exec_path)
+    assert "-smp" not in force_smp_in_student(add_sw, exec_path)
 
     add_sw = "-SMP"
     exec_path = r"C:\Program Files\ANSYS Inc\v222\ansys\bin\winx64\ANSYS222.exe"
-    assert "-SMP" in _force_smp_student_version(add_sw, exec_path)
+    assert "-SMP" in force_smp_in_student(add_sw, exec_path)
 
 
 @pytest.mark.parametrize(
@@ -332,19 +347,19 @@ def test__force_smp_student_version():
     [[each_key, each_value] for each_key, each_value in LICENSES.items()],
 )
 def test_license_product_argument(license_short, license_name):
-    additional_switches = _check_license_argument(license_name, "qwer")
+    additional_switches = set_license_switch(license_name, "qwer")
     assert f"qwer -p {license_short}" in additional_switches
 
 
 @pytest.mark.parametrize("unvalid_type", [1, {}, ()])
 def test_license_product_argument_type_error(unvalid_type):
     with pytest.raises(TypeError):
-        _check_license_argument(unvalid_type, "")
+        set_license_switch(unvalid_type, "")
 
 
 def test_license_product_argument_warning():
     with pytest.warns(UserWarning):
-        assert "-p asdf" in _check_license_argument("asdf", "qwer")
+        assert "-p asdf" in set_license_switch("asdf", "qwer")
 
 
 @pytest.mark.parametrize(
@@ -352,33 +367,37 @@ def test_license_product_argument_warning():
     [[each_key, each_value] for each_key, each_value in LICENSES.items()],
 )
 def test_license_product_argument_p_arg(license_short, license_name):
-    assert f"qw1234 -p {license_short}" == _check_license_argument(
+    assert f"qw1234 -p {license_short}" == set_license_switch(
         None, f"qw1234 -p {license_short}"
     )
 
 
 def test_license_product_argument_p_arg_warning():
     with pytest.warns(UserWarning):
-        assert "qwer -p asdf" in _check_license_argument(None, "qwer -p asdf")
+        assert "qwer -p asdf" in set_license_switch(None, "qwer -p asdf")
 
 
 installed_mapdl_versions = []
-installed_mapdl_versions.extend(list(versions.keys()))
-installed_mapdl_versions.extend([each / 10 for each in versions.keys()])
+installed_mapdl_versions.extend([int(each) for each in list(versions.keys())])
+installed_mapdl_versions.extend([float(each / 10) for each in versions.keys()])
 installed_mapdl_versions.extend([str(each) for each in list(versions.keys())])
 installed_mapdl_versions.extend([str(each / 10) for each in versions.keys()])
 installed_mapdl_versions.extend(list(versions.values()))
+installed_mapdl_versions.extend([None])
 
 
 @pytest.mark.parametrize("version", installed_mapdl_versions)
 def test__verify_version_pass(version):
-    ver = _verify_version(version)
-    assert isinstance(ver, int)
-    assert min(versions.keys()) <= ver <= max(versions.keys())
+    ver = get_version(version)
+    if version:
+        assert isinstance(ver, int)
+        assert min(versions.keys()) <= ver <= max(versions.keys())
+    else:
+        assert ver is None
 
 
 def test__verify_version_latest():
-    assert _verify_version("latest") is None
+    assert get_version("latest") is None
 
 
 @requires("ansys-tools-path")
@@ -416,13 +435,7 @@ def test_version(mapdl):
 @requires("local")
 def test_raise_exec_path_and_version_launcher(mapdl):
     with pytest.raises(ValueError):
-        launch_mapdl(
-            exec_file="asdf",
-            port=mapdl.port + 1,
-            version="asdf",
-            start_timeout=start_timeout,
-            additional_switches=QUICK_LAUNCH_SWITCHES,
-        )
+        get_version("asdf", "asdf")
 
 
 @requires("linux")
@@ -474,7 +487,8 @@ def test_launched(mapdl):
 
 
 @requires("local")
-def test_launching_on_busy_port(mapdl):
+def test_launching_on_busy_port(mapdl, monkeypatch):
+    monkeypatch.delenv("PYMAPDL_PORT", raising=False)
     with pytest.raises(PortAlreadyInUseByAnMAPDLInstance):
         launch_mapdl(port=mapdl.port)
 
@@ -487,17 +501,6 @@ def test_fail_channel_port():
 def test_fail_channel_ip():
     with pytest.raises(ValueError):
         launch_mapdl(channel="something", ip="something")
-
-
-def test_deprecate_verbose():
-    with pytest.raises(DeprecationError):
-        launch_mapdl(verbose_mapdl=True)
-
-    with pytest.raises(ValueError):
-        launch_mapdl(verbose=True)
-
-    with pytest.raises(DeprecationError):
-        launch_grpc(verbose=True)
 
 
 @pytest.mark.parametrize(
@@ -626,25 +629,102 @@ def test_deprecate_verbose():
     ),
     indirect=["set_env_var_context"],
 )
-def test__parse_slurm_options(set_env_var_context, validation):
+def test_get_slurm_options(set_env_var_context, validation):
     """test slurm env vars"""
     for each_key, each_value in set_env_var_context.items():
         if each_value:
             assert os.environ.get(each_key) == str(each_value)
 
-    exec_file, jobname, nproc, ram, additional_switches = _parse_slurm_options(
-        exec_file=None, jobname="", nproc=None, ram=None, additional_switches=""
-    )
-    assert nproc == validation["nproc"]
+    args = {
+        "exec_file": None,
+        "jobname": "",
+        "nproc": None,
+        "ram": None,
+        "additional_switches": "",
+        "start_timeout": 45,
+    }
+    kwargs = {}
+    get_slurm_options(args, kwargs)
+    assert args["nproc"] == validation["nproc"]
 
-    if ram:
-        assert ram == validation["ram"]
+    if args["ram"]:
+        assert args["ram"] == validation["ram"]
 
-    if jobname != "file":
-        assert jobname == validation["jobname"]
+    if args["jobname"] != "file":
+        assert args["jobname"] == validation["jobname"]
 
-    if exec_file and validation.get("exec_file", None):
-        assert exec_file == validation["exec_file"]
+    if args["exec_file"] and validation.get("exec_file", None):
+        assert args["exec_file"] == validation["exec_file"]
+
+
+@pytest.mark.parametrize(
+    "ram,expected,context",
+    [
+        ["2048k", 2, NullContext()],
+        ["10M", 10, NullContext()],
+        ["100G", 100 * 1024, NullContext()],
+        ["1T", 1024**2, NullContext()],
+        ["100", 100, NullContext()],
+        [
+            "100E",
+            "",
+            pytest.raises(
+                ValueError, match="The memory defined in 'SLURM_MEM_PER_NODE' env var"
+            ),
+        ],
+    ],
+)
+def test_slurm_ram(monkeypatch, ram, expected, context):
+    monkeypatch.setenv("SLURM_MEM_PER_NODE", ram)
+    monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "asdf/qwer/poiu")
+
+    args = {
+        "exec_file": None,
+        "jobname": "",
+        "ram": None,
+        "nproc": None,
+        "additional_switches": "",
+        "start_timeout": 45,
+    }
+    with context:
+        args = get_slurm_options(args, {})
+        assert args["ram"] == expected
+
+
+@pytest.mark.parametrize("slurm_env_var", ["True", "false", ""])
+@pytest.mark.parametrize("slurm_job_name", ["True", "false", ""])
+@pytest.mark.parametrize("slurm_job_id", ["True", "false", ""])
+@pytest.mark.parametrize("detect_slurm_config", [True, False, None])
+def test_is_on_slurm(
+    monkeypatch, slurm_env_var, slurm_job_name, slurm_job_id, detect_slurm_config
+):
+    monkeypatch.setenv("PYMAPDL_ON_SLURM", slurm_env_var)
+    monkeypatch.setenv("SLURM_JOB_NAME", slurm_job_name)
+    monkeypatch.setenv("SLURM_JOB_ID", slurm_job_id)
+
+    flag = is_on_slurm(args={"detect_slurm_config": detect_slurm_config})
+
+    if detect_slurm_config is not True:
+        assert not flag
+
+    else:
+        if slurm_env_var.lower() == "false":
+            assert not flag
+
+        else:
+            if slurm_job_name != "" and slurm_job_id != "":
+                assert flag
+            else:
+                assert not flag
+
+    if ON_LOCAL:
+        assert (
+            launch_mapdl(
+                detect_slurm_config=detect_slurm_config,
+                _debug_no_launch=True,
+            )["ON_SLURM"]
+            == flag
+        )
 
 
 @pytest.mark.parametrize(
@@ -654,7 +734,7 @@ def test__parse_slurm_options(set_env_var_context, validation):
         pytest.param(False, NullContext(), id="Boolean false"),
         pytest.param("true", NullContext(), id="String true"),
         pytest.param("TRue", NullContext(), id="String true weird capitalization"),
-        pytest.param("2", pytest.raises(OSError), id="String number"),
+        pytest.param("2", pytest.raises(ValueError), id="String number"),
         pytest.param(2, pytest.raises(ValueError), id="Int"),
     ],
 )
@@ -677,23 +757,27 @@ def test_get_start_instance_argument(monkeypatch, start_instance, context):
         pytest.param("FaLSE", NullContext()),
         pytest.param("asdf", pytest.raises(OSError)),
         pytest.param("1", pytest.raises(OSError)),
-        pytest.param("", pytest.raises(OSError)),
+        pytest.param("", NullContext()),
     ],
 )
 def test_get_start_instance_envvar(monkeypatch, start_instance, context):
     monkeypatch.setenv("PYMAPDL_START_INSTANCE", start_instance)
     with context:
-        if "true" in start_instance.lower():
-            assert get_start_instance(start_instance)
+        if "true" in start_instance.lower() or start_instance == "":
+            assert get_start_instance(start_instance=None)
         else:
-            assert not get_start_instance(start_instance)
+            assert not get_start_instance(start_instance=None)
 
 
+@requires("local")
+@requires("ansys-tools-path")
 @pytest.mark.parametrize("start_instance", [True, False])
 def test_launcher_start_instance(monkeypatch, start_instance):
     if "PYMAPDL_START_INSTANCE" in os.environ:
         monkeypatch.delenv("PYMAPDL_START_INSTANCE")
-    options = launch_mapdl(start_instance=start_instance, _debug_no_launch=True)
+    options = launch_mapdl(
+        exec_file=find_ansys()[0], start_instance=start_instance, _debug_no_launch=True
+    )
     assert start_instance == options["start_instance"]
 
 
@@ -704,76 +788,96 @@ def test_launcher_start_instance(monkeypatch, start_instance):
 def test_ip_and_start_instance(
     monkeypatch, start_instance, start_instance_envvar, ip, ip_envvar
 ):
-    # start_instance=False
-    # start_instance_envvar=True
-    # ip=""
-    # ip_envvar="123.1.1.1"
-
     # For more information, visit https://github.com/ansys/pymapdl/issues/2910
+
+    ###################
+    # Removing env var coming from CICD.
     if "PYMAPDL_START_INSTANCE" in os.environ:
         monkeypatch.delenv("PYMAPDL_START_INSTANCE")
 
+    ###################
+    # Injecting env vars for the test
     if start_instance_envvar is not None:
         monkeypatch.setenv("PYMAPDL_START_INSTANCE", str(start_instance_envvar))
     if ip_envvar is not None:
         monkeypatch.setenv("PYMAPDL_IP", str(ip_envvar))
 
-    start_instance_is_true = start_instance_envvar is True or (
-        start_instance_envvar is None and (start_instance is True)
-    )
+    # Skip if PyMAPDL cannot detect where MAPDL is installed.
+    if not _HAS_ATP and not os.environ.get("PYMAPDL_MAPDL_EXEC"):
+        # if start_instance and not ip:
+        with pytest.raises(
+            ModuleNotFoundError,
+            match="If you don't have 'ansys-tools-path' library installed, you need",
+        ):
+            options = launch_mapdl(
+                exec_file=None,
+                start_instance=start_instance,
+                ip=ip,
+                _debug_no_launch=True,
+            )
+        return  # Exit early the test
 
-    ip_is_true = bool(ip_envvar) or (
-        (ip_envvar is None or ip_envvar == "") and bool(ip)
-    )
-
-    exceptions = start_instance_envvar is None and start_instance is None and ip_is_true
-
-    if (start_instance_is_true and ip_is_true) and not exceptions:
+    ###################
+    # Exception case: start_instance and ip are passed as args.
+    if start_instance and ip:
         with pytest.raises(
             ValueError,
             match="When providing a value for the argument 'ip', the argument ",
         ):
             options = launch_mapdl(
-                start_instance=start_instance, ip=ip, _debug_no_launch=True
+                start_instance=start_instance,
+                ip=ip,
+                _debug_no_launch=True,
             )
+        return  # Exit early the test
 
-        return  # Exit
+    ###################
+    # Faking MAPDL launching and returning args
+    with warnings.catch_warnings():
+        options = launch_mapdl(
+            start_instance=start_instance,
+            ip=ip,
+            _debug_no_launch=True,
+        )
 
-    if (
-        isinstance(start_instance_envvar, bool) and isinstance(start_instance, bool)
-    ) or (ip_envvar and ip):
-        with pytest.warns(UserWarning):
-            options = launch_mapdl(
-                start_instance=start_instance, ip=ip, _debug_no_launch=True
-            )
+    ###################
+    # Checking logic
+    # The start instance arg has precedence over the env var
+
+    if start_instance is True:
+        assert options["start_instance"]
+    elif start_instance is False:
+        assert not options["start_instance"]
     else:
-        with warnings.catch_warnings():
-            options = launch_mapdl(
-                start_instance=start_instance, ip=ip, _debug_no_launch=True
-            )
+        #  start_instance is None, checking env var:
+        if ip or ip_envvar:
+            assert options["start_instance"] is False
 
-    if start_instance_envvar is True:
-        assert options["start_instance"] is True
-    elif start_instance_envvar is False:
-        assert options["start_instance"] is False
-    else:
-        if start_instance is None:
-            if ip_envvar or bool(ip):
+        elif start_instance_envvar is True:
+            assert options["start_instance"] is True
+
+        elif start_instance_envvar is False:
+            assert options["start_instance"] is False
+
+        else:
+            # start_instance is None.
+            # No IP env var or arg:
+            if ip:
+                # the ip is given either using the env var or the arg:
                 assert not options["start_instance"]
             else:
                 assert options["start_instance"]
-        elif start_instance is True:
-            assert options["start_instance"]
-        else:
-            assert not options["start_instance"]
 
     if ip_envvar:
+        # Getting IP from env var
         assert options["ip"] == ip_envvar
     else:
+        # From argument
         if ip:
             assert options["ip"] == ip
         else:
-            assert options["ip"] in (LOCALHOST, "0.0.0.0")
+            # Using default
+            assert options["ip"] in (LOCALHOST, "0.0.0.0", "127.0.0.1")
 
 
 def mycpucount(**kwargs):
@@ -797,3 +901,223 @@ def test_nproc(monkeypatch, nproc):
     else:
         args = launch_mapdl(nproc=nproc, _debug_no_launch=True)
         assert args["nproc"] == (nproc or 2)
+
+
+@patch("os.name", "nt")
+@patch("psutil.cpu_count", mycpucount)
+def test_generate_mapdl_launch_command_windows():
+    assert os.name == "nt"  # Checking mocking is properly done
+
+    exec_file = "C:/Program Files/ANSYS Inc/v242/ansys/bin/winx64/ANSYS242.exe"
+    jobname = "myjob"
+    nproc = 10
+    port = 1000
+    ram = 2
+    additional_switches = "-my_add=switch"
+
+    cmd = generate_mapdl_launch_command(
+        exec_file=exec_file,
+        jobname=jobname,
+        nproc=nproc,
+        port=port,
+        ram=ram,
+        additional_switches=additional_switches,
+    )
+
+    assert f'"{exec_file}" ' in cmd
+    assert f" -j {jobname} " in cmd
+    assert f" -port {port} " in cmd
+    assert f" -m {ram*1024} " in cmd
+    assert f" -np {nproc} " in cmd
+    assert " -grpc" in cmd
+    assert f" {additional_switches} " in cmd
+    assert f" -b -i .__tmp__.inp " in cmd
+    assert f" -o .__tmp__.out " in cmd
+
+
+def test_generate_mapdl_launch_command_linux():
+    assert os.name != "nt"  # Checking mocking is properly done
+
+    exec_file = "/ansys_inc/v242/ansys/bin/ansys242"
+    jobname = "myjob"
+    nproc = 10
+    port = 1000
+    ram = 2
+    additional_switches = "-my_add=switch"
+
+    cmd = generate_mapdl_launch_command(
+        exec_file=exec_file,
+        jobname=jobname,
+        nproc=nproc,
+        port=port,
+        ram=ram,
+        additional_switches=additional_switches,
+    )
+
+    assert f'"{exec_file}" ' in cmd
+    assert f" -j {jobname} " in cmd
+    assert f" -port {port} " in cmd
+    assert f" -m {ram*1024} " in cmd
+    assert f" -np {nproc} " in cmd
+    assert " -grpc" in cmd
+    assert f" {additional_switches} " in cmd
+
+    assert f" -i .__tmp__.inp " not in cmd
+    assert f" -o .__tmp__.out " not in cmd
+
+
+def test_generate_start_parameters_console():
+    args = {"mode": "console", "start_timeout": 90}
+
+    new_args = generate_start_parameters(args)
+    assert "start_timeout" in new_args
+    assert "ram" not in new_args
+    assert "override" not in new_args
+    assert "timeout" not in new_args
+
+
+@patch("ansys.mapdl.core.launcher._HAS_ATP", False)
+def test_get_exec_file(monkeypatch):
+    monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", False)
+
+    args = {"exec_file": None, "start_instance": True}
+
+    with pytest.raises(ModuleNotFoundError):
+        get_exec_file(args)
+
+
+def test_get_exec_file_not_found(monkeypatch):
+    monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", False)
+
+    args = {"exec_file": "my/fake/path", "start_instance": True}
+
+    with pytest.raises(FileNotFoundError):
+        get_exec_file(args)
+
+
+def _get_application_path(*args, **kwargs):
+    return None
+
+
+@requires("ansys-tools-path")
+@patch("ansys.tools.path.path._get_application_path", _get_application_path)
+def test_get_exec_file_not_found_two(monkeypatch):
+    monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", False)
+    args = {"exec_file": None, "start_instance": True}
+    with pytest.raises(
+        FileNotFoundError, match="Invalid exec_file path or cannot load cached "
+    ):
+        get_exec_file(args)
+
+
+@pytest.mark.parametrize("run_location", [None, True])
+@pytest.mark.parametrize("remove_temp_dir_on_exit", [None, False, True])
+def test_get_run_location(tmpdir, remove_temp_dir_on_exit, run_location):
+    if run_location:
+        new_path = os.path.join(str(tmpdir), "my_new_path")
+        assert not os.path.exists(new_path)
+    else:
+        new_path = None
+
+    args = {
+        "run_location": new_path,
+        "remove_temp_dir_on_exit": remove_temp_dir_on_exit,
+    }
+
+    get_run_location(args)
+
+    assert os.path.exists(args["run_location"])
+
+    assert "remove_temp_dir_on_exit" in args
+
+    if run_location:
+        assert not args["remove_temp_dir_on_exit"]
+    elif remove_temp_dir_on_exit:
+        assert args["remove_temp_dir_on_exit"]
+    else:
+        assert not args["remove_temp_dir_on_exit"]
+
+
+def fake_os_access(*args, **kwargs):
+    return False
+
+
+@patch("os.access", lambda *args, **kwargs: False)
+def test_get_run_location_no_access(tmpdir):
+    with pytest.raises(IOError, match="Unable to write to ``run_location``:"):
+        get_run_location({"run_location": str(tmpdir)})
+
+
+@pytest.mark.parametrize(
+    "args,match",
+    [
+        [
+            {"start_instance": True, "ip": True, "on_pool": False},
+            "When providing a value for the argument 'ip', the argument",
+        ],
+        [
+            {"exec_file": True, "version": True},
+            "Cannot specify both ``exec_file`` and ``version``.",
+        ],
+    ],
+)
+def test_pre_check_args(args, match):
+    with pytest.raises(ValueError, match=match):
+        launch_mapdl(**args)
+
+
+def test_remove_err_files(tmpdir):
+    run_location = str(tmpdir)
+    jobname = "jobname"
+    err_file = os.path.join(run_location, f"{jobname}.err")
+    with open(err_file, "w") as fid:
+        fid.write("Dummy")
+
+    assert os.path.isfile(err_file)
+    remove_err_files(run_location, jobname)
+    assert not os.path.isfile(err_file)
+
+
+def myosremove(*args, **kwargs):
+    raise IOError("Generic error")
+
+
+@patch("os.remove", myosremove)
+def test_remove_err_files_fail(tmpdir):
+    run_location = str(tmpdir)
+    jobname = "jobname"
+    err_file = os.path.join(run_location, f"{jobname}.err")
+    with open(err_file, "w") as fid:
+        fid.write("Dummy")
+
+    assert os.path.isfile(err_file)
+    with pytest.raises(IOError):
+        remove_err_files(run_location, jobname)
+    assert os.path.isfile(err_file)
+
+
+# testing on windows to account for temp file
+def fake_subprocess_open(*args, **kwargs):
+    kwargs["cmd"] = args[0]
+    return kwargs
+
+
+@patch("os.name", "nt")
+@patch("subprocess.Popen", fake_subprocess_open)
+def test_launch_grpc(tmpdir):
+    cmd = "ansys.exe -b -i my_input.inp -o my_output.inp"
+    run_location = str(tmpdir)
+    kwags = launch_grpc(cmd, run_location)
+
+    inp_file = os.path.join(run_location, "my_input.inp")
+    assert os.path.exists(inp_file)
+    with open(inp_file, "r") as fid:
+        assert "FINISH" in fid.read()
+
+    assert cmd == kwags["cmd"]
+    assert not kwags["shell"]
+    assert "TRUE" == kwags["env"].pop("ANS_CMD_NODIAG")
+    assert not kwags["env"]
+    assert isinstance(kwags["stdin"], type(subprocess.DEVNULL))
+    assert isinstance(kwags["stdout"], type(subprocess.PIPE))
+    assert isinstance(kwags["stderr"], type(subprocess.PIPE))

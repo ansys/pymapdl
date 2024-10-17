@@ -127,12 +127,14 @@ class MapdlPool:
     restart_failed : bool, optional
         Restarts any failed instances in the pool. Defaults to ``True``.
 
-    remove_temp_files : bool, optional
-        This launcher creates a new MAPDL working directory for each instance
-        of MAPDL within the temporary user directory, obtainable with
-        ``tempfile.gettempdir()``, for MAPDL files. When this parameter is
+    remove_temp_dir_on_exit : bool, optional
+        When ``run_location`` is ``None``, this launcher creates a new MAPDL
+        working directory within the user temporary directory, obtainable with
+        ``tempfile.gettempdir()``. When this parameter is
         ``True``, this directory will be deleted when MAPDL is exited. Default
         ``False``.
+        If you change the working directory, PyMAPDL does not delete the original
+        working directory nor the new one.
 
     names : str, Callable, optional
         You can specify the names of the directories where the instances are
@@ -206,7 +208,7 @@ class MapdlPool:
         port: Union[int, List[int]] = MAPDL_DEFAULT_PORT,
         progress_bar: bool = DEFAULT_PROGRESS_BAR,
         restart_failed: bool = True,
-        remove_temp_files: bool = True,
+        remove_temp_dir_on_exit: bool = True,
         names: Optional[str] = None,
         override=True,
         start_instance: bool = None,
@@ -225,7 +227,7 @@ class MapdlPool:
             run_location = create_temp_dir()
         self._root_dir: str = run_location
 
-        kwargs["remove_temp_files"] = remove_temp_files
+        kwargs["remove_temp_dir_on_exit"] = remove_temp_dir_on_exit
         kwargs["mode"] = "grpc"
         self._spawn_kwargs: Dict[str, Any] = kwargs
         self._spawning_i: int = 0
@@ -365,9 +367,9 @@ class MapdlPool:
             [thread.join() for thread in threads]
 
             # make sure everything is ready
-            timeout = time.time() + timeout
-
-            while timeout > time.time():
+            n_instances_ready = 0
+            time_end = time.time() + timeout
+            while time_end > time.time():
                 n_instances_ready = sum([each is not None for each in self._instances])
 
                 if n_instances_ready == n_instances:
@@ -376,7 +378,7 @@ class MapdlPool:
                 time.sleep(0.1)
             else:
                 raise TimeoutError(
-                    f"Only {n_instances_ready} of {n_instances} could be started."
+                    f"Only {n_instances_ready} of {n_instances} could be started after {timeout} seconds."
                 )
 
             if pbar is not None:
@@ -908,6 +910,9 @@ class MapdlPool:
         if not run_location:
             run_location = create_temp_dir(self._root_dir, name=name)
 
+        if self._spawn_kwargs.get("_debug_no_launch", False):
+            return
+
         self._instances[index] = launch_mapdl(
             exec_file=exec_file,
             run_location=run_location,
@@ -1048,7 +1053,9 @@ class MapdlPool:
                         "Argument 'port' does not support this type of argument."
                     )
             else:
-                raise TypeError("Argument 'ip' does not support this type of argument.")
+                raise TypeError(
+                    f"Argument 'ip' does not support this type of argument ({type(ip)})."
+                )
 
         else:
 
@@ -1077,7 +1084,7 @@ class MapdlPool:
                     ports = port
                 else:
                     raise TypeError(
-                        "Argument 'port' does not support this type of argument."
+                        f"Argument 'port' does not support this type of argument ({type(port)})."
                     )
 
             elif isinstance(ip, str):

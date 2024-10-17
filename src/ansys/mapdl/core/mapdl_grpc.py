@@ -337,7 +337,6 @@ class MapdlGrpc(MapdlBase):
         cleanup_on_exit: bool = False,
         log_apdl: Optional[str] = None,
         set_no_abort: bool = True,
-        remove_temp_files: Optional[bool] = None,
         remove_temp_dir_on_exit: bool = False,
         print_com: bool = False,
         disable_run_at_connect: bool = False,
@@ -346,16 +345,6 @@ class MapdlGrpc(MapdlBase):
         **start_parm,
     ):
         """Initialize connection to the mapdl server"""
-        if remove_temp_files is not None:  # pragma: no cover
-            warn(
-                "The option ``remove_temp_files`` is being deprecated and it will be removed by PyMAPDL version 0.66.0.\n"
-                "Please use ``remove_temp_dir_on_exit`` instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            remove_temp_dir_on_exit = remove_temp_files
-            remove_temp_files = None
-
         self._name: Optional[str] = None
         self._session_id_: Optional[str] = None
         self._checking_session_id_: bool = False
@@ -868,11 +857,25 @@ class MapdlGrpc(MapdlBase):
             raise MapdlRuntimeError(
                 "Can only launch the GUI with a local instance of MAPDL"
             )
-        from ansys.mapdl.core.launcher import launch_grpc
+        from ansys.mapdl.core.launcher import generate_mapdl_launch_command, launch_grpc
 
         self._exited = False  # reset exit state
-        port, directory, process = launch_grpc(**start_parm)
-        self._connect(port)
+
+        args = self._start_parm
+        cmd = generate_mapdl_launch_command(
+            exec_file=args["exec_file"],
+            jobname=args["jobname"],
+            nproc=args["nproc"],
+            ram=args["ram"],
+            port=args["port"],
+            additional_switches=args["additional_switches"],
+        )
+
+        process = launch_grpc(
+            cmd=cmd, run_location=args["run_location"], env_vars=self._env_vars or None
+        )
+
+        self._connect(args["port"])
 
         # may need to wait for viable connection in open_gui case
         tmax = time.time() + timeout
@@ -887,6 +890,9 @@ class MapdlGrpc(MapdlBase):
 
         if not success:
             raise MapdlConnectionError("Unable to reconnect to MAPDL")
+
+        # Update process
+        self._mapdl_process = process
 
     @supress_logging
     def _set_no_abort(self):
@@ -1065,6 +1071,7 @@ class MapdlGrpc(MapdlBase):
             f"Exiting MAPLD gRPC instance {self.ip}:{self.port} on '{self._path}'."
         )
 
+        mapdl_path = self.directory  # caching
         if self._exited is None:
             self._log.debug("'self._exited' is none.")
             return  # Some edge cases the class object is not completely initialized but the __del__ method
@@ -1100,7 +1107,6 @@ class MapdlGrpc(MapdlBase):
         if not kwargs.pop("fake_exit", False):
             # This cannot/should not be faked
             if self._local:
-                mapdl_path = self.directory
                 self._cache_pids()  # Recache processes
 
                 if os.name == "nt":
@@ -1117,7 +1123,7 @@ class MapdlGrpc(MapdlBase):
             # No cover: The CI is working with a single MAPDL instance
             self._remote_instance.delete()
 
-        self._remove_temp_dir_on_exit()
+        self._remove_temp_dir_on_exit(mapdl_path)
 
         if self._local and self._port in _LOCAL_PORTS:
             _LOCAL_PORTS.remove(self._port)

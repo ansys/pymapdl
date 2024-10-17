@@ -39,17 +39,17 @@ repos:
           )
 
 - repo: https://github.com/psf/black
-  rev: 24.8.0  # If version changes --> modify "blacken-docs" manually as well.
+  rev: 24.10.0  # If version changes --> modify "blacken-docs" manually as well.
   hooks:
   - id: black
     args:
       - --line-length=88
 
 - repo: https://github.com/adamchainz/blacken-docs
-  rev: 1.18.0
+  rev: 1.19.0
   hooks:
   - id: blacken-docs
-    additional_dependencies: [black==24.8.0]
+    additional_dependencies: [black==24.10.0]
 
 - repo: https://github.com/PyCQA/flake8
   rev: 7.1.1
@@ -71,13 +71,13 @@ repos:
 #     exclude: "tests/"
 
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.6.0
+  rev: v5.0.0
   hooks:
   - id: check-merge-conflict
   - id: debug-statements
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.29.3
+  rev: 0.29.4
   hooks:
     - id: check-github-workflows

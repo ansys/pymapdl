@@ -49,7 +49,7 @@ pytestmark = requires("grpc")
 IGNORE_POOL = os.environ.get("IGNORE_POOL", "").upper() == "TRUE"
 
 # skipping if ON_STUDENT and ON_LOCAL because we cannot spawn that many instances.
-if ON_STUDENT and ON_LOCAL:
+if not ON_LOCAL or (ON_STUDENT and ON_LOCAL):
     pytest.skip(allow_module_level=True)
 
 
@@ -123,7 +123,7 @@ class TestMapdlPool:
         # check it's been cleaned up
         if mapdl_pool[0] is not None:
             pth = mapdl_pool[0].directory
-            if mapdl_pool._spawn_kwargs["remove_temp_files"]:
+            if mapdl_pool._spawn_kwargs["remove_temp_dir_on_exit"]:
                 assert not list(Path(pth).rglob("*.page*"))
 
     @pytest.fixture
