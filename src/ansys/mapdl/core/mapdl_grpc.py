@@ -415,6 +415,7 @@ class MapdlGrpc(MapdlBase):
         self.__server_version: Optional[str] = None
         self._state: Optional[grpc.Future] = None
         self._timeout: int = timeout
+        self._env_vars: Dict[str, str] = start_parm.get("env_vars", {})
         self._pids: List[Union[int, None]] = []
         self._channel_state: grpc.ChannelConnectivity = (
             grpc.ChannelConnectivity.CONNECTING
@@ -1152,7 +1153,7 @@ class MapdlGrpc(MapdlBase):
 
         if self._mapdl_on_slurm:
             self.kill_job(self.jobid)
-            self._log.debug("Job has been cancel.")
+            self._log.debug(f"Job (id: {self.jobid}) has been cancel.")
 
         self._remove_temp_dir_on_exit(mapdl_path)
 
