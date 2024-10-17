@@ -126,8 +126,9 @@ if "ANSJUPHUB_VER" in os.environ:  # pragma: no cover
 else:
     from ansys.mapdl.core.launcher import launch_mapdl
 
+from ansys.mapdl.core.information import Information
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc as Mapdl
-from ansys.mapdl.core.misc import Information, Report, _check_has_ansys
+from ansys.mapdl.core.misc import Report, _check_has_ansys
 from ansys.mapdl.core.pool import MapdlPool
 
 _HAS_ANSYS = _check_has_ansys()
