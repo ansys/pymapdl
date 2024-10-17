@@ -1108,7 +1108,7 @@ For instance:
     user@machine:~$ export PYMAPDL_PORT=50052
     user@machine:~$ python -c "from ansys.mapdl.core import launch_mapdl; mapdl=launch_mapdl(port=60053)"
 
-The above command will launch an MAPDL instance on the port 60053,
+The above command launches an MAPDL instance on the port 60053,
 because the argument ``port`` has priority over the environment
 variable :envvar:`PYMAPDL_PORT`.
 
