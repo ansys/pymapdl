@@ -1,0 +1,46 @@
+
+.. _ref_matrix_operations:
+
+
+MatrixOperations
+================
+
+
+.. currentmodule:: pyconverter.generatedcommands.apdl.matrix_operations
+
+.. autoclass:: pyconverter.generatedcommands.apdl.matrix_operations.MatrixOperations
+
+.. autosummary::
+   :template: base.rst
+   :toctree: _autosummary
+
+
+   MatrixOperations.axpy
+   MatrixOperations.comp
+   MatrixOperations.dmat
+   MatrixOperations.dot
+   MatrixOperations.eigen
+   MatrixOperations.export
+   MatrixOperations.fft
+   MatrixOperations.free
+   MatrixOperations.hprod
+   MatrixOperations.init
+   MatrixOperations.starinquire
+   MatrixOperations.itengine
+   MatrixOperations.lsbac
+   MatrixOperations.lsdump
+   MatrixOperations.lsengine
+   MatrixOperations.lsfactor
+   MatrixOperations.lsrestore
+   MatrixOperations.merge
+   MatrixOperations.mult
+   MatrixOperations.nrm
+   MatrixOperations.starprint
+   MatrixOperations.remove
+   MatrixOperations.starrename
+   MatrixOperations.scal
+   MatrixOperations.smat
+   MatrixOperations.starsort
+   MatrixOperations.vec
+   MatrixOperations.wrk
+   MatrixOperations.xpl
