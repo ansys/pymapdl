@@ -161,7 +161,7 @@ omit = [
 show_missing = true
 
 [tool.codespell]
-skip = '*.pyc,*.txt,*.gif,*.png,*.jpg,*.js,*.html,*.doctree,*.ttf,*.woff,*.woff2,*.eot,*.mp4,*.inv,*.pickle,*.ipynb,flycheck*,./.git/*,./.hypothesis/*,*.yml,./doc/build/*,./doc/images/*,./dist/*,*~,.hypothesis*,./doc/source/examples/*,*cover,*.dat,*.mac,*.cdb,*.CDB,build,./docker/mapdl/v*,./factory/*,./ansys/mapdl/core/mapdl_functions.py,PKG-INFO,*.mypy_cache/*,./docker/mapdl/*,./_unused/*'
+skip = '*.pyc,*.txt,*.gif,*.png,*.jpg,*.js,*.html,*.doctree,*.ttf,*.woff,*.woff2,*.eot,*.mp4,*.inv,*.pickle,*.ipynb,flycheck*,./.git/*,./.hypothesis/*,*.yml,./doc/build/*,./doc/images/*,./dist/*,*~,.hypothesis*,./doc/source/examples/*,*cover,*.dat,*.mac,*.cdb,*.CDB,build,./docker/mapdl/v*,./factory/*,./ansys/mapdl/core/mapdl_functions.py,PKG-INFO,*.mypy_cache/*,./docker/mapdl/*,./_unused/*,./ansys/mapdl/core/_commands/apdl/*'
 quiet-level = 3
 ignore-regex=".*codespell-ignore$|NORML|POIN"
 ignore-words = "doc/styles/config/vocabularies/ANSYS/accept.txt"

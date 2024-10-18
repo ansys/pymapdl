@@ -1379,7 +1379,7 @@ class _MapdlCommandExtended(_MapdlCore):
         self.components.select(cmps_names)
         return output
 
-    @wraps(_MapdlCore.inquire)
+    @wraps(_MapdlCore.starinquire)
     def inquire(self, strarray="", func="", arg1="", arg2=""):
         """Wraps original INQUIRE function"""
         func_options = [
