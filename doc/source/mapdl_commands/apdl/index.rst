@@ -1,8 +1,10 @@
 
 .. _ref_apdl:
 
+<!-- vale off -->
 Apdl
 ====
+<!-- vale on -->
 
 .. list-table::
 
