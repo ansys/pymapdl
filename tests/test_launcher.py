@@ -724,7 +724,7 @@ def test_is_running_on_slurm(
             launch_mapdl(
                 detect_hpc=detect_hpc,
                 _debug_no_launch=True,
-            )["ON_SLURM"]
+            )["running_on_hpc"]
             == flag
         )
 
@@ -903,7 +903,27 @@ def test_generate_mapdl_launch_command_windows():
         additional_switches=additional_switches,
     )
 
-    assert f'"{exec_file}" ' in cmd
+    assert isinstance(cmd, list)
+
+    assert f"{exec_file}" in cmd
+    assert "-j" in cmd
+    assert f"{jobname}" in cmd
+    assert "-port" in cmd
+    assert f"{port}" in cmd
+    assert "-m" in cmd
+    assert f"{ram*1024}" in cmd
+    assert "-np" in cmd
+    assert f"{nproc}" in cmd
+    assert "-grpc" in cmd
+    assert f"{additional_switches}" in cmd
+    assert "-b" in cmd
+    assert "-i" in cmd
+    assert ".__tmp__.inp" in cmd
+    assert "-o" in cmd
+    assert ".__tmp__.out" in cmd
+
+    cmd = " ".join(cmd)
+    assert f"{exec_file} " in cmd
     assert f" -j {jobname} " in cmd
     assert f" -port {port} " in cmd
     assert f" -m {ram*1024} " in cmd
@@ -933,7 +953,28 @@ def test_generate_mapdl_launch_command_linux():
         additional_switches=additional_switches,
     )
 
-    assert f'"{exec_file}" ' in cmd
+    assert isinstance(cmd, list)
+
+    assert f"{exec_file}" in cmd
+    assert "-j" in cmd
+    assert f"{jobname}" in cmd
+    assert "-port" in cmd
+    assert f"{port}" in cmd
+    assert "-m" in cmd
+    assert f"{ram*1024}" in cmd
+    assert "-np" in cmd
+    assert f"{nproc}" in cmd
+    assert "-grpc" in cmd
+    assert f"{additional_switches}" in cmd
+
+    assert "-b" not in cmd
+    assert "-i" not in cmd
+    assert ".__tmp__.inp" not in cmd
+    assert "-o" not in cmd
+    assert ".__tmp__.out" not in cmd
+
+    cmd = " ".join(cmd)
+    assert f"{exec_file} " in cmd
     assert f" -j {jobname} " in cmd
     assert f" -port {port} " in cmd
     assert f" -m {ram*1024} " in cmd
@@ -1084,7 +1125,7 @@ def fake_subprocess_open(*args, **kwargs):
 @patch("os.name", "nt")
 @patch("subprocess.Popen", fake_subprocess_open)
 def test_launch_grpc(tmpdir):
-    cmd = "ansys.exe -b -i my_input.inp -o my_output.inp"
+    cmd = "ansys.exe -b -i my_input.inp -o my_output.inp".split(" ")
     run_location = str(tmpdir)
     kwags = launch_grpc(cmd, run_location)
 
@@ -1115,7 +1156,7 @@ def test_get_cpus(monkeypatch, arg, env):
     if (arg and arg > cores_machine) or (arg is None and env and env > cores_machine):
         context = pytest.raises(NotEnoughResources)
 
-    args = {"nproc": arg, "RUNNING_ON_HPC": False}
+    args = {"nproc": arg, "running_on_hpc": False}
     with context:
         get_cpus(args)
 
@@ -1129,6 +1170,6 @@ def test_get_cpus(monkeypatch, arg, env):
 
 @patch("psutil.cpu_count", lambda *args, **kwags: 1)
 def test_get_cpus_min():
-    args = {"nproc": None, "RUNNING_ON_HPC": False}
+    args = {"nproc": None, "running_on_hpc": False}
     get_cpus(args)
     assert args["nproc"] == 1

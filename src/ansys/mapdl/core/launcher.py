@@ -411,10 +411,12 @@ def generate_mapdl_launch_command(
     command_parm = [
         each for each in command_parm if each.strip()
     ]  # cleaning empty args.
-    command = " ".join(command_parm)
+
+    command = " ".join(command_parm[1:]).split(" ")
+    command.insert(0, f"{exec_file}")
 
     LOG.debug(f"Generated command: {command}")
-    return command_parm
+    return command
 
 
 def launch_grpc(
@@ -1978,8 +1980,7 @@ def pack_arguments(locals_):
 
 
 def is_running_on_slurm(args: Dict[str, Any]) -> bool:
-
-    args["running_on_hpc"] = os.environ.get("PYMAPDL_running_on_hpc", "True")
+    args["running_on_hpc"] = os.environ.get("PYMAPDL_RUNNING_ON_HPC", "True")
 
     is_flag_false = args["running_on_hpc"].lower() == "false"
 
