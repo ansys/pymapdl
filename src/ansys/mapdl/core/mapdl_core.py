@@ -41,7 +41,7 @@ import numpy as np
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core import _HAS_PYVISTA
+from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
     CMD_LISTING,
@@ -61,10 +61,10 @@ from ansys.mapdl.core.errors import (
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
 )
+from ansys.mapdl.core.information import Information
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.mapdl_types import MapdlFloat
 from ansys.mapdl.core.misc import (
-    Information,
     check_valid_routine,
     last_created,
     random_string,
@@ -163,6 +163,23 @@ VALID_SELECTION_ENTITY_TP = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"
 GUI_FONT_SIZE = 15
 LOG_APDL_DEFAULT_FILE_NAME = "apdl.log"
 
+_ALLOWED_START_PARM = [
+    "additional_switches",
+    "check_parameter_names",
+    "exec_file",
+    "ip",
+    "jobname",
+    "nproc",
+    "override",
+    "port",
+    "print_com",
+    "process",
+    "ram",
+    "run_location",
+    "start_timeout",
+    "timeout",
+]
+
 
 def parse_to_short_cmd(command):
     """Takes any MAPDL command and returns the first 4 characters of
@@ -195,25 +212,6 @@ def setup_logger(loglevel="INFO", log_file=True, mapdl_instance=None):
     return setup_logger.log
 
 
-_ALLOWED_START_PARM = [
-    "additional_switches",
-    "exec_file",
-    "ip",
-    "jobname",
-    "local",
-    "nproc",
-    "override",
-    "port",
-    "print_com",
-    "process",
-    "ram",
-    "run_location",
-    "start_timeout",
-    "timeout",
-    "check_parameter_names",
-]
-
-
 def _sanitize_start_parm(start_parm):
     for each_key in start_parm:
         if each_key not in _ALLOWED_START_PARM:
@@ -236,7 +234,6 @@ class _MapdlCore(Commands):
     ):
         """Initialize connection with MAPDL."""
         atexit.register(self.__del__)  # registering to exit properly
-        self._name = None  # For naming the instance.
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited: bool = False
@@ -253,8 +250,10 @@ class _MapdlCore(Commands):
         self._file_type_for_plots = file_type_for_plots
         self._default_file_type_for_plots = file_type_for_plots
         self._version = None  # cached version
+        self._mute = False
+        self._save_selection_obj = None
 
-        if _HAS_PYVISTA:
+        if _HAS_VISUALIZER:
             if use_vtk is not None:  # pragma: no cover
                 self._use_vtk = use_vtk
             else:
@@ -262,7 +261,8 @@ class _MapdlCore(Commands):
         else:  # pragma: no cover
             if use_vtk:
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'use_vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'use_vtk' requires having "
+                    "'ansys-tools-visualization_interface' installed."
                 )
             else:
                 self._use_vtk = False
@@ -278,12 +278,14 @@ class _MapdlCore(Commands):
         self._krylov = None
         self._on_docker = None
         self._platform = None
+        self._path_cache = None  # Cache
+        self._print_com: bool = print_com  # print the command /COM input.
 
+        # Start_parameters
         _sanitize_start_parm(start_parm)
         self._start_parm: Dict[str, Any] = start_parm
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
-        self._print_com: bool = print_com  # print the command /COM input.
         self.check_parameter_names = start_parm.get("check_parameter_names", True)
 
         # Setting up loggers
@@ -330,6 +332,9 @@ class _MapdlCore(Commands):
 
         self._info = Information(self)
 
+    def _after_run(self, _command: str) -> None:
+        pass
+
     @property
     def allow_ignore(self):
         """Invalid commands will be ignored rather than exceptions
@@ -372,6 +377,9 @@ class _MapdlCore(Commands):
             DeprecationWarning,
         )
         self._ignore_errors = bool(value)
+
+    def _before_run(self, _command: str) -> None:
+        pass
 
     @property
     def chain_commands(self):
@@ -504,10 +512,14 @@ class _MapdlCore(Commands):
             # new line to fix path issue, see #416
             self._path = repr(self._path)[1:-1]
         else:  # pragma: no cover
-            raise IOError(
-                f"The directory returned by /INQUIRE is not valid ('{self._path}')."
-            )
+            if self._path_cache:
+                return self._path_cache
+            else:
+                raise IOError(
+                    f"The directory returned by /INQUIRE is not valid ('{self._path}')."
+                )
 
+        self._path_cache = self._path  # update
         return self._path
 
     @directory.setter
@@ -948,7 +960,9 @@ class _MapdlCore(Commands):
         when exit returns to that selection.
 
         """
-        return self._save_selection(self)
+        if self._save_selection_obj is None:
+            self._save_selection_obj = self._save_selection(self)
+        return self._save_selection_obj
 
     @property
     def solution(self) -> "Solution":
@@ -1128,7 +1142,6 @@ class _MapdlCore(Commands):
     def _mesh(self) -> "Archive":
         """Write entire archive to ASCII and read it in as an
         ``ansys.mapdl.core.Archive``"""
-        # lazy import here to avoid loading pyvista and vtk
         from ansys.mapdl.reader import Archive
 
         if self._archive_cache is None:
@@ -1384,44 +1397,40 @@ class _MapdlCore(Commands):
 
         def __init__(self, parent):
             self._parent = weakref.ref(parent)
-            self.selection_sets = []
-            self.selection_sets_comps = []
+            self.selection = []
 
         def __enter__(self):
             self._parent()._log.debug("Entering saving selection context")
-
-            selection_set_name = random_string(10)
-            self.selection_sets.append(selection_set_name)
-            self.selection_sets_comps.append(self._parent().components.names)
-
             mapdl = self._parent()
 
-            prev_ier = mapdl.ignore_errors
-            mapdl.ignore_errors = True
-            for entity in ["kp", "lines", "area", "volu", "node", "elem"]:
-                mapdl.cm(f"_{selection_set_name}_{entity}_", f"{entity}", mute=True)
-            mapdl.ignore_errors = prev_ier
+            # Storing components
+            selection = {
+                "cmsel": mapdl.components.names,
+                # "components_type": mapdl.components.types,
+                "nsel": mapdl.mesh.nnum,
+                "esel": mapdl.mesh.enum,
+                "ksel": mapdl.geometry.knum,
+                "lsel": mapdl.geometry.lnum,
+                "asel": mapdl.geometry.anum,
+                "vsel": mapdl.geometry.vnum,
+            }
+
+            self.selection.append(selection)
 
         def __exit__(self, *args):
             self._parent()._log.debug("Exiting saving selection context")
-            last_selection_name = self.selection_sets.pop()
-            last_selection_cmps = self.selection_sets_comps.pop()
-
+            selection = self.selection.pop()
             mapdl = self._parent()
 
-            # probably this is redundant
-            prev_ier = mapdl.ignore_errors
-            mapdl.ignore_errors = True
-            for entity in ["kp", "lines", "area", "volu", "node", "elem"]:
-                cmp_name = f"_{last_selection_name}_{entity}_"
-                mapdl.cmsel("s", cmp_name, f"{entity}", mute=True)
-                mapdl.cmdele(cmp_name)
+            cmps = selection.pop("cmsel")
 
-            mapdl.ignore_errors = prev_ier
+            if cmps:
+                mapdl.components.select(cmps)
 
-            # mute to avoid getting issues when the component wasn't created in
-            # first place because there was no entities.
-            self._parent().components.select(last_selection_cmps, mute=True)
+            for select_cmd, ids in selection.items():
+                if ids.size > 0:
+                    func = getattr(mapdl, select_cmd)
+                    func(vmin=ids)
 
     class _chain_commands:
         """Store MAPDL commands and send one chained command."""
@@ -1434,7 +1443,7 @@ class _MapdlCore(Commands):
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
-            self._parent()._log.debug("Entering chained command mode")
+            self._parent()._log.debug("Exiting chained command mode")
             self._parent()._chain_stored()
             self._parent()._store_commands = False
 
@@ -1889,7 +1898,13 @@ class _MapdlCore(Commands):
         Overridden by gRPC.
 
         """
+        if not self._stored_commands:
+            self._log.debug("There is no commands to be flushed.")
+            self._store_commands = False
+            return
+
         self._log.debug("Flushing stored commands")
+
         rnd_str = random_string()
         tmp_out = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.out")
         self._stored_commands.insert(0, f"/OUTPUT, {tmp_out}")
@@ -1898,25 +1913,25 @@ class _MapdlCore(Commands):
         if self._apdl_log:
             self._apdl_log.write(commands + "\n")
 
-            self._store_commands = False
-            self._stored_commands = []
+        self._store_commands = False
+        self._stored_commands = []
 
-            # write to a temporary input file
-            self._log.debug(
-                "Writing the following commands to a temporary " "apdl input file:\n%s",
-                commands,
-            )
+        # write to a temporary input file
+        self._log.debug(
+            "Writing the following commands to a temporary " "apdl input file:\n%s",
+            commands,
+        )
 
-            tmp_inp = os.path.join(tempfile.gettempdir(), f"tmp_{random_string()}.inp")
-            with open(tmp_inp, "w") as f:
-                f.writelines(commands)
+        tmp_inp = os.path.join(tempfile.gettempdir(), f"tmp_{random_string()}.inp")
+        with open(tmp_inp, "w") as f:
+            f.writelines(commands)
 
-            # interactive result
-            _ = self.input(tmp_inp, write_to_log=False)
+        # interactive result
+        _ = self.input(tmp_inp, write_to_log=False)
 
-            time.sleep(0.1)  # allow MAPDL to close the file
-            if os.path.isfile(tmp_out):
-                self._response = "\n" + open(tmp_out).read()
+        time.sleep(0.1)  # allow MAPDL to close the file
+        if os.path.isfile(tmp_out):
+            self._response = "\n" + open(tmp_out).read()
 
         if self._response is None:  # pragma: no cover
             self._log.warning("Unable to read response from flushed commands")
@@ -2156,14 +2171,6 @@ class _MapdlCore(Commands):
             self._stored_commands.append(command)
             return
 
-        # Actually sending the message
-        if self._session_id is not None:
-            self._check_session_id()
-        else:
-            # For some reason the session hasn't been created
-            if self.is_grpc:
-                self._create_session()
-
         if mute is None:
             if hasattr(self, "mute"):
                 mute = self.mute
@@ -2225,6 +2232,8 @@ class _MapdlCore(Commands):
                 # Edge case. `\title, 'par=1234' `
                 self._check_parameter_name(param_name)
 
+        self._before_run(command)
+
         short_cmd = parse_to_short_cmd(command)
         text = self._run(command, verbose=verbose, mute=mute)
 
@@ -2236,9 +2245,7 @@ class _MapdlCore(Commands):
             self.show(self.default_file_type_for_plots)
             text = self._run(command, verbose=verbose, mute=mute)
 
-        if command[:4].upper() == "/CLE" and self.is_grpc:
-            # We have reset the database, so we need to create a new session id
-            self._create_session()
+        self._after_run(command)
 
         if mute:
             return
@@ -2282,7 +2289,8 @@ class _MapdlCore(Commands):
         if self._cleanup:
             # removing logging handlers if they are closed to avoid I/O errors
             # when exiting after the logger file has been closed.
-            self._cleanup_loggers()
+            # self._cleanup_loggers()
+            logging.disable(logging.CRITICAL)
 
             try:
                 self.exit()
@@ -2296,10 +2304,11 @@ class _MapdlCore(Commands):
     def _cleanup_loggers(self):
         """Clean up all the loggers"""
         # Detached from ``__del__`` for easier testing
-        if not hasattr(self, "_log"):
-            return  # Early exit if logger has been already cleaned.
+        # if not hasattr(self, "_log"):
+        #     return  # Early exit if logger has been already cleaned.
 
         logger = self._log
+        logger.setLevel(logging.CRITICAL + 1)
 
         if logger.hasHandlers():
             for each_handler in logger.logger.handlers:
@@ -2702,22 +2711,17 @@ class _MapdlCore(Commands):
         self, entity, selection_function, type_, item, comp, vmin, kabs
     ):
         """Select entities using CM, and the supplied selection function."""
-        self.cm(f"__temp_{entity}s__", f"{entity}")  # Saving previous selection
-
         # Getting new selection
         for id_, each_ in enumerate(vmin):
-            selection_function(
-                self, "S" if id_ == 0 else "A", item, comp, each_, "", "", kabs
-            )
+            if type_ == "S" or not type_:
+                type__ = "S" if id_ == 0 else "A"
+            # R is an issue, because first iteration will clean up the rest.
+            elif type_ == "R":
+                raise NotImplementedError("Mode R is not supported.")
+            else:
+                type__ = type_
 
-        self.cm(f"__temp_{entity}s_1__", f"{entity}")
-
-        self.cmsel("S", f"__temp_{entity}s__")
-        self.cmsel(type_, f"__temp_{entity}s_1__")
-
-        # Cleaning
-        self.cmdele(f"__temp_{entity}s__")
-        self.cmdele(f"__temp_{entity}s_1__")
+            selection_function(self, type__, item, comp, each_, "", "", kabs)
 
     def _raise_errors(self, text):
         # to make sure the following error messages are caught even if a breakline is in between.

@@ -25,11 +25,11 @@ import weakref
 
 import numpy as np
 
-from ansys.mapdl.core import _HAS_PYVISTA
+from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import requires_package, supress_logging
 
-if _HAS_PYVISTA:
+if _HAS_VISUALIZER:
     from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
 COMPONENT_STRESS_TYPE = ["X", "Y", "Z", "XY", "YZ", "XZ"]

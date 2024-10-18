@@ -44,15 +44,15 @@ Element = namedtuple(
 
 # Set if on local
 def is_on_local():
-    if "ON_LOCAL" in os.environ:
-        return os.environ.get("ON_LOCAL", "").lower() == "true"
+    if os.environ.get("ON_LOCAL"):
+        return os.environ.get("ON_LOCAL").lower() == "true"
 
-    if "ON_REMOTE" in os.environ:
-        return os.environ.get("ON_REMOTE", "").lower() == "true"
+    if os.environ.get("ON_REMOTE"):
+        return os.environ.get("ON_REMOTE").lower() == "true"
 
-    if os.environ.get("PYMAPDL_START_INSTANCE", None):
+    if os.environ.get("PYMAPDL_START_INSTANCE"):
         return (
-            os.environ.get("PYMAPDL_START_INSTANCE", "").lower() != "false"
+            os.environ.get("PYMAPDL_START_INSTANCE").lower() != "false"
         )  # default is false
 
     from ansys.tools.path import find_mapdl
@@ -72,7 +72,7 @@ def is_on_ci():
 
 # Set if on ubuntu
 def is_on_ubuntu():
-    envvar = os.environ.get("ON_UBUNTU", None)
+    envvar = os.environ.get("ON_UBUNTU")
 
     if envvar is not None:
         return envvar.lower() == "true"
@@ -81,7 +81,7 @@ def is_on_ubuntu():
 
 
 def has_grpc():
-    envvar = os.environ.get("HAS_GRPC", None)
+    envvar = os.environ.get("HAS_GRPC")
 
     if envvar is not None:
         return envvar.lower().strip() == "true"
@@ -104,7 +104,7 @@ def has_grpc():
 
 
 def has_dpf():
-    return bool(os.environ.get("DPF_PORT", ""))
+    return bool(os.environ.get("DPF_PORT"))
 
 
 def is_smp():
@@ -112,7 +112,7 @@ def is_smp():
 
 
 def support_plotting():
-    envvar = os.environ.get("SUPPORT_PLOTTING", None)
+    envvar = os.environ.get("SUPPORT_PLOTTING")
 
     if envvar is not None:
         return envvar.lower().strip() == "true"
@@ -138,7 +138,7 @@ def testing_minimal():
 
 
 def log_apdl() -> bool:
-    if "PYMAPDL_LOG_APDL" in os.environ and os.environ.get("PYMAPDL_LOG_APDL", ""):
+    if os.environ.get("PYMAPDL_LOG_APDL"):
         log_apdl = os.environ.get("PYMAPDL_LOG_APDL")
 
         if log_apdl.lower() in ["true", "false", "yes", "no"]:

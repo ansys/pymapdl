@@ -594,10 +594,9 @@ class Geometry:
         ...
 
         """
-        quality = int(quality)
-        if quality > 10:
+        if not isinstance(quality, int) or (quality > 10 or quality < 1):
             raise ValueError(
-                "The ``quality`` parameter must be a value between 0 and 10."
+                "The argument 'quality' can only be an integer between 1 and 10 (both included)."
             )
 
         surf = self.generate_surface(11 - quality)
@@ -650,24 +649,25 @@ class Geometry:
 
             # reselect from existing selection to mimic APDL behavior
             if amin or amax:
-                if amax is None:
-                    amax = amin
-
-                if amin is None:  # amax is non-zero
-                    amin = 1
-
-                if ninc is None:
-                    ninc = ""
+                amax = amax or amin
+                amin = amin or 1
+                ninc = ninc or ""
 
                 self._mapdl.asel("R", "AREA", vmin=amin, vmax=amax, vinc=ninc)
 
+            ## Duplication
             # duplicate areas to avoid affecting existing areas
+            # Getting the maximum area ID
             a_num = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
+            # Setting the new areas ID starting number
             self._mapdl.numstr("AREA", a_num, mute=True)
+            # Generating new areas
             self._mapdl.agen(2, "ALL", noelem=1, mute=True)
-            a_max = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
 
+            # Getting the new maximum area ID
+            a_max = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
             self._mapdl.asel("S", "AREA", vmin=a_num + 1, vmax=a_max, mute=True)
+
             # necessary to reset element/area meshing association
             self._mapdl.aatt(mute=True)
 
@@ -692,7 +692,7 @@ class Geometry:
 
             self._mapdl.esla("S")
             grid = self._mapdl.mesh._grid.linear_copy()
-            pd = pv.PolyData(grid.points, grid.cells, n_faces=grid.n_cells)
+            pd = pv.PolyData(grid.points, grid.cells)
 
             # pd['ansys_node_num'] = grid['ansys_node_num']
             # pd['vtkOriginalPointIds'] = grid['vtkOriginalPointIds']

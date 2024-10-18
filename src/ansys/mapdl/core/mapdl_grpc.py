@@ -64,7 +64,7 @@ try:
 except ImportError:  # pragma: no cover
     raise ImportError(MSG_IMPORT)
 
-from ansys.mapdl.core import _LOCAL_PORTS, __version__
+from ansys.mapdl.core import _HAS_TQDM, __version__
 from ansys.mapdl.core.common_grpc import (
     ANSYS_VALUE_TYPE,
     DEFAULT_CHUNKSIZE,
@@ -92,12 +92,8 @@ from ansys.mapdl.core.parameters import interp_star_status
 
 # Checking if tqdm is installed.
 # If it is, the default value for progress_bar is true.
-try:
+if _HAS_TQDM:
     from tqdm import tqdm
-
-    _HAS_TQDM = True
-except ModuleNotFoundError:  # pragma: no cover
-    _HAS_TQDM = False
 
 if TYPE_CHECKING:  # pragma: no cover
     from queue import Queue
@@ -337,7 +333,6 @@ class MapdlGrpc(MapdlBase):
         cleanup_on_exit: bool = False,
         log_apdl: Optional[str] = None,
         set_no_abort: bool = True,
-        remove_temp_files: Optional[bool] = None,
         remove_temp_dir_on_exit: bool = False,
         print_com: bool = False,
         disable_run_at_connect: bool = False,
@@ -346,16 +341,7 @@ class MapdlGrpc(MapdlBase):
         **start_parm,
     ):
         """Initialize connection to the mapdl server"""
-        if remove_temp_files is not None:  # pragma: no cover
-            warn(
-                "The option ``remove_temp_files`` is being deprecated and it will be removed by PyMAPDL version 0.66.0.\n"
-                "Please use ``remove_temp_dir_on_exit`` instead.",
-                DeprecationWarning,
-                stacklevel=2,
-            )
-            remove_temp_dir_on_exit = remove_temp_files
-            remove_temp_files = None
-
+        self._name: Optional[str] = None
         self._session_id_: Optional[str] = None
         self._checking_session_id_: bool = False
         self.__distributed: Optional[bool] = None
@@ -411,7 +397,6 @@ class MapdlGrpc(MapdlBase):
         self._health_response_queue: Optional["Queue"] = None
         self._exiting: bool = False
         self._exited: Optional[bool] = None
-        self._mute: bool = False
         self._db: Optional[MapdlDb] = None
         self.__server_version: Optional[str] = None
         self._state: Optional[grpc.Future] = None
@@ -488,6 +473,18 @@ class MapdlGrpc(MapdlBase):
             self._cache_pids()
 
         self._create_session()
+
+    def _after_run(self, command: str) -> None:
+        if command[:4].upper() == "/CLE":
+            # We have reset the database, so we need to create a new session id
+            self._create_session()
+
+    def _before_run(self, _command: str) -> None:
+        if self._session_id is not None:
+            self._check_session_id()
+        else:
+            # For some reason the session hasn't been created
+            self._create_session()
 
     def _create_process_stds_queue(self, process=None):
         from ansys.mapdl.core.launcher import (
@@ -856,11 +853,25 @@ class MapdlGrpc(MapdlBase):
             raise MapdlRuntimeError(
                 "Can only launch the GUI with a local instance of MAPDL"
             )
-        from ansys.mapdl.core.launcher import launch_grpc
+        from ansys.mapdl.core.launcher import generate_mapdl_launch_command, launch_grpc
 
         self._exited = False  # reset exit state
-        port, directory, process = launch_grpc(**start_parm)
-        self._connect(port)
+
+        args = self._start_parm
+        cmd = generate_mapdl_launch_command(
+            exec_file=args["exec_file"],
+            jobname=args["jobname"],
+            nproc=args["nproc"],
+            ram=args["ram"],
+            port=args["port"],
+            additional_switches=args["additional_switches"],
+        )
+
+        process = launch_grpc(
+            cmd=cmd, run_location=args["run_location"], env_vars=self._env_vars or None
+        )
+
+        self._connect(args["port"])
 
         # may need to wait for viable connection in open_gui case
         tmax = time.time() + timeout
@@ -876,6 +887,9 @@ class MapdlGrpc(MapdlBase):
         if not success:
             raise MapdlConnectionError("Unable to reconnect to MAPDL")
 
+        # Update process
+        self._mapdl_process = process
+
     @supress_logging
     def _set_no_abort(self):
         """Do not abort MAPDL."""
@@ -887,6 +901,7 @@ class MapdlGrpc(MapdlBase):
         with self.run_as_routine("POST26"):
             self.numvar(200, mute=True)
 
+        self.inquire("", "DIRECTORY")
         self.show(self._file_type_for_plots)
         self.version  # Caching version
         self.file_type_for_plots  # Setting /show,png and caching it.
@@ -1026,7 +1041,7 @@ class MapdlGrpc(MapdlBase):
                 continue
 
     @protect_from(ValueError, "I/O operation on closed file.")
-    def exit(self, save=False, force=False):
+    def exit(self, save=False, force=False, **kwargs):
         """Exit MAPDL.
 
         Parameters
@@ -1048,17 +1063,21 @@ class MapdlGrpc(MapdlBase):
         >>> mapdl.exit()
         """
         # check if permitted to start (and hence exit) instances
+        self._log.debug(
+            f"Exiting MAPLD gRPC instance {self.ip}:{self.port} on '{self._path}'."
+        )
 
+        mapdl_path = self.directory  # caching
         if self._exited is None:
+            self._log.debug("'self._exited' is none.")
             return  # Some edge cases the class object is not completely initialized but the __del__ method
             # is called when exiting python. So, early exit here instead an error in the following
             # self.directory command.
             # See issue #1796
         elif self._exited:
             # Already exited.
+            self._log.debug("Already exited")
             return
-        else:
-            mapdl_path = self.directory
 
         if save:
             self._log.debug("Saving MAPDL database")
@@ -1080,28 +1099,30 @@ class MapdlGrpc(MapdlBase):
                 return
 
         self._exiting = True
-        self._log.debug("Exiting MAPDL")
 
-        if self._local:
-            self._cache_pids()  # Recache processes
+        if not kwargs.pop("fake_exit", False):
+            # This cannot/should not be faked
+            if self._local:
+                self._cache_pids()  # Recache processes
 
-            if os.name == "nt":
+                if os.name == "nt":
+                    self._kill_server()
+                self._close_process()
+                self._remove_lock_file(mapdl_path)
+            else:
                 self._kill_server()
-            self._close_process()
-            self._remove_lock_file(mapdl_path)
-        else:
-            self._kill_server()
 
         self._exited = True
+        self._exiting = False
 
         if self._remote_instance:  # pragma: no cover
             # No cover: The CI is working with a single MAPDL instance
             self._remote_instance.delete()
 
-        self._remove_temp_dir_on_exit()
+        self._remove_temp_dir_on_exit(mapdl_path)
 
-        if self._local and self._port in _LOCAL_PORTS:
-            _LOCAL_PORTS.remove(self._port)
+        if self._local and self._port in pymapdl._LOCAL_PORTS:
+            pymapdl._LOCAL_PORTS.remove(self._port)
 
     def _remove_temp_dir_on_exit(self, path=None):
         """Removes the temporary directory created by the launcher.
@@ -1137,6 +1158,10 @@ class MapdlGrpc(MapdlBase):
         a local process.
 
         """
+        if self._exited:
+            self._log.debug("MAPDL server already exited")
+            return
+
         try:
             self._log.debug("Killing MAPDL server")
         except ValueError:
@@ -1218,6 +1243,7 @@ class MapdlGrpc(MapdlBase):
         if self.is_alive:
             raise MapdlRuntimeError("MAPDL could not be exited.")
         else:
+            self._log.debug("All MAPDL processes exited")
             self._exited = True
 
     def _cache_pids(self):
@@ -1228,6 +1254,7 @@ class MapdlGrpc(MapdlBase):
         processes.
 
         """
+        self._log.debug("Caching PIDs")
         self._pids = []
 
         for filename in self.list_files():
@@ -1249,10 +1276,14 @@ class MapdlGrpc(MapdlBase):
             try:
                 parent = psutil.Process(parent_pid)
             except psutil.NoSuchProcess:
+                self._log.debug(f"Parent process does not exist.")
                 return
+
             children = parent.children(recursive=True)
 
             self._pids = [parent_pid] + [each.pid for each in children]
+
+        self._log.debug(f"Recaching PIDs: {self._pids}")
 
     def _remove_lock_file(self, mapdl_path=None):
         """Removes the lock file.
@@ -2019,6 +2050,11 @@ class MapdlGrpc(MapdlBase):
         """Writes stored commands to an input file and runs the input
         file.  Used with non_interactive.
         """
+        if not self._stored_commands:
+            self._log.debug("There is no commands to be flushed.")
+            self._store_commands = False
+            return
+
         self._log.debug("Flushing stored commands")
 
         commands = "\n".join(self._stored_commands)
@@ -2605,9 +2641,15 @@ class MapdlGrpc(MapdlBase):
         if self._exited:
             self._log.debug("MAPDL instance is not alive because it is exited.")
             return False
+
         if self.busy:
             self._log.debug("MAPDL instance is alive because it is busy.")
             return True
+
+        if self._exiting:
+            # It should be exiting so we should not issue gRPC calls
+            self._log.debug("MAPDL instance is expected to be exiting")
+            return False
 
         try:
             check = bool(self._ctrl("VERSION"))
@@ -2622,6 +2664,9 @@ class MapdlGrpc(MapdlBase):
             return check
 
         except Exception as error:
+            if self._exited:
+                return False
+
             self._log.debug(
                 f"MAPDL instance is not alive because retrieving version failed with:\n{error}"
             )
@@ -2955,7 +3000,7 @@ class MapdlGrpc(MapdlBase):
         # non-interactive and there's no output to return
         super().cmatrix(symfac, condname, numcond, grndkey, capname, **kwargs)
 
-    @property
+    @MapdlBase.name.getter
     def name(self) -> str:
         """Instance unique identifier."""
         if not self._name:
