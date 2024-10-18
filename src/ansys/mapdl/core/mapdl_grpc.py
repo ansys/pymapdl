@@ -441,7 +441,7 @@ class MapdlGrpc(MapdlBase):
         # Storing HPC related stuff
         self._jobid: int = start_parm.get("jobid")
         self._hostname: str = start_parm.get("hostname")
-        self._mapdl_on_slurm: bool = bool(self._jobid)
+        self._mapdl_on_hpc: bool = bool(self._jobid)
         self.finish_job_on_exit: bool = start_parm.get("finish_job_on_exit", True)
 
         # Queueing the stds
@@ -1151,7 +1151,7 @@ class MapdlGrpc(MapdlBase):
             # No cover: The CI is working with a single MAPDL instance
             self._remote_instance.delete()
 
-        if self._mapdl_on_slurm:
+        if self._mapdl_on_hpc and self.finish_job_on_exit:
             self.kill_job(self.jobid)
             self._log.debug(f"Job (id: {self.jobid}) has been cancel.")
 
@@ -3738,7 +3738,12 @@ class MapdlGrpc(MapdlBase):
             Popen(cmd)
 
     def __del__(self):
-        if self._mapdl_on_slurm and self.finish_job_on_exit:
+        # For some reason, some tests do not seem this attribute.
+        if (
+            hasattr(self, "_mapdl_on_hpc")
+            and self._mapdl_on_hpc
+            and self.finish_job_on_exit
+        ):
             self.exit()
         else:
             super().__del__()

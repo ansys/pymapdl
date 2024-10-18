@@ -28,6 +28,7 @@ import tempfile
 from unittest.mock import patch
 import warnings
 
+import psutil
 import pytest
 
 from ansys.mapdl import core as pymapdl
@@ -49,7 +50,7 @@ from ansys.mapdl.core.launcher import (
     get_slurm_options,
     get_start_instance,
     get_version,
-    is_on_slurm,
+    is_running_on_slurm,
     launch_grpc,
     launch_mapdl,
     remove_err_files,
@@ -696,14 +697,14 @@ def test_slurm_ram(monkeypatch, ram, expected, context):
 @pytest.mark.parametrize("slurm_job_name", ["True", "false", ""])
 @pytest.mark.parametrize("slurm_job_id", ["True", "false", ""])
 @pytest.mark.parametrize("detect_hpc", [True, False, None])
-def test_is_on_slurm(
+def test_is_running_on_slurm(
     monkeypatch, slurm_env_var, slurm_job_name, slurm_job_id, detect_hpc
 ):
-    monkeypatch.setenv("PYMAPDL_RUNNING_ON_SLURM", slurm_env_var)
+    monkeypatch.setenv("PYMAPDL_RUNNING_ON_HPC", slurm_env_var)
     monkeypatch.setenv("SLURM_JOB_NAME", slurm_job_name)
     monkeypatch.setenv("SLURM_JOB_ID", slurm_job_id)
 
-    flag = is_on_slurm(args={"detect_hpc": detect_hpc})
+    flag = is_running_on_slurm(args={"detect_hpc": detect_hpc})
 
     if detect_hpc is not True:
         assert not flag
@@ -881,31 +882,8 @@ def test_ip_and_start_instance(
             assert options["ip"] in (LOCALHOST, "0.0.0.0", "127.0.0.1")
 
 
-def mycpucount(**kwargs):
-    return 10  # faking 10 cores
-
-
-def test_nproc_envvar(monkeypatch):
-    monkeypatch.setenv("PYMAPDL_NPROC", 10)
-    args = launch_mapdl(_debug_no_launch=True)
-    assert args["nproc"] == 10
-
-
-@pytest.mark.parametrize("nproc", [None, 5, 9, 15])
-@patch("psutil.cpu_count", mycpucount)
-def test_nproc(monkeypatch, nproc):
-    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
-
-    if nproc and nproc > mycpucount():
-        with pytest.raises(NotEnoughResources):
-            launch_mapdl(nproc=nproc, _debug_no_launch=True)
-    else:
-        args = launch_mapdl(nproc=nproc, _debug_no_launch=True)
-        assert args["nproc"] == (nproc or 2)
-
-
 @patch("os.name", "nt")
-@patch("psutil.cpu_count", mycpucount)
+@patch("psutil.cpu_count", lambda *args, **kwargs: 10)
 def test_generate_mapdl_launch_command_windows():
     assert os.name == "nt"  # Checking mocking is properly done
 
@@ -1137,7 +1115,7 @@ def test_get_cpus(monkeypatch, arg, env):
     if (arg and arg > cores_machine) or (arg is None and env and env > cores_machine):
         context = pytest.raises(NotEnoughResources)
 
-    args = {"nproc": arg, "ON_SLURM": False}
+    args = {"nproc": arg, "RUNNING_ON_HPC": False}
     with context:
         get_cpus(args)
 
@@ -1151,6 +1129,6 @@ def test_get_cpus(monkeypatch, arg, env):
 
 @patch("psutil.cpu_count", lambda *args, **kwags: 1)
 def test_get_cpus_min():
-    args = {"nproc": None, "ON_SLURM": False}
+    args = {"nproc": None, "RUNNING_ON_HPC": False}
     get_cpus(args)
     assert args["nproc"] == 1

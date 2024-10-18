@@ -99,6 +99,7 @@ ALLOWABLE_LAUNCH_MAPDL_ARGS = [
     "detect_hpc",
     "exec_file",
     "force_intel" "ip",
+    "ip",
     "jobname",
     "launch_on_hpc",
     "license_server_check",
@@ -1456,7 +1457,7 @@ def launch_mapdl(
             cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
         )
 
-    if args["RUNNING_ON_HPC"] or args["launch_on_hpc"]:
+    if args["running_on_hpc"] or args["launch_on_hpc"]:
         env_vars.setdefault("ANS_MULTIPLE_NODES", "1")
         env_vars.setdefault("HYDRA_BOOTSTRAP", "slurm")
 
@@ -1975,18 +1976,18 @@ def pack_arguments(locals_):
 
 def is_running_on_slurm(args: Dict[str, Any]) -> bool:
 
-    args["RUNNING_ON_HPC"] = os.environ.get("PYMAPDL_RUNNING_ON_HPC", "True")
+    args["running_on_hpc"] = os.environ.get("PYMAPDL_running_on_hpc", "True")
 
-    is_flag_false = args["RUNNING_ON_HPC"].lower() == "false"
+    is_flag_false = args["running_on_hpc"].lower() == "false"
 
     # Let's require the following env vars to exist to go into slurm mode.
-    args["RUNNING_ON_HPC"] = bool(
+    args["running_on_hpc"] = bool(
         args["detect_hpc"]
         and not is_flag_false  # default is true
         and os.environ.get("SLURM_JOB_NAME")
         and os.environ.get("SLURM_JOB_ID")
     )
-    return args["RUNNING_ON_HPC"]
+    return args["running_on_hpc"]
 
 
 def generate_start_parameters(args: Dict[str, Any]) -> Dict[str, Any]:
@@ -2414,7 +2415,7 @@ def get_cpus(args: Dict[str, Any]):
     # Bypassing number of processors checks because VDI/VNC might have
     # different number of processors than the cluster compute nodes.
     # Also the CPUs are set in `get_slurm_options`
-    if args["RUNNING_ON_HPC"]:
+    if args["running_on_hpc"]:
         return
 
     # Setting number of processors
@@ -2427,7 +2428,7 @@ def get_cpus(args: Dict[str, Any]):
         # Check the env var `PYMAPDL_NPROC`
         args["nproc"] = int(os.environ.get("PYMAPDL_NPROC", min_cpus))
 
-    if not args["launch_on_hpc"] and machine_cores < int(args["nproc"]):
+    if not args.get("launch_on_hpc", False) and machine_cores < int(args["nproc"]):
         raise NotEnoughResources(
             f"The machine has {machine_cores} cores. PyMAPDL is asking for {args['nproc']} cores."
         )
