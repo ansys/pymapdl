@@ -67,7 +67,7 @@ Constants
 ``Information`` class attributes
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. currentmodule:: ansys.mapdl.core.misc
+.. currentmodule:: ansys.mapdl.core.information
 
 .. autosummary::
    :toctree: _autosummary

@@ -29,7 +29,7 @@ from typing import Any, Dict, List, Optional, Union
 import warnings
 import weakref
 
-from ansys.mapdl.core import LOG, launch_mapdl
+from ansys.mapdl.core import _HAS_ATP, _HAS_TQDM, LOG, launch_mapdl
 from ansys.mapdl.core.errors import MapdlDidNotStart, MapdlRuntimeError, VersionError
 from ansys.mapdl.core.launcher import (
     LOCALHOST,
@@ -38,15 +38,10 @@ from ansys.mapdl.core.launcher import (
     get_start_instance,
     port_in_use,
 )
-from ansys.mapdl.core.mapdl_grpc import _HAS_TQDM
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
 
-try:
+if _HAS_ATP:
     from ansys.tools.path import get_ansys_path, version_from_path
-
-    _HAS_ATP = True
-except ModuleNotFoundError:
-    _HAS_ATP = False
 
 if _HAS_TQDM:
     from tqdm import tqdm

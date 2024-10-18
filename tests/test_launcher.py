@@ -44,6 +44,7 @@ from ansys.mapdl.core.launcher import (
     force_smp_in_student,
     generate_mapdl_launch_command,
     generate_start_parameters,
+    get_cpus,
     get_exec_file,
     get_run_location,
     get_slurm_options,
@@ -1119,3 +1120,35 @@ def test_launch_grpc(tmpdir):
     assert isinstance(kwags["stdin"], type(subprocess.DEVNULL))
     assert isinstance(kwags["stdout"], type(subprocess.PIPE))
     assert isinstance(kwags["stderr"], type(subprocess.PIPE))
+
+
+@patch("psutil.cpu_count", lambda *args, **kwags: 5)
+@pytest.mark.parametrize("arg", [None, 3, 10])
+@pytest.mark.parametrize("env", [None, 3, 10])
+def test_get_cpus(monkeypatch, arg, env):
+    if env:
+        monkeypatch.setenv("PYMAPDL_NPROC", env)
+
+    context = NullContext()
+    cores_machine = psutil.cpu_count(logical=False)  # it is patched
+
+    if (arg and arg > cores_machine) or (arg is None and env and env > cores_machine):
+        context = pytest.raises(NotEnoughResources)
+
+    args = {"nproc": arg, "ON_SLURM": False}
+    with context:
+        get_cpus(args)
+
+    if arg:
+        assert args["nproc"] == arg
+    elif env:
+        assert args["nproc"] == env
+    else:
+        assert args["nproc"] == 2
+
+
+@patch("psutil.cpu_count", lambda *args, **kwags: 1)
+def test_get_cpus_min():
+    args = {"nproc": None, "ON_SLURM": False}
+    get_cpus(args)
+    assert args["nproc"] == 1

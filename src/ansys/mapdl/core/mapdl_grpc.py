@@ -64,7 +64,7 @@ try:
 except ImportError:  # pragma: no cover
     raise ImportError(MSG_IMPORT)
 
-from ansys.mapdl.core import _LOCAL_PORTS, __version__
+from ansys.mapdl.core import _HAS_TQDM, __version__
 from ansys.mapdl.core.common_grpc import (
     ANSYS_VALUE_TYPE,
     DEFAULT_CHUNKSIZE,
@@ -92,12 +92,8 @@ from ansys.mapdl.core.parameters import interp_star_status
 
 # Checking if tqdm is installed.
 # If it is, the default value for progress_bar is true.
-try:
+if _HAS_TQDM:
     from tqdm import tqdm
-
-    _HAS_TQDM = True
-except ModuleNotFoundError:  # pragma: no cover
-    _HAS_TQDM = False
 
 if TYPE_CHECKING:  # pragma: no cover
     from queue import Queue
@@ -1131,8 +1127,8 @@ class MapdlGrpc(MapdlBase):
 
         self._remove_temp_dir_on_exit(mapdl_path)
 
-        if self._local and self._port in _LOCAL_PORTS:
-            _LOCAL_PORTS.remove(self._port)
+        if self._local and self._port in pymapdl._LOCAL_PORTS:
+            pymapdl._LOCAL_PORTS.remove(self._port)
 
     def _remove_temp_dir_on_exit(self, path=None):
         """Removes the temporary directory created by the launcher.

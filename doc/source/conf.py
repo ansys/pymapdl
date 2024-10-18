@@ -214,7 +214,7 @@ with open("substitutions.rst") as f:
     rst_epilog += f.read()
 
 # Broken anchors:
-linkcheck_exclude_documents = ["index"]
+linkcheck_exclude_documents = ["index", "changelog"]
 linkcheck_anchors_ignore_for_url = ["https://docs.pyvista.org/api/*"]
 linkcheck_ignore = [
     "https://github.com/ansys/pymapdl/*",

@@ -27,18 +27,12 @@ import socket
 import subprocess
 import time
 
-from ansys.mapdl.core import LOG
+from ansys.mapdl.core import _HAS_ATP, LOG
 from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.misc import threaded_daemon
 
-try:
+if _HAS_ATP:
     from ansys.tools.path import get_ansys_path, version_from_path
-
-    _HAS_ATP = True
-
-except ModuleNotFoundError:
-    _HAS_ATP = False
-
 
 LOCALHOST = "127.0.0.1"
 LIC_PATH_ENVAR = "ANSYSLIC_DIR"
