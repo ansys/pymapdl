@@ -1226,8 +1226,8 @@ def launch_mapdl(
     **Additional switches**
 
     These are the MAPDL switch options as of 2020R2 applicable for
-    running MAPDL as a service via gRPC.  Excluded switches such as
-    ``"-j"`` either not applicable or are set via keyword arguments.
+    running MAPDL as a service via gRPC.  Excluded switches not applicable or
+    are set via keyword arguments such as ``"-j"`` .
 
     \\-acc <device>
         Enables the use of GPU hardware.  See GPU
