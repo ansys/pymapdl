@@ -1123,24 +1123,34 @@ def fake_subprocess_open(*args, **kwargs):
 
 
 @patch("os.name", "nt")
+@pytest.mark.parametrize("launch_on_hpc", [None, False, True])
 @patch("subprocess.Popen", fake_subprocess_open)
-def test_launch_grpc(tmpdir):
-    cmd = "ansys.exe -b -i my_input.inp -o my_output.inp".split(" ")
+def test_launch_grpc(tmpdir, launch_on_hpc):
+    if launch_on_hpc:
+        cmd = ["sbatch", "--wrap", "'ansys.exe -b -i my_input.inp -o my_output.inp'"]
+    else:
+        cmd = "ansys.exe -b -i my_input.inp -o my_output.inp".split(" ")
     run_location = str(tmpdir)
-    kwags = launch_grpc(cmd, run_location)
+    kwargs = launch_grpc(cmd, run_location)
 
     inp_file = os.path.join(run_location, "my_input.inp")
     assert os.path.exists(inp_file)
     with open(inp_file, "r") as fid:
         assert "FINISH" in fid.read()
 
-    assert cmd == kwags["cmd"]
-    assert not kwags["shell"]
-    assert "TRUE" == kwags["env"].pop("ANS_CMD_NODIAG")
-    assert not kwags["env"]
-    assert isinstance(kwags["stdin"], type(subprocess.DEVNULL))
-    assert isinstance(kwags["stdout"], type(subprocess.PIPE))
-    assert isinstance(kwags["stderr"], type(subprocess.PIPE))
+    if launch_on_hpc:
+        assert "sbatch" in kwargs["cmd"]
+        assert "--wrap" in kwargs["cmd"]
+        assert " ".join(cmd) == kwargs["cmd"]
+    else:
+        assert cmd == kwargs["cmd"]
+
+    assert not kwargs["shell"]
+    assert "TRUE" == kwargs["env"].pop("ANS_CMD_NODIAG")
+    assert not kwargs["env"]
+    assert isinstance(kwargs["stdin"], type(subprocess.DEVNULL))
+    assert isinstance(kwargs["stdout"], type(subprocess.PIPE))
+    assert isinstance(kwargs["stderr"], type(subprocess.PIPE))
 
 
 @patch("psutil.cpu_count", lambda *args, **kwags: 5)
@@ -1173,3 +1183,6 @@ def test_get_cpus_min():
     args = {"nproc": None, "running_on_hpc": False}
     get_cpus(args)
     assert args["nproc"] == 1
+
+
+# def test_launch_grpc_slurm()
