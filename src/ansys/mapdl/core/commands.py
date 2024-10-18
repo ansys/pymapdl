@@ -345,7 +345,7 @@ class PreprocessorCommands(
     pass
 
 
-class APDLCommands(
+class Apdl(
     apdl.abbreviations.Abbreviations,
     apdl.array_parameters.ArrayParameters,
     apdl.encryption_decryption.EncryptionDecryption,
@@ -489,7 +489,7 @@ class InqFunctions(inq_func.inq_function):
 
 
 class Commands(
-    APDLCommands,
+    Apdl,
     Aux2Commands,
     Aux12Commands,
     DatabaseCommands,
