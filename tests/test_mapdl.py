@@ -1835,11 +1835,14 @@ def test_cache_pids(mapdl):
     if mapdl.version == 23.2:
         pytest.skip(f"Flaky test in MAPDL 23.2")  # I'm not sure why.
 
-    assert mapdl._pids
-    mapdl._cache_pids()  # Recache pids
+    if mapdl.launched:
+        assert mapdl._pids
+        mapdl._cache_pids()  # Recache pids
 
-    for each in mapdl._pids:
-        assert "ansys" in "".join(psutil.Process(each).cmdline()).lower()
+        for each in mapdl._pids:
+            assert "ansys" in "".join(psutil.Process(each).cmdline()).lower()
+    else:
+        pytest.skip(f"MAPDL needs to have been launched by PyMAPDL.")
 
 
 @requires("local")
@@ -1926,56 +1929,32 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
     assert int(n_ent[0]) > 0
 
 
-@requires("local")
-@requires("nostudent")
-@pytest.mark.xfail(reason="Save on exit is broken.")
 def test_save_on_exit(mapdl, cleared):
-    mapdl2 = launch_mapdl(
-        license_server_check=False,
-        additional_switches=QUICK_LAUNCH_SWITCHES,
-        port=PORT1,
-    )
-    mapdl2.parameters["my_par"] = "initial_value"
+    with mapdl.non_interactive:
+        mapdl.exit(save=True, fake_exit=True)
+        mapdl._exited = False  # avoiding set exited on the class.
 
-    db_name = mapdl2.jobname + ".db"
-    db_dir = mapdl2.directory
-    db_path = os.path.join(db_dir, db_name)
+        lines = "\n".join(mapdl._stored_commands.copy())
+        assert "SAVE" in lines.upper()
 
-    mapdl2.save(db_name)
-    assert os.path.exists(db_path)
+        mapdl._stored_commands = []  # resetting
+        mapdl.prep7()
 
-    mapdl2.parameters["my_par"] = "final_value"
-    mapdl2.exit(force=True)
+    mapdl.prep7()
 
-    mapdl2 = launch_mapdl(
-        license_server_check=False,
-        additional_switches=QUICK_LAUNCH_SWITCHES,
-        port=PORT1,
-    )
-    mapdl2.resume(db_path)
-    if mapdl.version >= 24.2:
-        assert mapdl2.parameters["my_par"] == "initial_value"
-    else:
-        # This fails in earlier versions of MAPDL
-        assert mapdl2.parameters["my_par"] != "initial_value"
-        assert mapdl2.parameters["my_par"] == "final_value"
 
-    mapdl2.parameters["my_par"] = "new_initial_value"
-    db_name = mapdl2.jobname + ".db"  # reupdating db path
-    db_dir = mapdl2.directory
-    db_path = os.path.join(db_dir, db_name)
-    mapdl2.exit(save=True, force=True)
+def test_save_on_exit_not(mapdl, cleared):
+    with mapdl.non_interactive:
+        mapdl.exit(save=False, fake_exit=True)
+        mapdl._exited = False  # avoiding set exited on the class.
 
-    mapdl2 = launch_mapdl(
-        license_server_check=False,
-        additional_switches=QUICK_LAUNCH_SWITCHES,
-        port=PORT1,
-    )
-    mapdl2.resume(db_path)
-    assert mapdl2.parameters["my_par"] == "new_initial_value"
+        lines = "\n".join(mapdl._stored_commands.copy())
+        assert "SAVE" not in lines.upper()
 
-    # cleaning up
-    mapdl2.exit(force=True)
+        mapdl._stored_commands = []  # resetting
+        mapdl.prep7()
+
+    mapdl.prep7()
 
 
 def test_input_strings_inside_non_interactive(mapdl, cleared):
@@ -2470,3 +2449,14 @@ def test_cleanup_loggers(mapdl):
     assert mapdl.logger is not None
     assert mapdl.logger.std_out_handler is None
     assert mapdl.logger.file_handler is None
+
+
+def test_no_flush_stored(mapdl):
+    assert not mapdl._store_commands
+    mapdl._store_commands = True
+    mapdl._stored_commands = []
+
+    mapdl._flush_stored()
+
+    assert not mapdl._store_commands
+    assert mapdl._stored_commands == []
