@@ -348,9 +348,10 @@ class PreprocessorCommands(
 class APDLCommands(
     apdl.abbreviations.Abbreviations,
     apdl.array_parameters.ArrayParameters,
+    apdl.encryption_decryption.EncryptionDecryption,
     apdl.macro_files.MacroFiles,
-    apdl.matrix_op.MatrixOP,
-    apdl.parameter_definition.ParameterDefinition,
+    apdl.matrix_operations.MatrixOperations,
+    apdl.parameters.Parameters,
     apdl.process_controls.ProcessControls,
 ):
     pass
