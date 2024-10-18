@@ -28,6 +28,7 @@ import tempfile
 from unittest.mock import patch
 import warnings
 
+import psutil
 import pytest
 
 from ansys.mapdl import core as pymapdl
@@ -43,12 +44,13 @@ from ansys.mapdl.core.launcher import (
     force_smp_in_student,
     generate_mapdl_launch_command,
     generate_start_parameters,
+    get_cpus,
     get_exec_file,
     get_run_location,
     get_slurm_options,
     get_start_instance,
     get_version,
-    is_on_slurm,
+    is_running_on_slurm,
     launch_grpc,
     launch_mapdl,
     remove_err_files,
@@ -694,17 +696,17 @@ def test_slurm_ram(monkeypatch, ram, expected, context):
 @pytest.mark.parametrize("slurm_env_var", ["True", "false", ""])
 @pytest.mark.parametrize("slurm_job_name", ["True", "false", ""])
 @pytest.mark.parametrize("slurm_job_id", ["True", "false", ""])
-@pytest.mark.parametrize("detect_HPC", [True, False, None])
-def test_is_on_slurm(
-    monkeypatch, slurm_env_var, slurm_job_name, slurm_job_id, detect_HPC
+@pytest.mark.parametrize("detect_hpc", [True, False, None])
+def test_is_running_on_slurm(
+    monkeypatch, slurm_env_var, slurm_job_name, slurm_job_id, detect_hpc
 ):
-    monkeypatch.setenv("PYMAPDL_ON_SLURM", slurm_env_var)
+    monkeypatch.setenv("PYMAPDL_RUNNING_ON_HPC", slurm_env_var)
     monkeypatch.setenv("SLURM_JOB_NAME", slurm_job_name)
     monkeypatch.setenv("SLURM_JOB_ID", slurm_job_id)
 
-    flag = is_on_slurm(args={"detect_HPC": detect_HPC})
+    flag = is_running_on_slurm(args={"detect_hpc": detect_hpc})
 
-    if detect_HPC is not True:
+    if detect_hpc is not True:
         assert not flag
 
     else:
@@ -720,9 +722,9 @@ def test_is_on_slurm(
     if ON_LOCAL:
         assert (
             launch_mapdl(
-                detect_HPC=detect_HPC,
+                detect_hpc=detect_hpc,
                 _debug_no_launch=True,
-            )["ON_SLURM"]
+            )["running_on_hpc"]
             == flag
         )
 
@@ -880,31 +882,8 @@ def test_ip_and_start_instance(
             assert options["ip"] in (LOCALHOST, "0.0.0.0", "127.0.0.1")
 
 
-def mycpucount(**kwargs):
-    return 10  # faking 10 cores
-
-
-def test_nproc_envvar(monkeypatch):
-    monkeypatch.setenv("PYMAPDL_NPROC", 10)
-    args = launch_mapdl(_debug_no_launch=True)
-    assert args["nproc"] == 10
-
-
-@pytest.mark.parametrize("nproc", [None, 5, 9, 15])
-@patch("psutil.cpu_count", mycpucount)
-def test_nproc(monkeypatch, nproc):
-    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
-
-    if nproc and nproc > mycpucount():
-        with pytest.raises(NotEnoughResources):
-            launch_mapdl(nproc=nproc, _debug_no_launch=True)
-    else:
-        args = launch_mapdl(nproc=nproc, _debug_no_launch=True)
-        assert args["nproc"] == (nproc or 2)
-
-
 @patch("os.name", "nt")
-@patch("psutil.cpu_count", mycpucount)
+@patch("psutil.cpu_count", lambda *args, **kwargs: 10)
 def test_generate_mapdl_launch_command_windows():
     assert os.name == "nt"  # Checking mocking is properly done
 
@@ -924,7 +903,27 @@ def test_generate_mapdl_launch_command_windows():
         additional_switches=additional_switches,
     )
 
-    assert f'"{exec_file}" ' in cmd
+    assert isinstance(cmd, list)
+
+    assert f"{exec_file}" in cmd
+    assert "-j" in cmd
+    assert f"{jobname}" in cmd
+    assert "-port" in cmd
+    assert f"{port}" in cmd
+    assert "-m" in cmd
+    assert f"{ram*1024}" in cmd
+    assert "-np" in cmd
+    assert f"{nproc}" in cmd
+    assert "-grpc" in cmd
+    assert f"{additional_switches}" in cmd
+    assert "-b" in cmd
+    assert "-i" in cmd
+    assert ".__tmp__.inp" in cmd
+    assert "-o" in cmd
+    assert ".__tmp__.out" in cmd
+
+    cmd = " ".join(cmd)
+    assert f"{exec_file} " in cmd
     assert f" -j {jobname} " in cmd
     assert f" -port {port} " in cmd
     assert f" -m {ram*1024} " in cmd
@@ -954,7 +953,28 @@ def test_generate_mapdl_launch_command_linux():
         additional_switches=additional_switches,
     )
 
-    assert f'"{exec_file}" ' in cmd
+    assert isinstance(cmd, list)
+
+    assert f"{exec_file}" in cmd
+    assert "-j" in cmd
+    assert f"{jobname}" in cmd
+    assert "-port" in cmd
+    assert f"{port}" in cmd
+    assert "-m" in cmd
+    assert f"{ram*1024}" in cmd
+    assert "-np" in cmd
+    assert f"{nproc}" in cmd
+    assert "-grpc" in cmd
+    assert f"{additional_switches}" in cmd
+
+    assert "-b" not in cmd
+    assert "-i" not in cmd
+    assert ".__tmp__.inp" not in cmd
+    assert "-o" not in cmd
+    assert ".__tmp__.out" not in cmd
+
+    cmd = " ".join(cmd)
+    assert f"{exec_file} " in cmd
     assert f" -j {jobname} " in cmd
     assert f" -port {port} " in cmd
     assert f" -m {ram*1024} " in cmd
@@ -1105,7 +1125,7 @@ def fake_subprocess_open(*args, **kwargs):
 @patch("os.name", "nt")
 @patch("subprocess.Popen", fake_subprocess_open)
 def test_launch_grpc(tmpdir):
-    cmd = "ansys.exe -b -i my_input.inp -o my_output.inp"
+    cmd = "ansys.exe -b -i my_input.inp -o my_output.inp".split(" ")
     run_location = str(tmpdir)
     kwags = launch_grpc(cmd, run_location)
 
@@ -1121,3 +1141,35 @@ def test_launch_grpc(tmpdir):
     assert isinstance(kwags["stdin"], type(subprocess.DEVNULL))
     assert isinstance(kwags["stdout"], type(subprocess.PIPE))
     assert isinstance(kwags["stderr"], type(subprocess.PIPE))
+
+
+@patch("psutil.cpu_count", lambda *args, **kwags: 5)
+@pytest.mark.parametrize("arg", [None, 3, 10])
+@pytest.mark.parametrize("env", [None, 3, 10])
+def test_get_cpus(monkeypatch, arg, env):
+    if env:
+        monkeypatch.setenv("PYMAPDL_NPROC", env)
+
+    context = NullContext()
+    cores_machine = psutil.cpu_count(logical=False)  # it is patched
+
+    if (arg and arg > cores_machine) or (arg is None and env and env > cores_machine):
+        context = pytest.raises(NotEnoughResources)
+
+    args = {"nproc": arg, "running_on_hpc": False}
+    with context:
+        get_cpus(args)
+
+    if arg:
+        assert args["nproc"] == arg
+    elif env:
+        assert args["nproc"] == env
+    else:
+        assert args["nproc"] == 2
+
+
+@patch("psutil.cpu_count", lambda *args, **kwags: 1)
+def test_get_cpus_min():
+    args = {"nproc": None, "running_on_hpc": False}
+    get_cpus(args)
+    assert args["nproc"] == 1

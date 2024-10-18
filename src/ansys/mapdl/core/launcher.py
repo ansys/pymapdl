@@ -92,37 +92,39 @@ ALLOWABLE_MODES = ["console", "grpc"]
 ALLOWABLE_VERSION_INT = tuple(SUPPORTED_ANSYS_VERSIONS.keys())
 
 ALLOWABLE_LAUNCH_MAPDL_ARGS = [
-    "exec_file",
-    "run_location",
-    "jobname",
-    "nproc",
-    "ram",
-    "mode",
-    "override",
-    "loglevel",
+    "add_env_vars",
     "additional_switches",
-    "start_timeout",
-    "port",
     "cleanup_on_exit",
-    "start_instance",
-    "ip",
     "clear_on_connect",
-    "log_apdl",
-    "remove_temp_dir_on_exit",
+    "detect_hpc",
+    "exec_file",
+    "force_intel" "ip",
+    "ip",
+    "jobname",
+    "launch_on_hpc",
     "license_server_check",
     "license_type",
+    "log_apdl",
+    "loglevel",
+    "mode",
+    "nproc",
+    "override",
+    "port",
     "print_com",
-    "add_env_vars",
+    "ram",
+    "remove_temp_dir_on_exit",
     "replace_env_vars",
-    "version",
-    "detect_HPC",
+    "run_location",
+    "scheduler_options",
     "set_no_abort",
-    "force_intel"
+    "start_instance",
+    "start_timeout",
+    "version",
     # Non documented args
-    "use_vtk",
+    "_debug_no_launch",
     "just_launch",
     "on_pool",
-    "_debug_no_launch",
+    "use_vtk",
 ]
 
 ON_WSL = os.name == "posix" and (
@@ -318,7 +320,7 @@ def generate_mapdl_launch_command(
     ram: Optional[int] = None,
     port: int = MAPDL_DEFAULT_PORT,
     additional_switches: str = "",
-) -> str:
+) -> List[str]:
     """Generate the command line to start MAPDL in gRPC mode.
 
     Parameters
@@ -355,7 +357,7 @@ def generate_mapdl_launch_command(
 
     Returns
     -------
-    str
+    List[str]
         Command
 
     """
@@ -407,16 +409,18 @@ def generate_mapdl_launch_command(
         ]
 
     command_parm = [
-        each for each in command_parm if command_parm
+        each for each in command_parm if each.strip()
     ]  # cleaning empty args.
-    command = " ".join(command_parm)
+
+    command = " ".join(command_parm[1:]).split(" ")
+    command.insert(0, f"{exec_file}")
 
     LOG.debug(f"Generated command: {command}")
     return command
 
 
 def launch_grpc(
-    cmd: str,
+    cmd: List[str],
     run_location: str = None,
     env_vars: Optional[Dict[str, str]] = None,
 ) -> subprocess.Popen:
@@ -445,21 +449,37 @@ def launch_grpc(
     # disable all MAPDL pop-up errors:
     env_vars.setdefault("ANS_CMD_NODIAG", "TRUE")
 
+    cmd_string = " ".join(cmd)
+    if "sbatch" in cmd:
+        header = "Running an MAPDL instance on the Cluster:"
+        shell = os.name != "nt"
+        cmd_ = cmd_string
+    else:
+        header = "Running an MAPDL instance"
+        shell = False  # To prevent shell injection
+        cmd_ = cmd
+
     LOG.info(
-        f"Running a local instance in {run_location} with the following command: '{cmd}'"
+        "\n============"
+        "\n============"
+        f"{header}:\nLocation:\n{run_location}\n"
+        f"Command:\n{cmd_string}\n"
+        f"Env vars:\n{env_vars}"
+        "\n============"
+        "\n============"
     )
 
     if os.name == "nt":
         # getting tmp file name
-        tmp_inp = cmd.split()[cmd.split().index("-i") + 1]
+        tmp_inp = cmd_string.split()[cmd_string.split().index("-i") + 1]
         with open(os.path.join(run_location, tmp_inp), "w") as f:
             f.write("FINISH\r\n")
             LOG.debug(f"Writing temporary input file: {tmp_inp} with 'FINISH' command.")
 
     LOG.debug("MAPDL starting in background.")
     process = subprocess.Popen(
-        cmd,
-        shell=os.name != "nt",
+        cmd_,
+        shell=shell,  # It does not work without shell.
         cwd=run_location,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
@@ -981,7 +1001,8 @@ def launch_mapdl(
     add_env_vars: Optional[Dict[str, str]] = None,
     replace_env_vars: Optional[Dict[str, str]] = None,
     version: Optional[Union[int, str]] = None,
-    detect_HPC: bool = True,
+    detect_hpc: bool = True,
+    launch_on_hpc: bool = False,
     **kwargs: Dict[str, Any],
 ) -> Union[MapdlGrpc, "MapdlConsole"]:
     """Start MAPDL locally.
@@ -1012,7 +1033,7 @@ def launch_mapdl(
     nproc : int, optional
         Number of processors.  Defaults to 2. If running on an HPC cluster,
         this value is adjusted to the number of CPUs allocated to the job,
-        unless ``detect_HPC`` is set to "false".
+        unless ``detect_hpc`` is set to "false".
 
     ram : float, optional
         Total size in megabytes of the workspace (memory) used for the initial
@@ -1059,9 +1080,10 @@ def launch_mapdl(
     port : int
         Port to launch MAPDL gRPC on.  Final port will be the first
         port available after (or including) this port.  Defaults to
-        50052.  You can also override the port default with the
-        environment variable ``PYMAPDL_PORT=<VALID PORT>``
-        This argument has priority over the environment variable.
+        50052. You can also provide this value through the environment variable
+        :envvar:`PYMAPDL_PORT`. For instance ``PYMAPDL_PORT=50053``.
+        However the argument (if specified) has precedence over the environment
+        variable. If this environment variable is empty, it is as it is not set.
 
     cleanup_on_exit : bool, optional
         Exit MAPDL when python exits or the mapdl Python instance is
@@ -1070,9 +1092,11 @@ def launch_mapdl(
     start_instance : bool, optional
         When False, connect to an existing MAPDL instance at ``ip``
         and ``port``, which default to ip ``'127.0.0.1'`` at port 50052.
-        Otherwise, launch a local instance of MAPDL.  You can also
-        override the default behavior of this keyword argument with
-        the environment variable ``PYMAPDL_START_INSTANCE=FALSE``.
+        Otherwise, launch a local instance of MAPDL. You can also
+        provide this value through the environment variable
+        :envvar:`PYMAPDL_START_INSTANCE`.
+        However the argument (if specified) has precedence over the environment
+        variable. If this environment variable is empty, it is as it is not set.
 
     ip : str, optional
         Used only when ``start_instance`` is ``False``. If provided,
@@ -1080,10 +1104,11 @@ def launch_mapdl(
         ``PYMAPDL_START_INSTANCE``) is ``True`` then, an exception is raised.
         Specify the IP address of the MAPDL instance to connect to.
         You can also provide a hostname as an alternative to an IP address.
-        Defaults to ``'127.0.0.1'``. You can also override the
-        default behavior of this keyword argument with the
-        environment variable ``PYMAPDL_IP=<IP>``. If this environment variable
-        is empty, it is as it is not set.
+        Defaults to ``'127.0.0.1'``.
+        You can also provide this value through the environment variable
+        :envvar:`PYMAPDL_IP`. For instance ``PYMAPDL_IP=123.45.67.89``.
+        However the argument (if specified) has precedence over the environment
+        variable. If this environment variable is empty, it is as it is not set.
 
     clear_on_connect : bool, optional
         Defaults to ``True``, giving you a fresh environment when
@@ -1141,26 +1166,34 @@ def launch_mapdl(
         floats (i.e. ``version=22.2``).
         To retrieve the available installed versions, use the function
         :meth:`ansys.tools.path.path.get_available_ansys_installations`.
+        You can also provide this value through the environment variable
+        :envvar:`PYMAPDL_MAPDL_VERSION`.
+        For instance ``PYMAPDL_MAPDL_VERSION=22.2``.
+        However the argument (if specified) has precedence over the environment
+        variable. If this environment variable is empty, it is as it is not set.
 
-        .. note::
-
-           The default version can be also set through the environment variable
-           ``PYMAPDL_MAPDL_VERSION``. For example:
-
-           .. code:: console
-
-              export PYMAPDL_MAPDL_VERSION=22.2
-
-    detect_HPC: bool, optional
+    detect_hpc: bool, optional
         Whether detect if PyMAPDL is running on an HPC cluster or not. Currently
         only SLURM clusters are supported. By detaul, it is set to true.
         This option can be bypassed if the environment variable
-        ``PYMAPDL_ON_SLURM`` is set to "true". For more information visit
-        :ref:`ref_hpc_slurm`.
+        ``PYMAPDL_RUNNING_ON_HPC`` is set to "false".
+        For more information visit :ref:`ref_hpc_slurm`.
+
+    launch_on_hpc: bool, optional
+        If ``True``, it uses the implemented scheduler (SLURM only) to launch
+        an MAPDL instance on the HPC. In this case you can pass the argument
+        'scheduler_options' to ``launch_mapdl` to specify arguments as a
+        string or as a dictionary.
+        For more information visit :ref:`ref_hpc_slurm`.
 
     kwargs : dict, optional
         These keyword arguments are interface specific or for
         development purposes. See Notes for more details.
+
+        scheduler_options : :class:`str`, :class:`dict`
+          Use it to specify options to the scheduler run command. It can be a
+          string or a dictionary with arguments and its values (both as strings).
+          For more information visit :ref:`ref_hpc_slurm`.
 
         set_no_abort : :class:`bool`
           *(Development use only)*
@@ -1341,7 +1374,7 @@ def launch_mapdl(
     pre_check_args(args)
 
     # SLURM settings
-    if is_on_slurm(args):
+    if is_running_on_slurm(args):
         LOG.info("On Slurm mode.")
 
         # extracting parameters
@@ -1388,13 +1421,18 @@ def launch_mapdl(
         args["license_type"], args["additional_switches"]
     )
 
-    env_vars = update_env_vars(args["add_env_vars"], args["replace_env_vars"])
+    env_vars: Dict[str, str] = update_env_vars(
+        args["add_env_vars"], args["replace_env_vars"]
+    )
 
     ########################################
     # Context specific launching adjustments
     # --------------------------------------
     #
     if args["start_instance"]:
+        # ON HPC:
+        # Assuming that if login node is ubuntu, the computation ones
+        # are also ubuntu.
         env_vars = configure_ubuntu(env_vars)
 
         # Set SMP by default if student version is used.
@@ -1422,7 +1460,7 @@ def launch_mapdl(
             cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
         )
 
-    if args["ON_SLURM"]:
+    if args["running_on_hpc"] or args["launch_on_hpc"]:
         env_vars.setdefault("ANS_MULTIPLE_NODES", "1")
         env_vars.setdefault("HYDRA_BOOTSTRAP", "slurm")
 
@@ -1439,6 +1477,7 @@ def launch_mapdl(
         LOG.debug(
             f"Connecting to an existing instance of MAPDL at {args['ip']}:{args['port']}"
         )
+        start_parm["launched"] = False
 
         mapdl = MapdlGrpc(
             cleanup_on_exit=False,
@@ -1471,43 +1510,86 @@ def launch_mapdl(
         lic_check = LicenseChecker(timeout=args["start_timeout"])
         lic_check.start()
 
-    try:
-        LOG.debug("Starting MAPDL")
-        if args["mode"] == "console":
-            from ansys.mapdl.core.mapdl_console import MapdlConsole
+    LOG.debug("Starting MAPDL")
+    if args["mode"] == "console":
+        ########################################
+        # Launch MAPDL on console mode
+        # ----------------------------
+        #
+        from ansys.mapdl.core.mapdl_console import MapdlConsole
 
-            mapdl = MapdlConsole(
-                loglevel=args["loglevel"],
-                log_apdl=args["log_apdl"],
-                use_vtk=args["use_vtk"],
-                **start_parm,
+        mapdl = MapdlConsole(
+            loglevel=args["loglevel"],
+            log_apdl=args["log_apdl"],
+            use_vtk=args["use_vtk"],
+            **start_parm,
+        )
+
+    elif args["mode"] == "grpc":
+        ########################################
+        # Launch MAPDL with gRPC
+        # ----------------------
+        #
+        cmd = generate_mapdl_launch_command(
+            exec_file=args["exec_file"],
+            jobname=args["jobname"],
+            nproc=args["nproc"],
+            ram=args["ram"],
+            port=args["port"],
+            additional_switches=args["additional_switches"],
+        )
+
+        if args["launch_on_hpc"]:
+            # wrapping command if on HPC
+            cmd = generate_sbatch_command(
+                cmd, scheduler_args=args.get("scheduler_args")
             )
 
-        elif args["mode"] == "grpc":
-
-            cmd = generate_mapdl_launch_command(
-                exec_file=args["exec_file"],
-                jobname=args["jobname"],
-                nproc=args["nproc"],
-                ram=args["ram"],
-                port=args["port"],
-                additional_switches=args["additional_switches"],
-            )
-
+        try:
+            #
             process = launch_grpc(
                 cmd=cmd, run_location=args["run_location"], env_vars=env_vars
             )
 
-            check_mapdl_launch(
-                process, args["run_location"], args["start_timeout"], cmd
-            )
+            if args["launch_on_hpc"]:
+                check_mapdl_launch_on_hpc(process, start_parm)
+            else:
+                # Local mapdl launch check
+                check_mapdl_launch(
+                    process, args["run_location"], args["start_timeout"], cmd
+                )
 
-            if args["just_launch"]:
-                out = [args["ip"], args["port"]]
-                if hasattr(process, "pid"):
-                    out += [process.pid]
-                return out
+        except Exception as exception:
+            LOG.error("An error occurred when launching MAPDL.")
 
+            jobid: int = args.get("jobid", "Not found")
+
+            if (
+                args["launch_on_hpc"]
+                and start_parm.get("finish_job_on_exit", True)
+                and jobid not in ["Not found", None]
+            ):
+
+                LOG.debug(f"Killing HPC job with id: {jobid}")
+                subprocess.Popen(["scancel", str(jobid)])
+
+            if args["license_server_check"]:
+                LOG.debug("Checking license server.")
+                lic_check.check()
+
+            raise exception
+
+        if args["just_launch"]:
+            out = [args["ip"], args["port"]]
+            if hasattr(process, "pid"):
+                out += [process.pid]
+            return out
+
+        ########################################
+        # Connect to MAPDL using gRPC
+        # ---------------------------
+        #
+        try:
             mapdl = MapdlGrpc(
                 cleanup_on_exit=args["cleanup_on_exit"],
                 loglevel=args["loglevel"],
@@ -1519,23 +1601,12 @@ def launch_mapdl(
                 **start_parm,
             )
 
-        # Setting launched property
-        mapdl._launched = True
-        mapdl._env_vars = env_vars
+            # Setting launched property
+            mapdl._launched = True
 
-    except Exception as exception:
-        # Failed to launch for some reason.  Check if failure was due
-        # to the license check
-        if args["license_server_check"]:
-            LOG.debug("Checking license server.")
-            lic_check.check()
-
-        raise exception
-
-    # Stopping license checker
-    if args["license_server_check"]:
-        LOG.debug("Stopping license server check.")
-        lic_check.is_connected = True
+        except Exception as exception:
+            LOG.error("An error occurred when connecting to MAPDL.")
+            raise exception
 
     return mapdl
 
@@ -1902,24 +1973,25 @@ def pack_arguments(locals_):
     args["_debug_no_launch"] = locals_.get(
         "_debug_no_launch", locals_["kwargs"].get("_debug_no_launch", None)
     )
+    args.setdefault("launch_on_hpc", False)
+    args.setdefault("ip", None)
 
     return args
 
 
-def is_on_slurm(args: Dict[str, Any]) -> bool:
+def is_running_on_slurm(args: Dict[str, Any]) -> bool:
+    args["running_on_hpc"] = os.environ.get("PYMAPDL_RUNNING_ON_HPC", "True")
 
-    args["ON_SLURM"] = os.environ.get("PYMAPDL_ON_SLURM", "True")
-
-    is_flag_false = args["ON_SLURM"].lower() == "false"
+    is_flag_false = args["running_on_hpc"].lower() == "false"
 
     # Let's require the following env vars to exist to go into slurm mode.
-    args["ON_SLURM"] = bool(
-        args["detect_HPC"]
+    args["running_on_hpc"] = bool(
+        args["detect_hpc"]
         and not is_flag_false  # default is true
         and os.environ.get("SLURM_JOB_NAME")
         and os.environ.get("SLURM_JOB_ID")
     )
-    return args["ON_SLURM"]
+    return args["running_on_hpc"]
 
 
 def generate_start_parameters(args: Dict[str, Any]) -> Dict[str, Any]:
@@ -1957,6 +2029,8 @@ def generate_start_parameters(args: Dict[str, Any]) -> Dict[str, Any]:
         start_parm["ram"] = args["ram"]
         start_parm["override"] = args["override"]
         start_parm["timeout"] = args["start_timeout"]
+
+    start_parm["launched"] = True
 
     LOG.debug(f"Using start parameters {start_parm}")
     return start_parm
@@ -2345,7 +2419,7 @@ def get_cpus(args: Dict[str, Any]):
     # Bypassing number of processors checks because VDI/VNC might have
     # different number of processors than the cluster compute nodes.
     # Also the CPUs are set in `get_slurm_options`
-    if args["ON_SLURM"]:
+    if args["running_on_hpc"]:
         return
 
     # Setting number of processors
@@ -2357,11 +2431,11 @@ def get_cpus(args: Dict[str, Any]):
     if not args["nproc"]:
         # Check the env var `PYMAPDL_NPROC`
         args["nproc"] = int(os.environ.get("PYMAPDL_NPROC", min_cpus))
-    else:
-        if machine_cores < int(args["nproc"]):
-            raise NotEnoughResources(
-                f"The machine has {machine_cores} cores. PyMAPDL is asking for {args['nproc']} cores."
-            )
+
+    if not args.get("launch_on_hpc", False) and machine_cores < int(args["nproc"]):
+        raise NotEnoughResources(
+            f"The machine has {machine_cores} cores. PyMAPDL is asking for {args['nproc']} cores."
+        )
 
 
 def remove_err_files(run_location, jobname):
@@ -2383,3 +2457,347 @@ def remove_err_files(run_location, jobname):
                         f'"{run_location}"'
                     )
                     raise error
+
+
+def launch_mapdl_on_cluster(
+    exec_file: Optional[str] = None,
+    run_location: Optional[str] = None,
+    jobname: str = "file",
+    *,
+    nproc: Optional[int] = None,
+    ram: Optional[Union[int, str]] = None,
+    mode: Optional[str] = None,
+    override: bool = False,
+    loglevel: str = "ERROR",
+    additional_switches: str = "",
+    start_timeout: int = 90,
+    port: Optional[int] = None,
+    cleanup_on_exit: bool = True,
+    start_instance: Optional[bool] = None,
+    ip: Optional[str] = None,
+    clear_on_connect: bool = True,
+    log_apdl: Optional[Union[bool, str]] = None,
+    remove_temp_dir_on_exit: bool = False,
+    license_server_check: bool = False,
+    license_type: Optional[bool] = None,
+    print_com: bool = False,
+    add_env_vars: Optional[Dict[str, str]] = None,
+    replace_env_vars: Optional[Dict[str, str]] = None,
+    version: Optional[Union[int, str]] = None,
+    detect_hpc: bool = True,
+    **kwargs: Dict[str, Any],
+):
+
+    ########################################
+    # Processing arguments
+    # --------------------
+    #
+    # packing arguments
+    args = pack_arguments(locals())  # packs args and kwargs
+
+    check_kwargs(args)  # check if passing wrong arguments
+
+    pre_check_args(args)
+
+    # SLURM settings
+    if is_running_on_slurm(args):
+        LOG.info("On Slurm mode.")
+
+        # extracting parameters
+        get_slurm_options(args, kwargs)
+
+    get_cpus(args)
+
+    get_start_instance_arg(args)
+
+    get_ip(args)
+
+    args["port"] = get_port(args["port"], args["start_instance"])
+
+    get_exec_file(args)
+
+    args["version"] = get_version(args["version"], exec_file)
+
+    if args["start_instance"]:
+        ########################################
+        # Local adjustments
+        # -----------------
+        #
+        # Only when starting MAPDL (aka Local)
+
+        get_run_location(args)
+
+        # verify lock file does not exist
+        check_lock_file(args["run_location"], args["jobname"], args["override"])
+
+        # remove err file so we can track its creation
+        # (as way to check if MAPDL started or not)
+        remove_err_files(args["run_location"], args["jobname"])
+
+        if _HAS_ATP and not args["_debug_no_launch"]:
+            version = version_from_path("mapdl", args["exec_file"])
+            args["mode"] = check_mode(args["mode"], version)
+
+    args["mode"] = "grpc"
+
+    LOG.debug(f"Using mode {args['mode']}")
+
+    args["additional_switches"] = set_license_switch(
+        args["license_type"], args["additional_switches"]
+    )
+
+    env_vars = update_env_vars(args["add_env_vars"], args["replace_env_vars"])
+
+    ########################################
+    # Context specific launching adjustments
+    # --------------------------------------
+    #
+    if args["start_instance"]:
+        # Assuming that if login node is ubuntu, the computation ones
+        # are also ubuntu.
+        env_vars = configure_ubuntu(env_vars)
+
+        # Set compatible MPI
+        args["additional_switches"] = set_MPI_additional_switches(
+            args["additional_switches"],
+            args["exec_file"],
+            force_intel=args["force_intel"],
+        )
+
+        LOG.debug(f"Using additional switches {args['additional_switches']}.")
+
+    start_parm = generate_start_parameters(args)
+
+    env_vars.setdefault("ANS_MULTIPLE_NODES", "1")
+    env_vars.setdefault("HYDRA_BOOTSTRAP", "slurm")
+
+    # Early exit for debugging.
+    if args["_debug_no_launch"]:
+        # Early exit, just for testing
+        return args  # type: ignore
+
+    ########################################
+    # Sphinx docs adjustments
+    # -----------------------
+    #
+    # special handling when building the gallery outside of CI. This
+    # creates an instance of mapdl the first time.
+    if pymapdl.BUILDING_GALLERY:  # pragma: no cover
+        return create_gallery_instances(args, start_parm)
+
+    ########################################
+    # Local launching
+    # ---------------
+    #
+    # Check the license server
+    if args["license_server_check"]:
+        LOG.debug("Checking license server.")
+        lic_check = LicenseChecker(timeout=args["start_timeout"])
+        lic_check.start()
+
+    LOG.debug("Starting MAPDL")
+
+    cmd = generate_mapdl_launch_command(
+        exec_file=args["exec_file"],
+        jobname=args["jobname"],
+        nproc=args["nproc"],
+        ram=args["ram"],
+        port=args["port"],
+        additional_switches=args["additional_switches"],
+    )
+
+    cmd = generate_sbatch_command(cmd, scheduler_args=args.get("scheduler_args"))
+
+    jobid = None
+    try:
+        # TODO: wrap the launch_grpc with sbatch
+        process = launch_grpc(
+            cmd=cmd, run_location=args["run_location"], env_vars=env_vars
+        )
+
+        def check_mapdl_launch_on_hpc(process, args):
+            stdout = process.stdout.read().decode()
+            if "Submitted batch job" not in stdout:
+                stderr = process.stderr.read().decode()
+                raise MapdlDidNotStart(
+                    f"PyMAPDL failed to submit the sbatch job:\n{stderr}"
+                )
+
+            jobid = get_jobid(stdout)
+            batch_host = get_hostname_host_cluster(jobid)
+
+    except Exception as exception:
+        LOG.error("An error occurred when launching MAPDL.")
+
+        if start_parm.get("finish_job_on_exit", True) and jobid:
+            LOG.debug(f"Killing HPC job with id: {jobid}")
+            subprocess.Popen(["scancel", str(jobid)])
+
+        raise exception
+
+    # TODO: A way to check if the job is ready.
+    start_parm["ip"] = batch_host
+    start_parm["hostname"] = batch_host
+    start_parm["jobid"] = jobid
+
+    if args["just_launch"]:
+        out = [args["ip"], args["port"]]
+        if hasattr(process, "pid"):
+            out += [process.pid]
+        return out
+
+    try:
+        mapdl = MapdlGrpc(
+            cleanup_on_exit=args["cleanup_on_exit"],
+            loglevel=args["loglevel"],
+            set_no_abort=args["set_no_abort"],
+            remove_temp_dir_on_exit=args["remove_temp_dir_on_exit"],
+            log_apdl=args["log_apdl"],
+            process=process,
+            use_vtk=args["use_vtk"],
+            **start_parm,
+        )
+
+        # Setting launched property
+        mapdl._launched = True
+        mapdl._env_vars = env_vars
+
+    except Exception as exception:
+        # Failed to launch for some reason.  Check if failure was due
+        # to the license check
+        if args["license_server_check"]:
+            LOG.debug("Checking license server.")
+            lic_check.check()
+
+        raise exception
+
+    # Stopping license checker
+    if args["license_server_check"]:
+        LOG.debug("Stopping license server check.")
+        lic_check.is_connected = True
+
+    return mapdl
+
+
+def get_hostname_host_cluster(job_id: int) -> str:
+    cmd = f"scontrol show jobid -dd {job_id}".split()
+    LOG.debug(f"Executing the command '{cmd}'")
+
+    ready = False
+    time_start = time.time()
+    timeout = 30  # second
+    counter = 0
+    while not ready:
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+        )
+        stdout = proc.stdout.read().decode()
+
+        if time.time() > time_start + timeout:
+            state = stdout.split("JobState=")[1].split(" ")[0]
+            try:
+                host = get_hostname_from_scontrol(stdout)
+                hostname_msg = f"The BatchHost for this job is '{host}'"
+            except (IndexError, AttributeError):
+                hostname_msg = f"PyMAPDL couldn't get the BatchHost hostname"
+            raise MapdlDidNotStart(
+                f"The HPC job (id: {job_id}) didn't start on time. "
+                f"The job state is '{state}'. "
+                f"{hostname_msg}. "
+                "You can check more information by issuing in your console:\n"
+                f" scontrol show jobid -dd {job_id}"
+            )
+
+        if "JobState=RUNNING" not in stdout:
+            counter += 1
+            time.sleep(1)
+            if (counter % 3 + 1) == 0:  # print every 3 seconds. Skipping the first.
+                LOG.debug("The job is not ready yet. Waiting...")
+                print("The job is not ready yet. Waiting...")
+        else:
+            ready = True
+
+    LOG.debug(f"The 'scontrol' command returned:\n{stdout}")
+    batchhost = get_hostname_from_scontrol(stdout)
+    LOG.debug(f"Batchhost: {batchhost}")
+
+    # we should validate
+    batchhost_ip = socket.gethostbyname(batchhost)
+    LOG.debug(f"Batchhost IP: {batchhost_ip}")
+
+    return batchhost
+
+
+def get_jobid(stdout: str) -> int:
+    """Extract the jobid from a command output"""
+    job_id = stdout.strip().split(" ")[-1]
+
+    try:
+        job_id = int(job_id)
+    except ValueError:
+        LOG.error(f"The console output does not seems to have a valid jobid:\n{stdout}")
+        raise ValueError("PyMAPDL could not retrieve the job id.")
+
+    LOG.debug(f"The job id is: {job_id}")
+    return job_id
+
+
+def generate_sbatch_command(
+    cmd: Union[str, List[str]], scheduler_args: Optional[Union[str, Dict[str, str]]]
+) -> List[str]:
+    """Generate sbatch command for a given MAPDL launch command."""
+
+    def add_minus(arg: str):
+        if not arg:
+            return ""
+
+        arg = str(arg)
+
+        if not arg.startswith("-"):
+            if len(arg) == 1:
+                arg = f"-{arg}"
+            else:
+                arg = f"--{arg}"
+            return arg
+
+    if scheduler_args:
+        if isinstance(scheduler_args, dict):
+            scheduler_args = " ".join(
+                [f"{add_minus(key)}='{value}'" for key, value in scheduler_args.items()]
+            )
+    else:
+        scheduler_args = ""
+
+    if "wrap" in scheduler_args:
+        raise ValueError(
+            "The sbatch argument 'wrap' is used by PyMAPDL to submit the job."
+            "Hence you cannot use it as sbatch argument."
+        )
+    LOG.debug(f"The additional sbatch arguments are: {scheduler_args}")
+
+    if isinstance(cmd, list):
+        cmd = " ".join(cmd)
+
+    cmd = ["sbatch", scheduler_args, "--wrap", f"'{cmd}'"]
+    cmd = [each for each in cmd if bool(each)]
+    return cmd
+
+
+def get_hostname_from_scontrol(stdout: str) -> str:
+    return stdout.split("BatchHost=")[1].splitlines()[0]
+
+
+def check_mapdl_launch_on_hpc(process: subprocess.Popen, start_parm: Dict[str, str]):
+    stdout = process.stdout.read().decode()
+    if "Submitted batch job" not in stdout:
+        stderr = process.stderr.read().decode()
+        raise MapdlDidNotStart(f"PyMAPDL failed to submit the sbatch job:\n{stderr}")
+
+    jobid = get_jobid(stdout)
+    batch_host = get_hostname_host_cluster(jobid)
+    batch_ip = socket.gethostbyname(batch_host)
+
+    start_parm["ip"] = batch_ip
+    start_parm["hostname"] = batch_host
+    start_parm["jobid"] = jobid

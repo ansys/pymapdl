@@ -1307,3 +1307,7 @@ def get_active_branch_name():
         kind = f"release/{'.'.join(pymapdl.__version__.split('.')[:2])}"
 
     return kind
+
+
+def only_numbers_and_dots(s):
+    return bool(re.fullmatch(r"[0-9.]+", s))
