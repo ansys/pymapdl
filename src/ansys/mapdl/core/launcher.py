@@ -320,7 +320,7 @@ def generate_mapdl_launch_command(
     ram: Optional[int] = None,
     port: int = MAPDL_DEFAULT_PORT,
     additional_switches: str = "",
-) -> str:
+) -> List[str]:
     """Generate the command line to start MAPDL in gRPC mode.
 
     Parameters
@@ -357,7 +357,7 @@ def generate_mapdl_launch_command(
 
     Returns
     -------
-    str
+    List[str]
         Command
 
     """
@@ -414,11 +414,11 @@ def generate_mapdl_launch_command(
     command = " ".join(command_parm)
 
     LOG.debug(f"Generated command: {command}")
-    return command
+    return command_parm
 
 
 def launch_grpc(
-    cmd: str,
+    cmd: List[str],
     run_location: str = None,
     env_vars: Optional[Dict[str, str]] = None,
 ) -> subprocess.Popen:
@@ -447,10 +447,11 @@ def launch_grpc(
     # disable all MAPDL pop-up errors:
     env_vars.setdefault("ANS_CMD_NODIAG", "TRUE")
 
+    cmd_string = " ".join(cmd)
     if "sbatch" in cmd:
         header = "Running an MAPDL instance on the Cluster:"
         shell = os.name != "nt"
-        cmd_ = " ".join(cmd)
+        cmd_ = cmd_string
     else:
         header = "Running an MAPDL instance"
         shell = False  # To prevent shell injection
@@ -460,7 +461,7 @@ def launch_grpc(
         "\n============"
         "\n============"
         f"{header}:\nLocation:\n{run_location}\n"
-        f"Command:\n{' '.join(cmd)}\n"
+        f"Command:\n{cmd_string}\n"
         f"Env vars:\n{env_vars}"
         "\n============"
         "\n============"
@@ -468,7 +469,7 @@ def launch_grpc(
 
     if os.name == "nt":
         # getting tmp file name
-        tmp_inp = cmd.split()[cmd.split().index("-i") + 1]
+        tmp_inp = cmd_string.split()[cmd_string.split().index("-i") + 1]
         with open(os.path.join(run_location, tmp_inp), "w") as f:
             f.write("FINISH\r\n")
             LOG.debug(f"Writing temporary input file: {tmp_inp} with 'FINISH' command.")
