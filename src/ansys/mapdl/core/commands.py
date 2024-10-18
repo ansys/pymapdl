@@ -347,7 +347,7 @@ class PreprocessorCommands(
 
 class APDLCommands(
     apdl.abbreviations.Abbreviations,
-    apdl.array_parameters.ArrayParam,
+    apdl.array_parameters.ArrayParameters,
     apdl.macro_files.MacroFiles,
     apdl.matrix_op.MatrixOP,
     apdl.parameter_definition.ParameterDefinition,
