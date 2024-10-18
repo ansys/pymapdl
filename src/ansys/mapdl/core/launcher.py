@@ -327,7 +327,7 @@ def generate_mapdl_launch_command(
     ----------
     exec_file : str, optional
         The location of the MAPDL executable.  Will use the cached
-        location when left at the default ``None``.
+        location when left at the default :class:`None`.
 
     jobname : str, optional
         MAPDL jobname.  Defaults to ``'file'``.
@@ -337,7 +337,7 @@ def generate_mapdl_launch_command(
 
     ram : float, optional
         Total size in megabytes of the workspace (memory) used for the initial allocation.
-        The default is ``None``, in which case 2 GB (2048 MB) is used. To force a fixed size
+        The default is :class:`None`, in which case 2 GB (2048 MB) is used. To force a fixed size
         throughout the run, specify a negative number.
 
     port : int
@@ -700,8 +700,8 @@ def get_start_instance(start_instance: Optional[Union[bool, str]] = None) -> boo
     Returns
     -------
     bool
-        ``True`` when the ``PYMAPDL_START_INSTANCE`` environment variable is
-        true, ``False`` when PYMAPDL_START_INSTANCE is false. If unset,
+        :class:`True` when the ``PYMAPDL_START_INSTANCE`` environment variable is
+        true, :class:`False` when PYMAPDL_START_INSTANCE is false. If unset,
         returns ``start_instance``.
 
     Raises
@@ -881,7 +881,7 @@ def set_MPI_additional_switches(
     exec_path : str
         Path to the MAPDL executable.
     force_intel : bool, optional
-        Force the usage of intelmpi. The default is ``False``.
+        Force the usage of intelmpi. The default is :class:`False`.
 
     Returns
     -------
@@ -1011,17 +1011,15 @@ def launch_mapdl(
     ----------
     exec_file : str, optional
         The location of the MAPDL executable.  Will use the cached
-        location when left at the default ``None`` and no environment
+        location when left at the default :class:`None` and no environment
         variable is set.
 
-        .. note::
+        The executable path can be also set through the environment variable
+        :envvar:`PYMAPDL_MAPDL_EXEC`. For example:
 
-           The executable path can be also set through the environment variable
-           ``PYMAPDL_MAPDL_EXEC``. For example:
+        .. code:: console
 
-           .. code:: console
-
-              export PYMAPDL_MAPDL_EXEC=/ansys_inc/v211/ansys/bin/mapdl
+            export PYMAPDL_MAPDL_EXEC=/ansys_inc/v211/ansys/bin/mapdl
 
     run_location : str, optional
         MAPDL working directory.  Defaults to a temporary working
@@ -1031,13 +1029,13 @@ def launch_mapdl(
         MAPDL jobname.  Defaults to ``'file'``.
 
     nproc : int, optional
-        Number of processors.  Defaults to 2. If running on an HPC cluster,
+        Number of processors.  Defaults to ``2``. If running on an HPC cluster,
         this value is adjusted to the number of CPUs allocated to the job,
-        unless ``detect_hpc`` is set to "false".
+        unless the argument ``detect_hpc`` is set to ``"false"``.
 
     ram : float, optional
         Total size in megabytes of the workspace (memory) used for the initial
-        allocation. The default is ``None``, in which case 2 GB (2048 MB) is
+        allocation. The default is :class:`None`, in which case 2 GB (2048 MB) is
         used. To force a fixed size throughout the run, specify a negative
         number.
 
@@ -1080,7 +1078,7 @@ def launch_mapdl(
     port : int
         Port to launch MAPDL gRPC on.  Final port will be the first
         port available after (or including) this port.  Defaults to
-        50052. You can also provide this value through the environment variable
+        ``50052``. You can also provide this value through the environment variable
         :envvar:`PYMAPDL_PORT`. For instance ``PYMAPDL_PORT=50053``.
         However the argument (if specified) has precedence over the environment
         variable. If this environment variable is empty, it is as it is not set.
@@ -1090,8 +1088,8 @@ def launch_mapdl(
         garbage collected.
 
     start_instance : bool, optional
-        When False, connect to an existing MAPDL instance at ``ip``
-        and ``port``, which default to ip ``'127.0.0.1'`` at port 50052.
+        When :class:`False`, connect to an existing MAPDL instance at ``ip``
+        and ``port``, which default to ip ``'127.0.0.1'`` at port ``50052``.
         Otherwise, launch a local instance of MAPDL. You can also
         provide this value through the environment variable
         :envvar:`PYMAPDL_START_INSTANCE`.
@@ -1099,21 +1097,22 @@ def launch_mapdl(
         variable. If this environment variable is empty, it is as it is not set.
 
     ip : str, optional
-        Used only when ``start_instance`` is ``False``. If provided,
-        and ``start_instance`` (or its correspondent environment variable
-        ``PYMAPDL_START_INSTANCE``) is ``True`` then, an exception is raised.
         Specify the IP address of the MAPDL instance to connect to.
         You can also provide a hostname as an alternative to an IP address.
         Defaults to ``'127.0.0.1'``.
+        Used only when ``start_instance`` is :class:`False`. If this argument
+        is provided, and ``start_instance`` (or its correspondent environment
+        variable :envvar:`PYMAPDL_START_INSTANCE`) is :class:`True` then, an
+        exception is raised.
         You can also provide this value through the environment variable
         :envvar:`PYMAPDL_IP`. For instance ``PYMAPDL_IP=123.45.67.89``.
         However the argument (if specified) has precedence over the environment
         variable. If this environment variable is empty, it is as it is not set.
 
     clear_on_connect : bool, optional
-        Defaults to ``True``, giving you a fresh environment when
+        Defaults to :class:`True`, giving you a fresh environment when
         connecting to MAPDL. When if ``start_instance`` is specified
-        it defaults to ``False``.
+        it defaults to :class:`False`.
 
     log_apdl : str, optional
         Enables logging every APDL command to the local disk.  This
@@ -1123,45 +1122,46 @@ def launch_mapdl(
         ``log_apdl='pymapdl_log.txt'``). By default this is disabled.
 
     remove_temp_dir_on_exit : bool, optional
-        When ``run_location`` is ``None``, this launcher creates a new MAPDL
+        When ``run_location`` is :class:`None`, this launcher creates a new MAPDL
         working directory within the user temporary directory, obtainable with
         ``tempfile.gettempdir()``. When this parameter is
-        ``True``, this directory will be deleted when MAPDL is exited. Default
-        ``False``.
+        :class:`True`, this directory will be deleted when MAPDL is exited.
+        Default to :class:`False`.
         If you change the working directory, PyMAPDL does not delete the original
         working directory nor the new one.
 
     license_server_check : bool, optional
         Check if the license server is available if MAPDL fails to
-        start.  Only available on ``mode='grpc'``. Defaults ``False``.
+        start.  Only available on ``mode='grpc'``. Defaults :class:`False`.
 
     license_type : str, optional
         Enable license type selection. You can input a string for its
         license name (for example ``'meba'`` or ``'ansys'``) or its description
         ("enterprise solver" or "enterprise" respectively).
         You can also use legacy licenses (for example ``'aa_t_a'``) but it will
-        also raise a warning. If it is not used (``None``), no specific license
-        will be requested, being up to the license server to provide a specific
-        license type. Default is ``None``.
+        also raise a warning. If it is not used (:class:`None`), no specific
+        license will be requested, being up to the license server to provide a
+        specific license type. Default is :class:`None`.
 
     print_com : bool, optional
         Print the command ``/COM`` arguments to the standard output.
-        Default ``False``.
+        Default :class:`False`.
 
     add_env_vars : dict, optional
         The provided dictionary will be used to extend the MAPDL process
         environment variables. If you want to control all of the environment
-        variables, use the argument ``replace_env_vars``. Defaults to ``None``.
+        variables, use the argument ``replace_env_vars``.
+        Defaults to :class:`None`.
 
     replace_env_vars : dict, optional
         The provided dictionary will be used to replace all the MAPDL process
         environment variables. It replace the system environment variables
         which otherwise would be used in the process.
         To just add some environment variables to the MAPDL
-        process, use ``add_env_vars``. Defaults to ``None``.
+        process, use ``add_env_vars``. Defaults to :class:`None`.
 
     version : float, optional
-        Version of MAPDL to launch. If ``None``, the latest version is used.
+        Version of MAPDL to launch. If :class:`None`, the latest version is used.
         Versions can be provided as integers (i.e. ``version=222``) or
         floats (i.e. ``version=22.2``).
         To retrieve the available installed versions, use the function
@@ -1172,23 +1172,25 @@ def launch_mapdl(
         However the argument (if specified) has precedence over the environment
         variable. If this environment variable is empty, it is as it is not set.
 
-    detect_hpc: bool, optional
+    detect_hpc : bool, optional
         Whether detect if PyMAPDL is running on an HPC cluster or not. Currently
         only SLURM clusters are supported. By detaul, it is set to true.
         This option can be bypassed if the environment variable
-        ``PYMAPDL_RUNNING_ON_HPC`` is set to "false".
+        :envvar:`PYMAPDL_RUNNING_ON_HPC` is set to ``"false"``.
         For more information visit :ref:`ref_hpc_slurm`.
 
-    launch_on_hpc: bool, optional
-        If ``True``, it uses the implemented scheduler (SLURM only) to launch
+    launch_on_hpc : bool, optional
+        If :class:`True`, it uses the implemented scheduler (SLURM only) to launch
         an MAPDL instance on the HPC. In this case you can pass the argument
-        'scheduler_options' to ``launch_mapdl` to specify arguments as a
-        string or as a dictionary.
+        '`scheduler_options`' to
+        :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
+        to specify arguments as a  string or as a dictionary.
         For more information visit :ref:`ref_hpc_slurm`.
 
-    kwargs : dict, optional
+    kwargs : dict, Optional
         These keyword arguments are interface specific or for
         development purposes. See Notes for more details.
+
 
         scheduler_options : :class:`str`, :class:`dict`
           Use it to specify options to the scheduler run command. It can be a
@@ -1198,14 +1200,15 @@ def launch_mapdl(
         set_no_abort : :class:`bool`
           *(Development use only)*
           Sets MAPDL to not abort at the first error within /BATCH mode.
-          Defaults to ``True``.
+          Defaults to :class:`True`.
 
         force_intel : :class:`bool`
           *(Development use only)*
           Forces the use of Intel message pass interface (MPI) in versions between
-          Ansys 2021R0 and 2022R2, where because of VPNs issues this MPI is deactivated
-          by default. See :ref:`vpn_issues_troubleshooting` for more information.
-          Defaults to ``False``.
+          Ansys 2021R0 and 2022R2, where because of VPNs issues this MPI is
+          deactivated by default.
+          See :ref:`vpn_issues_troubleshooting` for more information.
+          Defaults to :class:`False`.
 
     Returns
     -------
@@ -1319,8 +1322,10 @@ def launch_mapdl(
         Enables shared-memory parallelism.
         See the Parallel Processing Guide for more information.
 
+    **PyPIM**
+
     If the environment is configured to use `PyPIM <https://pypim.docs.pyansys.com>`_
-    and ``start_instance`` is ``True``, then starting the instance will be delegated to PyPIM.
+    and ``start_instance`` is :class:`True`, then starting the instance will be delegated to PyPIM.
     In this event, most of the options will be ignored and the server side configuration will
     be used.
 
@@ -1449,16 +1454,19 @@ def launch_mapdl(
 
         LOG.debug(f"Using additional switches {args['additional_switches']}.")
 
+        # Delegating to PyPIM
+        if _HAS_PIM and exec_file is None and pypim.is_configured():
+            # Start MAPDL with PyPIM if the environment is configured for it
+            # and the user did not pass a directive on how to launch it.
+            LOG.info(
+                "Starting MAPDL remotely. The startup configuration will be ignored."
+            )
+
+            return launch_remote_mapdl(
+                cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
+            )
+
     start_parm = generate_start_parameters(args)
-
-    if _HAS_PIM and exec_file is None and pypim.is_configured():
-        # Start MAPDL with PyPIM if the environment is configured for it
-        # and the user did not pass a directive on how to launch it.
-        LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
-
-        return launch_remote_mapdl(
-            cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
-        )
 
     if args["running_on_hpc"] or args["launch_on_hpc"]:
         env_vars.setdefault("ANS_MULTIPLE_NODES", "1")
@@ -1614,7 +1622,7 @@ def launch_mapdl(
 def check_mode(mode: ALLOWABLE_MODES, version: ALLOWABLE_VERSION_INT):
     """Check if the MAPDL server mode matches the allowable version
 
-    If ``None``, the newest mode will be selected.
+    If :class:`None`, the newest mode will be selected.
 
     Returns a value from ``ALLOWABLE_MODES``.
     """
