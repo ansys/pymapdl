@@ -1538,7 +1538,9 @@ def launch_mapdl(
 
         if args["launch_on_hpc"]:
             # wrapping command if on HPC
-            cmd = generate_sbatch_command(cmd, sbatch_args=args.get("sbatch_args"))
+            cmd = generate_sbatch_command(
+                cmd, scheduler_args=args.get("scheduler_args")
+            )
 
         try:
             #
@@ -2602,7 +2604,7 @@ def launch_mapdl_on_cluster(
         additional_switches=args["additional_switches"],
     )
 
-    cmd = generate_sbatch_command(cmd, sbatch_args=args.get("sbatch_args"))
+    cmd = generate_sbatch_command(cmd, scheduler_args=args.get("scheduler_args"))
 
     jobid = None
     try:
@@ -2740,7 +2742,7 @@ def get_jobid(stdout: str) -> int:
 
 
 def generate_sbatch_command(
-    cmd: Union[str, List[str]], sbatch_args: Optional[Union[str, Dict[str, str]]]
+    cmd: Union[str, List[str]], scheduler_args: Optional[Union[str, Dict[str, str]]]
 ) -> List[str]:
     """Generate sbatch command for a given MAPDL launch command."""
 
@@ -2757,25 +2759,25 @@ def generate_sbatch_command(
                 arg = f"--{arg}"
             return arg
 
-    if sbatch_args:
-        if isinstance(sbatch_args, dict):
-            sbatch_args = " ".join(
-                [f"{add_minus(key)}='{value}'" for key, value in sbatch_args.items()]
+    if scheduler_args:
+        if isinstance(scheduler_args, dict):
+            scheduler_args = " ".join(
+                [f"{add_minus(key)}='{value}'" for key, value in scheduler_args.items()]
             )
     else:
-        sbatch_args = ""
+        scheduler_args = ""
 
-    if "wrap" in sbatch_args:
+    if "wrap" in scheduler_args:
         raise ValueError(
             "The sbatch argument 'wrap' is used by PyMAPDL to submit the job."
             "Hence you cannot use it as sbatch argument."
         )
-    LOG.debug(f"The additional sbatch arguments are: {sbatch_args}")
+    LOG.debug(f"The additional sbatch arguments are: {scheduler_args}")
 
     if isinstance(cmd, list):
         cmd = " ".join(cmd)
 
-    cmd = ["sbatch", sbatch_args, "--wrap", f"'{cmd}'"]
+    cmd = ["sbatch", scheduler_args, "--wrap", f"'{cmd}'"]
     cmd = [each for each in cmd if bool(each)]
     return cmd
 
