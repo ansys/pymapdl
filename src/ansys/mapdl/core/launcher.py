@@ -368,7 +368,7 @@ def generate_mapdl_launch_command(
 
     # Windows will spawn a new window, special treatment
     if os.name == "nt":
-        exec_file = f'"{exec_file}"'
+        exec_file = f"'{exec_file}'"
         # must start in batch mode on windows to hide APDL window
         tmp_inp = ".__tmp__.inp"
         command_parm = [
