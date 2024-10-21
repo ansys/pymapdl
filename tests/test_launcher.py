@@ -1293,12 +1293,4 @@ def test_check_mapdl_launch_on_hpc(message_stdout, message_stderr):
         )
 
     with context:
-        check_mapdl_launch_on_hpc(process, start_parm)
-
-    if "Submitted batch job" in message_stdout:
-        assert start_parm["ip"] == "123.45.67.89"
-        assert start_parm["hostname"] == "mycoolhostname"
-        assert start_parm["jobid"] == 1001
-
-
-# def test_get_hostname_host_cluster()
+        assert check_mapdl_launch_on_hpc(process, start_parm) == 1001
