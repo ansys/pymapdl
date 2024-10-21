@@ -2767,7 +2767,11 @@ def generate_sbatch_command(
                 arg = f"-{arg}"
             else:
                 arg = f"--{arg}"
-            return arg
+        elif not arg.startswith("--") and len(arg) > 2:
+            # missing one "-" for a long argument
+            arg = f"-{arg}"
+
+        return arg
 
     if scheduler_args:
         if isinstance(scheduler_args, dict):
@@ -2800,7 +2804,10 @@ def check_mapdl_launch_on_hpc(process: subprocess.Popen, start_parm: Dict[str, s
     stdout = process.stdout.read().decode()
     if "Submitted batch job" not in stdout:
         stderr = process.stderr.read().decode()
-        raise MapdlDidNotStart(f"PyMAPDL failed to submit the sbatch job:\n{stderr}")
+        raise MapdlDidNotStart(
+            "PyMAPDL failed to submit the sbatch job:\n"
+            f"stdout:\n{stdout}\nstderr:\n{stderr}"
+        )
 
     jobid = get_jobid(stdout)
     batch_host = get_hostname_host_cluster(jobid)

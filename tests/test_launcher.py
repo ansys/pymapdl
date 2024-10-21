@@ -25,6 +25,7 @@
 import os
 import subprocess
 import tempfile
+from time import sleep
 from unittest.mock import patch
 import warnings
 
@@ -33,6 +34,7 @@ import pytest
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import (
+    MapdlDidNotStart,
     NotEnoughResources,
     PortAlreadyInUseByAnMAPDLInstance,
 )
@@ -41,8 +43,10 @@ from ansys.mapdl.core.launcher import (
     LOCALHOST,
     _is_ubuntu,
     _parse_ip_route,
+    check_mapdl_launch_on_hpc,
     force_smp_in_student,
     generate_mapdl_launch_command,
+    generate_sbatch_command,
     generate_start_parameters,
     get_cpus,
     get_exec_file,
@@ -90,6 +94,27 @@ paths = [
 ]
 
 start_timeout = 30  # Seconds
+
+
+def get_fake_process(message_stdout, message_stderr="", time_sleep=0):
+    class stdout:
+        def read(self):
+            return message_stdout.encode()
+
+    class stderr:
+        def read(self):
+            return message_stderr.encode()
+
+    class myprocess:
+        pass
+
+    process = myprocess()
+    process.stdout = stdout()
+    process.stderr = stderr()
+
+    sleep(time_sleep)
+
+    return process
 
 
 @pytest.fixture
@@ -1185,4 +1210,94 @@ def test_get_cpus_min():
     assert args["nproc"] == 1
 
 
-# def test_launch_grpc_slurm()
+@pytest.mark.parametrize(
+    "scheduler_args",
+    [None, "-N 10", {"N": 10, "nodes": 10, "-tasks": 3, "--ntask-per-node": 2}],
+)
+def test_generate_sbatch_command(scheduler_args):
+    cmd = [
+        "/ansys_inc/v242/ansys/bin/ansys242",
+        "-j",
+        "myjob",
+        "-np",
+        "10",
+        "-m",
+        "1024",
+        "-port",
+        "50052",
+        "-my_add=switch",
+    ]
+
+    cmd_post = generate_sbatch_command(cmd, scheduler_args)
+
+    assert cmd_post[0] == "sbatch"
+    if scheduler_args:
+        if isinstance(scheduler_args, dict):
+            assert (
+                cmd_post[1] == "-N='10' --nodes='10' --tasks='3' --ntask-per-node='2'"
+            )
+        else:
+            assert cmd_post[1] == scheduler_args
+
+    assert cmd_post[-2] == "--wrap"
+    assert cmd_post[-1] == f"""'{" ".join(cmd)}'"""
+
+
+@pytest.mark.parametrize(
+    "scheduler_args", [None, "--wrap '/bin/bash", {"--wrap": "/bin/bash", "nodes": 10}]
+)
+def test_generate_sbatch_wrap_in_arg(scheduler_args):
+    cmd = ["/ansys_inc/v242/ansys/bin/ansys242", "-grpc"]
+    if scheduler_args:
+        context = pytest.raises(
+            ValueError,
+            match="The sbatch argument 'wrap' is used by PyMAPDL to submit the job.",
+        )
+    else:
+        context = NullContext()
+
+    with context:
+        cmd_post = generate_sbatch_command(cmd, scheduler_args)
+
+
+def myfakegethostbyname(*args, **kwargs):
+    return "mycoolhostname"
+
+
+def myfakegethostbynameIP(*args, **kwargs):
+    return "123.45.67.89"
+
+
+@pytest.mark.parametrize(
+    "message_stdout, message_stderr",
+    [
+        ["Submitted batch job 1001", ""],
+        ["Submission failed", "Something very bad happened"],
+    ],
+)
+@patch("socket.gethostbyname", myfakegethostbynameIP)
+@patch("ansys.mapdl.core.launcher.get_hostname_host_cluster", myfakegethostbyname)
+def test_check_mapdl_launch_on_hpc(message_stdout, message_stderr):
+
+    process = get_fake_process(message_stdout, message_stderr)
+
+    start_parm = {}
+    if "Submitted batch job" in message_stdout:
+        context = NullContext()
+
+    else:
+        context = pytest.raises(
+            MapdlDidNotStart,
+            match=f"stdout:\n{message_stdout}\nstderr:\n{message_stderr}",
+        )
+
+    with context:
+        check_mapdl_launch_on_hpc(process, start_parm)
+
+    if "Submitted batch job" in message_stdout:
+        start_parm["ip"] == "123.45.67.89"
+        start_parm["hostname"] == "mycoolhostname"
+        start_parm["jobid"] == 1001
+
+
+# def test_get_hostname_host_cluster()
