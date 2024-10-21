@@ -27,7 +27,13 @@ import os
 import shutil
 import zipfile
 
-import requests
+try:
+    import requests
+
+    _HAS_REQUESTS = True
+
+except ModuleNotFoundError:
+    _HAS_REQUESTS = False
 
 from ansys.mapdl import core as pymapdl
 
