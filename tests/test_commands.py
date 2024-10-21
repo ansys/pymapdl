@@ -1101,10 +1101,8 @@ class Test_MAPDL_commands:
         func = getattr(mapdl, cmd)
 
         # Avoid wraps
-        wrapped = False
         while hasattr(func, "__wrapped__"):
             func = func.__wrapped__
-            wrapped = True
 
         if cmd in self.SKIP:
             pytest.skip("This function is overwritten in a subclass.")
