@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import inspect
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -37,9 +38,6 @@ from ansys.mapdl.core.commands import (
 )
 from ansys.mapdl.core.examples import verif_files
 from conftest import has_dependency, requires
-
-# from unittest.mock import patch
-
 
 if has_dependency("pandas"):
     import pandas as pd
@@ -1077,58 +1075,58 @@ class Test_MAPDL_commands:
 
     MAPDL_cmds = [each for each in dir(Commands) if not each.startswith("_")]
 
-    # @pytest.mark.parametrize("cmd", MAPDL_cmds)
-    # @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._send_command", fake_wrap)
-    # # Skip post processing the plot in PLESOL commands like.
-    # @patch("ansys.mapdl.core.mapdl_core.PLOT_COMMANDS", [])
-    # # skip retrieving value
-    # @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.scalar_param", fake_wrap)
-    # # Skip output the entity id after geometry manipulation
-    # @patch("ansys.mapdl.core._commands.parse.parse_a", fake_wrap)
-    # @patch("ansys.mapdl.core._commands.parse.parse_e", fake_wrap)
-    # @patch("ansys.mapdl.core._commands.parse.parse_et", fake_wrap)
-    # @patch("ansys.mapdl.core._commands.parse.parse_k", fake_wrap)
-    # @patch("ansys.mapdl.core._commands.parse.parse_knode", fake_wrap)
-    # @patch("ansys.mapdl.core._commands.parse.parse_kdist", fake_wrap)
-    # @patch("ansys.mapdl.core._commands.parse.parse_kl", fake_wrap)
-    # @patch("ansys.mapdl.core._commands.parse.parse_kpoint", fake_wrap)
-    # @patch("ansys.mapdl.core._commands.parse.parse_line_no", fake_wrap)
-    # @patch("ansys.mapdl.core._commands.parse.parse_line_nos", fake_wrap)
-    # @patch("ansys.mapdl.core._commands.parse.parse_n", fake_wrap)
-    # @patch("ansys.mapdl.core._commands.parse.parse_ndist", fake_wrap)
-    # @patch("ansys.mapdl.core._commands.parse.parse_output_areas", fake_wrap)
-    # @patch("ansys.mapdl.core._commands.parse.parse_output_volume_area", fake_wrap)
-    # @patch("ansys.mapdl.core._commands.parse.parse_v", fake_wrap)
-    # def test_command(self, mapdl, cmd):
-    #     func = getattr(mapdl, cmd)
+    @pytest.mark.parametrize("cmd", MAPDL_cmds)
+    @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._send_command", fake_wrap)
+    # Skip post processing the plot in PLESOL commands like.
+    @patch("ansys.mapdl.core.mapdl_core.PLOT_COMMANDS", [])
+    # skip retrieving value
+    @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.scalar_param", fake_wrap)
+    # Skip output the entity id after geometry manipulation
+    @patch("ansys.mapdl.core._commands.parse.parse_a", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_e", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_et", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_k", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_knode", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_kdist", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_kl", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_kpoint", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_line_no", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_line_nos", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_n", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_ndist", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_output_areas", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_output_volume_area", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_v", fake_wrap)
+    def test_command(self, mapdl, cmd):
+        func = getattr(mapdl, cmd)
 
-    #     # Avoid wraps
-    #     while hasattr(func, "__wrapped__"):
-    #         func = func.__wrapped__
+        # Avoid wraps
+        while hasattr(func, "__wrapped__"):
+            func = func.__wrapped__
 
-    #     if cmd in self.SKIP:
-    #         pytest.skip("This function is overwritten in a subclass.")
+        if cmd in self.SKIP:
+            pytest.skip("This function is overwritten in a subclass.")
 
-    #     parm = inspect.signature(func).parameters
-    #     assert "kwargs" in parm, "'kwargs' argument is missing in function signature."
+        parm = inspect.signature(func).parameters
+        assert "kwargs" in parm, "'kwargs' argument is missing in function signature."
 
-    #     args = [f"arg{i}" for i in range(len(parm) - 1)]  # 3 = self, cmd, kwargs
+        args = [f"arg{i}" for i in range(len(parm) - 1)]  # 3 = self, cmd, kwargs
 
-    #     if list(parm)[0].lower() == "self":
-    #         args = args[:-1]
-    #         post = func(mapdl, *args)
-    #     else:
-    #         post = func(*args)
+        if list(parm)[0].lower() == "self":
+            args = args[:-1]
+            post = func(mapdl, *args)
+        else:
+            post = func(*args)
 
-    #     for arg in args:
-    #         assert arg in post
+        for arg in args:
+            assert arg in post
 
-    #     # assert ",".join(args) in post.replace(",,", ",").replace(" ", "")
-    #     cmd_ = cmd.upper()
-    #     if cmd_.startswith("SLASH"):
-    #         cmd_ = cmd_.replace("SLASH_", "/").replace("SLASH", "/")
+        # assert ",".join(args) in post.replace(",,", ",").replace(" ", "")
+        cmd_ = cmd.upper()
+        if cmd_.startswith("SLASH"):
+            cmd_ = cmd_.replace("SLASH_", "/").replace("SLASH", "/")
 
-    #     if cmd_.startswith("STAR"):
-    #         cmd_ = cmd_.replace("STAR", "*")
+        if cmd_.startswith("STAR"):
+            cmd_ = cmd_.replace("STAR", "*")
 
-    #     assert cmd_ in post.upper()
+        assert cmd_ in post.upper()
