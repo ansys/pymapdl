@@ -2313,7 +2313,7 @@ class _MapdlCore(Commands):
                     if self._log is not None:
                         self._log.error("exit: %s", str(e))
                 except ValueError:
-                    logger.warning(f"Unable to exit the MAPDL session.")
+                    pass
 
     def _cleanup_loggers(self):
         """Clean up all the loggers"""

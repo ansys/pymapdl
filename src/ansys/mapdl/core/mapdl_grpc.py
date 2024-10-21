@@ -890,8 +890,8 @@ class MapdlGrpc(MapdlBase):
             except MapdlRuntimeError:
                 warn("PyMAPDL is taking longer than expected to connect to the server.")
 
-            if not success:
-                raise MapdlConnectionError("Unable to reconnect to MAPDL")
+        if not success:
+            raise MapdlConnectionError("Unable to reconnect to MAPDL")
 
         # Update process
         self._mapdl_process = process

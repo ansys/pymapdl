@@ -25,6 +25,7 @@ import re
 from subprocess import PIPE, STDOUT, Popen
 
 import pytest
+from requests.exceptions import HTTPError
 
 from ansys.mapdl.core import EXAMPLES_PATH, examples
 from ansys.mapdl.core.examples.downloads import (
@@ -112,7 +113,7 @@ def test_download_example_data_true_download():
 
 def test_failed_download(running_test):
     filename = "non_existing_file"
-    with pytest.raises(ValueError):
+    with pytest.raises(HTTPError):
         with running_test(active=False):  # To force downloading the file
             _download_file(filename, directory=None)
 
