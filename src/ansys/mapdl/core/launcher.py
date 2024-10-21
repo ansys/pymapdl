@@ -368,7 +368,6 @@ def generate_mapdl_launch_command(
 
     # Windows will spawn a new window, special treatment
     if os.name == "nt":
-        exec_file = f"'{exec_file}'"
         # must start in batch mode on windows to hide APDL window
         tmp_inp = ".__tmp__.inp"
         command_parm = [
@@ -401,7 +400,7 @@ def generate_mapdl_launch_command(
 
     # removing spaces in cells
     command_parm = " ".join(command_parm).split(" ")
-    command_parm.insert(0, f"{exec_file}")
+    command_parm.insert(0, f'"{exec_file}"')
 
     LOG.debug(f"Generated command: {' '.join(command_parm)}")
     return command_parm
