@@ -26,6 +26,6 @@ from . import (
     encryption_decryption,
     macro_files,
     matrix_operations,
-    parameters,
+    parameter_definition,
     process_controls,
 )

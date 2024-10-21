@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 
-class Parameters:
+class ParameterDefinition:
 
     def parres(self, lab: str = "", fname: str = "", ext: str = "", **kwargs):
         r"""Reads parameters from a file.

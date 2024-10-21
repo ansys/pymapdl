@@ -351,7 +351,7 @@ class Apdl(
     apdl.encryption_decryption.EncryptionDecryption,
     apdl.macro_files.MacroFiles,
     apdl.matrix_operations.MatrixOperations,
-    apdl.parameters.Parameters,
+    apdl.parameter_definition.ParameterDefinition,
     apdl.process_controls.ProcessControls,
 ):
     pass
