@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import inspect
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -1045,3 +1046,77 @@ class Test_bc_cmdlist_model:
 
         assert not flist_result.empty
         assert flist_result.compare(df_f).empty
+
+
+class Test_MAPDL_commands:
+    SKIP = [
+        "aplot",
+        "cfopen",
+        "cmatrix",
+        "create",
+        "end",
+        "eplot",
+        "geometry",
+        "input",
+        "kplot",
+        "lgwrite",
+        "lplot",
+        "lsread",
+        "mwrite",
+        "nplot",
+        "sys",
+        "vplot",
+        "vwrite",
+    ]
+
+    @staticmethod
+    def fake_wrap(*args, **kwags):
+        return args[0]
+
+    MAPDL_cmds = [each for each in dir(Commands) if not each.startswith("_")]
+
+    @pytest.mark.parametrize("cmd", MAPDL_cmds)
+    @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._send_command", fake_wrap)
+    # Skip post processing the plot in PLESOL commands like.
+    @patch("ansys.mapdl.core.mapdl_core.PLOT_COMMANDS", [])
+    # Skip output the entity id after geometry manipulation
+    @patch("ansys.mapdl.core._commands.parse.parse_a", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_e", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_et", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_k", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_knode", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_kdist", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_kl", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_kpoint", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_line_no", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_line_nos", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_n", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_ndist", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_output_areas", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_output_volume_area", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_v", fake_wrap)
+    def test_command(self, mapdl, cmd):
+        func = getattr(mapdl, cmd)
+
+        # Avoid wraps
+        wrapped = False
+        while hasattr(func, "__wrapped__"):
+            func = func.__wrapped__
+            wrapped = True
+
+        if cmd in self.SKIP:
+            pytest.skip("This function is overwritten in a subclass.")
+
+        parm = inspect.signature(func).parameters
+        assert "kwargs" in parm, "'kwargs' argument is missing in function signature."
+
+        args = [f"arg{i}" for i in range(len(parm) - 1)]  # 3 = self, cmd, kwargs
+
+        if list(parm)[0].lower() == "self":
+            args = args[:-1]
+            post = func(mapdl, *args)
+        else:
+            post = func(*args)
+
+        for arg in args:
+            assert arg in post
