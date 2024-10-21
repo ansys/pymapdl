@@ -2614,16 +2614,8 @@ def launch_mapdl_on_cluster(
             cmd=cmd, run_location=args["run_location"], env_vars=env_vars
         )
 
-        def check_mapdl_launch_on_hpc(process, args):
-            stdout = process.stdout.read().decode()
-            if "Submitted batch job" not in stdout:
-                stderr = process.stderr.read().decode()
-                raise MapdlDidNotStart(
-                    f"PyMAPDL failed to submit the sbatch job:\n{stderr}"
-                )
-
-            jobid = get_jobid(stdout)
-            batch_host = get_hostname_host_cluster(jobid)
+        jobid = check_mapdl_launch_on_hpc(process, start_parm)
+        get_job_info(jobid=jobid, start_parm=start_parm)
 
     except Exception as exception:
         LOG.error("An error occurred when launching MAPDL.")
@@ -2633,11 +2625,6 @@ def launch_mapdl_on_cluster(
             subprocess.Popen(["scancel", str(jobid)])
 
         raise exception
-
-    # TODO: A way to check if the job is ready.
-    start_parm["ip"] = batch_host
-    start_parm["hostname"] = batch_host
-    start_parm["jobid"] = jobid
 
     if args["just_launch"]:
         out = [args["ip"], args["port"]]
@@ -2678,13 +2665,12 @@ def launch_mapdl_on_cluster(
     return mapdl
 
 
-def get_hostname_host_cluster(job_id: int) -> str:
+def get_hostname_host_cluster(job_id: int, timeout: int = 30) -> str:
     cmd = f"scontrol show jobid -dd {job_id}".split()
     LOG.debug(f"Executing the command '{cmd}'")
 
     ready = False
     time_start = time.time()
-    timeout = 30  # second
     counter = 0
     while not ready:
         proc = subprocess.Popen(
@@ -2699,9 +2685,9 @@ def get_hostname_host_cluster(job_id: int) -> str:
                 host = get_hostname_from_scontrol(stdout)
                 hostname_msg = f"The BatchHost for this job is '{host}'"
             except (IndexError, AttributeError):
-                hostname_msg = f"PyMAPDL couldn't get the BatchHost hostname"
+                hostname_msg = "PyMAPDL couldn't get the BatchHost hostname"
             raise MapdlDidNotStart(
-                f"The HPC job (id: {job_id}) didn't start on time. "
+                f"The HPC job (id: {job_id}) didn't start on time (timeout={timeout}). "
                 f"The job state is '{state}'. "
                 f"{hostname_msg}. "
                 "You can check more information by issuing in your console:\n"
@@ -2725,7 +2711,7 @@ def get_hostname_host_cluster(job_id: int) -> str:
     batchhost_ip = socket.gethostbyname(batchhost)
     LOG.debug(f"Batchhost IP: {batchhost_ip}")
 
-    return batchhost
+    return batchhost, batchhost_ip
 
 
 def get_jobid(stdout: str) -> int:
@@ -2791,7 +2777,32 @@ def get_hostname_from_scontrol(stdout: str) -> str:
     return stdout.split("BatchHost=")[1].splitlines()[0]
 
 
-def check_mapdl_launch_on_hpc(process: subprocess.Popen, start_parm: Dict[str, str]):
+def check_mapdl_launch_on_hpc(
+    process: subprocess.Popen, start_parm: Dict[str, str]
+) -> int:
+    """Check if the job is ready on the HPC
+
+    Check if the job has been successfully submitted, and additionally, it does
+    retrieve the BathcHost hostname which is the IP to connect to using the gRPC
+    interface.
+
+    Parameters
+    ----------
+    process : subprocess.Popen
+        Process used to submit the job. The stdout is read from there.
+    start_parm : Dict[str, str]
+        To store the job ID, the BatchHost hostname and IP into.
+
+    Returns
+    -------
+    int :
+        The jobID
+
+    Raises
+    ------
+    MapdlDidNotStart
+        The job submission failed.
+    """
     stdout = process.stdout.read().decode()
     if "Submitted batch job" not in stdout:
         stderr = process.stderr.read().decode()
@@ -2800,9 +2811,29 @@ def check_mapdl_launch_on_hpc(process: subprocess.Popen, start_parm: Dict[str, s
             f"stdout:\n{stdout}\nstderr:\n{stderr}"
         )
 
-    jobid = get_jobid(stdout)
-    batch_host = get_hostname_host_cluster(jobid)
-    batch_ip = socket.gethostbyname(batch_host)
+    return get_jobid(stdout)
+
+
+def get_job_info(jobid: int, start_parm: Dict[str, str], timeout: int = 30):
+    """Get job info like BatchHost IP and hostname
+
+    Get BatchHost hostname and ip and stores them in the start_parm argument
+
+    Parameters
+    ----------
+    jobid : int
+        Job ID
+    start_parm : Dict[str, str]
+        Starting parameters for MAPDL.
+    timeout : int
+        Timeout for checking if the job is ready. Default checks for
+        'start_instance' key in the 'start_parm' argument, if none
+        is found, it passes :class:`None` to
+        :func:`ansys.mapdl.core.launcher.get_hostname_host_cluster`.
+    """
+    timeout = timeout or start_parm.get("start_instance")
+
+    batch_host, batch_ip = get_hostname_host_cluster(jobid, timeout=timeout)
 
     start_parm["ip"] = batch_ip
     start_parm["hostname"] = batch_host

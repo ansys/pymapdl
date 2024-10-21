@@ -1258,6 +1258,7 @@ def test_generate_sbatch_wrap_in_arg(scheduler_args):
 
     with context:
         cmd_post = generate_sbatch_command(cmd, scheduler_args)
+        assert cmd[0] in cmd_post[-1]
 
 
 def myfakegethostbyname(*args, **kwargs):
@@ -1295,9 +1296,9 @@ def test_check_mapdl_launch_on_hpc(message_stdout, message_stderr):
         check_mapdl_launch_on_hpc(process, start_parm)
 
     if "Submitted batch job" in message_stdout:
-        start_parm["ip"] == "123.45.67.89"
-        start_parm["hostname"] == "mycoolhostname"
-        start_parm["jobid"] == 1001
+        assert start_parm["ip"] == "123.45.67.89"
+        assert start_parm["hostname"] == "mycoolhostname"
+        assert start_parm["jobid"] == 1001
 
 
 # def test_get_hostname_host_cluster()

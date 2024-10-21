@@ -3730,7 +3730,7 @@ class MapdlGrpc(MapdlBase):
     def kill_job(self, jobid: int) -> None:
         cmd = ["scancel", f"{jobid}"]
         # to ensure the job is stopped properly, let's issue the scancel twice.
-        for i in range(2):
+        for _ in range(2):
             Popen(cmd)
 
     def __del__(self):
