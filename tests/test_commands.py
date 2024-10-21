@@ -1079,6 +1079,8 @@ class Test_MAPDL_commands:
     @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._send_command", fake_wrap)
     # Skip post processing the plot in PLESOL commands like.
     @patch("ansys.mapdl.core.mapdl_core.PLOT_COMMANDS", [])
+    # skip retrieving value
+    @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.scalar_param", fake_wrap)
     # Skip output the entity id after geometry manipulation
     @patch("ansys.mapdl.core._commands.parse.parse_a", fake_wrap)
     @patch("ansys.mapdl.core._commands.parse.parse_e", fake_wrap)
@@ -1120,3 +1122,13 @@ class Test_MAPDL_commands:
 
         for arg in args:
             assert arg in post
+
+        # assert ",".join(args) in post.replace(",,", ",").replace(" ", "")
+        cmd_ = cmd.upper()
+        if cmd_.startswith("SLASH"):
+            cmd_ = cmd_.replace("SLASH_", "/").replace("SLASH", "/")
+
+        if cmd_.startswith("STAR"):
+            cmd_ = cmd_.replace("STAR", "*")
+
+        assert cmd_ in post.upper()
