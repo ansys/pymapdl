@@ -103,12 +103,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.database import MapdlDb
     from ansys.mapdl.core.xpl import ansXpl
 
-import logging
-
-from ansys.mapdl.core.logging import Logger
-
-LOG = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
-
 TMP_VAR = "__tmpvar__"
 VOID_REQUEST = anskernel.EmptyRequest()
 
@@ -1044,7 +1038,7 @@ class MapdlGrpc(MapdlBase):
             except ReferenceError:
                 break
             except Exception:
-                LOG.debug("Checking if MAPDL instance is still alive.")
+                self._log.debug("Checking if MAPDL instance is still alive.")
 
     @protect_from(ValueError, "I/O operation on closed file.")
     def exit(self, save=False, force=False, **kwargs):
