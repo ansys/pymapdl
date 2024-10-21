@@ -1700,12 +1700,12 @@ class _MapdlCore(Commands):
             "cd",
             run_dir,
             "&&",
-            exec_file,
+            f"{exec_file}",
             "-g",
             "-j",
-            name,
+            f"{name}",
             "-np",
-            str(nproc),
+            f"{nproc}",
             *add_sw,
         ]
 

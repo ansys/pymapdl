@@ -114,7 +114,7 @@ def _download_file(filename, directory=None, _test=False):
     try:
         return _retrieve_file(url, filename, _test)
     except requests.exceptions.HTTPError as e:
-        raise ValueError(
+        raise requests.exceptions.HTTPError(
             "Retrieving the file from internet failed.\n"
             "You can download this file from:\n"
             f"{url}\n"
