@@ -28,6 +28,7 @@ import tempfile
 from unittest.mock import patch
 import warnings
 
+import psutil
 import pytest
 
 from ansys.mapdl import core as pymapdl
@@ -885,6 +886,7 @@ def mycpucount(**kwargs):
     return 10  # faking 10 cores
 
 
+@patch("psutil.cpu_count", mycpucount)
 def test_nproc_envvar(monkeypatch):
     monkeypatch.setenv("PYMAPDL_NPROC", 10)
     args = launch_mapdl(_debug_no_launch=True)
