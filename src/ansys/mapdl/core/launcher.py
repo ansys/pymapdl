@@ -36,23 +36,8 @@ import warnings
 
 import psutil
 
-try:
-    import ansys.platform.instancemanagement as pypim
-
-    _HAS_PIM = True
-
-except ModuleNotFoundError:  # pragma: no cover
-    _HAS_PIM = False
-
-try:
-    from ansys.tools.path import find_ansys, get_ansys_path, version_from_path
-
-    _HAS_ATP = True
-except ModuleNotFoundError:
-    _HAS_ATP = False
-
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import LOG
+from ansys.mapdl.core import _HAS_ATP, _HAS_PIM, LOG
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.errors import (
     LockFileException,
@@ -71,6 +56,12 @@ from ansys.mapdl.core.misc import (
     create_temp_dir,
     threaded,
 )
+
+if _HAS_PIM:
+    import ansys.platform.instancemanagement as pypim
+
+if _HAS_ATP:
+    from ansys.tools.path import find_ansys, get_ansys_path, version_from_path
 
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl_console import MapdlConsole
