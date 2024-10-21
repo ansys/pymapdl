@@ -495,13 +495,6 @@ def test_launching_on_busy_port(mapdl, monkeypatch):
         launch_mapdl(port=mapdl.port)
 
 
-@requires("local")
-def test_cpu_checks():
-    machine_cores = psutil.cpu_count(logical=False)
-    with pytest.raises(NotEnoughResources):
-        launch_mapdl(nproc=machine_cores + 2)
-
-
 def test_fail_channel_port():
     with pytest.raises(ValueError):
         launch_mapdl(channel="something", port="something")
@@ -610,7 +603,6 @@ def test_fail_channel_ip():
         ),
         pytest.param(
             {
-                "PYMAPDL_NPROC": 5,
                 "SLURM_JOB_NAME": "myawesomejob",
                 "SLURM_NTASKS": 2,
                 "SLURM_CPUS_PER_TASK": 2,
@@ -619,12 +611,11 @@ def test_fail_channel_ip():
                 "SLURM_MEM_PER_NODE": None,
                 "SLURM_NODELIST": None,
             },
-            {"nproc": 5, "jobname": "myawesomejob"},
-            id="Testing PYMAPDL_NPROC and SLURM_JOB_NAME",
+            {"nproc": 4, "jobname": "myawesomejob"},
+            id="Testing SLURM_JOB_NAME",
         ),
         pytest.param(
             {
-                "PYMAPDL_NPROC": 5,
                 "SLURM_JOB_NAME": "myawesomejob",
                 "SLURM_NTASKS": 2,
                 "SLURM_CPUS_PER_TASK": 2,
@@ -634,8 +625,8 @@ def test_fail_channel_ip():
                 "SLURM_NODELIST": None,
                 "PYMAPDL_MAPDL_EXEC": "asdf/qwer/poiu",
             },
-            {"nproc": 5, "jobname": "myawesomejob", "exec_file": "asdf/qwer/poiu"},
-            id="Testing PYMAPDL_NPROC and SLURM_JOB_NAME",
+            {"nproc": 4, "jobname": "myawesomejob", "exec_file": "asdf/qwer/poiu"},
+            id="Testing PYMAPDL_MAPDL_EXEC and SLURM_JOB_NAME",
         ),
     ),
     indirect=["set_env_var_context"],
@@ -705,17 +696,17 @@ def test_slurm_ram(monkeypatch, ram, expected, context):
 @pytest.mark.parametrize("slurm_env_var", ["True", "false", ""])
 @pytest.mark.parametrize("slurm_job_name", ["True", "false", ""])
 @pytest.mark.parametrize("slurm_job_id", ["True", "false", ""])
-@pytest.mark.parametrize("detect_slurm_config", [True, False, None])
+@pytest.mark.parametrize("detect_HPC", [True, False, None])
 def test_is_on_slurm(
-    monkeypatch, slurm_env_var, slurm_job_name, slurm_job_id, detect_slurm_config
+    monkeypatch, slurm_env_var, slurm_job_name, slurm_job_id, detect_HPC
 ):
     monkeypatch.setenv("PYMAPDL_ON_SLURM", slurm_env_var)
     monkeypatch.setenv("SLURM_JOB_NAME", slurm_job_name)
     monkeypatch.setenv("SLURM_JOB_ID", slurm_job_id)
 
-    flag = is_on_slurm(args={"detect_slurm_config": detect_slurm_config})
+    flag = is_on_slurm(args={"detect_HPC": detect_HPC})
 
-    if detect_slurm_config is not True:
+    if detect_HPC is not True:
         assert not flag
 
     else:
@@ -731,7 +722,7 @@ def test_is_on_slurm(
     if ON_LOCAL:
         assert (
             launch_mapdl(
-                detect_slurm_config=detect_slurm_config,
+                detect_HPC=detect_HPC,
                 _debug_no_launch=True,
             )["ON_SLURM"]
             == flag
@@ -893,6 +884,26 @@ def test_ip_and_start_instance(
 
 def mycpucount(**kwargs):
     return 10  # faking 10 cores
+
+
+@patch("psutil.cpu_count", mycpucount)
+def test_nproc_envvar(monkeypatch):
+    monkeypatch.setenv("PYMAPDL_NPROC", 10)
+    args = launch_mapdl(_debug_no_launch=True)
+    assert args["nproc"] == 10
+
+
+@pytest.mark.parametrize("nproc", [None, 5, 9, 15])
+@patch("psutil.cpu_count", mycpucount)
+def test_nproc(monkeypatch, nproc):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+
+    if nproc and nproc > mycpucount():
+        with pytest.raises(NotEnoughResources):
+            launch_mapdl(nproc=nproc, _debug_no_launch=True)
+    else:
+        args = launch_mapdl(nproc=nproc, _debug_no_launch=True)
+        assert args["nproc"] == (nproc or 2)
 
 
 @patch("os.name", "nt")
