@@ -1356,7 +1356,7 @@ class MapdlGrpc(MapdlBase):
         return files
 
     @supress_logging
-    def sys(self, cmd):
+    def sys(self, cmd, **kwargs):
         """Pass a command string to the operating system.
 
         APDL Command: /SYS
@@ -1389,7 +1389,7 @@ class MapdlGrpc(MapdlBase):
         """
         # always redirect system output to a temporary file
         tmp_file = f"__tmp_sys_out_{random_string()}__"
-        super().sys(f"{cmd} > {tmp_file}")
+        super().sys(f"{cmd} > {tmp_file}", **kwargs)
         if self._local:  # no need to download when local
             with open(os.path.join(self.directory, tmp_file)) as fobj:
                 obj = fobj.read()
