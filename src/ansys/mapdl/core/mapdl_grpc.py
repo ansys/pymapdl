@@ -882,6 +882,7 @@ class MapdlGrpc(MapdlBase):
                 success = True
                 break
             except MapdlRuntimeError:
+                time.sleep(1)
                 warn("PyMAPDL is taking longer than expected to connect to the server.")
 
         if not success:
