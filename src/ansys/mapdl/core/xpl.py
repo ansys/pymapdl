@@ -23,7 +23,6 @@
 """Contains the ansXpl class."""
 import json
 import pathlib
-import string
 import weakref
 
 from ansys.api.mapdl.v0 import mapdl_pb2
@@ -31,14 +30,7 @@ import numpy as np
 
 from .common_grpc import ANSYS_VALUE_TYPE
 from .errors import MapdlRuntimeError
-
-
-def id_generator(size=6, chars=string.ascii_uppercase):
-    """Generate a random string using only uppercase letters."""
-    import secrets
-
-    return "".join(secrets.choice(chars) for _ in range(size))
-
+from .misc import random_string
 
 MYCTYPE = {
     np.int32: "I",
@@ -447,7 +439,7 @@ class ansXpl:
         if recordname.upper() != "NSL":
             raise ValueError("Currently, the only supported recordname is 'NSL'")
 
-        rand_name = id_generator()
+        rand_name = random_string(stringLength=6)
         self._mapdl._log.info(
             "Calling MAPDL to extract the %s matrix from %s",
             recordname,
@@ -498,7 +490,7 @@ class ansXpl:
         """
         from ansys.math.core.math import AnsMath
 
-        rand_name = id_generator()
+        rand_name = random_string(stringLength=6)
         response = self._mapdl.run(f"*XPL,READ,{recordname},{rand_name}")
         self._check_ignored(response)
         data_info = self._mapdl._data_info(rand_name)
