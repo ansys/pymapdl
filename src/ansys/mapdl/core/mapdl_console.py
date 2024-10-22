@@ -286,7 +286,7 @@ class MapdlConsole(MapdlBase):
                 self._process.sendline("FINISH")
                 self._process.sendline("EXIT")
             except Exception as e:
-                LOG.warning(f"Unable to exit ANSYS: {e}")
+                LOG.warning(f"Unable to exit ANSYS MAPDL: {e}")
 
         if close_log:
             self._close_apdl_log()

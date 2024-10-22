@@ -84,7 +84,7 @@ def _get_file_url(filename, directory=None):
 
 def _check_url_exist(url):
     response = requests.get(url, timeout=10)  # 10 seconds timeout
-    if response.status_code == 200:
+    return response.status_code == 200
         return True
     else:
         return False
