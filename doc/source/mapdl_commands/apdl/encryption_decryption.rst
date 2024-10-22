@@ -6,9 +6,9 @@ EncryptionDecryption
 ====================
 
 
-.. currentmodule:: pyconverter.generatedcommands.apdl.encryption_decryption
+.. currentmodule:: ansys.mapdl.core._commands.apdl.encryption_decryption
 
-.. autoclass:: pyconverter.generatedcommands.apdl.encryption_decryption.EncryptionDecryption
+.. autoclass:: ansys.mapdl.core._commands.apdl.encryption_decryption.EncryptionDecryption
 
 .. autosummary::
    :template: base.rst

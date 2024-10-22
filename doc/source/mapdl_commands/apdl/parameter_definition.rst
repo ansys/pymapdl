@@ -6,9 +6,9 @@ ParameterDefinition
 ===================
 
 
-.. currentmodule:: pyconverter.generatedcommands.apdl.parameter_definition
+.. currentmodule:: ansys.mapdl.core._commands.apdl.parameter_definition
 
-.. autoclass:: pyconverter.generatedcommands.apdl.parameter_definition.ParameterDefinition
+.. autoclass:: ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition
 
 .. autosummary::
    :template: base.rst

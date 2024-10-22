@@ -6,9 +6,9 @@ MacroFiles
 ==========
 
 
-.. currentmodule:: pyconverter.generatedcommands.apdl.macro_files
+.. currentmodule:: ansys.mapdl.core._commands.apdl.macro_files
 
-.. autoclass:: pyconverter.generatedcommands.apdl.macro_files.MacroFiles
+.. autoclass:: ansys.mapdl.core._commands.apdl.macro_files.MacroFiles
 
 .. autosummary::
    :template: base.rst

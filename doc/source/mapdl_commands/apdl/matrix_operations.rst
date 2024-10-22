@@ -6,9 +6,9 @@ MatrixOperations
 ================
 
 
-.. currentmodule:: pyconverter.generatedcommands.apdl.matrix_operations
+.. currentmodule:: ansys.mapdl.core._commands.apdl.matrix_operations
 
-.. autoclass:: pyconverter.generatedcommands.apdl.matrix_operations.MatrixOperations
+.. autoclass:: ansys.mapdl.core._commands.apdl.matrix_operations.MatrixOperations
 
 .. autosummary::
    :template: base.rst

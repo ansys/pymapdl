@@ -6,9 +6,9 @@ ProcessControls
 ===============
 
 
-.. currentmodule:: pyconverter.generatedcommands.apdl.process_controls
+.. currentmodule:: ansys.mapdl.core._commands.apdl.process_controls
 
-.. autoclass:: pyconverter.generatedcommands.apdl.process_controls.ProcessControls
+.. autoclass:: ansys.mapdl.core._commands.apdl.process_controls.ProcessControls
 
 .. autosummary::
    :template: base.rst

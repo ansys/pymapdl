@@ -6,9 +6,9 @@ Abbreviations
 =============
 
 
-.. currentmodule:: pyconverter.generatedcommands.apdl.abbreviations
+.. currentmodule:: ansys.mapdl.core._commands.apdl.abbreviations
 
-.. autoclass:: pyconverter.generatedcommands.apdl.abbreviations.Abbreviations
+.. autoclass:: ansys.mapdl.core._commands.apdl.abbreviations.Abbreviations
 
 .. autosummary::
    :template: base.rst

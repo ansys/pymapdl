@@ -6,9 +6,9 @@ ArrayParameters
 ===============
 
 
-.. currentmodule:: pyconverter.generatedcommands.apdl.array_parameters
+.. currentmodule:: ansys.mapdl.core._commands.apdl.array_parameters
 
-.. autoclass:: pyconverter.generatedcommands.apdl.array_parameters.ArrayParameters
+.. autoclass:: ansys.mapdl.core._commands.apdl.array_parameters.ArrayParameters
 
 .. autosummary::
    :template: base.rst
