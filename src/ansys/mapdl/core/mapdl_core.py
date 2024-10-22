@@ -1697,9 +1697,6 @@ class _MapdlCore(Commands):
             )
         add_sw = add_sw.split()
         exec_array = [
-            "cd",
-            run_dir,
-            "&&",
             f"{exec_file}",
             "-g",
             "-j",
@@ -1712,6 +1709,7 @@ class _MapdlCore(Commands):
         call(
             exec_array,
             stdout=DEVNULL,
+            cwd=run_dir,
         )
 
         # Going back
