@@ -518,10 +518,12 @@ class Components:
 
         Fmat
             Format of the output file (defaults to ``BLOCKED``).
-            * ``BLOCKED``
-                Blocked format. This format allows faster reading of the file.
-            * ``UNBLOCKED``
-                Unblocked format.
+
+            * ``BLOCKED``: Blocked format. This format allows faster
+              reading of the file.
+
+            * ``UNBLOCKED``: Unblocked format.
+
         """
         command = f"CMWRITE,{fname},{ext},,,{fmat}"
         return self.run(command, **kwargs)
