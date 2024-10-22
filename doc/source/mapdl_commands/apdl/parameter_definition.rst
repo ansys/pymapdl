@@ -1,24 +1,31 @@
-.. _ref_parameter_definition_commands_api:
 
-********************
-Parameter definition
-********************
+.. _ref_parameter_definition:
 
-.. currentmodule:: ansys.mapdl.core
 
-These APDL commands are used to define parameters and their values.
+ParameterDefinition
+===================
+
+
+.. currentmodule:: ansys.mapdl.core._commands.apdl.parameter_definition
+
+.. autoclass:: ansys.mapdl.core._commands.apdl.parameter_definition.ParameterDefinition
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.afun
-   Mapdl.dim
-   Mapdl.inquire
-   Mapdl.parres
-   Mapdl.parsav
-   Mapdl.starset
-   Mapdl.taxis
-   Mapdl.tread
-   Mapdl.vfill
-   Mapdl.starvget
-   Mapdl.vread
+
+   ParameterDefinition.parres
+   ParameterDefinition.parsav
+   ParameterDefinition.get
+   ParameterDefinition.slashinquire
+   ParameterDefinition.starset
+   ParameterDefinition.starstatus
+   ParameterDefinition.tread
+   ParameterDefinition.taxis
+   ParameterDefinition.vread
+   ParameterDefinition.starvget
+   ParameterDefinition.vfill
+   ParameterDefinition.ask
+   ParameterDefinition.afun
+   ParameterDefinition.dim
