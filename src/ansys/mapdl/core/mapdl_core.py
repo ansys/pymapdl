@@ -30,7 +30,10 @@ import os
 import pathlib
 import re
 from shutil import copyfile, rmtree
-from subprocess import DEVNULL, call
+
+# Subprocess is needed to start the backend. But
+# the input is controlled by the library. Excluding bandit check.
+from subprocess import DEVNULL, call  # nosec B404
 import tempfile
 import time
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
@@ -1696,6 +1699,13 @@ class _MapdlCore(Commands):
                 f"The changes you make will overwrite the files in {run_dir}."
             )
         add_sw = add_sw.split()
+
+        # Ensure exec_file is a file
+        try:
+            pathlib.Path(exec_file).is_file()
+        except FileNotFoundError:
+            raise FileNotFoundError("The executable file for ANSYS was not found. ")
+
         exec_array = [
             f"{exec_file}",
             "-g",
@@ -1706,11 +1716,12 @@ class _MapdlCore(Commands):
             *add_sw,
         ]
 
+        # exec_array is controlled by the library. Excluding bandit check.
         call(
             exec_array,
             stdout=DEVNULL,
             cwd=run_dir,
-        )
+        )  # nosec B603
 
         # Going back
         os.chdir(cwd)

@@ -28,7 +28,10 @@ import platform
 from queue import Empty, Queue
 import re
 import socket
-import subprocess
+
+# Subprocess is needed to start the backend. But
+# the input is controlled by the library. Excluding bandit check.
+import subprocess  # nosec B404
 import threading
 import time
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
@@ -161,14 +164,18 @@ def _is_ubuntu() -> bool:
     word "ubuntu" in it.
 
     """
+
     # must be running linux for this to be True
     if os.name != "posix":
         return False
 
+    # args value is controlled by the library.
+    # awk is not a partial path - Bandit false positive.
+    # Excluding bandit check.
     proc = subprocess.Popen(
         ["awk", "-F=", "/^NAME/{print $2}", "/etc/os-release"],
         stdout=subprocess.PIPE,
-    )
+    )  # nosec B603 B607
     if "ubuntu" in proc.stdout.read().decode().lower():
         return True
 
@@ -449,6 +456,9 @@ def launch_grpc(
             LOG.debug(f"Writing temporary input file: {tmp_inp} with 'FINISH' command.")
 
     LOG.debug("MAPDL starting in background.")
+
+    # cmd is controlled by the library with generate_mapdl_launch_command.
+    # Excluding bandit check.
     process = subprocess.Popen(
         cmd,
         cwd=run_location,
@@ -456,7 +466,7 @@ def launch_grpc(
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         env=env_vars,
-    )
+    )  # nosec B603
 
     return process
 
@@ -1711,10 +1721,12 @@ def _get_windows_host_ip():
 
 
 def _run_ip_route():
-    from subprocess import run
 
     try:
-        p = run(["ip", "route"], capture_output=True)
+        # args value is controlled by the library.
+        # ip is not a partial path - Bandit false positive
+        # Excluding bandit check.
+        p = subprocess.run(["ip", "route"], capture_output=True)  # nosec B603 B607
     except Exception:
         LOG.debug(
             "Detecting the IP address of the host Windows machine requires being able to execute the command 'ip route'."
