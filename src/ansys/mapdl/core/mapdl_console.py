@@ -28,6 +28,7 @@ import os
 import re
 import time
 
+from ansys.mapdl.core import LOG
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.misc import requires_package
@@ -284,8 +285,8 @@ class MapdlConsole(MapdlBase):
             try:
                 self._process.sendline("FINISH")
                 self._process.sendline("EXIT")
-            except:
-                pass
+            except Exception as e:
+                LOG.warning(f"Unable to exit ANSYS MAPDL: {e}")
 
         if close_log:
             self._close_apdl_log()

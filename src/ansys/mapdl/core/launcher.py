@@ -166,8 +166,7 @@ def _is_ubuntu() -> bool:
         return False
 
     proc = subprocess.Popen(
-        "awk -F= '/^NAME/{print $2}' /etc/os-release",
-        shell=True,
+        ["awk", "-F=", "/^NAME/{print $2}", "/etc/os-release"],
         stdout=subprocess.PIPE,
     )
     if "ubuntu" in proc.stdout.read().decode().lower():
@@ -309,7 +308,7 @@ def generate_mapdl_launch_command(
     ram: Optional[int] = None,
     port: int = MAPDL_DEFAULT_PORT,
     additional_switches: str = "",
-) -> str:
+) -> list[str]:
     """Generate the command line to start MAPDL in gRPC mode.
 
     Parameters
@@ -346,7 +345,7 @@ def generate_mapdl_launch_command(
 
     Returns
     -------
-    str
+    list[str]
         Command
 
     """
@@ -369,10 +368,10 @@ def generate_mapdl_launch_command(
 
     # Windows will spawn a new window, special treatment
     if os.name == "nt":
+        exec_file = f'"{exec_file}"'
         # must start in batch mode on windows to hide APDL window
         tmp_inp = ".__tmp__.inp"
         command_parm = [
-            '"%s"' % exec_file,
             job_sw,
             cpu_sw,
             ram_sw,
@@ -388,7 +387,6 @@ def generate_mapdl_launch_command(
 
     else:  # linux
         command_parm = [
-            '"%s"' % exec_file,
             job_sw,
             cpu_sw,
             ram_sw,
@@ -398,16 +396,19 @@ def generate_mapdl_launch_command(
         ]
 
     command_parm = [
-        each for each in command_parm if command_parm
+        each for each in command_parm if each.strip()
     ]  # cleaning empty args.
-    command = " ".join(command_parm)
 
-    LOG.debug(f"Generated command: {command}")
-    return command
+    # removing spaces in cells
+    command_parm = " ".join(command_parm).split(" ")
+    command_parm.insert(0, f"{exec_file}")
+
+    LOG.debug(f"Generated command: {' '.join(command_parm)}")
+    return command_parm
 
 
 def launch_grpc(
-    cmd: str,
+    cmd: list[str],
     run_location: str = None,
     env_vars: Optional[Dict[str, str]] = None,
 ) -> subprocess.Popen:
@@ -442,7 +443,7 @@ def launch_grpc(
 
     if os.name == "nt":
         # getting tmp file name
-        tmp_inp = cmd.split()[cmd.split().index("-i") + 1]
+        tmp_inp = cmd[cmd.index("-i") + 1]
         with open(os.path.join(run_location, tmp_inp), "w") as f:
             f.write("FINISH\r\n")
             LOG.debug(f"Writing temporary input file: {tmp_inp} with 'FINISH' command.")
@@ -450,7 +451,6 @@ def launch_grpc(
     LOG.debug("MAPDL starting in background.")
     process = subprocess.Popen(
         cmd,
-        shell=os.name != "nt",
         cwd=run_location,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,

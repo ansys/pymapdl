@@ -500,8 +500,10 @@ class _MapdlCore(Commands):
         while (not self._path and i > 5) or i == 0:
             try:
                 self._path = self.inquire("", "DIRECTORY")
-            except Exception:  # pragma: no cover
-                pass
+            except Exception as e:  # pragma: no cover
+                logger.warning(
+                    f"Failed to get the directory due to the following error: {e}"
+                )
             i += 1
             if not self._path:  # pragma: no cover
                 time.sleep(0.1)
@@ -676,8 +678,8 @@ class _MapdlCore(Commands):
         """
         try:
             self._jobname = self.inquire("", "JOBNAME")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Failed to get the jobname due to the following error: {e}")
         return self._jobname
 
     @jobname.setter
@@ -1693,11 +1695,21 @@ class _MapdlCore(Commands):
                 "MAPDL GUI has been opened using 'inplace' kwarg. "
                 f"The changes you make will overwrite the files in {run_dir}."
             )
+        add_sw = add_sw.split()
+        exec_array = [
+            f"{exec_file}",
+            "-g",
+            "-j",
+            f"{name}",
+            "-np",
+            f"{nproc}",
+            *add_sw,
+        ]
 
         call(
-            f'cd "{run_dir}" && "{exec_file}" -g -j {name} -np {nproc} {add_sw}',
-            shell=True,
+            exec_array,
             stdout=DEVNULL,
+            cwd=run_dir,
         )
 
         # Going back
@@ -2298,7 +2310,7 @@ class _MapdlCore(Commands):
                 try:  # logger might be closed
                     if self._log is not None:
                         self._log.error("exit: %s", str(e))
-                except Exception:
+                except ValueError:
                     pass
 
     def _cleanup_loggers(self):
