@@ -1294,3 +1294,74 @@ def test_check_mapdl_launch_on_hpc(message_stdout, message_stderr):
 
     with context:
         assert check_mapdl_launch_on_hpc(process, start_parm) == 1001
+
+
+@patch("ansys.mapdl.core.Mapdl._exit_mapdl", lambda *args, **kwargs: None)
+def test_exit_job(mapdl):
+    # Setting to exit
+    mapdl._mapdl_on_hpc = True
+    mapdl.finish_job_on_exit = True
+    mapdl.remove_temp_dir_on_exit = False
+
+    mapdl._jobid = 1001
+    assert mapdl.jobid == 1001
+
+    with patch("subprocess.Popen") as mock_popen:
+        mapdl.exit(force=True)
+        mock_popen.assert_called_once_with(["scancel", "1001"])
+
+    mapdl._exited = False
+
+
+@patch(
+    "ansys.tools.path.path._get_application_path",
+    lambda *args, **kwargs: "path/to/mapdl/executable",
+)
+@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
+def test_launch_on_hpc_found_ansys(monkeypatch):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+
+    with patch("ansys.mapdl.core.launcher.launch_grpc") as mock_launch_grpc:
+        mock_launch_grpc.return_value = get_fake_process("Submitted batch job 1001")
+        mapdl = launch_mapdl(
+            launch_on_hpc=True,
+        )
+
+        mock_launch_grpc.assert_called_once()
+        cmd = mock_launch_grpc.call_args_list[0][1]["cmd"]
+        env_vars = mock_launch_grpc.call_args_list[0][1]["env_vars"]
+
+        assert "sbatch" in cmd
+        assert "--wrap" in cmd
+        assert "path/to/mapdl/executable" in cmd[-1]
+        assert "-grpc" in cmd[-1]
+
+        assert env_vars.get("ANS_MULTIPLE_NODES") == "1"
+        assert env_vars.get("HYDRA_BOOTSTRAP") == "slurm"
+
+
+def test_launch_on_hpc_not_found_ansys(monkeypatch):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    exec_file = "path/to/mapdl/v242/executable/ansys242"
+    with patch("ansys.mapdl.core.launcher.launch_grpc") as mock_launch_grpc:
+        mock_launch_grpc.return_value = get_fake_process("Submitted batch job 1001")
+
+        with pytest.warns(
+            UserWarning, match="PyMAPDL could not find the ANSYS executable."
+        ):
+            mapdl = launch_mapdl(
+                launch_on_hpc=True,
+                exec_file=exec_file,
+            )
+
+        mock_launch_grpc.assert_called_once()
+        cmd = mock_launch_grpc.call_args_list[0][1]["cmd"]
+        env_vars = mock_launch_grpc.call_args_list[0][1]["env_vars"]
+
+        assert "sbatch" in cmd
+        assert "--wrap" in cmd
+        assert exec_file in cmd[-1]
+        assert "-grpc" in cmd[-1]
+
+        assert env_vars.get("ANS_MULTIPLE_NODES") == "1"
+        assert env_vars.get("HYDRA_BOOTSTRAP") == "slurm"
