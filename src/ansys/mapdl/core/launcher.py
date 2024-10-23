@@ -106,7 +106,7 @@ ALLOWABLE_LAUNCH_MAPDL_ARGS = [
     "add_env_vars",
     "replace_env_vars",
     "version",
-    "detect_slurm_config",
+    "detect_HPC",
     "set_no_abort",
     "force_intel"
     # Non documented args
@@ -972,8 +972,8 @@ def launch_mapdl(
     add_env_vars: Optional[Dict[str, str]] = None,
     replace_env_vars: Optional[Dict[str, str]] = None,
     version: Optional[Union[int, str]] = None,
-    detect_slurm_config: bool = True,
-    **kwargs,
+    detect_HPC: bool = True,
+    **kwargs: Dict[str, Any],
 ) -> Union[MapdlGrpc, "MapdlConsole"]:
     """Start MAPDL locally.
 
@@ -1001,12 +1001,15 @@ def launch_mapdl(
         MAPDL jobname.  Defaults to ``'file'``.
 
     nproc : int, optional
-        Number of processors.  Defaults to 2.
+        Number of processors.  Defaults to 2. If running on an HPC cluster,
+        this value is adjusted to the number of CPUs allocated to the job,
+        unless ``detect_HPC`` is set to "false".
 
     ram : float, optional
-        Total size in megabytes of the workspace (memory) used for the initial allocation.
-        The default is ``None``, in which case 2 GB (2048 MB) is used. To force a fixed size
-        throughout the run, specify a negative number.
+        Total size in megabytes of the workspace (memory) used for the initial
+        allocation. The default is ``None``, in which case 2 GB (2048 MB) is
+        used. To force a fixed size throughout the run, specify a negative
+        number.
 
     mode : str, optional
         Mode to launch MAPDL.  Must be one of the following:
@@ -1139,9 +1142,16 @@ def launch_mapdl(
 
               export PYMAPDL_MAPDL_VERSION=22.2
 
+    detect_HPC: bool, optional
+        Whether detect if PyMAPDL is running on an HPC cluster. Currently
+        only SLURM clusters are supported. By default, it is set to true.
+        This option can be bypassed if the ``PYMAPDL_ON_SLURM``
+        environment variable is set to "true". For more information, see
+        :ref:`ref_hpc_slurm`.
+
     kwargs : dict, optional
-        These keyword arguments are interface specific or for
-        development purposes. See Notes for more details.
+        These keyword arguments are interface-specific or for
+        development purposes. For more information, see Notes.
 
         set_no_abort : :class:`bool`
           *(Development use only)*
@@ -1402,6 +1412,10 @@ def launch_mapdl(
         return launch_remote_mapdl(
             cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
         )
+
+    if args["ON_SLURM"]:
+        env_vars.setdefault("ANS_MULTIPLE_NODES", "1")
+        env_vars.setdefault("HYDRA_BOOTSTRAP", "slurm")
 
     # Early exit for debugging.
     if args["_debug_no_launch"]:
@@ -1742,7 +1756,7 @@ def get_slurm_options(
     # ntasks is for mpi
     SLURM_NTASKS = get_value("SLURM_NTASKS", kwargs)
     LOG.info(f"SLURM_NTASKS: {SLURM_NTASKS}")
-    # Sharing tasks acrros multiple nodes (DMP)
+    # Sharing tasks across multiple nodes (DMP)
     # the format of this envvar is a bit tricky. Avoiding it for the moment.
     # SLURM_TASKS_PER_NODE = int(
     #     kwargs.pop(
@@ -1891,7 +1905,7 @@ def is_on_slurm(args: Dict[str, Any]) -> bool:
 
     # Let's require the following env vars to exist to go into slurm mode.
     args["ON_SLURM"] = bool(
-        args["detect_slurm_config"]
+        args["detect_HPC"]
         and not is_flag_false  # default is true
         and os.environ.get("SLURM_JOB_NAME")
         and os.environ.get("SLURM_JOB_ID")
