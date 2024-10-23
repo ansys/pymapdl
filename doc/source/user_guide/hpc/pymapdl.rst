@@ -2,7 +2,7 @@
 .. _ref_hpc_pymapdl_job:
 
 =======================
-PyMAPDL on HPC Clusters
+PyMAPDL on HPC clusters
 =======================
 
 
@@ -10,18 +10,16 @@ Introduction
 ============
 
 PyMAPDL communicates with MAPDL using the gRPC protocol.
-This protocol offers many advantages and features, for more information
+This protocol offers the many advantages and features described in
 see :ref:`ref_project_page`.
-One of these features is that it is not required to have both,
-PyMAPDL and MAPDL processes, running on the same machine.
-This possibility open the door to many configurations, depending
-on whether you run them both or not on the HPC compute nodes.
-Additionally, you might to be able interact with them (``interactive`` mode)
+One of these features is that it is not required to have both
+PyMAPDL and MAPDL processes running on the same machine.
+This possibility opens the door to many configurations, depending
+on whether or not you run them both on the HPC compute nodes.
+Additionally, you might be able interact with them (``interactive`` mode)
 or not (``batch`` mode).
 
-Currently, the supported configurations are:
-
-* :ref:`ref_pymapdl_batch_in_cluster_hpc`
+For information on supported configurations, see :ref:`ref_pymapdl_batch_in_cluster_hpc`.
 
 
 Since v0.68.5, PyMAPDL can take advantage of the tight integration
@@ -31,9 +29,9 @@ to that job.
 For instance, if a SLURM job has allocated 8 nodes with 4 cores each,
 then PyMAPDL launches an MAPDL instance which uses 32 cores
 spawning across those 8 nodes.
-This behaviour can turn off if passing the environment variable
-:envvar:`PYMAPDL_RUNNING_ON_HPC` with ``'false'`` value
-or passing the argument `detect_hpc=False`
+This behaviour can turn off if passing the
+:envvar:`PYMAPDL_RUNNING_ON_HPC`  environment variable
+with ``'false'`` value or passing the `detect_hpc=False` argument
 to :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`.
 
 
@@ -42,16 +40,16 @@ to :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`.
 Submit a PyMAPDL batch job to the cluster from the entrypoint node
 ==================================================================
 
-Many HPC clusters allow their users to login in a machine using
-``ssh``, ``vnc``, ``rdp``, or similar technologies and submit a job
+Many HPC clusters allow their users to log into a machine using
+``ssh``, ``vnc``, ``rdp``, or similar technologies and then submit a job
 to the cluster from there.
-This entrypoint machine, sometimes known as *head node* or *entrypoint node*,
+This entrypoint machine, sometimes known as the *head node* or *entrypoint node*,
 might be a virtual machine (VDI/VM).
 
 In such cases, once the Python virtual environment with PyMAPDL is already
 set and is accessible to all the compute nodes, launching a
-PyMAPDL job from the entrypoint is very easy to do using ``sbatch`` command.
-Using ``sbatch`` command, the PyMAPDL runs and launches an MAPDL instance in
+PyMAPDL job from the entrypoint node is very easy to do using the ``sbatch`` command.
+When the ``sbatch`` command is used, PyMAPDL runs and launches an MAPDL instance in
 the compute nodes.
 No changes are needed on a PyMAPDL script to run it on an SLURM cluster.
 
@@ -62,10 +60,10 @@ First the virtual environment must be activated in the current terminal.
     user@entrypoint-machine:~$ export VENV_PATH=/my/path/to/the/venv
     user@entrypoint-machine:~$ source $VENV_PATH/bin/activate
 
-Once the virtual environment has been activated, you can launch any Python
-script if they do have the proper Python shebang (``#!/usr/bin/env python3``).
+Once the virtual environment is activated, you can launch any Python
+script that has the proper Python shebang (``#!/usr/bin/env python3``).
 
-For instance, to launch the following Python script ``main.py``:
+For instance, assume that you want to launch the following ``main.py`` Python script:
 
 .. code-block:: python
     :caption: main.py
@@ -81,21 +79,21 @@ For instance, to launch the following Python script ``main.py``:
 
     mapdl.exit()
 
-You can just run in your console:
+You can run this command in your console:
 
 .. code-block:: console
 
     (venv) user@entrypoint-machine:~$ sbatch main.py
 
-Alternatively, you can remove the shebang from the python file and use a
+Alternatively, you can remove the shebang from the Python file and use a
 Python executable call:
 
 .. code-block:: console
 
     (venv) user@entrypoint-machine:~$ sbatch python main.py
 
-Additionally, you can change the amount of cores used in your
-job, by setting the :envvar:`PYMAPDL_NPROC` to the desired value.
+Additionally, you can change the number of cores used in your
+job by setting the :envvar:`PYMAPDL_NPROC` environment variable to the desired value.
 
 .. code-block:: console
 
@@ -108,8 +106,8 @@ You can also add ``sbatch`` options to the command:
     (venv) user@entrypoint-machine:~$ PYMAPDL_NPROC=4 sbatch  main.py
 
 
-For instance, to launch a PyMAPDL job which start a four cores MAPDL instance
-on a 10 CPU SLURM job, you can use:
+For instance, to launch a PyMAPDL job that starts a four-core MAPDL instance
+on a 10-CPU SLURM job, you can run this command:
 
 .. code-block:: console
 
@@ -119,13 +117,13 @@ on a 10 CPU SLURM job, you can use:
 Using a submission script
 -------------------------
 
-In case you need to customize more your job, you can create a SLURM
-submission script to submit a PyMAPDL job.
+If you need to customize your PyMAPDL job further, you can create a SLURM
+submission script for submitting it. 
 In this case, you must create two files:
 
 - Python script with the PyMAPDL code
 - Bash script that activates the virtual environment and calls the
-  Python script.
+  Python script
 
 .. code-block:: python
     :caption: main.py
@@ -157,9 +155,9 @@ In this case, you must create two files:
    # Set env vars
    export MY_ENV_VAR=VALUE
 
-   # Activating Python virtual environment
+   # Activate Python virtual environment
    source /home/user/.venv/bin/activate
-   # Calling Python script
+   # Call Python script
    python main.py
 
 To start the simulation, you use this code:
@@ -171,7 +169,7 @@ To start the simulation, you use this code:
 In this case, the Python virtual environment does not need to be activated
 before submission since it is activated later in the script.
 
-The expected output of the job is
+The expected output of the job follows:
 
 .. code-block:: text
 
@@ -183,3 +181,4 @@ Python script.
 This bash script performs tasks such as creating environment variables,
 moving files to different directories, and printing to ensure your
 configuration is correct.
+

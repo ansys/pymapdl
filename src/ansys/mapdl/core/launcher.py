@@ -1192,25 +1192,24 @@ def launch_mapdl(
         However the argument (if specified) has precedence over the environment
         variable. If this environment variable is empty, it is as it is not set.
 
-    detect_hpc : bool, optional
-        Whether detect if PyMAPDL is running on an HPC cluster or not. Currently
-        only SLURM clusters are supported. By detaul, it is set to true.
-        This option can be bypassed if the environment variable
-        :envvar:`PYMAPDL_RUNNING_ON_HPC` is set to ``"false"``.
-        For more information visit :ref:`ref_hpc_slurm`.
+    detect_hpc: bool, optional
+        Whether detect if PyMAPDL is running on an HPC cluster. Currently
+        only SLURM clusters are supported. By default, it is set to true.
+        This option can be bypassed if the :envvar:`PYMAPDL_RUNNING_ON_HPC`
+        environment variable is set to :class:`True`.
+        For more information, see :ref:`ref_hpc_slurm`.
 
-    launch_on_hpc : bool, optional
+    launch_on_hpc : bool, Optional
         If :class:`True`, it uses the implemented scheduler (SLURM only) to launch
-        an MAPDL instance on the HPC. In this case you can pass the argument
-        '`scheduler_options`' to
+        an MAPDL instance on the HPC. In this case you can pass the
+        '`scheduler_options`' argument to
         :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
-        to specify arguments as a  string or as a dictionary.
-        For more information visit :ref:`ref_hpc_slurm`.
+        to specify the scheduler arguments as a string or as a dictionary.
+        For more information, see :ref:`ref_hpc_slurm`.
 
     kwargs : dict, Optional
-        These keyword arguments are interface specific or for
-        development purposes. See Notes for more details.
-
+        These keyword arguments are interface-specific or for
+        development purposes. For more information, see Notes.
 
         scheduler_options : :class:`str`, :class:`dict`
           Use it to specify options to the scheduler run command. It can be a
