@@ -24,7 +24,10 @@
 
 import os
 import socket
-import subprocess
+
+# Subprocess is needed to start the backend. But
+# the input is controlled by the library. Excluding bandit check.
+import subprocess  # nosec B404
 import time
 
 from ansys.mapdl.core import _HAS_ATP, LOG
@@ -328,12 +331,14 @@ class LicenseChecker:
             env["ANS_FLEXLM_DISABLE_DEFLICPATH"] = "TRUE"
 
         tstart = time.time()
+        # ansysli_util_path is controlled by the library.
+        # Excluding bandit check.
         process = subprocess.Popen(
             [f'"{ansysli_util_path}"', "-checkout", f"{lic}"],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             env=env,
-        )
+        )  # nosec B603
         output = process.stdout.read().decode()
 
         t_elap = time.time() - tstart

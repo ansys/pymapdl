@@ -31,7 +31,10 @@ import os
 import pathlib
 import re
 import shutil
-from subprocess import Popen
+
+# Subprocess is needed to start the backend. But
+# the input is controlled by the library. Excluding bandit check.
+from subprocess import Popen  # nosec B404
 import tempfile
 import threading
 import time
