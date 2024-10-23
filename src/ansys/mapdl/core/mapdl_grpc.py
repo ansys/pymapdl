@@ -1067,7 +1067,10 @@ class MapdlGrpc(MapdlBase):
             except Exception:
                 continue
 
+    # Placing logging in the exit method raises exceptions when
+    # this is triggered by "__del__"
     @protect_from(ValueError, "I/O operation on closed file.")
+    @protect_from(AttributeError, "'MapdlGrpc' object has no attribute '_log'")
     def exit(self, save=False, force=False, **kwargs):
         """Exit MAPDL.
 
@@ -1090,9 +1093,10 @@ class MapdlGrpc(MapdlBase):
         >>> mapdl.exit()
         """
         # check if permitted to start (and hence exit) instances
-        self._log.debug(
-            f"Exiting MAPLD gRPC instance {self.ip}:{self.port} on '{self._path}'."
-        )
+        if hasattr(self, "_log"):
+            self._log.debug(
+                f"Exiting MAPLD gRPC instance {self.ip}:{self.port} on '{self._path}'."
+            )
 
         mapdl_path = self.directory  # caching
         if self._exited is None:
@@ -3741,3 +3745,6 @@ class MapdlGrpc(MapdlBase):
     def __del__(self):
         """In case the object is deleted"""
         self.exit()
+        # Adding super call per:
+        # https://docs.python.org/3/reference/datamodel.html#object.__del__
+        super().__del__()
