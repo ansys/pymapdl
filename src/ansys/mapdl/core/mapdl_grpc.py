@@ -402,8 +402,8 @@ class MapdlGrpc(MapdlBase):
         self._path: Optional[str] = start_parm.get("run_location", None)
         self._busy: bool = False  # used to check if running a command on the server
         self._local: bool = ip in ["127.0.0.1", "127.0.1.1", "localhost"]
-        if "local" in start_parm:  # pragma: no cover  # allow this to be overridden
-            self._local: bool = start_parm["local"]
+        self._local: bool = start_parm.get("local", True)
+        self._launched: bool = start_parm.get("launched", True)
         self._health_response_queue: Optional["Queue"] = None
         self._exiting: bool = False
         self._exited: Optional[bool] = None
@@ -441,7 +441,7 @@ class MapdlGrpc(MapdlBase):
         self.finish_job_on_exit: bool = start_parm.get("finish_job_on_exit", True)
 
         # Queueing the stds
-        if self._mapdl_process:
+        if not self._mapdl_on_hpc and self._mapdl_process:
             self._create_process_stds_queue()
 
         try:
