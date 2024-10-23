@@ -137,7 +137,7 @@ jobs:
           python -c "from pyvista.plotting import system_supports_plotting; print('System support plotting ' + str(system_supports_plotting()))"
 
 
-  check-vulnerabilities-dev:
+  check-vulnerabilities:
     name: "Check library vulnerabilities"
     runs-on: ubuntu-latest
     steps:
@@ -147,7 +147,8 @@ jobs:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           python-package-name: ${{ env.PACKAGE_NAME }}
-          dev-mode: github.ref != 'refs/heads/main'
+          dev-mode: ${{ github.ref != 'refs/heads/main' }}
+
   docs-build:
     name: "Build documentation"
     runs-on: ubuntu-latest
