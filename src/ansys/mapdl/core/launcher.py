@@ -23,6 +23,7 @@
 """Module for launching MAPDL locally or connecting to a remote instance with gRPC."""
 
 import atexit
+from functools import wraps
 import os
 import platform
 from queue import Empty, Queue
@@ -61,7 +62,21 @@ if _HAS_PIM:
     import ansys.platform.instancemanagement as pypim
 
 if _HAS_ATP:
-    from ansys.tools.path import find_ansys, get_ansys_path, version_from_path
+    from ansys.tools.path import find_ansys, get_ansys_path
+    from ansys.tools.path import version_from_path as _version_from_path
+
+    @wraps(_version_from_path)
+    def version_from_path(*args, **kwargs):
+        """Wrap ansys.tool.path.version_from_path to raise a warning if the
+        executable couldn't be found"""
+        if kwargs.pop("launch_on_hpc", False):
+            try:
+                return _version_from_path(*args, **kwargs)
+            except RuntimeError:
+                warnings.warn("PyMAPDL could not find the ANSYS executable. ")
+        else:
+            return _version_from_path(*args, **kwargs)
+
 
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl_console import MapdlConsole
@@ -352,11 +367,6 @@ def generate_mapdl_launch_command(
         Command
 
     """
-    # verify version
-    if _HAS_ATP:
-        if version_from_path("mapdl", exec_file) < 202:
-            raise VersionError("The MAPDL gRPC interface requires MAPDL 20.2 or later")
-
     cpu_sw = "-np %d" % nproc
 
     if ram:
@@ -1386,7 +1396,9 @@ def launch_mapdl(
 
     get_exec_file(args)
 
-    args["version"] = get_version(args["version"], exec_file)
+    args["version"] = get_version(
+        args["version"], args.get("exec_file"), launch_on_hpc=args["launch_on_hpc"]
+    )
 
     if args["start_instance"]:
         ########################################
@@ -1404,9 +1416,8 @@ def launch_mapdl(
         # (as way to check if MAPDL started or not)
         remove_err_files(args["run_location"], args["jobname"])
 
-        if _HAS_ATP and not args["_debug_no_launch"]:
-            version = version_from_path("mapdl", args["exec_file"])
-            args["mode"] = check_mode(args["mode"], version)
+        # Check for a valid connection mode
+        args["mode"] = check_mode(args["mode"], args["version"])
 
     if not args["mode"]:
         args["mode"] = "grpc"
@@ -1510,7 +1521,7 @@ def launch_mapdl(
         lic_check.start()
 
     LOG.debug("Starting MAPDL")
-    if args["mode"] == "console":
+    if args["mode"] == "console":  # pragma: no cover
         ########################################
         # Launch MAPDL on console mode
         # ----------------------------
@@ -1610,13 +1621,16 @@ def launch_mapdl(
     return mapdl
 
 
-def check_mode(mode: ALLOWABLE_MODES, version: ALLOWABLE_VERSION_INT):
+def check_mode(mode: ALLOWABLE_MODES, version: Optional[int] = None):
     """Check if the MAPDL server mode matches the allowable version
 
     If :class:`None`, the newest mode will be selected.
 
     Returns a value from ``ALLOWABLE_MODES``.
     """
+    if not version:
+        return mode
+
     if isinstance(mode, str):
         mode = mode.lower()
         if mode == "grpc":
@@ -2158,6 +2172,7 @@ def get_port(port: Optional[int] = None, start_instance: Optional[bool] = None) 
 def get_version(
     version: Optional[Union[str, int]] = None,
     exec_file: Optional[str] = None,
+    launch_on_hpc: bool = False,
 ) -> Optional[int]:
     """Get MAPDL version
 
@@ -2180,6 +2195,14 @@ def get_version(
         version = os.getenv("PYMAPDL_MAPDL_VERSION")
 
     if not version:
+        # verify version
+        if exec_file and _HAS_ATP:
+            version = version_from_path("mapdl", exec_file, launch_on_hpc=launch_on_hpc)
+            if version and version < 202:
+                raise VersionError(
+                    "The MAPDL gRPC interface requires MAPDL 20.2 or later"
+                )
+
         # Early exit
         return
 
@@ -2287,8 +2310,7 @@ def get_exec_file(args: Dict[str, Any]) -> None:
     FileNotFoundError
         Invalid MAPDL executable
     """
-
-    args["exec_file"] = os.getenv("PYMAPDL_MAPDL_EXEC", args.get("exec_file"))
+    args["exec_file"] = args.get("exec_file") or os.getenv("PYMAPDL_MAPDL_EXEC")
 
     if not args["start_instance"] and args["exec_file"] is None:
         # 'exec_file' is not needed if the instance is not going to be launch
@@ -2318,7 +2340,9 @@ def get_exec_file(args: Dict[str, Any]) -> None:
                 "'exec_file' argument."
             )
     else:  # verify ansys exists at this location
-        if not os.path.isfile(args["exec_file"]):
+        if not args.get("launch_on_hpc", False) and not os.path.isfile(
+            args["exec_file"]
+        ):
             raise FileNotFoundError(
                 f'Invalid MAPDL executable at "{args["exec_file"]}"\n'
                 "Enter one manually using exec_file="
