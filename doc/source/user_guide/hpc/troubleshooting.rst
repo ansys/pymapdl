@@ -23,7 +23,8 @@ Debugging jobs
 
 - Check SLURM logs for error messages and debugging information.
 - It is also good idea to print the environment variables in your bash script, using 
-  ``printenv``. Additionally, you can filter them using ``grep``.
+  ``printenv`` *bash* command.
+  Additionally, you can filter its output using ``grep`` *bash* command.
 
   .. code-block:: bash
 
