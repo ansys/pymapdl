@@ -1306,20 +1306,30 @@ def test_check_mapdl_launch_on_hpc(message_stdout, message_stderr):
 
 
 @patch("ansys.mapdl.core.Mapdl._exit_mapdl", lambda *args, **kwargs: None)
-def test_exit_job(mapdl):
+@patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.kill_job")
+def test_exit_job(mock_popen, mapdl):
     # Setting to exit
     mapdl._mapdl_on_hpc = True
     mapdl.finish_job_on_exit = True
+    prev_rem = mapdl.remove_temp_dir_on_exit
     mapdl.remove_temp_dir_on_exit = False
+
+    mock_popen.return_value = lambda *args, **kwargs: True
 
     mapdl._jobid = 1001
     assert mapdl.jobid == 1001
 
-    with patch("subprocess.Popen") as mock_popen:
-        mapdl.exit(force=True)
-        mock_popen.assert_called_once_with(["scancel", "1001"])
+    mapdl.exit(force=True)
 
+    # Returning to state
+    mapdl._jobid = None
     mapdl._exited = False
+    mapdl._mapdl_on_hpc = False
+    mapdl.finish_job_on_exit = False
+    mapdl.remove_temp_dir_on_exit = prev_rem
+
+    # Checking
+    mock_popen.assert_called_once_with(1001)
 
 
 @patch(
