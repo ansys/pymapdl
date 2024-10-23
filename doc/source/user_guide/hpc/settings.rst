@@ -10,13 +10,13 @@ Requirements
 Using PyMAPDL in an HPC environment managed by SLURM scheduler has certain
 requirements:
 
-* **An Ansys installation must be accessible from all the compute nodes**.
+* **An Ansys installation must be accessible from all the compute nodes.**
   This normally implies that the ``ANSYS`` installation directory is in a
   shared drive or directory. Your HPC cluster administrator
   should provide you with the path to the ``ANSYS`` directory.
 
 * **A compatible Python installation must be accessible from all the compute
-  nodes**.
+  nodes.**
   For compatible Python versions, see :ref:`ref_pymapdl_installation`.
 
 Additionally, you must perform a few key steps to ensure efficient job
@@ -123,6 +123,7 @@ then you can run that script using:
 
 This command might take a minute or two to complete, depending on the amount of
 free resources available in the cluster.
+
 On the console, you should see this output:
 
 .. code-block:: text
@@ -132,4 +133,3 @@ On the console, you should see this output:
 
 If you see an error in the output, see :ref:`ref_hpc_troubleshooting`,
 especially :ref:`ref_python_venv_not_accesible`.
-
