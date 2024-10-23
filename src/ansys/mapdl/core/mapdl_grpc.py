@@ -32,7 +32,7 @@ import pathlib
 import re
 import shutil
 import socket
-from subprocess import Popen
+import subprocess
 import tempfile
 import threading
 import time
@@ -428,7 +428,7 @@ class MapdlGrpc(MapdlBase):
         self._subscribe_to_channel()
 
         # connect and validate to the channel
-        self._mapdl_process: Popen = start_parm.pop("process", None)
+        self._mapdl_process: subprocess.Popen = start_parm.pop("process", None)
 
         # saving for later use (for example open_gui)
         start_parm["port"] = port
@@ -1126,35 +1126,41 @@ class MapdlGrpc(MapdlBase):
                 self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
                 return
 
+        # Actually exiting MAPDL instance
         self._exiting = True
-
-        if not kwargs.pop("fake_exit", False):
-            # This cannot/should not be faked
-            if self._local:
-                self._cache_pids()  # Recache processes
-
-                if os.name == "nt":
-                    self._kill_server()
-                self._close_process()
-                self._remove_lock_file(mapdl_path)
-            else:
-                self._kill_server()
-
+        self._exit_mapdl(path=mapdl_path)
         self._exited = True
-        self._exiting = False
 
-        if self._remote_instance:  # pragma: no cover
-            # No cover: The CI is working with a single MAPDL instance
-            self._remote_instance.delete()
-
+        # Exiting HPC job
         if self._mapdl_on_hpc and self.finish_job_on_exit:
             self.kill_job(self.jobid)
             self._log.debug(f"Job (id: {self.jobid}) has been cancel.")
 
+        # Exiting remov
+        if self._remote_instance:  # pragma: no cover
+            # No cover: The CI is working with a single MAPDL instance
+            self._remote_instance.delete()
+
+        self._exiting = False
+
+        # Post-kill tasks
         self._remove_temp_dir_on_exit(mapdl_path)
 
         if self._local and self._port in pymapdl._LOCAL_PORTS:
             pymapdl._LOCAL_PORTS.remove(self._port)
+
+    def _exit_mapdl(self, path: str = None) -> None:
+        """Exit MAPDL and remove the lock file in `path`"""
+        # This cannot/should not be faked
+        if self._local:
+            self._cache_pids()  # Recache processes
+
+            if os.name == "nt":
+                self._kill_server()
+            self._close_process()
+            self._remove_lock_file(path)
+        else:
+            self._kill_server()
 
     def _remove_temp_dir_on_exit(self, path=None):
         """Removes the temporary directory created by the launcher.
@@ -3730,16 +3736,8 @@ class MapdlGrpc(MapdlBase):
     def kill_job(self, jobid: int) -> None:
         cmd = ["scancel", f"{jobid}"]
         # to ensure the job is stopped properly, let's issue the scancel twice.
-        for _ in range(2):
-            Popen(cmd)
+        subprocess.Popen(cmd)
 
     def __del__(self):
-        # For some reason, some tests do not seem this attribute.
-        if (
-            hasattr(self, "_mapdl_on_hpc")
-            and self._mapdl_on_hpc
-            and self.finish_job_on_exit
-        ):
-            self.exit()
-        else:
-            super().__del__()
+        """In case the object is deleted"""
+        self.exit()
