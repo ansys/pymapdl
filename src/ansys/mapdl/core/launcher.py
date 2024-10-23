@@ -1143,15 +1143,15 @@ def launch_mapdl(
               export PYMAPDL_MAPDL_VERSION=22.2
 
     detect_HPC: bool, optional
-        Whether detect if PyMAPDL is running on an HPC cluster or not. Currently
-        only SLURM clusters are supported. By detaul, it is set to true.
-        This option can be bypassed if the environment variable
-        ``PYMAPDL_ON_SLURM`` is set to "true". For more information visit
+        Whether detect if PyMAPDL is running on an HPC cluster. Currently
+        only SLURM clusters are supported. By default, it is set to true.
+        This option can be bypassed if the ``PYMAPDL_ON_SLURM``
+        environment variable is set to "true". For more information, see
         :ref:`ref_hpc_slurm`.
 
     kwargs : dict, optional
-        These keyword arguments are interface specific or for
-        development purposes. See Notes for more details.
+        These keyword arguments are interface-specific or for
+        development purposes. For more information, see Notes.
 
         set_no_abort : :class:`bool`
           *(Development use only)*
