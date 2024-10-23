@@ -937,7 +937,7 @@ def test_generate_mapdl_launch_command_windows():
 
     assert isinstance(cmd, list)
 
-    assert f"{exec_file}" in cmd
+    assert f'"{exec_file}"' in cmd
     assert "-j" in cmd
     assert f"{jobname}" in cmd
     assert "-port" in cmd
@@ -955,7 +955,7 @@ def test_generate_mapdl_launch_command_windows():
     assert ".__tmp__.out" in cmd
 
     cmd = " ".join(cmd)
-    assert f"{exec_file} " in cmd
+    assert f'"{exec_file}"' in cmd
     assert f" -j {jobname} " in cmd
     assert f" -port {port} " in cmd
     assert f" -m {ram*1024} " in cmd
@@ -984,6 +984,8 @@ def test_generate_mapdl_launch_command_linux():
         ram=ram,
         additional_switches=additional_switches,
     )
+    assert isinstance(cmd, list)
+    assert all([isinstance(each, str) for each in cmd])
 
     assert isinstance(cmd, list)
 
@@ -1163,12 +1165,9 @@ def test_launch_grpc(tmpdir, launch_on_hpc):
     else:
         cmd = "ansys.exe -b -i my_input.inp -o my_output.inp".split(" ")
     run_location = str(tmpdir)
-    kwargs = launch_grpc(cmd, run_location)
+    kwargs = launch_grpc(cmd, run_location, launch_on_hpc=launch_on_hpc)
 
     inp_file = os.path.join(run_location, "my_input.inp")
-    assert os.path.exists(inp_file)
-    with open(inp_file, "r") as fid:
-        assert "FINISH" in fid.read()
 
     if launch_on_hpc:
         assert "sbatch" in kwargs["cmd"]
@@ -1176,6 +1175,9 @@ def test_launch_grpc(tmpdir, launch_on_hpc):
         assert " ".join(cmd) == kwargs["cmd"]
     else:
         assert cmd == kwargs["cmd"]
+        assert os.path.exists(inp_file)
+        with open(inp_file, "r") as fid:
+            assert "FINISH" in fid.read()
 
     assert not kwargs["shell"]
     assert "TRUE" == kwargs["env"].pop("ANS_CMD_NODIAG")

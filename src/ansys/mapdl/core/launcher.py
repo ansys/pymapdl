@@ -29,7 +29,10 @@ import platform
 from queue import Empty, Queue
 import re
 import socket
-import subprocess
+
+# Subprocess is needed to start the backend. But
+# the input is controlled by the library. Excluding bandit check.
+import subprocess  # nosec B404
 import threading
 import time
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
@@ -178,15 +181,18 @@ def _is_ubuntu() -> bool:
     word "ubuntu" in it.
 
     """
+
     # must be running linux for this to be True
     if os.name != "posix":
         return False
 
+    # args value is controlled by the library.
+    # awk is not a partial path - Bandit false positive.
+    # Excluding bandit check.
     proc = subprocess.Popen(
-        "awk -F= '/^NAME/{print $2}' /etc/os-release",
-        shell=True,
+        ["awk", "-F=", "/^NAME/{print $2}", "/etc/os-release"],
         stdout=subprocess.PIPE,
-    )
+    )  # nosec B603 B607
     if "ubuntu" in proc.stdout.read().decode().lower():
         return True
 
@@ -326,7 +332,7 @@ def generate_mapdl_launch_command(
     ram: Optional[int] = None,
     port: int = MAPDL_DEFAULT_PORT,
     additional_switches: str = "",
-) -> List[str]:
+) -> list[str]:
     """Generate the command line to start MAPDL in gRPC mode.
 
     Parameters
@@ -363,7 +369,7 @@ def generate_mapdl_launch_command(
 
     Returns
     -------
-    List[str]
+    list[str]
         Command
 
     """
@@ -381,10 +387,10 @@ def generate_mapdl_launch_command(
 
     # Windows will spawn a new window, special treatment
     if os.name == "nt":
+        exec_file = f'"{exec_file}"'
         # must start in batch mode on windows to hide APDL window
         tmp_inp = ".__tmp__.inp"
         command_parm = [
-            '"%s"' % exec_file,
             job_sw,
             cpu_sw,
             ram_sw,
@@ -400,7 +406,6 @@ def generate_mapdl_launch_command(
 
     else:  # linux
         command_parm = [
-            '"%s"' % exec_file,
             job_sw,
             cpu_sw,
             ram_sw,
@@ -413,31 +418,37 @@ def generate_mapdl_launch_command(
         each for each in command_parm if each.strip()
     ]  # cleaning empty args.
 
-    command = " ".join(command_parm[1:]).split(" ")
-    command.insert(0, f"{exec_file}")
+    # removing spaces in cells
+    command_parm = " ".join(command_parm).split(" ")
+    command_parm.insert(0, f"{exec_file}")
 
-    LOG.debug(f"Generated command: {command}")
-    return command
+    LOG.debug(f"Generated command: {' '.join(command_parm)}")
+    return command_parm
 
 
 def launch_grpc(
-    cmd: List[str],
+    cmd: list[str],
     run_location: str = None,
     env_vars: Optional[Dict[str, str]] = None,
+    launch_on_hpc: bool = False,
 ) -> subprocess.Popen:
     """Start MAPDL locally in gRPC mode.
 
     Parameters
     ----------
-    cmd: str
+    cmd : str
         Command to use to launch the MAPDL instance.
 
     run_location : str, optional
         MAPDL working directory.  The default is the temporary working
         directory.
 
-    env_vars: dict, optional
+    env_vars : dict, optional
         Dictionary with the environment variables to inject in the process.
+
+    launch_on_hpc : bool, optional
+        If running on an HPC, this needs to be :class:`True` to avoid the
+        temporary file creation on Windows.
 
     Returns
     -------
@@ -472,21 +483,29 @@ def launch_grpc(
 
     if os.name == "nt":
         # getting tmp file name
-        tmp_inp = cmd_string.split()[cmd_string.split().index("-i") + 1]
-        with open(os.path.join(run_location, tmp_inp), "w") as f:
-            f.write("FINISH\r\n")
-            LOG.debug(f"Writing temporary input file: {tmp_inp} with 'FINISH' command.")
+        if not launch_on_hpc:
+            # if we are running on an HPC cluster (case not considered), we will
+            # have to upload/create this file because it is needed for starting.
+            tmp_inp = cmd[cmd.index("-i") + 1]
+            with open(os.path.join(run_location, tmp_inp), "w") as f:
+                f.write("FINISH\r\n")
+                LOG.debug(
+                    f"Writing temporary input file: {tmp_inp} with 'FINISH' command."
+                )
 
     LOG.debug("MAPDL starting in background.")
+
+    # cmd is controlled by the library with generate_mapdl_launch_command.
+    # Excluding bandit check.
     process = subprocess.Popen(
         cmd_,
-        shell=shell,  # It does not work without shell.
+        shell=shell,  # sbatch does not work without shell.
         cwd=run_location,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         env=env_vars,
-    )
+    )  # nosec B603
 
     return process
 
@@ -1558,7 +1577,10 @@ def launch_mapdl(
         try:
             #
             process = launch_grpc(
-                cmd=cmd, run_location=args["run_location"], env_vars=env_vars
+                cmd=cmd,
+                run_location=args["run_location"],
+                env_vars=env_vars,
+                launch_on_hpc=args.get("launch_on_hpc"),
             )
 
             if args["launch_on_hpc"]:
@@ -1802,10 +1824,12 @@ def _get_windows_host_ip():
 
 
 def _run_ip_route():
-    from subprocess import run
 
     try:
-        p = run(["ip", "route"], capture_output=True)
+        # args value is controlled by the library.
+        # ip is not a partial path - Bandit false positive
+        # Excluding bandit check.
+        p = subprocess.run(["ip", "route"], capture_output=True)  # nosec B603 B607
     except Exception:
         LOG.debug(
             "Detecting the IP address of the host Windows machine requires being able to execute the command 'ip route'."
@@ -2631,9 +2655,11 @@ def launch_mapdl_on_cluster(
 
     jobid = None
     try:
-        # TODO: wrap the launch_grpc with sbatch
         process = launch_grpc(
-            cmd=cmd, run_location=args["run_location"], env_vars=env_vars
+            cmd=cmd,
+            run_location=args["run_location"],
+            env_vars=env_vars,
+            launch_on_hpc=args.get("launch_on_hpc"),
         )
 
         jobid = check_mapdl_launch_on_hpc(process, start_parm)
