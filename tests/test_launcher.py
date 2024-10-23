@@ -63,7 +63,14 @@ from ansys.mapdl.core.launcher import (
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from conftest import ON_LOCAL, QUICK_LAUNCH_SWITCHES, NullContext, requires
+from ansys.mapdl.core.misc import stack
+from conftest import (
+    ON_LOCAL,
+    PATCH_MAPDL_START,
+    QUICK_LAUNCH_SWITCHES,
+    NullContext,
+    requires,
+)
 
 try:
     from ansys.tools.path import (
@@ -1318,50 +1325,155 @@ def test_exit_job(mapdl):
     lambda *args, **kwargs: "path/to/mapdl/executable",
 )
 @patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
-def test_launch_on_hpc_found_ansys(monkeypatch):
+@stack(*PATCH_MAPDL_START)
+@patch("ansys.mapdl.core.launcher.launch_grpc")
+@patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.kill_job")
+@patch("ansys.mapdl.core.launcher.send_scontrol")
+def test_launch_on_hpc_found_ansys(mck_ssctrl, mck_del, mck_launch_grpc, monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
 
-    with patch("ansys.mapdl.core.launcher.launch_grpc") as mock_launch_grpc:
-        mock_launch_grpc.return_value = get_fake_process("Submitted batch job 1001")
-        mapdl = launch_mapdl(
-            launch_on_hpc=True,
-        )
+    mck_launch_grpc.return_value = get_fake_process("Submitted batch job 1001")
+    mck_ssctrl.return_value = get_fake_process(
+        "a long scontrol...\nJobState=RUNNING\n...\nBatchHost=myhostname\n...\nin message"
+    )
 
-        mock_launch_grpc.assert_called_once()
-        cmd = mock_launch_grpc.call_args_list[0][1]["cmd"]
-        env_vars = mock_launch_grpc.call_args_list[0][1]["env_vars"]
+    mapdl_a = launch_mapdl(
+        launch_on_hpc=True,
+    )
+    mapdl_a.exit()
 
-        assert "sbatch" in cmd
-        assert "--wrap" in cmd
-        assert "path/to/mapdl/executable" in cmd[-1]
-        assert "-grpc" in cmd[-1]
+    mck_launch_grpc.assert_called_once()
+    cmd = mck_launch_grpc.call_args_list[0][1]["cmd"]
+    env_vars = mck_launch_grpc.call_args_list[0][1]["env_vars"]
 
-        assert env_vars.get("ANS_MULTIPLE_NODES") == "1"
-        assert env_vars.get("HYDRA_BOOTSTRAP") == "slurm"
+    assert "sbatch" in cmd
+    assert "--wrap" in cmd
+    assert "path/to/mapdl/executable" in cmd[-1]
+    assert "-grpc" in cmd[-1]
+
+    assert env_vars.get("ANS_MULTIPLE_NODES") == "1"
+    assert env_vars.get("HYDRA_BOOTSTRAP") == "slurm"
+
+    mck_ssctrl.assert_called_once()
+    assert "show" in mck_ssctrl.call_args[0][0]
+    assert "1001" in mck_ssctrl.call_args[0][0]
+
+    mck_del.assert_called_once()
 
 
-def test_launch_on_hpc_not_found_ansys(monkeypatch):
+@stack(*PATCH_MAPDL_START)
+@patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.kill_job")
+@patch("ansys.mapdl.core.launcher.launch_grpc")
+@patch("ansys.mapdl.core.launcher.send_scontrol")
+def test_launch_on_hpc_not_found_ansys(mck_sc, mck_lgrpc, mck_kj, monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
     exec_file = "path/to/mapdl/v242/executable/ansys242"
+
+    mck_lgrpc.return_value = get_fake_process("Submitted batch job 1001")
+    mck_kj.return_value = None
+    mck_sc.return_value = get_fake_process(
+        "a long scontrol...\nJobState=RUNNING\n...\nBatchHost=myhostname\n...\nin message"
+    )
+
+    with pytest.warns(
+        UserWarning, match="PyMAPDL could not find the ANSYS executable."
+    ):
+        mapdl = launch_mapdl(
+            launch_on_hpc=True,
+            exec_file=exec_file,
+        )
+        mapdl.exit()
+
+    mck_lgrpc.assert_called_once()
+    cmd = mck_lgrpc.call_args_list[0][1]["cmd"]
+    env_vars = mck_lgrpc.call_args_list[0][1]["env_vars"]
+
+    assert "sbatch" in cmd
+    assert "--wrap" in cmd
+    assert exec_file in cmd[-1]
+    assert "-grpc" in cmd[-1]
+
+    assert env_vars.get("ANS_MULTIPLE_NODES") == "1"
+    assert env_vars.get("HYDRA_BOOTSTRAP") == "slurm"
+
+    mck_sc.assert_called_once()
+    assert "show" in mck_sc.call_args[0][0]
+    assert "1001" in mck_sc.call_args[0][0]
+
+    mck_kj.assert_called_once()
+
+
+def test_launch_on_hpc_exception_launch_mapdl(monkeypatch):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    exec_file = "path/to/mapdl/v242/executable/ansys242"
+
+    process = get_fake_process("ERROR")
+
     with patch("ansys.mapdl.core.launcher.launch_grpc") as mock_launch_grpc:
-        mock_launch_grpc.return_value = get_fake_process("Submitted batch job 1001")
+        with patch("ansys.mapdl.core.launcher.kill_job") as mock_popen:
 
-        with pytest.warns(
-            UserWarning, match="PyMAPDL could not find the ANSYS executable."
-        ):
-            mapdl = launch_mapdl(
-                launch_on_hpc=True,
-                exec_file=exec_file,
-            )
+            mock_launch_grpc.return_value = process
 
-        mock_launch_grpc.assert_called_once()
-        cmd = mock_launch_grpc.call_args_list[0][1]["cmd"]
-        env_vars = mock_launch_grpc.call_args_list[0][1]["env_vars"]
+            with pytest.raises(
+                Exception, match="PyMAPDL failed to submit the sbatch job:"
+            ):
+                mapdl = launch_mapdl(
+                    launch_on_hpc=True,
+                    exec_file=exec_file,
+                )
 
-        assert "sbatch" in cmd
-        assert "--wrap" in cmd
-        assert exec_file in cmd[-1]
-        assert "-grpc" in cmd[-1]
+    mock_launch_grpc.assert_called_once()
+    cmd = mock_launch_grpc.call_args_list[0][1]["cmd"]
+    env_vars = mock_launch_grpc.call_args_list[0][1]["env_vars"]
 
-        assert env_vars.get("ANS_MULTIPLE_NODES") == "1"
-        assert env_vars.get("HYDRA_BOOTSTRAP") == "slurm"
+    assert "sbatch" in cmd
+    assert "--wrap" in cmd
+    assert exec_file in cmd[-1]
+    assert "-grpc" in cmd[-1]
+
+    assert env_vars.get("ANS_MULTIPLE_NODES") == "1"
+    assert env_vars.get("HYDRA_BOOTSTRAP") == "slurm"
+
+    # Popen wi
+    mock_popen.assert_not_called()
+
+
+def test_launch_on_hpc_exception_successfull_sbatch(monkeypatch):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    exec_file = "path/to/mapdl/v242/executable/ansys242"
+
+    def raise_exception(*args, **kwargs):
+        raise Exception("Fake exception when launching MAPDL")
+
+    process_launch_grpc = get_fake_process("Submitted batch job 1001")
+
+    process_scontrol = get_fake_process("Submitted batch job 1001")
+    process_scontrol.stdout.read = raise_exception
+
+    with patch("ansys.mapdl.core.launcher.launch_grpc") as mock_launch_grpc:
+        with patch("ansys.mapdl.core.launcher.send_scontrol") as mock_scontrol:
+            with patch("ansys.mapdl.core.launcher.kill_job") as mock_kill_job:
+
+                mock_launch_grpc.return_value = process_launch_grpc
+                mock_scontrol.return_value = process_scontrol
+
+                with pytest.raises(
+                    Exception, match="Fake exception when launching MAPDL"
+                ):
+                    mapdl = launch_mapdl(
+                        launch_on_hpc=True,
+                        exec_file=exec_file,
+                    )
+
+    mock_launch_grpc.assert_called_once()
+    cmd = mock_launch_grpc.call_args_list[0][1]["cmd"]
+    env_vars = mock_launch_grpc.call_args_list[0][1]["env_vars"]
+
+    mock_scontrol.assert_called_once()
+    args = mock_scontrol.call_args_list[0][0][0]
+
+    assert "show" in args
+    assert "jobid" in args
+    assert "1001" in args
+
+    mock_kill_job.assert_called_once()
