@@ -28,6 +28,7 @@ from shutil import get_terminal_size
 import subprocess
 from sys import platform
 import time
+from unittest.mock import patch
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
 import psutil
@@ -642,6 +643,29 @@ SpacedPaths = namedtuple(
     "SpacedPaths",
     ["path_without_spaces", "path_with_spaces", "path_with_single_quote"],
 )
+
+
+# Necessary patches to patch Mapdl launch
+def func_which_returns(return_=None):
+    return lambda *args, **kwargs: return_
+
+
+# Methods to patch in MAPDL when launching
+_meth_patch_MAPDL_launch = (
+    # method, and its return
+    ("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._connect", func_which_returns(True)),
+    ("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._run", func_which_returns("")),
+    ("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._create_channel", func_which_returns("")),
+    (
+        "ansys.mapdl.core.mapdl_grpc.MapdlGrpc._subscribe_to_channel",
+        func_which_returns(""),
+    ),
+    ("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._run_at_connect", func_which_returns("")),
+    ("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._exit_mapdl", func_which_returns(None)),
+    ("socket.gethostbyname", func_which_returns("123.45.67.99")),
+)
+
+PATCH_MAPDL_START = [patch(method, ret) for method, ret in _meth_patch_MAPDL_launch]
 
 
 @pytest.fixture(scope="function")
