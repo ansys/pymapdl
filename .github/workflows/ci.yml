@@ -138,8 +138,7 @@ jobs:
 
 
   check-vulnerabilities-dev:
-    name: "Check library vulnerabilities (development mode)"
-    if: github.ref != 'refs/heads/main'
+    name: "Check library vulnerabilities"
     runs-on: ubuntu-latest
     steps:
       - name: "Check library vulnerabilities with development mode"
@@ -148,21 +147,7 @@ jobs:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           python-package-name: ${{ env.PACKAGE_NAME }}
-          dev-mode: true
-
-
-  check-vulnerabilities-main:
-    name: "Check library vulnerabilities (default mode - only on main)"
-    if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
-    steps:
-      - name: "Check library vulnerabilities with default mode"
-        uses: ansys/actions/check-vulnerabilities@v8
-        with:
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
-          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-          python-package-name: ${{ env.PACKAGE_NAME }}
-
+          dev-mode: github.ref != 'refs/heads/main'
   docs-build:
     name: "Build documentation"
     runs-on: ubuntu-latest
