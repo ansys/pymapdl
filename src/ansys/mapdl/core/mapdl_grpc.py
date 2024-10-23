@@ -1097,6 +1097,8 @@ class MapdlGrpc(MapdlBase):
         >>> mapdl.exit()
         """
         # check if permitted to start (and hence exit) instances
+        from ansys.mapdl import core as pymapdl
+
         if hasattr(self, "_log"):
             self._log.debug(
                 f"Exiting MAPLD gRPC instance {self.ip}:{self.port} on '{self._path}'."
@@ -1127,9 +1129,8 @@ class MapdlGrpc(MapdlBase):
             if not get_start_instance():
                 self._log.info("Ignoring exit due to PYMAPDL_START_INSTANCE=False")
                 return
-            # or building the gallery
-            from ansys.mapdl import core as pymapdl
 
+            # or building the gallery
             if pymapdl.BUILDING_GALLERY:
                 self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
                 return
@@ -1144,7 +1145,7 @@ class MapdlGrpc(MapdlBase):
             self.kill_job(self.jobid)
             self._log.debug(f"Job (id: {self.jobid}) has been cancel.")
 
-        # Exiting remov
+        # Exiting remote instances
         if self._remote_instance:  # pragma: no cover
             # No cover: The CI is working with a single MAPDL instance
             self._remote_instance.delete()
