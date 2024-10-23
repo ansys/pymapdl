@@ -1562,7 +1562,8 @@ def launch_mapdl(
             )
 
             if args["launch_on_hpc"]:
-                check_mapdl_launch_on_hpc(process, start_parm)
+                start_parm["jobid"] = check_mapdl_launch_on_hpc(process, start_parm)
+                get_job_info(start_parm=start_parm)
             else:
                 # Local mapdl launch check
                 check_mapdl_launch(
@@ -1572,7 +1573,7 @@ def launch_mapdl(
         except Exception as exception:
             LOG.error("An error occurred when launching MAPDL.")
 
-            jobid: int = args.get("jobid", "Not found")
+            jobid: int = start_parm.get("jobid", "Not found")
 
             if (
                 args["launch_on_hpc"]
@@ -1581,7 +1582,7 @@ def launch_mapdl(
             ):
 
                 LOG.debug(f"Killing HPC job with id: {jobid}")
-                subprocess.Popen(["scancel", str(jobid)])
+                kill_job(jobid)
 
             if args["license_server_check"]:
                 LOG.debug("Checking license server.")
@@ -1610,9 +1611,6 @@ def launch_mapdl(
                 use_vtk=args["use_vtk"],
                 **start_parm,
             )
-
-            # Setting launched property
-            mapdl._launched = True
 
         except Exception as exception:
             LOG.error("An error occurred when connecting to MAPDL.")
@@ -2639,14 +2637,14 @@ def launch_mapdl_on_cluster(
         )
 
         jobid = check_mapdl_launch_on_hpc(process, start_parm)
-        get_job_info(jobid=jobid, start_parm=start_parm)
+        get_job_info(start_parm=start_parm, jobid=jobid)
 
     except Exception as exception:
         LOG.error("An error occurred when launching MAPDL.")
 
         if start_parm.get("finish_job_on_exit", True) and jobid:
             LOG.debug(f"Killing HPC job with id: {jobid}")
-            subprocess.Popen(["scancel", str(jobid)])
+            kill_job(jobid)
 
         raise exception
 
@@ -2690,33 +2688,16 @@ def launch_mapdl_on_cluster(
 
 
 def get_hostname_host_cluster(job_id: int, timeout: int = 30) -> str:
-    cmd = f"scontrol show jobid -dd {job_id}".split()
-    LOG.debug(f"Executing the command '{cmd}'")
+    options = f"show jobid -dd {job_id}".split()
+    LOG.debug(f"Executing the command 'scontrol {' '.join(options)}'")
 
     ready = False
     time_start = time.time()
     counter = 0
     while not ready:
-        proc = subprocess.Popen(
-            cmd,
-            stdout=subprocess.PIPE,
-        )
-        stdout = proc.stdout.read().decode()
+        proc = send_scontrol(options)
 
-        if time.time() > time_start + timeout:
-            state = stdout.split("JobState=")[1].split(" ")[0]
-            try:
-                host = get_hostname_from_scontrol(stdout)
-                hostname_msg = f"The BatchHost for this job is '{host}'"
-            except (IndexError, AttributeError):
-                hostname_msg = "PyMAPDL couldn't get the BatchHost hostname"
-            raise MapdlDidNotStart(
-                f"The HPC job (id: {job_id}) didn't start on time (timeout={timeout}). "
-                f"The job state is '{state}'. "
-                f"{hostname_msg}. "
-                "You can check more information by issuing in your console:\n"
-                f" scontrol show jobid -dd {job_id}"
-            )
+        stdout = proc.stdout.read().decode()
 
         if "JobState=RUNNING" not in stdout:
             counter += 1
@@ -2726,6 +2707,27 @@ def get_hostname_host_cluster(job_id: int, timeout: int = 30) -> str:
                 print("The job is not ready yet. Waiting...")
         else:
             ready = True
+            break
+
+        # Exit by raising exception
+        if time.time() > time_start + timeout:
+            state = stdout.split("JobState=")[1].split(" ")[0]
+
+            # Trying to get the hostname from the last valid message
+            try:
+                host = get_hostname_from_scontrol(stdout)
+                hostname_msg = f"The BatchHost for this job is '{host}'"
+            except (IndexError, AttributeError):
+                hostname_msg = "PyMAPDL couldn't get the BatchHost hostname"
+
+            # Raising exception
+            raise MapdlDidNotStart(
+                f"The HPC job (id: {job_id}) didn't start on time (timeout={timeout}). "
+                f"The job state is '{state}'. "
+                f"{hostname_msg}. "
+                "You can check more information by issuing in your console:\n"
+                f" scontrol show jobid -dd {job_id}"
+            )
 
     LOG.debug(f"The 'scontrol' command returned:\n{stdout}")
     batchhost = get_hostname_from_scontrol(stdout)
@@ -2838,17 +2840,19 @@ def check_mapdl_launch_on_hpc(
     return get_jobid(stdout)
 
 
-def get_job_info(jobid: int, start_parm: Dict[str, str], timeout: int = 30):
+def get_job_info(
+    start_parm: Dict[str, str], jobid: Optional[int] = None, timeout: int = 30
+):
     """Get job info like BatchHost IP and hostname
 
     Get BatchHost hostname and ip and stores them in the start_parm argument
 
     Parameters
     ----------
-    jobid : int
-        Job ID
     start_parm : Dict[str, str]
         Starting parameters for MAPDL.
+    jobid : int
+        Job ID
     timeout : int
         Timeout for checking if the job is ready. Default checks for
         'start_instance' key in the 'start_parm' argument, if none
@@ -2857,8 +2861,23 @@ def get_job_info(jobid: int, start_parm: Dict[str, str], timeout: int = 30):
     """
     timeout = timeout or start_parm.get("start_instance")
 
+    jobid = jobid or start_parm["jobid"]
+
     batch_host, batch_ip = get_hostname_host_cluster(jobid, timeout=timeout)
 
     start_parm["ip"] = batch_ip
     start_parm["hostname"] = batch_host
     start_parm["jobid"] = jobid
+
+
+def kill_job(jobid: int):
+    """Kill SLURM job"""
+    subprocess.Popen(["scancel", str(jobid)])
+
+
+def send_scontrol(args: List[str]):
+    args.insert(0, "scontrol")
+    return subprocess.Popen(
+        args,
+        stdout=subprocess.PIPE,
+    )
