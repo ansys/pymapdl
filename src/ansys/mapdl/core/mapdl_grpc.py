@@ -31,7 +31,10 @@ import os
 import pathlib
 import re
 import shutil
-from subprocess import Popen
+
+# Subprocess is needed to start the backend. But
+# the input is controlled by the library. Excluding bandit check.
+from subprocess import Popen  # nosec B404
 import tempfile
 import threading
 import time
@@ -881,8 +884,9 @@ class MapdlGrpc(MapdlBase):
                 self.prep7()
                 success = True
                 break
-            except:
-                pass
+            except MapdlRuntimeError:
+                time.sleep(1)
+                warn("PyMAPDL is taking longer than expected to connect to the server.")
 
         if not success:
             raise MapdlConnectionError("Unable to reconnect to MAPDL")
@@ -1025,7 +1029,7 @@ class MapdlGrpc(MapdlBase):
         return "".join(response)
 
     def _threaded_heartbeat(self):
-        """To be called from a thread to verify mapdl instance is alive"""
+        """To be called from a thread to verify MAPDL instance is alive"""
         self._initialised.set()
         while True:
             if self._exited:
@@ -1038,7 +1042,7 @@ class MapdlGrpc(MapdlBase):
             except ReferenceError:
                 break
             except Exception:
-                continue
+                self._log.debug("Checking if MAPDL instance is still alive.")
 
     @protect_from(ValueError, "I/O operation on closed file.")
     def exit(self, save=False, force=False, **kwargs):

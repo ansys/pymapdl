@@ -180,3 +180,4 @@ Python script.
 This bash script performs tasks such as creating environment variables,
 moving files to different directories, and printing to ensure your
 configuration is correct.
+
