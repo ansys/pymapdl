@@ -110,7 +110,6 @@ ALLOWABLE_LAUNCH_MAPDL_ARGS = [
     "replace_env_vars",
     "version",
     "detect_HPC",
-    "detect_HPC",
     "set_no_abort",
     "force_intel"
     # Non documented args
