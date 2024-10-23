@@ -28,6 +28,7 @@ import re
 import shutil
 import tempfile
 import time
+from unittest.mock import patch
 
 import grpc
 import numpy as np
@@ -2460,3 +2461,49 @@ def test_no_flush_stored(mapdl):
 
     assert not mapdl._store_commands
     assert mapdl._stored_commands == []
+
+
+# @requires("gprc")
+@pytest.mark.parametrize("ip", ["123.45.67.89", "myhostname"])
+@patch(
+    "ansys.mapdl.core.mapdl_grpc.MapdlGrpc._multi_connect", lambda *args, **kwargs: True
+)
+@patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._run", lambda *args, **kwargs: "")
+@patch(
+    "ansys.mapdl.core.mapdl_grpc.MapdlGrpc._create_channel", lambda *args, **kwargs: ""
+)
+@patch(
+    "ansys.mapdl.core.mapdl_grpc.MapdlGrpc._subscribe_to_channel",
+    lambda *args, **kwargs: "",
+)
+@patch(
+    "ansys.mapdl.core.mapdl_grpc.MapdlGrpc._run_at_connect", lambda *args, **kwargs: ""
+)
+@patch("socket.gethostbyname", lambda *args, **kwargs: "123.45.67.99")
+def test_ip_hostname_in_start_parm(ip):
+    start_parm = {
+        "ip": ip,
+        "local": False,
+        "set_no_abort": False,
+        "hostname": "myhost",
+        "jobid": 1001,
+    }
+
+    mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+
+    if ip == "myhostname":
+        assert mapdl.ip == "123.45.67.99"
+    else:
+        assert mapdl.ip == ip
+
+    assert mapdl.hostname == "myhost"
+    assert mapdl.hostname == 1001
+
+
+@patch("ansys.mapdl.core.Mapdl.__init__", lambda *args, **kwargs: None)
+def test_delete_mapdl_object(mapdl):
+    mapdl_b = pymapdl.Mapdl()
+
+    with patch("ansys.mapdl.core.Mapdl.exit") as mock_popen:
+        del mapdl_b
+        mock_popen.assert_called_once()
