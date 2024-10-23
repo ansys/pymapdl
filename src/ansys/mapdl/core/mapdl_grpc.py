@@ -3748,7 +3748,14 @@ class MapdlGrpc(MapdlBase):
 
     def __del__(self):
         """In case the object is deleted"""
-        self.exit()
+        try:
+            self.exit()
+        except Exception as e:
+            pass
+
         # Adding super call per:
         # https://docs.python.org/3/reference/datamodel.html#object.__del__
-        super().__del__()
+        try:
+            super().__del__()
+        except Exception as e:
+            pass
