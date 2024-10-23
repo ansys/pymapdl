@@ -439,7 +439,8 @@ def run_before_and_after_tests(
     yield  # this is where the testing happens
 
     assert prev == mapdl.is_local
-    assert not mapdl.exited
+    assert not mapdl.exited, "MAPDL is exited after the test. It should have not!"
+    assert not mapdl._mapdl_on_hpc, "Mapdl class is on HPC mode. It should not!"
 
     make_sure_not_instances_are_left_open()
 
