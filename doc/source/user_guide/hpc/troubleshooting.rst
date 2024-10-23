@@ -73,7 +73,7 @@ As the output shows, PyMAPDL could not be found, meaning that either:
 * The virtual environment does not have PyMAPDL installed.
   See :ref:`ref_install_pymapdl_on_hpc`.
 
-* Or the script did not activate properly the virtual environment
+* Or the script did not properly activate the virtual environment
   (``/home/user/.venv``).
 
 For the second reason, there could be a number of reasons.
@@ -102,7 +102,7 @@ due to one of these reasons:
 - The virtual environment has been created from a Python executable that is
   not available to the compute nodes. Hence, the virtual environment is not
   activated.
-  For example, you might be creating the virtual environment Using
+  For example, you might be creating the virtual environment using
   Python 3.10, but only Python 3.8 is available from the compute nodes.
   You can test which Python executable the cluster is using by starting an
   interactive session in a compute node with this code to list all commands

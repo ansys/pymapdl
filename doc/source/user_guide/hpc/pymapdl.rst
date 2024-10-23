@@ -14,7 +14,7 @@ This protocol offers many advantages and features, for more information
 see :ref:`ref_project_page`.
 One of these features is that it is not required to have both,
 PyMAPDL and MAPDL processes, running on the same machine.
-This possibility open the door to many configurations, depending
+This possibility opens the door to many configurations, depending
 on whether you run them both or not on the HPC compute nodes.
 Additionally, you might to be able interact with them (``interactive`` mode)
 or not (``batch`` mode).
