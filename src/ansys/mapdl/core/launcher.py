@@ -1475,17 +1475,19 @@ def launch_mapdl(
 
         LOG.debug(f"Using additional switches {args['additional_switches']}.")
 
-        # Delegating to PyPIM
-        if _HAS_PIM and exec_file is None and pypim.is_configured():
-            # Start MAPDL with PyPIM if the environment is configured for it
-            # and the user did not pass a directive on how to launch it.
-            LOG.info(
-                "Starting MAPDL remotely. The startup configuration will be ignored."
-            )
+    ########################################
+    # PyPIM connection
+    # ----------------
+    # Delegating to PyPIM if applicable
+    #
+    if _HAS_PIM and exec_file is None and pypim.is_configured():
+        # Start MAPDL with PyPIM if the environment is configured for it
+        # and the user did not pass a directive on how to launch it.
+        LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
 
-            return launch_remote_mapdl(
-                cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
-            )
+        return launch_remote_mapdl(
+            cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
+        )
 
     start_parm = generate_start_parameters(args)
 
