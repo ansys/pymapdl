@@ -1378,7 +1378,8 @@ def launch_mapdl(
 
         if _HAS_ATP and not args["_debug_no_launch"]:
             version = version_from_path("mapdl", args["exec_file"])
-            args["mode"] = check_mode(args["mode"], version)
+
+    args["mode"] = check_mode(args["mode"], args["version"])
 
     if not args["mode"]:
         args["mode"] = "grpc"
@@ -1544,10 +1545,19 @@ def launch_mapdl(
 def check_mode(mode: ALLOWABLE_MODES, version: ALLOWABLE_VERSION_INT):
     """Check if the MAPDL server mode matches the allowable version
 
-    If ``None``, the newest mode will be selected.
+    If :class:`None`, the newest mode will be selected.
 
     Returns a value from ``ALLOWABLE_MODES``.
     """
+    if not mode and not version:
+        return "grpc"
+    elif not version:
+        warnings.warn(
+            "PyMAPDL couldn't not detect MAPDL version, hence it could not "
+            f"verify that the connection mode {mode} is compatible with MAPDL."
+        )
+        return mode
+
     if isinstance(mode, str):
         mode = mode.lower()
         if mode == "grpc":
@@ -2109,8 +2119,10 @@ def get_version(
     if not version:
         version = os.getenv("PYMAPDL_MAPDL_VERSION")
 
-    if not version:
-        # Early exit
+    if not version and exec_file and _HAS_ATP:
+        version = version_from_path("mapdl", exec_file)
+
+    elif not version:
         return
 
     if isinstance(version, float):

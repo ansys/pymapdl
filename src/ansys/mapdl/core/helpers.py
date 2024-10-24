@@ -33,8 +33,7 @@ from ansys.mapdl.core import LOG
 def is_installed(package_name: str) -> bool:
     """Check if a package is installed"""
 
-    if os.name == "nt":
-        package_name = package_name.replace("-", ".")
+    package_name = package_name.replace("-", ".")
 
     try:
         importlib.import_module(package_name)

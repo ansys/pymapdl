@@ -71,15 +71,12 @@ try:
     from ansys.mapdl.core.launcher import get_default_ansys
 
     installed_mapdl_versions = list(get_available_ansys_installations().keys())
-    try:
-        V150_EXEC = find_ansys("150")[0]
-    except ValueError:
-        V150_EXEC = ""
+
 except:
     from conftest import MAPDL_VERSION
 
     installed_mapdl_versions = [MAPDL_VERSION]
-    V150_EXEC = ""
+
 
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS as versions
 
@@ -104,8 +101,7 @@ def fake_local_mapdl(mapdl):
     mapdl._local = False
 
 
-@requires("local")
-@requires("windows")
+@patch("os.name", "nt")
 def test_validate_sw():
     # ensure that windows adds msmpi
     # fake windows path
@@ -121,7 +117,6 @@ def test_validate_sw():
 
 
 @requires("ansys-tools-path")
-@requires("local")
 @pytest.mark.parametrize("path_data", paths)
 def test_version_from_path(path_data):
     exec_file, version = path_data
@@ -129,41 +124,63 @@ def test_version_from_path(path_data):
 
 
 @requires("ansys-tools-path")
-@requires("local")
 def test_catch_version_from_path():
     with pytest.raises(RuntimeError):
         version_from_path("mapdl", "abc")
 
 
+from pyfakefs.fake_filesystem import OSType
+
+
+@pytest.mark.parametrize(
+    "path,version,raises",
+    [
+        ["/ansys_inc/v221/ansys/bin/ansys221", 22.1, None],
+        ["/ansys_inc/v222/ansys/bin/mapdl", 22.2, None],
+        ["/usr/ansys_inc/v231/ansys/bin/mapdl", 23.1, None],
+        ["/usr/ansys_inc/v232/ansys/bin/mapdl", 23.2, None],
+        ["/usr/ansys_inc/v241/ansys/bin/mapdl", 24.1, None],
+        ["/ansysinc/v242/ansys/bin/ansys2", 24.2, ValueError],
+        ["/ansysinc/v242/ansys/bin/mapdl", 24.2, ValueError],
+    ],
+)
 @requires("ansys-tools-path")
-@requires("local")
-@requires("linux")
-def test_find_ansys_linux():
-    # assuming ansys is installed, should be able to find it on linux
-    # without env var
+def test_find_ansys_linux(fs, path, version, raises):
+    fs.os = OSType.LINUX
+    fs.create_file(path)
+    # fs.add_real_file("/proc/meminfo")
+
     bin_file, ver = pymapdl.launcher.find_ansys()
-    assert os.path.isfile(bin_file)
-    assert isinstance(ver, float)
+
+    if raises:
+        assert not bin_file
+        assert not ver
+
+    else:
+        assert bin_file.startswith(path.replace("mapdl", ""))
+        assert isinstance(ver, float)
+        assert ver == version
 
 
 @requires("ansys-tools-path")
-@requires("local")
-def test_invalid_mode(mapdl):
+def test_invalid_mode(mapdl, fs):
+    fs.create_file("/ansys_inc/v241/ansys/bin/ansys241")
     with pytest.raises(ValueError):
-        exec_file = find_ansys(installed_mapdl_versions[0])[0]
+        exec_file = find_ansys(241)[0]
         pymapdl.launch_mapdl(
             exec_file, port=mapdl.port + 1, mode="notamode", start_timeout=start_timeout
         )
 
 
 @requires("ansys-tools-path")
-@requires("local")
-@pytest.mark.skipif(not os.path.isfile(V150_EXEC), reason="Requires v150")
-def test_old_version(mapdl):
-    exec_file = find_ansys("150")[0]
-    with pytest.raises(ValueError):
+def test_old_version(mapdl, fs):
+    exec_file_v150 = "/ansys_inc/v150/ansys/bin/ansys150"
+    fs.create_file(exec_file_v150)
+    exec_file = find_ansys(150)[0]
+    assert exec_file == exec_file_v150
+    with pytest.raises(ValueError, match="MAPDL version must be one of the following:"):
         pymapdl.launch_mapdl(
-            exec_file, port=mapdl.port + 1, mode="console", start_timeout=start_timeout
+            exec_file, port=mapdl.port + 1, mode="grpc", start_timeout=start_timeout
         )
 
 
@@ -200,7 +217,6 @@ def test_license_type_keyword_names(mapdl, monkeypatch, license_name):
     assert f"-p {license_name}" in args["additional_switches"]
 
 
-# @requires("local")
 @pytest.mark.parametrize("license_name", LICENSES)
 def test_license_type_additional_switch(mapdl, license_name):
     args = launch_mapdl(
