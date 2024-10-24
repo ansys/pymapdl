@@ -298,7 +298,7 @@ def get_process_at_port(port) -> Optional[psutil.Process]:
     for proc in psutil.process_iter():
         try:
             # just to check if we can access the port
-            connections = proc.net_connections()
+            connections = proc.connections()
         except psutil.AccessDenied:
             continue
         except psutil.NoSuchProcess:
