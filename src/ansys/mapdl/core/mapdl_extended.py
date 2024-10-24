@@ -1382,7 +1382,7 @@ class _MapdlCommandExtended(_MapdlCore):
         return output
 
     @wraps(_MapdlCore.inquire)
-    def inquire(self, strarray="", func="", arg1="", arg2=""):
+    def inquire(self, strarray="", func="", arg1="", arg2="", **kwargs):
         """Wraps original INQUIRE function"""
         func_options = [
             "LOGIN",
@@ -1424,7 +1424,9 @@ class _MapdlCommandExtended(_MapdlCore):
                 f"The arguments (strarray='{strarray}', func='{func}') are not valid."
             )
 
-        response = self.run(f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False)
+        response = self.run(
+            f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False, **kwargs
+        )
         if func.upper() in [
             "ENV",
             "TITLE",
@@ -1463,7 +1465,7 @@ class _MapdlCommandExtended(_MapdlCore):
             fname_ = self._get_file_name(fname=file_, ext=ext_)
 
         # generate the log and download if necessary
-        output = super().lgwrite(fname=fname_, kedit=kedit, **kwargs)
+        output = super().lgwrite(fname=fname_, ext="", kedit=kedit, **kwargs)
 
         # Let's download the file to the location
         self._download(fname_, fname)
