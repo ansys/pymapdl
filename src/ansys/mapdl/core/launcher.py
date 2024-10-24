@@ -472,8 +472,8 @@ def launch_grpc(
 
     LOG.info(
         "\n============"
-        "\n============"
-        f"{header}:\nLocation:\n{run_location}\n"
+        "\n============\n"
+        f"{header}\nLocation:\n{run_location}\n"
         f"Command:\n{cmd_string}\n"
         f"Env vars:\n{env_vars}"
         "\n============"
@@ -1006,7 +1006,7 @@ def launch_mapdl(
     override: bool = False,
     loglevel: str = "ERROR",
     additional_switches: str = "",
-    start_timeout: int = 45,
+    start_timeout: Optional[int] = None,
     port: Optional[int] = None,
     cleanup_on_exit: bool = True,
     start_instance: Optional[bool] = None,
@@ -1092,7 +1092,8 @@ def launch_mapdl(
         section for additional details.
 
     start_timeout : float, optional
-        Maximum allowable time to connect to the MAPDL server.
+        Maximum allowable time to connect to the MAPDL server. By default it is
+        45 seconds, however, it is increased to 90 seconds if running on HPC.
 
     port : int
         Port to launch MAPDL gRPC on.  Final port will be the first
@@ -1566,7 +1567,7 @@ def launch_mapdl(
         if args["launch_on_hpc"]:
             # wrapping command if on HPC
             cmd = generate_sbatch_command(
-                cmd, scheduler_args=args.get("scheduler_args")
+                cmd, scheduler_options=args.get("scheduler_options")
             )
 
         try:
@@ -1882,7 +1883,8 @@ def get_slurm_options(
     SLURM_CPUS_PER_TASK = get_value("SLURM_CPUS_PER_TASK", kwargs)
     LOG.info(f"SLURM_CPUS_PER_TASK: {SLURM_CPUS_PER_TASK}")
 
-    # Set to value of the --ntasks option, if specified. See SLURM_NTASKS. Included for backwards compatibility.
+    # Set to value of the --ntasks option, if specified. See SLURM_NTASKS.
+    # Included for backwards compatibility.
     SLURM_NPROCS = get_value("SLURM_NPROCS", kwargs)
     LOG.info(f"SLURM_NPROCS: {SLURM_NPROCS}")
 
@@ -2431,7 +2433,7 @@ def check_kwargs(args: Dict[str, Any]):
         raise ValueError(f"The following arguments are not recognized: {ms_}")
 
 
-def pre_check_args(args):
+def pre_check_args(args: dict[str, Any]):
     if args["start_instance"] and args["ip"] and not args["on_pool"]:
         raise ValueError(
             "When providing a value for the argument 'ip', the argument "
@@ -2453,6 +2455,21 @@ def pre_check_args(args):
             "For example:\n\n"
             ">>> mapdl = launch_mapdl(start_instance=False, ip='123.45.67.89')\n\n"
             "where '123.45.67.89' is the IP of the machine where MAPDL is running."
+        )
+
+    # Setting timeout
+    if args["start_timeout"] is None:
+        if args["launch_on_hpc"]:
+            args["start_timeout"] = 90
+        else:
+            args["start_timeout"] = 45
+
+    # Raising warning
+    if args.get("scheduler_options") and args.get("nproc", None) is None:
+        raise ValueError(
+            "PyMAPDL does not read the number of cores from the 'scheduler_options'. "
+            "Hence you need to specify the number of cores you want to use using "
+            "the argument 'nproc' in 'launch_mapdl'."
         )
 
 
@@ -2654,7 +2671,7 @@ def launch_mapdl_on_cluster(
         additional_switches=args["additional_switches"],
     )
 
-    cmd = generate_sbatch_command(cmd, scheduler_args=args.get("scheduler_args"))
+    cmd = generate_sbatch_command(cmd, scheduler_options=args.get("scheduler_options"))
 
     jobid = None
     try:
@@ -2717,8 +2734,8 @@ def launch_mapdl_on_cluster(
 
 
 def get_hostname_host_cluster(job_id: int, timeout: int = 30) -> str:
-    options = f"show jobid -dd {job_id}".split()
-    LOG.debug(f"Executing the command 'scontrol {' '.join(options)}'")
+    options = f"show jobid -dd {job_id}"
+    LOG.debug(f"Executing the command 'scontrol {options}'")
 
     ready = False
     time_start = time.time()
@@ -2766,6 +2783,9 @@ def get_hostname_host_cluster(job_id: int, timeout: int = 30) -> str:
     batchhost_ip = socket.gethostbyname(batchhost)
     LOG.debug(f"Batchhost IP: {batchhost_ip}")
 
+    LOG.info(
+        f"Job {job_id} successfully allocated and running in '{batchhost}'({batchhost_ip})"
+    )
     return batchhost, batchhost_ip
 
 
@@ -2784,7 +2804,7 @@ def get_jobid(stdout: str) -> int:
 
 
 def generate_sbatch_command(
-    cmd: Union[str, List[str]], scheduler_args: Optional[Union[str, Dict[str, str]]]
+    cmd: Union[str, List[str]], scheduler_options: Optional[Union[str, Dict[str, str]]]
 ) -> List[str]:
     """Generate sbatch command for a given MAPDL launch command."""
 
@@ -2805,25 +2825,28 @@ def generate_sbatch_command(
 
         return arg
 
-    if scheduler_args:
-        if isinstance(scheduler_args, dict):
-            scheduler_args = " ".join(
-                [f"{add_minus(key)}='{value}'" for key, value in scheduler_args.items()]
+    if scheduler_options:
+        if isinstance(scheduler_options, dict):
+            scheduler_options = " ".join(
+                [
+                    f"{add_minus(key)}='{value}'"
+                    for key, value in scheduler_options.items()
+                ]
             )
     else:
-        scheduler_args = ""
+        scheduler_options = ""
 
-    if "wrap" in scheduler_args:
+    if "wrap" in scheduler_options:
         raise ValueError(
             "The sbatch argument 'wrap' is used by PyMAPDL to submit the job."
             "Hence you cannot use it as sbatch argument."
         )
-    LOG.debug(f"The additional sbatch arguments are: {scheduler_args}")
+    LOG.debug(f"The additional sbatch arguments are: {scheduler_options}")
 
     if isinstance(cmd, list):
         cmd = " ".join(cmd)
 
-    cmd = ["sbatch", scheduler_args, "--wrap", f"'{cmd}'"]
+    cmd = ["sbatch", scheduler_options, "--wrap", f"'{cmd}'"]
     cmd = [each for each in cmd if bool(each)]
     return cmd
 
@@ -2866,7 +2889,9 @@ def check_mapdl_launch_on_hpc(
             f"stdout:\n{stdout}\nstderr:\n{stderr}"
         )
 
-    return get_jobid(stdout)
+    jobid = get_jobid(stdout)
+    LOG.info(f"HPC job successfully submitted. JobID: {jobid}")
+    return jobid
 
 
 def get_job_info(
@@ -2904,9 +2929,10 @@ def kill_job(jobid: int):
     subprocess.Popen(["scancel", str(jobid)])
 
 
-def send_scontrol(args: List[str]):
-    args.insert(0, "scontrol")
+def send_scontrol(args: str):
+    cmd = f"scontrol {args}".split(" ")
     return subprocess.Popen(
-        args,
+        cmd,
         stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
     )
