@@ -23,7 +23,7 @@ PyMAPDL takes advantage of HPC clusters to launch MAPDL instances
 with increased resources.
 PyMAPDL automatically sets these MAPDL instances to read the
 scheduler job configuration (machines, number
-of cpus, memory, etc) which allows MAPDL to use all the resources
+of CPUs, memory, etc) which allows MAPDL to use all the resources
 allocated to that job.
 For more information see :ref:`ref_tight_integration_hpc`.
 
@@ -189,8 +189,8 @@ configuration is correct.
 
 .. _ref_tight_integration_hpc:
 
-Tigh integration between MAPDL and the HPC scheduler
-====================================================
+Tight integration between MAPDL and the HPC scheduler
+=====================================================
 
 Since v0.68.5, PyMAPDL can take advantage of the tight integration
 between the scheduler and MAPDL to read the job configuration and

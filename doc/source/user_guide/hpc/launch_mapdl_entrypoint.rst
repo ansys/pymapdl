@@ -154,7 +154,8 @@ Handling crashes on an HPC
 
 If MAPDL crashes while running on HPC, the job finishes right away.
 In that case, MAPDL disconnect from MAPDL.
-PyMAPDL retries to reconnect to the MAPDL instance up to 5 times waiting for up to 5s.
+PyMAPDL retries to reconnect to the MAPDL instance up to 5 times waiting
+for up to 5 seconds.
 If unsuccessful, you might get an error like this:
 
 .. code-block:: text
@@ -189,11 +190,11 @@ User case on a SLURM cluster
 
 Assume an user wants to start a remote MAPDL instance in a HPC cluster
 to interact with it.
-
 The user would like to request 10 nodes, and 1 task per node (to avoid clashes
-between MAPDL instances). He would like to also request 64 GB of memory RAM.
-Because of administration logistic, he must use the machines in `Keros` partition.
-
+between MAPDL instances). 
+He would like to also request 64 GB of memory RAM.
+Because of administration logistic, he must use the machines in
+`supercluster01` partition.
 To make PyMAPDL to launch an instance like that on SLURM, run the following code:
 
 .. code-block:: python
@@ -201,7 +202,12 @@ To make PyMAPDL to launch an instance like that on SLURM, run the following code
     from ansys.mapdl.core import launch_mapdl
     from ansys.mapdl.core.examples import vmfiles
 
-    scheduler_args = {"nodes": 10, "ntasks-per-node": 1, "partition": "keros", "memory": 64}
+    scheduler_args = {
+        "nodes": 10,
+        "ntasks-per-node": 1,
+        "partition": "supercluster01",
+        "memory": 64,
+    }
     mapdl = launch_mapdl(launch_on_hpc=True, scheduler_args=scheduler_args)
 
     num_cpu = mapdl.get_value("ACTIVE", 0, "NUMCPU")  # It should be equal to 10
@@ -221,5 +227,5 @@ To make PyMAPDL to launch an instance like that on SLURM, run the following code
 
 
 PyMAPDL automatically sets MAPDL to read the job configuration (machines, number
-of cpus, memory, etc) which allows MAPDL to use all the resources allocated
+of CPUs, memory, etc) which allows MAPDL to use all the resources allocated
 to that job.
