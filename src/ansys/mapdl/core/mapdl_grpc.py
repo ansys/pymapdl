@@ -361,11 +361,23 @@ class MapdlGrpc(MapdlBase):
                     "If `channel` is specified, neither `port` nor `ip` can be specified."
                 )
         if ip is None:
-            # We use if here to avoid having ip= ''
-            if start_parm.get("ip"):
-                ip: str = start_parm.pop("ip")
-            else:
-                ip: str = "127.0.0.1"
+            ip = start_parm.pop("ip", None) or "127.0.0.1"
+
+        # setting hostname
+        if not only_numbers_and_dots(ip):
+            # it is a hostname
+            self._hostname = ip
+            ip = socket.gethostbyname(ip)
+        else:
+            # it is an IP
+            self._hostname = (
+                "localhost"
+                if ip in ["127.0.0.1", "127.0.1.1", "localhost"]
+                else socket.gethostbyaddr(ip)[0]
+            )
+
+        check_valid_ip(ip)
+        self._ip: str = ip
 
         # port and ip are needed to setup the log
         if port is None:
@@ -374,14 +386,7 @@ class MapdlGrpc(MapdlBase):
             port = MAPDL_DEFAULT_PORT
 
         self._port: int = int(port)
-
-        if not only_numbers_and_dots(ip):
-            # it is a hostname
-            self._hostname = ip
-            ip = socket.gethostbyname(ip)
-
-        check_valid_ip(ip)
-        self._ip: str = ip
+        start_parm["port"] = self._port  # store for `open_gui`
 
         super().__init__(
             loglevel=loglevel,
@@ -404,7 +409,6 @@ class MapdlGrpc(MapdlBase):
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: Optional[str] = start_parm.get("run_location", None)
         self._busy: bool = False  # used to check if running a command on the server
-        self._local: bool = ip in ["127.0.0.1", "127.0.1.1", "localhost"]
         self._local: bool = start_parm.get("local", True)
         self._launched: bool = start_parm.get("launched", True)
         self._health_response_queue: Optional["Queue"] = None
@@ -434,12 +438,10 @@ class MapdlGrpc(MapdlBase):
         self._mapdl_process: subprocess.Popen = start_parm.pop("process", None)
 
         # saving for later use (for example open_gui)
-        start_parm["port"] = port
         self._start_parm: Dict[str, Any] = start_parm
 
         # Storing HPC related stuff
         self._jobid: int = start_parm.get("jobid")
-        self._hostname: str = start_parm.get("hostname")
         self._mapdl_on_hpc: bool = bool(self._jobid)
         self.finish_job_on_exit: bool = start_parm.get("finish_job_on_exit", True)
 
@@ -2938,9 +2940,14 @@ class MapdlGrpc(MapdlBase):
         en = stats.find("*** PrePro")
         product = "\n".join(stats[st:en].splitlines()[1:]).strip()
 
-        info = f"Product:             {product}\n"
+        info = f"Mapdl\n"
+        info += f"-----\n"
+        info += f"PyMAPDL Version:     {__version__}\n"
+        info += f"Interface:           grpc\n"
+        info += f"Product:             {product}\n"
         info += f"MAPDL Version:       {self.version}\n"
-        info += f"ansys.mapdl Version: {__version__}\n"
+        info += f"Running on:          {self.hostname}\n"
+        info += f"                     ({self.ip})"
         return info
 
     @supress_logging
