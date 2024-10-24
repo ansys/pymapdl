@@ -2449,6 +2449,17 @@ def pre_check_args(args):
     if args["exec_file"] and args["version"]:
         raise ValueError("Cannot specify both ``exec_file`` and ``version``.")
 
+    if args["launch_on_hpc"] and args["ip"]:
+        raise ValueError(
+            "PyMAPDL cannot ensure a specific IP will be used when launching "
+            "MAPDL on a cluster. Hence the 'ip' argument is not compatible. "
+            "If you want to connect to an already started MAPDL instance, "
+            "just connect normally as you would with a remote instance. "
+            "For example:\n\n"
+            ">>> mapdl = launch_mapdl(start_instance=False, ip='123.45.67.89')\n\n"
+            "where '123.45.67.89' is the IP of the machine where MAPDL is running."
+        )
+
 
 def get_cpus(args: Dict[str, Any]):
     """Get number of CPUs
