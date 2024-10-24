@@ -1092,6 +1092,7 @@ are unsupported.
 | * ``LSWRITE`` | |:white_check_mark:| Available (Internally running in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`)   | |:white_check_mark:| Available   | |:exclamation:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                       |                                                                                                     |
 +---------------+---------------------------------------------------------------------------------------------------------------------------------+----------------------------------+----------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
 
+.. _ref_environment_variables:
 
 Environment variables
 =====================
