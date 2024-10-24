@@ -1144,7 +1144,7 @@ class MapdlGrpc(MapdlBase):
                 return
 
         # Actually exiting MAPDL instance
-        if finish_job_on_exit:
+        if self.finish_job_on_exit:
             self._exiting = True
             self._exit_mapdl(path=mapdl_path)
             self._exited = True

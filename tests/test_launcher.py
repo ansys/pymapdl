@@ -242,6 +242,7 @@ def test_license_type_additional_switch(mapdl, license_name):
     assert f"-p {license_name}" in args["additional_switches"]
 
 
+@stack(*PATCH_MAPDL_START)
 @requires("ansys-tools-path")
 def test_license_type_dummy(mapdl):
     dummy_license_type = "dummy"
@@ -250,7 +251,7 @@ def test_license_type_dummy(mapdl):
         match="Still PyMAPDL will try to use it but in older MAPDL versions you might experience",
     ):
         launch_mapdl(
-            start_instance=False,
+            start_instance=True,
             port=mapdl.port + 1,
             additional_switches=f" -p {dummy_license_type} " + QUICK_LAUNCH_SWITCHES,
             start_timeout=start_timeout,
@@ -1325,7 +1326,7 @@ def test_exit_job(mock_popen, mapdl):
     mapdl._jobid = None
     mapdl._exited = False
     mapdl._mapdl_on_hpc = False
-    mapdl.finish_job_on_exit = False
+    mapdl.finish_job_on_exit = True
     mapdl.remove_temp_dir_on_exit = prev_rem
 
     # Checking
