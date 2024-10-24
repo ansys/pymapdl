@@ -24,28 +24,32 @@ in your login node.
 PyMAPDL submits a job to the scheduler using the appropriate commands.
 In case of SLURM, it uses ``sbatch`` command with the ``--wrap`` argument
 to pass the MAPDL command line need to start.
-Other scheduler arguments can be specified using ``scheduler_args``
+Other scheduler arguments can be specified using ``scheduler_options``
 argument as a Python :class:`dict`:
 
 .. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
-    >>> scheduler_args = {"nodes": 10, "ntasks-per-node": 2}
-    >>> mapdl = launch_mapdl(launch_on_hpc=True, scheduler_args=scheduler_args)
+    >>> scheduler_options = {"nodes": 10, "ntasks-per-node": 2}
+    >>> mapdl = launch_mapdl(launch_on_hpc=True, nproc=20, scheduler_options=scheduler_options)
+
 
 .. note::
-    The double minus (``--``) common in the long version of the SLURM commands
-    is added automatically if PyMAPDL detects it is missing and the specified
-    command is long (length more than 1).
-    For instance ``ntasks-per-node`` argument is submitted as ``--ntasks-per-node``.
+    PyMAPDL cannot infer the number of CPUs you are requesting from the scheduler,
+    hence you need to specify this value using the ``nproc`` argument.
+
+The double minus (``--``) common in the long version of some scheduler commands
+are added automatically if PyMAPDL detects it is missing and the specified
+command is long (length more than 1 character).
+For instance ``ntasks-per-node`` argument is submitted as ``--ntasks-per-node``.
 
 or as a single Python string (:class:`str`):
 
 .. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
-    >>> scheduler_args = "-N 10"
-    >>> mapdl = launch_mapdl(launch_on_hpc=True, scheduler_args=scheduler_args)
+    >>> scheduler_options = "-N 10"
+    >>> mapdl = launch_mapdl(launch_on_hpc=True, scheduler_options=scheduler_options)
 
 .. warning::
     Because PyMAPDL is already using the ``--wrap`` argument, this argument
@@ -202,13 +206,13 @@ To make PyMAPDL to launch an instance like that on SLURM, run the following code
     from ansys.mapdl.core import launch_mapdl
     from ansys.mapdl.core.examples import vmfiles
 
-    scheduler_args = {
+    scheduler_options = {
         "nodes": 10,
         "ntasks-per-node": 1,
         "partition": "supercluster01",
         "memory": 64,
     }
-    mapdl = launch_mapdl(launch_on_hpc=True, scheduler_args=scheduler_args)
+    mapdl = launch_mapdl(launch_on_hpc=True, nproc=10, scheduler_options=scheduler_options)
 
     num_cpu = mapdl.get_value("ACTIVE", 0, "NUMCPU")  # It should be equal to 10
 
