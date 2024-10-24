@@ -1434,8 +1434,8 @@ def launch_mapdl(
         # (as way to check if MAPDL started or not)
         remove_err_files(args["run_location"], args["jobname"])
 
-        # Check for a valid connection mode
-        args["mode"] = check_mode(args["mode"], args["version"])
+    # Check for a valid connection mode
+    args["mode"] = check_mode(args["mode"], args["version"])
 
     if not args["mode"]:
         args["mode"] = "grpc"
@@ -1649,7 +1649,9 @@ def check_mode(mode: ALLOWABLE_MODES, version: Optional[int] = None):
 
     Returns a value from ``ALLOWABLE_MODES``.
     """
-    if not version:
+    if not mode and not version:
+        return "grpc"
+    elif not version:
         return mode
 
     if isinstance(mode, str):
