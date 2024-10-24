@@ -2175,7 +2175,7 @@ def get_port(port: Optional[int] = None, start_instance: Optional[bool] = None) 
             LOG.debug(f"Port in use.  Incrementing port number. port={port}")
 
     else:
-        if port_in_use(port):
+        if start_instance and port_in_use(port):
             proc = get_process_at_port(port)
             if proc:
                 if is_ansys_process(proc):
