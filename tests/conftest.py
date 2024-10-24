@@ -441,6 +441,7 @@ def run_before_and_after_tests(
     assert prev == mapdl.is_local
     assert not mapdl.exited, "MAPDL is exited after the test. It should have not!"
     assert not mapdl._mapdl_on_hpc, "Mapdl class is on HPC mode. It should not!"
+    assert mapdl.finish_job_on_exit, "Mapdl class should finish the job!"
 
     make_sure_not_instances_are_left_open()
 
@@ -624,6 +625,8 @@ def mapdl(request, tmpdir_factory):
     if START_INSTANCE:
         mapdl._local = True
         mapdl._exited = False
+        # mapdl.finish_job_on_exit = True
+        assert mapdl.finish_job_on_exit
         mapdl.exit(save=True, force=True)
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
@@ -664,6 +667,7 @@ _meth_patch_MAPDL_launch = (
     ("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._run_at_connect", func_which_returns("")),
     ("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._exit_mapdl", func_which_returns(None)),
     ("socket.gethostbyname", func_which_returns("123.45.67.99")),
+    ("socket.gethostbyaddr", func_which_returns("mapdlhostname")),
 )
 
 PATCH_MAPDL_START = [patch(method, ret) for method, ret in _meth_patch_MAPDL_launch]

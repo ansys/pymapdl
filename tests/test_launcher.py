@@ -242,6 +242,7 @@ def test_license_type_additional_switch(mapdl, license_name):
     assert f"-p {license_name}" in args["additional_switches"]
 
 
+@stack(*PATCH_MAPDL_START)
 @requires("ansys-tools-path")
 def test_license_type_dummy(mapdl):
     dummy_license_type = "dummy"
@@ -250,7 +251,7 @@ def test_license_type_dummy(mapdl):
         match="Still PyMAPDL will try to use it but in older MAPDL versions you might experience",
     ):
         launch_mapdl(
-            start_instance=False,
+            start_instance=True,
             port=mapdl.port + 1,
             additional_switches=f" -p {dummy_license_type} " + QUICK_LAUNCH_SWITCHES,
             start_timeout=start_timeout,
@@ -1220,10 +1221,10 @@ def test_get_cpus_min():
 
 
 @pytest.mark.parametrize(
-    "scheduler_args",
+    "scheduler_options",
     [None, "-N 10", {"N": 10, "nodes": 10, "-tasks": 3, "--ntask-per-node": 2}],
 )
-def test_generate_sbatch_command(scheduler_args):
+def test_generate_sbatch_command(scheduler_options):
     cmd = [
         "/ansys_inc/v242/ansys/bin/ansys242",
         "-j",
@@ -1237,27 +1238,28 @@ def test_generate_sbatch_command(scheduler_args):
         "-my_add=switch",
     ]
 
-    cmd_post = generate_sbatch_command(cmd, scheduler_args)
+    cmd_post = generate_sbatch_command(cmd, scheduler_options)
 
     assert cmd_post[0] == "sbatch"
-    if scheduler_args:
-        if isinstance(scheduler_args, dict):
+    if scheduler_options:
+        if isinstance(scheduler_options, dict):
             assert (
                 cmd_post[1] == "-N='10' --nodes='10' --tasks='3' --ntask-per-node='2'"
             )
         else:
-            assert cmd_post[1] == scheduler_args
+            assert cmd_post[1] == scheduler_options
 
     assert cmd_post[-2] == "--wrap"
     assert cmd_post[-1] == f"""'{" ".join(cmd)}'"""
 
 
 @pytest.mark.parametrize(
-    "scheduler_args", [None, "--wrap '/bin/bash", {"--wrap": "/bin/bash", "nodes": 10}]
+    "scheduler_options",
+    [None, "--wrap '/bin/bash", {"--wrap": "/bin/bash", "nodes": 10}],
 )
-def test_generate_sbatch_wrap_in_arg(scheduler_args):
+def test_generate_sbatch_wrap_in_arg(scheduler_options):
     cmd = ["/ansys_inc/v242/ansys/bin/ansys242", "-grpc"]
-    if scheduler_args:
+    if scheduler_options:
         context = pytest.raises(
             ValueError,
             match="The sbatch argument 'wrap' is used by PyMAPDL to submit the job.",
@@ -1266,7 +1268,7 @@ def test_generate_sbatch_wrap_in_arg(scheduler_args):
         context = NullContext()
 
     with context:
-        cmd_post = generate_sbatch_command(cmd, scheduler_args)
+        cmd_post = generate_sbatch_command(cmd, scheduler_options)
         assert cmd[0] in cmd_post[-1]
 
 
@@ -1325,7 +1327,7 @@ def test_exit_job(mock_popen, mapdl):
     mapdl._jobid = None
     mapdl._exited = False
     mapdl._mapdl_on_hpc = False
-    mapdl.finish_job_on_exit = False
+    mapdl.finish_job_on_exit = True
     mapdl.remove_temp_dir_on_exit = prev_rem
 
     # Checking
