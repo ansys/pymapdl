@@ -35,7 +35,7 @@ argument as a Python :class:`dict`:
 
 
 .. note::
-    PyMAPDL cannot infer the number of CPUs you are requesting from the scheduler,
+    PyMAPDL cannot infer the number of CPU you are requesting from the scheduler,
     hence you need to specify this value using the ``nproc`` argument.
 
 The double minus (``--``) common in the long version of some scheduler commands
@@ -231,5 +231,5 @@ To make PyMAPDL to launch an instance like that on SLURM, run the following code
 
 
 PyMAPDL automatically sets MAPDL to read the job configuration (machines, number
-of CPUs, memory, etc) which allows MAPDL to use all the resources allocated
+of CPU, memory, etc) which allows MAPDL to use all the resources allocated
 to that job.
