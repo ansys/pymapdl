@@ -1581,7 +1581,7 @@ def launch_mapdl(
 
             if args["launch_on_hpc"]:
                 start_parm["jobid"] = check_mapdl_launch_on_hpc(process, start_parm)
-                get_job_info(start_parm=start_parm)
+                get_job_info(start_parm=start_parm, timeout=args["start_timeout"])
             else:
                 # Local mapdl launch check
                 check_mapdl_launch(
