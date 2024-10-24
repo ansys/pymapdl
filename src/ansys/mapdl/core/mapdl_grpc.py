@@ -1026,6 +1026,12 @@ class MapdlGrpc(MapdlBase):
         This is only applicable if MAPDL is running on an HPC cluster."""
         return self._jobid
 
+    @property
+    def mapdl_on_hpc(self):
+        """Returns :class:`True` if the MAPDL instance has been run using
+        a scheduler"""
+        return self._mapdl_on_hpc
+
     @protect_grpc
     def _send_command(self, cmd: str, mute: bool = False) -> Optional[str]:
         """Send a MAPDL command and return the response as a string"""
@@ -1138,14 +1144,15 @@ class MapdlGrpc(MapdlBase):
                 return
 
         # Actually exiting MAPDL instance
-        self._exiting = True
-        self._exit_mapdl(path=mapdl_path)
-        self._exited = True
+        if finish_job_on_exit:
+            self._exiting = True
+            self._exit_mapdl(path=mapdl_path)
+            self._exited = True
 
-        # Exiting HPC job
-        if self._mapdl_on_hpc and self.finish_job_on_exit:
-            self.kill_job(self.jobid)
-            self._log.debug(f"Job (id: {self.jobid}) has been cancel.")
+            # Exiting HPC job
+            if self._mapdl_on_hpc:
+                self.kill_job(self.jobid)
+                self._log.debug(f"Job (id: {self.jobid}) has been cancel.")
 
         # Exiting remote instances
         if self._remote_instance:  # pragma: no cover
