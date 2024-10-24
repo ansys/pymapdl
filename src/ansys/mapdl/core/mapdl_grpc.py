@@ -994,35 +994,41 @@ class MapdlGrpc(MapdlBase):
         return response.strip()
 
     @property
-    def busy(self):
+    def busy(self) -> bool:
         """True when MAPDL gRPC server is executing a command."""
         return self._busy
 
     @property
-    def exiting(self):
+    def exiting(self) -> bool:
         """Returns true if the MAPDL instance is exiting."""
         return self._exiting
 
     @property
-    def port(self):
+    def port(self) -> int:
         """Returns the MAPDL gRPC instance port."""
         return self._port
 
     @property
-    def ip(self):
+    def ip(self) -> str:
         """Return the MAPDL gRPC instance IP."""
         return self._ip
 
     @property
-    def hostname(self):
+    def hostname(self) -> str:
         """Return the hostname of the machine MAPDL is running in."""
         return self._hostname
 
     @property
-    def jobid(self):
+    def jobid(self) -> int:
         """Returns the job id where the MAPDL is running in.
         This is only applicable if MAPDL is running on an HPC cluster."""
         return self._jobid
+
+    @property
+    def mapdl_on_hpc(self) -> bool:
+        """Returns :class:`True` if the MAPDL instance has been launched using
+        an scheduler."""
+        return self._mapdl_on_hpc
 
     @protect_grpc
     def _send_command(self, cmd: str, mute: bool = False) -> Optional[str]:
