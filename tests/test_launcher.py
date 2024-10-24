@@ -1334,6 +1334,7 @@ def test_exit_job(mock_popen, mapdl):
     mock_popen.assert_called_once_with(1001)
 
 
+@requires("ansys-tools-path")
 @patch(
     "ansys.tools.path.path._get_application_path",
     lambda *args, **kwargs: "path/to/mapdl/executable",

@@ -1404,9 +1404,9 @@ def launch_mapdl(
         # extracting parameters
         get_slurm_options(args, kwargs)
 
-    get_cpus(args)
-
     get_start_instance_arg(args)
+
+    get_cpus(args)
 
     get_ip(args)
 
@@ -1425,9 +1425,6 @@ def launch_mapdl(
             args["version"], args.get("exec_file"), launch_on_hpc=args["launch_on_hpc"]
         )
 
-        # Check for a valid connection mode
-        args["mode"] = check_mode(args["mode"], args["version"])
-
         args["additional_switches"] = set_license_switch(
             args["license_type"], args["additional_switches"]
         )
@@ -1444,6 +1441,9 @@ def launch_mapdl(
         # remove err file so we can track its creation
         # (as way to check if MAPDL started or not)
         remove_err_files(args["run_location"], args["jobname"])
+
+    # Check for a valid connection mode
+    args["mode"] = check_mode(args["mode"], args["version"])
 
     ########################################
     # Context specific launching adjustments
@@ -1646,13 +1646,11 @@ def check_mode(mode: ALLOWABLE_MODES, version: Optional[int] = None):
     """
     if not mode and not version:
         return "grpc"
-    elif not version:
-        return mode
 
     if isinstance(mode, str):
         mode = mode.lower()
         if mode == "grpc":
-            if version < 211:
+            if version and version < 211:
                 if version < 202 and os.name == "nt":
                     raise VersionError(
                         "gRPC mode requires MAPDL 2020R2 or newer " "on Windows."
@@ -1663,7 +1661,7 @@ def check_mode(mode: ALLOWABLE_MODES, version: Optional[int] = None):
         elif mode == "console":
             if os.name == "nt":
                 raise ValueError("Console mode requires Linux.")
-            if version >= 211:
+            if version and version >= 211:
                 warnings.warn(
                     "Console mode not recommended in MAPDL 2021R1 or newer.\n"
                     "Recommend using gRPC mode instead."
@@ -1675,9 +1673,9 @@ def check_mode(mode: ALLOWABLE_MODES, version: Optional[int] = None):
             )
 
     else:  # auto-select based on best version
-        if version >= 211:
+        if version and version >= 211:
             mode = "grpc"
-        elif version == 202 and os.name == "nt":
+        elif version and version == 202 and os.name == "nt":
             # Windows supports it as of 2020R2
             mode = "grpc"
         else:
@@ -1688,7 +1686,7 @@ def check_mode(mode: ALLOWABLE_MODES, version: Optional[int] = None):
                 )
             mode = "console"
 
-    if version < 130:
+    if version and version < 130:
         warnings.warn("MAPDL as a service has not been tested on MAPDL < v13")
         mode = "console"
 
