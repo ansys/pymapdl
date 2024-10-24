@@ -307,9 +307,9 @@ def protect_grpc(func):
                 old_handler = signal.signal(signal.SIGINT, handler)
 
         # Capture gRPC exceptions
-        n_attempts = 3
-        initial_backoff = 0.05
-        multiplier_backoff = 3
+        n_attempts = 5
+        initial_backoff = 0.1
+        multiplier_backoff = 2
 
         i_attemps = 0
 

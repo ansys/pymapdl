@@ -28,13 +28,14 @@ import re
 import shutil
 import tempfile
 import time
+from unittest.mock import patch
 
 import grpc
 import numpy as np
 import psutil
 import pytest
 
-from conftest import VALID_PORTS, has_dependency
+from conftest import PATCH_MAPDL_START, VALID_PORTS, has_dependency
 
 if has_dependency("pyvista"):
     from pyvista import MultiBlock
@@ -53,7 +54,7 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
-from ansys.mapdl.core.misc import random_string
+from ansys.mapdl.core.misc import random_string, stack
 from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 
 # Path to files needed for examples
@@ -2460,3 +2461,34 @@ def test_no_flush_stored(mapdl):
 
     assert not mapdl._store_commands
     assert mapdl._stored_commands == []
+
+
+@pytest.mark.parametrize("ip", ["123.45.67.89", "myhostname"])
+@stack(*PATCH_MAPDL_START)
+def test_ip_hostname_in_start_parm(ip):
+    start_parm = {
+        "ip": ip,
+        "local": False,
+        "set_no_abort": False,
+        "hostname": "myhost",
+        "jobid": 1001,
+    }
+
+    mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+
+    if ip == "myhostname":
+        assert mapdl.ip == "123.45.67.99"
+    else:
+        assert mapdl.ip == ip
+
+    assert mapdl.hostname == "myhost"
+    del mapdl
+
+
+@patch("ansys.mapdl.core.Mapdl.__init__", lambda *args, **kwargs: None)
+def test_delete_mapdl_object(mapdl):
+    mapdl_b = pymapdl.Mapdl()
+
+    with patch("ansys.mapdl.core.Mapdl.exit") as mock_exit:
+        del mapdl_b
+        mock_exit.assert_called_once()
