@@ -297,9 +297,8 @@ def get_process_at_port(port) -> Optional[psutil.Process]:
     """Get the process (psutil.Process) running at the given port"""
     for proc in psutil.process_iter():
         try:
-            connections = proc.connections(
-                kind="inet"
-            )  # just to check if we can access the
+            # just to check if we can access the port
+            connections = proc.net_connections()
         except psutil.AccessDenied:
             continue
         except psutil.NoSuchProcess:
@@ -559,7 +558,7 @@ def check_mapdl_launch(
         msg = (
             str(e)
             + f"\nRun location: {run_location}"
-            + f"\nCommand line used: {cmd}\n\n"
+            + f"\nCommand line used: {' '.join(cmd)}\n\n"
         )
 
         terminal_output = "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
@@ -1412,18 +1411,29 @@ def launch_mapdl(
 
     args["port"] = get_port(args["port"], args["start_instance"])
 
-    get_exec_file(args)
-
-    args["version"] = get_version(
-        args["version"], args.get("exec_file"), launch_on_hpc=args["launch_on_hpc"]
-    )
-
     if args["start_instance"]:
         ########################################
         # Local adjustments
         # -----------------
         #
         # Only when starting MAPDL (aka Local)
+
+        get_exec_file(args)
+
+        args["version"] = get_version(
+            args["version"], args.get("exec_file"), launch_on_hpc=args["launch_on_hpc"]
+        )
+
+        # Check for a valid connection mode
+        args["mode"] = check_mode(args["mode"], args["version"])
+
+        args["additional_switches"] = set_license_switch(
+            args["license_type"], args["additional_switches"]
+        )
+
+        env_vars: Dict[str, str] = update_env_vars(
+            args["add_env_vars"], args["replace_env_vars"]
+        )
 
         get_run_location(args)
 
@@ -1433,22 +1443,6 @@ def launch_mapdl(
         # remove err file so we can track its creation
         # (as way to check if MAPDL started or not)
         remove_err_files(args["run_location"], args["jobname"])
-
-    # Check for a valid connection mode
-    args["mode"] = check_mode(args["mode"], args["version"])
-
-    if not args["mode"]:
-        args["mode"] = "grpc"
-
-    LOG.debug(f"Using mode {args['mode']}")
-
-    args["additional_switches"] = set_license_switch(
-        args["license_type"], args["additional_switches"]
-    )
-
-    env_vars: Dict[str, str] = update_env_vars(
-        args["add_env_vars"], args["replace_env_vars"]
-    )
 
     ########################################
     # Context specific launching adjustments
@@ -1697,6 +1691,7 @@ def check_mode(mode: ALLOWABLE_MODES, version: Optional[int] = None):
         warnings.warn("MAPDL as a service has not been tested on MAPDL < v13")
         mode = "console"
 
+    LOG.debug(f"Using mode {mode}")
     return mode
 
 
@@ -2577,6 +2572,14 @@ def launch_mapdl_on_cluster(
 
     args["version"] = get_version(args["version"], exec_file)
 
+    args["mode"] = check_mode(args["mode"], args["version"])
+
+    args["additional_switches"] = set_license_switch(
+        args["license_type"], args["additional_switches"]
+    )
+
+    env_vars = update_env_vars(args["add_env_vars"], args["replace_env_vars"])
+
     if args["start_instance"]:
         ########################################
         # Local adjustments
@@ -2592,20 +2595,6 @@ def launch_mapdl_on_cluster(
         # remove err file so we can track its creation
         # (as way to check if MAPDL started or not)
         remove_err_files(args["run_location"], args["jobname"])
-
-        if _HAS_ATP and not args["_debug_no_launch"]:
-            version = version_from_path("mapdl", args["exec_file"])
-            args["mode"] = check_mode(args["mode"], version)
-
-    args["mode"] = "grpc"
-
-    LOG.debug(f"Using mode {args['mode']}")
-
-    args["additional_switches"] = set_license_switch(
-        args["license_type"], args["additional_switches"]
-    )
-
-    env_vars = update_env_vars(args["add_env_vars"], args["replace_env_vars"])
 
     ########################################
     # Context specific launching adjustments
