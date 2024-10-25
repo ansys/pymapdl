@@ -68,6 +68,7 @@ from conftest import (
     ON_LOCAL,
     PATCH_MAPDL_START,
     QUICK_LAUNCH_SWITCHES,
+    TESTING_MINIMAL,
     NullContext,
     requires,
 )
@@ -1390,9 +1391,14 @@ def test_launch_on_hpc_not_found_ansys(mck_sc, mck_lgrpc, mck_kj, monkeypatch):
         "a long scontrol...\nJobState=RUNNING\n...\nBatchHost=myhostname\n...\nin message"
     )
 
-    with pytest.warns(
-        UserWarning, match="PyMAPDL could not find the ANSYS executable."
-    ):
+    if TESTING_MINIMAL:
+        context = NullContext()
+    else:
+        context = pytest.warns(
+            UserWarning, match="PyMAPDL could not find the ANSYS executable."
+        )
+
+    with context:
         mapdl = launch_mapdl(
             launch_on_hpc=True,
             exec_file=exec_file,
