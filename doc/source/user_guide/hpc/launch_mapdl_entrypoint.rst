@@ -10,11 +10,9 @@ Interactive MAPDL instance launched from the login node
 Starting the instance
 ---------------------
 
-If you are already logged in an login node, it is also
-possible to launch an MAPDL instance as an SLURM job and
+If you are already logged in a login node, you can launch an MAPDL instance as a SLURM job and
 connect to it.
-This can be accomplished running the following commands
-in your login node.
+To accomplish this, run these commands in your login node.
 
 .. code:: pycon
 
@@ -22,9 +20,9 @@ in your login node.
     >>> mapdl = launch_mapdl(launch_on_hpc=True)
 
 PyMAPDL submits a job to the scheduler using the appropriate commands.
-In case of SLURM, it uses ``sbatch`` command with the ``--wrap`` argument
-to pass the MAPDL command line need to start.
-Other scheduler arguments can be specified using ``scheduler_options``
+In case of SLURM, it uses the ``sbatch`` command with the ``--wrap`` argument
+to pass the MAPDL command line to start.
+Other scheduler arguments can be specified using the ``scheduler_options``
 argument as a Python :class:`dict`:
 
 .. code:: pycon
@@ -35,15 +33,15 @@ argument as a Python :class:`dict`:
 
 
 .. note::
-    PyMAPDL cannot infer the number of CPU you are requesting from the scheduler,
-    hence you need to specify this value using the ``nproc`` argument.
+    PyMAPDL cannot infer the number of CPUs that you are requesting from the scheduler.
+    Hence, you must specify this value using the ``nproc`` argument.
 
 The double minus (``--``) common in the long version of some scheduler commands
 are added automatically if PyMAPDL detects it is missing and the specified
-command is long (length more than 1 character).
-For instance ``ntasks-per-node`` argument is submitted as ``--ntasks-per-node``.
+command is long more than 1 character in length).
+For instance, the ``ntasks-per-node`` argument is submitted as ``--ntasks-per-node``.
 
-or as a single Python string (:class:`str`):
+Or, a single Python string (:class:`str`) is submitted:
 
 .. code:: pycon
 
@@ -55,15 +53,15 @@ or as a single Python string (:class:`str`):
     Because PyMAPDL is already using the ``--wrap`` argument, this argument
     cannot be used again.
 
-The values of each scheduler argument are wrapped with single quotes (`'`).
-This might cause parsing issues which can cause the job to fail after successful
+The values of each scheduler argument are wrapped in single quotes (`'`).
+This might cause parsing issues that can cause the job to fail after successful
 submission.
 
-It should be noticed also that PyMAPDL passes all the environment variables of the
+PyMAPDL passes all the environment variables of the
 user to the new job and to the MAPDL instance.
-This is normally convenient, since there are many environmental variables which are
-needed to run the job or MAPDL.
-For instance the license server is normally stored in :envvar:`ANSYSLMD_LICENSE_FILE` environment variable.
+This is usually convenient because many environmental variables are
+needed to run the job or MAPDL command.
+For instance, the license server is normally stored in the :envvar:`ANSYSLMD_LICENSE_FILE` environment variable.
 If you prefer not to pass these environment variables to the job, use the SLURM argument
 ``--export`` to specify the desired environment variables.
 For more information, see `SLURM documentation <slurm_docs_>`_.
@@ -73,9 +71,9 @@ Working with the instance
 -------------------------
 
 Once the :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` object has been created,
-there are no differences with a normal :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>`
+it does not differ from a normal :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>`
 instance.
-You can retrieve the IP of the MAPDL instance, as well as its hostname.
+You can retrieve the IP of the MAPDL instance as well as its hostname:
 
 .. code:: pycon
 
@@ -91,8 +89,9 @@ You can also retrieve the job ID:
     >>> mapdl.jobid
     10001
 
-If you want to check whether the instance has been launched using an scheduler,
-you can use :attr:`mapdl_on_hpc <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.mapdl_on_hpc>`
+If you want to check whether the instance has been launched using a scheduler,
+you can use the :attr:`mapdl_on_hpc <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.mapdl_on_hpc>`
+attribute:
 
 .. code:: pycon
 
@@ -103,42 +102,42 @@ you can use :attr:`mapdl_on_hpc <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.mapdl_on_
 Sharing files
 ^^^^^^^^^^^^^
 
-Most of the HPC cluster share the login node filesystem with the compute nodes,
-meaning you do not need to do extra work to upload or download files to the MAPDL
-instance, you just need to copy them to the location where MAPDL is running.
-This location can be obtained with
-:attr:`directory <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.directory>`.
+Most of the HPC clusters share the login node filesystem with the compute nodes,
+which means that you do not need to do extra work to upload or download files to the MAPDL
+instance. You only need to copy them to the location where MAPDL is running.
+You can obtain this location with the
+:attr:`directory <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.directory>` attribute.
 
-If no location is specified in :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`,
-then a temporal location is selected.
+If no location is specified in the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
+function, then a temporal location is selected.
 It is a good idea to set the ``run_location`` argument to a directory that is accessible
 from all the compute nodes.
 Normally anything under ``/home/user`` is available to all compute nodes.
-In case you are unsure where you should launch MAPDL, contact your cluster administrator.
+If you are unsure where you should launch MAPDL, contact your cluster administrator.
 
-Additionally, you can use methods like :meth:`upload <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.upload>`
-or :meth:`download <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.download>` to
-upload or download files to/from the MAPDL instance respectively.
-You do not need other connection like ``ssh`` or similar.
-However, for large files, you might want to consider other alternatives.
+Additionally, you can use methods like the :meth:`upload <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.upload>`
+and :meth:`download <ansys.mapdl.core.mapdl_grpc.MapdlGrpc.download>` to
+upload and download files to and from the MAPDL instance respectively.
+You do not need ``ssh`` or another similar connection.
+However, for large files, you might want to consider alternatives.
 
 
 Exiting MAPDL
 -------------
 
-Exiting MAPDL, either intentionally or unintentionally, stop the job.
-This behaviour is because MAPDL is the main process at the job, hence when finished
+Exiting MAPDL, either intentionally or unintentionally, stops the job.
+This behavior occurs because MAPDL is the main process at the job. Thus, when finished,
 the scheduler considers the job done.
 
-To exit MAPDL, you can use :meth:`exit() <ansys.mapdl.core.Mapdl.exit>` method.
-This method exit MAPDL and, additionally, it send a signal to the scheduler to cancel the job.
+To exit MAPDL, you can use the :meth:`exit() <ansys.mapdl.core.Mapdl.exit>` method.
+This method exits MAPDL and sends a signal to the scheduler to cancel the job.
 
 .. code-block:: python
 
     mapdl.exit()
 
 When the Python process you are running PyMAPDL on finishes without errors, and you have not
-issued :meth:`exit() <ansys.mapdl.core.Mapdl.exit>`, the garbage collector
+issued the :meth:`exit() <ansys.mapdl.core.Mapdl.exit>` method, the garbage collector
 kills the MAPDL instance and its job. This is intended to save resources.
 
 If you prefer that the job is not killed, set the following attribute in the
@@ -149,16 +148,16 @@ If you prefer that the job is not killed, set the following attribute in the
     mapdl.finish_job_on_exit = False
 
 
-In that case, it is recommended you set a timeout in your job to avoid having the job
-running more than needed.
+In this case, you should set a timeout in your job to avoid having the job
+running longer than needed.
 
 
 Handling crashes on an HPC
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-If MAPDL crashes while running on HPC, the job finishes right away.
-In that case, MAPDL disconnect from MAPDL.
-PyMAPDL retries to reconnect to the MAPDL instance up to 5 times waiting
+If MAPDL crashes while running on an HPC, the job finishes right away.
+In this case, MAPDL disconnects from MAPDL.
+PyMAPDL retries to reconnect to the MAPDL instance up to 5 times, waiting
 for up to 5 seconds.
 If unsuccessful, you might get an error like this:
 
@@ -183,23 +182,23 @@ If unsuccessful, you might get an error like this:
     >
 
 The data of that job is available at :attr:`directory <ansys.mapdl.core.Mapdl.directory>`.
-It is recommended you set the run location using ``run_location`` argument.
+You should set the run location using the ``run_location`` argument.
 
 While handling this exception, PyMAPDL also cancels the job to avoid resources leaking.
 Therefore, the only option is to start a new instance by launching a new job using
-:func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`.
+the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function.
 
 User case on a SLURM cluster
 ----------------------------
 
-Assume an user wants to start a remote MAPDL instance in a HPC cluster
+Assume a user wants to start a remote MAPDL instance in an HPC cluster
 to interact with it.
 The user would like to request 10 nodes, and 1 task per node (to avoid clashes
 between MAPDL instances). 
-He would like to also request 64 GB of memory RAM.
-Because of administration logistic, he must use the machines in
-`supercluster01` partition.
-To make PyMAPDL to launch an instance like that on SLURM, run the following code:
+The user would like to also request 64 GB of RAM.
+Because of administration logistics, the user must use the machines in
+the ``supercluster01`` partition.
+To make PyMAPDL launch an instance like that on SLURM, run the following code:
 
 .. code-block:: python
 
@@ -230,6 +229,6 @@ To make PyMAPDL to launch an instance like that on SLURM, run the following code
     mapdl.exit()  # Kill the MAPDL instance
 
 
-PyMAPDL automatically sets MAPDL to read the job configuration (machines, number
-of CPU, memory, etc) which allows MAPDL to use all the resources allocated
+PyMAPDL automatically sets MAPDL to read the job configuration (including machines,
+number of CPUs, and memory), which allows MAPDL to use all the resources allocated
 to that job.
