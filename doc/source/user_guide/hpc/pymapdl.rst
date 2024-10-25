@@ -31,7 +31,7 @@ then PyMAPDL launches an MAPDL instance which uses 32 cores
 spawning across those 8 nodes.
 This behaviour can turn off if passing the
 :envvar:`PYMAPDL_RUNNING_ON_HPC`  environment variable
-with ``'false'`` value or passing the `detect_hpc=False` argument
+with ``'false'`` value or passing the `running_on_hpc=False` argument
 to :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`.
 
 
