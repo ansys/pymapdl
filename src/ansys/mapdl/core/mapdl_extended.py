@@ -1428,9 +1428,9 @@ class _MapdlCommandExtended(_MapdlCore):
         while i_try < n_try and not response:
             response = self.run(f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False)
             i_try += 1
-        else:
-            if not response:
-                raise MapdlRuntimeError("/INQUIRE command didn't return a response.")
+
+        if not response:
+            raise MapdlRuntimeError("/INQUIRE command didn't return a response.")
 
         if func.upper() in [
             "ENV",
