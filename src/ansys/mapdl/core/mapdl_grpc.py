@@ -1112,7 +1112,7 @@ class MapdlGrpc(MapdlBase):
                 f"Exiting MAPLD gRPC instance {self.ip}:{self.port} on '{self._path}'."
             )
 
-        mapdl_path = self.directory  # caching
+        mapdl_path = self._path  # using cached version
         if self._exited is None:
             self._log.debug("'self._exited' is none.")
             return  # Some edge cases the class object is not completely
@@ -1152,7 +1152,8 @@ class MapdlGrpc(MapdlBase):
             # Exiting HPC job
             if self._mapdl_on_hpc:
                 self.kill_job(self.jobid)
-                self._log.debug(f"Job (id: {self.jobid}) has been cancel.")
+                if hasattr(self, "_log"):
+                    self._log.debug(f"Job (id: {self.jobid}) has been cancel.")
 
         # Exiting remote instances
         if self._remote_instance:  # pragma: no cover
@@ -3764,7 +3765,7 @@ class MapdlGrpc(MapdlBase):
     def __del__(self):
         """In case the object is deleted"""
         try:
-            self.exit()
+            self.exit(force=True)
         except Exception as e:
             pass
 
