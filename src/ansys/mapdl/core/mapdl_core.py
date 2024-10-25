@@ -185,6 +185,7 @@ _ALLOWED_START_PARM = [
     "process",
     "ram",
     "run_location",
+    "start_instance",
     "start_timeout",
     "timeout",
 ]

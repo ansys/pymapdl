@@ -139,6 +139,13 @@ SERVICE_DEFAULT_CONFIG = {
 }
 
 
+def get_start_instance(*args, **kwargs) -> bool:
+    """Wraps get_start_instance to avoid circular imports"""
+    from ansys.mapdl.core.launcher import get_start_instance
+
+    return get_start_instance(*args, **kwargs)
+
+
 def chunk_raw(raw, save_as):
     with io.BytesIO(raw) as f:
         while True:
@@ -408,6 +415,9 @@ class MapdlGrpc(MapdlBase):
         self.remove_temp_dir_on_exit: bool = remove_temp_dir_on_exit
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: Optional[str] = start_parm.get("run_location", None)
+        self._start_instance: Optional[str] = (
+            start_parm.get("start_instance") or get_start_instance()
+        )
         self._busy: bool = False  # used to check if running a command on the server
         self._local: bool = start_parm.get("local", True)
         self._launched: bool = start_parm.get("launched", True)
@@ -1132,11 +1142,8 @@ class MapdlGrpc(MapdlBase):
             self.save()
 
         if not force:
-            # lazy import here to avoid circular import
-            from ansys.mapdl.core.launcher import get_start_instance
-
             # ignore this method if PYMAPDL_START_INSTANCE=False
-            if not get_start_instance():
+            if not self._start_instance:
                 self._log.info("Ignoring exit due to PYMAPDL_START_INSTANCE=False")
                 return
 
@@ -1218,15 +1225,7 @@ class MapdlGrpc(MapdlBase):
 
         """
         if self._exited:
-            self._log.debug("MAPDL server already exited")
             return
-
-        try:
-            self._log.debug("Killing MAPDL server")
-        except ValueError:
-            # It might throw ValueError: I/O operation on closed file.
-            # if the logger already exited.
-            pass
 
         if (
             self._version and self._version >= 24.2
@@ -3766,14 +3765,11 @@ class MapdlGrpc(MapdlBase):
 
     def __del__(self):
         """In case the object is deleted"""
-        try:
-            self.exit(force=True)
-        except Exception as e:
-            pass
+        if not self._start_instance:
+            return
 
-        # Adding super call per:
-        # https://docs.python.org/3/reference/datamodel.html#object.__del__
-        try:
-            super().__del__()
-        except Exception as e:
-            pass
+        self._exit_mapdl(path=self._path)
+
+        # Exiting HPC job
+        if self._mapdl_on_hpc:
+            self.kill_job(self.jobid)
