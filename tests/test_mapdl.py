@@ -1728,6 +1728,7 @@ def test_on_docker(mapdl):
 def test_deprecation_allow_ignore_warning(mapdl):
     with pytest.warns(DeprecationWarning, match="'allow_ignore' is being deprecated"):
         mapdl.allow_ignore = True
+    mapdl.ignore_errors = False
 
 
 def test_deprecation_allow_ignore_errors_mapping(mapdl):
