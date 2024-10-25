@@ -1422,8 +1422,16 @@ class _MapdlCommandExtended(_MapdlCore):
             raise ValueError(
                 f"The arguments (strarray='{strarray}', func='{func}') are not valid."
             )
+        response = ""
+        n_try = 3
+        i_try = 0
+        while i_try < n_try and not response:
+            response = self.run(f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False)
+            i_try += 1
+        else:
+            if not response:
+                raise MapdlRuntimeError("/INQUIRE command didn't return a response.")
 
-        response = self.run(f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False)
         if func.upper() in [
             "ENV",
             "TITLE",
