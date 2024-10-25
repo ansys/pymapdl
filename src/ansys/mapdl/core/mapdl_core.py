@@ -287,7 +287,6 @@ class _MapdlCore(Commands):
         self._krylov = None
         self._on_docker = None
         self._platform = None
-        self._path_cache = None  # Cache
         self._print_com: bool = print_com  # print the command /COM input.
 
         # Start_parameters
@@ -505,17 +504,11 @@ class _MapdlCore(Commands):
         a warning.
         """
         # always attempt to cache the path
-        i = 0
-        while (not self._path and i > 5) or i == 0:
-            try:
-                self._path = self.inquire("", "DIRECTORY")
-            except Exception as e:  # pragma: no cover
-                logger.warning(
-                    f"Failed to get the directory due to the following error: {e}"
-                )
-            i += 1
-            if not self._path:  # pragma: no cover
-                time.sleep(0.1)
+
+        try:
+            self._path = self.inquire("", "DIRECTORY")
+        except MapdlExitedError:
+            return self._path
 
         # os independent path format
         if self._path:  # self.inquire might return ''.
@@ -523,14 +516,10 @@ class _MapdlCore(Commands):
             # new line to fix path issue, see #416
             self._path = repr(self._path)[1:-1]
         else:  # pragma: no cover
-            if self._path_cache:
-                return self._path_cache
-            else:
-                raise IOError(
-                    f"The directory returned by /INQUIRE is not valid ('{self._path}')."
-                )
+            raise MapdlRuntimeError(
+                f"The directory returned by /INQUIRE is not valid ('{self._path}')."
+            )
 
-        self._path_cache = self._path  # update
         return self._path
 
     @directory.setter
@@ -538,6 +527,7 @@ class _MapdlCore(Commands):
     def directory(self, path: Union[str, pathlib.Path]) -> None:
         """Change the directory using ``Mapdl.cwd``"""
         self.cwd(path)
+        self._path = path
 
     @property
     def exited(self):
