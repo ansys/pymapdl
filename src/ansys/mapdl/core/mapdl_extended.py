@@ -37,6 +37,7 @@ from ansys.mapdl.core.errors import (
     CommandDeprecated,
     ComponentDoesNotExits,
     IncorrectWorkingDirectory,
+    MapdlCommandIgnoredError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.mapdl_core import _MapdlCore
@@ -354,13 +355,12 @@ class _MapdlCommandExtended(_MapdlCore):
     @wraps(_MapdlCore.cwd)
     def cwd(self, *args, **kwargs):
         """Wraps cwd."""
-        output = super().cwd(*args, mute=False, **kwargs)
+        try:
+            output = super().cwd(*args, mute=False, **kwargs)
+        except MapdlCommandIgnoredError as e:
+            raise IncorrectWorkingDirectory(e.args[0])
 
-        if output is not None:
-            if "*** WARNING ***" in output or not self.directory:
-                raise IncorrectWorkingDirectory(
-                    "\n" + "\n".join(output.splitlines()[1:])
-                )
+        self._path = args[0]  # caching
         return output
 
     @wraps(_MapdlCore.list)
@@ -1422,8 +1422,16 @@ class _MapdlCommandExtended(_MapdlCore):
             raise ValueError(
                 f"The arguments (strarray='{strarray}', func='{func}') are not valid."
             )
+        response = ""
+        n_try = 3
+        i_try = 0
+        while i_try < n_try and not response:
+            response = self.run(f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False)
+            i_try += 1
+        else:
+            if not response:
+                raise MapdlRuntimeError("/INQUIRE command didn't return a response.")
 
-        response = self.run(f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False)
         if func.upper() in [
             "ENV",
             "TITLE",

@@ -503,21 +503,21 @@ class _MapdlCore(Commands):
         accessible, ``cwd`` (:func:`MapdlBase.cwd`) will raise
         a warning.
         """
-        # always attempt to cache the path
-
+        # Inside inquire there is already a retry mechanisim
         try:
             self._path = self.inquire("", "DIRECTORY")
         except MapdlExitedError:
-            return self._path
+            # Let's return the cached path
+            pass
 
         # os independent path format
         if self._path:  # self.inquire might return ''.
             self._path = self._path.replace("\\", "/")
             # new line to fix path issue, see #416
             self._path = repr(self._path)[1:-1]
-        else:  # pragma: no cover
+        else:
             raise MapdlRuntimeError(
-                f"The directory returned by /INQUIRE is not valid ('{self._path}')."
+                f"MAPDL could provide a path using /INQUIRE or the cached path ('{self._path}')."
             )
 
         return self._path

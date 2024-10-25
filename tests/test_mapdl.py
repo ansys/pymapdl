@@ -50,6 +50,7 @@ from ansys.mapdl.core.errors import (
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlConnectionError,
+    MapdlExitedError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.launcher import launch_mapdl
@@ -68,36 +69,26 @@ else:
     PORT1 = 50090
 
 DEPRECATED_COMMANDS = [
+    "edadapt",
+    "edale",
     "edasmp",
     "edbound",
+    "edbvis",
     "edbx",
+    "edcadapt",
     "edcgen",
     "edclist",
     "edcmore",
     "edcnstr",
     "edcontact",
-    "edcrb",
-    "edcurve",
-    "eddbl",
-    "eddc",
-    "edipart",
-    "edlcs",
-    "edmp",
-    "ednb",
-    "edndtsd",
-    "ednrot",
-    "edpart",
-    "edpc",
-    "edsp",
-    "edweld",
-    "edadapt",
-    "edale",
-    "edbvis",
-    "edcadapt",
     "edcpu",
+    "edcrb",
     "edcsc",
     "edcts",
+    "edcurve",
     "eddamp",
+    "eddbl",
+    "eddc",
     "eddrelax",
     "eddump",
     "edenergy",
@@ -107,10 +98,18 @@ DEPRECATED_COMMANDS = [
     "edhist",
     "edhtime",
     "edint",
+    "edipart",
     "edis",
+    "edlcs",
     "edload",
+    "edmp",
+    "ednb",
+    "edndtsd",
+    "ednrot",
     "edopt",
     "edout",
+    "edpart",
+    "edpc",
     "edpl",
     "edpvel",
     "edrc",
@@ -120,10 +119,12 @@ DEPRECATED_COMMANDS = [
     "edrun",
     "edshell",
     "edsolv",
+    "edsp",
     "edstart",
     "edterm",
     "edtp",
     "edvel",
+    "edweld",
     "edwrite",
     "rexport",
 ]
@@ -2493,3 +2494,35 @@ def test_delete_mapdl_object(mapdl):
     with patch("ansys.mapdl.core.Mapdl.exit") as mock_exit:
         del mapdl_b
         mock_exit.assert_called_once()
+
+
+def test_directory_setter(mapdl):
+    # Testing edge cases
+    prev_path = mapdl._path
+
+    with patch(
+        "ansys.mapdl.core.Mapdl.inquire", side_effect=MapdlExitedError("mocked error")
+    ) as mck_inquire:
+
+        assert prev_path == mapdl.directory
+
+        mck_inquire.assert_called_once()
+
+        mapdl._path = ""
+        with pytest.raises(
+            MapdlRuntimeError,
+            match="MAPDL could provide a path using /INQUIRE or the cached path",
+        ):
+            mapdl.directory
+
+    mapdl._path = prev_path
+
+
+def test_cwd_changing_directory(mapdl):
+    prev_path = mapdl._path
+    mapdl._path = None
+
+    mapdl.cwd(prev_path)
+
+    assert mapdl._path == prev_path
+    assert mapdl.directory == prev_path
