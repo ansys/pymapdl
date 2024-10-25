@@ -2478,15 +2478,6 @@ def test_ip_hostname_in_start_parm(ip):
     del mapdl
 
 
-@patch("ansys.mapdl.core.Mapdl.__init__", lambda *args, **kwargs: None)
-def test_delete_mapdl_object(mapdl):
-    mapdl_b = pymapdl.Mapdl()
-
-    with patch("ansys.mapdl.core.Mapdl.exit") as mock_exit:
-        del mapdl_b
-        mock_exit.assert_called_once()
-
-
 def test_directory_setter(mapdl):
     # Testing edge cases
     prev_path = mapdl._path

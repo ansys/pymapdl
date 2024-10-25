@@ -3765,10 +3765,9 @@ class MapdlGrpc(MapdlBase):
 
     def __del__(self):
         """In case the object is deleted"""
+        # We are just going to escape early if needed, and kill the HPC job.
         if not self._start_instance:
             return
-
-        self._exit_mapdl(path=self._path)
 
         # Exiting HPC job
         if self._mapdl_on_hpc:
