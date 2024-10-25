@@ -1441,8 +1441,8 @@ class _MapdlCommandExtended(_MapdlCore):
                 "TITLE",
             ]:  # the output is multiline, we just need the last line.
                 response = response.splitlines()[-1]
-            else:
-                response = response.split("=")[1].strip()
+
+            response = response.split("=")[1].strip()
 
         return response
 
