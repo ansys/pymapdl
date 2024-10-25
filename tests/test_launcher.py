@@ -57,6 +57,7 @@ from ansys.mapdl.core.launcher import (
     is_running_on_slurm,
     launch_grpc,
     launch_mapdl,
+    launch_mapdl_on_cluster,
     remove_err_files,
     set_license_switch,
     set_MPI_additional_switches,
@@ -68,6 +69,7 @@ from conftest import (
     ON_LOCAL,
     PATCH_MAPDL_START,
     QUICK_LAUNCH_SWITCHES,
+    TESTING_MINIMAL,
     NullContext,
     requires,
 )
@@ -729,17 +731,17 @@ def test_slurm_ram(monkeypatch, ram, expected, context):
 @pytest.mark.parametrize("slurm_env_var", ["True", "false", ""])
 @pytest.mark.parametrize("slurm_job_name", ["True", "false", ""])
 @pytest.mark.parametrize("slurm_job_id", ["True", "false", ""])
-@pytest.mark.parametrize("detect_hpc", [True, False, None])
+@pytest.mark.parametrize("running_on_hpc", [True, False, None])
 def test_is_running_on_slurm(
-    monkeypatch, slurm_env_var, slurm_job_name, slurm_job_id, detect_hpc
+    monkeypatch, slurm_env_var, slurm_job_name, slurm_job_id, running_on_hpc
 ):
     monkeypatch.setenv("PYMAPDL_RUNNING_ON_HPC", slurm_env_var)
     monkeypatch.setenv("SLURM_JOB_NAME", slurm_job_name)
     monkeypatch.setenv("SLURM_JOB_ID", slurm_job_id)
 
-    flag = is_running_on_slurm(args={"detect_hpc": detect_hpc})
+    flag = is_running_on_slurm(args={"running_on_hpc": running_on_hpc})
 
-    if detect_hpc is not True:
+    if running_on_hpc is not True:
         assert not flag
 
     else:
@@ -755,7 +757,7 @@ def test_is_running_on_slurm(
     if ON_LOCAL:
         assert (
             launch_mapdl(
-                detect_hpc=detect_hpc,
+                running_on_hpc=running_on_hpc,
                 _debug_no_launch=True,
             )["running_on_hpc"]
             == flag
@@ -1334,6 +1336,7 @@ def test_exit_job(mock_popen, mapdl):
     mock_popen.assert_called_once_with(1001)
 
 
+@requires("ansys-tools-path")
 @patch(
     "ansys.tools.path.path._get_application_path",
     lambda *args, **kwargs: "path/to/mapdl/executable",
@@ -1389,9 +1392,14 @@ def test_launch_on_hpc_not_found_ansys(mck_sc, mck_lgrpc, mck_kj, monkeypatch):
         "a long scontrol...\nJobState=RUNNING\n...\nBatchHost=myhostname\n...\nin message"
     )
 
-    with pytest.warns(
-        UserWarning, match="PyMAPDL could not find the ANSYS executable."
-    ):
+    if TESTING_MINIMAL:
+        context = NullContext()
+    else:
+        context = pytest.warns(
+            UserWarning, match="PyMAPDL could not find the ANSYS executable."
+        )
+
+    with context:
         mapdl = launch_mapdl(
             launch_on_hpc=True,
             exec_file=exec_file,
@@ -1491,3 +1499,38 @@ def test_launch_on_hpc_exception_successfull_sbatch(monkeypatch):
     assert "1001" in args
 
     mock_kill_job.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "args,context",
+    [
+        [
+            {"nproc": 10, "mode": "console"},
+            pytest.raises(
+                ValueError,
+                match="The only mode allowed for launch MAPDL on an HPC cluster is gRPC.",
+            ),
+        ],
+        [
+            {"nproc": 10, "ip": "123.11.22.33"},
+            pytest.raises(
+                ValueError,
+                match="PyMAPDL cannot ensure a specific IP will be used when launching MAPDL on a cluster",
+            ),
+        ],
+        [
+            {"nproc": 10, "start_instance": False},
+            pytest.raises(
+                ValueError,
+                match="The 'start_instance' argument must be 'True' when launching on HPC.",
+            ),
+        ],
+        [{"nproc": 10}, NullContext()],
+    ],
+)
+@patch("ansys.mapdl.core.launcher.launch_mapdl", lambda *args, **kwargs: kwargs)
+def test_launch_mapdl_on_cluster_exceptions(args, context):
+    with context:
+        ret = launch_mapdl_on_cluster(**args)
+        assert ret["launch_on_hpc"]
+        assert ret["nproc"] == 10

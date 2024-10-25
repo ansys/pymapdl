@@ -1,5 +1,4 @@
 ignore:
-  - "src/ansys/mapdl/core/_commands"
   - "src/ansys/mapdl/core/jupyter.py"
   - "src/ansys/mapdl/core/mapdl_console.py"
   - "src/ansys/mapdl/core/mapdl_inprocess.py"

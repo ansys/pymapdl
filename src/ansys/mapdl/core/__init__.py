@@ -115,8 +115,9 @@ else:
 
 from ansys.mapdl.core.information import Information
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc as Mapdl
-from ansys.mapdl.core.misc import Report, _check_has_ansys
+from ansys.mapdl.core.misc import _check_has_ansys
 from ansys.mapdl.core.pool import MapdlPool
+from ansys.mapdl.core.report import Report
 
 ###############################################################################
 # Convenient imports

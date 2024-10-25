@@ -442,6 +442,7 @@ def run_before_and_after_tests(
     assert not mapdl.exited, "MAPDL is exited after the test. It should have not!"
     assert not mapdl._mapdl_on_hpc, "Mapdl class is on HPC mode. It should not!"
     assert mapdl.finish_job_on_exit, "Mapdl class should finish the job!"
+    assert not mapdl.ignore_errors, "Mapdl class is ignoring errors!"
 
     make_sure_not_instances_are_left_open()
 
@@ -650,24 +651,34 @@ SpacedPaths = namedtuple(
 
 
 # Necessary patches to patch Mapdl launch
-def func_which_returns(return_=None):
+def _returns(return_=None):
     return lambda *args, **kwargs: return_
 
 
 # Methods to patch in MAPDL when launching
+def _patch_method(method):
+    return "ansys.mapdl.core.mapdl_grpc.MapdlGrpc." + method
+
+
 _meth_patch_MAPDL_launch = (
     # method, and its return
-    ("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._connect", func_which_returns(True)),
-    ("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._run", func_which_returns("")),
-    ("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._create_channel", func_which_returns("")),
+    (_patch_method("_connect"), _returns(True)),
+    (_patch_method("_run"), _returns("")),
+    (_patch_method("_create_channel"), _returns("")),
+    (_patch_method("inquire"), _returns("/home/simulation")),
+    (_patch_method("_subscribe_to_channel"), _returns("")),
+    (_patch_method("_run_at_connect"), _returns("")),
+    (_patch_method("_exit_mapdl"), _returns(None)),
+    # non-mapdl methods
+    ("socket.gethostbyname", _returns("123.45.67.99")),
     (
-        "ansys.mapdl.core.mapdl_grpc.MapdlGrpc._subscribe_to_channel",
-        func_which_returns(""),
+        "socket.gethostbyaddr",
+        _returns(
+            [
+                "mapdlhostname",
+            ]
+        ),
     ),
-    ("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._run_at_connect", func_which_returns("")),
-    ("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._exit_mapdl", func_which_returns(None)),
-    ("socket.gethostbyname", func_which_returns("123.45.67.99")),
-    ("socket.gethostbyaddr", func_which_returns("mapdlhostname")),
 )
 
 PATCH_MAPDL_START = [patch(method, ret) for method, ret in _meth_patch_MAPDL_launch]

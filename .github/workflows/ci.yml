@@ -774,6 +774,8 @@ jobs:
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
+      TESTING_MINIMAL: true
+      
 
     steps:
       - name: "Install Git and checkout project"
