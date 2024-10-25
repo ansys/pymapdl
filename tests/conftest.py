@@ -439,6 +439,7 @@ def run_before_and_after_tests(
 
     assert prev == mapdl.is_local
     assert not mapdl.exited
+    assert not mapdl.ignore_errors
 
     make_sure_not_instances_are_left_open()
 

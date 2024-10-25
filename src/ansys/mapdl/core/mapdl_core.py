@@ -281,7 +281,6 @@ class _MapdlCore(Commands):
         self._krylov = None
         self._on_docker = None
         self._platform = None
-        self._path_cache = None  # Cache
         self._print_com: bool = print_com  # print the command /COM input.
 
         # Start_parameters
@@ -498,33 +497,26 @@ class _MapdlCore(Commands):
         accessible, ``cwd`` (:func:`MapdlBase.cwd`) will raise
         a warning.
         """
-        # always attempt to cache the path
-        i = 0
-        while (not self._path and i > 5) or i == 0:
-            try:
-                self._path = self.inquire("", "DIRECTORY")
-            except Exception as e:  # pragma: no cover
-                logger.warning(
-                    f"Failed to get the directory due to the following error: {e}"
-                )
-            i += 1
-            if not self._path:  # pragma: no cover
-                time.sleep(0.1)
+        # Inside inquire there is already a retry mechanisim
+        path = None
+        try:
+            path = self.inquire("", "DIRECTORY")
+        except MapdlExitedError:
+            # Let's return the cached path
+            pass
 
         # os independent path format
-        if self._path:  # self.inquire might return ''.
-            self._path = self._path.replace("\\", "/")
+        if path:  # self.inquire might return ''.
+            path = path.replace("\\", "/")
             # new line to fix path issue, see #416
-            self._path = repr(self._path)[1:-1]
-        else:  # pragma: no cover
-            if self._path_cache:
-                return self._path_cache
-            else:
-                raise IOError(
-                    f"The directory returned by /INQUIRE is not valid ('{self._path}')."
-                )
+            path = repr(path)[1:-1]
+            self._path = path
 
-        self._path_cache = self._path  # update
+        elif not self._path:
+            raise MapdlRuntimeError(
+                f"MAPDL could provide a path using /INQUIRE or the cached path ('{self._path}')."
+            )
+
         return self._path
 
     @directory.setter
@@ -2319,7 +2311,7 @@ class _MapdlCore(Commands):
                 self.exit()
             except Exception as e:
                 try:  # logger might be closed
-                    if self._log is not None:
+                    if hasattr(self, "_log") and self._log is not None:
                         self._log.error("exit: %s", str(e))
                 except ValueError:
                     pass
