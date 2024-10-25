@@ -1932,32 +1932,22 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
     assert int(n_ent[0]) > 0
 
 
-def test_save_on_exit(mapdl, cleared):
-    with mapdl.non_interactive:
-        mapdl.exit(save=True, fake_exit=True)
-        mapdl._exited = False  # avoiding set exited on the class.
+@pytest.mark.parametrize("save", [None, True, False])
+@patch("ansys.mapdl.core.Mapdl.save")
+@patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._exit_mapdl")
+def test_save_on_exit(mck_exit, mck_save, mapdl, cleared, save):
 
-        lines = "\n".join(mapdl._stored_commands.copy())
-        assert "SAVE" in lines.upper()
+    mck_exit.return_value = None
 
-        mapdl._stored_commands = []  # resetting
-        mapdl.prep7()
+    mapdl.exit(save=save)
+    mapdl._exited = False  # avoiding set exited on the class.
 
-    mapdl.prep7()
+    if save:
+        mck_save.assert_called_once()
+    else:
+        mck_save.assert_not_called()
 
-
-def test_save_on_exit_not(mapdl, cleared):
-    with mapdl.non_interactive:
-        mapdl.exit(save=False, fake_exit=True)
-        mapdl._exited = False  # avoiding set exited on the class.
-
-        lines = "\n".join(mapdl._stored_commands.copy())
-        assert "SAVE" not in lines.upper()
-
-        mapdl._stored_commands = []  # resetting
-        mapdl.prep7()
-
-    mapdl.prep7()
+    assert mapdl.prep7()
 
 
 def test_input_strings_inside_non_interactive(mapdl, cleared):
