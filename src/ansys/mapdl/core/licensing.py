@@ -24,21 +24,18 @@
 
 import os
 import socket
-import subprocess
+
+# Subprocess is needed to start the backend. But
+# the input is controlled by the library. Excluding bandit check.
+import subprocess  # nosec B404
 import time
 
-from ansys.mapdl.core import LOG
+from ansys.mapdl.core import _HAS_ATP, LOG
 from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.misc import threaded_daemon
 
-try:
+if _HAS_ATP:
     from ansys.tools.path import get_ansys_path, version_from_path
-
-    _HAS_ATP = True
-
-except ModuleNotFoundError:
-    _HAS_ATP = False
-
 
 LOCALHOST = "127.0.0.1"
 LIC_PATH_ENVAR = "ANSYSLIC_DIR"
@@ -334,13 +331,14 @@ class LicenseChecker:
             env["ANS_FLEXLM_DISABLE_DEFLICPATH"] = "TRUE"
 
         tstart = time.time()
+        # ansysli_util_path is controlled by the library.
+        # Excluding bandit check.
         process = subprocess.Popen(
-            f'"{ansysli_util_path}" -checkout {lic}',
+            [f'"{ansysli_util_path}"', "-checkout", f"{lic}"],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             env=env,
-            shell=True,
-        )
+        )  # nosec B603
         output = process.stdout.read().decode()
 
         t_elap = time.time() - tstart

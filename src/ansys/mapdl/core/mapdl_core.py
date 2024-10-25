@@ -30,7 +30,10 @@ import os
 import pathlib
 import re
 from shutil import copyfile, rmtree
-from subprocess import DEVNULL, call
+
+# Subprocess is needed to start the backend. But
+# the input is controlled by the library. Excluding bandit check.
+from subprocess import DEVNULL, call  # nosec B404
 import tempfile
 import time
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
@@ -61,10 +64,10 @@ from ansys.mapdl.core.errors import (
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
 )
+from ansys.mapdl.core.information import Information
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.mapdl_types import MapdlFloat
 from ansys.mapdl.core.misc import (
-    Information,
     check_valid_routine,
     last_created,
     random_string,
@@ -163,6 +166,23 @@ VALID_SELECTION_ENTITY_TP = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"
 GUI_FONT_SIZE = 15
 LOG_APDL_DEFAULT_FILE_NAME = "apdl.log"
 
+_ALLOWED_START_PARM = [
+    "additional_switches",
+    "check_parameter_names",
+    "exec_file",
+    "ip",
+    "jobname",
+    "nproc",
+    "override",
+    "port",
+    "print_com",
+    "process",
+    "ram",
+    "run_location",
+    "start_timeout",
+    "timeout",
+]
+
 
 def parse_to_short_cmd(command):
     """Takes any MAPDL command and returns the first 4 characters of
@@ -193,25 +213,6 @@ def setup_logger(loglevel="INFO", log_file=True, mapdl_instance=None):
         setup_logger.log = logger.add_instance_logger("MAPDL", mapdl_instance)
 
     return setup_logger.log
-
-
-_ALLOWED_START_PARM = [
-    "additional_switches",
-    "exec_file",
-    "ip",
-    "jobname",
-    "local",
-    "nproc",
-    "override",
-    "port",
-    "print_com",
-    "process",
-    "ram",
-    "run_location",
-    "start_timeout",
-    "timeout",
-    "check_parameter_names",
-]
 
 
 def _sanitize_start_parm(start_parm):
@@ -263,7 +264,8 @@ class _MapdlCore(Commands):
         else:  # pragma: no cover
             if use_vtk:
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'use_vtk' requires having 'ansys-tools-visualization_interface' installed."
+                    "Using the keyword argument 'use_vtk' requires having "
+                    "'ansys-tools-visualization_interface' installed."
                 )
             else:
                 self._use_vtk = False
@@ -279,13 +281,14 @@ class _MapdlCore(Commands):
         self._krylov = None
         self._on_docker = None
         self._platform = None
+        self._path_cache = None  # Cache
+        self._print_com: bool = print_com  # print the command /COM input.
 
+        # Start_parameters
         _sanitize_start_parm(start_parm)
         self._start_parm: Dict[str, Any] = start_parm
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
-        self._path_cache = None  # Cache
-        self._print_com: bool = print_com  # print the command /COM input.
         self.check_parameter_names = start_parm.get("check_parameter_names", True)
 
         # Setting up loggers
@@ -500,8 +503,10 @@ class _MapdlCore(Commands):
         while (not self._path and i > 5) or i == 0:
             try:
                 self._path = self.inquire("", "DIRECTORY")
-            except Exception:  # pragma: no cover
-                pass
+            except Exception as e:  # pragma: no cover
+                logger.warning(
+                    f"Failed to get the directory due to the following error: {e}"
+                )
             i += 1
             if not self._path:  # pragma: no cover
                 time.sleep(0.1)
@@ -676,8 +681,8 @@ class _MapdlCore(Commands):
         """
         try:
             self._jobname = self.inquire("", "JOBNAME")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Failed to get the jobname due to the following error: {e}")
         return self._jobname
 
     @jobname.setter
@@ -1693,12 +1698,30 @@ class _MapdlCore(Commands):
                 "MAPDL GUI has been opened using 'inplace' kwarg. "
                 f"The changes you make will overwrite the files in {run_dir}."
             )
+        add_sw = add_sw.split()
 
+        # Ensure exec_file is a file
+        try:
+            pathlib.Path(exec_file).is_file()
+        except FileNotFoundError:
+            raise FileNotFoundError("The executable file for ANSYS was not found. ")
+
+        exec_array = [
+            f"{exec_file}",
+            "-g",
+            "-j",
+            f"{name}",
+            "-np",
+            f"{nproc}",
+            *add_sw,
+        ]
+
+        # exec_array is controlled by the library. Excluding bandit check.
         call(
-            f'cd "{run_dir}" && "{exec_file}" -g -j {name} -np {nproc} {add_sw}',
-            shell=True,
+            exec_array,
             stdout=DEVNULL,
-        )
+            cwd=run_dir,
+        )  # nosec B603
 
         # Going back
         os.chdir(cwd)
@@ -2298,7 +2321,7 @@ class _MapdlCore(Commands):
                 try:  # logger might be closed
                     if self._log is not None:
                         self._log.error("exit: %s", str(e))
-                except Exception:
+                except ValueError:
                     pass
 
     def _cleanup_loggers(self):

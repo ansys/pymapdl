@@ -33,6 +33,7 @@ from _pytest.terminal import TerminalReporter  # for terminal customization
 import psutil
 import pytest
 
+from ansys.mapdl.core.helpers import is_installed as has_dependency
 from ansys.mapdl.core.launcher import is_ansys_process
 from common import (
     Element,
@@ -121,7 +122,7 @@ requires_on_cicd = pytest.mark.skipif(
 
 skip_if_running_student_version = pytest.mark.skipif(
     ON_STUDENT,
-    reason="This tests does not work on student version. Maybe because license limitations",
+    reason="This tests does not work on student version.",
 )
 
 
@@ -133,23 +134,6 @@ PROCESS_OK_STATUS = [
     psutil.STATUS_PARKED,  # (Linux)
     psutil.STATUS_IDLE,  # (Linux, macOS, FreeBSD)
 ]
-
-
-def import_module(requirement):
-    from importlib import import_module
-
-    if os.name == "nt":
-        requirement = requirement.replace("-", ".")
-    return import_module(requirement)
-
-
-def has_dependency(requirement):
-    try:
-        requirement = requirement.replace("-", ".")
-        import_module(requirement)
-        return True
-    except ModuleNotFoundError:
-        return False
 
 
 def requires(requirement: str):
@@ -239,7 +223,7 @@ from ansys.mapdl.core.errors import (
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 
-if has_dependency("ansys-tools-visualization-interface"):
+if has_dependency("ansys-tools-visualization_interface"):
     import ansys.tools.visualization_interface as viz_interface
 
     viz_interface.TESTING_MODE = True
@@ -263,9 +247,12 @@ remote server with:
 
 {os_msg}
 
-If you do have Ansys installed, you may have to patch pymapdl to
-automatically find your Ansys installation.  Email the developer at:
-alexander.kaszynski@ansys.com
+If you do have Ansys installed, you may have to patch PyMAPDL to
+automatically find your Ansys installation.
+
+You can request assistance by opening an issue on:
+
+https://github.com/ansys/pymapdl/issues
 
 """
 MAPDL_VERSION = None  # this is cached by mapdl fixture and used in the minimal testing
@@ -301,7 +288,7 @@ def pytest_report_header(config, start_path, startdir):
         "DPF_START_SERVER",
         "IGNORE_POOL",
     ]:
-        env_var_value = os.environ.get(env_var, None)
+        env_var_value = os.environ.get(env_var)
         if env_var_value is not None:
             line += f"{env_var} ('{env_var_value}'), "
     text += [line]
@@ -451,6 +438,7 @@ def run_before_and_after_tests(
     yield  # this is where the testing happens
 
     assert prev == mapdl.is_local
+    assert not mapdl.exited
 
     make_sure_not_instances_are_left_open()
 
@@ -500,6 +488,7 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
 
         # Restoring the local configuration
         mapdl._local = local_
+        mapdl._exited = False
 
     return mapdl
 
@@ -632,6 +621,7 @@ def mapdl(request, tmpdir_factory):
     ###########################################################################
     if START_INSTANCE:
         mapdl._local = True
+        mapdl._exited = False
         mapdl.exit(save=True, force=True)
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)

@@ -25,13 +25,13 @@
 from functools import wraps
 import os
 import shutil
-import urllib.request
 import zipfile
 
 try:
     import requests
 
     _HAS_REQUESTS = True
+
 except ModuleNotFoundError:
     _HAS_REQUESTS = False
 
@@ -83,14 +83,8 @@ def _get_file_url(filename, directory=None):
 
 
 def _check_url_exist(url):
-    if not _HAS_REQUESTS:
-        raise ModuleNotFoundError("Examples module requires request module")
-
-    response = requests.get(url)
-    if response.status_code == 200:
-        return [True]
-    else:
-        return [False]
+    response = requests.get(url, timeout=10)  # 10 seconds timeout
+    return response.status_code == 200
 
 
 @check_directory_exist(pymapdl.EXAMPLES_PATH)
@@ -103,24 +97,28 @@ def _retrieve_file(url, filename, _test=False):
     local_path = os.path.join(pymapdl.EXAMPLES_PATH, os.path.basename(filename))
     local_path_no_zip = local_path.replace(".zip", "")
     if os.path.isfile(local_path_no_zip) or os.path.isdir(local_path_no_zip):
-        return local_path_no_zip, None
+        return local_path_no_zip
 
     # Perform download
-    saved_file, resp = urllib.request.urlretrieve(url)
-    shutil.move(saved_file, local_path)
+    requested_file = requests.get(url, timeout=10)
+    requested_file.raise_for_status()
+
+    with open(local_path, "wb") as f:
+        f.write(requested_file.content)
+
     if get_ext(local_path) in [".zip"]:
         _decompress(local_path)
         local_path = local_path[:-4]
-    return local_path, resp
+    return local_path
 
 
 def _download_file(filename, directory=None, _test=False):
     url = _get_file_url(filename, directory)
     try:
         return _retrieve_file(url, filename, _test)
-    except Exception as e:  # Genering exception
-        raise RuntimeError(
-            "For the reason mentioned below, retrieving the file from internet failed.\n"
+    except requests.exceptions.HTTPError as e:
+        raise requests.exceptions.HTTPError(
+            "Retrieving the file from internet failed.\n"
             "You can download this file from:\n"
             f"{url}\n"
             "\n"
@@ -140,27 +138,27 @@ def download_bracket():
     '/home/user/.local/share/ansys_mapdl_core/examples/bracket.iges'
 
     """
-    return _download_file("bracket.iges", "geometry")[0]
+    return _download_file("bracket.iges", "geometry")
 
 
 def download_tech_demo_data(example, filename):
     """Download Tech Demos external data."""
     example = "tech_demos/" + example
-    return _download_file(filename=filename, directory=example)[0]
+    return _download_file(filename=filename, directory=example)
 
 
 def download_vtk_rotor():
     """Download rotor vtk file."""
-    return _download_file("rotor.vtk", "geometry")[0]
+    return _download_file("rotor.vtk", "geometry")
 
 
 def _download_rotor_tech_demo_vtk():
     """Download the rotor surface VTK file."""
-    return _download_file("rotor2.vtk", "geometry")[0]
+    return _download_file("rotor2.vtk", "geometry")
 
 
 def download_example_data(filename, directory=None):
-    return _download_file(filename, directory=directory)[0]
+    return _download_file(filename, directory=directory)
 
 
 def download_manifold_example_data() -> dict:
@@ -168,10 +166,12 @@ def download_manifold_example_data() -> dict:
     download paths into a dictionary domain id->path.
     Examples files are downloaded to a persistent cache to avoid
     re-downloading the same file twice.
+
     Returns
     -------
     dict[str:str]
         Path to the example files.
+
     Examples
     --------
     Download the manifold geometry, ans file and return the path of the file
@@ -186,10 +186,10 @@ def download_manifold_example_data() -> dict:
     return {
         "geometry": _download_file(
             filename="manifold_geometry.anf", directory=files_dir
-        )[0],
+        ),
         "mapping_data": _download_file(
             filename="manifold_cht-final_temp.csv", directory=files_dir
-        )[0],
+        ),
     }
 
 
@@ -198,10 +198,12 @@ def download_cfx_mapping_example_data() -> dict:
     download paths into a dictionary domain id->path.
     Examples files are downloaded to a persistent cache to avoid
     re-downloading the same file twice.
+
     Returns
     -------
     dict[str:str]
         Path to the example files.
+
     Examples
     --------
     >>> from ansys.mapdl.core.examples.downloads import download_cfx_mapping_example_data
@@ -215,6 +217,6 @@ def download_cfx_mapping_example_data() -> dict:
     return {
         "data": _download_file(
             filename="11_blades_mode_1_ND_0.csv", directory=files_dir
-        )[0],
-        "model": _download_file(filename="ExampleMapping.db", directory=files_dir)[0],
+        ),
+        "model": _download_file(filename="ExampleMapping.db", directory=files_dir),
     }
