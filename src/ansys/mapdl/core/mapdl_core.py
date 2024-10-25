@@ -498,18 +498,21 @@ class _MapdlCore(Commands):
         a warning.
         """
         # Inside inquire there is already a retry mechanisim
+        path = None
         try:
-            self._path = self.inquire("", "DIRECTORY")
+            path = self.inquire("", "DIRECTORY")
         except MapdlExitedError:
             # Let's return the cached path
             pass
 
         # os independent path format
-        if self._path:  # self.inquire might return ''.
-            self._path = self._path.replace("\\", "/")
+        if path:  # self.inquire might return ''.
+            path = path.replace("\\", "/")
             # new line to fix path issue, see #416
-            self._path = repr(self._path)[1:-1]
-        else:
+            path = repr(path)[1:-1]
+            self._path = path
+
+        elif not self._path:
             raise MapdlRuntimeError(
                 f"MAPDL could provide a path using /INQUIRE or the cached path ('{self._path}')."
             )
