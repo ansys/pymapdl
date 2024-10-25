@@ -28,6 +28,7 @@ import re
 import shutil
 import tempfile
 import time
+from unittest.mock import patch
 
 import grpc
 import numpy as np
@@ -49,6 +50,7 @@ from ansys.mapdl.core.errors import (
     IncorrectWorkingDirectory,
     MapdlCommandIgnoredError,
     MapdlConnectionError,
+    MapdlExitedError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.launcher import launch_mapdl
@@ -67,36 +69,26 @@ else:
     PORT1 = 50090
 
 DEPRECATED_COMMANDS = [
+    "edadapt",
+    "edale",
     "edasmp",
     "edbound",
+    "edbvis",
     "edbx",
+    "edcadapt",
     "edcgen",
     "edclist",
     "edcmore",
     "edcnstr",
     "edcontact",
-    "edcrb",
-    "edcurve",
-    "eddbl",
-    "eddc",
-    "edipart",
-    "edlcs",
-    "edmp",
-    "ednb",
-    "edndtsd",
-    "ednrot",
-    "edpart",
-    "edpc",
-    "edsp",
-    "edweld",
-    "edadapt",
-    "edale",
-    "edbvis",
-    "edcadapt",
     "edcpu",
+    "edcrb",
     "edcsc",
     "edcts",
+    "edcurve",
     "eddamp",
+    "eddbl",
+    "eddc",
     "eddrelax",
     "eddump",
     "edenergy",
@@ -106,10 +98,18 @@ DEPRECATED_COMMANDS = [
     "edhist",
     "edhtime",
     "edint",
+    "edipart",
     "edis",
+    "edlcs",
     "edload",
+    "edmp",
+    "ednb",
+    "edndtsd",
+    "ednrot",
     "edopt",
     "edout",
+    "edpart",
+    "edpc",
     "edpl",
     "edpvel",
     "edrc",
@@ -119,10 +119,12 @@ DEPRECATED_COMMANDS = [
     "edrun",
     "edshell",
     "edsolv",
+    "edsp",
     "edstart",
     "edterm",
     "edtp",
     "edvel",
+    "edweld",
     "edwrite",
     "rexport",
 ]
@@ -2460,3 +2462,24 @@ def test_no_flush_stored(mapdl):
 
     assert not mapdl._store_commands
     assert mapdl._stored_commands == []
+
+
+def test_directory_setter(mapdl):
+    # Testing edge cases
+    prev_path = mapdl._path
+
+    with patch(
+        "ansys.mapdl.core.Mapdl.inquire", side_effect=MapdlExitedError("mocked error")
+    ) as mck_inquire:
+
+        assert prev_path == mapdl.directory
+
+        mck_inquire.assert_called_once()
+
+        mapdl._path = None
+        with pytest.raises(
+            MapdlRuntimeError, match="The directory returned by /INQUIRE is not valid"
+        ):
+            mapdl.directory
+
+    mapdl._path = prev_path

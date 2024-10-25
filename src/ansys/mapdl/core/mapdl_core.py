@@ -502,7 +502,8 @@ class _MapdlCore(Commands):
         try:
             self._path = self.inquire("", "DIRECTORY")
         except MapdlExitedError:
-            return self._path
+            # Let's return the cached path
+            pass
 
         # os independent path format
         if self._path:  # self.inquire might return ''.
