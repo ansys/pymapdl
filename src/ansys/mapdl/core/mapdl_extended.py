@@ -1422,7 +1422,6 @@ class _MapdlCommandExtended(_MapdlCore):
             raise ValueError(
                 f"The arguments (strarray='{strarray}', func='{func}') are not valid."
             )
-
         response = ""
         n_try = 3
         i_try = 0
