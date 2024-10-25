@@ -522,7 +522,6 @@ class _MapdlCore(Commands):
     def directory(self, path: Union[str, pathlib.Path]) -> None:
         """Change the directory using ``Mapdl.cwd``"""
         self.cwd(path)
-        self._path = path
 
     @property
     def exited(self):

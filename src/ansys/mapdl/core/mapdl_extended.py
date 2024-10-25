@@ -37,6 +37,7 @@ from ansys.mapdl.core.errors import (
     CommandDeprecated,
     ComponentDoesNotExits,
     IncorrectWorkingDirectory,
+    MapdlCommandIgnoredError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.mapdl_core import _MapdlCore
@@ -354,15 +355,12 @@ class _MapdlCommandExtended(_MapdlCore):
     @wraps(_MapdlCore.cwd)
     def cwd(self, *args, **kwargs):
         """Wraps cwd."""
-        output = super().cwd(*args, mute=False, **kwargs)
+        try:
+            output = super().cwd(*args, mute=False, **kwargs)
+        except MapdlCommandIgnoredError as e:
+            raise IncorrectWorkingDirectory(e.args[0])
 
-        if output is not None:
-            if "*** WARNING ***" in output:
-                raise IncorrectWorkingDirectory(
-                    "\n" + "\n".join(output.splitlines()[1:])
-                )
-
-        self.directory  # caching
+        self._path = args[0]  # caching
         return output
 
     @wraps(_MapdlCore.list)
