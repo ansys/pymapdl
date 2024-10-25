@@ -905,7 +905,9 @@ class MapdlGrpc(MapdlBase):
         with self.run_as_routine("POST26"):
             self.numvar(200, mute=True)
 
-        self.inquire("", "DIRECTORY")
+        # Caching directory
+        self.directory
+
         self.show(self._file_type_for_plots)
         self.version  # Caching version
         self.file_type_for_plots  # Setting /show,png and caching it.
