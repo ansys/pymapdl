@@ -357,10 +357,12 @@ class _MapdlCommandExtended(_MapdlCore):
         output = super().cwd(*args, mute=False, **kwargs)
 
         if output is not None:
-            if "*** WARNING ***" in output or not self.directory:
+            if "*** WARNING ***" in output:
                 raise IncorrectWorkingDirectory(
                     "\n" + "\n".join(output.splitlines()[1:])
                 )
+
+        self.directory  # caching
         return output
 
     @wraps(_MapdlCore.list)

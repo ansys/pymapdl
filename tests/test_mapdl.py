@@ -2483,3 +2483,13 @@ def test_directory_setter(mapdl):
             mapdl.directory
 
     mapdl._path = prev_path
+
+
+def test_cwd_changing_directory(mapdl):
+    prev_path = mapdl._path
+    mapdl._path = None
+
+    mapdl.cwd(prev_path)
+
+    assert mapdl._path == prev_path
+    assert mapdl.directory == prev_path
