@@ -442,6 +442,7 @@ def run_before_and_after_tests(
     assert not mapdl.exited, "MAPDL is exited after the test. It should have not!"
     assert not mapdl._mapdl_on_hpc, "Mapdl class is on HPC mode. It should not!"
     assert mapdl.finish_job_on_exit, "Mapdl class should finish the job!"
+    assert not mapdl.ignore_errors
 
     make_sure_not_instances_are_left_open()
 

@@ -1431,17 +1431,20 @@ class _MapdlCommandExtended(_MapdlCore):
                 f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False, **kwargs
             )
             i_try += 1
-        else:
-            if not response:
+
+        if not response:
+            if not self._store_commands:
                 raise MapdlRuntimeError("/INQUIRE command didn't return a response.")
+        else:
+            if func.upper() in [
+                "ENV",
+                "TITLE",
+            ]:  # the output is multiline, we just need the last line.
+                response = response.splitlines()[-1]
+            else:
+                response = response.split("=")[1].strip()
 
-        if func.upper() in [
-            "ENV",
-            "TITLE",
-        ]:  # the output is multiline, we just need the last line.
-            response = response.splitlines()[-1]
-
-        return response.split("=")[1].strip()
+        return response
 
     @wraps(_MapdlCore.parres)
     def parres(self, lab="", fname="", ext="", **kwargs):

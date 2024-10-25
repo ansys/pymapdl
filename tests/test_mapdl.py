@@ -469,7 +469,7 @@ def test_error(mapdl):
         mapdl.a(0, 0, 0, 0)
 
 
-def test_ignore_error(mapdl):
+def test_ignore_errors(mapdl):
     mapdl.ignore_errors = False
     assert not mapdl.ignore_errors
     mapdl.ignore_errors = True
@@ -480,8 +480,8 @@ def test_ignore_error(mapdl):
     out = mapdl._run("A, 0, 0, 0")
     assert "*** ERROR ***" in out
 
-    mapdl.ignore_error = False
-    assert mapdl.ignore_error is False
+    mapdl.ignore_errors = False
+    assert mapdl.ignore_errors is False
 
 
 @requires("grpc")
@@ -1728,6 +1728,7 @@ def test_on_docker(mapdl):
 def test_deprecation_allow_ignore_warning(mapdl):
     with pytest.warns(DeprecationWarning, match="'allow_ignore' is being deprecated"):
         mapdl.allow_ignore = True
+    mapdl.ignore_errors = False
 
 
 def test_deprecation_allow_ignore_errors_mapping(mapdl):
