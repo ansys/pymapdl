@@ -2476,9 +2476,10 @@ def test_directory_setter(mapdl):
 
         mck_inquire.assert_called_once()
 
-        mapdl._path = None
+        mapdl._path = ""
         with pytest.raises(
-            MapdlRuntimeError, match="The directory returned by /INQUIRE is not valid"
+            MapdlRuntimeError,
+            match="MAPDL could provide a path using /INQUIRE or the cached path",
         ):
             mapdl.directory
 
