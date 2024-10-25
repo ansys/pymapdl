@@ -2470,18 +2470,19 @@ def test_ip_hostname_in_start_parm(ip):
         "ip": ip,
         "local": False,
         "set_no_abort": False,
-        "hostname": "myhost",
         "jobid": 1001,
     }
 
-    mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+    with patch("socket.gethostbyaddr") as mck_sock:
+        mck_sock.return_value = ("myhostname",)
+        mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
 
     if ip == "myhostname":
         assert mapdl.ip == "123.45.67.99"
     else:
         assert mapdl.ip == ip
 
-    assert mapdl.hostname == "myhost"
+    assert mapdl.hostname == "myhostname"
     del mapdl
 
 

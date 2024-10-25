@@ -667,7 +667,14 @@ _meth_patch_MAPDL_launch = (
     ("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._run_at_connect", func_which_returns("")),
     ("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._exit_mapdl", func_which_returns(None)),
     ("socket.gethostbyname", func_which_returns("123.45.67.99")),
-    ("socket.gethostbyaddr", func_which_returns("mapdlhostname")),
+    (
+        "socket.gethostbyaddr",
+        func_which_returns(
+            [
+                "mapdlhostname",
+            ]
+        ),
+    ),
 )
 
 PATCH_MAPDL_START = [patch(method, ret) for method, ret in _meth_patch_MAPDL_launch]
