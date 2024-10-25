@@ -22,10 +22,10 @@ or not (``batch`` mode).
 PyMAPDL takes advantage of HPC clusters to launch MAPDL instances
 with increased resources.
 PyMAPDL automatically sets these MAPDL instances to read the
-scheduler job configuration (machines, number
-of CPU, memory, etc) which allows MAPDL to use all the resources
+scheduler job configuration (which includes machines, number
+of CPUs, and memory), which allows MAPDL to use all the resources
 allocated to that job.
-For more information see :ref:`ref_tight_integration_hpc`.
+For more information, see :ref:`ref_tight_integration_hpc`.
 
 The following configurations are supported:
 
@@ -197,15 +197,15 @@ between the scheduler and MAPDL to read the job configuration and
 launch an MAPDL instance that can use all the resources allocated
 to that job.
 For instance, if a SLURM job has allocated 8 nodes with 4 cores each,
-then PyMAPDL launches an MAPDL instance which uses 32 cores
+then PyMAPDL launches an MAPDL instance that uses 32 cores
 spawning across those 8 nodes.
 
-This behaviour can turn off if passing the
-:envvar:`PYMAPDL_RUNNING_ON_HPC`  environment variable
-with ``'false'`` value or passing the `detect_hpc=False` argument
-to :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`.
+This behavior can turn off by passing the
+:envvar:`PYMAPDL_RUNNING_ON_HPC` environment variable
+with a ``'false'`` value or passing the ``detect_hpc=False`` argument
+to the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function.
 
 Alternatively, you can override these settings by either specifying
 custom settings in the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
-arguments or using specific environment variables
-(:ref:`ref_environment_variables`).
+function's arguments or using specific environment variables. 
+For more information, see :ref:`ref_environment_variables`.
