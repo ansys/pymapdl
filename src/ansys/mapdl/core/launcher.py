@@ -1553,7 +1553,7 @@ def check_mode(mode: ALLOWABLE_MODES, version: ALLOWABLE_VERSION_INT):
         return "grpc"
     elif not version:
         warnings.warn(
-            "PyMAPDL couldn't not detect MAPDL version, hence it could not "
+            "PyMAPDL couldn't detect MAPDL version, hence it could not "
             f"verify that the connection mode {mode} is compatible with MAPDL."
         )
         return mode
