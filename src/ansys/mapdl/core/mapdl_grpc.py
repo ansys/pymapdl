@@ -906,6 +906,11 @@ class MapdlGrpc(MapdlBase):
             self.numvar(200, mute=True)
 
         self.inquire("", "DIRECTORY")
+
+        # Caching directory
+        if not self.directory:
+            self.directory  # try again
+
         self.show(self._file_type_for_plots)
         self.version  # Caching version
         self.file_type_for_plots  # Setting /show,png and caching it.
