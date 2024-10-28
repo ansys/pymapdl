@@ -438,6 +438,7 @@ def run_before_and_after_tests(
 
     yield  # this is where the testing happens
 
+    # Check resetting state
     assert prev == mapdl.is_local
     assert not mapdl.exited, "MAPDL is exited after the test. It should have not!"
     assert not mapdl._mapdl_on_hpc, "Mapdl class is on HPC mode. It should not!"
@@ -626,8 +627,7 @@ def mapdl(request, tmpdir_factory):
     if START_INSTANCE:
         mapdl._local = True
         mapdl._exited = False
-        # mapdl.finish_job_on_exit = True
-        assert mapdl.finish_job_on_exit
+        assert not mapdl.finish_job_on_exit
         mapdl.exit(save=True, force=True)
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
@@ -642,6 +642,9 @@ def mapdl(request, tmpdir_factory):
                 mapdl._send_command("/PREP7")
             with pytest.raises(MapdlExitedError):
                 mapdl._send_command_stream("/PREP7")
+
+        # Delete Mapdl object
+        del mapdl
 
 
 SpacedPaths = namedtuple(

@@ -3769,7 +3769,13 @@ class MapdlGrpc(MapdlBase):
         # The garbage collector remove attributes before we can evaluate this.
         try:
             # Exiting HPC job
-            if self._mapdl_on_hpc:
+            if (
+                hasattr(self, "_mapdl_on_hpc")
+                and self._mapdl_on_hpc
+                and hasattr(self, "finish_job_on_exit")
+                and self.finish_job_on_exit
+            ):
+
                 self.kill_job(self.jobid)
 
             if not self._start_instance:
