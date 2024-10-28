@@ -198,10 +198,8 @@ def _is_ubuntu() -> bool:
     # args value is controlled by the library.
     # awk is not a partial path - Bandit false positive.
     # Excluding bandit check.
-    proc = subprocess.Popen(
-        ["awk", "-F=", "/^NAME/{print $2}", "/etc/os-release"],
-        stdout=subprocess.PIPE,
-    )  # nosec B603 B607
+    proc = submitter(["awk", "-F=", "/^NAME/{print $2}", "/etc/os-release"])
+
     if "ubuntu" in proc.stdout.read().decode().lower():
         return True
 
@@ -502,20 +500,15 @@ def launch_grpc(
                 )
 
     LOG.debug("MAPDL starting in background.")
-
-    # cmd is controlled by the library with generate_mapdl_launch_command.
-    # Excluding bandit check.
-    process = subprocess.Popen(
+    return submitter(
         cmd_,
         shell=shell,  # sbatch does not work without shell.
         cwd=run_location,
         stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        env=env_vars,
-    )  # nosec B603
-
-    return process
+        env_vars=env_vars,
+    )
 
 
 def check_mapdl_launch(
@@ -2792,13 +2785,47 @@ def get_job_info(
 
 def kill_job(jobid: int):
     """Kill SLURM job"""
-    subprocess.Popen(["scancel", str(jobid)])
+    submitter(["scancel", str(jobid)])
 
 
 def send_scontrol(args: str):
     cmd = f"scontrol {args}".split(" ")
+    return submitter(cmd)
+
+
+def submitter(
+    cmd: Union[str, List[str]],
+    *,
+    executable: str = None,
+    shell: bool = False,
+    cwd: str = None,
+    stdin: subprocess.PIPE = None,
+    stdout: subprocess.PIPE = None,
+    stderr: subprocess.PIPE = None,
+    env_vars: dict[str, str] = None,
+):
+
+    if executable:
+        if isinstance(cmd, list):
+            cmd = [executable] + cmd
+        else:
+            cmd = [executable, cmd]
+
+    if not stdin:
+        stdin = subprocess.DEVNULL
+    if not stdout:
+        stdout = subprocess.PIPE
+    if not stderr:
+        stderr = subprocess.PIPE
+
+    # cmd is controlled by the library with generate_mapdl_launch_command.
+    # Excluding bandit check.
     return subprocess.Popen(
         cmd,
+        shell=shell,  # sbatch does not work without shell.
+        cwd=cwd,
+        stdin=subprocess.DEVNULL,
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-    )
+        env=env_vars,
+    )  # nosec B603 B607
