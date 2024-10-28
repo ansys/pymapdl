@@ -37,6 +37,7 @@ from ansys.mapdl.core.errors import (
     MapdlDidNotStart,
     NotEnoughResources,
     PortAlreadyInUseByAnMAPDLInstance,
+    VersionError,
 )
 from ansys.mapdl.core.launcher import (
     _HAS_ATP,
@@ -50,7 +51,9 @@ from ansys.mapdl.core.launcher import (
     generate_start_parameters,
     get_cpus,
     get_exec_file,
+    get_hostname_host_cluster,
     get_ip,
+    get_jobid,
     get_port,
     get_run_location,
     get_slurm_options,
@@ -1118,6 +1121,14 @@ def test_get_run_location_no_access(tmpdir):
             {"exec_file": True, "version": True},
             "Cannot specify both ``exec_file`` and ``version``.",
         ],
+        [
+            {"scheduler_options": True},
+            "PyMAPDL does not read the number of cores from the 'scheduler_options'.",
+        ],
+        [
+            {"launch_on_hpc": True, "ip": "111.22.33.44"},
+            "PyMAPDL cannot ensure a specific IP will be used when launching",
+        ],
     ],
 )
 def test_pre_check_args(args, match):
@@ -1605,3 +1616,95 @@ def test_get_port(monkeypatch, port, port_envvar, start_instance, port_busy, res
 
     with context:
         assert get_port(port, start_instance) == result
+
+
+@pytest.mark.parametrize("stdout", ["Submitted batch job 1001", "Something bad"])
+def test_get_jobid(stdout):
+    if "1001" in stdout:
+        context = NullContext()
+    else:
+        context = pytest.raises(
+            ValueError, match="PyMAPDL could not retrieve the job id"
+        )
+
+    with context:
+        jobid = get_jobid(stdout)
+        assert jobid == 1001
+
+
+@patch("socket.gethostbyname", lambda *args, **kwargs: "111.22.33.44")
+@pytest.mark.parametrize(
+    "jobid,timeout,time_to_stop,state,hostname, hostname_msg, raises",
+    [
+        [1001, 30, 2, "RUNNING", "myhostname", "BatchHost=myhostname", None],
+        [
+            1002,
+            2,
+            3,
+            "CONFIGURING",
+            "otherhostname",
+            "BatchHost=otherhostname",
+            MapdlDidNotStart,
+        ],
+        [1002, 2, 3, "CONFIGURING", "", "BatchHost=", MapdlDidNotStart],
+        [1002, 2, 3, "CONFIGURING", None, "Batch", MapdlDidNotStart],
+    ],
+)
+def test_get_hostname_host_cluster(
+    jobid, timeout, time_to_stop, state, hostname, hostname_msg, raises
+):
+    def fake_proc(*args, **kwargs):
+        assert f"show jobid -dd {jobid}" == args[0]
+        return get_fake_process(
+            f"a long scontrol...\nJobState={state}\n...\n{hostname_msg}\n...\nin message",
+            "",
+            time_to_stop,
+        )
+
+    with patch("ansys.mapdl.core.launcher.send_scontrol", fake_proc) as mck_sc:
+
+        if raises:
+            context = pytest.raises(raises)
+        else:
+            context = NullContext()
+
+        with context as excinfo:
+            batchhost, batchhost_ip = get_hostname_host_cluster(
+                job_id=jobid, timeout=timeout
+            )
+
+        if raises:
+            assert f"The HPC job (id: {jobid})" in excinfo.value.args[0]
+            assert f"(timeout={timeout})." in excinfo.value.args[0]
+            assert f"The job state is '{state}'. " in excinfo.value.args[0]
+
+            if hostname:
+                assert f"The BatchHost for this job is '{hostname}'"
+            else:
+                assert (
+                    "PyMAPDL couldn't get the BatchHost hostname"
+                    in excinfo.value.args[0]
+                )
+
+        else:
+            assert batchhost == "myhostname"
+            assert batchhost_ip == "111.22.33.44"
+
+
+@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 201)
+@patch("ansys.mapdl.core._HAS_ATP", True)
+def test_get_version_version_error(monkeypatch):
+    monkeypatch.delenv("PYMAPDL_MAPDL_VERSION", False)
+
+    with pytest.raises(
+        VersionError, match="The MAPDL gRPC interface requires MAPDL 20.2 or later"
+    ):
+        get_version(None, "/path/to/executable")
+
+
+@pytest.mark.parametrize("version", [211, 221, 232])
+def test_get_version_env_var(monkeypatch, version):
+    monkeypatch.setenv("PYMAPDL_MAPDL_VERSION", version)
+
+    assert version == get_version(None)
+    assert version != get_version(241)
