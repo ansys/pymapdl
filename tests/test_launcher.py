@@ -1171,14 +1171,9 @@ def test_remove_err_files_fail(tmpdir):
 
 
 # testing on windows to account for temp file
-def fake_subprocess_open(*args, **kwargs):
-    kwargs["cmd"] = args[0]
-    return kwargs
-
-
 @patch("os.name", "nt")
 @pytest.mark.parametrize("launch_on_hpc", [None, False, True])
-@patch("subprocess.Popen", fake_subprocess_open)
+@patch("subprocess.Popen", lambda *args, **kwargs: kwargs)
 def test_launch_grpc(tmpdir, launch_on_hpc):
     if launch_on_hpc:
         cmd = ["sbatch", "--wrap", "'ansys.exe -b -i my_input.inp -o my_output.inp'"]
@@ -1190,11 +1185,11 @@ def test_launch_grpc(tmpdir, launch_on_hpc):
     inp_file = os.path.join(run_location, "my_input.inp")
 
     if launch_on_hpc:
-        assert "sbatch" in kwargs["cmd"]
-        assert "--wrap" in kwargs["cmd"]
-        assert " ".join(cmd) == kwargs["cmd"]
+        assert "sbatch" in kwargs["args"]
+        assert "--wrap" in kwargs["args"]
+        assert " ".join(cmd) == kwargs["args"]
     else:
-        assert cmd == kwargs["cmd"]
+        assert cmd == kwargs["args"]
         assert os.path.exists(inp_file)
         with open(inp_file, "r") as fid:
             assert "FINISH" in fid.read()
@@ -1813,7 +1808,9 @@ def test_kill_job(jobid):
 
 
 @pytest.mark.parametrize("jobid", [1001, 2002])
-@patch("ansys.mapdl.core.launcher.submitter", fake_subprocess_open)  # return command
+@patch(
+    "ansys.mapdl.core.launcher.submitter", lambda *args, **kwargs: kwargs
+)  # return command
 def test_send_scontrol(jobid):
     with patch("ansys.mapdl.core.launcher.submitter") as mck_sub:
         args = f"my args {jobid}"
