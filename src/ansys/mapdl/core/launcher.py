@@ -2616,11 +2616,15 @@ def get_hostname_host_cluster(job_id: int, timeout: int = 30) -> str:
 
         # Exit by raising exception
         if time.time() > time_start + timeout:
-            state = stdout.split("JobState=")[1].split(" ")[0]
+            state = get_state_from_scontrol(stdout)
 
             # Trying to get the hostname from the last valid message
             try:
                 host = get_hostname_from_scontrol(stdout)
+                if not host:
+                    # If string is empty, go to the exception clause.
+                    raise IndexError()
+
                 hostname_msg = f"The BatchHost for this job is '{host}'"
             except (IndexError, AttributeError):
                 hostname_msg = "PyMAPDL couldn't get the BatchHost hostname"
@@ -2711,7 +2715,11 @@ def generate_sbatch_command(
 
 
 def get_hostname_from_scontrol(stdout: str) -> str:
-    return stdout.split("BatchHost=")[1].splitlines()[0]
+    return stdout.split("BatchHost=")[1].splitlines()[0].strip()
+
+
+def get_state_from_scontrol(stdout: str) -> str:
+    return stdout.split("JobState=")[1].splitlines()[0].strip()
 
 
 def check_mapdl_launch_on_hpc(
