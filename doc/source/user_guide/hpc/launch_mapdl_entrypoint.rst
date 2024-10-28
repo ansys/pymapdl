@@ -1,9 +1,4 @@
 
-.. _ref_pymapdl_interactive_in_cluster_hpc:
-
-.. _ref_pymapdl_interactive_in_cluster_hpc_from_login:
-
-
 Interactive MAPDL instance launched from the login node
 =======================================================
 

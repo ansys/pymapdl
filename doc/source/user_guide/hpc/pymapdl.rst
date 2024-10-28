@@ -183,8 +183,12 @@ moving files to different directories, and printing to ensure your
 configuration is correct.
 
 
-.. include:: launch_mapdl_entrypoint.rst
+.. _ref_pymapdl_interactive_in_cluster_hpc:
 
+
+.. _ref_pymapdl_interactive_in_cluster_hpc_from_login:
+
+.. include:: launch_mapdl_entrypoint.rst
 
 
 .. _ref_tight_integration_hpc:
