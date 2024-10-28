@@ -45,6 +45,7 @@ from ansys.mapdl.core.launcher import (
     _is_ubuntu,
     _parse_ip_route,
     check_mapdl_launch_on_hpc,
+    check_mode,
     force_smp_in_student,
     generate_mapdl_launch_command,
     generate_sbatch_command,
@@ -60,10 +61,12 @@ from ansys.mapdl.core.launcher import (
     get_start_instance,
     get_version,
     is_running_on_slurm,
+    kill_job,
     launch_grpc,
     launch_mapdl,
     launch_mapdl_on_cluster,
     remove_err_files,
+    send_scontrol,
     set_license_switch,
     set_MPI_additional_switches,
     update_env_vars,
@@ -1709,3 +1712,114 @@ def test_get_version_env_var(monkeypatch, version):
 
     assert version == get_version(None)
     assert version != get_version(241)
+
+
+@pytest.mark.parametrize(
+    "mode, version, osname, context, res",
+    [
+        [None, None, None, NullContext(), "grpc"],  # default
+        [
+            "grpc",
+            201,
+            "nt",
+            pytest.raises(
+                VersionError, match="gRPC mode requires MAPDL 2020R2 or newer on Window"
+            ),
+            None,
+        ],
+        [
+            "grpc",
+            202,
+            "posix",
+            pytest.raises(
+                VersionError, match="gRPC mode requires MAPDL 2021R1 or newer on Linux."
+            ),
+            None,
+        ],
+        ["grpc", 212, "nt", NullContext(), "grpc"],
+        ["grpc", 221, "posix", NullContext(), "grpc"],
+        ["grpc", 221, "nt", NullContext(), "grpc"],
+        [
+            "console",
+            221,
+            "nt",
+            pytest.raises(ValueError, match="Console mode requires Linux."),
+            None,
+        ],
+        [
+            "console",
+            221,
+            "posix",
+            pytest.warns(
+                UserWarning,
+                match="Console mode not recommended in MAPDL 2021R1 or newer.",
+            ),
+            "console",
+        ],
+        [
+            "nomode",
+            221,
+            "posix",
+            pytest.raises(ValueError, match=f'Invalid MAPDL server mode "nomode"'),
+            None,
+        ],
+        [None, 211, "posix", NullContext(), "grpc"],
+        [None, 211, "nt", NullContext(), "grpc"],
+        [None, 202, "nt", NullContext(), "grpc"],
+        [
+            None,
+            201,
+            "nt",
+            pytest.raises(VersionError, match="Running MAPDL as a service requires"),
+            None,
+        ],
+        [None, 202, "posix", NullContext(), "console"],
+        [None, 201, "posix", NullContext(), "console"],
+        [
+            None,
+            110,
+            "posix",
+            pytest.warns(
+                UserWarning,
+                match="MAPDL as a service has not been tested on MAPDL < v13",
+            ),
+            "console",
+        ],
+        [
+            None,
+            110,
+            "nt",
+            pytest.raises(VersionError, match="Running MAPDL as a service requires"),
+            None,
+        ],
+    ],
+)
+def test_check_mode(mode, version, osname, context, res):
+    with patch("os.name", osname):
+        with context:
+            assert res == check_mode(mode, version)
+
+
+@pytest.mark.parametrize("jobid", [1001, 2002])
+@patch("subprocess.Popen", lambda *args, **kwargs: None)
+def test_kill_job(jobid):
+    with patch("ansys.mapdl.core.launcher.submitter") as mck_sub:
+        assert kill_job(jobid) is None
+        mck_sub.assert_called_once()
+        arg = mck_sub.call_args_list[0][0][0]
+        assert arg[0] == "scancel"
+        assert arg[1] == str(jobid)
+
+
+@pytest.mark.parametrize("jobid", [1001, 2002])
+@patch("ansys.mapdl.core.launcher.submitter", fake_subprocess_open)  # return command
+def test_send_scontrol(jobid):
+    with patch("ansys.mapdl.core.launcher.submitter") as mck_sub:
+        args = f"my args {jobid}"
+        assert send_scontrol(args)
+
+        mck_sub.assert_called_once()
+        arg = mck_sub.call_args_list[0][0][0]
+        assert " ".join(arg) == f"scontrol my args {jobid}"
+        assert "scontrol" in arg
+        assert f"{jobid}" in arg

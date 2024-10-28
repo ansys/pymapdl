@@ -1658,7 +1658,9 @@ def check_mode(mode: ALLOWABLE_MODES, version: Optional[int] = None):
                         "gRPC mode requires MAPDL 2020R2 or newer " "on Windows."
                     )
                 elif os.name == "posix":
-                    raise VersionError("gRPC mode requires MAPDL 2021R1 or newer.")
+                    raise VersionError(
+                        "gRPC mode requires MAPDL 2021R1 or newer on Linux."
+                    )
 
         elif mode == "console":
             if os.name == "nt":
@@ -1671,7 +1673,7 @@ def check_mode(mode: ALLOWABLE_MODES, version: Optional[int] = None):
         else:
             raise ValueError(
                 f'Invalid MAPDL server mode "{mode}".\n\n'
-                f"Use one of the following modes:\n{ALLOWABLE_MODES}"
+                f"Use one of the following modes: {','.join(ALLOWABLE_MODES)}"
             )
 
     else:  # auto-select based on best version
