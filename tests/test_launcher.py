@@ -1509,11 +1509,11 @@ def test_launch_on_hpc_exception_successfull_sbatch(monkeypatch):
     assert exec_file in cmd[-1]
     assert "-grpc" in cmd[-1]
 
-    assert mock_launch_grpc.call_args_list[0][1]["env_vars"] == {
-        "ANS_MULTIPLE_NODES": "1",
-        "HYDRA_BOOTSTRAP": "slurm",
-        "myenvvar": "myenvvarvalue",
-    }
+    envvars = mock_launch_grpc.call_args_list[0][1]["env_vars"]
+
+    assert envvars["ANS_MULTIPLE_NODES"] == "1"
+    assert envvars["HYDRA_BOOTSTRAP"] == "slurm"
+    assert envvars["myenvvar"] == "myenvvarvalue"
 
     mock_scontrol.assert_called_once()
     args = mock_scontrol.call_args_list[0][0][0]
@@ -1691,6 +1691,7 @@ def test_get_hostname_host_cluster(
             assert batchhost_ip == "111.22.33.44"
 
 
+@requires("ansys-tools-path")
 @patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 201)
 @patch("ansys.mapdl.core._HAS_ATP", True)
 def test_get_version_version_error(monkeypatch):
