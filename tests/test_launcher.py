@@ -69,6 +69,7 @@ from ansys.mapdl.core.launcher import (
     send_scontrol,
     set_license_switch,
     set_MPI_additional_switches,
+    submitter,
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
@@ -1823,3 +1824,75 @@ def test_send_scontrol(jobid):
         assert " ".join(arg) == f"scontrol my args {jobid}"
         assert "scontrol" in arg
         assert f"{jobid}" in arg
+
+
+@pytest.mark.parametrize(
+    "cmd,executable,shell,cwd,stdin,stdout,stderr,envvars",
+    [
+        ["mycmd", None, True, "my_cwd", None, None, None, None],
+        [["my", "cmd"], None, True, "my_cwd", None, None, None, None],
+        [
+            "mycmd",
+            "exec",
+            False,
+            "my_other_cwd",
+            "other_obj",
+            "other_obj",
+            "other_obj",
+            {"aaa": 1},
+        ],
+        [
+            ["my", "cmd"],
+            "exec",
+            False,
+            "my_single_cwd",
+            "other_obj",
+            "other_obj",
+            "other_obj",
+            {"a": "b", "b": "c"},
+        ],
+    ],
+)
+def test_submitter(cmd, executable, shell, cwd, stdin, stdout, stderr, envvars):
+    def return_everything(*arg, **kwags):
+        return arg, kwags
+
+    with patch("subprocess.Popen", return_everything) as mck_popen:
+        args, kwargs = submitter(
+            cmd=cmd,
+            executable=executable,
+            shell=shell,
+            cwd=cwd,
+            stdin=stdin,
+            stdout=stdout,
+            stderr=stderr,
+            env_vars=envvars,
+        )
+
+        if executable:
+            if isinstance(cmd, str):
+                assert kwargs["args"] == [executable, cmd]
+            else:  # list
+                assert kwargs["args"] == [executable] + cmd
+        else:
+            assert kwargs["args"] == cmd
+
+        assert kwargs["shell"] == shell
+        assert kwargs["cwd"] == cwd
+
+        if stdin:
+            assert kwargs["stdin"] == stdin
+        else:
+            assert isinstance(kwargs["stdin"], type(subprocess.DEVNULL))
+
+        if stdout:
+            assert kwargs["stdout"] == stdout
+        else:
+            assert isinstance(kwargs["stdout"], type(subprocess.PIPE))
+
+        if stderr:
+            assert kwargs["stderr"] == stderr
+        else:
+            assert isinstance(kwargs["stderr"], type(subprocess.PIPE))
+
+        assert kwargs["env"] == envvars
