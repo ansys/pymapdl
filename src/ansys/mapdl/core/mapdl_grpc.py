@@ -2949,10 +2949,10 @@ class MapdlGrpc(MapdlBase):
         en = stats.find("*** PrePro")
         product = "\n".join(stats[st:en].splitlines()[1:]).strip()
 
-        info = f"Mapdl\n"
-        info += f"-----\n"
+        info = "Mapdl\n"
+        info += "-----\n"
         info += f"PyMAPDL Version:     {__version__}\n"
-        info += f"Interface:           grpc\n"
+        info += "Interface:           grpc\n"
         info += f"Product:             {product}\n"
         info += f"MAPDL Version:       {self.version}\n"
         info += f"Running on:          {self.hostname}\n"
@@ -3766,9 +3766,15 @@ class MapdlGrpc(MapdlBase):
     def __del__(self):
         """In case the object is deleted"""
         # We are just going to escape early if needed, and kill the HPC job.
-        if not self._start_instance:
-            return
+        # The garbage collector remove attributes before we can evaluate this.
+        try:
+            # Exiting HPC job
+            if self._mapdl_on_hpc:
+                self.kill_job(self.jobid)
 
-        # Exiting HPC job
-        if self._mapdl_on_hpc:
-            self.kill_job(self.jobid)
+            if not self._start_instance:
+                return
+
+        except Exception as e:
+            # This is on clean up.
+            pass
