@@ -2831,11 +2831,11 @@ def submitter(
     # cmd is controlled by the library with generate_mapdl_launch_command.
     # Excluding bandit check.
     return subprocess.Popen(
-        cmd,
+        args=cmd,
         shell=shell,  # sbatch does not work without shell.
         cwd=cwd,
-        stdin=subprocess.DEVNULL,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
+        stdin=stdin,
+        stdout=stdout,
+        stderr=stderr,
         env=env_vars,
     )  # nosec B603 B607
