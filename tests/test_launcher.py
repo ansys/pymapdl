@@ -50,6 +50,8 @@ from ansys.mapdl.core.launcher import (
     generate_start_parameters,
     get_cpus,
     get_exec_file,
+    get_ip,
+    get_port,
     get_run_location,
     get_slurm_options,
     get_start_instance,
@@ -1439,7 +1441,7 @@ def test_launch_on_hpc_exception_launch_mapdl(monkeypatch):
             with pytest.raises(
                 Exception, match="PyMAPDL failed to submit the sbatch job:"
             ):
-                mapdl = launch_mapdl(
+                launch_mapdl(
                     launch_on_hpc=True,
                     exec_file=exec_file,
                 )
@@ -1482,14 +1484,25 @@ def test_launch_on_hpc_exception_successfull_sbatch(monkeypatch):
                 with pytest.raises(
                     Exception, match="Fake exception when launching MAPDL"
                 ):
-                    mapdl = launch_mapdl(
+                    launch_mapdl(
                         launch_on_hpc=True,
                         exec_file=exec_file,
+                        replace_env_vars={"myenvvar": "myenvvarvalue"},
                     )
 
     mock_launch_grpc.assert_called_once()
     cmd = mock_launch_grpc.call_args_list[0][1]["cmd"]
-    env_vars = mock_launch_grpc.call_args_list[0][1]["env_vars"]
+
+    assert "sbatch" in cmd
+    assert "--wrap" in cmd
+    assert exec_file in cmd[-1]
+    assert "-grpc" in cmd[-1]
+
+    assert mock_launch_grpc.call_args_list[0][1]["env_vars"] == {
+        "ANS_MULTIPLE_NODES": "1",
+        "HYDRA_BOOTSTRAP": "slurm",
+        "myenvvar": "myenvvarvalue",
+    }
 
     mock_scontrol.assert_called_once()
     args = mock_scontrol.call_args_list[0][0][0]
@@ -1534,3 +1547,61 @@ def test_launch_mapdl_on_cluster_exceptions(args, context):
         ret = launch_mapdl_on_cluster(**args)
         assert ret["launch_on_hpc"]
         assert ret["nproc"] == 10
+
+
+@patch(
+    "socket.gethostbyname",
+    lambda *args, **kwargs: "123.45.67.89" if args[0] != LOCALHOST else LOCALHOST,
+)
+@pytest.mark.parametrize(
+    "ip,ip_env",
+    [[None, None], [None, "123.45.67.89"], ["123.45.67.89", "111.22.33.44"]],
+)
+def test_get_ip(monkeypatch, ip, ip_env):
+    monkeypatch.delenv("PYMAPDL_IP", False)
+    if ip_env:
+        monkeypatch.setenv("PYMAPDL_IP", ip_env)
+    args = {"ip": ip}
+
+    get_ip(args)
+
+    if ip:
+        assert args["ip"] == ip
+    else:
+        if ip_env:
+            assert args["ip"] == ip_env
+        else:
+            assert args["ip"] == LOCALHOST
+
+
+@pytest.mark.parametrize(
+    "port,port_envvar,start_instance,port_busy,result",
+    (
+        [None, None, True, False, 50052],  # Standard case
+        [None, None, True, True, 50055],  # Busy port case, not sure why it is not 50054
+        [None, 50053, True, True, 50053],
+        [None, 50053, False, False, 50053],
+        [50054, 50053, True, False, 50054],
+        [50054, 50053, True, False, 50054],
+        [50054, None, False, False, 50054],
+    ),
+)
+@patch("ansys.mapdl.core._LOCAL_PORTS", [])
+def test_get_port(monkeypatch, port, port_envvar, start_instance, port_busy, result):
+    # Settings
+    monkeypatch.delenv("PYMAPDL_PORT", False)
+    if port_envvar:
+        monkeypatch.setenv("PYMAPDL_PORT", port_envvar)
+
+    # Testing
+    if port_busy:
+        # Success after the second retry, it should go up to 2.
+        # But for some reason, it goes up 3.
+        side_effect = [True, True, False]
+    else:
+        side_effect = [False]
+
+    context = patch("ansys.mapdl.core.launcher.port_in_use", side_effect=side_effect)
+
+    with context:
+        assert get_port(port, start_instance) == result
