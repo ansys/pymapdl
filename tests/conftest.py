@@ -1195,38 +1195,6 @@ def contact_geom_and_mesh(mapdl):
 
 
 @pytest.fixture(scope="function")
-def contact_solve(mapdl, contact_geom_and_mesh):
-    # ==========================================================
-    # * Solution
-    # ==========================================================
-    # from precedent fixture
-    uz1 = 3.18e-03 / 4000
-
-    mapdl.mute = False
-    mapdl.run("/solu")
-    mapdl.antype(4)  # Transient analysis
-    mapdl.lnsrch("on")
-    mapdl.cutcontrol("plslimit", 0.15)
-    mapdl.kbc(0)  # Ramped loading within a load step
-    mapdl.nlgeom("on")  # Turn on large deformation effects
-    mapdl.timint("off", "struc")  # Structural dynamic effects are turned off.
-    mapdl.nropt("unsym")
-
-    # Load Step1
-    mapdl.time(1)
-    mapdl.nsubst(5, 10, 2)
-    mapdl.d(1, "uz", -uz1)  # Tool plunges into the workpiece
-    mapdl.outres("all", "all")
-    mapdl.allsel()
-    mapdl.solve()
-
-    mapdl.post1()
-    mapdl.allsel()
-    mapdl.set("last")
-    mapdl.mute = False
-
-
-@pytest.fixture(scope="function")
 def cuadratic_beam_problem(mapdl):
     mapdl.clear()
 
