@@ -28,6 +28,7 @@ import inspect
 import os
 from pathlib import Path
 import platform
+import re
 import socket
 import string
 import tempfile
@@ -599,3 +600,18 @@ def get_active_branch_name():
         kind = f"release/{'.'.join(pymapdl.__version__.split('.')[:2])}"
 
     return kind
+
+
+def only_numbers_and_dots(s):
+    return bool(re.fullmatch(r"[0-9.]+", s))
+
+
+def stack(*decorators):
+    """Stack multiple decorators on top of each other"""
+
+    def deco(f):
+        for dec in reversed(decorators):
+            f = dec(f)
+        return f
+
+    return deco

@@ -169,9 +169,15 @@ LOG_APDL_DEFAULT_FILE_NAME = "apdl.log"
 _ALLOWED_START_PARM = [
     "additional_switches",
     "check_parameter_names",
+    "env_vars",
+    "launched",
     "exec_file",
+    "finish_job_on_exit",
+    "hostname",
     "ip",
+    "jobid",
     "jobname",
+    "launch_on_hpc",
     "nproc",
     "override",
     "port",
@@ -179,6 +185,7 @@ _ALLOWED_START_PARM = [
     "process",
     "ram",
     "run_location",
+    "start_instance",
     "start_timeout",
     "timeout",
 ]
@@ -247,7 +254,7 @@ class _MapdlCore(Commands):
         self._response = None
         self._mode = None
         self._mapdl_process = None
-        self._launched: bool = False
+        self._launched: bool = start_parm.get("launched", False)
         self._stderr = None
         self._stdout = None
         self._file_type_for_plots = file_type_for_plots
@@ -524,6 +531,7 @@ class _MapdlCore(Commands):
     def directory(self, path: Union[str, pathlib.Path]) -> None:
         """Change the directory using ``Mapdl.cwd``"""
         self.cwd(path)
+        self._path = path
 
     @property
     def exited(self):

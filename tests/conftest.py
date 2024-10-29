@@ -28,6 +28,7 @@ from shutil import get_terminal_size
 import subprocess
 from sys import platform
 import time
+from unittest.mock import patch
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
 import psutil
@@ -437,9 +438,12 @@ def run_before_and_after_tests(
 
     yield  # this is where the testing happens
 
+    # Check resetting state
     assert prev == mapdl.is_local
-    assert not mapdl.exited
-    assert not mapdl.ignore_errors
+    assert not mapdl.exited, "MAPDL is exited after the test. It should have not!"
+    assert not mapdl._mapdl_on_hpc, "Mapdl class is on HPC mode. It should not!"
+    assert mapdl.finish_job_on_exit, "Mapdl class should finish the job!"
+    assert not mapdl.ignore_errors, "Mapdl class is ignoring errors!"
 
     make_sure_not_instances_are_left_open()
 
@@ -623,6 +627,7 @@ def mapdl(request, tmpdir_factory):
     if START_INSTANCE:
         mapdl._local = True
         mapdl._exited = False
+        assert mapdl.finish_job_on_exit
         mapdl.exit(save=True, force=True)
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
@@ -638,11 +643,48 @@ def mapdl(request, tmpdir_factory):
             with pytest.raises(MapdlExitedError):
                 mapdl._send_command_stream("/PREP7")
 
+        # Delete Mapdl object
+        del mapdl
+
 
 SpacedPaths = namedtuple(
     "SpacedPaths",
     ["path_without_spaces", "path_with_spaces", "path_with_single_quote"],
 )
+
+
+# Necessary patches to patch Mapdl launch
+def _returns(return_=None):
+    return lambda *args, **kwargs: return_
+
+
+# Methods to patch in MAPDL when launching
+def _patch_method(method):
+    return "ansys.mapdl.core.mapdl_grpc.MapdlGrpc." + method
+
+
+_meth_patch_MAPDL_launch = (
+    # method, and its return
+    (_patch_method("_connect"), _returns(True)),
+    (_patch_method("_run"), _returns("")),
+    (_patch_method("_create_channel"), _returns("")),
+    (_patch_method("inquire"), _returns("/home/simulation")),
+    (_patch_method("_subscribe_to_channel"), _returns("")),
+    (_patch_method("_run_at_connect"), _returns("")),
+    (_patch_method("_exit_mapdl"), _returns(None)),
+    # non-mapdl methods
+    ("socket.gethostbyname", _returns("123.45.67.99")),
+    (
+        "socket.gethostbyaddr",
+        _returns(
+            [
+                "mapdlhostname",
+            ]
+        ),
+    ),
+)
+
+PATCH_MAPDL_START = [patch(method, ret) for method, ret in _meth_patch_MAPDL_launch]
 
 
 @pytest.fixture(scope="function")
