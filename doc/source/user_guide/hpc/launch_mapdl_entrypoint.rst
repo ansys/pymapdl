@@ -77,7 +77,7 @@ You can retrieve the IP of the MAPDL instance as well as its hostname:
     >>> mapdl.hostname
     'node0'
 
-You can also retrieve the job ID:
+You can also retrieve the SLURM job ID:
 
 .. code:: pycon
 
