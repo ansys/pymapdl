@@ -751,44 +751,6 @@ def cube_solve(cleared, mapdl, cube_geom_and_mesh):
 
 
 @pytest.fixture
-def box_with_fields(cleared, mapdl):
-    mapdl.prep7()
-    mapdl.mp("kxx", 1, 45)
-    mapdl.mp("ex", 1, 2e10)
-    mapdl.mp("perx", 1, 1)
-    mapdl.mp("murx", 1, 1)
-    if mapdl.version >= 25.1:
-        mapdl.tb("pm", 1, "", "", "perm")
-        mapdl.tbdata("", 0)
-
-    mapdl.et(1, "SOLID70")
-    mapdl.et(2, "CPT215")
-    mapdl.keyopt(2, 12, 1)  # Activating PRES DOF
-    mapdl.et(3, "SOLID122")
-    mapdl.et(4, "SOLID96")
-    mapdl.block(0, 1, 0, 1, 0, 1)
-    mapdl.esize(0.5)
-    return mapdl
-
-
-@pytest.fixture
-def box_geometry(mapdl, cleared):
-    areas, keypoints = create_geometry(mapdl)
-    q = mapdl.queries
-    return q, keypoints, areas, get_details_of_nodes(mapdl)
-
-
-@pytest.fixture
-def line_geometry(mapdl, cleared):
-    mapdl.prep7(mute=True)
-    k0 = mapdl.k(1, 0, 0, 0)
-    k1 = mapdl.k(2, 1, 2, 2)
-    l0 = mapdl.l(k0, k1)
-    q = mapdl.queries
-    return q, [k0, k1], l0
-
-
-@pytest.fixture
 def query(mapdl, cleared):
     return mapdl.queries
 
@@ -842,32 +804,6 @@ def selection_test_geometry(mapdl, cleared):
     mapdl.esize(0.5)
     mapdl.vmesh("ALL")
     return mapdl.queries
-
-
-@pytest.fixture
-def twisted_sheet(mapdl, cleared):
-    mapdl.prep7()
-    mapdl.et(1, "SHELL181")
-    mapdl.mp("EX", 1, 2e5)
-    mapdl.mp("PRXY", 1, 0.3)  # Poisson's Ratio
-    mapdl.rectng(0, 1, 0, 1)
-    mapdl.sectype(1, "SHELL")
-    mapdl.secdata(0.1)
-    mapdl.esize(0.5)
-    mapdl.amesh("all")
-    mapdl.run("/SOLU")
-    mapdl.antype("STATIC")
-    mapdl.nsel("s", "loc", "x", 0)
-    mapdl.d("all", "all")
-    mapdl.nsel("s", "loc", "x", 1)
-    mapdl.d("all", "ux", -0.1)
-    mapdl.d("all", "uy", -0.1)
-    mapdl.d("all", "uz", -0.1)
-    mapdl.allsel("all")
-    mapdl.solve()
-    mapdl.finish()
-    q = mapdl.queries
-    return q, get_details_of_nodes(mapdl)
 
 
 def create_geometry(mapdl):
