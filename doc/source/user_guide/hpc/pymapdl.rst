@@ -11,7 +11,7 @@ Introduction
 
 PyMAPDL communicates with MAPDL using the gRPC protocol.
 This protocol offers the many advantages and features described in
-see :ref:`ref_project_page`.
+:ref:`ref_project_page`.
 One of these features is that it is not required to have both
 PyMAPDL and MAPDL processes running on the same machine.
 This possibility opens the door to many configurations, depending
