@@ -152,14 +152,14 @@ def fake_local_mapdl(mapdl):
 def test_validate_sw():
     # ensure that windows adds msmpi
     # fake windows path
-    exec_path = "C:/Program Files/ANSYS Inc/v211/ansys/bin/win64/ANSYS211.exe"
-    add_sw = set_MPI_additional_switches("", exec_path)
+    version = 211
+    add_sw = set_MPI_additional_switches("", version=version)
     assert "msmpi" in add_sw
 
-    add_sw = set_MPI_additional_switches("-mpi intelmpi", exec_path)
+    add_sw = set_MPI_additional_switches("-mpi intelmpi", version=version)
     assert "msmpi" in add_sw and "intelmpi" not in add_sw
 
-    add_sw = set_MPI_additional_switches("-mpi INTELMPI", exec_path)
+    add_sw = set_MPI_additional_switches("-mpi INTELMPI", version=version)
     assert "msmpi" in add_sw and "INTELMPI" not in add_sw
 
 
@@ -949,7 +949,7 @@ def test_generate_mapdl_launch_command_windows():
 
     assert isinstance(cmd, list)
 
-    assert f'"{exec_file}"' in cmd
+    assert f"{exec_file}" in cmd
     assert "-j" in cmd
     assert f"{jobname}" in cmd
     assert "-port" in cmd
@@ -967,7 +967,7 @@ def test_generate_mapdl_launch_command_windows():
     assert ".__tmp__.out" in cmd
 
     cmd = " ".join(cmd)
-    assert f'"{exec_file}"' in cmd
+    assert f"{exec_file}" in cmd
     assert f" -j {jobname} " in cmd
     assert f" -port {port} " in cmd
     assert f" -m {ram*1024} " in cmd
@@ -978,6 +978,7 @@ def test_generate_mapdl_launch_command_windows():
     assert f" -o .__tmp__.out " in cmd
 
 
+@patch("os.name", "posix")
 def test_generate_mapdl_launch_command_linux():
     assert os.name != "nt"  # Checking mocking is properly done
 

@@ -393,7 +393,7 @@ def generate_mapdl_launch_command(
 
     # Windows will spawn a new window, special treatment
     if os.name == "nt":
-        exec_file = f'"{exec_file}"'
+        exec_file = f"{exec_file}"
         # must start in batch mode on windows to hide APDL window
         tmp_inp = ".__tmp__.inp"
         command_parm = [
@@ -888,7 +888,7 @@ def check_lock_file(path, jobname, override):
 
 
 def set_MPI_additional_switches(
-    add_sw: str, exec_path: str, force_intel: bool = False
+    add_sw: str, force_intel: bool = False, version: Optional[int] = None
 ) -> str:
     """Validate MPI configuration.
 
@@ -899,10 +899,10 @@ def set_MPI_additional_switches(
     ----------
     add_sw : str
         Additional switches.
-    exec_path : str
-        Path to the MAPDL executable.
     force_intel : bool, optional
         Force the usage of intelmpi. The default is :class:`False`.
+    version: int, optional
+        MAPDL version as integer
 
     Returns
     -------
@@ -915,21 +915,17 @@ def set_MPI_additional_switches(
 
     # known issues with distributed memory parallel (DMP)
     if "smp" not in add_sw_lower_case:  # pragma: no cover
-        if _HAS_ATP:
-            condition = (
-                os.name == "nt"
-                and not force_intel
-                and (222 > version_from_path("mapdl", exec_path) >= 210)
-            )
+        if _HAS_ATP and os.name == "nt":
+            condition = not force_intel and version and (222 > version >= 210)
         else:
-            if os.name == "nt":
-                warnings.warn(
-                    "Because 'ansys-tools-path' is not installed, PyMAPDL cannot check\n"
-                    "if this Ansys version requires the MPI fix, so if you are on Windows,\n"
-                    "the fix is applied by default.\n"
-                    "Use 'force_intel=True' to not apply the fix."
-                )
-            condition = os.name == "nt" and not force_intel
+            warnings.warn(
+                "Because 'ansys-tools-path' is not installed, PyMAPDL cannot check\n"
+                "if this Ansys version requires the MPI fix, so if you are on Windows,\n"
+                "the fix is applied by default.\n"
+                "Use 'force_intel=True' to not apply the fix."
+            )
+
+            condition = not force_intel
 
         if condition:
             # Workaround to fix a problem when launching ansys in 'dmp' mode in the
@@ -1465,8 +1461,8 @@ def launch_mapdl(
         # Set compatible MPI
         args["additional_switches"] = set_MPI_additional_switches(
             args["additional_switches"],
-            args["exec_file"],
             force_intel=args["force_intel"],
+            version=args["version"],
         )
 
         LOG.debug(f"Using additional switches {args['additional_switches']}.")
