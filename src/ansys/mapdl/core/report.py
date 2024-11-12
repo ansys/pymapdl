@@ -93,10 +93,7 @@ class Plain_Report:
             self.kwargs["extra_meta"] = ("GPU Details", "None")
 
     def get_version(self, package):
-        try:
-            import importlib.metadata as importlib_metadata
-        except ModuleNotFoundError:  # pragma: no cover
-            import importlib_metadata
+        import importlib.metadata as importlib_metadata
 
         try:
             return importlib_metadata.version(package.replace(".", "-"))
