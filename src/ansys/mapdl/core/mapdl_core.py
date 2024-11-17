@@ -72,7 +72,7 @@ from ansys.mapdl.core.misc import (
     last_created,
     random_string,
     requires_package,
-    run_as_prep7,
+    run_as,
     supress_logging,
 )
 
@@ -1561,7 +1561,7 @@ class _MapdlCore(Commands):
         )
 
     @supress_logging
-    @run_as_prep7
+    @run_as("PREP7")
     def _generate_iges(self):
         """Save IGES geometry representation to disk"""
         filename = os.path.join(self.directory, "_tmp.iges")

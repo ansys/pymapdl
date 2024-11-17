@@ -90,7 +90,7 @@ from ansys.mapdl.core.misc import (
     last_created,
     only_numbers_and_dots,
     random_string,
-    run_as_prep7,
+    run_as,
     supress_logging,
 )
 from ansys.mapdl.core.parameters import interp_star_status
@@ -2960,7 +2960,7 @@ class MapdlGrpc(MapdlBase):
         return info
 
     @supress_logging
-    @run_as_prep7
+    @run_as("PREP7")
     def _generate_iges(self):
         """Save IGES geometry representation to disk"""
         basename = "_tmp.iges"
