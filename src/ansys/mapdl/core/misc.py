@@ -580,26 +580,6 @@ def allow_iterables_vmin(entity:str="node") -> Callable:
     return decorator
 
 
-def get_active_branch_name() -> str:
-    head_dir = Path(".") / ".git" / "HEAD"
-
-    if os.path.exists(head_dir):
-        with head_dir.open("r") as f:
-            content = f.read().splitlines()
-
-        for line in content:
-            if line[0:4] == "ref:":
-                return line.partition("refs/heads/")[2]
-
-    # In case the previous statements return None
-    if "dev" in pymapdl.__version__:
-        kind = "main"
-    else:  # pragma: no cover
-        kind = f"release/{'.'.join(pymapdl.__version__.split('.')[:2])}"
-
-    return kind
-
-
 def only_numbers_and_dots(st:str) -> bool:
     """Return if a string contains only numbers and dots"""
     return bool(re.fullmatch(r"[0-9.]+", st))
