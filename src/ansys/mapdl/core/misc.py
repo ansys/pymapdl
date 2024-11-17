@@ -33,13 +33,13 @@ import socket
 import string
 import tempfile
 from threading import Thread
-from typing import Union
+from typing import Union, Tuple, Callable, Dict, Iterable
 from warnings import warn
 
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import _HAS_PYVISTA, LOG
+from ansys.mapdl.core import _HAS_PYVISTA, LOG, Mapdl
 
 # path of this module
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -59,7 +59,7 @@ class ROUTINES(Enum):
     AUX15 = 65
 
 
-def check_valid_routine(routine):
+def check_valid_routine(routine: ROUTINES) -> bool:
     """Check if a routine is valid.
 
     Acceptable aliases for "Begin level" include "begin".
@@ -98,7 +98,7 @@ def check_valid_routine(routine):
     return True
 
 
-def is_float(input_string):
+def is_float(input_string: str) -> bool:
     """Returns true when a string can be converted to a float"""
     try:
         float(input_string)
@@ -107,14 +107,14 @@ def is_float(input_string):
         return False
 
 
-def random_string(stringLength=10, letters=string.ascii_lowercase):
+def random_string(stringLength:int=10, letters:str=string.ascii_lowercase)->str:
     """Generate a random string of fixed length"""
     import secrets
 
     return "".join(secrets.choice(letters) for _ in range(stringLength))
 
 
-def _check_has_ansys():
+def _check_has_ansys() -> bool:
     """Safely wraps check_valid_ansys
 
     Returns
@@ -131,7 +131,7 @@ def _check_has_ansys():
         return False
 
 
-def supress_logging(func):
+def supress_logging(func: Callable) -> Callable:
     """Decorator to suppress logging for a MAPDL instance"""
 
     @wraps(func)
@@ -151,7 +151,7 @@ def supress_logging(func):
     return wrapper
 
 
-def run_as_prep7(func):
+def run_as_prep7(func: Callable) -> Callable:
     """Run a MAPDL method at PREP7 and always revert to the prior processor"""
 
     @wraps(func)
@@ -175,7 +175,7 @@ def run_as_prep7(func):
     return wrapper
 
 
-def threaded(func):
+def threaded(func: Callable) -> Callable:
     """Decorator to call a function using a thread"""
 
     @wraps(func)
@@ -188,7 +188,7 @@ def threaded(func):
     return wrapper
 
 
-def threaded_daemon(func):
+def threaded_daemon(func: Callable) -> Callable:
     """Decorator to call a function using a daemon thread."""
 
     @wraps(func)
@@ -204,18 +204,18 @@ def threaded_daemon(func):
     return wrapper
 
 
-def unique_rows(a):
-    """Returns unique rows of a and indices of those rows"""
-    if not a.flags.c_contiguous:
-        a = np.ascontiguousarray(a)
+def unique_rows(arr: np.ndarray) -> Tuple(Union[np.ndarray, np.ndarray, np.ndarray]):
+    """Returns unique rows of `arr` and indices of those rows"""
+    if not arr.flags.c_contiguous:
+        arr = np.ascontiguousarray(arr)
 
-    b = a.view(np.dtype((np.void, a.dtype.itemsize * a.shape[1])))
+    b = arr.view(np.dtype((np.void, arr.dtype.itemsize * arr.shape[1])))
     _, idx, idx2 = np.unique(b, True, True)
 
-    return a[idx], idx, idx2
+    return arr[idx], idx, idx2
 
 
-def creation_time(path_to_file):
+def creation_time(path_to_file: str) -> float:
     """The file creation time.
 
     Try to get the date that a file was created, falling back to when
@@ -227,14 +227,14 @@ def creation_time(path_to_file):
     else:
         stat = os.stat(path_to_file)
         try:
-            return stat.st_birthtime
+            return float(stat.st_birthtime)
         except AttributeError:
             # We're probably on Linux. No easy way to get creation dates here,
             # so we'll settle for when its content was last modified.
             return stat.st_mtime
 
 
-def last_created(filenames):
+def last_created(filenames: List[str]) -> str:
     """Return the last created file given a list of filenames
 
     If all filenames have the same creation time, then return the last
@@ -248,7 +248,7 @@ def last_created(filenames):
     return filenames[idx]
 
 
-def create_temp_dir(tmpdir=None, name=None):
+def create_temp_dir(tmpdir:str=None, name:str=None) -> str:
     """Create a new unique directory at a given temporary directory"""
     if tmpdir is None:
         tmpdir = tempfile.gettempdir()
@@ -273,7 +273,7 @@ def create_temp_dir(tmpdir=None, name=None):
     return path
 
 
-def no_return(func):
+def no_return(func: Callable) -> Callable:
     """Decorator to return nothing from the wrapped function"""
 
     @wraps(func)
@@ -283,14 +283,14 @@ def no_return(func):
     return wrapper
 
 
-def get_bounding_box(nodes_xyz):
+def get_bounding_box(nodes_xyz: np.ndarray) -> np.ndarray:
     min_ = np.min(nodes_xyz, axis=0)
     max_ = np.max(nodes_xyz, axis=0)
 
     return max_ - min_
 
 
-def load_file(mapdl, fname, priority_mapdl_file=None):
+def load_file(mapdl:Mapdl, fname:str, priority_mapdl_file:bool=None) -> str:
     """
     Provide a file to the MAPDL instance.
 
@@ -363,26 +363,24 @@ def load_file(mapdl, fname, priority_mapdl_file=None):
     return os.path.basename(fname)
 
 
-def check_valid_ip(ip):
+def check_valid_ip(ip: str) -> None:
     """Check for valid IP address"""
     if ip.lower() != "localhost":
         ip = ip.replace('"', "").replace("'", "")
         socket.inet_aton(ip)
 
 
-def check_valid_port(port, lower_bound=1000, high_bound=60000):
+def check_valid_port(port: int, lower_bound:int=1000, high_bound:int=60000) -> None:
     if not isinstance(port, int):
         raise ValueError("The 'port' parameter should be an integer.")
 
-    if lower_bound < port < high_bound:
-        return
-    else:
+    if not (lower_bound < port < high_bound):
         raise ValueError(
             f"'port' values should be between {lower_bound} and {high_bound}."
         )
 
 
-def write_array(filename: Union[str, bytes], array: np.ndarray):
+def write_array(filename: Union[str, bytes], array: np.ndarray) -> None:
     """
     Write an array to a file.
 
@@ -401,7 +399,7 @@ def write_array(filename: Union[str, bytes], array: np.ndarray):
     np.savetxt(filename, array, fmt="%20.12f")
 
 
-def requires_package(package_name, softerror=False):
+def requires_package(package_name: str, softerror:bool =False) -> Callable:
     """
     Decorator check whether a package is installed or not.
 
@@ -439,7 +437,7 @@ def requires_package(package_name, softerror=False):
     return decorator
 
 
-def _get_args_xsel(*args, **kwargs):
+def _get_args_xsel(*args: Tuple[str], **kwargs: Dict[str, str]) -> Tuple[str]:
     type_ = kwargs.pop("type_", str(args[0]) if len(args) else "").upper()
     item = kwargs.pop("item", str(args[1]) if len(args) > 1 else "").upper()
     comp = kwargs.pop("comp", str(args[2]) if len(args) > 2 else "").upper()
@@ -450,7 +448,7 @@ def _get_args_xsel(*args, **kwargs):
     return type_, item, comp, vmin, vmax, vinc, kabs, kwargs
 
 
-def allow_pickable_entities(entity="node", plot_function="nplot"):
+def allow_pickable_entities(entity: str="node", plot_function: str="nplot")-> Callable:
     """
     This wrapper opens a window with the NPLOT or KPLOT, and get the selected points (Nodes or kp),
     and feed them as a list to the NSEL.
@@ -515,8 +513,8 @@ def allow_pickable_entities(entity="node", plot_function="nplot"):
     return decorator
 
 
-def allow_iterables_vmin(entity="node"):
-    def decorator(original_sel_func):
+def allow_iterables_vmin(entity:str="node") -> Callable:
+    def decorator(original_sel_func: Callable) -> Callable:
         """
         This function wraps a NSEL or KSEL function to allow using a list/tuple/array for vmin argument.
 
@@ -582,7 +580,7 @@ def allow_iterables_vmin(entity="node"):
     return decorator
 
 
-def get_active_branch_name():
+def get_active_branch_name() -> str:
     head_dir = Path(".") / ".git" / "HEAD"
 
     if os.path.exists(head_dir):
@@ -602,11 +600,12 @@ def get_active_branch_name():
     return kind
 
 
-def only_numbers_and_dots(s):
-    return bool(re.fullmatch(r"[0-9.]+", s))
+def only_numbers_and_dots(st:str) -> bool:
+    """Return if a string contains only numbers and dots"""
+    return bool(re.fullmatch(r"[0-9.]+", st))
 
 
-def stack(*decorators):
+def stack(*decorators: Iterable[Callable]) -> Callable:
     """Stack multiple decorators on top of each other"""
 
     def deco(f):
