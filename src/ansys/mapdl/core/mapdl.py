@@ -27,7 +27,13 @@ class MapdlBase(_MapdlExtended):
     """Base MAPDL class shared across all MAPDL subclasses.
 
     .. warning:: This class should NOT be imported by itself.
-       You should always import a subclass of it
+       You should always import a subclass of it like
+       :class:`MapdlGrpc <ansys.mapdl.core.mapdl_grpc.MapdlGrpc>`
+
     """
 
-    pass
+    def __init__(self, *args, **kwargs):
+      raise NotImplementedError(
+         "This class cannot be used by itself. Please import one of it subsclasses "
+         "like `ansys.mapdl.core.mapdl_grpc.MapdlGrpc`"
+         )
