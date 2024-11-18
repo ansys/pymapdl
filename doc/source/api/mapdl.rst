@@ -22,7 +22,6 @@
    Mapdl.directory
    Mapdl.exited
    Mapdl.exiting
-   Mapdl.file
    Mapdl.file_type_for_plots
    Mapdl.finish_job_on_exit
    Mapdl.force_output
@@ -96,17 +95,18 @@ Constants
 .. autosummary::
    :toctree: _autosummary
 
-   mapdl_grpc.channel_state
-   mapdl_grpc.check_status
-   mapdl_grpc.connection
-   mapdl_grpc.download_result
-   mapdl_grpc.ip
-   mapdl_grpc.is_local
+   mapdl_grpc.MapdlGrpc.channel_state
+   mapdl_grpc.MapdlGrpc.check_status
+   mapdl_grpc.MapdlGrpc.connection
    mapdl_grpc.MapdlGrpc.download
    mapdl_grpc.MapdlGrpc.download_project
+   mapdl_grpc.MapdlGrpc.download_result
+   mapdl_grpc.MapdlGrpc.file
+   mapdl_grpc.MapdlGrpc.ip
+   mapdl_grpc.MapdlGrpc.is_local
    mapdl_grpc.MapdlGrpc.list_error_file
    mapdl_grpc.MapdlGrpc.list_files
    mapdl_grpc.MapdlGrpc.mute
+   mapdl_grpc.MapdlGrpc.port
    mapdl_grpc.MapdlGrpc.upload
-   mapdl_grpc.port
 
