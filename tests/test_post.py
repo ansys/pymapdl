@@ -755,9 +755,15 @@ class Test_plastic_solve:
         mapdl.set(1, 2)
         mapdl.mute = False
 
+        mapdl.save()
+
+    @pytest.fixture()
+    def resume(mapdl):
+        mapdl.resume()
+
     @staticmethod
     @pytest.mark.parametrize("comp", COMPONENT_STRESS_TYPE)
-    def test_nodal_plastic_component_strain(mapdl, plastic_solve, comp):
+    def test_nodal_plastic_component_strain(mapdl, resume, comp):
         index = COMPONENT_STRESS_TYPE.index(comp)
         mapdl.prnsol("EPPL", "COMP", mute=True)  # run twice to clear out warning
 
@@ -771,12 +777,12 @@ class Test_plastic_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_plastic_component_strain(mapdl, plastic_solve):
+    def test_plot_nodal_plastic_component_strain(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_plastic_component_strain("x") is None
 
     @staticmethod
     @pytest.mark.parametrize("comp", PRINCIPAL_TYPE)
-    def test_nodal_plastic_principal_strain(mapdl, plastic_solve, comp):
+    def test_nodal_plastic_principal_strain(mapdl, resume, comp):
         from_grpc = mapdl.post_processing.nodal_plastic_principal_strain(comp)
 
         index = PRINCIPAL_TYPE.index(comp)
@@ -792,11 +798,11 @@ class Test_plastic_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_plastic_principal_strain(mapdl, plastic_solve):
+    def test_plot_nodal_plastic_principal_strain(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_plastic_principal_strain(1) is None
 
     @staticmethod
-    def test_nodal_plastic_strain_intensity(mapdl, plastic_solve):
+    def test_nodal_plastic_strain_intensity(mapdl, resume):
         mapdl.prnsol("EPPL", "PRIN", mute=True)  # run twice to clear out warning
         data = np.genfromtxt(mapdl.prnsol("EPPL", "PRIN").splitlines()[1:])
         nnum_ans = data[:, 0].astype(np.int32)
@@ -808,11 +814,11 @@ class Test_plastic_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_plastic_strain_intensity(mapdl, plastic_solve):
+    def test_plot_nodal_plastic_strain_intensity(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_plastic_strain_intensity() is None
 
     @staticmethod
-    def test_nodal_plastic_eqv_strain(mapdl, plastic_solve):
+    def test_nodal_plastic_eqv_strain(mapdl, resume):
         mapdl.prnsol("EPPL", "PRIN", mute=True)  # run twice to clear out warning
         data = np.genfromtxt(mapdl.prnsol("EPPL", "PRIN").splitlines()[1:])
         nnum_ans = data[:, 0].astype(np.int32)
@@ -824,7 +830,7 @@ class Test_plastic_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_plastic_eqv_strain(mapdl, plastic_solve):
+    def test_plot_nodal_plastic_eqv_strain(mapdl, resume):
         assert (
             mapdl.post_processing.plot_nodal_plastic_eqv_strain(smooth_shading=True)
             is None
@@ -1141,8 +1147,14 @@ class Test_contact_solve:
         mapdl.set("last")
         mapdl.mute = False
 
+        mapdl.save()
+
+    @pytest.fixture()
+    def resume(mapdl):
+        mapdl.resume()
+
     @staticmethod
-    def test_nodal_contact_friction_stress(mapdl, contact_solve):
+    def test_nodal_contact_friction_stress(mapdl, resume):
         # Format tables.
         mapdl.post1()
         mapdl.header("OFF", "OFF", "OFF", "OFF", "OFF", "OFF")
@@ -1162,7 +1174,7 @@ class Test_contact_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_contact_friction_stress(mapdl, contact_solve):
+    def test_plot_nodal_contact_friction_stress(mapdl, resume):
         assert (
             mapdl.post_processing.plot_nodal_contact_friction_stress(
                 smooth_shading=True
@@ -1172,7 +1184,7 @@ class Test_contact_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_incomplete_element_selection(mapdl, contact_solve):
+    def test_plot_incomplete_element_selection(mapdl, resume):
         mapdl.esel("S", "ELEM", "", 1, mapdl.mesh.n_elem // 2)
         assert mapdl.post_processing.plot_element_displacement() is None
 
@@ -1192,7 +1204,7 @@ class Test_contact_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_incomplete_nodal_selection(mapdl, contact_solve, verify_image_cache):
+    def test_plot_incomplete_nodal_selection(mapdl, resume, verify_image_cache):
         verify_image_cache.skip = True
 
         mapdl.nsel("S", "NODE", "", 1, mapdl.mesh.n_node // 2)
@@ -1215,21 +1227,21 @@ class Test_contact_solve:
         assert mapdl.post_processing.plot_nodal_displacement() is None
 
     @staticmethod
-    def test_time_frequency_values(mapdl, contact_solve):
+    def test_time_frequency_values(mapdl, resume):
         assert np.allclose(
             mapdl.post_processing.time_values,
             mapdl.post_processing.frequency_values,
         )
 
     @staticmethod
-    def test_time_values(mapdl, contact_solve):
+    def test_time_values(mapdl, resume):
         assert np.allclose(
             mapdl.post_processing.time_values, np.array([0.2, 0.4, 0.7, 1.0])
         )
 
     @staticmethod
     @pytest.mark.parametrize("step_", [1, 2, 3, 4])
-    def test_set(mapdl, contact_solve, step_):
+    def test_set(mapdl, resume, step_):
         mapdl.set(nset=step_)
         assert mapdl.post_processing.step == step_
 
