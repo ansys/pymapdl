@@ -212,7 +212,7 @@ Launch an MAPDL instance in your window
 Add an attribute to your MainWindow for the MAPDL instance and import the ``launch_mapdl`` package.
 
 .. literalinclude:: gui_app.py
-    :lines: 19, 22-26, 231-236
+    :lines: 41-42, 44-48, 229-254
 
 Develop the logic
 =================
@@ -246,7 +246,7 @@ Connect each button to a function that contains the logic:
 You can now write the related functions:
 
 .. literalinclude:: gui_app.py
-    :lines: 137-223
+    :lines: 159-254
 
 .. image:: final_app_preprocessing.png
 
@@ -257,6 +257,6 @@ You can now write the related functions:
 Additional files
 ================
 
-The example files can be downloaded using these links:
+The example files can be downloaded using this link:
 
 * Original :download:`gui_app.py <gui_app.py>` script
