@@ -25,6 +25,7 @@
 import os
 import subprocess
 import tempfile
+from time import sleep
 from unittest.mock import patch
 import warnings
 
@@ -33,33 +34,55 @@ import pytest
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import (
+    MapdlDidNotStart,
     NotEnoughResources,
     PortAlreadyInUseByAnMAPDLInstance,
+    VersionError,
 )
 from ansys.mapdl.core.launcher import (
     _HAS_ATP,
     LOCALHOST,
     _is_ubuntu,
     _parse_ip_route,
+    check_mapdl_launch_on_hpc,
+    check_mode,
     force_smp_in_student,
     generate_mapdl_launch_command,
+    generate_sbatch_command,
     generate_start_parameters,
     get_cpus,
     get_exec_file,
+    get_hostname_host_cluster,
+    get_ip,
+    get_jobid,
+    get_port,
     get_run_location,
     get_slurm_options,
     get_start_instance,
     get_version,
-    is_on_slurm,
+    is_running_on_slurm,
+    kill_job,
     launch_grpc,
     launch_mapdl,
+    launch_mapdl_on_cluster,
     remove_err_files,
+    send_scontrol,
     set_license_switch,
     set_MPI_additional_switches,
+    submitter,
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from conftest import ON_LOCAL, QUICK_LAUNCH_SWITCHES, NullContext, requires
+from ansys.mapdl.core.misc import stack
+from conftest import (
+    ON_LOCAL,
+    PATCH_MAPDL,
+    PATCH_MAPDL_START,
+    QUICK_LAUNCH_SWITCHES,
+    TESTING_MINIMAL,
+    NullContext,
+    requires,
+)
 
 try:
     from ansys.tools.path import (
@@ -92,6 +115,27 @@ paths = [
 start_timeout = 30  # Seconds
 
 
+def get_fake_process(message_stdout, message_stderr="", time_sleep=0):
+    class stdout:
+        def read(self):
+            return message_stdout.encode()
+
+    class stderr:
+        def read(self):
+            return message_stderr.encode()
+
+    class myprocess:
+        pass
+
+    process = myprocess()
+    process.stdout = stdout()
+    process.stderr = stderr()
+
+    sleep(time_sleep)
+
+    return process
+
+
 @pytest.fixture
 def fake_local_mapdl(mapdl):
     """Fixture to execute asserts before and after a test is run"""
@@ -109,14 +153,14 @@ def fake_local_mapdl(mapdl):
 def test_validate_sw():
     # ensure that windows adds msmpi
     # fake windows path
-    exec_path = "C:/Program Files/ANSYS Inc/v211/ansys/bin/win64/ANSYS211.exe"
-    add_sw = set_MPI_additional_switches("", exec_path)
+    version = 211
+    add_sw = set_MPI_additional_switches("", version=version)
     assert "msmpi" in add_sw
 
-    add_sw = set_MPI_additional_switches("-mpi intelmpi", exec_path)
+    add_sw = set_MPI_additional_switches("-mpi intelmpi", version=version)
     assert "msmpi" in add_sw and "intelmpi" not in add_sw
 
-    add_sw = set_MPI_additional_switches("-mpi INTELMPI", exec_path)
+    add_sw = set_MPI_additional_switches("-mpi INTELMPI", version=version)
     assert "msmpi" in add_sw and "INTELMPI" not in add_sw
 
 
@@ -210,6 +254,7 @@ def test_license_type_additional_switch(mapdl, license_name):
     assert f"-p {license_name}" in args["additional_switches"]
 
 
+@stack(*PATCH_MAPDL_START)
 @requires("ansys-tools-path")
 def test_license_type_dummy(mapdl):
     dummy_license_type = "dummy"
@@ -218,8 +263,7 @@ def test_license_type_dummy(mapdl):
         match="Still PyMAPDL will try to use it but in older MAPDL versions you might experience",
     ):
         launch_mapdl(
-            start_instance=False,
-            port=mapdl.port + 1,
+            start_instance=True,
             additional_switches=f" -p {dummy_license_type} " + QUICK_LAUNCH_SWITCHES,
             start_timeout=start_timeout,
             license_server_check=False,
@@ -696,17 +740,17 @@ def test_slurm_ram(monkeypatch, ram, expected, context):
 @pytest.mark.parametrize("slurm_env_var", ["True", "false", ""])
 @pytest.mark.parametrize("slurm_job_name", ["True", "false", ""])
 @pytest.mark.parametrize("slurm_job_id", ["True", "false", ""])
-@pytest.mark.parametrize("detect_HPC", [True, False, None])
-def test_is_on_slurm(
-    monkeypatch, slurm_env_var, slurm_job_name, slurm_job_id, detect_HPC
+@pytest.mark.parametrize("running_on_hpc", [True, False, None])
+def test_is_running_on_slurm(
+    monkeypatch, slurm_env_var, slurm_job_name, slurm_job_id, running_on_hpc
 ):
-    monkeypatch.setenv("PYMAPDL_ON_SLURM", slurm_env_var)
+    monkeypatch.setenv("PYMAPDL_RUNNING_ON_HPC", slurm_env_var)
     monkeypatch.setenv("SLURM_JOB_NAME", slurm_job_name)
     monkeypatch.setenv("SLURM_JOB_ID", slurm_job_id)
 
-    flag = is_on_slurm(args={"detect_HPC": detect_HPC})
+    flag = is_running_on_slurm(args={"running_on_hpc": running_on_hpc})
 
-    if detect_HPC is not True:
+    if running_on_hpc is not True:
         assert not flag
 
     else:
@@ -722,9 +766,9 @@ def test_is_on_slurm(
     if ON_LOCAL:
         assert (
             launch_mapdl(
-                detect_HPC=detect_HPC,
+                running_on_hpc=running_on_hpc,
                 _debug_no_launch=True,
-            )["ON_SLURM"]
+            )["running_on_hpc"]
             == flag
         )
 
@@ -882,32 +926,8 @@ def test_ip_and_start_instance(
             assert options["ip"] in (LOCALHOST, "0.0.0.0", "127.0.0.1")
 
 
-def mycpucount(**kwargs):
-    return 10  # faking 10 cores
-
-
-@patch("psutil.cpu_count", mycpucount)
-def test_nproc_envvar(monkeypatch):
-    monkeypatch.setenv("PYMAPDL_NPROC", 10)
-    args = launch_mapdl(_debug_no_launch=True)
-    assert args["nproc"] == 10
-
-
-@pytest.mark.parametrize("nproc", [None, 5, 9, 15])
-@patch("psutil.cpu_count", mycpucount)
-def test_nproc(monkeypatch, nproc):
-    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
-
-    if nproc and nproc > mycpucount():
-        with pytest.raises(NotEnoughResources):
-            launch_mapdl(nproc=nproc, _debug_no_launch=True)
-    else:
-        args = launch_mapdl(nproc=nproc, _debug_no_launch=True)
-        assert args["nproc"] == (nproc or 2)
-
-
 @patch("os.name", "nt")
-@patch("psutil.cpu_count", mycpucount)
+@patch("psutil.cpu_count", lambda *args, **kwargs: 10)
 def test_generate_mapdl_launch_command_windows():
     assert os.name == "nt"  # Checking mocking is properly done
 
@@ -928,10 +948,26 @@ def test_generate_mapdl_launch_command_windows():
     )
 
     assert isinstance(cmd, list)
-    assert all([isinstance(each, str) for each in cmd])
+
+    assert f"{exec_file}" in cmd
+    assert "-j" in cmd
+    assert f"{jobname}" in cmd
+    assert "-port" in cmd
+    assert f"{port}" in cmd
+    assert "-m" in cmd
+    assert f"{ram*1024}" in cmd
+    assert "-np" in cmd
+    assert f"{nproc}" in cmd
+    assert "-grpc" in cmd
+    assert f"{additional_switches}" in cmd
+    assert "-b" in cmd
+    assert "-i" in cmd
+    assert ".__tmp__.inp" in cmd
+    assert "-o" in cmd
+    assert ".__tmp__.out" in cmd
 
     cmd = " ".join(cmd)
-    assert f'"{exec_file}" ' in cmd
+    assert f"{exec_file}" in cmd
     assert f" -j {jobname} " in cmd
     assert f" -port {port} " in cmd
     assert f" -m {ram*1024} " in cmd
@@ -942,6 +978,7 @@ def test_generate_mapdl_launch_command_windows():
     assert f" -o .__tmp__.out " in cmd
 
 
+@patch("os.name", "posix")
 def test_generate_mapdl_launch_command_linux():
     assert os.name != "nt"  # Checking mocking is properly done
 
@@ -962,6 +999,26 @@ def test_generate_mapdl_launch_command_linux():
     )
     assert isinstance(cmd, list)
     assert all([isinstance(each, str) for each in cmd])
+
+    assert isinstance(cmd, list)
+
+    assert f"{exec_file}" in cmd
+    assert "-j" in cmd
+    assert f"{jobname}" in cmd
+    assert "-port" in cmd
+    assert f"{port}" in cmd
+    assert "-m" in cmd
+    assert f"{ram*1024}" in cmd
+    assert "-np" in cmd
+    assert f"{nproc}" in cmd
+    assert "-grpc" in cmd
+    assert f"{additional_switches}" in cmd
+
+    assert "-b" not in cmd
+    assert "-i" not in cmd
+    assert ".__tmp__.inp" not in cmd
+    assert "-o" not in cmd
+    assert ".__tmp__.out" not in cmd
 
     cmd = " ".join(cmd)
     assert f"{exec_file} " in cmd
@@ -1069,6 +1126,14 @@ def test_get_run_location_no_access(tmpdir):
             {"exec_file": True, "version": True},
             "Cannot specify both ``exec_file`` and ``version``.",
         ],
+        [
+            {"scheduler_options": True},
+            "PyMAPDL does not read the number of cores from the 'scheduler_options'.",
+        ],
+        [
+            {"launch_on_hpc": True, "ip": "111.22.33.44"},
+            "PyMAPDL cannot ensure a specific IP will be used when launching",
+        ],
     ],
 )
 def test_pre_check_args(args, match):
@@ -1107,30 +1172,35 @@ def test_remove_err_files_fail(tmpdir):
 
 
 # testing on windows to account for temp file
-def fake_subprocess_open(*args, **kwargs):
-    kwargs["cmd"] = args[0]
-    return kwargs
-
-
 @patch("os.name", "nt")
-@patch("subprocess.Popen", fake_subprocess_open)
-def test_launch_grpc(tmpdir):
-    cmd = "ansys.exe -b -i my_input.inp -o my_output.inp".split()
+@pytest.mark.parametrize("launch_on_hpc", [None, False, True])
+@patch("subprocess.Popen", lambda *args, **kwargs: kwargs)
+def test_launch_grpc(tmpdir, launch_on_hpc):
+    if launch_on_hpc:
+        cmd = ["sbatch", "--wrap", "'ansys.exe -b -i my_input.inp -o my_output.inp'"]
+    else:
+        cmd = "ansys.exe -b -i my_input.inp -o my_output.inp".split(" ")
     run_location = str(tmpdir)
-    kwags = launch_grpc(cmd, run_location)
+    kwargs = launch_grpc(cmd, run_location, launch_on_hpc=launch_on_hpc)
 
     inp_file = os.path.join(run_location, "my_input.inp")
 
-    assert os.path.exists(inp_file)
-    with open(inp_file, "r") as fid:
-        assert "FINISH" in fid.read()
+    if launch_on_hpc:
+        assert "sbatch" in kwargs["args"]
+        assert "--wrap" in kwargs["args"]
+        assert " ".join(cmd) == kwargs["args"]
+    else:
+        assert cmd == kwargs["args"]
+        assert os.path.exists(inp_file)
+        with open(inp_file, "r") as fid:
+            assert "FINISH" in fid.read()
 
-    assert cmd == kwags["cmd"]
-    assert "TRUE" == kwags["env"].pop("ANS_CMD_NODIAG")
-    assert not kwags["env"]
-    assert isinstance(kwags["stdin"], type(subprocess.DEVNULL))
-    assert isinstance(kwags["stdout"], type(subprocess.PIPE))
-    assert isinstance(kwags["stderr"], type(subprocess.PIPE))
+    assert not kwargs["shell"]
+    assert "TRUE" == kwargs["env"].pop("ANS_CMD_NODIAG")
+    assert not kwargs["env"]
+    assert isinstance(kwargs["stdin"], type(subprocess.DEVNULL))
+    assert isinstance(kwargs["stdout"], type(subprocess.PIPE))
+    assert isinstance(kwargs["stderr"], type(subprocess.PIPE))
 
 
 @patch("psutil.cpu_count", lambda *args, **kwags: 5)
@@ -1146,7 +1216,7 @@ def test_get_cpus(monkeypatch, arg, env):
     if (arg and arg > cores_machine) or (arg is None and env and env > cores_machine):
         context = pytest.raises(NotEnoughResources)
 
-    args = {"nproc": arg, "ON_SLURM": False}
+    args = {"nproc": arg, "running_on_hpc": False}
     with context:
         get_cpus(args)
 
@@ -1160,6 +1230,696 @@ def test_get_cpus(monkeypatch, arg, env):
 
 @patch("psutil.cpu_count", lambda *args, **kwags: 1)
 def test_get_cpus_min():
-    args = {"nproc": None, "ON_SLURM": False}
+    args = {"nproc": None, "running_on_hpc": False}
     get_cpus(args)
     assert args["nproc"] == 1
+
+
+@pytest.mark.parametrize(
+    "scheduler_options",
+    [None, "-N 10", {"N": 10, "nodes": 10, "-tasks": 3, "--ntask-per-node": 2}],
+)
+def test_generate_sbatch_command(scheduler_options):
+    cmd = [
+        "/ansys_inc/v242/ansys/bin/ansys242",
+        "-j",
+        "myjob",
+        "-np",
+        "10",
+        "-m",
+        "1024",
+        "-port",
+        "50052",
+        "-my_add=switch",
+    ]
+
+    cmd_post = generate_sbatch_command(cmd, scheduler_options)
+
+    assert cmd_post[0] == "sbatch"
+    if scheduler_options:
+        if isinstance(scheduler_options, dict):
+            assert (
+                cmd_post[1] == "-N='10' --nodes='10' --tasks='3' --ntask-per-node='2'"
+            )
+        else:
+            assert cmd_post[1] == scheduler_options
+
+    assert cmd_post[-2] == "--wrap"
+    assert cmd_post[-1] == f"""'{" ".join(cmd)}'"""
+
+
+@pytest.mark.parametrize(
+    "scheduler_options",
+    [None, "--wrap '/bin/bash", {"--wrap": "/bin/bash", "nodes": 10}],
+)
+def test_generate_sbatch_wrap_in_arg(scheduler_options):
+    cmd = ["/ansys_inc/v242/ansys/bin/ansys242", "-grpc"]
+    if scheduler_options:
+        context = pytest.raises(
+            ValueError,
+            match="The sbatch argument 'wrap' is used by PyMAPDL to submit the job.",
+        )
+    else:
+        context = NullContext()
+
+    with context:
+        cmd_post = generate_sbatch_command(cmd, scheduler_options)
+        assert cmd[0] in cmd_post[-1]
+
+
+def myfakegethostbyname(*args, **kwargs):
+    return "mycoolhostname"
+
+
+def myfakegethostbynameIP(*args, **kwargs):
+    return "123.45.67.89"
+
+
+@pytest.mark.parametrize(
+    "message_stdout, message_stderr",
+    [
+        ["Submitted batch job 1001", ""],
+        ["Submission failed", "Something very bad happened"],
+    ],
+)
+@patch("socket.gethostbyname", myfakegethostbynameIP)
+@patch("ansys.mapdl.core.launcher.get_hostname_host_cluster", myfakegethostbyname)
+def test_check_mapdl_launch_on_hpc(message_stdout, message_stderr):
+
+    process = get_fake_process(message_stdout, message_stderr)
+
+    start_parm = {}
+    if "Submitted batch job" in message_stdout:
+        context = NullContext()
+
+    else:
+        context = pytest.raises(
+            MapdlDidNotStart,
+            match=f"stdout:\n{message_stdout}\nstderr:\n{message_stderr}",
+        )
+
+    with context:
+        assert check_mapdl_launch_on_hpc(process, start_parm) == 1001
+
+
+@patch("ansys.mapdl.core.Mapdl._exit_mapdl", lambda *args, **kwargs: None)
+@patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.kill_job")
+def test_exit_job(mock_popen, mapdl):
+    # Setting to exit
+    mapdl._mapdl_on_hpc = True
+    mapdl.finish_job_on_exit = True
+    prev_rem = mapdl.remove_temp_dir_on_exit
+    mapdl.remove_temp_dir_on_exit = False
+
+    mock_popen.return_value = lambda *args, **kwargs: True
+
+    mapdl._jobid = 1001
+    assert mapdl.jobid == 1001
+
+    mapdl.exit(force=True)
+
+    # Returning to state
+    mapdl._jobid = None
+    mapdl._exited = False
+    mapdl._mapdl_on_hpc = False
+    mapdl.finish_job_on_exit = True
+    mapdl.remove_temp_dir_on_exit = prev_rem
+
+    # Checking
+    mock_popen.assert_called_once_with(1001)
+
+
+@requires("ansys-tools-path")
+@patch(
+    "ansys.tools.path.path._get_application_path",
+    lambda *args, **kwargs: "path/to/mapdl/executable",
+)
+@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
+@stack(*PATCH_MAPDL_START)
+@patch("ansys.mapdl.core.launcher.launch_grpc")
+@patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.kill_job")
+@patch("ansys.mapdl.core.launcher.send_scontrol")
+def test_launch_on_hpc_found_ansys(mck_ssctrl, mck_del, mck_launch_grpc, monkeypatch):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+
+    mck_launch_grpc.return_value = get_fake_process("Submitted batch job 1001")
+    mck_ssctrl.return_value = get_fake_process(
+        "a long scontrol...\nJobState=RUNNING\n...\nBatchHost=myhostname\n...\nin message"
+    )
+
+    mapdl_a = launch_mapdl(
+        launch_on_hpc=True,
+    )
+    mapdl_a.exit()
+
+    mck_launch_grpc.assert_called_once()
+    cmd = mck_launch_grpc.call_args_list[0][1]["cmd"]
+    env_vars = mck_launch_grpc.call_args_list[0][1]["env_vars"]
+
+    assert "sbatch" in cmd
+    assert "--wrap" in cmd
+    assert "path/to/mapdl/executable" in cmd[-1]
+    assert "-grpc" in cmd[-1]
+
+    assert env_vars.get("ANS_MULTIPLE_NODES") == "1"
+    assert env_vars.get("HYDRA_BOOTSTRAP") == "slurm"
+
+    mck_ssctrl.assert_called_once()
+    assert "show" in mck_ssctrl.call_args[0][0]
+    assert "1001" in mck_ssctrl.call_args[0][0]
+
+    mck_del.assert_called_once()
+
+
+@stack(*PATCH_MAPDL_START)
+@patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.kill_job")
+@patch("ansys.mapdl.core.launcher.launch_grpc")
+@patch("ansys.mapdl.core.launcher.send_scontrol")
+def test_launch_on_hpc_not_found_ansys(mck_sc, mck_lgrpc, mck_kj, monkeypatch):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    exec_file = "path/to/mapdl/v242/executable/ansys242"
+
+    mck_lgrpc.return_value = get_fake_process("Submitted batch job 1001")
+    mck_kj.return_value = None
+    mck_sc.return_value = get_fake_process(
+        "a long scontrol...\nJobState=RUNNING\n...\nBatchHost=myhostname\n...\nin message"
+    )
+
+    if TESTING_MINIMAL:
+        context = NullContext()
+    else:
+        context = pytest.warns(
+            UserWarning, match="PyMAPDL could not find the ANSYS executable."
+        )
+
+    with context:
+        mapdl = launch_mapdl(
+            launch_on_hpc=True,
+            exec_file=exec_file,
+        )
+        mapdl.exit()
+
+    mck_lgrpc.assert_called_once()
+    cmd = mck_lgrpc.call_args_list[0][1]["cmd"]
+    env_vars = mck_lgrpc.call_args_list[0][1]["env_vars"]
+
+    assert "sbatch" in cmd
+    assert "--wrap" in cmd
+    assert exec_file in cmd[-1]
+    assert "-grpc" in cmd[-1]
+
+    assert env_vars.get("ANS_MULTIPLE_NODES") == "1"
+    assert env_vars.get("HYDRA_BOOTSTRAP") == "slurm"
+
+    mck_sc.assert_called_once()
+    assert "show" in mck_sc.call_args[0][0]
+    assert "1001" in mck_sc.call_args[0][0]
+
+    mck_kj.assert_called_once()
+
+
+def test_launch_on_hpc_exception_launch_mapdl(monkeypatch):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    exec_file = "path/to/mapdl/v242/executable/ansys242"
+
+    process = get_fake_process("ERROR")
+
+    with patch("ansys.mapdl.core.launcher.launch_grpc") as mock_launch_grpc:
+        with patch("ansys.mapdl.core.launcher.kill_job") as mock_popen:
+
+            mock_launch_grpc.return_value = process
+
+            with pytest.raises(
+                Exception, match="PyMAPDL failed to submit the sbatch job:"
+            ):
+                launch_mapdl(
+                    launch_on_hpc=True,
+                    exec_file=exec_file,
+                )
+
+    mock_launch_grpc.assert_called_once()
+    cmd = mock_launch_grpc.call_args_list[0][1]["cmd"]
+    env_vars = mock_launch_grpc.call_args_list[0][1]["env_vars"]
+
+    assert "sbatch" in cmd
+    assert "--wrap" in cmd
+    assert exec_file in cmd[-1]
+    assert "-grpc" in cmd[-1]
+
+    assert env_vars.get("ANS_MULTIPLE_NODES") == "1"
+    assert env_vars.get("HYDRA_BOOTSTRAP") == "slurm"
+
+    # Popen wi
+    mock_popen.assert_not_called()
+
+
+def test_launch_on_hpc_exception_successfull_sbatch(monkeypatch):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    exec_file = "path/to/mapdl/v242/executable/ansys242"
+
+    def raise_exception(*args, **kwargs):
+        raise Exception("Fake exception when launching MAPDL")
+
+    process_launch_grpc = get_fake_process("Submitted batch job 1001")
+
+    process_scontrol = get_fake_process("Submitted batch job 1001")
+    process_scontrol.stdout.read = raise_exception
+
+    with patch("ansys.mapdl.core.launcher.launch_grpc") as mock_launch_grpc:
+        with patch("ansys.mapdl.core.launcher.send_scontrol") as mock_scontrol:
+            with patch("ansys.mapdl.core.launcher.kill_job") as mock_kill_job:
+
+                mock_launch_grpc.return_value = process_launch_grpc
+                mock_scontrol.return_value = process_scontrol
+
+                with pytest.raises(
+                    Exception, match="Fake exception when launching MAPDL"
+                ):
+                    launch_mapdl(
+                        launch_on_hpc=True,
+                        exec_file=exec_file,
+                        replace_env_vars={"myenvvar": "myenvvarvalue"},
+                    )
+
+    mock_launch_grpc.assert_called_once()
+    cmd = mock_launch_grpc.call_args_list[0][1]["cmd"]
+
+    assert "sbatch" in cmd
+    assert "--wrap" in cmd
+    assert exec_file in cmd[-1]
+    assert "-grpc" in cmd[-1]
+
+    envvars = mock_launch_grpc.call_args_list[0][1]["env_vars"]
+
+    assert envvars["ANS_MULTIPLE_NODES"] == "1"
+    assert envvars["HYDRA_BOOTSTRAP"] == "slurm"
+    assert envvars["myenvvar"] == "myenvvarvalue"
+
+    mock_scontrol.assert_called_once()
+    args = mock_scontrol.call_args_list[0][0][0]
+
+    assert "show" in args
+    assert "jobid" in args
+    assert "1001" in args
+
+    mock_kill_job.assert_called_once()
+
+
+@pytest.mark.parametrize(
+    "args,context",
+    [
+        [
+            {"nproc": 10, "mode": "console"},
+            pytest.raises(
+                ValueError,
+                match="The only mode allowed for launch MAPDL on an HPC cluster is gRPC.",
+            ),
+        ],
+        [
+            {"nproc": 10, "ip": "123.11.22.33"},
+            pytest.raises(
+                ValueError,
+                match="PyMAPDL cannot ensure a specific IP will be used when launching MAPDL on a cluster",
+            ),
+        ],
+        [
+            {"nproc": 10, "start_instance": False},
+            pytest.raises(
+                ValueError,
+                match="The 'start_instance' argument must be 'True' when launching on HPC.",
+            ),
+        ],
+        [{"nproc": 10}, NullContext()],
+    ],
+)
+@patch("ansys.mapdl.core.launcher.launch_mapdl", lambda *args, **kwargs: kwargs)
+def test_launch_mapdl_on_cluster_exceptions(args, context):
+    with context:
+        ret = launch_mapdl_on_cluster(**args)
+        assert ret["launch_on_hpc"]
+        assert ret["nproc"] == 10
+
+
+@patch(
+    "socket.gethostbyname",
+    lambda *args, **kwargs: "123.45.67.89" if args[0] != LOCALHOST else LOCALHOST,
+)
+@pytest.mark.parametrize(
+    "ip,ip_env",
+    [[None, None], [None, "123.45.67.89"], ["123.45.67.89", "111.22.33.44"]],
+)
+def test_get_ip(monkeypatch, ip, ip_env):
+    monkeypatch.delenv("PYMAPDL_IP", False)
+    if ip_env:
+        monkeypatch.setenv("PYMAPDL_IP", ip_env)
+    args = {"ip": ip}
+
+    get_ip(args)
+
+    if ip:
+        assert args["ip"] == ip
+    else:
+        if ip_env:
+            assert args["ip"] == ip_env
+        else:
+            assert args["ip"] == LOCALHOST
+
+
+@pytest.mark.parametrize(
+    "port,port_envvar,start_instance,port_busy,result",
+    (
+        [None, None, True, False, 50052],  # Standard case
+        [None, None, True, True, 50055],  # Busy port case, not sure why it is not 50054
+        [None, 50053, True, True, 50053],
+        [None, 50053, False, False, 50053],
+        [50054, 50053, True, False, 50054],
+        [50054, 50053, True, False, 50054],
+        [50054, None, False, False, 50054],
+    ),
+)
+@patch("ansys.mapdl.core._LOCAL_PORTS", [])
+def test_get_port(monkeypatch, port, port_envvar, start_instance, port_busy, result):
+    # Settings
+    monkeypatch.delenv("PYMAPDL_PORT", False)
+    if port_envvar:
+        monkeypatch.setenv("PYMAPDL_PORT", port_envvar)
+
+    # Testing
+    if port_busy:
+        # Success after the second retry, it should go up to 2.
+        # But for some reason, it goes up 3.
+        side_effect = [True, True, False]
+    else:
+        side_effect = [False]
+
+    context = patch("ansys.mapdl.core.launcher.port_in_use", side_effect=side_effect)
+
+    with context:
+        assert get_port(port, start_instance) == result
+
+
+@pytest.mark.parametrize("stdout", ["Submitted batch job 1001", "Something bad"])
+def test_get_jobid(stdout):
+    if "1001" in stdout:
+        context = NullContext()
+    else:
+        context = pytest.raises(
+            ValueError, match="PyMAPDL could not retrieve the job id"
+        )
+
+    with context:
+        jobid = get_jobid(stdout)
+        assert jobid == 1001
+
+
+@patch("socket.gethostbyname", lambda *args, **kwargs: "111.22.33.44")
+@pytest.mark.parametrize(
+    "jobid,timeout,time_to_stop,state,hostname, hostname_msg, raises",
+    [
+        [1001, 30, 2, "RUNNING", "myhostname", "BatchHost=myhostname", None],
+        [
+            1002,
+            2,
+            3,
+            "CONFIGURING",
+            "otherhostname",
+            "BatchHost=otherhostname",
+            MapdlDidNotStart,
+        ],
+        [1002, 2, 3, "CONFIGURING", "", "BatchHost=", MapdlDidNotStart],
+        [1002, 2, 3, "CONFIGURING", None, "Batch", MapdlDidNotStart],
+    ],
+)
+def test_get_hostname_host_cluster(
+    jobid, timeout, time_to_stop, state, hostname, hostname_msg, raises
+):
+    def fake_proc(*args, **kwargs):
+        assert f"show jobid -dd {jobid}" == args[0]
+        return get_fake_process(
+            f"a long scontrol...\nJobState={state}\n...\n{hostname_msg}\n...\nin message",
+            "",
+            time_to_stop,
+        )
+
+    with patch("ansys.mapdl.core.launcher.send_scontrol", fake_proc) as mck_sc:
+
+        if raises:
+            context = pytest.raises(raises)
+        else:
+            context = NullContext()
+
+        with context as excinfo:
+            batchhost, batchhost_ip = get_hostname_host_cluster(
+                job_id=jobid, timeout=timeout
+            )
+
+        if raises:
+            assert f"The HPC job (id: {jobid})" in excinfo.value.args[0]
+            assert f"(timeout={timeout})." in excinfo.value.args[0]
+            assert f"The job state is '{state}'. " in excinfo.value.args[0]
+
+            if hostname:
+                assert f"The BatchHost for this job is '{hostname}'"
+            else:
+                assert (
+                    "PyMAPDL couldn't get the BatchHost hostname"
+                    in excinfo.value.args[0]
+                )
+
+        else:
+            assert batchhost == "myhostname"
+            assert batchhost_ip == "111.22.33.44"
+
+
+@requires("ansys-tools-path")
+@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 201)
+@patch("ansys.mapdl.core._HAS_ATP", True)
+def test_get_version_version_error(monkeypatch):
+    monkeypatch.delenv("PYMAPDL_MAPDL_VERSION", False)
+
+    with pytest.raises(
+        VersionError, match="The MAPDL gRPC interface requires MAPDL 20.2 or later"
+    ):
+        get_version(None, "/path/to/executable")
+
+
+@pytest.mark.parametrize("version", [211, 221, 232])
+def test_get_version_env_var(monkeypatch, version):
+    monkeypatch.setenv("PYMAPDL_MAPDL_VERSION", version)
+
+    assert version == get_version(None)
+    assert version != get_version(241)
+
+
+@pytest.mark.parametrize(
+    "mode, version, osname, context, res",
+    [
+        [None, None, None, NullContext(), "grpc"],  # default
+        [
+            "grpc",
+            201,
+            "nt",
+            pytest.raises(
+                VersionError, match="gRPC mode requires MAPDL 2020R2 or newer on Window"
+            ),
+            None,
+        ],
+        [
+            "grpc",
+            202,
+            "posix",
+            pytest.raises(
+                VersionError, match="gRPC mode requires MAPDL 2021R1 or newer on Linux."
+            ),
+            None,
+        ],
+        ["grpc", 212, "nt", NullContext(), "grpc"],
+        ["grpc", 221, "posix", NullContext(), "grpc"],
+        ["grpc", 221, "nt", NullContext(), "grpc"],
+        [
+            "console",
+            221,
+            "nt",
+            pytest.raises(ValueError, match="Console mode requires Linux."),
+            None,
+        ],
+        [
+            "console",
+            221,
+            "posix",
+            pytest.warns(
+                UserWarning,
+                match="Console mode not recommended in MAPDL 2021R1 or newer.",
+            ),
+            "console",
+        ],
+        [
+            "nomode",
+            221,
+            "posix",
+            pytest.raises(ValueError, match=f'Invalid MAPDL server mode "nomode"'),
+            None,
+        ],
+        [None, 211, "posix", NullContext(), "grpc"],
+        [None, 211, "nt", NullContext(), "grpc"],
+        [None, 202, "nt", NullContext(), "grpc"],
+        [
+            None,
+            201,
+            "nt",
+            pytest.raises(VersionError, match="Running MAPDL as a service requires"),
+            None,
+        ],
+        [None, 202, "posix", NullContext(), "console"],
+        [None, 201, "posix", NullContext(), "console"],
+        [
+            None,
+            110,
+            "posix",
+            pytest.warns(
+                UserWarning,
+                match="MAPDL as a service has not been tested on MAPDL < v13",
+            ),
+            "console",
+        ],
+        [
+            None,
+            110,
+            "nt",
+            pytest.raises(VersionError, match="Running MAPDL as a service requires"),
+            None,
+        ],
+    ],
+)
+def test_check_mode(mode, version, osname, context, res):
+    with patch("os.name", osname):
+        with context:
+            assert res == check_mode(mode, version)
+
+
+@pytest.mark.parametrize("jobid", [1001, 2002])
+@patch("subprocess.Popen", lambda *args, **kwargs: None)
+def test_kill_job(jobid):
+    with patch("ansys.mapdl.core.launcher.submitter") as mck_sub:
+        assert kill_job(jobid) is None
+        mck_sub.assert_called_once()
+        arg = mck_sub.call_args_list[0][0][0]
+        assert arg[0] == "scancel"
+        assert arg[1] == str(jobid)
+
+
+@pytest.mark.parametrize("jobid", [1001, 2002])
+@patch(
+    "ansys.mapdl.core.launcher.submitter", lambda *args, **kwargs: kwargs
+)  # return command
+def test_send_scontrol(jobid):
+    with patch("ansys.mapdl.core.launcher.submitter") as mck_sub:
+        args = f"my args {jobid}"
+        assert send_scontrol(args)
+
+        mck_sub.assert_called_once()
+        arg = mck_sub.call_args_list[0][0][0]
+        assert " ".join(arg) == f"scontrol my args {jobid}"
+        assert "scontrol" in arg
+        assert f"{jobid}" in arg
+
+
+@pytest.mark.parametrize(
+    "cmd,executable,shell,cwd,stdin,stdout,stderr,envvars",
+    [
+        ["mycmd", None, True, "my_cwd", None, None, None, None],
+        [["my", "cmd"], None, True, "my_cwd", None, None, None, None],
+        [
+            "mycmd",
+            "exec",
+            False,
+            "my_other_cwd",
+            "other_obj",
+            "other_obj",
+            "other_obj",
+            {"aaa": 1},
+        ],
+        [
+            ["my", "cmd"],
+            "exec",
+            False,
+            "my_single_cwd",
+            "other_obj",
+            "other_obj",
+            "other_obj",
+            {"a": "b", "b": "c"},
+        ],
+    ],
+)
+def test_submitter(cmd, executable, shell, cwd, stdin, stdout, stderr, envvars):
+    def return_everything(*arg, **kwags):
+        return arg, kwags
+
+    with patch("subprocess.Popen", return_everything) as mck_popen:
+        args, kwargs = submitter(
+            cmd=cmd,
+            executable=executable,
+            shell=shell,
+            cwd=cwd,
+            stdin=stdin,
+            stdout=stdout,
+            stderr=stderr,
+            env_vars=envvars,
+        )
+
+        if executable:
+            if isinstance(cmd, str):
+                assert kwargs["args"] == [executable, cmd]
+            else:  # list
+                assert kwargs["args"] == [executable] + cmd
+        else:
+            assert kwargs["args"] == cmd
+
+        assert kwargs["shell"] == shell
+        assert kwargs["cwd"] == cwd
+
+        if stdin:
+            assert kwargs["stdin"] == stdin
+        else:
+            assert isinstance(kwargs["stdin"], type(subprocess.DEVNULL))
+
+        if stdout:
+            assert kwargs["stdout"] == stdout
+        else:
+            assert isinstance(kwargs["stdout"], type(subprocess.PIPE))
+
+        if stderr:
+            assert kwargs["stderr"] == stderr
+        else:
+            assert isinstance(kwargs["stderr"], type(subprocess.PIPE))
+
+        assert kwargs["env"] == envvars
+
+
+@requires("ansys-tools-path")
+@patch(
+    "ansys.tools.path.path._get_application_path",
+    lambda *args, **kwargs: "path/to/mapdl/executable",
+)
+@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
+@stack(*PATCH_MAPDL)
+@pytest.mark.parametrize(
+    "arg,value,method",
+    [
+        ("start_timeout", 88, "_timeout"),
+        ("start_timeout", 1099, "_timeout"),
+        ("cleanup_on_exit", False, "_cleanup"),
+        ("cleanup_on_exit", True, "_cleanup"),
+        ("jobname", "myjobnamestrange", "_jobname"),
+        ("jobid", 1088, "_jobid"),
+        ("finish_job_on_exit", True, "finish_job_on_exit"),
+        ("finish_job_on_exit", False, "finish_job_on_exit"),
+    ],
+)
+def test_args_pass(monkeypatch, arg, value, method):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+
+    kwargs = {arg: value}
+    mapdl = launch_mapdl(**kwargs)
+    meth = getattr(mapdl, method)
+    assert meth == value

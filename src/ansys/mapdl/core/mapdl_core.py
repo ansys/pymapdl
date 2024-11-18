@@ -72,7 +72,7 @@ from ansys.mapdl.core.misc import (
     last_created,
     random_string,
     requires_package,
-    run_as_prep7,
+    run_as,
     supress_logging,
 )
 
@@ -169,9 +169,15 @@ LOG_APDL_DEFAULT_FILE_NAME = "apdl.log"
 _ALLOWED_START_PARM = [
     "additional_switches",
     "check_parameter_names",
+    "env_vars",
+    "launched",
     "exec_file",
+    "finish_job_on_exit",
+    "hostname",
     "ip",
+    "jobid",
     "jobname",
+    "launch_on_hpc",
     "nproc",
     "override",
     "port",
@@ -179,6 +185,7 @@ _ALLOWED_START_PARM = [
     "process",
     "ram",
     "run_location",
+    "start_instance",
     "start_timeout",
     "timeout",
 ]
@@ -247,7 +254,7 @@ class _MapdlCore(Commands):
         self._response = None
         self._mode = None
         self._mapdl_process = None
-        self._launched: bool = False
+        self._launched: bool = start_parm.get("launched", False)
         self._stderr = None
         self._stdout = None
         self._file_type_for_plots = file_type_for_plots
@@ -288,7 +295,7 @@ class _MapdlCore(Commands):
         self._start_parm: Dict[str, Any] = start_parm
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
-        self.check_parameter_names = start_parm.get("check_parameter_names", True)
+        self._check_parameter_names = start_parm.get("check_parameter_names", True)
 
         # Setting up loggers
         self._log: logger = logger.add_instance_logger(
@@ -524,6 +531,7 @@ class _MapdlCore(Commands):
     def directory(self, path: Union[str, pathlib.Path]) -> None:
         """Change the directory using ``Mapdl.cwd``"""
         self.cwd(path)
+        self._path = path
 
     @property
     def exited(self):
@@ -708,7 +716,18 @@ class _MapdlCore(Commands):
         return self._launched
 
     @property
+    def check_parameter_names(self):
+        """Whether check if the name which is given to the parameter is allowed or not"""
+        return self._check_parameter_names
+
+    @check_parameter_names.setter
+    def check_parameter_names(self, value: bool):
+        """Whether check if the name which is given to the parameter is allowed or not"""
+        self._check_parameter_names = value
+
+    @property
     def logger(self) -> logging.Logger:
+        """MAPDL Python-based logger"""
         return self._log
 
     @property
@@ -862,6 +881,8 @@ class _MapdlCore(Commands):
 
     @property
     def print_com(self):
+        """Whether to print or not to the console the
+        :meth:`mapdl.com ("/COM") <ansys.mapdl.core.Mapdl.com>` calls."""
         return self._print_com
 
     @print_com.setter
@@ -1553,7 +1574,7 @@ class _MapdlCore(Commands):
         )
 
     @supress_logging
-    @run_as_prep7
+    @run_as("PREP7")
     def _generate_iges(self):
         """Save IGES geometry representation to disk"""
         filename = os.path.join(self.directory, "_tmp.iges")

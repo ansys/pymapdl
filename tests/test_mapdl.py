@@ -35,7 +35,7 @@ import numpy as np
 import psutil
 import pytest
 
-from conftest import VALID_PORTS, has_dependency
+from conftest import PATCH_MAPDL_START, VALID_PORTS, has_dependency
 
 if has_dependency("pyvista"):
     from pyvista import MultiBlock
@@ -55,7 +55,7 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
-from ansys.mapdl.core.misc import random_string
+from ansys.mapdl.core.misc import random_string, stack
 from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 
 # Path to files needed for examples
@@ -1932,32 +1932,22 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
     assert int(n_ent[0]) > 0
 
 
-def test_save_on_exit(mapdl, cleared):
-    with mapdl.non_interactive:
-        mapdl.exit(save=True, fake_exit=True)
-        mapdl._exited = False  # avoiding set exited on the class.
+@pytest.mark.parametrize("save", [None, True, False])
+@patch("ansys.mapdl.core.Mapdl.save")
+@patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._exit_mapdl")
+def test_save_on_exit(mck_exit, mck_save, mapdl, cleared, save):
 
-        lines = "\n".join(mapdl._stored_commands.copy())
-        assert "SAVE" in lines.upper()
+    mck_exit.return_value = None
 
-        mapdl._stored_commands = []  # resetting
-        mapdl.prep7()
+    mapdl.exit(save=save)
+    mapdl._exited = False  # avoiding set exited on the class.
 
-    mapdl.prep7()
+    if save:
+        mck_save.assert_called_once()
+    else:
+        mck_save.assert_not_called()
 
-
-def test_save_on_exit_not(mapdl, cleared):
-    with mapdl.non_interactive:
-        mapdl.exit(save=False, fake_exit=True)
-        mapdl._exited = False  # avoiding set exited on the class.
-
-        lines = "\n".join(mapdl._stored_commands.copy())
-        assert "SAVE" not in lines.upper()
-
-        mapdl._stored_commands = []  # resetting
-        mapdl.prep7()
-
-    mapdl.prep7()
+    assert mapdl.prep7()
 
 
 def test_input_strings_inside_non_interactive(mapdl, cleared):
@@ -2463,6 +2453,29 @@ def test_no_flush_stored(mapdl):
 
     assert not mapdl._store_commands
     assert mapdl._stored_commands == []
+
+
+@pytest.mark.parametrize("ip", ["123.45.67.89", "myhostname"])
+@stack(*PATCH_MAPDL_START)
+def test_ip_hostname_in_start_parm(ip):
+    start_parm = {
+        "ip": ip,
+        "local": False,
+        "set_no_abort": False,
+        "jobid": 1001,
+    }
+
+    with patch("socket.gethostbyaddr") as mck_sock:
+        mck_sock.return_value = ("myhostname",)
+        mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
+
+    if ip == "myhostname":
+        assert mapdl.ip == "123.45.67.99"
+    else:
+        assert mapdl.ip == ip
+
+    assert mapdl.hostname == "myhostname"
+    del mapdl
 
 
 def test_directory_setter(mapdl):

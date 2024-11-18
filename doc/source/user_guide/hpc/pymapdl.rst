@@ -11,7 +11,7 @@ Introduction
 
 PyMAPDL communicates with MAPDL using the gRPC protocol.
 This protocol offers the many advantages and features described in
-see :ref:`ref_project_page`.
+:ref:`ref_project_page`.
 One of these features is that it is not required to have both
 PyMAPDL and MAPDL processes running on the same machine.
 This possibility opens the door to many configurations, depending
@@ -19,35 +19,34 @@ on whether or not you run them both on the HPC compute nodes.
 Additionally, you might be able interact with them (``interactive`` mode)
 or not (``batch`` mode).
 
-For information on supported configurations, see :ref:`ref_pymapdl_batch_in_cluster_hpc`.
+PyMAPDL takes advantage of HPC clusters to launch MAPDL instances
+with increased resources.
+PyMAPDL automatically sets these MAPDL instances to read the
+scheduler job configuration (which includes machines, number
+of CPUs, and memory), which allows MAPDL to use all the resources
+allocated to that job.
+For more information, see :ref:`ref_tight_integration_hpc`.
 
+The following configurations are supported:
 
-Since v0.68.5, PyMAPDL can take advantage of the tight integration
-between the scheduler and MAPDL to read the job configuration and
-launch an MAPDL instance that can use all the resources allocated
-to that job.
-For instance, if a SLURM job has allocated 8 nodes with 4 cores each,
-then PyMAPDL launches an MAPDL instance which uses 32 cores
-spawning across those 8 nodes.
-This behavior can turn off if passing the :envvar:`PYMAPDL_ON_SLURM`
-environment variable or passing the ``detect_HPC=False`` argument
-to the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function.
+* :ref:`ref_pymapdl_batch_in_cluster_hpc`.
+* :ref:`ref_pymapdl_interactive_in_cluster_hpc_from_login`
 
 
 .. _ref_pymapdl_batch_in_cluster_hpc:
 
-Submit a PyMAPDL batch job to the cluster from the entrypoint node
-==================================================================
+Batch job submission from the login node
+========================================
 
 Many HPC clusters allow their users to log into a machine using
 ``ssh``, ``vnc``, ``rdp``, or similar technologies and then submit a job
 to the cluster from there.
-This entrypoint machine, sometimes known as the *head node* or *entrypoint node*,
+This login machine, sometimes known as the *head node* or *entrypoint node*,
 might be a virtual machine (VDI/VM).
 
 In such cases, once the Python virtual environment with PyMAPDL is already
 set and is accessible to all the compute nodes, launching a
-PyMAPDL job from the entrypoint node is very easy to do using the ``sbatch`` command.
+PyMAPDL job from the login node is very easy to do using the ``sbatch`` command.
 When the ``sbatch`` command is used, PyMAPDL runs and launches an MAPDL instance in
 the compute nodes.
 No changes are needed on a PyMAPDL script to run it on an SLURM cluster.
@@ -97,6 +96,8 @@ job by setting the :envvar:`PYMAPDL_NPROC` environment variable to the desired v
 .. code-block:: console
 
     (venv) user@entrypoint-machine:~$ PYMAPDL_NPROC=4 sbatch main.py
+
+For more applicable environment variables, see :ref:`ref_environment_variables`.
 
 You can also add ``sbatch`` options to the command:
 
@@ -181,3 +182,34 @@ This bash script performs tasks such as creating environment variables,
 moving files to different directories, and printing to ensure your
 configuration is correct.
 
+
+.. _ref_pymapdl_interactive_in_cluster_hpc:
+
+
+.. _ref_pymapdl_interactive_in_cluster_hpc_from_login:
+
+.. include:: launch_mapdl_entrypoint.rst
+
+
+.. _ref_tight_integration_hpc:
+
+Tight integration between MAPDL and the HPC scheduler
+=====================================================
+
+Since v0.68.5, PyMAPDL can take advantage of the tight integration
+between the scheduler and MAPDL to read the job configuration and
+launch an MAPDL instance that can use all the resources allocated
+to that job.
+For instance, if a SLURM job has allocated 8 nodes with 4 cores each,
+then PyMAPDL launches an MAPDL instance that uses 32 cores
+spawning across those 8 nodes.
+
+This behavior can turn off by passing the
+:envvar:`PYMAPDL_RUNNING_ON_HPC` environment variable
+with a ``'false'`` value or passing the ``detect_hpc=False`` argument
+to the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function.
+
+Alternatively, you can override these settings by either specifying
+custom settings in the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
+function's arguments or using specific environment variables. 
+For more information, see :ref:`ref_environment_variables`.
