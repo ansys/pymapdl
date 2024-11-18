@@ -26,7 +26,6 @@ from functools import wraps
 import importlib
 import inspect
 import os
-from pathlib import Path
 import platform
 import re
 import socket
@@ -38,7 +37,6 @@ from warnings import warn
 
 import numpy as np
 
-from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import _HAS_PYVISTA, LOG, Mapdl
 
 # path of this module
@@ -107,7 +105,7 @@ def is_float(input_string: str) -> bool:
         return False
 
 
-def random_string(stringLength:int=10, letters:str=string.ascii_lowercase)->str:
+def random_string(stringLength: int = 10, letters: str = string.ascii_lowercase) -> str:
     """Generate a random string of fixed length"""
     import secrets
 
@@ -248,7 +246,7 @@ def last_created(filenames: List[str]) -> str:
     return filenames[idx]
 
 
-def create_temp_dir(tmpdir:str=None, name:str=None) -> str:
+def create_temp_dir(tmpdir: str = None, name: str = None) -> str:
     """Create a new unique directory at a given temporary directory"""
     if tmpdir is None:
         tmpdir = tempfile.gettempdir()
@@ -290,7 +288,7 @@ def get_bounding_box(nodes_xyz: np.ndarray) -> np.ndarray:
     return max_ - min_
 
 
-def load_file(mapdl:Mapdl, fname:str, priority_mapdl_file:bool=None) -> str:
+def load_file(mapdl: Mapdl, fname: str, priority_mapdl_file: bool = None) -> str:
     """
     Provide a file to the MAPDL instance.
 
@@ -370,7 +368,9 @@ def check_valid_ip(ip: str) -> None:
         socket.inet_aton(ip)
 
 
-def check_valid_port(port: int, lower_bound:int=1000, high_bound:int=60000) -> None:
+def check_valid_port(
+    port: int, lower_bound: int = 1000, high_bound: int = 60000
+) -> None:
     if not isinstance(port, int):
         raise ValueError("The 'port' parameter should be an integer.")
 
@@ -399,7 +399,7 @@ def write_array(filename: Union[str, bytes], array: np.ndarray) -> None:
     np.savetxt(filename, array, fmt="%20.12f")
 
 
-def requires_package(package_name: str, softerror:bool =False) -> Callable:
+def requires_package(package_name: str, softerror: bool = False) -> Callable:
     """
     Decorator check whether a package is installed or not.
 
@@ -448,7 +448,9 @@ def _get_args_xsel(*args: Tuple[str], **kwargs: Dict[str, str]) -> Tuple[str]:
     return type_, item, comp, vmin, vmax, vinc, kabs, kwargs
 
 
-def allow_pickable_entities(entity: str="node", plot_function: str="nplot")-> Callable:
+def allow_pickable_entities(
+    entity: str = "node", plot_function: str = "nplot"
+) -> Callable:
     """
     This wrapper opens a window with the NPLOT or KPLOT, and get the selected points (Nodes or kp),
     and feed them as a list to the NSEL.
@@ -513,7 +515,7 @@ def allow_pickable_entities(entity: str="node", plot_function: str="nplot")-> Ca
     return decorator
 
 
-def allow_iterables_vmin(entity:str="node") -> Callable:
+def allow_iterables_vmin(entity: str = "node") -> Callable:
     def decorator(original_sel_func: Callable) -> Callable:
         """
         This function wraps a NSEL or KSEL function to allow using a list/tuple/array for vmin argument.
@@ -580,7 +582,7 @@ def allow_iterables_vmin(entity:str="node") -> Callable:
     return decorator
 
 
-def only_numbers_and_dots(st:str) -> bool:
+def only_numbers_and_dots(st: str) -> bool:
     """Return if a string contains only numbers and dots"""
     return bool(re.fullmatch(r"[0-9.]+", st))
 
