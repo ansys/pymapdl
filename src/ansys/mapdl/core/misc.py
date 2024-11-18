@@ -285,7 +285,7 @@ def no_return(func):
     def wrapper(*args, **kwargs):
         func(*args, **kwargs)
 
-    LOG.debug("Output has been supressed.")
+    LOG.debug("Output has been suppressed.")
     return wrapper
 
 
