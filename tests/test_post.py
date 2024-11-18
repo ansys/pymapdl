@@ -27,7 +27,7 @@ import re
 import numpy as np
 import pytest
 
-from conftest import has_dependency, requires
+from conftest import NullContext, has_dependency, requires
 
 if has_dependency("ansys-tools-visualization_interface"):
     from pyvista.plotting.renderer import CameraPosition
@@ -42,6 +42,22 @@ from ansys.mapdl.core.post import (
     STRESS_TYPES,
     PostProcessing,
 )
+
+
+def test_repr(mapdl, cleared):
+    mapdl.prep7()
+    print(mapdl.post_processing)
+    repr_ = mapdl.post_processing.__repr__()
+
+    assert "Number of result sets" in repr_
+    assert "Current load step" in repr_
+    assert "Number of result sets" in repr_
+    assert "Enable routine POST1 to see a table of available results" in repr_
+
+    mapdl.post1()
+    repr_ = mapdl.post_processing.__repr__()
+    assert "Enable routine POST1 to see a table of available results" not in repr_
+    assert mapdl.set("LIST") in repr_
 
 
 class Test_static_solve:
@@ -234,7 +250,7 @@ class Test_static_solve:
 
     # TODO: add valid result
     @staticmethod
-    @pytest.mark.parametrize("comp", ["X", "Y", "z"])  # lowercase intentional
+    @pytest.mark.parametrize("comp", ["X", "Y", "z", "all"])  # lowercase intentional
     def test_rot(mapdl, static_solve, comp):
         from_grpc = mapdl.post_processing.nodal_rotation(comp)
 
@@ -249,9 +265,17 @@ class Test_static_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    @pytest.mark.parametrize("comp", ["X", "Y", "z"])  # lowercase intentional
+    @pytest.mark.parametrize("comp", ["X", "Y", "z", "all"])  # lowercase intentional
     def test_plot_rot(mapdl, static_solve, comp):
-        assert mapdl.post_processing.plot_nodal_rotation(comp) is None
+        if comp == "all":
+            context = pytest.raises(
+                ValueError, match='"ALL" not allowed in this context'
+            )
+        else:
+            context = NullContext()
+
+        with context:
+            assert mapdl.post_processing.plot_nodal_rotation(comp) is None
 
     # TODO: add valid result
     @staticmethod
@@ -640,12 +664,21 @@ class Test_static_solve:
         assert np.allclose(norm_disp, disp_from_grpc)
 
     @staticmethod
-    @pytest.mark.parametrize("comp", ["X", "Y", "Z", "NORM"])
+    @pytest.mark.parametrize("comp", ["X", "Y", "Z", "NORM", "all"])
     @requires("ansys-tools-visualization_interface")
     def test_elem_disp_plot(mapdl, static_solve, comp):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
-        assert mapdl.post_processing.plot_element_displacement(comp) is None
+
+        if comp == "all":
+            context = pytest.raises(
+                ValueError, match='"ALL" not allowed in this context'
+            )
+        else:
+            context = NullContext()
+
+        with context:
+            assert mapdl.post_processing.plot_element_displacement(comp) is None
 
     @staticmethod
     @pytest.mark.parametrize("component", STRESS_TYPES[::3])
@@ -1142,6 +1175,16 @@ class Test_contact_solve:
         mapdl.mute = False
 
     @staticmethod
+    def test_time(mapdl, contact_solve):
+        assert mapdl.post_processing.time == 1
+
+    @staticmethod
+    def test_freq(mapdl, contact_solve):
+        # same as post_processing.time
+        assert mapdl.post_processing.freq == 1
+        assert mapdl.post_processing.time == mapdl.post_processing.freq
+
+    @staticmethod
     def test_nodal_contact_friction_stress(mapdl, contact_solve):
         # Format tables.
         mapdl.post1()
@@ -1300,76 +1343,164 @@ def test_exited(mapdl):
 
 
 ###############################################################################
-# @pytest.mark.parametrize('comp', COMPONENT_STRESS_TYPE)
-# def test_nodal_thermal_component_strain(mapdl, thermal_solve, comp):
-
-#     index = COMPONENT_STRESS_TYPE.index(comp)
-#     mapdl.prnsol('EPPL', 'COMP', mute=True)  # run twice to clear out warning
-
-#     data = np.genfromtxt(mapdl.prnsol('EPPL', 'COMP').splitlines()[1:])
-#     nnum_ans = data[:, 0].astype(np.int32)
-#     data_ans = data[:, index + 1]
-#     data = mapdl.post_processing.nodal_thermal_component_strain(comp)
-#     data = data[np.in1d(mapdl.mesh.nnum, nnum_ans)]
-
-#     assert np.allclose(data_ans, data)
 
 
-# @requires("ansys-tools-visualization_interface")
-# def test_plot_nodal_thermal_component_strain(mapdl, thermal_solve):
-#     assert mapdl.post_processing.plot_nodal_thermal_component_strain('x') is None
+class Test_thermal_solve:
 
+    @staticmethod
+    @pytest.fixture(scope="class")
+    def thermal_solve(mapdl):
+        mapdl.mute = True
+        mapdl.finish()
+        mapdl.clear()
 
-# @pytest.mark.parametrize('comp', PRINCIPAL_TYPE)
-# def test_nodal_thermal_principal_strain(mapdl, thermal_solve, comp):
-#     from_grpc = mapdl.post_processing.nodal_thermal_principal_strain(comp)
+        mapdl.prep7()
+        mapdl.et(1, "PLANE223", 11, 1)  # COUPLE-FIELD ELEMENT TYPE, WEAK COUPLING
+        mapdl.et(2, "CONTA175", 1)  # CONTACT ELEMENT TYPE
+        mapdl.et(3, "TARGE169")  # TARGET ELEMENT TYPE
+        mapdl.mp("EX", 1, 10e6)  # YOUNG'S MODULUS
+        mapdl.mp("KXX", 1, 250)  # CONDUCTIVITY
+        mapdl.mp("ALPX", 1, 12e-6)  # THERMAL EXPANSION COEFFICIENT
+        mapdl.mp("PRXY", "", 0.3)
+        mapdl.r(2, "", "", -1000, -0.005)
+        mapdl.rmore("", "", "", "", "", -100)
+        mapdl.rmore("", 100)
+        mapdl.rmore()
+        mapdl.rmore(0.01)
 
-#     index = PRINCIPAL_TYPE.index(comp)
-#     mapdl.prnsol('EPPL', 'PRIN')  # flush to ignore warning
-#     arr = np.genfromtxt(mapdl.prnsol('EPPL', 'PRIN').splitlines()[1:])
-#     nnum_ans = arr[:, 0]
-#     from_prns = arr[:, index + 1]
+        # SET UP FINITE ELEMENT MODEL
+        mapdl.n(1)
+        mapdl.n(2, 0.4)
+        mapdl.n(3, "(0.4+0.0035)")
+        mapdl.n(4, "(0.9+0.0035)")
+        mapdl.ngen(2, 4, 1, 4, 1, "", 0.1)
+        mapdl.e(1, 2, 6, 5)  # PLANE223 ELEMENTS
+        mapdl.e(3, 4, 8, 7)
+        mapdl.type(2)  # CONTACT ELEMENTS
+        mapdl.real(2)
+        mapdl.e(2)
+        mapdl.e(6)
+        mapdl.type(3)  # TARGET ELEMENTS
+        mapdl.real(2)
+        mapdl.nsel("S", "NODE", "", 3, 7, 4)
+        mapdl.esln()
+        mapdl.esurf()
+        mapdl.allsel()
 
-#     # grpc includes all nodes.  ignore the ones not included in prnsol
-#     from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        # APPLY INITIAL BOUNDARY CONDITIONS
+        mapdl.d(1, "UY", "", "", 4, 1)
+        mapdl.d(1, "UX", "", "", 5, 4)
+        mapdl.d(4, "UX", "", "", 8, 4)
+        mapdl.tref(100)
+        mapdl.eresx("YES")
+        mapdl.finish()
 
-#     assert np.allclose(from_grpc, from_prns)
+        mapdl.slashsolu()
+        mapdl.nlgeom("ON")  # LARGE DEFLECTION EFFECTS TURNED ON
+        mapdl.d(1, "TEMP", 500, "", 5, 4)
+        mapdl.d(3, "TEMP", 100, "", 4)
+        mapdl.d(7, "TEMP", 100, "", 8)
+        mapdl.solve()  # FIRST LOAD STEP
 
+        mapdl.solution()
+        mapdl.allsel()
+        mapdl.outres("all", "all")
+        mapdl.solve()
+        mapdl.mute = False
 
-# @requires("ansys-tools-visualization_interface")
-# def test_plot_nodal_thermal_principal_strain(mapdl, thermal_solve):
-#     assert mapdl.post_processing.plot_nodal_thermal_principal_strain(1) is None
+        mapdl.save("thermal_solve")
+        mapdl.finish()
 
+    @staticmethod
+    @pytest.fixture()
+    def resume(mapdl, thermal_solve):
+        mapdl.solution()
+        mapdl.resume("thermal_solve")
 
-# def test_nodal_thermal_strain_intensity(mapdl, thermal_solve):
-#     mapdl.prnsol('EPPL', 'PRIN', mute=True)  # run twice to clear out warning
-#     data = np.genfromtxt(mapdl.prnsol('EPPL', 'PRIN').splitlines()[1:])
-#     nnum_ans = data[:, 0].astype(np.int32)
-#     sint_ans = data[:, -2]
-#     sint = mapdl.post_processing.nodal_thermal_strain_intensity()
+        mapdl.post1()
+        mapdl.allsel()
+        mapdl.set("last")
 
-#     sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
-#     assert np.allclose(sint_ans, sint_aligned)
+        mapdl.header("OFF", "OFF", "OFF", "OFF", "OFF", "OFF")
+        nsigfig = 10
+        mapdl.format("", "E", nsigfig + 9, nsigfig)
+        mapdl.page(1e9, "", -1, 240)
 
+    @staticmethod
+    @pytest.mark.parametrize("comp", COMPONENT_STRESS_TYPE)
+    def test_nodal_thermal_component_strain(mapdl, resume, comp):
 
-# @requires("ansys-tools-visualization_interface")
-# def test_plot_nodal_thermal_strain_intensity(mapdl, thermal_solve):
-#     assert mapdl.post_processing.plot_nodal_thermal_strain_intensity() is None
+        index = COMPONENT_STRESS_TYPE.index(comp)
+        mapdl.prnsol("EPTH", "COMP", mute=True)  # run twice to clear out warning
 
+        data = np.genfromtxt(mapdl.prnsol("EPTH", "COMP").splitlines()[1:])
+        nnum_ans = data[:, 0].astype(np.int32)
+        data_ans = data[:, index + 1]
+        data = mapdl.post_processing.nodal_thermal_component_strain(comp)
+        data = data[np.in1d(mapdl.mesh.nnum, nnum_ans)]
 
-# def test_nodal_thermal_eqv_strain(mapdl, thermal_solve):
-#     mapdl.prnsol('EPPL', 'PRIN', mute=True)  # run twice to clear out warning
-#     data = np.genfromtxt(mapdl.prnsol('EPPL', 'PRIN').splitlines()[1:])
-#     nnum_ans = data[:, 0].astype(np.int32)
-#     seqv_ans = data[:, -1]
-#     seqv = mapdl.post_processing.nodal_thermal_eqv_strain()
+        assert np.allclose(data_ans, data)
 
-#     seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
-#     assert np.allclose(seqv_ans, seqv_aligned)
+    @staticmethod
+    @requires("ansys-tools-visualization_interface")
+    def test_plot_nodal_thermal_component_strain(mapdl, resume):
+        assert mapdl.post_processing.plot_nodal_thermal_component_strain("x") is None
 
+    @staticmethod
+    @pytest.mark.parametrize("comp", PRINCIPAL_TYPE)
+    def test_nodal_thermal_principal_strain(mapdl, resume, comp):
+        from_grpc = mapdl.post_processing.nodal_thermal_principal_strain(comp)
 
-# @requires("ansys-tools-visualization_interface")
-# def test_plot_nodal_thermal_eqv_strain(mapdl, thermal_solve):
-#     assert mapdl.post_processing.plot_nodal_thermal_eqv_strain(smooth_shading=True) is None
+        index = PRINCIPAL_TYPE.index(comp)
+        mapdl.prnsol("EPTH", "PRIN")  # flush to ignore warning
+        arr = np.genfromtxt(mapdl.prnsol("EPTH", "PRIN").splitlines()[1:])
+        nnum_ans = arr[:, 0]
+        from_prns = arr[:, index + 1]
+
+        # grpc includes all nodes.  ignore the ones not included in prnsol
+        from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+
+        assert np.allclose(from_grpc, from_prns)
+
+    @staticmethod
+    @requires("ansys-tools-visualization_interface")
+    def test_plot_nodal_thermal_principal_strain(mapdl, resume):
+        assert mapdl.post_processing.plot_nodal_thermal_principal_strain(1) is None
+
+    @staticmethod
+    def test_nodal_thermal_strain_intensity(mapdl, resume):
+        mapdl.prnsol("EPTH", "PRIN", mute=True)  # run twice to clear out warning
+        data = np.genfromtxt(mapdl.prnsol("EPTH", "PRIN").splitlines()[1:])
+        nnum_ans = data[:, 0].astype(np.int32)
+        sint_ans = data[:, -2]
+        sint = mapdl.post_processing.nodal_thermal_strain_intensity()
+
+        sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        assert np.allclose(sint_ans, sint_aligned)
+
+    @staticmethod
+    @requires("ansys-tools-visualization_interface")
+    def test_plot_nodal_thermal_strain_intensity(mapdl, resume):
+        assert mapdl.post_processing.plot_nodal_thermal_strain_intensity() is None
+
+    @staticmethod
+    def test_nodal_thermal_eqv_strain(mapdl, resume):
+        mapdl.prnsol("EPTH", "PRIN", mute=True)  # run twice to clear out warning
+        data = np.genfromtxt(mapdl.prnsol("EPTH", "PRIN").splitlines()[1:])
+        nnum_ans = data[:, 0].astype(np.int32)
+        seqv_ans = data[:, -1]
+        seqv = mapdl.post_processing.nodal_thermal_eqv_strain()
+
+        seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        assert np.allclose(seqv_ans, seqv_aligned)
+
+    @staticmethod
+    @requires("ansys-tools-visualization_interface")
+    def test_plot_nodal_thermal_eqv_strain(mapdl, resume):
+        assert (
+            mapdl.post_processing.plot_nodal_thermal_eqv_strain(smooth_shading=True)
+            is None
+        )
+
 
 ###############################################################################
