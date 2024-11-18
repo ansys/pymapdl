@@ -136,15 +136,6 @@ class PostProcessing:
         """Return the weakly referenced instance of MAPDL"""
         return self._mapdl_weakref()
 
-    @property
-    def _log(self):
-        """Alias for mapdl log"""
-        return self._mapdl._log
-
-    def _set_log_level(self, level):
-        """Alias for mapdl._set_log_level"""
-        return self._mapdl._set_log_level(level)
-
     @supress_logging
     def __repr__(self):
         info = "PyMAPDL PostProcessing Instance\n"
