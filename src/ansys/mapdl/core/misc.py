@@ -33,7 +33,7 @@ import socket
 import string
 import tempfile
 from threading import Thread
-from typing import Union, Tuple, Callable, Dict, Iterable
+from typing import Callable, Dict, Iterable, Tuple, Union
 from warnings import warn
 
 import numpy as np
