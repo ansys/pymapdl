@@ -534,7 +534,6 @@ CMD_DOC_STRING_INJECTOR = CMD_LISTING.copy()
 CMD_DOC_STRING_INJECTOR.extend(CMD_BC_LISTING)
 
 
-@pytest.fixture(scope="module")
 def plastic_solve(mapdl):
     mapdl.mute = True
     mapdl.finish()
@@ -546,7 +545,6 @@ def plastic_solve(mapdl):
     mapdl.mute = False
 
 
-@pytest.fixture(scope="module")
 def beam_solve(mapdl):
     mapdl.mute = True
     mapdl.finish()
