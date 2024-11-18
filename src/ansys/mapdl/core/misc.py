@@ -136,7 +136,15 @@ def supress_logging(func):
 
     @wraps(func)
     def wrapper(*args, **kwargs):
+        from ansys.mapdl.core.mapdl import MapdlBase
+
         mapdl = args[0]
+        if not issubclass(type(mapdl), (MapdlBase)):
+            # Assuming we are on a module object.
+            mapdl = mapdl._mapdl
+            if not issubclass(type(mapdl), (MapdlBase)):
+                raise Exception("This wrapper cannot access MAPDL object")
+
         prior_log_level = mapdl._log.level
         if prior_log_level != "CRITICAL":
             mapdl._set_log_level("CRITICAL")
@@ -157,7 +165,16 @@ def run_as(routine: ROUTINES):
     def decorator(function):
         @wraps(function)
         def wrapper(self, *args, **kwargs):
-            with self.run_as_routine(routine.upper()):
+            from ansys.mapdl.core.mapdl import MapdlBase
+
+            mapdl = self
+            if not issubclass(type(mapdl), (MapdlBase)):
+                # Assuming we are on a module object.
+                mapdl = mapdl._mapdl
+                if not issubclass(type(mapdl), (MapdlBase)):
+                    raise Exception("This wrapper cannot access MAPDL object")
+
+            with mapdl.run_as_routine(routine.upper()):
                 return function(self, *args, **kwargs)
 
         return wrapper
