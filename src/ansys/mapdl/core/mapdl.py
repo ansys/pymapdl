@@ -31,9 +31,3 @@ class MapdlBase(_MapdlExtended):
        :class:`MapdlGrpc <ansys.mapdl.core.mapdl_grpc.MapdlGrpc>`
 
     """
-
-    def __init__(self, *args, **kwargs):
-      raise NotImplementedError(
-         "This class cannot be used by itself. Please import one of it subsclasses "
-         "like `ansys.mapdl.core.mapdl_grpc.MapdlGrpc`"
-         )
