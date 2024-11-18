@@ -1910,6 +1910,10 @@ def test_submitter(cmd, executable, shell, cwd, stdin, stdout, stderr, envvars):
         ("start_timeout", 1099, "_timeout"),
         ("cleanup_on_exit", False, "_cleanup"),
         ("cleanup_on_exit", True, "_cleanup"),
+        ("jobname", "myjobnamestrange", "_jobname"),
+        ("jobid", 1088, "_jobid"),
+        ("finish_job_on_exit", True, "finish_job_on_exit"),
+        ("finish_job_on_exit", False, "finish_job_on_exit"),
     ],
 )
 def test_args_pass(monkeypatch, arg, value, method):
