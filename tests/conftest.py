@@ -663,7 +663,7 @@ def _patch_method(method):
     return "ansys.mapdl.core.mapdl_grpc.MapdlGrpc." + method
 
 
-_meth_patch_MAPDL_launch = (
+_meth_patch_MAPDL_launch = [
     # method, and its return
     (_patch_method("_connect"), _returns(True)),
     (_patch_method("_run"), _returns("")),
@@ -682,9 +682,23 @@ _meth_patch_MAPDL_launch = (
             ]
         ),
     ),
+]
+
+_meth_patch_MAPDL = _meth_patch_MAPDL_launch.copy()
+_meth_patch_MAPDL.extend(
+    [
+        # launcher methods
+        ("ansys.mapdl.core.launcher.launch_grpc", _returns(None)),
+        ("ansys.mapdl.core.launcher.check_mapdl_launch", _returns(None)),
+    ]
 )
 
+# For testing
+# Patch some of the starting procedures
 PATCH_MAPDL_START = [patch(method, ret) for method, ret in _meth_patch_MAPDL_launch]
+
+# Patch all the starting procedures so we can have a pseudo mapdl instance
+PATCH_MAPDL = [patch(method, ret) for method, ret in _meth_patch_MAPDL]
 
 
 @pytest.fixture(scope="function")
