@@ -1597,9 +1597,12 @@ def test_get_ip(monkeypatch, ip, ip_env):
         [50054, None, False, False, 50054],
     ),
 )
-@patch("ansys.mapdl.core._LOCAL_PORTS", [])
 def test_get_port(monkeypatch, port, port_envvar, start_instance, port_busy, result):
     # Settings
+    from ansys.mapdl import core as pymapdl
+
+    pymapdl._LOCAL_PORTS = []  # Resetting
+
     monkeypatch.delenv("PYMAPDL_PORT", False)
     if port_envvar:
         monkeypatch.setenv("PYMAPDL_PORT", port_envvar)
