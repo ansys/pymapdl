@@ -36,7 +36,7 @@ from ansys.mapdl.core.misc import (
     load_file,
     no_return,
     requires_package,
-    run_as_prep7,
+    run_as,
 )
 from conftest import requires
 
@@ -103,7 +103,7 @@ def test_run_as_prep7(mapdl, cleared):
     mapdl.post1()
     assert "POST1" in mapdl.parameters.routine
 
-    @run_as_prep7
+    @run_as("PREP7")
     def fun(
         mapdl,
     ):  # This function is for mapdl methods, hence we have to pass the MAPDL instance somehow.
