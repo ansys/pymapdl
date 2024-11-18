@@ -205,7 +205,7 @@ def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
         "eplot",
     ],
 )
-def test_plots_no_vtk(mapdl, method):
+def test_plots_no_vtk(mapdl, cube_solve, method):
     _ = getattr(mapdl, method)(vtk=False)
 
 
