@@ -38,7 +38,8 @@ from PySide6.QtWidgets import (
 )
 from pyvistaqt import QtInteractor
 
-from ansys.mapdl.core import Mapdl, MapdlTheme, launch_mapdl
+from ansys.mapdl.core import Mapdl, launch_mapdl
+from ansys.mapdl.core.plotting.theme import MapdlTheme
 
 
 class MainWindow(QMainWindow):
@@ -221,7 +222,7 @@ class MainWindow(QMainWindow):
         )
 
         self._preprocessing_plotter.GetRenderWindow().AddRenderer(
-            preprocessing_plotter.renderer
+            preprocessing_plotter.scene.renderer
         )
 
         self._mapdl.finish()
@@ -245,13 +246,14 @@ class MainWindow(QMainWindow):
             "norm", show_node_numbering=True, cpos="xy", return_plotter=True
         )
         self._postprocessing_plotter.GetRenderWindow().AddRenderer(
-            nodal_disp_plotter.renderer
+            nodal_disp_plotter.scene.renderer
         )
 
         mid_node_uy = mapdl.get_value(
             entity="NODE", entnum=self._number_of_nodes // 2 + 1, item1="u", it1num="y"
         )
-        self._deflection_label.setText(f"Deflection: {mid_node_uy:.3f}")
+
+        self._deflection_label.setText(f"Deflection: {mid_node_uy:.6f}")
 
     def closeEvent(self, event) -> None:
         self._preprocessing_plotter.close()
