@@ -151,7 +151,6 @@ def supress_logging(func):
     return wrapper
 
 
-
 def run_as(routine: ROUTINES):
     """Run a MAPDL method at PREP7 and always revert to the prior processor"""
 
@@ -164,6 +163,7 @@ def run_as(routine: ROUTINES):
         return wrapper
 
     return decorator
+
 
 def threaded(func):
     """Decorator to call a function using a thread"""
