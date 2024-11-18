@@ -13,13 +13,7 @@ The :download:`gui_app.py <gui_app.py>` script launches a graphical app using Py
 
 The **Preprocessing** tab contains input fields for Poisson's ratio, Young modulus, beam length, and a number of simulation nodes.
 
-.. image:: base_app.png
-
-The **Solver** tab provide a button to solve the model.
-Additional, you can add more analysis configuration options such as
-type of solver.
-
-.. image:: final_app_solver.png
+.. image:: final_app_preprocessing.png
 
 The **Postprocessing** tab shows the deformation plot.
 
@@ -92,8 +86,8 @@ The ``MainWindow`` object store the ``mapdl`` object internally:
     class MainWindow(QMainWindow):
         def __init__(self, mapdl: Mapdl, parent=None) -> None:
             super().__init__(parent)
-            self._setup_ui()
             self._mapdl = mapdl
+            self._setup_ui()
 
 
 
@@ -103,12 +97,12 @@ Simulation setup
 The model is built in ``build_model`` method:
 
 .. literalinclude:: gui_app.py
-    :lines: 203-233
+    :lines: 188-216
 
 And solved in ``run_solver``:
 
 .. literalinclude:: gui_app.py
-    :lines: 234-263
+    :lines: 217-246
 
 
 Develop the logic
@@ -123,20 +117,13 @@ Connect each button to a function that contains the logic:
 
     def _setup_tab_preprocessing(self) -> None:
         ...
-        # Button to run the preprocessor
-        self._run_preprocessor_button = QPushButton(text="Run preprocessor")
-        self._run_preprocessor_button.clicked.connect(self._run_preprocessor)
+        # Solve button
+        self._solve_button = QPushButton(text="Solve")
+        self._solve_button.clicked.connect(self.run_solver)
+        container_layout.addWidget(self._solve_button, 5, 0, 1, 3)
         ...
 
 
-    def _setup_tab_solver(self) -> None:
-        container_layout = QGridLayout()
-        self._tab_solver.setLayout(container_layout)
-
-        self._solve_button = QPushButton(text="Solve")
-        self._solve_button.clicked.connect(self._run_solver)
-
-        container_layout.addWidget(self._solve_button)
 
 .. vale on
 
