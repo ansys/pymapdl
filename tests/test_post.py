@@ -680,8 +680,10 @@ class Test_static_solve:
         with context:
             assert mapdl.post_processing.plot_element_displacement(comp) is None
 
+    STRESS_TYPES.extend([1, 2, 3])
+
     @staticmethod
-    @pytest.mark.parametrize("component", STRESS_TYPES[::3])
+    @pytest.mark.parametrize("component", STRESS_TYPES)
     @pytest.mark.parametrize("option", ["min", "max", "avg"])
     def test_element_stress(mapdl, static_solve, component, option):
         mapdl.post1(mute=True)
@@ -689,7 +691,7 @@ class Test_static_solve:
         stress = mapdl.post_processing.element_stress(component, option)
 
         # use pretab to get the data
-        table_name = "values" + component
+        table_name = "values" + str(component)
         mapdl.etable(table_name, "S", component, option=option, mute=True)
         from_pretab = np.genfromtxt(mapdl.pretab(table_name).splitlines()[1:])[:, 1]
         assert np.allclose(stress, from_pretab)

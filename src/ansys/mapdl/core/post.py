@@ -1346,8 +1346,8 @@ class PostProcessing:
                 0.        ,  0.        ])
 
         """
-        if not isinstance(option, str):
-            option = str(option)
+        if not isinstance(component, str):
+            component = str(component)
         component = elem_check_inputs(component, option, STRESS_TYPES)
         return self.element_values("S", component, option)
 
