@@ -776,6 +776,11 @@ class Test_plastic_solve:
         mapdl.post1()
         mapdl.set(1, 2)
 
+        # necessary for any prnsol printouts
+        mapdl.header("off", "off", "off", "off", "off", "off")
+        nsigfig = 10
+        mapdl.format("", "E", nsigfig + 9, nsigfig)
+
     @staticmethod
     @pytest.mark.parametrize("comp", COMPONENT_STRESS_TYPE)
     def test_nodal_plastic_component_strain(mapdl, resume, comp):
@@ -1168,15 +1173,14 @@ class Test_contact_solve:
         mapdl.allsel()
         mapdl.set("last")
 
-    @staticmethod
-    def test_nodal_contact_friction_stress(mapdl, resume):
-        # Format tables.
-        mapdl.post1()
         mapdl.header("OFF", "OFF", "OFF", "OFF", "OFF", "OFF")
         nsigfig = 10
         mapdl.format("", "E", nsigfig + 9, nsigfig)
         mapdl.page(1e9, "", -1, 240)
 
+    @staticmethod
+    def test_nodal_contact_friction_stress(mapdl, resume):
+        # Format tables.
         prnsol = mapdl.prnsol("CONT")
         array = np.genfromtxt(prnsol.splitlines(), skip_header=1)
         sfric_prn = array[:, 4]
