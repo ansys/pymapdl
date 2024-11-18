@@ -543,7 +543,7 @@ jobs:
             --ignore_image_cache \
             --cov-report=xml:${{ matrix.mapdl-version }}-remote.xml
 
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # required
@@ -742,7 +742,7 @@ jobs:
 
           reactions: rocket
 
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # required
@@ -849,7 +849,7 @@ jobs:
             ${{ env.PYTEST_ARGUMENTS }} \
             --cov-report=xml:${{ matrix.mapdl-version }}-minimal.xml
 
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # required
@@ -922,7 +922,7 @@ jobs:
             --ignore_image_cache \
             --cov-report=xml:windows-v22.2.0-local.xml
 
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # required
