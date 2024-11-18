@@ -26,7 +26,7 @@ The **Postprocessing** tab shows the deformation plot.
 .. image:: final_app_postprocessing.png
 
 
-Add a PyVista plotting frame in the window
+Add a PyVista plotting frame to the window
 ==========================================
 
 Start by importing the `QtInteractor <https://qtdocs.pyvista.org/api_reference.html#qtinteractor>`_
@@ -147,7 +147,7 @@ You can run the app as a normal python script:
 
 .. code:: console
 
-    python gui_app.py
+    $ python gui_app.py
 
 
 Additional files
