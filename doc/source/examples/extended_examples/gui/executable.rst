@@ -82,7 +82,7 @@ Finally, make sure to correctly close the VTK widgets when closing the app:
 Launch an MAPDL instance in your window
 =======================================
 
-In our example, the MAPDL instance is launched outside the ``MainWindow`` object,
+In this example, the MAPDL instance is launched outside the ``MainWindow`` object,
 and it passed to it as an argument.
 
 .. code:: python
