@@ -76,6 +76,7 @@ from ansys.mapdl.core.licensing import LICENSES
 from ansys.mapdl.core.misc import stack
 from conftest import (
     ON_LOCAL,
+    PATCH_MAPDL,
     PATCH_MAPDL_START,
     QUICK_LAUNCH_SWITCHES,
     TESTING_MINIMAL,
@@ -263,7 +264,6 @@ def test_license_type_dummy(mapdl):
     ):
         launch_mapdl(
             start_instance=True,
-            port=mapdl.port + 1,
             additional_switches=f" -p {dummy_license_type} " + QUICK_LAUNCH_SWITCHES,
             start_timeout=start_timeout,
             license_server_check=False,
@@ -1894,3 +1894,32 @@ def test_submitter(cmd, executable, shell, cwd, stdin, stdout, stderr, envvars):
             assert isinstance(kwargs["stderr"], type(subprocess.PIPE))
 
         assert kwargs["env"] == envvars
+
+
+@requires("ansys-tools-path")
+@patch(
+    "ansys.tools.path.path._get_application_path",
+    lambda *args, **kwargs: "path/to/mapdl/executable",
+)
+@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
+@stack(*PATCH_MAPDL)
+@pytest.mark.parametrize(
+    "arg,value,method",
+    [
+        ("start_timeout", 88, "_timeout"),
+        ("start_timeout", 1099, "_timeout"),
+        ("cleanup_on_exit", False, "_cleanup"),
+        ("cleanup_on_exit", True, "_cleanup"),
+        ("jobname", "myjobnamestrange", "_jobname"),
+        ("jobid", 1088, "_jobid"),
+        ("finish_job_on_exit", True, "finish_job_on_exit"),
+        ("finish_job_on_exit", False, "finish_job_on_exit"),
+    ],
+)
+def test_args_pass(monkeypatch, arg, value, method):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+
+    kwargs = {arg: value}
+    mapdl = launch_mapdl(**kwargs)
+    meth = getattr(mapdl, method)
+    assert meth == value
