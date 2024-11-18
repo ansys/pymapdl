@@ -33,7 +33,7 @@ class MapdlBase(_MapdlExtended):
     """
 
     def __init__(self, *args, **kwargs):
-      raise NotImplementedError(
-         "This class cannot be used by itself. Please import one of it subsclasses "
-         "like `ansys.mapdl.core.mapdl_grpc.MapdlGrpc`"
-         )
+        raise NotImplementedError(
+            "This class cannot be used by itself. Please import one of it subsclasses "
+            "like `ansys.mapdl.core.mapdl_grpc.MapdlGrpc`"
+        )
