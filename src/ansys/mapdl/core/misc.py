@@ -183,6 +183,7 @@ def threaded(func):
         name = kwargs.get("name", f"Threaded `{func.__name__}` function")
         thread = Thread(target=func, name=name, args=args, kwargs=kwargs)
         thread.start()
+        LOG.debug(f"Thread started with name: {name}")
         return thread
 
     return wrapper
@@ -196,9 +197,11 @@ def threaded_daemon(func):
         name = kwargs.pop(
             "thread_name", f"Threaded (with Daemon) `{func.__name__}` function"
         )
+
         thread = Thread(target=func, name=name, args=args, kwargs=kwargs)
         thread.daemon = True
         thread.start()
+        LOG.debug(f"Thread demon started with name: {name}")
         return thread
 
     return wrapper
@@ -229,8 +232,10 @@ def creation_time(path_to_file):
         try:
             return stat.st_birthtime
         except AttributeError:
-            # We're probably on Linux. No easy way to get creation dates here,
-            # so we'll settle for when its content was last modified.
+            LOG.debug(
+                "We're probably on Linux. No easy way to get creation dates here, "
+                "so we'll settle for when its content was last modified."
+            )
             return stat.st_mtime
 
 
@@ -280,6 +285,7 @@ def no_return(func):
     def wrapper(*args, **kwargs):
         func(*args, **kwargs)
 
+    LOG.debug("Output has been suppressed.")
     return wrapper
 
 
