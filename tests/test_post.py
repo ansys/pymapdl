@@ -186,14 +186,22 @@ class Test_static_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    @pytest.mark.parametrize("comp", ["X", "Y", "z", "norm"])  # lowercase intentional
+    @pytest.mark.parametrize(
+        "comp", ["X", "Y", "z", "norm", "all"]
+    )  # lowercase intentional
     def test_disp_plot(mapdl, static_solve, comp):
-        assert (
-            mapdl.post_processing.plot_nodal_displacement(
-                comp, smooth_shading=True, cmap=PyMAPDL_cmap
+        if comp == "all":
+            context = pytest.raises(ValueError, '"ALL" not allowed in this context')
+        else:
+            context = NullContext()
+
+        with context:
+            assert (
+                mapdl.post_processing.plot_nodal_displacement(
+                    comp, smooth_shading=True, cmap=PyMAPDL_cmap
+                )
+                is None
             )
-            is None
-        )
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
@@ -621,19 +629,25 @@ class Test_static_solve:
         )
 
     @staticmethod
-    @pytest.mark.parametrize("comp", ["X", "Y", "z"])  # lowercase intentional
+    @pytest.mark.parametrize("comp", ["X", "Y", "z", "all"])  # lowercase intentional
     def test_elem_disp(mapdl, static_solve, comp):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
         mapdl.allsel()
 
-        disp_from_grpc = mapdl.post_processing.element_displacement(comp)
+        if comp == "all":
+            context = pytest.raises(ValueError, '"ALL" not allowed in this context')
+        else:
+            context = NullContext()
 
-        # use pretab to get the data
-        table_name = "values"
-        mapdl.etable(table_name, "U", comp, mute=True)
-        arr = np.genfromtxt(mapdl.pretab(table_name).splitlines()[1:])[:, 1]
-        assert np.allclose(arr, disp_from_grpc)
+        with context:
+            disp_from_grpc = mapdl.post_processing.element_displacement(comp)
+
+            # use pretab to get the data
+            table_name = "values"
+            mapdl.etable(table_name, "U", comp, mute=True)
+            arr = np.genfromtxt(mapdl.pretab(table_name).splitlines()[1:])[:, 1]
+            assert np.allclose(arr, disp_from_grpc)
 
     @staticmethod
     @pytest.mark.parametrize("option", ["min", "max", "avg"])
