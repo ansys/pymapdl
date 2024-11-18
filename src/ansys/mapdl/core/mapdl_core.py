@@ -295,7 +295,7 @@ class _MapdlCore(Commands):
         self._start_parm: Dict[str, Any] = start_parm
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
-        self.check_parameter_names = start_parm.get("check_parameter_names", True)
+        self._check_parameter_names = start_parm.get("check_parameter_names", True)
 
         # Setting up loggers
         self._log: logger = logger.add_instance_logger(
@@ -716,7 +716,18 @@ class _MapdlCore(Commands):
         return self._launched
 
     @property
+    def check_parameter_names(self):
+        """Whether check if the name which is given to the parameter is allowed or not"""
+        return self._check_parameter_names
+
+    @check_parameter_names.setter
+    def check_parameter_names(self, value: bool):
+        """Whether check if the name which is given to the parameter is allowed or not"""
+        self._check_parameter_names = value
+
+    @property
     def logger(self) -> logging.Logger:
+        """MAPDL Python-based logger"""
         return self._log
 
     @property
@@ -870,6 +881,8 @@ class _MapdlCore(Commands):
 
     @property
     def print_com(self):
+        """Whether to print or not to the console the
+        :meth:`mapdl.com ("/COM") <ansys.mapdl.core.Mapdl.com>` calls."""
         return self._print_com
 
     @print_com.setter
