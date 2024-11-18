@@ -24,8 +24,9 @@ Add a PyVista plotting frame to the window
 ==========================================
 
 Start by importing the `QtInteractor <https://qtdocs.pyvista.org/api_reference.html#qtinteractor>`_
-class from the ``pyvistaqt`` package and the :class:`MapdlTheme <ansys.mapdl.core.plotting.theme.MapdlTheme>`
-class from the ``ansys-mapdl-core`` package:
+class from the `pyvistaqt <https://github.com/pyvista/pyvistaqt>`_ package and
+the :class:`MapdlTheme <ansys.mapdl.core.plotting.theme.MapdlTheme>`
+class from the `ansys-mapdl-core <pymapdl_repo_>`_ package:
 
 .. code:: python
 
@@ -55,6 +56,20 @@ Add another plotter on the second tab:
         self._postprocessing_plotter = QtInteractor(theme=MapdlTheme())
         container_layout.addWidget(self._postprocessing_plotter)
 
+The plotter can be updated with a PyMAPDL plotter object as follow:
+
+.. code:: python
+
+    # Getting PyMAPDL plotter object
+    nodal_disp_plotter = self._mapdl.post_processing.plot_nodal_displacement(
+        "norm", show_node_numbering=True, cpos="xy", return_plotter=True
+    )
+
+    # Updating widget
+    self._postprocessing_plotter.GetRenderWindow().AddRenderer(
+        nodal_disp_plotter.scene.renderer
+    )
+
 Finally, make sure to correctly close the VTK widgets when closing the app:
 
 .. code:: python
@@ -67,8 +82,8 @@ Finally, make sure to correctly close the VTK widgets when closing the app:
 Launch an MAPDL instance in your window
 =======================================
 
-In our example, the MAPDL instance is launched outside the main window object, and passed to it as
-an argument.
+In our example, the MAPDL instance is launched outside the ``MainWindow`` object,
+and it passed to it as an argument.
 
 .. code:: python
 
@@ -79,7 +94,7 @@ an argument.
         window.show()
         sys.exit(app.exec())
 
-The ``MainWindow`` object store the ``mapdl`` object internally:
+The ``MainWindow`` object stores the :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` object internally:
 
 .. code:: python
 
@@ -90,19 +105,18 @@ The ``MainWindow`` object store the ``mapdl`` object internally:
             self._setup_ui()
 
 
-
 Simulation setup
 ================
 
 The model is built in ``build_model`` method:
 
 .. literalinclude:: gui_app.py
-    :lines: 188-216
+    :lines: 189-216
 
 And solved in ``run_solver``:
 
 .. literalinclude:: gui_app.py
-    :lines: 217-246
+    :lines: 218-246
 
 
 Develop the logic
@@ -113,7 +127,7 @@ Connect each button to a function that contains the logic:
 .. vale off
 
 .. code-block:: python
-    :emphasize-lines: 5,14
+    :emphasize-lines: 5
 
     def _setup_tab_preprocessing(self) -> None:
         ...
@@ -122,8 +136,6 @@ Connect each button to a function that contains the logic:
         self._solve_button.clicked.connect(self.run_solver)
         container_layout.addWidget(self._solve_button, 5, 0, 1, 3)
         ...
-
-
 
 .. vale on
 
