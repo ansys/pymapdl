@@ -32,12 +32,12 @@ import socket
 import string
 import tempfile
 from threading import Thread
-from typing import Callable, Dict, Iterable, Tuple, Union
+from typing import Callable, Dict, Iterable, List, Tuple, Union
 from warnings import warn
 
 import numpy as np
 
-from ansys.mapdl.core import _HAS_PYVISTA, LOG, Mapdl
+from ansys.mapdl.core import _HAS_PYVISTA, LOG
 
 # path of this module
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -202,7 +202,7 @@ def threaded_daemon(func: Callable) -> Callable:
     return wrapper
 
 
-def unique_rows(arr: np.ndarray) -> Tuple(Union[np.ndarray, np.ndarray, np.ndarray]):
+def unique_rows(arr: np.ndarray) -> Tuple[Union[np.ndarray, np.ndarray, np.ndarray]]:
     """Returns unique rows of `arr` and indices of those rows"""
     if not arr.flags.c_contiguous:
         arr = np.ascontiguousarray(arr)
@@ -288,7 +288,7 @@ def get_bounding_box(nodes_xyz: np.ndarray) -> np.ndarray:
     return max_ - min_
 
 
-def load_file(mapdl: Mapdl, fname: str, priority_mapdl_file: bool = None) -> str:
+def load_file(mapdl: "Mapdl", fname: str, priority_mapdl_file: bool = None) -> str:
     """
     Provide a file to the MAPDL instance.
 
