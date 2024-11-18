@@ -134,7 +134,15 @@ def supress_logging(func: Callable) -> Callable:
 
     @wraps(func)
     def wrapper(*args, **kwargs):
+        from ansys.mapdl.core.mapdl import MapdlBase
+
         mapdl = args[0]
+        if not issubclass(type(mapdl), (MapdlBase)):
+            # Assuming we are on a module object.
+            mapdl = mapdl._mapdl
+            if not issubclass(type(mapdl), (MapdlBase)):
+                raise Exception("This wrapper cannot access MAPDL object")
+
         prior_log_level = mapdl._log.level
         if prior_log_level != "CRITICAL":
             mapdl._set_log_level("CRITICAL")
@@ -149,28 +157,27 @@ def supress_logging(func: Callable) -> Callable:
     return wrapper
 
 
-def run_as_prep7(func: Callable) -> Callable:
+def run_as(routine: ROUTINES):
     """Run a MAPDL method at PREP7 and always revert to the prior processor"""
 
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        mapdl = args[0]
-        if hasattr(mapdl, "_mapdl"):
-            mapdl = mapdl._mapdl
-        prior_processor = mapdl.parameters.routine
-        if prior_processor != "PREP7":
-            mapdl.prep7()
+    def decorator(function):
+        @wraps(function)
+        def wrapper(self, *args, **kwargs):
+            from ansys.mapdl.core.mapdl import MapdlBase
 
-        out = func(*args, **kwargs)
+            mapdl = self
+            if not issubclass(type(mapdl), (MapdlBase)):
+                # Assuming we are on a module object.
+                mapdl = mapdl._mapdl
+                if not issubclass(type(mapdl), (MapdlBase)):
+                    raise Exception("This wrapper cannot access MAPDL object")
 
-        if prior_processor == "Begin level":
-            mapdl.finish()
-        elif prior_processor != "PREP7":
-            mapdl.run("/%s" % prior_processor)
+            with mapdl.run_as_routine(routine.upper()):
+                return function(self, *args, **kwargs)
 
-        return out
+        return wrapper
 
-    return wrapper
+    return decorator
 
 
 def threaded(func: Callable) -> Callable:
@@ -181,6 +188,7 @@ def threaded(func: Callable) -> Callable:
         name = kwargs.get("name", f"Threaded `{func.__name__}` function")
         thread = Thread(target=func, name=name, args=args, kwargs=kwargs)
         thread.start()
+        LOG.debug(f"Thread started with name: {name}")
         return thread
 
     return wrapper
@@ -194,9 +202,11 @@ def threaded_daemon(func: Callable) -> Callable:
         name = kwargs.pop(
             "thread_name", f"Threaded (with Daemon) `{func.__name__}` function"
         )
+
         thread = Thread(target=func, name=name, args=args, kwargs=kwargs)
         thread.daemon = True
         thread.start()
+        LOG.debug(f"Thread demon started with name: {name}")
         return thread
 
     return wrapper
@@ -227,8 +237,10 @@ def creation_time(path_to_file: str) -> float:
         try:
             return float(stat.st_birthtime)
         except AttributeError:
-            # We're probably on Linux. No easy way to get creation dates here,
-            # so we'll settle for when its content was last modified.
+            LOG.debug(
+                "We're probably on Linux. No easy way to get creation dates here, "
+                "so we'll settle for when its content was last modified."
+            )
             return stat.st_mtime
 
 
@@ -278,6 +290,7 @@ def no_return(func: Callable) -> Callable:
     def wrapper(*args, **kwargs):
         func(*args, **kwargs)
 
+    LOG.debug("Output has been suppressed.")
     return wrapper
 
 

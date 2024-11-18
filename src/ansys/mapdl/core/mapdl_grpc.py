@@ -90,7 +90,7 @@ from ansys.mapdl.core.misc import (
     last_created,
     only_numbers_and_dots,
     random_string,
-    run_as_prep7,
+    run_as,
     supress_logging,
 )
 from ansys.mapdl.core.parameters import interp_star_status
@@ -629,6 +629,7 @@ class MapdlGrpc(MapdlBase):
 
     @property
     def process_is_alive(self):
+        """Check if the MAPDL process is alive"""
         return self._is_alive_subprocess()
 
     def _post_mortem_checks(self):
@@ -2960,7 +2961,7 @@ class MapdlGrpc(MapdlBase):
         return info
 
     @supress_logging
-    @run_as_prep7
+    @run_as("PREP7")
     def _generate_iges(self):
         """Save IGES geometry representation to disk"""
         basename = "_tmp.iges"
@@ -3403,24 +3404,20 @@ class MapdlGrpc(MapdlBase):
         node : int
             Node number on this element for which data are to be
             stored. If blank, store the average element value (except
-            for FMAG values, which are summed instead of averaged).
+            for ``FMAG`` values, which are summed instead of averaged).
 
         item : str
-            Label identifying the item. General item labels are shown
-            in Table 134: ESOL - General Item and Component Labels
-            below. Some items also require a component label.
+            Label identifying the item. Some items also require a component label.
 
         comp : str
-            Component of the item (if required). General component
-            labels are shown in Table 134: ESOL - General Item and
-            Component Labels below.  If Comp is a sequence number (n),
-            the NODE field will be ignored.
+            Component of the item (if required). If Comp is a sequence number (n),
+            the ``NODE`` field will be ignored.
 
         name : str, optional
             Thirty-two character name for identifying the item on the
             printout and displays.  The default is a label formed by
             concatenating the first four characters of the ``item`` and
-           ``comp`` labels.
+            ``comp`` labels.
 
         tstrt : str, optional
             Time (or frequency) corresponding to start of IR data.  If between
@@ -3441,21 +3438,18 @@ class MapdlGrpc(MapdlBase):
         Notes
         -----
         By default, this command store temporally the variable on the
-        variable number set by ``VAR_IR`` in the class MapdlGrpc.
+        variable number set by ``VAR_IR`` in the class
+        :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>`
         Therefore, any variable in that slot will be deleted when using
         this command.
 
-        See Table: 134:: ESOL - General Item and Component Labels for
-        a list of valid item and component labels for element (except
-        line element) results.
-
-        The ESOL command defines element results data to be stored
-        from a results file (FILE). Not all items are valid for all
+        The ``ESOL`` command defines element results data to be stored
+        from a results file (``FILE``). Not all items are valid for all
         elements. To see the available items for a given element,
         refer to the input and output summary tables in the
         documentation for that element.
 
-        Two methods of data access are available via the ESOL
+        Two methods of data access are available via the ``ESOL``
         command. You can access some simply by using a generic label
         (component name method), while others require a label and
         number (sequence number method).
@@ -3476,10 +3470,10 @@ class MapdlGrpc(MapdlBase):
         system.  Element forces and moments are in the nodal
         coordinate system. Results are obtainable for an element at a
         specified node. Further location specifications can be made
-        for some elements via the SHELL, LAYERP26, and FORCE commands.
+        for some elements via the ``SHELL``, ``LAYERP26``, and ``FORCE`` commands.
 
         For more information on the meaning of contact status and its
-        possible values, see Reviewing Results in POST1 in the Contact
+        possible values, see Reviewing Results in ``POST1`` in the Contact
         Technology Guide.
         """
         self.esol(
@@ -3759,6 +3753,15 @@ class MapdlGrpc(MapdlBase):
             return os.path.basename(target_dir)
 
     def kill_job(self, jobid: int) -> None:
+        """Kill an HPC job
+
+        Kill a job given its identifier.
+
+        Parameters
+        ----------
+        jobid : int
+            Job ID.
+        """
         cmd = ["scancel", f"{jobid}"]
         # to ensure the job is stopped properly, let's issue the scancel twice.
         subprocess.Popen(cmd)
