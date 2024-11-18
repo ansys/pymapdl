@@ -142,4 +142,5 @@ Additional files
 
 The example files can be downloaded using this link:
 
-* Original :download:`gui_app.py <gui_app.py>` script.
+* :download:`gui_app.py <gui_app.py>`: Complete Python script.
+* :download:`requirements.txt <requirements.txt>`: Python libraries requirements.
