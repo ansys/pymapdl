@@ -153,16 +153,18 @@ class MainWindow(QMainWindow):
 
         # Button to run the solver
         self._solve_button = QPushButton(text="Solve")
-        self._solve_button.clicked.connect(self._run_solver)
+        self._solve_button.clicked.connect(self.run_solver)
 
         container_layout.addWidget(self._solve_button)
 
     def _setup_tab_postprocessing(self) -> None:
         container_layout = QtWidgets.QVBoxLayout()
         self._tab_postprocessing.setLayout(container_layout)
+
         # Add a PyVista frame
         self._postprocessing_plotter = QtInteractor(theme=MapdlTheme())
         container_layout.addWidget(self._postprocessing_plotter)
+
         self._deflection_label = QLabel("Deflection: ")
         container_layout.addWidget(self._deflection_label)
 
@@ -180,40 +182,11 @@ class MainWindow(QMainWindow):
 
         poisson_ratio = float(self._poisson_ratio_input.text())
         young_modulus = float(self._young_modulus_input.text())
+        nnodes = int(self._number_of_nodes_input.value())
         length = float(self._length_input.text())
         force = float(self._force_input.text())
 
-        self._mapdl.clear()
-        self._mapdl.verify()
-        self._mapdl.prep7()
-        self._mapdl.antype("STATIC")
-        # create element type
-        self._mapdl.et(1, "BEAM188")
-
-        # Create material
-        self._mapdl.mp("PRXY", 1, poisson_ratio)
-        self._mapdl.mp("EX", 1, young_modulus)
-        self._mapdl.sectype(1, "BEAM", "RECT")
-        self._mapdl.secdata("10", "10")
-
-        self._number_of_nodes = self._number_of_nodes_input.value()
-
-        # Create the nodes
-        for node_num in range(1, self._number_of_nodes + 1):
-            self._mapdl.n(
-                node_num, (node_num - 1) * length / (self._number_of_nodes - 1), 0, 0
-            )
-
-        # Create the elements
-        for elem_num in range(1, self._number_of_nodes):
-            self._mapdl.e(elem_num, elem_num + 1)
-
-        # Fix beam ends
-        self._mapdl.d(1, lab="ALL")
-        self._mapdl.d(self._number_of_nodes, lab="ALL")
-
-        #  Apply the force to the node in the middle
-        self._mapdl.f(self._number_of_nodes // 2 + 1, lab="FY", value=force)
+        self.build_model(poisson_ratio, young_modulus, nnodes, length, force)
 
         # Get the pv.Plotter object from mapdl.eplot function
         # to plot in the window
@@ -227,7 +200,36 @@ class MainWindow(QMainWindow):
 
         self._mapdl.finish()
 
-    def _run_solver(self) -> None:
+    def build_model(self, poisson_ratio, young_modulus, nnodes, length, force):
+        self._mapdl.clear()
+        self._mapdl.verify()
+        self._mapdl.prep7()
+        self._mapdl.antype("STATIC")
+        # create element type
+        self._mapdl.et(1, "BEAM188")
+
+        # Create material
+        self._mapdl.mp("PRXY", 1, poisson_ratio)
+        self._mapdl.mp("EX", 1, young_modulus)
+        self._mapdl.sectype(1, "BEAM", "RECT")
+        self._mapdl.secdata("10", "10")
+
+        # Create the nodes
+        for node_num in range(1, nnodes + 1):
+            self._mapdl.n(node_num, (node_num - 1) * length / (nnodes - 1), 0, 0)
+
+        # Create the elements
+        for elem_num in range(1, nnodes):
+            self._mapdl.e(elem_num, elem_num + 1)
+
+        # Fix beam ends
+        self._mapdl.d(1, lab="ALL")
+        self._mapdl.d(nnodes, lab="ALL")
+
+        #  Apply the force to the node in the middle
+        self._mapdl.f(nnodes // 2 + 1, lab="FY", value=force)
+
+    def run_solver(self) -> None:
         # solve
         self._mapdl.slashsolu()
         self._mapdl.solve()
@@ -249,8 +251,10 @@ class MainWindow(QMainWindow):
             nodal_disp_plotter.scene.renderer
         )
 
+        nnodes = len(mapdl.mesh.nodes)
+
         mid_node_uy = mapdl.get_value(
-            entity="NODE", entnum=self._number_of_nodes // 2 + 1, item1="u", it1num="y"
+            entity="NODE", entnum=nnodes // 2 + 1, item1="u", it1num="y"
         )
 
         self._deflection_label.setText(f"Deflection: {mid_node_uy:.6f}")
