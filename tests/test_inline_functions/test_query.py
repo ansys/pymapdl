@@ -87,11 +87,7 @@ class TestParseParameter:
 class TestRunQuery:
 
     @pytest.fixture(scope="class")
-    def line_geometry(self, mapdl):
-        mapdl.finish(mute=True)
-        mapdl.clear("NOSTART", mute=True)
-
-        mapdl.prep7(mute=True)
+    def line_geometry(self, mapdl, cleared):
         k0 = mapdl.k(1, 0, 0, 0)
         k1 = mapdl.k(2, 1, 2, 2)
         l0 = mapdl.l(k0, k1)

@@ -34,9 +34,7 @@ if has_dependency("pyvista"):
 from ansys.mapdl.core import examples
 
 
-def test_empty_model(mapdl):
-    mapdl.clear()
-
+def test_empty_model(mapdl, cleared):
     assert mapdl.mesh.nnum.size == 0
     assert mapdl.mesh.enum.size == 0
 

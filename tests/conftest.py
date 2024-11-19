@@ -736,11 +736,17 @@ def path_tests(tmpdir):
 
 @pytest.fixture(scope="function")
 def cleared(mapdl):
-    mapdl.finish(mute=True)
+    mapdl.mute = True
+    mapdl.finish()
     # *MUST* be NOSTART.  With START fails after 20 calls...
     # this has been fixed in later pymapdl and MAPDL releases
-    mapdl.clear("NOSTART", mute=True)
-    mapdl.prep7(mute=True)
+    mapdl.clear("NOSTART")
+    mapdl.header("DEFA")
+    mapdl.format("DEFA")
+    mapdl.page("DEFA")
+
+    mapdl.prep7()
+    mapdl.mute = False
     yield
 
 
@@ -772,7 +778,6 @@ def query(mapdl, cleared):
 @pytest.fixture
 def solved_box(mapdl, cleared):
     mapdl.mute = True  # improve stability
-    mapdl.prep7()
     mapdl.et(1, "SOLID5")
     mapdl.block(0, 10, 0, 20, 0, 30)
     mapdl.esize(10)
@@ -807,7 +812,6 @@ def common_functions_and_classes():
 
 @pytest.fixture
 def selection_test_geometry(mapdl, cleared):
-    mapdl.prep7()
     k0 = mapdl.k(1, 0, 0, 0)
     k1 = mapdl.k(2, 0, 0, 1)
     k2 = mapdl.k(3, 0, 1, 0)
@@ -865,13 +869,10 @@ def coupled_example(mapdl, cleared):
 
 
 @pytest.fixture(scope="function")
-def contact_geom_and_mesh(mapdl):
+def contact_geom_and_mesh(mapdl, cleared):
     mapdl.mute = True
-    mapdl.finish()
-    mapdl.clear()
 
     # Based on tech demo 28.
-    mapdl.prep7()
     # ***** Problem parameters ********
     l = 76.2e-03 / 3  # Length of each plate,m
     w = 31.75e-03 / 2  # Width of each plate,m
@@ -1145,11 +1146,7 @@ def contact_geom_and_mesh(mapdl):
 
 
 @pytest.fixture(scope="function")
-def cuadratic_beam_problem(mapdl):
-    mapdl.clear()
-
-    # Enter verification example mode and the pre-processing routine.
-    mapdl.prep7()
+def cuadratic_beam_problem(mapdl, cleared):
 
     # Type of analysis: static.
     mapdl.antype("STATIC")

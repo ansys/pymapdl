@@ -73,7 +73,6 @@ def write_tmp_in_mapdl_instance(mapdl, filename, ext="txt"):
 
 @pytest.fixture(scope="function")
 def setup_for_cmatrix(mapdl, cleared):
-    mapdl.prep7()
     mapdl.title("Capacitance of two long cylinders above a ground plane")
     mapdl.run("a=100")  # Cylinder inside radius (μm)
     mapdl.run("d=400")  # Outer radius of air region
@@ -176,9 +175,7 @@ def test_stream(mapdl):
     assert "PREP7" in resp
 
 
-def test_basic_input_output(mapdl, tmpdir):
-    mapdl.finish()
-    mapdl.clear("NOSTART")
+def test_basic_input_output(mapdl, tmpdir, cleared):
     filename = "tmp2.inp"
     basic_inp = tmpdir.join(filename)
     with open(basic_inp, "w") as f:
@@ -196,9 +193,7 @@ def test_basic_input_output(mapdl, tmpdir):
     # input file won't actually run, but we want to see if the output switches
 
 
-def test_upload_large(mapdl):
-    mapdl.finish()
-    mapdl.clear("NOSTART")
+def test_upload_large(mapdl, cleared):
 
     file_name = examples.vmfiles["vm153"]
     test_file = os.path.join(PATH, "test_files", file_name)
@@ -263,19 +258,15 @@ def test_cmatrix(mapdl, setup_for_cmatrix):
 # directory.
 
 
-def test_read_input_file_verbose(mapdl):
+def test_read_input_file_verbose(mapdl, cleared):
     test_file = examples.vmfiles["vm153"]
-    mapdl.finish()
-    mapdl.clear()
     response = mapdl.input(test_file, verbose=True)
     assert re.search("\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
 
 
 @pytest.mark.parametrize("file_name", ["full26.dat", "static.dat"])
-def test_read_input_file(mapdl, file_name):
+def test_read_input_file(mapdl, file_name, cleared):
     test_file = os.path.join(PATH, "test_files", file_name)
-    mapdl.finish()
-    mapdl.clear()
     response = mapdl.input(test_file)
 
     assert (

@@ -292,8 +292,7 @@ class TestARNEXT:
 
 class TestVLNEXT:
     @staticmethod
-    def make_volumes(mapdl):
-        mapdl.prep7()
+    def make_volumes(mapdl, cleared):
         point1 = mapdl.k(999, 0, 10, 0)
         point2 = mapdl.k(99, 0, 0, 10)
         kps = [mapdl.k(i + 1, i, 0, 0) for i in range(10)]

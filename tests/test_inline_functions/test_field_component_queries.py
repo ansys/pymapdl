@@ -27,11 +27,7 @@ class TestFieldComponentValueGetter:
 
     # The tests change the mesh so this fixture must be function scoped.
     @pytest.fixture(scope="function")
-    def box_with_fields(self, mapdl):
-        mapdl.finish(mute=True)
-        mapdl.clear("NOSTART", mute=True)
-
-        mapdl.prep7()
+    def box_with_fields(self, mapdl, cleared):
         mapdl.mp("kxx", 1, 45)
         mapdl.mp("ex", 1, 2e10)
         mapdl.mp("perx", 1, 1)

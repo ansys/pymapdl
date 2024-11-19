@@ -74,10 +74,8 @@ def test_failure_on_non_allowed_versions(mapdl):
 
 
 @pytest.fixture(scope="session")
-def gen_block(mapdl):
+def gen_block(mapdl, cleared):
     """Generate nodes and elements in a simple block."""
-    mapdl.clear()
-    mapdl.prep7()
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.et(1, 186)
     mapdl.esize(0.25)

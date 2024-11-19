@@ -116,7 +116,6 @@ def test_run_as_prep7(mapdl, cleared):
 
 
 def test_no_return(mapdl, cleared):
-    mapdl.prep7()
 
     @no_return
     def fun(

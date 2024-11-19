@@ -103,8 +103,7 @@ def test_basic_command(cleared, mapdl_console):
     assert "CREATE A HEXAHEDRAL VOLUME" in resp
 
 
-def test_allow_ignore(mapdl_console):
-    mapdl_console.clear()
+def test_allow_ignore(mapdl_console, cleared):
     mapdl_console.allow_ignore = False
     assert mapdl_console.allow_ignore is False
     with pytest.raises(pymapdl.errors.MapdlInvalidRoutineError):

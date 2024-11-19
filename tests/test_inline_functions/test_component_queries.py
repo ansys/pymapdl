@@ -28,10 +28,7 @@ from conftest import create_geometry, get_details_of_nodes
 class TestCentroidGetter:
 
     @pytest.fixture(scope="class")
-    def box_geometry(self, mapdl):
-        mapdl.finish(mute=True)
-        mapdl.clear("NOSTART", mute=True)
-        mapdl.prep7(mute=True)
+    def box_geometry(self, mapdl, cleared):
         areas, keypoints = create_geometry(mapdl)
         q = mapdl.queries
         return q, keypoints, areas, get_details_of_nodes(mapdl)
@@ -104,12 +101,8 @@ class TestCentroidGetter:
 class TestDisplacementComponentQueriesBox:
 
     @pytest.fixture(scope="class")
-    def solved_box(self, mapdl):
+    def solved_box(self, mapdl, cleared):
         mapdl.mute = True  # improve stability
-        mapdl.finish(mute=True)
-        mapdl.clear("NOSTART", mute=True)
-
-        mapdl.prep7()
         mapdl.et(1, "SOLID5")
         mapdl.block(0, 10, 0, 20, 0, 30)
         mapdl.esize(10)
@@ -155,11 +148,7 @@ class TestDisplacementComponentQueriesBox:
 class TestDisplacementComponentQueriesSheet:
 
     @pytest.fixture(scope="class")
-    def twisted_sheet(self, mapdl):
-        mapdl.finish(mute=True)
-        mapdl.clear("NOSTART", mute=True)
-
-        mapdl.prep7()
+    def twisted_sheet(self, mapdl, cleared):
         mapdl.et(1, "SHELL181")
         mapdl.mp("EX", 1, 2e5)
         mapdl.mp("PRXY", 1, 0.3)  # Poisson's Ratio

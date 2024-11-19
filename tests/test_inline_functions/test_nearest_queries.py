@@ -28,11 +28,7 @@ from conftest import create_geometry, get_details_of_nodes
 class TestNearestEntityQueries:
 
     @pytest.fixture(scope="class")
-    def box_geometry(self, mapdl):
-        mapdl.finish(mute=True)
-        mapdl.clear("NOSTART", mute=True)
-        mapdl.prep7(mute=True)
-
+    def box_geometry(self, mapdl, cleared):
         areas, keypoints = create_geometry(mapdl)
         q = mapdl.queries
         return q, keypoints, areas, get_details_of_nodes(mapdl)

@@ -534,10 +534,8 @@ CMD_DOC_STRING_INJECTOR = CMD_LISTING.copy()
 CMD_DOC_STRING_INJECTOR.extend(CMD_BC_LISTING)
 
 
-def plastic_solve(mapdl):
+def plastic_solve(mapdl, cleared):
     mapdl.mute = True
-    mapdl.finish()
-    mapdl.clear()
     mapdl.input(examples.verif_files.vmfiles["vm273"])
 
     mapdl.post1()
@@ -545,10 +543,8 @@ def plastic_solve(mapdl):
     mapdl.mute = False
 
 
-def beam_solve(mapdl):
+def beam_solve(mapdl, cleared):
     mapdl.mute = True
-    mapdl.finish()
-    mapdl.clear()
     mapdl.input(examples.verif_files.vmfiles["vm10"])
 
     mapdl.post1()
@@ -734,10 +730,7 @@ def test_nlist_to_array(mapdl, beam_solve):
     assert np.allclose(nlist.to_array()[:, 1:4], mapdl.mesh.nodes)
 
 
-def test_cmlist(mapdl):
-    mapdl.clear()
-
-    mapdl.prep7()
+def test_cmlist(mapdl, cleared):
     # setup the full file
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.et(1, 186)
@@ -769,13 +762,7 @@ def test_cmlist(mapdl):
 
 class Test_bc_cmdlist_solid:
 
-    def solid_model(self, mapdl):
-        # Solid model (Geometry)
-
-        mapdl.clear()
-
-        mapdl.prep7()
-
+    def solid_model(self, mapdl, cleared):
         # Define keypoints, lines and area
         # --------------------
         mapdl.k(1, 0, 0)
@@ -963,13 +950,7 @@ class Test_bc_cmdlist_solid:
 
 class Test_bc_cmdlist_model:
 
-    def solid_model(self, mapdl):
-        # Solid model (Geometry)
-
-        mapdl.clear()
-
-        mapdl.prep7()
-
+    def solid_model(self, mapdl, cleared):
         # Define keypoints, lines and area
         # --------------------
         mapdl.k(1, 0, 0)
@@ -1025,7 +1006,7 @@ class Test_bc_cmdlist_model:
         assert dlist_result.compare(df_d).empty
 
     @requires("pandas")
-    def test_flist(self, mapdl):
+    def test_flist(self, mapdl, cleared):
 
         df_f = pd.DataFrame(
             {

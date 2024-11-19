@@ -287,7 +287,7 @@ def test_parameters_name_error(mapdl, func, par_name):
 
 
 def test_contain_iter(mapdl, cleared):
-    mapdl.clear()  # to check that #1107 is solved
+    mapdl.finish()  # to check that #1107 is solved
     mapdl.parameters["TWO"] = 2.0
     assert 2.0 == mapdl.parameters["TWO"]
     assert "TWO" in mapdl.parameters

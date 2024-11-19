@@ -48,10 +48,8 @@ class Test_static_solve:
 
     @staticmethod
     @pytest.fixture(scope="class")
-    def static_solve(mapdl):
+    def static_solve(mapdl, cleared):
         mapdl.mute = True
-        mapdl.finish()
-        mapdl.clear()
 
         # cylinder and mesh parameters
         # torque = 100
@@ -63,7 +61,6 @@ class Test_static_solve:
         force = 100 / radius
         pressure = force / (h_tip * 2 * np.pi * radius)
 
-        mapdl.prep7()
         mapdl.et(1, 186)
         mapdl.et(2, 154)
         mapdl.r(1)
@@ -124,9 +121,10 @@ class Test_static_solve:
 
         mapdl.save("static_solve", slab="all")
 
-    @staticmethod
     @pytest.fixture(scope="function")
-    def resume(mapdl, static_solve):
+    def resume(self, mapdl, static_solve):
+        self.mapdl = mapdl
+
         mapdl.prep7()
         mapdl.resume("static_solve")
 
@@ -756,10 +754,8 @@ class Test_plastic_solve:
 
     @staticmethod
     @pytest.fixture(scope="class")
-    def plastic_solve(mapdl):
+    def plastic_solve(mapdl, cleared):
         mapdl.mute = True
-        mapdl.finish()
-        mapdl.clear()
         mapdl.input(examples.verif_files.vmfiles["vm273"])
 
         mapdl.mute = False
@@ -861,13 +857,10 @@ class Test_contact_solve:
 
     @staticmethod
     @pytest.fixture(scope="class")
-    def contact_solve(mapdl):
+    def contact_solve(mapdl, cleared):
         mapdl.mute = True
-        mapdl.finish()
-        mapdl.clear()
 
         # Based on tech demo 28.
-        mapdl.prep7()
         # ***** Problem parameters ********
         l = 76.2e-03 / 3  # Length of each plate,m
         w = 31.75e-03 / 2  # Width of each plate,m

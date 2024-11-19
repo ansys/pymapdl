@@ -203,11 +203,17 @@ FINISH
 
 
 def clearing_cdread_cdwrite_tests(mapdl):
-    mapdl.finish(mute=True)
+    mapdl.mute = True
+    mapdl.finish()
     # *MUST* be NOSTART.  With START fails after 20 calls...
     # this has been fixed in later pymapdl and MAPDL releases
-    mapdl.clear("NOSTART", mute=True)
-    mapdl.prep7(mute=True)
+    mapdl.clear("NOSTART")
+    mapdl.header("DEFA")
+    mapdl.format("DEFA")
+    mapdl.page("DEFA")
+
+    mapdl.prep7()
+    mapdl.mute = False
 
 
 def asserting_cdread_cdwrite_tests(mapdl):
@@ -424,13 +430,11 @@ def test_comment(cleared, mapdl):
 
 
 def test_basic_command(cleared, mapdl):
-    resp = mapdl.prep7()
     resp = mapdl.finish()
     assert "ROUTINE COMPLETED" in resp
 
 
-def test_allow_ignore(mapdl):
-    mapdl.clear()
+def test_allow_ignore(mapdl, cleared):
     mapdl.allow_ignore = False
     assert mapdl.allow_ignore is False
     with pytest.raises(pymapdl.errors.MapdlInvalidRoutineError):
@@ -454,7 +458,6 @@ def test_chaining(mapdl, cleared):
             with mapdl.chain_commands:
                 mapdl.prep7()
     else:
-        mapdl.prep7()
         n_kp = 1000
         with mapdl.chain_commands:
             for i in range(1, 1 + n_kp):
@@ -463,20 +466,18 @@ def test_chaining(mapdl, cleared):
         assert mapdl.geometry.n_keypoint == 1000
 
 
-def test_error(mapdl):
+def test_error(mapdl, cleared):
     with pytest.raises(MapdlRuntimeError):
-        mapdl.prep7()
         mapdl.a(0, 0, 0, 0)
 
 
-def test_ignore_errors(mapdl):
+def test_ignore_errors(mapdl, cleared):
     mapdl.ignore_errors = False
     assert not mapdl.ignore_errors
     mapdl.ignore_errors = True
     assert mapdl.ignore_errors is True
 
     # verify that an error is not raised
-    mapdl.prep7(mute=True)
     out = mapdl._run("A, 0, 0, 0")
     assert "*** ERROR ***" in out
 
@@ -523,7 +524,7 @@ def test_keypoints(cleared, mapdl):
 
 
 @requires("pyvista")
-def test_lines(cleared, mapdl):
+def test_lines(mapdl, cleared):
     assert mapdl.geometry.n_line == 0
 
     k0 = mapdl.k("", 0, 0, 0)
@@ -784,7 +785,6 @@ def test_set_parameters_too_long(mapdl):
 
 
 def test_builtin_parameters(mapdl, cleared):
-    mapdl.prep7()
     assert mapdl.parameters.routine == "PREP7"
 
     mapdl.units("SI")
@@ -829,7 +829,6 @@ def test_partial_mesh_nnum2(mapdl, make_block):
 
 def test_cyclic_solve(mapdl, cleared):
     # build the cyclic model
-    mapdl.prep7()
     mapdl.shpp("off")
     mapdl.cdread("db", os.path.join(test_files, "sector.cdb"))
     mapdl.prep7()
@@ -919,7 +918,6 @@ def test_lssolve(mapdl, cleared):
     mapdl.mute = True
 
     mapdl.run("/units,user,0.001,0.001,1,1,0,1,1,1")
-    mapdl.prep7()
     mapdl.et(1, 182)
     mapdl.mp("ex", 1, 210e3)
     mapdl.mp("nuxy", 1, 0.33)
@@ -1237,7 +1235,6 @@ def test_inquire(mapdl):
 
 def test_ksel(mapdl, cleared):
     mapdl.k(1, 0, 0, 0)
-    mapdl.prep7()
     assert "SELECTED" in mapdl.ksel("S", "KP", vmin=1, return_mapdl_output=True)
     assert "SELECTED" in mapdl.ksel("S", "KP", "", 1, return_mapdl_output=True)
 
@@ -1306,9 +1303,8 @@ def test_tbft(mapdl, cleared, tmpdir, option2, option3, option4):
     #     mapdl.tbft("FADD", mat_id, "HYPER", "MOONEY", "3")
 
 
-def test_tbft_not_found(mapdl):
+def test_tbft_not_found(mapdl, cleared):
     with pytest.raises(FileNotFoundError):
-        mapdl.prep7(mute=True)
         mat_id = mapdl.get_value("MAT", 0, "NUM", "MAX") + 1
         mapdl.tbft("FADD", mat_id, "HYPER", "MOONEY", "3", mute=True)
         mapdl.tbft("EADD", mat_id, "UNIA", "non_existing.file", "", "", mute=True)
@@ -1316,6 +1312,7 @@ def test_tbft_not_found(mapdl):
 
 def test_rescontrol(mapdl):
     # Making sure we have the maximum number of arguments.
+    mapdl.solution()
     mapdl.rescontrol("DEFINE", "", "", "", "", "XNNN")  # This is default
 
 
@@ -1398,9 +1395,7 @@ def test_seltol(mapdl, value):
         assert "SELECT TOLERANCE SET TO DEFAULT" == mapdl.seltol(value)
 
 
-def test_mpfunctions(mapdl, cube_solve, capsys):
-    mapdl.prep7()
-
+def test_mpfunctions(mapdl, mapdl, cube_solve, capsys):
     # check writing to file
     fname = "test"
     ext = "mp1"
@@ -1596,8 +1591,7 @@ def test_get_variable_nsol_esol_wrappers(mapdl, coupled_example):
     assert np.allclose(variable, esol_1)
 
 
-def test_retain_routine(mapdl):
-    mapdl.prep7()
+def test_retain_routine(mapdl, cleared):
     routine = "POST26"
     with mapdl.run_as_routine(routine):
         assert mapdl.parameters.routine == routine
@@ -1606,7 +1600,6 @@ def test_retain_routine(mapdl):
 
 def test_non_interactive(mapdl, cleared):
     with mapdl.non_interactive:
-        mapdl.prep7()
         mapdl.k(1, 1, 1, 1)
         mapdl.k(2, 2, 2, 2)
 
@@ -1615,7 +1608,6 @@ def test_non_interactive(mapdl, cleared):
 
 def test_ignored_command(mapdl, cleared):
     mapdl.ignore_errors = False
-    mapdl.prep7(mute=True)
     mapdl.n(mute=True)
     with pytest.raises(MapdlCommandIgnoredError, match="command is ignored"):
         mapdl.f(1, 1, 1, 1)
@@ -2068,7 +2060,7 @@ def test_distributed(mapdl):
         assert mapdl._distributed
 
 
-def test_non_used_kwargs(mapdl):
+def test_non_used_kwargs(mapdl, cleared):
     with pytest.warns(UserWarning):
         mapdl.prep7(non_valid_argument=2)
 
@@ -2080,8 +2072,7 @@ def test_non_used_kwargs(mapdl):
         mapdl.run("/prep7", True, None, **kwarg)
 
 
-def test_non_valid_kwarg(mapdl):
-    mapdl.prep7()
+def test_non_valid_kwarg(mapdl, cleared):
     mapdl.blc4(0, 0, 1, 1, 1)
 
     with pytest.warns(UserWarning):
@@ -2324,7 +2315,6 @@ def test_sys(mapdl):
     ),
 )
 def test_lgwrite(mapdl, cleared, filename, ext, remove_grpc_extra, kedit):
-    mapdl.prep7()
     mapdl.k(1, 0, 0, 0, mute=True)
     mapdl.k(2, 2, 0, 0)
 
@@ -2407,7 +2397,6 @@ def test_screenshot(mapdl, make_block, tmpdir):
 
 
 def test_force_command_ignored_not_active_set(mapdl, cleared):
-    mapdl.prep7()
     mapdl.et("", 227)
     mapdl.keyopt(1, 1)  # Thermal-Piezoelectric
     mapdl.n(1, 0, 0, 0)
@@ -2417,15 +2406,12 @@ def test_force_command_ignored_not_active_set(mapdl, cleared):
 
 
 def test_force_command_when_no_nodes(mapdl, cleared):
-    mapdl.prep7()
     mapdl.et(1, 189)
     with pytest.raises(MapdlCommandIgnoredError, match="No nodes defined"):
         mapdl.f(1, "CHRG", 0)
 
 
-def test_not_correct_et_element(mapdl):
-    mapdl.clear()
-    mapdl.prep7()
+def test_not_correct_et_element(mapdl, cleared):
     mapdl.et(1, 227)
     with pytest.warns(UserWarning, match="is normal behavior when a CDB file is used"):
         mapdl.keyopt(1, 222)
