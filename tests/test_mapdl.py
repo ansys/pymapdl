@@ -556,6 +556,10 @@ def test_apdl_logging_start(tmpdir, mapdl):
     )
 
     assert filename in launch_options["log_apdl"]
+
+    # remove logger first
+    mapdl._apdl_log = None
+
     # activating logger
     mapdl.open_apdl_log(filename, mode="w")
 
