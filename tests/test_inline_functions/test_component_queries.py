@@ -22,13 +22,13 @@
 
 import pytest
 
-from conftest import create_geometry, get_details_of_nodes
+from conftest import TestClass, create_geometry, get_details_of_nodes
 
 
-class TestCentroidGetter:
+class TestCentroidGetter(TestClass):
 
     @pytest.fixture(scope="class")
-    def box_geometry(self, mapdl, cleared):
+    def box_geometry(self, mapdl):
         areas, keypoints = create_geometry(mapdl)
         q = mapdl.queries
         return q, keypoints, areas, get_details_of_nodes(mapdl)
@@ -98,10 +98,10 @@ class TestCentroidGetter:
         assert kp in kps
 
 
-class TestDisplacementComponentQueriesBox:
+class TestDisplacementComponentQueriesBox(TestClass):
 
     @pytest.fixture(scope="class")
-    def solved_box(self, mapdl, cleared):
+    def solved_box(self, mapdl):
         mapdl.mute = True  # improve stability
         mapdl.et(1, "SOLID5")
         mapdl.block(0, 10, 0, 20, 0, 30)
@@ -145,10 +145,10 @@ class TestDisplacementComponentQueriesBox:
         assert len(displaced_nodes) > 0
 
 
-class TestDisplacementComponentQueriesSheet:
+class TestDisplacementComponentQueriesSheet(TestClass):
 
     @pytest.fixture(scope="class")
-    def twisted_sheet(self, mapdl, cleared):
+    def twisted_sheet(self, mapdl):
         mapdl.et(1, "SHELL181")
         mapdl.mp("EX", 1, 2e5)
         mapdl.mp("PRXY", 1, 0.3)  # Poisson's Ratio

@@ -37,7 +37,7 @@ from ansys.mapdl.core.commands import (
     StringWithLiteralRepr,
 )
 from ansys.mapdl.core.examples import verif_files
-from conftest import has_dependency, requires
+from conftest import TestClass, has_dependency, requires
 
 if has_dependency("pandas"):
     import pandas as pd
@@ -731,34 +731,40 @@ def test_cmlist(mapdl, cleared):
         assert each_ in cmlist_all
 
 
-class Test_bc_cmdlist_solid:
+def solid_FE_model(mapdl):
+    # Define keypoints, lines and area
+    # --------------------
+    mapdl.k(1, 0, 0)
+    mapdl.k(2, 1, 0)
+    mapdl.k(3, 1, 1)
+    mapdl.l(1, 2)
+    mapdl.l(2, 3)
+    mapdl.l(3, 1)
+    mapdl.a(1, 2, 3)
 
-    def solid_model(self, mapdl, cleared):
-        # Define keypoints, lines and area
-        # --------------------
-        mapdl.k(1, 0, 0)
-        mapdl.k(2, 1, 0)
-        mapdl.k(3, 1, 1)
-        mapdl.l(1, 2)
-        mapdl.l(2, 3)
-        mapdl.l(3, 1)
-        mapdl.a(1, 2, 3)
+    # Define a material
+    # --------------------
+    mapdl.mp("EX", 1, 30e6)
+    mapdl.mp("NUXY", 1, 0.25)  # Poisson's Ratio
 
-        # Define a material
-        # --------------------
-        mapdl.mp("EX", 1, 30e6)
-        mapdl.mp("NUXY", 1, 0.25)  # Poisson's Ratio
+    # Define section
+    # --------------------
+    mapdl.et(1, "PLANE183")
+    mapdl.keyopt(1, 1, 0)
+    mapdl.keyopt(1, 3, 3)
+    mapdl.keyopt(1, 6, 0)
+    mapdl.r(1, 0.01)
 
-        # Define section
-        # --------------------
-        mapdl.et(1, "PLANE183")
-        mapdl.keyopt(1, 1, 0)
-        mapdl.keyopt(1, 3, 3)
-        mapdl.keyopt(1, 6, 0)
-        mapdl.r(1, 0.01)
+
+class Test_bc_cmdlist_solid(TestClass):
+
+    @staticmethod
+    @pytest.fixture(scope="class")
+    def solid_model(mapdl):
+        solid_FE_model(mapdl)
 
     @requires("pandas")
-    def test_dklist(self, mapdl):
+    def test_dklist(self, mapdl, solid_model):
 
         df_dk = pd.DataFrame(
             {
@@ -769,8 +775,6 @@ class Test_bc_cmdlist_solid:
                 "EXP KEY": ["0"],
             }
         )
-
-        self.solid_model(mapdl)
         mapdl.dk(1, "UX", 0)
 
         dklist_result = mapdl.dklist().to_dataframe()
@@ -779,7 +783,7 @@ class Test_bc_cmdlist_solid:
         assert dklist_result.compare(df_dk).empty
 
     @requires("pandas")
-    def test_dllist(self, mapdl):
+    def test_dllist(self, mapdl, solid_model):
 
         df_dl = pd.DataFrame(
             {
@@ -791,7 +795,6 @@ class Test_bc_cmdlist_solid:
             }
         )
 
-        self.solid_model(mapdl)
         mapdl.dl(2, 1, "ALL", 0)
 
         dllist_result = mapdl.dllist().to_dataframe()
@@ -800,7 +803,7 @@ class Test_bc_cmdlist_solid:
         assert dllist_result.compare(df_dl).empty
 
     @requires("pandas")
-    def test_dalist(self, mapdl):
+    def test_dalist(self, mapdl, solid_model):
 
         df_da = pd.DataFrame(
             {
@@ -811,7 +814,6 @@ class Test_bc_cmdlist_solid:
             }
         )
 
-        self.solid_model(mapdl)
         mapdl.da(1, "UZ", 0)
 
         dalist_result = mapdl.dalist().to_dataframe()
@@ -820,7 +822,7 @@ class Test_bc_cmdlist_solid:
         assert dalist_result.compare(df_da).empty
 
     @requires("pandas")
-    def test_fklist(self, mapdl):
+    def test_fklist(self, mapdl, solid_model):
 
         df_fk = pd.DataFrame(
             {
@@ -831,7 +833,6 @@ class Test_bc_cmdlist_solid:
             }
         )
 
-        self.solid_model(mapdl)
         mapdl.fk(2, "FY", 200)
         mapdl.fk(3, "FY", 100)
 
@@ -841,7 +842,7 @@ class Test_bc_cmdlist_solid:
         assert fklist_result.compare(df_fk).empty
 
     @requires("pandas")
-    def test_sfllist(self, mapdl):
+    def test_sfllist(self, mapdl, solid_model):
 
         df_sfl = pd.DataFrame(
             {
@@ -852,7 +853,6 @@ class Test_bc_cmdlist_solid:
             }
         )
 
-        self.solid_model(mapdl)
         mapdl.sfl(2, "PRES", 50, 500)
         mapdl.sfl(3, "PRES", 50, 500)
 
@@ -862,7 +862,7 @@ class Test_bc_cmdlist_solid:
         assert sfllist_result.compare(df_sfl).empty
 
     @requires("pandas")
-    def test_bfklist(self, mapdl):
+    def test_bfklist(self, mapdl, solid_model):
 
         df_bfk = pd.DataFrame(
             {
@@ -872,7 +872,6 @@ class Test_bc_cmdlist_solid:
             }
         )
 
-        self.solid_model(mapdl)
         mapdl.bfk(2, "TEMP", 10)
 
         bfklist_result = mapdl.bfklist().to_dataframe()
@@ -881,7 +880,7 @@ class Test_bc_cmdlist_solid:
         assert bfklist_result.compare(df_bfk).empty
 
     @requires("pandas")
-    def test_bfllist(self, mapdl):
+    def test_bfllist(self, mapdl, solid_model):
 
         df_bfl = pd.DataFrame(
             {
@@ -891,7 +890,6 @@ class Test_bc_cmdlist_solid:
             }
         )
 
-        self.solid_model(mapdl)
         mapdl.bfl(3, "TEMP", 15)
 
         bfllist_result = mapdl.bfllist().to_dataframe()
@@ -900,7 +898,7 @@ class Test_bc_cmdlist_solid:
         assert bfllist_result.compare(df_bfl).empty
 
     @requires("pandas")
-    def test_bfalist(self, mapdl):
+    def test_bfalist(self, mapdl, solid_model):
 
         df_bfa = pd.DataFrame(
             {
@@ -910,7 +908,6 @@ class Test_bc_cmdlist_solid:
             }
         )
 
-        self.solid_model(mapdl)
         mapdl.bfa(1, "TEMP", 20)
 
         bfalist_result = mapdl.bfalist().to_dataframe()
@@ -919,36 +916,11 @@ class Test_bc_cmdlist_solid:
         assert bfalist_result.compare(df_bfa).empty
 
 
-class Test_bc_cmdlist_model:
+class Test_bc_cmdlist_model(TestClass):
 
-    def solid_model(self, mapdl, cleared):
-        # Define keypoints, lines and area
-        # --------------------
-        mapdl.k(1, 0, 0)
-        mapdl.k(2, 1, 0)
-        mapdl.k(3, 1, 1)
-        mapdl.l(1, 2)
-        mapdl.l(2, 3)
-        mapdl.l(3, 1)
-        mapdl.a(1, 2, 3)
-
-        # Define a material
-        # --------------------
-        mapdl.mp("EX", 1, 30e6)
-        mapdl.mp("NUXY", 1, 0.25)  # Poisson's Ratio
-
-        # Define section
-        # --------------------
-        mapdl.et(1, "PLANE183")
-        mapdl.keyopt(1, 1, 0)
-        mapdl.keyopt(1, 3, 3)
-        mapdl.keyopt(1, 6, 0)
-        mapdl.r(1, 0.01)
-
+    @pytest.fixture(scope="class")
     def fe_model(self, mapdl):
-        # FE model (Mesh)
-
-        self.solid_model(mapdl)
+        solid_FE_model(mapdl)
 
         mapdl.esize(0.02)
         mapdl.mshape(0, "2D")
@@ -956,7 +928,7 @@ class Test_bc_cmdlist_model:
         mapdl.amesh(1, 1, 1)
 
     @requires("pandas")
-    def test_dlist(self, mapdl):
+    def test_dlist(self, mapdl, fe_model):
 
         df_d = pd.DataFrame(
             {
@@ -967,7 +939,6 @@ class Test_bc_cmdlist_model:
             }
         )
 
-        self.fe_model(mapdl)
         mapdl.d(2, "UX", 0)
         mapdl.d(2, "UY", 0)
 
@@ -977,7 +948,7 @@ class Test_bc_cmdlist_model:
         assert dlist_result.compare(df_d).empty
 
     @requires("pandas")
-    def test_flist(self, mapdl, cleared):
+    def test_flist(self, mapdl, fe_model):
 
         df_f = pd.DataFrame(
             {
@@ -988,7 +959,6 @@ class Test_bc_cmdlist_model:
             }
         )
 
-        self.fe_model(mapdl)
         mapdl.f(4, "FX", 10)
         mapdl.f(4, "FY", 20)
 
@@ -998,7 +968,7 @@ class Test_bc_cmdlist_model:
         assert flist_result.compare(df_f).empty
 
 
-class Test_MAPDL_commands:
+class Test_MAPDL_commands(TestClass):
     SKIP = [
         "aplot",
         "cfopen",
@@ -1082,15 +1052,11 @@ class Test_MAPDL_commands:
         assert cmd_ in post.upper()
 
 
-class Test_output_listing:
+class Test_output_listing(TestClass):
 
     @staticmethod
     @pytest.fixture(scope="class")
     def plastic_solve_output(mapdl):
-        from conftest import clear
-
-        clear(mapdl)
-
         mapdl.mute = True
         mapdl.input(examples.verif_files.vmfiles["vm273"])
 

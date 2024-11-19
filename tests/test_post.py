@@ -27,7 +27,7 @@ import re
 import numpy as np
 import pytest
 
-from conftest import has_dependency, requires
+from conftest import TestClass, has_dependency, requires
 
 if has_dependency("ansys-tools-visualization_interface"):
     from pyvista.plotting.renderer import CameraPosition
@@ -44,11 +44,11 @@ from ansys.mapdl.core.post import (
 )
 
 
-class Test_static_solve:
+class Test_static_solve(TestClass):
 
     @staticmethod
     @pytest.fixture(scope="class")
-    def static_solve(mapdl, cleared):
+    def static_solve(mapdl):
         mapdl.mute = True
 
         # cylinder and mesh parameters
@@ -750,11 +750,11 @@ class Test_static_solve:
 ###############################################################################
 
 
-class Test_plastic_solve:
+class Test_plastic_solve(TestClass):
 
     @staticmethod
     @pytest.fixture(scope="class")
-    def plastic_solve(mapdl, cleared):
+    def plastic_solve(mapdl):
         mapdl.mute = True
         mapdl.input(examples.verif_files.vmfiles["vm273"])
 
@@ -853,11 +853,11 @@ class Test_plastic_solve:
         )
 
 
-class Test_contact_solve:
+class Test_contact_solve(TestClass):
 
     @staticmethod
     @pytest.fixture(scope="class")
-    def contact_solve(mapdl, cleared):
+    def contact_solve(mapdl):
         mapdl.mute = True
 
         # Based on tech demo 28.

@@ -26,7 +26,7 @@ import pytest
 
 from ansys.mapdl.core import examples
 from ansys.mapdl.core._commands.parse import parse_e, parse_et
-from conftest import requires
+from conftest import TestClass, requires
 
 
 @pytest.fixture
@@ -138,7 +138,7 @@ def test_edele(mapdl, cleared):
     assert "DELETE SELECTED ELEMENTS" in output
 
 
-class TestParseElementCommands:
+class TestParseElementCommands(TestClass):
     @pytest.mark.parametrize(
         "message",
         [

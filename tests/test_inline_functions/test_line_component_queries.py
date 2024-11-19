@@ -24,11 +24,13 @@ from math import isclose
 
 import pytest
 
+from conftest import TestClass
 
-class TestLineCoordinateQueries:
+
+class TestLineCoordinateQueries(TestClass):
 
     @pytest.fixture(scope="class")
-    def line_geometry(self, mapdl, cleared):
+    def line_geometry(self, mapdl):
         k0 = mapdl.k(1, 0, 0, 0)
         k1 = mapdl.k(2, 1, 2, 2)
         l0 = mapdl.l(k0, k1)
@@ -51,9 +53,9 @@ class TestLineCoordinateQueries:
         assert z == 1.0
 
 
-class TestLineSlopeQueries:
+class TestLineSlopeQueries(TestClass):
     @pytest.fixture(scope="class")
-    def line_geometry(self, mapdl, cleared):
+    def line_geometry(self, mapdl):
         k0 = mapdl.k(1, 0, 0, 0)
         k1 = mapdl.k(2, 1, 2, 2)
         l0 = mapdl.l(k0, k1)
