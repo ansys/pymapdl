@@ -321,11 +321,12 @@ def test_instance_log_to_file(mapdl, tmpdir):
     file_msg_error = "This is a error message"
     file_msg_debug = "This is a debug message"
 
-    if not mapdl._log.file_handler:
-        mapdl._log.log_to_file(file_path)
+    mapdl._log.log_to_file(file_path)
 
     mapdl._log.error(file_msg_error)
     mapdl._log.debug(file_msg_debug)
+
+    assert os.path.exists(file_path)
 
     with open(file_path, "r") as fid:
         text = "".join(fid.readlines())
