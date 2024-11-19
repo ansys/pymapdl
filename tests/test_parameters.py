@@ -299,7 +299,7 @@ def test_contain_iter(mapdl, cleared):
 
 
 @pytest.mark.parametrize("number", [1 / 3, 1 / 7, 0.0181681816816816168168168])
-def test_double_parameter_get(mapdl, number):
+def test_double_parameter_get(mapdl, number, cleared):
     # Running grpc method
     mapdl.parameters["value"] = number
 

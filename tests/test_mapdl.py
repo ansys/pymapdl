@@ -2258,7 +2258,7 @@ def test_default_file_type_for_plots(mapdl):
 
 
 @requires("matplotlib")
-def test_use_vtk(mapdl):
+def test_use_vtk(mapdl, cleared):
     assert isinstance(mapdl.use_vtk, bool)
 
     prev = mapdl.use_vtk
