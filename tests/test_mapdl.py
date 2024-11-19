@@ -1395,7 +1395,7 @@ def test_seltol(mapdl, value):
         assert "SELECT TOLERANCE SET TO DEFAULT" == mapdl.seltol(value)
 
 
-def test_mpfunctions(mapdl, mapdl, cube_solve, capsys):
+def test_mpfunctions(mapdl, cube_solve, capsys):
     # check writing to file
     fname = "test"
     ext = "mp1"
