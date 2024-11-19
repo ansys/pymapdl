@@ -2216,7 +2216,7 @@ def test_inquire_invalid(mapdl):
 
 
 def test_inquire_default(mapdl):
-    mapdl.title = "heeeelloo"
+    mapdl.title("heeeelloo")
     assert Path(mapdl.directory) == Path(mapdl.inquire())
 
 
