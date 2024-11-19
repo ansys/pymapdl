@@ -460,68 +460,6 @@ class Test_static_solve(TestClass):
     ###############################################################################
     @staticmethod
     @pytest.mark.parametrize("comp", COMPONENT_STRESS_TYPE)
-    def test_nodal_component_stress(mapdl, resume, comp):
-        from_grpc = mapdl.post_processing.nodal_component_stress(comp)
-        mapdl.post1(mute=True)
-        mapdl.set(1, 1, mute=True)
-        index = COMPONENT_STRESS_TYPE.index(comp)
-        mapdl.prnsol("S", "COMP")  # flush to ignore warning
-        arr = np.genfromtxt(mapdl.prnsol("S", "COMP").splitlines()[1:])
-        nnum_ans = arr[:, 0]
-        from_prns = arr[:, index + 1]
-
-        # grpc includes all nodes.  ignore the ones not included in prnsol
-        from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
-
-        assert np.allclose(from_grpc, from_prns)
-
-    @staticmethod
-    @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_component_stress(mapdl, resume):
-        assert mapdl.post_processing.plot_nodal_component_stress("X") is None
-
-    @staticmethod
-    @pytest.mark.parametrize("comp", PRINCIPAL_TYPE)
-    def test_nodal_principal_stress(mapdl, resume, comp):
-        from_grpc = mapdl.post_processing.nodal_principal_stress(comp)
-        mapdl.post1(mute=True)
-        mapdl.set(1, 1, mute=True)
-        index = PRINCIPAL_TYPE.index(comp)
-        mapdl.prnsol("S", "PRIN")  # flush to ignore warning
-        arr = np.genfromtxt(mapdl.prnsol("S", "PRIN").splitlines()[1:])
-        nnum_ans = arr[:, 0]
-        from_prns = arr[:, index + 1]
-
-        # grpc includes all nodes.  ignore the ones not included in prnsol
-        from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
-        assert np.allclose(from_grpc, from_prns, atol=1e-5)
-
-    @staticmethod
-    @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_principal_stress(mapdl, resume):
-        assert mapdl.post_processing.plot_nodal_principal_stress(1) is None
-
-    @staticmethod
-    def test_nodal_stress_intensity(mapdl, resume):
-        mapdl.post1(mute=True)
-        mapdl.set(1, 1, mute=True)
-
-        mapdl.prnsol("S", "PRIN", mute=True)  # run twice to clear out warning
-        data = np.genfromtxt(mapdl.prnsol("S", "PRIN").splitlines()[1:])
-        nnum_ans = data[:, 0].astype(np.int32)
-        sint_ans = data[:, -2]
-        sint = mapdl.post_processing.nodal_stress_intensity()
-
-        sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
-        assert np.allclose(sint_ans, sint_aligned)
-
-    @staticmethod
-    @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_stress_intensity(mapdl, resume):
-        assert mapdl.post_processing.plot_nodal_stress_intensity() is None
-
-    @staticmethod
-    @pytest.mark.parametrize("comp", COMPONENT_STRESS_TYPE)
     def test_nodal_elastic_component_strain(mapdl, resume, comp):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)

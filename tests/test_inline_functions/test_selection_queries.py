@@ -48,7 +48,7 @@ class TestXSEL(TestClass):
         k1 = mapdl.k(2, 0, 0, 1)
         k2 = mapdl.k(3, 0, 1, 0)
         k3 = mapdl.k(4, 1, 0, 0)
-        v0 = mapdl.v(k0, k1, k2, k3)
+        mapdl.v(k0, k1, k2, k3)
         mapdl.mshape(1, "3D")
         mapdl.et(1, "SOLID98")
         mapdl.esize(0.5)
