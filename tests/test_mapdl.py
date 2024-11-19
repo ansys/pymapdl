@@ -437,6 +437,8 @@ def test_basic_command(cleared, mapdl):
 def test_allow_ignore(mapdl, cleared):
     mapdl.allow_ignore = False
     assert mapdl.allow_ignore is False
+    mapdl.finish()
+
     with pytest.raises(pymapdl.errors.MapdlInvalidRoutineError):
         mapdl.k()
 
@@ -545,7 +547,7 @@ def test_lines(mapdl, cleared):
 
 
 @requires("local")
-def test_apdl_logging_start(tmpdir, mapdl):
+def test_apdl_logging_start(tmpdir, mapdl, cleared):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
 
     launch_options = launch_mapdl(
@@ -1399,6 +1401,8 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     # check writing to file
     fname = "test"
     ext = "mp1"
+
+    mapdl.prep7()
 
     assert f"WRITE OUT MATERIAL PROPERTY LIBRARY TO FILE=" in mapdl.mpwrite(fname, ext)
     assert f"{fname}.{ext}" in mapdl.list_files()
