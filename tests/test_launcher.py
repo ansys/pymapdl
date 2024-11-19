@@ -1589,7 +1589,7 @@ def test_get_ip(monkeypatch, ip, ip_env):
     "port,port_envvar,start_instance,port_busy,result",
     (
         [None, None, True, False, 50052],  # Standard case
-        [None, None, True, True, 50055],  # Busy port case, not sure why it is not 50054
+        [None, None, True, True, 50054],
         [None, 50053, True, True, 50053],
         [None, 50053, False, False, 50053],
         [50054, 50053, True, False, 50054],
