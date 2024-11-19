@@ -191,7 +191,9 @@ class Test_static_solve:
     )  # lowercase intentional
     def test_disp_plot(mapdl, static_solve, comp):
         if comp == "all":
-            context = pytest.raises(ValueError, '"ALL" not allowed in this context')
+            context = pytest.raises(
+                ValueError, match='"ALL" not allowed in this context'
+            )
         else:
             context = NullContext()
 
@@ -636,7 +638,9 @@ class Test_static_solve:
         mapdl.allsel()
 
         if comp == "all":
-            context = pytest.raises(ValueError, '"ALL" not allowed in this context')
+            context = pytest.raises(
+                ValueError, match='"ALL" not allowed in this context'
+            )
         else:
             context = NullContext()
 
