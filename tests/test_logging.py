@@ -322,6 +322,9 @@ def test_instance_log_to_file(mapdl, tmpdir):
     file_msg_debug = "This is a debug message"
 
     mapdl._log.log_to_file(file_path)
+    mapdl._log.logger.setLevel("ERROR")
+    for each_handler in mapdl._log.logger.handlers:
+        each_handler.setLevel("ERROR")
 
     mapdl._log.error(file_msg_error)
     mapdl._log.debug(file_msg_debug)
