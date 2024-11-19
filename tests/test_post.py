@@ -637,21 +637,23 @@ class Test_static_solve:
         mapdl.set(1, 1, mute=True)
         mapdl.allsel()
 
-        if comp == "all":
-            context = pytest.raises(
-                ValueError, match='"ALL" not allowed in this context'
-            )
-        else:
-            context = NullContext()
+        disp_from_grpc = mapdl.post_processing.element_displacement(comp)
 
-        with context:
-            disp_from_grpc = mapdl.post_processing.element_displacement(comp)
-
-            # use pretab to get the data
-            table_name = "values"
+        # use pretab to get the data
+        table_name = "values"
+        if comp != "all":
             mapdl.etable(table_name, "U", comp, mute=True)
             arr = np.genfromtxt(mapdl.pretab(table_name).splitlines()[1:])[:, 1]
-            assert np.allclose(arr, disp_from_grpc)
+        else:
+            arr = []
+            for direction in ["x", "y", "z"]:
+                mapdl.etable(table_name, "U", direction, mute=True)
+                arr.append(
+                    np.genfromtxt(mapdl.pretab(table_name).splitlines()[1:])[:, 1]
+                )
+            arr = np.array(arr).T
+
+        assert np.allclose(arr, disp_from_grpc)
 
     @staticmethod
     @pytest.mark.parametrize("option", ["min", "max", "avg"])
