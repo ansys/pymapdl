@@ -1130,7 +1130,6 @@ class Test_contact_solve(TestClass):
         mapdl.d(1, "all")
         mapdl.ddele(1, "temp")
         mapdl.allsel("all")
-        mapdl.mute = False
         # ==========================================================
         # * Solution
         # ==========================================================
