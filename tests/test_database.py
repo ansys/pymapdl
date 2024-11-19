@@ -198,14 +198,17 @@ class Test_Nodes(TestClass):
         gen_block(mapdl)
         return db.nodes
 
+    @staticmethod
     def test_nodes_repr(nodes):
         assert "425" in str(nodes)
         assert "Number of nodes" in str(nodes)
 
+    @staticmethod
     def test_nodes_first(nodes):
         assert nodes.first() == 1
         assert nodes.first(inod=10) == 11
 
+    @staticmethod
     def test_nodes_next(nodes):
         nodes._itnod = -1  # resets nodes state
 
@@ -217,21 +220,26 @@ class Test_Nodes(TestClass):
         nodes.first()
         assert nodes.next() == 2
 
+    @staticmethod
     def test_nodes_info(nodes):
         assert nodes.info(1, DBDef.DB_SELECTED) == 1
 
     @pytest.mark.parametrize("selected", [True, False])
+    @staticmethod
     def test_nodes_num(nodes, selected):
         assert nodes.num(selected=selected) == 425
 
+    @staticmethod
     def test_nodes_max_num(nodes):
         assert nodes.max_num == 425
 
+    @staticmethod
     def test_nodes_coord(nodes):
         sel, coord = nodes.coord(22)
         assert sel == 0  # selected
         assert coord == (1.0, 0.5, 0.0, 0.0, 0.0, 0.0)
 
+    @staticmethod
     def test_nodes_asarray(nodes):
         ind, coords, angles = nodes.all_asarray()
         assert np.allclose(ind, np.arange(1, 426))
@@ -239,6 +247,7 @@ class Test_Nodes(TestClass):
         assert np.allclose(coords, nodes._db._mapdl.mesh.nodes)
         assert np.allclose(angles, 0)
 
+    @staticmethod
     def test_nodes_push(nodes):
         nnum = 100000
         x, y, z, xang, yang, zang = 1, 5, 10, 30, 40, 50
@@ -263,14 +272,17 @@ class Test_Elems(TestClass):
         gen_block(mapdl)
         return db.elems
 
+    @staticmethod
     def test_elems_repr(elems):
         assert "64" in str(elems)
         assert "Number of elements" in str(elems)
 
+    @staticmethod
     def test_elems_first(elems):
         assert elems.first() == 1
         assert elems.first(ielm=10) == 11
 
+    @staticmethod
     def test_elems_next(elems):
         elems._itelm = -1  # resets elems state
 
@@ -282,16 +294,20 @@ class Test_Elems(TestClass):
         elems.first()
         assert elems.next() == 2
 
+    @staticmethod
     def test_elems_info(elems):
         assert elems.info(1, DBDef.DB_SELECTED) == 1
 
     @pytest.mark.parametrize("selected", [True, False])
+    @staticmethod
     def test_elems_num(elems, selected):
         assert elems.num(selected=selected) == 64
 
+    @staticmethod
     def test_elems_max_num(elems):
         assert elems.max_num == 64
 
+    @staticmethod
     def test_elems_get(elems):
         ielm = 1
         elem_info = elems.get(ielm)
@@ -300,6 +316,7 @@ class Test_Elems(TestClass):
         assert len(elem_info.elmdat) == 10
         assert elem_info.ielem == ielm
 
+    @staticmethod
     def test_elems_push(elems):
         ielm = 1
         elem_info = elems.get(ielm)
