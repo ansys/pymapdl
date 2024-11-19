@@ -534,15 +534,7 @@ CMD_DOC_STRING_INJECTOR = CMD_LISTING.copy()
 CMD_DOC_STRING_INJECTOR.extend(CMD_BC_LISTING)
 
 
-def plastic_solve(mapdl, cleared):
-    mapdl.mute = True
-    mapdl.input(examples.verif_files.vmfiles["vm273"])
-
-    mapdl.post1()
-    mapdl.set(1, 2)
-    mapdl.mute = False
-
-
+@pytest.fixture()
 def beam_solve(mapdl, cleared):
     mapdl.mute = True
     mapdl.input(examples.verif_files.vmfiles["vm10"])
@@ -627,27 +619,6 @@ def test_inquire_functions(mapdl, func):
     else:
         assert isinstance(output, str)
         assert "=" in output
-
-
-@pytest.mark.parametrize(
-    "func,args",
-    [("prnsol", ("U", "X")), ("presol", ("S", "X")), ("presol", ("S", "ALL"))],
-)
-def test_output_listing(mapdl, plastic_solve, func, args):
-    mapdl.post1()
-    func_ = getattr(mapdl, func)
-    out = func_(*args)
-
-    out_list = out.to_list()
-    out_array = out.to_array()
-
-    assert isinstance(out, CommandListingOutput)
-    assert isinstance(out_list, list) and out_list
-    assert isinstance(out_array, np.ndarray) and out_array.size != 0
-
-    if has_dependency("pandas"):
-        out_df = out.to_dataframe()
-        assert isinstance(out_df, pd.DataFrame) and not out_df.empty
 
 
 @pytest.mark.parametrize("func", ["dlist", "flist"])
@@ -1109,3 +1080,41 @@ class Test_MAPDL_commands:
             cmd_ = cmd_.replace("STAR", "*")
 
         assert cmd_ in post.upper()
+
+
+class Test_output_listing:
+
+    @staticmethod
+    @pytest.fixture(scope="class")
+    def plastic_solve_output(mapdl):
+        from conftest import clear
+
+        clear(mapdl)
+
+        mapdl.mute = True
+        mapdl.input(examples.verif_files.vmfiles["vm273"])
+
+        mapdl.post1()
+        mapdl.set(1, 2)
+        mapdl.mute = False
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "func,args",
+        [("prnsol", ("U", "X")), ("presol", ("S", "X")), ("presol", ("S", "ALL"))],
+    )
+    def test_output_listing(mapdl, plastic_solve_output, func, args):
+        mapdl.post1()
+        func_ = getattr(mapdl, func)
+        out = func_(*args)
+
+        out_list = out.to_list()
+        out_array = out.to_array()
+
+        assert isinstance(out, CommandListingOutput)
+        assert isinstance(out_list, list) and out_list
+        assert isinstance(out_array, np.ndarray) and out_array.size != 0
+
+        if has_dependency("pandas"):
+            out_df = out.to_dataframe()
+            assert isinstance(out_df, pd.DataFrame) and not out_df.empty

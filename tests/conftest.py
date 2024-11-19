@@ -734,8 +734,7 @@ def path_tests(tmpdir):
     return SpacedPaths(str(p1), str(p2), str(p3))
 
 
-@pytest.fixture(scope="function")
-def cleared(mapdl):
+def clear(mapdl):
     mapdl.mute = True
     mapdl.finish()
     # *MUST* be NOSTART.  With START fails after 20 calls...
@@ -747,6 +746,11 @@ def cleared(mapdl):
 
     mapdl.prep7()
     mapdl.mute = False
+
+
+@pytest.fixture(scope="function")
+def cleared(mapdl):
+    clear(mapdl)
     yield
 
 
