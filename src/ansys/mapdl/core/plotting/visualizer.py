@@ -819,6 +819,7 @@ class MapdlPlotter(Plotter):
         if savefig:
             self._off_screen = True
             self._notebook = False
+
         # permit user to save the figure as a screenshot
         if self._savefig or savefig:
             self._backend.show(
@@ -833,7 +834,7 @@ class MapdlPlotter(Plotter):
             if return_plotter:
                 return self
 
-            # ifplotter.scene.set_background("paraview") not returning plotter, close right away
+            # if plotter.scene.set_background("paraview") not returning plotter, close right away
             self.scene.close()
 
         else:
