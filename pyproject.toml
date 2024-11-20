@@ -119,7 +119,7 @@ pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_
 pymapdl = "ansys.mapdl.core.cli:main"
 
 [tool.pytest.ini_options]
-addopts = "-rxXsa -vvv --maxfail=10"
+addopts = "-rxXsa -vvv --maxfail=10 --strict-markers"
 junit_family = "legacy"
 filterwarnings = [
     "ignore::FutureWarning",
