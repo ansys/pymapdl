@@ -2379,7 +2379,13 @@ class _MapdlCore(Commands):
             else:  # pragma: no cover
                 raise MapdlRuntimeError("Unable to find screenshot at %s", filename)
         else:
-            raise MapdlRuntimeError("Unable to find file in MAPDL command output.")
+            raise MapdlRuntimeError(
+                "Unable to find plotted file in MAPDL command output. "
+                "One possible reason is that the graphics device is not correct. "
+                "Please check you are using FULL graphics device. "
+                "For example:\n"
+                ">>> mapdl.graphics('FULL')"
+            )
 
     def _display_plot(self, filename: str) -> None:
         """Display the last generated plot (*.png) from MAPDL"""
