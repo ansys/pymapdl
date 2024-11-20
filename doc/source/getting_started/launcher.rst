@@ -223,7 +223,7 @@ to enter the path again. If you must change the default Ansys path
     new_path = "C:\\Program Files\\ANSYS Inc\\v241\\ANSYS\\bin\\winx64\\ansys241.exe"
     pymapdl.change_default_ansys_path(new_path)
 
-For more information, see the :func:`change_default_ansys_path() <ansys.mapdl.core.change_default_ansys_path>` method and the :func:`find_ansys() <ansys.mapdl.core.find_ansys>` method.
+For more information, see the :func:`change_default_ansys_path() <ansys.mapdl.core.change_default_ansys_path>` method and the :func:`find_mapdl() <ansys.mapdl.core.find_mapdl>` method.
 
 Additionally, it is possible to specify the executable in each PyMAPDL script using the ``exec_file`` keyword argument. 
 
