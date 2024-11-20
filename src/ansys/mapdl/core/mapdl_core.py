@@ -2377,9 +2377,9 @@ class _MapdlCore(Commands):
             if os.path.isfile(filename):
                 return filename
             else:  # pragma: no cover
-                self._log.error("Unable to find screenshot at %s", filename)
+                raise MapdlRuntimeError("Unable to find screenshot at %s", filename)
         else:
-            self._log.error("Unable to find file in MAPDL command output.")
+            raise MapdlRuntimeError("Unable to find file in MAPDL command output.")
 
     def _display_plot(self, filename: str) -> None:
         """Display the last generated plot (*.png) from MAPDL"""
