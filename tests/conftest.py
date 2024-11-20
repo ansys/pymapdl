@@ -446,6 +446,10 @@ def run_before_and_after_tests(
     assert not mapdl.ignore_errors, "Mapdl class is ignoring errors!"
     assert not mapdl.mute
 
+    # Returning to default
+    mapdl.graphics("full")
+
+    # Handling extra instances
     make_sure_not_instances_are_left_open()
 
     # Teardown
