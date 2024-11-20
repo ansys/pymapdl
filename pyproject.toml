@@ -132,7 +132,7 @@ filterwarnings = [
 ]
 markers = [
     "skip_grpc: skip tests using grpc",
-    "requires_gui: skip tests that launch the GUI interface",
+    "requires_gui: run tests that require to launch the GUI interface",
     "console: run console test based",
 ]
 testpaths = "tests"
