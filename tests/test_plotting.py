@@ -31,7 +31,7 @@ from conftest import has_dependency, requires
 if not has_dependency("pyvista"):
     pytest.skip(allow_module_level=True)
 
-from ansys.mapdl.core.errors import ComponentDoesNotExits
+from ansys.mapdl.core.errors import ComponentDoesNotExits, MapdlRuntimeError
 from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
 FORCE_LABELS = [["FX", "FY", "FZ"], ["HEAT"], ["CHRG"]]
@@ -1254,3 +1254,24 @@ def test_aplot_quality_fail(mapdl, make_block, quality):
         match="The argument 'quality' can only be an integer between 1 and 10",
     ):
         mapdl.aplot(quality=quality)
+
+
+def test_plot_path(mapdl, tmpdir):
+    mapdl.graphics("POWER")
+
+    with pytest.raises(
+        MapdlRuntimeError,
+        match="One possible reason is that the graphics device is not correct.",
+    ):
+        mapdl.eplot(vtk=False)
+
+    # mapdl.screenshot is not affected by the device.
+    # It should not raise exceptions
+    scheenshot_path = os.path.join(tmpdir, "screenshot.png")
+    mapdl.screenshot(scheenshot_path)
+
+    assert os.path.exists(scheenshot_path)
+    assert os.path.getsize(scheenshot_path) > 100  # check if it is not empty
+
+    # Returning to previous state.
+    mapdl.graphics("FULL")
