@@ -346,7 +346,7 @@ class Test_static_solve(TestClass):
         # grpc includes all nodes.  ignore the ones not included in prnsol
         from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
 
-        assert np.allclose(from_grpc, from_prns)
+        assert np.allclose(from_grpc, from_prns, 1e-5)
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
@@ -362,7 +362,7 @@ class Test_static_solve(TestClass):
         data = np.genfromtxt(mapdl.prnsol("S", "PRIN").splitlines()[1:])
         nnum_ans = data[:, 0].astype(np.int32)
         sint_ans = data[:, -2]
-        sint = mapdl.post_processing.nodal_stress_intensity
+        sint = mapdl.post_processing.nodal_stress_intensity()
 
         sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(sint_ans, sint_aligned)
