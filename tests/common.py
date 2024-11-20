@@ -23,9 +23,27 @@
 """Shared testing module"""
 from collections import namedtuple
 import os
-from typing import Dict
+from typing import Dict, List
 
-from ansys.mapdl.core.launcher import _is_ubuntu
+import psutil
+
+from ansys.mapdl.core import Mapdl
+from ansys.mapdl.core.errors import MapdlConnectionError, MapdlExitedError
+from ansys.mapdl.core.launcher import (
+    _is_ubuntu,
+    get_start_instance,
+    is_ansys_process,
+    launch_mapdl,
+)
+
+PROCESS_OK_STATUS = [
+    psutil.STATUS_RUNNING,  #
+    psutil.STATUS_SLEEPING,  #
+    psutil.STATUS_DISK_SLEEP,
+    psutil.STATUS_DEAD,
+    psutil.STATUS_PARKED,  # (Linux)
+    psutil.STATUS_IDLE,  # (Linux, macOS, FreeBSD)
+]
 
 Node = namedtuple("Node", ["number", "x", "y", "z", "thx", "thy", "thz"])
 Element = namedtuple(
@@ -199,3 +217,98 @@ def get_details_of_elements(mapdl_) -> Dict[int, Node]:
             if len(args) == 6:
                 elements[args[0]] = Element(*args, node_numbers=None)
     return elements
+
+
+def log_test_start(mapdl: Mapdl) -> None:
+    """Print the current test to the MAPDL log file and console output."""
+    test_name = os.environ.get(
+        "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
+    )
+
+    mapdl.run("!")
+    mapdl.run(f"! PyMAPDL running test: {test_name}")
+    mapdl.run("!")
+
+    # To see it also in MAPDL terminal output
+    if len(test_name) > 75:
+        # terminal output is limited to 75 characters
+        test_name = test_name.split("::")
+        if len(test_name) > 2:
+            types_ = ["File path", "Test class", "Method"]
+        else:
+            types_ = ["File path", "Test function"]
+
+        mapdl._run("/com,Running test in:", mute=True)
+        for type_, name_ in zip(types_, test_name):
+            mapdl._run(f"/com,    {type_}: {name_}", mute=True)
+
+    else:
+        mapdl._run(f"/com,Running test: {test_name}", mute=True)
+
+
+def restart_mapdl(mapdl: Mapdl) -> Mapdl:
+    """Restart MAPDL after a failed test"""
+
+    def is_exited(mapdl: Mapdl):
+        try:
+            _ = mapdl._ctrl("VERSION")
+            return False
+        except MapdlExitedError:
+            return True
+
+    if get_start_instance() and (is_exited(mapdl) or mapdl._exited):
+        # Backing up the current local configuration
+        local_ = mapdl._local
+        channel = mapdl._channel
+        ip = mapdl.ip
+        port = mapdl.port
+        try:
+            # to connect
+            mapdl = Mapdl(port=port, ip=ip)
+
+        except MapdlConnectionError as err:
+            # we cannot connect.
+            # Kill the instance
+            mapdl.exit()
+
+            # Relaunching MAPDL
+            mapdl = launch_mapdl(
+                port=mapdl._port,
+                override=True,
+                run_location=mapdl._path,
+                cleanup_on_exit=mapdl._cleanup,
+                log_apdl=log_apdl(),
+            )
+
+        # Restoring the local configuration
+        mapdl._local = local_
+        mapdl._exited = False
+
+    return mapdl
+
+
+def make_sure_not_instances_are_left_open(valid_ports: List) -> None:
+    """Make sure we leave no MAPDL running behind"""
+
+    if is_on_local():
+        for proc in psutil.process_iter():
+            try:
+                if (
+                    psutil.pid_exists(proc.pid)
+                    and proc.status() in PROCESS_OK_STATUS
+                    and is_ansys_process(proc)
+                ):
+
+                    cmdline = proc.cmdline()
+                    port = int(cmdline[cmdline.index("-port") + 1])
+
+                    if port not in valid_ports:
+                        cmdline_ = " ".join([f'"{each}"' for each in cmdline])
+                        subprocess.run(["pymapdl", "stop", "--port", f"{port}"])
+                        time.sleep(1)
+                        # raise Exception(
+                        #     f"The following MAPDL instance running at port {port} is alive after the test.\n"
+                        #     f"Only ports {valid_ports} are allowed.\nCMD: {cmdline_}"
+                        # )
+            except psutil.NoSuchProcess:
+                continue
