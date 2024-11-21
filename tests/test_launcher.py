@@ -30,6 +30,7 @@ from unittest.mock import patch
 import warnings
 
 import psutil
+from pyfakefs.fake_filesystem import OSType
 import pytest
 
 from ansys.mapdl import core as pymapdl
@@ -134,6 +135,12 @@ def get_fake_process(message_stdout, message_stderr="", time_sleep=0):
 
 
 @pytest.fixture
+def my_fs(fs):
+    fs.add_real_directory("/proc")
+    yield fs
+
+
+@pytest.fixture
 def fake_local_mapdl(mapdl):
     """Fixture to execute asserts before and after a test is run"""
     # Setup: fill with any logic you want
@@ -173,9 +180,6 @@ def test_catch_version_from_path():
         version_from_path("mapdl", "abc")
 
 
-from pyfakefs.fake_filesystem import OSType
-
-
 @pytest.mark.parametrize(
     "path,version,raises",
     [
@@ -189,10 +193,9 @@ from pyfakefs.fake_filesystem import OSType
     ],
 )
 @requires("ansys-tools-path")
-def test_find_ansys_linux(fs, path, version, raises):
-    fs.os = OSType.LINUX
-    fs.create_file(path)
-    # fs.add_real_file("/proc/meminfo")
+def test_find_ansys_linux(my_fs, path, version, raises):
+    my_fs.os = OSType.LINUX
+    my_fs.create_file(path)
 
     bin_file, ver = pymapdl.launcher.find_ansys()
 
@@ -207,8 +210,8 @@ def test_find_ansys_linux(fs, path, version, raises):
 
 
 @requires("ansys-tools-path")
-def test_invalid_mode(mapdl, fs):
-    fs.create_file("/ansys_inc/v241/ansys/bin/ansys241")
+def test_invalid_mode(mapdl, my_fs):
+    my_fs.create_file("/ansys_inc/v241/ansys/bin/ansys241")
     with pytest.raises(ValueError):
         exec_file = find_ansys(241)[0]
         pymapdl.launch_mapdl(
@@ -217,9 +220,9 @@ def test_invalid_mode(mapdl, fs):
 
 
 @requires("ansys-tools-path")
-def test_old_version(mapdl, fs):
+def test_old_version(mapdl, my_fs):
     exec_file_v150 = "/ansys_inc/v150/ansys/bin/ansys150"
-    fs.create_file(exec_file_v150)
+    my_fs.create_file(exec_file_v150)
     exec_file = find_ansys(150)[0]
     assert exec_file == exec_file_v150
     with pytest.raises(ValueError, match="MAPDL version must be one of the following:"):
