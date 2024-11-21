@@ -2122,7 +2122,7 @@ def get_version(
     if not version and exec_file and _HAS_ATP:
         version = version_from_path("mapdl", exec_file)
 
-    elif not version:
+    else not version:
         return
 
     if isinstance(version, float):
