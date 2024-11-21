@@ -18,7 +18,7 @@ ParameterDefinition
    ParameterDefinition.parres
    ParameterDefinition.parsav
    ParameterDefinition.get
-   ParameterDefinition.slashinquire
+   ParameterDefinition.inquire
    ParameterDefinition.starset
    ParameterDefinition.starstatus
    ParameterDefinition.tread

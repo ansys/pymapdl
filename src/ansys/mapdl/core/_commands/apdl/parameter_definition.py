@@ -184,15 +184,12 @@ class ParameterDefinition:
         command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num}"
         return self.run(command, **kwargs)
 
-    def slashinquire(
+    def inquire(
         self,
         strarray: str = "",
         func: str = "",
-        envname: str = "",
-        substring: str = "",
-        parameter: str = "",
-        fname: str = "",
-        ext: str = "",
+        arg1: str = "",
+        arg2: str = "",
         **kwargs,
     ):
         r"""Returns system information to a parameter.
@@ -201,55 +198,147 @@ class ParameterDefinition:
 
         Parameters
         ----------
-        strarray : str
-            Name of the "string array" parameter that will hold the returned values. String array parameters
-            are similar to character arrays, but each array element can be as long as 248 characters. If the
-            string parameter does not exist, it will be created.
+        strarray : str, optional
+            Name of the string array or parameter that will hold the returned values.
+            Normally, if used in a python script you should just work with the
+            return value from this method.
+        func : str, optional
+            Specifies the type of system information returned.  See the
+            notes section for more information.
+        arg1 : str, optional
+            First argument. See notes for ``arg1`` definition.
+        arg2 : str, optional
+            Second argument. See notes for ``arg1`` definition.
 
-        func : str
-            Specifies the type of system information returned:
-
-            * ``LOGIN`` - Returns the pathname of the login directory on Linux systems or the pathname of the
-              default directory (including drive letter) on Windows systems.
-            * ``DOCU`` - Returns the pathname of the Mechanical APDL docu directory.
-            * ``APDL`` - Returns the pathname of the Mechanical APDL APDL directory.
-            * ``PROG`` - Returns the pathname of the Mechanical APDL executable directory.
-            * ``AUTH`` - Returns the pathname of the directory in which the license file resides.
-            * ``USER`` - Returns the name of the user currently logged-in.
-            * ``DIRECTORY`` - Returns the pathname of the current directory.
-            * ``JOBNAME`` - Returns the current ``Jobname``.
-            * ``RSTDIR`` - Returns rst directory ( :ref:`file` command).
-            * ``RSTFILE`` - Returns rst file name ( :ref:`file` command).
-            * ``RSTEXT`` - Returns rst file extension ( :ref:`file` command).
-            * ``PSEARCH`` - Returns path used for "unknown command" macro ( :ref:`psearch` command).
-            * ``OUTPUT`` - Returns the current output file name ( :ref:`output` command).
-
-        envname : str
-            Specifies the name of the environment variable.
-
-        substring : str
-            If ``Substring`` = 1, the first substring (up to the first colon (:)) is returned. If
-            ``Substring`` = 2, the second substring is returned, etc. For Windows platforms, the separating
-            character is semicolon (;). If this argument is either blank or 0, the entire value of the
-            environment variable is returned.
-
-        parameter : str
-            Name of the parameter that will hold the returned values.
-
-        fname : str
-            File name and directory path (248 characters maximum, including the characters needed for the
-        directory path). An unspecified directory path defaults to the working directory; in this case, you
-        can use all 248 characters for the file name.
-
-        ext : str
-            Filename extension (eight-character maximum).
+        Returns
+        -------
+        str
+            Value of the inquired item.
 
         Notes
         -----
-        The :ref:`slashinquire` command is valid in any processor.
+        The ``/INQUIRE`` command is valid in any processor.
+
+        .. warning::
+        Take note that from version 0.60.4 and later, the command behaviour
+        has been changed.
+        Previously, the ``StrArray`` argument was omitted. For example:
+        >>> mapdl.inquire('DIRECTORY')
+        C:\\Users\\user\\AppData\\Local\\Temp\\ansys_nynvxsaooh
+
+        Now this will raise an exception.
+        The default behaviour now, requires to input ``StrArray``:
+        >>> mapdl.inquire('', 'DIRECTORY')
+        C:\\Users\\user\\AppData\\Local\\Temp\\ansys_nynvxsaooh
+
+        \*\*GENERAL FUNC OPTIONS\*\*
+
+        - ``LOGIN`` - Returns the pathname of the login directory on Linux
+        systems or the pathname of the default directory (including
+        drive letter) on Windows systems.
+        - ``DOCU`` - Pathname of the ANSYS documentation directory.
+        - ``APDL`` - Pathname of the ANSYS APDL directory.
+        - ``PROG`` - Pathname of the ANSYS executable directory.
+        - ``AUTH`` - Pathname of the directory in which the license file resides.
+        - ``USER`` - Name of the user currently logged-in.
+        - ``DIRECTORY`` - Pathname of the current directory.
+        - ``JOBNAME`` - Current Jobname.
+        - ``RSTDIR`` - Result file directory.
+        - ``RSTFILE`` - Result file name.
+        - ``RSTEXT`` - Result file extension.
+        - ``OUTPUT`` - Current output file name.
+
+        \*\*RETURNING THE VALUE OF AN ENVIRONMENT VARIABLE TO A PARAMETER\*\*
+
+        If ``FUNC=ENV``, the command format is ``/INQUIRE,StrArray,ENV,ENVNAME,Substring``.
+        In this instance, ENV specifies that the command should return the
+        value of an environment variable.
+        The following defines the remaining fields:
+
+        Envname:
+        Specifies the name of the environment variable.
+
+        Substring:
+        If ``Substring = 1``, the first substring (up to the first colon (:)) is returned.
+        If ``Substring = 2``, the second substring is returned, etc. For Windows platforms,
+        the separating character is semicolon (;).
+        If this argument is either blank or 0, the entire value of the environment
+        variable is returned.
+
+        \*\*RETURNING THE VALUE OF A TITLE TO A PARAMETER\*\*
+
+        If ``FUNC = TITLE``, the command format is ``/INQUIRE,StrArray,TITLE,Title_num``.
+        In this context, the value of Title_num can be blank or ``1`` through ``5``. If the
+        value is ``1`` or blank, the title is returned. If the value is ``2`` through ``5``,
+        a corresponding subtitle is returned (``2`` denoting the first subtitle, and so on).
+
+        \*\*RETURNING INFORMATION ABOUT A FILE TO A PARAMETER\*\*
+
+        The ``/INQUIRE`` command can also return information about specified files
+        within the file system.
+        For these capabilities, the format is ``/INQUIRE,Parameter,FUNC,Fname, Ext, --``.
+        The following defines the fields:
+
+        Parameter:
+        Name of the parameter that will hold the returned values.
+
+        Func:
+        Specifies the type of file information returned:
+
+        EXIST:
+        Returns a ``1`` if the specified file exists, and ``0`` if it does not.
+
+        DATE:
+        Returns the date stamp of the specified file in the format ``\*yyyymmdd.hhmmss\*``.
+
+        SIZE:
+        Returns the size of the specified file in MB.
+
+        WRITE:
+        Returns the status of the write attribute. A ``0`` denotes no write permission while a ``1`` denotes
+        write permission.
+
+        READ:
+        Returns the status of the read attribute. A ``0`` denotes no read permission while a ``1`` denotes read
+        permission.
+
+        EXEC:
+        Returns the status of the execute attribute (this has meaning only on Linux). A ``0`` denotes no
+        execute permission while a ``1`` denotes execute permission.
+
+        LINES:
+        Returns the number of lines in an ASCII file.
+
+        Fname:
+        File name and directory path (248 characters maximum, including the characters needed for the
+        directory path). An unspecified directory path defaults to the working directory; in this case, you
+        can use all 248 characters for the file name.
+
+        Ext:
+        Filename extension (eight-character maximum).
+
+        Examples
+        --------
+        Return the MAPDL working directory
+        >>> mapdl.inquire('', 'DIRECTORY')
+        C:\\Users\\gayuso\\AppData\\Local\\Temp\\ansys_nynvxsaooh
+
+        Or
+
+        >>> mapdl.inquire()
+        C:\\Users\\gayuso\\AppData\\Local\\Temp\\ansys_nynvxsaooh
+
+        Return the job name
+
+        >>> mapdl.inquire('', 'JOBNAME')
+        file
+
+        Return the result file name
+
+        >>> mapdl.inquire('', 'RSTFILE')
+        'file.rst'
         """
-        command = f"/INQUIRE,{strarray},{func},{envname},{substring},{parameter},{fname},{ext}"
-        return self.run(command, **kwargs)
+        return self.run(f"/INQUIRE,{strarray},{func},{arg1},{arg2}", **kwargs)
 
     def starset(
         self,
@@ -343,8 +432,6 @@ class ParameterDefinition:
             value) are sequentially assigned to the succeeding array elements of the column. `Examples:`
             \*SET,A(1,4),10,11 assigns A(1,4)=10, A(2,4)=11, and \*SET,B(2,3),'file10','file11' assigns
             B(2,3)='file10', B(3,3)='file11'.
-
-        Notes
 
         Notes
         -----
