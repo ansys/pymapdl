@@ -22,6 +22,7 @@
 
 """Unit tests regarding plotting."""
 import os
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -1256,15 +1257,19 @@ def test_aplot_quality_fail(mapdl, make_block, quality):
         mapdl.aplot(quality=quality)
 
 
+@patch("ansys.mapdl.core.Mapdl.is_png_found", lambda *args, **kwargs: False)
 def test_plot_path(mapdl, tmpdir):
     mapdl.graphics("POWER")
 
     with pytest.raises(
         MapdlRuntimeError,
-        match="One possible reason is that the graphics device is not correct.",
+        match="One possible reason is that the graphics device is not correct",
     ):
         mapdl.eplot(vtk=False)
 
+
+def test_plot_path_screenshoot(mapdl, cleared, tmpdir):
+    mapdl.graphics("POWER")
     # mapdl.screenshot is not affected by the device.
     # It should not raise exceptions
     scheenshot_path = os.path.join(tmpdir, "screenshot.png")
