@@ -218,7 +218,7 @@ def test_global_logger_format():
 
 
 @requires("grpc")
-def test_instance_logger_format(mapdl, cleared):
+def test_instance_logger_format(mapdl, cleared, tmpdir):
     # Since we cannot read the format of our logger, because pytest just dont show the console output or
     # if it does, it formats the logger with its own formatter, we are going to check the logger handlers
     # and output by faking a record.
@@ -226,15 +226,22 @@ def test_instance_logger_format(mapdl, cleared):
     # There are things such as filename or class that we cannot evaluate without going
     # into the code.
 
+    msg = "This is a message"
+    logfile = os.path.join(tmpdir, "mylogfile.log")
+
+    # Adding a log handler
+    mapdl.logger.log_to_file(logfile, logging.DEBUG)
+
+    # Faking a record
     log = fake_record(
         mapdl._log.logger,
-        msg="This is a message",
-        level=deflogging.DEBUG,
+        msg=msg,
+        level=logging.DEBUG,
         extra={"instance_name": "172.1.1.1"},
     )
     assert re.findall("(?:[0-9]{1,3}\.){3}[0-9]{1,3}", log)
     assert "DEBUG" in log
-    assert "This is a message" in log
+    assert msg in log
 
 
 def test_global_methods(caplog):
