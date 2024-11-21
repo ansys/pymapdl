@@ -212,7 +212,7 @@ def test_input_empty(mapdl, cleared):
     assert "INPUT FILE" in resp
 
 
-def test_input_empty(mapdl, cleared):
+def test_input_not_a_file(mapdl, cleared):
     resp = mapdl._send_command("/INPUT, not_a_file")
     assert "does not exist" in resp
 

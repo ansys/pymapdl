@@ -27,7 +27,7 @@ from typing import Dict, List
 
 import psutil
 
-from ansys.mapdl.core import Mapdl
+from ansys.mapdl.core import LOG, Mapdl
 from ansys.mapdl.core.errors import MapdlConnectionError, MapdlExitedError
 from ansys.mapdl.core.launcher import (
     _is_ubuntu,
@@ -259,7 +259,6 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
     if get_start_instance() and (is_exited(mapdl) or mapdl._exited):
         # Backing up the current local configuration
         local_ = mapdl._local
-        channel = mapdl._channel
         ip = mapdl.ip
         port = mapdl.port
         try:
@@ -267,6 +266,9 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
             mapdl = Mapdl(port=port, ip=ip)
 
         except MapdlConnectionError as err:
+            # Registering error.
+            LOG.info(str(err))
+
             # we cannot connect.
             # Kill the instance
             mapdl.exit()
@@ -298,17 +300,11 @@ def make_sure_not_instances_are_left_open(valid_ports: List) -> None:
                     and proc.status() in PROCESS_OK_STATUS
                     and is_ansys_process(proc)
                 ):
-
                     cmdline = proc.cmdline()
                     port = int(cmdline[cmdline.index("-port") + 1])
 
                     if port not in valid_ports:
-                        cmdline_ = " ".join([f'"{each}"' for each in cmdline])
                         subprocess.run(["pymapdl", "stop", "--port", f"{port}"])
                         time.sleep(1)
-                        # raise Exception(
-                        #     f"The following MAPDL instance running at port {port} is alive after the test.\n"
-                        #     f"Only ports {valid_ports} are allowed.\nCMD: {cmdline_}"
-                        # )
             except psutil.NoSuchProcess:
                 continue
