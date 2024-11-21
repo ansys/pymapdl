@@ -23,6 +23,7 @@
 """Shared testing module"""
 from collections import namedtuple
 import os
+import subprocess
 from typing import Dict, List
 
 import psutil
