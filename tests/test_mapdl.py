@@ -35,7 +35,7 @@ import numpy as np
 import psutil
 import pytest
 
-from conftest import PATCH_MAPDL_START, VALID_PORTS, has_dependency
+from conftest import PATCH_MAPDL_START, VALID_PORTS, Running_test, has_dependency
 
 if has_dependency("pyvista"):
     from pyvista import MultiBlock
@@ -1916,7 +1916,10 @@ def test_check_empty_session_id(mapdl):
 
 @requires("requests")  # Requires 'requests' package
 def test_igesin_whitespace(mapdl, cleared, tmpdir):
-    bracket_file = pymapdl.examples.download_bracket()
+    # make sure we download the IGES file
+    with Running_test(False):  # allow access to internet
+        bracket_file = pymapdl.examples.download_bracket()
+
     assert os.path.isfile(bracket_file)
 
     # moving to another location
