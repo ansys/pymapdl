@@ -30,7 +30,7 @@ LATEST=3 # for 'latest-ubuntu' and 'latest-ubuntu-student'
 ONLY_UBUNTU="${ONLY_UBUNTU:-false}"
 
 # Do not process more than the $AUTH_USER_LIMIT_VERSIONS versions in above list
-AUTH_USER_LIMIT_VERSIONS="${AUTH_USER_LIMIT_VERSIONS:-3}"
+AUTH_USER_LIMIT_VERSIONS="${AUTH_USER_LIMIT_VERSIONS:-2}"
 AUTH_USER_LIMIT=$((LATEST+AUTH_USER_LIMIT_VERSIONS*3)) 
 
 # Students licenses only last a year, hence $NON_AUTH_USER_LIMIT_VERSIONS cannot be more than 2.
