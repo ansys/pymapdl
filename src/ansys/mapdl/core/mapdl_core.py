@@ -2360,12 +2360,15 @@ class _MapdlCore(Commands):
             logger.std_out_handler.close()
             logger.std_out_handler = None
 
+    def is_png_found(self, text: str) -> bool:
+        # findall returns None if there is no match
+        return PNG_IS_WRITTEN_TO_FILE.findall(text) is not None
+
     def _get_plot_name(self, text: str) -> str:
         """Obtain the plot filename."""
-        self._log.debug(text)
-        png_found = PNG_IS_WRITTEN_TO_FILE.findall(text)
+        self._log.debug(f"Output from terminal used to find plot name: {text}")
 
-        if png_found:
+        if self.is_png_found(text):
             # flush graphics writer
             previous_device = self.file_type_for_plots
             self.show("CLOSE", mute=True)
@@ -2378,9 +2381,16 @@ class _MapdlCore(Commands):
             if os.path.isfile(filename):
                 return filename
             else:  # pragma: no cover
-                self._log.error("Unable to find screenshot at %s", filename)
+                raise MapdlRuntimeError("Unable to find screenshot at %s", filename)
         else:
-            self._log.error("Unable to find file in MAPDL command output.")
+            raise MapdlRuntimeError(
+                "Unable to find plotted file in MAPDL command output. "
+                "One possible reason is that the graphics device is not correct. "
+                "Please check you are using FULL graphics device. "
+                "For example:\n"
+                ">>> mapdl.graphics('FULL')"
+                f"\nThe text output from MAPDL is:\n{text}"
+            )
 
     def _display_plot(self, filename: str) -> None:
         """Display the last generated plot (*.png) from MAPDL"""
