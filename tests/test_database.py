@@ -65,7 +65,7 @@ def db(mapdl):
     return mapdl.db
 
 
-def test_failure_on_non_allowed_versions(mapdl):
+def test_failure_on_non_allowed_versions(mapdl, cleared):
     if str(mapdl.version) in ["24.1", "24.2"]:
         with pytest.raises(MapdlVersionError):
             mapdl.db.start()
@@ -73,7 +73,7 @@ def test_failure_on_non_allowed_versions(mapdl):
         pytest.skip(f"Should run only on MAPDL 24.1 and 24.2")
 
 
-def test_database_start_stop(mapdl):
+def test_database_start_stop(mapdl, cleared):
     if mapdl._server_version < (0, 4, 1):  # 2021R2
         pytest.skip("requires 2021R2 or newer")
 
@@ -140,7 +140,7 @@ def test__channel_str(db):
     assert re.search("\d{4,6}", db._channel_str)
 
 
-def test_off_db(mapdl, db):
+def test_off_db(mapdl, cleared, db):
     """Testing that when there is no active database"""
     if db.active:
         db.stop()
@@ -149,7 +149,7 @@ def test_off_db(mapdl, db):
     assert mapdl.db.elems is None
 
 
-def test_wrong_api_version(mapdl, db):
+def test_wrong_api_version(mapdl, cleared, db):
     mapdl.db.stop()
     mapdl.__server_version = (0, 1, 1)
     mapdl._MapdlGrpc__server_version = (0, 1, 1)
@@ -168,7 +168,7 @@ def test_wrong_api_version(mapdl, db):
     assert "is currently running" in mapdl.db._status()
 
 
-def test_repr(mapdl, db):
+def test_repr(mapdl, cleared, db):
     elems = mapdl.db.elems
     nodes = mapdl.db.nodes
 

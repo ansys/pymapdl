@@ -1251,7 +1251,7 @@ def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
     )
 
 
-def test_exited(mapdl):
+def test_exited(mapdl, cleared):
     mapdl._exited = True
     with pytest.raises(MapdlRuntimeError):
         mapdl.post_processing.plot_nodal_displacement(

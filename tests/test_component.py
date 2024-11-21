@@ -276,7 +276,7 @@ def test_default_entity_error(mapdl, cube_geom_and_mesh):
         mapdl.components.default_entity = "asdf"
 
 
-def test_logger(mapdl):
+def test_logger(mapdl, cleared):
     assert mapdl.components.logger == mapdl.logger
 
 

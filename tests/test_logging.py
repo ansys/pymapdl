@@ -218,7 +218,7 @@ def test_global_logger_format():
 
 
 @requires("grpc")
-def test_instance_logger_format(mapdl):
+def test_instance_logger_format(mapdl, cleared):
     # Since we cannot read the format of our logger, because pytest just dont show the console output or
     # if it does, it formats the logger with its own formatter, we are going to check the logger handlers
     # and output by faking a record.
@@ -307,12 +307,12 @@ def test_log_to_file(tmpdir):
     assert file_msg_debug in text
 
 
-def test_log_instance_name(mapdl):
+def test_log_instance_name(mapdl, cleared):
     # verify we can access via an instance name
     LOG[mapdl.name] == mapdl._log
 
 
-def test_instance_log_to_file(mapdl, tmpdir):
+def test_instance_log_to_file(mapdl, cleared, tmpdir):
     """Testing writing to log file.
 
     Since the default loglevel of LOG is error, debug are not normally recorded to it.

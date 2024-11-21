@@ -68,16 +68,16 @@ def test_jobname(mapdl_console, cleared):
     assert mapdl_console.jobname == other_jobname
 
 
-def test_empty(mapdl_console):
+def test_empty(mapdl_console, cleared):
     with pytest.raises(ValueError):
         mapdl_console.run("")
 
 
-def test_str(mapdl_console):
+def test_str(mapdl_console, cleared):
     assert "ANSYS Mechanical" in str(mapdl_console)
 
 
-def test_version(mapdl_console):
+def test_version(mapdl_console, cleared):
     assert isinstance(mapdl_console.version, float)
 
 
@@ -216,12 +216,12 @@ def test_al(cleared, mapdl_console):
     assert a0 == 1
 
 
-def test_invalid_area(mapdl_console):
+def test_invalid_area(mapdl_console, cleared):
     with pytest.raises(MapdlRuntimeError):
         mapdl_console.a(0, 0, 0, 0)
 
 
-# def test_invalid_input(mapdl_console):
+# def test_invalid_input(mapdl_console, cleared):
 # with pytest.raises(FileNotFoundError):
 # mapdl_console.input('thisisnotafile')
 
@@ -461,7 +461,7 @@ def test_elements(cleared, mapdl_console):
         np.random.random((10, 3, 3)),
     ),
 )
-def test_set_get_parameters(mapdl_console, parm):
+def test_set_get_parameters(mapdl_console, cleared, parm):
     parm_name = pymapdl.misc.random_string(20)
     mapdl_console.parameters[parm_name] = parm
     if isinstance(parm, str):
@@ -475,7 +475,7 @@ def test_set_parameters_arr_to_scalar(mapdl_console, cleared):
     mapdl_console.parameters["PARM"] = 2
 
 
-def test_set_parameters_string_spaces(mapdl_console):
+def test_set_parameters_string_spaces(mapdl_console, cleared):
     with pytest.raises(ValueError):
         mapdl_console.parameters["PARM"] = "string with spaces"
 
@@ -505,7 +505,7 @@ def test_builtin_parameters(mapdl_console, cleared):
     assert mapdl_console.parameters.real == 1
 
 
-def test_eplot_fail(mapdl_console):
+def test_eplot_fail(mapdl_console, cleared):
     # must fail with empty mesh
     with pytest.raises(MapdlRuntimeError):
         mapdl_console.eplot()
@@ -595,7 +595,7 @@ def test_cyclic_solve(mapdl_console, cleared):
     assert mapdl_console.result.nsets == 16  # multiple result files...
 
 
-def test_load_table(mapdl_console):
+def test_load_table(mapdl_console, cleared):
     my_conv = np.array(
         [
             [0, 0.001],
@@ -610,7 +610,7 @@ def test_load_table(mapdl_console):
     assert np.allclose(mapdl_console.parameters["my_conv"], my_conv[:, -1])
 
 
-def test_mode_console(mapdl_console):
+def test_mode_console(mapdl_console, cleared):
     assert mapdl_console.mode == "console"
     assert not mapdl_console.is_grpc
     assert not mapdl_console.is_corba

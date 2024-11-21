@@ -234,7 +234,7 @@ def test_cmd_class_dlist_vm(mapdl, cleared):
 
 
 @pytest.mark.parametrize("func", LIST_OF_INQUIRE_FUNCTIONS)
-def test_inquire_functions(mapdl, func):
+def test_inquire_functions(mapdl, cleared, func):
     func_ = getattr(mapdl, func)
     func_args = inspect.getfullargspec(func_).args
     args = [
@@ -266,7 +266,7 @@ def test_bclist(mapdl, beam_solve, func):
 
 
 @pytest.mark.parametrize("method", CMD_DOC_STRING_INJECTOR)
-def test_docstring_injector(mapdl, method):
+def test_docstring_injector(mapdl, cleared, method):
     """Check if the docstring has been injected."""
     for name in dir(mapdl):
         if name[0:4].upper() == method and name in dir(

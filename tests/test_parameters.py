@@ -118,7 +118,7 @@ gen_status = """ABBREVIATION STATUS-
         1e61,
     ],
 )
-def test__get_parameter_array(mapdl, number):
+def test__get_parameter_array(mapdl, cleared, number):
     name = "param_array"
 
     # Testing 1D arrays
@@ -182,7 +182,7 @@ def parameters_name(mapdl, func, par_name):
         "array3d_(1,1,1)",
     ],
 )
-def test_parameters_name(mapdl, func, par_name):
+def test_parameters_name(mapdl, cleared, func, par_name):
     parameters_name(mapdl, func, par_name)
 
 
@@ -281,7 +281,7 @@ def test_parameters_name(mapdl, func, par_name):
         ),
     ],
 )
-def test_parameters_name_error(mapdl, func, par_name):
+def test_parameters_name_error(mapdl, cleared, func, par_name):
     with pytest.raises(ValueError):
         parameters_name(mapdl, func, par_name)
 
@@ -324,7 +324,7 @@ def test_double_parameter_get(mapdl, number, cleared):
     mapdl._name = mapdl_name
 
 
-def test_parameter_delete_raise(mapdl):
+def test_parameter_delete_raise(mapdl, cleared):
     with pytest.raises(KeyError, match="does not exist"):
         del mapdl.parameters["not-a-parm"]
 
@@ -368,7 +368,7 @@ def test_interp_star_status(status, check):
         assert output["PORT"]["value"] == 50054.0
 
 
-def test_str_arrays(mapdl):
+def test_str_arrays(mapdl, cleared):
     mapdl.run("*dim, mystrarr, string, 80")
     mapdl.run("mystrarr(1) = 'hello there!'")
 
@@ -384,7 +384,7 @@ def test_str_arrays(mapdl):
     ]
 
 
-def test_3d_array(mapdl):
+def test_3d_array(mapdl, cleared):
     mapdl.dim("myarr", "array", 2, 2, 2)
     mapdl.run("myarr(1,1,1)= 100")
     mapdl.run("myarr(1,1,2)= 200")
@@ -397,7 +397,7 @@ def test_3d_array(mapdl):
     )
 
 
-def test_parameter_with_spaces(mapdl):
+def test_parameter_with_spaces(mapdl, cleared):
     string_ = "DEV:F10X, front weights     "
     mapdl.run(f"*SET,SIMULATION,'{string_}'")
     mapdl.parsav()
@@ -409,7 +409,7 @@ def test_parameter_with_spaces(mapdl):
     assert string_.strip() == mapdl.parameters["SIMULATION"]
 
 
-def test_parameters_keys(mapdl):
+def test_parameters_keys(mapdl, cleared):
     mapdl.parameters["MYPAR"] = 1234
 
     assert "MYPAR" in list(mapdl.parameters.keys())
@@ -451,7 +451,7 @@ def test_non_existing_parameter(mapdl, cleared):
         mapdl.parameters["A"]
 
 
-def test_non_interactive(mapdl):
+def test_non_interactive(mapdl, cleared):
     mapdl.parameters["asdf"] = 2
     with pytest.raises(MapdlRuntimeError):
         with mapdl.non_interactive:

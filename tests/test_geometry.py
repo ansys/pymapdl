@@ -539,7 +539,7 @@ def test_entities_multiple_bodies(mapdl, contact_geom_and_mesh, entity, number):
     assert isinstance(entity, pv.MultiBlock)
 
 
-def test_create_geometry(mapdl):
+def test_create_geometry(mapdl, cleared):
     assert isinstance(mapdl._create_geometry(), Geometry)
 
 

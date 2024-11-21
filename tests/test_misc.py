@@ -129,7 +129,7 @@ def test_no_return(mapdl, cleared):
 
 
 @pytest.mark.parametrize("file_", ["dummy.dumdum", "dumdum.dummy"])
-def test_load_file_local(mapdl, tmpdir, file_):
+def test_load_file_local(mapdl, cleared, tmpdir, file_):
     """Checking 'load_file' function.
 
     In CICD it seems we cannot write to the root folder '/'.

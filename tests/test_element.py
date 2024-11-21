@@ -117,7 +117,7 @@ def test_etype(mapdl, cleared):
     assert "CURRENT NODAL DOF SET IS  UX    UY    UZ" in out
 
 
-def test_eshape(mapdl):
+def test_eshape(mapdl, cleared):
     with pytest.warns(UserWarning):
         mapdl.eshape()
 

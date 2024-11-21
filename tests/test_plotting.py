@@ -468,7 +468,7 @@ def test_bc_plot_bc_target_error(mapdl, boundary_conditions_example, bc_target):
         )
 
 
-def test_bc_no_mapdl(mapdl):
+def test_bc_no_mapdl(mapdl, cleared):
     with pytest.raises(ValueError):
         pl = MapdlPlotter()
         pl.plot([], [], [], plot_bc=True)
@@ -1001,7 +1001,7 @@ def test_WithInterativePlotting(mapdl, make_block):
     os.remove(last_png)
 
 
-def test_file_type_for_plots(mapdl):
+def test_file_type_for_plots(mapdl, cleared):
     assert mapdl.file_type_for_plots in ["PNG", "TIFF", "PNG", "VRML", "TERM", "CLOSE"]
 
     mapdl.file_type_for_plots = "TIFF"
