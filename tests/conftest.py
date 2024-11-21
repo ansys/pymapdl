@@ -212,6 +212,7 @@ from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+from ansys.mapdl.core.mapdl_core import VALID_DEVICES
 
 if has_dependency("ansys-tools-visualization_interface"):
     import ansys.tools.visualization_interface as viz_interface
@@ -442,6 +443,7 @@ def run_before_and_after_tests(
     assert mapdl.finish_job_on_exit, "Mapdl class should finish the job!"
     assert not mapdl.ignore_errors, "Mapdl class is ignoring errors!"
     assert not mapdl.mute
+    assert mapdl.test_file_type_for_plots in VALID_DEVICES
 
     # Returning to default
     mapdl.graphics("full")
