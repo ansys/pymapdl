@@ -136,7 +136,7 @@ def get_fake_process(message_stdout, message_stderr="", time_sleep=0):
 
 @pytest.fixture
 def my_fs(fs):
-    fs.add_real_directory("/proc")
+    fs.add_real_directory("/proc", lazy_read=False)
     yield fs
 
 
