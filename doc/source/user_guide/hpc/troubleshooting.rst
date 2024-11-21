@@ -7,8 +7,8 @@ Troubleshooting
 
 Debugging jobs
 --------------
-- Use ``--output`` and ``--error`` directives in batch scripts to captures
-  standard output and error messages to specific files.
+- Use ``--output`` and ``--error`` directives in batch scripts to capture
+  standard output and error messages to specific files:
 
   .. code-block:: bash
 
@@ -23,7 +23,8 @@ Debugging jobs
 
 - Check SLURM logs for error messages and debugging information.
 - It is also good idea to print the environment variables in your bash script, using 
-  ``printenv``. Additionally, you can filter them using ``grep``.
+  ``printenv`` *bash* command.
+  Additionally, you can filter its output using ``grep`` *bash* command.
 
   .. code-block:: bash
 
@@ -41,7 +42,7 @@ Debugging jobs
 - Use PyMAPDL logging to printout valuable information. To activate this, see
   :ref:`ref_debug_pymapdl`.
 
-- In case you need more help, visit :ref:`ref_troubleshooting`.
+- If you need more help, see :ref:`ref_troubleshooting`.
 
 
 .. _ref_python_venv_not_accesible:
@@ -50,14 +51,14 @@ Python virtual environment is not accessible
 --------------------------------------------
 If there is an error while testing the Python installation, it might mean 
 that the Python environment is not accessible to the compute nodes.
-For example, given the following *bash* script `test.sh`:
+For example, assume you have the following `test.sh` *bash* script:
 
 .. code-block:: bash
 
    source /home/user/.venv/bin/activate
    python -c "from ansys.mapdl import core as pymapdl; pymapdl.report()"
 
-The following output is shown after running in the terminal:
+The following output is shown after running this script in the terminal:
 
 .. code-block:: console
 
@@ -68,18 +69,18 @@ The following output is shown after running in the terminal:
     File "<string>", line 1, in <module>
     ImportError: No module named ansys.mapdl
 
-As the output shows, PyMAPDL could not be found, meaning that either:
+As the output shows, PyMAPDL could not be found, indicating one of the following problems:
 
 * The virtual environment does not have PyMAPDL installed.
   See :ref:`ref_install_pymapdl_on_hpc`.
 
-* Or the script did not activate properly the virtual environment
+* The script did not properly activate the virtual environment
   (``/home/user/.venv``).
 
-For the second reason, there could be a number of reasons.
+The second problem can occur due to a number of reasons.
 One of them is that the system Python distribution used to create
 the virtual environment is not accessible from the compute nodes
-due to one of these reasons:
+because of one of these situations:
 
 - The virtual environment has been created in a directory that is
   not accessible from the nodes. In this case, your terminal might
@@ -92,21 +93,20 @@ due to one of these reasons:
      bash: .venv/bin/activate: No such file or directory
 
   Depending on your terminal configuration, the preceding error might be
-  sufficient to exit the terminal process, or not. 
-  If not, the execution continues, and the subsequent ``python`` call is
-  executed using the default python executable.
-  It is very likely that the default ``python`` executable does not have
-  PyMAPDL installed, hence the ``ImportError`` error showed preceding might
+  sufficient to exit the terminal process. If it is not, the execution continues,
+  and the subsequent ``python`` call is executed using the default Python executable.
+  It is very likely that the default Python executable does not have
+  PyMAPDL installed. Hence the ``ImportError`` error might
   appear too.
 
 - The virtual environment has been created from a Python executable that is
   not available to the compute nodes. Hence, the virtual environment is not
   activated.
-  For example, you might be creating the virtual environment Using
+  For example, you might be creating the virtual environment using
   Python 3.10, but only Python 3.8 is available from the compute nodes.
   You can test which Python executable the cluster is using by starting an
   interactive session in a compute node with this code to list all commands
-  which starts with ``python``:
+  that start with ``python``:
 
 .. code-block:: console
 
@@ -116,12 +116,11 @@ due to one of these reasons:
 .. the approach to solve this comes from:
    https://stackoverflow.com/questions/64188693/problem-with-python-environment-and-slurm-srun-sbatch
 
-It should be noticed the preceding approach assumes that all the nodes have similar
-configuration, hence all of them should have the same Python installations
+It should be noted that the preceding approach assumes that all the nodes have similar
+configurations. Hence, all of them should have the same Python installations
 available.
 
-It is also convenient to be aware that environment variable modules can be
-used to activate Python installations.
+You can also use environment variable modules to activate Python installations.
 For more information, see :ref:`ref_envvar_modules_on_hpc`.
 
 
@@ -158,10 +157,10 @@ In certain HPC environments the possibility of installing a different Python
 version is limited for security reasons.
 In such cases, the Python distribution available in the Ansys installation
 can be used.
-This Python distribution is a customized Python (CPython) version for Ansys
-products use only.
-Its use is **discouraged** except for very advanced users and special use
-cases.
+This Python distribution is a customized Python (CPython) version for use only by Ansys
+products.
+Its use is **discouraged** unless you are a very advanced user or have a special use
+case.
 
 This Python distribution is in the following directory, where
 ``%MAPDL_VERSION%`` is the three-digit Ansys version:
@@ -178,7 +177,7 @@ For example, here is the directory for Ansys 2024 R2:
 
 
 In Ansys 2024 R1 and later, the unified installer includes CPython 3.10.
-Earlier versions include CPython 3.7
+Earlier Ansys versions include CPython 3.7
 (``/commonfiles/CPython/3_7/linx64/Release/python``).
 
 Because the Ansys installation must be available to all

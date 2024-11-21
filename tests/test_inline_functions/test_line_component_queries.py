@@ -22,8 +22,23 @@
 
 from math import isclose
 
+import pytest
+
 
 class TestLineCoordinateQueries:
+
+    @pytest.fixture(scope="class")
+    def line_geometry(self, mapdl):
+        mapdl.finish(mute=True)
+        mapdl.clear("NOSTART", mute=True)
+
+        mapdl.prep7(mute=True)
+        k0 = mapdl.k(1, 0, 0, 0)
+        k1 = mapdl.k(2, 1, 2, 2)
+        l0 = mapdl.l(k0, k1)
+        q = mapdl.queries
+        return q, [k0, k1], l0
+
     def test_lx(self, line_geometry):
         q, kps, line = line_geometry
         x = q.lx(line, 0.5)
@@ -41,6 +56,18 @@ class TestLineCoordinateQueries:
 
 
 class TestLineSlopeQueries:
+    @pytest.fixture(scope="class")
+    def line_geometry(self, mapdl):
+        mapdl.finish(mute=True)
+        mapdl.clear("NOSTART", mute=True)
+
+        mapdl.prep7(mute=True)
+        k0 = mapdl.k(1, 0, 0, 0)
+        k1 = mapdl.k(2, 1, 2, 2)
+        l0 = mapdl.l(k0, k1)
+        q = mapdl.queries
+        return q, [k0, k1], l0
+
     def test_lsx(self, line_geometry):
         q, kps, line = line_geometry
         sx = q.lsx(line, 0.5)

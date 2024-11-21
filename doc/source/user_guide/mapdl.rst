@@ -1092,6 +1092,7 @@ are unsupported.
 | * ``LSWRITE`` | |:white_check_mark:| Available (Internally running in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`)   | |:white_check_mark:| Available   | |:exclamation:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                       |                                                                                                     |
 +---------------+---------------------------------------------------------------------------------------------------------------------------------+----------------------------------+----------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
 
+.. _ref_environment_variables:
 
 Environment variables
 =====================
@@ -1099,20 +1100,19 @@ Environment variables
 There are several PyMAPDL-specific environment variables that can be
 used to control the default behavior of PyMAPDL or launching MAPDL.
 
-It should be mentioned that these environment variables do not have
+These environment variables do not have
 priority over the arguments given in the corresponding functions.
-For instance:
+Consider this command:
 
 .. code-block:: console
     
     user@machine:~$ export PYMAPDL_PORT=50052
     user@machine:~$ python -c "from ansys.mapdl.core import launch_mapdl; mapdl=launch_mapdl(port=60053)"
 
-The preceding command launches an MAPDL instance on the port 60053,
-because the argument ``port`` has priority over the environment
-variable :envvar:`PYMAPDL_PORT`.
+This command launches an MAPDL instance on port 60053
+because the ``port`` argument has priority over the :envvar:`PYMAPDL_PORT`
+environment variable. The following table describes all arguments.
 
-These are described in the following table:
 
 +---------------------------------------+----------------------------------------------------------------------------------+
 | :envvar:`PYMAPDL_START_INSTANCE`      | Override the behavior of the                                                     |
@@ -1190,7 +1190,7 @@ These are described in the following table:
 |                                       |    user@machine:~$ export PYMAPDL_MAPDL_VERSION=22.2                             |
 |                                       |                                                                                  |
 +---------------------------------------+----------------------------------------------------------------------------------+
-| :envvar:`PYMAPDL_ON_SLURM`            | With this environment variable set to ``FALSE``, you can avoid                   |
+| :envvar:`PYMAPDL_RUNNING_ON_HPC`      | With this environment variable set to ``FALSE``, you can avoid                   |
 |                                       | PyMAPDL from detecting that it is running on a SLURM HPC cluster.                |
 +---------------------------------------+----------------------------------------------------------------------------------+
 | :envvar:`PYMAPDL_MAX_MESSAGE_LENGTH`  | Maximum gRPC message length. If your                                             |

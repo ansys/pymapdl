@@ -32,7 +32,6 @@ from ansys.mapdl.core import LOG
 
 def is_installed(package_name: str) -> bool:
     """Check if a package is installed"""
-
     package_name = package_name.replace("-", ".")
 
     try:

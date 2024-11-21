@@ -20,10 +20,38 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import pytest
+
 
 class TestFieldComponentValueGetter:
+
+    # The tests change the mesh so this fixture must be function scoped.
+    @pytest.fixture(scope="function")
+    def box_with_fields(self, mapdl):
+        mapdl.finish(mute=True)
+        mapdl.clear("NOSTART", mute=True)
+
+        mapdl.prep7()
+        mapdl.mp("kxx", 1, 45)
+        mapdl.mp("ex", 1, 2e10)
+        mapdl.mp("perx", 1, 1)
+        mapdl.mp("murx", 1, 1)
+        if mapdl.version >= 25.1:
+            mapdl.tb("pm", 1, "", "", "perm")
+            mapdl.tbdata("", 0)
+
+        mapdl.et(1, "SOLID70")
+        mapdl.et(2, "CPT215")
+        mapdl.keyopt(2, 12, 1)  # Activating PRES DOF
+        mapdl.et(3, "SOLID122")
+        mapdl.et(4, "SOLID96")
+        mapdl.block(0, 1, 0, 1, 0, 1)
+        mapdl.esize(0.5)
+        return mapdl
+
     def test_temp(self, box_with_fields):
         mapdl = box_with_fields
+        mapdl.prep7()
         mapdl.type(1)
         mapdl.vmesh(1)
         mapdl.d("all", "temp", 5.0)
@@ -34,6 +62,7 @@ class TestFieldComponentValueGetter:
 
     def test_pressure(self, box_with_fields):
         mapdl = box_with_fields
+        mapdl.prep7()
         mapdl.type(2)
         mapdl.vmesh(1)
         mapdl.d("all", "pres", 5.0)
@@ -45,6 +74,7 @@ class TestFieldComponentValueGetter:
 
     def test_volt(self, box_with_fields):
         mapdl = box_with_fields
+        mapdl.prep7()
         mapdl.type(3)
         mapdl.vmesh(1)
         mapdl.d("all", "volt", 5.0)
@@ -55,6 +85,7 @@ class TestFieldComponentValueGetter:
 
     def test_mag(self, box_with_fields):
         mapdl = box_with_fields
+        mapdl.prep7()
         mapdl.type(4)
         mapdl.vmesh(1)
         mapdl.d("all", "mag", 5.0)

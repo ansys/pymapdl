@@ -37,6 +37,7 @@ from ansys.mapdl.core.errors import (
     CommandDeprecated,
     ComponentDoesNotExits,
     IncorrectWorkingDirectory,
+    MapdlCommandIgnoredError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.mapdl_core import _MapdlCore
@@ -354,14 +355,12 @@ class _MapdlCommandExtended(_MapdlCore):
     @wraps(_MapdlCore.cwd)
     def cwd(self, *args, **kwargs):
         """Wraps cwd."""
-        output = super().cwd(*args, mute=False, **kwargs)
+        try:
+            output = super().cwd(*args, mute=False, **kwargs)
+        except MapdlCommandIgnoredError as e:
+            raise IncorrectWorkingDirectory(e.args[0])
 
-        if output is not None:
-            if "*** WARNING ***" in output:
-                raise IncorrectWorkingDirectory(
-                    "\n" + "\n".join(output.splitlines()[1:])
-                )
-
+        self._path = args[0]  # caching
         return output
 
     @wraps(_MapdlCore.list)
@@ -1382,7 +1381,7 @@ class _MapdlCommandExtended(_MapdlCore):
         return output
 
     @wraps(_MapdlCore.inquire)
-    def inquire(self, strarray="", func="", arg1="", arg2=""):
+    def inquire(self, strarray="", func="", arg1="", arg2="", **kwargs):
         """Wraps original INQUIRE function"""
         func_options = [
             "LOGIN",
@@ -1424,14 +1423,28 @@ class _MapdlCommandExtended(_MapdlCore):
                 f"The arguments (strarray='{strarray}', func='{func}') are not valid."
             )
 
-        response = self.run(f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False)
-        if func.upper() in [
-            "ENV",
-            "TITLE",
-        ]:  # the output is multiline, we just need the last line.
-            response = response.splitlines()[-1]
+        response = ""
+        n_try = 3
+        i_try = 0
+        while i_try < n_try and not response:
+            response = self.run(
+                f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False, **kwargs
+            )
+            i_try += 1
 
-        return response.split("=")[1].strip()
+        if not response:
+            if not self._store_commands:
+                raise MapdlRuntimeError("/INQUIRE command didn't return a response.")
+        else:
+            if func.upper() in [
+                "ENV",
+                "TITLE",
+            ]:  # the output is multiline, we just need the last line.
+                response = response.splitlines()[-1]
+
+            response = response.split("=")[1].strip()
+
+        return response
 
     @wraps(_MapdlCore.parres)
     def parres(self, lab="", fname="", ext="", **kwargs):
@@ -1463,7 +1476,7 @@ class _MapdlCommandExtended(_MapdlCore):
             fname_ = self._get_file_name(fname=file_, ext=ext_)
 
         # generate the log and download if necessary
-        output = super().lgwrite(fname=fname_, kedit=kedit, **kwargs)
+        output = super().lgwrite(fname=fname_, ext="", kedit=kedit, **kwargs)
 
         # Let's download the file to the location
         self._download(fname_, fname)
