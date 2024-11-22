@@ -22,7 +22,7 @@
 
 from functools import wraps
 import re
-from typing import Callable
+from typing import Callable, List, Optional
 import weakref
 
 from ansys.mapdl import core as pymapdl
