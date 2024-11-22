@@ -79,7 +79,7 @@ _HAS_VISUALIZER: bool = is_installed("ansys.tools.visualization_interface")
 USER_DATA_PATH: str = user_data_dir(appname="ansys_mapdl_core", appauthor="Ansys")
 EXAMPLES_PATH: str = os.path.join(USER_DATA_PATH, "examples")
 
-# Store local ports
+# Store ports occupied by local instances
 _LOCAL_PORTS: List[int] = []
 
 ###############################################################################
