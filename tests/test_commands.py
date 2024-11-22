@@ -678,6 +678,10 @@ class Test_MAPDL_commands(TestClass):
 
         assert cmd_ in post.upper()
 
+        # Restoring defaults
+        if cmd == "show":
+            mapdl.show("PNG")
+
 
 class Test_output_listing(TestClass):
 
