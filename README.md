@@ -2,7 +2,7 @@
    <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://github.com/ansys/pymapdl/blob/main/doc/source/_static/logo_dark.png">
       <source media="(prefers-color-scheme: light)" srcset="https://github.com/ansys/pymapdl/blob/main/doc/source/_static/logo_light.png">
-      <img alt="PyMAPDL Logo" src="https://github.com/ansys/pymapdl/blob/main/doc/source/_static/logo_light.png" width="70%">
+      <img alt="PyMAPDL Logo" src="https://raw.githubusercontent.com/ansys/pymapdl/blob/main/doc/source/_static/logo_light.png" width="70%">
    </picture>
 </p>
 

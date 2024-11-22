@@ -85,6 +85,19 @@ class TestParseParameter:
 
 
 class TestRunQuery:
+
+    @pytest.fixture(scope="class")
+    def line_geometry(self, mapdl):
+        mapdl.finish(mute=True)
+        mapdl.clear("NOSTART", mute=True)
+
+        mapdl.prep7(mute=True)
+        k0 = mapdl.k(1, 0, 0, 0)
+        k1 = mapdl.k(2, 1, 2, 2)
+        l0 = mapdl.l(k0, k1)
+        q = mapdl.queries
+        return q, [k0, k1], l0
+
     @pytest.mark.parametrize("command", [("KX(1)", float), ("KP(1,1,1)", int)])
     def test_run_query_returned_type(self, line_geometry, command):
         q, kps, l0 = line_geometry
