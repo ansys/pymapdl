@@ -20,8 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import importlib.metadata as importlib_metadata
-
 ###############################################################################
 # Imports
 # =======
@@ -40,16 +38,15 @@ from platformdirs import user_data_dir
 #
 from ansys.mapdl.core.logging import Logger
 
-LOG = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
+LOG: Logger = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
 LOG.debug("Loaded logging module as LOG")
 
 ###############################################################################
 # Globals
 # =======
 #
+from ansys.mapdl.core._version import __version__
 from ansys.mapdl.core.helpers import is_installed, run_every_import, run_first_time
-
-__version__: str = importlib_metadata.version(__name__.replace(".", "-"))
 
 # A dictionary relating PyMAPDL server versions with the unified install ones
 VERSION_MAP: Dict[Tuple[int, int, int], str] = {
@@ -77,7 +74,7 @@ _HAS_VISUALIZER: bool = is_installed("ansys.tools.visualization_interface")
 
 # Setup directories
 USER_DATA_PATH: str = user_data_dir(appname="ansys_mapdl_core", appauthor="Ansys")
-EXAMPLES_PATH = os.path.join(USER_DATA_PATH, "examples")
+EXAMPLES_PATH: str = os.path.join(USER_DATA_PATH, "examples")
 
 # Store local ports
 _LOCAL_PORTS: List[int] = []
