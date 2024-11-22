@@ -443,7 +443,7 @@ def run_before_and_after_tests(
     assert mapdl.finish_job_on_exit, "Mapdl class should finish the job!"
     assert not mapdl.ignore_errors, "Mapdl class is ignoring errors!"
     assert not mapdl.mute
-    assert mapdl.test_file_type_for_plots in VALID_DEVICES
+    assert mapdl.file_type_for_plots in VALID_DEVICES
 
     # Returning to default
     mapdl.graphics("full")
