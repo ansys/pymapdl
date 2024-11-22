@@ -73,7 +73,7 @@ def run_first_time() -> None:
                 "release."
             )
 
-        if sys.version_info[1] <= MINIMUM_PYTHON_VERSION[1]:
+        if sys.version_info[1] < MINIMUM_PYTHON_VERSION[1]:
             warn(
                 f"Python {py_ver} is not being tested or officially supported. "
                 "It is recommended you use a newer version of Python. "
