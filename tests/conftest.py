@@ -28,6 +28,7 @@ from shutil import get_terminal_size
 import subprocess
 from sys import platform
 import time
+from unittest.mock import patch
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
 import psutil
@@ -437,8 +438,12 @@ def run_before_and_after_tests(
 
     yield  # this is where the testing happens
 
+    # Check resetting state
     assert prev == mapdl.is_local
-    assert not mapdl.exited
+    assert not mapdl.exited, "MAPDL is exited after the test. It should have not!"
+    assert not mapdl._mapdl_on_hpc, "Mapdl class is on HPC mode. It should not!"
+    assert mapdl.finish_job_on_exit, "Mapdl class should finish the job!"
+    assert not mapdl.ignore_errors, "Mapdl class is ignoring errors!"
 
     make_sure_not_instances_are_left_open()
 
@@ -622,6 +627,7 @@ def mapdl(request, tmpdir_factory):
     if START_INSTANCE:
         mapdl._local = True
         mapdl._exited = False
+        assert mapdl.finish_job_on_exit
         mapdl.exit(save=True, force=True)
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
@@ -637,11 +643,62 @@ def mapdl(request, tmpdir_factory):
             with pytest.raises(MapdlExitedError):
                 mapdl._send_command_stream("/PREP7")
 
+        # Delete Mapdl object
+        del mapdl
+
 
 SpacedPaths = namedtuple(
     "SpacedPaths",
     ["path_without_spaces", "path_with_spaces", "path_with_single_quote"],
 )
+
+
+# Necessary patches to patch Mapdl launch
+def _returns(return_=None):
+    return lambda *args, **kwargs: return_
+
+
+# Methods to patch in MAPDL when launching
+def _patch_method(method):
+    return "ansys.mapdl.core.mapdl_grpc.MapdlGrpc." + method
+
+
+_meth_patch_MAPDL_launch = [
+    # method, and its return
+    (_patch_method("_connect"), _returns(True)),
+    (_patch_method("_run"), _returns("")),
+    (_patch_method("_create_channel"), _returns("")),
+    (_patch_method("inquire"), _returns("/home/simulation")),
+    (_patch_method("_subscribe_to_channel"), _returns("")),
+    (_patch_method("_run_at_connect"), _returns("")),
+    (_patch_method("_exit_mapdl"), _returns(None)),
+    # non-mapdl methods
+    ("socket.gethostbyname", _returns("123.45.67.99")),
+    (
+        "socket.gethostbyaddr",
+        _returns(
+            [
+                "mapdlhostname",
+            ]
+        ),
+    ),
+]
+
+_meth_patch_MAPDL = _meth_patch_MAPDL_launch.copy()
+_meth_patch_MAPDL.extend(
+    [
+        # launcher methods
+        ("ansys.mapdl.core.launcher.launch_grpc", _returns(None)),
+        ("ansys.mapdl.core.launcher.check_mapdl_launch", _returns(None)),
+    ]
+)
+
+# For testing
+# Patch some of the starting procedures
+PATCH_MAPDL_START = [patch(method, ret) for method, ret in _meth_patch_MAPDL_launch]
+
+# Patch all the starting procedures so we can have a pseudo mapdl instance
+PATCH_MAPDL = [patch(method, ret) for method, ret in _meth_patch_MAPDL]
 
 
 @pytest.fixture(scope="function")
@@ -708,44 +765,6 @@ def cube_solve(cleared, mapdl, cube_geom_and_mesh):
 
 
 @pytest.fixture
-def box_with_fields(cleared, mapdl):
-    mapdl.prep7()
-    mapdl.mp("kxx", 1, 45)
-    mapdl.mp("ex", 1, 2e10)
-    mapdl.mp("perx", 1, 1)
-    mapdl.mp("murx", 1, 1)
-    if mapdl.version >= 25.1:
-        mapdl.tb("pm", 1, "", "", "perm")
-        mapdl.tbdata("", 0)
-
-    mapdl.et(1, "SOLID70")
-    mapdl.et(2, "CPT215")
-    mapdl.keyopt(2, 12, 1)  # Activating PRES DOF
-    mapdl.et(3, "SOLID122")
-    mapdl.et(4, "SOLID96")
-    mapdl.block(0, 1, 0, 1, 0, 1)
-    mapdl.esize(0.5)
-    return mapdl
-
-
-@pytest.fixture
-def box_geometry(mapdl, cleared):
-    areas, keypoints = create_geometry(mapdl)
-    q = mapdl.queries
-    return q, keypoints, areas, get_details_of_nodes(mapdl)
-
-
-@pytest.fixture
-def line_geometry(mapdl, cleared):
-    mapdl.prep7(mute=True)
-    k0 = mapdl.k(1, 0, 0, 0)
-    k1 = mapdl.k(2, 1, 2, 2)
-    l0 = mapdl.l(k0, k1)
-    q = mapdl.queries
-    return q, [k0, k1], l0
-
-
-@pytest.fixture
 def query(mapdl, cleared):
     return mapdl.queries
 
@@ -799,32 +818,6 @@ def selection_test_geometry(mapdl, cleared):
     mapdl.esize(0.5)
     mapdl.vmesh("ALL")
     return mapdl.queries
-
-
-@pytest.fixture
-def twisted_sheet(mapdl, cleared):
-    mapdl.prep7()
-    mapdl.et(1, "SHELL181")
-    mapdl.mp("EX", 1, 2e5)
-    mapdl.mp("PRXY", 1, 0.3)  # Poisson's Ratio
-    mapdl.rectng(0, 1, 0, 1)
-    mapdl.sectype(1, "SHELL")
-    mapdl.secdata(0.1)
-    mapdl.esize(0.5)
-    mapdl.amesh("all")
-    mapdl.run("/SOLU")
-    mapdl.antype("STATIC")
-    mapdl.nsel("s", "loc", "x", 0)
-    mapdl.d("all", "all")
-    mapdl.nsel("s", "loc", "x", 1)
-    mapdl.d("all", "ux", -0.1)
-    mapdl.d("all", "uy", -0.1)
-    mapdl.d("all", "uz", -0.1)
-    mapdl.allsel("all")
-    mapdl.solve()
-    mapdl.finish()
-    q = mapdl.queries
-    return q, get_details_of_nodes(mapdl)
 
 
 def create_geometry(mapdl):
@@ -1148,38 +1141,6 @@ def contact_geom_and_mesh(mapdl):
     mapdl.d(1, "all")
     mapdl.ddele(1, "temp")
     mapdl.allsel("all")
-    mapdl.mute = False
-
-
-@pytest.fixture(scope="function")
-def contact_solve(mapdl, contact_geom_and_mesh):
-    # ==========================================================
-    # * Solution
-    # ==========================================================
-    # from precedent fixture
-    uz1 = 3.18e-03 / 4000
-
-    mapdl.mute = False
-    mapdl.run("/solu")
-    mapdl.antype(4)  # Transient analysis
-    mapdl.lnsrch("on")
-    mapdl.cutcontrol("plslimit", 0.15)
-    mapdl.kbc(0)  # Ramped loading within a load step
-    mapdl.nlgeom("on")  # Turn on large deformation effects
-    mapdl.timint("off", "struc")  # Structural dynamic effects are turned off.
-    mapdl.nropt("unsym")
-
-    # Load Step1
-    mapdl.time(1)
-    mapdl.nsubst(5, 10, 2)
-    mapdl.d(1, "uz", -uz1)  # Tool plunges into the workpiece
-    mapdl.outres("all", "all")
-    mapdl.allsel()
-    mapdl.solve()
-
-    mapdl.post1()
-    mapdl.allsel()
-    mapdl.set("last")
     mapdl.mute = False
 
 

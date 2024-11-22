@@ -137,6 +137,18 @@ jobs:
           python -c "from pyvista.plotting import system_supports_plotting; print('System support plotting ' + str(system_supports_plotting()))"
 
 
+  check-vulnerabilities:
+    name: "Check library vulnerabilities"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: ansys/actions/check-vulnerabilities@v8
+        with:
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          python-package-name: ${{ env.PACKAGE_NAME }}
+          dev-mode: ${{ github.ref != 'refs/heads/main' }}
+          upload-reports: True
+
   docs-build:
     name: "Build documentation"
     runs-on: ubuntu-latest
@@ -152,7 +164,7 @@ jobs:
       GRPC_ENABLE_FORK_SUPPORT: false  # See #3434
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.1
+        uses: actions/checkout@v4.2.2
 
       - name: "Login in Github container registry"
         uses: docker/login-action@v3.3.0
@@ -349,7 +361,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.1
+        uses: actions/checkout@v4.2.2
 
       - name: Get event type and user to check permissions.
         id: get_user
@@ -404,7 +416,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.1
+        uses: actions/checkout@v4.2.2
 
       - name: "Login in Github container registry"
         uses: docker/login-action@v3.3.0
@@ -531,7 +543,7 @@ jobs:
             --ignore_image_cache \
             --cov-report=xml:${{ matrix.mapdl-version }}-remote.xml
 
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # required
@@ -588,7 +600,7 @@ jobs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.1
+        uses: actions/checkout@v4.2.2
 
       - uses: tspascoal/get-user-teams-membership@v3
         id: is_organization_member
@@ -635,7 +647,7 @@ jobs:
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.1
+        uses: actions/checkout@v4.2.2
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -730,7 +742,7 @@ jobs:
 
           reactions: rocket
 
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # required
@@ -763,10 +775,11 @@ jobs:
     env:
       ON_LOCAL: true
       ON_UBUNTU: true
+      TESTING_MINIMAL: true
 
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.1
+        uses: actions/checkout@v4.2.2
         with:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
@@ -836,7 +849,7 @@ jobs:
             ${{ env.PYTEST_ARGUMENTS }} \
             --cov-report=xml:${{ matrix.mapdl-version }}-minimal.xml
 
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # required
@@ -861,7 +874,7 @@ jobs:
       ON_LOCAL: TRUE
 
     steps:
-      - uses: actions/checkout@v4.2.1
+      - uses: actions/checkout@v4.2.2
 
       # Skipping because it is installed locally.
       # - name: Setup Python
@@ -909,7 +922,7 @@ jobs:
             --ignore_image_cache \
             --cov-report=xml:windows-v22.2.0-local.xml
 
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # required
@@ -1018,7 +1031,7 @@ jobs:
         os: [ubuntu-latest, windows-latest]
 
     steps:
-      - uses: actions/checkout@v4.2.1
+      - uses: actions/checkout@v4.2.2
       - name: "Set up Julia"
         uses: julia-actions/setup-julia@v2
         with:
