@@ -850,8 +850,9 @@ class Test_contact_solve(TestClass):
 
     @staticmethod
     @pytest.fixture(scope="class")
-    def contact_solve(mapdl, cleared):
+    def contact_solve(mapdl):
         mapdl.mute = True
+        mapdl.clear()
 
         # Based on tech demo 28.
         # ***** Problem parameters ********
@@ -1158,26 +1159,23 @@ class Test_contact_solve(TestClass):
         mapdl.allsel()
         mapdl.set("last")
 
+        # Format tables.
+        mapdl.header("OFF", "OFF", "OFF", "OFF", "OFF", "OFF")
+        nsigfig = 10
+        mapdl.format("", "E", nsigfig + 9, nsigfig)
+        mapdl.page(1e9, "", -1, 240)
+
     @staticmethod
-    def test_time(mapdl, contact_solve):
+    def test_time(mapdl, resume):
         assert mapdl.post_processing.time == 1
 
     @staticmethod
-    def test_freq(mapdl, contact_solve):
+    def test_freq(mapdl, resume):
         # same as post_processing.time
         mapdl.set("last")
 
         assert mapdl.post_processing.freq == 1
         assert mapdl.post_processing.time == mapdl.post_processing.freq
-
-    @staticmethod
-    def test_nodal_contact_friction_stress(mapdl, contact_solve):
-        # Format tables.
-        mapdl.post1()
-        mapdl.header("OFF", "OFF", "OFF", "OFF", "OFF", "OFF")
-        nsigfig = 10
-        mapdl.format("", "E", nsigfig + 9, nsigfig)
-        mapdl.page(1e9, "", -1, 240)
 
     @staticmethod
     def test_nodal_contact_friction_stress(mapdl, resume):
