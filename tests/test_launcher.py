@@ -86,7 +86,7 @@ from conftest import (
 
 try:
     from ansys.tools.path import (
-        find_ansys,
+        find_mapdl,
         get_available_ansys_installations,
         version_from_path,
     )
@@ -95,7 +95,7 @@ try:
 
     installed_mapdl_versions = list(get_available_ansys_installations().keys())
     try:
-        V150_EXEC = find_ansys("150")[0]
+        V150_EXEC = find_mapdl("150")[0]
     except ValueError:
         V150_EXEC = ""
 except:
@@ -182,10 +182,10 @@ def test_catch_version_from_path():
 @requires("ansys-tools-path")
 @requires("local")
 @requires("linux")
-def test_find_ansys_linux():
+def test_find_mapdl_linux():
     # assuming ansys is installed, should be able to find it on linux
     # without env var
-    bin_file, ver = pymapdl.launcher.find_ansys()
+    bin_file, ver = pymapdl.launcher.find_mapdl()
     assert os.path.isfile(bin_file)
     assert isinstance(ver, float)
 
@@ -194,7 +194,7 @@ def test_find_ansys_linux():
 @requires("local")
 def test_invalid_mode(mapdl, cleared):
     with pytest.raises(ValueError):
-        exec_file = find_ansys(installed_mapdl_versions[0])[0]
+        exec_file = find_mapdl(installed_mapdl_versions[0])[0]
         pymapdl.launch_mapdl(
             exec_file, port=mapdl.port + 1, mode="notamode", start_timeout=start_timeout
         )
@@ -216,7 +216,7 @@ def test_old_version(mapdl, cleared):
 @requires("linux")
 @requires("console")
 def test_failed_console():
-    exec_file = find_ansys(installed_mapdl_versions[0])[0]
+    exec_file = find_mapdl(installed_mapdl_versions[0])[0]
     with pytest.raises(ValueError):
         pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
@@ -227,7 +227,7 @@ def test_failed_console():
 @requires("linux")
 @pytest.mark.parametrize("version", installed_mapdl_versions)
 def test_launch_console(version):
-    exec_file = find_ansys(version)[0]
+    exec_file = find_mapdl(version)[0]
     mapdl = pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
     assert mapdl.version == int(version) / 10
 
@@ -453,16 +453,16 @@ def test_find_ansys(mapdl, cleared):
 
     # Checking ints
     version = int(mapdl.version * 10)
-    assert find_ansys(version=version) is not None
+    assert find_mapdl(version=version) is not None
 
     # Checking floats
     with pytest.raises(ValueError):
-        find_ansys(version=22.2)
+        find_mapdl(version=22.2)
 
-    assert find_ansys(version=mapdl.version) is not None
+    assert find_mapdl(version=mapdl.version) is not None
 
     with pytest.raises(ValueError):
-        assert find_ansys(version="11")
+        assert find_mapdl(version="11")
 
 
 @requires("local")
@@ -822,7 +822,7 @@ def test_launcher_start_instance(monkeypatch, start_instance):
     if "PYMAPDL_START_INSTANCE" in os.environ:
         monkeypatch.delenv("PYMAPDL_START_INSTANCE")
     options = launch_mapdl(
-        exec_file=find_ansys()[0], start_instance=start_instance, _debug_no_launch=True
+        exec_file=find_mapdl()[0], start_instance=start_instance, _debug_no_launch=True
     )
     assert start_instance == options["start_instance"]
 

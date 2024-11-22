@@ -87,9 +87,16 @@ for version in "${versions[@]}"; do
     echo "  - Student: $ON_STUDENT"
     echo "  - Ubuntu: $ON_UBUNTU"
 
-    # Early exiting if on Ubuntu only
+    # Skipping if on Ubuntu only
     if [[ "$ON_UBUNTU" != "true" && "$ONLY_UBUNTU" == "true" ]]; then
         echo "Skipping non-ubuntu versions"
+        echo ""
+        continue
+    fi
+
+    # Skipping student versions on auth_user
+    if [[ "$auth_user" == "true" && "$ON_STUDENT" == "true" ]]; then
+        echo "Skipping student versions when user is authenticated"
         echo ""
         continue
     fi

@@ -30,9 +30,9 @@ import pytest
 from conftest import ON_LOCAL, ON_STUDENT, has_dependency
 
 if has_dependency("ansys-tools-path"):
-    from ansys.tools.path import find_ansys
+    from ansys.tools.path import find_mapdl
 
-    EXEC_FILE = find_ansys()[0]
+    EXEC_FILE = find_mapdl()[0]
 
 else:
     EXEC_FILE = os.environ.get("PYMAPDL_MAPDL_EXEC")
