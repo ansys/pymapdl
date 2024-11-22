@@ -66,6 +66,7 @@ MINIMUM_PYTHON_VERSION: Tuple[int, int] = (3, 10)
 
 # Import related globals
 _HAS_ATP: bool = is_installed("ansys.tools.path")
+_HAS_CLICK: bool = is_installed("click")
 _HAS_PIM: bool = is_installed("ansys.platform.instancemanagement")
 _HAS_PYANSYS_REPORT: bool = is_installed("ansys.tools.report")
 _HAS_PYVISTA: bool = is_installed("pyvista")
