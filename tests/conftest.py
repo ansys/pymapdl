@@ -197,7 +197,7 @@ def requires_dependency(dependency: str):
 ################
 
 if has_dependency("ansys-tools-package"):
-    from ansys.tools.path import get_available_ansys_installations
+    from ansys.tools.path import find_mapdl, get_available_ansys_installations
 
 
 if has_dependency("pyvista"):
@@ -316,7 +316,8 @@ class MyReporter(TerminalReporter):
             )
 
 
-@pytest.mark.trylast
+# @pytest.mark.trylast
+@pytest.hookimpl(trylast=True)
 def pytest_configure(config):
     vanilla_reporter = config.pluginmanager.getplugin("terminalreporter")
     my_reporter = MyReporter(config)
@@ -564,7 +565,7 @@ def mapdl_console(request):
     for version in ansys_base_paths:
         version = abs(version)
         if version < 211:
-            console_path = find_ansys(str(version))[0]
+            console_path = find_mapdl(str(version))[0]
 
     if console_path is None:
         raise MapdlRuntimeError(
