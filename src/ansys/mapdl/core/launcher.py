@@ -65,7 +65,7 @@ if _HAS_PIM:
     import ansys.platform.instancemanagement as pypim
 
 if _HAS_ATP:
-    from ansys.tools.path import find_ansys, get_ansys_path
+    from ansys.tools.path import find_mapdl, get_ansys_path
     from ansys.tools.path import version_from_path as _version_from_path
 
     @wraps(_version_from_path)
@@ -801,7 +801,7 @@ def get_default_ansys():
     >>> get_default_ansys()
     (/usr/ansys_inc/v211/ansys/bin/ansys211, 21.1)
     """
-    return find_ansys(supported_versions=SUPPORTED_ANSYS_VERSIONS)
+    return find_mapdl(supported_versions=SUPPORTED_ANSYS_VERSIONS)
 
 
 def get_default_ansys_path():
