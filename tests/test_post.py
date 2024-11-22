@@ -850,7 +850,7 @@ class Test_contact_solve(TestClass):
 
     @staticmethod
     @pytest.fixture(scope="class")
-    def contact_solve(mapdl):
+    def contact_solve(mapdl, cleared):
         mapdl.mute = True
 
         # Based on tech demo 28.
@@ -1165,6 +1165,8 @@ class Test_contact_solve(TestClass):
     @staticmethod
     def test_freq(mapdl, contact_solve):
         # same as post_processing.time
+        mapdl.set("last")
+
         assert mapdl.post_processing.freq == 1
         assert mapdl.post_processing.time == mapdl.post_processing.freq
 
