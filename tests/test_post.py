@@ -851,9 +851,6 @@ class Test_contact_solve(TestClass):
     @staticmethod
     @pytest.fixture(scope="class")
     def contact_solve(mapdl):
-        mapdl.mute = True
-        mapdl.clear()
-
         # Based on tech demo 28.
         # ***** Problem parameters ********
         l = 76.2e-03 / 3  # Length of each plate,m
@@ -1130,7 +1127,6 @@ class Test_contact_solve(TestClass):
         # from precedent fixture
         uz1 = 3.18e-03 / 4000
 
-        mapdl.mute = False
         mapdl.run("/solu")
         mapdl.antype(4)  # Transient analysis
         mapdl.lnsrch("on")
