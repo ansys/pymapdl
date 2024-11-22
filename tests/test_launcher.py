@@ -204,7 +204,7 @@ def test_invalid_mode(mapdl, cleared):
 @requires("local")
 @pytest.mark.skipif(not os.path.isfile(V150_EXEC), reason="Requires v150")
 def test_old_version(mapdl, cleared):
-    exec_file = find_ansys("150")[0]
+    exec_file = find_mapdl("150")[0]
     with pytest.raises(ValueError):
         pymapdl.launch_mapdl(
             exec_file, port=mapdl.port + 1, mode="console", start_timeout=start_timeout
@@ -237,7 +237,7 @@ def test_launch_console(version):
 @requires("ansys-tools-path")
 @pytest.mark.parametrize("license_name", LICENSES)
 def test_license_type_keyword_names(monkeypatch, license_name):
-    exec_file = find_ansys()[0]
+    exec_file = find_mapdl()[0]
     args = launch_mapdl(
         exec_file=exec_file, license_type=license_name, _debug_no_launch=True
     )
@@ -449,7 +449,7 @@ def test__verify_version_latest():
 @requires("ansys-tools-path")
 @requires("local")
 def test_find_ansys(mapdl, cleared):
-    assert find_ansys() is not None
+    assert find_mapdl() is not None
 
     # Checking ints
     version = int(mapdl.version * 10)
