@@ -772,7 +772,7 @@ class CommandListingOutput(CommandOutput):
 
     def to_dataframe(
         self, data: Optional[np.ndarray] = None, columns: Optional[List[str]] = None
-    ) -> "pd.DataFrame":
+    ) -> "pandas.DataFrame":
         """Export the command output as a Pandas DataFrame.
 
         Parameters
@@ -933,7 +933,7 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
     def to_array(self):
         raise ValueError(MSG_BCLISTINGOUTPUT_TO_ARRAY)
 
-    def to_dataframe(self) -> "pd.DataFrame":
+    def to_dataframe(self) -> "pandas.DataFrame":
         """Convert the command output to a Pandas Dataframe.
 
         Returns
