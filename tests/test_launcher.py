@@ -210,6 +210,7 @@ def test_find_mapdl_linux(my_fs, path, version, raises):
 
 @requires("ansys-tools-path")
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
+@patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
 @patch("ansys.mapdl.core.launcher.get_process_at_port", lambda *args, **kwargs: None)
 def test_invalid_mode(mapdl, my_fs, cleared, monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
@@ -225,21 +226,50 @@ def test_invalid_mode(mapdl, my_fs, cleared, monkeypatch):
 
 
 @requires("ansys-tools-path")
+@pytest.mark.parametrize("version", [120, 170, 190])
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
+@patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
 @patch("ansys.mapdl.core.launcher.get_process_at_port", lambda *args, **kwargs: None)
-def test_old_version(mapdl, my_fs, cleared, monkeypatch):
+def test_old_version_not_version(mapdl, my_fs, cleared, monkeypatch, version):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
     monkeypatch.delenv("PYMAPDL_IP", False)
     monkeypatch.delenv("PYMAPDL_PORT", False)
 
-    exec_file_v150 = "/ansys_inc/v150/ansys/bin/ansys150"
-    my_fs.create_file(exec_file_v150)
-    exec_file = find_mapdl()[0]
+    exec_file = f"/ansys_inc/v{version}/ansys/bin/ansys{version}"
+    my_fs.create_file(exec_file)
+    assert exec_file == find_mapdl()[0]
 
-    assert exec_file == exec_file_v150
-    with pytest.raises(ValueError, match="MAPDL version must be one of the following:"):
+    with pytest.raises(
+        ValueError, match="The MAPDL gRPC interface requires MAPDL 20.2 or later"
+    ):
         pymapdl.launch_mapdl(
-            port=mapdl.port + 1, mode="grpc", start_timeout=start_timeout
+            exec_file=exec_file,
+            port=mapdl.port + 1,
+            mode="grpc",
+            start_timeout=start_timeout,
+        )
+
+
+@requires("ansys-tools-path")
+@pytest.mark.parametrize("version", [203, 213, 351])
+@patch("psutil.cpu_count", lambda *args, **kwargs: 2)
+@patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
+@patch("ansys.mapdl.core.launcher.get_process_at_port", lambda *args, **kwargs: None)
+def test_not_valid_versions(mapdl, my_fs, cleared, monkeypatch, version):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    monkeypatch.delenv("PYMAPDL_IP", False)
+    monkeypatch.delenv("PYMAPDL_PORT", False)
+
+    exec_file = f"/ansys_inc/v{version}/ansys/bin/ansys{version}"
+    my_fs.create_file(exec_file)
+
+    assert exec_file == find_mapdl()[0]
+    with pytest.raises(ValueError, match="MAPDL version must be one of the following"):
+        pymapdl.launch_mapdl(
+            exec_file=exec_file,
+            port=mapdl.port + 1,
+            mode="grpc",
+            start_timeout=start_timeout,
         )
 
 
