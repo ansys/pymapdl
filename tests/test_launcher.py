@@ -879,7 +879,7 @@ def test_ip_and_start_instance(
 
     ###################
     # Faking MAPDL launching and returning args
-    with warnings.catch_warnings():
+    with warnings.catch_warnings(record=True):
         options = launch_mapdl(
             start_instance=start_instance,
             ip=ip,
@@ -1790,12 +1790,22 @@ def test_get_version_env_var(monkeypatch, version):
             pytest.raises(VersionError, match="Running MAPDL as a service requires"),
             None,
         ],
+        ["anymode", None, "posix", warnings.catch_warnings(record=True), "anymode"],
     ],
 )
 def test_check_mode(mode, version, osname, context, res):
     with patch("os.name", osname):
-        with context:
+        with context as cnt:
             assert res == check_mode(mode, version)
+
+        if mode is not None and version is None:
+            # check warning
+            for each in cnt:
+                if "PyMAPDL couldn't detect MAPDL version" in each.message.args[0]:
+                    break
+            else:
+                # if using the break above, this 'else' is not executed.
+                assert False, "The expected warning was not raised"
 
 
 @pytest.mark.parametrize("jobid", [1001, 2002])
