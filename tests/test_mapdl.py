@@ -2516,14 +2516,14 @@ def test_load_not_raising_warning():
 
     os.remove(FIRST_TIME_FILE)
 
-    with catch_warnings():
+    with catch_warnings(record=True):
         reload(pymapdl)
 
 
 @pytest.mark.parametrize(
     "python_version,minimal_version,deprecating,context",
     [
-        ((3, 9, 10), (3, 9), False, catch_warnings()),  # standard case
+        ((3, 9, 10), (3, 9), False, catch_warnings(record=True)),  # standard case
         (
             (3, 9, 10),
             (3, 9),
@@ -2565,7 +2565,7 @@ def test_raising_warns(python_version, minimal_version, deprecating, context):
         pymapdl.helpers.run_first_time()
 
     # Assert warnings won't be retrigger
-    with catch_warnings():
+    with catch_warnings(record=True):
         reload(pymapdl)
 
     pymapdl.helpers.run_first_time()

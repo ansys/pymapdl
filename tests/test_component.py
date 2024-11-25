@@ -160,7 +160,7 @@ def test_defaul_entity_warning(mapdl, cube_geom_and_mesh):
         mapdl.components["mycomp"] = (1, 2, 3)
 
     mapdl.components.default_entity_warning = False
-    with warnings.catch_warnings():
+    with warnings.catch_warnings(record=True):
         mapdl.components["mycomp"] = (1, 2, 3)
 
     mapdl.components.default_entity_warning = True

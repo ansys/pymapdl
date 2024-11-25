@@ -940,7 +940,7 @@ def test_ip_and_start_instance(
 
     ###################
     # Faking MAPDL launching and returning args
-    with warnings.catch_warnings():
+    with warnings.catch_warnings(record=True):
         options = launch_mapdl(
             start_instance=start_instance,
             ip=ip,
@@ -1851,11 +1851,18 @@ def test_get_version_env_var(monkeypatch, version):
             pytest.raises(VersionError, match="Running MAPDL as a service requires"),
             None,
         ],
+        [
+            "anymode",
+            None,
+            "posix",
+            pytest.warns(UserWarning, match="PyMAPDL couldn't detect MAPDL version"),
+            "anymode",
+        ],
     ],
 )
 def test_check_mode(mode, version, osname, context, res):
     with patch("os.name", osname):
-        with context:
+        with context as cnt:
             assert res == check_mode(mode, version)
 
 

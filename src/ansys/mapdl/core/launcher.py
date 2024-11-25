@@ -1647,7 +1647,8 @@ def check_mode(mode: ALLOWABLE_MODES, version: Optional[int] = None):
     elif not version:
         warnings.warn(
             "PyMAPDL couldn't detect MAPDL version, hence it could not "
-            f"verify that the connection mode {mode} is compatible with MAPDL."
+            f"verify that the provided connection mode '{mode}' is compatible "
+            "with the current MAPDL installation."
         )
         return mode
 
