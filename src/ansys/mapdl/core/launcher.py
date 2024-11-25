@@ -914,8 +914,8 @@ def set_MPI_additional_switches(
     add_sw_lower_case = add_sw.lower()
 
     # known issues with distributed memory parallel (DMP)
-    if "smp" not in add_sw_lower_case:  # pragma: no cover
-        if _HAS_ATP and os.name == "nt":
+    if os.name == "nt" and "smp" not in add_sw_lower_case:  # pragma: no cover
+        if _HAS_ATP:
             condition = not force_intel and version and (222 > version >= 210)
         else:
             warnings.warn(
