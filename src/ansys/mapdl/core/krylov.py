@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import os
-from typing import List, Literal
+from typing import List, Literal, Optional
 import weakref
 
 from ansys.math.core.math import AnsMath, AnsVec
