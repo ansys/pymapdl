@@ -26,8 +26,9 @@ from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 
-if TYPE_CHECKING:
-    from ansys.mapdl.core import _HAS_PANDAS
+from ansys.mapdl.core import _HAS_PANDAS
+
+if TYPE_CHECKING and _HAS_PANDAS:
     import pandas
 
 from ._commands import (
