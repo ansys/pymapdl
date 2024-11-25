@@ -210,6 +210,7 @@ def test_find_mapdl_linux(my_fs, path, version, raises):
 
 @requires("ansys-tools-path")
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
+@patch("ansys.mapdl.core.launcher.get_process_at_port", lambda *args, **kwargs: None)
 def test_invalid_mode(mapdl, my_fs, cleared, monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
     monkeypatch.delenv("PYMAPDL_IP", False)
@@ -225,6 +226,7 @@ def test_invalid_mode(mapdl, my_fs, cleared, monkeypatch):
 
 @requires("ansys-tools-path")
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
+@patch("ansys.mapdl.core.launcher.get_process_at_port", lambda *args, **kwargs: None)
 def test_old_version(mapdl, my_fs, cleared, monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
     monkeypatch.delenv("PYMAPDL_IP", False)
