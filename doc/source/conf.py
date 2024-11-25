@@ -10,6 +10,7 @@ import ansys.tools.visualization_interface as viz_interface
 from ansys_sphinx_theme import ansys_favicon, get_version_match
 import numpy as np
 import plotly.io as pio
+from plotly.io._sg_scraper import plotly_sg_scraper
 import pyvista
 from sphinx.application import Sphinx
 from sphinx.util import logging
@@ -273,7 +274,11 @@ sphinx_gallery_conf = {
     "backreferences_dir": None,
     # Modules for which function level galleries are created.  In
     "doc_module": "ansys-mapdl-core",
-    "image_scrapers": ("pyvista", "matplotlib"),
+    "image_scrapers": (
+        "pyvista",
+        "matplotlib",
+        plotly_sg_scraper,
+    ),
     "ignore_pattern": "flycheck*",
     "thumbnail_size": (350, 350),
     "remove_config_comments": True,
