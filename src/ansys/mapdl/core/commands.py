@@ -22,9 +22,13 @@
 
 from functools import wraps
 import re
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
 
 import numpy as np
+
+if TYPE_CHECKING:
+    from ansys.mapdl.core import _HAS_PANDAS
+    import pandas
 
 from ._commands import (
     apdl,
@@ -516,18 +520,6 @@ class Commands(
     """Wrapped MAPDL commands"""
 
 
-def _requires_pandas(func: Callable) -> Callable:
-    """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
-
-    def func_wrapper(self, *args, **kwargs):
-        if HAS_PANDAS:
-            return func(self, *args, **kwargs)
-        else:
-            raise ModuleNotFoundError(MSG_NOT_PANDAS)
-
-    return func_wrapper
-
-
 class CommandOutput(str):
     """Custom string subclass for handling the commands output.
 
@@ -801,9 +793,7 @@ class CommandListingOutput(CommandOutput):
         (inheritate from :func:`to_array()
         <ansys.mapdl.core.commands.CommandListingOutput.to_array>` method).
         """
-        try:
-            import pandas as pd
-        except ModuleNotFoundError:
+        if not _HAS_PANDAS:
             raise ModuleNotFoundError(MSG_NOT_PANDAS)
 
         if data is None:
@@ -811,7 +801,7 @@ class CommandListingOutput(CommandOutput):
         if not columns:
             columns = self.get_columns()
 
-        return pd.DataFrame(data=data, columns=columns)
+        return pandas.DataFrame(data=data, columns=columns)
 
 
 class BoundaryConditionsListingOutput(CommandListingOutput):
