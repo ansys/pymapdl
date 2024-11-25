@@ -80,8 +80,6 @@ def _get_file_url(filename: str, directory: Optional[str] = None) -> str:
 
 
 def _check_url_exist(url: str) -> bool:
-    import requests
-
     response = requests.get(url, timeout=10)  # 10 seconds timeout
     return response.status_code == 200
 
@@ -91,8 +89,6 @@ def _retrieve_file(url: str, filename: str, _test: bool = False) -> str:
     # escape test
     if pymapdl.RUNNING_TESTS:
         return _check_url_exist(url)
-
-    import requests
 
     # First check if file has already been downloaded
     local_path = os.path.join(pymapdl.EXAMPLES_PATH, os.path.basename(filename))

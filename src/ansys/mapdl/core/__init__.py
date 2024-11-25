@@ -70,7 +70,7 @@ _HAS_CLICK: bool = is_installed("click")
 _HAS_PIM: bool = is_installed("ansys.platform.instancemanagement")
 _HAS_PYANSYS_REPORT: bool = is_installed("ansys.tools.report")
 _HAS_PYVISTA: bool = is_installed("pyvista")
-_HAS_REQUESTS: bool = is_installed("request")
+_HAS_REQUESTS: bool = is_installed("requests")
 _HAS_TQDM: bool = is_installed("tqdm")
 _HAS_VISUALIZER: bool = is_installed("ansys.tools.visualization_interface")
 
