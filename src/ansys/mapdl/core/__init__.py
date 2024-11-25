@@ -127,7 +127,7 @@ from ansys.mapdl.core.report import Report
 if _HAS_ATP:
     from ansys.tools.path.path import (
         change_default_ansys_path,
-        find_ansys,
+        find_mapdl,
         get_ansys_path,
         get_available_ansys_installations,
         save_ansys_path,

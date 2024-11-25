@@ -87,7 +87,7 @@ from conftest import (
 
 try:
     from ansys.tools.path import (
-        find_ansys,
+        find_mapdl,
         get_available_ansys_installations,
         version_from_path,
     )
@@ -95,7 +95,6 @@ try:
     from ansys.mapdl.core.launcher import get_default_ansys
 
     installed_mapdl_versions = list(get_available_ansys_installations().keys())
-
 except:
     from conftest import MAPDL_VERSION
 
@@ -193,11 +192,11 @@ def test_catch_version_from_path():
     ],
 )
 @requires("ansys-tools-path")
-def test_find_ansys_linux(my_fs, path, version, raises):
+def test_find_mapdl_linux(my_fs, path, version, raises):
     my_fs.os = OSType.LINUX
     my_fs.create_file(path)
 
-    bin_file, ver = pymapdl.launcher.find_ansys()
+    bin_file, ver = pymapdl.launcher.find_mapdl()
 
     if raises:
         assert not bin_file
@@ -213,7 +212,7 @@ def test_find_ansys_linux(my_fs, path, version, raises):
 def test_invalid_mode(mapdl, my_fs):
     my_fs.create_file("/ansys_inc/v241/ansys/bin/ansys241")
     with pytest.raises(ValueError):
-        exec_file = find_ansys(241)[0]
+        exec_file = find_mapdl(241)[0]
         pymapdl.launch_mapdl(
             exec_file, port=mapdl.port + 1, mode="notamode", start_timeout=start_timeout
         )
@@ -223,7 +222,7 @@ def test_invalid_mode(mapdl, my_fs):
 def test_old_version(mapdl, my_fs):
     exec_file_v150 = "/ansys_inc/v150/ansys/bin/ansys150"
     my_fs.create_file(exec_file_v150)
-    exec_file = find_ansys(150)[0]
+    exec_file = find_mapdl(150)[0]
     assert exec_file == exec_file_v150
     with pytest.raises(ValueError, match="MAPDL version must be one of the following:"):
         pymapdl.launch_mapdl(
@@ -236,7 +235,7 @@ def test_old_version(mapdl, my_fs):
 @requires("linux")
 @requires("console")
 def test_failed_console():
-    exec_file = find_ansys(installed_mapdl_versions[0])[0]
+    exec_file = find_mapdl(installed_mapdl_versions[0])[0]
     with pytest.raises(ValueError):
         pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
@@ -247,7 +246,7 @@ def test_failed_console():
 @requires("linux")
 @pytest.mark.parametrize("version", installed_mapdl_versions)
 def test_launch_console(version):
-    exec_file = find_ansys(version)[0]
+    exec_file = find_mapdl(version)[0]
     mapdl = pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
     assert mapdl.version == int(version) / 10
 
@@ -257,7 +256,7 @@ def test_launch_console(version):
 @requires("ansys-tools-path")
 @pytest.mark.parametrize("license_name", LICENSES)
 def test_license_type_keyword_names(mapdl, monkeypatch, license_name):
-    exec_file = find_ansys()[0]
+    exec_file = find_mapdl()[0]
     args = launch_mapdl(
         exec_file=exec_file, license_type=license_name, _debug_no_launch=True
     )
@@ -467,21 +466,21 @@ def test__verify_version_latest():
 
 @requires("ansys-tools-path")
 @requires("local")
-def test_find_ansys(mapdl):
-    assert find_ansys() is not None
+def test_find_mapdl(mapdl):
+    assert find_mapdl() is not None
 
     # Checking ints
     version = int(mapdl.version * 10)
-    assert find_ansys(version=version) is not None
+    assert find_mapdl(version=version) is not None
 
     # Checking floats
     with pytest.raises(ValueError):
-        find_ansys(version=22.2)
+        find_mapdl(version=22.2)
 
-    assert find_ansys(version=mapdl.version) is not None
+    assert find_mapdl(version=mapdl.version) is not None
 
     with pytest.raises(ValueError):
-        assert find_ansys(version="11")
+        assert find_mapdl(version="11")
 
 
 @requires("local")
@@ -841,7 +840,7 @@ def test_launcher_start_instance(monkeypatch, start_instance):
     if "PYMAPDL_START_INSTANCE" in os.environ:
         monkeypatch.delenv("PYMAPDL_START_INSTANCE")
     options = launch_mapdl(
-        exec_file=find_ansys()[0], start_instance=start_instance, _debug_no_launch=True
+        exec_file=find_mapdl()[0], start_instance=start_instance, _debug_no_launch=True
     )
     assert start_instance == options["start_instance"]
 
