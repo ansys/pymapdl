@@ -136,7 +136,7 @@ def get_fake_process(message_stdout, message_stderr="", time_sleep=0):
 
 @pytest.fixture
 def my_fs(fs):
-    fs.add_real_directory("/proc", lazy_read=False)
+    # fs.add_real_directory("/proc", lazy_read=False)
     yield fs
 
 
@@ -364,7 +364,7 @@ def test_env_injection():
         [None, False, "Working directory is NOT in the pytest directory."],
         [True, None, "There is a result file, and WDIR is a temp dir."],
         pytest.param(
-            True, True, "Both options (`True`) is not allowed.", marks=pytest.mark.fail
+            True, True, "Both options (`True`) is not allowed.", marks=pytest.mark.xfail
         ),
         [True, False, "There is a result file, and WDIR is in a temp dir."],
         [False, None, "There is NOT a result file, and WDIR is in a temp dir."],
