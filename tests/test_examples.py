@@ -198,3 +198,11 @@ print('Everything went well')
     out = p.communicate()[0].decode()
 
     assert out.strip() == "Everything went well"
+
+
+def test_external_models():
+    from ansys.mapdl.core.examples import examples
+
+    for each in dir(examples):
+        if each not in ["os", "dir_path"] and not each.startswith("__"):
+            obj = getattr(examples, each)
