@@ -2558,16 +2558,16 @@ def test_raising_warns(python_version, minimal_version, deprecating, context):
     def func(*args, **kwargs):
         return python_version
 
-    # We can't use reload here because it seems to remove the patching
-    with patch("ansys.mapdl.core.helpers.get_python_version", func) as mck_pyver:
-        with patch(
+    # We can't use "reload" here because it seems to remove the patching
+    with (
+        patch("ansys.mapdl.core.helpers.get_python_version", func) as mck_pyver,
+        patch(
             "ansys.mapdl.core.DEPRECATING_MINIMUM_PYTHON_VERSION", deprecating
-        ) as mck_dep:
-            with patch(
-                "ansys.mapdl.core.MINIMUM_PYTHON_VERSION", minimal_version
-            ) as mck_min:
-                with context:
-                    pymapdl.helpers.run_first_time()
+        ) as mck_dep,
+        patch("ansys.mapdl.core.MINIMUM_PYTHON_VERSION", minimal_version) as mck_min,
+        context,
+    ):
+        pymapdl.helpers.run_first_time()
 
     # Assert warnings won't be retrigger
     with catch_warnings():
