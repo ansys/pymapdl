@@ -209,6 +209,7 @@ def test_find_mapdl_linux(my_fs, path, version, raises):
 
 
 @requires("ansys-tools-path")
+@patch("psutil.cpu_count", lambda *args, **kwargs: 2)
 def test_invalid_mode(mapdl, my_fs, cleared):
     my_fs.create_file("/ansys_inc/v241/ansys/bin/ansys241")
     with pytest.raises(ValueError):
@@ -219,14 +220,20 @@ def test_invalid_mode(mapdl, my_fs, cleared):
 
 
 @requires("ansys-tools-path")
-def test_old_version(mapdl, my_fs, cleared):
+@patch("psutil.cpu_count", lambda *args, **kwargs: 2)
+def test_old_version(mapdl, my_fs, cleared, monkeypatch):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    monkeypatch.delenv("PYMAPDL_IP", False)
+    monkeypatch.delenv("PYMAPDL_PORT", False)
+
     exec_file_v150 = "/ansys_inc/v150/ansys/bin/ansys150"
     my_fs.create_file(exec_file_v150)
-    exec_file = find_mapdl(150)[0]
+    exec_file = find_mapdl()[0]
+
     assert exec_file == exec_file_v150
     with pytest.raises(ValueError, match="MAPDL version must be one of the following:"):
         pymapdl.launch_mapdl(
-            exec_file, port=mapdl.port + 1, mode="grpc", start_timeout=start_timeout
+            port=mapdl.port + 1, mode="grpc", start_timeout=start_timeout
         )
 
 
