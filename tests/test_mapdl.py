@@ -2560,11 +2560,9 @@ def test_raising_warns(python_version, minimal_version, deprecating, context):
 
     # We can't use "reload" here because it seems to remove the patching
     with (
-        patch("ansys.mapdl.core.helpers.get_python_version", func) as mck_pyver,
-        patch(
-            "ansys.mapdl.core.DEPRECATING_MINIMUM_PYTHON_VERSION", deprecating
-        ) as mck_dep,
-        patch("ansys.mapdl.core.MINIMUM_PYTHON_VERSION", minimal_version) as mck_min,
+        patch("ansys.mapdl.core.helpers.get_python_version", func),
+        patch("ansys.mapdl.core.DEPRECATING_MINIMUM_PYTHON_VERSION", deprecating),
+        patch("ansys.mapdl.core.MINIMUM_PYTHON_VERSION", minimal_version),
         context,
     ):
         pymapdl.helpers.run_first_time()
