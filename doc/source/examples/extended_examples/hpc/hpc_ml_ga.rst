@@ -173,7 +173,7 @@ created to run the simulation:
 
 .. literalinclude:: ml_ga_beam.py
     :language: python
-    :start-at: ga_instance = pygad.GA(
+    :start-at: import pygad
     :end-at: To count the number of generations
 
 
@@ -188,13 +188,26 @@ Once the model is set, use the ``run()`` method to start the simulation:
     :end-at: print(f"Time spent (minutes): {(t1-t0)/60}")
 
 
-Plot convergence
-================
+Plot fitness and genes values
+=============================
+
+You can plot the solution fitness across generations and the evolution of gene
+values using the following code:
 
 .. literalinclude:: ml_ga_beam.py
     :language: python
     :start-at: import os
     :end-at: print(f"Fitness value of the best solution = {solution_fitness}")
+
+
+.. figure:: fitness_plot.png
+
+   Fitness at each generation plot
+
+
+.. figure:: genes.png
+
+   Evolution of genes values
 
 
 Model storage
@@ -238,7 +251,7 @@ this script.
 
    If you have problems when creating the virtual environment
    or accessing it from the compute nodes,
-   see :ref:`ref_hpc_pymapdl_job`.
+   see :ref:`ref_hpc_troubleshooting`.
 
 3. Install the requirements for this example from the
    :download:`requirements.txt <requirements.txt>` file.

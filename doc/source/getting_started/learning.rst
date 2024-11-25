@@ -7,7 +7,7 @@ Learning PyMAPDL
 Introduction
 ============
 
-.. centered:: _PyMAPDL provides Pythonic access to MAPDL, an Ansys finite element solver._
+.. centered:: *PyMAPDL provides Pythonic access to MAPDL, an Ansys finite element solver.*
 
 PyMAPDL touches on different technologies such as Python and finite elements, to bring them together
 and offer you a better user experience by seamlessly connecting this Ansys solver and the Python ecosystem.
@@ -38,11 +38,12 @@ Downloads
   These are versions valid during a year and with limited capabilities 
   regarding number of nodes, elements, etc.
 
-- View and download :download:`PyMAPDL cheatsheet <Cheat_Sheet_PyMAPDL.pdf>` to help
-  you to learn PyMAPDL.
+.. jinja:: cheat_sheet
+  
+  - View and download :download:`PyMAPDL cheatsheet <https://mapdl.docs.ansys.com/version/{{ version }}/_static/cheatsheet.pdf>`
+    to help you to learn PyMAPDL.
 
-- Visit :ref:`ref_examples` to learn how PyMAPDL can be
-  used to solve different real problems.
+- Visit :ref:`ref_examples` to learn how PyMAPDL can be used to solve different real problems.
 
 
 Courses

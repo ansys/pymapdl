@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -34,9 +34,7 @@ if has_dependency("pyvista"):
 from ansys.mapdl.core import examples
 
 
-def test_empty_model(mapdl):
-    mapdl.clear()
-
+def test_empty_model(mapdl, cleared):
     assert mapdl.mesh.nnum.size == 0
     assert mapdl.mesh.enum.size == 0
 
@@ -73,13 +71,13 @@ def test_repr(mapdl, cube_geom_and_mesh):
     assert "Number of Element Types" in out
 
 
-def test_mapdl(mapdl):
+def test_mapdl(mapdl, cleared):
     from ansys.mapdl.core.mapdl import MapdlBase
 
     assert isinstance(mapdl.mesh._mapdl, MapdlBase)
 
 
-def test_local(mapdl):
+def test_local(mapdl, cleared):
     assert isinstance(mapdl.mesh.local, bool)
     assert mapdl._local == mapdl.mesh.local
 

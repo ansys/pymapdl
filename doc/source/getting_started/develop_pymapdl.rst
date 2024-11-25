@@ -230,12 +230,14 @@ It is executed upstream of each test and not within all tests.
 
 .. code:: python
 
-   def test_my_new_feature(mapdl):  # pass the 'mapdl' fixture as an argument.
+   def test_my_new_feature(mapdl, cleared):  # pass the 'mapdl' fixture as an argument.
        mapdl.prep7()
        # .... more code
 
        return True  # if everything goes ok until here
 
+Passing the ``cleared`` fixture is also useful since it clears up the MAPDL database
+and configuration before performing the test.
 If you do not have MAPDL installed locally but still want to run the
 unit testing, you must set up the following environment variables.
 
@@ -275,8 +277,14 @@ The automation of testing, monitoring, and deployment of newly added
 code allows continuous deployment (CD) throughout the app lifecycle,
 providing a comprehensive CI/CD approach.
 
-.. figure:: ../images/cicd.jpg
+.. image:: ../images/cicd_dark_theme.png
+    :class: only-dark
     :width: 300pt
+
+.. image:: ../images/cicd_light_theme.png
+    :class: only-light
+    :width: 300pt
+
 
 Example
 --------

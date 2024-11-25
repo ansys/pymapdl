@@ -51,10 +51,21 @@ while producing network footprints that are compact and efficient.
 
 The following diagram presents a simplified architecture of PyMAPDL.
 
-.. figure:: ../images/architecture_diagram.png
+.. figure:: ../images/architecture_diagram_dark_theme.png
+    :figclass: only-dark
     :width: 400pt
+    :alt: PyMAPDL architecture diagram
 
     PyMAPDL architecture diagram
+
+
+.. figure:: ../images/architecture_diagram_light_theme.png
+    :figclass: only-light
+    :width: 400pt
+    :alt: PyMAPDL architecture diagram
+
+    PyMAPDL architecture diagram
+
 
 Quick code
 ----------
@@ -163,10 +174,8 @@ In the upper right corner of the documentation's title bar, there is an option f
 viewing the documentation for the latest stable release to viewing the documentation for the
 development version or previously released versions.
 
-You can also `view <https://cheatsheets.docs.pyansys.com/pymapdl_cheat_sheet.png>`_ or
-`download <https://cheatsheets.docs.pyansys.com/pymapdl_cheat_sheet.pdf>`_ the
-PyMAPDL cheat sheet. This one-page reference provides syntax rules and commands
-for using PyMAPDL. 
+You can also `download <pymapdl_cheat_sheet>`_ the PyMAPDL cheat sheet. This one-page reference provides
+syntax rules and commands for using PyMAPDL. 
 
 On the `PyMAPDL Issues <https://github.com/ansys/pymapdl/issues>`_ page,
 you can create issues to report bugs and request new features. On the `PyMAPDL Discussions

@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -28,6 +28,7 @@ import os
 import re
 import time
 
+from ansys.mapdl.core import LOG
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.misc import requires_package
@@ -117,6 +118,7 @@ class MapdlConsole(MapdlBase):
         self._auto_continue = True
         self._continue_on_error = False
         self._process = None
+        self._name = None
         self._launch(start_parm)
         super().__init__(
             loglevel=loglevel,
@@ -283,8 +285,8 @@ class MapdlConsole(MapdlBase):
             try:
                 self._process.sendline("FINISH")
                 self._process.sendline("EXIT")
-            except:
-                pass
+            except Exception as e:
+                LOG.warning(f"Unable to exit ANSYS MAPDL: {e}")
 
         if close_log:
             self._close_apdl_log()
@@ -315,7 +317,7 @@ class MapdlConsole(MapdlBase):
                     self._log.warning("Unable to kill process %d", self._process.pid)
                 self._log.debug("Killed process %d", self._process.pid)
 
-    @property
+    @MapdlBase.name.getter
     def name(self):
         """Instance unique identifier."""
         if not self._name:

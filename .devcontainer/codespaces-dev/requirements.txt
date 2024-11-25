@@ -1,4 +1,5 @@
 ansys-dpf-core==0.12.1
+ansys-tools-visualization-interface==0.2.6
 autopep8==2.3.1
 matplotlib==3.9.0
 pandas==2.2.2
@@ -9,6 +10,5 @@ pytest-memprof<0.3.0
 pytest-pyvista==0.1.9
 pytest-rerunfailures==14.0
 pytest==8.2.2
-pyvista==0.43.10
 scipy==1.14.0
 vtk==9.3.0
