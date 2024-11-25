@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -108,12 +108,14 @@ def test_get_item_autoselect_components(mapdl, cube_geom_and_mesh):
     mapdl.components["mycomp"] = "node", [1, 2, 3]
     mapdl.cmsel("NONE")
 
+    prev = mapdl.components._autoselect_components
     mapdl.components._autoselect_components = True
     cm_ = mapdl.run("cmlist").upper()
     assert "MYCOMP" not in cm_
     assert "NODE" not in cm_
 
     assert mapdl.components["mycomp"] == (1, 2, 3)
+    mapdl.components._autoselect_components = prev
 
 
 def test_raise_empty_comp(mapdl, cleared):
@@ -178,6 +180,9 @@ def test_default_entity(mapdl, cube_geom_and_mesh, type_):
     cm_ = mapdl.run("cmlist").upper()
     assert comp_name in cm_
     assert type_.upper() in cm_
+
+    # Returning back to default
+    mapdl.components.default_entity = "NODES"
 
 
 @pytest.mark.parametrize(
@@ -271,7 +276,7 @@ def test_default_entity_error(mapdl, cube_geom_and_mesh):
         mapdl.components.default_entity = "asdf"
 
 
-def test_logger(mapdl):
+def test_logger(mapdl, cleared):
     assert mapdl.components.logger == mapdl.logger
 
 

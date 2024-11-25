@@ -201,7 +201,7 @@ The preceding code generates this input for MAPDL:
     NSEL,ALL   
     NSEL,R,LOC,Z,10
 
-This MAPLD input is executed with a :meth:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>` method call.
+This MAPDL input is executed with a :meth:`Mapdl.input() <ansys.mapdl.core.Mapdl.input>` method call.
 
 Because of the non-interactive context not running all the commands until the end,
 you might find issues interacting inside it, with Python for instance.
@@ -985,47 +985,47 @@ Table-1_ Comprehensive information on commands that are unavailable
   +---------------------------+-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
   |                           | MAPDL command     | Interactive            | Non-interactive                         | Direct run                                   | Notes                                                                                                                                                   |
   +===========================+===================+========================+=========================================+==============================================+=========================================================================================================================================================+
-  | **GUI commands**          | * ``*ASK``        | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | When used in :func:`mapdl.run() <ansys.mapdl.core.Mapdl.run>` it automatically assumes the user input is 0. Use Python ``input`` instead.               |
+  | **GUI commands**          | * ``*ASK``        | |:x:| Not available    | |:x:| Not available                     | |:white_check_mark:| Works                   | When used in :func:`mapdl.run() <ansys.mapdl.core.Mapdl.run>` it automatically assumes the user input is 0. Use Python ``input`` instead.               |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | * ``*VEDIT``      | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| MAPDL shows a warning   | It requires a GUI session to work.                                                                                                                      |
+  |                           | * ``*VEDIT``      | |:x:| Not available    | |:x:| Not available                     | |:exclamation:| MAPDL shows a warning        | It requires a GUI session to work.                                                                                                                      |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | * ``/ERASE``      | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It does not make sense in a non-GUI session.                                                                                                            |
+  |                           | * ``/ERASE``      | |:x:| Not available    | |:x:| Not available                     | |:white_check_mark:| Works                   | It does not make sense in a non-GUI session.                                                                                                            |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | * ``ERASE``       | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| MAPDL shows a warning   | It does not make sense in a non-GUI session.                                                                                                            |
+  |                           | * ``ERASE``       | |:x:| Not available    | |:x:| Not available                     | |:exclamation:| MAPDL shows a warning        | It does not make sense in a non-GUI session.                                                                                                            |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | * ``HELP``        | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| Ignored by MAPDL        | It requires a GUI session to work.                                                                                                                      |
+  |                           | * ``HELP``        | |:x:| Not available    | |:x:| Not available                     | |:exclamation:| Ignored by MAPDL             | It requires a GUI session to work.                                                                                                                      |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | * ``HELPDISP``    | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| Ignored by MAPDL        | It requires a GUI session to work.                                                                                                                      |
+  |                           | * ``HELPDISP``    | |:x:| Not available    | |:x:| Not available                     | |:exclamation:| Ignored by MAPDL             | It requires a GUI session to work.                                                                                                                      |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | * ``NOERASE``     | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It does not make sense in a non-GUI session.                                                                                                            |
+  |                           | * ``NOERASE``     | |:x:| Not available    | |:x:| Not available                     | |:white_check_mark:| Works                   | It does not make sense in a non-GUI session.                                                                                                            |
   +---------------------------+-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  | **Control flow commands** | * ``*CYCLE``      | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``continue``.                                                                       |
+  | **Control flow commands** | * ``*CYCLE``      | |:x:| Not available    | |:x:| Not available                     | |:white_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``continue``.                                                                       |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | * ``*DO``         | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``for``.                                                                            |
+  |                           | * ``*DO``         | |:x:| Not available    | |:x:| Not available                     | |:white_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``for``.                                                                            |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | * ``*DOWHILE``    | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``while``.                                                                          |
+  |                           | * ``*DOWHILE``    | |:x:| Not available    | |:x:| Not available                     | |:white_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``while``.                                                                          |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | * ``*ELSE``       | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``else``.                                                                           |
+  |                           | * ``*ELSE``       | |:x:| Not available    | |:x:| Not available                     | |:white_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``else``.                                                                           |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | * ``*ELSEIF``     | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``elif``.                                                                           |
+  |                           | * ``*ELSEIF``     | |:x:| Not available    | |:x:| Not available                     | |:white_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``elif``.                                                                           |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | * ``*ENDDO``      | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords.                                                                                                  |
+  |                           | * ``*ENDDO``      | |:x:| Not available    | |:x:| Not available                     | |:white_check_mark:| Works                   | It is recommended to use Python control flow keywords.                                                                                                  |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | * ``*GO``         | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, such as ``if`` or functions.                                                                     |
+  |                           | * ``*GO``         | |:x:| Not available    | |:x:| Not available                     | |:white_check_mark:| Works                   | It is recommended to use Python control flow keywords, such as ``if`` or functions.                                                                     |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | * ``*IF``         | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``continue``.                                                                       |
+  |                           | * ``*IF``         | |:x:| Not available    | |:x:| Not available                     | |:white_check_mark:| Works                   | It is recommended to use Python control flow keywords, in this case ``continue``.                                                                       |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | * ``*REPEAT``     | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords such as ``for`` or ``while``                                                                      |
+  |                           | * ``*REPEAT``     | |:x:| Not available    | |:x:| Not available                     | |:white_check_mark:| Works                   | It is recommended to use Python control flow keywords such as ``for`` or ``while``                                                                      |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | * ``*RETURN``     | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python control flow keywords such as ``break``, ``continue`` or ``return``                                                     |
+  |                           | * ``*RETURN``     | |:x:| Not available    | |:x:| Not available                     | |:white_check_mark:| Works                   | It is recommended to use Python control flow keywords such as ``break``, ``continue`` or ``return``                                                     |
   +---------------------------+-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  | **Others commands**       | * ``*DEL``        | |:x:| Not available    | |:x:| Not available                     | |:heavy_check_mark:| Works                   | It is recommended to use Python variables (use Python memory) instead of MAPDL variables.                                                               |
+  | **Others commands**       | * ``*DEL``        | |:x:| Not available    | |:x:| Not available                     | |:white_check_mark:| Works                   | It is recommended to use Python variables (use Python memory) instead of MAPDL variables.                                                               |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | * ``/BATCH``      | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| Ignored by MAPDL.       | It does not make sense in a PyMAPDL session.                                                                                                            |
+  |                           | * ``/BATCH``      | |:x:| Not available    | |:x:| Not available                     | |:exclamation:| Ignored by MAPDL.            | It does not make sense in a PyMAPDL session.                                                                                                            |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
   |                           | * ``/EOF``        | |:x:| Not available    | |:x:| Not available                     | |:x:| PyMAPDL shows an exception             | To stop the server, use :func:`mapdl.exit() <ansys.mapdl.core.Mapdl.exit>`                                                                              |
   |                           +-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
-  |                           | * ``UNDO``        | |:x:| Not available    | |:x:| Not available                     | |:heavy_minus_sign:| MAPDL shows a warning   | It does not undo any command.                                                                                                                           |
+  |                           | * ``UNDO``        | |:x:| Not available    | |:x:| Not available                     | |:exclamation:| MAPDL shows a warning        | It does not undo any command.                                                                                                                           |
   +---------------------------+-------------------+------------------------+-----------------------------------------+----------------------------------------------+---------------------------------------------------------------------------------------------------------------------------------------------------------+
 
 
@@ -1079,96 +1079,124 @@ are unsupported.
 +---------------+---------------------------------------------------------------------------------------------------------------------------------+----------------------------------+----------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
 |               | Interactive                                                                                                                     | Non-interactive                  | Direct Run                                                                                                           | Notes                                                                                               |
 +===============+=================================================================================================================================+==================================+======================================================================================================================+=====================================================================================================+
-| * ``*CREATE`` | |:x:| Not available                                                                                                             | |:heavy_check_mark:| Available   | |:heavy_minus_sign:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                  | It is recommended to create Python functions instead.                                               |
+| * ``*CREATE`` | |:x:| Not available                                                                                                             | |:white_check_mark:| Available   | |:exclamation:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                       | It is recommended to create Python functions instead.                                               |
 +---------------+---------------------------------------------------------------------------------------------------------------------------------+----------------------------------+----------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
-| * ``CFOPEN``  | |:x:| Not available                                                                                                             | |:heavy_check_mark:| Available   | |:heavy_minus_sign:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                  | It is recommended to use Python functions such as ``open``.                                         |
+| * ``CFOPEN``  | |:x:| Not available                                                                                                             | |:white_check_mark:| Available   | |:exclamation:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                       | It is recommended to use Python functions such as ``open``.                                         |
 +---------------+---------------------------------------------------------------------------------------------------------------------------------+----------------------------------+----------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
-| * ``CFCLOSE`` | |:x:| Not available                                                                                                             | |:heavy_check_mark:| Available   | |:heavy_minus_sign:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                  | It is recommended to use Python functions such as ``open``.                                         |
+| * ``CFCLOSE`` | |:x:| Not available                                                                                                             | |:white_check_mark:| Available   | |:exclamation:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                       | It is recommended to use Python functions such as ``open``.                                         |
 +---------------+---------------------------------------------------------------------------------------------------------------------------------+----------------------------------+----------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
-| * ``*VWRITE`` | |:x:| Not available                                                                                                             | |:heavy_check_mark:| Available   | |:heavy_minus_sign:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                  | If you are working in a local session, it is recommended you use Python function such as ``open``.  |
+| * ``*VWRITE`` | |:x:| Not available                                                                                                             | |:white_check_mark:| Available   | |:exclamation:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                       | If you are working in a local session, it is recommended you use Python function such as ``open``.  |
 +---------------+---------------------------------------------------------------------------------------------------------------------------------+----------------------------------+----------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
-| * ``LSWRITE`` | |:heavy_check_mark:| Available (Internally running in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`)   | |:heavy_check_mark:| Available   | |:heavy_minus_sign:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                  |                                                                                                     |
+| * ``*MWRITE`` | |:x:| Not available                                                                                                             | |:white_check_mark:| Available   | |:exclamation:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                       | If you are working in a local session, it is recommended you use Python function such as ``open``.  |
++---------------+---------------------------------------------------------------------------------------------------------------------------------+----------------------------------+----------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
+| * ``LSWRITE`` | |:white_check_mark:| Available (Internally running in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`)   | |:white_check_mark:| Available   | |:exclamation:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                       |                                                                                                     |
 +---------------+---------------------------------------------------------------------------------------------------------------------------------+----------------------------------+----------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
 
+.. _ref_environment_variables:
 
 Environment variables
 =====================
 
 There are several PyMAPDL-specific environment variables that can be
-used to control the behavior or launching of PyMAPDL and MAPDL.
-These are described in the following table:
+used to control the default behavior of PyMAPDL or launching MAPDL.
 
-+---------------------------------------+---------------------------------------------------------------------+
-| :envvar:`PYMAPDL_START_INSTANCE`      | Override the behavior of the                                        |
-|                                       | :func:`ansys.mapdl.core.launcher.launch_mapdl` function             |
-|                                       | to only attempt to connect to existing                              |
-|                                       | instances of PyMAPDL. Generally used                                |
-|                                       | in combination with ``PYMAPDL_PORT``.                               |
-|                                       |                                                                     |
-|                                       | **Example:**                                                        |
-|                                       |                                                                     |
-|                                       | .. code:: console                                                   |
-|                                       |                                                                     |
-|                                       |    export PYMAPDL_START_INSTANCE=True                               |
-|                                       |                                                                     |
-+---------------------------------------+---------------------------------------------------------------------+
-| :envvar:`PYMAPDL_PORT`                | Default port for PyMAPDL to connect to.                             |
-|                                       |                                                                     |
-|                                       | **Example:**                                                        |
-|                                       |                                                                     |
-|                                       | .. code:: console                                                   |
-|                                       |                                                                     |
-|                                       |    export PYMAPDL_PORT=50052                                        |
-|                                       |                                                                     |
-+---------------------------------------+---------------------------------------------------------------------+
-| :envvar:`PYMAPDL_IP`                  | Default IP for PyMAPDL to connect to.                               |
-|                                       |                                                                     |
-|                                       | **Example:**                                                        |
-|                                       |                                                                     |
-|                                       | .. code:: console                                                   |
-|                                       |                                                                     |
-|                                       |    export PYMAPDL_IP=123.45.67.89                                   |
-|                                       |                                                                     |
-+---------------------------------------+---------------------------------------------------------------------+
-| :envvar:`ANSYSLMD_LICENSE_FILE`       | License file or IP address with port in the format                  |
-|                                       | ``PORT@IP``. Do not confuse with the ``IP`` and                     |
-|                                       | ``PORT`` where the MAPDL instance is running, which                 |
-|                                       | are specified using :envvar:`PYMAPDL_IP` and                        |
-|                                       | :envvar:`PYMAPDL_PORT`.                                             |
-|                                       | This is helpful for supplying licensing for                         |
-|                                       | Docker.                                                             |
-|                                       |                                                                     |
-|                                       | **Example:**                                                        |
-|                                       |                                                                     |
-|                                       | .. code:: console                                                   |
-|                                       |                                                                     |
-|                                       |    export ANSYSLMD_LICENSE_FILE=1055@123.45.67.89                   |
-|                                       |                                                                     |
-+---------------------------------------+---------------------------------------------------------------------+
-| :envvar:`PYMAPDL_MAPDL_EXEC`          | Executable path from where to launch MAPDL                          |
-|                                       | instances.                                                          |
-|                                       |                                                                     |
-|                                       | **Example:**                                                        |
-|                                       |                                                                     |
-|                                       | .. code:: console                                                   |
-|                                       |                                                                     |
-|                                       |    export PYMAPDL_MAPDL_EXEC=/ansys_inc/v222/ansys/bin/mapdl        |
-|                                       |                                                                     |
-+---------------------------------------+---------------------------------------------------------------------+
-| :envvar:`PYMAPDL_MAPDL_VERSION`       | Default MAPDL version to launch in case there                       |
-|                                       | are several versions availables.                                    |
-|                                       |                                                                     |
-|                                       | **Example:**                                                        |
-|                                       |                                                                     |
-|                                       | .. code:: console                                                   |
-|                                       |                                                                     |
-|                                       |    export PYMAPDL_MAPDL_VERSION=22.2                                |
-|                                       |                                                                     |
-+---------------------------------------+---------------------------------------------------------------------+
-| :envvar:`PYMAPDL_MAX_MESSAGE_LENGTH`  | Maximum gRPC message length. If your                                |
-|                                       | connection terminates when running                                  |
-|                                       | PRNSOL or NLIST, raise this. In bytes,                              |
-|                                       | defaults to 256 MB.                                                 |
-|                                       |                                                                     |
-|                                       | Only for developing purposes.                                       |
-+---------------------------------------+---------------------------------------------------------------------+
+These environment variables do not have
+priority over the arguments given in the corresponding functions.
+Consider this command:
+
+.. code-block:: console
+    
+    user@machine:~$ export PYMAPDL_PORT=50052
+    user@machine:~$ python -c "from ansys.mapdl.core import launch_mapdl; mapdl=launch_mapdl(port=60053)"
+
+This command launches an MAPDL instance on port 60053
+because the ``port`` argument has priority over the :envvar:`PYMAPDL_PORT`
+environment variable. The following table describes all arguments.
+
+
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`PYMAPDL_START_INSTANCE`      | Override the behavior of the                                                     |
+|                                       | :func:`ansys.mapdl.core.launcher.launch_mapdl` function                          |
+|                                       | to only attempt to connect to existing                                           |
+|                                       | instances of PyMAPDL. Generally used                                             |
+|                                       | in combination with ``PYMAPDL_PORT``.                                            |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export PYMAPDL_START_INSTANCE=True                            |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`PYMAPDL_PORT`                | Default port for PyMAPDL to connect to.                                          |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export PYMAPDL_PORT=50052                                     |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`PYMAPDL_IP`                  | Default IP for PyMAPDL to connect to.                                            |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export PYMAPDL_IP=123.45.67.89                                |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`PYMAPDL_NPROC`               | Default number of cores for MAPDL to use.                                        |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export PYMAPDL_NPROC=10                                       |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`ANSYSLMD_LICENSE_FILE`       | License file or IP address with port in the format                               |
+|                                       | ``PORT@IP``. Do not confuse with the ``IP`` and                                  |
+|                                       | ``PORT`` where the MAPDL instance is running, which                              |
+|                                       | are specified using :envvar:`PYMAPDL_IP` and                                     |
+|                                       | :envvar:`PYMAPDL_PORT`.                                                          |
+|                                       | This is helpful for supplying licensing for                                      |
+|                                       | Docker.                                                                          |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export ANSYSLMD_LICENSE_FILE=1055@123.45.89                   |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`PYMAPDL_MAPDL_EXEC`          | Executable path from where to launch MAPDL                                       |
+|                                       | instances.                                                                       |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export PYMAPDL_MAPDL_EXEC=/ansys_inc/v241/ansys/bin/mapdl     |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`PYMAPDL_MAPDL_VERSION`       | Default MAPDL version to launch in case there                                    |
+|                                       | are several versions availables.                                                 |
+|                                       |                                                                                  |
+|                                       | **Example:**                                                                     |
+|                                       |                                                                                  |
+|                                       | .. code-block:: console                                                          |
+|                                       |                                                                                  |
+|                                       |    user@machine:~$ export PYMAPDL_MAPDL_VERSION=22.2                             |
+|                                       |                                                                                  |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`PYMAPDL_RUNNING_ON_HPC`      | With this environment variable set to ``FALSE``, you can avoid                   |
+|                                       | PyMAPDL from detecting that it is running on a SLURM HPC cluster.                |
++---------------------------------------+----------------------------------------------------------------------------------+
+| :envvar:`PYMAPDL_MAX_MESSAGE_LENGTH`  | Maximum gRPC message length. If your                                             |
+|                                       | connection terminates when running                                               |
+|                                       | PRNSOL or NLIST, raise this. In bytes,                                           |
+|                                       | defaults to 256 MB.                                                              |
+|                                       |                                                                                  |
+|                                       | Only for developing purposes.                                                    |
++---------------------------------------+----------------------------------------------------------------------------------+

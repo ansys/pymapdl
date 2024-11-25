@@ -2,23 +2,33 @@
 
 from datetime import datetime
 import os
+from pathlib import Path
+import sys
 import warnings
 
-from ansys_sphinx_theme import ansys_favicon, get_version_match, pyansys_logo_white
+import ansys.tools.visualization_interface as viz_interface
+from ansys_sphinx_theme import ansys_favicon, get_version_match
 import numpy as np
 import pyvista
 from pyvista.plotting.utilities.sphinx_gallery import DynamicScraper
 from sphinx.application import Sphinx
+from sphinx.util import logging
 from sphinx_gallery.sorting import FileNameSortKey
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
 
+# Convert notebooks into Python scripts and include them in the output files
+logger = logging.getLogger(__name__)
+
+viz_interface.DOCUMENTATION_BUILD = True
+pyvista.BUILDING_GALLERY = True
+pyvista.OFF_SCREEN = True
+
 # Manage errors
 pyvista.set_error_output_file("errors.txt")
 
 # Ensure that offscreen rendering is used for docs generation
-pyvista.OFF_SCREEN = True
 
 # must be less than or equal to the XVFB window size
 try:
@@ -43,28 +53,38 @@ warnings.filterwarnings(
     message="Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.",
 )
 
+# To allow using 'helper' python file as a module
+sys.path.append(os.path.dirname(__file__))
+
 
 # -- Project information -----------------------------------------------------
 
-project = "ansys.mapdl.core"
+project = "ansys-mapdl-core"
 copyright = f"(c) {datetime.now().year} ANSYS, Inc. All rights reserved"
 author = "ANSYS Inc."
 
 # The short X.Y version
 release = version = __version__
 cname = os.getenv("DOCUMENTATION_CNAME", "mapdl.docs.pyansys.com")
+switcher_version = get_version_match(__version__)
 
 REPOSITORY_NAME = "pymapdl"
 USERNAME = "ansys"
 BRANCH = "main"
 
-
 DEFAULT_EXAMPLE_EXTENSION = "py"
+
+DOC_PATH = "doc/source"
 GALLERY_EXAMPLES_PATH = "examples/gallery_examples"
 EXAMPLES_ROOT = "examples"
 EXAMPLES_PATH_FOR_DOCS = f"../../{EXAMPLES_ROOT}/"
-DOC_PATH = "doc/source"
+
 SEARCH_HINTS = ["def", "class"]
+
+SOURCE_PATH = Path(__file__).parent.resolve().absolute()
+pyansys_light_mode_logo = str(
+    os.path.join(SOURCE_PATH, "_static", "pyansys-logo-light_mode.png")
+)
 
 # -- General configuration ---------------------------------------------------
 extensions = [
@@ -79,13 +99,12 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx_autodoc_typehints",
     "sphinx_design",
+    "sphinx_jinja",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
-    "sphinx_reredirects",
     "ansys_sphinx_theme.extension.linkcode",
-    "sphinx_design",
 ]
 
 # Intersphinx mapping
@@ -95,16 +114,16 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "pandas": ("https://pandas.pydata.org/docs/", None),
-    "pyvista": ("https://docs.pyvista.org/version/stable/", None),
+    "pyvista": ("https://docs.pyvista.org", None),
     "grpc": ("https://grpc.github.io/grpc/python/", None),
     "pypim": ("https://pypim.docs.pyansys.com/version/dev/", None),
     "ansys-dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
     "ansys-math-core": ("https://math.docs.pyansys.com/version/stable/", None),
+    "ansys-tools-path": ("https://path.tools.docs.pyansys.com/version/stable/", None),
 }
 
-suppress_warnings = ["label.*", "design.fa-build"]
+suppress_warnings = ["label.*", "design.fa-build", "config.cache"]
 sd_fontawesome_latex = True
-# supress_warnings = ["ref.option"]
 
 # Graphviz diagrams configuration
 graphviz_output_format = "png"
@@ -140,6 +159,7 @@ html_favicon = ansys_favicon
 # notfound.extension
 notfound_template = "404.rst"
 notfound_urls_prefix = "/../"
+html_baseurl = f"https://{cname}/version/stable"
 
 # static path
 html_static_path = ["_static"]
@@ -195,21 +215,16 @@ rst_epilog = rst_epilog.replace("%%PYMAPDLVERSION%%", release)
 with open("substitutions.rst") as f:
     rst_epilog += f.read()
 
-
-# Setting redicts
-redirects = {
-    # old linK: https://dev.mapdl.docs.pyansys.com/user_guide/krylov.html
-    "user_guide/krylov": "examples/extended_examples/Krylov/krylov_example"
-}
-
 # Broken anchors:
-linkcheck_exclude_documents = ["index"]
+linkcheck_exclude_documents = ["index", "changelog"]
 linkcheck_anchors_ignore_for_url = ["https://docs.pyvista.org/api/*"]
 linkcheck_ignore = [
     "https://github.com/ansys/pymapdl/*",
     "https://mapdl.docs.pyansys.com/*",
     "https://ansysaccount.b2clogin.com/*",  # behind payfirewall
     "https://ansyshelp.ansys.com/*",  # behind payfirewall
+    "https://forum.ansys.com/forums/*",  # It is detected as broken
+    "https://courses.ansys.com/*",  # It is detected as broken
 ]
 linkcheck_anchors_ignore = [
     # these anchors are picked by linkcheck as broken but they are not.
@@ -218,6 +233,15 @@ linkcheck_anchors_ignore = [
     "pyvista.UnstructuredGrid",
     "pyvista.Plotter.show",
 ]
+
+# If we are on a release, we have to ignore the "release" URLs, since it is not
+# available until the release is published.
+if switcher_version != "dev":
+    linkcheck_ignore.append(
+        f"https://github.com/ansys/pymapdl/releases/tag/v{__version__}"
+    )
+
+user_agent = """curl https://www.ansys.com -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.3"""
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -252,7 +276,7 @@ sphinx_gallery_conf = {
     "ignore_pattern": "flycheck*",
     "thumbnail_size": (350, 350),
     "remove_config_comments": True,
-    "default_thumb_file": pyansys_logo_white,
+    "default_thumb_file": pyansys_light_mode_logo,
     "show_signature": False,
 }
 # ---
@@ -261,8 +285,8 @@ sphinx_gallery_conf = {
 # -- Options for HTML output -------------------------------------------------
 html_short_title = html_title = "PyMAPDL"
 html_theme = "ansys_sphinx_theme"
-html_logo = "./_static/pyansys-logo-black-cropped.png"  # pyansys_logo_black
 html_theme_options = {
+    "logo": "pyansys",
     "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
     "github_url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}",
     "show_prev_next": False,
@@ -287,25 +311,34 @@ html_theme_options = {
     ],
     "switcher": {
         "json_url": f"https://{cname}/versions.json",
-        "version_match": get_version_match(__version__),
-    },
-    "use_meilisearch": {
-        "api_key": os.getenv("MEILISEARCH_PUBLIC_API_KEY", ""),
-        "index_uids": {
-            f"pymapdl-v{get_version_match(__version__).replace('.', '-')}": "PyMAPDL",
-        },
+        "version_match": switcher_version,
     },
 }
+
+BUILD_CHEATSHEET = os.environ.get("BUILD_CHEATSHEET", "false").lower() == "true"
+
+if BUILD_CHEATSHEET:
+    html_theme_options["cheatsheet"] = {
+        "file": "cheat_sheet/cheat_sheet.qmd",
+        "title": "PyMAPDL cheat sheet",
+        "version": f"v{version}",
+        "pages": ["getting_started/learning"],
+    }
 
 html_context = {
     "display_github": True,  # Integrate GitHub
     "github_user": USERNAME,
     "github_repo": REPOSITORY_NAME,
     "github_version": BRANCH,
-    "doc_path": DOC_PATH,
+    "doc_path": str(DOC_PATH),
     "source_path": "src",
 }
 html_show_sourcelink = False
+
+html_sidebars = {
+    "mapdl_commands/**/**": [],
+    "mapdl_commands/index": [],
+}
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
@@ -402,3 +435,13 @@ def setup(app: Sphinx):
 
     # Julia lexer
     app.add_lexer("julia", JuliaLexer)
+
+    # Setting custom directive
+    from helpers import HideObject
+
+    app.add_directive("hideobject", HideObject)
+
+
+jinja_contexts = {
+    "cheat_sheet": {"version": switcher_version},
+}

@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -611,7 +611,7 @@ def test_golden(mapdl_cmd):
 @pytest.fixture
 def run_cli():
     def do_run(*args):
-        args = ["pymapdl_convert_script"] + list(args)
+        args = ["pymapdl convert"] + list(args)
         return os.system(" ".join(args))
 
     return do_run
@@ -714,3 +714,35 @@ def test_convert_sf_all_inf():
 
 def test_convert_slash_typef():
     assert "mapdl.slashtype()" in convert_apdl_block("/TYPE", only_commands=True)
+
+
+def test_chained_commands():
+    assert """with mapdl.chain_commands:
+    mapdl.type(11)
+    mapdl.real(11)
+    mapdl.mat(11)""" in convert_apdl_block(
+        "type,11 $real,11 $mat,11", only_commands=True
+    )
+
+    assert """with mapdl.chain_commands:
+    mapdl.esel("s")
+    mapdl.real(11)
+    mapdl.mat(22)
+    mapdl.com("hi")
+    # hello""" in convert_apdl_block(
+        "esel,s $real,11 $mat,22 $/com hi $!hello", only_commands=True
+    )
+
+    assert """mapdl.esel("s")
+with mapdl.chain_commands:
+    mapdl.real(11)
+    mapdl.mat(22)
+    mapdl.com("hi")
+    # hello
+mapdl.nsel()""" in convert_apdl_block(
+        """
+esel,s
+real,11 $mat,22 $/com hi $!hello
+nsel,""",
+        only_commands=True,
+    )

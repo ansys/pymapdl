@@ -85,25 +85,28 @@ container.
 To instantiate an MAPDL Docker container from an image hosted at ``ghcr.io/myuser/myrepo/mymapdldockerimage``,
 use code like in the following examples.
 
-**On Windows**
+.. tab-set::
 
-.. code:: pwsh-session
+    .. tab-item:: Windows
+        :sync: key1
 
-    $env:ANSYSLMD_LICENSE_FILE="1055@MY_LICENSE_SERVER_IP"
-    $env:LOCAL_MAPDL_PORT=50053
-    $env:MAPDL_DOCKER_REGISTRY_URL="ghcr.io/myuser/myrepo/mymapdldockerimage"
+        .. code:: pwsh-session
 
-    docker run -e ANSYSLMD_LICENSE_FILE=$env:ANSYSLMD_LICENSE_FILE --restart always --name mapdl -p $env:LOCAL_MAPDL_PORT`:50052   $env:MAPDL_DOCKER_REGISTRY_URL -smp
+            $env:ANSYSLMD_LICENSE_FILE="1055@MY_LICENSE_SERVER_IP"
+            $env:LOCAL_MAPDL_PORT=50053
+            $env:MAPDL_DOCKER_REGISTRY_URL="ghcr.io/myuser/myrepo/mymapdldockerimage"
 
+            docker run -e ANSYSLMD_LICENSE_FILE=$env:ANSYSLMD_LICENSE_FILE --restart always --name mapdl -p $env:LOCAL_MAPDL_PORT`:50052   $env:MAPDL_DOCKER_REGISTRY_URL -smp
 
-**On Linux**
+    .. tab-item:: Linux
+        :sync: key1
 
-.. code:: bash
+        .. code:: bash
 
-  ANSYSLMD_LICENSE_FILE=1055@MY_LICENSE_SERVER_IP
-  LOCAL_MAPDL_PORT=50053
-  MAPDL_DOCKER_REGISTRY_URL=ghcr.io/myuser/myrepo/mymapdldockerimage
-  docker run -e ANSYSLMD_LICENSE_FILE=$ANSYSLMD_LICENSE_FILE --restart always --name mapdl -p $LOCAL_MAPDL_PORT:50052 $MAPDL_DOCKER_REGISTRY_URL -smp > log.txt
+          ANSYSLMD_LICENSE_FILE=1055@MY_LICENSE_SERVER_IP
+          LOCAL_MAPDL_PORT=50053
+          MAPDL_DOCKER_REGISTRY_URL=ghcr.io/myuser/myrepo/mymapdldockerimage
+          docker run -e ANSYSLMD_LICENSE_FILE=$ANSYSLMD_LICENSE_FILE --restart always --name mapdl -p $LOCAL_MAPDL_PORT:50052 $MAPDL_DOCKER_REGISTRY_URL -smp > log.txt
 
 
 The first time you instantiate the container, Docker logins into the registry and
@@ -111,17 +114,42 @@ pulls the required image. This can take some time, depending on the size of the 
 
 To rerun it, you should restart the container with this command:
 
-.. code:: bash
 
-   docker start mapdl
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> docker start mapdl
+
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
+
+            (.venv) user@machine:~$ docker start mapdl
 
 Or you can delete the container and run it again using these commands:
 
-.. code:: bash
+.. tab-set::
 
-    docker rm -f mapdl
+    .. tab-item:: Windows
+        :sync: key1
 
-    docker run -e ANSYSLMD_LICENSE_FILE=$ANSYSLMD_LICENSE_FILE --restart always --name mapdl -p $LOCAL_MAPDL_PORT:50052   $MAPDL_DOCKER_REGISTRY_URL -smp > log.txt
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> docker rm -f mapdl
+            (.venv) PS C:\Users\user\pymapdl> docker run -e ANSYSLMD_LICENSE_FILE=$ANSYSLMD_LICENSE_FILE --restart always --name mapdl -p $LOCAL_MAPDL_PORT:50052   $MAPDL_DOCKER_REGISTRY_URL -smp > log.txt
+
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
+
+            (.venv) user@machine:~$ docker rm -f mapdl
+            (.venv) user@machine:~$ docker run -e ANSYSLMD_LICENSE_FILE=$ANSYSLMD_LICENSE_FILE --restart always --name mapdl -p $LOCAL_MAPDL_PORT:50052   $MAPDL_DOCKER_REGISTRY_URL -smp > log.txt
 
 
 You can append the Docker flag ``--rm`` to automatically clean up the container
@@ -157,10 +185,22 @@ appending them to the end of the command.
 For example, you can increase the number of processors (up to the
 number available on the host machine) with the ``-np`` switch:
 
-.. code:: bash
 
-  docker run -e ANSYSLMD_LICENSE_FILE=$ANSYSLMD_LICENSE_FILE --restart always -d --name mapdl -p $LOCAL_MAPDL_PORT:50052 $MAPDL_DOCKER_REGISTRY_URL -smp -np 8 > log.txt
+.. tab-set::
 
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> docker run -e ANSYSLMD_LICENSE_FILE=$ANSYSLMD_LICENSE_FILE --restart always -d --name mapdl -p $LOCAL_MAPDL_PORT:50052 $MAPDL_DOCKER_REGISTRY_URL -smp -np 8 | Out-File -FilePath .\log.txt
+
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
+
+            (.venv) user@machine:~$ docker run -e ANSYSLMD_LICENSE_FILE=$ANSYSLMD_LICENSE_FILE --restart always -d --name mapdl -p $LOCAL_MAPDL_PORT:50052 $MAPDL_DOCKER_REGISTRY_URL -smp -np 8 > log.txt
 
 For additional command line arguments, see the *Notes* section in the
 description for the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
@@ -172,7 +212,7 @@ to run the preceding commands all at once.
 Once you have launched MAPDL, you should see the following content
 in your console (or the output file):
 
-.. code::
+.. code:: text
 
     Start GRPC Server
 
@@ -208,6 +248,12 @@ use.
 Using the `docker-compose.yml <pymapdl_docker_compose_base_>`_ file is recommended.
 This is the *base* configuration file for launching an instance of MAPDL that you can connect
 to remotely.
+
+you can use the following command to launch MAPDL:
+
+.. code:: bash
+
+    docker-compose -f docker-compose.yml up -d mapdl
 
 
 .. _pymapdl_connect_to_MAPDL_container:
@@ -249,14 +295,32 @@ the process with the ``ANSYS_LOCK`` environment variable set to ``"OFF"``.
 
 This code shows how to do this in your `docker run <docker_run_>`_ command:
 
-.. code:: bash
 
-  docker run \
-      --restart always \
-      -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER \
-      -e ANSYS_LOCK="OFF" \
-      -p 50052:50052 \
-      $IMAGE
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> docker run `
+                --restart always `
+                -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER `
+                -e ANSYS_LOCK="OFF" `
+                -p 50052:50052 `
+                $IMAGE
+
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
+
+            (.venv) user@machine:~$ docker run \
+                --restart always \
+                -e ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER \
+                -e ANSYS_LOCK="OFF" \
+                -p 50052:50052 \
+                $IMAGE
 
 
 Get useful files after abnormal termination
@@ -268,75 +332,205 @@ tools that Docker provides.
 
 First, get the Docker container name:
 
-.. code:: pwsh-session
 
-  PS docker ps -a
-  CONTAINER ID   IMAGE                                   COMMAND                  CREATED          STATUS          PORTS                      NAMES
-  c14560bff70f   my.registry/myuser/mypackage/mapdl   "/ansys_inc/ansys/bi…"   9 seconds ago    Exited(137)    0.0.0.0:50053->50052/tcp   mapdl
+.. tab-set::
 
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> docker ps -a
+            CONTAINER ID   IMAGE                                   COMMAND                  CREATED          STATUS          PORTS                      NAMES
+            c14560bff70f   my.registry/myuser/mypackage/mapdl   "/ansys_inc/ansys/bi…"   9 seconds ago    Exited(137)    0.0.0.0:50053->50052/tcp   mapdl
+
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
+
+            (.venv) user@machine:~$ docker ps -a
+            CONTAINER ID   IMAGE                                   COMMAND                  CREATED          STATUS          PORTS                      NAMES
+            c14560bff70f   my.registry/myuser/mypackage/mapdl   "/ansys_inc/ansys/bi…"   9 seconds ago    Exited(137)    0.0.0.0:50053->50052/tcp   mapdl
 
 Then use the ``name`` in this command:
 
-.. code:: pwsh-session
 
-  PS docker exec -it mapdl /bin/bash
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> docker exec -it mapdl /bin/bash
+
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
+
+            (.venv) user@machine:~$ docker exec -it mapdl /bin/bash
 
 This command executes the command shell (``/bin/bash``) of the container and attaches your current terminal to it (interactive ``-it``).
 
-.. code:: pwsh-session
 
-  PS C:\Users\user> docker exec -it mapdl /bin/bash
-  [root@c14560bff70f /]#
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> docker exec -it mapdl /bin/bash
+            [root@c14560bff70f /]#
+
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
+
+            (.venv) user@machine:~$ docker exec -it mapdl /bin/bash
+            [root@c14560bff70f /]#
 
 Now you can enter commands inside the Docker container and navigate inside it.
 
-.. code:: pwsh-session
+.. tab-set::
 
-  PS C:\Users\user> docker exec -it mapdl /bin/bash
-  [root@c14560bff70f /]# ls
-  anaconda-post.log  cleanup-ansys-c14560bff70f-709.sh  file0.err   file1.err  file1.page  file2.out   file3.log   home   media  proc  sbin  tmp
-  ansys_inc          dev                                file0.log   file1.log  file2.err   file2.page  file3.out   lib    mnt    root  srv   usr
-  bin                etc                                file0.page  file1.out  file2.log   file3.err   file3.page  lib64  opt    run   sys   var
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> docker exec -it mapdl /bin/bash
+            [root@c14560bff70f /]# ls
+            anaconda-post.log  cleanup-ansys-c14560bff70f-709.sh  file0.err   file1.err  file1.page  file2.out   file3.log   home   media  proc  sbin  tmp
+            ansys_inc          dev                                file0.log   file1.log  file2.err   file2.page  file3.out   lib    mnt    root  srv   usr
+            bin                etc                                file0.page  file1.out  file2.log   file3.err   file3.page  lib64  opt    run   sys   var
+
+
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
+
+            (.venv) user@machine:~$ docker exec -it mapdl /bin/bash
+            [root@c14560bff70f /]# ls
+            anaconda-post.log  cleanup-ansys-c14560bff70f-709.sh  file0.err   file1.err  file1.page  file2.out   file3.log   home   media  proc  sbin  tmp
+            ansys_inc          dev                                file0.log   file1.log  file2.err   file2.page  file3.out   lib    mnt    root  srv   usr
+            bin                etc                                file0.page  file1.out  file2.log   file3.err   file3.page  lib64  opt    run   sys   var
+
 
 You can then take note of the files you want to retrieve. For example, you would likely want to retrieve the error and output files (``file*.err`` and ``file*.out``).
 
 Exit the container terminal using the ``exit`` command:
 
-.. code:: pwsh-session
+.. tab-set::
 
-  [root@c14560bff70f /]# exit
-  exit
-  (base) PS C:\Users\user>
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            [root@c14560bff70f /]# exit
+            exit
+            (.venv) PS C:\Users\user\pymapdl> 
+
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
+
+            [root@c14560bff70f /]# exit
+            exit
+            (.venv) user@machine:~$ 
 
 You can then copy the noted files using the `docker cp <docker_cp_>`_ command:
 
-.. code:: pwsh-session
+.. tab-set::
 
-  docker cp mapdl:/file0.err .
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> docker cp mapdl:/file0.err .
+
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
+
+            (.venv) user@machine:~$ docker cp mapdl:/file0.err .
 
 This command copies the files in the current directory. You can specify a different destination using
 the second argument.
 
 If you want to retrieve multiple files, the most efficient approach is to get back inside the Docker container:
 
-.. code:: pwsh-session
 
-  PS C:\Users\user> docker exec -it mapdl /bin/bash
-  [root@c14560bff70f /]#
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> docker exec -it mapdl /bin/bash
+            [root@c14560bff70f /]#
+
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
+
+            (.venv) user@machine:~$ docker exec -it mapdl /bin/bash
+            [root@c14560bff70f /]#
 
 Create a folder where you are going to copy all the desired files:
 
-.. code:: pwsh-session
 
-  [root@c14560bff70f /]# mkdir -p /mapdl_logs
-  [root@c14560bff70f /]# cp -f /file*.out /mapdl_logs
-  [root@c14560bff70f /]# cp -f /file*.err /mapdl_logs
-  [root@c14560bff70f /]# ls mapdl_logs/
-  file0.err  file1.err  file1.out  file2.err  file2.out  file3.err  file3.out
+.. tab-set::
+
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> 
+            [root@c14560bff70f /]# mkdir -p /mapdl_logs
+            [root@c14560bff70f /]# cp -f /file*.out /mapdl_logs
+            [root@c14560bff70f /]# cp -f /file*.err /mapdl_logs
+            [root@c14560bff70f /]# ls mapdl_logs/
+            file0.err  file1.err  file1.out  file2.err  file2.out  file3.err  file3.out
+
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
+
+            (.venv) user@machine:~$ 
+            [root@c14560bff70f /]# mkdir -p /mapdl_logs
+            [root@c14560bff70f /]# cp -f /file*.out /mapdl_logs
+            [root@c14560bff70f /]# cp -f /file*.err /mapdl_logs
+            [root@c14560bff70f /]# ls mapdl_logs/
+            file0.err  file1.err  file1.out  file2.err  file2.out  file3.err  file3.out
+
 
 Then copy the entire folder content at once:
 
-.. code:: pwsh-session
+.. tab-set::
 
-  docker cp mapdl:/mapdl_logs/. .
+    .. tab-item:: Windows
+        :sync: key1
 
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> docker cp mapdl:/mapdl_logs/. .
+
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
+
+            (.venv) user@machine:~$ docker cp mapdl:/mapdl_logs/. .

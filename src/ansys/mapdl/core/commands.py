@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -52,9 +52,8 @@ REG_LETTERS = re.compile(r"[a-df-zA-DF-Z]+")  # all except E or e
 REG_FLOAT_INT = re.compile(
     r"[+-]?[0-9]*[.]?[0-9]*[Ee]?[+-]?[0-9]+|\s[0-9]+\s"
 )  # match number groups
-BC_REGREP = re.compile(
-    r"^\s*([0-9]+)\s*([A-Za-z]+)\s*([0-9]*[.]?[0-9]+)\s+([0-9]*[.]?[0-9]+)"
-)
+BC_REGREP = re.compile(r"^\s*([0-9]+)\s*([A-Za-z]+)((?:\s+[0-9]*[.]?[0-9]+)+)$")
+
 
 MSG_NOT_PANDAS = """'Pandas' is not installed or could not be found.
 Hence this command is not applicable.
@@ -105,7 +104,34 @@ CMD_RESULT_LISTING = [
     "SWLI",
 ]
 
-CMD_BC_LISTING = ["FLIS", "DLIS"]
+CMD_BC_LISTING = [
+    "DKLI",
+    "DLLI",
+    "DALI",
+    "DLIS",
+    "FKLI",
+    "FLIS",
+    "SFLL",
+    # "SFAL",   Define two integers before label (regex)
+    # "SFLI",   Use two lines to define each BC in the list
+    # "SFEL",   Use two lines to define each BC in the list
+    "BFKL",
+    "BFLL",
+    "BFAL",
+]
+
+COLNAMES_BC_LISTING = {
+    "DKLI": ["KEYPOINT", "LABEL", "REAL", "IMAG", "EXP KEY"],
+    "DLLI": ["LINE", "LABEL", "REAL", "IMAG", "NAREA"],
+    "DALI": ["AREA", "LABEL", "REAL", "IMAG"],
+    "DLIS": ["NODE", "LABEL", "REAL", "IMAG"],
+    "FKLI": ["KEYPOINT", "LABEL", "REAL", "IMAG"],
+    "FLIS": ["NODE", "LABEL", "REAL", "IMAG"],
+    "SFLL": ["LINE", "LABEL", "VALI", "VALJ", "VAL2I", "VAL2J"],
+    "BFKL": ["KEYPOINT", "LABEL", "VALUE"],
+    "BFLL": ["LINE", "LABEL", "VALUE"],
+    "BFAL": ["AREA", "LABEL", "VALUE"],
+}
 
 CMD_ENTITY_LISTING = [
     "NLIS",
@@ -204,7 +230,7 @@ def get_section_indentation(section_name, docstring):
 def inject_before(section, indentation, indented_doc_inject, docstring):
     return re.sub(
         section + r"\n\s*-*",
-        f"{indented_doc_inject.strip()}\n\n{indentation}\g<0>",
+        f"{indented_doc_inject.strip()}\n\n{indentation}" + r"\g<0>",
         docstring,
         flags=re.IGNORECASE,
     )
@@ -278,7 +304,7 @@ def check_valid_output(func):
         if (
             "*** WARNING ***" in output or "*** ERROR ***" in output
         ):  # Error should be caught in mapdl.run.
-            err_type = re.findall("\*\*\* (.*) \*\*\*", output)[0]
+            err_type = re.findall(r"*** (.*) ***", output)[0]
             msg = f"Unable to parse because of next {err_type.title()}" + "\n".join(
                 output.splitlines()[-2:]
             )
@@ -793,15 +819,92 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
 
     """
 
+    def bc_colnames(self):
+        """Get the column names based on bc list command"""
+
+        bc_type = {
+            "BODY FORCES": "BF",
+            "SURFACE LOAD": "SF",
+            "POINT LOAD": "F",
+            "FORCES": "F",
+            "CONSTRAINTS": "D",
+        }
+
+        entity = {
+            "KEYPOINT": "K",
+            "LINE": "L",
+            "AREA": "A",
+            "NODE": "",
+            "ELEMENT": "E",
+        }
+
+        title = self._get_body()[0]
+
+        _bcType = [i for i in bc_type.keys() if i in title]
+        _entity = [i for i in entity.keys() if i in title]
+
+        if _bcType and _entity:
+
+            key_bc = bc_type[_bcType[0]] + entity[_entity[0]] + "LIST"
+            key_bc = key_bc[:4]
+
+            if key_bc in COLNAMES_BC_LISTING.keys():
+
+                _cols = COLNAMES_BC_LISTING[key_bc]
+
+                # Check num columns in data
+                ldata = []
+                for line in self.splitlines():
+                    line = line.strip()
+                    # exclude any line containing characters [A-Z] except for E
+                    if line:
+                        items = BC_REGREP.findall(line)
+                        if items:
+                            ldata = list(items[0][:2]) + items[0][2].split()
+                            break
+
+                if ldata:
+                    if len(_cols) > len(ldata):
+                        _cols = _cols[: len(ldata)]
+
+                    return _cols
+
+        return None
+
+    def get_columns(self):
+        """Get the column names for the dataframe.
+
+        Returns
+        -------
+        List of strings
+
+        """
+        if self._columns_names:
+            return self._columns_names
+
+        bc_colnames = self.bc_colnames()
+
+        if bc_colnames:
+            return bc_colnames
+
+        body = self._get_body()
+
+        pairs = list(self._get_data_group_indexes(body))
+        try:
+            return body[pairs[0][0]].split()
+        except:
+            return None
+
     def _parse_table(self):
         """Parse tabular command output."""
         parsed_lines = []
         for line in self.splitlines():
+            line = line.strip()
             # exclude any line containing characters [A-Z] except for E
             if line:
                 items = BC_REGREP.findall(line)
                 if items:
-                    parsed_lines.append(list(items[0]))
+                    parsed_lines.append(list(items[0][:2]) + items[0][2].split())
 
         return parsed_lines
 
@@ -838,17 +941,19 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
 
         """
         df = super().to_dataframe(data=self.to_list())
-        if "NODE" in df.columns:
-            df["NODE"] = df["NODE"].astype(np.int32, copy=False)
+
+        primitives = ["KEYPOINT", "LINE", "AREA", "VOLUME", "NODE", "ELEMENT"]
+
+        float_col = ["REAL", "IMAG", "VALUE", "VALI", "VALJ"]
+
+        for i in df.columns.intersection(primitives):
+            df[i] = df[i].astype(np.int32, copy=False)
 
         if "LABEL" in df.columns:
             df["LABEL"] = df["LABEL"].astype(str, copy=False)
 
-        if "REAL" in df.columns:
-            df["REAL"] = df["REAL"].astype(np.float64, copy=False)
-
-        if "IMAG" in df.columns:
-            df["IMAG"] = df["IMAG"].astype(np.float64, copy=False)
+        for i in df.columns.intersection(float_col):
+            df[i] = df[i].astype(np.float64, copy=False)
 
         return df
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -312,7 +312,7 @@ print(grids)
 #
 # The plot is then shown and it recreates the native plot quite well.
 
-from ansys.mapdl.core.theme import PyMAPDL_cmap
+from ansys.mapdl.core.plotting.theme import PyMAPDL_cmap
 
 plotter = pv.Plotter()
 

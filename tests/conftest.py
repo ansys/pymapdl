@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,13 +21,17 @@
 # SOFTWARE.
 
 from collections import namedtuple
+from collections.abc import Generator
 import os
 from pathlib import Path
+from shutil import get_terminal_size
 from sys import platform
+from unittest.mock import patch
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
 import pytest
 
+from ansys.mapdl.core.helpers import is_installed as has_dependency
 from common import (
     Element,
     Node,
@@ -40,6 +44,10 @@ from common import (
     is_on_ubuntu,
     is_running_on_student,
     is_smp,
+    log_apdl,
+    log_test_start,
+    make_sure_not_instances_are_left_open,
+    restart_mapdl,
     support_plotting,
     testing_minimal,
 )
@@ -66,8 +74,10 @@ HAS_GRPC = has_grpc()
 HAS_DPF = has_dpf()
 SUPPORT_PLOTTING = support_plotting()
 IS_SMP = is_smp()
+LOG_APDL = log_apdl()
 
 QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
+VALID_PORTS = []
 
 ## Skip ifs
 skip_on_windows = pytest.mark.skipif(ON_WINDOWS, reason="Skip on Windows")
@@ -80,6 +90,11 @@ skip_no_xserver = pytest.mark.skipif(
 skip_if_not_local = pytest.mark.skipif(
     not ON_LOCAL,
     reason="Skipping because not on local. ",
+)
+
+skip_if_not_remote = pytest.mark.skipif(
+    ON_LOCAL,
+    reason="Skipping because not on remote. ",
 )
 
 skip_if_on_cicd = pytest.mark.skipif(
@@ -107,25 +122,8 @@ requires_on_cicd = pytest.mark.skipif(
 
 skip_if_running_student_version = pytest.mark.skipif(
     ON_STUDENT,
-    reason="This tests does not work on student version. Maybe because license limitations",
+    reason="This tests does not work on student version.",
 )
-
-
-def import_module(requirement):
-    from importlib import import_module
-
-    if os.name == "nt":
-        requirement = requirement.replace("-", ".")
-    return import_module(requirement)
-
-
-def has_dependency(requirement):
-    try:
-        requirement = requirement.replace("-", ".")
-        import_module(requirement)
-        return True
-    except ModuleNotFoundError:
-        return False
 
 
 def requires(requirement: str):
@@ -140,6 +138,9 @@ def requires(requirement: str):
 
     elif "local" == requirement:
         return skip_if_not_local
+
+    elif "remote" == requirement:
+        return skip_if_not_remote
 
     elif "cicd" == requirement:
         return skip_if_on_cicd
@@ -173,40 +174,58 @@ def requires(requirement: str):
 
 
 def requires_dependency(dependency: str):
-    try:
-        import_module(dependency)
+    if has_dependency(dependency):
         return pytest.mark.skipif(
-            False, reason="Never skip"
+            False, reason=f"Required package ('{dependency}') is installed"
         )  # faking a null skipif decorator
-
-    except ModuleNotFoundError:
+    else:
         # package does not exist
         return pytest.mark.skip(reason=f"Requires '{dependency}' package")
 
 
-################
+################################################################
+#
+# Importing packages
+# ------------------
+#
 
 if has_dependency("ansys-tools-package"):
-    from ansys.tools.path import get_available_ansys_installations
+    from ansys.tools.path import find_mapdl, get_available_ansys_installations
 
 
 if has_dependency("pyvista"):
     import pyvista
 
-    from ansys.mapdl.core.theme import _apply_default_theme
+    from ansys.mapdl.core.plotting.theme import _apply_default_theme
 
     _apply_default_theme()
 
     # Necessary for CI plotting
     pyvista.OFF_SCREEN = True
+    pyvista.global_theme.allow_empty_mesh = True
 
 import ansys.mapdl.core as pymapdl
 
 pymapdl.RUNNING_TESTS = True
 
+from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+from ansys.mapdl.core.mapdl_core import VALID_DEVICES
+
+if has_dependency("ansys-tools-visualization_interface"):
+    import ansys.tools.visualization_interface as viz_interface
+
+    viz_interface.TESTING_MODE = True
+
+
+################################################################
+#
+# Pytest configuration
+# --------------------
+#
+
 
 # check if the user wants to permit pytest to start MAPDL
 START_INSTANCE = get_start_instance()
@@ -227,15 +246,53 @@ remote server with:
 
 {os_msg}
 
-If you do have Ansys installed, you may have to patch pymapdl to
-automatically find your Ansys installation.  Email the developer at:
-alexander.kaszynski@ansys.com
+If you do have Ansys installed, you may have to patch PyMAPDL to
+automatically find your Ansys installation.
+
+You can request assistance by opening an issue on:
+
+https://github.com/ansys/pymapdl/issues
 
 """
 MAPDL_VERSION = None  # this is cached by mapdl fixture and used in the minimal testing
 
 if START_INSTANCE and not ON_LOCAL:
     raise MapdlRuntimeError(ERRMSG)
+
+
+@pytest.hookimpl(trylast=True)
+def pytest_report_header(config, start_path, startdir):
+    text = []
+    text += ["Testing variables".center(get_terminal_size()[0], "-")]
+    text += [
+        f"Session dependent: ON_CI ({ON_CI}), TESTING_MINIMAL ({TESTING_MINIMAL}), SUPPORT_PLOTTING ({SUPPORT_PLOTTING})"
+    ]
+    text += [
+        f"OS dependent: ON_LINUX ({ON_LINUX}), ON_UBUNTU ({ON_UBUNTU}), ON_WINDOWS ({ON_WINDOWS}), ON_MACOS ({ON_MACOS})"
+    ]
+    text += [
+        f"MAPDL dependent: ON_LOCAL ({ON_LOCAL}), ON_STUDENT ({ON_STUDENT}), HAS_GRPC ({HAS_GRPC}), HAS_DPF ({HAS_DPF}), IS_SMP ({IS_SMP})"
+    ]
+
+    text += ["Environment variables".center(get_terminal_size()[0], "-")]
+    line = ""
+    for env_var in [
+        "PYMAPDL_START_INSTANCE",
+        "PYMAPDL_PORT",
+        "PYMAPDL_PORT2",
+        "PYMAPDL_DB_PORT",
+        "PYMAPDL_IP",
+        "PYMAPDL_IP2",
+        "DPF_PORT",
+        "DPF_START_SERVER",
+        "IGNORE_POOL",
+    ]:
+        env_var_value = os.environ.get(env_var)
+        if env_var_value is not None:
+            line += f"{env_var} ('{env_var_value}'), "
+    text += [line]
+    text += ["Pytest configuration".center(get_terminal_size()[0], "-")]
+    return "\n".join(text)
 
 
 ## Changing report line length
@@ -257,7 +314,8 @@ class MyReporter(TerminalReporter):
             )
 
 
-@pytest.mark.trylast
+# @pytest.mark.trylast
+@pytest.hookimpl(trylast=True)
 def pytest_configure(config):
     vanilla_reporter = config.pluginmanager.getplugin("terminalreporter")
     my_reporter = MyReporter(config)
@@ -315,8 +373,8 @@ def pytest_collection_modifyitems(config, items):
 
 ################################################################
 #
-# Setting fixtures
-# ---------------------------
+# Setting configuration fixtures
+# ------------------------------
 #
 
 if has_dependency("pytest-pyvista"):
@@ -362,53 +420,113 @@ def running_test():
 
 
 @pytest.fixture(autouse=True, scope="function")
-def run_before_and_after_tests(request, mapdl):
+def run_before_and_after_tests(
+    request: pytest.FixtureRequest, mapdl: Mapdl
+) -> Generator[Mapdl]:
     """Fixture to execute asserts before and after a test is run"""
 
-    # Setup: fill with any logic you want
-    def is_exited(mapdl):
-        try:
-            _ = mapdl._ctrl("VERSION")
-            return False
-        except MapdlExitedError:
-            return True
+    # Relaunching MAPDL if dead
+    mapdl = restart_mapdl(mapdl)
 
-    if START_INSTANCE and is_exited(mapdl):
-        # Backing up the current local configuration
-        local_ = mapdl._local
+    # Write test info to log_apdl
+    if LOG_APDL:
+        log_test_start(mapdl)
 
-        # Relaunching MAPDL
-        mapdl_ = launch_mapdl(
-            port=mapdl._port,
-            override=True,
-            run_location=mapdl._path,
-            cleanup_on_exit=mapdl._cleanup,
-        )
-
-        # Cloning the new mapdl instance channel into the old one.
-        mapdl._channel = mapdl_._channel
-        mapdl._multi_connect(timeout=mapdl._timeout)
-
-        # Restoring the local configuration
-        mapdl._local = local_
-
-    mapdl.gopr()
-    yield  # this is where the testing happens
-
-    # Teardown : fill with any logic you want
-    if mapdl.is_local and mapdl._exited:
-        # The test exited MAPDL, so it is fail.
-        assert False  # this will fail the test
-
-
-@pytest.fixture(autouse=True, scope="function")
-def run_before_and_after_tests_2(request, mapdl):
-    """Make sure we are not changing these properties in tests"""
+    # check if the local/remote state has changed or not
     prev = mapdl.is_local
 
+    yield  # this is where the testing happens
+
+    # Check resetting state
+    assert prev == mapdl.is_local
+    assert not mapdl.exited, "MAPDL is exited after the test. It should have not!"
+    assert not mapdl._mapdl_on_hpc, "Mapdl class is on HPC mode. It should not!"
+    assert mapdl.finish_job_on_exit, "Mapdl class should finish the job!"
+    assert not mapdl.ignore_errors, "Mapdl class is ignoring errors!"
+    assert not mapdl.mute
+    assert mapdl.file_type_for_plots in VALID_DEVICES
+
+    # Returning to default
+    mapdl.graphics("full")
+
+    # Handling extra instances
+    make_sure_not_instances_are_left_open(VALID_PORTS)
+
+    # Teardown
+    if mapdl.is_local and mapdl._exited:
+        # The test exited MAPDL, so it has failed.
+        test_name = os.environ.get(
+            "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
+        )
+
+        assert (
+            False
+        ), f"Test {test_name} failed at the teardown."  # this will fail the test
+
+
+@pytest.fixture(scope="function")
+def set_env_var(request, monkeypatch):
+    """Set an environment variable from given requests, this fixture must be used with `parametrize`"""
+    env_var_name = request.param[0]
+    env_var_value = request.param[1]
+    monkeypatch.setenv(f"{env_var_name}", f"{env_var_value}")
+    yield request.param
+
+
+@pytest.fixture(scope="function")
+def set_env_var_context(request, monkeypatch):
+    """Set MY_VARIABLE environment variable, this fixture must be used with `parametrize`"""
+    if not isinstance(request.param, (tuple, list)):
+        request_param = [request.param]
+    else:
+        request_param = request.param
+
+    for each_dict in request_param:
+        for each_key, each_value in each_dict.items():
+            if each_value is not None:
+                monkeypatch.setenv(f"{each_key}", f"{each_value}")
+
+    yield request.param
+
+
+@pytest.fixture
+def path_tests(tmpdir):
+    SpacedPaths = namedtuple(
+        "SpacedPaths",
+        ["path_without_spaces", "path_with_spaces", "path_with_single_quote"],
+    )
+
+    p1 = tmpdir.mkdir("./temp/")
+    p2 = tmpdir.mkdir("./t e m p/")
+    p3 = tmpdir.mkdir("./temp'")
+    return SpacedPaths(str(p1), str(p2), str(p3))
+
+
+def clear(mapdl):
+    mapdl.mute = True
+    mapdl.finish()
+    # *MUST* be NOSTART.  With START fails after 20 calls...
+    # this has been fixed in later pymapdl and MAPDL releases
+    mapdl.clear("NOSTART")
+    mapdl.header("DEFA")
+    mapdl.format("DEFA")
+    mapdl.page("DEFA")
+
+    mapdl.prep7()
+    mapdl.mute = False
+
+
+@pytest.fixture(scope="function")
+def cleared(mapdl):
+    clear(mapdl)
     yield
 
-    assert prev == mapdl.is_local
+
+################################################################
+#
+# Setting interface fixtures
+# --------------------------
+#
 
 
 @pytest.fixture(scope="session")
@@ -424,7 +542,7 @@ def mapdl_console(request):
     for version in ansys_base_paths:
         version = abs(version)
         if version < 211:
-            console_path = find_ansys(str(version))[0]
+            console_path = find_mapdl(str(version))[0]
 
     if console_path is None:
         raise MapdlRuntimeError(
@@ -433,7 +551,7 @@ def mapdl_console(request):
             "Valid versions are up to 2020R2."
         )
 
-    mapdl = launch_mapdl(console_path)
+    mapdl = launch_mapdl(console_path, log_apdl=LOG_APDL)
     from ansys.mapdl.core.mapdl_console import MapdlConsole
 
     assert isinstance(mapdl, MapdlConsole)
@@ -464,9 +582,12 @@ def mapdl(request, tmpdir_factory):
         cleanup_on_exit=cleanup,
         license_server_check=False,
         start_timeout=50,
+        log_apdl=LOG_APDL,
     )
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
     MAPDL_VERSION = mapdl.version  # Caching version
+
+    VALID_PORTS.append(mapdl.port)
 
     if ON_CI:
         mapdl._local = ON_LOCAL  # CI: override for testing
@@ -477,11 +598,14 @@ def mapdl(request, tmpdir_factory):
     # using yield rather than return here to be able to test exit
     yield mapdl
 
+    VALID_PORTS.remove(mapdl.port)
     ###########################################################################
     # test exit: only when allowed to start PYMAPDL
     ###########################################################################
     if START_INSTANCE:
         mapdl._local = True
+        mapdl._exited = False
+        assert mapdl.finish_job_on_exit
         mapdl.exit(save=True, force=True)
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
@@ -497,29 +621,91 @@ def mapdl(request, tmpdir_factory):
             with pytest.raises(MapdlExitedError):
                 mapdl._send_command_stream("/PREP7")
 
+        # Delete Mapdl object
+        del mapdl
 
-SpacedPaths = namedtuple(
-    "SpacedPaths",
-    ["path_without_spaces", "path_with_spaces", "path_with_single_quote"],
+
+################################################################
+#
+# MAPDL patches
+# -------------
+#
+
+
+# Necessary patches to patch Mapdl launch
+def _returns(return_=None):
+    return lambda *args, **kwargs: return_
+
+
+# Methods to patch in MAPDL when launching
+def _patch_method(method):
+    return "ansys.mapdl.core.mapdl_grpc.MapdlGrpc." + method
+
+
+_meth_patch_MAPDL_launch = [
+    # method, and its return
+    (_patch_method("_connect"), _returns(True)),
+    (_patch_method("_run"), _returns("")),
+    (_patch_method("_create_channel"), _returns("")),
+    (_patch_method("inquire"), _returns("/home/simulation")),
+    (_patch_method("_subscribe_to_channel"), _returns("")),
+    (_patch_method("_run_at_connect"), _returns("")),
+    (_patch_method("_exit_mapdl"), _returns(None)),
+    # non-mapdl methods
+    ("socket.gethostbyname", _returns("123.45.67.99")),
+    (
+        "socket.gethostbyaddr",
+        _returns(
+            [
+                "mapdlhostname",
+            ]
+        ),
+    ),
+]
+
+_meth_patch_MAPDL = _meth_patch_MAPDL_launch.copy()
+_meth_patch_MAPDL.extend(
+    [
+        # launcher methods
+        ("ansys.mapdl.core.launcher.launch_grpc", _returns(None)),
+        ("ansys.mapdl.core.launcher.check_mapdl_launch", _returns(None)),
+    ]
 )
 
+# For testing
+# Patch some of the starting procedures
+PATCH_MAPDL_START = [patch(method, ret) for method, ret in _meth_patch_MAPDL_launch]
 
-@pytest.fixture
-def path_tests(tmpdir):
-    p1 = tmpdir.mkdir("./temp/")
-    p2 = tmpdir.mkdir("./t e m p/")
-    p3 = tmpdir.mkdir("./temp'")
-    return SpacedPaths(str(p1), str(p2), str(p3))
+# Patch all the starting procedures so we can have a pseudo mapdl instance
+PATCH_MAPDL = [patch(method, ret) for method, ret in _meth_patch_MAPDL]
+
+################################################################
+#
+# TestClass
+# ---------
+#
 
 
-@pytest.fixture(scope="function")
-def cleared(mapdl):
-    mapdl.finish(mute=True)
-    # *MUST* be NOSTART.  With START fails after 20 calls...
-    # this has been fixed in later pymapdl and MAPDL releases
-    mapdl.clear("NOSTART", mute=True)
-    mapdl.prep7(mute=True)
-    yield
+class TestClass:
+    """Base class for testing.
+
+    Provide some helper methods.
+
+    This class cleans automatically the MAPDL database upon creation."""
+
+    @pytest.fixture(scope="class", autouse=True)
+    def initializer(self, mapdl):
+        self.mapdl = mapdl
+        self.clear()
+
+    def clear(self):
+        clear(self.mapdl)
+
+
+############################################################
+# Fixtures Models
+# ================
+#
 
 
 @pytest.fixture(scope="function")
@@ -543,48 +729,8 @@ def cube_solve(cleared, mapdl, cube_geom_and_mesh):
 
 
 @pytest.fixture
-def box_with_fields(cleared, mapdl):
-    mapdl.prep7()
-    mapdl.mp("kxx", 1, 45)
-    mapdl.mp("ex", 1, 2e10)
-    mapdl.mp("perx", 1, 1)
-    mapdl.mp("murx", 1, 1)
-    mapdl.et(1, "SOLID70")
-    mapdl.et(2, "CPT215")
-    mapdl.keyopt(2, 12, 1)  # Activating PRES DOF
-    mapdl.et(3, "SOLID122")
-    mapdl.et(4, "SOLID96")
-    mapdl.block(0, 1, 0, 1, 0, 1)
-    mapdl.esize(0.5)
-    return mapdl
-
-
-@pytest.fixture
-def box_geometry(mapdl, cleared):
-    areas, keypoints = create_geometry(mapdl)
-    q = mapdl.queries
-    return q, keypoints, areas, get_details_of_nodes(mapdl)
-
-
-@pytest.fixture
-def line_geometry(mapdl, cleared):
-    mapdl.prep7(mute=True)
-    k0 = mapdl.k(1, 0, 0, 0)
-    k1 = mapdl.k(2, 1, 2, 2)
-    l0 = mapdl.l(k0, k1)
-    q = mapdl.queries
-    return q, [k0, k1], l0
-
-
-@pytest.fixture
-def query(mapdl, cleared):
-    return mapdl.queries
-
-
-@pytest.fixture
 def solved_box(mapdl, cleared):
     mapdl.mute = True  # improve stability
-    mapdl.prep7()
     mapdl.et(1, "SOLID5")
     mapdl.block(0, 10, 0, 20, 0, 30)
     mapdl.esize(10)
@@ -608,78 +754,6 @@ def solved_box(mapdl, cleared):
     mapdl.finish()
     mapdl.mute = False
 
-    q = mapdl.queries
-    return q, get_details_of_nodes(mapdl)
-
-
-@pytest.fixture
-def common_functions_and_classes():
-    return get_details_of_nodes, get_details_of_elements, Node, Element
-
-
-@pytest.fixture
-def selection_test_geometry(mapdl, cleared):
-    mapdl.prep7()
-    k0 = mapdl.k(1, 0, 0, 0)
-    k1 = mapdl.k(2, 0, 0, 1)
-    k2 = mapdl.k(3, 0, 1, 0)
-    k3 = mapdl.k(4, 1, 0, 0)
-    v0 = mapdl.v(k0, k1, k2, k3)
-    mapdl.mshape(1, "3D")
-    mapdl.et(1, "SOLID98")
-    mapdl.esize(0.5)
-    mapdl.vmesh("ALL")
-    return mapdl.queries
-
-
-@pytest.fixture
-def twisted_sheet(mapdl, cleared):
-    mapdl.prep7()
-    mapdl.et(1, "SHELL181")
-    mapdl.mp("EX", 1, 2e5)
-    mapdl.mp("PRXY", 1, 0.3)  # Poisson's Ratio
-    mapdl.rectng(0, 1, 0, 1)
-    mapdl.sectype(1, "SHELL")
-    mapdl.secdata(0.1)
-    mapdl.esize(0.5)
-    mapdl.amesh("all")
-    mapdl.run("/SOLU")
-    mapdl.antype("STATIC")
-    mapdl.nsel("s", "loc", "x", 0)
-    mapdl.d("all", "all")
-    mapdl.nsel("s", "loc", "x", 1)
-    mapdl.d("all", "ux", -0.1)
-    mapdl.d("all", "uy", -0.1)
-    mapdl.d("all", "uz", -0.1)
-    mapdl.allsel("all")
-    mapdl.solve()
-    mapdl.finish()
-    q = mapdl.queries
-    return q, get_details_of_nodes(mapdl)
-
-
-def create_geometry(mapdl):
-    mapdl.prep7()
-    k0 = mapdl.k(1, 0, 0, 0)
-    k1 = mapdl.k(2, 0, 5, 0)
-    k2 = mapdl.k(3, 5, 5, 0)
-    k3 = mapdl.k(4, 5, 0, 0)
-    k4 = mapdl.k(5, 0, 0, 5)
-    k5 = mapdl.k(6, 0, 5, 5)
-    k6 = mapdl.k(7, 5, 5, 5)
-    k7 = mapdl.k(8, 5, 0, 5)
-    a0 = mapdl.a(1, 2, 3, 4)
-    a1 = mapdl.a(5, 6, 7, 8)
-    a2 = mapdl.a(3, 4, 8, 7)
-    a3 = mapdl.a(1, 2, 6, 5)
-    keypoints = [k0, k1, k2, k3, k4, k5, k6, k7]
-    areas = [a0, a1, a2, a3]
-    mapdl.esize(5)
-    mapdl.mshape(1, "2D")
-    mapdl.et(1, "SHELL181")
-    mapdl.amesh("ALL")
-    return areas, keypoints
-
 
 @pytest.fixture(scope="function")
 def make_block(mapdl, cleared):
@@ -691,6 +765,7 @@ def make_block(mapdl, cleared):
 
 @pytest.fixture(scope="function")
 def coupled_example(mapdl, cleared):
+    # TRANSIENT THERMAL STRESS IN A CYLINDER
     vm33 = vmfiles["vm33"]
     with open(vm33, "r") as fid:
         mapdl_code = fid.read()
@@ -703,13 +778,10 @@ def coupled_example(mapdl, cleared):
 
 
 @pytest.fixture(scope="function")
-def contact_geom_and_mesh(mapdl):
+def contact_geom_and_mesh(mapdl, cleared):
     mapdl.mute = True
-    mapdl.finish()
-    mapdl.clear()
 
     # Based on tech demo 28.
-    mapdl.prep7()
     # ***** Problem parameters ********
     l = 76.2e-03 / 3  # Length of each plate,m
     w = 31.75e-03 / 2  # Width of each plate,m
@@ -983,43 +1055,7 @@ def contact_geom_and_mesh(mapdl):
 
 
 @pytest.fixture(scope="function")
-def contact_solve(mapdl, contact_geom_and_mesh):
-    # ==========================================================
-    # * Solution
-    # ==========================================================
-    # from precedent fixture
-    uz1 = 3.18e-03 / 4000
-
-    mapdl.mute = False
-    mapdl.run("/solu")
-    mapdl.antype(4)  # Transient analysis
-    mapdl.lnsrch("on")
-    mapdl.cutcontrol("plslimit", 0.15)
-    mapdl.kbc(0)  # Ramped loading within a load step
-    mapdl.nlgeom("on")  # Turn on large deformation effects
-    mapdl.timint("off", "struc")  # Structural dynamic effects are turned off.
-    mapdl.nropt("unsym")
-
-    # Load Step1
-    mapdl.time(1)
-    mapdl.nsubst(5, 10, 2)
-    mapdl.d(1, "uz", -uz1)  # Tool plunges into the workpiece
-    mapdl.outres("all", "all")
-    mapdl.allsel()
-    mapdl.solve()
-
-    mapdl.post1()
-    mapdl.allsel()
-    mapdl.set("last")
-    mapdl.mute = False
-
-
-@pytest.fixture(scope="function")
-def cuadratic_beam_problem(mapdl):
-    mapdl.clear()
-
-    # Enter verification example mode and the pre-processing routine.
-    mapdl.prep7()
+def cuadratic_beam_problem(mapdl, cleared):
 
     # Type of analysis: static.
     mapdl.antype("STATIC")
@@ -1081,3 +1117,36 @@ def cuadratic_beam_problem(mapdl):
     mapdl.run("/SOLU")
     mapdl.solve()
     mapdl.finish()
+
+
+def create_geometry(mapdl):
+    mapdl.prep7()
+    k0 = mapdl.k(1, 0, 0, 0)
+    k1 = mapdl.k(2, 0, 5, 0)
+    k2 = mapdl.k(3, 5, 5, 0)
+    k3 = mapdl.k(4, 5, 0, 0)
+    k4 = mapdl.k(5, 0, 0, 5)
+    k5 = mapdl.k(6, 0, 5, 5)
+    k6 = mapdl.k(7, 5, 5, 5)
+    k7 = mapdl.k(8, 5, 0, 5)
+    a0 = mapdl.a(1, 2, 3, 4)
+    a1 = mapdl.a(5, 6, 7, 8)
+    a2 = mapdl.a(3, 4, 8, 7)
+    a3 = mapdl.a(1, 2, 6, 5)
+    keypoints = [k0, k1, k2, k3, k4, k5, k6, k7]
+    areas = [a0, a1, a2, a3]
+    mapdl.esize(5)
+    mapdl.mshape(1, "2D")
+    mapdl.et(1, "SHELL181")
+    mapdl.amesh("ALL")
+    return areas, keypoints
+
+
+@pytest.fixture
+def query(mapdl, cleared):
+    return mapdl.queries
+
+
+@pytest.fixture
+def common_functions_and_classes():
+    return get_details_of_nodes, get_details_of_elements, Node, Element

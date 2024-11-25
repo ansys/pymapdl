@@ -55,19 +55,27 @@ Launch a local gRPC MAPDL session
 
 You can start MAPDL from the command line and then connect to it.
 
-To launch MAPDL on Windows (assuming that Ansys is installed in the
-:file:`C:/Program Files/ANSYS Inc/v241` directory), use this command:
+To launch MAPDL, use this command:
 
-.. code:: pwsh-session
+.. tab-set::
 
-    C:/Program Files/ANSYS Inc/v241/ansys/bin/winx64/ANSYS211.exe -grpc
+    .. tab-item:: Windows
+        :sync: key1
 
-To launch MAPDL on Linux (assuming that Ansys is installed in the
-:file:`/usr/ansys_inc` directory), use this command:
+        .. code:: pwsh-session
 
-.. code:: console
+            (.venv) PS C:\Users\user\pymapdl> C:/Program Files/ANSYS Inc/v241/ansys/bin/winx64/ANSYS241.exe -grpc
 
-    /usr/ansys_inc/v241/ansys/bin/ansys211 -grpc
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
+
+            (.venv) user@machine:~$ /usr/ansys_inc/v241/ansys/bin/ansys241 -grpc
+
+When launching MAPDL on Windows, it is assumed that Ansys is installed in the
+:file:`C:/Program Files/ANSYS Inc/v241` directory and, on Linux, it is assumed
+that Ansys is installed in the :file:`/usr/ansys_inc` directory.
 
 This starts MAPDL in gRPC mode. MAPDL should display this output:
 
@@ -86,9 +94,22 @@ You can configure the port that MAPDL starts on with the ``-port`` argument.
 For example, you can start the server to listen for connections at 
 port 50005 with this command:
 
-.. code:: console
+.. tab-set::
 
-    /usr/ansys_inc/v241/ansys/bin/ansys211 -port 50005 -grpc
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: pwsh-session
+
+            (.venv) PS C:\Users\user\pymapdl> C:/Program Files/ANSYS Inc/v241/ansys/bin/winx64/ANSYS241.exe -port 50005  -grpc
+
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
+
+            (.venv) user@machine:~$ /usr/ansys_inc/v241/ansys/bin/ansys241 -port 50005  -grpc
+
 
 From version v0.68, you can use a command line interface to launch, stop, and list
 local MAPDL instances.
@@ -171,10 +192,10 @@ variables:
 
 * ``AWP_ROOTXXX``, where ``XXX``` is the three-digit version. This environment variable
   contains the path of the Ansys installation with the version matching ``XXX``.
-  For example, ``AWP_ROOT222=/ansys_inc`` contains the path to an Ansys 2022 R2 installation.
+  For example, ``AWP_ROOT241=/ansys_inc`` contains the path to an Ansys 2024 R1 installation.
 
 * ``PYMAPDL_MAPDL_EXEC`` contains the path to the Ansys MAPDL executable file.
-  For example, ``PYMAPDL_MAPDL_EXEC=/ansys_inc/v222/ansys/bin/ansys222``.
+  For example, ``PYMAPDL_MAPDL_EXEC=/ansys_inc/v241/ansys/bin/ansys241``.
 
 If PyMAPDL is unable to find a copy of MAPDL, you
 are prompted for the location of the MAPDL executable.
@@ -183,13 +204,13 @@ Here is the prompt with an example response for Windows:
 
 .. code:: output
 
-    Enter location of MAPDL executable: C:\Program Files\ANSYS Inc\v222\ANSYS\bin\winx64\ansys222.exe
+    Enter location of MAPDL executable: C:\Program Files\ANSYS Inc\v241\ANSYS\bin\winx64\ansys241.exe
 
 Here is the prompt with an example response for Linux:
 
 .. code:: output
 
-    Enter location of MAPDL executable: /usr/ansys_inc/v222/ansys/bin/ansys222
+    Enter location of MAPDL executable: /usr/ansys_inc/v241/ansys/bin/ansys241
 
 The settings file is stored locally, which means that you are not prompted
 to enter the path again. If you must change the default Ansys path
@@ -199,40 +220,63 @@ to enter the path again. If you must change the default Ansys path
 
     from ansys.mapdl import core as pymapdl
 
-    new_path = "C:\\Program Files\\ANSYS Inc\\v212\\ANSYS\\bin\\winx64\\ansys222.exe"
+    new_path = "C:\\Program Files\\ANSYS Inc\\v241\\ANSYS\\bin\\winx64\\ansys241.exe"
     pymapdl.change_default_ansys_path(new_path)
 
-For more information, see the :func:`change_default_ansys_path() <ansys.mapdl.core.change_default_ansys_path>` method and the :func:`find_ansys() <ansys.mapdl.core.find_ansys>` method.
+For more information, see the :func:`change_default_ansys_path() <ansys.mapdl.core.change_default_ansys_path>` method and the :func:`find_mapdl() <ansys.mapdl.core.find_mapdl>` method.
 
 Additionally, it is possible to specify the executable in each PyMAPDL script using the ``exec_file`` keyword argument. 
 
 
-**On Windows:**
+.. tab-set::
 
-.. code:: python
+    .. tab-item:: Windows
+        :sync: key1
 
-    from ansys.mapdl.core import launch_mapdl
+        .. code:: python
 
-    mapdl = launch_mapdl(
-        exec_file="C://Program Files//ANSYS Inc//v212//ANSYS//bin//winx64//ansys212.exe"
-    )
+            from ansys.mapdl.core import launch_mapdl
 
-**On Linux:**
+            mapdl = launch_mapdl(
+                exec_file="C://Program Files//ANSYS Inc//v241//ANSYS//bin//winx64//ansys241.exe"
+            )
 
-.. code:: python
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: python
 
-    from ansys.mapdl.core import launch_mapdl
+            from ansys.mapdl.core import launch_mapdl
 
-    mapdl = launch_mapdl(exec_file="/usr/ansys_inc/v212/ansys/bin/ansys212")
+            mapdl = launch_mapdl(exec_file="/usr/ansys_inc/v241/ansys/bin/ansys241")
 
 
 You could also specify a custom executable made from a custom MAPDL compilation by adding the correspondent flag (``-custom``) to the ``additional_switches``
 keyword argument:
 
-.. code:: python
 
-    from ansys.mapdl.core import launch_mapdl
+.. tab-set::
 
-    custom_exec = "/usr/ansys_inc/v212/ansys/bin/ansys212t"
-    add_switch = f" -custom {custom_exec}"
-    mapdl = launch_mapdl(additional_switches=add_switch)
+    .. tab-item:: Windows
+        :sync: key1
+
+        .. code:: python
+
+            from ansys.mapdl.core import launch_mapdl
+
+            custom_exec = "C://Program Files//ANSYS Inc//v241//ANSYS//bin//winx64//ansys241.exe"
+            add_switch = f" -custom {custom_exec}"
+            mapdl = launch_mapdl(additional_switches=add_switch)
+
+
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: python
+
+            from ansys.mapdl.core import launch_mapdl
+
+            custom_exec = "/usr/ansys_inc/v241/ansys/bin/ansys241t"
+            add_switch = f" -custom {custom_exec}"
+            mapdl = launch_mapdl(additional_switches=add_switch)
+

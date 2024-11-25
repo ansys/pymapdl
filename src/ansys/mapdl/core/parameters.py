@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -149,7 +149,7 @@ class Parameters:
     def routine(self) -> str:
         """Current routine string as a string.  For example ``"/PREP7"``
 
-        MAPDL Command: \*GET, ACTIVE, 0, ROUT
+        MAPDL Command: \\*GET, ACTIVE, 0, ROUT
 
         Returns
         -------
@@ -532,7 +532,7 @@ class Parameters:
         """
         escaped = False
         for each_format_number in [20, 30, 40, 64, 100]:
-            format_str = f"(1F{each_format_number}.12)"
+            format_str = f"(1E{each_format_number}.12)"
             with self._mapdl.non_interactive:
                 # use C ordering
                 self._mapdl.mwrite(parm_name.upper(), label="kji")
@@ -548,7 +548,7 @@ class Parameters:
         if not escaped:  # pragma: no cover
             raise MapdlRuntimeError(
                 f"The array '{parm_name}' has a number format "
-                "that could not be read using '{format_str}'."
+                f"that could not be read using '{format_str}'."
             )
 
         arr_flat = np.fromstring(output, sep="\n").reshape(shape)
@@ -564,7 +564,7 @@ class Parameters:
         """Load a numpy array or python list directly to MAPDL
 
         Writes the numpy array to disk and then reads it in within
-        MAPDL using \*VREAD.
+        MAPDL using \\*VREAD.
 
         Parameters
         ----------
@@ -751,12 +751,12 @@ def is_array_listing(status):
 
 
 def interp_star_status(status):
-    """Interprets \*STATUS command output from MAPDL
+    """Interprets \\*STATUS command output from MAPDL
 
     Parameters
     ----------
     status : str
-        Output from MAPDL \*STATUS
+        Output from MAPDL \\*STATUS
 
     Returns
     -------

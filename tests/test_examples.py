@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -110,9 +110,12 @@ def test_download_example_data_true_download():
     assert os.path.exists(path)
 
 
+@requires("requests")
 def test_failed_download(running_test):
+    from requests.exceptions import HTTPError
+
     filename = "non_existing_file"
-    with pytest.raises(RuntimeError):
+    with pytest.raises(HTTPError):
         with running_test(active=False):  # To force downloading the file
             _download_file(filename, directory=None)
 
@@ -164,28 +167,33 @@ def test_download_tech_demo_data(running_test):
 
 @requires("requests")
 def test_detach_examples_submodule():
-    cmd = """
+    cmd = (
+        """
 import sys
 
-assert "ansys.mapdl.core" not in sys.modules
-assert "requests" not in sys.modules
-assert "ansys.mapdl.core.examples" not in sys.modules
+assert 'ansys.mapdl.core' not in sys.modules
+assert 'requests' not in sys.modules
+assert 'ansys.mapdl.core.examples' not in sys.modules
 
 from ansys.mapdl import core as pymapdl
 
-assert "ansys.mapdl.core" in sys.modules
-assert "ansys.mapdl.core.examples" not in sys.modules
-assert "requests" not in sys.modules
+assert 'ansys.mapdl.core' in sys.modules
+assert 'ansys.mapdl.core.examples' not in sys.modules
+assert 'requests' not in sys.modules
 
 from ansys.mapdl.core.examples import vmfiles
 
-assert "ansys.mapdl.core.examples" in sys.modules
-assert "requests" in sys.modules
+assert 'ansys.mapdl.core.examples' in sys.modules
+assert 'requests' in sys.modules
 
-print("Everything went well")
-"""
+print('Everything went well')
+""".strip()
+        .replace("\n", ";")
+        .replace(";;", ";")
+    )
 
-    cmd_line = f"""python -c '{cmd}' """
+    cmd_line = f"""python -c "{cmd}" """
+
     p = Popen(cmd_line, shell=True, stdout=PIPE, stderr=STDOUT)
     out = p.communicate()[0].decode()
 
