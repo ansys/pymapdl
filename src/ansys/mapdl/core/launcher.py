@@ -2229,9 +2229,9 @@ def get_version(
                 raise VersionError(
                     "The MAPDL gRPC interface requires MAPDL 20.2 or later"
                 )
-
-        # Early exit
-        return
+        else:
+            # Early exit
+            return
 
     if isinstance(version, float):
         version = int(version * 10)
