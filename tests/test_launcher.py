@@ -1471,7 +1471,7 @@ def test_launch_on_hpc_not_found_ansys(mck_sc, mck_lgrpc, mck_kj, monkeypatch):
 
 def test_launch_on_hpc_exception_launch_mapdl(monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
-    exec_file = "path/to/mapdl/v242/executable/ansys242"
+    exec_file = "path/to/mapdl/v242/ansys/bin/executable/ansys242"
 
     process = get_fake_process("ERROR")
 
@@ -1506,7 +1506,7 @@ def test_launch_on_hpc_exception_launch_mapdl(monkeypatch):
 
 def test_launch_on_hpc_exception_successfull_sbatch(monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
-    exec_file = "path/to/mapdl/v242/executable/ansys242"
+    exec_file = "path/to/mapdl/v242/ansys/bin/executable/ansys242"
 
     def raise_exception(*args, **kwargs):
         raise Exception("Fake exception when launching MAPDL")
