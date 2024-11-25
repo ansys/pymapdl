@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import os
-from typing import List, Literal, Optional
+from typing import List, Literal, Optional, Tuple, Union
 import weakref
 
 from ansys.math.core.math import AnsMath, AnsVec
@@ -38,6 +38,8 @@ RESIDUAL_ALGORITHM: List[str] = [
     "l-2",
     "l2",
 ]
+
+RESIDUAL_ALGORITHM_LITERAL = Literal[tuple(RESIDUAL_ALGORITHM)]
 
 
 class KrylovSolver:
@@ -200,7 +202,7 @@ class KrylovSolver:
         self,
         return_solution: bool,
         residual_computation: bool,
-        residual_algorithm: Literal[RESIDUAL_ALGORITHM],
+        residual_algorithm: RESIDUAL_ALGORITHM_LITERAL,
     ):
         """Validate the inputs to the ``expand`` method."""
 
@@ -535,7 +537,7 @@ class KrylovSolver:
     def expand(
         self,
         residual_computation: bool = False,
-        residual_algorithm: Optional[Literal[RESIDUAL_ALGORITHM]] = None,
+        residual_algorithm: Optional[RESIDUAL_ALGORITHM_LITERAL] = None,
         compute_solution_vectors: bool = True,
         return_solution: bool = False,
     ) -> np.ndarray:
