@@ -1626,7 +1626,7 @@ class _MapdlCore(Commands):
         >>> mapdl.eplot()
         """
         # lazy load here to avoid circular import
-        from ansys.mapdl.core.launcher import get_ansys_path
+        from ansys.mapdl.core.launcher import get_mapdl_path
 
         if not self._local:
             raise MapdlRuntimeError(
@@ -1703,7 +1703,7 @@ class _MapdlCore(Commands):
         # issue system command to run ansys in GUI mode
         cwd = os.getcwd()
         os.chdir(run_dir)
-        exec_file = self._start_parm.get("exec_file", get_ansys_path(allow_input=False))
+        exec_file = self._start_parm.get("exec_file", get_mapdl_path(allow_input=False))
         nproc = self._start_parm.get("nproc", 2)
         add_sw = self._start_parm.get("additional_switches", "")
 
