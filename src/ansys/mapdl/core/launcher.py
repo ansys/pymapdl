@@ -2221,10 +2221,7 @@ def get_version(
     if not version:
         version = os.getenv("PYMAPDL_MAPDL_VERSION")
 
-    if not version and exec_file and _HAS_ATP:
-        version = version_from_path("mapdl", exec_file)
-
-    elif not version:
+    if not version:
         # verify version
         if exec_file and _HAS_ATP:
             version = version_from_path("mapdl", exec_file, launch_on_hpc=launch_on_hpc)
