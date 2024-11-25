@@ -159,11 +159,17 @@ def test_validate_sw():
     add_sw = set_MPI_additional_switches("", version=version)
     assert "msmpi" in add_sw
 
-    add_sw = set_MPI_additional_switches("-mpi intelmpi", version=version)
-    assert "msmpi" in add_sw and "intelmpi" not in add_sw
+    with pytest.warns(
+        UserWarning, match="Due to incompatibilities between this MAPDL version"
+    ):
+        add_sw = set_MPI_additional_switches("-mpi intelmpi", version=version)
+        assert "msmpi" in add_sw and "intelmpi" not in add_sw
 
-    add_sw = set_MPI_additional_switches("-mpi INTELMPI", version=version)
-    assert "msmpi" in add_sw and "INTELMPI" not in add_sw
+    with pytest.warns(
+        UserWarning, match="Due to incompatibilities between this MAPDL version"
+    ):
+        add_sw = set_MPI_additional_switches("-mpi INTELMPI", version=version)
+        assert "msmpi" in add_sw and "INTELMPI" not in add_sw
 
 
 @requires("ansys-tools-path")
@@ -782,7 +788,7 @@ def test_get_slurm_options(set_env_var_context, validation):
     ],
 )
 def test_slurm_ram(monkeypatch, ram, expected, context):
-    monkeypatch.setenv("SLURM_MEM_PER_NODE", ram)
+    monkeypatch.setenv("SLURM_MEM_PER_NODE", str(ram))
     monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "asdf/qwer/poiu")
 
     args = {
@@ -1269,7 +1275,7 @@ def test_launch_grpc(tmpdir, launch_on_hpc):
 @pytest.mark.parametrize("env", [None, 3, 10])
 def test_get_cpus(monkeypatch, arg, env):
     if env:
-        monkeypatch.setenv("PYMAPDL_NPROC", env)
+        monkeypatch.setenv("PYMAPDL_NPROC", str(env))
 
     context = NullContext()
     cores_machine = psutil.cpu_count(logical=False)  # it is patched
@@ -1664,7 +1670,7 @@ def test_get_port(monkeypatch, port, port_envvar, start_instance, port_busy, res
 
     monkeypatch.delenv("PYMAPDL_PORT", False)
     if port_envvar:
-        monkeypatch.setenv("PYMAPDL_PORT", port_envvar)
+        monkeypatch.setenv("PYMAPDL_PORT", str(port_envvar))
 
     # Testing
     if port_busy:
@@ -1767,7 +1773,7 @@ def test_get_version_version_error(monkeypatch):
 
 @pytest.mark.parametrize("version", [211, 221, 232])
 def test_get_version_env_var(monkeypatch, version):
-    monkeypatch.setenv("PYMAPDL_MAPDL_VERSION", version)
+    monkeypatch.setenv("PYMAPDL_MAPDL_VERSION", str(version))
 
     assert version == get_version(None)
     assert version != get_version(241)
