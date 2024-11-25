@@ -1934,7 +1934,10 @@ def test_args_pass(monkeypatch, arg, value, method):
 
 
 def test_check_has_mapdl():
-    assert check_has_mapdl() == ON_LOCAL
+    if TESTING_MINIMAL:
+        assert check_has_mapdl() is False
+    else:
+        assert check_has_mapdl() == ON_LOCAL
 
 
 def raising():
