@@ -54,7 +54,7 @@ By default, it stops instances running on the port 50052.""",
 def stop(port: int, pid: Optional[int], all: bool) -> None:
     """Stop MAPDL instances running on a given port or with a given process id (PID).
 
-    This command stop MAPDL instances running on a given port or with a given process id (PID).
+    This command stops MAPDL instances running on a given port or with a given process id (PID).
     By default, it stops instances running on the port 50052.
 
     Parameters
