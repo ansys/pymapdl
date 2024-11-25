@@ -698,6 +698,12 @@ jobs:
           python -m build
           python -m pip install dist/*.whl
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+          
+      - name: "Install DPF"
+        id: set-server-path
+        uses: ansys/pydpf-actions/install-dpf-server@v2.3
+        with:
+          dpf-standalone-TOKEN: ${{secrets.PYANSYS_CI_BOT_TOKEN}}
 
       - name: "Unit testing requirements installation"
         run: |
@@ -712,7 +718,7 @@ jobs:
           echo "ON_STUDENT: $ON_STUDENT"
           unset PYMAPDL_PORT
           unset PYMAPDL_START_INSTANCE
-          xvfb-run pytest -k "not test_dpf" \
+          xvfb-run pytest \
             ${{ env.PYTEST_ARGUMENTS }} \
             --reset_only_failed --add_missing_images \
             --cov-report=xml:${{ matrix.mapdl-version }}-local.xml
