@@ -2240,7 +2240,7 @@ class _MapdlCore(Commands):
                 f"/com, PyMAPDL: {msg}"  # Using '!' makes the output of '_run' empty
             )
 
-        if command[:3].upper() in INVAL_COMMANDS:
+        if len(command) == 3 and command.upper() in INVAL_COMMANDS:
             exception = MapdlRuntimeError(
                 'Invalid PyMAPDL command "%s"\n\n%s'
                 % (command, INVAL_COMMANDS[command[:3].upper()])
