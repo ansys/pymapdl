@@ -794,7 +794,9 @@ class CommandListingOutput(CommandOutput):
         (inheritate from :func:`to_array()
         <ansys.mapdl.core.commands.CommandListingOutput.to_array>` method).
         """
-        if not _HAS_PANDAS:
+        if _HAS_PANDAS:
+            import pandas
+        else:
             raise ModuleNotFoundError(MSG_NOT_PANDAS)
 
         if data is None:
