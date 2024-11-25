@@ -171,20 +171,20 @@ def test_detach_examples_submodule():
         """
 import sys
 
-assert 'ansys.mapdl.core' not in sys.modules
-assert 'requests' not in sys.modules
-assert 'ansys.mapdl.core.examples' not in sys.modules
+assert 'ansys.mapdl.core' not in sys.modules, 'PyMAPDL is loaded!'
+assert 'requests' not in sys.modules, 'Requests is loaded!'
+assert 'ansys.mapdl.core.examples' not in sys.modules, 'Examples is loaded!'
 
 from ansys.mapdl import core as pymapdl
 
-assert 'ansys.mapdl.core' in sys.modules
-assert 'ansys.mapdl.core.examples' not in sys.modules
-assert 'requests' not in sys.modules
+assert 'ansys.mapdl.core' in sys.modules, 'PyMAPDL is not loaded!'
+assert 'ansys.mapdl.core.examples' not in sys.modules, 'Examples is loaded!'
+assert 'requests' in sys.modules, 'Requests is loaded!'
 
 from ansys.mapdl.core.examples import vmfiles
 
-assert 'ansys.mapdl.core.examples' in sys.modules
-assert 'requests' in sys.modules
+assert 'ansys.mapdl.core.examples' in sys.modules, 'examples is not loaded!'
+assert 'requests' in sys.modules, 'requests is not loaded!'
 
 print('Everything went well')
 """.strip()
