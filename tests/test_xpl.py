@@ -85,7 +85,7 @@ def test_save(xpl):
         xpl.list()
 
 
-def test_copy(mapdl, xpl):
+def test_copy(mapdl, cleared, xpl):
     filename = "tmpfile.full"
     xpl.copy(filename)
     assert filename in mapdl.list_files()

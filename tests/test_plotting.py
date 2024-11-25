@@ -42,9 +42,7 @@ ALL_LABELS.extend(DISPL_LABELS)
 
 
 @pytest.fixture
-def boundary_conditions_example(mapdl):
-    mapdl.clear()
-    mapdl.prep7()
+def boundary_conditions_example(mapdl, cleared):
     mapdl.et("", 189)
 
     mapdl.n(1, 0, 0, 0)
@@ -93,10 +91,7 @@ def boundary_conditions_example(mapdl):
 
 
 @pytest.fixture
-def block_example_coupled(mapdl):
-    mapdl.clear()
-    mapdl.prep7()
-
+def block_example_coupled(mapdl, cleared):
     mapdl.et(1, 226)
     mapdl.keyopt(1, 1, 1011)  # Thermal-Piezoelectric
 
@@ -206,7 +201,7 @@ def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
         "eplot",
     ],
 )
-def test_plots_no_vtk(mapdl, method):
+def test_plots_no_vtk(mapdl, cube_solve, method):
     _ = getattr(mapdl, method)(vtk=False)
 
 
@@ -301,9 +296,7 @@ def test_eplot_savefig(mapdl, make_block, tmpdir):
     "field", ["UX", "UY", "UZ", "FX", "FY", "FZ", "TEMP", "HEAT", "VOLT", "CHRG"]
 )
 @pytest.mark.parametrize("magnitude", [0, 50, 500])
-def test_single_glyph(mapdl, field, magnitude, verify_image_cache):
-    mapdl.clear()
-    mapdl.prep7()
+def test_single_glyph(mapdl, cleared, field, magnitude, verify_image_cache):
     mapdl.et(1, 226)
     mapdl.keyopt(1, 1, 1011)  # Thermal-Piezoelectric
     mapdl.n(1, 0, 0, 0)
@@ -476,7 +469,7 @@ def test_bc_plot_bc_target_error(mapdl, boundary_conditions_example, bc_target):
         )
 
 
-def test_bc_no_mapdl(mapdl):
+def test_bc_no_mapdl(mapdl, cleared):
     with pytest.raises(ValueError):
         pl = MapdlPlotter()
         pl.plot([], [], [], plot_bc=True)
@@ -1009,7 +1002,7 @@ def test_WithInterativePlotting(mapdl, make_block):
     os.remove(last_png)
 
 
-def test_file_type_for_plots(mapdl):
+def test_file_type_for_plots(mapdl, cleared):
     assert mapdl.file_type_for_plots in ["PNG", "TIFF", "PNG", "VRML", "TERM", "CLOSE"]
 
     mapdl.file_type_for_plots = "TIFF"
@@ -1150,8 +1143,6 @@ def test_node_numbering_order(mapdl, cleared):
 
 
 def test_lplot_line(mapdl, cleared):
-    mapdl.prep7()
-
     # Create keypoints 3 keypoints
     mapdl.k(1, 0, 0, 0)
     mapdl.k(2, 1, 0, 0)
@@ -1193,7 +1184,6 @@ def test_xplot_not_changing_geo_selection(mapdl, cleared, func, entity, partial)
 
 
 def test_xplot_not_changing_geo_selection2(mapdl, cleared):
-    mapdl.prep7()
     mapdl.rectng(0, 1, 0, 1)
     mapdl.cm("area1", "area")
     mapdl.cmsel("u", "area1")

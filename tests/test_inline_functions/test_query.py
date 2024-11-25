@@ -23,7 +23,7 @@
 import pytest
 
 from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
-from conftest import requires
+from conftest import TestClass, requires
 
 
 class TestParseParameter:
@@ -84,14 +84,10 @@ class TestParseParameter:
             query._parse_parameter_integer_response(input_)
 
 
-class TestRunQuery:
+class TestRunQuery(TestClass):
 
     @pytest.fixture(scope="class")
     def line_geometry(self, mapdl):
-        mapdl.finish(mute=True)
-        mapdl.clear("NOSTART", mute=True)
-
-        mapdl.prep7(mute=True)
         k0 = mapdl.k(1, 0, 0, 0)
         k1 = mapdl.k(2, 1, 2, 2)
         l0 = mapdl.l(k0, k1)

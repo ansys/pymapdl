@@ -27,7 +27,7 @@ import re
 import numpy as np
 import pytest
 
-from conftest import NullContext, has_dependency, requires
+from conftest import NullContext, TestClass, has_dependency, requires
 
 if has_dependency("ansys-tools-visualization_interface"):
     from pyvista.plotting.renderer import CameraPosition
@@ -60,14 +60,12 @@ def test_repr(mapdl, cleared):
     assert mapdl.set("LIST") in repr_
 
 
-class Test_static_solve:
+class Test_static_solve(TestClass):
 
     @staticmethod
     @pytest.fixture(scope="class")
     def static_solve(mapdl):
         mapdl.mute = True
-        mapdl.finish()
-        mapdl.clear()
 
         # cylinder and mesh parameters
         # torque = 100
@@ -79,7 +77,6 @@ class Test_static_solve:
         force = 100 / radius
         pressure = force / (h_tip * 2 * np.pi * radius)
 
-        mapdl.prep7()
         mapdl.et(1, 186)
         mapdl.et(2, 154)
         mapdl.r(1)
@@ -136,17 +133,29 @@ class Test_static_solve:
         # mapdl.eqslv('pcg', 1e-8)
         mapdl.solve()
 
+        mapdl.mute = False
+
+        mapdl.save("static_solve", slab="all")
+
+    @pytest.fixture(scope="function")
+    def resume(self, mapdl, static_solve):
+        self.mapdl = mapdl
+
+        mapdl.prep7()
+        mapdl.resume("static_solve")
+
         # necessary for any prnsol printouts
         mapdl.header("off", "off", "off", "off", "off", "off")
         nsigfig = 10
         mapdl.format("", "E", nsigfig + 9, nsigfig)
-        # mapdl.post1(mute=True)
-        # mapdl.set(1, 1)
-        mapdl.mute = False
+
+        mapdl.post1()
+        mapdl.allsel()
+        mapdl.set("last")
 
     @staticmethod
     @pytest.mark.parametrize("comp", ["X", "Y", "z"])  # lowercase intentional
-    def test_disp(mapdl, static_solve, comp):
+    def test_disp(mapdl, resume, comp):
         disp_from_grpc = mapdl.post_processing.nodal_displacement(comp)
 
         mapdl.post1(mute=True)
@@ -157,7 +166,7 @@ class Test_static_solve:
         assert np.allclose(disp_from_grpc, disp_from_prns)
 
     @staticmethod
-    def test_enum_all(mapdl, static_solve):
+    def test_enum_all(mapdl, resume):
         # ensure that element selection status has no effect on the all_enum
         try:
             n_elem = mapdl.mesh.n_elem
@@ -170,7 +179,7 @@ class Test_static_solve:
             mapdl.allsel(mute=True)
 
     @staticmethod
-    def test_disp_norm_all(mapdl, static_solve):
+    def test_disp_norm_all(mapdl, resume):
         # test norm
         disp_norm = mapdl.post_processing.nodal_displacement("NORM")
 
@@ -189,7 +198,7 @@ class Test_static_solve:
     @pytest.mark.parametrize(
         "comp", ["X", "Y", "z", "norm", "all"]
     )  # lowercase intentional
-    def test_disp_plot(mapdl, static_solve, comp):
+    def test_disp_plot(mapdl, resume, comp):
         if comp == "all":
             context = pytest.raises(
                 ValueError, match='"ALL" not allowed in this context'
@@ -207,7 +216,7 @@ class Test_static_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_disp_plot_subselection(mapdl, static_solve, verify_image_cache):
+    def test_disp_plot_subselection(mapdl, resume, verify_image_cache):
         verify_image_cache.skip = True  # skipping image verification
 
         mapdl.nsel("S", "NODE", vmin=500, vmax=2000, mute=True)
@@ -221,7 +230,7 @@ class Test_static_solve:
         mapdl.allsel()
 
     @staticmethod
-    def test_nodal_eqv_stress(mapdl, static_solve):
+    def test_nodal_eqv_stress(mapdl, resume):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
 
@@ -236,13 +245,13 @@ class Test_static_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_eqv_stress(mapdl, static_solve, verify_image_cache):
+    def test_plot_nodal_eqv_stress(mapdl, resume, verify_image_cache):
         verify_image_cache.skip = True  # skipping image verification
 
         assert mapdl.post_processing.plot_nodal_eqv_stress(smooth_shading=True) is None
 
     @staticmethod
-    def test_node_selection(mapdl, static_solve):
+    def test_node_selection(mapdl, resume):
         mapdl.nsel("S", "NODE", vmin=1, vmax=2000, mute=True)
         assert mapdl.post_processing.selected_nodes.sum() == 2000
 
@@ -250,7 +259,7 @@ class Test_static_solve:
         assert mapdl.post_processing.selected_nodes.sum() == mapdl.mesh.n_node
 
     @staticmethod
-    def test_element_selection(mapdl, static_solve):
+    def test_element_selection(mapdl, resume):
         mx_val = 1000
         mapdl.esel("S", "ELEM", vmin=1, vmax=mx_val, mute=True)
         assert mapdl.post_processing.selected_elements.sum() == mx_val
@@ -261,7 +270,7 @@ class Test_static_solve:
     # TODO: add valid result
     @staticmethod
     @pytest.mark.parametrize("comp", ["X", "Y", "z", "all"])  # lowercase intentional
-    def test_rot(mapdl, static_solve, comp):
+    def test_rot(mapdl, resume, comp):
         from_grpc = mapdl.post_processing.nodal_rotation(comp)
 
         # need a result with ROTX DOF
@@ -276,7 +285,7 @@ class Test_static_solve:
     @staticmethod
     @requires("ansys-tools-visualization_interface")
     @pytest.mark.parametrize("comp", ["X", "Y", "z", "all"])  # lowercase intentional
-    def test_plot_rot(mapdl, static_solve, comp):
+    def test_plot_rot(mapdl, resume, comp):
         if comp == "all":
             context = pytest.raises(
                 ValueError, match='"ALL" not allowed in this context'
@@ -289,13 +298,13 @@ class Test_static_solve:
 
     # TODO: add valid result
     @staticmethod
-    def test_temperature(mapdl, static_solve):
+    def test_temperature(mapdl, resume):
         from_grpc = mapdl.post_processing.nodal_temperature()
         assert np.allclose(from_grpc, 0)
 
     # TODO: add valid result
     @staticmethod
-    def test_element_temperature(mapdl, static_solve):
+    def test_element_temperature(mapdl, resume):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
         values = mapdl.post_processing.element_temperature()
@@ -303,40 +312,40 @@ class Test_static_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_element_temperature(mapdl, static_solve):
+    def test_plot_element_temperature(mapdl, resume):
         mapdl.set(1, 1, mute=True)
         assert mapdl.post_processing.plot_element_temperature() is None
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_temperature(mapdl, static_solve):
+    def test_plot_temperature(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_temperature() is None
 
     # TODO: add valid result
     @staticmethod
-    def test_pressure(mapdl, static_solve):
+    def test_pressure(mapdl, resume):
         from_grpc = mapdl.post_processing.nodal_pressure()
         assert np.allclose(from_grpc, 0)
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_pressure(mapdl, static_solve):
+    def test_plot_pressure(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_pressure() is None
 
     # TODO: add valid result
     @staticmethod
-    def test_voltage(mapdl, static_solve):
+    def test_voltage(mapdl, resume):
         from_grpc = mapdl.post_processing.nodal_voltage()
         assert np.allclose(from_grpc, 0)
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_voltage(mapdl, static_solve):
+    def test_plot_voltage(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_voltage() is None
 
     @staticmethod
     @pytest.mark.parametrize("comp", COMPONENT_STRESS_TYPE)
-    def test_nodal_component_stress(mapdl, static_solve, comp):
+    def test_nodal_component_stress(mapdl, resume, comp):
         from_grpc = mapdl.post_processing.nodal_component_stress(comp)
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
@@ -353,12 +362,12 @@ class Test_static_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_component_stress(mapdl, static_solve):
+    def test_plot_nodal_component_stress(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_component_stress("X") is None
 
     @staticmethod
     @pytest.mark.parametrize("comp", PRINCIPAL_TYPE)
-    def test_nodal_principal_stress(mapdl, static_solve, comp):
+    def test_nodal_principal_stress(mapdl, resume, comp):
         from_grpc = mapdl.post_processing.nodal_principal_stress(comp)
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
@@ -371,15 +380,15 @@ class Test_static_solve:
         # grpc includes all nodes.  ignore the ones not included in prnsol
         from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
 
-        assert np.allclose(from_grpc, from_prns)
+        assert np.allclose(from_grpc, from_prns, 1e-5)
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_principal_stress(mapdl, static_solve):
+    def test_plot_nodal_principal_stress(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_principal_stress(1) is None
 
     @staticmethod
-    def test_nodal_stress_intensity(mapdl, static_solve):
+    def test_nodal_stress_intensity(mapdl, resume):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
 
@@ -387,19 +396,19 @@ class Test_static_solve:
         data = np.genfromtxt(mapdl.prnsol("S", "PRIN").splitlines()[1:])
         nnum_ans = data[:, 0].astype(np.int32)
         sint_ans = data[:, -2]
-        sint = mapdl.post_processing.nodal_stress_intensity
+        sint = mapdl.post_processing.nodal_stress_intensity()
 
         sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(sint_ans, sint_aligned)
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_stress_intensity(mapdl, static_solve):
+    def test_plot_nodal_stress_intensity(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_stress_intensity() is None
 
     @staticmethod
     @pytest.mark.parametrize("comp", COMPONENT_STRESS_TYPE)
-    def test_nodal_total_component_strain(mapdl, static_solve, comp):
+    def test_nodal_total_component_strain(mapdl, resume, comp):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
 
@@ -416,12 +425,12 @@ class Test_static_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_total_component_strain(mapdl, static_solve):
+    def test_plot_nodal_total_component_strain(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_total_component_strain("x") is None
 
     @staticmethod
     @pytest.mark.parametrize("comp", PRINCIPAL_TYPE)
-    def test_nodal_principal_total_strain(mapdl, static_solve, comp):
+    def test_nodal_principal_total_strain(mapdl, resume, comp):
         from_grpc = mapdl.post_processing.nodal_total_principal_strain(comp)
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
@@ -438,11 +447,11 @@ class Test_static_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_principal_total_strain(mapdl, static_solve):
+    def test_plot_nodal_principal_total_strain(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_total_principal_strain(1) is None
 
     @staticmethod
-    def test_nodal_total_strain_intensity(mapdl, static_solve):
+    def test_nodal_total_strain_intensity(mapdl, resume):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
 
@@ -457,11 +466,11 @@ class Test_static_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_total_strain_intensity(mapdl, static_solve):
+    def test_plot_nodal_total_strain_intensity(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_total_strain_intensity() is None
 
     @staticmethod
-    def test_nodal_total_eqv_strain(mapdl, static_solve):
+    def test_nodal_total_eqv_strain(mapdl, resume):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
 
@@ -476,7 +485,7 @@ class Test_static_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_total_eqv_strain(mapdl, static_solve):
+    def test_plot_nodal_total_eqv_strain(mapdl, resume):
         assert (
             mapdl.post_processing.plot_nodal_total_eqv_strain(smooth_shading=True)
             is None
@@ -485,69 +494,7 @@ class Test_static_solve:
     ###############################################################################
     @staticmethod
     @pytest.mark.parametrize("comp", COMPONENT_STRESS_TYPE)
-    def test_nodal_component_stress(mapdl, static_solve, comp):
-        from_grpc = mapdl.post_processing.nodal_component_stress(comp)
-        mapdl.post1(mute=True)
-        mapdl.set(1, 1, mute=True)
-        index = COMPONENT_STRESS_TYPE.index(comp)
-        mapdl.prnsol("S", "COMP")  # flush to ignore warning
-        arr = np.genfromtxt(mapdl.prnsol("S", "COMP").splitlines()[1:])
-        nnum_ans = arr[:, 0]
-        from_prns = arr[:, index + 1]
-
-        # grpc includes all nodes.  ignore the ones not included in prnsol
-        from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
-
-        assert np.allclose(from_grpc, from_prns)
-
-    @staticmethod
-    @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_component_stress(mapdl, static_solve):
-        assert mapdl.post_processing.plot_nodal_component_stress("X") is None
-
-    @staticmethod
-    @pytest.mark.parametrize("comp", PRINCIPAL_TYPE)
-    def test_nodal_principal_stress(mapdl, static_solve, comp):
-        from_grpc = mapdl.post_processing.nodal_principal_stress(comp)
-        mapdl.post1(mute=True)
-        mapdl.set(1, 1, mute=True)
-        index = PRINCIPAL_TYPE.index(comp)
-        mapdl.prnsol("S", "PRIN")  # flush to ignore warning
-        arr = np.genfromtxt(mapdl.prnsol("S", "PRIN").splitlines()[1:])
-        nnum_ans = arr[:, 0]
-        from_prns = arr[:, index + 1]
-
-        # grpc includes all nodes.  ignore the ones not included in prnsol
-        from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
-        assert np.allclose(from_grpc, from_prns, atol=1e-5)
-
-    @staticmethod
-    @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_principal_stress(mapdl, static_solve):
-        assert mapdl.post_processing.plot_nodal_principal_stress(1) is None
-
-    @staticmethod
-    def test_nodal_stress_intensity(mapdl, static_solve):
-        mapdl.post1(mute=True)
-        mapdl.set(1, 1, mute=True)
-
-        mapdl.prnsol("S", "PRIN", mute=True)  # run twice to clear out warning
-        data = np.genfromtxt(mapdl.prnsol("S", "PRIN").splitlines()[1:])
-        nnum_ans = data[:, 0].astype(np.int32)
-        sint_ans = data[:, -2]
-        sint = mapdl.post_processing.nodal_stress_intensity()
-
-        sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
-        assert np.allclose(sint_ans, sint_aligned)
-
-    @staticmethod
-    @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_stress_intensity(mapdl, static_solve):
-        assert mapdl.post_processing.plot_nodal_stress_intensity() is None
-
-    @staticmethod
-    @pytest.mark.parametrize("comp", COMPONENT_STRESS_TYPE)
-    def test_nodal_elastic_component_strain(mapdl, static_solve, comp):
+    def test_nodal_elastic_component_strain(mapdl, resume, comp):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
 
@@ -564,12 +511,12 @@ class Test_static_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_elastic_component_strain(mapdl, static_solve):
+    def test_plot_nodal_elastic_component_strain(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_elastic_component_strain("x") is None
 
     @staticmethod
     @pytest.mark.parametrize("comp", PRINCIPAL_TYPE)
-    def test_nodal_elastic_principal_strain(mapdl, static_solve, comp):
+    def test_nodal_elastic_principal_strain(mapdl, resume, comp):
         from_grpc = mapdl.post_processing.nodal_elastic_principal_strain(comp)
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
@@ -586,11 +533,11 @@ class Test_static_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_elastic_principal_strain(mapdl, static_solve):
+    def test_plot_nodal_elastic_principal_strain(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_elastic_principal_strain(1) is None
 
     @staticmethod
-    def test_nodal_elastic_strain_intensity(mapdl, static_solve):
+    def test_nodal_elastic_strain_intensity(mapdl, resume):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
 
@@ -605,11 +552,11 @@ class Test_static_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_elastic_strain_intensity(mapdl, static_solve):
+    def test_plot_nodal_elastic_strain_intensity(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_elastic_strain_intensity() is None
 
     @staticmethod
-    def test_nodal_elastic_eqv_strain(mapdl, static_solve):
+    def test_nodal_elastic_eqv_strain(mapdl, resume):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
 
@@ -624,7 +571,7 @@ class Test_static_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_elastic_eqv_strain(mapdl, static_solve):
+    def test_plot_nodal_elastic_eqv_strain(mapdl, resume):
         assert (
             mapdl.post_processing.plot_nodal_elastic_eqv_strain(smooth_shading=True)
             is None
@@ -632,7 +579,7 @@ class Test_static_solve:
 
     @staticmethod
     @pytest.mark.parametrize("comp", ["X", "Y", "z", "all"])  # lowercase intentional
-    def test_elem_disp(mapdl, static_solve, comp):
+    def test_elem_disp(mapdl, resume, comp):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
         mapdl.allsel()
@@ -657,7 +604,7 @@ class Test_static_solve:
 
     @staticmethod
     @pytest.mark.parametrize("option", ["min", "max", "avg"])
-    def test_elem_disp_all(mapdl, static_solve, option):
+    def test_elem_disp_all(mapdl, resume, option):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
 
@@ -675,7 +622,7 @@ class Test_static_solve:
         assert np.allclose(array, disp_from_grpc)
 
     @staticmethod
-    def test_elem_disp_norm(mapdl, static_solve):
+    def test_elem_disp_norm(mapdl, resume):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
         disp = mapdl.post_processing.element_displacement("ALL")
@@ -686,7 +633,7 @@ class Test_static_solve:
     @staticmethod
     @pytest.mark.parametrize("comp", ["X", "Y", "Z", "NORM", "all"])
     @requires("ansys-tools-visualization_interface")
-    def test_elem_disp_plot(mapdl, static_solve, comp):
+    def test_elem_disp_plot(mapdl, resume, comp):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
 
@@ -705,7 +652,7 @@ class Test_static_solve:
     @staticmethod
     @pytest.mark.parametrize("component", STRESS_TYPES)
     @pytest.mark.parametrize("option", ["min", "max", "avg"])
-    def test_element_stress(mapdl, static_solve, component, option):
+    def test_element_stress(mapdl, resume, component, option):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
         stress = mapdl.post_processing.element_stress(component, option)
@@ -719,14 +666,14 @@ class Test_static_solve:
     @staticmethod
     @pytest.mark.parametrize("comp", ["X", "1", "INT", "EQV"])
     @requires("ansys-tools-visualization_interface")
-    def test_plot_element_stress(mapdl, static_solve, comp):
+    def test_plot_element_stress(mapdl, resume, comp):
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
         assert mapdl.post_processing.plot_element_stress(comp) is None
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_element_values(mapdl, static_solve, verify_image_cache):
+    def test_plot_element_values(mapdl, resume, verify_image_cache):
         verify_image_cache.high_variance_test = 600
         mapdl.post1(mute=True)
         mapdl.set(1, 1, mute=True)
@@ -734,7 +681,7 @@ class Test_static_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_general_plotter_returns(mapdl, static_solve, verify_image_cache):
+    def test_general_plotter_returns(mapdl, resume, verify_image_cache):
         verify_image_cache.skip = True  # skipping image verification
 
         # Returns
@@ -796,23 +743,36 @@ class Test_static_solve:
 ###############################################################################
 
 
-class Test_plastic_solve:
+class Test_plastic_solve(TestClass):
 
     @staticmethod
     @pytest.fixture(scope="class")
     def plastic_solve(mapdl):
         mapdl.mute = True
-        mapdl.finish()
-        mapdl.clear()
         mapdl.input(examples.verif_files.vmfiles["vm273"])
 
+        mapdl.mute = False
+
+        mapdl.save("plastic_solve", slab="all")
+
+    @staticmethod
+    @pytest.fixture(scope="function")
+    def resume(mapdl, plastic_solve):
+        mapdl.prep7()
+        mapdl.resume("plastic_solve")
+
+        mapdl.allsel()
         mapdl.post1()
         mapdl.set(1, 2)
-        mapdl.mute = False
+
+        # necessary for any prnsol printouts
+        mapdl.header("off", "off", "off", "off", "off", "off")
+        nsigfig = 10
+        mapdl.format("", "E", nsigfig + 9, nsigfig)
 
     @staticmethod
     @pytest.mark.parametrize("comp", COMPONENT_STRESS_TYPE)
-    def test_nodal_plastic_component_strain(mapdl, plastic_solve, comp):
+    def test_nodal_plastic_component_strain(mapdl, resume, comp):
         index = COMPONENT_STRESS_TYPE.index(comp)
         mapdl.prnsol("EPPL", "COMP", mute=True)  # run twice to clear out warning
 
@@ -826,12 +786,12 @@ class Test_plastic_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_plastic_component_strain(mapdl, plastic_solve):
+    def test_plot_nodal_plastic_component_strain(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_plastic_component_strain("x") is None
 
     @staticmethod
     @pytest.mark.parametrize("comp", PRINCIPAL_TYPE)
-    def test_nodal_plastic_principal_strain(mapdl, plastic_solve, comp):
+    def test_nodal_plastic_principal_strain(mapdl, resume, comp):
         from_grpc = mapdl.post_processing.nodal_plastic_principal_strain(comp)
 
         index = PRINCIPAL_TYPE.index(comp)
@@ -847,11 +807,11 @@ class Test_plastic_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_plastic_principal_strain(mapdl, plastic_solve):
+    def test_plot_nodal_plastic_principal_strain(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_plastic_principal_strain(1) is None
 
     @staticmethod
-    def test_nodal_plastic_strain_intensity(mapdl, plastic_solve):
+    def test_nodal_plastic_strain_intensity(mapdl, resume):
         mapdl.prnsol("EPPL", "PRIN", mute=True)  # run twice to clear out warning
         data = np.genfromtxt(mapdl.prnsol("EPPL", "PRIN").splitlines()[1:])
         nnum_ans = data[:, 0].astype(np.int32)
@@ -863,11 +823,11 @@ class Test_plastic_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_plastic_strain_intensity(mapdl, plastic_solve):
+    def test_plot_nodal_plastic_strain_intensity(mapdl, resume):
         assert mapdl.post_processing.plot_nodal_plastic_strain_intensity() is None
 
     @staticmethod
-    def test_nodal_plastic_eqv_strain(mapdl, plastic_solve):
+    def test_nodal_plastic_eqv_strain(mapdl, resume):
         mapdl.prnsol("EPPL", "PRIN", mute=True)  # run twice to clear out warning
         data = np.genfromtxt(mapdl.prnsol("EPPL", "PRIN").splitlines()[1:])
         nnum_ans = data[:, 0].astype(np.int32)
@@ -879,24 +839,19 @@ class Test_plastic_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_plastic_eqv_strain(mapdl, plastic_solve):
+    def test_plot_nodal_plastic_eqv_strain(mapdl, resume):
         assert (
             mapdl.post_processing.plot_nodal_plastic_eqv_strain(smooth_shading=True)
             is None
         )
 
 
-class Test_contact_solve:
+class Test_contact_solve(TestClass):
 
     @staticmethod
     @pytest.fixture(scope="class")
     def contact_solve(mapdl):
-        mapdl.mute = True
-        mapdl.finish()
-        mapdl.clear()
-
         # Based on tech demo 28.
-        mapdl.prep7()
         # ***** Problem parameters ********
         l = 76.2e-03 / 3  # Length of each plate,m
         w = 31.75e-03 / 2  # Width of each plate,m
@@ -1166,14 +1121,12 @@ class Test_contact_solve:
         mapdl.d(1, "all")
         mapdl.ddele(1, "temp")
         mapdl.allsel("all")
-        mapdl.mute = False
         # ==========================================================
         # * Solution
         # ==========================================================
         # from precedent fixture
         uz1 = 3.18e-03 / 4000
 
-        mapdl.mute = False
         mapdl.run("/solu")
         mapdl.antype(4)  # Transient analysis
         mapdl.lnsrch("on")
@@ -1191,30 +1144,38 @@ class Test_contact_solve:
         mapdl.allsel()
         mapdl.solve()
 
+        mapdl.save("contact_solve", slab="all")
+
+    @staticmethod
+    @pytest.fixture(scope="function")
+    def resume(mapdl, contact_solve):
+        mapdl.prep7()
+        mapdl.resume("contact_solve")
         mapdl.post1()
         mapdl.allsel()
         mapdl.set("last")
-        mapdl.mute = False
 
-    @staticmethod
-    def test_time(mapdl, contact_solve):
-        assert mapdl.post_processing.time == 1
-
-    @staticmethod
-    def test_freq(mapdl, contact_solve):
-        # same as post_processing.time
-        assert mapdl.post_processing.freq == 1
-        assert mapdl.post_processing.time == mapdl.post_processing.freq
-
-    @staticmethod
-    def test_nodal_contact_friction_stress(mapdl, contact_solve):
         # Format tables.
-        mapdl.post1()
         mapdl.header("OFF", "OFF", "OFF", "OFF", "OFF", "OFF")
         nsigfig = 10
         mapdl.format("", "E", nsigfig + 9, nsigfig)
         mapdl.page(1e9, "", -1, 240)
 
+    @staticmethod
+    def test_time(mapdl, resume):
+        assert mapdl.post_processing.time == 1
+
+    @staticmethod
+    def test_freq(mapdl, resume):
+        # same as post_processing.time
+        mapdl.set("last")
+
+        assert mapdl.post_processing.freq == 1
+        assert mapdl.post_processing.time == mapdl.post_processing.freq
+
+    @staticmethod
+    def test_nodal_contact_friction_stress(mapdl, resume):
+        # Format tables.
         prnsol = mapdl.prnsol("CONT")
         array = np.genfromtxt(prnsol.splitlines(), skip_header=1)
         sfric_prn = array[:, 4]
@@ -1227,7 +1188,7 @@ class Test_contact_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_nodal_contact_friction_stress(mapdl, contact_solve):
+    def test_plot_nodal_contact_friction_stress(mapdl, resume):
         assert (
             mapdl.post_processing.plot_nodal_contact_friction_stress(
                 smooth_shading=True
@@ -1237,7 +1198,7 @@ class Test_contact_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_incomplete_element_selection(mapdl, contact_solve):
+    def test_plot_incomplete_element_selection(mapdl, resume):
         mapdl.esel("S", "ELEM", "", 1, mapdl.mesh.n_elem // 2)
         assert mapdl.post_processing.plot_element_displacement() is None
 
@@ -1257,7 +1218,7 @@ class Test_contact_solve:
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_plot_incomplete_nodal_selection(mapdl, contact_solve, verify_image_cache):
+    def test_plot_incomplete_nodal_selection(mapdl, resume, verify_image_cache):
         verify_image_cache.skip = True
 
         mapdl.nsel("S", "NODE", "", 1, mapdl.mesh.n_node // 2)
@@ -1280,21 +1241,21 @@ class Test_contact_solve:
         assert mapdl.post_processing.plot_nodal_displacement() is None
 
     @staticmethod
-    def test_time_frequency_values(mapdl, contact_solve):
+    def test_time_frequency_values(mapdl, resume):
         assert np.allclose(
             mapdl.post_processing.time_values,
             mapdl.post_processing.frequency_values,
         )
 
     @staticmethod
-    def test_time_values(mapdl, contact_solve):
+    def test_time_values(mapdl, resume):
         assert np.allclose(
             mapdl.post_processing.time_values, np.array([0.2, 0.4, 0.7, 1.0])
         )
 
     @staticmethod
     @pytest.mark.parametrize("step_", [1, 2, 3, 4])
-    def test_set(mapdl, contact_solve, step_):
+    def test_set(mapdl, resume, step_):
         mapdl.set(nset=step_)
         assert mapdl.post_processing.step == step_
 
@@ -1355,7 +1316,7 @@ def test_cuadratic_beam(mapdl, cuadratic_beam_problem):
     )
 
 
-def test_exited(mapdl):
+def test_exited(mapdl, cleared):
     mapdl._exited = True
     with pytest.raises(MapdlRuntimeError):
         mapdl.post_processing.plot_nodal_displacement(
