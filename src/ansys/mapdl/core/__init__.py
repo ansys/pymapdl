@@ -64,7 +64,7 @@ VERSION_MAP: Dict[Tuple[int, int, int], str] = {
 BUILDING_GALLERY: bool = False
 RUNNING_TESTS: bool = False
 
-DEPRECATING_MINIMUM_PYTHON_VERSION: bool = True
+DEPRECATING_MINIMUM_PYTHON_VERSION: bool = False
 MINIMUM_PYTHON_VERSION: Tuple[int, int] = (3, 10)
 
 # Import related globals
@@ -127,7 +127,7 @@ from ansys.mapdl.core.report import Report
 if _HAS_ATP:
     from ansys.tools.path.path import (
         change_default_ansys_path,
-        find_ansys,
+        find_mapdl,
         get_ansys_path,
         get_available_ansys_installations,
         save_ansys_path,

@@ -76,8 +76,7 @@
         :link-type: ref
 
         Check our :ref:`ref_getting_started` section to learn to
-        :ref:`ref_using_standard_install`, :ref:`ref_pymapdl_installation`,
-        and :ref:`ref_launch_pymapdl`.
+        install MAPDL, install PyMAPDL or launch PyMAPDL.
 
     .. jinja:: main_toctree
 
@@ -104,7 +103,7 @@
 
         Check our :ref:`ref_troubleshooting` section.
         Additionally, there are some helpful
-        resources in :ref:`faq`.
+        resources in like frequently asked questions.
 
     .. grid-item-card:: :fa:`users` Contribute to PyMAPDL project
         :link: ref_contributing

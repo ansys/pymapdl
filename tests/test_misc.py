@@ -36,7 +36,7 @@ from ansys.mapdl.core.misc import (
     load_file,
     no_return,
     requires_package,
-    run_as_prep7,
+    run_as,
 )
 from conftest import requires
 
@@ -103,7 +103,7 @@ def test_run_as_prep7(mapdl, cleared):
     mapdl.post1()
     assert "POST1" in mapdl.parameters.routine
 
-    @run_as_prep7
+    @run_as("PREP7")
     def fun(
         mapdl,
     ):  # This function is for mapdl methods, hence we have to pass the MAPDL instance somehow.
@@ -116,7 +116,6 @@ def test_run_as_prep7(mapdl, cleared):
 
 
 def test_no_return(mapdl, cleared):
-    mapdl.prep7()
 
     @no_return
     def fun(
@@ -130,7 +129,7 @@ def test_no_return(mapdl, cleared):
 
 
 @pytest.mark.parametrize("file_", ["dummy.dumdum", "dumdum.dummy"])
-def test_load_file_local(mapdl, tmpdir, file_):
+def test_load_file_local(mapdl, cleared, tmpdir, file_):
     """Checking 'load_file' function.
 
     In CICD it seems we cannot write to the root folder '/'.

@@ -53,6 +53,7 @@ CentOS7
 Chao
 ci
 container_layout
+CPUs
 datas
 delet
 Dependabot

@@ -72,7 +72,7 @@ from ansys.mapdl.core.misc import (
     last_created,
     random_string,
     requires_package,
-    run_as_prep7,
+    run_as,
     supress_logging,
 )
 
@@ -169,9 +169,15 @@ LOG_APDL_DEFAULT_FILE_NAME = "apdl.log"
 _ALLOWED_START_PARM = [
     "additional_switches",
     "check_parameter_names",
+    "env_vars",
+    "launched",
     "exec_file",
+    "finish_job_on_exit",
+    "hostname",
     "ip",
+    "jobid",
     "jobname",
+    "launch_on_hpc",
     "nproc",
     "override",
     "port",
@@ -179,6 +185,7 @@ _ALLOWED_START_PARM = [
     "process",
     "ram",
     "run_location",
+    "start_instance",
     "start_timeout",
     "timeout",
 ]
@@ -247,7 +254,7 @@ class _MapdlCore(Commands):
         self._response = None
         self._mode = None
         self._mapdl_process = None
-        self._launched: bool = False
+        self._launched: bool = start_parm.get("launched", False)
         self._stderr = None
         self._stdout = None
         self._file_type_for_plots = file_type_for_plots
@@ -281,7 +288,6 @@ class _MapdlCore(Commands):
         self._krylov = None
         self._on_docker = None
         self._platform = None
-        self._path_cache = None  # Cache
         self._print_com: bool = print_com  # print the command /COM input.
 
         # Start_parameters
@@ -289,7 +295,7 @@ class _MapdlCore(Commands):
         self._start_parm: Dict[str, Any] = start_parm
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
-        self.check_parameter_names = start_parm.get("check_parameter_names", True)
+        self._check_parameter_names = start_parm.get("check_parameter_names", True)
 
         # Setting up loggers
         self._log: logger = logger.add_instance_logger(
@@ -498,33 +504,26 @@ class _MapdlCore(Commands):
         accessible, ``cwd`` (:func:`MapdlBase.cwd`) will raise
         a warning.
         """
-        # always attempt to cache the path
-        i = 0
-        while (not self._path and i > 5) or i == 0:
-            try:
-                self._path = self.inquire("", "DIRECTORY")
-            except Exception as e:  # pragma: no cover
-                logger.warning(
-                    f"Failed to get the directory due to the following error: {e}"
-                )
-            i += 1
-            if not self._path:  # pragma: no cover
-                time.sleep(0.1)
+        # Inside inquire there is already a retry mechanisim
+        path = None
+        try:
+            path = self.inquire("", "DIRECTORY")
+        except MapdlExitedError:
+            # Let's return the cached path
+            pass
 
         # os independent path format
-        if self._path:  # self.inquire might return ''.
-            self._path = self._path.replace("\\", "/")
+        if path:  # self.inquire might return ''.
+            path = path.replace("\\", "/")
             # new line to fix path issue, see #416
-            self._path = repr(self._path)[1:-1]
-        else:  # pragma: no cover
-            if self._path_cache:
-                return self._path_cache
-            else:
-                raise IOError(
-                    f"The directory returned by /INQUIRE is not valid ('{self._path}')."
-                )
+            path = repr(path)[1:-1]
+            self._path = path
 
-        self._path_cache = self._path  # update
+        elif not self._path:
+            raise MapdlRuntimeError(
+                f"MAPDL could provide a path using /INQUIRE or the cached path ('{self._path}')."
+            )
+
         return self._path
 
     @directory.setter
@@ -532,6 +531,7 @@ class _MapdlCore(Commands):
     def directory(self, path: Union[str, pathlib.Path]) -> None:
         """Change the directory using ``Mapdl.cwd``"""
         self.cwd(path)
+        self._path = path
 
     @property
     def exited(self):
@@ -716,7 +716,18 @@ class _MapdlCore(Commands):
         return self._launched
 
     @property
+    def check_parameter_names(self):
+        """Whether check if the name which is given to the parameter is allowed or not"""
+        return self._check_parameter_names
+
+    @check_parameter_names.setter
+    def check_parameter_names(self, value: bool):
+        """Whether check if the name which is given to the parameter is allowed or not"""
+        self._check_parameter_names = value
+
+    @property
     def logger(self) -> logging.Logger:
+        """MAPDL Python-based logger"""
         return self._log
 
     @property
@@ -870,6 +881,8 @@ class _MapdlCore(Commands):
 
     @property
     def print_com(self):
+        """Whether to print or not to the console the
+        :meth:`mapdl.com ("/COM") <ansys.mapdl.core.Mapdl.com>` calls."""
         return self._print_com
 
     @print_com.setter
@@ -1547,6 +1560,7 @@ class _MapdlCore(Commands):
         """
         if self._apdl_log is not None:
             raise MapdlRuntimeError("APDL command logging already enabled")
+
         self._log.debug("Opening ANSYS log file at %s", filename)
 
         if mode not in ["w", "a", "x"]:
@@ -1561,7 +1575,7 @@ class _MapdlCore(Commands):
         )
 
     @supress_logging
-    @run_as_prep7
+    @run_as("PREP7")
     def _generate_iges(self):
         """Save IGES geometry representation to disk"""
         filename = os.path.join(self.directory, "_tmp.iges")
@@ -2319,7 +2333,7 @@ class _MapdlCore(Commands):
                 self.exit()
             except Exception as e:
                 try:  # logger might be closed
-                    if self._log is not None:
+                    if hasattr(self, "_log") and self._log is not None:
                         self._log.error("exit: %s", str(e))
                 except ValueError:
                     pass
@@ -2346,12 +2360,15 @@ class _MapdlCore(Commands):
             logger.std_out_handler.close()
             logger.std_out_handler = None
 
+    def is_png_found(self, text: str) -> bool:
+        # findall returns None if there is no match
+        return PNG_IS_WRITTEN_TO_FILE.findall(text) is not None
+
     def _get_plot_name(self, text: str) -> str:
         """Obtain the plot filename."""
-        self._log.debug(text)
-        png_found = PNG_IS_WRITTEN_TO_FILE.findall(text)
+        self._log.debug(f"Output from terminal used to find plot name: {text}")
 
-        if png_found:
+        if self.is_png_found(text):
             # flush graphics writer
             previous_device = self.file_type_for_plots
             self.show("CLOSE", mute=True)
@@ -2364,9 +2381,16 @@ class _MapdlCore(Commands):
             if os.path.isfile(filename):
                 return filename
             else:  # pragma: no cover
-                self._log.error("Unable to find screenshot at %s", filename)
+                raise MapdlRuntimeError("Unable to find screenshot at %s", filename)
         else:
-            self._log.error("Unable to find file in MAPDL command output.")
+            raise MapdlRuntimeError(
+                "Unable to find plotted file in MAPDL command output. "
+                "One possible reason is that the graphics device is not correct. "
+                "Please check you are using FULL graphics device. "
+                "For example:\n"
+                ">>> mapdl.graphics('FULL')"
+                f"\nThe text output from MAPDL is:\n{text}"
+            )
 
     def _display_plot(self, filename: str) -> None:
         """Display the last generated plot (*.png) from MAPDL"""

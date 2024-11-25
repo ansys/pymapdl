@@ -1092,6 +1092,7 @@ are unsupported.
 | * ``LSWRITE`` | |:white_check_mark:| Available (Internally running in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`)   | |:white_check_mark:| Available   | |:exclamation:| Only in :attr:`Mapdl.non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`                       |                                                                                                     |
 +---------------+---------------------------------------------------------------------------------------------------------------------------------+----------------------------------+----------------------------------------------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------+
 
+.. _ref_environment_variables:
 
 Environment variables
 =====================
@@ -1189,7 +1190,7 @@ environment variable. The following table describes all arguments.
 |                                       |    user@machine:~$ export PYMAPDL_MAPDL_VERSION=22.2                             |
 |                                       |                                                                                  |
 +---------------------------------------+----------------------------------------------------------------------------------+
-| :envvar:`PYMAPDL_ON_SLURM`            | With this environment variable set to ``FALSE``, you can avoid                   |
+| :envvar:`PYMAPDL_RUNNING_ON_HPC`      | With this environment variable set to ``FALSE``, you can avoid                   |
 |                                       | PyMAPDL from detecting that it is running on a SLURM HPC cluster.                |
 +---------------------------------------+----------------------------------------------------------------------------------+
 | :envvar:`PYMAPDL_MAX_MESSAGE_LENGTH`  | Maximum gRPC message length. If your                                             |
