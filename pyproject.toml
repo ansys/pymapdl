@@ -67,6 +67,7 @@ tests = [
     "pytest-pyvista==0.1.9",
     "pytest-random-order==1.1.1",
     "pytest-rerunfailures==15.0",
+    "pytest-timeout==2.3.1",
     "pytest==8.3.3",
     "scipy==1.14.1",
     "vtk==9.3.1",
@@ -118,7 +119,7 @@ pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_
 pymapdl = "ansys.mapdl.core.cli:main"
 
 [tool.pytest.ini_options]
-addopts = "-rxXsa -vvv --maxfail=10 --random-order-bucket=class --random-order --durations=10"
+addopts = "-rxXsa -vvv --maxfail=10 --random-order-bucket=class --random-order --durations=10 --timeout=40"
 junit_family = "legacy"
 filterwarnings = [
     "ignore::FutureWarning",
