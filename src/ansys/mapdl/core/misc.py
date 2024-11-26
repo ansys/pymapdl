@@ -112,7 +112,7 @@ def random_string(stringLength: int = 10, letters: str = string.ascii_lowercase)
     return "".join(secrets.choice(letters) for _ in range(stringLength))
 
 
-def _check_has_ansys() -> bool:
+def check_has_mapdl() -> bool:
     """Safely wraps check_valid_ansys
 
     Returns
@@ -125,7 +125,10 @@ def _check_has_ansys() -> bool:
 
     try:
         return check_valid_ansys()
-    except:
+    except Exception as err:
+        LOG.error(
+            f"An error was obtained when checking for a valid MAPDL installation:\n{str(err)}"
+        )
         return False
 
 
