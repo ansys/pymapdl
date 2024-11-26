@@ -74,7 +74,7 @@ from ansys.mapdl.core.launcher import (
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from ansys.mapdl.core.misc import stack
+from ansys.mapdl.core.misc import check_has_mapdl, stack
 from conftest import (
     ON_LOCAL,
     PATCH_MAPDL,
@@ -1998,3 +1998,19 @@ def test_args_pass(monkeypatch, arg, value, method):
     mapdl = launch_mapdl(**kwargs)
     meth = getattr(mapdl, method)
     assert meth == value
+
+
+def test_check_has_mapdl():
+    if TESTING_MINIMAL:
+        assert check_has_mapdl() is False
+    else:
+        assert check_has_mapdl() == ON_LOCAL
+
+
+def raising():
+    raise Exception("An error")
+
+
+@patch("ansys.mapdl.core.launcher.check_valid_ansys", raising)
+def test_check_has_mapdl_failed():
+    assert check_has_mapdl() is False
