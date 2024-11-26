@@ -526,10 +526,12 @@ class MapdlGrpc(MapdlBase):
             process = self._mapdl_process
 
         self._stdout_queue, self._stdout_thread = (
-            None  # _create_queue_for_std(process.stdout)
+            None,
+            None,  # _create_queue_for_std(process.stdout)
         )
         self._stderr_queue, self._stderr_thread = (
-            None  # _create_queue_for_std(process.stderr)
+            None,
+            None,  # _create_queue_for_std(process.stderr)
         )
 
     def _create_channel(self, ip: str, port: int) -> grpc.Channel:
