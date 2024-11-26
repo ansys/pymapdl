@@ -515,22 +515,6 @@ class MacroFiles:
         command = f"/MKDIR"
         return self.run(command, **kwargs)
 
-    def end(self, **kwargs):
-        r"""Closes a macro file.
-
-        Mechanical APDL Command: `\*END <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_END.html>`_
-
-        Notes
-        -----
-        Closes a file opened with :ref:`create`. The :ref:`end` command is an 8-character command (to
-        differentiate it from :ref:`endif` ). If you add commented text on that same line but do not allow
-        enough spaces between :ref:`end` and the "!" that indicates the comment text, the :ref:`end` will
-        attempt to interpret the "!" as the 8th character and will fail.  This command is valid in any
-        processor.
-        """
-        command = f"*END"
-        return self.run(command, **kwargs)
-
     def slashtee(self, label: str = "", fname: str = "", ext: str = "", **kwargs):
         r"""Writes a list of commands to a specified file at the same time that the commands are being executed.
 

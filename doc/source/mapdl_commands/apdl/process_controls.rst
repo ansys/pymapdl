@@ -15,13 +15,13 @@ ProcessControls
    :toctree: _autosummary
 
 
-   ProcessControls.cycle
-   ProcessControls.do
-   ProcessControls.dowhile
-   ProcessControls.elseif
-   ProcessControls.enddo
-   ProcessControls.endif
-   ProcessControls.starexit
    ProcessControls.stargo
-   ProcessControls.repeat
    ProcessControls.wait
+   ProcessControls.cycle
+   ProcessControls.endif
+   ProcessControls.elseif
+   ProcessControls.starexit
+   ProcessControls.enddo
+   ProcessControls.repeat
+   ProcessControls.dowhile
+   ProcessControls.do

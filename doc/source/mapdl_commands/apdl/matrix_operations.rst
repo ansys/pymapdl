@@ -15,32 +15,32 @@ MatrixOperations
    :toctree: _autosummary
 
 
-   MatrixOperations.axpy
-   MatrixOperations.comp
-   MatrixOperations.dmat
-   MatrixOperations.dot
-   MatrixOperations.eigen
-   MatrixOperations.export
-   MatrixOperations.fft
+   MatrixOperations.starprint
    MatrixOperations.free
-   MatrixOperations.hprod
-   MatrixOperations.init
+   MatrixOperations.fft
+   MatrixOperations.wrk
+   MatrixOperations.comp
+   MatrixOperations.xpl
+   MatrixOperations.nrm
+   MatrixOperations.merge
+   MatrixOperations.mult
    MatrixOperations.starinquire
    MatrixOperations.itengine
-   MatrixOperations.lsbac
-   MatrixOperations.lsdump
+   MatrixOperations.init
+   MatrixOperations.export
+   MatrixOperations.eigen
+   MatrixOperations.smat
+   MatrixOperations.starsort
+   MatrixOperations.scal
+   MatrixOperations.vec
+   MatrixOperations.hprod
    MatrixOperations.lsengine
    MatrixOperations.lsfactor
    MatrixOperations.lsrestore
-   MatrixOperations.merge
-   MatrixOperations.mult
-   MatrixOperations.nrm
-   MatrixOperations.starprint
+   MatrixOperations.lsbac
+   MatrixOperations.lsdump
    MatrixOperations.remove
    MatrixOperations.starrename
-   MatrixOperations.scal
-   MatrixOperations.smat
-   MatrixOperations.starsort
-   MatrixOperations.vec
-   MatrixOperations.wrk
-   MatrixOperations.xpl
+   MatrixOperations.axpy
+   MatrixOperations.dmat
+   MatrixOperations.dot

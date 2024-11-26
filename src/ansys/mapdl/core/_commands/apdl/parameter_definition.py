@@ -1072,46 +1072,6 @@ class ParameterDefinition:
         command = f"*VFILL,{parr},{func},{con1},{con2},{con3},{con4},{con5},{con6},{con7},{con8},{con9},{con10}"
         return self.run(command, **kwargs)
 
-    def ask(self, par: str = "", query: str = "", dval: str = "", **kwargs):
-        r"""Prompts the user to input a parameter value.
-
-        Mechanical APDL Command: `\*ASK <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ASK.html>`_
-
-        Parameters
-        ----------
-        par : str
-            An alphanumeric name used to identify the scalar parameter. See :ref:`starset` for name
-            restrictions.
-
-        query : str
-            Text string to be displayed on the next line as the query (32 characters maximum). Characters
-            having special meaning (such as $ ! ) should not be included.
-
-        dval : str
-            Default value assigned to the parameter if the user issues a blank response. May be a number or
-            character string (up to 8 characters enclosed in single quotes). If a default is not assigned, a
-            blank response will delete the parameter.
-
-        Notes
-        -----
-        Intended primarily for use in macros, the command prints the query (after the word ``ENTER`` ) on
-        the next line and waits for a response. The response is read from the keyboard, except in batch mode
-        ( :ref:`batch` ), when the response(s) must be the next-read input line(s). The response may be a
-        number, a character string (up to 8 characters enclosed in single quotes), a parameter (numeric or
-        character) or an expression that evaluates to a number. The scalar parameter is then set to the
-        response value. For example, :ref:`ask` ,NN,PARAMETER NN will set NN to the value entered on the
-        next line (after the prompt ``ENTER PARAMETER NN`` ).  The :ref:`ask` command is not written to
-        ``File.LOG``, but the responses are written there as follows: If :ref:`ask` is contained in a
-        macro, the response(s) (only) is written to ``File.LOG`` on the line(s) following the macro name. If
-        not contained in a macro, the response is written to ``File.LOG`` as a parameter assignment (that
-        is, ``Par`` = "user-response").  If used within a do-loop that is executed interactively, :ref:`ask`
-        should be contained in a macro. If not contained in a macro, :ref:`ask` will still query the user as
-        intended, but the resulting log file will `not` reproduce the effects of the original run.  This
-        command is valid in any processor.
-        """
-        command = f"*ASK,{par},{query},{dval}"
-        return self.run(command, **kwargs)
-
     def afun(self, lab: str = "", **kwargs):
         r"""Specifies units for angular functions in parameter expressions.
 
@@ -1132,6 +1092,56 @@ class ParameterDefinition:
         :ref:`vfun` ) are affected by this command.
         """
         command = f"*AFUN,{lab}"
+        return self.run(command, **kwargs)
+
+    def stardel(self, val1: str = "", val2: str = "", **kwargs):
+        r"""Deletes a parameter or parameters (GUI).
+
+        Mechanical APDL Command: `\*DEL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DEL.html>`_
+
+        Parameters
+        ----------
+        val1 : str
+            Command behavior key:
+
+            * ``ALL`` - Delete all user-defined parameters, or all user-defined parameters `and` all system
+              parameters, as specified by ``Val2``.
+            * ```` - Delete the parameter(s) specified by ``Val2``.
+            * ``ParmName`` - Delete a single named parameter, specified here. ( ``Val2`` is not used in this
+              case.)
+
+        val2 : str
+            The parameter or parameters to delete (used only when ``Val1`` = ALL or (blank)):
+
+            * ``LOC`` - When ``Val1`` is (blank), specifies the location of the parameter within the `Array
+              Parameters
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_wid/Hlp_UI_Arry_Stat.html#warrystatlist>`_
+              dialog box. The location number is based on an alphabetically ordered list of all parameters in
+              the database.
+            * ``_PRM`` - When ``Val1`` is ALL, deletes all parameters, including those named with a leading
+              underscore (_) (except _STATUS and _RETURN). When ``Val1`` is (blank), deletes only those
+              parameters named with a leading underscore (_) (except _STATUS and _RETURN).
+            * ``PRM_`` - When ``Val1`` is (blank), deletes only those parameters named with a trailing
+              underscore (_).
+            * ```` - When ``Val1`` is ALL, a (blank) value for ``Val2`` causes `all` user-defined parameters to
+              be deleted.
+
+        Notes
+        -----
+        This is a command generally created by the graphical user interface (GUI). It appears in the log
+        file ( ``Jobname.LOG`` ) if an array parameter is deleted from within the Array Parameters dialog.
+        Usage examples:    Delete all user-defined parameters: :ref:`stardel`,ALL Delete only those user-
+        defined parameters named with a trailing underscore: :ref:`stardel`,,PRM Delete all user-defined
+        `and` all system parameters (except for _STATUS and _RETURN): :ref:`stardel`,ALL,_PRM Delete a
+        parameter by specifying its location within the Array Parameters dialog: :ref:`stardel`, ``LOC``
+        Delete a single specified parameter by name: :ref:`stardel`, ``ParmName`` (You cannot specify more
+        than one named parameter at a time.)  The :ref:`stardel` command does not free up memory but only
+        deletes the specified reference. For example, memory usage increases from the continued issuance of
+        :ref:`stardel` and :ref:`dim` within :ref:`dowhile` loops, as arrays are stored in the database
+        (memory) and :ref:`stardel` removes only the ``reference`` to the array. To release the memory in
+        use, issue the :ref:`save` command after :ref:`stardel`.  This command is valid in any processor.
+        """
+        command = f"*DEL,{val1},{val2}"
         return self.run(command, **kwargs)
 
     def dim(

@@ -17,15 +17,14 @@ Apdl
    * - :ref:`ref_encryption_decryption`
 
 
-
 .. toctree::
    :maxdepth: 1
    :hidden:
 
-   abbreviations
-   parameters
-   matrix_operations
    macro_files
+   parameter_definition
+   matrix_operations
+   abbreviations
    process_controls
-   encryption_decryption
    array_parameters
+   encryption_decryption

@@ -26,6 +26,6 @@ ParameterDefinition
    ParameterDefinition.vread
    ParameterDefinition.starvget
    ParameterDefinition.vfill
-   ParameterDefinition.ask
    ParameterDefinition.afun
+   ParameterDefinition.stardel
    ParameterDefinition.dim
