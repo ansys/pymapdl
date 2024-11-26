@@ -442,7 +442,7 @@ class MapdlGrpc(MapdlBase):
             self._channel: grpc.Channel = channel
 
         # Subscribe to channel for channel state updates
-        self._subscribe_to_channel()
+        # self._subscribe_to_channel()
 
         # connect and validate to the channel
         self._mapdl_process: subprocess.Popen = start_parm.pop("process", None)
