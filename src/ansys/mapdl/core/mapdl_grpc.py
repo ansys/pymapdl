@@ -518,15 +518,19 @@ class MapdlGrpc(MapdlBase):
             self._create_session()
 
     def _create_process_stds_queue(self, process=None):
-        from ansys.mapdl.core.launcher import (
-            _create_queue_for_std,  # Avoid circular import error
-        )
+        # from ansys.mapdl.core.launcher import (
+        #     _create_queue_for_std,  # Avoid circular import error
+        # )
 
         if not process:
             process = self._mapdl_process
 
-        self._stdout_queue, self._stdout_thread = _create_queue_for_std(process.stdout)
-        self._stderr_queue, self._stderr_thread = _create_queue_for_std(process.stderr)
+        self._stdout_queue, self._stdout_thread = (
+            None  # _create_queue_for_std(process.stdout)
+        )
+        self._stderr_queue, self._stderr_thread = (
+            None  # _create_queue_for_std(process.stderr)
+        )
 
     def _create_channel(self, ip: str, port: int) -> grpc.Channel:
         """Create an insecured grpc channel."""
