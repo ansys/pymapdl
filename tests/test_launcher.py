@@ -73,7 +73,7 @@ from ansys.mapdl.core.launcher import (
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from ansys.mapdl.core.misc import stack
+from ansys.mapdl.core.misc import check_has_mapdl, stack
 from conftest import (
     ON_LOCAL,
     PATCH_MAPDL,
@@ -86,7 +86,7 @@ from conftest import (
 
 try:
     from ansys.tools.path import (
-        find_ansys,
+        find_mapdl,
         get_available_ansys_installations,
         version_from_path,
     )
@@ -95,7 +95,7 @@ try:
 
     installed_mapdl_versions = list(get_available_ansys_installations().keys())
     try:
-        V150_EXEC = find_ansys("150")[0]
+        V150_EXEC = find_mapdl("150")[0]
     except ValueError:
         V150_EXEC = ""
 except:
@@ -182,19 +182,19 @@ def test_catch_version_from_path():
 @requires("ansys-tools-path")
 @requires("local")
 @requires("linux")
-def test_find_ansys_linux():
+def test_find_mapdl_linux():
     # assuming ansys is installed, should be able to find it on linux
     # without env var
-    bin_file, ver = pymapdl.launcher.find_ansys()
+    bin_file, ver = pymapdl.launcher.find_mapdl()
     assert os.path.isfile(bin_file)
     assert isinstance(ver, float)
 
 
 @requires("ansys-tools-path")
 @requires("local")
-def test_invalid_mode(mapdl):
+def test_invalid_mode(mapdl, cleared):
     with pytest.raises(ValueError):
-        exec_file = find_ansys(installed_mapdl_versions[0])[0]
+        exec_file = find_mapdl(installed_mapdl_versions[0])[0]
         pymapdl.launch_mapdl(
             exec_file, port=mapdl.port + 1, mode="notamode", start_timeout=start_timeout
         )
@@ -203,8 +203,8 @@ def test_invalid_mode(mapdl):
 @requires("ansys-tools-path")
 @requires("local")
 @pytest.mark.skipif(not os.path.isfile(V150_EXEC), reason="Requires v150")
-def test_old_version(mapdl):
-    exec_file = find_ansys("150")[0]
+def test_old_version(mapdl, cleared):
+    exec_file = find_mapdl("150")[0]
     with pytest.raises(ValueError):
         pymapdl.launch_mapdl(
             exec_file, port=mapdl.port + 1, mode="console", start_timeout=start_timeout
@@ -216,7 +216,7 @@ def test_old_version(mapdl):
 @requires("linux")
 @requires("console")
 def test_failed_console():
-    exec_file = find_ansys(installed_mapdl_versions[0])[0]
+    exec_file = find_mapdl(installed_mapdl_versions[0])[0]
     with pytest.raises(ValueError):
         pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
@@ -227,7 +227,7 @@ def test_failed_console():
 @requires("linux")
 @pytest.mark.parametrize("version", installed_mapdl_versions)
 def test_launch_console(version):
-    exec_file = find_ansys(version)[0]
+    exec_file = find_mapdl(version)[0]
     mapdl = pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
     assert mapdl.version == int(version) / 10
 
@@ -236,8 +236,8 @@ def test_launch_console(version):
 @requires("nostudent")
 @requires("ansys-tools-path")
 @pytest.mark.parametrize("license_name", LICENSES)
-def test_license_type_keyword_names(mapdl, monkeypatch, license_name):
-    exec_file = find_ansys()[0]
+def test_license_type_keyword_names(monkeypatch, license_name):
+    exec_file = find_mapdl()[0]
     args = launch_mapdl(
         exec_file=exec_file, license_type=license_name, _debug_no_launch=True
     )
@@ -246,7 +246,7 @@ def test_license_type_keyword_names(mapdl, monkeypatch, license_name):
 
 # @requires("local")
 @pytest.mark.parametrize("license_name", LICENSES)
-def test_license_type_additional_switch(mapdl, license_name):
+def test_license_type_additional_switch(license_name):
     args = launch_mapdl(
         additional_switches=QUICK_LAUNCH_SWITCHES + " -p " + license_name,
         _debug_no_launch=True,
@@ -256,7 +256,7 @@ def test_license_type_additional_switch(mapdl, license_name):
 
 @stack(*PATCH_MAPDL_START)
 @requires("ansys-tools-path")
-def test_license_type_dummy(mapdl):
+def test_license_type_dummy(mapdl, cleared):
     dummy_license_type = "dummy"
     with pytest.warns(
         UserWarning,
@@ -273,7 +273,7 @@ def test_license_type_dummy(mapdl):
 
 @requires("local")
 @requires("nostudent")
-def test_remove_temp_dir_on_exit(mapdl):
+def test_remove_temp_dir_on_exit(mapdl, cleared):
     """Ensure the working directory is removed when run_location is not set."""
     mapdl_ = launch_mapdl(
         port=mapdl.port + 1,
@@ -296,7 +296,7 @@ def test_remove_temp_dir_on_exit(mapdl):
 
 @requires("local")
 @requires("nostudent")
-def test_remove_temp_dir_on_exit_fail(tmpdir, mapdl):
+def test_remove_temp_dir_on_exit_fail(mapdl, cleared, tmpdir):
     """Ensure the working directory is not removed when the cwd is changed."""
     mapdl_ = launch_mapdl(
         port=mapdl.port + 1,
@@ -345,7 +345,7 @@ def test_env_injection():
         [None, False, "Working directory is NOT in the pytest directory."],
         [True, None, "There is a result file, and WDIR is a temp dir."],
         pytest.param(
-            True, True, "Both options (`True`) is not allowed.", marks=pytest.mark.fail
+            True, True, "Both options (`True`) is not allowed.", marks=pytest.mark.xfail
         ),
         [True, False, "There is a result file, and WDIR is in a temp dir."],
         [False, None, "There is NOT a result file, and WDIR is in a temp dir."],
@@ -448,25 +448,25 @@ def test__verify_version_latest():
 
 @requires("ansys-tools-path")
 @requires("local")
-def test_find_ansys(mapdl):
-    assert find_ansys() is not None
+def test_find_ansys(mapdl, cleared):
+    assert find_mapdl() is not None
 
     # Checking ints
     version = int(mapdl.version * 10)
-    assert find_ansys(version=version) is not None
+    assert find_mapdl(version=version) is not None
 
     # Checking floats
     with pytest.raises(ValueError):
-        find_ansys(version=22.2)
+        find_mapdl(version=22.2)
 
-    assert find_ansys(version=mapdl.version) is not None
+    assert find_mapdl(version=mapdl.version) is not None
 
     with pytest.raises(ValueError):
-        assert find_ansys(version="11")
+        assert find_mapdl(version="11")
 
 
 @requires("local")
-def test_version(mapdl):
+def test_version(mapdl, cleared):
     version = int(10 * mapdl.version)
     launching_arg = launch_mapdl(
         port=mapdl.port + 1,
@@ -479,7 +479,7 @@ def test_version(mapdl):
 
 
 @requires("local")
-def test_raise_exec_path_and_version_launcher(mapdl):
+def test_raise_exec_path_and_version_launcher(mapdl, cleared):
     with pytest.raises(ValueError):
         get_version("asdf", "asdf")
 
@@ -496,7 +496,7 @@ def test_get_default_ansys():
     assert get_default_ansys() is not None
 
 
-def test_launch_mapdl_non_recognaised_arguments(mapdl):
+def test_launch_mapdl_non_recognaised_arguments(mapdl, cleared):
     with pytest.raises(ValueError, match="my_fake_argument"):
         launch_mapdl(
             port=mapdl.port + 1,
@@ -525,7 +525,7 @@ default via 172.23.112.1 dev eth0 proto kernel
     assert "172.23.112.1" == _parse_ip_route(output)
 
 
-def test_launched(mapdl):
+def test_launched(mapdl, cleared):
     if ON_LOCAL:
         assert mapdl.launched
     else:
@@ -533,7 +533,7 @@ def test_launched(mapdl):
 
 
 @requires("local")
-def test_launching_on_busy_port(mapdl, monkeypatch):
+def test_launching_on_busy_port(mapdl, cleared, monkeypatch):
     monkeypatch.delenv("PYMAPDL_PORT", raising=False)
     with pytest.raises(PortAlreadyInUseByAnMAPDLInstance):
         launch_mapdl(port=mapdl.port)
@@ -822,7 +822,7 @@ def test_launcher_start_instance(monkeypatch, start_instance):
     if "PYMAPDL_START_INSTANCE" in os.environ:
         monkeypatch.delenv("PYMAPDL_START_INSTANCE")
     options = launch_mapdl(
-        exec_file=find_ansys()[0], start_instance=start_instance, _debug_no_launch=True
+        exec_file=find_mapdl()[0], start_instance=start_instance, _debug_no_launch=True
     )
     assert start_instance == options["start_instance"]
 
@@ -879,7 +879,7 @@ def test_ip_and_start_instance(
 
     ###################
     # Faking MAPDL launching and returning args
-    with warnings.catch_warnings():
+    with warnings.catch_warnings(record=True):
         options = launch_mapdl(
             start_instance=start_instance,
             ip=ip,
@@ -1324,7 +1324,7 @@ def test_check_mapdl_launch_on_hpc(message_stdout, message_stderr):
 
 @patch("ansys.mapdl.core.Mapdl._exit_mapdl", lambda *args, **kwargs: None)
 @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.kill_job")
-def test_exit_job(mock_popen, mapdl):
+def test_exit_job(mock_popen, mapdl, cleared):
     # Setting to exit
     mapdl._mapdl_on_hpc = True
     mapdl.finish_job_on_exit = True
@@ -1589,7 +1589,7 @@ def test_get_ip(monkeypatch, ip, ip_env):
     "port,port_envvar,start_instance,port_busy,result",
     (
         [None, None, True, False, 50052],  # Standard case
-        [None, None, True, True, 50055],  # Busy port case, not sure why it is not 50054
+        [None, None, True, True, 50054],
         [None, 50053, True, True, 50053],
         [None, 50053, False, False, 50053],
         [50054, 50053, True, False, 50054],
@@ -1597,9 +1597,10 @@ def test_get_ip(monkeypatch, ip, ip_env):
         [50054, None, False, False, 50054],
     ),
 )
-@patch("ansys.mapdl.core._LOCAL_PORTS", [])
 def test_get_port(monkeypatch, port, port_envvar, start_instance, port_busy, result):
     # Settings
+    pymapdl._LOCAL_PORTS = []  # Resetting
+
     monkeypatch.delenv("PYMAPDL_PORT", False)
     if port_envvar:
         monkeypatch.setenv("PYMAPDL_PORT", port_envvar)
@@ -1789,11 +1790,18 @@ def test_get_version_env_var(monkeypatch, version):
             pytest.raises(VersionError, match="Running MAPDL as a service requires"),
             None,
         ],
+        [
+            "anymode",
+            None,
+            "posix",
+            pytest.warns(UserWarning, match="PyMAPDL couldn't detect MAPDL version"),
+            "anymode",
+        ],
     ],
 )
 def test_check_mode(mode, version, osname, context, res):
     with patch("os.name", osname):
-        with context:
+        with context as cnt:
             assert res == check_mode(mode, version)
 
 
@@ -1923,3 +1931,19 @@ def test_args_pass(monkeypatch, arg, value, method):
     mapdl = launch_mapdl(**kwargs)
     meth = getattr(mapdl, method)
     assert meth == value
+
+
+def test_check_has_mapdl():
+    if TESTING_MINIMAL:
+        assert check_has_mapdl() is False
+    else:
+        assert check_has_mapdl() == ON_LOCAL
+
+
+def raising():
+    raise Exception("An error")
+
+
+@patch("ansys.mapdl.core.launcher.check_valid_ansys", raising)
+def test_check_has_mapdl_failed():
+    assert check_has_mapdl() is False

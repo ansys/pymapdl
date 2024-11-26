@@ -65,7 +65,7 @@ if _HAS_PIM:
     import ansys.platform.instancemanagement as pypim
 
 if _HAS_ATP:
-    from ansys.tools.path import find_ansys, get_ansys_path
+    from ansys.tools.path import find_mapdl, get_ansys_path
     from ansys.tools.path import version_from_path as _version_from_path
 
     @wraps(_version_from_path)
@@ -801,7 +801,7 @@ def get_default_ansys():
     >>> get_default_ansys()
     (/usr/ansys_inc/v211/ansys/bin/ansys211, 21.1)
     """
-    return find_ansys(supported_versions=SUPPORTED_ANSYS_VERSIONS)
+    return find_mapdl(supported_versions=SUPPORTED_ANSYS_VERSIONS)
 
 
 def get_default_ansys_path():
@@ -914,8 +914,8 @@ def set_MPI_additional_switches(
     add_sw_lower_case = add_sw.lower()
 
     # known issues with distributed memory parallel (DMP)
-    if "smp" not in add_sw_lower_case:  # pragma: no cover
-        if _HAS_ATP and os.name == "nt":
+    if os.name == "nt" and "smp" not in add_sw_lower_case:  # pragma: no cover
+        if _HAS_ATP:
             condition = not force_intel and version and (222 > version >= 210)
         else:
             warnings.warn(
@@ -1644,6 +1644,13 @@ def check_mode(mode: ALLOWABLE_MODES, version: Optional[int] = None):
     """
     if not mode and not version:
         return "grpc"
+    elif not version:
+        warnings.warn(
+            "PyMAPDL couldn't detect MAPDL version, hence it could not "
+            f"verify that the provided connection mode '{mode}' is compatible "
+            "with the current MAPDL installation."
+        )
+        return mode
 
     if isinstance(mode, str):
         mode = mode.lower()
