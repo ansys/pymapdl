@@ -220,12 +220,17 @@ if has_dependency("ansys-tools-visualization_interface"):
     viz_interface.TESTING_MODE = True
 
 
+if LOG_APDL:
+    from ansys.mapdl.core import LOG
+
+    LOG.setLevel("DEBUG")
+    LOG.log_to_file("mylog.log")
+
 ################################################################
 #
 # Pytest configuration
 # --------------------
 #
-
 
 # check if the user wants to permit pytest to start MAPDL
 START_INSTANCE = get_start_instance()
@@ -583,7 +588,9 @@ def mapdl(request, tmpdir_factory):
         license_server_check=False,
         start_timeout=50,
         log_apdl=LOG_APDL,
+        loglevel="DEBUG" if LOG_APDL else "ERROR",
     )
+
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
     MAPDL_VERSION = mapdl.version  # Caching version
 
