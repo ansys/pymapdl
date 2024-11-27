@@ -2697,7 +2697,7 @@ class MapdlGrpc(MapdlBase):
     @property
     def is_alive(self) -> bool:
         """True when there is an active connect to the gRPC server"""
-        if self.channel_state not in ["IDLE", "READY"]:
+        if self.channel_state not in ["IDLE", "READY", None]:
             self._log.debug(
                 "MAPDL instance is not alive because the channel is not 'IDLE' o 'READY'."
             )

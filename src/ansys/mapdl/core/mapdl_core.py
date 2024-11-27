@@ -2272,6 +2272,7 @@ class _MapdlCore(Commands):
         self._before_run(command)
 
         short_cmd = parse_to_short_cmd(command)
+        self._log.debug(f"Running (verbose: {verbose}, mute={mute}): '{command}'")
         text = self._run(command, verbose=verbose, mute=mute)
 
         if (
