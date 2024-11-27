@@ -138,33 +138,35 @@ class PostProcessing:
 
     @supress_logging
     def __repr__(self):
-        info = "PyMAPDL PostProcessing Instance\n"
-        info += f"\tActive Result File:    {self.filename}\n"
+        with self._mapdl.run_as_routine("POST1"):
+            info = "PyMAPDL PostProcessing Instance\n"
+            info += f"\tActive Result File:    {self.filename}\n"
 
-        # If there is no result file, this fails.
-        try:
-            nsets = int(self.nsets)
-        except MapdlRuntimeError:
-            nsets = "NA"
+            # If there is no result file, this fails.
+            try:
+                nsets = int(self.nsets)
+            except MapdlRuntimeError:
+                nsets = "NA"
 
-        info += f"\tNumber of result sets: {nsets}\n"
-        info += f"\tCurrent load step:     {self.load_step}\n"
-        info += f"\tCurrent sub step:      {self.sub_step}\n"
+            info += f"\tNumber of result sets: {nsets}\n"
+            info += f"\tCurrent load step:     {self.load_step}\n"
+            info += f"\tCurrent sub step:      {self.sub_step}\n"
 
-        try:
-            nlist = self._mapdl.set("LIST")
-        except MapdlRuntimeError as err:
-            if "An error occurred while attempting to open the results file" in str(
-                err
-            ):
-                nlist = "Results file is not available"
+            try:
+                nlist = self._mapdl.set("LIST")
+            except MapdlRuntimeError as err:
+                if (
+                    "An error occurred while attempting to open the results file"
+                    in str(err)
+                ):
+                    nlist = "Results file is not available"
+                else:
+                    raise err
+
+            if self._mapdl.parameters.routine == "POST1":
+                info += "\n\n" + nlist
             else:
-                raise err
-
-        if self._mapdl.parameters.routine == "POST1":
-            info += "\n\n" + nlist
-        else:
-            info += "\n\nEnable routine POST1 to see a table of available results"
+                info += "\n\nEnable routine POST1 to see a table of available results"
 
         return info
 
