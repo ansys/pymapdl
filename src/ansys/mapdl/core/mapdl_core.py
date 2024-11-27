@@ -1392,7 +1392,8 @@ class _MapdlCore(Commands):
             self._parent = weakref.ref(parent)
 
         def __enter__(self):
-            self._parent()._log.debug("Entering non-interactive mode")
+            self._parent()._log.debug("Entering in non-interactive mode")
+            self._parent().com("Entering in non_interactive mode")
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
@@ -1409,6 +1410,8 @@ class _MapdlCore(Commands):
                 # No exception so let's flush.
                 self._parent()._log.debug("Exiting non-interactive mode")
                 self._parent()._flush_stored()
+
+            self._parent().com("Exiting non_interactive mode")
 
     class _save_selection:
         """Save the selection and returns to it when exiting"""
