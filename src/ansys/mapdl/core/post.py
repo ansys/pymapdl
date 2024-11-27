@@ -151,8 +151,18 @@ class PostProcessing:
         info += f"\tCurrent load step:     {self.load_step}\n"
         info += f"\tCurrent sub step:      {self.sub_step}\n"
 
+        try:
+            nlist = self._mapdl.set("LIST")
+        except MapdlRuntimeError as err:
+            if "An error occurred while attempting to open the results file" in str(
+                err
+            ):
+                nlist = "Results file is not available"
+            else:
+                raise err
+
         if self._mapdl.parameters.routine == "POST1":
-            info += "\n\n" + self._mapdl.set("LIST")
+            info += "\n\n" + nlist
         else:
             info += "\n\nEnable routine POST1 to see a table of available results"
 
