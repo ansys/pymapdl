@@ -5,18 +5,22 @@
    :keywords: pymapdl, mapdl, simulation, finite elements, python
    :description: Welcome to PyMAPDL documentation.
 
+.. jinja:: main_toctree
+    
+    .. toctree::
+       :hidden:
+       :maxdepth: 3
 
-.. toctree::
-   :hidden:
-   :maxdepth: 3
-
-   getting_started/index
-   user_guide/index
-   mapdl_commands/index
-   api/index
-   examples/index
-   changelog
-
+       getting_started/index
+       user_guide/index
+       {% if build_api %}
+       mapdl_commands/index
+       api/index
+       {% endif %}
+       {% if build_examples %}
+       examples/index
+       {% endif %}
+       changelog
 
 .. image:: ../source/_static/logo_dark.png
     :class: only-dark
@@ -74,13 +78,17 @@
         Check our :ref:`ref_getting_started` section to learn to
         install MAPDL, install PyMAPDL or launch PyMAPDL.
 
-    .. grid-item-card:: :fa:`gears` See some PyMAPDL usage examples
-        :link: ref_examples
-        :link-type: ref
+    .. jinja:: main_toctree
 
-        In our :ref:`ref_examples` section, you
-        can find a great collection of PyMAPDL
-        user cases.
+        {% if build_examples %}
+        .. grid-item-card:: :fa:`gears` See some PyMAPDL usage examples
+            :link: ref_examples
+            :link-type: ref
+
+            In our :ref:`ref_examples` section, you
+            can find a great collection of PyMAPDL
+            user cases..
+        {% endif %}
 
     .. grid-item-card:: :fa:`book-open-reader` Use the different library modules
         :link: ref_user_guide
