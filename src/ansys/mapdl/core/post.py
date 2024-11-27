@@ -139,10 +139,17 @@ class PostProcessing:
     @supress_logging
     def __repr__(self):
         info = "PyMAPDL PostProcessing Instance\n"
-        info += "\tActive Result File:    %s\n" % self.filename
-        info += "\tNumber of result sets: %d\n" % self.nsets
-        info += "\tCurrent load step:     %d\n" % self.load_step
-        info += "\tCurrent sub step:      %d\n" % self.sub_step
+        info += f"\tActive Result File:    {self.filename}\n"
+
+        # If there is no result file, this fails.
+        try:
+            nsets = int(self.nsets)
+        except MapdlRuntimeError:
+            nsets = "NA"
+
+        info += f"\tNumber of result sets: {nsets}\n"
+        info += f"\tCurrent load step:     {self.load_step}\n"
+        info += f"\tCurrent sub step:      {self.sub_step}\n"
 
         if self._mapdl.parameters.routine == "POST1":
             info += "\n\n" + self._mapdl.set("LIST")
