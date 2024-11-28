@@ -1,11 +1,11 @@
 # Setting codespaces/development container
 version: '3.3'
+name: "PyMAPDL-Development"  # this needs to be updated/unique if you want to have multiple containers
 services:
   pymapdldev:
     restart: always
-    shm_size: '2gb'  # Increase the shared memory directory
-    # to avoid running issues. By Default this is very small (64MB)
-    container_name: PyMAPDL-Development
+    shm_size: '2gb'  # Increase the shared memory directory to avoid running issues. By Default this is very small (64MB)
+    container_name: "PyMAPDL-Development"  # this needs to be updated/unique if you want to have multiple containers
     mem_reservation: 8g
     image: 'ghcr.io/ansys/mapdl:v24.1-ubuntu-student'
     build:
