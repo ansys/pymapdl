@@ -628,14 +628,6 @@ class Test_MAPDL_commands(TestClass):
     @patch("ansys.mapdl.core.mapdl_core.PLOT_COMMANDS", [])
     # skip retrieving value
     @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.scalar_param", fake_wrap)
-    @patch(
-        "ansys.mapdl.core._commands.apdl.process_controls.ProcessControls.endif",
-        fake_wrap,
-    )
-    @patch(
-        "ansys.mapdl.core._commands.apdl.process_controls.ProcessControls.enddo",
-        fake_wrap,
-    )
     # Skip output the entity id after geometry manipulation
     @patch("ansys.mapdl.core._commands.parse.parse_a", fake_wrap)
     @patch("ansys.mapdl.core._commands.parse.parse_e", fake_wrap)
