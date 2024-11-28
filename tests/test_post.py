@@ -773,6 +773,7 @@ class Test_plastic_solve(TestClass):
 
     @staticmethod
     def test_list_in_repr(mapdl, resume):
+        mapdl.finish()
         assert "Enable routine POST1 to see a table of available results" in str(
             mapdl.post_processing
         )
