@@ -132,11 +132,20 @@ def test__get_parameter_array(mapdl, cleared, number):
     assert np.allclose(array, mapdl.parameters._get_parameter_array(name, shape))
 
     # High number
-    with pytest.raises(MapdlRuntimeError):
-        shape = (100, 100)
-        array = np.ones(shape) * number
-        mapdl.load_array(name=name, array=array)
-        mapdl.parameters._get_parameter_array(name, shape)
+    shape = (100, 100)
+    array = np.ones(shape) * number
+    mapdl.load_array(name=name, array=array)
+    assert np.allclose(array, mapdl.parameters._get_parameter_array(name, shape))
+
+    # Random number
+    array = np.random.rand(*shape)
+    mapdl.load_array(name=name, array=array)
+    assert np.allclose(array, mapdl.parameters._get_parameter_array(name, shape))
+
+    # Random big number
+    array = np.random.rand(*shape) * number
+    mapdl.load_array(name=name, array=array)
+    assert np.allclose(array, mapdl.parameters._get_parameter_array(name, shape))
 
 
 def parameters_name(mapdl, func, par_name):
