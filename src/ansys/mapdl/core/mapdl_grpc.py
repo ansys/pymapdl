@@ -650,7 +650,7 @@ class MapdlGrpc(MapdlBase):
             _get_std_output,  # Avoid circular import error
         )
 
-        if self._mapdl_process is None:
+        if self._mapdl_process is None or not self._mapdl_process.stdout:
             return
 
         self._log.debug("Reading stdout")
