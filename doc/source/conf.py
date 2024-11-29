@@ -205,7 +205,7 @@ rst_epilog = ""
 with open("links.rst") as f:
     rst_epilog += f.read()
 
-rst_epilog = rst_epilog.replace("%%VERSION%%", "v231")
+rst_epilog = rst_epilog.replace("%%VERSION%%", "v242")
 rst_epilog = rst_epilog.replace("%%PYMAPDLVERSION%%", release)
 
 
@@ -219,8 +219,10 @@ linkcheck_anchors_ignore_for_url = ["https://docs.pyvista.org/api/*"]
 linkcheck_ignore = [
     "https://github.com/ansys/pymapdl/*",
     "https://mapdl.docs.pyansys.com/*",
-    "https://ansysaccount.b2clogin.com/*",  # behind payfirewall
-    "https://ansyshelp.ansys.com/*",  # behind payfirewall
+    "https://www.ansys.com/*",  # behind firewall
+    " https://download.ansys.com/*",  # behind firewall
+    "https://ansysaccount.b2clogin.com/*",  # behind authentication
+    "https://ansyshelp.ansys.com/*",  # behind authentication
     "https://forum.ansys.com/forums/*",  # It is detected as broken
     "https://courses.ansys.com/*",  # It is detected as broken
 ]
