@@ -35,6 +35,7 @@ from ansys.mapdl.core.helpers import is_installed as has_dependency
 from common import (
     Element,
     Node,
+    debug_testing,
     get_details_of_elements,
     get_details_of_nodes,
     has_dpf,
@@ -44,7 +45,6 @@ from common import (
     is_on_ubuntu,
     is_running_on_student,
     is_smp,
-    log_apdl,
     log_test_start,
     make_sure_not_instances_are_left_open,
     restart_mapdl,
@@ -58,6 +58,7 @@ from common import (
 # ---------------------------
 #
 
+DEBUG_TESTING = debug_testing()
 TESTING_MINIMAL = testing_minimal()
 
 ON_LOCAL = is_on_local()
@@ -74,7 +75,6 @@ HAS_GRPC = has_grpc()
 HAS_DPF = has_dpf()
 SUPPORT_PLOTTING = support_plotting()
 IS_SMP = is_smp()
-LOG_APDL = log_apdl()
 
 QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
 VALID_PORTS = []
@@ -183,6 +183,13 @@ def requires_dependency(dependency: str):
         return pytest.mark.skip(reason=f"Requires '{dependency}' package")
 
 
+if DEBUG_TESTING:
+    from ansys.mapdl.core import LOG
+
+    LOG.setLevel("DEBUG")
+    LOG.log_to_file("pymapdl.log")
+
+
 ################################################################
 #
 # Importing packages
@@ -265,7 +272,7 @@ def pytest_report_header(config, start_path, startdir):
     text = []
     text += ["Testing variables".center(get_terminal_size()[0], "-")]
     text += [
-        f"Session dependent: ON_CI ({ON_CI}), TESTING_MINIMAL ({TESTING_MINIMAL}), SUPPORT_PLOTTING ({SUPPORT_PLOTTING})"
+        f"Session dependent: DEBUG_TESTING ({DEBUG_TESTING}), ON_CI ({ON_CI}), TESTING_MINIMAL ({TESTING_MINIMAL}), SUPPORT_PLOTTING ({SUPPORT_PLOTTING})"
     ]
     text += [
         f"OS dependent: ON_LINUX ({ON_LINUX}), ON_UBUNTU ({ON_UBUNTU}), ON_WINDOWS ({ON_WINDOWS}), ON_MACOS ({ON_MACOS})"
@@ -429,7 +436,7 @@ def run_before_and_after_tests(
     mapdl = restart_mapdl(mapdl)
 
     # Write test info to log_apdl
-    if LOG_APDL:
+    if DEBUG_TESTING:
         log_test_start(mapdl)
 
     # check if the local/remote state has changed or not
@@ -551,7 +558,9 @@ def mapdl_console(request):
             "Valid versions are up to 2020R2."
         )
 
-    mapdl = launch_mapdl(console_path, log_apdl=LOG_APDL)
+    mapdl = launch_mapdl(
+        console_path, log_apdl="pymapdl.apdl" if DEBUG_TESTING else None
+    )
     from ansys.mapdl.core.mapdl_console import MapdlConsole
 
     assert isinstance(mapdl, MapdlConsole)
@@ -582,8 +591,10 @@ def mapdl(request, tmpdir_factory):
         cleanup_on_exit=cleanup,
         license_server_check=False,
         start_timeout=50,
-        log_apdl=LOG_APDL,
+        log_apdl="pymapdl.apdl" if DEBUG_TESTING else None,
+        loglevel="DEBUG" if DEBUG_TESTING else "ERROR",
     )
+
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures
     MAPDL_VERSION = mapdl.version  # Caching version
 
@@ -594,6 +605,9 @@ def mapdl(request, tmpdir_factory):
 
     if mapdl.is_local:
         assert Path(mapdl.directory) == Path(run_path)
+
+    if DEBUG_TESTING:
+        mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
 
     # using yield rather than return here to be able to test exit
     yield mapdl

@@ -157,14 +157,14 @@ def testing_minimal():
     return os.environ.get("TESTING_MINIMAL", "NO").upper().strip() in ["YES", "TRUE"]
 
 
-def log_apdl() -> bool:
-    if os.environ.get("PYMAPDL_LOG_APDL"):
-        log_apdl = os.environ.get("PYMAPDL_LOG_APDL")
+def debug_testing() -> bool:
+    if os.environ.get("PYMAPDL_DEBUG_TESTING"):
+        debug_testing = os.environ.get("PYMAPDL_DEBUG_TESTING")
 
-        if log_apdl.lower() in ["true", "false", "yes", "no"]:
-            return log_apdl.lower() in ["true", "yes"]
+        if debug_testing.lower() in ["true", "false", "yes", "no"]:
+            return debug_testing.lower() in ["true", "yes"]
         else:
-            return log_apdl
+            return debug_testing
 
     else:
         return False
