@@ -228,7 +228,7 @@ def log_test_start(mapdl: Mapdl) -> None:
     )
 
     mapdl.run("!")
-    mapdl.run(f"! PyMAPDL running test: {test_name}")
+    mapdl.run(f"! PyMAPDL running test: {test_name}"[:639])
     mapdl.run("!")
 
     # To see it also in MAPDL terminal output
@@ -241,6 +241,7 @@ def log_test_start(mapdl: Mapdl) -> None:
             types_ = ["File path", "Test function"]
 
         mapdl._run("/com,Running test in:", mute=True)
+
         for type_, name_ in zip(types_, test_name):
             mapdl._run(f"/com,    {type_}: {name_}", mute=True)
 
