@@ -220,7 +220,7 @@ linkcheck_ignore = [
     "https://github.com/ansys/pymapdl/*",
     "https://mapdl.docs.pyansys.com/*",
     "https://www.ansys.com/*",  # behind firewall
-    " https://download.ansys.com/*",  # behind firewall
+    "https://download.ansys.com/*",  # behind firewall
     "https://ansysaccount.b2clogin.com/*",  # behind authentication
     "https://ansyshelp.ansys.com/*",  # behind authentication
     "https://forum.ansys.com/forums/*",  # It is detected as broken
