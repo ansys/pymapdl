@@ -30,6 +30,7 @@ from unittest.mock import patch
 import warnings
 
 import psutil
+from pyfakefs.fake_filesystem import OSType
 import pytest
 
 from ansys.mapdl import core as pymapdl
@@ -94,15 +95,11 @@ try:
     from ansys.mapdl.core.launcher import get_default_ansys
 
     installed_mapdl_versions = list(get_available_ansys_installations().keys())
-    try:
-        V150_EXEC = find_mapdl("150")[0]
-    except ValueError:
-        V150_EXEC = ""
 except:
     from conftest import MAPDL_VERSION
 
     installed_mapdl_versions = [MAPDL_VERSION]
-    V150_EXEC = ""
+
 
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS as versions
 
@@ -137,6 +134,12 @@ def get_fake_process(message_stdout, message_stderr="", time_sleep=0):
 
 
 @pytest.fixture
+def my_fs(fs):
+    # fs.add_real_directory("/proc", lazy_read=False)
+    yield fs
+
+
+@pytest.fixture
 def fake_local_mapdl(mapdl):
     """Fixture to execute asserts before and after a test is run"""
     # Setup: fill with any logic you want
@@ -148,8 +151,7 @@ def fake_local_mapdl(mapdl):
     mapdl._local = False
 
 
-@requires("local")
-@requires("windows")
+@patch("os.name", "nt")
 def test_validate_sw():
     # ensure that windows adds msmpi
     # fake windows path
@@ -157,15 +159,20 @@ def test_validate_sw():
     add_sw = set_MPI_additional_switches("", version=version)
     assert "msmpi" in add_sw
 
-    add_sw = set_MPI_additional_switches("-mpi intelmpi", version=version)
-    assert "msmpi" in add_sw and "intelmpi" not in add_sw
+    with pytest.warns(
+        UserWarning, match="Due to incompatibilities between this MAPDL version"
+    ):
+        add_sw = set_MPI_additional_switches("-mpi intelmpi", version=version)
+        assert "msmpi" in add_sw and "intelmpi" not in add_sw
 
-    add_sw = set_MPI_additional_switches("-mpi INTELMPI", version=version)
-    assert "msmpi" in add_sw and "INTELMPI" not in add_sw
+    with pytest.warns(
+        UserWarning, match="Due to incompatibilities between this MAPDL version"
+    ):
+        add_sw = set_MPI_additional_switches("-mpi INTELMPI", version=version)
+        assert "msmpi" in add_sw and "INTELMPI" not in add_sw
 
 
 @requires("ansys-tools-path")
-@requires("local")
 @pytest.mark.parametrize("path_data", paths)
 def test_version_from_path(path_data):
     exec_file, version = path_data
@@ -173,41 +180,102 @@ def test_version_from_path(path_data):
 
 
 @requires("ansys-tools-path")
-@requires("local")
 def test_catch_version_from_path():
     with pytest.raises(RuntimeError):
         version_from_path("mapdl", "abc")
 
 
+@pytest.mark.parametrize(
+    "path,version,raises",
+    [
+        ["/ansys_inc/v221/ansys/bin/ansys221", 22.1, None],
+        ["/ansys_inc/v222/ansys/bin/mapdl", 22.2, None],
+        ["/usr/ansys_inc/v231/ansys/bin/mapdl", 23.1, None],
+        ["/usr/ansys_inc/v232/ansys/bin/mapdl", 23.2, None],
+        ["/usr/ansys_inc/v241/ansys/bin/mapdl", 24.1, None],
+        ["/ansysinc/v242/ansys/bin/ansys2", 24.2, ValueError],
+        ["/ansysinc/v242/ansys/bin/mapdl", 24.2, ValueError],
+    ],
+)
 @requires("ansys-tools-path")
-@requires("local")
-@requires("linux")
-def test_find_mapdl_linux():
-    # assuming ansys is installed, should be able to find it on linux
-    # without env var
+def test_find_mapdl_linux(my_fs, path, version, raises):
+    my_fs.os = OSType.LINUX
+    my_fs.create_file(path)
+
     bin_file, ver = pymapdl.launcher.find_mapdl()
-    assert os.path.isfile(bin_file)
-    assert isinstance(ver, float)
+
+    if raises:
+        assert not bin_file
+        assert not ver
+
+    else:
+        assert bin_file.startswith(path.replace("mapdl", ""))
+        assert isinstance(ver, float)
+        assert ver == version
 
 
 @requires("ansys-tools-path")
-@requires("local")
-def test_invalid_mode(mapdl, cleared):
+@patch("psutil.cpu_count", lambda *args, **kwargs: 2)
+@patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
+@patch("ansys.mapdl.core.launcher.get_process_at_port", lambda *args, **kwargs: None)
+def test_invalid_mode(mapdl, my_fs, cleared, monkeypatch):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    monkeypatch.delenv("PYMAPDL_IP", False)
+    monkeypatch.delenv("PYMAPDL_PORT", False)
+
+    my_fs.create_file("/ansys_inc/v241/ansys/bin/ansys241")
     with pytest.raises(ValueError):
-        exec_file = find_mapdl(installed_mapdl_versions[0])[0]
+        exec_file = find_mapdl()[0]
         pymapdl.launch_mapdl(
             exec_file, port=mapdl.port + 1, mode="notamode", start_timeout=start_timeout
         )
 
 
 @requires("ansys-tools-path")
-@requires("local")
-@pytest.mark.skipif(not os.path.isfile(V150_EXEC), reason="Requires v150")
-def test_old_version(mapdl, cleared):
-    exec_file = find_mapdl("150")[0]
-    with pytest.raises(ValueError):
+@pytest.mark.parametrize("version", [120, 170, 190])
+@patch("psutil.cpu_count", lambda *args, **kwargs: 2)
+@patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
+@patch("ansys.mapdl.core.launcher.get_process_at_port", lambda *args, **kwargs: None)
+def test_old_version_not_version(mapdl, my_fs, cleared, monkeypatch, version):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    monkeypatch.delenv("PYMAPDL_IP", False)
+    monkeypatch.delenv("PYMAPDL_PORT", False)
+
+    exec_file = f"/ansys_inc/v{version}/ansys/bin/ansys{version}"
+    my_fs.create_file(exec_file)
+    assert exec_file == find_mapdl()[0]
+
+    with pytest.raises(
+        ValueError, match="The MAPDL gRPC interface requires MAPDL 20.2 or later"
+    ):
         pymapdl.launch_mapdl(
-            exec_file, port=mapdl.port + 1, mode="console", start_timeout=start_timeout
+            exec_file=exec_file,
+            port=mapdl.port + 1,
+            mode="grpc",
+            start_timeout=start_timeout,
+        )
+
+
+@requires("ansys-tools-path")
+@pytest.mark.parametrize("version", [203, 213, 351])
+@patch("psutil.cpu_count", lambda *args, **kwargs: 2)
+@patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
+@patch("ansys.mapdl.core.launcher.get_process_at_port", lambda *args, **kwargs: None)
+def test_not_valid_versions(mapdl, my_fs, cleared, monkeypatch, version):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+    monkeypatch.delenv("PYMAPDL_IP", False)
+    monkeypatch.delenv("PYMAPDL_PORT", False)
+
+    exec_file = f"/ansys_inc/v{version}/ansys/bin/ansys{version}"
+    my_fs.create_file(exec_file)
+
+    assert exec_file == find_mapdl()[0]
+    with pytest.raises(ValueError, match="MAPDL version must be one of the following"):
+        pymapdl.launch_mapdl(
+            exec_file=exec_file,
+            port=mapdl.port + 1,
+            mode="grpc",
+            start_timeout=start_timeout,
         )
 
 
@@ -244,7 +312,6 @@ def test_license_type_keyword_names(monkeypatch, license_name):
     assert f"-p {license_name}" in args["additional_switches"]
 
 
-# @requires("local")
 @pytest.mark.parametrize("license_name", LICENSES)
 def test_license_type_additional_switch(license_name):
     args = launch_mapdl(
@@ -721,7 +788,7 @@ def test_get_slurm_options(set_env_var_context, validation):
     ],
 )
 def test_slurm_ram(monkeypatch, ram, expected, context):
-    monkeypatch.setenv("SLURM_MEM_PER_NODE", ram)
+    monkeypatch.setenv("SLURM_MEM_PER_NODE", str(ram))
     monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "asdf/qwer/poiu")
 
     args = {
@@ -1208,7 +1275,7 @@ def test_launch_grpc(tmpdir, launch_on_hpc):
 @pytest.mark.parametrize("env", [None, 3, 10])
 def test_get_cpus(monkeypatch, arg, env):
     if env:
-        monkeypatch.setenv("PYMAPDL_NPROC", env)
+        monkeypatch.setenv("PYMAPDL_NPROC", str(env))
 
     context = NullContext()
     cores_machine = psutil.cpu_count(logical=False)  # it is patched
@@ -1440,7 +1507,7 @@ def test_launch_on_hpc_not_found_ansys(mck_sc, mck_lgrpc, mck_kj, monkeypatch):
 
 def test_launch_on_hpc_exception_launch_mapdl(monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
-    exec_file = "path/to/mapdl/v242/executable/ansys242"
+    exec_file = "path/to/mapdl/v242/ansys/bin/executable/ansys242"
 
     process = get_fake_process("ERROR")
 
@@ -1475,7 +1542,7 @@ def test_launch_on_hpc_exception_launch_mapdl(monkeypatch):
 
 def test_launch_on_hpc_exception_successfull_sbatch(monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
-    exec_file = "path/to/mapdl/v242/executable/ansys242"
+    exec_file = "path/to/mapdl/v242/ansys/bin/executable/ansys242"
 
     def raise_exception(*args, **kwargs):
         raise Exception("Fake exception when launching MAPDL")
@@ -1603,7 +1670,7 @@ def test_get_port(monkeypatch, port, port_envvar, start_instance, port_busy, res
 
     monkeypatch.delenv("PYMAPDL_PORT", False)
     if port_envvar:
-        monkeypatch.setenv("PYMAPDL_PORT", port_envvar)
+        monkeypatch.setenv("PYMAPDL_PORT", str(port_envvar))
 
     # Testing
     if port_busy:
@@ -1706,7 +1773,7 @@ def test_get_version_version_error(monkeypatch):
 
 @pytest.mark.parametrize("version", [211, 221, 232])
 def test_get_version_env_var(monkeypatch, version):
-    monkeypatch.setenv("PYMAPDL_MAPDL_VERSION", version)
+    monkeypatch.setenv("PYMAPDL_MAPDL_VERSION", str(version))
 
     assert version == get_version(None)
     assert version != get_version(241)
