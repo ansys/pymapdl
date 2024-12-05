@@ -20,8 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import re
 import os
+import re
 
 from ansys.tools.versioning import server_meets_version
 import numpy as np
@@ -32,7 +32,6 @@ from ansys.mapdl.core.database import MINIMUM_MAPDL_VERSION, DBDef, MapdlDb
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlVersionError
 from ansys.mapdl.core.misc import random_string
 from conftest import ON_CI, TestClass
-
 
 if os.name == "nt":
     # it keeps failing in MAPDL manually compiled version
