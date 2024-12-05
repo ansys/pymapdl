@@ -1335,7 +1335,10 @@ class MapdlGrpc(MapdlBase):
                     pids = set(re.findall(r"-9 (\d+)", raw))
                 self._pids = [int(pid) for pid in pids]
 
-        if not self._pids:
+        if not self._pids and not self._mapdl_process:
+            self._log.debug(f"MAPDL process is not provided. PIDs could not be retrieved.")
+            return
+        elif not self._pids:
             # For the cases where the cleanup file is not generated,
             # we relay on the process.
             parent_pid = self._mapdl_process.pid
