@@ -2219,7 +2219,7 @@ def test_inquire_invalid(mapdl, cleared):
 
 def test_inquire_default(mapdl, cleared):
     mapdl.title("heeeelloo")
-    assert Path(mapdl.directory) == Path(mapdl.inquire())
+    assert str(Path(mapdl.directory)) == str(Path(mapdl.inquire()))
 
 
 def test_vwrite_error(mapdl, cleared):

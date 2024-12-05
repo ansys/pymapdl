@@ -542,7 +542,7 @@ def check_mapdl_launch(
         MAPDL did not start.
     """
     LOG.debug("Generating queue object for stdout")
-    stdout_queue, _ = _create_queue_for_std(process.stdout)
+    # stdout_queue, thread = _create_queue_for_std(process.stdout)
 
     # Checking connection
     try:
@@ -554,7 +554,7 @@ def check_mapdl_launch(
 
         if os.name == "posix" and not ON_WSL:
             LOG.debug("Checking if gRPC server is alive.")
-            _check_server_is_alive(stdout_queue, run_location, timeout)
+            # _check_server_is_alive(stdout_queue, run_location, timeout)
 
     except MapdlDidNotStart as e:  # pragma: no cover
         msg = (
@@ -563,9 +563,9 @@ def check_mapdl_launch(
             + f"\nCommand line used: {' '.join(cmd)}\n\n"
         )
 
-        terminal_output = "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
-        if terminal_output.strip():
-            msg = msg + "The full terminal output is:\n\n" + terminal_output
+        # terminal_output = "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
+        # if terminal_output.strip():
+        #     msg = msg + "The full terminal output is:\n\n" + terminal_output
 
         raise MapdlDidNotStart(msg) from e
 

@@ -1392,7 +1392,8 @@ class _MapdlCore(Commands):
             self._parent = weakref.ref(parent)
 
         def __enter__(self):
-            self._parent()._log.debug("Entering non-interactive mode")
+            self._parent()._log.debug("Entering in non-interactive mode")
+            self._parent().com("Entering in non_interactive mode")
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
@@ -2216,6 +2217,8 @@ class _MapdlCore(Commands):
 
         command = command.strip()
 
+        is_comment = command.startswith("!") or command.upper().startswith("/COM")
+
         # always reset the cache
         self._reset_cache()
 
@@ -2261,7 +2264,7 @@ class _MapdlCore(Commands):
             # simply return the contents of the file
             return self.list(*command.split(",")[1:])
 
-        if "=" in command:
+        if "=" in command and not is_comment:
             # We are storing a parameter.
             param_name = command.split("=")[0].strip()
 
@@ -2272,6 +2275,7 @@ class _MapdlCore(Commands):
         self._before_run(command)
 
         short_cmd = parse_to_short_cmd(command)
+        self._log.debug(f"Running (verbose: {verbose}, mute={mute}): '{command}'")
         text = self._run(command, verbose=verbose, mute=mute)
 
         if (
@@ -2867,11 +2871,6 @@ class _MapdlCore(Commands):
                 else:
                     # Catching only the first error.
                     error_message = error_message.group(0)
-
-                # Trimming empty lines
-                error_message = "\n".join(
-                    [each for each in error_message.splitlines() if each]
-                )
 
                 # Trimming empty lines
                 error_message = "\n".join(
