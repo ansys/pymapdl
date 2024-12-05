@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import re
+import os
 
 from ansys.tools.versioning import server_meets_version
 import numpy as np
@@ -61,8 +62,8 @@ def db(mapdl):
         )
 
     mapdl.clear()
-    if mapdl.db.active and mapdl.db._stub is None:
-        mapdl.db._stop()
+    if mapdl.db.active or mapdl.db._stub is None:
+        mapdl.db.stop()
 
     mapdl.db.start()
     return mapdl.db
@@ -145,8 +146,8 @@ def test_clear(db):
 def test__channel_str(db):
     assert db._channel_str is not None
     assert ":" in db._channel_str
-    assert re.search("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", db._channel_str)
-    assert re.search("\d{4,6}", db._channel_str)
+    assert re.search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", db._channel_str)
+    assert re.search(r"\d{4,6}", db._channel_str)
 
 
 def test_off_db(mapdl, cleared, db):
