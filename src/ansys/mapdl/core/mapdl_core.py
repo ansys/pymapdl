@@ -1411,8 +1411,6 @@ class _MapdlCore(Commands):
                 self._parent()._log.debug("Exiting non-interactive mode")
                 self._parent()._flush_stored()
 
-            self._parent().com("Exiting non_interactive mode")
-
     class _save_selection:
         """Save the selection and returns to it when exiting"""
 
