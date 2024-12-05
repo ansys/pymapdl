@@ -599,7 +599,7 @@ def mapdl(request, tmpdir_factory):
     if ON_CI:
         mapdl._local = ON_LOCAL  # CI: override for testing
 
-    if mapdl.is_local:
+    if ON_LOCAL and mapdl.is_local:
         assert Path(mapdl.directory) == Path(run_path)
 
     if LOG_APDL:
