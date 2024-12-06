@@ -400,6 +400,7 @@ class MapdlGrpc(MapdlBase):
             log_apdl=log_apdl,
             log_file=log_file,
             print_com=print_com,
+            mode="grpc",
             **start_parm,
         )
         self._mode: Literal["grpc"] = "grpc"

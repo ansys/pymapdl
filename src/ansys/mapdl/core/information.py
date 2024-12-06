@@ -25,6 +25,7 @@ import re
 import weakref
 
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core.errors import MapdlExitedError
 
 
 def update_information_first(update=False):
@@ -122,6 +123,9 @@ class Information:
         self._mapdl._log.debug("Information class: Updated")
 
     def __repr__(self):
+        if self._mapdl.is_console and self._mapdl.exited:
+            return "MAPDL exited"
+
         if not self._stats:
             self._update()
 
