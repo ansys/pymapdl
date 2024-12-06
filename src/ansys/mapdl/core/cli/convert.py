@@ -21,13 +21,14 @@
 # SOFTWARE.
 
 import os
+from typing import Any, List
 
 import click
 
-_USING_PIPE = [False]
+_USING_PIPE: List[bool] = [False]
 
 
-def get_input_source(ctx, param, value):
+def get_input_source(ctx: click.Context, param: Any, value: Any):
     if not value and not click.get_text_stream("stdin").isatty():
         _USING_PIPE[0] = True
         return click.get_text_stream("stdin").read().strip()
@@ -180,7 +181,7 @@ def convert(
     use_vtk: bool,
     clear_at_start: bool,
     check_parameter_names: bool,
-):
+) -> None:
     """Convert MAPDL code to PyMAPDL"""
     from ansys.mapdl.core.convert import convert_apdl_block, convert_script
 

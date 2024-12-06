@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from typing import Optional
+
 import click
 
 
@@ -49,7 +51,21 @@ By default, it stops instances running on the port 50052.""",
     default=False,
     help="Kill all MAPDL instances",
 )
-def stop(port, pid, all):
+def stop(port: int, pid: Optional[int], all: bool) -> None:
+    """Stop MAPDL instances running on a given port or with a given process id (PID).
+
+    This command stops MAPDL instances running on a given port or with a given process id (PID).
+    By default, it stops instances running on the port 50052.
+
+    Parameters
+    ----------
+    port : int
+        Port where the MAPDL instance is running.
+    pid : Optional[int]
+        PID of the MAPDL instance
+    all : bool
+        If :class:`True`, kill all the instances regardless their port or PID.
+    """
     import psutil
 
     from ansys.mapdl.core.launcher import is_ansys_process
