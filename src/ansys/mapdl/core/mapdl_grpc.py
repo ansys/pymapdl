@@ -657,7 +657,7 @@ class MapdlGrpc(MapdlBase):
             _get_std_output,  # Avoid circular import error
         )
 
-        if self._mapdl_process is None:
+        if self._mapdl_process is None or not self._mapdl_process.stdout:
             return
 
         self._log.debug("Reading stdout")
@@ -2703,7 +2703,7 @@ class MapdlGrpc(MapdlBase):
     @property
     def is_alive(self) -> bool:
         """True when there is an active connect to the gRPC server"""
-        if self.channel_state not in ["IDLE", "READY"]:
+        if self.channel_state not in ["IDLE", "READY", None]:
             self._log.debug(
                 "MAPDL instance is not alive because the channel is not 'IDLE' o 'READY'."
             )
