@@ -1947,3 +1947,34 @@ def raising():
 @patch("ansys.mapdl.core.launcher.check_valid_ansys", raising)
 def test_check_has_mapdl_failed():
     assert check_has_mapdl() is False
+
+
+@requires("local")
+@requires("nostudent")
+def test_mapdl_output(tmpdir):
+    def submitter(**kwargs):
+        from _io import FileIO
+
+        from ansys.mapdl.core.launcher import submitter
+
+        # Checking we are passing the arguments
+        assert isinstance(kwargs["stdout"], FileIO)
+        assert kwargs["stderr"] is subprocess.STDOUT
+
+        return submitter(**kwargs)
+
+    with patch("ansys.mapdl.core.launcher.submitter") as mck_sub:
+
+        mapdl_output = os.path.join(tmpdir, "apdl.out")
+        mapdl = launch_mapdl(mapdl_output=mapdl_output)
+
+    assert os.path.exists(mapdl_output)
+
+    with open(mapdl_output, "r") as fid:
+        content = fid.read()
+
+    assert "Beta activation of the GRPC server." in content
+    assert "### START GRPC SERVER      ###" in content
+    assert "Server listening on" in content
+
+    mapdl.exit(force=True)
