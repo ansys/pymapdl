@@ -20,7 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import logging
 import re
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -134,11 +136,20 @@ def test__get_parameter_array(mapdl, cleared, number):
     assert np.allclose(array, mapdl.parameters._get_parameter_array(name, shape))
 
     # High number
-    with pytest.raises(MapdlRuntimeError):
-        shape = (100, 100)
-        array = np.ones(shape) * number
-        mapdl.load_array(name=name, array=array)
-        mapdl.parameters._get_parameter_array(name, shape)
+    shape = (100, 100)
+    array = np.ones(shape) * number
+    mapdl.load_array(name=name, array=array)
+    assert np.allclose(array, mapdl.parameters._get_parameter_array(name, shape))
+
+    # Random number
+    array = np.random.rand(*shape)
+    mapdl.load_array(name=name, array=array)
+    assert np.allclose(array, mapdl.parameters._get_parameter_array(name, shape))
+
+    # Random big number
+    array = np.random.rand(*shape) * number
+    mapdl.load_array(name=name, array=array)
+    assert np.allclose(array, mapdl.parameters._get_parameter_array(name, shape))
 
 
 def parameters_name(mapdl, func, par_name):
@@ -461,3 +472,25 @@ def test_non_interactive(mapdl, cleared):
         mapdl.parameters["qwer"] = 3
 
     assert mapdl.parameters["qwer"] == 3
+
+
+@pytest.mark.parametrize("value", [121, 299])
+def test_failing_get_routine(mapdl, caplog, value):
+    from ansys.mapdl.core.parameters import ROUTINE_MAP
+
+    prev_level = mapdl.logger.logger.level
+    mapdl.logger.setLevel(logging.INFO)
+
+    with patch("ansys.mapdl.core.mapdl_extended._MapdlExtended.get_value") as mck:
+        mck.return_value = value
+        with caplog.at_level(logging.INFO):
+            routine = mapdl.parameters.routine
+
+        mck.assert_called_once()
+
+    txt = str(caplog.text)
+    assert f"Getting a valid routine number failed." in txt
+    assert f"Routine obtained is {value}. Executing 'FINISH'." in txt
+    assert routine == ROUTINE_MAP[0]
+
+    mapdl.logger.setLevel(prev_level)
