@@ -1951,7 +1951,7 @@ def test_check_has_mapdl_failed():
 
 @requires("local")
 @requires("nostudent")
-def test_mapdl_output_patch(tmpdir):
+def test_mapdl_output(tmpdir):
     def submitter(**kwargs):
         from _io import FileIO
 
@@ -1975,6 +1975,6 @@ def test_mapdl_output_patch(tmpdir):
 
     assert "Beta activation of the GRPC server." in content
     assert "### START GRPC SERVER      ###" in content
-    assert " Server listening on" in content
+    assert "Server listening on" in content
 
     mapdl.exit(force=True)
