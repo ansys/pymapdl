@@ -35,7 +35,7 @@ import socket
 import subprocess  # nosec B404
 import threading
 import time
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Union
 import warnings
 
 import psutil
@@ -115,7 +115,6 @@ ALLOWABLE_LAUNCH_MAPDL_ARGS = [
     "license_type",
     "log_apdl",
     "loglevel",
-    "mapdl_output",
     "mode",
     "nproc",
     "override",
@@ -438,7 +437,6 @@ def launch_grpc(
     run_location: str = None,
     env_vars: Optional[Dict[str, str]] = None,
     launch_on_hpc: bool = False,
-    mapdl_output: Optional[str] = None,
 ) -> subprocess.Popen:
     """Start MAPDL locally in gRPC mode.
 
@@ -457,9 +455,6 @@ def launch_grpc(
     launch_on_hpc : bool, optional
         If running on an HPC, this needs to be :class:`True` to avoid the
         temporary file creation on Windows.
-
-    mapdl_output : str, optional
-        Whether redirect MAPDL console output (stdout and stderr) to a file.
 
     Returns
     -------
@@ -492,13 +487,6 @@ def launch_grpc(
         "\n============"
     )
 
-    if mapdl_output:
-        stdout = open(str(mapdl_output), "wb", 0)
-        stderr = subprocess.STDOUT
-    else:
-        stdout = subprocess.PIPE
-        stderr = subprocess.PIPE
-
     if os.name == "nt":
         # getting tmp file name
         if not launch_on_hpc:
@@ -517,8 +505,8 @@ def launch_grpc(
         shell=shell,  # sbatch does not work without shell.
         cwd=run_location,
         stdin=subprocess.DEVNULL,
-        stdout=stdout,
-        stderr=stderr,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
         env_vars=env_vars,
     )
 
@@ -608,11 +596,7 @@ def _check_file_error_created(run_location, timeout):
         raise MapdlDidNotStart(msg)
 
 
-def _check_server_is_alive(stdout_queue, timeout):
-    if not stdout_queue:
-        LOG.debug("No STDOUT queue. Not checking MAPDL this way.")
-        return
-
+def _check_server_is_alive(stdout_queue, run_location, timeout):
     t0 = time.time()
     empty_attemps = 3
     empty_i = 0
@@ -645,9 +629,6 @@ def _check_server_is_alive(stdout_queue, timeout):
 
 
 def _get_std_output(std_queue, timeout=1):
-    if not std_queue:
-        return [None]
-
     lines = []
     reach_empty = False
     t0 = time.time()
@@ -661,15 +642,10 @@ def _get_std_output(std_queue, timeout=1):
     return lines
 
 
-def _create_queue_for_std(
-    std: subprocess.PIPE,
-) -> Tuple[Optional[Queue[str]], Optional[threading.Thread]]:
+def _create_queue_for_std(std):
     """Create a queue and thread objects for a given PIPE std"""
-    if not std:
-        LOG.debug("No STDOUT. Not checking MAPDL this way.")
-        return None, None
 
-    def enqueue_output(out: subprocess.PIPE, queue: Queue[str]) -> None:
+    def enqueue_output(out, queue):
         try:
             for line in iter(out.readline, b""):
                 queue.put(line)
@@ -679,8 +655,8 @@ def _create_queue_for_std(
             # ValueError: PyMemoryView_FromBuffer(): info -> buf must not be NULL
             pass
 
-    q: Queue[str] = Queue()
-    t: threading.Thread = threading.Thread(target=enqueue_output, args=(std, q))
+    q = Queue()
+    t = threading.Thread(target=enqueue_output, args=(std, q))
     t.daemon = True  # thread dies with the program
     t.start()
 
@@ -688,7 +664,7 @@ def _create_queue_for_std(
 
 
 def launch_remote_mapdl(
-    version: Optional[str] = None,
+    version: str = None,
     cleanup_on_exit: bool = True,
 ) -> MapdlGrpc:
     """Start MAPDL remotely using the product instance management API.
@@ -1044,7 +1020,6 @@ def launch_mapdl(
     version: Optional[Union[int, str]] = None,
     running_on_hpc: bool = True,
     launch_on_hpc: bool = False,
-    mapdl_output: Optional[str] = None,
     **kwargs: Dict[str, Any],
 ) -> Union[MapdlGrpc, "MapdlConsole"]:
     """Start MAPDL locally.
@@ -1229,9 +1204,6 @@ def launch_mapdl(
         :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>`
         to specify the scheduler arguments as a string or as a dictionary.
         For more information, see :ref:`ref_hpc_slurm`.
-
-    mapdl_output : str, optional
-        Redirect the MAPDL console output to a given file.
 
     kwargs : dict, Optional
         These keyword arguments are interface-specific or for
@@ -1603,7 +1575,6 @@ def launch_mapdl(
                 run_location=args["run_location"],
                 env_vars=env_vars,
                 launch_on_hpc=args.get("launch_on_hpc"),
-                mapdl_output=args.get("mapdl_output"),
             )
 
             if args["launch_on_hpc"]:
