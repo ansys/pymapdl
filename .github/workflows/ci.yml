@@ -36,6 +36,7 @@ env:
   PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=10 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html'
 
   BUILD_CHEATSHEET: True
+  PYMAPDL_DEBUG_TESTING: True
 
   # Following env vars when changed will "reset" the mentioned cache,
   # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
@@ -713,6 +714,27 @@ jobs:
             --reset_only_failed --add_missing_images \
             --cov-report=xml:${{ matrix.mapdl-version }}-local.xml
 
+      - name: "Collect logs on failure"
+        if: always()
+        env:
+          LOG_NAMES: logs-local-${{ matrix.mapdl-version }}
+        run: |
+          .ci/collect_mapdl_logs_local.sh
+
+      - name: "Upload logs to GitHub"
+        if: always()
+        uses: actions/upload-artifact@master
+        with:
+          name: logs-local-${{ matrix.mapdl-version }}.tgz
+          path: ./logs-local-${{ matrix.mapdl-version }}.tgz
+
+      - name: "Display files structure"
+        if: always()
+        env:
+          LOG_NAMES: logs-local-${{ matrix.mapdl-version }}
+        run: |
+          .ci/display_logs_locals.sh
+
       - name: "Adding the directory as safe directory for later step"
         run: |
           git config --global --add safe.directory $GITHUB_WORKSPACE
@@ -850,6 +872,27 @@ jobs:
             ${{ env.PYTEST_ARGUMENTS }} \
             --cov-report=xml:${{ matrix.mapdl-version }}-minimal.xml
 
+      - name: "Collect logs on failure"
+        if: always()
+        env:
+          LOG_NAMES: logs-minimal-${{ matrix.mapdl-version }}
+        run: |
+          .ci/collect_mapdl_logs_local.sh
+
+      - name: "Upload logs to GitHub"
+        if: always()
+        uses: actions/upload-artifact@master
+        with:
+          name: logs-minimal-${{ matrix.mapdl-version }}.tgz
+          path: ./logs-minimal-${{ matrix.mapdl-version }}.tgz
+
+      - name: "Display files structure"
+        if: always()
+        env:
+          LOG_NAMES: logs-minimal-${{ matrix.mapdl-version }}
+        run: |
+          .ci/display_logs_locals.sh
+    
       - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
         with:
