@@ -589,6 +589,7 @@ def mapdl(request, tmpdir_factory):
         start_timeout=50,
         log_apdl=LOG_APDL,
         loglevel="DEBUG" if LOG_APDL else "ERROR",
+        mapdl_output="apdl.out" if LOG_APDL else None,
     )
 
     mapdl._show_matplotlib_figures = False  # CI: don't show matplotlib figures

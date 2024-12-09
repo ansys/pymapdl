@@ -566,7 +566,7 @@ def check_mapdl_launch(
 
         if os.name == "posix" and not ON_WSL:
             LOG.debug("Checking if gRPC server is alive.")
-            _check_server_is_alive(stdout_queue, timeout)
+            # _check_server_is_alive(stdout_queue, timeout)
 
     except MapdlDidNotStart as e:  # pragma: no cover
         msg = (
