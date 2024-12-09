@@ -137,6 +137,7 @@
 .. _lmod_docs: https://lmod.readthedocs.io/en/latest/
 .. _pygad_docs: https://pygad.readthedocs.io/en/latest/
 .. _ga_article: https://blog.derlin.ch/genetic-algorithms-with-pygad
+.. _simutech_linux_dependencies: https://install.simutechgroup.com/info-required-linux-packages-and-libraries
 
 
 .. #Github links:
