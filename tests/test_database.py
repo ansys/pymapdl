@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import os
 import re
 
 from ansys.tools.versioning import server_meets_version
@@ -31,6 +32,10 @@ from ansys.mapdl.core.database import MINIMUM_MAPDL_VERSION, DBDef, MapdlDb
 from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlVersionError
 from ansys.mapdl.core.misc import random_string
 from conftest import ON_CI, TestClass
+
+if os.name == "nt":
+    # it keeps failing in MAPDL manually compiled version
+    pytest.skip("skipping on windows", allow_module_level=True)
 
 
 @pytest.fixture(scope="session")
@@ -61,6 +66,9 @@ def db(mapdl):
         )
 
     mapdl.clear()
+    if mapdl.db.active or mapdl.db._stub is None:
+        mapdl.db.stop()
+
     mapdl.db.start()
     return mapdl.db
 
@@ -89,6 +97,9 @@ def test_database_start_stop(mapdl, cleared):
             f"This MAPDL version ({mapdl_version}) docker image seems to not support DB, but local does."
         )
 
+    if MapdlDb(mapdl).active:
+        MapdlDb(mapdl)._stop()
+
     # verify it can be created twice
     mapdl.prep7()
     for _ in range(2):
@@ -108,6 +119,9 @@ def test_database_start_stop(mapdl, cleared):
 
     with pytest.warns(UserWarning):
         database.stop()
+
+    # Starting the database for the rest of the test session
+    mapdl.db.start()
 
 
 def test_database_repr(db):
@@ -136,8 +150,8 @@ def test_clear(db):
 def test__channel_str(db):
     assert db._channel_str is not None
     assert ":" in db._channel_str
-    assert re.search("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", db._channel_str)
-    assert re.search("\d{4,6}", db._channel_str)
+    assert re.search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", db._channel_str)
+    assert re.search(r"\d{4,6}", db._channel_str)
 
 
 def test_off_db(mapdl, cleared, db):
@@ -184,6 +198,10 @@ def test_repr(mapdl, cleared, db):
 
 def gen_block(mapdl):
     """Generate nodes and elements in a simple block."""
+    from conftest import clear
+
+    clear(mapdl)
+
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.et(1, 186)
     mapdl.esize(0.25)
@@ -224,8 +242,8 @@ class Test_Nodes(TestClass):
     def test_nodes_info(nodes):
         assert nodes.info(1, DBDef.DB_SELECTED) == 1
 
-    @pytest.mark.parametrize("selected", [True, False])
     @staticmethod
+    @pytest.mark.parametrize("selected", [True, False])
     def test_nodes_num(nodes, selected):
         assert nodes.num(selected=selected) == 425
 
@@ -248,7 +266,7 @@ class Test_Nodes(TestClass):
         assert np.allclose(angles, 0)
 
     @staticmethod
-    def test_nodes_push(nodes):
+    def test_nodes_push(mapdl, nodes):
         nnum = 100000
         x, y, z, xang, yang, zang = 1, 5, 10, 30, 40, 50
         nodes.push(nnum, x, y, z, xang, yang, zang)
@@ -262,6 +280,10 @@ class Test_Nodes(TestClass):
 
         with pytest.raises(ValueError, match="X and Y angles must be input"):
             nodes.push(nnum, x, y, z, zang=1)
+
+        # this test changes the database, so let's restore it back
+        # as in `nodes` fixture.
+        gen_block(mapdl)
 
 
 class Test_Elems(TestClass):

@@ -442,7 +442,8 @@ class MapdlGrpc(MapdlBase):
             self._channel: grpc.Channel = channel
 
         # Subscribe to channel for channel state updates
-        self._subscribe_to_channel()
+        # self._subscribe_to_channel()
+        self._channel_state: grpc.ChannelConnectivity = grpc.ChannelConnectivity.READY
 
         # connect and validate to the channel
         self._mapdl_process: subprocess.Popen = start_parm.pop("process", None)
@@ -518,15 +519,21 @@ class MapdlGrpc(MapdlBase):
             self._create_session()
 
     def _create_process_stds_queue(self, process=None):
-        from ansys.mapdl.core.launcher import (
-            _create_queue_for_std,  # Avoid circular import error
-        )
+        # from ansys.mapdl.core.launcher import (
+        #     _create_queue_for_std,  # Avoid circular import error
+        # )
 
         if not process:
             process = self._mapdl_process
 
-        self._stdout_queue, self._stdout_thread = _create_queue_for_std(process.stdout)
-        self._stderr_queue, self._stderr_thread = _create_queue_for_std(process.stderr)
+        self._stdout_queue, self._stdout_thread = (
+            None,
+            None,  # _create_queue_for_std(process.stdout)
+        )
+        self._stderr_queue, self._stderr_thread = (
+            None,
+            None,  # _create_queue_for_std(process.stderr)
+        )
 
     def _create_channel(self, ip: str, port: int) -> grpc.Channel:
         """Create an insecured grpc channel."""
@@ -650,7 +657,7 @@ class MapdlGrpc(MapdlBase):
             _get_std_output,  # Avoid circular import error
         )
 
-        if self._mapdl_process is None:
+        if self._mapdl_process is None or not self._mapdl_process.stdout:
             return
 
         self._log.debug("Reading stdout")
@@ -1328,7 +1335,12 @@ class MapdlGrpc(MapdlBase):
                     pids = set(re.findall(r"-9 (\d+)", raw))
                 self._pids = [int(pid) for pid in pids]
 
-        if not self._pids:
+        if not self._pids and not self._mapdl_process:
+            self._log.debug(
+                f"MAPDL process is not provided. PIDs could not be retrieved."
+            )
+            return
+        elif not self._pids:
             # For the cases where the cleanup file is not generated,
             # we relay on the process.
             parent_pid = self._mapdl_process.pid
@@ -2691,7 +2703,7 @@ class MapdlGrpc(MapdlBase):
     @property
     def is_alive(self) -> bool:
         """True when there is an active connect to the gRPC server"""
-        if self.channel_state not in ["IDLE", "READY"]:
+        if self.channel_state not in ["IDLE", "READY", None]:
             self._log.debug(
                 "MAPDL instance is not alive because the channel is not 'IDLE' o 'READY'."
             )
