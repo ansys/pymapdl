@@ -1967,7 +1967,7 @@ def test_mapdl_output(tmpdir):
     mapdl.exit()
 
 
-def test_mapdl_output_patch(tmpdir):
+def test_mapdl_output(tmpdir):
     def submitter(**kwargs):
         from _io import FileIO
 
