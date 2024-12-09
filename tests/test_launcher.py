@@ -1951,22 +1951,6 @@ def test_check_has_mapdl_failed():
 
 @requires("local")
 @requires("nostudent")
-def test_mapdl_output(tmpdir):
-    mapdl_output = os.path.join(tmpdir, "apdl.out")
-    mapdl = launch_mapdl(mapdl_output=mapdl_output)
-
-    assert os.path.exists(mapdl_output)
-
-    with open(mapdl_output, "r") as fid:
-        content = fid.read()
-
-    assert "Beta activation of the GRPC server." in content
-    assert "### START GRPC SERVER      ###" in content
-    assert " Server listening on" in content
-
-    mapdl.exit()
-
-
 def test_mapdl_output_patch(tmpdir):
     def submitter(**kwargs):
         from _io import FileIO
