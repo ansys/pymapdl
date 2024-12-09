@@ -1977,4 +1977,4 @@ def test_mapdl_output_patch(tmpdir):
     assert "### START GRPC SERVER      ###" in content
     assert " Server listening on" in content
 
-    mapdl.exit()
+    mapdl.exit(force=True)
