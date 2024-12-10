@@ -178,6 +178,7 @@ _ALLOWED_START_PARM = [
     "jobid",
     "jobname",
     "launch_on_hpc",
+    "mode",
     "nproc",
     "override",
     "port",
@@ -252,7 +253,7 @@ class _MapdlCore(Commands):
         self._store_commands: bool = False
         self._stored_commands = []
         self._response = None
-        self._mode = None
+        self._mode = start_parm.get("mode", None)
         self._mapdl_process = None
         self._launched: bool = start_parm.get("launched", False)
         self._stderr = None
@@ -1290,6 +1291,9 @@ class _MapdlCore(Commands):
 
     def _wrap_xsel_commands(self):
         # Wrapping XSEL commands.
+        if self.is_console:
+            return
+
         def wrap_xsel_function(func):
             if hasattr(func, "__func__"):
                 func.__func__.__doc__ = inject_docs(
