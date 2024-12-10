@@ -2428,11 +2428,6 @@ def test_not_correct_et_element(mapdl, cleared):
         mapdl.keyopt(1, 222)
 
 
-def test_ctrl(mapdl, cleared):
-    mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
-    mapdl._ctrl("set_verb", 0)  # Returning to non-verbose
-
-
 def test_cleanup_loggers(mapdl, cleared):
     assert mapdl.logger is not None
     assert mapdl.logger.hasHandlers()

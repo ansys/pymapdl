@@ -2123,15 +2123,6 @@ class _MapdlCommandExtended(_MapdlCore):
 
         return ComponentListing(super().cmlist(*args, **kwargs))
 
-    @wraps(_MapdlCore.solve)
-    def solve(self, action="", **kwargs):
-        self._ctrl("set_verb", 0)
-        if hasattr(self, "logger") and self.logger is not None:
-            self.logger.debug("Disabling gRPC logging when solving")
-
-        # TODO: Implement a get verbose option on server side
-        return super().solve(action=action, **kwargs)
-
 
 class _MapdlExtended(_MapdlCommandExtended):
     """Extend Mapdl class with new functions"""
