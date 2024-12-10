@@ -736,7 +736,6 @@ def cube_geom_and_mesh(cleared, mapdl):
 @pytest.fixture(scope="function")
 def cube_solve(cleared, mapdl, cube_geom_and_mesh):
     # solve first 10 non-trivial modes
-    mapdl.file("file")
     out = mapdl.modal_analysis(nmode=10, freqb=1)
 
 
