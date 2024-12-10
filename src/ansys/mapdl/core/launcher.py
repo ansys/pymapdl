@@ -65,7 +65,7 @@ if _HAS_PIM:
     import ansys.platform.instancemanagement as pypim
 
 if _HAS_ATP:
-    from ansys.tools.path import find_mapdl, get_ansys_path
+    from ansys.tools.path import find_mapdl, get_mapdl_path
     from ansys.tools.path import version_from_path as _version_from_path
 
     @wraps(_version_from_path)
@@ -856,7 +856,7 @@ def get_default_ansys_version():
 
 def check_valid_ansys():
     """Checks if a valid version of ANSYS is installed and preconfigured"""
-    ansys_bin = get_ansys_path(allow_input=False)
+    ansys_bin = get_mapdl_path(allow_input=False)
     if ansys_bin is not None:
         version = version_from_path("mapdl", ansys_bin)
         return not (version < 170 and os.name != "posix")
@@ -2362,7 +2362,7 @@ def get_exec_file(args: Dict[str, Any]) -> None:
             return
 
         LOG.debug("Using default executable.")
-        args["exec_file"] = get_ansys_path(version=args.get("version"))
+        args["exec_file"] = get_mapdl_path(version=args.get("version"))
 
         # Edge case
         if args["exec_file"] is None:
