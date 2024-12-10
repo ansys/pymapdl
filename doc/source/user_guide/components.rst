@@ -36,7 +36,7 @@ Set a component without specifying the type, by default it is ``NODE``:
    >>> mapdl.components["mycomp4"] = (1, 2, 3)
    /Users/german.ayuso/pymapdl/src/ansys/mapdl/core/component.py:347: UserWarning: Assuming   a KP selection.
    It is recommended you use the following notation to avoid this warning:
-   > mapdl.components['mycomp4'] = 'KP' (1, 2, 3)
+   > mapdl.components['mycomp4'] = 'KP', (1, 2, 3)
    Alternatively, you disable this warning using:
    > mapdl.components.default_entity_warning=False
    warnings.warn(

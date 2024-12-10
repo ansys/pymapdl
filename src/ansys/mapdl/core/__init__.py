@@ -128,8 +128,8 @@ if _HAS_ATP:
     from ansys.tools.path.path import (
         change_default_ansys_path,
         find_mapdl,
-        get_ansys_path,
         get_available_ansys_installations,
+        get_mapdl_path,
         save_ansys_path,
     )
 

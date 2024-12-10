@@ -41,7 +41,7 @@ from ansys.mapdl.core.launcher import (
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
 
 if _HAS_ATP:
-    from ansys.tools.path import get_ansys_path, version_from_path
+    from ansys.tools.path import get_mapdl_path, version_from_path
 
 if _HAS_TQDM:
     from tqdm import tqdm
@@ -281,7 +281,7 @@ class MapdlPool:
 
             if not exec_file:  # get default executable
                 if _HAS_ATP:
-                    exec_file = get_ansys_path()
+                    exec_file = get_mapdl_path()
                 else:
                     raise ValueError(
                         "Please use 'exec_file' argument to specify the location of the ansys installation.\n"

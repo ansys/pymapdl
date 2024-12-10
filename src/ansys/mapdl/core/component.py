@@ -74,7 +74,7 @@ UNDERLYING_DICT = Dict[str, ITEMS_VALUES]
 warning_entity = (
     "Assuming a {default_entity} selection.\n"
     "It is recommended you use the following notation to avoid this warning:\n"
-    ">>> mapdl.components['{key}'] = '{default_entity}' {value}\n"
+    ">>> mapdl.components['{key}'] = '{default_entity}', {value}\n"
     "Alternatively, you disable this warning using:\n"
     ">>> mapdl.components.default_entity_warning=False"
 )
@@ -204,7 +204,7 @@ class ComponentManager:
     >>> mapdl.components["mycomp4"] = (1, 2, 3)
     /Users/german.ayuso/pymapdl/src/ansys/mapdl/core/component.py:282: UserWarning: Assuming a NODES selection.
     It is recommended you use the following notation to avoid this warning:
-    \>\>\> mapdl.components['mycomp3'] = 'NODES' (1, 2, 3)
+    \>\>\> mapdl.components['mycomp3'] = 'NODES', (1, 2, 3)
     Alternatively, you disable this warning using:
     > mapdl.components.default_entity_warning=False
     warnings.warn(

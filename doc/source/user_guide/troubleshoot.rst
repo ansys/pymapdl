@@ -412,6 +412,8 @@ dependencies.
                 libxp6
 
 
+An useful resource is `HOW TO - Install Ansys' Required Linux Packages & Libraries <simutech_linux_dependencies_>`_.
+
 .. _conflicts_student_version:
 
 Conflicts with student version

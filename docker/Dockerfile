@@ -11,8 +11,7 @@ ENV ANSYS_VERSION=$VERSION
 
 # Location env var
 # This var needs to be updated when version changes.
-ENV AWP_ROOT222=/ansys_inc
-
+ENV AWP_ROOT242=/ansys_inc
 
 # LABELS
 LABEL description="MAPDL on Ubuntu"
@@ -23,16 +22,25 @@ LABEL org.opencontainers.image.documentation="https://mapdl.docs.pyansys.com"
 
 # Update packages before packing and
 # installing dependencies
+# libxp.so missing. This is a workaround
+#https://bugs.launchpad.net/ubuntu/+source/libxp/+bug/1517884
 RUN apt-get update && \
     apt-get install -y \
       sudo \
       git \
       python3.10-venv \
+      python3-pip \
       openssh-client \
+      libgomp1 \
       libgl1 \
       libglu1 \
       libxm4 \
-      libxi6
+      libxi6 && \
+    apt install -y software-properties-common \
+    && add-apt-repository -y ppa:zeehio/libxp \
+    && apt-get update \
+    && apt-get install -y libxp6 && \
+    mkdir -p /ansys_inc
 
 # libxp.so missing. This is a workaround
 #https://bugs.launchpad.net/ubuntu/+source/libxp/+bug/1517884
@@ -41,35 +49,37 @@ RUN apt install -y software-properties-common \
     && apt-get update \
     && apt-get install -y libxp6
 
+# Setting home directory
+ENV HOME=/home/$USERNAME
 
-# Create the user
-RUN groupadd --gid $USER_GID $USERNAME \
-    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME
-
+# Setting working directory
+ENV WORKING_DIRECTORY=/jobs
 
 # Copying files
-RUN mkdir -p /ansys_inc
 COPY $MAPDL_PATH /ansys_inc
+
+# Adding locales
+RUN apt-get install -y locales && \
+    locale-gen 'en_US.UTF-8' && \
+    update-locale LC_ALL='en_US.UTF-8' && \
+    sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen && \
+    echo -e '\nexport LANG=en_US.UTF-8\nexport LANGUAGE=en_US:en\nexport LC_ALL=en_US.UTF-8' >> ~/.bashrc
 
 # Cleaning
 RUN rm -rf .dockerignore \
     && rm -rf Dockerfile \
     && rm -rf *.log
 
-
-# Setting working directory
-ENV WORKING_DIRECTORY=/jobs
-
-# Setting home directory
-ENV HOME=/home/$USERNAME
-
 # License server
 # (Optional)
 # ENV LICENSE_SERVER=111.222.333.444
 # ENV ANSYSLMD_LICENSE_FILE=1055@$LICENSE_SERVER
 
-# Add a working directory and make it accessible to any user
-RUN mkdir -p /home/$USERNAME/$WORKING_DIRECTORY \
+# Add username, create the working directory and make it accessible to any user
+RUN groupadd --gid $USER_GID $USERNAME \
+    && useradd --uid $USER_UID --gid $USER_GID -m $USERNAME && \
+    mkdir -p /home/$USERNAME/$WORKING_DIRECTORY \
     && \
     chown -R $USERNAME:$USERNAME /home/$USERNAME/$WORKING_DIRECTORY \
     && \
@@ -78,14 +88,16 @@ RUN mkdir -p /home/$USERNAME/$WORKING_DIRECTORY \
 # Setting other env vars
 ## For MAPDL awareness
 ENV ON_DOCKER=TRUE
+ENV DEBIAN_FRONTEND=noninteractive
 
 ENV OMPI_ALLOW_RUN_AS_ROOT=1
 ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
 # Adding alias to ansys executable
-RUN printf '#!/bin/bash\n/ansys_inc/v$ANSYS_VERSION/ansys/bin/mapdl "$@"' > /usr/bin/ansys && \
-    chmod +x /usr/bin/ansys
-RUN printf '#!/bin/bash\n/ansys_inc/v$ANSYS_VERSION/ansys/bin/mapdl -grpc "$@"' > /usr/bin/ansysgrpc && \
+RUN echo 'alias ansys="/ansys_inc/v$ANSYS_VERSION/ansys/bin/mapdl"' >> ~/.bashrc && \
+    printf '#!/bin/bash\n/ansys_inc/v$ANSYS_VERSION/ansys/bin/mapdl "$@"' > /usr/bin/ansys && \
+    chmod +x /usr/bin/ansys && \
+    printf '#!/bin/bash\n/ansys_inc/v$ANSYS_VERSION/ansys/bin/mapdl -grpc "$@"' > /usr/bin/ansysgrpc && \
     chmod +x /usr/bin/ansysgrpc
 
 # Setting user

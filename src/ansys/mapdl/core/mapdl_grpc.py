@@ -931,6 +931,9 @@ class MapdlGrpc(MapdlBase):
     def _run_at_connect(self):
         """Run house-keeping commands when initially connecting to MAPDL."""
         # increase the number of variables allowed in POST26 to the maximum
+        with self.run_as_routine("Begin level"):
+            self._run("/verify", mute=False)
+
         with self.run_as_routine("POST26"):
             self.numvar(200, mute=True)
 
@@ -1611,6 +1614,11 @@ class MapdlGrpc(MapdlBase):
             return
 
         resp = self._stub.Ctrl(request)
+
+        if cmd.lower() == "set_verb" and str(opt1) == "0":
+            warn("Disabling gRPC verbose ('_ctr') by issuing also '/VERIFY' command.")
+            self.run("/verify")
+
         if hasattr(resp, "response"):
             return resp.response
 
