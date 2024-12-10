@@ -2436,6 +2436,7 @@ def test_ctrl(mapdl, cleared):
 
         assert "/verify" in mck_run.call_args_list[0].args[0]
 
+    mapdl.finish()
     mapdl.run("/verify")  # mocking might skip running this inside mapdl._ctrl
 
 
