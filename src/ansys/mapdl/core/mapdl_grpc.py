@@ -1614,6 +1614,11 @@ class MapdlGrpc(MapdlBase):
             return
 
         resp = self._stub.Ctrl(request)
+
+        if cmd.lower() == "set_verb" and str(opt1) == "0":
+            warn("Disabling gRPC verbose ('_ctr') by issuing also '/VERIFY' command.")
+            self.run("/verify")
+
         if hasattr(resp, "response"):
             return resp.response
 
