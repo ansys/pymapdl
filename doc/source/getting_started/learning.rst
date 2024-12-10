@@ -40,7 +40,7 @@ Downloads
 
 .. jinja:: cheat_sheet
   
-  - View and download :download:`PyMAPDL cheatsheet <https://mapdl.docs.ansys.com/version/{{ version }}/_static/cheatsheet.pdf>`
+  - View and download :download:`PyMAPDL cheatsheet <https://github.com/ansys/pymapdl/blob/gh-pages/version/{{ version }}/_static/cheat_sheet.pdf>`  
     to help you to learn PyMAPDL.
 
 - Visit :ref:`ref_examples` to learn how PyMAPDL can be used to solve different real problems.
