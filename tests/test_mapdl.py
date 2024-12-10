@@ -2576,3 +2576,19 @@ def test_raising_warns(python_version, minimal_version, deprecating, context):
         reload(pymapdl)
 
     pymapdl.helpers.run_first_time()
+
+
+def test_max_cmd_len(mapdl):
+    with pytest.raises(
+        ValueError, match="Maximum command length must be less than 640 characters"
+    ):
+        cmd = "a" * 640
+        mapdl.run(cmd)
+
+
+def test_max_cmd_len_mapdlgrpc(mapdl):
+    with pytest.raises(
+        ValueError, match="Maximum command length must be less than 640 characters"
+    ):
+        cmd = "a" * 640
+        mapdl._run(cmd)
