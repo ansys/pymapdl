@@ -73,7 +73,7 @@ from ansys.mapdl.core.launcher import (
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from ansys.mapdl.core.misc import stack
+from ansys.mapdl.core.misc import check_has_mapdl, stack
 from conftest import (
     ON_LOCAL,
     PATCH_MAPDL,
@@ -879,7 +879,7 @@ def test_ip_and_start_instance(
 
     ###################
     # Faking MAPDL launching and returning args
-    with warnings.catch_warnings():
+    with warnings.catch_warnings(record=True):
         options = launch_mapdl(
             start_instance=start_instance,
             ip=ip,
@@ -1790,11 +1790,18 @@ def test_get_version_env_var(monkeypatch, version):
             pytest.raises(VersionError, match="Running MAPDL as a service requires"),
             None,
         ],
+        [
+            "anymode",
+            None,
+            "posix",
+            pytest.warns(UserWarning, match="PyMAPDL couldn't detect MAPDL version"),
+            "anymode",
+        ],
     ],
 )
 def test_check_mode(mode, version, osname, context, res):
     with patch("os.name", osname):
-        with context:
+        with context as cnt:
             assert res == check_mode(mode, version)
 
 
@@ -1924,3 +1931,19 @@ def test_args_pass(monkeypatch, arg, value, method):
     mapdl = launch_mapdl(**kwargs)
     meth = getattr(mapdl, method)
     assert meth == value
+
+
+def test_check_has_mapdl():
+    if TESTING_MINIMAL:
+        assert check_has_mapdl() is False
+    else:
+        assert check_has_mapdl() == ON_LOCAL
+
+
+def raising():
+    raise Exception("An error")
+
+
+@patch("ansys.mapdl.core.launcher.check_valid_ansys", raising)
+def test_check_has_mapdl_failed():
+    assert check_has_mapdl() is False

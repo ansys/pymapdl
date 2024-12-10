@@ -22,6 +22,7 @@
 
 """Test MAPDL interface"""
 from datetime import datetime
+from importlib import reload
 import os
 from pathlib import Path
 import re
@@ -29,6 +30,7 @@ import shutil
 import tempfile
 import time
 from unittest.mock import patch
+from warnings import catch_warnings
 
 import grpc
 import numpy as np
@@ -44,6 +46,7 @@ if has_dependency("ansys-mapdl-reader"):
     from ansys.mapdl.reader.rst import Result
 
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core import USER_DATA_PATH
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
@@ -60,7 +63,8 @@ from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 
 # Path to files needed for examples
 PATH = os.path.dirname(os.path.abspath(__file__))
-test_files = os.path.join(PATH, "test_files")
+TEST_FILES = os.path.join(PATH, "test_files")
+FIRST_TIME_FILE = os.path.join(USER_DATA_PATH, ".firstime")
 
 
 if VALID_PORTS:
@@ -832,7 +836,7 @@ def test_partial_mesh_nnum2(mapdl, make_block):
 def test_cyclic_solve(mapdl, cleared):
     # build the cyclic model
     mapdl.shpp("off")
-    mapdl.cdread("db", os.path.join(test_files, "sector.cdb"))
+    mapdl.cdread("db", os.path.join(TEST_FILES, "sector.cdb"))
     mapdl.prep7()
     time.sleep(1.0)
     mapdl.cyclic()
@@ -2425,8 +2429,15 @@ def test_not_correct_et_element(mapdl, cleared):
 
 
 def test_ctrl(mapdl, cleared):
-    mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
-    mapdl._ctrl("set_verb", 0)  # Returning to non-verbose
+    with patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.run") as mck_run:
+
+        mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
+        mapdl._ctrl("set_verb", 0)  # Returning to non-verbose
+
+        assert "/verify" in mck_run.call_args_list[0].args[0]
+
+    mapdl.finish()
+    mapdl.run("/verify")  # mocking might skip running this inside mapdl._ctrl
 
 
 def test_cleanup_loggers(mapdl, cleared):
@@ -2505,3 +2516,63 @@ def test_cwd_changing_directory(mapdl, cleared):
 
     assert mapdl._path == prev_path
     assert mapdl.directory == prev_path
+
+
+def test_load_not_raising_warning():
+    assert os.path.exists(FIRST_TIME_FILE)
+
+    os.remove(FIRST_TIME_FILE)
+
+    with catch_warnings(record=True):
+        reload(pymapdl)
+
+
+@pytest.mark.parametrize(
+    "python_version,minimal_version,deprecating,context",
+    [
+        ((3, 9, 10), (3, 9), False, catch_warnings(record=True)),  # standard case
+        (
+            (3, 9, 10),
+            (3, 9),
+            True,
+            pytest.warns(UserWarning, match="will be dropped in the next minor"),
+        ),
+        (
+            (3, 9, 10),
+            (3, 10),
+            False,
+            pytest.warns(
+                UserWarning, match="It is recommended you use a newer version of Python"
+            ),
+        ),
+        (
+            (3, 9, 10),
+            (3, 10),
+            True,
+            pytest.warns(
+                UserWarning, match="It is recommended you use a newer version of Python"
+            ),
+        ),
+    ],
+)
+def test_raising_warns(python_version, minimal_version, deprecating, context):
+    # To trigger the warnings
+    os.remove(FIRST_TIME_FILE)
+
+    def func(*args, **kwargs):
+        return python_version
+
+    # We can't use "reload" here because it seems to remove the patching
+    with (
+        patch("ansys.mapdl.core.helpers.get_python_version", func),
+        patch("ansys.mapdl.core.DEPRECATING_MINIMUM_PYTHON_VERSION", deprecating),
+        patch("ansys.mapdl.core.MINIMUM_PYTHON_VERSION", minimal_version),
+        context,
+    ):
+        pymapdl.helpers.run_first_time()
+
+    # Assert warnings won't be retrigger
+    with catch_warnings(record=True):
+        reload(pymapdl)
+
+    pymapdl.helpers.run_first_time()

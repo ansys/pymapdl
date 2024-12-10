@@ -15,7 +15,7 @@ and then copy the generated files to the container.
 Requirements
 ============
 
-* A linux machine, preferable with Ubuntu 18.04 or later.
+* A linux machine, preferable with Ubuntu 20.04 or later.
   CentOS Linux distribution is not supported anymore.
   This machine needs to have `Docker <https://www.docker.com>`_ installed.
 
@@ -87,8 +87,8 @@ which you should modify to adapt it to your needs.
     cp ./path-to-pymapdl/pymapdl/docker/.dockerignore
 
     # Creating env vars for the Dockerfile
-    export VERSION=222
-    export TAG="V222"
+    export VERSION=242  # MAPDL version
+    export TAG="V242"  # docker container tag
     export MAPDL_PATH=/path_to_mapdl_installation/ansys_inc
 
     # Build Docker image

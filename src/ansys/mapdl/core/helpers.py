@@ -22,6 +22,7 @@
 
 """Module for helper functions"""
 
+from functools import namedtuple
 import importlib
 import os
 import sys
@@ -43,6 +44,10 @@ def is_installed(package_name: str) -> bool:
         return False
 
 
+def get_python_version() -> namedtuple:
+    return sys.version_info
+
+
 def run_first_time() -> None:
     """Run this function the first time PyMAPDL is imported"""
     from ansys.mapdl.core import (
@@ -61,11 +66,13 @@ def run_first_time() -> None:
             os.makedirs(USER_DATA_PATH)
 
         # Show warning about Python compatibility
-        py_ver = f"{sys.version_info[0]}.{sys.version_info[1]}"
+        version_info = get_python_version()
+
+        py_ver = f"{version_info[0]}.{version_info[1]}"
         py_ver_min = f"{MINIMUM_PYTHON_VERSION[0]}.{MINIMUM_PYTHON_VERSION[1]}"
 
         if (
-            sys.version_info[1] == MINIMUM_PYTHON_VERSION[1]
+            version_info[1] == MINIMUM_PYTHON_VERSION[1]
             and DEPRECATING_MINIMUM_PYTHON_VERSION
         ):
             warn(
@@ -73,7 +80,7 @@ def run_first_time() -> None:
                 "release."
             )
 
-        if sys.version_info[1] <= MINIMUM_PYTHON_VERSION[1]:
+        if version_info[1] < MINIMUM_PYTHON_VERSION[1]:
             warn(
                 f"Python {py_ver} is not being tested or officially supported. "
                 "It is recommended you use a newer version of Python. "

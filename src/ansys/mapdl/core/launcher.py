@@ -65,7 +65,7 @@ if _HAS_PIM:
     import ansys.platform.instancemanagement as pypim
 
 if _HAS_ATP:
-    from ansys.tools.path import find_mapdl, get_ansys_path
+    from ansys.tools.path import find_mapdl, get_mapdl_path
     from ansys.tools.path import version_from_path as _version_from_path
 
     @wraps(_version_from_path)
@@ -856,7 +856,7 @@ def get_default_ansys_version():
 
 def check_valid_ansys():
     """Checks if a valid version of ANSYS is installed and preconfigured"""
-    ansys_bin = get_ansys_path(allow_input=False)
+    ansys_bin = get_mapdl_path(allow_input=False)
     if ansys_bin is not None:
         version = version_from_path("mapdl", ansys_bin)
         return not (version < 170 and os.name != "posix")
@@ -914,8 +914,8 @@ def set_MPI_additional_switches(
     add_sw_lower_case = add_sw.lower()
 
     # known issues with distributed memory parallel (DMP)
-    if "smp" not in add_sw_lower_case:  # pragma: no cover
-        if _HAS_ATP and os.name == "nt":
+    if os.name == "nt" and "smp" not in add_sw_lower_case:  # pragma: no cover
+        if _HAS_ATP:
             condition = not force_intel and version and (222 > version >= 210)
         else:
             warnings.warn(
@@ -1644,6 +1644,13 @@ def check_mode(mode: ALLOWABLE_MODES, version: Optional[int] = None):
     """
     if not mode and not version:
         return "grpc"
+    elif not version:
+        warnings.warn(
+            "PyMAPDL couldn't detect MAPDL version, hence it could not "
+            f"verify that the provided connection mode '{mode}' is compatible "
+            "with the current MAPDL installation."
+        )
+        return mode
 
     if isinstance(mode, str):
         mode = mode.lower()
@@ -2351,7 +2358,7 @@ def get_exec_file(args: Dict[str, Any]) -> None:
             return
 
         LOG.debug("Using default executable.")
-        args["exec_file"] = get_ansys_path(version=args.get("version"))
+        args["exec_file"] = get_mapdl_path(version=args.get("version"))
 
         # Edge case
         if args["exec_file"] is None:
