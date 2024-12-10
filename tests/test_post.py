@@ -55,9 +55,10 @@ def test_repr(mapdl, cleared):
     assert "Enable routine POST1 to see a table of available results" in repr_
 
     mapdl.post1()
-    repr_ = mapdl.post_processing.__repr__()
-    assert "Enable routine POST1 to see a table of available results" not in repr_
-    assert mapdl.set("LIST") in repr_
+    assert (
+        "Enable routine POST1 to see a table of available results"
+        not in mapdl.post_processing.__repr__()
+    )
 
 
 class Test_static_solve(TestClass):
@@ -769,6 +770,16 @@ class Test_plastic_solve(TestClass):
         mapdl.header("off", "off", "off", "off", "off", "off")
         nsigfig = 10
         mapdl.format("", "E", nsigfig + 9, nsigfig)
+
+    @staticmethod
+    def test_list_in_repr(mapdl, resume):
+        mapdl.finish()
+        assert "Enable routine POST1 to see a table of available results" in str(
+            mapdl.post_processing
+        )
+
+        mapdl.post1()
+        assert mapdl.set("LIST") in mapdl.post_processing.__str__()
 
     @staticmethod
     @pytest.mark.parametrize("comp", COMPONENT_STRESS_TYPE)
