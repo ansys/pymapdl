@@ -876,7 +876,7 @@ def test_pick_areas(mapdl, make_block, selection):
 def test_plotter_input(mapdl, make_block):
     import pyvista as pv
 
-    pl = MapdlPlotter(off_screen=False)
+    pl = MapdlPlotter()
     pl2 = mapdl.eplot(return_plotter=True, plotter=pl)
     assert pl is pl2
     pl2.show()  # plotting for catching
