@@ -225,11 +225,6 @@ class MapdlPlotter(Plotter):
         list[pv.PolyData]
             Plotted meshes.
         """
-        datasets = []
-        for actor in self.scene.actors.values():
-            if hasattr(actor, "mapper"):
-                datasets.append(actor.mapper.dataset)
-
         return [
             actor.mapper.dataset
             for actor in self.scene.actors.values()
