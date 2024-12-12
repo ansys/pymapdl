@@ -1187,12 +1187,13 @@ class MapdlGrpc(MapdlBase):
         if self._local:
             self._cache_pids()  # Recache processes
 
-            if os.name == "nt":
-                self._kill_server()
+            self._exit_mapdl_server()
+
             self._close_process()
+
             self._remove_lock_file(path)
         else:
-            self._kill_server()
+            self._exit_mapdl_server()
 
     def _remove_temp_dir_on_exit(self, path=None):
         """Removes the temporary directory created by the launcher.
@@ -1218,7 +1219,7 @@ class MapdlGrpc(MapdlBase):
                     tmp_dir,
                 )
 
-    def _kill_server(self):
+    def _exit_mapdl_server(self):
         """Call exit(0) on the server.
 
         Notes
@@ -1230,6 +1231,9 @@ class MapdlGrpc(MapdlBase):
         """
         if self._exited:
             return
+
+        self.finish()
+        self.verify()  # to avoid issues while parsing
 
         if (
             self._version and self._version >= 24.2
@@ -1287,15 +1291,12 @@ class MapdlGrpc(MapdlBase):
         Notes
         -----
         This is effectively the only way to completely close down MAPDL locally on
-        linux. Just killing the server with ``_kill_server`` leaves orphaned
+        linux. Just killing the server with ``_exit_mapdl_server`` leaves orphaned
         processes making this method ineffective for a local instance of MAPDL.
 
         """
         self._log.debug("Closing processes")
         if self._local:
-            # killing server process
-            self._kill_server()
-
             # killing main process (subprocess)
             self._kill_process()
 
