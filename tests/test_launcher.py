@@ -1949,26 +1949,35 @@ def test_check_has_mapdl_failed():
     assert check_has_mapdl() is False
 
 
-@requires("local")
-@requires("nostudent")
-def test_mapdl_output(tmpdir):
-    def submitter(**kwargs):
+@patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
+@patch("ansys.mapdl.core.launcher.check_mapdl_launch", lambda *args, **kwargs: None)
+def test_mapdl_output_pass_arg(tmpdir):
+    def submitter(*args, **kwargs):
         from _io import FileIO
-
-        from ansys.mapdl.core.launcher import submitter
 
         # Checking we are passing the arguments
         assert isinstance(kwargs["stdout"], FileIO)
         assert kwargs["stderr"] is subprocess.STDOUT
 
-        return submitter(**kwargs)
+        return
 
-    with patch("ansys.mapdl.core.launcher.submitter") as mck_sub:
+    with patch("ansys.mapdl.core.launcher.submitter", submitter) as mck_sub:
+        mapdl_output = os.path.join(tmpdir, "apdl.txt")
+        args = launch_mapdl(just_launch=True, mapdl_output=mapdl_output)
 
-        mapdl_output = os.path.join(tmpdir, "apdl.out")
-        mapdl = launch_mapdl(mapdl_output=mapdl_output)
+    assert isinstance(args, list)
+
+
+@requires("local")
+@requires("nostudent")
+def test_mapdl_output(tmpdir):
+    mapdl_output = os.path.join(tmpdir, "apdl.txt")
+    mapdl = launch_mapdl(mapdl_output=mapdl_output, port=50058)
 
     assert os.path.exists(mapdl_output)
+
+    mapdl.prep7()
+    mapdl.exit(force=True)
 
     with open(mapdl_output, "r") as fid:
         content = fid.read()
@@ -1976,5 +1985,3 @@ def test_mapdl_output(tmpdir):
     assert "Beta activation of the GRPC server." in content
     assert "### START GRPC SERVER      ###" in content
     assert "Server listening on" in content
-
-    mapdl.exit(force=True)
