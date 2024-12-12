@@ -1949,6 +1949,7 @@ def test_check_has_mapdl_failed():
     assert check_has_mapdl() is False
 
 
+@requires("local")
 @patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
 @patch("ansys.mapdl.core.launcher.check_mapdl_launch", lambda *args, **kwargs: None)
 def test_mapdl_output_pass_arg(tmpdir):
