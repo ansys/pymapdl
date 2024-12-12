@@ -87,7 +87,9 @@ pyansys_light_mode_logo = str(
 
 # -- General configuration ---------------------------------------------------
 extensions = [
+    "ansys_sphinx_theme.extension.linkcode",
     "jupyter_sphinx",
+    "linuxdoc.rstFlatTable",
     "numpydoc",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
@@ -102,7 +104,6 @@ extensions = [
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
-    "ansys_sphinx_theme.extension.linkcode",
 ]
 
 # Intersphinx mapping
