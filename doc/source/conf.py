@@ -121,7 +121,8 @@ intersphinx_mapping = {
     "ansys-tools-path": ("https://path.tools.docs.pyansys.com/version/stable/", None),
 }
 
-suppress_warnings = ["label.*", "design.fa-build", "config.cache"]
+# ref.ref warning needs to be readded when merging to main
+suppress_warnings = ["label.*", "design.fa-build", "config.cache", "ref.ref"]
 sd_fontawesome_latex = True
 
 # Graphviz diagrams configuration
