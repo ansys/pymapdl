@@ -20,7 +20,6 @@ MatrixOperations
    MatrixOperations.fft
    MatrixOperations.wrk
    MatrixOperations.comp
-   MatrixOperations.xpl
    MatrixOperations.nrm
    MatrixOperations.merge
    MatrixOperations.mult

@@ -213,53 +213,6 @@ class MatrixOperations:
         command = f"*COMP,{matrix},{algorithm},{threshold},{val1},{val2}"
         return self.run(command, **kwargs)
 
-    def xpl(self, action: str = "", val1: str = "", val2: str = "", **kwargs):
-        r"""Accesses content of a Mechanical APDL file.
-
-        Mechanical APDL Command: `\*XPL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_XPL.html>`_
-
-        Parameters
-        ----------
-        action : str
-            Specifies the action for scanning file content (no default). Valid labels are:
-
-            * ``OPEN`` - Open the specified file.
-            * ``CLOSE`` - Close the specified file.
-            * ``LIST`` - List the records at the current level in the hierarchy of records.
-            * ``WHERE`` - Display the current location in the tree.
-            * ``STEP`` - Step down in the tree of records.
-            * ``UP`` - Go up in the tree of records.
-            * ``READ`` - Read a record into an APDL Math object.
-            * ``INFO`` - Display information from a record.
-            * ``GOTO`` - Move directly to a given place in the tree of records (this avoids multiple calls to
-              the STEP and UP options).
-            * ``MARK`` - Mark a set of records of the current file; the asterisk (\*) character can be used to
-              specify multiple branches/records.
-            * ``COPY`` - Copy the current file to a new one, ignoring the marked records.
-            * ``SAVE`` - Save the current file, ignoring the marked records.
-
-        val1 : str
-            Additional input. The meanings of ``Val1`` and ``Val2`` vary depending on the specified
-            ``Action``, as described in the table below.
-
-        val2 : str
-            Additional input. The meanings of ``Val1`` and ``Val2`` vary depending on the specified
-            ``Action``, as described in the table below.
-
-        Notes
-        -----
-        The :ref:`xpl` command enables you to explore the contents of a Mechanical APDL file. Use this command to
-        traverse up and down the tree structure of the specified file and review what is in the file. Files
-        that can be scanned include ``.RST``, ``.MODE``, ``.FULL``, ``.CMS``, and ``.SUB`` files. For
-        more information and examples, see `Using APDL to List File Structure and Content
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdl_usingxpl.html>`_   The command
-        :ref:`xpl` ,READ generates either a :ref:`vec` or a :ref:`dmat` object according to the record type.
-        You do not have to create the APDL Math object before issuing this command.  This command is valid
-        in any processor.
-        """
-        command = f"*XPL,{action},{val1},{val2}"
-        return self.run(command, **kwargs)
-
     def nrm(
         self,
         name: str = "",

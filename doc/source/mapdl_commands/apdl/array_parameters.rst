@@ -36,4 +36,3 @@ ArrayParameters
    ArrayParameters.vcum
    ArrayParameters.vedit
    ArrayParameters.vlen
-   ArrayParameters.directory
