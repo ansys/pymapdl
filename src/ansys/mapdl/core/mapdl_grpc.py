@@ -1233,7 +1233,7 @@ class MapdlGrpc(MapdlBase):
             return
 
         self.finish()
-        self.verify()  # to avoid issues while parsing
+        self.verify()  # to avoid issues on the gRPC interface
 
         if (
             self._version and self._version >= 24.2
