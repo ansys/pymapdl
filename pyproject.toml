@@ -56,7 +56,7 @@ jupyter = [
 
 tests = [
     "ansys-dpf-core==0.10.1",
-    "ansys-tools-visualization-interface==0.5.0",
+    "ansys-tools-visualization-interface==0.6.1",
     "autopep8==2.3.1",
     "matplotlib==3.9.2",
     "pandas==2.2.3",
@@ -76,7 +76,7 @@ doc = [
     "ansys-dpf-core==0.10.1",
     "ansys-mapdl-reader==0.54.2",
     "ansys-sphinx-theme==1.2.2",
-    "ansys-tools-visualization-interface==0.5.0",
+    "ansys-tools-visualization-interface==0.6.1",
     "grpcio==1.68.0",
     "imageio-ffmpeg==0.5.1",
     "imageio==2.36.1",
