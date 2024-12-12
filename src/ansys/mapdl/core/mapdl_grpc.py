@@ -1232,14 +1232,20 @@ class MapdlGrpc(MapdlBase):
         if self._exited:
             return
 
-        if (
-            self._version and self._version >= 24.2
-        ):  # We can't use the non-cached version because of recursion error.
+        # Default
+        if self._version is None or self._version < 24.1:
+            self._ctrl("EXIT")
+
+        elif self._version >= 25.1:
+            # We can't use the non-cached version because of recursion error.
             # self.run("/EXIT,NOSAVE,,,,,SERVER")
             self.finish()
             self._ctrl("EXIT")
-        else:
+
+        elif self._version >= 24.1:
             self._ctrl("EXIT")
+
+        return
 
     def _kill_process(self):
         """Kill process stored in self._mapdl_process"""
