@@ -205,40 +205,49 @@ class MacroFiles:
             below for additional details.
 
         ar10 : str
-            The description of the argument is missing in the Python function. Please, refer to the product
-            documentation for further information.
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_USE.html>`_
+            for further information.
 
         ar11 : str
-            The description of the argument is missing in the Python function. Please, refer to the product
-            documentation for further information.
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_USE.html>`_
+            for further information.
 
         ar12 : str
-            The description of the argument is missing in the Python function. Please, refer to the product
-            documentation for further information.
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_USE.html>`_
+            for further information.
 
         ar13 : str
-            The description of the argument is missing in the Python function. Please, refer to the product
-            documentation for further information.
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_USE.html>`_
+            for further information.
 
         ar14 : str
-            The description of the argument is missing in the Python function. Please, refer to the product
-            documentation for further information.
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_USE.html>`_
+            for further information.
 
         ag15 : str
-            The description of the argument is missing in the Python function. Please, refer to the product
-            documentation for further information.
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_USE.html>`_
+            for further information.
 
         ar16 : str
-            The description of the argument is missing in the Python function. Please, refer to the product
-            documentation for further information.
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_USE.html>`_
+            for further information.
 
         ar17 : str
-            The description of the argument is missing in the Python function. Please, refer to the product
-            documentation for further information.
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_USE.html>`_
+            for further information.
 
         ar18 : str
-            The description of the argument is missing in the Python function. Please, refer to the product
-            documentation for further information.
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_USE.html>`_
+            for further information.
 
         Notes
         -----

@@ -190,12 +190,16 @@ class MatrixOperations:
             method of compression: 1E-7 for SVD; 1E-14 for MGS; 1E-16 for SPARSE.
 
         val1 : str
-            The description of the argument is missing in the Python function. Please, refer to the product
-            documentation for further information.
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_COMP.html>`_ for further
+            information.
 
         val2 : str
-            The description of the argument is missing in the Python function. Please, refer to the product
-            documentation for further information.
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_COMP.html>`_ for further
+            information.
 
         Notes
         -----
