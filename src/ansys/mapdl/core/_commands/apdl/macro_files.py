@@ -205,22 +205,40 @@ class MacroFiles:
             below for additional details.
 
         ar10 : str
+            The description of the argument is missing in the Python function. Please, refer to the product
+            documentation for further information.
 
         ar11 : str
+            The description of the argument is missing in the Python function. Please, refer to the product
+            documentation for further information.
 
         ar12 : str
+            The description of the argument is missing in the Python function. Please, refer to the product
+            documentation for further information.
 
         ar13 : str
+            The description of the argument is missing in the Python function. Please, refer to the product
+            documentation for further information.
 
         ar14 : str
+            The description of the argument is missing in the Python function. Please, refer to the product
+            documentation for further information.
 
         ag15 : str
+            The description of the argument is missing in the Python function. Please, refer to the product
+            documentation for further information.
 
         ar16 : str
+            The description of the argument is missing in the Python function. Please, refer to the product
+            documentation for further information.
 
         ar17 : str
+            The description of the argument is missing in the Python function. Please, refer to the product
+            documentation for further information.
 
         ar18 : str
+            The description of the argument is missing in the Python function. Please, refer to the product
+            documentation for further information.
 
         Notes
         -----
@@ -345,7 +363,7 @@ class MacroFiles:
         file is open when the :ref:`vwrite` command is issued.  Issue the :ref:`cfclos` command to close the
         command file.  This command is valid in any processor.
         """
-        command = f"*CFOPEN,{fname},{ext},{loc}"
+        command = f"*CFOPEN,{fname},{ext},,{loc}"
         return self.run(command, **kwargs)
 
     def create(self, fname: str = "", ext: str = "", **kwargs):

@@ -679,7 +679,7 @@ class ParameterDefinition:
         defined before you can read in an external file. See :ref:`dim` for more information.  This command
         is not applicable to 4- or 5-D tables.
         """
-        command = f"*TREAD,{par},{fname},{ext},{nskip}"
+        command = f"*TREAD,{par},{fname},{ext},,{nskip}"
         return self.run(command, **kwargs)
 
     def taxis(
@@ -870,7 +870,7 @@ class ParameterDefinition:
 
         This command is valid in any processor.
         """
-        command = f"*VREAD,{parr},{fname},{ext},{label},{n1},{n2},{n3},{nskip}"
+        command = f"*VREAD,{parr},{fname},{ext},,{label},{n1},{n2},{n3},{nskip}"
         return self.run(command, **kwargs)
 
     def starvget(

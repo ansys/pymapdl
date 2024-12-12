@@ -190,11 +190,12 @@ class MatrixOperations:
             method of compression: 1E-7 for SVD; 1E-14 for MGS; 1E-16 for SPARSE.
 
         val1 : str
-            Name of the vector used to store the :math:``  values (see  below). This argument is optional.
+            The description of the argument is missing in the Python function. Please, refer to the product
+            documentation for further information.
 
         val2 : str
-            Name of the dense matrix used to store the :math:``  output matrix (see  below). This argument
-            is optional.
+            The description of the argument is missing in the Python function. Please, refer to the product
+            documentation for further information.
 
         Notes
         -----
@@ -811,7 +812,6 @@ class MatrixOperations:
         val2: str = "",
         val3: str = "",
         val4: str = "",
-        val5: str = "",
         **kwargs,
     ):
         r"""Creates a vector.
@@ -859,16 +859,12 @@ class MatrixOperations:
             Additional input. The meaning of ``Val1`` through ``Val5`` will vary depending on the specified
             ``Method``. See details below.
 
-        val5 : str
-            Additional input. The meaning of ``Val1`` through ``Val5`` will vary depending on the specified
-            ``Method``. See details below.
-
         Notes
         -----
         Use the :ref:`dmat` command to create a matrix.  For more information on the BACK and FORWARD nodal
         mapping vectors, see in the `Ansys Parametric Design Language Guide <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdlxpl.html>`_.
         """
-        command = f"*VEC,{vector},{type_},{method},{val1},{val2},{val3},{val4},{val5}"
+        command = f"*VEC,{vector},{type_},{method},{val1},{val2},{val3},{val4}"
         return self.run(command, **kwargs)
 
     def hprod(self, a: str = "", b: str = "", c: str = "", **kwargs):

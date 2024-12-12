@@ -136,7 +136,7 @@ class ArrayParameters:
         :ref:`mwrite` command must be contained in an externally prepared file and read into Mechanical APDL (that
         is, :ref:`use`, :ref:`input`, etc.).  This command is valid in any processor.
         """
-        command = f"*MWRITE,{parr},{fname},{ext},{label},{n1},{n2},{n3}"
+        command = f"*MWRITE,{parr},{fname},{ext},,{label},{n1},{n2},{n3}"
         return self.run(command, **kwargs)
 
     def moper(
@@ -400,7 +400,7 @@ class ArrayParameters:
         The :ref:`sread` command reads from a file into a string array parameter. The file must be an ASCII
         text file.
         """
-        command = f"*SREAD,{strarray},{fname},{ext},{nchar},{nskip},{nread}"
+        command = f"*SREAD,{strarray},{fname},{ext},,{nchar},{nskip},{nread}"
         return self.run(command, **kwargs)
 
     def toper(
@@ -479,8 +479,8 @@ class ArrayParameters:
             blank, row subscript numbers are used instead. ``ParX`` is not sorted by the program.
 
         pary : str
-            Name of the array parameter whose column vector values will be graphed against the ``ParX``
-            values.
+            Additional column subscript of the ``ParY`` array parameter whose values are to be graphed
+            against the ``ParX`` values.
 
         y2 : str
             Additional column subscript of the ``ParY`` array parameter whose values are to be graphed
@@ -1563,7 +1563,7 @@ class ArrayParameters:
         strarray: str = "",
         filename: str = "",
         ext: str = "",
-        directory: str = "",
+        dir: str = "",
         **kwargs,
     ):
         r"""Put the file names in the current directory into a string parameter array.
@@ -1586,13 +1586,14 @@ class ArrayParameters:
             File name extension (8 characters maximum). Only files with an extension matching this name will
             be returned. A blank or ALL will match any extension.
 
-        directory : str
-            The directory in which the files reside. The default is the current working directory.
+        dir : str
+            The description of the argument is missing in the Python function. Please, refer to the product
+            documentation for further information.
 
         Notes
         -----
         The :ref:`directory` command gets the file names in the current directory and puts them into a
         string parameter array. Each file will be included in the array as a name-extension pair.
         """
-        command = f"/DIRECTORY,{strarray},{filename},{ext},{directory}"
+        command = f"/DIRECTORY,{strarray},{filename},{ext},{dir}"
         return self.run(command, **kwargs)
