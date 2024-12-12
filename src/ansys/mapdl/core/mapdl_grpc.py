@@ -1232,13 +1232,11 @@ class MapdlGrpc(MapdlBase):
         if self._exited:
             return
 
-        self.finish()
-        self.verify()  # to avoid issues on the gRPC interface
-
         if (
             self._version and self._version >= 24.2
         ):  # We can't use the non-cached version because of recursion error.
             # self.run("/EXIT,NOSAVE,,,,,SERVER")
+            self.finish()
             self._ctrl("EXIT")
         else:
             self._ctrl("EXIT")
