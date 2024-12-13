@@ -2179,6 +2179,11 @@ class _MapdlCore(Commands):
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")
 
+        if len(command) > 639:  # CMD_MAX_LENGTH
+            # If using mapdl_grpc, this check is redundant on purpose.
+            # Console probably do not have this limitation, but I'm not certain.
+            raise ValueError("Maximum command length must be less than 640 characters")
+
         # Check kwargs
         verbose = kwargs.pop("verbose", False)
         save_fig = kwargs.pop("savefig", False)
