@@ -1423,7 +1423,25 @@ def launch_mapdl(
 
     pre_check_args(args)
 
+    ########################################
+    # PyPIM connection
+    # ----------------
+    # Delegating to PyPIM if applicable
+    #
+    if _HAS_PIM and exec_file is None and pypim.is_configured():
+        # Start MAPDL with PyPIM if the environment is configured for it
+        # and the user did not pass a directive on how to launch it.
+        LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
+
+        return launch_remote_mapdl(
+            cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
+        )
+
+    ########################################
     # SLURM settings
+    # --------------
+    # Checking if running on SLURM HPC
+    #
     if is_running_on_slurm(args):
         LOG.info("On Slurm mode.")
 
@@ -1498,20 +1516,6 @@ def launch_mapdl(
         if args["running_on_hpc"] or args["launch_on_hpc"]:
             env_vars.setdefault("ANS_MULTIPLE_NODES", "1")
             env_vars.setdefault("HYDRA_BOOTSTRAP", "slurm")
-
-    ########################################
-    # PyPIM connection
-    # ----------------
-    # Delegating to PyPIM if applicable
-    #
-    if _HAS_PIM and exec_file is None and pypim.is_configured():
-        # Start MAPDL with PyPIM if the environment is configured for it
-        # and the user did not pass a directive on how to launch it.
-        LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
-
-        return launch_remote_mapdl(
-            cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
-        )
 
     start_parm = generate_start_parameters(args)
 
@@ -2261,9 +2265,9 @@ def get_version(
                 raise VersionError(
                     "The MAPDL gRPC interface requires MAPDL 20.2 or later"
                 )
-
-        # Early exit
-        return
+        else:
+            # Early exit
+            return
 
     if isinstance(version, float):
         version = int(version * 10)
