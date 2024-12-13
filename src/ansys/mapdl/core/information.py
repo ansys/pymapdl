@@ -123,7 +123,6 @@ class Information:
         self._stats = stats
         self._mapdl._log.debug("Information class: Updated")
 
-
     def __repr__(self) -> str:
         if self._mapdl.is_console and self._mapdl.exited:
             return "MAPDL exited"
