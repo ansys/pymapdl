@@ -821,13 +821,7 @@ jobs:
 
       - name: "Unit testing requirements installation"
         run: |
-          python -m pip install \
-            pytest==8.3.3 \
-            pytest-cov==6.0.0 \
-            pytest-random-order==1.1.1 \
-            pytest-rerunfailures==15.0 \
-            pyfakefs \
-            pytest-timeout==2.3.1
+          python -m pip install pytest pytest-rerunfailures pytest-cov pytest-random-order pyfakefs pytest-timeout
 
       - name: "Unit testing"
         env:
@@ -935,7 +929,7 @@ jobs:
 
       - name: "Unit testing requirements installation"
         run: |
-          python -m pip install pytest pytest-rerunfailures pytest-cov pytest-random-order
+          python -m pip install pytest pytest-rerunfailures pytest-cov pytest-random-order pyfakefs pytest-timeout
 
       - name: "Unit testing"
         env:
