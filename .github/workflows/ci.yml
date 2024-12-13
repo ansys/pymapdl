@@ -616,7 +616,7 @@ jobs:
       - id: set-matrix
         env:
           ONLY_UBUNTU: true
-          LIMIT_VERSIONS: 3
+          LIMIT_VERSIONS: 2
           ON_SCHEDULE: ${{ github.event_name == 'schedule' }}
           ON_WORKFLOW_DISPATCH: ${{ github.event_name == 'workflow_dispatch' }}
           RUN_ALL_TEST: ${{ inputs.run_all_tests }}
