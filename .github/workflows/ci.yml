@@ -956,21 +956,21 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           pytest -k "console" \
             ${{ env.PYTEST_ARGUMENTS }} \
-            --cov-report=xml:${{ matrix.mapdl-version }}-minimal.xml
+            --cov-report=xml:${{ matrix.mapdl-version }}-minimal-console.xml
 
       - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
         with:
           token: ${{ secrets.CODECOV_TOKEN }} # required
           root_dir: ${{ github.workspace }}
-          name: ${{ matrix.mapdl-version }}-minimal.xml
-          flags: ubuntu,local,${{ matrix.mapdl-version }},minimal,${{ steps.student_check.outputs.TAG_STUDENT }},dmp
+          name: ${{ matrix.mapdl-version }}-minimal-console.xml
+          flags: ubuntu,local,${{ matrix.mapdl-version }},minimal,console,${{ steps.student_check.outputs.TAG_STUDENT }},dmp
 
       - name: "Upload coverage artifacts"
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.mapdl-version }}-minimal.xml
-          path: ./${{ matrix.mapdl-version }}-minimal.xml
+          name: ${{ matrix.mapdl-version }}-minimal-console.xml
+          path: ./${{ matrix.mapdl-version }}-minimal-console.xml
 
 
   test-windows:
