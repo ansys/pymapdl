@@ -821,7 +821,7 @@ jobs:
 
       - name: "Unit testing requirements installation"
         run: |
-          python -m pip install pytest pytest-rerunfailures pytest-cov pytest-random-order
+          python -m pip install pytest pytest-rerunfailures pytest-cov pytest-random-order pyfakefs
 
       - name: "Unit testing"
         env:

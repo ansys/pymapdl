@@ -63,7 +63,6 @@ tests = [
     "pyfakefs==5.7.2",
     "pyiges[full]==0.3.1",
     "pytest-cov==6.0.0",
-    "pytest-memprof<0.3.0",
     "pytest-pyvista==0.1.9",
     "pytest-random-order==1.1.1",
     "pytest-rerunfailures==15.0",
