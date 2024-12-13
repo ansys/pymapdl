@@ -30,7 +30,7 @@ import time
 
 import pytest
 
-from conftest import has_dependency, requires
+from conftest import clear, has_dependency, requires
 
 # skip entire module unless --console is enabled
 pytestmark = requires("console")
@@ -46,6 +46,11 @@ if has_dependency("ansys-mapdl-reader"):
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
+
+
+@pytest.fixture(scope="function")
+def cleared(mapdl_console):
+    clear(mapdl_console)
 
 
 @pytest.fixture(scope="function")
@@ -74,7 +79,7 @@ def test_empty(mapdl_console, cleared):
 
 
 def test_str(mapdl_console, cleared):
-    assert "ANSYS Mechanical" in str(mapdl_console)
+    assert "Ansys Mechanical" in str(mapdl_console)
 
 
 def test_version(mapdl_console, cleared):
@@ -127,6 +132,7 @@ def test_chaining(mapdl_console, cleared):
 
 
 def test_e(mapdl_console, cleared):
+    mapdl.prep7()
     mapdl_console.et("", 183)
     n0 = mapdl_console.n("", 0, 0, 0)
     n1 = mapdl_console.n("", 1, 0, 0)
@@ -362,7 +368,7 @@ def test_nodes(tmpdir, cleared, mapdl_console):
     basename = "tmp.nodes"
     filename = str(tmpdir.mkdir("tmpdir").join(basename))
     mapdl_console.nwrite(filename)
-    mapdl_console.download(basename, filename)
+    # mapdl_console.download(basename, filename)
 
     assert np.allclose(mapdl_console.mesh.nodes, np.loadtxt(filename)[:, 1:])
     assert mapdl_console.mesh.n_node == 11

@@ -1569,6 +1569,7 @@ def launch_mapdl(
         #
         from ansys.mapdl.core.mapdl_console import MapdlConsole
 
+        start_parm = check_console_start_parameters(start_parm)
         mapdl = MapdlConsole(
             loglevel=args["loglevel"],
             log_apdl=args["log_apdl"],
@@ -2101,6 +2102,7 @@ def generate_start_parameters(args: Dict[str, Any]) -> Dict[str, Any]:
         start_parm["timeout"] = args["start_timeout"]
 
     start_parm["launched"] = True
+    start_parm.pop("mode")
 
     LOG.debug(f"Using start parameters {start_parm}")
     return start_parm
@@ -2871,3 +2873,19 @@ def submitter(
         stderr=stderr,
         env=env_vars,
     )  # nosec B603 B607
+
+
+def check_console_start_parameters(start_parm):
+    valid_args = [
+        "exec_file",
+        "run_location",
+        "jobname",
+        "nproc",
+        "additional_switches",
+        "start_timeout",
+    ]
+    for each in list(start_parm.keys()):
+        if each not in valid_args:
+            start_parm.pop(each)
+
+    return start_parm
