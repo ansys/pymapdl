@@ -189,8 +189,8 @@ def requires_dependency(dependency: str):
 # ------------------
 #
 
-if has_dependency("ansys-tools-package"):
-    from ansys.tools.path import find_mapdl, get_available_ansys_installations
+if has_dependency("ansys-tools-path"):
+    from ansys.tools.path import find_mapdl
 
 
 if has_dependency("pyvista"):
@@ -542,14 +542,7 @@ def mapdl_console(request):
         raise MapdlRuntimeError(
             '"--console" testing option unavailable.  ' "Only Linux is supported."
         )
-    ansys_base_paths = get_available_ansys_installations()
-
-    # find a valid version of console
-    console_path = None
-    for version in ansys_base_paths:
-        version = abs(version)
-        if version < 211:
-            console_path = find_mapdl(str(version))[0]
+    console_path = find_mapdl()[0]
 
     if console_path is None:
         raise MapdlRuntimeError(
@@ -558,7 +551,7 @@ def mapdl_console(request):
             "Valid versions are up to 2020R2."
         )
 
-    mapdl = launch_mapdl(console_path, log_apdl=LOG_APDL)
+    mapdl = launch_mapdl(console_path, mode="console", log_apdl=LOG_APDL)
     from ansys.mapdl.core.mapdl_console import MapdlConsole
 
     assert isinstance(mapdl, MapdlConsole)
