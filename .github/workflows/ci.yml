@@ -1001,6 +1001,27 @@ jobs:
             ${{ env.PYTEST_ARGUMENTS }} \
             --cov-report=xml:${{ matrix.mapdl-version }}-minimal-console.xml
 
+      - name: "Collect logs on failure"
+        if: always()
+        env:
+          LOG_NAMES: logs-minimal-console-${{ matrix.mapdl-version }}
+        run: |
+          .ci/collect_mapdl_logs_locals.sh
+
+      - name: "Upload logs to GitHub"
+        if: always()
+        uses: actions/upload-artifact@master
+        with:
+          name: logs-minimal-console-${{ matrix.mapdl-version }}.tgz
+          path: ./logs-minimal-console-${{ matrix.mapdl-version }}.tgz
+
+      - name: "Display files structure"
+        if: always()
+        env:
+          LOG_NAMES: logs-minimal-console-${{ matrix.mapdl-version }}
+        run: |
+          .ci/display_logs_locals.sh
+
       - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
         with:
