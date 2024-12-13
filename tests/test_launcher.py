@@ -1986,3 +1986,21 @@ def test_mapdl_output(tmpdir):
     assert "Beta activation of the GRPC server." in content
     assert "### START GRPC SERVER      ###" in content
     assert "Server listening on" in content
+
+
+def test_check_server_is_alive_no_queue():
+    from ansys.mapdl.core.launcher import _check_server_is_alive
+
+    assert _check_server_is_alive(None, 30) is None
+
+
+def test_get_std_output_no_queue():
+    from ansys.mapdl.core.launcher import _get_std_output
+
+    assert _get_std_output(None, 30) == [None]
+
+
+def test_create_queue_for_std_no_queue():
+    from ansys.mapdl.core.launcher import _create_queue_for_std
+
+    assert _create_queue_for_std(None) == (None, None)
