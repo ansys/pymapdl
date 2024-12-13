@@ -337,7 +337,7 @@ jobs:
           MAPDL_INSTANCE: MAPDL_0
           LOG_NAMES: logs-build-docs
         run: |
-          .ci/collect_mapdl_logs.sh
+          .ci/collect_mapdl_logs_remote.sh
 
       - name: "Upload logs to GitHub"
         if: always()
@@ -352,7 +352,7 @@ jobs:
           MAPDL_INSTANCE: MAPDL_0
           LOG_NAMES: logs-build-docs
         run: |
-          .ci/display_logs.sh
+          .ci/display_logs_remote.sh
 
   build-test-remote-matrix:
     name: "Build remote test matrix"
@@ -577,7 +577,7 @@ jobs:
           MAPDL_INSTANCE: MAPDL_0
           LOG_NAMES: logs-remote-${{ matrix.mapdl-version }}
         run: |
-          .ci/collect_mapdl_logs.sh
+          .ci/collect_mapdl_logs_remote.sh
 
       - name: "Upload logs to GitHub"
         if: always()
@@ -592,7 +592,7 @@ jobs:
           MAPDL_INSTANCE: MAPDL_0
           LOG_NAMES: logs-remote-${{ matrix.mapdl-version }}
         run: |
-          .ci/display_logs.sh
+          .ci/display_logs_remote.sh
 
   build-test-local-minimal-matrix:
     name: "Build test matrix for minimal and local"
@@ -719,7 +719,7 @@ jobs:
         env:
           LOG_NAMES: logs-local-${{ matrix.mapdl-version }}
         run: |
-          .ci/collect_mapdl_log_locals.sh
+          .ci/collect_mapdl_logs_locals.sh
 
       - name: "Upload logs to GitHub"
         if: always()
@@ -877,7 +877,7 @@ jobs:
         env:
           LOG_NAMES: logs-minimal-${{ matrix.mapdl-version }}
         run: |
-          .ci/collect_mapdl_log_locals.sh
+          .ci/collect_mapdl_logs_locals.sh
 
       - name: "Upload logs to GitHub"
         if: always()
