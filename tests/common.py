@@ -264,8 +264,6 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
         local_ = mapdl._local
         ip = mapdl.ip
         port = mapdl.port
-        warn("ATTEMPTING TO RESTART MAPDL!")
-
         try:
             # to connect
             mapdl = Mapdl(port=port, ip=ip)
