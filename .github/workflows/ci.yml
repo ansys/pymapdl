@@ -719,7 +719,7 @@ jobs:
         env:
           LOG_NAMES: logs-local-${{ matrix.mapdl-version }}
         run: |
-          .ci/collect_mapdl_logs_local.sh
+          .ci/collect_mapdl_log_locals.sh
 
       - name: "Upload logs to GitHub"
         if: always()
@@ -877,7 +877,7 @@ jobs:
         env:
           LOG_NAMES: logs-minimal-${{ matrix.mapdl-version }}
         run: |
-          .ci/collect_mapdl_logs_local.sh
+          .ci/collect_mapdl_log_locals.sh
 
       - name: "Upload logs to GitHub"
         if: always()
