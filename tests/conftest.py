@@ -598,9 +598,6 @@ def mapdl(request, tmpdir_factory):
     if ON_LOCAL and mapdl.is_local:
         assert Path(mapdl.directory) == Path(run_path)
 
-    if LOG_APDL:
-        mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
-
     # using yield rather than return here to be able to test exit
     yield mapdl
 

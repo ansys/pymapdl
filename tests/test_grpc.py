@@ -603,7 +603,6 @@ def test_subscribe_to_channel(mapdl, cleared):
 
 
 @requires("remote")
-@pytest.mark.skipif(True, reason="Temporary skip")
 def test_exception_message_length(mapdl, cleared):
     # This test does not fail if running on local
     channel = grpc.insecure_channel(
@@ -631,7 +630,6 @@ def test_exception_message_length(mapdl, cleared):
     mapdl2.exit()
 
 
-@pytest.mark.skipif(True, reason="Temporary skip")
 def test_generic_grpc_exception(monkeypatch, grpc_channel):
     mapdl = MapdlGrpc(channel=grpc_channel)
     assert mapdl.is_alive
@@ -652,7 +650,6 @@ def test_generic_grpc_exception(monkeypatch, grpc_channel):
     assert mapdl.is_alive
 
 
-@pytest.mark.skipif(True, reason="Temporary skip")
 def test_generic_grpc_exception_exited(monkeypatch, grpc_channel):
     mapdl = MapdlGrpc(channel=grpc_channel)
     assert mapdl.is_alive
