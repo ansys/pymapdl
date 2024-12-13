@@ -95,11 +95,11 @@ for version in "${versions[@]}"; do
     fi
 
     # Skipping student versions on auth_user
-    if [[ "$auth_user" == "true" && "$ON_STUDENT" == "true" ]]; then
-        echo "Skipping student versions when user is authenticated"
-        echo ""
-        continue
-    fi
+    # if [[ "$auth_user" == "true" && "$ON_STUDENT" == "true" ]]; then
+    #     echo "Skipping student versions when user is authenticated"
+    #     echo ""
+    #     continue
+    # fi
 
     # main logic
     if [[ "$auth_user" == "true" ]]; then
