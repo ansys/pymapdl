@@ -63,6 +63,82 @@ class ArrayParameters:
         command = f"*MFUN,{parr},{func},{par1}"
         return self.run(command, **kwargs)
 
+    def mwrite(
+        self,
+        parr: str = "",
+        fname: str = "",
+        ext: str = "",
+        label: str = "",
+        n1: str = "",
+        n2: str = "",
+        n3: str = "",
+        **kwargs,
+    ):
+        r"""Writes a matrix to a file in a formatted sequence.
+
+        Mechanical APDL Command: `\*MWRITE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MWRITE_st.html>`_
+
+        Parameters
+        ----------
+        parr : str
+            The name of the array parameter. See :ref:`starset` for name restrictions.
+
+        fname : str
+            File name and directory path (248 characters maximum, including the characters needed for the
+        directory path). An unspecified directory path defaults to the working directory; in this case, you
+        can use all 248 characters for the file name. If the file name fields are left blank, the default file is the current output
+            file.
+
+        ext : str
+            Filename extension (eight-character maximum).
+
+        label : str
+            Can use a value of IJK, IKJ, JIK, JKI, KIJ, KJI, or blank (JIK).
+
+        n1 : str
+            Write as ((( ``ParR`` (i,j,k), k = 1,n1), i = 1, n2), j = 1, n3) for ``Label`` = KIJ. ``n1,``
+            ``n2,`` and ``n3`` default to the corresponding dimensions of the array parameter ParR.
+
+        n2 : str
+            Write as ((( ``ParR`` (i,j,k), k = 1,n1), i = 1, n2), j = 1, n3) for ``Label`` = KIJ. ``n1,``
+            ``n2,`` and ``n3`` default to the corresponding dimensions of the array parameter ParR.
+
+        n3 : str
+            Write as ((( ``ParR`` (i,j,k), k = 1,n1), i = 1, n2), j = 1, n3) for ``Label`` = KIJ. ``n1,``
+            ``n2,`` and ``n3`` default to the corresponding dimensions of the array parameter ParR.
+
+        Notes
+        -----
+        Writes a matrix or vector to a specified file in a formatted sequence. You can also use the
+        :ref:`vwrite` command to write data to a specified file. Both commands contain format descriptors on
+        the line immediately following the command. The format descriptors can be in either FORTRAN or C
+        format.  FORTRAN format descriptors are enclosed in parentheses. They must immediately follow the
+        :ref:`mwrite` command on a separate line of the same input file. The word FORMAT should not be
+        included. The format must specify the number of fields to be written per line, the field width, the
+        placement of the decimal point, etc. There should be one field descriptor for each data item
+        written. The write operation uses the available system FORTRAN FORMAT conventions (see your system
+        FORTRAN manual). Any standard FORTRAN `real` format (such as (4F6.0), (E10.3,2X,D8.2), etc.) and
+        character format (A) may be used. Integer (I) and list-directed (\*) descriptors may `not` be used.
+        Text may be included in the format as a quoted string. `The FORTRAN descriptor must be enclosed in
+        parentheses` and the format must not exceed 80 characters (including parentheses).  The "C" format
+        descriptors are used if the first character of the format descriptor line is not a left parenthesis.
+        "C" format descriptors may be up to 80 characters long, consisting of text strings and predefined
+        "data descriptors" between the strings where numeric or alphanumeric character data are to be
+        inserted. The normal descriptors are %I for integer data, %G for double precision data, %C for
+        alphanumeric character data, and %/ for a line break. There must be one data descriptor for each
+        specified value in the order of the specified values. The enhanced formats described in :ref:`msg`
+        can also be used.  The starting array element number must be defined. Looping continues in the
+        directions indicated by the Label argument. The number of loops and loop skipping may also be
+        controlled via :ref:`vlen` and :ref:`vmask`, which work in the ``n2`` direction (by row on the
+        output file), and by :ref:`vcol`, which works in the ``n1`` direction (by column in the output
+        file). The vector specifications :ref:`vabs` and :ref:`vfact` apply to this command, while
+        :ref:`vcum` does not apply to this command. See :ref:`voper` for details. If you are in the GUI, the
+        :ref:`mwrite` command must be contained in an externally prepared file and read into Mechanical APDL (that
+        is, :ref:`use`, :ref:`input`, etc.).  This command is valid in any processor.
+        """
+        command = f"*MWRITE,{parr},{fname},{ext},,{label},{n1},{n2},{n3}"
+        return self.run(command, **kwargs)
+
     def moper(
         self,
         parr: str = "",
@@ -707,6 +783,196 @@ class ArrayParameters:
         command is valid in any processor.
         """
         command = f"*VOPER,{parr},{par1},{oper},{par2},{con1},{con2}"
+        return self.run(command, **kwargs)
+
+    def vwrite(
+        self,
+        par1: str = "",
+        par2: str = "",
+        par3: str = "",
+        par4: str = "",
+        par5: str = "",
+        par6: str = "",
+        par7: str = "",
+        par8: str = "",
+        par9: str = "",
+        par10: str = "",
+        par11: str = "",
+        par12: str = "",
+        par13: str = "",
+        par14: str = "",
+        par15: str = "",
+        par16: str = "",
+        par17: str = "",
+        par18: str = "",
+        par19: str = "",
+        **kwargs,
+    ):
+        r"""Writes data to a file in a formatted sequence.
+
+        Mechanical APDL Command: `\*VWRITE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VWRITE.html>`_
+
+        Parameters
+        ----------
+        par1 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par2 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par3 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par4 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par5 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par6 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par7 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par8 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par9 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par10 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par11 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par12 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par13 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par14 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par15 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par16 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par17 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par18 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        par19 : str
+            You can write up to 19 parameters (or constants) at a time. Any `Par` values after a blank `Par`
+            value are ignored. If you leave them all blank, one line will be written (to write a title or a
+            blank line). If you input the keyword SEQU, a sequence of numbers (starting from 1) will be
+            written for that item.
+
+        Notes
+        -----
+        You use :ref:`vwrite` to write data to a file in a formatted sequence. Data items ( ``Par1`` ,
+        ``Par2``, etc.) may be array parameters, scalar parameters, character parameters (scalar or array),
+        or constants. You must evaluate expressions and functions in the data item fields before using the
+        :ref:`vwrite` command, since initially they will be evaluated to a constant and remain constant
+        throughout the operation. Unless a file is defined with the :ref:`cfopen` command, data is written
+        to the standard output file. Data written to the standard output file may be diverted to a different
+        file by first switching the current output file with the :ref:`output` command. You can also use the
+        :ref:`mwrite` command to write data to a specified file. Both commands contain format descriptors on
+        the line immediately following the command. The format descriptors can be in either FORTRAN or C
+        format.  You must enclose FORTRAN format descriptors in parentheses. They must immediately follow
+        the :ref:`vwrite` command on a separate line of the same input file. Do not include the word FORMAT.
+        The format must specify the number of fields to be written per line, the field width, the placement
+        of the decimal point, etc. You should use one field descriptor for each data item written. The write
+        operation uses your system's available FORTRAN FORMAT conventions (see your system FORTRAN manual).
+        You can use any standard FORTRAN `real` format (such as (4F6.0), (E10.3,2X,D8.2), etc.) and
+        alphanumeric format (A). Alphanumeric strings are limited to a maximum of 8 characters for any field
+        (A8) using the FORTRAN format. Use the "C" format for string arrays larger than 8 characters.
+        Integer (I) and list-directed (\*) descriptors may `not` be used. You can include text in the format
+        as a quoted string. `The parentheses must be included in the format` and the format must not exceed
+        80 characters (including parentheses). The output line length is limited to 128 characters.  The "C"
+        format descriptors are used if the first character of the format descriptor line is not a left
+        parenthesis. "C" format descriptors are up to 80 characters long, consisting of text strings and
+        predefined "data descriptors" between the strings where numeric or alphanumeric character data will
+        be inserted. The normal descriptors are %I for integer data, %G for double precision data, %C for
+        alphanumeric character data, and %/ for a line break. There must be one data descriptor for each
+        specified value (8 maximum) in the order of the specified values. The enhanced formats described in
+        :ref:`msg` may also be used.  For array parameter items, you must define the starting array element
+        number. Looping continues (incrementing the vector index number of each array parameter by one) each
+        time you output a line, until the maximum array vector element is written. For example,
+        :ref:`vwrite` ,A(1) followed by (F6.0) will write one value per output line, that is, A(1), A(2),
+        A(3), A(4), etc. You write constants and scalar parameters with the same values for each loop. You
+        can also control the number of loops and loop skipping with the :ref:`vlen` and :ref:`vmask`
+        commands. The vector specifications :ref:`vabs`, :ref:`vfact`, and :ref:`vcum` do not apply to
+        this command. If looping continues beyond the supplied data array's length, zeros will be output for
+        numeric array parameters and blanks for character array parameters. For multi-dimensioned array
+        parameters, only the first (row) subscript is incremented. See the :ref:`voper` command for details.
+        If you are in the GUI, the :ref:`vwrite` command must be contained in an externally prepared file
+        and read into Mechanical APDL (that is, :ref:`use`, :ref:`input`, etc.).  If ``Par`` is a table array
+        name, the subscripts refer to the index numbers of the table and not the index values of its primary
+        variables. See :ref:`starset` if you want to evaluate a table array at certain values of its primary
+        variables for writing.  This command is valid in any processor.
+        """
+        command = f"*VWRITE,{par1},{par2},{par3},{par4},{par5},{par6},{par7},{par8},{par9},{par10},{par11},{par12},{par13},{par14},{par15},{par16},{par17},{par18},{par19}"
         return self.run(command, **kwargs)
 
     def vitrp(

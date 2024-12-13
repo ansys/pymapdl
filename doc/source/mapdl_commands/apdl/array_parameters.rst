@@ -16,6 +16,7 @@ ArrayParameters
 
 
    ArrayParameters.mfun
+   ArrayParameters.mwrite
    ArrayParameters.moper
    ArrayParameters.mfouri
    ArrayParameters.sread
@@ -26,6 +27,7 @@ ArrayParameters
    ArrayParameters.vscfun
    ArrayParameters.vstat
    ArrayParameters.voper
+   ArrayParameters.vwrite
    ArrayParameters.vitrp
    ArrayParameters.vabs
    ArrayParameters.starvput
