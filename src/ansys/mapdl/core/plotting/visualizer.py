@@ -228,7 +228,7 @@ class MapdlPlotter(Plotter):
         return [
             actor.mapper.dataset
             for actor in self.scene.actors.values()
-            if hasattr(actor, "mapper")
+            if hasattr(actor, "mapper") and hasattr(actor.mapper, "dataset")
         ]
 
     def add_labels(
