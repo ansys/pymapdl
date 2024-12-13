@@ -288,10 +288,12 @@ def test_log_to_file(tmpdir):
     LOG.std_out_handler.setLevel("ERROR")
 
     if LOG.file_handler is None:
+        old_logger = None
         LOG.log_to_file(file_path)
     else:
         # the logger has been already instantiated
-        file_path = LOG.file_handler.baseFilename
+        old_logger = LOG.file_handler.baseFilename
+        LOG.log_to_file(file_path)
 
     LOG.error(file_msg_error)
     LOG.debug(file_msg_debug)
@@ -315,6 +317,9 @@ def test_log_to_file(tmpdir):
         text = "".join(fid.readlines())
 
     assert file_msg_debug in text
+
+    if old_logger is not None:
+        LOG.log_to_file(old_logger)
 
 
 def test_log_instance_name(mapdl, cleared):
