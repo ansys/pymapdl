@@ -843,7 +843,7 @@ jobs:
 
       - name: "Unit testing requirements installation"
         run: |
-          python -m pip install pytest pytest-rerunfailures pytest-cov pytest-random-order pyfakefs
+          python -m pip install -r .ci/requirements_minimal.txt
 
       - name: "Unit testing"
         env:
@@ -972,7 +972,7 @@ jobs:
 
       - name: "Unit testing requirements installation"
         run: |
-          python -m pip install pytest pytest-rerunfailures pytest-cov pytest-random-order
+          python -m pip install -r .ci/requirements_minimal.txt
 
       - name: "Unit testing"
         env:
