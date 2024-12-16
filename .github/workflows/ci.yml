@@ -33,7 +33,7 @@ env:
   DPF_PORT: 21004
   MAPDL_PACKAGE: ghcr.io/ansys/mapdl
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=10 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html'
+  PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=10 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=40'
 
   BUILD_CHEATSHEET: True
 
@@ -615,7 +615,7 @@ jobs:
       - id: set-matrix
         env:
           ONLY_UBUNTU: true
-          LIMIT_VERSIONS: 3
+          LIMIT_VERSIONS: 2
           ON_SCHEDULE: ${{ github.event_name == 'schedule' }}
           ON_WORKFLOW_DISPATCH: ${{ github.event_name == 'workflow_dispatch' }}
           RUN_ALL_TEST: ${{ inputs.run_all_tests }}
@@ -821,7 +821,7 @@ jobs:
 
       - name: "Unit testing requirements installation"
         run: |
-          python -m pip install pytest pytest-rerunfailures pytest-cov pytest-random-order
+          python -m pip install pytest pytest-rerunfailures pytest-cov pytest-random-order pyfakefs pytest-timeout
 
       - name: "Unit testing"
         env:
@@ -863,6 +863,114 @@ jobs:
         with:
           name: ${{ matrix.mapdl-version }}-minimal.xml
           path: ./${{ matrix.mapdl-version }}-minimal.xml
+
+
+  build-test-ubuntu-console:
+    name: "Local-min-console: ${{ matrix.mapdl-version }}"
+    runs-on: ubuntu-latest
+    if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: [smoke-tests, build-test-local-minimal-matrix]
+    timeout-minutes: 75
+    strategy:
+      fail-fast: false
+      matrix: ${{fromJson(needs.build-test-local-minimal-matrix.outputs.matrix)}}
+    container:
+      image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
+      options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    env:
+      ON_LOCAL: true
+      ON_UBUNTU: true
+      TESTING_MINIMAL: true
+      ON_CONSOLE: true
+
+    steps:
+      - name: "Install Git and checkout project"
+        uses: actions/checkout@v4.2.2
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.ref }}
+
+      - name: "Get if running student version"
+        id: student_check
+        run: |
+          if [[ "${{ matrix.mapdl-version }}" == *"student"* ]]; 
+            then export ON_STUDENT=true; export TAG_STUDENT="student";
+            else export ON_STUDENT=false; export TAG_STUDENT="non-student";
+          fi
+
+          echo "ON_STUDENT: $ON_STUDENT"
+          echo "TAG_STUDENT: $TAG_STUDENT"
+          echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
+          echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
+
+      - name: "Installing missing package"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libgomp1
+
+      - name: "Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+
+      - name: "Checking Python"
+        run: |
+          python --version
+          python -m pip install --upgrade pip
+
+      - name: "Install ansys-mapdl-core"
+        run: |
+          python -m pip install . --no-deps
+          python -m pip install -r minimum_requirements.txt
+          python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
+
+      - name: "Unit testing requirements installation"
+        run: |
+          python -m pip install pytest pytest-rerunfailures pytest-cov pytest-random-order pyfakefs pytest-timeout
+
+      - name: "Unit testing"
+        env:
+          ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
+          ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
+        run: |
+          echo "ON_UBUNTU: $ON_UBUNTU"
+          echo "ON_STUDENT: $ON_STUDENT"
+
+          # Because there is no 'ansys-tools-path' we need to input the
+          # executable path with the env var: PYMAPDL_MAPDL_EXEC.
+
+          if [[ "${{ matrix.mapdl-version }}" == *"latest-ubuntu"* ]] ; then
+            version=${{ env.LATEST_VERSION }}
+          else
+            version=$(echo "${{ matrix.mapdl-version }}" | head -c 5 | tail -c 4 | tr -d '.')
+          fi;
+
+          echo "Version: $version"
+
+          export PYMAPDL_MAPDL_EXEC=/ansys_inc/v"$version"/ansys/bin/ansys"$version"
+          echo "$PYMAPDL_MAPDL_EXEC"
+
+          unset PYMAPDL_START_INSTANCE
+          pytest -k "console" \
+            ${{ env.PYTEST_ARGUMENTS }} \
+            --cov-report=xml:${{ matrix.mapdl-version }}-minimal-console.xml
+
+      - uses: codecov/codecov-action@v5
+        name: "Upload coverage to Codecov"
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} # required
+          root_dir: ${{ github.workspace }}
+          name: ${{ matrix.mapdl-version }}-minimal-console.xml
+          flags: ubuntu,local,${{ matrix.mapdl-version }},minimal,console,${{ steps.student_check.outputs.TAG_STUDENT }},dmp
+
+      - name: "Upload coverage artifacts"
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.mapdl-version }}-minimal-console.xml
+          path: ./${{ matrix.mapdl-version }}-minimal-console.xml
 
 
   test-windows:
