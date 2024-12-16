@@ -2919,6 +2919,7 @@ class _MapdlCore(Commands):
             self._platform = "windows"
         else:  # pragma: no cover
             raise MapdlRuntimeError("Unknown platform: {}".format(platform))
+        self.logger.debug(f"MAPDL is running on {self._platform} OS.")
 
     def _check_on_docker(self):
         """Check if MAPDL is running on docker."""
