@@ -1423,7 +1423,25 @@ def launch_mapdl(
 
     pre_check_args(args)
 
+    ########################################
+    # PyPIM connection
+    # ----------------
+    # Delegating to PyPIM if applicable
+    #
+    if _HAS_PIM and exec_file is None and pypim.is_configured():
+        # Start MAPDL with PyPIM if the environment is configured for it
+        # and the user did not pass a directive on how to launch it.
+        LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
+
+        return launch_remote_mapdl(
+            cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
+        )
+
+    ########################################
     # SLURM settings
+    # --------------
+    # Checking if running on SLURM HPC
+    #
     if is_running_on_slurm(args):
         LOG.info("On Slurm mode.")
 
@@ -1499,20 +1517,6 @@ def launch_mapdl(
             env_vars.setdefault("ANS_MULTIPLE_NODES", "1")
             env_vars.setdefault("HYDRA_BOOTSTRAP", "slurm")
 
-    ########################################
-    # PyPIM connection
-    # ----------------
-    # Delegating to PyPIM if applicable
-    #
-    if _HAS_PIM and exec_file is None and pypim.is_configured():
-        # Start MAPDL with PyPIM if the environment is configured for it
-        # and the user did not pass a directive on how to launch it.
-        LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
-
-        return launch_remote_mapdl(
-            cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
-        )
-
     start_parm = generate_start_parameters(args)
 
     # Early exit for debugging.
@@ -1569,6 +1573,7 @@ def launch_mapdl(
         #
         from ansys.mapdl.core.mapdl_console import MapdlConsole
 
+        start_parm = check_console_start_parameters(start_parm)
         mapdl = MapdlConsole(
             loglevel=args["loglevel"],
             log_apdl=args["log_apdl"],
@@ -2101,6 +2106,7 @@ def generate_start_parameters(args: Dict[str, Any]) -> Dict[str, Any]:
         start_parm["timeout"] = args["start_timeout"]
 
     start_parm["launched"] = True
+    start_parm.pop("mode")
 
     LOG.debug(f"Using start parameters {start_parm}")
     return start_parm
@@ -2259,9 +2265,9 @@ def get_version(
                 raise VersionError(
                     "The MAPDL gRPC interface requires MAPDL 20.2 or later"
                 )
-
-        # Early exit
-        return
+        else:
+            # Early exit
+            return
 
     if isinstance(version, float):
         version = int(version * 10)
@@ -2871,3 +2877,19 @@ def submitter(
         stderr=stderr,
         env=env_vars,
     )  # nosec B603 B607
+
+
+def check_console_start_parameters(start_parm):
+    valid_args = [
+        "exec_file",
+        "run_location",
+        "jobname",
+        "nproc",
+        "additional_switches",
+        "start_timeout",
+    ]
+    for each in list(start_parm.keys()):
+        if each not in valid_args:
+            start_parm.pop(each)
+
+    return start_parm
