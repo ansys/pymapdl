@@ -119,6 +119,9 @@ VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26
 
 SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
 
+DEFAULT_TIME_STEP_STREAM_NT = 500
+DEFAULT_TIME_STEP_STREAM_POSIX = 100
+
 # Retry policy for gRPC calls.
 SERVICE_DEFAULT_CONFIG = {
     # see https://github.com/grpc/proposal/blob/master/A6-client-retries.md#retry-policy-capabilities
@@ -1935,8 +1938,11 @@ class MapdlGrpc(MapdlBase):
             return response.strip()
 
         # otherwise, not verbose
-        if time_step_stream is None:
-            time_step_stream = 50
+        if time_step_stream is None and os.name == "nt":
+            time_step_stream = 500
+        elif time_step_stream is None:
+            time_step_stream = 100
+
         metadata = [
             ("time_step_stream", str(time_step_stream)),
             ("chunk_size", str(chunk_size)),
