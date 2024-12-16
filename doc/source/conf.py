@@ -87,7 +87,9 @@ pyansys_light_mode_logo = str(
 
 # -- General configuration ---------------------------------------------------
 extensions = [
+    "ansys_sphinx_theme.extension.linkcode",
     "jupyter_sphinx",
+    "linuxdoc.rstFlatTable",
     "numpydoc",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
@@ -102,7 +104,6 @@ extensions = [
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
-    "ansys_sphinx_theme.extension.linkcode",
 ]
 
 # Intersphinx mapping
@@ -120,7 +121,8 @@ intersphinx_mapping = {
     "ansys-tools-path": ("https://path.tools.docs.pyansys.com/version/stable/", None),
 }
 
-suppress_warnings = ["label.*", "design.fa-build", "config.cache"]
+# ref.ref warning needs to be readded when merging to main
+suppress_warnings = ["label.*", "design.fa-build", "config.cache", "ref.ref"]
 sd_fontawesome_latex = True
 
 # Graphviz diagrams configuration

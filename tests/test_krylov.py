@@ -35,7 +35,7 @@ if not has_dependency("ansys-math-core"):
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
-# Krylov Apdl Macro Files
+# Krylov APDL Macro Files
 lib_path = os.path.join(PATH, "test_files")
 
 # Results from APDL Macro to compare with PyMAPDL results

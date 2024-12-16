@@ -1560,7 +1560,6 @@ class _MapdlCore(Commands):
         """
         if self._apdl_log is not None:
             raise MapdlRuntimeError("APDL command logging already enabled")
-
         self._log.debug("Opening ANSYS log file at %s", filename)
 
         if mode not in ["w", "a", "x"]:
@@ -2249,7 +2248,7 @@ class _MapdlCore(Commands):
                 % (command, INVAL_COMMANDS[command[:3].upper()])
             )
             raise exception
-        elif command[:4].upper() in INVAL_COMMANDS:
+        elif len(command) == 4 and command.upper() in INVAL_COMMANDS:
             exception = MapdlRuntimeError(
                 'Invalid PyMAPDL command "%s"\n\n%s'
                 % (command, INVAL_COMMANDS[command[:4].upper()])
