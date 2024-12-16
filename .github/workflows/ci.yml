@@ -33,7 +33,7 @@ env:
   DPF_PORT: 21004
   MAPDL_PACKAGE: ghcr.io/ansys/mapdl
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=10 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html'
+  PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=10 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=40'
 
   BUILD_CHEATSHEET: True
 
@@ -615,7 +615,7 @@ jobs:
       - id: set-matrix
         env:
           ONLY_UBUNTU: true
-          LIMIT_VERSIONS: 3
+          LIMIT_VERSIONS: 2
           ON_SCHEDULE: ${{ github.event_name == 'schedule' }}
           ON_WORKFLOW_DISPATCH: ${{ github.event_name == 'workflow_dispatch' }}
           RUN_ALL_TEST: ${{ inputs.run_all_tests }}
@@ -821,7 +821,7 @@ jobs:
 
       - name: "Unit testing requirements installation"
         run: |
-          python -m pip install pytest pytest-rerunfailures pytest-cov pytest-random-order pyfakefs
+          python -m pip install pytest pytest-rerunfailures pytest-cov pytest-random-order pyfakefs pytest-timeout
 
       - name: "Unit testing"
         env:
@@ -929,7 +929,7 @@ jobs:
 
       - name: "Unit testing requirements installation"
         run: |
-          python -m pip install pytest pytest-rerunfailures pytest-cov pytest-random-order
+          python -m pip install pytest pytest-rerunfailures pytest-cov pytest-random-order pyfakefs pytest-timeout
 
       - name: "Unit testing"
         env:
