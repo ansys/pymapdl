@@ -851,4 +851,12 @@ class MapdlPlotter(Plotter):
     @property
     def meshes(self):
         """Return the meshes."""
-        return self.scene.meshes
+        try:
+            # Pyvista 0.44.2 makes this method to fail, so adding a backup plan
+            return self.scene.meshes
+        except AttributeError:
+            return [
+                actor.mapper.dataset
+                for actor in self.scene.actors.values()
+                if hasattr(actor, "mapper") and hasattr(actor.mapper, "dataset")
+            ]
