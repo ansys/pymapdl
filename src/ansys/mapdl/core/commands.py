@@ -22,13 +22,13 @@
 
 from functools import wraps
 import re
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 
 from ansys.mapdl.core import _HAS_PANDAS
 
-if TYPE_CHECKING and _HAS_PANDAS:
+if _HAS_PANDAS:
     import pandas
 
 from ._commands import (
