@@ -61,7 +61,6 @@ class ansPlugin:
         """Return the weakly referenced instance of mapdl."""
         return self._mapdl_weakref()
 
-
     def load(self, plugin_name: str, feature: str = "CMD") -> str:
         """
         Loads a plugin into MAPDL.
@@ -83,14 +82,15 @@ class ansPlugin:
         PluginLoadError
                 If the plugin fails to load.
         """
-        
+
         command = f"*PLUG,LOAD,{plugin_name},{feature}"
         response = self._mapdl.run(command)
         if "error" in response.lower():
-            raise PluginLoadError(f"Failed to load plugin '{plugin_name}' with feature '{feature}'.")
+            raise PluginLoadError(
+                f"Failed to load plugin '{plugin_name}' with feature '{feature}'."
+            )
         return f"Plugin '{plugin_name}' with feature '{feature}' loaded successfully."
 
-    
     def unload(self, plugin_name: str) -> str:
         """
         Unloads a plugin from MAPDL.
@@ -117,7 +117,6 @@ class ansPlugin:
             raise PluginUnloadError(f"Failed to unload plugin '{plugin_name}'.")
         return f"Plugin '{plugin_name}' unloaded successfully."
 
-    
     def list(self) -> list:
         """
         Lists all currently loaded plugins in MAPDL.
