@@ -54,7 +54,7 @@ def db(mapdl):
         and ON_CI
     ):
         pytest.skip(
-            f"This MAPDL version ({mapdl_version}) docker image seems to not support DB, but local does."
+            f"This MAPDL version ({mapdl_version}) docker image seems to not support DB on CICD."
         )
 
     if mapdl._server_version < (0, 4, 1):  # 2021R2
