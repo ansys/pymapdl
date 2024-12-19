@@ -106,8 +106,8 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.platform.instancemanagement import Instance as PIM_Instance
 
     from ansys.mapdl.core.database import MapdlDb
-    from ansys.mapdl.core.xpl import ansXpl
     from ansys.mapdl.core.plugin import ansPlugin
+    from ansys.mapdl.core.xpl import ansXpl
 
 TMP_VAR = "__tmpvar__"
 VOID_REQUEST = anskernel.EmptyRequest()

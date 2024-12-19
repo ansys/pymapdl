@@ -31,6 +31,7 @@ from .common_grpc import ANSYS_VALUE_TYPE
 from .errors import MapdlRuntimeError
 from .misc import random_string
 
+
 class ansPlugin:
     """
     ANSYS MAPDL Plugin Manager.
