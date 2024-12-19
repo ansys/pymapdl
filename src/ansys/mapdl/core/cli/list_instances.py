@@ -65,7 +65,7 @@ from ansys.mapdl.core.cli import main
     default=False,
     help="Print running location info.",
 )
-def list_instances(instances, long, cmd, location):
+def list_instances(instances, long, cmd, location) -> None:
     import psutil
     from tabulate import tabulate
 
