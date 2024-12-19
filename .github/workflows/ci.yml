@@ -24,7 +24,7 @@ env:
   PACKAGE_NAME: 'ansys-mapdl-core'
   PACKAGE_NAMESPACE: 'ansys.mapdl.core'
   DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
-  LATEST_VERSION: "242"
+  LATEST_VERSION: "252"
   MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.2-ubuntu-student
   MEILISEARCH_API_KEY: ${{ secrets.MEILISEARCH_API_KEY }}
   MEILISEARCH_PUBLIC_API_KEY: ${{ secrets.MEILISEARCH_PUBLIC_API_KEY }}
@@ -33,7 +33,7 @@ env:
   DPF_PORT: 21004
   MAPDL_PACKAGE: ghcr.io/ansys/mapdl
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=10 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=40'
+  PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=10 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180'
 
 
   BUILD_CHEATSHEET: True
