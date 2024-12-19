@@ -10,8 +10,6 @@ versions=(
     'latest-ubuntu' 
     'latest-ubuntu-student'
     'v25.2.0'
-    'v25.2-ubuntu'
-    'v25.2-ubuntu-student'
     'v25.1.0'
     'v25.1-ubuntu'
     'v25.1-ubuntu-student'
