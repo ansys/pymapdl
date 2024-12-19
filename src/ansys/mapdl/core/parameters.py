@@ -558,7 +558,7 @@ class Parameters:
                 f"that could not be read using '{format_str}'."
             )
 
-        arr_flat = np.fromstring(output, sep="\n").reshape(shape)
+        arr_flat = np.fromstring(output.strip(), sep="\n").reshape(shape)
 
         if len(shape) == 3:
             if shape[2] == 1:
