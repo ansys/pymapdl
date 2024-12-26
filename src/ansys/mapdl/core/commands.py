@@ -845,8 +845,8 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
 
         title = self._get_body()[0]
 
-        _bcType = [i for i in bc_type.keys() if i in title]
-        _entity = [i for i in entity.keys() if i in title]
+        _bcType = [i for i in bc_type if i in title]
+        _entity = [i for i in entity if i in title]
 
         if _bcType and _entity:
 
