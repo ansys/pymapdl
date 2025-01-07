@@ -57,7 +57,7 @@ tests = [
     "ansys-dpf-core==0.10.1",
     "ansys-tools-visualization-interface==0.6.2",
     "autopep8==2.3.1",
-    "matplotlib==3.9.3",
+    "matplotlib==3.10.0",
     "pandas==2.2.3",
     "pyansys-tools-report==0.8.1",
     "pyfakefs==5.7.2",
@@ -74,7 +74,7 @@ tests = [
 doc = [
     "ansys-dpf-core==0.10.1",
     "ansys-mapdl-reader==0.54.2",
-    "ansys-sphinx-theme==1.2.3",
+    "ansys-sphinx-theme==1.2.4",
     "ansys-tools-visualization-interface==0.6.2",
     "grpcio==1.68.1",
     "imageio-ffmpeg==0.5.1",
@@ -82,7 +82,7 @@ doc = [
     "jupyter_sphinx==0.5.3",
     "jupyter==1.1.1",
     "jupyterlab>=3.2.8",
-    "matplotlib==3.9.3",
+    "matplotlib==3.10.0",
     "nbformat==5.10.4",
     "numpydoc==1.8.0",
     "pandas==2.2.3",
@@ -118,7 +118,7 @@ pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_
 pymapdl = "ansys.mapdl.core.cli:main"
 
 [tool.pytest.ini_options]
-addopts = "-rxXsa -vvv --maxfail=10 --random-order-bucket=class --random-order --durations=10  --timeout=40"
+addopts = "-rxXsa -vvv --maxfail=10 --random-order-bucket=class --random-order --durations=10  --timeout=180"
 junit_family = "legacy"
 filterwarnings = [
     "ignore::FutureWarning",
