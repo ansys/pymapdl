@@ -1317,6 +1317,10 @@ class _MapdlCore(Commands):
                     return self.geometry.anum
                 elif name == "VSEL":
                     return self.geometry.vnum
+                elif name == 'ESLN':
+                    return self.mesh.enum
+                elif name == 'NSLE':
+                    return self.mesh.nnum
                 else:
                     return None
 

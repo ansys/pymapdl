@@ -185,6 +185,8 @@ CMD_XSEL = [
     "LSEL",
     "ASEL",
     "VSEL",
+    "ESLN",
+    "NSLE",
 ]
 
 
