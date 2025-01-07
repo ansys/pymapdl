@@ -2876,7 +2876,7 @@ def submitter(
         stdout=stdout,
         stderr=stderr,
         env=env_vars,
-    )  # nosec B603 B607
+    )
 
 
 def check_console_start_parameters(start_parm):
