@@ -2941,7 +2941,7 @@ class MapdlGrpc(MapdlBase):
 
     @property
     def locked(self):
-        """Instance is in use within a pool"""
+        """Instance is in use within a pool."""
         return self._locked
 
     @locked.setter
@@ -2987,7 +2987,7 @@ class MapdlGrpc(MapdlBase):
 
     @property
     def _distributed_result_file(self):
-        """Path of the distributed result file"""
+        """Path of the distributed result file."""
         if not self._distributed:
             return
 
@@ -3022,7 +3022,7 @@ class MapdlGrpc(MapdlBase):
 
     @property
     def thermal_result(self):
-        """The thermal result object"""
+        """The thermal result object."""
         self._prioritize_thermal = True
         result = self.result
         self._prioritize_thermal = False
@@ -3045,7 +3045,7 @@ class MapdlGrpc(MapdlBase):
             return open(os.path.join(self.directory, error_file)).read()
         elif self._exited:
             raise MapdlExitedError(
-                "Cannot list error file when MAPDL Service has " "exited"
+                "Cannot list error file when MAPDL Service has exited"
             )
 
         return self._download_as_raw(error_file).decode("latin-1")
@@ -3060,9 +3060,7 @@ class MapdlGrpc(MapdlBase):
         capname="",
         **kwargs,
     ):
-        """Run CMATRIX in non-interactive mode and return the response
-        from file.
-        """
+        """Run CMATRIX in non-interactive mode and return the response from file."""
 
         # The CMATRIX command needs to run in non-interactive mode
         if not self._store_commands:
