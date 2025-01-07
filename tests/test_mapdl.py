@@ -2429,8 +2429,15 @@ def test_not_correct_et_element(mapdl, cleared):
 
 
 def test_ctrl(mapdl, cleared):
-    mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
-    mapdl._ctrl("set_verb", 0)  # Returning to non-verbose
+    with patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.run") as mck_run:
+
+        mapdl._ctrl("set_verb", 5)  # Setting verbosity on the server
+        mapdl._ctrl("set_verb", 0)  # Returning to non-verbose
+
+        assert "/verify" in mck_run.call_args_list[0].args[0]
+
+    mapdl.finish()
+    mapdl.run("/verify")  # mocking might skip running this inside mapdl._ctrl
 
 
 def test_cleanup_loggers(mapdl, cleared):
@@ -2569,3 +2576,19 @@ def test_raising_warns(python_version, minimal_version, deprecating, context):
         reload(pymapdl)
 
     pymapdl.helpers.run_first_time()
+
+
+def test_max_cmd_len(mapdl):
+    with pytest.raises(
+        ValueError, match="Maximum command length must be less than 640 characters"
+    ):
+        cmd = "a" * 640
+        mapdl.run(cmd)
+
+
+def test_max_cmd_len_mapdlgrpc(mapdl):
+    with pytest.raises(
+        ValueError, match="Maximum command length must be less than 640 characters"
+    ):
+        cmd = "a" * 640
+        mapdl._run(cmd)

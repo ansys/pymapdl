@@ -577,12 +577,18 @@ def test_input_compatibility_api_change(mapdl, cleared):
 
 @requires("grpc")
 @requires("local")
-def test__check_stds(mapdl, cleared):
+@requires("nostudent")
+def test__check_stds():
     """Test that the standard input is checked."""
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(port=50058)
 
     mapdl._read_stds()
     assert mapdl._stdout is not None
     assert mapdl._stderr is not None
+
+    mapdl.exit(force=True)
 
 
 def test_subscribe_to_channel(mapdl, cleared):

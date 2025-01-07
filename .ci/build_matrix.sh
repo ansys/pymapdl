@@ -9,7 +9,10 @@ versions=(
     # if added more "latest", change "$LATEST"
     'latest-ubuntu' 
     'latest-ubuntu-student'
+    'v25.2.0'
     'v25.1.0'
+    'v25.1-ubuntu'
+    'v25.1-ubuntu-student'
     'v24.2.0'
     'v24.2-ubuntu'
     'v24.2-ubuntu-student'
@@ -95,11 +98,11 @@ for version in "${versions[@]}"; do
     fi
 
     # Skipping student versions on auth_user
-    if [[ "$auth_user" == "true" && "$ON_STUDENT" == "true" ]]; then
-        echo "Skipping student versions when user is authenticated"
-        echo ""
-        continue
-    fi
+    # if [[ "$auth_user" == "true" && "$ON_STUDENT" == "true" ]]; then
+    #     echo "Skipping student versions when user is authenticated"
+    #     echo ""
+    #     continue
+    # fi
 
     # main logic
     if [[ "$auth_user" == "true" ]]; then

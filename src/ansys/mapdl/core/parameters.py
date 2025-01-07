@@ -171,7 +171,14 @@ class Parameters:
         >>> mapdl.parameters.routine
         'PREP7'
         """
-        value = self._mapdl.get_value("ACTIVE", item1="ROUT")
+        value = int(self._mapdl.get_value("ACTIVE", item1="ROUT"))
+        if value not in ROUTINE_MAP:
+            self._mapdl.logger.info(
+                f"Getting a valid routine number failed. Routine obtained is {value}. Executing 'FINISH'."
+            )
+            self._mapdl.finish()
+            value = 0
+
         return ROUTINE_MAP[int(value)]
 
     @property

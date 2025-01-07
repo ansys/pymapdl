@@ -32,6 +32,8 @@ from ansys.mapdl.core.errors import MapdlRuntimeError, MapdlVersionError
 from ansys.mapdl.core.misc import random_string
 from conftest import ON_CI, TestClass
 
+SKIP_ON_VERSIONS = ["22.2", "23.1", "23.2", "24.1", "24.2", "25.1", "25.2"]
+
 
 @pytest.fixture(scope="session")
 def db(mapdl):
@@ -49,9 +51,9 @@ def db(mapdl):
         )
 
     ## Exceptions
-    if mapdl_version in ["22.2", "23.1", "23.2", "24.1", "24.2", "25.1"] and ON_CI:
+    if mapdl_version in SKIP_ON_VERSIONS and ON_CI:
         pytest.skip(
-            f"This MAPDL version ({mapdl_version}) docker image seems to not support DB, but local does."
+            f"This MAPDL version ({mapdl_version}) docker image seems to not support DB on CICD."
         )
 
     if mapdl._server_version < (0, 4, 1):  # 2021R2
@@ -84,7 +86,7 @@ def test_database_start_stop(mapdl, cleared):
         )
 
     # Exceptions
-    if mapdl_version in ["22.2", "23.1", "23.2", "24.1", "24.2", "25.1"] and ON_CI:
+    if mapdl_version in SKIP_ON_VERSIONS and ON_CI:
         pytest.skip(
             f"This MAPDL version ({mapdl_version}) docker image seems to not support DB, but local does."
         )

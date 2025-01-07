@@ -178,6 +178,7 @@ _ALLOWED_START_PARM = [
     "jobid",
     "jobname",
     "launch_on_hpc",
+    "mode",
     "nproc",
     "override",
     "port",
@@ -252,7 +253,7 @@ class _MapdlCore(Commands):
         self._store_commands: bool = False
         self._stored_commands = []
         self._response = None
-        self._mode = None
+        self._mode = start_parm.get("mode", None)
         self._mapdl_process = None
         self._launched: bool = start_parm.get("launched", False)
         self._stderr = None
@@ -1290,6 +1291,9 @@ class _MapdlCore(Commands):
 
     def _wrap_xsel_commands(self):
         # Wrapping XSEL commands.
+        if self.is_console:
+            return
+
         def wrap_xsel_function(func):
             if hasattr(func, "__func__"):
                 func.__func__.__doc__ = inject_docs(
@@ -2183,6 +2187,11 @@ class _MapdlCore(Commands):
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")
 
+        if len(command) > 639:  # CMD_MAX_LENGTH
+            # If using mapdl_grpc, this check is redundant on purpose.
+            # Console probably do not have this limitation, but I'm not certain.
+            raise ValueError("Maximum command length must be less than 640 characters")
+
         # Check kwargs
         verbose = kwargs.pop("verbose", False)
         save_fig = kwargs.pop("savefig", False)
@@ -2219,6 +2228,8 @@ class _MapdlCore(Commands):
                 mute = False
 
         command = command.strip()
+
+        is_comment = command.startswith("!") or command.upper().startswith("/COM")
 
         # always reset the cache
         self._reset_cache()
@@ -2265,7 +2276,7 @@ class _MapdlCore(Commands):
             # simply return the contents of the file
             return self.list(*command.split(",")[1:])
 
-        if "=" in command:
+        if "=" in command and not is_comment:
             # We are storing a parameter.
             param_name = command.split("=")[0].strip()
 
@@ -2871,11 +2882,6 @@ class _MapdlCore(Commands):
                 else:
                     # Catching only the first error.
                     error_message = error_message.group(0)
-
-                # Trimming empty lines
-                error_message = "\n".join(
-                    [each for each in error_message.splitlines() if each]
-                )
 
                 # Trimming empty lines
                 error_message = "\n".join(
