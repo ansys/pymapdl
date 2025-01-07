@@ -48,14 +48,14 @@ class Test_xpl:
 
         clear(mapdl)
 
-        # setup the full file
+        # set up the full file
         mapdl.block(0, 1, 0, 1, 0, 1)
         mapdl.et(1, 186)
         mapdl.esize(0.5)
         mapdl.vmesh("all")
 
         # Define a material (nominal steel in SI)
-        mapdl.mp("EX", 1, 210e9)  # Elastic moduli in Pa (kg/(m*s**2))
+        mapdl.mp("EX", 1, 210e9)  # Elastic modulus in Pa (kg/(m*s**2))
         mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
         mapdl.mp("NUXY", 1, 0.3)  # Poisson's Ratio
 
