@@ -145,7 +145,9 @@ class PostProcessing:
         try:
             nsets = int(self.nsets)
         except MapdlRuntimeError as error:
-            self._mapdl.logger.debug(f"Error when obtaining the number of sets:\n{error}")
+            self._mapdl.logger.debug(
+                f"Error when obtaining the number of sets:\n{error}"
+            )
             nsets = "NA"
 
         info += f"\tNumber of result sets: {nsets}\n"
@@ -160,7 +162,9 @@ class PostProcessing:
                     "An error occurred while attempting to open the results file"
                     in str(err)
                 ):
-                    self._mapdl.logger.debug(f"List of steps could not be obtained due to error:\n{err}")
+                    self._mapdl.logger.debug(
+                        f"List of steps could not be obtained due to error:\n{err}"
+                    )
                     nlist = "Results file is not available"
                 else:
                     raise err
