@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -157,14 +157,14 @@ def testing_minimal():
     return os.environ.get("TESTING_MINIMAL", "NO").upper().strip() in ["YES", "TRUE"]
 
 
-def log_apdl() -> bool:
-    if os.environ.get("PYMAPDL_LOG_APDL"):
-        log_apdl = os.environ.get("PYMAPDL_LOG_APDL")
+def debug_testing() -> bool:
+    if os.environ.get("PYMAPDL_DEBUG_TESTING"):
+        debug_testing = os.environ.get("PYMAPDL_DEBUG_TESTING")
 
-        if log_apdl.lower() in ["true", "false", "yes", "no"]:
-            return log_apdl.lower() in ["true", "yes"]
+        if debug_testing.lower() in ["true", "false", "yes", "no"]:
+            return debug_testing.lower() in ["true", "yes"]
         else:
-            return log_apdl
+            return debug_testing
 
     else:
         return False
@@ -228,7 +228,7 @@ def log_test_start(mapdl: Mapdl) -> None:
     )
 
     mapdl.run("!")
-    mapdl.run(f"! PyMAPDL running test: {test_name}")
+    mapdl.run(f"! PyMAPDL running test: {test_name}"[:639])
     mapdl.run("!")
 
     # To see it also in MAPDL terminal output
@@ -241,6 +241,7 @@ def log_test_start(mapdl: Mapdl) -> None:
             types_ = ["File path", "Test function"]
 
         mapdl._run("/com,Running test in:", mute=True)
+
         for type_, name_ in zip(types_, test_name):
             mapdl._run(f"/com,    {type_}: {name_}", mute=True)
 
