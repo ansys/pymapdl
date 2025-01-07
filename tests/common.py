@@ -274,7 +274,10 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
 
             # we cannot connect.
             # Kill the instance
-            mapdl.exit()
+            try:
+                mapdl.exit()
+            except Exception as e:
+                LOG.error(f"An error occurred when killing the instance:\n{str(e)}")
 
             # Relaunching MAPDL
             mapdl = launch_mapdl(
@@ -284,6 +287,8 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
                 cleanup_on_exit=mapdl._cleanup,
                 log_apdl=log_apdl(),
             )
+
+        LOG.info("Successfully re-connected to MAPDL")
 
         # Restoring the local configuration
         mapdl._local = local_
