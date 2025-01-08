@@ -2035,12 +2035,10 @@ class MapdlGrpc(MapdlBase):
                 )
 
         else:
-            if time_step_stream <= 0:
-                raise ValueError(
-                    "``time_step_stream`` argument must be greater than 0``"
-                )
+            if time_step <= 0:
+                raise ValueError("``time_step`` argument must be greater than 0``")
 
-        self.logger.debug(f"The time_step_stream argument is set to: {time_step}")
+        self.logger.debug(f"The time_step argument is set to: {time_step}")
         return time_step
 
     def _get_file_path(self, fname: str, progress_bar: bool = False) -> str:
