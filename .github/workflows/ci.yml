@@ -151,6 +151,8 @@ jobs:
           python-package-name: ${{ env.PACKAGE_NAME }}
           dev-mode: ${{ github.ref != 'refs/heads/main' }}
           upload-reports: True
+          hide-log: false
+
 
   docs-build:
     name: "Build documentation"
