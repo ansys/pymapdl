@@ -15,7 +15,7 @@ Abbreviations
    :toctree: _autosummary
 
 
-   Abbreviations.ucmd
-   Abbreviations.abbres
    Abbreviations.abbr
+   Abbreviations.abbres
    Abbreviations.abbsav
+   Abbreviations.ucmd

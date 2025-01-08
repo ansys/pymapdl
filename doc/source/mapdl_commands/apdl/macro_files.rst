@@ -15,15 +15,15 @@ MacroFiles
    :toctree: _autosummary
 
 
-   MacroFiles.pmacro
-   MacroFiles.psearch
-   MacroFiles.ulib
-   MacroFiles.use
-   MacroFiles.cfwrite
    MacroFiles.cfclos
    MacroFiles.cfopen
+   MacroFiles.cfwrite
    MacroFiles.create
-   MacroFiles.msg
    MacroFiles.mkdir
-   MacroFiles.slashtee
+   MacroFiles.msg
+   MacroFiles.pmacro
+   MacroFiles.psearch
    MacroFiles.rmdir
+   MacroFiles.slashtee
+   MacroFiles.ulib
+   MacroFiles.use

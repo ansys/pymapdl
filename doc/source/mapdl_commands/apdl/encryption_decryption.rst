@@ -15,7 +15,7 @@ EncryptionDecryption
    :toctree: _autosummary
 
 
-   EncryptionDecryption.encrypt
-   EncryptionDecryption.decrypt
    EncryptionDecryption.dbdecrypt
    EncryptionDecryption.dbencrypt
+   EncryptionDecryption.decrypt
+   EncryptionDecryption.encrypt

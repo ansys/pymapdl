@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -45,9 +45,13 @@ class EncryptionDecryption:
         Notes
         -----
         This command opens the encrypted file specified by ``Fname`` and ``Ext`` for writing encrypted input
-        commands.  Issuing this command results in a new file that overwrites any data in an existing file
-        by the same name. When the encrypted file is written, the first line in the file is ``/DECRYPT``
-        ,PASSWORD,OPENSSL and the last line is ``/DECRYPT``.  See `Encrypting Command Input and Other Data
+        commands.
+
+        Issuing this command results in a new file that overwrites any data in an existing file by the same
+        name. When the encrypted file is written, the first line in the file is ``/DECRYPT``
+        ,PASSWORD,OPENSSL and the last line is ``/DECRYPT``.
+
+        See `Encrypting Command Input and Other Data
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdl_encryptmat.html>`_
         :ref:`encrypt` and performing encryption and decryption.
         """
@@ -62,23 +66,31 @@ class EncryptionDecryption:
         Parameters
         ----------
         key1 : str
-            Key to decrypt the encrypted input created by :ref:`encrypt`. The only valid label is PASSWORD.
+            Key to decrypt the encrypted input created by :ref:`encrypt` . The only valid label is PASSWORD.
 
         key2 : str
             Key to decrypt the encrypted input or to set the global encryption key. The following are valid
-            inputs:   If ``Key2`` = OPENSSL or is blank, then decryption commences and the previously set
-            global encryption key is used for decryption. If ``Key2`` has a value, then that value is set as
-            the global encryption key. If ``Key2`` = OFF, then the global encryption password previously set
-            by the command :ref:`decrypt`,PASSWORD, ``Key2`` is reset.
+            inputs:
+
+            If ``Key2`` = OPENSSL or is blank, then decryption commences and the previously set global
+            encryption key is used for decryption. If ``Key2`` has a value, then that value is set as the
+            global encryption key. If ``Key2`` = OFF, then the global encryption password previously set by
+            the command :ref:`decrypt` ,PASSWORD, ``Key2`` is reset.
 
         Notes
         -----
         When decrypting an encrypted input, ``/DECRYPT,PASSWORD,OPENSSL`` must appear as the first line of
         the encrypted file. The line is inserted automatically when you issue :ref:`encrypt` to create the
-        encrypted file.  To read an encrypted file, enter :ref:`decrypt` ,PASSWORD, ``Key2`` anywhere in the
-        standard input file to set the global encryption key. The encryption key must be set before reading
-        in the encrypted input.  :ref:`decrypt` is also valid when entered in the Command Input Window of
-        the Mechanical APDL user interface.  See `Encrypting Command Input and Other Data
+        encrypted file.
+
+        To read an encrypted file, enter :ref:`decrypt` ,PASSWORD, ``Key2`` anywhere in the standard input
+        file to set the global encryption key. The encryption key must be set before reading in the
+        encrypted input.
+
+        :ref:`decrypt` is also valid when entered in the Command Input Window of the Mechanical APDL user
+        interface.
+
+        See `Encrypting Command Input and Other Data
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdl_encryptmat.html>`_
         :ref:`decrypt` and performing encryption and decryption.
         """
@@ -128,14 +140,18 @@ class EncryptionDecryption:
         Notes
         -----
         This command decrypts data in the database file. It must be issued before resuming the database file
-        ( :ref:`resume` command). Only ``KeyA`` is required for a one-level encryption. For a `two-level
+        ( :ref:`resume` command). Only ``KeyA`` is required for a one-level encryption . For a `two-level
         encryption
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdl_encryptmat.html#partial_access>`_
         , inputting ``KeyB`` gives you partial access to the data. Inputting both ``KeyA`` and ``KeyB``
-        gives you full access.  For more information about using :ref:`dbdecrypt` in the
-        encryption/decryption procedure, see `Encrypting Material Data
+        gives you full access.
+
+        For more information about using :ref:`dbdecrypt` in the encryption/decryption procedure, see
+        `Encrypting Material Data
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdl_encryptmat.html#apdl_encryptsteps_mat>`_
-        :ref:`dbencrypt` command.  This command is valid in any processor.
+        :ref:`dbencrypt` command.
+
+        This command is valid in any processor.
         """
         command = f"/DBDECRYPT,{keya},{keyb},{datatype},{num1},{num2},{inc}"
         return self.run(command, **kwargs)
@@ -162,7 +178,7 @@ class EncryptionDecryption:
 
         keyb : str
             Encryption key B (32-character maximum). This key is used to encrypt the data in a two-level
-            encryption. If ``KeyB`` is not specified, a one-level encryption is used to encrypt the data.
+            encryption . If ``KeyB`` is not specified, a one-level encryption is used to encrypt the data.
 
         datatype : str
             Type of data to encrypt. Must be set to MAT for material data.
@@ -182,14 +198,21 @@ class EncryptionDecryption:
         Notes
         -----
         This command encrypts data in the database file. It must be issued before saving the database file (
-        :ref:`save` command).  For a one-level encryption, specify only ``KeyA`` and set ``NUM1`` to ALL. (
-        ``NUM2`` and ``INC`` are not used.)  For a `two-level encryption
+        :ref:`save` command).
+
+        For a one-level encryption, specify only ``KeyA`` and set ``NUM1`` to ALL. ( ``NUM2`` and ``INC``
+        are not used.)
+
+        For a `two-level encryption
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdl_encryptmat.html#partial_access>`_
-        , specify both ``KeyA`` and ``KeyB``. Also specify ``NUM1``, ``NUM2``, and ``INC`` as needed.  For
-        more information about using :ref:`dbencrypt` in the encryption/decryption procedure, see
+        , specify both ``KeyA`` and ``KeyB``. Also specify ``NUM1``, ``NUM2``, and ``INC`` as needed.
+
+        For more information about using :ref:`dbencrypt` in the encryption/decryption procedure, see
         `Encrypting Material Data
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdl_encryptmat.html#apdl_encryptsteps_mat>`_
-        :ref:`dbdecrypt` command.  This command is valid in any processor.
+        :ref:`dbdecrypt` command.
+
+        This command is valid in any processor.
         """
         command = f"/DBENCRYPT,{keya},{keyb},{datatype},{num1},{num2},{inc}"
         return self.run(command, **kwargs)

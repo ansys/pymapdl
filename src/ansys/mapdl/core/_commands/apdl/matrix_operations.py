@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -83,11 +83,12 @@ class MatrixOperations:
 
         Parameters
         ----------
-        type : str
+        type_ : str
             Type of FFT transformation:
 
-            * ``FORW`` - Forward FFT computation (default).
-            * ``BACK`` - Backward FFT computation.
+              * ``FORW`` - Forward FFT computation (default).
+
+              * ``BACK`` - Backward FFT computation.
 
         inputdata : str
             Name of matrix or vector for which the FFT will be computed. This can be a dense matrix (created
@@ -97,6 +98,7 @@ class MatrixOperations:
         outputdata : str
             Name of matrix or vector where the FFT results will be stored. The type of this argument must be
             consistent with ``InputData`` (see table below). There is no default value for this argument.
+
             InformalTables need to be added.
 
         dim1 : str
@@ -110,11 +112,12 @@ class MatrixOperations:
         resultformat : str
             Specifies the result format:
 
-            * ``FULL`` - Returns the full result. That is, the result matches the dimension specified on this
+              * ``FULL`` - Returns the full result. That is, the result matches the dimension specified on this
               command ( ``DIM1``, ``DIM2`` ).
-            * ``PART`` - Returns partial results. For real input data, there is a symmetry in the results of the
-              Fourier transform as some coefficients are conjugated. The partial format uses this symmetry to
-              optimize the storage of the results. (Valid only for real data.)
+
+              * ``PART`` - Returns partial results. For real input data, there is a symmetry in the results of
+              the Fourier transform as some coefficients are conjugated. The partial format uses this symmetry
+              to optimize the storage of the results. (Valid only for real data.)
 
         Notes
         -----
@@ -141,19 +144,19 @@ class MatrixOperations:
         This feature enables you to associate a set of vector and matrices in a given memory workspace, so
         that you can easily manage the free step:
 
-        .. code::
+        .. code:: apdl
 
-           \*VEC,V,D,ALLOC,5  ! V belongs to the default Workspace 1
+           *VEC,V,D,ALLOC,5		! V belongs to the default Workspace 1
 
-           \*WRK,2     ! Set the active workspace as the number 2
+           *WRK,2					! Set the active workspace as the number 2
 
-           \*VEC,W,D,IMPORT,FULL,file.full,RHS ! W belongs to the Workspace 2
-           \*SMAT,K,D,IMPORT,FULL,file.full,STIFF ! K belongs to the Workspace 2
-           \*DMAT,M,ALLOC,10,10    ! M belongs to the Workspace 2
-           …
-           \*FREE,WRK,2   ! W, K and M are deleted, but not V
+           *VEC,W,D,IMPORT,FULL,file.full,RHS	! W belongs to the Workspace 2
+           *SMAT,K,D,IMPORT,FULL,file.full,STIFF	! K belongs to the Workspace 2
+           *DMAT,M,ALLOC,10,10 			! M belongs to the Workspace 2
+           ...
+           *FREE,WRK,2			! W, K and M are deleted, but not V
 
-           \*PRINT,V
+           *PRINT,V
 
         This feature can be useful to free all the temporary APDLMath variables inside a MACRO in one call.
         """
@@ -181,9 +184,11 @@ class MatrixOperations:
         algorithm : str
             Algorithm or method to use:
 
-            * ``SVD`` - Singular value decomposition algorithm (default).
-            * ``MGS`` - Modified Gram-Schmidt algorithm.
-            * ``SPARSE`` - Compress a sparse matrix based on the threshold value.
+              * ``SVD`` - Singular value decomposition algorithm (default).
+
+              * ``MGS`` - Modified Gram-Schmidt algorithm.
+
+              * ``SPARSE`` - Compress a sparse matrix based on the threshold value.
 
         threshold : str
             Numerical threshold value used to manage the compression. The default value depends on the
@@ -206,13 +211,20 @@ class MatrixOperations:
         The SVD and MGS algorithms are only applicable to dense matrices that were created using the
         :ref:`dmat` command. Columns that are linearly dependent on others are removed, leaving the
         independent or basis vectors. The matrix is resized according to the new size determined by the
-        algorithm.  For the SVD algorithm, the singular value decomposition of an input matrix :math:``  is
-        a factorization of the form:    .. math::     Here, the :math:``  matrix is replaced by the
-        :math:``  matrix, according to the specified threshold.  The SPARSE compression method is only
-        applicable to sparse matrices that were created using the :ref:`smat` command. All terms that have
-        an absolute value below the specified threshold, relative to the maximum value in the matrix, are
-        removed from the original matrix. For example, given a sparse matrix having 100 as the largest term
-        and ``THRESHOLD`` = 0.5, all terms having an absolute value below 0.5\*100 = 50 are removed.
+        algorithm.
+
+        For the SVD algorithm, the singular value decomposition of an input matrix :math:``  is a
+        factorization of the form:
+
+        M = U Σ V *
+        Here, the :math:``  matrix is replaced by the  :math:``  matrix, according to the specified
+        threshold.
+
+        The SPARSE compression method is only applicable to sparse matrices that were created using the
+        :ref:`smat` command. All terms that have an absolute value below the specified threshold, relative
+        to the maximum value in the matrix, are removed from the original matrix. For example, given a
+        sparse matrix having 100 as the largest term and ``THRESHOLD`` = 0.5, all terms having an absolute
+        value below 0.5\2100 = 50 are removed.
         """
         command = f"*COMP,{matrix},{algorithm},{threshold},{val1},{val2}"
         return self.run(command, **kwargs)
@@ -239,9 +251,11 @@ class MatrixOperations:
         normtype : str
             Mathematical norm to use:
 
-            * ``NRM2`` - L2 (Euclidian or SRSS) norm (default).
-            * ``NRM1`` - L1 (absolute sum) norm (vectors and dense matrices only).
-            * ``NRMINF`` - Maximum norm.
+              * ``NRM2`` - L2 (Euclidian or SRSS) norm (default).
+
+              * ``NRM1`` - L1 (absolute sum) norm (vectors and dense matrices only).
+
+              * ``NRMINF`` - Maximum norm.
 
         parr : str
             Parameter name that contains the result.
@@ -249,17 +263,32 @@ class MatrixOperations:
         normalize : str
             Normalization key; to be used only for vectors created by :ref:`vec` :
 
-            * ``YES`` - Normalize the vector such that the norm is 1.0.
-            * ``NO`` - Do not normalize the vector (default).
+              * ``YES`` - Normalize the vector such that the norm is 1.0.
+
+              * ``NO`` - Do not normalize the vector (default).
 
         Notes
         -----
         The NRM2 option corresponds to the Euclidian or L2 norm and is applicable to either vectors or
-        matrices:  :math:``,  :math:``   :math:``,  :math:``  where  :math:``  is the complex conjugate of
-        :math:``   :math:``,  :math:``  = largest eigenvalue of  :math:``   The NRM1 option corresponds to
-        the L1 norm and is applicable to vectors and dense matrices:  :math:``  or  :math:``,  :math:``
-        :math:``  or  :math:``,  :math:``   The NRMINF option is the maximum norm and is applicable to
-        either vectors or matrices:  :math:``  or  :math:``,  :math:``   :math:``  or  :math:``,  :math:``
+        matrices:
+
+        :math:``,  :math:``
+
+        :math:``,  :math:`` where  :math:``  is the complex conjugate of  :math:``
+
+        :math:``,  :math:`` = largest eigenvalue of  :math:``
+
+        The NRM1 option corresponds to the L1 norm and is applicable to vectors and dense matrices:
+
+        :math:``  or  :math:``,  :math:``
+
+        :math:``  or  :math:``,  :math:``
+
+        The NRMINF option is the maximum norm and is applicable to either vectors or matrices:
+
+        :math:``  or  :math:``,  :math:``
+
+        :math:``  or  :math:``,  :math:``
         """
         command = f"*NRM,{name},{normtype},{parr},{normalize}"
         return self.run(command, **kwargs)
@@ -291,13 +320,24 @@ class MatrixOperations:
         -----
         :ref:`merge` can be used to add new columns or rows to a dense matrix that was created by the
         :ref:`dmat` command. In this case, ``Name1`` must be the name of the dense matrix and ``Name2`` must
-        refer to a vector or another dense matrix.  The following two examples demonstrate merging columns
-        into a dense matrix.    .. figure::../../images/gMERGE1.png  The following example demonstrates
-        merging rows into a dense matrix.    .. figure::../../images/gMERGE3.png  :ref:`merge` can also be
-        used to add new rows to a vector that was created by the :ref:`vec` command. In this case, ``Name1``
-        and ``Name2`` must both refer to vectors, as demonstrated in the example below.    ..
-        figure::../../images/gMERGE2.png  In all cases, the values of the original matrix or vector are
-        retained, and the matrix or vector is resized to accommodate the additional rows or columns.
+        refer to a vector or another dense matrix.
+
+        The following two examples demonstrate merging columns into a dense matrix.
+
+        .. figure::../../images/gMERGE1.png
+
+        The following example demonstrates merging rows into a dense matrix.
+
+        .. figure::../../images/gMERGE3.png
+
+        :ref:`merge` can also be used to add new rows to a vector that was created by the :ref:`vec`
+        command. In this case, ``Name1`` and ``Name2`` must both refer to vectors, as demonstrated in the
+        example below.
+
+        .. figure::../../images/gMERGE2.png
+
+        In all cases, the values of the original matrix or vector are retained, and the matrix or vector is
+        resized to accommodate the additional rows or columns.
         """
         command = f"*MERGE,{name1},{name2},{val1},{val2}"
         return self.run(command, **kwargs)
@@ -311,7 +351,7 @@ class MatrixOperations:
         m3: str = "",
         **kwargs,
     ):
-        r"""Performs the matrix multiplication M3 = M1 :sup:`(T1)` \*M2 :sup:`(T2)` .
+        r"""Performs the matrix multiplication M3 = M1 :sup:`(T1)` *M2 :sup:`(T2)`.
 
         Mechanical APDL Command: `\*MULT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MULT.html>`_
 
@@ -341,9 +381,11 @@ class MatrixOperations:
         -----
         The matrices must be dimensionally consistent such that the number of columns of ``M1`` (or the
         transposed matrix, if requested) is equal to the number of rows of ``M2`` (or the transposed matrix,
-        if requested).  You cannot multiply two sparse matrices with this command (that is, ``M1`` and
-        ``M2`` cannot both be sparse). The resulting matrix, ``M3``, will always be a dense matrix, no
-        matter what combination of input matrices is used (dense\*sparse, sparse\*dense, or dense\*dense).
+        if requested).
+
+        You cannot multiply two sparse matrices with this command (that is, ``M1`` and ``M2`` cannot both be
+        sparse). The resulting matrix, ``M3``, will always be a dense matrix, no matter what combination of
+        input matrices is used (dense\2sparse, sparse\2dense, or dense\2dense).
         """
         command = f"*MULT,{m1},{t1},{m2},{t2},{m3}"
         return self.run(command, **kwargs)
@@ -361,21 +403,23 @@ class MatrixOperations:
         property : str
             Object property to get:
 
-            * ``DIM1`` - First dimension of a matrix, or size of a vector.
-            * ``DIM2`` - Second dimension of a matrix.
+              * ``DIM1`` - First dimension of a matrix, or size of a vector.
+
+              * ``DIM2`` - Second dimension of a matrix.
 
         var1 : str
             Name of the resulting parameter that contains the property value.
 
         Notes
         -----
-        The following example demonstrates using :ref:`starinquire` to get the number of rows and columns of an existing matrix.
+        The following example demonstrates using :ref:`starinquire` to get the number of rows and columns of
+        an existing matrix.
 
-        .. code::
+        .. code:: apdl
 
-           \*SMAT,K,D,IMPORT,FULL,file.full,STIFF  ! Import the stiffness matrix from an existing FULL file
-           \*INQUIRE,K,DIM1,NROW                   ! Get the first dimension of the stiffness matrix
-           \*INQUIRE,K,DIM2,NCOL                   ! Get the second dimension of the stiffness matrix
+           *SMAT,K,D,IMPORT,FULL,file.full,STIFF  ! Import the stiffness matrix from an existing FULL file
+           *INQUIRE,K,DIM1,NROW                   ! Get the first dimension of the stiffness matrix
+           *INQUIRE,K,DIM2,NCOL                   ! Get the second dimension of the stiffness matrix
            /COM, K matrix size: %NROW% x %NCOL%
         """
         command = f"*INQUIRE,{obj},{property},{var1}"
@@ -399,10 +443,10 @@ class MatrixOperations:
 
         Parameters
         ----------
-        type : str
+        type_ : str
             Specifies the algorithm to be used:
 
-            * ``PCG`` - Preconditioned conjugate gradient (default).
+              * ``PCG`` - Preconditioned conjugate gradient (default).
 
         enginename : str
             Name used to identify this iterative solver engine. Must be specified.
@@ -459,17 +503,23 @@ class MatrixOperations:
         method : str
             Initialization method to use:
 
-            * ``ZERO`` - Fill the vector/matrix with zeros (default).
-            * ``CONST`` - Fill the vector/matrix with a constant value.
-            * ``RAND`` - Fill the vector/matrix with random values.
-            * ``DIAG`` - Fill the ``n`` th diagonal of the matrix with a constant value. Other values are not
+              * ``ZERO`` - Fill the vector/matrix with zeros (default).
+
+              * ``CONST`` - Fill the vector/matrix with a constant value.
+
+              * ``RAND`` - Fill the vector/matrix with random values.
+
+              * ``DIAG`` - Fill the ``n`` th diagonal of the matrix with a constant value. Other values are not
               overwritten. For this option, ``Name`` must be a dense matrix.
-            * ``ADIAG`` - Fill the ``n`` th anti-diagonal of the matrix with a constant value. Other values are
-              not overwritten. For this option, ``Name`` must be a dense matrix.
-            * ``CONJ`` - Take the complex conjugate of the values in the vector/matrix (no change for non-
+
+              * ``ADIAG`` - Fill the ``n`` th anti-diagonal of the matrix with a constant value. Other values
+              are not overwritten. For this option, ``Name`` must be a dense matrix.
+
+              * ``CONJ`` - Take the complex conjugate of the values in the vector/matrix (no change for non-
               complex values).
-            * ``FILTER`` - Initialize a subset of values of a vector using a filtering vector. For this option,
-              ``Name`` must be a vector.
+
+              * ``FILTER`` - Initialize a subset of values of a vector using a filtering vector. For this
+              option, ``Name`` must be a vector.
 
         val1 : str
             Additional input. The meaning of ``Val1`` through ``Val3`` will vary depending on the specified
@@ -514,20 +564,28 @@ class MatrixOperations:
         format : str
             Format of the output file:
 
-            * ``MMF`` - Export the matrix in the Matrix Market Format.
-            * ``SUB`` - Export the matrix in the ``SUB`` file format.
-            * ``HBMAT`` - Export the matrix in the Harwell-Boeing file format.
-            * ``MAT`` - Export the matrix in a native format, to be re-imported using the :ref:`dmat` or
+              * ``MMF`` - Export the matrix in the Matrix Market Format.
+
+              * ``SUB`` - Export the matrix in the ``SUB`` file format.
+
+              * ``HBMAT`` - Export the matrix in the Harwell-Boeing file format.
+
+              * ``MAT`` - Export the matrix in a native format, to be re-imported using the :ref:`dmat` or
               :ref:`smat` command.
-            * ``EMAT`` - Export the matrix to an existing ``EMAT`` file.
-            * ``APDL`` - Export the matrix to an APDL array parameter.
-            * ``PS`` - Export the matrix profile to a Postscript file.
-            * ``DMIG`` - Export the matrix in the ``DMIG`` file format.
-            * ``CSV`` - Export the matrix to an ASCII CSV (comma-separated values) file.
+
+              * ``EMAT`` - Export the matrix to an existing ``EMAT`` file.
+
+              * ``APDL`` - Export the matrix to an APDL array parameter.
+
+              * ``PS`` - Export the matrix profile to a Postscript file.
+
+              * ``DMIG`` - Export the matrix in the ``DMIG`` file format.
+
+              * ``CSV`` - Export the matrix to an ASCII CSV (comma-separated values) file.
 
         fname : str
             Name of the file (case-sensitive, 32-character maximum), or name of the array parameter if
-            ``Format`` = APDL (no default).
+            ``Format`` = APDL (no default) .
 
         val1 : str
             Additional input. The meaning of ``Val1`` through ``Val3`` will vary depending on the specified
@@ -544,18 +602,26 @@ class MatrixOperations:
         Notes
         -----
         Only sparse matrices can be exported to Postscript files. This option plots the matrix profile as a
-        series of dots.  If you want to create a ``.SUB`` file from several matrices, you need to set
-        ``Val3`` = WAIT for all matrices but the last, and ``Val3`` = DONE for the last one. The export will
-        be effective at the last :ref:`export` command.  To create a ``.SUB`` file or ``.DMIG`` file from
-        scratch, you must supply the row information array. (Specify this array in the ``Val2`` field for
-        ``.SUB`` or in the ``Val1`` field for ``.DMIG``.) This must be an ``m`` x 2 array, where ``m`` is
-        the size of the matrix. The first column is the node number and the second column is the DOF number
-        corresponding to each row of the matrix.  When exporting an HBMAT file in ASCII format, you can
-        include the matrix type in the header of the file by specifying the matrix type in the ``Val2``
-        field. The matrix type is not included in the header if ``Val2`` is empty. If ``Val1`` = BINARY,
-        ``Val2`` is not used.  The :ref:`export` command is not applicable to sparse matrices initialized
-        from ``.FULL`` files by means of the NOD2SOLV option on the :ref:`smat` command (that is,
-        :ref:`smat` ,,,IMPORT,FULL,,NOD2SOLV).  The ``.CSV`` file format does not support sparse matrices.
+        series of dots.
+
+        If you want to create a ``.SUB`` file from several matrices, you need to set ``Val3`` = WAIT for all
+        matrices but the last, and ``Val3`` = DONE for the last one. The export will be effective at the
+        last :ref:`export` command.
+
+        To create a ``.SUB`` file or ``.DMIG`` file from scratch, you must supply the row information array.
+        (Specify this array in the ``Val2`` field for ``.SUB`` or in the ``Val1`` field for ``.DMIG``.)
+        This must be an ``m`` x 2 array, where ``m`` is the size of the matrix. The first column is the node
+        number and the second column is the DOF number corresponding to each row of the matrix.
+
+        When exporting an HBMAT file in ASCII format, you can include the matrix type in the header of the
+        file by specifying the matrix type in the ``Val2`` field. The matrix type is not included in the
+        header if ``Val2`` is empty. If ``Val1`` = BINARY, ``Val2`` is not used.
+
+        The :ref:`export` command is not applicable to sparse matrices initialized from ``.FULL`` files by
+        means of the NOD2SOLV option on the :ref:`smat` command (that is, :ref:`smat`
+        ,,,IMPORT,FULL,,NOD2SOLV).
+
+        The ``.CSV`` file format does not support sparse matrices.
         """
         command = f"*EXPORT,{matrix},{format},{fname},{val1},{val2},{val3}"
         return self.run(command, **kwargs)
@@ -597,8 +663,10 @@ class MatrixOperations:
         -----
         Use the command :ref:`antype` ,MODAL and the :ref:`modopt` command to specify the modal solution
         options. Only :ref:`modopt` ,DAMP, :ref:`modopt` ,UNSYM, :ref:`modopt` ,LANB, and :ref:`modopt`
-        ,SUBSP are supported.  :ref:`eigen` with Block Lanczos (LANB) only supports sparse matrices.
-        Distributed-Memory Parallel (DMP) Restriction This command is not supported in a DMP solution.
+        ,SUBSP are supported.
+
+        :ref:`eigen` with Block Lanczos (LANB) only supports sparse matrices. Distributed-Memory Parallel
+        (DMP) Restriction This command is not supported in a DMP solution.
         """
         command = f"*EIGEN,{kmatrix},{mmatrix},{cmatrix},{evals},{evects}"
         return self.run(command, **kwargs)
@@ -624,18 +692,21 @@ class MatrixOperations:
         matrix : str
             Name used to identify the matrix. Must be specified.
 
-        type : str
+        type_ : str
             Matrix type:
 
-            * ``D`` - Double precision real values (default).
-            * ``Z`` - Complex double precision values.
+              * ``D`` - Double precision real values (default).
+
+              * ``Z`` - Complex double precision values.
 
         method : str
             Method used to create the matrix:
 
-            * ``ALLOC`` - Allocate a new matrix.
-            * ``COPY`` - Copy an existing matrix.
-            * ``IMPORT`` - Import the matrix from a file.
+              * ``ALLOC`` - Allocate a new matrix.
+
+              * ``COPY`` - Copy an existing matrix.
+
+              * ``IMPORT`` - Import the matrix from a file.
 
         val1 : str
             Additional input. The meaning of ``Val1`` through ``Val5`` will vary depending on the specified
@@ -659,11 +730,17 @@ class MatrixOperations:
 
         Notes
         -----
-        Use the :ref:`dmat` command to create a dense matrix.  For more information on the CSR format, see
-        `Creating a Sparse Matrix Using the CSR Format
+        Use the :ref:`dmat` command to create a dense matrix.
+
+        For more information on the CSR format, see `Creating a Sparse Matrix Using the CSR Format
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdlCSRformat.html#eqdaaeaade-718e-4f25-b7ce-
-        ba5a1903b1bf>`_   For more information on the NOD2SOLV and USR2SOLV mapping vectors, see.  For more
-        information about ``.FULL`` file contents, see the :ref:`hbmat` in the `Command Reference <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_Z_TOC.html>`_.
+        ba5a1903b1bf>`_
+
+        For more information on the NOD2SOLV and USR2SOLV mapping vectors, see.
+
+        For more information about ``.FULL`` file contents, see the :ref:`hbmat` in the `Command Reference
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_Z_TOC.html>`_  Command
+        Reference.
         """
         command = f"*SMAT,{matrix},{type_},{method},{val1},{val2},{val3},{val4},{val5}"
         return self.run(command, **kwargs)
@@ -688,9 +765,11 @@ class MatrixOperations:
         sorttype : str
             Criteria used to sort the values:
 
-            * ``VALUE`` - Values are sorted based on their real value (default).
-            * ``ABS`` - Values are sorted based on their absolute value.
-            * ``PERM`` - Values are sorted based on the input permutation vector ( ``Val1`` ).
+              * ``VALUE`` - Values are sorted based on their real value (default).
+
+              * ``ABS`` - Values are sorted based on their absolute value.
+
+              * ``PERM`` - Values are sorted based on the input permutation vector ( ``Val1`` ).
 
         val1 : str
             Additional input. The meaning of ``Val1``, ``Val2`` varies depending on the specified
@@ -706,29 +785,29 @@ class MatrixOperations:
 
         The following input:
 
-        .. code::
+        .. code:: apdl
 
-           \*VEC,V,I,ALLOC,5
+           *VEC,V,I,ALLOC,5
            V(1)=5,-3,2,0,-1
-           \*SORT,V,VALUE
-           \*PRINT,V
+           *SORT,V,VALUE
+           *PRINT,V
 
         generates this output:
 
-        .. code::
+        .. code:: apdl
 
                   -3        -1         0         2         5
 
         To reverse the order, this input:
 
-        .. code::
+        .. code:: apdl
 
-           \*SORT,V,VALUE,,1
-           \*PRINT,V
+           *SORT,V,VALUE,,1
+           *PRINT,V
 
         generates this output:
 
-        .. code::
+        .. code:: apdl
 
                    5         2         0        -1        -3
         """
@@ -780,23 +859,29 @@ class MatrixOperations:
         vector : str
             Name used to identify the vector. Must be specified.
 
-        type : str
+        type_ : str
             Vector type:
 
-            * ``D`` - Double precision real values (default).
-            * ``Z`` - Complex double precision values.
-            * ``I`` - Integer values.
+              * ``D`` - Double precision real values (default).
+
+              * ``Z`` - Complex double precision values.
+
+              * ``I`` - Integer values.
 
         method : str
             Method used to create the vector:
 
-            * ``ALLOC`` - Allocate space for a vector (default).
-            * ``RESIZE`` - Resize an existing vector to a new length. Values are kept from the original vector.
-              If the length specified by ``Val1`` is greater than the original vector length, the additional
-              rows are assigned a value of zero.
-            * ``COPY`` - Copy an existing vector.
-            * ``IMPORT`` - Import the vector from a file.
-            * ``LINK`` - Link to a column of an existing dense :ref:`dmat` matrix and use it in subsequent
+              * ``ALLOC`` - Allocate space for a vector (default).
+
+              * ``RESIZE`` - Resize an existing vector to a new length. Values are kept from the original
+              vector. If the length specified by ``Val1`` is greater than the original vector length, the
+              additional rows are assigned a value of zero.
+
+              * ``COPY`` - Copy an existing vector.
+
+              * ``IMPORT`` - Import the vector from a file.
+
+              * ``LINK`` - Link to a column of an existing dense :ref:`dmat` matrix and use it in subsequent
               vector calculations. Any changes to the vector are also made to the corresponding matrix column
               (memory is shared).
 
@@ -818,8 +903,12 @@ class MatrixOperations:
 
         Notes
         -----
-        Use the :ref:`dmat` command to create a matrix.  For more information on the BACK and FORWARD nodal
-        mapping vectors, see in the `Ansys Parametric Design Language Guide <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdlxpl.html>`_.
+        Use the :ref:`dmat` command to create a matrix.
+
+        For more information on the BACK and FORWARD nodal mapping vectors, see in the `Ansys Parametric
+        Design Language Guide
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdlxpl.html>`_  ANSYS Parametric
+        Design Language Guide.
         """
         command = f"*VEC,{vector},{type_},{method},{val1},{val2},{val3},{val4}"
         return self.run(command, **kwargs)
@@ -843,8 +932,10 @@ class MatrixOperations:
         Notes
         -----
         For two vectors ``A`` and ``B`` of the same dimension ``n``, the Hadamard product (A∘B) is a vector
-        of the same dimension as the operands, with elements given by:    .. math::     This command is
-        limited to vector operands.
+        of the same dimension as the operands, with elements given by:
+
+        A ∘ B i = A i * B i
+        This command is limited to vector operands.
         """
         command = f"*HPROD,{a},{b},{c}"
         return self.run(command, **kwargs)
@@ -863,12 +954,14 @@ class MatrixOperations:
 
         Parameters
         ----------
-        type : str
+        type_ : str
             Specifies the algorithm to be used:
 
-            * ``DSS`` - MKL sparse linear solver.
-            * ``LAPACK`` - LAPACK dense matrix linear solver (default if applied to dense matrices).
-            * ``DSP`` - Distributed sparse solver (default for sparse matrices).
+              * ``DSS`` - MKL sparse linear solver.
+
+              * ``LAPACK`` - LAPACK dense matrix linear solver (default if applied to dense matrices).
+
+              * ``DSP`` - Distributed sparse solver (default for sparse matrices).
 
         enginename : str
             Name used to identify this engine. Must be specified.
@@ -879,13 +972,16 @@ class MatrixOperations:
         option : str
             Option to control the memory mode of the DSS solver (used only if ``Type`` = DSS):
 
-            * ``INCORE`` - In-core memory mode.
-            * ``OUTOFCORE`` - Out-of-core memory mode.
+              * ``INCORE`` - In-core memory mode.
+
+              * ``OUTOFCORE`` - Out-of-core memory mode.
 
         Notes
         -----
-        This command creates a linear solver engine.  The DSS and DSP solvers can only be used with sparse
-        matrices. For dense matrices, use the LAPACK solver.
+        This command creates a linear solver engine.
+
+        The DSS and DSP solvers can only be used with sparse matrices. For dense matrices, use the LAPACK
+        solver.
         """
         command = f"*LSENGINE,{type_},{enginename},{matrix},{option}"
         return self.run(command, **kwargs)
@@ -898,17 +994,17 @@ class MatrixOperations:
         Parameters
         ----------
         enginename : str
-            Name used to identify this engine. Must have been previously created using :ref:`lsengine`.
+            Name used to identify this engine. Must have been previously created using :ref:`lsengine` .
 
         option : str
             Option to invert the matrix, used only with an LAPACK engine ( :ref:`lsengine` ,LAPACK):
 
-            * ``INVERT`` - Invert the matrix.
+              * ``INVERT`` - Invert the matrix.
 
         Notes
         -----
         Performs the computationally intensive, memory intensive factorization of a matrix specified by
-        :ref:`lsengine`, using the solver engine also specified by :ref:`lsengine`.
+        :ref:`lsengine`, using the solver engine also specified by :ref:`lsengine` .
         """
         command = f"*LSFACTOR,{enginename},{option}"
         return self.run(command, **kwargs)
@@ -929,7 +1025,9 @@ class MatrixOperations:
         Notes
         -----
         Restores a previously dumped Linear Solver (see the :ref:`lsdump` command). This Linear Solver can
-        be used to solve a linear system using the :ref:`lsbac` command.  Caret 122?
+        be used to solve a linear system using the :ref:`lsbac` command.
+
+
         """
         command = f"*LSRESTORE,{enginename},{filename}"
         return self.run(command, **kwargs)
@@ -950,7 +1048,7 @@ class MatrixOperations:
         ----------
         enginename : str
             Name used to identify this engine. Must have been previously created using :ref:`lsengine` and
-            factorized using :ref:`lsfactor`.
+            factorized using :ref:`lsfactor` .
 
         rhsvector : str
             Name of vector containing the right-hand side (load) vectors as input. Must have been previously
@@ -968,9 +1066,10 @@ class MatrixOperations:
         -----
         This command performs forward and back substitution to obtain the solution to the linear matrix
         equation Ax = b (or A :sup:`T` x = b if ``TransKey`` = TRANS). The matrix engine must have been
-        previously defined using :ref:`lsengine`, and the matrix factored using :ref:`lsfactor`.  You can
-        use the :ref:`dmat` ,,,COPY (or :ref:`vec` ,,,COPY) command to copy the load vector to the solution
-        vector in order to predefine it with the appropriate size.
+        previously defined using :ref:`lsengine`, and the matrix factored using :ref:`lsfactor` .
+
+        You can use the :ref:`dmat` ,,,COPY (or :ref:`vec` ,,,COPY) command to copy the load vector to the
+        solution vector in order to predefine it with the appropriate size.
         """
         command = f"*LSBAC,{enginename},{rhsvector},{solvector},{transkey}"
         return self.run(command, **kwargs)
@@ -984,7 +1083,7 @@ class MatrixOperations:
         ----------
         enginename : str
             Name used to identify this engine. Must have been previously created using :ref:`lsengine` and
-            factorized using :ref:`lsfactor`.
+            factorized using :ref:`lsfactor` .
 
         filename : str
             Name of the file to create.
@@ -993,8 +1092,11 @@ class MatrixOperations:
         -----
         Dumps a previously factorized linear solver system to a binary file. Only LAPACK and BCS linear
         solvers can be used with this feature. The Linear Solver can later be restored with the
-        :ref:`lsrestore` command.  A BCS Sparse Solver can be dumped only if uses the ``INCORE`` memory
-        option (see :ref:`bcsoption` ).  Caret 7?
+        :ref:`lsrestore` command.
+
+        A BCS Sparse Solver can be dumped only if uses the ``INCORE`` memory option (see :ref:`bcsoption` ).
+
+
         """
         command = f"*LSDUMP,{enginename},{filename}"
         return self.run(command, **kwargs)
@@ -1062,7 +1164,7 @@ class MatrixOperations:
         m2: str = "",
         **kwargs,
     ):
-        r"""Performs the matrix operation M2= v\*M1 + w\*M2.
+        r"""Performs the matrix operation M2= v\2M1 + w\2M2.
 
         Mechanical APDL Command: `\*AXPY <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AXPY.html>`_
 
@@ -1075,7 +1177,7 @@ class MatrixOperations:
             The real and imaginary parts of the scalar ``v``. Default value is 0.
 
         m1 : str
-            Name of matrix ``M1``. If not specified, the operation M2 = w\*M2 will be performed.
+            Name of matrix ``M1``. If not specified, the operation M2 = w\2M2 will be performed.
 
         wr : str
             The real and imaginary parts of the scalar ``w``. Default value is 0.
@@ -1115,26 +1217,32 @@ class MatrixOperations:
         matrix : str
             Name used to identify the matrix. Must be specified.
 
-        type : str
+        type_ : str
             Matrix type:
 
-            * ``D`` - Double precision real values (default).
-            * ``Z`` - Complex double precision values.
-            * ``I`` - Integer values.
+              * ``D`` - Double precision real values (default).
+
+              * ``Z`` - Complex double precision values.
+
+              * ``I`` - Integer values.
 
         method : str
             Method used to create the matrix:
 
-            * ``ALLOC`` - Allocate space for a matrix (default).
-            * ``RESIZE`` - Resize an existing matrix to new row and column dimensions. Values are kept from the
-              original matrix. If the dimensions specified by ``Val1`` (rows) and ``Val2`` (columns) are greater
-              than the original matrix size, the additional entries are assigned a value of zero.
-            * ``COPY`` - Copy an existing matrix.
-            * ``LINK`` - Link to an existing matrix. The memory will be shared between the original matrix and
+              * ``ALLOC`` - Allocate space for a matrix (default).
+
+              * ``RESIZE`` - Resize an existing matrix to new row and column dimensions. Values are kept from
+              the original matrix. If the dimensions specified by ``Val1`` (rows) and ``Val2`` (columns) are
+              greater than the original matrix size, the additional entries are assigned a value of zero.
+
+              * ``COPY`` - Copy an existing matrix.
+
+              * ``LINK`` - Link to an existing matrix. The memory will be shared between the original matrix and
               the new matrix. This is useful for manipulating a submatrix of a larger matrix. The ``Val1``
               through ``Val5`` arguments will be used to specify the lower and upper bounds of row and column
               numbers from the original matrix.
-            * ``IMPORT`` - Import the matrix from a file.
+
+              * ``IMPORT`` - Import the matrix from a file.
 
         val1 : str
             Additional input. The meaning of ``Val1`` through ``Val5`` will vary depending on the specified
@@ -1158,35 +1266,50 @@ class MatrixOperations:
 
         Notes
         -----
-        This command allows you to create a dense matrix. To create a sparse matrix, use the :ref:`smat` command. :ref:`smat` is recommended for large matrices obtained from the ``.FULL`` or ``.HBMAT`` file. Refer to the :ref:`hbmat` command documentation for more information about ``.FULL`` file contents.
+        This command allows you to create a dense matrix. To create a sparse matrix, use the :ref:`smat`
+        command. :ref:`smat` is recommended for large matrices obtained from the ``.FULL`` or ``.HBMAT``
+        file. Refer to the :ref:`hbmat` command documentation for more information about ``.FULL`` file
+        contents.
 
         Use the :ref:`vec` command to create a vector.
 
-        For very large matrices, use the OUTOFCORE option ( ``Method`` = ALLOC or COPY) to keep some of the matrix on disk if there is insufficient memory.
+        For very large matrices, use the OUTOFCORE option ( ``Method`` = ALLOC or COPY) to keep some of the
+        matrix on disk if there is insufficient memory.
 
-        When importing a dense matrix from a DMIG file, you can define the formatting of the file using the ``Val3`` and ``Val4`` fields. Here are a few different example of formats:
+        When importing a dense matrix from a **DMIG** file, you can define the formatting of the file using
+        the ``Val3`` and ``Val4`` fields. Here are a few different example of formats:
 
-        A LARGE field format file (using ``Val3`` = ’LARGE’):
-        .. code::
-          ...
-           DMIG\*   KAAX                          21               2
+        A LARGE field format file (using ``Val3`` = ``LARGE``):
+
+        .. code:: apdl
+
+           ...
+           DMIG*   KAAX                          21               2
            *                     21               1-2.261491337E+08
-          ...
-        A FREE field format file with blank separators (using ``Val4`` = ’S’):
-        .. code::
-          ...
+           ...
+
+        A FREE field format file with blank separators (using ``Val4`` = ``S``):
+
+        .. code:: apdl
+
+           ...
            DMIG stiff 1 2 1 2 29988.
            1 6 149940. 2 2 -29988.
            2 6 149940.
-          ...
-        A FREE field format file with a comma separator (using ``Val4`` = ’,’):
-        .. code::
-          ...
+           ...
+
+        A FREE field format file with a comma separator (using ``Val4`` = ``,``):
+
+        .. code:: apdl
+
+           ...
            DMIG,KF,22321,3,,22321,2,-5.00E+6
            DMIG,KF,22320,3,,22320,2,-5.00E+6
-          ...
+           ...
 
-        Requirement when importing matrices from a Nastran DMIG file: To ensure that the ``.sub`` file is properly generated from matrices imported from Nastran DMIG file, the generalized coordinates for a CMS superelement (SPOINTS in Nastran) must appear last (have
+        **Requirement when importing matrices from a Nastran DMIG file:** To ensure that the ``.sub`` file
+        is properly generated from matrices imported from Nastran **DMIG** file, the generalized coordinates
+        for a CMS superelement (SPOINTS in Nastran) must appear last (have
         highest ID number).
         """
         command = f"*DMAT,{matrix},{type_},{method},{val1},{val2},{val3},{val4},{val5}"
@@ -1222,15 +1345,21 @@ class MatrixOperations:
         conj : str
             Key to specify use of the conjugate of ``Vector1`` when the vectors are complex:
 
-            * ``TRUE`` - Use the conjugate of ``Vector1`` (default).
-            * ``FALSE`` - Do not use the conjugate of ``Vector1``.
+              * ``TRUE`` - Use the conjugate of ``Vector1`` (default).
+
+              * ``FALSE`` - Do not use the conjugate of ``Vector1``.
 
         Notes
         -----
         If ``Vector1`` and ``Vector2`` are complex, the complex conjugate of ``Vector1`` is used to compute
-        the result ( ``Par_Real``, ``Par_Imag`` ). Therefore, \*DOT applied to complex vectors performs the
-        operation:    .. math::     Set ``Conj`` = FALSE if you do not want to use the conjugate of
-        ``Vector1``. In this case, the operation is:    .. math::
+        the result ( ``Par_Real``, ``Par_Imag`` ). Therefore, **\*DOT** applied to complex vectors performs
+        the operation:
+
+        r e s = V 1 * ⋅ V 2
+        Set ``Conj`` = FALSE if you do not want to use the conjugate of ``Vector1``. In this case, the
+        operation is:
+
+        r e s = V 1 ⋅ V 2
         """
         command = f"*DOT,{vector1},{vector2},{par_real},{par_imag},{conj}"
         return self.run(command, **kwargs)

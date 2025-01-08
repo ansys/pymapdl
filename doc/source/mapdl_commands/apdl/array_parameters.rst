@@ -15,24 +15,24 @@ ArrayParameters
    :toctree: _autosummary
 
 
-   ArrayParameters.mfun
-   ArrayParameters.mwrite
-   ArrayParameters.moper
    ArrayParameters.mfouri
+   ArrayParameters.mfun
+   ArrayParameters.moper
+   ArrayParameters.mwrite
    ArrayParameters.sread
-   ArrayParameters.toper
    ArrayParameters.starvplot
-   ArrayParameters.vmask
-   ArrayParameters.vcol
-   ArrayParameters.vscfun
-   ArrayParameters.vstat
-   ArrayParameters.voper
-   ArrayParameters.vwrite
-   ArrayParameters.vitrp
-   ArrayParameters.vabs
    ArrayParameters.starvput
-   ArrayParameters.vfun
-   ArrayParameters.vfact
+   ArrayParameters.toper
+   ArrayParameters.vabs
+   ArrayParameters.vcol
    ArrayParameters.vcum
    ArrayParameters.vedit
+   ArrayParameters.vfact
+   ArrayParameters.vfun
+   ArrayParameters.vitrp
    ArrayParameters.vlen
+   ArrayParameters.vmask
+   ArrayParameters.voper
+   ArrayParameters.vscfun
+   ArrayParameters.vstat
+   ArrayParameters.vwrite

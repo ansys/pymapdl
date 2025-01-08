@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -30,8 +30,8 @@ class MacroFiles:
 
         Notes
         -----
-        This command forces the contents of a macro or other input file to be written to ``Jobname.LOG``. It
-        is valid only within a macro or input file, and should be placed at the top of the file.
+        This command forces the contents of a macro or other input file to be written to ``Jobname.LOG``.
+        It is valid only within a macro or input file, and should be placed at the top of the file.
         :ref:`pmacro`   should be included in any macro or input file that calls GUI functions.
         """
         command = f"/PMACRO"
@@ -53,9 +53,12 @@ class MacroFiles:
         Notes
         -----
         Specifies the pathname of a directory for file searches when reading unknown-command macro files.
+
         The search for the files is typically from the program directory, then from the user home directory,
         and then from the current working directory. The command allows the middle directory searched to be
-        other than the user home directory.  This command is valid only at the Begin level.
+        other than the user home directory.
+
+        This command is valid only at the Begin level.
         """
         command = f"/PSEARCH,{pname}"
         return self.run(command, **kwargs)
@@ -83,7 +86,7 @@ class MacroFiles:
         file. The macro blocks must be enclosed within block identifier and terminator lines as shown in
         this example: Macro Blocks
 
-        .. code::
+        .. code:: apdl
 
            ABC! Any valid alphanumeric name (32 characters maximum)
            !  identifying this data block
@@ -98,19 +101,24 @@ class MacroFiles:
            /EOF! Terminator for this data block
            (etc.)
 
-        To add comment lines to a macro block, place them anywhere `within` the macro block, including directly on the lines where the macro block identifier and the macro
+        To add comment lines to a macro block, place them anywhere within the macro block, including
+        directly on the lines where the macro block identifier and the macro
         block terminator appear as shown in the example. Do not place comment lines (or any other lines)
         outside of a macro block.
 
-        The name of the macro library file is identified for reading via :ref:`ulib` . The name of the macro block is identified via :ref:`use` .
+        The name of the macro library file is identified for reading via :ref:`ulib` . The name of the macro
+        block is identified via :ref:`use` .
 
-        Commands within the macro block are copied to a temporary file (of the macro block name) during the :ref:`use` operation and executed as if a macro file of that name had been created. The temporary file is deleted after it has been used.
+        Commands within the macro block are copied to a temporary file (of the macro block name) during the
+        :ref:`use` operation and executed as if a macro file of that name had been created. The temporary
+        file is deleted after it has been used.
 
         Macro block names should be acceptable file names (system-dependent) and should not match user-
         created macro file names, as the user-created macro file is used first (if it exists) before the
         library file is searched.
 
-        Macro blocks may be stacked in any order. Branching ( :ref:`stargo` or :ref:`if` ) external to the macro block is not allowed.
+        Macro blocks may be stacked in any order. Branching ( :ref:`stargo` or ``\*IF`` ) external to the
+        macro block is not allowed.
 
         This command is valid in any processor.
         """
@@ -253,54 +261,72 @@ class MacroFiles:
         -----
         Causes execution of a macro file called ``Name``, or, if not found, a macro block " ``Name`` " on
         the macro library file ( :ref:`ulib` ). Argument values (numeric or character) are passed into the
-        file or block and substituted for local parameters ARG1, ARG2,..., AR18. The file ``Name`` may also
+        file or block and substituted for local parameters ARG1, ARG2, ..., AR18. The file ``Name`` may also
         be executed as an "unknown command" (that is, without the :ref:`use` command name) as described
-        below.  A macro is a sequence of Mechanical APDL commands (as many as needed) recorded in a file or in a
-        macro block in a library file (specified with the :ref:`ulib` command). The file or block is
-        typically executed via :ref:`use`. In addition to command, numerical and alphanumeric data, the
-        macro can include parameters which will be assigned numerical or alphanumerical character values
-        when the macro is used. Use of the macro can be repeated (within a do-loop, for example) with the
-        parameters incremented.  A macro is defined within a run by enclosing a sequence of data input
-        commands between :ref:`create` and :ref:`end` commands. The data input commands are passive (not
-        executed) while being written to the macro file. The macro file (without :ref:`create` and
-        :ref:`end` ) can also be created external to Mechanical APDL.  Up to 99 specially named scalar parameters,
-        ARG1 to AR99, are `locally` available to each macro:   The prefix for the first nine parameters is
-        ARG, and the prefix for the remaining 90 parameters is AR. A local parameter is not affected by, nor
-        does it affect, other parameters, even those of the same name, which are used outside of the macro.
-        The only way a local parameter can affect, or be affected by, parameters outside the macro is if
-        values are passed out of, or into, the macro by an argument list. Parameters ARG1 through AR18 can
-        have their values (numeric or character) passed via the argument list on :ref:`use`. (ARG1 through
-        AR19 can be passed as arguments on the unknown-command macro.) Parameters AR19 through AR99 (AR20
-        through AR99 in the unknown-command macro) are available solely for use within the macro; they
-        cannot be passed via an argument list. Local parameters are available to do-loops and to
-        :ref:`input` files processed within the macro. In addition to an ARG1--AR99 set for each macro,
-        another ARG1--AR99 set is available external to all macros, local to "non-macro" space.   A macro is
-        exited after its last line is executed. Macros may be nested (such as a :ref:`use` or an unknown
-        command within a macro). Each nested macro has its own set of 99 local parameters. Only one set of
-        local parameters can be active at a time and that is the set corresponding to the macro currently
-        being executed or to the set external to all macros (if any). When a nested macro completes
-        execution, the previous set of local parameters once again becomes available. Issue
-        :ref:`starstatus` ,ARGX to view current macro parameter values.  An alternate way of executing a
-        macro file is via the unknown-command route. If a command unknown to Mechanical APDL is entered, a search
-        for a file of that name (plus a ``.MAC`` suffix) is made. If the file exists, it is executed, if
-        not, the "unknown command" message is output. Thus, you can write your own commands in terms of
-        other Mechanical APDL commands. The procedure is similar to issuing :ref:`use` with the unknown command in
-        the ``Name`` field. For example, the command CMD ,10,20,30 is internally similar to :ref:`use`
-        ,CMD,10,20,30. The macro file named ``CMD.MAC`` is executed with the three parameters. The
-        :ref:`use` macro description also applies to the unknown-command macro, except that various
-        directories are searched and a suffix ( ``.MAC`` ) is assumed. Also, a macro library file is not
-        searched.  A three-level directory search for the unknown-command macro file may be available. The
-        search order may be: 1) a high-level system directory, 2) the log-in directory, and 3) the local
-        (working) directory. Issue :ref:`psearch` to change the directory search path. For an unknown
-        command CMD, the first file named ``CMD.MAC`` found to exist in the search order is executed. The
-        command can be input in lower-, upper-, or mixed-case; however, it converts to uppercase
-        automatically before the file name search occurs. On systems that preserve the case as it was input,
-        a file matching the upper-case name is used first, followed by a file with the matching the lower-
-        case name, and finally a file matching the mixed-case name. All macro files placed in the ``apdl``
-        directory must be upper-case.  Because undocumented commands exist in Mechanical APDL, you should issue the
-        command intended for the macro file name to ensure that the unknown-command message is output in the
-        processor where it is to be used. If the macro is to be used in other processors, the other
-        processors must also be checked.  This command is valid in any processor.
+        below.
+
+        A macro is a sequence of Mechanical APDL commands (as many as needed) recorded in a file or in a
+        macro
+        block in a library file (specified with the :ref:`ulib` command). The file or block is typically
+        executed via :ref:`use` . In addition to command, numerical and alphanumeric data, the macro can
+        include parameters which will be assigned numerical or alphanumerical character values when the
+        macro is used. Use of the macro can be repeated (within a do-loop, for example) with the parameters
+        incremented.
+
+        A macro is defined within a run by enclosing a sequence of data input commands between :ref:`create`
+        and ``\*END`` commands. The data input commands are passive (not executed) while being written to the
+        macro file. The macro file (without :ref:`create` and ``\*END`` ) can also be created external to
+        Mechanical APDL.
+
+        Up to 99 specially named scalar parameters, ARG1 to AR99, are locally available to each macro:
+
+        The prefix for the first nine parameters is ARG, and the prefix for the remaining 90 parameters is
+        AR.
+        A local parameter is not affected by, nor does it affect, other parameters, even those of the same
+        name, which are used outside of the macro. The only way a local parameter can affect, or be affected
+        by, parameters outside the macro is if values are passed out of, or into, the macro by an argument
+        list.
+        Parameters ARG1 through AR18 can have their values (numeric or character) passed via the argument
+        list on :ref:`use` . (ARG1 through AR19 can be passed as arguments on the unknown-command macro.)
+        Parameters AR19 through AR99 (AR20 through AR99 in the unknown-command macro) are available solely
+        for use within the macro; they cannot be passed via an argument list.
+        Local parameters are available to do-loops and to :ref:`input` files processed within the macro. In
+        addition to an ARG1--AR99 set for each macro, another ARG1--AR99 set is available external to all
+        macros, local to "non-macro" space.
+
+        A macro is exited after its last line is executed. Macros may be nested (such as a :ref:`use` or an
+        unknown command within a macro). Each nested macro has its own set of 99 local parameters. Only one
+        set of local parameters can be active at a time and that is the set corresponding to the macro
+        currently being executed or to the set external to all macros (if any). When a nested macro
+        completes execution, the previous set of local parameters once again becomes available. Issue
+        :ref:`starstatus` ,ARGX to view current macro parameter values.
+
+        An alternate way of executing a macro file is via the unknown-command route. If a command unknown to
+        Mechanical APDL is entered, a search for a file of that name (plus a ``.MAC`` suffix) is made. If
+        the file exists, it is executed, if not, the "unknown command" message is output. Thus, you can
+        write your own commands in terms of other Mechanical APDL commands. The procedure is similar to
+        issuing :ref:`use` with the unknown command in the ``Name`` field. For example, the command **CMD**
+        ,10,20,30 is internally similar to :ref:`use` ,CMD,10,20,30. The macro file named ``CMD.MAC`` is
+        executed with the three parameters. The :ref:`use` macro description also applies to the unknown-
+        command macro, except that various directories are searched and a suffix ( ``.MAC`` ) is assumed.
+        Also, a macro library file is not searched.
+
+        A three-level directory search for the unknown-command macro file may be available. The search order
+        may be: 1) a high-level system directory, 2) the log-in directory, and 3) the local (working)
+        directory. Issue :ref:`psearch` to change the directory search path. For an unknown command **CMD**
+        , the first file named ``CMD.MAC`` found to exist in the search order is executed. The command can
+        be input in lower-, upper-, or mixed-case; however, it converts to uppercase automatically before
+        the file name search occurs. On systems that preserve the case as it was input, a file matching the
+        upper-case name is used first, followed by a file with the matching the lower-case name, and finally
+        a file matching the mixed-case name. All macro files placed in the ``apdl`` directory must be upper-
+        case.
+
+        Because undocumented commands exist in Mechanical APDL, you should issue the command intended for
+        the macro
+        file name to ensure that the unknown-command message is output in the processor where it is to be
+        used. If the macro is to be used in other processors, the other processors must also be checked.
+
+        This command is valid in any processor.
         """
         command = f"*USE,{name},{arg1},{arg2},{arg3},{arg4},{arg5},{arg6},{arg7},{arg8},{arg9},{ar10},{ar11},{ar12},{ar13},{ar14},{ag15},{ar16},{ar17},{ar18}"
         return self.run(command, **kwargs)
@@ -319,15 +345,19 @@ class MacroFiles:
 
         Notes
         -----
-        Writes a Mechanical APDL command (or similar string) to the file opened via :ref:`cfopen`. The ``Command``
-        string is not executed (except that numeric and character parameter substitution and operations
-        (with imbedded \*, /, >, etc. characters) are performed before writing).  When used with :ref:`get`
-        results and parameter substitution, a command can be created from results and then read back into
-        the Mechanical APDL program (or used elsewhere). For example, if the command :ref:`cfwrite`
-        ,BF,NNUM,TEMP,TVAL is used in a do-loop, where TVAL is a parameter value returned from the
-        :ref:`get` operation and NNUM is a specified or returned parameter value, a series of :ref:`bf`
-        commands, with numerical values substituted for the two parameters, will be written.  To create a
-        file without parameter substitution, issue :ref:`create`.  This command is valid in any processor.
+        Writes a Mechanical APDL command (or similar string) to the file opened via :ref:`cfopen` . The
+        ``Command`` string is not executed (except that numeric and character parameter substitution and
+        operations (with imbedded *, /, >, etc. characters) are performed before writing).
+
+        When used with :ref:`get` results and parameter substitution, a command can be created from results
+        and then read back into the Mechanical APDL program (or used elsewhere). For example, if the command
+        :ref:`cfwrite` ,BF,NNUM,TEMP,TVAL is used in a do-loop, where TVAL is a parameter value returned
+        from the :ref:`get` operation and NNUM is a specified or returned parameter value, a series of
+        :ref:`bf` commands, with numerical values substituted for the two parameters, will be written.
+
+        To create a file without parameter substitution, issue :ref:`create` .
+
+        This command is valid in any processor.
         """
         command = f"*CFWRITE,{command}"
         return self.run(command, **kwargs)
@@ -353,24 +383,29 @@ class MacroFiles:
         ----------
         fname : str
             File name and directory path (248 characters maximum, including the characters needed for the
-        directory path). An unspecified directory path defaults to the working directory; in this case, you
-        can use all 248 characters for the file name. The file name defaults to ``Jobname``.
+            directory path). An unspecified directory path defaults to the working directory; in this case,
+            you can use all 248 characters for the file name. The file name defaults to ``Jobname``.
 
         ext : str
-            Filename extension (eight-character maximum). The extension defaults to CMD if ``Fname`` is blank.
+            Filename extension (eight-character maximum). The extension defaults to CMD if ``Fname`` is
+            blank.
 
         loc : str
             Determines whether existing file will be overwritten or appended:
 
-            * ```` - The existing file will be overwritten.
-            * ``APPEND`` - The file will be appended to the existing file.
+              * ```` - The existing file will be overwritten.
+
+              * ``APPEND`` - The file will be appended to the existing file.
 
         Notes
         -----
         Mechanical APDL commands specified by the :ref:`cfwrite` command are written to the file opened by
         :ref:`cfopen`. Data processed with the :ref:`vwrite` command are also written to this file if the
-        file is open when the :ref:`vwrite` command is issued.  Issue the :ref:`cfclos` command to close the
-        command file.  This command is valid in any processor.
+        file is open when the :ref:`vwrite` command is issued.
+
+        Issue the :ref:`cfclos` command to close the command file.
+
+        This command is valid in any processor.
         """
         command = f"*CFOPEN,{fname},{ext},,{loc}"
         return self.run(command, **kwargs)
@@ -384,24 +419,26 @@ class MacroFiles:
         ----------
         fname : str
             File name and directory path (248 characters maximum, including the characters needed for the
-        directory path). An unspecified directory path defaults to the working directory; in this case, you
-        can use all 248 characters for the file name. Do not use a directory path if file is to be read with the macro ``Name`` option of
-            the :ref:`use` command.
+            directory path). An unspecified directory path defaults to the working directory; in this case,
+            you can use all 248 characters for the file name. Do not use a directory path if file is to be
+            read with the macro ``Name`` option of the :ref:`use` command.
 
         ext : str
-            Filename extension (eight-character maximum). ``Ext`` should not be used if file is to be read with the macro ``Name`` option of
-            the :ref:`use` command.
+            Filename extension (eight-character maximum). ``Ext`` should not be used if file is to be read
+            with the macro ``Name`` option of the :ref:`use` command.
 
         Notes
         -----
         See the :ref:`use` command for a discussion of macros. All commands following the :ref:`create`
-        command, up to the :ref:`end` command, are written to the specified file without being executed. An
+        command, up to the ``\*END`` command, are written to the specified file without being executed. An
         existing file of the same name, if any, will be overwritten. Parameter values are not substituted
         for parameter names in the commands when the commands are written to the file. Use :ref:`cfwrite` to
         create a file if this is desired. The resulting macro may be executed with a :ref:`use` command
         (which also allows parameters to be passed into the macro) or a :ref:`input` command (which does not
         allow parameters to be passed in). Several macros may be stacked into a library file ( :ref:`ulib`
-        ). You cannot use :ref:`create` within a DO loop.  This command is valid in any processor.
+        ). You cannot use :ref:`create` within a DO loop.
+
+        This command is valid in any processor.
         """
         command = f"*CREATE,{fname},{ext}"
         return self.run(command, **kwargs)
@@ -428,16 +465,21 @@ class MacroFiles:
         lab : str
             Label for output and termination control:
 
-            * ``INFO`` - Writes the message with no heading (default).
-            * ``NOTE`` - Writes the message with a "NOTE" heading.
-            * ``WARN`` - Writes the message with a "WARNING" heading. Also writes the message to the errors
+              * ``INFO`` - Writes the message with no heading (default).
+
+              * ``NOTE`` - Writes the message with a "NOTE" heading.
+
+              * ``WARN`` - Writes the message with a "WARNING" heading. Also writes the message to the errors
               file, ``Jobname.ERR``.
-            * ``ERROR`` - Writes the message with a "ERROR" heading and causes run termination (if batch) at
+
+              * ``ERROR`` - Writes the message with a "ERROR" heading and causes run termination (if batch) at
               earliest "clean exit" point. Also writes the message to the errors file, ``Jobname.ERR``.
-            * ``FATAL`` - Writes the message with a "FATAL ERROR" heading and causes run termination
+
+              * ``FATAL`` - Writes the message with a "FATAL ERROR" heading and causes run termination
               immediately. Also writes the message to the errors file, ``Jobname.ERR``.
-            * ``UI`` - Writes the message with a "NOTE" heading and displays it in the message dialog box. This
-              option is most useful in GUI mode.
+
+              * ``UI`` - Writes the message with a "NOTE" heading and displays it in the message dialog box.
+              This option is most useful in GUI mode.
 
         val1 : str
             Numeric or alphanumeric character values to be included in message. Values may be the results of
@@ -481,9 +523,12 @@ class MacroFiles:
 
         Notes
         -----
-        Allows writing an output message via the Mechanical APDL message subroutine. Also allows run termination
-        control. This command is used only when contained in a prepared file read into the Mechanical APDL program
-        (that is, :ref:`use`, :ref:`input`, etc.). A message format must immediately follow the :ref:`msg` command (on a separate line, without parentheses, as described below).
+        Allows writing an output message via the Mechanical APDL message subroutine. Also allows run
+        termination
+        control. This command is used only when contained in a prepared file read into the Mechanical APDL
+        program
+        (that is, :ref:`use`, :ref:`input`, etc.). A message format must immediately follow the :ref:`msg`
+        command (on a separate line, without parentheses, as described below).
 
         The message format may be up to 80 characters long, consisting of text strings and predefined "data
         descriptors" between the strings where numeric or alphanumeric character data are to be inserted.
@@ -494,26 +539,32 @@ class MacroFiles:
 
         Enhanced descriptions may also be used: InformalTables need to be added.
 
-        Do not begin :ref:`msg` format lines with :ref:`if`, :ref:`else`, :ref:`elseif`, or :ref:`endif` . If the last nonblank character of the message format is an ampersand (&), a second line will also be read as a continuation of the format. Up to nine continuations (ten total lines) may be read. If normal descriptions are used, then consecutive blanks are condensed into one blank upon output, and a period is appended. Up to ten lines of output of 72 characters each may be produced (using the %/ descriptor). Two examples follow.
+        Do not begin :ref:`msg` format lines with ``\*IF``, ``\*ELSE``, :ref:`elseif`, or :ref:`endif`. If
+        the last nonblank character of the message format is an ampersand (&), a second line will also be
+        read as a continuation of the format. Up to nine continuations (ten total lines) may be read. If
+        normal descriptions are used, then consecutive blanks are condensed into one blank upon output, and
+        a period is appended. Up to ten lines of output of 72 characters each may be produced (using the %/
+        descriptor). Two examples follow.
 
-        Here is an example of the :ref:`msg` command and a format to print a message with two integer values and one real value:
+        Here is an example of the :ref:`msg` command and a format to print a message with two integer values
+        and one real value:
 
-        .. code::
+        .. code:: apdl
 
-           \*MSG, INFO, 'Inner',25,1.2,148
+           *MSG, INFO, 'Inner',25,1.2,148
            Radius ( %C) = %I, Thick = %G, Length = %I
 
         The output line is:
 
-        .. code::
+        .. code:: apdl
 
            Radius (Inner) = 25, Thick = 1.2, Length = 148.
 
         Here is an example illustrating multiline displays in GUI message windows:
 
-        .. code::
+        .. code:: apdl
 
-           \*MSG,UI,Vcoilrms,THTAv,Icoilrms,THTAi,Papprnt,Pelec,PF,indctnc
+           *MSG,UI,Vcoilrms,THTAv,Icoilrms,THTAi,Papprnt,Pelec,PF,indctnc
            Coil RMS voltage, RMS current, apparent pwr, actual pwr, pwr factor: %/&
            Vcoil = %G V (electrical angle = %G DEG) %/&
            Icoil = %G A (electrical angle = %G DEG) %/&
@@ -523,7 +574,10 @@ class MacroFiles:
            Inductance = %G %/&
            VALUES ARE FOR ENTIRE COIL (NOT JUST THE MODELED SECTOR)
 
-        The :ref:`uis` ,MSGPOP command controls which messages are displayed in the message dialog box when the GUI is active. All messages produced by the :ref:`msg` command are subject to the :ref:`uis` specification, with one exception, If ``Lab`` = UI, the message will be displayed in the dialog box regardless of the :ref:`uis` specification.
+        The :ref:`uis` ,MSGPOP command controls which messages are displayed in the message dialog box when
+        the GUI is active. All messages produced by the :ref:`msg` command are subject to the :ref:`uis`
+        specification, with one exception, If ``Lab`` = UI, the message will be displayed in the dialog box
+        regardless of the :ref:`uis` specification.
 
         This command is valid in any processor.
         """
@@ -559,29 +613,36 @@ class MacroFiles:
         label : str
             Specifies how Mechanical APDL is to interpret this :ref:`slashtee` command:
 
-            * ``NEW`` - Signals the beginning of the command text that is to be written to ``Fname``. If
+              * ``NEW`` - Signals the beginning of the command text that is to be written to ``Fname``. If
               ``Fname`` already exists, specifying NEW causes the contents of ``Fname`` to be overwritten.
-            * ``APPEND`` - Indicates that you want to append to ``Fname`` the command text that follows.
-            * ``END`` - Signals the end of the command text that is to be written to or appended to ``Fname``.
+
+              * ``APPEND`` - Indicates that you want to append to ``Fname`` the command text that follows.
+
+              * ``END`` - Signals the end of the command text that is to be written to or appended to ``Fname``
+              .
 
         fname : str
             File name and directory path (248 characters maximum, including the characters needed for the
-        directory path). An unspecified directory path defaults to the working directory; in this case, you
-        can use all 248 characters for the file name.
+            directory path). An unspecified directory path defaults to the working directory; in this case,
+            you can use all 248 characters for the file name.
 
         ext : str
-            Filename extension (eight-character maximum). If you plan to execute the file as if it were a Mechanical APDL command, use the extension
-            ``.mac``.
+            Filename extension (eight-character maximum). If you plan to execute the file as if it were a
+            Mechanical APDL command, use the extension ``.mac``.
 
         Notes
         -----
-        You can use the :ref:`slashtee` command to record a macro to a specified file at the same time that the macro is being executed. It is similar to the Linux tee command.
+        You can use the :ref:`slashtee` command to record a macro to a specified file at the same time that
+        the macro is being executed. It is similar to the Linux **tee** command.
 
-        For more information about the :ref:`slashtee` command, see the of the `Ansys Parametric Design Language Guide <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdlxpl.html>`_.
+        For more information about the :ref:`slashtee` command, see the of the `Ansys Parametric Design
+        Language Guide <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdlxpl.html>`_
+        ANSYS Parametric Design Language Guide.
 
-        The following example illustrates the use of the :ref:`slashtee` command. If you issue these commands:
+        The following example illustrates the use of the :ref:`slashtee` command. If you issue these
+        commands:
 
-        .. code::
+        .. code:: apdl
 
            /tee,new,myfile,mac
            et,1,42,0,0,1
@@ -594,9 +655,9 @@ class MacroFiles:
            ngen,5,5,1,5,1,0,1
            /tee,end
 
-        the content of myfile.mac is:
+        the content of **myfile.mac** is:
 
-        .. code::
+        .. code:: apdl
 
            et,1,42,0,0,1
            ex,1,3e7
@@ -623,7 +684,8 @@ class MacroFiles:
 
         Notes
         -----
-        Removes a directory on the computer on which Mechanical APDL is currently running. No warning or prompt is
+        Removes a directory on the computer on which Mechanical APDL is currently running. No warning or
+        prompt is
         given, so use with extreme caution.
         """
         command = f"/RMDIR,{dir}"

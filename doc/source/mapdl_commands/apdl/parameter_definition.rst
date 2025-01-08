@@ -15,17 +15,17 @@ ParameterDefinition
    :toctree: _autosummary
 
 
-   ParameterDefinition.parres
-   ParameterDefinition.parsav
+   ParameterDefinition.afun
+   ParameterDefinition.dim
    ParameterDefinition.get
    ParameterDefinition.inquire
+   ParameterDefinition.parres
+   ParameterDefinition.parsav
+   ParameterDefinition.stardel
    ParameterDefinition.starset
    ParameterDefinition.starstatus
-   ParameterDefinition.tread
-   ParameterDefinition.taxis
-   ParameterDefinition.vread
    ParameterDefinition.starvget
+   ParameterDefinition.taxis
+   ParameterDefinition.tread
    ParameterDefinition.vfill
-   ParameterDefinition.afun
-   ParameterDefinition.stardel
-   ParameterDefinition.dim
+   ParameterDefinition.vread
