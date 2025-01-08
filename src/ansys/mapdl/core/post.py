@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -139,13 +139,37 @@ class PostProcessing:
     @supress_logging
     def __repr__(self):
         info = "PyMAPDL PostProcessing Instance\n"
-        info += "\tActive Result File:    %s\n" % self.filename
-        info += "\tNumber of result sets: %d\n" % self.nsets
-        info += "\tCurrent load step:     %d\n" % self.load_step
-        info += "\tCurrent sub step:      %d\n" % self.sub_step
+        info += f"\tActive Result File:    {self.filename}\n"
+
+        # If there is no result file, this fails.
+        try:
+            nsets = int(self.nsets)
+        except MapdlRuntimeError as error:
+            self._mapdl.logger.debug(
+                f"Error when obtaining the number of sets:\n{error}"
+            )
+            nsets = "NA"
+
+        info += f"\tNumber of result sets: {nsets}\n"
+        info += f"\tCurrent load step:     {self.load_step}\n"
+        info += f"\tCurrent sub step:      {self.sub_step}\n"
 
         if self._mapdl.parameters.routine == "POST1":
-            info += "\n\n" + self._mapdl.set("LIST")
+            try:
+                nlist = self._mapdl.set("LIST")
+            except MapdlRuntimeError as err:
+                if (
+                    "An error occurred while attempting to open the results file"
+                    in str(err)
+                ):
+                    self._mapdl.logger.debug(
+                        f"List of steps could not be obtained due to error:\n{err}"
+                    )
+                    nlist = "Results file is not available"
+                else:
+                    raise err
+
+            info += "\n\n" + nlist
         else:
             info += "\n\nEnable routine POST1 to see a table of available results"
 
