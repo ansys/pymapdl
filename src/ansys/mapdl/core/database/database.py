@@ -313,8 +313,9 @@ class MapdlDb:
 
         self._mapdl._log.debug("Closing the connection with the MAPDL DB Server")
         self._stop()
-        self._channel.close()
-        self._channel = None
+        if self._channel:
+            self._channel.close()
+            self._channel = None
         self._stub = None
         self._state = None
 
