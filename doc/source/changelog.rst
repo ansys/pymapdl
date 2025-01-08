@@ -9,6 +9,26 @@ This document contains the release notes for the project.
 
 .. towncrier release notes start
 
+`0.69.1 <https://github.com/ansys/pymapdl/releases/tag/v0.69.1>`_ - 2025-01-08
+==============================================================================
+
+Added
+^^^^^
+
+- chore: update CHANGELOG for v0.69.0 `#3641 <https://github.com/ansys/pymapdl/pull/3641>`_
+
+
+Fixed
+^^^^^
+
+- fix: timeout for file checking `#3642 <https://github.com/ansys/pymapdl/pull/3642>`_
+
+
+Miscellaneous
+^^^^^^^^^^^^^
+
+- feat: node/element selection commands returning selected ids `#3636 <https://github.com/ansys/pymapdl/pull/3636>`_
+
 `0.69.0 <https://github.com/ansys/pymapdl/releases/tag/v0.69.0>`_ - 2025-01-08
 ==============================================================================
 
