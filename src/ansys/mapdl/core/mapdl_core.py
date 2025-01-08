@@ -1400,7 +1400,8 @@ class _MapdlCore(Commands):
             self._parent = weakref.ref(parent)
 
         def __enter__(self):
-            self._parent()._log.debug("Entering non-interactive mode")
+            self._parent()._log.debug("Entering in non-interactive mode")
+            self._parent().com("Entering in non_interactive mode")
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
@@ -2287,6 +2288,7 @@ class _MapdlCore(Commands):
         self._before_run(command)
 
         short_cmd = parse_to_short_cmd(command)
+        self._log.debug(f"Running (verbose: {verbose}, mute={mute}): '{command}'")
         text = self._run(command, verbose=verbose, mute=mute)
 
         if (

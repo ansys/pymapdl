@@ -35,6 +35,7 @@ env:
   ON_CI: True
   PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=10 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180'
 
+
   BUILD_CHEATSHEET: True
   PYMAPDL_DEBUG_TESTING: True
 
@@ -62,7 +63,6 @@ permissions:
   issues: write
 
 jobs:
-
 
   update-changelog:
     name: "Update CHANGELOG (on release)"
