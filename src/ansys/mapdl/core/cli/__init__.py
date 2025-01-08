@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,22 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-try:
-    import click
-
-    _HAS_CLICK = True
-
-except ModuleNotFoundError:
-    _HAS_CLICK = False
-
+from ansys.mapdl.core import _HAS_CLICK
 
 if _HAS_CLICK:
     ###################################
     # PyMAPDL CLI
+    import click
 
     @click.group(invoke_without_command=True)
     @click.pass_context
-    def main(ctx):
+    def main(ctx: click.Context):
         pass
 
     from ansys.mapdl.core.cli.convert import convert

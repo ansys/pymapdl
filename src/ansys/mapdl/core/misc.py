@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -571,9 +571,10 @@ def allow_iterables_vmin(entity: str = "node") -> Callable:
                     # assuming you want to select nothing because you supplied an empty list/tuple/array
                     return original_sel_func(self, "none")
 
-                self._perform_entity_list_selection(
-                    entity, original_sel_func, type_, item, comp, vmin, kabs
-                )
+                with self.non_interactive:  # to speed up
+                    self._perform_entity_list_selection(
+                        entity, original_sel_func, type_, item, comp, vmin, kabs
+                    )
 
                 if kwargs.pop("Used_P", False):
                     # we want to return the

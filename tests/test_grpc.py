@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -25,6 +25,7 @@ import os
 import re
 import shutil
 import sys
+from unittest.mock import patch
 
 import grpc
 import pytest
@@ -577,12 +578,18 @@ def test_input_compatibility_api_change(mapdl, cleared):
 
 @requires("grpc")
 @requires("local")
-def test__check_stds(mapdl, cleared):
+@requires("nostudent")
+def test__check_stds():
     """Test that the standard input is checked."""
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(port=50058)
 
     mapdl._read_stds()
     assert mapdl._stdout is not None
     assert mapdl._stderr is not None
+
+    mapdl.exit(force=True)
 
 
 def test_subscribe_to_channel(mapdl, cleared):
@@ -676,3 +683,32 @@ def test_generic_grpc_exception_exited(monkeypatch, grpc_channel):
         mapdl.prep7(mapdl)
 
     mapdl._exited = False  # Restoring
+
+
+@pytest.mark.parametrize("platform", ["linux", "windows", "error"])
+def test__get_time_step_stream(mapdl, platform):
+    with patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.platform", platform):
+        from ansys.mapdl.core import mapdl_grpc
+
+        if platform == "linux":
+            DEFAULT_TIME_STEP_STREAM = mapdl_grpc.DEFAULT_TIME_STEP_STREAM_POSIX
+        elif platform == "windows":
+            DEFAULT_TIME_STEP_STREAM = mapdl_grpc.DEFAULT_TIME_STEP_STREAM_NT
+        else:
+            with pytest.raises(ValueError, match="The MAPDL platform"):
+                mapdl._get_time_step_stream()
+
+            return  # Early exit
+
+        assert DEFAULT_TIME_STEP_STREAM == mapdl._get_time_step_stream()
+
+        mapdl_grpc.DEFAULT_TIME_STEP_STREAM = 200
+        assert mapdl_grpc.DEFAULT_TIME_STEP_STREAM == mapdl._get_time_step_stream()
+        mapdl_grpc.DEFAULT_TIME_STEP_STREAM = None
+
+        assert 700 == mapdl._get_time_step_stream(700)
+
+        with pytest.raises(
+            ValueError, match="``time_step`` argument must be greater than 0``"
+        ):
+            mapdl._get_time_step_stream(-700)

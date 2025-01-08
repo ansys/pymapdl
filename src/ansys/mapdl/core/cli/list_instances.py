@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -65,7 +65,7 @@ from ansys.mapdl.core.cli import main
     default=False,
     help="Print running location info.",
 )
-def list_instances(instances, long, cmd, location):
+def list_instances(instances, long, cmd, location) -> None:
     import psutil
     from tabulate import tabulate
 

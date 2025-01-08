@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -2219,7 +2219,7 @@ def test_inquire_invalid(mapdl, cleared):
 
 def test_inquire_default(mapdl, cleared):
     mapdl.title("heeeelloo")
-    assert Path(mapdl.directory) == Path(mapdl.inquire())
+    assert str(Path(mapdl.directory)) == str(Path(mapdl.inquire()))
 
 
 def test_vwrite_error(mapdl, cleared):
@@ -2576,3 +2576,19 @@ def test_raising_warns(python_version, minimal_version, deprecating, context):
         reload(pymapdl)
 
     pymapdl.helpers.run_first_time()
+
+
+def test_max_cmd_len(mapdl):
+    with pytest.raises(
+        ValueError, match="Maximum command length must be less than 640 characters"
+    ):
+        cmd = "a" * 640
+        mapdl.run(cmd)
+
+
+def test_max_cmd_len_mapdlgrpc(mapdl):
+    with pytest.raises(
+        ValueError, match="Maximum command length must be less than 640 characters"
+    ):
+        cmd = "a" * 640
+        mapdl._run(cmd)

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,12 +21,25 @@
 # SOFTWARE.
 
 import os
+from typing import List, Literal, Optional, Tuple, Union
 import weakref
 
+from ansys.math.core.math import AnsMath, AnsVec
 import numpy as np
 
 from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
+
+RESIDUAL_ALGORITHM: List[str] = [
+    "l-inf",
+    "linf",
+    "l-1",
+    "l1",
+    "l-2",
+    "l2",
+]
+
+RESIDUAL_ALGORITHM_LITERAL = Literal[tuple(RESIDUAL_ALGORITHM)]
 
 
 class KrylovSolver:
@@ -94,11 +107,11 @@ class KrylovSolver:
         self.orthogonality = None
 
     @property
-    def _mapdl(self):
+    def _mapdl(self) -> Mapdl:
         """Return the weakly referenced instance of mapdl."""
         return self._mapdl_weakref()
 
-    def _check_full_file_exists(self, full_file=None):
+    def _check_full_file_exists(self, full_file: str = None) -> None:
         """Check full file exists."""
         current_dir = self._mapdl.directory
         # Check if full file exists
@@ -120,7 +133,7 @@ class KrylovSolver:
                 )
 
     @property
-    def is_orthogonal(self):
+    def is_orthogonal(self) -> bool:
         """
         Check whether the solution is orthogonal.
 
@@ -133,7 +146,9 @@ class KrylovSolver:
             eye_ = np.eye(N=self.orthogonality.shape[0])
             return np.allclose(self.orthogonality, eye_)
 
-    def _check_input_gensubspace(self, max_dim_q, freq_val, check_orthogonality):
+    def _check_input_gensubspace(
+        self, max_dim_q: int, freq_val: int, check_orthogonality: bool
+    ):
         """Validate the inputs to the ``gensubspace`` method."""
 
         # Check for illegal input values by the user
@@ -154,7 +169,9 @@ class KrylovSolver:
                 "True or False"
             )
 
-    def _check_input_solve(self, freq_start, freq_end, freq_steps, ramped_load):
+    def _check_input_solve(
+        self, freq_start: int, freq_end: int, freq_steps: int, ramped_load: bool
+    ):
         """Validate the inputs to the ``solve`` method."""
 
         if not isinstance(freq_start, int) or freq_start < 0:
@@ -182,7 +199,10 @@ class KrylovSolver:
             )
 
     def _check_input_expand(
-        self, return_solution, residual_computation, residual_algorithm
+        self,
+        return_solution: bool,
+        residual_computation: bool,
+        residual_algorithm: RESIDUAL_ALGORITHM_LITERAL,
     ):
         """Validate the inputs to the ``expand`` method."""
 
@@ -192,21 +212,15 @@ class KrylovSolver:
             )
         if not isinstance(residual_computation, bool):
             raise ValueError("The 'residual_computation' must be True or False.")
-        if not isinstance(
-            residual_algorithm, str
-        ) or residual_algorithm.lower() not in [
-            "l-inf",
-            "linf",
-            "l-1",
-            "l1",
-            "l-2",
-            "l2",
-        ]:
+        if (
+            not isinstance(residual_algorithm, str)
+            or residual_algorithm.lower() not in RESIDUAL_ALGORITHM
+        ):
             raise ValueError(
                 "The provided 'residual_algorithm' is not allowed. Only allowed are 'L-inf', 'Linf', 'L-1', 'L1', 'L-2', 'L2'."
             )
 
-    def _get_data_from_full_file(self):
+    def _get_data_from_full_file(self) -> None:
         """Extract stiffness, mass, damping, and force matrices from the FULL file."""
 
         self._mat_k = self.mm.stiff(fname=self.full_file)
@@ -221,7 +235,7 @@ class KrylovSolver:
         self._mapdl.vec("fz0", "Z", "COPY", "fz")
         self.fz0 = self.mm.vec(name="fz0")
 
-    def _calculate_orthogonality(self, uz, num_q):
+    def _calculate_orthogonality(self, uz: AnsVec, num_q: int):
         """Check Orthonormality of vectors"""
 
         if self.orthogonality is not None:
@@ -246,8 +260,12 @@ class KrylovSolver:
         return self.orthogonality
 
     def gensubspace(
-        self, max_dim_q, frequency, check_orthogonality=False, full_file=None
-    ):
+        self,
+        max_dim_q: int,
+        frequency: int,
+        check_orthogonality: bool = False,
+        full_file: Optional[str] = None,
+    ) -> AnsMath:
         """Generate a Krylov subspace for model reduction in a harmonic analysis.
 
         This method generates a Krylov subspace used for a model reduction
@@ -406,7 +424,9 @@ class KrylovSolver:
         self._run_gensubspace = True
         return self.Qz
 
-    def solve(self, freq_start, freq_end, freq_steps, ramped_load=True):
+    def solve(
+        self, freq_start: str, freq_end: str, freq_steps: str, ramped_load: bool = True
+    ) -> AnsMath:
         """Reduce the system of equations and solve at each frequency.
 
         This method uses a Krylov subspace to solve a reduced harmonic
@@ -516,11 +536,11 @@ class KrylovSolver:
 
     def expand(
         self,
-        residual_computation=False,
-        residual_algorithm=None,
-        compute_solution_vectors=True,
-        return_solution=False,
-    ):
+        residual_computation: bool = False,
+        residual_algorithm: Optional[RESIDUAL_ALGORITHM_LITERAL] = None,
+        compute_solution_vectors: bool = True,
+        return_solution: bool = False,
+    ) -> np.ndarray:
         """Expand the reduced solution back to FE space.
 
         This method expands the reduced solution for a harmonic analysis
@@ -637,7 +657,9 @@ class KrylovSolver:
         if return_solution:
             return self.solution_vectors
 
-    def compute_residuals(self, iFreq, RzV, Xi, omega):
+    def compute_residuals(
+        self, iFreq: int, RzV: AnsMath, Xi: AnsMath, omega: float
+    ) -> Tuple[float]:
         """Compute residuals of the matrices"""
         # form {iRHS}
         self.iRHS.zeros()
@@ -699,7 +721,9 @@ class KrylovSolver:
 
         return norm_rz, norm_fz
 
-    def _compute_solution_vector(self, Xi):
+    def _compute_solution_vector(
+        self, Xi: AnsMath
+    ) -> List[Tuple[Union[int, int, complex]]]:
         self._mapdl.mult(
             m1=self.Nod2Solv.id, t1="TRANS", m2=Xi.id, t2="", m3="Xii"
         )  # Map {Xi} to internal (ANSYS) order

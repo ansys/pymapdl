@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,12 +22,14 @@
 
 from functools import wraps
 import re
+from typing import Callable, List, Optional
 import weakref
 
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core.errors import MapdlExitedError
 
 
-def update_information_first(update=False):
+def update_information_first(update: bool = False) -> Callable:
     """
     Decorator to wrap :class:`Information <ansys.mapdl.core.misc.Information>`
     methods to force update the fields when accessed.
@@ -85,7 +87,7 @@ class Information:
 
     """
 
-    def __init__(self, mapdl):
+    def __init__(self, mapdl: "Mapdl") -> None:
         """Class Initializer"""
         from ansys.mapdl.core.mapdl import MapdlBase  # lazy import to avoid circular
 
@@ -101,11 +103,11 @@ class Information:
         }
 
     @property
-    def _mapdl(self):
+    def _mapdl(self) -> "Mapdl":
         """Return the weakly referenced MAPDL instance."""
         return self._mapdl_weakref()
 
-    def _update(self):
+    def _update(self) -> None:
         """We might need to do more calls if we implement properties
         that change over the MAPDL session."""
         try:
@@ -121,7 +123,10 @@ class Information:
         self._stats = stats
         self._mapdl._log.debug("Information class: Updated")
 
-    def __repr__(self):
+    def __repr__(self) -> str:
+        if self._mapdl.is_console and self._mapdl.exited:
+            return "MAPDL exited"
+
         if not self._stats:
             self._update()
 
@@ -134,92 +139,92 @@ class Information:
 
     @property
     @update_information_first(False)
-    def product(self):
+    def product(self) -> str:
         """Retrieve the product from the MAPDL instance."""
         return self._get_product()
 
     @property
     @update_information_first(False)
-    def mapdl_version(self):
+    def mapdl_version(self) -> str:
         """Retrieve the MAPDL version from the MAPDL instance."""
         return self._get_mapdl_version()
 
     @property
     @update_information_first(False)
-    def mapdl_version_release(self):
+    def mapdl_version_release(self) -> str:
         """Retrieve the MAPDL version release from the MAPDL instance."""
         st = self._get_mapdl_version()
         return self._get_between("RELEASE", "BUILD", st).strip()
 
     @property
     @update_information_first(False)
-    def mapdl_version_build(self):
+    def mapdl_version_build(self) -> str:
         """Retrieve the MAPDL version build from the MAPDL instance."""
         st = self._get_mapdl_version()
         return self._get_between("BUILD", "UPDATE", st).strip()
 
     @property
     @update_information_first(False)
-    def mapdl_version_update(self):
+    def mapdl_version_update(self) -> str:
         """Retrieve the MAPDL version update from the MAPDL instance."""
         st = self._get_mapdl_version()
         return self._get_between("UPDATE", "", st).strip()
 
     @property
     @update_information_first(False)
-    def pymapdl_version(self):
+    def pymapdl_version(self) -> str:
         """Retrieve the PyMAPDL version from the MAPDL instance."""
         return self._get_pymapdl_version()
 
     @property
     @update_information_first(False)
-    def products(self):
+    def products(self) -> str:
         """Retrieve the products from the MAPDL instance."""
         return self._get_products()
 
     @property
     @update_information_first(False)
-    def preprocessing_capabilities(self):
+    def preprocessing_capabilities(self) -> str:
         """Retrieve the preprocessing capabilities from the MAPDL instance."""
         return self._get_preprocessing_capabilities()
 
     @property
     @update_information_first(False)
-    def aux_capabilities(self):
+    def aux_capabilities(self) -> str:
         """Retrieve the aux capabilities from the MAPDL instance."""
         return self._get_aux_capabilities()
 
     @property
     @update_information_first(True)
-    def solution_options(self):
+    def solution_options(self) -> str:
         """Retrieve the solution options from the MAPDL instance."""
         return self._get_solution_options()
 
     @property
     @update_information_first(False)
-    def post_capabilities(self):
+    def post_capabilities(self) -> str:
         """Retrieve the post capabilities from the MAPDL instance."""
         return self._get_post_capabilities()
 
     @property
     @update_information_first(True)
-    def titles(self):
+    def titles(self) -> str:
         """Retrieve the titles from the MAPDL instance."""
         return self._get_titles()
 
     @property
     @update_information_first(True)
-    def title(self):
+    def title(self) -> str:
         """Retrieve and set the title from the MAPDL instance."""
         return self._mapdl.inquire("", "title")
 
     @title.setter
-    def title(self, title):
+    def title(self, title) -> str:
         return self._mapdl.run(f"/TITLE, {title}")
 
     @property
     @update_information_first(True)
-    def stitles(self, i=None):
+    def stitles(self, i: int = None) -> str:
         """Retrieve or set the value for the MAPDL stitle (subtitles).
 
         If 'stitle' includes newline characters (`\\n`), then each line
@@ -237,7 +242,7 @@ class Information:
             return self._get_stitles()[i]
 
     @stitles.setter
-    def stitles(self, stitle, i=None):
+    def stitles(self, stitle: str, i: int = None) -> None:
         if stitle is None:
             # Case to empty
             stitle = ["", "", "", ""]
@@ -264,71 +269,76 @@ class Information:
 
     @property
     @update_information_first(True)
-    def units(self):
+    def units(self) -> str:
         """Retrieve the units from the MAPDL instance."""
         return self._get_units()
 
     @property
     @update_information_first(True)
-    def scratch_memory_status(self):
+    def scratch_memory_status(self) -> str:
         """Retrieve the scratch memory status from the MAPDL instance."""
         return self._get_scratch_memory_status()
 
     @property
     @update_information_first(True)
-    def database_status(self):
+    def database_status(self) -> str:
         """Retrieve the database status from the MAPDL instance."""
         return self._get_database_status()
 
     @property
     @update_information_first(True)
-    def config_values(self):
+    def config_values(self) -> str:
         """Retrieve the config values from the MAPDL instance."""
         return self._get_config_values()
 
     @property
     @update_information_first(True)
-    def global_status(self):
+    def global_status(self) -> str:
         """Retrieve the global status from the MAPDL instance."""
         return self._get_global_status()
 
     @property
     @update_information_first(True)
-    def job_information(self):
+    def job_information(self) -> str:
         """Retrieve the job information from the MAPDL instance."""
         return self._get_job_information()
 
     @property
     @update_information_first(True)
-    def model_information(self):
+    def model_information(self) -> str:
         """Retrieve the model information from the MAPDL instance."""
         return self._get_model_information()
 
     @property
     @update_information_first(True)
-    def boundary_condition_information(self):
+    def boundary_condition_information(self) -> str:
         """Retrieve the boundary condition information from the MAPDL instance."""
         return self._get_boundary_condition_information()
 
     @property
     @update_information_first(True)
-    def routine_information(self):
+    def routine_information(self) -> str:
         """Retrieve the routine information from the MAPDL instance."""
         return self._get_routine_information()
 
     @property
     @update_information_first(True)
-    def solution_options_configuration(self):
+    def solution_options_configuration(self) -> str:
         """Retrieve the solution options configuration from the MAPDL instance."""
         return self._get_solution_options_configuration()
 
     @property
     @update_information_first(True)
-    def load_step_options(self):
+    def load_step_options(self) -> str:
         """Retrieve the load step options from the MAPDL instance."""
         return self._get_load_step_options()
 
-    def _get_between(self, init_string, end_string=None, string=None):
+    def _get_between(
+        self,
+        init_string: str,
+        end_string: Optional[str] = None,
+        string: Optional[str] = None,
+    ) -> str:
         if not string:
             self._update()
             string = self._stats
@@ -341,24 +351,24 @@ class Information:
             en = string.find(end_string)
         return "\n".join(string[st:en].splitlines()).strip()
 
-    def _get_product(self):
+    def _get_product(self) -> str:
         return self._get_products().splitlines()[0]
 
-    def _get_mapdl_version(self):
+    def _get_mapdl_version(self) -> str:
         titles_ = self._get_titles()
         st = titles_.find("RELEASE")
         en = titles_.find("INITIAL", st)
         return titles_[st:en].split("CUSTOMER")[0].strip()
 
-    def _get_pymapdl_version(self):
+    def _get_pymapdl_version(self) -> str:
         return pymapdl.__version__
 
-    def _get_title(self):
+    def _get_title(self) -> str:
         match = re.match(r"TITLE=(.*)$", self._get_titles())
         if match:
             return match.groups(1)[0].strip()
 
-    def _get_stitles(self):
+    def _get_stitles(self) -> List[str]:
         return [
             (
                 re.search(f"SUBTITLE  {i}=(.*)", self._get_titles())
@@ -370,87 +380,87 @@ class Information:
             for i in range(1, 5)
         ]
 
-    def _get_products(self):
+    def _get_products(self) -> str:
         init_ = "*** Products ***"
         end_string = "*** PreProcessing Capabilities ***"
         return self._get_between(init_, end_string)
 
-    def _get_preprocessing_capabilities(self):
+    def _get_preprocessing_capabilities(self) -> str:
         init_ = "*** PreProcessing Capabilities ***"
         end_string = "*** Aux Capabilities ***"
         return self._get_between(init_, end_string)
 
-    def _get_aux_capabilities(self):
+    def _get_aux_capabilities(self) -> str:
         init_ = "*** Aux Capabilities ***"
         end_string = "*** Solution Options ***"
         return self._get_between(init_, end_string)
 
-    def _get_solution_options(self):
+    def _get_solution_options(self) -> str:
         init_ = "*** Solution Options ***"
         end_string = "*** Post Capabilities ***"
         return self._get_between(init_, end_string)
 
-    def _get_post_capabilities(self):
+    def _get_post_capabilities(self) -> str:
         init_ = "*** Post Capabilities ***"
         end_string = "***** TITLES *****"
         return self._get_between(init_, end_string)
 
-    def _get_titles(self):
+    def _get_titles(self) -> str:
         init_ = "***** TITLES *****"
         end_string = "***** UNITS *****"
         return self._get_between(init_, end_string)
 
-    def _get_units(self):
+    def _get_units(self) -> str:
         init_ = "***** UNITS *****"
         end_string = "***** SCRATCH MEMORY STATUS *****"
         return self._get_between(init_, end_string)
 
-    def _get_scratch_memory_status(self):
+    def _get_scratch_memory_status(self) -> str:
         init_ = "***** SCRATCH MEMORY STATUS *****"
         end_string = "*****    DATABASE STATUS    *****"
         return self._get_between(init_, end_string)
 
-    def _get_database_status(self):
+    def _get_database_status(self) -> str:
         init_ = "*****    DATABASE STATUS    *****"
         end_string = "***** CONFIG VALUES *****"
         return self._get_between(init_, end_string)
 
-    def _get_config_values(self):
+    def _get_config_values(self) -> str:
         init_ = "***** CONFIG VALUES *****"
         end_string = "G L O B A L   S T A T U S"
         return self._get_between(init_, end_string)
 
-    def _get_global_status(self):
+    def _get_global_status(self) -> str:
         init_ = "G L O B A L   S T A T U S"
         end_string = "J O B   I N F O R M A T I O N"
         return self._get_between(init_, end_string)
 
-    def _get_job_information(self):
+    def _get_job_information(self) -> str:
         init_ = "J O B   I N F O R M A T I O N"
         end_string = "M O D E L   I N F O R M A T I O N"
         return self._get_between(init_, end_string)
 
-    def _get_model_information(self):
+    def _get_model_information(self) -> str:
         init_ = "M O D E L   I N F O R M A T I O N"
         end_string = "B O U N D A R Y   C O N D I T I O N   I N F O R M A T I O N"
         return self._get_between(init_, end_string)
 
-    def _get_boundary_condition_information(self):
+    def _get_boundary_condition_information(self) -> str:
         init_ = "B O U N D A R Y   C O N D I T I O N   I N F O R M A T I O N"
         end_string = "R O U T I N E   I N F O R M A T I O N"
         return self._get_between(init_, end_string)
 
-    def _get_routine_information(self):
+    def _get_routine_information(self) -> str:
         init_ = "R O U T I N E   I N F O R M A T I O N"
         end_string = None
         return self._get_between(init_, end_string)
 
-    def _get_solution_options_configuration(self):
+    def _get_solution_options_configuration(self) -> str:
         init_ = "S O L U T I O N   O P T I O N S"
         end_string = "L O A D   S T E P   O P T I O N S"
         return self._get_between(init_, end_string)
 
-    def _get_load_step_options(self):
+    def _get_load_step_options(self) -> str:
         init_ = "L O A D   S T E P   O P T I O N S"
         end_string = None
         return self._get_between(init_, end_string)

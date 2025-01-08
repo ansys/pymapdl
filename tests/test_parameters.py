@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,7 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import logging
 import re
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -28,22 +30,21 @@ import pytest
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.parameters import interp_star_status
 
-parm_status = """PARAMETER STATUS- PORT  (     12 PARAMETERS DEFINED)
+GOLDEN_TESTS = {
+    "parameter status": """PARAMETER STATUS- PORT  (     12 PARAMETERS DEFINED)
                   (INCLUDING        3 INTERNAL PARAMETERS)
 
  NAME                              VALUE                        TYPE  DIMENSIONS
- PORT                              50054.0000                  SCALAR"""
-
-arr_status = """PARAMETER STATUS- ASDF  (      5 PARAMETERS DEFINED)
+ PORT                              50054.0000                  SCALAR""",
+    "array status": """PARAMETER STATUS- ASDF  (      5 PARAMETERS DEFINED)
                   (INCLUDING        3 INTERNAL PARAMETERS)
 
       LOCATION                VALUE
         1       1       1    1.00000000
         2       1       1    2.00000000
         3       1       1    3.00000000
-        4       1       1    4.00000000"""
-
-arr3d_status = """
+        4       1       1    4.00000000""",
+    "array 3d status": """
 PARAMETER STATUS- MYARR  (      6 PARAMETERS DEFINED)
                   (INCLUDING        3 INTERNAL PARAMETERS)
 
@@ -74,17 +75,15 @@ PARAMETER STATUS- MYARR  (      6 PARAMETERS DEFINED)
         3       2       3    3.00000000
         1       3       3    0.00000000
         2       3       3    0.00000000
-        3       3       3    0.00000000"""
-
-strarr_status = """PARAMETER STATUS- MYSTR3  (     12 PARAMETERS DEFINED)
+        3       3       3    0.00000000""",
+    "string array status": """PARAMETER STATUS- MYSTR3  (     12 PARAMETERS DEFINED)
                   (INCLUDING        3 INTERNAL PARAMETERS)
        96       1       1  aqzzzxcv zx zxcv   zxcv
 
        96       2       1  qwer wer qwer
 
-       96       3       1  zxcv"""
-
-gen_status = """ABBREVIATION STATUS-
+       96       3       1  zxcv""",
+    "general status": """ABBREVIATION STATUS-
 
   ABBREV    STRING
   SAVE_DB   SAVE
@@ -104,7 +103,8 @@ gen_status = """ABBREVIATION STATUS-
  PGFZJK_DIM                        20.0000000                  SCALAR
  PGFZJK_ROWDIM                     20.0000000                  SCALAR
  PORT                              50054.0000                  SCALAR
- STRARRAY                                   STRING ARRAY      96       1       1"""
+ STRARRAY                                   STRING ARRAY      96       1       1""",
+}
 
 
 @pytest.mark.parametrize(
@@ -339,12 +339,12 @@ def test_parameter_delete_raise(mapdl, cleared):
 
 
 @pytest.mark.parametrize(
-    "status,check",
+    "status_key,check",
     [
-        (parm_status, 50054),
-        (arr_status, np.array([1, 2, 3, 4])),
+        ("parameter status", 50054),
+        ("array status", np.array([1, 2, 3, 4])),
         (
-            arr3d_status,
+            "array 3d status",
             np.array(
                 [
                     [[1.0, 1.0, 1.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]],
@@ -353,11 +353,12 @@ def test_parameter_delete_raise(mapdl, cleared):
                 ]
             ),
         ),
-        (strarr_status, ["aqzzzxcv zx zxcv   zxcv", "qwer wer qwer", "zxcv"]),
-        (gen_status, None),
+        ("string array status", ["aqzzzxcv zx zxcv   zxcv", "qwer wer qwer", "zxcv"]),
+        ("general status", None),
     ],
 )
-def test_interp_star_status(status, check):
+def test_interp_star_status(status_key, check):
+    status = GOLDEN_TESTS[status_key]
     output = interp_star_status(status)
     if len(output) == 1:
         name = list(output.keys())[0]
@@ -470,3 +471,25 @@ def test_non_interactive(mapdl, cleared):
         mapdl.parameters["qwer"] = 3
 
     assert mapdl.parameters["qwer"] == 3
+
+
+@pytest.mark.parametrize("value", [121, 299])
+def test_failing_get_routine(mapdl, caplog, value):
+    from ansys.mapdl.core.parameters import ROUTINE_MAP
+
+    prev_level = mapdl.logger.logger.level
+    mapdl.logger.setLevel(logging.INFO)
+
+    with patch("ansys.mapdl.core.mapdl_extended._MapdlExtended.get_value") as mck:
+        mck.return_value = value
+        with caplog.at_level(logging.INFO):
+            routine = mapdl.parameters.routine
+
+        mck.assert_called_once()
+
+    txt = str(caplog.text)
+    assert f"Getting a valid routine number failed." in txt
+    assert f"Routine obtained is {value}. Executing 'FINISH'." in txt
+    assert routine == ROUTINE_MAP[0]
+
+    mapdl.logger.setLevel(prev_level)

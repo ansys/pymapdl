@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -178,6 +178,7 @@ _ALLOWED_START_PARM = [
     "jobid",
     "jobname",
     "launch_on_hpc",
+    "mode",
     "nproc",
     "override",
     "port",
@@ -252,7 +253,7 @@ class _MapdlCore(Commands):
         self._store_commands: bool = False
         self._stored_commands = []
         self._response = None
-        self._mode = None
+        self._mode = start_parm.get("mode", None)
         self._mapdl_process = None
         self._launched: bool = start_parm.get("launched", False)
         self._stderr = None
@@ -1290,6 +1291,9 @@ class _MapdlCore(Commands):
 
     def _wrap_xsel_commands(self):
         # Wrapping XSEL commands.
+        if self.is_console:
+            return
+
         def wrap_xsel_function(func):
             if hasattr(func, "__func__"):
                 func.__func__.__doc__ = inject_docs(
@@ -1317,6 +1321,10 @@ class _MapdlCore(Commands):
                     return self.geometry.anum
                 elif name == "VSEL":
                     return self.geometry.vnum
+                elif name == "ESLN":
+                    return self.mesh.enum
+                elif name == "NSLE":
+                    return self.mesh.nnum
                 else:
                     return None
 
@@ -1392,7 +1400,8 @@ class _MapdlCore(Commands):
             self._parent = weakref.ref(parent)
 
         def __enter__(self):
-            self._parent()._log.debug("Entering non-interactive mode")
+            self._parent()._log.debug("Entering in non-interactive mode")
+            self._parent().com("Entering in non_interactive mode")
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
@@ -2179,6 +2188,11 @@ class _MapdlCore(Commands):
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")
 
+        if len(command) > 639:  # CMD_MAX_LENGTH
+            # If using mapdl_grpc, this check is redundant on purpose.
+            # Console probably do not have this limitation, but I'm not certain.
+            raise ValueError("Maximum command length must be less than 640 characters")
+
         # Check kwargs
         verbose = kwargs.pop("verbose", False)
         save_fig = kwargs.pop("savefig", False)
@@ -2274,6 +2288,7 @@ class _MapdlCore(Commands):
         self._before_run(command)
 
         short_cmd = parse_to_short_cmd(command)
+        self._log.debug(f"Running (verbose: {verbose}, mute={mute}): '{command}'")
         text = self._run(command, verbose=verbose, mute=mute)
 
         if (
@@ -2904,6 +2919,7 @@ class _MapdlCore(Commands):
             self._platform = "windows"
         else:  # pragma: no cover
             raise MapdlRuntimeError("Unknown platform: {}".format(platform))
+        self.logger.debug(f"MAPDL is running on {self._platform} OS.")
 
     def _check_on_docker(self):
         """Check if MAPDL is running on docker."""
