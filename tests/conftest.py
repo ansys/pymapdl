@@ -1157,6 +1157,24 @@ def create_geometry(mapdl):
     return areas, keypoints
 
 
+@pytest.fixture(scope="function")
+def two_dimensional_mesh(mapdl, cleared):
+    length = 4
+    height = 1
+    thickness = 0.2
+    mesh_size = 0.1
+
+    mapdl.prep7()
+
+    mapdl.r(r1=thickness)
+    mapdl.et(1, "PLANE182", kop3=3, kop6=0)
+    mapdl.rectng(0, length, 0, height)
+    mapdl.mshkey(1)
+    mapdl.mshape(0, "2D")
+    mapdl.esize(mesh_size)
+    mapdl.amesh("ALL")
+
+
 @pytest.fixture
 def query(mapdl, cleared):
     return mapdl.queries
