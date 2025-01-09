@@ -19,6 +19,7 @@ MacroFiles
    MacroFiles.cfopen
    MacroFiles.cfwrite
    MacroFiles.create
+   MacroFiles.end
    MacroFiles.mkdir
    MacroFiles.msg
    MacroFiles.pmacro

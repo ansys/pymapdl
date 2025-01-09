@@ -21,7 +21,6 @@ ParameterDefinition
    ParameterDefinition.inquire
    ParameterDefinition.parres
    ParameterDefinition.parsav
-   ParameterDefinition.stardel
    ParameterDefinition.starset
    ParameterDefinition.starstatus
    ParameterDefinition.starvget

@@ -133,7 +133,7 @@ class Abbreviations:
         string : str
             String of characters (60 maximum) represented by ``Abbr``. Cannot include a $ or any of the
             commands ``C***``, :ref:`com`, :ref:`gopr`, :ref:`nopr`, :ref:`quit`, :ref:`ui`, or
-            ``\*END``. Parameter names and commands of the :ref:`do` and Use the ``\*IF`` groups may not be
+            :ref:`end`. Parameter names and commands of the ``\*DO`` and Use the ``\*IF`` groups may not be
             abbreviated. If ``String`` is blank, the abbreviation is deleted. To abbreviate multiple
             commands, create an "unknown command" macro or define ``String`` to execute a macro file (
             :ref:`use` ) containing the desired commands.
@@ -147,7 +147,7 @@ class Abbreviations:
         time.
 
         Use :ref:`starstatus` to display the current list of abbreviations. For abbreviations repeated with
-        :ref:`repeat`, substitution occurs before the repeat increments are applied. There are a number of
+        ``\*REPEAT``, substitution occurs before the repeat increments are applied. There are a number of
         abbreviations that are predefined by the program (these can be deleted by using the blank ``String``
         option described above). Note that ``String`` will be written to the ``File.LOG``.
 

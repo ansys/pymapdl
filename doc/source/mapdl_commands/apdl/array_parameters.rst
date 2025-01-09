@@ -26,7 +26,6 @@ ArrayParameters
    ArrayParameters.vabs
    ArrayParameters.vcol
    ArrayParameters.vcum
-   ArrayParameters.vedit
    ArrayParameters.vfact
    ArrayParameters.vfun
    ArrayParameters.vitrp

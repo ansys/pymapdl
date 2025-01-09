@@ -475,10 +475,10 @@ class ParameterDefinition:
         very large numbers of parameters, it is most efficient to define them in alphabetical order.
 
         Parameter values can be redefined at any time. Array parameters can also be assigned values within a
-        do-loop ( :ref:`do` ) for convenience. Internally programmed do-loop commands are also available
-        with the **\*V** ``XX``  commands ( :ref:`vfill` ). Parameter values (except for parameters ending in
-        an underscore) can be listed with the :ref:`starstatus` command, displayed via :ref:`starvplot`
-        (numeric parameters only), and modified via :ref:`vedit` (numeric parameters only).
+        do-loop ( ``\*DO`` ) for convenience. Internally programmed do-loop commands are also available with
+        the **\*V** ``XX``  commands ( :ref:`vfill` ). Parameter values (except for parameters ending in an
+        underscore) can be listed with the :ref:`starstatus` command, displayed via :ref:`starvplot`
+        (numeric parameters only), and modified via ``\*VEDIT`` (numeric parameters only).
 
         Older program-provided macro files can use parameter names that do not begin with an underscore.
         Using these macros embedded in your own macros may cause conflicts if the same parameter names are
@@ -539,9 +539,9 @@ class ParameterDefinition:
         (extension) arguments, :ref:`abbr` command ( ``Abbr`` arguments), :ref:`title` and :ref:`stitle`
         commands ( ``Title`` argument) and :ref:`tlabel` command ( ``Text`` argument). Character parameter
         substitution is also available in the ``\*ASK``, :ref:`an3d`, :ref:`cfwrite`, ``\*IF``,
-        :ref:`elseif`, :ref:`msg`, :ref:`starset`, :ref:`use`, :ref:`vread`, and :ref:`vwrite`
-        commands. Character array parameters must include a subscript (within parentheses) to identify the
-        array element whose value is to be substituted.
+        ``\*ELSEIF``, :ref:`msg`, :ref:`starset`, :ref:`use`, :ref:`vread`, and :ref:`vwrite` commands.
+        Character array parameters must include a subscript (within parentheses) to identify the array
+        element whose value is to be substituted.
 
         If a parameter operation expression is input in a numeric argument, the numeric value of the
         expression is substituted into the command
@@ -622,7 +622,7 @@ class ParameterDefinition:
         Parameters
         ----------
         par : str
-            Specifies the parameter or sets of parameters listed. For array parameters, use ``IMIN``, ``IMAX``, etc. to specify ranges. Use :ref:`dim` to define array parameters. Use :ref:`vedit` to review array parameters interactively. Use :ref:`vwrite` to print array values in a formatted output. If ``Par`` is blank, list all scalar parameter values, array parameter dimensions, and abbreviations. If ARGX, list the active set of local macro parameters (ARG1 to ARG9 and AR10 to AR99) ( :ref:`use` ).
+            Specifies the parameter or sets of parameters listed. For array parameters, use ``IMIN``, ``IMAX``, etc. to specify ranges. Use :ref:`dim` to define array parameters. Use ``\*VEDIT`` to review array parameters interactively. Use :ref:`vwrite` to print array values in a formatted output. If ``Par`` is blank, list all scalar parameter values, array parameter dimensions, and abbreviations. If ARGX, list the active set of local macro parameters (ARG1 to ARG9 and AR10 to AR99) ( :ref:`use` ).
 
             The following are possible values for ``Par``
 
@@ -1250,70 +1250,6 @@ class ParameterDefinition:
         :ref:`vfun` ) are affected by this command.
         """
         command = f"*AFUN,{lab}"
-        return self.run(command, **kwargs)
-
-    def stardel(self, val1: str = "", val2: str = "", **kwargs):
-        r"""Deletes a parameter or parameters (GUI).
-
-        Mechanical APDL Command: `\*DEL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DEL.html>`_
-
-        Parameters
-        ----------
-        val1 : str
-            Command behavior key:
-
-              * ``ALL`` - Delete all user-defined parameters, or all user-defined parameters and all system
-              parameters, as specified by ``Val2``.
-
-              * ```` - Delete the parameter(s) specified by ``Val2``.
-
-              * ``ParmName`` - Delete a single named parameter, specified here. ( ``Val2`` is not used in this
-              case.)
-
-        val2 : str
-            The parameter or parameters to delete (used only when ``Val1`` = ALL or (blank)):
-
-              * ``LOC`` - When ``Val1`` is (blank), specifies the location of the parameter within the `Array
-              Parameters
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_wid/Hlp_UI_Arry_Stat.html#warrystatlist>`_
-              dialog box. The location number is based on an alphabetically ordered list of all parameters in
-              the database.
-
-              * ``_PRM`` - When ``Val1`` is ALL, deletes all parameters, including those named with a leading
-              underscore (_) (except _STATUS and _RETURN). When ``Val1`` is (blank), deletes only those
-              parameters named with a leading underscore (_) (except _STATUS and _RETURN).
-
-              * ``PRM_`` - When ``Val1`` is (blank), deletes only those parameters named with a trailing
-              underscore (_).
-
-              * ```` - When ``Val1`` is ALL, a (blank) value for ``Val2`` causes all user-defined parameters to
-              be deleted.
-
-        Notes
-        -----
-        This is a command generally created by the graphical user interface (GUI). It appears in the log
-        file ( ``Jobname.LOG`` ) if an array parameter is deleted from within the Array Parameters dialog.
-
-        Usage examples:
-
-        Delete all user-defined parameters: :ref:`stardel` ,ALL
-        Delete only those user-defined parameters named with a trailing underscore: :ref:`stardel` ,,PRM
-        Delete all user-defined and all system parameters (except for _STATUS and _RETURN): :ref:`stardel`
-        ,ALL,_PRM
-        Delete a parameter by specifying its location within the Array Parameters dialog: :ref:`stardel` ,,
-        ``LOC``
-        Delete a single specified parameter by name: :ref:`stardel`, ``ParmName`` (You cannot specify more
-        than one named parameter at a time.)
-
-        The :ref:`stardel` command does not free up memory but only deletes the specified reference. For
-        example, memory usage increases from the continued issuance of :ref:`stardel` and :ref:`dim` within
-        :ref:`dowhile` loops, as arrays are stored in the database (memory) and :ref:`stardel` removes only
-        the ``reference`` to the array. To release the memory in use, issue the :ref:`save` command after
-        :ref:`stardel`.
-
-        This command is valid in any processor.
-        """
-        command = f"*DEL,{val1},{val2}"
         return self.run(command, **kwargs)
 
     def dim(

@@ -84,6 +84,11 @@ class ArrayParameters:
 
         Mechanical APDL Command: `\*MWRITE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MWRITE_st.html>`_
 
+        .. warning::
+           This command must be run using :func:`non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
+           Please visit `Unsupported Interactive Commands <https://mapdl.docs.pyansys.com/version/stable/user_guide/mapdl.html#unsupported-interactive-commands>`_
+           for further information.
+
         Parameters
         ----------
         parr : str
@@ -890,7 +895,7 @@ class ArrayParameters:
         information.)
 
         Operations on a sequence of array elements can be performed by repeating the desired function or
-        operation in a do-loop ( :ref:`do` ). The vector operations within Mechanical APDLm ( **\*V** ``XX``
+        operation in a do-loop ( ``\*DO`` ). The vector operations within Mechanical APDLm ( **\*V** ``XX``
         commands) are internally programmed do-loops that conveniently perform the indicated operation over
         a sequence of array elements. If the array is multidimensional, only the first subscript is
         incremented in the do-loop; that is, the operation repeats in column vector fashion down the array.
@@ -949,6 +954,11 @@ class ArrayParameters:
         r"""Writes data to a file in a formatted sequence.
 
         Mechanical APDL Command: `\*VWRITE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VWRITE.html>`_
+
+        .. warning::
+           This command must be run using :func:`non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
+           Please visit `Unsupported Interactive Commands <https://mapdl.docs.pyansys.com/version/stable/user_guide/mapdl.html#unsupported-interactive-commands>`_
+           for further information.
 
         Parameters
         ----------
@@ -1711,34 +1721,6 @@ class ArrayParameters:
         This command is valid in any processor.
         """
         command = f"*VCUM,{key}"
-        return self.run(command, **kwargs)
-
-    def vedit(self, par: str = "", **kwargs):
-        r"""Allows numerical array parameters to be graphically edited.
-
-        Mechanical APDL Command: `\*VEDIT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VEDIT.html>`_
-
-        Parameters
-        ----------
-        par : str
-            Name of the array parameter to be edited.
-
-        Notes
-        -----
-        Invokes a graphical editing system that displays array parameter values in matrix form, and allows
-        the use of the mouse to edit individual values. The starting array subscripts must be defined, such
-        as :ref:`vedit` ,A(4,6,1), to indicate the section of the array to be edited. The array section
-        starts at the specified array element and continues to the maximum extent of the array parameter.
-        Row and column index values may be set or changed in any plane, and those values will be applied to
-        all planes. The menu system must be on ( :ref:`menu` ) when this command is issued. Graphical
-        editing is not available for character array parameters. The :ref:`vedit` command can not be used in
-        a macro or other secondary input file.
-
-        This command is not applicable to 4- or 5-D arrays.
-
-        This command is valid in any processor.
-        """
-        command = f"*VEDIT,{par}"
         return self.run(command, **kwargs)
 
     def vlen(self, nrow: str = "", ninc: str = "", **kwargs):

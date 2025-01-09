@@ -117,8 +117,8 @@ class MacroFiles:
         created macro file names, as the user-created macro file is used first (if it exists) before the
         library file is searched.
 
-        Macro blocks may be stacked in any order. Branching ( :ref:`stargo` or ``\*IF`` ) external to the
-        macro block is not allowed.
+        Macro blocks may be stacked in any order. Branching ( ``\*GO`` or ``\*IF`` ) external to the macro
+        block is not allowed.
 
         This command is valid in any processor.
         """
@@ -274,9 +274,9 @@ class MacroFiles:
         incremented.
 
         A macro is defined within a run by enclosing a sequence of data input commands between :ref:`create`
-        and ``\*END`` commands. The data input commands are passive (not executed) while being written to the
-        macro file. The macro file (without :ref:`create` and ``\*END`` ) can also be created external to
-        Mechanical APDL.
+        and :ref:`end` commands. The data input commands are passive (not executed) while being written to
+        the macro file. The macro file (without :ref:`create` and :ref:`end` ) can also be created external
+        to Mechanical APDL.
 
         Up to 99 specially named scalar parameters, ARG1 to AR99, are locally available to each macro:
 
@@ -415,6 +415,11 @@ class MacroFiles:
 
         Mechanical APDL Command: `\*CREATE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CREATE.html>`_
 
+        .. warning::
+           This command must be run using :func:`non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`
+           Please visit `Unsupported Interactive Commands <https://mapdl.docs.pyansys.com/version/stable/user_guide/mapdl.html#unsupported-interactive-commands>`_
+           for further information.
+
         Parameters
         ----------
         fname : str
@@ -430,7 +435,7 @@ class MacroFiles:
         Notes
         -----
         See the :ref:`use` command for a discussion of macros. All commands following the :ref:`create`
-        command, up to the ``\*END`` command, are written to the specified file without being executed. An
+        command, up to the :ref:`end` command, are written to the specified file without being executed. An
         existing file of the same name, if any, will be overwritten. Parameter values are not substituted
         for parameter names in the commands when the commands are written to the file. Use :ref:`cfwrite` to
         create a file if this is desired. The resulting macro may be executed with a :ref:`use` command
@@ -539,7 +544,7 @@ class MacroFiles:
 
         Enhanced descriptions may also be used: InformalTables need to be added.
 
-        Do not begin :ref:`msg` format lines with ``\*IF``, ``\*ELSE``, :ref:`elseif`, or :ref:`endif`. If
+        Do not begin :ref:`msg` format lines with ``\*IF``, ``\*ELSE``, ``\*ELSEIF``, or :ref:`endif`. If
         the last nonblank character of the message format is an ampersand (&), a second line will also be
         read as a continuation of the format. Up to nine continuations (ten total lines) may be read. If
         normal descriptions are used, then consecutive blanks are condensed into one blank upon output, and
@@ -601,6 +606,23 @@ class MacroFiles:
         Creates a directory on the computer Mechanical APDL is currently running on.
         """
         command = f"/MKDIR,{dir_}"
+        return self.run(command, **kwargs)
+
+    def end(self, **kwargs):
+        r"""Closes a macro file.
+
+        Mechanical APDL Command: `\*END <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_END.html>`_
+
+        Notes
+        -----
+        Closes a file opened with :ref:`create` . The :ref:`end` command is an 8-character command (to
+        differentiate it from :ref:`endif` ). If you add commented text on that same line but do not allow
+        enough spaces between :ref:`end` and the "!" that indicates the comment text, the :ref:`end` will
+        attempt to interpret the "!" as the 8th character and will fail.
+
+        This command is valid in any processor.
+        """
+        command = "*END"
         return self.run(command, **kwargs)
 
     def slashtee(self, label: str = "", fname: str = "", ext: str = "", **kwargs):
