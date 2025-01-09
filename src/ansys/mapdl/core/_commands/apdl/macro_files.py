@@ -34,7 +34,7 @@ class MacroFiles:
         It is valid only within a macro or input file, and should be placed at the top of the file.
         :ref:`pmacro`   should be included in any macro or input file that calls GUI functions.
         """
-        command = f"/PMACRO"
+        command = "/PMACRO"
         return self.run(command, **kwargs)
 
     def psearch(self, pname: str = "", **kwargs):
@@ -371,7 +371,7 @@ class MacroFiles:
         -----
         This command is valid in any processor.
         """
-        command = f"*CFCLOS"
+        command = "*CFCLOS"
         return self.run(command, **kwargs)
 
     def cfopen(self, fname: str = "", ext: str = "", loc: str = "", **kwargs):
@@ -584,14 +584,14 @@ class MacroFiles:
         command = f"*MSG,{lab},{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8}"
         return self.run(command, **kwargs)
 
-    def mkdir(self, dir: str = "", **kwargs):
+    def mkdir(self, dir_: str = "", **kwargs):
         r"""Creates a directory.
 
         Mechanical APDL Command: `/MKDIR <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MKDIR.html>`_
 
         Parameters
         ----------
-        dir : str
+        dir_ : str
             The directory to create (248 characters maximum on Linux; 233 on Windows). If no path is
             provided, it will be created in the current working directory. Must be a valid name (and path)
             for the system you are working on.
@@ -600,7 +600,7 @@ class MacroFiles:
         -----
         Creates a directory on the computer Mechanical APDL is currently running on.
         """
-        command = f"/MKDIR,{dir}"
+        command = f"/MKDIR,{dir_}"
         return self.run(command, **kwargs)
 
     def slashtee(self, label: str = "", fname: str = "", ext: str = "", **kwargs):
@@ -671,14 +671,14 @@ class MacroFiles:
         command = f"/TEE,{label},{fname},{ext}"
         return self.run(command, **kwargs)
 
-    def rmdir(self, dir: str = "", **kwargs):
+    def rmdir(self, dir_: str = "", **kwargs):
         r"""Removes (deletes) a directory.
 
         Mechanical APDL Command: `/RMDIR <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RMDIR.html>`_
 
         Parameters
         ----------
-        dir : str
+        dir_ : str
             The directory to remove. If no path is provided, it will be assumed to be in the current working
             directory. All files in the directory are also removed.
 
@@ -688,5 +688,5 @@ class MacroFiles:
         prompt is
         given, so use with extreme caution.
         """
-        command = f"/RMDIR,{dir}"
+        command = f"/RMDIR,{dir_}"
         return self.run(command, **kwargs)

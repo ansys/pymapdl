@@ -390,7 +390,7 @@ class MatrixOperations:
         command = f"*MULT,{m1},{t1},{m2},{t2},{m3}"
         return self.run(command, **kwargs)
 
-    def starinquire(self, obj: str = "", property: str = "", var1: str = "", **kwargs):
+    def starinquire(self, obj: str = "", property_: str = "", var1: str = "", **kwargs):
         r"""Retrieves properties of an existing APDL Math object.
 
         Mechanical APDL Command: `\*INQUIRE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_INQUIRE_a.html>`_
@@ -400,7 +400,7 @@ class MatrixOperations:
         obj : str
             Name of the vector or matrix of interest.
 
-        property : str
+        property_ : str
             Object property to get:
 
               * ``DIM1`` - First dimension of a matrix, or size of a vector.
@@ -422,7 +422,7 @@ class MatrixOperations:
            *INQUIRE,K,DIM2,NCOL                   ! Get the second dimension of the stiffness matrix
            /COM, K matrix size: %NROW% x %NCOL%
         """
-        command = f"*INQUIRE,{obj},{property},{var1}"
+        command = f"*INQUIRE,{obj},{property_},{var1}"
         return self.run(command, **kwargs)
 
     def itengine(
@@ -544,7 +544,7 @@ class MatrixOperations:
     def export(
         self,
         matrix: str = "",
-        format: str = "",
+        format_: str = "",
         fname: str = "",
         val1: str = "",
         val2: str = "",
@@ -561,7 +561,7 @@ class MatrixOperations:
             Name of the matrix to export (must be a matrix previously created with :ref:`dmat` or
             :ref:`smat`, or a vector previously created with :ref:`vec` ).
 
-        format : str
+        format_ : str
             Format of the output file:
 
               * ``MMF`` - Export the matrix in the Matrix Market Format.
@@ -623,7 +623,7 @@ class MatrixOperations:
 
         The ``.CSV`` file format does not support sparse matrices.
         """
-        command = f"*EXPORT,{matrix},{format},{fname},{val1},{val2},{val3}"
+        command = f"*EXPORT,{matrix},{format_},{fname},{val1},{val2},{val3}"
         return self.run(command, **kwargs)
 
     def eigen(

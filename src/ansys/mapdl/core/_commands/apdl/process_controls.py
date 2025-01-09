@@ -88,7 +88,7 @@ class ProcessControls:
 
         This command is valid in any processor.
         """
-        command = f"*CYCLE"
+        command = "*CYCLE"
         return self.run(command, **kwargs)
 
     def endif(self, **kwargs):
@@ -107,7 +107,7 @@ class ProcessControls:
 
         This command is valid in any processor.
         """
-        command = f"*ENDIF"
+        command = "*ENDIF"
         return self.run(command, **kwargs)
 
     def elseif(
@@ -199,7 +199,7 @@ class ProcessControls:
 
         This command is valid in any processor.
         """
-        command = f"*EXIT"
+        command = "*EXIT"
         return self.run(command, **kwargs)
 
     def enddo(self, **kwargs):
@@ -214,7 +214,7 @@ class ProcessControls:
 
         This command is valid in any processor.
         """
-        command = f"*ENDDO"
+        command = "*ENDDO"
         return self.run(command, **kwargs)
 
     def repeat(

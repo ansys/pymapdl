@@ -749,7 +749,7 @@ class ArrayParameters:
 
         This command is valid in any processor.
         """
-        command = f"*VSTAT"
+        command = "*VSTAT"
         return self.run(command, **kwargs)
 
     def voper(
