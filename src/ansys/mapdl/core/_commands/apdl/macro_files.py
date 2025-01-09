@@ -544,11 +544,11 @@ class MacroFiles:
 
         Enhanced descriptions may also be used: InformalTables need to be added.
 
-        Do not begin :ref:`msg` format lines with ``\*IF``, ``\*ELSE``, ``\*ELSEIF``, or :ref:`endif`. If
-        the last nonblank character of the message format is an ampersand (&), a second line will also be
-        read as a continuation of the format. Up to nine continuations (ten total lines) may be read. If
-        normal descriptions are used, then consecutive blanks are condensed into one blank upon output, and
-        a period is appended. Up to ten lines of output of 72 characters each may be produced (using the %/
+        Do not begin :ref:`msg` format lines with ``\*IF``, ``\*ELSE``, ``\*ELSEIF``, or ``\*ENDIF``. If the
+        last nonblank character of the message format is an ampersand (&), a second line will also be read
+        as a continuation of the format. Up to nine continuations (ten total lines) may be read. If normal
+        descriptions are used, then consecutive blanks are condensed into one blank upon output, and a
+        period is appended. Up to ten lines of output of 72 characters each may be produced (using the %/
         descriptor). Two examples follow.
 
         Here is an example of the :ref:`msg` command and a format to print a message with two integer values
@@ -616,7 +616,7 @@ class MacroFiles:
         Notes
         -----
         Closes a file opened with :ref:`create` . The :ref:`end` command is an 8-character command (to
-        differentiate it from :ref:`endif` ). If you add commented text on that same line but do not allow
+        differentiate it from ``\*ENDIF`` ). If you add commented text on that same line but do not allow
         enough spaces between :ref:`end` and the "!" that indicates the comment text, the :ref:`end` will
         attempt to interpret the "!" as the 8th character and will fail.
 

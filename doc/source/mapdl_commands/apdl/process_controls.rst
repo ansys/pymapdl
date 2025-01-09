@@ -15,6 +15,5 @@ ProcessControls
    :toctree: _autosummary
 
 
-   ProcessControls.endif
    ProcessControls.starexit
    ProcessControls.wait

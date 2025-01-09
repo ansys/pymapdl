@@ -45,25 +45,6 @@ class ProcessControls:
         command = f"/WAIT,{dtime}"
         return self.run(command, **kwargs)
 
-    def endif(self, **kwargs):
-        r"""Ends an if-then-else.
-
-        Mechanical APDL Command: `\*ENDIF <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ENDIF.html>`_
-
-        Notes
-        -----
-        Required terminator for the if-then-else construct. See ``\*IF`` for details.
-
-        If a batch input stream hits an end-of-file during a false ``\*IF`` condition, the analysis will not
-        terminate normally. You will need to terminate it externally (use either the Linux "kill" function
-        or the Windows task manager). The :ref:`endif` command must appear on the same file as the ``\*IF``
-        command, and all six characters must be input.
-
-        This command is valid in any processor.
-        """
-        command = "*ENDIF"
-        return self.run(command, **kwargs)
-
     def starexit(self, **kwargs):
         r"""Exits a do-loop.
 
