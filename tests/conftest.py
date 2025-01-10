@@ -224,7 +224,8 @@ pymapdl.RUNNING_TESTS = True
 from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
-from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
+from ansys.mapdl.core.launcher import launch_mapdl
+from ansys.mapdl.core.launcher.tools import get_start_instance
 from ansys.mapdl.core.mapdl_core import VALID_DEVICES
 
 if has_dependency("ansys-tools-visualization_interface"):
@@ -679,13 +680,6 @@ _meth_patch_MAPDL_launch = [
 ]
 
 _meth_patch_MAPDL = _meth_patch_MAPDL_launch.copy()
-_meth_patch_MAPDL.extend(
-    [
-        # launcher methods
-        ("ansys.mapdl.core.launcher.launch_grpc", _returns(None)),
-        ("ansys.mapdl.core.launcher.check_mapdl_launch", _returns(None)),
-    ]
-)
 
 # For testing
 # Patch some of the starting procedures

@@ -34,40 +34,41 @@ from pyfakefs.fake_filesystem import OSType
 import pytest
 
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core import _HAS_ATP
 from ansys.mapdl.core.errors import (
     MapdlDidNotStart,
     NotEnoughResources,
     PortAlreadyInUseByAnMAPDLInstance,
     VersionError,
 )
-from ansys.mapdl.core.launcher import (
-    _HAS_ATP,
-    LOCALHOST,
+from ansys.mapdl.core.launcher import LOCALHOST, launch_mapdl
+from ansys.mapdl.core.launcher.grpc import launch_grpc
+from ansys.mapdl.core.launcher.hpc import (
+    check_mapdl_launch_on_hpc,
+    generate_sbatch_command,
+    get_hostname_host_cluster,
+    get_jobid,
+    get_slurm_options,
+    is_running_on_slurm,
+    kill_job,
+    launch_mapdl_on_cluster,
+    send_scontrol,
+)
+from ansys.mapdl.core.launcher.tools import (
     _is_ubuntu,
     _parse_ip_route,
-    check_mapdl_launch_on_hpc,
     check_mode,
     force_smp_in_student,
     generate_mapdl_launch_command,
-    generate_sbatch_command,
     generate_start_parameters,
     get_cpus,
     get_exec_file,
-    get_hostname_host_cluster,
     get_ip,
-    get_jobid,
     get_port,
     get_run_location,
-    get_slurm_options,
     get_start_instance,
     get_version,
-    is_running_on_slurm,
-    kill_job,
-    launch_grpc,
-    launch_mapdl,
-    launch_mapdl_on_cluster,
     remove_err_files,
-    send_scontrol,
     set_license_switch,
     set_MPI_additional_switches,
     submitter,
@@ -216,8 +217,10 @@ def test_find_mapdl_linux(my_fs, path, version, raises):
 
 @requires("ansys-tools-path")
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
-@patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
-@patch("ansys.mapdl.core.launcher.get_process_at_port", lambda *args, **kwargs: None)
+@patch("ansys.mapdl.core.launcher.tools._is_ubuntu", lambda *args, **kwargs: True)
+@patch(
+    "ansys.mapdl.core.launcher.tools.get_process_at_port", lambda *args, **kwargs: None
+)
 def test_invalid_mode(mapdl, my_fs, cleared, monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
     monkeypatch.delenv("PYMAPDL_IP", False)
@@ -234,8 +237,10 @@ def test_invalid_mode(mapdl, my_fs, cleared, monkeypatch):
 @requires("ansys-tools-path")
 @pytest.mark.parametrize("version", [120, 170, 190])
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
-@patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
-@patch("ansys.mapdl.core.launcher.get_process_at_port", lambda *args, **kwargs: None)
+@patch("ansys.mapdl.core.launcher.tools._is_ubuntu", lambda *args, **kwargs: True)
+@patch(
+    "ansys.mapdl.core.launcher.tools.get_process_at_port", lambda *args, **kwargs: None
+)
 def test_old_version_not_version(mapdl, my_fs, cleared, monkeypatch, version):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
     monkeypatch.delenv("PYMAPDL_IP", False)
@@ -259,8 +264,10 @@ def test_old_version_not_version(mapdl, my_fs, cleared, monkeypatch, version):
 @requires("ansys-tools-path")
 @pytest.mark.parametrize("version", [203, 213, 351])
 @patch("psutil.cpu_count", lambda *args, **kwargs: 2)
-@patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
-@patch("ansys.mapdl.core.launcher.get_process_at_port", lambda *args, **kwargs: None)
+@patch("ansys.mapdl.core.launcher.tools._is_ubuntu", lambda *args, **kwargs: True)
+@patch(
+    "ansys.mapdl.core.launcher.tools.get_process_at_port", lambda *args, **kwargs: None
+)
 def test_not_valid_versions(mapdl, my_fs, cleared, monkeypatch, version):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
     monkeypatch.delenv("PYMAPDL_IP", False)
@@ -1110,7 +1117,7 @@ def test_generate_start_parameters_console():
     assert "timeout" not in new_args
 
 
-@patch("ansys.mapdl.core.launcher._HAS_ATP", False)
+@patch("ansys.mapdl.core.launcher.tools._HAS_ATP", False)
 def test_get_exec_file(monkeypatch):
     monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", False)
 
@@ -1370,7 +1377,7 @@ def myfakegethostbynameIP(*args, **kwargs):
     ],
 )
 @patch("socket.gethostbyname", myfakegethostbynameIP)
-@patch("ansys.mapdl.core.launcher.get_hostname_host_cluster", myfakegethostbyname)
+@patch("ansys.mapdl.core.launcher.hpc.get_hostname_host_cluster", myfakegethostbyname)
 def test_check_mapdl_launch_on_hpc(message_stdout, message_stderr):
 
     process = get_fake_process(message_stdout, message_stderr)
@@ -1423,9 +1430,9 @@ def test_exit_job(mock_popen, mapdl, cleared):
 )
 @patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
 @stack(*PATCH_MAPDL_START)
-@patch("ansys.mapdl.core.launcher.launch_grpc")
+@patch("ansys.mapdl.core.launcher.launcher.launch_grpc")
 @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.kill_job")
-@patch("ansys.mapdl.core.launcher.send_scontrol")
+@patch("ansys.mapdl.core.launcher.hpc.send_scontrol")
 def test_launch_on_hpc_found_ansys(mck_ssctrl, mck_del, mck_launch_grpc, monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
 
@@ -1460,8 +1467,8 @@ def test_launch_on_hpc_found_ansys(mck_ssctrl, mck_del, mck_launch_grpc, monkeyp
 
 @stack(*PATCH_MAPDL_START)
 @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.kill_job")
-@patch("ansys.mapdl.core.launcher.launch_grpc")
-@patch("ansys.mapdl.core.launcher.send_scontrol")
+@patch("ansys.mapdl.core.launcher.launcher.launch_grpc")
+@patch("ansys.mapdl.core.launcher.hpc.send_scontrol")
 def test_launch_on_hpc_not_found_ansys(mck_sc, mck_lgrpc, mck_kj, monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
     exec_file = "path/to/mapdl/v242/executable/ansys242"
@@ -1511,8 +1518,8 @@ def test_launch_on_hpc_exception_launch_mapdl(monkeypatch):
 
     process = get_fake_process("ERROR")
 
-    with patch("ansys.mapdl.core.launcher.launch_grpc") as mock_launch_grpc:
-        with patch("ansys.mapdl.core.launcher.kill_job") as mock_popen:
+    with patch("ansys.mapdl.core.launcher.launcher.launch_grpc") as mock_launch_grpc:
+        with patch("ansys.mapdl.core.launcher.hpc.kill_job") as mock_popen:
 
             mock_launch_grpc.return_value = process
 
@@ -1552,9 +1559,9 @@ def test_launch_on_hpc_exception_successfull_sbatch(monkeypatch):
     process_scontrol = get_fake_process("Submitted batch job 1001")
     process_scontrol.stdout.read = raise_exception
 
-    with patch("ansys.mapdl.core.launcher.launch_grpc") as mock_launch_grpc:
-        with patch("ansys.mapdl.core.launcher.send_scontrol") as mock_scontrol:
-            with patch("ansys.mapdl.core.launcher.kill_job") as mock_kill_job:
+    with patch("ansys.mapdl.core.launcher.launcher.launch_grpc") as mock_launch_grpc:
+        with patch("ansys.mapdl.core.launcher.hpc.send_scontrol") as mock_scontrol:
+            with patch("ansys.mapdl.core.launcher.launcher.kill_job") as mock_kill_job:
 
                 mock_launch_grpc.return_value = process_launch_grpc
                 mock_scontrol.return_value = process_scontrol
@@ -1680,7 +1687,9 @@ def test_get_port(monkeypatch, port, port_envvar, start_instance, port_busy, res
     else:
         side_effect = [False]
 
-    context = patch("ansys.mapdl.core.launcher.port_in_use", side_effect=side_effect)
+    context = patch(
+        "ansys.mapdl.core.launcher.tools.port_in_use", side_effect=side_effect
+    )
 
     with context:
         assert get_port(port, start_instance) == result
@@ -1729,7 +1738,7 @@ def test_get_hostname_host_cluster(
             time_to_stop,
         )
 
-    with patch("ansys.mapdl.core.launcher.send_scontrol", fake_proc) as mck_sc:
+    with patch("ansys.mapdl.core.launcher.hpc.send_scontrol", fake_proc) as mck_sc:
 
         if raises:
             context = pytest.raises(raises)
@@ -1875,7 +1884,7 @@ def test_check_mode(mode, version, osname, context, res):
 @pytest.mark.parametrize("jobid", [1001, 2002])
 @patch("subprocess.Popen", lambda *args, **kwargs: None)
 def test_kill_job(jobid):
-    with patch("ansys.mapdl.core.launcher.submitter") as mck_sub:
+    with patch("ansys.mapdl.core.launcher.hpc.submitter") as mck_sub:
         assert kill_job(jobid) is None
         mck_sub.assert_called_once()
         arg = mck_sub.call_args_list[0][0][0]
@@ -1884,13 +1893,13 @@ def test_kill_job(jobid):
 
 
 @pytest.mark.parametrize("jobid", [1001, 2002])
-@patch(
-    "ansys.mapdl.core.launcher.submitter", lambda *args, **kwargs: kwargs
-)  # return command
 def test_send_scontrol(jobid):
-    with patch("ansys.mapdl.core.launcher.submitter") as mck_sub:
+    with patch("ansys.mapdl.core.launcher.hpc.submitter") as mck_sub:
+        mck_sub.side_effect = lambda *args, **kwargs: (args, kwargs)
+
         args = f"my args {jobid}"
-        assert send_scontrol(args)
+        ret_args = send_scontrol(args)
+        assert ret_args
 
         mck_sub.assert_called_once()
         arg = mck_sub.call_args_list[0][0][0]
@@ -1978,6 +1987,11 @@ def test_submitter(cmd, executable, shell, cwd, stdin, stdout, stderr, envvars):
 )
 @patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
 @stack(*PATCH_MAPDL)
+@patch("ansys.mapdl.core.launcher.launcher.launch_grpc", lambda *args, **kwargs: None)
+@patch(
+    "ansys.mapdl.core.launcher.launcher.check_mapdl_launch",
+    lambda *args, **kwargs: None,
+)
 @pytest.mark.parametrize(
     "arg,value,method",
     [
@@ -2011,14 +2025,16 @@ def raising():
     raise Exception("An error")
 
 
-@patch("ansys.mapdl.core.launcher.check_valid_ansys", raising)
+@patch("ansys.mapdl.core.launcher.tools.check_valid_ansys", raising)
 def test_check_has_mapdl_failed():
     assert check_has_mapdl() is False
 
 
 @requires("local")
-@patch("ansys.mapdl.core.launcher._is_ubuntu", lambda *args, **kwargs: True)
-@patch("ansys.mapdl.core.launcher.check_mapdl_launch", lambda *args, **kwargs: None)
+@patch("ansys.mapdl.core.launcher.tools._is_ubuntu", lambda *args, **kwargs: True)
+@patch(
+    "ansys.mapdl.core.launcher.tools.check_mapdl_launch", lambda *args, **kwargs: None
+)
 def test_mapdl_output_pass_arg(tmpdir):
     def submitter(*args, **kwargs):
         from _io import FileIO
@@ -2029,7 +2045,7 @@ def test_mapdl_output_pass_arg(tmpdir):
 
         return
 
-    with patch("ansys.mapdl.core.launcher.submitter", submitter) as mck_sub:
+    with patch("ansys.mapdl.core.launcher.tools.submitter", submitter) as mck_sub:
         mapdl_output = os.path.join(tmpdir, "apdl.txt")
         args = launch_mapdl(just_launch=True, mapdl_output=mapdl_output)
 
@@ -2056,18 +2072,18 @@ def test_mapdl_output(tmpdir):
 
 
 def test_check_server_is_alive_no_queue():
-    from ansys.mapdl.core.launcher import _check_server_is_alive
+    from ansys.mapdl.core.launcher.tools import _check_server_is_alive
 
     assert _check_server_is_alive(None, 30) is None
 
 
 def test_get_std_output_no_queue():
-    from ansys.mapdl.core.launcher import _get_std_output
+    from ansys.mapdl.core.launcher.tools import _get_std_output
 
     assert _get_std_output(None, 30) == [None]
 
 
 def test_create_queue_for_std_no_queue():
-    from ansys.mapdl.core.launcher import _create_queue_for_std
+    from ansys.mapdl.core.launcher.tools import _create_queue_for_std
 
     assert _create_queue_for_std(None) == (None, None)

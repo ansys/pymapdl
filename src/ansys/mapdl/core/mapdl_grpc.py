@@ -145,7 +145,7 @@ SERVICE_DEFAULT_CONFIG = {
 
 def get_start_instance(*args, **kwargs) -> bool:
     """Wraps get_start_instance to avoid circular imports"""
-    from ansys.mapdl.core.launcher import get_start_instance
+    from ansys.mapdl.core.launcher.tools import get_start_instance
 
     return get_start_instance(*args, **kwargs)
 
@@ -523,7 +523,7 @@ class MapdlGrpc(MapdlBase):
             self._create_session()
 
     def _create_process_stds_queue(self, process=None):
-        from ansys.mapdl.core.launcher import (
+        from ansys.mapdl.core.launcher.tools import (
             _create_queue_for_std,  # Avoid circular import error
         )
 
@@ -890,7 +890,8 @@ class MapdlGrpc(MapdlBase):
             raise MapdlRuntimeError(
                 "Can only launch the GUI with a local instance of MAPDL"
             )
-        from ansys.mapdl.core.launcher import generate_mapdl_launch_command, launch_grpc
+        from ansys.mapdl.core.launcher import launch_grpc
+        from ansys.mapdl.core.launcher.tools import generate_mapdl_launch_command
 
         self._exited = False  # reset exit state
 
