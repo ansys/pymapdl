@@ -68,7 +68,7 @@ tests = [
     "pytest-rerunfailures==15.0",
     "pytest-timeout==2.3.1",
     "pytest==8.3.4",
-    "scipy==1.14.1",
+    "scipy==1.15.0",
     "vtk==9.3.1",
 ]
 doc = [
