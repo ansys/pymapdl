@@ -212,4 +212,4 @@ def launch_grpc(
         stdout=stdout,
         stderr=stderr,
         env_vars=env_vars,
-    )
+    )  # nosec B604

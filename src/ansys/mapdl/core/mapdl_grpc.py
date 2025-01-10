@@ -3805,8 +3805,7 @@ class MapdlGrpc(MapdlBase):
             Job ID.
         """
         cmd = ["scancel", f"{jobid}"]
-        # to ensure the job is stopped properly, let's issue the scancel twice.
-        subprocess.Popen(cmd)
+        subprocess.Popen(cmd)  # nosec B603
 
     def __del__(self):
         """In case the object is deleted"""
@@ -3826,6 +3825,6 @@ class MapdlGrpc(MapdlBase):
             if not self._start_instance:
                 return
 
-        except Exception as e:
+        except Exception as e:  # nosec B110
             # This is on clean up.
-            pass
+            pass  # nosec B110

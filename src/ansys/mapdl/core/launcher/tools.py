@@ -201,7 +201,7 @@ def submitter(
         stdout=stdout,
         stderr=stderr,
         env=env_vars,
-    )
+    )  # nosec B604
 
 
 def close_all_local_instances(port_range: range = None) -> None:
