@@ -22,6 +22,7 @@
 
 from typing import Any, Dict, Optional, Union
 
+from ansys.mapdl.core import LOG
 from ansys.mapdl.core.launcher.tools import (
     check_kwargs,
     generate_start_parameters,

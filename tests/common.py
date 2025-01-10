@@ -23,7 +23,7 @@
 """Shared testing module"""
 from collections import namedtuple
 import os
-import subprocess
+import subprocess  # nosec B404
 import time
 from typing import Dict, List
 

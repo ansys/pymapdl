@@ -21,6 +21,8 @@
 # SOFTWARE.
 
 """Launch MAPDL locally"""
+
+from ansys.mapdl.core import LOG
 from ansys.mapdl.core.launcher.tools import (
     check_kwargs,
     check_lock_file,
@@ -72,9 +74,7 @@ def processing_local_arguments(args):
         args["license_type"], args["additional_switches"]
     )
 
-    env_vars: Dict[str, str] = update_env_vars(
-        args["add_env_vars"], args["replace_env_vars"]
-    )
+    args["env_vars"] = update_env_vars(args["add_env_vars"], args["replace_env_vars"])
 
     get_run_location(args)
 
@@ -91,7 +91,7 @@ def processing_local_arguments(args):
     # ON HPC:
     # Assuming that if login node is ubuntu, the computation ones
     # are also ubuntu.
-    env_vars = configure_ubuntu(env_vars)
+    args["env_vars"] = configure_ubuntu(args["env_vars"])
 
     # Set SMP by default if student version is used.
     args["additional_switches"] = force_smp_in_student(
@@ -108,7 +108,7 @@ def processing_local_arguments(args):
     LOG.debug(f"Using additional switches {args['additional_switches']}.")
 
     if args["running_on_hpc"] or args["launch_on_hpc"]:
-        env_vars.setdefault("ANS_MULTIPLE_NODES", "1")
-        env_vars.setdefault("HYDRA_BOOTSTRAP", "slurm")
+        args["env_vars"].setdefault("ANS_MULTIPLE_NODES", "1")
+        args["env_vars"].setdefault("HYDRA_BOOTSTRAP", "slurm")
 
     return args

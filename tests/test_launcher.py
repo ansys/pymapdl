@@ -23,7 +23,7 @@
 """Test the mapdl launcher"""
 
 import os
-import subprocess
+import subprocess  # nosec B404
 import tempfile
 from time import sleep
 from unittest.mock import patch
@@ -1738,7 +1738,7 @@ def test_get_hostname_host_cluster(
             time_to_stop,
         )
 
-    with patch("ansys.mapdl.core.launcher.hpc.send_scontrol", fake_proc) as mck_sc:
+    with patch("ansys.mapdl.core.launcher.hpc.send_scontrol", fake_proc):
 
         if raises:
             context = pytest.raises(raises)
@@ -2045,7 +2045,7 @@ def test_mapdl_output_pass_arg(tmpdir):
 
         return
 
-    with patch("ansys.mapdl.core.launcher.tools.submitter", submitter) as mck_sub:
+    with patch("ansys.mapdl.core.launcher.tools.submitter", submitter):
         mapdl_output = os.path.join(tmpdir, "apdl.txt")
         args = launch_mapdl(just_launch=True, mapdl_output=mapdl_output)
 

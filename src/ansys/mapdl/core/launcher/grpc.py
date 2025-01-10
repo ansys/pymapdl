@@ -30,6 +30,8 @@ from typing import Dict, Optional
 from ansys.mapdl.core import LOG
 from ansys.mapdl.core.launcher.local import processing_local_arguments
 from ansys.mapdl.core.launcher.tools import (
+    check_mapdl_launch,
+    generate_mapdl_launch_command,
     generate_start_parameters,
     get_port,
     submitter,
@@ -87,8 +89,6 @@ def launch_mapdl_grpc():
 
         except Exception as exception:
             LOG.error("An error occurred when launching MAPDL.")
-
-            jobid: int = start_parm.get("jobid", "Not found")
 
             if args["license_server_check"]:
                 LOG.debug("Checking license server.")

@@ -25,7 +25,7 @@ import platform
 from queue import Empty, Queue
 import re
 import socket
-import subprocess
+import subprocess  # nosec B404
 import threading
 import time
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -450,6 +450,8 @@ def create_gallery_instances(
     # launch an instance of pymapdl if it does not already exist and
     # we're allowed to start instances
     if GALLERY_INSTANCE[0] is None:
+        from ansys.mapdl.core.launcher import launch_mapdl
+
         LOG.debug("Loading first MAPDL instance for gallery building.")
         GALLERY_INSTANCE[0] = "Loading..."
         mapdl = launch_mapdl(
@@ -832,7 +834,7 @@ def check_mapdl_launch(
         MAPDL did not start.
     """
     LOG.debug("Generating queue object for stdout")
-    stdout_queue, thread = _create_queue_for_std(process.stdout)
+    stdout_queue, _ = _create_queue_for_std(process.stdout)
 
     # Checking connection
     try:

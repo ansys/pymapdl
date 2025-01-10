@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import re
-import subprocess
+import subprocess  # nosec B404
 
 import psutil
 import pytest

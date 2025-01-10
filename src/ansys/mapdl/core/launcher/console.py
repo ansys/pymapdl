@@ -22,6 +22,8 @@
 
 from typing import Optional, Union
 
+from ansys.mapdl.core import LOG
+from ansys.mapdl.core.launcher.local import processing_local_arguments
 from ansys.mapdl.core.launcher.tools import generate_start_parameters
 from ansys.mapdl.core.licensing import LicenseChecker
 from ansys.mapdl.core.mapdl_console import MapdlConsole

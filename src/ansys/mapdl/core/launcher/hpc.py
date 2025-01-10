@@ -22,14 +22,20 @@
 
 import os
 import socket
-import subprocess
+import subprocess  # nosec B404
 import time
 from typing import Any, Callable, Dict, List, Optional, Union
 
 from ansys.mapdl.core import LOG
 from ansys.mapdl.core.errors import MapdlDidNotStart
 from ansys.mapdl.core.launcher.grpc import launch_grpc
-from ansys.mapdl.core.launcher.tools import submitter
+from ansys.mapdl.core.launcher.local import processing_local_arguments
+from ansys.mapdl.core.launcher.tools import (
+    generate_start_parameters,
+    get_port,
+    submitter,
+)
+from ansys.mapdl.core.licensing import LicenseChecker
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
 LAUNCH_ON_HCP_ERROR_MESSAGE_IP = (
@@ -328,7 +334,7 @@ def launch_mapdl_on_cluster(
     )
 
 
-def launch_mapdl_grpc():
+def launch_mapdl_grpc():  # to be fixed
     args = processing_local_arguments(locals())
     if args.get("mode", "grpc") != "grpc":
         raise ValueError("Invalid 'mode'.")
