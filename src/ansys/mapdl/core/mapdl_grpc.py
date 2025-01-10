@@ -651,7 +651,7 @@ class MapdlGrpc(MapdlBase):
 
     def _read_stds(self):
         """Read the stdout and stderr from the subprocess."""
-        from ansys.mapdl.core.launcher import (
+        from ansys.mapdl.core.launcher.tools import (
             _get_std_output,  # Avoid circular import error
         )
 
