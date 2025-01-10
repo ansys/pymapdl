@@ -400,7 +400,7 @@ class MacroFiles:
         Notes
         -----
         Mechanical APDL commands specified by the :ref:`cfwrite` command are written to the file opened by
-        :ref:`cfopen`. Data processed with the :ref:`vwrite` command are also written to this file if the
+        :ref:`cfopen` . Data processed with the :ref:`vwrite` command are also written to this file if the
         file is open when the :ref:`vwrite` command is issued.
 
         Issue the :ref:`cfclos` command to close the command file.
@@ -475,16 +475,16 @@ class MacroFiles:
               * ``NOTE`` - Writes the message with a "NOTE" heading.
 
               * ``WARN`` - Writes the message with a "WARNING" heading. Also writes the message to the errors
-              file, ``Jobname.ERR``.
+                file, ``Jobname.ERR``.
 
               * ``ERROR`` - Writes the message with a "ERROR" heading and causes run termination (if batch) at
-              earliest "clean exit" point. Also writes the message to the errors file, ``Jobname.ERR``.
+                earliest "clean exit" point. Also writes the message to the errors file, ``Jobname.ERR``.
 
               * ``FATAL`` - Writes the message with a "FATAL ERROR" heading and causes run termination
-              immediately. Also writes the message to the errors file, ``Jobname.ERR``.
+                immediately. Also writes the message to the errors file, ``Jobname.ERR``.
 
               * ``UI`` - Writes the message with a "NOTE" heading and displays it in the message dialog box.
-              This option is most useful in GUI mode.
+                This option is most useful in GUI mode.
 
         val1 : str
             Numeric or alphanumeric character values to be included in message. Values may be the results of
@@ -636,12 +636,12 @@ class MacroFiles:
             Specifies how Mechanical APDL is to interpret this :ref:`slashtee` command:
 
               * ``NEW`` - Signals the beginning of the command text that is to be written to ``Fname``. If
-              ``Fname`` already exists, specifying NEW causes the contents of ``Fname`` to be overwritten.
+                ``Fname`` already exists, specifying NEW causes the contents of ``Fname`` to be overwritten.
 
               * ``APPEND`` - Indicates that you want to append to ``Fname`` the command text that follows.
 
               * ``END`` - Signals the end of the command text that is to be written to or appended to ``Fname``
-              .
+                .
 
         fname : str
             File name and directory path (248 characters maximum, including the characters needed for the

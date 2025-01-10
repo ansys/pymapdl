@@ -113,11 +113,11 @@ class MatrixOperations:
             Specifies the result format:
 
               * ``FULL`` - Returns the full result. That is, the result matches the dimension specified on this
-              command ( ``DIM1``, ``DIM2`` ).
+                command ( ``DIM1``, ``DIM2`` ).
 
               * ``PART`` - Returns partial results. For real input data, there is a symmetry in the results of
-              the Fourier transform as some coefficients are conjugated. The partial format uses this symmetry
-              to optimize the storage of the results. (Valid only for real data.)
+                the Fourier transform as some coefficients are conjugated. The partial format uses this symmetry
+                to optimize the storage of the results. (Valid only for real data.)
 
         Notes
         -----
@@ -351,7 +351,7 @@ class MatrixOperations:
         m3: str = "",
         **kwargs,
     ):
-        r"""Performs the matrix multiplication M3 = M1 :sup:`(T1)` *M2 :sup:`(T2)`.
+        r"""Performs the matrix multiplication M3 = M1 :sup:`(T1)` *M2 :sup:`(T2)` .
 
         Mechanical APDL Command: `\*MULT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MULT.html>`_
 
@@ -510,16 +510,16 @@ class MatrixOperations:
               * ``RAND`` - Fill the vector/matrix with random values.
 
               * ``DIAG`` - Fill the ``n`` th diagonal of the matrix with a constant value. Other values are not
-              overwritten. For this option, ``Name`` must be a dense matrix.
+                overwritten. For this option, ``Name`` must be a dense matrix.
 
               * ``ADIAG`` - Fill the ``n`` th anti-diagonal of the matrix with a constant value. Other values
-              are not overwritten. For this option, ``Name`` must be a dense matrix.
+                are not overwritten. For this option, ``Name`` must be a dense matrix.
 
               * ``CONJ`` - Take the complex conjugate of the values in the vector/matrix (no change for non-
-              complex values).
+                complex values).
 
               * ``FILTER`` - Initialize a subset of values of a vector using a filtering vector. For this
-              option, ``Name`` must be a vector.
+                option, ``Name`` must be a vector.
 
         val1 : str
             Additional input. The meaning of ``Val1`` through ``Val3`` will vary depending on the specified
@@ -571,7 +571,7 @@ class MatrixOperations:
               * ``HBMAT`` - Export the matrix in the Harwell-Boeing file format.
 
               * ``MAT`` - Export the matrix in a native format, to be re-imported using the :ref:`dmat` or
-              :ref:`smat` command.
+                :ref:`smat` command.
 
               * ``EMAT`` - Export the matrix to an existing ``EMAT`` file.
 
@@ -874,16 +874,16 @@ class MatrixOperations:
               * ``ALLOC`` - Allocate space for a vector (default).
 
               * ``RESIZE`` - Resize an existing vector to a new length. Values are kept from the original
-              vector. If the length specified by ``Val1`` is greater than the original vector length, the
-              additional rows are assigned a value of zero.
+                vector. If the length specified by ``Val1`` is greater than the original vector length, the
+                additional rows are assigned a value of zero.
 
               * ``COPY`` - Copy an existing vector.
 
               * ``IMPORT`` - Import the vector from a file.
 
               * ``LINK`` - Link to a column of an existing dense :ref:`dmat` matrix and use it in subsequent
-              vector calculations. Any changes to the vector are also made to the corresponding matrix column
-              (memory is shared).
+                vector calculations. Any changes to the vector are also made to the corresponding matrix column
+                (memory is shared).
 
         val1 : str
             Additional input. The meaning of ``Val1`` through ``Val5`` will vary depending on the specified
@@ -1232,15 +1232,15 @@ class MatrixOperations:
               * ``ALLOC`` - Allocate space for a matrix (default).
 
               * ``RESIZE`` - Resize an existing matrix to new row and column dimensions. Values are kept from
-              the original matrix. If the dimensions specified by ``Val1`` (rows) and ``Val2`` (columns) are
-              greater than the original matrix size, the additional entries are assigned a value of zero.
+                the original matrix. If the dimensions specified by ``Val1`` (rows) and ``Val2`` (columns) are
+                greater than the original matrix size, the additional entries are assigned a value of zero.
 
               * ``COPY`` - Copy an existing matrix.
 
               * ``LINK`` - Link to an existing matrix. The memory will be shared between the original matrix and
-              the new matrix. This is useful for manipulating a submatrix of a larger matrix. The ``Val1``
-              through ``Val5`` arguments will be used to specify the lower and upper bounds of row and column
-              numbers from the original matrix.
+                the new matrix. This is useful for manipulating a submatrix of a larger matrix. The ``Val1``
+                through ``Val5`` arguments will be used to specify the lower and upper bounds of row and column
+                numbers from the original matrix.
 
               * ``IMPORT`` - Import the matrix from a file.
 

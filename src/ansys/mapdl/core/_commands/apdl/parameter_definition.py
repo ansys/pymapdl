@@ -36,7 +36,7 @@ class ParameterDefinition:
               * ``NEW`` - Replace current parameter set with these parameters (default).
 
               * ``CHANGE`` - Extend current parameter set with these parameters, replacing any that already
-              exist.
+                exist.
 
         fname : str
             File name and directory path (248 characters maximum, including the characters needed for the
@@ -627,24 +627,24 @@ class ParameterDefinition:
             The following are possible values for ``Par``
 
               * ```` - Lists all parameters (except local macro parameters and those with names beginning or
-              ending with an underbar) and toolbar abbreviations.
+                ending with an underbar) and toolbar abbreviations.
 
               * ``_PRM`` - Lists only parameters with names beginning with an underbar (_). These are Mechanical APDL
-              internal parameters.
+                internal parameters.
 
               * ``PRM_`` - Lists only parameters with names ending with an underbar (_). A good APDL programming
-              convention is to ensure that all parameters created by your system programmer are named with a
-              trailing underbar.
+                convention is to ensure that all parameters created by your system programmer are named with a
+                trailing underbar.
 
               * ``ABBR`` - Lists all toolbar abbreviations.
 
               * ``PARM`` - Lists all parameters (except local macro parameters and those with names beginning or
-              ending with an underbar).
+                ending with an underbar).
 
               * ``MATH`` - Lists all APDL Math parameters, including vectors, matrices, and linear solvers.
 
               * ``PARNAME`` - Lists only the parameter specified. ``PARNAME`` cannot be a local macro parameter
-              name.
+                name.
 
               * ``ARGX`` - Lists all local macro parameter values (ARG1- AR99) that are non-zero or non-blank.
 
@@ -1127,13 +1127,13 @@ class ParameterDefinition:
             Fill function:
 
               * ``DATA`` - Assign specified values ``CON1``, ``CON2``, etc. to successive array elements. Up
-              to 10 assignments may be made at a time. Any CON values after a blank CON value are ignored.
+                to 10 assignments may be made at a time. Any CON values after a blank CON value are ignored.
 
               * ``RAMP`` - Assign ramp function values: ``CON1`` +((n-1)* ``CON2`` ), where n is the loop number
-              ( :ref:`vlen` ). To specify a constant function (no ramp), set ``CON2`` to zero.
+                ( :ref:`vlen` ). To specify a constant function (no ramp), set ``CON2`` to zero.
 
               * ``RAND`` - Assign random number values based on a uniform distribution RAND( ``CON1``, ``CON2``
-              ), where:
+                ), where:
 
               ``CON1`` is the lower bound (defaults to 0.0) ``CON2`` is the upper bound (defaults to 1.0)
 
@@ -1142,44 +1142,45 @@ class ParameterDefinition:
               ``CON1`` is the mean (defaults to 0.0) ``CON2`` is the standard deviation (defaults to 1.0)
 
               * ``TRIA`` - Assigns random number values based on a triangular distribution TRIA( ``CON1``,
-              ``CON2``, ``CON3`` ) where:
+                ``CON2``, ``CON3`` ) where:
 
               ``CON1`` is the lower bound (defaults to 0.0) ``CON2`` is the location of the peak value (
-              ``CON1`` ≤ ``CON2`` ≤ ``CON3`` ; ``CON2`` defaults to 0 if ``CON1`` ≤ 0 ≤ ``CON3``, ``CON1`` if 0
-              ≤ ``CON1``, or ``CON3`` if ``CON3`` ≤ 0) ``CON3`` is the upper bound (defaults to 1.0 + ``CON1``
-              if ``CON1`` ≥ 0 or 0.0 if ``CON1`` ≤ 0)
+                ``CON1`` ≤ ``CON2`` ≤ ``CON3`` ; ``CON2`` defaults to 0 if ``CON1`` ≤ 0 ≤ ``CON3``, ``CON1`` if
+                0 ≤ ``CON1``, or ``CON3`` if ``CON3`` ≤ 0) ``CON3`` is the upper bound (defaults to 1.0 +
+                ``CON1`` if ``CON1`` ≥ 0 or 0.0 if ``CON1`` ≤ 0)
 
               * ``BETA`` - Assigns random number values based on a beta distribution BETA( ``CON1``, ``CON2``,
-              ``CON3``, ``CON4`` ) where:
+                ``CON3``, ``CON4`` ) where:
 
               ``CON1`` is the lower bound (defaults to 0.0) ``CON2`` is the upper bound (defaults to 1.0 +
-              ``CON1`` if ``CON1`` ≥ 0 or 0.0 if ``CON1`` ≤ 0) ``CON3`` and ``CON4`` are the alpha and beta
-              parameters, respectively, of the beta function. Alpha and beta must both be positive; they default
-              to 1.0.
+                ``CON1`` if ``CON1`` ≥ 0 or 0.0 if ``CON1`` ≤ 0) ``CON3`` and ``CON4`` are the alpha and beta
+                parameters, respectively, of the beta function. Alpha and beta must both be positive; they
+                default to 1.0.
 
               * ``GAMM`` - Assigns random number values based on a gamma distribution: GAMM( ``CON1``, ``CON2``
          , ``CON3`` ) where:
 
               ``CON1`` is the lower bound (defaults to 0.0) ``CON2`` and ``CON3`` are the alpha and beta
-              parameters, respectively, of the gamma function. Alpha and beta must both be positive; they
-              default to 1.0.
+                parameters, respectively, of the gamma function. Alpha and beta must both be positive; they
+                default to 1.0.
 
               * ``RIGID`` - Generates the rigid body modes with respect to the reference point coordinates (
-              ``CON1``, ``CON2``, ``CON3`` ). The dimensions of the array parameter ``ParR`` are (dim 1 ,dim 2
-              ) where dim 1 is the maximum node number (including internal nodes but excluding orientation nodes
-              ) multiplied by the number of degrees of freedom, and dim 2 is the number of rigid body modes
-              (which corresponds to the number of structural degrees of freedom).
+                ``CON1``, ``CON2``, ``CON3`` ). The dimensions of the array parameter ``ParR`` are (dim 1 ,dim
+                2 ) where dim 1 is the maximum node number (including internal nodes but excluding orientation
+                nodes ) multiplied by the number of degrees of freedom, and dim 2 is the number of rigid body
+                modes (which corresponds to the number of structural degrees of freedom).
 
               * ``CLUSTER`` - Generates excitation frequencies with clustering option CLUSTER( ``CON1``,
-              ``CON2``, ``CON3``, ``CON4``, ``%CON5%`` ) where:
+                ``CON2``, ``CON3``, ``CON4``, ``%CON5%`` ) where:
 
               ``CON1`` is the lower end of the frequency range in Hz (0 < ``CON1`` ) ``CON2`` is the upper end
-              of the frequency range in Hz ( ``CON1`` < ``CON2`` ) ``CON3`` is the number of points on each side
-              of the natural frequency (4 ≤ ``CON3`` ≤ 20, defaults to 4) ``CON4`` is the constant damping ratio
-              value or an array parameter (size NFR) specifying the damping ratios (if zero or blank, defaults
-              to constant damping ratio of 0.005) ``CON5`` is an array parameter (size NFR) specifying the
-              natural frequencies in Hz The dimension of the resulting array parameter ParR is less than
-              2+NFR\2(2*  ``CON3`` +1) where NFR is the number of natural frequencies defined in ``CON5``.
+                of the frequency range in Hz ( ``CON1`` < ``CON2`` ) ``CON3`` is the number of points on each
+                side of the natural frequency (4 ≤ ``CON3`` ≤ 20, defaults to 4) ``CON4`` is the constant
+                damping ratio value or an array parameter (size NFR) specifying the damping ratios (if zero or
+                blank, defaults to constant damping ratio of 0.005) ``CON5`` is an array parameter (size NFR)
+                specifying the natural frequencies in Hz The dimension of the resulting array parameter ParR is
+                less than 2+NFR\2(2*  ``CON3`` +1) where NFR is the number of natural frequencies defined in
+                ``CON5``.
 
         con1 : str
             Constants used with above functions.
@@ -1218,7 +1219,7 @@ class ParameterDefinition:
 
         where the functions (f) are described above. Operations use successive array elements ( :ref:`vlen`
         , :ref:`vmask` ) with the default being all successive elements. For example, :ref:`vfill`
-        ,A,RAMP,1,10 assigns A(1) = 1.0, A(2) = 11.0, A(3) = 21.0, etc. :ref:`vfill`,B(5,1),DATA,1.5,3.0
+        ,A,RAMP,1,10 assigns A(1) = 1.0, A(2) = 11.0, A(3) = 21.0, etc. :ref:`vfill` ,B(5,1),DATA,1.5,3.0
         assigns B(5,1) = 1.5 and B(6,1) = 3.0. Absolute values and scale factors may be applied to the
         result parameter ( :ref:`vabs`, :ref:`vfact` ). Results may be cumulative ( :ref:`vcum` ). See the
         :ref:`voper` command for details.
@@ -1278,30 +1279,30 @@ class ParameterDefinition:
             Array type:
 
               * ``ARRAY`` - Arrays are similar to standard FORTRAN arrays (indices are integers) (default).
-              Index numbers for the rows, columns, and planes are sequential values beginning with one. Used for
-              1-, 2-, or 3D arrays.
+                Index numbers for the rows, columns, and planes are sequential values beginning with one. Used
+                for 1-, 2-, or 3D arrays.
 
               * ``ARR4`` - Same as ARRAY, but used to specify 4-D arrays.
 
               * ``ARR5`` - Same as ARRAY, but used to specify 5-D arrays.
 
               * ``CHAR`` - Array entries are character strings (up to 8 characters each). Index numbers for
-              rows, columns, and planes are sequential values beginning with one.
+                rows, columns, and planes are sequential values beginning with one.
 
               * ``TABLE`` - Array indices are real (non-integer) numbers which must be defined when filling the
-              table. Index numbers for the rows and columns are stored in the zero column and row "array
-              elements" and are initially assigned a near-zero value. Index numbers must be in ascending order
-              and are used only for retrieving an array element. When retrieving an array element with a real
-              index that does not match a specified index, linear interpolation is done among the nearest
-              indices and the corresponding array element values ( :ref:`starset` ). Used for 1-, 2-, or 3D
-              tables.
+                table. Index numbers for the rows and columns are stored in the zero column and row "array
+                elements" and are initially assigned a near-zero value. Index numbers must be in ascending order
+                and are used only for retrieving an array element. When retrieving an array element with a real
+                index that does not match a specified index, linear interpolation is done among the nearest
+                indices and the corresponding array element values ( :ref:`starset` ). Used for 1-, 2-, or 3D
+                tables.
 
               * ``TAB4`` - Same as TABLE, but used to specify 4-D tables.
 
               * ``TAB5`` - Same as TABLE, but used to specify 5-D tables.
 
               * ``STRING`` - Array entries are character strings (up to IMAX each). Index numbers for columns
-              and planes are sequential values beginning with 1. Row index is character position in string.
+                and planes are sequential values beginning with 1. Row index is character position in string.
 
         imax : str
             Extent of first dimension (row). (For ``Type`` = STRING, ``IMAX`` is rounded up to the next

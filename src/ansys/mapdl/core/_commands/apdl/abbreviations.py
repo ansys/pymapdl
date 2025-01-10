@@ -96,7 +96,7 @@ class Abbreviations:
               * ``NEW`` - Replace current abbreviation set with these abbreviations (default).
 
               * ``CHANGE`` - Extend current abbreviation set with these abbreviations, replacing any of the same
-              name that already exist.
+                name that already exist.
 
         fname : str
             File name and directory path (248 characters maximum, including the characters needed for the
@@ -132,11 +132,11 @@ class Abbreviations:
 
         string : str
             String of characters (60 maximum) represented by ``Abbr``. Cannot include a $ or any of the
-            commands ``C***``, :ref:`com`, :ref:`gopr`, :ref:`nopr`, :ref:`quit`, :ref:`ui`, or
-            :ref:`end`. Parameter names and commands of the ``\*DO`` and Use the ``\*IF`` groups may not be
-            abbreviated. If ``String`` is blank, the abbreviation is deleted. To abbreviate multiple
-            commands, create an "unknown command" macro or define ``String`` to execute a macro file (
-            :ref:`use` ) containing the desired commands.
+            commands ``C***``, :ref:`com`, :ref:`gopr`, :ref:`nopr`, :ref:`quit`, :ref:`ui`, or :ref:`end`.
+            Parameter names and commands of the ``\*DO`` and Use the ``\*IF`` groups may not be abbreviated.
+            If ``String`` is blank, the abbreviation is deleted. To abbreviate multiple commands, create an
+            "unknown command" macro or define ``String`` to execute a macro file ( :ref:`use` ) containing
+            the desired commands.
 
         Notes
         -----

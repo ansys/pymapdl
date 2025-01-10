@@ -39,7 +39,7 @@ class ArrayParameters:
               * ``COPY`` - ``Par1`` is copied to ``ParR``
 
               * ``TRAN`` - ``Par1`` is transposed to ``ParR``. Rows (m) and columns (n) of ``Par1`` matrix are
-              transposed to resulting ``ParR`` matrix of shape (n,m).
+                transposed to resulting ``ParR`` matrix of shape (n,m).
 
         par1 : str
             Array parameter matrix input to the operation.
@@ -189,119 +189,119 @@ class ArrayParameters:
               * ``INVERT`` - ( :ref:`moper`, ``ParR``, ``Par1``, INVERT)
 
               Square matrix invert: Inverts the n x n matrix in Par1 into ParR . The matrix must be well
-              conditioned.
+                conditioned.
 
               Non-independent or ill-conditioned equations can cause erroneous results.
 
               For large matrices, use the APDL Math operation :ref:`lsfactor` for efficiency (see `APDL Math
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdlmathex.html>`_
+                <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdlmathex.html>`_
 
               * ``MULT`` - ( :ref:`moper`, ``ParR``, ``Par1``, MULT, ``Par2`` )
 
               Matrix multiply: Multiplies ``Par1`` by ``Par2``. The number of rows of ``Par2`` must equal the
-              number of columns of ``Par1`` for the operation. If ``Par2`` is input with a number of rows
-              greater than the number of columns of ``Par1``, matrices are still multiplied. However, the
-              operation only uses a number of rows of ``Par2`` equal to the number of columns of ``Par1``.
+                number of columns of ``Par1`` for the operation. If ``Par2`` is input with a number of rows
+                greater than the number of columns of ``Par1``, matrices are still multiplied. However, the
+                operation only uses a number of rows of ``Par2`` equal to the number of columns of ``Par1``.
 
               * ``COVAR`` - ( :ref:`moper`, ``ParR``, ``Par1``, COVAR, ``Par2`` )
 
               Covariance: The measure of association between columns of the ``Par1`` input matrix. ``Par1`` of
-              size m runs (rows) by n data (columns) is first processed to produce a row vector containing the
-              mean of each column, which is transposed to the output column vector ``Par2`` of n array elements.
-              The ``Par1`` and ``Par2`` operation then produces ``ParR``, a resulting n x n matrix of
-              covariances (with the variances as the diagonal terms).
+                size m runs (rows) by n data (columns) is first processed to produce a row vector containing the
+                mean of each column, which is transposed to the output column vector ``Par2`` of n array
+                elements. The ``Par1`` and ``Par2`` operation then produces ``ParR``, a resulting n x n matrix
+                of covariances (with the variances as the diagonal terms).
 
               * ``CORR`` - ( :ref:`moper`, ``ParR``, ``Par1``, CORR, ``Par2`` )
 
               Correlation: The correlation coefficient between columns of the ``Par1`` input matrix. ``Par1`` of
-              size m runs (rows) by n data (columns) is first processed to produce a row vector containing the
-              mean of each column, which is then transposed to the output column vector ``Par2`` of n array
-              elements. The ``Par1`` and ``Par2`` operation then produces ``ParR``, a resulting n x n matrix of
-              correlation coefficients (with a value of 1.0 for the diagonal terms).
+                size m runs (rows) by n data (columns) is first processed to produce a row vector containing the
+                mean of each column, which is then transposed to the output column vector ``Par2`` of n array
+                elements. The ``Par1`` and ``Par2`` operation then produces ``ParR``, a resulting n x n matrix
+                of correlation coefficients (with a value of 1.0 for the diagonal terms).
 
               * ``SOLV`` - ( :ref:`moper`, ``ParR``, ``Par1``, SOLV, ``Par2`` )
 
               Solution of simultaneous equations: Solves the set of ``n`` equations of ``n`` terms of the form a
-              n1 x 1 + a n2 x 2 + :sup:`...` + a nn x n = b n where ``Par1`` contains the matrix of
-              a-coefficients, ``Par2`` contains the vector(s) of b-values, and ``ParR`` contains the vector(s)
-              of x-results. ``Par1`` must be a square matrix. The equations must be linear, independent, and
-              well conditioned.
+                n1 x 1 + a n2 x 2 + :sup:`...` + a nn x n = b n where ``Par1`` contains the matrix of
+                a-coefficients, ``Par2`` contains the vector(s) of b-values, and ``ParR`` contains the vector(s)
+                of x-results. ``Par1`` must be a square matrix. The equations must be linear, independent, and
+                well conditioned.
 
               Non-independent or ill-conditioned equations can cause erroneous results.
 
               For large matrices, use the APDL Math operation :ref:`lsfactor` for efficiency (see `APDL Math
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdlmathex.html>`_
+                <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdlmathex.html>`_
 
               * ``SORT`` - ( :ref:`moper`, ``ParR``, ``Par1``, SORT, ``Par2``, ``n1``, ``n2``, ``n3`` )
 
               Matrix sort: Sorts the columns of matrix ``Par1`` according to sort vector ``Par2`` and places the
-              result back into ``Par1``. Rows of ``Par1`` are moved to the corresponding positions indicated by
-              the values of ``Par2``. ``Par2`` may be a column of ``Par1`` (in which case it will also be
-              reordered). Alternatively, you may specify the column of ``Par1`` to sort using ``n1`` (leaving
-              ``Par2`` blank). A secondary sort can be specified by column ``n2``, and a third sort using
-              column ``n3``. ``ParR`` is the vector of initial row positions (the permutation vector). Sorting
-              ``Par1`` according to ``ParR`` should reproduce the initial ordering.
+                result back into ``Par1``. Rows of ``Par1`` are moved to the corresponding positions indicated
+                by the values of ``Par2``. ``Par2`` may be a column of ``Par1`` (in which case it will also be
+                reordered). Alternatively, you may specify the column of ``Par1`` to sort using ``n1`` (leaving
+                ``Par2`` blank). A secondary sort can be specified by column ``n2``, and a third sort using
+                column ``n3``. ``ParR`` is the vector of initial row positions (the permutation vector).
+                Sorting ``Par1`` according to ``ParR`` should reproduce the initial ordering.
 
               * ``NNEAR`` - ( :ref:`moper`, ``ParR``, ``Par1``, NNEAR, ``Toler`` )
 
               Nearest Node: Finds the nodes nearest to the given set of points in ``Par1``, where ``Par1`` is
-              an n x 3 array of coordinate locations. ``ParR`` is a vector of the nearest selected nodes, or 0
-              if no nodes are nearer than ``Toler``. ``Toler`` defaults to 1 and is limited to the maximum
-              model size.
+                an n x 3 array of coordinate locations. ``ParR`` is a vector of the nearest selected nodes, or 0
+                if no nodes are nearer than ``Toler``. ``Toler`` defaults to 1 and is limited to the maximum
+                model size.
 
               * ``ENEAR`` - ( :ref:`moper`, ``ParR``, ``Par1``, ENEAR, ``Toler`` )
 
               Nearest Element: Finds the elements nearest to the given set of points in ``Par1``, where
-              ``Par1`` is an n x 3 array of coordinate locations. ``ParR`` is a vector of the nearest selected
-              elements, or 0 if no element centroids are nearer than ``Toler``. ``Toler`` defaults to 1 and is
-              limited to the maximum model size.
+                ``Par1`` is an n x 3 array of coordinate locations. ``ParR`` is a vector of the nearest selected
+                elements, or 0 if no element centroids are nearer than ``Toler``. ``Toler`` defaults to 1 and
+                is limited to the maximum model size.
 
               * ``MAP`` - ( :ref:`moper`, ``ParR``, ``Par1``, MAP, ``Par2``, ``Par3``, ``kDim``, ``--``,
-              ``kOut``, ``LIMIT`` )
+                ``kOut``, ``LIMIT`` )
 
               Maps the results from one set of points to another. For example, you can map pressures from a CFD
-              analysis onto your model for a structural analysis.
+                analysis onto your model for a structural analysis.
 
               ``Par1`` is the Nout x 3 array of points that will be mapped to. ``Par2`` is the Nin x M array
-              that contains M values of data to be interpolated at each point and corresponds to the Nin x 3
-              points in ``Par3``. The resulting ``ParR`` is the Nout x M array of mapped data points.
+                that contains M values of data to be interpolated at each point and corresponds to the Nin x 3
+                points in ``Par3``. The resulting ``ParR`` is the Nout x M array of mapped data points.
 
               For each point in the destination mesh, all possible triangles in the source mesh are searched to
-              find the best triangle containing each point. It then does a linear interpolation inside this
-              triangle. You should carefully specify your interpolation method and search criteria in order to
-              provide faster and more accurate results (see ``LIMIT``, below).
+                find the best triangle containing each point. It then does a linear interpolation inside this
+                triangle. You should carefully specify your interpolation method and search criteria in order to
+                provide faster and more accurate results (see ``LIMIT``, below).
 
               ``kDim`` is the interpolation criteria. If ``kDim`` = 2 or 0, two dimensional interpolation is
-              applied (interpolate on a surface). If ``kDim`` = 3, three dimensional interpolation is applied
-              (interpolate on a volume).
+                applied (interpolate on a surface). If ``kDim`` = 3, three dimensional interpolation is applied
+                (interpolate on a volume).
 
               ``kOut`` specified how points outside of the domain are handled. If ``kOut`` = 0, use the value(s)
-              of the nearest region point for points outside of the region. If ``kOut`` = 1, set results outside
-              of the region to zero.
+                of the nearest region point for points outside of the region. If ``kOut`` = 1, set results
+                outside of the region to zero.
 
               ``LIMIT`` specifies the number of nearby points considered for interpolation. The default is 20,
-              and the minimum is 5. Lower values will reduce processing time; however, some distorted or
-              irregular sets of points will require a higher ``LIMIT`` value to encounter three nodes for
-              triangulation.
+                and the minimum is 5. Lower values will reduce processing time; however, some distorted or
+                irregular sets of points will require a higher ``LIMIT`` value to encounter three nodes for
+                triangulation.
 
               Output points are incorrect if they are not within the domain (area or volume) defined by the
-              specified input points. Also, calculations for out-of-bound points require much more processing
-              time than do points that are within bounds. Results mapping is available from the command line
-              only.
+                specified input points. Also, calculations for out-of-bound points require much more processing
+                time than do points that are within bounds. Results mapping is available from the command line
+                only.
 
               * ``INTP`` - ( :ref:`moper`, ``ParR``, ``Par1``, INTP, ``Par2`` )
 
               Finds the elements that contain each point in the array of n x 3 points in ``Par1``. ``Par2``
-              will contain the set of element ID numbers and ``ParR`` will contain their n x 3 set of natural
-              element coordinates (values between -1 and 1). ``Par1`` must be in global Cartesian coordinates.
+                will contain the set of element ID numbers and ``ParR`` will contain their n x 3 set of natural
+                element coordinates (values between -1 and 1). ``Par1`` must be in global Cartesian coordinates.
 
               * ``SGET`` - ( :ref:`moper`, ``ParR``, ``Par1``, SGET, ``Par2``, ``Label``, ``Comp`` )
 
               Gets the nodal solution item corresponding to ``Label`` and ``Comp`` (see the :ref:`plnsol`
-              command) and interpolates it to the given element locations. ``Par1`` contains the n x 3 array of
-              natural element coordinates (values between -1 and 1) of the n element ID numbers in ``Par2``.
-              ``Par1`` and ``Par2`` are usually the output of the :ref:`moper`,,,INTP operation. ``ParR``
-              contains the n interpolated results.
+                command) and interpolates it to the given element locations. ``Par1`` contains the n x 3 array
+                of natural element coordinates (values between -1 and 1) of the n element ID numbers in ``Par2``
+                . ``Par1`` and ``Par2`` are usually the output of the :ref:`moper`,,,INTP operation. ``ParR``
+                contains the n interpolated results.
 
         val1 : str
             Additional input used in the operation. The meanings of ``Val1`` through ``Val6`` vary depending
@@ -330,7 +330,7 @@ class ArrayParameters:
         Notes
         -----
         Each starting array element number must be defined for each array parameter matrix if it does not
-        start at the first location. For example, :ref:`moper`,A(2,3),B(1,4),MULT,C(1,5) multiplies
+        start at the first location. For example, :ref:`moper` ,A(2,3),B(1,4),MULT,C(1,5) multiplies
         submatrix B (starting at element (1,4)) by submatrix C (starting at element (1,5)) and puts the
         result in matrix A (starting at element (2,3)).
 
@@ -369,10 +369,10 @@ class ArrayParameters:
             Type of Fourier operation:
 
               * ``FIT`` - Calculate Fourier coefficients ``COEFF`` from ``MODE``, ``ISYM``, ``THETA``, and
-              ``CURVE``.
+                ``CURVE``.
 
               * ``EVAL`` - Evaluate the Fourier curve ``CURVE`` from ``COEFF``, ``MODE``, ``ISYM`` and
-              ``THETA``
+                ``THETA``
 
         coeff : str
             Name of the array parameter vector containing the Fourier coefficients (calculated if ``Oper`` =
@@ -696,21 +696,21 @@ class ArrayParameters:
               * ``MIN`` - Minimum: the minimum ``Par1`` array element value.
 
               * ``LMAX`` - Index location of the maximum ``Par1`` array element value. Array ``Par1`` is
-              searched starting from its specified index.
+                searched starting from its specified index.
 
               * ``LMIN`` - Index location of the minimum ``Par1`` array element value. Array ``Par1`` is
-              searched starting from its specified index.
+                searched starting from its specified index.
 
               * ``FIRST`` - Index location of the first nonzero value in array ``Par1``. Array ``Par1`` is
-              searched starting from its specified index.
+                searched starting from its specified index.
 
               * ``LAST`` - Index location of the last nonzero value in array ``Par1``. Array ``Par1`` is
-              searched starting from its specified index.
+                searched starting from its specified index.
 
               * ``SUM`` - Sum: ``Par1`` (the summation of the ``Par1`` array element values).
 
               * ``MEDI`` - Median: value of ``Par1`` at which there are an equal number of values above and
-              below.
+                below.
 
               * ``MEAN`` - Mean: (σ Par1)/NUM, where NUM is the number of summed values.
 
@@ -798,67 +798,67 @@ class ArrayParameters:
               * ``LT`` - Less than comparison: ``Par1`` < ``Par2`` gives 1.0 if true, 0.0 if false.
 
               * ``LE`` - Less than or equal comparison: ``Par1``  :math:``  ``Par2`` gives 1.0 if true, 0.0 if
-              false.
+                false.
 
               * ``EQ`` - Equal comparison: ``Par1`` = ``Par2`` gives 1.0 if true, 0.0 if false.
 
               * ``NE`` - Not equal comparison: ``Par1`` ≠ ``Par2`` gives 1.0 if true, 0.0 if false.
 
               * ``GE`` - Greater than or equal comparison: ``Par1``  :math:`` Par2 gives 1.0 if true, 0.0 if
-              false.
+                false.
 
               * ``GT`` - Greater than comparison: ``Par1`` > ``Par2`` gives 1.0 if true, 0.0 if false.
 
               * ``DER1`` - First derivative: d( ``Par1`` )/d( ``Par2`` ). The derivative at a point is
-              determined over points half way between the previous and next points (by linear interpolation).
-              ``Par1`` must be a function (a unique ``Par1`` value for each ``Par2`` value) and ``Par2`` must be
-              in ascending order.
+                determined over points half way between the previous and next points (by linear interpolation).
+                ``Par1`` must be a function (a unique ``Par1`` value for each ``Par2`` value) and ``Par2`` must
+                be in ascending order.
 
               * ``DER2`` - Second derivative: d :sup:`2` ( ``Par1`` )/d( ``Par2`` ) :sup:`2`. See also DER1.
 
               * ``INT1`` - Single integral:  ``Par1`` d( ``Par2`` ), where ``CON1`` is the integration constant.
-              The integral at a point is determined by using the single integration procedure described in the
-              `Theory Reference <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_biblio.html>`_  Mechanical APDL Theory Reference.
+                The integral at a point is determined by using the single integration procedure described in the
+                `Theory Reference <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_biblio.html>`_  Mechanical APDL Theory Reference.
 
               * ``INT2`` - Double integral:   ``Par1`` d( ``Par2`` ), where ``CON1`` is the integration constant
-              of the first integral and ``CON2`` is the integration constant of the second integral. If ``Par1``
-              contains acceleration data, ``CON1`` is the initial velocity and ``CON2`` is the initial
-              displacement. See also INT1.
+                of the first integral and ``CON2`` is the integration constant of the second integral. If
+                ``Par1`` contains acceleration data, ``CON1`` is the initial velocity and ``CON2`` is the
+                initial displacement. See also INT1.
 
               * ``DOT`` - Dot product: ``Par1``. ``Par2``. ``Par1`` and ``Par2`` must each have three
-              consecutive columns of data, with the columns containing the i, j, and k vector components,
-              respectively. Only the starting row index and the column index for the i components are specified
-              for ``Par1`` and ``Par2``, such as A(1,1). The j and k components of the vector are assumed to
-              begin in the corresponding next columns, such as A(1,2) and A(1,3).
+                consecutive columns of data, with the columns containing the i, j, and k vector components,
+                respectively. Only the starting row index and the column index for the i components are
+                specified for ``Par1`` and ``Par2``, such as A(1,1). The j and k components of the vector are
+                assumed to begin in the corresponding next columns, such as A(1,2) and A(1,3).
 
               * ``CROSS`` - Cross product: ``Par1`` x ``Par2``. ``Par1``, ``Par2``, and ``ParR`` must each
-              have 3 components, respectively. Only the starting row index and the column index for the i
-              components are specified for ``Par1``, ``Par2``, and ``ParR``, such as A(1,1). The j and k
-              components of the vector are assumed to begin in the corresponding next columns, such as A(1,2)
-              and A(1,3).
+                have 3 components, respectively. Only the starting row index and the column index for the i
+                components are specified for ``Par1``, ``Par2``, and ``ParR``, such as A(1,1). The j and k
+                components of the vector are assumed to begin in the corresponding next columns, such as A(1,2)
+                and A(1,3).
 
               * ``GATH`` - Gather: For a vector of position numbers, ``Par2``, copy the value of ``Par1`` at
-              each position number to ``ParR``. Example: for ``Par1`` = 10,20,30,40 and ``Par2`` = 2,4,1;
-              ``ParR`` = 20,40,10.
+                each position number to ``ParR``. Example: for ``Par1`` = 10,20,30,40 and ``Par2`` = 2,4,1;
+                ``ParR`` = 20,40,10.
 
               * ``SCAT`` - Scatter: Opposite of GATH operation. For a vector of position numbers, ``Par2``,
-              copy the value of ``Par1`` to that position number in ``ParR``. Example: for ``Par1`` =
-              10,20,30,40,50 and ``Par2`` = 2,1,0,5,3; ``ParR`` = 20,10,50,0,40.
+                copy the value of ``Par1`` to that position number in ``ParR``. Example: for ``Par1`` =
+                10,20,30,40,50 and ``Par2`` = 2,1,0,5,3; ``ParR`` = 20,10,50,0,40.
 
               * ``ATN2`` - Arctangent: arctangent of ``Par1`` / ``Par2`` with the sign of each component
-              considered.
+                considered.
 
               * ``LOCAL`` - Transform the data in ``Par1`` from the global Cartesian coordinate system to the
-              local coordinate system given in ``CON1``. ``Par1`` must be an N x 3 (that is, vector) or an N x
-              6 (that is, stress or strain tensor) array. If the local coordinate system is a cylindrical,
-              spherical, or toroidal system, then you must provide the global Cartesian coordinates in ``Par2``
-              as an N x 3 array. Set ``CON2`` = 1 if the data is strain data.
+                local coordinate system given in ``CON1``. ``Par1`` must be an N x 3 (that is, vector) or an N
+                x 6 (that is, stress or strain tensor) array. If the local coordinate system is a cylindrical,
+                spherical, or toroidal system, then you must provide the global Cartesian coordinates in
+                ``Par2`` as an N x 3 array. Set ``CON2`` = 1 if the data is strain data.
 
               * ``GLOBAL`` - Transform the data in ``Par1`` from the local coordinate system given in ``CON1``
-              to the global Cartesian coordinate system. ``Par1`` must be an N x 3 (that is, vector) or an N x 6
-              (that is, stress or strain tensor) array. If the local coordinate system is a cylindrical,
-              spherical, or toroidal system, then you must provide the global Cartesian coordinates in ``Par2``
-              as an N x 3   array. Set ``CON2`` = 1 if the data is strain data.
+                to the global Cartesian coordinate system. ``Par1`` must be an N x 3 (that is, vector) or an N x
+                6 (that is, stress or strain tensor) array. If the local coordinate system is a cylindrical,
+                spherical, or toroidal system, then you must provide the global Cartesian coordinates in
+                ``Par2`` as an N x 3   array. Set ``CON2`` = 1 if the data is strain data.
 
         par2 : str
             Second array parameter vector in the operation. May also be a scalar parameter or a literal
@@ -881,7 +881,7 @@ class ArrayParameters:
         Results can be cumulative ( :ref:`vcum` ).
 
         Starting array element numbers must be defined for each array parameter vector if it does not start
-        at the first location, such as :ref:`voper`,A,B(5),ADD,C(3) which adds the third element of C to
+        at the first location, such as :ref:`voper` ,A,B(5),ADD,C(3) which adds the third element of C to
         the fifth element of B and stores the result in the first element of A.
 
         Operations continue on successive array elements ( :ref:`vlen`, :ref:`vmask` ) with the default
@@ -1519,13 +1519,13 @@ class ArrayParameters:
               * ``ASIN`` - Arcsine: ASIN( ``Par1`` ).
 
               * ``ASORT`` - Par1 is sorted in ascending order. :ref:`vcol`, :ref:`vmask`, :ref:`vcum`, and
-              :ref:`vlen`,,NINC do not apply. :ref:`vlen`,NROW does apply.
+                :ref:`vlen`,,NINC do not apply. :ref:`vlen`,NROW does apply.
 
               * ``ATAN`` - Arctangent: ATAN( ``Par1`` ).
 
               * ``COMP`` - Compress: Selectively compresses data set. "True" ( :ref:`vmask` ) values of ``Par1``
-              (or row positions to be considered according to the ``NINC`` value on the :ref:`vlen` command) are
-              written in compressed form to ``ParR``, starting at the specified position.
+                (or row positions to be considered according to the ``NINC`` value on the :ref:`vlen` command)
+                are written in compressed form to ``ParR``, starting at the specified position.
 
               * ``COPY`` - Copy: ``Par1`` copied to ``ParR``.
 
@@ -1534,20 +1534,20 @@ class ArrayParameters:
               * ``COSH`` - Hyperbolic cosine: COSH( ``Par1`` ).
 
               * ``DIRCOS`` - Direction cosines of the principal stresses ( ``n`` X9). ``Par1`` contains the
-              ``n`` X6 component stresses for the ``n`` locations of the calculations.
+                ``n`` X6 component stresses for the ``n`` locations of the calculations.
 
               * ``DSORT`` - ``Par1`` is sorted in descending order. :ref:`vcol`, :ref:`vmask`, :ref:`vcum`,
-              and :ref:`vlen`,,NINC do not apply. :ref:`vlen`,NROW does apply.
+                and :ref:`vlen`,,NINC do not apply. :ref:`vlen`,NROW does apply.
 
               * ``EULER`` - Euler angles of the principal stresses ( ``n`` X3). ``Par1`` contains the ``n`` X6
-              component stresses for the ``n`` locations of the calculations.
+                component stresses for the ``n`` locations of the calculations.
 
               * ``EXP`` - Exponential: EXP( ``Par1`` ).
 
               * ``EXPA`` - Expand: Reverse of the COMP function. All elements of ``Par1`` (starting at the
-              position specified) are written in expanded form to corresponding "true" ( :ref:`vmask` )
-              positions (or row positions to be considered according to the ``NINC`` value on the :ref:`vlen`
-              command) of ``ParR``.
+                position specified) are written in expanded form to corresponding "true" ( :ref:`vmask` )
+                positions (or row positions to be considered according to the ``NINC`` value on the :ref:`vlen`
+                command) of ``ParR``.
 
               * ``LOG`` - Natural logarithm: LOG( ``Par1`` ).
 
@@ -1556,14 +1556,14 @@ class ArrayParameters:
               * ``NINT`` - Nearest integer: 2.783 becomes 3.0, -1.75 becomes -2.0.
 
               * ``NOT`` - Logical complement: values :math:``  0.0 (false) become 1.0 (true).  Values > 0.0
-              (true) become0.0 (false).
+                (true) become0.0 (false).
 
               * ``PRIN`` - Principal stresses ( ``n`` X5). ``Par1`` contains the ``n`` X6 component stresses for
-              the ``n`` locations of the calculations.
+                the ``n`` locations of the calculations.
 
               * ``PWR`` - Power function: ``Par1`` ** ``CON1``. Exponentiation of any negative number in the
-              vector ``Par1`` to a non-integer power is performed by exponentiating the positive number and
-              prepending the minus sign. For example, -4**2.3 is -(4**2.3).
+                vector ``Par1`` to a non-integer power is performed by exponentiating the positive number and
+                prepending the minus sign. For example, -4**2.3 is -(4**2.3).
 
               * ``SIN`` - Sine: SIN( ``Par1`` ).
 
@@ -1576,46 +1576,46 @@ class ArrayParameters:
               * ``TANH`` - Hyperbolic tangent: TANH( ``Par1`` ).
 
               * ``TANG`` - Tangent to a path at a point: the slope at a point is determined by linear
-              interpolation half way between the previous and next points. Points are assumed to be in the
-              global Cartesian coordinate system. Path points are specified in array ``Par1`` (having 3
-              consecutive columns of data, with the columns containing the x, y, and z coordinate locations,
-              respectively, of the points). Only the starting row index and the column index for the x
-              coordinates are specified, such as A(1,1). The y and z coordinates of the vector are assumed to
-              begin in the corresponding next columns, such as A(1,2) and A(1,3). The tangent result, ``ParR``,
-              must also have 3 consecutive columns of data and will contain the tangent direction vector
-              (normalized to 1.0); such as 1,0,0 for an x-direction vector.
+                interpolation half way between the previous and next points. Points are assumed to be in the
+                global Cartesian coordinate system. Path points are specified in array ``Par1`` (having 3
+                consecutive columns of data, with the columns containing the x, y, and z coordinate locations,
+                respectively, of the points). Only the starting row index and the column index for the x
+                coordinates are specified, such as A(1,1). The y and z coordinates of the vector are assumed to
+                begin in the corresponding next columns, such as A(1,2) and A(1,3). The tangent result, ``ParR``
+               , must also have 3 consecutive columns of data and will contain the tangent direction vector
+                (normalized to 1.0); such as 1,0,0 for an x-direction vector.
 
               * ``NORM`` - Normal to a path and an input vector at a point: determined from the cross-product of
-              the calculated tangent vector (see TANG) and the input direction vector (with the i, j, and k
-              components input as ``CON1``, ``CON2``, and ``CON3`` ). Points are assumed to be in the global
-              Cartesian coordinate system. Path points are specified in array ``Par1`` (having 3 consecutive
-              columns of data, with the columns containing the x, y, and z coordinate locations, respectively,
-              of the points). Only the starting row index and the column index for the x coordinates are
-              specified, such as A(1,1). The y and z coordinates of the vector are assumed to begin in the
-              corresponding next columns, such as A(1,2) and A(1,3). The normal result, ``ParR``, must also
-              have 3 consecutive columns of data and will contain the normal direction vector (normalized to
-              1.0); such as 1,0,0 for an x-direction vector.
+                the calculated tangent vector (see TANG) and the input direction vector (with the i, j, and k
+                components input as ``CON1``, ``CON2``, and ``CON3`` ). Points are assumed to be in the global
+                Cartesian coordinate system. Path points are specified in array ``Par1`` (having 3 consecutive
+                columns of data, with the columns containing the x, y, and z coordinate locations, respectively,
+                of the points). Only the starting row index and the column index for the x coordinates are
+                specified, such as A(1,1). The y and z coordinates of the vector are assumed to begin in the
+                corresponding next columns, such as A(1,2) and A(1,3). The normal result, ``ParR``, must also
+                have 3 consecutive columns of data and will contain the normal direction vector (normalized to
+                1.0); such as 1,0,0 for an x-direction vector.
 
               * ``LOCAL`` - Transforms global Cartesian coordinates of a point to the coordinates of a specified
-              system: points to be transformed are specified in array ``Par1`` (having 3 consecutive columns of
-              data, with the columns containing the x, y, and z global Cartesian coordinate locations,
-              respectively, of the points). Only the starting row index and the column index for the x
-              coordinates are specified, such as A(1,1). The y and z coordinates of the vector are assumed to
-              begin in the corresponding next columns, such as A(1,2) and A(1,3). Results are transformed to
-              coordinate system ``CON1`` (which may be any valid coordinate system number, such as 1,2,11,12,
-              etc.). The transformed result, ``ParR``, must also have 3 consecutive columns of data and will
-              contain the corresponding transformed coordinate locations.
+                system: points to be transformed are specified in array ``Par1`` (having 3 consecutive columns
+                of data, with the columns containing the x, y, and z global Cartesian coordinate locations,
+                respectively, of the points). Only the starting row index and the column index for the x
+                coordinates are specified, such as A(1,1). The y and z coordinates of the vector are assumed to
+                begin in the corresponding next columns, such as A(1,2) and A(1,3). Results are transformed to
+                coordinate system ``CON1`` (which may be any valid coordinate system number, such as 1,2,11,12,
+                etc.). The transformed result, ``ParR``, must also have 3 consecutive columns of data and will
+                contain the corresponding transformed coordinate locations.
 
               * ``GLOBAL`` - Transforms specified coordinates of a point to global Cartesian coordinates: points
-              to be transformed are specified in array ``Par1`` (having 3 consecutive columns of data, with the
-              columns containing the local coordinate locations (x, y, z or r, θ, z or etc.) of the
-              points). Only the starting row index and the column index for the x coordinates are specified,
-              such as A(1,1). The y and z coordinates (or θ and z, or etc.) of the vector are assumed to
-              begin in the corresponding next columns, such as A(1,2) and A(1,3). Local coordinate locations are
-              assumed to be in coordinate system ``CON1`` (which may be any valid coordinate system number, such
-              as 1,2,11,12, etc.). The transformed result, ``ParR``, must also have 3 consecutive columns of
-              data, with the columns containing the global Cartesian x, y, and z coordinate locations,
-              respectively.
+                to be transformed are specified in array ``Par1`` (having 3 consecutive columns of data, with
+                the columns containing the local coordinate locations (x, y, z or r, θ, z or etc.) of the
+                points). Only the starting row index and the column index for the x coordinates are specified,
+                such as A(1,1). The y and z coordinates (or θ and z, or etc.) of the vector are assumed
+                to begin in the corresponding next columns, such as A(1,2) and A(1,3). Local coordinate
+                locations are assumed to be in coordinate system ``CON1`` (which may be any valid coordinate
+                system number, such as 1,2,11,12, etc.). The transformed result, ``ParR``, must also have 3
+                consecutive columns of data, with the columns containing the global Cartesian x, y, and z
+                coordinate locations, respectively.
 
         par1 : str
             Array parameter vector in the operation.
@@ -1639,10 +1639,10 @@ class ArrayParameters:
         approximately greater than 32 or less than -32) produce a zero value. Input and output for angular
         functions may be radians (default) or degrees ( :ref:`afun` ). ``ParR`` may be the same as ``Par1``
         . Starting array element numbers must be defined for each array parameter vector if it does not
-        start at the first location. For example, :ref:`vfun`,A,SQRT,B(5) takes the square root of the
+        start at the first location. For example, :ref:`vfun` ,A,SQRT,B(5) takes the square root of the
         fifth element of B and stores the result in the first element of A. Operations continue on
         successive array elements ( :ref:`vlen`, :ref:`vmask` ) with the default being all successive
-        elements. Absolute values and scale factors may be applied to all parameters ( :ref:`vabs`,
+        elements. Absolute values and scale factors may be applied to all parameters ( :ref:`vabs` ,
         :ref:`vfact` ). Results may be cumulative ( :ref:`vcum` ). Skipping array elements via :ref:`vmask`
         or :ref:`vlen` for the TANG and NORM functions skips only the writing of the results (skipped array
         element data are used in all calculations). See the :ref:`voper` command for details.
