@@ -99,7 +99,7 @@ extensions = [
     "sphinx_design",
     "sphinx_jinja",
     "sphinx_copybutton",
-    "sphinx_gallery.gen_gallery",
+#    "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
     "ansys_sphinx_theme.extension.linkcode",

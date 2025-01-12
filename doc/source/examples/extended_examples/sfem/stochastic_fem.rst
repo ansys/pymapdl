@@ -97,3 +97,7 @@ where :math:`\sigma_E^2` is the variance, and :math:`\ell` is the correlation le
 To aid understanding, the figure below is a diagram depicting two equivalent ways of visualizing a
 stochastic process / random field, that is, as an infinite collection of random variables or as a
 realization/sample function assigned to each outcome of an experiment.
+
+.. figure:: realizations.png
+
+   A random field as a collection of random variables or realizations
