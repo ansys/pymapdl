@@ -26,15 +26,74 @@ ease of implementation, MCS can be applied to virtually any type of problem in s
 
 Random variables vs stochastic processes
 ----------------------------------------
-A distinction between random variables and stochastic processes (also called random fields) is attempted in this
-section. Explaining these concepts is important since they are used for modelling the system randomness.
-Random variables are easier to understand from elementary probability theory, the same cannot be said for stochastic
-processes. Readers are advised to consult books on SFEM if the explanation here seems to brief.
+A distinction between random variables and stochastic processes is attempted in this section. Explaining these
+concepts is important since they are used for modelling the system randomness. Random variables are easier to
+understand from elementary probability theory, the same cannot be said for stochastic processes. Readers are
+advised to consult books on SFEM if the explanation here seems too brief.
 
 Random variables
 ~~~~~~~~~~~~~~~~
-Imagine a beam with a concentrated load :math:`P` applied at a specific point on the beam. The value of :math:`P`
-is uncertain — it could vary due to manufacturing tolerances, loading conditions, or measurement errors. Mathematically,
+**Definition:** A random variable is a rule for assigning to every possible outcome :math:`\theta` of an experiment a
+number :math:`X(\theta)`. For notational convenience, the dependence on :math:`\theta` is usually dropped and the
+random variable is written as :math:`X`.
+
+Practical example
++++++++++++++++++
+Imagine a beam with a concentrated load :math:`P` applied at a specific point. The value of :math:`P`
+is uncertain—it could vary due to manufacturing tolerances, loading conditions, or measurement errors. Mathematically,
 :math:`P` is a random variable:
 
-.. math:: P : \Omega \longrightarrow \mathbb{R}
+.. math:: P : \Theta \longrightarrow \mathbb{R}
+
+where :math:`\Theta` is the sample space of all possible loading scenarios, and :math:`\mathbb{R}` represents the set of
+possible load magnitudes. For example, :math:`P` could be modeled as a random variable with a probability density
+function (PDF) such as:
+
+.. math:: f_P(p) = \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(p-\mu)^2}{2\sigma^2}},
+
+where :math:`\mu` is the mean load, and :math:`\sigma^2` is its variance.
+
+Stochastic processes
+~~~~~~~~~~~~~~~~~~~~
+**Definition:**
+recall that a random variable is defined as a rule that assigns a number :math:`X(\theta)` to every outcome :math:`\theta`
+of an experiment. However, in some applications, the experiment evolves with respect to a deterministic parameter :math:`t`,
+which belongs to an interval :math:`I`. For example, this occurs in an engineering system subjected to random dynamic loads
+over a time interval :math:`I \subseteq \mathbb{R}^+`. In such cases, the system's response at a specific material point is
+described not by a single random variable but by a collection of random variables :math:`\{X(t)\}` indexed by :math:`t \in I`. 
+This 'infinite' collection of random variables over the interval :math:`I` is called a stochastic process and is denoted as
+:math:`\{X(t), t \in I\}` or simply :math:`X`. In this way, a stochastic process generalizes the concept of a random variable,
+as it assigns to each outcome :math:`\theta` of the experiment a function :math:`X(t, \theta)`, known as a realization or sample
+function. Lastly, if :math:`X` is indexed by some spatial coordinate :math:`s \in D \subseteq \mathbb{R}^n` rather than time :math:`t`,
+then :math:`\{X(s), s \in D\}` is called a random field.
+
+Practical example
++++++++++++++++++
+Now, consider the material property of the beam, such as Young's modulus :math:`E(x)`, which may vary randomly along
+the length of the beam :math:`x`.  Instead of being a single random value, :math:`E(x)` is a random field—its value
+is uncertain at each point along the domain, and it changes continuously across the beam. Mathematically, :math:`E(x)`
+random field:
+
+.. math:: E(x) : x \in [0,L] \longrightarrow \mathbb{R}
+
+Here:
+
+* :math:`x` is the spatial coordinate along the length of the beam (:math:`x \in [0,L]`).
+* :math:`E(x)` is a random variable at each point :math:`x`, and its randomness is described
+  by a covariance function or an autocorrelation function.
+
+For example, :math:`E(x)` could be a Gaussian random field, in which case it has the stationarity
+property, making its statistics completely defined by its mean (:math:`\mu_E`), standard deviation
+(:math:`\sigma_E`) and covariance function :math:`C_E(x_1,x_2)`. This 'stationarity' simply means
+that the mean and standard deviation of every random variable :math:`E(x)` is constant and equal to
+:math:`\mu_E` and :math:`\sigma_E` respectively. :math:`C_E(x_1,x_2)` describes how random variables
+:math:`E(x_1)` and :math:`E(x_2)` are related.
+For a zero-mean Gaussian random field, the covariance function is given by:
+
+.. math:: C_E(x_1,x_2) = \sigma_E^2e^{-\frac{\lvert x_1-x_2 \rvert}{\ell}}
+
+where :math:`\sigma_E^2` is the variance, and :math:`\ell` is the correlation length parameter.
+
+To aid understanding, the figure below is a diagram depicting two equivalent ways of visualizing a
+stochastic process / random field, that is, as an infinite collection of random variables or as a
+realization/sample function assigned to each outcome of an experiment.
