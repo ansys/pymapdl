@@ -84,13 +84,13 @@ Here:
 
 For example, :math:`E(x)` could be a Gaussian random field, in which case it has the stationarity
 property, making its statistics completely defined by its mean (:math:`\mu_E`), standard deviation
-(:math:`\sigma_E`) and covariance function :math:`C_E(x_1,x_2)`. This 'stationarity' simply means
+(:math:`\sigma_E`) and covariance function :math:`C_E(x_i,x_j)`. This 'stationarity' simply means
 that the mean and standard deviation of every random variable :math:`E(x)` is constant and equal to
-:math:`\mu_E` and :math:`\sigma_E` respectively. :math:`C_E(x_1,x_2)` describes how random variables
-:math:`E(x_1)` and :math:`E(x_2)` are related.
+:math:`\mu_E` and :math:`\sigma_E` respectively. :math:`C_E(x_i,x_j)` describes how random variables
+:math:`E(x_i)` and :math:`E(x_j)` are related.
 For a zero-mean Gaussian random field, the covariance function is given by:
 
-.. math:: C_E(x_1,x_2) = \sigma_E^2e^{-\frac{\lvert x_1-x_2 \rvert}{\ell}}
+.. math:: C_E(x_i,x_j) = \sigma_E^2e^{-\frac{\lvert x_i-x_j \rvert}{\ell}}
 
 where :math:`\sigma_E^2` is the variance, and :math:`\ell` is the correlation length parameter.
 
@@ -101,3 +101,23 @@ realization/sample function assigned to each outcome of an experiment.
 .. figure:: realizations.png
 
    A random field as a collection of random variables or realizations
+
+.. note::
+  The concepts above generalize to more dimensions, for example, a random vector instead of a random
+  variable, or an :math:`\mathbb{R}^d`-valued stochastic process. The presentation above is however
+  sufficient for this example.
+
+Series expansion of stochastic processes
+----------------------------------------
+Since a stochastic processes involves an infinite number of random variables, most engineering applications
+involving stochastic processes will be mathematically and computationally intractable if there isn't a way of
+approximating them with a series of a finite number of random variables. A series expansion method which will
+be used in this example is explained next.
+
+The Karhunen-Loève (K-L) series expansion
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+For a zero-mean stationary gaussian process, :math:`X(t)`, with covariance function
+:math:`C_X(t_i,t_j)=\sigma_X^2e^{-\frac{\lvert t_i-t_j \rvert}{b}}` defined on a domain :math:`\mathbb{D}=[-a,a]`,
+the K-L series expansion is given by:
+
+.. math:: X(t) = \sum_{n=1}^\infty \sqrt{\lambda_{n,c}}\cdot\phi_{n,c}(t)\cdot\xi_{n,c} + \sum_{n=1}^\infty \sqrt{\lambda_{n,s}}\cdot\phi_{n,s}(t)\cdot\xi_{n,s},\quad t\in\mathbb{D}
