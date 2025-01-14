@@ -68,7 +68,7 @@ tests = [
     "pytest-rerunfailures==15.0",
     "pytest-timeout==2.3.1",
     "pytest==8.3.4",
-    "scipy==1.14.1",
+    "scipy==1.15.0",
     "vtk==9.3.1",
 ]
 doc = [
@@ -76,7 +76,7 @@ doc = [
     "ansys-mapdl-reader==0.54.2",
     "ansys-sphinx-theme==1.2.4",
     "ansys-tools-visualization-interface==0.6.2",
-    "grpcio==1.68.1",
+    "grpcio==1.69.0",
     "imageio-ffmpeg==0.5.1",
     "imageio==2.36.1",
     "jupyter_sphinx==0.5.3",
@@ -88,7 +88,7 @@ doc = [
     "pandas==2.2.3",
     "plotly==5.24.1",
     "pyiges[full]==0.3.1",
-    "pypandoc==1.14",
+    "pypandoc==1.15",
     "pytest-sphinx==0.6.3",
     "pythreejs==2.4.2",
     "sphinx-autobuild==2024.10.3",

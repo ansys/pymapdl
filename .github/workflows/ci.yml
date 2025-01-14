@@ -67,7 +67,7 @@ jobs:
   update-changelog:
     name: "Update CHANGELOG (on release)"
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     permissions:
       contents: write
       pull-requests: write
@@ -82,7 +82,7 @@ jobs:
   pull-request-name:
     if: github.event_name == 'pull_request'
     name: Check the name of the pull-request
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Check pull-request name
         uses: ansys/actions/check-pr-title@v8
@@ -92,7 +92,7 @@ jobs:
 
   doc-style:
     name: "Documentation style ${{ matrix.folder }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         folder: ["doc", "examples"]
@@ -142,7 +142,7 @@ jobs:
 
   check-vulnerabilities:
     name: "Check library vulnerabilities"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - uses: ansys/actions/check-vulnerabilities@v8
         with:
@@ -156,7 +156,7 @@ jobs:
 
   docs-build:
     name: "Build documentation"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: doc-style
     timeout-minutes: 60
     outputs:
@@ -359,7 +359,7 @@ jobs:
 
   build-test-remote-matrix:
     name: "Build remote test matrix"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -400,7 +400,7 @@ jobs:
 
   build-test-remote:
     name: "Remote: ${{ matrix.mapdl-version }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [smoke-tests, build-test-remote-matrix]
     timeout-minutes: 35
     strategy:
@@ -599,7 +599,7 @@ jobs:
 
   build-test-local-minimal-matrix:
     name: "Build test matrix for minimal and local"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
@@ -630,7 +630,7 @@ jobs:
 
   build-test-ubuntu-local:
     name: "Local: ${{ matrix.mapdl-version }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [smoke-tests, build-test-local-minimal-matrix]
     timeout-minutes: 75
@@ -785,7 +785,7 @@ jobs:
 
   build-test-ubuntu-minimal:
     name: "Local-min: ${{ matrix.mapdl-version }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [smoke-tests, build-test-local-minimal-matrix]
     timeout-minutes: 75
@@ -913,7 +913,7 @@ jobs:
 
   build-test-ubuntu-console:
     name: "Local-min-console: ${{ matrix.mapdl-version }}"
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [smoke-tests, build-test-local-minimal-matrix]
     timeout-minutes: 75
@@ -1115,7 +1115,7 @@ jobs:
   package:
     name: "Package library"
     needs: [build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal, docs-build]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: "Build library source and wheel artifacts"
         uses: ansys/actions/build-library@v8
@@ -1128,7 +1128,7 @@ jobs:
     name: "Release project"
     if: ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
     needs: [package, update-changelog]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     # Specifying a GitHub environment is optional, but strongly encouraged
     environment: release
     permissions:
@@ -1154,7 +1154,7 @@ jobs:
   upload-docs-release:
     name: "Upload release documentation"
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [release]
     steps:
       - name: "Deploy the stable documentation"
@@ -1170,7 +1170,7 @@ jobs:
   upload-dev-docs:
     name: "Upload dev documentation"
     if: github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: [docs-build]
     steps:
       - name: "Deploy the latest documentation"
@@ -1186,7 +1186,7 @@ jobs:
     name: "Notify failed build"
     needs: [smoke-tests, docs-build, build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal]
     if: failure() && github.event_name == 'schedule'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: "Open issue"
         uses: jayqi/failed-build-issue-action@v1
