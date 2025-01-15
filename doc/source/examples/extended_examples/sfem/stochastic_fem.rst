@@ -114,10 +114,39 @@ involving stochastic processes will be mathematically and computationally intrac
 approximating them with a series of a finite number of random variables. A series expansion method which will
 be used in this example is explained next.
 
-The Karhunen-Loève (K-L) series expansion
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The Karhunen-Loève (K-L) series expansion for a Gaussian process
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+More generally, the K-L expansion of any process is based on a spectral decomposition of its covariance function. Analytical
+solutions are possible in a few cases, and such is the case of Gaussian process.
+
+
 For a zero-mean stationary gaussian process, :math:`X(t)`, with covariance function
-:math:`C_X(t_i,t_j)=\sigma_X^2e^{-\frac{\lvert t_i-t_j \rvert}{b}}` defined on a domain :math:`\mathbb{D}=[-a,a]`,
+:math:`C_X(t_i,t_j)=\sigma_X^2e^{-\frac{\lvert t_i-t_j \rvert}{b}}` defined on a symmetric domain :math:`\mathbb{D}=[-a,a]`,
 the K-L series expansion is given by:
 
-.. math:: X(t) = \sum_{n=1}^\infty \sqrt{\lambda_{n,c}}\cdot\phi_{n,c}(t)\cdot\xi_{n,c} + \sum_{n=1}^\infty \sqrt{\lambda_{n,s}}\cdot\phi_{n,s}(t)\cdot\xi_{n,s},\quad t\in\mathbb{D}
+.. math:: X(t) = \sum_{n=1}^\infty \sqrt{\lambda_{c,n}}\cdot\varphi_{c,n}(t)\cdot\xi_{c,n} + \sum_{n=1}^\infty \sqrt{\lambda_{s,n}}\cdot\varphi_{s,n}(t)\cdot\xi_{s,n},\quad t\in\mathbb{D}
+
+where,
+
+.. math:: \lambda_{c,n} = \frac{2b}{1+\omega_{c,n}^2\cdot b^2},\quad \varphi_{c,n}(t) = k_{c,n}\cos(\omega_{c,n}\cdot t)
+.. math:: k_{c,n} = \frac{1}{\sqrt{a+\frac{\sin(2\omega_{c,n}\cdot a)}{2\omega_{c,n}}}}
+
+:math:`\omega_{c,n}` is obtained as the solution of
+
+.. math:: \frac{1}{b} - \omega_{c,n}\cdot\tan(\omega_{c,n}\cdot a) = 0 \quad \text{in the range} \quad \biggl[(n-1)\frac{\pi}{a}, (n-\frac{1}{2})\frac{\pi}{a}\biggr]
+
+and,
+
+.. math:: \lambda_{s,n} = \frac{2b}{1+\omega_{s,n}^2\cdot b^2},\quad \varphi_{s,n}(t) = k_{s,n}\sin(\omega_{s,n}\cdot t)
+.. math:: k_{s,n} = \frac{1}{\sqrt{a-\frac{\sin(2\omega_{s,n}\cdot a)}{2\omega_{s,n}}}}
+
+:math:`\omega_{s,n}` is obtained as the solution of
+
+.. math:: \frac{1}{b}\cdot\tan(\omega_{s,n}\cdot a) + \omega_{s,n} = 0 \quad \text{in the range} \quad \biggl[(n-\frac{1}{2})\frac{\pi}{a}, n\frac{\pi}{a}\biggr]
+
+The K-L expansion of a gaussian process has the property that :math:`\xi_{c,n}` are independent standard normal variables. For practical
+implementation, the infinite series of the K-L expansion above is truncated after a finite number of terms, M, giving the approximation
+
+.. math:: X(t) \approx \hat{X}(t) = \sum_{n=1}^M \sqrt{\lambda_{c,n}}\cdot\varphi_{c,n}(t)\cdot\xi_{c,n} + \sum_{n=1}^M \sqrt{\lambda_{s,n}}\cdot\varphi_{s,n}(t)\cdot\xi_{s,n},\quad t\in\mathbb{D}
+
+
