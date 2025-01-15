@@ -576,7 +576,7 @@ class TestMapdlPool:
                 [MAPDL_DEFAULT_PORT, MAPDL_DEFAULT_PORT + 1],
                 NullContext(),
                 marks=pytest.mark.xfail(
-                    reason="Available ports cannot does not start in `MAPDL_DEFAULT_PORT`. Probably because there are other instances running already."
+                    reason="Cannot start in `MAPDL_DEFAULT_PORT`. Probably because there are other instances running already."
                 ),
             ),
             pytest.param(
@@ -588,7 +588,7 @@ class TestMapdlPool:
                 [MAPDL_DEFAULT_PORT, MAPDL_DEFAULT_PORT + 1, MAPDL_DEFAULT_PORT + 2],
                 NullContext(),
                 marks=pytest.mark.xfail(
-                    reason="Available ports cannot does not start in `MAPDL_DEFAULT_PORT`. Probably because there are other instances running already."
+                    reason="Cannot start in `MAPDL_DEFAULT_PORT`. Probably because there are other instances running already."
                 ),
             ),
             pytest.param(
@@ -600,7 +600,7 @@ class TestMapdlPool:
                 [50053, 50053 + 1, 50053 + 2],
                 NullContext(),
                 marks=pytest.mark.xfail(
-                    reason="Available ports cannot does not start in `MAPDL_DEFAULT_PORT`. Probably because there are other instances running already."
+                    reason="Cannot start in `MAPDL_DEFAULT_PORT`. Probably because there are other instances running already."
                 ),
             ),
             pytest.param(
