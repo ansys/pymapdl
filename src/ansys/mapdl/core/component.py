@@ -471,6 +471,16 @@ class ComponentManager:
         """
         yield from self._comp.keys()
 
+    def __len__(self) -> int:
+        """Return the number of components
+
+        Returns
+        -------
+        int
+            Number of components
+        """
+        return self._comp.__len__()
+
     @property
     def names(self) -> Tuple[str]:
         """
