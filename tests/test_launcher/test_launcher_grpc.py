@@ -24,6 +24,7 @@ from ansys.mapdl.core.launcher.grpc import launch_mapdl_grpc
 from conftest import requires
 
 
+@requires("local")
 @requires("nostudent")
 def test_launch_mapdl_grpc():
 

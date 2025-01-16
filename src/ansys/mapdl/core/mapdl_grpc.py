@@ -420,9 +420,8 @@ class MapdlGrpc(MapdlBase):
         self.remove_temp_dir_on_exit: bool = remove_temp_dir_on_exit
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: Optional[str] = start_parm.get("run_location", None)
-        self._start_instance: Optional[str] = (
-            start_parm.get("start_instance") or get_start_instance()
-        )
+        self._start_instance: Optional[str] = start_parm.get("start_instance")
+
         self._busy: bool = False  # used to check if running a command on the server
         self._local: bool = start_parm.get("local", True)
         self._launched: bool = start_parm.get("launched", True)

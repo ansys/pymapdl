@@ -26,15 +26,13 @@ import pytest
 from ansys.mapdl.core.launcher.remote import _NON_VALID_ARGS, connect_to_mapdl
 
 
-def test_connect_to_mapdl():
-    mapdl = connect_to_mapdl()
+def test_connect_to_mapdl(mapdl):
+    mapdl_2 = connect_to_mapdl(port=mapdl.port)
 
-    assert "PREP7" in mapdl.prep7()
+    assert "PREP7" in mapdl_2.prep7()
 
-    assert not mapdl._start_instance
-    assert not mapdl._launched
-
-    mapdl.exit(force=False)
+    assert not mapdl_2._start_instance
+    assert not mapdl_2._launched
 
 
 @pytest.mark.parametrize("arg", _NON_VALID_ARGS)
