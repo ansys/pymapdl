@@ -26,6 +26,7 @@ import os
 from pathlib import Path
 from shutil import get_terminal_size
 from sys import platform
+from typing import Literal, Union
 from unittest.mock import patch
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
@@ -124,8 +125,27 @@ skip_if_running_student_version = pytest.mark.skipif(
     reason="This tests does not work on student version.",
 )
 
+_REQUIRES_ARG = Union[
+    Literal[
+        "GRPC",
+        "DPF",
+        "LOCAL",
+        "REMOTE",
+        "CICD",
+        "NOCICD",
+        "XSERVER",
+        "LINUX",
+        "NOLINUX",
+        "WINDOWS",
+        "NOWINDOWS",
+        "NOSTUDENT",
+        "CONSOLE",
+    ],
+    str,
+]
 
-def requires(requirement: str):
+
+def requires(requirement: _REQUIRES_ARG):
     """Check requirements"""
     requirement = requirement.lower()
 
