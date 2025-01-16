@@ -116,7 +116,7 @@ def launch_mapdl(
 
         .. code:: console
 
-            export PYMAPDL_MAPDL_EXEC=/ansys_inc/v211/ansys/bin/mapdl
+            export PYMAPDL_MAPDL_EXEC=/ansys_inc/v251/ansys/bin/mapdl
 
     run_location : str, optional
         MAPDL working directory.  Defaults to a temporary working

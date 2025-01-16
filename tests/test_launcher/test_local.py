@@ -26,10 +26,6 @@ import pytest
 from ansys.mapdl.core.launcher.local import processing_local_arguments
 
 
-def test_processing_local_arguments():
-    pass
-
-
 @pytest.mark.parametrize("start_instance", [True, False, None, ""])
 @patch("ansys.mapdl.core.launcher.local.get_cpus", lambda *args, **kwargs: None)
 @patch("psutil.cpu_count", lambda *args, **kwargs: 4)
