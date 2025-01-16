@@ -1,0 +1,1593 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Structural Analysis of a Lathe Cutter &#8212; PyMAPDL</title>
+  
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/bootstrap.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+
+  
+  <link href="../../../_static/vendor/fontawesome/6.5.2/css/all.min.css?digest=dfe6caa3a7d634c4db9b" rel="stylesheet" />
+  <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-solid-900.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-brands-400.woff2" />
+<link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.5.2/webfonts/fa-regular-400.woff2" />
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css?v=572af1d6" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery.css?v=d2d258e8" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-binder.css?v=f4aeca0c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-dataframe.css?v=2082cf3c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sg_gallery-rendered-html.css?v=1277b6f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/ansys_sphinx_theme.css?v=77703c5e" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.23/css/jquery.dataTables.min.css" />
+    <link rel="stylesheet" type="text/css" href="https://www.nerdfonts.com/assets/css/webfont.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/sphinx-design.min.css?v=95c83b7e" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=91007d66" />
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" />
+  
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b" />
+<link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
+  <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+  
+    <link href="../../../_static/css/breadcrumbs.css" rel="stylesheet" />
+  
+    <script src="../../../_static/documentation_options.js?v=e43aecd7"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=49e1bf35"></script>
+    <script src="../../../_static/js/table.js?v=b64f5182"></script>
+    <script src="https://cdn.datatables.net/1.10.23/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script src="../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script async="async" src="https://www.googletagmanager.com/gtag/js?id=G-JQJKPV6ZVB"></script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){ dataLayer.push(arguments); }
+                gtag('js', new Date());
+                gtag('config', 'G-JQJKPV6ZVB');
+            </script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'examples/gallery_examples/00-mapdl-examples/lathe_cutter';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.15.4';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://mapdl.docs.pyansys.com/versions.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = 'dev';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner = false;
+        </script>
+    <link rel="icon" href="../../../_static/ansys-favicon.png"/>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="MAPDL 3D Beam Example" href="mapdl_3d_beam.html" />
+    <link rel="prev" title="Plotting and Mesh Access" href="geometry.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <link rel="canonical" href="https://mapdl.docs.pyansys.com/version/stable/examples/gallery_examples/00-mapdl-examples/lathe_cutter.html" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-primary-sidebar-checkbox"/>
+  <label class="overlay overlay-primary" for="pst-primary-sidebar-checkbox"></label>
+  
+  <input type="checkbox"
+          class="sidebar-toggle"
+          id="pst-secondary-sidebar-checkbox"/>
+  <label class="overlay overlay-secondary" for="pst-secondary-sidebar-checkbox"></label>
+  
+  <div class="search-button__wrapper">
+    <div class="search-button__overlay"></div>
+    <div class="search-button__search-container">
+<form class="bd-search d-flex align-items-center"
+      action="../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         id="search-input"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form></div>
+  </div>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+
+<a class="navbar-brand logo" href="https://docs.pyansys.com/">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../_static/pyansys_logo_transparent_black.png" class="logo__image only-light" alt="PyMAPDL - Home"/>
+    <script>document.write(`<img src="../../../_static/pyansys_logo_transparent_white.png" class="logo__image only-dark" alt="PyMAPDL - Home"/>`);</script>
+  
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../mapdl_commands/index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    Examples
+  </a>
+</li>
+
+            <li class="nav-item dropdown">
+                <button class="btn dropdown-toggle nav-item" type="button" data-bs-toggle="dropdown" aria-expanded="false" aria-controls="pst-nav-more-links">
+                    More
+                </button>
+                <ul id="pst-nav-more-links" class="dropdown-menu">
+                    
+<li class=" ">
+  <a class="nav-link dropdown-item nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+                </ul>
+            </li>
+            
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+</div>
+        </div>
+      
+      
+        <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-2"
+      type="button"
+      class="version-switcher__button btn btn-sm dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-2"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-2"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-2">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+      
+        <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+<div class="search-bar pst-js-only" id="search-bar">
+  <form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+    <i class="fa-solid fa-magnifying-glass"></i>
+    <input type="search" class="form-control" name="q" placeholder="Search the docs ..."
+      aria-label="Search the docs ..." autocomplete="off" autocorrect="off"
+      autocapitalize="off" spellcheck="false" />
+    <span class="search-button__kbd-shortcut">
+      <kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd>
+    </span>
+  </form>
+  <div id="static-search-results" class="static-search-results" style="display:none;" tabindex="0"></div>
+</div>
+    </div>
+  
+
+  
+    <button class="pst-navbar-icon sidebar-toggle secondary-toggle" aria-label="On this page">
+      <span class="fa-solid fa-outdent"></span>
+    </button>
+  
+</div>
+
+    </header>
+  
+  
+    <div id="announcement_msg"></div>
+<script>
+  fetch("announcement.html")
+    .then((response) => {
+      if (!response.ok) {
+        throw new Error(`HTTP error: ${response.status}`);
+      }
+      return response.text();
+    })
+    .then(
+      (text) => (document.getElementById("announcement_msg").innerHTML = text),
+    )
+    .catch((error) => console.error(`Fetch problem: ${error.message}`));
+</script>
+  
+
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+      <div class="bd-sidebar-primary bd-sidebar">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../getting_started/index.html">
+    Getting started
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../user_guide/index.html">
+    User guide
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../mapdl_commands/index.html">
+    MAPDL commands
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../api/index.html">
+    API reference
+  </a>
+</li>
+
+
+<li class="nav-item current active">
+  <a class="nav-link nav-internal" href="../../index.html">
+    Examples
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../changelog.html">
+    Release notes
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+<script>
+document.write(`
+  <div class="version-switcher__container dropdown">
+    <button id="pst-version-switcher-button-3"
+      type="button"
+      class="version-switcher__button btn btn-sm dropdown-toggle"
+      data-bs-toggle="dropdown"
+      aria-haspopup="listbox"
+      aria-controls="pst-version-switcher-list-3"
+      aria-label="Version switcher list"
+    >
+      Choose version  <!-- this text may get changed later by javascript -->
+      <span class="caret"></span>
+    </button>
+    <div id="pst-version-switcher-list-3"
+      class="version-switcher__menu dropdown-menu list-group-flush py-0"
+      role="listbox" aria-labelledby="pst-version-switcher-button-3">
+      <!-- dropdown will be populated by javascript on page load -->
+    </div>
+  </div>
+`);
+</script></div>
+        
+          <div class="navbar-item">
+
+<script>
+document.write(`
+  <button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button" title="light/dark" aria-label="light/dark" data-bs-placement="bottom" data-bs-toggle="tooltip">
+    <i class="theme-switch fa-solid fa-sun fa-lg" data-mode="light"></i>
+    <i class="theme-switch fa-solid fa-moon fa-lg" data-mode="dark"></i>
+    <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"></i>
+  </button>
+`);
+</script></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/ansys/pymapdl/discussions" title="Support" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-comment fa-fw fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Support</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://mapdl.docs.pyansys.com/version/dev/getting_started/contribution.html" title="Contribute" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa fa-wrench fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">Contribute</span></a>
+        </li>
+</ul></div>
+        
+      </div>
+    
+  </div>
+  
+    <div class="sidebar-primary-items__start sidebar-primary__section">
+        <div class="sidebar-primary-item">
+<nav class="bd-docs-nav bd-links"
+     aria-label="Section Navigation">
+  <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
+  <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
+<li class="toctree-l1 current active has-children"><a class="reference internal" href="index.html">Full examples using PyMAPDL</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="2d_magnetostatic_solenoid-BodyFlux_Averaging.html">Analysis of a 2D magnetostatic solenoid</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2d_plate_with_a_hole.html">MAPDL 2D Plane Stress Concentration Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="2d_pressure_vessel.html">2D Pressure Vessel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3d_notch.html">3D Stress Concentration Analysis for a Notched Plate</a></li>
+<li class="toctree-l2"><a class="reference internal" href="3d_plate_thermal.html">Basic Thermal Analysis with PyMAPDL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="acoustic_analysis.html">3D Acoustic Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="basic_dpf_example.html">Basic DPF-Core Usage with PyMAPDL</a></li>
+
+
+
+
+
+<li class="toctree-l2"><a class="reference internal" href="bracket_static.html">Static analysis of a corner bracket</a></li>
+<li class="toctree-l2"><a class="reference internal" href="contact_elements.html">Contact Element Example</a></li>
+
+<li class="toctree-l2"><a class="reference internal" href="cyclic_analysis.html">Cyclic Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="cyclic_static.html">Static Cyclic Analysis</a></li>
+<li class="toctree-l2"><a class="reference internal" href="exhaust_manifold_thermal_stress.html">Thermal-structural analysis of exhaust manifold</a></li>
+<li class="toctree-l2"><a class="reference internal" href="geometry.html">Plotting and Mesh Access</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">Structural Analysis of a Lathe Cutter</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mapdl_3d_beam.html">MAPDL 3D Beam Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="mapdl_beam.html">MAPDL 2D Beam Example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="modal_beam.html">MAPDL modal beam analysis example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="path_operations.html">Path Operations within PyMAPDL and MAPDL</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pressure_vessel.html">Pressure Vessel</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pyvista_mesh.html">PyVista Mesh Integration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="slashmap_cfx_mapping.html">CFX pressure data mapping to structural blade</a></li>
+<li class="toctree-l2"><a class="reference internal" href="spotweld.html">Running an input file - spotweld SHELL181 example</a></li>
+<li class="toctree-l2"><a class="reference internal" href="torsional_load.html">Torsional load on a bar using SURF154 elements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="transient_thermal.html">Example Thermal Transient Analysis</a></li>
+</ul>
+</details></li>
+<li class="toctree-l1"><a class="reference internal" href="../01-geometry/index.html">Geometry examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../02-tips-n-tricks/index.html">Miscellaneous examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../03-general-fea/index.html">Academic finite element examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../extended_examples/index.html">Extended examples</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../devportal.html">PyMAPDL Developer Portal articles</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://examples.mapdl.docs.pyansys.com/verif-manual/index.html">Verification Manual</a></li>
+<li class="toctree-l1"><a class="reference external" href="https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html">Technology Showcases</a></li>
+</ul>
+</div>
+</nav></div>
+    </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+  </div>
+  
+  <div id="rtd-footer-container"></div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+<nav aria-label="Breadcrumb">
+  <ul class="bd-breadcrumbs">
+         
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="https://docs.pyansys.com/" class="nav-link">PyAnsys</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a
+        href="../../../index.html"
+        class="nav-link"
+        aria-label="Home"
+      >
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="../../index.html" class="nav-link">Examples</a>
+    </li>
+     
+    <li class="breadcrumb-item">
+      <a href="index.html" class="nav-link">Full examples using PyMAPDL</a>
+    </li>
+      
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">Structural Analysis of a Lathe Cutter</span></li>
+    
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference internal" href="#sphx-glr-download-examples-gallery-examples-00-mapdl-examples-lathe-cutter-py"><span class="std std-ref">Go to the end</span></a>
+to download the full example code.</p>
+</div>
+<section class="sphx-glr-example-title" id="structural-analysis-of-a-lathe-cutter">
+<span id="ref-lathe-cutter-example"></span><span id="sphx-glr-examples-gallery-examples-00-mapdl-examples-lathe-cutter-py"></span><h1>Structural Analysis of a Lathe Cutter<a class="headerlink" href="#structural-analysis-of-a-lathe-cutter" title="Link to this heading">#</a></h1>
+<p>Basic walk through PyMAPDL capabilities.</p>
+<section id="objective">
+<h2>Objective<a class="headerlink" href="#objective" title="Link to this heading">#</a></h2>
+<p>The objective of this example is to highlight some regularly used
+PyMAPDL features via a lathe cutter finite element model. Lathe
+cutters have multiple avenues of wear and failure, and the analyses
+supporting their design would most often be transient
+thermal-structural. However, for simplicity, this simulation
+example uses a non-uniform load.</p>
+<figure class="align-center" id="id4">
+<a class="reference internal image-reference" href="../../../_images/lathe_cutter_model.png"><img alt="Lathe cutter geometry and load description." src="../../../_images/lathe_cutter_model.png" style="width: 600px;" />
+</a>
+<figcaption>
+<p><span class="caption-text"><strong>Figure 1: Lathe cutter geometry and load description.</strong></span><a class="headerlink" href="#id4" title="Link to this image">#</a></p>
+</figcaption>
+</figure>
+</section>
+<section id="contents">
+<h2>Contents<a class="headerlink" href="#contents" title="Link to this heading">#</a></h2>
+<ol class="arabic simple">
+<li><p><strong>Variables and launch</strong>
+Define necessary variables and launch MAPDL.</p></li>
+<li><p><strong>Geometry, mesh, and MAPDL parameters</strong>
+Import geometry and inspect for MAPDL parameters. Define linear
+elastic material model with Python variables. Mesh and apply symmetry
+boundary conditions.</p></li>
+<li><p><strong>Coordinate system and load</strong>
+Create a local coordinate system for the applied load and verify with
+a plot.</p></li>
+<li><p><strong>Pressure load</strong>
+Define the pressure load as a sine function of the length of the
+application area using numpy arrays. Import the pressure array into
+MAPDL as a table array. Verify the applied load and solve.</p></li>
+<li><p><strong>Plotting</strong>
+Show result plotting, plotting with selection, and working with the
+plot legend.</p></li>
+<li><p><strong>Postprocessing:</strong>
+List a result two ways: use PyMAPDL and the Pythonic version of APDL.
+Demonstrate extended methods and writing a list to a file.</p></li>
+<li><p><strong>Advanced plotting</strong>
+Use of <a class="reference external" href="https://docs.pyvista.org/api/core/_autosummary/pyvista.UnstructuredGrid.html#pyvista.UnstructuredGrid" title="(in PyVista v0.44.2)"><code class="xref py py-class docutils literal notranslate"><span class="pre">pyvista.UnstructuredGrid</span></code></a>
+for additional postprocessing.</p></li>
+</ol>
+</section>
+<section id="step-1-variables-and-launch">
+<h2>Step 1: Variables and launch<a class="headerlink" href="#step-1-variables-and-launch" title="Link to this heading">#</a></h2>
+<p>Define variables and launch MAPDL.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">ansys.mapdl.core</span><span class="w"> </span><span class="kn">import</span> <span class="n">launch_mapdl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">ansys.mapdl.core.examples.downloads</span><span class="w"> </span><span class="kn">import</span> <span class="n">download_example_data</span>
+
+<span class="c1"># cwd = current working directory</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">path</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/os.html#os.getcwd" title="os.getcwd" class="sphx-glr-backref-module-os sphx-glr-backref-type-py-function"><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span></a><span class="p">()</span>
+<a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">PI</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">np</span><span class="o">.</span><span class="n">pi</span></a>
+<a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">EXX</span></a> <span class="o">=</span> <span class="mf">1.0e7</span>
+<a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">NU</span></a> <span class="o">=</span> <span class="mf">0.27</span>
+</pre></div>
+</div>
+<p>Often used MAPDL command line options are exposed as Pythonic parameter names in
+<a class="reference internal" href="../../../api/_autosummary/ansys.mapdl.core.launcher.launch_mapdl.html#ansys.mapdl.core.launcher.launch_mapdl" title="ansys.mapdl.core.launcher.launch_mapdl"><code class="xref py py-func docutils literal notranslate"><span class="pre">ansys.mapdl.core.launcher.launch_mapdl()</span></code></a>. For example, <code class="docutils literal notranslate"><span class="pre">-dir</span></code>
+has become <code class="docutils literal notranslate"><span class="pre">run_location</span></code>.
+You could use <code class="docutils literal notranslate"><span class="pre">run_location</span></code> to specify the MAPDL run location. For example:</p>
+<div class="highlight-python3 notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span> <span class="o">=</span> <span class="n">launch_mapdl</span><span class="p">(</span><span class="n">run_location</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">path</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<p>Otherwise, the MAPDL working directory is stored in <code class="docutils literal notranslate"><span class="pre">mapdl.directory</span></code>. In this
+directory, MAPDL will create some of the images we will show later.</p>
+<p>Options without a Pythonic version can be accessed by the <code class="docutils literal notranslate"><span class="pre">additional_switches</span></code>
+parameter.
+Here <code class="docutils literal notranslate"><span class="pre">-smp</span></code> is used only to keep the number of solver files to a minimum.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span> <span class="o">=</span> <span class="n">launch_mapdl</span><span class="p">(</span><span class="n">additional_switches</span><span class="o">=</span><span class="s2">&quot;-smp&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="step-2-geometry-mesh-and-mapdl-parameters">
+<h2>Step 2: Geometry, mesh, and MAPDL parameters<a class="headerlink" href="#step-2-geometry-mesh-and-mapdl-parameters" title="Link to this heading">#</a></h2>
+<ul class="simple">
+<li><p>Import geometry and inspect for MAPDL parameters.</p></li>
+<li><p>Define material and mesh, and then create boundary conditions.</p></li>
+</ul>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># First, reset the MAPDL database.</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Import the geometry file and list any MAPDL parameters.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">lathe_cutter_geo</span></a> <span class="o">=</span> <span class="n">download_example_data</span><span class="p">(</span><span class="s2">&quot;LatheCutter.anf&quot;</span><span class="p">,</span> <span class="s2">&quot;geometry&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">input</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">lathe_cutter_geo</span></a><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mapdl</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>MAPDL Parameters
+----------------
+DMP                              : &quot;&quot;
+PRESS_LENGTH                     : 0.055
+UNIT_SYSTEM                      : &quot;bin&quot;
+</pre></div>
+</div>
+<p>Use pressure area per length in the load definition.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pressure_length</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s2">&quot;PRESS_LENGTH&quot;</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">mapdl</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>MAPDL Parameters
+----------------
+DMP                              : &quot;&quot;
+PRESS_LENGTH                     : 0.055
+UNIT_SYSTEM                      : &quot;bin&quot;
+</pre></div>
+</div>
+<p>Change the units and title.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">units</span><span class="p">(</span><span class="s2">&quot;Bin&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="s2">&quot;Lathe Cutter&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>TITLE=
+ Lathe Cutter
+</pre></div>
+</div>
+<p>Set material properties.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">prep7</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">mp</span><span class="p">(</span><span class="s2">&quot;EX&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">EXX</span></a><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">mp</span><span class="p">(</span><span class="s2">&quot;NUXY&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">NU</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>MATERIAL          1     NUXY =  0.2700000
+</pre></div>
+</div>
+<p>The MAPDL element type <code class="docutils literal notranslate"><span class="pre">SOLID285</span></code> is used for demonstration purposes.
+Consider using an appropriate element type or mesh density for your actual
+application.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">et</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">285</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">smrtsize</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">aesize</span><span class="p">(</span><span class="mi">14</span><span class="p">,</span> <span class="mf">0.0025</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">vmesh</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">mapdl</span><span class="o">.</span><span class="n">da</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="s2">&quot;symm&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">da</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="s2">&quot;symm&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">da</span><span class="p">(</span><span class="mi">9</span><span class="p">,</span> <span class="s2">&quot;symm&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">da</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;symm&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>CONSTRAINT AT AREA    10
+      LOAD LABEL = SYMM
+</pre></div>
+</div>
+</section>
+<section id="step-3-coordinate-system-and-load">
+<h2>Step 3: Coordinate system and load<a class="headerlink" href="#step-3-coordinate-system-and-load" title="Link to this heading">#</a></h2>
+<p>Create a local Coordinate System (CS) for the applied pressure as a function
+of local X.</p>
+<p>Local CS ID is 11</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">cskp</span><span class="p">(</span><span class="mi">11</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">13</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">csys</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">psymb</span><span class="p">(</span><span class="s2">&quot;CS&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">vplot</span><span class="p">(</span>
+    <span class="n">color_areas</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">cpos</span><span class="o">=</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+    <span class="n">smooth_shading</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<ul class="sphx-glr-horizontal">
+<li><img src="../../../_images/sphx_glr_lathe_cutter_001.png" srcset="../../../_images/sphx_glr_lathe_cutter_001.png" alt="lathe cutter" class = "sphx-glr-multi-img"/></li>
+<li><img src="../../../_images/sphx_glr_lathe_cutter_002.png" srcset="../../../_images/sphx_glr_lathe_cutter_002.png" alt="lathe cutter" class = "sphx-glr-multi-img"/></li>
+</ul>
+<p>VTK plots do not show MAPDL plot symbols.
+However, to use MAPDL plotting capabilities, you can set the keyword
+option <code class="docutils literal notranslate"><span class="pre">vtk</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">lplot</span><span class="p">(</span><span class="n">vtk</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_lathe_cutter_003.png" srcset="../../../_images/sphx_glr_lathe_cutter_003.png" alt="lathe cutter" class = "sphx-glr-single-img"/></section>
+<section id="step-4-pressure-load">
+<h2>Step 4: Pressure load<a class="headerlink" href="#step-4-pressure-load" title="Link to this heading">#</a></h2>
+<p>Create a pressure load, load it into MAPDL as a table array, verify the load,
+and solve.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># pressure_length = 0.055 inch</span>
+
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pts</span></a> <span class="o">=</span> <span class="mi">10</span>
+<a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pts_1</span></a> <span class="o">=</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pts</span></a> <span class="o">-</span> <span class="mi">1</span>
+
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">length_x</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.arange.html#numpy.arange" title="numpy.arange" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">arange</span></a><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pts</span></a><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">length_x</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">length_x</span></a> <span class="o">*</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pressure_length</span></a> <span class="o">/</span> <a href="https://docs.python.org/3/library/functions.html#int" title="builtins.int" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pts_1</span></a>
+
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">press</span></a> <span class="o">=</span> <span class="mi">10000</span> <span class="o">*</span> <span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ufunc.html#numpy.ufunc" title="numpy.ufunc" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">np</span><span class="o">.</span><span class="n">sin</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">PI</span></a> <span class="o">*</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">length_x</span></a> <span class="o">/</span> <a href="https://docs.python.org/3/library/functions.html#float" title="builtins.float" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">pressure_length</span></a><span class="p">))</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">length_x</span></code> and <code class="docutils literal notranslate"><span class="pre">press</span></code> are vectors. To combine them into the correct
+form needed to define the MAPDL table array, you can use
+<a class="reference external" href="https://numpy.org/doc/stable/reference/generated/numpy.stack.html">numpy.stack</a>.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">press</span></a> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.stack.html#numpy.stack" title="numpy.stack" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-function"><span class="n">np</span><span class="o">.</span><span class="n">stack</span></a><span class="p">((</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">length_x</span></a><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">press</span></a><span class="p">),</span> <span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">load_table</span><span class="p">(</span><span class="s2">&quot;MY_PRESS&quot;</span><span class="p">,</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">press</span></a><span class="p">,</span> <span class="s2">&quot;X&quot;</span><span class="p">,</span> <span class="n">csysid</span><span class="o">=</span><span class="mi">11</span><span class="p">)</span>
+
+<span class="n">mapdl</span><span class="o">.</span><span class="n">asel</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;Area&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="mi">14</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">nsla</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">sf</span><span class="p">(</span><span class="s2">&quot;All&quot;</span><span class="p">,</span> <span class="s2">&quot;Press&quot;</span><span class="p">,</span> <span class="s2">&quot;%MY_PRESS%&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">allsel</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>SELECT ALL ENTITIES OF TYPE= ALL  AND BELOW
+</pre></div>
+</div>
+<p>You can open the MAPDL GUI to check the model.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">open_gui</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Set up the solution.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">slashsolu</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">nlgeom</span><span class="p">(</span><span class="s2">&quot;On&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">psf</span><span class="p">(</span><span class="s2">&quot;PRES&quot;</span><span class="p">,</span> <span class="s2">&quot;NORM&quot;</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">eplot</span><span class="p">(</span><span class="n">vtk</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_lathe_cutter_004.png" srcset="../../../_images/sphx_glr_lathe_cutter_004.png" alt="lathe cutter" class = "sphx-glr-single-img"/><p>Solve the model.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">solve</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
+<span class="k">if</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">solution</span><span class="o">.</span><span class="n">converged</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The solution has converged.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>The solution has converged.
+</pre></div>
+</div>
+</section>
+<section id="step-5-plotting">
+<h2>Step 5: Plotting<a class="headerlink" href="#step-5-plotting" title="Link to this heading">#</a></h2>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">post1</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s2">&quot;last&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">allsel</span><span class="p">()</span>
+
+<span class="n">mapdl</span><span class="o">.</span><span class="n">post_processing</span><span class="o">.</span><span class="n">plot_nodal_principal_stress</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">smooth_shading</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_lathe_cutter_005.png" srcset="../../../_images/sphx_glr_lathe_cutter_005.png" alt="lathe cutter" class = "sphx-glr-single-img"/><section id="plotting-part-of-model">
+<h3>Plotting - Part of Model<a class="headerlink" href="#plotting-part-of-model" title="Link to this heading">#</a></h3>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">csys</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">nsel</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;LOC&quot;</span><span class="p">,</span> <span class="s2">&quot;Z&quot;</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">,</span> <span class="o">-</span><span class="mf">0.141</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">esln</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">nsle</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">post_processing</span><span class="o">.</span><span class="n">plot_nodal_principal_stress</span><span class="p">(</span>
+    <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">edge_color</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span> <span class="n">show_edges</span><span class="o">=</span><span class="kc">True</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_lathe_cutter_006.png" srcset="../../../_images/sphx_glr_lathe_cutter_006.png" alt="lathe cutter" class = "sphx-glr-single-img"/></section>
+<section id="plotting-legend-options">
+<h3>Plotting - Legend Options<a class="headerlink" href="#plotting-legend-options" title="Link to this heading">#</a></h3>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">allsel</span><span class="p">()</span>
+<a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sbar_kwargs</span></a> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;1st Principal Stress (psi)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;vertical&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">&quot;n_labels&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">post_processing</span><span class="o">.</span><span class="n">plot_nodal_principal_stress</span><span class="p">(</span>
+    <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+    <span class="n">cpos</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">,</span>
+    <span class="n">background</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
+    <span class="n">edge_color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+    <span class="n">show_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">scalar_bar_args</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sbar_kwargs</span></a><span class="p">,</span>
+    <span class="n">n_colors</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_lathe_cutter_007.png" srcset="../../../_images/sphx_glr_lathe_cutter_007.png" alt="lathe cutter" class = "sphx-glr-single-img"/><p>Let’s try out some scalar bar options from the
+<a class="reference external" href="https://docs.pyvista.org/version/stable/">PyVista documentation</a>.
+For example, let’s set black text on a beige background.</p>
+<p>The scalar bar keywords defined as a Python dictionary are an alternate
+method to using {key:value}’s.
+You can use the click-and drag method to reposition the scalar bar.
+Left-click it and hold down the left mouse button while moving the mouse.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sbar_kwargs</span></a> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+    <span class="n">title_font_size</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+    <span class="n">label_font_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+    <span class="n">shadow</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">n_labels</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
+    <span class="n">italic</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">bold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">fmt</span><span class="o">=</span><span class="s2">&quot;</span><span class="si">%.1f</span><span class="s2">&quot;</span><span class="p">,</span>
+    <span class="n">font_family</span><span class="o">=</span><span class="s2">&quot;arial&quot;</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="s2">&quot;1st Principal Stress (psi)&quot;</span><span class="p">,</span>
+    <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">mapdl</span><span class="o">.</span><span class="n">post_processing</span><span class="o">.</span><span class="n">plot_nodal_principal_stress</span><span class="p">(</span>
+    <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+    <span class="n">cpos</span><span class="o">=</span><span class="s2">&quot;xy&quot;</span><span class="p">,</span>
+    <span class="n">edge_color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+    <span class="n">background</span><span class="o">=</span><span class="s2">&quot;beige&quot;</span><span class="p">,</span>
+    <span class="n">show_edges</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">scalar_bar_args</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sbar_kwargs</span></a><span class="p">,</span>
+    <span class="n">n_colors</span><span class="o">=</span><span class="mi">256</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># cmap names *_r usually reverses values.  Try cmap=&#39;jet_r&#39;</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_lathe_cutter_008.png" srcset="../../../_images/sphx_glr_lathe_cutter_008.png" alt="lathe cutter" class = "sphx-glr-single-img"/></section>
+</section>
+<section id="step-6-postprocessing">
+<h2>Step 6: Postprocessing<a class="headerlink" href="#step-6-postprocessing" title="Link to this heading">#</a></h2>
+<section id="results-list">
+<h3>Results List<a class="headerlink" href="#results-list" title="Link to this heading">#</a></h3>
+<p>Get all principal nodal stresses.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">post_processing</span><span class="o">.</span><span class="n">nodal_principal_stress</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>array([ 887.53948311, 1288.58259737,  229.12863096, ...,  855.96810266,
+       2285.54348104, 1614.97139698], shape=(1243,))
+</pre></div>
+</div>
+<p>Get the principal nodal stresses of the node subset.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">nsel</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">1200</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="mi">1210</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">esln</span><span class="p">()</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">nsle</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The node numbers are:&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mapdl</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><span class="n">nnum</span><span class="p">)</span>  <span class="c1"># get node numbers</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;The principal nodal stresses are:&quot;</span><span class="p">)</span>
+<span class="n">mapdl</span><span class="o">.</span><span class="n">post_processing</span><span class="o">.</span><span class="n">nodal_principal_stress</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>The node numbers are:
+[ 184  185  186  326  332  336  346  347  348  349  357  358  359  360
+  361  366  368  369  370  376  381  382  385  392  393  394  395  396
+  397  779  780  891  892  893  894  969  970  971  973  974  975  976
+  979  992  993 1002 1003 1010 1011 1013 1030 1031 1060 1083 1084 1111
+ 1113 1115 1116 1117 1119 1152 1157 1161 1163 1179 1182 1191 1195 1196
+ 1200 1201 1202 1203 1204 1205 1206 1207 1208 1209 1210 1211 1213 1214
+ 1222 1224 1225 1228 1229 1231 1233 1234 1235 1238 1239 1240 1242]
+The principal nodal stresses are:
+
+array([2657.37560975, 2199.92110418, 2031.93530652, 1967.70828092,
+       1929.31411256, 2557.03672855, 1983.75538004, 2978.09117685,
+       2577.80722207, 1999.3067353 , 1981.6816549 , 2994.4659789 ,
+       3181.29206113, 2150.11514007, 1581.86327238, 2093.24097911,
+       2534.58551933, 1998.32242897, 1493.85658084, 2175.15574789,
+       2281.95183316, 1791.55814526, 2924.60094659, 2784.67800905,
+       2724.95509346, 2049.05388449, 2929.03999388, 2928.08125247,
+       2818.85447784, 2136.07869   , 1942.80152533, 1581.33058849,
+       1495.85599243, 1604.97477647, 2041.3430778 , 1976.05997671,
+       1914.45871679, 2167.60333527, 1687.59208139, 1677.98339784,
+       1592.09502535, 1624.78720227, 1570.11308717, 1539.60460303,
+       1582.00596324, 1345.54016792, 1489.42855398, 1710.90266775,
+       1712.59705453, 1488.89176357, 1595.69075559, 1620.03252476,
+       1551.1257534 , 1364.89099284, 1519.67822337, 1995.44065207,
+       1929.0706437 , 2142.79570232, 1792.2967255 , 1744.6157808 ,
+       1505.21656909, 1890.80844256, 1699.06909213, 1862.47369574,
+       1794.75879886, 2037.59274059, 1335.90030641, 1543.58233473,
+       1515.15226733, 1535.96898677, 2171.6289332 , 1728.39876279,
+       1780.57448682, 2379.70803018, 1809.85588767, 1602.37545759,
+       1892.63730217, 2273.5551964 , 1553.1905515 , 1726.50414976,
+       1667.75204821, 1711.30553588, 1563.3225931 , 1764.9396505 ,
+       2009.24676917, 2384.24248841, 1676.37174787, 1747.60949784,
+       2071.42221582, 1573.25394918, 1861.79985674, 2116.76005325,
+       1586.62444609, 2338.8774132 , 2238.65926408, 2177.04549497,
+       2187.3531445 ])
+</pre></div>
+</div>
+</section>
+<section id="results-as-lists-arrays-and-dataframes">
+<h3>Results as lists, arrays, and DataFrames<a class="headerlink" href="#results-as-lists-arrays-and-dataframes" title="Link to this heading">#</a></h3>
+<p>Using <code class="xref py py-meth docutils literal notranslate"><span class="pre">mapdl.prnsol()</span></code> to check</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">mapdl</span><span class="o">.</span><span class="n">prnsol</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;PRIN&quot;</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>PRINT S    NODAL SOLUTION PER NODE
+
+ *** MAPDL - ENGINEERING ANALYSIS SYSTEM  RELEASE                  24.2     ***
+ Ansys Mechanical Enterprise Academic Student
+ 01055371  VERSION=LINUX x64     12:42:15  JAN 07, 2025 CP=     31.639
+
+ Lathe Cutter
+
+
+
+  ***** POST1 NODAL STRESS LISTING *****
+
+  LOAD STEP=     1  SUBSTEP=     1
+   TIME=    1.0000      LOAD CASE=   0
+
+    NODE     S1           S2           S3           SINT         SEQV
+     184   2657.4       104.13      -1710.5       4367.9       3800.7
+     185   2199.9       119.45      -1179.7       3379.6       2952.8
+     186   2031.9       87.415      -958.24       2990.2       2628.3
+     326   1967.7       129.86      -595.45       2563.2       2288.4
+     332   1929.3       89.608      -874.20       2803.5       2467.1
+     336   2557.0       58.236      -2060.1       4617.1       4003.0
+     346   1983.8       131.01      -846.32       2830.1       2489.7
+     347   2978.1       130.33      -2168.4       5146.5       4465.4
+     348   2577.8       61.414      -2072.2       4650.1       4031.6
+     349   1999.3       75.784      -1998.3       3997.6       3462.8
+     357   1981.7       109.67      -1060.4       3042.1       2657.8
+     358   2994.5       295.76      -1917.8       4912.2       4261.0
+     359   3181.3       211.89      -2236.5       5417.8       4699.2
+     360   2150.1       111.89      -1943.8       4094.0       3545.5
+     361   1581.9       52.906      -2005.9       3587.7       3118.3
+     366   2093.2       254.94      -986.09       3079.3       2683.4
+     368   2534.6       131.91      -1853.4       4388.0       3805.9
+     369   1998.3      -17.969      -2081.5       4079.8       3533.3
+     370   1493.9      -60.219      -2060.7       3554.5       3086.4
+     376   2175.2       147.12      -982.63       3157.8       2771.4
+     381   2282.0      -42.882      -1607.4       3889.3       3389.6
+     382   1791.6       9.0671      -2075.0       3866.6       3351.9
+     385   2924.6       108.89      -1555.7       4480.3       3922.5
+     392   2784.7       269.58      -1483.7       4268.4       3716.1
+     393   2725.0       121.29      -1960.0       4685.0       4065.7
+     394   2049.1       65.728      -1795.2       3844.2       3329.7
+     395   2929.0       123.41      -1660.5       4589.6       4007.4
+     396   2928.1       43.331      -1673.0       4601.1       4027.3
+     397   2818.9       160.02      -1833.3       4652.2       4042.6
+     779   2136.1       150.14      -1342.2       3478.2       3022.3
+     780   1942.8       164.40      -1009.9       2952.7       2574.9
+     891   1581.3      -73.395      -1924.0       3505.3       3037.2
+     892   1495.9      -67.436      -1822.7       3318.5       2875.5
+     893   1605.0       14.399      -1837.8       3442.8       2984.4
+     894   2041.3       55.679      -1950.3       3991.6       3456.9
+     969   1976.1       56.642      -1116.4       3092.5       2704.0
+     970   1914.5       132.92      -877.49       2792.0       2448.5
+     971   2167.6       383.19      -1387.4       3555.1       3078.8
+     973   1687.6      -146.09      -1485.9       3173.5       2759.4
+
+ *** MAPDL - ENGINEERING ANALYSIS SYSTEM  RELEASE                  24.2     ***
+ Ansys Mechanical Enterprise Academic Student
+ 01055371  VERSION=LINUX x64     12:42:15  JAN 07, 2025 CP=     31.640
+
+ Lathe Cutter
+
+
+
+  ***** POST1 NODAL STRESS LISTING *****
+
+  LOAD STEP=     1  SUBSTEP=     1
+   TIME=    1.0000      LOAD CASE=   0
+
+    NODE     S1           S2           S3           SINT         SEQV
+     974   1678.0      -64.527      -1295.4       2973.4       2587.7
+     975   1592.1      -104.87      -1497.9       3090.0       2680.4
+     976   1624.8      -84.077      -1435.9       3060.6       2656.6
+     979   1570.1      -178.23      -1608.5       3178.6       2757.3
+     992   1539.6       137.20      -735.60       2275.2       1988.1
+     993   1582.0       157.76      -542.43       2124.4       1875.1
+    1002   1345.5      -50.322      -1061.8       2407.4       2093.7
+    1003   1489.4       97.664      -717.15       2206.6       1932.6
+    1010   1710.9       114.95      -848.69       2559.6       2239.1
+    1011   1712.6       9.1008      -1068.8       2781.4       2429.0
+    1013   1488.9      -3.5241      -999.06       2487.9       2168.9
+    1030   1595.7      -214.85      -1780.2       3375.9       2926.1
+    1031   1620.0      -61.545      -1864.6       3484.6       3018.4
+    1060   1551.1      -193.93      -1596.4       3147.6       2731.2
+    1083   1364.9      -145.29      -1857.7       3222.6       2792.7
+    1084   1519.7      -82.636      -1770.8       3290.5       2849.9
+    1111   1995.4       74.004      -1974.3       3969.8       3438.5
+    1113   1929.1      -37.655      -1702.9       3632.0       3149.0
+    1115   2142.8       129.18      -1497.3       3640.1       3158.4
+    1116   1792.3       134.01      -1126.2       2918.5       2535.3
+    1117   1744.6       39.536      -1448.5       3193.1       2767.4
+    1119   1505.2      -194.66      -1735.8       3241.0       2807.9
+    1152   1890.8       286.00      -417.11       2307.9       2048.9
+    1157   1699.1       100.64      -1010.2       2709.3       2358.9
+    1161   1862.5       2.4250      -1554.5       3417.0       2963.1
+    1163   1794.8       187.75      -1412.9       3207.7       2777.9
+    1179   2037.6       76.527      -2087.0       4124.6       3573.5
+    1182   1335.9      -81.999      -1892.8       3228.7       2803.0
+    1191   1543.6       194.10      -444.00       1987.6       1757.7
+    1195   1515.2      -153.96      -1900.6       3415.7       2958.4
+    1196   1536.0       79.011      -521.97       2057.9       1832.9
+    1200   2171.6       27.617      -1585.2       3756.8       3264.3
+    1201   1728.4       73.642      -713.14       2441.5       2158.5
+    1202   1780.6       129.37      -864.45       2645.0       2314.1
+    1203   2379.7       27.127      -2138.9       4518.6       3914.3
+    1204   1809.9      -30.076      -1975.7       3785.5       3278.8
+    1205   1602.4       24.994      -1027.1       2629.5       2292.3
+    1206   1892.6      -25.168      -1870.6       3763.2       3259.2
+    1207   2273.6       91.723      -1686.1       3959.7       3435.1
+
+ *** MAPDL - ENGINEERING ANALYSIS SYSTEM  RELEASE                  24.2     ***
+ Ansys Mechanical Enterprise Academic Student
+ 01055371  VERSION=LINUX x64     12:42:15  JAN 07, 2025 CP=     31.640
+
+ Lathe Cutter
+
+
+
+  ***** POST1 NODAL STRESS LISTING *****
+
+  LOAD STEP=     1  SUBSTEP=     1
+   TIME=    1.0000      LOAD CASE=   0
+
+    NODE     S1           S2           S3           SINT         SEQV
+    1208   1553.2      -45.381      -1839.9       3393.1       2940.1
+    1209   1726.5      -125.53      -1706.7       3433.2       2976.3
+    1210   1667.8      -117.97      -1565.8       3233.6       2805.5
+    1211   1711.3      -21.493      -1838.7       3550.0       3074.7
+    1213   1563.3      -43.132      -715.62       2278.9       2028.1
+    1214   1764.9       6.8066      -1644.5       3409.5       2953.2
+    1222   2009.2       122.10      -1353.9       3363.1       2919.8
+    1224   2384.2       198.64      -2031.8       4416.1       3824.5
+    1225   1676.4      -19.065      -1865.6       3542.0       3068.4
+    1228   1747.6       158.26      -628.54       2376.2       2096.6
+    1229   2071.4       65.592      -1706.8       3778.2       3274.1
+    1231   1573.3      -197.22      -1702.0       3275.3       2839.6
+    1233   1861.8      -92.373      -1832.7       3694.5       3201.3
+    1234   2116.8       28.452      -1948.1       4064.9       3520.8
+    1235   1586.6      -183.65      -1739.7       3326.3       2882.6
+    1238   2338.9       134.21      -1974.6       4313.5       3735.9
+    1239   2238.7       87.313      -1802.0       4040.6       3501.8
+    1240   2177.0       141.77      -1624.6       3801.7       3295.1
+    1242   2187.4       103.31      -1745.2       3932.6       3407.8
+
+ MINIMUM VALUES
+ NODE        1182          1030           359          1191          1191
+ VALUE    1335.9      -214.85      -2236.5       1987.6       1757.7
+
+ MAXIMUM VALUES
+ NODE         359           971          1152           359           359
+ VALUE    3181.3       383.19      -417.11       5417.8       4699.2
+</pre></div>
+</div>
+<p>Use this command to obtain the data as a list.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mapdl_s_1_list</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">prnsol</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;PRIN&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#list" title="builtins.list" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mapdl_s_1_list</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[184.0, 2657.4, 104.13, -1710.5, 4367.9, 3800.7], [185.0, 2199.9, 119.45, -1179.7, 3379.6, 2952.8], [186.0, 2031.9, 87.415, -958.24, 2990.2, 2628.3], [326.0, 1967.7, 129.86, -595.45, 2563.2, 2288.4], [332.0, 1929.3, 89.608, -874.2, 2803.5, 2467.1], [336.0, 2557.0, 58.236, -2060.1, 4617.1, 4003.0], [346.0, 1983.8, 131.01, -846.32, 2830.1, 2489.7], [347.0, 2978.1, 130.33, -2168.4, 5146.5, 4465.4], [348.0, 2577.8, 61.414, -2072.2, 4650.1, 4031.6], [349.0, 1999.3, 75.784, -1998.3, 3997.6, 3462.8], [357.0, 1981.7, 109.67, -1060.4, 3042.1, 2657.8], [358.0, 2994.5, 295.76, -1917.8, 4912.2, 4261.0], [359.0, 3181.3, 211.89, -2236.5, 5417.8, 4699.2], [360.0, 2150.1, 111.89, -1943.8, 4094.0, 3545.5], [361.0, 1581.9, 52.906, -2005.9, 3587.7, 3118.3], [366.0, 2093.2, 254.94, -986.09, 3079.3, 2683.4], [368.0, 2534.6, 131.91, -1853.4, 4388.0, 3805.9], [369.0, 1998.3, -17.969, -2081.5, 4079.8, 3533.3], [370.0, 1493.9, -60.219, -2060.7, 3554.5, 3086.4], [376.0, 2175.2, 147.12, -982.63, 3157.8, 2771.4], [381.0, 2282.0, -42.882, -1607.4, 3889.3, 3389.6], [382.0, 1791.6, 9.0671, -2075.0, 3866.6, 3351.9], [385.0, 2924.6, 108.89, -1555.7, 4480.3, 3922.5], [392.0, 2784.7, 269.58, -1483.7, 4268.4, 3716.1], [393.0, 2725.0, 121.29, -1960.0, 4685.0, 4065.7], [394.0, 2049.1, 65.728, -1795.2, 3844.2, 3329.7], [395.0, 2929.0, 123.41, -1660.5, 4589.6, 4007.4], [396.0, 2928.1, 43.331, -1673.0, 4601.1, 4027.3], [397.0, 2818.9, 160.02, -1833.3, 4652.2, 4042.6], [779.0, 2136.1, 150.14, -1342.2, 3478.2, 3022.3], [780.0, 1942.8, 164.4, -1009.9, 2952.7, 2574.9], [891.0, 1581.3, -73.395, -1924.0, 3505.3, 3037.2], [892.0, 1495.9, -67.436, -1822.7, 3318.5, 2875.5], [893.0, 1605.0, 14.399, -1837.8, 3442.8, 2984.4], [894.0, 2041.3, 55.679, -1950.3, 3991.6, 3456.9], [969.0, 1976.1, 56.642, -1116.4, 3092.5, 2704.0], [970.0, 1914.5, 132.92, -877.49, 2792.0, 2448.5], [971.0, 2167.6, 383.19, -1387.4, 3555.1, 3078.8], [973.0, 1687.6, -146.09, -1485.9, 3173.5, 2759.4], [974.0, 1678.0, -64.527, -1295.4, 2973.4, 2587.7], [975.0, 1592.1, -104.87, -1497.9, 3090.0, 2680.4], [976.0, 1624.8, -84.077, -1435.9, 3060.6, 2656.6], [979.0, 1570.1, -178.23, -1608.5, 3178.6, 2757.3], [992.0, 1539.6, 137.2, -735.6, 2275.2, 1988.1], [993.0, 1582.0, 157.76, -542.43, 2124.4, 1875.1], [1002.0, 1345.5, -50.322, -1061.8, 2407.4, 2093.7], [1003.0, 1489.4, 97.664, -717.15, 2206.6, 1932.6], [1010.0, 1710.9, 114.95, -848.69, 2559.6, 2239.1], [1011.0, 1712.6, 9.1008, -1068.8, 2781.4, 2429.0], [1013.0, 1488.9, -3.5241, -999.06, 2487.9, 2168.9], [1030.0, 1595.7, -214.85, -1780.2, 3375.9, 2926.1], [1031.0, 1620.0, -61.545, -1864.6, 3484.6, 3018.4], [1060.0, 1551.1, -193.93, -1596.4, 3147.6, 2731.2], [1083.0, 1364.9, -145.29, -1857.7, 3222.6, 2792.7], [1084.0, 1519.7, -82.636, -1770.8, 3290.5, 2849.9], [1111.0, 1995.4, 74.004, -1974.3, 3969.8, 3438.5], [1113.0, 1929.1, -37.655, -1702.9, 3632.0, 3149.0], [1115.0, 2142.8, 129.18, -1497.3, 3640.1, 3158.4], [1116.0, 1792.3, 134.01, -1126.2, 2918.5, 2535.3], [1117.0, 1744.6, 39.536, -1448.5, 3193.1, 2767.4], [1119.0, 1505.2, -194.66, -1735.8, 3241.0, 2807.9], [1152.0, 1890.8, 286.0, -417.11, 2307.9, 2048.9], [1157.0, 1699.1, 100.64, -1010.2, 2709.3, 2358.9], [1161.0, 1862.5, 2.425, -1554.5, 3417.0, 2963.1], [1163.0, 1794.8, 187.75, -1412.9, 3207.7, 2777.9], [1179.0, 2037.6, 76.527, -2087.0, 4124.6, 3573.5], [1182.0, 1335.9, -81.999, -1892.8, 3228.7, 2803.0], [1191.0, 1543.6, 194.1, -444.0, 1987.6, 1757.7], [1195.0, 1515.2, -153.96, -1900.6, 3415.7, 2958.4], [1196.0, 1536.0, 79.011, -521.97, 2057.9, 1832.9], [1200.0, 2171.6, 27.617, -1585.2, 3756.8, 3264.3], [1201.0, 1728.4, 73.642, -713.14, 2441.5, 2158.5], [1202.0, 1780.6, 129.37, -864.45, 2645.0, 2314.1], [1203.0, 2379.7, 27.127, -2138.9, 4518.6, 3914.3], [1204.0, 1809.9, -30.076, -1975.7, 3785.5, 3278.8], [1205.0, 1602.4, 24.994, -1027.1, 2629.5, 2292.3], [1206.0, 1892.6, -25.168, -1870.6, 3763.2, 3259.2], [1207.0, 2273.6, 91.723, -1686.1, 3959.7, 3435.1], [1208.0, 1553.2, -45.381, -1839.9, 3393.1, 2940.1], [1209.0, 1726.5, -125.53, -1706.7, 3433.2, 2976.3], [1210.0, 1667.8, -117.97, -1565.8, 3233.6, 2805.5], [1211.0, 1711.3, -21.493, -1838.7, 3550.0, 3074.7], [1213.0, 1563.3, -43.132, -715.62, 2278.9, 2028.1], [1214.0, 1764.9, 6.8066, -1644.5, 3409.5, 2953.2], [1222.0, 2009.2, 122.1, -1353.9, 3363.1, 2919.8], [1224.0, 2384.2, 198.64, -2031.8, 4416.1, 3824.5], [1225.0, 1676.4, -19.065, -1865.6, 3542.0, 3068.4], [1228.0, 1747.6, 158.26, -628.54, 2376.2, 2096.6], [1229.0, 2071.4, 65.592, -1706.8, 3778.2, 3274.1], [1231.0, 1573.3, -197.22, -1702.0, 3275.3, 2839.6], [1233.0, 1861.8, -92.373, -1832.7, 3694.5, 3201.3], [1234.0, 2116.8, 28.452, -1948.1, 4064.9, 3520.8], [1235.0, 1586.6, -183.65, -1739.7, 3326.3, 2882.6], [1238.0, 2338.9, 134.21, -1974.6, 4313.5, 3735.9], [1239.0, 2238.7, 87.313, -1802.0, 4040.6, 3501.8], [1240.0, 2177.0, 141.77, -1624.6, 3801.7, 3295.1], [1242.0, 2187.4, 103.31, -1745.2, 3932.6, 3407.8]]
+</pre></div>
+</div>
+<p>Use this command to obtain the data as an array:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mapdl_s_1_array</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">prnsol</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;PRIN&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_array</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mapdl_s_1_array</span></a><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[[ 1.8400e+02  2.6574e+03  1.0413e+02 -1.7105e+03  4.3679e+03  3.8007e+03]
+ [ 1.8500e+02  2.1999e+03  1.1945e+02 -1.1797e+03  3.3796e+03  2.9528e+03]
+ [ 1.8600e+02  2.0319e+03  8.7415e+01 -9.5824e+02  2.9902e+03  2.6283e+03]
+ [ 3.2600e+02  1.9677e+03  1.2986e+02 -5.9545e+02  2.5632e+03  2.2884e+03]
+ [ 3.3200e+02  1.9293e+03  8.9608e+01 -8.7420e+02  2.8035e+03  2.4671e+03]
+ [ 3.3600e+02  2.5570e+03  5.8236e+01 -2.0601e+03  4.6171e+03  4.0030e+03]
+ [ 3.4600e+02  1.9838e+03  1.3101e+02 -8.4632e+02  2.8301e+03  2.4897e+03]
+ [ 3.4700e+02  2.9781e+03  1.3033e+02 -2.1684e+03  5.1465e+03  4.4654e+03]
+ [ 3.4800e+02  2.5778e+03  6.1414e+01 -2.0722e+03  4.6501e+03  4.0316e+03]
+ [ 3.4900e+02  1.9993e+03  7.5784e+01 -1.9983e+03  3.9976e+03  3.4628e+03]
+ [ 3.5700e+02  1.9817e+03  1.0967e+02 -1.0604e+03  3.0421e+03  2.6578e+03]
+ [ 3.5800e+02  2.9945e+03  2.9576e+02 -1.9178e+03  4.9122e+03  4.2610e+03]
+ [ 3.5900e+02  3.1813e+03  2.1189e+02 -2.2365e+03  5.4178e+03  4.6992e+03]
+ [ 3.6000e+02  2.1501e+03  1.1189e+02 -1.9438e+03  4.0940e+03  3.5455e+03]
+ [ 3.6100e+02  1.5819e+03  5.2906e+01 -2.0059e+03  3.5877e+03  3.1183e+03]
+ [ 3.6600e+02  2.0932e+03  2.5494e+02 -9.8609e+02  3.0793e+03  2.6834e+03]
+ [ 3.6800e+02  2.5346e+03  1.3191e+02 -1.8534e+03  4.3880e+03  3.8059e+03]
+ [ 3.6900e+02  1.9983e+03 -1.7969e+01 -2.0815e+03  4.0798e+03  3.5333e+03]
+ [ 3.7000e+02  1.4939e+03 -6.0219e+01 -2.0607e+03  3.5545e+03  3.0864e+03]
+ [ 3.7600e+02  2.1752e+03  1.4712e+02 -9.8263e+02  3.1578e+03  2.7714e+03]
+ [ 3.8100e+02  2.2820e+03 -4.2882e+01 -1.6074e+03  3.8893e+03  3.3896e+03]
+ [ 3.8200e+02  1.7916e+03  9.0671e+00 -2.0750e+03  3.8666e+03  3.3519e+03]
+ [ 3.8500e+02  2.9246e+03  1.0889e+02 -1.5557e+03  4.4803e+03  3.9225e+03]
+ [ 3.9200e+02  2.7847e+03  2.6958e+02 -1.4837e+03  4.2684e+03  3.7161e+03]
+ [ 3.9300e+02  2.7250e+03  1.2129e+02 -1.9600e+03  4.6850e+03  4.0657e+03]
+ [ 3.9400e+02  2.0491e+03  6.5728e+01 -1.7952e+03  3.8442e+03  3.3297e+03]
+ [ 3.9500e+02  2.9290e+03  1.2341e+02 -1.6605e+03  4.5896e+03  4.0074e+03]
+ [ 3.9600e+02  2.9281e+03  4.3331e+01 -1.6730e+03  4.6011e+03  4.0273e+03]
+ [ 3.9700e+02  2.8189e+03  1.6002e+02 -1.8333e+03  4.6522e+03  4.0426e+03]
+ [ 7.7900e+02  2.1361e+03  1.5014e+02 -1.3422e+03  3.4782e+03  3.0223e+03]
+ [ 7.8000e+02  1.9428e+03  1.6440e+02 -1.0099e+03  2.9527e+03  2.5749e+03]
+ [ 8.9100e+02  1.5813e+03 -7.3395e+01 -1.9240e+03  3.5053e+03  3.0372e+03]
+ [ 8.9200e+02  1.4959e+03 -6.7436e+01 -1.8227e+03  3.3185e+03  2.8755e+03]
+ [ 8.9300e+02  1.6050e+03  1.4399e+01 -1.8378e+03  3.4428e+03  2.9844e+03]
+ [ 8.9400e+02  2.0413e+03  5.5679e+01 -1.9503e+03  3.9916e+03  3.4569e+03]
+ [ 9.6900e+02  1.9761e+03  5.6642e+01 -1.1164e+03  3.0925e+03  2.7040e+03]
+ [ 9.7000e+02  1.9145e+03  1.3292e+02 -8.7749e+02  2.7920e+03  2.4485e+03]
+ [ 9.7100e+02  2.1676e+03  3.8319e+02 -1.3874e+03  3.5551e+03  3.0788e+03]
+ [ 9.7300e+02  1.6876e+03 -1.4609e+02 -1.4859e+03  3.1735e+03  2.7594e+03]
+ [ 9.7400e+02  1.6780e+03 -6.4527e+01 -1.2954e+03  2.9734e+03  2.5877e+03]
+ [ 9.7500e+02  1.5921e+03 -1.0487e+02 -1.4979e+03  3.0900e+03  2.6804e+03]
+ [ 9.7600e+02  1.6248e+03 -8.4077e+01 -1.4359e+03  3.0606e+03  2.6566e+03]
+ [ 9.7900e+02  1.5701e+03 -1.7823e+02 -1.6085e+03  3.1786e+03  2.7573e+03]
+ [ 9.9200e+02  1.5396e+03  1.3720e+02 -7.3560e+02  2.2752e+03  1.9881e+03]
+ [ 9.9300e+02  1.5820e+03  1.5776e+02 -5.4243e+02  2.1244e+03  1.8751e+03]
+ [ 1.0020e+03  1.3455e+03 -5.0322e+01 -1.0618e+03  2.4074e+03  2.0937e+03]
+ [ 1.0030e+03  1.4894e+03  9.7664e+01 -7.1715e+02  2.2066e+03  1.9326e+03]
+ [ 1.0100e+03  1.7109e+03  1.1495e+02 -8.4869e+02  2.5596e+03  2.2391e+03]
+ [ 1.0110e+03  1.7126e+03  9.1008e+00 -1.0688e+03  2.7814e+03  2.4290e+03]
+ [ 1.0130e+03  1.4889e+03 -3.5241e+00 -9.9906e+02  2.4879e+03  2.1689e+03]
+ [ 1.0300e+03  1.5957e+03 -2.1485e+02 -1.7802e+03  3.3759e+03  2.9261e+03]
+ [ 1.0310e+03  1.6200e+03 -6.1545e+01 -1.8646e+03  3.4846e+03  3.0184e+03]
+ [ 1.0600e+03  1.5511e+03 -1.9393e+02 -1.5964e+03  3.1476e+03  2.7312e+03]
+ [ 1.0830e+03  1.3649e+03 -1.4529e+02 -1.8577e+03  3.2226e+03  2.7927e+03]
+ [ 1.0840e+03  1.5197e+03 -8.2636e+01 -1.7708e+03  3.2905e+03  2.8499e+03]
+ [ 1.1110e+03  1.9954e+03  7.4004e+01 -1.9743e+03  3.9698e+03  3.4385e+03]
+ [ 1.1130e+03  1.9291e+03 -3.7655e+01 -1.7029e+03  3.6320e+03  3.1490e+03]
+ [ 1.1150e+03  2.1428e+03  1.2918e+02 -1.4973e+03  3.6401e+03  3.1584e+03]
+ [ 1.1160e+03  1.7923e+03  1.3401e+02 -1.1262e+03  2.9185e+03  2.5353e+03]
+ [ 1.1170e+03  1.7446e+03  3.9536e+01 -1.4485e+03  3.1931e+03  2.7674e+03]
+ [ 1.1190e+03  1.5052e+03 -1.9466e+02 -1.7358e+03  3.2410e+03  2.8079e+03]
+ [ 1.1520e+03  1.8908e+03  2.8600e+02 -4.1711e+02  2.3079e+03  2.0489e+03]
+ [ 1.1570e+03  1.6991e+03  1.0064e+02 -1.0102e+03  2.7093e+03  2.3589e+03]
+ [ 1.1610e+03  1.8625e+03  2.4250e+00 -1.5545e+03  3.4170e+03  2.9631e+03]
+ [ 1.1630e+03  1.7948e+03  1.8775e+02 -1.4129e+03  3.2077e+03  2.7779e+03]
+ [ 1.1790e+03  2.0376e+03  7.6527e+01 -2.0870e+03  4.1246e+03  3.5735e+03]
+ [ 1.1820e+03  1.3359e+03 -8.1999e+01 -1.8928e+03  3.2287e+03  2.8030e+03]
+ [ 1.1910e+03  1.5436e+03  1.9410e+02 -4.4400e+02  1.9876e+03  1.7577e+03]
+ [ 1.1950e+03  1.5152e+03 -1.5396e+02 -1.9006e+03  3.4157e+03  2.9584e+03]
+ [ 1.1960e+03  1.5360e+03  7.9011e+01 -5.2197e+02  2.0579e+03  1.8329e+03]
+ [ 1.2000e+03  2.1716e+03  2.7617e+01 -1.5852e+03  3.7568e+03  3.2643e+03]
+ [ 1.2010e+03  1.7284e+03  7.3642e+01 -7.1314e+02  2.4415e+03  2.1585e+03]
+ [ 1.2020e+03  1.7806e+03  1.2937e+02 -8.6445e+02  2.6450e+03  2.3141e+03]
+ [ 1.2030e+03  2.3797e+03  2.7127e+01 -2.1389e+03  4.5186e+03  3.9143e+03]
+ [ 1.2040e+03  1.8099e+03 -3.0076e+01 -1.9757e+03  3.7855e+03  3.2788e+03]
+ [ 1.2050e+03  1.6024e+03  2.4994e+01 -1.0271e+03  2.6295e+03  2.2923e+03]
+ [ 1.2060e+03  1.8926e+03 -2.5168e+01 -1.8706e+03  3.7632e+03  3.2592e+03]
+ [ 1.2070e+03  2.2736e+03  9.1723e+01 -1.6861e+03  3.9597e+03  3.4351e+03]
+ [ 1.2080e+03  1.5532e+03 -4.5381e+01 -1.8399e+03  3.3931e+03  2.9401e+03]
+ [ 1.2090e+03  1.7265e+03 -1.2553e+02 -1.7067e+03  3.4332e+03  2.9763e+03]
+ [ 1.2100e+03  1.6678e+03 -1.1797e+02 -1.5658e+03  3.2336e+03  2.8055e+03]
+ [ 1.2110e+03  1.7113e+03 -2.1493e+01 -1.8387e+03  3.5500e+03  3.0747e+03]
+ [ 1.2130e+03  1.5633e+03 -4.3132e+01 -7.1562e+02  2.2789e+03  2.0281e+03]
+ [ 1.2140e+03  1.7649e+03  6.8066e+00 -1.6445e+03  3.4095e+03  2.9532e+03]
+ [ 1.2220e+03  2.0092e+03  1.2210e+02 -1.3539e+03  3.3631e+03  2.9198e+03]
+ [ 1.2240e+03  2.3842e+03  1.9864e+02 -2.0318e+03  4.4161e+03  3.8245e+03]
+ [ 1.2250e+03  1.6764e+03 -1.9065e+01 -1.8656e+03  3.5420e+03  3.0684e+03]
+ [ 1.2280e+03  1.7476e+03  1.5826e+02 -6.2854e+02  2.3762e+03  2.0966e+03]
+ [ 1.2290e+03  2.0714e+03  6.5592e+01 -1.7068e+03  3.7782e+03  3.2741e+03]
+ [ 1.2310e+03  1.5733e+03 -1.9722e+02 -1.7020e+03  3.2753e+03  2.8396e+03]
+ [ 1.2330e+03  1.8618e+03 -9.2373e+01 -1.8327e+03  3.6945e+03  3.2013e+03]
+ [ 1.2340e+03  2.1168e+03  2.8452e+01 -1.9481e+03  4.0649e+03  3.5208e+03]
+ [ 1.2350e+03  1.5866e+03 -1.8365e+02 -1.7397e+03  3.3263e+03  2.8826e+03]
+ [ 1.2380e+03  2.3389e+03  1.3421e+02 -1.9746e+03  4.3135e+03  3.7359e+03]
+ [ 1.2390e+03  2.2387e+03  8.7313e+01 -1.8020e+03  4.0406e+03  3.5018e+03]
+ [ 1.2400e+03  2.1770e+03  1.4177e+02 -1.6246e+03  3.8017e+03  3.2951e+03]
+ [ 1.2420e+03  2.1874e+03  1.0331e+02 -1.7452e+03  3.9326e+03  3.4078e+03]]
+</pre></div>
+</div>
+<p>or as a DataFrame:</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="pandas.core.frame.DataFrame" class="sphx-glr-backref-module-pandas-core-frame sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">mapdl_s_1_df</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">prnsol</span><span class="p">(</span><span class="s2">&quot;S&quot;</span><span class="p">,</span> <span class="s2">&quot;PRIN&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+<a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.head.html#pandas.DataFrame.head" title="pandas.DataFrame.head" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-method"><span class="n">mapdl_s_1_df</span><span class="o">.</span><span class="n">head</span></a><span class="p">()</span>
+</pre></div>
+</div>
+<div class="output_subarea output_html rendered_html output_result">
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>NODE</th>
+      <th>S1</th>
+      <th>S2</th>
+      <th>S3</th>
+      <th>SINT</th>
+      <th>SEQV</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>184.0</td>
+      <td>2657.4</td>
+      <td>104.130</td>
+      <td>-1710.50</td>
+      <td>4367.9</td>
+      <td>3800.7</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>185.0</td>
+      <td>2199.9</td>
+      <td>119.450</td>
+      <td>-1179.70</td>
+      <td>3379.6</td>
+      <td>2952.8</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>186.0</td>
+      <td>2031.9</td>
+      <td>87.415</td>
+      <td>-958.24</td>
+      <td>2990.2</td>
+      <td>2628.3</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>326.0</td>
+      <td>1967.7</td>
+      <td>129.860</td>
+      <td>-595.45</td>
+      <td>2563.2</td>
+      <td>2288.4</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>332.0</td>
+      <td>1929.3</td>
+      <td>89.608</td>
+      <td>-874.20</td>
+      <td>2803.5</td>
+      <td>2467.1</td>
+    </tr>
+  </tbody>
+</table>
+</div>
+</div>
+<br />
+<br /><p>Use this command to obtain the data as a DataFrame, which is a.
+<a class="reference external" href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.html">Pandas data type</a>.
+Because the Pandas module is imported, you can use its functions.
+For example, you can write principal stresses to a file.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="c1"># mapdl_s_1_df.to_csv(path + &#39;\prin-stresses.csv&#39;)</span>
+<span class="c1"># mapdl_s_1_df.to_json(path + &#39;\prin-stresses.json&#39;)</span>
+<a href="https://pandas.pydata.org/docs/reference/api/pandas.DataFrame.to_html.html#pandas.DataFrame.to_html" title="pandas.DataFrame.to_html" class="sphx-glr-backref-module-pandas sphx-glr-backref-type-py-method"><span class="n">mapdl_s_1_df</span><span class="o">.</span><span class="n">to_html</span></a><span class="p">(</span><a href="https://docs.python.org/3/library/stdtypes.html#str" title="builtins.str" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">path</span></a> <span class="o">+</span> <span class="s2">&quot;\prin-stresses.html&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+</section>
+<section id="step-7-advanced-plotting">
+<h2>Step 7: Advanced plotting<a class="headerlink" href="#step-7-advanced-plotting" title="Link to this heading">#</a></h2>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">allsel</span><span class="p">()</span>
+<a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">principal_1</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">post_processing</span><span class="o">.</span><span class="n">nodal_principal_stress</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Load this result into the VTK grid.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.pyvista.org/api/core/_autosummary/pyvista.UnstructuredGrid.html#pyvista.UnstructuredGrid" title="pyvista.UnstructuredGrid" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a> <span class="o">=</span> <span class="n">mapdl</span><span class="o">.</span><span class="n">mesh</span><span class="o">.</span><a href="https://docs.pyvista.org/api/core/_autosummary/pyvista.UnstructuredGrid.html#pyvista.UnstructuredGrid" title="pyvista.UnstructuredGrid" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a>
+<a href="https://docs.pyvista.org/api/core/_autosummary/pyvista.UnstructuredGrid.html#pyvista.UnstructuredGrid" title="pyvista.UnstructuredGrid" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">grid</span></a><span class="p">[</span><span class="s2">&quot;p1&quot;</span><span class="p">]</span> <span class="o">=</span> <a href="https://numpy.org/doc/stable/reference/generated/numpy.ndarray.html#numpy.ndarray" title="numpy.ndarray" class="sphx-glr-backref-module-numpy sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">principal_1</span></a>
+
+<a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sbar_kwargs</span></a> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;color&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;1st Principal Stress (psi)&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;vertical&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="s2">&quot;n_labels&quot;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Generate a single horizontal slice along the XY plane.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>PyVista’s <code class="docutils literal notranslate"><span class="pre">eye_dome_lighting</span></code> method is used here to enhance the plots of the slices.
+For more information, see`Eye Dome Lighting &lt;<a class="reference external" href="https://docs.pyvista.org/examples/02-plot/edl.html">pyvista_eye_dome_lighting</a>&gt;`_.</p>
+</div>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.pyvista.org/api/core/_autosummary/pyvista.PolyData.html#pyvista.PolyData" title="pyvista.PolyData" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">single_slice</span></a> <span class="o">=</span> <a href="https://docs.pyvista.org/api/core/_autosummary/pyvista.DataSetFilters.slice.html#pyvista.DataSetFilters.slice" title="pyvista.DataSetFilters.slice" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-method"><span class="n">grid</span><span class="o">.</span><span class="n">slice</span></a><span class="p">(</span><span class="n">normal</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">origin</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+<a href="https://docs.pyvista.org/api/core/_autosummary/pyvista.DataSet.plot.html#pyvista.DataSet.plot" title="pyvista.DataSet.plot" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-method"><span class="n">single_slice</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span>
+    <span class="n">scalars</span><span class="o">=</span><span class="s2">&quot;p1&quot;</span><span class="p">,</span>
+    <span class="n">background</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
+    <span class="n">lighting</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">eye_dome_lighting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">,</span>
+    <span class="n">n_colors</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
+    <span class="n">scalar_bar_args</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sbar_kwargs</span></a><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_lathe_cutter_009.png" srcset="../../../_images/sphx_glr_lathe_cutter_009.png" alt="lathe cutter" class = "sphx-glr-single-img"/><p>Generate a plot with three slice planes.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.pyvista.org/api/core/_autosummary/pyvista.MultiBlock.html#pyvista.MultiBlock" title="pyvista.MultiBlock" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">slices</span></a> <span class="o">=</span> <a href="https://docs.pyvista.org/api/core/_autosummary/pyvista.DataSetFilters.slice_orthogonal.html#pyvista.DataSetFilters.slice_orthogonal" title="pyvista.DataSetFilters.slice_orthogonal" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-method"><span class="n">grid</span><span class="o">.</span><span class="n">slice_orthogonal</span></a><span class="p">()</span>
+<a href="https://docs.pyvista.org/api/core/_autosummary/pyvista.MultiBlock.plot.html#pyvista.MultiBlock.plot" title="pyvista.MultiBlock.plot" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-method"><span class="n">slices</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span>
+    <span class="n">scalars</span><span class="o">=</span><span class="s2">&quot;p1&quot;</span><span class="p">,</span>
+    <span class="n">background</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
+    <span class="n">lighting</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">eye_dome_lighting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">,</span>
+    <span class="n">n_colors</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
+    <span class="n">scalar_bar_args</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sbar_kwargs</span></a><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_lathe_cutter_010.png" srcset="../../../_images/sphx_glr_lathe_cutter_010.png" alt="lathe cutter" class = "sphx-glr-single-img"/><p>Generate a grid with multiple slices in the same plane.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><a href="https://docs.pyvista.org/api/core/_autosummary/pyvista.MultiBlock.html#pyvista.MultiBlock" title="pyvista.MultiBlock" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">slices</span></a> <span class="o">=</span> <a href="https://docs.pyvista.org/api/core/_autosummary/pyvista.DataSetFilters.slice_along_axis.html#pyvista.DataSetFilters.slice_along_axis" title="pyvista.DataSetFilters.slice_along_axis" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-method"><span class="n">grid</span><span class="o">.</span><span class="n">slice_along_axis</span></a><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">)</span>
+<a href="https://docs.pyvista.org/api/core/_autosummary/pyvista.MultiBlock.plot.html#pyvista.MultiBlock.plot" title="pyvista.MultiBlock.plot" class="sphx-glr-backref-module-pyvista sphx-glr-backref-type-py-method"><span class="n">slices</span><span class="o">.</span><span class="n">plot</span></a><span class="p">(</span>
+    <span class="n">scalars</span><span class="o">=</span><span class="s2">&quot;p1&quot;</span><span class="p">,</span>
+    <span class="n">background</span><span class="o">=</span><span class="s2">&quot;white&quot;</span><span class="p">,</span>
+    <span class="n">show_edges</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">lighting</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">eye_dome_lighting</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">cmap</span><span class="o">=</span><span class="s2">&quot;jet&quot;</span><span class="p">,</span>
+    <span class="n">n_colors</span><span class="o">=</span><span class="mi">9</span><span class="p">,</span>
+    <span class="n">scalar_bar_args</span><span class="o">=</span><a href="https://docs.python.org/3/library/stdtypes.html#dict" title="builtins.dict" class="sphx-glr-backref-module-builtins sphx-glr-backref-type-py-class sphx-glr-backref-instance"><span class="n">sbar_kwargs</span></a><span class="p">,</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+<img src="../../../_images/sphx_glr_lathe_cutter_011.png" srcset="../../../_images/sphx_glr_lathe_cutter_011.png" alt="lathe cutter" class = "sphx-glr-single-img"/><p>Finally, exit MAPDL.</p>
+<div class="highlight-Python notranslate"><div class="highlight"><pre><span></span><span class="n">mapdl</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> (1 minutes 5.119 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-examples-gallery-examples-00-mapdl-examples-lathe-cutter-py">
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../../_downloads/99cd4b74bfef56e91af40925a4b31a9b/lathe_cutter.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">lathe_cutter.ipynb</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../../_downloads/40e09c69e156638398f7e5b3df296d8f/lathe_cutter.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">lathe_cutter.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-zip docutils container">
+<p><a class="reference download internal" download="" href="../../../_downloads/20d8f82d9bff92a800a75c8b5ef975d7/lathe_cutter.zip"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">zipped:</span> <span class="pre">lathe_cutter.zip</span></code></a></p>
+</div>
+</div>
+</section>
+</section>
+
+
+                </article>
+              
+              
+              
+              
+              
+            </div>
+            
+            
+              
+                <div class="bd-sidebar-secondary bd-toc"><div class="sidebar-secondary-items sidebar-secondary__inner">
+
+
+  <div class="sidebar-secondary-item">
+<div
+    id="pst-page-navigation-heading-2"
+    class="page-toc tocsection onthispage">
+    <i class="fa-solid fa-list"></i> On this page
+  </div>
+  <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
+    <ul class="visible nav section-nav flex-column">
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#objective">Objective</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#contents">Contents</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-1-variables-and-launch">Step 1: Variables and launch</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-2-geometry-mesh-and-mapdl-parameters">Step 2: Geometry, mesh, and MAPDL parameters</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-3-coordinate-system-and-load">Step 3: Coordinate system and load</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-4-pressure-load">Step 4: Pressure load</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-5-plotting">Step 5: Plotting</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-part-of-model">Plotting - Part of Model</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#plotting-legend-options">Plotting - Legend Options</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-6-postprocessing">Step 6: Postprocessing</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#results-list">Results List</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#results-as-lists-arrays-and-dataframes">Results as lists, arrays, and DataFrames</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#step-7-advanced-plotting">Step 7: Advanced plotting</a></li>
+</ul>
+  </nav></div>
+
+  <div class="sidebar-secondary-item"> 
+<div class="tocsection editthispage">
+  <a href="https://github.com/ansys/pymapdl/edit/main/doc/source/examples/gallery_examples/00-mapdl-examples/lathe_cutter.rst">
+    <i class="fa-solid fa-pencil"></i>
+       Edit
+    on GitHub  
+  </a>
+</div>
+
+</div>
+
+</div></div>
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/bootstrap.js?digest=dfe6caa3a7d634c4db9b"></script>
+<script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b"></script>
+
+<link rel="stylesheet" href="../../../_static/css/fuse-search.css">
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.7/require.min.js"></script>
+
+<script>
+// Passing the search options to the search.js file
+const SEARCH_OPTIONS = JSON.parse('{"keys": ["title", "text"], "limit": 10, "threshold": 0.2}');
+const SEARCH_FILE = "../../../_static/search.json";
+</script>
+
+
+<script src="../../../_static/js/search.js"></script>
+<footer class="bd-footer" font-size="4px">
+  <div class="bd-footer__inner bd-page-width">
+    <div class="footer-items__start">
+      <div class="footer-item">
+        <p class="copyright">
+          PyMAPDL 0.69.dev0 © Copyright (c) 2024 ANSYS, Inc. All rights reserved.
+          <br>
+        </p>
+      </div>
+    </div>
+    <div class="footer-items__end">
+      <div class="footer-item">
+        <p class="theme-version">
+          Built with the
+          <a href="https://sphinxdocs.ansys.com/version/stable/index.html">Ansys Sphinx Theme</a>
+          1.2.4. and
+           <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+          on <span id="date"></span>
+        </p>
+        <script>
+          var options = { day: "numeric", month: "long", year: "numeric" };
+          var lastModifiedDate = new Date(document.lastModified);
+          var date = lastModifiedDate.toLocaleDateString("en-US", options);
+          document.getElementById("date").innerHTML = date;
+        </script>
+      </div>
+    </div>
+  </div>
+</footer>
+
+  </body>
+</html>
