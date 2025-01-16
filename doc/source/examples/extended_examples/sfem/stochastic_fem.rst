@@ -215,4 +215,8 @@ We are to do the following:
    Carlo simulation to the probability density function of the response :math:`u`, at the bottom right corner 
    of the cantilever. 
 
-2. If :math:`u` must not exceed :math:`0.2 m`, how confident can we be of this requirement?
+2. If :math:`u` must not exceed :math:`0.2 \thickspace m`, how confident can we be of this requirement?
+
+Evaluating 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Firstly, we implement code that allows us to represent the zero-mean field :math:`f`. 
