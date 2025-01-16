@@ -57,6 +57,7 @@ from common import (
 # Setting testing environment
 # ---------------------------
 #
+pytest_plugins = ["pytest_profiling"]
 
 DEBUG_TESTING = debug_testing()
 TESTING_MINIMAL = testing_minimal()

@@ -35,6 +35,9 @@ echo "Copying docker launch log..."
 cp mapdl_launch_0.log ./"$LOG_NAMES"/mapdl_launch_0.log || echo "MAPDL launch docker log not found."
 cp mapdl_launch_1.log ./"$LOG_NAMES"/mapdl_launch_1.log || echo "MAPDL launch docker log not found."
 
+echo "Copying the profiling files..."
+cp prof ./"$LOG_NAMES"/prof || echo "No profile files could be found"
+
 echo "Collecting file structure..."
 ls -R > ./"$LOG_NAMES"/files_structure.txt || echo "Failed to copy file structure to a file"
 
