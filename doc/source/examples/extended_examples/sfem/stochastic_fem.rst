@@ -99,7 +99,7 @@ realization/sample function assigned to each outcome of an experiment.
 
 .. figure:: realizations.png
 
-   A random field as a collection of random variables or realizations
+   A random field :math:`E(x)` viewed as a collection of random variables or as realizations
 
 .. note::
   The concepts above generalize to more dimensions, for example, a random vector instead of a random
@@ -124,24 +124,37 @@ For a zero-mean stationary Gaussian process, :math:`X(t)`, with covariance funct
 the K-L series expansion is given by:
 
 .. math:: X(t) = \sum_{n=1}^\infty \sqrt{\lambda_{c,n}}\cdot\varphi_{c,n}(t)\cdot\xi_{c,n} + \sum_{n=1}^\infty \sqrt{\lambda_{s,n}}\cdot\varphi_{s,n}(t)\cdot\xi_{s,n},\quad t\in\mathbb{D}
+   :label: K-L expansion
 
 where,
 
-.. math:: \lambda_{c,n} = \frac{2b}{1+\omega_{c,n}^2\cdot b^2},\quad \varphi_{c,n}(t) = k_{c,n}\cos(\omega_{c,n}\cdot t)
-.. math:: k_{c,n} = \frac{1}{\sqrt{a+\frac{\sin(2\omega_{c,n}\cdot a)}{2\omega_{c,n}}}}
+.. math:: 
+   :label: cosine terms
+
+   \lambda_{c,n} = \frac{2b}{1+\omega_{c,n}^2\cdot b^2},\quad \varphi_{c,n}(t) = k_{c,n}\cos(\omega_{c,n}\cdot t)
+
+   k_{c,n} = \frac{1}{\sqrt{a+\frac{\sin(2\omega_{c,n}\cdot a)}{2\omega_{c,n}}}}
 
 where :math:`\omega_{c,n}` is obtained as the solution of
 
 .. math:: \frac{1}{b} - \omega_{c,n}\cdot\tan(\omega_{c,n}\cdot a) = 0 \quad \text{in the range} \quad \biggl[(n-1)\frac{\pi}{a}, (n-\frac{1}{2})\frac{\pi}{a}\biggr]
+   :label: cosine equation
 
 and,
 
-.. math:: \lambda_{s,n} = \frac{2b}{1+\omega_{s,n}^2\cdot b^2},\quad \varphi_{s,n}(t) = k_{s,n}\sin(\omega_{s,n}\cdot t)
-.. math:: k_{s,n} = \frac{1}{\sqrt{a-\frac{\sin(2\omega_{s,n}\cdot a)}{2\omega_{s,n}}}}
+.. math:: 
+   :label: sine terms
+
+   \lambda_{s,n} = \frac{2b}{1+\omega_{s,n}^2\cdot b^2},\quad \varphi_{s,n}(t) = k_{s,n}\sin(\omega_{s,n}\cdot t)
+ 
+   k_{s,n} = \frac{1}{\sqrt{a-\frac{\sin(2\omega_{s,n}\cdot a)}{2\omega_{s,n}}}}
 
 where :math:`\omega_{s,n}` is obtained as the solution of
 
 .. math:: \frac{1}{b}\cdot\tan(\omega_{s,n}\cdot a) + \omega_{s,n} = 0 \quad \text{in the range} \quad \biggl[(n-\frac{1}{2})\frac{\pi}{a}, n\frac{\pi}{a}\biggr]
+   :label: sine equation
+
+It is worth mentioning that :math:`\lambda` and :math:`\omega` in the series expansion are referred to as eigenvalue and frequency respectively.
 
 .. note::
   In the case of an asymmetric domain e.g. :math:`\mathbb{D}=[-t_{min},t_{max}]`, a shift parameter :math:`T = (t_{min}+t_{max})/2` is required and the corresponding
@@ -159,17 +172,21 @@ that :math:`\lambda_{c,n}` and :math:`\lambda_{s,n}` converge to zero fast (in t
 this means that the infinite series of the K-L expansion above is truncated after a finite number of terms, giving the approximation:
 
 .. math:: X(t) \approx \hat{X}(t) = \sum_{n=1}^P \sqrt{\lambda_{c,n}}\cdot\varphi_{c,n}(t)\cdot\xi_{c,n} + \sum_{n=1}^Q \sqrt{\lambda_{s,n}}\cdot\varphi_{s,n}(t)\cdot\xi_{s,n}
+   :label: approximation
 
-The equation above is computationally feasible to handle. Let's summarize how it can be used to generate realizations of :math:`X(t)`.
+Equation :math:numref:`approximation` is computationally feasible to handle. Let's summarize how it can be used to generate realizations of :math:`X(t)`:
 
 1. To generate the j-th realization, we draw a random value for each :math:`\xi_{c,n}, n=1,\dots ,P, \quad \xi_{s,n}, n=1,\dots ,Q` from the standard
    normal distribution :math:`\mathcal{N}(0,1)` and obtain :math:`\xi_{c,1}^j,\dots ,\xi_{c,P}^j, \quad \xi_{s,1}^j,\dots ,\xi_{s,P}^j`
 
-2. We insert these values into the equation in other to obtain the j-th realization:
+2. We insert these values into equation :math:numref:`approximation` in other to obtain the j-th realization:
 
 .. math:: \hat{X}^j(t) = \sum_{n=1}^P \sqrt{\lambda_{c,n}}\cdot\varphi_{c,n}(t)\cdot\xi_{c,n}^j + \sum_{n=1}^Q \sqrt{\lambda_{s,n}}\cdot\varphi_{s,n}(t)\cdot\xi_{s,n}^j
 
 3. To generate additional realizations, we simply draw new random values for :math:`\xi_{c,n}, n=1,\dots ,P, \quad \xi_{s,n}, n=1,\dots ,Q` each from :math:`\mathcal{N}(0,1)`
+
+.. note::
+  In this case of a field, the same discussion above applies as the only difference is a change in notation (e.g. :math:`t` to :math:`x`).
 
 The Monte Carlo simulation
 --------------------------
@@ -215,8 +232,115 @@ We are to do the following:
    Carlo simulation to the probability density function of the response :math:`u`, at the bottom right corner 
    of the cantilever. 
 
-2. If :math:`u` must not exceed :math:`0.2 \thickspace m`, how confident can we be of this requirement?
+2. If :math:`u` must not exceed :math:`0.2 \: m`, how confident can we be of this requirement?
 
-Evaluating 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Firstly, we implement code that allows us to represent the zero-mean field :math:`f`. 
+.. note::
+  This example really emphasizes how PyMAPDL can help to supercharge workflows. At a very high level, what will be done
+  in subsequent sections involves using python libraries to handle computations related to the stochasticity of the problem, and
+  using MAPDL to run the necessary simulations, all within the comfort of a python environment.
+
+Evaluating the young modulus
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Firstly, we implement code that allows us to represent the zero-mean Gaussian field :math:`f`. This simply means solving
+:math:numref:`cosine equation` and :math:numref:`sine equation`, then substituting calculated values into
+:math:numref:`cosine terms` and :math:numref:`sine terms` to obtain the constant terms in those equations. The
+number of retained terms :math:`P` and :math:`Q` in :math:numref:`approximation` can be automatically determined
+by structuring our code to stop computing values when :math:`\lambda_{c,n}, \lambda_{s,n}` become lower than
+our desired accuracy level. The implementation is as follows:
+
+.. literalinclude:: sfem.py
+  :language: python
+  :lines: 1-173
+
+The next step is to put this all together in a function that expresses :math:`f` using equation :math:numref:`approximation`
+as follows:
+
+.. literalinclude:: sfem.py
+  :language: python
+  :lines: 176-236
+
+And then the function for evaluating the young modulus itself is straight forward:
+
+.. literalinclude:: sfem.py
+  :language: python
+  :lines: 239-266
+
+Realizations of the young modulus
++++++++++++++++++++++++++++++++++++++++++++++
+We can now generate sample realizations of the young's modulus to see how they look like:
+
+.. literalinclude:: sfem.py
+  :language: python
+  :lines: 269-317
+
+.. figure:: young_modulus_realizations.png
+   
+   10 realizations of the young's modulus depicting randomness from one realization to another
+
+Verification of the implementation
+++++++++++++++++++++++++++++++++++
+Let us compute the theoretical mean and variance of the young modulus and then show that our implementation of the
+young's modulus is correct.
+
+For the mean:
+
+.. math::
+  :label: theoretical mean
+
+  \mathbb{E}(E) = \mathbb{E}(10^5(1+0.10f))
+
+  \mathbb{E}(E) = 10^5(1 + 0.1\mathbb{E}(f))
+
+  \mathbb{E}(E) = 10^5(1 + 0.1(0)) = 10^5 \: kN/m^2
+
+
+For the variance:
+
+.. math::
+  :label: theoretical variance
+
+  Var(E) = \mathbb{E}(E^2) - [\mathbb{E}(E)]^2
+
+  Var(E) = \mathbb{E}[10^{10}(1 + 0.2f + 0.01f^2)] - 10^{10}
+
+  Var(E) = 10^{10}[1 + 0.2\mathbb{E}(f) + 0.01\mathbb{E}(f^2)] - 10^{10}
+
+  Var(E) = 10^{10}[0.2(0) + 0.01(1)]
+
+  Var(E) = 10^8 \: {kN}^2/m^4
+
+We should then expect that as the number of realizations increase indefinitely, the ensemble mean and
+variance will converge towards theoretical values calculated in :math:numref:`theoretical mean` and :math:numref:`theoretical variance`:
+
+First we generate a lot of realizations, 5000 is enough i.e. the same as the number of simulations we are required to run later on. We then
+perform some statistical processing on these realizations
+
+.. literalinclude:: sfem.py
+  :language: python
+  :lines: 319-352
+
+We can then generate a plot of the mean vs the number of realizations
+
+.. literalinclude:: sfem.py
+  :language: python
+  :lines: 354-364
+
+.. figure:: mean.png
+   
+   Convergence of the mean to the true value as the number of realizations is increased
+
+And also a plot of the variance vs the number of realizations
+
+.. literalinclude:: sfem.py
+  :language: python
+  :lines: 366-376
+
+.. figure:: variance.png
+
+  Convergence of the variance to the true value as the number of realizations is increased
+
+The plots above confirms that our implementation is indeed correct. If one desires more accuracy, the minimum eigenvalue
+can be further decreased but the value already chosen is sufficient.
+
+Running the simulations
+~~~~~~~~~~~~~~~~~~~~~~~
