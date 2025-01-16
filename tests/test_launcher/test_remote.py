@@ -19,3 +19,62 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+from unittest.mock import patch
+
+import pytest
+
+from ansys.mapdl.core.launcher.remote import _NON_VALID_ARGS, connect_to_mapdl
+
+
+def test_connect_to_mapdl():
+    mapdl = connect_to_mapdl()
+
+    assert "PREP7" in mapdl.prep7()
+
+    assert not mapdl._start_instance
+    assert not mapdl._launched
+
+    mapdl.exit(force=False)
+
+
+@pytest.mark.parametrize("arg", _NON_VALID_ARGS)
+def test_connect_to_mapdl_exceptions(arg):
+    with pytest.raises(
+        ValueError, match=f"'connect_to_mapdl' does not accept '{arg}' argument."
+    ):
+        connect_to_mapdl(**{arg: True})
+
+
+_IP_TEST = "my_ip"
+
+
+@pytest.mark.parametrize(
+    "arg,value",
+    (
+        ("ip", _IP_TEST),
+        ("port", 50053),
+        ("loglevel", "DEBUG"),
+        ("loglevel", "ERROR"),
+        ("start_timeout", 12),
+        ("start_timeout", 15),
+        ("cleanup_on_exit", True),
+        ("cleanup_on_exit", False),
+        ("clear_on_connect", True),
+        ("clear_on_connect", False),
+        ("log_apdl", True),
+        ("log_apdl", False),
+        ("log_apdl", "log.out"),
+        ("print_com", False),
+    ),
+)
+@patch("socket.gethostbyname", lambda *args, **kwargs: _IP_TEST)
+@patch("socket.inet_aton", lambda *args, **kwargs: _IP_TEST)
+def test_connect_to_mapdl_kwargs(arg, value):
+    with patch("ansys.mapdl.core.launcher.remote.MapdlGrpc") as mock_mg:
+        args = {arg: value}
+        mapdl = connect_to_mapdl(**args)
+
+        mock_mg.assert_called_once()
+        kw = mock_mg.call_args_list[0].kwargs
+        assert "ip" in kw and kw["ip"] == _IP_TEST
+        assert arg in kw and kw[arg] == value

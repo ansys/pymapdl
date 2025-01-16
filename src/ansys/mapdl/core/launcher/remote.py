@@ -33,14 +33,50 @@ from ansys.mapdl.core.launcher.tools import (
 )
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
+_NON_VALID_ARGS = (
+    "add_env_vars",
+    "additional_switches",
+    "exec_file",
+    "jobname",
+    "launch_on_hpc",
+    "license_server_check",
+    "license_type",
+    "mapdl_output",
+    "mode",
+    "nproc",
+    "override",
+    "ram",
+    "remove_temp_dir_on_exit",
+    "replace_env_vars",
+    "run_location",
+    "running_on_hpc",
+    "start_instance",
+    "version",
+)
+
+
+def check_remote_args(args):
+    for each_arg in _NON_VALID_ARGS:
+        if each_arg in args:
+            raise ValueError(
+                f"'connect_to_mapdl' does not accept '{each_arg}' argument."
+            )
+        else:
+            if each_arg == "mode":
+                args[each_arg] = "grpc"
+            elif each_arg == "start_instance":
+                args[each_arg] = False
+            else:
+                args[each_arg] = None  # setting everything as None.
+
 
 def connect_to_mapdl(
+    port: Optional[int] = None,
+    ip: Optional[str] = None,
     *,
     loglevel: str = "ERROR",
     start_timeout: Optional[int] = None,
-    port: Optional[int] = None,
     cleanup_on_exit: bool = True,
-    ip: Optional[str] = None,
     clear_on_connect: bool = True,
     log_apdl: Optional[Union[bool, str]] = None,
     print_com: bool = False,
@@ -55,12 +91,7 @@ def connect_to_mapdl(
 
     check_kwargs(args)  # check if passing wrong arguments
 
-    if args.get("start_instance"):
-        raise ValueError(
-            "'connect_to_mapdl' only accept 'start_instance' equals 'False'. "
-            "If you intend to launch locally an instance use either "
-            "'launch_mapdl_grpc' or the infamous 'launch_mapdl(start_instance=True)'."
-        )
+    check_remote_args(args)
 
     pre_check_args(args)
 
@@ -68,17 +99,7 @@ def connect_to_mapdl(
 
     args["port"] = get_port(args["port"], args["start_instance"])
 
-    # Check for a valid connection mode
-    # args["mode"] = check_mode(args["mode"], args["version"])
-    if args.get("mode", "grpc") != "grpc":
-        raise ValueError("Only a 'grpc' instance can be connected to remotely.")
-
     start_parm = generate_start_parameters(args)
-
-    # Early exit for debugging.
-    if args["_debug_no_launch"]:
-        # Early exit, just for testing
-        return args  # type: ignore
 
     ########################################
     # Connecting to a remote instance
@@ -90,7 +111,7 @@ def connect_to_mapdl(
     start_parm["launched"] = False
 
     mapdl = MapdlGrpc(
-        cleanup_on_exit=False,
+        cleanup_on_exit=args["cleanup_on_exit"],
         loglevel=args["loglevel"],
         set_no_abort=args["set_no_abort"],
         use_vtk=args["use_vtk"],

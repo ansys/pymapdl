@@ -1176,8 +1176,6 @@ def pack_arguments(locals_):
     args["_debug_no_launch"] = locals_.get(
         "_debug_no_launch", locals_["kwargs"].get("_debug_no_launch", None)
     )
-    args.setdefault("launch_on_hpc", False)
-    args.setdefault("ip", None)
 
     return args
 
@@ -1564,6 +1562,9 @@ def pre_check_args(args: dict[str, Any]):
             "Hence you need to specify the number of cores you want to use using "
             "the argument 'nproc' in 'launch_mapdl'."
         )
+
+    args.setdefault("launch_on_hpc", False)
+    args.setdefault("ip", None)
 
 
 def get_cpus(args: Dict[str, Any]):
