@@ -19,15 +19,34 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+from unittest.mock import patch
 
-from ansys.mapdl.core.launcher.grpc import launch_mapdl_grpc
-from conftest import requires
+import pytest
+
+from ansys.mapdl.core.launcher.local import processing_local_arguments
 
 
-@requires("nostudent")
-def test_launch_mapdl_grpc():
+def test_processing_local_arguments():
+    pass
 
-    mapdl = launch_mapdl_grpc()
 
-    assert "PREP7" in mapdl.prep7()
-    mapdl.exit()
+@pytest.mark.parametrize("start_instance", [True, False, None, ""])
+@patch("ansys.mapdl.core.launcher.local.get_cpus", lambda *args, **kwargs: None)
+@patch("psutil.cpu_count", lambda *args, **kwargs: 4)
+def test_processing_local_arguments_start_instance(start_instance):
+    args = {
+        "exec_file": "my_path/v242/ansys/bin/ansys242",  # To skip checks
+        "launch_on_hpc": True,  # To skip checks
+        "kwargs": {},
+    }
+
+    if start_instance == "":
+        processing_local_arguments(args)
+    else:
+        args["start_instance"] = start_instance
+
+        if start_instance is False:
+            with pytest.raises(ValueError):
+                processing_local_arguments(args)
+        else:
+            processing_local_arguments(args)

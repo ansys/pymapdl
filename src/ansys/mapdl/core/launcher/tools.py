@@ -1521,7 +1521,7 @@ def check_kwargs(args: Dict[str, Any]):
     kwargs = list(args["kwargs"].keys())
 
     # Raising error if using non-allowed arguments
-    for each in kwargs.copy():
+    for each in args["kwargs"]:
         if each in _ALLOWED_START_PARM or each in ALLOWABLE_LAUNCH_MAPDL_ARGS:
             kwargs.remove(each)
 
@@ -1531,6 +1531,15 @@ def check_kwargs(args: Dict[str, Any]):
 
 
 def pre_check_args(args: dict[str, Any]):
+    """Set defaults arguments if missing and check the arguments are consistent"""
+
+    args.setdefault("start_instance", None)
+    args.setdefault("ip", None)
+    args.setdefault("on_pool", None)
+    args.setdefault("version", None)
+    args.setdefault("launch_on_hpc", None)
+    args.setdefault("exec_file", None)
+
     if args["start_instance"] and args["ip"] and not args["on_pool"]:
         raise ValueError(
             "When providing a value for the argument 'ip', the argument "
@@ -1549,7 +1558,7 @@ def pre_check_args(args: dict[str, Any]):
         raise ValueError(LAUNCH_ON_HCP_ERROR_MESSAGE_IP)
 
     # Setting timeout
-    if args["start_timeout"] is None:
+    if args.get("start_timeout", None) is None:
         if args["launch_on_hpc"]:
             args["start_timeout"] = 90
         else:
@@ -1563,8 +1572,19 @@ def pre_check_args(args: dict[str, Any]):
             "the argument 'nproc' in 'launch_mapdl'."
         )
 
+    # Setting defaults
+    args.setdefault("mapdl_output", None)
     args.setdefault("launch_on_hpc", False)
-    args.setdefault("ip", None)
+    args.setdefault("running_on_hpc", None)
+    args.setdefault("add_env_vars", None)
+    args.setdefault("replace_env_vars", None)
+    args.setdefault("license_type", None)
+    args.setdefault("additional_switches", "")
+    args.setdefault("run_location", None)
+    args.setdefault("jobname", "file")
+    args.setdefault("override", False)
+    args.setdefault("mode", None)
+    args.setdefault("nproc", None)
 
 
 def get_cpus(args: Dict[str, Any]):
@@ -1584,7 +1604,7 @@ def get_cpus(args: Dict[str, Any]):
     # Bypassing number of processors checks because VDI/VNC might have
     # different number of processors than the cluster compute nodes.
     # Also the CPUs are set in `get_slurm_options`
-    if args["running_on_hpc"]:
+    if "running_on_hpc" in args and args["running_on_hpc"]:
         return
 
     # Setting number of processors

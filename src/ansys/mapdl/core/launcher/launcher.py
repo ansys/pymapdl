@@ -475,7 +475,7 @@ def launch_mapdl(
 
     args = pack_arguments(locals())  # packs args and kwargs
 
-    check_kwargs(args)  # check if passing wrong arguments
+    check_kwargs(args)  # check if passing wrong key arguments
 
     pre_check_args(args)
 

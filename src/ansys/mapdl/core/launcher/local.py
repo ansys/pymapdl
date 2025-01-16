@@ -22,6 +22,8 @@
 
 """Launch MAPDL locally"""
 
+from typing import Any, Dict
+
 from ansys.mapdl.core import LOG
 from ansys.mapdl.core.launcher.tools import (
     check_kwargs,
@@ -42,20 +44,22 @@ from ansys.mapdl.core.launcher.tools import (
 )
 
 
-def processing_local_arguments(args):
+def processing_local_arguments(args_: Dict[str, Any]):
     # packing arguments
-    args = pack_arguments(locals())  # packs args and kwargs
+    args = pack_arguments(args_)  # packs args and kwargs
 
     check_kwargs(args)  # check if passing wrong arguments
 
-    if args.get("start_instance") and args["start_instance"] != False:
+    if "start_instance" in args and args["start_instance"] is False:
         raise ValueError(
             "'start_instance' argument is not valid."
             "If you intend to connect to an already started instance use either "
             "'connect_to_mapdl' or the infamous 'launch_mapdl(start_instance=False)'."
         )
+    args["start_instance"] = True
 
     pre_check_args(args)
+    args["running_on_hpc"] = False
 
     get_cpus(args)
 
