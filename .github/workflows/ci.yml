@@ -35,7 +35,6 @@ env:
   ON_CI: True
   PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=10 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180'
 
-
   BUILD_CHEATSHEET: True
   PYMAPDL_DEBUG_TESTING: True
 
@@ -396,6 +395,7 @@ jobs:
         env:
           extended_testing: ${{ github.event_name == 'schedule' || ( github.event_name == 'workflow_dispatch' && inputs.run_all_tests ) || ( github.event_name == 'push' && contains(github.ref, 'refs/tags') ) }}
           auth_user: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' || github.actor == 'dependabot[bot]'  }}
+          ON_REMOTE: true
         run: .ci/build_matrix.sh
 
   build-test-remote:
@@ -787,11 +787,12 @@ jobs:
     name: "Local-min: ${{ matrix.mapdl-version }}"
     runs-on: ubuntu-22.04
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    needs: [smoke-tests, build-test-local-minimal-matrix]
+    needs: [build-test-ubuntu-local, build-test-remote]
     timeout-minutes: 75
     strategy:
       fail-fast: false
-      matrix: ${{fromJson(needs.build-test-local-minimal-matrix.outputs.matrix)}}
+      matrix:
+        mapdl-version: ['latest-ubuntu', 'v25.1-ubuntu']
     container:
       image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
@@ -915,11 +916,12 @@ jobs:
     name: "Local-min-console: ${{ matrix.mapdl-version }}"
     runs-on: ubuntu-22.04
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    needs: [smoke-tests, build-test-local-minimal-matrix]
+    needs: [build-test-ubuntu-local, build-test-remote]
     timeout-minutes: 75
     strategy:
       fail-fast: false
-      matrix: ${{fromJson(needs.build-test-local-minimal-matrix.outputs.matrix)}}
+      matrix:
+        mapdl-version: ['latest-ubuntu', 'v25.1-ubuntu']
     container:
       image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash

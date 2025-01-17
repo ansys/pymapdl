@@ -85,6 +85,24 @@ def test_logger(mapdl, cleared):
     assert mapdl.components.logger == mapdl.logger
 
 
+def test_parsing_too_many_components(mapdl, cleared):
+    mapdl.prep7()
+
+    for i in range(1, 100):
+        mapdl.nsel("NONE")
+        mapdl.n(i, i, 0, 0)
+        mapdl.cm(f"node_{i:03.0f}", "NODE")
+
+    s = mapdl.components.__str__()
+    assert len(mapdl.components._comp) == 99
+
+    assert "VERIFICATION" not in s
+    assert "***" not in s
+    assert "*****MAPDL" not in s
+    for i in range(1, 100):
+        assert re.search(f"NODE_{i:03.0f}\s+: NODE", s)
+
+
 class Test_components(TestClass):
 
     @staticmethod
