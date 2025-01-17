@@ -68,7 +68,7 @@ def stop(port: int, pid: Optional[int], all: bool) -> None:
     """
     import psutil
 
-    from ansys.mapdl.core.launcher import is_ansys_process
+    from ansys.mapdl.core.launcher.tools import is_ansys_process
 
     PROCESS_OK_STATUS = [
         # List of all process status, comment out the ones that means that

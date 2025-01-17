@@ -889,7 +889,7 @@ class MapdlGrpc(MapdlBase):
             raise MapdlRuntimeError(
                 "Can only launch the GUI with a local instance of MAPDL"
             )
-        from ansys.mapdl.core.launcher import launch_grpc
+        from ansys.mapdl.core.launcher.grpc import launch_grpc
         from ansys.mapdl.core.launcher.tools import generate_mapdl_launch_command
 
         self._exited = False  # reset exit state
