@@ -23,6 +23,7 @@
 """Test MAPDL interface"""
 from datetime import datetime
 from importlib import reload
+import logging
 import os
 from pathlib import Path
 import re
@@ -2597,12 +2598,12 @@ def test_max_cmd_len_mapdlgrpc(mapdl):
 def test_comment_on_debug_mode(mapdl, cleared):
     loglevel = mapdl.logger.logger.level
 
-    mapdl.logger.logger.level = 40
+    mapdl.logger.logger.level = logging.ERROR
     with patch("ansys.mapdl.core.Mapdl.com") as mockcom:
         mapdl.parameters["asdf"] = [1, 2, 3]
     mockcom.assert_not_called()
 
-    mapdl.logger.logger.level = 10
+    mapdl.logger.logger.level = logging.DEBUG
     with patch("ansys.mapdl.core.Mapdl.com") as mockcom:
         mapdl.parameters["asdf"] = [1, 2, 3]
     mockcom.assert_called_once_with("Entering in non_interactive mode")
