@@ -200,7 +200,7 @@ to
 
 where :math:`\pmb{\xi}` collects a sources of system randomness. The Monte Carlo simulation for solving the equation above
 consists of generating a large number of :math:`N_{sim}` of samples :math:`\pmb{\xi}, i=1,\dots ,N_{sim}` from their probability
-distribution and for each of these samples, solve the deterministic problem
+distribution and for each of these samples, solving the deterministic problem
 
 .. math:: \pmb{K}(\pmb{\xi}_{(i)})\pmb{U}(\pmb{\xi}_{(i)}) = \pmb{F}(\pmb{\xi}_{(i)})
 
@@ -229,10 +229,11 @@ with :math:`f(x)` being a zero mean stationary Gaussian field with unit variance
 We are to do the following:
 
 1. Using the K-L series expansion, generate 5000 realizations for :math:`E(x)` and perform Monte 
-   Carlo simulation to the probability density function of the response :math:`u`, at the bottom right corner 
+   Carlo simulation to determine the probability density function of the response :math:`u`, at the bottom right corner 
    of the cantilever. 
 
-2. If :math:`u` must not exceed :math:`0.2 \: m`, how confident can we be of this requirement?
+2. If some design code stipulates that the displacement :math:`u` must not exceed :math:`0.2 \: m`, how confident can
+   we be that the above structure meets this requirement?
 
 .. note::
   This example really emphasizes how PyMAPDL can help to supercharge workflows. At a very high level, what will be done
@@ -245,8 +246,8 @@ Firstly, we implement code that allows us to represent the zero-mean Gaussian fi
 :math:numref:`cosine equation` and :math:numref:`sine equation`, then substituting calculated values into
 :math:numref:`cosine terms` and :math:numref:`sine terms` to obtain the constant terms in those equations. The
 number of retained terms :math:`P` and :math:`Q` in :math:numref:`approximation` can be automatically determined
-by structuring our code to stop computing values when :math:`\lambda_{c,n}, \lambda_{s,n}` become lower than
-our desired accuracy level. The implementation is as follows:
+by structuring our code to stop computing values when :math:`\lambda_{c,n}, \lambda_{s,n}` become lower than a
+desired accuracy level. The implementation is as follows:
 
 .. literalinclude:: sfem.py
   :language: python
@@ -344,3 +345,81 @@ can be further decreased but the value already chosen is sufficient.
 
 Running the simulations
 ~~~~~~~~~~~~~~~~~~~~~~~
+Now we focus on the PyMAPDL part of this example. Remember that the problem requires running 5000 simulations. Therefore, we need
+to write a workflow that does the following:
+
+1. Create the geometry of the cantilever model
+
+2. Mesh the model. For this, 4-node PLANE182 elements will be used
+
+3. Generate one realization of :math:`E` and one sample of :math:`P` for each simulation
+
+4. For each simulation, loop through the elements and for each element, use the realization
+   above to assign the value of the young's modulus. Also assign the load for each simulation.
+
+5. Solve the model and store :math:`u` for each simulation.
+
+.. note::
+  One realization continuously varies with :math:`x` but a plane stress element like PLANE182 can only have a constant
+  young modulus assigned. Therefore, for an element whose :math:`x`-coordinates are between :math:`x_1` and :math:`x_2`, one can simply
+  assign the average value of :math:`E` between these two values or assign the value of :math:`E` at the centroid. The later is
+  chosen for this implementation. The method chosen becomes insignificant with a finer mesh as both methods should produce similar
+  results.
+
+A function implementing the steps above follows:
+
+.. literalinclude:: sfem.py
+  :language: python
+  :lines: 381-513
+
+Required arguments can be passed to the above function to run the simulations:
+
+.. literalinclude:: sfem.py
+  :language: python
+  :lines: 516-517
+
+Answering problem questions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+To finish answering the first question (simulations have already been run), we proceed to perform a statistical
+post-processing of simulation results to determine the pdf of the response :math:`u`:
+
+.. literalinclude:: sfem.py
+  :language: python
+  :lines: 519-529
+
+.. figure:: pdf.png
+
+   The probability density function of response :math:`u`
+
+To answer the second question, we simply evaluate the probability that the response :math:`u` is less than
+:math:`0.2 \: m`:
+
+.. literalinclude:: sfem.py
+  :language: python
+  :lines: 532-534
+
+The computed probability is aprroximately 99%, which is a measure of how well the structure satisfies the design
+requirement.
+
+.. note::
+   The implementation above was split into several functiomns so users can modify practically any aspect of the problem
+   statement with minimal edits to the code for testing out other scenarios. For example, different structural geometry,
+   different mesh size, different loading condition etc.
+
+Improving simulation speed via multi-threading
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+One of the main drawbacks of MCS is the number of simulations required. In the example above, 5000 simulations can take quite
+some time to run on a single MAPDL instance. To speed things up, the :class:`~ansys.mapdl.core.pool.MapdlPool` class can be
+run simulations across multiple MAPDL instances. The implementation is as follows:
+
+.. literalinclude:: sfem.py
+  :language: python
+  :lines: 537-676
+
+To run simulations over 10 MAPDL instances, the function above is simply called with appropriate arguments:
+
+.. literalinclude:: sfem.py
+  :language: python
+  :lines: 679-689
+
+Now the simulations will be completed much faster.

@@ -316,7 +316,7 @@ ax.set_xlim(domain[0], domain[1])
 for i in range(no_of_realizations):
     cosine_random_variables_set = np.random.normal(0, 1, size=len(cosine_frequency_array))
     sine_random_variables_set = np.random.normal(0, 1, size=len(sine_frequency_array))
-    
+
     realization = np.array(
         [
             young_modulus_realization(
@@ -335,7 +335,7 @@ for i in range(no_of_realizations):
         ]
     )
     ax.plot(x, realization)
-    
+
 plt.show()
 
 # Verification that the above implementation indeed represents the young's modulus
@@ -370,14 +370,14 @@ for i in range(no_of_realizations):
 ensemble_mean_with_realization = np.zeros(realization_collection.shape[0])
 ensemble_var_with_realization = np.zeros(realization_collection.shape[0])
 for i in range(realization_collection.shape[0]):
-    ensemble_mean_with_realization[i] = np.mean(realization_collection[:i+1, :])
-    ensemble_var_with_realization[i] = np.var(realization_collection[:i+1, :])
+    ensemble_mean_with_realization[i] = np.mean(realization_collection[: i + 1, :])
+    ensemble_var_with_realization[i] = np.var(realization_collection[: i + 1, :])
 
 # Plot of ensemble mean
 fig, ax = plt.subplots()
 fig.set_size_inches(15, 8)
-ax.plot(ensemble_mean_with_realization, label='Computed mean')
-ax.axhline(y=1e5, color='r', linestyle='dashed', label='Actual mean')
+ax.plot(ensemble_mean_with_realization, label="Computed mean")
+ax.axhline(y=1e5, color="r", linestyle="dashed", label="Actual mean")
 plt.xlabel("No of realizations")
 plt.ylabel(r"Ensemble mean of $E$")
 ax.grid(True)
@@ -388,11 +388,324 @@ plt.show()
 # Plot of ensemble variance
 fig, ax = plt.subplots()
 fig.set_size_inches(15, 8)
-ax.plot(ensemble_var_with_realization, label='Actual variance')
-ax.axhline(y=1e8, color='r', linestyle='dashed', label='Computed variance')
+ax.plot(ensemble_var_with_realization, label="Actual variance")
+ax.axhline(y=1e8, color="r", linestyle="dashed", label="Computed variance")
 plt.xlabel("No of realizations")
 plt.ylabel(r"Ensemble varianc of $E$")
 ax.grid(True)
 ax.set_xlim(0, no_of_realizations)
 ax.legend()
 plt.show()
+
+# .................................... PyMAPDL part starts here ........................................
+
+
+# Single-threaded approach
+# Function for running the simulations
+def run_simulations(
+    length: float, height: float, thickness: float, mesh_size: float, no_of_simulations: int
+) -> np.ndarray:
+    """Run desired number of simulations to obtain response data.
+
+    Parameters
+    ----------
+    length : float
+        The length of the cantilever structure
+    height : float
+        The height of the cantilever structure
+    thickness : float
+        The thickness of the cantilever structure
+    mesh_size : float
+        The desired mesh size
+    no_of_simulations : int
+        The number of simulations to run
+
+    Returns
+    -------
+    np.ndarray
+        Array containing simulation results.
+    """
+
+    from pathlib import Path
+    from ansys.mapdl.core import launch_mapdl
+
+    path = Path.cwd()
+    mapdl = launch_mapdl(run_location=path)
+
+    domain = [0, length]
+    correl_length_param = 3
+    min_eigen_value = 0.001
+    poisson_ratio = 0.3
+
+    mapdl.prep7()  # Enter preprocessor
+
+    mapdl.r(r1=thickness)
+    mapdl.et(1, "PLANE182", kop3=3, kop6=0)
+    mapdl.rectng(0, length, 0, height)
+    mapdl.mshkey(1)
+    mapdl.mshape(0, "2D")
+    mapdl.esize(mesh_size)
+    mapdl.amesh("ALL")
+
+    # Fixed edge
+    mapdl.nsel("S", "LOC", "X", 0)
+    mapdl.cm("FIXED_END", "NODE")
+
+    # Load application node
+    mapdl.nsel("S", "LOC", "X", length)
+    mapdl.nsel("R", "LOC", "Y", height)
+    mapdl.cm("LOAD_APPLICATION_POINT", "NODE")
+
+    mapdl.finish()  # Exit preprocessor
+
+    mapdl.slashsolu()  # Enter solution processor
+
+    element_ids = mapdl.esel(
+        "S", "CENT", "Y", 0, mesh_size
+    )  # Select bottom row elements and store the ids
+
+    # Generate quantities required to define the young's modulus stochastic process
+    cosine_frequency_list, cosine_eigen_values, cosine_constants = evaluate_KL_cosine_terms(
+        domain, correl_length_param, min_eigen_value
+    )
+    sine_frequency_list, sine_eigen_values, sine_constants = evaluate_KL_sine_terms(
+        domain, correl_length_param, min_eigen_value
+    )
+
+    simulation_results = np.zeros(no_of_simulations)
+
+    for simulation in range(no_of_simulations):
+        # Generate random variables and load needed for one realization of the process
+        cosine_random_variables_set = np.random.normal(0, 1, size=len(cosine_frequency_list))
+        sine_random_variables_set = np.random.normal(0, 1, size=len(sine_frequency_list))
+        load = -np.random.normal(10, 2**0.5)  # Generate a random load
+
+        material_property = 0  # Initialize material property ID
+        for element_id in element_ids:
+            material_property += 1
+            mapdl.get("ELEMENT_ID", "ELEM", element_id, "CENT", "X")
+            element_centroid_x_coord = mapdl.parameters["ELEMENT_ID"]
+            mapdl.esel(
+                "S", "CENT", "X", element_centroid_x_coord
+            )  # Select all elements having this coordinate as centroid
+
+            # Evaluate young's modulus at this material point
+            young_modulus_value = young_modulus_realization(
+                cosine_frequency_list,
+                cosine_eigen_values,
+                cosine_constants,
+                cosine_random_variables_set,
+                sine_frequency_list,
+                sine_eigen_values,
+                sine_constants,
+                sine_random_variables_set,
+                domain,
+                element_centroid_x_coord,
+            )
+
+            mapdl.mp(
+                "EX", f"{material_property}", young_modulus_value
+            )  # Define property ID, assign young's modulus
+            mapdl.mp("NUXY", f"{material_property}", poisson_ratio)  # Assign poisson ratio
+            mapdl.mpchg(material_property, "ALL")  # Assign property to selected elements
+
+        mapdl.allsel()
+
+        mapdl.d("FIXED_END", lab="UX", value=0, lab2="UY")  # Apply fixed end BC
+        mapdl.f("LOAD_APPLICATION_POINT", lab="FY", value=load)  # Apply load BC
+        mapdl.solve()
+
+        # Displacement probe point - where Uy results will be extracted
+        mapdl.nsel("S", "LOC", "X", 4)
+        displacement_probe_point = mapdl.nsel("R", "LOC", "Y", 0)
+        displacement = mapdl.get(
+            "DISP_AT_PROBE_POINT", "NODE", int(displacement_probe_point[0]), "U", "Y"
+        )
+
+        simulation_results[simulation] = displacement
+
+        mapdl.mpdele("ALL", "ALL")
+        if int((simulation + 1) % 10) == 0:
+            print(f"Completed {simulation + 1} simulations ...")
+
+    mapdl.exit()
+    print()
+    print("All simulations completed!")
+
+    return simulation_results
+
+
+# Run the simulations
+simulation_results = run_simulations(4, 1, 0.2, 0.1, 5000)
+
+# Perform statistical post processing and plot the pdf
+import scipy.stats as stats
+
+kde = stats.gaussian_kde(simulation_results)  # Kernel density estimate
+
+fig, ax = plt.subplots()
+fig.set_size_inches(15, 8)
+x_eval = np.linspace(min(simulation_results), max(simulation_results), num=200)
+ax.plot(x_eval, kde.pdf(x_eval), "r-", label="PDF of response $u$")
+plt.xlabel("Displacement in (m)")
+ax.legend()
+plt.show()
+
+# We can then proceed to evaluate the probability that response u is less than 0.2 m
+probability = kde.integrate_box_1d(-0.2, x_eval[-1])
+print(f"The probability that u is less than 0.2 m is {probability:.0%}")
+
+
+# Multi-threaded approach
+# Note, no of instances should not be more than the number of available CPU cores on your PC
+def run_simulations_threaded(
+    mapdl, length, height, thickness, mesh_size, no_of_simulations, instance_identifier
+):
+    domain = [0, length]
+    correl_length_param = 3
+    min_eigen_value = 0.001
+    poisson_ratio = 0.3
+
+    mapdl.prep7()  # Enter preprocessor
+
+    mapdl.r(r1=thickness)
+    mapdl.et(1, "PLANE182", kop3=3, kop6=0)
+    mapdl.rectng(0, length, 0, height)
+    mapdl.mshkey(1)
+    mapdl.mshape(0, "2D")
+    mapdl.esize(mesh_size)
+    mapdl.amesh("ALL")
+
+    # Fixed edge
+    mapdl.nsel("S", "LOC", "X", 0)
+    mapdl.cm("FIXED_END", "NODE")
+
+    # Load application node
+    mapdl.nsel("S", "LOC", "X", length)
+    mapdl.nsel("R", "LOC", "Y", height)
+    mapdl.cm("LOAD_APPLICATION_POINT", "NODE")
+
+    mapdl.finish()  # Exit preprocessor
+
+    mapdl.slashsolu()  # Enter solution processor
+
+    element_ids = mapdl.esel(
+        "S", "CENT", "Y", 0, mesh_size
+    )  # Select bottom row elements and store the ids
+
+    # Generate quantities required to define the young's modulus stochastic process
+    cosine_frequency_list, cosine_eigen_values, cosine_constants = evaluate_KL_cosine_terms(
+        domain, correl_length_param, min_eigen_value
+    )
+    sine_frequency_list, sine_eigen_values, sine_constants = evaluate_KL_sine_terms(
+        domain, correl_length_param, min_eigen_value
+    )
+
+    simulation_results = np.zeros(no_of_simulations)
+
+    for simulation in range(no_of_simulations):
+        # Generate random variables and load needed for one realization of the process
+        cosine_random_variables_set = np.random.normal(0, 1, size=len(cosine_frequency_list))
+        sine_random_variables_set = np.random.normal(0, 1, size=len(sine_frequency_list))
+        load = -np.random.normal(10, 2**0.5)  # Generate a random load
+
+        material_property = 0  # Initialize material property ID
+        for element_id in element_ids:
+            material_property += 1
+            mapdl.get("ELEMENT_ID", "ELEM", element_id, "CENT", "X")
+            element_centroid_x_coord = mapdl.parameters["ELEMENT_ID"]
+            mapdl.esel(
+                "S", "CENT", "X", element_centroid_x_coord
+            )  # Select all elements having this coordinate as centroid
+
+            # Evaluate young's modulus at this material point
+            young_modulus_value = young_modulus_realization(
+                cosine_frequency_list,
+                cosine_eigen_values,
+                cosine_constants,
+                cosine_random_variables_set,
+                sine_frequency_list,
+                sine_eigen_values,
+                sine_constants,
+                sine_random_variables_set,
+                domain,
+                element_centroid_x_coord,
+            )
+
+            mapdl.mp(
+                "EX", f"{material_property}", young_modulus_value
+            )  # Define property ID, assign young's modulus
+            mapdl.mp("NUXY", f"{material_property}", poisson_ratio)  # Assign poisson ratio
+            mapdl.mpchg(material_property, "ALL")  # Assign property to selected elements
+
+        mapdl.allsel()
+
+        mapdl.d("FIXED_END", lab="UX", value=0, lab2="UY")  # Apply fixed end BC
+        mapdl.f("LOAD_APPLICATION_POINT", lab="FY", value=load)  # Apply load BC
+        mapdl.solve()
+
+        # Displacement probe point - where Uy results will be extracted
+        mapdl.nsel("S", "LOC", "X", 4)
+        displacement_probe_point = mapdl.nsel("R", "LOC", "Y", 0)
+        displacement = mapdl.get(
+            "DISP_AT_PROBE_POINT", "NODE", int(displacement_probe_point[0]), "U", "Y"
+        )
+
+        simulation_results[simulation] = displacement
+
+        mapdl.mpdele("ALL", "ALL")
+        if int((simulation + 1) % 10) == 0:
+            print(f"Completed {simulation + 1} simulations in instance {instance_identifier} ...")
+
+    mapdl.exit()
+    print()
+    print(f"All simulations completed in instance {instance_identifier}!")
+
+    return instance_identifier, no_of_simulations, simulation_results
+
+
+def run_simulations_over_multple_instances(
+    length, height, thickness, mesh_size, no_of_simulations, no_of_instances
+):
+    from pathlib import Path
+    from ansys.mapdl.core import MapdlPool
+
+    # First determine the number of simulations to run per instance
+    if no_of_simulations % no_of_instances == 0:
+        # Simlations can be split equally across instances
+        simulations_per_instance = no_of_simulations // no_of_instances
+        simulations_per_instance_list = [simulations_per_instance for i in range(no_of_instances)]
+    else:
+        # Simulations can not be split equally across instances
+        simulations_per_instance = no_of_simulations // no_of_instances
+        simulations_per_instance_list = [
+            simulations_per_instance for i in range(no_of_instances - 1)
+        ]
+        remaining_simulations = no_of_simulations - sum(simulations_per_instance_list)
+        simulations_per_instance_list.append(remaining_simulations)
+
+    path = Path.cwd()
+    pool = MapdlPool(no_of_instances, nproc=1, run_location=path, start_timeout=120)
+
+    inputs = [
+        (length, height, thickness, mesh_size, simulations, id + 1)
+        for id, simulations in enumerate(simulations_per_instance_list)
+    ]
+
+    overall_simulation_results = pool.map(run_simulations_threaded, inputs)
+    pool.exit()
+
+    return overall_simulation_results
+
+
+# Run the simulations over several instances
+simulation_results = run_simulations_over_multple_instances(10, 1, 0.2, 0.1, 5000, 10)
+
+# Collect the results from each instance
+combined_results = [result[2] for result in simulation_results]
+combined_results = np.concatenate(combined_results)
+
+# Calculate the probability
+kde = stats.gaussian_kde(combined_results)  # Kernel density estimate
+probability = kde.integrate_box_1d(-0.2, max(combined_results))
+print(f"The probability that u is less than 0.2 m is {probability:.0%}")
