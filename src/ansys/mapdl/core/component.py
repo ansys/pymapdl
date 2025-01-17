@@ -590,13 +590,13 @@ def _parse_cmlist(cmlist: Optional[str] = None) -> Dict[str, Any]:
         # header
         #  "NAME                            TYPE      SUBCOMPONENTS"
         blocks = re.findall(
-            r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+            r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\*\*\*\*\*|\Z)",
             cmlist,
             flags=re.DOTALL,
         )
     elif re.search(r"NAME\s+SELE\s+TYPE\s+SUBCOMPONENTS", cmlist):
         blocks = re.findall(
-            r"(?s)NAME\s+SELE\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+            r"(?s)NAME\s+SELE\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\*\*\*\*\*|\Z)",
             cmlist,
             flags=re.DOTALL,
         )
