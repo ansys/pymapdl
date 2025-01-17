@@ -22,8 +22,9 @@
 
 import math
 import random
+from typing import Callable, Tuple
+
 import numpy as np
-from typing import Tuple, Callable
 
 
 def find_solution(
@@ -427,6 +428,7 @@ def run_simulations(
     """
 
     from pathlib import Path
+
     from ansys.mapdl.core import launch_mapdl
 
     path = Path.cwd()
@@ -668,6 +670,7 @@ def run_simulations_over_multple_instances(
     length, height, thickness, mesh_size, no_of_simulations, no_of_instances
 ):
     from pathlib import Path
+
     from ansys.mapdl.core import MapdlPool
 
     # First determine the number of simulations to run per instance
