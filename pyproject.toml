@@ -56,7 +56,7 @@ jupyter = [
 tests = [
     "ansys-dpf-core==0.10.1",
     "ansys-tools-visualization-interface==0.8.1",
-    "autopep8==2.3.1",
+    "autopep8==2.3.2",
     "matplotlib==3.10.0",
     "pandas==2.2.3",
     "pyansys-tools-report==0.8.1",
