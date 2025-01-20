@@ -402,15 +402,15 @@ The computed probability is aprroximately 99%, which is a measure of how well th
 requirement.
 
 .. note::
-   The implementation above was split into several functiomns so users can modify practically any aspect of the problem
+   The implementation above was split into several functions so users can modify practically any aspect of the problem
    statement with minimal edits to the code for testing out other scenarios. For example, different structural geometry,
    different mesh size, different loading condition etc.
 
 Improving simulation speed via multi-threading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 One of the main drawbacks of MCS is the number of simulations required. In the example above, 5000 simulations can take quite
-some time to run on a single MAPDL instance. To speed things up, the :class:`~ansys.mapdl.core.pool.MapdlPool` class can be
-run simulations across multiple MAPDL instances. The implementation is as follows:
+some time to run on a single MAPDL instance. To speed things up, the :class:`~ansys.mapdl.core.pool.MapdlPool` class can be utilized
+to run simulations across multiple MAPDL instances. The implementation is as follows:
 
 .. literalinclude:: sfem.py
   :language: python
