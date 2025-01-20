@@ -61,7 +61,9 @@ def find_solution(
             current_guess = random.uniform(*solution_range)
             continue
 
-        updated_guess = current_guess - func(current_guess) / derivative_func(current_guess)
+        updated_guess = current_guess - func(current_guess) / derivative_func(
+            current_guess
+        )
         error = abs(updated_guess - current_guess)
 
         if error < acceptable_solution_error and not (
@@ -122,7 +124,9 @@ def evaluate_KL_cosine_terms(
         # start solving here
         acceptable_solution_error = 1e-10
         solution_range = [(n - 1) * math.pi / A, (n - 0.5) * math.pi / A]
-        solution = find_solution(func, deriv_func, acceptable_solution_error, solution_range)
+        solution = find_solution(
+            func, deriv_func, acceptable_solution_error, solution_range
+        )
 
         frequency_array.append(solution)
         cosine_eigen_values_array.append(eigen_value(solution))
@@ -181,7 +185,9 @@ def evaluate_KL_sine_terms(
         # start solving here
         acceptable_solution_error = 1e-10
         solution_range = [(n - 0.5) * math.pi / A, n * math.pi / A]
-        solution = find_solution(func, deriv_func, acceptable_solution_error, solution_range)
+        solution = find_solution(
+            func, deriv_func, acceptable_solution_error, solution_range
+        )
 
         frequency_array.append(solution)
         sine_eigen_values_array.append(eigen_value(solution))
@@ -296,8 +302,8 @@ domain = (0, 4)
 correl_length_param = 3
 min_eigen_value = 0.001
 
-cosine_frequency_array, cosine_eigen_values, cosine_constants = evaluate_KL_cosine_terms(
-    domain, correl_length_param, min_eigen_value
+cosine_frequency_array, cosine_eigen_values, cosine_constants = (
+    evaluate_KL_cosine_terms(domain, correl_length_param, min_eigen_value)
 )
 sine_frequency_array, sine_eigen_values, sine_constants = evaluate_KL_sine_terms(
     domain, correl_length_param, min_eigen_value
@@ -315,7 +321,9 @@ fig.set_size_inches(15, 8)
 ax.set_xlim(domain[0], domain[1])
 
 for i in range(no_of_realizations):
-    cosine_random_variables_set = np.random.normal(0, 1, size=len(cosine_frequency_array))
+    cosine_random_variables_set = np.random.normal(
+        0, 1, size=len(cosine_frequency_array)
+    )
     sine_random_variables_set = np.random.normal(0, 1, size=len(sine_frequency_array))
 
     realization = np.array(
@@ -345,7 +353,9 @@ x = np.linspace(domain[0], domain[1], 101)
 realization_collection = np.zeros((no_of_realizations, len(x)))
 
 for i in range(no_of_realizations):
-    cosine_random_variables_set = np.random.normal(0, 1, size=len(cosine_frequency_array))
+    cosine_random_variables_set = np.random.normal(
+        0, 1, size=len(cosine_frequency_array)
+    )
     sine_random_variables_set = np.random.normal(0, 1, size=len(sine_frequency_array))
 
     realization = np.array(
@@ -404,7 +414,11 @@ plt.show()
 # Single-threaded approach
 # Function for running the simulations
 def run_simulations(
-    length: float, height: float, thickness: float, mesh_size: float, no_of_simulations: int
+    length: float,
+    height: float,
+    thickness: float,
+    mesh_size: float,
+    no_of_simulations: int,
 ) -> np.ndarray:
     """Run desired number of simulations to obtain response data.
 
@@ -467,8 +481,8 @@ def run_simulations(
     )  # Select bottom row elements and store the ids
 
     # Generate quantities required to define the young's modulus stochastic process
-    cosine_frequency_list, cosine_eigen_values, cosine_constants = evaluate_KL_cosine_terms(
-        domain, correl_length_param, min_eigen_value
+    cosine_frequency_list, cosine_eigen_values, cosine_constants = (
+        evaluate_KL_cosine_terms(domain, correl_length_param, min_eigen_value)
     )
     sine_frequency_list, sine_eigen_values, sine_constants = evaluate_KL_sine_terms(
         domain, correl_length_param, min_eigen_value
@@ -478,8 +492,12 @@ def run_simulations(
 
     for simulation in range(no_of_simulations):
         # Generate random variables and load needed for one realization of the process
-        cosine_random_variables_set = np.random.normal(0, 1, size=len(cosine_frequency_list))
-        sine_random_variables_set = np.random.normal(0, 1, size=len(sine_frequency_list))
+        cosine_random_variables_set = np.random.normal(
+            0, 1, size=len(cosine_frequency_list)
+        )
+        sine_random_variables_set = np.random.normal(
+            0, 1, size=len(sine_frequency_list)
+        )
         load = -np.random.normal(10, 2**0.5)  # Generate a random load
 
         material_property = 0  # Initialize material property ID
@@ -508,8 +526,12 @@ def run_simulations(
             mapdl.mp(
                 "EX", f"{material_property}", young_modulus_value
             )  # Define property ID, assign young's modulus
-            mapdl.mp("NUXY", f"{material_property}", poisson_ratio)  # Assign poisson ratio
-            mapdl.mpchg(material_property, "ALL")  # Assign property to selected elements
+            mapdl.mp(
+                "NUXY", f"{material_property}", poisson_ratio
+            )  # Assign poisson ratio
+            mapdl.mpchg(
+                material_property, "ALL"
+            )  # Assign property to selected elements
 
         mapdl.allsel()
 
@@ -596,8 +618,8 @@ def run_simulations_threaded(
     )  # Select bottom row elements and store the ids
 
     # Generate quantities required to define the young's modulus stochastic process
-    cosine_frequency_list, cosine_eigen_values, cosine_constants = evaluate_KL_cosine_terms(
-        domain, correl_length_param, min_eigen_value
+    cosine_frequency_list, cosine_eigen_values, cosine_constants = (
+        evaluate_KL_cosine_terms(domain, correl_length_param, min_eigen_value)
     )
     sine_frequency_list, sine_eigen_values, sine_constants = evaluate_KL_sine_terms(
         domain, correl_length_param, min_eigen_value
@@ -607,8 +629,12 @@ def run_simulations_threaded(
 
     for simulation in range(no_of_simulations):
         # Generate random variables and load needed for one realization of the process
-        cosine_random_variables_set = np.random.normal(0, 1, size=len(cosine_frequency_list))
-        sine_random_variables_set = np.random.normal(0, 1, size=len(sine_frequency_list))
+        cosine_random_variables_set = np.random.normal(
+            0, 1, size=len(cosine_frequency_list)
+        )
+        sine_random_variables_set = np.random.normal(
+            0, 1, size=len(sine_frequency_list)
+        )
         load = -np.random.normal(10, 2**0.5)  # Generate a random load
 
         material_property = 0  # Initialize material property ID
@@ -637,8 +663,12 @@ def run_simulations_threaded(
             mapdl.mp(
                 "EX", f"{material_property}", young_modulus_value
             )  # Define property ID, assign young's modulus
-            mapdl.mp("NUXY", f"{material_property}", poisson_ratio)  # Assign poisson ratio
-            mapdl.mpchg(material_property, "ALL")  # Assign property to selected elements
+            mapdl.mp(
+                "NUXY", f"{material_property}", poisson_ratio
+            )  # Assign poisson ratio
+            mapdl.mpchg(
+                material_property, "ALL"
+            )  # Assign property to selected elements
 
         mapdl.allsel()
 
@@ -657,7 +687,9 @@ def run_simulations_threaded(
 
         mapdl.mpdele("ALL", "ALL")
         if int((simulation + 1) % 10) == 0:
-            print(f"Completed {simulation + 1} simulations in instance {instance_identifier} ...")
+            print(
+                f"Completed {simulation + 1} simulations in instance {instance_identifier} ..."
+            )
 
     mapdl.exit()
     print()
@@ -677,7 +709,9 @@ def run_simulations_over_multple_instances(
     if no_of_simulations % no_of_instances == 0:
         # Simlations can be split equally across instances
         simulations_per_instance = no_of_simulations // no_of_instances
-        simulations_per_instance_list = [simulations_per_instance for i in range(no_of_instances)]
+        simulations_per_instance_list = [
+            simulations_per_instance for i in range(no_of_instances)
+        ]
     else:
         # Simulations can not be split equally across instances
         simulations_per_instance = no_of_simulations // no_of_instances
