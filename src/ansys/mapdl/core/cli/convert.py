@@ -161,6 +161,12 @@ this value. Defaults to `None` which is Mapdl class default.""",
     default=False,
     help="""Set MAPDL object to avoid parameter name checks (do not raise leading underscored parameter exceptions). Defaults to `False`.""",
 )
+@click.option(
+    "--apdl",
+    default=None,
+    type=str,
+    help="Pass the APDL code as a string. This method is convenient for short APDL code.",
+)
 def convert(
     filename_in: str,
     o: str,
@@ -181,6 +187,7 @@ def convert(
     use_vtk: bool,
     clear_at_start: bool,
     check_parameter_names: bool,
+    apdl: str,
 ) -> None:
     """Convert MAPDL code to PyMAPDL"""
     from ansys.mapdl.core.convert import convert_apdl_block, convert_script
@@ -188,8 +195,11 @@ def convert(
     if o:
         filename_out = o
 
-    if _USING_PIPE[0]:
-        code_block = filename_in  # from PIPE
+    if apdl or _USING_PIPE[0]:
+        if apdl and "\\n" in apdl:
+            apdl = apdl.splitlines()
+
+        code_block = apdl or filename_in  # from PIPE
         click.echo(
             convert_apdl_block(
                 code_block,
