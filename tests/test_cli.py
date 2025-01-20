@@ -203,7 +203,7 @@ BLOCK,0,1,0,1,0,1
 """
         )
 
-    output = run_cli(f"convert -f {input_file} -o {output_file}")
+    run_cli(f"convert -f {input_file} -o {output_file}")
 
     with open(output_file, "r") as fid:
         converted = fid.read()
@@ -304,10 +304,10 @@ def test_convert_passing(mock_conv, run_cli, tmpdir, arg, value):
     default_[arg] = value
 
     if arg not in ["only_commands"]:
-        output = run_cli(f"convert -f {input_file} --{arg} {value}")
+        run_cli(f"convert -f {input_file} --{arg} {value}")
 
     else:
-        output = run_cli(f"convert -f {input_file} --{arg}")
+        run_cli(f"convert -f {input_file} --{arg}")
 
     mock_conv.assert_called()
     kwargs = mock_conv.call_args.kwargs
