@@ -23,6 +23,21 @@
 
 class ProcessControls:
 
+    def starexit(self, **kwargs):
+        r"""Exits a do-loop.
+
+        Mechanical APDL Command: `\*EXIT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EXIT_st.html>`_
+
+        Notes
+        -----
+        The command following the ``\*ENDDO`` is executed next. The exit option may also be conditional [Use
+        the ``\*IF`` ]. The :ref:`starexit` command must appear on the same file as the ``\*DO`` command.
+
+        This command is valid in any processor.
+        """
+        command = "*EXIT"
+        return self.run(command, **kwargs)
+
     def wait(self, dtime: str = "", **kwargs):
         r"""Causes a delay before the reading of the next command.
 
@@ -43,19 +58,4 @@ class ProcessControls:
         This command is valid in any processor.
         """
         command = f"/WAIT,{dtime}"
-        return self.run(command, **kwargs)
-
-    def starexit(self, **kwargs):
-        r"""Exits a do-loop.
-
-        Mechanical APDL Command: `\*EXIT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EXIT_st.html>`_
-
-        Notes
-        -----
-        The command following the ``\*ENDDO`` is executed next. The exit option may also be conditional [Use
-        the ``\*IF`` ]. The :ref:`starexit` command must appear on the same file as the ``\*DO`` command.
-
-        This command is valid in any processor.
-        """
-        command = "*EXIT"
         return self.run(command, **kwargs)

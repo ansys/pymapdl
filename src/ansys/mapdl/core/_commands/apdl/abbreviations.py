@@ -35,10 +35,7 @@ class Abbreviations:
             with any Mechanical APDL command name or any user unknown-command macro name.
 
         srnum : str
-            User subroutine number (1 to 10) programmed for this command. For example, the command
-            :ref:`ucmd` ,MYCMD,3 will execute subroutine USER03 whenever the command **MYCMD** is entered.
-            Use a blank command name to disassociate ``SRNUM`` from its command. For example, :ref:`ucmd`
-            ,,3 removes **MYCMD** as a command.
+            User subroutine number (1 to 10) programmed for this command. For example, the command :ref:`ucmd`,MYCMD,3 will execute subroutine USER03 whenever the command **MYCMD** is entered. Use a blank command name to disassociate ``SRNUM`` from its command. For example, :ref:`ucmd`,,3 removes **MYCMD** as a command.
 
         Notes
         -----
@@ -62,7 +59,7 @@ class Abbreviations:
         The USER01 routine is commented and should be listed from the distribution media (system dependent)
         for more details.
 
-        Issue :ref:`ucmd` ,STAT to list all user-defined command names.
+        Issue :ref:`ucmd`,STAT to list all user-defined command names.
 
         Because a user-programmed command is a nonstandard use of the program, the verification of any
         Mechanical APDL run incorporating these commands is your responsibility. In any contact with
@@ -93,15 +90,15 @@ class Abbreviations:
         lab : str
             Label that specifies the read operation:
 
-              * ``NEW`` - Replace current abbreviation set with these abbreviations (default).
+            * ``NEW`` - Replace current abbreviation set with these abbreviations (default).
 
-              * ``CHANGE`` - Extend current abbreviation set with these abbreviations, replacing any of the same
-                name that already exist.
+            * ``CHANGE`` - Extend current abbreviation set with these abbreviations, replacing any of the same name that
+              already exist.
 
         fname : str
             File name and directory path (248 characters maximum, including the characters needed for the
             directory path). An unspecified directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name. The file name defaults to ``Jobname``.
+            you can use all 248 characters for the file name. The file name defaults to :file:``Jobname``.
 
         ext : str
             Filename extension (eight-character maximum). The extension defaults to ABBR if ``Fname`` is
@@ -110,12 +107,43 @@ class Abbreviations:
         Notes
         -----
         The abbreviation file may have been written with the :ref:`abbsav` command. Do not issue
-        :ref:`abbres` ,NEW while inside an executing abbreviation. Doing so will cause all data for the
+        :ref:`abbres`,NEW while inside an executing abbreviation. Doing so will cause all data for the
         executing abbreviation to be deleted.
 
         This command is valid in any processor.
         """
         command = f"ABBRES,{lab},{fname},{ext}"
+        return self.run(command, **kwargs)
+
+    def abbsav(self, lab: str = "", fname: str = "", ext: str = "", **kwargs):
+        r"""Writes the current abbreviation set to a coded file.
+
+        Mechanical APDL Command: `ABBSAV <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ABBSAV.html>`_
+
+        Parameters
+        ----------
+        lab : str
+            Label that specifies the write operation:
+
+            * ``ALL`` - Write all abbreviations (default).
+
+        fname : str
+            File name and directory path (248 characters maximum, including the characters needed for the
+            directory path). An unspecified directory path defaults to the working directory; in this case,
+            you can use all 248 characters for the file name. The file name defaults to :file:``Jobname``.
+
+        ext : str
+            Filename extension (eight-character maximum). The extension defaults to ABBR if ``Fname`` is
+            blank.
+
+        Notes
+        -----
+        Existing abbreviations on this file, if any, will be overwritten. The abbreviation file may be read
+        with the :ref:`abbres` command.
+
+        This command is valid in any processor.
+        """
+        command = f"ABBSAV,{lab},{fname},{ext}"
         return self.run(command, **kwargs)
 
     def abbr(self, abbr: str = "", string: str = "", **kwargs):
@@ -149,40 +177,9 @@ class Abbreviations:
         Use :ref:`starstatus` to display the current list of abbreviations. For abbreviations repeated with
         ``\*REPEAT``, substitution occurs before the repeat increments are applied. There are a number of
         abbreviations that are predefined by the program (these can be deleted by using the blank ``String``
-        option described above). Note that ``String`` will be written to the ``File.LOG``.
+        option described above). Note that ``String`` will be written to the :file:``File.LOG``.
 
         This command is valid in any processor.
         """
         command = f"*ABBR,{abbr},{string}"
-        return self.run(command, **kwargs)
-
-    def abbsav(self, lab: str = "", fname: str = "", ext: str = "", **kwargs):
-        r"""Writes the current abbreviation set to a coded file.
-
-        Mechanical APDL Command: `ABBSAV <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ABBSAV.html>`_
-
-        Parameters
-        ----------
-        lab : str
-            Label that specifies the write operation:
-
-              * ``ALL`` - Write all abbreviations (default).
-
-        fname : str
-            File name and directory path (248 characters maximum, including the characters needed for the
-            directory path). An unspecified directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name. The file name defaults to ``Jobname``.
-
-        ext : str
-            Filename extension (eight-character maximum). The extension defaults to ABBR if ``Fname`` is
-            blank.
-
-        Notes
-        -----
-        Existing abbreviations on this file, if any, will be overwritten. The abbreviation file may be read
-        with the :ref:`abbres` command.
-
-        This command is valid in any processor.
-        """
-        command = f"ABBSAV,{lab},{fname},{ext}"
         return self.run(command, **kwargs)

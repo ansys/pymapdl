@@ -9,12 +9,12 @@ Apdl
 .. list-table::
 
    * - :ref:`ref_macro_files`
-   * - :ref:`ref_parameter_definition`
-   * - :ref:`ref_matrix_operations`
    * - :ref:`ref_abbreviations`
-   * - :ref:`ref_process_controls`
-   * - :ref:`ref_array_parameters`
+   * - :ref:`ref_matrix_operations`
    * - :ref:`ref_encryption_decryption`
+   * - :ref:`ref_process_controls`
+   * - :ref:`ref_parameter_definition`
+   * - :ref:`ref_array_parameters`
 
 
 .. toctree::
@@ -22,9 +22,9 @@ Apdl
    :hidden:
 
    macro_files
-   parameter_definition
-   matrix_operations
    abbreviations
-   process_controls
-   array_parameters
+   matrix_operations
    encryption_decryption
+   process_controls
+   parameter_definition
+   array_parameters
