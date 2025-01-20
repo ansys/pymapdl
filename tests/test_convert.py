@@ -633,7 +633,7 @@ def test_converter_cli(tmpdir, run_cli):
     with input_file.open("w") as f:
         f.write(content)
 
-    assert run_cli(str(input_file)) == 0
+    assert run_cli("-f " + str(input_file)) == 0
 
     assert os.path.exists(output_file)
     with output_file.open("r") as f:
@@ -646,6 +646,7 @@ def test_converter_cli(tmpdir, run_cli):
     # This one overwrite the previous file
     assert (
         run_cli(
+            "-f",
             str(input_file),
             "-o",
             str(output_file),
