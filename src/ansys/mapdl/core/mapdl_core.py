@@ -1321,6 +1321,10 @@ class _MapdlCore(Commands):
                     return self.geometry.anum
                 elif name == "VSEL":
                     return self.geometry.vnum
+                elif name == "ESLN":
+                    return self.mesh.enum
+                elif name == "NSLE":
+                    return self.mesh.nnum
                 else:
                     return None
 
@@ -2915,6 +2919,7 @@ class _MapdlCore(Commands):
             self._platform = "windows"
         else:  # pragma: no cover
             raise MapdlRuntimeError("Unknown platform: {}".format(platform))
+        self.logger.debug(f"MAPDL is running on {self._platform} OS.")
 
     def _check_on_docker(self):
         """Check if MAPDL is running on docker."""

@@ -193,6 +193,8 @@ CMD_XSEL: List[str] = [
     "LSEL",
     "ASEL",
     "VSEL",
+    "ESLN",
+    "NSLE",
 ]
 
 
