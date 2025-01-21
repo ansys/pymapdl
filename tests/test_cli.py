@@ -270,6 +270,7 @@ DEFAULT_ARGS = {
 }
 
 
+@requires("click")
 @pytest.mark.parametrize(
     "arg, value",
     (
