@@ -311,6 +311,7 @@ class MacroFiles:
         Mechanical APDL Command: `\*CREATE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CREATE.html>`_
 
         .. warning::
+
             This command must be run using :func:`non_interactive <ansys.mapdl.core.Mapdl.non_interactive>
             Please visit `Unsupported Interactive Commands
             <https://mapdl.docs.pyansys.com/version/stable/user_guide/mapdl.html#unsupported-interactive-commands>`_

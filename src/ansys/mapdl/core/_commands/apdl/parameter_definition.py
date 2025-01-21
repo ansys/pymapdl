@@ -671,7 +671,7 @@ class ParameterDefinition:
         Notes
         -----
         Assigns values to user-named parameters that can be substituted later in the run. The equivalent
-        (and recommended) format is ``Par`` = ``VALUE`., ``VAL2`., ``VAL3``...., ``VAL10``
+        (and recommended) format is ``Par`` = ``VALUE``, ``VAL2``, ``VAL3``,..., ``VAL10``
 
         which can be used in place of :ref:`starset`, ``Par``,... for convenience.
 

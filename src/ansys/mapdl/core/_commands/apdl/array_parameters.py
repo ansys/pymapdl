@@ -591,7 +591,7 @@ class ArrayParameters:
              - X, Y, or Z structural rotation.
            * - TEMP
              -
-             - Temperature. For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use TBOT, TE2, TE3...., TTOP instead of TEMP. Alternative getfunctions: TEMP(N), TBOT(N), TE2(N), etc.
+             - Temperature. For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use TBOT, TE2, TE3,..., TTOP instead of TEMP. Alternative getfunctions: TEMP(N), TBOT(N), TE2(N), etc.
            * - PRES
              -
              - Pressure.
@@ -911,6 +911,7 @@ class ArrayParameters:
         Mechanical APDL Command: `\*VWRITE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VWRITE.html>`_
 
         .. warning::
+
             This command must be run using :func:`non_interactive <ansys.mapdl.core.Mapdl.non_interactive>
             Please visit `Unsupported Interactive Commands
             <https://mapdl.docs.pyansys.com/version/stable/user_guide/mapdl.html#unsupported-interactive-commands>`_
@@ -1370,6 +1371,7 @@ class ArrayParameters:
         Mechanical APDL Command: `\*MWRITE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MWRITE_st.html>`_
 
         .. warning::
+
             This command must be run using :func:`non_interactive <ansys.mapdl.core.Mapdl.non_interactive>
             Please visit `Unsupported Interactive Commands
             <https://mapdl.docs.pyansys.com/version/stable/user_guide/mapdl.html#unsupported-interactive-commands>`_
@@ -1548,6 +1550,7 @@ class ArrayParameters:
               conditioned.
 
               .. warning::
+
                   Non-independent or ill-conditioned equations can cause erroneous results.
 
               For large matrices, use the APDL Math operation :ref:`lsfactor` for efficiency (see `APDL Math
@@ -1585,6 +1588,7 @@ class ArrayParameters:
               conditioned.
 
               .. warning::
+
                   Non-independent or ill-conditioned equations can cause erroneous results.
 
               For large matrices, use the APDL Math operation :ref:`lsfactor` for efficiency (see `APDL Math
