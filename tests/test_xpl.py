@@ -196,4 +196,4 @@ class Test_xpl:
             xpl.extract("NOD")
 
         mat = xpl.extract("NSL")
-        assert mat.shape == (13851, 10)
+        assert mat.shape == (243, 10)
