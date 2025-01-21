@@ -643,7 +643,30 @@ def test_converter_cli(tmpdir, run_cli):
     assert "mapdl.exit()" in newcontent
     assert "launch_mapdl" in newcontent
 
-    # This one overwrite the previous file
+    # This one is appended the previous file
+    assert (
+        run_cli(
+            "-f",
+            str(input_file),
+            "-o",
+            str(output_file),
+            "--auto_exit",
+            "False",
+            "--add_imports",
+            "False",
+        )
+        == 0
+    )
+
+    assert os.path.exists(output_file)
+    with output_file.open("r") as f:
+        newcontent = f.read()
+
+    assert newcontent.count("ansys-mapdl-core version") == 2
+
+    # Deleting file
+    os.remove(str(output_file))
+
     assert (
         run_cli(
             "-f",
