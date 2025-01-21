@@ -944,11 +944,6 @@ class PostProcessing:
         numpy.ndarray
             Array containing the nodal structural displacement.
 
-        Notes
-        -----
-        This command always returns all nodal displacements regardless
-        of if the nodes are selected or not.
-
         Examples
         --------
         Displacement in the ``'X'`` direction for the current result.
