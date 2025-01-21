@@ -157,7 +157,7 @@ where :math:`\omega_{s,n}` is obtained as the solution of
 It is worth mentioning that :math:`\lambda` and :math:`\omega` in the series expansion are referred to as eigenvalue and frequency respectively.
 
 .. note::
-  In the case of an asymmetric domain e.g. :math:`\mathbb{D}=[-t_{min},t_{max}]`, a shift parameter :math:`T = (t_{min}+t_{max})/2` is required and the corresponding
+  In the case of an asymmetric domain, for example, :math:`\mathbb{D}=[-t_{min},t_{max}]`, a shift parameter :math:`T = (t_{min}+t_{max})/2` is required and the corresponding
   symmetric domain becomes
 
   .. math:: D' = D - T = \biggl[\frac{t_{min}-t_{max}}{2}, \frac{t_{max}-t_{min}}{2} \biggr]
@@ -166,7 +166,7 @@ It is worth mentioning that :math:`\lambda` and :math:`\omega` in the series exp
 
   .. math:: X(t) = \sum_{n=1}^\infty \sqrt{\lambda_{c,n}}\cdot\varphi_{c,n}(t-T)\cdot\xi_{c,n} + \sum_{n=1}^\infty \sqrt{\lambda_{s,n}}\cdot\varphi_{s,n}(t-T)\cdot\xi_{s,n},\quad t\in\mathbb{D}
 
-The K-L expansion of a gaussian process has the property that :math:`\xi_{c,n}` and :math:`\xi_{s,n}` are independent
+The K-L expansion of a Gaussian process has the property that :math:`\xi_{c,n}` and :math:`\xi_{s,n}` are independent
 standard normal variables, that is, they follow the :math:`\mathcal{N}(0,1)` distribution. The other great property is
 that :math:`\lambda_{c,n}` and :math:`\lambda_{s,n}` converge to zero fast (in the mean square sense). For practical implementation,
 this means that the infinite series of the K-L expansion above is truncated after a finite number of terms, giving the approximation:
@@ -186,7 +186,7 @@ Equation :math:numref:`approximation` is computationally feasible to handle. Let
 3. To generate additional realizations, we simply draw new random values for :math:`\xi_{c,n}, n=1,\dots ,P, \quad \xi_{s,n}, n=1,\dots ,Q` each from :math:`\mathcal{N}(0,1)`
 
 .. note::
-  In this case of a field, the same discussion above applies as the only difference is a change in notation (e.g. :math:`t` to :math:`x`).
+  In this case of a field, the same discussion above applies as the only difference is a change in notation (for example :math:`t` to :math:`x`).
 
 The Monte Carlo simulation
 --------------------------
@@ -215,7 +215,7 @@ In the following plane stress problem
 
 .. figure:: problem.png
 
-   A two-dimensional cantilver structure under a point load
+   A two-dimensional cantilever structure under a point load
 
 :math:`P` is a random variable following the Gaussian distribution :math:`\mathcal{N}(0,1)` (kN) and the modulus of elasticity is a
 random field given by the expression:
@@ -313,7 +313,7 @@ For the variance:
 We should then expect that as the number of realizations increase indefinitely, the ensemble mean and
 variance will converge towards theoretical values calculated in :math:numref:`theoretical mean` and :math:numref:`theoretical variance`:
 
-First we generate a lot of realizations, 5000 is enough i.e. the same as the number of simulations we are required to run later on. We then
+First we generate a lot of realizations, 5000 is enough, that is, the same as the number of simulations we are required to run later on. We then
 perform some statistical processing on these realizations
 
 .. literalinclude:: sfem.py
@@ -381,7 +381,7 @@ Required arguments can be passed to the above function to run the simulations:
 Answering problem questions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 To finish answering the first question (simulations have already been run), we proceed to perform a statistical
-post-processing of simulation results to determine the pdf of the response :math:`u`:
+post-processing of simulation results to determine the probability density function of the response :math:`u`:
 
 .. literalinclude:: sfem.py
   :language: python
@@ -425,7 +425,7 @@ To run simulations over 10 MAPDL instances, the function above is simply called 
 Now the simulations can be completed much faster.
 
 .. tip::
-   In a local test, using the MapdlPool approach (with 10 MAPDL instances) took about 38 mins to run, while a single instance run 
+   In a local test, using the MapdlPool approach (with 10 MAPDL instances) took about 38 minutes to run, while a single instance run 
    lasted for about 3 hours. The simulation speed depends on a multitude of factors but this comparison provides an idea of the speed
    gain to expect when utilizing multiple instances.
 
