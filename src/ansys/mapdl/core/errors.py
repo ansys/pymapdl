@@ -343,6 +343,10 @@ def protect_grpc(func: Callable) -> Callable:
                     # Retry again
                     continue
 
+                # Every try to reconnecto to MAPDL failed
+                # So let's avoid execution
+                mapdl._exited = True
+
                 # Custom errors
                 reason = ""
                 suggestion = ""
