@@ -105,7 +105,6 @@ ALLOWABLE_LAUNCH_MAPDL_ARGS = [
     "additional_switches",
     "cleanup_on_exit",
     "clear_on_connect",
-    "running_on_hpc",
     "exec_file",
     "force_intel" "ip",
     "ip",
@@ -125,6 +124,7 @@ ALLOWABLE_LAUNCH_MAPDL_ARGS = [
     "remove_temp_dir_on_exit",
     "replace_env_vars",
     "run_location",
+    "running_on_hpc",
     "scheduler_options",
     "set_no_abort",
     "start_instance",
@@ -554,7 +554,7 @@ def check_mapdl_launch(
         MAPDL did not start.
     """
     LOG.debug("Generating queue object for stdout")
-    stdout_queue, _ = _create_queue_for_std(process.stdout)
+    stdout_queue, thread = _create_queue_for_std(process.stdout)
 
     # Checking connection
     try:
@@ -2876,7 +2876,7 @@ def submitter(
         stdout=stdout,
         stderr=stderr,
         env=env_vars,
-    )  # nosec B603 B607
+    )
 
 
 def check_console_start_parameters(start_parm):

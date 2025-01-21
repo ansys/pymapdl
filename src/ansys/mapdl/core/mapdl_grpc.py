@@ -119,6 +119,10 @@ VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26
 
 SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
 
+DEFAULT_TIME_STEP_STREAM = None
+DEFAULT_TIME_STEP_STREAM_NT = 500
+DEFAULT_TIME_STEP_STREAM_POSIX = 100
+
 # Retry policy for gRPC calls.
 SERVICE_DEFAULT_CONFIG = {
     # see https://github.com/grpc/proposal/blob/master/A6-client-retries.md#retry-policy-capabilities
@@ -1069,7 +1073,8 @@ class MapdlGrpc(MapdlBase):
     def _send_command_stream(self, cmd, verbose=False) -> str:
         """Send a command and expect a streaming response"""
         request = pb_types.CmdRequest(command=cmd)
-        metadata = [("time_step_stream", "100")]
+        time_step = self._get_time_step_stream()
+        metadata = [("time_step_stream", str(time_step))]
         stream = self._stub.SendCommandS(request, metadata=metadata)
         response = []
         for item in stream:
@@ -1334,7 +1339,12 @@ class MapdlGrpc(MapdlBase):
                     pids = set(re.findall(r"-9 (\d+)", raw))
                 self._pids = [int(pid) for pid in pids]
 
-        if not self._pids:
+        if not self._pids and not self._mapdl_process:
+            self._log.debug(
+                f"MAPDL process is not provided. PIDs could not be retrieved."
+            )
+            return
+        elif not self._pids:
             # For the cases where the cleanup file is not generated,
             # we relay on the process.
             parent_pid = self._mapdl_process.pid
@@ -1770,13 +1780,14 @@ class MapdlGrpc(MapdlBase):
             execution time.
 
             Due to stability issues, the default time_step_stream is
-            dependent on verbosity.  The defaults are:
+            dependent on the OS MAPDL is running on.  The defaults are:
 
-            - ``verbose=True``: ``time_step_stream=500``
-            - ``verbose=False``: ``time_step_stream=50``
+            - Windows: ``time_step_stream=500``
+            - Linux: ``time_step_stream=100``
 
             These defaults will be ignored if ``time_step_stream`` is
-            manually set.
+            manually set. See the *Examples* section to learn how to change
+            the default value globally.
 
         orig_cmd : str, optional
             Original command. There are some cases, were input is
@@ -1825,6 +1836,11 @@ class MapdlGrpc(MapdlBase):
         'inputtrigger.inp'
         >>> with mapdl.non_interactive:
                 mapdl.run("/input,inputtrigger,inp") # This inputs 'myinput.inp'
+
+        You can also change them globably using:
+
+        >>> from ansys.mapdl.core import mapdl_grpc
+        >>> mapdl_grpc.DEFAULT_TIME_STEP_STREAM=100 # in milliseconds
 
         """
         # Checking compatibility
@@ -1906,18 +1922,14 @@ class MapdlGrpc(MapdlBase):
             # are unclear
             filename = self._get_file_path(fname, progress_bar)
 
-        if time_step_stream is not None:
-            if time_step_stream <= 0:
-                raise ValueError("``time_step_stream`` must be greater than 0``")
+        time_step_stream = self._get_time_step_stream(time_step_stream)
+
+        metadata = [
+            ("time_step_stream", str(time_step_stream)),
+            ("chunk_size", str(chunk_size)),
+        ]
 
         if verbose:
-            if time_step_stream is None:
-                time_step_stream = 500
-            metadata = [
-                ("time_step_stream", str(time_step_stream)),
-                ("chunk_size", str(chunk_size)),
-            ]
-
             request = pb_types.InputFileRequest(filename=filename)
             strouts = self._stub.InputFileS(request, metadata=metadata)
             responses = []
@@ -1929,13 +1941,8 @@ class MapdlGrpc(MapdlBase):
             response = "\n".join(responses)
             return response.strip()
 
-        # otherwise, not verbose
-        if time_step_stream is None:
-            time_step_stream = 50
-        metadata = [
-            ("time_step_stream", str(time_step_stream)),
-            ("chunk_size", str(chunk_size)),
-        ]
+        ##
+        # Otherwise, not verbose
 
         # since we can't directly run /INPUT, we have to write a
         # temporary input file that tells MAPDL to read the input
@@ -2008,6 +2015,31 @@ class MapdlGrpc(MapdlBase):
                 self.slashdelete(filename)
 
         return output
+
+    def _get_time_step_stream(
+        self, time_step: Optional[Union[int, float]] = None
+    ) -> str:
+        """Return the time step for checking if MAPDL is done writing the
+        output to the file which later will be returned as response
+        """
+        if time_step is None:
+            if DEFAULT_TIME_STEP_STREAM is not None:
+                time_step = DEFAULT_TIME_STEP_STREAM
+            elif self.platform == "windows":
+                time_step = DEFAULT_TIME_STEP_STREAM_NT
+            elif self.platform == "linux":
+                time_step = DEFAULT_TIME_STEP_STREAM_POSIX
+            else:
+                raise ValueError(
+                    f"The MAPDL platform ('{self.platform}') is not recognaised."
+                )
+
+        else:
+            if time_step <= 0:
+                raise ValueError("``time_step`` argument must be greater than 0``")
+
+        self.logger.debug(f"The time_step argument is set to: {time_step}")
+        return time_step
 
     def _get_file_path(self, fname: str, progress_bar: bool = False) -> str:
         """Find files in the Python and MAPDL working directories.
@@ -2941,7 +2973,7 @@ class MapdlGrpc(MapdlBase):
 
     @property
     def locked(self):
-        """Instance is in use within a pool"""
+        """Instance is in use within a pool."""
         return self._locked
 
     @locked.setter
@@ -2987,7 +3019,7 @@ class MapdlGrpc(MapdlBase):
 
     @property
     def _distributed_result_file(self):
-        """Path of the distributed result file"""
+        """Path of the distributed result file."""
         if not self._distributed:
             return
 
@@ -3022,7 +3054,7 @@ class MapdlGrpc(MapdlBase):
 
     @property
     def thermal_result(self):
-        """The thermal result object"""
+        """The thermal result object."""
         self._prioritize_thermal = True
         result = self.result
         self._prioritize_thermal = False
@@ -3045,7 +3077,7 @@ class MapdlGrpc(MapdlBase):
             return open(os.path.join(self.directory, error_file)).read()
         elif self._exited:
             raise MapdlExitedError(
-                "Cannot list error file when MAPDL Service has " "exited"
+                "Cannot list error file when MAPDL Service has exited"
             )
 
         return self._download_as_raw(error_file).decode("latin-1")
@@ -3060,9 +3092,7 @@ class MapdlGrpc(MapdlBase):
         capname="",
         **kwargs,
     ):
-        """Run CMATRIX in non-interactive mode and return the response
-        from file.
-        """
+        """Run CMATRIX in non-interactive mode and return the response from file."""
 
         # The CMATRIX command needs to run in non-interactive mode
         if not self._store_commands:
