@@ -9,6 +9,58 @@ This document contains the release notes for the project.
 
 .. towncrier release notes start
 
+`0.69.1 <https://github.com/ansys/pymapdl/releases/tag/v0.69.1>`_ - 2025-01-21
+==============================================================================
+
+Added
+^^^^^
+
+- chore: update CHANGELOG for v0.69.1 `#3643 <https://github.com/ansys/pymapdl/pull/3643>`_
+- refactor: using test class in test_components.py `#3664 <https://github.com/ansys/pymapdl/pull/3664>`_
+- test: making sure the full and rst files exists before running the tests `#3666 <https://github.com/ansys/pymapdl/pull/3666>`_
+
+
+Fixed
+^^^^^
+
+- fix: parsing components when too many `#3662 <https://github.com/ansys/pymapdl/pull/3662>`_
+- fix: avoid com logging if not in debug mode `#3665 <https://github.com/ansys/pymapdl/pull/3665>`_
+
+
+Dependencies
+^^^^^^^^^^^^
+
+- build: bump grpcio from 1.68.1 to 1.69.0 in the grpc-deps group `#3645 <https://github.com/ansys/pymapdl/pull/3645>`_
+- build: bump scipy from 1.14.1 to 1.15.0 in the core group `#3646 <https://github.com/ansys/pymapdl/pull/3646>`_
+- build: bump pypandoc from 1.14 to 1.15 in the documentation group `#3647 <https://github.com/ansys/pymapdl/pull/3647>`_
+- build: bump the core group with 3 updates `#3670 <https://github.com/ansys/pymapdl/pull/3670>`_
+- build: bump imageio-ffmpeg from 0.5.1 to 0.6.0 in the documentation group `#3671 <https://github.com/ansys/pymapdl/pull/3671>`_
+- build: bump autopep8 from 2.3.1 to 2.3.2 in the testing group `#3672 <https://github.com/ansys/pymapdl/pull/3672>`_
+- build: bump pyfakefs from 5.7.3 to 5.7.4 `#3673 <https://github.com/ansys/pymapdl/pull/3673>`_
+- ci: adding-profiling-to-unit-tests `#3676 <https://github.com/ansys/pymapdl/pull/3676>`_
+
+
+Miscellaneous
+^^^^^^^^^^^^^
+
+- feat: adding __len__ to components `#3663 <https://github.com/ansys/pymapdl/pull/3663>`_
+
+
+Documentation
+^^^^^^^^^^^^^
+
+- docs: fix post documentation `#3684 <https://github.com/ansys/pymapdl/pull/3684>`_
+
+
+Maintenance
+^^^^^^^^^^^
+
+- ci: pre-commit autoupdate `#3657 <https://github.com/ansys/pymapdl/pull/3657>`_, `#3681 <https://github.com/ansys/pymapdl/pull/3681>`_
+- ci: pin ubuntu OS to 22.04. `#3659 <https://github.com/ansys/pymapdl/pull/3659>`_
+- ci: downgrade add-license-headers ansys precommit hook. `#3667 <https://github.com/ansys/pymapdl/pull/3667>`_
+- ci: skipping students version if on remote `#3668 <https://github.com/ansys/pymapdl/pull/3668>`_
+- ci: reducing minimal and console to two versions, and after local and remote `#3669 <https://github.com/ansys/pymapdl/pull/3669>`_
+
 `0.69.1 <https://github.com/ansys/pymapdl/releases/tag/v0.69.1>`_ - 2025-01-08
 ==============================================================================
 
