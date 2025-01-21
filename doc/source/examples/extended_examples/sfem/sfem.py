@@ -219,7 +219,7 @@ def stochastic_field_realization(
     Parameters
     ----------
     cosine_frequency_array : np.ndarray
-        Array of length P, containining frequencies associated with retained cosine terms
+        Array of length P, containing frequencies associated with retained cosine terms
     cosine_eigen_values : np.ndarray
         Array of length P, containing eigenvalues associated with retained cosine terms
     cosine_constants : np.ndarray
@@ -227,7 +227,7 @@ def stochastic_field_realization(
     cosine_random_variables_set : np.ndarray
         Array of length P, containing random variable drawn from N(0,1) for the cosine terms
     sine_frequency_array : np.ndarray
-        Array of length Q, containining frequencies associated with retained sine terms
+        Array of length Q, containing frequencies associated with retained sine terms
     sine_eigen_values : np.ndarray
         Array of length Q, containing eigenvalues associated with retained sine terms
     sine_constants : np.ndarray
@@ -540,16 +540,13 @@ def run_simulations(
         mapdl.solve()
 
         # Displacement probe point - where Uy results will be extracted
-        mapdl.nsel("S", "LOC", "X", 4)
-        displacement_probe_point = mapdl.nsel("R", "LOC", "Y", 0)
-        displacement = mapdl.get(
-            "DISP_AT_PROBE_POINT", "NODE", int(displacement_probe_point[0]), "U", "Y"
-        )
+        displacement_probe_point = mapdl.queries.node(length, 0, 0)
+        displacement = mapdl.get_value("NODE", displacement_probe_point, "U", "Y")
 
         simulation_results[simulation] = displacement
 
         mapdl.mpdele("ALL", "ALL")
-        if int((simulation + 1) % 10) == 0:
+        if (simulation + 1) % 10 == 0:
             print(f"Completed {simulation + 1} simulations ...")
 
     mapdl.exit()
@@ -560,7 +557,16 @@ def run_simulations(
 
 
 # Run the simulations
+import time
+
+start = time.time()
 simulation_results = run_simulations(4, 1, 0.2, 0.1, 5000)
+end = time.time()
+print(
+    "Simulation took {} min {} s".format(
+        int((end - start) // 60), int((end - start) % 60)
+    )
+)
 
 # Perform statistical post processing and plot the pdf
 import scipy.stats as stats
@@ -677,16 +683,13 @@ def run_simulations_threaded(
         mapdl.solve()
 
         # Displacement probe point - where Uy results will be extracted
-        mapdl.nsel("S", "LOC", "X", 4)
-        displacement_probe_point = mapdl.nsel("R", "LOC", "Y", 0)
-        displacement = mapdl.get(
-            "DISP_AT_PROBE_POINT", "NODE", int(displacement_probe_point[0]), "U", "Y"
-        )
+        displacement_probe_point = mapdl.queries.node(length, 0, 0)
+        displacement = mapdl.get_value("NODE", displacement_probe_point, "U", "Y")
 
         simulation_results[simulation] = displacement
 
         mapdl.mpdele("ALL", "ALL")
-        if int((simulation + 1) % 10) == 0:
+        if (simulation + 1) % 10 == 0:
             print(
                 f"Completed {simulation + 1} simulations in instance {instance_identifier} ..."
             )
@@ -707,7 +710,7 @@ def run_simulations_over_multple_instances(
 
     # First determine the number of simulations to run per instance
     if no_of_simulations % no_of_instances == 0:
-        # Simlations can be split equally across instances
+        # Simulations can be split equally across instances
         simulations_per_instance = no_of_simulations // no_of_instances
         simulations_per_instance_list = [
             simulations_per_instance for i in range(no_of_instances)
@@ -736,7 +739,14 @@ def run_simulations_over_multple_instances(
 
 
 # Run the simulations over several instances
-simulation_results = run_simulations_over_multple_instances(10, 1, 0.2, 0.1, 5000, 10)
+start = time.time()
+simulation_results = run_simulations_over_multple_instances(4, 1, 0.2, 0.1, 5000, 10)
+end = time.time()
+print(
+    "Simulation took {} min {} s".format(
+        int((end - start) // 60), int((end - start) % 60)
+    )
+)
 
 # Collect the results from each instance
 combined_results = [result[2] for result in simulation_results]

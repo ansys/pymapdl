@@ -29,7 +29,7 @@ Random variables vs stochastic processes
 A distinction between random variables and stochastic processes is attempted in this section. Explaining these
 concepts is important since they are used for modelling the system randomness. Random variables are easier to
 understand from elementary probability theory, the same cannot be said for stochastic processes. Readers are
-advised to consult books on SFEM if the explanation here seems too brief.
+advised to consult books on SFEM if the explanation here seems too brief. [1]_ and [2]_ are recommended resources.
 
 Random variables
 ~~~~~~~~~~~~~~~~
@@ -251,20 +251,20 @@ desired accuracy level. The implementation is as follows:
 
 .. literalinclude:: sfem.py
   :language: python
-  :lines: 1-173
+  :lines: 23-202
 
 The next step is to put this all together in a function that expresses :math:`f` using equation :math:numref:`approximation`
 as follows:
 
 .. literalinclude:: sfem.py
   :language: python
-  :lines: 176-236
+  :lines: 205-265
 
 And then the function for evaluating the young modulus itself is straight forward:
 
 .. literalinclude:: sfem.py
   :language: python
-  :lines: 239-266
+  :lines: 268-295
 
 Realizations of the young modulus
 +++++++++++++++++++++++++++++++++++++++++++++
@@ -272,7 +272,7 @@ We can now generate sample realizations of the young's modulus to see how they l
 
 .. literalinclude:: sfem.py
   :language: python
-  :lines: 269-317
+  :lines: 298-348
 
 .. figure:: young_modulus_realizations.png
    
@@ -318,13 +318,13 @@ perform some statistical processing on these realizations
 
 .. literalinclude:: sfem.py
   :language: python
-  :lines: 319-352
+  :lines: 350-385
 
 We can then generate a plot of the mean vs the number of realizations
 
 .. literalinclude:: sfem.py
   :language: python
-  :lines: 354-364
+  :lines: 387-397
 
 .. figure:: mean.png
    
@@ -334,7 +334,7 @@ And also a plot of the variance vs the number of realizations
 
 .. literalinclude:: sfem.py
   :language: python
-  :lines: 366-376
+  :lines: 399-409
 
 .. figure:: variance.png
 
@@ -370,13 +370,13 @@ A function implementing the steps above follows:
 
 .. literalinclude:: sfem.py
   :language: python
-  :lines: 381-513
+  :lines: 444-556
 
 Required arguments can be passed to the above function to run the simulations:
 
 .. literalinclude:: sfem.py
   :language: python
-  :lines: 516-517
+  :lines: 559-569
 
 Answering problem questions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -385,7 +385,7 @@ post-processing of simulation results to determine the pdf of the response :math
 
 .. literalinclude:: sfem.py
   :language: python
-  :lines: 519-529
+  :lines: 571-582
 
 .. figure:: pdf.png
 
@@ -396,9 +396,9 @@ To answer the second question, we simply evaluate the probability that the respo
 
 .. literalinclude:: sfem.py
   :language: python
-  :lines: 532-534
+  :lines: 584-586
 
-The computed probability is aprroximately 99%, which is a measure of how well the structure satisfies the design
+The computed probability is approximately 99%, which is a measure of how well the structure satisfies the design
 requirement.
 
 .. note::
@@ -414,12 +414,26 @@ to run simulations across multiple MAPDL instances. The implementation is as fol
 
 .. literalinclude:: sfem.py
   :language: python
-  :lines: 537-676
+  :lines: 589-738
 
 To run simulations over 10 MAPDL instances, the function above is simply called with appropriate arguments:
 
 .. literalinclude:: sfem.py
   :language: python
-  :lines: 679-689
+  :lines: 741-758
 
-Now the simulations will be completed much faster.
+Now the simulations can be completed much faster.
+
+.. tip::
+   In a local test, using the MapdlPool approach (with 10 MAPDL instances) took about 38 mins to run, while a single instance run 
+   lasted for about 3 hours. The simulation speed depends on a multitude of factors but this comparison provides an idea of the speed
+   gain to expect when utilizing multiple instances.
+
+.. warning::
+   Ensure there are enough licenses available to run multiple MAPDL instances concurrently. 
+
+References
+----------
+.. [1] Ioannis Kalogeris, "Advanced surrogate modeling and machine learning methods in computational stochastic mechanics," PhD Dissertation 
+.. [2] Dimitris G. Giovanis and Vissarion Papadopoulos, "Stochastic Finite Element Methods : An Introduction"
+
