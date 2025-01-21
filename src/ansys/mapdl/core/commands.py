@@ -368,7 +368,10 @@ class APDLCommands(
     pass
 
 
-class Aux2Commands(aux2.bin_dump.BinDump, aux2.bin_manip.BinManip):
+class Aux2Commands(
+    aux2.binary_file_dump.BinaryFileDump,
+    aux2.binary_file_manipulation.BinaryFileManipulation,
+):
     pass
 
 
