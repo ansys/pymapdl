@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -352,6 +352,10 @@ class ArrayParam:
         """Writes a matrix to a file in a formatted sequence.
 
         APDL Command: ``*MWRITE``
+
+        .. warning::
+           This command cannot be run interactively.  See
+           :func:`non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`.
 
         Parameters
         ----------

@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -25,7 +25,7 @@
 import numpy as np
 
 try:
-    from matplotlib.colors import ListedColormap
+    from matplotlib.colors import LinearSegmentedColormap, ListedColormap
 
     _HAS_MATPLOTLIB = True
 except ModuleNotFoundError:
@@ -35,6 +35,7 @@ except ModuleNotFoundError:
 from ansys.mapdl.core import _HAS_PYVISTA
 
 if _HAS_PYVISTA:
+    from cycler import Cycler
     from pyvista.plotting.colors import get_cycler
 
     try:
@@ -76,12 +77,77 @@ if _HAS_MATPLOTLIB:
     PyMAPDL_cmap: ListedColormap = ListedColormap(MAPDL_colorbar, name="PyMAPDL")
 
 
-def get_ansys_colors(N=9):
+def get_ansys_cmap(N: int = 9) -> "LinearSegmentedColormap":
+    """Returns a Matplotlib colormap of given length.
+
+    Returns a Matplotlib colormap which is the result of interpolate the MAPDL
+    colormap to obtain a colormap of a given number of colors.
+
+    Parameters
+    ----------
+    N : int, optional
+        Number of colours, by default 9
+
+    Returns
+    -------
+    matplotlib.colors.LinearSegmentedColormap
+        Colormap
+    """
+    return LinearSegmentedColormap.from_list("PyMAPDL", MAPDL_colorbar.tolist(), N=N)
+
+
+def get_ansys_colors(N: int = 9) -> np.array:
+    """Get N number of colors as array.
+
+    Obtain N unique colors as a Numpy array (N x 4). Transparency is included.
+    This function uses `get_ansys_cmap` to interpolate between the colors given
+    in `PyMAPDL_cmap`.
+
+    Parameters
+    ----------
+    N : int, optional
+        Number of colors, by default 9
+
+    Returns
+    -------
+    np.array
+        Color array
+
+    Raises
+    ------
+    ModuleNotFoundError
+        Matplotlib can not be found.
+    """
     if not _HAS_MATPLOTLIB:
         raise ModuleNotFoundError(
             "'matplotlib' package is needed for 'get_ansys_colors'."
         )
-    return np.array([PyMAPDL_cmap(i) for i in range(N)])
+
+    cmap = get_ansys_cmap(N=N)
+    return cmap([i for i in range(N)])
+
+
+def get_ansys_color_cycle(N: int = 9) -> np.array:
+    """Get a color cycler
+
+    Give an array of N colors which is the result of cycling through the MAPDL
+    colormap. Only m unique colors can be provided through this function, where
+    m is the minimal of 9 or N.
+
+    Parameters
+    ----------
+    N : int, optional
+        Number of colors, by default 9
+
+    Returns
+    -------
+    np.array
+        Array of colors
+    """
+    from cycler import cycler
+
+    cyc_ = cycler(color=MAPDL_colorbar.tolist())()
+    return np.array([each["color"] for i, each in zip(range(N), cyc_)])
 
 
 class MapdlTheme(Theme):
@@ -89,7 +155,7 @@ class MapdlTheme(Theme):
 
     The theme includes these defaults:
 
-    - ``'jet'`` for the (rainbow) colormap.
+    - PyMAPDL colormap as default colormap.
     - ``'Courier'`` font family for an interactive plot
     - ``'PyMAPDL'`` for the title of an interactive plot
 
@@ -100,7 +166,6 @@ class MapdlTheme(Theme):
     >>> from ansys.mapdl import core as pymapdl
     >>> my_theme = pymapdl.MapdlTheme()
     >>> my_theme.background = 'white'
-    >>> my_theme.cmap = 'jet'  # colormap
     >>> my_theme.axes.show = False
     >>> my_theme.show_scalar_bar = False
 
@@ -118,31 +183,31 @@ class MapdlTheme(Theme):
         """Initialize the theme."""
         super().__init__()
 
-        self.name = "PyMAPDL-Theme"
-        self.title = "PyMAPDL"
-        self.background = "paraview"
-        self.interactive = True
+        self.name: str = "PyMAPDL-Theme"
+        self.title: str = "PyMAPDL"
+        self.background: str = "paraview"
+        self.interactive: bool = True
 
         if _HAS_MATPLOTLIB:
             self.cmap = PyMAPDL_cmap
-        self.font.family = "arial"
+        self.font.family: str = "arial"
 
-        self.font.size = 18
-        self.font.title_size = 18
-        self.font.label_size = 18
-        self.font.color = "black"
+        self.font.size: int = 18
+        self.font.title_size: int = 18
+        self.font.label_size: int = 18
+        self.font.color: str = "black"
 
-        self.axes.x_color = "tomato"
-        self.axes.y_color = "seagreen"
-        self.axes.z_color = "blue"
+        self.axes.x_color: str = "tomato"
+        self.axes.y_color: str = "seagreen"
+        self.axes.z_color: str = "blue"
 
-        self.show_edges = False
-        self.color = "lightblue"
-        self.outline_color = "black"
-        self.edge_color = "black"
+        self.show_edges: bool = False
+        self.color: str = "lightblue"
+        self.outline_color: str = "black"
+        self.edge_color: str = "black"
 
-        self.color_cycler = get_cycler(MAPDL_colorbar.tolist())
-        self.render_points_as_spheres = True
+        self.color_cycler: Cycler = get_cycler(MAPDL_colorbar.tolist())
+        self.render_points_as_spheres: bool = True
 
 
 def _apply_default_theme():

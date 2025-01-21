@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -34,9 +34,7 @@ if has_dependency("pyvista"):
 from ansys.mapdl.core import examples
 
 
-def test_empty_model(mapdl):
-    mapdl.clear()
-
+def test_empty_model(mapdl, cleared):
     assert mapdl.mesh.nnum.size == 0
     assert mapdl.mesh.enum.size == 0
 
@@ -73,13 +71,13 @@ def test_repr(mapdl, cube_geom_and_mesh):
     assert "Number of Element Types" in out
 
 
-def test_mapdl(mapdl):
+def test_mapdl(mapdl, cleared):
     from ansys.mapdl.core.mapdl import MapdlBase
 
     assert isinstance(mapdl.mesh._mapdl, MapdlBase)
 
 
-def test_local(mapdl):
+def test_local(mapdl, cleared):
     assert isinstance(mapdl.mesh.local, bool)
     assert mapdl._local == mapdl.mesh.local
 
@@ -319,3 +317,42 @@ def test_nodal_rotation(mapdl, cleared):
         ]
     )
     assert np.allclose(nrotation_ref, nrotations[:7, :])
+
+
+def test_esln(mapdl, two_dimensional_mesh):
+    mapdl.nsel("S", "LOC", "X", 0)
+    selected_ids = mapdl.esln("S", 0)
+    expected_selected_ids = np.array([1, 41, 81, 121, 161, 201, 241, 281, 321, 361])
+    assert all(selected_ids == expected_selected_ids)
+
+
+def test_nsle(mapdl, two_dimensional_mesh):
+    mapdl.esel("S", "CENT", "X", 0, 0.1)
+    selected_ids = mapdl.nsle("S")
+    expected_selected_ids = np.array(
+        [
+            1,
+            3,
+            52,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+        ]
+    )
+    assert all(selected_ids == expected_selected_ids)

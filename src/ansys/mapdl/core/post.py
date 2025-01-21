@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -25,11 +25,11 @@ import weakref
 
 import numpy as np
 
-from ansys.mapdl.core import _HAS_PYVISTA
+from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import requires_package, supress_logging
 
-if _HAS_PYVISTA:
+if _HAS_VISUALIZER:
     from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
 COMPONENT_STRESS_TYPE = ["X", "Y", "Z", "XY", "YZ", "XZ"]
@@ -130,34 +130,48 @@ class PostProcessing:
         if not isinstance(mapdl, MapdlBase):  # pragma: no cover
             raise TypeError("Must be initialized using Mapdl instance")
         self._mapdl_weakref = weakref.ref(mapdl)
-        self._set_loaded = False
 
     @property
     def _mapdl(self):
         """Return the weakly referenced instance of MAPDL"""
         return self._mapdl_weakref()
 
-    @property
-    def _log(self):
-        """Alias for mapdl log"""
-        return self._mapdl._log
-
-    def _set_log_level(self, level):
-        """Alias for mapdl._set_log_level"""
-        return self._mapdl._set_log_level(level)
-
     @supress_logging
     def __repr__(self):
         info = "PyMAPDL PostProcessing Instance\n"
-        info += "\tActive Result File:    %s\n" % self.filename
-        info += "\tNumber of result sets: %d\n" % self.nsets
-        info += "\tCurrent load step:     %d\n" % self.load_step
-        info += "\tCurrent sub step:      %d\n" % self.sub_step
+        info += f"\tActive Result File:    {self.filename}\n"
+
+        # If there is no result file, this fails.
+        try:
+            nsets = int(self.nsets)
+        except MapdlRuntimeError as error:
+            self._mapdl.logger.debug(
+                f"Error when obtaining the number of sets:\n{error}"
+            )
+            nsets = "NA"
+
+        info += f"\tNumber of result sets: {nsets}\n"
+        info += f"\tCurrent load step:     {self.load_step}\n"
+        info += f"\tCurrent sub step:      {self.sub_step}\n"
 
         if self._mapdl.parameters.routine == "POST1":
-            info += "\n\n" + self._mapdl.set("LIST")
+            try:
+                nlist = self._mapdl.set("LIST")
+            except MapdlRuntimeError as err:
+                if (
+                    "An error occurred while attempting to open the results file"
+                    in str(err)
+                ):
+                    self._mapdl.logger.debug(
+                        f"List of steps could not be obtained due to error:\n{err}"
+                    )
+                    nlist = "Results file is not available"
+                else:
+                    raise err
+
+            info += "\n\n" + nlist
         else:
-            info += "\n\n Enable routine POST1 to see a table of available results"
+            info += "\n\nEnable routine POST1 to see a table of available results"
 
         return info
 
@@ -207,10 +221,6 @@ class PostProcessing:
         """
         # Because in MAPDL is the same.
         return self.time_values
-
-    def _reset_cache(self):
-        """Reset local cache"""
-        self._set_loaded = False
 
     @property
     def filename(self) -> str:
@@ -734,19 +744,6 @@ class PostProcessing:
 
     @property
     @supress_logging
-    def _all_nnum(self):
-        with self._mapdl.save_selection:
-            self._mapdl.allsel()
-            nnum = self._mapdl.get_array("NODE", item1="NLIST")
-
-            # rerun if encountered weird edge case of negative first index.
-            if nnum[0] == -1:
-                nnum = self._mapdl.get_array("NODE", item1="NLIST")
-
-        return nnum.astype(np.int32, copy=False)
-
-    @property
-    @supress_logging
     def _all_enum(self):
         with self._mapdl.save_selection:
             self._mapdl.allsel()
@@ -1046,7 +1043,7 @@ class PostProcessing:
         if isinstance(component, str):
             if component.upper() == "ALL":
                 raise ValueError(
-                    '"ALL" not allowed in this context.  Select a '
+                    '"ALL" not allowed in this context. Select a '
                     'single displacement component (e.g. "X")'
                 )
 
@@ -1156,7 +1153,7 @@ class PostProcessing:
         if isinstance(component, str):
             if component.upper() == "ALL":
                 raise ValueError(
-                    '"ALL" not allowed in this context.  Select a '
+                    '"ALL" not allowed in this context. Select a '
                     'single component (e.g. "X")'
                 )
 
@@ -1293,7 +1290,7 @@ class PostProcessing:
         """
         if component.upper() == "ALL":
             raise ValueError(
-                '"ALL" not allowed in this context.  Select a '
+                '"ALL" not allowed in this context. Select a '
                 'single displacement component (e.g. "X" or "NORM")'
             )
 
@@ -1364,6 +1361,8 @@ class PostProcessing:
                 0.        ,  0.        ])
 
         """
+        if not isinstance(component, str):
+            component = str(component)
         component = elem_check_inputs(component, option, STRESS_TYPES)
         return self.element_values("S", component, option)
 
@@ -2119,8 +2118,6 @@ class PostProcessing:
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
 
         """
-        if isinstance(component, int):
-            component = str(component)
         component = check_comp(component, COMPONENT_STRESS_TYPE)
         return self.nodal_values("EPTO", component)
 
@@ -2497,8 +2494,6 @@ class PostProcessing:
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
 
         """
-        if isinstance(component, int):
-            component = str(component)
         component = check_comp(component, COMPONENT_STRESS_TYPE)
         return self.nodal_values("EPEL", component)
 
@@ -2838,7 +2833,7 @@ class PostProcessing:
         """
         scalars = self.nodal_elastic_eqv_strain()
         kwargs.setdefault(
-            "scalar_bar_args", {"title": "Elastic Nodal\n Equivalent Strain"}
+            "scalar_bar_args", {"title": "Elastic Nodal\nEquivalent Strain"}
         )
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
@@ -2878,8 +2873,6 @@ class PostProcessing:
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
 
         """
-        if isinstance(component, int):
-            component = str(component)
         component = check_comp(component, COMPONENT_STRESS_TYPE)
         return self.nodal_values("EPPL", component)
 
@@ -3221,7 +3214,7 @@ class PostProcessing:
         """
         scalars = self.nodal_plastic_eqv_strain()
         kwargs.setdefault(
-            "scalar_bar_args", {"title": "Plastic Nodal\n Equivalent Strain"}
+            "scalar_bar_args", {"title": "Plastic Nodal\nEquivalent Strain"}
         )
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
@@ -3262,8 +3255,6 @@ class PostProcessing:
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
 
         """
-        if isinstance(component, int):
-            component = str(component)
         component = check_comp(component, COMPONENT_STRESS_TYPE)
         return self.nodal_values("EPTH", component)
 
@@ -3424,7 +3415,7 @@ class PostProcessing:
 
         Equivalent MAPDL command:
 
-        * ``PRNSOL, EPTH, PRIN``
+        * ``PRNSOL, EPTH, INT``
 
         Returns
         -------
@@ -3611,7 +3602,7 @@ class PostProcessing:
         """
         scalars = self.nodal_thermal_eqv_strain()
         kwargs.setdefault(
-            "scalar_bar_args", {"title": "Thermal Nodal\n Equivalent Strain"}
+            "scalar_bar_args", {"title": "Thermal Nodal\nEquivalent Strain"}
         )
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
@@ -3702,7 +3693,7 @@ class PostProcessing:
 
         """
         kwargs.setdefault(
-            "scalar_bar_args", {"title": "Nodal Contact\n Friction Stress"}
+            "scalar_bar_args", {"title": "Nodal Contact\nFriction Stress"}
         )
         return self._plot_point_scalars(
             self.nodal_contact_friction_stress(),

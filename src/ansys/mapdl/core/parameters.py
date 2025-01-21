@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -171,7 +171,14 @@ class Parameters:
         >>> mapdl.parameters.routine
         'PREP7'
         """
-        value = self._mapdl.get_value("ACTIVE", item1="ROUT")
+        value = int(self._mapdl.get_value("ACTIVE", item1="ROUT"))
+        if value not in ROUTINE_MAP:
+            self._mapdl.logger.info(
+                f"Getting a valid routine number failed. Routine obtained is {value}. Executing 'FINISH'."
+            )
+            self._mapdl.finish()
+            value = 0
+
         return ROUTINE_MAP[int(value)]
 
     @property
@@ -548,10 +555,10 @@ class Parameters:
         if not escaped:  # pragma: no cover
             raise MapdlRuntimeError(
                 f"The array '{parm_name}' has a number format "
-                "that could not be read using '{format_str}'."
+                f"that could not be read using '{format_str}'."
             )
 
-        arr_flat = np.fromstring(output, sep="\n").reshape(shape)
+        arr_flat = np.fromstring(output.strip(), sep="\n").reshape(shape)
 
         if len(shape) == 3:
             if shape[2] == 1:

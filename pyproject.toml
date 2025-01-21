@@ -8,7 +8,7 @@ name = "ansys-mapdl-core"
 version = "0.69.dev0"
 description = "A Python wrapper for Ansys MAPDL."
 readme = "README.md"
-requires-python = ">=3.9,<3.13"  # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
+requires-python = ">=3.10,<3.13"  # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
 license = {file = "LICENSE"}
 authors = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
@@ -17,14 +17,12 @@ dependencies = [
     "ansys-mapdl-reader>=0.51.7",
     "ansys-math-core>=0.1.2",
     "ansys-platform-instancemanagement~=1.0",
-    "ansys-tools-visualization-interface>=0.2.6",
     "ansys-tools-path>=0.3.1",
+    "ansys-tools-visualization-interface>=0.2.6",
     "click>=8.1.3", # for CLI interface
     "grpcio>=1.30.0",  # tested up to grpcio==1.35
-    "importlib-metadata>=4.0",
     "matplotlib>=3.0.0",  # for colormaps for pyvista
-    "numpy>=1.14.0,<1.25.0; python_version < '3.9'",
-    "numpy>=1.14.0,<2.0.0; python_version >= '3.9'",
+    "numpy>=1.14.0,<3.0.0",
     "pexpect>=4.8.0 ; platform_system=='Linux'",
     "platformdirs>=3.6.0",
     "protobuf>=3.12.2",  # minimum required based on latest ansys-grpc-mapdl
@@ -44,7 +42,6 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX",
     "Operating System :: MacOS",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -58,46 +55,51 @@ jupyter = [
 
 tests = [
     "ansys-dpf-core==0.10.1",
-    "ansys-tools-visualization-interface==0.2.6",
-    "autopep8==2.3.1",
-    "matplotlib==3.9.1",
-    "pandas==2.2.2",
-    "pyansys-tools-report==0.7.3",
+    "ansys-tools-visualization-interface==0.8.1",
+    "autopep8==2.3.2",
+    "matplotlib==3.10.0",
+    "pandas==2.2.3",
+    "pyansys-tools-report==0.8.1",
+    "pyfakefs==5.7.4",
     "pyiges[full]==0.3.1",
-    "pytest-cov==5.0.0",
-    "pytest-memprof<0.3.0",
+    "pytest-cov==6.0.0",
     "pytest-pyvista==0.1.9",
-    "pytest-rerunfailures==14.0",
-    "pytest==8.2.2",
-    "scipy==1.14.0",
+    "pytest-random-order==1.1.1",
+    "pytest-rerunfailures==15.0",
+    "pytest-timeout==2.3.1",
+    "pytest==8.3.4",
+    "scipy==1.15.1",
     "vtk==9.3.1",
 ]
 doc = [
     "ansys-dpf-core==0.10.1",
-    "ansys-mapdl-reader==0.53.0",
-    "ansys-tools-visualization-interface==0.2.6",
-    "ansys-sphinx-theme==0.16.6",
-    "grpcio==1.65.0",
-    "imageio-ffmpeg==0.5.1",
-    "imageio==2.34.2",
+    "ansys-mapdl-reader==0.54.2",
+    "ansys-sphinx-theme==1.2.6",
+    "ansys-tools-visualization-interface==0.8.1",
+    "grpcio==1.69.0",
+    "imageio-ffmpeg==0.6.0",
+    "imageio==2.36.1",
     "jupyter_sphinx==0.5.3",
+    "jupyter==1.1.1",
     "jupyterlab>=3.2.8",
-    "matplotlib==3.9.1",
-    "numpydoc==1.7.0",
-    "pandas==2.2.2",
-    "plotly==5.22.0",
+    "matplotlib==3.10.0",
+    "nbformat==5.10.4",
+    "numpydoc==1.8.0",
+    "pandas==2.2.3",
+    "plotly==5.24.1",
     "pyiges[full]==0.3.1",
-    "pypandoc==1.13",
+    "pypandoc==1.15",
     "pytest-sphinx==0.6.3",
     "pythreejs==2.4.2",
-    "sphinx-autobuild==2024.4.16",
+    "sphinx-autobuild==2024.10.3",
     "sphinx-autodoc-typehints==1.25.2",
     "sphinx-copybutton==0.5.2",
-    "sphinx-design==0.6.0",
-    "sphinx-gallery==0.16.0",
-    "sphinx-notfound-page==1.0.2",
-    "sphinx==7.4.4",
-    "sphinxcontrib-websupport==1.2.7",
+    "sphinx-design==0.6.1",
+    "sphinx-gallery==0.18.0",
+    "sphinx-jinja==2.0.2",
+    "sphinx-notfound-page==1.0.4",
+    "sphinx==8.1.3",
+    "sphinxcontrib-websupport==2.0.0",
     "sphinxemoji==0.3.1",
     "vtk==9.3.1",
 ]
@@ -121,6 +123,7 @@ pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_
 pymapdl = "ansys.mapdl.core.cli:main"
 
 [tool.pytest.ini_options]
+addopts = "-rxXsa -vvv --maxfail=10 --random-order-bucket=class --random-order --durations=10  --timeout=180"
 junit_family = "legacy"
 filterwarnings = [
     "ignore::FutureWarning",
@@ -148,8 +151,6 @@ src_paths = ["doc", "src", "tests"]
 [tool.coverage.run]
 source = ["ansys/pymapdl"]
 omit = [
-    # omit commands
-    "ansys/mapdl/core/_commands/*",
     # ignore legacy interfaces
     "ansys/mapdl/core/mapdl_console.py",
     "ansys/mapdl/core/jupyter.py",
@@ -265,4 +266,18 @@ showcontent = true
 [[tool.towncrier.type]]
 directory = "miscellaneous"
 name = "Miscellaneous"
+showcontent = true
+[[tool.towncrier.type]]
+directory = "documentation"
+name = "Documentation"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "maintenance"
+name = "Maintenance"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "test"
+name = "Test"
 showcontent = true

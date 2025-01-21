@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -39,114 +39,143 @@ def check_supports_extract(mapdl):
         pytest.skip("command not supported")
 
 
-@pytest.fixture(scope="function")
-def xpl(mapdl, cube_solve):
-    xpl = mapdl.xpl
-    xpl.open("file.full")
-    return xpl
+class Test_xpl:
 
+    @staticmethod
+    @pytest.fixture(scope="class")
+    def cube_solve(mapdl):
+        from conftest import clear
 
-def test_close(xpl):
-    xpl.close()
-    with pytest.raises(MapdlCommandIgnoredError):
-        xpl.list()
+        clear(mapdl)
 
+        # set up the full file
+        mapdl.block(0, 1, 0, 1, 0, 1)
+        mapdl.et(1, 186)
+        mapdl.esize(0.5)
+        mapdl.vmesh("all")
 
-def test_xpl_str(xpl):
-    assert "file.full" in str(xpl)
+        # Define a material (nominal steel in SI)
+        mapdl.mp("EX", 1, 210e9)  # Elastic modulus in Pa (kg/(m*s**2))
+        mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
+        mapdl.mp("NUXY", 1, 0.3)  # Poisson's Ratio
 
+        # solve first 10 non-trivial modes
+        mapdl.modal_analysis(nmode=10, freqb=1)
+        mapdl.save("cube_solve_xpl")
 
-@requires("ansys-math-core")
-def test_read_int32(xpl):
-    vec = xpl.read("MASS")
-    arr = vec.asarray()
-    assert arr.size
-    assert arr.dtype == np.int32
+    @staticmethod
+    @pytest.fixture(scope="function")
+    def xpl(mapdl, cube_solve):
+        mapdl.prep7()
+        mapdl.resume("cube_solve_xpl")
 
+        xpl = mapdl.xpl
+        xpl.open("file.full")
 
-@requires("ansys-math-core")
-def test_read_double(xpl):
-    vec = xpl.read("DIAGK")
-    arr = vec.asarray()
-    assert arr.size
-    assert arr.dtype == np.double
+        return xpl
 
+    @staticmethod
+    def test_close(xpl):
+        xpl.close()
+        with pytest.raises(MapdlCommandIgnoredError):
+            xpl.list()
 
-@requires("ansys-math-core")
-def test_read_asarray(xpl):
-    vec1 = xpl.read("MASS", asarray=True)
-    vec2 = xpl.read("MASS")
-    assert np.allclose(vec1, vec2.asarray())
+    @staticmethod
+    def test_xpl_str(xpl):
+        assert "file.full" in str(xpl)
 
+    @staticmethod
+    @requires("ansys-math-core")
+    def test_read_int32(xpl):
+        vec = xpl.read("MASS")
+        arr = vec.asarray()
+        assert arr.size
+        assert arr.dtype == np.int32
 
-def test_save(xpl):
-    xpl.save()
-    with pytest.raises(MapdlCommandIgnoredError):
-        xpl.list()
+    @staticmethod
+    @requires("ansys-math-core")
+    def test_read_double(xpl):
+        vec = xpl.read("DIAGK")
+        arr = vec.asarray()
+        assert arr.size
+        assert arr.dtype == np.double
 
+    @staticmethod
+    @requires("ansys-math-core")
+    def test_read_asarray(xpl):
+        vec1 = xpl.read("MASS", asarray=True)
+        vec2 = xpl.read("MASS")
+        assert np.allclose(vec1, vec2.asarray())
 
-def test_copy(mapdl, xpl):
-    filename = "tmpfile.full"
-    xpl.copy(filename)
-    assert filename in mapdl.list_files()
+    @staticmethod
+    def test_save(xpl):
+        xpl.save()
+        with pytest.raises(MapdlCommandIgnoredError):
+            xpl.list()
 
+    @staticmethod
+    def test_copy(mapdl, cleared, xpl):
+        filename = "tmpfile.full"
+        xpl.copy(filename)
+        assert filename in mapdl.list_files()
 
-def test_list(xpl):
-    assert "::FULL::" in xpl.list(1)
+    @staticmethod
+    def test_list(xpl):
+        assert "::FULL::" in xpl.list(1)
 
+    @staticmethod
+    def test_help(xpl):
+        assert "SAVE" in xpl.help()
 
-def test_help(xpl):
-    assert "SAVE" in xpl.help()
+    @staticmethod
+    def test_step_where(xpl):
+        xpl.step("MASS")
+        assert "FULL::MASS" in xpl.where()
 
+        with pytest.raises(MapdlRuntimeError):
+            xpl.step("notarecord")
 
-def test_step_where(xpl):
-    xpl.step("MASS")
-    assert "FULL::MASS" in xpl.where()
+    @staticmethod
+    def test_info(xpl):
+        assert "Record Size" in xpl.info("NGPH")
 
-    with pytest.raises(MapdlRuntimeError):
-        xpl.step("notarecord")
+    @staticmethod
+    def test_print(xpl):
+        assert "10" in xpl.print("MASS")
 
+    @staticmethod
+    def test_json(xpl):
+        json_out = xpl.json()
+        assert json_out["name"] == "FULL"
+        assert "children" in json_out
 
-def test_info(xpl):
-    assert "Record Size" in xpl.info("NGPH")
+    @staticmethod
+    def test_up(xpl):
+        xpl.step("MASS")
+        xpl.up()
+        assert "Current Location : FULL" in xpl.where()
 
+        xpl.up("TOP")
+        assert "Current Location : FULL" in xpl.where()
 
-def test_print(xpl):
-    assert "10" in xpl.print("MASS")
+    @staticmethod
+    def test_goto(xpl):
+        xpl.goto("MASS")
+        assert "Current Location : FULL::MASS" in xpl.where()
 
+    @staticmethod
+    @requires("ansys-math-core")
+    @pytest.mark.usefixtures("check_supports_extract")
+    def test_extract(xpl):
+        # expecting fixture to already have a non-result file open
+        assert xpl._filename[-3:] != "rst"
+        with pytest.raises(MapdlRuntimeError, match="result files"):
+            mat = xpl.extract("NSL")
 
-def test_json(xpl):
-    json_out = xpl.json()
-    assert json_out["name"] == "FULL"
-    assert "children" in json_out
+        xpl.open("file.rst")
 
+        with pytest.raises(ValueError, match="the only supported recordname is 'NSL'"):
+            xpl.extract("NOD")
 
-def test_up(xpl):
-    xpl.step("MASS")
-    xpl.up()
-    assert "Current Location : FULL" in xpl.where()
-
-    xpl.up("TOP")
-    assert "Current Location : FULL" in xpl.where()
-
-
-def test_goto(xpl):
-    xpl.goto("MASS")
-    assert "Current Location : FULL::MASS" in xpl.where()
-
-
-@requires("ansys-math-core")
-@pytest.mark.usefixtures("check_supports_extract")
-def test_extract(xpl):
-    # expecting fixture to already have a non-result file open
-    assert xpl._filename[-3:] != "rst"
-    with pytest.raises(MapdlRuntimeError, match="result files"):
         mat = xpl.extract("NSL")
-
-    xpl.open("file.rst")
-
-    with pytest.raises(ValueError, match="the only supported recordname is 'NSL'"):
-        xpl.extract("NOD")
-
-    mat = xpl.extract("NSL")
-    assert mat.shape == (243, 10)
+        assert mat.shape == (243, 10)

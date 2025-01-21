@@ -53,6 +53,7 @@ CentOS7
 Chao
 ci
 container_layout
+CPUs
 datas
 delet
 Dependabot
@@ -98,7 +99,6 @@ levl
 Linder
 Linux
 MacOS
-mapdl
 mapdl
 MAPDL
 mater
@@ -160,7 +160,6 @@ tablet
 thermomechanical
 thermomechanically
 THIRDPARTY
-thispagetitle
 Tool-Narayanaswamy
 tread
 trian

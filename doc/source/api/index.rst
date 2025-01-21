@@ -24,6 +24,7 @@ PyMAPDL, see :ref:`ref_mapdl_commands`.
    geometry
    helper
    hpc
+   information
    inline
    krylov
    launcher

@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,7 +22,7 @@
 
 
 class RadiositySolver:
-    def hemiopt(self, hres="", **kwargs):
+    def hemiopt(self, hres="", tolerance="", **kwargs):
         """Specifies options for Hemicube view factor calculation.
 
         APDL Command: HEMIOPT

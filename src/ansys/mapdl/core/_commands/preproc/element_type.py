@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -25,7 +25,7 @@ These PREP7 commands define the type of elements to be used in the model.
 """
 from typing import Optional, Union
 
-from ansys.mapdl.core._commands.parse import parse_et
+from ansys.mapdl.core._commands import parse
 from ansys.mapdl.core.mapdl_types import MapdlInt
 
 
@@ -272,9 +272,9 @@ class ElementType:
 
         """
         command = (
-            f"ET,{itype},{ename},{kop1},{kop2},{kop3},{kop4}," f"{kop5},{kop6},{inopr}"
+            f"ET,{itype},{ename},{kop1},{kop2},{kop3},{kop4},{kop5},{kop6},{inopr}"
         )
-        return parse_et(self.run(command, **kwargs))
+        return parse.parse_et(self.run(command, **kwargs))
 
     def etchg(self, cnv: str = "", **kwargs) -> Optional[str]:
         """Changes element types to their corresponding types.

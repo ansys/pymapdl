@@ -82,6 +82,8 @@
 .. _pymapdl_ex_repo: https://github.com/ansys/pymapdl-examples
 .. _pymapdl_ex_ts: https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html
 .. _pymapdl_ex_vm: https://examples.mapdl.docs.pyansys.com/verif-manual/index.html
+.. _pymapdl_cheat_sheet: https://mapdl.docs.pyansys.com/stable/_static/_static/cheat_sheet.pdf
+
 
 .. # Ansys Structural Guide links:
 .. _ansys_krylov_sweep_harmonic_analysis: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_str/str_Krysweep.html
@@ -135,6 +137,7 @@
 .. _lmod_docs: https://lmod.readthedocs.io/en/latest/
 .. _pygad_docs: https://pygad.readthedocs.io/en/latest/
 .. _ga_article: https://blog.derlin.ch/genetic-algorithms-with-pygad
+.. _simutech_linux_dependencies: https://install.simutechgroup.com/info-required-linux-packages-and-libraries
 
 
 .. #Github links:

@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -30,7 +30,10 @@ import os
 import pathlib
 import re
 from shutil import copyfile, rmtree
-from subprocess import DEVNULL, call
+
+# Subprocess is needed to start the backend. But
+# the input is controlled by the library. Excluding bandit check.
+from subprocess import DEVNULL, call  # nosec B404
 import tempfile
 import time
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
@@ -41,7 +44,7 @@ import numpy as np
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core import _HAS_PYVISTA
+from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
     CMD_LISTING,
@@ -56,19 +59,20 @@ from ansys.mapdl.core.commands import (
 from ansys.mapdl.core.errors import (
     ComponentNoData,
     MapdlCommandIgnoredError,
+    MapdlExitedError,
     MapdlFileNotFoundError,
     MapdlInvalidRoutineError,
     MapdlRuntimeError,
 )
+from ansys.mapdl.core.information import Information
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.mapdl_types import MapdlFloat
 from ansys.mapdl.core.misc import (
-    Information,
     check_valid_routine,
     last_created,
     random_string,
     requires_package,
-    run_as_prep7,
+    run_as,
     supress_logging,
 )
 
@@ -104,20 +108,22 @@ PNG_IS_WRITTEN_TO_FILE = re.compile(
     "WRITTEN TO FILE"
 )  # getting the file name is buggy.
 
-VWRITE_REPLACEMENT = """
-Cannot use *VWRITE directly as a command in MAPDL
+VWRITE_MWRITE_REPLACEMENT = """
+Cannot use *VWRITE/*MWRITE directly as a command in MAPDL
 service mode.  Instead, run it as ``non_interactive``.
 
-For example:
+For example, in the *VWRITE case:
 
 with self.non_interactive:
     self.vwrite('%s(1)' % parm_name)
     self.run('(F20.12)')
+
 """
 
 ## Invalid commands in interactive mode.
 INVAL_COMMANDS = {
-    "*VWR": VWRITE_REPLACEMENT,
+    "*VWR": VWRITE_MWRITE_REPLACEMENT,
+    "*MWR": VWRITE_MWRITE_REPLACEMENT,
     "*CFO": "Run CFOPEN as ``non_interactive``",
     "*CRE": "Create a function within python or run as non_interactive",
     "*END": "Create a function within python or run as non_interactive",
@@ -158,6 +164,32 @@ VALID_SELECTION_TYPE_TP = Literal["S", "R", "A", "U"]
 VALID_SELECTION_ENTITY_TP = Literal["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
 
 GUI_FONT_SIZE = 15
+LOG_APDL_DEFAULT_FILE_NAME = "apdl.log"
+
+_ALLOWED_START_PARM = [
+    "additional_switches",
+    "check_parameter_names",
+    "env_vars",
+    "launched",
+    "exec_file",
+    "finish_job_on_exit",
+    "hostname",
+    "ip",
+    "jobid",
+    "jobname",
+    "launch_on_hpc",
+    "mode",
+    "nproc",
+    "override",
+    "port",
+    "print_com",
+    "process",
+    "ram",
+    "run_location",
+    "start_instance",
+    "start_timeout",
+    "timeout",
+]
 
 
 def parse_to_short_cmd(command):
@@ -191,25 +223,6 @@ def setup_logger(loglevel="INFO", log_file=True, mapdl_instance=None):
     return setup_logger.log
 
 
-_ALLOWED_START_PARM = [
-    "additional_switches",
-    "exec_file",
-    "ip",
-    "jobname",
-    "local",
-    "nproc",
-    "override",
-    "port",
-    "print_com",
-    "process",
-    "ram",
-    "run_location",
-    "start_timeout",
-    "timeout",
-    "check_parameter_names",
-]
-
-
 def _sanitize_start_parm(start_parm):
     for each_key in start_parm:
         if each_key not in _ALLOWED_START_PARM:
@@ -232,7 +245,6 @@ class _MapdlCore(Commands):
     ):
         """Initialize connection with MAPDL."""
         atexit.register(self.__del__)  # registering to exit properly
-        self._name = None  # For naming the instance.
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited: bool = False
@@ -241,16 +253,18 @@ class _MapdlCore(Commands):
         self._store_commands: bool = False
         self._stored_commands = []
         self._response = None
-        self._mode = None
+        self._mode = start_parm.get("mode", None)
         self._mapdl_process = None
-        self._launched: bool = False
+        self._launched: bool = start_parm.get("launched", False)
         self._stderr = None
         self._stdout = None
         self._file_type_for_plots = file_type_for_plots
         self._default_file_type_for_plots = file_type_for_plots
         self._version = None  # cached version
+        self._mute = False
+        self._save_selection_obj = None
 
-        if _HAS_PYVISTA:
+        if _HAS_VISUALIZER:
             if use_vtk is not None:  # pragma: no cover
                 self._use_vtk = use_vtk
             else:
@@ -258,7 +272,8 @@ class _MapdlCore(Commands):
         else:  # pragma: no cover
             if use_vtk:
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'use_vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'use_vtk' requires having "
+                    "'ansys-tools-visualization_interface' installed."
                 )
             else:
                 self._use_vtk = False
@@ -274,13 +289,14 @@ class _MapdlCore(Commands):
         self._krylov = None
         self._on_docker = None
         self._platform = None
+        self._print_com: bool = print_com  # print the command /COM input.
 
+        # Start_parameters
         _sanitize_start_parm(start_parm)
         self._start_parm: Dict[str, Any] = start_parm
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
-        self._print_com: bool = print_com  # print the command /COM input.
-        self.check_parameter_names = start_parm.get("check_parameter_names", True)
+        self._check_parameter_names = start_parm.get("check_parameter_names", True)
 
         # Setting up loggers
         self._log: logger = logger.add_instance_logger(
@@ -309,6 +325,9 @@ class _MapdlCore(Commands):
 
         self._componentmanager: ComponentManager = ComponentManager(self)
 
+        if isinstance(log_apdl, bool) and log_apdl:
+            log_apdl = LOG_APDL_DEFAULT_FILE_NAME
+
         if log_apdl:
             self.open_apdl_log(log_apdl, mode="w")
 
@@ -322,6 +341,9 @@ class _MapdlCore(Commands):
         self._wrap_xsel_commands()
 
         self._info = Information(self)
+
+    def _after_run(self, _command: str) -> None:
+        pass
 
     @property
     def allow_ignore(self):
@@ -365,6 +387,9 @@ class _MapdlCore(Commands):
             DeprecationWarning,
         )
         self._ignore_errors = bool(value)
+
+    def _before_run(self, _command: str) -> None:
+        pass
 
     @property
     def chain_commands(self):
@@ -428,7 +453,7 @@ class _MapdlCore(Commands):
 
         >>> mapdl.solution.converged
         """
-        if self._exited:  # pragma: no cover
+        if self.exited:  # pragma: no cover
             raise MapdlRuntimeError("MAPDL exited.")
         return self._componentmanager
 
@@ -480,25 +505,24 @@ class _MapdlCore(Commands):
         accessible, ``cwd`` (:func:`MapdlBase.cwd`) will raise
         a warning.
         """
-        # always attempt to cache the path
-        i = 0
-        while (not self._path and i > 5) or i == 0:
-            try:
-                self._path = self.inquire("", "DIRECTORY")
-            except Exception:  # pragma: no cover
-                pass
-            i += 1
-            if not self._path:  # pragma: no cover
-                time.sleep(0.1)
+        # Inside inquire there is already a retry mechanisim
+        path = None
+        try:
+            path = self.inquire("", "DIRECTORY")
+        except MapdlExitedError:
+            # Let's return the cached path
+            pass
 
         # os independent path format
-        if self._path:  # self.inquire might return ''.
-            self._path = self._path.replace("\\", "/")
+        if path:  # self.inquire might return ''.
+            path = path.replace("\\", "/")
             # new line to fix path issue, see #416
-            self._path = repr(self._path)[1:-1]
-        else:  # pragma: no cover
-            raise IOError(
-                f"The directory returned by /INQUIRE is not valid ('{self._path}')."
+            path = repr(path)[1:-1]
+            self._path = path
+
+        elif not self._path:
+            raise MapdlRuntimeError(
+                f"MAPDL could provide a path using /INQUIRE or the cached path ('{self._path}')."
             )
 
         return self._path
@@ -508,6 +532,7 @@ class _MapdlCore(Commands):
     def directory(self, path: Union[str, pathlib.Path]) -> None:
         """Change the directory using ``Mapdl.cwd``"""
         self.cwd(path)
+        self._path = path
 
     @property
     def exited(self):
@@ -657,8 +682,8 @@ class _MapdlCore(Commands):
         """
         try:
             self._jobname = self.inquire("", "JOBNAME")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(f"Failed to get the jobname due to the following error: {e}")
         return self._jobname
 
     @jobname.setter
@@ -692,7 +717,18 @@ class _MapdlCore(Commands):
         return self._launched
 
     @property
+    def check_parameter_names(self):
+        """Whether check if the name which is given to the parameter is allowed or not"""
+        return self._check_parameter_names
+
+    @check_parameter_names.setter
+    def check_parameter_names(self, value: bool):
+        """Whether check if the name which is given to the parameter is allowed or not"""
+        self._check_parameter_names = value
+
+    @property
     def logger(self) -> logging.Logger:
+        """MAPDL Python-based logger"""
         return self._log
 
     @property
@@ -838,7 +874,7 @@ class _MapdlCore(Commands):
         array([1.07512979e-04, 8.59137773e-05, 5.70690047e-05, ...,
                5.70333124e-05, 8.58600402e-05, 1.07445726e-04])
         """
-        if self._exited:
+        if self.exited:
             raise MapdlRuntimeError(
                 "MAPDL exited.\n\nCan only postprocess a live " "MAPDL instance."
             )
@@ -846,6 +882,8 @@ class _MapdlCore(Commands):
 
     @property
     def print_com(self):
+        """Whether to print or not to the console the
+        :meth:`mapdl.com ("/COM") <ansys.mapdl.core.Mapdl.com>` calls."""
         return self._print_com
 
     @print_com.setter
@@ -941,7 +979,9 @@ class _MapdlCore(Commands):
         when exit returns to that selection.
 
         """
-        return self._save_selection(self)
+        if self._save_selection_obj is None:
+            self._save_selection_obj = self._save_selection(self)
+        return self._save_selection_obj
 
     @property
     def solution(self) -> "Solution":
@@ -957,7 +997,7 @@ class _MapdlCore(Commands):
 
         >>> mapdl.solution.converged
         """
-        if self._exited:
+        if self.exited:
             raise MapdlRuntimeError("MAPDL exited.")
         return self._solution
 
@@ -1121,7 +1161,6 @@ class _MapdlCore(Commands):
     def _mesh(self) -> "Archive":
         """Write entire archive to ASCII and read it in as an
         ``ansys.mapdl.core.Archive``"""
-        # lazy import here to avoid loading pyvista and vtk
         from ansys.mapdl.reader import Archive
 
         if self._archive_cache is None:
@@ -1252,6 +1291,9 @@ class _MapdlCore(Commands):
 
     def _wrap_xsel_commands(self):
         # Wrapping XSEL commands.
+        if self.is_console:
+            return
+
         def wrap_xsel_function(func):
             if hasattr(func, "__func__"):
                 func.__func__.__doc__ = inject_docs(
@@ -1279,6 +1321,10 @@ class _MapdlCore(Commands):
                     return self.geometry.anum
                 elif name == "VSEL":
                     return self.geometry.vnum
+                elif name == "ESLN":
+                    return self.mesh.enum
+                elif name == "NSLE":
+                    return self.mesh.nnum
                 else:
                     return None
 
@@ -1354,7 +1400,10 @@ class _MapdlCore(Commands):
             self._parent = weakref.ref(parent)
 
         def __enter__(self):
-            self._parent()._log.debug("Entering non-interactive mode")
+            self._parent()._log.debug("Entering in non-interactive mode")
+            if self._parent().logger.logger.level <= logging.DEBUG:
+                # only commenting if on debug mode
+                self._parent().com("Entering in non_interactive mode")
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
@@ -1377,44 +1426,40 @@ class _MapdlCore(Commands):
 
         def __init__(self, parent):
             self._parent = weakref.ref(parent)
-            self.selection_sets = []
-            self.selection_sets_comps = []
+            self.selection = []
 
         def __enter__(self):
             self._parent()._log.debug("Entering saving selection context")
-
-            selection_set_name = random_string(10)
-            self.selection_sets.append(selection_set_name)
-            self.selection_sets_comps.append(self._parent().components.names)
-
             mapdl = self._parent()
 
-            prev_ier = mapdl.ignore_errors
-            mapdl.ignore_errors = True
-            for entity in ["kp", "lines", "area", "volu", "node", "elem"]:
-                mapdl.cm(f"_{selection_set_name}_{entity}_", f"{entity}", mute=True)
-            mapdl.ignore_errors = prev_ier
+            # Storing components
+            selection = {
+                "cmsel": mapdl.components.names,
+                # "components_type": mapdl.components.types,
+                "nsel": mapdl.mesh.nnum,
+                "esel": mapdl.mesh.enum,
+                "ksel": mapdl.geometry.knum,
+                "lsel": mapdl.geometry.lnum,
+                "asel": mapdl.geometry.anum,
+                "vsel": mapdl.geometry.vnum,
+            }
+
+            self.selection.append(selection)
 
         def __exit__(self, *args):
             self._parent()._log.debug("Exiting saving selection context")
-            last_selection_name = self.selection_sets.pop()
-            last_selection_cmps = self.selection_sets_comps.pop()
-
+            selection = self.selection.pop()
             mapdl = self._parent()
 
-            # probably this is redundant
-            prev_ier = mapdl.ignore_errors
-            mapdl.ignore_errors = True
-            for entity in ["kp", "lines", "area", "volu", "node", "elem"]:
-                cmp_name = f"_{last_selection_name}_{entity}_"
-                mapdl.cmsel("s", cmp_name, f"{entity}", mute=True)
-                mapdl.cmdele(cmp_name)
+            cmps = selection.pop("cmsel")
 
-            mapdl.ignore_errors = prev_ier
+            if cmps:
+                mapdl.components.select(cmps)
 
-            # mute to avoid getting issues when the component wasn't created in
-            # first place because there was no entities.
-            self._parent().components.select(last_selection_cmps, mute=True)
+            for select_cmd, ids in selection.items():
+                if ids.size > 0:
+                    func = getattr(mapdl, select_cmd)
+                    func(vmin=ids)
 
     class _chain_commands:
         """Store MAPDL commands and send one chained command."""
@@ -1427,7 +1472,7 @@ class _MapdlCore(Commands):
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
-            self._parent()._log.debug("Entering chained command mode")
+            self._parent()._log.debug("Exiting chained command mode")
             self._parent()._chain_stored()
             self._parent()._store_commands = False
 
@@ -1436,29 +1481,27 @@ class _MapdlCore(Commands):
 
         def __init__(self, parent, routine):
             self._parent = weakref.ref(parent)
-
-            # check the routine is valid since we're muting the output
-            check_valid_routine(routine)
             self._requested_routine = routine
 
         def __enter__(self):
             """Store the current routine and enter the requested routine."""
-            self._cached_routine = self._parent().parameters.routine
-            self._parent()._log.debug("Caching routine %s", self._cached_routine)
-            if self._requested_routine.lower() != self._cached_routine.lower():
-                self._enter_routine(self._requested_routine)
+            self._parent()._cache_routine()
+            self._parent()._log.debug(f"Caching routine {self._cached_routine}")
+
+            if (
+                self._requested_routine.lower().strip()
+                != self._cached_routine.lower().strip()
+            ):
+                self._parent()._enter_routine(self._requested_routine)
 
         def __exit__(self, *args):
             """Restore the original routine."""
-            self._parent()._log.debug("Restoring routine %s", self._cached_routine)
-            self._enter_routine(self._cached_routine)
+            self._parent()._log.debug(f"Restoring routine '{self._cached_routine}'")
+            self._parent()._resume_routine()
 
-        def _enter_routine(self, routine):
-            """Enter a routine."""
-            if routine.lower() == "begin level":
-                self._parent().finish(mute=True)
-            else:
-                self._parent().run(f"/{routine}", mute=True)
+        @property
+        def _cached_routine(self):
+            return self._parent()._cached_routine
 
     def run_as_routine(self, routine):
         """
@@ -1528,6 +1571,7 @@ class _MapdlCore(Commands):
         """
         if self._apdl_log is not None:
             raise MapdlRuntimeError("APDL command logging already enabled")
+
         self._log.debug("Opening ANSYS log file at %s", filename)
 
         if mode not in ["w", "a", "x"]:
@@ -1542,7 +1586,7 @@ class _MapdlCore(Commands):
         )
 
     @supress_logging
-    @run_as_prep7
+    @run_as("PREP7")
     def _generate_iges(self):
         """Save IGES geometry representation to disk"""
         filename = os.path.join(self.directory, "_tmp.iges")
@@ -1593,7 +1637,7 @@ class _MapdlCore(Commands):
         >>> mapdl.eplot()
         """
         # lazy load here to avoid circular import
-        from ansys.mapdl.core.launcher import get_ansys_path
+        from ansys.mapdl.core.launcher import get_mapdl_path
 
         if not self._local:
             raise MapdlRuntimeError(
@@ -1670,7 +1714,7 @@ class _MapdlCore(Commands):
         # issue system command to run ansys in GUI mode
         cwd = os.getcwd()
         os.chdir(run_dir)
-        exec_file = self._start_parm.get("exec_file", get_ansys_path(allow_input=False))
+        exec_file = self._start_parm.get("exec_file", get_mapdl_path(allow_input=False))
         nproc = self._start_parm.get("nproc", 2)
         add_sw = self._start_parm.get("additional_switches", "")
 
@@ -1679,12 +1723,30 @@ class _MapdlCore(Commands):
                 "MAPDL GUI has been opened using 'inplace' kwarg. "
                 f"The changes you make will overwrite the files in {run_dir}."
             )
+        add_sw = add_sw.split()
 
+        # Ensure exec_file is a file
+        try:
+            pathlib.Path(exec_file).is_file()
+        except FileNotFoundError:
+            raise FileNotFoundError("The executable file for ANSYS was not found. ")
+
+        exec_array = [
+            f"{exec_file}",
+            "-g",
+            "-j",
+            f"{name}",
+            "-np",
+            f"{nproc}",
+            *add_sw,
+        ]
+
+        # exec_array is controlled by the library. Excluding bandit check.
         call(
-            f'cd "{run_dir}" && "{exec_file}" -g -j {name} -np {nproc} {add_sw}',
-            shell=True,
+            exec_array,
             stdout=DEVNULL,
-        )
+            cwd=run_dir,
+        )  # nosec B603
 
         # Going back
         os.chdir(cwd)
@@ -1700,6 +1762,18 @@ class _MapdlCore(Commands):
         # restore remove tmp state
         self._remove_tmp = remove_tmp
 
+    def _enter_routine(self, routine):
+        # check the routine is valid since we're muting the output
+        check_valid_routine(routine)
+
+        if routine.lower() in ["begin level", "finish"]:
+            self.finish(mute=True)
+        else:
+            if not routine.startswith("/"):
+                routine = f"/{routine}"
+
+            self.run(f"{routine}", mute=True)
+
     def _cache_routine(self):
         """Cache the current routine."""
         self._cached_routine = self.parameters.routine
@@ -1707,10 +1781,7 @@ class _MapdlCore(Commands):
     def _resume_routine(self):
         """Resume the cached routine."""
         if self._cached_routine is not None:
-            if "BEGIN" not in self._cached_routine:
-                self.run(f"/{self._cached_routine}", mute=True)
-            else:
-                self.finish(mute=True)
+            self._enter_routine(self._cached_routine)
             self._cached_routine = None
 
     def _launch(self, *args, **kwargs):  # pragma: no cover
@@ -1875,30 +1946,37 @@ class _MapdlCore(Commands):
         Overridden by gRPC.
 
         """
+        if not self._stored_commands:
+            self._log.debug("There is no commands to be flushed.")
+            self._store_commands = False
+            return
+
         self._log.debug("Flushing stored commands")
+
         rnd_str = random_string()
         tmp_out = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.out")
-        self._stored_commands.insert(0, "/OUTPUT, f'{tmp_out}'")
+        self._stored_commands.insert(0, f"/OUTPUT, {tmp_out}")
         self._stored_commands.append("/OUTPUT")
         commands = "\n".join(self._stored_commands)
         if self._apdl_log:
             self._apdl_log.write(commands + "\n")
 
+        self._store_commands = False
+        self._stored_commands = []
+
         # write to a temporary input file
-        tmp_inp = os.path.join(tempfile.gettempdir(), f"tmp_{rnd_str}.inp")
         self._log.debug(
             "Writing the following commands to a temporary " "apdl input file:\n%s",
             commands,
         )
 
+        tmp_inp = os.path.join(tempfile.gettempdir(), f"tmp_{random_string()}.inp")
         with open(tmp_inp, "w") as f:
             f.writelines(commands)
 
-        self._store_commands = False
-        self._stored_commands = []
-
         # interactive result
         _ = self.input(tmp_inp, write_to_log=False)
+
         time.sleep(0.1)  # allow MAPDL to close the file
         if os.path.isfile(tmp_out):
             self._response = "\n" + open(tmp_out).read()
@@ -2103,9 +2181,19 @@ class _MapdlCore(Commands):
         >>> mapdl.prep7()
 
         """
+        if self.exited:
+            raise MapdlExitedError(
+                f"The MAPDL instance has been exited before running the command: {command}"
+            )
+
         # check if multiline
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")
+
+        if len(command) > 639:  # CMD_MAX_LENGTH
+            # If using mapdl_grpc, this check is redundant on purpose.
+            # Console probably do not have this limitation, but I'm not certain.
+            raise ValueError("Maximum command length must be less than 640 characters")
 
         # Check kwargs
         verbose = kwargs.pop("verbose", False)
@@ -2136,14 +2224,6 @@ class _MapdlCore(Commands):
             self._stored_commands.append(command)
             return
 
-        # Actually sending the message
-        if self._session_id is not None:
-            self._check_session_id()
-        else:
-            # For some reason the session hasn't been created
-            if self.is_grpc:
-                self._create_session()
-
         if mute is None:
             if hasattr(self, "mute"):
                 mute = self.mute
@@ -2151,6 +2231,8 @@ class _MapdlCore(Commands):
                 mute = False
 
         command = command.strip()
+
+        is_comment = command.startswith("!") or command.upper().startswith("/COM")
 
         # always reset the cache
         self._reset_cache()
@@ -2197,7 +2279,7 @@ class _MapdlCore(Commands):
             # simply return the contents of the file
             return self.list(*command.split(",")[1:])
 
-        if "=" in command:
+        if "=" in command and not is_comment:
             # We are storing a parameter.
             param_name = command.split("=")[0].strip()
 
@@ -2205,7 +2287,10 @@ class _MapdlCore(Commands):
                 # Edge case. `\title, 'par=1234' `
                 self._check_parameter_name(param_name)
 
+        self._before_run(command)
+
         short_cmd = parse_to_short_cmd(command)
+        self._log.debug(f"Running (verbose: {verbose}, mute={mute}): '{command}'")
         text = self._run(command, verbose=verbose, mute=mute)
 
         if (
@@ -2216,9 +2301,7 @@ class _MapdlCore(Commands):
             self.show(self.default_file_type_for_plots)
             text = self._run(command, verbose=verbose, mute=mute)
 
-        if command[:4].upper() == "/CLE" and self.is_grpc:
-            # We have reset the database, so we need to create a new session id
-            self._create_session()
+        self._after_run(command)
 
         if mute:
             return
@@ -2262,24 +2345,26 @@ class _MapdlCore(Commands):
         if self._cleanup:
             # removing logging handlers if they are closed to avoid I/O errors
             # when exiting after the logger file has been closed.
-            self._cleanup_loggers()
+            # self._cleanup_loggers()
+            logging.disable(logging.CRITICAL)
 
             try:
                 self.exit()
             except Exception as e:
                 try:  # logger might be closed
-                    if self._log is not None:
+                    if hasattr(self, "_log") and self._log is not None:
                         self._log.error("exit: %s", str(e))
-                except Exception:
+                except ValueError:
                     pass
 
     def _cleanup_loggers(self):
         """Clean up all the loggers"""
         # Detached from ``__del__`` for easier testing
-        if not hasattr(self, "_log"):
-            return  # Early exit if logger has been already cleaned.
+        # if not hasattr(self, "_log"):
+        #     return  # Early exit if logger has been already cleaned.
 
         logger = self._log
+        logger.setLevel(logging.CRITICAL + 1)
 
         if logger.hasHandlers():
             for each_handler in logger.logger.handlers:
@@ -2294,12 +2379,15 @@ class _MapdlCore(Commands):
             logger.std_out_handler.close()
             logger.std_out_handler = None
 
+    def is_png_found(self, text: str) -> bool:
+        # findall returns None if there is no match
+        return PNG_IS_WRITTEN_TO_FILE.findall(text) is not None
+
     def _get_plot_name(self, text: str) -> str:
         """Obtain the plot filename."""
-        self._log.debug(text)
-        png_found = PNG_IS_WRITTEN_TO_FILE.findall(text)
+        self._log.debug(f"Output from terminal used to find plot name: {text}")
 
-        if png_found:
+        if self.is_png_found(text):
             # flush graphics writer
             previous_device = self.file_type_for_plots
             self.show("CLOSE", mute=True)
@@ -2312,9 +2400,16 @@ class _MapdlCore(Commands):
             if os.path.isfile(filename):
                 return filename
             else:  # pragma: no cover
-                self._log.error("Unable to find screenshot at %s", filename)
+                raise MapdlRuntimeError("Unable to find screenshot at %s", filename)
         else:
-            self._log.error("Unable to find file in MAPDL command output.")
+            raise MapdlRuntimeError(
+                "Unable to find plotted file in MAPDL command output. "
+                "One possible reason is that the graphics device is not correct. "
+                "Please check you are using FULL graphics device. "
+                "For example:\n"
+                ">>> mapdl.graphics('FULL')"
+                f"\nThe text output from MAPDL is:\n{text}"
+            )
 
     def _display_plot(self, filename: str) -> None:
         """Display the last generated plot (*.png) from MAPDL"""
@@ -2682,22 +2777,17 @@ class _MapdlCore(Commands):
         self, entity, selection_function, type_, item, comp, vmin, kabs
     ):
         """Select entities using CM, and the supplied selection function."""
-        self.cm(f"__temp_{entity}s__", f"{entity}")  # Saving previous selection
-
         # Getting new selection
         for id_, each_ in enumerate(vmin):
-            selection_function(
-                self, "S" if id_ == 0 else "A", item, comp, each_, "", "", kabs
-            )
+            if type_ == "S" or not type_:
+                type__ = "S" if id_ == 0 else "A"
+            # R is an issue, because first iteration will clean up the rest.
+            elif type_ == "R":
+                raise NotImplementedError("Mode R is not supported.")
+            else:
+                type__ = type_
 
-        self.cm(f"__temp_{entity}s_1__", f"{entity}")
-
-        self.cmsel("S", f"__temp_{entity}s__")
-        self.cmsel(type_, f"__temp_{entity}s_1__")
-
-        # Cleaning
-        self.cmdele(f"__temp_{entity}s__")
-        self.cmdele(f"__temp_{entity}s_1__")
+            selection_function(self, type__, item, comp, each_, "", "", kabs)
 
     def _raise_errors(self, text):
         # to make sure the following error messages are caught even if a breakline is in between.
@@ -2802,11 +2892,6 @@ class _MapdlCore(Commands):
                     [each for each in error_message.splitlines() if each]
                 )
 
-                # Trimming empty lines
-                error_message = "\n".join(
-                    [each for each in error_message.splitlines() if each]
-                )
-
                 # Checking for permitted error.
                 for each_error in _PERMITTED_ERRORS:
                     permited_error_message = re.search(each_error, error_message)
@@ -2836,6 +2921,7 @@ class _MapdlCore(Commands):
             self._platform = "windows"
         else:  # pragma: no cover
             raise MapdlRuntimeError("Unknown platform: {}".format(platform))
+        self.logger.debug(f"MAPDL is running on {self._platform} OS.")
 
     def _check_on_docker(self):
         """Check if MAPDL is running on docker."""

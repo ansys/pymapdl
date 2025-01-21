@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -102,12 +102,12 @@ class _QueryExecution:
                 return self._parse_parameter_integer_response(resp)
             return self._parse_parameter_float_response(resp)
 
-    def _parse_parameter_integer_response(self, response) -> int:
+    def _parse_parameter_integer_response(self, response: str) -> int:
         """Parse integer response."""
         return int(self._parse_parameter_float_response(response))
 
     @staticmethod
-    def _parse_parameter_float_response(response) -> float:
+    def _parse_parameter_float_response(response: str) -> float:
         if "PARAMETER" not in response or "=" not in response:
             raise TypeError(f"Parameter response not recognised: " f'"{response}"')
         parts = response.rsplit("=", 1)

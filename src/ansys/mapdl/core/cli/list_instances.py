@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -66,7 +66,7 @@ from ansys.mapdl.core.cli import main
     default=False,
     help="Print running location info.",
 )
-def list_instances(instances, long, cmd, location):
+def list_instances(instances, long, cmd, location) -> None:
     import psutil
     from tabulate import tabulate
 
@@ -126,9 +126,13 @@ def list_instances(instances, long, cmd, location):
         ind_grpc = cmdline.index("-port")
         return cmdline[ind_grpc + 1]
 
+    def is_grpc_based(proc):
+        cmdline = proc.cmdline()
+        return "-grpc" in cmdline
+
     table = []
     for each_p in mapdl_instances:
-        if instances and not each_p.ansys_instance:
+        if not each_p.ansys_instance or not is_grpc_based(each_p):
             continue
 
         proc_line = []
