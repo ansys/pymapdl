@@ -3,33 +3,33 @@
 Stochastic finite element method with PyMAPDL
 =============================================
 
-This example leverages PyMAPDL for stochastic finite element analysis via the Monte Carlo simulation.
-Numerous advantages / workflow possibilities that PyMAPDL affords users is demonstrated through this
-extended example. Important theoretical concepts are first explained before the example is presented.
+This example leverages PyMAPDL for stochastic finite element analysis using the Monte Carlo simulation.
+This extended example demonstrates numerous advantages and workflow possibilities that PyMAPDL
+provides. It explains important theoretical concepts before presenting the example.
 
 Introduction
 ------------
-Often in a mechanical system, system parameters (geometry, materials, loads, etc.) and response parameters
-(displacement, strain, stress, etc) are taken to be deterministic. This simplification, while sufficient for a
-wide range of engineering applications, results in a crude approximation of actual system behaviour.
+Often in a mechanical system, system parameters (such as geometry, materials, and loads) and response parameters
+(such as displacement, strain, and stress) are taken to be deterministic. This simplification, while sufficient for a
+wide range of engineering applications, results in a crude approximation of actual system behavior.
 
 To obtain a more accurate representation of a physical system, it is essential to consider the randomness
 in system parameters and loading conditions, along with the uncertainty in their estimation and their
 spatial variability. The finite element method is undoubtedly the most widely used tool for solving deterministic
-physical problems today and to account for randomness and uncertainty in the modeling of engineering systems,
+physical problems today. To account for randomness and uncertainty in the modeling of engineering systems,
 the stochastic finite element method (SFEM) was introduced.
 
-The stochastic finite element method (SFEM) extends the classical deterministic finite element approach
+SFEM extends the classical deterministic finite element approach
 to a stochastic framework, offering various techniques for calculating response variability. Among these,
 the Monte Carlo simulation (MCS) stands out as the most prominent method. Renowned for its versatility and
 ease of implementation, MCS can be applied to virtually any type of problem in stochastic analysis.
 
-Random variables vs stochastic processes
-----------------------------------------
-A distinction between random variables and stochastic processes is attempted in this section. Explaining these
-concepts is important since they are used for modelling the system randomness. Random variables are easier to
-understand from elementary probability theory, the same cannot be said for stochastic processes. Readers are
-advised to consult books on SFEM if the explanation here seems too brief. [1]_ and [2]_ are recommended resources.
+Random variables versus stochastic processes
+--------------------------------------------------
+This section attempts to explain how random variables and stochastic processes differ. Because these
+concepts are used for modeling the system randomness, explaining them is important. Random variables are easier to
+understand from elementary probability theory, which isn't the case for stochastic processes. If the following
+explanations are too brief, consult books on SFEM. Both [1]_and [2]_are recommended resources.
 
 Random variables
 ~~~~~~~~~~~~~~~~
@@ -40,8 +40,7 @@ random variable is written as :math:`X`.
 Practical example
 +++++++++++++++++
 Imagine a beam with a concentrated load :math:`P` applied at a specific point. The value of :math:`P`
-is uncertain—it could vary due to manufacturing tolerances, loading conditions, or measurement errors. Mathematically,
-:math:`P` is a random variable:
+is uncertain. It could vary due to manufacturing tolerances, loading conditions, or measurement errors. Mathematically,
 
 .. math:: P : \Theta \longrightarrow \mathbb{R}
 

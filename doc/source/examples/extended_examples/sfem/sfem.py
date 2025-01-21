@@ -33,23 +33,23 @@ def find_solution(
     acceptable_solution_error: float,
     solution_range: Tuple[float, float],
 ) -> float:
-    """Find the solution of g(x) = 0 within solution range where g(x) is non-linear.
+    """Find the solution of g(x) = 0 within a solution range where g(x) is non-linear.
 
     Parameters
     ----------
     func : Callable[float, float]
-        The function definition
+        Definition of the function.
     derivative_func : Callable[float, float]
-        The derivative of the above function
+        Derivative of the preceding function.
     acceptable_solution_error : float
-        Error at which the solution is acceptable
+        Error the solution is acceptable at.
     solution_range : Tuple[float, float]
-        The range within which the solution will be searched
+        Range for searching for the solution.
 
     Returns
     -------
     float
-        Solution to g(x) = 0
+        Solution to g(x) = 0.
     """
 
     current_guess = random.uniform(*solution_range)
@@ -83,21 +83,21 @@ def find_solution(
 def evaluate_KL_cosine_terms(
     domain: Tuple[float, float], correl_length_param: float, min_eigen_value: float
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Build array of eigenvalues and constants of the cosine terms in the KL expansion of a gaussian stochastic process.
+    """Build array of eigenvalues and constants of the cosine terms in the KL expansion of a Gaussian stochastic process.
 
     Parameters
     ----------
     domain : Tuple[float, float]
-        Domain over which the KL representation of the stochastic process should be found
+        Domain for finding the KL representation of the stochastic process.
     correl_length_param : float
-        Correlation length parameter of the autocorrelation function of the process
+        Correlation length parameter of the autocorrelation function of the process.
     min_eigen_value : float
-        Minimum eigenvalue to achieve require accuracy
+        Minimum eigenvalue to achieve require accuracy.
 
     Returns
     -------
     Tuple[np.ndarray, np.ndarray, np.ndarray]
-        Arrays of frequencies, eigenvalues, and constants of retained cosine terms (P in total) in the KL expansion
+        Arrays of frequencies, eigenvalues, and constants of the retained cosine terms (P in total) in the KL expansion.
     """
 
     A = (domain[1] - domain[0]) / 2  # Symmetric domain parameter -> [-A, A]
@@ -144,21 +144,21 @@ def evaluate_KL_cosine_terms(
 def evaluate_KL_sine_terms(
     domain: Tuple[float, float], correl_length_param: float, min_eigen_value: float
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    """Build array of eigenvalues and constants of the sine terms in the KL expansion of a gaussian stochastic process.
+    """Build an array of eigenvalues and constants of the sine terms in the KL expansion of a gaussian stochastic process.
 
     Parameters
     ----------
     domain : Tuple[float, float]
-        Domain over which the KL representation of the stochastic process should be found
+        Domain for finding the KL representation of the stochastic process.
     correl_length_param : float
-        Correlation length parameter of the autocorrelation function of the process
+        Correlation length parameter of the autocorrelation function of the process.
     min_eigen_value : float
-        Minimum eigenvalue to achieve require accuracy
+        Minimum eigenvalue to achieve require accuracy.
 
     Returns
     -------
     Tuple[np.ndarray, np.ndarray, np.ndarray]
-        Arrays of frequencies, eigenvalues, and constants of retained sine terms (Q in total) in the KL expansion
+        Arrays of frequencies, eigenvalues, and constants of the retained sine terms (Q in total) in the KL expansion.
     """
 
     A = (domain[1] - domain[0]) / 2  # Symmetric domain parameter -> [-A, A]
@@ -214,40 +214,40 @@ def stochastic_field_realization(
     domain: Tuple[float, float],
     evaluation_point: float,
 ) -> float:
-    """The realization of the gaussian field f(x)
+    """Realization of the Gaussian field f(x).
 
     Parameters
     ----------
     cosine_frequency_array : np.ndarray
-        Array of length P, containing frequencies associated with retained cosine terms
+        Array of length P, containing the frequencies associated with the retained cosine terms.
     cosine_eigen_values : np.ndarray
-        Array of length P, containing eigenvalues associated with retained cosine terms
+        Array of length P, containing the eigenvalues associated with the retained cosine terms.
     cosine_constants : np.ndarray
-        Array of length P, containing constants associated with retained cosine terms
+        Array of length P, containing constants associated with the retained cosine terms.
     cosine_random_variables_set : np.ndarray
-        Array of length P, containing random variable drawn from N(0,1) for the cosine terms
+        Array of length P, containing the random variables drawn from N(0,1) for the cosine terms.
     sine_frequency_array : np.ndarray
-        Array of length Q, containing frequencies associated with retained sine terms
+        Array of length Q, containing the frequencies associated with the retained sine terms.
     sine_eigen_values : np.ndarray
-        Array of length Q, containing eigenvalues associated with retained sine terms
+        Array of length Q, containing eigenvalues associated with retained sine terms.
     sine_constants : np.ndarray
-        Array of length Q, containing constants associated with retained sine terms
+         Array of length Q, containing the constants associated with the retained sine terms.
     sine_random_variables_set : np.ndarray
-        Array of length P, containing random variable drawn from N(0,1) for the sine terms
+         Array of length P, containing the random variable drawn from N(0,1) for the sine terms.
     domain : Tuple[float, float]
-        Domain over which the KL representation of the stochastic process should be found
+        Domain for finding the KL representation of the stochastic process.
     evaluation_point : float
-        Point within the domain at which the value of a realization is required
+        Point within the domain at which the value of a realization is required.
 
     Returns
     -------
     float
         The value of the realization at a given point within the domain
     """
-    # Shift parameter -> Because we had solved for terms in a symmetric domain [-A, A]
+    # Shift parameter -> Because terms are solved in a symmetric domain [-A, A]
     T = (domain[0] + domain[1]) / 2
 
-    # Making use of array operation provided by the numpy package is much simpler for expressing the stochastic process
+    # Using the array operation provided by the numpy package is much simpler for expressing the stochastic process
     cosine_function_terms = (
         np.sqrt(cosine_eigen_values)
         * cosine_constants
@@ -309,7 +309,7 @@ sine_frequency_array, sine_eigen_values, sine_constants = evaluate_KL_sine_terms
     domain, correl_length_param, min_eigen_value
 )
 
-# Now let's see how some realizations looks like
+# See what the realizations looks like
 no_of_realizations = 10
 x = np.linspace(domain[0], domain[1], 101)
 
@@ -347,7 +347,7 @@ for i in range(no_of_realizations):
 
 plt.show()
 
-# Verification that the above implementation indeed represents the young's modulus
+# Verify that the previous implementation represents the Young's modulus
 no_of_realizations = 5000
 x = np.linspace(domain[0], domain[1], 101)
 realization_collection = np.zeros((no_of_realizations, len(x)))
@@ -384,7 +384,7 @@ for i in range(realization_collection.shape[0]):
     ensemble_mean_with_realization[i] = np.mean(realization_collection[: i + 1, :])
     ensemble_var_with_realization[i] = np.var(realization_collection[: i + 1, :])
 
-# Plot of ensemble mean
+# Plot the ensemble mean
 fig, ax = plt.subplots()
 fig.set_size_inches(15, 8)
 ax.plot(ensemble_mean_with_realization, label="Computed mean")
@@ -425,15 +425,15 @@ def run_simulations(
     Parameters
     ----------
     length : float
-        The length of the cantilever structure
+        Length of the cantilever structure.
     height : float
-        The height of the cantilever structure
+        Height of the cantilever structure.
     thickness : float
-        The thickness of the cantilever structure
+        Thickness of the cantilever structure.
     mesh_size : float
-        The desired mesh size
+        Desired mesh size.
     no_of_simulations : int
-        The number of simulations to run
+       Number of simulations to run.
 
     Returns
     -------
@@ -480,7 +480,7 @@ def run_simulations(
         "S", "CENT", "Y", 0, mesh_size
     )  # Select bottom row elements and store the ids
 
-    # Generate quantities required to define the young's modulus stochastic process
+    # Generate quantities required to define the Young's modulus stochastic process
     cosine_frequency_list, cosine_eigen_values, cosine_constants = (
         evaluate_KL_cosine_terms(domain, correl_length_param, min_eigen_value)
     )
@@ -539,7 +539,7 @@ def run_simulations(
         mapdl.f("LOAD_APPLICATION_POINT", lab="FY", value=load)  # Apply load BC
         mapdl.solve()
 
-        # Displacement probe point - where Uy results will be extracted
+        # Displacement probe point - where Uy results are to be extracted
         displacement_probe_point = mapdl.queries.node(length, 0, 0)
         displacement = mapdl.get_value("NODE", displacement_probe_point, "U", "Y")
 
@@ -547,7 +547,7 @@ def run_simulations(
 
         mapdl.mpdele("ALL", "ALL")
         if (simulation + 1) % 10 == 0:
-            print(f"Completed {simulation + 1} simulations ...")
+            print(f"Completed {simulation + 1} simulations.")
 
     mapdl.exit()
     print()
@@ -568,7 +568,7 @@ print(
     )
 )
 
-# Perform statistical post processing and plot the pdf
+# Perform statistical postprocessing and plot the PDF
 import scipy.stats as stats
 
 kde = stats.gaussian_kde(simulation_results)  # Kernel density estimate
@@ -581,13 +581,13 @@ plt.xlabel("Displacement in (m)")
 ax.legend()
 plt.show()
 
-# We can then proceed to evaluate the probability that response u is less than 0.2 m
+# Proceed to evaluate the probability that the response u is less than 0.2 m
 probability = kde.integrate_box_1d(-0.2, x_eval[-1])
-print(f"The probability that u is less than 0.2 m is {probability:.0%}")
+print(f"The probability that u is less than 0.2 m is {probability:.0%}.")
 
 
 # Multi-threaded approach
-# Note, no of instances should not be more than the number of available CPU cores on your PC
+# Note that the number of instances should not be more than the number of available CPU cores on your PC
 def run_simulations_threaded(
     mapdl, length, height, thickness, mesh_size, no_of_simulations, instance_identifier
 ):
@@ -606,7 +606,7 @@ def run_simulations_threaded(
     mapdl.esize(mesh_size)
     mapdl.amesh("ALL")
 
-    # Fixed edge
+    # Defined fixed edge
     mapdl.nsel("S", "LOC", "X", 0)
     mapdl.cm("FIXED_END", "NODE")
 
@@ -623,7 +623,7 @@ def run_simulations_threaded(
         "S", "CENT", "Y", 0, mesh_size
     )  # Select bottom row elements and store the ids
 
-    # Generate quantities required to define the young's modulus stochastic process
+    # Generate quantities required to define the Young's modulus stochastic process
     cosine_frequency_list, cosine_eigen_values, cosine_constants = (
         evaluate_KL_cosine_terms(domain, correl_length_param, min_eigen_value)
     )
@@ -634,7 +634,7 @@ def run_simulations_threaded(
     simulation_results = np.zeros(no_of_simulations)
 
     for simulation in range(no_of_simulations):
-        # Generate random variables and load needed for one realization of the process
+        # Generate random variables and the load needed for one realization of the process
         cosine_random_variables_set = np.random.normal(
             0, 1, size=len(cosine_frequency_list)
         )
@@ -652,7 +652,7 @@ def run_simulations_threaded(
                 "S", "CENT", "X", element_centroid_x_coord
             )  # Select all elements having this coordinate as centroid
 
-            # Evaluate young's modulus at this material point
+            # Evaluate Young's modulus at this material point
             young_modulus_value = young_modulus_realization(
                 cosine_frequency_list,
                 cosine_eigen_values,
@@ -668,10 +668,10 @@ def run_simulations_threaded(
 
             mapdl.mp(
                 "EX", f"{material_property}", young_modulus_value
-            )  # Define property ID, assign young's modulus
+            )  # Define property ID and assign Young's modulus
             mapdl.mp(
                 "NUXY", f"{material_property}", poisson_ratio
-            )  # Assign poisson ratio
+            )  # Assign Poisson ratio
             mapdl.mpchg(
                 material_property, "ALL"
             )  # Assign property to selected elements
@@ -682,7 +682,7 @@ def run_simulations_threaded(
         mapdl.f("LOAD_APPLICATION_POINT", lab="FY", value=load)  # Apply load BC
         mapdl.solve()
 
-        # Displacement probe point - where Uy results will be extracted
+        # Displacement probe point - where Uy results are to be extracted
         displacement_probe_point = mapdl.queries.node(length, 0, 0)
         displacement = mapdl.get_value("NODE", displacement_probe_point, "U", "Y")
 
@@ -691,12 +691,12 @@ def run_simulations_threaded(
         mapdl.mpdele("ALL", "ALL")
         if (simulation + 1) % 10 == 0:
             print(
-                f"Completed {simulation + 1} simulations in instance {instance_identifier} ..."
+                f"Completed {simulation + 1} simulations in instance {instance_identifier}."
             )
 
     mapdl.exit()
     print()
-    print(f"All simulations completed in instance {instance_identifier}!")
+    print(f"All simulations completed in instance {instance_identifier}.")
 
     return instance_identifier, no_of_simulations, simulation_results
 
@@ -716,7 +716,7 @@ def run_simulations_over_multple_instances(
             simulations_per_instance for i in range(no_of_instances)
         ]
     else:
-        # Simulations can not be split equally across instances
+        # Simulations cannot be split equally across instances
         simulations_per_instance = no_of_simulations // no_of_instances
         simulations_per_instance_list = [
             simulations_per_instance for i in range(no_of_instances - 1)
