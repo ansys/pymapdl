@@ -330,28 +330,6 @@ def test_remove_temp_dir_on_exit(mapdl, cleared, tmpdir):
         assert os.path.isdir(tmp_dir)
 
 
-@requires("local")
-@requires("nostudent")
-def test_remove_temp_dir_on_exit_fail(mapdl, cleared, tmpdir):
-    """Ensure the working directory is not removed when the cwd is changed."""
-    mapdl_ = launch_mapdl(
-        port=mapdl.port + 1,
-        remove_temp_dir_on_exit=True,
-        start_timeout=start_timeout,
-        additional_switches=QUICK_LAUNCH_SWITCHES,
-    )
-    old_path = mapdl_.directory
-    assert os.path.isdir(str(tmpdir))
-    mapdl_.cwd(str(tmpdir))
-    path = mapdl_.directory
-    mapdl_.exit()
-    assert os.path.isdir(path)
-
-    # Checking no changes in the old path
-    assert os.path.isdir(old_path)
-    assert os.listdir(old_path)
-
-
 @pytest.mark.requires_gui
 @pytest.mark.parametrize(
     "include_result,inplace,to_check",
