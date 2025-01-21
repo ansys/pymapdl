@@ -295,27 +295,39 @@ def test_license_type_dummy(mapdl, cleared):
         )
 
 
-@requires("local")
-@requires("nostudent")
-def test_remove_temp_dir_on_exit(mapdl, cleared):
+@patch("ansys.mapdl.core.Mapdl._exit_mapdl", lambda *args, **kwargs: None)
+def test_remove_temp_dir_on_exit(mapdl, cleared, tmpdir):
     """Ensure the working directory is removed when run_location is not set."""
-    mapdl_ = launch_mapdl(
-        port=mapdl.port + 1,
-        remove_temp_dir_on_exit=True,
-        start_timeout=start_timeout,
-        additional_switches=QUICK_LAUNCH_SWITCHES,
-    )
 
-    # possible MAPDL is installed but running in "remote" mode
-    path = mapdl_.directory
-    mapdl_.exit()
+    with (
+        patch.object(mapdl, "finish_job_on_exit", False),
+        patch.object(mapdl, "_local", True),
+        patch.object(mapdl, "remove_temp_dir_on_exit", True),
+    ):
 
-    tmp_dir = tempfile.gettempdir()
-    ans_temp_dir = os.path.join(tmp_dir, "ansys_")
-    if path.startswith(ans_temp_dir):
-        assert not os.path.isdir(path)
-    else:
-        assert os.path.isdir(path)
+        # Testing reaching the method
+        with patch.object(mapdl, "_remove_temp_dir_on_exit") as mock_rm:
+            mock_rm.side_effect = None
+
+            mapdl.exit(force=True)
+
+            mock_rm.assert_called()
+            assert mapdl.directory == mock_rm.call_args.args[0]
+
+        # Testing the method
+        # Directory to be deleted
+        ans_temp_dir = os.path.join(tempfile.gettempdir(), "ansys_")
+
+        os.makedirs(ans_temp_dir, exist_ok=True)
+        assert os.path.isdir(ans_temp_dir)
+        mapdl._remove_temp_dir_on_exit(ans_temp_dir)
+        assert not os.path.isdir(ans_temp_dir)
+
+        # Directory to NOT be deleted
+        tmp_dir = str(tmpdir)
+        assert os.path.isdir(tmp_dir)
+        mapdl._remove_temp_dir_on_exit(tmp_dir)
+        assert os.path.isdir(tmp_dir)
 
 
 @requires("local")
