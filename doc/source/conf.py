@@ -75,6 +75,7 @@ DEFAULT_EXAMPLE_EXTENSION = "py"
 
 DOC_PATH = "doc/source"
 GALLERY_EXAMPLES_PATH = "examples/gallery_examples"
+MAPDL_COMMANDS_PATH = "api/src/ansys/mapdl/core/_commands"
 EXAMPLES_ROOT = "examples"
 EXAMPLES_PATH_FOR_DOCS = f"../../{EXAMPLES_ROOT}/"
 
@@ -101,7 +102,7 @@ extensions = [
     "sphinx_design",
     "sphinx_jinja",
     "sphinx_copybutton",
-    "sphinx_gallery.gen_gallery",
+    # "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
 ]
@@ -122,7 +123,13 @@ intersphinx_mapping = {
 }
 
 # ref.ref warning needs to be readded when merging to main
-suppress_warnings = ["label.*", "design.fa-build", "config.cache", "ref.ref"]
+suppress_warnings = [
+    "label.*",
+    "design.fa-build",
+    "config.cache",
+    "ref.ref",
+    "misc.highlighting_failure",
+]
 sd_fontawesome_latex = True
 
 # Graphviz diagrams configuration
@@ -151,6 +158,7 @@ numpydoc_validation_checks = {
 numpydoc_validation_exclude = {  # set of regex
     # class inherits from pymapdl-reader
     r"\.*MeshGrpc\.*",
+    r"ansys\.mapdl\.core\._commands\..+",
 }
 
 # Favicon
