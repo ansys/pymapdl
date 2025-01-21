@@ -102,16 +102,16 @@ realization/sample function assigned to each outcome of an experiment.
    A random field :math:`E(x)` viewed as a collection of random variables or as realizations
 
 .. note::
-  The concepts above generalize to more dimensions, for example, a random vector instead of a random
-  variable, or an :math:`\mathbb{R}^d`-valued stochastic process. The presentation above is however
+  The concepts in the preceding sections generalize to more dimensions, for example, a random vector instead of a random
+  variable, or an :math:`\mathbb{R}^d`-valued stochastic process. The preceding presentation is however
   sufficient for this example.
 
 Series expansion of stochastic processes
 ----------------------------------------
 Since a stochastic process involves an infinite number of random variables, most engineering applications
-involving stochastic processes will be mathematically and computationally intractable if there isn't a way of
-approximating them with a series of a finite number of random variables. A series expansion method which will
-be used in this example is explained next.
+involving stochastic processes are mathematically and computationally intractable if there isn't a way of
+approximating them with a series of a finite number of random variables. A series expansion method used in
+this example is explained next.
 
 The Karhunen-Loève (K-L) series expansion for a Gaussian process
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -169,24 +169,24 @@ It is worth mentioning that :math:`\lambda` and :math:`\omega` in the series exp
 The K-L expansion of a Gaussian process has the property that :math:`\xi_{c,n}` and :math:`\xi_{s,n}` are independent
 standard normal variables, that is, they follow the :math:`\mathcal{N}(0,1)` distribution. The other great property is
 that :math:`\lambda_{c,n}` and :math:`\lambda_{s,n}` converge to zero fast (in the mean square sense). For practical implementation,
-this means that the infinite series of the K-L expansion above is truncated after a finite number of terms, giving the approximation:
+this means that the infinite series of the K-L expansion is truncated after a finite number of terms, giving the approximation:
 
 .. math:: X(t) \approx \hat{X}(t) = \sum_{n=1}^P \sqrt{\lambda_{c,n}}\cdot\varphi_{c,n}(t)\cdot\xi_{c,n} + \sum_{n=1}^Q \sqrt{\lambda_{s,n}}\cdot\varphi_{s,n}(t)\cdot\xi_{s,n}
    :label: approximation
 
-Equation :math:numref:`approximation` is computationally feasible to handle. Let's summarize how it can be used to generate realizations of :math:`X(t)`:
+Equation :math:numref:`approximation` is computationally feasible to handle. A summary of how to use it to generate realizations of :math:`X(t)` follows:
 
-1. To generate the j-th realization, we draw a random value for each :math:`\xi_{c,n}, n=1,\dots ,P, \quad \xi_{s,n}, n=1,\dots ,Q` from the standard
+1. To generate the j-th realization, draw a random value for each :math:`\xi_{c,n}, n=1,\dots ,P, \quad \xi_{s,n}, n=1,\dots ,Q` from the standard
    normal distribution :math:`\mathcal{N}(0,1)` and obtain :math:`\xi_{c,1}^j,\dots ,\xi_{c,P}^j, \quad \xi_{s,1}^j,\dots ,\xi_{s,P}^j`
 
-2. We insert these values into equation :math:numref:`approximation` in other to obtain the j-th realization:
+2. Insert these values into equation :math:numref:`approximation` in other to obtain the j-th realization:
 
 .. math:: \hat{X}^j(t) = \sum_{n=1}^P \sqrt{\lambda_{c,n}}\cdot\varphi_{c,n}(t)\cdot\xi_{c,n}^j + \sum_{n=1}^Q \sqrt{\lambda_{s,n}}\cdot\varphi_{s,n}(t)\cdot\xi_{s,n}^j
 
-3. To generate additional realizations, we simply draw new random values for :math:`\xi_{c,n}, n=1,\dots ,P, \quad \xi_{s,n}, n=1,\dots ,Q` each from :math:`\mathcal{N}(0,1)`
+3. To generate additional realizations, simply draw new random values for :math:`\xi_{c,n}, n=1,\dots ,P, \quad \xi_{s,n}, n=1,\dots ,Q` each from :math:`\mathcal{N}(0,1)`
 
 .. note::
-  In this case of a field, the same discussion above applies as the only difference is a change in notation (for example :math:`t` to :math:`x`).
+  In this case of a field, the preceding discussion applies as the only difference is a change in notation (for example :math:`t` to :math:`x`).
 
 The Monte Carlo simulation
 --------------------------
@@ -198,14 +198,14 @@ to
 
 .. math:: \pmb{K}(\pmb{\xi})\pmb{U}(\pmb{\xi}) = \pmb{F}(\pmb{\xi})
 
-where :math:`\pmb{\xi}` collects a sources of system randomness. The Monte Carlo simulation for solving the equation above
+where :math:`\pmb{\xi}` collects a sources of system randomness. The Monte Carlo simulation for solving the preceding equation
 consists of generating a large number of :math:`N_{sim}` of samples :math:`\pmb{\xi}, i=1,\dots ,N_{sim}` from their probability
 distribution and for each of these samples, solving the deterministic problem
 
 .. math:: \pmb{K}(\pmb{\xi}_{(i)})\pmb{U}(\pmb{\xi}_{(i)}) = \pmb{F}(\pmb{\xi}_{(i)})
 
 The next step is to collect the :math:`N_{sim}` response vectors :math:`\pmb{U} := \pmb{U}(\pmb{\xi}_{(i)})` and perform a statistical
-post-processing in order to extract useful information such as mean value, variance, histogram,
+post-processing to extract useful information such as mean value, variance, histogram,
 empirical pdf/cdf, etc.
 
 
@@ -224,29 +224,29 @@ random field given by the expression:
 
 with :math:`f(x)` being a zero mean stationary Gaussian field with unit variance. The covariance function for :math:`f` is
 
-.. math:: C_f(x_i,x_j)=e^{-\frac{\lvert x_i-x_j \rvert}{3}}
+.. math:: C_f(x_r,x_s)=e^{-\frac{\lvert x_r-x_s \rvert}{3}}
 
-We are to do the following:
+The following are required:
 
 1. Using the K-L series expansion, generate 5000 realizations for :math:`E(x)` and perform Monte 
    Carlo simulation to determine the probability density function of the response :math:`u`, at the bottom right corner 
    of the cantilever. 
 
 2. If some design code stipulates that the displacement :math:`u` must not exceed :math:`0.2 \: m`, how confident can
-   we be that the above structure meets this requirement?
+   one be that the structure meets this requirement?
 
 .. note::
-  This example really emphasizes how PyMAPDL can help to supercharge workflows. At a very high level, what will be done
-  in subsequent sections involves using python libraries to handle computations related to the stochasticity of the problem, and
-  using MAPDL to run the necessary simulations, all within the comfort of a python environment.
+  This example really emphasizes how PyMAPDL can help to supercharge workflows. At a very high level, subsequent sections 
+  involves using python libraries to handle computations related to the stochasticity of the problem, and using MAPDL to
+  run the necessary simulations, all within the comfort of a python environment.
 
 Evaluating the young modulus
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Firstly, we implement code that allows us to represent the zero-mean Gaussian field :math:`f`. This simply means solving
+Firstly, code that allows representation of the zero-mean Gaussian field :math:`f` is first implemented. This simply means solving
 :math:numref:`cosine equation` and :math:numref:`sine equation`, then substituting calculated values into
 :math:numref:`cosine terms` and :math:numref:`sine terms` to obtain the constant terms in those equations. The
 number of retained terms :math:`P` and :math:`Q` in :math:numref:`approximation` can be automatically determined
-by structuring our code to stop computing values when :math:`\lambda_{c,n}, \lambda_{s,n}` become lower than a
+by structuring the code to stop computing values when :math:`\lambda_{c,n}, \lambda_{s,n}` become lower than a
 desired accuracy level. The implementation is as follows:
 
 .. literalinclude:: sfem.py
@@ -268,7 +268,7 @@ And then the function for evaluating the young modulus itself is straight forwar
 
 Realizations of the young modulus
 +++++++++++++++++++++++++++++++++++++++++++++
-We can now generate sample realizations of the young's modulus to see how they look like:
+Sample realizations of the young's modulus can now be generated to see how they look like:
 
 .. literalinclude:: sfem.py
   :language: python
@@ -280,8 +280,8 @@ We can now generate sample realizations of the young's modulus to see how they l
 
 Verification of the implementation
 ++++++++++++++++++++++++++++++++++
-Let us compute the theoretical mean and variance of the young modulus and then show that our implementation of the
-young's modulus is correct.
+The theoretical mean and variance of the young modulus can be computed and this can be used to verify the correctness
+of the implemented code.
 
 For the mean:
 
@@ -310,17 +310,17 @@ For the variance:
 
   Var(E) = 10^8 \: {kN}^2/m^4
 
-We should then expect that as the number of realizations increase indefinitely, the ensemble mean and
-variance will converge towards theoretical values calculated in :math:numref:`theoretical mean` and :math:numref:`theoretical variance`:
+It is expected that as the number of realizations increase indefinitely, the ensemble mean and
+variance should converge towards theoretical values calculated in :math:numref:`theoretical mean` and :math:numref:`theoretical variance`.
 
-First we generate a lot of realizations, 5000 is enough, that is, the same as the number of simulations we are required to run later on. We then
-perform some statistical processing on these realizations
+Firstly, several realizations are generated. 5000 is enough, which is the same as the number of simulations to be run later on. Statistical processing
+is then performed on these realizations.
 
 .. literalinclude:: sfem.py
   :language: python
   :lines: 350-385
 
-We can then generate a plot of the mean vs the number of realizations
+A plot of the mean vs the number of realizations can be generated:
 
 .. literalinclude:: sfem.py
   :language: python
@@ -330,7 +330,7 @@ We can then generate a plot of the mean vs the number of realizations
    
    Convergence of the mean to the true value as the number of realizations is increased
 
-And also a plot of the variance vs the number of realizations
+And also a plot of the variance vs the number of realizations:
 
 .. literalinclude:: sfem.py
   :language: python
@@ -340,22 +340,22 @@ And also a plot of the variance vs the number of realizations
 
   Convergence of the variance to the true value as the number of realizations is increased
 
-The plots above confirms that our implementation is indeed correct. If one desires more accuracy, the minimum eigenvalue
+The preceding plots confirms that the implementation is indeed correct. If one desires more accuracy, the minimum eigenvalue
 can be further decreased but the value already chosen is sufficient.
 
 Running the simulations
 ~~~~~~~~~~~~~~~~~~~~~~~
-Now we focus on the PyMAPDL part of this example. Remember that the problem requires running 5000 simulations. Therefore, we need
+Now focus shifts to the PyMAPDL part of this example. Remember that the problem requires running 5000 simulations. Therefore, there is need
 to write a workflow that does the following:
 
 1. Create the geometry of the cantilever model
 
-2. Mesh the model. For this, 4-node PLANE182 elements will be used
+2. Mesh the model. For this, 4-node PLANE182 elements is going to be used
 
 3. Generate one realization of :math:`E` and one sample of :math:`P` for each simulation
 
-4. For each simulation, loop through the elements and for each element, use the realization
-   above to assign the value of the young's modulus. Also assign the load for each simulation.
+4. For each simulation, loop through the elements and for each element, use the generated 
+   realization to assign the value of the young's modulus. Also assign the load for each simulation.
 
 5. Solve the model and store :math:`u` for each simulation.
 
@@ -366,13 +366,13 @@ to write a workflow that does the following:
   chosen for this implementation. The method chosen becomes insignificant with a finer mesh as both methods should produce similar
   results.
 
-A function implementing the steps above follows:
+A function implementing the preceding steps follows:
 
 .. literalinclude:: sfem.py
   :language: python
   :lines: 444-556
 
-Required arguments can be passed to the above function to run the simulations:
+Required arguments can be passed to the defined function to run the simulations:
 
 .. literalinclude:: sfem.py
   :language: python
@@ -380,8 +380,8 @@ Required arguments can be passed to the above function to run the simulations:
 
 Answering problem questions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-To finish answering the first question (simulations have already been run), we proceed to perform a statistical
-post-processing of simulation results to determine the probability density function of the response :math:`u`:
+To finish answering the first question (simulations have already been run), a statistical post-processing of 
+simulation results can performed to determine the probability density function of the response :math:`u`:
 
 .. literalinclude:: sfem.py
   :language: python
@@ -391,7 +391,7 @@ post-processing of simulation results to determine the probability density funct
 
    The probability density function of response :math:`u`
 
-To answer the second question, we simply evaluate the probability that the response :math:`u` is less than
+To answer the second question, simply evaluate the probability that the response :math:`u` is less than
 :math:`0.2 \: m`:
 
 .. literalinclude:: sfem.py
@@ -402,13 +402,13 @@ The computed probability is approximately 99%, which is a measure of how well th
 requirement.
 
 .. note::
-   The implementation above was split into several functions so users can modify practically any aspect of the problem
+   The overall implementation of this example was split into several functions so users can modify practically any aspect of the problem
    statement with minimal edits to the code for testing out other scenarios. For example, different structural geometry,
    different mesh size, different loading condition etc.
 
 Improving simulation speed via multi-threading
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-One of the main drawbacks of MCS is the number of simulations required. In the example above, 5000 simulations can take quite
+One of the main drawbacks of MCS is the number of simulations required. In this example, 5000 simulations can take quite
 some time to run on a single MAPDL instance. To speed things up, the :class:`~ansys.mapdl.core.pool.MapdlPool` class can be utilized
 to run simulations across multiple MAPDL instances. The implementation is as follows:
 
@@ -416,7 +416,7 @@ to run simulations across multiple MAPDL instances. The implementation is as fol
   :language: python
   :lines: 589-738
 
-To run simulations over 10 MAPDL instances, the function above is simply called with appropriate arguments:
+To run simulations over 10 MAPDL instances, the preceding function is simply called with appropriate arguments:
 
 .. literalinclude:: sfem.py
   :language: python

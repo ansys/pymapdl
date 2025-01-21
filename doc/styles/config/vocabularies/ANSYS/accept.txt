@@ -47,7 +47,6 @@ BCs
 Block Lanzos
 Boyce
 breakpoint
-cantilever
 centerline
 CentOS
 CentOS7
