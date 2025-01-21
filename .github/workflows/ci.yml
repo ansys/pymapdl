@@ -33,7 +33,7 @@ env:
   DPF_PORT: 21004
   MAPDL_PACKAGE: ghcr.io/ansys/mapdl
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=10 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180'
+  PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile'
 
   BUILD_CHEATSHEET: True
   PYMAPDL_DEBUG_TESTING: True
@@ -513,7 +513,7 @@ jobs:
       - name: "Install os packages"
         run: |
           sudo apt update
-          sudo apt install libgl1-mesa-glx xvfb
+          sudo apt install libgl1-mesa-glx xvfb graphviz
 
       - name: "Test virtual framebuffer"
         run: |
@@ -685,7 +685,7 @@ jobs:
       - name: "Install OS packages"
         run: |
           apt update
-          apt install -y libgl1-mesa-glx xvfb libgomp1
+          apt install -y libgl1-mesa-glx xvfb libgomp1 graphviz
 
       - name: "Test virtual framebuffer"
         run: |
@@ -827,7 +827,7 @@ jobs:
       - name: "Installing missing package"
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgomp1
+          sudo apt-get install -y libgomp1 graphviz
 
       - name: "Setup Python"
         uses: actions/setup-python@v5
@@ -957,7 +957,7 @@ jobs:
       - name: "Installing missing package"
         run: |
           sudo apt-get update
-          sudo apt-get install -y libgomp1
+          sudo apt-get install -y libgomp1 graphviz
 
       - name: "Setup Python"
         uses: actions/setup-python@v5
