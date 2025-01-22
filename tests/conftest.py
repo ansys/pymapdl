@@ -57,7 +57,6 @@ from common import (
 # Setting testing environment
 # ---------------------------
 #
-
 DEBUG_TESTING = debug_testing()
 TESTING_MINIMAL = testing_minimal()
 
