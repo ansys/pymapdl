@@ -25,7 +25,7 @@ the Monte Carlo simulation (MCS) stands out as the most prominent method. Renown
 ease of implementation, MCS can be applied to virtually any type of problem in stochastic analysis.
 
 Random variables versus stochastic processes
---------------------------------------------------
+--------------------------------------------
 This section attempts to explain how random variables and stochastic processes differ. Because these
 concepts are used for modeling the system randomness, explaining them is important. Random variables are easier to
 understand from elementary probability theory, which isn't the case for stochastic processes. If the following
@@ -96,7 +96,7 @@ Here :math:`\sigma_E^2` is the variance, and :math:`\ell` is the correlation len
 
 To aid understanding, the figure below is a diagram depicting two equivalent ways of visualizing a
 stochastic process or random field, that is, as an infinite collection of random variables or as a
-realization/sample function assigned to each outcome of an experiment.
+realization or sample function assigned to each outcome of an experiment.
 
 .. figure:: realizations.png
 
@@ -127,7 +127,7 @@ the K-L series expansion is given by this equation:
 .. math:: X(t) = \sum_{n=1}^\infty \sqrt{\lambda_{c,n}}\cdot\varphi_{c,n}(t)\cdot\xi_{c,n} + \sum_{n=1}^\infty \sqrt{\lambda_{s,n}}\cdot\varphi_{s,n}(t)\cdot\xi_{s,n},\quad t\in\mathbb{D}
    :label: K-L expansion
 
-where,
+The terms in the first summation are given by
 
 .. math:: 
    :label: cosine terms
@@ -136,12 +136,12 @@ where,
 
    k_{c,n} = \frac{1}{\sqrt{a+\frac{\sin(2\omega_{c,n}\cdot a)}{2\omega_{c,n}}}}
 
-where :math:`\omega_{c,n}` is obtained as the solution of
+In the preceding terms, :math:`\omega_{c,n}` is obtained as the solution of
 
 .. math:: \frac{1}{b} - \omega_{c,n}\cdot\tan(\omega_{c,n}\cdot a) = 0 \quad \text{in the range} \quad \biggl[(n-1)\frac{\pi}{a}, (n-\frac{1}{2})\frac{\pi}{a}\biggr]
    :label: cosine equation
 
-and,
+The terms in the second summation are given by
 
 .. math:: 
    :label: sine terms
@@ -150,7 +150,7 @@ and,
  
    k_{s,n} = \frac{1}{\sqrt{a-\frac{\sin(2\omega_{s,n}\cdot a)}{2\omega_{s,n}}}}
 
-where :math:`\omega_{s,n}` is obtained as the solution of
+In the preceding terms, :math:`\omega_{s,n}` is obtained as the solution of
 
 .. math:: \frac{1}{b}\cdot\tan(\omega_{s,n}\cdot a) + \omega_{s,n} = 0 \quad \text{in the range} \quad \biggl[(n-\frac{1}{2})\frac{\pi}{a}, n\frac{\pi}{a}\biggr]
    :label: sine equation
