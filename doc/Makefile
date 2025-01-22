@@ -7,7 +7,7 @@ SPHINXBUILDORIG = sphinx-build
 SOURCEDIR     = source
 BUILDDIR      = _build
 LINKCHECKDIR  = $(BUILDDIR)/linkcheck
-SPHINXOPTS    = -j auto # this will be reverted
+SPHINXOPTS    = -j auto --color
 LINKCHECKOPTS = -d $(BUILDDIR)/.doctrees -W --keep-going --color
 
 # For codespaces

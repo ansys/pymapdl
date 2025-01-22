@@ -1285,7 +1285,7 @@ class ArrayParameters:
               Cartesian coordinate system. ``Par1`` must be an N x 3 (that is, vector) or an N x 6 (that is,
               stress or strain tensor) array. If the local coordinate system is a cylindrical, spherical, or
               toroidal system, then you must provide the global Cartesian coordinates in ``Par2`` as an N x 3
-              array. Set ``CON2`` = 1 if the data is strain data.
+               array. Set ``CON2`` = 1 if the data is strain data.
 
         par2 : str
             Second array parameter vector in the operation. May also be a scalar parameter or a literal
