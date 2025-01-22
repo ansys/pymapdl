@@ -292,6 +292,7 @@ class TestMapdlPool:
         assert all(["my_instance" in each for each in dirs_path_pool])
 
     @skip_if_ignore_pool
+    @pytest.mark.xfail(reason="Flaky test. See #2435")
     def test_directory_names_function(self, tmpdir):
         def myfun(i):
             if i == 0:
