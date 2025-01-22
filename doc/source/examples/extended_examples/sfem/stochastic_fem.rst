@@ -105,7 +105,7 @@ realization or sample function assigned to each outcome of an experiment.
 .. note::
   The concepts in the preceding sections generalize to more dimensions, for example, a random vector instead of a random
   variable, or an :math:`\mathbb{R}^d`-valued stochastic process. A detailed discussion of these generalizations can be
-  found in [1]_and [2]_.
+  found in [1]_ and [2]_.
 
 Series expansion of stochastic processes
 ----------------------------------------
@@ -163,7 +163,7 @@ It is worth mentioning that :math:`\lambda` and :math:`\omega` in the series exp
 
   .. math:: D' = D - T = \biggl[\frac{t_{min}-t_{max}}{2}, \frac{t_{max}-t_{min}}{2} \biggr]
 
- The series expansion is then defined by this equation:
+  The series expansion is then defined by this equation:
 
   .. math:: X(t) = \sum_{n=1}^\infty \sqrt{\lambda_{c,n}}\cdot\varphi_{c,n}(t-T)\cdot\xi_{c,n} + \sum_{n=1}^\infty \sqrt{\lambda_{s,n}}\cdot\varphi_{s,n}(t-T)\cdot\xi_{s,n},\quad t\in\mathbb{D}
 
@@ -191,11 +191,11 @@ Equation :math:numref:`approximation` is computationally feasible to handle. A s
 
 Monte Carlo simulation
 ----------------------
-For linear static problems in the context of FEM, the system equations that must be solved change.
+For linear static problems in the context of FEM, the system equations that must be solved change. The well-known deterministic equation defined by:
 
 .. math:: \pmb{K}\pmb{U} = \pmb{F}
 
-to
+changes to
 
 .. math:: \pmb{K}(\pmb{\xi})\pmb{U}(\pmb{\xi}) = \pmb{F}(\pmb{\xi})
 
@@ -206,8 +206,8 @@ distribution and for each of these samples solving the deterministic problem:
 .. math:: \pmb{K}(\pmb{\xi}_{(i)})\pmb{U}(\pmb{\xi}_{(i)}) = \pmb{F}(\pmb{\xi}_{(i)})
 
 The next step is to collect the :math:`N_{sim}` response vectors :math:`\pmb{U} := \pmb{U}(\pmb{\xi}_{(i)})` and perform a statistical
-post-processing to extract useful information such as mean value, variance, histogram,
-empirical pdf/cdf, etc.
+postprocessing to extract useful information such as mean value, variance, histogram, and
+empirical PDF.
 
 
 Problem description
