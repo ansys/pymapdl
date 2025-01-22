@@ -242,7 +242,7 @@ def stochastic_field_realization(
     Returns
     -------
     float
-        The value of the realization at a given point within the domain
+        Value of the realization at a given point within the domain.
     """
     # Shift parameter -> Because terms are solved in a symmetric domain [-A, A]
     T = (domain[0] + domain[1]) / 2
@@ -708,7 +708,7 @@ def run_simulations_over_multple_instances(
 
     from ansys.mapdl.core import MapdlPool
 
-    # First determine the number of simulations to run per instance
+    # Determine the number of simulations to run per instance
     if no_of_simulations % no_of_instances == 0:
         # Simulations can be split equally across instances
         simulations_per_instance = no_of_simulations // no_of_instances

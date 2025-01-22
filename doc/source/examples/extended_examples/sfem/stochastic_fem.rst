@@ -29,7 +29,7 @@ Random variables versus stochastic processes
 This section attempts to explain how random variables and stochastic processes differ. Because these
 concepts are used for modeling the system randomness, explaining them is important. Random variables are easier to
 understand from elementary probability theory, which isn't the case for stochastic processes. If the following
-explanations are too brief, consult books on SFEM. Both [1]_and [2]_are recommended resources.
+explanations are too brief, consult books on SFEM. Both [1]_ and [2]_ are recommended resources.
 
 Random variables
 ~~~~~~~~~~~~~~~~
@@ -94,8 +94,8 @@ this equation:
 
 Here :math:`\sigma_E^2` is the variance, and :math:`\ell` is the correlation length parameter.
 
-To aid understanding, the following diagram depicts two equivalent ways of visualizing a
-stochastic process/random field, that is as an infinite collection of random variables or as a
+To aid understanding, the figure below is a diagram depicting two equivalent ways of visualizing a
+stochastic process or random field, that is, as an infinite collection of random variables or as a
 realization/sample function assigned to each outcome of an experiment.
 
 .. figure:: realizations.png
@@ -104,8 +104,8 @@ realization/sample function assigned to each outcome of an experiment.
 
 .. note::
   The concepts in the preceding sections generalize to more dimensions, for example, a random vector instead of a random
-  variable, or an :math:`\mathbb{R}^d`-valued stochastic process. The preceding presentation is however
-  sufficient for this example.
+  variable, or an :math:`\mathbb{R}^d`-valued stochastic process. A detailed discussion of these generalizations can be
+  found in [1]_and [2]_.
 
 Series expansion of stochastic processes
 ----------------------------------------
@@ -223,14 +223,10 @@ random field given by this expression:
 
 .. math:: E(x) = 10^5(1+0.10f(x)) (kN/m^2)
 
-Here :math:`f(x)` is a zero mean stationary Gaussian field with unit variance. The covariance function for :math:`f` follows:
-
-.. math:: C_f(x_r,x_s)=e^{-\frac{\lvert x_r-x_s \rvert}{3}}
-
-The following are required:
+with :math:`f(x)` being a zero mean stationary Gaussian field with unit variance. The covariance function for :math:`f` is :math:`C_f(x_r,x_s)=e^{-\frac{\lvert x_r-x_s \rvert}{3}}`.
 
 1. Using the K-L series expansion, generate 5000 realizations for :math:`E(x)` and perform Monte 
-   Carlo simulation to determine the probability density function of the response :math:`u`, at the bottom right corner 
+   Carlo simulation to determine the PDF of the response :math:`u`, at the bottom right corner 
    of the cantilever. 
 
 2. If some design code stipulates that the displacement :math:`u` must not exceed :math:`0.2 \: m`, how confident can
@@ -266,8 +262,8 @@ The function for evaluating the Young's modulus itself is straight forward:
   :language: python
   :lines: 268-295
 
-Realizations of the young modulus
-+++++++++++++++++++++++++++++++++++++++++++++
+Realizations of the Young's modulus
++++++++++++++++++++++++++++++++++++
 You can now generate sample realizations of the Young's modulus to see what they look like:
 
 .. literalinclude:: sfem.py
@@ -344,17 +340,17 @@ The preceding plots confirm that the implementation is correct. If you desire mo
 
 Running the simulations
 ~~~~~~~~~~~~~~~~~~~~~~~
-Now focus shifts to the PyMAPDL part of this example. Remember that the problem requires running 5000 simulations. Therefore, there is need
-to write a workflow that does the following:
+Focus now shifts to the PyMAPDL part of this example. Remember that the problem requires running 5000 simulations. Therefore,
+you must write a workflow that performs these actions:
 
-1. Create the geometry of the cantilever model
+1. Create the geometry of the cantilever model.
 
-2. Mesh the model. For this, 4-node PLANE182 elements is going to be used
+2. Mesh the model. The following code uses the four-node PLANE182 elements.
 
-3. Generate one realization of :math:`E` and one sample of :math:`P` for each simulation
+3. For each simulation, generate one realization of :math:`E` and one sample of :math:`P`.
 
 4. For each simulation, loop through the elements and for each element, use the generated 
-   realization to assign the value of the young's modulus. Also assign the load for each simulation.
+   realization to assign the value of the Young's modulus. Also assign the load for each simulation.
 
 5. Solve the model and store :math:`u` for each simulation.
 
@@ -379,8 +375,8 @@ You can pass the required arguments to the defined function to run the simulatio
 
 Answering problem questions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-To finish answering the first question (simulations have already been run), a statistical post-processing of 
-simulation results can performed to determine the probability density function of the response :math:`u`:
+To determine the PDF of the response :math:`u`, you can perform a statistical post-processing of
+simulation results:
 
 .. literalinclude:: sfem.py
   :language: python
@@ -388,7 +384,7 @@ simulation results can performed to determine the probability density function o
 
 .. figure:: pdf.png
 
-   The probability density function of response :math:`u`.
+   The PDF of response :math:`u`
 
 To answer the second question, simply evaluate the probability that the response :math:`u` is less than
 :math:`0.2 \: m`:
