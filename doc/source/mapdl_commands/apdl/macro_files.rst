@@ -1,35 +1,30 @@
-.. _ref_macro_files_commands_api:
 
-***********
-Macro files
-***********
+.. _ref_macro_files:
 
-.. currentmodule:: ansys.mapdl.core
 
-These APDL commands are used to build and execute command macros.
+MacroFiles
+==========
 
-.. note::
-   Most of the commands here should be replaced with Python
-   alternatives. For example, instead of using macros, use Python
-   functions. Instead of ``/MKDIR`` use ``os.mkdir``.
 
-.. warning::
-   Many of the commands here must be run in ``mapdl.non_interactive``
+.. currentmodule:: ansys.mapdl.core._commands.apdl.macro_files
+
+.. autoclass:: ansys.mapdl.core._commands.apdl.macro_files.MacroFiles
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.cfclos
-   Mapdl.cfopen
-   Mapdl.cfwrite
-   Mapdl.create
-   Mapdl.dflab
-   Mapdl.end
-   Mapdl.mkdir
-   Mapdl.msg
-   Mapdl.pmacro
-   Mapdl.psearch
-   Mapdl.rmdir
-   Mapdl.tee
-   Mapdl.ulib
-   Mapdl.use
+
+   MacroFiles.cfclos
+   MacroFiles.cfopen
+   MacroFiles.cfwrite
+   MacroFiles.create
+   MacroFiles.end
+   MacroFiles.mkdir
+   MacroFiles.msg
+   MacroFiles.pmacro
+   MacroFiles.psearch
+   MacroFiles.rmdir
+   MacroFiles.slashtee
+   MacroFiles.ulib
+   MacroFiles.use

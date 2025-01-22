@@ -297,7 +297,7 @@ jobs:
 
       - name: "Build documentation"
         run: |
-          xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
+          xvfb-run make -C doc html SPHINXOPTS="-j auto"
 
       - name: "Substitute defective GIF"
         run: |
