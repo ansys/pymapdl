@@ -34,7 +34,7 @@ if _HAS_PANDAS:
 from ._commands import (
     apdl,
     aux2_,
-    aux3_,
+    aux3,
     aux12_,
     aux15_,
     conn,
@@ -514,7 +514,7 @@ class Commands(
     ReducedCommands,
     SessionCommands,
     SolutionCommands,
-    aux3_.Aux3,
+    aux3.Aux3,
     aux15_.Aux15,
     conn.Conn,
     hidden._Hidden,
