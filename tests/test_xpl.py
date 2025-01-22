@@ -40,10 +40,9 @@ def check_supports_extract(mapdl):
 
 
 class Test_xpl:
+    full_file = None
 
-    @staticmethod
-    @pytest.fixture(scope="class")
-    def cube_solve(mapdl):
+    def create_cube(self, mapdl):
         from conftest import clear
 
         clear(mapdl)
@@ -51,27 +50,44 @@ class Test_xpl:
         # set up the full file
         mapdl.block(0, 1, 0, 1, 0, 1)
         mapdl.et(1, 186)
-        mapdl.esize(0.5)
-        mapdl.vmesh("all")
 
         # Define a material (nominal steel in SI)
         mapdl.mp("EX", 1, 210e9)  # Elastic modulus in Pa (kg/(m*s**2))
         mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
         mapdl.mp("NUXY", 1, 0.3)  # Poisson's Ratio
 
+        mapdl.esize(0.5)
+        mapdl.vmesh("all")
+
+        # Delete files
+        self.full_file = mapdl.jobname + ".full"
+        if "full.file" in mapdl.list_files():
+            mapdl.slashdelete("full.file")
+
+        if mapdl.result_file in mapdl.list_files():
+            mapdl.slashdelete(mapdl.result_file)
+
+        if mapdl.result_file in mapdl.list_files():
+            mapdl.slashdelete(mapdl.result_file)
+
         # solve first 10 non-trivial modes
         mapdl.modal_analysis(nmode=10, freqb=1)
         mapdl.save("cube_solve_xpl")
 
-    @staticmethod
+    @pytest.fixture(scope="class")
+    def cube_solve(self, mapdl):
+        self.create_cube(mapdl)
+
     @pytest.fixture(scope="function")
-    def xpl(mapdl, cube_solve):
+    def xpl(self, mapdl, cube_solve):
         mapdl.prep7()
         mapdl.resume("cube_solve_xpl")
 
         xpl = mapdl.xpl
-        xpl.open("file.full")
+        if not self.full_file and not self.full_file in mapdl.list_files():
+            self.create_cube(mapdl)
 
+        xpl.open(self.full_file)
         return xpl
 
     @staticmethod
@@ -116,6 +132,9 @@ class Test_xpl:
     @staticmethod
     def test_copy(mapdl, cleared, xpl):
         filename = "tmpfile.full"
+        if filename in mapdl.list_files():
+            mapdl.slashdelete(filename)
+
         xpl.copy(filename)
         assert filename in mapdl.list_files()
 
@@ -163,16 +182,15 @@ class Test_xpl:
         xpl.goto("MASS")
         assert "Current Location : FULL::MASS" in xpl.where()
 
-    @staticmethod
     @requires("ansys-math-core")
     @pytest.mark.usefixtures("check_supports_extract")
-    def test_extract(xpl):
+    def test_extract(self, xpl):
         # expecting fixture to already have a non-result file open
         assert xpl._filename[-3:] != "rst"
         with pytest.raises(MapdlRuntimeError, match="result files"):
             mat = xpl.extract("NSL")
 
-        xpl.open("file.rst")
+        xpl.open(xpl._mapdl.result_file)
 
         with pytest.raises(ValueError, match="the only supported recordname is 'NSL'"):
             xpl.extract("NOD")
