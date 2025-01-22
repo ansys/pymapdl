@@ -75,20 +75,20 @@ class MatrixOperations:
 
             * ``MMF`` - Export the matrix in the Matrix Market Format.
 
-            * ``SUB`` - Export the matrix in the :file:``SUB`` file format.
+            * ``SUB`` - Export the matrix in the :file:`SUB` file format.
 
             * ``HBMAT`` - Export the matrix in the Harwell-Boeing file format.
 
             * ``MAT`` - Export the matrix in a native format, to be re-imported using the :ref:`dmat` or :ref:`smat`
               command.
 
-            * ``EMAT`` - Export the matrix to an existing :file:``EMAT`` file.
+            * ``EMAT`` - Export the matrix to an existing :file:`EMAT` file.
 
             * ``APDL`` - Export the matrix to an APDL array parameter.
 
             * ``PS`` - Export the matrix profile to a Postscript file.
 
-            * ``DMIG`` - Export the matrix in the :file:``DMIG`` file format.
+            * ``DMIG`` - Export the matrix in the :file:`DMIG` file format.
 
             * ``CSV`` - Export the matrix to an ASCII CSV (comma-separated values) file.
 
@@ -113,13 +113,13 @@ class MatrixOperations:
         Only sparse matrices can be exported to Postscript files. This option plots the matrix profile as a
         series of dots.
 
-        If you want to create a :file:``.SUB`` file from several matrices, you need to set ``Val3`` = WAIT
-        for all matrices but the last, and ``Val3`` = DONE for the last one. The export will be effective at
-        the last :ref:`export` command.
+        If you want to create a :file:`.SUB` file from several matrices, you need to set ``Val3`` = WAIT for
+        all matrices but the last, and ``Val3`` = DONE for the last one. The export will be effective at the
+        last :ref:`export` command.
 
-        To create a :file:``.SUB`` file or :file:``.DMIG`` file from scratch, you must supply the row
-        information array. (Specify this array in the ``Val2`` field for :file:``.SUB`` or in the ``Val1``
-        field for :file:``.DMIG``.) This must be an ``m`` x 2 array, where ``m`` is the size of the matrix.
+        To create a :file:`.SUB` file or :file:`.DMIG` file from scratch, you must supply the row
+        information array. (Specify this array in the ``Val2`` field for :file:`.SUB` or in the ``Val1``
+        field for :file:`.DMIG`.) This must be an ``m`` x 2 array, where ``m`` is the size of the matrix.
         The first column is the node number and the second column is the DOF number corresponding to each
         row of the matrix.
 
@@ -127,11 +127,11 @@ class MatrixOperations:
         file by specifying the matrix type in the ``Val2`` field. The matrix type is not included in the
         header if ``Val2`` is empty. If ``Val1`` = BINARY, ``Val2`` is not used.
 
-        The :ref:`export` command is not applicable to sparse matrices initialized from :file:``.FULL``
-        files by means of the NOD2SOLV option on the :ref:`smat` command (that is,
+        The :ref:`export` command is not applicable to sparse matrices initialized from :file:`.FULL` files
+        by means of the NOD2SOLV option on the :ref:`smat` command (that is,
         :ref:`smat`,,,IMPORT,FULL,,NOD2SOLV).
 
-        The :file:``.CSV`` file format does not support sparse matrices.
+        The :file:`.CSV` file format does not support sparse matrices.
         """
         command = f"*EXPORT,{matrix},{format_},{fname},{val1},{val2},{val3}"
         return self.run(command, **kwargs)
@@ -993,7 +993,7 @@ class MatrixOperations:
 
         For more information on the NOD2SOLV and USR2SOLV mapping vectors, see.
 
-        For more information about :file:``.FULL`` file contents, see the :ref:`hbmat` in the `Command
+        For more information about :file:`.FULL` file contents, see the :ref:`hbmat` in the `Command
         Reference <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_Z_TOC.html>`_  Command
         Reference.
         """
@@ -1096,9 +1096,9 @@ class MatrixOperations:
         Notes
         -----
         This command allows you to create a dense matrix. To create a sparse matrix, use the :ref:`smat`
-        command. :ref:`smat` is recommended for large matrices obtained from the :file:``.FULL`` or
-        :file:``.HBMAT`` file. Refer to the :ref:`hbmat` command documentation for more information about
-        :file:``.FULL`` file contents.
+        command. :ref:`smat` is recommended for large matrices obtained from the :file:`.FULL` or
+        :file:`.HBMAT` file. Refer to the :ref:`hbmat` command documentation for more information about
+        :file:`.FULL` file contents.
 
         Use the :ref:`vec` command to create a vector.
 
@@ -1136,7 +1136,7 @@ class MatrixOperations:
            DMIG,KF,22320,3,,22320,2,-5.00E+6
            ...
 
-        **Requirement when importing matrices from a Nastran DMIG file:** To ensure that the :file:``.sub``
+        **Requirement when importing matrices from a Nastran DMIG file:** To ensure that the :file:`.sub`
         file is properly generated from matrices imported from Nastran **DMIG** file, the generalized
         coordinates for a CMS superelement (SPOINTS in Nastran) must appear last (have
         highest ID number).

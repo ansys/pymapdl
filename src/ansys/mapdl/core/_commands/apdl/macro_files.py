@@ -259,24 +259,24 @@ class MacroFiles:
         :ref:`starstatus`,ARGX to view current macro parameter values.
 
         An alternate way of executing a macro file is via the unknown-command route. If a command unknown to
-        Mechanical APDL is entered, a search for a file of that name (plus a :file:``.MAC`` suffix) is made.
+        Mechanical APDL is entered, a search for a file of that name (plus a :file:`.MAC` suffix) is made.
         If the file exists, it is executed, if not, the "unknown command" message is output. Thus, you can
         write your own commands in terms of other Mechanical APDL commands. The procedure is similar to
         issuing :ref:`use` with the unknown command in the ``Name`` field. For example, the command
         **CMD**,10,20,30 is internally similar to :ref:`use`,CMD,10,20,30. The macro file named
-        :file:``CMD.MAC`` is executed with the three parameters. The :ref:`use` macro description also
-        applies to the unknown-command macro, except that various directories are searched and a suffix (
-        :file:``.MAC`` ) is assumed. Also, a macro library file is not searched.
+        :file:`CMD.MAC` is executed with the three parameters. The :ref:`use` macro description also applies
+        to the unknown-command macro, except that various directories are searched and a suffix (
+        :file:`.MAC` ) is assumed. Also, a macro library file is not searched.
 
         A three-level directory search for the unknown-command macro file may be available. The search order
         may be: 1) a high-level system directory, 2) the log-in directory, and 3) the local (working)
         directory. Issue :ref:`psearch` to change the directory search path. For an unknown command **CMD**,
-        the first file named :file:``CMD.MAC`` found to exist in the search order is executed. The command
-        can be input in lower-, upper-, or mixed-case; however, it converts to uppercase automatically
-        before the file name search occurs. On systems that preserve the case as it was input, a file
-        matching the upper-case name is used first, followed by a file with the matching the lower-case
-        name, and finally a file matching the mixed-case name. All macro files placed in the :file:``apdl``
-        directory must be upper-case.
+        the first file named :file:`CMD.MAC` found to exist in the search order is executed. The command can
+        be input in lower-, upper-, or mixed-case; however, it converts to uppercase automatically before
+        the file name search occurs. On systems that preserve the case as it was input, a file matching the
+        upper-case name is used first, followed by a file with the matching the lower-case name, and finally
+        a file matching the mixed-case name. All macro files placed in the :file:`apdl` directory must be
+        upper-case.
 
         Because undocumented commands exist in Mechanical APDL, you should issue the command intended for
         the macro
@@ -399,7 +399,7 @@ class MacroFiles:
         fname : str
             File name and directory path (248 characters maximum, including the characters needed for the
             directory path). An unspecified directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name. The file name defaults to :file:``Jobname``.
+            you can use all 248 characters for the file name. The file name defaults to :file:`Jobname`.
 
         ext : str
             Filename extension (eight-character maximum). The extension defaults to CMD if ``Fname`` is
@@ -453,8 +453,8 @@ class MacroFiles:
         Notes
         -----
         This command forces the contents of a macro or other input file to be written to
-        :file:``Jobname.LOG``. It is valid only within a macro or input file, and should be placed at the
-        top of the file. :ref:`pmacro`   should be included in any macro or input file that calls GUI
+        :file:`Jobname.LOG`. It is valid only within a macro or input file, and should be placed at the top
+        of the file. :ref:`pmacro`   should be included in any macro or input file that calls GUI
         functions.
         """
         command = "/PMACRO"
@@ -599,13 +599,13 @@ class MacroFiles:
             * ``NOTE`` - Writes the message with a "NOTE" heading.
 
             * ``WARN`` - Writes the message with a "WARNING" heading. Also writes the message to the errors file,
-              :file:``Jobname.ERR``.
+              :file:`Jobname.ERR`.
 
             * ``ERROR`` - Writes the message with a "ERROR" heading and causes run termination (if batch) at earliest "clean
-              exit" point. Also writes the message to the errors file, :file:``Jobname.ERR``.
+              exit" point. Also writes the message to the errors file, :file:`Jobname.ERR`.
 
             * ``FATAL`` - Writes the message with a "FATAL ERROR" heading and causes run termination immediately. Also writes
-              the message to the errors file, :file:``Jobname.ERR``.
+              the message to the errors file, :file:`Jobname.ERR`.
 
             * ``UI`` - Writes the message with a "NOTE" heading and displays it in the message dialog box. This option is
               most useful in GUI mode.

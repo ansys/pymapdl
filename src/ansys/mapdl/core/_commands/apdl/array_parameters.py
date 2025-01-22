@@ -591,7 +591,7 @@ class ArrayParameters:
              - X, Y, or Z structural rotation.
            * - TEMP
              -
-             - Temperature. For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use TBOT, TE2, TE3,..., TTOP instead of TEMP. Alternative getfunctions: TEMP(N), TBOT(N), TE2(N), etc.
+             - Temperature. For SHELL131 and SHELL132 elements with KEYOPT(3) = 0 or 1, use TBOT, TE2, TE3...., TTOP instead of TEMP. Alternative getfunctions: TEMP(N), TBOT(N), TE2(N), etc.
            * - PRES
              -
              - Pressure.

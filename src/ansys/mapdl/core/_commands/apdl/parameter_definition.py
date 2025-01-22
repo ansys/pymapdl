@@ -113,7 +113,7 @@ class ParameterDefinition:
         fname : str
             File name and directory path (248 characters maximum, including the characters needed for the
             directory path). An unspecified directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name. The file name defaults to :file:``Jobname``.
+            you can use all 248 characters for the file name. The file name defaults to :file:`Jobname`.
 
         ext : str
             Filename extension (eight-character maximum). The extension defaults to PARM if ``Fname`` is
@@ -150,7 +150,7 @@ class ParameterDefinition:
         fname : str
             File name and directory path (248 characters maximum, including the characters needed for the
             directory path). An unspecified directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name. The file name defaults to :file:``Jobname``.
+            you can use all 248 characters for the file name. The file name defaults to :file:`Jobname`.
 
         ext : str
             Filename extension (eight-character maximum). The extension defaults to PARM if ``Fname`` is
@@ -671,7 +671,7 @@ class ParameterDefinition:
         Notes
         -----
         Assigns values to user-named parameters that can be substituted later in the run. The equivalent
-        (and recommended) format is ``Par`` = ``VALUE``, ``VAL2``, ``VAL3``,..., ``VAL10``
+        (and recommended) format is ``Par`` = ``VALUE``, ``VAL2``, ``VAL3`....., ``VAL10``
 
         which can be used in place of :ref:`starset`, ``Par``,... for convenience.
 
@@ -1277,8 +1277,8 @@ class ParameterDefinition:
         Both :ref:`get` and :ref:`starvget` retrieve information from the active data stored in memory. The
         database is often the source, and sometimes the information is retrieved from common memory blocks
         that Mechanical APDL uses to manipulate information. Although POST1 and POST26 operations use a
-        :file:``\*.rst`` file, GET data is accessed from the database or from the common blocks. Get
-        operations do not access the :file:``\*.rst`` file directly.
+        :file:`\*.rst` file, GET data is accessed from the database or from the common blocks. Get
+        operations do not access the :file:`\*.rst` file directly.
 
         The :ref:`starvget` command retrieves both the unprocessed real and the imaginary parts (original
         and duplicate sector nodes and elements) of a `cyclic symmetry
@@ -1598,8 +1598,8 @@ class ParameterDefinition:
         Both :ref:`get` and :ref:`starvget` retrieve information from the active data stored in memory. The
         database is often the source, and sometimes the information is retrieved from common memory blocks
         that the program uses to manipulate information. Although POST1 and POST26 operations use a
-        :file:``\*.rst`` file, :ref:`get` data is accessed from the database or from the common blocks. Get
-        operations do not access the :file:``\*.rst`` file directly. For repeated gets of sequential items,
+        :file:`\*.rst` file, :ref:`get` data is accessed from the database or from the common blocks. Get
+        operations do not access the :file:`\*.rst` file directly. For repeated gets of sequential items,
         such as from a series of elements, see the :ref:`starvget` command.
 
         Most items are stored in the database after they are calculated and are available anytime

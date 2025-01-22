@@ -98,7 +98,7 @@ class Abbreviations:
         fname : str
             File name and directory path (248 characters maximum, including the characters needed for the
             directory path). An unspecified directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name. The file name defaults to :file:``Jobname``.
+            you can use all 248 characters for the file name. The file name defaults to :file:`Jobname`.
 
         ext : str
             Filename extension (eight-character maximum). The extension defaults to ABBR if ``Fname`` is
@@ -130,7 +130,7 @@ class Abbreviations:
         fname : str
             File name and directory path (248 characters maximum, including the characters needed for the
             directory path). An unspecified directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name. The file name defaults to :file:``Jobname``.
+            you can use all 248 characters for the file name. The file name defaults to :file:`Jobname`.
 
         ext : str
             Filename extension (eight-character maximum). The extension defaults to ABBR if ``Fname`` is
@@ -177,7 +177,7 @@ class Abbreviations:
         Use :ref:`starstatus` to display the current list of abbreviations. For abbreviations repeated with
         ``\*REPEAT``, substitution occurs before the repeat increments are applied. There are a number of
         abbreviations that are predefined by the program (these can be deleted by using the blank ``String``
-        option described above). Note that ``String`` will be written to the :file:``File.LOG``.
+        option described above). Note that ``String`` will be written to the :file:`File.LOG`.
 
         This command is valid in any processor.
         """
