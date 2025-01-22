@@ -1544,6 +1544,9 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
     # this file should exist remotely
     rst_file_name = mapdl.result_file
     if not rst_file_name in mapdl.list_files():
+        mapdl.solution()
+        mapdl.solve()
+
         mapdl.finish()
         mapdl.save()
 
