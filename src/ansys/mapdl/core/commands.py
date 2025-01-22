@@ -373,6 +373,10 @@ class Aux2Commands(aux2_.bin_dump.BinDump, aux2_.bin_manip.BinManip):
     pass
 
 
+class Aux3Commands(aux3.results_files.ResultsFiles):
+    pass
+
+
 class Aux12Commands(
     aux12_.radiosity_solver.RadiositySolver,
     aux12_.radiation_mat.RadiationMat,
@@ -503,6 +507,7 @@ class InqFunctions(inq_func.inq_function):
 class Commands(
     Apdl,
     Aux2Commands,
+    Aux3Commands,
     Aux12Commands,
     DatabaseCommands,
     DisplayCommands,
@@ -514,7 +519,6 @@ class Commands(
     ReducedCommands,
     SessionCommands,
     SolutionCommands,
-    aux3.Aux3,
     aux15_.Aux15,
     conn.Conn,
     hidden._Hidden,

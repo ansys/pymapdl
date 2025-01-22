@@ -1,3 +1,26 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class ResultsFiles:
 
     def undelete(self, option: str = "", nstart: str = "", nend: str = "", **kwargs):
@@ -34,8 +57,6 @@ class ResultsFiles:
         command = f"UNDELETE,{option},{nstart},{nend}"
         return self.run(command, **kwargs)
 
-
-
     def compress(self, **kwargs):
         r"""Deletes all specified sets.
 
@@ -52,8 +73,6 @@ class ResultsFiles:
         command = "COMPRESS"
         return self.run(command, **kwargs)
 
-
-
     def list(self, **kwargs):
         r"""Lists out the sets in the results file.
 
@@ -69,8 +88,6 @@ class ResultsFiles:
         """
         command = "LIST"
         return self.run(command, **kwargs)
-
-
 
     def aux3(self, **kwargs):
         r"""Enters the results file editing processor.
@@ -90,8 +107,6 @@ class ResultsFiles:
         """
         command = "/AUX3"
         return self.run(command, **kwargs)
-
-
 
     def fileaux3(self, fname: str = "", ext: str = "", **kwargs):
         r"""Specifies the results file to be edited.
@@ -115,8 +130,6 @@ class ResultsFiles:
         """
         command = f"FILEAUX3,{fname},{ext}"
         return self.run(command, **kwargs)
-
-
 
     def delete(self, set: str = "", nstart: str = "", nend: str = "", **kwargs):
         r"""Specifies sets in the results file to be deleted before postprocessing.
@@ -147,9 +160,16 @@ class ResultsFiles:
         command = f"DELETE,{set},{nstart},{nend}"
         return self.run(command, **kwargs)
 
-
-
-    def modify(self, set: str = "", lstep: str = "", iter: str = "", cumit: str = "", time: str = "", ktitle: int | str = "", **kwargs):
+    def modify(
+        self,
+        set: str = "",
+        lstep: str = "",
+        iter: str = "",
+        cumit: str = "",
+        time: str = "",
+        ktitle: int | str = "",
+        **kwargs,
+    ):
         r"""Changes the listed values of the data in a set.
 
         Mechanical APDL Command: `MODIFY <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MODIFY.html>`_
@@ -189,5 +209,3 @@ class ResultsFiles:
         """
         command = f"MODIFY,{set},{lstep},{iter},{cumit},{time},{ktitle}"
         return self.run(command, **kwargs)
-
-
