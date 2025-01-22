@@ -343,10 +343,6 @@ def protect_grpc(func: Callable) -> Callable:
                     # Retry again
                     continue
 
-                # Every try to reconnecto to MAPDL failed
-                # So let's avoid execution
-                mapdl._exited = True
-
                 # Custom errors
                 reason = ""
                 suggestion = ""
@@ -364,6 +360,11 @@ def protect_grpc(func: Callable) -> Callable:
                             " environment variable. For instance:\n\n"
                             f"$ export PYMAPDL_MAX_MESSAGE_LENGTH={lim_}"
                         )
+
+                # Every try to reconnecto to MAPDL failed
+                # So let's avoid execution from now on.
+                # The above exception should not break the channel.
+                mapdl._exited = True
 
                 if error.code() == grpc.StatusCode.UNAVAILABLE:
                     # Very likely the MAPDL server has died.
