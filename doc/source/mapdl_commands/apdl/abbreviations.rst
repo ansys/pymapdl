@@ -1,22 +1,21 @@
-.. _ref_abbreviations_commands_api:
 
-*************
+.. _ref_abbreviations:
+
+
 Abbreviations
-*************
+=============
 
-.. currentmodule:: ansys.mapdl.core
 
-These APDL commands can be used to define abbreviations for longer commands, and to create user-defined commands.
+.. currentmodule:: ansys.mapdl.core._commands.apdl.abbreviations
 
-.. note::
-   It is probably easier to use Python strings instead of MAPDL
-   strings.
-
+.. autoclass:: ansys.mapdl.core._commands.apdl.abbreviations.Abbreviations
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.abbr
-   Mapdl.abbres
-   Mapdl.abbsav
-   Mapdl.ucmd
+
+   Abbreviations.abbr
+   Abbreviations.abbres
+   Abbreviations.abbsav
+   Abbreviations.ucmd
