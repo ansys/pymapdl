@@ -131,14 +131,14 @@ class ResultsFiles:
         command = f"FILEAUX3,{fname},{ext}"
         return self.run(command, **kwargs)
 
-    def delete(self, set: str = "", nstart: str = "", nend: str = "", **kwargs):
+    def delete(self, set_: str = "", nstart: str = "", nend: str = "", **kwargs):
         r"""Specifies sets in the results file to be deleted before postprocessing.
 
         Mechanical APDL Command: `DELETE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DELETE.html>`_
 
         Parameters
         ----------
-        set : str
+        set_ : str
             Specifies that sets in the results file are to be deleted.
 
         nstart : str
@@ -157,14 +157,14 @@ class ResultsFiles:
         The :ref:`delete` command is valid only in the results file editing processor (auxiliary processor
         AUX3).
         """
-        command = f"DELETE,{set},{nstart},{nend}"
+        command = f"DELETE,{set_},{nstart},{nend}"
         return self.run(command, **kwargs)
 
     def modify(
         self,
-        set: str = "",
+        set_: str = "",
         lstep: str = "",
-        iter: str = "",
+        iter_: str = "",
         cumit: str = "",
         time: str = "",
         ktitle: int | str = "",
@@ -176,13 +176,13 @@ class ResultsFiles:
 
         Parameters
         ----------
-        set : str
+        set_ : str
             Set of data in results file to be modified.
 
         lstep : str
             The new load step number.
 
-        iter : str
+        iter_ : str
             The new load substep number.
 
         cumit : str
@@ -207,5 +207,5 @@ class ResultsFiles:
         AUX3), and, like the other AUX3 commands, it only affects the data steps index (DSI), time (TIM),
         loadstep, substep and cumulative step iteration (LSP) records in the results file.
         """
-        command = f"MODIFY,{set},{lstep},{iter},{cumit},{time},{ktitle}"
+        command = f"MODIFY,{set_},{lstep},{iter_},{cumit},{time},{ktitle}"
         return self.run(command, **kwargs)
