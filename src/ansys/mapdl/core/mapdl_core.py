@@ -1458,7 +1458,9 @@ class _MapdlCore(Commands):
             for each_type, each_name in _TMP_COMP.items():
                 each_name = f"__{each_name}{id_}__"
                 selection[each_type] = each_name
-                mapdl.cm(each_name, each_type)
+                mapdl.cm(
+                    each_name, each_type, mute=True
+                )  # to hide ComponentNoData error
 
             self.selection.append(selection)
 
@@ -1474,17 +1476,17 @@ class _MapdlCore(Commands):
 
             if cmps:
                 for each_name, each_value in cmps.items():
-                    mapdl.cmsel("a", each_name, each_value)
+                    mapdl.cmsel("a", each_name, each_value, mute=True)
 
             for each_type, each_name in selection.items():
-                mapdl.cmsel("a", each_name, each_type)
+                mapdl.cmsel("a", each_name, each_type, mute=True)
 
                 selfun = getattr(
                     mapdl, ENTITIES_TO_SELECTION_MAPPING[each_type.upper()]
                 )
-                selfun("s", vmin=each_name)
+                selfun("s", vmin=each_name, mute=True)
 
-                mapdl.cmdele(each_name)
+                mapdl.cmdele(each_name, mute=True)
 
     class _chain_commands:
         """Store MAPDL commands and send one chained command."""
