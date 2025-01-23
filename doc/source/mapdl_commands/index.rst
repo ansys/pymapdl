@@ -218,7 +218,7 @@ files by deleting sets or by changing values.
    :maxdepth: 1
    :caption: AUX3
 
-   aux3
+   aux3/index
 
 
 *****
