@@ -2217,7 +2217,6 @@ def test_save_selection_2(mapdl, cleared, make_block):
     mapdl.nsel(vmin=n1)
     assert n1 in mapdl.mesh.nnum
     mapdl.cm("nodes_cm", "NODE")
-    mapdl.components["nodes_cm"]
     assert "nodes_cm" in mapdl.components
     assert n1 in mapdl.components["nodes_cm"].items
     assert "NODE" == mapdl.components["nodes_cm"].type
@@ -2226,7 +2225,6 @@ def test_save_selection_2(mapdl, cleared, make_block):
     mapdl.esel(vmin=e1)
     assert e1 in mapdl.mesh.enum
     mapdl.cm("elem_cm", "ELEM")
-    mapdl.components["elem_cm"]
     assert "elem_cm" in mapdl.components
     assert e1 in mapdl.components["elem_cm"].items
     assert "ELEM" == mapdl.components["elem_cm"].type
@@ -2235,7 +2233,6 @@ def test_save_selection_2(mapdl, cleared, make_block):
     mapdl.ksel(vmin=kp1)
     assert kp1 in mapdl.geometry.knum
     mapdl.cm("kp_cm", "kp")
-    mapdl.components["kp_cm"]
     assert "kp_cm" in mapdl.components
     assert kp1 in mapdl.components["kp_cm"].items
     assert "KP" == mapdl.components["kp_cm"].type
@@ -2244,7 +2241,6 @@ def test_save_selection_2(mapdl, cleared, make_block):
     mapdl.lsel(vmin=l1)
     assert l1 in mapdl.geometry.lnum
     mapdl.cm("line_cm", "line")
-    mapdl.components["line_cm"]
     assert "line_cm" in mapdl.components
     assert l1 in mapdl.components["line_cm"].items
     assert "LINE" == mapdl.components["line_cm"].type
