@@ -92,7 +92,7 @@ def evaluate_KL_cosine_terms(
     correl_length_param : float
         Correlation length parameter of the autocorrelation function of the process.
     min_eigen_value : float
-        Minimum eigenvalue to achieve require accuracy.
+        Minimum eigenvalue to achieve required accuracy.
 
     Returns
     -------
@@ -153,7 +153,7 @@ def evaluate_KL_sine_terms(
     correl_length_param : float
         Correlation length parameter of the autocorrelation function of the process.
     min_eigen_value : float
-        Minimum eigenvalue to achieve require accuracy.
+        Minimum eigenvalue to achieve required accuracy.
 
     Returns
     -------
@@ -295,7 +295,7 @@ def young_modulus_realization(
     )
 
 
-# Generation of K-L expansion parameters
+# Generate K-L expansion parameters
 import matplotlib.pyplot as plt
 
 domain = (0, 4)
@@ -509,7 +509,7 @@ def run_simulations(
                 "S", "CENT", "X", element_centroid_x_coord
             )  # Select all elements having this coordinate as centroid
 
-            # Evaluate young's modulus at this material point
+            # Evaluate Young's modulus at this material point
             young_modulus_value = young_modulus_realization(
                 cosine_frequency_list,
                 cosine_eigen_values,
@@ -525,7 +525,7 @@ def run_simulations(
 
             mapdl.mp(
                 "EX", f"{material_property}", young_modulus_value
-            )  # Define property ID, assign young's modulus
+            )  # Define property ID and assign Young's modulus
             mapdl.mp(
                 "NUXY", f"{material_property}", poisson_ratio
             )  # Assign poisson ratio
@@ -551,7 +551,7 @@ def run_simulations(
 
     mapdl.exit()
     print()
-    print("All simulations completed!")
+    print("All simulations completed.")
 
     return simulation_results
 
@@ -621,7 +621,7 @@ def run_simulations_threaded(
 
     element_ids = mapdl.esel(
         "S", "CENT", "Y", 0, mesh_size
-    )  # Select bottom row elements and store the ids
+    )  # Select bottom row elements and store the IDs
 
     # Generate quantities required to define the Young's modulus stochastic process
     cosine_frequency_list, cosine_eigen_values, cosine_constants = (

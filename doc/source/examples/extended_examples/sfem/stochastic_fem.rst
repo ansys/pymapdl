@@ -3,7 +3,7 @@
 Stochastic finite element method with PyMAPDL
 =============================================
 
-This example leverages PyMAPDL for stochastic finite element analysis using the Monte Carlo simulation.
+This example leverages PyMAPDL for stochastic finite element method (SFEM) analysis using the Monte Carlo simulation.
 This extended example demonstrates numerous advantages and workflow possibilities that PyMAPDL
 provides. It explains important theoretical concepts before presenting the example.
 
@@ -17,16 +17,16 @@ To obtain a more accurate representation of a physical system, it is essential t
 in system parameters and loading conditions, along with the uncertainty in their estimation and their
 spatial variability. The finite element method is undoubtedly the most widely used tool for solving deterministic
 physical problems today. To account for randomness and uncertainty in the modeling of engineering systems,
-the stochastic finite element method (SFEM) was introduced.
+the SFEM was introduced.
 
 SFEM extends the classical deterministic finite element approach
 to a stochastic framework, offering various techniques for calculating response variability. Among these,
-the Monte Carlo simulation (MCS) stands out as the most prominent method. Renowned for its versatility and
+Monte Carlo simulation (MCS) stands out as the most prominent method. Renowned for its versatility and
 ease of implementation, MCS can be applied to virtually any type of problem in stochastic analysis.
 
 Random variables versus stochastic processes
 --------------------------------------------
-This section attempts to explain how random variables and stochastic processes differ. Because these
+This section explains how random variables and stochastic processes differ. Because these
 concepts are used for modeling the system randomness, explaining them is important. Random variables are easier to
 understand from elementary probability theory, which isn't the case for stochastic processes. If the following
 explanations are too brief, consult books on SFEM. Both [1]_ and [2]_ are recommended resources.
@@ -40,13 +40,13 @@ random variable is written as :math:`X`.
 Practical example
 +++++++++++++++++
 Imagine a beam with a concentrated load :math:`P` applied at a specific point. The value of :math:`P`
-is uncertain. It could vary due to manufacturing tolerances, loading conditions, or measurement errors. Mathematically,
+is uncertain. It could vary due to manufacturing tolerances, loading conditions, or measurement errors. Here is a mathematical representation:
 
 .. math:: P : \Theta \longrightarrow \mathbb{R}
 
 In the preceding equation, :math:`\Theta` is the sample space of all possible loading scenarios, and :math:`\mathbb{R}` represents the set of
 possible load magnitudes. For example, :math:`P` could be modeled as a random variable with a probability density
-function (PDF) such as:
+function (PDF):
 
 .. math:: f_P(p) = \frac{1}{\sqrt{2\pi\sigma^2}}e^{-\frac{(p-\mu)^2}{2\sigma^2}},
 
@@ -61,7 +61,7 @@ which belongs to an interval :math:`I`. For example, this occurs in an engineeri
 over a time interval :math:`I \subseteq \mathbb{R}^+`. In such cases, the system's response at a specific material point is
 described not by a single random variable but by a collection of random variables :math:`\{X(t)\}` indexed by :math:`t \in I`. 
 
-This 'infinite' collection of random variables over the interval :math:`I` is called a stochastic process and is denoted as
+This `infinite` collection of random variables over the interval :math:`I` is called a stochastic process and is denoted as
 :math:`\{X(t), t \in I\}` or simply :math:`X`. In this way, a stochastic process generalizes the concept of a random variable
 as it assigns to each outcome :math:`\theta` of the experiment a function :math:`X(t, \theta)`, known as a realization or sample
 function. Lastly, if :math:`X` is indexed by some spatial coordinate :math:`s \in D \subseteq \mathbb{R}^n` rather than time :math:`t`,
@@ -84,7 +84,7 @@ Here:
 
 For example, :math:`E(x)` could be a Gaussian random field, in which case it has the stationarity
 property, making its statistics completely defined by its mean (:math:`\mu_E`), standard deviation
-(:math:`\sigma_E`) and covariance function :math:`C_E(x_i,x_j)`. This 'stationarity' simply means
+(:math:`\sigma_E`), and covariance function :math:`C_E(x_i,x_j)`. This `stationarity` simply means
 that the mean and standard deviation of every random variable :math:`E(x)` is constant and equal to
 :math:`\mu_E` and :math:`\sigma_E` respectively. :math:`C_E(x_i,x_j)` describes how random variables
 :math:`E(x_i)` and :math:`E(x_j)` are related. For a zero-mean Gaussian random field, the covariance function is given by
@@ -94,7 +94,7 @@ this equation:
 
 Here :math:`\sigma_E^2` is the variance, and :math:`\ell` is the correlation length parameter.
 
-To aid understanding, the figure below is a diagram depicting two equivalent ways of visualizing a
+To aid understanding, the figure following diagram depicts two equivalent ways of visualizing a
 stochastic process or random field, that is, as an infinite collection of random variables or as a
 realization or sample function assigned to each outcome of an experiment.
 
@@ -103,7 +103,7 @@ realization or sample function assigned to each outcome of an experiment.
    A random field :math:`E(x)` viewed as a collection of random variables or as realizations.
 
 .. note::
-  The concepts in the preceding sections generalize to more dimensions, for example, a random vector instead of a random
+  The concepts in the preceding topics generalize to more dimensions, for example, a random vector instead of a random
   variable, or an :math:`\mathbb{R}^d`-valued stochastic process. A detailed discussion of these generalizations can be
   found in [1]_ and [2]_.
 
@@ -111,14 +111,13 @@ Series expansion of stochastic processes
 ----------------------------------------
 Since a stochastic process involves an infinite number of random variables, most engineering applications
 involving stochastic processes are mathematically and computationally intractable if there isn't a way of
-approximating them with a series of a finite number of random variables. The next section explains
+approximating them with a series of a finite number of random variables. The next topic explains
 the series expansion method used in this example.
 
 Karhunen-Loève (K-L) series expansion for a Gaussian process
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 The K-L expansion of any process is based on a spectral decomposition of its covariance function. Analytical
 solutions are possible in a few cases, and such is the case of a Gaussian process.
-
 
 For a zero-mean stationary Gaussian process, :math:`X(t)`, with covariance function
 :math:`C_X(t_i,t_j)=\sigma_X^2e^{-\frac{\lvert t_i-t_j \rvert}{b}}` defined on a symmetric domain :math:`\mathbb{D}=[-a,a]`,
@@ -168,7 +167,7 @@ It is worth mentioning that :math:`\lambda` and :math:`\omega` in the series exp
   .. math:: X(t) = \sum_{n=1}^\infty \sqrt{\lambda_{c,n}}\cdot\varphi_{c,n}(t-T)\cdot\xi_{c,n} + \sum_{n=1}^\infty \sqrt{\lambda_{s,n}}\cdot\varphi_{s,n}(t-T)\cdot\xi_{s,n},\quad t\in\mathbb{D}
 
 The K-L expansion of a Gaussian process has the property that :math:`\xi_{c,n}` and :math:`\xi_{s,n}` are independent
-standard normal variables, that is they follow the :math:`\mathcal{N}(0,1)` distribution. The other great property is
+standard normal variables, that is they follow the :math:`\mathcal{N}(0,1)` distribution. Another property is
 that :math:`\lambda_{c,n}` and :math:`\lambda_{s,n}` converge to zero fast (in the mean square sense). For practical implementation,
 this means that the infinite series of the K-L expansion is truncated after a finite number of terms, giving the approximation:
 
@@ -223,17 +222,17 @@ random field given by this expression:
 
 .. math:: E(x) = 10^5(1+0.10f(x)) (kN/m^2)
 
-with :math:`f(x)` being a zero mean stationary Gaussian field with unit variance. The covariance function for :math:`f` is :math:`C_f(x_r,x_s)=e^{-\frac{\lvert x_r-x_s \rvert}{3}}`.
+Here :math:`f(x)` is a zero mean stationary Gaussian field with unit variance. The covariance function for :math:`f` is :math:`C_f(x_r,x_s)=e^{-\frac{\lvert x_r-x_s \rvert}{3}}`.
 
 1. Using the K-L series expansion, generate 5000 realizations for :math:`E(x)` and perform Monte 
    Carlo simulation to determine the PDF of the response :math:`u`, at the bottom right corner 
    of the cantilever. 
 
 2. If some design code stipulates that the displacement :math:`u` must not exceed :math:`0.2 \: m`, how confident can
-   one be that the structure meets this requirement?
+   you be that the structure meets this requirement?
 
 .. note::
-  This example strongly emphasizes how PyMAPDL can help to supercharge workflows. At a very high level, subsequent sections 
+  This example strongly emphasizes how PyMAPDL can help to supercharge workflows. At a very high level, subsequent topics
   use Python libraries to handle computations related to the stochasticity of the problem and use MAPDL to
   run the necessary simulations all within the comfort of a Python environment.
 
@@ -343,16 +342,16 @@ Running the simulations
 Focus now shifts to the PyMAPDL part of this example. Remember that the problem requires running 5000 simulations. Therefore,
 you must write a workflow that performs these actions:
 
-1. Create the geometry of the cantilever model.
+#. Create the geometry of the cantilever model.
 
-2. Mesh the model. The following code uses the four-node PLANE182 elements.
+#. Mesh the model. The following code uses the four-node PLANE182 elements.
 
-3. For each simulation, generate one realization of :math:`E` and one sample of :math:`P`.
+#. For each simulation, generate one realization of :math:`E` and one sample of :math:`P`.
 
-4. For each simulation, loop through the elements and for each element, use the generated 
+#. For each simulation, loop through the elements and for each element, use the generated 
    realization to assign the value of the Young's modulus. Also assign the load for each simulation.
 
-5. Solve the model and store :math:`u` for each simulation.
+#. Solve the model and store :math:`u` for each simulation.
 
 .. note::
   One realization continuously varies with :math:`x`, but a plane stress element like PLANE182 can only have a constant
@@ -375,7 +374,7 @@ You can pass the required arguments to the defined function to run the simulatio
 
 Answering problem questions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
-To determine the PDF of the response :math:`u`, you can perform a statistical post-processing of
+To determine the PDF of the response :math:`u`, you can perform a statistical postprocessing of
 simulation results:
 
 .. literalinclude:: sfem.py
@@ -384,9 +383,10 @@ simulation results:
 
 .. figure:: pdf.png
 
-   The PDF of response :math:`u`
+   The PDF of response :math:`u`.
 
-To answer the second question, simply evaluate the probability that the response :math:`u` is less than
+To determine whether the structure meets the requirement of the design code, simply evaluate the
+probability that the response :math:`u` is less than
 :math:`0.2 \: m`:
 
 .. literalinclude:: sfem.py
@@ -420,7 +420,7 @@ To run simulations over 10 MAPDL instances, call the preceding function with app
 The simulations are completed much faster.
 
 .. tip::
-   In a local test, using the MapdlPool approach (with 10 MAPDL instances) takes about 38 minutes to run, while a single instance runs 
+   In a local test, using the ``MapdlPool`` approach (with 10 MAPDL instances) takes about 38 minutes to run, while a single instance runs 
    for about 3 hours. The simulation speed depends on a multitude of factors, but this comparison provides an idea of the speed
    gain to expect when using multiple instances.
 
