@@ -269,6 +269,8 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
             mapdl = Mapdl(port=port, ip=ip)
 
         except MapdlConnectionError as err:
+            from conftest import DEBUG_TESTING, ON_LOCAL
+
             # Registering error.
             LOG.info(str(err))
 
@@ -285,7 +287,12 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
                 override=True,
                 run_location=mapdl._path,
                 cleanup_on_exit=mapdl._cleanup,
-                log_apdl=log_apdl(),
+                license_server_check=False,
+                start_timeout=50,
+                loglevel="DEBUG" if DEBUG_TESTING else "ERROR",
+                # If the following file names are changed, update `ci.yml`.
+                log_apdl="pymapdl.apdl" if DEBUG_TESTING else None,
+                mapdl_output="apdl.out" if (DEBUG_TESTING and ON_LOCAL) else None,
             )
 
         LOG.info("Successfully re-connected to MAPDL")
