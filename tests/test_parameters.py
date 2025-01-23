@@ -410,7 +410,7 @@ def test_3d_array(mapdl, cleared):
 def test_parameter_with_spaces(mapdl, cleared):
     string_ = "DEV:F10X, front weights     "
     mapdl.run(f"*SET,SIMULATION,'{string_}'")
-    mapdl.parsav()
+    mapdl.parsav("all", fname="file", ext="parm")
     mapdl.clear()
     mapdl.parres("NEW", fname="file", ext="parm")
     assert mapdl.starstatus()
