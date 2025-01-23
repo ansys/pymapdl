@@ -654,7 +654,8 @@ def test_generic_grpc_exception(monkeypatch, grpc_channel):
         # passing mapdl to simulate the function `_raise_error_code` to be a method.
         mapdl.prep7(mapdl)
 
-    assert mapdl.is_alive
+    assert not mapdl.is_alive
+    mapdl._exited = False
 
 
 def test_generic_grpc_exception_exited(monkeypatch, grpc_channel):
