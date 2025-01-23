@@ -103,6 +103,24 @@ _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*The distributed memory parallel solution does not support KRYLOV method",
 ]
 
+_TMP_COMP = {
+    "KP": "cmp_kp",
+    "LINE": "cmp_line",
+    "AREA": "cmp_area",
+    "VOLU": "cmp_volu",
+    "NODE": "cmp_node",
+    "ELEM": "cmp_elem",
+}
+
+ENTITIES_TO_SELECTION_MAPPING = {
+    "KP": "ksel",
+    "LINE": "lsel",
+    "AREA": "asel",
+    "VOLU": "vsel",
+    "NODE": "nsel",
+    "ELEM": "esel",
+}
+
 # test for png file
 PNG_IS_WRITTEN_TO_FILE = re.compile(
     "WRITTEN TO FILE"
@@ -1434,32 +1452,39 @@ class _MapdlCore(Commands):
 
             # Storing components
             selection = {
-                "cmsel": mapdl.components.names,
-                # "components_type": mapdl.components.types,
-                "nsel": mapdl.mesh.nnum,
-                "esel": mapdl.mesh.enum,
-                "ksel": mapdl.geometry.knum,
-                "lsel": mapdl.geometry.lnum,
-                "asel": mapdl.geometry.anum,
-                "vsel": mapdl.geometry.vnum,
+                "cmsel": mapdl.components._comp,
             }
+            id_ = random_string(5)
+            for each_type, each_name in _TMP_COMP.items():
+                each_name = f"__{each_name}{id_}__"
+                selection[each_type] = each_name
+                mapdl.cm(each_name, each_type)
 
             self.selection.append(selection)
 
         def __exit__(self, *args):
             self._parent()._log.debug("Exiting saving selection context")
-            selection = self.selection.pop()
-            mapdl = self._parent()
 
+            mapdl = self._parent()
+            mapdl.allsel()
+            mapdl.cmsel("None")
+
+            selection = self.selection.pop()
             cmps = selection.pop("cmsel")
 
             if cmps:
-                mapdl.components.select(cmps)
+                for each_name, each_value in cmps.items():
+                    mapdl.cmsel("a", each_name, each_value)
 
-            for select_cmd, ids in selection.items():
-                if ids.size > 0:
-                    func = getattr(mapdl, select_cmd)
-                    func(vmin=ids)
+            for each_type, each_name in selection.items():
+                mapdl.cmsel("a", each_name, each_type)
+
+                selfun = getattr(
+                    mapdl, ENTITIES_TO_SELECTION_MAPPING[each_type.upper()]
+                )
+                selfun("s", vmin=each_name)
+
+                mapdl.cmdele(each_name)
 
     class _chain_commands:
         """Store MAPDL commands and send one chained command."""
