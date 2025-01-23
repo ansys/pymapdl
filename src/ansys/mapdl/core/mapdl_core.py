@@ -1321,6 +1321,10 @@ class _MapdlCore(Commands):
                     return self.geometry.anum
                 elif name == "VSEL":
                     return self.geometry.vnum
+                elif name == "ESLN":
+                    return self.mesh.enum
+                elif name == "NSLE":
+                    return self.mesh.nnum
                 else:
                     return None
 
@@ -1396,7 +1400,10 @@ class _MapdlCore(Commands):
             self._parent = weakref.ref(parent)
 
         def __enter__(self):
-            self._parent()._log.debug("Entering non-interactive mode")
+            self._parent()._log.debug("Entering in non-interactive mode")
+            if self._parent().logger.logger.level <= logging.DEBUG:
+                # only commenting if on debug mode
+                self._parent().com("Entering in non_interactive mode")
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
@@ -2283,6 +2290,7 @@ class _MapdlCore(Commands):
         self._before_run(command)
 
         short_cmd = parse_to_short_cmd(command)
+        self._log.debug(f"Running (verbose: {verbose}, mute={mute}): '{command}'")
         text = self._run(command, verbose=verbose, mute=mute)
 
         if (
@@ -2913,6 +2921,7 @@ class _MapdlCore(Commands):
             self._platform = "windows"
         else:  # pragma: no cover
             raise MapdlRuntimeError("Unknown platform: {}".format(platform))
+        self.logger.debug(f"MAPDL is running on {self._platform} OS.")
 
     def _check_on_docker(self):
         """Check if MAPDL is running on docker."""

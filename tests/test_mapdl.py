@@ -23,6 +23,7 @@
 """Test MAPDL interface"""
 from datetime import datetime
 from importlib import reload
+import logging
 import os
 from pathlib import Path
 import re
@@ -2219,7 +2220,7 @@ def test_inquire_invalid(mapdl, cleared):
 
 def test_inquire_default(mapdl, cleared):
     mapdl.title("heeeelloo")
-    assert Path(mapdl.directory) == Path(mapdl.inquire())
+    assert str(Path(mapdl.directory)) == str(Path(mapdl.inquire()))
 
 
 def test_vwrite_error(mapdl, cleared):
@@ -2592,3 +2593,19 @@ def test_max_cmd_len_mapdlgrpc(mapdl):
     ):
         cmd = "a" * 640
         mapdl._run(cmd)
+
+
+def test_comment_on_debug_mode(mapdl, cleared):
+    loglevel = mapdl.logger.logger.level
+
+    mapdl.logger.logger.level = logging.ERROR
+    with patch("ansys.mapdl.core.Mapdl.com") as mockcom:
+        mapdl.parameters["asdf"] = [1, 2, 3]
+    mockcom.assert_not_called()
+
+    mapdl.logger.logger.level = logging.DEBUG
+    with patch("ansys.mapdl.core.Mapdl.com") as mockcom:
+        mapdl.parameters["asdf"] = [1, 2, 3]
+    mockcom.assert_called_once_with("Entering in non_interactive mode")
+
+    mapdl.logger.logger.level = loglevel
