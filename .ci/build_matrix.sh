@@ -101,8 +101,8 @@ for version in "${versions[@]}"; do
     fi
 
     # Skipping if on remote and on student
-    if [[ "$ON_STUDENT" == "true" && "$ON_REMOTE" == "true" ]]; then
-        echo "Skipping student versions when running on remote"
+    if [[ "$ON_STUDENT" != "true" && "$ON_REMOTE" == "true" ]]; then
+        echo "Skipping non-student versions when running on remote"
         echo ""
         continue
     fi
