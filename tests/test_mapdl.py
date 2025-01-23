@@ -1542,9 +1542,20 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
 
     mapdl.post1()
     # this file should exist remotely
-    rst_file_name = "file.rst"
-    assert rst_file_name in mapdl.list_files()
+    rst_file_name = mapdl.result_file
+    if not rst_file_name in mapdl.list_files():
+        mapdl.solution()
+        mapdl.solve()
 
+        mapdl.finish()
+        mapdl.save()
+
+    rst_file_name = os.path.basename(rst_file_name)
+    assert (
+        rst_file_name in mapdl.list_files()
+    ), f"File {os.path.basename(rst_file_name)} is not in {mapdl.list_files()}"
+
+    mapdl.post1()
     mapdl.file(rst_file_name)  # checking we can read it.
 
     with pytest.raises(FileNotFoundError):
