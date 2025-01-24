@@ -731,7 +731,7 @@ class MapdlPlotter(Plotter):
         """
 
         if not meshes and not points and not labels:
-            raise ValueError("Nothing to plot.")
+            return
 
         # Getting the plotter
         self.add_mesh(
