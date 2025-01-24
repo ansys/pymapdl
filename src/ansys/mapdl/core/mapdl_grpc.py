@@ -145,7 +145,7 @@ SERVICE_DEFAULT_CONFIG = {
 
 def get_start_instance(*args, **kwargs) -> bool:
     """Wraps get_start_instance to avoid circular imports"""
-    from ansys.mapdl.core.launcher import get_start_instance
+    from ansys.mapdl.core.launcher.tools import get_start_instance
 
     return get_start_instance(*args, **kwargs)
 
@@ -420,9 +420,8 @@ class MapdlGrpc(MapdlBase):
         self.remove_temp_dir_on_exit: bool = remove_temp_dir_on_exit
         self._jobname: str = start_parm.get("jobname", "file")
         self._path: Optional[str] = start_parm.get("run_location", None)
-        self._start_instance: Optional[str] = (
-            start_parm.get("start_instance") or get_start_instance()
-        )
+        self._start_instance: Optional[str] = start_parm.get("start_instance")
+
         self._busy: bool = False  # used to check if running a command on the server
         self._local: bool = start_parm.get("local", True)
         self._launched: bool = start_parm.get("launched", True)
@@ -523,7 +522,7 @@ class MapdlGrpc(MapdlBase):
             self._create_session()
 
     def _create_process_stds_queue(self, process=None):
-        from ansys.mapdl.core.launcher import (
+        from ansys.mapdl.core.launcher.tools import (
             _create_queue_for_std,  # Avoid circular import error
         )
 
@@ -651,7 +650,7 @@ class MapdlGrpc(MapdlBase):
 
     def _read_stds(self):
         """Read the stdout and stderr from the subprocess."""
-        from ansys.mapdl.core.launcher import (
+        from ansys.mapdl.core.launcher.tools import (
             _get_std_output,  # Avoid circular import error
         )
 
@@ -890,7 +889,8 @@ class MapdlGrpc(MapdlBase):
             raise MapdlRuntimeError(
                 "Can only launch the GUI with a local instance of MAPDL"
             )
-        from ansys.mapdl.core.launcher import generate_mapdl_launch_command, launch_grpc
+        from ansys.mapdl.core.launcher.grpc import launch_grpc
+        from ansys.mapdl.core.launcher.tools import generate_mapdl_launch_command
 
         self._exited = False  # reset exit state
 
@@ -3804,8 +3804,7 @@ class MapdlGrpc(MapdlBase):
             Job ID.
         """
         cmd = ["scancel", f"{jobid}"]
-        # to ensure the job is stopped properly, let's issue the scancel twice.
-        subprocess.Popen(cmd)
+        subprocess.Popen(cmd)  # nosec B603
 
     def __del__(self):
         """In case the object is deleted"""
@@ -3825,6 +3824,6 @@ class MapdlGrpc(MapdlBase):
             if not self._start_instance:
                 return
 
-        except Exception as e:
+        except Exception as e:  # nosec B110
             # This is on clean up.
-            pass
+            pass  # nosec B110
