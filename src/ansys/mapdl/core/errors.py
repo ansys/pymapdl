@@ -461,12 +461,8 @@ def handle_generic_grpc_error(
 
     else:
         # Making sure we do not keep executing gRPC calls.
-        mapdl._exited = True
-        mapdl._exiting = True
-
         # Must close unfinished processes
-        mapdl._close_process()
-        mapdl._exiting = False
+        mapdl.exit()
         raise MapdlExitedError(msg)
 
 
