@@ -332,7 +332,7 @@ class MapdlPlotter(Plotter):
             Extra kwargs, by default {}
         """
         if not meshes and not points and not labels:
-            raise ValueError("Nothing to plot.")
+            return
 
         if theme is None:
             theme = MapdlTheme()
@@ -403,11 +403,6 @@ class MapdlPlotter(Plotter):
             else:
                 scalars = None
                 mesh_ = meshes
-            print(
-                mesh.get("color")
-                if isinstance(mesh, Dict) and "color" in mesh
-                else color
-            )
             for each_mesh in mesh_:
                 self.scene.add_mesh(
                     each_mesh,
@@ -729,9 +724,6 @@ class MapdlPlotter(Plotter):
         name_filter : str, optional
             Filter to apply to the object. The default is ``None``.
         """
-
-        if not meshes and not points and not labels:
-            return
 
         # Getting the plotter
         self.add_mesh(
