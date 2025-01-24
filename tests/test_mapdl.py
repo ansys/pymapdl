@@ -30,7 +30,7 @@ import re
 import shutil
 import tempfile
 import time
-from unittest.mock import patch
+from unittest.mock import PropertyMock, patch
 from warnings import catch_warnings
 
 import grpc
@@ -1952,20 +1952,43 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
 
 
 @pytest.mark.parametrize("save", [None, True, False])
-@patch("ansys.mapdl.core.Mapdl.save")
-@patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._exit_mapdl")
-def test_save_on_exit(mck_exit, mck_save, mapdl, cleared, save):
+def test_save_on_exit(mapdl, cleared, save):
 
-    mck_exit.return_value = None
+    with (
+        patch.object(mapdl, "_exit_mapdl") as mock_exit,
+        patch.object(mapdl, "save") as mock_save,
+    ):
 
-    mapdl.exit(save=save)
+        mock_exit.return_value = None
+        mock_save.return_value = None
+
+        mapdl.exit(save=save, force=True)
+
+        mock_exit.assert_called_once()
+        if save:
+            mock_save.assert_called_once()
+        else:
+            mock_save.assert_not_called()
+
+    assert mapdl.exited
+    assert mapdl._exited
+    exited = mapdl._exited
+
+    with (
+        patch.object(mapdl, "_run") as mock_run,
+        patch.object(mapdl, "_exited") as mock__exited,
+    ):
+
+        mock__exited.return_value = exited
+
+        with pytest.raises(MapdlExitedError):
+            mapdl.prep7()
+
+        mock_run.assert_not_called()
+
     mapdl._exited = False  # avoiding set exited on the class.
 
-    if save:
-        mck_save.assert_called_once()
-    else:
-        mck_save.assert_not_called()
-
+    # Making sure we have the instance ready
     assert mapdl.prep7()
 
 
@@ -2722,3 +2745,48 @@ def test_comment_on_debug_mode(mapdl, cleared):
     mockcom.assert_called_once_with("Entering in non_interactive mode")
 
     mapdl.logger.logger.level = loglevel
+
+
+@patch("ansys.mapdl.core.errors.N_ATTEMPTS", 2)
+@patch("ansys.mapdl.core.errors.MULTIPLIER_BACKOFF", 1)
+def test_timeout_when_exiting(mapdl):
+    from ansys.mapdl.core import errors
+
+    def raise_exception(*args, **kwargs):
+        from grpc import RpcError
+
+        e = RpcError("My patched error")
+        e.code = lambda: grpc.StatusCode.ABORTED
+        e.details = lambda: "My gRPC error details"
+
+        raise e
+
+    handle_generic_grpc_error = errors.handle_generic_grpc_error
+    with (
+        patch("ansys.mapdl.core.mapdl_grpc.pb_types.CmdRequest") as mock_cmdrequest,
+        patch(
+            "ansys.mapdl.core.mapdl_grpc.MapdlGrpc.is_alive", new_callable=PropertyMock
+        ) as mock_is_alive,
+        patch.object(mapdl, "_connect") as mock_connect,
+        patch(
+            "ansys.mapdl.core.errors.handle_generic_grpc_error", autospec=True
+        ) as mock_handle,
+    ):
+
+        mock_is_alive.return_value = False
+        mock_connect.return_value = None  # patched to avoid timeout
+        mock_cmdrequest.side_effect = raise_exception
+        mock_handle.side_effect = handle_generic_grpc_error
+
+        with pytest.raises(MapdlExitedError):
+            mapdl.prep7()
+
+        # After
+        assert mapdl._exited
+
+        mock_connect.call_count == errors.N_ATTEMPTS
+        mock_cmdrequest.call_count == errors.N_ATTEMPTS + 1
+        mock_handle.call_count == 1
+        mock_is_alive.call_count == errors.N_ATTEMPTS + 2
+
+        mapdl._exited = False

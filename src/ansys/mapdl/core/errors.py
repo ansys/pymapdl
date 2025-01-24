@@ -33,6 +33,11 @@ from ansys.mapdl.core import LOG as logger
 
 SIGINT_TRACKER: List = []
 
+# Configuration of 'protect_grpc' wrapper
+N_ATTEMPTS = 5
+INITIAL_BACKOFF = 0.1
+MULTIPLIER_BACKOFF = 2
+
 
 LOCKFILE_MSG: str = """
 Another ANSYS job with the same job name is already running in this
@@ -307,9 +312,9 @@ def protect_grpc(func: Callable) -> Callable:
                 old_handler = signal.signal(signal.SIGINT, handler)
 
         # Capture gRPC exceptions
-        n_attempts = 5
-        initial_backoff = 0.1
-        multiplier_backoff = 2
+        n_attempts = kwargs.get("n_attempts", N_ATTEMPTS)
+        initial_backoff = kwargs.get("initial_backoff", INITIAL_BACKOFF)
+        multiplier_backoff = kwargs.get("multiplier_backoff", MULTIPLIER_BACKOFF)
 
         i_attemps = 0
 
@@ -321,7 +326,6 @@ def protect_grpc(func: Callable) -> Callable:
                 break
 
             except grpc.RpcError as error:
-
                 mapdl = retrieve_mapdl_from_args(args)
                 mapdl._log.debug("A gRPC error has been detected.")
 
@@ -331,14 +335,16 @@ def protect_grpc(func: Callable) -> Callable:
                     wait = (
                         initial_backoff * multiplier_backoff**i_attemps
                     )  # Exponential backoff
-                    sleep(wait)
 
                     # reconnect
                     mapdl._log.debug(
                         f"Re-connection attempt {i_attemps} after waiting {wait:0.3f} seconds"
                     )
 
-                    connected = mapdl._connect(timeout=wait)
+                    if not mapdl.is_alive:
+                        connected = mapdl._connect(timeout=wait)
+                    else:
+                        sleep(wait)
 
                     # Retry again
                     continue
