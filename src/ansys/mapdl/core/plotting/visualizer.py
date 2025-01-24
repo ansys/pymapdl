@@ -22,7 +22,7 @@
 
 """Module for the MapdlPlotter class."""
 from collections import OrderedDict
-from typing import Any, Iterable, Optional, Union
+from typing import Any, Dict, Iterable, Optional, Union
 
 from ansys.tools.visualization_interface import Plotter
 from ansys.tools.visualization_interface.backends.pyvista import PyVistaBackendInterface
@@ -280,9 +280,9 @@ class MapdlPlotter(Plotter):
 
     def add_mesh(
         self,
-        meshes,
-        points,
-        labels,
+        meshes: Union[pv.PolyData, Dict[str, Any]] = [],
+        points=[],
+        labels=[],
         *,
         cpos=None,
         show_bounds=False,
@@ -331,6 +331,9 @@ class MapdlPlotter(Plotter):
         plotter_kwargs : dict, optional
             Extra kwargs, by default {}
         """
+        if not meshes and not points and not labels:
+            raise ValueError("Nothing to plot.")
+
         if theme is None:
             theme = MapdlTheme()
 
@@ -378,31 +381,48 @@ class MapdlPlotter(Plotter):
                 **(add_points_kwargs or {}),
             )
 
+        if isinstance(meshes, pv.PolyData):
+            meshes = [meshes]
         for mesh in meshes:
-            scalars: Optional[NDArray[Any]] = mesh.get("scalars")
+            rgb = False
+            if isinstance(mesh, Dict):
+                scalars: Optional[NDArray[Any]] = mesh.get("scalars")
 
-            if (
-                "scalars" in mesh
-                and scalars.ndim == 2
-                and (scalars.shape[1] == 3 or scalars.shape[1] == 4)
-            ):
-                # for the case we are using scalars for plotting
-                rgb = True
+                if (
+                    "scalars" in mesh
+                    and scalars.ndim == 2
+                    and (scalars.shape[1] == 3 or scalars.shape[1] == 4)
+                ):
+                    # for the case we are using scalars for plotting
+                    rgb = True
+
+                # To avoid index error.
+                mesh_ = mesh["mesh"]
+                if not isinstance(mesh_, list):
+                    mesh_ = [mesh_]
             else:
-                rgb = False
-
-            # To avoid index error.
-            mesh_ = mesh["mesh"]
-            if not isinstance(mesh_, list):
-                mesh_ = [mesh_]
-
+                scalars = None
+                mesh_ = meshes
+            print(
+                mesh.get("color")
+                if isinstance(mesh, Dict) and "color" in mesh
+                else color
+            )
             for each_mesh in mesh_:
                 self.scene.add_mesh(
                     each_mesh,
                     scalars=scalars,
                     scalar_bar_args=scalar_bar_args,
-                    color=mesh.get("color", color),
-                    style=mesh.get("style", style),
+                    color=(
+                        mesh.get("color", color)
+                        if isinstance(mesh, Dict) and "color" in mesh
+                        else color
+                    ),
+                    style=(
+                        mesh.get("style", style)
+                        if isinstance(mesh, Dict) and "style" in mesh
+                        else style
+                    ),
                     show_edges=show_edges,
                     edge_color=edge_color,
                     smooth_shading=smooth_shading,
@@ -651,9 +671,9 @@ class MapdlPlotter(Plotter):
 
     def plot(
         self,
-        meshes,
-        points,
-        labels,
+        meshes: Union[pv.PolyData, Dict[str, Any]] = [],
+        points=[],
+        labels=[],
         *,
         title="",
         cpos=None,
@@ -709,6 +729,9 @@ class MapdlPlotter(Plotter):
         name_filter : str, optional
             Filter to apply to the object. The default is ``None``.
         """
+
+        if not meshes and not points and not labels:
+            raise ValueError("Nothing to plot.")
 
         # Getting the plotter
         self.add_mesh(
