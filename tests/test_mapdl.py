@@ -2771,8 +2771,10 @@ def test_timeout_when_exiting(mapdl):
         patch(
             "ansys.mapdl.core.errors.handle_generic_grpc_error", autospec=True
         ) as mock_handle,
+        patch.object(mapdl, "_exit_mapdl") as mock_exit_mapdl,
     ):
 
+        mock_exit_mapdl.return_value = None  # Avoid exiting
         mock_is_alive.return_value = False
         mock_connect.return_value = None  # patched to avoid timeout
         mock_cmdrequest.side_effect = raise_exception
@@ -2784,10 +2786,10 @@ def test_timeout_when_exiting(mapdl):
         # After
         assert mapdl._exited
 
+        assert mock_handle.call_count == 1
         assert mock_connect.call_count == errors.N_ATTEMPTS
         assert mock_cmdrequest.call_count == errors.N_ATTEMPTS + 1
-        assert mock_handle.call_count == 1
-        assert mock_is_alive.call_count == errors.N_ATTEMPTS + 2
+        assert mock_is_alive.call_count == errors.N_ATTEMPTS + 1
 
         mapdl._exited = False
 
