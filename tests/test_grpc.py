@@ -588,7 +588,7 @@ def test__check_stds(mapdl):
 
     process = subprocess.Popen(
         ["bash", "-c", cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    )
+    )  # nosec B603 B607
 
     if not hasattr(mapdl, "_stdout_queue"):
         mapdl._stdout_queue = None
@@ -596,9 +596,10 @@ def test__check_stds(mapdl):
         mapdl._stdout_thread = None
 
     with (
-        patch.object(mapdl, "_stdout_queue") as mock_stdout_queue,
-        patch.object(mapdl, "_stdout_thread") as mock_stdout_thread,
-        patch.object(mapdl, "_mapdl_process") as mock_mapdl_process,
+        # To avoid overwriting the values for the rest of the tests.
+        patch.object(mapdl, "_stdout_queue"),
+        patch.object(mapdl, "_stdout_thread"),
+        patch.object(mapdl, "_mapdl_process"),
         patch(
             "ansys.mapdl.core.launcher._get_std_output", autospec=True
         ) as mock_get_std_output,
@@ -629,7 +630,7 @@ def test__check_stds(mapdl):
 
 
 @requires("grpc")
-@requires("linux")
+@requires("nowindows")  # since we are using bash
 def test__post_mortem_checks(mapdl):
     """Test that the standard input is checked."""
     from ansys.mapdl.core.launcher import _get_std_output
@@ -656,9 +657,10 @@ done
         mapdl._stdout_thread = None
 
     with (
-        patch.object(mapdl, "_stdout_queue") as mock_stdout_queue,
-        patch.object(mapdl, "_stdout_thread") as mock_stdout_thread,
-        patch.object(mapdl, "_mapdl_process") as mock_mapdl_process,
+        # To avoid overwriting the values for the rest of the tests.
+        patch.object(mapdl, "_stdout_queue"),
+        patch.object(mapdl, "_stdout_thread"),
+        patch.object(mapdl, "_mapdl_process"),
         patch(
             "ansys.mapdl.core.launcher._get_std_output", autospec=True
         ) as mock_get_std_output,

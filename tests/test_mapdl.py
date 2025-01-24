@@ -2784,9 +2784,9 @@ def test_timeout_when_exiting(mapdl):
         # After
         assert mapdl._exited
 
-        mock_connect.call_count == errors.N_ATTEMPTS
-        mock_cmdrequest.call_count == errors.N_ATTEMPTS + 1
-        mock_handle.call_count == 1
-        mock_is_alive.call_count == errors.N_ATTEMPTS + 2
+        assert mock_connect.call_count == errors.N_ATTEMPTS
+        assert mock_cmdrequest.call_count == errors.N_ATTEMPTS + 1
+        assert mock_handle.call_count == 1
+        assert mock_is_alive.call_count == errors.N_ATTEMPTS + 2
 
         mapdl._exited = False
