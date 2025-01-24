@@ -2802,8 +2802,8 @@ def test_timeout_when_exiting(mapdl):
         ("modopt", None),
     ),
 )
-def test_none_as_argument(mapdl, cmd, arg):
-    with patch.object(mapdl, "_run") as mock_run:
+def test_none_as_argument(mapdl, make_block, cmd, arg):
+    with patch.object(mapdl, "_run", autospec=True) as mock_run:
         func = getattr(mapdl, cmd)
         out = func(arg)
 
