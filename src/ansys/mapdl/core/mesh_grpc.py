@@ -105,12 +105,12 @@ class MeshGrpc:
         """Returns True when has nodes"""
         # if isinstance(self._nodes, np.ndarray):
         # return bool(self._nodes.size)
-        return self._mapdl.get_value(entity="nodes", item1="count") != 0
+        return self.nodes.size != 0
 
     @property
     def _has_elements(self):
         """Returns True when geometry has elements"""
-        return self._mapdl.get_value(entity="elem", item1="count") != 0
+        return self._elem.size != 0
 
     def _set_log_level(self, level):
         """Wraps set_log_level"""
