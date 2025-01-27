@@ -2722,3 +2722,36 @@ def test_comment_on_debug_mode(mapdl, cleared):
     mockcom.assert_called_once_with("Entering in non_interactive mode")
 
     mapdl.logger.logger.level = loglevel
+
+
+@pytest.mark.parametrize(
+    "cmd,arg",
+    (
+        ("block", None),
+        ("nsel", None),
+        ("modopt", None),
+    ),
+)
+def test_none_as_argument(mapdl, cmd, arg):
+    with patch.object(mapdl, "_run") as mock_run:
+        func = getattr(mapdl, cmd)
+        out = func(arg)
+
+        if "sel" in cmd:
+            assert isinstance(out, np.ndarray)
+            assert len(out) == 0
+
+        cmd = mock_run.call_args.args[0]
+
+        assert isinstance(cmd, str)
+        assert "NONE" in cmd.upper()
+
+
+@pytest.mark.parametrize("func", ["ksel", "lsel", "asel", "vsel"])
+def test_none_on_selecting(mapdl, cleared, func):
+    mapdl.block(0, 1, 0, 1, 0, 1)
+
+    selfunc = getattr(mapdl, func)
+
+    assert len(selfunc("all")) > 0
+    assert len(selfunc(None)) == 0
