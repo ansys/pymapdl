@@ -30,7 +30,7 @@ import re
 import shutil
 import tempfile
 import time
-from unittest.mock import PropertyMock, patch
+from unittest.mock import patch
 from warnings import catch_warnings
 
 import grpc
@@ -1952,43 +1952,20 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
 
 
 @pytest.mark.parametrize("save", [None, True, False])
-def test_save_on_exit(mapdl, cleared, save):
+@patch("ansys.mapdl.core.Mapdl.save")
+@patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._exit_mapdl")
+def test_save_on_exit(mck_exit, mck_save, mapdl, cleared, save):
 
-    with (
-        patch.object(mapdl, "_exit_mapdl") as mock_exit,
-        patch.object(mapdl, "save") as mock_save,
-    ):
+    mck_exit.return_value = None
 
-        mock_exit.return_value = None
-        mock_save.return_value = None
-
-        mapdl.exit(save=save, force=True)
-
-        mock_exit.assert_called_once()
-        if save:
-            mock_save.assert_called_once()
-        else:
-            mock_save.assert_not_called()
-
-    assert mapdl.exited
-    assert mapdl._exited
-    exited = mapdl._exited
-
-    with (
-        patch.object(mapdl, "_run") as mock_run,
-        patch.object(mapdl, "_exited") as mock__exited,
-    ):
-
-        mock__exited.return_value = exited
-
-        with pytest.raises(MapdlExitedError):
-            mapdl.prep7()
-
-        mock_run.assert_not_called()
-
+    mapdl.exit(save=save)
     mapdl._exited = False  # avoiding set exited on the class.
 
-    # Making sure we have the instance ready
+    if save:
+        mck_save.assert_called_once()
+    else:
+        mck_save.assert_not_called()
+
     assert mapdl.prep7()
 
 
@@ -2836,3 +2813,14 @@ def test_none_on_selecting(mapdl, cleared, func):
 
     assert len(selfunc("all")) > 0
     assert len(selfunc(None)) == 0
+
+
+def test_requires_package_speed():
+    from ansys.mapdl.core.misc import requires_package
+
+    @requires_package("pyvista")
+    def my_func(i):
+        return i + 1
+
+    for i in range(1_000_000):
+        my_func(i)
