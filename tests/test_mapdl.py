@@ -2836,3 +2836,14 @@ def test_none_on_selecting(mapdl, cleared, func):
 
     assert len(selfunc("all")) > 0
     assert len(selfunc(None)) == 0
+
+
+def test_requires_package_speed():
+    from ansys.mapdl.core.misc import requires_package
+
+    @requires_package("pyvista")
+    def my_func(i):
+        return i + 1
+
+    for i in range(1_000_000):
+        my_func(i)
