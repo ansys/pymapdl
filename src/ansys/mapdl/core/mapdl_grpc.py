@@ -1197,7 +1197,7 @@ class MapdlGrpc(MapdlBase):
 
             self._close_process()
 
-            self._remove_lock_file(path)
+            self._remove_lock_file(path, use_cached=True)
         else:
             self._exit_mapdl_server()
 
@@ -1360,17 +1360,24 @@ class MapdlGrpc(MapdlBase):
 
         self._log.debug(f"Recaching PIDs: {self._pids}")
 
-    def _remove_lock_file(self, mapdl_path=None):
+    def _remove_lock_file(
+        self, mapdl_path: str = None, jobname: str = None, use_cached: bool = False
+    ):
         """Removes the lock file.
 
         Necessary to call this as a segfault of MAPDL or exit(0) will
         not remove the lock file.
         """
+        if jobname is None and use_cached:
+            jobname = self._jobname
+        elif jobname is None:
+            jobname = self.jobname
+
         self._log.debug("Removing lock file after exit.")
         if mapdl_path is None:  # pragma: no cover
             mapdl_path = self.directory
         if mapdl_path:
-            for lockname in [self.jobname + ".lock", "file.lock"]:
+            for lockname in [jobname + ".lock", "file.lock"]:
                 lock_file = os.path.join(mapdl_path, lockname)
                 if os.path.isfile(lock_file):
                     try:
@@ -3804,6 +3811,7 @@ class MapdlGrpc(MapdlBase):
             Job ID.
         """
         cmd = ["scancel", f"{jobid}"]
+        # to ensure the job is stopped properly, let's issue the scancel twice.
         subprocess.Popen(cmd)  # nosec B603
 
     def __del__(self):
