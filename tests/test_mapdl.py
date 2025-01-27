@@ -2749,7 +2749,8 @@ def test_comment_on_debug_mode(mapdl, cleared):
 
 @patch("ansys.mapdl.core.errors.N_ATTEMPTS", 2)
 @patch("ansys.mapdl.core.errors.MULTIPLIER_BACKOFF", 1)
-def test_timeout_when_exiting(mapdl):
+@pytest.mark.parametrize("is_exited", [True, False])
+def test_timeout_when_exiting(mapdl, is_exited):
     from ansys.mapdl.core import errors
 
     def raise_exception(*args, **kwargs):
@@ -2759,9 +2760,13 @@ def test_timeout_when_exiting(mapdl):
         e.code = lambda: grpc.StatusCode.ABORTED
         e.details = lambda: "My gRPC error details"
 
+        # Simulating MAPDL exiting by force
+        mapdl._exited = is_exited
+
         raise e
 
     handle_generic_grpc_error = errors.handle_generic_grpc_error
+
     with (
         patch("ansys.mapdl.core.mapdl_grpc.pb_types.CmdRequest") as mock_cmdrequest,
         patch(
@@ -2787,9 +2792,17 @@ def test_timeout_when_exiting(mapdl):
         assert mapdl._exited
 
         assert mock_handle.call_count == 1
-        assert mock_connect.call_count == errors.N_ATTEMPTS
-        assert mock_cmdrequest.call_count == errors.N_ATTEMPTS + 1
-        assert mock_is_alive.call_count == errors.N_ATTEMPTS + 1
+
+        if is_exited:
+            # Checking no trying to reconnect
+            assert mock_connect.call_count == 0
+            assert mock_cmdrequest.call_count == 1
+            assert mock_is_alive.call_count == 1
+
+        else:
+            assert mock_connect.call_count == errors.N_ATTEMPTS
+            assert mock_cmdrequest.call_count == errors.N_ATTEMPTS + 1
+            assert mock_is_alive.call_count == errors.N_ATTEMPTS + 1
 
         mapdl._exited = False
 
