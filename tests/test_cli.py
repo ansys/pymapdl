@@ -76,8 +76,79 @@ def test_launch_mapdl_cli(monkeypatch, run_cli, start_instance):
     # grab ips and port
     pid = int(re.search(r"\(PID=(\d+)\)", output).groups()[0])
 
-    output = run_cli(f"stop --port {PORT1}")
-    assert "success" in output.lower()
+
+@requires("click")
+@pytest.mark.parametrize(
+    "mapping",
+    ((False, True), (False, True, False), (False, False, False), (True, True, False)),
+)
+def test_pymapdl_stop_instances(run_cli, mapping):
+
+    fake_process_ = [
+        {
+            "pid": np.random.randint(10000, 100000),
+            "name": f"ansys251_{ind}" if each else "process",
+            "port": str(50052 + ind),
+            "ansys_process": each,
+        }
+        for ind, each in enumerate(mapping)
+    ]
+
+    fake_processes = [make_fake_process(**each) for each in fake_process_]
+
+    with (
+        patch("ansys.mapdl.core.cli.stop._kill_process") as mock_kill,
+        patch("psutil.pid_exists") as mock_pid,
+        patch("psutil.process_iter", return_value=iter(fake_processes)),
+    ):
+
+        mock_pid.return_value = lambda *args, **kwargs: True  # All process exists
+        mock_kill.side_effect = lambda *args, **kwargs: None  # avoid kill nothing
+
+        if sum(mapping) == 0:
+            output = run_cli(f"stop --port {PORT1}")
+            assert (
+                f"error: no ansys instances running on port {PORT1}" in output.lower()
+            )
+            mock_kill.assert_not_called()
+
+            output = run_cli(f"stop --all")
+            assert f"error: no ansys instances have been found." in output.lower()
+            mock_kill.assert_not_called()
+
+        elif sum(mapping) == 1:
+            # Port
+            process, process_mock = [
+                (each, each_mock)
+                for each, each_mock in zip(fake_process_, fake_processes)
+                if "ansys251" in each["name"]
+            ][0]
+            port = process["port"]
+
+            output = run_cli(f"stop --port {port}")
+            assert (
+                f"success: ansys instances running on port {port} have been stopped"
+                in output.lower()
+            )
+
+            # PID
+            pid = process["pid"]
+            with patch("psutil.Process") as mock_process:
+                mock_process.return_value = process_mock
+
+                output = run_cli(f"stop --pid {pid}")
+                assert (
+                    f"the process with pid {pid} and its children have been stopped."
+                    in output.lower()
+                )
+
+            mock_kill.assert_called()
+            assert mock_kill.call_count == 2
+
+        else:
+            output = run_cli(f"stop --all")
+            assert "success: ansys instances have been stopped." in output.lower()
+            assert mock_kill.call_count == sum(mapping)
 
 
 @requires("click")
