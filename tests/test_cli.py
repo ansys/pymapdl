@@ -111,6 +111,7 @@ def test_launch_mapdl_cli(monkeypatch, run_cli, start_instance):
     assert pid != 0
 
 
+@requires("click")
 @pytest.mark.parametrize(
     "mapping",
     ((False, True), (False, True, False), (False, False, False), (True, True, False)),

@@ -2851,6 +2851,7 @@ def test_none_on_selecting(mapdl, cleared, func):
     assert len(selfunc(None)) == 0
 
 
+@requires("pyvista")
 def test_requires_package_speed():
     from ansys.mapdl.core.misc import requires_package
 
