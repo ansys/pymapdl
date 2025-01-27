@@ -2803,7 +2803,10 @@ def test_timeout_when_exiting(mapdl):
     ),
 )
 def test_none_as_argument(mapdl, make_block, cmd, arg):
-    with patch.object(mapdl, "_run", autospec=True) as mock_run:
+    with patch.object(mapdl, "_run", wraps=mapdl._run) as mock_run:
+
+        mock_run.assert_not_called()
+
         func = getattr(mapdl, cmd)
         out = func(arg)
 
@@ -2811,6 +2814,7 @@ def test_none_as_argument(mapdl, make_block, cmd, arg):
             assert isinstance(out, np.ndarray)
             assert len(out) == 0
 
+        mock_run.assert_called()
         cmd = mock_run.call_args.args[0]
 
         assert isinstance(cmd, str)
