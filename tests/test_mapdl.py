@@ -1723,13 +1723,25 @@ def test_mode(mapdl, cleared):
     mapdl._mode = "grpc"  # Going back to default
 
 
-def test_remove_lock_file(mapdl, cleared, tmpdir):
+@pytest.mark.parametrize("use_cached", (True, False))
+def test_remove_lock_file(mapdl, cleared, tmpdir, use_cached):
     tmpdir_ = tmpdir.mkdir("ansys")
     lock_file = tmpdir_.join("file.lock")
     with open(lock_file, "w") as fid:
         fid.write("test")
 
-    mapdl._remove_lock_file(tmpdir_)
+    with patch(
+        "ansys.mapdl.core.mapdl_grpc.MapdlGrpc.jobname", new_callable=PropertyMock
+    ) as mock_jb:
+        mock_jb.return_value = mapdl._jobname
+
+        mapdl._remove_lock_file(tmpdir_, use_cached=use_cached)
+
+    if use_cached:
+        mock_jb.assert_not_called()
+    else:
+        mock_jb.assert_called()
+
     assert not os.path.exists(lock_file)
 
 
