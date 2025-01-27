@@ -29,6 +29,7 @@ from ansys.tools.visualization_interface.backends.pyvista import PyVistaBackendI
 import numpy as np
 from numpy.typing import NDArray
 
+from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.misc import get_bounding_box
 from ansys.mapdl.core.plotting.consts import (
@@ -332,6 +333,7 @@ class MapdlPlotter(Plotter):
             Extra kwargs, by default {}
         """
         if not meshes and not points and not labels:
+            logger.warning("No meshes, points or labels to plot.")
             return
 
         if theme is None:
