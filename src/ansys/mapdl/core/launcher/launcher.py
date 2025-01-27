@@ -551,7 +551,7 @@ def launch_mapdl(
     #
     if args["start_instance"]:
         # ON HPC:
-        # Assuming that if login node is ubuntu, the computation ones
+        # Assuming that if login node is ubuntu, the computation nodes
         # are also ubuntu.
         env_vars = configure_ubuntu(env_vars)
 

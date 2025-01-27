@@ -29,13 +29,11 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from ansys.mapdl.core import LOG
 from ansys.mapdl.core.errors import MapdlDidNotStart
 from ansys.mapdl.core.launcher.grpc import launch_grpc
-from ansys.mapdl.core.launcher.local import processing_local_arguments
 from ansys.mapdl.core.launcher.tools import (
     generate_start_parameters,
     get_port,
     submitter,
 )
-from ansys.mapdl.core.licensing import LicenseChecker
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
 LAUNCH_ON_HCP_ERROR_MESSAGE_IP = (
@@ -272,7 +270,7 @@ def get_state_from_scontrol(stdout: str) -> str:
     return stdout.split("JobState=")[1].splitlines()[0].strip()
 
 
-def launch_mapdl_on_cluster(
+def launch_mapdl_on_cluster_locally(
     nproc: int,
     *,
     scheduler_options: Union[str, Dict[str, str]] = None,
@@ -290,6 +288,9 @@ def launch_mapdl_on_cluster(
     scheduler_options : Dict[str, str], optional
         A string or dictionary specifying the job configuration for the
         scheduler. For example ``scheduler_options = "-N 10"``.
+
+    launch_mapdl_args : Dict[str, Any], optional
+        Any keyword argument from the :func:`ansys.mapdl.core.launcher.grpc.launch_mapdl_grpc` function.
 
     Returns
     -------
@@ -309,10 +310,18 @@ def launch_mapdl_on_cluster(
             )
 
     """
-    from ansys.mapdl.core.launcher import launch_mapdl
+    # from ansys.mapdl.core.launcher import launch_mapdl
 
     # Processing the arguments
     launch_mapdl_args["launch_on_hpc"] = True
+    launch_mapdl_args["running_on_hpc"] = True
+
+    if launch_mapdl_args.get("license_server_check", False):
+        raise ValueError(
+            "The argument 'license_server_check' is not allowed when launching on an HPC platform."
+        )
+
+    launch_mapdl_args["license_server_check"] = False
 
     if launch_mapdl_args.get("mode", "grpc") != "grpc":
         raise ValueError(
@@ -327,31 +336,253 @@ def launch_mapdl_on_cluster(
             "The 'start_instance' argument must be 'True' when launching on HPC."
         )
 
-    return launch_mapdl(
+    if launch_mapdl_args.get("mapdl_output", False):
+        raise ValueError(
+            "The 'mapdl_output' argument is not allowed when launching on an HPC platform."
+        )
+
+    return launch_mapdl_grpc_on_hpc(
         nproc=nproc,
         scheduler_options=scheduler_options,
         **launch_mapdl_args,
     )
 
 
-def launch_mapdl_grpc():  # to be fixed
-    args = processing_local_arguments(locals())
+def launch_mapdl_grpc_on_hpc(
+    *,
+    exec_file: Optional[str] = None,
+    run_location: Optional[str] = None,
+    jobname: str = "file",
+    nproc: Optional[int] = None,
+    ram: Optional[Union[int, str]] = None,
+    mode: Optional[str] = None,
+    override: bool = False,
+    loglevel: str = "ERROR",
+    additional_switches: str = "",
+    start_timeout: Optional[int] = None,
+    port: Optional[int] = None,
+    cleanup_on_exit: bool = True,
+    start_instance: Optional[bool] = None,
+    clear_on_connect: bool = True,
+    log_apdl: Optional[Union[bool, str]] = None,
+    remove_temp_dir_on_exit: bool = False,
+    license_server_check: bool = False,
+    license_type: Optional[bool] = None,
+    print_com: bool = False,
+    add_env_vars: Optional[Dict[str, str]] = None,
+    replace_env_vars: Optional[Dict[str, str]] = None,
+    version: Optional[Union[int, str]] = None,
+    running_on_hpc: bool = True,
+    launch_on_hpc: bool = False,
+    **kwargs: Dict[str, Any],
+) -> MapdlGrpc:
+    """Start MAPDL locally with gRPC interface.
+
+    Parameters
+    ----------
+    exec_file : str, optional
+        The location of the MAPDL executable.  Will use the cached
+        location when left at the default :class:`None` and no environment
+        variable is set.
+
+        The executable path can be also set through the environment variable
+        :envvar:`PYMAPDL_MAPDL_EXEC`. For example:
+
+        .. code:: console
+
+            export PYMAPDL_MAPDL_EXEC=/ansys_inc/v211/ansys/bin/mapdl
+
+    run_location : str, optional
+        MAPDL working directory.  Defaults to a temporary working
+        directory.  If directory doesn't exist, one is created.
+
+    jobname : str, optional
+        MAPDL jobname.  Defaults to ``'file'``.
+
+    nproc : int, optional
+        Number of processors.  Defaults to ``2``. If running on an HPC cluster,
+        this value is adjusted to the number of CPUs allocated to the job,
+        unless the argument ``running_on_hpc`` is set to ``"false"``.
+
+    ram : float, optional
+        Total size in megabytes of the workspace (memory) used for the initial
+        allocation. The default is :class:`None`, in which case 2 GB (2048 MB) is
+        used. To force a fixed size throughout the run, specify a negative
+        number.
+
+    mode : str, optional
+        Mode to launch MAPDL.  Must be one of the following:
+
+        - ``'grpc'``
+        - ``'console'``
+
+        The ``'grpc'`` mode is available on ANSYS 2021R1 or newer and
+        provides the best performance and stability.
+        The ``'console'`` mode is for legacy use only Linux only prior to 2020R2.
+        This console mode is pending depreciation.
+        Visit :ref:`versions_and_interfaces` for more information.
+
+    override : bool, optional
+        Attempts to delete the lock file at the ``run_location``.
+        Useful when a prior MAPDL session has exited prematurely and
+        the lock file has not been deleted.
+
+    loglevel : str, optional
+        Sets which messages are printed to the console.  ``'INFO'``
+        prints out all ANSYS messages, ``'WARNING'`` prints only
+        messages containing ANSYS warnings, and ``'ERROR'`` logs only
+        error messages.
+
+    additional_switches : str, optional
+        Additional switches for MAPDL, for example ``'aa_r'``, the
+        academic research license, would be added with:
+
+        - ``additional_switches="-aa_r"``
+
+        Avoid adding switches like ``-i``, ``-o`` or ``-b`` as these are already
+        included to start up the MAPDL server.  See the notes
+        section for additional details.
+
+    start_timeout : float, optional
+        Maximum allowable time to connect to the MAPDL server. By default it is
+        45 seconds, however, it is increased to 90 seconds if running on HPC.
+
+    port : int
+        Port to launch MAPDL gRPC on.  Final port will be the first
+        port available after (or including) this port.  Defaults to
+        ``50052``. You can also provide this value through the environment variable
+        :envvar:`PYMAPDL_PORT`. For instance ``PYMAPDL_PORT=50053``.
+        However the argument (if specified) has precedence over the environment
+        variable. If this environment variable is empty, it is as it is not set.
+
+    cleanup_on_exit : bool, optional
+        Exit MAPDL when python exits or the mapdl Python instance is
+        garbage collected.
+
+    start_instance : bool, optional
+        When :class:`False`, connect to an existing MAPDL instance at ``ip``
+        and ``port``, which default to ip ``'127.0.0.1'`` at port ``50052``.
+        Otherwise, launch a local instance of MAPDL. You can also
+        provide this value through the environment variable
+        :envvar:`PYMAPDL_START_INSTANCE`.
+        However the argument (if specified) has precedence over the environment
+        variable. If this environment variable is empty, it is as it is not set.
+
+    clear_on_connect : bool, optional
+        Defaults to :class:`True`, giving you a fresh environment when
+        connecting to MAPDL. When if ``start_instance`` is specified
+        it defaults to :class:`False`.
+
+    log_apdl : str, optional
+        Enables logging every APDL command to the local disk.  This
+        can be used to "record" all the commands that are sent to
+        MAPDL via PyMAPDL so a script can be run within MAPDL without
+        PyMAPDL. This argument is the path of the output file (e.g.
+        ``log_apdl='pymapdl_log.txt'``). By default this is disabled.
+
+    remove_temp_dir_on_exit : bool, optional
+        When ``run_location`` is :class:`None`, this launcher creates a new MAPDL
+        working directory within the user temporary directory, obtainable with
+        ``tempfile.gettempdir()``. When this parameter is
+        :class:`True`, this directory will be deleted when MAPDL is exited.
+        Default to :class:`False`.
+        If you change the working directory, PyMAPDL does not delete the original
+        working directory nor the new one.
+
+    license_server_check : bool, optional
+        Check if the license server is available if MAPDL fails to
+        start.  Only available on ``mode='grpc'``. Defaults :class:`False`.
+
+    license_type : str, optional
+        Enable license type selection. You can input a string for its
+        license name (for example ``'meba'`` or ``'ansys'``) or its description
+        ("enterprise solver" or "enterprise" respectively).
+        You can also use legacy licenses (for example ``'aa_t_a'``) but it will
+        also raise a warning. If it is not used (:class:`None`), no specific
+        license will be requested, being up to the license server to provide a
+        specific license type. Default is :class:`None`.
+
+    print_com : bool, optional
+        Print the command ``/COM`` arguments to the standard output.
+        Default :class:`False`.
+
+    add_env_vars : dict, optional
+        The provided dictionary will be used to extend the MAPDL process
+        environment variables. If you want to control all of the environment
+        variables, use the argument ``replace_env_vars``.
+        Defaults to :class:`None`.
+
+    replace_env_vars : dict, optional
+        The provided dictionary will be used to replace all the MAPDL process
+        environment variables. It replace the system environment variables
+        which otherwise would be used in the process.
+        To just add some environment variables to the MAPDL
+        process, use ``add_env_vars``. Defaults to :class:`None`.
+
+    version : float, optional
+        Version of MAPDL to launch. If :class:`None`, the latest version is used.
+        Versions can be provided as integers (i.e. ``version=222``) or
+        floats (i.e. ``version=22.2``).
+        To retrieve the available installed versions, use the function
+        :meth:`ansys.tools.path.path.get_available_ansys_installations`.
+        You can also provide this value through the environment variable
+        :envvar:`PYMAPDL_MAPDL_VERSION`.
+        For instance ``PYMAPDL_MAPDL_VERSION=22.2``.
+        However the argument (if specified) has precedence over the environment
+        variable. If this environment variable is empty, it is as it is not set.
+
+    kwargs : dict, Optional
+        These keyword arguments are interface-specific or for
+        development purposes. For more information, see Notes.
+
+        scheduler_options : :class:`str`, :class:`dict`
+          Use it to specify options to the scheduler run command. It can be a
+          string or a dictionary with arguments and its values (both as strings).
+          For more information visit :ref:`ref_hpc_slurm`.
+
+        set_no_abort : :class:`bool`
+          *(Development use only)*
+          Sets MAPDL to not abort at the first error within /BATCH mode.
+          Defaults to :class:`True`.
+
+        force_intel : :class:`bool`
+          *(Development use only)*
+          Forces the use of Intel message pass interface (MPI) in versions between
+          Ansys 2021R0 and 2022R2, where because of VPNs issues this MPI is
+          deactivated by default.
+          See :ref:`vpn_issues_troubleshooting` for more information.
+          Defaults to :class:`False`.
+
+    Returns
+    -------
+    MapdlGrpc
+        An instance of Mapdl.
+    """
+    args = pack_arguments(locals())  # packs args and kwargs
+
+    check_kwargs(args)  # check if passing wrong key arguments
+
+    pre_check_args(args)
+
+    if is_running_on_slurm(args):
+        LOG.info("On Slurm mode.")
+
+        # extracting parameters
+        get_slurm_options(args, kwargs)
+
+    get_start_instance_arg(args)
+
+    get_cpus(args)
+
+    get_ip(args)
+
+    args["port"] = get_port(args["port"], args["start_instance"])
+
     if args.get("mode", "grpc") != "grpc":
         raise ValueError("Invalid 'mode'.")
     args["port"] = get_port(args["port"], args["start_instance"])
 
     start_parm = generate_start_parameters(args)
-
-    # Early exit for debugging.
-    if args["_debug_no_launch"]:
-        # Early exit, just for testing
-        return args  # type: ignore
-
-    # Check the license server
-    if args["license_server_check"]:
-        LOG.debug("Checking license server.")
-        lic_check = LicenseChecker(timeout=args["start_timeout"])
-        lic_check.start()
 
     ########################################
     # Launch MAPDL with gRPC
@@ -387,26 +618,15 @@ def launch_mapdl_grpc():  # to be fixed
 
         jobid: int = start_parm.get("jobid", "Not found")
 
-        if (
-            args["launch_on_hpc"]
-            and start_parm.get("finish_job_on_exit", True)
-            and jobid not in ["Not found", None]
-        ):
+        if start_parm.get("finish_job_on_exit", True) and jobid not in [
+            "Not found",
+            None,
+        ]:
 
             LOG.debug(f"Killing HPC job with id: {jobid}")
             kill_job(jobid)
 
-        if args["license_server_check"]:
-            LOG.debug("Checking license server.")
-            lic_check.check()
-
         raise exception
-
-    if args["just_launch"]:
-        out = [args["ip"], args["port"]]
-        if hasattr(process, "pid"):
-            out += [process.pid]
-        return out
 
     ########################################
     # Connect to MAPDL using gRPC
@@ -425,7 +645,10 @@ def launch_mapdl_grpc():  # to be fixed
         )
 
     except Exception as exception:
-        LOG.error("An error occurred when connecting to MAPDL.")
+        jobid = start_parm.get("jobid", "'Not found'")
+        LOG.error(
+            f"An error occurred when connecting to the MAPDL instance running on job {jobid}."
+        )
         raise exception
 
     return mapdl

@@ -38,6 +38,8 @@ if ON_WSL:
 
 
 from ansys.mapdl.core.launcher.console import launch_mapdl_console
+from ansys.mapdl.core.launcher.grpc import launch_mapdl_grpc
+from ansys.mapdl.core.launcher.hpc import launch_mapdl_on_cluster_locally
 from ansys.mapdl.core.launcher.launcher import launch_mapdl
 from ansys.mapdl.core.launcher.remote import connect_to_mapdl
 from ansys.mapdl.core.launcher.tools import (
