@@ -327,27 +327,29 @@ def protect_grpc(func: Callable) -> Callable:
 
             except grpc.RpcError as error:
                 mapdl = retrieve_mapdl_from_args(args)
+
                 mapdl._log.debug("A gRPC error has been detected.")
 
-                i_attemps += 1
-                if i_attemps <= n_attempts:
+                if not mapdl.exited:
+                    i_attemps += 1
+                    if i_attemps <= n_attempts:
 
-                    wait = (
-                        initial_backoff * multiplier_backoff**i_attemps
-                    )  # Exponential backoff
+                        wait = (
+                            initial_backoff * multiplier_backoff**i_attemps
+                        )  # Exponential backoff
 
-                    # reconnect
-                    mapdl._log.debug(
-                        f"Re-connection attempt {i_attemps} after waiting {wait:0.3f} seconds"
-                    )
+                        # reconnect
+                        mapdl._log.debug(
+                            f"Re-connection attempt {i_attemps} after waiting {wait:0.3f} seconds"
+                        )
 
-                    if not mapdl.is_alive:
-                        connected = mapdl._connect(timeout=wait)
-                    else:
-                        sleep(wait)
+                        if not mapdl.is_alive:
+                            connected = mapdl._connect(timeout=wait)
+                        else:
+                            sleep(wait)
 
-                    # Retry again
-                    continue
+                        # Retry again
+                        continue
 
                 # Custom errors
                 reason = ""
