@@ -23,6 +23,7 @@
 from functools import wraps
 from typing import Any, Dict, Optional, Union
 
+import paramiko
 from paramiko.client import SSHClient
 
 from ansys.mapdl.core import LOG
@@ -72,7 +73,7 @@ def launch_on_remote_hpc(
     add_env_vars: Optional[Dict[str, str]] = None,
     replace_env_vars: Optional[Dict[str, str]] = None,
     running_on_hpc: bool = True,
-    launch_on_hpc: bool = False,
+    launch_on_hpc: bool = True,
     mapdl_output: Optional[str] = None,
     **kwargs: Dict[str, Any],
 ) -> MapdlGrpc:
@@ -310,6 +311,7 @@ def launch_on_remote_hpc(
         ram=args["ram"],
         port=args["port"],
         additional_switches=args["additional_switches"],
+        launch_on_hpc=args["launch_on_hpc"],
     )
 
     cmd = generate_sbatch_command(cmd, scheduler_options=args.get("scheduler_options"))
@@ -326,7 +328,11 @@ def launch_on_remote_hpc(
         )
 
         start_parm["jobid"] = check_mapdl_launch_on_hpc(process, start_parm)
-        get_job_info(start_parm=start_parm, timeout=args["start_timeout"])
+        get_job_info(
+            start_parm=start_parm,
+            timeout=args["start_timeout"],
+            ssh_session=args["session_ssh"],
+        )
 
     except Exception as exception:
         LOG.error("An error occurred when launching MAPDL.")
@@ -339,7 +345,7 @@ def launch_on_remote_hpc(
             and jobid not in ["Not found", None]
         ):
             LOG.debug(f"Killing HPC job with id: {jobid}")
-            kill_job(jobid)
+            kill_job(jobid, ssh_session=args["session_ssh"])
 
         raise exception
 
@@ -358,6 +364,7 @@ def launch_on_remote_hpc(
             use_vtk=args["use_vtk"],
             **start_parm,
         )
+        mapdl._ssh_session = args["session_ssh"]
 
     except Exception as exception:
         LOG.error("An error occurred when connecting to MAPDL.")
@@ -379,6 +386,7 @@ class SshSession:
 
     def __enter__(self):
         self.session = SSHClient()
+        self.session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         self.session.connect(
             hostname=self.hostname,
             username=self.username,
@@ -404,7 +412,10 @@ class SshSession:
     def run(self, cmd, environment=None):
         if not self._connected:
             raise Exception("ssh session is not connected")
+        if isinstance(cmd, list):
+            cmd = " ".join(cmd)
 
+        LOG.debug(cmd)
         stdin, stdout, stderr = self.exec_command(command=cmd, environment=environment)
 
         if stderr:

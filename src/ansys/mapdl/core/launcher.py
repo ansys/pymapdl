@@ -339,6 +339,7 @@ def generate_mapdl_launch_command(
     ram: Optional[int] = None,
     port: int = MAPDL_DEFAULT_PORT,
     additional_switches: str = "",
+    launch_on_hpc=False,
 ) -> list[str]:
     """Generate the command line to start MAPDL in gRPC mode.
 
@@ -393,7 +394,7 @@ def generate_mapdl_launch_command(
     grpc_sw = "-grpc"
 
     # Windows will spawn a new window, special treatment
-    if os.name == "nt":
+    if os.name == "nt" and not launch_on_hpc:
         exec_file = f"{exec_file}"
         # must start in batch mode on windows to hide APDL window
         tmp_inp = ".__tmp__.inp"
@@ -1595,6 +1596,7 @@ def launch_mapdl(
             ram=args["ram"],
             port=args["port"],
             additional_switches=args["additional_switches"],
+            launch_on_hpc=args["launch_on_hpc"],
         )
 
         if args["launch_on_hpc"]:
@@ -2634,7 +2636,7 @@ def launch_mapdl_on_cluster(
     )
 
 
-def get_hostname_host_cluster(job_id: int, timeout: int = 30) -> str:
+def get_hostname_host_cluster(job_id: int, timeout: int = 30, ssh_session=None) -> str:
     options = f"show jobid -dd {job_id}"
     LOG.debug(f"Executing the command 'scontrol {options}'")
 
@@ -2642,9 +2644,12 @@ def get_hostname_host_cluster(job_id: int, timeout: int = 30) -> str:
     time_start = time.time()
     counter = 0
     while not ready:
-        proc = send_scontrol(options)
+        proc = send_scontrol(options, ssh_session=ssh_session)
 
-        stdout = proc.stdout.read().decode()
+        if isinstance(proc, tuple):
+            stdout = proc[0]
+        else:
+            stdout = proc.stdout.read().decode()
 
         if "JobState=RUNNING" not in stdout:
             counter += 1
@@ -2811,7 +2816,10 @@ def check_mapdl_launch_on_hpc(
 
 
 def get_job_info(
-    start_parm: Dict[str, str], jobid: Optional[int] = None, timeout: int = 30
+    start_parm: Dict[str, str],
+    jobid: Optional[int] = None,
+    timeout: int = 30,
+    ssh_session=None,
 ):
     """Get job info like BatchHost IP and hostname
 
@@ -2833,21 +2841,23 @@ def get_job_info(
 
     jobid = jobid or start_parm["jobid"]
 
-    batch_host, batch_ip = get_hostname_host_cluster(jobid, timeout=timeout)
+    batch_host, batch_ip = get_hostname_host_cluster(
+        jobid, timeout=timeout, ssh_session=ssh_session
+    )
 
     start_parm["ip"] = batch_ip
     start_parm["hostname"] = batch_host
     start_parm["jobid"] = jobid
 
 
-def kill_job(jobid: int):
+def kill_job(jobid: int, ssh_session=None):
     """Kill SLURM job"""
-    submitter(["scancel", str(jobid)])
+    submitter(["scancel", str(jobid)], ssh_session=ssh_session)
 
 
-def send_scontrol(args: str):
+def send_scontrol(args: str, ssh_session=None):
     cmd = f"scontrol {args}".split(" ")
-    return submitter(cmd)
+    return submitter(cmd, ssh_session=ssh_session)
 
 
 def submitter(
