@@ -106,7 +106,7 @@ ALLOWABLE_LAUNCH_MAPDL_ARGS = [
     "cleanup_on_exit",
     "clear_on_connect",
     "exec_file",
-    "force_intel" "ip",
+    "force_intel",
     "ip",
     "jobname",
     "launch_on_hpc",
@@ -439,6 +439,7 @@ def launch_grpc(
     env_vars: Optional[Dict[str, str]] = None,
     launch_on_hpc: bool = False,
     mapdl_output: Optional[str] = None,
+    ssh_session=None,
 ) -> subprocess.Popen:
     """Start MAPDL locally in gRPC mode.
 
@@ -520,6 +521,7 @@ def launch_grpc(
         stdout=stdout,
         stderr=stderr,
         env_vars=env_vars,
+        ssh_session=ssh_session,
     )
 
 
@@ -2788,9 +2790,16 @@ def check_mapdl_launch_on_hpc(
     MapdlDidNotStart
         The job submission failed.
     """
-    stdout = process.stdout.read().decode()
-    if "Submitted batch job" not in stdout:
+    if isinstance(process, tuple):
+        stdout, stderr = process
+    elif isinstance(process, str):
+        stdout = process
+        stderr = ""
+    else:
+        stdout = process.stdout.read().decode()
         stderr = process.stderr.read().decode()
+
+    if "Submitted batch job" not in stdout:
         raise MapdlDidNotStart(
             "PyMAPDL failed to submit the sbatch job:\n"
             f"stdout:\n{stdout}\nstderr:\n{stderr}"
@@ -2851,6 +2860,7 @@ def submitter(
     stdout: subprocess.PIPE = None,
     stderr: subprocess.PIPE = None,
     env_vars: dict[str, str] = None,
+    ssh_session=None,
 ):
 
     if executable:
@@ -2868,15 +2878,20 @@ def submitter(
 
     # cmd is controlled by the library with generate_mapdl_launch_command.
     # Excluding bandit check.
-    return subprocess.Popen(
-        args=cmd,
-        shell=shell,  # sbatch does not work without shell.
-        cwd=cwd,
-        stdin=stdin,
-        stdout=stdout,
-        stderr=stderr,
-        env=env_vars,
-    )
+    if ssh_session:
+        with ssh_session as ssh:
+            return ssh.submit(cmd, cwd, env_vars)
+
+    else:
+        return subprocess.Popen(
+            args=cmd,
+            shell=shell,  # sbatch does not work without shell.
+            cwd=cwd,
+            stdin=stdin,
+            stdout=stdout,
+            stderr=stderr,
+            env=env_vars,
+        )
 
 
 def check_console_start_parameters(start_parm):
