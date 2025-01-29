@@ -516,6 +516,7 @@ def test_parameter_types(mapdl, cleared, parameter):
     mapdl.parameters["temp_arr"] = parameter
 
     if isinstance(parameter, np.ndarray):
+        # Reshaping arrays until #3717 is closed
         assert np.allclose(
             parameter.reshape((-1, 1)), mapdl.parameters["temp_arr"].reshape((-1, 1))
         )
