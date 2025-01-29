@@ -136,6 +136,7 @@ markers = [
 ]
 testpaths = "tests"
 image_cache_dir = "tests/.image_cache"
+log_cli = true
 
 [tool.isort]
 profile = "black"
