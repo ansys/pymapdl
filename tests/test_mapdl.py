@@ -1723,13 +1723,25 @@ def test_mode(mapdl, cleared):
     mapdl._mode = "grpc"  # Going back to default
 
 
-def test_remove_lock_file(mapdl, cleared, tmpdir):
+@pytest.mark.parametrize("use_cached", (True, False))
+def test_remove_lock_file(mapdl, cleared, tmpdir, use_cached):
     tmpdir_ = tmpdir.mkdir("ansys")
     lock_file = tmpdir_.join("file.lock")
     with open(lock_file, "w") as fid:
         fid.write("test")
 
-    mapdl._remove_lock_file(tmpdir_)
+    with patch(
+        "ansys.mapdl.core.mapdl_grpc.MapdlGrpc.jobname", new_callable=PropertyMock
+    ) as mock_jb:
+        mock_jb.return_value = mapdl._jobname
+
+        mapdl._remove_lock_file(tmpdir_, use_cached=use_cached)
+
+    if use_cached:
+        mock_jb.assert_not_called()
+    else:
+        mock_jb.assert_called()
+
     assert not os.path.exists(lock_file)
 
 
@@ -2749,7 +2761,8 @@ def test_comment_on_debug_mode(mapdl, cleared):
 
 @patch("ansys.mapdl.core.errors.N_ATTEMPTS", 2)
 @patch("ansys.mapdl.core.errors.MULTIPLIER_BACKOFF", 1)
-def test_timeout_when_exiting(mapdl):
+@pytest.mark.parametrize("is_exited", [True, False])
+def test_timeout_when_exiting(mapdl, is_exited):
     from ansys.mapdl.core import errors
 
     def raise_exception(*args, **kwargs):
@@ -2759,9 +2772,13 @@ def test_timeout_when_exiting(mapdl):
         e.code = lambda: grpc.StatusCode.ABORTED
         e.details = lambda: "My gRPC error details"
 
+        # Simulating MAPDL exiting by force
+        mapdl._exited = is_exited
+
         raise e
 
     handle_generic_grpc_error = errors.handle_generic_grpc_error
+
     with (
         patch("ansys.mapdl.core.mapdl_grpc.pb_types.CmdRequest") as mock_cmdrequest,
         patch(
@@ -2787,9 +2804,17 @@ def test_timeout_when_exiting(mapdl):
         assert mapdl._exited
 
         assert mock_handle.call_count == 1
-        assert mock_connect.call_count == errors.N_ATTEMPTS
-        assert mock_cmdrequest.call_count == errors.N_ATTEMPTS + 1
-        assert mock_is_alive.call_count == errors.N_ATTEMPTS + 1
+
+        if is_exited:
+            # Checking no trying to reconnect
+            assert mock_connect.call_count == 0
+            assert mock_cmdrequest.call_count == 1
+            assert mock_is_alive.call_count == 1
+
+        else:
+            assert mock_connect.call_count == errors.N_ATTEMPTS
+            assert mock_cmdrequest.call_count == errors.N_ATTEMPTS + 1
+            assert mock_is_alive.call_count == errors.N_ATTEMPTS + 1
 
         mapdl._exited = False
 
@@ -2838,6 +2863,7 @@ def test_none_on_selecting(mapdl, cleared, func):
     assert len(selfunc(None)) == 0
 
 
+@requires("pyvista")
 def test_requires_package_speed():
     from ansys.mapdl.core.misc import requires_package
 

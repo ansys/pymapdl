@@ -36,6 +36,7 @@ from ansys.mapdl.core.launcher import (
     generate_start_parameters,
     get_cpus,
     get_job_info,
+    get_slurm_options,
     is_running_on_slurm,
     kill_job,
     launch_grpc,
