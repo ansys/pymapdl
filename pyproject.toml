@@ -48,6 +48,10 @@ classifiers = [
 ]
 
 [project.optional-dependencies]
+hpc = [
+  "paramiko==3.5.0",
+]
+
 jupyter = [
     "jupyterlab>=3",
     "ipywidgets",
