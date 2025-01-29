@@ -637,8 +637,8 @@ def mapdl(request, tmpdir_factory):
             with pytest.raises(MapdlExitedError):
                 mapdl._send_command_stream("/PREP7")
 
-        # Delete Mapdl object
-        del mapdl
+    # Delete Mapdl object
+    del mapdl
 
 
 ################################################################

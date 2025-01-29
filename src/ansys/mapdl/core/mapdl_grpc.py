@@ -637,10 +637,12 @@ class MapdlGrpc(MapdlBase):
         """Check if the MAPDL process is alive"""
         return self._is_alive_subprocess()
 
-    def _post_mortem_checks(self):
+    def _post_mortem_checks(self, process=None):
         """Check possible reasons for not having a successful connection."""
         # Check early exit
-        process = self._mapdl_process
+        if process is None:
+            process = self._mapdl_process
+
         if process is None or not self.is_grpc:
             return
 
@@ -651,9 +653,7 @@ class MapdlGrpc(MapdlBase):
 
     def _read_stds(self):
         """Read the stdout and stderr from the subprocess."""
-        from ansys.mapdl.core.launcher import (
-            _get_std_output,  # Avoid circular import error
-        )
+        from ansys.mapdl.core.launcher import _get_std_output
 
         if self._mapdl_process is None or not self._mapdl_process.stdout:
             return
@@ -1197,7 +1197,7 @@ class MapdlGrpc(MapdlBase):
 
             self._close_process()
 
-            self._remove_lock_file(path)
+            self._remove_lock_file(path, use_cached=True)
         else:
             self._exit_mapdl_server()
 
@@ -1360,17 +1360,24 @@ class MapdlGrpc(MapdlBase):
 
         self._log.debug(f"Recaching PIDs: {self._pids}")
 
-    def _remove_lock_file(self, mapdl_path=None):
+    def _remove_lock_file(
+        self, mapdl_path: str = None, jobname: str = None, use_cached: bool = False
+    ):
         """Removes the lock file.
 
         Necessary to call this as a segfault of MAPDL or exit(0) will
         not remove the lock file.
         """
+        if jobname is None and use_cached:
+            jobname = self._jobname
+        elif jobname is None:
+            jobname = self.jobname
+
         self._log.debug("Removing lock file after exit.")
         if mapdl_path is None:  # pragma: no cover
             mapdl_path = self.directory
         if mapdl_path:
-            for lockname in [self.jobname + ".lock", "file.lock"]:
+            for lockname in [jobname + ".lock", "file.lock"]:
                 lock_file = os.path.join(mapdl_path, lockname)
                 if os.path.isfile(lock_file):
                     try:
@@ -3805,7 +3812,7 @@ class MapdlGrpc(MapdlBase):
         """
         cmd = ["scancel", f"{jobid}"]
         # to ensure the job is stopped properly, let's issue the scancel twice.
-        subprocess.Popen(cmd)
+        subprocess.Popen(cmd)  # nosec B603
 
     def __del__(self):
         """In case the object is deleted"""
@@ -3825,6 +3832,6 @@ class MapdlGrpc(MapdlBase):
             if not self._start_instance:
                 return
 
-        except Exception as e:
+        except Exception as e:  # nosec B110
             # This is on clean up.
             pass
