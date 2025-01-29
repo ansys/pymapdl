@@ -204,7 +204,7 @@ distribution and for each of these samples solving the deterministic problem:
 
 .. math:: \pmb{K}(\pmb{\xi}_{(i)})\pmb{U}(\pmb{\xi}_{(i)}) = \pmb{F}(\pmb{\xi}_{(i)})
 
-The next step is to collect the :math:`N_{sim}` response vectors :math:`\pmb{U} := \pmb{U}(\pmb{\xi}_{(i)})` and perform a statistical
+The next step is to collect the :math:`N_{sim}` response vectors :math:`\pmb{U_i} := \pmb{U}(\pmb{\xi}_{(i)})` and perform a statistical
 postprocessing to extract useful information such as mean value, variance, histogram, and
 empirical PDF.
 
@@ -217,7 +217,7 @@ The following plane stress problem shows a two-dimensional cantilever structure 
 
    A two-dimensional cantilever structure under a point load.
 
-:math:`P` is a random variable following the Gaussian distribution :math:`\mathcal{N}(0,1)` (kN), and the modulus of elasticity is a
+:math:`P` is a random variable following the Gaussian distribution :math:`\mathcal{N}(10,2)` (kN), and the modulus of elasticity is a
 random field given by this expression:
 
 .. math:: E(x) = 10^5(1+0.10f(x)) (kN/m^2)
@@ -364,7 +364,7 @@ This function implements the preceding steps:
 
 .. literalinclude:: sfem.py
   :language: python
-  :lines: 444-556
+  :lines: 414-556
 
 You can pass the required arguments to the defined function to run the simulations:
 
