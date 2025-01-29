@@ -498,16 +498,16 @@ class Parameters:
             Examples: ``"ABC" "A3X" "TOP_END"``.
 
         """
-        if not isinstance(value, (str, int, float)):
+        if not isinstance(value, (str, int, float, np.integer, np.floating)):
             raise TypeError("``Parameter`` must be either a float, int, or string")
 
-        if isinstance(value, str) and len(value) >= 32:
+        if isinstance(value, str) and len(value) > 32:
             raise ValueError("Length of ``value`` must be 32 characters or less")
 
         if not isinstance(name, str):
             raise TypeError("``name`` must be a string")
 
-        if len(name) >= 32:
+        if len(name) > 32:
             raise ValueError("Length of ``name`` must be 32 characters or less")
 
         # delete the parameter if it exists as an array
