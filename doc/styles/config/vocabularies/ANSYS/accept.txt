@@ -53,10 +53,12 @@ CentOS7
 Chao
 ci
 container_layout
+CPUs
 datas
 delet
 Dependabot
 Dev
+Dimitris
 devcontainer
 DevContainer
 dof
@@ -75,6 +77,7 @@ FEMs
 filname
 Fortran
 FSW
+Giovanis
 GitHub
 Gmsh
 GPa
@@ -85,10 +88,12 @@ hexahedral
 hostname
 HTML
 Image[Mm]agick
+Ioannis
 imagin
 importlib
 ist
 Julia
+Kalogeris
 Krylov
 kwarg
 Lanzos
@@ -98,7 +103,6 @@ levl
 Linder
 Linux
 MacOS
-mapdl
 mapdl
 MAPDL
 mater
@@ -118,6 +122,7 @@ NORML
 NumPy
 onefile
 optiSLang
+Papadopoulos
 parm
 perf
 performant
@@ -152,6 +157,7 @@ sord
 spotweld
 squeue
 srun
+stationarity
 struc
 subselected
 substep
@@ -160,7 +166,6 @@ tablet
 thermomechanical
 thermomechanically
 THIRDPARTY
-thispagetitle
 Tool-Narayanaswamy
 tread
 trian
@@ -174,6 +179,7 @@ UPF
 UPFs
 viscoplastic
 vise
+Vissarion
 Visual Studio Code
 von
 VTK

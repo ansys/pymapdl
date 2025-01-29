@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,7 +22,6 @@
 
 import os
 from pathlib import Path
-import socket
 import time
 
 import numpy as np
@@ -31,9 +30,9 @@ import pytest
 from conftest import ON_LOCAL, ON_STUDENT, has_dependency
 
 if has_dependency("ansys-tools-path"):
-    from ansys.tools.path import find_ansys
+    from ansys.tools.path import find_mapdl
 
-    EXEC_FILE = find_ansys()[0]
+    EXEC_FILE = find_mapdl()[0]
 
 else:
     EXEC_FILE = os.environ.get("PYMAPDL_MAPDL_EXEC")
@@ -50,7 +49,7 @@ pytestmark = requires("grpc")
 IGNORE_POOL = os.environ.get("IGNORE_POOL", "").upper() == "TRUE"
 
 # skipping if ON_STUDENT and ON_LOCAL because we cannot spawn that many instances.
-if ON_STUDENT and ON_LOCAL:
+if not ON_LOCAL or (ON_STUDENT and ON_LOCAL):
     pytest.skip(allow_module_level=True)
 
 
@@ -124,7 +123,7 @@ class TestMapdlPool:
         # check it's been cleaned up
         if mapdl_pool[0] is not None:
             pth = mapdl_pool[0].directory
-            if mapdl_pool._spawn_kwargs["remove_temp_files"]:
+            if mapdl_pool._spawn_kwargs["remove_temp_dir_on_exit"]:
                 assert not list(Path(pth).rglob("*.page*"))
 
     @pytest.fixture
@@ -276,7 +275,6 @@ class TestMapdlPool:
             assert pool._names(i) in dirs_path_pool
             assert f"Instance_{i}" in dirs_path_pool
 
-    @requires("local")
     @skip_if_ignore_pool
     def test_directory_names_custom_string(self, tmpdir):
         pool = MapdlPool(
@@ -287,15 +285,12 @@ class TestMapdlPool:
             names="my_instance",
             port=50056,
             additional_switches=QUICK_LAUNCH_SWITCHES,
+            _debug_no_launch=True,
         )
-
         dirs_path_pool = os.listdir(pool._root_dir)
-        assert "my_instance_0" in dirs_path_pool
-        assert "my_instance_1" in dirs_path_pool
+        time.sleep(2)
+        assert all(["my_instance" in each for each in dirs_path_pool])
 
-        pool.exit(block=True)
-
-    @requires("local")
     @skip_if_ignore_pool
     def test_directory_names_function(self, tmpdir):
         def myfun(i):
@@ -313,6 +308,7 @@ class TestMapdlPool:
             names=myfun,
             run_location=tmpdir,
             additional_switches=QUICK_LAUNCH_SWITCHES,
+            _debug_no_launch=True,
         )
 
         dirs_path_pool = os.listdir(pool._root_dir)
@@ -334,16 +330,17 @@ class TestMapdlPool:
     @skip_if_ignore_pool
     @requires("local")
     def test_only_one_instance(self):
-        pool = MapdlPool(
+        pool_ = MapdlPool(
             1,
             exec_file=EXEC_FILE,
             nproc=NPROC,
             additional_switches=QUICK_LAUNCH_SWITCHES,
+            _debug_no_launch=True,
         )
-        pool_sz = len(pool)
-        _ = pool.map(lambda mapdl: mapdl.prep7())
-        assert len(pool) == pool_sz
-        pool.exit()
+        args = pool_._debug_no_launch
+        pool_sz = len(pool_)
+        assert len(args["ips"]) == 1
+        assert len(args["ports"]) == 1
 
     def test_ip(self, monkeypatch):
         monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
@@ -416,8 +413,6 @@ class TestMapdlPool:
         monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", raising=False)
 
         conf = MapdlPool(ip=ips, _debug_no_launch=True)._debug_no_launch
-
-        ips = [socket.gethostbyname(each) for each in ips]
 
         assert conf["ips"] == ips
         assert conf["ports"] == [50052 for i in range(len(ips))]
@@ -785,9 +780,6 @@ class TestMapdlPool:
             conf = MapdlPool(
                 n_instances=n_instances, ip=ip, port=port, _debug_no_launch=True
             )._debug_no_launch
-
-            if exp_ip:
-                exp_ip = [socket.gethostbyname(each) for each in exp_ip]
 
             assert conf["n_instances"] == exp_n_instances
             assert len(conf["ips"]) == exp_n_instances

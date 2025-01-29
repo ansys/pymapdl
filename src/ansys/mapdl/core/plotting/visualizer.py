@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -29,8 +29,8 @@ from ansys.tools.visualization_interface.backends.pyvista import PyVistaBackendI
 import numpy as np
 from numpy.typing import NDArray
 
-from ansys.mapdl.core import _HAS_PYVISTA
-from ansys.mapdl.core.misc import get_bounding_box, unique_rows
+from ansys.mapdl.core import _HAS_VISUALIZER
+from ansys.mapdl.core.misc import get_bounding_box
 from ansys.mapdl.core.plotting.consts import (
     ALLOWED_TARGETS,
     BC_D,
@@ -42,7 +42,7 @@ from ansys.mapdl.core.plotting.consts import (
 )
 from ansys.mapdl.core.plotting.theme import MapdlTheme
 
-if _HAS_PYVISTA:
+if _HAS_VISUALIZER:
     import pyvista as pv
 
     from ansys.mapdl.core.plotting.plotting_defaults import DefaultSymbol
@@ -424,16 +424,12 @@ class MapdlPlotter(Plotter):
                 )
 
         for label in labels:
-            # verify points are not duplicates
-            points = np.atleast_2d(np.array(label["points"]))
-            _, idx, idx2 = unique_rows(points)
-            points = points[idx2][idx]  # Getting back the initial order.
+            # Pyvista does not support plotting two labels with the same point.
+            # It does handle that case by keeping only the first label.
 
-            # Converting python order (0 based)
-            labels_ = np.array(label["labels"] - 1)[idx]
             self.add_labels(
-                points,
-                labels_,
+                label["points"],
+                label["labels"],
                 show_points=False,
                 shadow=False,
                 font_size=font_size,
@@ -823,6 +819,7 @@ class MapdlPlotter(Plotter):
         if savefig:
             self._off_screen = True
             self._notebook = False
+
         # permit user to save the figure as a screenshot
         if self._savefig or savefig:
             self._backend.show(
@@ -837,7 +834,7 @@ class MapdlPlotter(Plotter):
             if return_plotter:
                 return self
 
-            # ifplotter.scene.set_background("paraview") not returning plotter, close right away
+            # if plotter.scene.set_background("paraview") not returning plotter, close right away
             self.scene.close()
 
         else:

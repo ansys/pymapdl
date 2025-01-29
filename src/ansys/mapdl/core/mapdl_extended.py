@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -31,12 +31,13 @@ import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core import _HAS_PYVISTA
+from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
     ComponentDoesNotExits,
     IncorrectWorkingDirectory,
+    MapdlCommandIgnoredError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.mapdl_core import _MapdlCore
@@ -354,14 +355,12 @@ class _MapdlCommandExtended(_MapdlCore):
     @wraps(_MapdlCore.cwd)
     def cwd(self, *args, **kwargs):
         """Wraps cwd."""
-        output = super().cwd(*args, mute=False, **kwargs)
+        try:
+            output = super().cwd(*args, mute=False, **kwargs)
+        except MapdlCommandIgnoredError as e:
+            raise IncorrectWorkingDirectory(e.args[0])
 
-        if output is not None:
-            if "*** WARNING ***" in output:
-                raise IncorrectWorkingDirectory(
-                    "\n" + "\n".join(output.splitlines()[1:])
-                )
-
+        self._path = args[0]  # caching
         return output
 
     @wraps(_MapdlCore.list)
@@ -425,7 +424,7 @@ class _MapdlCommandExtended(_MapdlCore):
             HPT - Plots only those keypoints that are hard points.
 
         vtk : bool, optional
-            Plot the currently selected lines using ``pyvista``.
+            Plot the currently selected lines using ``ansys-tools-visualization_interface``.
 
         show_keypoint_numbering : bool, optional
             Display keypoint numbers when ``vtk=True``.
@@ -439,9 +438,9 @@ class _MapdlCommandExtended(_MapdlCore):
         if vtk is None:
             vtk = self._use_vtk
         elif vtk is True:
-            if not _HAS_PYVISTA:  # pragma: no cover
+            if not _HAS_VISUALIZER:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
                 )
         if vtk:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
@@ -464,7 +463,9 @@ class _MapdlCommandExtended(_MapdlCore):
 
             labels = []
             if show_keypoint_numbering:
-                labels.append({"points": keypoints, "labels": self.geometry.knum})
+                labels.append(
+                    {"points": keypoints, "labels": self.geometry.knum.astype(int)}
+                )
             pl.plot([], points, labels, **kwargs)
             return pl.show(**kwargs)
         # otherwise, use the legacy plotter
@@ -498,13 +499,16 @@ class _MapdlCommandExtended(_MapdlCore):
             NINC are ignored and display all selected lines [LSEL].
 
         vtk : bool, optional
-            Plot the currently selected lines using ``pyvista``.
+            Plot the currently selected lines using ``ansys-tools-visualization_interface``.
 
         show_line_numbering : bool, optional
             Display line and keypoint numbers when ``vtk=True``.
 
         show_keypoint_numbering : bool, optional
             Number keypoints.  Only valid when ``show_keypoints=True``
+
+        color_lines : bool, optional
+            Color each line with a different color.
 
         **kwargs
             See :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` for
@@ -526,9 +530,9 @@ class _MapdlCommandExtended(_MapdlCore):
         if vtk is None:
             vtk = self._use_vtk
         elif vtk is True:
-            if not _HAS_PYVISTA:  # pragma: no cover
+            if not _HAS_VISUALIZER:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
                 )
 
         if vtk:
@@ -588,7 +592,7 @@ class _MapdlCommandExtended(_MapdlCore):
                     labels.append(
                         {
                             "points": line.points[len(line.points) // 2],
-                            "labels": line["entity_num"],
+                            "labels": line["entity_num"].astype(int),
                         }
                     )
 
@@ -596,7 +600,7 @@ class _MapdlCommandExtended(_MapdlCore):
                 labels.append(
                     {
                         "points": self.geometry.get_keypoints(return_as_array=True),
-                        "labels": self.geometry.knum,
+                        "labels": self.geometry.knum.astype(int),
                     }
                 )
             pl = MapdlPlotter()
@@ -653,8 +657,8 @@ class _MapdlCommandExtended(_MapdlCore):
             when ``vtk=True``.
 
         vtk : bool, optional
-            Plot the currently selected areas using ``pyvista``.  As
-            this creates a temporary surface mesh, this may have a
+            Plot the currently selected areas using ``ansys-tools-visualization_interface``.
+            As this creates a temporary surface mesh, this may have a
             long execution time for large meshes.
 
         quality : int, optional
@@ -710,9 +714,9 @@ class _MapdlCommandExtended(_MapdlCore):
         if vtk is None:
             vtk = self._use_vtk
         elif vtk is True:
-            if not _HAS_PYVISTA:  # pragma: no cover
+            if not _HAS_VISUALIZER:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
                 )
 
         if vtk:
@@ -733,10 +737,6 @@ class _MapdlCommandExtended(_MapdlCore):
                 pl.plot([], [], [], **kwargs)
                 return pl.show(**kwargs)
 
-            if quality > 10:
-                quality = 10
-            if quality < 1:
-                quality = 1
             surfs = self.geometry.get_areas(return_as_list=True, quality=quality)
             meshes = []
             labels = []
@@ -806,14 +806,18 @@ class _MapdlCommandExtended(_MapdlCore):
 
                 for surf in surfs:
                     anum = np.unique(surf["entity_num"])
-                    assert (
-                        len(anum) == 1
-                    ), f"The pv.Unstructured from the entity {anum[0]} contains entities from other entities {anum}"  # Sanity check
+                    if len(anum) != 1:
+                        raise RuntimeError(
+                            f"The pv.Unstructured from the entity {anum[0]} contains entities"
+                            f"from other entities {anum}"  # Sanity check
+                        )
 
                     area = surf.extract_cells(surf["entity_num"] == anum)
                     centers.append(area.center)
 
-                labels.append({"points": np.array(centers), "labels": anums})
+                labels.append(
+                    {"points": np.array(centers), "labels": anums.astype(int)}
+                )
 
             if show_lines or show_line_numbering:
                 kwargs.setdefault("line_width", 2)
@@ -831,7 +835,7 @@ class _MapdlCommandExtended(_MapdlCore):
                     labels.append(
                         {
                             "points": lines.points[50::101],
-                            "labels": lines["entity_num"],
+                            "labels": lines["entity_num"].astype(int),
                         }
                     )
             pl = MapdlPlotter()
@@ -888,8 +892,8 @@ class _MapdlCommandExtended(_MapdlCore):
             to .075).  Ignored when ``vtk=True``.
 
         vtk : bool, optional
-            Plot the currently selected volumes using ``pyvista``.  As
-            this creates a temporary surface mesh, this may have a
+            Plot the currently selected volumes using ``ansys-tools-visualization_interface``.
+            As this creates a temporary surface mesh, this may have a
             long execution time for large meshes.
 
         quality : int, optional
@@ -914,9 +918,9 @@ class _MapdlCommandExtended(_MapdlCore):
         if vtk is None:
             vtk = self._use_vtk
         elif vtk is True:
-            if not _HAS_PYVISTA:  # pragma: no cover
+            if not _HAS_VISUALIZER:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
                 )
 
         if vtk:
@@ -1093,12 +1097,12 @@ class _MapdlCommandExtended(_MapdlCore):
             vtk = self._use_vtk
 
         if vtk is True:
-            if _HAS_PYVISTA:
+            if _HAS_VISUALIZER:
                 # lazy import here to avoid top level import
                 import pyvista as pv
             else:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
                 )
 
         if "knum" in kwargs:
@@ -1123,7 +1127,9 @@ class _MapdlCommandExtended(_MapdlCore):
                 pcloud["labels"] = self.mesh.nnum
                 pcloud.clean(inplace=True)
 
-                labels = [{"points": pcloud.points, "labels": pcloud["labels"]}]
+                labels = [
+                    {"points": pcloud.points, "labels": pcloud["labels"].astype(int)}
+                ]
             points = [{"points": self.mesh.nodes}]
             pl.plot([], points, labels, mapdl=self, **kwargs)
             return pl.show(**kwargs)
@@ -1147,7 +1153,7 @@ class _MapdlCommandExtended(_MapdlCore):
         Parameters
         ----------
         vtk : bool, optional
-            Plot the currently selected elements using ``pyvista``.
+            Plot the currently selected elements using ``ansys-tools-visualization_interface``.
             Defaults to current ``use_vtk`` setting.
 
         show_node_numbering : bool, optional
@@ -1233,9 +1239,9 @@ class _MapdlCommandExtended(_MapdlCore):
         if vtk is None:
             vtk = self._use_vtk
         elif vtk is True:
-            if not _HAS_PYVISTA:  # pragma: no cover
+            if not _HAS_VISUALIZER:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having Pyvista installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
                 )
 
         if vtk:
@@ -1243,6 +1249,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
             pl = kwargs.get("plotter", None)
             pl = MapdlPlotter().switch_scene(pl)
+            pl.mapdl = self
 
             kwargs.setdefault("title", "MAPDL Element Plot")
             if not self._mesh.n_elem:
@@ -1257,7 +1264,12 @@ class _MapdlCommandExtended(_MapdlCore):
             # if show_node_numbering:
             labels = []
             if show_node_numbering:
-                labels = [{"points": esurf.points, "labels": esurf["ansys_node_num"]}]
+                labels = [
+                    {
+                        "points": esurf.points,
+                        "labels": esurf["ansys_node_num"].astype(int),
+                    }
+                ]
 
             pl.plot(
                 [{"mesh": esurf, "style": kwargs.pop("style", "surface")}],
@@ -1369,7 +1381,7 @@ class _MapdlCommandExtended(_MapdlCore):
         return output
 
     @wraps(_MapdlCore.inquire)
-    def inquire(self, strarray="", func="", arg1="", arg2=""):
+    def inquire(self, strarray="", func="", arg1="", arg2="", **kwargs):
         """Wraps original INQUIRE function"""
         func_options = [
             "LOGIN",
@@ -1411,14 +1423,28 @@ class _MapdlCommandExtended(_MapdlCore):
                 f"The arguments (strarray='{strarray}', func='{func}') are not valid."
             )
 
-        response = self.run(f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False)
-        if func.upper() in [
-            "ENV",
-            "TITLE",
-        ]:  # the output is multiline, we just need the last line.
-            response = response.splitlines()[-1]
+        response = ""
+        n_try = 3
+        i_try = 0
+        while i_try < n_try and not response:
+            response = self.run(
+                f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False, **kwargs
+            )
+            i_try += 1
 
-        return response.split("=")[1].strip()
+        if not response:
+            if not self._store_commands:
+                raise MapdlRuntimeError("/INQUIRE command didn't return a response.")
+        else:
+            if func.upper() in [
+                "ENV",
+                "TITLE",
+            ]:  # the output is multiline, we just need the last line.
+                response = response.splitlines()[-1]
+
+            response = response.split("=")[1].strip()
+
+        return response
 
     @wraps(_MapdlCore.parres)
     def parres(self, lab="", fname="", ext="", **kwargs):
@@ -1450,7 +1476,7 @@ class _MapdlCommandExtended(_MapdlCore):
             fname_ = self._get_file_name(fname=file_, ext=ext_)
 
         # generate the log and download if necessary
-        output = super().lgwrite(fname=fname_, kedit=kedit, **kwargs)
+        output = super().lgwrite(fname=fname_, ext="", kedit=kedit, **kwargs)
 
         # Let's download the file to the location
         self._download(fname_, fname)
@@ -2288,7 +2314,7 @@ class _MapdlExtended(_MapdlCommandExtended):
         np.savetxt(
             filename,
             array,
-            delimiter=",",
+            delimiter="",
             header="File generated by PyMAPDL:load_array",
             fmt="%24.18e",
         )
@@ -2303,7 +2329,7 @@ class _MapdlExtended(_MapdlCommandExtended):
             n2 = imax
             n3 = kmax
             self.vread(name, filename, n1=n1, n2=n2, n3=n3, label=label, nskip=1)
-            fmt = "(" + ",',',".join(["E24.18" for i in range(jmax)]) + ")"
+            fmt = f"({jmax}E24.18)"
             logger.info("Using *VREAD with format %s in %s", fmt, filename)
             self.run(fmt)
 
@@ -2787,13 +2813,13 @@ class _MapdlExtended(_MapdlCommandExtended):
         --------
         Retrieve the number of nodes.
 
-        >>> value = ansys.get_value('node', '', 'count')
+        >>> value = mapdl.get_value('node', '', 'count')
         >>> value
         3003
 
         Retrieve the number of nodes using keywords.
 
-        >>> value = ansys.get_value(entity='node', item1='count')
+        >>> value = mapdl.get_value(entity='node', item1='count')
         >>> value
         3003
         """

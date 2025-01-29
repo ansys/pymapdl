@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -209,15 +209,13 @@ def test_kdist(cleared, mapdl):
 
 
 # kept here for potential usage
-# def test_kfill(cleared, mapdl):
-#     mapdl.clear()
-#     mapdl.prep7()
-#     kp0 = (0, 0, 0)
-#     kp1 = (10, 0, 0)
+def test_kfill(cleared, mapdl):
+    kp0 = (0, 0, 0)
+    kp1 = (10, 0, 0)
 
-#     knum0 = mapdl.k("", *kp0)
-#     knum1 = mapdl.k("", *kp1)
-#     mapdl.kfill(knum0, knum1, 8, ninc=1)
+    knum0 = mapdl.k("", *kp0)
+    knum1 = mapdl.k("", *kp1)
+    mapdl.kfill(knum0, knum1, 8, ninc=1)
 
 
 def test_kl(cleared, mapdl):
@@ -514,9 +512,7 @@ def test_ndist(cleared, mapdl):
     assert node_zdist == node2[2] - node1[2]
 
 
-def test_empty_model(mapdl):
-    mapdl.clear()
-
+def test_empty_model(mapdl, cleared):
     assert mapdl.geometry.knum.size == 0
     assert mapdl.geometry.lnum.size == 0
     assert mapdl.geometry.anum.size == 0
@@ -543,7 +539,7 @@ def test_entities_multiple_bodies(mapdl, contact_geom_and_mesh, entity, number):
     assert isinstance(entity, pv.MultiBlock)
 
 
-def test_create_geometry(mapdl):
+def test_create_geometry(mapdl, cleared):
     assert isinstance(mapdl._create_geometry(), Geometry)
 
 

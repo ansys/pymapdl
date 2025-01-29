@@ -1,20 +1,5 @@
 {% extends "!layout.html" %}
 
-{% block htmltitle %}
-
-{% if meta is mapping %}
-    {% if 'thispagetitle' in meta %}
-        <title>{{ meta.get("thispagetitle") }}</title>
-    {% else %}
-        {{ super() }}
-    {% endif %}
-{% else %}
-    {{ super() }}
-{% endif %}
-
-{% endblock %}
-
-
 {% block footer %}
 <footer class="bd-footer" font-size="4px">
   <div class="bd-footer__inner bd-page-width">

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -664,7 +664,7 @@ class RunControls:
 
         This command is valid in any processor.
         """
-        command = "/SYS,%s" % (str(string))
+        command = f"/SYS,{string}"
         return self.run(command, **kwargs)
 
     def unpause(self, **kwargs):

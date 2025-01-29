@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -26,7 +26,7 @@ from .core import _QueryExecution
 class _AngleQueries(_QueryExecution):
     _mapdl = None
 
-    def anglen(self, n1, n2, n3) -> float:
+    def anglen(self, n1: int, n2: int, n3: int) -> float:
         """Return the angle between 3 nodes where ``n1`` is the vertex.
 
         Subtended angle between two lines (defined by three
@@ -66,7 +66,7 @@ class _AngleQueries(_QueryExecution):
         """
         return self._run_query(f"ANGLEN({n1},{n2},{n3})", integer=False)
 
-    def anglek(self, k1, k2, k3) -> float:
+    def anglek(self, k1: int, k2: int, k3: int) -> float:
         """Return the angle between 3 keypoints where ``k1`` is the vertex.
 
         Subtended angle between two lines (defined by three
@@ -111,7 +111,7 @@ class _AngleQueries(_QueryExecution):
 class _AreaQueries(_QueryExecution):
     _mapdl = None
 
-    def areand(self, n1, n2, n3) -> float:
+    def areand(self, n1: int, n2: int, n3: int) -> float:
         """Area of the triangle with vertices at nodes ``n1``, ``n2``, and ``n3``.
 
         Parameters
@@ -143,7 +143,7 @@ class _AreaQueries(_QueryExecution):
         """
         return self._run_query(f"AREAND({n1},{n2},{n3})", integer=False)
 
-    def areakp(self, k1, k2, k3) -> float:
+    def areakp(self, k1: int, k2: int, k3: int) -> float:
         """Area of the triangle with vertices at keypoints ``k1``, ``k2``, and ``k3``.
 
         Parameters
@@ -179,7 +179,7 @@ class _AreaQueries(_QueryExecution):
 class _DistanceQueries(_QueryExecution):
     _mapdl = None
 
-    def distnd(self, n1, n2) -> float:
+    def distnd(self, n1: int, n2: int) -> float:
         """Compute the distance between nodes ``n1`` and ``n2``.
 
         Parameters
@@ -208,7 +208,7 @@ class _DistanceQueries(_QueryExecution):
         """
         return self._run_query(f"DISTND({n1},{n2})", integer=False)
 
-    def distkp(self, k1, k2) -> float:
+    def distkp(self, k1: int, k2: int) -> float:
         """Compute the distance between keypoints ``k1`` and ``k2``.
 
         Parameters

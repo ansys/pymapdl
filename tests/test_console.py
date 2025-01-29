@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -30,7 +30,7 @@ import time
 
 import pytest
 
-from conftest import has_dependency, requires
+from conftest import clear, has_dependency, requires
 
 # skip entire module unless --console is enabled
 pytestmark = requires("console")
@@ -46,6 +46,11 @@ if has_dependency("ansys-mapdl-reader"):
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
+
+
+@pytest.fixture(scope="function")
+def cleared(mapdl_console):
+    clear(mapdl_console)
 
 
 @pytest.fixture(scope="function")
@@ -68,16 +73,16 @@ def test_jobname(mapdl_console, cleared):
     assert mapdl_console.jobname == other_jobname
 
 
-def test_empty(mapdl_console):
+def test_empty(mapdl_console, cleared):
     with pytest.raises(ValueError):
         mapdl_console.run("")
 
 
-def test_str(mapdl_console):
-    assert "ANSYS Mechanical" in str(mapdl_console)
+def test_str(mapdl_console, cleared):
+    assert "Ansys Mechanical" in str(mapdl_console)
 
 
-def test_version(mapdl_console):
+def test_version(mapdl_console, cleared):
     assert isinstance(mapdl_console.version, float)
 
 
@@ -103,8 +108,7 @@ def test_basic_command(cleared, mapdl_console):
     assert "CREATE A HEXAHEDRAL VOLUME" in resp
 
 
-def test_allow_ignore(mapdl_console):
-    mapdl_console.clear()
+def test_allow_ignore(mapdl_console, cleared):
     mapdl_console.allow_ignore = False
     assert mapdl_console.allow_ignore is False
     with pytest.raises(pymapdl.errors.MapdlInvalidRoutineError):
@@ -128,6 +132,7 @@ def test_chaining(mapdl_console, cleared):
 
 
 def test_e(mapdl_console, cleared):
+    mapdl.prep7()
     mapdl_console.et("", 183)
     n0 = mapdl_console.n("", 0, 0, 0)
     n1 = mapdl_console.n("", 1, 0, 0)
@@ -217,12 +222,12 @@ def test_al(cleared, mapdl_console):
     assert a0 == 1
 
 
-def test_invalid_area(mapdl_console):
+def test_invalid_area(mapdl_console, cleared):
     with pytest.raises(MapdlRuntimeError):
         mapdl_console.a(0, 0, 0, 0)
 
 
-# def test_invalid_input(mapdl_console):
+# def test_invalid_input(mapdl_console, cleared):
 # with pytest.raises(FileNotFoundError):
 # mapdl_console.input('thisisnotafile')
 
@@ -363,7 +368,7 @@ def test_nodes(tmpdir, cleared, mapdl_console):
     basename = "tmp.nodes"
     filename = str(tmpdir.mkdir("tmpdir").join(basename))
     mapdl_console.nwrite(filename)
-    mapdl_console.download(basename, filename)
+    # mapdl_console.download(basename, filename)
 
     assert np.allclose(mapdl_console.mesh.nodes, np.loadtxt(filename)[:, 1:])
     assert mapdl_console.mesh.n_node == 11
@@ -462,7 +467,7 @@ def test_elements(cleared, mapdl_console):
         np.random.random((10, 3, 3)),
     ),
 )
-def test_set_get_parameters(mapdl_console, parm):
+def test_set_get_parameters(mapdl_console, cleared, parm):
     parm_name = pymapdl.misc.random_string(20)
     mapdl_console.parameters[parm_name] = parm
     if isinstance(parm, str):
@@ -476,7 +481,7 @@ def test_set_parameters_arr_to_scalar(mapdl_console, cleared):
     mapdl_console.parameters["PARM"] = 2
 
 
-def test_set_parameters_string_spaces(mapdl_console):
+def test_set_parameters_string_spaces(mapdl_console, cleared):
     with pytest.raises(ValueError):
         mapdl_console.parameters["PARM"] = "string with spaces"
 
@@ -506,7 +511,7 @@ def test_builtin_parameters(mapdl_console, cleared):
     assert mapdl_console.parameters.real == 1
 
 
-def test_eplot_fail(mapdl_console):
+def test_eplot_fail(mapdl_console, cleared):
     # must fail with empty mesh
     with pytest.raises(MapdlRuntimeError):
         mapdl_console.eplot()
@@ -596,7 +601,7 @@ def test_cyclic_solve(mapdl_console, cleared):
     assert mapdl_console.result.nsets == 16  # multiple result files...
 
 
-def test_load_table(mapdl_console):
+def test_load_table(mapdl_console, cleared):
     my_conv = np.array(
         [
             [0, 0.001],
@@ -611,7 +616,7 @@ def test_load_table(mapdl_console):
     assert np.allclose(mapdl_console.parameters["my_conv"], my_conv[:, -1])
 
 
-def test_mode_console(mapdl_console):
+def test_mode_console(mapdl_console, cleared):
     assert mapdl_console.mode == "console"
     assert not mapdl_console.is_grpc
     assert not mapdl_console.is_corba

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,6 +22,7 @@
 
 """Unit tests regarding plotting."""
 import os
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -31,7 +32,7 @@ from conftest import has_dependency, requires
 if not has_dependency("pyvista"):
     pytest.skip(allow_module_level=True)
 
-from ansys.mapdl.core.errors import ComponentDoesNotExits
+from ansys.mapdl.core.errors import ComponentDoesNotExits, MapdlRuntimeError
 from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
 FORCE_LABELS = [["FX", "FY", "FZ"], ["HEAT"], ["CHRG"]]
@@ -41,9 +42,7 @@ ALL_LABELS.extend(DISPL_LABELS)
 
 
 @pytest.fixture
-def boundary_conditions_example(mapdl):
-    mapdl.clear()
-    mapdl.prep7()
+def boundary_conditions_example(mapdl, cleared):
     mapdl.et("", 189)
 
     mapdl.n(1, 0, 0, 0)
@@ -92,10 +91,7 @@ def boundary_conditions_example(mapdl):
 
 
 @pytest.fixture
-def block_example_coupled(mapdl):
-    mapdl.clear()
-    mapdl.prep7()
-
+def block_example_coupled(mapdl, cleared):
     mapdl.et(1, 226)
     mapdl.keyopt(1, 1, 1011)  # Thermal-Piezoelectric
 
@@ -109,6 +105,43 @@ def block_example_coupled(mapdl):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(2, 1, 0, 0)
     mapdl.n(3, 2, 0, 0)
+
+
+def check_geometry(mapdl, function):
+    prev_knum = mapdl.geometry.knum
+    prev_lnum = mapdl.geometry.lnum
+    prev_anum = mapdl.geometry.anum
+    prev_kps = mapdl.geometry.get_keypoints(
+        return_as_array=True, return_ids_in_array=True
+    )
+    prev_lines = mapdl.geometry.get_lines(return_as_list=True)
+    prev_areas = mapdl.geometry.get_areas(return_as_list=True)
+
+    out = function()
+
+    new_knum = mapdl.geometry.knum
+    new_lnum = mapdl.geometry.lnum
+    new_anum = mapdl.geometry.anum
+    new_kps = mapdl.geometry.get_keypoints(
+        return_as_array=True, return_ids_in_array=True
+    )
+    new_lines = mapdl.geometry.get_lines(return_as_list=True)
+    new_areas = mapdl.geometry.get_areas(return_as_list=True)
+
+    assert np.allclose(prev_knum, new_knum)
+    assert np.allclose(prev_lnum, new_lnum)
+    assert np.allclose(prev_anum, new_anum)
+    assert len(prev_kps) == len(new_kps)
+    assert len(prev_lines) == len(new_lines)
+    assert len(prev_areas) == len(new_areas)
+    assert all([each in new_kps for each in prev_kps])
+    assert all([each in new_lines for each in prev_lines])
+    assert all([each in new_areas for each in prev_areas])
+    assert all([each in prev_kps for each in new_kps])
+    assert all([each in prev_lines for each in new_lines])
+    assert all([each in prev_areas for each in new_areas])
+
+    return out
 
 
 def test_plot_empty_mesh(mapdl, cleared):
@@ -168,7 +201,7 @@ def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
         "eplot",
     ],
 )
-def test_plots_no_vtk(mapdl, method):
+def test_plots_no_vtk(mapdl, cube_solve, method):
     _ = getattr(mapdl, method)(vtk=False)
 
 
@@ -218,8 +251,8 @@ def test_aplot(cleared, mapdl, vtk):
     mapdl.aplot(show_area_numbering=True)
     mapdl.aplot(vtk=vtk, color_areas=vtk, show_lines=True, show_line_numbering=True)
 
-    mapdl.aplot(quality=100)
-    mapdl.aplot(quality=-1)
+    mapdl.aplot(quality=10)
+    mapdl.aplot(quality=1)
 
 
 @pytest.mark.parametrize("vtk", [True, False, None])
@@ -263,9 +296,7 @@ def test_eplot_savefig(mapdl, make_block, tmpdir):
     "field", ["UX", "UY", "UZ", "FX", "FY", "FZ", "TEMP", "HEAT", "VOLT", "CHRG"]
 )
 @pytest.mark.parametrize("magnitude", [0, 50, 500])
-def test_single_glyph(mapdl, field, magnitude, verify_image_cache):
-    mapdl.clear()
-    mapdl.prep7()
+def test_single_glyph(mapdl, cleared, field, magnitude, verify_image_cache):
     mapdl.et(1, 226)
     mapdl.keyopt(1, 1, 1011)  # Thermal-Piezoelectric
     mapdl.n(1, 0, 0, 0)
@@ -438,7 +469,7 @@ def test_bc_plot_bc_target_error(mapdl, boundary_conditions_example, bc_target):
         )
 
 
-def test_bc_no_mapdl(mapdl):
+def test_bc_no_mapdl(mapdl, cleared):
     with pytest.raises(ValueError):
         pl = MapdlPlotter()
         pl.plot([], [], [], plot_bc=True)
@@ -845,7 +876,7 @@ def test_pick_areas(mapdl, make_block, selection):
 def test_plotter_input(mapdl, make_block):
     import pyvista as pv
 
-    pl = MapdlPlotter(off_screen=False)
+    pl = MapdlPlotter()
     pl2 = mapdl.eplot(return_plotter=True, plotter=pl)
     assert pl is pl2
     pl2.show()  # plotting for catching
@@ -971,7 +1002,7 @@ def test_WithInterativePlotting(mapdl, make_block):
     os.remove(last_png)
 
 
-def test_file_type_for_plots(mapdl):
+def test_file_type_for_plots(mapdl, cleared):
     assert mapdl.file_type_for_plots in ["PNG", "TIFF", "PNG", "VRML", "TERM", "CLOSE"]
 
     mapdl.file_type_for_plots = "TIFF"
@@ -1109,3 +1140,133 @@ def test_node_numbering_order(mapdl, cleared):
     # There is no way to retrieve labels from the plotter object. So we cannot
     # test it.
     pl.show()
+
+
+def test_lplot_line(mapdl, cleared):
+    # Create keypoints 3 keypoints
+    mapdl.k(1, 0, 0, 0)
+    mapdl.k(2, 1, 0, 0)
+    mapdl.k(3, 1, 1, 0)
+
+    # Create line connecting keypoints 1 and 2
+    mapdl.l(1, 2)
+
+    # Plot the geometry
+    mapdl.lplot(
+        show_line_numbering=False, show_keypoint_numbering=True, color_lines=True
+    )
+
+
+@pytest.mark.parametrize(
+    "func,entity",
+    [("vplot", "VOLU"), ("aplot", "AREA"), ("lplot", "LINE"), ("kplot", "KP")],
+)
+@pytest.mark.parametrize("partial", [True, False])
+def test_xplot_not_changing_geo_selection(mapdl, cleared, func, entity, partial):
+    mapdl.prep7()
+    mapdl.block(0, 1, 0, 1, 0, 1)
+    mapdl.block(1, 2, 1, 2, 1, 2)
+    mapdl.block(2, 3, 2, 3, 2, 3)
+
+    mapdl.geometry._select_items(1, entity, "S")
+    mapdl.cm("selection1", entity)
+    mapdl.cmsel("u", "selection1")
+
+    mapdl.geometry._select_items(2, entity, "S")
+    mapdl.cm("selection2", entity)
+
+    if not partial:
+        mapdl.allsel()
+        mapdl.cmsel("all")
+
+    fn = getattr(mapdl, func)
+    check_geometry(mapdl, fn)
+
+
+def test_xplot_not_changing_geo_selection2(mapdl, cleared):
+    mapdl.rectng(0, 1, 0, 1)
+    mapdl.cm("area1", "area")
+    mapdl.cmsel("u", "area1")
+    mapdl.rectng(2, 4, -1, 1)
+    mapdl.cm("area2", "area")
+    mapdl.allsel()
+    mapdl.cmsel("all")
+
+    check_geometry(mapdl, mapdl.aplot)
+
+
+@pytest.mark.parametrize(
+    "plot_func,entity,gen_func,arg1,arg2",
+    [
+        ("vplot", "VOLU", "block", (0, 1, 0, 1, 0, 1), (1, 2, 1, 2, 1, 2)),
+        # Uncommenting the following lines, raise an exception for channel not
+        # alive. See #3421
+        # ("aplot", "AREA", "rectng", (0, 1, 0, 1), (1, 2, 1, 2)),
+        # ("lplot", "LINE", "l", (1, 1, 1), (1, -1, 1)),
+        # ("kplot", "KP", "k", ("", 0, 0, 0), ("", 1, 1, 1)),
+    ],
+)
+def test_xplot_not_changing_geo_selection_components(
+    mapdl, cleared, plot_func, entity, gen_func, arg1, arg2
+):
+    mapdl.prep7()
+    gen_func = getattr(mapdl, gen_func)
+
+    if entity == "LINE":
+        kp0 = mapdl.k("", 0, 0, 0)
+        kp1 = mapdl.k("", 1, 1, 1)
+        mapdl.l(kp0, kp1)
+    else:
+        gen_func(*arg1)
+
+    mapdl.cm("select1", entity)
+    mapdl.cmsel("u", "select1")
+
+    if entity == "LINE":
+        kp2 = mapdl.k("", 0, 0, 0)
+        kp3 = mapdl.k("", *arg2)
+        mapdl.l(kp2, kp3)
+    else:
+        gen_func(*arg2)
+
+    mapdl.cm("select2", entity)
+
+    mapdl.allsel()
+    mapdl.cmsel("all")
+
+    plot_func = getattr(mapdl, plot_func)
+    check_geometry(mapdl, plot_func)
+
+
+@pytest.mark.parametrize("quality", [101, -2, 0, "as"])
+def test_aplot_quality_fail(mapdl, make_block, quality):
+    with pytest.raises(
+        ValueError,
+        match="The argument 'quality' can only be an integer between 1 and 10",
+    ):
+        mapdl.aplot(quality=quality)
+
+
+@patch("ansys.mapdl.core.Mapdl.is_png_found", lambda *args, **kwargs: False)
+def test_plot_path(mapdl, tmpdir):
+    mapdl.graphics("POWER")
+
+    with pytest.raises(
+        MapdlRuntimeError,
+        match="One possible reason is that the graphics device is not correct",
+    ):
+        mapdl.eplot(vtk=False)
+
+
+def test_plot_path_screenshoot(mapdl, cleared, tmpdir):
+    mapdl.graphics("POWER")
+    # mapdl.screenshot is not affected by the device.
+    # It should not raise exceptions
+    scheenshot_path = os.path.join(tmpdir, "screenshot.png")
+    mapdl.screenshot(scheenshot_path)
+
+    assert os.path.exists(scheenshot_path)
+    assert os.path.getsize(scheenshot_path) > 100  # check if it is not empty
+
+    # Returning to previous state.
+    mapdl.graphics("FULL")

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -36,7 +36,7 @@ from ansys.mapdl.core.cli import main
     flag_value=True,
     type=bool,
     default=False,
-    help="Print only instances",
+    help="Do not print the child process, only the main processes (instances).",
 )
 @click.option(
     "--long",
@@ -65,12 +65,21 @@ from ansys.mapdl.core.cli import main
     default=False,
     help="Print running location info.",
 )
-def list_instances(instances, long, cmd, location):
+def list_instances(instances, long, cmd, location) -> None:
     import psutil
     from tabulate import tabulate
 
     # Assuming all ansys processes have -grpc flag
     mapdl_instances = []
+
+    def is_grpc_based(proc):
+        cmdline = proc.cmdline()
+        return "-grpc" in cmdline
+
+    def get_port(proc):
+        cmdline = proc.cmdline()
+        ind_grpc = cmdline.index("-port")
+        return cmdline[ind_grpc + 1]
 
     def is_valid_process(proc):
         valid_status = proc.status() in [
@@ -81,12 +90,7 @@ def list_instances(instances, long, cmd, location):
         valid_ansys_process = ("ansys" in proc.name().lower()) or (
             "mapdl" in proc.name().lower()
         )
-        # Early exit to avoid checking 'cmdline' of a protected process (raises psutil.AccessDenied)
-        if not valid_ansys_process:
-            return False
-
-        grpc_is_active = "-grpc" in proc.cmdline()
-        return valid_status and valid_ansys_process and grpc_is_active
+        return valid_status and valid_ansys_process and is_grpc_based(proc)
 
     for proc in psutil.process_iter():
         # Check if the process is running and not suspended
@@ -104,8 +108,6 @@ def list_instances(instances, long, cmd, location):
             continue
 
     # printing
-    table = []
-
     if long:
         cmd = True
         location = True
@@ -120,14 +122,10 @@ def list_instances(instances, long, cmd, location):
     if location:
         headers.append("Working directory")
 
-    def get_port(proc):
-        cmdline = proc.cmdline()
-        ind_grpc = cmdline.index("-port")
-        return cmdline[ind_grpc + 1]
-
     table = []
     for each_p in mapdl_instances:
         if instances and not each_p.ansys_instance:
+            # Skip child processes if only printing instances
             continue
 
         proc_line = []
