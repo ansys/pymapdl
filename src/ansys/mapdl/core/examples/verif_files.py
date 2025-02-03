@@ -20,8 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""loads a list of verification files
-"""
+"""loads a list of verification files"""
 import glob
 import inspect
 import os

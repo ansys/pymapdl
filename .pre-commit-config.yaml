@@ -21,7 +21,7 @@ repos:
     - --start_year=2016
 
 - repo: https://github.com/pycqa/isort
-  rev: 5.13.2
+  rev: 6.0.0
   hooks:
   - id: isort
 
@@ -39,7 +39,7 @@ repos:
           )
 
 - repo: https://github.com/psf/black
-  rev: 24.10.0  # If version changes --> modify "blacken-docs" manually as well.
+  rev: 25.1.0  # If version changes --> modify "blacken-docs" manually as well.
   hooks:
   - id: black
     args:
@@ -78,6 +78,6 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.31.0
+  rev: 0.31.1
   hooks:
     - id: check-github-workflows
