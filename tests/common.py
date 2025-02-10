@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -26,6 +26,7 @@ import os
 import subprocess
 import time
 from typing import Dict, List
+from warnings import warn
 
 import psutil
 
@@ -157,14 +158,14 @@ def testing_minimal():
     return os.environ.get("TESTING_MINIMAL", "NO").upper().strip() in ["YES", "TRUE"]
 
 
-def log_apdl() -> bool:
-    if os.environ.get("PYMAPDL_LOG_APDL"):
-        log_apdl = os.environ.get("PYMAPDL_LOG_APDL")
+def debug_testing() -> bool:
+    if os.environ.get("PYMAPDL_DEBUG_TESTING"):
+        debug_testing = os.environ.get("PYMAPDL_DEBUG_TESTING")
 
-        if log_apdl.lower() in ["true", "false", "yes", "no"]:
-            return log_apdl.lower() in ["true", "yes"]
+        if debug_testing.lower() in ["true", "false", "yes", "no"]:
+            return debug_testing.lower() in ["true", "yes"]
         else:
-            return log_apdl
+            return debug_testing
 
     else:
         return False
@@ -228,7 +229,7 @@ def log_test_start(mapdl: Mapdl) -> None:
     )
 
     mapdl.run("!")
-    mapdl.run(f"! PyMAPDL running test: {test_name}")
+    mapdl.run(f"! PyMAPDL running test: {test_name}"[:639])
     mapdl.run("!")
 
     # To see it also in MAPDL terminal output
@@ -241,6 +242,7 @@ def log_test_start(mapdl: Mapdl) -> None:
             types_ = ["File path", "Test function"]
 
         mapdl._run("/com,Running test in:", mute=True)
+
         for type_, name_ in zip(types_, test_name):
             mapdl._run(f"/com,    {type_}: {name_}", mute=True)
 
@@ -266,14 +268,20 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
         try:
             # to connect
             mapdl = Mapdl(port=port, ip=ip)
+            warn("MAPDL disconnected during testing, reconnected.")
 
         except MapdlConnectionError as err:
+            from conftest import DEBUG_TESTING, ON_LOCAL
+
             # Registering error.
             LOG.info(str(err))
 
             # we cannot connect.
             # Kill the instance
-            mapdl.exit()
+            try:
+                mapdl.exit()
+            except Exception as e:
+                LOG.error(f"An error occurred when killing the instance:\n{str(e)}")
 
             # Relaunching MAPDL
             mapdl = launch_mapdl(
@@ -281,8 +289,16 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
                 override=True,
                 run_location=mapdl._path,
                 cleanup_on_exit=mapdl._cleanup,
-                log_apdl=log_apdl(),
+                license_server_check=False,
+                start_timeout=50,
+                loglevel="DEBUG" if DEBUG_TESTING else "ERROR",
+                # If the following file names are changed, update `ci.yml`.
+                log_apdl="pymapdl.apdl" if DEBUG_TESTING else None,
+                mapdl_output="apdl.out" if (DEBUG_TESTING and ON_LOCAL) else None,
             )
+            warn("MAPDL died during testing, relaunched.")
+
+        LOG.info("Successfully re-connected to MAPDL")
 
         # Restoring the local configuration
         mapdl._local = local_

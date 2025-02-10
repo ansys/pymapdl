@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -25,7 +25,7 @@ import os
 
 import pytest
 
-from conftest import HAS_DPF, has_dependency, requires
+from conftest import HAS_DPF, ON_CI, has_dependency, requires
 
 if not has_dependency("ansys-dpf-core") or not HAS_DPF:
     pytest.skip(allow_module_level=True)
@@ -36,9 +36,20 @@ from ansys.dpf.core.server_types import DPF_DEFAULT_PORT
 DPF_PORT = os.environ.get("DPF_PORT", DPF_DEFAULT_PORT)  # Set in ci.yaml
 
 
+@pytest.fixture()
+def skip_dpf(mapdl):
+    mapdl_version = str(mapdl.version)
+    if mapdl_version in ["25.2"] and ON_CI:
+        pytest.skip(
+            f"This MAPDL version ({mapdl_version}) docker image seems to not support DPF on CICD.",
+            allow_module_level=True,
+        )
+    return
+
+
 @requires("dpf")
 @requires("ansys-dpf-core")
-def test_dpf_connection():
+def test_dpf_connection(skip_dpf):
     # uses 127.0.0.1 and port 50054 by default
     try:
         grpc_con = dpf.connect_to_server(port=DPF_PORT)
@@ -50,11 +61,11 @@ def test_dpf_connection():
 
 @requires("dpf")
 @requires("ansys-dpf-core")
-def test_upload(mapdl, solved_box, tmpdir):
+def test_upload(skip_dpf, mapdl, solved_box, tmpdir):
     # Download RST file
     rst_path = mapdl.download_result(str(tmpdir.mkdir("tmpdir")))
 
-    # Stabilishing connection
+    # Establishing connection
     grpc_con = dpf.connect_to_server(port=DPF_PORT)
     assert grpc_con.live
 

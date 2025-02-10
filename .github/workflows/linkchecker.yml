@@ -21,7 +21,7 @@ env:
 jobs:
   linkchecker:
     name: Check Links
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 60
     env:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners

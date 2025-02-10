@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-""""Testing of log module"""
+""" "Testing of log module"""
 import logging as deflogging  # Default logging
 import os
 import re
@@ -287,7 +287,12 @@ def test_log_to_file(tmpdir):
     LOG.logger.setLevel("ERROR")
     LOG.std_out_handler.setLevel("ERROR")
 
-    if not LOG.file_handler:
+    if LOG.file_handler is None:
+        old_logger = None
+        LOG.log_to_file(file_path)
+    else:
+        # the logger has been already instantiated
+        old_logger = LOG.file_handler.baseFilename
         LOG.log_to_file(file_path)
 
     LOG.error(file_msg_error)
@@ -312,6 +317,9 @@ def test_log_to_file(tmpdir):
         text = "".join(fid.readlines())
 
     assert file_msg_debug in text
+
+    if old_logger is not None:
+        LOG.log_to_file(old_logger)
 
 
 def test_log_instance_name(mapdl, cleared):

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -35,7 +35,7 @@ from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.misc import threaded_daemon
 
 if _HAS_ATP:
-    from ansys.tools.path import get_ansys_path, version_from_path
+    from ansys.tools.path import get_mapdl_path, version_from_path
 
 LOCALHOST = "127.0.0.1"
 LIC_PATH_ENVAR = "ANSYSLIC_DIR"
@@ -498,7 +498,7 @@ def get_ansys_license_debug_file_name():  # pragma: no cover
     hostname = socket.gethostname()
     appname = APP_NAME
     # This is the type of license my client requests (Windows 10, 2021R2)
-    version = version_from_path("mapdl", get_ansys_path(allow_input=False))
+    version = version_from_path("mapdl", get_mapdl_path(allow_input=False))
     ending = "out"
 
     if version < 221:

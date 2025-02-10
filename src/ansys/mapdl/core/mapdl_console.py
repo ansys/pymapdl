@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -119,15 +119,18 @@ class MapdlConsole(MapdlBase):
         self._continue_on_error = False
         self._process = None
         self._name = None
+        self._session_id = None
+        self._cleanup = None
+
         self._launch(start_parm)
         super().__init__(
             loglevel=loglevel,
             use_vtk=use_vtk,
             log_apdl=log_apdl,
             print_com=print_com,
+            mode="console",
             **start_parm,
         )
-        self._mode = "console"
 
     def _launch(self, start_parm):
         """Connect to MAPDL process using pexpect"""
