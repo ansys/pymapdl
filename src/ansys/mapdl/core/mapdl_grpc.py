@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""A gRPC specific class and methods for the MAPDL gRPC client """
+"""A gRPC specific class and methods for the MAPDL gRPC client"""
 
 import fnmatch
 from functools import wraps
