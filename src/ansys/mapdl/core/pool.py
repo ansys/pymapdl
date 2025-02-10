@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -41,7 +41,7 @@ from ansys.mapdl.core.launcher import (
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
 
 if _HAS_ATP:
-    from ansys.tools.path import get_ansys_path, version_from_path
+    from ansys.tools.path import get_mapdl_path, version_from_path
 
 if _HAS_TQDM:
     from tqdm import tqdm
@@ -281,7 +281,7 @@ class MapdlPool:
 
             if not exec_file:  # get default executable
                 if _HAS_ATP:
-                    exec_file = get_ansys_path()
+                    exec_file = get_mapdl_path()
                 else:
                     raise ValueError(
                         "Please use 'exec_file' argument to specify the location of the ansys installation.\n"
@@ -614,8 +614,10 @@ class MapdlPool:
                     try:
                         self._exiting_i += 1
                         instance.exit()
-                    except Exception as e:
-                        LOG.error("Failed to close instance", exc_info=True)
+                    except Exception:
+                        LOG.error(
+                            f"Failed to close instance due to:\n{e}", exc_info=True
+                        )
                         self._exiting_i -= 1
 
             else:

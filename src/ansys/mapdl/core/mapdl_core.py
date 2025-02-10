@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -88,6 +88,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 from ansys.mapdl.core.post import PostProcessing
 
+MAX_PARAM_CHARS = 32
+
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 
 VALID_DEVICES = ["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
@@ -102,6 +104,24 @@ _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*is turning inside out.",
     r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*The distributed memory parallel solution does not support KRYLOV method",
 ]
+
+_TMP_COMP = {
+    "KP": "cmp_kp",
+    "LINE": "cmp_line",
+    "AREA": "cmp_area",
+    "VOLU": "cmp_volu",
+    "NODE": "cmp_node",
+    "ELEM": "cmp_elem",
+}
+
+ENTITIES_TO_SELECTION_MAPPING = {
+    "KP": "ksel",
+    "LINE": "lsel",
+    "AREA": "asel",
+    "VOLU": "vsel",
+    "NODE": "nsel",
+    "ELEM": "esel",
+}
 
 # test for png file
 PNG_IS_WRITTEN_TO_FILE = re.compile(
@@ -178,6 +198,7 @@ _ALLOWED_START_PARM = [
     "jobid",
     "jobname",
     "launch_on_hpc",
+    "mode",
     "nproc",
     "override",
     "port",
@@ -252,7 +273,7 @@ class _MapdlCore(Commands):
         self._store_commands: bool = False
         self._stored_commands = []
         self._response = None
-        self._mode = None
+        self._mode = start_parm.get("mode", None)
         self._mapdl_process = None
         self._launched: bool = start_parm.get("launched", False)
         self._stderr = None
@@ -1290,6 +1311,9 @@ class _MapdlCore(Commands):
 
     def _wrap_xsel_commands(self):
         # Wrapping XSEL commands.
+        if self.is_console:
+            return
+
         def wrap_xsel_function(func):
             if hasattr(func, "__func__"):
                 func.__func__.__doc__ = inject_docs(
@@ -1317,6 +1341,10 @@ class _MapdlCore(Commands):
                     return self.geometry.anum
                 elif name == "VSEL":
                     return self.geometry.vnum
+                elif name == "ESLN":
+                    return self.mesh.enum
+                elif name == "NSLE":
+                    return self.mesh.nnum
                 else:
                     return None
 
@@ -1392,7 +1420,10 @@ class _MapdlCore(Commands):
             self._parent = weakref.ref(parent)
 
         def __enter__(self):
-            self._parent()._log.debug("Entering non-interactive mode")
+            self._parent()._log.debug("Entering in non-interactive mode")
+            if self._parent().logger.logger.level <= logging.DEBUG:
+                # only commenting if on debug mode
+                self._parent().com("Entering in non_interactive mode")
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
@@ -1423,32 +1454,41 @@ class _MapdlCore(Commands):
 
             # Storing components
             selection = {
-                "cmsel": mapdl.components.names,
-                # "components_type": mapdl.components.types,
-                "nsel": mapdl.mesh.nnum,
-                "esel": mapdl.mesh.enum,
-                "ksel": mapdl.geometry.knum,
-                "lsel": mapdl.geometry.lnum,
-                "asel": mapdl.geometry.anum,
-                "vsel": mapdl.geometry.vnum,
+                "cmsel": mapdl.components._comp,
             }
+            id_ = random_string(5)
+            for each_type, each_name in _TMP_COMP.items():
+                each_name = f"__{each_name}{id_}__"
+                selection[each_type] = each_name
+                mapdl.cm(
+                    each_name, each_type, mute=True
+                )  # to hide ComponentNoData error
 
             self.selection.append(selection)
 
         def __exit__(self, *args):
             self._parent()._log.debug("Exiting saving selection context")
-            selection = self.selection.pop()
-            mapdl = self._parent()
 
+            mapdl = self._parent()
+            mapdl.allsel()
+            mapdl.cmsel("None")
+
+            selection = self.selection.pop()
             cmps = selection.pop("cmsel")
 
             if cmps:
-                mapdl.components.select(cmps)
+                for each_name, each_value in cmps.items():
+                    mapdl.cmsel("a", each_name, each_value, mute=True)
 
-            for select_cmd, ids in selection.items():
-                if ids.size > 0:
-                    func = getattr(mapdl, select_cmd)
-                    func(vmin=ids)
+            for each_type, each_name in selection.items():
+                mapdl.cmsel("a", each_name, each_type, mute=True)
+
+                selfun = getattr(
+                    mapdl, ENTITIES_TO_SELECTION_MAPPING[each_type.upper()]
+                )
+                selfun("s", vmin=each_name, mute=True)
+
+                mapdl.cmdele(each_name, mute=True)
 
     class _chain_commands:
         """Store MAPDL commands and send one chained command."""
@@ -1626,7 +1666,7 @@ class _MapdlCore(Commands):
         >>> mapdl.eplot()
         """
         # lazy load here to avoid circular import
-        from ansys.mapdl.core.launcher import get_ansys_path
+        from ansys.mapdl.core.launcher import get_mapdl_path
 
         if not self._local:
             raise MapdlRuntimeError(
@@ -1703,7 +1743,7 @@ class _MapdlCore(Commands):
         # issue system command to run ansys in GUI mode
         cwd = os.getcwd()
         os.chdir(run_dir)
-        exec_file = self._start_parm.get("exec_file", get_ansys_path(allow_input=False))
+        exec_file = self._start_parm.get("exec_file", get_mapdl_path(allow_input=False))
         nproc = self._start_parm.get("nproc", 2)
         add_sw = self._start_parm.get("additional_switches", "")
 
@@ -2179,6 +2219,11 @@ class _MapdlCore(Commands):
         if "\n" in command or "\r" in command:
             raise ValueError("Use ``input_strings`` for multi-line commands")
 
+        if len(command) > 639:  # CMD_MAX_LENGTH
+            # If using mapdl_grpc, this check is redundant on purpose.
+            # Console probably do not have this limitation, but I'm not certain.
+            raise ValueError("Maximum command length must be less than 640 characters")
+
         # Check kwargs
         verbose = kwargs.pop("verbose", False)
         save_fig = kwargs.pop("savefig", False)
@@ -2215,6 +2260,8 @@ class _MapdlCore(Commands):
                 mute = False
 
         command = command.strip()
+
+        is_comment = command.startswith("!") or command.upper().startswith("/COM")
 
         # always reset the cache
         self._reset_cache()
@@ -2261,7 +2308,7 @@ class _MapdlCore(Commands):
             # simply return the contents of the file
             return self.list(*command.split(",")[1:])
 
-        if "=" in command:
+        if "=" in command and not is_comment:
             # We are storing a parameter.
             param_name = command.split("=")[0].strip()
 
@@ -2272,6 +2319,7 @@ class _MapdlCore(Commands):
         self._before_run(command)
 
         short_cmd = parse_to_short_cmd(command)
+        self._log.debug(f"Running (verbose: {verbose}, mute={mute}): '{command}'")
         text = self._run(command, verbose=verbose, mute=mute)
 
         if (
@@ -2471,12 +2519,14 @@ class _MapdlCore(Commands):
 
         param_name = param_name.strip()
 
-        match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0,31}$"
+        match_valid_parameter_name = (
+            r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0," + f"{MAX_PARAM_CHARS-1}" + r"}$"
+        )
         # Using % is allowed, because of substitution, but it is very likely MAPDL will complain.
         if not re.search(match_valid_parameter_name, param_name):
             raise ValueError(
-                f"The parameter name `{param_name}` is an invalid parameter name."
-                "Only letters, numbers and `_` are permitted, up to 32 characters long."
+                f"The parameter name `{param_name}` is an invalid parameter name. "
+                f"Only letters, numbers and `_` are permitted, up to {MAX_PARAM_CHARS} characters long. "
                 "It cannot start with a number either."
             )
 
@@ -2500,7 +2550,7 @@ class _MapdlCore(Commands):
 
         # Using leading underscored parameters
         match_reserved_leading_underscored_parameter_name = (
-            r"^_[a-zA-Z\d_\(\),\s_]{1,31}[a-zA-Z\d\(\),\s]$"
+            r"^_[a-zA-Z\d_\(\),\s_]{1," + f"{MAX_PARAM_CHARS}" + r"}[a-zA-Z\d\(\),\s]$"
         )
         # If it also ends in underscore, this won't be triggered.
         if re.search(match_reserved_leading_underscored_parameter_name, param_name):
@@ -2873,11 +2923,6 @@ class _MapdlCore(Commands):
                     [each for each in error_message.splitlines() if each]
                 )
 
-                # Trimming empty lines
-                error_message = "\n".join(
-                    [each for each in error_message.splitlines() if each]
-                )
-
                 # Checking for permitted error.
                 for each_error in _PERMITTED_ERRORS:
                     permited_error_message = re.search(each_error, error_message)
@@ -2907,6 +2952,7 @@ class _MapdlCore(Commands):
             self._platform = "windows"
         else:  # pragma: no cover
             raise MapdlRuntimeError("Unknown platform: {}".format(platform))
+        self.logger.debug(f"MAPDL is running on {self._platform} OS.")
 
     def _check_on_docker(self):
         """Check if MAPDL is running on docker."""

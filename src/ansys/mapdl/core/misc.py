@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,7 +22,7 @@
 
 """Module for miscellaneous functions and methods"""
 from enum import Enum
-from functools import wraps
+from functools import cache, wraps
 import importlib
 import inspect
 import os
@@ -112,7 +112,7 @@ def random_string(stringLength: int = 10, letters: str = string.ascii_lowercase)
     return "".join(secrets.choice(letters) for _ in range(stringLength))
 
 
-def _check_has_ansys() -> bool:
+def check_has_mapdl() -> bool:
     """Safely wraps check_valid_ansys
 
     Returns
@@ -125,7 +125,10 @@ def _check_has_ansys() -> bool:
 
     try:
         return check_valid_ansys()
-    except:
+    except Exception as err:
+        LOG.error(
+            f"An error was obtained when checking for a valid MAPDL installation:\n{str(err)}"
+        )
         return False
 
 
@@ -412,6 +415,16 @@ def write_array(filename: Union[str, bytes], array: np.ndarray) -> None:
     np.savetxt(filename, array, fmt="%20.12f")
 
 
+@cache
+def is_package_installed_cached(package_name):
+    try:
+        importlib.import_module(package_name)
+        return True
+
+    except ModuleNotFoundError:
+        return False
+
+
 def requires_package(package_name: str, softerror: bool = False) -> Callable:
     """
     Decorator check whether a package is installed or not.
@@ -427,11 +440,11 @@ def requires_package(package_name: str, softerror: bool = False) -> Callable:
     def decorator(function):
         @wraps(function)
         def wrapper(self, *args, **kwargs):
-            try:
-                importlib.import_module(package_name)
+
+            if is_package_installed_cached(package_name):
                 return function(self, *args, **kwargs)
 
-            except ModuleNotFoundError:
+            else:
                 msg = (
                     f"To use the method '{function.__name__}', "
                     f"the package '{package_name}' is required.\n"
@@ -568,9 +581,10 @@ def allow_iterables_vmin(entity: str = "node") -> Callable:
                     # assuming you want to select nothing because you supplied an empty list/tuple/array
                     return original_sel_func(self, "none")
 
-                self._perform_entity_list_selection(
-                    entity, original_sel_func, type_, item, comp, vmin, kabs
-                )
+                with self.non_interactive:  # to speed up
+                    self._perform_entity_list_selection(
+                        entity, original_sel_func, type_, item, comp, vmin, kabs
+                    )
 
                 if kwargs.pop("Used_P", False):
                     # we want to return the

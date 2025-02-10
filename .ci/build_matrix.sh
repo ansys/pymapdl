@@ -9,7 +9,10 @@ versions=(
     # if added more "latest", change "$LATEST"
     'latest-ubuntu' 
     'latest-ubuntu-student'
+    'v25.2.0'
     'v25.1.0'
+    'v25.1-ubuntu'
+    'v25.1-ubuntu-student'
     'v24.2.0'
     'v24.2-ubuntu'
     'v24.2-ubuntu-student'
@@ -28,6 +31,9 @@ LATEST=3 # for 'latest-ubuntu' and 'latest-ubuntu-student'
 
 # Run only ubuntu jobs
 ONLY_UBUNTU="${ONLY_UBUNTU:-false}"
+
+# On remote
+ON_REMOTE="${ON_REMOTE:-false}"
 
 # Do not process more than the $AUTH_USER_LIMIT_VERSIONS versions in above list
 AUTH_USER_LIMIT_VERSIONS="${AUTH_USER_LIMIT_VERSIONS:-2}"
@@ -94,12 +100,19 @@ for version in "${versions[@]}"; do
         continue
     fi
 
-    # Skipping student versions on auth_user
-    if [[ "$auth_user" == "true" && "$ON_STUDENT" == "true" ]]; then
-        echo "Skipping student versions when user is authenticated"
+    # Skipping if on remote and on student
+    if [[ "$ON_STUDENT" != "true" && "$ON_REMOTE" == "true" ]]; then
+        echo "Skipping non-student versions when running on remote"
         echo ""
         continue
     fi
+
+    # Skipping student versions on auth_user
+    # if [[ "$auth_user" == "true" && "$ON_STUDENT" == "true" ]]; then
+    #     echo "Skipping student versions when user is authenticated"
+    #     echo ""
+    #     continue
+    # fi
 
     # main logic
     if [[ "$auth_user" == "true" ]]; then

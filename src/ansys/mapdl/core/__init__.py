@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import importlib.metadata as importlib_metadata
-
 ###############################################################################
 # Imports
 # =======
@@ -40,16 +38,15 @@ from platformdirs import user_data_dir
 #
 from ansys.mapdl.core.logging import Logger
 
-LOG = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
+LOG: Logger = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
 LOG.debug("Loaded logging module as LOG")
 
 ###############################################################################
 # Globals
 # =======
 #
+from ansys.mapdl.core._version import __version__
 from ansys.mapdl.core.helpers import is_installed, run_every_import, run_first_time
-
-__version__: str = importlib_metadata.version(__name__.replace(".", "-"))
 
 # A dictionary relating PyMAPDL server versions with the unified install ones
 VERSION_MAP: Dict[Tuple[int, int, int], str] = {
@@ -69,17 +66,21 @@ MINIMUM_PYTHON_VERSION: Tuple[int, int] = (3, 10)
 
 # Import related globals
 _HAS_ATP: bool = is_installed("ansys.tools.path")
+_HAS_CLICK: bool = is_installed("click")
 _HAS_PIM: bool = is_installed("ansys.platform.instancemanagement")
+_HAS_PANDAS: bool = is_installed("pandas")
 _HAS_PYANSYS_REPORT: bool = is_installed("ansys.tools.report")
 _HAS_PYVISTA: bool = is_installed("pyvista")
+_HAS_REQUESTS: bool = is_installed("requests")
 _HAS_TQDM: bool = is_installed("tqdm")
 _HAS_VISUALIZER: bool = is_installed("ansys.tools.visualization_interface")
 
+
 # Setup directories
 USER_DATA_PATH: str = user_data_dir(appname="ansys_mapdl_core", appauthor="Ansys")
-EXAMPLES_PATH = os.path.join(USER_DATA_PATH, "examples")
+EXAMPLES_PATH: str = os.path.join(USER_DATA_PATH, "examples")
 
-# Store local ports
+# Store ports occupied by local instances
 _LOCAL_PORTS: List[int] = []
 
 ###############################################################################
@@ -115,7 +116,7 @@ else:
 
 from ansys.mapdl.core.information import Information
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc as Mapdl
-from ansys.mapdl.core.misc import _check_has_ansys
+from ansys.mapdl.core.misc import check_has_mapdl
 from ansys.mapdl.core.pool import MapdlPool
 from ansys.mapdl.core.report import Report
 
@@ -128,8 +129,8 @@ if _HAS_ATP:
     from ansys.tools.path.path import (
         change_default_ansys_path,
         find_mapdl,
-        get_ansys_path,
         get_available_ansys_installations,
+        get_mapdl_path,
         save_ansys_path,
     )
 
