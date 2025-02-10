@@ -779,15 +779,20 @@ def test_set_parameters_string_spaces(mapdl, cleared):
 
 
 def test_set_parameters_too_long(mapdl, cleared):
+    from ansys.mapdl.core.mapdl_core import MAX_PARAM_CHARS
+
+    parm_name = "a" * (MAX_PARAM_CHARS + 1)
     with pytest.raises(
-        ValueError, match="Length of ``name`` must be 32 characters or less"
+        ValueError,
+        match=f"The parameter name `{parm_name}` is an invalid parameter name.* {MAX_PARAM_CHARS} characters long",
     ):
-        mapdl.parameters["a" * 32] = 2
+        mapdl.parameters[parm_name] = 2
 
     with pytest.raises(
-        ValueError, match="Length of ``value`` must be 32 characters or less"
+        ValueError,
+        match=f"Length of ``value`` must be {MAX_PARAM_CHARS} characters or less",
     ):
-        mapdl.parameters["asdf"] = "a" * 32
+        mapdl.parameters["asdf"] = "a" * (MAX_PARAM_CHARS + 1)
 
 
 def test_builtin_parameters(mapdl, cleared):
