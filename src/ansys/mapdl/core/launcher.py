@@ -523,7 +523,7 @@ def launch_grpc(
         stderr=stderr,
         env_vars=env_vars,
         ssh_session=ssh_session,
-    )
+    )  # nosec B604
 
 
 def check_mapdl_launch(
