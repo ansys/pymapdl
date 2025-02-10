@@ -416,6 +416,7 @@ jobs:
       PYMAPDL_START_INSTANCE: FALSE
       ON_LOCAL: FALSE
       ON_UBUNTU: FALSE
+      HAS_DPF: true
 
     outputs:
       DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
@@ -652,6 +653,7 @@ jobs:
       ON_UBUNTU: true
       P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"
       PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
+      HAS_DPF: true
 
     steps:
       - name: "Install Git and checkout project"
