@@ -198,7 +198,7 @@ def test_generate_mapdl_launch_command_windows():
     jobname = "myjob"
     nproc = 10
     port = 1000
-    ram = 2
+    ram = 2024
     additional_switches = "-my_add=switch"
 
     cmd = generate_mapdl_launch_command(
@@ -218,7 +218,7 @@ def test_generate_mapdl_launch_command_windows():
     assert "-port" in cmd
     assert f"{port}" in cmd
     assert "-m" in cmd
-    assert f"{ram*1024}" in cmd
+    assert f"{ram}" in cmd
     assert "-np" in cmd
     assert f"{nproc}" in cmd
     assert "-grpc" in cmd
@@ -233,7 +233,7 @@ def test_generate_mapdl_launch_command_windows():
     assert f"{exec_file}" in cmd
     assert f" -j {jobname} " in cmd
     assert f" -port {port} " in cmd
-    assert f" -m {ram*1024} " in cmd
+    assert f" -m {ram} " in cmd
     assert f" -np {nproc} " in cmd
     assert " -grpc" in cmd
     assert f" {additional_switches} " in cmd
@@ -249,7 +249,7 @@ def test_generate_mapdl_launch_command_linux():
     jobname = "myjob"
     nproc = 10
     port = 1000
-    ram = 2
+    ram = 2024
     additional_switches = "-my_add=switch"
 
     cmd = generate_mapdl_launch_command(
@@ -271,7 +271,7 @@ def test_generate_mapdl_launch_command_linux():
     assert "-port" in cmd
     assert f"{port}" in cmd
     assert "-m" in cmd
-    assert f"{ram*1024}" in cmd
+    assert f"{ram}" in cmd
     assert "-np" in cmd
     assert f"{nproc}" in cmd
     assert "-grpc" in cmd
@@ -287,7 +287,7 @@ def test_generate_mapdl_launch_command_linux():
     assert f"{exec_file} " in cmd
     assert f" -j {jobname} " in cmd
     assert f" -port {port} " in cmd
-    assert f" -m {ram*1024} " in cmd
+    assert f" -m {ram} " in cmd
     assert f" -np {nproc} " in cmd
     assert " -grpc" in cmd
     assert f" {additional_switches} " in cmd
