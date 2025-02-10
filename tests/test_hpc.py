@@ -47,7 +47,7 @@ def test_launch_on_remote_hpc():
 
         hostname = "myhost"
         username = "myuser"
-        password = "mypass"
+        password = "mypass"  # nosec B105
         exec_file = "my/path/to/ansys"
         port = 50054
 

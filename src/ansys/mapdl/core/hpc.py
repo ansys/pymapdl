@@ -417,7 +417,9 @@ class SshSession:
             cmd = " ".join(cmd)
 
         LOG.debug(cmd)
-        stdin, stdout, stderr = self.exec_command(command=cmd, environment=environment)
+        _, stdout, stderr = self.exec_command(
+            command=cmd, environment=environment
+        )  # nosec B78
 
         if stderr:
             raise Exception(f"ERROR: {stderr}")
