@@ -57,7 +57,6 @@ from common import (
 # Setting testing environment
 # ---------------------------
 #
-
 DEBUG_TESTING = debug_testing()
 TESTING_MINIMAL = testing_minimal()
 
@@ -621,7 +620,9 @@ def mapdl(request, tmpdir_factory):
         mapdl._local = True
         mapdl._exited = False
         assert mapdl.finish_job_on_exit
-        mapdl.exit(save=True, force=True)
+
+        mapdl.exit(save=False, force=True)
+
         assert mapdl._exited
         assert "MAPDL exited" in str(mapdl)
 
@@ -636,8 +637,8 @@ def mapdl(request, tmpdir_factory):
             with pytest.raises(MapdlExitedError):
                 mapdl._send_command_stream("/PREP7")
 
-        # Delete Mapdl object
-        del mapdl
+    # Delete Mapdl object
+    del mapdl
 
 
 ################################################################

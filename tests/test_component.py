@@ -383,3 +383,12 @@ class Test_components(TestClass):
         assert [("MYCOMP1", "NODE"), ("MYCOMP2", "KP")] == list(
             mapdl.components.items()
         )
+
+    @staticmethod
+    def test_dunder_methods_len(mapdl, basic_components):
+        assert len(mapdl.components) == 2
+        mapdl.components["mycomp3"] = "NODE", [1, 2]
+        assert len(mapdl.components) == 3
+        mapdl.nsel("s", vmin=1)
+        mapdl.cm("asdf", "node")
+        assert len(mapdl.components) == 4

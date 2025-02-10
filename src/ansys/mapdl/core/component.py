@@ -83,7 +83,7 @@ WARNING_ENTITY: str = (
 
 
 def _check_valid_pyobj_to_entities(
-    items: Union[Tuple[int, ...], List[int], NDArray[Any]]
+    items: Union[Tuple[int, ...], List[int], NDArray[Any]],
 ) -> None:
     """Check whether the python objects can be converted to entities.
     At the moment, only list and numpy arrays of ints are allowed.
@@ -470,6 +470,16 @@ class ComponentManager:
 
         """
         yield from self._comp.keys()
+
+    def __len__(self) -> int:
+        """Return the number of components
+
+        Returns
+        -------
+        int
+            Number of components
+        """
+        return self._comp.__len__()
 
     @property
     def names(self) -> Tuple[str]:

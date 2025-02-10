@@ -25,6 +25,8 @@ with other programs, libraries, and features in development.
 +------------------------------------------------------+--------------------------------------------------------------------------------------------+
 | :ref:`hpc_ml_ga_example`                             |  Demonstrates how to use PyMAPDL in a high-performance computing system managed by SLURM.  |
 +------------------------------------------------------+--------------------------------------------------------------------------------------------+
+| :ref:`stochastic_fem_example`                        |  Demonstrates using PyMAPDL for stochastic FEA using Monte Carlo simulation.               |
++------------------------------------------------------+--------------------------------------------------------------------------------------------+
 
 
 .. toctree::
@@ -39,4 +41,5 @@ with other programs, libraries, and features in development.
     executable/executable.rst
     gui/executable.rst
     hpc/hpc_ml_ga.rst
+    sfem/stochastic_fem.rst
 
