@@ -561,6 +561,13 @@ class ansXpl:
 
     @property
     def opened(self):
+        """
+        Check if a file is currently open.
+
+        Returns:
+            str or None: The filename if a file is open, otherwise None.
+        """
+
         if self._open:
             return self._filename
         else:
