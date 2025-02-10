@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-""""Testing of log module"""
+""" "Testing of log module"""
 import logging as deflogging  # Default logging
 import os
 import re
