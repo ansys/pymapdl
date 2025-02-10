@@ -61,17 +61,15 @@ class Test_xpl:
 
         # Delete files
         self.full_file = mapdl.jobname + ".full"
+
         if "full.file" in mapdl.list_files():
             mapdl.slashdelete("full.file")
 
         if mapdl.result_file in mapdl.list_files():
             mapdl.slashdelete(mapdl.result_file)
 
-        if mapdl.result_file in mapdl.list_files():
-            mapdl.slashdelete(mapdl.result_file)
-
         # solve first 10 non-trivial modes
-        mapdl.modal_analysis(nmode=10, freqb=1)
+        mapdl.modal_analysis(nmode=10, freqb=1, method="UNSYMM")
         mapdl.save("cube_solve_xpl")
 
     @pytest.fixture(scope="class")
