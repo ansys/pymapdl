@@ -223,6 +223,7 @@ class Test_SshSession:
     @pytest.mark.parametrize("cmd", ["exec_command", "run"])
     def test_failed_not_connected_after_started(self, cmd):
         with patch("paramiko.client.SSHClient.connect") as mck_connect:
+            mck_connect.return_value = None
             with pytest.raises(Exception, match="ssh session is not connected"):
                 with SshSession("myhost", "myuser", "mypass") as ssh:
                     ssh._connected = False
@@ -275,7 +276,7 @@ class Test_SshSession:
             assert mck_run.call_args_list[1].args[0] == f"cd {cwd};{cmd}"
             assert mck_run.call_args_list[1].kwargs["environment"] == env
 
-    def test_submit(self):
+    def test_submit_fail(self):
         with (
             patch("paramiko.client.SSHClient.connect") as mck_connect,
             patch("paramiko.client.SSHClient.close") as mck_close,
@@ -287,6 +288,7 @@ class Test_SshSession:
             error = "Failed to run command"
 
             mck_run.side_effect = Exception(error)
+            mck_connect.return_value = None
 
             with pytest.raises(Exception, match=f"Unexpected error occurred: {error}"):
                 with SshSession("myhost", "myuser", "mypass") as ssh:
