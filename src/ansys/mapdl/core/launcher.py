@@ -2527,7 +2527,7 @@ def get_cpus(args: Dict[str, Any]):
     # Bypassing number of processors checks because VDI/VNC might have
     # different number of processors than the cluster compute nodes.
     # Also the CPUs are set in `get_slurm_options`
-    if args["running_on_hpc"]:
+    if args.get("running_on_hpc"):
         return
 
     # Setting number of processors

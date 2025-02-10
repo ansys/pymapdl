@@ -36,8 +36,6 @@ from ansys.mapdl.core.launcher import (
     generate_start_parameters,
     get_cpus,
     get_job_info,
-    get_slurm_options,
-    is_running_on_slurm,
     kill_job,
     launch_grpc,
     pack_arguments,
@@ -73,7 +71,6 @@ def launch_on_remote_hpc(
     print_com: bool = False,
     add_env_vars: Optional[Dict[str, str]] = None,
     replace_env_vars: Optional[Dict[str, str]] = None,
-    running_on_hpc: bool = True,
     launch_on_hpc: bool = True,
     mapdl_output: Optional[str] = None,
     **kwargs: Dict[str, Any],
@@ -102,9 +99,7 @@ def launch_on_remote_hpc(
         MAPDL jobname.  Defaults to ``'file'``.
 
     nproc : int, optional
-        Number of processors.  Defaults to ``2``. If running on an HPC cluster,
-        this value is adjusted to the number of CPUs allocated to the job,
-        unless the argument ``running_on_hpc`` is set to ``"false"``.
+        Number of processors.  Defaults to ``2``.
 
     ram : float, optional
         Total size in megabytes of the workspace (memory) used for the initial
@@ -238,21 +233,10 @@ def launch_on_remote_hpc(
     args["start_instance"] = True
     args["version"] = None
 
-    pre_check_args(args)
-
     if args.get("ip", None):
         raise ValueError("Argument IP is not allowed for launching MAPDL on HPC.")
 
-    ########################################
-    # SLURM settings
-    # --------------
-    # Checking if running on SLURM HPC
-    #
-    if is_running_on_slurm(args):
-        LOG.info("On Slurm mode.")
-
-        # extracting parameters
-        get_slurm_options(args, kwargs)
+    pre_check_args(args)
 
     get_cpus(args)
 
@@ -294,7 +278,7 @@ def launch_on_remote_hpc(
 
     LOG.debug(f"Using additional switches {args['additional_switches']}.")
 
-    if args["running_on_hpc"] or args["launch_on_hpc"]:
+    if args["launch_on_hpc"]:
         env_vars.setdefault("ANS_MULTIPLE_NODES", "1")
         env_vars.setdefault("HYDRA_BOOTSTRAP", "slurm")
         env_vars.setdefault("I_MPI_SHM_LMT", "shm")  # ubuntu
@@ -434,7 +418,7 @@ class SshSession:
 
             return self.run(cmd, environment=environment)
 
-        except IOError as e:
+        except Exception as e:
             raise Exception(f"Unexpected error occurred: {e}")
         finally:
             self.session.close()
