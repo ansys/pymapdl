@@ -47,6 +47,15 @@ class Test_xpl:
 
         clear(mapdl)
 
+        # Delete files
+        self.full_file = mapdl.jobname + ".full"
+
+        if "full.file" in mapdl.list_files():
+            mapdl.slashdelete("full.file")
+
+        if mapdl.result_file in mapdl.list_files():
+            mapdl.slashdelete(mapdl.result_file)
+
         # set up the full file
         mapdl.block(0, 1, 0, 1, 0, 1)
         mapdl.et(1, 186)
@@ -59,18 +68,9 @@ class Test_xpl:
         mapdl.esize(0.5)
         mapdl.vmesh("all")
 
-        # Delete files
-        self.full_file = mapdl.jobname + ".full"
-
-        if "full.file" in mapdl.list_files():
-            mapdl.slashdelete("full.file")
-
-        if mapdl.result_file in mapdl.list_files():
-            mapdl.slashdelete(mapdl.result_file)
-
         # solve first 10 non-trivial modes
-        mapdl.modal_analysis(nmode=10, freqb=1, method="UNSYMM")
-        mapdl.save("cube_solve_xpl")
+        mapdl.modal_analysis(nmode=10, freqb=1)
+        mapdl.save("cube_solve_xpl", slab="all")
 
     @pytest.fixture(scope="class")
     def cube_solve(self, mapdl):
@@ -86,7 +86,8 @@ class Test_xpl:
             self.create_cube(mapdl)
 
         xpl.open(self.full_file)
-        return xpl
+        yield xpl
+        xpl.close()
 
     @staticmethod
     def test_close(xpl):
