@@ -360,18 +360,28 @@ def launch_on_remote_hpc(
 
 class SshSession:
 
-    def __init__(self, hostname: str, username: str, password: str, port: int = 22):
-        port = port or 22
-
+    def __init__(
+        self,
+        hostname: str,
+        username: str,
+        password: str,
+        port: int = 22,
+        allow_missing_host_key: bool = False,
+    ):
         self.username = username
         self.hostname = hostname
         self.password = password
         self.port = port
+        self.allow_missing_host_key = allow_missing_host_key
         self._connected = False
 
     def __enter__(self):
         self.session = SSHClient()
-        self.session.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        if self.allow_missing_host_key:
+            self.session.set_missing_host_key_policy(paramiko.WarningPolicy())
+        else:
+            self.session.set_missing_host_key_policy(paramiko.RejectPolicy())
+
         self.session.connect(
             hostname=self.hostname,
             username=self.username,

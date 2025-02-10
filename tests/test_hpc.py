@@ -264,7 +264,9 @@ class Test_SshSession:
             cwd = "mydir"
             env = {"MYVAR": "myval"}
 
-            with SshSession("myhost", "myuser", "mypass") as ssh:
+            with SshSession(
+                "myhost", "myuser", "mypass", allow_missing_host_key=True
+            ) as ssh:
                 ssh.submit(cmd, cwd=cwd, environment=env)
 
             mck_run.assert_called()
