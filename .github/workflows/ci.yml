@@ -703,7 +703,16 @@ jobs:
           python -m build
           python -m pip install dist/*.whl
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
-          
+
+      - name: "Install powershell (for DPF)"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/PowerShell/PowerShell/releases/download/v7.5.0/powershell_7.5.0-1.deb_amd64.deb
+          sudo dpkg -i powershell_7.5.0-1.deb_amd64.deb
+          sudo apt-get install -f
+          rm powershell_7.5.0-1.deb_amd64.deb
+
       - name: "Install DPF"
         id: set-server-path
         uses: ansys/pydpf-actions/install-dpf-server@v2.3
