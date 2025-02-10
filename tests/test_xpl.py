@@ -86,11 +86,13 @@ class Test_xpl:
             self.create_cube(mapdl)
 
         xpl.open(self.full_file)
-        yield xpl
-        xpl.close()
 
-    @staticmethod
-    def test_close(xpl):
+        yield xpl
+
+        if xpl.opened:
+            xpl.close()
+
+    def test_close(self, xpl):
         xpl.close()
         with pytest.raises(MapdlCommandIgnoredError):
             xpl.list()
@@ -197,3 +199,10 @@ class Test_xpl:
 
         mat = xpl.extract("NSL")
         assert mat.shape == (243, 10)
+
+    def test_opened(self, xpl):
+        assert xpl.opened
+        xpl.close()
+        assert not xpl.opened
+        xpl.open(self.full_file)
+        assert xpl.opened
