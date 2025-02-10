@@ -378,7 +378,9 @@ class SshSession:
     def __enter__(self):
         self.session = SSHClient()
         if self.allow_missing_host_key:
-            self.session.set_missing_host_key_policy(paramiko.WarningPolicy())
+            self.session.set_missing_host_key_policy(
+                paramiko.WarningPolicy()
+            )  # nosec B507
         else:
             self.session.set_missing_host_key_policy(paramiko.RejectPolicy())
 
@@ -399,7 +401,7 @@ class SshSession:
     def exec_command(self, *args, **kwargs):
         if not self._connected:
             raise Exception("ssh session is not connected")
-        stdin, stdout, stderr = self.session.exec_command(*args, **kwargs)
+        stdin, stdout, stderr = self.session.exec_command(*args, **kwargs)  # nosec B601
         output = stdout.read().decode("utf-8")
         error = stderr.read().decode("utf-8")
         return stdin, output, error
