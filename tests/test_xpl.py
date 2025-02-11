@@ -47,6 +47,7 @@ class Test_xpl:
 
         clear(mapdl)
         mapdl.clear()
+        mapdl.prep7()
 
         # set up the full file
         mapdl.block(0, 1, 0, 1, 0, 1)
