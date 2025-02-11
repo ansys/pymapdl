@@ -63,5 +63,5 @@ cd $OLD_PATH
 $full_executable_path --address 127.0.0.1 > dpf_server.log &
 
 echo "Server started"
-sleep 2
-echo "File output: $(cat logdpf.txt)"
+sleep 4
+echo "File output: $(cat dpf_server.log)"
