@@ -384,8 +384,8 @@ def generate_mapdl_launch_command(
     cpu_sw = "-np %d" % nproc
 
     if ram:
-        ram_sw = "-m %d" % int(1024 * ram)
-        LOG.debug(f"Setting RAM: {ram_sw}")
+        ram_sw = "-m %d" % int(ram)
+        LOG.debug(f"Setting RAM: {ram_sw} MB")
     else:
         ram_sw = ""
 
@@ -1994,7 +1994,7 @@ def get_slurm_options(
                 ram = SLURM_MEM_PER_NODE
 
             if not units:
-                args["ram"] = int(ram)
+                args["ram"] = int(ram)  # Assuming in MB
             elif units == "T":  # tera
                 args["ram"] = int(ram) * (2**10) ** 2
             elif units == "G":  # giga
