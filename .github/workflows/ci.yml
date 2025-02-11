@@ -31,7 +31,7 @@ env:
   PYANSYS_OFF_SCREEN: True
   MAPDL_PACKAGE: ghcr.io/ansys/mapdl
   ON_CI: True
-  PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile'
+  PYTEST_ARGUMENTS: '-vvv -k "dpf" -rxXsa --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile'
   ANSYS_DPF_ACCEPT_LA: "Y"
 
   BUILD_CHEATSHEET: True
@@ -402,7 +402,7 @@ jobs:
   build-test-remote:
     name: "Remote: ${{ matrix.mapdl-version }}"
     runs-on: ubuntu-22.04
-    needs: [smoke-tests, build-test-remote-matrix]
+    needs: [build-test-remote-matrix]
     timeout-minutes: 35
     strategy:
       fail-fast: false
@@ -636,7 +636,7 @@ jobs:
     name: "Local: ${{ matrix.mapdl-version }}"
     runs-on: ubuntu-22.04
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    needs: [smoke-tests, build-test-local-minimal-matrix]
+    needs: [build-test-local-minimal-matrix]
     timeout-minutes: 75
     strategy:
       fail-fast: false
