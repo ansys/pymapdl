@@ -29,7 +29,7 @@ if not has_dependency("ansys-dpf-core") or not HAS_DPF:
     pytest.skip(allow_module_level=True)
 
 from ansys.dpf import core as dpf
-from ansys.dpf.core import server_module
+from ansys.dpf.core import server as server_module
 
 
 @pytest.fixture()
