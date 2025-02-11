@@ -46,6 +46,8 @@ class Test_xpl:
         from conftest import clear
 
         clear(mapdl)
+        mapdl.clear()
+        mapdl.prep7()
 
         # set up the full file
         mapdl.block(0, 1, 0, 1, 0, 1)
@@ -70,9 +72,12 @@ class Test_xpl:
         if mapdl.result_file in mapdl.list_files():
             mapdl.slashdelete(mapdl.result_file)
 
+        if "cube_solve_xpl" in mapdl.list_files():
+            mapdl.slashdelete("cube_solve_xpl.db")
+
         # solve first 10 non-trivial modes
         mapdl.modal_analysis(nmode=10, freqb=1)
-        mapdl.save("cube_solve_xpl")
+        mapdl.save("cube_solve_xpl", "db")
 
     @pytest.fixture(scope="class")
     def cube_solve(self, mapdl):
@@ -81,17 +86,20 @@ class Test_xpl:
     @pytest.fixture(scope="function")
     def xpl(self, mapdl, cube_solve):
         mapdl.prep7()
-        mapdl.resume("cube_solve_xpl")
+        mapdl.resume("cube_solve_xpl", "db")
 
         xpl = mapdl.xpl
         if not self.full_file and not self.full_file in mapdl.list_files():
             self.create_cube(mapdl)
 
         xpl.open(self.full_file)
-        return xpl
 
-    @staticmethod
-    def test_close(xpl):
+        yield xpl
+
+        if xpl.opened:
+            xpl.close()
+
+    def test_close(self, xpl):
         xpl.close()
         with pytest.raises(MapdlCommandIgnoredError):
             xpl.list()
@@ -198,3 +206,10 @@ class Test_xpl:
 
         mat = xpl.extract("NSL")
         assert mat.shape == (243, 10)
+
+    def test_opened(self, xpl):
+        assert xpl.opened
+        xpl.close()
+        assert not xpl.opened
+        xpl.open(self.full_file)
+        assert xpl.opened
