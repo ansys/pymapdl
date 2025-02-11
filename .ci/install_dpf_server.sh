@@ -36,12 +36,18 @@ echo "AWP_ROOT$ANSYS_VERSION=$SERVER" >> $GITHUB_OUTPUT
 # Setting up the files
 cd $SERVER
 cd */*/*
-echo "Current directory: $(pwd)"
-echo "Files in the directory: $(ls)"
+echo "Current directory:"
+echo "$(pwd)"
 
-cd $DIR
-echo "Current directory: $(pwd)"
-echo "Files in the directory: $(ls)"
+echo "Files in the directory:"
+echo "$(ls)"
+
+cd ".$DIR"
+echo "Current directory:"
+echo "$(pwd)"
+
+echo "Files in the directory:"
+echo "$(ls)"
 
 if [[ "$OS" == "Linux" ]]; then
     echo "Setting files permissions"
