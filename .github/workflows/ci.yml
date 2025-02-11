@@ -492,6 +492,7 @@ jobs:
         uses: ansys/pydpf-actions/install-dpf-server@v2.3
         with:
           dpf-standalone-TOKEN: ${{secrets.PYANSYS_CI_BOT_TOKEN}}
+          ANSYS_VERSION: ${{ matrix.number }}
 
       - name: "Getting files change filters"
         uses: dorny/paths-filter@v3
@@ -718,6 +719,7 @@ jobs:
         uses: ansys/pydpf-actions/install-dpf-server@v2.3
         with:
           dpf-standalone-TOKEN: ${{secrets.PYANSYS_CI_BOT_TOKEN}}
+          ANSYS_VERSION: ${{ matrix.number }}
 
       - name: "Unit testing requirements installation"
         run: |
