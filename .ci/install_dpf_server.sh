@@ -7,6 +7,7 @@ ANSYS_VERSION="${ANSYS_VERSION:-221}"
 ANSYS_VERSION_WITH_POINT="${ANSYS_VERSION:0:2}.${ANSYS_VERSION:2}"
 GITHUB_TOKEN="${GITHUB_TOKEN:?Error: MY_VAR is not set or empty}"
 
+OLD_PATH=$(pwd)
 echo "OS: $OS"
 echo "Ansys version: $ANSYS_VERSION"
 echo "Ansys version (number): $ANSYS_VERSION_WITH_POINT"
@@ -56,7 +57,10 @@ if [[ "$OS" == "Linux" ]]; then
 fi
 
 echo "Starting server"
-$executable --address 127.0.0.1 > logdpf.txt &
+full_executable_path="$(pwd)/$executable"
+
+cd $OLD_PATH
+$full_executable_path --address 127.0.0.1 > dpf_server.log &
 
 echo "Server started"
 sleep 2
