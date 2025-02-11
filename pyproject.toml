@@ -93,7 +93,7 @@ doc = [
     "pytest-sphinx==0.6.3",
     "pythreejs==2.4.2",
     "sphinx-autobuild==2024.10.3",
-    "sphinx-autodoc-typehints==1.25.2",
+    "sphinx-autodoc-typehints==3.0.1",
     "sphinx-copybutton==0.5.2",
     "sphinx-design==0.6.1",
     "sphinx-gallery==0.18.0",
