@@ -13,14 +13,14 @@ echo "Ansys version (number): $ANSYS_VERSION_WITH_POINT"
 
 if [[ "$OS" == "Linux" ]]; then
     BranchName="linux_release-$ANSYS_VERSION_WITH_POINT"
-    DIRECTORY=$(echo pwd)
+    DIRECTORY="$(pwd)"
     SERVER=$DIRECTORY/dpf-standalone
     DIR="/aisol/bin/linx64"
     executable="./Ans.Dpf.Grpc.sh"
 
 else # Windows
     BranchName="win_release-$ANSYS_VERSION_WITH_POINT"
-    DIRECTORY=$(echo pwd)
+    DIRECTORY="$(pwd)"
     SERVER=$DIRECTORY/dpf-standalone
     DIR="\aisol\bin\winx64"
     executable="./Ans.Dpf.Grpc.bat"
