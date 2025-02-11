@@ -188,11 +188,11 @@ jobs:
           echo "Launching MAPDL service at PID: $DOCKER_PID"
           echo "DOCKER_PID=$(echo $DOCKER_PID)" >> $GITHUB_OUTPUT
 
-      - name: "Install DPF"
-        id: set-server-path
-        uses: ansys/pydpf-actions/install-dpf-server@feat/allow-running-from-custom-location
-        with:
-          dpf-standalone-TOKEN: ${{secrets.PYANSYS_CI_BOT_TOKEN}}
+      # - name: "Install DPF"
+      #   id: set-server-path
+      #   uses: ansys/pydpf-actions/install-dpf-server@feat/allow-running-from-custom-location
+      #   with:
+      #     dpf-standalone-TOKEN: ${{secrets.PYANSYS_CI_BOT_TOKEN}}
 
       - name: "Getting files change filters"
         uses: dorny/paths-filter@v3
@@ -487,12 +487,12 @@ jobs:
           echo "DOCKER_PID_0=$(echo $DOCKER_PID_0)" >> $GITHUB_OUTPUT
           echo "DOCKER_PID_1=$(echo $DOCKER_PID_1)" >> $GITHUB_OUTPUT
 
-      - name: "Install DPF"
-        id: set-server-path
-        uses: ansys/pydpf-actions/install-dpf-server@feat/allow-running-from-custom-location
-        with:
-          dpf-standalone-TOKEN: ${{secrets.PYANSYS_CI_BOT_TOKEN}}
-          ANSYS_VERSION: ${{ matrix.number }}
+      # - name: "Install DPF"
+      #   id: set-server-path
+      #   uses: ansys/pydpf-actions/install-dpf-server@feat/allow-running-from-custom-location
+      #   with:
+      #     dpf-standalone-TOKEN: ${{secrets.PYANSYS_CI_BOT_TOKEN}}
+      #     ANSYS_VERSION: ${{ matrix.number }}
 
       - name: "Getting files change filters"
         uses: dorny/paths-filter@v3
@@ -689,6 +689,15 @@ jobs:
           python -m venv ./.venv
           source ./.venv/bin/activate
 
+      - name: "Install DPF"
+        id: set-server-path
+        env:
+          OS: ${{ runner.os }}
+          ANSYS_VERSION: ${{ matrix.number }}
+          GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+        run: |
+          .ci/install_dpf_server.sh
+          
       - name: "Install OS packages"
         run: |
           apt update
@@ -705,22 +714,6 @@ jobs:
           python -m build
           python -m pip install dist/*.whl
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
-
-      - name: "Install powershell (for DPF)"
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget https://github.com/PowerShell/PowerShell/releases/download/v7.5.0/powershell_7.5.0-1.deb_amd64.deb
-          sudo dpkg -i powershell_7.5.0-1.deb_amd64.deb
-          sudo apt-get install -f
-          rm powershell_7.5.0-1.deb_amd64.deb
-
-      - name: "Install DPF"
-        id: set-server-path
-        uses: ansys/pydpf-actions/install-dpf-server@feat/allow-running-from-custom-location
-        with:
-          dpf-standalone-TOKEN: ${{secrets.PYANSYS_CI_BOT_TOKEN}}
-          ANSYS_VERSION: ${{ matrix.number }}
 
       - name: "Unit testing requirements installation"
         run: |
