@@ -52,12 +52,13 @@ echo "$(ls)"
 
 if [[ "$OS" == "Linux" ]]; then
     echo "Setting files permissions"
-    chmod 755 Ans.Dpf.Grpc.sh || echo "Failed to set permissions in 'Ans.Dpf.Grpc.sh' file." && exit 1
-    chmod 755 Ans.Dpf.Grpc.exe  || echo "Failed to set permissions in 'Ans.Dpf.Grpc.exe' file." && exit 1
+    chmod 755 Ans.Dpf.Grpc.sh #|| echo "Failed to set permissions in 'Ans.Dpf.Grpc.sh' file." && exit 1
+    chmod 755 Ans.Dpf.Grpc.exe  #|| echo "Failed to set permissions in 'Ans.Dpf.Grpc.exe' file." && exit 1
 fi
 
 echo "Starting server"
 full_executable_path="$(pwd)/$executable"
+echo "Full executable path: $full_executable_path"
 
 cd $OLD_PATH
 $full_executable_path --address 127.0.0.1 > dpf_server.log &
