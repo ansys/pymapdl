@@ -425,7 +425,7 @@ class MapdlGrpc(MapdlBase):
         )
         self._busy: bool = False  # used to check if running a command on the server
         self._local: bool = start_parm.get("local", True)
-        self._launched: bool = start_parm.get("launched", True)
+        self._launched: bool = start_parm.get("launched", False)
         self._health_response_queue: Optional["Queue"] = None
         self._exiting: bool = False
         self._exited: Optional[bool] = None
@@ -1117,10 +1117,16 @@ class MapdlGrpc(MapdlBase):
 
         Notes
         -----
+        If Mapdl didn't start the instance, then this will be ignored unless
+        ``force=True``.
+
         If ``PYMAPDL_START_INSTANCE`` is set to ``False`` (generally set in
         remote testing or documentation build), then this will be
         ignored. Override this behavior with ``force=True`` to always force
         exiting MAPDL regardless of your local environment.
+
+        If ``Mapdl.finish_job_on_exit`` is set to ``True`` and there is a valid
+        JobID in ``Mapdl.jobid``, then the SLURM job will be canceled.
 
         Examples
         --------
@@ -1153,8 +1159,10 @@ class MapdlGrpc(MapdlBase):
 
         if not force:
             # ignore this method if PYMAPDL_START_INSTANCE=False
-            if not self._start_instance:
-                self._log.info("Ignoring exit due to PYMAPDL_START_INSTANCE=False")
+            if not self._start_instance or not self._launched:
+                self._log.info(
+                    "Ignoring exit due to PYMAPDL_START_INSTANCE=False or because PyMAPDL didn't launch the instance."
+                )
                 return
 
             # or building the gallery
@@ -1162,17 +1170,15 @@ class MapdlGrpc(MapdlBase):
                 self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
                 return
 
-        # Actually exiting MAPDL instance
-        if self.finish_job_on_exit:
-            self._exiting = True
-            self._exit_mapdl(path=mapdl_path)
-            self._exited = True
+        # Exiting MAPDL instance if we launched.
+        self._exiting = True
+        self._exit_mapdl(path=mapdl_path)
+        self._exited = True
 
-            # Exiting HPC job
-            if self._mapdl_on_hpc:
-                self.kill_job(self.jobid)
-                if hasattr(self, "_log"):
-                    self._log.debug(f"Job (id: {self.jobid}) has been cancel.")
+        if self.finish_job_on_exit and self._mapdl_on_hpc:
+            self.kill_job(self.jobid)
+            if hasattr(self, "_log"):
+                self._log.debug(f"Job (id: {self.jobid}) has been cancel.")
 
         # Exiting remote instances
         if self._remote_instance:  # pragma: no cover
@@ -3818,20 +3824,17 @@ class MapdlGrpc(MapdlBase):
         """In case the object is deleted"""
         # We are just going to escape early if needed, and kill the HPC job.
         # The garbage collector remove attributes before we can evaluate this.
-        try:
-            # Exiting HPC job
-            if (
-                hasattr(self, "_mapdl_on_hpc")
-                and self._mapdl_on_hpc
-                and hasattr(self, "finish_job_on_exit")
-                and self.finish_job_on_exit
-            ):
+        if self._exited:
+            return
 
-                self.kill_job(self.jobid)
+        if not self._start_instance:
+            # Early skip if start_instance is False
+            return
 
-            if not self._start_instance:
-                return
+        # Killing the instance if we launched it.
+        if self._launched:
+            self._exit_mapdl(self._path)
 
-        except Exception as e:  # nosec B110
-            # This is on clean up.
-            pass
+        # Exiting HPC job
+        if self._mapdl_on_hpc and self.finish_job_on_exit:
+            self.kill_job(self.jobid)
