@@ -1135,20 +1135,13 @@ class MapdlGrpc(MapdlBase):
         # check if permitted to start (and hence exit) instances
         from ansys.mapdl import core as pymapdl
 
-        if hasattr(self, "_log"):
-            self._log.debug(
-                f"Exiting MAPLD gRPC instance {self.ip}:{self.port} on '{self._path}'."
-            )
+        self._log.debug(
+            f"Exiting MAPLD gRPC instance {self.ip}:{self.port} on '{self._path}'."
+        )
 
         mapdl_path = self._path  # using cached version
-        if self._exited is None:
-            self._log.debug("'self._exited' is none.")
-            return  # Some edge cases the class object is not completely
-            # initialized but the __del__ method
-            # is called when exiting python. So, early exit here instead an
-            # error in the following self.directory command.
-            # See issue #1796
-        elif self._exited:
+
+        if self._exited:
             # Already exited.
             self._log.debug("Already exited")
             return
@@ -1177,8 +1170,7 @@ class MapdlGrpc(MapdlBase):
 
         if self.finish_job_on_exit and self._mapdl_on_hpc:
             self.kill_job(self.jobid)
-            if hasattr(self, "_log"):
-                self._log.debug(f"Job (id: {self.jobid}) has been cancel.")
+            self._log.debug(f"Job (id: {self.jobid}) has been cancel.")
 
         # Exiting remote instances
         if self._remote_instance:  # pragma: no cover
