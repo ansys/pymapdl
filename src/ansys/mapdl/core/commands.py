@@ -35,7 +35,7 @@ from ._commands import (
     apdl,
     aux2,
     aux3_,
-    aux12_,
+    aux12,
     aux15_,
     conn,
     database,
@@ -377,9 +377,9 @@ class Aux2Commands(
 
 
 class Aux12Commands(
-    aux12_.radiosity_solver.RadiositySolver,
-    aux12_.radiation_mat.RadiationMat,
-    aux12_.general_radiation.GeneralRadiation,
+    aux12.radiosity_solver.RadiositySolver,
+    aux12.radiation_matrix_method.RadiationMatrixMethod,
+    aux12.general_radiation.GeneralRadiation,
 ):
     pass
 

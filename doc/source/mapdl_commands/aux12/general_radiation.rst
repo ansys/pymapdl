@@ -1,15 +1,19 @@
-.. _ref_general Radiation_api:
 
-*****************
-General radiation
-*****************
+.. _ref_general_radiation:
 
-.. currentmodule:: ansys.mapdl.core
 
-These AUX12 commands are used to specify general radiation parameters.
+GeneralRadiation
+================
+
+
+.. currentmodule:: ansys.mapdl.core._commands.aux12.general_radiation
+
+.. autoclass:: ansys.mapdl.core._commands.aux12.general_radiation.GeneralRadiation
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.stef
-   Mapdl.toffst
+
+   GeneralRadiation.aux12
+   GeneralRadiation.stef
