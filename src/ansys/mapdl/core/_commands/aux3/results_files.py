@@ -23,54 +23,33 @@
 
 class ResultsFiles:
 
-    def undelete(self, option: str = "", nstart: str = "", nend: str = "", **kwargs):
-        r"""Removes results sets from the group of sets selected for editing.
+    def delete(self, set_: str = "", nstart: str = "", nend: str = "", **kwargs):
+        r"""Specifies sets in the results file to be deleted before postprocessing.
 
-        Mechanical APDL Command: `UNDELETE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_UNDELETE.html>`_
+        Mechanical APDL Command: `DELETE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DELETE.html>`_
 
         Parameters
         ----------
-        option : str
-            Specifies which sets are to be removed from the selected sets.
-
-            * ``SET`` - Specifies one or more particular sets in the results file that are to be removed from the group of
-              sets selected for deletion.
-
-            * ``ALL`` - Removes all selected sets that are currently selected for deletion.
+        set_ : str
+            Specifies that sets in the results file are to be deleted.
 
         nstart : str
-            The first set to be removed from the set selected for deletion.
+            The first set in a results file to be deleted.
 
         nend : str
-            The final set to be removed from the set selected for deletion. This field is used only if
-            operating on more than one sequential set.
+            The final set in a results file to be deleted. This field is used only if deleting more than one
+            sequential sets.
 
         Notes
         -----
-        Use this command if you have previously marked a set for deletion (with the :ref:`delete` command)
-        and now wish to keep that set instead of deleting it.
+        :ref:`delete` is a specification command that flags sets in the results file for deletion. It should
+        be followed by a :ref:`compress` command, the corresponding action command that deletes the
+        specified sets.
 
-        The :ref:`undelete` command is valid only in the results file editing processor (auxiliary processor
-        AUX3), and, like the other AUX3 commands, it only affects the data steps index (DSI), time (TIM),
-        loadstep, substep and cumulative step iteration (LSP) records in the results file.
+        The :ref:`delete` command is valid only in the results file editing processor (auxiliary processor
+        AUX3).
         """
-        command = f"UNDELETE,{option},{nstart},{nend}"
-        return self.run(command, **kwargs)
-
-    def compress(self, **kwargs):
-        r"""Deletes all specified sets.
-
-        Mechanical APDL Command: `COMPRESS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_COMPRESS.html>`_
-
-        Notes
-        -----
-        Issue this command to delete all sets specified with the :ref:`delete` command.
-
-        The :ref:`compress` command is valid only in the results file editing processor (auxiliary processor
-        AUX3), and, like the other AUX3 commands, it only affects the data steps index (DSI), time (TIM),
-        loadstep, substep and cumulative step iteration (LSP) records in the results file.
-        """
-        command = "COMPRESS"
+        command = f"DELETE,{set_},{nstart},{nend}"
         return self.run(command, **kwargs)
 
     def list(self, **kwargs):
@@ -131,33 +110,54 @@ class ResultsFiles:
         command = f"FILEAUX3,{fname},{ext}"
         return self.run(command, **kwargs)
 
-    def delete(self, set_: str = "", nstart: str = "", nend: str = "", **kwargs):
-        r"""Specifies sets in the results file to be deleted before postprocessing.
+    def undelete(self, option: str = "", nstart: str = "", nend: str = "", **kwargs):
+        r"""Removes results sets from the group of sets selected for editing.
 
-        Mechanical APDL Command: `DELETE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DELETE.html>`_
+        Mechanical APDL Command: `UNDELETE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_UNDELETE.html>`_
 
         Parameters
         ----------
-        set_ : str
-            Specifies that sets in the results file are to be deleted.
+        option : str
+            Specifies which sets are to be removed from the selected sets.
+
+            * ``SET`` - Specifies one or more particular sets in the results file that are to be removed from the group of
+              sets selected for deletion.
+
+            * ``ALL`` - Removes all selected sets that are currently selected for deletion.
 
         nstart : str
-            The first set in a results file to be deleted.
+            The first set to be removed from the set selected for deletion.
 
         nend : str
-            The final set in a results file to be deleted. This field is used only if deleting more than one
-            sequential sets.
+            The final set to be removed from the set selected for deletion. This field is used only if
+            operating on more than one sequential set.
 
         Notes
         -----
-        :ref:`delete` is a specification command that flags sets in the results file for deletion. It should
-        be followed by a :ref:`compress` command, the corresponding action command that deletes the
-        specified sets.
+        Use this command if you have previously marked a set for deletion (with the :ref:`delete` command)
+        and now wish to keep that set instead of deleting it.
 
-        The :ref:`delete` command is valid only in the results file editing processor (auxiliary processor
-        AUX3).
+        The :ref:`undelete` command is valid only in the results file editing processor (auxiliary processor
+        AUX3), and, like the other AUX3 commands, it only affects the data steps index (DSI), time (TIM),
+        loadstep, substep and cumulative step iteration (LSP) records in the results file.
         """
-        command = f"DELETE,{set_},{nstart},{nend}"
+        command = f"UNDELETE,{option},{nstart},{nend}"
+        return self.run(command, **kwargs)
+
+    def compress(self, **kwargs):
+        r"""Deletes all specified sets.
+
+        Mechanical APDL Command: `COMPRESS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_COMPRESS.html>`_
+
+        Notes
+        -----
+        Issue this command to delete all sets specified with the :ref:`delete` command.
+
+        The :ref:`compress` command is valid only in the results file editing processor (auxiliary processor
+        AUX3), and, like the other AUX3 commands, it only affects the data steps index (DSI), time (TIM),
+        loadstep, substep and cumulative step iteration (LSP) records in the results file.
+        """
+        command = "COMPRESS"
         return self.run(command, **kwargs)
 
     def modify(
