@@ -68,6 +68,11 @@ TWAIT = 100
 NPROC = 1
 
 
+def patch_spawn_mapdl(*args, **kwargs):
+    kwargs["index"] = args[0]
+    return kwargs
+
+
 class TestMapdlPool:
 
     @pytest.fixture(scope="class")
@@ -276,6 +281,7 @@ class TestMapdlPool:
             assert f"Instance_{i}" in dirs_path_pool
 
     @skip_if_ignore_pool
+    @patch("ansys.mapdl.core.launcher.spawn_mapdl", patch_spawn_mapdl)
     def test_directory_names_custom_string(self, tmpdir):
         pool = MapdlPool(
             2,
@@ -285,7 +291,8 @@ class TestMapdlPool:
             names="my_instance",
             port=50056,
             additional_switches=QUICK_LAUNCH_SWITCHES,
-            _debug_no_launch=True,
+            wait=False,
+            restart_failed=False,
         )
         dirs_path_pool = os.listdir(pool._root_dir)
         time.sleep(2)
