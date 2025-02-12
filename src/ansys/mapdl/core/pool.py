@@ -354,12 +354,15 @@ class MapdlPool:
             for i, (ip, port) in enumerate(zip(ips, ports))
         ]
 
+        # Storing
+        self._threads = threads
+
         # Early exit due to debugging
         if _debug_no_launch:
             return
 
         if wait:
-            [thread.join() for thread in threads]
+            [thread.join() for thread in self._threads]
 
             # make sure everything is ready
             n_instances_ready = 0
@@ -925,21 +928,12 @@ class MapdlPool:
         # This is introduce to mitigate #2173
         timeout = time.time() + timeout
 
-        def initialized(index):
-            if self._instances[index] is not None:
-                if self._instances[index].exited:
-                    raise MapdlRuntimeError("The instance is already exited!")
-                if "PREP" not in self._instances[index].prep7().upper():
-                    raise MapdlDidNotStart("Error while processing PREP7 signal.")
-                return True
-            return False
-
         while timeout > time.time():
-            if initialized(index):
+            if self.is_initialized(index):
                 break
             time.sleep(0.1)
         else:
-            if not initialized:
+            if not self.is_initialized(index):
                 raise TimeoutError(
                     f"The instance running at {ip}:{port} could not be started."
                 )
@@ -949,6 +943,15 @@ class MapdlPool:
             pbar.update(1)
 
         self._spawning_i -= 1
+
+    def is_initialized(self, index):
+        if self._instances[index] is not None:
+            if self._instances[index].exited:
+                raise MapdlRuntimeError("The instance is already exited!")
+            if "PREP" not in self._instances[index].prep7().upper():
+                raise MapdlDidNotStart("Error while processing PREP7 signal.")
+            return True
+        return False
 
     @threaded_daemon
     def _monitor_pool(self, refresh=1.0):
