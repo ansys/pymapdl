@@ -764,7 +764,7 @@ jobs:
 
             You might want to rerun the test to make sure that everything is passing. You can retrigger the CICD sending an empty commit `git commit -m "chore: empty comment to trigger CICD" --allow-empty`.
 
-            You will see this message every time your commit changes the image cache but you are not attaching the updated cache. :nerd_face:
+            You will see this message everytime your commit changes the image cache but you are not attaching the updated cache. :nerd_face:
 
           reactions: rocket
 
