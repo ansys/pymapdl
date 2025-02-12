@@ -20,8 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 from ansys.mapdl.core import _HAS_VISUALIZER
-from ansys.mapdl.core.plotting.consts import (  # noqa: F401
-    ALLOWED_TARGETS,
+from ansys.mapdl.core.plotting.consts import (
     BC_D,
     BC_F,
     BCS,
@@ -29,6 +28,7 @@ from ansys.mapdl.core.plotting.consts import (  # noqa: F401
     FIELDS_ORDERED_LABELS,
     POINT_SIZE,
 )
+from ansys.mapdl.core.plotting.consts import ALLOWED_TARGETS  # noqa: F401
 
 if _HAS_VISUALIZER:
     from ansys.mapdl.core.plotting.theme import MapdlTheme  # noqa: F401
