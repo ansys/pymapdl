@@ -124,7 +124,7 @@ intersphinx_mapping = {
     "ansys-tools-path": ("https://path.tools.docs.pyansys.com/version/stable/", None),
 }
 
-# ref.ref warning needs to be readded when merging to main
+# ref.ref warning needs to be re-added when merging to main
 suppress_warnings = [
     "label.*",
     "design.fa-build",

@@ -33,7 +33,7 @@ if _HAS_PANDAS:
 
 from ._commands import (
     apdl,
-    aux2_,
+    aux2,
     aux3_,
     aux12_,
     aux15_,
@@ -369,7 +369,10 @@ class Apdl(
     pass
 
 
-class Aux2Commands(aux2_.bin_dump.BinDump, aux2_.bin_manip.BinManip):
+class Aux2Commands(
+    aux2.binary_file_dump.BinaryFileDump,
+    aux2.binary_file_manipulation.BinaryFileManipulation,
+):
     pass
 
 
