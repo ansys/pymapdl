@@ -22,7 +22,7 @@
 
 """Module for miscellaneous functions and methods"""
 from enum import Enum
-from functools import wraps
+from functools import cache, wraps
 import importlib
 import inspect
 import os
@@ -415,6 +415,16 @@ def write_array(filename: Union[str, bytes], array: np.ndarray) -> None:
     np.savetxt(filename, array, fmt="%20.12f")
 
 
+@cache
+def is_package_installed_cached(package_name):
+    try:
+        importlib.import_module(package_name)
+        return True
+
+    except ModuleNotFoundError:
+        return False
+
+
 def requires_package(package_name: str, softerror: bool = False) -> Callable:
     """
     Decorator check whether a package is installed or not.
@@ -430,11 +440,11 @@ def requires_package(package_name: str, softerror: bool = False) -> Callable:
     def decorator(function):
         @wraps(function)
         def wrapper(self, *args, **kwargs):
-            try:
-                importlib.import_module(package_name)
+
+            if is_package_installed_cached(package_name):
                 return function(self, *args, **kwargs)
 
-            except ModuleNotFoundError:
+            else:
                 msg = (
                     f"To use the method '{function.__name__}', "
                     f"the package '{package_name}' is required.\n"
