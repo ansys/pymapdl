@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class BinaryFileDump:
 
     def dump(self, nstrt: str = "", nstop: str = "", **kwargs):
@@ -47,8 +48,6 @@ class BinaryFileDump:
         command = f"DUMP,{nstrt},{nstop}"
         return self.run(command, **kwargs)
 
-
-
     def aux2(self, **kwargs):
         r"""Enters the binary file dumping processor.
 
@@ -63,8 +62,6 @@ class BinaryFileDump:
         """
         command = "/AUX2"
         return self.run(command, **kwargs)
-
-
 
     def form(self, lab: str = "", **kwargs):
         r"""Specifies the format of the file dump.
@@ -88,8 +85,6 @@ class BinaryFileDump:
         """
         command = f"FORM,{lab}"
         return self.run(command, **kwargs)
-
-
 
     def fileaux2(self, fname: str = "", ident: str = "", **kwargs):
         r"""Specifies the binary file to be dumped.
@@ -117,9 +112,9 @@ class BinaryFileDump:
         command = f"FILEAUX2,{fname},{ident}"
         return self.run(command, **kwargs)
 
-
-
-    def ptr(self, loc: str = "", base: str = "", loch: str = "", baseh: str = "", **kwargs):
+    def ptr(
+        self, loc: str = "", base: str = "", loch: str = "", baseh: str = "", **kwargs
+    ):
         r"""Dumps the record of a binary file.
 
         Mechanical APDL Command: `PTR <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PTR.html>`_
@@ -147,5 +142,3 @@ class BinaryFileDump:
         """
         command = f"PTR,{loc},{base},{loch},{baseh}"
         return self.run(command, **kwargs)
-
-
