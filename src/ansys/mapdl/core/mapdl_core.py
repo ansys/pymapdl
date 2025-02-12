@@ -2370,21 +2370,8 @@ class _MapdlCore(Commands):
         raise NotImplementedError("Implemented by child class")
 
     def __del__(self):
-        """Clean up when complete"""
-        if self._cleanup:
-            # removing logging handlers if they are closed to avoid I/O errors
-            # when exiting after the logger file has been closed.
-            # self._cleanup_loggers()
-            logging.disable(logging.CRITICAL)
-
-            try:
-                self.exit()
-            except Exception as e:
-                try:  # logger might be closed
-                    if hasattr(self, "_log") and self._log is not None:
-                        self._log.error("exit: %s", str(e))
-                except ValueError:
-                    pass
+        """Kill MAPDL when garbage cleaning"""
+        self.exit()
 
     def _cleanup_loggers(self):
         """Clean up all the loggers"""
