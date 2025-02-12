@@ -60,6 +60,7 @@ Dependabot
 Dev
 devcontainer
 DevContainer
+Dimitris
 dof
 ect
 eigenfrequency
@@ -88,6 +89,7 @@ HTML
 Image[Mm]agick
 imagin
 importlib
+Ioannis
 ist
 Julia
 Krylov
@@ -99,6 +101,7 @@ levl
 Linder
 Linux
 MacOS
+maint
 mapdl
 MAPDL
 mater
