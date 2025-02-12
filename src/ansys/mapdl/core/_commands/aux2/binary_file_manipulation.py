@@ -20,9 +20,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class BinaryFileManipulation:
 
-    def psmat(self, fname: str = "", ext: str = "", matrix: str = "", color: str = "", **kwargs):
+    def psmat(
+        self,
+        fname: str = "",
+        ext: str = "",
+        matrix: str = "",
+        color: str = "",
+        **kwargs,
+    ):
         r"""Writes an assembled global matrix to a postscript format that graphically displays nonzero matrix
         values.
 
@@ -122,8 +130,6 @@ class BinaryFileManipulation:
         command = f"PSMAT,{fname},{ext},{matrix},{color}"
         return self.run(command, **kwargs)
 
-
-
     def combine(self, filetype: str = "", num: str = "", **kwargs):
         r"""Combines distributed memory parallel ( DMP ) files.
 
@@ -211,9 +217,16 @@ class BinaryFileManipulation:
         command = f"COMBINE,{filetype},{num}"
         return self.run(command, **kwargs)
 
-
-
-    def hbmat(self, fname: str = "", ext: str = "", form: str = "", matrx: str = "", rhs: str = "", mapping: str = "", **kwargs):
+    def hbmat(
+        self,
+        fname: str = "",
+        ext: str = "",
+        form: str = "",
+        matrx: str = "",
+        rhs: str = "",
+        mapping: str = "",
+        **kwargs,
+    ):
         r"""Writes an assembled global matrix in Harwell-Boeing format.
 
         Mechanical APDL Command: `HBMAT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_HBMAT.html>`_
@@ -320,5 +333,3 @@ class BinaryFileManipulation:
         """
         command = f"HBMAT,{fname},{ext},,{form},{matrx},{rhs},{mapping}"
         return self.run(command, **kwargs)
-
-
