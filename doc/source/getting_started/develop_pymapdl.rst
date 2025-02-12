@@ -167,7 +167,7 @@ development within a repository, fostering collaboration, code quality, and feat
 .. _table_prefix:
 
 +-------------+-----------------------------+------------------------------+----------------------------------+
-| prefix      | Commit                      | Branch                       | Pull-request                     |
+| Prefix      | Commit (``prefix:``)        | Branch (``prefix/``)         | Pull-request (``prefix:``)       |
 +=============+=============================+==============================+==================================+
 | `build`     | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
 +-------------+-----------------------------+------------------------------+----------------------------------+
