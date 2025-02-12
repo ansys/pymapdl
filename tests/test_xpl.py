@@ -21,6 +21,8 @@
 # SOFTWARE.
 
 """Test xpl functionality"""
+import re
+
 from ansys.tools.versioning.utils import SemanticVersion
 import numpy as np
 import pytest
@@ -115,7 +117,7 @@ class Test_xpl:
 
     @staticmethod
     def test_xpl_str(xpl):
-        assert "file.full" in str(xpl)
+        assert re.match("file\d*.full", str(xpl), re.IGNORECASE)
 
     @staticmethod
     @requires("ansys-math-core")
