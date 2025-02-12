@@ -282,7 +282,7 @@ class TestMapdlPool:
             assert f"Instance_{i}" in dirs_path_pool
 
     @skip_if_ignore_pool
-    @patch("ansys.mapdl.core.launcher.spawn_mapdl", patch_spawn_mapdl)
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
     def test_directory_names_custom_string(self, tmpdir):
         pool = MapdlPool(
             2,
