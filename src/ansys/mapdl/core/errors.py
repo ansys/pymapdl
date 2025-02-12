@@ -33,6 +33,11 @@ from ansys.mapdl.core import LOG as logger
 
 SIGINT_TRACKER: List = []
 
+# Configuration of 'protect_grpc' wrapper
+N_ATTEMPTS = 5
+INITIAL_BACKOFF = 0.1
+MULTIPLIER_BACKOFF = 2
+
 
 LOCKFILE_MSG: str = """
 Another ANSYS job with the same job name is already running in this
@@ -307,9 +312,9 @@ def protect_grpc(func: Callable) -> Callable:
                 old_handler = signal.signal(signal.SIGINT, handler)
 
         # Capture gRPC exceptions
-        n_attempts = 5
-        initial_backoff = 0.1
-        multiplier_backoff = 2
+        n_attempts = kwargs.get("n_attempts", N_ATTEMPTS)
+        initial_backoff = kwargs.get("initial_backoff", INITIAL_BACKOFF)
+        multiplier_backoff = kwargs.get("multiplier_backoff", MULTIPLIER_BACKOFF)
 
         i_attemps = 0
 
@@ -321,27 +326,30 @@ def protect_grpc(func: Callable) -> Callable:
                 break
 
             except grpc.RpcError as error:
-
                 mapdl = retrieve_mapdl_from_args(args)
+
                 mapdl._log.debug("A gRPC error has been detected.")
 
-                i_attemps += 1
-                if i_attemps <= n_attempts:
+                if not mapdl.exited:
+                    i_attemps += 1
+                    if i_attemps <= n_attempts:
 
-                    wait = (
-                        initial_backoff * multiplier_backoff**i_attemps
-                    )  # Exponential backoff
-                    sleep(wait)
+                        wait = (
+                            initial_backoff * multiplier_backoff**i_attemps
+                        )  # Exponential backoff
 
-                    # reconnect
-                    mapdl._log.debug(
-                        f"Re-connection attempt {i_attemps} after waiting {wait:0.3f} seconds"
-                    )
+                        # reconnect
+                        mapdl._log.debug(
+                            f"Re-connection attempt {i_attemps} after waiting {wait:0.3f} seconds"
+                        )
 
-                    connected = mapdl._connect(timeout=wait)
+                        if not mapdl.is_alive:
+                            connected = mapdl._connect(timeout=wait)
+                        else:
+                            sleep(wait)
 
-                    # Retry again
-                    continue
+                        # Retry again
+                        continue
 
                 # Custom errors
                 reason = ""
@@ -360,6 +368,11 @@ def protect_grpc(func: Callable) -> Callable:
                             " environment variable. For instance:\n\n"
                             f"$ export PYMAPDL_MAX_MESSAGE_LENGTH={lim_}"
                         )
+
+                # Every try to reconnecto to MAPDL failed
+                # So let's avoid execution from now on.
+                # The above exception should not break the channel.
+                mapdl._exited = True
 
                 if error.code() == grpc.StatusCode.UNAVAILABLE:
                     # Very likely the MAPDL server has died.
@@ -450,12 +463,8 @@ def handle_generic_grpc_error(
 
     else:
         # Making sure we do not keep executing gRPC calls.
-        mapdl._exited = True
-        mapdl._exiting = True
-
         # Must close unfinished processes
-        mapdl._close_process()
-        mapdl._exiting = False
+        mapdl.exit()
         raise MapdlExitedError(msg)
 
 

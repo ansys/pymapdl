@@ -30,7 +30,7 @@ import re
 import shutil
 import tempfile
 import time
-from unittest.mock import patch
+from unittest.mock import PropertyMock, patch
 from warnings import catch_warnings
 
 import grpc
@@ -780,15 +780,20 @@ def test_set_parameters_string_spaces(mapdl, cleared):
 
 
 def test_set_parameters_too_long(mapdl, cleared):
+    from ansys.mapdl.core.mapdl_core import MAX_PARAM_CHARS
+
+    parm_name = "a" * (MAX_PARAM_CHARS + 1)
     with pytest.raises(
-        ValueError, match="Length of ``name`` must be 32 characters or less"
+        ValueError,
+        match=f"The parameter name `{parm_name}` is an invalid parameter name.* {MAX_PARAM_CHARS} characters long",
     ):
-        mapdl.parameters["a" * 32] = 2
+        mapdl.parameters[parm_name] = 2
 
     with pytest.raises(
-        ValueError, match="Length of ``value`` must be 32 characters or less"
+        ValueError,
+        match=f"Length of ``value`` must be {MAX_PARAM_CHARS} characters or less",
     ):
-        mapdl.parameters["asdf"] = "a" * 32
+        mapdl.parameters["asdf"] = "a" * (MAX_PARAM_CHARS + 1)
 
 
 def test_builtin_parameters(mapdl, cleared):
@@ -1542,9 +1547,20 @@ def test_file_command_remote(mapdl, cube_solve, tmpdir):
 
     mapdl.post1()
     # this file should exist remotely
-    rst_file_name = "file.rst"
-    assert rst_file_name in mapdl.list_files()
+    rst_file_name = mapdl.result_file
+    if not rst_file_name in mapdl.list_files():
+        mapdl.solution()
+        mapdl.solve()
 
+        mapdl.finish()
+        mapdl.save()
+
+    rst_file_name = os.path.basename(rst_file_name)
+    assert (
+        rst_file_name in mapdl.list_files()
+    ), f"File {os.path.basename(rst_file_name)} is not in {mapdl.list_files()}"
+
+    mapdl.post1()
     mapdl.file(rst_file_name)  # checking we can read it.
 
     with pytest.raises(FileNotFoundError):
@@ -1712,13 +1728,25 @@ def test_mode(mapdl, cleared):
     mapdl._mode = "grpc"  # Going back to default
 
 
-def test_remove_lock_file(mapdl, cleared, tmpdir):
+@pytest.mark.parametrize("use_cached", (True, False))
+def test_remove_lock_file(mapdl, cleared, tmpdir, use_cached):
     tmpdir_ = tmpdir.mkdir("ansys")
     lock_file = tmpdir_.join("file.lock")
     with open(lock_file, "w") as fid:
         fid.write("test")
 
-    mapdl._remove_lock_file(tmpdir_)
+    with patch(
+        "ansys.mapdl.core.mapdl_grpc.MapdlGrpc.jobname", new_callable=PropertyMock
+    ) as mock_jb:
+        mock_jb.return_value = mapdl._jobname
+
+        mapdl._remove_lock_file(tmpdir_, use_cached=use_cached)
+
+    if use_cached:
+        mock_jb.assert_not_called()
+    else:
+        mock_jb.assert_called()
+
     assert not os.path.exists(lock_file)
 
 
@@ -1941,20 +1969,43 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
 
 
 @pytest.mark.parametrize("save", [None, True, False])
-@patch("ansys.mapdl.core.Mapdl.save")
-@patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._exit_mapdl")
-def test_save_on_exit(mck_exit, mck_save, mapdl, cleared, save):
+def test_save_on_exit(mapdl, cleared, save):
 
-    mck_exit.return_value = None
+    with (
+        patch.object(mapdl, "_exit_mapdl") as mock_exit,
+        patch.object(mapdl, "save") as mock_save,
+    ):
 
-    mapdl.exit(save=save)
+        mock_exit.return_value = None
+        mock_save.return_value = None
+
+        mapdl.exit(save=save, force=True)
+
+        mock_exit.assert_called_once()
+        if save:
+            mock_save.assert_called_once()
+        else:
+            mock_save.assert_not_called()
+
+    assert mapdl.exited
+    assert mapdl._exited
+    exited = mapdl._exited
+
+    with (
+        patch.object(mapdl, "_run") as mock_run,
+        patch.object(mapdl, "_exited") as mock__exited,
+    ):
+
+        mock__exited.return_value = exited
+
+        with pytest.raises(MapdlExitedError):
+            mapdl.prep7()
+
+        mock_run.assert_not_called()
+
     mapdl._exited = False  # avoiding set exited on the class.
 
-    if save:
-        mck_save.assert_called_once()
-    else:
-        mck_save.assert_not_called()
-
+    # Making sure we have the instance ready
     assert mapdl.prep7()
 
 
@@ -2112,7 +2163,7 @@ def test_components_selection_keep_between_plots(mapdl, cube_solve):
     assert "mycm" in mapdl.components
 
 
-def test_saving_selection_context(mapdl, cube_solve):
+def test_save_selection_1(mapdl, cube_solve):
     mapdl.allsel()
 
     for i in range(1, 4):
@@ -2208,6 +2259,108 @@ def test_saving_selection_context(mapdl, cube_solve):
 
     assert "nod_selection_4".upper() not in mapdl.cmlist()
     assert "nod_selection_4" not in mapdl.components
+
+
+def test_save_selection_2(mapdl, cleared, make_block):
+    from ansys.mapdl.core.mapdl_core import _TMP_COMP
+
+    n1 = 1
+    mapdl.nsel(vmin=n1)
+    assert n1 in mapdl.mesh.nnum
+    mapdl.cm("nodes_cm", "NODE")
+    assert "nodes_cm" in mapdl.components
+    assert n1 in mapdl.components["nodes_cm"].items
+    assert "NODE" == mapdl.components["nodes_cm"].type
+
+    e1 = 1
+    mapdl.esel(vmin=e1)
+    assert e1 in mapdl.mesh.enum
+    mapdl.cm("elem_cm", "ELEM")
+    assert "elem_cm" in mapdl.components
+    assert e1 in mapdl.components["elem_cm"].items
+    assert "ELEM" == mapdl.components["elem_cm"].type
+
+    kp1 = 1
+    mapdl.ksel(vmin=kp1)
+    assert kp1 in mapdl.geometry.knum
+    mapdl.cm("kp_cm", "kp")
+    assert "kp_cm" in mapdl.components
+    assert kp1 in mapdl.components["kp_cm"].items
+    assert "KP" == mapdl.components["kp_cm"].type
+
+    l1 = 1
+    mapdl.lsel(vmin=l1)
+    assert l1 in mapdl.geometry.lnum
+    mapdl.cm("line_cm", "line")
+    assert "line_cm" in mapdl.components
+    assert l1 in mapdl.components["line_cm"].items
+    assert "LINE" == mapdl.components["line_cm"].type
+
+    a1 = 1
+    mapdl.asel(vmin=a1)
+    assert a1 in mapdl.geometry.anum
+    mapdl.cm("area_cm", "area")
+    assert "area_cm" in mapdl.components
+    assert a1 in mapdl.components["area_cm"].items
+    assert "AREA" == mapdl.components["area_cm"].type
+
+    # Assert we have properly set the components
+    assert {
+        "AREA_CM": "AREA",
+        "ELEM_CM": "ELEM",
+        "KP_CM": "KP",
+        "LINE_CM": "LINE",
+        "NODES_CM": "NODE",
+    } == mapdl.components._comp
+
+    # additional changes to the selections
+    kpoints = mapdl.ksel("u", vmin=1)
+    lines = mapdl.lsel("a", vmin=[2, 5, 6])
+    areas = mapdl.asel("a", vmin=2)
+    nodes = mapdl.nsel("S", vmin=[4, 5])
+    elem = mapdl.esel("s", vmin=[1, 3])
+
+    # checking all the elements are correct
+    assert np.allclose(kpoints, mapdl.geometry.knum)
+    assert np.allclose(lines, mapdl.geometry.lnum)
+    assert np.allclose(areas, mapdl.geometry.anum)
+    assert np.allclose(nodes, mapdl.mesh.nnum)
+    assert np.allclose(elem, mapdl.mesh.enum)
+
+    ## storing... __enter__
+    comp_selection = mapdl.components._comp
+
+    print("Starting...")
+    with mapdl.save_selection:
+
+        # do something
+        mapdl.allsel()
+        mapdl.cmsel("NONE")
+        mapdl.asel("NONE")
+        mapdl.nsel("s", vmin=[1, 2, 8, 9])
+        mapdl.allsel()
+        mapdl.vsel("none")
+        mapdl.lsel("a", vmin=[9])
+        mapdl.vsel("all")
+        mapdl.ksel("none")
+
+    # checks
+    assert np.allclose(kpoints, mapdl.geometry.knum)
+    assert np.allclose(lines, mapdl.geometry.lnum)
+    assert np.allclose(areas, mapdl.geometry.anum)
+    assert np.allclose(nodes, mapdl.mesh.nnum)
+    assert np.allclose(elem, mapdl.mesh.enum)
+
+    for each_key, each_value in comp_selection.items():
+        assert (
+            each_key in mapdl.components
+        ), f"Component '{each_key}' is not defined/selected"
+        assert (
+            each_value == mapdl.components[each_key].type
+        ), f"Component '{each_key}' type is not correct"
+
+    for each_tmp in _TMP_COMP.values():
+        assert each_tmp not in mapdl.components
 
 
 def test_inquire_invalid(mapdl, cleared):
@@ -2609,3 +2762,119 @@ def test_comment_on_debug_mode(mapdl, cleared):
     mockcom.assert_called_once_with("Entering in non_interactive mode")
 
     mapdl.logger.logger.level = loglevel
+
+
+@patch("ansys.mapdl.core.errors.N_ATTEMPTS", 2)
+@patch("ansys.mapdl.core.errors.MULTIPLIER_BACKOFF", 1)
+@pytest.mark.parametrize("is_exited", [True, False])
+def test_timeout_when_exiting(mapdl, is_exited):
+    from ansys.mapdl.core import errors
+
+    def raise_exception(*args, **kwargs):
+        from grpc import RpcError
+
+        e = RpcError("My patched error")
+        e.code = lambda: grpc.StatusCode.ABORTED
+        e.details = lambda: "My gRPC error details"
+
+        # Simulating MAPDL exiting by force
+        mapdl._exited = is_exited
+
+        raise e
+
+    handle_generic_grpc_error = errors.handle_generic_grpc_error
+
+    with (
+        patch("ansys.mapdl.core.mapdl_grpc.pb_types.CmdRequest") as mock_cmdrequest,
+        patch(
+            "ansys.mapdl.core.mapdl_grpc.MapdlGrpc.is_alive", new_callable=PropertyMock
+        ) as mock_is_alive,
+        patch.object(mapdl, "_connect") as mock_connect,
+        patch(
+            "ansys.mapdl.core.errors.handle_generic_grpc_error", autospec=True
+        ) as mock_handle,
+        patch.object(mapdl, "_exit_mapdl") as mock_exit_mapdl,
+    ):
+
+        mock_exit_mapdl.return_value = None  # Avoid exiting
+        mock_is_alive.return_value = False
+        mock_connect.return_value = None  # patched to avoid timeout
+        mock_cmdrequest.side_effect = raise_exception
+        mock_handle.side_effect = handle_generic_grpc_error
+
+        with pytest.raises(MapdlExitedError):
+            mapdl.prep7()
+
+        # After
+        assert mapdl._exited
+
+        assert mock_handle.call_count == 1
+
+        if is_exited:
+            # Checking no trying to reconnect
+            assert mock_connect.call_count == 0
+            assert mock_cmdrequest.call_count == 1
+            assert mock_is_alive.call_count == 1
+
+        else:
+            assert mock_connect.call_count == errors.N_ATTEMPTS
+            assert mock_cmdrequest.call_count == errors.N_ATTEMPTS + 1
+            assert mock_is_alive.call_count == errors.N_ATTEMPTS + 1
+
+        mapdl._exited = False
+
+
+@pytest.mark.parametrize(
+    "cmd,arg",
+    (
+        ("block", None),
+        ("nsel", None),
+        ("esel", None),
+        ("ksel", None),
+        ("modopt", None),
+    ),
+)
+def test_none_as_argument(mapdl, make_block, cmd, arg):
+    if "sel" in cmd:
+        kwargs = {"wraps": mapdl._run}
+    else:
+        kwargs = {}
+
+    with patch.object(mapdl, "_run", **kwargs) as mock_run:
+
+        mock_run.assert_not_called()
+
+        func = getattr(mapdl, cmd)
+        out = func(arg)
+
+        mock_run.assert_called()
+
+        if "sel" in cmd:
+            assert isinstance(out, np.ndarray)
+            assert len(out) == 0
+
+        cmd = mock_run.call_args_list[0].args[0]
+        assert isinstance(cmd, str)
+        assert "NONE" in cmd.upper()
+
+
+@pytest.mark.parametrize("func", ["ksel", "lsel", "asel", "vsel"])
+def test_none_on_selecting(mapdl, cleared, func):
+    mapdl.block(0, 1, 0, 1, 0, 1)
+
+    selfunc = getattr(mapdl, func)
+
+    assert len(selfunc("all")) > 0
+    assert len(selfunc(None)) == 0
+
+
+@requires("pyvista")
+def test_requires_package_speed():
+    from ansys.mapdl.core.misc import requires_package
+
+    @requires_package("pyvista")
+    def my_func(i):
+        return i + 1
+
+    for i in range(1_000_000):
+        my_func(i)

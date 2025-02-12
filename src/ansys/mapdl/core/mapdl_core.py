@@ -88,6 +88,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 from ansys.mapdl.core.post import PostProcessing
 
+MAX_PARAM_CHARS = 32
+
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 
 VALID_DEVICES = ["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
@@ -102,6 +104,24 @@ _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*is turning inside out.",
     r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*The distributed memory parallel solution does not support KRYLOV method",
 ]
+
+_TMP_COMP = {
+    "KP": "cmp_kp",
+    "LINE": "cmp_line",
+    "AREA": "cmp_area",
+    "VOLU": "cmp_volu",
+    "NODE": "cmp_node",
+    "ELEM": "cmp_elem",
+}
+
+ENTITIES_TO_SELECTION_MAPPING = {
+    "KP": "ksel",
+    "LINE": "lsel",
+    "AREA": "asel",
+    "VOLU": "vsel",
+    "NODE": "nsel",
+    "ELEM": "esel",
+}
 
 # test for png file
 PNG_IS_WRITTEN_TO_FILE = re.compile(
@@ -1434,32 +1454,41 @@ class _MapdlCore(Commands):
 
             # Storing components
             selection = {
-                "cmsel": mapdl.components.names,
-                # "components_type": mapdl.components.types,
-                "nsel": mapdl.mesh.nnum,
-                "esel": mapdl.mesh.enum,
-                "ksel": mapdl.geometry.knum,
-                "lsel": mapdl.geometry.lnum,
-                "asel": mapdl.geometry.anum,
-                "vsel": mapdl.geometry.vnum,
+                "cmsel": mapdl.components._comp,
             }
+            id_ = random_string(5)
+            for each_type, each_name in _TMP_COMP.items():
+                each_name = f"__{each_name}{id_}__"
+                selection[each_type] = each_name
+                mapdl.cm(
+                    each_name, each_type, mute=True
+                )  # to hide ComponentNoData error
 
             self.selection.append(selection)
 
         def __exit__(self, *args):
             self._parent()._log.debug("Exiting saving selection context")
-            selection = self.selection.pop()
-            mapdl = self._parent()
 
+            mapdl = self._parent()
+            mapdl.allsel()
+            mapdl.cmsel("None")
+
+            selection = self.selection.pop()
             cmps = selection.pop("cmsel")
 
             if cmps:
-                mapdl.components.select(cmps)
+                for each_name, each_value in cmps.items():
+                    mapdl.cmsel("a", each_name, each_value, mute=True)
 
-            for select_cmd, ids in selection.items():
-                if ids.size > 0:
-                    func = getattr(mapdl, select_cmd)
-                    func(vmin=ids)
+            for each_type, each_name in selection.items():
+                mapdl.cmsel("a", each_name, each_type, mute=True)
+
+                selfun = getattr(
+                    mapdl, ENTITIES_TO_SELECTION_MAPPING[each_type.upper()]
+                )
+                selfun("s", vmin=each_name, mute=True)
+
+                mapdl.cmdele(each_name, mute=True)
 
     class _chain_commands:
         """Store MAPDL commands and send one chained command."""
@@ -2489,12 +2518,14 @@ class _MapdlCore(Commands):
 
         param_name = param_name.strip()
 
-        match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0,31}$"
+        match_valid_parameter_name = (
+            r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0," + f"{MAX_PARAM_CHARS-1}" + r"}$"
+        )
         # Using % is allowed, because of substitution, but it is very likely MAPDL will complain.
         if not re.search(match_valid_parameter_name, param_name):
             raise ValueError(
-                f"The parameter name `{param_name}` is an invalid parameter name."
-                "Only letters, numbers and `_` are permitted, up to 32 characters long."
+                f"The parameter name `{param_name}` is an invalid parameter name. "
+                f"Only letters, numbers and `_` are permitted, up to {MAX_PARAM_CHARS} characters long. "
                 "It cannot start with a number either."
             )
 
@@ -2518,7 +2549,7 @@ class _MapdlCore(Commands):
 
         # Using leading underscored parameters
         match_reserved_leading_underscored_parameter_name = (
-            r"^_[a-zA-Z\d_\(\),\s_]{1,31}[a-zA-Z\d\(\),\s]$"
+            r"^_[a-zA-Z\d_\(\),\s_]{1," + f"{MAX_PARAM_CHARS}" + r"}[a-zA-Z\d\(\),\s]$"
         )
         # If it also ends in underscore, this won't be triggered.
         if re.search(match_reserved_leading_underscored_parameter_name, param_name):
