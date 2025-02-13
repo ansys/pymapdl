@@ -63,35 +63,46 @@ guidelines for developing code in a repository:
 #. **Use branches**: Create branches for different features, bug fixes, or
    experiments. This keeps changes isolated and facilitates parallel
    development. The CI/CD checks that the branch name is compliant. For example,
-   the branch name must start with a prefix and a backslash.
+   the branch name must start with a lower case prefix and a backslash.
    The allowed prefixes are:
 
-   - `fix/` - Bug fixes.
-   - `feat/` - Changes that introduce a new feature or significant addition.
-   - `maint/` - General maintenance of the repository. For instance, improving the CI/CD workflows.
-   - `docs/` - Improves documentation and examples.
-   - `no-ci/` - (Not applicable to PyMAPDL) In some repositories, branches with this prefix do not trigger CI/CD.
-   - `test/` - Improvements or changes to testing.
-   - `testing/` - For testing and debugging. It should not be used for branches that are going to be merged to ``main``.
-   - `release/` - Contains the released versions changes.
+   - `build/` - Changes that affect the build system or external dependencies (such as to ``pip`` or ``make``).
+   - `ci/` - Changes to the CI/CD configuration files and scripts.
    - `dependabot/` - Created by Dependabot.
+   - `docs/` - Improves documentation and examples.
+   - `feat/` - Changes that introduce a new feature or significant addition.
+   - `fix/` - Bug fixes.
    - `junk/` - Other purposes. It should not be used for branches that are going to be merged to ``main``.
+   - `maint/` - General maintenance of the repository.
+   - `no-ci/` - (Not applicable to PyMAPDL) In some repositories, branches with this prefix do not trigger CI/CD.
+   - `perf/` - A code change that improves performance.
+   - `refactor/` - A code change that neither fixes a bug nor adds a feature.
+   - `release/` - Contains the released versions changes.
+   - `revert/` - Reverts a previous commit.
+   - `testing/` - For testing and debugging. It can be used to add new tests.
+
+   **Note**: For more information, see `Table of allowed prefix <table_prefix_>`_.
 
 #. **Write descriptive commit messages**: Provide clear and concise commit
    messages that explain the purpose and context of the changes. Follow a
    consistent style.
 
-   - `fix:` - Bug fixes.
-   - `feat:` - Changes that introduce a new feature or significant addition.
-   - `docs:` - Changes pertaining only to documentation.
-   - `style:` - Changes that do not affect the meaning of the code (such as white space, formatting, and missing semicolons).
-   - `refactor:` - A code change that neither fixes a bug nor adds a feature.
-   - `perf:` - A code change that improves performance.
-   - `test:` - Improvements or changes to testing.
    - `build:` - Changes that affect the build system or external dependencies (such as to ``pip`` or ``make``).
+   - `chore:` - Other changes that don't modify the code. It can be used as a fall back general branch name.
    - `ci:` - Changes to the CI/CD configuration files and scripts.
-   - `chore:` - Other changes that don't modify the code (such as releasing and versioning).
+   - `docs:` - Improves documentation and examples.
+   - `feat:` - Changes that introduce a new feature or significant addition.
+   - `fix:` - Bug fixes.
+   - `maint:` - General maintenance of the repository.
+   - `no-ci:` - (Not applicable to PyMAPDL) In some repositories, branches with this prefix do not trigger CI/CD.
+   - `perf:` - A code change that improves performance.
+   - `refactor:` - A code change that neither fixes a bug nor adds a feature.
+   - `release:` - Contains the released versions changes.
    - `revert:` - Reverts a previous commit.
+   - `style:` - Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc).
+   - `testing:` - For testing and debugging. It can be used to add new tests.
+
+   **Note**: For more information, see `Table of allowed prefix <table_prefix_>`_.
 
 #. **Commit frequently**: Make small, meaningful commits frequently. Avoid
    making a large number of unrelated changes in a single commit.
@@ -105,17 +116,19 @@ guidelines for developing code in a repository:
    Pull requests must follow the same convention as the commit messages.
    The following prefixes are allowed in the pull request names:
 
-   - `fix:` - Bug fixes.
-   - `feat:` - Changes that introduce a new feature or significant addition.
-   - `docs:` - Changes pertaining only to documentation.
-   - `style:` - Changes that do not affect the meaning of the code (such as white space, formatting, and missing semicolons).
-   - `refactor:` - A code change that neither fixes a bug nor adds a feature.
-   - `perf:` - A code change that improves performance.
-   - `test:` - Improvements or changes to testing.
    - `build:` - Changes that affect the build system or external dependencies (such as to ``pip`` or ``make``).
    - `ci:` - Changes to the CI/CD configuration files and scripts.
-   - `chore:` - Other changes that don't modify the code (such as releasing and versioning).
-   - `revert:` - Reverts a previous pull request.
+   - `docs:` - Improves documentation and examples.
+   - `feat:` - Changes that introduce a new feature or significant addition.
+   - `fix:` - Bug fixes.
+   - `maint:` - General maintenance of the repository.
+   - `no-ci:` - (Not applicable to PyMAPDL) In some repositories, branches with this prefix do not trigger CI/CD.
+   - `perf:` - A code change that improves performance.
+   - `refactor:` - A code change that neither fixes a bug nor adds a feature.
+   - `revert:` - Reverts a previous commit.
+   - `testing:` - For testing and debugging. It can be used to add new tests.
+
+   **Note**: For more information, see `Table of allowed prefix <table_prefix_>`_.
 
    The pull requests can also be labeled for easier repository maintenance.
    The CI/CD automatically labels each pull request based on the pull requests prefix and
@@ -148,6 +161,52 @@ guidelines for developing code in a repository:
 
 By following these guidelines, you can ensure smooth and organized code
 development within a repository, fostering collaboration, code quality, and feature enhancement.
+
+**Table of allowed prefix**
+
+.. _table_prefix:
+
++-------------+-----------------------------+------------------------------+----------------------------------+
+| Prefix      | Commit (``prefix:``)        | Branch (``prefix/``)         | Pull-request (``prefix:``)       |
++=============+=============================+==============================+==================================+
+| `build`     | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `dependabot`| |:x:|                       | |:white_check_mark:|         | |:x:|                            |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `chore`     | |:white_check_mark:|        | |:x:|                        | |:x:|                            |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `ci`        | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `docs`      | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `feat`      | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `fix`       | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `junk`      | |:x:|                       | |:white_check_mark:|         | |:x:|                            |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `maint`     | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `no-ci`     | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `perf`      | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `refactor`  | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `release`   | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `revert`    | |:white_check_mark:|        | |:white_check_mark:|         | |:x:|                            |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `style`     | |:white_check_mark:|        | |:x:|                        | |:x:|                            |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `testing`   | |:white_check_mark:|        | |:white_check_mark:|         | |:x:|                            |
++-------------+-----------------------------+------------------------------+----------------------------------+
+
+
+Where:
+
+* |:white_check_mark:| means that the prefix is allowed.
+* |:x:| means that the prefix is not allowed.
 
 
 .. _ref_unit_testing_contributing:
