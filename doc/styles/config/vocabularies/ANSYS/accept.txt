@@ -87,10 +87,11 @@ Hashin
 hexahedral
 hostname
 HTML
+Iges
 Image[Mm]agick
-Ioannis
 imagin
 importlib
+Ioannis
 ist
 Julia
 Kalogeris
