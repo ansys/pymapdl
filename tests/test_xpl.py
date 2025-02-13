@@ -117,7 +117,7 @@ class Test_xpl:
 
     @staticmethod
     def test_xpl_str(xpl):
-        assert re.match("file\d*.full", str(xpl), re.IGNORECASE)
+        assert re.search(r"file\d*\.full", str(xpl))
 
     @staticmethod
     @requires("ansys-math-core")
