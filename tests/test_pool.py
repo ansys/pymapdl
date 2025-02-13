@@ -312,6 +312,10 @@ class TestMapdlPool:
     @patch(
         "ansys.mapdl.core.pool.MapdlPool.is_initialized", lambda *args, **kwargs: True
     )
+    @patch(
+        "ansys.mapdl.core.pool.MapdlPool._verify_unique_ports",
+        lambda *args, **kwargs: None,
+    )
     def test_directory_names_function(self, tmpdir):
         def myfun(i):
             if i == 0:
@@ -379,11 +383,14 @@ class TestMapdlPool:
             wait=False,
             restart_failed=False,
         )
-        args = pool_._debug_no_launch
 
-        assert not args["start_instance"]  # Because of ip
-        assert args["ips"] == ips
-        assert args["ports"] == ports
+        assert [each["start_instance"] for each in pool_._threads] == [
+            False,
+            False,
+            False,
+        ]
+        assert [each["ip"] for each in pool_._threads] == ips
+        assert [each["port"] for each in pool_._threads] == ports
 
     @skip_if_ignore_pool
     @requires("local")

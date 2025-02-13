@@ -215,9 +215,6 @@ class MapdlPool:
         self._instances: List[None] = []
         self._n_instances = n_instances
 
-        # Getting debug arguments
-        _debug_no_launch = kwargs.get("_debug_no_launch", None)
-
         if run_location is None:
             run_location = create_temp_dir()
         self._root_dir: str = run_location
@@ -325,17 +322,6 @@ class MapdlPool:
         # initialize a list of dummy instances
         self._instances = [None for _ in range(n_instances)]
 
-        # threaded spawn
-        if _debug_no_launch:
-            self._debug_no_launch = {
-                "ports": ports,
-                "ips": ips,
-                "names": self._names,
-                "start_instance": start_instance,
-                "exec_file": exec_file,
-                "n_instances": n_instances,
-            }
-
         # Converting ip or hostname to ip
         self._ips = [socket.gethostbyname(each) for each in self._ips]
         _ = [check_valid_ip(each) for each in self._ips]  # double check
@@ -356,10 +342,6 @@ class MapdlPool:
 
         # Storing
         self._threads = threads
-
-        # Early exit due to debugging
-        if _debug_no_launch:
-            return
 
         if wait:
             [thread.join() for thread in self._threads]
@@ -909,9 +891,6 @@ class MapdlPool:
 
         if not run_location:
             run_location = create_temp_dir(self._root_dir, name=name)
-
-        if self._spawn_kwargs.get("_debug_no_launch", False):
-            return
 
         self._instances[index] = launch_mapdl(
             exec_file=exec_file,
