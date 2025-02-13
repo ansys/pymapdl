@@ -22,7 +22,7 @@
 
 """Module to control interaction with MAPDL through Python"""
 
-import atexit
+# import atexit
 from functools import wraps
 import glob
 import logging
@@ -264,7 +264,6 @@ class _MapdlCore(Commands):
         **start_parm,
     ):
         """Initialize connection with MAPDL."""
-        atexit.register(self.__del__)  # registering to exit properly
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited: bool = False
