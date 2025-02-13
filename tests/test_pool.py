@@ -309,7 +309,9 @@ class TestMapdlPool:
 
     @skip_if_ignore_pool
     @patch("ansys.mapdl.core.pool.launch_mapdl", lambda *args, **kwargs: kwargs)
-    @patch("ansys.mapdl.core.pool.MapdlPool.initialized", lambda *args, **kwargs: True)
+    @patch(
+        "ansys.mapdl.core.pool.MapdlPool.is_initialized", lambda *args, **kwargs: True
+    )
     def test_directory_names_function(self, tmpdir):
         def myfun(i):
             if i == 0:
