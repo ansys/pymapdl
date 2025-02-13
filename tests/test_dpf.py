@@ -65,7 +65,7 @@ def test_upload(skip_dpf, mapdl, solved_box, tmpdir):
     # Download RST file
     rst_path = mapdl.download_result(str(tmpdir.mkdir("tmpdir")))
 
-    # Stabilishing connection
+    # Establishing connection
     grpc_con = dpf.connect_to_server(port=DPF_PORT)
     assert grpc_con.live
 

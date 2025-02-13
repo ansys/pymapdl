@@ -780,15 +780,20 @@ def test_set_parameters_string_spaces(mapdl, cleared):
 
 
 def test_set_parameters_too_long(mapdl, cleared):
+    from ansys.mapdl.core.mapdl_core import MAX_PARAM_CHARS
+
+    parm_name = "a" * (MAX_PARAM_CHARS + 1)
     with pytest.raises(
-        ValueError, match="Length of ``name`` must be 32 characters or less"
+        ValueError,
+        match=f"The parameter name `{parm_name}` is an invalid parameter name.* {MAX_PARAM_CHARS} characters long",
     ):
-        mapdl.parameters["a" * 32] = 2
+        mapdl.parameters[parm_name] = 2
 
     with pytest.raises(
-        ValueError, match="Length of ``value`` must be 32 characters or less"
+        ValueError,
+        match=f"Length of ``value`` must be {MAX_PARAM_CHARS} characters or less",
     ):
-        mapdl.parameters["asdf"] = "a" * 32
+        mapdl.parameters["asdf"] = "a" * (MAX_PARAM_CHARS + 1)
 
 
 def test_builtin_parameters(mapdl, cleared):
@@ -2873,3 +2878,53 @@ def test_requires_package_speed():
 
     for i in range(1_000_000):
         my_func(i)
+
+
+@pytest.mark.parametrize("start_instance", [True, False])
+@pytest.mark.parametrize("exited", [True, False])
+@pytest.mark.parametrize("launched", [True, False])
+@pytest.mark.parametrize("on_hpc", [True, False])
+@pytest.mark.parametrize("finish_job_on_exit", [True, False])
+def test_garbage_clean_del(
+    start_instance, exited, launched, on_hpc, finish_job_on_exit
+):
+    from ansys.mapdl.core import Mapdl
+
+    class DummyMapdl(Mapdl):
+        def __init__(self):
+            pass
+
+    with (
+        patch.object(DummyMapdl, "_exit_mapdl") as mock_exit,
+        patch.object(DummyMapdl, "kill_job") as mock_kill,
+    ):
+
+        mock_exit.return_value = None
+        mock_kill.return_value = None
+
+        # Setup
+        mapdl = DummyMapdl()
+        mapdl._path = ""
+        mapdl._jobid = 1001
+
+        # Config
+        mapdl._start_instance = start_instance
+        mapdl._exited = exited
+        mapdl._launched = launched
+        mapdl._mapdl_on_hpc = on_hpc
+        mapdl.finish_job_on_exit = finish_job_on_exit
+
+        del mapdl
+
+        if exited or not start_instance or not launched:
+            mock_exit.assert_not_called()
+        else:
+            mock_exit.assert_called_once()
+
+        if exited or not start_instance:
+            mock_kill.assert_not_called()
+        else:
+            if on_hpc and finish_job_on_exit:
+                mock_kill.assert_called_once()
+            else:
+                mock_kill.assert_not_called()
