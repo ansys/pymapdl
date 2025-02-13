@@ -138,7 +138,7 @@ testpaths = "tests"
 image_cache_dir = "tests/.image_cache"
 # Output logging records as they are emitted directly into the console
 # https://docs.pytest.org/en/stable/how-to/logging.html#live-logs
-# log_cli = true 
+log_cli = true
 
 [tool.isort]
 profile = "black"

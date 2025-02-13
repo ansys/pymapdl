@@ -515,7 +515,6 @@ def path_tests(tmpdir):
 
 
 def clear(mapdl):
-    # mapdl.mute = True
     mapdl.finish()
     # *MUST* be NOSTART.  With START fails after 20 calls...
     # this has been fixed in later pymapdl and MAPDL releases
@@ -525,7 +524,6 @@ def clear(mapdl):
     mapdl.page("DEFA")
 
     mapdl.prep7()
-    # mapdl.mute = False
 
 
 @pytest.fixture(scope="function")
