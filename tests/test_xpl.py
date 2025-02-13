@@ -91,7 +91,7 @@ class Test_xpl:
         mapdl.save("cube_solve_xpl", "db", slab="all")
 
     @pytest.fixture(scope="class")
-    def cube_solve(self, mapdl, cleared):
+    def cube_solve(self, mapdl):
         self.create_cube(mapdl)
 
     @pytest.fixture(scope="function")
