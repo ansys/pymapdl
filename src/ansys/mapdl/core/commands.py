@@ -34,7 +34,7 @@ if _HAS_PANDAS:
 from ._commands import (
     apdl,
     aux2,
-    aux3_,
+    aux3,
     aux12,
     aux15_,
     conn,
@@ -376,6 +376,10 @@ class Aux2Commands(
     pass
 
 
+class Aux3Commands(aux3.results_files.ResultsFiles):
+    pass
+
+
 class Aux12Commands(
     aux12.radiosity_solver.RadiositySolver,
     aux12.radiation_matrix_method.RadiationMatrixMethod,
@@ -506,6 +510,7 @@ class InqFunctions(inq_func.inq_function):
 class Commands(
     Apdl,
     Aux2Commands,
+    Aux3Commands,
     Aux12Commands,
     DatabaseCommands,
     DisplayCommands,
@@ -517,7 +522,6 @@ class Commands(
     ReducedCommands,
     SessionCommands,
     SolutionCommands,
-    aux3_.Aux3,
     aux15_.Aux15,
     conn.Conn,
     hidden._Hidden,
