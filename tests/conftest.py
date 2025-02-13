@@ -638,6 +638,7 @@ def mapdl(request, tmpdir_factory):
                 mapdl._send_command_stream("/PREP7")
 
     # Delete Mapdl object
+    mapdl.exit()
     del mapdl
 
 
