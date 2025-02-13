@@ -1,23 +1,20 @@
-.. _ref_radiosity Solver_api:
 
-****************
-Radiosity solver
-****************
+.. _ref_radiosity_solver:
 
-.. currentmodule:: ansys.mapdl.core
 
-These AUX12 commands are used to calculate the radiation view factors
-and to specify the solution parameters for the Radiosity solver
-method.
+RadiositySolver
+===============
+
+
+.. currentmodule:: ansys.mapdl.core._commands.aux12.radiosity_solver
+
+.. autoclass:: ansys.mapdl.core._commands.aux12.radiosity_solver.RadiositySolver
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.hemiopt
-   Mapdl.radopt
-   Mapdl.spcnod
-   Mapdl.spctemp
-   Mapdl.v2dopt
-   Mapdl.vfsm
-   Mapdl.vfopt
-   Mapdl.vfquery
+
+   RadiositySolver.vfco
+   RadiositySolver.vfquery
+   RadiositySolver.vfsm

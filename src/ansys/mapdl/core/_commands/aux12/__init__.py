@@ -20,4 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from . import general_radiation, radiation_mat, radiosity_solver
+from . import (
+    general_radiation,
+    radiation_matrix_method,
+    radiosity_solver,
+)
