@@ -924,6 +924,7 @@ class MapdlPool:
         self._spawning_i -= 1
 
     def is_initialized(self, index):
+        """Check if the instance is initialized"""
         if self._instances[index] is not None:
             if self._instances[index].exited:
                 raise MapdlRuntimeError("The instance is already exited!")
