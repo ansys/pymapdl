@@ -2127,7 +2127,7 @@ class _MapdlCommandExtended(_MapdlCore):
 class _MapdlExtended(_MapdlCommandExtended):
     """Extend Mapdl class with new functions"""
 
-    def load_table(self, name, array, var1="", var2="", var3="", csysid=""):
+    def load_table(self, name, array, var1="", var2="", var3="", csysid="",col_header=False):
         """Load a table from Python to into MAPDL.
 
         Uses :func:`tread <Mapdl.tread>` to transfer the table.
@@ -2212,10 +2212,21 @@ class _MapdlExtended(_MapdlCommandExtended):
             )
 
         if array.ndim == 2:
+            # MAPDL considers the first row to be column header when col num > 2.
+            # When col header is not available duplicate the first row
+            if array.shape[1] > 2 and col_header==False:
+                array = np.vstack((array[0], array))
+                imax_val = array.shape[0] - 1
+            # When col header is available use col header
+            elif array.shape[1] > 2 and col_header==True:
+                imax_val = array.shape[0] - 1
+            else:
+                imax_val = array.shape[0]
+
             self.dim(
                 name,
                 "TABLE",
-                imax=array.shape[0],
+                imax=imax_val,
                 jmax=array.shape[1] - 1,
                 kmax="",
                 var1=var1,
@@ -2233,10 +2244,6 @@ class _MapdlExtended(_MapdlCommandExtended):
                 "The underlying ``TREAD`` command requires that the first column is in "
                 "ascending order."
             )
-
-        # weird bug where MAPDL ignores the first row when there are greater than 2 columns
-        if array.shape[1] > 2:
-            array = np.vstack((array[0], array))
 
         base_name = random_string() + ".txt"
         filename = os.path.join(tempfile.gettempdir(), base_name)
