@@ -77,6 +77,7 @@ FEMs
 filname
 Fortran
 FSW
+Giovanis
 GitHub
 Gmsh
 GPa
@@ -92,6 +93,7 @@ importlib
 Ioannis
 ist
 Julia
+Kalogeris
 Krylov
 kwarg
 Lanzos
@@ -121,6 +123,7 @@ NORML
 NumPy
 onefile
 optiSLang
+Papadopoulos
 parm
 perf
 performant
@@ -155,6 +158,7 @@ sord
 spotweld
 squeue
 srun
+stationarity
 struc
 subselected
 substep
@@ -176,6 +180,7 @@ UPF
 UPFs
 viscoplastic
 vise
+Vissarion
 Visual Studio Code
 von
 VTK

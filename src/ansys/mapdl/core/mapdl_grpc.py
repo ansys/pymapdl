@@ -636,10 +636,12 @@ class MapdlGrpc(MapdlBase):
         """Check if the MAPDL process is alive"""
         return self._is_alive_subprocess()
 
-    def _post_mortem_checks(self):
+    def _post_mortem_checks(self, process=None):
         """Check possible reasons for not having a successful connection."""
         # Check early exit
-        process = self._mapdl_process
+        if process is None:
+            process = self._mapdl_process
+
         if process is None or not self.is_grpc:
             return
 
@@ -650,9 +652,7 @@ class MapdlGrpc(MapdlBase):
 
     def _read_stds(self):
         """Read the stdout and stderr from the subprocess."""
-        from ansys.mapdl.core.launcher.tools import (
-            _get_std_output,  # Avoid circular import error
-        )
+        from ansys.mapdl.core.launcher import _get_std_output
 
         if self._mapdl_process is None or not self._mapdl_process.stdout:
             return
@@ -3810,7 +3810,7 @@ class MapdlGrpc(MapdlBase):
         """
         cmd = ["scancel", f"{jobid}"]
         # to ensure the job is stopped properly, let's issue the scancel twice.
-        subprocess.Popen(cmd)  # nosec B603
+        subprocess.Popen(cmd)  # nosec B603  # nosec B603
 
     def __del__(self):
         """In case the object is deleted"""
@@ -3818,11 +3818,23 @@ class MapdlGrpc(MapdlBase):
         # The garbage collector remove attributes before we can evaluate this.
         if self._exited:
             return
+        if self._exited:
+            return
 
         if not self._start_instance:
             # Early skip if start_instance is False
             return
+        if not self._start_instance:
+            # Early skip if start_instance is False
+            return
 
+        # Killing the instance if we launched it.
+        if self._launched:
+            self._exit_mapdl(self._path)
+
+        # Exiting HPC job
+        if self._mapdl_on_hpc and self.finish_job_on_exit:
+            self.kill_job(self.jobid)
         # Killing the instance if we launched it.
         if self._launched:
             self._exit_mapdl(self._path)

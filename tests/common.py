@@ -26,6 +26,7 @@ import os
 import subprocess  # nosec B404
 import time
 from typing import Dict, List
+from warnings import warn
 
 import psutil
 
@@ -267,6 +268,7 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
         try:
             # to connect
             mapdl = Mapdl(port=port, ip=ip)
+            warn("MAPDL disconnected during testing, reconnected.")
 
         except MapdlConnectionError as err:
             from conftest import DEBUG_TESTING, ON_LOCAL
@@ -294,6 +296,7 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
                 log_apdl="pymapdl.apdl" if DEBUG_TESTING else None,
                 mapdl_output="apdl.out" if (DEBUG_TESTING and ON_LOCAL) else None,
             )
+            warn("MAPDL died during testing, relaunched.")
 
         LOG.info("Successfully re-connected to MAPDL")
 

@@ -24,6 +24,7 @@
 import os
 import re
 import shutil
+import subprocess
 import sys
 from unittest.mock import patch
 
@@ -34,6 +35,8 @@ from ansys.mapdl.core import examples
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
+    MapdlConnectionError,
+    MapdlDidNotStart,
     MapdlExitedError,
     MapdlgRPCError,
     MapdlRuntimeError,
@@ -577,19 +580,101 @@ def test_input_compatibility_api_change(mapdl, cleared):
 
 
 @requires("grpc")
-@requires("local")
-@requires("nostudent")
-def test__check_stds():
+def test__check_stds(mapdl):
     """Test that the standard input is checked."""
-    from ansys.mapdl.core import launch_mapdl
+    from ansys.mapdl.core.launcher import _check_server_is_alive, _get_std_output
 
-    mapdl = launch_mapdl(port=50058)
+    cmd = "counter=1; while true; do echo $counter; ((counter++)); sleep 1; done"
 
-    mapdl._read_stds()
-    assert mapdl._stdout is not None
-    assert mapdl._stderr is not None
+    process = subprocess.Popen(
+        ["bash", "-c", cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )  # nosec B603 B607
 
-    mapdl.exit(force=True)
+    if not hasattr(mapdl, "_stdout_queue"):
+        mapdl._stdout_queue = None
+    if not hasattr(mapdl, "_stdout_thread"):
+        mapdl._stdout_thread = None
+
+    with (
+        # To avoid overwriting the values for the rest of the tests.
+        patch.object(mapdl, "_stdout_queue"),
+        patch.object(mapdl, "_stdout_thread"),
+        patch.object(mapdl, "_mapdl_process"),
+        patch(
+            "ansys.mapdl.core.launcher._get_std_output", autospec=True
+        ) as mock_get_std_output,
+    ):
+
+        mock_get_std_output.side_effect = _get_std_output
+
+        mapdl._mapdl_process = process
+        mapdl._create_process_stds_queue(process)
+
+        # this should raise no issues
+        mapdl._post_mortem_checks(process)
+
+        with pytest.raises(MapdlDidNotStart):
+            _check_server_is_alive(mapdl._stdout_queue, 0.5)
+
+        assert isinstance(mapdl._stdout, list)
+        assert isinstance(mapdl._stderr, list)
+
+        assert (
+            mapdl._stdout
+            and len(mapdl._stdout) > 0
+            and mapdl._stdout[-1]
+            and mapdl._stdout[-1].strip().isdigit()
+        )
+
+        mock_get_std_output.assert_called()
+
+
+@requires("grpc")
+@requires("nowindows")  # since we are using bash
+def test__post_mortem_checks(mapdl):
+    """Test that the standard input is checked."""
+    from ansys.mapdl.core.launcher import _get_std_output
+
+    bash_command = """
+counter=1; while true; do
+  echo $counter;
+  ((counter++));
+  sleep 0.1;
+  if [ $counter -eq 7 ]; then
+    echo "";
+    echo "ERROR: Expected MapdlConnection error";
+    echo "";
+  fi;
+done
+"""
+    process = subprocess.Popen(
+        ["bash", "-c", bash_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+
+    if not hasattr(mapdl, "_stdout_queue"):
+        mapdl._stdout_queue = None
+    if not hasattr(mapdl, "_stdout_thread"):
+        mapdl._stdout_thread = None
+
+    with (
+        # To avoid overwriting the values for the rest of the tests.
+        patch.object(mapdl, "_stdout_queue"),
+        patch.object(mapdl, "_stdout_thread"),
+        patch.object(mapdl, "_mapdl_process"),
+        patch(
+            "ansys.mapdl.core.launcher._get_std_output", autospec=True
+        ) as mock_get_std_output,
+    ):
+
+        mock_get_std_output.side_effect = _get_std_output
+
+        mapdl._mapdl_process = process
+        mapdl._create_process_stds_queue(process)
+
+        with pytest.raises(
+            MapdlConnectionError, match="Expected MapdlConnection error"
+        ):
+            mapdl._post_mortem_checks(process)
 
 
 def test_subscribe_to_channel(mapdl, cleared):

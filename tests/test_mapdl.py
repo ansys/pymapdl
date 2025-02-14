@@ -29,7 +29,7 @@ from pathlib import Path
 import re
 import shutil
 import time
-from unittest.mock import patch
+from unittest.mock import PropertyMock, patch
 from warnings import catch_warnings
 
 import grpc
@@ -1968,20 +1968,43 @@ def test_igesin_whitespace(mapdl, cleared, tmpdir):
 
 
 @pytest.mark.parametrize("save", [None, True, False])
-@patch("ansys.mapdl.core.Mapdl.save")
-@patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._exit_mapdl")
-def test_save_on_exit(mck_exit, mck_save, mapdl, cleared, save):
+def test_save_on_exit(mapdl, cleared, save):
 
-    mck_exit.return_value = None
+    with (
+        patch.object(mapdl, "_exit_mapdl") as mock_exit,
+        patch.object(mapdl, "save") as mock_save,
+    ):
 
-    mapdl.exit(save=save)
+        mock_exit.return_value = None
+        mock_save.return_value = None
+
+        mapdl.exit(save=save, force=True)
+
+        mock_exit.assert_called_once()
+        if save:
+            mock_save.assert_called_once()
+        else:
+            mock_save.assert_not_called()
+
+    assert mapdl.exited
+    assert mapdl._exited
+    exited = mapdl._exited
+
+    with (
+        patch.object(mapdl, "_run") as mock_run,
+        patch.object(mapdl, "_exited") as mock__exited,
+    ):
+
+        mock__exited.return_value = exited
+
+        with pytest.raises(MapdlExitedError):
+            mapdl.prep7()
+
+        mock_run.assert_not_called()
+
     mapdl._exited = False  # avoiding set exited on the class.
 
-    if save:
-        mck_save.assert_called_once()
-    else:
-        mck_save.assert_not_called()
-
+    # Making sure we have the instance ready
     assert mapdl.prep7()
 
 
@@ -2139,7 +2162,7 @@ def test_components_selection_keep_between_plots(mapdl, cube_solve):
     assert "mycm" in mapdl.components
 
 
-def test_saving_selection_context(mapdl, cube_solve):
+def test_save_selection_1(mapdl, cube_solve):
     mapdl.allsel()
 
     for i in range(1, 4):
@@ -2235,6 +2258,108 @@ def test_saving_selection_context(mapdl, cube_solve):
 
     assert "nod_selection_4".upper() not in mapdl.cmlist()
     assert "nod_selection_4" not in mapdl.components
+
+
+def test_save_selection_2(mapdl, cleared, make_block):
+    from ansys.mapdl.core.mapdl_core import _TMP_COMP
+
+    n1 = 1
+    mapdl.nsel(vmin=n1)
+    assert n1 in mapdl.mesh.nnum
+    mapdl.cm("nodes_cm", "NODE")
+    assert "nodes_cm" in mapdl.components
+    assert n1 in mapdl.components["nodes_cm"].items
+    assert "NODE" == mapdl.components["nodes_cm"].type
+
+    e1 = 1
+    mapdl.esel(vmin=e1)
+    assert e1 in mapdl.mesh.enum
+    mapdl.cm("elem_cm", "ELEM")
+    assert "elem_cm" in mapdl.components
+    assert e1 in mapdl.components["elem_cm"].items
+    assert "ELEM" == mapdl.components["elem_cm"].type
+
+    kp1 = 1
+    mapdl.ksel(vmin=kp1)
+    assert kp1 in mapdl.geometry.knum
+    mapdl.cm("kp_cm", "kp")
+    assert "kp_cm" in mapdl.components
+    assert kp1 in mapdl.components["kp_cm"].items
+    assert "KP" == mapdl.components["kp_cm"].type
+
+    l1 = 1
+    mapdl.lsel(vmin=l1)
+    assert l1 in mapdl.geometry.lnum
+    mapdl.cm("line_cm", "line")
+    assert "line_cm" in mapdl.components
+    assert l1 in mapdl.components["line_cm"].items
+    assert "LINE" == mapdl.components["line_cm"].type
+
+    a1 = 1
+    mapdl.asel(vmin=a1)
+    assert a1 in mapdl.geometry.anum
+    mapdl.cm("area_cm", "area")
+    assert "area_cm" in mapdl.components
+    assert a1 in mapdl.components["area_cm"].items
+    assert "AREA" == mapdl.components["area_cm"].type
+
+    # Assert we have properly set the components
+    assert {
+        "AREA_CM": "AREA",
+        "ELEM_CM": "ELEM",
+        "KP_CM": "KP",
+        "LINE_CM": "LINE",
+        "NODES_CM": "NODE",
+    } == mapdl.components._comp
+
+    # additional changes to the selections
+    kpoints = mapdl.ksel("u", vmin=1)
+    lines = mapdl.lsel("a", vmin=[2, 5, 6])
+    areas = mapdl.asel("a", vmin=2)
+    nodes = mapdl.nsel("S", vmin=[4, 5])
+    elem = mapdl.esel("s", vmin=[1, 3])
+
+    # checking all the elements are correct
+    assert np.allclose(kpoints, mapdl.geometry.knum)
+    assert np.allclose(lines, mapdl.geometry.lnum)
+    assert np.allclose(areas, mapdl.geometry.anum)
+    assert np.allclose(nodes, mapdl.mesh.nnum)
+    assert np.allclose(elem, mapdl.mesh.enum)
+
+    ## storing... __enter__
+    comp_selection = mapdl.components._comp
+
+    print("Starting...")
+    with mapdl.save_selection:
+
+        # do something
+        mapdl.allsel()
+        mapdl.cmsel("NONE")
+        mapdl.asel("NONE")
+        mapdl.nsel("s", vmin=[1, 2, 8, 9])
+        mapdl.allsel()
+        mapdl.vsel("none")
+        mapdl.lsel("a", vmin=[9])
+        mapdl.vsel("all")
+        mapdl.ksel("none")
+
+    # checks
+    assert np.allclose(kpoints, mapdl.geometry.knum)
+    assert np.allclose(lines, mapdl.geometry.lnum)
+    assert np.allclose(areas, mapdl.geometry.anum)
+    assert np.allclose(nodes, mapdl.mesh.nnum)
+    assert np.allclose(elem, mapdl.mesh.enum)
+
+    for each_key, each_value in comp_selection.items():
+        assert (
+            each_key in mapdl.components
+        ), f"Component '{each_key}' is not defined/selected"
+        assert (
+            each_value == mapdl.components[each_key].type
+        ), f"Component '{each_key}' type is not correct"
+
+    for each_tmp in _TMP_COMP.values():
+        assert each_tmp not in mapdl.components
 
 
 def test_inquire_invalid(mapdl, cleared):
