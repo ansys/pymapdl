@@ -2011,7 +2011,8 @@ class _MapdlCore(Commands):
         if self._response is None:  # pragma: no cover
             self._log.warning("Unable to read response from flushed commands")
         else:
-            self._log.info(self._response)
+            response_ = "\n".join(self._response.splitlines()[:10])
+            self._log.debug(f"Printing truncated response: {response_}")
 
     def run_multiline(self, commands) -> str:
         """Run several commands as a single block
