@@ -2127,7 +2127,9 @@ class _MapdlCommandExtended(_MapdlCore):
 class _MapdlExtended(_MapdlCommandExtended):
     """Extend Mapdl class with new functions"""
 
-    def load_table(self, name, array, var1="", var2="", var3="", csysid="",col_header=False):
+    def load_table(
+        self, name, array, var1="", var2="", var3="", csysid="", col_header=False
+    ):
         """Load a table from Python to into MAPDL.
 
         Uses :func:`tread <Mapdl.tread>` to transfer the table.
@@ -2214,11 +2216,11 @@ class _MapdlExtended(_MapdlCommandExtended):
         if array.ndim == 2:
             # MAPDL considers the first row to be column header when col num > 2.
             # When col header is not available duplicate the first row
-            if array.shape[1] > 2 and col_header==False:
+            if array.shape[1] > 2 and col_header == False:
                 array = np.vstack((array[0], array))
                 imax_val = array.shape[0] - 1
             # When col header is available use col header
-            elif array.shape[1] > 2 and col_header==True:
+            elif array.shape[1] > 2 and col_header == True:
                 imax_val = array.shape[0] - 1
             else:
                 imax_val = array.shape[0]
