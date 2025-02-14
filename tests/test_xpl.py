@@ -57,10 +57,19 @@ class Test_xpl:
             mapdl.slashdelete(mapdl.result_file)
 
         clear(mapdl)
-        mapdl.clear()
-        mapdl.prep7()
+
+        # Delete files
+        self.full_file = mapdl.jobname + ".full"
+
+        if "full.file" in mapdl.list_files():
+            mapdl.slashdelete("full.file")
+
+        if mapdl.result_file in mapdl.list_files():
+            mapdl.slashdelete(mapdl.result_file)
 
         # set up the full file
+        mapdl.clear("NOSTART")
+        mapdl.prep7()
         mapdl.block(0, 1, 0, 1, 0, 1)
         mapdl.et(1, 186)
 
