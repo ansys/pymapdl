@@ -22,7 +22,6 @@
 
 """Module to control interaction with MAPDL through Python"""
 
-# import atexit
 from functools import wraps
 import glob
 import logging
