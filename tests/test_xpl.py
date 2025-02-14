@@ -47,10 +47,6 @@ class Test_xpl:
     def create_cube(self, mapdl):
         from conftest import clear
 
-        clear(mapdl)
-        mapdl.clear()
-        mapdl.prep7()
-
         # Delete files
         self.full_file = mapdl.jobname + ".full"
 
@@ -59,6 +55,10 @@ class Test_xpl:
 
         if mapdl.result_file in mapdl.list_files():
             mapdl.slashdelete(mapdl.result_file)
+
+        clear(mapdl)
+        mapdl.clear()
+        mapdl.prep7()
 
         # set up the full file
         mapdl.block(0, 1, 0, 1, 0, 1)
