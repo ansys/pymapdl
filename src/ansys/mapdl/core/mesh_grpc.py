@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -804,14 +804,26 @@ class MeshGrpc:
     ):
         from ansys.mapdl.core.mesh.mesh import _parse_vtk
 
-        return _parse_vtk(
-            self,
-            allowable_types,
-            force_linear,
-            null_unallowed,
-            fix_midside,
-            additional_checking,
-        )
+        try:
+            return _parse_vtk(
+                self,
+                allowable_types,
+                force_linear,
+                null_unallowed,
+                fix_midside,
+                additional_checking,
+            )
+        except ValueError:
+            # In case we fail to detect/apply midside nodes in cuadratic
+            # elements
+            return _parse_vtk(
+                self,
+                allowable_types,
+                force_linear,
+                null_unallowed,
+                not fix_midside,
+                additional_checking,
+            )
 
     def _parse_rlist(self) -> Dict[int, float]:
         # mapdl.rmore(*list)

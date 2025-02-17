@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,8 +22,8 @@
 
 import os
 from pathlib import Path
-import socket
 import time
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -31,9 +31,9 @@ import pytest
 from conftest import ON_LOCAL, ON_STUDENT, has_dependency
 
 if has_dependency("ansys-tools-path"):
-    from ansys.tools.path import find_ansys
+    from ansys.tools.path import find_mapdl
 
-    EXEC_FILE = find_ansys()[0]
+    EXEC_FILE = find_mapdl()[0]
 
 else:
     EXEC_FILE = os.environ.get("PYMAPDL_MAPDL_EXEC")
@@ -50,7 +50,7 @@ pytestmark = requires("grpc")
 IGNORE_POOL = os.environ.get("IGNORE_POOL", "").upper() == "TRUE"
 
 # skipping if ON_STUDENT and ON_LOCAL because we cannot spawn that many instances.
-if ON_STUDENT and ON_LOCAL:
+if ON_STUDENT:
     pytest.skip(allow_module_level=True)
 
 
@@ -67,6 +67,11 @@ skip_requires_194 = pytest.mark.skipif(
 
 TWAIT = 100
 NPROC = 1
+
+
+def patch_spawn_mapdl(*args, **kwargs):
+    kwargs["index"] = args[0]
+    return kwargs
 
 
 class TestMapdlPool:
@@ -124,7 +129,7 @@ class TestMapdlPool:
         # check it's been cleaned up
         if mapdl_pool[0] is not None:
             pth = mapdl_pool[0].directory
-            if mapdl_pool._spawn_kwargs["remove_temp_files"]:
+            if mapdl_pool._spawn_kwargs["remove_temp_dir_on_exit"]:
                 assert not list(Path(pth).rglob("*.page*"))
 
     @pytest.fixture
@@ -144,6 +149,7 @@ class TestMapdlPool:
             )
 
     @skip_if_ignore_pool
+    @requires("local")
     def test_heal(self, pool):
         pool_sz = len(pool)
         pool_names = pool._names  # copy pool names
@@ -163,6 +169,7 @@ class TestMapdlPool:
         pool._verify_unique_ports()
 
     @skip_if_ignore_pool
+    @requires("local")
     def test_simple_map(self, pool):
         pool_sz = len(pool)
         _ = pool.map(lambda mapdl: mapdl.prep7())
@@ -193,6 +200,7 @@ class TestMapdlPool:
         assert len(pool) == pool_sz
 
     @skip_if_ignore_pool
+    @requires("local")
     def test_simple(self, pool):
         pool_sz = len(pool)
 
@@ -205,12 +213,14 @@ class TestMapdlPool:
         assert len(pool) == pool_sz
 
     @skip_if_ignore_pool
+    @requires("local")
     def test_batch(self, pool):
         input_files = [examples.vmfiles["vm%d" % i] for i in range(1, len(pool) + 1)]
         outputs = pool.run_batch(input_files)
         assert len(outputs) == len(input_files)
 
     @skip_if_ignore_pool
+    @requires("local")
     def test_map(self, pool):
         completed_indices = []
 
@@ -226,6 +236,7 @@ class TestMapdlPool:
         assert len(outputs) == len(inputs)
 
     @skip_if_ignore_pool
+    @requires("local")
     @requires("local")
     def test_abort(self, pool, tmpdir):
         pool_sz = len(pool)  # initial pool size
@@ -255,6 +266,7 @@ class TestMapdlPool:
         assert path_deleted
 
     @skip_if_ignore_pool
+    @requires("local")
     def test_directory_names_default(self, pool):
         dirs_path_pool = os.listdir(pool._root_dir)
         for i, _ in enumerate(pool._instances):
@@ -262,6 +274,7 @@ class TestMapdlPool:
             assert f"Instance_{i}" in dirs_path_pool
 
     @skip_if_ignore_pool
+    @requires("local")
     def test_directory_names_default_with_restart(self, pool):
 
         pool[1].exit()
@@ -276,8 +289,8 @@ class TestMapdlPool:
             assert pool._names(i) in dirs_path_pool
             assert f"Instance_{i}" in dirs_path_pool
 
-    @requires("local")
     @skip_if_ignore_pool
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
     def test_directory_names_custom_string(self, tmpdir):
         pool = MapdlPool(
             2,
@@ -287,16 +300,22 @@ class TestMapdlPool:
             names="my_instance",
             port=50056,
             additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
         )
-
         dirs_path_pool = os.listdir(pool._root_dir)
-        assert "my_instance_0" in dirs_path_pool
-        assert "my_instance_1" in dirs_path_pool
+        time.sleep(2)
+        assert all(["my_instance" in each for each in dirs_path_pool])
 
-        pool.exit(block=True)
-
-    @requires("local")
     @skip_if_ignore_pool
+    @patch("ansys.mapdl.core.pool.launch_mapdl", lambda *args, **kwargs: kwargs)
+    @patch(
+        "ansys.mapdl.core.pool.MapdlPool.is_initialized", lambda *args, **kwargs: True
+    )
+    @patch(
+        "ansys.mapdl.core.pool.MapdlPool._verify_unique_ports",
+        lambda *args, **kwargs: None,
+    )
     def test_directory_names_function(self, tmpdir):
         def myfun(i):
             if i == 0:
@@ -313,14 +332,14 @@ class TestMapdlPool:
             names=myfun,
             run_location=tmpdir,
             additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
         )
 
         dirs_path_pool = os.listdir(pool._root_dir)
         assert "instance_zero" in dirs_path_pool
         assert "instance_one" in dirs_path_pool
         assert "Other_instance" in dirs_path_pool
-
-        pool.exit(block=True)
 
     def test_num_instances(self):
         with pytest.raises(ValueError, match="least 1 instance"):
@@ -332,19 +351,22 @@ class TestMapdlPool:
             )
 
     @skip_if_ignore_pool
-    @requires("local")
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
     def test_only_one_instance(self):
-        pool = MapdlPool(
+        pool_ = MapdlPool(
             1,
             exec_file=EXEC_FILE,
             nproc=NPROC,
             additional_switches=QUICK_LAUNCH_SWITCHES,
+            wait=False,
+            restart_failed=False,
         )
-        pool_sz = len(pool)
-        _ = pool.map(lambda mapdl: mapdl.prep7())
-        assert len(pool) == pool_sz
-        pool.exit()
 
+        pool_sz = len(pool_)
+        assert len([each["ip"] for each in pool_._threads]) == 1
+        assert len([each["port"] for each in pool_._threads]) == 1
+
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
     def test_ip(self, monkeypatch):
         monkeypatch.delenv("PYMAPDL_START_INSTANCE", raising=False)
         monkeypatch.delenv("PYMAPDL_IP", raising=False)
@@ -358,15 +380,20 @@ class TestMapdlPool:
             exec_file=EXEC_FILE,
             nproc=NPROC,
             additional_switches=QUICK_LAUNCH_SWITCHES,
-            _debug_no_launch=True,
+            wait=False,
+            restart_failed=False,
         )
-        args = pool_._debug_no_launch
 
-        assert not args["start_instance"]  # Because of ip
-        assert args["ips"] == ips
-        assert args["ports"] == ports
+        assert [each["start_instance"] for each in pool_._threads] == [
+            False,
+            False,
+            False,
+        ]
+        assert [each["ip"] for each in pool_._threads] == ips
+        assert [each["port"] for each in pool_._threads] == ports
 
     @skip_if_ignore_pool
+    @requires("local")
     def test_next(self, pool):
         # Check the instances are free
         for each_instance in pool:
@@ -384,6 +411,7 @@ class TestMapdlPool:
             assert not each_instance._busy
 
     @skip_if_ignore_pool
+    @requires("local")
     def test_next_with_returns_index(self, pool):
         # Check the instances are free
         for each_instance in pool:
@@ -404,6 +432,9 @@ class TestMapdlPool:
             assert not each_instance.locked
             assert not each_instance._busy
 
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    @patch("socket.gethostbyname", lambda *args, **kwargs: args[0])
+    @patch("ansys.mapdl.core.pool.port_in_use", lambda *args, **kwargs: False)
     def test_multiple_ips(self, monkeypatch):
         ips = [
             "123.45.67.1",
@@ -415,16 +446,27 @@ class TestMapdlPool:
 
         monkeypatch.delenv("PYMAPDL_MAPDL_EXEC", raising=False)
 
-        conf = MapdlPool(ip=ips, _debug_no_launch=True)._debug_no_launch
+        pool = MapdlPool(
+            ip=ips,
+            wait=False,
+            restart_failed=False,
+        )
 
-        ips = [socket.gethostbyname(each) for each in ips]
+        assert [each["ip"] for each in pool._threads] == ips
+        assert [each["port"] for each in pool._threads] == [
+            50052 for i in range(len(ips))
+        ]
+        assert [each["start_instance"] for each in pool._threads] == [
+            False for i in range(len(ips))
+        ]
+        assert [each["exec_file"] for each in pool._threads] == [
+            None for i in range(len(ips))
+        ]
+        assert len(pool._threads) == len(ips)
 
-        assert conf["ips"] == ips
-        assert conf["ports"] == [50052 for i in range(len(ips))]
-        assert conf["start_instance"] is False
-        assert conf["exec_file"] is None
-        assert conf["n_instances"] == len(ips)
-
+    @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
+    @patch("socket.gethostbyname", lambda *args, **kwargs: args[0])
+    @patch("ansys.mapdl.core.pool.port_in_use", lambda *args, **kwargs: False)
     @pytest.mark.parametrize(
         "n_instances,ip,port,exp_n_instances,exp_ip,exp_port,context",
         [
@@ -580,9 +622,6 @@ class TestMapdlPool:
                 [LOCALHOST, LOCALHOST],
                 [MAPDL_DEFAULT_PORT, MAPDL_DEFAULT_PORT + 1],
                 NullContext(),
-                marks=pytest.mark.xfail(
-                    reason="Available ports cannot does not start in `MAPDL_DEFAULT_PORT`. Probably because there are other instances running already."
-                ),
             ),
             pytest.param(
                 3,
@@ -592,9 +631,6 @@ class TestMapdlPool:
                 [LOCALHOST, LOCALHOST, LOCALHOST],
                 [MAPDL_DEFAULT_PORT, MAPDL_DEFAULT_PORT + 1, MAPDL_DEFAULT_PORT + 2],
                 NullContext(),
-                marks=pytest.mark.xfail(
-                    reason="Available ports cannot does not start in `MAPDL_DEFAULT_PORT`. Probably because there are other instances running already."
-                ),
             ),
             pytest.param(
                 3,
@@ -604,9 +640,6 @@ class TestMapdlPool:
                 [LOCALHOST, LOCALHOST, LOCALHOST],
                 [50053, 50053 + 1, 50053 + 2],
                 NullContext(),
-                marks=pytest.mark.xfail(
-                    reason="Available ports cannot does not start in `MAPDL_DEFAULT_PORT`. Probably because there are other instances running already."
-                ),
             ),
             pytest.param(
                 3,
@@ -782,16 +815,23 @@ class TestMapdlPool:
         monkeypatch.setenv("PYMAPDL_MAPDL_EXEC", "/ansys_inc/v222/ansys/bin/ansys222")
 
         with context:
-            conf = MapdlPool(
-                n_instances=n_instances, ip=ip, port=port, _debug_no_launch=True
-            )._debug_no_launch
+            pool = MapdlPool(
+                n_instances=n_instances,
+                ip=ip,
+                port=port,
+                wait=False,
+                restart_failed=False,
+            )
 
-            if exp_ip:
-                exp_ip = [socket.gethostbyname(each) for each in exp_ip]
+            ips = [each["ip"] for each in pool._threads]
+            ports = [each["port"] for each in pool._threads]
+            exec_files = [each["exec_file"] for each in pool._threads]
 
-            assert conf["n_instances"] == exp_n_instances
-            assert len(conf["ips"]) == exp_n_instances
-            assert len(conf["ports"]) == exp_n_instances
-            assert conf["ips"] == exp_ip
-            assert conf["ports"] == exp_port
-            assert conf["exec_file"] == "/ansys_inc/v222/ansys/bin/ansys222"
+            assert len(pool._threads) == exp_n_instances
+            assert len(ips) == exp_n_instances
+            assert len(ports) == exp_n_instances
+            assert ips == exp_ip
+            assert ports == exp_port
+            assert exec_files == [
+                "/ansys_inc/v222/ansys/bin/ansys222" for i in range(exp_n_instances)
+            ]

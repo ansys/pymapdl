@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -23,7 +23,7 @@
 import pytest
 
 from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
-from conftest import requires
+from conftest import TestClass, requires
 
 
 class TestParseParameter:
@@ -84,7 +84,16 @@ class TestParseParameter:
             query._parse_parameter_integer_response(input_)
 
 
-class TestRunQuery:
+class TestRunQuery(TestClass):
+
+    @pytest.fixture(scope="class")
+    def line_geometry(self, mapdl):
+        k0 = mapdl.k(1, 0, 0, 0)
+        k1 = mapdl.k(2, 1, 2, 2)
+        l0 = mapdl.l(k0, k1)
+        q = mapdl.queries
+        return q, [k0, k1], l0
+
     @pytest.mark.parametrize("command", [("KX(1)", float), ("KP(1,1,1)", int)])
     def test_run_query_returned_type(self, line_geometry, command):
         q, kps, l0 = line_geometry

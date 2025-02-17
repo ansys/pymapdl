@@ -25,21 +25,19 @@ You plot lines within Python using the :func:`Mapdl.lplot() <ansys.mapdl.core.Ma
 .. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
+    >>> import numpy as np
     >>> mapdl = launch_mapdl()
 
-    Create a rectangle with a few holes
-
+    # Create a rectangle with a few holes
     >>> mapdl.prep7()
     >>> rect_anum = mapdl.blc4(width=1, height=0.2)
 
-    Create several circles in the middle in the rectangle
-
+    # Create several circles in the middle in the rectangle
     >>> for x in np.linspace(0.1, 0.9, 8):
     ...     mapdl.cyl4(x, 0.1, 0.025)
     ...
 
-    Generate a line plot
-
+    # Generate a line plot
     >>> mapdl.lplot(color_lines=True, cpos="xy")
 
 
@@ -60,8 +58,7 @@ extrudes it.
 
     >>> plate_holes = mapdl.asba(rect_anum, "all")
 
-    Extrude this area
-
+    # Extrude this area
     >>> mapdl.vext(plate_holes, dz=0.1)
     >>> mapdl.vplot()
 

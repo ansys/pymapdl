@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -1911,7 +1911,7 @@ class Special:
         Distributed ANSYS Restriction: This command is not supported in
         Distributed ANSYS.
         """
-        command = f"PRCAMP,{option},{slope},{unit},{freqb},{cname},{stabval},{keyallfreq},{keynegfreq}"
+        command = f"PRCAMP,{option},{slope},{unit},{freqb},{cname},{stabval},{keyallfreq},{keynegfreq},{keywhirl}"
         return self.run(command, **kwargs)
 
     def prfar(

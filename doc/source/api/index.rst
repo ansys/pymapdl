@@ -23,6 +23,7 @@ PyMAPDL, see :ref:`ref_mapdl_commands`.
    database
    geometry
    helper
+   information
    inline
    krylov
    launcher

@@ -3,6 +3,7 @@
 from datetime import datetime
 import os
 from pathlib import Path
+import sys
 import warnings
 
 import ansys.tools.visualization_interface as viz_interface
@@ -10,10 +11,14 @@ from ansys_sphinx_theme import ansys_favicon, get_version_match
 import numpy as np
 import pyvista
 from sphinx.application import Sphinx
+from sphinx.util import logging
 from sphinx_gallery.sorting import FileNameSortKey
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
+
+# Convert notebooks into Python scripts and include them in the output files
+logger = logging.getLogger(__name__)
 
 viz_interface.DOCUMENTATION_BUILD = True
 pyvista.BUILDING_GALLERY = True
@@ -46,6 +51,9 @@ warnings.filterwarnings(
     category=UserWarning,
     message="Matplotlib is currently using agg, which is a non-GUI backend, so cannot show the figure.",
 )
+
+# To allow using 'helper' python file as a module
+sys.path.append(os.path.dirname(__file__))
 
 
 # -- Project information -----------------------------------------------------
@@ -89,11 +97,13 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx_autodoc_typehints",
     "sphinx_design",
+    "sphinx_jinja",
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
     "ansys_sphinx_theme.extension.linkcode",
+    "sphinx.ext.mathjax",
 ]
 
 # Intersphinx mapping
@@ -103,7 +113,7 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "pandas": ("https://pandas.pydata.org/docs/", None),
-    "pyvista": ("https://docs.pyvista.org/version/stable/", None),
+    "pyvista": ("https://docs.pyvista.org", None),
     "grpc": ("https://grpc.github.io/grpc/python/", None),
     "pypim": ("https://pypim.docs.pyansys.com/version/dev/", None),
     "ansys-dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
@@ -196,7 +206,7 @@ rst_epilog = ""
 with open("links.rst") as f:
     rst_epilog += f.read()
 
-rst_epilog = rst_epilog.replace("%%VERSION%%", "v231")
+rst_epilog = rst_epilog.replace("%%VERSION%%", "v242")
 rst_epilog = rst_epilog.replace("%%PYMAPDLVERSION%%", release)
 
 
@@ -205,13 +215,15 @@ with open("substitutions.rst") as f:
     rst_epilog += f.read()
 
 # Broken anchors:
-linkcheck_exclude_documents = ["index"]
+linkcheck_exclude_documents = ["index", "changelog"]
 linkcheck_anchors_ignore_for_url = ["https://docs.pyvista.org/api/*"]
 linkcheck_ignore = [
     "https://github.com/ansys/pymapdl/*",
     "https://mapdl.docs.pyansys.com/*",
-    "https://ansysaccount.b2clogin.com/*",  # behind payfirewall
-    "https://ansyshelp.ansys.com/*",  # behind payfirewall
+    "https://www.ansys.com/*",  # behind firewall
+    "https://download.ansys.com/*",  # behind firewall
+    "https://ansysaccount.b2clogin.com/*",  # behind authentication
+    "https://ansyshelp.ansys.com/*",  # behind authentication
     "https://forum.ansys.com/forums/*",  # It is detected as broken
     "https://courses.ansys.com/*",  # It is detected as broken
 ]
@@ -230,7 +242,7 @@ if switcher_version != "dev":
         f"https://github.com/ansys/pymapdl/releases/tag/v{__version__}"
     )
 
-user_agent = """curl https://www.ansys.com -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.3"""
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.2420.81"  # noqa: E501
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -302,13 +314,17 @@ html_theme_options = {
         "json_url": f"https://{cname}/versions.json",
         "version_match": switcher_version,
     },
-    "use_meilisearch": {
-        "api_key": os.getenv("MEILISEARCH_PUBLIC_API_KEY", ""),
-        "index_uids": {
-            f"pymapdl-v{switcher_version.replace('.', '-')}": "PyMAPDL",
-        },
-    },
 }
+
+BUILD_CHEATSHEET = os.environ.get("BUILD_CHEATSHEET", "false").lower() == "true"
+
+if BUILD_CHEATSHEET:
+    html_theme_options["cheatsheet"] = {
+        "file": "cheat_sheet/cheat_sheet.qmd",
+        "title": "PyMAPDL cheat sheet",
+        "version": f"v{version}",
+        "pages": ["getting_started/learning"],
+    }
 
 html_context = {
     "display_github": True,  # Integrate GitHub
@@ -420,3 +436,13 @@ def setup(app: Sphinx):
 
     # Julia lexer
     app.add_lexer("julia", JuliaLexer)
+
+    # Setting custom directive
+    from helpers import HideObject
+
+    app.add_directive("hideobject", HideObject)
+
+
+jinja_contexts = {
+    "cheat_sheet": {"version": switcher_version},
+}
