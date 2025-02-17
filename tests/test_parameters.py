@@ -532,3 +532,43 @@ def test_parameter_types(mapdl, cleared, parameter):
 
     else:
         assert isinstance(mapdl.parameters["temp_arr"], type(parameter))
+
+
+@pytest.mark.parametrize("use_load_table", [True, False])
+def test_table_interpolation(mapdl, use_load_table):
+    file_name = "table.txt"
+
+    table = """
+    0,1,2,3,4
+    10, 0.1, 0.2, 0.3, 0.4
+    20, 0.2, 0.3, 0.4, 0.5
+    30, 0.3, 0.4, 0.5, 0.6
+    40, 0.4, 0.5, 0.6, 0.7
+    """
+
+    with open(file_name, "w") as fid:
+        fid.write(table)
+
+    if use_load_table:
+        table_data = np.genfromtxt(file_name, delimiter=",")
+        mapdl.load_table("table", table_data, "time")
+    else:
+        mapdl.upload(file_name)
+        mapdl.run("*DIM,table,TABLE,4,4,,time,,,")
+        mapdl.run(f"*TREAD,table,{file_name},,,")
+        mapdl.starstatus("table")
+
+    mapdl.run("tmp_ = table(10, 1)")
+    assert np.allclose(mapdl.parameters["tmp_"], 0.100000000)
+    mapdl.run("tmp_ = table(15, 1)")  # Interpolated!
+    assert np.allclose(mapdl.parameters["tmp_"], 0.15000000000)
+    mapdl.run("tmp_ = table(20,1)")
+    assert np.allclose(mapdl.parameters["tmp_"], 0.2000000000)
+    mapdl.run("tmp_ = table(10,1)")
+    assert np.allclose(mapdl.parameters["tmp_"], 0.1000000000)
+    mapdl.run("tmp_ = table(10, 1.5)")  # Interpolated!
+    assert np.allclose(mapdl.parameters["tmp_"], 0.15000000000)
+    mapdl.run("tmp_ = table(10,2)")
+    assert np.allclose(mapdl.parameters["tmp_"], 0.2000000000)
+    mapdl.run("tmp_ = table(15,1.5)")  # Interpolated!
+    assert np.allclose(mapdl.parameters["tmp_"], 0.20000000000)

@@ -67,6 +67,10 @@ class Test_xpl:
         if mapdl.result_file in mapdl.list_files():
             mapdl.slashdelete(mapdl.result_file)
 
+        # Delete files
+        if "cube_solve_xpl" in mapdl.list_files():
+            mapdl.slashdelete("cube_solve_xpl.db")
+
         # set up the full file
         mapdl.clear("NOSTART")
         mapdl.prep7()
@@ -80,20 +84,6 @@ class Test_xpl:
 
         mapdl.esize(0.5)
         mapdl.vmesh("all")
-
-        # Delete files
-        self.full_file = mapdl.jobname + ".full"
-        if "full.file" in mapdl.list_files():
-            mapdl.slashdelete("full.file")
-
-        if mapdl.result_file in mapdl.list_files():
-            mapdl.slashdelete(mapdl.result_file)
-
-        if mapdl.result_file in mapdl.list_files():
-            mapdl.slashdelete(mapdl.result_file)
-
-        if "cube_solve_xpl" in mapdl.list_files():
-            mapdl.slashdelete("cube_solve_xpl.db")
 
         # solve first 10 non-trivial modes
         mapdl.modal_analysis(nmode=10, freqb=1)

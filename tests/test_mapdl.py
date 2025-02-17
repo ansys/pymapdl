@@ -873,12 +873,18 @@ def test_cyclic_solve(mapdl, cleared):
         )
     ),
 )
-def test_load_table(mapdl, cleared, dim_rows, dim_cols):
+@pytest.mark.parametrize("col_header", [False, True])
+def test_load_table(mapdl, cleared, dim_rows, dim_cols, col_header):
     my_conv = np.random.rand(dim_rows, dim_cols)
     my_conv[:, 0] = np.arange(dim_rows)  # "time" values
 
-    mapdl.load_table("my_conv", my_conv, "TIME")
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv[:, 1:], 1e-7)
+    mapdl.load_table("my_conv", my_conv, "TIME", col_header=col_header)
+
+    if col_header and dim_cols > 2:
+        # Assertion when col_header is True and more than two columns
+        assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], atol=1e-7)
+    else:
+        assert np.allclose(mapdl.parameters["my_conv"], my_conv[:, 1:], atol=1e-7)
 
 
 def test_load_table_error_ascending_row(mapdl, cleared):
