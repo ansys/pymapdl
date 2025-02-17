@@ -37,10 +37,46 @@ class RadiationMatrixMethod:
 
         Notes
         -----
+
+        .. _WRITE_notes:
+
         Writes radiation matrix file ( :file:`File.SUB` ) for input to the substructure thermal "use" pass.
         Subsequent :ref:`write` operations to the same file overwrite the file.
         """
         command = f"WRITE,{fname}"
+        return self.run(command, **kwargs)
+
+    def emis(self, mat: str = "", evalu: str = "", **kwargs):
+        r"""Specifies emissivity as a material property for the Radiation Matrix method.
+
+        Mechanical APDL Command: `EMIS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EMIS.html>`_
+
+        **Command default:**
+
+        .. _EMIS_default:
+
+        Since there is no :ref:`command default value for emissivity, you must issue <ans_cmd_cmdDef>`
+        :ref:`emis` to specify it. Otherwise, an error message appears. If you issue :ref:`emis` without
+        defining a numerical value, emissivity defaults to 0.
+
+        Parameters
+        ----------
+        mat : str
+            Material number associated with this emissivity (500 maximum). Defaults to 1.
+
+        evalu : str
+            Emissivity for this material (0.0 < ``EVALU``  :math:``  1.0).  Enter a very small number for
+            zero.
+
+        Notes
+        -----
+
+        .. _EMIS_notes:
+
+        Specifies emissivity as a material property for the Radiation Matrix method. This material property
+        can then be associated with each element.
+        """
+        command = f"EMIS,{mat},{evalu}"
         return self.run(command, **kwargs)
 
     def vtype(self, nohid: int | str = "", nzone: str = "", **kwargs):
@@ -64,48 +100,29 @@ class RadiationMatrixMethod:
         command = f"VTYPE,{nohid},{nzone}"
         return self.run(command, **kwargs)
 
-    def emis(self, mat: str = "", evalu: str = "", **kwargs):
-        r"""Specifies emissivity as a material property for the Radiation Matrix method.
+    def mprint(self, key: int | str = "", **kwargs):
+        r"""Specifies that radiation matrices are to be printed.
 
-        Mechanical APDL Command: `EMIS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EMIS.html>`_
-
-        Default: Since there is no  :ref:`emis` to specify it. Otherwise, an
-        error message appears. If you issue :ref:`emis` without defining a
-        numerical value, emissivity defaults to 0.   Emissivity value of 1.0
-        is associated with all materials.
+        Mechanical APDL Command: `MPRINT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MPRINT.html>`_
 
         Parameters
         ----------
-        mat : str
-            Material number associated with this emissivity (500 maximum). Defaults to 1.
+        key : int or str
+            Print key:
 
-        evalu : str
-            Emissivity for this material (0.0 < ``EVALU``  :math:``  1.0).  Enter a very small number for
-            zero.
+            * ``0`` - Do not print matrices.
 
-        Notes
-        -----
-        Specifies emissivity as a material property for the Radiation Matrix method. This material property
-        can then be associated with each element.
-        """
-        command = f"EMIS,{mat},{evalu}"
-        return self.run(command, **kwargs)
-
-    def space(self, node: str = "", **kwargs):
-        r"""Defines a space node for radiation using the Radiation Matrix method.
-
-        Mechanical APDL Command: `SPACE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SPACE.html>`_
-
-        Parameters
-        ----------
-        node : str
-            Node defined to be the space node.
+            * ``1`` - Print matrices.
 
         Notes
         -----
-        A space node is required in an open system to account for radiation losses.
+
+        .. _MPRINT_notes:
+
+        Specifies that the element and node radiation matrices are to be printed when the :ref:`write`
+        command is issued. If ``KEY`` = 1, form factor information for each element will also be printed.
         """
-        command = f"SPACE,{node}"
+        command = f"MPRINT,{key}"
         return self.run(command, **kwargs)
 
     def geom(self, k2d: int | str = "", ndiv: str = "", **kwargs):
@@ -131,24 +148,22 @@ class RadiationMatrixMethod:
         command = f"GEOM,{k2d},{ndiv}"
         return self.run(command, **kwargs)
 
-    def mprint(self, key: int | str = "", **kwargs):
-        r"""Specifies that radiation matrices are to be printed.
+    def space(self, node: str = "", **kwargs):
+        r"""Defines a space node for radiation using the Radiation Matrix method.
 
-        Mechanical APDL Command: `MPRINT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MPRINT.html>`_
+        Mechanical APDL Command: `SPACE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SPACE.html>`_
 
         Parameters
         ----------
-        key : int or str
-            Print key:
-
-            * ``0`` - Do not print matrices.
-
-            * ``1`` - Print matrices.
+        node : str
+            Node defined to be the space node.
 
         Notes
         -----
-        Specifies that the element and node radiation matrices are to be printed when the :ref:`write`
-        command is issued. If ``KEY`` = 1, form factor information for each element will also be printed.
+
+        .. _SPACE_notes:
+
+        A space node is required in an open system to account for radiation losses.
         """
-        command = f"MPRINT,{key}"
+        command = f"SPACE,{node}"
         return self.run(command, **kwargs)

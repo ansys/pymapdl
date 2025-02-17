@@ -30,6 +30,9 @@ class GeneralRadiation:
 
         Notes
         -----
+
+        .. _s-AUX12_notes:
+
         Enters the radiation processor (auxiliary processor AUX12). This processor supports the Radiation
         Matrix and the Radiosity Solver methods.
 
@@ -50,6 +53,9 @@ class GeneralRadiation:
 
         Notes
         -----
+
+        .. _STEF_notes:
+
         You can use this command in the general preprocessor (PREP7) and in the Solution processor to
         specify the Stefan-Boltzmann constant in analyses using the radiation matrix method or the radiosity
         solver to model radiation.
