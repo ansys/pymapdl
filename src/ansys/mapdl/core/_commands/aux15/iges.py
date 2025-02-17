@@ -23,21 +23,6 @@
 
 class Iges:
 
-    def aux15(self, **kwargs):
-        r"""Enters the IGES file transfer processor.
-
-        Mechanical APDL Command: `/AUX15 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AUX15.html>`_
-
-        Notes
-        -----
-        Enters the IGES file-transfer processor (auxiliary processor AUX15), used to read an IGES data file
-        into the Mechanical APDL program.
-
-        This command is valid only at the Begin Level.
-        """
-        command = "/AUX15"
-        return self.run(command, **kwargs)
-
     def igesin(self, fname: str = "", ext: str = "", **kwargs):
         r"""Transfers IGES data from a file into Mechanical APDL.
 
@@ -56,6 +41,9 @@ class Iges:
 
         Notes
         -----
+
+        .. _IGESIN_notes:
+
         Reads a file containing IGES data and transfers it into the Mechanical APDL database. The file
         transferred
         is the IGES Version 5.1, ASCII format file. IGES (Initial Graphics Exchange Specification) is a
@@ -123,6 +111,9 @@ class Iges:
 
         Notes
         -----
+
+        .. _IOPTN_notes:
+
         Controls various options during a model file transfer. A global solid model tolerance (GTOLER) can
         be specified.
 
@@ -161,4 +152,22 @@ class Iges:
         This command is valid in any processor.
         """
         command = f"IOPTN,{lab},{val1}"
+        return self.run(command, **kwargs)
+
+    def aux15(self, **kwargs):
+        r"""Enters the IGES file transfer processor.
+
+        Mechanical APDL Command: `/AUX15 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AUX15.html>`_
+
+        Notes
+        -----
+
+        .. _s-AUX15_notes:
+
+        Enters the IGES file-transfer processor (auxiliary processor AUX15), used to read an IGES data file
+        into the Mechanical APDL program.
+
+        This command is valid only at the Begin Level.
+        """
+        command = "/AUX15"
         return self.run(command, **kwargs)
