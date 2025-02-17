@@ -815,6 +815,7 @@ class MapdlPool:
         >>> pool.exit()
         """
         self._active = False  # kills any active instance restart
+        self._spawning_i = 0  # Avoid respawning
 
         @threaded
         def threaded_exit(index, instance):
@@ -827,7 +828,7 @@ class MapdlPool:
                         f"Unable to exit instance {index} because of the following reason:\n{str(e)}"
                     )
                 self._instances[index] = None
-                # LOG.debug("Exited instance: %s", str(instance))
+                LOG.debug(f"Exited instance: {instance}")
                 self._exiting_i -= 1
 
         threads = []
