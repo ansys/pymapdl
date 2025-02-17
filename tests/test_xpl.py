@@ -21,6 +21,8 @@
 # SOFTWARE.
 
 """Test xpl functionality"""
+import re
+
 from ansys.tools.versioning.utils import SemanticVersion
 import numpy as np
 import pytest
@@ -45,11 +47,33 @@ class Test_xpl:
     def create_cube(self, mapdl):
         from conftest import clear
 
+        # Delete files
+        self.full_file = mapdl.jobname + ".full"
+
+        if "full.file" in mapdl.list_files():
+            mapdl.slashdelete("full.file")
+
+        if mapdl.result_file in mapdl.list_files():
+            mapdl.slashdelete(mapdl.result_file)
+
         clear(mapdl)
-        mapdl.clear()
-        mapdl.prep7()
+
+        # Delete files
+        self.full_file = mapdl.jobname + ".full"
+
+        if "full.file" in mapdl.list_files():
+            mapdl.slashdelete("full.file")
+
+        if mapdl.result_file in mapdl.list_files():
+            mapdl.slashdelete(mapdl.result_file)
+
+        # Delete files
+        if "cube_solve_xpl" in mapdl.list_files():
+            mapdl.slashdelete("cube_solve_xpl.db")
 
         # set up the full file
+        mapdl.clear("NOSTART")
+        mapdl.prep7()
         mapdl.block(0, 1, 0, 1, 0, 1)
         mapdl.et(1, 186)
 
@@ -61,23 +85,9 @@ class Test_xpl:
         mapdl.esize(0.5)
         mapdl.vmesh("all")
 
-        # Delete files
-        self.full_file = mapdl.jobname + ".full"
-        if "full.file" in mapdl.list_files():
-            mapdl.slashdelete("full.file")
-
-        if mapdl.result_file in mapdl.list_files():
-            mapdl.slashdelete(mapdl.result_file)
-
-        if mapdl.result_file in mapdl.list_files():
-            mapdl.slashdelete(mapdl.result_file)
-
-        if "cube_solve_xpl" in mapdl.list_files():
-            mapdl.slashdelete("cube_solve_xpl.db")
-
         # solve first 10 non-trivial modes
         mapdl.modal_analysis(nmode=10, freqb=1)
-        mapdl.save("cube_solve_xpl", "db")
+        mapdl.save("cube_solve_xpl", "db", slab="all")
 
     @pytest.fixture(scope="class")
     def cube_solve(self, mapdl):
@@ -106,7 +116,7 @@ class Test_xpl:
 
     @staticmethod
     def test_xpl_str(xpl):
-        assert "file.full" in str(xpl)
+        assert re.search(r"file\d*\.full", str(xpl))
 
     @staticmethod
     @requires("ansys-math-core")

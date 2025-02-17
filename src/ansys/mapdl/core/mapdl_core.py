@@ -22,7 +22,6 @@
 
 """Module to control interaction with MAPDL through Python"""
 
-# import atexit
 from functools import wraps
 import glob
 import logging
@@ -1915,7 +1914,8 @@ class _MapdlCore(Commands):
         filename = os.path.join(self.directory, ".".join(items[1:]))
         if os.path.isfile(filename):
             self._response = open(filename).read()
-            self._log.info(self._response)
+            response_ = "\n".join(self._response.splitlines()[:10])
+            self._log.info(response_)
         else:
             raise Exception("Cannot run:\n{command}\n\nFile does not exist")
 
@@ -2013,7 +2013,8 @@ class _MapdlCore(Commands):
         if self._response is None:  # pragma: no cover
             self._log.warning("Unable to read response from flushed commands")
         else:
-            self._log.info(self._response)
+            response_ = "\n".join(self._response.splitlines()[:10])
+            self._log.debug(f"Printing truncated response: {response_}")
 
     def run_multiline(self, commands) -> str:
         """Run several commands as a single block
@@ -2338,7 +2339,8 @@ class _MapdlCore(Commands):
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
         if text:
             self._response = StringWithLiteralRepr(text.strip())
-            self._log.info(self._response)
+            response_ = "\n".join(self._response.splitlines()[:20])
+            self._log.info(response_)
         else:
             self._response = None
             return self._response

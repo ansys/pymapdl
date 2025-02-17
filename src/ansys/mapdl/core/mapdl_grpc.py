@@ -2198,7 +2198,8 @@ class MapdlGrpc(MapdlBase):
         )
         # skip the first line as it simply states that it's reading an input file
         self._response = out[out.find("LINE=       0") + 13 :]
-        self._log.info(self._response)
+        response_ = "\n".join(self._response.splitlines()[:20])
+        self._log.info(response_)
 
         if not self._ignore_errors:
             self._raise_errors(self._response)
