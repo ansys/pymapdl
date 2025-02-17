@@ -27,6 +27,8 @@ This has been copied from test_mapdl.py
 """
 import os
 import time
+from unittest.mock import patch
+from warnings import catch_warnings
 
 import pytest
 
@@ -111,6 +113,8 @@ def test_basic_command(cleared, mapdl_console):
 def test_allow_ignore(mapdl_console, cleared):
     mapdl_console.allow_ignore = False
     assert mapdl_console.allow_ignore is False
+
+    mapdl_console.finish()
     with pytest.raises(pymapdl.errors.MapdlInvalidRoutineError):
         mapdl_console.k()
 
@@ -132,7 +136,7 @@ def test_chaining(mapdl_console, cleared):
 
 
 def test_e(mapdl_console, cleared):
-    mapdl.prep7()
+    mapdl_console.prep7()
     mapdl_console.et("", 183)
     n0 = mapdl_console.n("", 0, 0, 0)
     n1 = mapdl_console.n("", 1, 0, 0)
@@ -613,7 +617,10 @@ def test_load_table(mapdl_console, cleared):
         ]
     )
     mapdl_console.load_table("my_conv", my_conv, "TIME")
-    assert np.allclose(mapdl_console.parameters["my_conv"], my_conv[:, -1])
+    assert np.allclose(
+        mapdl_console.parameters["my_conv"].reshape(-1, 1),
+        my_conv[:, -1].reshape(-1, 1),
+    )
 
 
 def test_mode_console(mapdl_console, cleared):
@@ -647,3 +654,57 @@ def test_console_apdl_logging_start(tmpdir):
     assert "K,2,1,0,0" in text
     assert "K,3,1,1,0" in text
     assert "K,4,0,1,0" in text
+
+
+def test__del__console():
+    from ansys.mapdl.core.mapdl_console import MapdlConsole
+
+    class FakeProcess:
+        def sendline(self, command):
+            pass
+
+    class DummyMapdl(MapdlConsole):
+        @property
+        def _process(self):
+            return _proc
+
+        def __init__(self):
+            self._proc = FakeProcess()
+
+    with (
+        patch.object(DummyMapdl, "_process", autospec=True) as mock_process,
+        patch.object(DummyMapdl, "_close_apdl_log") as mock_close_log,
+    ):
+
+        mock_close_log.return_value = None
+
+        # Setup
+        mapdl = DummyMapdl()
+
+        del mapdl
+
+        mock_close_log.assert_not_called()
+        assert [each.args[0] for each in mock_process.sendline.call_args_list] == [
+            "FINISH",
+            "EXIT",
+        ]
+
+
+@pytest.mark.parametrize("close_log", [True, False])
+def test_exit_console(mapdl_console, close_log):
+    with (
+        patch.object(mapdl_console, "_close_apdl_log") as mock_close_log,
+        patch.object(mapdl_console, "_exit") as mock_exit,
+    ):
+        mock_exit.return_value = None
+        mock_close_log.return_value = None
+
+        with catch_warnings(record=True):
+            mapdl_console.exit(close_log=close_log, timeout=1)
+
+        if close_log:
+            mock_close_log.assert_called_once()
+        else:
+            mock_close_log.assert_not_called()
+
+        mock_exit.assert_called_once()

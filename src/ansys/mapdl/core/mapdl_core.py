@@ -22,7 +22,6 @@
 
 """Module to control interaction with MAPDL through Python"""
 
-import atexit
 from functools import wraps
 import glob
 import logging
@@ -89,6 +88,8 @@ if TYPE_CHECKING:  # pragma: no cover
 
 from ansys.mapdl.core.post import PostProcessing
 
+MAX_PARAM_CHARS = 32
+
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 
 VALID_DEVICES = ["PNG", "TIFF", "VRML", "TERM", "CLOSE"]
@@ -103,6 +104,24 @@ _PERMITTED_ERRORS = [
     r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*is turning inside out.",
     r"(\*\*\* ERROR \*\*\*).*[\r\n]+.*The distributed memory parallel solution does not support KRYLOV method",
 ]
+
+_TMP_COMP = {
+    "KP": "cmp_kp",
+    "LINE": "cmp_line",
+    "AREA": "cmp_area",
+    "VOLU": "cmp_volu",
+    "NODE": "cmp_node",
+    "ELEM": "cmp_elem",
+}
+
+ENTITIES_TO_SELECTION_MAPPING = {
+    "KP": "ksel",
+    "LINE": "lsel",
+    "AREA": "asel",
+    "VOLU": "vsel",
+    "NODE": "nsel",
+    "ELEM": "esel",
+}
 
 # test for png file
 PNG_IS_WRITTEN_TO_FILE = re.compile(
@@ -245,7 +264,6 @@ class _MapdlCore(Commands):
         **start_parm,
     ):
         """Initialize connection with MAPDL."""
-        atexit.register(self.__del__)  # registering to exit properly
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited: bool = False
@@ -1404,7 +1422,9 @@ class _MapdlCore(Commands):
 
         def __enter__(self):
             self._parent()._log.debug("Entering in non-interactive mode")
-            self._parent().com("Entering in non_interactive mode")
+            if self._parent().logger.logger.level <= logging.DEBUG:
+                # only commenting if on debug mode
+                self._parent().com("Entering in non_interactive mode")
             self._parent()._store_commands = True
 
         def __exit__(self, *args):
@@ -1435,32 +1455,41 @@ class _MapdlCore(Commands):
 
             # Storing components
             selection = {
-                "cmsel": mapdl.components.names,
-                # "components_type": mapdl.components.types,
-                "nsel": mapdl.mesh.nnum,
-                "esel": mapdl.mesh.enum,
-                "ksel": mapdl.geometry.knum,
-                "lsel": mapdl.geometry.lnum,
-                "asel": mapdl.geometry.anum,
-                "vsel": mapdl.geometry.vnum,
+                "cmsel": mapdl.components._comp,
             }
+            id_ = random_string(5)
+            for each_type, each_name in _TMP_COMP.items():
+                each_name = f"__{each_name}{id_}__"
+                selection[each_type] = each_name
+                mapdl.cm(
+                    each_name, each_type, mute=True
+                )  # to hide ComponentNoData error
 
             self.selection.append(selection)
 
         def __exit__(self, *args):
             self._parent()._log.debug("Exiting saving selection context")
-            selection = self.selection.pop()
-            mapdl = self._parent()
 
+            mapdl = self._parent()
+            mapdl.allsel()
+            mapdl.cmsel("None")
+
+            selection = self.selection.pop()
             cmps = selection.pop("cmsel")
 
             if cmps:
-                mapdl.components.select(cmps)
+                for each_name, each_value in cmps.items():
+                    mapdl.cmsel("a", each_name, each_value, mute=True)
 
-            for select_cmd, ids in selection.items():
-                if ids.size > 0:
-                    func = getattr(mapdl, select_cmd)
-                    func(vmin=ids)
+            for each_type, each_name in selection.items():
+                mapdl.cmsel("a", each_name, each_type, mute=True)
+
+                selfun = getattr(
+                    mapdl, ENTITIES_TO_SELECTION_MAPPING[each_type.upper()]
+                )
+                selfun("s", vmin=each_name, mute=True)
+
+                mapdl.cmdele(each_name, mute=True)
 
     class _chain_commands:
         """Store MAPDL commands and send one chained command."""
@@ -1887,7 +1916,8 @@ class _MapdlCore(Commands):
         filename = os.path.join(self.directory, ".".join(items[1:]))
         if os.path.isfile(filename):
             self._response = open(filename).read()
-            self._log.info(self._response)
+            response_ = "\n".join(self._response.splitlines()[:10])
+            self._log.info(response_)
         else:
             raise Exception("Cannot run:\n{command}\n\nFile does not exist")
 
@@ -1985,7 +2015,8 @@ class _MapdlCore(Commands):
         if self._response is None:  # pragma: no cover
             self._log.warning("Unable to read response from flushed commands")
         else:
-            self._log.info(self._response)
+            response_ = "\n".join(self._response.splitlines()[:10])
+            self._log.debug(f"Printing truncated response: {response_}")
 
     def run_multiline(self, commands) -> str:
         """Run several commands as a single block
@@ -2310,7 +2341,8 @@ class _MapdlCore(Commands):
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
         if text:
             self._response = StringWithLiteralRepr(text.strip())
-            self._log.info(self._response)
+            response_ = "\n".join(self._response.splitlines()[:20])
+            self._log.info(response_)
         else:
             self._response = None
             return self._response
@@ -2342,21 +2374,8 @@ class _MapdlCore(Commands):
         raise NotImplementedError("Implemented by child class")
 
     def __del__(self):
-        """Clean up when complete"""
-        if self._cleanup:
-            # removing logging handlers if they are closed to avoid I/O errors
-            # when exiting after the logger file has been closed.
-            # self._cleanup_loggers()
-            logging.disable(logging.CRITICAL)
-
-            try:
-                self.exit()
-            except Exception as e:
-                try:  # logger might be closed
-                    if hasattr(self, "_log") and self._log is not None:
-                        self._log.error("exit: %s", str(e))
-                except ValueError:
-                    pass
+        """Kill MAPDL when garbage cleaning"""
+        self.exit()
 
     def _cleanup_loggers(self):
         """Clean up all the loggers"""
@@ -2491,12 +2510,14 @@ class _MapdlCore(Commands):
 
         param_name = param_name.strip()
 
-        match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0,31}$"
+        match_valid_parameter_name = (
+            r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0," + f"{MAX_PARAM_CHARS-1}" + r"}$"
+        )
         # Using % is allowed, because of substitution, but it is very likely MAPDL will complain.
         if not re.search(match_valid_parameter_name, param_name):
             raise ValueError(
-                f"The parameter name `{param_name}` is an invalid parameter name."
-                "Only letters, numbers and `_` are permitted, up to 32 characters long."
+                f"The parameter name `{param_name}` is an invalid parameter name. "
+                f"Only letters, numbers and `_` are permitted, up to {MAX_PARAM_CHARS} characters long. "
                 "It cannot start with a number either."
             )
 
@@ -2520,7 +2541,7 @@ class _MapdlCore(Commands):
 
         # Using leading underscored parameters
         match_reserved_leading_underscored_parameter_name = (
-            r"^_[a-zA-Z\d_\(\),\s_]{1,31}[a-zA-Z\d\(\),\s]$"
+            r"^_[a-zA-Z\d_\(\),\s_]{1," + f"{MAX_PARAM_CHARS}" + r"}[a-zA-Z\d\(\),\s]$"
         )
         # If it also ends in underscore, this won't be triggered.
         if re.search(match_reserved_leading_underscored_parameter_name, param_name):

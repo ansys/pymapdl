@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""A gRPC specific class and methods for the MAPDL gRPC client """
+"""A gRPC specific class and methods for the MAPDL gRPC client"""
 
 import fnmatch
 from functools import wraps
@@ -426,7 +426,7 @@ class MapdlGrpc(MapdlBase):
         )
         self._busy: bool = False  # used to check if running a command on the server
         self._local: bool = start_parm.get("local", True)
-        self._launched: bool = start_parm.get("launched", True)
+        self._launched: bool = start_parm.get("launched", False)
         self._health_response_queue: Optional["Queue"] = None
         self._exiting: bool = False
         self._exited: Optional[bool] = None
@@ -638,10 +638,12 @@ class MapdlGrpc(MapdlBase):
         """Check if the MAPDL process is alive"""
         return self._is_alive_subprocess()
 
-    def _post_mortem_checks(self):
+    def _post_mortem_checks(self, process=None):
         """Check possible reasons for not having a successful connection."""
         # Check early exit
-        process = self._mapdl_process
+        if process is None:
+            process = self._mapdl_process
+
         if process is None or not self.is_grpc:
             return
 
@@ -652,9 +654,7 @@ class MapdlGrpc(MapdlBase):
 
     def _read_stds(self):
         """Read the stdout and stderr from the subprocess."""
-        from ansys.mapdl.core.launcher import (
-            _get_std_output,  # Avoid circular import error
-        )
+        from ansys.mapdl.core.launcher import _get_std_output
 
         if self._mapdl_process is None or not self._mapdl_process.stdout:
             return
@@ -1118,10 +1118,16 @@ class MapdlGrpc(MapdlBase):
 
         Notes
         -----
+        If Mapdl didn't start the instance, then this will be ignored unless
+        ``force=True``.
+
         If ``PYMAPDL_START_INSTANCE`` is set to ``False`` (generally set in
         remote testing or documentation build), then this will be
         ignored. Override this behavior with ``force=True`` to always force
         exiting MAPDL regardless of your local environment.
+
+        If ``Mapdl.finish_job_on_exit`` is set to ``True`` and there is a valid
+        JobID in ``Mapdl.jobid``, then the SLURM job will be canceled.
 
         Examples
         --------
@@ -1130,20 +1136,13 @@ class MapdlGrpc(MapdlBase):
         # check if permitted to start (and hence exit) instances
         from ansys.mapdl import core as pymapdl
 
-        if hasattr(self, "_log"):
-            self._log.debug(
-                f"Exiting MAPLD gRPC instance {self.ip}:{self.port} on '{self._path}'."
-            )
+        self._log.debug(
+            f"Exiting MAPLD gRPC instance {self.ip}:{self.port} on '{self._path}'."
+        )
 
         mapdl_path = self._path  # using cached version
-        if self._exited is None:
-            self._log.debug("'self._exited' is none.")
-            return  # Some edge cases the class object is not completely
-            # initialized but the __del__ method
-            # is called when exiting python. So, early exit here instead an
-            # error in the following self.directory command.
-            # See issue #1796
-        elif self._exited:
+
+        if self._exited:
             # Already exited.
             self._log.debug("Already exited")
             return
@@ -1154,8 +1153,10 @@ class MapdlGrpc(MapdlBase):
 
         if not force:
             # ignore this method if PYMAPDL_START_INSTANCE=False
-            if not self._start_instance:
-                self._log.info("Ignoring exit due to PYMAPDL_START_INSTANCE=False")
+            if not self._start_instance or not self._launched:
+                self._log.info(
+                    "Ignoring exit due to PYMAPDL_START_INSTANCE=False or because PyMAPDL didn't launch the instance."
+                )
                 return
 
             # or building the gallery
@@ -1163,17 +1164,14 @@ class MapdlGrpc(MapdlBase):
                 self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
                 return
 
-        # Actually exiting MAPDL instance
-        if self.finish_job_on_exit:
-            self._exiting = True
-            self._exit_mapdl(path=mapdl_path)
-            self._exited = True
+        # Exiting MAPDL instance if we launched.
+        self._exiting = True
+        self._exit_mapdl(path=mapdl_path)
+        self._exited = True
 
-            # Exiting HPC job
-            if self._mapdl_on_hpc:
-                self.kill_job(self.jobid)
-                if hasattr(self, "_log"):
-                    self._log.debug(f"Job (id: {self.jobid}) has been cancel.")
+        if self.finish_job_on_exit and self._mapdl_on_hpc:
+            self.kill_job(self.jobid)
+            self._log.debug(f"Job (id: {self.jobid}) has been cancel.")
 
         # Exiting remote instances
         if self._remote_instance:  # pragma: no cover
@@ -1198,7 +1196,7 @@ class MapdlGrpc(MapdlBase):
 
             self._close_process()
 
-            self._remove_lock_file(path)
+            self._remove_lock_file(path, use_cached=True)
         else:
             self._exit_mapdl_server()
 
@@ -1361,17 +1359,24 @@ class MapdlGrpc(MapdlBase):
 
         self._log.debug(f"Recaching PIDs: {self._pids}")
 
-    def _remove_lock_file(self, mapdl_path=None):
+    def _remove_lock_file(
+        self, mapdl_path: str = None, jobname: str = None, use_cached: bool = False
+    ):
         """Removes the lock file.
 
         Necessary to call this as a segfault of MAPDL or exit(0) will
         not remove the lock file.
         """
+        if jobname is None and use_cached:
+            jobname = self._jobname
+        elif jobname is None:
+            jobname = self.jobname
+
         self._log.debug("Removing lock file after exit.")
         if mapdl_path is None:  # pragma: no cover
             mapdl_path = self.directory
         if mapdl_path:
-            for lockname in [self.jobname + ".lock", "file.lock"]:
+            for lockname in [jobname + ".lock", "file.lock"]:
                 lock_file = os.path.join(mapdl_path, lockname)
                 if os.path.isfile(lock_file):
                     try:
@@ -2194,7 +2199,8 @@ class MapdlGrpc(MapdlBase):
         )
         # skip the first line as it simply states that it's reading an input file
         self._response = out[out.find("LINE=       0") + 13 :]
-        self._log.info(self._response)
+        response_ = "\n".join(self._response.splitlines()[:20])
+        self._log.info(response_)
 
         if not self._ignore_errors:
             self._raise_errors(self._response)
@@ -3826,26 +3832,23 @@ class MapdlGrpc(MapdlBase):
         """
         cmd = ["scancel", f"{jobid}"]
         # to ensure the job is stopped properly, let's issue the scancel twice.
-        subprocess.Popen(cmd)
+        subprocess.Popen(cmd)  # nosec B603
 
     def __del__(self):
         """In case the object is deleted"""
         # We are just going to escape early if needed, and kill the HPC job.
         # The garbage collector remove attributes before we can evaluate this.
-        try:
-            # Exiting HPC job
-            if (
-                hasattr(self, "_mapdl_on_hpc")
-                and self._mapdl_on_hpc
-                and hasattr(self, "finish_job_on_exit")
-                and self.finish_job_on_exit
-            ):
+        if self._exited:
+            return
 
-                self.kill_job(self.jobid)
+        if not self._start_instance:
+            # Early skip if start_instance is False
+            return
 
-            if not self._start_instance:
-                return
+        # Killing the instance if we launched it.
+        if self._launched:
+            self._exit_mapdl(self._path)
 
-        except Exception as e:
-            # This is on clean up.
-            pass
+        # Exiting HPC job
+        if self._mapdl_on_hpc and self.finish_job_on_exit:
+            self.kill_job(self.jobid)

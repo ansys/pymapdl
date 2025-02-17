@@ -79,7 +79,6 @@ docker/mapdl/v212
 docker/mapdl/_old
 docker/mapdl/*.sh
 
-
 # temp testing
 tmp.out
 
@@ -101,3 +100,6 @@ doc/source/sg_execution_times.rst
 *prin-stresses.html
 doc/webserver.log
 doc/webserver.pid
+
+# Profiling
+prof
