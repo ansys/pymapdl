@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 17.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="273px" height="209.9px" viewBox="0 0 273 209.9" enable-background="new 0 0 273 209.9" xml:space="preserve">
+<g>
+	<g>
+		<line fill="none" stroke="#000000" x1="135" y1="74.1" x2="152.8" y2="77.2"/>
+		<polygon points="151,79 159.4,78.3 151.7,74.8 		"/>
+	</g>
+</g>
+<text transform="matrix(0.8269 0 0 1 124.8623 76.9399)" font-family="'ArialMT'" font-size="11">d2</text>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" x1="124.3" y1="72.3" x2="107" y2="69.3"/>
+		<polygon points="108.8,67.4 100.4,68.2 108.1,71.7 		"/>
+	</g>
+</g>
+<line fill="none" stroke="#000000" stroke-width="0.9971" stroke-dasharray="5.76,5.76" x1="101.5" y1="84.7" x2="222.6" y2="106.9"/>
+<line fill="none" stroke="#000000" stroke-width="0.9971" stroke-dasharray="5.76,5.76" x1="12.7" y1="173.2" x2="98.7" y2="85.2"/>
+<path fill="none" stroke="#000000" stroke-miterlimit="10" d="M223.1,33.1L98.9,11.9l-87.3,88"/>
+<line fill="none" stroke="#000000" stroke-width="0.9971" stroke-miterlimit="10" x1="222.6" y1="33.4" x2="98.9" y2="11.9"/>
+<line fill="none" stroke="#000000" stroke-width="0.9971" stroke-miterlimit="10" x1="222.6" y1="68.5" x2="222.6" y2="33.4"/>
+<line fill="none" stroke="#000000" stroke-width="0.9971" stroke-miterlimit="10" x1="222.6" y1="106.9" x2="222.6" y2="68.5"/>
+<polyline fill="none" stroke="#000000" stroke-width="0.9971" stroke-miterlimit="10" points="14.1,173.1 137.6,196.4 222.6,106.9 
+	"/>
+<line fill="none" stroke="#000000" stroke-width="0.9971" stroke-miterlimit="10" x1="12.4" y1="99.4" x2="12.5" y2="173.2"/>
+<line fill="none" stroke="#000000" stroke-width="0.9971" stroke-miterlimit="10" x1="222" y1="34.6" x2="136.4" y2="123.7"/>
+<polygon fill="none" stroke="#000000" stroke-width="0.9971" stroke-miterlimit="10" points="223,33.4 136.4,123.7 12,99.4 98.7,12 
+	"/>
+<line fill="none" stroke="#000000" stroke-width="0.9971" stroke-dasharray="5.76,5.76" x1="98.7" y1="85.2" x2="98.8" y2="12.4"/>
+<path fill="none" stroke="#000000" stroke-width="0.9971" stroke-dasharray="5.76,5.76" d="M99.5,24.9"/>
+<text transform="matrix(0.8269 0 0 1 7.7168 187.1045)" font-family="'ArialMT'" font-size="11">I (d = 0)</text>
+<text transform="matrix(0.8269 0 0 1 64.5229 196.9258)" font-family="'ArialMT'" font-size="11">II</text>
+<text transform="matrix(0.8269 0 0 1 140.334 206.3516)" font-family="'ArialMT'" font-size="11">J (d = 1)</text>
+<text transform="matrix(0.8269 0 0 1 228 111.0723)" font-family="'ArialMT'" font-size="11">K</text>
+<text transform="matrix(0.8269 0 0 1 164 19.5991)" font-family="'ArialMT'" font-size="11">KK</text>
+<text transform="matrix(0.8269 0 0 1 89 79.7734)" font-family="'ArialMT'" font-size="11">L</text>
+<text transform="matrix(0.8269 0 0 1 75.2739 123.5752)" enable-background="new    "><tspan x="0" y="0" font-family="'ArialMT'" font-size="11">L</tspan><tspan x="6.1" y="0" font-family="'ArialMT'" font-size="11">L</tspan></text>
+<g>
+	<line fill="none" stroke="#A6A6A6" stroke-width="2.16" x1="94.9" y1="109.1" x2="111.6" y2="84"/>
+	<line fill="none" stroke="#A6A6A6" stroke-width="2" x1="103.6" y1="145.5" x2="141.7" y2="86.1"/>
+	<line fill="none" stroke="#A6A6A6" stroke-width="2.16" x1="95.1" y1="127.9" x2="127" y2="78.1"/>
+	<line fill="none" stroke="#A6A6A6" stroke-width="2.16" x1="97.6" y1="141.3" x2="133.7" y2="82.9"/>
+</g>
+<path d="M157.5,94.3c0.3-1.6,1.8-2.6,3.4-2.3c1.6,0.3,2.6,1.8,2.3,3.4s-1.8,2.6-3.4,2.3C158.2,97.4,157.2,95.9,157.5,94.3
+	L157.5,94.3z"/>
+<path d="M132.8,195.6c0.3-1.6,1.8-2.6,3.4-2.3c1.6,0.3,2.6,1.8,2.3,3.4c-0.3,1.6-1.8,2.6-3.4,2.3
+	C133.6,198.7,132.5,197.2,132.8,195.6L132.8,195.6z"/>
+<text transform="matrix(0.8269 0 0 1 149.334 91.1055)" font-family="'ArialMT'" font-size="11">JJ</text>
+<path d="M157.8,22c0.3-1.6,1.8-2.6,3.4-2.3c1.6,0.3,2.6,1.8,2.3,3.4s-1.8,2.6-3.4,2.3C158.6,25,157.5,23.5,157.8,22L157.8,22z"/>
+<path d="M219.8,106.6c0.3-1.6,1.8-2.6,3.4-2.3c1.6,0.3,2.6,1.8,2.3,3.4s-1.8,2.6-3.4,2.3C220.6,109.7,219.5,108.2,219.8,106.6
+	L219.8,106.6z"/>
+<path d="M95.8,83.6c0.3-1.6,1.8-2.6,3.4-2.3c1.6,0.3,2.6,1.8,2.3,3.4c-0.3,1.6-1.8,2.6-3.4,2.3C96.6,86.7,95.5,85.2,95.8,83.6
+	L95.8,83.6z"/>
+<path d="M69.2,111c0.3-1.6,1.8-2.6,3.4-2.3c1.6,0.3,2.6,1.8,2.3,3.4c-0.3,1.6-1.8,2.6-3.4,2.3C69.9,114,68.9,112.5,69.2,111
+	L69.2,111z"/>
+<path d="M68.5,183.3c0.3-1.6,1.8-2.6,3.4-2.3s2.6,1.8,2.3,3.4c-0.3,1.6-1.8,2.6-3.4,2.3C69.2,186.4,68.2,184.9,68.5,183.3
+	L68.5,183.3z"/>
+<path d="M9.8,99.6c0.3-1.6,1.8-2.6,3.4-2.3c1.6,0.3,2.6,1.8,2.3,3.4s-1.8,2.6-3.4,2.3C10.6,102.7,9.5,101.2,9.8,99.6L9.8,99.6z"/>
+<path d="M9.8,172.6c0.3-1.6,1.8-2.6,3.4-2.3s2.6,1.8,2.3,3.4c-0.3,1.6-1.8,2.6-3.4,2.3C10.6,175.7,9.5,174.2,9.8,172.6L9.8,172.6z"
+	/>
+<text transform="matrix(0.8269 0 0 1 -3.051758e-005 101.1064)" font-family="'ArialMT'" font-size="11">M</text>
+<path d="M95.8,11.6c0.3-1.6,1.8-2.6,3.4-2.3s2.6,1.8,2.3,3.4c-0.3,1.6-1.8,2.6-3.4,2.3C96.6,14.7,95.5,13.2,95.8,11.6L95.8,11.6z"/>
+<text transform="matrix(0.8269 0 0 1 88.333 9.4395)" font-family="'ArialMT'" font-size="11">P</text>
+<text transform="matrix(0.8269 0 0 1 228 34.1064)" font-family="'ArialMT'" font-size="11">O</text>
+<path d="M219.8,32.6c0.3-1.6,1.8-2.6,3.4-2.3c1.6,0.3,2.6,1.8,2.3,3.4c-0.3,1.6-1.8,2.6-3.4,2.3C220.6,35.7,219.5,34.2,219.8,32.6
+	L219.8,32.6z"/>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" x1="47" y1="171.2" x2="64.2" y2="174.5"/>
+		<polygon points="62.3,176.3 70.7,175.7 63.1,172 		"/>
+	</g>
+</g>
+<text transform="matrix(0.8269 0 0 1 36.0274 173.1064)" font-family="'ArialMT'" font-size="11">d1</text>
+<text transform="matrix(0.8269 0 0 1 140.334 131.1064)" font-family="'ArialMT'" font-size="11">N </text>
+<text transform="matrix(0.8269 0 0 1 255 73.7729)" font-family="'ArialMT'" font-size="11">f = 2</text>
+<polyline fill="#FFFFFF" stroke="#000000" stroke-width="0.9971" stroke-miterlimit="10" points="136.4,123.7 136.4,196.5 
+	136.4,123.7 12,99.4 "/>
+<path d="M132.8,123.6c0.3-1.6,1.8-2.6,3.4-2.3c1.6,0.3,2.6,1.8,2.3,3.4s-1.8,2.6-3.4,2.3C133.6,126.7,132.5,125.2,132.8,123.6
+	L132.8,123.6z"/>
+<line fill="none" stroke="#ED1C24" stroke-width="0.9971" stroke-miterlimit="10" x1="72.1" y1="110.7" x2="160.8" y2="21.7"/>
+<line fill="none" stroke="#ED1C24" stroke-width="0.9971" stroke-miterlimit="10" x1="72.2" y1="184.5" x2="72.1" y2="110.7"/>
+<line fill="none" stroke="#ED1C24" stroke-width="0.9971" stroke-miterlimit="10" stroke-dasharray="5.76,5.76" x1="160.8" y1="21.7" x2="160.5" y2="94.8"/>
+<line fill="none" stroke="#ED1C24" stroke-width="0.9971" stroke-miterlimit="10" stroke-dasharray="5.76,5.76" x1="72.2" y1="184.5" x2="160.5" y2="94.8"/>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" x1="20.7" y1="166.3" x2="34.6" y2="168.9"/>
+		<polygon points="22.5,164.5 14.1,165.1 21.7,168.8 		"/>
+	</g>
+</g>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" x1="47" y1="123.2" x2="63.3" y2="126.3"/>
+		<polygon points="61.4,128.2 69.8,127.5 62.3,123.9 		"/>
+	</g>
+</g>
+<text transform="matrix(0.8269 0 0 1 36.0274 125.1064)" font-family="'ArialMT'" font-size="11">d1</text>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" x1="20.7" y1="118.3" x2="34.6" y2="120.9"/>
+		<polygon points="22.5,116.5 14.1,117.1 21.7,120.8 		"/>
+	</g>
+</g>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" x1="129" y1="24.1" x2="146.8" y2="27.2"/>
+		<polygon points="145,29 153.4,28.3 145.7,24.8 		"/>
+	</g>
+</g>
+<text transform="matrix(0.8269 0 0 1 118.8624 26.9399)" font-family="'ArialMT'" font-size="11">d2</text>
+<g>
+	<g>
+		<line fill="none" stroke="#000000" x1="118.3" y1="22.3" x2="101" y2="19.3"/>
+		<polygon points="102.8,17.4 94.4,18.2 102.1,21.7 		"/>
+	</g>
+</g>
+</svg>
