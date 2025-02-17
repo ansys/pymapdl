@@ -873,12 +873,18 @@ def test_cyclic_solve(mapdl, cleared):
         )
     ),
 )
-def test_load_table(mapdl, cleared, dim_rows, dim_cols):
+@pytest.mark.parametrize("col_header", [False, True])
+def test_load_table(mapdl, cleared, dim_rows, dim_cols, col_header):
     my_conv = np.random.rand(dim_rows, dim_cols)
     my_conv[:, 0] = np.arange(dim_rows)  # "time" values
 
-    mapdl.load_table("my_conv", my_conv, "TIME")
-    assert np.allclose(mapdl.parameters["my_conv"], my_conv[:, 1:], 1e-7)
+    mapdl.load_table("my_conv", my_conv, "TIME", col_header=col_header)
+
+    if col_header and dim_cols > 2:
+        # Assertion when col_header is True and more than two columns
+        assert np.allclose(mapdl.parameters["my_conv"], my_conv[1:, 1:], atol=1e-7)
+    else:
+        assert np.allclose(mapdl.parameters["my_conv"], my_conv[:, 1:], atol=1e-7)
 
 
 def test_load_table_error_ascending_row(mapdl, cleared):
@@ -2878,3 +2884,53 @@ def test_requires_package_speed():
 
     for i in range(1_000_000):
         my_func(i)
+
+
+@pytest.mark.parametrize("start_instance", [True, False])
+@pytest.mark.parametrize("exited", [True, False])
+@pytest.mark.parametrize("launched", [True, False])
+@pytest.mark.parametrize("on_hpc", [True, False])
+@pytest.mark.parametrize("finish_job_on_exit", [True, False])
+def test_garbage_clean_del(
+    start_instance, exited, launched, on_hpc, finish_job_on_exit
+):
+    from ansys.mapdl.core import Mapdl
+
+    class DummyMapdl(Mapdl):
+        def __init__(self):
+            pass
+
+    with (
+        patch.object(DummyMapdl, "_exit_mapdl") as mock_exit,
+        patch.object(DummyMapdl, "kill_job") as mock_kill,
+    ):
+
+        mock_exit.return_value = None
+        mock_kill.return_value = None
+
+        # Setup
+        mapdl = DummyMapdl()
+        mapdl._path = ""
+        mapdl._jobid = 1001
+
+        # Config
+        mapdl._start_instance = start_instance
+        mapdl._exited = exited
+        mapdl._launched = launched
+        mapdl._mapdl_on_hpc = on_hpc
+        mapdl.finish_job_on_exit = finish_job_on_exit
+
+        del mapdl
+
+        if exited or not start_instance or not launched:
+            mock_exit.assert_not_called()
+        else:
+            mock_exit.assert_called_once()
+
+        if exited or not start_instance:
+            mock_kill.assert_not_called()
+        else:
+            if on_hpc and finish_job_on_exit:
+                mock_kill.assert_called_once()
+            else:
+                mock_kill.assert_not_called()

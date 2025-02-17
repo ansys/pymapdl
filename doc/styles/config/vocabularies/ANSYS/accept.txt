@@ -58,9 +58,9 @@ datas
 delet
 Dependabot
 Dev
-Dimitris
 devcontainer
 DevContainer
+Dimitris
 dof
 ect
 eigenfrequency
@@ -104,6 +104,7 @@ levl
 Linder
 Linux
 MacOS
+maint
 mapdl
 MAPDL
 mater

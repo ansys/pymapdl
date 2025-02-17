@@ -22,7 +22,6 @@
 
 """Module to control interaction with MAPDL through Python"""
 
-import atexit
 from functools import wraps
 import glob
 import logging
@@ -264,7 +263,6 @@ class _MapdlCore(Commands):
         **start_parm,
     ):
         """Initialize connection with MAPDL."""
-        atexit.register(self.__del__)  # registering to exit properly
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited: bool = False
@@ -1914,7 +1912,8 @@ class _MapdlCore(Commands):
         filename = os.path.join(self.directory, ".".join(items[1:]))
         if os.path.isfile(filename):
             self._response = open(filename).read()
-            self._log.info(self._response)
+            response_ = "\n".join(self._response.splitlines()[:10])
+            self._log.info(response_)
         else:
             raise Exception("Cannot run:\n{command}\n\nFile does not exist")
 
@@ -2012,7 +2011,8 @@ class _MapdlCore(Commands):
         if self._response is None:  # pragma: no cover
             self._log.warning("Unable to read response from flushed commands")
         else:
-            self._log.info(self._response)
+            response_ = "\n".join(self._response.splitlines()[:10])
+            self._log.debug(f"Printing truncated response: {response_}")
 
     def run_multiline(self, commands) -> str:
         """Run several commands as a single block
@@ -2337,7 +2337,8 @@ class _MapdlCore(Commands):
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
         if text:
             self._response = StringWithLiteralRepr(text.strip())
-            self._log.info(self._response)
+            response_ = "\n".join(self._response.splitlines()[:20])
+            self._log.info(response_)
         else:
             self._response = None
             return self._response
@@ -2369,21 +2370,8 @@ class _MapdlCore(Commands):
         raise NotImplementedError("Implemented by child class")
 
     def __del__(self):
-        """Clean up when complete"""
-        if self._cleanup:
-            # removing logging handlers if they are closed to avoid I/O errors
-            # when exiting after the logger file has been closed.
-            # self._cleanup_loggers()
-            logging.disable(logging.CRITICAL)
-
-            try:
-                self.exit()
-            except Exception as e:
-                try:  # logger might be closed
-                    if hasattr(self, "_log") and self._log is not None:
-                        self._log.error("exit: %s", str(e))
-                except ValueError:
-                    pass
+        """Kill MAPDL when garbage cleaning"""
+        self.exit()
 
     def _cleanup_loggers(self):
         """Clean up all the loggers"""
