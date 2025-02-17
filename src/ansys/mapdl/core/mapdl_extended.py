@@ -2186,6 +2186,11 @@ class _MapdlExtended(_MapdlCommandExtended):
             An integer corresponding to the coordinate system ID number.
             APDL Default = 0 (global Cartesian)
 
+        col_header : bool, optional
+            Indicates if the first row of the input array is a header.
+            Set to True if the array includes a header row.
+            Default is False.
+
         Examples
         --------
         Transfer a table to MAPDL. The first column is time values and must be
