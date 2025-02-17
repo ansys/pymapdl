@@ -2221,11 +2221,9 @@ class _MapdlExtended(_MapdlCommandExtended):
         if array.ndim == 2:
             # MAPDL considers the first row to be column header when col num > 2.
             # When col header is not available duplicate the first row
-            if array.shape[1] > 2 and col_header == False:
-                array = np.vstack((array[0], array))
-                imax_val = array.shape[0] - 1
-            # When col header is available use col header
-            elif array.shape[1] > 2 and col_header == True:
+            if array.shape[1] > 2:
+                if col_header is False:
+                    array = np.vstack((array[0], array))
                 imax_val = array.shape[0] - 1
             else:
                 imax_val = array.shape[0]
