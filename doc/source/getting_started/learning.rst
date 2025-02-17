@@ -38,11 +38,12 @@ Downloads
   These are versions valid during a year and with limited capabilities 
   regarding number of nodes, elements, etc.
 
-- View and download :download:`PyMAPDL cheatsheet <Cheat_Sheet_PyMAPDL.pdf>` to help
-  you to learn PyMAPDL.
+.. jinja:: cheat_sheet
+  
+  - View and download :download:`PyMAPDL cheatsheet <https://github.com/ansys/pymapdl/blob/gh-pages/version/{{ version }}/_static/cheat_sheet.pdf>`  
+    to help you to learn PyMAPDL.
 
-- Visit :ref:`ref_examples` to learn how PyMAPDL can be
-  used to solve different real problems.
+- Visit :ref:`ref_examples` to learn how PyMAPDL can be used to solve different real problems.
 
 
 Courses

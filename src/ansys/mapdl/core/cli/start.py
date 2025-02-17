@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -126,21 +126,9 @@ For more information see :func:`ansys.mapdl.core.launcher.launch_mapdl`.""",
     help="Argument not allowed in CLI. It will be ignored.",
 )
 @click.option(
-    "--remove_temp_files",
-    default=None,
-    type=str,
-    help="Argument not allowed in CLI. It will be ignored.",
-)
-@click.option(
     "--remove_temp_dir_on_exit",
     default=False,
     type=bool,
-    help="Argument not allowed in CLI. It will be ignored.",
-)
-@click.option(
-    "--verbose_mapdl",
-    default=None,
-    type=str,
     help="Argument not allowed in CLI. It will be ignored.",
 )
 @click.option(
@@ -196,16 +184,14 @@ def start(
     ip: str,
     clear_on_connect: bool,  # ignored
     log_apdl: bool,  # ignored
-    remove_temp_files: bool,  # ignored
     remove_temp_dir_on_exit: bool,  # ignored
-    verbose_mapdl: bool,  # ignored
     license_server_check: bool,  # ignored
     license_type: str,
     print_com: bool,  # ignored
     add_env_vars: Dict[str, str],  # ignored
     replace_env_vars: Dict[str, str],  # ignored
     version: Union[int, str],
-):
+) -> None:
     from ansys.mapdl.core.launcher import launch_mapdl
 
     if mode:
@@ -250,22 +236,10 @@ def start(
             + " The following argument is not allowed in CLI: 'log_apdl'.\nIgnoring argument."
         )
 
-    if remove_temp_files:
-        click.echo(
-            click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'remove_temp_files'.\nIgnoring argument."
-        )
-
     if remove_temp_dir_on_exit:
         click.echo(
             click.style("Warn:", fg="yellow")
             + " The following argument is not allowed in CLI: 'remove_temp_dir_on_exit'.\nIgnoring argument."
-        )
-
-    if verbose_mapdl:
-        click.echo(
-            click.style("Warn:", fg="yellow")
-            + " The following argument is not allowed in CLI: 'verbose_mapdl'.\nIgnoring argument."
         )
 
     if print_com:
@@ -307,7 +281,6 @@ def start(
         additional_switches=additional_switches,
         start_timeout=start_timeout,
         port=port,
-        license_server_check=license_server_check,
         license_type=license_type,
         version=version,
     )

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -62,7 +62,7 @@ mapdl.secdata(0.01)
 mapdl.emodif("ALL", "SECNUM", 1)
 
 # specify material properties
-# using aprox values for AISI 5000 Series Steel
+# using approximated values for AISI 5000 Series Steel
 # http://www.matweb.com/search/datasheet.aspx?matguid=89d4b891eece40fbbe6b71f028b64e9e
 mapdl.units("SI")  # not necessary, but helpful for book keeping
 mapdl.mp("EX", 1, 200e9)  # Elastic moduli in Pa (kg/(m*s**2))

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -111,12 +111,11 @@ def solu_krylov(mapdl, frq):
     mapdl.finish()
 
 
-def test_krylov_with_point_load(mapdl):
+def test_krylov_with_point_load(mapdl, cleared):
     if not server_meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL 2022 R2 or later.")
 
     # Case1 : Run Krylov PyMAPDL
-    mapdl.clear()
     mapdl.jobname = "point_load_py"
 
     # Parameters set for Krylov
@@ -143,13 +142,12 @@ def test_krylov_with_point_load(mapdl):
 @pytest.mark.parametrize(
     "residual_algorithm", ["L-inf", "Linf", "L-1", "L1", "L-2", "L2"]
 )
-def test_krylov_with_pressure_load(mapdl, residual_algorithm):
+def test_krylov_with_pressure_load(mapdl, cleared, residual_algorithm):
     if not server_meets_version(mapdl._server_version, (0, 5, 0)):
         pytest.skip("Requires MAPDL 2022 R2 or later.")
 
     # With ramped loading
     # Case1 : Run Krylov PyMAPDL
-    mapdl.clear()
     mapdl.jobname = "pressure_py"
 
     # Parameters set for Krylov

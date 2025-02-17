@@ -1,9 +1,9 @@
 
 .. title:: Welcome to PyMAPDL
 
-
 .. meta::
    :keywords: pymapdl, mapdl, simulation, finite elements, python
+   :description: Welcome to PyMAPDL documentation.
 
 
 .. toctree::
@@ -32,6 +32,13 @@
 
 
 .. vale off
+
+.. let's hide the `Edit on GitHub` link in this page...
+.. and the whole sidebar with it.
+.. hideobject::
+    :class: bd-sidebar-secondary bd-toc
+    :remove: true
+    :adjustmargin: true
 
 
 .. title is given using the 
@@ -65,8 +72,7 @@
         :link-type: ref
 
         Check our :ref:`ref_getting_started` section to learn to
-        :ref:`ref_using_standard_install`, :ref:`ref_pymapdl_installation`,
-        and :ref:`ref_launch_pymapdl`.
+        install MAPDL, install PyMAPDL or launch PyMAPDL.
 
     .. grid-item-card:: :fa:`gears` See some PyMAPDL usage examples
         :link: ref_examples
@@ -89,7 +95,7 @@
 
         Check our :ref:`ref_troubleshooting` section.
         Additionally, there are some helpful
-        resources in :ref:`faq`.
+        resources in like frequently asked questions.
 
     .. grid-item-card:: :fa:`users` Contribute to PyMAPDL project
         :link: ref_contributing

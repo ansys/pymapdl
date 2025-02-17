@@ -8,6 +8,7 @@ Troubleshooting PyMAPDL
 To help you resolve any problems that you might have when using PyMAPDL,
 some of the most common problems and frequently asked questions are posted here.
 
+.. _ref_debug_pymapdl:
 
 Debug in PyMAPDL
 ----------------
@@ -410,6 +411,8 @@ dependencies.
                 libxi6 \
                 libxp6
 
+
+An useful resource is `HOW TO - Install Ansys' Required Linux Packages & Libraries <simutech_linux_dependencies_>`_.
 
 .. _conflicts_student_version:
 
