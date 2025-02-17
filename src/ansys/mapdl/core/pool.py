@@ -215,9 +215,6 @@ class MapdlPool:
         self._instances: List[None] = []
         self._n_instances = n_instances
 
-        # Getting debug arguments
-        _debug_no_launch = kwargs.get("_debug_no_launch", None)
-
         if run_location is None:
             run_location = create_temp_dir()
         self._root_dir: str = run_location
@@ -325,17 +322,6 @@ class MapdlPool:
         # initialize a list of dummy instances
         self._instances = [None for _ in range(n_instances)]
 
-        # threaded spawn
-        if _debug_no_launch:
-            self._debug_no_launch = {
-                "ports": ports,
-                "ips": ips,
-                "names": self._names,
-                "start_instance": start_instance,
-                "exec_file": exec_file,
-                "n_instances": n_instances,
-            }
-
         # Converting ip or hostname to ip
         self._ips = [socket.gethostbyname(each) for each in self._ips]
         _ = [check_valid_ip(each) for each in self._ips]  # double check
@@ -354,12 +340,11 @@ class MapdlPool:
             for i, (ip, port) in enumerate(zip(ips, ports))
         ]
 
-        # Early exit due to debugging
-        if _debug_no_launch:
-            return
+        # Storing
+        self._threads = threads
 
         if wait:
-            [thread.join() for thread in threads]
+            [thread.join() for thread in self._threads]
 
             # make sure everything is ready
             n_instances_ready = 0
@@ -907,9 +892,6 @@ class MapdlPool:
         if not run_location:
             run_location = create_temp_dir(self._root_dir, name=name)
 
-        if self._spawn_kwargs.get("_debug_no_launch", False):
-            return
-
         self._instances[index] = launch_mapdl(
             exec_file=exec_file,
             run_location=run_location,
@@ -925,21 +907,12 @@ class MapdlPool:
         # This is introduce to mitigate #2173
         timeout = time.time() + timeout
 
-        def initialized(index):
-            if self._instances[index] is not None:
-                if self._instances[index].exited:
-                    raise MapdlRuntimeError("The instance is already exited!")
-                if "PREP" not in self._instances[index].prep7().upper():
-                    raise MapdlDidNotStart("Error while processing PREP7 signal.")
-                return True
-            return False
-
         while timeout > time.time():
-            if initialized(index):
+            if self.is_initialized(index):
                 break
             time.sleep(0.1)
         else:
-            if not initialized:
+            if not self.is_initialized(index):
                 raise TimeoutError(
                     f"The instance running at {ip}:{port} could not be started."
                 )
@@ -949,6 +922,16 @@ class MapdlPool:
             pbar.update(1)
 
         self._spawning_i -= 1
+
+    def is_initialized(self, index):
+        """Check if the instance is initialized"""
+        if self._instances[index] is not None:
+            if self._instances[index].exited:
+                raise MapdlRuntimeError("The instance is already exited!")
+            if "PREP" not in self._instances[index].prep7().upper():
+                raise MapdlDidNotStart("Error while processing PREP7 signal.")
+            return True
+        return False
 
     @threaded_daemon
     def _monitor_pool(self, refresh=1.0):
