@@ -218,7 +218,7 @@ files by deleting sets or by changing values.
    :maxdepth: 1
    :caption: AUX3
 
-   aux3/index
+   aux3/results_files
 
 
 *****
@@ -245,7 +245,7 @@ These commands are used to read in an IGES file for analysis in ANSYS.
    :maxdepth: 1
    :caption: AUX15
 
-   aux15
+   aux15/iges
 
 
 *****************

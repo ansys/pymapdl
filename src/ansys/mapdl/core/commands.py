@@ -36,7 +36,7 @@ from ._commands import (
     aux2,
     aux3,
     aux12,
-    aux15_,
+    aux15,
     conn,
     database,
     display_,
@@ -388,6 +388,12 @@ class Aux12Commands(
     pass
 
 
+class Aux15Commands(
+    aux15.iges.Iges,
+):
+    pass
+
+
 class DatabaseCommands(
     database.setup.Setup,
     database.picking.Picking,
@@ -512,6 +518,7 @@ class Commands(
     Aux2Commands,
     Aux3Commands,
     Aux12Commands,
+    Aux15Commands,
     DatabaseCommands,
     DisplayCommands,
     GraphicsCommands,
@@ -522,7 +529,6 @@ class Commands(
     ReducedCommands,
     SessionCommands,
     SolutionCommands,
-    aux15_.Aux15,
     conn.Conn,
     hidden._Hidden,
     map_cmd.MapCommand,
