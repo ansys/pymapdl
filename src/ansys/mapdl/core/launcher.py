@@ -1623,12 +1623,12 @@ def launch_mapdl(
         except Exception as exception:
             LOG.error("An error occurred when launching MAPDL.")
 
-            jobid: int = start_parm.get("jobid", "Not found")
+            jobid: int = start_parm.get("jobid")
 
             if (
                 args["launch_on_hpc"]
                 and start_parm.get("finish_job_on_exit", True)
-                and jobid not in ["Not found", None]
+                and jobid is not None
             ):
 
                 LOG.debug(f"Killing HPC job with id: {jobid}")
