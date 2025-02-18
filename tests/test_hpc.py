@@ -26,6 +26,10 @@ import pytest
 
 from ansys.mapdl.core.hpc import SshSession, launch_on_remote_hpc
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
+from conftest import TESTING_MINIMAL, has_dependency
+
+if not has_dependency("paramiko") or TESTING_MINIMAL:
+    pytest.skip(allow_module_level=True)
 
 
 def test_launch_on_remote_hpc():
