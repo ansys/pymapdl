@@ -45,7 +45,7 @@ from ansys.mapdl.core.launcher.hpc import (
     get_slurm_options,
     is_running_on_slurm,
     kill_job,
-    launch_mapdl_on_cluster,
+    launch_mapdl_on_cluster_locally,
     send_scontrol,
 )
 from ansys.mapdl.core.launcher.tools import submitter
@@ -1113,7 +1113,7 @@ def test_launch_on_hpc_exception_successfull_sbatch(monkeypatch):
 @patch("ansys.mapdl.core.launcher.launch_mapdl", lambda *args, **kwargs: kwargs)
 def test_launch_mapdl_on_cluster_exceptions(args, context):
     with context:
-        ret = launch_mapdl_on_cluster(**args)
+        ret = launch_mapdl_on_cluster_locally(**args)
         assert ret["launch_on_hpc"]
         assert ret["nproc"] == 10
 
