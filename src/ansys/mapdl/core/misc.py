@@ -470,7 +470,7 @@ def _get_args_xsel(*args: Tuple[str], **kwargs: Dict[str, str]) -> Tuple[str]:
     vmin = kwargs.pop("vmin", args[3] if len(args) > 3 else "")
     vmax = kwargs.pop("vmax", args[4] if len(args) > 4 else "")
     vinc = kwargs.pop("vinc", args[5] if len(args) > 5 else "")
-    kabs = kwargs.pop("kabs", args[6] if len(args) > 6 else "")
+    kabs = kwargs.pop("kabs", kwargs.pop("kswp", args[6] if len(args) > 6 else ""))
     return type_, item, comp, vmin, vmax, vinc, kabs, kwargs
 
 
