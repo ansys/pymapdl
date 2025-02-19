@@ -1,10 +1,11 @@
 import json
 import os
 
+import click
 import numpy as np
 
-BIG_WIDTH = 75
-SMALL_WIDTH = 12
+BIG_WIDTH = 80
+SMALL_WIDTH = 8
 
 
 def find_json_files(base_dir):
@@ -39,6 +40,9 @@ def extract_tests_with_tags(json_files):
         for test in test_data:
             if test.get("outcome", "").lower() == "passed" and test.get("duration"):
                 nodeid = test.get("nodeid")
+                if nodeid.startswith("tests/"):
+                    nodeid = nodeid[6:]
+
                 when = test.get("when")
                 duration = test["duration"]
                 tags = directory_name.split("-")
@@ -116,6 +120,10 @@ def compute_statistics(tests):
 
 
 def print_table(data, keys, headers, title=""):
+
+    def make_bold(s):
+        return click.style(s, bold=True)
+
     h = [headers[0].ljust(BIG_WIDTH)]
     h.extend([each.center(SMALL_WIDTH)[:SMALL_WIDTH] for each in headers[1:]])
 
@@ -125,19 +133,26 @@ def print_table(data, keys, headers, title=""):
     top_sep = "+" + "-" * (len_h - 2) + "+"
 
     if title:
-        print("\n" + top_sep)
-        print("| " + f"Top {len(data)} {title}".center(len_h - 4) + " |")
-        print(sep)
+        click.echo("\n" + top_sep)
+        click.echo(
+            "| " + make_bold(f"Top {len(data)} {title}".center(len_h - 4)) + " |"
+        )
+        click.echo(sep)
 
-    print("| " + " | ".join(h) + " |")
-    print(sep)
+    click.echo("| " + " | ".join([make_bold(each) for each in h]) + " |")
+    click.echo(sep)
 
     for test in data:
         s = []
         for i, each_key in enumerate(keys):
 
             if i == 0:
-                s.append(f"{test[each_key]}".ljust(BIG_WIDTH)[0:BIG_WIDTH])
+                id_ = test[each_key]
+                if len(id_) >= BIG_WIDTH:
+                    id_ = id_[: BIG_WIDTH - 15] + "..." + id_[-12:]
+
+                s.append(f"{id_}".ljust(BIG_WIDTH)[0:BIG_WIDTH])
+
             elif each_key == "n_tests":
                 s.append(f"{int(test[each_key])}".center(SMALL_WIDTH))
             else:
@@ -146,8 +161,8 @@ def print_table(data, keys, headers, title=""):
                 else:
                     s.append(f"{test[each_key]:.4f}".center(SMALL_WIDTH))
 
-        print("| " + " | ".join(s) + " |")
-    print(sep)
+        click.echo("| " + " | ".join(s) + " |")
+    click.echo(sep)
 
 
 def print_summary(summary, num=10):
@@ -158,7 +173,7 @@ def print_summary(summary, num=10):
     print_table(
         longest_tests,
         ["id", "n_tests", "average_duration", "std_dev"],
-        ["Test ID", "N. tests", "Avg Duration", "STD"],
+        ["Test ID", "N. tests", "Avg", "STD"],
         "Longest Running Tests",
     )
 
@@ -179,23 +194,43 @@ def print_summary(summary, num=10):
             "N. tests",
             "Std",
             "Avg",
-            "Std (99%)",
-            "Avg (99%)",
-            "Std (75%)",
-            "Avg (75%)",
+            "Std-99%",
+            "Avg-99%",
+            "Std-75%",
+            "Avg-75%",
         ],
         "Most Variable Running Tests",
     )
 
 
-if __name__ == "__main__":
-    base_directory = os.getcwd()  # Change this to your base directory
-    json_files = find_json_files(base_directory)
+@click.command()
+@click.option(
+    "--directory",
+    type=click.Path(exists=True, file_okay=False, dir_okay=True),
+    default=None,
+)
+@click.option(
+    "--num", default=10, help="Number of top tests to display.", show_default=True
+)
+@click.option(
+    "--save-file",
+    default=None,
+    help="File to save the test durations. Default 'tests_durations.json'.",
+    show_default=True,
+)
+def analyze_tests(directory, num, save_file):
+    directory = directory or os.getcwd()  # Change this to your base directory
+    json_files = find_json_files(directory)
     tests = extract_tests_with_tags(json_files)
 
-    with open("tests_durations.json", "a+") as f:
-        for each_line in tests:
-            json.dump(each_line, f, indent=2)
+    if save_file:
+        with open(save_file, "a+") as f:
+            for each_line in tests:
+                json.dump(each_line, f, indent=2)
 
     summary = compute_statistics(tests)
-    print_summary(summary, num=50)
+    print_summary(summary, num=num)
+
+
+if __name__ == "__main__":
+    analyze_tests()
