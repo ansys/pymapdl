@@ -913,13 +913,13 @@ def generate_mapdl_launch_command(
     cpu_sw = "-np %d" % nproc
 
     if ram:
-        ram_sw = "-m %d" % int(1024 * ram)
+        ram_sw = f"-m {int(ram)}"
         LOG.debug(f"Setting RAM: {ram_sw}")
     else:
         ram_sw = ""
 
-    job_sw = "-j %s" % jobname
-    port_sw = "-port %d" % port
+    job_sw = f"-j {jobname}"
+    port_sw = f"-port {int(port)}"
     grpc_sw = "-grpc"
 
     # Windows will spawn a new window, special treatment
