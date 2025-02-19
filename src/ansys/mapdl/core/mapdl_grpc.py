@@ -652,7 +652,7 @@ class MapdlGrpc(MapdlBase):
 
     def _read_stds(self):
         """Read the stdout and stderr from the subprocess."""
-        from ansys.mapdl.core.launcher import _get_std_output
+        from ansys.mapdl.core.launcher.tools import _get_std_output
 
         if self._mapdl_process is None or not self._mapdl_process.stdout:
             return
@@ -3829,13 +3829,6 @@ class MapdlGrpc(MapdlBase):
             # Early skip if start_instance is False
             return
 
-        # Killing the instance if we launched it.
-        if self._launched:
-            self._exit_mapdl(self._path)
-
-        # Exiting HPC job
-        if self._mapdl_on_hpc and self.finish_job_on_exit:
-            self.kill_job(self.jobid)
         # Killing the instance if we launched it.
         if self._launched:
             self._exit_mapdl(self._path)

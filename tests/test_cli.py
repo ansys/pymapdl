@@ -290,7 +290,7 @@ def test_launch_mapdl_cli_config(run_cli, arg):
 
     with (
         patch("ansys.mapdl.core.launcher.launch_mapdl") as mock_launch,
-        patch("ansys.mapdl.core.launcher.submitter") as mock_submitter,
+        patch("ansys.mapdl.core.launcher.tools.submitter") as mock_submitter,
     ):  # test we are not calling Popen
         mock_launch.side_effect = lambda *args, **kwargs: (
             "123.45.67.89",
