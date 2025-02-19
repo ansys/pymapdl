@@ -30,8 +30,15 @@ from ansys.mapdl.core import LOG
 from ansys.mapdl.core.errors import MapdlDidNotStart
 from ansys.mapdl.core.launcher.grpc import launch_grpc
 from ansys.mapdl.core.launcher.tools import (
+    check_kwargs,
+    generate_mapdl_launch_command,
     generate_start_parameters,
+    get_cpus,
+    get_ip,
     get_port,
+    get_start_instance_arg,
+    pack_arguments,
+    pre_check_args,
     submitter,
 )
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
@@ -575,8 +582,6 @@ def launch_mapdl_grpc_on_hpc(
     get_cpus(args)
 
     get_ip(args)
-
-    args["port"] = get_port(args["port"], args["start_instance"])
 
     if args.get("mode", "grpc") != "grpc":
         raise ValueError("Invalid 'mode'.")
