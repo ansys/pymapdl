@@ -1282,11 +1282,11 @@ jobs:
 
       - name: "Create summary"
         run: |
-          export GITHUB_STEP_SUMMARY=github_step_summary.md
           echo "# Test summary 🚀" >>  $GITHUB_STEP_SUMMARY
           echo -e "The followin tables show a summary of tests duration and standard desviation for all the jobs.\n" >>  $GITHUB_STEP_SUMMARY
           python .ci/pytest_summary.py --num 25 --save-file tests_durations.json >> summary.md
           echo "$(cat summary.md)" >> $GITHUB_STEP_SUMMARY
+          cat summary.md
 
       - name: "Upload tests summary"
         uses: actions/upload-artifact@v4
