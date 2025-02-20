@@ -1277,11 +1277,11 @@ jobs:
 
       - name: "List directories"
         run: |
-          ls -Rla artifacts
+          ls -Rla .
 
       - name: "Run script"
         run: |
-          python  .ci/pytest_summary.py --directory artifacts --num 25 --save-file tests_durations.json
+          python .ci/pytest_summary.py --num 25 --save-file tests_durations.json
 
       - name: "Upload tests summary"
         uses: actions/upload-artifact@v4
