@@ -1273,12 +1273,11 @@ jobs:
 
       - name: "Uncompress files"
         run: |
-          find . -mindepth 2 -maxdepth 2 -type f -name 'logs-*.tgz' -exec tar -xzvf {} -C $(dirname {}) \;
+          find . -mindepth 1 -maxdepth 4 -type f -name 'logs-*.tgz' -exec tar -xzvf {} -C $(dirname {}) \;
 
       - name: "List directories"
         run: |
-          cd artifacts
-          find . -mindepth 2 -maxdepth 2 -type f
+          ls -Rla artifacts
 
       - name: "Run script"
         run: |
