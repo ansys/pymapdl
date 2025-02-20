@@ -1271,6 +1271,10 @@ jobs:
       - run: |
           ls -Rla artifacts
 
+      - name: "Uncompress files"
+        run: |
+          find . -mindepth 2 -maxdepth 2 -type f -name 'logs-*.tgz' -exec tar -xzvf {} -C $(dirname {}) \;
+
       - name: "List directories"
         run: |
           cd artifacts
