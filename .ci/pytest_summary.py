@@ -120,6 +120,7 @@ def compute_statistics(tests):
 
 
 def print_table(data, keys, headers, title=""):
+    JUNCTION = "|"
 
     def make_bold(s):
         return click.style(s, bold=True)
@@ -129,11 +130,15 @@ def print_table(data, keys, headers, title=""):
 
     len_h = len("| " + " | ".join(h) + " |")
 
-    sep = "+-" + "-+-".join(["-" * len(each) for each in h]) + "-+"
-    top_sep = "+" + "-" * (len_h - 2) + "+"
+    sep = (
+        f"{JUNCTION}-"
+        + f"-{JUNCTION}-".join(["-" * len(each) for each in h])
+        + f"-{JUNCTION}"
+    )
+    top_sep = f"{JUNCTION}" + "-" * (len_h - 2) + f"{JUNCTION}"
 
     if title:
-        click.echo("\n" + top_sep)
+        # click.echo(top_sep)
         click.echo(
             "| " + make_bold(f"Top {len(data)} {title}".center(len_h - 4)) + " |"
         )
@@ -162,7 +167,7 @@ def print_table(data, keys, headers, title=""):
                     s.append(f"{test[each_key]:.4f}".center(SMALL_WIDTH))
 
         click.echo("| " + " | ".join(s) + " |")
-    click.echo(sep)
+    # click.echo(sep)
 
 
 def print_summary(summary, num=10):
@@ -170,13 +175,16 @@ def print_summary(summary, num=10):
     longest_tests = sorted(summary, key=lambda x: -x["average_duration"])[:num]
     most_variable_tests = sorted(summary, key=lambda x: -x["std_dev"])[:num]
 
+    print(f"\n## Top {num} Longest Running Tests\n")
     print_table(
         longest_tests,
         ["id", "n_tests", "average_duration", "std_dev"],
         ["Test ID", "N. tests", "Avg", "STD"],
-        "Longest Running Tests",
+        # "Longest Running Tests",
     )
 
+    print("")
+    print(f"\n## Top {num} Most Variable Running Tests\n")
     print_table(
         most_variable_tests,
         [
@@ -199,7 +207,7 @@ def print_summary(summary, num=10):
             "Std-75%",
             "Avg-75%",
         ],
-        "Most Variable Running Tests",
+        # "Most Variable Running Tests",
     )
 
 
