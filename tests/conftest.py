@@ -667,6 +667,10 @@ _meth_patch_MAPDL_launch = [
     (_patch_method("_subscribe_to_channel"), _returns("")),
     (_patch_method("_run_at_connect"), _returns("")),
     (_patch_method("_exit_mapdl"), _returns(None)),
+    (
+        _patch_method("_check_mapdl_os"),
+        _returns("linux" if os.name == "posix" else "win"),
+    ),
     # non-mapdl methods
     ("socket.gethostbyname", _returns("123.45.67.99")),
     (
