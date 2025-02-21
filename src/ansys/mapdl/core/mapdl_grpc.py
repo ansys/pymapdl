@@ -510,6 +510,11 @@ class MapdlGrpc(MapdlBase):
 
         self._create_session()
 
+        # Caching platform.
+        self._log.info(
+            f"Connected to MAPDL server running at {self._hostname} on {self.ip}:{self.port} on {self.platform} OS"
+        )
+
     def _after_run(self, command: str) -> None:
         if command[:4].upper() == "/CLE":
             # We have reset the database, so we need to create a new session id
