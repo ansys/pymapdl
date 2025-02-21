@@ -1984,7 +1984,7 @@ class MapdlGrpc(MapdlBase):
             self._stored_commands.append(tmp_dat.splitlines()[1])
             return None
 
-        request = pb_types.InputFileRequest(filename=tmp_name)
+        request = pb_types.InputFileRequest(filename=tmp_name, opt="MUTE")
 
         # even though we don't care about the output, we still
         # need to check.  otherwise, since inputfile is
