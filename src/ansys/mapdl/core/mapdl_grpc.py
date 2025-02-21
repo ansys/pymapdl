@@ -2245,8 +2245,15 @@ class MapdlGrpc(MapdlBase):
         cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3}, {it3num}, {item4}, {it4num}"
 
         # not threadsafe; don't allow multiple get commands
+        timeout_ = kwargs.pop("timeout", 2)
+        timeout = time.time() + timeout_
         while self._get_lock:
             time.sleep(0.001)
+            if time.time() > timeout:
+                raise MapdlRuntimeError(
+                    "PyMAPDL couldn't obtain 'get_lock' in {timeout_} seconds "
+                    "and PyMAPDL cannot issue multiple get commands simultaneously."
+                )
 
         self._get_lock = True
         try:
