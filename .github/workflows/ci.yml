@@ -540,13 +540,15 @@ jobs:
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
           ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
           ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
+          file_name: "${{ matrix.mapdl-version }}-remote"
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
           echo "ON_STUDENT: $ON_STUDENT"
           xvfb-run pytest \
             ${{ env.PYTEST_ARGUMENTS }} \
             --ignore_image_cache \
-            --cov-report=xml:${{ matrix.mapdl-version }}-remote.xml
+            --report-log=$file_name.jsonl \
+            --cov-report=xml:$file_name.xml
 
       - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
@@ -707,6 +709,7 @@ jobs:
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
           ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
+          file_name: "${{ matrix.mapdl-version }}-local"
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
           echo "ON_STUDENT: $ON_STUDENT"
@@ -714,8 +717,10 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           xvfb-run pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
-            --reset_only_failed --add_missing_images \
-            --cov-report=xml:${{ matrix.mapdl-version }}-local.xml
+            --reset_only_failed \
+            --add_missing_images \
+            --report-log=$file_name.jsonl \
+            --cov-report=xml:$file_name.xml
 
       - name: "Collect logs on failure"
         if: always()
@@ -847,12 +852,13 @@ jobs:
 
       - name: "Unit testing requirements installation"
         run: |
-          python -m pip install -r .ci/requirements_minimal.txt
+          python -m pip install -r .ci/requirements_testing_minimal.txt
 
       - name: "Unit testing"
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
           ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
+          file_name: "${{ matrix.mapdl-version }}-minimal"
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
           echo "ON_STUDENT: $ON_STUDENT"
@@ -874,7 +880,8 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           pytest -k "not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
-            --cov-report=xml:${{ matrix.mapdl-version }}-minimal.xml
+            --report-log=$file_name.jsonl \
+            --cov-report=xml:$file_name.xml
 
       - name: "Collect logs on failure"
         if: always()
@@ -977,12 +984,13 @@ jobs:
 
       - name: "Unit testing requirements installation"
         run: |
-          python -m pip install -r .ci/requirements_minimal.txt
+          python -m pip install -r .ci/requirements_testing_minimal.txt
 
       - name: "Unit testing"
         env:
           ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
           ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
+          file_name: "${{ matrix.mapdl-version }}-minimal-console"
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
           echo "ON_STUDENT: $ON_STUDENT"
@@ -1004,7 +1012,8 @@ jobs:
           unset PYMAPDL_START_INSTANCE
           pytest -k "console" \
             ${{ env.PYTEST_ARGUMENTS }} \
-            --cov-report=xml:${{ matrix.mapdl-version }}-minimal-console.xml
+            --report-log=$file_name.jsonl \
+            --cov-report=xml:$file_name.xml
 
       - name: "Collect logs on failure"
         if: always()
@@ -1092,13 +1101,16 @@ jobs:
 
       - name: "Unit testing"
         shell: powershell
+        env:
+          file_name: windows-v22.2.0-local
         run: |
           set PYMAPDL_PORT=
           set PYMAPDL_START_INSTANCE=
           python -m pytest -k "not test_database and not test_dpf" \
             ${{ env.PYTEST_ARGUMENTS }} \
             --ignore_image_cache \
-            --cov-report=xml:windows-v22.2.0-local.xml
+            --report-log=$file_name.jsonl \
+            --cov-report=xml:$file_name.xml
 
       - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
@@ -1231,3 +1243,53 @@ jobs:
         shell: julia {0}
         run: |
           using Pkg; Pkg.add("PyCall");using PyCall;pymapdl = pyimport("ansys.mapdl.core");print(pymapdl.__version__)
+
+
+  pytest-summary:
+    name: Pytest summary for all the test jobs
+    needs: [build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal, build-test-ubuntu-console]
+    if: always()
+    runs-on: ubuntu-22.04          
+    steps:
+      - name: "Install Git and checkout project"
+        uses: actions/checkout@v4.2.2
+
+      - name: "Setup Python with cache"
+        uses: actions/setup-python@v5
+        with:
+          cache: 'pip'
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+
+      - name: "Install numpy"
+        run: python -m pip install numpy click
+
+      - name: "Download artifacts"
+        uses: actions/download-artifact@v4
+        with:
+          path: "artifacts"
+
+      - name: "List directories"
+        run: |
+          echo "::group:: List directories:" && ls -Rla artifacts && echo "::endgroup::"
+
+      - name: "Uncompress files"
+        run: |
+          find . -mindepth 1 -maxdepth 4 -type f -name 'logs-*.tgz' -exec tar -xzvf {} -C $(dirname {}) \;
+
+      - name: "List directories"
+        run: |
+          echo "::group:: List directories:" && ls -Rla . && echo "::endgroup::"
+
+      - name: "Create summary"
+        run: |
+          echo "# Test summary 🚀" >>  $GITHUB_STEP_SUMMARY
+          echo -e "The followin tables show a summary of tests duration and standard desviation for all the jobs.\n" >>  $GITHUB_STEP_SUMMARY
+          python .ci/pytest_summary.py --num 10 --save-file tests_durations.json >> summary.md
+          echo "$(cat summary.md)" >> $GITHUB_STEP_SUMMARY
+          cat summary.md
+
+      - name: "Upload tests summary"
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests_durations.json
+          path: tests_durations.json
