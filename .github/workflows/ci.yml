@@ -1284,7 +1284,7 @@ jobs:
         run: |
           echo "# Test summary 🚀" >>  $GITHUB_STEP_SUMMARY
           echo -e "The followin tables show a summary of tests duration and standard desviation for all the jobs.\n" >>  $GITHUB_STEP_SUMMARY
-          python .ci/pytest_summary.py --num 25 --save-file tests_durations.json >> summary.md
+          python .ci/pytest_summary.py --num 10 --save-file tests_durations.json >> summary.md
           echo "$(cat summary.md)" >> $GITHUB_STEP_SUMMARY
           cat summary.md
 
