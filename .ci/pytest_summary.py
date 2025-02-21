@@ -153,6 +153,13 @@ def print_table(data, keys, headers, title=""):
 
             if i == 0:
                 id_ = test[each_key]
+
+                id_ = (
+                    id_.replace("(", "\(")
+                    .replace(")", "\)")
+                    .replace("[", "\[")
+                    .replace("]", "\]")
+                )
                 if len(id_) >= BIG_WIDTH:
                     id_ = id_[: BIG_WIDTH - 15] + "..." + id_[-12:]
 
