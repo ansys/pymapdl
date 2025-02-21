@@ -2256,7 +2256,7 @@ class MapdlGrpc(MapdlBase):
             time.sleep(0.001)
             if time.time() > timeout:
                 raise MapdlRuntimeError(
-                    "PyMAPDL couldn't obtain 'get_lock' in {timeout_} seconds "
+                    f"PyMAPDL couldn't obtain 'get_lock' in {timeout_} seconds "
                     "and PyMAPDL cannot issue multiple get commands simultaneously."
                 )
 
