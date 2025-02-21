@@ -1959,12 +1959,12 @@ class MapdlGrpc(MapdlBase):
         if "CDRE" in orig_cmd.upper():
             # Using CDREAD
             option = kwargs.get("cd_read_option", "COMB")
-            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{option}','{filename}'\n"
+            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{option}','{filename}'\n/OUT,"
             delete_uploaded_files = False
 
         else:
             # Using default INPUT
-            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n"
+            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n/OUT,"
             delete_uploaded_files = True
 
         if write_to_log and self._apdl_log is not None:
