@@ -2269,7 +2269,7 @@ class MapdlGrpc(MapdlBase):
             out = self.run("*GET,__temp__," + cmd)
             self._log.debug(f"Default *get output:\n{out}")
 
-            if "VALUE=" in out:
+            if out and "VALUE=" in out:
                 from ansys.mapdl.core.misc import is_float
 
                 out = out.split("VALUE=")[1].strip()
@@ -2278,7 +2278,8 @@ class MapdlGrpc(MapdlBase):
                     return float(out)
                 else:
                     return out
-
+            elif out is None:
+                return None
             else:
                 raise MapdlError(f"Error when processing '*get' request output.\n{out}")
 
