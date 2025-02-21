@@ -450,6 +450,7 @@ def run_before_and_after_tests(
     mapdl.prep7()
 
     # Check resetting state
+    assert mapdl._stub is not None
     assert prev == mapdl.is_local
     assert not mapdl.exited, "MAPDL is exited after the test. It should have not!"
     assert not mapdl._mapdl_on_hpc, "Mapdl class is on HPC mode. It should not!"
