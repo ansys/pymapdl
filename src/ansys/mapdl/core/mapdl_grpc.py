@@ -2259,16 +2259,21 @@ class MapdlGrpc(MapdlBase):
                 "The 'grpc' get method seems to have failed. Trying old implementation for more verbose output."
             )
 
-            try:
-                out = self.run("*GET,__temp__," + cmd)
-                return float(out.split("VALUE=")[1].strip())
+            out = self.run("*GET,__temp__," + cmd)
+            self._log.debug(f"Default *get output:\n{out}")
 
-            except MapdlRuntimeError as e:
-                # Get can thrown some errors, in that case, they are caught in the default run method.
-                raise e
+            if "VALUE=" in out:
+                from ansys.mapdl.core.misc import is_float
 
-            except (IndexError, ValueError):
-                raise MapdlError("Error when processing '*get' request output.")
+                out = out.split("VALUE=")[1].strip()
+
+                if is_float(out):
+                    return float(out)
+                else:
+                    return out
+
+            else:
+                raise MapdlError(f"Error when processing '*get' request output.\n{out}")
 
         if getresponse.type == 1:
             return getresponse.dval
