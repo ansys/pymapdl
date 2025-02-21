@@ -270,12 +270,13 @@ def test_read_input_file_verbose(mapdl, cleared):
 
 @pytest.mark.parametrize("file_name", ["full26.dat", "static.dat"])
 def test_read_input_file(mapdl, file_name, cleared):
+    mapdl.prep7()
     test_file = os.path.join(PATH, "test_files", file_name)
     response = mapdl.input(test_file)
 
     assert (
         re.search("\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
-        or "PyMAPDL: Simulation Finished." in response
+        or "***** ROUTINE COMPLETED *****" in response
     )
 
 
