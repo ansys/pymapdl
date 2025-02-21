@@ -1247,7 +1247,7 @@ jobs:
 
   pytest-summary:
     name: Pytest summary for all the test jobs
-    needs: [build-test-remote] #, build-test-ubuntu-local, build-test-ubuntu-minimal, build-test-ubuntu-console]
+    needs: [build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal, build-test-ubuntu-console]
     if: always()
     runs-on: ubuntu-22.04          
     steps:
