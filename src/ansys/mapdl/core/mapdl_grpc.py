@@ -813,6 +813,7 @@ class MapdlGrpc(MapdlBase):
 
     @mute.setter
     def mute(self, value):
+        self._log.info("Mute value has been changed to %s", value)
         self._mute = value
 
     def __repr__(self):
