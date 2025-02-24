@@ -814,8 +814,9 @@ class MapdlGrpc(MapdlBase):
 
     @mute.setter
     def mute(self, value):
-        trace = "\n".join(traceback.print_stack())
-        self._log.warning(f"Mute value has been changed to {value} on:\n{trace}")
+        self._log.warning(
+            f"Mute value has been changed to {value} on:\n{traceback.print_stack()}"
+        )
         self._mute = value
 
     def __repr__(self):
