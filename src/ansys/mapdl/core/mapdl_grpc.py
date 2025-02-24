@@ -2268,39 +2268,39 @@ class MapdlGrpc(MapdlBase):
 
         self._get_lock = True
         try:
-            getresponse = self._stub.Get(pb_types.GetRequest(getcmd=cmd))
+            response = self._stub.Get(pb_types.GetRequest(getcmd=cmd))
         finally:
             self._get_lock = False
 
-        if getresponse.type == 0:
+        if response.type == 0:
             self._log.debug(
                 "The 'grpc' get method seems to have failed. Trying old implementation for more verbose output."
             )
 
-            out = self.run("*GET,__temp__," + cmd, mute=False)
-            self._log.debug(f"Default *get output:\n{out}")
+            response = self.run("*GET,__temp__," + cmd, mute=False)
+            self._log.debug(f"Default *get output:\n{response}")
 
-            if out:
+            if response:
                 from ansys.mapdl.core.misc import is_float
 
-                if "VALUE=" in out:
-                    out = out.split("VALUE=")[1].strip()
+                if "VALUE=" in response:
+                    response = response.split("VALUE=")[1].strip()
 
-                if is_float(out):
-                    return float(out)
+                if is_float(response):
+                    return float(response)
                 else:
-                    return out
+                    return response
             else:
-                raise MapdlError(f"Error when processing '*get' request output.\n{out}")
+                raise MapdlError(
+                    f"Error when processing '*get' request output.\n{response}"
+                )
 
-        if getresponse.type == 1:
-            return getresponse.dval
-        elif getresponse.type == 2:
-            return getresponse.sval
+        if response.type == 1:
+            return response.dval
+        elif response.type == 2:
+            return response.sval
 
-        raise MapdlRuntimeError(
-            f"Unsupported type {getresponse.type} response from MAPDL"
-        )
+        raise MapdlRuntimeError(f"Unsupported type {response.type} response from MAPDL")
 
     def download_project(
         self,
