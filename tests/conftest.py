@@ -444,6 +444,8 @@ def run_before_and_after_tests(
 
     # check if the local/remote state has changed or not
     prev = mapdl.is_local
+    assert not mapdl.exited, "MAPDL is exited before the test. It should not!"
+    assert not mapdl.mute
 
     yield  # this is where the testing happens
 
