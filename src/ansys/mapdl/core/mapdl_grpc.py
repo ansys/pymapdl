@@ -510,6 +510,11 @@ class MapdlGrpc(MapdlBase):
 
         self._create_session()
 
+        # Caching platform.
+        self._log.info(
+            f"Connected to MAPDL server running at {self._hostname} on {self.ip}:{self.port} on {self.platform} OS"
+        )
+
     def _after_run(self, command: str) -> None:
         if command[:4].upper() == "/CLE":
             # We have reset the database, so we need to create a new session id
@@ -2245,8 +2250,15 @@ class MapdlGrpc(MapdlBase):
         cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3}, {it3num}, {item4}, {it4num}"
 
         # not threadsafe; don't allow multiple get commands
+        timeout_ = kwargs.pop("timeout", 2)
+        timeout = time.time() + timeout_
         while self._get_lock:
             time.sleep(0.001)
+            if time.time() > timeout:
+                raise MapdlRuntimeError(
+                    f"PyMAPDL couldn't obtain 'get_lock' in {timeout_} seconds "
+                    "and PyMAPDL cannot issue multiple get commands simultaneously."
+                )
 
         self._get_lock = True
         try:
@@ -2259,16 +2271,23 @@ class MapdlGrpc(MapdlBase):
                 "The 'grpc' get method seems to have failed. Trying old implementation for more verbose output."
             )
 
-            try:
-                out = self.run("*GET,__temp__," + cmd)
-                return float(out.split("VALUE=")[1].strip())
+            out = self.run("*GET,__temp__," + cmd)
+            self._log.debug(f"Default *get output:\n{out}")
 
-            except MapdlRuntimeError as e:
-                # Get can thrown some errors, in that case, they are caught in the default run method.
-                raise e
+            if out:
+                from ansys.mapdl.core.misc import is_float
 
-            except (IndexError, ValueError):
-                raise MapdlError("Error when processing '*get' request output.")
+                if "VALUE=" in out:
+                    out = out.split("VALUE=")[1].strip()
+
+                if is_float(out):
+                    return float(out)
+                else:
+                    return out
+            elif out is None:
+                return None
+            else:
+                raise MapdlError(f"Error when processing '*get' request output.\n{out}")
 
         if getresponse.type == 1:
             return getresponse.dval
