@@ -1181,28 +1181,24 @@ class _MapdlCore(Commands):
         ``ansys.mapdl.core.Archive``"""
         from ansys.mapdl.reader import Archive
 
+        from ansys.mapdl.core.misc import ChangeProperty
+
         if self._archive_cache is None:
             # write database to an archive file
             arch_filename = os.path.join(self.directory, "_tmp.cdb")
             nblock_filename = os.path.join(self.directory, "nblock.cdb")
 
             # must have all nodes elements are using selected
-            if hasattr(self, "mute"):
-                old_mute = self.mute
-                self.mute = True
+            with ChangeProperty(mapdl, "mute", True):
+                self.cm("__NODE__", "NODE", mute=True)
+                self.nsle("S", mute=True)
+                self.cdwrite("db", arch_filename, mute=True)
+                self.cmsel("S", "__NODE__", "NODE", mute=True)
 
-            self.cm("__NODE__", "NODE", mute=True)
-            self.nsle("S", mute=True)
-            self.cdwrite("db", arch_filename, mute=True)
-            self.cmsel("S", "__NODE__", "NODE", mute=True)
-
-            self.cm("__ELEM__", "ELEM", mute=True)
-            self.esel("NONE", mute=True)
-            self.cdwrite("db", nblock_filename, mute=True)
-            self.cmsel("S", "__ELEM__", "ELEM", mute=True)
-
-            if hasattr(self, "mute"):
-                self.mute = old_mute
+                self.cm("__ELEM__", "ELEM", mute=True)
+                self.esel("NONE", mute=True)
+                self.cdwrite("db", nblock_filename, mute=True)
+                self.cmsel("S", "__ELEM__", "ELEM", mute=True)
 
             self._archive_cache = Archive(arch_filename, parse_vtk=False, name="Mesh")
             grid = self._archive_cache._parse_vtk(additional_checking=True)
