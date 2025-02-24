@@ -838,6 +838,20 @@ class _MapdlCore(Commands):
         """
         return self._non_interactive(self)
 
+    def muted(self):
+        """Context manager that suppress all output from MAPDL
+
+        Use the `muted` context manager to suppress all the output. Similar to
+        setting `mapdl.mute = True` but only for the context manager.
+
+        Examples
+        --------
+        >>> with mapdl.muted:
+        ...    mapdl.run("/SOLU") # This call is muted
+
+        """
+        return self._muted(self)
+
     @property
     def parameters(self) -> "Parameters":
         """Collection of MAPDL parameters.
@@ -1181,24 +1195,21 @@ class _MapdlCore(Commands):
         ``ansys.mapdl.core.Archive``"""
         from ansys.mapdl.reader import Archive
 
-        from ansys.mapdl.core.misc import ChangeProperty
-
         if self._archive_cache is None:
             # write database to an archive file
             arch_filename = os.path.join(self.directory, "_tmp.cdb")
             nblock_filename = os.path.join(self.directory, "nblock.cdb")
 
             # must have all nodes elements are using selected
-            with ChangeProperty(mapdl, "mute", True):
-                self.cm("__NODE__", "NODE", mute=True)
-                self.nsle("S", mute=True)
-                self.cdwrite("db", arch_filename, mute=True)
-                self.cmsel("S", "__NODE__", "NODE", mute=True)
+            self.cm("__NODE__", "NODE", mute=True)
+            self.nsle("S", mute=True)
+            self.cdwrite("db", arch_filename, mute=True)
+            self.cmsel("S", "__NODE__", "NODE", mute=True)
 
-                self.cm("__ELEM__", "ELEM", mute=True)
-                self.esel("NONE", mute=True)
-                self.cdwrite("db", nblock_filename, mute=True)
-                self.cmsel("S", "__ELEM__", "ELEM", mute=True)
+            self.cm("__ELEM__", "ELEM", mute=True)
+            self.esel("NONE", mute=True)
+            self.cdwrite("db", nblock_filename, mute=True)
+            self.cmsel("S", "__ELEM__", "ELEM", mute=True)
 
             self._archive_cache = Archive(arch_filename, parse_vtk=False, name="Mesh")
             grid = self._archive_cache._parse_vtk(additional_checking=True)
@@ -1525,6 +1536,19 @@ class _MapdlCore(Commands):
         @property
         def _cached_routine(self):
             return self._parent()._cached_routine
+
+    class _muted:
+        def __init__(self, parent):
+            self.parent = weakref.ref(parent)
+            self.old_value = None
+
+        def __enter__(self):
+            self.old_value = self.parent.mute
+            self.mute = True
+
+        def __exit__(self, *args):
+            self.parent.mute = self.old_value
+            self.old_value = None
 
     def run_as_routine(self, routine):
         """

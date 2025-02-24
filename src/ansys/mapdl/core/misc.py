@@ -34,7 +34,6 @@ import tempfile
 from threading import Thread
 from typing import Callable, Dict, Iterable, List, Tuple, Union
 from warnings import warn
-import weakref
 
 import numpy as np
 
@@ -624,18 +623,3 @@ def stack(*decorators: Iterable[Callable]) -> Callable:
         return f
 
     return deco
-
-
-class ChangeProperty:
-    def __init__(self, obj, prop, new_value):
-        self.obj = weakref.ref(obj)
-        self.property = prop
-        self.new_value = new_value
-        self.old_value = None
-
-    def __enter__(self, *args, **kwargs):
-        self.old_value = getattr(self.obj(), self.property)
-        setattr(self.obj(), self.property, self.new_value)
-
-    def __exit__(self, *args, **kwargs):
-        setattr(self.obj(), self.property, self.old_value)
