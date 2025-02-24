@@ -438,7 +438,7 @@ class MapdlGrpc(MapdlBase):
         self._channel_state: grpc.ChannelConnectivity = (
             grpc.ChannelConnectivity.CONNECTING
         )
-        self.__get_time_step_stream: Optional[int] = None
+        self._time_step_stream: Optional[int] = None
 
         if channel is None:
             self._log.debug("Creating channel to %s:%s", ip, port)
@@ -2035,12 +2035,12 @@ class MapdlGrpc(MapdlBase):
         output to the file which later will be returned as response
         """
         if time_step is None:
-            if self.__get_time_step_stream is not None:
-                time_step = self.__get_time_step_stream
+            if DEFAULT_TIME_STEP_STREAM is not None:
+                time_step = DEFAULT_TIME_STEP_STREAM
+            elif self._time_step_stream is not None:
+                time_step = self._time_step_stream
             else:
-                if DEFAULT_TIME_STEP_STREAM is not None:
-                    time_step = DEFAULT_TIME_STEP_STREAM
-                elif self.platform == "windows":
+                if self.platform == "windows":
                     time_step = DEFAULT_TIME_STEP_STREAM_NT
                 elif self.platform == "linux":
                     time_step = DEFAULT_TIME_STEP_STREAM_POSIX
@@ -2054,7 +2054,7 @@ class MapdlGrpc(MapdlBase):
                 raise ValueError("``time_step`` argument must be greater than 0``")
 
         self.logger.debug(f"The time_step argument is set to: {time_step}")
-        self.__get_time_step_stream = time_step
+        self._time_step_stream = time_step
         return time_step
 
     def _get_file_path(self, fname: str, progress_bar: bool = False) -> str:
