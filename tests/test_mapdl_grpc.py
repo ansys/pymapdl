@@ -100,3 +100,6 @@ def test_get_non_interactive_mode(mapdl):
 
     with pytest.raises(MapdlRuntimeError):
         mapdl._get(entity="NODE", entnum="1", item1="U", it1num=1)
+
+    # reset
+    mapdl._store_commands = False
