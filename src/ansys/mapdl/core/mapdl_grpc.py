@@ -2277,7 +2277,7 @@ class MapdlGrpc(MapdlBase):
                 "The 'grpc' get method seems to have failed. Trying old implementation for more verbose output."
             )
 
-            out = self.run("*GET,__temp__," + cmd)
+            out = self.run("*GET,__temp__," + cmd, mute=False)
             self._log.debug(f"Default *get output:\n{out}")
 
             if out:
