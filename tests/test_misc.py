@@ -28,7 +28,6 @@ import numpy as np
 import pytest
 
 from ansys.mapdl.core.misc import (
-    ChangeProperty,
     check_valid_ip,
     check_valid_port,
     check_valid_routine,
@@ -273,22 +272,3 @@ def test_create_temp_dir():
     dir_ = path.parts[-1]
 
     assert str(path) != create_temp_dir(parent, dir_)
-
-
-@pytest.mark.parametrize("prop", ["mute"])
-def test_change_property_context(mapdl, prop):
-    assert not mapdl.mute
-    with ChangeProperty(mapdl, prop, True):
-        assert getattr(mapdl, prop) is True
-
-    assert not mapdl.mute
-
-
-def test_change_property_context_method(mapdl):
-    type_ = type(mapdl._log)
-    assert mapdl._log
-    with ChangeProperty(mapdl, "_log", True):
-        assert getattr(mapdl, "_log") is True
-
-    assert mapdl._log
-    assert isinstance(mapdl._log, type_)
