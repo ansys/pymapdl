@@ -122,6 +122,7 @@ pymapdl = "ansys.mapdl.core.cli:main"
 addopts = "-rxXsa -vvv --maxfail=10 --random-order-bucket=class --random-order --durations=10  --timeout=180"
 junit_family = "legacy"
 filterwarnings = [
+    "default::ResourceWarning",
     "ignore::FutureWarning",
     "ignore::PendingDeprecationWarning",
     "ignore::DeprecationWarning",

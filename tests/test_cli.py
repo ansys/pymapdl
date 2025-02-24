@@ -57,9 +57,7 @@ def make_fake_process(pid, name, port=PORT1, ansys_process=False, n_children=0):
     return mock_process
 
 
-@pytest.fixture
-@requires("click")
-@requires("nostudent")
+@pytest.fixture(scope="function")
 def run_cli():
     def do_run(arguments=""):
         from click.testing import CliRunner

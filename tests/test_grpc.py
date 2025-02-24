@@ -265,7 +265,9 @@ def test_cmatrix(mapdl, setup_for_cmatrix):
 def test_read_input_file_verbose(mapdl, cleared):
     test_file = examples.vmfiles["vm153"]
     response = mapdl.input(test_file, verbose=True)
-    assert re.search("\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
+    assert re.search(
+        r"\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response
+    )
 
 
 @pytest.mark.parametrize("file_name", ["full26.dat", "static.dat"])
@@ -274,7 +276,7 @@ def test_read_input_file(mapdl, file_name, cleared):
     response = mapdl.input(test_file)
 
     assert (
-        re.search("\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
+        re.search(r"\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
         or "PyMAPDL: Simulation Finished." in response
     )
 
@@ -467,8 +469,8 @@ def test_download_result(mapdl, cleared, tmpdir):
 def test__channel_str(mapdl, cleared):
     assert mapdl._channel_str is not None
     assert ":" in mapdl._channel_str
-    assert re.search("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", mapdl._channel_str)
-    assert re.search("\d{4,6}", mapdl._channel_str)
+    assert re.search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", mapdl._channel_str)
+    assert re.search(r"\d{4,6}", mapdl._channel_str)
 
 
 def test_mode(mapdl, cleared):

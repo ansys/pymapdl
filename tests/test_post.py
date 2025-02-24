@@ -829,7 +829,7 @@ class Test_plastic_solve(TestClass):
         sint_ans = data[:, -2]
         sint = mapdl.post_processing.nodal_plastic_strain_intensity()
 
-        sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        sint_aligned = sint[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(sint_ans, sint_aligned)
 
     @staticmethod
