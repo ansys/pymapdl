@@ -39,7 +39,6 @@ import subprocess  # nosec B404
 import tempfile
 import threading
 import time
-import traceback
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
 from uuid import uuid4
 from warnings import warn
@@ -814,9 +813,7 @@ class MapdlGrpc(MapdlBase):
 
     @mute.setter
     def mute(self, value):
-        self._log.warning(
-            f"Mute value has been changed to {value} on:\n{traceback.print_stack()}"
-        )
+        self._log.warning(f"Mute value has been changed to '{value}'.")
         self._mute = value
 
     def __repr__(self):
