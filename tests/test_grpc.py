@@ -776,6 +776,9 @@ def test__get_time_step_stream(mapdl, platform):
     with patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.platform", platform):
         from ansys.mapdl.core import mapdl_grpc
 
+        mapdl._time_step_stream = None
+        mapdl_grpc.DEFAULT_TIME_STEP_STREAM = None
+
         if platform == "linux":
             DEFAULT_TIME_STEP_STREAM = mapdl_grpc.DEFAULT_TIME_STEP_STREAM_POSIX
         elif platform == "windows":
