@@ -438,6 +438,7 @@ class MapdlGrpc(MapdlBase):
         self._channel_state: grpc.ChannelConnectivity = (
             grpc.ChannelConnectivity.CONNECTING
         )
+        self.__get_time_step_stream: Optional[int] = None
 
         if channel is None:
             self._log.debug("Creating channel to %s:%s", ip, port)
@@ -2033,22 +2034,26 @@ class MapdlGrpc(MapdlBase):
         output to the file which later will be returned as response
         """
         if time_step is None:
-            if DEFAULT_TIME_STEP_STREAM is not None:
-                time_step = DEFAULT_TIME_STEP_STREAM
-            elif self.platform == "windows":
-                time_step = DEFAULT_TIME_STEP_STREAM_NT
-            elif self.platform == "linux":
-                time_step = DEFAULT_TIME_STEP_STREAM_POSIX
+            if self.__get_time_step_stream is not None:
+                time_step = self.__get_time_step_stream
             else:
-                raise ValueError(
-                    f"The MAPDL platform ('{self.platform}') is not recognaised."
-                )
+                if DEFAULT_TIME_STEP_STREAM is not None:
+                    time_step = DEFAULT_TIME_STEP_STREAM
+                elif self.platform == "windows":
+                    time_step = DEFAULT_TIME_STEP_STREAM_NT
+                elif self.platform == "linux":
+                    time_step = DEFAULT_TIME_STEP_STREAM_POSIX
+                else:
+                    raise ValueError(
+                        f"The MAPDL platform ('{self.platform}') is not recognaised."
+                    )
 
         else:
             if time_step <= 0:
                 raise ValueError("``time_step`` argument must be greater than 0``")
 
         self.logger.debug(f"The time_step argument is set to: {time_step}")
+        self.__get_time_step_stream = time_step
         return time_step
 
     def _get_file_path(self, fname: str, progress_bar: bool = False) -> str:
@@ -2284,8 +2289,6 @@ class MapdlGrpc(MapdlBase):
                     return float(out)
                 else:
                     return out
-            elif out is None:
-                return None
             else:
                 raise MapdlError(f"Error when processing '*get' request output.\n{out}")
 
