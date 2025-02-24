@@ -2274,10 +2274,11 @@ class MapdlGrpc(MapdlBase):
             out = self.run("*GET,__temp__," + cmd)
             self._log.debug(f"Default *get output:\n{out}")
 
-            if out and "VALUE=" in out:
+            if out:
                 from ansys.mapdl.core.misc import is_float
 
-                out = out.split("VALUE=")[1].strip()
+                if "VALUE=" in out:
+                    out = out.split("VALUE=")[1].strip()
 
                 if is_float(out):
                     return float(out)
