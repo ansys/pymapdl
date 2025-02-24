@@ -193,8 +193,32 @@ jobs:
         run: |
           $(docker pull ghcr.io/ansys/dpf-core:22.2dev && docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}.") &
 
+      - name: "Getting files change filters"
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            workflows:
+              - '.github/workflows/**'
+              - 'pyproject.toml'
+            examples:
+              - 'examples/**'
+              - 'pyproject.toml'
+            documentation:
+              - 'examples/**'
+              - 'doc/**'
+              - 'pyproject.toml'
+
+      - name: "Setup Python with cache"
+        uses: actions/setup-python@v5
+        if:  steps.changes.outputs.workflows != 'true'
+        with:
+          cache: 'pip'
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+
       - name: "Setup Python without cache"
         uses: actions/setup-python@v5
+        if: steps.changes.outputs.workflows == 'true'
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
@@ -218,6 +242,33 @@ jobs:
         run: |
           echo "PYMAPDL_VERSION=$(python -c 'from ansys.mapdl.core import __version__; print(__version__)')" >> $GITHUB_OUTPUT
           echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
+
+      - name: "Cache examples"
+        uses: actions/cache@v4
+        if: steps.changes.outputs.documentation == 'false' || (github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags'))
+        with:
+          path: doc/source/examples
+          key: Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          restore-keys: |
+            Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
+
+      - name: "Cache docs build directory"
+        uses: actions/cache@v4
+        if: steps.changes.outputs.documentation == 'false' || (github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags'))
+        with:
+          path: doc/_build
+          key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          restore-keys: |
+            doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
+
+      - name: "Cache autosummary"
+        uses: actions/cache@v4
+        if: steps.changes.outputs.documentation == 'false' || (github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags'))
+        with:
+          path: doc/source/**/_autosummary/*.rst
+          key: autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          restore-keys: |
+            autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
 
       - name: "Install docs build requirements"
         run: |
@@ -438,8 +489,24 @@ jobs:
         run: |
           $(docker pull ghcr.io/ansys/dpf-core:22.2dev && docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}.") &
 
+      - name: "Getting files change filters"
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            workflows:
+              - '.github/workflows/**'
+
+      - name: "Setup Python with cache"
+        uses: actions/setup-python@v5
+        if:  steps.changes.outputs.workflows != 'true'
+        with:
+          cache: 'pip'
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+
       - name: "Setup Python without cache"
         uses: actions/setup-python@v5
+        if: steps.changes.outputs.workflows == 'true'
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
