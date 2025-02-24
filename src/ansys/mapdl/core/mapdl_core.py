@@ -540,7 +540,7 @@ class _MapdlCore(Commands):
 
         elif not self._path:
             raise MapdlRuntimeError(
-                f"MAPDL could provide a path using /INQUIRE or the cached path ('{self._path}')."
+                f"MAPDL could NOT provide a path using /INQUIRE or the cached path ('{self._path}')."
             )
 
         return self._path

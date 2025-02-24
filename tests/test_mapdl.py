@@ -2661,7 +2661,7 @@ def test_directory_setter(mapdl, cleared):
         mapdl._path = ""
         with pytest.raises(
             MapdlRuntimeError,
-            match="MAPDL could provide a path using /INQUIRE or the cached path",
+            match="MAPDL could NOT provide a path using /INQUIRE or the cached path",
         ):
             mapdl.directory
 
