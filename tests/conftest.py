@@ -170,6 +170,12 @@ def requires(requirement: str):
             "not config.getoption('console')", reason="need --console option to run"
         )
 
+    elif "requires_gui" == requirement:
+        return pytest.mark.skipif(
+            "not config.getoption('only-gui')",
+            reason="need --only-gui option to launch MAPDL GUI interface.",
+        )
+
     else:
         return requires_dependency(requirement)
 
