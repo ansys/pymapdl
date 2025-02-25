@@ -838,6 +838,7 @@ class _MapdlCore(Commands):
         """
         return self._non_interactive(self)
 
+    @property
     def muted(self):
         """Context manager that suppress all output from MAPDL
 
@@ -1539,15 +1540,15 @@ class _MapdlCore(Commands):
 
     class _muted:
         def __init__(self, parent):
-            self.parent = weakref.ref(parent)
+            self._parent = weakref.ref(parent)
             self.old_value = None
 
         def __enter__(self):
-            self.old_value = self.parent.mute
-            self.mute = True
+            self.old_value = self._parent().mute
+            self._parent().mute = True
 
         def __exit__(self, *args):
-            self.parent.mute = self.old_value
+            self._parent().mute = self.old_value
             self.old_value = None
 
     def run_as_routine(self, routine):
