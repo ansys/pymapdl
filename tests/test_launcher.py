@@ -946,7 +946,12 @@ def test_ip_and_start_instance(
 
     ###################
     # Faking MAPDL launching and returning args
-    with warnings.catch_warnings(record=True):
+    if start_instance_envvar is not None and start_instance is True:
+        context = pytest.warns(UserWarning)
+    else:
+        context = warnings.catch_warnings(record=True)
+
+    with context:
         options = launch_mapdl(
             start_instance=start_instance,
             ip=ip,
