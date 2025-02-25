@@ -631,6 +631,9 @@ def test__check_stds(mapdl):
 
         mock_get_std_output.assert_called()
 
+    process.kill()
+    del process
+
 
 @requires("grpc")
 @requires("nowindows")  # since we are using bash
@@ -678,6 +681,9 @@ done
             MapdlConnectionError, match="Expected MapdlConnection error"
         ):
             mapdl._post_mortem_checks(process)
+
+    process.kill()
+    del process
 
 
 def test_subscribe_to_channel(mapdl, cleared):
