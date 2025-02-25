@@ -145,12 +145,11 @@ CMD_DOC_STRING_INJECTOR.extend(CMD_BC_LISTING)
 
 @pytest.fixture()
 def beam_solve(mapdl, cleared):
-    mapdl.mute = True
-    mapdl.input(vmfiles["vm10"])
+    with mapdl.muted:
+        mapdl.input(vmfiles["vm10"])
 
-    mapdl.post1()
-    mapdl.set(1, 2)
-    mapdl.mute = False
+        mapdl.post1()
+        mapdl.set(1, 2)
 
 
 def test_cmd_class():
@@ -699,12 +698,11 @@ class Test_output_listing(TestClass):
     @staticmethod
     @pytest.fixture(scope="class")
     def plastic_solve_output(mapdl):
-        mapdl.mute = True
-        mapdl.input(vmfiles["vm273"])
+        with mapdl.muted:
+            mapdl.input(vmfiles["vm273"])
 
-        mapdl.post1()
-        mapdl.set(1, 2)
-        mapdl.mute = False
+            mapdl.post1()
+            mapdl.set(1, 2)
 
     @staticmethod
     @pytest.mark.parametrize(
