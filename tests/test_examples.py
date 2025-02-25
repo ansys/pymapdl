@@ -199,6 +199,9 @@ print('Everything went well')
 
     assert out.strip() == "Everything went well"
 
+    p.kill()
+    del p
+
 
 def test_external_models():
     from ansys.mapdl.core.examples import examples
