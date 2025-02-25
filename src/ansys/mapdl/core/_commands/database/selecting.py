@@ -65,7 +65,7 @@ class Selecting:
             **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
             (rotations); ROT (ROTX,
             ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            **Thermal labels** : TEMP, TBOT, TE2, TE3,..., TTOP (temperature).
             **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
             **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
             **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
@@ -73,7 +73,7 @@ class Selecting:
             **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
             (MX, MY, and MZ); FORC (F
             and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            **Thermal force labels** : HEAT, HBOT, HE2, HE3,..., HTOP (heat flow).
             **Fluid flow force label** : FLOW (fluid flow).
             **Electric force labels** : AMPS (current flow); CHRG (electric charge).
             **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
@@ -85,7 +85,7 @@ class Selecting:
             **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
             (rotations); ROT (ROTX,
             ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            **Thermal labels** : TEMP, TBOT, TE2, TE3,..., TTOP (temperature).
             **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
             **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
             **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
@@ -93,7 +93,7 @@ class Selecting:
             **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
             (MX, MY, and MZ); FORC (F
             and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            **Thermal force labels** : HEAT, HBOT, HE2, HE3,..., HTOP (heat flow).
             **Fluid flow force label** : FLOW (fluid flow).
             **Electric force labels** : AMPS (current flow); CHRG (electric charge).
             **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
@@ -105,7 +105,7 @@ class Selecting:
             **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
             (rotations); ROT (ROTX,
             ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            **Thermal labels** : TEMP, TBOT, TE2, TE3,..., TTOP (temperature).
             **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
             **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
             **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
@@ -113,7 +113,7 @@ class Selecting:
             **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
             (MX, MY, and MZ); FORC (F
             and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            **Thermal force labels** : HEAT, HBOT, HE2, HE3,..., HTOP (heat flow).
             **Fluid flow force label** : FLOW (fluid flow).
             **Electric force labels** : AMPS (current flow); CHRG (electric charge).
             **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
@@ -125,7 +125,7 @@ class Selecting:
             **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
             (rotations); ROT (ROTX,
             ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            **Thermal labels** : TEMP, TBOT, TE2, TE3,..., TTOP (temperature).
             **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
             **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
             **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
@@ -133,7 +133,7 @@ class Selecting:
             **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
             (MX, MY, and MZ); FORC (F
             and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            **Thermal force labels** : HEAT, HBOT, HE2, HE3,..., HTOP (heat flow).
             **Fluid flow force label** : FLOW (fluid flow).
             **Electric force labels** : AMPS (current flow); CHRG (electric charge).
             **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
@@ -145,7 +145,7 @@ class Selecting:
             **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
             (rotations); ROT (ROTX,
             ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            **Thermal labels** : TEMP, TBOT, TE2, TE3,..., TTOP (temperature).
             **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
             **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
             **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
@@ -153,7 +153,7 @@ class Selecting:
             **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
             (MX, MY, and MZ); FORC (F
             and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            **Thermal force labels** : HEAT, HBOT, HE2, HE3,..., HTOP (heat flow).
             **Fluid flow force label** : FLOW (fluid flow).
             **Electric force labels** : AMPS (current flow); CHRG (electric charge).
             **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
@@ -165,7 +165,7 @@ class Selecting:
             **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
             (rotations); ROT (ROTX,
             ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            **Thermal labels** : TEMP, TBOT, TE2, TE3,..., TTOP (temperature).
             **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
             **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
             **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
@@ -173,7 +173,7 @@ class Selecting:
             **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
             (MX, MY, and MZ); FORC (F
             and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            **Thermal force labels** : HEAT, HBOT, HE2, HE3,..., HTOP (heat flow).
             **Fluid flow force label** : FLOW (fluid flow).
             **Electric force labels** : AMPS (current flow); CHRG (electric charge).
             **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
@@ -1859,6 +1859,12 @@ class Selecting:
         r"""Selects a subset of areas.
 
         Mechanical APDL Command: `ASEL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ASEL.html>`_
+
+        .. note::
+
+            Starting with PyMAPDL v0.66.0, you can use "P" as a second argument to select entities interactively. A window pops up
+            allowing you to select, unselect, add or reselect entities depending on the first argument ``type_``. An array with
+            the ids of new selection is returned when the window is closed.
 
         **Command default:**
 
