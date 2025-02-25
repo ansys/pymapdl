@@ -208,17 +208,16 @@ FINISH
 
 
 def clearing_cdread_cdwrite_tests(mapdl):
-    mapdl.mute = True
-    mapdl.finish()
-    # *MUST* be NOSTART.  With START fails after 20 calls...
-    # this has been fixed in later pymapdl and MAPDL releases
-    mapdl.clear("NOSTART")
-    mapdl.header("DEFA")
-    mapdl.format("DEFA")
-    mapdl.page("DEFA")
+    with mapdl.muted:
+        mapdl.finish()
+        # *MUST* be NOSTART.  With START fails after 20 calls...
+        # this has been fixed in later pymapdl and MAPDL releases
+        mapdl.clear("NOSTART")
+        mapdl.header("DEFA")
+        mapdl.format("DEFA")
+        mapdl.page("DEFA")
 
-    mapdl.prep7()
-    mapdl.mute = False
+        mapdl.prep7()
 
 
 def asserting_cdread_cdwrite_tests(mapdl):
@@ -933,47 +932,46 @@ def test_load_array_failure_types(mapdl, cleared, array):
 
 @requires("grpc")
 def test_lssolve(mapdl, cleared):
-    mapdl.mute = True
+    with mapdl.muted:
+        mapdl.run("/units,user,0.001,0.001,1,1,0,1,1,1")
+        mapdl.et(1, 182)
+        mapdl.mp("ex", 1, 210e3)
+        mapdl.mp("nuxy", 1, 0.33)
+        mapdl.mp("dens", 1, 7.81e-06)
+        mapdl.k(1, 0, 0)
+        mapdl.k(2, 5, 0)
+        mapdl.k(3, 5, 1)
+        mapdl.k(4, 0, 1)
+        mapdl.l(1, 2)
+        mapdl.l(2, 3)
+        mapdl.l(3, 4)
+        mapdl.l(4, 1)
+        mapdl.al(1, 2, 3, 4)
+        mapdl.lsel("s", "", "", 1, 4)
+        mapdl.lesize("all", 0.5)
+        mapdl.amesh(1)
+        mapdl.allsel()
+        mapdl.finish()
+        mapdl.run("/solu")
+        mapdl.antype("static'")
+        mapdl.kbc(0)
+        mapdl.lsel("s", "", "", 4)
+        mapdl.nsll("s", 1)
+        mapdl.d("all", "all", 0)
+        mapdl.ksel("s", "", "", 3)
+        mapdl.nslk("s")
+        mapdl.f("all", "fy", 5)
+        mapdl.allsel()
+        mapdl.lswrite(1)
+        mapdl.fdele("all", "all")
+        mapdl.ksel("s", "", "", 3)
+        mapdl.nslk("s")
+        mapdl.f("all", "fy", -5)
+        mapdl.allsel()
 
-    mapdl.run("/units,user,0.001,0.001,1,1,0,1,1,1")
-    mapdl.et(1, 182)
-    mapdl.mp("ex", 1, 210e3)
-    mapdl.mp("nuxy", 1, 0.33)
-    mapdl.mp("dens", 1, 7.81e-06)
-    mapdl.k(1, 0, 0)
-    mapdl.k(2, 5, 0)
-    mapdl.k(3, 5, 1)
-    mapdl.k(4, 0, 1)
-    mapdl.l(1, 2)
-    mapdl.l(2, 3)
-    mapdl.l(3, 4)
-    mapdl.l(4, 1)
-    mapdl.al(1, 2, 3, 4)
-    mapdl.lsel("s", "", "", 1, 4)
-    mapdl.lesize("all", 0.5)
-    mapdl.amesh(1)
-    mapdl.allsel()
-    mapdl.finish()
-    mapdl.run("/solu")
-    mapdl.antype("static'")
-    mapdl.kbc(0)
-    mapdl.lsel("s", "", "", 4)
-    mapdl.nsll("s", 1)
-    mapdl.d("all", "all", 0)
-    mapdl.ksel("s", "", "", 3)
-    mapdl.nslk("s")
-    mapdl.f("all", "fy", 5)
-    mapdl.allsel()
-    mapdl.lswrite(1)
-    mapdl.fdele("all", "all")
-    mapdl.ksel("s", "", "", 3)
-    mapdl.nslk("s")
-    mapdl.f("all", "fy", -5)
-    mapdl.allsel()
+        lsnum = 2
+        mapdl.lswrite(lsnum)
 
-    lsnum = 2
-    mapdl.lswrite(lsnum)
-    mapdl.mute = False
     out = mapdl.lssolve(1, lsnum)
     assert f"Load step file number {lsnum}.  Begin solution ..." in out
 
@@ -1369,25 +1367,25 @@ def test_print_com(mapdl, cleared, capfd):
     assert string_ not in out
 
     mapdl.print_com = True
-    mapdl.mute = True
-    mapdl.com(string_)
-    out, err = capfd.readouterr()
-    assert string_ not in out
+    with mapdl.muted:
+        mapdl.com(string_)
+        out, err = capfd.readouterr()
+        assert string_ not in out
+
+        mapdl.print_com = True
+        mapdl.mute = False
+
+        mapdl.com(string_, mute=True)
+        out, err = capfd.readouterr()
+        assert string_ not in out
+
+        mapdl.print_com = True
+        mapdl.mute = True
+        mapdl.com(string_, mute=True)
+        out, err = capfd.readouterr()
+        assert string_ not in out
 
     mapdl.print_com = True
-    mapdl.mute = False
-    mapdl.com(string_, mute=True)
-    out, err = capfd.readouterr()
-    assert string_ not in out
-
-    mapdl.print_com = True
-    mapdl.mute = True
-    mapdl.com(string_, mute=True)
-    out, err = capfd.readouterr()
-    assert string_ not in out
-
-    mapdl.print_com = True
-    mapdl.mute = False
     mapdl.com(string_, mute=False)
     out, err = capfd.readouterr()
     assert string_ in out
@@ -1909,17 +1907,16 @@ def test_process_is_alive(mapdl, cleared):
 
 
 def test_force_output(mapdl, cleared):
-    mapdl.mute = True
-    with mapdl.force_output:
-        assert mapdl.prep7()
-    assert not mapdl.prep7()
+    with mapdl.muted:
+        with mapdl.force_output:
+            assert mapdl.prep7()
+        assert not mapdl.prep7()
 
-    mapdl._run("nopr")
-    with mapdl.force_output:
-        assert mapdl.prep7()
-    assert not mapdl.prep7()
+        mapdl._run("nopr")
+        with mapdl.force_output:
+            assert mapdl.prep7()
+        assert not mapdl.prep7()
 
-    mapdl.mute = False
     mapdl._run("gopr")
     with mapdl.force_output:
         assert mapdl.prep7()
@@ -2950,3 +2947,14 @@ def test_garbage_clean_del(
                 mock_kill.assert_called_once()
             else:
                 mock_kill.assert_not_called()
+
+
+@pytest.mark.parametrize("prop", ["mute"])
+def test_muted(mapdl, prop):
+    assert not mapdl.mute
+
+    with mapdl.muted:
+        assert mapdl.mute
+        assert mapdl.prep7() is None
+
+    assert not mapdl.mute
