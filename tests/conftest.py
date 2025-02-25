@@ -166,15 +166,7 @@ def requires(requirement: str):
         return skip_if_running_student_version
 
     elif "console" == requirement:
-        return pytest.mark.skipif(
-            "not config.getoption('console')", reason="need --console option to run"
-        )
-
-    elif "requires_gui" == requirement:
-        return pytest.mark.skipif(
-            "not config.getoption('only-gui')",
-            reason="need --only-gui option to launch MAPDL GUI interface.",
-        )
+        return pytest.mark.console
 
     else:
         return requires_dependency(requirement)
@@ -279,7 +271,7 @@ if START_INSTANCE and not ON_LOCAL:
 
 
 @pytest.hookimpl(trylast=True)
-def pytest_report_header(config, start_path):
+def pytest_report_header(config, start_path, startdir):
     text = []
     text += ["Testing variables".center(get_terminal_size()[0], "-")]
     text += [
@@ -358,7 +350,7 @@ def pytest_addoption(parser):
     )
 
 
-def pytest_collection_modifyitems(config, items):
+def pytest_collection_modifyitems(session, config, items):
     if not config.getoption("--console"):
         # --console given in cli: run console interface tests
         skip_console = pytest.mark.skip(reason="need --console option to run")
