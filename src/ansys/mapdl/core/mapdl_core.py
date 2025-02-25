@@ -2942,7 +2942,9 @@ class _MapdlCore(Commands):
 
                 # Raising errors
                 if error_is_fine:
-                    self._log.warn("PERMITTED ERROR: " + permited_error_message.string)
+                    self._log.warning(
+                        "PERMITTED ERROR: " + permited_error_message.string
+                    )
                     continue
                 else:
                     # We don't need to log exception because they already included in the main logger.

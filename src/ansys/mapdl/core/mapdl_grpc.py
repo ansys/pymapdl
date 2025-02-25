@@ -2546,7 +2546,7 @@ class MapdlGrpc(MapdlBase):
 
         else:
             raise ValueError(
-                f"The `file` parameter type ({type(files)}) is not supported."
+                f"The `file` parameter type ({type(files)}) is not supported. "
                 "Only strings, tuple of strings or list of strings are allowed."
             )
 
@@ -2651,9 +2651,10 @@ class MapdlGrpc(MapdlBase):
         )
 
         if not file_size:
-            warn(
-                f'File "{target_name}" is empty or does not exist in {self.list_files()}.'
-            )
+            if target_name not in self.list_files():
+                warn(f'File "{target_name}" does not exist.')
+            else:
+                warn(f'File "{target_name}" is empty.')
 
     @protect_grpc
     def upload(self, file_name: str, progress_bar: bool = _HAS_TQDM) -> str:

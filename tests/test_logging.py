@@ -212,7 +212,7 @@ def test_global_logger_format():
         level=deflogging.DEBUG,
         extra={"instance_name": "172.1.1.1"},
     )
-    assert re.findall("(?:[0-9]{1,3}\.){3}[0-9]{1,3}", log)
+    assert re.findall(r"(?:[0-9]{1,3}\.){3}[0-9]{1,3}", log)
     assert "DEBUG" in log
     assert "This is a message" in log
 
@@ -239,7 +239,7 @@ def test_instance_logger_format(mapdl, cleared, tmpdir):
         level=logging.DEBUG,
         extra={"instance_name": "172.1.1.1"},
     )
-    assert re.findall("(?:[0-9]{1,3}\.){3}[0-9]{1,3}", log)
+    assert re.findall(r"(?:[0-9]{1,3}\.){3}[0-9]{1,3}", log)
     assert "DEBUG" in log
     assert msg in log
 

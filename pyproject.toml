@@ -123,6 +123,7 @@ pymapdl = "ansys.mapdl.core.cli:main"
 addopts = "-rxXsa -vvv --maxfail=10 --random-order-bucket=class --random-order --durations=10  --timeout=180"
 junit_family = "legacy"
 filterwarnings = [
+    "ignore::ResourceWarning",
     "ignore::FutureWarning",
     "ignore::PendingDeprecationWarning",
     "ignore::DeprecationWarning",
@@ -134,7 +135,9 @@ filterwarnings = [
 markers = [
     "skip_grpc: skip tests using grpc",
     "gui: skip tests that launch the GUI interface",
+    "console: Run also console tests",
 ]
+
 testpaths = "tests"
 image_cache_dir = "tests/.image_cache"
 # Output logging records as they are emitted directly into the console

@@ -238,7 +238,7 @@ class Test_static_solve(TestClass):
         seqv_ans = data[:, -1]
         seqv = mapdl.post_processing.nodal_eqv_stress()
 
-        seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        seqv_aligned = seqv[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(seqv_ans, seqv_aligned)
 
     @staticmethod
@@ -354,7 +354,7 @@ class Test_static_solve(TestClass):
         from_prns = arr[:, index + 1]
 
         # grpc includes all nodes.  ignore the ones not included in prnsol
-        from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        from_grpc = from_grpc[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(from_grpc, from_prns)
 
@@ -376,7 +376,7 @@ class Test_static_solve(TestClass):
         from_prns = arr[:, index + 1]
 
         # grpc includes all nodes.  ignore the ones not included in prnsol
-        from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        from_grpc = from_grpc[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(from_grpc, from_prns, 1e-5)
 
@@ -396,7 +396,7 @@ class Test_static_solve(TestClass):
         sint_ans = data[:, -2]
         sint = mapdl.post_processing.nodal_stress_intensity()
 
-        sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        sint_aligned = sint[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(sint_ans, sint_aligned)
 
     @staticmethod
@@ -417,7 +417,7 @@ class Test_static_solve(TestClass):
         nnum_ans = data[:, 0].astype(np.int32)
         data_ans = data[:, index + 1]
         data = mapdl.post_processing.nodal_total_component_strain(comp)
-        data = data[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        data = data[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(data_ans, data)
 
@@ -439,7 +439,7 @@ class Test_static_solve(TestClass):
         from_prns = arr[:, index + 1]
 
         # grpc includes all nodes.  ignore the ones not included in prnsol
-        from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        from_grpc = from_grpc[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(from_grpc, from_prns)
 
@@ -459,7 +459,7 @@ class Test_static_solve(TestClass):
         sint_ans = data[:, -2]
         sint = mapdl.post_processing.nodal_total_strain_intensity()
 
-        sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        sint_aligned = sint[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(sint_ans, sint_aligned)
 
     @staticmethod
@@ -478,7 +478,7 @@ class Test_static_solve(TestClass):
         seqv_ans = data[:, -1]
         seqv = mapdl.post_processing.nodal_total_eqv_strain()
 
-        seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        seqv_aligned = seqv[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(seqv_ans, seqv_aligned)
 
     @staticmethod
@@ -503,7 +503,7 @@ class Test_static_solve(TestClass):
         nnum_ans = data[:, 0].astype(np.int32)
         data_ans = data[:, index + 1]
         data = mapdl.post_processing.nodal_elastic_component_strain(comp)
-        data = data[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        data = data[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(data_ans, data)
 
@@ -525,7 +525,7 @@ class Test_static_solve(TestClass):
         from_prns = arr[:, index + 1]
 
         # grpc includes all nodes.  ignore the ones not included in prnsol
-        from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        from_grpc = from_grpc[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(from_grpc, from_prns)
 
@@ -545,7 +545,7 @@ class Test_static_solve(TestClass):
         sint_ans = data[:, -2]
         sint = mapdl.post_processing.nodal_elastic_strain_intensity()
 
-        sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        sint_aligned = sint[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(sint_ans, sint_aligned)
 
     @staticmethod
@@ -564,7 +564,7 @@ class Test_static_solve(TestClass):
         seqv_ans = data[:, -1]
         seqv = mapdl.post_processing.nodal_elastic_eqv_strain()
 
-        seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        seqv_aligned = seqv[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(seqv_ans, seqv_aligned)
 
     @staticmethod
@@ -786,7 +786,7 @@ class Test_plastic_solve(TestClass):
         nnum_ans = data[:, 0].astype(np.int32)
         data_ans = data[:, index + 1]
         data = mapdl.post_processing.nodal_plastic_component_strain(comp)
-        data = data[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        data = data[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(data_ans, data)
 
@@ -807,7 +807,7 @@ class Test_plastic_solve(TestClass):
         from_prns = arr[:, index + 1]
 
         # grpc includes all nodes.  ignore the ones not included in prnsol
-        from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        from_grpc = from_grpc[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(from_grpc, from_prns)
 
@@ -824,7 +824,7 @@ class Test_plastic_solve(TestClass):
         sint_ans = data[:, -2]
         sint = mapdl.post_processing.nodal_plastic_strain_intensity()
 
-        sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        sint_aligned = sint[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(sint_ans, sint_aligned)
 
     @staticmethod
@@ -840,7 +840,7 @@ class Test_plastic_solve(TestClass):
         seqv_ans = data[:, -1]
         seqv = mapdl.post_processing.nodal_plastic_eqv_strain()
 
-        seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        seqv_aligned = seqv[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(seqv_ans, seqv_aligned)
 
     @staticmethod
@@ -1425,7 +1425,7 @@ class Test_thermal_solve:
         nnum_ans = data[:, 0].astype(np.int32)
         data_ans = data[:, index + 1]
         data = mapdl.post_processing.nodal_thermal_component_strain(comp)
-        data = data[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        data = data[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(data_ans, data)
 
@@ -1446,7 +1446,7 @@ class Test_thermal_solve:
         from_prns = arr[:, index + 1]
 
         # grpc includes all nodes.  ignore the ones not included in prnsol
-        from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        from_grpc = from_grpc[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(from_grpc, from_prns)
 
@@ -1463,7 +1463,7 @@ class Test_thermal_solve:
         sint_ans = data[:, -2]
         sint = mapdl.post_processing.nodal_thermal_strain_intensity()
 
-        sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        sint_aligned = sint[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(sint_ans, sint_aligned)
 
     @staticmethod
@@ -1479,7 +1479,7 @@ class Test_thermal_solve:
         seqv_ans = data[:, -1]
         seqv = mapdl.post_processing.nodal_thermal_eqv_strain()
 
-        seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        seqv_aligned = seqv[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(seqv_ans, seqv_aligned)
 
     @staticmethod
