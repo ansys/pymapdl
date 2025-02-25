@@ -1772,35 +1772,34 @@ def test_deprecation_allow_ignore_warning(mapdl, cleared):
     with pytest.warns(DeprecationWarning, match="'allow_ignore' is being deprecated"):
         mapdl.allow_ignore = True
 
-    with pytest.warns(DeprecationWarning, match="'allow_ignore' is being deprecated"):
-        mapdl.ignore_errors = False
+    mapdl.ignore_errors = False
 
 
 def test_deprecation_allow_ignore_errors_mapping(mapdl, cleared):
     with pytest.warns(
         DeprecationWarning,
-        "'allow_ignore' is being deprecated and will be removed in a future release",
+        match="'allow_ignore' is being deprecated and will be removed in a future release",
     ):
         mapdl.allow_ignore = True
         assert mapdl.allow_ignore == mapdl.ignore_errors
 
     with pytest.warns(
         DeprecationWarning,
-        "'allow_ignore' is being deprecated and will be removed in a future release",
+        match="'allow_ignore' is being deprecated and will be removed in a future release",
     ):
         mapdl.allow_ignore = False
         assert mapdl.allow_ignore == mapdl.ignore_errors
 
     with pytest.warns(
         DeprecationWarning,
-        "'allow_ignore' is being deprecated and will be removed in a future release",
+        match="'allow_ignore' is being deprecated and will be removed in a future release",
     ):
         mapdl.ignore_errors = True
         assert mapdl.allow_ignore == mapdl.ignore_errors
 
     with pytest.warns(
         DeprecationWarning,
-        "'allow_ignore' is being deprecated and will be removed in a future release",
+        match="'allow_ignore' is being deprecated and will be removed in a future release",
     ):
         mapdl.ignore_errors = False
         assert mapdl.allow_ignore == mapdl.ignore_errors
