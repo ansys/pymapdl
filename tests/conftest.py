@@ -166,7 +166,9 @@ def requires(requirement: str):
         return skip_if_running_student_version
 
     elif "console" == requirement:
-        return pytest.mark.console
+        return pytest.mark.skipif(
+            "not config.getoption('console')", reason="need --console option to run"
+        )
 
     else:
         return requires_dependency(requirement)
@@ -338,6 +340,7 @@ def pytest_addoption(parser):
         "--console",
         action="store_true",
         default=False,
+        dest="console",
         help="run console tests",
     )
     parser.addoption("--gui", action="store_true", default=False, help="run GUI tests")
