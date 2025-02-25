@@ -438,6 +438,7 @@ class MapdlGrpc(MapdlBase):
         self._channel_state: grpc.ChannelConnectivity = (
             grpc.ChannelConnectivity.CONNECTING
         )
+        self._time_step_stream: Optional[int] = None
 
         if channel is None:
             self._log.debug("Creating channel to %s:%s", ip, port)
@@ -509,6 +510,11 @@ class MapdlGrpc(MapdlBase):
             self._cache_pids()
 
         self._create_session()
+
+        # Caching platform.
+        self._log.info(
+            f"Connected to MAPDL server running at {self._hostname} on {self.ip}:{self.port} on {self.platform} OS"
+        )
 
     def _after_run(self, command: str) -> None:
         if command[:4].upper() == "/CLE":
@@ -807,6 +813,7 @@ class MapdlGrpc(MapdlBase):
 
     @mute.setter
     def mute(self, value):
+        self._log.debug(f"Mute value has been changed to '{value}'.")
         self._mute = value
 
     def __repr__(self):
@@ -1959,12 +1966,12 @@ class MapdlGrpc(MapdlBase):
         if "CDRE" in orig_cmd.upper():
             # Using CDREAD
             option = kwargs.get("cd_read_option", "COMB")
-            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{option}','{filename}'\n"
+            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{option}','{filename}'\n/OUT,"
             delete_uploaded_files = False
 
         else:
             # Using default INPUT
-            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n"
+            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n/OUT,"
             delete_uploaded_files = True
 
         if write_to_log and self._apdl_log is not None:
@@ -1984,7 +1991,7 @@ class MapdlGrpc(MapdlBase):
             self._stored_commands.append(tmp_dat.splitlines()[1])
             return None
 
-        request = pb_types.InputFileRequest(filename=tmp_name)
+        request = pb_types.InputFileRequest(filename=tmp_name, opt="MUTE")
 
         # even though we don't care about the output, we still
         # need to check.  otherwise, since inputfile is
@@ -2030,20 +2037,24 @@ class MapdlGrpc(MapdlBase):
         if time_step is None:
             if DEFAULT_TIME_STEP_STREAM is not None:
                 time_step = DEFAULT_TIME_STEP_STREAM
-            elif self.platform == "windows":
-                time_step = DEFAULT_TIME_STEP_STREAM_NT
-            elif self.platform == "linux":
-                time_step = DEFAULT_TIME_STEP_STREAM_POSIX
+            elif self._time_step_stream is not None:
+                time_step = self._time_step_stream
             else:
-                raise ValueError(
-                    f"The MAPDL platform ('{self.platform}') is not recognaised."
-                )
+                if self.platform == "windows":
+                    time_step = DEFAULT_TIME_STEP_STREAM_NT
+                elif self.platform == "linux":
+                    time_step = DEFAULT_TIME_STEP_STREAM_POSIX
+                else:
+                    raise ValueError(
+                        f"The MAPDL platform ('{self.platform}') is not recognaised."
+                    )
 
         else:
             if time_step <= 0:
                 raise ValueError("``time_step`` argument must be greater than 0``")
 
         self.logger.debug(f"The time_step argument is set to: {time_step}")
+        self._time_step_stream = time_step
         return time_step
 
     def _get_file_path(self, fname: str, progress_bar: bool = False) -> str:
@@ -2245,39 +2256,51 @@ class MapdlGrpc(MapdlBase):
         cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3}, {it3num}, {item4}, {it4num}"
 
         # not threadsafe; don't allow multiple get commands
+        timeout_ = kwargs.pop("timeout", 2)
+        timeout = time.time() + timeout_
         while self._get_lock:
             time.sleep(0.001)
+            if time.time() > timeout:
+                raise MapdlRuntimeError(
+                    f"PyMAPDL couldn't obtain 'get_lock' in {timeout_} seconds "
+                    "and PyMAPDL cannot issue multiple get commands simultaneously."
+                )
 
         self._get_lock = True
         try:
-            getresponse = self._stub.Get(pb_types.GetRequest(getcmd=cmd))
+            response = self._stub.Get(pb_types.GetRequest(getcmd=cmd))
         finally:
             self._get_lock = False
 
-        if getresponse.type == 0:
+        if response.type == 0:
             self._log.debug(
                 "The 'grpc' get method seems to have failed. Trying old implementation for more verbose output."
             )
 
-            try:
-                out = self.run("*GET,__temp__," + cmd)
-                return float(out.split("VALUE=")[1].strip())
+            response = self.run("*GET,__temp__," + cmd, mute=False)
+            self._log.debug(f"Default *get output:\n{response}")
 
-            except MapdlRuntimeError as e:
-                # Get can thrown some errors, in that case, they are caught in the default run method.
-                raise e
+            if response:
+                from ansys.mapdl.core.misc import is_float
 
-            except (IndexError, ValueError):
-                raise MapdlError("Error when processing '*get' request output.")
+                if "VALUE=" in response:
+                    response = response.split("VALUE=")[1].strip()
 
-        if getresponse.type == 1:
-            return getresponse.dval
-        elif getresponse.type == 2:
-            return getresponse.sval
+                if is_float(response):
+                    return float(response)
+                else:
+                    return response
+            else:
+                raise MapdlError(
+                    f"Error when processing '*get' request output.\n{response}"
+                )
 
-        raise MapdlRuntimeError(
-            f"Unsupported type {getresponse.type} response from MAPDL"
-        )
+        if response.type == 1:
+            return response.dval
+        elif response.type == 2:
+            return response.sval
+
+        raise MapdlRuntimeError(f"Unsupported type {response.type} response from MAPDL")
 
     def download_project(
         self,

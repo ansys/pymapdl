@@ -1999,6 +1999,9 @@ def test_args_pass(monkeypatch, arg, value, method):
     meth = getattr(mapdl, method)
     assert meth == value
 
+    mapdl._ctrl = lambda *args, **kwargs: None
+    del mapdl
+
 
 def test_check_has_mapdl():
     if TESTING_MINIMAL:
