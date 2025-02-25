@@ -1323,6 +1323,9 @@ def test_args_pass(monkeypatch, arg, value, method):
     meth = getattr(mapdl, method)
     assert meth == value
 
+    mapdl._ctrl = lambda *args, **kwargs: None
+    del mapdl
+
 
 @requires("local")
 @patch("ansys.mapdl.core.launcher.tools._is_ubuntu", lambda *args, **kwargs: True)
