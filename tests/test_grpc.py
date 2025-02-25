@@ -777,11 +777,15 @@ def test__get_time_step_stream(mapdl, platform):
     with patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.platform", platform):
         from ansys.mapdl.core import mapdl_grpc
 
+        mapdl._time_step_stream = None
+        mapdl_grpc.DEFAULT_TIME_STEP_STREAM = None
+
         if platform == "linux":
             DEFAULT_TIME_STEP_STREAM = mapdl_grpc.DEFAULT_TIME_STEP_STREAM_POSIX
         elif platform == "windows":
             DEFAULT_TIME_STEP_STREAM = mapdl_grpc.DEFAULT_TIME_STEP_STREAM_NT
         else:
+            mapdl_grpc.DEFAULT_TIME_STEP_STREAM = None
             with pytest.raises(ValueError, match="The MAPDL platform"):
                 mapdl._get_time_step_stream()
 
@@ -789,13 +793,20 @@ def test__get_time_step_stream(mapdl, platform):
 
         assert DEFAULT_TIME_STEP_STREAM == mapdl._get_time_step_stream()
 
+        # Using global
+        mapdl._time_step_stream = None
         mapdl_grpc.DEFAULT_TIME_STEP_STREAM = 200
         assert mapdl_grpc.DEFAULT_TIME_STEP_STREAM == mapdl._get_time_step_stream()
-        mapdl_grpc.DEFAULT_TIME_STEP_STREAM = None
 
+        # Using argument, should override the global
+        mapdl_grpc.DEFAULT_TIME_STEP_STREAM = 1000
         assert 700 == mapdl._get_time_step_stream(700)
+        assert mapdl._time_step_stream == 700
 
         with pytest.raises(
             ValueError, match="``time_step`` argument must be greater than 0``"
         ):
             mapdl._get_time_step_stream(-700)
+
+        mapdl._time_step_stream = None
+        mapdl_grpc.DEFAULT_TIME_STEP_STREAM = None

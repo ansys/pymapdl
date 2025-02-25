@@ -102,29 +102,28 @@ class TestDisplacementComponentQueriesBox(TestClass):
 
     @pytest.fixture(scope="class")
     def solved_box(self, mapdl):
-        mapdl.mute = True  # improve stability
-        mapdl.et(1, "SOLID5")
-        mapdl.block(0, 10, 0, 20, 0, 30)
-        mapdl.esize(10)
-        mapdl.vmesh("ALL")
-        mapdl.units("SI")  # SI - International system (m, kg, s, K).
-        # Define a material (nominal steel in SI)
-        mapdl.mp("EX", 1, 210e9)  # Elastic moduli in Pa (kg/(m*s**2))
-        mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
-        mapdl.mp("PRXY", 1, 0.3)  # Poisson's Ratio
-        # Fix the left-hand side.
-        mapdl.nsel("S", "LOC", "Z", 0)
-        mapdl.d("ALL", "UX")
-        mapdl.d("ALL", "UY")
-        mapdl.d("ALL", "UZ")
+        with mapdl.muted:  # improve stability
+            mapdl.et(1, "SOLID5")
+            mapdl.block(0, 10, 0, 20, 0, 30)
+            mapdl.esize(10)
+            mapdl.vmesh("ALL")
+            mapdl.units("SI")  # SI - International system (m, kg, s, K).
+            # Define a material (nominal steel in SI)
+            mapdl.mp("EX", 1, 210e9)  # Elastic moduli in Pa (kg/(m*s**2))
+            mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
+            mapdl.mp("PRXY", 1, 0.3)  # Poisson's Ratio
+            # Fix the left-hand side.
+            mapdl.nsel("S", "LOC", "Z", 0)
+            mapdl.d("ALL", "UX")
+            mapdl.d("ALL", "UY")
+            mapdl.d("ALL", "UZ")
 
-        mapdl.nsel("S", "LOC", "Z", 30)
-        mapdl.f("ALL", "FX", 1000)
-        mapdl.run("/SOLU")
-        mapdl.antype("STATIC")
-        mapdl.solve()
-        mapdl.finish()
-        mapdl.mute = False
+            mapdl.nsel("S", "LOC", "Z", 30)
+            mapdl.f("ALL", "FX", 1000)
+            mapdl.run("/SOLU")
+            mapdl.antype("STATIC")
+            mapdl.solve()
+            mapdl.finish()
 
         q = mapdl.queries
         return q, get_details_of_nodes(mapdl)

@@ -438,6 +438,7 @@ class MapdlGrpc(MapdlBase):
         self._channel_state: grpc.ChannelConnectivity = (
             grpc.ChannelConnectivity.CONNECTING
         )
+        self._time_step_stream: Optional[int] = None
 
         if channel is None:
             self._log.debug("Creating channel to %s:%s", ip, port)
@@ -812,6 +813,7 @@ class MapdlGrpc(MapdlBase):
 
     @mute.setter
     def mute(self, value):
+        self._log.debug(f"Mute value has been changed to '{value}'.")
         self._mute = value
 
     def __repr__(self):
@@ -2035,20 +2037,24 @@ class MapdlGrpc(MapdlBase):
         if time_step is None:
             if DEFAULT_TIME_STEP_STREAM is not None:
                 time_step = DEFAULT_TIME_STEP_STREAM
-            elif self.platform == "windows":
-                time_step = DEFAULT_TIME_STEP_STREAM_NT
-            elif self.platform == "linux":
-                time_step = DEFAULT_TIME_STEP_STREAM_POSIX
+            elif self._time_step_stream is not None:
+                time_step = self._time_step_stream
             else:
-                raise ValueError(
-                    f"The MAPDL platform ('{self.platform}') is not recognaised."
-                )
+                if self.platform == "windows":
+                    time_step = DEFAULT_TIME_STEP_STREAM_NT
+                elif self.platform == "linux":
+                    time_step = DEFAULT_TIME_STEP_STREAM_POSIX
+                else:
+                    raise ValueError(
+                        f"The MAPDL platform ('{self.platform}') is not recognaised."
+                    )
 
         else:
             if time_step <= 0:
                 raise ValueError("``time_step`` argument must be greater than 0``")
 
         self.logger.debug(f"The time_step argument is set to: {time_step}")
+        self._time_step_stream = time_step
         return time_step
 
     def _get_file_path(self, fname: str, progress_bar: bool = False) -> str:
@@ -2262,41 +2268,39 @@ class MapdlGrpc(MapdlBase):
 
         self._get_lock = True
         try:
-            getresponse = self._stub.Get(pb_types.GetRequest(getcmd=cmd))
+            response = self._stub.Get(pb_types.GetRequest(getcmd=cmd))
         finally:
             self._get_lock = False
 
-        if getresponse.type == 0:
+        if response.type == 0:
             self._log.debug(
                 "The 'grpc' get method seems to have failed. Trying old implementation for more verbose output."
             )
 
-            out = self.run("*GET,__temp__," + cmd)
-            self._log.debug(f"Default *get output:\n{out}")
+            response = self.run("*GET,__temp__," + cmd, mute=False)
+            self._log.debug(f"Default *get output:\n{response}")
 
-            if out:
+            if response:
                 from ansys.mapdl.core.misc import is_float
 
-                if "VALUE=" in out:
-                    out = out.split("VALUE=")[1].strip()
+                if "VALUE=" in response:
+                    response = response.split("VALUE=")[1].strip()
 
-                if is_float(out):
-                    return float(out)
+                if is_float(response):
+                    return float(response)
                 else:
-                    return out
-            elif out is None:
-                return None
+                    return response
             else:
-                raise MapdlError(f"Error when processing '*get' request output.\n{out}")
+                raise MapdlError(
+                    f"Error when processing '*get' request output.\n{response}"
+                )
 
-        if getresponse.type == 1:
-            return getresponse.dval
-        elif getresponse.type == 2:
-            return getresponse.sval
+        if response.type == 1:
+            return response.dval
+        elif response.type == 2:
+            return response.sval
 
-        raise MapdlRuntimeError(
-            f"Unsupported type {getresponse.type} response from MAPDL"
-        )
+        raise MapdlRuntimeError(f"Unsupported type {response.type} response from MAPDL")
 
     def download_project(
         self,
