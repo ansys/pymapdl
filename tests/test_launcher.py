@@ -403,7 +403,7 @@ def test_env_injection():
         update_env_vars(None, "asdf")
 
 
-@requires("requires_gui")
+@requires("gui")
 @pytest.mark.parametrize(
     "include_result,inplace,to_check",
     (
