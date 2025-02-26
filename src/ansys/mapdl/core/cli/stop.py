@@ -68,8 +68,6 @@ def stop(port: int, pid: Optional[int], all: bool) -> None:
     """
     import psutil
 
-    from ansys.mapdl.core.launcher import is_ansys_process
-
     PROCESS_OK_STATUS = [
         # List of all process status, comment out the ones that means that
         # process is not OK.
@@ -97,15 +95,11 @@ def stop(port: int, pid: Optional[int], all: bool) -> None:
         killed_ = False
         for proc in psutil.process_iter():
             try:
-                if (
-                    psutil.pid_exists(proc.pid)
-                    and proc.status() in PROCESS_OK_STATUS
-                    and is_ansys_process(proc)
-                ):
+                if _is_valid_ansys_process(PROCESS_OK_STATUS, proc):
                     # Killing "all"
                     if all:
                         try:
-                            proc.kill()
+                            _kill_process(proc)
                             killed_ = True
                         except psutil.NoSuchProcess:
                             pass
@@ -114,7 +108,7 @@ def stop(port: int, pid: Optional[int], all: bool) -> None:
                         # Killing by ports
                         if str(port) in proc.cmdline():
                             try:
-                                proc.kill()
+                                _kill_process(proc)
                                 killed_ = True
                             except psutil.NoSuchProcess:
                                 pass
@@ -154,8 +148,9 @@ def stop(port: int, pid: Optional[int], all: bool) -> None:
 
         p = psutil.Process(pid)
         for child in p.children(recursive=True):
-            child.kill()
-        p.kill()
+            _kill_process(child)
+
+        _kill_process(p)
 
         if p.status == "running":
             click.echo(
@@ -168,3 +163,19 @@ def stop(port: int, pid: Optional[int], all: bool) -> None:
                 + f"The process with PID {pid} and its children have been stopped."
             )
         return
+
+
+def _kill_process(proc):
+    proc.kill()
+
+
+def _is_valid_ansys_process(PROCESS_OK_STATUS, proc):
+    import psutil
+
+    from ansys.mapdl.core.launcher import is_ansys_process
+
+    return (
+        psutil.pid_exists(proc.pid)
+        and proc.status() in PROCESS_OK_STATUS
+        and is_ansys_process(proc)
+    )

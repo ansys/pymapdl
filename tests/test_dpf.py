@@ -27,7 +27,7 @@ import pytest
 
 from conftest import HAS_DPF, ON_CI, has_dependency, requires
 
-if not has_dependency("ansys-dpf-core") or not HAS_DPF:
+if not HAS_DPF or not has_dependency("ansys-dpf-core"):
     pytest.skip(allow_module_level=True)
 
 from ansys.dpf import core as dpf
@@ -65,7 +65,7 @@ def test_upload(skip_dpf, mapdl, solved_box, tmpdir):
     # Download RST file
     rst_path = mapdl.download_result(str(tmpdir.mkdir("tmpdir")))
 
-    # Stabilishing connection
+    # Establishing connection
     grpc_con = dpf.connect_to_server(port=DPF_PORT)
     assert grpc_con.live
 

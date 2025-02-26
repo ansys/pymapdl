@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Test mesh """
+"""Test mesh"""
 import os
 
 import numpy as np
@@ -292,6 +292,7 @@ def test_nodes_in_current_CS(mapdl, cleared, cube_geom_and_mesh):
     for icoord in range(6):
         mapdl.csys(icoord)
         mapdl.dsys(icoord)
+
         assert np.allclose(
             mapdl.mesh.nodes_in_current_CS, mapdl.nlist().to_array()[:, 1:4], atol=1e-3
         )  # nlist is not as accurate as 'nodes_in_current_CS'

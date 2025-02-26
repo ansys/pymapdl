@@ -1,7 +1,7 @@
 ansys-dpf-core==0.10.1
 ansys-mapdl-reader==0.54.2
 ansys-sphinx-theme==1.2.2
-ansys-tools-visualization-interface==0.5.0
+ansys-tools-visualization-interface==0.8.3
 autopep8==2.3.1
 grpcio==1.68.0
 imageio-ffmpeg==0.5.1
@@ -26,7 +26,7 @@ pytest==8.3.3
 pythreejs==2.4.2
 scipy==1.14.1
 sphinx-autobuild==2024.10.3
-sphinx-autodoc-typehints==1.25.2
+sphinx-autodoc-typehints==3.1.0
 sphinx-copybutton==0.5.2
 sphinx-design==0.6.1
 sphinx-gallery==0.18.0
