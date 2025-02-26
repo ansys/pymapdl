@@ -27,6 +27,7 @@ Used when launching Mapdl via pexpect on Linux when <= 17.0
 import os
 import re
 import time
+from warnings import warn
 
 from ansys.mapdl.core import LOG
 from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
@@ -274,6 +275,20 @@ class MapdlConsole(MapdlBase):
         """
         return self._mesh
 
+    def __del__(self):
+        """Garbage cleaning the class"""
+        self._exit()
+
+    def _exit(self):
+        """Minimal exit command. No logging or cleanup so it does not raise
+        exceptions"""
+        if self._process is not None:
+            try:
+                self._process.sendline("FINISH")
+                self._process.sendline("EXIT")
+            except Exception as e:
+                LOG.warning(f"Unable to exit ANSYS MAPDL: {e}")
+
     def exit(self, close_log=True, timeout=3):
         """Exit MAPDL process.
 
@@ -284,12 +299,7 @@ class MapdlConsole(MapdlBase):
             ``None`` to not wait until MAPDL stops.
         """
         self._log.debug("Exiting ANSYS")
-        if self._process is not None:
-            try:
-                self._process.sendline("FINISH")
-                self._process.sendline("EXIT")
-            except Exception as e:
-                LOG.warning(f"Unable to exit ANSYS MAPDL: {e}")
+        self._exit()
 
         if close_log:
             self._close_apdl_log()
@@ -302,11 +312,10 @@ class MapdlConsole(MapdlBase):
             tstart = time.time()
             while self._process.isalive():
                 time.sleep(0.05)
-                telap = tstart - time.time()
-                if telap > timeout:
-                    return 1
-
-        return 0
+                if (time.time() - tstart) > timeout:
+                    if self._process.isalive():
+                        warn("MAPDL couldn't be exited on time.")
+                        return
 
     def kill(self):
         """Forces ANSYS process to end and removes lock file"""
