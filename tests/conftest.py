@@ -188,6 +188,9 @@ def requires(requirement: _REQUIRES_ARG):
     elif "console" == requirement:
         return pytest.mark.console
 
+    elif "gui" == requirement:
+        return pytest.mark.gui
+
     else:
         return requires_dependency(requirement)
 
@@ -359,24 +362,27 @@ def pytest_addoption(parser):
         "--console",
         action="store_true",
         default=False,
+        dest="console",
         help="run console tests",
     )
-    parser.addoption("--gui", action="store_true", default=False, help="run GUI tests")
     parser.addoption(
-        "--only-gui",
-        action="store_true",
-        default=False,
-        help="run only GUI tests",
+        "--gui", action="store_true", default=False, dest="gui", help="run GUI tests"
     )
 
 
-def pytest_collection_modifyitems(config, items):
+def pytest_collection_modifyitems(session, config, items):
     if not config.getoption("--console"):
         # --console given in cli: run console interface tests
         skip_console = pytest.mark.skip(reason="need --console option to run")
         for item in items:
             if "console" in item.keywords:
                 item.add_marker(skip_console)
+
+    if not config.getoption("--gui"):
+        skip_gui = pytest.mark.skip(reason="need --gui option to run")
+        for item in items:
+            if "gui" in item.keywords:
+                item.add_marker(skip_gui)
 
     if not HAS_GRPC:
         skip_grpc = pytest.mark.skip(
@@ -385,21 +391,6 @@ def pytest_collection_modifyitems(config, items):
         for item in items:
             if "skip_grpc" in item.keywords:
                 item.add_marker(skip_grpc)
-
-    only_gui_filter = config.getoption("--only-gui")
-    if only_gui_filter:
-        new_items = []
-        for item in items:
-            mark = item.get_closest_marker("requires_gui")
-            if mark and mark.name == "requires_gui":
-                new_items.append(item)
-        items[:] = new_items
-
-    if not config.getoption("--gui") and not only_gui_filter:
-        skip_gui = pytest.mark.skip(reason="Requires to launch MAPDL GUI interface.")
-        for item in items:
-            if "requires_gui" in item.keywords:
-                item.add_marker(skip_gui)
 
 
 ################################################################
@@ -691,6 +682,7 @@ _meth_patch_MAPDL_launch = [
     (_patch_method("_subscribe_to_channel"), _returns("")),
     (_patch_method("_run_at_connect"), _returns("")),
     (_patch_method("_exit_mapdl"), _returns(None)),
+    (_patch_method("kill_job"), _returns(None)),
     (
         _patch_method("_check_mapdl_os"),
         _returns("linux" if os.name == "posix" else "win"),

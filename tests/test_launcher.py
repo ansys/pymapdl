@@ -330,7 +330,7 @@ def test_remove_temp_dir_on_exit(mapdl, cleared, tmpdir):
         assert os.path.isdir(tmp_dir)
 
 
-@pytest.mark.requires_gui
+@requires("gui")
 @pytest.mark.parametrize(
     "include_result,inplace,to_check",
     (
@@ -714,7 +714,12 @@ def test_ip_and_start_instance(
 
     ###################
     # Faking MAPDL launching and returning args
-    with warnings.catch_warnings(record=True):
+    if start_instance_envvar is not None and start_instance is True:
+        context = pytest.warns(UserWarning)
+    else:
+        context = warnings.catch_warnings(record=True)
+
+    with context:
         options = launch_mapdl(
             start_instance=start_instance,
             ip=ip,
@@ -914,10 +919,9 @@ def test_exit_job(mock_popen, mapdl, cleared):
 )
 @patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
 @stack(*PATCH_MAPDL_START)
-@patch("ansys.mapdl.core.launcher.launcher.launch_grpc")
-@patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.kill_job")
-@patch("ansys.mapdl.core.launcher.hpc.send_scontrol")
-def test_launch_on_hpc_found_ansys(mck_ssctrl, mck_del, mck_launch_grpc, monkeypatch):
+@patch("ansys.mapdl.core.launcher.launch_grpc")
+@patch("ansys.mapdl.core.launcher.send_scontrol")
+def test_launch_on_hpc_found_ansys(mck_ssctrl, mck_launch_grpc, monkeypatch):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
 
     mck_launch_grpc.return_value = get_fake_process("Submitted batch job 1001")
@@ -928,7 +932,9 @@ def test_launch_on_hpc_found_ansys(mck_ssctrl, mck_del, mck_launch_grpc, monkeyp
     mapdl_a = launch_mapdl(
         launch_on_hpc=True,
     )
-    mapdl_a.exit()
+    with patch.object(mapdl_a, "kill_job") as mck_del:
+        mapdl_a.exit()
+        mck_del.assert_called_once()
 
     mck_launch_grpc.assert_called_once()
     cmd = mck_launch_grpc.call_args_list[0][1]["cmd"]
@@ -945,8 +951,6 @@ def test_launch_on_hpc_found_ansys(mck_ssctrl, mck_del, mck_launch_grpc, monkeyp
     mck_ssctrl.assert_called_once()
     assert "show" in mck_ssctrl.call_args[0][0]
     assert "1001" in mck_ssctrl.call_args[0][0]
-
-    mck_del.assert_called_once()
 
 
 @stack(*PATCH_MAPDL_START)
@@ -975,7 +979,10 @@ def test_launch_on_hpc_not_found_ansys(mck_sc, mck_lgrpc, mck_kj, monkeypatch):
             launch_on_hpc=True,
             exec_file=exec_file,
         )
-        mapdl.exit()
+        with patch.object(mapdl, "kill_job") as mck_kj:
+            mapdl.exit()
+            del mapdl
+            mck_kj.assert_called_once()
 
     mck_lgrpc.assert_called_once()
     cmd = mck_lgrpc.call_args_list[0][1]["cmd"]
@@ -992,8 +999,6 @@ def test_launch_on_hpc_not_found_ansys(mck_sc, mck_lgrpc, mck_kj, monkeypatch):
     mck_sc.assert_called_once()
     assert "show" in mck_sc.call_args[0][0]
     assert "1001" in mck_sc.call_args[0][0]
-
-    mck_kj.assert_called_once()
 
 
 def test_launch_on_hpc_exception_launch_mapdl(monkeypatch):
