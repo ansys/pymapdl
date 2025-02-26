@@ -73,6 +73,7 @@ tests = [
     "scipy==1.15.2",
     "vtk==9.3.1",
 ]
+
 doc = [
     "ansys-dpf-core==0.10.1",
     "ansys-mapdl-reader==0.54.2",
