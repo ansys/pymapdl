@@ -172,7 +172,7 @@ def _kill_process(proc):
 def _is_valid_ansys_process(PROCESS_OK_STATUS, proc):
     import psutil
 
-    from ansys.mapdl.core.launcher import is_ansys_process
+    from ansys.mapdl.core.launcher.tools import is_ansys_process
 
     return (
         psutil.pid_exists(proc.pid)
