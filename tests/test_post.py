@@ -66,75 +66,72 @@ class Test_static_solve(TestClass):
     @staticmethod
     @pytest.fixture(scope="class")
     def static_solve(mapdl):
-        mapdl.mute = True
+        with mapdl.muted:
+            # cylinder and mesh parameters
+            # torque = 100
+            radius = 2
+            h_tip = 2
+            height = 20
+            elemsize = 0.5
+            # pi = np.arccos(-1)
+            force = 100 / radius
+            pressure = force / (h_tip * 2 * np.pi * radius)
 
-        # cylinder and mesh parameters
-        # torque = 100
-        radius = 2
-        h_tip = 2
-        height = 20
-        elemsize = 0.5
-        # pi = np.arccos(-1)
-        force = 100 / radius
-        pressure = force / (h_tip * 2 * np.pi * radius)
+            mapdl.et(1, 186)
+            mapdl.et(2, 154)
+            mapdl.r(1)
+            mapdl.r(2)
 
-        mapdl.et(1, 186)
-        mapdl.et(2, 154)
-        mapdl.r(1)
-        mapdl.r(2)
+            # Aluminum properties (or something)
+            mapdl.mp("ex", 1, 10e6)
+            mapdl.mp("nuxy", 1, 0.3)
+            mapdl.mp("dens", 1, 0.1 / 386.1)
+            mapdl.mp("dens", 2, 0)
 
-        # Aluminum properties (or something)
-        mapdl.mp("ex", 1, 10e6)
-        mapdl.mp("nuxy", 1, 0.3)
-        mapdl.mp("dens", 1, 0.1 / 386.1)
-        mapdl.mp("dens", 2, 0)
+            # Simple cylinder
+            for i in range(4):
+                mapdl.cylind(radius, "", "", height, 90 * (i - 1), 90 * i)
 
-        # Simple cylinder
-        for i in range(4):
-            mapdl.cylind(radius, "", "", height, 90 * (i - 1), 90 * i)
+            mapdl.nummrg("kp")
 
-        mapdl.nummrg("kp")
+            # mesh cylinder
+            mapdl.lsel("s", "loc", "x", 0)
+            mapdl.lsel("r", "loc", "y", 0)
+            mapdl.lsel("r", "loc", "z", 0, height - h_tip)
+            mapdl.lesize("all", elemsize * 2)
+            mapdl.mshape(0)
+            mapdl.mshkey(1)
 
-        # mesh cylinder
-        mapdl.lsel("s", "loc", "x", 0)
-        mapdl.lsel("r", "loc", "y", 0)
-        mapdl.lsel("r", "loc", "z", 0, height - h_tip)
-        mapdl.lesize("all", elemsize * 2)
-        mapdl.mshape(0)
-        mapdl.mshkey(1)
+            mapdl.esize(elemsize)
+            mapdl.allsel("all")
+            mapdl.vsweep("ALL")
+            mapdl.csys(1)
+            mapdl.asel("s", "loc", "z", "", height - h_tip + 0.0001)
+            mapdl.asel("r", "loc", "x", radius)
+            mapdl.local(11, 1)
 
-        mapdl.esize(elemsize)
-        mapdl.allsel("all")
-        mapdl.vsweep("ALL")
-        mapdl.csys(1)
-        mapdl.asel("s", "loc", "z", "", height - h_tip + 0.0001)
-        mapdl.asel("r", "loc", "x", radius)
-        mapdl.local(11, 1)
+            mapdl.csys(0)
 
-        mapdl.csys(0)
+            # mesh the surface with SURF154
+            mapdl.aatt(2, 2, 2, 11)
+            mapdl.amesh("all")
+            mapdl.prep7()
 
-        # mesh the surface with SURF154
-        mapdl.aatt(2, 2, 2, 11)
-        mapdl.amesh("all")
-        mapdl.prep7()
+            # Apply tangential pressure
+            mapdl.esel("S", "TYPE", "", 2)
+            mapdl.sfe("all", 2, "pres", "", pressure)
 
-        # Apply tangential pressure
-        mapdl.esel("S", "TYPE", "", 2)
-        mapdl.sfe("all", 2, "pres", "", pressure)
+            # Constrain bottom of cylinder/rod
+            mapdl.asel("s", "loc", "z", 0)
+            mapdl.nsla("s", 1)
+            mapdl.d("all", "all")
+            mapdl.allsel()
 
-        # Constrain bottom of cylinder/rod
-        mapdl.asel("s", "loc", "z", 0)
-        mapdl.nsla("s", 1)
-        mapdl.d("all", "all")
-        mapdl.allsel()
-
-        # new solution
-        mapdl.run("/SOLU")
-        mapdl.antype("static", "new")
-        # mapdl.eqslv('pcg', 1e-8)
-        mapdl.solve()
-
-        mapdl.mute = False
+            # new solution
+            mapdl.run("/SOLU")
+            mapdl.antype("static", "new")
+            # mapdl.eqslv('pcg', 1e-8)
+            mapdl.solve()
 
         mapdl.save("static_solve", slab="all")
 
@@ -241,7 +238,7 @@ class Test_static_solve(TestClass):
         seqv_ans = data[:, -1]
         seqv = mapdl.post_processing.nodal_eqv_stress()
 
-        seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        seqv_aligned = seqv[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(seqv_ans, seqv_aligned)
 
     @staticmethod
@@ -357,7 +354,7 @@ class Test_static_solve(TestClass):
         from_prns = arr[:, index + 1]
 
         # grpc includes all nodes.  ignore the ones not included in prnsol
-        from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        from_grpc = from_grpc[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(from_grpc, from_prns)
 
@@ -379,7 +376,7 @@ class Test_static_solve(TestClass):
         from_prns = arr[:, index + 1]
 
         # grpc includes all nodes.  ignore the ones not included in prnsol
-        from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        from_grpc = from_grpc[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(from_grpc, from_prns, 1e-5)
 
@@ -399,7 +396,7 @@ class Test_static_solve(TestClass):
         sint_ans = data[:, -2]
         sint = mapdl.post_processing.nodal_stress_intensity()
 
-        sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        sint_aligned = sint[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(sint_ans, sint_aligned)
 
     @staticmethod
@@ -420,7 +417,7 @@ class Test_static_solve(TestClass):
         nnum_ans = data[:, 0].astype(np.int32)
         data_ans = data[:, index + 1]
         data = mapdl.post_processing.nodal_total_component_strain(comp)
-        data = data[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        data = data[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(data_ans, data)
 
@@ -442,7 +439,7 @@ class Test_static_solve(TestClass):
         from_prns = arr[:, index + 1]
 
         # grpc includes all nodes.  ignore the ones not included in prnsol
-        from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        from_grpc = from_grpc[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(from_grpc, from_prns)
 
@@ -462,7 +459,7 @@ class Test_static_solve(TestClass):
         sint_ans = data[:, -2]
         sint = mapdl.post_processing.nodal_total_strain_intensity()
 
-        sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        sint_aligned = sint[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(sint_ans, sint_aligned)
 
     @staticmethod
@@ -481,7 +478,7 @@ class Test_static_solve(TestClass):
         seqv_ans = data[:, -1]
         seqv = mapdl.post_processing.nodal_total_eqv_strain()
 
-        seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        seqv_aligned = seqv[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(seqv_ans, seqv_aligned)
 
     @staticmethod
@@ -506,7 +503,7 @@ class Test_static_solve(TestClass):
         nnum_ans = data[:, 0].astype(np.int32)
         data_ans = data[:, index + 1]
         data = mapdl.post_processing.nodal_elastic_component_strain(comp)
-        data = data[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        data = data[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(data_ans, data)
 
@@ -528,7 +525,7 @@ class Test_static_solve(TestClass):
         from_prns = arr[:, index + 1]
 
         # grpc includes all nodes.  ignore the ones not included in prnsol
-        from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        from_grpc = from_grpc[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(from_grpc, from_prns)
 
@@ -548,7 +545,7 @@ class Test_static_solve(TestClass):
         sint_ans = data[:, -2]
         sint = mapdl.post_processing.nodal_elastic_strain_intensity()
 
-        sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        sint_aligned = sint[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(sint_ans, sint_aligned)
 
     @staticmethod
@@ -567,7 +564,7 @@ class Test_static_solve(TestClass):
         seqv_ans = data[:, -1]
         seqv = mapdl.post_processing.nodal_elastic_eqv_strain()
 
-        seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        seqv_aligned = seqv[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(seqv_ans, seqv_aligned)
 
     @staticmethod
@@ -749,10 +746,8 @@ class Test_plastic_solve(TestClass):
     @staticmethod
     @pytest.fixture(scope="class")
     def plastic_solve(mapdl):
-        mapdl.mute = True
-        mapdl.input(examples.verif_files.vmfiles["vm273"])
-
-        mapdl.mute = False
+        with mapdl.muted:
+            mapdl.input(examples.verif_files.vmfiles["vm273"])
 
         mapdl.save("plastic_solve", slab="all")
 
@@ -791,7 +786,7 @@ class Test_plastic_solve(TestClass):
         nnum_ans = data[:, 0].astype(np.int32)
         data_ans = data[:, index + 1]
         data = mapdl.post_processing.nodal_plastic_component_strain(comp)
-        data = data[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        data = data[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(data_ans, data)
 
@@ -812,7 +807,7 @@ class Test_plastic_solve(TestClass):
         from_prns = arr[:, index + 1]
 
         # grpc includes all nodes.  ignore the ones not included in prnsol
-        from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        from_grpc = from_grpc[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(from_grpc, from_prns)
 
@@ -829,7 +824,7 @@ class Test_plastic_solve(TestClass):
         sint_ans = data[:, -2]
         sint = mapdl.post_processing.nodal_plastic_strain_intensity()
 
-        sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        sint_aligned = sint[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(sint_ans, sint_aligned)
 
     @staticmethod
@@ -845,7 +840,7 @@ class Test_plastic_solve(TestClass):
         seqv_ans = data[:, -1]
         seqv = mapdl.post_processing.nodal_plastic_eqv_strain()
 
-        seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        seqv_aligned = seqv[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(seqv_ans, seqv_aligned)
 
     @staticmethod
@@ -1344,63 +1339,62 @@ class Test_thermal_solve:
     @staticmethod
     @pytest.fixture(scope="class")
     def thermal_solve(mapdl):
-        mapdl.mute = True
-        mapdl.finish()
-        mapdl.clear()
+        with mapdl.muted:
+            mapdl.finish()
+            mapdl.clear()
 
-        mapdl.prep7()
-        mapdl.et(1, "PLANE223", 11, 1)  # COUPLE-FIELD ELEMENT TYPE, WEAK COUPLING
-        mapdl.et(2, "CONTA175", 1)  # CONTACT ELEMENT TYPE
-        mapdl.et(3, "TARGE169")  # TARGET ELEMENT TYPE
-        mapdl.mp("EX", 1, 10e6)  # YOUNG'S MODULUS
-        mapdl.mp("KXX", 1, 250)  # CONDUCTIVITY
-        mapdl.mp("ALPX", 1, 12e-6)  # THERMAL EXPANSION COEFFICIENT
-        mapdl.mp("PRXY", "", 0.3)
-        mapdl.r(2, "", "", -1000, -0.005)
-        mapdl.rmore("", "", "", "", "", -100)
-        mapdl.rmore("", 100)
-        mapdl.rmore()
-        mapdl.rmore(0.01)
+            mapdl.prep7()
+            mapdl.et(1, "PLANE223", 11, 1)  # COUPLE-FIELD ELEMENT TYPE, WEAK COUPLING
+            mapdl.et(2, "CONTA175", 1)  # CONTACT ELEMENT TYPE
+            mapdl.et(3, "TARGE169")  # TARGET ELEMENT TYPE
+            mapdl.mp("EX", 1, 10e6)  # YOUNG'S MODULUS
+            mapdl.mp("KXX", 1, 250)  # CONDUCTIVITY
+            mapdl.mp("ALPX", 1, 12e-6)  # THERMAL EXPANSION COEFFICIENT
+            mapdl.mp("PRXY", "", 0.3)
+            mapdl.r(2, "", "", -1000, -0.005)
+            mapdl.rmore("", "", "", "", "", -100)
+            mapdl.rmore("", 100)
+            mapdl.rmore()
+            mapdl.rmore(0.01)
 
-        # SET UP FINITE ELEMENT MODEL
-        mapdl.n(1)
-        mapdl.n(2, 0.4)
-        mapdl.n(3, "(0.4+0.0035)")
-        mapdl.n(4, "(0.9+0.0035)")
-        mapdl.ngen(2, 4, 1, 4, 1, "", 0.1)
-        mapdl.e(1, 2, 6, 5)  # PLANE223 ELEMENTS
-        mapdl.e(3, 4, 8, 7)
-        mapdl.type(2)  # CONTACT ELEMENTS
-        mapdl.real(2)
-        mapdl.e(2)
-        mapdl.e(6)
-        mapdl.type(3)  # TARGET ELEMENTS
-        mapdl.real(2)
-        mapdl.nsel("S", "NODE", "", 3, 7, 4)
-        mapdl.esln()
-        mapdl.esurf()
-        mapdl.allsel()
+            # SET UP FINITE ELEMENT MODEL
+            mapdl.n(1)
+            mapdl.n(2, 0.4)
+            mapdl.n(3, "(0.4+0.0035)")
+            mapdl.n(4, "(0.9+0.0035)")
+            mapdl.ngen(2, 4, 1, 4, 1, "", 0.1)
+            mapdl.e(1, 2, 6, 5)  # PLANE223 ELEMENTS
+            mapdl.e(3, 4, 8, 7)
+            mapdl.type(2)  # CONTACT ELEMENTS
+            mapdl.real(2)
+            mapdl.e(2)
+            mapdl.e(6)
+            mapdl.type(3)  # TARGET ELEMENTS
+            mapdl.real(2)
+            mapdl.nsel("S", "NODE", "", 3, 7, 4)
+            mapdl.esln()
+            mapdl.esurf()
+            mapdl.allsel()
 
-        # APPLY INITIAL BOUNDARY CONDITIONS
-        mapdl.d(1, "UY", "", "", 4, 1)
-        mapdl.d(1, "UX", "", "", 5, 4)
-        mapdl.d(4, "UX", "", "", 8, 4)
-        mapdl.tref(100)
-        mapdl.eresx("YES")
-        mapdl.finish()
+            # APPLY INITIAL BOUNDARY CONDITIONS
+            mapdl.d(1, "UY", "", "", 4, 1)
+            mapdl.d(1, "UX", "", "", 5, 4)
+            mapdl.d(4, "UX", "", "", 8, 4)
+            mapdl.tref(100)
+            mapdl.eresx("YES")
+            mapdl.finish()
 
-        mapdl.slashsolu()
-        mapdl.nlgeom("ON")  # LARGE DEFLECTION EFFECTS TURNED ON
-        mapdl.d(1, "TEMP", 500, "", 5, 4)
-        mapdl.d(3, "TEMP", 100, "", 4)
-        mapdl.d(7, "TEMP", 100, "", 8)
-        mapdl.solve()  # FIRST LOAD STEP
+            mapdl.slashsolu()
+            mapdl.nlgeom("ON")  # LARGE DEFLECTION EFFECTS TURNED ON
+            mapdl.d(1, "TEMP", 500, "", 5, 4)
+            mapdl.d(3, "TEMP", 100, "", 4)
+            mapdl.d(7, "TEMP", 100, "", 8)
+            mapdl.solve()  # FIRST LOAD STEP
 
-        mapdl.solution()
-        mapdl.allsel()
-        mapdl.outres("all", "all")
-        mapdl.solve()
-        mapdl.mute = False
+            mapdl.solution()
+            mapdl.allsel()
+            mapdl.outres("all", "all")
+            mapdl.solve()
 
         mapdl.save("thermal_solve")
         mapdl.finish()
@@ -1431,7 +1425,7 @@ class Test_thermal_solve:
         nnum_ans = data[:, 0].astype(np.int32)
         data_ans = data[:, index + 1]
         data = mapdl.post_processing.nodal_thermal_component_strain(comp)
-        data = data[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        data = data[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(data_ans, data)
 
@@ -1452,7 +1446,7 @@ class Test_thermal_solve:
         from_prns = arr[:, index + 1]
 
         # grpc includes all nodes.  ignore the ones not included in prnsol
-        from_grpc = from_grpc[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        from_grpc = from_grpc[np.isin(mapdl.mesh.nnum, nnum_ans)]
 
         assert np.allclose(from_grpc, from_prns)
 
@@ -1469,7 +1463,7 @@ class Test_thermal_solve:
         sint_ans = data[:, -2]
         sint = mapdl.post_processing.nodal_thermal_strain_intensity()
 
-        sint_aligned = sint[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        sint_aligned = sint[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(sint_ans, sint_aligned)
 
     @staticmethod
@@ -1485,7 +1479,7 @@ class Test_thermal_solve:
         seqv_ans = data[:, -1]
         seqv = mapdl.post_processing.nodal_thermal_eqv_strain()
 
-        seqv_aligned = seqv[np.in1d(mapdl.mesh.nnum, nnum_ans)]
+        seqv_aligned = seqv[np.isin(mapdl.mesh.nnum, nnum_ans)]
         assert np.allclose(seqv_ans, seqv_aligned)
 
     @staticmethod
