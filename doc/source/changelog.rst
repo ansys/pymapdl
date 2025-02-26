@@ -37,7 +37,7 @@ Fixed
 - fix: problem with the load_table method `#3745 <https://github.com/ansys/pymapdl/pull/3745>`_
 - fix: do all the cleaning commands before cleaning the database, so we avoid having to issue `/POST1`. `#3747 <https://github.com/ansys/pymapdl/pull/3747>`_
 - fix: Bug located in VSEL using KSWP field `#3753 <https://github.com/ansys/pymapdl/pull/3753>`_
-- fix: Improve error handling in *GET method and enhance output logging `#3758 <https://github.com/ansys/pymapdl/pull/3758>`_
+- fix: Improve error handling in \*GET method and enhance output logging `#3758 <https://github.com/ansys/pymapdl/pull/3758>`_
 - fix: avoid returning output when using input grpc method `#3759 <https://github.com/ansys/pymapdl/pull/3759>`_
 
 
