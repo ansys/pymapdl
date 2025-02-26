@@ -8,7 +8,7 @@ name = "ansys-mapdl-core"
 version = "0.69.dev0"
 description = "A Python wrapper for Ansys MAPDL."
 readme = "README.md"
-requires-python = ">=3.10,<3.13"  # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
+requires-python = ">=3.10,<3.14"  # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
 license = {file = "LICENSE"}
 authors = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
@@ -45,6 +45,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
 [project.optional-dependencies]
@@ -71,8 +72,9 @@ tests = [
     "pytest-timeout==2.3.1",
     "pytest==8.3.4",
     "scipy==1.15.2",
-    "vtk==9.3.1",
+    "vtk==9.4.1",
 ]
+
 doc = [
     "ansys-dpf-core==0.10.1",
     "ansys-mapdl-reader==0.54.2",
@@ -103,7 +105,7 @@ doc = [
     "sphinx==8.2.1",
     "sphinxcontrib-websupport==2.0.0",
     "sphinxemoji==0.3.1",
-    "vtk==9.3.1",
+    "vtk==9.4.1",
 ]
 
 [tool.flit.module]
