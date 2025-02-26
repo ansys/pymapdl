@@ -2383,7 +2383,7 @@ class PostProcessing:
 
         Examples
         --------
-        Total quivalent strain for the current result.
+        Total equivalent strain for the current result.
 
         >>> mapdl.post_processing.nodal_total_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
@@ -2757,7 +2757,7 @@ class PostProcessing:
 
         Examples
         --------
-        Elastic quivalent strain for the current result.
+        Elastic equivalent strain for the current result.
 
         >>> mapdl.post_processing.nodal_elastic_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
@@ -3138,7 +3138,7 @@ class PostProcessing:
 
         Examples
         --------
-        Plastic quivalent strain for the current result
+        Plastic equivalent strain for the current result
 
         >>> mapdl.post_processing.nodal_plastic_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
@@ -3526,7 +3526,7 @@ class PostProcessing:
 
         Examples
         --------
-        Thermal quivalent strain for the current result.
+        Thermal equivalent strain for the current result.
 
         >>> mapdl.post_processing.nodal_thermal_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
@@ -3618,7 +3618,7 @@ class PostProcessing:
 
         Examples
         --------
-        Thermal quivalent strain for the current result.
+        Thermal equivalent strain for the current result.
 
         >>> mapdl.post_processing.nodal_contact_friction_stress()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,

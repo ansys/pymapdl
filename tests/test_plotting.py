@@ -938,10 +938,14 @@ def test_asel_iterable(mapdl, make_block):
     )
 
 
-def test_vsel_iterable(mapdl, make_block):
+def test_vsel_iterable_and_kswp(mapdl, make_block):
     mapdl.run("VGEN, 5, 1, , , 100, , , , , ")
     assert np.allclose(
         mapdl.vsel("S", "volu", "", [1, 2, 4], "", ""), np.array([1, 2, 4])
+    )
+    mapdl.vsel("S", "volu", "", [1], "", "", kswp=1)
+    assert np.allclose(mapdl.geometry.vnum, [1]) and np.allclose(
+        mapdl.geometry.anum, [1, 2, 3, 4, 5, 6]
     )
 
 

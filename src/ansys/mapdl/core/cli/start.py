@@ -281,7 +281,6 @@ def start(
         additional_switches=additional_switches,
         start_timeout=start_timeout,
         port=port,
-        license_server_check=license_server_check,
         license_type=license_type,
         version=version,
     )

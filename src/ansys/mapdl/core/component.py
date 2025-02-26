@@ -83,7 +83,7 @@ WARNING_ENTITY: str = (
 
 
 def _check_valid_pyobj_to_entities(
-    items: Union[Tuple[int, ...], List[int], NDArray[Any]]
+    items: Union[Tuple[int, ...], List[int], NDArray[Any]],
 ) -> None:
     """Check whether the python objects can be converted to entities.
     At the moment, only list and numpy arrays of ints are allowed.

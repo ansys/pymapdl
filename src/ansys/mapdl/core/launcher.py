@@ -306,7 +306,7 @@ def get_process_at_port(port) -> Optional[psutil.Process]:
     for proc in psutil.process_iter():
         try:
             # just to check if we can access the port
-            connections = proc.connections()
+            connections = proc.net_connections()
         except psutil.AccessDenied:
             continue
         except psutil.NoSuchProcess:
@@ -383,8 +383,8 @@ def generate_mapdl_launch_command(
     cpu_sw = "-np %d" % nproc
 
     if ram:
-        ram_sw = "-m %d" % int(1024 * ram)
-        LOG.debug(f"Setting RAM: {ram_sw}")
+        ram_sw = "-m %d" % int(ram)
+        LOG.debug(f"Setting RAM: {ram_sw} MB")
     else:
         ram_sw = ""
 
@@ -1623,12 +1623,12 @@ def launch_mapdl(
         except Exception as exception:
             LOG.error("An error occurred when launching MAPDL.")
 
-            jobid: int = start_parm.get("jobid", "Not found")
+            jobid: int = start_parm.get("jobid")
 
             if (
                 args["launch_on_hpc"]
                 and start_parm.get("finish_job_on_exit", True)
-                and jobid not in ["Not found", None]
+                and jobid is not None
             ):
 
                 LOG.debug(f"Killing HPC job with id: {jobid}")
@@ -1990,7 +1990,7 @@ def get_slurm_options(
                 ram = SLURM_MEM_PER_NODE
 
             if not units:
-                args["ram"] = int(ram)
+                args["ram"] = int(ram)  # Assuming in MB
             elif units == "T":  # tera
                 args["ram"] = int(ram) * (2**10) ** 2
             elif units == "G":  # giga
