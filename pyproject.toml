@@ -72,8 +72,9 @@ tests = [
     "pytest-timeout==2.3.1",
     "pytest==8.3.4",
     "scipy==1.15.2",
-    "vtk==9.4.1",
+    "vtk==9.3.1",
 ]
+
 doc = [
     "ansys-dpf-core==0.10.1",
     "ansys-mapdl-reader==0.54.2",
