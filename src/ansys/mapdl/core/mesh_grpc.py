@@ -418,9 +418,8 @@ class MeshGrpc:
 
             nnum = self._mapdl.get_array("NODE", item1="NLIST")
             nnum = nnum.astype(np.int32)
-            if nnum.size == 1:
-                if nnum[0] == 0:
-                    nnum = np.empty(0, np.int32)
+            if nnum.size == 1 and nnum[0] == 0:
+                nnum = np.empty(0, np.int32)
 
         self._ignore_cache_reset = False
 
@@ -441,9 +440,8 @@ class MeshGrpc:
 
             enum = self._mapdl.get_array("ELEM", item1="ELIST")
             enum = enum.astype(np.int32)
-            if enum.size == 1:
-                if enum[0] == 0:
-                    enum = np.empty(0, np.int32)
+            if enum.size == 1 and enum[0] == 0:
+                enum = np.empty(0, np.int32)
 
         self._ignore_cache_reset = False
         return enum
