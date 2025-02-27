@@ -551,7 +551,7 @@ class MeshGrpc:
         """Returns an array of node rotations"""
         return self._mapdl.nlist(kinternal="").to_array()[:, 4:]
 
-    def _load_nodes(self, chunk_size=DEFAULT_CHUNKSIZE):
+    def _load_nodes(self, chunk_size=None):
         """Loads nodes from server.
 
         Parameters
@@ -565,8 +565,8 @@ class MeshGrpc:
         np.ndarray
             Numpy array of nodes
         """
-        if self._chunk_size:
-            chunk_size = self._chunk_size
+        if not chunk_size:
+            chunk_size = self._chunk_size or DEFAULT_CHUNKSIZE
 
         request = anskernel.StreamRequest(chunk_size=chunk_size)
         chunks = self._mapdl._stub.Nodes(request)
@@ -606,7 +606,7 @@ class MeshGrpc:
     def _elem_off(self, value):
         self._cache_elem_off = value
 
-    def _load_elements_offset(self, chunk_size=DEFAULT_CHUNKSIZE):
+    def _load_elements_offset(self, chunk_size=None):
         """Loads elements from server
 
         Parameters
@@ -639,8 +639,8 @@ class MeshGrpc:
             Array of indices indicating the start of each element.
 
         """
-        if self._chunk_size:
-            chunk_size = self._chunk_size
+        if not chunk_size:
+            chunk_size = self._chunk_size or DEFAULT_CHUNKSIZE
 
         request = anskernel.StreamRequest(chunk_size=chunk_size)
         chunks = self._mapdl._stub.LoadElements(request)
@@ -664,7 +664,7 @@ class MeshGrpc:
         elems_[indx_elem] = self.enum
         return elems_, offset
 
-    def _load_element_types(self, chunk_size=DEFAULT_CHUNKSIZE):
+    def _load_element_types(self, chunk_size=None):
         """Loads element types from the MAPDL server.
 
         Returns
@@ -677,6 +677,9 @@ class MeshGrpc:
         int
             Size of the chunks to request from the server.
         """
+        if not chunk_size:
+            chunk_size = self._chunk_size or DEFAULT_CHUNKSIZE
+
         request = anskernel.StreamRequest(chunk_size=chunk_size)
         chunks = self._mapdl._stub.LoadElementTypeDescription(request)
         data = parse_chunks(chunks, np.int32)
