@@ -15,13 +15,13 @@ This document contains the release notes for the project.
 Added
 ^^^^^
 
-- refactor: make cli testing not depending on MAPDL. `#3678 <https://github.com/ansys/pymapdl/pull/3678>`_
-- chore: update CHANGELOG for v0.69.2 `#3688 <https://github.com/ansys/pymapdl/pull/3688>`_
-- test: adding tests asserting None are translated to "None". `#3694 <https://github.com/ansys/pymapdl/pull/3694>`_
-- test: improving testing performance `#3703 <https://github.com/ansys/pymapdl/pull/3703>`_
+- feat: add stochastic fem example `#3648 <https://github.com/ansys/pymapdl/pull/3648>`_
+- feat: allow passing strings to the converter from the terminal `#3679 <https://github.com/ansys/pymapdl/pull/3679>`_
+- feat: improving performance of save_selection `#3697 <https://github.com/ansys/pymapdl/pull/3697>`_
 - feat: speed up `requires_package` using caching `#3705 <https://github.com/ansys/pymapdl/pull/3705>`_
-- test: improving pool testing `#3736 <https://github.com/ansys/pymapdl/pull/3736>`_
-- refactor: removing warnings `#3763 <https://github.com/ansys/pymapdl/pull/3763>`_
+- feat: avoiding reconnecting if MAPDL exited already `#3708 <https://github.com/ansys/pymapdl/pull/3708>`_
+- feat: adding opened attribute `#3731 <https://github.com/ansys/pymapdl/pull/3731>`_
+- feat: adding `muted` context manager `#3760 <https://github.com/ansys/pymapdl/pull/3760>`_
 
 
 Fixed
@@ -47,15 +47,12 @@ Dependencies
 
 - build: bump grpcio from 1.69.0 to 1.70.0 in the grpc-deps group `#3699 <https://github.com/ansys/pymapdl/pull/3699>`_
 - build: bump imageio from 2.36.1 to 2.37.0 in the documentation group `#3700 <https://github.com/ansys/pymapdl/pull/3700>`_
-- ci: improving testing `#3716 <https://github.com/ansys/pymapdl/pull/3716>`_
 - build: bump the documentation group across 1 directory with 3 updates `#3727 <https://github.com/ansys/pymapdl/pull/3727>`_
 - build: update sphinx-autodoc-typehints to 3.0.1 `#3733 <https://github.com/ansys/pymapdl/pull/3733>`_
 - build: bump sphinx-gallery from 0.18.0 to 0.19.0 in the documentation group `#3743 <https://github.com/ansys/pymapdl/pull/3743>`_
 - build: bump pyansys-tools-report from 0.8.1 to 0.8.2 in the testing group `#3744 <https://github.com/ansys/pymapdl/pull/3744>`_
-- ci: enhance CI testing by summarizing tests durations `#3754 <https://github.com/ansys/pymapdl/pull/3754>`_
 - build: bump the core group across 1 directory with 2 updates `#3761 <https://github.com/ansys/pymapdl/pull/3761>`_
 - build: bump the documentation group across 1 directory with 2 updates `#3766 <https://github.com/ansys/pymapdl/pull/3766>`_
-- ci: using python3.12 as main testing python version `#3767 <https://github.com/ansys/pymapdl/pull/3767>`_
 - build: temporary avoid flit latest version `#3771 <https://github.com/ansys/pymapdl/pull/3771>`_
 
 
@@ -63,29 +60,32 @@ Miscellaneous
 ^^^^^^^^^^^^^
 
 - [pre-commit.ci] pre-commit autoupdate `#3330 <https://github.com/ansys/pymapdl/pull/3330>`_
-- feat: improving performance of save_selection `#3697 <https://github.com/ansys/pymapdl/pull/3697>`_
-- feat: avoiding reconnecting if MAPDL exited already `#3708 <https://github.com/ansys/pymapdl/pull/3708>`_
-- feat: adding opened attribute `#3731 <https://github.com/ansys/pymapdl/pull/3731>`_
 
 
 Documentation
 ^^^^^^^^^^^^^
 
-- feat: add stochastic fem example `#3648 <https://github.com/ansys/pymapdl/pull/3648>`_
-- feat: allow passing strings to the converter from the terminal `#3679 <https://github.com/ansys/pymapdl/pull/3679>`_
-- ci: pre-commit autoupdate `#3710 <https://github.com/ansys/pymapdl/pull/3710>`_, `#3723 <https://github.com/ansys/pymapdl/pull/3723>`_
 - docs: homogenizing commit/branches/pull request prefix `#3737 <https://github.com/ansys/pymapdl/pull/3737>`_
-- feat: adding `muted` context manager `#3760 <https://github.com/ansys/pymapdl/pull/3760>`_
 
 
 Maintenance
 ^^^^^^^^^^^
 
+- chore: update CHANGELOG for v0.69.2 `#3688 <https://github.com/ansys/pymapdl/pull/3688>`_
 - ci: skipping non-student versions when running on remote `#3690 <https://github.com/ansys/pymapdl/pull/3690>`_
 - ci: adding memory limitation to MAPDL command line `#3693 <https://github.com/ansys/pymapdl/pull/3693>`_
 - build: bump numpy from 2.2.1 to 2.2.2 in the minimal group `#3698 <https://github.com/ansys/pymapdl/pull/3698>`_
+- refactor: make cli testing not depending on MAPDL. `#3678 <https://github.com/ansys/pymapdl/pull/3678>`_
+- test: adding tests asserting None are translated to "None". `#3694 <https://github.com/ansys/pymapdl/pull/3694>`_
+- test: improving testing performance `#3703 <https://github.com/ansys/pymapdl/pull/3703>`_
+- ci: pre-commit autoupdate `#3710 <https://github.com/ansys/pymapdl/pull/3710>`_, `#3723 <https://github.com/ansys/pymapdl/pull/3723>`_
+- ci: improving testing `#3716 <https://github.com/ansys/pymapdl/pull/3716>`_
+- test: improving pool testing `#3736 <https://github.com/ansys/pymapdl/pull/3736>`_
 - build: bump the minimal group with 2 updates `#3742 <https://github.com/ansys/pymapdl/pull/3742>`_
+- ci: enhance CI testing by summarizing tests durations `#3754 <https://github.com/ansys/pymapdl/pull/3754>`_
+- refactor: removing warnings `#3763 <https://github.com/ansys/pymapdl/pull/3763>`_
 - ci: pre-commit autoupdate `#3749 <https://github.com/ansys/pymapdl/pull/3749>`_, `#3765 <https://github.com/ansys/pymapdl/pull/3765>`_
+- ci: using python3.12 as main testing python version `#3767 <https://github.com/ansys/pymapdl/pull/3767>`_
 
 `0.69.2 <https://github.com/ansys/pymapdl/releases/tag/v0.69.2>`_ - 2025-01-22
 ==============================================================================
