@@ -439,7 +439,14 @@ def test_basic_command(cleared, mapdl):
 
 
 def test_allow_ignore(mapdl, cleared):
-    mapdl.allow_ignore = False
+    with pytest.warns(DeprecationWarning):
+        mapdl.allow_ignore = True
+
+    assert mapdl.allow_ignore is True
+
+    with pytest.warns(DeprecationWarning):
+        mapdl.allow_ignore = False
+
     assert mapdl.allow_ignore is False
     mapdl.finish()
 
@@ -447,14 +454,17 @@ def test_allow_ignore(mapdl, cleared):
         mapdl.k()
 
     # Does not create keypoints and yet does not raise error
-    mapdl.allow_ignore = True
-    assert mapdl.allow_ignore
+    with pytest.warns(DeprecationWarning):
+        mapdl.allow_ignore = True
+    assert mapdl.allow_ignore is True
 
     mapdl.finish()
     mapdl.k()  # Raise an error because we are not in PREP7.
     assert mapdl.get_value("KP", 0, "count") == 0.0  # Effectively no KP created.
 
-    mapdl.allow_ignore = False
+    # Reset
+    with pytest.warns(DeprecationWarning):
+        mapdl.allow_ignore = False
 
 
 def test_chaining(mapdl, cleared):
@@ -1201,13 +1211,9 @@ def test_cwd(mapdl, cleared, tmpdir):
     if mapdl.is_local:
         tempdir_ = tmpdir
     else:
-        if mapdl.platform == "linux":
-            mapdl.sys("mkdir -p /tmp")
-            tempdir_ = "/tmp"
-        elif mapdl.platform == "windows":
-            tempdir_ = "C:\\Windows\\Temp"
-        else:
-            raise ValueError("Unknown platform")
+        tempdir_ = os.path.join(mapdl.directory, "tmp")
+        mapdl.sys(f"mkdir tmp")
+
     try:
         mapdl.directory = str(tempdir_)
         assert str(mapdl.directory) == str(tempdir_).replace("\\", "/")
@@ -1765,21 +1771,38 @@ def test_on_docker(mapdl, cleared):
 def test_deprecation_allow_ignore_warning(mapdl, cleared):
     with pytest.warns(DeprecationWarning, match="'allow_ignore' is being deprecated"):
         mapdl.allow_ignore = True
+
     mapdl.ignore_errors = False
 
 
 def test_deprecation_allow_ignore_errors_mapping(mapdl, cleared):
-    mapdl.allow_ignore = True
-    assert mapdl.allow_ignore == mapdl.ignore_errors
+    with pytest.warns(
+        DeprecationWarning,
+        match="'allow_ignore' is being deprecated and will be removed in a future release",
+    ):
+        mapdl.allow_ignore = True
+        assert mapdl.allow_ignore == mapdl.ignore_errors
 
-    mapdl.allow_ignore = False
-    assert mapdl.allow_ignore == mapdl.ignore_errors
+    with pytest.warns(
+        DeprecationWarning,
+        match="'allow_ignore' is being deprecated and will be removed in a future release",
+    ):
+        mapdl.allow_ignore = False
+        assert mapdl.allow_ignore == mapdl.ignore_errors
 
-    mapdl.ignore_errors = True
-    assert mapdl.allow_ignore == mapdl.ignore_errors
+    with pytest.warns(
+        DeprecationWarning,
+        match="'allow_ignore' is being deprecated and will be removed in a future release",
+    ):
+        mapdl.ignore_errors = True
+        assert mapdl.allow_ignore == mapdl.ignore_errors
 
-    mapdl.ignore_errors = False
-    assert mapdl.allow_ignore == mapdl.ignore_errors
+    with pytest.warns(
+        DeprecationWarning,
+        match="'allow_ignore' is being deprecated and will be removed in a future release",
+    ):
+        mapdl.ignore_errors = False
+        assert mapdl.allow_ignore == mapdl.ignore_errors
 
 
 def test_check_stds(mapdl, cleared):
@@ -2580,8 +2603,8 @@ def test_force_command_when_no_nodes(mapdl, cleared):
 
 
 def test_not_correct_et_element(mapdl, cleared):
-    mapdl.et(1, 227)
     with pytest.warns(UserWarning, match="is normal behavior when a CDB file is used"):
+        mapdl.et(1, 227)
         mapdl.keyopt(1, 222)
 
 

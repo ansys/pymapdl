@@ -316,6 +316,10 @@ class TestMapdlPool:
         "ansys.mapdl.core.pool.MapdlPool._verify_unique_ports",
         lambda *args, **kwargs: None,
     )
+    @patch(
+        "ansys.mapdl.core.pool.MapdlPool.__del__",
+        lambda *args, **kwargs: None,
+    )
     def test_directory_names_function(self, tmpdir):
         def myfun(i):
             if i == 0:
