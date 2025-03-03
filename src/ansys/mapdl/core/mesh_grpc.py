@@ -24,6 +24,7 @@
 from functools import wraps
 import os
 import re
+import threading
 import time
 from typing import Dict
 import weakref
@@ -76,7 +77,10 @@ class MeshGrpc:
         self.logger = mapdl._log
         self._log = mapdl._log
 
+        self._freeze_model = False
         self._ignore_cache_reset = False
+        self._thread_lock_nodes = threading.Lock()
+        self._thread_lock_elem = threading.Lock()
         self._reset_cache()
 
     def __repr__(self):
@@ -149,41 +153,44 @@ class MeshGrpc:
             self._tshape = None
             self._tshape_key = None
 
+    @property
+    def ignore_cache_reset(self):
+        """Context manager used to ignore mesh cache reset"""
+        return self._ignore_cache_reset_context(self)
+
     def _update_cache(self):
         """Threaded local cache update.
 
         Used when needing all the geometry entries from MAPDL.
         """
-        self.logger.debug("Updating cache")
-        # elements must have their underlying nodes selected to avoid
-        # VTK segfaul
-        with self._mapdl.save_selection:
-            self._mapdl.nsle("S", mute=True)
+        if not self._ignore_cache_reset:
+            self.logger.debug("Updating cache")
+            # elements must have their underlying nodes selected to avoid
+            # VTK segfaul
+            with self._mapdl.save_selection:
+                self._mapdl.nsle("S", mute=True)
 
-            # not thread safe
-            self._update_cache_elem()
+                # not thread safe
+                self._update_cache_elem()
 
-            threads = [
-                self._update_cache_element_desc(),
-                self._update_cache_nnum(),
-                self._update_node_coord(),
-            ]
+                threads = [
+                    self._update_cache_element_desc(),
+                    self._update_cache_nnum(),
+                    self._update_node_coord(),
+                ]
 
-            for thread in threads:
-                thread.join()
+                for thread in threads:
+                    thread.join()
 
-            # must occur after read
-            self._ignore_cache_reset = True
+                # somehow requesting path seems to help windows avoid an
+                # outright segfault prior to running CMSEL
+                if os.name == "nt":
+                    _ = self._mapdl.path
 
-            # somehow requesting path seems to help windows avoid an
-            # outright segfault prior to running CMSEL
-            if os.name == "nt":
-                _ = self._mapdl.path
-
-            # TODO: flaky
-            time.sleep(0.05)
-
-        self._ignore_cache_reset = False
+                # TODO: flaky
+                time.sleep(0.05)
+        else:
+            self.logger.debug("Ignoring cache reset.")
 
     @threaded
     def _update_cache_nnum(self):
@@ -226,6 +233,7 @@ class MeshGrpc:
 
     @threaded
     def _update_node_coord(self):
+        # with self._thread_lock_nodes:
         if self._node_coord is None:
             self._node_coord = self._load_nodes()
 
@@ -412,8 +420,7 @@ class MeshGrpc:
         >>> mapdl.mesh.nnum_all
         array([    1,     2,     3, ..., 19998, 19999, 20000])
         """
-        self._ignore_cache_reset = True
-        with self._mapdl.save_selection:
+        with self.ignore_cache_reset, self._mapdl.save_selection:
             self._mapdl.nsel("all", mute=True)
 
             nnum = self._mapdl.get_array("NODE", item1="NLIST")
@@ -421,8 +428,6 @@ class MeshGrpc:
             if nnum.size == 1:
                 if nnum[0] == 0:
                     nnum = np.empty(0, np.int32)
-
-        self._ignore_cache_reset = False
 
         return nnum
 
@@ -435,17 +440,14 @@ class MeshGrpc:
         >>> mapdl.mesh.enum_all
         array([    1,     2,     3, ..., 19998, 19999, 20000])
         """
-        self._ignore_cache_reset = True
-        with self._mapdl.save_selection:
+        with self.ignore_cache_reset, self._mapdl.save_selection:
             self._mapdl.esel("all", mute=True)
 
             enum = self._mapdl.get_array("ELEM", item1="ELIST")
             enum = enum.astype(np.int32)
-            if enum.size == 1:
-                if enum[0] == 0:
-                    enum = np.empty(0, np.int32)
+            if enum.size == 1 and enum[0] == 0:
+                enum = np.empty(0, np.int32)
 
-        self._ignore_cache_reset = False
         return enum
 
     @property
@@ -565,8 +567,8 @@ class MeshGrpc:
         np.ndarray
             Numpy array of nodes
         """
-        if self._chunk_size:
-            chunk_size = self._chunk_size
+        if not chunk_size:
+            chunk_size = self._chunk_size or DEFAULT_CHUNKSIZE
 
         request = anskernel.StreamRequest(chunk_size=chunk_size)
         chunks = self._mapdl._stub.Nodes(request)
@@ -858,3 +860,16 @@ class MeshGrpc:
                 const_[set_][jlimit] = values_[i]
 
         return const_
+
+    class _ignore_cache_reset_context:
+        """Ignore cache reset context manager"""
+
+        def __init__(self, parent):
+            self._parent = weakref.ref(parent)
+
+        def __enter__(self):
+            self._parent()._ignore_cache_reset = True
+            self._parent()._log.debug("Ignore cache reset.")
+
+        def __exit__(self, *args):
+            self._parent()._ignore_cache_reset = False

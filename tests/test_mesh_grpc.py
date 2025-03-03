@@ -24,7 +24,6 @@
 import os
 
 import numpy as np
-import pytest
 
 from conftest import has_dependency, requires
 
@@ -82,46 +81,63 @@ def test_local(mapdl, cleared):
     assert mapdl._local == mapdl.mesh.local
 
 
-@pytest.mark.xfail(strict=False, reason="Flaky test. See #2435")
-def test_empty_mesh(mapdl, cleared):
-    assert mapdl.mesh.n_node == 0
-    assert mapdl.mesh.n_elem == 0
-    assert mapdl.mesh.nnum_all.size == 0
-    assert mapdl.mesh.enum_all.size == 0
-    assert mapdl.mesh.nnum.size == 0
-    assert mapdl.mesh.enum.size == 0
+def test_only_one_load_nodes(mapdl, cleared):
     assert mapdl.mesh.nodes.size == 0
-    # assert mapdl.mesh.node_angles.size == 0 Not implemented
 
-    # elem is a list
-    assert len(mapdl.mesh.elem) == 0
 
-    # Using size because it should be empty arrays
-    assert mapdl.mesh.ekey.size == 0
-    assert mapdl.mesh.et_id.size == 0
-    assert mapdl.mesh.tshape.size == 0
-    assert mapdl.mesh.material_type.size == 0
-    assert mapdl.mesh.etype.size == 0
-    assert mapdl.mesh.section.size == 0
-    assert mapdl.mesh.element_coord_system.size == 0
-    assert mapdl.mesh.elem_real_constant.size == 0
-    assert mapdl.mesh.ekey.size == 0
+def test_empty_mesh(mapdl, cleared):
+    # Reset mesh grid
+    mapdl.mesh._grid_cache = None
+    assert mapdl.mesh.grid is not None
 
-    # should be empty dicts
-    assert not mapdl.mesh.key_option
-    assert not mapdl.mesh.tshape_key
-    assert not mapdl.mesh.element_components
-    assert not mapdl.mesh.node_components
+    # To avoid further cache updates
+    with mapdl.mesh.ignore_cache_reset:
 
-    # bools
-    assert not mapdl.mesh._has_elements
-    assert not mapdl.mesh._has_nodes
+        if has_dependency("pyvista"):
+            assert mapdl.mesh.grid.points.size == 0
+            assert mapdl.mesh.grid.cells.size == 0
+            assert mapdl.mesh.grid.n_points == 0
+            assert mapdl.mesh.grid.n_cells == 0
 
-    # Others
-    if has_dependency("pyvista"):
-        assert mapdl.mesh.grid is None
-        with pytest.raises(ValueError):
-            mapdl.mesh.save("file.vtk")
+        assert mapdl.mesh.n_node == 0
+        assert mapdl.mesh.n_elem == 0
+        assert mapdl.mesh.nnum_all.size == 0
+        assert mapdl.mesh.enum_all.size == 0
+        assert mapdl.mesh.nnum.size == 0
+        assert mapdl.mesh.enum.size == 0
+        assert mapdl.mesh.nodes.size == 0
+        # assert mapdl.mesh.node_angles.size == 0 Not implemented
+
+        # elem is a list
+        assert len(mapdl.mesh.elem) == 0
+
+        # Using size because it should be empty arrays
+        assert mapdl.mesh.ekey.size == 0
+        assert mapdl.mesh.et_id.size == 0
+        assert mapdl.mesh.tshape.size == 0
+        assert mapdl.mesh.material_type.size == 0
+        assert mapdl.mesh.etype.size == 0
+        assert mapdl.mesh.section.size == 0
+        assert mapdl.mesh.element_coord_system.size == 0
+        assert mapdl.mesh.elem_real_constant.size == 0
+        assert mapdl.mesh.ekey.size == 0
+
+        # should be empty dicts
+        assert not mapdl.mesh.key_option
+        assert not mapdl.mesh.tshape_key
+        assert not mapdl.mesh.element_components
+        assert not mapdl.mesh.node_components
+
+        # bools
+        assert not mapdl.mesh._has_elements
+        assert not mapdl.mesh._has_nodes
+
+        # Others
+        if has_dependency("pyvista"):
+            assert mapdl.mesh.grid.points.size == 0
+            assert mapdl.mesh.grid.cells.size == 0
+            assert mapdl.mesh.grid.n_points == 0
+            assert mapdl.mesh.grid.n_cells == 0
 
 
 def test_element_node_components(mapdl, contact_geom_and_mesh):
