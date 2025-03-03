@@ -122,6 +122,7 @@ class MeshGrpc:
 
     def _reset_cache(self):
         """Reset entire mesh cache"""
+
         if not self._ignore_cache_reset:
             self.logger.debug("Resetting cache")
 
@@ -198,6 +199,7 @@ class MeshGrpc:
             self.logger.debug("Updating nodes cache")
             nnum = self._mapdl.get_array("NODE", item1="NLIST")
             self._cache_nnum = nnum.astype(np.int32)
+
         if self._cache_nnum.size == 1:
             if self._cache_nnum[0] == 0:
                 self._cache_nnum = np.empty(0, np.int32)
