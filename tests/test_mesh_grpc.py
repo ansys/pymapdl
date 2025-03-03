@@ -24,6 +24,7 @@
 import os
 
 import numpy as np
+import pytest
 
 from conftest import has_dependency, requires
 
@@ -373,3 +374,25 @@ def test_nsle(mapdl, two_dimensional_mesh):
         ]
     )
     assert all(selected_ids == expected_selected_ids)
+
+
+@pytest.mark.parametrize("initial_state", [None, True, False])
+def test_ignore_cache_reset_context(mapdl, cleared, initial_state):
+    mesh = mapdl.mesh
+    previous_state = mesh._ignore_cache_reset
+    mesh._ignore_cache_reset = initial_state
+
+    with mesh.ignore_cache_reset:
+        assert mesh._ignore_cache_reset is True
+
+    assert mesh._ignore_cache_reset == initial_state
+    mesh._ignore_cache_reset = previous_state
+
+
+def test_ignore_cache_reset_context_logging(mapdl, cleared, caplog):
+    mesh = mapdl.mesh
+    with caplog.at_level("DEBUG"):
+        with mesh.ignore_cache_reset:
+            pass
+
+    assert "Ignore cache reset." in caplog.text
