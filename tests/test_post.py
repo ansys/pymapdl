@@ -1226,6 +1226,7 @@ class Test_contact_solve(TestClass):
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
+    @pytest.mark.skipif(True, reason="Crash python until #3782 is fixed.")
     def test_plot_incomplete_nodal_selection(mapdl, resume, verify_image_cache):
         verify_image_cache.skip = True
 
