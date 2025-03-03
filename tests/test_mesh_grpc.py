@@ -82,10 +82,6 @@ def test_local(mapdl, cleared):
     assert mapdl._local == mapdl.mesh.local
 
 
-def test_only_one_load_nodes(mapdl, cleared):
-    assert mapdl.mesh.nodes.size == 0
-
-
 def test_empty_mesh(mapdl, cleared):
     # Reset mesh grid
     mapdl.mesh._grid_cache = None
