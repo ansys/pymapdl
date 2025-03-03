@@ -197,9 +197,8 @@ def parse_chunks(
     while not chunks.is_active() and time.time() < time_max:
         time.sleep(time_step)
 
-    else:
-        if not chunks.is_active() and chunks.code() != grpc.StatusCode.OK:
-            LOG.error("The channel might not alive.")
+    if not chunks.is_active() and chunks.code() != grpc.StatusCode.OK:
+        LOG.error("The channel might not alive.")
 
     try:
         chunk = chunks.next()
