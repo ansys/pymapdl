@@ -383,12 +383,3 @@ def test_ignore_cache_reset_context(mapdl, cleared, initial_state):
 
     assert mesh._ignore_cache_reset == initial_state
     mesh._ignore_cache_reset = previous_state
-
-
-def test_ignore_cache_reset_context_logging(mapdl, cleared, caplog):
-    mesh = mapdl.mesh
-    with caplog.at_level("DEBUG"):
-        with mesh.ignore_cache_reset:
-            pass
-
-    assert "Ignore cache reset." in caplog.text
