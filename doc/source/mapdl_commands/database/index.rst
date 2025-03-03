@@ -10,8 +10,8 @@ Database
    * - :ref:`ref_working_plane`
    * - :ref:`ref_coordinate_system`
    * - :ref:`ref_components`
-   * - :ref:`ref_set_up`
    * - :ref:`ref_picking`
+   * - :ref:`ref_set_up`
 
 
 .. toctree::
@@ -22,5 +22,5 @@ Database
    working_plane
    coordinate_system
    components
-   set_up
    picking
+   set_up
