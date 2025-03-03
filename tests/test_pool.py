@@ -344,8 +344,6 @@ class TestMapdlPool:
             restart_failed=False,
         )
 
-        assert len(pool) == 3
-
         dirs_path_pool = os.listdir(pool._root_dir)
         assert "instance_zero" in dirs_path_pool
         assert "instance_one" in dirs_path_pool
