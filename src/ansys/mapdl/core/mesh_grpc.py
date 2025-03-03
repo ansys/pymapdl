@@ -866,10 +866,12 @@ class MeshGrpc:
 
         def __init__(self, parent):
             self._parent = weakref.ref(parent)
+            self._previous_state = None
 
         def __enter__(self):
+            self._previous_state = self._parent()._ignore_cache_reset
             self._parent()._ignore_cache_reset = True
             self._parent()._log.debug("Ignore cache reset.")
 
         def __exit__(self, *args):
-            self._parent()._ignore_cache_reset = False
+            self._parent()._ignore_cache_reset = self._previous_state
