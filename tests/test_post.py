@@ -215,19 +215,57 @@ class Test_static_solve(TestClass):
     @staticmethod
     @requires("ansys-tools-visualization_interface")
     def test_disp_plot_subselection(mapdl, resume):
+        mapdl.nsel("S", "NODE", vmin=500, vmax=503, mute=True)
         mapdl.esel("S", "ELEM", vmin=500, vmax=510, mute=True)
 
         pl = mapdl.post_processing.plot_nodal_displacement(
-            "X", smooth_shading=True, show_node_numbering=True, return_plotter=True
+            "X",
+            smooth_shading=True,
+            show_node_numbering=True,
+            return_plotter=True,
         )
-        poly = pl.meshes[0]
-        elem_ids = np.unique(poly.cell_data["ansys_elem_num"])
 
-        assert mapdl.mesh.n_elem == len(elem_ids)
-        assert np.allclose(mapdl.mesh.enum, elem_ids)
+        poly = pl.meshes[0]
+        nodes_ids = np.unique(poly.point_data["ansys_node_num"])
+
         assert pl.show() is None
 
-        mapdl.allsel()
+    @staticmethod
+    def test_uncomplete_element_plotting(mapdl, resume):
+        enums = mapdl.esel("S", "ELEM", vmin=500, vmax=510)
+
+        pl = mapdl.post_processing.plot_element_displacement(
+            "X",
+            smooth_shading=True,
+            show_node_numbering=True,
+            return_plotter=True,
+        )
+
+        mesh = pl.meshes[0]
+        elem_ids = np.unique(mesh.cell_data["ansys_elem_num"])
+
+        # assert no state change
+        assert mapdl.mesh.n_elem == len(enums)
+
+        assert np.allclose(elem_ids, enums)
+
+    @staticmethod
+    def test_uncomplete_nodal_plotting(mapdl, resume):
+        nnums = mapdl.nsel("S", "node", vmin=500, vmax=510)
+
+        pl = mapdl.post_processing.plot_nodal_displacement(
+            "X",
+            smooth_shading=True,
+            show_node_numbering=True,
+            return_plotter=True,
+        )
+
+        mesh = pl.meshes[0]
+        node_ids = np.unique(mesh.point_data["ansys_node_num"])
+
+        # assert no state change
+        assert mapdl.mesh.n_node == len(nnums)
+        assert np.allclose(mapdl.mesh.nnum, nnums)
 
     @staticmethod
     def test_nodal_eqv_stress(mapdl, resume):
