@@ -23,240 +23,7 @@
 
 class Selecting:
 
-    def dofsel(
-        self,
-        type_: str = "",
-        dof1: str = "",
-        dof2: str = "",
-        dof3: str = "",
-        dof4: str = "",
-        dof5: str = "",
-        dof6: str = "",
-        **kwargs,
-    ):
-        r"""Selects a DOF label set for reference by other commands.
-
-        Mechanical APDL Command: `DOFSEL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DOFSEL.html>`_
-
-        **Command default:**
-
-        .. _DOFSEL_default:
-
-        Degree of freedom (and the corresponding force) labels are determined from the model.
-
-        Parameters
-        ----------
-        type_ : str
-            Label identifying the type of select:
-
-            * ``S`` - Select a new set of labels.
-
-            * ``A`` - Add labels to the current set.
-
-            * ``U`` - Unselect (remove) labels from the current set.
-
-            * ``ALL`` - Restore the full set of labels.
-
-            * ``STAT`` - Display the current select status.
-
-        dof1 : str
-            Used only with ``Type`` = S, A, or U. Valid lables are:
-
-            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
-            (rotations); ROT (ROTX,
-            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3,..., TTOP (temperature).
-            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
-            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
-            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
-            (current).
-            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
-            (MX, MY, and MZ); FORC (F
-            and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3,..., HTOP (heat flow).
-            **Fluid flow force label** : FLOW (fluid flow).
-            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
-            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
-            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
-
-        dof2 : str
-            Used only with ``Type`` = S, A, or U. Valid lables are:
-
-            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
-            (rotations); ROT (ROTX,
-            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3,..., TTOP (temperature).
-            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
-            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
-            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
-            (current).
-            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
-            (MX, MY, and MZ); FORC (F
-            and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3,..., HTOP (heat flow).
-            **Fluid flow force label** : FLOW (fluid flow).
-            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
-            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
-            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
-
-        dof3 : str
-            Used only with ``Type`` = S, A, or U. Valid lables are:
-
-            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
-            (rotations); ROT (ROTX,
-            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3,..., TTOP (temperature).
-            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
-            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
-            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
-            (current).
-            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
-            (MX, MY, and MZ); FORC (F
-            and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3,..., HTOP (heat flow).
-            **Fluid flow force label** : FLOW (fluid flow).
-            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
-            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
-            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
-
-        dof4 : str
-            Used only with ``Type`` = S, A, or U. Valid lables are:
-
-            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
-            (rotations); ROT (ROTX,
-            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3,..., TTOP (temperature).
-            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
-            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
-            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
-            (current).
-            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
-            (MX, MY, and MZ); FORC (F
-            and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3,..., HTOP (heat flow).
-            **Fluid flow force label** : FLOW (fluid flow).
-            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
-            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
-            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
-
-        dof5 : str
-            Used only with ``Type`` = S, A, or U. Valid lables are:
-
-            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
-            (rotations); ROT (ROTX,
-            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3,..., TTOP (temperature).
-            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
-            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
-            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
-            (current).
-            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
-            (MX, MY, and MZ); FORC (F
-            and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3,..., HTOP (heat flow).
-            **Fluid flow force label** : FLOW (fluid flow).
-            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
-            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
-            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
-
-        dof6 : str
-            Used only with ``Type`` = S, A, or U. Valid lables are:
-
-            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
-            (rotations); ROT (ROTX,
-            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3,..., TTOP (temperature).
-            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
-            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
-            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
-            (current).
-            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
-            (MX, MY, and MZ); FORC (F
-            and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3,..., HTOP (heat flow).
-            **Fluid flow force label** : FLOW (fluid flow).
-            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
-            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
-            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
-
-        Notes
-        -----
-
-        .. _DOFSEL_notes:
-
-        Selects a degree of freedom label set for reference by other commands. The label set is used on
-        certain commands where ALL is either input in the degree of freedom label field or implied. The
-        active label set has no effect on the solution degrees of freedom. Specified labels which are not
-        active in the model (from the :ref:`et` or :ref:`dof` command) are ignored. As a convenience, a set
-        of force labels corresponding to the degree of freedom labels is also selected. For example,
-        selecting UX also causes FX to be selected (and vice versa). The force label set is used on certain
-        commands where ALL is input in the force label field.
-
-        This command is valid in any processor.
-        """
-        command = f"DOFSEL,{type_},{dof1},{dof2},{dof3},{dof4},{dof5},{dof6}"
-        return self.run(command, **kwargs)
-
-    def ksln(self, type_: str = "", **kwargs):
-        r"""Selects those keypoints associated with the selected nodes.
-
-        Mechanical APDL Command: `KSLN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSLN.html>`_
-
-        Parameters
-        ----------
-        type_ : str
-            Label identifying the type of keypoint select:
-
-            * ``S`` - Select a new set (default).
-
-            * ``R`` - Reselect a set from the current set.
-
-            * ``A`` - Additionally select a set and extend the current set.
-
-            * ``U`` - Unselect a set from the current set.
-
-        Notes
-        -----
-
-        .. _KSLN_notes:
-
-        Valid only if the nodes were generated by a meshing operation ( :ref:`kmesh`, :ref:`lmesh`,
-        :ref:`amesh`, :ref:`vmesh` ) on a solid model that contains the associated keypoints.
-
-        This command is valid in any processor.
-        """
-        command = f"KSLN,{type_}"
-        return self.run(command, **kwargs)
-
-    def ksll(self, type_: str = "", **kwargs):
-        r"""Selects those keypoints contained in the selected lines.
-
-        Mechanical APDL Command: `KSLL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSLL.html>`_
-
-        Parameters
-        ----------
-        type_ : str
-            Label identifying the type of keypoint select:
-
-            * ``S`` - Select a new set (default).
-
-            * ``R`` - Reselect a set from the current set.
-
-            * ``A`` - Additionally select a set and extend the current set.
-
-            * ``U`` - Unselect a set from the current set.
-
-        Notes
-        -----
-
-        .. _KSLL_notes:
-
-        This command is valid in any processor.
-        """
-        command = f"KSLL,{type_}"
-        return self.run(command, **kwargs)
-
-    def ksel(
+    def vsel(
         self,
         type_: str = "",
         item: str = "",
@@ -264,17 +31,17 @@ class Selecting:
         vmin: str = "",
         vmax: str = "",
         vinc: str = "",
-        kabs: str = "",
+        kswp: str = "",
         **kwargs,
     ):
-        r"""Selects a subset of keypoints or hard points.
+        r"""Selects a subset of volumes.
 
-        Mechanical APDL Command: `KSEL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_
+        Mechanical APDL Command: `VSEL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_
 
         Parameters
         ----------
         type_ : str
-            Label identifying the type of select:
+            Label identifying the type of volume select:
 
             * ``S`` - Select a new set (default).
 
@@ -295,99 +62,156 @@ class Selecting:
         item : str
             The description of the argument is missing in the Python function. Please, refer to the `command
             documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
             information.
 
         comp : str
             The description of the argument is missing in the Python function. Please, refer to the `command
             documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
             information.
 
         vmin : str
             The description of the argument is missing in the Python function. Please, refer to the `command
             documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
             information.
 
         vmax : str
             The description of the argument is missing in the Python function. Please, refer to the `command
             documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
             information.
 
         vinc : str
             The description of the argument is missing in the Python function. Please, refer to the `command
             documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
             information.
 
-        kabs : str
+        kswp : str
             The description of the argument is missing in the Python function. Please, refer to the `command
             documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
             information.
 
         Notes
         -----
 
-        .. _KSEL_notes:
+        .. _VSEL_notes:
 
-        Selects a subset of keypoints or hard points. For example, to select a new set of keypoints based on
-        keypoint numbers 1 through 7, use :ref:`ksel`,S,KP,,1,7. The selected subset is used when the ALL
-        label is entered (or implied) on other commands, such as :ref:`klist`,ALL. Only data identified by
-        keypoint number are selected. Data are flagged as selected and unselected; no data are actually
-        deleted from the database.
+        Selects volumes based on values of a labeled item and component. For example, to select a new set of
+        volumes based on volume numbers 1 through 7, use :ref:`vsel`,S,VOLU,,1,7. The subset is used when
+        the ALL label is entered (or implied) on other commands, such as :ref:`vlist`,ALL. Only data
+        identified by volume number are selected. Data are flagged as selected and unselected; no data are
+        actually deleted from the database.
 
         This command is valid in any processor.
 
-        For selections based on non-integer numbers (coordinates, results, etc.), items that are within the
-        range ``VMIN`` - ``Toler`` and ``VMAX`` + ``Toler`` are selected. The default tolerance ``Toler`` is
-        based on the relative values of ``VMIN`` and ``VMAX`` as follows:
+        For Selects based on non-integer numbers (coordinates, results, etc.), items that are within the
+        range VMIN- ``Toler`` and VMAX+ ``Toler`` are selected. The default tolerance ``Toler`` is based on
+        the relative values of VMIN and VMAX as follows:
 
-        If ``VMIN`` = ``VMAX``, ``Toler`` = 0.005 x ``VMIN``.
-        If ``VMIN`` = ``VMAX`` = 0.0, ``Toler`` = 1.0E-6.
-        If ``VMAX`` ≠ ``VMIN``, ``Toler`` = 1.0E-8 x ( ``VMAX`` - ``VMIN`` ).
+        If VMIN = VMAX, ``Toler`` = 0.005 x VMIN.
+        If VMIN = VMAX = 0.0, ``Toler`` = 1.0E-6.
+        If VMAX ≠ VMIN, ``Toler`` = 1.0E-8 x (VMAX-VMIN).
 
         Use the `SELTOL
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SELTOL.html#SELTOL.menupath>`_
         :ref:`seltol` command to override this default and specify ``Toler`` explicitly.
 
-        **KSEL - Valid Item and Component Labels**
+        **VSEL - Valid Item and Component Labels**
 
-        .. flat-table:: Valid Item and Component Labels :ref:`ksel`, ``Type, Item, Comp, VMIN, VMAX, VINC,`` KABS
+        .. flat-table:: :ref:`vsel`  ``Type, Item, Comp, VMIN, VMAX, VINC, KABS``
            :header-rows: 1
 
            * - Item
              - Comp
              - Description
-           * - KP
+           * - VOLU
              -
-             - Keypoint number.
-           * - EXT
-             -
-             - Keypoint numbers on exterior of selected lines (ignore remaining fields).
-           * - HPT
-             -
-             - Hard point number.
+             - Volume number.
            * - LOC
-             - X,Y,Z
-             - X, Y, or Z location in the active coordinate system.
+             - X, Y, Z
+             - X, Y, or Z center (picking "hot spot" location in the active coordinate system).
            * - MAT
              -
-             - Material number associated with the keypoint.
+             - Material number associated with the volume.
            * - TYPE
              -
-             - Element type number associated with the keypoint.
+             - Element type number associated with the volume.
            * - REAL
              -
-             - Real constant set number associated with the keypoint.
+             - Real constant set number associated with the volume.
            * - ESYS
              -
-             - Element coordinate system associated with the keypoint.
+             - Element coordinate system associated with the volume.
 
         """
-        command = f"KSEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kabs}"
+        command = f"VSEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kswp}"
+        return self.run(command, **kwargs)
+
+    def vsla(self, type_: str = "", vlkey: int | str = "", **kwargs):
+        r"""Selects those volumes containing the selected areas.
+
+        Mechanical APDL Command: `VSLA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSLA.html>`_
+
+        Parameters
+        ----------
+        type_ : str
+            Label identifying the type of volume select:
+
+            * ``S`` - Select a new set (default).
+
+            * ``R`` - Reselect a set from the current set.
+
+            * ``A`` - Additionally select a set and extend the current set.
+
+            * ``U`` - Unselect a set from the current set.
+
+        vlkey : int or str
+            Specifies whether all contained volume areas must be selected ( :ref:`asel` ):
+
+            * ``0`` - Select volume if any of its areas are in the selected area set.
+
+            * ``1`` - Select volume only if all of its areas are in the selected area set.
+
+        Notes
+        -----
+
+        .. _VSLA_notes:
+
+        This command is valid in any processor.
+        """
+        command = f"VSLA,{type_},{vlkey}"
+        return self.run(command, **kwargs)
+
+    def lsla(self, type_: str = "", **kwargs):
+        r"""Selects those lines contained in the selected areas.
+
+        Mechanical APDL Command: `LSLA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LSLA.html>`_
+
+        Parameters
+        ----------
+        type_ : str
+            Label identifying the type of line select:
+
+            * ``S`` - Select a new set (default).
+
+            * ``R`` - Reselect a set from the current set.
+
+            * ``A`` - Additionally select a set and extend the current set.
+
+            * ``U`` - Unselect a set from the current set.
+
+        Notes
+        -----
+
+        .. _LSLA_notes:
+
+        This command is valid in any processor.
+        """
+        command = f"LSLA,{type_}"
         return self.run(command, **kwargs)
 
     def lslk(self, type_: str = "", lskey: int | str = "", **kwargs):
@@ -423,34 +247,6 @@ class Selecting:
         This command is valid in any processor.
         """
         command = f"LSLK,{type_},{lskey}"
-        return self.run(command, **kwargs)
-
-    def lsla(self, type_: str = "", **kwargs):
-        r"""Selects those lines contained in the selected areas.
-
-        Mechanical APDL Command: `LSLA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LSLA.html>`_
-
-        Parameters
-        ----------
-        type_ : str
-            Label identifying the type of line select:
-
-            * ``S`` - Select a new set (default).
-
-            * ``R`` - Reselect a set from the current set.
-
-            * ``A`` - Additionally select a set and extend the current set.
-
-            * ``U`` - Unselect a set from the current set.
-
-        Notes
-        -----
-
-        .. _LSLA_notes:
-
-        This command is valid in any processor.
-        """
-        command = f"LSLA,{type_}"
         return self.run(command, **kwargs)
 
     def lsel(
@@ -618,6 +414,180 @@ class Selecting:
         command = f"LSEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kswp}"
         return self.run(command, **kwargs)
 
+    def dofsel(
+        self,
+        type_: str = "",
+        dof1: str = "",
+        dof2: str = "",
+        dof3: str = "",
+        dof4: str = "",
+        dof5: str = "",
+        dof6: str = "",
+        **kwargs,
+    ):
+        r"""Selects a DOF label set for reference by other commands.
+
+        Mechanical APDL Command: `DOFSEL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DOFSEL.html>`_
+
+        **Command default:**
+
+        .. _DOFSEL_default:
+
+        Degree of freedom (and the corresponding force) labels are determined from the model.
+
+        Parameters
+        ----------
+        type_ : str
+            Label identifying the type of select:
+
+            * ``S`` - Select a new set of labels.
+
+            * ``A`` - Add labels to the current set.
+
+            * ``U`` - Unselect (remove) labels from the current set.
+
+            * ``ALL`` - Restore the full set of labels.
+
+            * ``STAT`` - Display the current select status.
+
+        dof1 : str
+            Used only with ``Type`` = S, A, or U. Valid lables are:
+
+            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
+            (rotations); ROT (ROTX,
+            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
+            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
+            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
+            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
+            (current).
+            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
+            (MX, MY, and MZ); FORC (F
+            and M); DVOL (fluid mass flow rate).
+            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            **Fluid flow force label** : FLOW (fluid flow).
+            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
+            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
+            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
+
+        dof2 : str
+            Used only with ``Type`` = S, A, or U. Valid lables are:
+
+            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
+            (rotations); ROT (ROTX,
+            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
+            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
+            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
+            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
+            (current).
+            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
+            (MX, MY, and MZ); FORC (F
+            and M); DVOL (fluid mass flow rate).
+            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            **Fluid flow force label** : FLOW (fluid flow).
+            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
+            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
+            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
+
+        dof3 : str
+            Used only with ``Type`` = S, A, or U. Valid lables are:
+
+            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
+            (rotations); ROT (ROTX,
+            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
+            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
+            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
+            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
+            (current).
+            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
+            (MX, MY, and MZ); FORC (F
+            and M); DVOL (fluid mass flow rate).
+            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            **Fluid flow force label** : FLOW (fluid flow).
+            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
+            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
+            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
+
+        dof4 : str
+            Used only with ``Type`` = S, A, or U. Valid lables are:
+
+            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
+            (rotations); ROT (ROTX,
+            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
+            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
+            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
+            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
+            (current).
+            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
+            (MX, MY, and MZ); FORC (F
+            and M); DVOL (fluid mass flow rate).
+            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            **Fluid flow force label** : FLOW (fluid flow).
+            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
+            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
+            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
+
+        dof5 : str
+            Used only with ``Type`` = S, A, or U. Valid lables are:
+
+            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
+            (rotations); ROT (ROTX,
+            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
+            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
+            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
+            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
+            (current).
+            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
+            (MX, MY, and MZ); FORC (F
+            and M); DVOL (fluid mass flow rate).
+            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            **Fluid flow force label** : FLOW (fluid flow).
+            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
+            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
+            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
+
+        dof6 : str
+            Used only with ``Type`` = S, A, or U. Valid lables are:
+
+            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
+            (rotations); ROT (ROTX,
+            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
+            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
+            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
+            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
+            (current).
+            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
+            (MX, MY, and MZ); FORC (F
+            and M); DVOL (fluid mass flow rate).
+            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            **Fluid flow force label** : FLOW (fluid flow).
+            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
+            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
+            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
+
+        Notes
+        -----
+
+        .. _DOFSEL_notes:
+
+        Selects a degree of freedom label set for reference by other commands. The label set is used on
+        certain commands where ALL is either input in the degree of freedom label field or implied. The
+        active label set has no effect on the solution degrees of freedom. Specified labels which are not
+        active in the model (from the :ref:`et` or :ref:`dof` command) are ignored. As a convenience, a set
+        of force labels corresponding to the degree of freedom labels is also selected. For example,
+        selecting UX also causes FX to be selected (and vice versa). The force label set is used on certain
+        commands where ALL is input in the force label field.
+
+        This command is valid in any processor.
+        """
+        command = f"DOFSEL,{type_},{dof1},{dof2},{dof3},{dof4},{dof5},{dof6}"
+        return self.run(command, **kwargs)
+
     def esll(self, type_: str = "", **kwargs):
         r"""Selects those elements associated with the selected lines.
 
@@ -729,36 +699,6 @@ class Selecting:
         This command is valid in any processor.
         """
         command = f"ESLA,{type_}"
-        return self.run(command, **kwargs)
-
-    def eslv(self, type_: str = "", **kwargs):
-        r"""Selects elements associated with the selected volumes.
-
-        Mechanical APDL Command: `ESLV <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ESLV.html>`_
-
-        Parameters
-        ----------
-        type_ : str
-            Label identifying the type of element selected:
-
-            * ``S`` - Select a new set (default).
-
-            * ``R`` - Reselect a set from the current set.
-
-            * ``A`` - Additionally select a set and extend the current set.
-
-            * ``U`` - Unselect a set from the current set.
-
-        Notes
-        -----
-
-        .. _ESLV_notes:
-
-        Selects volume elements belonging to meshed ( :ref:`vmesh` ), selected ( :ref:`vsel` ) volumes.
-
-        This command is valid in any processor.
-        """
-        command = f"ESLV,{type_}"
         return self.run(command, **kwargs)
 
     def esel(
@@ -938,15 +878,15 @@ class Selecting:
         command = f"ESEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kabs}"
         return self.run(command, **kwargs)
 
-    def nslk(self, type_: str = "", **kwargs):
-        r"""Selects those nodes associated with the selected keypoints.
+    def eslv(self, type_: str = "", **kwargs):
+        r"""Selects elements associated with the selected volumes.
 
-        Mechanical APDL Command: `NSLK <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NSLK.html>`_
+        Mechanical APDL Command: `ESLV <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ESLV.html>`_
 
         Parameters
         ----------
         type_ : str
-            Label identifying the type of node select:
+            Label identifying the type of element selected:
 
             * ``S`` - Select a new set (default).
 
@@ -959,14 +899,13 @@ class Selecting:
         Notes
         -----
 
-        .. _NSLK_notes:
+        .. _ESLV_notes:
 
-        Valid only if the nodes were generated by a keypoint meshing operation ( :ref:`kmesh`, :ref:`lmesh`,
-        :ref:`amesh`, :ref:`vmesh` ) on a solid model that contains the selected keypoints.
+        Selects volume elements belonging to meshed ( :ref:`vmesh` ), selected ( :ref:`vsel` ) volumes.
 
         This command is valid in any processor.
         """
-        command = f"NSLK,{type_}"
+        command = f"ESLV,{type_}"
         return self.run(command, **kwargs)
 
     def nsle(self, type_: str = "", nodetype: str = "", num: str = "", **kwargs):
@@ -1062,10 +1001,10 @@ class Selecting:
         command = f"NSLL,{type_},{nkey}"
         return self.run(command, **kwargs)
 
-    def nsla(self, type_: str = "", nkey: int | str = "", **kwargs):
-        r"""Selects those nodes associated with the selected areas.
+    def nslk(self, type_: str = "", **kwargs):
+        r"""Selects those nodes associated with the selected keypoints.
 
-        Mechanical APDL Command: `NSLA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NSLA.html>`_
+        Mechanical APDL Command: `NSLK <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NSLK.html>`_
 
         Parameters
         ----------
@@ -1080,25 +1019,17 @@ class Selecting:
 
             * ``U`` - Unselect a set from the current set.
 
-        nkey : int or str
-            Specifies whether only interior area nodes are to be selected:
-
-            * ``0`` - Select only nodes interior to selected areas.
-
-            * ``1`` - Select all nodes (interior to area, interior to lines, and at keypoints) associated with the
-              selected areas.
-
         Notes
         -----
 
-        .. _NSLA_notes:
+        .. _NSLK_notes:
 
-        Valid only if the nodes were generated by an area meshing operation ( :ref:`amesh`, :ref:`vmesh` )
-        on a solid model that contains the selected areas.
+        Valid only if the nodes were generated by a keypoint meshing operation ( :ref:`kmesh`, :ref:`lmesh`,
+        :ref:`amesh`, :ref:`vmesh` ) on a solid model that contains the selected keypoints.
 
         This command is valid in any processor.
         """
-        command = f"NSLA,{type_},{nkey}"
+        command = f"NSLK,{type_}"
         return self.run(command, **kwargs)
 
     def nsel(
@@ -1524,6 +1455,45 @@ class Selecting:
         command = f"NSEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kabs}"
         return self.run(command, **kwargs)
 
+    def nsla(self, type_: str = "", nkey: int | str = "", **kwargs):
+        r"""Selects those nodes associated with the selected areas.
+
+        Mechanical APDL Command: `NSLA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NSLA.html>`_
+
+        Parameters
+        ----------
+        type_ : str
+            Label identifying the type of node select:
+
+            * ``S`` - Select a new set (default).
+
+            * ``R`` - Reselect a set from the current set.
+
+            * ``A`` - Additionally select a set and extend the current set.
+
+            * ``U`` - Unselect a set from the current set.
+
+        nkey : int or str
+            Specifies whether only interior area nodes are to be selected:
+
+            * ``0`` - Select only nodes interior to selected areas.
+
+            * ``1`` - Select all nodes (interior to area, interior to lines, and at keypoints) associated with the
+              selected areas.
+
+        Notes
+        -----
+
+        .. _NSLA_notes:
+
+        Valid only if the nodes were generated by an area meshing operation ( :ref:`amesh`, :ref:`vmesh` )
+        on a solid model that contains the selected areas.
+
+        This command is valid in any processor.
+        """
+        command = f"NSLA,{type_},{nkey}"
+        return self.run(command, **kwargs)
+
     def nslv(self, type_: str = "", nkey: int | str = "", **kwargs):
         r"""Selects those nodes associated with the selected volumes.
 
@@ -1561,169 +1531,6 @@ class Selecting:
         This command is valid in any processor.
         """
         command = f"NSLV,{type_},{nkey}"
-        return self.run(command, **kwargs)
-
-    def vsel(
-        self,
-        type_: str = "",
-        item: str = "",
-        comp: str = "",
-        vmin: str = "",
-        vmax: str = "",
-        vinc: str = "",
-        kswp: str = "",
-        **kwargs,
-    ):
-        r"""Selects a subset of volumes.
-
-        Mechanical APDL Command: `VSEL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_
-
-        Parameters
-        ----------
-        type_ : str
-            Label identifying the type of volume select:
-
-            * ``S`` - Select a new set (default).
-
-            * ``R`` - Reselect a set from the current set.
-
-            * ``A`` - Additionally select a set and extend the current set.
-
-            * ``U`` - Unselect a set from the current set.
-
-            * ``ALL`` - Restore the full set.
-
-            * ``NONE`` - Unselect the full set.
-
-            * ``INVE`` - Invert the current set (selected becomes unselected and vice versa).
-
-            * ``STAT`` - Display the current select status.
-
-        item : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
-            information.
-
-        comp : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
-            information.
-
-        vmin : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
-            information.
-
-        vmax : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
-            information.
-
-        vinc : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
-            information.
-
-        kswp : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
-            information.
-
-        Notes
-        -----
-
-        .. _VSEL_notes:
-
-        Selects volumes based on values of a labeled item and component. For example, to select a new set of
-        volumes based on volume numbers 1 through 7, use :ref:`vsel`,S,VOLU,,1,7. The subset is used when
-        the ALL label is entered (or implied) on other commands, such as :ref:`vlist`,ALL. Only data
-        identified by volume number are selected. Data are flagged as selected and unselected; no data are
-        actually deleted from the database.
-
-        This command is valid in any processor.
-
-        For Selects based on non-integer numbers (coordinates, results, etc.), items that are within the
-        range VMIN- ``Toler`` and VMAX+ ``Toler`` are selected. The default tolerance ``Toler`` is based on
-        the relative values of VMIN and VMAX as follows:
-
-        If VMIN = VMAX, ``Toler`` = 0.005 x VMIN.
-        If VMIN = VMAX = 0.0, ``Toler`` = 1.0E-6.
-        If VMAX ≠ VMIN, ``Toler`` = 1.0E-8 x (VMAX-VMIN).
-
-        Use the `SELTOL
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SELTOL.html#SELTOL.menupath>`_
-        :ref:`seltol` command to override this default and specify ``Toler`` explicitly.
-
-        **VSEL - Valid Item and Component Labels**
-
-        .. flat-table:: :ref:`vsel`  ``Type, Item, Comp, VMIN, VMAX, VINC, KABS``
-           :header-rows: 1
-
-           * - Item
-             - Comp
-             - Description
-           * - VOLU
-             -
-             - Volume number.
-           * - LOC
-             - X, Y, Z
-             - X, Y, or Z center (picking "hot spot" location in the active coordinate system).
-           * - MAT
-             -
-             - Material number associated with the volume.
-           * - TYPE
-             -
-             - Element type number associated with the volume.
-           * - REAL
-             -
-             - Real constant set number associated with the volume.
-           * - ESYS
-             -
-             - Element coordinate system associated with the volume.
-
-        """
-        command = f"VSEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kswp}"
-        return self.run(command, **kwargs)
-
-    def vsla(self, type_: str = "", vlkey: int | str = "", **kwargs):
-        r"""Selects those volumes containing the selected areas.
-
-        Mechanical APDL Command: `VSLA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSLA.html>`_
-
-        Parameters
-        ----------
-        type_ : str
-            Label identifying the type of volume select:
-
-            * ``S`` - Select a new set (default).
-
-            * ``R`` - Reselect a set from the current set.
-
-            * ``A`` - Additionally select a set and extend the current set.
-
-            * ``U`` - Unselect a set from the current set.
-
-        vlkey : int or str
-            Specifies whether all contained volume areas must be selected ( :ref:`asel` ):
-
-            * ``0`` - Select volume if any of its areas are in the selected area set.
-
-            * ``1`` - Select volume only if all of its areas are in the selected area set.
-
-        Notes
-        -----
-
-        .. _VSLA_notes:
-
-        This command is valid in any processor.
-        """
-        command = f"VSLA,{type_},{vlkey}"
         return self.run(command, **kwargs)
 
     def asll(self, type_: str = "", arkey: int | str = "", **kwargs):
@@ -2014,33 +1821,228 @@ class Selecting:
 
         Notes
         -----
-        For selects based on non-integer numbers (e.g. coordinates, results, etc.), items within the range
-        VMIN - ``Toler`` and VMAX + ``Toler`` are selected, where VMIN and VMAX are the range values input
-        on the xSEL commands ( `ASEL
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_ASEL.html#ASEL.menupath>`_
-        :ref:`asel`, `ESEL
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_ESEL.html#ESEL.menupath>`_
-        :ref:`esel`, `KSEL
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_KSEL.html#KSEL.menupath>`_
-        :ref:`ksel`, `LSEL
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_LSEL.html#LSEL.menupath>`_
-        :ref:`lsel`, `NSEL
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_NSEL.html#NSEL.menupath>`_
-        :ref:`nsel`, and `VSEL
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_VSEL.html#VSEL.menupath>`_
-        :ref:`vsel` ).
+        For selects based on non-integer numbers (e.g. coordinates,
+        results, etc.), items within the range VMIN - Toler and VMAX +
+        Toler are selected, where VMIN and VMAX are the range values input
+        on the xSEL commands (ASEL, ESEL, KSEL, LSEL, NSEL, and VSEL).
 
-        The default tolerance logic is based on the relative values of VMIN and VMAX as follows:
+        The default tolerance logic is based on the relative values of
+        VMIN and VMAX as follows:
 
-        If VMIN = VMAX, ``Toler`` = 0.005 x VMIN.
-        If VMIN = VMAX = 0.0, ``Toler`` = 1.0E-6.
-        If VMAX ≠ VMIN, ``Toler`` = 1.0E-8 x (VMAX-VMIN).
+        If ``vmin == vmax``, ``toler = 0.005\2vmin``
 
-        This command is typically used when VMAX-VMIN is very large so that the computed default tolerance
-        is therefore large and the xSEL  commands selects more than what is desired.
+        If ``vmin == vmax == 0.0``, ``toler = 1.0E-6``.
 
-        ``Toler`` remains active until respecified by a subsequent :ref:`seltol` command. A :ref:`seltol` <
-        blank > resets back to the default ``Toler`` logic.
+        If ``vmax != vmin``, ``toler = 1.0E-8 x (vmax - vmin)``.
+
+        This command is typically used when ``vmax - vmin`` is very large so
+        that the computed default tolerance is therefore large and the
+        xSEL commands selects more than what is desired.
+
+        Toler remains active until respecified by a subsequent seltol
+        command. ``seltol()`` resets back to the default toler value.
+
+        Examples
+        --------
+        Set selection tolarance to 1E-5
+
+        >>> seltol(1E-5)
         """
-        command = f"SELTOL,{toler}"
+        if toler:
+            cmd = f"SELTOL,{toler}"
+        else:
+            cmd = "SELTOL"
+        return self.run(cmd, **kwargs)
+
+    def ksll(self, type_: str = "", **kwargs):
+        r"""Selects those keypoints contained in the selected lines.
+
+        Mechanical APDL Command: `KSLL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSLL.html>`_
+
+        Parameters
+        ----------
+        type_ : str
+            Label identifying the type of keypoint select:
+
+            * ``S`` - Select a new set (default).
+
+            * ``R`` - Reselect a set from the current set.
+
+            * ``A`` - Additionally select a set and extend the current set.
+
+            * ``U`` - Unselect a set from the current set.
+
+        Notes
+        -----
+
+        .. _KSLL_notes:
+
+        This command is valid in any processor.
+        """
+        command = f"KSLL,{type_}"
+        return self.run(command, **kwargs)
+
+    def ksel(
+        self,
+        type_: str = "",
+        item: str = "",
+        comp: str = "",
+        vmin: str = "",
+        vmax: str = "",
+        vinc: str = "",
+        kabs: str = "",
+        **kwargs,
+    ):
+        r"""Selects a subset of keypoints or hard points.
+
+        Mechanical APDL Command: `KSEL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_
+
+        Parameters
+        ----------
+        type_ : str
+            Label identifying the type of select:
+
+            * ``S`` - Select a new set (default).
+
+            * ``R`` - Reselect a set from the current set.
+
+            * ``A`` - Additionally select a set and extend the current set.
+
+            * ``U`` - Unselect a set from the current set.
+
+            * ``ALL`` - Restore the full set.
+
+            * ``NONE`` - Unselect the full set.
+
+            * ``INVE`` - Invert the current set (selected becomes unselected and vice versa).
+
+            * ``STAT`` - Display the current select status.
+
+        item : str
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
+            information.
+
+        comp : str
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
+            information.
+
+        vmin : str
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
+            information.
+
+        vmax : str
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
+            information.
+
+        vinc : str
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
+            information.
+
+        kabs : str
+            The description of the argument is missing in the Python function. Please, refer to the `command
+            documentation
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
+            information.
+
+        Notes
+        -----
+
+        .. _KSEL_notes:
+
+        Selects a subset of keypoints or hard points. For example, to select a new set of keypoints based on
+        keypoint numbers 1 through 7, use :ref:`ksel`,S,KP,,1,7. The selected subset is used when the ALL
+        label is entered (or implied) on other commands, such as :ref:`klist`,ALL. Only data identified by
+        keypoint number are selected. Data are flagged as selected and unselected; no data are actually
+        deleted from the database.
+
+        This command is valid in any processor.
+
+        For selections based on non-integer numbers (coordinates, results, etc.), items that are within the
+        range ``VMIN`` - ``Toler`` and ``VMAX`` + ``Toler`` are selected. The default tolerance ``Toler`` is
+        based on the relative values of ``VMIN`` and ``VMAX`` as follows:
+
+        If ``VMIN`` = ``VMAX``, ``Toler`` = 0.005 x ``VMIN``.
+        If ``VMIN`` = ``VMAX`` = 0.0, ``Toler`` = 1.0E-6.
+        If ``VMAX`` ≠ ``VMIN``, ``Toler`` = 1.0E-8 x ( ``VMAX`` - ``VMIN`` ).
+
+        Use the `SELTOL
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SELTOL.html#SELTOL.menupath>`_
+        :ref:`seltol` command to override this default and specify ``Toler`` explicitly.
+
+        **KSEL - Valid Item and Component Labels**
+
+        .. flat-table:: Valid Item and Component Labels :ref:`ksel`, ``Type, Item, Comp, VMIN, VMAX, VINC,`` KABS
+           :header-rows: 1
+
+           * - Item
+             - Comp
+             - Description
+           * - KP
+             -
+             - Keypoint number.
+           * - EXT
+             -
+             - Keypoint numbers on exterior of selected lines (ignore remaining fields).
+           * - HPT
+             -
+             - Hard point number.
+           * - LOC
+             - X,Y,Z
+             - X, Y, or Z location in the active coordinate system.
+           * - MAT
+             -
+             - Material number associated with the keypoint.
+           * - TYPE
+             -
+             - Element type number associated with the keypoint.
+           * - REAL
+             -
+             - Real constant set number associated with the keypoint.
+           * - ESYS
+             -
+             - Element coordinate system associated with the keypoint.
+
+        """
+        command = f"KSEL,{type_},{item},{comp},{vmin},{vmax},{vinc},{kabs}"
+        return self.run(command, **kwargs)
+
+    def ksln(self, type_: str = "", **kwargs):
+        r"""Selects those keypoints associated with the selected nodes.
+
+        Mechanical APDL Command: `KSLN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSLN.html>`_
+
+        Parameters
+        ----------
+        type_ : str
+            Label identifying the type of keypoint select:
+
+            * ``S`` - Select a new set (default).
+
+            * ``R`` - Reselect a set from the current set.
+
+            * ``A`` - Additionally select a set and extend the current set.
+
+            * ``U`` - Unselect a set from the current set.
+
+        Notes
+        -----
+
+        .. _KSLN_notes:
+
+        Valid only if the nodes were generated by a meshing operation ( :ref:`kmesh`, :ref:`lmesh`,
+        :ref:`amesh`, :ref:`vmesh` ) on a solid model that contains the associated keypoints.
+
+        This command is valid in any processor.
+        """
+        command = f"KSLN,{type_}"
         return self.run(command, **kwargs)

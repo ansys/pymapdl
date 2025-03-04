@@ -23,80 +23,6 @@
 
 class SetUp:
 
-    def resume(
-        self,
-        fname: str = "",
-        ext: str = "",
-        nopar: int | str = "",
-        knoplot: str = "",
-        **kwargs,
-    ):
-        r"""Resumes the database from the database file.
-
-        Mechanical APDL Command: `RESUME <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RESUME.html>`_
-
-        Parameters
-        ----------
-        fname : str
-            File name and directory path (248 characters maximum, including the characters needed for the
-            directory path). An unspecified directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name. The file name defaults to :file:`Jobname`.
-
-        ext : str
-            Filename extension (eight-character maximum). The extension defaults to DB if ``Fname`` is
-            blank.
-
-        nopar : int or str
-            Parameter resume key:
-
-            * ``0`` - All data in the database, including the scalar parameters, are replaced with the data saved on
-              :file:`Jobname.db` (default).
-
-            * ``1`` - All data in the database, except the scalar parameters, are replaced with the data saved on
-              :file:`Jobname.db`.
-
-        knoplot : str
-            If equal to 1, will suppress automatic plot. Otherwise, if the GUI is on and this :ref:`resume`
-            command was not read from a file, the selected elements from ``Fname`` are plotted. (If there
-            are no selected elements, selected nodes are plotted. If no nodes, volumes; if no volumes,
-            areas; if no areas, lines; if no lines, keypoints. If there are no selected keypoints, the
-            screen is erased.)
-
-        Notes
-        -----
-
-        .. _RESUME_notes:
-
-        The :ref:`resume` command resumes a database file into Mechanical APDL. The command causes the
-        database
-        file ( :file:`Jobname.db` ) to be read, thereby resetting the database (including any geometry
-        settings) either a) as it was at the last :ref:`save` command, or b) as it was saved with the last
-        :ref:`slashexit` command, whichever was last.
-
-        For multiple load step analyses (because only the data for one load step at a time may reside in the
-        database), the load step data restored to the database will correspond to the load step data written
-        when the save occurred.
-
-        If the database file was saved in another Ansys, Inc. product, it may contain element type
-        and :ref:`keyopt` specifications which are invalid in the resuming product. Immediately after the
-        database resume is completed, you should redefine these invalid element types and :ref:`keyopt`
-        settings to valid ones ( :ref:`et`, :ref:`keyopt` ).
-
-        The ``NOPAR`` = 1 option should not be used if array parameters are defined, as existing array
-        parameters might be redefined with arbitrary values. For a more general method of preventing the
-        replacement of both scalar and array parameters, see :ref:`parsav` and :ref:`parres`.)
-
-        If a radiosity mapping data file ( :file:`.rsm` file) was saved by the previous :ref:`save` command,
-        that mapping file must be present in the directory along with the database file in order for
-        radiosity surface elements ( SURF251, SURF252 ) to be correctly mapped onto the model when
-        :ref:`resume` is issued.
-
-        This command is valid in any processor. If used in the solution processor, this command is valid
-        only within the first load step.
-        """
-        command = f"RESUME,{fname},{ext},,{nopar},{knoplot}"
-        return self.run(command, **kwargs)
-
     def title(self, title: str = "", **kwargs):
         r"""Defines a main title.
 
@@ -253,35 +179,113 @@ class SetUp:
         command = f"/UNITS,{label},{lenfact},{massfact},{timefact},{tempfact},{toffst},{chargefact},{forcefact},{heatfact}"
         return self.run(command, **kwargs)
 
-    def smbc(self, mode: str = "", **kwargs):
-        r"""Controls the display of solid model boundary condition symbols and labels.
+    def resume(
+        self,
+        fname: str = "",
+        ext: str = "",
+        nopar: int | str = "",
+        knoplot: str = "",
+        **kwargs,
+    ):
+        r"""Resumes the database from the database file.
 
-        Mechanical APDL Command: `/SMBC <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SMBC_sl.html>`_
+        Mechanical APDL Command: `RESUME <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RESUME.html>`_
 
         Parameters
         ----------
-        mode : str
+        fname : str
+            File name and directory path (248 characters maximum, including the characters needed for the
+            directory path). An unspecified directory path defaults to the working directory; in this case,
+            you can use all 248 characters for the file name. The file name defaults to :file:`Jobname`.
 
-            * ``CENT`` - Solid model boundary condition symbols and labels appear at the centroid of the solid model entity
-              (default).
+        ext : str
+            Filename extension (eight-character maximum). The extension defaults to DB if ``Fname`` is
+            blank.
 
-            * ``TESS`` - Solid model boundary condition symbols and labels appear inside each constituent element of the
-              tessellation.
+        nopar : int or str
+            Parameter resume key:
+
+            * ``0`` - All data in the database, including the scalar parameters, are replaced with the data saved on
+              :file:`Jobname.db` (default).
+
+            * ``1`` - All data in the database, except the scalar parameters, are replaced with the data saved on
+              :file:`Jobname.db`.
+
+        knoplot : str
+            If equal to 1, will suppress automatic plot. Otherwise, if the GUI is on and this :ref:`resume`
+            command was not read from a file, the selected elements from ``Fname`` are plotted. (If there
+            are no selected elements, selected nodes are plotted. If no nodes, volumes; if no volumes,
+            areas; if no areas, lines; if no lines, keypoints. If there are no selected keypoints, the
+            screen is erased.)
 
         Notes
         -----
 
-        .. _s-SMBC_notes:
+        .. _RESUME_notes:
 
-        ``Mode`` = CENT is designed to reduce the clutter of boundary condition symbols in solid model
-        plots. For example, if you have assigned normal pressure loads to an area, you may choose to display
-        the pressures as arrows with the :ref:`psf` command using :ref:`psf`,PRES,NORM,2. When ``Mode`` =
-        CENT, the pressure arrow is displayed at the centroid of the area. When ``Mode`` = TESS, a pressure
-        arrow is displayed at the centroid of each polygon of the area's tessellation.
+        The :ref:`resume` command resumes a database file into Mechanical APDL. The command causes the
+        database
+        file ( :file:`Jobname.db` ) to be read, thereby resetting the database (including any geometry
+        settings) either a) as it was at the last :ref:`save` command, or b) as it was saved with the last
+        :ref:`slashexit` command, whichever was last.
+
+        For multiple load step analyses (because only the data for one load step at a time may reside in the
+        database), the load step data restored to the database will correspond to the load step data written
+        when the save occurred.
+
+        If the database file was saved in another Ansys, Inc. product, it may contain element type
+        and :ref:`keyopt` specifications which are invalid in the resuming product. Immediately after the
+        database resume is completed, you should redefine these invalid element types and :ref:`keyopt`
+        settings to valid ones ( :ref:`et`, :ref:`keyopt` ).
+
+        The ``NOPAR`` = 1 option should not be used if array parameters are defined, as existing array
+        parameters might be redefined with arbitrary values. For a more general method of preventing the
+        replacement of both scalar and array parameters, see :ref:`parsav` and :ref:`parres`.)
+
+        If a radiosity mapping data file ( :file:`.rsm` file) was saved by the previous :ref:`save` command,
+        that mapping file must be present in the directory along with the database file in order for
+        radiosity surface elements ( SURF251, SURF252 ) to be correctly mapped onto the model when
+        :ref:`resume` is issued.
+
+        This command is valid in any processor. If used in the solution processor, this command is valid
+        only within the first load step.
+        """
+        command = f"RESUME,{fname},{ext},,{nopar},{knoplot}"
+        return self.run(command, **kwargs)
+
+    def stitle(self, nline: str = "", title: str = "", **kwargs):
+        r"""Defines subtitles.
+
+        Mechanical APDL Command: `/STITLE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_STITLE.html>`_
+
+        Parameters
+        ----------
+        nline : str
+            Subtitle line number (1 to 4). Defaults to 1.
+
+        title : str
+            Input up to 70 alphanumeric characters. Parameter substitution may be forced within the title by
+            enclosing the parameter name or parametric expression within percent (%) signs. If ``Title`` is
+            blank, this subtitle is deleted.
+
+        Notes
+        -----
+
+        .. _s-STITLE_notes:
+
+        Up to four subtitles are displayed in the output along with the main title ( :ref:`title` ).
+
+        Subtitles do not appear in GUI windows or in plot displays.
+
+        The first subtitle is also written to various Mechanical APDL files along with the main title.
+
+        Previous subtitles can be overwritten or deleted.
+
+        Issue :ref:`slashstatus` to display titles.
 
         This command is valid in any processor.
         """
-        command = f"/SMBC,{mode}"
+        command = f"/STITLE,{nline},{title}"
         return self.run(command, **kwargs)
 
     def save(self, fname: str = "", ext: str = "", slab: str = "", **kwargs):
@@ -347,39 +351,35 @@ class SetUp:
         command = f"SAVE,{fname},{ext},,{slab}"
         return self.run(command, **kwargs)
 
-    def stitle(self, nline: str = "", title: str = "", **kwargs):
-        r"""Defines subtitles.
+    def smbc(self, mode: str = "", **kwargs):
+        r"""Controls the display of solid model boundary condition symbols and labels.
 
-        Mechanical APDL Command: `/STITLE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_STITLE.html>`_
+        Mechanical APDL Command: `/SMBC <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SMBC_sl.html>`_
 
         Parameters
         ----------
-        nline : str
-            Subtitle line number (1 to 4). Defaults to 1.
+        mode : str
 
-        title : str
-            Input up to 70 alphanumeric characters. Parameter substitution may be forced within the title by
-            enclosing the parameter name or parametric expression within percent (%) signs. If ``Title`` is
-            blank, this subtitle is deleted.
+            * ``CENT`` - Solid model boundary condition symbols and labels appear at the centroid of the solid model entity
+              (default).
+
+            * ``TESS`` - Solid model boundary condition symbols and labels appear inside each constituent element of the
+              tessellation.
 
         Notes
         -----
 
-        .. _s-STITLE_notes:
+        .. _s-SMBC_notes:
 
-        Up to four subtitles are displayed in the output along with the main title ( :ref:`title` ).
-
-        Subtitles do not appear in GUI windows or in plot displays.
-
-        The first subtitle is also written to various Mechanical APDL files along with the main title.
-
-        Previous subtitles can be overwritten or deleted.
-
-        Issue :ref:`slashstatus` to display titles.
+        ``Mode`` = CENT is designed to reduce the clutter of boundary condition symbols in solid model
+        plots. For example, if you have assigned normal pressure loads to an area, you may choose to display
+        the pressures as arrows with the :ref:`psf` command using :ref:`psf`,PRES,NORM,2. When ``Mode`` =
+        CENT, the pressure arrow is displayed at the centroid of the area. When ``Mode`` = TESS, a pressure
+        arrow is displayed at the centroid of each polygon of the area's tessellation.
 
         This command is valid in any processor.
         """
-        command = f"/STITLE,{nline},{title}"
+        command = f"/SMBC,{mode}"
         return self.run(command, **kwargs)
 
     def stat(self, **kwargs):

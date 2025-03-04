@@ -7,11 +7,11 @@ Database
 .. list-table::
 
    * - :ref:`ref_selecting`
-   * - :ref:`ref_working_plane`
    * - :ref:`ref_coordinate_system`
+   * - :ref:`ref_working_plane`
+   * - :ref:`ref_set_up`
    * - :ref:`ref_components`
    * - :ref:`ref_picking`
-   * - :ref:`ref_set_up`
 
 
 .. toctree::
@@ -19,8 +19,8 @@ Database
    :hidden:
 
    selecting
-   working_plane
    coordinate_system
+   working_plane
+   set_up
    components
    picking
-   set_up

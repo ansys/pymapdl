@@ -23,6 +23,285 @@
 
 class CoordinateSystem:
 
+    def local(
+        self,
+        kcn: str = "",
+        kcs: str = "",
+        xc: str = "",
+        yc: str = "",
+        zc: str = "",
+        thxy: str = "",
+        thyz: str = "",
+        thzx: str = "",
+        par1: str = "",
+        par2: str = "",
+        **kwargs,
+    ):
+        r"""Defines a local coordinate system by a location and orientation.
+
+        Mechanical APDL Command: `LOCAL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LOCAL.html>`_
+
+        Parameters
+        ----------
+        kcn : str
+            Arbitrary reference number assigned to this coordinate system. Must be greater than 10. A
+            coordinate system previously defined with this number will be redefined.
+
+        kcs : str
+            Coordinate system type:
+
+            * ``0 or CART`` - Cartesian
+
+            * ``1 or CYLIN`` - Cylindrical (circular or elliptical)
+
+            * ``2 or SPHE`` - Spherical (or spheroidal)
+
+            * ``3 or TORO`` - Toroidal
+
+        xc : str
+            Location (in the global Cartesian coordinate system) of the origin of the new coordinate system.
+
+        yc : str
+            Location (in the global Cartesian coordinate system) of the origin of the new coordinate system.
+
+        zc : str
+            Location (in the global Cartesian coordinate system) of the origin of the new coordinate system.
+
+        thxy : str
+            First rotation about local Z (positive X toward Y).
+
+        thyz : str
+            Second rotation about local X (positive Y toward Z).
+
+        thzx : str
+            Third rotation about local Y (positive Z toward X).
+
+        par1 : str
+            Used for elliptical, spheroidal, or toroidal systems. If ``KCS`` = 1 or 2, ``PAR1`` is the ratio
+            of the ellipse Y-axis radius to X-axis radius (defaults to 1.0 (circle)). If ``KCS`` = 3,
+            ``PAR1`` is the major radius of the torus.
+
+        par2 : str
+            Used for spheroidal systems. If ``KCS`` = 2, ``PAR2`` = ratio of ellipse Z-axis radius to X-axis
+            radius (defaults to 1.0 (circle)).
+
+        Notes
+        -----
+
+        .. _LOCAL_notes:
+
+        Defines a local coordinate system by origin location and orientation angles. The local coordinate
+        system is parallel to the global Cartesian system unless rotated. Rotation angles are in degrees and
+        redefine any previous rotation angles. See the :ref:`clocal`, :ref:`cs`, :ref:`cswpla`, and
+        :ref:`cskp` commands for alternate definitions. This local system becomes the active coordinate
+        system ( :ref:`csys` ). Local coordinate systems may be displayed with the :ref:`psymb` command.
+
+        This command is valid in any processor.
+        """
+        command = f"LOCAL,{kcn},{kcs},{xc},{yc},{zc},{thxy},{thyz},{thzx},{par1},{par2}"
+        return self.run(command, **kwargs)
+
+    def cswpla(
+        self, kcn: str = "", kcs: str = "", par1: str = "", par2: str = "", **kwargs
+    ):
+        r"""Defines a local coordinate system at the origin of the working plane.
+
+        Mechanical APDL Command: `CSWPLA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CSWPLA.html>`_
+
+        Parameters
+        ----------
+        kcn : str
+            Arbitrary reference number assigned to this coordinate system. Must be greater than 10. A
+            coordinate system previously defined with this number will be redefined.
+
+        kcs : str
+            Coordinate system type:
+
+            * ``0 or CART`` - Cartesian
+
+            * ``1 or CYLIN`` - Cylindrical (circular or elliptical)
+
+            * ``2 or SPHE`` - Spherical (or spheroidal)
+
+            * ``3 or TORO`` - Toroidal
+
+        par1 : str
+            Used for elliptical, spheroidal, or toroidal systems. If ``KCS`` = 1 or 2, ``PAR1`` is the ratio
+            of the ellipse Y-axis radius to X-axis radius (defaults to 1.0 (circle)). If ``KCS`` = 3,
+            ``PAR1`` is the major radius of the torus.
+
+        par2 : str
+            Used for spheroidal systems. If ``KCS`` = 2, ``PAR2`` = ratio of ellipse Z-axis radius to X-axis
+            radius (defaults to 1.0 (circle)).
+
+        Notes
+        -----
+
+        .. _CSWPLA_notes:
+
+        Defines and activates a local right-handed coordinate system centered at the origin of the working
+        plane. The coordinate system's local x-y plane (for a Cartesian system) or R-θ plane (for a
+        cylindrical or spherical system) corresponds to the working plane. This local system becomes the
+        active coordinate system. See the :ref:`cs`, :ref:`local`, :ref:`clocal`, and :ref:`cskp` commands
+        for alternate ways to define a local coordinate system. Local coordinate systems may be displayed
+        with the :ref:`psymb` command.
+
+        This command is valid in any processor.
+        """
+        command = f"CSWPLA,{kcn},{kcs},{par1},{par2}"
+        return self.run(command, **kwargs)
+
+    def csdele(self, kcn1: str = "", kcn2: str = "", kcinc: str = "", **kwargs):
+        r"""Deletes local coordinate systems.
+
+        Mechanical APDL Command: `CSDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CSDELE.html>`_
+
+        Parameters
+        ----------
+        kcn1 : str
+            Delete coordinate systems from ``KCN1`` (must be greater than 10) to ``KCN2`` (defaults to
+            ``KCN1`` ) in steps of ``KCINC`` (defaults to 1). If ``KCN1`` = ALL, ``KCN2`` and ``KCINC`` are
+            ignored and all coordinate systems are deleted.
+
+        kcn2 : str
+            Delete coordinate systems from ``KCN1`` (must be greater than 10) to ``KCN2`` (defaults to
+            ``KCN1`` ) in steps of ``KCINC`` (defaults to 1). If ``KCN1`` = ALL, ``KCN2`` and ``KCINC`` are
+            ignored and all coordinate systems are deleted.
+
+        kcinc : str
+            Delete coordinate systems from ``KCN1`` (must be greater than 10) to ``KCN2`` (defaults to
+            ``KCN1`` ) in steps of ``KCINC`` (defaults to 1). If ``KCN1`` = ALL, ``KCN2`` and ``KCINC`` are
+            ignored and all coordinate systems are deleted.
+
+        Notes
+        -----
+
+        .. _CSDELE_notes:
+
+        This command is valid in any processor.
+        """
+        command = f"CSDELE,{kcn1},{kcn2},{kcinc}"
+        return self.run(command, **kwargs)
+
+    def cs(
+        self,
+        kcn: str = "",
+        kcs: str = "",
+        norig: str = "",
+        nxax: str = "",
+        nxypl: str = "",
+        par1: str = "",
+        par2: str = "",
+        **kwargs,
+    ):
+        r"""Defines a local coordinate system by three node locations.
+
+        Mechanical APDL Command: `CS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CS.html>`_
+
+        Parameters
+        ----------
+        kcn : str
+            Arbitrary reference number assigned to this coordinate system. Must be greater than 10. A
+            coordinate system previously defined with this number will be redefined.
+
+        kcs : str
+            Coordinate system type:
+
+            * ``0 or CART`` - Cartesian
+
+            * ``1 or CYLIN`` - Cylindrical (circular or elliptical)
+
+            * ``2 or SPHE`` - Spherical (or spheroidal)
+
+            * ``3 or TORO`` - Toroidal
+
+        norig : str
+            Node defining the origin of this coordinate system. If ``NORIG`` = P, graphical picking is
+            enabled and all remaining command fields are ignored (valid only in the GUI).
+
+        nxax : str
+            Node defining the positive x-axis orientation of this coordinate system.
+
+        nxypl : str
+            Node defining the x-y plane (with ``NORIG`` and ``NXAX`` ) in the first or second quadrant of
+            this coordinate system.
+
+        par1 : str
+            Used for elliptical, spheroidal, or toroidal systems. If ``KCS`` = 1 or 2, ``PAR1`` is the ratio
+            of the ellipse Y-axis radius to X-axis radius (defaults to 1.0 (circle)). If ``KCS`` = 3,
+            ``PAR1`` is the major radius of the torus.
+
+        par2 : str
+            Used for spheroidal systems. If ``KCS`` = 2, ``PAR2`` = ratio of ellipse Z-axis radius to X-axis
+            radius (defaults to 1.0 (circle)).
+
+        Notes
+        -----
+
+        .. _CS_notes:
+
+        Defines and activates a local right-handed coordinate system by specifying three existing nodes: to
+        locate the origin, to locate the positive x-axis, and to define the positive x-y plane. This local
+        system becomes the active coordinate system. See the :ref:`clocal`, :ref:`cskp`, :ref:`cswpla`, and
+        :ref:`local` commands for alternate definitions. Local coordinate systems may be displayed with the
+        :ref:`psymb` command.
+
+        This command is valid in any processor.
+        """
+        command = f"CS,{kcn},{kcs},{norig},{nxax},{nxypl},{par1},{par2}"
+        return self.run(command, **kwargs)
+
+    def cscir(
+        self, kcn: str = "", kthet: int | str = "", kphi: int | str = "", **kwargs
+    ):
+        r"""Locates the singularity for non-Cartesian local coordinate systems.
+
+        Mechanical APDL Command: `CSCIR <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CSCIR.html>`_
+
+        **Command default:**
+
+        .. _CSCIR_default:
+
+        Singularities at ±180°.
+
+        Parameters
+        ----------
+        kcn : str
+            Number of the local coordinate system in which singularity location is to be changed. Must be
+            greater than 10.
+
+        kthet : int or str
+            Theta singularity location for cylindrical, spherical, and toroidal systems:
+
+            * ``0`` - Singularity at ±180°.
+
+            * ``1`` - Singularity at 0° (360°).
+
+        kphi : int or str
+            Phi singularity location for toroidal systems:
+
+            * ``0`` - Singularity in phi direction at ±180°.
+
+            * ``1`` - Singularity in phi direction at 0° (360°).
+
+        Notes
+        -----
+
+        .. _CSCIR_notes:
+
+        Continuous closed surfaces (circles, cylinders, spheres, etc.) have a singularity (discontinuity) at
+        θ = ±180°. For local cylindrical, spherical, and toroidal coordinate systems, this
+        singularity location may be changed to 0° (360°).
+
+        An additional, similar singularity occurs in the toroidal coordinate system at Φ = ±180° and can be
+        moved with ``KPHI``. Additional singularities occur in the spherical coordinate system at Φ = ±90°,
+        but cannot be moved.
+
+        This command is valid in any processor.
+        """
+        command = f"CSCIR,{kcn},{kthet},{kphi}"
+        return self.run(command, **kwargs)
+
     def csys(self, kcn: int | str = "", **kwargs):
         r"""Activates a previously defined coordinate system.
 
@@ -81,54 +360,36 @@ class CoordinateSystem:
         command = f"CSYS,{kcn}"
         return self.run(command, **kwargs)
 
-    def cswpla(
-        self, kcn: str = "", kcs: str = "", par1: str = "", par2: str = "", **kwargs
-    ):
-        r"""Defines a local coordinate system at the origin of the working plane.
+    def cslist(self, kcn1: str = "", kcn2: str = "", kcinc: str = "", **kwargs):
+        r"""Lists coordinate systems.
 
-        Mechanical APDL Command: `CSWPLA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CSWPLA.html>`_
+        Mechanical APDL Command: `CSLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CSLIST.html>`_
 
         Parameters
         ----------
-        kcn : str
-            Arbitrary reference number assigned to this coordinate system. Must be greater than 10. A
-            coordinate system previously defined with this number will be redefined.
+        kcn1 : str
+            List coordinate systems from ``KCN1`` to ``KCN2`` (defaults to ``KCN1`` ) in steps of ``KCINC``
+            (defaults to 1). If ``KCN1`` = ALL (default), ``KCN2`` and ``KCINC`` are ignored and all
+            coordinate systems are listed.
 
-        kcs : str
-            Coordinate system type:
+        kcn2 : str
+            List coordinate systems from ``KCN1`` to ``KCN2`` (defaults to ``KCN1`` ) in steps of ``KCINC``
+            (defaults to 1). If ``KCN1`` = ALL (default), ``KCN2`` and ``KCINC`` are ignored and all
+            coordinate systems are listed.
 
-            * ``0 or CART`` - Cartesian
-
-            * ``1 or CYLIN`` - Cylindrical (circular or elliptical)
-
-            * ``2 or SPHE`` - Spherical (or spheroidal)
-
-            * ``3 or TORO`` - Toroidal
-
-        par1 : str
-            Used for elliptical, spheroidal, or toroidal systems. If ``KCS`` = 1 or 2, ``PAR1`` is the ratio
-            of the ellipse Y-axis radius to X-axis radius (defaults to 1.0 (circle)). If ``KCS`` = 3,
-            ``PAR1`` is the major radius of the torus.
-
-        par2 : str
-            Used for spheroidal systems. If ``KCS`` = 2, ``PAR2`` = ratio of ellipse Z-axis radius to X-axis
-            radius (defaults to 1.0 (circle)).
+        kcinc : str
+            List coordinate systems from ``KCN1`` to ``KCN2`` (defaults to ``KCN1`` ) in steps of ``KCINC``
+            (defaults to 1). If ``KCN1`` = ALL (default), ``KCN2`` and ``KCINC`` are ignored and all
+            coordinate systems are listed.
 
         Notes
         -----
 
-        .. _CSWPLA_notes:
-
-        Defines and activates a local right-handed coordinate system centered at the origin of the working
-        plane. The coordinate system's local x-y plane (for a Cartesian system) or R-θ plane (for a
-        cylindrical or spherical system) corresponds to the working plane. This local system becomes the
-        active coordinate system. See the :ref:`cs`, :ref:`local`, :ref:`clocal`, and :ref:`cskp` commands
-        for alternate ways to define a local coordinate system. Local coordinate systems may be displayed
-        with the :ref:`psymb` command.
+        .. _CSLIST_notes:
 
         This command is valid in any processor.
         """
-        command = f"CSWPLA,{kcn},{kcs},{par1},{par2}"
+        command = f"CSLIST,{kcn1},{kcn2},{kcinc}"
         return self.run(command, **kwargs)
 
     def cskp(
@@ -197,70 +458,6 @@ class CoordinateSystem:
         This command is valid in any processor.
         """
         command = f"CSKP,{kcn},{kcs},{porig},{pxaxs},{pxypl},{par1},{par2}"
-        return self.run(command, **kwargs)
-
-    def cslist(self, kcn1: str = "", kcn2: str = "", kcinc: str = "", **kwargs):
-        r"""Lists coordinate systems.
-
-        Mechanical APDL Command: `CSLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CSLIST.html>`_
-
-        Parameters
-        ----------
-        kcn1 : str
-            List coordinate systems from ``KCN1`` to ``KCN2`` (defaults to ``KCN1`` ) in steps of ``KCINC``
-            (defaults to 1). If ``KCN1`` = ALL (default), ``KCN2`` and ``KCINC`` are ignored and all
-            coordinate systems are listed.
-
-        kcn2 : str
-            List coordinate systems from ``KCN1`` to ``KCN2`` (defaults to ``KCN1`` ) in steps of ``KCINC``
-            (defaults to 1). If ``KCN1`` = ALL (default), ``KCN2`` and ``KCINC`` are ignored and all
-            coordinate systems are listed.
-
-        kcinc : str
-            List coordinate systems from ``KCN1`` to ``KCN2`` (defaults to ``KCN1`` ) in steps of ``KCINC``
-            (defaults to 1). If ``KCN1`` = ALL (default), ``KCN2`` and ``KCINC`` are ignored and all
-            coordinate systems are listed.
-
-        Notes
-        -----
-
-        .. _CSLIST_notes:
-
-        This command is valid in any processor.
-        """
-        command = f"CSLIST,{kcn1},{kcn2},{kcinc}"
-        return self.run(command, **kwargs)
-
-    def csdele(self, kcn1: str = "", kcn2: str = "", kcinc: str = "", **kwargs):
-        r"""Deletes local coordinate systems.
-
-        Mechanical APDL Command: `CSDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CSDELE.html>`_
-
-        Parameters
-        ----------
-        kcn1 : str
-            Delete coordinate systems from ``KCN1`` (must be greater than 10) to ``KCN2`` (defaults to
-            ``KCN1`` ) in steps of ``KCINC`` (defaults to 1). If ``KCN1`` = ALL, ``KCN2`` and ``KCINC`` are
-            ignored and all coordinate systems are deleted.
-
-        kcn2 : str
-            Delete coordinate systems from ``KCN1`` (must be greater than 10) to ``KCN2`` (defaults to
-            ``KCN1`` ) in steps of ``KCINC`` (defaults to 1). If ``KCN1`` = ALL, ``KCN2`` and ``KCINC`` are
-            ignored and all coordinate systems are deleted.
-
-        kcinc : str
-            Delete coordinate systems from ``KCN1`` (must be greater than 10) to ``KCN2`` (defaults to
-            ``KCN1`` ) in steps of ``KCINC`` (defaults to 1). If ``KCN1`` = ALL, ``KCN2`` and ``KCINC`` are
-            ignored and all coordinate systems are deleted.
-
-        Notes
-        -----
-
-        .. _CSDELE_notes:
-
-        This command is valid in any processor.
-        """
-        command = f"CSDELE,{kcn1},{kcn2},{kcinc}"
         return self.run(command, **kwargs)
 
     def clocal(
@@ -345,201 +542,4 @@ class CoordinateSystem:
         command = (
             f"CLOCAL,{kcn},{kcs},{xl},{yl},{zl},{thxy},{thyz},{thzx},{par1},{par2}"
         )
-        return self.run(command, **kwargs)
-
-    def cscir(
-        self, kcn: str = "", kthet: int | str = "", kphi: int | str = "", **kwargs
-    ):
-        r"""Locates the singularity for non-Cartesian local coordinate systems.
-
-        Mechanical APDL Command: `CSCIR <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CSCIR.html>`_
-
-        **Command default:**
-
-        .. _CSCIR_default:
-
-        Singularities at ±180°.
-
-        Parameters
-        ----------
-        kcn : str
-            Number of the local coordinate system in which singularity location is to be changed. Must be
-            greater than 10.
-
-        kthet : int or str
-            Theta singularity location for cylindrical, spherical, and toroidal systems:
-
-            * ``0`` - Singularity at ±180°.
-
-            * ``1`` - Singularity at 0° (360°).
-
-        kphi : int or str
-            Phi singularity location for toroidal systems:
-
-            * ``0`` - Singularity in phi direction at ±180°.
-
-            * ``1`` - Singularity in phi direction at 0° (360°).
-
-        Notes
-        -----
-
-        .. _CSCIR_notes:
-
-        Continuous closed surfaces (circles, cylinders, spheres, etc.) have a singularity (discontinuity) at
-        θ = ±180°. For local cylindrical, spherical, and toroidal coordinate systems, this
-        singularity location may be changed to 0° (360°).
-
-        An additional, similar singularity occurs in the toroidal coordinate system at Φ = ±180° and can be
-        moved with ``KPHI``. Additional singularities occur in the spherical coordinate system at Φ = ±90°,
-        but cannot be moved.
-
-        This command is valid in any processor.
-        """
-        command = f"CSCIR,{kcn},{kthet},{kphi}"
-        return self.run(command, **kwargs)
-
-    def cs(
-        self,
-        kcn: str = "",
-        kcs: str = "",
-        norig: str = "",
-        nxax: str = "",
-        nxypl: str = "",
-        par1: str = "",
-        par2: str = "",
-        **kwargs,
-    ):
-        r"""Defines a local coordinate system by three node locations.
-
-        Mechanical APDL Command: `CS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CS.html>`_
-
-        Parameters
-        ----------
-        kcn : str
-            Arbitrary reference number assigned to this coordinate system. Must be greater than 10. A
-            coordinate system previously defined with this number will be redefined.
-
-        kcs : str
-            Coordinate system type:
-
-            * ``0 or CART`` - Cartesian
-
-            * ``1 or CYLIN`` - Cylindrical (circular or elliptical)
-
-            * ``2 or SPHE`` - Spherical (or spheroidal)
-
-            * ``3 or TORO`` - Toroidal
-
-        norig : str
-            Node defining the origin of this coordinate system. If ``NORIG`` = P, graphical picking is
-            enabled and all remaining command fields are ignored (valid only in the GUI).
-
-        nxax : str
-            Node defining the positive x-axis orientation of this coordinate system.
-
-        nxypl : str
-            Node defining the x-y plane (with ``NORIG`` and ``NXAX`` ) in the first or second quadrant of
-            this coordinate system.
-
-        par1 : str
-            Used for elliptical, spheroidal, or toroidal systems. If ``KCS`` = 1 or 2, ``PAR1`` is the ratio
-            of the ellipse Y-axis radius to X-axis radius (defaults to 1.0 (circle)). If ``KCS`` = 3,
-            ``PAR1`` is the major radius of the torus.
-
-        par2 : str
-            Used for spheroidal systems. If ``KCS`` = 2, ``PAR2`` = ratio of ellipse Z-axis radius to X-axis
-            radius (defaults to 1.0 (circle)).
-
-        Notes
-        -----
-
-        .. _CS_notes:
-
-        Defines and activates a local right-handed coordinate system by specifying three existing nodes: to
-        locate the origin, to locate the positive x-axis, and to define the positive x-y plane. This local
-        system becomes the active coordinate system. See the :ref:`clocal`, :ref:`cskp`, :ref:`cswpla`, and
-        :ref:`local` commands for alternate definitions. Local coordinate systems may be displayed with the
-        :ref:`psymb` command.
-
-        This command is valid in any processor.
-        """
-        command = f"CS,{kcn},{kcs},{norig},{nxax},{nxypl},{par1},{par2}"
-        return self.run(command, **kwargs)
-
-    def local(
-        self,
-        kcn: str = "",
-        kcs: str = "",
-        xc: str = "",
-        yc: str = "",
-        zc: str = "",
-        thxy: str = "",
-        thyz: str = "",
-        thzx: str = "",
-        par1: str = "",
-        par2: str = "",
-        **kwargs,
-    ):
-        r"""Defines a local coordinate system by a location and orientation.
-
-        Mechanical APDL Command: `LOCAL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LOCAL.html>`_
-
-        Parameters
-        ----------
-        kcn : str
-            Arbitrary reference number assigned to this coordinate system. Must be greater than 10. A
-            coordinate system previously defined with this number will be redefined.
-
-        kcs : str
-            Coordinate system type:
-
-            * ``0 or CART`` - Cartesian
-
-            * ``1 or CYLIN`` - Cylindrical (circular or elliptical)
-
-            * ``2 or SPHE`` - Spherical (or spheroidal)
-
-            * ``3 or TORO`` - Toroidal
-
-        xc : str
-            Location (in the global Cartesian coordinate system) of the origin of the new coordinate system.
-
-        yc : str
-            Location (in the global Cartesian coordinate system) of the origin of the new coordinate system.
-
-        zc : str
-            Location (in the global Cartesian coordinate system) of the origin of the new coordinate system.
-
-        thxy : str
-            First rotation about local Z (positive X toward Y).
-
-        thyz : str
-            Second rotation about local X (positive Y toward Z).
-
-        thzx : str
-            Third rotation about local Y (positive Z toward X).
-
-        par1 : str
-            Used for elliptical, spheroidal, or toroidal systems. If ``KCS`` = 1 or 2, ``PAR1`` is the ratio
-            of the ellipse Y-axis radius to X-axis radius (defaults to 1.0 (circle)). If ``KCS`` = 3,
-            ``PAR1`` is the major radius of the torus.
-
-        par2 : str
-            Used for spheroidal systems. If ``KCS`` = 2, ``PAR2`` = ratio of ellipse Z-axis radius to X-axis
-            radius (defaults to 1.0 (circle)).
-
-        Notes
-        -----
-
-        .. _LOCAL_notes:
-
-        Defines a local coordinate system by origin location and orientation angles. The local coordinate
-        system is parallel to the global Cartesian system unless rotated. Rotation angles are in degrees and
-        redefine any previous rotation angles. See the :ref:`clocal`, :ref:`cs`, :ref:`cswpla`, and
-        :ref:`cskp` commands for alternate definitions. This local system becomes the active coordinate
-        system ( :ref:`csys` ). Local coordinate systems may be displayed with the :ref:`psymb` command.
-
-        This command is valid in any processor.
-        """
-        command = f"LOCAL,{kcn},{kcs},{xc},{yc},{zc},{thxy},{thyz},{thzx},{par1},{par2}"
         return self.run(command, **kwargs)

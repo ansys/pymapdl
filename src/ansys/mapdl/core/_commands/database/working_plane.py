@@ -23,153 +23,36 @@
 
 class WorkingPlane:
 
-    def kwplan(
-        self, wn: str = "", korig: str = "", kxax: str = "", kplan: str = "", **kwargs
-    ):
-        r"""Defines the working plane using three keypoints.
+    def lwplan(self, wn: str = "", nl1: str = "", ratio: str = "", **kwargs):
+        r"""Defines the working plane normal to a location on a line.
 
-        Mechanical APDL Command: `KWPLAN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KWPLAN.html>`_
+        Mechanical APDL Command: `LWPLAN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LWPLAN.html>`_
 
         Parameters
         ----------
         wn : str
             Window number whose viewing direction will be modified to be normal to the working plane
-            (defaults to 1). If ``WN`` is a negative value, the viewing direction will not be modified. If
-            fewer than three points are used, the viewing direction of window ``WN`` will be used instead to
-            define the normal to the working plane.
+            (defaults to 1). If ``WN`` is a negative value, the viewing direction will not be modified.
 
-        korig : str
-            Keypoint number defining the origin of the working plane coordinate system. If ``KORIG`` = P,
-            graphical picking is enabled and all remaining command fields are ignored (valid only in the
-            GUI).
+        nl1 : str
+            Number of line to be used. If ``NL1`` = P, graphical picking is enabled and all remaining
+            command fields are ignored (valid only in the GUI).
 
-        kxax : str
-            Keypoint number defining the x-axis orientation (defaults to the x-axis being parallel to the
-            global X-axis; or if the normal to the working plane is parallel to the global X-axis, then
-            defaults to being parallel to the global Y-axis).
-
-        kplan : str
-            Keypoint number defining the working plane (the normal defaults to the present display view (
-            :ref:`view` ) of window ``WN`` ).
+        ratio : str
+            Location on ``NL1``, specified as a ratio of the line length. Must be between 0.0 and 1.0. If
+            ``RATIO`` = P, use graphical picking to specify location on the line.
 
         Notes
         -----
 
-        .. _KWPLAN_notes:
+        .. _LWPLAN_notes:
 
-        Defines a working plane to assist in picking operations using three keypoints as an alternate to the
-        :ref:`wplane` command. The three keypoints also define the working plane coordinate system. A
-        minimum of one keypoint (at the working plane origin) is required. Immediate mode may also be
-        active. See :ref:`wpstyl` command to set the style of working plane display.
+        Defines a working plane (to assist in picking operations) normal to a location on a line. See
+        :ref:`wpstyl` command to set the style of working plane display.
 
         This command is valid in any processor.
         """
-        command = f"KWPLAN,{wn},{korig},{kxax},{kplan}"
-        return self.run(command, **kwargs)
-
-    def kwpave(
-        self,
-        p1: str = "",
-        p2: str = "",
-        p3: str = "",
-        p4: str = "",
-        p5: str = "",
-        p6: str = "",
-        p7: str = "",
-        p8: str = "",
-        p9: str = "",
-        **kwargs,
-    ):
-        r"""Moves the working plane origin to the average location of keypoints.
-
-        Mechanical APDL Command: `KWPAVE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KWPAVE.html>`_
-
-        Parameters
-        ----------
-        p1 : str
-            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
-            graphical picking is enabled and all remaining command fields are ignored (valid only in the
-            GUI).
-
-        p2 : str
-            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
-            graphical picking is enabled and all remaining command fields are ignored (valid only in the
-            GUI).
-
-        p3 : str
-            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
-            graphical picking is enabled and all remaining command fields are ignored (valid only in the
-            GUI).
-
-        p4 : str
-            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
-            graphical picking is enabled and all remaining command fields are ignored (valid only in the
-            GUI).
-
-        p5 : str
-            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
-            graphical picking is enabled and all remaining command fields are ignored (valid only in the
-            GUI).
-
-        p6 : str
-            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
-            graphical picking is enabled and all remaining command fields are ignored (valid only in the
-            GUI).
-
-        p7 : str
-            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
-            graphical picking is enabled and all remaining command fields are ignored (valid only in the
-            GUI).
-
-        p8 : str
-            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
-            graphical picking is enabled and all remaining command fields are ignored (valid only in the
-            GUI).
-
-        p9 : str
-            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
-            graphical picking is enabled and all remaining command fields are ignored (valid only in the
-            GUI).
-
-        Notes
-        -----
-
-        .. _KWPAVE_notes:
-
-        Moves the origin of the working plane to the average of the specified keypoints. Averaging is based
-        on the active coordinate system.
-
-        This command is valid in any processor.
-        """
-        command = f"KWPAVE,{p1},{p2},{p3},{p4},{p5},{p6},{p7},{p8},{p9}"
-        return self.run(command, **kwargs)
-
-    def wprota(self, thxy: str = "", thyz: str = "", thzx: str = "", **kwargs):
-        r"""Rotates the working plane.
-
-        Mechanical APDL Command: `WPROTA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_WPROTA.html>`_
-
-        Parameters
-        ----------
-        thxy : str
-            First rotation about the working plane Z axis (positive X toward Y).
-
-        thyz : str
-            Second rotation about working plane X axis (positive Y toward Z).
-
-        thzx : str
-            Third rotation about working plane Y axis (positive Z toward X).
-
-        Notes
-        -----
-
-        .. _WPROTA_notes:
-
-        The specified angles (in degrees) are relative to the orientation of the working plane.
-
-        This command is valid in any processor.
-        """
-        command = f"WPROTA,{thxy},{thyz},{thzx}"
+        command = f"LWPLAN,{wn},{nl1},{ratio}"
         return self.run(command, **kwargs)
 
     def wpstyl(
@@ -274,6 +157,66 @@ class WorkingPlane:
         command = f"WPSTYL,{snap},{grspac},{grmin},{grmax},{wptol},{wpctyp},{grtype},{wpvis},{snapang}"
         return self.run(command, **kwargs)
 
+    def wprota(self, thxy: str = "", thyz: str = "", thzx: str = "", **kwargs):
+        r"""Rotates the working plane.
+
+        Mechanical APDL Command: `WPROTA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_WPROTA.html>`_
+
+        Parameters
+        ----------
+        thxy : str
+            First rotation about the working plane Z axis (positive X toward Y).
+
+        thyz : str
+            Second rotation about working plane X axis (positive Y toward Z).
+
+        thzx : str
+            Third rotation about working plane Y axis (positive Z toward X).
+
+        Notes
+        -----
+
+        .. _WPROTA_notes:
+
+        The specified angles (in degrees) are relative to the orientation of the working plane.
+
+        This command is valid in any processor.
+        """
+        command = f"WPROTA,{thxy},{thyz},{thzx}"
+        return self.run(command, **kwargs)
+
+    def wpoffs(self, xoff: str = "", yoff: str = "", zoff: str = "", **kwargs):
+        r"""Offsets the working plane.
+
+        Mechanical APDL Command: `WPOFFS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_WPOFFS.html>`_
+
+        Parameters
+        ----------
+        xoff : str
+            Offset increments defined in the working plane coordinate system. If only ``ZOFF`` is used, the
+            working plane will be redefined parallel to the present plane and offset by ``ZOFF``.
+
+        yoff : str
+            Offset increments defined in the working plane coordinate system. If only ``ZOFF`` is used, the
+            working plane will be redefined parallel to the present plane and offset by ``ZOFF``.
+
+        zoff : str
+            Offset increments defined in the working plane coordinate system. If only ``ZOFF`` is used, the
+            working plane will be redefined parallel to the present plane and offset by ``ZOFF``.
+
+        Notes
+        -----
+
+        .. _WPOFFS_notes:
+
+        Changes the origin of the working plane by translating the working plane along its coordinate system
+        axes.
+
+        This command is valid in any processor.
+        """
+        command = f"WPOFFS,{xoff},{yoff},{zoff}"
+        return self.run(command, **kwargs)
+
     def wpave(
         self,
         x1: str = "",
@@ -338,36 +281,43 @@ class WorkingPlane:
         command = f"WPAVE,{x1},{y1},{z1},{x2},{y2},{z2},{x3},{y3},{z3}"
         return self.run(command, **kwargs)
 
-    def wpoffs(self, xoff: str = "", yoff: str = "", zoff: str = "", **kwargs):
-        r"""Offsets the working plane.
+    def wpcsys(self, wn: str = "", kcn: str = "", **kwargs):
+        r"""Defines the working plane location based on a coordinate system.
 
-        Mechanical APDL Command: `WPOFFS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_WPOFFS.html>`_
+        Mechanical APDL Command: `WPCSYS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_WPCSYS.html>`_
 
         Parameters
         ----------
-        xoff : str
-            Offset increments defined in the working plane coordinate system. If only ``ZOFF`` is used, the
-            working plane will be redefined parallel to the present plane and offset by ``ZOFF``.
+        wn : str
+            Window number whose viewing direction will be modified to be normal to the working plane
+            (defaults to 1). If ``WN`` is a negative value, the viewing direction will not be modified.
 
-        yoff : str
-            Offset increments defined in the working plane coordinate system. If only ``ZOFF`` is used, the
-            working plane will be redefined parallel to the present plane and offset by ``ZOFF``.
-
-        zoff : str
-            Offset increments defined in the working plane coordinate system. If only ``ZOFF`` is used, the
-            working plane will be redefined parallel to the present plane and offset by ``ZOFF``.
+        kcn : str
+            Coordinate system number. ``KCN`` may be 0,1,2 or any previously defined local coordinate system
+            number (defaults to the active system).
 
         Notes
         -----
 
-        .. _WPOFFS_notes:
+        .. _WPCSYS_notes:
 
-        Changes the origin of the working plane by translating the working plane along its coordinate system
-        axes.
+        Defines a working plane location and orientation based on an existing coordinate system. If a
+        Cartesian system is used as the basis ( ``KCN`` ) for the working plane, the working plane will also
+        be Cartesian, in the X-Y plane of the base system. If a cylindrical, spherical, or toroidal base
+        system is used, the working plane will be a polar system in the R-θ plane of the base system.
+
+        If working plane tracking has been activated ( :ref:`csys`,WP or :ref:`csys`,4), the updated active
+        coordinate system will be of a similar type, except that a toroidal system will be updated to a
+        cylindrical system. See the `Modeling and Meshing Guide
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_ for more
+        information on working plane tracking.
 
         This command is valid in any processor.
+
+        Some primitive generation commands will not honor R-theta transformations for non-cartesian
+        coordinate systems. Refer to the primitive commands table for more information.
         """
-        command = f"WPOFFS,{xoff},{yoff},{zoff}"
+        command = f"WPCSYS,{wn},{kcn}"
         return self.run(command, **kwargs)
 
     def wplane(
@@ -442,77 +392,6 @@ class WorkingPlane:
         This command is valid in any processor.
         """
         command = f"WPLANE,{wn},{xorig},{yorig},{zorig},{xxax},{yxax},{zxax},{xplan},{yplan},{zplan}"
-        return self.run(command, **kwargs)
-
-    def wpcsys(self, wn: str = "", kcn: str = "", **kwargs):
-        r"""Defines the working plane location based on a coordinate system.
-
-        Mechanical APDL Command: `WPCSYS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_WPCSYS.html>`_
-
-        Parameters
-        ----------
-        wn : str
-            Window number whose viewing direction will be modified to be normal to the working plane
-            (defaults to 1). If ``WN`` is a negative value, the viewing direction will not be modified.
-
-        kcn : str
-            Coordinate system number. ``KCN`` may be 0,1,2 or any previously defined local coordinate system
-            number (defaults to the active system).
-
-        Notes
-        -----
-
-        .. _WPCSYS_notes:
-
-        Defines a working plane location and orientation based on an existing coordinate system. If a
-        Cartesian system is used as the basis ( ``KCN`` ) for the working plane, the working plane will also
-        be Cartesian, in the X-Y plane of the base system. If a cylindrical, spherical, or toroidal base
-        system is used, the working plane will be a polar system in the R-θ plane of the base system.
-
-        If working plane tracking has been activated ( :ref:`csys`,WP or :ref:`csys`,4), the updated active
-        coordinate system will be of a similar type, except that a toroidal system will be updated to a
-        cylindrical system. See the `Modeling and Meshing Guide
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mod/Hlp_G_MOD14.html>`_ for more
-        information on working plane tracking.
-
-        This command is valid in any processor.
-
-        Some primitive generation commands will not honor R-theta transformations for non-cartesian
-        coordinate systems. Refer to the primitive commands table for more information.
-        """
-        command = f"WPCSYS,{wn},{kcn}"
-        return self.run(command, **kwargs)
-
-    def lwplan(self, wn: str = "", nl1: str = "", ratio: str = "", **kwargs):
-        r"""Defines the working plane normal to a location on a line.
-
-        Mechanical APDL Command: `LWPLAN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LWPLAN.html>`_
-
-        Parameters
-        ----------
-        wn : str
-            Window number whose viewing direction will be modified to be normal to the working plane
-            (defaults to 1). If ``WN`` is a negative value, the viewing direction will not be modified.
-
-        nl1 : str
-            Number of line to be used. If ``NL1`` = P, graphical picking is enabled and all remaining
-            command fields are ignored (valid only in the GUI).
-
-        ratio : str
-            Location on ``NL1``, specified as a ratio of the line length. Must be between 0.0 and 1.0. If
-            ``RATIO`` = P, use graphical picking to specify location on the line.
-
-        Notes
-        -----
-
-        .. _LWPLAN_notes:
-
-        Defines a working plane (to assist in picking operations) normal to a location on a line. See
-        :ref:`wpstyl` command to set the style of working plane display.
-
-        This command is valid in any processor.
-        """
-        command = f"LWPLAN,{wn},{nl1},{ratio}"
         return self.run(command, **kwargs)
 
     def nwplan(
@@ -624,4 +503,125 @@ class WorkingPlane:
         This command is valid in any processor.
         """
         command = f"NWPAVE,{n1},{n2},{n3},{n4},{n5},{n6},{n7},{n8},{n9}"
+        return self.run(command, **kwargs)
+
+    def kwpave(
+        self,
+        p1: str = "",
+        p2: str = "",
+        p3: str = "",
+        p4: str = "",
+        p5: str = "",
+        p6: str = "",
+        p7: str = "",
+        p8: str = "",
+        p9: str = "",
+        **kwargs,
+    ):
+        r"""Moves the working plane origin to the average location of keypoints.
+
+        Mechanical APDL Command: `KWPAVE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KWPAVE.html>`_
+
+        Parameters
+        ----------
+        p1 : str
+            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
+            graphical picking is enabled and all remaining command fields are ignored (valid only in the
+            GUI).
+
+        p2 : str
+            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
+            graphical picking is enabled and all remaining command fields are ignored (valid only in the
+            GUI).
+
+        p3 : str
+            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
+            graphical picking is enabled and all remaining command fields are ignored (valid only in the
+            GUI).
+
+        p4 : str
+            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
+            graphical picking is enabled and all remaining command fields are ignored (valid only in the
+            GUI).
+
+        p5 : str
+            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
+            graphical picking is enabled and all remaining command fields are ignored (valid only in the
+            GUI).
+
+        p6 : str
+            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
+            graphical picking is enabled and all remaining command fields are ignored (valid only in the
+            GUI).
+
+        p7 : str
+            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
+            graphical picking is enabled and all remaining command fields are ignored (valid only in the
+            GUI).
+
+        p8 : str
+            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
+            graphical picking is enabled and all remaining command fields are ignored (valid only in the
+            GUI).
+
+        p9 : str
+            Keypoints used in calculation of the average. At least one must be defined. If ``P1`` = P,
+            graphical picking is enabled and all remaining command fields are ignored (valid only in the
+            GUI).
+
+        Notes
+        -----
+
+        .. _KWPAVE_notes:
+
+        Moves the origin of the working plane to the average of the specified keypoints. Averaging is based
+        on the active coordinate system.
+
+        This command is valid in any processor.
+        """
+        command = f"KWPAVE,{p1},{p2},{p3},{p4},{p5},{p6},{p7},{p8},{p9}"
+        return self.run(command, **kwargs)
+
+    def kwplan(
+        self, wn: str = "", korig: str = "", kxax: str = "", kplan: str = "", **kwargs
+    ):
+        r"""Defines the working plane using three keypoints.
+
+        Mechanical APDL Command: `KWPLAN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KWPLAN.html>`_
+
+        Parameters
+        ----------
+        wn : str
+            Window number whose viewing direction will be modified to be normal to the working plane
+            (defaults to 1). If ``WN`` is a negative value, the viewing direction will not be modified. If
+            fewer than three points are used, the viewing direction of window ``WN`` will be used instead to
+            define the normal to the working plane.
+
+        korig : str
+            Keypoint number defining the origin of the working plane coordinate system. If ``KORIG`` = P,
+            graphical picking is enabled and all remaining command fields are ignored (valid only in the
+            GUI).
+
+        kxax : str
+            Keypoint number defining the x-axis orientation (defaults to the x-axis being parallel to the
+            global X-axis; or if the normal to the working plane is parallel to the global X-axis, then
+            defaults to being parallel to the global Y-axis).
+
+        kplan : str
+            Keypoint number defining the working plane (the normal defaults to the present display view (
+            :ref:`view` ) of window ``WN`` ).
+
+        Notes
+        -----
+
+        .. _KWPLAN_notes:
+
+        Defines a working plane to assist in picking operations using three keypoints as an alternate to the
+        :ref:`wplane` command. The three keypoints also define the working plane coordinate system. A
+        minimum of one keypoint (at the working plane origin) is required. Immediate mode may also be
+        active. See :ref:`wpstyl` command to set the style of working plane display.
+
+        This command is valid in any processor.
+        """
+        command = f"KWPLAN,{wn},{korig},{kxax},{kplan}"
         return self.run(command, **kwargs)
