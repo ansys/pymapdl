@@ -82,6 +82,7 @@ def test_local(mapdl, cleared):
     assert mapdl._local == mapdl.mesh.local
 
 
+@requires("pyvista")
 def test_empty_mesh(mapdl, cleared):
     # Reset mesh grid
     mapdl.mesh._grid_cache = None
