@@ -21,12 +21,14 @@
 # SOFTWARE.
 
 """Common gRPC functions"""
-from time import sleep
+import time
 from typing import Dict, Iterable, List, Literal, Optional, get_args
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
+import grpc
 import numpy as np
 
+from ansys.mapdl.core import LOG
 from ansys.mapdl.core.errors import MapdlConnectionError, MapdlRuntimeError
 
 # chunk sizes for streaming and file streaming
@@ -188,19 +190,28 @@ def parse_chunks(
         Deserialized numpy array.
 
     """
-    time_int = 0
+    timeout = 3  # seconds
     time_step = 0.01
-    time_max = 3  # seconds
-    while not chunks.is_active():
-        time_int += 1
-        sleep(time_step)
-        if time_int > time_max / time_step:
-            raise MapdlConnectionError("The channel is not alive.")
+    time_max = timeout + time.time()  # seconds
+
+    while not chunks.is_active() and time.time() < time_max:
+        time.sleep(time_step)
+
+    if not chunks.is_active() and chunks.code() != grpc.StatusCode.OK:
+        LOG.error("The channel might not alive.")
 
     try:
         chunk = chunks.next()
-    except:
-        return np.empty(0)
+
+    except StopIteration:
+        if chunks.code() == grpc.StatusCode.OK:
+            return np.empty(0)
+        else:
+            raise MapdlConnectionError(
+                "The chunk couldn't be parsed. The error information is:\n"
+                f"code: {chunks.code()}\n"
+                f"message: '{chunks.details()}'"
+            )
 
     if not chunk.value_type and dtype is None:
         raise ValueError("Must specify a data type for this record")

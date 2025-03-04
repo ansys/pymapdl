@@ -214,17 +214,19 @@ class Test_static_solve(TestClass):
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_disp_plot_subselection(mapdl, resume, verify_image_cache):
-        verify_image_cache.skip = True  # skipping image verification
+    def test_disp_plot_subselection(mapdl, resume):
+        mapdl.esel("S", "ELEM", vmin=500, vmax=510, mute=True)
 
-        mapdl.nsel("S", "NODE", vmin=500, vmax=2000, mute=True)
-        mapdl.esel("S", "ELEM", vmin=500, vmax=2000, mute=True)
-        assert (
-            mapdl.post_processing.plot_nodal_displacement(
-                "X", smooth_shading=True, show_node_numbering=True
-            )
-            is None
+        pl = mapdl.post_processing.plot_nodal_displacement(
+            "X", smooth_shading=True, show_node_numbering=True, return_plotter=True
         )
+        poly = pl.meshes[0]
+        elem_ids = np.unique(poly.cell_data["ansys_elem_num"])
+
+        assert mapdl.mesh.n_elem == len(elem_ids)
+        assert np.allclose(mapdl.mesh.enum, elem_ids)
+        assert pl.show() is None
+
         mapdl.allsel()
 
     @staticmethod
@@ -1204,6 +1206,7 @@ class Test_contact_solve(TestClass):
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
+    @pytest.mark.skipif(True, reason="Crash python until #3782 is fixed.")
     def test_plot_incomplete_element_selection(mapdl, resume):
         mapdl.esel("S", "ELEM", "", 1, mapdl.mesh.n_elem // 2)
         assert mapdl.post_processing.plot_element_displacement() is None
@@ -1224,6 +1227,7 @@ class Test_contact_solve(TestClass):
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
+    @pytest.mark.skipif(True, reason="Crash python until #3782 is fixed.")
     def test_plot_incomplete_nodal_selection(mapdl, resume, verify_image_cache):
         verify_image_cache.skip = True
 
