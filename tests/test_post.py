@@ -225,9 +225,6 @@ class Test_static_solve(TestClass):
             return_plotter=True,
         )
 
-        poly = pl.meshes[0]
-        nodes_ids = np.unique(poly.point_data["ansys_node_num"])
-
         assert pl.show() is None
 
     @staticmethod
@@ -259,9 +256,6 @@ class Test_static_solve(TestClass):
             show_node_numbering=True,
             return_plotter=True,
         )
-
-        mesh = pl.meshes[0]
-        node_ids = np.unique(mesh.point_data["ansys_node_num"])
 
         # assert no state change
         assert mapdl.mesh.n_node == len(nnums)
