@@ -585,7 +585,7 @@ def test_input_compatibility_api_change(mapdl, cleared):
 @requires("grpc")
 def test__check_stds(mapdl):
     """Test that the standard input is checked."""
-    from ansys.mapdl.core.launcher import _check_server_is_alive, _get_std_output
+    from ansys.mapdl.core.launcher.tools import _check_server_is_alive, _get_std_output
 
     cmd = "counter=1; while true; do echo $counter; ((counter++)); sleep 1; done"
 
@@ -604,7 +604,7 @@ def test__check_stds(mapdl):
         patch.object(mapdl, "_stdout_thread"),
         patch.object(mapdl, "_mapdl_process"),
         patch(
-            "ansys.mapdl.core.launcher._get_std_output", autospec=True
+            "ansys.mapdl.core.launcher.tools._get_std_output", autospec=True
         ) as mock_get_std_output,
     ):
 
@@ -639,7 +639,7 @@ def test__check_stds(mapdl):
 @requires("nowindows")  # since we are using bash
 def test__post_mortem_checks(mapdl):
     """Test that the standard input is checked."""
-    from ansys.mapdl.core.launcher import _get_std_output
+    from ansys.mapdl.core.launcher.tools import _get_std_output
 
     bash_command = """
 counter=1; while true; do
@@ -668,7 +668,7 @@ done
         patch.object(mapdl, "_stdout_thread"),
         patch.object(mapdl, "_mapdl_process"),
         patch(
-            "ansys.mapdl.core.launcher._get_std_output", autospec=True
+            "ansys.mapdl.core.launcher.tools._get_std_output", autospec=True
         ) as mock_get_std_output,
     ):
 
