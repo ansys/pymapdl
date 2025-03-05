@@ -228,8 +228,10 @@ class Test_static_solve(TestClass):
         assert pl.show() is None
 
     @staticmethod
+    @requires("ansys-tools-visualization_interface")
     def test_uncomplete_element_plotting(mapdl, resume):
         enums = mapdl.esel("S", "ELEM", vmin=500, vmax=510)
+        mapdl.nsel("s", "node", vmin=50, vmax=60)
 
         pl = mapdl.post_processing.plot_element_displacement(
             "X",
@@ -247,6 +249,7 @@ class Test_static_solve(TestClass):
         assert np.allclose(elem_ids, enums)
 
     @staticmethod
+    @requires("ansys-tools-visualization_interface")
     def test_uncomplete_nodal_plotting(mapdl, resume):
         nnums = mapdl.nsel("S", "node", vmin=500, vmax=510)
 
