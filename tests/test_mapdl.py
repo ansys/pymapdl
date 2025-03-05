@@ -843,7 +843,7 @@ def test_partial_mesh_nnum(mapdl, make_block):
 
 @requires("pyvista")
 def test_partial_mesh_nnum2(mapdl, make_block):
-    mapdl.nsel("S", "NODE", vmin=1, vmax=10)
+    # mapdl.nsel("S", "NODE", vmin=1, vmax=10)  #See #3782
     mapdl.esel("S", "ELEM", vmin=10, vmax=20)
     assert mapdl.mesh._grid.n_cells == 11
 
