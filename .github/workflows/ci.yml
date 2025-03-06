@@ -422,7 +422,7 @@ jobs:
 
     steps:
       - name: Run Pytest for ${{ matrix.mapdl-version }} on remote mode
-        uses: ansys/pymapdl/.github/actions/test_remote
+        uses: ./.github/actions/test_remote
         with:
           mapdl-version: ${{ matrix.mapdl-version }}
           username: ${{ github.actor }}
