@@ -36,6 +36,9 @@ inputs:
 
 runs:
   using: "composite"
+  defaults:
+    run:
+      shell: bash
 
   steps:
     - name: "Login in Github container registry"
