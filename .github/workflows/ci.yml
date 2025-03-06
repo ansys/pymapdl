@@ -214,7 +214,7 @@ jobs:
     secrets:
       license-server: ${{ secrets.LICENSE_SERVER }}
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
-      github-token: ${{ secrets.GITHUB_TOKEN }}
+      token: ${{ secrets.GITHUB_TOKEN }}
       actor: ${{ github.actor }}
     with:
       testing-minimal: false

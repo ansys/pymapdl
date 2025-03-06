@@ -55,7 +55,7 @@ on:
           Token for Codecov.
         required: true
       
-      github-token:
+      token:
         description: |
           Token for GitHub.
         required: true
@@ -156,7 +156,7 @@ jobs:
 
       - name: "Unit testing"
         env:
-          ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.license_server }}"
+          ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.license-server }}"
           ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
           file_name: ${{ inputs.file-name }}
           ON_MINIMAL: ${{ inputs.testing-minimal }}
@@ -219,7 +219,7 @@ jobs:
       - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
         with:
-          token: ${{ secrets.codecov_token }} # required
+          token: ${{ secrets.codecov-token }} # required
           root_dir: ${{ github.workspace }}
           name: ${{ inputs.file-name }}.xml
           flags: ubuntu,local,${{ inputs.mapdl-version }},${{ inputs.tags }},${{ steps.student_check.outputs.TAG_STUDENT }},dmp
