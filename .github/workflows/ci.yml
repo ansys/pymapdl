@@ -418,6 +418,9 @@ jobs:
       # BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
     steps:
+      - name: "Install Git and checkout project"
+        uses: actions/checkout@v4.2.2
+
       - name: Run Pytest for ${{ matrix.mapdl-version }} on remote mode
         uses: ./.github/actions/test_remote
         with:
