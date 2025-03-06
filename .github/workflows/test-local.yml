@@ -50,12 +50,6 @@ on:
           Latest version of MAPDL.
         required: true
         type: string
-      
-      main-python-version:
-        description: |
-          Python version to test.
-        required: true
-        type: string
 
     secrets:
       license-server:
