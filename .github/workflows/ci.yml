@@ -222,7 +222,7 @@ jobs:
       mapdl-version: ${{ matrix.mapdl-version }}
       file-name: "${{ matrix.mapdl-version }}-local"
       tags: "local"
-      latest-version: ${{ env.LATEST_VERSION }}
+      latest-version: "252"
 
   build-test-ubuntu-minimal:
     name: "Local-min: ${{ matrix.mapdl-version }}"
