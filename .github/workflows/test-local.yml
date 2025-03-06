@@ -83,7 +83,7 @@ jobs:
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
         username: ${{ secrets.actor }}
-        password: ${{ secrets.github-token }}
+        password: ${{ secrets.token }}
 
     steps:
       - name: "Install Git and checkout project"
