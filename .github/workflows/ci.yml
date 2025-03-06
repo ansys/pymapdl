@@ -417,9 +417,6 @@ jobs:
       ON_UBUNTU: FALSE
       # BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
-    outputs:
-      DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
-
     steps:
       - name: Run Pytest for ${{ matrix.mapdl-version }} on remote mode
         uses: ./.github/actions/test_remote
