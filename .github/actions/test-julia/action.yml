@@ -20,6 +20,7 @@ runs:
 
     - name: "Getting python interpreter"
       id: get_python
+      shell: bash
       run: |
         pycallpython=$(julia -e 'using Pkg;Pkg.add("PyCall");using PyCall;println(PyCall.python)')
         echo "pythonpath=$(echo $pycallpython)" >> $GITHUB_OUTPUT
@@ -27,6 +28,7 @@ runs:
     - name: "Installing PyMAPDL"
       env:
         PYTHON_PATH: ${{ steps.get_python.outputs.pythonpath }}
+      shell: bash
       run: |
         "$PYTHON_PATH" -m pip install -e .
 

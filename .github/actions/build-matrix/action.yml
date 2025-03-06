@@ -31,6 +31,7 @@ runs:
       id: get_user
       env:
         type_event: ${{ github.event.issue.pull_request }}
+      shell: bash
       run: |
         if [[ $type_event ]]; then
           echo "Event type: $type_event"
@@ -56,11 +57,12 @@ runs:
       env:
         auth_user: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' || github.actor == 'dependabot[bot]'  }}
         ON_REMOTE: ${{ inputs.local == 'false' }}
-        ONLY_UBUNTU: ${{ input.local == 'true' }}
+        ONLY_UBUNTU: ${{ inputs.local == 'true' }}
         ON_SCHEDULE: ${{ github.event_name == 'schedule' }}
         ON_WORKFLOW_DISPATCH: ${{ github.event_name == 'workflow_dispatch' }}
         RUN_ALL_TEST: ${{ inputs.run_all_builds == 'true' }}
         ON_PUSH: ${{ github.event_name == 'push' }}
         HAS_TAG: ${{ contains(github.ref, 'refs/tags') }}
         LIMIT_VERSIONS: 2
+      shell: bash
       run: .ci/build_matrix.sh
