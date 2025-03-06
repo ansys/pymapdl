@@ -415,14 +415,14 @@ jobs:
       PYMAPDL_START_INSTANCE: FALSE
       ON_LOCAL: FALSE
       ON_UBUNTU: FALSE
-      BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+      # BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
     outputs:
       DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
 
     steps:
       - name: Run Pytest for ${{ matrix.mapdl-version }} on remote mode
-        uses: ansys/pymapdl/.github/actions/test_remote@${{ env.BRANCH_NAME }}
+        uses: ansys/pymapdl/.github/actions/test_remote
         with:
           mapdl-version: ${{ matrix.mapdl-version }}
           username: ${{ github.actor }}
