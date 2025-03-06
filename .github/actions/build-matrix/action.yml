@@ -24,6 +24,11 @@ inputs:
     type: boolean
     default: false
 
+outputs:
+  matrix:
+    description: "Matrix of MAPDL containers to test."
+    value: ${{ steps.set-matrix.outputs.matrix }}
+
 runs:
   using: "composite"
   steps:
