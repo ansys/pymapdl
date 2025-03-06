@@ -24,9 +24,9 @@ on:
           Username for the GitHub container registry.
         required: true
       
-      password:
+      token:
         description: |
-          Password for the GitHub container registry.
+          Token for GitHub.
         required: true
 
       license-server:
@@ -65,7 +65,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ secrets.username }}
-          password: ${{ secrets.password }}
+          password: ${{ secrets.token }}
 
       - name: "Getting SMP/DMP mode"
         id: distributed_mode
