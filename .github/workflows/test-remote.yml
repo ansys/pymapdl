@@ -108,7 +108,7 @@ jobs:
       - name: "Pull, launch, and validate MAPDL service"
         id: start_mapdl
         env:
-          LICENSE_SERVER: ${{ secrets.license_server }}
+          LICENSE_SERVER: ${{ secrets.license-server }}
           MAPDL_VERSION: ${{ inputs.mapdl-version }}
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
         shell: bash

@@ -7,7 +7,7 @@ on:
     
     # Secrets
     secrets:
-      license_server:
+      license-server:
         description: |
           License server for ANSYS MAPDL
         required: true
@@ -34,6 +34,7 @@ jobs:
       ON_DOCUMENTATION: TRUE
       GRPC_ENABLE_FORK_SUPPORT: false  # See #3434
       DPF_PORT: 21004
+      MAIN_PYTHON_VERSION: "3.12"
 
     steps:
       - name: "Install Git and checkout project"
@@ -49,7 +50,7 @@ jobs:
       - name: "Pull, launch, and validate MAPDL service"
         id: start_mapdl
         env:
-          LICENSE_SERVER: ${{ secrets.license_server }}
+          LICENSE_SERVER: ${{ secrets.license-server }}
           MAPDL_VERSION: ${{ env.MAPDL_IMAGE_VERSION_DOCS_BUILD }}
           DISTRIBUTED_MODE: "dmp"
         shell: bash
