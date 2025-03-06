@@ -34,7 +34,11 @@ jobs:
       ON_DOCUMENTATION: TRUE
       GRPC_ENABLE_FORK_SUPPORT: false  # See #3434
       DPF_PORT: 21004
+
     steps:
+      - name: "Install Git and checkout project"
+        uses: actions/checkout@v4.2.2
+
       - name: "Login in Github container registry"
         uses: docker/login-action@v3.3.0
         with:
