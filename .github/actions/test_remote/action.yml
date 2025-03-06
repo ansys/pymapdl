@@ -36,9 +36,6 @@ inputs:
 
 runs:
   using: "composite"
-  defaults:
-    run:
-      shell: bash
 
   steps:
     - name: "Login in Github container registry"
@@ -50,6 +47,7 @@ runs:
 
     - name: "Getting SMP/DMP mode"
       id: distributed_mode
+      shell: bash
       run: |
         image=${{ inputs.mapdl-version }}
         export distributed_mode="smp"
@@ -61,6 +59,7 @@ runs:
 
     - name: "Get if running on Ubuntu"
       id: ubuntu_check
+      shell: bash
       run: |
         if [[ "${{ inputs.mapdl-version }}" == *"ubuntu"* ]];
           then export ON_UBUNTU=true; export TAG_UBUNTU="ubuntu";
@@ -73,6 +72,7 @@ runs:
 
     - name: "Get if running student version"
       id: student_check
+      shell: bash
       run: |
         if [[ "${{ inputs.mapdl-version }}" == *"student"* ]]; 
           then export ON_STUDENT=true; export TAG_STUDENT="student";
@@ -89,6 +89,7 @@ runs:
         LICENSE_SERVER: ${{ inputs.LICENSE_SERVER }}
         MAPDL_VERSION: ${{ inputs.mapdl-version }}
         DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
+      shell: bash
       run: |
         echo "Launching first MAPDL instance..."
         export INSTANCE_NAME=MAPDL_0
@@ -104,6 +105,7 @@ runs:
         echo "DOCKER_PID_1=$(echo $DOCKER_PID_1)" >> $GITHUB_OUTPUT
 
     - name: "DPF server activation"
+      shell: bash
       run: |
         $(docker pull ghcr.io/ansys/dpf-core:22.2dev && docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}.") &
 
@@ -129,16 +131,19 @@ runs:
         python-version: ${{ env.MAIN_PYTHON_VERSION }}
 
     - name: "Install os packages"
+      shell: bash
       run: |
         sudo apt update
         sudo apt install libgl1-mesa-glx xvfb graphviz
 
     - name: "Test virtual framebuffer"
+      shell: bash
       run: |
         pip install -r .ci/requirements_test_xvfb.txt
         xvfb-run python .ci/display_test.py
 
     - name: Install ansys-mapdl-core
+      shell: bash
       run: |
         python -m pip install build
         python -m build
@@ -146,10 +151,12 @@ runs:
         xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
     - name: "Unit testing requirements installation"
+      shell: bash
       run: |
         python -m pip install .[tests]
 
     - name: "Waiting for the services to be up"
+      shell: bash
       run: |
         .ci/waiting_services.sh
 
@@ -159,6 +166,7 @@ runs:
         ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
         ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
         file_name: "${{ inputs.mapdl-version }}-remote"
+      shell: bash
       run: |
         echo "ON_UBUNTU: $ON_UBUNTU"
         echo "ON_STUDENT: $ON_STUDENT"
@@ -182,6 +190,7 @@ runs:
         path: ./${{ inputs.mapdl-version }}-remote.xml
 
     - name: "Check package"
+      shell: bash
       run: |
         pip install twine
         twine check dist/*
@@ -199,6 +208,7 @@ runs:
         MAPDL_VERSION: ${{ inputs.mapdl-version }}
         MAPDL_INSTANCE: MAPDL_0
         LOG_NAMES: logs-remote-${{ inputs.mapdl-version }}
+      shell: bash
       run: |
         .ci/collect_mapdl_logs_remote.sh
 
@@ -214,5 +224,6 @@ runs:
       env:
         MAPDL_INSTANCE: MAPDL_0
         LOG_NAMES: logs-remote-${{ inputs.mapdl-version }}
+      shell: bash
       run: |
         .ci/display_logs_remote.sh
