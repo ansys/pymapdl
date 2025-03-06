@@ -158,6 +158,7 @@ jobs:
       - name: "Test virtual framebuffer"
         shell: bash
         run: |
+          ls -laR .
           pip install -r .ci/requirements_test_xvfb.txt
           xvfb-run python .ci/display_test.py
 
