@@ -182,7 +182,7 @@ jobs:
           # executable path with the env var: PYMAPDL_MAPDL_EXEC.
 
           if [[ "${{ inputs.mapdl-version }}" == *"latest-ubuntu"* ]] ; then
-            version=${{ input.latest-version }}
+            version=${{ inputs.latest-version }}
           else
             version=$(echo "${{ inputs.mapdl-version }}" | head -c 5 | tail -c 4 | tr -d '.')
           fi;
