@@ -23,6 +23,13 @@ inputs:
     required: false
     type: boolean
     default: false
+  
+  type_event:
+    description: |
+      Type of event that triggered the workflow.
+    required: false
+    type: string
+    default: ""
 
 outputs:
   matrix:
@@ -35,7 +42,7 @@ runs:
     - name: Get event type and user to check permissions.
       id: get_user
       env:
-        type_event: ${{ github.event.issue.pull_request }}
+        type_event: ${{ inputs.type_event }}
       shell: bash
       run: |
         if [[ $type_event ]]; then
@@ -58,7 +65,6 @@ runs:
         GITHUB_TOKEN: ${{ inputs.token_teams_user_read }}
 
     - id: set-matrix
-      if: inputs.local == 'false'
       env:
         auth_user: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' || github.actor == 'dependabot[bot]'  }}
         ON_REMOTE: ${{ inputs.local == 'false' }}

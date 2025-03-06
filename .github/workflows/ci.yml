@@ -190,7 +190,7 @@ jobs:
         uses: ./.github/actions/build-matrix
         id: set-matrix
         with:
-          token_teams_user_read: ${{ secrets.TOKEN_TEAMS_USER_READ}}
+          token_teams_user_read: ${{ secrets.TOKEN_TEAMS_USER_READ }}
           local: false
           run_all_builds: ${{ inputs.run_all_builds }}
 
@@ -241,7 +241,7 @@ jobs:
         uses: ./.github/actions/build-matrix
         id: set-matrix
         with:
-          token_teams_user_read: ${{ secrets.TOKEN_TEAMS_USER_READ}}
+          token_teams_user_read: ${{ secrets.TOKEN_TEAMS_USER_READ }}
           local: true
           run_all_builds: ${{ inputs.run_all_builds }}
 
@@ -253,7 +253,7 @@ jobs:
     timeout-minutes: 75
     strategy:
       fail-fast: false
-      matrix: ${{fromJson(needs.build-test-local-matrix.outputs.matrix)}}
+      matrix: ${{ fromJson(needs.build-test-local-matrix.outputs.matrix) }}
 
     container:
       image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
