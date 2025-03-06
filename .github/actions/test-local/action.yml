@@ -86,7 +86,7 @@ runs:
         python -m pip install --upgrade pip
 
     - name: "Install ansys-mapdl-core"
-      if: ${{ !inputs.minimal }}
+      if: inputs.minimal == 'false'
       shell: bash
       run: |
         python -m pip install build
@@ -96,20 +96,20 @@ runs:
 
     - name: "Install ansys-mapdl-core with minimal requirements"
       shell: bash
-      if: ${{ inputs.minimal }}
+      if: inputs.minimal == 'true'
       run: |
         python -m pip install . --no-deps
         python -m pip install -r minimum_requirements.txt
         python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
 
     - name: "Unit testing requirements installation"
-      if: ${{ !inputs.minimal }}
+      if: inputs.minimal == 'false'
       shell: bash
       run: |
         python -m pip install .[tests]
 
     - name: "Unit testing requirements installation"
-      if: ${{ inputs.minimal }}
+      if: inputs.minimal == 'true'
       shell: bash
       run: |
         python -m pip install -r .ci/requirements_testing_minimal.txt

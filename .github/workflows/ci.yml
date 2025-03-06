@@ -422,7 +422,7 @@ jobs:
         uses: actions/checkout@v4.2.2
 
       - name: Run Pytest for ${{ matrix.mapdl-version }} on remote mode
-        uses: ./.github/actions/test_remote
+        uses: ./.github/actions/test-remote
         with:
           mapdl-version: ${{ matrix.mapdl-version }}
           username: ${{ github.actor }}
