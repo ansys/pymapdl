@@ -415,189 +415,20 @@ jobs:
       PYMAPDL_START_INSTANCE: FALSE
       ON_LOCAL: FALSE
       ON_UBUNTU: FALSE
+      BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
 
     outputs:
       DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
 
     steps:
-      - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.2
-
-      - name: "Login in Github container registry"
-        uses: docker/login-action@v3.3.0
+      - name: Run Pytest for ${{ matrix.mapdl-version }} on remote mode
+        uses: ansys/pymapdl/.github/actions/test_remote@${{ env.BRANCH_NAME }}
         with:
-          registry: ghcr.io
+          mapdl-version: ${{ matrix.mapdl-version }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: "Getting SMP/DMP mode"
-        id: distributed_mode
-        run: |
-          image=${{ matrix.mapdl-version }}
-          export distributed_mode="smp"
-          if [[ $image == *".1."* ]]; then
-            export distributed_mode="dmp";
-          fi
-          echo "Distributed mode: $distributed_mode"
-          echo "distributed_mode=$(echo $distributed_mode)" >> $GITHUB_OUTPUT
-
-      - name: "Get if running on Ubuntu"
-        id: ubuntu_check
-        run: |
-          if [[ "${{ matrix.mapdl-version }}" == *"ubuntu"* ]];
-            then export ON_UBUNTU=true; export TAG_UBUNTU="ubuntu";
-            else export ON_UBUNTU=false; export TAG_UBUNTU="centos";
-          fi
-          echo "ON_UBUNTU: $ON_UBUNTU"
-          echo "TAG_UBUNTU: $TAG_UBUNTU"
-          echo "ON_UBUNTU=$(echo $ON_UBUNTU)" >> $GITHUB_OUTPUT
-          echo "TAG_UBUNTU=$(echo $TAG_UBUNTU)" >> $GITHUB_OUTPUT
-
-      - name: "Get if running student version"
-        id: student_check
-        run: |
-          if [[ "${{ matrix.mapdl-version }}" == *"student"* ]]; 
-            then export ON_STUDENT=true; export TAG_STUDENT="student";
-            else export ON_STUDENT=false; export TAG_STUDENT="non-student";
-          fi
-          echo "ON_STUDENT: $ON_STUDENT"
-          echo "TAG_STUDENT: $TAG_STUDENT"
-          echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
-          echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
-          
-      - name: "Pull, launch, and validate MAPDL service"
-        id: start_mapdl
-        env:
-          LICENSE_SERVER: ${{ secrets.LICENSE_SERVER }}
-          MAPDL_VERSION: ${{ matrix.mapdl-version }}
-          DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
-        run: |
-          echo "Launching first MAPDL instance..."
-          export INSTANCE_NAME=MAPDL_0
-          .ci/start_mapdl.sh &> mapdl_launch_0.log & export DOCKER_PID_0=$!
-          echo "Launching a second instance for MAPDL pool testing..."
-          export PYMAPDL_PORT=${{ env.PYMAPDL_PORT2 }}
-          export PYMAPDL_DB_PORT=${{ env.PYMAPDL_DB_PORT2 }}
-          export INSTANCE_NAME=MAPDL_1
-          .ci/start_mapdl.sh &> mapdl_launch_1.log & export DOCKER_PID_1=$!
-          echo "Launching MAPDL service 0 at PID: $DOCKER_PID_0"
-          echo "Launching MAPDL service 1 at PID: $DOCKER_PID_2"
-          echo "DOCKER_PID_0=$(echo $DOCKER_PID_0)" >> $GITHUB_OUTPUT
-          echo "DOCKER_PID_1=$(echo $DOCKER_PID_1)" >> $GITHUB_OUTPUT
-
-      - name: "DPF server activation"
-        run: |
-          $(docker pull ghcr.io/ansys/dpf-core:22.2dev && docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}.") &
-
-      - name: "Getting files change filters"
-        uses: dorny/paths-filter@v3
-        id: changes
-        with:
-          filters: |
-            workflows:
-              - '.github/workflows/**'
-
-      - name: "Setup Python with cache"
-        uses: actions/setup-python@v5
-        if:  steps.changes.outputs.workflows != 'true'
-        with:
-          cache: 'pip'
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
-
-      - name: "Setup Python without cache"
-        uses: actions/setup-python@v5
-        if: steps.changes.outputs.workflows == 'true'
-        with:
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
-
-      - name: "Install os packages"
-        run: |
-          sudo apt update
-          sudo apt install libgl1-mesa-glx xvfb graphviz
-
-      - name: "Test virtual framebuffer"
-        run: |
-          pip install -r .ci/requirements_test_xvfb.txt
-          xvfb-run python .ci/display_test.py
-
-      - name: Install ansys-mapdl-core
-        run: |
-          python -m pip install build
-          python -m build
-          python -m pip install dist/*.whl
-          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
-
-      - name: "Unit testing requirements installation"
-        run: |
-          python -m pip install .[tests]
-
-      - name: "Waiting for the services to be up"
-        run: |
-          .ci/waiting_services.sh
-
-      - name: "Unit testing"
-        env:
-          DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
-          ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
-          ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
-          file_name: "${{ matrix.mapdl-version }}-remote"
-        run: |
-          echo "ON_UBUNTU: $ON_UBUNTU"
-          echo "ON_STUDENT: $ON_STUDENT"
-          xvfb-run pytest \
-            ${{ env.PYTEST_ARGUMENTS }} \
-            --ignore_image_cache \
-            --report-log=$file_name.jsonl \
-            --cov-report=xml:$file_name.xml
-
-      - uses: codecov/codecov-action@v5
-        name: "Upload coverage to Codecov"
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }} # required
-          name: ${{ matrix.mapdl-version }}-remote.xml
-          flags: remote,${{ steps.ubuntu_check.outputs.TAG_UBUNTU }},${{ matrix.mapdl-version }},${{ steps.distributed_mode.outputs.distributed_mode }},${{ steps.student_check.outputs.TAG_STUDENT }}
-
-      - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.mapdl-version }}-remote.xml
-          path: ./${{ matrix.mapdl-version }}-remote.xml
-
-      - name: "Check package"
-        run: |
-          pip install twine
-          twine check dist/*
-
-      - name: "Upload wheel and binaries"
-        uses: actions/upload-artifact@v4
-        with:
-          name: PyMAPDL-packages-${{ matrix.mapdl-version }}
-          path: dist/
-          retention-days: 7
-
-      - name: "Collect logs on failure"
-        if: always()
-        env:
-          MAPDL_VERSION: ${{ matrix.mapdl-version }}
-          MAPDL_INSTANCE: MAPDL_0
-          LOG_NAMES: logs-remote-${{ matrix.mapdl-version }}
-        run: |
-          .ci/collect_mapdl_logs_remote.sh
-
-      - name: "Upload logs to GitHub"
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: logs-remote-${{ matrix.mapdl-version }}.tgz
-          path: ./logs-remote-${{ matrix.mapdl-version }}.tgz
-
-      - name: "Display files structure"
-        if: always()
-        env:
-          MAPDL_INSTANCE: MAPDL_0
-          LOG_NAMES: logs-remote-${{ matrix.mapdl-version }}
-        run: |
-          .ci/display_logs_remote.sh
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+          license_server: ${{ secrets.LICENSE_SERVER }}
 
   build-test-local-minimal-matrix:
     name: "Build test matrix for minimal and local"
