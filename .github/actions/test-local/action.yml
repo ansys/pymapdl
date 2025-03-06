@@ -69,10 +69,17 @@ runs:
         echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
         echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
 
+    - name: "Installing minimal OS packages"
+      shell: bash
+      if: inputs.minimal == 'true'
+      run: |
+        sudo apt-get update && apt install -y libgomp1 graphviz
+
     - name: "Installing OS packages"
       shell: bash
+      if: inputs.minimal == 'false'
       run: |
-        sudo apt-get update && apt-get install -y libgomp1 graphviz
+        sudo apt-get update && apt install -y libgl1-mesa-glx xvfb libgomp1 graphviz
 
     - name: "Setup Python"
       uses: actions/setup-python@v5
@@ -140,12 +147,15 @@ runs:
         if [[ "${{ inputs.minimal }}" == "true" ]]; then
           echo "PYMAPDL_MAPDL_EXEC: $PYMAPDL_MAPDL_EXEC"
           export PYMAPDL_MAPDL_EXEC=/ansys_inc/v"$version"/ansys/bin/ansys"$version"
+          export cmd="pytest"
+        else
+          export cmd="xvfb-run pytest"
         fi;
 
         unset PYMAPDL_START_INSTANCE
         unset PYMAPDL_PORT
 
-        pytest ${{ inputs.pytest-arguments }} \
+        $cmd ${{ inputs.pytest-arguments }} \
           ${{ env.PYTEST_ARGUMENTS }} \
           --report-log=$file_name.jsonl \
           --cov-report=xml:$file_name.xml
