@@ -16,7 +16,7 @@ inputs:
       Username for the GitHub container registry.
     required: true
     type: string
-  
+
   password:
     description: |
       Password for the GitHub container registry.

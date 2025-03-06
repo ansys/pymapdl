@@ -188,6 +188,7 @@ jobs:
 
       - name: Build matrix for remote testing
         uses: ./.github/actions/build-matrix
+        id: set-matrix
         with:
           token_teams_user_read: ${{ secrets.TOKEN_TEAMS_USER_READ}}
           local: false
@@ -238,6 +239,7 @@ jobs:
 
       - name: Build matrix for local, minimal and console testing
         uses: ./.github/actions/build-matrix
+        id: set-matrix
         with:
           token_teams_user_read: ${{ secrets.TOKEN_TEAMS_USER_READ}}
           local: true

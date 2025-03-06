@@ -16,7 +16,7 @@ inputs:
     required: false
     type: boolean
     default: true
-  
+
   run_all_builds:
     description: |
       If true, run all extended MAPDL build tests.
