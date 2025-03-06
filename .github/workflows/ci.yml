@@ -490,134 +490,16 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: "Get if running student version"
-        id: student_check
-        run: |
-          if [[ "${{ matrix.mapdl-version }}" == *"student"* ]]; 
-            then export ON_STUDENT=true; export TAG_STUDENT="student";
-            else export ON_STUDENT=false; export TAG_STUDENT="non-student";
-          fi
-
-          echo "ON_STUDENT: $ON_STUDENT"
-          echo "TAG_STUDENT: $TAG_STUDENT"
-          echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
-          echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
-
-      - name: "Setup Python"
-        uses: actions/setup-python@v5
+      - name: "Run pytest on local"
+        uses: ./.github/actions/test-local
         with:
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
-
-      - name: "Checking Python"
-        run: |
-          python --version
-          python -m pip install --upgrade pip
-          python -m venv ./.venv
-          source ./.venv/bin/activate
-
-      - name: "Install OS packages"
-        run: |
-          apt update
-          apt install -y libgl1-mesa-glx xvfb libgomp1 graphviz
-
-      - name: "Test virtual framebuffer"
-        run: |
-          python -m pip install -r .ci/requirements_test_xvfb.txt
-          xvfb-run python .ci/display_test.py
-
-      - name: "Install ansys-mapdl-core"
-        run: |
-          python -m pip install build
-          python -m build
-          python -m pip install dist/*.whl
-          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
-
-      - name: "Unit testing requirements installation"
-        run: |
-          python -m pip install .[tests]
-
-      - name: "Unit testing"
-        env:
-          ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
-          ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
-          file_name: "${{ matrix.mapdl-version }}-local"
-        run: |
-          echo "ON_UBUNTU: $ON_UBUNTU"
-          echo "ON_STUDENT: $ON_STUDENT"
-          unset PYMAPDL_PORT
-          unset PYMAPDL_START_INSTANCE
-          xvfb-run pytest -k "not test_dpf" \
-            ${{ env.PYTEST_ARGUMENTS }} \
-            --reset_only_failed \
-            --add_missing_images \
-            --report-log=$file_name.jsonl \
-            --cov-report=xml:$file_name.xml
-
-      - name: "Collect logs on failure"
-        if: always()
-        env:
-          LOG_NAMES: logs-local-${{ matrix.mapdl-version }}
-        run: |
-          .ci/collect_mapdl_logs_locals.sh
-
-      - name: "Upload logs to GitHub"
-        if: always()
-        uses: actions/upload-artifact@master
-        with:
-          name: logs-local-${{ matrix.mapdl-version }}.tgz
-          path: ./logs-local-${{ matrix.mapdl-version }}.tgz
-
-      - name: "Display files structure"
-        if: always()
-        env:
-          LOG_NAMES: logs-local-${{ matrix.mapdl-version }}
-        run: |
-          .ci/display_logs_locals.sh
-
-      - name: "Adding the directory as safe directory for later step"
-        run: |
-          git config --global --add safe.directory $GITHUB_WORKSPACE
-
-      - name: "Attaching modified files to PR"
-        id: attatch-to-pr
-        uses: EndBug/add-and-commit@v9
-        with:
-          message: "chore: update the image cache"
-          committer_name: GitHub Actions
-          committer_email: actions@github.com
-          add: './tests/.image_cache/*.png'
-
-      - name: "PR comment with reactions"
-        if: ${{ steps.attatch-to-pr.outputs.pushed == 'true' }}
-        uses: thollander/actions-comment-pull-request@v3
-        with:
-          message: |
-            Hello!  :wave:
-
-            Your PR is changing the image cache. So I am attaching the new image cache in a new [commit](https://github.com/ansys/pymapdl/commit/${{ steps.attatch-to-pr.outputs.commit_long_sha }}).
-
-            This commit does not re-run the CICD workflows (since no changes are made in the codebase) therefore you will see the actions showing in their status `Expected — Waiting for status to be reported`. Do not worry. You commit workflow is still running [here](https://github.com/ansys/pymapdl/pull/${{ github.event.pull_request.number }}/checks?sha=${{ github.event.pull_request.head.sha }}) :smile:
-
-            You might want to rerun the test to make sure that everything is passing. You can retrigger the CICD sending an empty commit `git commit -m "chore: empty comment to trigger CICD" --allow-empty`.
-
-            You will see this message everytime your commit changes the image cache but you are not attaching the updated cache. :nerd_face:
-
-          reactions: rocket
-
-      - uses: codecov/codecov-action@v5
-        name: "Upload coverage to Codecov"
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }} # required
-          root_dir: ${{ github.workspace }}
-          name: ${{ matrix.mapdl-version }}-local.xml
-          flags: ubuntu,local,${{ matrix.mapdl-version }},${{ steps.student_check.outputs.TAG_STUDENT }},dmp
-
-      - name: "Upload coverage artifacts"
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.mapdl-version }}-local.xml
-          path: ./${{ matrix.mapdl-version }}-local.xml
-
+          mapdl-version: ${{ matrix.mapdl-version }}
+          minimal: false
+          license_server: ${{ secrets.LICENSE_SERVER }}
+          pytest-arguments: '-k "not test_dpf" --reset_only_failed  --add_missing_images'
+          file-name: "${{ matrix.mapdl-version }}-local"
+          tags: "local"
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
   build-test-ubuntu-minimal:
     name: "Local-min: ${{ matrix.mapdl-version }}"
@@ -647,108 +529,16 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: "Get if running student version"
-        id: student_check
-        run: |
-          if [[ "${{ matrix.mapdl-version }}" == *"student"* ]]; 
-            then export ON_STUDENT=true; export TAG_STUDENT="student";
-            else export ON_STUDENT=false; export TAG_STUDENT="non-student";
-          fi
-
-          echo "ON_STUDENT: $ON_STUDENT"
-          echo "TAG_STUDENT: $TAG_STUDENT"
-          echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
-          echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
-
-      - name: "Installing missing package"
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgomp1 graphviz
-
-      - name: "Setup Python"
-        uses: actions/setup-python@v5
+      - name: "Run Pytest for ${{ matrix.mapdl-version }} on local mode using minimal configuration"
+        uses: ./.github/actions/test-local
         with:
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
-
-      - name: "Checking Python"
-        run: |
-          python --version
-          python -m pip install --upgrade pip
-
-      - name: "Install ansys-mapdl-core"
-        run: |
-          python -m pip install . --no-deps
-          python -m pip install -r minimum_requirements.txt
-          python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
-
-      - name: "Unit testing requirements installation"
-        run: |
-          python -m pip install -r .ci/requirements_testing_minimal.txt
-
-      - name: "Unit testing"
-        env:
-          ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
-          ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
-          file_name: "${{ matrix.mapdl-version }}-minimal"
-        run: |
-          echo "ON_UBUNTU: $ON_UBUNTU"
-          echo "ON_STUDENT: $ON_STUDENT"
-
-          # Because there is no 'ansys-tools-path' we need to input the
-          # executable path with the env var: PYMAPDL_MAPDL_EXEC.
-
-          if [[ "${{ matrix.mapdl-version }}" == *"latest-ubuntu"* ]] ; then
-            version=${{ env.LATEST_VERSION }}
-          else
-            version=$(echo "${{ matrix.mapdl-version }}" | head -c 5 | tail -c 4 | tr -d '.')
-          fi;
-
-          echo "Version: $version"
-
-          export PYMAPDL_MAPDL_EXEC=/ansys_inc/v"$version"/ansys/bin/ansys"$version"
-          echo "$PYMAPDL_MAPDL_EXEC"
-
-          unset PYMAPDL_START_INSTANCE
-          pytest -k "not test_dpf" \
-            ${{ env.PYTEST_ARGUMENTS }} \
-            --report-log=$file_name.jsonl \
-            --cov-report=xml:$file_name.xml
-
-      - name: "Collect logs on failure"
-        if: always()
-        env:
-          LOG_NAMES: logs-minimal-${{ matrix.mapdl-version }}
-        run: |
-          .ci/collect_mapdl_logs_locals.sh
-
-      - name: "Upload logs to GitHub"
-        if: always()
-        uses: actions/upload-artifact@master
-        with:
-          name: logs-minimal-${{ matrix.mapdl-version }}.tgz
-          path: ./logs-minimal-${{ matrix.mapdl-version }}.tgz
-
-      - name: "Display files structure"
-        if: always()
-        env:
-          LOG_NAMES: logs-minimal-${{ matrix.mapdl-version }}
-        run: |
-          .ci/display_logs_locals.sh
-    
-      - uses: codecov/codecov-action@v5
-        name: "Upload coverage to Codecov"
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }} # required
-          root_dir: ${{ github.workspace }}
-          name: ${{ matrix.mapdl-version }}-minimal.xml
-          flags: ubuntu,local,${{ matrix.mapdl-version }},minimal,${{ steps.student_check.outputs.TAG_STUDENT }},dmp
-
-      - name: "Upload coverage artifacts"
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.mapdl-version }}-minimal.xml
-          path: ./${{ matrix.mapdl-version }}-minimal.xml
-
+          mapdl-version: ${{ matrix.mapdl-version }}
+          minimal: true
+          license_server: ${{ secrets.LICENSE_SERVER }}
+          pytest-arguments: '-k "not test_dpf"'
+          file-name: "${{ matrix.mapdl-version }}-minimal"
+          tags: "local,minimal"
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
   build-test-ubuntu-console:
     name: "Local-min-console: ${{ matrix.mapdl-version }}"
@@ -779,109 +569,17 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
           ref: ${{ github.event.pull_request.head.ref }}
 
-      - name: "Get if running student version"
-        id: student_check
-        run: |
-          if [[ "${{ matrix.mapdl-version }}" == *"student"* ]]; 
-            then export ON_STUDENT=true; export TAG_STUDENT="student";
-            else export ON_STUDENT=false; export TAG_STUDENT="non-student";
-          fi
-
-          echo "ON_STUDENT: $ON_STUDENT"
-          echo "TAG_STUDENT: $TAG_STUDENT"
-          echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
-          echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
-
-      - name: "Installing missing package"
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libgomp1 graphviz
-
-      - name: "Setup Python"
-        uses: actions/setup-python@v5
+      - name: "Run Pytest for ${{ matrix.mapdl-version }} on local mode using console configuration"
+        uses: ./.github/actions/test-local
         with:
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
-
-      - name: "Checking Python"
-        run: |
-          python --version
-          python -m pip install --upgrade pip
-
-      - name: "Install ansys-mapdl-core"
-        run: |
-          python -m pip install . --no-deps
-          python -m pip install -r minimum_requirements.txt
-          python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
-
-      - name: "Unit testing requirements installation"
-        run: |
-          python -m pip install -r .ci/requirements_testing_minimal.txt
-
-      - name: "Unit testing"
-        env:
-          ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.LICENSE_SERVER }}"
-          ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
-          file_name: "${{ matrix.mapdl-version }}-minimal-console"
-        run: |
-          echo "ON_UBUNTU: $ON_UBUNTU"
-          echo "ON_STUDENT: $ON_STUDENT"
-
-          # Because there is no 'ansys-tools-path' we need to input the
-          # executable path with the env var: PYMAPDL_MAPDL_EXEC.
-
-          if [[ "${{ matrix.mapdl-version }}" == *"latest-ubuntu"* ]] ; then
-            version=${{ env.LATEST_VERSION }}
-          else
-            version=$(echo "${{ matrix.mapdl-version }}" | head -c 5 | tail -c 4 | tr -d '.')
-          fi;
-
-          echo "Version: $version"
-
-          export PYMAPDL_MAPDL_EXEC=/ansys_inc/v"$version"/ansys/bin/ansys"$version"
-          echo "$PYMAPDL_MAPDL_EXEC"
-
-          unset PYMAPDL_START_INSTANCE
-          pytest -k "console" \
-            ${{ env.PYTEST_ARGUMENTS }} \
-            --report-log=$file_name.jsonl \
-            --cov-report=xml:$file_name.xml
-
-      - name: "Collect logs on failure"
-        if: always()
-        env:
-          LOG_NAMES: logs-minimal-console-${{ matrix.mapdl-version }}
-        run: |
-          .ci/collect_mapdl_logs_locals.sh
-
-      - name: "Upload logs to GitHub"
-        if: always()
-        uses: actions/upload-artifact@master
-        with:
-          name: logs-minimal-console-${{ matrix.mapdl-version }}.tgz
-          path: ./logs-minimal-console-${{ matrix.mapdl-version }}.tgz
-
-      - name: "Display files structure"
-        if: always()
-        env:
-          LOG_NAMES: logs-minimal-console-${{ matrix.mapdl-version }}
-        run: |
-          .ci/display_logs_locals.sh
-
-      - uses: codecov/codecov-action@v5
-        name: "Upload coverage to Codecov"
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }} # required
-          root_dir: ${{ github.workspace }}
-          name: ${{ matrix.mapdl-version }}-minimal-console.xml
-          flags: ubuntu,local,${{ matrix.mapdl-version }},minimal,console,${{ steps.student_check.outputs.TAG_STUDENT }},dmp
-
-      - name: "Upload coverage artifacts"
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.mapdl-version }}-minimal-console.xml
-          path: ./${{ matrix.mapdl-version }}-minimal-console.xml
-
-
+          mapdl-version: ${{ matrix.mapdl-version }}
+          minimal: true
+          license_server: ${{ secrets.LICENSE_SERVER }}
+          pytest-arguments: '-k console'
+          file-name: "${{ matrix.mapdl-version }}-minimal-console"
+          tags: "local,minimal,console"
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+          
   test-windows:
     # Skipped
     if: github.repository == ''
@@ -894,67 +592,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4.2.2
 
-      # Skipping because it is installed locally.
-      # - name: Setup Python
-      #   uses: actions/setup-python@v5
-      #   with:
-      #     python-version: 3.9
-
-      - name: "Checking Python"
-        shell: powershell
-        run: |
-          python -m pip install --upgrade pip
-
-      - name: "Creating python venv"
-        shell: powershell
-        run: |
-          python -m venv .\.venv
-          .\.venv\Scripts\activate
-
-      - name: "Install ansys-mapdl-core"
-        shell: powershell
-        run: |
-          python -m pip install build
-          python -m build
-          $FILE_=Resolve-Path '.\dist\*.whl'
-          python -m pip install $FILE_.Path --upgrade
-          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
-
-      - name: "Unit testing requirements installation"
-        shell: powershell
-        run: |
-          python -m pip install .[tests]
-
-      # - name: DPF Server Activation
-      #   run: |
-      #     docker pull ghcr.io/ansys/dpf-core:22.2dev
-      #     docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
-
-      - name: "Unit testing"
-        shell: powershell
-        env:
-          file_name: windows-v22.2.0-local
-        run: |
-          set PYMAPDL_PORT=
-          set PYMAPDL_START_INSTANCE=
-          python -m pytest -k "not test_database and not test_dpf" \
-            ${{ env.PYTEST_ARGUMENTS }} \
-            --ignore_image_cache \
-            --report-log=$file_name.jsonl \
-            --cov-report=xml:$file_name.xml
-
-      - uses: codecov/codecov-action@v5
-        name: "Upload coverage to Codecov"
+      - uses: ./.github/actions/test_windows
         with:
-          token: ${{ secrets.CODECOV_TOKEN }} # required
-          name: windows-v22.2.0-local.xml
-          flags: windows,local,v22.2.0
-
-      - name: "Upload coverage artifacts"
-        uses: actions/upload-artifact@v4
-        with:
-          name: windows-v22.2.0-local.xml
-          path: ./windows_local.xml
+          codecov_token: ${{ secrets.CODECOV_TOKEN }}
 
 
   package:
@@ -991,6 +631,7 @@ jobs:
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           additional-artifacts: "minimum_requirements.txt"
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Display structure of downloaded files"
         run: ls -Rla
@@ -1075,52 +716,16 @@ jobs:
         run: |
           using Pkg; Pkg.add("PyCall");using PyCall;pymapdl = pyimport("ansys.mapdl.core");print(pymapdl.__version__)
 
-
   pytest-summary:
     name: Pytest summary for all the test jobs
-    needs: [build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal, build-test-ubuntu-console]
+    needs: [
+      build-test-remote, build-test-ubuntu-local, build-test-ubuntu-minimal, build-test-ubuntu-console
+      ]
     if: always()
     runs-on: ubuntu-22.04          
     steps:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.2.2
 
-      - name: "Setup Python with cache"
-        uses: actions/setup-python@v5
-        with:
-          cache: 'pip'
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
-
-      - name: "Install numpy"
-        run: python -m pip install numpy click
-
-      - name: "Download artifacts"
-        uses: actions/download-artifact@v4
-        with:
-          path: "artifacts"
-
-      - name: "List directories"
-        run: |
-          echo "::group:: List directories:" && ls -Rla artifacts && echo "::endgroup::"
-
-      - name: "Uncompress files"
-        run: |
-          find . -mindepth 1 -maxdepth 4 -type f -name 'logs-*.tgz' -exec tar -xzvf {} -C $(dirname {}) \;
-
-      - name: "List directories"
-        run: |
-          echo "::group:: List directories:" && ls -Rla . && echo "::endgroup::"
-
-      - name: "Create summary"
-        run: |
-          echo "# Test summary 🚀" >>  $GITHUB_STEP_SUMMARY
-          echo -e "The followin tables show a summary of tests duration and standard desviation for all the jobs.\n" >>  $GITHUB_STEP_SUMMARY
-          python .ci/pytest_summary.py --num 10 --save-file tests_durations.json >> summary.md
-          echo "$(cat summary.md)" >> $GITHUB_STEP_SUMMARY
-          cat summary.md
-
-      - name: "Upload tests summary"
-        uses: actions/upload-artifact@v4
-        with:
-          name: tests_durations.json
-          path: tests_durations.json
+      - name: "Run Pytest-summary action"
+        uses: ./.github/actions/pytest-summary
