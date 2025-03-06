@@ -11,13 +11,12 @@ on:
           MAPDL version to test.
         required: true
         type: string
-      
-      minimal:
+
+      latest-version:
         description: |
-          If true, the minimal requirements will be installed.
-        required: false
-        type: boolean
-        default: false
+          Latest version of MAPDL.
+        required: true
+        type: string
 
       pytest-arguments:
         description: |
@@ -25,6 +24,13 @@ on:
         required: false
         type: string
         default: ""
+
+      testing-minimal: 
+        description: |
+          If true, the minimal requirements will be installed.
+        required: false
+        type: boolean
+        default: false
 
       file-name:
         description: |
@@ -35,19 +41,6 @@ on:
       tags:
         description: |
           Tags to add to the coverage report.
-        required: true
-        type: string
-
-      testing-minimal: 
-        description: |
-          If true, the minimal requirements will be installed.
-        required: false
-        type: boolean
-        default: false
-
-      latest-version:
-        description: |
-          Latest version of MAPDL.
         required: true
         type: string
 
@@ -111,13 +104,13 @@ jobs:
 
       - name: "Installing minimal OS packages"
         shell: bash
-        if: inputs.testing-minimal == 'true'
+        if: inputs.testing-minimal == true
         run: |
           sudo apt-get update && apt install -y libgomp1 graphviz
 
       - name: "Installing OS packages"
         shell: bash
-        if: inputs.testing-minimal == 'false'
+        if: inputs.testing-minimal == false
         run: |
           sudo apt-get update && apt install -y libgl1-mesa-glx xvfb libgomp1 graphviz
 
@@ -133,7 +126,7 @@ jobs:
           python -m pip install --upgrade pip
 
       - name: "Install ansys-mapdl-core"
-        if: inputs.testing-minimal == 'false'
+        if: inputs.testing-minimal == false
         shell: bash
         run: |
           python -m pip install build
@@ -143,20 +136,20 @@ jobs:
 
       - name: "Install ansys-mapdl-core with minimal requirements"
         shell: bash
-        if: inputs.testing-minimal == 'true'
+        if: inputs.testing-minimal == true
         run: |
           python -m pip install . --no-deps
           python -m pip install -r minimum_requirements.txt
           python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
 
       - name: "Unit testing requirements installation"
-        if: inputs.testing-minimal == 'false'
+        if: inputs.testing-minimal == false
         shell: bash
         run: |
           python -m pip install .[tests]
 
       - name: "Unit testing requirements installation"
-        if: inputs.testing-minimal == 'true'
+        if: inputs.testing-minimal == true
         shell: bash
         run: |
           python -m pip install -r .ci/requirements_testing_minimal.txt
