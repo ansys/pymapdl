@@ -180,9 +180,9 @@ jobs:
       license-server: ${{ secrets.LICENSE_SERVER }}
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
       password: ${{ secrets.GITHUB_TOKEN }}
-      actor: ${{ github.actor }}
+      username: ${{ github.actor }}
     with:
-      mapdl-version: ${{ matrix.mapdl-version }}
+      mapdl-version: "${{ matrix.mapdl-version }}"
       file-name: "${{ matrix.mapdl-version }}-remote"
 
   build-test-local-matrix:
