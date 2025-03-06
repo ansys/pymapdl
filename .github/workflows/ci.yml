@@ -25,7 +25,6 @@ env:
   PACKAGE_NAMESPACE: 'ansys.mapdl.core'
   DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
   LATEST_VERSION: "252"
-  MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.2-ubuntu-student
   MEILISEARCH_API_KEY: ${{ secrets.MEILISEARCH_API_KEY }}
   MEILISEARCH_PUBLIC_API_KEY: ${{ secrets.MEILISEARCH_PUBLIC_API_KEY }}
   PYANSYS_OFF_SCREEN: True
@@ -38,14 +37,6 @@ env:
   BUILD_CHEATSHEET: True
   PYMAPDL_DEBUG_TESTING: True
 
-  # Following env vars when changed will "reset" the mentioned cache,
-  # by changing the cache file name. It is rendered as ...-v%RESET_XXX%-...
-  # You should go up in number, if you go down (or repeat a previous value)
-  # you might end up reusing a previous cache if it haven't been deleted already.
-  # It applies 7 days retention policy by default.
-  RESET_EXAMPLES_CACHE: 0
-  RESET_DOC_BUILD_CACHE: 0
-  RESET_AUTOSUMMARY_CACHE: 0
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -150,30 +141,14 @@ jobs:
           upload-reports: True
           hide-log: false
 
-
   docs-build:
     name: "Build documentation"
-    runs-on: ubuntu-22.04
     needs: doc-style
-    timeout-minutes: 60
-    outputs:
-      PYMAPDL_VERSION: ${{ steps.version.outputs.PYMAPDL_VERSION }}
-    env:
-      PYMAPDL_PORT: 21000  # default won't work on GitHub runners
-      PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
-      PYMAPDL_START_INSTANCE: FALSE
-      ON_DOCUMENTATION: TRUE
-      GRPC_ENABLE_FORK_SUPPORT: false  # See #3434
-    steps:
-      - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.2
-
-      - name: "Build documentation"
-        uses: ./.github/actions/doc-build
-        with:
-          license_server: ${{ secrets.LICENSE_SERVER }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+    uses: ./.github/workflows/doc-build.yml
+    secrets:
+      license_server: ${{ secrets.LICENSE_SERVER }}
+      username: ${{ github.actor }}
+      password: ${{ secrets.GITHUB_TOKEN }}
 
   build-test-remote-matrix:
     name: "Build remote test matrix"
@@ -194,38 +169,21 @@ jobs:
           local: false
           run_all_builds: ${{ inputs.run_all_builds }}
 
-
   build-test-remote:
     name: "Remote: ${{ matrix.mapdl-version }}"
-    runs-on: ubuntu-22.04
     needs: [smoke-tests, build-test-remote-matrix]
-    timeout-minutes: 35
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-test-remote-matrix.outputs.matrix) }}
-
-    env:
-      PYMAPDL_PORT: 21000  # default won't work on GitHub runners
-      PYMAPDL_PORT2: 21001  # for the pool testing and default won't work on GitHub runners
-      PYMAPDL_DB_PORT: 21002  # default won't work on GitHub runners
-      PYMAPDL_DB_PORT2: 21003  # default won't work on GitHub runners
-      PYMAPDL_START_INSTANCE: FALSE
-      ON_LOCAL: FALSE
-      ON_UBUNTU: FALSE
-      # BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-
-    steps:
-      - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.2
-
-      - name: Run Pytest for ${{ matrix.mapdl-version }} on remote mode
-        uses: ./.github/actions/test-remote
-        with:
-          mapdl-version: ${{ matrix.mapdl-version }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-          codecov_token: ${{ secrets.CODECOV_TOKEN }}
-          license_server: ${{ secrets.LICENSE_SERVER }}
+    uses: ./.github/workflows/test-remote.yml
+    secrets:
+      license-server: ${{ secrets.LICENSE_SERVER }}
+      codecov-token: ${{ secrets.CODECOV_TOKEN }}
+      password: ${{ secrets.GITHUB_TOKEN }}
+      actor: ${{ github.actor }}
+    with:
+      mapdl-version: ${{ matrix.mapdl-version }}
+      file-name: "${{ matrix.mapdl-version }}-remote"
 
   build-test-local-matrix:
     name: "Build test matrix for minimal and local"
@@ -247,43 +205,24 @@ jobs:
 
   build-test-ubuntu-local:
     name: "Local: ${{ matrix.mapdl-version }}"
-    runs-on: ubuntu-22.04
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: [smoke-tests, build-test-local-matrix]
-    timeout-minutes: 75
+    uses: ./.github/workflows/test-local.yml
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(needs.build-test-local-matrix.outputs.matrix) }}
-
-    container:
-      image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
-      options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    env:
-      ON_LOCAL: true
-      ON_UBUNTU: true
-      P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"
-      PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
-
-    steps:
-      - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.2
-        with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
-
-      - name: "Run pytest on local"
-        uses: ./.github/actions/test-local
-        with:
-          mapdl-version: ${{ matrix.mapdl-version }}
-          minimal: false
-          license_server: ${{ secrets.LICENSE_SERVER }}
-          pytest-arguments: '-k "not test_dpf" --reset_only_failed  --add_missing_images'
-          file-name: "${{ matrix.mapdl-version }}-local"
-          tags: "local"
-          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+    secrets:
+      license-server: ${{ secrets.LICENSE_SERVER }}
+      codecov-token: ${{ secrets.CODECOV_TOKEN }}
+      github-token: ${{ secrets.GITHUB_TOKEN }}
+      actor: ${{ github.actor }}
+    with:
+      testing-minimal: false
+      pytest-arguments: '-k "not test_dpf" --reset_only_failed  --add_missing_images'
+      mapdl-version: ${{ matrix.mapdl-version }}
+      file-name: "${{ matrix.mapdl-version }}-local"
+      tags: "local"
+      latest-version: ${{ env.LATEST_VERSION }}
 
   build-test-ubuntu-minimal:
     name: "Local-min: ${{ matrix.mapdl-version }}"

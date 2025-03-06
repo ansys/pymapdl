@@ -10,7 +10,7 @@ inputs:
     required: true
     type: string
 
-  local: 
+  local:
     description: |
       If true, the building matrix for local testing
     required: false
@@ -23,7 +23,7 @@ inputs:
     required: false
     type: boolean
     default: false
-  
+
   type_event:
     description: |
       Type of event that triggered the workflow.
