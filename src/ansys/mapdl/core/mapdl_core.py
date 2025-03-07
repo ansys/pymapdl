@@ -543,7 +543,7 @@ class _MapdlCore(Commands):
 
         elif not self._path:
             raise MapdlRuntimeError(
-                f"MAPDL could provide a path using /INQUIRE or the cached path ('{self._path}')."
+                f"MAPDL could NOT provide a path using /INQUIRE or the cached path ('{self._path}')."
             )
 
         return self._path
@@ -840,6 +840,21 @@ class _MapdlCore(Commands):
 
         """
         return self._non_interactive(self)
+
+    @property
+    def muted(self):
+        """Context manager that suppress all output from MAPDL
+
+        Use the `muted` context manager to suppress all the output. Similar to
+        setting `mapdl.mute = True` but only for the context manager.
+
+        Examples
+        --------
+        >>> with mapdl.muted:
+        ...    mapdl.run("/SOLU") # This call is muted
+
+        """
+        return self._muted(self)
 
     @property
     def parameters(self) -> "Parameters":
@@ -1190,10 +1205,6 @@ class _MapdlCore(Commands):
             nblock_filename = os.path.join(self.directory, "nblock.cdb")
 
             # must have all nodes elements are using selected
-            if hasattr(self, "mute"):
-                old_mute = self.mute
-                self.mute = True
-
             self.cm("__NODE__", "NODE", mute=True)
             self.nsle("S", mute=True)
             self.cdwrite("db", arch_filename, mute=True)
@@ -1203,9 +1214,6 @@ class _MapdlCore(Commands):
             self.esel("NONE", mute=True)
             self.cdwrite("db", nblock_filename, mute=True)
             self.cmsel("S", "__ELEM__", "ELEM", mute=True)
-
-            if hasattr(self, "mute"):
-                self.mute = old_mute
 
             self._archive_cache = Archive(arch_filename, parse_vtk=False, name="Mesh")
             grid = self._archive_cache._parse_vtk(additional_checking=True)
@@ -1532,6 +1540,19 @@ class _MapdlCore(Commands):
         @property
         def _cached_routine(self):
             return self._parent()._cached_routine
+
+    class _muted:
+        def __init__(self, parent):
+            self._parent = weakref.ref(parent)
+            self.old_value = None
+
+        def __enter__(self):
+            self.old_value = self._parent().mute
+            self._parent().mute = True
+
+        def __exit__(self, *args):
+            self._parent().mute = self.old_value
+            self.old_value = None
 
     def run_as_routine(self, routine):
         """
@@ -2924,7 +2945,9 @@ class _MapdlCore(Commands):
 
                 # Raising errors
                 if error_is_fine:
-                    self._log.warn("PERMITTED ERROR: " + permited_error_message.string)
+                    self._log.warning(
+                        "PERMITTED ERROR: " + permited_error_message.string
+                    )
                     continue
                 else:
                     # We don't need to log exception because they already included in the main logger.
