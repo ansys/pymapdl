@@ -393,3 +393,5 @@ jobs:
 
       - name: "Run Pytest-summary action"
         uses: ./.github/actions/pytest-summary
+        with:
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
