@@ -1225,6 +1225,9 @@ def test_cwd(mapdl, cleared, tmpdir):
     finally:
         mapdl.cwd(old_path)
 
+    # we need to flush the error output
+    mapdl.slashdelete("anstmp")
+
 
 @requires("nocicd")
 @requires("local")
