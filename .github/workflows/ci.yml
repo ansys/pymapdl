@@ -146,7 +146,7 @@ jobs:
     needs: doc-style
     uses: ./.github/workflows/doc-build.yml
     secrets:
-      license_server: ${{ secrets.LICENSE_SERVER }}
+      license-server: ${{ secrets.LICENSE_SERVER }}
       username: ${{ github.actor }}
       password: ${{ secrets.GITHUB_TOKEN }}
 
