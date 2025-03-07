@@ -215,7 +215,7 @@ jobs:
       license-server: ${{ secrets.LICENSE_SERVER }}
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
       token: ${{ secrets.GITHUB_TOKEN }}
-      actor: ${{ github.actor }}
+      username: ${{ github.actor }}
     with:
       testing-minimal: false
       pytest-arguments: '-k "not test_dpf" --reset_only_failed  --add_missing_images'
@@ -226,83 +226,49 @@ jobs:
 
   build-test-ubuntu-minimal:
     name: "Local-min: ${{ matrix.mapdl-version }}"
-    runs-on: ubuntu-22.04
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    needs: [build-test-ubuntu-local, build-test-remote]
-    timeout-minutes: 75
+    # needs: [build-test-ubuntu-local, build-test-remote]
+    uses: ./.github/workflows/test-local.yml
     strategy:
       fail-fast: false
       matrix:
         mapdl-version: ['latest-ubuntu', 'v25.1-ubuntu']
-    container:
-      image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
-      options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    env:
-      ON_LOCAL: true
-      ON_UBUNTU: true
-      TESTING_MINIMAL: true
-
-    steps:
-      - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.2
-        with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
-
-      - name: "Run Pytest for ${{ matrix.mapdl-version }} on local mode using minimal configuration"
-        uses: ./.github/actions/test-local
-        with:
-          mapdl-version: ${{ matrix.mapdl-version }}
-          minimal: true
-          license_server: ${{ secrets.LICENSE_SERVER }}
-          pytest-arguments: '-k "not test_dpf"'
-          file-name: "${{ matrix.mapdl-version }}-minimal"
-          tags: "local,minimal"
-          codecov_token: ${{ secrets.CODECOV_TOKEN }}
+    secrets:
+      license-server: ${{ secrets.LICENSE_SERVER }}
+      codecov-token: ${{ secrets.CODECOV_TOKEN }}
+      token: ${{ secrets.GITHUB_TOKEN }}
+      username: ${{ github.actor }}
+    with:
+      testing-minimal: true
+      pytest-arguments: '-k "not test_dpf" --reset_only_failed  --add_missing_images'
+      mapdl-version: ${{ matrix.mapdl-version }}
+      file-name: "${{ matrix.mapdl-version }}-minimal"
+      tags: "local,minimal"
+      latest-version: "252"
 
   build-test-ubuntu-console:
     name: "Local-min-console: ${{ matrix.mapdl-version }}"
-    runs-on: ubuntu-22.04
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    needs: [build-test-ubuntu-local, build-test-remote]
-    timeout-minutes: 75
+    # needs: [build-test-ubuntu-local, build-test-remote]
+    uses: ./.github/workflows/test-local.yml
     strategy:
       fail-fast: false
       matrix:
         mapdl-version: ['latest-ubuntu', 'v25.1-ubuntu']
-    container:
-      image: ghcr.io/ansys/mapdl:${{ matrix.mapdl-version }}
-      options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
-      credentials:
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-    env:
-      ON_LOCAL: true
-      ON_UBUNTU: true
-      TESTING_MINIMAL: true
-      ON_CONSOLE: true
+    secrets:
+      license-server: ${{ secrets.LICENSE_SERVER }}
+      codecov-token: ${{ secrets.CODECOV_TOKEN }}
+      token: ${{ secrets.GITHUB_TOKEN }}
+      username: ${{ github.actor }}
+    with:
+      latest-version: "252"
+      mapdl-version: ${{ matrix.mapdl-version }}
+      testing-minimal: true
+      on-console: true
+      pytest-arguments: '-k console'
+      file-name: "${{ matrix.mapdl-version }}-minimal-console"
+      tags: "local,minimal,console"
 
-    steps:
-      - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.2
-        with:
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-          ref: ${{ github.event.pull_request.head.ref }}
-
-      - name: "Run Pytest for ${{ matrix.mapdl-version }} on local mode using console configuration"
-        uses: ./.github/actions/test-local
-        with:
-          mapdl-version: ${{ matrix.mapdl-version }}
-          minimal: true
-          license_server: ${{ secrets.LICENSE_SERVER }}
-          pytest-arguments: '-k console'
-          file-name: "${{ matrix.mapdl-version }}-minimal-console"
-          tags: "local,minimal,console"
-          codecov_token: ${{ secrets.CODECOV_TOKEN }}
-          
   test-windows:
     # Skipped
     if: github.repository == ''

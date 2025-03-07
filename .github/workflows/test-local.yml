@@ -31,6 +31,13 @@ on:
         required: false
         type: boolean
         default: false
+      
+      on-console:
+        description: |
+          If true, the tests will be run on console.
+        required: false
+        type: boolean
+        default: false
 
       file-name:
         description: |
@@ -57,12 +64,12 @@ on:
       
       token:
         description: |
-          Token for GitHub.
+          Token for GitHub. Used also for login into ghcr.io.
         required: true
       
-      actor:
+      username:
         description: |
-          GitHub actor.
+          GitHub username for login into ghcr.io.
         required: true
 
 jobs:
@@ -82,7 +89,7 @@ jobs:
       image: ghcr.io/ansys/mapdl:${{ inputs.mapdl-version }}
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
-        username: ${{ secrets.actor }}
+        username: ${{ secrets.username }}
         password: ${{ secrets.token }}
 
     steps:
@@ -157,10 +164,11 @@ jobs:
 
       - name: "Unit testing"
         env:
-          ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.license-server }}"
           ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
-          file_name: ${{ inputs.file-name }}
           ON_MINIMAL: ${{ inputs.testing-minimal }}
+          ON_CONSOLE: ${{ inputs.on-console }}
+          ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.license-server }}"
+          file_name: ${{ inputs.file-name }}
         shell: bash
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
