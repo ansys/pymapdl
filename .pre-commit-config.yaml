@@ -14,14 +14,14 @@ ci:
 repos:
 
 - repo: https://github.com/ansys/pre-commit-hooks
-  rev: v0.5.1
+  rev: v0.5.2
   hooks:
   - id: add-license-headers
     args:
     - --start_year=2016
 
 - repo: https://github.com/pycqa/isort
-  rev: 6.0.0
+  rev: 6.0.1
   hooks:
   - id: isort
 
