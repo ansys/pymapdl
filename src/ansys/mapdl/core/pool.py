@@ -340,7 +340,7 @@ class MapdlPool:
             for i, (ip, port) in enumerate(zip(ips, ports))
         ]
 
-        # Storing
+        # Storing threads
         self._threads = threads
 
         if wait:
