@@ -55,6 +55,7 @@ jobs:
       DPF_PORT: 21004
       PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile'
       MAIN_PYTHON_VERSION: '3.12'
+      MAPDL_PACKAGE: ghcr.io/ansys/mapdl
 
     steps:
       - name: "Install Git and checkout project"
@@ -180,6 +181,9 @@ jobs:
 
       - name: "Waiting for the services to be up"
         shell: bash
+        env:
+          PYMAPDL_PORT: ${{ env.PYMAPDL_PORT }}
+          PYMAPDL_PORT2: ${{ env.PYMAPDL_PORT2 }}
         run: |
           .ci/waiting_services.sh
 
