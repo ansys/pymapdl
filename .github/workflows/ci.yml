@@ -19,23 +19,14 @@ on:
     - cron:  '30 4 * * *'
 
 env:
+  ON_CI: True
   PROJECT_NAME: 'PyMAPDL'
   MAIN_PYTHON_VERSION: '3.12'
   PACKAGE_NAME: 'ansys-mapdl-core'
   PACKAGE_NAMESPACE: 'ansys.mapdl.core'
   DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
-  LATEST_VERSION: "252"
   MEILISEARCH_API_KEY: ${{ secrets.MEILISEARCH_API_KEY }}
   MEILISEARCH_PUBLIC_API_KEY: ${{ secrets.MEILISEARCH_PUBLIC_API_KEY }}
-  PYANSYS_OFF_SCREEN: True
-  DPF_START_SERVER: False
-  DPF_PORT: 21004
-  MAPDL_PACKAGE: ghcr.io/ansys/mapdl
-  ON_CI: True
-  PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile'
-
-  BUILD_CHEATSHEET: True
-  PYMAPDL_DEBUG_TESTING: True
 
 
 concurrency:
@@ -240,7 +231,7 @@ jobs:
       username: ${{ github.actor }}
     with:
       testing-minimal: true
-      pytest-arguments: '-k "not test_dpf" --reset_only_failed  --add_missing_images'
+      pytest-arguments: '-k "not test_dpf"'
       mapdl-version: ${{ matrix.mapdl-version }}
       file-name: "${{ matrix.mapdl-version }}-minimal"
       tags: "local,minimal"

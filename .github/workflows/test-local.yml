@@ -79,6 +79,7 @@ jobs:
       ON_CI: True
       ON_LOCAL: true
       ON_UBUNTU: true
+      PYMAPDL_DEBUG_TESTING: True
       TESTING_MINIMAL: ${{ inputs.testing-minimal }}
       MAIN_PYTHON_VERSION: "3.12"
       P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"

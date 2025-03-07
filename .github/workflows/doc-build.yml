@@ -28,12 +28,15 @@ jobs:
     env:
       ON_CI: True
       ON_DOCUMENTATION: TRUE
+      PYANSYS_OFF_SCREEN: True
+      BUILD_CHEATSHEET: True
       MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.2-ubuntu-student
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
       PYMAPDL_START_INSTANCE: FALSE
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
       DPF_PORT: 21004
+      DPF_START_SERVER: False
       GRPC_ENABLE_FORK_SUPPORT: false  # See #3434
       MAIN_PYTHON_VERSION: "3.12"
 
