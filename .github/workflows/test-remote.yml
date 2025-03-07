@@ -112,6 +112,7 @@ jobs:
           LICENSE_SERVER: ${{ secrets.license-server }}
           MAPDL_VERSION: ${{ inputs.mapdl-version }}
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
+          MAPDL_PACKAGE: ${{ env.MAPDL_PACKAGE }}
         shell: bash
         run: |
           echo "Launching first MAPDL instance..."

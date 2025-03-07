@@ -27,13 +27,14 @@ jobs:
     runs-on: ubuntu-22.04
     env:
       ON_CI: True
+      ON_DOCUMENTATION: TRUE
       MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.2-ubuntu-student
+      MAPDL_PACKAGE: ghcr.io/ansys/mapdl
+      PYMAPDL_START_INSTANCE: FALSE
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
-      PYMAPDL_START_INSTANCE: FALSE
-      ON_DOCUMENTATION: TRUE
-      GRPC_ENABLE_FORK_SUPPORT: false  # See #3434
       DPF_PORT: 21004
+      GRPC_ENABLE_FORK_SUPPORT: false  # See #3434
       MAIN_PYTHON_VERSION: "3.12"
 
     steps:
@@ -52,6 +53,7 @@ jobs:
         env:
           LICENSE_SERVER: ${{ secrets.license-server }}
           MAPDL_VERSION: ${{ env.MAPDL_IMAGE_VERSION_DOCS_BUILD }}
+          MAPDL_PACKAGE: ${{ env.MAPDL_PACKAGE }}
           DISTRIBUTED_MODE: "dmp"
         shell: bash
         run: |
