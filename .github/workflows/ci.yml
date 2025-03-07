@@ -218,7 +218,7 @@ jobs:
   build-test-ubuntu-minimal:
     name: "Local-min: ${{ matrix.mapdl-version }}"
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    # needs: [build-test-ubuntu-local, build-test-remote]
+    needs: [build-test-ubuntu-local, build-test-remote]
     uses: ./.github/workflows/test-local.yml
     strategy:
       fail-fast: false
@@ -240,7 +240,7 @@ jobs:
   build-test-ubuntu-console:
     name: "Local-min-console: ${{ matrix.mapdl-version }}"
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    # needs: [build-test-ubuntu-local, build-test-remote]
+    needs: [build-test-ubuntu-local, build-test-remote]
     uses: ./.github/workflows/test-local.yml
     strategy:
       fail-fast: false
