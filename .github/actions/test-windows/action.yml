@@ -1,0 +1,82 @@
+
+name: |
+  Test Windows
+
+description: |
+  This action runs PyMAPDL tests on Windows
+
+inputs:
+  
+  # Required inputs
+
+  codecov_token:
+    description: |
+      Token for Codecov.
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+
+    # Skipping because it is installed locally.
+    # - name: Setup Python
+    #   uses: actions/setup-python@v5
+    #   with:
+    #     python-version: 3.9
+
+    - name: "Checking Python"
+      shell: powershell
+      run: |
+        python -m pip install --upgrade pip
+
+    - name: "Creating python venv"
+      shell: powershell
+      run: |
+        python -m venv .\.venv
+        .\.venv\Scripts\activate
+
+    - name: "Install ansys-mapdl-core"
+      shell: powershell
+      run: |
+        python -m pip install build
+        python -m build
+        $FILE_=Resolve-Path '.\dist\*.whl'
+        python -m pip install $FILE_.Path --upgrade
+        python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+
+    - name: "Unit testing requirements installation"
+      shell: powershell
+      run: |
+        python -m pip install .[tests]
+
+    # - name: DPF Server Activation
+    #   run: |
+    #     docker pull ghcr.io/ansys/dpf-core:22.2dev
+    #     docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}."
+
+    - name: "Unit testing"
+      shell: powershell
+      env:
+        file_name: windows-v22.2.0-local
+      run: |
+        set PYMAPDL_PORT=
+        set PYMAPDL_START_INSTANCE=
+        python -m pytest -k "not test_database and not test_dpf" \
+          ${{ env.PYTEST_ARGUMENTS }} \
+          --ignore_image_cache \
+          --report-log=$file_name.jsonl \
+          --cov-report=xml:$file_name.xml
+
+    - uses: codecov/codecov-action@v5
+      name: "Upload coverage to Codecov"
+      with:
+        token: ${{ inputs.codecov_token }} # required
+        name: windows-v22.2.0-local.xml
+        flags: windows,local,v22.2.0
+
+    - name: "Upload coverage artifacts"
+      uses: actions/upload-artifact@v4
+      with:
+        name: windows-v22.2.0-local.xml
+        path: ./windows_local.xml
