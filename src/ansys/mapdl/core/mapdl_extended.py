@@ -2257,8 +2257,6 @@ class _MapdlExtended(_MapdlCommandExtended):
         if not self._local:
             self.upload(filename, progress_bar=False)
             filename = base_name
-        # skip the first line its a header we wrote in np.savetxt
-        self.tread(name, filename, nskip=1, mute=True)
 
         # skip the first line its a header we wrote in np.savetxt
         self.tread(name, filename, nskip=1, mute=True)

@@ -633,29 +633,40 @@ class PostProcessing:
                 "exist within the result file."
             )
 
-        mask = self.selected_nodes
-        all_scalars = np.empty(mask.size)
-        all_scalars[mask] = scalars
+        with self._mapdl.save_selection:
+            mask = self.selected_nodes
+            nodes_ids = self._mapdl.get_array("NODE", item1="NLIST")
+            nodes_loc = self._mapdl.mesh.nodes
 
-        # we can directly the node numbers as the array of selected
-        # nodes will be a mask sized to the highest node index - 1
-        surf = self._mapdl.mesh._surf
-        node_id = surf["ansys_node_num"].astype(np.int32) - 1
-        all_scalars = all_scalars[node_id]
+            self._mapdl.esln("S", 0)  # selecting elements associated with those nodes
+            self._mapdl.nsle(
+                "A", "all"
+            )  # selecting nodes associated with those elements to avoid segfault
 
-        meshes = [
-            {
-                "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
-                "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
-                "scalars": all_scalars,
-            }
-        ]
+            all_scalars = np.empty(mask.size)
+            all_scalars[mask] = scalars
 
-        labels = []
-        if show_node_numbering:
-            labels = [{"points": surf.points, "labels": surf["ansys_node_num"]}]
-        pl = MapdlPlotter()
-        pl.plot(meshes, [], labels, mapdl=self, **kwargs)
+            # we can directly the node numbers as the array of selected
+            # nodes will be a mask sized to the highest node index - 1
+            surf = self._mapdl.mesh._surf  # problem here
+            node_id = surf["ansys_node_num"].astype(np.int32) - 1
+            all_scalars = all_scalars[node_id]
+
+            meshes = [
+                {
+                    "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
+                    "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
+                    "scalars": all_scalars,
+                }
+            ]
+
+            labels = []
+            if show_node_numbering:
+                labels = [{"points": nodes_loc, "labels": nodes_ids}]
+
+            pl = MapdlPlotter()
+            pl.plot(meshes, [], labels, mapdl=self, **kwargs)
+
         return pl.show(**kwargs)
 
     @requires_package("ansys.tools.visualization_interface")
@@ -668,78 +679,83 @@ class PostProcessing:
                 "exist within the result file."
             )
 
-        surf = self._mapdl.mesh._surf
+        with self._mapdl.save_selection:
+            # Select nodes to avoid segfault
+            self._mapdl.nsle("s", "all")
 
-        # as ``disp`` returns the result for all nodes/elems, we need all node/elem numbers
-        # and to index to the output node numbers
-        if hasattr(self._mapdl.mesh, "enum_all"):
-            enum = self._mapdl.mesh.enum_all
-        else:
-            enum = self._all_enum
+            # Getting mesh
+            surf = self._mapdl.mesh._surf
 
-        #######################################################################
-        # Bool operations
-        # ===============
-        # I'm going to explain this clearly because it can be confusing for the
-        # future developers (me).
-        # This explanation is based in scalars (`element_values`) NOT having the
-        # full elements (selected and not selected) size.
-        #
-        # First, it's possible that there are duplicated element numbers,
-        # in the surf object returned by Pyvista.
-        # Therefore we need to get the unique values and a reverse index, to
-        # later convert the MAPDL values to Pyvista values.
-        uni, ridx = np.unique(surf["ansys_elem_num"], return_inverse=True)
-        # which means that, uni is the id of mapdl elements in the polydata
-        # object. These elements does not need to be in order, and there can be
-        # duplicated!
-        # Hence:
-        # uni[ridx] = surf["ansys_elem_num"]
-        #
-        # Let's notice that:
-        # * enum[self.selected_elements] is mapdl selected elements ids in MAPDL notation.
-        #
-        # Theoretical approach
-        # --------------------
-        # The theoretical approach will be using an intermediate array of the
-        # size of the MAPDL total number of elements (we do not care about selected).
-        #
-        values = np.zeros(enum.shape)
-        #
-        # Then assign the MAPDL values for the selected element (scalars)
-        #
-        values[self.selected_elements] = scalars
-        #
-        # Because values are in order, but with python notation, then we can do:
-        #
-        surf_values = values[
-            uni - 1
-        ]  # -1 to set MAPDL element indexing to python indexing
-        #
-        # Then to account for the original Pyvista object:
-        #
-        surf_values = surf_values[ridx]
-        #
-        #######################################################################
+            # as ``disp`` returns the result for all nodes/elems, we need all node/elem numbers
+            # and to index to the output node numbers
+            if hasattr(self._mapdl.mesh, "enum_all"):
+                enum = self._mapdl.mesh.enum_all
+            else:
+                enum = self._all_enum
 
-        meshes = [
-            {
-                "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
-                "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
-                "scalars": surf_values,
-            }
-        ]
+            #######################################################################
+            # Bool operations
+            # ===============
+            # I'm going to explain this clearly because it can be confusing for the
+            # future developers (me).
+            # This explanation is based in scalars (`element_values`) NOT having the
+            # full elements (selected and not selected) size.
+            #
+            # First, it's possible that there are duplicated element numbers,
+            # in the surf object returned by Pyvista.
+            # Therefore we need to get the unique values and a reverse index, to
+            # later convert the MAPDL values to Pyvista values.
+            uni, ridx = np.unique(surf["ansys_elem_num"], return_inverse=True)
+            # which means that, uni is the id of mapdl elements in the polydata
+            # object. These elements does not need to be in order, and there can be
+            # duplicated!
+            # Hence:
+            # uni[ridx] = surf["ansys_elem_num"]
+            #
+            # Let's notice that:
+            # * enum[self.selected_elements] is mapdl selected elements ids in MAPDL notation.
+            #
+            # Theoretical approach
+            # --------------------
+            # The theoretical approach will be using an intermediate array of the
+            # size of the MAPDL total number of elements (we do not care about selected).
+            #
+            values = np.zeros(enum.shape)
+            #
+            # Then assign the MAPDL values for the selected element (scalars)
+            #
+            values[self.selected_elements] = scalars
+            #
+            # Because values are in order, but with python notation, then we can do:
+            #
+            surf_values = values[
+                uni - 1
+            ]  # -1 to set MAPDL element indexing to python indexing
+            #
+            # Then to account for the original Pyvista object:
+            #
+            surf_values = surf_values[ridx]
+            #
+            #######################################################################
 
-        labels = []
-        if show_elem_numbering:
-            labels = [
+            meshes = [
                 {
-                    "points": surf.cell_centers().points,
-                    "labels": surf["ansys_elem_num"],
+                    "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
+                    "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
+                    "scalars": surf_values,
                 }
             ]
-        pl = MapdlPlotter()
-        pl.plot(meshes, [], labels, mapdl=self, **kwargs)
+
+            labels = []
+            if show_elem_numbering:
+                labels = [
+                    {
+                        "points": surf.cell_centers().points,
+                        "labels": surf["ansys_elem_num"],
+                    }
+                ]
+            pl = MapdlPlotter()
+            pl.plot(meshes, [], labels, mapdl=self, **kwargs)
         return pl.show(**kwargs)
 
     @property
