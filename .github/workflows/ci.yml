@@ -256,7 +256,7 @@ jobs:
       mapdl-version: ${{ matrix.mapdl-version }}
       testing-minimal: true
       on-console: true
-      pytest-arguments: '-k console'
+      pytest-arguments: '--console -k console'
       file-name: "${{ matrix.mapdl-version }}-minimal-console"
       tags: "local,minimal,console"
 
