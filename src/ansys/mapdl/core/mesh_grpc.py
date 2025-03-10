@@ -546,7 +546,7 @@ class MeshGrpc:
             return self.nodes
         else:
             # self._mapdl.parameters["__node_loc__"] = self.nodes
-            self._mapdl.starget("__nnodes__", entity="NODE", entnum="0", item1="COUNT")
+            self._mapdl.get("__nnodes__", entity="NODE", entnum="0", item1="COUNT")
             self._mapdl.dim(
                 par="__node_loc_cs__", type_="ARRAY", imax="__nnodes__", jmax=3
             )
