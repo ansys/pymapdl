@@ -546,24 +546,26 @@ class MeshGrpc:
             return self.nodes
         else:
             # self._mapdl.parameters["__node_loc__"] = self.nodes
-            mapdl.starget("__nnodes__", entity="NODE", entnum="0", item1="COUNT")
-            mapdl.dim(par="__node_loc_cs__", type_="ARRAY", imax="__nnodes__", jmax=3)
+            self._mapdl.starget("__nnodes__", entity="NODE", entnum="0", item1="COUNT")
+            self._mapdl.dim(
+                par="__node_loc_cs__", type_="ARRAY", imax="__nnodes__", jmax=3
+            )
 
-            mapdl.starvget(
+            self._mapdl.starvget(
                 "__node_loc_cs__(1,1)",
                 entity="NODE",
                 entnum="0",
                 item1="LOC",
                 it1num="X",
             )
-            mapdl.starvget(
+            self._mapdl.starvget(
                 "__node_loc_cs__(1,2)",
                 entity="NODE",
                 entnum="0",
                 item1="LOC",
                 it1num="Y",
             )
-            mapdl.starvget(
+            self._mapdl.starvget(
                 "__node_loc_cs__(1,3)",
                 entity="NODE",
                 entnum="0",
