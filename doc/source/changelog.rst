@@ -1,4 +1,4 @@
-.. _vref_release_notes:
+.. _ref_release_notes:
 
 Release notes
 #############
