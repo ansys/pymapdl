@@ -1,4 +1,4 @@
-.. _ref_release_notes:
+.. _vref_release_notes:
 
 Release notes
 #############
@@ -10,7 +10,7 @@ This document contains the release notes for the project.
 .. towncrier release notes start
 
 
-.. _0.69.3:
+.. _v0.69.3:
 
 `0.69.3 <https://github.com/ansys/pymapdl/releases/tag/v0.69.3>`_ - 2025-02-27
 ==============================================================================
@@ -91,7 +91,7 @@ Maintenance
 - ci: using python3.12 as main testing python version `#3767 <https://github.com/ansys/pymapdl/pull/3767>`_
 
 
-.. _0.69.2:
+.. _v0.69.2:
 
 `0.69.2 <https://github.com/ansys/pymapdl/releases/tag/v0.69.2>`_ - 2025-01-22
 ==============================================================================
@@ -141,7 +141,7 @@ Maintenance
 - ci: adding-profiling-to-unit-tests `#3676 <https://github.com/ansys/pymapdl/pull/3676>`_
 
 
-.. _0.69.1:
+.. _v0.69.1:
 
 `0.69.1 <https://github.com/ansys/pymapdl/releases/tag/v0.69.1>`_ - 2025-01-08
 ==============================================================================
@@ -164,7 +164,7 @@ Miscellaneous
 - feat: node/element selection commands returning selected ids `#3636 <https://github.com/ansys/pymapdl/pull/3636>`_
 
 
-.. _0.69.0:
+.. _v0.69.0:
 
 `0.69.0 <https://github.com/ansys/pymapdl/releases/tag/v0.69.0>`_ - 2025-01-08
 ==============================================================================
@@ -331,7 +331,7 @@ Maintenance
 - ci: fix safety issue `#3638 <https://github.com/ansys/pymapdl/pull/3638>`_
 
 
-.. _0.68.6:
+.. _v0.68.6:
 
 `0.68.6 <https://github.com/ansys/pymapdl/releases/tag/v0.68.6>`_ - 2024-10-11
 ==============================================================================
@@ -383,7 +383,7 @@ Maintenance
 - build: bump numpy from 2.1.1 to 2.1.2 in the minimal group `#3476 <https://github.com/ansys/pymapdl/pull/3476>`_
 
 
-.. _0.68.5:
+.. _v0.68.5:
 
 `0.68.5 <https://github.com/ansys/pymapdl/releases/tag/v0.68.5>`_ - 2024-10-04
 ==============================================================================
@@ -507,7 +507,7 @@ Maintenance
 - ci: changing pre-commit commit and pr name `#3445 <https://github.com/ansys/pymapdl/pull/3445>`_
 
 
-.. _0.68.4:
+.. _v0.68.4:
 
 `0.68.4 <https://github.com/ansys/pymapdl/releases/tag/v0.68.4>`_ - 2024-07-15
 ==============================================================================
@@ -584,7 +584,7 @@ Miscellaneous
 - chore: update CHANGELOG for v0.68.2 `#3183 <https://github.com/ansys/pymapdl/pull/3183>`_
 
 
-.. _0.68.3:
+.. _v0.68.3:
 
 `0.68.3 <https://github.com/ansys/pymapdl/releases/tag/v0.68.3>`_ - 2024-06-21
 ==============================================================================
@@ -595,7 +595,7 @@ Added
 - feat: Add an inprocess backend to pymapdl `#3198 <https://github.com/ansys/pymapdl/pull/3198>`_
 
 
-.. _0.68.2:
+.. _v0.68.2:
 
 `0.68.2 <https://github.com/ansys/pymapdl/releases/tag/v0.68.2>`_ - 2024-06-18
 ==============================================================================
