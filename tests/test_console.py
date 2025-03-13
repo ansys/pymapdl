@@ -732,3 +732,19 @@ def test_exit_console(mapdl_console, close_log):
 
     # restoring state
     mapdl_console._exited = False
+
+
+@pytest.mark.parametrize("command", ["FINISH", "/PREP7", "/SOLU"])
+def test_not_command_in_response(mapdl_console, cleared, command):
+    resp = mapdl_console.run(command)
+
+    assert command not in resp
+
+
+@pytest.mark.parametrize("command", ["FINISH", "/PREP7", "/SOLU"])
+def test_command_in_response(mapdl_console, cleared, command):
+    mapdl_console.clean_response = False
+    resp = mapdl_console.run(command, clean_response=False)
+    mapdl_console.clean_response = True
+
+    assert command in resp

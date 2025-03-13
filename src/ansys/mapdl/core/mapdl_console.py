@@ -122,6 +122,7 @@ class MapdlConsole(MapdlBase):
         self._name = None
         self._session_id = None
         self._cleanup = None
+        self.clean_response = True
 
         self._launch(start_parm)
         super().__init__(
@@ -169,6 +170,19 @@ class MapdlConsole(MapdlBase):
         while True:
             i = self._process.expect_list(expect_list, timeout=None)
             response = self._process.before.decode("utf-8")
+
+            if self.clean_response:
+                # Cleaning up responses
+                response = response.strip().splitlines()
+                if (
+                    isinstance(response, list)
+                    and len(response) > 0
+                    and response[0].upper() == command.upper()
+                ):
+                    response = response[1:]
+
+                response = "\n".join(response)
+
             full_response += response
             if i >= CONTINUE_IDX and i < WARNING_IDX:  # continue
                 self._log.debug(
@@ -335,3 +349,10 @@ class MapdlConsole(MapdlBase):
         if not self._name:
             self._name = f"Console_PID_{self._process.pid}"
         return self._name
+
+    def scalar_param(self, parm_name):
+        response = self.starstatus(parm_name)
+        response = response.splitlines()[-1]
+        if parm_name.upper() not in response:
+            raise ValueError(f"Parameter {parm_name} not found")
+        return float(response.split()[1].strip())
