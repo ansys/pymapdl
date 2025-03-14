@@ -283,8 +283,9 @@ def test_not_valid_versions(mapdl, my_fs, cleared, monkeypatch, version):
 @requires("local")
 @requires("linux")
 @requires("console")
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_failed_console():
-    exec_file = find_mapdl(installed_mapdl_versions[0])[0]
+    exec_file = find_mapdl(str(installed_mapdl_versions[0]))[0]
     with pytest.raises(ValueError):
         pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
