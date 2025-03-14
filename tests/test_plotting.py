@@ -26,6 +26,7 @@ from unittest.mock import patch
 
 import numpy as np
 import pytest
+import pyvista as pv
 
 from conftest import has_dependency, requires
 
@@ -1263,8 +1264,7 @@ def test_plot_path(mapdl, tmpdir):
 
 
 def test_add_mesh():
-    import pyvista as pv
-
+    """Test the add_mesh method from MapdlPlotter class."""
     cube1 = pv.Cube()
     pl1 = MapdlPlotter()
     pl1.add_mesh(cube1)
