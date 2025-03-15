@@ -65,6 +65,13 @@ on:
         required: false
         type: string
         default: ghcr.io/ansys/mapdl
+      
+      runner:
+        description: |
+          Runner to use.
+        required: false
+        type: string
+        default: ubuntu-22.04
         
     secrets:
       license-server:
@@ -89,7 +96,7 @@ on:
 
 jobs:
   test-local:
-    runs-on: ubuntu-22.04
+    runs-on: ${{ inputs.runner }}
     env:
       ON_CI: True
       ON_LOCAL: true
