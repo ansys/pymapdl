@@ -58,6 +58,13 @@ on:
         required: false
         default: true
         type: boolean
+
+      package-registry:
+        description: |
+          Package registry for the container.
+        required: false
+        type: string
+        default: ghcr.io/ansys/mapdl
         
     secrets:
       license-server:
@@ -95,7 +102,7 @@ jobs:
       PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile'
 
     container:
-      image: ghcr.io/ansys/mapdl:${{ inputs.mapdl-version }}
+      image: "${{ inputs.package-registry }}:${{ inputs.mapdl-version }}"
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
         username: ${{ secrets.username }}
@@ -104,6 +111,8 @@ jobs:
     steps:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.2.2
+        with:
+          repository: ansys/pymapdl
 
       - name: "Get if running student version"
         id: student_check
