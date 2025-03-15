@@ -51,6 +51,14 @@ on:
         required: true
         type: string
 
+      codecov-report:
+        description: |
+          Whether to upload the coverage report to Codecov or not. If `true`, then the
+          appropriate token is needed.
+        required: false
+        default: true
+        type: boolean
+        
     secrets:
       license-server:
         description: |
@@ -228,6 +236,7 @@ jobs:
 
       - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
+        if: inputs.codecov-report == true
         with:
           token: ${{ secrets.codecov-token }} # required
           root_dir: ${{ github.workspace }}
@@ -236,6 +245,7 @@ jobs:
 
       - name: "Upload coverage artifacts"
         uses: actions/upload-artifact@v4
+        if: inputs.codecov-report == true
         with:
           name: ${{ inputs.file-name }}.xml
           path: ./${{ inputs.file-name }}.xml
