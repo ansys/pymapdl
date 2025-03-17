@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -191,17 +191,15 @@ def _parse_vtk(
     grid.cell_data["ansys_elem_type_num"] = mesh.etype
 
     # store node angles
-    if angles is not None:
-        if angles.shape[1] == 3:
-            grid.point_data["angles"] = angles
+    if angles is not None and angles.shape[1] == 3:
+        grid.point_data["angles"] = angles
 
     if not null_unallowed:
         grid = grid.extract_cells(grid.celltypes != 0)
 
-    if force_linear:
-        # only run if the grid has points or cells
-        if grid.n_points:
-            grid = grid.linear_copy()
+    # only run if the grid has points or cells
+    if force_linear and grid.n_points:
+        grid = grid.linear_copy()
 
     # map over element types
     # Add tracker for original node numbering

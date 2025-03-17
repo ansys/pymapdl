@@ -7,14 +7,16 @@ Setting PyMAPDL
 Requirements
 ============
 
-Using PyMAPDL in an HPC environment managed by SLURM scheduler has certain requirements:
+Using PyMAPDL in an HPC environment managed by SLURM scheduler has certain
+requirements:
 
-* **An Ansys installation must be accessible from all the compute nodes**.
+* **An Ansys installation must be accessible from all the compute nodes.**
   This normally implies that the ``ANSYS`` installation directory is in a
   shared drive or directory. Your HPC cluster administrator
   should provide you with the path to the ``ANSYS`` directory.
 
-* **A compatible Python installation must be accessible from all the compute nodes**.
+* **A compatible Python installation must be accessible from all the compute
+  nodes.**
   For compatible Python versions, see :ref:`ref_pymapdl_installation`.
 
 Additionally, you must perform a few key steps to ensure efficient job
@@ -23,8 +25,8 @@ execution and resource utilization. Subsequent topics describe these steps.
 Check the Python installation
 =============================
 
-The PyMAPDL Python package (``ansys-mapdl-core``) must be installed in a virtual
-environment that is accessible from the compute nodes.
+The PyMAPDL Python package (``ansys-mapdl-core``) must be installed in
+a virtual environment that is accessible from the compute nodes.
 
 To see where your Python distribution is installed, use this code:
 
@@ -38,11 +40,12 @@ To print the version of Python you have available, use this code:
 .. code-block:: console
 
     user@machine:~$ python3 --version
-    Python 3.9.16
+    Python 3.10.15
 
-You should be aware that your machine might have installed other Python versions.
-To find out if those installations are already in the ``PATH`` environment variable,
-you can press the **Tab** key to use autocomplete:
+You should be aware that your machine might have other Python versions
+installed.
+To find out if those installations are already in the ``PATH`` environment
+variable, you can press the **Tab** key to use autocomplete:
 
 .. code-block:: console
 
@@ -55,11 +58,20 @@ you can press the **Tab** key to use autocomplete:
 You should use a Python version that is compatible with PyMAPDL.
 For more information, see :ref:`ref_pymapdl_installation`.
 
-The ``which`` command returns the path where the Python executable is installed.
-You can use that executable to create your own Python virtual environment in a directory
-that is accessible from all the compute nodes.
-For most HPC clusters, the ``/home/$user`` directory is generally available to all nodes.
-You can then create the virtual environment in the ``/home/user/.venv`` directory:
+.. warning::
+    
+    Contact your cluster administrator if you cannot find a Python version
+    compatible with PyMAPDL.
+
+
+The ``which`` command returns the path where the Python executable is
+installed.
+You can use that executable to create your own Python virtual environment
+in a directory that is accessible from all the compute nodes.
+For most HPC clusters, the ``/home/$user`` directory is generally available
+to all nodes.
+You can then create the virtual environment in the ``/home/user/.venv``
+directory:
 
 .. code-block:: console
 
@@ -67,11 +79,13 @@ You can then create the virtual environment in the ``/home/user/.venv`` director
 
 After activating the virtual environment, you can install PyMAPDL.
 
+.. _ref_install_pymapdl_on_hpc:
 
 Install PyMAPDL
 ===============
 
-To install PyMAPDL on the activated virtual environment, run the following commands:
+To install PyMAPDL on the activated virtual environment, run the following
+commands:
 
 .. code-block:: console
 
@@ -107,8 +121,9 @@ then you can run that script using:
 
     user@machine:~$ srun test.sh
 
-This command might take a minute or two to complete, depending on the amount of free
-resources available in the cluster.
+This command might take a minute or two to complete, depending on the amount of
+free resources available in the cluster.
+
 On the console, you should see this output:
 
 .. code-block:: text
@@ -116,5 +131,5 @@ On the console, you should see this output:
     Testing Python!
     PyMAPDL version 0.68.1 was successfully imported.
 
-If you see an error in the output, see :ref:`ref_hpc_troubleshooting`, especially
-:ref:`ref_python_venv_not_accesible`.
+If you see an error in the output, see :ref:`ref_hpc_troubleshooting`,
+especially :ref:`ref_python_venv_not_accesible`.

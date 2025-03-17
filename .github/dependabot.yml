@@ -20,7 +20,7 @@ updates:
     package-ecosystem: "pip" # See documentation for possible values
     insecure-external-code-execution: allow
     schedule:
-      interval: "weekly"      
+      interval: "weekly"
       day: "friday"
       time: "00:00"
     labels:
@@ -34,7 +34,6 @@ updates:
        minimal:
           patterns:
             - "ansys-api-mapdl"
-            - "importlib-metadata"
             - "numpy"
             - "platformdirs"
             - "psutil"

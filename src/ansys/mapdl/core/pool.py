@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -29,7 +29,7 @@ from typing import Any, Dict, List, Optional, Union
 import warnings
 import weakref
 
-from ansys.mapdl.core import LOG, launch_mapdl
+from ansys.mapdl.core import _HAS_ATP, _HAS_TQDM, LOG, launch_mapdl
 from ansys.mapdl.core.errors import MapdlDidNotStart, MapdlRuntimeError, VersionError
 from ansys.mapdl.core.launcher import (
     LOCALHOST,
@@ -38,15 +38,10 @@ from ansys.mapdl.core.launcher import (
     get_start_instance,
     port_in_use,
 )
-from ansys.mapdl.core.mapdl_grpc import _HAS_TQDM
 from ansys.mapdl.core.misc import create_temp_dir, threaded, threaded_daemon
 
-try:
-    from ansys.tools.path import get_ansys_path, version_from_path
-
-    _HAS_ATP = True
-except ModuleNotFoundError:
-    _HAS_ATP = False
+if _HAS_ATP:
+    from ansys.tools.path import get_mapdl_path, version_from_path
 
 if _HAS_TQDM:
     from tqdm import tqdm
@@ -220,9 +215,6 @@ class MapdlPool:
         self._instances: List[None] = []
         self._n_instances = n_instances
 
-        # Getting debug arguments
-        _debug_no_launch = kwargs.get("_debug_no_launch", None)
-
         if run_location is None:
             run_location = create_temp_dir()
         self._root_dir: str = run_location
@@ -286,7 +278,7 @@ class MapdlPool:
 
             if not exec_file:  # get default executable
                 if _HAS_ATP:
-                    exec_file = get_ansys_path()
+                    exec_file = get_mapdl_path()
                 else:
                     raise ValueError(
                         "Please use 'exec_file' argument to specify the location of the ansys installation.\n"
@@ -330,17 +322,6 @@ class MapdlPool:
         # initialize a list of dummy instances
         self._instances = [None for _ in range(n_instances)]
 
-        # threaded spawn
-        if _debug_no_launch:
-            self._debug_no_launch = {
-                "ports": ports,
-                "ips": ips,
-                "names": self._names,
-                "start_instance": start_instance,
-                "exec_file": exec_file,
-                "n_instances": n_instances,
-            }
-
         # Converting ip or hostname to ip
         self._ips = [socket.gethostbyname(each) for each in self._ips]
         _ = [check_valid_ip(each) for each in self._ips]  # double check
@@ -359,17 +340,16 @@ class MapdlPool:
             for i, (ip, port) in enumerate(zip(ips, ports))
         ]
 
-        # Early exit due to debugging
-        if _debug_no_launch:
-            return
+        # Storing threads
+        self._threads = threads
 
         if wait:
-            [thread.join() for thread in threads]
+            [thread.join() for thread in self._threads]
 
             # make sure everything is ready
-            timeout = time.time() + timeout
-
-            while timeout > time.time():
+            n_instances_ready = 0
+            time_end = time.time() + timeout
+            while time_end > time.time():
                 n_instances_ready = sum([each is not None for each in self._instances])
 
                 if n_instances_ready == n_instances:
@@ -378,7 +358,7 @@ class MapdlPool:
                 time.sleep(0.1)
             else:
                 raise TimeoutError(
-                    f"Only {n_instances_ready} of {n_instances} could be started."
+                    f"Only {n_instances_ready} of {n_instances} could be started after {timeout} seconds."
                 )
 
             if pbar is not None:
@@ -567,8 +547,8 @@ class MapdlPool:
                 if not complete[0]:
                     try:
                         obj.exit()
-                    except:
-                        pass
+                    except MapdlRuntimeError:
+                        LOG.warning(f"Unable to delete the object {obj}")
 
                     # ensure that the directory is cleaned up
                     if obj._cleanup:
@@ -577,11 +557,9 @@ class MapdlPool:
                         if os.path.isdir(obj.directory):
                             try:
                                 shutil.rmtree(obj.directory)
-                            except Exception as e:
+                            except OSError as e:
                                 LOG.warning(
-                                    "Unable to remove directory at %s:\n%s",
-                                    obj.directory,
-                                    str(e),
+                                    f"Unable to remove directory at {obj.directory}:\n{e}"
                                 )
 
             obj.locked = False
@@ -621,8 +599,10 @@ class MapdlPool:
                     try:
                         self._exiting_i += 1
                         instance.exit()
-                    except Exception as e:
-                        LOG.error("Failed to close instance", exc_info=True)
+                    except Exception:
+                        LOG.error(
+                            f"Failed to close instance due to:\n{e}", exc_info=True
+                        )
                         self._exiting_i -= 1
 
             else:
@@ -835,6 +815,7 @@ class MapdlPool:
         >>> pool.exit()
         """
         self._active = False  # kills any active instance restart
+        self._spawning_i = 0  # Avoid respawning
 
         @threaded
         def threaded_exit(index, instance):
@@ -842,10 +823,12 @@ class MapdlPool:
                 self._exiting_i += 1
                 try:
                     instance.exit()
-                except:
-                    pass
+                except MapdlRuntimeError as e:
+                    LOG.warning(
+                        f"Unable to exit instance {index} because of the following reason:\n{str(e)}"
+                    )
                 self._instances[index] = None
-                # LOG.debug("Exited instance: %s", str(instance))
+                LOG.debug(f"Exited instance: {instance}")
                 self._exiting_i -= 1
 
         threads = []
@@ -925,21 +908,12 @@ class MapdlPool:
         # This is introduce to mitigate #2173
         timeout = time.time() + timeout
 
-        def initialized(index):
-            if self._instances[index] is not None:
-                if self._instances[index].exited:
-                    raise MapdlRuntimeError("The instance is already exited!")
-                if "PREP" not in self._instances[index].prep7().upper():
-                    raise MapdlDidNotStart("Error while processing PREP7 signal.")
-                return True
-            return False
-
         while timeout > time.time():
-            if initialized(index):
+            if self.is_initialized(index):
                 break
             time.sleep(0.1)
         else:
-            if not initialized:
+            if not self.is_initialized(index):
                 raise TimeoutError(
                     f"The instance running at {ip}:{port} could not be started."
                 )
@@ -949,6 +923,16 @@ class MapdlPool:
             pbar.update(1)
 
         self._spawning_i -= 1
+
+    def is_initialized(self, index):
+        """Check if the instance is initialized"""
+        if self._instances[index] is not None:
+            if self._instances[index].exited:
+                raise MapdlRuntimeError("The instance is already exited!")
+            if "PREP" not in self._instances[index].prep7().upper():
+                raise MapdlDidNotStart("Error while processing PREP7 signal.")
+            return True
+        return False
 
     @threaded_daemon
     def _monitor_pool(self, refresh=1.0):
@@ -1050,7 +1034,9 @@ class MapdlPool:
                         "Argument 'port' does not support this type of argument."
                     )
             else:
-                raise TypeError("Argument 'ip' does not support this type of argument.")
+                raise TypeError(
+                    f"Argument 'ip' does not support this type of argument ({type(ip)})."
+                )
 
         else:
 
@@ -1079,7 +1065,7 @@ class MapdlPool:
                     ports = port
                 else:
                     raise TypeError(
-                        "Argument 'port' does not support this type of argument."
+                        f"Argument 'port' does not support this type of argument ({type(port)})."
                     )
 
             elif isinstance(ip, str):

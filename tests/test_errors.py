@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -102,7 +102,7 @@ empty_log = """
         ),
     ],
 )
-def test_raise_output_errors(mapdl, response, expected_error):
+def test_raise_output_errors(mapdl, cleared, response, expected_error):
     if expected_error:
         with pytest.raises(expected_error):
             mapdl._raise_output_errors(response)
@@ -134,7 +134,7 @@ def test_exception_classes(error_class):
         raise error_class(message)
 
 
-def test_error_handler(mapdl):
+def test_error_handler(mapdl, cleared):
     text = "is not a recognized"
     with pytest.raises(MapdlInvalidRoutineError, match="recognized"):
         mapdl._raise_errors(text)

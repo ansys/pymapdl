@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -261,7 +261,7 @@ class DynamicOptions:
 
         This command is also valid in PREP7.
         """
-        command = f"HARFRQ,{freqb},{freqe},{logopt},{freqarr},{toler}"
+        command = f"HARFRQ,{freqb},{freqe},,{logopt},{freqarr},{toler}"
         return self.run(command, **kwargs)
 
     def hrexp(self, angle="", **kwargs):

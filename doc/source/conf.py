@@ -107,6 +107,7 @@ extensions = [
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
     "ansys_sphinx_theme.extension.linkcode",
+    "sphinx.ext.mathjax",
 ]
 
 # Intersphinx mapping
@@ -209,7 +210,7 @@ rst_epilog = ""
 with open("links.rst") as f:
     rst_epilog += f.read()
 
-rst_epilog = rst_epilog.replace("%%VERSION%%", "v231")
+rst_epilog = rst_epilog.replace("%%VERSION%%", "v242")
 rst_epilog = rst_epilog.replace("%%PYMAPDLVERSION%%", release)
 
 
@@ -218,13 +219,15 @@ with open("substitutions.rst") as f:
     rst_epilog += f.read()
 
 # Broken anchors:
-linkcheck_exclude_documents = ["index"]
+linkcheck_exclude_documents = ["index", "changelog"]
 linkcheck_anchors_ignore_for_url = ["https://docs.pyvista.org/api/*"]
 linkcheck_ignore = [
     "https://github.com/ansys/pymapdl/*",
     "https://mapdl.docs.pyansys.com/*",
-    "https://ansysaccount.b2clogin.com/*",  # behind payfirewall
-    "https://ansyshelp.ansys.com/*",  # behind payfirewall
+    "https://www.ansys.com/*",  # behind firewall
+    "https://download.ansys.com/*",  # behind firewall
+    "https://ansysaccount.b2clogin.com/*",  # behind authentication
+    "https://ansyshelp.ansys.com/*",  # behind authentication
     "https://forum.ansys.com/forums/*",  # It is detected as broken
     "https://courses.ansys.com/*",  # It is detected as broken
 ]
@@ -243,7 +246,7 @@ if switcher_version != "dev":
         f"https://github.com/ansys/pymapdl/releases/tag/v{__version__}"
     )
 
-user_agent = """curl https://www.ansys.com -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.3"""
+user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36 Edg/123.0.2420.81"  # noqa: E501
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "sphinx"
@@ -398,7 +401,7 @@ texinfo_documents = [
         "ansys.mapdl.core Documentation",
         author,
         "ansys.mapdl.core",
-        "Pythonic interface to MAPDL using gRPC",
+        "A Python client library for Ansys MAPDL",
         "Engineering Software",
     ),
 ]

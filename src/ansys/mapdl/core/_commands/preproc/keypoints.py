@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -19,8 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
-import re
 
 from ansys.mapdl.core._commands import parse
 
@@ -70,16 +68,7 @@ class KeyPoints:
 
         """
         command = f"K,{npt},{x},{y},{z}"
-        msg = self.run(command, **kwargs)
-
-        if msg:
-            if not re.search(r"KEYPOINT NUMBER", msg):
-                res = re.search(r"(KEYPOINT\s*)([0-9]+)", msg)
-            else:
-                res = re.search(r"(KEYPOINT NUMBER =\s*)([0-9]+)", msg)
-
-            if res:
-                return int(res.group(2))
+        return parse.parse_k(self.run(command, **kwargs))
 
     def kbetw(self, kp1="", kp2="", kpnew="", type_="", value="", **kwargs) -> int:
         """Creates a keypoint between two existing keypoints.
@@ -418,11 +407,8 @@ class KeyPoints:
         1
 
         """
-        msg = self.run(f"KL,{nl1},{ratio},{nk1}", **kwargs)
-        if msg:
-            res = re.search(r"KEYPOINT\s+(\d+)\s+", msg)
-            if res is not None:
-                return int(res.group(1))
+        cmd = f"KL,{nl1},{ratio},{nk1}"
+        return parse.parse_kl(self.run(cmd, **kwargs))
 
     def klist(self, np1="", np2="", ninc="", lab="", **kwargs):
         """Lists the defined keypoints or hard points.
@@ -565,7 +551,7 @@ class KeyPoints:
         command = f"KMOVE,{npt},{kc1},{x1},{y1},{z1},{kc2},{x2},{y2},{z2}"
         return self.run(command, **kwargs)
 
-    def knode(self, npt="", node="", **kwargs) -> int:
+    def knode(self, npt="", node="", **kwargs) -> str:
         """Defines a keypoint at an existing node location.
 
         APDL Command: KNODE
@@ -595,11 +581,8 @@ class KeyPoints:
         1
 
         """
-        msg = self.run(f"KNODE,{npt},{node}", **kwargs)
-        if msg:
-            res = re.search(r"KEYPOINT NUMBER =\s+(\d+)", msg)
-            if res is not None:
-                return int(res.group(1))
+        cmd = f"KNODE,{npt},{node}"
+        return parse.parse_knode(self.run(cmd, **kwargs))
 
     def kplot(self, np1="", np2="", ninc="", lab="", **kwargs):
         """Displays the selected keypoints.

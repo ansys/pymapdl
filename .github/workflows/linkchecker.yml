@@ -21,7 +21,7 @@ env:
 jobs:
   linkchecker:
     name: Check Links
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     timeout-minutes: 60
     env:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
@@ -31,7 +31,7 @@ jobs:
       SHELLOPTS: "errexit:pipefail"
     steps:
       - name: "Install Git and checkout project"
-        uses: actions/checkout@v4.2.1
+        uses: actions/checkout@v4.2.2
 
       - name: "Login in Github container registry"
         uses: docker/login-action@v3.3.0

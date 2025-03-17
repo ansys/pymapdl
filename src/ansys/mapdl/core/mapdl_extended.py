@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -37,6 +37,7 @@ from ansys.mapdl.core.errors import (
     CommandDeprecated,
     ComponentDoesNotExits,
     IncorrectWorkingDirectory,
+    MapdlCommandIgnoredError,
     MapdlRuntimeError,
 )
 from ansys.mapdl.core.mapdl_core import _MapdlCore
@@ -354,14 +355,12 @@ class _MapdlCommandExtended(_MapdlCore):
     @wraps(_MapdlCore.cwd)
     def cwd(self, *args, **kwargs):
         """Wraps cwd."""
-        output = super().cwd(*args, mute=False, **kwargs)
+        try:
+            output = super().cwd(*args, mute=False, **kwargs)
+        except MapdlCommandIgnoredError as e:
+            raise IncorrectWorkingDirectory(e.args[0])
 
-        if output is not None:
-            if "*** WARNING ***" in output:
-                raise IncorrectWorkingDirectory(
-                    "\n" + "\n".join(output.splitlines()[1:])
-                )
-
+        self._path = args[0]  # caching
         return output
 
     @wraps(_MapdlCore.list)
@@ -807,9 +806,11 @@ class _MapdlCommandExtended(_MapdlCore):
 
                 for surf in surfs:
                     anum = np.unique(surf["entity_num"])
-                    assert (
-                        len(anum) == 1
-                    ), f"The pv.Unstructured from the entity {anum[0]} contains entities from other entities {anum}"  # Sanity check
+                    if len(anum) != 1:
+                        raise RuntimeError(
+                            f"The pv.Unstructured from the entity {anum[0]} contains entities"
+                            f"from other entities {anum}"  # Sanity check
+                        )
 
                     area = surf.extract_cells(surf["entity_num"] == anum)
                     centers.append(area.center)
@@ -1380,7 +1381,7 @@ class _MapdlCommandExtended(_MapdlCore):
         return output
 
     @wraps(_MapdlCore.inquire)
-    def inquire(self, strarray="", func="", arg1="", arg2=""):
+    def inquire(self, strarray="", func="", arg1="", arg2="", **kwargs):
         """Wraps original INQUIRE function"""
         func_options = [
             "LOGIN",
@@ -1422,14 +1423,28 @@ class _MapdlCommandExtended(_MapdlCore):
                 f"The arguments (strarray='{strarray}', func='{func}') are not valid."
             )
 
-        response = self.run(f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False)
-        if func.upper() in [
-            "ENV",
-            "TITLE",
-        ]:  # the output is multiline, we just need the last line.
-            response = response.splitlines()[-1]
+        response = ""
+        n_try = 3
+        i_try = 0
+        while i_try < n_try and not response:
+            response = self.run(
+                f"/INQUIRE,{strarray},{func},{arg1},{arg2}", mute=False, **kwargs
+            )
+            i_try += 1
 
-        return response.split("=")[1].strip()
+        if not response:
+            if not self._store_commands:
+                raise MapdlRuntimeError("/INQUIRE command didn't return a response.")
+        else:
+            if func.upper() in [
+                "ENV",
+                "TITLE",
+            ]:  # the output is multiline, we just need the last line.
+                response = response.splitlines()[-1]
+
+            response = response.split("=")[1].strip()
+
+        return response
 
     @wraps(_MapdlCore.parres)
     def parres(self, lab="", fname="", ext="", **kwargs):
@@ -1461,7 +1476,7 @@ class _MapdlCommandExtended(_MapdlCore):
             fname_ = self._get_file_name(fname=file_, ext=ext_)
 
         # generate the log and download if necessary
-        output = super().lgwrite(fname=fname_, kedit=kedit, **kwargs)
+        output = super().lgwrite(fname=fname_, ext="", kedit=kedit, **kwargs)
 
         # Let's download the file to the location
         self._download(fname_, fname)
@@ -2112,7 +2127,9 @@ class _MapdlCommandExtended(_MapdlCore):
 class _MapdlExtended(_MapdlCommandExtended):
     """Extend Mapdl class with new functions"""
 
-    def load_table(self, name, array, var1="", var2="", var3="", csysid=""):
+    def load_table(
+        self, name, array, var1="", var2="", var3="", csysid="", col_header=False
+    ):
         """Load a table from Python to into MAPDL.
 
         Uses :func:`tread <Mapdl.tread>` to transfer the table.
@@ -2169,6 +2186,11 @@ class _MapdlExtended(_MapdlCommandExtended):
             An integer corresponding to the coordinate system ID number.
             APDL Default = 0 (global Cartesian)
 
+        col_header : bool, optional
+            Indicates if the first row of the input array is a header.
+            Set to True if the array includes a header row.
+            Default is False.
+
         Examples
         --------
         Transfer a table to MAPDL. The first column is time values and must be
@@ -2197,10 +2219,19 @@ class _MapdlExtended(_MapdlCommandExtended):
             )
 
         if array.ndim == 2:
+            # MAPDL considers the first row to be column header when col num > 2.
+            # When col header is not available duplicate the first row
+            if array.shape[1] > 2:
+                if col_header is False:
+                    array = np.vstack((array[0], array))
+                imax_val = array.shape[0] - 1
+            else:
+                imax_val = array.shape[0]
+
             self.dim(
                 name,
                 "TABLE",
-                imax=array.shape[0],
+                imax=imax_val,
                 jmax=array.shape[1] - 1,
                 kmax="",
                 var1=var1,
@@ -2219,10 +2250,6 @@ class _MapdlExtended(_MapdlCommandExtended):
                 "ascending order."
             )
 
-        # weird bug where MAPDL ignores the first row when there are greater than 2 columns
-        if array.shape[1] > 2:
-            array = np.vstack((array[0], array))
-
         base_name = random_string() + ".txt"
         filename = os.path.join(tempfile.gettempdir(), base_name)
         np.savetxt(filename, array, header="File generated by PyMAPDL:load_table")
@@ -2230,8 +2257,6 @@ class _MapdlExtended(_MapdlCommandExtended):
         if not self._local:
             self.upload(filename, progress_bar=False)
             filename = base_name
-        # skip the first line its a header we wrote in np.savetxt
-        self.tread(name, filename, nskip=1, mute=True)
 
         # skip the first line its a header we wrote in np.savetxt
         self.tread(name, filename, nskip=1, mute=True)
@@ -2299,7 +2324,7 @@ class _MapdlExtended(_MapdlCommandExtended):
         np.savetxt(
             filename,
             array,
-            delimiter=",",
+            delimiter="",
             header="File generated by PyMAPDL:load_array",
             fmt="%24.18e",
         )
@@ -2314,7 +2339,7 @@ class _MapdlExtended(_MapdlCommandExtended):
             n2 = imax
             n3 = kmax
             self.vread(name, filename, n1=n1, n2=n2, n3=n3, label=label, nskip=1)
-            fmt = "(" + ",',',".join(["E24.18" for i in range(jmax)]) + ")"
+            fmt = f"({jmax}E24.18)"
             logger.info("Using *VREAD with format %s in %s", fmt, filename)
             self.run(fmt)
 
