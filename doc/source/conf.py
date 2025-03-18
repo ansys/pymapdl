@@ -106,7 +106,7 @@ extensions = [
     "sphinx_gallery.gen_gallery",
     "sphinxemoji.sphinxemoji",
     "sphinx.ext.graphviz",
-    # "ansys_sphinx_theme.extension.linkcode",
+    "ansys_sphinx_theme.extension.linkcode",
     "sphinx.ext.mathjax",
 ]
 
