@@ -177,6 +177,11 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y poppler-utils
 
+      - name: Install ansys-sphinx-theme branch
+        shell: bash
+        run: |
+          pip install git+https://github.com/ansys/ansys-sphinx-theme.git@feat/plotly
+  
       - name: "Build documentation"
         shell: bash
         run: |
