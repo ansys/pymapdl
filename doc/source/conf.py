@@ -349,6 +349,8 @@ html_sidebars = {
     "mapdl_commands/index": [],
 }
 
+html_js_files = ["https://cdn.plot.ly/plotly-3.0.1.min.js"]
+
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
