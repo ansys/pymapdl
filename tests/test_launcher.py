@@ -2072,7 +2072,7 @@ def test_check_server_is_alive_no_queue():
 def test_get_std_output_no_queue():
     from ansys.mapdl.core.launcher import _get_std_output
 
-    assert _get_std_output(None, 30) == [None]
+    assert _get_std_output(None, 30) == [""]
 
 
 def test_create_queue_for_std_no_queue():

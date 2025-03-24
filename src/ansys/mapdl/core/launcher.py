@@ -653,7 +653,7 @@ def _get_std_output(std_queue: Queue[str], timeout: int = 1) -> List[str]:
     t0 = time.time()
     while (not reach_empty) or (time.time() < (t0 + timeout)):
         try:
-            message = str(std_queue.get_nowait())
+            message = std_queue.get_nowait().decode(encoding="utf-8", errors="replace")
             lines.append(message)
         except Empty:
             reach_empty = True
