@@ -38,7 +38,13 @@ import numpy as np
 import psutil
 import pytest
 
-from conftest import PATCH_MAPDL_START, VALID_PORTS, Running_test, has_dependency
+from conftest import (
+    PATCH_MAPDL,
+    PATCH_MAPDL_START,
+    VALID_PORTS,
+    Running_test,
+    has_dependency,
+)
 
 if has_dependency("pyvista"):
     from pyvista import MultiBlock
@@ -66,7 +72,6 @@ from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 PATH = os.path.dirname(os.path.abspath(__file__))
 TEST_FILES = os.path.join(PATH, "test_files")
 FIRST_TIME_FILE = os.path.join(USER_DATA_PATH, ".firstime")
-
 
 if VALID_PORTS:
     PORT1 = max(VALID_PORTS) + 1
@@ -2968,3 +2973,35 @@ def test_muted(mapdl, prop):
         assert mapdl.prep7() is None
 
     assert not mapdl.mute
+
+
+@requires("ansys-tools-path")
+@patch(
+    "ansys.tools.path.path._get_application_path",
+    lambda *args, **kwargs: "path/to/mapdl/executable",
+)
+@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
+@stack(*PATCH_MAPDL)
+@patch("ansys.mapdl.core.Mapdl._exit_mapdl", lambda *args, **kwargs: None)
+@pytest.mark.parametrize("set_no_abort", [True, False, None])
+@pytest.mark.parametrize("start_instance", [True, False])
+def test_set_no_abort(monkeypatch, set_no_abort, start_instance):
+    monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
+
+    with (
+        patch(
+            "ansys.mapdl.core.mapdl_grpc.MapdlGrpc._run", return_value=""
+        ) as mock_run,
+        patch(
+            "ansys.mapdl.core.mapdl_grpc.MapdlGrpc.__del__", return_value=None
+        ) as mock_del,
+    ):
+        mapdl = launch_mapdl(set_no_abort=set_no_abort, start_instance=start_instance)
+
+    kwargs = mock_run.call_args_list[0].kwargs
+    calls = [each.args[0].upper() for each in mock_run.call_args_list]
+
+    if set_no_abort is None or set_no_abort:
+        assert any(["/NERR,,,-1" in each for each in calls])
+
+    del mapdl
