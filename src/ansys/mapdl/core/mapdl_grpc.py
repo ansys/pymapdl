@@ -497,7 +497,7 @@ class MapdlGrpc(MapdlBase):
         # Set to not abort after encountering errors.  Otherwise, many
         # failures in a row will cause MAPDL to exit without returning
         # anything useful.  Also avoids abort in batch mode if set.
-        if set_no_abort:
+        if set_no_abort is None or set_no_abort:
             self._set_no_abort()
 
         # double check we have access to the local path if not
@@ -938,6 +938,7 @@ class MapdlGrpc(MapdlBase):
     @supress_logging
     def _set_no_abort(self):
         """Do not abort MAPDL."""
+        self._log.debug("Setting no abort")
         self.nerr(abort=-1, mute=True)
 
     def _run_at_connect(self):
