@@ -180,7 +180,7 @@ jobs:
       - name: Install ansys-sphinx-theme branch
         shell: bash
         run: |
-          pip install git+https://github.com/ansys/ansys-sphinx-theme.git@fix/quarto-std
+          pip install git+https://github.com/ansys/ansys-sphinx-theme.git@main
   
       - name: "Build documentation"
         shell: bash
