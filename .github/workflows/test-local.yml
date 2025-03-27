@@ -74,7 +74,7 @@ on:
 
 jobs:
   test-local:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     env:
       ON_CI: True
       ON_LOCAL: true
@@ -121,7 +121,7 @@ jobs:
         shell: bash
         if: inputs.testing-minimal == false
         run: |
-          sudo apt-get update && apt install -y libgl1-mesa-glx xvfb libgomp1 graphviz
+          sudo apt-get update && apt install -y libgl1 libglx-mesa0 xvfb libgomp1 graphviz
 
       - name: "Setup Python"
         uses: actions/setup-python@v5
