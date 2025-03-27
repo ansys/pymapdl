@@ -21,7 +21,7 @@ env:
 jobs:
   linkchecker:
     name: Check Links
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     timeout-minutes: 60
     env:
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
@@ -64,7 +64,7 @@ jobs:
       - name: "Install OS packages"
         run: |
           sudo apt update 
-          sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz
+          sudo apt install zip pandoc libgl1 libglx-mesa0 xvfb texlive-latex-extra latexmk graphviz
 
       - name: "Test virtual framebuffer"
         run: |

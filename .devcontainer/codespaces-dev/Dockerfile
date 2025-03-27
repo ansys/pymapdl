@@ -9,7 +9,7 @@ ENV ON_CODESPACES=true
 ENV CODESPACES_MODE=dev
 
 # Installing libs for testing and docs
-RUN apt-get -qq update &&  apt install -qq -y libgl1-mesa-glx xvfb libgomp1 && \
+RUN apt-get -qq update &&  apt install -qq -y libgl1 libglx-mesa0 xvfb libgomp1 && \
     apt-get -qq clean  && rm -rf /var/lib/apt/lists/* && \
     usermod -s /bin/bash $USERNAME && \
     usermod -a -G sudo $USERNAME && \
