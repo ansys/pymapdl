@@ -177,7 +177,6 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y poppler-utils
 
-  
       - name: "Build documentation"
         shell: bash
         run: |
