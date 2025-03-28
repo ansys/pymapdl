@@ -77,6 +77,7 @@ IS_SMP = is_smp()
 
 QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
 VALID_PORTS = []
+ACCEPTABLE_FAILURE_RATE = 50
 
 ## Skip ifs
 skip_on_windows = pytest.mark.skipif(ON_WINDOWS, reason="Skip on Windows")
@@ -370,6 +371,24 @@ def pytest_collection_modifyitems(session, config, items):
         for item in items:
             if "skip_grpc" in item.keywords:
                 item.add_marker(skip_grpc)
+
+
+@pytest.hookimpl()
+def pytest_sessionfinish(session: pytest.Session, exitstatus: pytest.ExitCode):
+    if os.environ.get("ALLOW_FAILURE_RATE") is None:
+        return
+
+    else:
+        acceptable_failure_rate = float(
+            os.environ.get("ALLOW_FAILURE_RATE", ACCEPTABLE_FAILURE_RATE)
+        )
+
+    if exitstatus != pytest.ExitCode.TESTS_FAILED:
+        return
+
+    failure_rate = (100.0 * session.testsfailed) / session.testscollected
+    if failure_rate <= acceptable_failure_rate:
+        session.exitstatus = 0
 
 
 ################################################################

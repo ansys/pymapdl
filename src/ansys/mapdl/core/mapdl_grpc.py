@@ -615,7 +615,7 @@ class MapdlGrpc(MapdlBase):
                 # Process is alive
                 raise MapdlConnectionError(
                     msg
-                    + f"The MAPDL process seems to be alive (PID: {self._mapdl_process.pid}) but PyMAPDL cannot connect to it."
+                    + f" The MAPDL process seems to be alive (PID: {self._mapdl_process.pid}) but PyMAPDL cannot connect to it."
                 )
             else:
                 pid_msg = (
