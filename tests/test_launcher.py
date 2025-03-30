@@ -61,6 +61,7 @@ from ansys.mapdl.core.launcher import (
     get_slurm_options,
     get_start_instance,
     get_version,
+    inject_additional_switches,
     is_running_on_slurm,
     kill_job,
     launch_grpc,
