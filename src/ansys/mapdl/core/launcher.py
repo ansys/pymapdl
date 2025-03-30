@@ -1438,6 +1438,12 @@ def launch_mapdl(
         )
 
     ########################################
+    # Additional switches injection
+    # -----------------------------
+    #
+    args = inject_additional_switches(args)
+
+    ########################################
     # SLURM settings
     # --------------
     # Checking if running on SLURM HPC
@@ -2893,3 +2899,31 @@ def check_console_start_parameters(start_parm):
             start_parm.pop(each)
 
     return start_parm
+
+
+def inject_additional_switches(args: dict[str, Any]) -> dict[str, Any]:
+    """Inject additional switches to the command line
+
+    Parameters
+    ----------
+    args : Dict[str, Any]
+        Arguments dictionary
+
+    Returns
+    -------
+    Dict[str, Any]
+        Arguments dictionary with the additional switches injected
+    """
+    envvaras = os.environ.get("PYMAPDL_ADDITIONAL_SWITCHES")
+
+    if envvaras:
+        if args.get("additional_switches"):
+            args["additional_switches"] += f" {envvaras}"
+        else:
+            args["additional_switches"] = envvaras
+
+        LOG.debug(
+            f"Injecting additional switches from 'PYMAPDL_ADDITIONAL_SWITCHES' env var: {envvaras}"
+        )
+
+    return args
