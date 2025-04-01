@@ -2037,7 +2037,7 @@ def pack_arguments(locals_):
     args.update(locals_["kwargs"])  # attaching kwargs
 
     args["set_no_abort"] = locals_.get(
-        "set_no_abort", locals_["kwargs"].get("set_no_abort", None)
+        "set_no_abort", locals_["kwargs"].get("set_no_abort", True)
     )
     args["force_intel"] = locals_.get(
         "force_intel", locals_["kwargs"].get("force_intel", None)
