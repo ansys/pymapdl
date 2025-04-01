@@ -18,7 +18,6 @@ dependencies = [
     "ansys-math-core>=0.1.2",
     "ansys-platform-instancemanagement~=1.0",
     "ansys-tools-path>=0.3.1",
-    "ansys-tools-visualization-interface>=0.2.6",
     "click>=8.1.3", # for CLI interface
     "grpcio>=1.30.0",  # tested up to grpcio==1.35
     "matplotlib>=3.0.0",  # for colormaps for pyvista
@@ -51,6 +50,10 @@ classifiers = [
 jupyter = [
     "jupyterlab>=3",
     "ipywidgets",
+]
+
+graphics = [
+    "ansys-tools-visualization-interface>=0.2.6",
 ]
 
 tests = [
