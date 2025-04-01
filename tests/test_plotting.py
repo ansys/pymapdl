@@ -1262,6 +1262,37 @@ def test_plot_path(mapdl, tmpdir):
         mapdl.eplot(vtk=False)
 
 
+def test_add_mesh():
+    """Test the add_mesh method from MapdlPlotter class."""
+    import pyvista as pv
+
+    cube1 = pv.Cube()
+    pl1 = MapdlPlotter()
+    pl1.add_mesh(cube1)
+
+    cube2 = pv.Cube()
+    meshes_dict = [
+        {
+            "mesh": cube2,
+            "scalars": np.random.default_rng(seed=1).random((8, 3)),
+        }
+    ]
+
+    pl2 = MapdlPlotter()
+    pl2.add_mesh(meshes_dict)
+
+    cube3 = pv.Cube()
+    sphere = pv.Sphere()
+
+    pl3 = MapdlPlotter()
+    pl3.add_mesh([cube3, sphere])
+
+    assert pl1.meshes[0] == cube1
+    assert pl2.meshes[0] == cube2
+    assert pl3.meshes[0] == cube3
+    assert pl3.meshes[1] == sphere
+
+
 def test_plot_path_screenshoot(mapdl, cleared, tmpdir):
     mapdl.graphics("POWER")
     # mapdl.screenshot is not affected by the device.

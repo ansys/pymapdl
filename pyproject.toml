@@ -6,7 +6,7 @@ build-backend = "flit_core.buildapi"
 # Check https://flit.readthedocs.io/en/latest/pyproject_toml.html for all available sections
 name = "ansys-mapdl-core"
 version = "0.69.dev0"
-description = "A Python wrapper for Ansys MAPDL."
+description = "A Python client library for Ansys MAPDL."
 readme = "README.md"
 requires-python = ">=3.10,<3.13"  # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
 license = {file = "LICENSE"}
@@ -60,7 +60,7 @@ tests = [
     "matplotlib==3.10.1",
     "pandas==2.2.3",
     "pyansys-tools-report==0.8.2",
-    "pyfakefs==5.7.4",
+    "pyfakefs==5.8.0",
     "pyiges[full]==0.3.1",
     "pytest-cov==6.0.0",
     "pytest-profiling==1.8.1",
@@ -244,7 +244,8 @@ directory = "doc/changelog.d"
 filename = "doc/source/changelog.rst"
 template = "doc/changelog.d/changelog_template.jinja"
 start_string = ".. towncrier release notes start\n"
-title_format = "`{version} <https://github.com/ansys/pymapdl/releases/tag/v{version}>`_ - {project_date}"
+title_format = "\n.. _{version}:\n\n`{version} <https://github.com/ansys/pymapdl/releases/tag/v{version}>`_ - {project_date}"
+
 issue_format = "`#{issue} <https://github.com/ansys/pymapdl/pull/{issue}>`_"
 
 [[tool.towncrier.type]]

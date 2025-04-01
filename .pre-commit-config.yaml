@@ -52,7 +52,7 @@ repos:
       - --line-length=88
 
 - repo: https://github.com/PyCQA/flake8
-  rev: 7.1.2
+  rev: 7.2.0
   hooks:
   - id: flake8
 
@@ -78,6 +78,6 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.31.2
+  rev: 0.32.1
   hooks:
     - id: check-github-workflows
