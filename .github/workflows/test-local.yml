@@ -48,9 +48,31 @@ on:
       tags:
         description: |
           Tags to add to the coverage report.
-        required: true
+        required: false
         type: string
 
+      codecov-report:
+        description: |
+          Whether to upload the coverage report to Codecov or not. If `true`, then the
+          appropriate token is needed.
+        required: false
+        default: true
+        type: boolean
+
+      package-registry:
+        description: |
+          Package registry for the container.
+        required: false
+        type: string
+        default: ghcr.io/ansys/mapdl
+      
+      runner:
+        description: |
+          Runner to use.
+        required: false
+        type: string
+        default: ubuntu-22.04
+        
     secrets:
       license-server:
         description: |
@@ -74,7 +96,7 @@ on:
 
 jobs:
   test-local:
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
     env:
       ON_CI: True
       ON_LOCAL: true
@@ -85,9 +107,11 @@ jobs:
       P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"
       PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
       PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile'
+      OMPI_ALLOW_RUN_AS_ROOT: 1
+      OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
 
     container:
-      image: ghcr.io/ansys/mapdl:${{ inputs.mapdl-version }}
+      image: "${{ inputs.package-registry }}:${{ inputs.mapdl-version }}"
       options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
       credentials:
         username: ${{ secrets.username }}
@@ -96,6 +120,8 @@ jobs:
     steps:
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.2.2
+        with:
+          repository: ansys/pymapdl
 
       - name: "Get if running student version"
         id: student_check
@@ -115,13 +141,13 @@ jobs:
         shell: bash
         if: inputs.testing-minimal == true
         run: |
-          sudo apt-get update && apt install -y libgomp1 graphviz
+          apt-get update && apt install -y libgomp1 graphviz
 
       - name: "Installing OS packages"
         shell: bash
         if: inputs.testing-minimal == false
         run: |
-          sudo apt-get update && apt install -y libgl1 libglx-mesa0 xvfb libgomp1 graphviz
+          apt-get update && apt install -y libgl1-mesa-glx xvfb libgomp1 graphviz
 
       - name: "Setup Python"
         uses: actions/setup-python@v5
@@ -228,6 +254,7 @@ jobs:
 
       - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
+        if: inputs.codecov-report == true
         with:
           token: ${{ secrets.codecov-token }} # required
           root_dir: ${{ github.workspace }}
@@ -236,6 +263,7 @@ jobs:
 
       - name: "Upload coverage artifacts"
         uses: actions/upload-artifact@v4
+        if: inputs.codecov-report == true
         with:
           name: ${{ inputs.file-name }}.xml
           path: ./${{ inputs.file-name }}.xml
