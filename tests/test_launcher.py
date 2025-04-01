@@ -61,6 +61,7 @@ from ansys.mapdl.core.launcher import (
     get_slurm_options,
     get_start_instance,
     get_version,
+    inject_additional_switches,
     is_running_on_slurm,
     kill_job,
     launch_grpc,
@@ -2072,10 +2073,23 @@ def test_check_server_is_alive_no_queue():
 def test_get_std_output_no_queue():
     from ansys.mapdl.core.launcher import _get_std_output
 
-    assert _get_std_output(None, 30) == [None]
+    assert _get_std_output(None, 30) == [""]
 
 
 def test_create_queue_for_std_no_queue():
     from ansys.mapdl.core.launcher import _create_queue_for_std
 
     assert _create_queue_for_std(None) == (None, None)
+
+
+def test_inject_additional_switches(monkeypatch):
+    """
+    Test the inject_additional_switches function.
+    """
+    envvar = "-my-add=switch --other_switch -b"
+    monkeypatch.setenv("PYMAPDL_ADDITIONAL_SWITCHES", envvar)
+    args = {"additional_switches": "-my_add=switch --other_switch -b"}
+
+    new_args = inject_additional_switches(args)
+    assert args["additional_switches"] in new_args["additional_switches"]
+    assert envvar in new_args["additional_switches"]

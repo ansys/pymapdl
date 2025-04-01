@@ -524,7 +524,7 @@ def launch_grpc(
 
 
 def check_mapdl_launch(
-    process: subprocess.Popen, run_location: str, timeout: int, cmd: str
+    process: subprocess.Popen[bytes], run_location: str, timeout: int, cmd: str
 ) -> None:
     """Check MAPDL launching process.
 
@@ -554,7 +554,7 @@ def check_mapdl_launch(
         MAPDL did not start.
     """
     LOG.debug("Generating queue object for stdout")
-    stdout_queue, thread = _create_queue_for_std(process.stdout)
+    stdout_queue, _ = _create_queue_for_std(process.stdout)
 
     # Checking connection
     try:
@@ -564,7 +564,7 @@ def check_mapdl_launch(
         LOG.debug("Checking file error is created")
         _check_file_error_created(run_location, timeout)
 
-        if os.name == "posix" and not ON_WSL:
+        if os.name == "posix" and not ON_WSL and stdout_queue is not None:
             LOG.debug("Checking if gRPC server is alive.")
             _check_server_is_alive(stdout_queue, timeout)
 
@@ -608,7 +608,7 @@ def _check_file_error_created(run_location, timeout):
         raise MapdlDidNotStart(msg)
 
 
-def _check_server_is_alive(stdout_queue, timeout):
+def _check_server_is_alive(stdout_queue: Queue[str], timeout: int):
     if not stdout_queue:
         LOG.debug("No STDOUT queue. Not checking MAPDL this way.")
         return
@@ -644,11 +644,11 @@ def _check_server_is_alive(stdout_queue, timeout):
         raise MapdlDidNotStart("MAPDL failed to start the gRPC server")
 
 
-def _get_std_output(std_queue, timeout=1):
+def _get_std_output(std_queue: Queue[str], timeout: int = 1) -> List[str]:
     if not std_queue:
-        return [None]
+        return [""]
 
-    lines = []
+    lines: List[str] = []
     reach_empty = False
     t0 = time.time()
     while (not reach_empty) or (time.time() < (t0 + timeout)):
@@ -1438,6 +1438,12 @@ def launch_mapdl(
         )
 
     ########################################
+    # Additional switches injection
+    # -----------------------------
+    #
+    args = inject_additional_switches(args)
+
+    ########################################
     # SLURM settings
     # --------------
     # Checking if running on SLURM HPC
@@ -2031,7 +2037,7 @@ def pack_arguments(locals_):
     args.update(locals_["kwargs"])  # attaching kwargs
 
     args["set_no_abort"] = locals_.get(
-        "set_no_abort", locals_["kwargs"].get("set_no_abort", None)
+        "set_no_abort", locals_["kwargs"].get("set_no_abort", True)
     )
     args["force_intel"] = locals_.get(
         "force_intel", locals_["kwargs"].get("force_intel", None)
@@ -2893,3 +2899,31 @@ def check_console_start_parameters(start_parm):
             start_parm.pop(each)
 
     return start_parm
+
+
+def inject_additional_switches(args: dict[str, Any]) -> dict[str, Any]:
+    """Inject additional switches to the command line
+
+    Parameters
+    ----------
+    args : Dict[str, Any]
+        Arguments dictionary
+
+    Returns
+    -------
+    Dict[str, Any]
+        Arguments dictionary with the additional switches injected
+    """
+    envvaras = os.environ.get("PYMAPDL_ADDITIONAL_SWITCHES")
+
+    if envvaras:
+        if args.get("additional_switches"):
+            args["additional_switches"] += f" {envvaras}"
+        else:
+            args["additional_switches"] = envvaras
+
+        LOG.debug(
+            f"Injecting additional switches from 'PYMAPDL_ADDITIONAL_SWITCHES' env var: {envvaras}"
+        )
+
+    return args
