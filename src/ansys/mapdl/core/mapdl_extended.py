@@ -440,7 +440,8 @@ class _MapdlCommandExtended(_MapdlCore):
         elif vtk is True:
             if not _HAS_VISUALIZER:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed. "
+                    "You  can install this using `pip install ansys-mapdl-core[graphics]`."
                 )
         if vtk:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
@@ -532,7 +533,8 @@ class _MapdlCommandExtended(_MapdlCore):
         elif vtk is True:
             if not _HAS_VISUALIZER:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed. "
+                    "You  can install this using `pip install ansys-mapdl-core[graphics]`."
                 )
 
         if vtk:
@@ -716,7 +718,8 @@ class _MapdlCommandExtended(_MapdlCore):
         elif vtk is True:
             if not _HAS_VISUALIZER:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed. "
+                    "You  can install this using `pip install ansys-mapdl-core[graphics]`."
                 )
 
         if vtk:
@@ -920,7 +923,8 @@ class _MapdlCommandExtended(_MapdlCore):
         elif vtk is True:
             if not _HAS_VISUALIZER:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed. "
+                    "You  can install this using `pip install ansys-mapdl-core[graphics]`."
                 )
 
         if vtk:
@@ -1102,7 +1106,8 @@ class _MapdlCommandExtended(_MapdlCore):
                 import pyvista as pv
             else:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed. "
+                    "You  can install this using `pip install ansys-mapdl-core[graphics]`."
                 )
 
         if "knum" in kwargs:
@@ -1241,7 +1246,8 @@ class _MapdlCommandExtended(_MapdlCore):
         elif vtk is True:
             if not _HAS_VISUALIZER:  # pragma: no cover
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
+                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed. "
+                    "You  can install this using `pip install ansys-mapdl-core[graphics]`."
                 )
 
         if vtk:
