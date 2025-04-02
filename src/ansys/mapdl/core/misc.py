@@ -429,14 +429,14 @@ def requires_graphics() -> None:
     """Warn the user if the visualizer is not installed"""
 
     def decorator(function):
-        def wrapper(self, *args, **kwargs):
+        def wrapper(*args, **kwargs):
             if not _HAS_VISUALIZER:
                 raise ModuleNotFoundError(
                     "Graphic libraries are required to use this method.\n"
-                    "You  can install this using `pip install ansys-mapdl-core[graphics]`."
+                    "You can install this using `pip install ansys-mapdl-core[graphics]`."
                 )
 
-            return function(self, *args, **kwargs)
+            return function(*args, **kwargs)
 
         return wrapper
 
