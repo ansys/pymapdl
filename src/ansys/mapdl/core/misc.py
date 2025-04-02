@@ -37,7 +37,7 @@ from warnings import warn
 
 import numpy as np
 
-from ansys.mapdl.core import _HAS_PYVISTA, LOG
+from ansys.mapdl.core import _HAS_PYVISTA, _HAS_VISUALIZER, LOG
 
 # path of this module
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -423,6 +423,24 @@ def is_package_installed_cached(package_name):
 
     except ModuleNotFoundError:
         return False
+
+
+def requires_graphics() -> None:
+    """Warn the user if the visualizer is not installed"""
+
+    def decorator(function):
+        def wrapper(self, *args, **kwargs):
+            if not _HAS_VISUALIZER:
+                raise ModuleNotFoundError(
+                    "Graphic libraries are required to use this method.\n"
+                    "You  can install this using `pip install ansys-mapdl-core[graphics]`."
+                )
+
+            return function(self, *args, **kwargs)
+
+        return wrapper
+
+    return decorator
 
 
 def requires_package(package_name: str, softerror: bool = False) -> Callable:

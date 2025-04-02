@@ -31,7 +31,6 @@ import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
@@ -47,6 +46,7 @@ from ansys.mapdl.core.misc import (
     allow_pickable_entities,
     load_file,
     random_string,
+    requires_graphics,
     supress_logging,
 )
 
@@ -390,13 +390,14 @@ class _MapdlCommandExtended(_MapdlCore):
         with open(path) as fid:
             return fid.read()
 
+    @requires_graphics
     def kplot(
         self,
         np1="",
         np2="",
         ninc="",
         lab="",
-        vtk=None,
+        interactive_plot=None,
         show_keypoint_numbering=True,
         **kwargs,
     ):
@@ -405,7 +406,7 @@ class _MapdlCommandExtended(_MapdlCore):
         APDL Command: KPLOT
 
         .. note::
-            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            PyMAPDL plotting commands with ``interactive_plot=True`` ignore any
             values set with the ``PNUM`` command.
 
         Parameters
@@ -423,11 +424,11 @@ class _MapdlCommandExtended(_MapdlCore):
 
             HPT - Plots only those keypoints that are hard points.
 
-        vtk : bool, optional
+        interactive_plot : bool, optional
             Plot the currently selected lines using ``ansys-tools-visualization_interface``.
 
         show_keypoint_numbering : bool, optional
-            Display keypoint numbers when ``vtk=True``.
+            Display keypoint numbers when ``interactive_plot=True``.
 
 
 
@@ -435,15 +436,10 @@ class _MapdlCommandExtended(_MapdlCore):
         -----
         This command is valid in any processor.
         """
-        if vtk is None:
-            vtk = self._use_vtk
-        elif vtk is True:
-            if not _HAS_VISUALIZER:  # pragma: no cover
-                raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed. "
-                    "You  can install this using `pip install ansys-mapdl-core[graphics]`."
-                )
-        if vtk:
+        if interactive_plot is None:
+            interactive_plot = self._use_vtk
+
+        if interactive_plot:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
             pl = kwargs.get("plotter", None)
@@ -473,12 +469,13 @@ class _MapdlCommandExtended(_MapdlCore):
         with self._enable_interactive_plotting():
             return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
 
+    @requires_graphics
     def lplot(
         self,
         nl1="",
         nl2="",
         ninc="",
-        vtk=None,
+        interactive_plot=None,
         show_line_numbering=True,
         show_keypoint_numbering=False,
         color_lines=False,
@@ -489,7 +486,7 @@ class _MapdlCommandExtended(_MapdlCore):
         APDL Command: LPLOT
 
         .. note::
-            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            PyMAPDL plotting commands with ``interactive_plot=True`` ignore any
             values set with the ``PNUM`` command.
 
         Parameters
@@ -499,11 +496,11 @@ class _MapdlCommandExtended(_MapdlCore):
             of NINC (defaults to 1).  If NL1 = ALL (default), NL2 and
             NINC are ignored and display all selected lines [LSEL].
 
-        vtk : bool, optional
+        interactive_plot : bool, optional
             Plot the currently selected lines using ``ansys-tools-visualization_interface``.
 
         show_line_numbering : bool, optional
-            Display line and keypoint numbers when ``vtk=True``.
+            Display line and keypoint numbers when ``interactive_plot=True``.
 
         show_keypoint_numbering : bool, optional
             Number keypoints.  Only valid when ``show_keypoints=True``
@@ -514,30 +511,24 @@ class _MapdlCommandExtended(_MapdlCore):
         **kwargs
             See :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
-            ``vtk=True``.
+            ``interactive_plot=True``.
 
         Notes
         -----
         Mesh divisions on plotted lines are controlled by the ``ldiv``
-        option of the ``psymb`` command when ``vtk=False``.
+        option of the ``psymb`` command when ``interactive_plot=False``.
         Otherwise, line divisions are controlled automatically.
 
         This command is valid in any processor.
 
         Examples
         --------
-        >>> mapdl.lplot(vtk=True, cpos='xy', line_width=10)
+        >>> mapdl.lplot(interactive_plot=True, cpos='xy', line_width=10)
         """
-        if vtk is None:
-            vtk = self._use_vtk
-        elif vtk is True:
-            if not _HAS_VISUALIZER:  # pragma: no cover
-                raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed. "
-                    "You  can install this using `pip install ansys-mapdl-core[graphics]`."
-                )
+        if interactive_plot is None:
+            interactive_plot = self._use_vtk
 
-        if vtk:
+        if interactive_plot:
             from ansys.mapdl.core.plotting.theme import get_ansys_colors
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
@@ -612,6 +603,7 @@ class _MapdlCommandExtended(_MapdlCore):
             with self._enable_interactive_plotting():
                 return super().lplot(nl1=nl1, nl2=nl2, ninc=ninc, **kwargs)
 
+    @requires_graphics
     def aplot(
         self,
         na1="",
@@ -619,7 +611,7 @@ class _MapdlCommandExtended(_MapdlCore):
         ninc="",
         degen="",
         scale="",
-        vtk=None,
+        interactive_plot=None,
         quality=4,
         show_area_numbering=False,
         show_line_numbering=False,
@@ -635,7 +627,7 @@ class _MapdlCommandExtended(_MapdlCore):
         APDL Command: ``APLOT``
 
         .. note::
-            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            PyMAPDL plotting commands with ``interactive_plot=True`` ignore any
             values set with the ``PNUM`` command.
 
         Parameters
@@ -650,31 +642,31 @@ class _MapdlCommandExtended(_MapdlCore):
             Increment between minimum and maximum area.
 
         degen, str, optional
-            Degeneracy marker.  This option is ignored when ``vtk=True``.
+            Degeneracy marker.  This option is ignored when ``interactive_plot=True``.
 
         scale : float, optional
             Scale factor for the size of the degeneracy-marker star.
             The scale is the size in window space (-1 to 1 in both
             directions) (defaults to 0.075).  This option is ignored
-            when ``vtk=True``.
+            when ``interactive_plot=True``.
 
-        vtk : bool, optional
+        interactive_plot : bool, optional
             Plot the currently selected areas using ``ansys-tools-visualization_interface``.
             As this creates a temporary surface mesh, this may have a
             long execution time for large meshes.
 
         quality : int, optional
             Quality of the mesh to display.  Varies between 1 (worst)
-            to 10 (best) when ``vtk=True``.
+            to 10 (best) when ``interactive_plot=True``.
 
         show_area_numbering : bool, optional
-            Display area numbers when ``vtk=True``.
+            Display area numbers when ``interactive_plot=True``.
 
         show_line_numbering : bool, optional
-            Display line numbers when ``vtk=True``.
+            Display line numbers when ``interactive_plot=True``.
 
         color_areas : Union[bool, str, np.array], optional
-            Only used when ``vtk=True``.
+            Only used when ``interactive_plot=True``.
             If ``color_areas`` is a bool, randomly color areas when ``True``.
             If ``color_areas`` is a string, it must be a valid color string
             which will be applied to all areas.
@@ -689,7 +681,7 @@ class _MapdlCommandExtended(_MapdlCore):
         **kwargs
             See :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
-            ``vtk=True``.
+            ``interactive_plot=True``.
 
         Examples
         --------
@@ -713,16 +705,10 @@ class _MapdlCommandExtended(_MapdlCore):
         >>> pl.show()
 
         """
-        if vtk is None:
-            vtk = self._use_vtk
-        elif vtk is True:
-            if not _HAS_VISUALIZER:  # pragma: no cover
-                raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed. "
-                    "You  can install this using `pip install ansys-mapdl-core[graphics]`."
-                )
+        if interactive_plot is None:
+            interactive_plot = self._use_vtk
 
-        if vtk:
+        if interactive_plot:
             from matplotlib.colors import to_rgba
 
             from ansys.mapdl.core.plotting.theme import get_ansys_colors
@@ -850,6 +836,7 @@ class _MapdlCommandExtended(_MapdlCore):
                 na1=na1, na2=na2, ninc=ninc, degen=degen, scale=scale, **kwargs
             )
 
+    @requires_graphics
     def vplot(
         self,
         nv1="",
@@ -857,7 +844,7 @@ class _MapdlCommandExtended(_MapdlCore):
         ninc="",
         degen="",
         scale="",
-        vtk=None,
+        interactive_plot=None,
         quality=4,
         show_volume_numbering=False,
         show_area_numbering=False,
@@ -871,7 +858,7 @@ class _MapdlCommandExtended(_MapdlCore):
         APDL Command: VPLOT
 
         .. note::
-            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            PyMAPDL plotting commands with ``interactive_plot=True`` ignore any
             values set with the ``PNUM`` command.
 
         Parameters
@@ -880,36 +867,36 @@ class _MapdlCommandExtended(_MapdlCore):
             Display volumes from NV1 to NV2 (defaults to NV1) in steps
             of NINC (defaults to 1).  If NV1 = ALL (default), NV2 and
             NINC are ignored and all selected volumes [VSEL] are
-            displayed.  Ignored when ``vtk=True``.
+            displayed.  Ignored when ``interactive_plot=True``.
 
         degen
             Degeneracy marker.  ``"blank"`` No degeneracy marker is
             used (default), or ``"DEGE"``.  A red star is placed on
             keypoints at degeneracies (see the Modeling and Meshing
             Guide).  Not available if /FACET,WIRE is set.  Ignored
-            when ``vtk=True``.
+            when ``interactive_plot=True``.
 
         scale
             Scale factor for the size of the degeneracy-marker star.  The scale
             is the size in window space (-1 to 1 in both directions) (defaults
-            to .075).  Ignored when ``vtk=True``.
+            to .075).  Ignored when ``interactive_plot=True``.
 
-        vtk : bool, optional
+        interactive_plot : bool, optional
             Plot the currently selected volumes using ``ansys-tools-visualization_interface``.
             As this creates a temporary surface mesh, this may have a
             long execution time for large meshes.
 
         quality : int, optional
             quality of the mesh to display.  Varies between 1 (worst)
-            to 10 (best).  Applicable when ``vtk=True``.
+            to 10 (best).  Applicable when ``interactive_plot=True``.
 
         show_numbering : bool, optional
-            Display line and keypoint numbers when ``vtk=True``.
+            Display line and keypoint numbers when ``interactive_plot=True``.
 
         **kwargs
             See :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
-            ``vtk=True``.
+            ``interactive_plot=True``.
 
         Examples
         --------
@@ -918,16 +905,10 @@ class _MapdlCommandExtended(_MapdlCore):
         >>> mapdl.vplot(show_area_numbering=True)
 
         """
-        if vtk is None:
-            vtk = self._use_vtk
-        elif vtk is True:
-            if not _HAS_VISUALIZER:  # pragma: no cover
-                raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed. "
-                    "You  can install this using `pip install ansys-mapdl-core[graphics]`."
-                )
+        if interactive_plot is None:
+            interactive_plot = self._use_vtk
 
-        if vtk:
+        if interactive_plot:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
             pl = kwargs.get("plotter", None)
@@ -957,7 +938,7 @@ class _MapdlCommandExtended(_MapdlCore):
                     self.aslv("S", mute=True)  # select areas attached to active volumes
 
                     pl_aplot = self.aplot(
-                        vtk=True,
+                        interactive_plot=True,
                         color_areas=color_areas,
                         quality=quality,
                         show_area_numbering=show_area_numbering,
@@ -985,13 +966,14 @@ class _MapdlCommandExtended(_MapdlCore):
                     nv1=nv1, nv2=nv2, ninc=ninc, degen=degen, scale=scale, **kwargs
                 )
 
-    def nplot(self, nnum="", vtk=None, **kwargs):
+    @requires_graphics
+    def nplot(self, nnum="", interactive_plot=None, **kwargs):
         """APDL Command: NPLOT
 
         Displays nodes.
 
         .. note::
-           PyMAPDL plotting commands with ``vtk=True`` ignore any
+           PyMAPDL plotting commands with ``interactive_plot=True`` ignore any
            values set with the ``PNUM`` command.
 
         Parameters
@@ -1003,9 +985,9 @@ class _MapdlCommandExtended(_MapdlCore):
             - ``True`` : Include node numbers on display.
 
             .. note::
-               This parameter is only valid when ``vtk==True``
+               This parameter is only valid when ``interactive_plot==True``
 
-        vtk : bool, optional
+        interactive_plot : bool, optional
             Plot the currently selected nodes using ``pyvista``.
             Defaults to current ``use_vtk`` setting as set on the
             initialization of MAPDL.
@@ -1074,7 +1056,7 @@ class _MapdlCommandExtended(_MapdlCore):
         >>> mapdl.fill(1, 11, 9)
         >>> mapdl.nplot(
         ...     nnum=True,
-        ...     vtk=True,
+        ...     interactive_plot=True,
         ...     background='w',
         ...     color='k',
         ...     show_bounds=True
@@ -1086,7 +1068,7 @@ class _MapdlCommandExtended(_MapdlCore):
         >>> mapdl.n(1, 0, 0, 0)
         >>> mapdl.n(11, 10, 0, 0)
         >>> mapdl.fill(1, 11, 9)
-        >>> mapdl.nplot(vtk=False)
+        >>> mapdl.nplot(interactive_plot=False)
 
         Plot nodal boundary conditions.
 
@@ -1097,23 +1079,15 @@ class _MapdlCommandExtended(_MapdlCore):
         ... )
 
         """
-        if vtk is None:
-            vtk = self._use_vtk
-
-        if vtk is True:
-            if _HAS_VISUALIZER:
-                # lazy import here to avoid top level import
-                import pyvista as pv
-            else:  # pragma: no cover
-                raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed. "
-                    "You  can install this using `pip install ansys-mapdl-core[graphics]`."
-                )
+        if interactive_plot is None:
+            interactive_plot = self._use_vtk
 
         if "knum" in kwargs:
             raise ValueError("`knum` keyword deprecated.  Please use `nnum` instead.")
 
-        if vtk:
+        if interactive_plot:
+            import pyvista as pv
+
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
             pl = kwargs.get("plotter", None)
@@ -1146,18 +1120,19 @@ class _MapdlCommandExtended(_MapdlCore):
         with self._enable_interactive_plotting():
             return super().nplot(nnum, **kwargs)
 
-    def eplot(self, show_node_numbering=False, vtk=None, **kwargs):
+    @requires_graphics
+    def eplot(self, show_node_numbering=False, interactive_plot=None, **kwargs):
         """Plots the currently selected elements.
 
         APDL Command: EPLOT
 
         .. note::
-            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            PyMAPDL plotting commands with ``interactive_plot=True`` ignore any
             values set with the ``PNUM`` command.
 
         Parameters
         ----------
-        vtk : bool, optional
+        interactive_plot : bool, optional
             Plot the currently selected elements using ``ansys-tools-visualization_interface``.
             Defaults to current ``use_vtk`` setting.
 
@@ -1220,7 +1195,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
         **kwargs
             See ``help(ansys.mapdl.core.plotting.visualizer.MapdlPlotter)`` for more
-            keyword arguments related to visualizing using ``vtk``.
+            keyword arguments related to visualizing using ``interactive_plot``.
 
         Examples
         --------
@@ -1241,16 +1216,10 @@ class _MapdlCommandExtended(_MapdlCore):
                         off_screen=True)
 
         """
-        if vtk is None:
-            vtk = self._use_vtk
-        elif vtk is True:
-            if not _HAS_VISUALIZER:  # pragma: no cover
-                raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed. "
-                    "You  can install this using `pip install ansys-mapdl-core[graphics]`."
-                )
+        if interactive_plot is None:
+            interactive_plot = self._use_vtk
 
-        if vtk:
+        if interactive_plot:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
             pl = kwargs.get("plotter", None)
