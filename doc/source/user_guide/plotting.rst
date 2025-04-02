@@ -10,7 +10,7 @@ transfer the geometry to Python to visualize it:
 
 - :func:`Mapdl.kplot() <ansys.mapdl.core.Mapdl.kplot>`
 - :func:`Mapdl.vplot() <ansys.mapdl.core.Mapdl.vplot>`
-- :func:`Mapdl.eplot() <ansys.mapdl.core.Mapdl.eplot>`). 
+- :func:`Mapdl.eplot() <ansys.mapdl.core.Mapdl.eplot>`).
 
 These methods rely on the :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter`
 method. Combined with the MAPDL geometry commands, you can
@@ -91,10 +91,10 @@ some element types, performs meshing, and then displays the mesh:
 Plotting non-interactively using MAPDL
 --------------------------------------
 You can also plot using MAPDL's native plotting tools. To use the
-native tools, pass ``vtk=False`` when running plotting commands such
+native tools, pass ``graphics_backend=GraphicsBackend.MATPLOTLIB`` when running plotting commands such
 as the :func:`Mapdl.aplot <ansys.mapdl.core.Mapdl.aplot>` and
 :func:`Mapdl.eplot <ansys.mapdl.core.Mapdl.eplot>` methods. Plots are
-generated within MAPDL and then shown using 
+generated within MAPDL and then shown using
 `Matplotlib <matplotlib_main_>`_.
 
 
@@ -132,15 +132,16 @@ Each of these creates a Matplotlib figure and pause execution.
 
 .. code:: pycon
 
-    >>> mapdl.aplot(vtk=False)
-    >>> mapdl.lplot(vtk=False)
-    >>> mapdl.kplot(vtk=False)
+    >>> from ansys.mapdl.core import GraphicsBackend
+    >>> mapdl.aplot(graphics_backend=GraphicsBackend.MATPLOTLIB)
+    >>> mapdl.lplot(graphics_backend=GraphicsBackend.MATPLOTLIB)
+    >>> mapdl.kplot(graphics_backend=GraphicsBackend.MATPLOTLIB)
 
 
 .. figure:: ../images/aplot.png
     :width: 400pt
 
-    Area Plot from MAPDL displayed using 
+    Area Plot from MAPDL displayed using
     `Matplotlib <matplotlib_main_>`_
 
 
@@ -149,7 +150,7 @@ For more information on plotting functions, see :ref:`ref_plotting_api`.
 
 Plotting keyword options
 ------------------------
-When ``vtk=True``, which is the default, all MAPDL plotting
+When ``graphics_backend=GraphicsBackend.PYVISTA``, which is the default, all MAPDL plotting
 methods allow you to enter in additional keyword arguments to better
 control the plot. For example, you can automatically generate a
 screenshot of an area plot or element plot with this code:

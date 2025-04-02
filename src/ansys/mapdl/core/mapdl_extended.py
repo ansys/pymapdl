@@ -30,6 +30,7 @@ import warnings
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
+from ansys.mapdl.core import GraphicsBackend
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
@@ -397,7 +398,7 @@ class _MapdlCommandExtended(_MapdlCore):
         np2="",
         ninc="",
         lab="",
-        interactive_plot=None,
+        graphics_backend=None,
         show_keypoint_numbering=True,
         **kwargs,
     ):
@@ -406,7 +407,7 @@ class _MapdlCommandExtended(_MapdlCore):
         APDL Command: KPLOT
 
         .. note::
-            PyMAPDL plotting commands with ``interactive_plot=True`` ignore any
+            PyMAPDL plotting commands with ``graphics_backend=GraphicsBackend.PYVISTA`` ignore any
             values set with the ``PNUM`` command.
 
         Parameters
@@ -424,11 +425,11 @@ class _MapdlCommandExtended(_MapdlCore):
 
             HPT - Plots only those keypoints that are hard points.
 
-        interactive_plot : bool, optional
+        graphics_backend : GraphicsBackend, optional
             Plot the currently selected lines using ``ansys-tools-visualization_interface``.
 
         show_keypoint_numbering : bool, optional
-            Display keypoint numbers when ``interactive_plot=True``.
+            Display keypoint numbers when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
 
 
@@ -436,10 +437,10 @@ class _MapdlCommandExtended(_MapdlCore):
         -----
         This command is valid in any processor.
         """
-        if interactive_plot is None:
-            interactive_plot = self._use_vtk
+        if graphics_backend is None:
+            graphics_backend = self._graphics_backend
 
-        if interactive_plot:
+        if graphics_backend is GraphicsBackend.PYVISTA:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
             pl = kwargs.get("plotter", None)
@@ -465,9 +466,11 @@ class _MapdlCommandExtended(_MapdlCore):
                 )
             pl.plot([], points, labels, **kwargs)
             return pl.show(**kwargs)
+
         # otherwise, use the legacy plotter
-        with self._enable_interactive_plotting():
-            return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
+        if graphics_backend is GraphicsBackend.MATPLOTLIB:
+            with self._enable_interactive_plotting():
+                return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
 
     @requires_graphics
     def lplot(
@@ -475,7 +478,7 @@ class _MapdlCommandExtended(_MapdlCore):
         nl1="",
         nl2="",
         ninc="",
-        interactive_plot=None,
+        graphics_backend=None,
         show_line_numbering=True,
         show_keypoint_numbering=False,
         color_lines=False,
@@ -486,7 +489,7 @@ class _MapdlCommandExtended(_MapdlCore):
         APDL Command: LPLOT
 
         .. note::
-            PyMAPDL plotting commands with ``interactive_plot=True`` ignore any
+            PyMAPDL plotting commands with ``graphics_backend=GraphicsBackend.PYVISTA`` ignore any
             values set with the ``PNUM`` command.
 
         Parameters
@@ -496,11 +499,11 @@ class _MapdlCommandExtended(_MapdlCore):
             of NINC (defaults to 1).  If NL1 = ALL (default), NL2 and
             NINC are ignored and display all selected lines [LSEL].
 
-        interactive_plot : bool, optional
+        graphics_backend : GraphicsBackend, optional
             Plot the currently selected lines using ``ansys-tools-visualization_interface``.
 
         show_line_numbering : bool, optional
-            Display line and keypoint numbers when ``interactive_plot=True``.
+            Display line and keypoint numbers when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         show_keypoint_numbering : bool, optional
             Number keypoints.  Only valid when ``show_keypoints=True``
@@ -511,24 +514,24 @@ class _MapdlCommandExtended(_MapdlCore):
         **kwargs
             See :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
-            ``interactive_plot=True``.
+            ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         Notes
         -----
         Mesh divisions on plotted lines are controlled by the ``ldiv``
-        option of the ``psymb`` command when ``interactive_plot=False``.
+        option of the ``psymb`` command when ``graphics_backend=GraphicsBackend.MATPLOTLIB``.
         Otherwise, line divisions are controlled automatically.
 
         This command is valid in any processor.
 
         Examples
         --------
-        >>> mapdl.lplot(interactive_plot=True, cpos='xy', line_width=10)
+        >>> mapdl.lplot(graphics_backend=GraphicsBackend.PYVISTA, cpos='xy', line_width=10)
         """
-        if interactive_plot is None:
-            interactive_plot = self._use_vtk
+        if graphics_backend is None:
+            graphics_backend = self._graphics_backend
 
-        if interactive_plot:
+        if graphics_backend:
             from ansys.mapdl.core.plotting.theme import get_ansys_colors
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
@@ -611,7 +614,7 @@ class _MapdlCommandExtended(_MapdlCore):
         ninc="",
         degen="",
         scale="",
-        interactive_plot=None,
+        graphics_backend=None,
         quality=4,
         show_area_numbering=False,
         show_line_numbering=False,
@@ -627,7 +630,7 @@ class _MapdlCommandExtended(_MapdlCore):
         APDL Command: ``APLOT``
 
         .. note::
-            PyMAPDL plotting commands with ``interactive_plot=True`` ignore any
+            PyMAPDL plotting commands with ``graphics_backend=GraphicsBackend.PYVISTA`` ignore any
             values set with the ``PNUM`` command.
 
         Parameters
@@ -642,31 +645,31 @@ class _MapdlCommandExtended(_MapdlCore):
             Increment between minimum and maximum area.
 
         degen, str, optional
-            Degeneracy marker.  This option is ignored when ``interactive_plot=True``.
+            Degeneracy marker.  This option is ignored when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         scale : float, optional
             Scale factor for the size of the degeneracy-marker star.
             The scale is the size in window space (-1 to 1 in both
             directions) (defaults to 0.075).  This option is ignored
-            when ``interactive_plot=True``.
+            when ``graphics_backend != GraphicsBackend.MATPLOTLIB``.
 
-        interactive_plot : bool, optional
+        graphics_backend : GraphicsBackend, optional
             Plot the currently selected areas using ``ansys-tools-visualization_interface``.
             As this creates a temporary surface mesh, this may have a
             long execution time for large meshes.
 
         quality : int, optional
             Quality of the mesh to display.  Varies between 1 (worst)
-            to 10 (best) when ``interactive_plot=True``.
+            to 10 (best) when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         show_area_numbering : bool, optional
-            Display area numbers when ``interactive_plot=True``.
+            Display area numbers when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         show_line_numbering : bool, optional
-            Display line numbers when ``interactive_plot=True``.
+            Display line numbers when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         color_areas : Union[bool, str, np.array], optional
-            Only used when ``interactive_plot=True``.
+            Only used when ``graphics_backend=GraphicsBackend.PYVISTA``.
             If ``color_areas`` is a bool, randomly color areas when ``True``.
             If ``color_areas`` is a string, it must be a valid color string
             which will be applied to all areas.
@@ -681,7 +684,7 @@ class _MapdlCommandExtended(_MapdlCore):
         **kwargs
             See :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
-            ``interactive_plot=True``.
+            ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         Examples
         --------
@@ -705,10 +708,10 @@ class _MapdlCommandExtended(_MapdlCore):
         >>> pl.show()
 
         """
-        if interactive_plot is None:
-            interactive_plot = self._use_vtk
+        if graphics_backend is None:
+            graphics_backend = self._graphics_backend
 
-        if interactive_plot:
+        if graphics_backend:
             from matplotlib.colors import to_rgba
 
             from ansys.mapdl.core.plotting.theme import get_ansys_colors
@@ -830,11 +833,11 @@ class _MapdlCommandExtended(_MapdlCore):
             pl = MapdlPlotter()
             pl.plot(meshes, [], labels, **kwargs)
             return pl.show(**kwargs)
-
-        with self._enable_interactive_plotting():
-            return super().aplot(
-                na1=na1, na2=na2, ninc=ninc, degen=degen, scale=scale, **kwargs
-            )
+        if graphics_backend is GraphicsBackend.MATPLOTLIB:
+            with self._enable_interactive_plotting():
+                return super().aplot(
+                    na1=na1, na2=na2, ninc=ninc, degen=degen, scale=scale, **kwargs
+                )
 
     @requires_graphics
     def vplot(
@@ -844,7 +847,7 @@ class _MapdlCommandExtended(_MapdlCore):
         ninc="",
         degen="",
         scale="",
-        interactive_plot=None,
+        graphics_backend=None,
         quality=4,
         show_volume_numbering=False,
         show_area_numbering=False,
@@ -858,7 +861,7 @@ class _MapdlCommandExtended(_MapdlCore):
         APDL Command: VPLOT
 
         .. note::
-            PyMAPDL plotting commands with ``interactive_plot=True`` ignore any
+            PyMAPDL plotting commands with ``graphics_backend=GraphicsBackend.PYVISTA`` ignore any
             values set with the ``PNUM`` command.
 
         Parameters
@@ -867,36 +870,36 @@ class _MapdlCommandExtended(_MapdlCore):
             Display volumes from NV1 to NV2 (defaults to NV1) in steps
             of NINC (defaults to 1).  If NV1 = ALL (default), NV2 and
             NINC are ignored and all selected volumes [VSEL] are
-            displayed.  Ignored when ``interactive_plot=True``.
+            displayed.  Ignored when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         degen
             Degeneracy marker.  ``"blank"`` No degeneracy marker is
             used (default), or ``"DEGE"``.  A red star is placed on
             keypoints at degeneracies (see the Modeling and Meshing
             Guide).  Not available if /FACET,WIRE is set.  Ignored
-            when ``interactive_plot=True``.
+            when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         scale
             Scale factor for the size of the degeneracy-marker star.  The scale
             is the size in window space (-1 to 1 in both directions) (defaults
-            to .075).  Ignored when ``interactive_plot=True``.
+            to .075).  Ignored when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
-        interactive_plot : bool, optional
+        graphics_backend : GraphicsBackend, optional
             Plot the currently selected volumes using ``ansys-tools-visualization_interface``.
             As this creates a temporary surface mesh, this may have a
             long execution time for large meshes.
 
         quality : int, optional
             quality of the mesh to display.  Varies between 1 (worst)
-            to 10 (best).  Applicable when ``interactive_plot=True``.
+            to 10 (best).  Applicable when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         show_numbering : bool, optional
-            Display line and keypoint numbers when ``interactive_plot=True``.
+            Display line and keypoint numbers when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         **kwargs
             See :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
-            ``interactive_plot=True``.
+            ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         Examples
         --------
@@ -905,10 +908,10 @@ class _MapdlCommandExtended(_MapdlCore):
         >>> mapdl.vplot(show_area_numbering=True)
 
         """
-        if interactive_plot is None:
-            interactive_plot = self._use_vtk
+        if graphics_backend is None:
+            graphics_backend = self._graphics_backend
 
-        if interactive_plot:
+        if graphics_backend is GraphicsBackend.PYVISTA:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
             pl = kwargs.get("plotter", None)
@@ -938,7 +941,7 @@ class _MapdlCommandExtended(_MapdlCore):
                     self.aslv("S", mute=True)  # select areas attached to active volumes
 
                     pl_aplot = self.aplot(
-                        interactive_plot=True,
+                        graphics_backend=GraphicsBackend.PYVISTA,
                         color_areas=color_areas,
                         quality=quality,
                         show_area_numbering=show_area_numbering,
@@ -960,20 +963,20 @@ class _MapdlCommandExtended(_MapdlCore):
             pl.plot(meshes, points, labels, **kwargs)
             return pl.show(return_plotter=return_plotter, **kwargs)
 
-        else:
+        elif graphics_backend is GraphicsBackend.MATPLOTLIB:
             with self._enable_interactive_plotting():
                 return super().vplot(
                     nv1=nv1, nv2=nv2, ninc=ninc, degen=degen, scale=scale, **kwargs
                 )
 
     @requires_graphics
-    def nplot(self, nnum="", interactive_plot=None, **kwargs):
+    def nplot(self, nnum="", graphics_backend=None, **kwargs):
         """APDL Command: NPLOT
 
         Displays nodes.
 
         .. note::
-           PyMAPDL plotting commands with ``interactive_plot=True`` ignore any
+           PyMAPDL plotting commands with ``graphics_backend=GraphicsBackend.PYVISTA`` ignore any
            values set with the ``PNUM`` command.
 
         Parameters
@@ -985,11 +988,11 @@ class _MapdlCommandExtended(_MapdlCore):
             - ``True`` : Include node numbers on display.
 
             .. note::
-               This parameter is only valid when ``interactive_plot==True``
+               This parameter is only valid when ``graphics_backend==GraphicsBackend.PYVISTA``
 
-        interactive_plot : bool, optional
-            Plot the currently selected nodes using ``pyvista``.
-            Defaults to current ``use_vtk`` setting as set on the
+        graphics_backend : GraphicsBackend, optional
+            Plot the currently selected nodes using an specific backend.
+            Defaults to current ``graphics_backend`` setting as set on the
             initialization of MAPDL.
 
         plot_bc : bool, optional
@@ -1056,7 +1059,7 @@ class _MapdlCommandExtended(_MapdlCore):
         >>> mapdl.fill(1, 11, 9)
         >>> mapdl.nplot(
         ...     nnum=True,
-        ...     interactive_plot=True,
+        ...     graphics_backend=GraphicsBackend.PYVISTA,
         ...     background='w',
         ...     color='k',
         ...     show_bounds=True
@@ -1068,7 +1071,7 @@ class _MapdlCommandExtended(_MapdlCore):
         >>> mapdl.n(1, 0, 0, 0)
         >>> mapdl.n(11, 10, 0, 0)
         >>> mapdl.fill(1, 11, 9)
-        >>> mapdl.nplot(interactive_plot=False)
+        >>> mapdl.nplot(graphics_backend=GraphicsBackend.MATPLOTLIB)
 
         Plot nodal boundary conditions.
 
@@ -1079,13 +1082,13 @@ class _MapdlCommandExtended(_MapdlCore):
         ... )
 
         """
-        if interactive_plot is None:
-            interactive_plot = self._use_vtk
+        if graphics_backend is None:
+            graphics_backend = self._graphics_backend
 
         if "knum" in kwargs:
             raise ValueError("`knum` keyword deprecated.  Please use `nnum` instead.")
 
-        if interactive_plot:
+        if graphics_backend is GraphicsBackend.PYVISTA:
             import pyvista as pv
 
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
@@ -1113,28 +1116,29 @@ class _MapdlCommandExtended(_MapdlCore):
             pl.plot([], points, labels, mapdl=self, **kwargs)
             return pl.show(**kwargs)
 
-        # otherwise, use the built-in nplot
-        if isinstance(nnum, bool):
-            nnum = int(nnum)
+        elif graphics_backend is GraphicsBackend.MATPLOTLIB:
+            # otherwise, use the built-in nplot
+            if isinstance(nnum, bool):
+                nnum = int(nnum)
 
-        with self._enable_interactive_plotting():
-            return super().nplot(nnum, **kwargs)
+            with self._enable_interactive_plotting():
+                return super().nplot(nnum, **kwargs)
 
     @requires_graphics
-    def eplot(self, show_node_numbering=False, interactive_plot=None, **kwargs):
+    def eplot(self, show_node_numbering=False, graphics_backend=None, **kwargs):
         """Plots the currently selected elements.
 
         APDL Command: EPLOT
 
         .. note::
-            PyMAPDL plotting commands with ``interactive_plot=True`` ignore any
+            PyMAPDL plotting commands with ``graphics_backend=GraphicsBackend.PYVISTA`` ignore any
             values set with the ``PNUM`` command.
 
         Parameters
         ----------
-        interactive_plot : bool, optional
-            Plot the currently selected elements using ``ansys-tools-visualization_interface``.
-            Defaults to current ``use_vtk`` setting.
+        graphics_backend : GraphicsBackend, optional
+            Plot the currently selected elements using the picked backend.
+            Defaults to current ``graphics_backend`` setting.
 
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
@@ -1195,7 +1199,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
         **kwargs
             See ``help(ansys.mapdl.core.plotting.visualizer.MapdlPlotter)`` for more
-            keyword arguments related to visualizing using ``interactive_plot``.
+            keyword arguments related to visualizing using ``graphics_backend``.
 
         Examples
         --------
@@ -1216,10 +1220,10 @@ class _MapdlCommandExtended(_MapdlCore):
                         off_screen=True)
 
         """
-        if interactive_plot is None:
-            interactive_plot = self._use_vtk
+        if graphics_backend is None:
+            graphics_backend = self._graphics_backend
 
-        if interactive_plot:
+        if graphics_backend is GraphicsBackend.PYVISTA:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
             pl = kwargs.get("plotter", None)
@@ -1254,10 +1258,10 @@ class _MapdlCommandExtended(_MapdlCore):
                 **kwargs,
             )
             return pl.show(**kwargs)
-
-        # otherwise, use MAPDL plotter
-        with self._enable_interactive_plotting():
-            return self.run("EPLOT", **kwargs)
+        elif graphics_backend is GraphicsBackend.MATPLOTLIB:
+            # otherwise, use MAPDL plotter
+            with self._enable_interactive_plotting():
+                return self.run("EPLOT", **kwargs)
 
     def clear(self, *args, **kwargs):
         """Clear the database.
