@@ -293,7 +293,7 @@ class _MapdlCore(Commands):
             if graphics_backend:
                 raise ModuleNotFoundError(
                     "Graphic libraries are required to use this class.\n"
-                    "You  can install this using `pip install ansys-mapdl-core[graphics]`."
+                    "You can install this using `pip install ansys-mapdl-core[graphics]`."
                 )
 
         self._log_filehandler = None
