@@ -425,22 +425,18 @@ def is_package_installed_cached(package_name):
         return False
 
 
-def requires_graphics() -> None:
+def requires_graphics(function):
     """Warn the user if the visualizer is not installed"""
 
-    def decorator(function):
-        def wrapper(*args, **kwargs):
-            if not _HAS_VISUALIZER:
-                raise ModuleNotFoundError(
-                    "Graphic libraries are required to use this method.\n"
-                    "You can install this using `pip install ansys-mapdl-core[graphics]`."
-                )
+    def wrapper(*args, **kwargs):
+        if not _HAS_VISUALIZER:
+            raise ModuleNotFoundError(
+                "Graphic libraries are required to use this method.\n"
+                "You can install this using `pip install ansys-mapdl-core[graphics]`."
+            )
+        return function(*args, **kwargs)
 
-            return function(*args, **kwargs)
-
-        return wrapper
-
-    return decorator
+    return wrapper
 
 
 def requires_package(package_name: str, softerror: bool = False) -> Callable:
