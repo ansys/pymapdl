@@ -194,7 +194,7 @@ mapdl.vplot(
 #
 # VTK plots do not show MAPDL plot symbols.
 # However, to use MAPDL plotting capabilities, you can set the keyword
-# option ``vtk`` to ``False``.
+# option ``backend`` to ``GraphicsBackend.MAPDL``.
 mapdl.set_graphics_backend(GraphicsBackend.MAPDL)
 mapdl.lplot()
 

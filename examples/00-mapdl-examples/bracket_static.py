@@ -633,7 +633,6 @@ mapdl.lsel("S", "LOC", "Y", pinhole2_Y - pinhole_radius, pinhole2_Y)
 mapdl.lsel("R", "LOC", "X", pinhole2_X, pinhole2_X + pinhole_radius)
 
 mapdl.lplot(
-    vtk=True,
     cpos="xy",
     show_line_numbering=True,
 )
