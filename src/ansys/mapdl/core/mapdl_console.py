@@ -111,7 +111,7 @@ class MapdlConsole(MapdlBase):
         self,
         loglevel="INFO",
         log_apdl=None,
-        use_vtk=True,
+        graphics_backend=True,
         print_com=False,
         **start_parm,
     ):
@@ -126,7 +126,7 @@ class MapdlConsole(MapdlBase):
         self._launch(start_parm)
         super().__init__(
             loglevel=loglevel,
-            use_vtk=use_vtk,
+            graphics_backend=graphics_backend,
             log_apdl=log_apdl,
             print_com=print_com,
             mode="console",

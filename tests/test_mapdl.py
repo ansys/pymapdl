@@ -53,7 +53,7 @@ if has_dependency("ansys-mapdl-reader"):
     from ansys.mapdl.reader.rst import Result
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import USER_DATA_PATH
+from ansys.mapdl.core import USER_DATA_PATH, GraphicsBackend
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
@@ -2453,14 +2453,14 @@ def test_default_file_type_for_plots(mapdl, cleared):
 
 
 @requires("matplotlib")
-def test_use_vtk(mapdl, cleared):
-    assert isinstance(mapdl.use_vtk, bool)
+def test_graphics_backend(mapdl, cleared):
+    assert isinstance(mapdl.graphics_backend, GraphicsBackend)
 
-    prev = mapdl.use_vtk
-    mapdl.use_vtk = False
+    prev = mapdl.graphics_backend
+    mapdl.graphics_backend = GraphicsBackend.MAPDL
     mapdl.eplot()
 
-    mapdl.use_vtk = prev
+    mapdl.graphics_backend = prev
 
 
 @requires("local")

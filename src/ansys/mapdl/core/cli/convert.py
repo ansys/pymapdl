@@ -24,6 +24,8 @@ import sys
 
 import click
 
+from ansys.mapdl.core import GraphicsBackend
+
 
 @click.command(
     short_help="Convert APDL code to PyMAPDL code.",
@@ -173,10 +175,10 @@ and exit commands are NOT included (``auto_exit=False``).
 Overrides ``header``, ``add_imports`` and ``auto_exit``.""",
 )
 @click.option(
-    "--use_vtk",
+    "--use_pyvista",
     default=None,
     type=bool,
-    help="""It sets the `mapdl.use_vtk` argument equals True or False depending on
+    help="""It sets the `mapdl.graphics_backend` argument equals True or False depending on
 this value. Defaults to `None` which is Mapdl class default.""",
 )
 @click.option(
@@ -207,7 +209,7 @@ def convert(
     header: str,
     print_com: bool,
     only_commands: bool,
-    use_vtk: bool,
+    use_pyvista: bool,
     clear_at_start: bool,
     check_parameter_names: bool,
 ) -> None:
@@ -229,7 +231,9 @@ def convert(
         header=header,
         print_com=print_com,
         only_commands=only_commands,
-        use_vtk=use_vtk,
+        graphics_backend=(
+            GraphicsBackend.PYVISTA if use_pyvista else GraphicsBackend.MAPDL
+        ),
         clear_at_start=clear_at_start,
         check_parameter_names=check_parameter_names,
     )

@@ -29,6 +29,7 @@ import numpy as np
 import psutil
 import pytest
 
+from ansys.mapdl.core import GraphicsBackend
 from conftest import VALID_PORTS, requires
 
 if VALID_PORTS:
@@ -390,7 +391,7 @@ DEFAULT_ARGS = {
     "header": True,
     "print_com": True,
     "only_commands": False,
-    "use_vtk": None,
+    "graphics_backend": None,
     "clear_at_start": False,
     "check_parameter_names": False,
 }
@@ -414,7 +415,7 @@ DEFAULT_ARGS = {
         ("header", False),
         ("print_com", False),
         ("only_commands", True),
-        ("use_vtk", True),
+        ("graphics_backend", GraphicsBackend.MAPDL),
         ("clear_at_start", True),
         ("check_parameter_names", True),
     ),
