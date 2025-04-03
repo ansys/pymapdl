@@ -438,7 +438,5 @@ def test_convert_passing(mock_conv, run_cli, tmpdir, arg, value):
 
     mock_conv.assert_called()
     kwargs = mock_conv.call_args.kwargs
-    print(kwargs)
-    print(default_)
     for key in DEFAULT_ARGS:
         assert kwargs[key] == default_[key]

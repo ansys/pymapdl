@@ -204,7 +204,7 @@ def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
     ],
 )
 def test_plots_no_vtk(mapdl, cube_solve, method):
-    _ = getattr(mapdl, method)(backend=GraphicsBackend.MAPDL)
+    _ = getattr(mapdl, method)(graphics_backend=GraphicsBackend.MAPDL)
 
 
 @pytest.mark.parametrize(
@@ -217,7 +217,7 @@ def test_kplot(cleared, mapdl, tmpdir, backend):
     mapdl.k("", 0, 1, 0)
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
-    cpos = mapdl.kplot(backend=backend, savefig=filename)
+    cpos = mapdl.kplot(graphics_backend=backend, savefig=filename)
     assert cpos is None
     if backend:
         assert os.path.isfile(filename)
@@ -237,7 +237,9 @@ def test_lplot(cleared, mapdl, tmpdir, backend):
     mapdl.l(k3, k0)
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
-    cpos = mapdl.lplot(backend=backend, show_keypoint_numbering=True, savefig=filename)
+    cpos = mapdl.lplot(
+        graphics_backend=backend, show_keypoint_numbering=True, savefig=filename
+    )
     assert cpos is None
     if backend:
         assert os.path.isfile(filename)
@@ -274,7 +276,7 @@ def test_aplot(cleared, mapdl, backend):
 )
 def test_vplot(cleared, mapdl, backend):
     mapdl.block(0, 1, 0, 1, 0, 1)
-    mapdl.vplot(backend=backend, color_areas=True)
+    mapdl.vplot(graphics_backend=backend, color_areas=True)
 
 
 @pytest.mark.parametrize("nnum", [True, False])
@@ -285,7 +287,7 @@ def test_nplot(cleared, mapdl, nnum, backend):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
     mapdl.fill(1, 11, 9)
-    mapdl.nplot(backend=backend, nnum=nnum, background="w", color="k")
+    mapdl.nplot(graphics_backend=backend, nnum=nnum, background="w", color="k")
 
 
 @pytest.mark.parametrize(
@@ -295,7 +297,9 @@ def test_eplot(mapdl, make_block, backend):
     init_elem = mapdl.mesh.n_elem
     mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
     mapdl.eplot(show_node_numbering=True, background="w", color="b")
-    mapdl.eplot(backend=backend, show_node_numbering=True, background="w", color="b")
+    mapdl.eplot(
+        graphics_backend=backend, show_node_numbering=True, background="w", color="b"
+    )
     mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
     assert mapdl.mesh.n_elem == init_elem
 
@@ -1001,7 +1005,7 @@ def test_color_areas_error(mapdl, make_block):
 
 
 def test_WithInterativePlotting(mapdl, make_block):
-    mapdl.eplot(backend=GraphicsBackend.MAPDL)
+    mapdl.eplot(graphics_backend=GraphicsBackend.MAPDL)
     jobname = mapdl.jobname.upper()
 
     def filtering(file_name):
@@ -1040,7 +1044,7 @@ def test_file_type_for_plots(mapdl, cleared):
         [each for each in mapdl.list_files() if each.endswith(".png")]
     )
 
-    mapdl.eplot(backend=GraphicsBackend.MAPDL)
+    mapdl.eplot(graphics_backend=GraphicsBackend.MAPDL)
     n_files_ending_png_after = len(
         [each for each in mapdl.list_files() if each.endswith(".png")]
     )
@@ -1279,7 +1283,7 @@ def test_plot_path(mapdl, tmpdir):
         MapdlRuntimeError,
         match="One possible reason is that the graphics device is not correct",
     ):
-        mapdl.eplot(backend=GraphicsBackend.MAPDL)
+        mapdl.eplot(graphics_backend=GraphicsBackend.MAPDL)
 
 
 def test_add_mesh():
