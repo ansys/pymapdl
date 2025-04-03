@@ -175,10 +175,10 @@ and exit commands are NOT included (``auto_exit=False``).
 Overrides ``header``, ``add_imports`` and ``auto_exit``.""",
 )
 @click.option(
-    "--use_pyvista",
+    "--graphics_backend",
     default=None,
-    type=bool,
-    help="""It sets the `mapdl.graphics_backend` argument equals True or False depending on
+    type=str,
+    help="""It sets the `mapdl.graphics_backend` argument depending on
 this value. Defaults to `None` which is Mapdl class default.""",
 )
 @click.option(
@@ -209,12 +209,21 @@ def convert(
     header: str,
     print_com: bool,
     only_commands: bool,
-    use_pyvista: bool,
+    graphics_backend: bool,
     clear_at_start: bool,
     check_parameter_names: bool,
 ) -> None:
     """Convert MAPDL code to PyMAPDL"""
     from ansys.mapdl.core.convert import convert_apdl_block
+
+    backend = None
+    if graphics_backend is not None:
+        if graphics_backend == "pyvista":
+            backend = GraphicsBackend.PYVISTA
+        elif graphics_backend == "mapdl":
+            backend = GraphicsBackend.MAPDL
+        else:
+            backend = None
 
     converted_code = convert_apdl_block(
         apdl_strings=file.read(),
@@ -231,9 +240,7 @@ def convert(
         header=header,
         print_com=print_com,
         only_commands=only_commands,
-        graphics_backend=(
-            GraphicsBackend.PYVISTA if use_pyvista else GraphicsBackend.MAPDL
-        ),
+        graphics_backend=backend,
         clear_at_start=clear_at_start,
         check_parameter_names=check_parameter_names,
     )
