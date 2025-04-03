@@ -55,6 +55,20 @@ from ansys.mapdl.core.misc import (
 class _MapdlCommandExtended(_MapdlCore):
     """Class that extended MAPDL capabilities by wrapping or overwriting commands"""
 
+    def __init__(self, *args, **kwargs):
+        """Initialize the MAPDL command extended class.
+
+        Parameters
+        ----------
+        *args : list
+            Positional arguments to pass to the base class.
+
+        **kwargs : dict
+            Keyword arguments to pass to the base class.
+        """
+        super().__init__(*args, **kwargs)
+        self._graphics_backend = GraphicsBackend.PYVISTA
+
     def file(self, fname: str = "", ext: str = "", **kwargs) -> str:
         """Specifies the data file where results are to be found.
 
@@ -95,6 +109,10 @@ class _MapdlCommandExtended(_MapdlCore):
     def _file(self, filename: str, extension: str, **kwargs) -> str:
         """Run the MAPDL ``file`` command with a proper filename."""
         return self.run(f"FILE,{filename},{extension}", **kwargs)
+
+    def set_graphics_backend(self, backend: GraphicsBackend):
+        """Set the graphics backend to use for plotting."""
+        self._graphics_backend = backend
 
     @wraps(_MapdlCore.lsread)
     def lsread(self, *args, **kwargs):
@@ -468,7 +486,7 @@ class _MapdlCommandExtended(_MapdlCore):
             return pl.show(**kwargs)
 
         # otherwise, use the legacy plotter
-        if graphics_backend is GraphicsBackend.MATPLOTLIB:
+        if graphics_backend is GraphicsBackend.MAPDL:
             with self._enable_interactive_plotting():
                 return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
 
@@ -519,7 +537,7 @@ class _MapdlCommandExtended(_MapdlCore):
         Notes
         -----
         Mesh divisions on plotted lines are controlled by the ``ldiv``
-        option of the ``psymb`` command when ``graphics_backend=GraphicsBackend.MATPLOTLIB``.
+        option of the ``psymb`` command when ``graphics_backend=GraphicsBackend.MAPDL``.
         Otherwise, line divisions are controlled automatically.
 
         This command is valid in any processor.
@@ -651,7 +669,7 @@ class _MapdlCommandExtended(_MapdlCore):
             Scale factor for the size of the degeneracy-marker star.
             The scale is the size in window space (-1 to 1 in both
             directions) (defaults to 0.075).  This option is ignored
-            when ``graphics_backend != GraphicsBackend.MATPLOTLIB``.
+            when ``graphics_backend != GraphicsBackend.MAPDL``.
 
         graphics_backend : GraphicsBackend, optional
             Plot the currently selected areas using ``ansys-tools-visualization_interface``.
@@ -833,7 +851,7 @@ class _MapdlCommandExtended(_MapdlCore):
             pl = MapdlPlotter()
             pl.plot(meshes, [], labels, **kwargs)
             return pl.show(**kwargs)
-        if graphics_backend is GraphicsBackend.MATPLOTLIB:
+        if graphics_backend is GraphicsBackend.MAPDL:
             with self._enable_interactive_plotting():
                 return super().aplot(
                     na1=na1, na2=na2, ninc=ninc, degen=degen, scale=scale, **kwargs
@@ -963,7 +981,7 @@ class _MapdlCommandExtended(_MapdlCore):
             pl.plot(meshes, points, labels, **kwargs)
             return pl.show(return_plotter=return_plotter, **kwargs)
 
-        elif graphics_backend is GraphicsBackend.MATPLOTLIB:
+        elif graphics_backend is GraphicsBackend.MAPDL:
             with self._enable_interactive_plotting():
                 return super().vplot(
                     nv1=nv1, nv2=nv2, ninc=ninc, degen=degen, scale=scale, **kwargs
@@ -1071,7 +1089,7 @@ class _MapdlCommandExtended(_MapdlCore):
         >>> mapdl.n(1, 0, 0, 0)
         >>> mapdl.n(11, 10, 0, 0)
         >>> mapdl.fill(1, 11, 9)
-        >>> mapdl.nplot(graphics_backend=GraphicsBackend.MATPLOTLIB)
+        >>> mapdl.nplot(graphics_backend=GraphicsBackend.MAPDL)
 
         Plot nodal boundary conditions.
 
@@ -1116,7 +1134,7 @@ class _MapdlCommandExtended(_MapdlCore):
             pl.plot([], points, labels, mapdl=self, **kwargs)
             return pl.show(**kwargs)
 
-        elif graphics_backend is GraphicsBackend.MATPLOTLIB:
+        elif graphics_backend is GraphicsBackend.MAPDL:
             # otherwise, use the built-in nplot
             if isinstance(nnum, bool):
                 nnum = int(nnum)
@@ -1258,7 +1276,7 @@ class _MapdlCommandExtended(_MapdlCore):
                 **kwargs,
             )
             return pl.show(**kwargs)
-        elif graphics_backend is GraphicsBackend.MATPLOTLIB:
+        elif graphics_backend is GraphicsBackend.MAPDL:
             # otherwise, use MAPDL plotter
             with self._enable_interactive_plotting():
                 return self.run("EPLOT", **kwargs)

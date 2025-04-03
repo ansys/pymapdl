@@ -87,7 +87,7 @@ class GraphicsBackend(Enum):
     """
 
     PYVISTA: str = "pyvista"
-    MATPLOTLIB: str = "matplotlib"
+    MAPDL: str = "mapdl"
 
 
 # Setup directories
