@@ -32,6 +32,7 @@ from conftest import has_dependency, requires
 if not has_dependency("pyvista"):
     pytest.skip(allow_module_level=True)
 
+from ansys.mapdl.core import GraphicsBackend
 from ansys.mapdl.core.errors import ComponentDoesNotExits, MapdlRuntimeError
 from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
@@ -146,35 +147,36 @@ def check_geometry(mapdl, function):
 
 def test_plot_empty_mesh(mapdl, cleared):
     with pytest.warns(UserWarning):
-        mapdl.nplot(vtk=True)
+        mapdl.nplot()
 
     with pytest.warns(UserWarning):
-        mapdl.eplot(vtk=True)
+        mapdl.eplot()
 
 
 def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
     # Testing basic behaviour
-    mapdl.eplot(vtk=False, savefig="myfile.png")
+    mapdl.set_graphics_backend(GraphicsBackend.MAPDL)
+    mapdl.eplot(savefig="myfile.png")
     assert os.path.exists("myfile.png")
     ti_m = os.path.getmtime("myfile.png")
 
     # Testing overwriting
-    mapdl.eplot(vtk=False, savefig="myfile.png")
+    mapdl.eplot(savefig="myfile.png")
     assert not os.path.exists("myfile_1.png")
     assert os.path.getmtime("myfile.png") != ti_m  # file has been modified.
 
     os.remove("myfile.png")
 
     # Testing no extension
-    mapdl.eplot(vtk=False, savefig="myfile")
+    mapdl.eplot(savefig="myfile")
     assert os.path.exists("myfile")
     os.remove("myfile")
 
     # Testing update name when file exists.
-    mapdl.eplot(vtk=False, savefig=True)
+    mapdl.eplot(savefig=True)
     assert os.path.exists("plot.png")
 
-    mapdl.eplot(vtk=False, savefig=True)
+    mapdl.eplot(savefig=True)
     assert os.path.exists("plot_1.png")
 
     os.remove("plot.png")
@@ -182,11 +184,11 @@ def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
 
     # Testing full path for downloading
     plot_ = os.path.join(tmpdir, "myplot.png")
-    mapdl.eplot(vtk=False, savefig=plot_)
+    mapdl.eplot(savefig=plot_)
     assert os.path.exists(plot_)
 
     plot_ = os.path.join(tmpdir, "myplot")
-    mapdl.eplot(vtk=False, savefig=plot_)
+    mapdl.eplot(savefig=plot_)
     assert os.path.exists(plot_)
 
 
@@ -202,25 +204,29 @@ def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
     ],
 )
 def test_plots_no_vtk(mapdl, cube_solve, method):
-    _ = getattr(mapdl, method)(vtk=False)
+    _ = getattr(mapdl, method)(backend=GraphicsBackend.MAPDL)
 
 
-@pytest.mark.parametrize("vtk", [True, False, None])
-def test_kplot(cleared, mapdl, tmpdir, vtk):
+@pytest.mark.parametrize(
+    "backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL, None]
+)
+def test_kplot(cleared, mapdl, tmpdir, backend):
     mapdl.k("", 0, 0, 0)
     mapdl.k("", 1, 0, 0)
     mapdl.k("", 1, 1, 0)
     mapdl.k("", 0, 1, 0)
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
-    cpos = mapdl.kplot(vtk=vtk, savefig=filename)
+    cpos = mapdl.kplot(backend=backend, savefig=filename)
     assert cpos is None
-    if vtk:
+    if backend:
         assert os.path.isfile(filename)
 
 
-@pytest.mark.parametrize("vtk", [True, False, None])
-def test_lplot(cleared, mapdl, tmpdir, vtk):
+@pytest.mark.parametrize(
+    "backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL, None]
+)
+def test_lplot(cleared, mapdl, tmpdir, backend):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
     k2 = mapdl.k("", 1, 1, 0)
@@ -231,14 +237,16 @@ def test_lplot(cleared, mapdl, tmpdir, vtk):
     mapdl.l(k3, k0)
 
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
-    cpos = mapdl.lplot(vtk=vtk, show_keypoint_numbering=True, savefig=filename)
+    cpos = mapdl.lplot(backend=backend, show_keypoint_numbering=True, savefig=filename)
     assert cpos is None
-    if vtk:
+    if backend:
         assert os.path.isfile(filename)
 
 
-@pytest.mark.parametrize("vtk", [True, False, None])
-def test_aplot(cleared, mapdl, vtk):
+@pytest.mark.parametrize(
+    "backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL, None]
+)
+def test_aplot(cleared, mapdl, backend):
     k0 = mapdl.k("", 0, 0, 0)
     k1 = mapdl.k("", 1, 0, 0)
     k2 = mapdl.k("", 1, 1, 0)
@@ -249,33 +257,45 @@ def test_aplot(cleared, mapdl, vtk):
     l3 = mapdl.l(k3, k0)
     mapdl.al(l0, l1, l2, l3)
     mapdl.aplot(show_area_numbering=True)
-    mapdl.aplot(vtk=vtk, color_areas=vtk, show_lines=True, show_line_numbering=True)
+    color_areas_bool = True if backend == GraphicsBackend.PYVISTA else False
+    mapdl.aplot(
+        backend=backend,
+        color_areas=color_areas_bool,
+        show_lines=True,
+        show_line_numbering=True,
+    )
 
     mapdl.aplot(quality=10)
     mapdl.aplot(quality=1)
 
 
-@pytest.mark.parametrize("vtk", [True, False, None])
-def test_vplot(cleared, mapdl, vtk):
+@pytest.mark.parametrize(
+    "backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL, None]
+)
+def test_vplot(cleared, mapdl, backend):
     mapdl.block(0, 1, 0, 1, 0, 1)
-    mapdl.vplot(vtk=vtk, color_areas=True)
+    mapdl.vplot(backend=backend, color_areas=True)
 
 
 @pytest.mark.parametrize("nnum", [True, False])
-@pytest.mark.parametrize("vtk", [True, False, None])
-def test_nplot(cleared, mapdl, nnum, vtk):
+@pytest.mark.parametrize(
+    "backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL, None]
+)
+def test_nplot(cleared, mapdl, nnum, backend):
     mapdl.n(1, 0, 0, 0)
     mapdl.n(11, 10, 0, 0)
     mapdl.fill(1, 11, 9)
-    mapdl.nplot(vtk=vtk, nnum=nnum, background="w", color="k")
+    mapdl.nplot(backend=backend, nnum=nnum, background="w", color="k")
 
 
-@pytest.mark.parametrize("vtk", [True, False, None])
-def test_eplot(mapdl, make_block, vtk):
+@pytest.mark.parametrize(
+    "backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL, None]
+)
+def test_eplot(mapdl, make_block, backend):
     init_elem = mapdl.mesh.n_elem
     mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
     mapdl.eplot(show_node_numbering=True, background="w", color="b")
-    mapdl.eplot(vtk=vtk, show_node_numbering=True, background="w", color="b")
+    mapdl.eplot(backend=backend, show_node_numbering=True, background="w", color="b")
     mapdl.aplot()  # check aplot and verify it doesn't mess up the element plotting
     assert mapdl.mesh.n_elem == init_elem
 
@@ -950,7 +970,7 @@ def test_vsel_iterable_and_kswp(mapdl, make_block):
 
 
 def test_color_areas(mapdl, make_block):
-    mapdl.aplot(vtk=True, color_areas=True)
+    mapdl.aplot(color_areas=True)
 
 
 @pytest.mark.parametrize(
@@ -971,17 +991,17 @@ def test_color_areas(mapdl, make_block):
 )
 def test_color_areas_individual(mapdl, make_block, color_areas):
     # we do rely on the `pytest-pyvista` extension to deal with the differences
-    mapdl.aplot(vtk=True, color_areas=color_areas)
+    mapdl.aplot(color_areas=color_areas)
 
 
 def test_color_areas_error(mapdl, make_block):
     color_areas = ["red", "green", "blue"]
     with pytest.raises(ValueError):
-        mapdl.aplot(vtk=True, color_areas=color_areas)
+        mapdl.aplot(color_areas=color_areas)
 
 
 def test_WithInterativePlotting(mapdl, make_block):
-    mapdl.eplot(vtk=False)
+    mapdl.eplot(backend=GraphicsBackend.MAPDL)
     jobname = mapdl.jobname.upper()
 
     def filtering(file_name):
@@ -1020,7 +1040,7 @@ def test_file_type_for_plots(mapdl, cleared):
         [each for each in mapdl.list_files() if each.endswith(".png")]
     )
 
-    mapdl.eplot(vtk=False)
+    mapdl.eplot(backend=GraphicsBackend.MAPDL)
     n_files_ending_png_after = len(
         [each for each in mapdl.list_files() if each.endswith(".png")]
     )
@@ -1259,7 +1279,7 @@ def test_plot_path(mapdl, tmpdir):
         MapdlRuntimeError,
         match="One possible reason is that the graphics device is not correct",
     ):
-        mapdl.eplot(vtk=False)
+        mapdl.eplot(backend=GraphicsBackend.MAPDL)
 
 
 def test_add_mesh():

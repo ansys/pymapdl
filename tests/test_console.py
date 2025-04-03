@@ -47,6 +47,7 @@ if has_dependency("ansys-mapdl-reader"):
     from ansys.mapdl.reader import examples
 
 from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core import GraphicsBackend
 from ansys.mapdl.core.errors import MapdlRuntimeError
 
 
@@ -239,7 +240,7 @@ def test_invalid_area(mapdl_console, cleared):
 @requires("xserver")
 def test_kplot(cleared, mapdl_console, tmpdir):
     with pytest.raises(MapdlRuntimeError):
-        mapdl_console.kplot(vtk=True)
+        mapdl_console.kplot()
 
     mapdl_console.k("", 0, 0, 0)
     mapdl_console.k("", 1, 0, 0)
@@ -251,7 +252,9 @@ def test_kplot(cleared, mapdl_console, tmpdir):
     assert cpos is None
     assert os.path.isfile(filename)
 
-    mapdl_console.kplot(knum=True, vtk=False)  # make sure legacy still works
+    mapdl_console.kplot(
+        knum=True, backend=GraphicsBackend.MAPDL
+    )  # make sure legacy still works
 
 
 @requires("xserver")
@@ -272,14 +275,14 @@ def test_aplot(cleared, mapdl_console):
     mapdl_console.aplot(quality=-1)
 
     # and legacy as well
-    mapdl_console.aplot(vtk=False)
+    mapdl_console.aplot(backend=GraphicsBackend.MAPDL)
 
 
 @requires("xserver")
-@pytest.mark.parametrize("vtk", [True, False])
-def test_vplot(cleared, mapdl_console, vtk):
+@pytest.mark.parametrize("backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL])
+def test_vplot(cleared, mapdl_console, backend):
     mapdl_console.block(0, 1, 0, 1, 0, 1)
-    mapdl_console.vplot(vtk=vtk, color_areas=True)
+    mapdl_console.vplot(backend=backend, color_areas=True)
 
 
 def test_keypoints(cleared, mapdl_console):
@@ -319,7 +322,7 @@ def test_lines(cleared, mapdl_console):
 @requires("xserver")
 def test_lplot(cleared, mapdl_console, tmpdir):
     with pytest.raises(MapdlRuntimeError):
-        mapdl_console.lplot(vtk=True)
+        mapdl_console.lplot()
 
     k0 = mapdl_console.k("", 0, 0, 0)
     k1 = mapdl_console.k("", 1, 0, 0)
@@ -335,7 +338,7 @@ def test_lplot(cleared, mapdl_console, tmpdir):
     assert cpos is None
     assert os.path.isfile(filename)
 
-    mapdl_console.lplot(vtk=False)  # make sure legacy still works
+    mapdl_console.lplot(backend=GraphicsBackend.MAPDL)  # make sure legacy still works
 
 
 def test_logging(mapdl_console, tmpdir):
@@ -399,7 +402,7 @@ def test_nplot_vtk(cleared, mapdl_console, knum):
     mapdl_console.n(1, 0, 0, 0)
     mapdl_console.n(11, 10, 0, 0)
     mapdl_console.fill(1, 11, 9)
-    mapdl_console.nplot(vtk=True, knum=knum, background="w", color="k")
+    mapdl_console.nplot(knum=knum, background="w", color="k")
 
 
 @requires("xserver")
@@ -407,7 +410,7 @@ def test_nplot(cleared, mapdl_console):
     mapdl_console.n(1, 0, 0, 0)
     mapdl_console.n(11, 10, 0, 0)
     mapdl_console.fill(1, 11, 9)
-    mapdl_console.nplot(vtk=False, background="w", color="k")
+    mapdl_console.nplot(backend=GraphicsBackend.MAPDL, background="w", color="k")
 
 
 def test_elements(cleared, mapdl_console):

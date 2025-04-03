@@ -215,7 +215,7 @@ circle1_X = box1[0]
 circle1_Y = (box1[2] + box1[3]) / 2
 mapdl.cyl4(circle1_X, circle1_Y, radius)
 
-mapdl.aplot(vtk=True, cpos="xy", show_lines=True)
+mapdl.aplot(cpos="xy", show_lines=True)
 
 
 ###############################################################################
@@ -233,7 +233,7 @@ circle2_Y = box2[3]
 # as the first circle area.
 
 mapdl.cyl4(circle2_X, circle2_Y, radius)
-mapdl.aplot(vtk=True, cpos="xy", show_lines=True)
+mapdl.aplot(cpos="xy", show_lines=True)
 
 
 ###############################################################################
@@ -299,7 +299,7 @@ mapdl.allsel()
 line3 = mapdl.lfillt("line1", l2, fillet_radius)
 
 mapdl.allsel()
-mapdl.lplot(vtk=True, cpos="xy")
+mapdl.lplot(cpos="xy")
 
 ###############################################################################
 # Create fillet area
@@ -334,7 +334,7 @@ mapdl.lsel("S", "LENGTH", "", fillet_radius)
 mapdl.lsel("A", "LINE", "", line3)
 
 # plotting ares
-mapdl.lplot(vtk=True, cpos="xy", show_line_numbering=True)
+mapdl.lplot(cpos="xy", show_line_numbering=True)
 
 ###############################################################################
 # Then use :meth:`mapdl.al() <ansys.mapdl.core.Mapdl.al>` command to create the areas
@@ -355,7 +355,7 @@ mapdl.al("ALL")  # Prints the ID of the newly created area
 
 # Add the area to the main area
 mapdl.aadd("all")
-mapdl.aplot(vtk=True, cpos="xy", show_lines=True)
+mapdl.aplot(cpos="xy", show_lines=True)
 
 ###############################################################################
 # Create first pin hole
@@ -410,7 +410,7 @@ pinhole2_lines = mapdl.asll("S", 0)
 # Remove pin hole areas from bracket
 mapdl.asba("all", pinhole1)
 bracket = mapdl.asba("all", pinhole2)
-mapdl.aplot(vtk=True, show_lines=True, cpos="xy")
+mapdl.aplot(show_lines=True, cpos="xy")
 
 ###############################################################################
 # Model definition
@@ -500,7 +500,6 @@ element_size = 0.5
 mapdl.esize(element_size)
 mapdl.amesh(bracket)
 mapdl.eplot(
-    vtk=True,
     cpos="xy",
     show_edges=True,
     show_axes=False,
@@ -612,7 +611,7 @@ mapdl.lsel("S", "LOC", "Y", pinhole2_Y - pinhole_radius, pinhole2_Y)
 #
 mapdl.lsel("R", "LOC", "X", 0, pinhole2_X)
 
-mapdl.lplot(vtk=True, cpos="xy")
+mapdl.lplot(cpos="xy")
 
 ###############################################################################
 #

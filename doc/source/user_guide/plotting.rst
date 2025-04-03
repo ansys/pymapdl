@@ -91,7 +91,7 @@ some element types, performs meshing, and then displays the mesh:
 Plotting non-interactively using MAPDL
 --------------------------------------
 You can also plot using MAPDL's native plotting tools. To use the
-native tools, pass ``graphics_backend=GraphicsBackend.MATPLOTLIB`` when running plotting commands such
+native tools, pass ``graphics_backend=GraphicsBackend.MAPDL`` when running plotting commands such
 as the :func:`Mapdl.aplot <ansys.mapdl.core.Mapdl.aplot>` and
 :func:`Mapdl.eplot <ansys.mapdl.core.Mapdl.eplot>` methods. Plots are
 generated within MAPDL and then shown using
@@ -133,9 +133,9 @@ Each of these creates a Matplotlib figure and pause execution.
 .. code:: pycon
 
     >>> from ansys.mapdl.core import GraphicsBackend
-    >>> mapdl.aplot(graphics_backend=GraphicsBackend.MATPLOTLIB)
-    >>> mapdl.lplot(graphics_backend=GraphicsBackend.MATPLOTLIB)
-    >>> mapdl.kplot(graphics_backend=GraphicsBackend.MATPLOTLIB)
+    >>> mapdl.aplot(graphics_backend=GraphicsBackend.MAPDL)
+    >>> mapdl.lplot(graphics_backend=GraphicsBackend.MAPDL)
+    >>> mapdl.kplot(graphics_backend=GraphicsBackend.MAPDL)
 
 
 .. figure:: ../images/aplot.png

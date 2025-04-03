@@ -83,7 +83,7 @@ The Power Graphics style plot is then set up via PyVista.
 import numpy as np
 import pyvista as pv
 
-from ansys.mapdl.core import launch_mapdl
+from ansys.mapdl.core import GraphicsBackend, launch_mapdl
 
 ###############################################################################
 # Launch MAPDL service
@@ -182,7 +182,7 @@ mapdl.aatt(2, 1, 1, 0)
 mapdl.pnum("MAT", 1)  # Turn material numbers on
 mapdl.allsel("ALL")
 
-mapdl.aplot(vtk=False)
+mapdl.aplot(graphics_backend=GraphicsBackend.MAPDL)
 
 ###############################################################################
 # Mesh
