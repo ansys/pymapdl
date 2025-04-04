@@ -120,7 +120,6 @@ mapdl.mopt("EXPND", 0.7)  # default 1
 mapdl.esize(plate_esize)
 mapdl.amesh(plate_with_hole_anum)
 mapdl.eplot(
-    vtk=True,
     cpos="xy",
     show_edges=True,
     show_axes=False,

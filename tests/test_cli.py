@@ -390,7 +390,7 @@ DEFAULT_ARGS = {
     "header": True,
     "print_com": True,
     "only_commands": False,
-    "use_vtk": None,
+    "graphics_backend": None,
     "clear_at_start": False,
     "check_parameter_names": False,
 }
@@ -414,7 +414,7 @@ DEFAULT_ARGS = {
         ("header", False),
         ("print_com", False),
         ("only_commands", True),
-        ("use_vtk", True),
+        ("graphics_backend", "mapdl"),
         ("clear_at_start", True),
         ("check_parameter_names", True),
     ),
@@ -438,6 +438,5 @@ def test_convert_passing(mock_conv, run_cli, tmpdir, arg, value):
 
     mock_conv.assert_called()
     kwargs = mock_conv.call_args.kwargs
-
     for key in DEFAULT_ARGS:
         assert kwargs[key] == default_[key]

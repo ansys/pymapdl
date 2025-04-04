@@ -134,7 +134,7 @@ ALLOWABLE_LAUNCH_MAPDL_ARGS = [
     "_debug_no_launch",
     "just_launch",
     "on_pool",
-    "use_vtk",
+    "graphics_backend",
 ]
 
 ON_WSL = os.name == "posix" and (
@@ -1544,7 +1544,7 @@ def launch_mapdl(
             cleanup_on_exit=False,
             loglevel=args["loglevel"],
             set_no_abort=args["set_no_abort"],
-            use_vtk=args["use_vtk"],
+            graphics_backend=args["graphics_backend"],
             log_apdl=args["log_apdl"],
             **start_parm,
         )
@@ -1583,7 +1583,7 @@ def launch_mapdl(
         mapdl = MapdlConsole(
             loglevel=args["loglevel"],
             log_apdl=args["log_apdl"],
-            use_vtk=args["use_vtk"],
+            graphics_backend=args["graphics_backend"],
             **start_parm,
         )
 
@@ -1664,7 +1664,7 @@ def launch_mapdl(
                 remove_temp_dir_on_exit=args["remove_temp_dir_on_exit"],
                 log_apdl=args["log_apdl"],
                 process=process,
-                use_vtk=args["use_vtk"],
+                graphics_backend=args["graphics_backend"],
                 **start_parm,
             )
 
@@ -2045,7 +2045,9 @@ def pack_arguments(locals_):
     args["broadcast"] = locals_.get(
         "broadcast", locals_["kwargs"].get("broadcast", None)
     )
-    args["use_vtk"] = locals_.get("use_vtk", locals_["kwargs"].get("use_vtk", None))
+    args["graphics_backend"] = locals_.get(
+        "graphics_backend", locals_["kwargs"].get("graphics_backend", None)
+    )
     args["just_launch"] = locals_.get(
         "just_launch", locals_["kwargs"].get("just_launch", None)
     )
@@ -2354,7 +2356,7 @@ def create_gallery_instances(
             cleanup_on_exit=False,
             loglevel=args["loglevel"],
             set_no_abort=args["set_no_abort"],
-            use_vtk=args["use_vtk"],
+            graphics_backend=args["graphics_backend"],
             **start_parm,
         )
         if args["clear_on_connect"]:

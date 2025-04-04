@@ -26,7 +26,7 @@ import re
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from warnings import warn
 
-from ansys.mapdl.core import __version__
+from ansys.mapdl.core import GraphicsBackend, __version__
 from ansys.mapdl.core.commands import Commands
 from ansys.mapdl.core.misc import is_float
 
@@ -51,7 +51,7 @@ CLEANUP_OUTPUT_DEFAULT: bool = True
 HEADER_DEFAULT: bool = True
 PRINT_COM_DEFAULT: bool = True
 ONLY_COMMANDS_DEFAULT: bool = False
-USE_VTK_DEFAULT: Optional[bool] = None
+GRAPHICS_BACKEND_DEFAULT: Optional[GraphicsBackend] = None
 CLEAR_AT_START_DEFAULT: bool = False
 CHECK_PARAMETER_NAMES_DEFAULT: bool = True
 
@@ -142,7 +142,7 @@ def convert_script(
     header: bool = True,
     print_com: bool = True,
     only_commands: bool = False,
-    use_vtk: Optional[bool] = None,
+    graphics_backend: Optional[GraphicsBackend] = None,
     clear_at_start: bool = False,
     check_parameter_names: bool = True,
 ) -> List[str]:
@@ -216,8 +216,8 @@ def convert_script(
         and exit commands are NOT included (``auto_exit=False``).
         Overrides ``header``, ``add_imports`` and ``auto_exit``.
 
-    use_vtk : bool, optional
-        It sets the `mapdl.use_vtk` argument equals True or False depending on
+    graphics_backend : bool, optional
+        It sets the `mapdl.graphics_backend` argument equals True or False depending on
         this value.
 
     clear_at_start : bool, optional
@@ -278,7 +278,7 @@ def convert_script(
         header=header,
         print_com=print_com,
         only_commands=only_commands,
-        use_vtk=use_vtk,
+        graphics_backend=graphics_backend,
         clear_at_start=clear_at_start,
         check_parameter_names=check_parameter_names,
     )
@@ -302,7 +302,7 @@ def convert_apdl_block(
     header: bool = True,
     print_com: bool = True,
     only_commands: bool = False,
-    use_vtk: Optional[bool] = None,
+    graphics_backend: Optional[GraphicsBackend] = None,
     clear_at_start: bool = False,
     check_parameter_names: bool = False,
 ) -> List[str]:
@@ -372,8 +372,8 @@ def convert_apdl_block(
         and exit commands are NOT included (``auto_exit=False``).
         Overrides ``header``, ``add_imports`` and ``auto_exit``.
 
-    use_vtk : bool, optional
-        It sets the `mapdl.use_vtk` argument equals True or False depending on
+    graphics_backend : bool, optional
+        It sets the `mapdl.graphics_backend` argument equals True or False depending on
         this value. Defaults to `None` which is Mapdl class default.
 
     clear_at_start : bool, optional
@@ -419,7 +419,7 @@ def convert_apdl_block(
         header=header,
         print_com=print_com,
         only_commands=only_commands,
-        use_vtk=use_vtk,
+        graphics_backend=graphics_backend,
         clear_at_start=clear_at_start,
         check_parameter_names=check_parameter_names,
     )
@@ -469,7 +469,7 @@ class FileTranslator:
         cleanup_output: bool = True,
         header: bool = True,
         print_com: bool = True,
-        use_vtk: Optional[bool] = None,
+        graphics_backend: Optional[GraphicsBackend] = None,
         clear_at_start: bool = False,
         check_parameter_names: bool = False,
     ) -> None:
@@ -490,7 +490,7 @@ class FileTranslator:
         self._header = header
         self.print_com = print_com
         self.verification_example = False
-        self.use_vtk = use_vtk
+        self.graphics_backend = graphics_backend
         self.clear_at_start = clear_at_start
         self.check_parameter_names = check_parameter_names
         self.macros_names = []
@@ -602,8 +602,10 @@ class FileTranslator:
         if self.print_com:
             mapdl_arguments.append("print_com=True")
 
-        if self.use_vtk is not None:
-            mapdl_arguments.append(f"use_vtk={bool(self.use_vtk)}")
+        if self.graphics_backend is not None:
+            mapdl_arguments.append(
+                f"graphics_backend={GraphicsBackend(self.graphics_backend)}"
+            )
 
         if self.check_parameter_names is not None and not self.check_parameter_names:
             mapdl_arguments.append("check_parameter_names=False")
@@ -1203,7 +1205,7 @@ def _convert(
     header: bool = True,
     print_com: bool = True,
     only_commands: bool = False,
-    use_vtk: Optional[bool] = None,
+    graphics_backend: Optional[bool] = None,
     clear_at_start: bool = False,
     check_parameter_names: bool = False,
 ) -> FileTranslator:
@@ -1224,7 +1226,7 @@ def _convert(
         cleanup_output=cleanup_output,
         header=header,
         print_com=print_com,
-        use_vtk=use_vtk,
+        graphics_backend=graphics_backend,
         clear_at_start=clear_at_start,
         check_parameter_names=check_parameter_names,
     )
