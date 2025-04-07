@@ -2665,13 +2665,13 @@ def test_ip_hostname_in_start_parm(ip):
         mck_sock.return_value = ("myhostname",)
         mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
 
-    if ip == "myhostname":
-        assert mapdl.ip == "123.45.67.99"
-    else:
-        assert mapdl.ip == ip
+        if ip == "myhostname":
+            assert mapdl.ip == "123.45.67.99"
+        else:
+            assert mapdl.ip == ip
 
-    assert mapdl.hostname == "myhostname"
-    del mapdl
+        assert mapdl.hostname == "myhostname"
+        del mapdl
 
 
 def test_directory_setter(mapdl, cleared):
@@ -2997,11 +2997,10 @@ def test_set_no_abort(monkeypatch, set_no_abort, start_instance):
         ) as mock_del,
     ):
         mapdl = launch_mapdl(set_no_abort=set_no_abort, start_instance=start_instance)
+        del mapdl
 
     kwargs = mock_run.call_args_list[0].kwargs
     calls = [each.args[0].upper() for each in mock_run.call_args_list]
 
     if set_no_abort is None or set_no_abort:
         assert any(["/NERR,,,-1" in each for each in calls])
-
-    del mapdl
