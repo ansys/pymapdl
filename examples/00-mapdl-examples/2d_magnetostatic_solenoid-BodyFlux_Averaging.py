@@ -83,7 +83,8 @@ The Power Graphics style plot is then set up via PyVista.
 import numpy as np
 import pyvista as pv
 
-from ansys.mapdl.core.plotting import GraphicsBackend, launch_mapdl
+from ansys.mapdl.core import launch_mapdl
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 ###############################################################################
 # Launch MAPDL service
