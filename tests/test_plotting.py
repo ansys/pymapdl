@@ -155,41 +155,41 @@ def test_plot_empty_mesh(mapdl, cleared):
 
 def test_download_file_with_vkt_false(mapdl, cube_solve, tmpdir):
     # Testing basic behaviour
-    mapdl.set_graphics_backend(GraphicsBackend.MAPDL)
-    mapdl.eplot(savefig="myfile.png")
-    assert os.path.exists("myfile.png")
-    ti_m = os.path.getmtime("myfile.png")
+    with patch.object(mapdl, "_graphics_backend", GraphicsBackend.MAPDL):
+        mapdl.eplot(savefig="myfile.png")
+        assert os.path.exists("myfile.png")
+        ti_m = os.path.getmtime("myfile.png")
 
-    # Testing overwriting
-    mapdl.eplot(savefig="myfile.png")
-    assert not os.path.exists("myfile_1.png")
-    assert os.path.getmtime("myfile.png") != ti_m  # file has been modified.
+        # Testing overwriting
+        mapdl.eplot(savefig="myfile.png")
+        assert not os.path.exists("myfile_1.png")
+        assert os.path.getmtime("myfile.png") != ti_m  # file has been modified.
 
-    os.remove("myfile.png")
+        os.remove("myfile.png")
 
-    # Testing no extension
-    mapdl.eplot(savefig="myfile")
-    assert os.path.exists("myfile")
-    os.remove("myfile")
+        # Testing no extension
+        mapdl.eplot(savefig="myfile")
+        assert os.path.exists("myfile")
+        os.remove("myfile")
 
-    # Testing update name when file exists.
-    mapdl.eplot(savefig=True)
-    assert os.path.exists("plot.png")
+        # Testing update name when file exists.
+        mapdl.eplot(savefig=True)
+        assert os.path.exists("plot.png")
 
-    mapdl.eplot(savefig=True)
-    assert os.path.exists("plot_1.png")
+        mapdl.eplot(savefig=True)
+        assert os.path.exists("plot_1.png")
 
-    os.remove("plot.png")
-    os.remove("plot_1.png")
+        os.remove("plot.png")
+        os.remove("plot_1.png")
 
-    # Testing full path for downloading
-    plot_ = os.path.join(tmpdir, "myplot.png")
-    mapdl.eplot(savefig=plot_)
-    assert os.path.exists(plot_)
+        # Testing full path for downloading
+        plot_ = os.path.join(tmpdir, "myplot.png")
+        mapdl.eplot(savefig=plot_)
+        assert os.path.exists(plot_)
 
-    plot_ = os.path.join(tmpdir, "myplot")
-    mapdl.eplot(savefig=plot_)
-    assert os.path.exists(plot_)
+        plot_ = os.path.join(tmpdir, "myplot")
+        mapdl.eplot(savefig=plot_)
+        assert os.path.exists(plot_)
 
 
 @pytest.mark.parametrize(
