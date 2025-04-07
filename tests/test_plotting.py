@@ -32,8 +32,8 @@ from conftest import has_dependency, requires
 if not has_dependency("pyvista"):
     pytest.skip(allow_module_level=True)
 
-from ansys.mapdl.core import GraphicsBackend
 from ansys.mapdl.core.errors import ComponentDoesNotExits, MapdlRuntimeError
+from ansys.mapdl.core.plotting import GraphicsBackend
 from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
 FORCE_LABELS = [["FX", "FY", "FZ"], ["HEAT"], ["CHRG"]]
