@@ -10,6 +10,7 @@ ENV CODESPACES_MODE=dev
 
 # Installing libs for testing and docs
 RUN apt-get -qq update &&  apt install -qq -y
+    libgl1 \
     libgl1-mesa-glx \
     libgomp1 \
     python3-pip \

@@ -11,6 +11,7 @@ ENV CODESPACES_MODE=docs
 # Installing libs for testing and docs
 RUN apt-get -qq update && apt install -qq -y \
     graphviz \
+    libgl1 \
     latexmk \
     libgl1-mesa-glx \
     pandoc \
