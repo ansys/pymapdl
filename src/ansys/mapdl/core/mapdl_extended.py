@@ -30,7 +30,6 @@ import warnings
 import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
-from ansys.mapdl.core import GraphicsBackend
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
@@ -50,6 +49,7 @@ from ansys.mapdl.core.misc import (
     requires_graphics,
     supress_logging,
 )
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 
 class _MapdlCommandExtended(_MapdlCore):
@@ -986,6 +986,8 @@ class _MapdlCommandExtended(_MapdlCore):
                 return super().vplot(
                     nv1=nv1, nv2=nv2, ninc=ninc, degen=degen, scale=scale, **kwargs
                 )
+        else:
+            raise ValueError(f"Invalid graphics backend: {graphics_backend}. ")
 
     @requires_graphics
     def nplot(self, nnum="", graphics_backend=None, **kwargs):
@@ -1141,6 +1143,8 @@ class _MapdlCommandExtended(_MapdlCore):
 
             with self._enable_interactive_plotting():
                 return super().nplot(nnum, **kwargs)
+        else:
+            raise ValueError(f"Invalid graphics backend: {graphics_backend}. ")
 
     @requires_graphics
     def eplot(self, show_node_numbering=False, graphics_backend=None, **kwargs):

@@ -92,8 +92,8 @@ import os
 
 import numpy as np
 
-from ansys.mapdl.core import GraphicsBackend, launch_mapdl
 from ansys.mapdl.core.examples.downloads import download_example_data
+from ansys.mapdl.core.plotting import GraphicsBackend, launch_mapdl
 
 # cwd = current working directory
 path = os.getcwd()

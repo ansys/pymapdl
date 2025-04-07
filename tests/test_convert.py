@@ -25,12 +25,12 @@ import os
 import pytest
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import GraphicsBackend, examples
 from ansys.mapdl.core.convert import (
     COMMANDS_TO_NOT_BE_CONVERTED,
     FileTranslator,
     convert_apdl_block,
 )
+from ansys.mapdl.core.plotting import GraphicsBackend, examples
 from conftest import requires
 
 nblock = """nblock,3,,326253

@@ -20,8 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from enum import Enum
-
 ###############################################################################
 # Imports
 # =======
@@ -78,16 +76,6 @@ _HAS_TQDM: bool = is_installed("tqdm")
 _HAS_VISUALIZER: bool = is_installed(
     "ansys.tools.visualization_interface"
 ) and is_installed("matplotlib")
-
-
-class GraphicsBackend(Enum):
-    """Graphics backend for PyMAPDL.
-
-    This enum is used to set the graphics backend for PyMAPDL.
-    """
-
-    PYVISTA: str = "pyvista"
-    MAPDL: str = "mapdl"
 
 
 # Setup directories

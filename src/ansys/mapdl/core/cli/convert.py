@@ -24,7 +24,7 @@ import sys
 
 import click
 
-from ansys.mapdl.core import GraphicsBackend
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 
 @click.command(
@@ -209,7 +209,7 @@ def convert(
     header: str,
     print_com: bool,
     only_commands: bool,
-    graphics_backend: bool,
+    graphics_backend: str,
     clear_at_start: bool,
     check_parameter_names: bool,
 ) -> None:
@@ -223,7 +223,9 @@ def convert(
         elif graphics_backend == "mapdl":
             backend = GraphicsBackend.MAPDL
         else:
-            backend = None
+            raise ValueError(
+                f"Invalid graphics backend '{graphics_backend}'. Allowed values are 'pyvista' or 'mapdl'."
+            )
 
     converted_code = convert_apdl_block(
         apdl_strings=file.read(),

@@ -60,6 +60,7 @@ from ansys.mapdl.core.misc import (
     create_temp_dir,
     threaded,
 )
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 if _HAS_PIM:
     import ansys.platform.instancemanagement as pypim
@@ -2045,9 +2046,20 @@ def pack_arguments(locals_):
     args["broadcast"] = locals_.get(
         "broadcast", locals_["kwargs"].get("broadcast", None)
     )
+
     args["graphics_backend"] = locals_.get(
         "graphics_backend", locals_["kwargs"].get("graphics_backend", None)
     )
+
+    if locals_.get("use_vtk"):
+        LOG.warn(
+            "'use_vtk' will be deprecated in the next releases. Please use `graphics_backend` instead"
+        )
+        if locals_["use_vtk"]:
+            args["graphics_backend"] = GraphicsBackend.PYVISTA
+        else:
+            args["graphics_backend"] = GraphicsBackend.MAPDL
+
     args["just_launch"] = locals_.get(
         "just_launch", locals_["kwargs"].get("just_launch", None)
     )

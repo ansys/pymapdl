@@ -42,7 +42,6 @@ import weakref
 import numpy as np
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import GraphicsBackend
 from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.commands import (
@@ -76,6 +75,7 @@ from ansys.mapdl.core.misc import (
     run_as,
     supress_logging,
 )
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.reader import Archive
@@ -1035,13 +1035,13 @@ class _MapdlCore(Commands):
         return self._solution
 
     @property
-    def graphics_backend(self):
-        """Returns if using VTK by default or not."""
+    def graphics_backend(self) -> GraphicsBackend:
+        """Returns current graphics backend."""
         return self._graphics_backend
 
     @graphics_backend.setter
     def graphics_backend(self, value: GraphicsBackend):
-        """Set VTK to be used by default or not."""
+        """Set the graphics backend to be used."""
         self._graphics_backend = value
 
     @property

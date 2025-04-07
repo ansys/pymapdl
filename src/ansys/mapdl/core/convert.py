@@ -26,9 +26,9 @@ import re
 from typing import Any, Callable, Dict, List, Optional, Tuple
 from warnings import warn
 
-from ansys.mapdl.core import GraphicsBackend, __version__
 from ansys.mapdl.core.commands import Commands
 from ansys.mapdl.core.misc import is_float
+from ansys.mapdl.core.plotting import GraphicsBackend, __version__
 
 # Because the APDL version has empty arguments, whereas the PyMAPDL
 # doesn't have them. Hence the order of arguments is messed up.

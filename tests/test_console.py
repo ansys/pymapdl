@@ -47,8 +47,8 @@ if has_dependency("ansys-mapdl-reader"):
     from ansys.mapdl.reader import examples
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import GraphicsBackend
 from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 
 @pytest.fixture(scope="function")

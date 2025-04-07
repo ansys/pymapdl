@@ -132,7 +132,7 @@ Each of these creates a Matplotlib figure and pause execution.
 
 .. code:: pycon
 
-    >>> from ansys.mapdl.core import GraphicsBackend
+    >>> from ansys.mapdl.core.plotting import GraphicsBackend
     >>> mapdl.aplot(graphics_backend=GraphicsBackend.MAPDL)
     >>> mapdl.lplot(graphics_backend=GraphicsBackend.MAPDL)
     >>> mapdl.kplot(graphics_backend=GraphicsBackend.MAPDL)

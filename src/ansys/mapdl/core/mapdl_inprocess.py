@@ -22,8 +22,8 @@
 
 from typing import Protocol
 
-from ansys.mapdl.core import GraphicsBackend
 from ansys.mapdl.core.mapdl import MapdlBase
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 
 class _Backend(Protocol):
