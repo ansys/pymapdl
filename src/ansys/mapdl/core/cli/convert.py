@@ -216,15 +216,23 @@ def convert(
     """Convert MAPDL code to PyMAPDL"""
     from ansys.mapdl.core.convert import convert_apdl_block
 
+    allowed_backends = GraphicsBackend.__members__
     backend = None
+
     if graphics_backend is not None:
-        if graphics_backend == "pyvista":
-            backend = GraphicsBackend.PYVISTA
-        elif graphics_backend == "mapdl":
-            backend = GraphicsBackend.MAPDL
+        if (
+            isinstance(graphics_backend, str)
+            and graphics_backend.upper() in allowed_backends
+        ):
+            backend = GraphicsBackend[graphics_backend.upper()]
+        elif graphics_backend in list(allowed_backends.values()):
+            backend = graphics_backend
         else:
+            allowed_backend_string = ", ".join(
+                [str(each) for each in allowed_backends.values()]
+            )
             raise ValueError(
-                f"Invalid graphics backend '{graphics_backend}'. Allowed values are 'pyvista' or 'mapdl'."
+                f"Invalid graphics backend '{graphics_backend}'. Allowed values are: {allowed_backend_string}."
             )
 
     converted_code = convert_apdl_block(
