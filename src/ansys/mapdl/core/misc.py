@@ -428,6 +428,7 @@ def is_package_installed_cached(package_name):
 def requires_graphics(function):
     """Warn the user if the visualizer is not installed"""
 
+    @wraps(function)
     def wrapper(*args, **kwargs):
         if not _HAS_VISUALIZER:
             raise ModuleNotFoundError(
