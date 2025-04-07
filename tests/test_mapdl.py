@@ -53,7 +53,7 @@ if has_dependency("ansys-mapdl-reader"):
     from ansys.mapdl.reader.rst import Result
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import USER_DATA_PATH, GraphicsBackend
+from ansys.mapdl.core import USER_DATA_PATH
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
@@ -66,6 +66,7 @@ from ansys.mapdl.core.errors import (
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string, stack
+from ansys.mapdl.core.plotting import GraphicsBackend
 from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 
 # Path to files needed for examples
