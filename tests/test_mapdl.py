@@ -2671,6 +2671,7 @@ def test_ip_hostname_in_start_parm(ip):
             assert mapdl.ip == ip
 
         assert mapdl.hostname == "myhostname"
+        mapdl.__del__ = lambda x: None  # Avoiding exit
         del mapdl
 
 
@@ -2997,6 +2998,8 @@ def test_set_no_abort(monkeypatch, set_no_abort, start_instance):
         ) as mock_del,
     ):
         mapdl = launch_mapdl(set_no_abort=set_no_abort, start_instance=start_instance)
+
+        mapdl.__del__ = lambda x: None  # Avoiding exit
         del mapdl
 
     kwargs = mock_run.call_args_list[0].kwargs
