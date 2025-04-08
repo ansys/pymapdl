@@ -419,6 +419,7 @@ DEFAULT_ARGS = {
         ("graphics_backend", "mapdl"),
         ("graphics_backend", "pyvista"),
         ("graphics_backend", "pyVISTa"),
+        ("graphics_backend", "no_exists"),
         ("clear_at_start", True),
         ("check_parameter_names", True),
     ),
@@ -434,6 +435,10 @@ def test_convert_passing(mock_conv, run_cli, tmpdir, arg, value):
     default_ = DEFAULT_ARGS.copy()
     default_[arg] = value
 
+    if value == "no_exists":
+        with pytest.raises(ValueError):
+            run_cli(f"convert -f {input_file} --{arg} {value}")
+        return
     if arg not in ["only_commands"]:
         run_cli(f"convert -f {input_file} --{arg} {value}")
 
