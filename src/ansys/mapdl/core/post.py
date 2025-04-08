@@ -527,7 +527,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -599,7 +599,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -910,7 +910,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1030,7 +1030,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1146,7 +1146,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1280,7 +1280,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1426,7 +1426,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1536,7 +1536,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1606,7 +1606,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1695,7 +1695,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1798,7 +1798,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1889,7 +1889,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1966,7 +1966,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2062,7 +2062,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2167,7 +2167,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2266,7 +2266,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2347,7 +2347,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2443,7 +2443,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2541,7 +2541,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2637,7 +2637,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2722,7 +2722,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2817,7 +2817,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2920,7 +2920,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3010,7 +3010,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3096,7 +3096,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3198,7 +3198,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3302,7 +3302,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3398,7 +3398,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3484,7 +3484,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3586,7 +3586,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3678,7 +3678,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using

@@ -171,7 +171,7 @@ class Controls:
 
         .. warning::
            This will not change element plotting within PyMAPDL with
-           ``eplot(vtk=True)``
+           ``eplot()``
 
         Parameters
         ----------

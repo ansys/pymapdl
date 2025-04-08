@@ -66,6 +66,7 @@ from ansys.mapdl.core.errors import (
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string, stack
+from ansys.mapdl.core.plotting import GraphicsBackend
 from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 
 # Path to files needed for examples
@@ -2453,14 +2454,14 @@ def test_default_file_type_for_plots(mapdl, cleared):
 
 
 @requires("matplotlib")
-def test_use_vtk(mapdl, cleared):
-    assert isinstance(mapdl.use_vtk, bool)
+def test_graphics_backend(mapdl, cleared):
+    assert isinstance(mapdl.graphics_backend, GraphicsBackend)
 
-    prev = mapdl.use_vtk
-    mapdl.use_vtk = False
+    prev = mapdl.graphics_backend
+    mapdl.graphics_backend = GraphicsBackend.MAPDL
     mapdl.eplot()
 
-    mapdl.use_vtk = prev
+    mapdl.graphics_backend = prev
 
 
 @requires("local")

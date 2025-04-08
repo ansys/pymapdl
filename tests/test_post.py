@@ -1324,8 +1324,9 @@ def test_meta_post_plot_docstrings():
                     ), f"The argument '{each_}' in '{meth.__name__}' is not in its docstring."
 
             assert (
-                "If ``vkt=True`` (default), this function uses" in docstring
-            ), f"'vtk=True' part not found in {meth.__name__}"
+                "If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses"
+                in docstring
+            ), f"'graphics_backend=GraphicsBackend.PYVISTA' part not found in {meth.__name__}"
             assert (
                 len(
                     re.findall(
