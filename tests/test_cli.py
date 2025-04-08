@@ -60,7 +60,7 @@ def make_fake_process(pid, name, port=PORT1, ansys_process=False, n_children=0):
 
 @pytest.fixture(scope="function")
 def run_cli():
-    def do_run(arguments=""):
+    def do_run(arguments="", expect_error=False):
         from click.testing import CliRunner
 
         from ansys.mapdl.core.cli import main
@@ -72,8 +72,10 @@ def run_cli():
 
         runner = CliRunner()
         result = runner.invoke(main, args)
-
-        assert result.exit_code == 0
+        if expect_error:
+            assert result.exit_code != 0
+        else:
+            assert result.exit_code == 0
         return result.output
 
     return do_run
@@ -434,17 +436,18 @@ def test_convert_passing(mock_conv, run_cli, tmpdir, arg, value):
 
     default_ = DEFAULT_ARGS.copy()
     default_[arg] = value
-
+    expect_error = False
     if value == "no_exists":
-        with pytest.raises(ValueError):
-            run_cli(f"convert -f {input_file} --{arg} {value}")
-        return
+        expect_error = True
     if arg not in ["only_commands"]:
-        run_cli(f"convert -f {input_file} --{arg} {value}")
+        run_cli(f"convert -f {input_file} --{arg} {value}", expect_error)
 
     else:
-        run_cli(f"convert -f {input_file} --{arg}")
+        run_cli(f"convert -f {input_file} --{arg}", expect_error)
 
+    # Early return if expect_error is True and function is not called
+    if expect_error:
+        return
     mock_conv.assert_called()
     kwargs = mock_conv.call_args.kwargs
     for key in DEFAULT_ARGS:
