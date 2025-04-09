@@ -2671,6 +2671,7 @@ def test_ip_hostname_in_start_parm(ip):
             assert mapdl.ip == ip
 
         assert mapdl.hostname == "myhostname"
+        mapdl.kill_job = lambda x: None  # Avoiding exit
         mapdl.__del__ = lambda x: None  # Avoiding exit
         del mapdl
 
@@ -2983,7 +2984,6 @@ def test_muted(mapdl, prop):
 )
 @patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
 @stack(*PATCH_MAPDL)
-@patch("ansys.mapdl.core.Mapdl._exit_mapdl", lambda *args, **kwargs: None)
 @pytest.mark.parametrize("set_no_abort", [True, False, None])
 @pytest.mark.parametrize("start_instance", [True, False])
 def test_set_no_abort(monkeypatch, set_no_abort, start_instance):
@@ -2999,6 +2999,7 @@ def test_set_no_abort(monkeypatch, set_no_abort, start_instance):
     ):
         mapdl = launch_mapdl(set_no_abort=set_no_abort, start_instance=start_instance)
 
+        mapdl._exit_mapdl = lambda *args, **kwargs: None  # Avoiding exit
         mapdl.__del__ = lambda x: None  # Avoiding exit
         del mapdl
 
