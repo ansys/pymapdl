@@ -2002,11 +2002,13 @@ def test_args_pass(monkeypatch, arg, value, method):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
 
     kwargs = {arg: value}
+
     mapdl = launch_mapdl(**kwargs)
     meth = getattr(mapdl, method)
     assert meth == value
 
     mapdl._ctrl = lambda *args, **kwargs: None
+    mapdl.kill_job = lambda *args, **kwargs: None
     del mapdl
 
 
