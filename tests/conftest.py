@@ -471,6 +471,7 @@ def run_before_and_after_tests(
     assert not mapdl.ignore_errors, "Mapdl class is ignoring errors!"
     assert not mapdl.mute
     assert mapdl.file_type_for_plots in VALID_DEVICES
+    assert mapdl._jobid is None
 
     # Returning to default
     mapdl.graphics("full")
