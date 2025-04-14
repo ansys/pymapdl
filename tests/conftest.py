@@ -473,6 +473,7 @@ def run_before_and_after_tests(
     assert not mapdl.mute
     assert mapdl.file_type_for_plots in VALID_DEVICES
     assert mapdl._graphics_backend is GraphicsBackend.PYVISTA
+    assert mapdl._jobid is None
 
     # Returning to default
     mapdl.graphics("full")
