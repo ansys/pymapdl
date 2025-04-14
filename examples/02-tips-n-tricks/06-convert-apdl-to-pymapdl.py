@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-'''
+"""
 .. _ref_converting_apdl_to_pymapdl:
 
 ==================================
@@ -36,7 +36,7 @@ which work with strings and files respectively.
 
 This example considers a modified version of the APDL verification example 45
 as the source to be converted.
-'''
+"""
 
 import tempfile
 
@@ -107,7 +107,7 @@ print(result)
 ###############################################################################
 # Quality of Life kwargs
 # ~~~~~~~~~~~~~~~~~~~~~~
-# This function also includes several kwargs that cover common use cases when converting 
+# This function also includes several kwargs that cover common use cases when converting
 # from APDL to PyMAPDL, such as adding the necessary python imports when `add_imports`
 # is set to True, or adding an `mapdl.exit()` to the end when `auto_exit` is set to True.
 # Some of the most useful commands are below.
@@ -119,26 +119,28 @@ print(result)
 # * `cleanup_output` - when True format output using `autopep8` (if you have it installed)
 #
 
-result = convert_apdl_block(apdl_script, print_com=True, clear_at_start=True,
-                             add_imports=True, auto_exit=True)
+result = convert_apdl_block(
+    apdl_script, print_com=True, clear_at_start=True, add_imports=True, auto_exit=True
+)
 print(result)
 
 ###############################################################################
 # Converting from file
 # ~~~~~~~~~~~~~~~~~~~~
 # The function `convert_script` is also available and covers all the same functionality
-# but converts from a file to a list of translated strings, and provides the 
-# additional option to save the result to file  automatically. This functionality 
+# but converts from a file to a list of translated strings, and provides the
+# additional option to save the result to file  automatically. This functionality
 # is not available in `convert_apdl_block()`.
 #
 
-new_file, filename = tempfile.mkstemp(suffix='.inp')
-with open(filename, 'w') as f:
+new_file, filename = tempfile.mkstemp(suffix=".inp")
+with open(filename, "w") as f:
     f.write(apdl_script)
 print(filename)
-result = convert_script(filename, print_com=True, clear_at_start=True,
-                        add_imports=True, auto_exit=True)
-print('\n'.join(result))
+result = convert_script(
+    filename, print_com=True, clear_at_start=True, add_imports=True, auto_exit=True
+)
+print("\n".join(result))
 
 
 mapdl.exit()
