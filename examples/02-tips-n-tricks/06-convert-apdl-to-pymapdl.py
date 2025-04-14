@@ -148,13 +148,13 @@ print("\n".join(result))
 # a file called `mapdl.in` into `mapdl.out`.
 #
 # .. code:: console
-#    
-#    $ pymapdl convert -f mapdl.dat --print_com --clear_at_start --add_imports --auto_exit --output mapdl.out 
-#    
+#
+#    $ pymapdl convert -f mapdl.dat --print_com --clear_at_start --add_imports --auto_exit --output mapdl.out
+#
 # The input can even be built on the fly using `echo`:
 #
 # .. code:: console
-#    
+#
 #   $ echo -e "/prep7\nblock,0,1,0,1,0,1" | pymapdl convert -oc
 #   mapdl.prep7()
 #   mapdl.block(0, 1, 0, 1, 0, 1)
