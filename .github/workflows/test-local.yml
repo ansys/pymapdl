@@ -71,7 +71,7 @@ on:
           Runner to use.
         required: false
         type: string
-        default: ubuntu-22.04
+        default: ubuntu-latest
         
     secrets:
       license-server:
