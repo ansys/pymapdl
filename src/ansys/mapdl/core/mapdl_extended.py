@@ -418,6 +418,7 @@ class _MapdlCommandExtended(_MapdlCore):
         np2="",
         ninc="",
         lab="",
+        *,
         graphics_backend=None,
         show_keypoint_numbering=True,
         **kwargs,
@@ -499,6 +500,7 @@ class _MapdlCommandExtended(_MapdlCore):
         nl1="",
         nl2="",
         ninc="",
+        *,
         graphics_backend=None,
         show_line_numbering=True,
         show_keypoint_numbering=False,
@@ -636,6 +638,7 @@ class _MapdlCommandExtended(_MapdlCore):
         ninc="",
         degen="",
         scale="",
+        *,
         graphics_backend=None,
         quality=4,
         show_area_numbering=False,
@@ -870,6 +873,7 @@ class _MapdlCommandExtended(_MapdlCore):
         ninc="",
         degen="",
         scale="",
+        *,
         graphics_backend=None,
         quality=4,
         show_volume_numbering=False,
@@ -996,7 +1000,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
     @check_deprecated_vtk_kwargs
     @requires_graphics
-    def nplot(self, nnum="", graphics_backend=None, **kwargs):
+    def nplot(self, nnum="", *, graphics_backend=None, **kwargs):
         """APDL Command: NPLOT
 
         Displays nodes.
@@ -1154,7 +1158,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
     @check_deprecated_vtk_kwargs
     @requires_graphics
-    def eplot(self, show_node_numbering=False, graphics_backend=None, **kwargs):
+    def eplot(self, show_node_numbering=False, *, graphics_backend=None, **kwargs):
         """Plots the currently selected elements.
 
         APDL Command: EPLOT
