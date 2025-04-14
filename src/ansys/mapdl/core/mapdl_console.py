@@ -50,6 +50,8 @@ ready_items = [
     rb"executed\?",
     # errors
     rb"SHOULD INPUT PROCESSING BE SUSPENDED\?",
+    rb"ANSYS Traceback",
+    rb"eMPIChildJob",
     # prompts
     rb"ENTER FORMAT for",
 ]
@@ -58,6 +60,7 @@ CONTINUE_IDX = ready_items.index(rb"YES,NO OR CONTINUOUS\)\=")
 WARNING_IDX = ready_items.index(rb"executed\?")
 ERROR_IDX = ready_items.index(rb"SHOULD INPUT PROCESSING BE SUSPENDED\?")
 PROMPT_IDX = ready_items.index(rb"ENTER FORMAT for")
+
 
 nitems = len(ready_items)
 expect_list = []
@@ -113,7 +116,7 @@ class MapdlConsole(MapdlBase):
         log_apdl=None,
         use_vtk=True,
         print_com=False,
-        **start_parm,
+        set_no_abort=True**start_parm,
     ):
         """Opens an ANSYS process using pexpect"""
         self._auto_continue = True
@@ -133,6 +136,8 @@ class MapdlConsole(MapdlBase):
             mode="console",
             **start_parm,
         )
+        if set_no_abort:
+            self.nerr(abort=-1, mute=True)
 
     def _launch(self, start_parm):
         """Connect to MAPDL process using pexpect"""
