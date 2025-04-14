@@ -27,7 +27,7 @@
 Converting APDL scripts to PyMAPDL
 ==================================
 
-There two methods to convert APDL scripts to PyMAPDL ones in PyMAPDL,
+There are two methods to convert APDL scripts to PyMAPDL ones in PyMAPDL,
 
 * `convert_apdl_block()`
 * `convert_script()`
