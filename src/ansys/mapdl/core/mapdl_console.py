@@ -86,13 +86,13 @@ def launch_pexpect(
         nproc,
         additional_switches,
     )
-    process = pexpect.spawn(command, cwd=run_location)
+    process = pexpect.spawn(command, cwd=run_location, use_poll=True)
     process.delaybeforesend = None
 
     try:
         index = process.expect(["BEGIN:", "CONTINUE"], timeout=start_timeout)
-    except:  # capture failure
-        raise RuntimeError(process.before.decode("utf-8"))
+    except Exception as err:  # capture failure
+        raise RuntimeError(process.before.decode("utf-8") or err)
 
     if index:  # received ... press enter to continue
         process.sendline("")
