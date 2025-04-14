@@ -40,10 +40,7 @@ as the source to be converted.
 
 import tempfile
 
-from ansys.mapdl.core import convert_apdl_block, convert_script, launch_mapdl
-
-# start MAPDL
-mapdl = launch_mapdl()
+from ansys.mapdl.core import convert_apdl_block, convert_script
 
 apdl_script = """
 /COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
@@ -142,4 +139,22 @@ result = convert_script(
 print("\n".join(result))
 
 
-mapdl.exit()
+###############################################################################
+# Command line interface
+# ~~~~~~~~~~~~~~~~~~~~
+# Additionally the converter is also accessible via the terminal, through a CLI.
+# Assuming a virtual environment is activated the following can by run to convert
+# a file called `mapdl.in` into `mapdl.out`.
+#
+# .. code:: console
+#    
+#    $ pymapdl convert -f mapdl.dat --print_com --clear_at_start --add_imports --auto_exit --output mapdl.out 
+#    
+# The input can even be built on the fly using `echo`:
+#
+# .. code:: console
+#    
+#   $ echo -e "/prep7\nblock,0,1,0,1,0,1" | pymapdl convert -oc
+#   mapdl.prep7()
+#   mapdl.block(0, 1, 0, 1, 0, 1)
+#
