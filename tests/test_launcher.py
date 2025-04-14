@@ -2095,4 +2095,5 @@ def test_inject_additional_switches(monkeypatch):
 
     new_args = inject_additional_switches(args)
     assert args["additional_switches"] in new_args["additional_switches"]
-    assert envvar in new_args["additional_switches"]
+    # The env var is ignored if the argument is used
+    assert envvar not in new_args["additional_switches"]
