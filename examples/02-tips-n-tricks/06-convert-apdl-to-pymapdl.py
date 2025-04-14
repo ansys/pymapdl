@@ -68,7 +68,7 @@ OUTRES,ALL,0
 D,1,ALL
 D,2,UX
 FINISH
-/SOLU    
+/SOLU
 SOLVE
 *GET,FREQ,MODE,1,FREQ
 *DIM,LABEL,CHAR,1,2
@@ -76,7 +76,7 @@ SOLVE
 LABEL(1,1) = '      F,'
 LABEL(1,2) = ' (Hz)   '
 *VFILL,VALUE(1,1),DATA,13.701
-*VFILL,VALUE(1,2),DATA,FREQ 
+*VFILL,VALUE(1,2),DATA,FREQ
 *VFILL,VALUE(1,3),DATA,ABS(FREQ/13.701)
 /COM
 /OUT,vm45,vrt
@@ -136,7 +136,6 @@ print(result)
 new_file, filename = tempfile.mkstemp(suffix=".inp")
 with open(filename, "w") as f:
     f.write(apdl_script)
-print(filename)
 result = convert_script(
     filename, print_com=True, clear_at_start=True, add_imports=True, auto_exit=True
 )
