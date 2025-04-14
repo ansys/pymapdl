@@ -116,7 +116,8 @@ class MapdlConsole(MapdlBase):
         log_apdl=None,
         use_vtk=True,
         print_com=False,
-        set_no_abort=True**start_parm,
+        set_no_abort=True,
+        **start_parm,
     ):
         """Opens an ANSYS process using pexpect"""
         self._auto_continue = True
