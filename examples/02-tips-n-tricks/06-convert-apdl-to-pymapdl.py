@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 """
-.. _ref_converting_apdl_to_pymapdl:
+.. _ref_converting_apdl_to_pymapdl_example:
 
 ==================================
 Converting APDL scripts to PyMAPDL
