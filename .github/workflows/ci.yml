@@ -133,6 +133,7 @@ jobs:
           upload-reports: True
           hide-log: false
 
+
   docs-build:
     name: "Build documentation"
     needs: doc-style
@@ -141,6 +142,7 @@ jobs:
       license-server: ${{ secrets.LICENSE_SERVER }}
       username: ${{ github.actor }}
       password: ${{ secrets.GITHUB_TOKEN }}
+
 
   build-test-remote-matrix:
     name: "Build remote test matrix"
@@ -161,6 +163,7 @@ jobs:
           local: false
           run_all_builds: ${{ inputs.run_all_builds }}
 
+
   build-test-remote:
     name: "Remote: ${{ matrix.mapdl-version }}"
     needs: [smoke-tests, build-test-remote-matrix]
@@ -176,6 +179,7 @@ jobs:
     with:
       mapdl-version: "${{ matrix.mapdl-version }}"
       file-name: "${{ matrix.mapdl-version }}-remote"
+
 
   build-test-local-matrix:
     name: "Build test matrix for minimal and local"
@@ -194,6 +198,7 @@ jobs:
           token_teams_user_read: ${{ secrets.TOKEN_TEAMS_USER_READ }}
           local: true
           run_all_builds: ${{ inputs.run_all_builds }}
+
 
   build-test-ubuntu-local:
     name: "Local: ${{ matrix.mapdl-version }}"
@@ -215,6 +220,7 @@ jobs:
       file-name: "${{ matrix.mapdl-version }}-local"
       tags: "local"
       latest-version: "252"
+
 
   build-test-ubuntu-minimal:
     name: "Local-min: ${{ matrix.mapdl-version }}"
@@ -238,6 +244,7 @@ jobs:
       tags: "local,minimal"
       latest-version: "252"
 
+
   build-test-ubuntu-console:
     name: "Local-min-console: ${{ matrix.mapdl-version }}"
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -260,6 +267,7 @@ jobs:
       pytest-arguments: '--console -k console'
       file-name: "${{ matrix.mapdl-version }}-console"
       tags: "local,console"
+
 
   test-windows:
     # Skipped
@@ -301,10 +309,22 @@ jobs:
       id-token: write
       contents: write
     steps:
-      - name: "Release to the public PyPI repository"
-        uses: ansys/actions/release-pypi-public@v9
+      - name: "Download the library artifacts from build-library step"
+        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
         with:
-          library-name: ${{ env.PACKAGE_NAME }}
+          name: ${{ env.PACKAGE_NAME }}-artifacts
+          path: ${{ env.PACKAGE_NAME }}-artifacts
+
+      - name: "Display structure of downloaded files"
+        run: ls -Rla
+
+      - name: "Release to PyPI using trusted publisher"
+        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
+        with:
+          repository-url: "https://upload.pypi.org/legacy/"
+          print-hash: true
+          packages-dir: ${{ env.PACKAGE_NAME }}-artifacts
+          skip-existing: false
 
       - name: "Release to GitHub"
         uses: ansys/actions/release-github@v9
@@ -312,9 +332,6 @@ jobs:
           library-name: ${{ env.PACKAGE_NAME }}
           additional-artifacts: "minimum_requirements.txt"
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: "Display structure of downloaded files"
-        run: ls -Rla
 
 
   upload-docs-release:
@@ -379,6 +396,7 @@ jobs:
         uses: ./.github/actions/test-julia
         with:
           julia-version: ${{ matrix.julia-version }}
+
 
   pytest-summary:
     name: Pytest summary for all the test jobs
