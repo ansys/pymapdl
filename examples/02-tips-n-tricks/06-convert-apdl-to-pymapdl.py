@@ -21,13 +21,13 @@
 # SOFTWARE.
 
 """
-.. _ref_converting_apdl_to_pymapdl:
+.. _ref_converting_apdl_to_pymapdl_example:
 
 ==================================
 Converting APDL scripts to PyMAPDL
 ==================================
 
-There two methods to convert APDL scripts to PyMAPDL ones in PyMAPDL,
+There are two methods to convert APDL scripts to PyMAPDL ones in PyMAPDL,
 
 * `convert_apdl_block()`
 * `convert_script()`
@@ -109,6 +109,7 @@ print(result)
 # is set to True, or adding an `mapdl.exit()` to the end when `auto_exit` is set to True.
 # Some of the most useful commands are below.
 #
+# * `only_commands` - Convert the commands without adding any boilerplate such as `mapdl=launch...` or `mapdl.exit`.
 # * `print_com` - change `/COM` commands to `print()`
 # * `clear_at_start` - call `mapdl.clear()` after `launch_mapdl`
 # * `add_imports` - add Python import lines at the start of the script
