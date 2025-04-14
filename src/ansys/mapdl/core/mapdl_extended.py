@@ -44,6 +44,7 @@ from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
 from ansys.mapdl.core.misc import (
     allow_iterables_vmin,
     allow_pickable_entities,
+    check_deprecated_vtk_kwargs,
     load_file,
     random_string,
     requires_graphics,
@@ -409,6 +410,7 @@ class _MapdlCommandExtended(_MapdlCore):
         with open(path) as fid:
             return fid.read()
 
+    @check_deprecated_vtk_kwargs
     @requires_graphics
     def kplot(
         self,
@@ -490,6 +492,7 @@ class _MapdlCommandExtended(_MapdlCore):
             with self._enable_interactive_plotting():
                 return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
 
+    @check_deprecated_vtk_kwargs
     @requires_graphics
     def lplot(
         self,
@@ -624,6 +627,7 @@ class _MapdlCommandExtended(_MapdlCore):
             with self._enable_interactive_plotting():
                 return super().lplot(nl1=nl1, nl2=nl2, ninc=ninc, **kwargs)
 
+    @check_deprecated_vtk_kwargs
     @requires_graphics
     def aplot(
         self,
@@ -857,6 +861,7 @@ class _MapdlCommandExtended(_MapdlCore):
                     na1=na1, na2=na2, ninc=ninc, degen=degen, scale=scale, **kwargs
                 )
 
+    @check_deprecated_vtk_kwargs
     @requires_graphics
     def vplot(
         self,
@@ -989,6 +994,7 @@ class _MapdlCommandExtended(_MapdlCore):
         else:
             raise ValueError(f"Invalid graphics backend: {graphics_backend}. ")
 
+    @check_deprecated_vtk_kwargs
     @requires_graphics
     def nplot(self, nnum="", graphics_backend=None, **kwargs):
         """APDL Command: NPLOT
@@ -1146,6 +1152,7 @@ class _MapdlCommandExtended(_MapdlCore):
         else:
             raise ValueError(f"Invalid graphics backend: {graphics_backend}. ")
 
+    @check_deprecated_vtk_kwargs
     @requires_graphics
     def eplot(self, show_node_numbering=False, graphics_backend=None, **kwargs):
         """Plots the currently selected elements.

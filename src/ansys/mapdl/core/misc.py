@@ -38,6 +38,7 @@ from warnings import warn
 import numpy as np
 
 from ansys.mapdl.core import _HAS_PYVISTA, _HAS_VISUALIZER, LOG
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 # path of this module
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -436,6 +437,28 @@ def requires_graphics(function):
                 "You can install this using `pip install ansys-mapdl-core[graphics]`."
             )
         return function(*args, **kwargs)
+
+    return wrapper
+
+
+def check_deprecated_vtk_kwargs(func: Callable) -> Callable:
+    """Decorator to warn if 'vtk' or 'use_vtk' are passed as kwargs."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if "vtk" in kwargs or "use_vtk" in kwargs:
+            warn(
+                f"'vtk' and 'use_vtk' are deprecated in '{func.__name__}'; "
+                f"use 'graphics_backend=GraphicsBackend.PYVISTA' instead.",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            if kwargs.get("vtk", True) or kwargs.get("use_vtk", True):
+                kwargs["graphics_backend"] = GraphicsBackend.PYVISTA
+            elif kwargs.get("vtk", False) or kwargs.get("use_vtk", False):
+                kwargs["graphics_backend"] = GraphicsBackend.MAPDL
+
+        return func(*args, **kwargs)
 
     return wrapper
 

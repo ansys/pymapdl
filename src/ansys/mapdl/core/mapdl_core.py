@@ -67,6 +67,7 @@ from ansys.mapdl.core.information import Information
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.mapdl_types import MapdlFloat
 from ansys.mapdl.core.misc import (
+    check_deprecated_vtk_kwargs,
     check_valid_routine,
     last_created,
     random_string,
@@ -253,6 +254,7 @@ def _sanitize_start_parm(start_parm):
 class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
+    @check_deprecated_vtk_kwargs
     def __init__(
         self,
         loglevel: DEBUG_LEVELS = "DEBUG",
