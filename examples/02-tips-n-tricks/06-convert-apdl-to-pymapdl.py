@@ -38,8 +38,9 @@ This example considers a modified version of the APDL verification example 45
 as the source to be converted.
 '''
 
-from ansys.mapdl.core import launch_mapdl, convert_script, convert_apdl_block
 import tempfile
+
+from ansys.mapdl.core import convert_apdl_block, convert_script, launch_mapdl
 
 # start MAPDL
 mapdl = launch_mapdl()
