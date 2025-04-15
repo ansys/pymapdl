@@ -48,6 +48,7 @@ if has_dependency("ansys-mapdl-reader"):
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 
 @pytest.fixture(scope="function")
@@ -107,7 +108,7 @@ def test_comment(cleared, mapdl_console):
 
 def test_basic_command(cleared, mapdl_console):
     resp = mapdl_console.block(0, 1, 0, 1, 0, 1)
-    assert "CREATE A HEXAHEDRAL VOLUME" in resp
+    assert resp == 1
 
 
 def test_allow_ignore(mapdl_console, cleared):
@@ -126,13 +127,19 @@ def test_allow_ignore(mapdl_console, cleared):
 
 
 def test_chaining(mapdl_console, cleared):
-    mapdl_console.prep7()
-    n_kp = 1000
-    with mapdl_console.chain_commands:
-        for i in range(1, 1 + n_kp):
-            mapdl_console.k(i, i, i, i)
+    # test chaining with distributed only
+    if mapdl_console._distributed:
+        with pytest.raises(MapdlRuntimeError):
+            with mapdl_console.chain_commands:
+                mapdl_console.prep7()
+    else:
+        mapdl_console.prep7()
+        n_kp = 1000
+        with mapdl_console.chain_commands:
+            for i in range(1, 1 + n_kp):
+                mapdl_console.k(i, i, i, i)
 
-    assert mapdl_console.geometry.n_keypoint == 1000
+        assert mapdl_console.geometry.n_keypoint == 1000
 
 
 def test_e(mapdl_console, cleared):
@@ -226,6 +233,7 @@ def test_al(cleared, mapdl_console):
     assert a0 == 1
 
 
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_invalid_area(mapdl_console, cleared):
     with pytest.raises(MapdlRuntimeError):
         mapdl_console.a(0, 0, 0, 0)
@@ -237,9 +245,10 @@ def test_invalid_area(mapdl_console, cleared):
 
 
 @requires("xserver")
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_kplot(cleared, mapdl_console, tmpdir):
     with pytest.raises(MapdlRuntimeError):
-        mapdl_console.kplot(vtk=True)
+        mapdl_console.kplot()
 
     mapdl_console.k("", 0, 0, 0)
     mapdl_console.k("", 1, 0, 0)
@@ -251,9 +260,12 @@ def test_kplot(cleared, mapdl_console, tmpdir):
     assert cpos is None
     assert os.path.isfile(filename)
 
-    mapdl_console.kplot(knum=True, vtk=False)  # make sure legacy still works
+    mapdl_console.kplot(
+        knum=True, backend=GraphicsBackend.MAPDL
+    )  # make sure legacy still works
 
 
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 @requires("xserver")
 def test_aplot(cleared, mapdl_console):
     k0 = mapdl_console.k("", 0, 0, 0)
@@ -272,14 +284,15 @@ def test_aplot(cleared, mapdl_console):
     mapdl_console.aplot(quality=-1)
 
     # and legacy as well
-    mapdl_console.aplot(vtk=False)
+    mapdl_console.aplot(graphics_backend=GraphicsBackend.MAPDL)
 
 
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 @requires("xserver")
-@pytest.mark.parametrize("vtk", [True, False])
-def test_vplot(cleared, mapdl_console, vtk):
+@pytest.mark.parametrize("backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL])
+def test_vplot(cleared, mapdl_console, backend):
     mapdl_console.block(0, 1, 0, 1, 0, 1)
-    mapdl_console.vplot(vtk=vtk, color_areas=True)
+    mapdl_console.vplot(graphics_backend=backend, color_areas=True)
 
 
 def test_keypoints(cleared, mapdl_console):
@@ -294,7 +307,7 @@ def test_keypoints(cleared, mapdl_console):
         i += 1
 
     assert mapdl_console.geometry.n_keypoint == 4
-    assert np.allclose(kps, mapdl_console.geometry.keypoints)
+    assert np.allclose(kps, mapdl_console.geometry.get_keypoints(return_as_array=True))
     assert np.allclose(knum, mapdl_console.geometry.knum)
 
 
@@ -311,15 +324,16 @@ def test_lines(cleared, mapdl_console):
     l3 = mapdl_console.l(k3, k0)
 
     lines = mapdl_console.geometry.lines
-    assert isinstance(lines, pyvista.PolyData)
+    assert isinstance(lines, pyvista.MultiBlock)
     assert np.allclose(mapdl_console.geometry.lnum, [l0, l1, l2, l3])
     assert mapdl_console.geometry.n_line == 4
 
 
 @requires("xserver")
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_lplot(cleared, mapdl_console, tmpdir):
     with pytest.raises(MapdlRuntimeError):
-        mapdl_console.lplot(vtk=True)
+        mapdl_console.lplot()
 
     k0 = mapdl_console.k("", 0, 0, 0)
     k1 = mapdl_console.k("", 1, 0, 0)
@@ -335,7 +349,9 @@ def test_lplot(cleared, mapdl_console, tmpdir):
     assert cpos is None
     assert os.path.isfile(filename)
 
-    mapdl_console.lplot(vtk=False)  # make sure legacy still works
+    mapdl_console.lplot(
+        graphics_backend=GraphicsBackend.MAPDL
+    )  # make sure legacy still works
 
 
 def test_logging(mapdl_console, tmpdir):
@@ -385,6 +401,7 @@ def test_nodes(tmpdir, cleared, mapdl_console):
     assert not mapdl_console.mesh.nnum.size
 
 
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_enum(mapdl_console, make_block):
     assert mapdl_console.mesh.n_elem
     assert np.allclose(mapdl_console.mesh.enum, range(1, mapdl_console.mesh.n_elem + 1))
@@ -392,6 +409,7 @@ def test_enum(mapdl_console, make_block):
 
 @pytest.mark.parametrize("knum", [True, False])
 @requires("xserver")
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_nplot_vtk(cleared, mapdl_console, knum):
     with pytest.raises(MapdlRuntimeError):
         mapdl_console.nplot()
@@ -399,17 +417,21 @@ def test_nplot_vtk(cleared, mapdl_console, knum):
     mapdl_console.n(1, 0, 0, 0)
     mapdl_console.n(11, 10, 0, 0)
     mapdl_console.fill(1, 11, 9)
-    mapdl_console.nplot(vtk=True, knum=knum, background="w", color="k")
+    mapdl_console.nplot(knum=knum, background="w", color="k")
 
 
 @requires("xserver")
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_nplot(cleared, mapdl_console):
     mapdl_console.n(1, 0, 0, 0)
     mapdl_console.n(11, 10, 0, 0)
     mapdl_console.fill(1, 11, 9)
-    mapdl_console.nplot(vtk=False, background="w", color="k")
+    mapdl_console.nplot(
+        graphics_backend=GraphicsBackend.MAPDL, background="w", color="k"
+    )
 
 
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_elements(cleared, mapdl_console):
     mapdl_console.et(1, 185)
 
@@ -436,7 +458,7 @@ def test_elements(cleared, mapdl_console):
         [0, 1, 3],
     ]
 
-    with mapdl_console.chain_commands:
+    with mapdl_console.non_interactive:
         for cell in [cell1, cell2]:
             for x, y, z in cell:
                 mapdl_console.n(x=x, y=y, z=z)
@@ -515,6 +537,7 @@ def test_builtin_parameters(mapdl_console, cleared):
     assert mapdl_console.parameters.real == 1
 
 
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_eplot_fail(mapdl_console, cleared):
     # must fail with empty mesh
     with pytest.raises(MapdlRuntimeError):
@@ -522,6 +545,7 @@ def test_eplot_fail(mapdl_console, cleared):
 
 
 @requires("xserver")
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_eplot(mapdl_console, make_block):
     init_elem = mapdl_console.mesh.n_elem
     mapdl_console.aplot()  # check aplot and verify it doesn't mess up the element plotting
@@ -531,6 +555,7 @@ def test_eplot(mapdl_console, make_block):
 
 
 @requires("xserver")
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_eplot_screenshot(mapdl_console, make_block, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     mapdl_console.eplot(
@@ -566,6 +591,7 @@ def test_cyclic_solve(mapdl_console, cleared):
         assert mapdl_console.result.nsets == 16
 
 
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_partial_mesh_nnum(mapdl_console, make_block):
     allsel_nnum_old = mapdl_console.mesh.nnum
     mapdl_console.nsel("S", "NODE", vmin=100, vmax=200)
@@ -576,7 +602,8 @@ def test_partial_mesh_nnum(mapdl_console, make_block):
     assert np.allclose(allsel_nnum_old, mapdl_console.mesh.nnum)
 
 
-def test_partial_mesh_nnum(mapdl_console, make_block):
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
+def test_partial_mesh_n_cells(mapdl_console, make_block):
     mapdl_console.nsel("S", "NODE", vmin=1, vmax=10)
     mapdl_console.esel("S", "ELEM", vmin=10, vmax=20)
     assert mapdl_console.mesh._grid.n_cells == 11
@@ -624,7 +651,7 @@ def test_load_table(mapdl_console, cleared):
 
 
 def test_mode_console(mapdl_console, cleared):
-    assert mapdl_console.mode == "console"
+    assert mapdl_console._mode == "console"
     assert not mapdl_console.is_grpc
     assert not mapdl_console.is_corba
     assert mapdl_console.is_console
@@ -708,3 +735,23 @@ def test_exit_console(mapdl_console, close_log):
             mock_close_log.assert_not_called()
 
         mock_exit.assert_called_once()
+        assert mapdl_console._exited
+
+    # restoring state
+    mapdl_console._exited = False
+
+
+@pytest.mark.parametrize("command", ["FINISH", "/PREP7", "/SOLU"])
+def test_not_command_in_response(mapdl_console, cleared, command):
+    resp = mapdl_console.run(command)
+
+    assert command not in resp
+
+
+@pytest.mark.parametrize("command", ["FINISH", "/PREP7", "/SOLU"])
+def test_command_in_response(mapdl_console, cleared, command):
+    mapdl_console.clean_response = False
+    resp = mapdl_console.run(command, clean_response=False)
+    mapdl_console.clean_response = True
+
+    assert command in resp

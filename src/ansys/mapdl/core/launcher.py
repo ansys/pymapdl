@@ -60,6 +60,7 @@ from ansys.mapdl.core.misc import (
     create_temp_dir,
     threaded,
 )
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 if _HAS_PIM:
     import ansys.platform.instancemanagement as pypim
@@ -134,7 +135,7 @@ ALLOWABLE_LAUNCH_MAPDL_ARGS = [
     "_debug_no_launch",
     "just_launch",
     "on_pool",
-    "use_vtk",
+    "graphics_backend",
 ]
 
 ON_WSL = os.name == "posix" and (
@@ -524,7 +525,7 @@ def launch_grpc(
 
 
 def check_mapdl_launch(
-    process: subprocess.Popen, run_location: str, timeout: int, cmd: str
+    process: subprocess.Popen[bytes], run_location: str, timeout: int, cmd: str
 ) -> None:
     """Check MAPDL launching process.
 
@@ -554,7 +555,7 @@ def check_mapdl_launch(
         MAPDL did not start.
     """
     LOG.debug("Generating queue object for stdout")
-    stdout_queue, thread = _create_queue_for_std(process.stdout)
+    stdout_queue, _ = _create_queue_for_std(process.stdout)
 
     # Checking connection
     try:
@@ -564,7 +565,7 @@ def check_mapdl_launch(
         LOG.debug("Checking file error is created")
         _check_file_error_created(run_location, timeout)
 
-        if os.name == "posix" and not ON_WSL:
+        if os.name == "posix" and not ON_WSL and stdout_queue is not None:
             LOG.debug("Checking if gRPC server is alive.")
             _check_server_is_alive(stdout_queue, timeout)
 
@@ -608,7 +609,7 @@ def _check_file_error_created(run_location, timeout):
         raise MapdlDidNotStart(msg)
 
 
-def _check_server_is_alive(stdout_queue, timeout):
+def _check_server_is_alive(stdout_queue: Queue[str], timeout: int):
     if not stdout_queue:
         LOG.debug("No STDOUT queue. Not checking MAPDL this way.")
         return
@@ -644,11 +645,11 @@ def _check_server_is_alive(stdout_queue, timeout):
         raise MapdlDidNotStart("MAPDL failed to start the gRPC server")
 
 
-def _get_std_output(std_queue, timeout=1):
+def _get_std_output(std_queue: Queue[str], timeout: int = 1) -> List[str]:
     if not std_queue:
-        return [None]
+        return [""]
 
-    lines = []
+    lines: List[str] = []
     reach_empty = False
     t0 = time.time()
     while (not reach_empty) or (time.time() < (t0 + timeout)):
@@ -1438,6 +1439,12 @@ def launch_mapdl(
         )
 
     ########################################
+    # Additional switches injection
+    # -----------------------------
+    #
+    args = inject_additional_switches(args)
+
+    ########################################
     # SLURM settings
     # --------------
     # Checking if running on SLURM HPC
@@ -1538,7 +1545,7 @@ def launch_mapdl(
             cleanup_on_exit=False,
             loglevel=args["loglevel"],
             set_no_abort=args["set_no_abort"],
-            use_vtk=args["use_vtk"],
+            graphics_backend=args["graphics_backend"],
             log_apdl=args["log_apdl"],
             **start_parm,
         )
@@ -1577,7 +1584,7 @@ def launch_mapdl(
         mapdl = MapdlConsole(
             loglevel=args["loglevel"],
             log_apdl=args["log_apdl"],
-            use_vtk=args["use_vtk"],
+            graphics_backend=args["graphics_backend"],
             **start_parm,
         )
 
@@ -1658,7 +1665,7 @@ def launch_mapdl(
                 remove_temp_dir_on_exit=args["remove_temp_dir_on_exit"],
                 log_apdl=args["log_apdl"],
                 process=process,
-                use_vtk=args["use_vtk"],
+                graphics_backend=args["graphics_backend"],
                 **start_parm,
             )
 
@@ -2031,7 +2038,7 @@ def pack_arguments(locals_):
     args.update(locals_["kwargs"])  # attaching kwargs
 
     args["set_no_abort"] = locals_.get(
-        "set_no_abort", locals_["kwargs"].get("set_no_abort", None)
+        "set_no_abort", locals_["kwargs"].get("set_no_abort", True)
     )
     args["force_intel"] = locals_.get(
         "force_intel", locals_["kwargs"].get("force_intel", None)
@@ -2039,7 +2046,20 @@ def pack_arguments(locals_):
     args["broadcast"] = locals_.get(
         "broadcast", locals_["kwargs"].get("broadcast", None)
     )
-    args["use_vtk"] = locals_.get("use_vtk", locals_["kwargs"].get("use_vtk", None))
+
+    args["graphics_backend"] = locals_.get(
+        "graphics_backend", locals_["kwargs"].get("graphics_backend", None)
+    )
+
+    if locals_.get("use_vtk"):
+        LOG.warn(
+            "'use_vtk' will be deprecated in the next releases. Please use `graphics_backend` instead"
+        )
+        if locals_["use_vtk"]:
+            args["graphics_backend"] = GraphicsBackend.PYVISTA
+        else:
+            args["graphics_backend"] = GraphicsBackend.MAPDL
+
     args["just_launch"] = locals_.get(
         "just_launch", locals_["kwargs"].get("just_launch", None)
     )
@@ -2348,7 +2368,7 @@ def create_gallery_instances(
             cleanup_on_exit=False,
             loglevel=args["loglevel"],
             set_no_abort=args["set_no_abort"],
-            use_vtk=args["use_vtk"],
+            graphics_backend=args["graphics_backend"],
             **start_parm,
         )
         if args["clear_on_connect"]:
@@ -2893,3 +2913,33 @@ def check_console_start_parameters(start_parm):
             start_parm.pop(each)
 
     return start_parm
+
+
+def inject_additional_switches(args: dict[str, Any]) -> dict[str, Any]:
+    """Inject additional switches to the command line
+
+    Parameters
+    ----------
+    args : Dict[str, Any]
+        Arguments dictionary
+
+    Returns
+    -------
+    Dict[str, Any]
+        Arguments dictionary with the additional switches injected
+    """
+    envvaras = os.environ.get("PYMAPDL_ADDITIONAL_SWITCHES")
+
+    if envvaras:
+        if args.get("additional_switches"):
+            LOG.warning(
+                "Skipping injecting additional switches from env var if the function argument is used."
+            )
+        else:
+            args["additional_switches"] = envvaras
+
+        LOG.debug(
+            f"Injecting additional switches from 'PYMAPDL_ADDITIONAL_SWITCHES' env var: {envvaras}"
+        )
+
+    return args
