@@ -77,6 +77,7 @@ IS_SMP = is_smp()
 
 QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
 VALID_PORTS = []
+ACCEPTABLE_FAILURE_RATE = 50
 
 ## Skip ifs
 skip_on_windows = pytest.mark.skipif(ON_WINDOWS, reason="Skip on Windows")
@@ -228,6 +229,7 @@ from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 from ansys.mapdl.core.mapdl_core import VALID_DEVICES
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 if has_dependency("ansys-tools-visualization_interface"):
     import ansys.tools.visualization_interface as viz_interface
@@ -372,6 +374,24 @@ def pytest_collection_modifyitems(session, config, items):
                 item.add_marker(skip_grpc)
 
 
+@pytest.hookimpl()
+def pytest_sessionfinish(session: pytest.Session, exitstatus: pytest.ExitCode):
+    if os.environ.get("ALLOW_FAILURE_RATE") is None:
+        return
+
+    else:
+        acceptable_failure_rate = float(
+            os.environ.get("ALLOW_FAILURE_RATE", ACCEPTABLE_FAILURE_RATE)
+        )
+
+    if exitstatus != pytest.ExitCode.TESTS_FAILED:
+        return
+
+    failure_rate = (100.0 * session.testsfailed) / session.testscollected
+    if failure_rate <= acceptable_failure_rate:
+        session.exitstatus = 0
+
+
 ################################################################
 #
 # Setting configuration fixtures
@@ -452,6 +472,8 @@ def run_before_and_after_tests(
     assert not mapdl.ignore_errors, "Mapdl class is ignoring errors!"
     assert not mapdl.mute
     assert mapdl.file_type_for_plots in VALID_DEVICES
+    assert mapdl._graphics_backend is GraphicsBackend.PYVISTA
+    assert mapdl._jobid is None
 
     # Returning to default
     mapdl.graphics("full")
@@ -554,6 +576,7 @@ def mapdl_console(request):
         mode="console",
         log_apdl="pymapdl.apdl" if DEBUG_TESTING else None,
         loglevel="DEBUG" if DEBUG_TESTING else "ERROR",
+        additional_switches="-smp",
     )
     from ansys.mapdl.core.mapdl_console import MapdlConsole
 

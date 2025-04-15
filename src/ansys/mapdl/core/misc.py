@@ -37,7 +37,8 @@ from warnings import warn
 
 import numpy as np
 
-from ansys.mapdl.core import _HAS_PYVISTA, LOG
+from ansys.mapdl.core import _HAS_PYVISTA, _HAS_VISUALIZER, LOG
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 # path of this module
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -423,6 +424,41 @@ def is_package_installed_cached(package_name):
 
     except ModuleNotFoundError:
         return False
+
+
+def requires_graphics(function):
+    """Warn the user if the visualizer is not installed"""
+
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        if not _HAS_VISUALIZER:
+            raise ModuleNotFoundError(
+                "Graphic libraries are required to use this method.\n"
+                "You can install this using `pip install ansys-mapdl-core[graphics]`."
+            )
+        return function(*args, **kwargs)
+
+    return wrapper
+
+
+def check_deprecated_vtk_kwargs(func: Callable) -> Callable:
+    """Decorator to warn if 'vtk' or 'use_vtk' are passed as kwargs."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if "vtk" in kwargs or "use_vtk" in kwargs:
+            warn(
+                "From 0.70.0, the arguments 'vtk' and 'use_vtk' are deprecated. "
+                "To use interactive plots, use 'graphics_backend=GraphicsBackend.PYVISTA' instead. ",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            if kwargs.get("vtk") is False or kwargs.get("use_vtk") is False:
+                kwargs["graphics_backend"] = GraphicsBackend.MAPDL
+
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 def requires_package(package_name: str, softerror: bool = False) -> Callable:
