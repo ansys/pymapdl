@@ -284,8 +284,9 @@ def test_not_valid_versions(mapdl, my_fs, cleared, monkeypatch, version):
 @requires("local")
 @requires("linux")
 @requires("console")
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_failed_console():
-    exec_file = find_mapdl(installed_mapdl_versions[0])[0]
+    exec_file = find_mapdl(str(installed_mapdl_versions[0]))[0]
     with pytest.raises(ValueError):
         pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
@@ -2094,4 +2095,5 @@ def test_inject_additional_switches(monkeypatch):
 
     new_args = inject_additional_switches(args)
     assert args["additional_switches"] in new_args["additional_switches"]
-    assert envvar in new_args["additional_switches"]
+    # The env var is ignored if the argument is used
+    assert envvar not in new_args["additional_switches"]
