@@ -75,7 +75,7 @@
    Mapdl.screenshot
    Mapdl.set_log_level
    Mapdl.thermal_result
-   Mapdl.use_vtk
+   Mapdl.graphics_backend
    Mapdl.version
 
 
