@@ -293,7 +293,7 @@ class Style:
         warnings.warn(
             "pymapdl does not support /ESHAPE when plotting in "
             "Python using ``mapdl.eplot()``.  "
-            "Use ``mapdl.eplot(vtk=False)`` "
+            "Use ``mapdl.eplot(backend=GraphicsBackend.MAPDL)`` "
         )
         command = f"/ESHAPE,{scale},{key}"
         return self.run(command, **kwargs)
