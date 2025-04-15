@@ -189,6 +189,13 @@ jobs:
         run: |
           python -m pip install -r .ci/requirements_testing_minimal.txt
 
+      - name: Checking space
+        run: |
+          df -h
+          du -hsx /
+          du -hs *
+          du -sh /usr/local/* /opt/* /usr/* | sort -hr
+
       - name: "Unit testing"
         env:
           ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
@@ -228,6 +235,13 @@ jobs:
             ${{ env.PYTEST_ARGUMENTS }} \
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml
+
+      - name: Checking space
+        run: |
+          df -h
+          du -hsx /
+          du -hs *
+          du -sh /usr/local/* /opt/* /usr/* | sort -hr
 
       - name: "Collect logs on failure"
         if: always()
