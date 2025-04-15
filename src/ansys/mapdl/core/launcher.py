@@ -2918,7 +2918,9 @@ def inject_additional_switches(args: dict[str, Any]) -> dict[str, Any]:
 
     if envvaras:
         if args.get("additional_switches"):
-            args["additional_switches"] += f" {envvaras}"
+            LOG.warning(
+                "Skipping injecting additional switches from env var if the function argument is used."
+            )
         else:
             args["additional_switches"] = envvaras
 

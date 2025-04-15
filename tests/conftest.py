@@ -574,6 +574,7 @@ def mapdl_console(request):
         mode="console",
         log_apdl="pymapdl.apdl" if DEBUG_TESTING else None,
         loglevel="DEBUG" if DEBUG_TESTING else "ERROR",
+        additional_switches="-smp",
     )
     from ansys.mapdl.core.mapdl_console import MapdlConsole
 

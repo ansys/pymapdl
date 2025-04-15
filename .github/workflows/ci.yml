@@ -262,11 +262,12 @@ jobs:
     with:
       latest-version: "252"
       mapdl-version: ${{ matrix.mapdl-version }}
-      testing-minimal: true
+      testing-minimal: false
       on-console: true
       pytest-arguments: '-k console'
-      file-name: "${{ matrix.mapdl-version }}-minimal-console"
-      tags: "local,minimal,console"
+
+      file-name: "${{ matrix.mapdl-version }}-console"
+      tags: "local,console"
 
 
   test-windows:
