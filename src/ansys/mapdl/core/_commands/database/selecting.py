@@ -31,7 +31,7 @@ class Selecting:
         vmin: str = "",
         vmax: str = "",
         vinc: str = "",
-        kswp: str = "",
+        kswp: int | str = "",
         **kwargs,
     ):
         r"""Selects a subset of volumes.
@@ -60,43 +60,44 @@ class Selecting:
             * ``STAT`` - Display the current select status.
 
         item : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
-            information.
+            Label identifying data. Valid item labels are shown in the table below. Some items also require
+            a component label. If ``Item`` = PICK (or simply "P"), graphical picking is enabled and all
+            remaining command fields are ignored (valid only in the GUI). Defaults to VOLU.
 
         comp : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
-            information.
+            Component of the item (if required). Valid component labels are shown in the table below.
 
         vmin : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
-            information.
+            Minimum value of item range. Ranges are volume numbers, coordinate values, attribute numbers,
+            etc., as appropriate for the item. A component name (as specified on the :ref:`cm` command) may
+            also be substituted for ``VMIN`` ( ``VMAX`` and ``VINC`` are ignored). If ``Item`` = MAT, TYPE,
+            REAL, or ESYS and if ``VMIN`` is positive, the absolute value of ``Item`` is compared against
+            the range for selection; if ``VMIN`` is negative, the signed value of ``Item`` is compared. See
+            the :ref:`vlist` command for a discussion of signed attributes.
 
         vmax : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
-            information.
+            Maximum value of item range. ``VMAX`` defaults to ``VMIN``.
 
         vinc : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
-            information.
+            Value increment within range. Used only with integer ranges (such as for volume numbers).
+            Defaults to 1. ``VINC`` cannot be negative.
 
-        kswp : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_ for further
-            information.
+        kswp : int or str
+            Specifies whether only volumes are to be selected:
+
+            * ``0`` - Select volumes only.
+
+            * ``1`` - Select volumes, as well as keypoints, lines, areas, nodes, and elements associated with
+              selected volumes. Valid only with ``Type`` = S.
 
         Notes
         -----
+
+        .. warning::
+
+           This function contains specificities regarding the argument definitions.
+           Please refer to the `command documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSEL.html>`_
+           for further explanations.
 
         .. _VSEL_notes:
 
@@ -112,13 +113,17 @@ class Selecting:
         range VMIN- ``Toler`` and VMAX+ ``Toler`` are selected. The default tolerance ``Toler`` is based on
         the relative values of VMIN and VMAX as follows:
 
-        If VMIN = VMAX, ``Toler`` = 0.005 x VMIN.
-        If VMIN = VMAX = 0.0, ``Toler`` = 1.0E-6.
-        If VMAX ≠ VMIN, ``Toler`` = 1.0E-8 x (VMAX-VMIN).
+        * If VMIN = VMAX, ``Toler`` = 0.005 x VMIN.
+
+        * If VMIN = VMAX = 0.0, ``Toler`` = 1.0E-6.
+
+        * If VMAX ≠ VMIN, ``Toler`` = 1.0E-8 x (VMAX-VMIN).
 
         Use the `SELTOL
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SELTOL.html#SELTOL.menupath>`_
         :ref:`seltol` command to override this default and specify ``Toler`` explicitly.
+
+        .. _vsel.tab.1:
 
         **VSEL - Valid Item and Component Labels**
 
@@ -257,7 +262,7 @@ class Selecting:
         vmin: str = "",
         vmax: str = "",
         vinc: str = "",
-        kswp: str = "",
+        kswp: int | str = "",
         **kwargs,
     ):
         r"""Selects a subset of lines.
@@ -286,43 +291,45 @@ class Selecting:
             * ``STAT`` - Display the current select status.
 
         item : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LSEL.html>`_ for further
-            information.
+            Label identifying data. Valid item labels are shown in the table below. Some items also require
+            a component label. If ``Item`` = PICK (or simply "P"), graphical picking is enabled and all
+            remaining command fields are ignored (valid only in the GUI). Defaults to LINE.
 
         comp : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LSEL.html>`_ for further
-            information.
+            Component of the item (if required). Valid component labels are shown in the table below.
 
         vmin : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LSEL.html>`_ for further
-            information.
+            Minimum value of item range. Ranges are line numbers, coordinate values, attribute numbers,
+            etc., as appropriate for the item. If ``VMIN`` = 0.0, a tolerance of ±1.0E-6 is used, or ±0.005
+            x ``VMIN`` if ``VMIN`` = ``VMAX``. A component name (as specified on the :ref:`cm` command) may
+            also be substituted for ``VMIN`` ( ``VMAX`` and ``VINC`` are ignored). If ``Item`` = MAT, TYPE,
+            REAL, ESYS, or NDIV and if ``VMIN`` is positive, the absolute value of ``Item`` is compared
+            against the range for selection; if ``VMIN`` is negative, the signed value of ``Item`` is
+            compared. See the :ref:`llist` command for a discussion of signed attributes.
 
         vmax : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LSEL.html>`_ for further
-            information.
+            Maximum value of item range. ``VMAX`` defaults to ``VMIN``.
 
         vinc : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LSEL.html>`_ for further
-            information.
+            Value increment within range. Used only with integer ranges (such as for line numbers). Defaults
+            to 1. ``VINC`` cannot be negative.
 
-        kswp : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LSEL.html>`_ for further
-            information.
+        kswp : int or str
+            Specifies whether only lines are to be selected:
+
+            * ``0`` - Select lines only.
+
+            * ``1`` - Select lines, as well as keypoints, nodes, and elements associated with selected lines.
+              Valid only with ``Type`` = S.
 
         Notes
         -----
+
+        .. warning::
+
+           This function contains specificities regarding the argument definitions.
+           Please refer to the `command documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LSEL.html>`_
+           for further explanations.
 
         .. _LSEL_notes:
 
@@ -345,13 +352,17 @@ class Selecting:
         within the range ``VMIN`` - ``Toler`` and ``VMAX`` + ``Toler`` are selected. The default tolerance
         ``Toler`` is based on the relative values of ``VMIN`` and ``VMAX`` as follows:
 
-        If ``VMIN`` = ``VMAX``, ``Toler`` = 0.005 x ``VMIN``.
-        If ``VMIN`` = ``VMAX`` = 0.0, ``Toler`` = 1.0E-6.
-        If ``VMAX`` ≠ ``VMIN``, ``Toler`` = 1.0E-8 x ( ``VMAX`` - ``VMIN`` ).
+        * If ``VMIN`` = ``VMAX``, ``Toler`` = 0.005 x ``VMIN``.
+
+        * If ``VMIN`` = ``VMAX`` = 0.0, ``Toler`` = 1.0E-6.
+
+        * If ``VMAX`` ≠ ``VMIN``, ``Toler`` = 1.0E-8 x ( ``VMAX`` - ``VMIN`` ).
 
         Use the `SELTOL
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SELTOL.html#SELTOL.menupath>`_
         :ref:`seltol` command to override this default and specify ``Toler`` explicitly.
+
+        .. _lsel.tab.1:
 
         **LSEL - Valid Item and Component Labels**
 
@@ -453,122 +464,110 @@ class Selecting:
         dof1 : str
             Used only with ``Type`` = S, A, or U. Valid lables are:
 
-            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
-            (rotations); ROT (ROTX,
-            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
-            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
-            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
-            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
-            (current).
-            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
-            (MX, MY, and MZ); FORC (F
-            and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
-            **Fluid flow force label** : FLOW (fluid flow).
-            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
-            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
-            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
+            * **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
+              (rotations); ROT (ROTX, ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
+            * **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            * **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
+            * **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
+            * **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ);
+              CURR (current).
+            * **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments);
+              M (MX, MY, and MZ); FORC (F and M); DVOL (fluid mass flow rate).
+            * **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            * **Fluid flow force label** : FLOW (fluid flow).
+            * **Electric force labels** : AMPS (current flow); CHRG (electric charge).
+            * **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
+            * **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
 
         dof2 : str
             Used only with ``Type`` = S, A, or U. Valid lables are:
 
-            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
-            (rotations); ROT (ROTX,
-            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
-            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
-            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
-            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
-            (current).
-            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
-            (MX, MY, and MZ); FORC (F
-            and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
-            **Fluid flow force label** : FLOW (fluid flow).
-            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
-            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
-            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
+            * **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
+              (rotations); ROT (ROTX, ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
+            * **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            * **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
+            * **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
+            * **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ);
+              CURR (current).
+            * **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments);
+              M (MX, MY, and MZ); FORC (F and M); DVOL (fluid mass flow rate).
+            * **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            * **Fluid flow force label** : FLOW (fluid flow).
+            * **Electric force labels** : AMPS (current flow); CHRG (electric charge).
+            * **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
+            * **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
 
         dof3 : str
             Used only with ``Type`` = S, A, or U. Valid lables are:
 
-            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
-            (rotations); ROT (ROTX,
-            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
-            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
-            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
-            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
-            (current).
-            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
-            (MX, MY, and MZ); FORC (F
-            and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
-            **Fluid flow force label** : FLOW (fluid flow).
-            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
-            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
-            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
+            * **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
+              (rotations); ROT (ROTX, ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
+            * **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            * **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
+            * **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
+            * **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ);
+              CURR (current).
+            * **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments);
+              M (MX, MY, and MZ); FORC (F and M); DVOL (fluid mass flow rate).
+            * **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            * **Fluid flow force label** : FLOW (fluid flow).
+            * **Electric force labels** : AMPS (current flow); CHRG (electric charge).
+            * **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
+            * **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
 
         dof4 : str
             Used only with ``Type`` = S, A, or U. Valid lables are:
 
-            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
-            (rotations); ROT (ROTX,
-            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
-            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
-            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
-            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
-            (current).
-            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
-            (MX, MY, and MZ); FORC (F
-            and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
-            **Fluid flow force label** : FLOW (fluid flow).
-            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
-            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
-            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
+            * **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
+              (rotations); ROT (ROTX, ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
+            * **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            * **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
+            * **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
+            * **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ);
+              CURR (current).
+            * **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments);
+              M (MX, MY, and MZ); FORC (F and M); DVOL (fluid mass flow rate).
+            * **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            * **Fluid flow force label** : FLOW (fluid flow).
+            * **Electric force labels** : AMPS (current flow); CHRG (electric charge).
+            * **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
+            * **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
 
         dof5 : str
             Used only with ``Type`` = S, A, or U. Valid lables are:
 
-            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
-            (rotations); ROT (ROTX,
-            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
-            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
-            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
-            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
-            (current).
-            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
-            (MX, MY, and MZ); FORC (F
-            and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
-            **Fluid flow force label** : FLOW (fluid flow).
-            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
-            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
-            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
+            * **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
+              (rotations); ROT (ROTX, ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
+            * **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            * **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
+            * **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
+            * **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ);
+              CURR (current).
+            * **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments);
+              M (MX, MY, and MZ); FORC (F and M); DVOL (fluid mass flow rate).
+            * **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            * **Fluid flow force label** : FLOW (fluid flow).
+            * **Electric force labels** : AMPS (current flow); CHRG (electric charge).
+            * **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
+            * **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
 
         dof6 : str
             Used only with ``Type`` = S, A, or U. Valid lables are:
 
-            **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
-            (rotations); ROT (ROTX,
-            ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
-            **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
-            **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
-            **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
-            **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ); CURR
-            (current).
-            **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments); M
-            (MX, MY, and MZ); FORC (F
-            and M); DVOL (fluid mass flow rate).
-            **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
-            **Fluid flow force label** : FLOW (fluid flow).
-            **Electric force labels** : AMPS (current flow); CHRG (electric charge).
-            **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
-            **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
+            * **Structural labels** : UX, UY, or UZ (displacements); U (UX, UY, and UZ) ; ROTX, ROTY, or ROTZ
+              (rotations); ROT (ROTX, ROTY, and ROTZ); DISP (U and ROT); HDSP (Hydrostatic pressure).
+            * **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
+            * **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements).
+            * **Electric labels** : VOLT (voltage); EMF (electromotive force drop); CURR (current).
+            * **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential); A (AZ);
+              CURR (current).
+            * **Structural force labels** : FX, FY, or FZ (forces); F (FX, FY, and FZ); MX, MY, or MZ (moments);
+              M (MX, MY, and MZ); FORC (F and M); DVOL (fluid mass flow rate).
+            * **Thermal force labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
+            * **Fluid flow force label** : FLOW (fluid flow).
+            * **Electric force labels** : AMPS (current flow); CHRG (electric charge).
+            * **Magnetic force labels** : FLUX (scalar magnetic flux); CSGZ (magnetic current segment).
+            * **Diffusion labels** : CONC (concentration); RATE (diffusion flow rate).
 
         Notes
         -----
@@ -648,10 +647,11 @@ class Selecting:
 
             * ``ALL`` - Select elements considering all of their nodes (default).
 
-            * ``ACTIVE`` - Select elements considering only their active nodes. An active node is a node that contributes DOFs
-              to the model.
+            * ``ACTIVE`` - Select elements considering only their active nodes. An active node is a node that
+              contributes DOFs to the model.
 
-            * ``INACTIVE`` - Select elements considering only their inactive nodes (such as orientation or radiation nodes).
+            * ``INACTIVE`` - Select elements considering only their inactive nodes (such as orientation or
+              radiation nodes).
 
             * ``CORNER`` - Select elements considering only their corner nodes.
 
@@ -709,7 +709,7 @@ class Selecting:
         vmin: str = "",
         vmax: str = "",
         vinc: str = "",
-        kabs: str = "",
+        kabs: int | str = "",
         **kwargs,
     ):
         r"""Selects a subset of elements.
@@ -744,43 +744,47 @@ class Selecting:
             * ``STAT`` - Display the current select status.
 
         item : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ESEL.html>`_ for further
-            information.
+            Label identifying data, see :ref:`ESEL.tab.1`. Some items also require a component label. If
+            ``Item`` = PICK (or simply "P"), graphical picking is enabled and all remaining command fields
+            are ignored (valid only in the GUI). Defaults to ELEM. If ``Item`` = STRA (straightened),
+            elements are selected whose midside nodes do not conform to the curved line or non-flat area on
+            which they should lie. (Such elements are sometimes formed during volume meshing ( :ref:`vmesh`
+            ) in an attempt to avoid excessive element distortion.) You should graphically examine any such
+            elements to evaluate their possible effect on solution accuracy.
 
         comp : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ESEL.html>`_ for further
-            information.
+            Component of the item (if required). Valid component labels are shown in :ref:`ESEL.tab.1`below.
 
         vmin : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ESEL.html>`_ for further
-            information.
+            Minimum value of item range. Ranges are element numbers, attribute numbers, load values, or
+            result values as appropriate for the item. A component name (as specified via the :ref:`cm`
+            command) can also be substituted for ``VMIN`` (in which case ``VMAX`` and ``VINC`` are ignored).
 
         vmax : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ESEL.html>`_ for further
-            information.
+            Maximum value of item range. ``VMAX`` defaults to ``VMIN`` for input values.
+
+            For result values, ``VMAX`` defaults to infinity if ``VMIN`` is positive, or to zero if ``VMIN``
+            is negative.
 
         vinc : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ESEL.html>`_ for further
-            information.
+            Value increment within range. Used only with integer ranges (such as for element and attribute
+            numbers). Defaults to 1. ``VINC`` cannot be negative.
 
-        kabs : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ESEL.html>`_ for further
-            information.
+        kabs : int or str
+            Absolute value key:
+
+            * ``0`` - Check sign of value during selection.
+
+            * ``1`` - Use absolute value during selection (sign ignored).
 
         Notes
         -----
+
+        .. warning::
+
+           This function contains specificities regarding the argument definitions.
+           Please refer to the `command documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ESEL.html>`_
+           for further explanations.
 
         .. _ESEL_notes:
 
@@ -805,13 +809,17 @@ class Selecting:
         range ``VMIN`` - ``Toler`` and ``VMAX`` + ``Toler`` are selected. The default tolerance ``Toler`` is
         based on the relative values of ``VMIN`` and ``VMAX`` as follows:
 
-        If ``VMIN`` = ``VMAX``, ``Toler`` = 0.005 x ``VMIN``.
-        If ``VMIN`` = ``VMAX`` = 0.0, ``Toler`` = 1.0E-6.
-        If ``VMAX`` ≠ ``VMIN``, ``Toler`` = 1.0E-8 x ( ``VMAX`` - ``VMIN`` ).
+        * If ``VMIN`` = ``VMAX``, ``Toler`` = 0.005 x ``VMIN``.
+
+        * If ``VMIN`` = ``VMAX`` = 0.0, ``Toler`` = 1.0E-6.
+
+        * If ``VMAX`` ≠ ``VMIN``, ``Toler`` = 1.0E-8 x ( ``VMAX`` - ``VMIN`` ).
 
         To override this default and specify ``Toler`` explicitly, issue the `SELTOL
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SELTOL.html#SELTOL.menupath>`_
         :ref:`seltol` command.
+
+        .. _ESEL.tab.1:
 
         **ESEL - Valid Item and Component Labels**
 
@@ -931,7 +939,8 @@ class Selecting:
 
             * ``ALL`` - Select all nodes of the selected elements (default).
 
-            * ``ACTIVE`` - Select only the active nodes. An active node is a node that contributes DOFs to the model.
+            * ``ACTIVE`` - Select only the active nodes. An active node is a node that contributes DOFs to the
+              model.
 
             * ``INACTIVE`` - Select only inactive nodes (such as orientation or radiation).
 
@@ -1040,7 +1049,7 @@ class Selecting:
         vmin: str = "",
         vmax: str = "",
         vinc: str = "",
-        kabs: str = "",
+        kabs: int | str = "",
         **kwargs,
     ):
         r"""Selects a subset of nodes.
@@ -1069,43 +1078,41 @@ class Selecting:
             * ``STAT`` - Display the current select status.
 
         item : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NSEL.html>`_ for further
-            information.
+            Label identifying data. Valid item labels are shown in the table below. Some items also require
+            a component label. If ``Item`` = PICK (or simply "P"), graphical picking is enabled and all
+            remaining command fields are ignored (valid only in the GUI). Defaults to NODE.
 
         comp : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NSEL.html>`_ for further
-            information.
+            Component of the item (if required). Valid component labels are shown in the table below.
 
         vmin : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NSEL.html>`_ for further
-            information.
+            Minimum value of item range. Ranges are node numbers, set numbers, coordinate values, load
+            values, or result values as appropriate for the item. A component name (as specified on the
+            :ref:`cm` command) may also be substituted for ``VMIN`` ( ``VMAX`` and ``VINC`` are ignored).
 
         vmax : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NSEL.html>`_ for further
-            information.
+            Maximum value of item range. ``VMAX`` defaults to ``VMIN`` for input values. For result values,
+            ``VMAX`` defaults to infinity if ``VMIN`` is positive, or to zero if ``VMIN`` is negative.
 
         vinc : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NSEL.html>`_ for further
-            information.
+            Value increment within range. Used only with integer ranges (such as for node and set numbers).
+            Defaults to 1. ``VINC`` cannot be negative.
 
-        kabs : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NSEL.html>`_ for further
-            information.
+        kabs : int or str
+            Absolute value key:
+
+            * ``0`` - Check sign of value during selection.
+
+            * ``1`` - Use absolute value during selection (sign ignored).
 
         Notes
         -----
+
+        .. warning::
+
+           This function contains specificities regarding the argument definitions.
+           Please refer to the `command documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NSEL.html>`_
+           for further explanations.
 
         .. _NSEL_notes:
 
@@ -1133,13 +1140,17 @@ class Selecting:
         range VMIN- ``Toler`` and VMAX+ ``Toler`` are selected. The default tolerance ``Toler`` is based on
         the relative values of VMIN and VMAX as follows:
 
-        If VMIN = VMAX, ``Toler`` = 0.005 x VMIN.
-        If VMIN = VMAX = 0.0, ``Toler`` = 1.0E-6.
-        If VMAX ≠ VMIN, ``Toler`` = 1.0E-8 x (VMAX-VMIN).
+        * If VMIN = VMAX, ``Toler`` = 0.005 x VMIN.
+
+        * If VMIN = VMAX = 0.0, ``Toler`` = 1.0E-6.
+
+        * If VMAX ≠ VMIN, ``Toler`` = 1.0E-8 x (VMAX-VMIN).
 
         Use the `SELTOL
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SELTOL.html#SELTOL.menupath>`_
         :ref:`seltol` command to override this default and specify ``Toler`` explicitly.
+
+        .. _nsel.tab.1:
 
         **NSEL - Valid Item and Component Labels**
 
@@ -1265,6 +1276,9 @@ class Selecting:
              - DGEN
              - Nodal diffusing substance generation rate.
 
+
+        .. _nsel.tab.2:
+
         **NSEL - Valid Item and Component Labels for Nodal DOF Result Values**
 
         .. flat-table::
@@ -1306,6 +1320,9 @@ class Selecting:
            * - EMF
              -
              - Electromotive force drop.
+
+
+        .. _nsel.tab.3:
 
         **NSEL - Valid Item and Component Labels for Element Result Values**
 
@@ -1400,7 +1417,7 @@ class Selecting:
              - PLWK
              - Plastic work/volume.
            * - CONT
-             - STAT
+             - STAT :ref:`NSELcontstat`
              - Contact status.
            * - "
              - PENE
@@ -1478,8 +1495,8 @@ class Selecting:
 
             * ``0`` - Select only nodes interior to selected areas.
 
-            * ``1`` - Select all nodes (interior to area, interior to lines, and at keypoints) associated with the
-              selected areas.
+            * ``1`` - Select all nodes (interior to area, interior to lines, and at keypoints) associated with
+              the selected areas.
 
         Notes
         -----
@@ -1517,8 +1534,8 @@ class Selecting:
 
             * ``0`` - Select only nodes interior to selected volumes.
 
-            * ``1`` - Select all nodes (interior to volume, interior to areas, interior to lines, and at keypoints)
-              associated with the selected volumes.
+            * ``1`` - Select all nodes (interior to volume, interior to areas, interior to lines, and at
+              keypoints) associated with the selected volumes.
 
         Notes
         -----
@@ -1578,10 +1595,11 @@ class Selecting:
         labt : str
             Type of selection to be made:
 
-            * ``ALL`` - Selects all items of the specified entity type and all items of lower entity types (default).
+            * ``ALL`` - Selects all items of the specified entity type and all items of lower entity types
+              (default).
 
-            * ``BELOW`` - Selects all items directly associated with and below the selected items of the specified entity
-              type.
+            * ``BELOW`` - Selects all items directly associated with and below the selected items of the
+              specified entity type.
 
         entity : str
             Entity type on which selection is based:
@@ -1660,7 +1678,7 @@ class Selecting:
         vmin: str = "",
         vmax: str = "",
         vinc: str = "",
-        kswp: str = "",
+        kswp: int | str = "",
         **kwargs,
     ):
         r"""Selects a subset of areas.
@@ -1701,43 +1719,44 @@ class Selecting:
             * ``STAT`` - Display the current select status.
 
         item : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ASEL.html>`_ for further
-            information.
+            Label identifying data. Valid item labels are shown in :ref:`asel.tab.1`. Some items also
+            require a component label. If ``Item`` = PICK (or simply "P"), graphical picking is enabled and
+            all remaining command fields are ignored (valid only in the GUI). Defaults to AREA.
 
         comp : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ASEL.html>`_ for further
-            information.
+            Component of the item (if required). Valid component labels are shown in :ref:`asel.tab.1`.
 
         vmin : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ASEL.html>`_ for further
-            information.
+            Minimum value of item range. Ranges are area numbers, coordinate values, attribute numbers,
+            etc., as appropriate for the item. A component name (as specified on the :ref:`cm` command) may
+            also be substituted for ``VMIN`` ( ``VMAX`` and ``VINC`` are ignored). If ``Item`` = MAT, TYPE,
+            REAL, or ESYS and if ``VMIN`` is positive, the absolute value of ``Item`` is compared against
+            the range for selection; if ``VMIN`` is negative, the signed value of ``Item`` is compared. See
+            the :ref:`alist` command for a discussion of signed attributes.
 
         vmax : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ASEL.html>`_ for further
-            information.
+            Maximum value of item range. ``VMAX`` defaults to ``VMIN``.
 
         vinc : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ASEL.html>`_ for further
-            information.
+            Value increment within range. Used only with integer ranges (such as for area numbers). Defaults
+            to 1. ``VINC`` cannot be negative.
 
-        kswp : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ASEL.html>`_ for further
-            information.
+        kswp : int or str
+            Specifies whether only areas are to be selected:
+
+            * ``0`` - Select areas only.
+
+            * ``1`` - Select areas, as well as keypoints, lines, nodes, and elements associated with selected
+              areas. Valid only with ``Type`` = S.
 
         Notes
         -----
+
+        .. warning::
+
+           This function contains specificities regarding the argument definitions.
+           Please refer to the `command documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ASEL.html>`_
+           for further explanations.
 
         .. _ASEL_notes:
 
@@ -1758,13 +1777,17 @@ class Selecting:
         range VMIN- ``Toler`` and VMAX+ ``Toler`` are selected. The default tolerance ``Toler`` is based on
         the relative values of VMIN and VMAX as follows:
 
-        If VMIN = VMAX, ``Toler`` = 0.005 x VMIN.
-        If VMIN = VMAX = 0.0, ``Toler`` = 1.0E-6.
-        If VMAX ≠ VMIN, ``Toler`` = 1.0E-8 x (VMAX-VMIN).
+        * If VMIN = VMAX, ``Toler`` = 0.005 x VMIN.
+
+        * If VMIN = VMAX = 0.0, ``Toler`` = 1.0E-6.
+
+        * If VMAX ≠ VMIN, ``Toler`` = 1.0E-8 x (VMAX-VMIN).
 
         Use the `SELTOL
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SELTOL.html#SELTOL.menupath>`_
         :ref:`seltol` command to override this default and specify ``Toler`` explicitly.
+
+        .. _asel.tab.1:
 
         **ASEL - Valid Item and Component Labels**
 
@@ -1821,26 +1844,35 @@ class Selecting:
 
         Notes
         -----
-        For selects based on non-integer numbers (e.g. coordinates,
-        results, etc.), items within the range VMIN - Toler and VMAX +
-        Toler are selected, where VMIN and VMAX are the range values input
-        on the xSEL commands (ASEL, ESEL, KSEL, LSEL, NSEL, and VSEL).
+        For selects based on non-integer numbers (e.g. coordinates, results, etc.), items within the range
+        VMIN - ``Toler`` and VMAX + ``Toler`` are selected, where VMIN and VMAX are the range values input
+        on the xSEL commands ( `ASEL
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_ASEL.html#ASEL.menupath>`_
+        :ref:`asel`, `ESEL
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_ESEL.html#ESEL.menupath>`_
+        :ref:`esel`, `KSEL
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_KSEL.html#KSEL.menupath>`_
+        :ref:`ksel`, `LSEL
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_LSEL.html#LSEL.menupath>`_
+        :ref:`lsel`, `NSEL
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_NSEL.html#NSEL.menupath>`_
+        :ref:`nsel`, and `VSEL
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_VSEL.html#VSEL.menupath>`_
+        :ref:`vsel` ).
 
-        The default tolerance logic is based on the relative values of
-        VMIN and VMAX as follows:
+        The default tolerance logic is based on the relative values of VMIN and VMAX as follows:
 
-        If ``vmin == vmax``, ``toler = 0.005\2vmin``
+        * If VMIN = VMAX, ``Toler`` = 0.005 x VMIN.
 
-        If ``vmin == vmax == 0.0``, ``toler = 1.0E-6``.
+        * If VMIN = VMAX = 0.0, ``Toler`` = 1.0E-6.
 
-        If ``vmax != vmin``, ``toler = 1.0E-8 x (vmax - vmin)``.
+        * If VMAX ≠ VMIN, ``Toler`` = 1.0E-8 x (VMAX-VMIN).
 
-        This command is typically used when ``vmax - vmin`` is very large so
-        that the computed default tolerance is therefore large and the
-        xSEL commands selects more than what is desired.
+        This command is typically used when VMAX-VMIN is very large so that the computed default tolerance
+        is therefore large and the xSEL  commands selects more than what is desired.
 
-        Toler remains active until respecified by a subsequent seltol
-        command. ``seltol()`` resets back to the default toler value.
+        ``Toler`` remains active until respecified by a subsequent :ref:`seltol` command. A :ref:`seltol` <
+        blank > resets back to the default ``Toler`` logic.
 
         Examples
         --------
@@ -1890,7 +1922,7 @@ class Selecting:
         vmin: str = "",
         vmax: str = "",
         vinc: str = "",
-        kabs: str = "",
+        kabs: int | str = "",
         **kwargs,
     ):
         r"""Selects a subset of keypoints or hard points.
@@ -1919,43 +1951,43 @@ class Selecting:
             * ``STAT`` - Display the current select status.
 
         item : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
-            information.
+            Label identifying data. Valid item labels are shown in the table below. Some items also require
+            a component label. If ``Item`` = PICK (or simply "P"), graphical picking is enabled and all
+            remaining command fields are ignored (valid only in the GUI). Defaults to KP.
 
         comp : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
-            information.
+            Component of the item (if required). Valid component labels are shown in the table below.
 
         vmin : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
-            information.
+            Minimum value of item range. Ranges are keypoint numbers, coordinate values, attribute numbers,
+            etc., as appropriate for the item. A component name (as specified on the :ref:`cm` command) may
+            also be substituted for ``VMIN`` ( ``VMAX`` and ``VINC`` are ignored). If ``Item`` = MAT, TYPE,
+            REAL, or ESYS and if ``VMIN`` is positive, the absolute value of ``Item`` is compared against
+            the range for selection; if ``VMIN`` is negative, the signed value of ``Item`` is compared. See
+            the :ref:`klist` command for a discussion of signed attributes.
 
         vmax : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
-            information.
+            Maximum value of item range. ``VMAX`` defaults to ``VMIN``.
 
         vinc : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
-            information.
+            Value increment within range. Used only with integer ranges (such as for keypoint numbers).
+            Defaults to 1. ``VINC`` cannot be negative.
 
-        kabs : str
-            The description of the argument is missing in the Python function. Please, refer to the `command
-            documentation
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_ for further
-            information.
+        kabs : int or str
+            Absolute value key:
+
+            * ``0`` - Check sign of value during selection.
+
+            * ``1`` - Use absolute value during selection (sign ignored).
 
         Notes
         -----
+
+        .. warning::
+
+           This function contains specificities regarding the argument definitions.
+           Please refer to the `command documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KSEL.html>`_
+           for further explanations.
 
         .. _KSEL_notes:
 
@@ -1971,13 +2003,17 @@ class Selecting:
         range ``VMIN`` - ``Toler`` and ``VMAX`` + ``Toler`` are selected. The default tolerance ``Toler`` is
         based on the relative values of ``VMIN`` and ``VMAX`` as follows:
 
-        If ``VMIN`` = ``VMAX``, ``Toler`` = 0.005 x ``VMIN``.
-        If ``VMIN`` = ``VMAX`` = 0.0, ``Toler`` = 1.0E-6.
-        If ``VMAX`` ≠ ``VMIN``, ``Toler`` = 1.0E-8 x ( ``VMAX`` - ``VMIN`` ).
+        * If ``VMIN`` = ``VMAX``, ``Toler`` = 0.005 x ``VMIN``.
+
+        * If ``VMIN`` = ``VMAX`` = 0.0, ``Toler`` = 1.0E-6.
+
+        * If ``VMAX`` ≠ ``VMIN``, ``Toler`` = 1.0E-8 x ( ``VMAX`` - ``VMIN`` ).
 
         Use the `SELTOL
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SELTOL.html#SELTOL.menupath>`_
         :ref:`seltol` command to override this default and specify ``Toler`` explicitly.
+
+        .. _KSEL.tab.1:
 
         **KSEL - Valid Item and Component Labels**
 

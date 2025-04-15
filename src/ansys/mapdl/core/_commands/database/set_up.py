@@ -137,6 +137,12 @@ class SetUp:
         Notes
         -----
 
+        .. warning::
+
+           This function contains specificities regarding the argument definitions.
+           Please refer to the `command documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_UNITS.html>`_
+           for further explanations.
+
         .. _s-UNITS_notes:
 
         Allows the user to set a marker in the database indicating the system of units used. The setting may
@@ -205,11 +211,11 @@ class SetUp:
         nopar : int or str
             Parameter resume key:
 
-            * ``0`` - All data in the database, including the scalar parameters, are replaced with the data saved on
-              :file:`Jobname.db` (default).
+            * ``0`` - All data in the database, including the scalar parameters, are replaced with the data
+              saved on :file:`Jobname.db` (default).
 
-            * ``1`` - All data in the database, except the scalar parameters, are replaced with the data saved on
-              :file:`Jobname.db`.
+            * ``1`` - All data in the database, except the scalar parameters, are replaced with the data saved
+              on :file:`Jobname.db`.
 
         knoplot : str
             If equal to 1, will suppress automatic plot. Otherwise, if the GUI is on and this :ref:`resume`
@@ -307,7 +313,8 @@ class SetUp:
         slab : str
             Mode for saving the database:
 
-            * ``ALL`` - Save the model data, solution data and post data (element tables, etc.). This value is the default.
+            * ``ALL`` - Save the model data, solution data and post data (element tables, etc.). This value is
+              the default.
 
             * ``MODEL`` - Save the model data (solid model, finite element model, loadings, etc.) only.
 
@@ -360,11 +367,11 @@ class SetUp:
         ----------
         mode : str
 
-            * ``CENT`` - Solid model boundary condition symbols and labels appear at the centroid of the solid model entity
-              (default).
+            * ``CENT`` - Solid model boundary condition symbols and labels appear at the centroid of the solid
+              model entity (default).
 
-            * ``TESS`` - Solid model boundary condition symbols and labels appear inside each constituent element of the
-              tessellation.
+            * ``TESS`` - Solid model boundary condition symbols and labels appear inside each constituent
+              element of the tessellation.
 
         Notes
         -----

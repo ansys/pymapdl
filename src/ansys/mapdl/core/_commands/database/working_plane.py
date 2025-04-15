@@ -107,12 +107,14 @@ class WorkingPlane:
         wpctyp : int or str
             Working plane coordinate system type:
 
-            * ``0`` - Cartesian (default). If working plane tracking is on ( :ref:`csys`,4), the updated active coordinate
-              system will also be Cartesian.
+            * ``0`` - Cartesian (default). If working plane tracking is on ( :ref:`csys`,4), the updated active
+              coordinate system will also be Cartesian.
 
-            * ``1`` - Polar. If working plane tracking is on, the updated active coordinate system will be cylindrical.
+            * ``1`` - Polar. If working plane tracking is on, the updated active coordinate system will be
+              cylindrical.
 
-            * ``2`` - Polar. If working plane tracking is on, the updated active coordinate system will be spherical.
+            * ``2`` - Polar. If working plane tracking is on, the updated active coordinate system will be
+              spherical.
 
         grtype : int or str
             Grid type:
@@ -128,8 +130,8 @@ class WorkingPlane:
 
             * ``0`` - Do not show ``GRTYPE`` entities (grid and/or triad) (default).
 
-            * ``1`` - Show ``GRTYPE`` entities. Cartesian working planes will be displayed with a Cartesian grid, polar
-              with a polar grid.
+            * ``1`` - Show ``GRTYPE`` entities. Cartesian working planes will be displayed with a Cartesian
+              grid, polar with a polar grid.
 
         snapang : str
             Snap angle (0--180) in degrees. Used only if ``WPCTYP`` = 1 or 2. Defaults to 5 degrees.

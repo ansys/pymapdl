@@ -53,14 +53,14 @@ class Components:
             * ``NODE`` - Nodes.
 
         kopt : str
-            Controls how element component contents are updated during `nonlinear mesh adaptivity analysis
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnaexample.html>`_ :
+            Controls how element component contents are updated during `nonlinear mesh adaptivity analysis <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_nlad/advmnaexample.html>`_ :
 
-            0 - Component is not updated during remeshing and therefore contains only initial mesh elements
-            (default). 1 - Component is updated during remeshing to contain the updated elements.
+            * 0 - Component is not updated during remeshing and therefore contains only initial mesh elements
+              (default).
+            * 1 - Component is updated during remeshing to contain the updated elements.
 
-            This argument is valid only for nonlinear mesh adaptivity analysis with ``Entity`` = ELEM, and
-            for solid element components only.
+            This argument is valid only for nonlinear mesh adaptivity analysis with ``Entity`` = ELEM, and for
+            solid element components only.
 
         Notes
         -----
@@ -117,7 +117,7 @@ class Components:
         keyword : str
             The label identifying the type of value to be modified.
 
-            NAME - Modify the NAME of the component
+            * NAME - Modify the NAME of the component
 
         value : str
             If ``Keyword`` is NAME, then the value is the alphanumeric label to be applied. See the
@@ -241,12 +241,12 @@ class Components:
         label : str
             Name of the component or assembly to be plotted.
 
-            * ``(blank)`` - All selected components and assemblies are plotted (default). If fewer than 11 components are
-              selected, then all are plotted. If more than 11 components are selected, then only the first 11 are
-              plotted.
+            * ``(blank)`` - All selected components and assemblies are plotted (default). If fewer than 11
+              components are selected, then all are plotted. If more than 11 components are selected, then only
+              the first 11 are plotted.
 
-            * ``ALL`` - All selected components are plotted. If number of selected components is greater than 11, then the
-              legend showing component names will not be shown.
+            * ``ALL`` - All selected components are plotted. If number of selected components is greater than
+              11, then the legend showing component names will not be shown.
 
             * ``N`` - Next set of defined components and assemblies is plotted.
 
@@ -286,15 +286,17 @@ class Components:
 
         Possible usage:
 
-        :ref:`cmplot`, ``CNAME`` - Plots the specified component (if selected). :ref:`cmplot`, ``CNAME``,
-        ALL - Plot component in the context of all other selected entity components of the same type as the
-        component. :ref:`cmplot` - Plot the first eleven selected components. :ref:`cmplot`,ALL - Plot all
-        selected components. :ref:`cmplot`,N or :ref:`cmplot`,P - Plot next or previous set of eleven
-        components. :ref:`cmplot`,ALL, ``Entity`` - Plot all selected components of type specified in
-        ``Entity``. :ref:`cmplot`, ``Entity`` - Plot components of type specified in ``Entity``, from the
-        first eleven components. :ref:`cmplot`,N, ``Entity`` - Plot components of type specified in
-        ``Entity``, if any, from the next set of eleven components (substitute P for N to plot from previous
-        set).
+        * :ref:`cmplot`, ``CNAME`` - Plots the specified component (if selected).
+        * :ref:`cmplot`, ``CNAME``, ALL - Plot component in the context of all other selected entity
+          components of the same type as the component.
+        * :ref:`cmplot` - Plot the first eleven selected components.
+        * :ref:`cmplot`,ALL - Plot all selected components.
+        * :ref:`cmplot`,N or :ref:`cmplot`,P - Plot next or previous set of eleven components.
+        * :ref:`cmplot`,ALL, ``Entity`` - Plot all selected components of type specified in ``Entity``.
+        * :ref:`cmplot`, ``Entity`` - Plot components of type specified in ``Entity``, from the first
+          eleven components.
+        * :ref:`cmplot`,N, ``Entity`` - Plot components of type specified in ``Entity``, if any, from the
+          next set of eleven components (substitute P for N to plot from previous set).
 
         This command is valid in any processor.
         """
@@ -326,8 +328,8 @@ class Components:
         oper : str
             Operation label:
 
-            * ``ADD`` - To add more components. The level of any assembly to be added must be lower than that of the
-              assembly ``Aname`` (see :ref:`cmgrp` command).
+            * ``ADD`` - To add more components. The level of any assembly to be added must be lower than that of
+              the assembly ``Aname`` (see :ref:`cmgrp` command).
 
             * ``DELE`` - To remove components.
 
@@ -405,11 +407,13 @@ class Components:
 
         Examples of possible usage:
 
-        :ref:`cmlist` - List all selected components. :ref:`cmlist`, EXPA - List all selected components
-        and for each component list the underlying entity ID's. :ref:`cmlist`, ``Name`` - List the specified
-        component. :ref:`cmlist`, ``Name``,EXPA - List specified component along with all underlying entity
-        ID's. :ref:`cmlist`, EXPA,  ``Entity`` - List all selected components of specified entity
-        type. For each component also list the underlying entity ID's.
+        * :ref:`cmlist` - List all selected components.
+        * :ref:`cmlist`, EXPA - List all selected components and for each component list the underlying
+          entity ID's.
+        * :ref:`cmlist`, ``Name`` - List the specified component.
+        * :ref:`cmlist`, ``Name``,EXPA - List specified component along with all underlying entity ID's.
+        * :ref:`cmlist`, EXPA,  ``Entity`` - List all selected components of specified entity type.
+          For each component also list the underlying entity ID's.
         """
         command = f"CMLIST,{name},{key},{entity}"
         return self.run(command, **kwargs)

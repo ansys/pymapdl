@@ -128,8 +128,8 @@ class Picking:
 
             * ``NOOR`` - Data is not ordered (default).
 
-            * ``ORDER`` - Data is in an ordered list (such as for the :ref:`e`,P51X and :ref:`a`,P51X commands, in which the
-              order of the data items is significant for the picking operation).
+            * ``ORDER`` - Data is in an ordered list (such as for the :ref:`e`,P51X and :ref:`a`,P51X commands,
+              in which the order of the data items is significant for the picking operation).
 
         leng : str
             Length of number of items describing the list (should equal ``NARG`` if ``Otype`` = NOOR;
