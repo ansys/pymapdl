@@ -262,11 +262,12 @@ jobs:
     with:
       latest-version: "252"
       mapdl-version: ${{ matrix.mapdl-version }}
-      testing-minimal: true
+      testing-minimal: false
       on-console: true
       pytest-arguments: '-k console'
-      file-name: "${{ matrix.mapdl-version }}-minimal-console"
-      tags: "local,minimal,console"
+
+      file-name: "${{ matrix.mapdl-version }}-console"
+      tags: "local,console"
 
 
   test-windows:
@@ -310,7 +311,7 @@ jobs:
       contents: write
     steps:
       - name: "Download the library artifacts from build-library step"
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
           name: ${{ env.PACKAGE_NAME }}-artifacts
           path: ${{ env.PACKAGE_NAME }}-artifacts
