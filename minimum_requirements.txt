@@ -1,5 +1,5 @@
 ansys-api-mapdl==0.5.2
-numpy==2.2.2
-platformdirs==4.3.6
-psutil==6.1.1
+numpy==2.2.4
+platformdirs==4.3.7
+psutil==7.0.0
 pyansys-tools-versioning==0.6.0

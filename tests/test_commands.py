@@ -36,7 +36,7 @@ from ansys.mapdl.core.commands import (
     StringWithLiteralRepr,
 )
 from ansys.mapdl.core.examples.verif_files import vmfiles
-from conftest import TestClass, has_dependency, requires
+from conftest import NullContext, TestClass, has_dependency, requires
 
 if has_dependency("pandas"):
     import pandas as pd
@@ -145,12 +145,11 @@ CMD_DOC_STRING_INJECTOR.extend(CMD_BC_LISTING)
 
 @pytest.fixture()
 def beam_solve(mapdl, cleared):
-    mapdl.mute = True
-    mapdl.input(vmfiles["vm10"])
+    with mapdl.muted:
+        mapdl.input(vmfiles["vm10"])
 
-    mapdl.post1()
-    mapdl.set(1, 2)
-    mapdl.mute = False
+        mapdl.post1()
+        mapdl.set(1, 2)
 
 
 def test_cmd_class():
@@ -616,6 +615,9 @@ class Test_MAPDL_commands(TestClass):
         "vwrite",
     ]
 
+    RAISE_WARNINGS = ["eshape"]
+    RAISE_EXCEPTIONS = []
+
     @staticmethod
     def fake_wrap(*args, **kwags):
         return args[0]
@@ -659,11 +661,19 @@ class Test_MAPDL_commands(TestClass):
 
         args = [f"arg{i}" for i in range(len(parm) - 1)]  # 3 = self, cmd, kwargs
 
-        if list(parm)[0].lower() == "self":
-            args = args[:-1]
-            post = func(mapdl, *args)
+        if cmd in self.RAISE_WARNINGS:
+            context = pytest.warns(UserWarning)
+        elif cmd in self.RAISE_EXCEPTIONS:
+            context = pytest.raises(Exception)
         else:
-            post = func(*args)
+            context = NullContext()
+
+        with context:
+            if list(parm)[0].lower() == "self":
+                args = args[:-1]
+                post = func(mapdl, *args)
+            else:
+                post = func(*args)
 
         for arg in args:
             assert arg in post
@@ -688,12 +698,11 @@ class Test_output_listing(TestClass):
     @staticmethod
     @pytest.fixture(scope="class")
     def plastic_solve_output(mapdl):
-        mapdl.mute = True
-        mapdl.input(vmfiles["vm273"])
+        with mapdl.muted:
+            mapdl.input(vmfiles["vm273"])
 
-        mapdl.post1()
-        mapdl.set(1, 2)
-        mapdl.mute = False
+            mapdl.post1()
+            mapdl.set(1, 2)
 
     @staticmethod
     @pytest.mark.parametrize(

@@ -22,7 +22,6 @@
 
 """Module to control interaction with MAPDL through Python"""
 
-import atexit
 from functools import wraps
 import glob
 import logging
@@ -87,6 +86,8 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.xpl import ansXpl
 
 from ansys.mapdl.core.post import PostProcessing
+
+MAX_PARAM_CHARS = 32
 
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 
@@ -188,7 +189,6 @@ _ALLOWED_START_PARM = [
     "additional_switches",
     "check_parameter_names",
     "env_vars",
-    "launched",
     "exec_file",
     "finish_job_on_exit",
     "hostname",
@@ -196,6 +196,7 @@ _ALLOWED_START_PARM = [
     "jobid",
     "jobname",
     "launch_on_hpc",
+    "launched",
     "mode",
     "nproc",
     "override",
@@ -262,7 +263,6 @@ class _MapdlCore(Commands):
         **start_parm,
     ):
         """Initialize connection with MAPDL."""
-        atexit.register(self.__del__)  # registering to exit properly
         self._show_matplotlib_figures = True  # for testing
         self._query = None
         self._exited: bool = False
@@ -540,7 +540,7 @@ class _MapdlCore(Commands):
 
         elif not self._path:
             raise MapdlRuntimeError(
-                f"MAPDL could provide a path using /INQUIRE or the cached path ('{self._path}')."
+                f"MAPDL could NOT provide a path using /INQUIRE or the cached path ('{self._path}')."
             )
 
         return self._path
@@ -837,6 +837,21 @@ class _MapdlCore(Commands):
 
         """
         return self._non_interactive(self)
+
+    @property
+    def muted(self):
+        """Context manager that suppress all output from MAPDL
+
+        Use the `muted` context manager to suppress all the output. Similar to
+        setting `mapdl.mute = True` but only for the context manager.
+
+        Examples
+        --------
+        >>> with mapdl.muted:
+        ...    mapdl.run("/SOLU") # This call is muted
+
+        """
+        return self._muted(self)
 
     @property
     def parameters(self) -> "Parameters":
@@ -1187,10 +1202,6 @@ class _MapdlCore(Commands):
             nblock_filename = os.path.join(self.directory, "nblock.cdb")
 
             # must have all nodes elements are using selected
-            if hasattr(self, "mute"):
-                old_mute = self.mute
-                self.mute = True
-
             self.cm("__NODE__", "NODE", mute=True)
             self.nsle("S", mute=True)
             self.cdwrite("db", arch_filename, mute=True)
@@ -1200,9 +1211,6 @@ class _MapdlCore(Commands):
             self.esel("NONE", mute=True)
             self.cdwrite("db", nblock_filename, mute=True)
             self.cmsel("S", "__ELEM__", "ELEM", mute=True)
-
-            if hasattr(self, "mute"):
-                self.mute = old_mute
 
             self._archive_cache = Archive(arch_filename, parse_vtk=False, name="Mesh")
             grid = self._archive_cache._parse_vtk(additional_checking=True)
@@ -1529,6 +1537,19 @@ class _MapdlCore(Commands):
         @property
         def _cached_routine(self):
             return self._parent()._cached_routine
+
+    class _muted:
+        def __init__(self, parent):
+            self._parent = weakref.ref(parent)
+            self.old_value = None
+
+        def __enter__(self):
+            self.old_value = self._parent().mute
+            self._parent().mute = True
+
+        def __exit__(self, *args):
+            self._parent().mute = self.old_value
+            self.old_value = None
 
     def run_as_routine(self, routine):
         """
@@ -1913,7 +1934,8 @@ class _MapdlCore(Commands):
         filename = os.path.join(self.directory, ".".join(items[1:]))
         if os.path.isfile(filename):
             self._response = open(filename).read()
-            self._log.info(self._response)
+            response_ = "\n".join(self._response.splitlines()[:10])
+            self._log.info(response_)
         else:
             raise Exception("Cannot run:\n{command}\n\nFile does not exist")
 
@@ -2011,7 +2033,8 @@ class _MapdlCore(Commands):
         if self._response is None:  # pragma: no cover
             self._log.warning("Unable to read response from flushed commands")
         else:
-            self._log.info(self._response)
+            response_ = "\n".join(self._response.splitlines()[:10])
+            self._log.debug(f"Printing truncated response: {response_}")
 
     def run_multiline(self, commands) -> str:
         """Run several commands as a single block
@@ -2336,7 +2359,8 @@ class _MapdlCore(Commands):
         text = text.replace("\\r\\n", "\n").replace("\\n", "\n")
         if text:
             self._response = StringWithLiteralRepr(text.strip())
-            self._log.info(self._response)
+            response_ = "\n".join(self._response.splitlines()[:20])
+            self._log.info(response_)
         else:
             self._response = None
             return self._response
@@ -2368,21 +2392,8 @@ class _MapdlCore(Commands):
         raise NotImplementedError("Implemented by child class")
 
     def __del__(self):
-        """Clean up when complete"""
-        if self._cleanup:
-            # removing logging handlers if they are closed to avoid I/O errors
-            # when exiting after the logger file has been closed.
-            # self._cleanup_loggers()
-            logging.disable(logging.CRITICAL)
-
-            try:
-                self.exit()
-            except Exception as e:
-                try:  # logger might be closed
-                    if hasattr(self, "_log") and self._log is not None:
-                        self._log.error("exit: %s", str(e))
-                except ValueError:
-                    pass
+        """Kill MAPDL when garbage cleaning"""
+        self.exit()
 
     def _cleanup_loggers(self):
         """Clean up all the loggers"""
@@ -2517,12 +2528,14 @@ class _MapdlCore(Commands):
 
         param_name = param_name.strip()
 
-        match_valid_parameter_name = r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0,31}$"
+        match_valid_parameter_name = (
+            r"^[a-zA-Z_][a-zA-Z\d_\(\),\s\%]{0," + f"{MAX_PARAM_CHARS-1}" + r"}$"
+        )
         # Using % is allowed, because of substitution, but it is very likely MAPDL will complain.
         if not re.search(match_valid_parameter_name, param_name):
             raise ValueError(
-                f"The parameter name `{param_name}` is an invalid parameter name."
-                "Only letters, numbers and `_` are permitted, up to 32 characters long."
+                f"The parameter name `{param_name}` is an invalid parameter name. "
+                f"Only letters, numbers and `_` are permitted, up to {MAX_PARAM_CHARS} characters long. "
                 "It cannot start with a number either."
             )
 
@@ -2546,7 +2559,7 @@ class _MapdlCore(Commands):
 
         # Using leading underscored parameters
         match_reserved_leading_underscored_parameter_name = (
-            r"^_[a-zA-Z\d_\(\),\s_]{1,31}[a-zA-Z\d\(\),\s]$"
+            r"^_[a-zA-Z\d_\(\),\s_]{1," + f"{MAX_PARAM_CHARS}" + r"}[a-zA-Z\d\(\),\s]$"
         )
         # If it also ends in underscore, this won't be triggered.
         if re.search(match_reserved_leading_underscored_parameter_name, param_name):
@@ -2929,7 +2942,9 @@ class _MapdlCore(Commands):
 
                 # Raising errors
                 if error_is_fine:
-                    self._log.warn("PERMITTED ERROR: " + permited_error_message.string)
+                    self._log.warning(
+                        "PERMITTED ERROR: " + permited_error_message.string
+                    )
                     continue
                 else:
                     # We don't need to log exception because they already included in the main logger.

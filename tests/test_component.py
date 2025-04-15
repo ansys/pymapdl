@@ -100,7 +100,7 @@ def test_parsing_too_many_components(mapdl, cleared):
     assert "***" not in s
     assert "*****MAPDL" not in s
     for i in range(1, 100):
-        assert re.search(f"NODE_{i:03.0f}\s+: NODE", s)
+        assert re.search(f"NODE_{i:03.0f}" + r"\s+: NODE", s)
 
 
 class Test_components(TestClass):

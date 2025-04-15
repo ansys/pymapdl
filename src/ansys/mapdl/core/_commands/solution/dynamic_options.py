@@ -261,7 +261,7 @@ class DynamicOptions:
 
         This command is also valid in PREP7.
         """
-        command = f"HARFRQ,{freqb},{freqe},{logopt},{freqarr},{toler}"
+        command = f"HARFRQ,{freqb},{freqe},,{logopt},{freqarr},{toler}"
         return self.run(command, **kwargs)
 
     def hrexp(self, angle="", **kwargs):

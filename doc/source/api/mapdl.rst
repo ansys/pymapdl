@@ -54,6 +54,7 @@
    Mapdl.logger
    Mapdl.mapdl_on_hpc
    Mapdl.mute
+   Mapdl.muted
    Mapdl.name
    Mapdl.non_interactive
    Mapdl.on_docker

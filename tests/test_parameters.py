@@ -493,3 +493,82 @@ def test_failing_get_routine(mapdl, caplog, value):
     assert routine == ROUTINE_MAP[0]
 
     mapdl.logger.setLevel(prev_level)
+
+
+@pytest.mark.parametrize(
+    "parameter",
+    [
+        "asdf",
+        "32_chars_length",
+        1,
+        1.0,
+        np.array([1, 2, 3]),
+        np.array([1, 3])[0],
+        np.array([1.0, 2.2, 3.5]),
+        np.array([1.03, 3.9])[0],
+        np.array([1.4, 2.3], dtype=np.int32),
+        np.array([1.4, 2.3], dtype=np.int32)[0],
+        np.array([1.4, 2.3], dtype=np.int64),
+        np.array([1.4, 2.3], dtype=np.int64)[0],
+    ],
+)
+def test_parameter_types(mapdl, cleared, parameter):
+    mapdl.parameters["temp_arr"] = parameter
+
+    if isinstance(parameter, np.ndarray):
+        # Reshaping arrays until #3717 is closed
+        assert np.allclose(
+            parameter.reshape((-1, 1)), mapdl.parameters["temp_arr"].reshape((-1, 1))
+        )
+    else:
+        assert parameter == mapdl.parameters["temp_arr"]
+
+    if isinstance(parameter, (int, np.integer)):
+        # All numbers in MAPDL are stored as float.
+        assert isinstance(mapdl.parameters["temp_arr"], float)
+
+    elif isinstance(parameter, (float, np.floating)):
+        assert isinstance(mapdl.parameters["temp_arr"], float)
+
+    else:
+        assert isinstance(mapdl.parameters["temp_arr"], type(parameter))
+
+
+@pytest.mark.parametrize("use_load_table", [True, False])
+def test_table_interpolation(mapdl, use_load_table):
+    file_name = "table.txt"
+
+    table = """
+    0,1,2,3,4
+    10, 0.1, 0.2, 0.3, 0.4
+    20, 0.2, 0.3, 0.4, 0.5
+    30, 0.3, 0.4, 0.5, 0.6
+    40, 0.4, 0.5, 0.6, 0.7
+    """
+
+    with open(file_name, "w") as fid:
+        fid.write(table)
+
+    if use_load_table:
+        table_data = np.genfromtxt(file_name, delimiter=",")
+        mapdl.load_table("table", table_data, "time")
+    else:
+        mapdl.upload(file_name)
+        mapdl.run("*DIM,table,TABLE,4,4,,time,,,")
+        mapdl.run(f"*TREAD,table,{file_name},,,")
+        mapdl.starstatus("table")
+
+    mapdl.run("tmp_ = table(10, 1)")
+    assert np.allclose(mapdl.parameters["tmp_"], 0.100000000)
+    mapdl.run("tmp_ = table(15, 1)")  # Interpolated!
+    assert np.allclose(mapdl.parameters["tmp_"], 0.15000000000)
+    mapdl.run("tmp_ = table(20,1)")
+    assert np.allclose(mapdl.parameters["tmp_"], 0.2000000000)
+    mapdl.run("tmp_ = table(10,1)")
+    assert np.allclose(mapdl.parameters["tmp_"], 0.1000000000)
+    mapdl.run("tmp_ = table(10, 1.5)")  # Interpolated!
+    assert np.allclose(mapdl.parameters["tmp_"], 0.15000000000)
+    mapdl.run("tmp_ = table(10,2)")
+    assert np.allclose(mapdl.parameters["tmp_"], 0.2000000000)
+    mapdl.run("tmp_ = table(15,1.5)")  # Interpolated!
+    assert np.allclose(mapdl.parameters["tmp_"], 0.20000000000)

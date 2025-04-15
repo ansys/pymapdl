@@ -1,0 +1,79 @@
+name: "Build remote matrix for testing"
+
+description: |
+  This action builds the matrix for remote testing of PyMAPDL.
+
+inputs:
+  token_teams_user_read:
+    description: |
+      Token for reading user teams.
+    required: true
+    type: string
+
+  local:
+    description: |
+      If true, the building matrix for local testing
+    required: false
+    type: boolean
+    default: true
+
+  run_all_builds:
+    description: |
+      If true, run all extended MAPDL build tests.
+    required: false
+    type: boolean
+    default: false
+
+  type_event:
+    description: |
+      Type of event that triggered the workflow.
+    required: false
+    type: string
+    default: ""
+
+outputs:
+  matrix:
+    description: "Matrix of MAPDL containers to test."
+    value: ${{ steps.set-matrix.outputs.matrix }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Get event type and user to check permissions.
+      id: get_user
+      env:
+        type_event: ${{ inputs.type_event }}
+      shell: bash
+      run: |
+        if [[ $type_event ]]; then
+          echo "Event type: $type_event"
+          echo "event_type=$( echo "$type_event" )" >> $GITHUB_OUTPUT
+          export user=${{ github.event.pull_request.user.login }}
+        else
+          export user=${{ github.actor }}
+        fi
+        echo "This PR has been opened by: $user"
+        echo "user=$( echo "$user" )" >> $GITHUB_OUTPUT
+
+    - uses: tspascoal/get-user-teams-membership@v3
+      id: is_organization_member
+      if: ${{ github.actor != 'dependabot[bot]' }}
+      with:
+        username: ${{ steps.get_user.outputs.user }}
+        organization: ansys
+        team: 'pymapdl-developers'
+        GITHUB_TOKEN: ${{ inputs.token_teams_user_read }}
+
+    - id: set-matrix
+      env:
+        auth_user: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' || github.actor == 'dependabot[bot]'  }}
+        ON_REMOTE: ${{ inputs.local == 'false' }}
+        ONLY_UBUNTU: ${{ inputs.local == 'true' }}
+        ON_SCHEDULE: ${{ github.event_name == 'schedule' }}
+        ON_WORKFLOW_DISPATCH: ${{ github.event_name == 'workflow_dispatch' }}
+        RUN_ALL_TEST: ${{ inputs.run_all_builds == 'true' }}
+        ON_PUSH: ${{ github.event_name == 'push' }}
+        HAS_TAG: ${{ contains(github.ref, 'refs/tags') }}
+        LIMIT_VERSIONS: 2
+      shell: bash
+      run: .ci/build_matrix.sh

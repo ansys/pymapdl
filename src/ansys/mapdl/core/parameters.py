@@ -38,6 +38,7 @@ import numpy as np
 
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.mapdl import MapdlBase
+from ansys.mapdl.core.mapdl_core import MAX_PARAM_CHARS
 from ansys.mapdl.core.misc import supress_logging
 
 ROUTINE_MAP = {
@@ -354,7 +355,7 @@ class Parameters:
                 value_str = str(info["value"])
             else:
                 continue
-            lines.append("%-32s : %s" % (key, value_str))
+            lines.append(f"%-{MAX_PARAM_CHARS}s : %s" % (key, value_str))
         return "\n".join(lines)
 
     def __getitem__(self, key):
@@ -493,22 +494,27 @@ class Parameters:
         ----------
         name : str
             An alphanumeric name used to identify this parameter.  Name
-            may be up to 32 characters, beginning with a letter and
-            containing only letters, numbers, and underscores.
+            may be up to 32 character or the value given in
+            :attr:`ansys.mapdl.core.mapdl_core.MAX_PARAM_CHARS`, beginning with
+            a letter and containing only letters, numbers, and underscores.
             Examples: ``"ABC" "A3X" "TOP_END"``.
 
         """
-        if not isinstance(value, (str, int, float)):
+        if not isinstance(value, (str, int, float, np.integer, np.floating)):
             raise TypeError("``Parameter`` must be either a float, int, or string")
 
-        if isinstance(value, str) and len(value) >= 32:
-            raise ValueError("Length of ``value`` must be 32 characters or less")
+        if isinstance(value, str) and len(value) > MAX_PARAM_CHARS:
+            raise ValueError(
+                f"Length of ``value`` must be {MAX_PARAM_CHARS} characters or less"
+            )
 
         if not isinstance(name, str):
             raise TypeError("``name`` must be a string")
 
-        if len(name) >= 32:
-            raise ValueError("Length of ``name`` must be 32 characters or less")
+        if len(name) > MAX_PARAM_CHARS:
+            raise ValueError(
+                f"Length of ``name`` must be {MAX_PARAM_CHARS} characters or less"
+            )
 
         # delete the parameter if it exists as an array
         parm = self._parm
@@ -657,11 +663,6 @@ class Parameters:
         elif arr.ndim == 2:
             arr = np.expand_dims(arr, 2)
 
-        # backwards compatibility with CORBA
-        if hasattr(self._mapdl, "mute"):
-            old_mute = self._mapdl.mute
-            self._mapdl.mute = True
-
         with self._mapdl.non_interactive:
             self._mapdl.dim(name, imax=idim, jmax=jdim, kmax=kdim)
             for i in range(idim):
@@ -669,9 +670,6 @@ class Parameters:
                     for k in range(kdim):
                         index = f"{i + 1},{j + 1},{k + 1}"
                         self._mapdl.run(f"{name}({index})={arr[i, j, k]}")
-
-        if hasattr(self._mapdl, "mute"):
-            self._mapdl.mute = old_mute
 
     def _write_numpy_array(self, filename, arr):
         """Write a numpy array to disk"""
@@ -830,8 +828,8 @@ def interp_star_status(status):
         # line will contain either a character, scalar, or array
         name = items[0]
         if len(items) == 2 or "CHARACTER" in items[-1].upper():
-            name = line[:32].strip()
-            value = line.replace(items[-1], "")[33:].strip()
+            name = line[:MAX_PARAM_CHARS].strip()
+            value = line.replace(items[-1], "")[(MAX_PARAM_CHARS + 1) :].strip()
             parameters[name] = {"type": "CHARACTER", "value": value}
 
         elif len(items) == 3:

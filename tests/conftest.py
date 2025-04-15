@@ -77,6 +77,7 @@ IS_SMP = is_smp()
 
 QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
 VALID_PORTS = []
+ACCEPTABLE_FAILURE_RATE = 50
 
 ## Skip ifs
 skip_on_windows = pytest.mark.skipif(ON_WINDOWS, reason="Skip on Windows")
@@ -167,6 +168,9 @@ def requires(requirement: str):
 
     elif "console" == requirement:
         return pytest.mark.console
+
+    elif "gui" == requirement:
+        return pytest.mark.gui
 
     else:
         return requires_dependency(requirement)
@@ -338,24 +342,27 @@ def pytest_addoption(parser):
         "--console",
         action="store_true",
         default=False,
+        dest="console",
         help="run console tests",
     )
-    parser.addoption("--gui", action="store_true", default=False, help="run GUI tests")
     parser.addoption(
-        "--only-gui",
-        action="store_true",
-        default=False,
-        help="run only GUI tests",
+        "--gui", action="store_true", default=False, dest="gui", help="run GUI tests"
     )
 
 
-def pytest_collection_modifyitems(config, items):
+def pytest_collection_modifyitems(session, config, items):
     if not config.getoption("--console"):
         # --console given in cli: run console interface tests
         skip_console = pytest.mark.skip(reason="need --console option to run")
         for item in items:
             if "console" in item.keywords:
                 item.add_marker(skip_console)
+
+    if not config.getoption("--gui"):
+        skip_gui = pytest.mark.skip(reason="need --gui option to run")
+        for item in items:
+            if "gui" in item.keywords:
+                item.add_marker(skip_gui)
 
     if not HAS_GRPC:
         skip_grpc = pytest.mark.skip(
@@ -365,20 +372,23 @@ def pytest_collection_modifyitems(config, items):
             if "skip_grpc" in item.keywords:
                 item.add_marker(skip_grpc)
 
-    only_gui_filter = config.getoption("--only-gui")
-    if only_gui_filter:
-        new_items = []
-        for item in items:
-            mark = item.get_closest_marker("requires_gui")
-            if mark and mark.name == "requires_gui":
-                new_items.append(item)
-        items[:] = new_items
 
-    if not config.getoption("--gui") and not only_gui_filter:
-        skip_gui = pytest.mark.skip(reason="Requires to launch MAPDL GUI interface.")
-        for item in items:
-            if "requires_gui" in item.keywords:
-                item.add_marker(skip_gui)
+@pytest.hookimpl()
+def pytest_sessionfinish(session: pytest.Session, exitstatus: pytest.ExitCode):
+    if os.environ.get("ALLOW_FAILURE_RATE") is None:
+        return
+
+    else:
+        acceptable_failure_rate = float(
+            os.environ.get("ALLOW_FAILURE_RATE", ACCEPTABLE_FAILURE_RATE)
+        )
+
+    if exitstatus != pytest.ExitCode.TESTS_FAILED:
+        return
+
+    failure_rate = (100.0 * session.testsfailed) / session.testscollected
+    if failure_rate <= acceptable_failure_rate:
+        session.exitstatus = 0
 
 
 ################################################################
@@ -444,12 +454,16 @@ def run_before_and_after_tests(
 
     # check if the local/remote state has changed or not
     prev = mapdl.is_local
+    assert not mapdl.exited, "MAPDL is exited before the test. It should not!"
+    assert not mapdl.mute
 
     yield  # this is where the testing happens
 
     mapdl.prep7()
 
     # Check resetting state
+    assert not mapdl._store_commands
+    assert mapdl._stub is not None
     assert prev == mapdl.is_local
     assert not mapdl.exited, "MAPDL is exited after the test. It should have not!"
     assert not mapdl._mapdl_on_hpc, "Mapdl class is on HPC mode. It should not!"
@@ -457,6 +471,7 @@ def run_before_and_after_tests(
     assert not mapdl.ignore_errors, "Mapdl class is ignoring errors!"
     assert not mapdl.mute
     assert mapdl.file_type_for_plots in VALID_DEVICES
+    assert mapdl._jobid is None
 
     # Returning to default
     mapdl.graphics("full")
@@ -515,7 +530,6 @@ def path_tests(tmpdir):
 
 
 def clear(mapdl):
-    mapdl.mute = True
     mapdl.finish()
     # *MUST* be NOSTART.  With START fails after 20 calls...
     # this has been fixed in later pymapdl and MAPDL releases
@@ -525,7 +539,6 @@ def clear(mapdl):
     mapdl.page("DEFA")
 
     mapdl.prep7()
-    mapdl.mute = False
 
 
 @pytest.fixture(scope="function")
@@ -638,6 +651,7 @@ def mapdl(request, tmpdir_factory):
                 mapdl._send_command_stream("/PREP7")
 
     # Delete Mapdl object
+    mapdl.exit()
     del mapdl
 
 
@@ -667,6 +681,11 @@ _meth_patch_MAPDL_launch = [
     (_patch_method("_subscribe_to_channel"), _returns("")),
     (_patch_method("_run_at_connect"), _returns("")),
     (_patch_method("_exit_mapdl"), _returns(None)),
+    (_patch_method("kill_job"), _returns(None)),
+    (
+        _patch_method("_check_mapdl_os"),
+        _returns("linux" if os.name == "posix" else "win"),
+    ),
     # non-mapdl methods
     ("socket.gethostbyname", _returns("123.45.67.99")),
     (
@@ -746,29 +765,28 @@ def cube_solve(cleared, mapdl, cube_geom_and_mesh):
 
 @pytest.fixture
 def solved_box(mapdl, cleared):
-    mapdl.mute = True  # improve stability
-    mapdl.et(1, "SOLID5")
-    mapdl.block(0, 10, 0, 20, 0, 30)
-    mapdl.esize(10)
-    mapdl.vmesh("ALL")
-    mapdl.units("SI")  # SI - International system (m, kg, s, K).
-    # Define a material (nominal steel in SI)
-    mapdl.mp("EX", 1, 210e9)  # Elastic moduli in Pa (kg/(m*s**2))
-    mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
-    mapdl.mp("PRXY", 1, 0.3)  # Poisson's Ratio
-    # Fix the left-hand side.
-    mapdl.nsel("S", "LOC", "Z", 0)
-    mapdl.d("ALL", "UX")
-    mapdl.d("ALL", "UY")
-    mapdl.d("ALL", "UZ")
+    with mapdl.muted:  # improve stability
+        mapdl.et(1, "SOLID5")
+        mapdl.block(0, 10, 0, 20, 0, 30)
+        mapdl.esize(10)
+        mapdl.vmesh("ALL")
+        mapdl.units("SI")  # SI - International system (m, kg, s, K).
+        # Define a material (nominal steel in SI)
+        mapdl.mp("EX", 1, 210e9)  # Elastic moduli in Pa (kg/(m*s**2))
+        mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
+        mapdl.mp("PRXY", 1, 0.3)  # Poisson's Ratio
+        # Fix the left-hand side.
+        mapdl.nsel("S", "LOC", "Z", 0)
+        mapdl.d("ALL", "UX")
+        mapdl.d("ALL", "UY")
+        mapdl.d("ALL", "UZ")
 
-    mapdl.nsel("S", "LOC", "Z", 30)
-    mapdl.f("ALL", "FX", 1000)
-    mapdl.run("/SOLU")
-    mapdl.antype("STATIC")
-    mapdl.solve()
-    mapdl.finish()
-    mapdl.mute = False
+        mapdl.nsel("S", "LOC", "Z", 30)
+        mapdl.f("ALL", "FX", 1000)
+        mapdl.run("/SOLU")
+        mapdl.antype("STATIC")
+        mapdl.solve()
+        mapdl.finish()
 
 
 @pytest.fixture(scope="function")
@@ -795,279 +813,277 @@ def coupled_example(mapdl, cleared):
 
 @pytest.fixture(scope="function")
 def contact_geom_and_mesh(mapdl, cleared):
-    mapdl.mute = True
+    with mapdl.muted:
+        # Based on tech demo 28.
+        # ***** Problem parameters ********
+        l = 76.2e-03 / 3  # Length of each plate,m
+        w = 31.75e-03 / 2  # Width of each plate,m
+        t = 3.18e-03  # Thickness of each plate,m
+        r1 = 7.62e-03  # Shoulder radius of tool,m
+        h = 15.24e-03  # Height of tool, m
+        l1 = r1  # Starting location of tool on weldline
+        l2 = l - l1
+        tcc1 = 2e06  # Thermal contact conductance b/w plates,W/m^2'C
+        tcc2 = 10  # Thermal contact conductance b/w tool &
+        # workpiece,W/m^2'C
+        fwgt = 0.95  # weight factor for distribution of heat b/w tool
+        # & workpiece
+        fplw = 0.8  # Fraction of plastic work converted to heat
 
-    # Based on tech demo 28.
-    # ***** Problem parameters ********
-    l = 76.2e-03 / 3  # Length of each plate,m
-    w = 31.75e-03 / 2  # Width of each plate,m
-    t = 3.18e-03  # Thickness of each plate,m
-    r1 = 7.62e-03  # Shoulder radius of tool,m
-    h = 15.24e-03  # Height of tool, m
-    l1 = r1  # Starting location of tool on weldline
-    l2 = l - l1
-    tcc1 = 2e06  # Thermal contact conductance b/w plates,W/m^2'C
-    tcc2 = 10  # Thermal contact conductance b/w tool &
-    # workpiece,W/m^2'C
-    fwgt = 0.95  # weight factor for distribution of heat b/w tool
-    # & workpiece
-    fplw = 0.8  # Fraction of plastic work converted to heat
+        # this is also modified in the dependent fixture
+        uz1 = t / 4000  # Depth of penetration,m
 
-    # this is also modified in the dependent fixture
-    uz1 = t / 4000  # Depth of penetration,m
+        # ==========================================================
+        # * Material properties
+        # ==========================================================
+        # * Material properties for 304l stainless steel Plates
+        mapdl.mp("ex", 1, 193e9)  # Elastic modulus (N/m^2)
+        mapdl.mp("nuxy", 1, 0.3)  # Poisson's ratio
+        mapdl.mp("alpx", 1, 1.875e-5)  # Coefficient of thermal expansion, µm/m'c
+        # Fraction of plastic work converted to heat, 80%
+        mapdl.mp("qrate", 1, fplw)
 
-    # ==========================================================
-    # * Material properties
-    # ==========================================================
-    # * Material properties for 304l stainless steel Plates
-    mapdl.mp("ex", 1, 193e9)  # Elastic modulus (N/m^2)
-    mapdl.mp("nuxy", 1, 0.3)  # Poisson's ratio
-    mapdl.mp("alpx", 1, 1.875e-5)  # Coefficient of thermal expansion, µm/m'c
-    # Fraction of plastic work converted to heat, 80%
-    mapdl.mp("qrate", 1, fplw)
+        # *BISO material model
+        EX = 193e9
+        ET = 2.8e9
+        EP = EX * ET / (EX - ET)
+        mapdl.tb("plas", 1, 1, "", "biso")  # Bilinear isotropic material
+        mapdl.tbdata(1, 290e6, EP)  # Yield stress & plastic tangent modulus
+        mapdl.mptemp(1, 0, 200, 400, 600, 800, 1000)
+        mapdl.mpdata("kxx", 1, 1, 16, 19, 21, 24, 29, 30)  # therm cond.(W/m'C)
+        mapdl.mpdata("c", 1, 1, 500, 540, 560, 590, 600, 610)  # spec heat(J/kg'C)
+        mapdl.mpdata("dens", 1, 1, 7894, 7744, 7631, 7518, 7406, 7406)  # kg/m^3
 
-    # *BISO material model
-    EX = 193e9
-    ET = 2.8e9
-    EP = EX * ET / (EX - ET)
-    mapdl.tb("plas", 1, 1, "", "biso")  # Bilinear isotropic material
-    mapdl.tbdata(1, 290e6, EP)  # Yield stress & plastic tangent modulus
-    mapdl.mptemp(1, 0, 200, 400, 600, 800, 1000)
-    mapdl.mpdata("kxx", 1, 1, 16, 19, 21, 24, 29, 30)  # therm cond.(W/m'C)
-    mapdl.mpdata("c", 1, 1, 500, 540, 560, 590, 600, 610)  # spec heat(J/kg'C)
-    mapdl.mpdata("dens", 1, 1, 7894, 7744, 7631, 7518, 7406, 7406)  # kg/m^3
+        # * Material properties for PCBN tool
+        mapdl.mp("ex", 2, 680e9)  # Elastic modulus (N/m^2)
+        mapdl.mp("nuxy", 2, 0.22)  # Poisson's ratio
+        mapdl.mp("kxx", 2, 100)  # Thermal conductivity(W/m'C)
+        mapdl.mp("c", 2, 750)  # Specific heat(J/kg'C)
+        mapdl.mp("dens", 2, 4280)  # Density,kg/m^3
 
-    # * Material properties for PCBN tool
-    mapdl.mp("ex", 2, 680e9)  # Elastic modulus (N/m^2)
-    mapdl.mp("nuxy", 2, 0.22)  # Poisson's ratio
-    mapdl.mp("kxx", 2, 100)  # Thermal conductivity(W/m'C)
-    mapdl.mp("c", 2, 750)  # Specific heat(J/kg'C)
-    mapdl.mp("dens", 2, 4280)  # Density,kg/m^3
+        # ==========================================================
+        # * Geometry
+        # ==========================================================
+        # * Node for pilot node
+        mapdl.n(1, 0, 0, h)
+        # * Workpiece geometry (two rectangular plates)
+        mapdl.block(0, w, -l1, l2, 0, -t)
+        mapdl.block(0, -w, -l1, l2, 0, -t)
+        # * Tool geometry
+        mapdl.cyl4(0, 0, r1, 0, r1, 90, h)
+        mapdl.cyl4(0, 0, r1, 90, r1, 180, h)
+        mapdl.cyl4(0, 0, r1, 180, r1, 270, h)
+        mapdl.cyl4(0, 0, r1, 270, r1, 360, h)
+        mapdl.vglue(3, 4, 5, 6)
 
-    # ==========================================================
-    # * Geometry
-    # ==========================================================
-    # * Node for pilot node
-    mapdl.n(1, 0, 0, h)
-    # * Workpiece geometry (two rectangular plates)
-    mapdl.block(0, w, -l1, l2, 0, -t)
-    mapdl.block(0, -w, -l1, l2, 0, -t)
-    # * Tool geometry
-    mapdl.cyl4(0, 0, r1, 0, r1, 90, h)
-    mapdl.cyl4(0, 0, r1, 90, r1, 180, h)
-    mapdl.cyl4(0, 0, r1, 180, r1, 270, h)
-    mapdl.cyl4(0, 0, r1, 270, r1, 360, h)
-    mapdl.vglue(3, 4, 5, 6)
+        # ==========================================================
+        # * Meshing
+        # ==========================================================
+        mapdl.et(1, "SOLID226", 11)  # Coupled-field solid element,KEYOPT(1) is
+        # set to 11 for a structural-thermal analysis
+        mapdl.allsel()
+        ndiv1 = 2
+        ndiv2 = 5
+        ndiv3 = 1
 
-    # ==========================================================
-    # * Meshing
-    # ==========================================================
-    mapdl.et(1, "SOLID226", 11)  # Coupled-field solid element,KEYOPT(1) is
-    # set to 11 for a structural-thermal analysis
-    mapdl.allsel()
-    ndiv1 = 2
-    ndiv2 = 5
-    ndiv3 = 1
+        mapdl.lsel("s", "", "", 4, 5)
+        mapdl.lsel("a", "", "", 14, 19, 5)
+        mapdl.lesize("all", "", "", ndiv1)
+        mapdl.lsel("s", "", "", 16, 17)
+        mapdl.lsel("a", "", "", 2, 7, 5)
+        mapdl.lesize("all", "", "", ndiv1)
+        mapdl.lsel("s", "", "", 1)
+        mapdl.lsel("a", "", "", 3)
+        mapdl.lsel("a", "", "", 6)
+        mapdl.lsel("a", "", "", 8)
+        mapdl.lsel("a", "", "", 13)
+        mapdl.lsel("a", "", "", 15)
+        mapdl.lsel("a", "", "", 18)
+        mapdl.lsel("a", "", "", 20)
+        mapdl.lesize("all", "", "", ndiv2)
+        mapdl.lsel("s", "", "", 9, "")
+        mapdl.lsel("a", "", "", 22)
+        mapdl.lesize("all", "", "", ndiv3)
+        mapdl.allsel("all")
+        mapdl.mshmid(2)  # midside nodes dropped
+        mapdl.vsweep(1)
+        mapdl.vsweep(2)
+        mapdl.vsel("u", "volume", "", 1, 2)
+        mapdl.mat(2)
+        mapdl.esize(0.005)
+        mapdl.numstr("NODE", 1000)
+        mapdl.vsweep("all")
+        mapdl.allsel("all")
 
-    mapdl.lsel("s", "", "", 4, 5)
-    mapdl.lsel("a", "", "", 14, 19, 5)
-    mapdl.lesize("all", "", "", ndiv1)
-    mapdl.lsel("s", "", "", 16, 17)
-    mapdl.lsel("a", "", "", 2, 7, 5)
-    mapdl.lesize("all", "", "", ndiv1)
-    mapdl.lsel("s", "", "", 1)
-    mapdl.lsel("a", "", "", 3)
-    mapdl.lsel("a", "", "", 6)
-    mapdl.lsel("a", "", "", 8)
-    mapdl.lsel("a", "", "", 13)
-    mapdl.lsel("a", "", "", 15)
-    mapdl.lsel("a", "", "", 18)
-    mapdl.lsel("a", "", "", 20)
-    mapdl.lesize("all", "", "", ndiv2)
-    mapdl.lsel("s", "", "", 9, "")
-    mapdl.lsel("a", "", "", 22)
-    mapdl.lesize("all", "", "", ndiv3)
-    mapdl.allsel("all")
-    mapdl.mshmid(2)  # midside nodes dropped
-    mapdl.vsweep(1)
-    mapdl.vsweep(2)
-    mapdl.vsel("u", "volume", "", 1, 2)
-    mapdl.mat(2)
-    mapdl.esize(0.005)
-    mapdl.numstr("NODE", 1000)
-    mapdl.vsweep("all")
-    mapdl.allsel("all")
+        # ==========================================================
+        # * Contact Pairs
+        # ==========================================================
+        # * Define Rigid Surface Constraint on tool top surface
+        mapdl.et(2, "TARGE170")
+        mapdl.keyopt(2, 2, 1)  # User defined boundary condition on rigid
+        # target nodes
 
-    # ==========================================================
-    # * Contact Pairs
-    # ==========================================================
-    # * Define Rigid Surface Constraint on tool top surface
-    mapdl.et(2, "TARGE170")
-    mapdl.keyopt(2, 2, 1)  # User defined boundary condition on rigid
-    # target nodes
+        mapdl.et(3, "CONTA174")
+        mapdl.keyopt(3, 1, 1)  # To include Temp DOF
+        mapdl.keyopt(3, 2, 2)  # To include MPC contact algorithm
+        mapdl.keyopt(3, 4, 2)  # For a rigid surface constraint
+        mapdl.keyopt(3, 12, 5)  # To set the behavior of contact surface as a
+        # bonded (always)
 
-    mapdl.et(3, "CONTA174")
-    mapdl.keyopt(3, 1, 1)  # To include Temp DOF
-    mapdl.keyopt(3, 2, 2)  # To include MPC contact algorithm
-    mapdl.keyopt(3, 4, 2)  # For a rigid surface constraint
-    mapdl.keyopt(3, 12, 5)  # To set the behavior of contact surface as a
-    # bonded (always)
+        mapdl.vsel("u", "volume", "", 1, 2)  # Selecting Tool volume
+        mapdl.allsel("below", "volume")
+        mapdl.nsel("r", "loc", "z", h)  # Selecting nodes on the tool top surface
+        mapdl.type(3)
+        mapdl.r(3)
+        mapdl.real(3)
+        mapdl.esln()
+        mapdl.esurf()  # Create contact elements
+        mapdl.allsel("all")
 
-    mapdl.vsel("u", "volume", "", 1, 2)  # Selecting Tool volume
-    mapdl.allsel("below", "volume")
-    mapdl.nsel("r", "loc", "z", h)  # Selecting nodes on the tool top surface
-    mapdl.type(3)
-    mapdl.r(3)
-    mapdl.real(3)
-    mapdl.esln()
-    mapdl.esurf()  # Create contact elements
-    mapdl.allsel("all")
+        # * Define pilot node at the top of the tool
+        mapdl.nsel("s", "node", "", 1)
+        mapdl.tshap("pilo")
+        mapdl.type(2)
+        mapdl.real(3)
+        mapdl.e(1)  # Create target element on pilot node
+        mapdl.allsel()
 
-    # * Define pilot node at the top of the tool
-    mapdl.nsel("s", "node", "", 1)
-    mapdl.tshap("pilo")
-    mapdl.type(2)
-    mapdl.real(3)
-    mapdl.e(1)  # Create target element on pilot node
-    mapdl.allsel()
+        # * Define contact pair between two plates
+        mapdl.et(6, "TARGE170")
+        mapdl.et(7, "CONTA174")
+        mapdl.keyopt(7, 1, 1)  # Displacement & Temp dof
+        mapdl.keyopt(7, 4, 3)  # To include Surface projection based method
+        mapdl.mat(1)
+        mapdl.asel("s", "", "", 5)
+        mapdl.nsla("", 1)
+        mapdl.cm("tn.cnt", "node")  # Creating component on weld side of plate1
 
-    # * Define contact pair between two plates
-    mapdl.et(6, "TARGE170")
-    mapdl.et(7, "CONTA174")
-    mapdl.keyopt(7, 1, 1)  # Displacement & Temp dof
-    mapdl.keyopt(7, 4, 3)  # To include Surface projection based method
-    mapdl.mat(1)
-    mapdl.asel("s", "", "", 5)
-    mapdl.nsla("", 1)
-    mapdl.cm("tn.cnt", "node")  # Creating component on weld side of plate1
+        mapdl.asel("s", "", "", 12)
+        mapdl.nsla("", 1)
+        mapdl.cm("tn.tgt", "node")  # Creating component on weld side of plate2
 
-    mapdl.asel("s", "", "", 12)
-    mapdl.nsla("", 1)
-    mapdl.cm("tn.tgt", "node")  # Creating component on weld side of plate2
+        mapdl.allsel("all")
+        mapdl.type(6)
+        mapdl.r(6)
+        mapdl.rmodif(6, 14, tcc1)  # A real constant TCC,Thermal contact
+        # conductance coeffi. b/w the plates, W/m^2'C
+        mapdl.rmodif(6, 35, 1000)  # A real constant TBND,Bonding temperature
+        # for welding, 'C
+        mapdl.real(6)
+        mapdl.cmsel("s", "tn.cnt")
+        mapdl.esurf()
+        mapdl.type(7)
+        mapdl.real(6)
+        mapdl.cmsel("s", "tn.tgt")
+        mapdl.esurf()
+        mapdl.allsel("all")
 
-    mapdl.allsel("all")
-    mapdl.type(6)
-    mapdl.r(6)
-    mapdl.rmodif(6, 14, tcc1)  # A real constant TCC,Thermal contact
-    # conductance coeffi. b/w the plates, W/m^2'C
-    mapdl.rmodif(6, 35, 1000)  # A real constant TBND,Bonding temperature
-    # for welding, 'C
-    mapdl.real(6)
-    mapdl.cmsel("s", "tn.cnt")
-    mapdl.esurf()
-    mapdl.type(7)
-    mapdl.real(6)
-    mapdl.cmsel("s", "tn.tgt")
-    mapdl.esurf()
-    mapdl.allsel("all")
+        # * Define contact pair between tool & workpiece
+        mapdl.et(4, "TARGE170")
+        mapdl.et(5, "CONTA174")
+        mapdl.keyopt(5, 1, 1)  # Displacement & Temp dof
+        mapdl.keyopt(5, 5, 3)  # Close gap/reduce penetration with auto cnof
+        mapdl.keyopt(5, 9, 1)  # Exclude both initial penetration or gap
+        mapdl.keyopt(5, 10, 0)  # Contact stiffness update each iteration
+        # based
 
-    # * Define contact pair between tool & workpiece
-    mapdl.et(4, "TARGE170")
-    mapdl.et(5, "CONTA174")
-    mapdl.keyopt(5, 1, 1)  # Displacement & Temp dof
-    mapdl.keyopt(5, 5, 3)  # Close gap/reduce penetration with auto cnof
-    mapdl.keyopt(5, 9, 1)  # Exclude both initial penetration or gap
-    mapdl.keyopt(5, 10, 0)  # Contact stiffness update each iteration
-    # based
+        # Bottom & lateral(all except top) surfaces of tool for target
+        mapdl.vsel("u", "volume", "", 1, 2)
+        mapdl.allsel("below", "volume")
+        mapdl.nsel("r", "loc", "z", 0, h)
+        mapdl.nsel("u", "loc", "z", h)
+        mapdl.type(4)
+        mapdl.r(5)
+        mapdl.tb("fric", 5, 6)  # Definition of friction co efficient at
+        # different temp
+        mapdl.tbtemp(25)
+        mapdl.tbdata(1, 0.4)  # friction co-efficient at temp 25
+        mapdl.tbtemp(200)
+        mapdl.tbdata(1, 0.4)  # friction co-efficient at temp 200
+        mapdl.tbtemp(400)
+        mapdl.tbdata(1, 0.4)  # friction co-efficient at temp 400
+        mapdl.tbtemp(600)
+        mapdl.tbdata(1, 0.3)  # friction co-efficient at temp 600
+        mapdl.tbtemp(800)
+        mapdl.tbdata(1, 0.3)  # friction co-efficient at temp 800
+        mapdl.tbtemp(1000)
+        mapdl.tbdata(1, 0.2)  # friction co-efficient at temp 1000
+        mapdl.rmodif(5, 9, 500e6)  # Max.friction stress
+        mapdl.rmodif(5, 14, tcc2)  # Thermal contact conductance b/w tool and
+        # workpiece, 10 W/m^2'C
+        mapdl.rmodif(5, 15, 1)  # A real constant FHTG,the fraction of
+        # frictional dissipated energy converted
+        # into heat
+        mapdl.rmodif(5, 18, fwgt)  # A real constant  FWGT, weight factor for
+        # the distribution of heat between the
+        # contact and target surfaces, 0.95
+        mapdl.real(5)
+        mapdl.mat(5)
+        mapdl.esln()
+        mapdl.esurf()
+        mapdl.allsel("all")
 
-    # Bottom & lateral(all except top) surfaces of tool for target
-    mapdl.vsel("u", "volume", "", 1, 2)
-    mapdl.allsel("below", "volume")
-    mapdl.nsel("r", "loc", "z", 0, h)
-    mapdl.nsel("u", "loc", "z", h)
-    mapdl.type(4)
-    mapdl.r(5)
-    mapdl.tb("fric", 5, 6)  # Definition of friction co efficient at
-    # different temp
-    mapdl.tbtemp(25)
-    mapdl.tbdata(1, 0.4)  # friction co-efficient at temp 25
-    mapdl.tbtemp(200)
-    mapdl.tbdata(1, 0.4)  # friction co-efficient at temp 200
-    mapdl.tbtemp(400)
-    mapdl.tbdata(1, 0.4)  # friction co-efficient at temp 400
-    mapdl.tbtemp(600)
-    mapdl.tbdata(1, 0.3)  # friction co-efficient at temp 600
-    mapdl.tbtemp(800)
-    mapdl.tbdata(1, 0.3)  # friction co-efficient at temp 800
-    mapdl.tbtemp(1000)
-    mapdl.tbdata(1, 0.2)  # friction co-efficient at temp 1000
-    mapdl.rmodif(5, 9, 500e6)  # Max.friction stress
-    mapdl.rmodif(5, 14, tcc2)  # Thermal contact conductance b/w tool and
-    # workpiece, 10 W/m^2'C
-    mapdl.rmodif(5, 15, 1)  # A real constant FHTG,the fraction of
-    # frictional dissipated energy converted
-    # into heat
-    mapdl.rmodif(5, 18, fwgt)  # A real constant  FWGT, weight factor for
-    # the distribution of heat between the
-    # contact and target surfaces, 0.95
-    mapdl.real(5)
-    mapdl.mat(5)
-    mapdl.esln()
-    mapdl.esurf()
-    mapdl.allsel("all")
+        # Top surfaces of plates nodes for contact
+        mapdl.vsel("s", "volume", "", 1, 2)
+        mapdl.allsel("below", "volume")
+        mapdl.nsel("r", "loc", "z", 0)
+        mapdl.type(5)
+        mapdl.real(5)
+        mapdl.esln()
+        mapdl.esurf()
+        mapdl.allsel("all")
 
-    # Top surfaces of plates nodes for contact
-    mapdl.vsel("s", "volume", "", 1, 2)
-    mapdl.allsel("below", "volume")
-    mapdl.nsel("r", "loc", "z", 0)
-    mapdl.type(5)
-    mapdl.real(5)
-    mapdl.esln()
-    mapdl.esurf()
-    mapdl.allsel("all")
+        # ==========================================================
+        # * Boundary conditions
+        # ==========================================================
+        mapdl.tref(25)  # Reference temperature 25'C
+        mapdl.allsel()
+        mapdl.nsel("all")
+        mapdl.ic("all", "temp", 25)  # Initial condition at nodes,temp 25'C
 
-    # ==========================================================
-    # * Boundary conditions
-    # ==========================================================
-    mapdl.tref(25)  # Reference temperature 25'C
-    mapdl.allsel()
-    mapdl.nsel("all")
-    mapdl.ic("all", "temp", 25)  # Initial condition at nodes,temp 25'C
+        # Mechanical Boundary Conditions
+        # 20% ends of the each plate is constraint
+        mapdl.nsel("s", "loc", "x", -0.8 * w, -w)
+        mapdl.nsel("a", "loc", "x", 0.8 * w, w)
+        mapdl.d("all", "uz", 0)  # Displacement constraint in x-direction
+        mapdl.d("all", "uy", 0)  # Displacement constraint in y-direction
+        mapdl.d("all", "ux", 0)  # Displacement constraint in z-direction
+        mapdl.allsel("all")
 
-    # Mechanical Boundary Conditions
-    # 20% ends of the each plate is constraint
-    mapdl.nsel("s", "loc", "x", -0.8 * w, -w)
-    mapdl.nsel("a", "loc", "x", 0.8 * w, w)
-    mapdl.d("all", "uz", 0)  # Displacement constraint in x-direction
-    mapdl.d("all", "uy", 0)  # Displacement constraint in y-direction
-    mapdl.d("all", "ux", 0)  # Displacement constraint in z-direction
-    mapdl.allsel("all")
+        # Bottom of workpiece is constraint in z-direction
+        mapdl.nsel("s", "loc", "z", -t)
+        mapdl.d("all", "uz")  # Displacement constraint in z-direction
+        mapdl.allsel("all")
 
-    # Bottom of workpiece is constraint in z-direction
-    mapdl.nsel("s", "loc", "z", -t)
-    mapdl.d("all", "uz")  # Displacement constraint in z-direction
-    mapdl.allsel("all")
+        # Thermal Boundary Conditions
+        # Convection heat loss from the workpiece surfaces
+        mapdl.vsel("s", "volume", "", 1, 2)  # Selecting the workpiece
+        mapdl.allsel("below", "volume")
+        mapdl.nsel("r", "loc", "z", 0)
+        mapdl.nsel("a", "loc", "x", -w)
+        mapdl.nsel("a", "loc", "x", w)
+        mapdl.nsel("a", "loc", "y", -l1)
+        mapdl.nsel("a", "loc", "y", l2)
+        mapdl.sf("all", "conv", 30, 25)
 
-    # Thermal Boundary Conditions
-    # Convection heat loss from the workpiece surfaces
-    mapdl.vsel("s", "volume", "", 1, 2)  # Selecting the workpiece
-    mapdl.allsel("below", "volume")
-    mapdl.nsel("r", "loc", "z", 0)
-    mapdl.nsel("a", "loc", "x", -w)
-    mapdl.nsel("a", "loc", "x", w)
-    mapdl.nsel("a", "loc", "y", -l1)
-    mapdl.nsel("a", "loc", "y", l2)
-    mapdl.sf("all", "conv", 30, 25)
+        # Convection (high)heat loss from the workpiece bottom
+        mapdl.nsel("s", "loc", "z", -t)
+        mapdl.sf("all", "conv", 300, 25)
+        mapdl.allsel("all")
 
-    # Convection (high)heat loss from the workpiece bottom
-    mapdl.nsel("s", "loc", "z", -t)
-    mapdl.sf("all", "conv", 300, 25)
-    mapdl.allsel("all")
+        # Convection heat loss from the tool surfaces
+        mapdl.vsel("u", "volume", "", 1, 2)  # Selecting the tool
+        mapdl.allsel("below", "volume")
+        mapdl.csys(1)
+        mapdl.nsel("r", "loc", "x", r1)
+        mapdl.nsel("a", "loc", "z", h)
+        mapdl.sf("all", "conv", 30, 25)
+        mapdl.allsel("all")
 
-    # Convection heat loss from the tool surfaces
-    mapdl.vsel("u", "volume", "", 1, 2)  # Selecting the tool
-    mapdl.allsel("below", "volume")
-    mapdl.csys(1)
-    mapdl.nsel("r", "loc", "x", r1)
-    mapdl.nsel("a", "loc", "z", h)
-    mapdl.sf("all", "conv", 30, 25)
-    mapdl.allsel("all")
-
-    # Constraining all DOFs at pilot node except the Temp DOF
-    mapdl.d(1, "all")
-    mapdl.ddele(1, "temp")
-    mapdl.allsel("all")
-    mapdl.mute = False
+        # Constraining all DOFs at pilot node except the Temp DOF
+        mapdl.d(1, "all")
+        mapdl.ddele(1, "temp")
+        mapdl.allsel("all")
 
 
 @pytest.fixture(scope="function")

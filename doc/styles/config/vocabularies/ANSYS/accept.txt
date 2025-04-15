@@ -58,9 +58,9 @@ datas
 delet
 Dependabot
 Dev
-Dimitris
 devcontainer
 DevContainer
+Dimitris
 dof
 ect
 eigenfrequency
@@ -88,9 +88,9 @@ hexahedral
 hostname
 HTML
 Image[Mm]agick
-Ioannis
 imagin
 importlib
+Ioannis
 ist
 Julia
 Kalogeris
@@ -103,6 +103,7 @@ levl
 Linder
 Linux
 MacOS
+maint
 mapdl
 MAPDL
 mater

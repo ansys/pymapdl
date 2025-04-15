@@ -38,6 +38,9 @@ cp mapdl_launch_1.log ./"$LOG_NAMES"/mapdl_launch_1.log || echo "MAPDL launch do
 echo "Copying the profiling files..."
 cp -r prof ./"$LOG_NAMES"/prof || echo "No profile files could be found"
 
+echo "Copying the JSONL files..."
+cp *.jsonl ./"$LOG_NAMES"/ || echo "No JSONL files could be found"
+
 echo "Collecting file structure..."
 ls -R > ./"$LOG_NAMES"/files_structure.txt || echo "Failed to copy file structure to a file"
 

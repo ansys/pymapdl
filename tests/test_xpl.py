@@ -21,6 +21,8 @@
 # SOFTWARE.
 
 """Test xpl functionality"""
+import re
+
 from ansys.tools.versioning.utils import SemanticVersion
 import numpy as np
 import pytest
@@ -45,9 +47,33 @@ class Test_xpl:
     def create_cube(self, mapdl):
         from conftest import clear
 
+        # Delete files
+        self.full_file = mapdl.jobname + ".full"
+
+        if "full.file" in mapdl.list_files():
+            mapdl.slashdelete("full.file")
+
+        if mapdl.result_file in mapdl.list_files():
+            mapdl.slashdelete(mapdl.result_file)
+
         clear(mapdl)
 
+        # Delete files
+        self.full_file = mapdl.jobname + ".full"
+
+        if "full.file" in mapdl.list_files():
+            mapdl.slashdelete("full.file")
+
+        if mapdl.result_file in mapdl.list_files():
+            mapdl.slashdelete(mapdl.result_file)
+
+        # Delete files
+        if "cube_solve_xpl" in mapdl.list_files():
+            mapdl.slashdelete("cube_solve_xpl.db")
+
         # set up the full file
+        mapdl.clear("NOSTART")
+        mapdl.prep7()
         mapdl.block(0, 1, 0, 1, 0, 1)
         mapdl.et(1, 186)
 
@@ -59,20 +85,9 @@ class Test_xpl:
         mapdl.esize(0.5)
         mapdl.vmesh("all")
 
-        # Delete files
-        self.full_file = mapdl.jobname + ".full"
-        if "full.file" in mapdl.list_files():
-            mapdl.slashdelete("full.file")
-
-        if mapdl.result_file in mapdl.list_files():
-            mapdl.slashdelete(mapdl.result_file)
-
-        if mapdl.result_file in mapdl.list_files():
-            mapdl.slashdelete(mapdl.result_file)
-
         # solve first 10 non-trivial modes
         mapdl.modal_analysis(nmode=10, freqb=1)
-        mapdl.save("cube_solve_xpl")
+        mapdl.save("cube_solve_xpl", "db", slab="all")
 
     @pytest.fixture(scope="class")
     def cube_solve(self, mapdl):
@@ -81,24 +96,27 @@ class Test_xpl:
     @pytest.fixture(scope="function")
     def xpl(self, mapdl, cube_solve):
         mapdl.prep7()
-        mapdl.resume("cube_solve_xpl")
+        mapdl.resume("cube_solve_xpl", "db")
 
         xpl = mapdl.xpl
         if not self.full_file and not self.full_file in mapdl.list_files():
             self.create_cube(mapdl)
 
         xpl.open(self.full_file)
-        return xpl
 
-    @staticmethod
-    def test_close(xpl):
+        yield xpl
+
+        if xpl.opened:
+            xpl.close()
+
+    def test_close(self, xpl):
         xpl.close()
         with pytest.raises(MapdlCommandIgnoredError):
             xpl.list()
 
     @staticmethod
     def test_xpl_str(xpl):
-        assert "file.full" in str(xpl)
+        assert re.search(r"file\d*\.full", str(xpl))
 
     @staticmethod
     @requires("ansys-math-core")
@@ -198,3 +216,10 @@ class Test_xpl:
 
         mat = xpl.extract("NSL")
         assert mat.shape == (243, 10)
+
+    def test_opened(self, xpl):
+        assert xpl.opened
+        xpl.close()
+        assert not xpl.opened
+        xpl.open(self.full_file)
+        assert xpl.opened

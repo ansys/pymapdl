@@ -938,10 +938,14 @@ def test_asel_iterable(mapdl, make_block):
     )
 
 
-def test_vsel_iterable(mapdl, make_block):
+def test_vsel_iterable_and_kswp(mapdl, make_block):
     mapdl.run("VGEN, 5, 1, , , 100, , , , , ")
     assert np.allclose(
         mapdl.vsel("S", "volu", "", [1, 2, 4], "", ""), np.array([1, 2, 4])
+    )
+    mapdl.vsel("S", "volu", "", [1], "", "", kswp=1)
+    assert np.allclose(mapdl.geometry.vnum, [1]) and np.allclose(
+        mapdl.geometry.anum, [1, 2, 3, 4, 5, 6]
     )
 
 
@@ -1256,6 +1260,37 @@ def test_plot_path(mapdl, tmpdir):
         match="One possible reason is that the graphics device is not correct",
     ):
         mapdl.eplot(vtk=False)
+
+
+def test_add_mesh():
+    """Test the add_mesh method from MapdlPlotter class."""
+    import pyvista as pv
+
+    cube1 = pv.Cube()
+    pl1 = MapdlPlotter()
+    pl1.add_mesh(cube1)
+
+    cube2 = pv.Cube()
+    meshes_dict = [
+        {
+            "mesh": cube2,
+            "scalars": np.random.default_rng(seed=1).random((8, 3)),
+        }
+    ]
+
+    pl2 = MapdlPlotter()
+    pl2.add_mesh(meshes_dict)
+
+    cube3 = pv.Cube()
+    sphere = pv.Sphere()
+
+    pl3 = MapdlPlotter()
+    pl3.add_mesh([cube3, sphere])
+
+    assert pl1.meshes[0] == cube1
+    assert pl2.meshes[0] == cube2
+    assert pl3.meshes[0] == cube3
+    assert pl3.meshes[1] == sphere
 
 
 def test_plot_path_screenshoot(mapdl, cleared, tmpdir):
