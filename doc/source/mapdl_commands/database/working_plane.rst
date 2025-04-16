@@ -1,28 +1,25 @@
+.. _ref_working_plane_api:
 
-.. _ref_working_plane:
+*************
+Working plane
+*************
 
+.. currentmodule:: ansys.mapdl.core
 
-WorkingPlane
-============
-
-
-.. currentmodule:: ansys.mapdl.core._commands.database.working_plane
-
-.. autoclass:: ansys.mapdl.core._commands.database.working_plane.WorkingPlane
+These DATABASE commands turn on, move, rotate, and modify the working
+plane, which is used for picking operations.
 
 .. autosummary::
-   :template: base.rst
-   :toctree: _autosummary
+   :toctree: _autosummary/
 
-
-   WorkingPlane.kwpave
-   WorkingPlane.kwplan
-   WorkingPlane.lwplan
-   WorkingPlane.nwpave
-   WorkingPlane.nwplan
-   WorkingPlane.wpave
-   WorkingPlane.wpcsys
-   WorkingPlane.wplane
-   WorkingPlane.wpoffs
-   WorkingPlane.wprota
-   WorkingPlane.wpstyl
+   Mapdl.kwpave
+   Mapdl.kwplan
+   Mapdl.lwplan
+   Mapdl.nwpave
+   Mapdl.nwplan
+   Mapdl.wpave
+   Mapdl.wpcsys
+   Mapdl.wplane
+   Mapdl.wpoffs
+   Mapdl.wprota
+   Mapdl.wpstyl

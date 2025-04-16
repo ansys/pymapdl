@@ -1,42 +1,39 @@
+.. _ref_selecting_api:
 
-.. _ref_selecting:
-
-
+*********
 Selecting
-=========
+*********
 
+.. currentmodule:: ansys.mapdl.core
 
-.. currentmodule:: ansys.mapdl.core._commands.database.selecting
-
-.. autoclass:: ansys.mapdl.core._commands.database.selecting.Selecting
+These DATABASE commands are used to select subsets of database
+entities for further operations.
 
 .. autosummary::
-   :template: base.rst
-   :toctree: _autosummary
+   :toctree: _autosummary/
 
-
-   Selecting.allsel
-   Selecting.asel
-   Selecting.asll
-   Selecting.aslv
-   Selecting.dofsel
-   Selecting.esel
-   Selecting.esla
-   Selecting.esll
-   Selecting.esln
-   Selecting.eslv
-   Selecting.ksel
-   Selecting.ksll
-   Selecting.ksln
-   Selecting.lsel
-   Selecting.lsla
-   Selecting.lslk
-   Selecting.nsel
-   Selecting.nsla
-   Selecting.nsle
-   Selecting.nslk
-   Selecting.nsll
-   Selecting.nslv
-   Selecting.seltol
-   Selecting.vsel
-   Selecting.vsla
+   Mapdl.allsel
+   Mapdl.asll
+   Mapdl.asel
+   Mapdl.aslv
+   Mapdl.dofsel
+   Mapdl.esel
+   Mapdl.esla
+   Mapdl.esll
+   Mapdl.esln
+   Mapdl.eslv
+   Mapdl.ksel
+   Mapdl.ksll
+   Mapdl.ksln
+   Mapdl.lsel
+   Mapdl.lsla
+   Mapdl.lslk
+   Mapdl.nsel
+   Mapdl.nsla
+   Mapdl.nsle
+   Mapdl.nslk
+   Mapdl.nsll
+   Mapdl.nslv
+   Mapdl.partsel
+   Mapdl.vsel
+   Mapdl.vsla
