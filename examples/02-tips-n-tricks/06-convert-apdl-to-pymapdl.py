@@ -144,8 +144,8 @@ print("\n".join(result))
 # ~~~~~~~~~~~~~~~~~~~~~~
 # You can access the ``convert_script`` function in the terminal using a CLI
 # (command-line interface). Assuming a virtual environment is activated,
-# you can use the following command to convert a file named ``mapdl.in`` 
-#to a ``mapdl.out`` file.
+# you can use the following command to convert a file named ``mapdl.in``
+# to a ``mapdl.out`` file.
 #
 # .. code:: console
 #
