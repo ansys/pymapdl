@@ -142,7 +142,7 @@ print("\n".join(result))
 
 ###############################################################################
 # Command line interface
-# ~~~~~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~
 # Additionally the converter is also accessible via the terminal, through a CLI.
 # Assuming a virtual environment is activated the following can by run to convert
 # a file called `mapdl.in` into `mapdl.out`.
