@@ -29,13 +29,10 @@ Converting APDL scripts to PyMAPDL
 
 PyMAPDL offers two methods for converting APDL scripts to PyMAPDL scripts,
 
-* `convert_apdl_block()`
-* `convert_script()`
+* ``convert_apdl_block()``, which works with strings
+* ``convert_script()``, which works with files
 
-which work with strings and files respectively.
-
-This example considers a modified version of the APDL verification example 45
-as the source to be converted.
+This example converts a modified version of the APDL verification example 45.
 """
 
 import tempfile
@@ -92,9 +89,9 @@ FINISH
 
 
 ###############################################################################
-# Convert 'inline'
+# Convert a string inline
 # ~~~~~~~~~~~~~~~~
-# Calling `convert_apdl_block()` converts the supplied string to a list of translated
+# Calling the ``convert_apdl_block()`` function converts the supplied string to a list of translated
 # lines of code.
 #
 
@@ -105,16 +102,18 @@ print(result)
 # Quality of Life kwargs
 # ~~~~~~~~~~~~~~~~~~~~~~
 # This function also includes several kwargs that cover common use cases when converting
-# from APDL to PyMAPDL, such as adding the necessary python imports when `add_imports`
-# is set to True, or adding an `mapdl.exit()` to the end when `auto_exit` is set to True.
-# Some of the most useful commands are below.
+# from APDL to PyMAPDL, such as adding the necessary Python imports when ``add_imports``
+# is set to ``True`` or adding the ``mapdl.exit()`` command to the end when ``auto_exit``
+# is set to ``True``.
 #
-# * `only_commands` - Convert the commands without adding any boilerplate such as `mapdl=launch...` or `mapdl.exit`.
-# * `print_com` - change `/COM` commands to `print()`
-# * `clear_at_start` - call `mapdl.clear()` after `launch_mapdl`
-# * `add_imports` - add Python import lines at the start of the script
-# * `auto_exit` - When True, this appends a `mapdl.exit()` to the end of the file
-# * `cleanup_output` - when True format output using `autopep8` (if you have it installed)
+# Some of the most useful kwargs follow.
+#
+# * ``only_commands``: Convert the commands without adding any boilerplate such as ``mapdl=launch...`` or ``mapdl.exit``.
+# * ``print_com``: Change ``/COM`` commands to ``print()`` commands.
+# * ``clear_at_start``: Call the ``mapdl.clear()`` method after the `launch_mapdl`` method.
+# * ``add_imports`` Add Python import lines at the start of the script.
+# * ``auto_exit``:  If ``True``, append the ``mapdl.exit()`` method to the end of the file.
+# * ``cleanup_output``: If ``True``, format output using ``autopep8`` (if you have this Python package installed).
 #
 
 result = convert_apdl_block(
@@ -123,12 +122,12 @@ result = convert_apdl_block(
 print(result)
 
 ###############################################################################
-# Converting from file
+# Convert from a file
 # ~~~~~~~~~~~~~~~~~~~~
-# The function `convert_script` is also available and covers all the same functionality
-# but converts from a file to a list of translated strings, and provides the
-# additional option to save the result to file  automatically. This functionality
-# is not available in `convert_apdl_block()`.
+# The ``convert_script`` function provides all the same functionality
+# but converts from a file to a list of translated strings. Additionally,
+# it provides an option for saving the result to a file automatically, which
+# the ``convert_apdl_block()`` function does not provide.
 #
 
 new_file, filename = tempfile.mkstemp(suffix=".inp")
@@ -141,17 +140,18 @@ print("\n".join(result))
 
 
 ###############################################################################
-# Command line interface
+# Command-line interface
 # ~~~~~~~~~~~~~~~~~~~~~~
-# Additionally the converter is also accessible via the terminal, through a CLI.
-# Assuming a virtual environment is activated the following can by run to convert
-# a file called `mapdl.in` into `mapdl.out`.
+# You can access the ``convert_script`` function in the terminal using a CLI
+# (command-line interface). Assuming a virtual environment is activated,
+# you can use the following command to convert a file named ``mapdl.in`` 
+#to a ``mapdl.out`` file.
 #
 # .. code:: console
 #
 #    $ pymapdl convert -f mapdl.dat --print_com --clear_at_start --add_imports --auto_exit --output mapdl.out
 #
-# The input can even be built on the fly using `echo`:
+# You can even build the input on the fly using the ``echo`` command:
 #
 # .. code:: console
 #
