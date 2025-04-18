@@ -404,7 +404,7 @@ texinfo_documents = [
         "ansys.mapdl.core Documentation",
         author,
         "ansys.mapdl.core",
-        "Pythonic interface to MAPDL using gRPC",
+        "A Python client library for Ansys MAPDL",
         "Engineering Software",
     ),
 ]

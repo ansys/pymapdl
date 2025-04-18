@@ -40,7 +40,11 @@ class TestParseParameter:
     )
     def test_parse_float(self, values, query):
         input_, output = values
-        assert query._parse_parameter_float_response(input_) == output
+        if "WARNING" in values[0]:
+            with pytest.warns(UserWarning):
+                assert query._parse_parameter_float_response(input_) == output
+        else:
+            assert query._parse_parameter_float_response(input_) == output
 
     @pytest.mark.parametrize(
         "values",
@@ -55,7 +59,11 @@ class TestParseParameter:
     )
     def test_parse_int(self, values, query):
         input_, output = values
-        assert query._parse_parameter_integer_response(input_) == output
+        if "WARNING" in values[0]:
+            with pytest.warns(UserWarning):
+                assert query._parse_parameter_integer_response(input_) == output
+        else:
+            assert query._parse_parameter_integer_response(input_) == output
 
     def test_parse_float_type_warning(self, query):
         input_ = "WARNING PARAMETER = 4"

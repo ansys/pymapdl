@@ -265,17 +265,20 @@ def test_cmatrix(mapdl, setup_for_cmatrix):
 def test_read_input_file_verbose(mapdl, cleared):
     test_file = examples.vmfiles["vm153"]
     response = mapdl.input(test_file, verbose=True)
-    assert re.search("\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
+    assert re.search(
+        r"\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response
+    )
 
 
 @pytest.mark.parametrize("file_name", ["full26.dat", "static.dat"])
 def test_read_input_file(mapdl, file_name, cleared):
+    mapdl.prep7()
     test_file = os.path.join(PATH, "test_files", file_name)
     response = mapdl.input(test_file)
 
     assert (
-        re.search("\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
-        or "PyMAPDL: Simulation Finished." in response
+        re.search(r"\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
+        or "***** ROUTINE COMPLETED *****" in response
     )
 
 
@@ -467,8 +470,8 @@ def test_download_result(mapdl, cleared, tmpdir):
 def test__channel_str(mapdl, cleared):
     assert mapdl._channel_str is not None
     assert ":" in mapdl._channel_str
-    assert re.search("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", mapdl._channel_str)
-    assert re.search("\d{4,6}", mapdl._channel_str)
+    assert re.search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", mapdl._channel_str)
+    assert re.search(r"\d{4,6}", mapdl._channel_str)
 
 
 def test_mode(mapdl, cleared):
@@ -628,6 +631,9 @@ def test__check_stds(mapdl):
 
         mock_get_std_output.assert_called()
 
+    process.kill()
+    del process
+
 
 @requires("grpc")
 @requires("nowindows")  # since we are using bash
@@ -675,6 +681,9 @@ done
             MapdlConnectionError, match="Expected MapdlConnection error"
         ):
             mapdl._post_mortem_checks(process)
+
+    process.kill()
+    del process
 
 
 def test_subscribe_to_channel(mapdl, cleared):
@@ -776,11 +785,15 @@ def test__get_time_step_stream(mapdl, platform):
     with patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.platform", platform):
         from ansys.mapdl.core import mapdl_grpc
 
+        mapdl._time_step_stream = None
+        mapdl_grpc.DEFAULT_TIME_STEP_STREAM = None
+
         if platform == "linux":
             DEFAULT_TIME_STEP_STREAM = mapdl_grpc.DEFAULT_TIME_STEP_STREAM_POSIX
         elif platform == "windows":
             DEFAULT_TIME_STEP_STREAM = mapdl_grpc.DEFAULT_TIME_STEP_STREAM_NT
         else:
+            mapdl_grpc.DEFAULT_TIME_STEP_STREAM = None
             with pytest.raises(ValueError, match="The MAPDL platform"):
                 mapdl._get_time_step_stream()
 
@@ -788,13 +801,20 @@ def test__get_time_step_stream(mapdl, platform):
 
         assert DEFAULT_TIME_STEP_STREAM == mapdl._get_time_step_stream()
 
+        # Using global
+        mapdl._time_step_stream = None
         mapdl_grpc.DEFAULT_TIME_STEP_STREAM = 200
         assert mapdl_grpc.DEFAULT_TIME_STEP_STREAM == mapdl._get_time_step_stream()
-        mapdl_grpc.DEFAULT_TIME_STEP_STREAM = None
 
+        # Using argument, should override the global
+        mapdl_grpc.DEFAULT_TIME_STEP_STREAM = 1000
         assert 700 == mapdl._get_time_step_stream(700)
+        assert mapdl._time_step_stream == 700
 
         with pytest.raises(
             ValueError, match="``time_step`` argument must be greater than 0``"
         ):
             mapdl._get_time_step_stream(-700)
+
+        mapdl._time_step_stream = None
+        mapdl_grpc.DEFAULT_TIME_STEP_STREAM = None

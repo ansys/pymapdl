@@ -27,7 +27,7 @@ import pytest
 
 from conftest import HAS_DPF, ON_CI, has_dependency, requires
 
-if not has_dependency("ansys-dpf-core") or not HAS_DPF:
+if not HAS_DPF or not has_dependency("ansys-dpf-core"):
     pytest.skip(allow_module_level=True)
 
 from ansys.dpf import core as dpf

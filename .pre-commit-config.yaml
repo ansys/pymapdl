@@ -14,14 +14,14 @@ ci:
 repos:
 
 - repo: https://github.com/ansys/pre-commit-hooks
-  rev: v0.5.1
+  rev: v0.5.2
   hooks:
   - id: add-license-headers
     args:
     - --start_year=2016
 
 - repo: https://github.com/pycqa/isort
-  rev: 6.0.0
+  rev: 6.0.1
   hooks:
   - id: isort
 
@@ -52,7 +52,7 @@ repos:
       - --line-length=88
 
 - repo: https://github.com/PyCQA/flake8
-  rev: 7.1.2
+  rev: 7.2.0
   hooks:
   - id: flake8
 
@@ -78,6 +78,6 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.31.1
+  rev: 0.32.1
   hooks:
     - id: check-github-workflows

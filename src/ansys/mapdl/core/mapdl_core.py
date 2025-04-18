@@ -67,13 +67,16 @@ from ansys.mapdl.core.information import Information
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.mapdl_types import MapdlFloat
 from ansys.mapdl.core.misc import (
+    check_deprecated_vtk_kwargs,
     check_valid_routine,
     last_created,
     random_string,
+    requires_graphics,
     requires_package,
     run_as,
     supress_logging,
 )
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.reader import Archive
@@ -189,7 +192,6 @@ _ALLOWED_START_PARM = [
     "additional_switches",
     "check_parameter_names",
     "env_vars",
-    "launched",
     "exec_file",
     "finish_job_on_exit",
     "hostname",
@@ -197,6 +199,7 @@ _ALLOWED_START_PARM = [
     "jobid",
     "jobname",
     "launch_on_hpc",
+    "launched",
     "mode",
     "nproc",
     "override",
@@ -251,10 +254,11 @@ def _sanitize_start_parm(start_parm):
 class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
+    @check_deprecated_vtk_kwargs
     def __init__(
         self,
         loglevel: DEBUG_LEVELS = "DEBUG",
-        use_vtk: Optional[bool] = None,
+        graphics_backend: Optional[GraphicsBackend] = None,
         log_apdl: Optional[str] = None,
         log_file: Union[bool, str] = False,
         local: bool = True,
@@ -283,18 +287,16 @@ class _MapdlCore(Commands):
         self._save_selection_obj = None
 
         if _HAS_VISUALIZER:
-            if use_vtk is not None:  # pragma: no cover
-                self._use_vtk = use_vtk
+            if graphics_backend is not None:  # pragma: no cover
+                self._graphics_backend = graphics_backend
             else:
-                self._use_vtk = True
+                self._graphics_backend = GraphicsBackend.PYVISTA
         else:  # pragma: no cover
-            if use_vtk:
+            if graphics_backend:
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'use_vtk' requires having "
-                    "'ansys-tools-visualization_interface' installed."
+                    "Graphic libraries are required to use this class.\n"
+                    "You can install this using `pip install ansys-mapdl-core[graphics]`."
                 )
-            else:
-                self._use_vtk = False
 
         self._log_filehandler = None
         self._local: bool = local
@@ -540,7 +542,7 @@ class _MapdlCore(Commands):
 
         elif not self._path:
             raise MapdlRuntimeError(
-                f"MAPDL could provide a path using /INQUIRE or the cached path ('{self._path}')."
+                f"MAPDL could NOT provide a path using /INQUIRE or the cached path ('{self._path}')."
             )
 
         return self._path
@@ -839,6 +841,21 @@ class _MapdlCore(Commands):
         return self._non_interactive(self)
 
     @property
+    def muted(self):
+        """Context manager that suppress all output from MAPDL
+
+        Use the `muted` context manager to suppress all the output. Similar to
+        setting `mapdl.mute = True` but only for the context manager.
+
+        Examples
+        --------
+        >>> with mapdl.muted:
+        ...    mapdl.run("/SOLU") # This call is muted
+
+        """
+        return self._muted(self)
+
+    @property
     def parameters(self) -> "Parameters":
         """Collection of MAPDL parameters.
 
@@ -1020,14 +1037,14 @@ class _MapdlCore(Commands):
         return self._solution
 
     @property
-    def use_vtk(self):
-        """Returns if using VTK by default or not."""
-        return self._use_vtk
+    def graphics_backend(self) -> GraphicsBackend:
+        """Returns current graphics backend."""
+        return self._graphics_backend
 
-    @use_vtk.setter
-    def use_vtk(self, value: bool):
-        """Set VTK to be used by default or not."""
-        self._use_vtk = value
+    @graphics_backend.setter
+    def graphics_backend(self, value: GraphicsBackend):
+        """Set the graphics backend to be used."""
+        self._graphics_backend = value
 
     @property
     @requires_package("ansys.mapdl.reader", softerror=True)
@@ -1187,10 +1204,6 @@ class _MapdlCore(Commands):
             nblock_filename = os.path.join(self.directory, "nblock.cdb")
 
             # must have all nodes elements are using selected
-            if hasattr(self, "mute"):
-                old_mute = self.mute
-                self.mute = True
-
             self.cm("__NODE__", "NODE", mute=True)
             self.nsle("S", mute=True)
             self.cdwrite("db", arch_filename, mute=True)
@@ -1200,9 +1213,6 @@ class _MapdlCore(Commands):
             self.esel("NONE", mute=True)
             self.cdwrite("db", nblock_filename, mute=True)
             self.cmsel("S", "__ELEM__", "ELEM", mute=True)
-
-            if hasattr(self, "mute"):
-                self.mute = old_mute
 
             self._archive_cache = Archive(arch_filename, parse_vtk=False, name="Mesh")
             grid = self._archive_cache._parse_vtk(additional_checking=True)
@@ -1530,6 +1540,19 @@ class _MapdlCore(Commands):
         def _cached_routine(self):
             return self._parent()._cached_routine
 
+    class _muted:
+        def __init__(self, parent):
+            self._parent = weakref.ref(parent)
+            self.old_value = None
+
+        def __enter__(self):
+            self.old_value = self._parent().mute
+            self._parent().mute = True
+
+        def __exit__(self, *args):
+            self._parent().mute = self.old_value
+            self.old_value = None
+
     def run_as_routine(self, routine):
         """
         Runs a command or commands at a routine and then revert to the prior routine.
@@ -1840,15 +1863,9 @@ class _MapdlCore(Commands):
             self._parent = weakref.ref(parent)
             self._pixel_res = pixel_res
 
+        @requires_graphics
         def __enter__(self) -> None:
             self._parent()._log.debug("Entering in 'WithInterativePlotting' mode")
-
-            if not self._parent()._has_matplotlib:  # pragma: no cover
-                raise ModuleNotFoundError(
-                    "Install matplotlib to display plots from MAPDL ,"
-                    "from Python.  Otherwise, plot with vtk with:\n"
-                    "``vtk=True``"
-                )
 
             if not self._parent()._store_commands:
                 if not self._parent()._png_mode:
@@ -2920,7 +2937,9 @@ class _MapdlCore(Commands):
 
                 # Raising errors
                 if error_is_fine:
-                    self._log.warn("PERMITTED ERROR: " + permited_error_message.string)
+                    self._log.warning(
+                        "PERMITTED ERROR: " + permited_error_message.string
+                    )
                     continue
                 else:
                     # We don't need to log exception because they already included in the main logger.

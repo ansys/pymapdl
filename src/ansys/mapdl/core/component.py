@@ -205,11 +205,15 @@ class ComponentManager:
 
     >>> mapdl.components["mycomp4"] = (1, 2, 3)
     /Users/german.ayuso/pymapdl/src/ansys/mapdl/core/component.py:282: UserWarning: Assuming a NODES selection.
+
+    This assumes you are doing a NODES selection.
     It is recommended you use the following notation to avoid this warning:
-    \>\>\> mapdl.components['mycomp3'] = 'NODES', (1, 2, 3)
+
+    >>> mapdl.components['mycomp3'] = 'NODES', (1, 2, 3)
+
     Alternatively, you disable this warning using:
-    > mapdl.components.default_entity_warning=False
-    warnings.warn(
+
+    >>> mapdl.components.default_entity_warning=False
 
     You can change the default type by changing
     :attr:`Mapdl.components.default_entity <ansys.mapdl.core.Mapdl.components.default_entity>`
