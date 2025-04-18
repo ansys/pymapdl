@@ -29,7 +29,7 @@ class Style:
         self,
         wn: str = "",
         num: int | str = "",
-        int: str = "",
+        int_: str = "",
         xv: str = "",
         yv: str = "",
         zv: str = "",
@@ -52,7 +52,7 @@ class Style:
 
             * ``1`` - Directional light.
 
-        int : str
+        int_ : str
             Light intensity factor (defaults to 0.3 for ambient, 1.0 for directional). This option is valid
             only for 3D devices).
 
@@ -93,7 +93,7 @@ class Style:
 
         This command is valid in any processor.
         """
-        command = f"/LIGHT,{wn},{num},{int},{xv},{yv},{zv},{refl}"
+        command = f"/LIGHT,{wn},{num},{int_},{xv},{yv},{zv},{refl}"
         return self.run(command, **kwargs)
 
     def edge(self, wn: str = "", key: int | str = "", angle: str = "", **kwargs):
@@ -287,7 +287,7 @@ class Style:
         This command is valid in any processor.
         """
         warnings.warn(
-            "pymapdl does not support /ESHAPE when plotting in Python using ``mapdl.eplot()``.  Use ``mapdl.eplot(vtk=False)`` "
+            "pymapdl does not support /ESHAPE when plotting in Python using ``mapdl.eplot()``.  Use ``mapdl.eplot(backend=GraphicsBackend.MAPDL)`` "
         )
         command = f"/ESHAPE,{scale},{key}"
         return self.run(command, **kwargs)

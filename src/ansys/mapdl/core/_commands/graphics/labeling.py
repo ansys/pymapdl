@@ -286,9 +286,9 @@ class Labeling:
         self,
         item: str = "",
         key: int | str = "",
-        min: str = "",
-        max: str = "",
-        abs: str = "",
+        min_: str = "",
+        max_: str = "",
+        abs_: str = "",
         **kwargs,
     ):
         r"""Shows boundary condition (BC) symbols and values on displays.
@@ -310,7 +310,7 @@ class Labeling:
 
             * ``ROT`` - Applied rotational constraints (ROTX, ROTY, ROTZ).
 
-            * ``TEMP`` - Applied temperatures (TEMP, TBOT, TE2, TE3...., TTOP).
+            * ``TEMP`` - Applied temperatures (TEMP, TBOT, TE2, TE3,..., TTOP).
 
             * ``PRES`` - Applied fluid pressures.
 
@@ -330,7 +330,7 @@ class Labeling:
 
             * ``M or MOME`` - Applied structural moments (MX, MY, MZ).
 
-            * ``HEAT`` - Applied heat flows (HEAT, HBOT, HE2, HE3...., HTOP).
+            * ``HEAT`` - Applied heat flows (HEAT, HBOT, HE2, HE3,..., HTOP).
 
             * ``FLOW`` - Applied fluid flow.
 
@@ -375,13 +375,13 @@ class Labeling:
 
             * ``2`` - Plot value next to symbol.
 
-        min : str
+        min_ : str
             Minimum value in a range of values plotted on screen.
 
-        max : str
+        max_ : str
             Maximum value in a range of values plotted on screen.
 
-        abs : str
+        abs_ : str
             Absolute number. If ``KEY`` = 2 and ``ABS`` = 0, a number falling between the ``MIN`` and
             ``MAX`` is displayed. If ``ABS`` is not specified, it defaults to 0. If ``KEY`` = 2 and ``ABS``
             = 1, an absolute value falling between the ``MIN`` and ``MAX`` is displayed. ``ABS`` = 1 lets
@@ -425,7 +425,7 @@ class Labeling:
 
         The :ref:`pbc` command is valid in any processor.
         """
-        command = f"/PBC,{item},,{key},{min},{max},{abs}"
+        command = f"/PBC,{item},,{key},{min_},{max_},{abs_}"
         return self.run(command, **kwargs)
 
     def plopts(self, label: str = "", key: int | str = "", **kwargs):
