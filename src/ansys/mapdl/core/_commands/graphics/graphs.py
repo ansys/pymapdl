@@ -132,11 +132,12 @@ class Graphs:
 
             * ``0 or 1`` - Single Y-axis. Up to 10 curves scaled to a single Y-axis.
 
-            * ``2`` - Additional Y-axes (one for each curve) (3 curves maximum). Allows better scaling of curves with
-              widely differing numbering ranges.
+            * ``2`` - Additional Y-axes (one for each curve) (3 curves maximum). Allows better scaling of curves
+              with widely differing numbering ranges.
 
-            * ``3`` - Same as 2 but with additional Y-axis and curves projected out of the plane (6 curves maximum).
-              Allows clearer display with an isometric view. The default view when ``KAXIS`` = 3 is View,1,1,2,3.
+            * ``3`` - Same as 2 but with additional Y-axis and curves projected out of the plane (6 curves
+              maximum). Allows clearer display with an isometric view. The default view when ``KAXIS`` = 3 is
+              View,1,1,2,3.
 
         Notes
         -----
@@ -154,6 +155,47 @@ class Graphs:
         command = f"/GRTYP,{kaxis}"
         return self.run(command, **kwargs)
 
+    def gthk(self, label: str = "", thick: int | str = "", **kwargs):
+        r"""Sets line thicknesses for graph lines.
+
+        Mechanical APDL Command: `/GTHK <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GTHK.html>`_
+
+        Parameters
+        ----------
+        label : str
+            Apply thicknesses as selected from the following labels:
+
+            * ``AXIS`` - Modify thickness of ordinate and abscissa axes on graph displays.
+
+            * ``GRID`` - Modify thickness of grid lines on graph displays.
+
+            * ``CURVE`` - Modify thickness of curve lines (when no area fill ( :ref:`gropt` )).
+
+        thick : int or str
+            Thickness ratio (whole numbers only, from -1 to 10):
+
+            * ``-1`` - Do not draw the curve, but show only the markers specified by :ref:`gmarker`.
+
+            * ``0 or 1`` - Thin lines.
+
+            * ``2`` - The default thickness.
+
+            * ``3`` - 1.5 times the default thickness.
+
+            * ``etc.`` - (up to 10)
+
+        Notes
+        -----
+
+        .. _s-GTHK_notes:
+
+        Sets line thicknesses for graph lines (in raster mode only). Use :ref:`gthk`,STAT to show settings.
+
+        This command is valid in any processor.
+        """
+        command = f"/GTHK,{label},{thick}"
+        return self.run(command, **kwargs)
+
     def gropt(self, lab: str = "", key: str = "", **kwargs):
         r"""Sets various line graph display options.
 
@@ -166,13 +208,14 @@ class Graphs:
 
             * ``AXDV`` - Axis division (tick) marks (defaults to ``KEY`` = ON).
 
-            * ``AXNM`` - Axis scale numbers (defaults to ``KEY`` = ON, which puts numbers at the back plane of the graph). If
-              ``KEY`` = FRONT, numbers are on the front plane of the graph.
+            * ``AXNM`` - Axis scale numbers (defaults to ``KEY`` = ON, which puts numbers at the back plane of
+              the graph). If ``KEY`` = FRONT, numbers are on the front plane of the graph.
 
             * ``AXNSC`` - Axis number size scale factor. Input the scale value for ``KEY`` (defaults to 1.0).
 
-            * ``ASCAL`` - Automatic scaling of additional Y-axes for multi-curve ( :ref:`grtyp`, 2 or 3) graphs (defaults to
-              ``KEY`` = ON). If ``KEY`` = OFF, use base Y-axis scaling (see the :ref:`yrange` command).
+            * ``ASCAL`` - Automatic scaling of additional Y-axes for multi-curve ( :ref:`grtyp`, 2 or 3) graphs
+              (defaults to ``KEY`` = ON). If ``KEY`` = OFF, use base Y-axis scaling (see the :ref:`yrange`
+              command).
 
             * ``LOGX`` - Log X scale (defaults to ``KEY`` = OFF (linear)).
 
@@ -180,18 +223,18 @@ class Graphs:
 
             * ``FILL`` - Color fill areas under curves (defaults to ``KEY`` = OFF).
 
-            * ``CGRID`` - Superimpose background grid ( :ref:`grid` ) over areas under filled curves (defaults to ``KEY`` =
-              OFF).
+            * ``CGRID`` - Superimpose background grid ( :ref:`grid` ) over areas under filled curves (defaults
+              to ``KEY`` = OFF).
 
-            * ``DIG1`` - Number of significant digits before decimal point for axis values. Input the value for ``KEY``
-              (defaults to 4).
+            * ``DIG1`` - Number of significant digits before decimal point for axis values. Input the value for
+              ``KEY`` (defaults to 4).
 
-            * ``DIG2`` - Number of significant digits after decimal point for axis values. Input the value for ``KEY``
-              (defaults to 3).
+            * ``DIG2`` - Number of significant digits after decimal point for axis values. Input the value for
+              ``KEY`` (defaults to 3).
 
-            * ``VIEW`` - View key for graph displays (defaults to ``KEY`` = OFF, in which case the view is (0,0,1) for 2D
-              graph displays or (1,2,3) for 3D graph displays). If ``KEY`` = ON, the view settings for graph
-              displays are the same as the view settings for the model.
+            * ``VIEW`` - View key for graph displays (defaults to ``KEY`` = OFF, in which case the view is
+              (0,0,1) for 2D graph displays or (1,2,3) for 3D graph displays). If ``KEY`` = ON, the view settings
+              for graph displays are the same as the view settings for the model.
 
             * ``REVX`` - Plots the values on the X-axis in reverse order.
 
@@ -201,26 +244,26 @@ class Graphs:
 
             * ``DIVY`` - Determines the number of divisions (grid markers) that will be plotted on the Y axis.
 
-            * ``LTYP`` - Specifies whether program-generated ( ``KEY`` = 1) or system-derived ( ``KEY`` = 0) fonts are used
-              for the axis labels.
+            * ``LTYP`` - Specifies whether program-generated ( ``KEY`` = 1) or system-derived ( ``KEY`` = 0)
+              fonts are used for the axis labels.
 
-            * ``CURL`` - Determines the position of the curve labels. If ( ``KEY`` = 1), the curve label will be plotted in
-              the legend column, and the label will be displayed in the same color as the curve. If ( ``KEY`` = 0)
-              the curve labels will be plotted near the curve. (default).
+            * ``CURL`` - Determines the position of the curve labels. If ( ``KEY`` = 1), the curve label will be
+              plotted in the legend column, and the label will be displayed in the same color as the curve. If (
+              ``KEY`` = 0) the curve labels will be plotted near the curve. (default).
 
-            * ``XAXO`` - When you use this label, the subsequent ``KEY`` value will determine an offset amount from the
-              default (along the bottom) location for the X axis. If ``KEY`` = 1.0, a full offset occurs (the X
-              axis is moved to the top of the graph). If ``KEY`` = 0.5, the axis is offset to the midpoint of the
-              graph, and if ``KEY`` = 0 the axis remains in the original position, along the bottom of the graph.
-              For any offset, a grey copy of the original axis (containing the axis numbering) remains at the
-              original location.
+            * ``XAXO`` - When you use this label, the subsequent ``KEY`` value will determine an offset amount
+              from the default (along the bottom) location for the X axis. If ``KEY`` = 1.0, a full offset occurs
+              (the X axis is moved to the top of the graph). If ``KEY`` = 0.5, the axis is offset to the midpoint
+              of the graph, and if ``KEY`` = 0 the axis remains in the original position, along the bottom of the
+              graph. For any offset, a grey copy of the original axis (containing the axis numbering) remains at
+              the original location.
 
-            * ``YAXO`` - When you use this label, the subsequent ``KEY`` value will determine an offset amount from the
-              default (along the left side of the graph) location for the Y axis. If ``KEY`` = 1.0, a full offset
-              occurs (the Y axis is moved to the right side of the graph). If ``KEY`` = 0.5, the axis is offset to
-              the midpoint of the graph, and if ``KEY`` = 0 the axis remains in the original position, along the
-              left side of the graph. For any offset, a gray copy of the original axis (containing the axis
-              numbering) remains at the original location.
+            * ``YAXO`` - When you use this label, the subsequent ``KEY`` value will determine an offset amount
+              from the default (along the left side of the graph) location for the Y axis. If ``KEY`` = 1.0, a
+              full offset occurs (the Y axis is moved to the right side of the graph). If ``KEY`` = 0.5, the axis
+              is offset to the midpoint of the graph, and if ``KEY`` = 0 the axis remains in the original
+              position, along the left side of the graph. For any offset, a gray copy of the original axis
+              (containing the axis numbering) remains at the original location.
 
         key : str
             Option values:
@@ -235,12 +278,12 @@ class Graphs:
 
             * ``FRONT`` - If ``Lab`` is AXNM, FRONT may also be input.
 
-            * ``Ndiv`` - If ``Lab`` is DIVX or DIVY, determines the number of divisions (1-99) that will be applied to the
-              axis.
+            * ``Ndiv`` - If ``Lab`` is DIVX or DIVY, determines the number of divisions (1-99) that will be
+              applied to the axis.
 
-            * ``Kfont`` - If ``Lab`` is LTYP, ``Kfont`` is ON (1) or OFF(0). ON uses program-generated fonts for the axis
-              labels, while OFF uses SYSTEM (Windows, X-system, etc.) fonts. Default: ``Kfont`` = ON (Mechanical APDL
-              fonts).
+            * ``Kfont`` - If ``Lab`` is LTYP, ``Kfont`` is ON (1) or OFF(0). ON uses program-generated fonts for
+              the axis labels, while OFF uses SYSTEM (Windows, X-system, etc.) fonts. Default: ``Kfont`` = ON
+              (Mechanical APDL fonts).
 
         Notes
         -----
@@ -295,45 +338,4 @@ class Graphs:
         This command is valid in any processor.
         """
         command = f"/GRID,{key}"
-        return self.run(command, **kwargs)
-
-    def gthk(self, label: str = "", thick: int | str = "", **kwargs):
-        r"""Sets line thicknesses for graph lines.
-
-        Mechanical APDL Command: `/GTHK <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GTHK.html>`_
-
-        Parameters
-        ----------
-        label : str
-            Apply thicknesses as selected from the following labels:
-
-            * ``AXIS`` - Modify thickness of ordinate and abscissa axes on graph displays.
-
-            * ``GRID`` - Modify thickness of grid lines on graph displays.
-
-            * ``CURVE`` - Modify thickness of curve lines (when no area fill ( :ref:`gropt` )).
-
-        thick : int or str
-            Thickness ratio (whole numbers only, from -1 to 10):
-
-            * ``-1`` - Do not draw the curve, but show only the markers specified by :ref:`gmarker`.
-
-            * ``0 or 1`` - Thin lines.
-
-            * ``2`` - The default thickness.
-
-            * ``3`` - 1.5 times the default thickness.
-
-            * ``etc.`` - (up to 10)
-
-        Notes
-        -----
-
-        .. _s-GTHK_notes:
-
-        Sets line thicknesses for graph lines (in raster mode only). Use :ref:`gthk`,STAT to show settings.
-
-        This command is valid in any processor.
-        """
-        command = f"/GTHK,{label},{thick}"
         return self.run(command, **kwargs)

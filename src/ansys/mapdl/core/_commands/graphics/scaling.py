@@ -23,6 +23,20 @@
 
 class Scaling:
 
+    def iclwid(self, factor: str = "", **kwargs):
+        r"""Scales the line width of circuit builder icons.
+
+        Mechanical APDL Command: `/ICLWID <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ICLWID.html>`_
+
+        Parameters
+        ----------
+        factor : str
+            Multiplication factor applied to the default line width (defaults to 1). The minimum is 1 and
+            the maximum is 6.
+        """
+        command = f"/ICLWID,{factor}"
+        return self.run(command, **kwargs)
+
     def icscale(self, wn: str = "", factor: str = "", **kwargs):
         r"""Scales the icon size for elements supported in the circuit builder.
 
@@ -47,18 +61,39 @@ class Scaling:
         command = f"/ICSCALE,{wn},{factor}"
         return self.run(command, **kwargs)
 
-    def iclwid(self, factor: str = "", **kwargs):
-        r"""Scales the line width of circuit builder icons.
+    def vscale(self, wn: str = "", vratio: str = "", key: int | str = "", **kwargs):
+        r"""Scales the length of displayed vectors.
 
-        Mechanical APDL Command: `/ICLWID <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ICLWID.html>`_
+        Mechanical APDL Command: `/VSCALE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSCALE.html>`_
 
         Parameters
         ----------
-        factor : str
-            Multiplication factor applied to the default line width (defaults to 1). The minimum is 1 and
-            the maximum is 6.
+        wn : str
+            Window number (or ALL) to which command applies (defaults to 1).
+
+        vratio : str
+            Ratio value applied to the automatically calculated scale factor (defaults to 1.0, that is, use
+            scale factor as automatically calculated).
+
+        key : int or str
+            Relative scaling key:
+
+            * ``0`` - Use relative length scaling among vectors based on magnitudes.
+
+            * ``1`` - Use uniform length scaling for all vector lengths.
+
+        Notes
+        -----
+
+        .. _s-VSCALE_notes:
+
+        Allows scaling of the vector length displayed with the :ref:`plvect` command of POST1 and the
+        :ref:`pbc` and :ref:`psf` commands. Also allows the scaling of the element (that is,
+        :ref:`psymb`,ESYS) and the nodal (that is, :ref:`psymb`,NDIR) coordinate system symbols.
+
+        This command is valid in any processor.
         """
-        command = f"/ICLWID,{factor}"
+        command = f"/VSCALE,{wn},{vratio},{key}"
         return self.run(command, **kwargs)
 
     def slashdscale(self, wn: str = "", dmult: int | str = "", **kwargs):
@@ -72,12 +107,14 @@ class Scaling:
 
         The default value is AUTO or 0 except when:
 
-        Large deflection effects are included ( :ref:`nlgeom`,ON) and it is not a modal analysis; then the
-        default is 1. It is a spectrum analysis ( :ref:`antype`,SPECTR); then the default is OFF. The
-        amplitude of a time-harmonic solution is computed using the :ref:`hrcplx` command (OMEGAT _font
-        FamName="Agency FB"? ≥ /_font? 360 _font FamName="Agency FB"? ° /_font? ); then the default is OFF.
-        The amplitude of a complex modal or harmonic solution is stored into the database using the
-        :ref:`set` command ( ``KIMG`` = AMPL); then the default is OFF.
+        * Large deflection effects are included ( :ref:`nlgeom`,ON) and it is not a modal analysis; then the
+          default is 1.
+        * It is a spectrum analysis ( :ref:`antype`,SPECTR); then the default is OFF.
+        * The amplitude of a time-harmonic solution is computed using the :ref:`hrcplx` command (OMEGAT
+          _font FamName="Agency FB"? ≥ /_font? 360 _font FamName="Agency FB"? ° /_font? ); then the default
+          is OFF.
+        * The amplitude of a complex modal or harmonic solution is stored into the database using the
+          :ref:`set` command ( ``KIMG`` = AMPL); then the default is OFF.
 
         Parameters
         ----------
@@ -86,18 +123,19 @@ class Scaling:
 
         dmult : int or str
 
-            * ``AUTO or 0`` - Scale displacements automatically so that maximum displacement (vector amplitude) displays as 5
-              percent of the maximum model length, as measured in the global Cartesian X, Y, or Z directions.
+            * ``AUTO or 0`` - Scale displacements automatically so that maximum displacement (vector amplitude)
+              displays as 5 percent of the maximum model length, as measured in the global Cartesian X, Y, or Z
+              directions.
 
-            * ``1`` - Do not scale displacements (that is, scale displacements by 1.0, true to geometry). Often used with
-              large deflection results.
+            * ``1`` - Do not scale displacements (that is, scale displacements by 1.0, true to geometry). Often
+              used with large deflection results.
 
             * ``FACTOR`` - Scale displacements by numerical value input for FACTOR.
 
             * ``OFF`` - Remove displacement scaling (that is, scale displacements by 0.0, no distortion).
 
-            * ``USER`` - Set ``DMULT`` to that used for last display (useful when last ``DMULT`` value was automatically
-              calculated).
+            * ``USER`` - Set ``DMULT`` to that used for last display (useful when last ``DMULT`` value was
+              automatically calculated).
 
         Notes
         -----
@@ -143,41 +181,6 @@ class Scaling:
         This command is valid in any processor.
         """
         command = f"/RATIO,{wn},{ratox},{ratoy}"
-        return self.run(command, **kwargs)
-
-    def vscale(self, wn: str = "", vratio: str = "", key: int | str = "", **kwargs):
-        r"""Scales the length of displayed vectors.
-
-        Mechanical APDL Command: `/VSCALE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSCALE.html>`_
-
-        Parameters
-        ----------
-        wn : str
-            Window number (or ALL) to which command applies (defaults to 1).
-
-        vratio : str
-            Ratio value applied to the automatically calculated scale factor (defaults to 1.0, that is, use
-            scale factor as automatically calculated).
-
-        key : int or str
-            Relative scaling key:
-
-            * ``0`` - Use relative length scaling among vectors based on magnitudes.
-
-            * ``1`` - Use uniform length scaling for all vector lengths.
-
-        Notes
-        -----
-
-        .. _s-VSCALE_notes:
-
-        Allows scaling of the vector length displayed with the :ref:`plvect` command of POST1 and the
-        :ref:`pbc` and :ref:`psf` commands. Also allows the scaling of the element (that is,
-        :ref:`psymb`,ESYS) and the nodal (that is, :ref:`psymb`,NDIR) coordinate system symbols.
-
-        This command is valid in any processor.
-        """
-        command = f"/VSCALE,{wn},{vratio},{key}"
         return self.run(command, **kwargs)
 
     def sscale(self, wn: str = "", smult: str = "", **kwargs):
