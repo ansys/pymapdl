@@ -90,7 +90,7 @@ FINISH
 
 ###############################################################################
 # Convert a string inline
-# ~~~~~~~~~~~~~~~~
+# ~~~~~~~~~~~~~~~~~~~~~~~
 # Calling the ``convert_apdl_block()`` function converts the supplied string to a list of translated
 # lines of code.
 #
