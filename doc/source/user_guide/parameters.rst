@@ -18,6 +18,35 @@ populate a parameter, you can then access the parameter with code:
    >>> mapdl.get("DEF_Y", "NODE", 2, "U", "Y")
    >>> mapdl.parameters["DEF_Y"]
 
+Alternatively, you could use the :meth:`Mapdl.parameters.get_value() <ansys.mapdl.core.Mapdl.parameters.get_value>` method.
+This method is a wrapper around the MAPDL :meth:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` method
+and allows you to retrieve the value of a parameter without
+having to store the parameter in an intermediate MAPDL variable.
+For example, if you want to retrieve the value of a parameter directly, you can use:
+
+.. code:: pycon
+   
+   >>> mapdl.get_value("NODE", 2, "U", "Y")
+   1.0
+
+You can also follow a similar approach to get array parameters from the
+MAPDL `*VGET` command.
+For example, if you want to store the value of the displacement of all nodes
+in the Y direction, you can use the following code:
+
+.. code:: pycon
+
+   >>> mapdl.vget("MY_UY", "NODE", "U", "Y")
+   >>> mapdl.parameters["MY_UY"]
+   array([1.0, 2.0, 3.0, ...])
+
+Or, if you want to retrieve the value of the array directly, you can use:
+
+.. code:: pycon
+
+   >>> mapdl.get_array("NODE", "U", "Y")
+   array([1.0, 2.0, 3.0, ...])
+
 You can also set both scalar and array parameters from Python objects
 using :attr:`Mapdl.parameters <ansys.mapdl.core.Mapdl.parameters>`
 with:
