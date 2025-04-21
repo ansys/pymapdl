@@ -17,6 +17,7 @@ populate a parameter, you can then access the parameter with code:
    >>> mapdl = launch_mapdl()
    >>> mapdl.get("DEF_Y", "NODE", 2, "U", "Y")
    >>> mapdl.parameters["DEF_Y"]
+   1.0
 
 Alternatively, you could use the
 :meth:`Mapdl.parameters.get_value() <ansys.mapdl.core.Mapdl.parameters.get_value>`
