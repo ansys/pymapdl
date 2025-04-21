@@ -21,3 +21,16 @@ jobs:
       license-server: ${{ secrets.LICENSE_SERVER }}
       username: ${{ github.actor }}
       password: ${{ secrets.GITHUB_TOKEN }}
+
+  notify:
+    name: "Notify failed build"
+    needs: [linkcheck]
+    if: failure() && github.event_name == 'schedule'
+    runs-on: ubuntu-22.04
+    steps:
+      - name: "Open issue"
+        uses: jayqi/failed-build-issue-action@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          title-template: "Failed scheduled linkcheck 🔗 build"
+          label-name: "Build failed"
