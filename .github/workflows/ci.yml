@@ -215,7 +215,7 @@ jobs:
       username: ${{ github.actor }}
     with:
       testing-minimal: false
-      pytest-arguments: '-k "not test_dpf" --reset_only_failed  --add_missing_images'
+      pytest-arguments: '--reset_only_failed  --add_missing_images'
       mapdl-version: ${{ matrix.mapdl-version }}
       file-name: "${{ matrix.mapdl-version }}-local"
       tags: "local"
