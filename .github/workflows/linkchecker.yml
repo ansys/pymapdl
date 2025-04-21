@@ -84,6 +84,7 @@ jobs:
 
       - name: "Install docs build requirements"
         run: |
+          pip uninstall ansys-sphinx-theme
           pip install .[doc]
 
       - name: "Waiting for the services to be up"
