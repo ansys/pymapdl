@@ -57,7 +57,7 @@ graphics = [
 ]
 
 all = [
-    "ansys-tools-visualization-interface>=0.2.6",
+    "ansys-tools-visualization-interface>=0.9.0",
     "matplotlib>=3.0.0",  # for colormaps for pyvista
     "jupyterlab>=3",
     "ipywidgets",
