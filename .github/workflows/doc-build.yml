@@ -25,6 +25,27 @@ on:
         default: true
         type: boolean
 
+      use_cache_examples:
+        description: |
+          Whether to use the examples cache. Default is "true".
+        required: false
+        default: true
+        type: boolean
+
+      use_cache_doc_build:
+        description: |
+          Whether to use the doc build cache. Default is "true".
+        required: false
+        default: true
+        type: boolean
+
+      use_cache_autosummary:
+        description: |
+          Whether to use the autosummary cache. Default is "true".
+        required: false
+        default: true
+        type: boolean
+
     # Secrets
     secrets:
       license-server:
@@ -146,7 +167,7 @@ jobs:
 
       - name: "Cache examples"
         uses: actions/cache@v4
-        if: ${{ steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE }}
+        if: ${{ inputs.use_cache_examples && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
         with:
           path: doc/source/examples
           key: Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -155,7 +176,7 @@ jobs:
 
       - name: "Cache docs build directory"
         uses: actions/cache@v4
-        if: ${{ steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE }}
+        if: ${{ inputs.use_cache_doc_build && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
         with:
           path: doc/_build
           key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -164,7 +185,7 @@ jobs:
 
       - name: "Cache autosummary"
         uses: actions/cache@v4
-        if: ${{ steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE }}
+        if: ${{ inputs.use_cache_autosummary && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
         with:
           path: doc/source/**/_autosummary/*.rst
           key: autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
