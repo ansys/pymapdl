@@ -18,11 +18,15 @@ populate a parameter, you can then access the parameter with code:
    >>> mapdl.get("DEF_Y", "NODE", 2, "U", "Y")
    >>> mapdl.parameters["DEF_Y"]
 
-Alternatively, you could use the :meth:`Mapdl.parameters.get_value() <ansys.mapdl.core.Mapdl.parameters.get_value>` method.
-This method is a wrapper around the MAPDL :meth:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` method
+Alternatively, you could use the
+:meth:`Mapdl.parameters.get_value() <ansys.mapdl.core.Mapdl.parameters.get_value>`
+method.
+This method is a wrapper around the MAPDL
+:meth:`Mapdl.get() <ansys.mapdl.core.Mapdl.get>` method
 and allows you to retrieve the value of a parameter without
 having to store the parameter in an intermediate MAPDL variable.
-For example, if you want to retrieve the value of a parameter directly, you can use:
+For example, if you want to retrieve the value of a parameter directly,
+you can use:
 
 .. code:: pycon
    
