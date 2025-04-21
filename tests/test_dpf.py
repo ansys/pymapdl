@@ -23,15 +23,11 @@
 """Test the DPF implementation"""
 import os
 
-import pytest
-
-from conftest import HAS_DPF, ON_CI, has_dependency, requires
-
-if not HAS_DPF or not has_dependency("ansys-dpf-core"):
-    pytest.skip(allow_module_level=True)
-
 from ansys.dpf import core as dpf
 from ansys.dpf.core.server_types import DPF_DEFAULT_PORT
+import pytest
+
+from conftest import ON_LOCAL, requires
 
 DPF_PORT = os.environ.get("DPF_PORT", DPF_DEFAULT_PORT)  # Set in ci.yaml
 
@@ -39,16 +35,18 @@ DPF_PORT = os.environ.get("DPF_PORT", DPF_DEFAULT_PORT)  # Set in ci.yaml
 @pytest.fixture()
 def skip_dpf(mapdl):
     mapdl_version = str(mapdl.version)
-    if mapdl_version in ["25.2"] and ON_CI:
-        pytest.skip(
-            f"This MAPDL version ({mapdl_version}) docker image seems to not support DPF on CICD.",
-            allow_module_level=True,
-        )
+
+    # if mapdl_version in ["25.2"] and ON_CI:
+    #     pytest.skip(
+    #         f"This MAPDL version ({mapdl_version}) docker image seems to not support DPF on CICD.",
+    #         allow_module_level=True,
+    #     )
     return
 
 
 @requires("dpf")
 @requires("ansys-dpf-core")
+@pytest.mark.skipif(ON_LOCAL, reason="Skip on local machine")
 def test_dpf_connection(skip_dpf):
     # uses 127.0.0.1 and port 50054 by default
     try:
