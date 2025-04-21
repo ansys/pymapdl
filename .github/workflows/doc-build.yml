@@ -59,7 +59,7 @@ jobs:
       DPF_START_SERVER: False
       GRPC_ENABLE_FORK_SUPPORT: false  # See #3434
       MAIN_PYTHON_VERSION: "3.12"
-      ON_RELEASE: ${{ github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags') }}
+      NOT_ON_RELEASE: ${{ github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags') }}
 
     steps:
       - name: "Install Git and checkout project"
@@ -104,7 +104,7 @@ jobs:
               - 'pyproject.toml'
             documentation:
               - 'examples/**'
-              - 'doc/**'
+              - 'doc/source/**'
               - 'pyproject.toml'
 
       - name: "Setup Python with cache"
@@ -146,7 +146,7 @@ jobs:
 
       - name: "Cache examples"
         uses: actions/cache@v4
-        if: steps.changes.outputs.documentation == 'false' || env.ON_RELEASE
+        if: ${{ steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE }}
         with:
           path: doc/source/examples
           key: Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -155,7 +155,7 @@ jobs:
 
       - name: "Cache docs build directory"
         uses: actions/cache@v4
-        if: steps.changes.outputs.documentation == 'false' || env.ON_RELEASE
+        if: ${{ steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE }}
         with:
           path: doc/_build
           key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -164,7 +164,7 @@ jobs:
 
       - name: "Cache autosummary"
         uses: actions/cache@v4
-        if: steps.changes.outputs.documentation == 'false' || env.ON_RELEASE
+        if: ${{ steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE }}
         with:
           path: doc/source/**/_autosummary/*.rst
           key: autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
