@@ -3,8 +3,49 @@ name: "Documentation Build"
 
 on:
   workflow_call:  
-    # inputs:
-    
+    inputs:
+      builder:
+        description: |
+          The builder to use for the documentation. Default is "html".
+        required: false
+        default: "html"
+        type: string
+
+      build_pdf:
+        description: |
+          Whether to build the PDF documentation. Default is "false".
+        required: false
+        default: true
+        type: boolean
+
+      build_cheatsheet:
+        description: |
+          Whether to build the cheatsheet. Default is "false".
+        required: false
+        default: true
+        type: boolean
+
+      use_cache_examples:
+        description: |
+          Whether to use the examples cache. Default is "true".
+        required: false
+        default: true
+        type: boolean
+
+      use_cache_doc_build:
+        description: |
+          Whether to use the doc build cache. Default is "true".
+        required: false
+        default: true
+        type: boolean
+
+      use_cache_autosummary:
+        description: |
+          Whether to use the autosummary cache. Default is "true".
+        required: false
+        default: true
+        type: boolean
+
     # Secrets
     secrets:
       license-server:
@@ -29,7 +70,7 @@ jobs:
       ON_CI: True
       ON_DOCUMENTATION: TRUE
       PYANSYS_OFF_SCREEN: True
-      BUILD_CHEATSHEET: True
+      BUILD_CHEATSHEET: '${{ inputs.build_cheatsheet }}'
       MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.2-ubuntu-student
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
       PYMAPDL_START_INSTANCE: FALSE
@@ -39,6 +80,7 @@ jobs:
       DPF_START_SERVER: False
       GRPC_ENABLE_FORK_SUPPORT: false  # See #3434
       MAIN_PYTHON_VERSION: "3.12"
+      NOT_ON_RELEASE: ${{ github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags') }}
 
     steps:
       - name: "Install Git and checkout project"
@@ -83,7 +125,7 @@ jobs:
               - 'pyproject.toml'
             documentation:
               - 'examples/**'
-              - 'doc/**'
+              - 'doc/source/**'
               - 'pyproject.toml'
 
       - name: "Setup Python with cache"
@@ -125,7 +167,7 @@ jobs:
 
       - name: "Cache examples"
         uses: actions/cache@v4
-        if: steps.changes.outputs.documentation == 'false' || (github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags'))
+        if: ${{ inputs.use_cache_examples && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
         with:
           path: doc/source/examples
           key: Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -134,7 +176,7 @@ jobs:
 
       - name: "Cache docs build directory"
         uses: actions/cache@v4
-        if: steps.changes.outputs.documentation == 'false' || (github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags'))
+        if: ${{ inputs.use_cache_doc_build && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
         with:
           path: doc/_build
           key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -143,7 +185,7 @@ jobs:
 
       - name: "Cache autosummary"
         uses: actions/cache@v4
-        if: steps.changes.outputs.documentation == 'false' || (github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags'))
+        if: ${{ inputs.use_cache_autosummary && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
         with:
           path: doc/source/**/_autosummary/*.rst
           key: autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
@@ -162,16 +204,19 @@ jobs:
           .ci/waiting_services.sh
       
       - name: Install Quarto
+        if: ${{ inputs.build_cheatsheet }}
         uses: quarto-dev/quarto-actions/setup@v2
         with:
           tinytex: true
 
       - name: Check Quarto Version
+        if: ${{ inputs.build_cheatsheet }}
         shell: bash
         run: |
           quarto --version
       
       - name: "Install Poppler for PDF to PNG conversion"
+        if: ${{ inputs.build_cheatsheet }}
         shell: bash
         run: |
           sudo apt-get update
@@ -180,7 +225,7 @@ jobs:
       - name: "Build documentation"
         shell: bash
         run: |
-          xvfb-run make -C doc html SPHINXOPTS="-j auto -W --keep-going"
+          xvfb-run make -C doc ${{ inputs.builder }} SPHINXOPTS="-j auto -W --keep-going"
 
       - name: "Substitute defective GIF"
         shell: bash
@@ -195,16 +240,19 @@ jobs:
           retention-days: 7
 
       - name: "Build PDF Documentation"
+        if: ${{ inputs.build_pdf }}
         working-directory: doc
         shell: bash
         run: make pdf
 
       - name: "Show latex dir"
+        if: ${{ inputs.build_pdf }}
         working-directory: doc
         shell: bash
         run: ls _build/latex
 
       - name: "Upload PDF documentation"
+        if: ${{ inputs.build_pdf }}
         uses: actions/upload-artifact@v4
         with:
           name: documentation-pdf
