@@ -84,6 +84,7 @@ from ansys.mapdl.core.plotting import GraphicsBackend
     "--loglevel",
     "-ll",
     default="WARNING",
+    type=str,
     help="Logging level of the ansys object within the script.",
 )
 @click.option(
@@ -153,6 +154,7 @@ from ansys.mapdl.core.plotting import GraphicsBackend
     "--header",
     "-h",
     default=True,
+    type=bool,
     help="If ``True``, the default header is written in the first line of the output. If a string is provided, this string will be used as header.",
 )
 @click.option(
@@ -184,6 +186,7 @@ this value. Defaults to `None` which is Mapdl class default.""",
 @click.option(
     "--clear_at_start",
     default=False,
+    type=bool,
     help="""Add a `mapdl.clear()` after the Mapdl object initialization. Defaults to
 `False`.""",
 )
@@ -191,6 +194,7 @@ this value. Defaults to `None` which is Mapdl class default.""",
     "--check_parameter_names",
     "--cpn",
     default=False,
+    type=bool,
     help="""Set MAPDL object to avoid parameter name checks (do not raise leading underscored parameter exceptions). Defaults to `False`.""",
 )
 def convert(
