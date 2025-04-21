@@ -183,19 +183,19 @@ jobs:
           .ci/waiting_services.sh
       
       - name: Install Quarto
-        if: ${{ inputs.build_cheatsheet == 'true' }}
+        if: ${{ inputs.build_cheatsheet }}
         uses: quarto-dev/quarto-actions/setup@v2
         with:
           tinytex: true
 
       - name: Check Quarto Version
-        if: ${{ inputs.build_cheatsheet == 'true' }}
+        if: ${{ inputs.build_cheatsheet }}
         shell: bash
         run: |
           quarto --version
       
       - name: "Install Poppler for PDF to PNG conversion"
-        if: ${{ inputs.build_cheatsheet == 'true' }}
+        if: ${{ inputs.build_cheatsheet }}
         shell: bash
         run: |
           sudo apt-get update
@@ -219,19 +219,19 @@ jobs:
           retention-days: 7
 
       - name: "Build PDF Documentation"
-        if: ${{ inputs.build_pdf == 'true' }}
+        if: ${{ inputs.build_pdf }}
         working-directory: doc
         shell: bash
         run: make pdf
 
       - name: "Show latex dir"
-        if: ${{ inputs.build_pdf == 'true' }}
+        if: ${{ inputs.build_pdf }}
         working-directory: doc
         shell: bash
         run: ls _build/latex
 
       - name: "Upload PDF documentation"
-        if: ${{ inputs.build_pdf == 'true' }}
+        if: ${{ inputs.build_pdf }}
         uses: actions/upload-artifact@v4
         with:
           name: documentation-pdf
