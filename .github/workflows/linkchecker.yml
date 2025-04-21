@@ -17,6 +17,9 @@ jobs:
       builder: linkcheck
       build_pdf: false
       build_cheatsheet: false
+      use_cache_examples: false
+      use_cache_doc_build: false
+      use_cache_autosummary: false
     secrets:
       license-server: ${{ secrets.LICENSE_SERVER }}
       username: ${{ github.actor }}
