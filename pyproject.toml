@@ -72,7 +72,7 @@ tests = [
     "pytest-timeout==2.3.1",
     "pytest==8.3.5",
     "scipy==1.15.2",
-    "vtk==9.4.1",
+    "vtk==9.4.2",
 ]
 
 doc = [
@@ -105,7 +105,7 @@ doc = [
     "sphinx==8.2.3",
     "sphinxcontrib-websupport==2.0.0",
     "sphinxemoji==0.3.1",
-    "vtk==9.4.1",
+    "vtk==9.4.2",
 ]
 
 [tool.flit.module]

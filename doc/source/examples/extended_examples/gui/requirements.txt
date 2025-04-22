@@ -59,7 +59,7 @@ trame-vtk==2.8.12
 trame-vuetify==2.7.2
 typing_extensions==4.12.2
 urllib3==2.2.3
-vtk==9.4.1
+vtk==9.4.2
 websockets==13.1
 wslink==2.2.1
 yarl==1.17.2
