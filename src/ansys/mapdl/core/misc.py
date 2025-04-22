@@ -271,7 +271,7 @@ def create_temp_dir(tmpdir: str = None, name: str = None) -> str:
     letters_ = string.ascii_lowercase.replace("n", "")
 
     def get_name():
-        return random_string(10, letters_)
+        return "ansys_" + random_string(10, letters_)
 
     name = name or get_name()
     while os.path.exists(os.path.join(tmpdir, name)):
