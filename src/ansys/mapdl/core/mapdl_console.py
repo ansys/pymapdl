@@ -50,6 +50,8 @@ ready_items = [
     rb"executed\?",
     # errors
     rb"SHOULD INPUT PROCESSING BE SUSPENDED\?",
+    rb"ANSYS Traceback",
+    rb"eMPIChildJob",
     # prompts
     rb"ENTER FORMAT for",
 ]
@@ -58,6 +60,7 @@ CONTINUE_IDX = ready_items.index(rb"YES,NO OR CONTINUOUS\)\=")
 WARNING_IDX = ready_items.index(rb"executed\?")
 ERROR_IDX = ready_items.index(rb"SHOULD INPUT PROCESSING BE SUSPENDED\?")
 PROMPT_IDX = ready_items.index(rb"ENTER FORMAT for")
+
 
 nitems = len(ready_items)
 expect_list = []
@@ -86,13 +89,13 @@ def launch_pexpect(
         nproc,
         additional_switches,
     )
-    process = pexpect.spawn(command, cwd=run_location)
+    process = pexpect.spawn(command, cwd=run_location, use_poll=True)
     process.delaybeforesend = None
 
     try:
         index = process.expect(["BEGIN:", "CONTINUE"], timeout=start_timeout)
-    except:  # capture failure
-        raise RuntimeError(process.before.decode("utf-8"))
+    except Exception as err:  # capture failure
+        raise RuntimeError(process.before.decode("utf-8") or err)
 
     if index:  # received ... press enter to continue
         process.sendline("")
@@ -111,8 +114,9 @@ class MapdlConsole(MapdlBase):
         self,
         loglevel="INFO",
         log_apdl=None,
-        use_vtk=True,
+        graphics_backend=True,
         print_com=False,
+        set_no_abort=True,
         **start_parm,
     ):
         """Opens an ANSYS process using pexpect"""
@@ -122,16 +126,19 @@ class MapdlConsole(MapdlBase):
         self._name = None
         self._session_id = None
         self._cleanup = None
+        self.clean_response = True
 
         self._launch(start_parm)
         super().__init__(
             loglevel=loglevel,
-            use_vtk=use_vtk,
+            graphics_backend=graphics_backend,
             log_apdl=log_apdl,
             print_com=print_com,
             mode="console",
             **start_parm,
         )
+        if set_no_abort:
+            self.nerr(abort=-1, mute=True)
 
     def _launch(self, start_parm):
         """Connect to MAPDL process using pexpect"""
@@ -169,6 +176,19 @@ class MapdlConsole(MapdlBase):
         while True:
             i = self._process.expect_list(expect_list, timeout=None)
             response = self._process.before.decode("utf-8")
+
+            if self.clean_response:
+                # Cleaning up responses
+                response = response.strip().splitlines()
+                if (
+                    isinstance(response, list)
+                    and len(response) > 0
+                    and response[0].upper() == command.upper()
+                ):
+                    response = response[1:]
+
+                response = "\n".join(response)
+
             full_response += response
             if i >= CONTINUE_IDX and i < WARNING_IDX:  # continue
                 self._log.debug(
@@ -335,3 +355,10 @@ class MapdlConsole(MapdlBase):
         if not self._name:
             self._name = f"Console_PID_{self._process.pid}"
         return self._name
+
+    def scalar_param(self, parm_name):
+        response = self.starstatus(parm_name)
+        response = response.splitlines()[-1]
+        if parm_name.upper() not in response:
+            raise ValueError(f"Parameter {parm_name} not found")
+        return float(response.split()[1].strip())

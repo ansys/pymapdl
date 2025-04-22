@@ -53,7 +53,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: ansys/actions/doc-deploy-changelog@v8
+      - uses: ansys/actions/doc-deploy-changelog@v9
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
@@ -66,7 +66,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Check pull-request name
-        uses: ansys/actions/check-pr-title@v8
+        uses: ansys/actions/check-pr-title@v9
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -79,7 +79,7 @@ jobs:
         folder: ["doc", "examples"]
     steps:
       - name: "Ansys documentation style checks"
-        uses: ansys/actions/doc-style@v8
+        uses: ansys/actions/doc-style@v9
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: ${{ matrix.folder }}
@@ -105,12 +105,13 @@ jobs:
             os: macos-latest
     steps:
       - name: "Build wheelhouse and perform smoke test"
-        uses: ansys/actions/build-wheelhouse@v8
+        uses: ansys/actions/build-wheelhouse@v9
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           operating-system: ${{ matrix.os }}
           python-version: ${{ matrix.python-version }}
-          whitelist-license-check: "attrs" # This has MIT license but fails the check
+          check-licenses: true
+          # whitelist-license-check: "attrs" # This has MIT license but fails the check
 
       - name: "Importing library"
         run: python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
@@ -123,7 +124,7 @@ jobs:
     name: "Check library vulnerabilities"
     runs-on: ubuntu-22.04
     steps:
-      - uses: ansys/actions/check-vulnerabilities@v8
+      - uses: ansys/actions/check-vulnerabilities@v9
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
@@ -131,6 +132,7 @@ jobs:
           dev-mode: ${{ github.ref != 'refs/heads/main' }}
           upload-reports: True
           hide-log: false
+
 
   docs-build:
     name: "Build documentation"
@@ -140,6 +142,7 @@ jobs:
       license-server: ${{ secrets.LICENSE_SERVER }}
       username: ${{ github.actor }}
       password: ${{ secrets.GITHUB_TOKEN }}
+
 
   build-test-remote-matrix:
     name: "Build remote test matrix"
@@ -160,6 +163,7 @@ jobs:
           local: false
           run_all_builds: ${{ inputs.run_all_builds }}
 
+
   build-test-remote:
     name: "Remote: ${{ matrix.mapdl-version }}"
     needs: [smoke-tests, build-test-remote-matrix]
@@ -175,6 +179,7 @@ jobs:
     with:
       mapdl-version: "${{ matrix.mapdl-version }}"
       file-name: "${{ matrix.mapdl-version }}-remote"
+
 
   build-test-local-matrix:
     name: "Build test matrix for minimal and local"
@@ -193,6 +198,7 @@ jobs:
           token_teams_user_read: ${{ secrets.TOKEN_TEAMS_USER_READ }}
           local: true
           run_all_builds: ${{ inputs.run_all_builds }}
+
 
   build-test-ubuntu-local:
     name: "Local: ${{ matrix.mapdl-version }}"
@@ -215,6 +221,7 @@ jobs:
       tags: "local"
       latest-version: "252"
 
+
   build-test-ubuntu-minimal:
     name: "Local-min: ${{ matrix.mapdl-version }}"
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -223,7 +230,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-version: ['latest-ubuntu', 'v25.1-ubuntu']
+        mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu']
     secrets:
       license-server: ${{ secrets.LICENSE_SERVER }}
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
@@ -237,6 +244,7 @@ jobs:
       tags: "local,minimal"
       latest-version: "252"
 
+
   build-test-ubuntu-console:
     name: "Local-min-console: ${{ matrix.mapdl-version }}"
     if: github.ref != 'refs/heads/main' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
@@ -245,7 +253,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        mapdl-version: ['latest-ubuntu', 'v25.1-ubuntu']
+        mapdl-version: ['v25.2-ubuntu-cicd', 'v25.1-ubuntu']
     secrets:
       license-server: ${{ secrets.LICENSE_SERVER }}
       codecov-token: ${{ secrets.CODECOV_TOKEN }}
@@ -254,11 +262,13 @@ jobs:
     with:
       latest-version: "252"
       mapdl-version: ${{ matrix.mapdl-version }}
-      testing-minimal: true
+      testing-minimal: false
       on-console: true
       pytest-arguments: '-k console'
-      file-name: "${{ matrix.mapdl-version }}-minimal-console"
-      tags: "local,minimal,console"
+
+      file-name: "${{ matrix.mapdl-version }}-console"
+      tags: "local,console"
+
 
   test-windows:
     # Skipped
@@ -283,7 +293,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: "Build library source and wheel artifacts"
-        uses: ansys/actions/build-library@v8
+        uses: ansys/actions/build-library@v9
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
@@ -300,21 +310,29 @@ jobs:
       id-token: write
       contents: write
     steps:
-      - name: "Release to the public PyPI repository"
-        uses: ansys/actions/release-pypi-public@v8
+      - name: "Download the library artifacts from build-library step"
+        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
         with:
-          library-name: ${{ env.PACKAGE_NAME }}
-          use-trusted-publisher: true
+          name: ${{ env.PACKAGE_NAME }}-artifacts
+          path: ${{ env.PACKAGE_NAME }}-artifacts
+
+      - name: "Display structure of downloaded files"
+        run: ls -Rla
+
+      - name: "Release to PyPI using trusted publisher"
+        uses: pypa/gh-action-pypi-publish@76f52bc884231f62b9a034ebfe128415bbaabdfc # v1.12.4
+        with:
+          repository-url: "https://upload.pypi.org/legacy/"
+          print-hash: true
+          packages-dir: ${{ env.PACKAGE_NAME }}-artifacts
+          skip-existing: false
 
       - name: "Release to GitHub"
-        uses: ansys/actions/release-github@v8
+        uses: ansys/actions/release-github@v9
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           additional-artifacts: "minimum_requirements.txt"
           token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: "Display structure of downloaded files"
-        run: ls -Rla
 
 
   upload-docs-release:
@@ -324,7 +342,7 @@ jobs:
     needs: [release]
     steps:
       - name: "Deploy the stable documentation"
-        uses: ansys/actions/doc-deploy-stable@v8
+        uses: ansys/actions/doc-deploy-stable@v9
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -340,7 +358,7 @@ jobs:
     needs: [docs-build]
     steps:
       - name: "Deploy the latest documentation"
-        uses: ansys/actions/doc-deploy-dev@v8
+        uses: ansys/actions/doc-deploy-dev@v9
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -379,6 +397,7 @@ jobs:
         uses: ./.github/actions/test-julia
         with:
           julia-version: ${{ matrix.julia-version }}
+
 
   pytest-summary:
     name: Pytest summary for all the test jobs

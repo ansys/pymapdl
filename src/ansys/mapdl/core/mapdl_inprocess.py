@@ -23,6 +23,7 @@
 from typing import Protocol
 
 from ansys.mapdl.core.mapdl import MapdlBase
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 
 class _Backend(Protocol):
@@ -44,7 +45,10 @@ class _Backend(Protocol):
 class MapdlInProcess(MapdlBase):
     def __init__(self, in_process_backend: _Backend):
         super().__init__(
-            loglevel="WARNING", use_vtk=False, log_apdl=None, print_com=False
+            loglevel="WARNING",
+            graphics_backend=GraphicsBackend.MAPDL,
+            log_apdl=None,
+            print_com=False,
         )
         self._in_process_backend = in_process_backend
         self._cleanup: bool = True
