@@ -23,12 +23,15 @@
 """Test the DPF implementation"""
 import os
 
-from ansys.dpf import core as dpf
-from ansys.dpf.core.server_types import DPF_DEFAULT_PORT
 import pytest
 
 from ansys.mapdl.core.helpers import is_installed
 from conftest import HAS_DPF, ON_LOCAL
+
+if is_installed("ansys-dpf-core"):
+    from ansys.dpf import core as dpf
+    from ansys.dpf.core.server_types import DPF_DEFAULT_PORT
+
 
 DPF_PORT = os.environ.get("DPF_PORT", DPF_DEFAULT_PORT)  # Set in ci.yaml
 
@@ -46,8 +49,9 @@ def dpf_server():
         # If running locally, start the server
         dpf_server = dpf.start_local_server(port=int(DPF_PORT))
         assert not dpf_server.info["server_ip"]
+
     else:
-        # If running in a container, connect to the server
+        # If running in a container or remote, connect to the server
         dpf_server = dpf.connect_to_server(port=DPF_PORT)
         assert dpf_server.info["server_ip"]
 
