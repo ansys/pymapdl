@@ -27,20 +27,15 @@ from ansys.dpf import core as dpf
 from ansys.dpf.core.server_types import DPF_DEFAULT_PORT
 import pytest
 
-from conftest import ON_LOCAL, requires
+from conftest import HAS_DPF, ON_LOCAL, requires
 
 DPF_PORT = os.environ.get("DPF_PORT", DPF_DEFAULT_PORT)  # Set in ci.yaml
 
 
 @pytest.fixture()
-def skip_dpf(mapdl):
-    mapdl_version = str(mapdl.version)
-
-    # if mapdl_version in ["25.2"] and ON_CI:
-    #     pytest.skip(
-    #         f"This MAPDL version ({mapdl_version}) docker image seems to not support DPF on CICD.",
-    #         allow_module_level=True,
-    #     )
+def skip_dpf():
+    if not HAS_DPF:
+        pytest.skip("DPF is not available.", allow_module_level=True)
     return
 
 
@@ -57,7 +52,7 @@ def test_dpf_connection(skip_dpf):
         assert False
 
 
-@requires("dpf")
+# @requires("dpf")
 @requires("ansys-dpf-core")
 def test_upload(skip_dpf, mapdl, solved_box, tmpdir):
     # Download RST file
