@@ -72,6 +72,13 @@ on:
         required: false
         type: string
         default: ubuntu-22.04
+
+      python-version:
+        description: |
+          Python version to use.
+        required: false
+        type: string
+        default: "3.12"
         
     secrets:
       license-server:
@@ -103,7 +110,6 @@ jobs:
       ON_UBUNTU: true
       PYMAPDL_DEBUG_TESTING: True
       TESTING_MINIMAL: ${{ inputs.testing-minimal }}
-      MAIN_PYTHON_VERSION: "3.12"
       P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"
       PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
       PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile'
@@ -152,7 +158,7 @@ jobs:
       - name: "Setup Python"
         uses: actions/setup-python@v5
         with:
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+          python-version: ${{ inputs.python-version }}
 
       - name: "Checking Python"
         shell: bash
