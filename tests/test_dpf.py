@@ -28,7 +28,7 @@ from ansys.dpf.core.server_types import DPF_DEFAULT_PORT
 import pytest
 
 from ansys.mapdl.core.helpers import is_installed
-from conftest import HAS_DPF, ON_LOCAL, requires
+from conftest import HAS_DPF, ON_LOCAL
 
 DPF_PORT = os.environ.get("DPF_PORT", DPF_DEFAULT_PORT)  # Set in ci.yaml
 
@@ -54,9 +54,8 @@ def dpf_server():
     return dpf_server
 
 
-@requires("ansys-dpf-core")
-@requires("local")
-def test_upload(dpf_server, mapdl, solved_box, tmpdir):
+@pytest.fixture()
+def model(dpf_server, mapdl, solved_box, tmpdir):
     # Download RST file
     rst_path = mapdl.download_result(str(tmpdir.mkdir("tmpdir")))
 
@@ -64,11 +63,25 @@ def test_upload(dpf_server, mapdl, solved_box, tmpdir):
     if not dpf_server.local_server:
         rst_path = dpf.upload_file_in_tmp_folder(rst_path)
 
-    # Creating model
     model = dpf.Model(rst_path)
     assert model.results is not None
 
+    return model
+
+
+def test_metadata_meshed_region(dpf_server, mapdl, model):
     # Checks
     mapdl.allsel()
     assert mapdl.mesh.n_node == model.metadata.meshed_region.nodes.n_nodes
     assert mapdl.mesh.n_elem == model.metadata.meshed_region.elements.n_elements
+
+
+def test_displacement(model, mapdl):
+    results = model.results
+    displacements = results.displacement()
+
+    disp_dpf = displacements.outputs.fields_container()[0].data
+    disp_mapdl = mapdl.post_processing.nodal_displacement("all")
+
+    assert disp_dpf.max() == disp_mapdl.max()
+    assert disp_dpf.min() == disp_mapdl.min()
