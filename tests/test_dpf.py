@@ -32,8 +32,7 @@ if is_installed("ansys-dpf-core"):
     from ansys.dpf import core as dpf
     from ansys.dpf.core.server_types import DPF_DEFAULT_PORT
 
-
-DPF_PORT = os.environ.get("DPF_PORT", DPF_DEFAULT_PORT)  # Set in ci.yaml
+    DPF_PORT = os.environ.get("DPF_PORT", DPF_DEFAULT_PORT)  # Set in ci.yaml
 
 
 @pytest.fixture()
