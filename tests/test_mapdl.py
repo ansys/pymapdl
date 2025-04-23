@@ -66,6 +66,7 @@ from ansys.mapdl.core.errors import (
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string, stack
+from ansys.mapdl.core.plotting import GraphicsBackend
 from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 
 # Path to files needed for examples
@@ -2453,14 +2454,14 @@ def test_default_file_type_for_plots(mapdl, cleared):
 
 
 @requires("matplotlib")
-def test_use_vtk(mapdl, cleared):
-    assert isinstance(mapdl.use_vtk, bool)
+def test_graphics_backend(mapdl, cleared):
+    assert isinstance(mapdl.graphics_backend, GraphicsBackend)
 
-    prev = mapdl.use_vtk
-    mapdl.use_vtk = False
+    prev = mapdl.graphics_backend
+    mapdl.graphics_backend = GraphicsBackend.MAPDL
     mapdl.eplot()
 
-    mapdl.use_vtk = prev
+    mapdl.graphics_backend = prev
 
 
 @requires("local")
@@ -2665,13 +2666,15 @@ def test_ip_hostname_in_start_parm(ip):
         mck_sock.return_value = ("myhostname",)
         mapdl = pymapdl.Mapdl(disable_run_at_connect=False, **start_parm)
 
-    if ip == "myhostname":
-        assert mapdl.ip == "123.45.67.99"
-    else:
-        assert mapdl.ip == ip
+        if ip == "myhostname":
+            assert mapdl.ip == "123.45.67.99"
+        else:
+            assert mapdl.ip == ip
 
-    assert mapdl.hostname == "myhostname"
-    del mapdl
+        assert mapdl.hostname == "myhostname"
+        mapdl.kill_job = lambda x: None  # Avoiding exit
+        mapdl.__del__ = lambda x: None  # Avoiding exit
+        del mapdl
 
 
 def test_directory_setter(mapdl, cleared):
@@ -2982,7 +2985,6 @@ def test_muted(mapdl, prop):
 )
 @patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
 @stack(*PATCH_MAPDL)
-@patch("ansys.mapdl.core.Mapdl._exit_mapdl", lambda *args, **kwargs: None)
 @pytest.mark.parametrize("set_no_abort", [True, False, None])
 @pytest.mark.parametrize("start_instance", [True, False])
 def test_set_no_abort(monkeypatch, set_no_abort, start_instance):
@@ -2998,10 +3000,12 @@ def test_set_no_abort(monkeypatch, set_no_abort, start_instance):
     ):
         mapdl = launch_mapdl(set_no_abort=set_no_abort, start_instance=start_instance)
 
+        mapdl._exit_mapdl = lambda *args, **kwargs: None  # Avoiding exit
+        mapdl.__del__ = lambda x: None  # Avoiding exit
+        del mapdl
+
     kwargs = mock_run.call_args_list[0].kwargs
     calls = [each.args[0].upper() for each in mock_run.call_args_list]
 
     if set_no_abort is None or set_no_abort:
         assert any(["/NERR,,,-1" in each for each in calls])
-
-    del mapdl
