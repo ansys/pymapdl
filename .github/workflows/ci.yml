@@ -215,11 +215,12 @@ jobs:
       username: ${{ github.actor }}
     with:
       testing-minimal: false
-      pytest-arguments: '-k "not test_dpf" --reset_only_failed  --add_missing_images'
+      pytest-arguments: '--reset_only_failed  --add_missing_images'
       mapdl-version: ${{ matrix.mapdl-version }}
       file-name: "${{ matrix.mapdl-version }}-local"
       tags: "local"
       latest-version: "252"
+      test_dpf: ${{ contains(matrix.mapdl-version, 'cicd') }}
 
 
   build-test-ubuntu-minimal:
@@ -238,11 +239,12 @@ jobs:
       username: ${{ github.actor }}
     with:
       testing-minimal: true
-      pytest-arguments: '-k "not test_dpf"'
+      pytest-arguments: ''
       mapdl-version: ${{ matrix.mapdl-version }}
       file-name: "${{ matrix.mapdl-version }}-minimal"
       tags: "local,minimal"
       latest-version: "252"
+      test_dpf: false
 
 
   build-test-ubuntu-console:
@@ -265,9 +267,9 @@ jobs:
       testing-minimal: false
       on-console: true
       pytest-arguments: '-k console'
-
       file-name: "${{ matrix.mapdl-version }}-console"
       tags: "local,console"
+      test_dpf: false
 
 
   test-windows:
