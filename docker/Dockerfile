@@ -36,10 +36,6 @@ RUN apt-get update && \
       libglu1 \
       libxm4 \
       libxi6 && \
-    apt install -y software-properties-common \
-    && add-apt-repository -y ppa:zeehio/libxp \
-    && apt-get update \
-    && apt-get install -y libxp6 && \
     mkdir -p /ansys_inc
 
 # libxp.so missing. This is a workaround
@@ -90,6 +86,7 @@ RUN groupadd --gid $USER_GID $USERNAME \
 ENV ON_DOCKER=TRUE
 ENV DEBIAN_FRONTEND=noninteractive
 
+# OpenMPI env vars
 ENV OMPI_ALLOW_RUN_AS_ROOT=1
 ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
