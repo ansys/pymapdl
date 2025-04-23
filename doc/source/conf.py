@@ -226,6 +226,8 @@ linkcheck_ignore = [
     "https://ansyshelp.ansys.com/*",  # behind authentication
     "https://forum.ansys.com/forums/*",  # It is detected as broken
     "https://courses.ansys.com/*",  # It is detected as broken
+    "https://blog.derlin.ch/genetic-algorithms-with-pygad",  # Error: Too Many Requests for url
+    "https://www.mdpi.com/*",  # 403 Client Error: Forbidden for url
 ]
 linkcheck_anchors_ignore = [
     # these anchors are picked by linkcheck as broken but they are not.
@@ -393,7 +395,7 @@ texinfo_documents = [
         "ansys.mapdl.core Documentation",
         author,
         "ansys.mapdl.core",
-        "Pythonic interface to MAPDL using gRPC",
+        "A Python client library for Ansys MAPDL",
         "Engineering Software",
     ),
 ]

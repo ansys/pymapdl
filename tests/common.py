@@ -26,7 +26,6 @@ import os
 import subprocess
 import time
 from typing import Dict, List
-from warnings import warn
 
 import psutil
 
@@ -125,7 +124,7 @@ def has_grpc():
 
 
 def has_dpf():
-    return bool(os.environ.get("DPF_PORT"))
+    return bool(os.environ.get("HAS_DPF", "false").lower() == "true")
 
 
 def is_smp():
@@ -268,13 +267,13 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
         try:
             # to connect
             mapdl = Mapdl(port=port, ip=ip)
-            warn("MAPDL disconnected during testing, reconnected.")
+            LOG.warning("MAPDL disconnected during testing, reconnected.")
 
         except MapdlConnectionError as err:
             from conftest import DEBUG_TESTING, ON_LOCAL
 
             # Registering error.
-            LOG.info(str(err))
+            LOG.warning(str(err))
 
             # we cannot connect.
             # Kill the instance
@@ -296,7 +295,7 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
                 log_apdl="pymapdl.apdl" if DEBUG_TESTING else None,
                 mapdl_output="apdl.out" if (DEBUG_TESTING and ON_LOCAL) else None,
             )
-            warn("MAPDL died during testing, relaunched.")
+            LOG.info("MAPDL died during testing, relaunched.")
 
         LOG.info("Successfully re-connected to MAPDL")
 

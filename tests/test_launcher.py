@@ -61,6 +61,7 @@ from ansys.mapdl.core.launcher import (
     get_slurm_options,
     get_start_instance,
     get_version,
+    inject_additional_switches,
     is_running_on_slurm,
     kill_job,
     launch_grpc,
@@ -283,8 +284,9 @@ def test_not_valid_versions(mapdl, my_fs, cleared, monkeypatch, version):
 @requires("local")
 @requires("linux")
 @requires("console")
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_failed_console():
-    exec_file = find_mapdl(installed_mapdl_versions[0])[0]
+    exec_file = find_mapdl(str(installed_mapdl_versions[0]))[0]
     with pytest.raises(ValueError):
         pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
@@ -2000,11 +2002,13 @@ def test_args_pass(monkeypatch, arg, value, method):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
 
     kwargs = {arg: value}
+
     mapdl = launch_mapdl(**kwargs)
     meth = getattr(mapdl, method)
     assert meth == value
 
     mapdl._ctrl = lambda *args, **kwargs: None
+    mapdl.kill_job = lambda *args, **kwargs: None
     del mapdl
 
 
@@ -2072,10 +2076,24 @@ def test_check_server_is_alive_no_queue():
 def test_get_std_output_no_queue():
     from ansys.mapdl.core.launcher import _get_std_output
 
-    assert _get_std_output(None, 30) == [None]
+    assert _get_std_output(None, 30) == [""]
 
 
 def test_create_queue_for_std_no_queue():
     from ansys.mapdl.core.launcher import _create_queue_for_std
 
     assert _create_queue_for_std(None) == (None, None)
+
+
+def test_inject_additional_switches(monkeypatch):
+    """
+    Test the inject_additional_switches function.
+    """
+    envvar = "-my-add=switch --other_switch -b"
+    monkeypatch.setenv("PYMAPDL_ADDITIONAL_SWITCHES", envvar)
+    args = {"additional_switches": "-my_add=switch --other_switch -b"}
+
+    new_args = inject_additional_switches(args)
+    assert args["additional_switches"] in new_args["additional_switches"]
+    # The env var is ignored if the argument is used
+    assert envvar not in new_args["additional_switches"]

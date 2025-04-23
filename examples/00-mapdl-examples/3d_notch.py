@@ -89,18 +89,18 @@ cut_area = mapdl.asba(rect_anum, "ALL")  # cut all areas except the plate
 
 
 mapdl.lsla("S")
-mapdl.lplot(vtk=True, show_keypoint_numbering=True)
+mapdl.lplot(show_keypoint_numbering=True)
 mapdl.lsel("all")
 
 # plot the area using vtk/pyvista
-mapdl.aplot(vtk=True, show_area_numbering=True, show_lines=True, cpos="xy")
+mapdl.aplot(show_area_numbering=True, show_lines=True, cpos="xy")
 
 # Next, extrude the area to create volume
 thickness = 0.01
 mapdl.vext(cut_area, dz=thickness)
 
 # Checking volume plot
-mapdl.vplot(vtk=True, show_lines=True, show_axes=True, smooth_shading=True)
+mapdl.vplot(show_lines=True, show_axes=True, smooth_shading=True)
 
 
 ###############################################################################
@@ -126,7 +126,7 @@ plate_esize = 0.01
 # line and area numbers identified using aplot
 
 mapdl.asel("S", "AREA", vmin=1, vmax=1)
-mapdl.aplot(vtk=True, show_line_numbering=True)
+mapdl.aplot(show_line_numbering=True)
 
 
 mapdl.lsel("NONE")
@@ -147,7 +147,7 @@ if esize > thickness / 2:
 mapdl.esize()  # this is tough to automate
 mapdl.et(1, "SOLID186")
 mapdl.vsweep("all")
-mapdl.eplot(vtk=True, show_edges=True, show_axes=False, line_width=2, background="w")
+mapdl.eplot(show_edges=True, show_axes=False, line_width=2, background="w")
 
 
 ###############################################################################

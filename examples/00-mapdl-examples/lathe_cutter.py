@@ -94,6 +94,7 @@ import numpy as np
 
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.examples.downloads import download_example_data
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 # cwd = current working directory
 path = os.getcwd()
@@ -194,9 +195,9 @@ mapdl.vplot(
 #
 # VTK plots do not show MAPDL plot symbols.
 # However, to use MAPDL plotting capabilities, you can set the keyword
-# option ``vtk`` to ``False``.
-
-mapdl.lplot(vtk=False)
+# option ``backend`` to ``GraphicsBackend.MAPDL``.
+mapdl.set_graphics_backend(GraphicsBackend.MAPDL)
+mapdl.lplot()
 
 ###############################################################################
 # Step 4: Pressure load
@@ -244,7 +245,7 @@ mapdl.slashsolu()
 mapdl.nlgeom("On")
 mapdl.psf("PRES", "NORM", 3, 0, 1)
 mapdl.view(1, -1, 1, 1)
-mapdl.eplot(vtk=False)
+mapdl.eplot()
 
 ###############################################################################
 # Solve the model.
