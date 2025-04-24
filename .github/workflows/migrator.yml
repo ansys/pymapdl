@@ -1,5 +1,5 @@
 # .github/workflows/recreate-pr.yml
-name: Recreate PR in Main Repo
+name: Fork PR Handler
 
 on:
   issue_comment:
