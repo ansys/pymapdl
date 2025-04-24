@@ -73,10 +73,10 @@ jobs:
           # git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
 
           echo "Adding new remote"
-          git remote add dest https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ github.repository }}.git
+          # git remote add dest https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ github.repository }}.git
 
           echo "Pushing to new remote"
-          git push dest HEAD:refs/heads/$NEW_BRANCH
+          # git push dest HEAD:refs/heads/$NEW_BRANCH
 
       - name: Create new PR
         uses: peter-evans/create-pull-request@v5
