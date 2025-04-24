@@ -38,7 +38,7 @@ jobs:
         run: |
           PR_HEAD_REPO=${{ steps.pr.outputs.data.head.repo.clone_url }}
           PR_HEAD_REF=${{ steps.pr.outputs.data.head.ref }}
-          NEW_BRANCH=migrated/pr-${{ github.event.issue.number }}
+          NEW_BRANCH=migrated/pr-${{ steps.config.outputs.issue_number }}
 
           git clone $PR_HEAD_REPO pr-source
           cd pr-source
@@ -52,7 +52,7 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-          title: "Migrated PR #${{ github.event.issue.number }}"
+          title: "Migrated PR #${{ steps.config.outputs.issue_number }}"
           body: "This PR was migrated from a fork to allow secrets to run in workflows."
-          branch: migrated/pr-${{ github.event.issue.number }}
+          branch: migrated/pr-${{ steps.config.outputs.issue_number }}
           base: ${{ steps.pr.outputs.data.base.ref }}
