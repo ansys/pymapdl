@@ -49,6 +49,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+
       - name: Clone PR branch from fork
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -60,11 +65,17 @@ jobs:
           #   git clone $PR_HEAD_REPO pr-source
           #   cd pr-source
           #   git checkout $PR_HEAD_REF
-          gh pr checkout ${{ steps.config.outputs.issue_number }}
+          # echo "Cloning PR branch from fork"
+          # gh pr checkout ${{ steps.config.outputs.issue_number }}
 
-          git config --global user.name "${{ secrets.PYANSYS_CI_BOT_USERNAME }}"
-          git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
+          # echo "Setting up git"
+          # git config --global user.name "${{ secrets.PYANSYS_CI_BOT_USERNAME }}"
+          # git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
+
+          echo "Adding new remote"
           git remote add dest https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ github.repository }}.git
+
+          echo "Pushing to new remote"
           git push dest HEAD:refs/heads/$NEW_BRANCH
 
       - name: Create new PR
