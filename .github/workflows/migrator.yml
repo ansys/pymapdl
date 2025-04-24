@@ -47,6 +47,8 @@ jobs:
           repository: ${{ github.event.pull_request.head.repo.full_name }}
 
       - name: Check out the branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: | 
           gh pr checkout ${{ steps.config.outputs.issue_number }}
           # git pull origin pull/${{ steps.config.outputs.issue_number }}/head
