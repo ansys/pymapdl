@@ -49,6 +49,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - run: |
+          echo "PR info: ${{ steps.pr.outputs.data }}"
+          echo "PR head ref: ${{ steps.pr.outputs.data.head.ref }}"
+          echo "PR base ref: ${{ steps.pr.outputs.data.base.ref }}"
+          echo "ref: ${{ github.event.pull_request.head.ref }}"
+          echo "full name: ${{ github.event.pull_request.head.repo.full_name }}"
+          echo data: ${{ steps.pr.outputs.data }} >> pr_info.txt
+          cat pr_info.txt
+
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.ref }}
