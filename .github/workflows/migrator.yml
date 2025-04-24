@@ -10,7 +10,7 @@ jobs:
     if: |
        (
         github.event.issue.pull_request != null &&
-        contains(github.event.comment.body, '@pyansys-ci-bot LGTM') &&
+        contains(github.event.comment.body, '@pyansys-ci-bot migrate') &&
         github.event.comment.user.login == 'germa89' 
         ) || ( github.event_name == 'workflow_dispatch' )
     runs-on: ubuntu-latest
