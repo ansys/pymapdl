@@ -50,6 +50,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Clone PR branch from fork
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PR_HEAD_REPO=${{ github.event.pull_request.head.repo.full_name }}
           PR_HEAD_REF=${{ steps.pr.outputs.data.head.ref }}
