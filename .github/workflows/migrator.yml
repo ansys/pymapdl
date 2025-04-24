@@ -41,6 +41,17 @@ jobs:
           commentId: ${{ github.event.comment.id }} # Optional if the trigger is a comment. Use another action to find this otherwise.
           reaction: "rocket"
 
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ steps.pr.outputs.data.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+      - name: Check out the branch
+        run: | 
+          gh pr checkout ${{ steps.config.outputs.issue_number }}
+          # git pull origin pull/${{ steps.config.outputs.issue_number }}/head
+          # git checkout FETCH_HEAD
+
       - name: Get PR info
         id: pr
         uses: octokit/request-action@v2.x
@@ -66,10 +77,6 @@ jobs:
 
           echo "${{ toJson(github) }}"
 
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ steps.pr.outputs.data.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
 
       - name: Clone PR branch from fork
         env:
