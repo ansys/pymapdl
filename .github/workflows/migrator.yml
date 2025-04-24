@@ -51,65 +51,23 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: | 
           gh pr checkout ${{ steps.config.outputs.issue_number }}
-          git status
-
-      - name: Get PR info
-        id: pr
-        uses: octokit/request-action@v2.x
-        with:
-          route: GET /repos/${{ github.repository }}/pulls/${{ steps.config.outputs.issue_number }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - run: |
-          echo "Using data"
-          echo "full name: ${{ steps.pr.outputs.data.head.repo.full_name }}"
-          echo "Is fork: ${{ steps.pr.outputs.data.head.repo.fork }}"
-          echo "label: ${{ steps.pr.outputs.data.head.label }}" # "germa89:test/pr-migration",
-          echo "ref: ${{ steps.pr.outputs.data.head.ref }}" # "test/pr-migration"
-
-          echo "Using event"
-          echo "full name: ${{ github.event.pull_request.head.repo.full_name }}"
-          echo "Is fork: ${{ github.event.pull_request.head.repo.fork }}"
-          echo "label: ${{ github.event.pull_request.head.label }}" # "germa89:test/pr-migration",
-          echo "ref: ${{ github.event.pull_request.head.ref }}" # "test/pr-migration"
-
-          echo "event: ${{ github.event_name }}"
-
-          echo "${{ toJson(github) }}"
-
+          echo $(git status)
 
       - name: Clone PR branch from fork
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PR_HEAD_REPO=${{ github.event.pull_request.head.repo.full_name }}
-          PR_HEAD_REF=${{ steps.pr.outputs.data.head.ref }}
           NEW_BRANCH=migrated/pr-${{ steps.config.outputs.issue_number }}
 
-          #   git clone $PR_HEAD_REPO pr-source
-          #   cd pr-source
-          #   git checkout $PR_HEAD_REF
-          # echo "Cloning PR branch from fork"
-          # gh pr checkout ${{ steps.config.outputs.issue_number }}
-
           # echo "Setting up git"
-          # git config --global user.name "${{ secrets.PYANSYS_CI_BOT_USERNAME }}"
-          # git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
+          git config --global user.name "${{ secrets.PYANSYS_CI_BOT_USERNAME }}"
+          git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
 
           echo "Adding new remote"
-          # git remote add dest https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ github.repository }}.git
+          git remote add dest https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ github.repository }}.git
 
           echo "Pushing to new remote"
-          # git push dest HEAD:refs/heads/$NEW_BRANCH
+          git push dest HEAD:refs/heads/$NEW_BRANCH
 
-          echo "Base ref: ${{ steps.pr.outputs.data.base.ref }}"
-
-      - name: Create new PR
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-          title: "Migrated PR #${{ steps.config.outputs.issue_number }}"
-          body: "This PR was migrated from a fork to allow secrets to run in workflows."
-          branch: migrated/pr-${{ steps.config.outputs.issue_number }}
-          base: ${{ steps.pr.outputs.data.base.ref }}
+          echo "Creating PR"
+          gh pr create --head $NEW_BRANCH --title "Migrated PR #${{ steps.config.outputs.issue_number }}" --body "This PR was migrated from a fork to allow secrets to run in workflows."
