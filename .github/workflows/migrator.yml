@@ -62,11 +62,9 @@ jobs:
           echo "label: ${{ github.event.pull_request.head.label }}" # "germa89:test/pr-migration",
           echo "ref: ${{ github.event.pull_request.head.ref }}" # "test/pr-migration"
 
-          #
-          original_repo=${{ github.event.pull_request.head.repo.full_name }}
+          echo "event: ${{ github.event_name }}"
 
-          echo "data: ${{ steps.pr.outputs.data }}" >> pr_info.txt
-          cat pr_info.txt
+          echo "${{ github.event }}"
 
       - uses: actions/checkout@v3
         with:
