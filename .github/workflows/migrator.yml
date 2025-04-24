@@ -64,7 +64,7 @@ jobs:
 
           echo "event: ${{ github.event_name }}"
 
-          echo "${{ github.event }}"
+          echo "${{ toJson(github) }}"
 
       - uses: actions/checkout@v3
         with:
