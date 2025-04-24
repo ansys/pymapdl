@@ -50,17 +50,27 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - run: |
-          echo "PR info: ${{ steps.pr.outputs.data }}"
-          echo "PR head ref: ${{ steps.pr.outputs.data.head.ref }}"
-          echo "PR base ref: ${{ steps.pr.outputs.data.base.ref }}"
-          echo "ref: ${{ github.event.pull_request.head.ref }}"
+          echo "Using data"
+          echo "full name: ${{ steps.pr.outputs.data.head.repo.full_name }}"
+          echo "Is fork: ${{ steps.pr.outputs.data.head.repo.fork }}"
+          echo "label: ${{ steps.pr.outputs.data.head.label }}" # "germa89:test/pr-migration",
+          echo "ref: ${{ steps.pr.outputs.data.head.ref }}" # "test/pr-migration"
+
+          echo "Using event"
           echo "full name: ${{ github.event.pull_request.head.repo.full_name }}"
-          echo data: ${{ steps.pr.outputs.data }} >> pr_info.txt
+          echo "Is fork: ${{ github.event.pull_request.head.repo.fork }}"
+          echo "label: ${{ github.event.pull_request.head.label }}" # "germa89:test/pr-migration",
+          echo "ref: ${{ github.event.pull_request.head.ref }}" # "test/pr-migration"
+
+          #
+          original_repo=${{ github.event.pull_request.head.repo.full_name }}
+
+          echo "data: ${{ steps.pr.outputs.data }}" >> pr_info.txt
           cat pr_info.txt
 
       - uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
+          ref: ${{ steps.pr.outputs.data.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
 
       - name: Clone PR branch from fork
