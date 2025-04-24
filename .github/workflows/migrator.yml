@@ -55,9 +55,11 @@ jobs:
           PR_HEAD_REF=${{ steps.pr.outputs.data.head.ref }}
           NEW_BRANCH=migrated/pr-${{ steps.config.outputs.issue_number }}
 
-          git clone $PR_HEAD_REPO pr-source
-          cd pr-source
-          git checkout $PR_HEAD_REF
+          #   git clone $PR_HEAD_REPO pr-source
+          #   cd pr-source
+          #   git checkout $PR_HEAD_REF
+          gh pr checkout ${{ steps.config.outputs.issue_number }}
+
           git config --global user.name "${{ secrets.PYANSYS_CI_BOT_USERNAME }}"
           git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
           git remote add dest https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ github.repository }}.git
