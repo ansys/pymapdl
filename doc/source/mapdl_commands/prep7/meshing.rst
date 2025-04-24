@@ -1,68 +1,73 @@
-.. _ref_meshing_commands_api:
 
-*******
+.. _ref_meshing:
+
+
 Meshing
-*******
+=======
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands are used to mesh solid models with nodes and elements.
+.. currentmodule:: ansys.mapdl.core._commands.prep7.meshing
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.meshing.Meshing
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.accat
-   Mapdl.aclear
-   Mapdl.aesize
-   Mapdl.amap
-   Mapdl.amesh
-   Mapdl.arefine
-   Mapdl.chkmsh
-   Mapdl.clrmshln
-   Mapdl.cpcyc
-   Mapdl.czdel
-   Mapdl.czmesh
-   Mapdl.desize
-   Mapdl.eorient
-   Mapdl.erefine
-   Mapdl.esize
-   Mapdl.esys
-   Mapdl.fvmesh
-   Mapdl.gsgdata
-   Mapdl.imesh
-   Mapdl.katt
-   Mapdl.kclear
-   Mapdl.kesize
-   Mapdl.kmesh
-   Mapdl.krefine
-   Mapdl.kscon
-   Mapdl.latt
-   Mapdl.lccat
-   Mapdl.lclear
-   Mapdl.lesize
-   Mapdl.lmesh
-   Mapdl.lrefine
-   Mapdl.mat
-   Mapdl.mcheck
-   Mapdl.modmsh
-   Mapdl.mopt
-   Mapdl.mshape
-   Mapdl.mshcopy
-   Mapdl.mshkey
-   Mapdl.mshmid
-   Mapdl.mshpattern
-   Mapdl.nrefine
-   Mapdl.psmesh
-   Mapdl.real
-   Mapdl.rthick
-   Mapdl.shpp
-   Mapdl.smrtsize
-   Mapdl.tchg
-   Mapdl.timp
-   Mapdl.type
-   Mapdl.vatt
-   Mapdl.vclear
-   Mapdl.vimp
-   Mapdl.vmesh
-   Mapdl.veorient
-   Mapdl.vsweep
+
+   Meshing.aatt
+   Meshing.accat
+   Meshing.aclear
+   Meshing.aesize
+   Meshing.amap
+   Meshing.amesh
+   Meshing.arefine
+   Meshing.chkmsh
+   Meshing.clrmshln
+   Meshing.cpcyc
+   Meshing.czdel
+   Meshing.czmesh
+   Meshing.desize
+   Meshing.eorient
+   Meshing.erefine
+   Meshing.esize
+   Meshing.esys
+   Meshing.fvmesh
+   Meshing.gsgdata
+   Meshing.imesh
+   Meshing.katt
+   Meshing.kclear
+   Meshing.kesize
+   Meshing.kmesh
+   Meshing.krefine
+   Meshing.kscon
+   Meshing.latt
+   Meshing.lccat
+   Meshing.lclear
+   Meshing.lesize
+   Meshing.lmesh
+   Meshing.lrefine
+   Meshing.mat
+   Meshing.mcheck
+   Meshing.modmsh
+   Meshing.mopt
+   Meshing.mshape
+   Meshing.mshcopy
+   Meshing.mshkey
+   Meshing.mshmid
+   Meshing.mshpattern
+   Meshing.nrefine
+   Meshing.psmesh
+   Meshing.real
+   Meshing.rsmesh
+   Meshing.shpp
+   Meshing.smrtsize
+   Meshing.tchg
+   Meshing.timp
+   Meshing.type
+   Meshing.vatt
+   Meshing.vclear
+   Meshing.veorient
+   Meshing.vimp
+   Meshing.vmesh
+   Meshing.vsweep

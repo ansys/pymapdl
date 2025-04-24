@@ -1,47 +1,51 @@
-.. _ref_booleans_commands_api:
 
-********
+.. _ref_booleans:
+
+
 Booleans
-********
+========
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands are used to perform Boolean operations on solid model entities.
+.. currentmodule:: ansys.mapdl.core._commands.prep7.booleans
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.booleans.Booleans
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.aadd
-   Mapdl.aglue
-   Mapdl.aina
-   Mapdl.ainp
-   Mapdl.ainv
-   Mapdl.aovlap
-   Mapdl.aptn
-   Mapdl.asba
-   Mapdl.asbl
-   Mapdl.asbv
-   Mapdl.asbw
-   Mapdl.boptn
-   Mapdl.btol
-   Mapdl.lcsl
-   Mapdl.lglue
-   Mapdl.lina
-   Mapdl.linl
-   Mapdl.linp
-   Mapdl.linv
-   Mapdl.lovlap
-   Mapdl.lptn
-   Mapdl.lsba
-   Mapdl.lsbl
-   Mapdl.lsbv
-   Mapdl.lsbw
-   Mapdl.vadd
-   Mapdl.vglue
-   Mapdl.vinp
-   Mapdl.vinv
-   Mapdl.vovlap
-   Mapdl.vptn
-   Mapdl.vsba
-   Mapdl.vsbv
-   Mapdl.vsbw
+
+   Booleans.aadd
+   Booleans.aglue
+   Booleans.aina
+   Booleans.ainp
+   Booleans.ainv
+   Booleans.aovlap
+   Booleans.aptn
+   Booleans.asba
+   Booleans.asbl
+   Booleans.asbv
+   Booleans.asbw
+   Booleans.boptn
+   Booleans.btol
+   Booleans.lcsl
+   Booleans.lglue
+   Booleans.lina
+   Booleans.linl
+   Booleans.linp
+   Booleans.linv
+   Booleans.lovlap
+   Booleans.lptn
+   Booleans.lsba
+   Booleans.lsbl
+   Booleans.lsbv
+   Booleans.lsbw
+   Booleans.vadd
+   Booleans.vglue
+   Booleans.vinp
+   Booleans.vinv
+   Booleans.vovlap
+   Booleans.vptn
+   Booleans.vsba
+   Booleans.vsbv
+   Booleans.vsbw
