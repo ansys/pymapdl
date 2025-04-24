@@ -78,6 +78,8 @@ jobs:
           echo "Pushing to new remote"
           # git push dest HEAD:refs/heads/$NEW_BRANCH
 
+          echo "Base ref: ${{ steps.pr.outputs.data.base.ref }}"
+
       - name: Create new PR
         uses: peter-evans/create-pull-request@v5
         with:
