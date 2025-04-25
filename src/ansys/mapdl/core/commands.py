@@ -341,7 +341,7 @@ class Prep7Commands(
     prep7.element_type.ElementType,
     prep7.elements.Elements,
     prep7.hard_points.HardPoints,
-    prep7.keypoints.KeyPoints,
+    prep7.keypoints.Keypoints,
     prep7.lines.Lines,
     prep7.materials.Materials,
     prep7.meshing.Meshing,
