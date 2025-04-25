@@ -52,6 +52,9 @@ from ._commands import (
     session,
     solution,
 )
+from ._deprecated_commands import (
+    explicit_dynamics,
+)
 
 # compiled regular expressions used for parsing tablular outputs
 REG_LETTERS: re.Pattern = re.compile(r"[a-df-zA-DF-Z]+")  # all except E or e
@@ -354,6 +357,7 @@ class Prep7Commands(
     prep7.status.Status,
     prep7.superelements.Superelements,
     prep7.volumes.Volumes,
+    explicit_dynamics.ExplicitDynamics,  # deprecated in Ansys 19.1
 ):
     pass
 

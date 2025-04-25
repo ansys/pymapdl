@@ -1625,16 +1625,13 @@ class _MapdlCommandExtended(_MapdlCore):
             super().lssolve(lsmin=lsmin, lsmax=lsmax, lsinc=lsinc, **kwargs)
         return self.last_response
 
+    @wraps(_MapdlCore.edasmp)
     def edasmp(self, *args, **kwargs):
         if self.version >= 19.1:
             raise CommandDeprecated(
                 "The command 'Mapdl.edasmp()' for explicit analysis was deprecated in Ansys 19.1"
             )
-        else:
-            warnings.warn(
-                "The command 'Mapdl.edasmp()' for explicit analysis was deprecated after Ansys 19.1"
-                "You can use it with the 'mapdl.run' command."
-            )
+        super().edasmp(*args, **kwargs)
 
     @wraps(_MapdlCore.edbound)
     def edbound(self, *args, **kwargs):
