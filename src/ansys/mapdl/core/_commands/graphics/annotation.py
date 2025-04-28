@@ -80,7 +80,7 @@ class Annotation:
         Parameters
         ----------
         nvert : str
-            Number of vertices of polygon (3 :math:````   ``NVERT``  :math:````  8).  Use  :ref:`pmore` for
+            Number of vertices of polygon (3 :math:``   ``NVERT``  :math:``  8).  Use  :ref:`pmore` for
             polygons with more than 4 vertices.
 
         x1 : str
@@ -142,7 +142,7 @@ class Annotation:
         Parameters
         ----------
         pcolor : int or str
-            Polygon color (0 :math:````   ``PCOLOR``  :math:````  15):
+            Polygon color (0 :math:``   ``PCOLOR``  :math:``  15):
 
             * ``0`` - Black.
 
@@ -546,7 +546,7 @@ class Annotation:
         Parameters
         ----------
         tcolor : int or str
-            Text color (0 :math:````   ``TCOLOR``  :math:````  15):
+            Text color (0 :math:``   ``TCOLOR``  :math:``  15):
 
             * ``0`` - Black.
 

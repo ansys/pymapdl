@@ -74,14 +74,14 @@ class Labeling:
 
             * ``DATE`` - Controls the display of the date and time in your legend. Subsequent ``KEY`` values control the display as follows:
 
-              * 0 â No date or time displays are included in your legend.
-              * 1 â Only the date is shown.
-              * 2 â Both the date and time are shown (default).
+              * 0 - No date or time displays are included in your legend.
+              * 1 - Only the date is shown.
+              * 2 - Both the date and time are shown (default).
 
             * ``FILE`` - Controls the display of the Mechanical APDL jobname in your legend. Subsequent ``KEY`` values control the display as follows:
 
-              * 0 â The Mechanical APDL jobname is not included in your legend (default).
-              * 1 â The Mechanical APDL jobname is included in your legend.
+              * 0 - The Mechanical APDL jobname is not included in your legend (default).
+              * 1 - The Mechanical APDL jobname is included in your legend.
 
         key : int or str
             Switch:
@@ -216,7 +216,7 @@ class Labeling:
 
             * ``ROT`` - Applied rotational constraints (ROTX, ROTY, ROTZ).
 
-            * ``TEMP`` - Applied temperatures (TEMP, TBOT, TE2, TE3...., TTOP).
+            * ``TEMP`` - Applied temperatures (TEMP, TBOT, TE2, TE3,..., TTOP).
 
             * ``PRES`` - Applied fluid pressures.
 
@@ -236,7 +236,7 @@ class Labeling:
 
             * ``M or MOME`` - Applied structural moments (MX, MY, MZ).
 
-            * ``HEAT`` - Applied heat flows (HEAT, HBOT, HE2, HE3...., HTOP).
+            * ``HEAT`` - Applied heat flows (HEAT, HBOT, HE2, HE3,..., HTOP).
 
             * ``FLOW`` - Applied fluid flow.
 
@@ -356,10 +356,10 @@ class Labeling:
         Parameters
         ----------
         item : str
-            Labels identifying the surface load to be shown; see :ref:`psf.tab.1`.
+            Labels identifying the surface load to be shown; see :ref:`psf_tab_1`.
 
         comp : str
-            Labels identifying the surface load to be shown; see :ref:`psf.tab.1`.
+            Labels identifying the surface load to be shown; see :ref:`psf_tab_1`.
 
         key : int or str
             Key to turn surface load symbols on or off:
@@ -434,9 +434,10 @@ class Labeling:
 
         This command is valid in any processor.
 
-        .. _psf.tab.1:
+        .. _psf_tab_1:
 
-        **/PSF - Valid Item and Component Labels**
+        /PSF - Valid Item and Component Labels
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
         .. flat-table::
            :header-rows: 1
@@ -445,13 +446,13 @@ class Labeling:
              - Comp
              - Description
              - Comments
-           * - :rspan:`14` PRES [ :ref:`psf.labels.fn.1`]
+           * - :rspan:`14` PRES [ :ref:`psf_labels_fn_1`]
              - NORM (or blank)
              - Applied pressure normal to the face (real component only).
              - For element types other than  ``SURF153``, ``SURF154``and ``SURF156``.
            * - NORM
              - Applied pressure normal to the face (real component).
-             - :rspan:`5` For element types ``SURF153``, ``SURF154``and ``SURF156``with KEYOPT(2) = 0. For `supported structural elements<https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SFCONTROL.html#>`_ with``KCSYS`` = 0. [ :ref:`psf.labels.fn.2`]
+             - :rspan:`5` For element types ``SURF153``, ``SURF154``and ``SURF156``with KEYOPT(2) = 0. For `supported structural elements<https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_SFCONTROL.html#>`_ with``KCSYS`` = 0. [ :ref:`psf_labels_fn_2`]
            * - TANX
              - Applied pressure in the element tangential x direction (real component).
            * - TANY
@@ -464,7 +465,7 @@ class Labeling:
              - Applied pressure in the element tangential y direction (imaginary component).
            * - LOCX
              - Applied pressure in the local x direction (real component).
-             - :rspan:`5` For element types ``SURF153``, ``SURF154``and ``SURF156``with KEYOPT(2) = 1. For `supported structural element`_ with``KCSYS`` = 1. [ :ref:`psf.labels.fn.2`]
+             - :rspan:`5` For element types ``SURF153``, ``SURF154``and ``SURF156``with KEYOPT(2) = 1. For `supported structural element`_ with``KCSYS`` = 1. [ :ref:`psf_labels_fn_2`]
            * - LOCY
              - Applied pressure in the local y direction (real component).
            * - LOCZ
@@ -477,7 +478,7 @@ class Labeling:
              - Applied pressure in the local z direction (imaginary component).
            * - RVEC
              - Applied pressure in the user-defined direction (real component).
-             - :rspan:`1` For `supported structural element`_ with``KCSYS`` = 2. [ :ref:`psf.labels.fn.2`]
+             - :rspan:`1` For `supported structural element`_ with``KCSYS`` = 2. [ :ref:`psf_labels_fn_2`]
            * - IVEC
              - Applied pressure in the user-defined direction (imaginary component).
            * - :rspan:`1` CONV
@@ -541,8 +542,12 @@ class Labeling:
              - Boundary layer impedance flag.
              -
 
+        .. _psf_labels_fn_1:
+
         Pressure loads apply to the element coordinate system (KEYOPT(2) = 0). Adjust appropriately for a
         local coordinate system (KEYOPT(2) = 1). See, and in the Element Reference.
+
+        .. _psf_labels_fn_2:
 
         ``KCSYS`` is specified when issuing :ref:`sfcontrol`.
         """
@@ -664,19 +669,19 @@ class Labeling:
 
             * ``ELEM`` - Element numbers and colors on element plots.
 
-            * ``SEC`` - Section numbers and colors on element and solid model plots (see :ref:`s-PNUM.notes`).
+            * ``SEC`` - Section numbers and colors on element and solid model plots (see :ref:`s-PNUM_notes`).
 
             * ``MAT`` - Material set numbers and colors on element and solid model plots (see
-              :ref:`s-PNUM.notes`).
+              :ref:`s-PNUM_notes`).
 
             * ``TYPE`` - Element type reference numbers and colors on element and solid model plots (see
-              :ref:`s-PNUM.notes`).
+              :ref:`s-PNUM_notes`).
 
             * ``REAL`` - Real constant set numbers and colors on element and solid model plots (see
-              :ref:`s-PNUM.notes`).
+              :ref:`s-PNUM_notes`).
 
             * ``ESYS`` - Element coordinate system numbers on element and solid model plots (see
-              :ref:`s-PNUM.notes`).
+              :ref:`s-PNUM_notes`).
 
             * ``LOC`` - Location numbers/colors of the element in matrix assembly order on element plots.
 

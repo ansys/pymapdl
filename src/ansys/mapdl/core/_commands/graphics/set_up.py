@@ -1170,7 +1170,7 @@ class SetUp:
               parameters. These values are device specific; using the same command input file ( :ref:`input` ) on
               different machines may yield different results.. The following ``KEY`` values determine the font
               information that will be supplied to the appropriate driver (for example, Postscript, X11, Win32,
-              JPEG....):
+              JPEG,...):
 
               * ``KEY = 1`` - The command controls the LEGEND (documentation column) font.
 

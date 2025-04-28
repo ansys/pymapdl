@@ -79,16 +79,17 @@ class Views:
         view cone) angle Φ as follows:
 
         M A G F  =  ℓ  /  2 ( d )  T A N ϕ
-        where :math:````, for square windows, is thelargest in-plane vertical or horizontal dimension, d is
-        the distance fromthe observer to the plane ofnbsp :math:````  (usuallythe front plane of the
-        object), andnbsp:math:`\Phi` is the view cone angle (definedwith the  :ref:`vcone` command). The
+        where :math:``, for square windows, is thelargest in-plane vertical or horizontal dimension, d is
+        the distance fromthe observer to the plane of  :math:``  (usuallythe front plane of the
+        object), and :math:`\Phi` is the view cone angle (definedwith the  :ref:`vcone` command). The
         bigger
         the cone angle, the more the perspective. The magnification factor proportionally decreases with
         increasing Φ. The distance can be defined with the :ref:`dist` or the :ref:`focus` command. Note,
         the distance input on the :ref:`dist` command is equal to d only if the focus point is located on
-        the plane of :math:````.  It is recommended that if a general perspective is desired(that is, not
-        any specific cone angle), use :math:`\Phi` = 45.0 (since TAN(45.0) = 1.0)and let the d value be
-        automatically calculated for full window magnification.
+        the plane of :math:``.  It is recommended that if a general perspective is desired(that is, not any
+        specific cone angle), use :math:`\Phi` = 45.0 (since TAN(45.0) = 1.0)and let the d value be
+        automatically
+        calculated for full window magnification.
 
         Note that any number of :ref:`dist`, :ref:`focus`, and :ref:`vcone` combinations can be used to
         produce the same magnification. Distances less than the object depth will produce views from within
@@ -396,8 +397,8 @@ class Views:
         .. _s-DIST_notes:
 
         The scale factor is relative to the window shape. For example, for objects centered in a square
-        window and with parallel projection (no perspective), a distance of :math:````  /2 (+10%) producesa
-        full window magnification, where nbsp :math:````  isthe largest in-plane vertical or horizontal
+        window and with parallel projection (no perspective), a distance of :math:``  /2 (+10%) producesa
+        full window magnification, where   :math:``  isthe largest in-plane vertical or horizontal
         dimension.  See also  :ref:`auto` and :ref:`user` commands.
 
         This command is valid in any processor.
