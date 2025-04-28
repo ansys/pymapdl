@@ -23,6 +23,176 @@
 
 class Views:
 
+    def user(self, wn: str = "", **kwargs):
+        r"""Conveniently resets :ref:`focus` and :ref:`dist` to USER.
+
+        Mechanical APDL Command: `/USER <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_USER.html>`_
+
+        Parameters
+        ----------
+        wn : str
+            Window number (or ALL) to which command applies (defaults to 1).
+
+        Notes
+        -----
+
+        .. _s-USER_notes:
+
+        Conveniently resets scale parameters to USER on the :ref:`focus` and :ref:`dist` commands. Scale
+        parameters will be internally respecified to those used for the last display. Convenient when the
+        last scale parameters were automatically calculated. User specified parameters hold until changed or
+        removed ( :ref:`auto` ). Parameters may be reset on the individual commands after this command has
+        been issued.
+
+        This command is valid in any processor.
+        """
+        command = f"/USER,{wn}"
+        return self.run(command, **kwargs)
+
+    def vcone(self, wn: str = "", phi: str = "", **kwargs):
+        r"""Defines the view cone angle for perspective displays.
+
+        Mechanical APDL Command: `/VCONE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VCONE.html>`_
+
+        Parameters
+        ----------
+        wn : str
+            Window number (or ALL) to which command applies (defaults to 1).
+
+        phi : str
+            View cone angle (0.0 to 85.°) to define perspective. Use ``PHI`` = 45.0° for typical
+            perspective. Increase angle for more perspective, decrease angle for less. If the distance (
+            :ref:`dist` ) is not specified, it will be automatically calculated to give full window
+            magnification. If the distance is also specified, ``PHI`` controls both the perspective and the
+            magnification. The larger the angle, the more the perspective and the less the magnification.
+            Defaults to 0.0 (no perspective).
+
+        Notes
+        -----
+
+        .. _s-VCONE_notes:
+
+        Perspective shows the true depth of the object in the display. A variable magnification results
+        since the back plane of the object is further from the observer than the front plane. The largest
+        magnification occurs at the front plane. With perspective, the magnification factor (MAGF) is not
+        only a function of the distance from the object, but also the window shape and the perspective (or
+        view cone) angle Φ as follows:
+
+        M A G F  =  ℓ  /  2 ( d )  T A N ϕ
+        where :math:````, for square windows, is thelargest in-plane vertical or horizontal dimension, d is
+        the distance fromthe observer to the plane ofnbsp :math:````  (usuallythe front plane of the
+        object), andnbsp:math:`\Phi` is the view cone angle (definedwith the  :ref:`vcone` command). The
+        bigger
+        the cone angle, the more the perspective. The magnification factor proportionally decreases with
+        increasing Φ. The distance can be defined with the :ref:`dist` or the :ref:`focus` command. Note,
+        the distance input on the :ref:`dist` command is equal to d only if the focus point is located on
+        the plane of :math:````.  It is recommended that if a general perspective is desired(that is, not
+        any specific cone angle), use :math:`\Phi` = 45.0 (since TAN(45.0) = 1.0)and let the d value be
+        automatically calculated for full window magnification.
+
+        Note that any number of :ref:`dist`, :ref:`focus`, and :ref:`vcone` combinations can be used to
+        produce the same magnification. Distances less than the object depth will produce views from within
+        the object.
+
+        A magnification factor of 1.0 just fills the window. If the automatic scaling option is used (
+        :ref:`auto` ), the magnification factor is fixed at 0.91 (to allow a 10% margin around the object)
+        and d is automatically calculated for the given :ref:`vcone` and :ref:`focus` values. Any value of Φ
+        between 0.0 and 85.0 (usually 45.0) may be used to activate the perspective. Views from inside the
+        object are not possible when d is automatically calculated (use manual scaling ( :ref:`user` ) along
+        with :ref:`dist` specification).
+
+        This command is valid in any processor.
+        """
+        command = f"/VCONE,{wn},{phi}"
+        return self.run(command, **kwargs)
+
+    def vup(self, wn: str = "", label: str = "", **kwargs):
+        r"""Specifies the global Cartesian coordinate system reference orientation.
+
+        Mechanical APDL Command: `/VUP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VUP.html>`_
+
+        Parameters
+        ----------
+        wn : str
+            Window number (or ALL) to which command applies (defaults to 1).
+
+        label : str
+            Orientation:
+
+            * ``Y`` - Y vertical upward, X horizontal to the right, Z out from the screen (default).
+
+            * ``-Y`` - Y vertical downward, X horizontal to the left, Z out from the screen.
+
+            * ``X`` - X vertical upward, Y horizontal to the left, Z out from the screen.
+
+            * ``-X`` - X vertical downward, Y horizontal to the right, Z out from the screen.
+
+            * ``Z`` - Z vertical upward, Y horizontal to the right, X out from the screen. With this choice, you
+              should use a view other than the :ref:`view` default of (0,0,1).
+
+            * ``-Z`` - Z vertical downward, Y horizontal to the left, X out from the screen. With this choice,
+              you should use a view other than the :ref:`view` default of (0,0,1).
+
+        Notes
+        -----
+
+        .. _s-VUP_notes:
+
+        Specifies the global Cartesian coordinate system reference orientation. The :ref:`view` and
+        :ref:`angle` commands may be used to reorient the view and are relative to this reference
+        orientation. All coordinate systems are right-handed.
+
+        This command is valid in any processor.
+        """
+        command = f"/VUP,{wn},{label}"
+        return self.run(command, **kwargs)
+
+    def view(self, wn: str = "", xv: str = "", yv: str = "", zv: str = "", **kwargs):
+        r"""Defines the viewing direction for the display.
+
+        Mechanical APDL Command: `/VIEW <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VIEW.html>`_
+
+        Parameters
+        ----------
+        wn : str
+            Window number (or ALL) to which command applies (defaults to 1).
+
+        xv : str
+            The object is viewed along the line from point ``XV``, ``YV``, ``ZV`` (in the global coordinate
+            system) to the global coordinate system origin. For section displays, the cutting plane is
+            assumed to be perpendicular to this line. If ``XV`` = WP, modify view to be normal to the
+            currently defined working plane. Defaults to (0,0,1).
+
+        yv : str
+            The object is viewed along the line from point ``XV``, ``YV``, ``ZV`` (in the global coordinate
+            system) to the global coordinate system origin. For section displays, the cutting plane is
+            assumed to be perpendicular to this line. If ``XV`` = WP, modify view to be normal to the
+            currently defined working plane. Defaults to (0,0,1).
+
+        zv : str
+            The object is viewed along the line from point ``XV``, ``YV``, ``ZV`` (in the global coordinate
+            system) to the global coordinate system origin. For section displays, the cutting plane is
+            assumed to be perpendicular to this line. If ``XV`` = WP, modify view to be normal to the
+            currently defined working plane. Defaults to (0,0,1).
+
+        Notes
+        -----
+
+        .. _s-VIEW_notes:
+
+        The view line is always normal to the screen. The view is selected by defining a point (in the
+        global Cartesian coordinate system) representing a point along the viewing line. This point, and the
+        global Cartesian coordinate system origin, define the line along which the object is viewed while
+        looking toward the origin. Any point along the view line may be used, that is, (1,1,1) and (2,2,2)
+        give the same view. The display orientation may be changed as desired ( :ref:`angle` ). The display
+        coordinate system type may be changed (from Cartesian to cylindrical, spherical, toroidal, etc.)
+        with the :ref:`dsys` command.
+
+        This command is valid in any processor.
+        """
+        command = f"/VIEW,{wn},{xv},{yv},{zv}"
+        return self.run(command, **kwargs)
+
     def xfrm(
         self,
         lab: str = "",
@@ -118,284 +288,6 @@ class Views:
         command = f"/XFRM,{lab},{x1},{y1},{z1},{x2},{y2},{z2}"
         return self.run(command, **kwargs)
 
-    def vup(self, wn: str = "", label: str = "", **kwargs):
-        r"""Specifies the global Cartesian coordinate system reference orientation.
-
-        Mechanical APDL Command: `/VUP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VUP.html>`_
-
-        Parameters
-        ----------
-        wn : str
-            Window number (or ALL) to which command applies (defaults to 1).
-
-        label : str
-            Orientation:
-
-            * ``Y`` - Y vertical upward, X horizontal to the right, Z out from the screen (default).
-
-            * ``-Y`` - Y vertical downward, X horizontal to the left, Z out from the screen.
-
-            * ``X`` - X vertical upward, Y horizontal to the left, Z out from the screen.
-
-            * ``-X`` - X vertical downward, Y horizontal to the right, Z out from the screen.
-
-            * ``Z`` - Z vertical upward, Y horizontal to the right, X out from the screen. With this choice, you
-              should use a view other than the :ref:`view` default of (0,0,1).
-
-            * ``-Z`` - Z vertical downward, Y horizontal to the left, X out from the screen. With this choice,
-              you should use a view other than the :ref:`view` default of (0,0,1).
-
-        Notes
-        -----
-
-        .. _s-VUP_notes:
-
-        Specifies the global Cartesian coordinate system reference orientation. The :ref:`view` and
-        :ref:`angle` commands may be used to reorient the view and are relative to this reference
-        orientation. All coordinate systems are right-handed.
-
-        This command is valid in any processor.
-        """
-        command = f"/VUP,{wn},{label}"
-        return self.run(command, **kwargs)
-
-    def vcone(self, wn: str = "", phi: str = "", **kwargs):
-        r"""Defines the view cone angle for perspective displays.
-
-        Mechanical APDL Command: `/VCONE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VCONE.html>`_
-
-        Parameters
-        ----------
-        wn : str
-            Window number (or ALL) to which command applies (defaults to 1).
-
-        phi : str
-            View cone angle (0.0 to 85.°) to define perspective. Use ``PHI`` = 45.0° for typical
-            perspective. Increase angle for more perspective, decrease angle for less. If the distance (
-            :ref:`dist` ) is not specified, it will be automatically calculated to give full window
-            magnification. If the distance is also specified, ``PHI`` controls both the perspective and the
-            magnification. The larger the angle, the more the perspective and the less the magnification.
-            Defaults to 0.0 (no perspective).
-
-        Notes
-        -----
-
-        .. _s-VCONE_notes:
-
-        Perspective shows the true depth of the object in the display. A variable magnification results
-        since the back plane of the object is further from the observer than the front plane. The largest
-        magnification occurs at the front plane. With perspective, the magnification factor (MAGF) is not
-        only a function of the distance from the object, but also the window shape and the perspective (or
-        view cone) angle Φ as follows:
-
-        M A G F  =  ℓ  /  2 ( d )  T A N ϕ
-        where :math:``, for square windows, is thelargest in-plane vertical or horizontal dimension, d is
-        the distance fromthe observer to the plane ofnbsp :math:``  (usuallythe front plane of the
-        object), andnbsp:math:`\Phi` is the view cone angle (definedwith the  :ref:`vcone` command). The
-        bigger
-        the cone angle, the more the perspective. The magnification factor proportionally decreases with
-        increasing Φ. The distance can be defined with the :ref:`dist` or the :ref:`focus` command. Note,
-        the distance input on the :ref:`dist` command is equal to d only if the focus point is located on
-        the plane of :math:``.  It is recommended that if a general perspective is desired(that is, not any
-        specific cone angle), use :math:`\Phi` = 45.0 (since TAN(45.0) = 1.0)and let the d value be
-        automatically
-        calculated for full window magnification.
-
-        Note that any number of :ref:`dist`, :ref:`focus`, and :ref:`vcone` combinations can be used to
-        produce the same magnification. Distances less than the object depth will produce views from within
-        the object.
-
-        A magnification factor of 1.0 just fills the window. If the automatic scaling option is used (
-        :ref:`auto` ), the magnification factor is fixed at 0.91 (to allow a 10% margin around the object)
-        and d is automatically calculated for the given :ref:`vcone` and :ref:`focus` values. Any value of Φ
-        between 0.0 and 85.0 (usually 45.0) may be used to activate the perspective. Views from inside the
-        object are not possible when d is automatically calculated (use manual scaling ( :ref:`user` ) along
-        with :ref:`dist` specification).
-
-        This command is valid in any processor.
-        """
-        command = f"/VCONE,{wn},{phi}"
-        return self.run(command, **kwargs)
-
-    def view(self, wn: str = "", xv: str = "", yv: str = "", zv: str = "", **kwargs):
-        r"""Defines the viewing direction for the display.
-
-        Mechanical APDL Command: `/VIEW <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VIEW.html>`_
-
-        Parameters
-        ----------
-        wn : str
-            Window number (or ALL) to which command applies (defaults to 1).
-
-        xv : str
-            The object is viewed along the line from point ``XV``, ``YV``, ``ZV`` (in the global coordinate
-            system) to the global coordinate system origin. For section displays, the cutting plane is
-            assumed to be perpendicular to this line. If ``XV`` = WP, modify view to be normal to the
-            currently defined working plane. Defaults to (0,0,1).
-
-        yv : str
-            The object is viewed along the line from point ``XV``, ``YV``, ``ZV`` (in the global coordinate
-            system) to the global coordinate system origin. For section displays, the cutting plane is
-            assumed to be perpendicular to this line. If ``XV`` = WP, modify view to be normal to the
-            currently defined working plane. Defaults to (0,0,1).
-
-        zv : str
-            The object is viewed along the line from point ``XV``, ``YV``, ``ZV`` (in the global coordinate
-            system) to the global coordinate system origin. For section displays, the cutting plane is
-            assumed to be perpendicular to this line. If ``XV`` = WP, modify view to be normal to the
-            currently defined working plane. Defaults to (0,0,1).
-
-        Notes
-        -----
-
-        .. _s-VIEW_notes:
-
-        The view line is always normal to the screen. The view is selected by defining a point (in the
-        global Cartesian coordinate system) representing a point along the viewing line. This point, and the
-        global Cartesian coordinate system origin, define the line along which the object is viewed while
-        looking toward the origin. Any point along the view line may be used, that is, (1,1,1) and (2,2,2)
-        give the same view. The display orientation may be changed as desired ( :ref:`angle` ). The display
-        coordinate system type may be changed (from Cartesian to cylindrical, spherical, toroidal, etc.)
-        with the :ref:`dsys` command.
-
-        This command is valid in any processor.
-        """
-        command = f"/VIEW,{wn},{xv},{yv},{zv}"
-        return self.run(command, **kwargs)
-
-    def dist(self, wn: str = "", dval: str = "", kfact: int | str = "", **kwargs):
-        r"""Specifies the viewing distance for magnifications and perspective.
-
-        Mechanical APDL Command: `/DIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DIST.html>`_
-
-        **Command default:**
-
-        .. _s-DIST_default:
-
-        Distance is automatically calculated to produce full window magnification.
-
-        Parameters
-        ----------
-        wn : str
-            Window number (or ALL) to which command applies (defaults to 1).
-
-        dval : str
-            Distance along the view line from the observer to the focus point (defaults to value producing
-            full- window display). Distances "too close" to the object will produce excessive
-            magnifications. If ``DVAL`` = AUTO, zero, or blank, the program will calculate the distance
-            automatically. If ``DVAL`` = USER, the distance of last display will be used (useful when last
-            display automatically calculated distance).
-
-        kfact : int or str
-            ``DVAL`` interpretation key:
-
-            * ``0`` - Interpret numerical ``DVAL`` values as described above.
-
-            * ``1`` - Interpret ``DVAL`` as a multiplier on the current distance ( ``DVAL`` of 2 gives twice the
-              current distance; 0.5 gives half the current distance, etc.).
-
-        Notes
-        -----
-
-        .. _s-DIST_notes:
-
-        The scale factor is relative to the window shape. For example, for objects centered in a square
-        window and with parallel projection (no perspective), a distance of :math:``  /2 (+10%) producesa
-        full window magnification, where nbsp :math:``  isthe largest in-plane vertical or horizontal
-        dimension.  See also  :ref:`auto` and :ref:`user` commands.
-
-        This command is valid in any processor.
-        """
-        command = f"/DIST,{wn},{dval},{kfact}"
-        return self.run(command, **kwargs)
-
-    def user(self, wn: str = "", **kwargs):
-        r"""Conveniently resets :ref:`focus` and :ref:`dist` to USER.
-
-        Mechanical APDL Command: `/USER <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_USER.html>`_
-
-        Parameters
-        ----------
-        wn : str
-            Window number (or ALL) to which command applies (defaults to 1).
-
-        Notes
-        -----
-
-        .. _s-USER_notes:
-
-        Conveniently resets scale parameters to USER on the :ref:`focus` and :ref:`dist` commands. Scale
-        parameters will be internally respecified to those used for the last display. Convenient when the
-        last scale parameters were automatically calculated. User specified parameters hold until changed or
-        removed ( :ref:`auto` ). Parameters may be reset on the individual commands after this command has
-        been issued.
-
-        This command is valid in any processor.
-        """
-        command = f"/USER,{wn}"
-        return self.run(command, **kwargs)
-
-    def focus(
-        self,
-        wn: str = "",
-        xf: str = "",
-        yf: str = "",
-        zf: str = "",
-        ktrans: int | str = "",
-        **kwargs,
-    ):
-        r"""Specifies the focus point (center of the window).
-
-        Mechanical APDL Command: `/FOCUS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FOCUS.html>`_
-
-        Parameters
-        ----------
-        wn : str
-            Window number (or ALL) to which command applies (defaults to 1).
-
-        xf : str
-            Location of the object to be at the focus point (center of the window) in the global Cartesian
-            coordinate system. If ``XF`` = AUTO, allow automatic location calculation. If ``XF`` = USER, use
-            focus location of last display (useful when last display had auto focus).
-
-        yf : str
-            Location of the object to be at the focus point (center of the window) in the global Cartesian
-            coordinate system. If ``XF`` = AUTO, allow automatic location calculation. If ``XF`` = USER, use
-            focus location of last display (useful when last display had auto focus).
-
-        zf : str
-            Location of the object to be at the focus point (center of the window) in the global Cartesian
-            coordinate system. If ``XF`` = AUTO, allow automatic location calculation. If ``XF`` = USER, use
-            focus location of last display (useful when last display had auto focus).
-
-        ktrans : int or str
-            Translate key:
-
-            * ``0`` - Interpret numerical ``XF``, ``YF``, ``ZF`` values as described above.
-
-            * ``1`` - Interpret ``XF``, ``YF``, ``ZF`` values as multiples of half-screens to translate from the
-              current position in the screen coordinate system. Example: ``XF`` of 2.4 translates the display
-              approximately 2.4 half-screens to the left in the screen X (horizontal) direction.
-
-            * ``2`` - Interpret ``XF``, ``YF``, ``ZF`` values as multiples of half-screens to translate from the
-              current position in the global Cartesian coordinate system. Example: ``XF`` of 1.5 translates the
-              display approximately 1.5 half-screens in the global Cartesian X direction of the model.
-
-        Notes
-        -----
-
-        .. _s-FOCUS_notes:
-
-        Specifies the location on (or off) the model which is to be located at the focus point (center of
-        the window). For section and capped displays, the cutting plane is also assumed to pass through this
-        location (unless the working plane is used via :ref:`cplane` ). See also :ref:`auto` and :ref:`user`
-        commands.
-
-        This command is valid in any processor.
-        """
-        command = f"/FOCUS,{wn},{xf},{yf},{zf},{ktrans}"
-        return self.run(command, **kwargs)
-
     def angle(
         self,
         wn: str = "",
@@ -465,6 +357,52 @@ class Views:
         This command is valid in any processor.
         """
         command = f"/AUTO,{wn}"
+        return self.run(command, **kwargs)
+
+    def dist(self, wn: str = "", dval: str = "", kfact: int | str = "", **kwargs):
+        r"""Specifies the viewing distance for magnifications and perspective.
+
+        Mechanical APDL Command: `/DIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DIST.html>`_
+
+        **Command default:**
+
+        .. _s-DIST_default:
+
+        Distance is automatically calculated to produce full window magnification.
+
+        Parameters
+        ----------
+        wn : str
+            Window number (or ALL) to which command applies (defaults to 1).
+
+        dval : str
+            Distance along the view line from the observer to the focus point (defaults to value producing
+            full- window display). Distances "too close" to the object will produce excessive
+            magnifications. If ``DVAL`` = AUTO, zero, or blank, the program will calculate the distance
+            automatically. If ``DVAL`` = USER, the distance of last display will be used (useful when last
+            display automatically calculated distance).
+
+        kfact : int or str
+            ``DVAL`` interpretation key:
+
+            * ``0`` - Interpret numerical ``DVAL`` values as described above.
+
+            * ``1`` - Interpret ``DVAL`` as a multiplier on the current distance ( ``DVAL`` of 2 gives twice the
+              current distance; 0.5 gives half the current distance, etc.).
+
+        Notes
+        -----
+
+        .. _s-DIST_notes:
+
+        The scale factor is relative to the window shape. For example, for objects centered in a square
+        window and with parallel projection (no perspective), a distance of :math:````  /2 (+10%) producesa
+        full window magnification, where nbsp :math:````  isthe largest in-plane vertical or horizontal
+        dimension.  See also  :ref:`auto` and :ref:`user` commands.
+
+        This command is valid in any processor.
+        """
+        command = f"/DIST,{wn},{dval},{kfact}"
         return self.run(command, **kwargs)
 
     def zoom(
@@ -542,4 +480,65 @@ class Views:
         This command is valid in any processor.
         """
         command = f"/ZOOM,{wn},{lab},{x1},{y1},{x2},{y2}"
+        return self.run(command, **kwargs)
+
+    def focus(
+        self,
+        wn: str = "",
+        xf: str = "",
+        yf: str = "",
+        zf: str = "",
+        ktrans: int | str = "",
+        **kwargs,
+    ):
+        r"""Specifies the focus point (center of the window).
+
+        Mechanical APDL Command: `/FOCUS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FOCUS.html>`_
+
+        Parameters
+        ----------
+        wn : str
+            Window number (or ALL) to which command applies (defaults to 1).
+
+        xf : str
+            Location of the object to be at the focus point (center of the window) in the global Cartesian
+            coordinate system. If ``XF`` = AUTO, allow automatic location calculation. If ``XF`` = USER, use
+            focus location of last display (useful when last display had auto focus).
+
+        yf : str
+            Location of the object to be at the focus point (center of the window) in the global Cartesian
+            coordinate system. If ``XF`` = AUTO, allow automatic location calculation. If ``XF`` = USER, use
+            focus location of last display (useful when last display had auto focus).
+
+        zf : str
+            Location of the object to be at the focus point (center of the window) in the global Cartesian
+            coordinate system. If ``XF`` = AUTO, allow automatic location calculation. If ``XF`` = USER, use
+            focus location of last display (useful when last display had auto focus).
+
+        ktrans : int or str
+            Translate key:
+
+            * ``0`` - Interpret numerical ``XF``, ``YF``, ``ZF`` values as described above.
+
+            * ``1`` - Interpret ``XF``, ``YF``, ``ZF`` values as multiples of half-screens to translate from the
+              current position in the screen coordinate system. Example: ``XF`` of 2.4 translates the display
+              approximately 2.4 half-screens to the left in the screen X (horizontal) direction.
+
+            * ``2`` - Interpret ``XF``, ``YF``, ``ZF`` values as multiples of half-screens to translate from the
+              current position in the global Cartesian coordinate system. Example: ``XF`` of 1.5 translates the
+              display approximately 1.5 half-screens in the global Cartesian X direction of the model.
+
+        Notes
+        -----
+
+        .. _s-FOCUS_notes:
+
+        Specifies the location on (or off) the model which is to be located at the focus point (center of
+        the window). For section and capped displays, the cutting plane is also assumed to pass through this
+        location (unless the working plane is used via :ref:`cplane` ). See also :ref:`auto` and :ref:`user`
+        commands.
+
+        This command is valid in any processor.
+        """
+        command = f"/FOCUS,{wn},{xf},{yf},{zf},{ktrans}"
         return self.run(command, **kwargs)

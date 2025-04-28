@@ -23,179 +23,6 @@
 
 class Graphs:
 
-    def xrange(self, xmin: str = "", xmax: str = "", **kwargs):
-        r"""Specifies a linear abscissa (X) scale range.
-
-        Mechanical APDL Command: `/XRANGE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_XRANGE.html>`_
-
-        Parameters
-        ----------
-        xmin : str
-            Minimum abscissa scale value.
-
-        xmax : str
-            Maximum abscissa scale value.
-
-        Notes
-        -----
-
-        .. _s-XRANGE_notes:
-
-        Specifies a linear abscissa (X) scale range for the line graph display. Use :ref:`xrange`,DEFAULT to
-        return to automatic scaling.
-
-        Automatic scaling will often yield inappropriate range values for logarithmic scales ( :ref:`gropt`,
-        LOGX).
-
-        This command is valid in any processor.
-        """
-        command = f"/XRANGE,{xmin},{xmax}"
-        return self.run(command, **kwargs)
-
-    def yrange(self, ymin: str = "", ymax: str = "", num: str = "", **kwargs):
-        r"""Specifies a linear ordinate (Y) scale range.
-
-        Mechanical APDL Command: `/YRANGE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_YRANGE.html>`_
-
-        Parameters
-        ----------
-        ymin : str
-            Minimum ordinate scale value.
-
-        ymax : str
-            Maximum ordinate scale value.
-
-        num : str
-            Y-axis number to which range applies (defaults to 1). Valid numbers are 1 to 3 for
-            :ref:`grtyp`,2 and 1 to 6 for :ref:`grtyp`,3. If ALL, apply to all Y-axes.
-
-        Notes
-        -----
-
-        .. _s-YRANGE_notes:
-
-        Specifies a linear ordinate (Y) scale range for the line graph display. Use :ref:`yrange`,DEFAULT to
-        return to automatic scaling. For multiple Y-axes graphs ( :ref:`grtyp` ), see :ref:`gropt`, ASCAL to
-        automatically scale the additional Y-axes.
-
-        Automatic scaling will often yield inappropriate range values for logarithmic scales ( :ref:`gropt`,
-        LOGY).
-
-        This command is valid in any processor.
-        """
-        command = f"/YRANGE,{ymin},{ymax},{num}"
-        return self.run(command, **kwargs)
-
-    def axlab(self, axis: str = "", lab: str = "", **kwargs):
-        r"""Labels the X and Y axes on graph displays.
-
-        Mechanical APDL Command: `/AXLAB <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AXLAB.html>`_
-
-        **Command default:**
-
-        .. _s-AXLAB_default:
-
-        Labels are determined by the program.
-
-        Parameters
-        ----------
-        axis : str
-            Axis specifier:
-
-            * ``X`` - Apply label to X axis.
-
-            * ``Y`` - Apply label to Y axis.
-
-        lab : str
-            Axis label (user defined text up to 30 characters long). Leave blank to reestablish the default
-            for ``Axis`` axis.
-
-        Notes
-        -----
-
-        .. _s-AXLAB_notes:
-
-        This command is valid in any processor.
-        """
-        command = f"/AXLAB,{axis},{lab}"
-        return self.run(command, **kwargs)
-
-    def grtyp(self, kaxis: int | str = "", **kwargs):
-        r"""Selects single or multiple Y-axes graph displays.
-
-        Mechanical APDL Command: `/GRTYP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GRTYP.html>`_
-
-        Parameters
-        ----------
-        kaxis : int or str
-            Axis selection key:
-
-            * ``0 or 1`` - Single Y-axis. Up to 10 curves scaled to a single Y-axis.
-
-            * ``2`` - Additional Y-axes (one for each curve) (3 curves maximum). Allows better scaling of curves
-              with widely differing numbering ranges.
-
-            * ``3`` - Same as 2 but with additional Y-axis and curves projected out of the plane (6 curves
-              maximum). Allows clearer display with an isometric view. The default view when ``KAXIS`` = 3 is
-              View,1,1,2,3.
-
-        Notes
-        -----
-
-        .. _s-GRTYP_notes:
-
-        The basic line graph has one or more curves plotted against the same Y and X axes. Multiple curve
-        graphs can also be plotted with individual Y axes and the same X axis. The Y axis of the first curve
-        is referred to as the base Y-axis and the Y axes of the other curves as additional Y axes. Curves
-        are numbered sequentially from 1 (the base curve) in the order in which they are displayed. See the
-        :ref:`axlab`, :ref:`gropt`, :ref:`grid`, and :ref:`gthk` commands for other display options.
-
-        This command is valid in any processor.
-        """
-        command = f"/GRTYP,{kaxis}"
-        return self.run(command, **kwargs)
-
-    def gthk(self, label: str = "", thick: int | str = "", **kwargs):
-        r"""Sets line thicknesses for graph lines.
-
-        Mechanical APDL Command: `/GTHK <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GTHK.html>`_
-
-        Parameters
-        ----------
-        label : str
-            Apply thicknesses as selected from the following labels:
-
-            * ``AXIS`` - Modify thickness of ordinate and abscissa axes on graph displays.
-
-            * ``GRID`` - Modify thickness of grid lines on graph displays.
-
-            * ``CURVE`` - Modify thickness of curve lines (when no area fill ( :ref:`gropt` )).
-
-        thick : int or str
-            Thickness ratio (whole numbers only, from -1 to 10):
-
-            * ``-1`` - Do not draw the curve, but show only the markers specified by :ref:`gmarker`.
-
-            * ``0 or 1`` - Thin lines.
-
-            * ``2`` - The default thickness.
-
-            * ``3`` - 1.5 times the default thickness.
-
-            * ``etc.`` - (up to 10)
-
-        Notes
-        -----
-
-        .. _s-GTHK_notes:
-
-        Sets line thicknesses for graph lines (in raster mode only). Use :ref:`gthk`,STAT to show settings.
-
-        This command is valid in any processor.
-        """
-        command = f"/GTHK,{label},{thick}"
-        return self.run(command, **kwargs)
-
     def gropt(self, lab: str = "", key: str = "", **kwargs):
         r"""Sets various line graph display options.
 
@@ -307,6 +134,82 @@ class Graphs:
         command = f"/GROPT,{lab},{key}"
         return self.run(command, **kwargs)
 
+    def gthk(self, label: str = "", thick: int | str = "", **kwargs):
+        r"""Sets line thicknesses for graph lines.
+
+        Mechanical APDL Command: `/GTHK <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GTHK.html>`_
+
+        Parameters
+        ----------
+        label : str
+            Apply thicknesses as selected from the following labels:
+
+            * ``AXIS`` - Modify thickness of ordinate and abscissa axes on graph displays.
+
+            * ``GRID`` - Modify thickness of grid lines on graph displays.
+
+            * ``CURVE`` - Modify thickness of curve lines (when no area fill ( :ref:`gropt` )).
+
+        thick : int or str
+            Thickness ratio (whole numbers only, from -1 to 10):
+
+            * ``-1`` - Do not draw the curve, but show only the markers specified by :ref:`gmarker`.
+
+            * ``0 or 1`` - Thin lines.
+
+            * ``2`` - The default thickness.
+
+            * ``3`` - 1.5 times the default thickness.
+
+            * ``etc.`` - (up to 10)
+
+        Notes
+        -----
+
+        .. _s-GTHK_notes:
+
+        Sets line thicknesses for graph lines (in raster mode only). Use :ref:`gthk`,STAT to show settings.
+
+        This command is valid in any processor.
+        """
+        command = f"/GTHK,{label},{thick}"
+        return self.run(command, **kwargs)
+
+    def grtyp(self, kaxis: int | str = "", **kwargs):
+        r"""Selects single or multiple Y-axes graph displays.
+
+        Mechanical APDL Command: `/GRTYP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GRTYP.html>`_
+
+        Parameters
+        ----------
+        kaxis : int or str
+            Axis selection key:
+
+            * ``0 or 1`` - Single Y-axis. Up to 10 curves scaled to a single Y-axis.
+
+            * ``2`` - Additional Y-axes (one for each curve) (3 curves maximum). Allows better scaling of curves
+              with widely differing numbering ranges.
+
+            * ``3`` - Same as 2 but with additional Y-axis and curves projected out of the plane (6 curves
+              maximum). Allows clearer display with an isometric view. The default view when ``KAXIS`` = 3 is
+              View,1,1,2,3.
+
+        Notes
+        -----
+
+        .. _s-GRTYP_notes:
+
+        The basic line graph has one or more curves plotted against the same Y and X axes. Multiple curve
+        graphs can also be plotted with individual Y axes and the same X axis. The Y axis of the first curve
+        is referred to as the base Y-axis and the Y axes of the other curves as additional Y axes. Curves
+        are numbered sequentially from 1 (the base curve) in the order in which they are displayed. See the
+        :ref:`axlab`, :ref:`gropt`, :ref:`grid`, and :ref:`gthk` commands for other display options.
+
+        This command is valid in any processor.
+        """
+        command = f"/GRTYP,{kaxis}"
+        return self.run(command, **kwargs)
+
     def grid(self, key: str = "", **kwargs):
         r"""Selects the type of grid on graph displays.
 
@@ -338,4 +241,101 @@ class Graphs:
         This command is valid in any processor.
         """
         command = f"/GRID,{key}"
+        return self.run(command, **kwargs)
+
+    def yrange(self, ymin: str = "", ymax: str = "", num: str = "", **kwargs):
+        r"""Specifies a linear ordinate (Y) scale range.
+
+        Mechanical APDL Command: `/YRANGE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_YRANGE.html>`_
+
+        Parameters
+        ----------
+        ymin : str
+            Minimum ordinate scale value.
+
+        ymax : str
+            Maximum ordinate scale value.
+
+        num : str
+            Y-axis number to which range applies (defaults to 1). Valid numbers are 1 to 3 for
+            :ref:`grtyp`,2 and 1 to 6 for :ref:`grtyp`,3. If ALL, apply to all Y-axes.
+
+        Notes
+        -----
+
+        .. _s-YRANGE_notes:
+
+        Specifies a linear ordinate (Y) scale range for the line graph display. Use :ref:`yrange`,DEFAULT to
+        return to automatic scaling. For multiple Y-axes graphs ( :ref:`grtyp` ), see :ref:`gropt`, ASCAL to
+        automatically scale the additional Y-axes.
+
+        Automatic scaling will often yield inappropriate range values for logarithmic scales ( :ref:`gropt`,
+        LOGY).
+
+        This command is valid in any processor.
+        """
+        command = f"/YRANGE,{ymin},{ymax},{num}"
+        return self.run(command, **kwargs)
+
+    def xrange(self, xmin: str = "", xmax: str = "", **kwargs):
+        r"""Specifies a linear abscissa (X) scale range.
+
+        Mechanical APDL Command: `/XRANGE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_XRANGE.html>`_
+
+        Parameters
+        ----------
+        xmin : str
+            Minimum abscissa scale value.
+
+        xmax : str
+            Maximum abscissa scale value.
+
+        Notes
+        -----
+
+        .. _s-XRANGE_notes:
+
+        Specifies a linear abscissa (X) scale range for the line graph display. Use :ref:`xrange`,DEFAULT to
+        return to automatic scaling.
+
+        Automatic scaling will often yield inappropriate range values for logarithmic scales ( :ref:`gropt`,
+        LOGX).
+
+        This command is valid in any processor.
+        """
+        command = f"/XRANGE,{xmin},{xmax}"
+        return self.run(command, **kwargs)
+
+    def axlab(self, axis: str = "", lab: str = "", **kwargs):
+        r"""Labels the X and Y axes on graph displays.
+
+        Mechanical APDL Command: `/AXLAB <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AXLAB.html>`_
+
+        **Command default:**
+
+        .. _s-AXLAB_default:
+
+        Labels are determined by the program.
+
+        Parameters
+        ----------
+        axis : str
+            Axis specifier:
+
+            * ``X`` - Apply label to X axis.
+
+            * ``Y`` - Apply label to Y axis.
+
+        lab : str
+            Axis label (user defined text up to 30 characters long). Leave blank to reestablish the default
+            for ``Axis`` axis.
+
+        Notes
+        -----
+
+        .. _s-AXLAB_notes:
+
+        This command is valid in any processor.
+        """
+        command = f"/AXLAB,{axis},{lab}"
         return self.run(command, **kwargs)

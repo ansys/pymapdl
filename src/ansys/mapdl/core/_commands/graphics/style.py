@@ -25,6 +25,200 @@ import warnings
 
 class Style:
 
+    def eshape(self, scale: str = "", key: str = "", **kwargs):
+        r"""Displays elements with shapes determined from the real constants, section definition, or other
+        inputs.
+
+        Mechanical APDL Command: `/ESHAPE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ESHAPE.html>`_
+
+        **Command default:**
+
+        .. _s-ESHAPE_default:
+
+        Use simple display of line and area elements ( ``SCALE`` = 0).
+
+        Parameters
+        ----------
+        scale : int or str
+            Scaling factor:
+
+            * ``0`` - Use simple display of line and area elements. This value is the default.
+
+            * ``1`` - Use real constants, section definition, or other information to form a solid shape display
+              of the applicable elements.
+
+            * ``FAC`` - Multiply certain real constants, such as thickness, by ``FAC`` (where ``FAC`` > 0.01)
+              and use them to form a solid shape display of elements.
+
+        key : int or str
+            Current shell thickness key:
+
+            * ``0`` - Use current thickness in the displaced solid shape display of shell elements (valid for
+              ``SHELL181``, ``SHELL208``, ``SHELL209``, and ``SHELL281``). This value is the default.
+
+            * ``1`` - Use initial thickness in the displaced solid shape display of shell elements.
+
+        Notes
+        -----
+
+        .. _s-ESHAPE_notes:
+
+        The :ref:`eshape` command allows beams, shells, current sources, and certain special-purpose
+        elements or elements with special options to be displayed as solids with the shape determined from
+        the real constants, section types, or other information. Elements are displayed via the :ref:`eplot`
+        command. No checks for valid or complete input are made for the display.
+
+        Following are details about using this command with various element types:
+
+        * ``COMBIN14``, ``COMBIN39``, and ``MASS21``are displayed with a graphics icon, with the offset
+          determined by the real constants and KEYOPT settings.
+
+        * ``BEAM188``, ``BEAM189``, ``PIPE288``, ``PIPE289``and ``ELBOW290``are displayed as solids with the
+          shape determined via the section-definition commands ( :ref:`sectype` and :ref:`secdata` ). The
+          arbitrary section option ( ``Subtype`` = ASEC) has no definite shape and appears as a thin
+          rectangle to indicate the orientation; the thin side represents the beam Y axis and the thick
+          (longer) side represents the Z axis. The length of thick side is determined by ``TKz``. If ``TKz``
+          = 0, the area is used to determine the length of thick side. The thin side is scaled by the
+          fraction of the thick side, regardless of ``TKy``. If the offsets are defined via ``CGy`` /
+          ``CGz`` ( :ref:`secdata` or :ref:`secoffset`,USER, ``OFFSETY``, ``OFFSETZ`` ), they are applied to
+          the plot without scaling. The elements are displayed with internal lines representing the cross-
+          section mesh.
+
+        * Reduced-integration and lower-order shells ( ``SHELL181``and ``SHELL208``with KEYOPT(3)=0) are
+          displayed with uniform thickness, evaluated at the centroid, to reflect the element behavior.
+
+        * ``SOLID272``and ``SOLID273``are displayed as solids with the shape determined via the section-
+          definition commands ( :ref:`sectype` and :ref:`secdata` ). The 2D master plane is revolved around
+          the prescribed axis of symmetry.
+
+        * ``PLANE182``, ``PLANE183``, ``PLANE222``, and ``PLANE223`` with KEYOPT(3) = 6 are displayed as 3D
+          solids with the shape determined by nodal locations and displacements at the nodes.
+
+        * Contour plots are available for these elements in postprocessing for PowerGraphics only (
+          :ref:`graphics`,POWER). To view 3D deformed shapes for the elements, issue :ref:`outres`,MISC or
+          :ref:`outres`,ALL for static or transient analyses. To view 3D mode shapes for a modal or
+          eigenvalue buckling analysis, expand the modes with element results calculation ON ( ``Elcalc`` =
+          YES for :ref:`mxpand` ).
+
+        * ``SOURC36``, ``CIRCU124``, and ``TRANS126``elements always plot using :ref:`eshape` when
+          PowerGraphics is activated ( :ref:`graphics`,POWER).
+
+        In most cases, :ref:`eshape` renders a thickness representation of your shell, plane and layered
+        elements more readily in PowerGraphics ( :ref:`graphics`,POWER). This type of representation employs
+        PowerGraphics to generate the enhanced representation, and will often provide no enhancement in Full
+        Graphics ( :ref:`graphics`,FULL). This is especially true for POST1 results displays, where
+        :ref:`eshape` is not supported for most element types with FULL graphics.
+
+        When PowerGraphics is active, :ref:`eshape` may degrade the image if adjacent elements have
+        overlapping material, such as shell elements which are not co-planar. Additionally, if adjacent
+        elements have different thicknesses, the polygons depicting the connectivity between the "thicker"
+        and "thinner" elements along the shared element edges may not always be displayed.
+
+        For POST1 results displays (such as :ref:`plnsol` ), the following limitations apply:
+
+        * If you issue :ref:`rsys`,SOLU before reviewing results for beam or pipe elements, contour plots
+          for displacement (for example, :ref:`plnsol`,U,X and :ref:`pldisp` ) do not appear in the solution
+          coordinate system when :ref:`eshape` is active. Instead, the contours appear in the global
+          Cartesian coordinate system.
+
+        * When shell elements are not co-planar, the resulting :ref:`plnsol` display with :ref:`eshape` will
+          actually be a :ref:`plesol` display as the non-coincident pseudo-nodes are not averaged.
+          Additionally, :ref:`eshape` should not be used with coincident elements because the plot may
+          incorrectly average the displacements of the coincident elements.
+
+        * When nodes are initially coincident and PowerGraphics is active, duplicate polygons are eliminated
+          to conserve display time and disk space. The command may degrade the image if initially coincident
+          nodes have different displacements. The tolerance for determining coincidence is 1E-9 times the
+          model``s bounding box diagonal.
+
+        * If you want to view solution results ( :ref:`plnsol`, etc.) on layered elements (such as
+          ``SHELL181``, ``SOLSH190``, ``SOLID185``Layered Solid, ``SOLID186``Layered Solid, ``SHELL208``,
+          ``SHELL209``, ``SHELL281``, and ``ELBOW290``), set KEYOPT(8) = 1 for the layer elements so that
+          the data for all layers is stored in the results file.
+
+        * You can plot the through-thickness temperatures of elements ``SHELL131``and ``SHELL132``regardless
+          of the thermal DOFs in use by issuing the :ref:`plnsol`,TEMP command (with PowerGraphics and
+          :ref:`eshape` active).
+
+        * The :ref:`eshape`,1 and :ref:`eshape`, ``FAC`` commands are incompatible with the :ref:`cycexpand`
+          command used in cyclic symmetry analyses.
+
+        * The :ref:`eshape`,1 command does not support velocity and acceleration results for elements
+          ``PLANE182``, ``PLANE183``, ``PLANE222``, or ``PLANE223``with KEYOPT(3) = 6.
+
+        * For coupled-field elements ``PLANE222``and ``PLANE223``with KEYOPT(3) = 6, the :ref:`eshape`
+          command can be used to visualize structural results. Non-structural results visualization is
+          limited to gradient and flux displays supported with PowerGraphics.
+
+        This command is valid in any processor.
+        """
+        warnings.warn(
+            "pymapdl does not support /ESHAPE when plotting in Python using ``mapdl.eplot()``.  Use ``mapdl.eplot(backend=GraphicsBackend.MAPDL)`` "
+        )
+        command = f"/ESHAPE,{scale},{key}"
+        return self.run(command, **kwargs)
+
+    def edge(self, wn: str = "", key: int | str = "", angle: str = "", **kwargs):
+        r"""Displays only the common lines (“edges”) of an object.
+
+        Mechanical APDL Command: `/EDGE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EDGE.html>`_
+
+        **Command default:**
+
+        .. _s-EDGE_default:
+
+        For element plots, display common lines between all adjacent element faces. For contour plots,
+        display only the common lines between non-coplanar faces.
+
+        Parameters
+        ----------
+        wn : str
+            Window number (or ALL) to which command applies. The default window is 1.
+
+        key : int or str
+            Edge key:
+
+            **Elements Plots**
+
+            * ``0`` - Display common lines between all adjacent element faces.
+
+            * ``1`` - Display only the common lines between non-coplanar faces (that is, show only the edges).
+
+            **Contour Plots**
+
+            * ``0`` - Display only the common lines between non-coplanar faces.
+
+            * ``1`` - Display common lines between all element faces.
+
+        angle : str
+            Largest angle between two faces for which the faces are considered to be coplanar (0° to 180°).
+            Defaults to 45°. A smaller angle produces more edges, a larger angle produces fewer edges.
+
+        Notes
+        -----
+
+        .. _s-EDGE_notes:
+
+        The ``ANGLE`` field is used in PowerGraphics to determine geometric discontinuities. It is a
+        tolerance measure for the differences between the normals of the surfaces being considered. Values
+        within the tolerance are accepted as coplanar (geometrically continuous). In postprocessing
+        displays, results are not averaged across discontinuous surfaces.
+
+        A surface can be displayed as an edge outline without interior detail. This is useful for both
+        geometry and postprocessing displays. Element outlines are normally shown as solid lines for
+        geometry and displacement displays. Lines common to adjacent "coplanar" element faces are removed
+        from the display. Midside nodes of elements are ignored.
+
+        The :ref:`shrink` option is ignored with the edge option.
+
+        :ref:`edge` is not supported for :ref:`plesol` and :ref:`eshape` displays when in PowerGraphics mode
+        ( :ref:`graphics`,POWER).
+
+        The :ref:`edge` command is valid in any processor.
+        """
+        command = f"/EDGE,{wn},{key},{angle}"
+        return self.run(command, **kwargs)
+
     def light(
         self,
         wn: str = "",
@@ -96,200 +290,193 @@ class Style:
         command = f"/LIGHT,{wn},{num},{int_},{xv},{yv},{zv},{refl}"
         return self.run(command, **kwargs)
 
-    def edge(self, wn: str = "", key: int | str = "", angle: str = "", **kwargs):
-        r"""Displays only the common lines (“edges”) of an object.
+    def gmface(self, lab: str = "", n: str = "", **kwargs):
+        r"""Specifies the facet representation used to form solid models.
 
-        Mechanical APDL Command: `/EDGE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EDGE.html>`_
+        Mechanical APDL Command: `GMFACE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GMFACE.html>`_
 
-        **Command default:**
+        Parameters
+        ----------
+        lab : str
+            Valid Labels:
 
-        .. _s-EDGE_default:
+            * ``FINE`` - Value that determines how coarse the facets will be.
 
-        For element plots, display common lines between all adjacent element faces. For contour plots,
-        display only the common lines between non-coplanar faces.
+        n : str
+            An integer value between one (small) and ten (large) that determines the tolerances that will be
+            applied to the creation of arcs and surfaces. Ten will create many facets, which may in turn
+            cause Mechanical APDL to run very slowly. One will create fewer facets, which may in turn cause
+            larger tolerance errors.
+        """
+        command = f"GMFACE,{lab},{n}"
+        return self.run(command, **kwargs)
+
+    def gmarker(self, curve: str = "", key: int | str = "", incr: str = "", **kwargs):
+        r"""Specifies the curve marking style.
+
+        Mechanical APDL Command: `/GMARKER <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GMARKER.html>`_
+
+        Parameters
+        ----------
+        curve : str
+            Curve number markers will be applied on (integer value between 1 and 10).
+
+        key : int or str
+            Marker key:
+
+            * ``0`` - No markers will be applied (default).
+
+            * ``1`` - TRIANGLES will be applied.
+
+            * ``2`` - SQUARES will be applied.
+
+            * ``3`` - DIAMONDS will be applied.
+
+            * ``4`` - CROSSES will be applied.
+
+        incr : str
+            Determines the curve marking frequency. (a whole number value between 1 and 255). If ``INCR`` =
+            1, markers are displayed at every data point on the curve. If ``INCR`` = 2 then markers are
+            displayed at every second data point. If ``INCR`` = 3 then they are displayed at every third
+            data point.
+
+        Notes
+        -----
+
+        .. _s-GMARKER_notes:
+
+        The user-specified markers will not be drawn when the area under the curve is color-filled (
+        :ref:`gropt`, FILL).
+        """
+        command = f"/GMARKER,{curve},{key},{incr}"
+        return self.run(command, **kwargs)
+
+    def gline(self, wn: str = "", style: int | str = "", **kwargs):
+        r"""Specifies the element outline style.
+
+        Mechanical APDL Command: `/GLINE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GLINE.html>`_
 
         Parameters
         ----------
         wn : str
-            Window number (or ALL) to which command applies. The default window is 1.
+            Window number (or ALL) to which command applies (defaults to 1).
 
-        key : int or str
-            Edge key:
+        style : int or str
+            Outline key:
 
-            **Elements Plots**
+            * ``0`` - Solid element outlines (default)
 
-            * ``0`` - Display common lines between all adjacent element faces.
+            * ``1`` - Dashed element outlines
 
-            * ``1`` - Display only the common lines between non-coplanar faces (that is, show only the edges).
-
-            **Contour Plots**
-
-            * ``0`` - Display only the common lines between non-coplanar faces.
-
-            * ``1`` - Display common lines between all element faces.
-
-        angle : str
-            Largest angle between two faces for which the faces are considered to be coplanar (0° to 180°).
-            Defaults to 45°. A smaller angle produces more edges, a larger angle produces fewer edges.
+            * ``-1`` - No element outlines
 
         Notes
         -----
 
-        .. _s-EDGE_notes:
+        .. _s-GLINE_notes:
 
-        The ``ANGLE`` field is used in PowerGraphics to determine geometric discontinuities. It is a
-        tolerance measure for the differences between the normals of the surfaces being considered. Values
-        within the tolerance are accepted as coplanar (geometrically continuous). In postprocessing
-        displays, results are not averaged across discontinuous surfaces.
+        Determines the element outline style. Often used when node numbers are displayed to prevent element
+        lin  es from overwriting node numbers.
 
-        A surface can be displayed as an edge outline without interior detail. This is useful for both
-        geometry and postprocessing displays. Element outlines are normally shown as solid lines for
-        geometry and displacement displays. Lines common to adjacent "coplanar" element faces are removed
-        from the display. Midside nodes of elements are ignored.
+        Unless you are using an OpenGL or Starbase driver, the dashed element outline option ( :ref:`gline`,
+        ``WN``,1) is not available in the following situations:
 
-        The :ref:`shrink` option is ignored with the edge option.
+        * Z-buffered displays ( :ref:`slashtype`, ``WN``,6).
 
-        :ref:`edge` is not supported for :ref:`plesol` and :ref:`eshape` displays when in PowerGraphics mode
-        ( :ref:`graphics`,POWER).
+        * Capped Z-buffered displays ( :ref:`slashtype`, ``WN``,7).
 
-        The :ref:`edge` command is valid in any processor.
-        """
-        command = f"/EDGE,{wn},{key},{angle}"
-        return self.run(command, **kwargs)
-
-    def eshape(self, scale: str = "", key: str = "", **kwargs):
-        r"""Displays elements with shapes determined from the real constants, section definition, or other
-        inputs.
-
-        Mechanical APDL Command: `/ESHAPE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ESHAPE.html>`_
-
-        **Command default:**
-
-        .. _s-ESHAPE_default:
-
-        Use simple display of line and area elements ( ``SCALE`` = 0).
-
-        Parameters
-        ----------
-        scale : int or str
-            Scaling factor:
-
-            * ``0`` - Use simple display of line and area elements. This value is the default.
-
-            * ``1`` - Use real constants, section definition, or other information to form a solid shape display
-              of the applicable elements.
-
-            * ``FAC`` - Multiply certain real constants, such as thickness, by ``FAC`` (where ``FAC`` > 0.01)
-              and use them to form a solid shape display of elements.
-
-        key : int or str
-            Current shell thickness key:
-
-            * ``0`` - Use current thickness in the displaced solid shape display of shell elements (valid for
-              SHELL181, SHELL208, SHELL209, and SHELL281 ). This value is the default.
-
-            * ``1`` - Use initial thickness in the displaced solid shape display of shell elements.
-
-        Notes
-        -----
-
-        .. _s-ESHAPE_notes:
-
-        The :ref:`eshape` command allows beams, shells, current sources, and certain special-purpose
-        elements or elements with special options to be displayed as solids with the shape determined from
-        the real constants, section types, or other information. Elements are displayed via the :ref:`eplot`
-        command. No checks for valid or complete input are made for the display.
-
-        Following are details about using this command with various element types:
-
-        * COMBIN14, COMBIN39, and MASS21 are displayed with a graphics icon, with the offset determined by
-          the real constants and KEYOPT settings.
-
-        * BEAM188, BEAM189, PIPE288, PIPE289 and ELBOW290 are displayed as solids with the shape determined
-          via the section-definition commands ( :ref:`sectype` and :ref:`secdata` ). The arbitrary section
-          option ( ``Subtype`` = ASEC) has no definite shape and appears as a thin rectangle to indicate the
-          orientation; the thin side represents the beam Y axis and the thick (longer) side represents the Z
-          axis. The length of thick side is determined by ``TKz``. If ``TKz`` = 0, the area is used to
-          determine the length of thick side. The thin side is scaled by the fraction of the thick side,
-          regardless of ``TKy``. If the offsets are defined via ``CGy`` / ``CGz`` ( :ref:`secdata` or
-          :ref:`secoffset`,USER, ``OFFSETY``, ``OFFSETZ`` ), they are applied to the plot without scaling.
-          The elements are displayed with internal lines representing the cross-section mesh.
-
-        * Reduced-integration and lower-order shells ( SHELL181 and SHELL208 with KEYOPT(3)=0) are displayed
-          with uniform thickness, evaluated at the centroid, to reflect the element behavior.
-
-        * SOLID272 and SOLID273 are displayed as solids with the shape determined via the section-definition
-          commands ( :ref:`sectype` and :ref:`secdata` ). The 2D master plane is revolved around the
-          prescribed axis of symmetry.
-
-        * PLANE182, PLANE183, PLANE222, and PLANE223 with KEYOPT(3) = 6 are displayed as
-
-         3D solids with the shape determined by
-
-         nodal locations and displacements at the nodes.
-
-        * Contour plots are available for these elements in postprocessing for PowerGraphics only (
-          :ref:`graphics`,POWER). To view 3D deformed shapes for the elements, issue :ref:`outres`,MISC or
-          :ref:`outres`,ALL for static or transient analyses. To view 3D mode shapes for a modal or
-          eigenvalue buckling analysis, expand the modes with element results calculation ON ( ``Elcalc`` =
-          YES for :ref:`mxpand` ).
-
-        * SOURC36, CIRCU124, and TRANS126 elements always plot using :ref:`eshape` when PowerGraphics is
-          activated ( :ref:`graphics`,POWER).
-
-        In most cases, :ref:`eshape` renders a thickness representation of your shell, plane and layered
-        elements more readily in PowerGraphics ( :ref:`graphics`,POWER). This type of representation employs
-        PowerGraphics to generate the enhanced representation, and will often provide no enhancement in Full
-        Graphics ( :ref:`graphics`,FULL). This is especially true for POST1 results displays, where
-        :ref:`eshape` is not supported for most element types with FULL graphics.
-
-        When PowerGraphics is active, :ref:`eshape` may degrade the image if adjacent elements have
-        overlapping material, such as shell elements which are not co-planar. Additionally, if adjacent
-        elements have different thicknesses, the polygons depicting the connectivity between the "thicker"
-        and "thinner" elements along the shared element edges may not always be displayed.
-
-        For POST1 results displays (such as :ref:`plnsol` ), the following limitations apply:
-
-        * If you issue :ref:`rsys`,SOLU before reviewing results for beam or pipe elements, contour plots
-          for displacement (for example, :ref:`plnsol`,U,X and :ref:`pldisp` ) do not appear in the solution
-          coordinate system when :ref:`eshape` is active. Instead, the contours appear in the global
-          Cartesian coordinate system.
-
-        * When shell elements are not co-planar, the resulting :ref:`plnsol` display with :ref:`eshape` will
-          actually be a :ref:`plesol` display as the non-coincident pseudo-nodes are not averaged.
-          Additionally, :ref:`eshape` should not be used with coincident elements because the plot may
-          incorrectly average the displacements of the coincident elements.
-
-        * When nodes are initially coincident and PowerGraphics is active, duplicate polygons are eliminated
-          to conserve display time and disk space. The command may degrade the image if initially coincident
-          nodes have different displacements. The tolerance for determining coincidence is 1E-9 times the
-          model``s bounding box diagonal.
-
-        * If you want to view solution results ( :ref:`plnsol`, etc.) on layered elements (such as SHELL181,
-          SOLSH190, SOLID185 Layered Solid, SOLID186 Layered Solid, SHELL208, SHELL209, SHELL281, and
-          ELBOW290 ), set KEYOPT(8) = 1 for the layer elements so that the data for all layers is stored in
-          the results file.
-
-        * You can plot the through-thickness temperatures of elements SHELL131 and SHELL132 regardless of
-          the thermal DOFs in use by issuing the :ref:`plnsol`,TEMP command (with PowerGraphics and
-          :ref:`eshape` active).
-
-        * The :ref:`eshape`,1 and :ref:`eshape`, ``FAC`` commands are incompatible with the :ref:`cycexpand`
-          command used in cyclic symmetry analyses.
-
-        * The :ref:`eshape`,1 command does not support velocity and acceleration results for elements
-          PLANE182, PLANE183, PLANE222, or PLANE223 with KEYOPT(3) = 6.
-
-        * For coupled-field elements PLANE222 and PLANE223 with KEYOPT(3) = 6, the :ref:`eshape` command can
-          be used to visualize structural results. Non-structural results visualization is limited to
-          gradient and flux displays supported with PowerGraphics.
+        * Qslice Z-buffered displays ( :ref:`slashtype`, ``WN``,8).
 
         This command is valid in any processor.
         """
-        warnings.warn(
-            "pymapdl does not support /ESHAPE when plotting in Python using ``mapdl.eplot()``.  Use ``mapdl.eplot(backend=GraphicsBackend.MAPDL)`` "
-        )
-        command = f"/ESHAPE,{scale},{key}"
+        command = f"/GLINE,{wn},{style}"
+        return self.run(command, **kwargs)
+
+    def slashtype(self, wn: str = "", type_: str = "", **kwargs):
+        r"""Defines the type of display.
+
+        Mechanical APDL Command: `/TYPE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TYPE_sl.html>`_
+
+        Parameters
+        ----------
+        wn : str
+            Window number (or ALL) to which command applies (defaults to 1).
+
+        type_ : str
+            Display type. Defaults to ZBUF for raster mode displays or BASIC for vector mode displays:
+
+            * ``BASIC or 0`` - Basic display (no hidden or section operations).
+
+            * ``SECT or 1`` - Section display (plane view). Use the :ref:`cplane` command to define the cutting
+              plane.
+
+            * ``HIDC or 2`` - Centroid hidden display (based on item centroid sort).
+
+            * ``HIDD or 3`` - Face hidden display (based on face centroid sort).
+
+            * ``HIDP or 4`` - Precise hidden display (like HIDD but with more precise checking). Because all
+              facets are sorted, this mode can be extremely slow, especially for large models.
+
+            * ``CAP or 5`` - Capped hidden display (same as combined SECT and HIDD with model in front of
+              section plane removed).
+
+            * ``ZBUF or 6`` - Z-buffered display (like HIDD but using software Z-buffering).
+
+            * ``ZCAP or 7`` - Capped Z-buffered display (same as combined SECT and ZBUF with model in front of
+              section plane removed).
+
+            * ``ZQSL or 8`` - QSLICE Z-buffered display (same as SECT but the edge lines of the remaining 3D
+              model are shown).
+
+            * ``HQSL or 9`` - QSLICE precise hidden display (like ZQSL but using precise hidden).
+
+        Notes
+        -----
+
+        .. _s-TYPE_notes:
+
+        Defines the type of display, such as section display or hidden-line display. Use the :ref:`device`
+        command to specify either raster or vector mode.
+
+        The SECT, CAP, ZCAP, ZQSL, and HQSL options produce section displays. The section or "cutting" plane
+        is specified on the :ref:`cplane` command as either normal to the viewing vector at the focus point
+        (default), or as the working plane.
+
+        When you use PowerGraphics, the section display options (Section, Slice, and Capped) use different
+        averaging techniques for the interior and exterior results. Because of the different averaging
+        schemes, anomalies may appear at the transition areas. In many cases, the automatically computed MIN
+        and MAX values will differ from the full range of interior values. You can lessen the effect of
+        these anomalies by issuing :ref:`avres`,,FULL ( Main Menu> General Post Proc> Options for Outp ).
+        This command sets your legend's automatic contour interval range according to the minimum and
+        maximum results found throughout the entire model.
+
+        With PowerGraphics active ( :ref:`graphics`,POWER), the averaging scheme for surface data with
+        interior element data included ( :ref:`avres`,,FULL) and multiple facets per edge ( :ref:`efacet`,2
+        or :ref:`efacet`,4) will yield differing minimum and maximum contour values depending on the
+        Z-Buffering options ( :ref:`slashtype`,,6 or :ref:`slashtype`,,7). When the Section data is not
+        included in the averaging schemes ( :ref:`slashtype`,,7), the resulting absolute value for the
+        midside node is significantly smaller.
+
+        The HIDC, HIDD, HIDP, ZBUF, ZQSL, and HQSL options produce displays with "hidden" lines removed.
+        Hidden lines are lines obscured from view by another element, area, etc. The choice of non-Z-
+        buffered hidden-line procedure types is available only for raster mode ( :ref:`device` ) displays.
+        For vector mode displays, all non-Z-buffered "hidden-line" options use the same procedure (which is
+        slightly different from the raster procedures). Both geometry and postprocessing displays may be of
+        the hidden-line type. Interior stress contour lines within solid elements can also be removed as
+        hidden lines, leaving only the stress contour lines and element outlines on the visible surfaces.
+        Midside nodes of elements are ignored on postprocessing displays. Overlapping elements will not be
+        displayed.
+
+        The ZBUF, ZCAP, and ZQSL options use a specific hidden-line technique called software Z-buffering.
+        This technique allows a more accurate display of overlapping surfaces (common when using Boolean
+        operations or :ref:`eshape` on element displays), and allows smooth shaded displays on all
+        interactive graphics displays. Z-buffered displays can be performed faster than HIDP and CAP type
+        displays for large models. See also the :ref:`light`, :ref:`shade`, and :ref:`gfile` commands for
+        additional options when Z-buffering is used.
+
+        This command is valid in any processor.
+        """
+        command = f"/TYPE,{wn},{type_}"
         return self.run(command, **kwargs)
 
     def txtre(
@@ -536,125 +723,39 @@ class Style:
         command = f"/TRLCY,{lab},{tlevel},{n1},{n2},{ninc}"
         return self.run(command, **kwargs)
 
-    def slashtype(self, wn: str = "", type_: str = "", **kwargs):
-        r"""Defines the type of display.
+    def normal(self, wn: str = "", key: int | str = "", **kwargs):
+        r"""Allows displaying area elements by top or bottom faces.
 
-        Mechanical APDL Command: `/TYPE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TYPE_sl.html>`_
+        Mechanical APDL Command: `/NORMAL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NORMAL.html>`_
 
         Parameters
         ----------
         wn : str
             Window number (or ALL) to which command applies (defaults to 1).
 
-        type_ : str
-            Display type. Defaults to ZBUF for raster mode displays or BASIC for vector mode displays:
-
-            * ``BASIC or 0`` - Basic display (no hidden or section operations).
-
-            * ``SECT or 1`` - Section display (plane view). Use the :ref:`cplane` command to define the cutting
-              plane.
-
-            * ``HIDC or 2`` - Centroid hidden display (based on item centroid sort).
-
-            * ``HIDD or 3`` - Face hidden display (based on face centroid sort).
-
-            * ``HIDP or 4`` - Precise hidden display (like HIDD but with more precise checking). Because all
-              facets are sorted, this mode can be extremely slow, especially for large models.
-
-            * ``CAP or 5`` - Capped hidden display (same as combined SECT and HIDD with model in front of
-              section plane removed).
-
-            * ``ZBUF or 6`` - Z-buffered display (like HIDD but using software Z-buffering).
-
-            * ``ZCAP or 7`` - Capped Z-buffered display (same as combined SECT and ZBUF with model in front of
-              section plane removed).
-
-            * ``ZQSL or 8`` - QSLICE Z-buffered display (same as SECT but the edge lines of the remaining 3D
-              model are shown).
-
-            * ``HQSL or 9`` - QSLICE precise hidden display (like ZQSL but using precise hidden).
-
-        Notes
-        -----
-
-        .. _s-TYPE_notes:
-
-        Defines the type of display, such as section display or hidden-line display. Use the :ref:`device`
-        command to specify either raster or vector mode.
-
-        The SECT, CAP, ZCAP, ZQSL, and HQSL options produce section displays. The section or "cutting" plane
-        is specified on the :ref:`cplane` command as either normal to the viewing vector at the focus point
-        (default), or as the working plane.
-
-        When you use PowerGraphics, the section display options (Section, Slice, and Capped) use different
-        averaging techniques for the interior and exterior results. Because of the different averaging
-        schemes, anomalies may appear at the transition areas. In many cases, the automatically computed MIN
-        and MAX values will differ from the full range of interior values. You can lessen the effect of
-        these anomalies by issuing :ref:`avres`,,FULL ( Main Menu> General Post Proc> Options for Outp ).
-        This command sets your legend's automatic contour interval range according to the minimum and
-        maximum results found throughout the entire model.
-
-        With PowerGraphics active ( :ref:`graphics`,POWER), the averaging scheme for surface data with
-        interior element data included ( :ref:`avres`,,FULL) and multiple facets per edge ( :ref:`efacet`,2
-        or :ref:`efacet`,4) will yield differing minimum and maximum contour values depending on the
-        Z-Buffering options ( :ref:`slashtype`,,6 or :ref:`slashtype`,,7). When the Section data is not
-        included in the averaging schemes ( :ref:`slashtype`,,7), the resulting absolute value for the
-        midside node is significantly smaller.
-
-        The HIDC, HIDD, HIDP, ZBUF, ZQSL, and HQSL options produce displays with "hidden" lines removed.
-        Hidden lines are lines obscured from view by another element, area, etc. The choice of non-Z-
-        buffered hidden-line procedure types is available only for raster mode ( :ref:`device` ) displays.
-        For vector mode displays, all non-Z-buffered "hidden-line" options use the same procedure (which is
-        slightly different from the raster procedures). Both geometry and postprocessing displays may be of
-        the hidden-line type. Interior stress contour lines within solid elements can also be removed as
-        hidden lines, leaving only the stress contour lines and element outlines on the visible surfaces.
-        Midside nodes of elements are ignored on postprocessing displays. Overlapping elements will not be
-        displayed.
-
-        The ZBUF, ZCAP, and ZQSL options use a specific hidden-line technique called software Z-buffering.
-        This technique allows a more accurate display of overlapping surfaces (common when using Boolean
-        operations or :ref:`eshape` on element displays), and allows smooth shaded displays on all
-        interactive graphics displays. Z-buffered displays can be performed faster than HIDP and CAP type
-        displays for large models. See also the :ref:`light`, :ref:`shade`, and :ref:`gfile` commands for
-        additional options when Z-buffering is used.
-
-        This command is valid in any processor.
-        """
-        command = f"/TYPE,{wn},{type_}"
-        return self.run(command, **kwargs)
-
-    def cplane(self, key: int | str = "", **kwargs):
-        r"""Specifies the cutting plane for section and capped displays.
-
-        Mechanical APDL Command: `/CPLANE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CPLANE.html>`_
-
-        **Command default:**
-
-        .. _s-CPLANE_default:
-
-        The cutting plane is normal to the viewing vector at the focus point.
-
-        Parameters
-        ----------
         key : int or str
-            Specifies the cutting plane:
+            Display key:
 
-            * ``0`` - Cutting plane is normal to the viewing vector ( :ref:`view` ) and passes through the focus
-              point ( :ref:`focus` ) (default).
+            * ``0`` - No face distinction.
 
-            * ``1`` - The working plane ( :ref:`wplane` ) is the cutting plane.
+            * ``1`` - Show only area elements having their positive normals directed toward the viewing point.
+
+            * ``-1`` - Show only area elements having their positive normals directed away from the viewing
+              point.
 
         Notes
         -----
 
-        .. _s-CPLANE_notes:
+        .. _s-NORMAL_notes:
 
-        Defines the cutting plane to be used for section and capped displays ( :ref:`slashtype`,,(1, 5, or
-        7)).
+        :ref:`normal` allows you to select area elements and area plots by the top or bottom faces. It is
+        useful for checking the normal directions on shell elements. The positive normal (element Z
+        direction) is defined by the right-hand rule following the node I, J, K, L input direction. This
+        command is available only with raster or hidden-line displays, for WIN32 or X11 2D displays only.
 
         This command is valid in any processor.
         """
-        command = f"/CPLANE,{key}"
+        command = f"/NORMAL,{wn},{key}"
         return self.run(command, **kwargs)
 
     def ctype(
@@ -724,72 +825,38 @@ class Style:
         command = f"/CTYPE,{key},{dotd},{dots},{dshp},{tlen}"
         return self.run(command, **kwargs)
 
-    def normal(self, wn: str = "", key: int | str = "", **kwargs):
-        r"""Allows displaying area elements by top or bottom faces.
+    def cplane(self, key: int | str = "", **kwargs):
+        r"""Specifies the cutting plane for section and capped displays.
 
-        Mechanical APDL Command: `/NORMAL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NORMAL.html>`_
+        Mechanical APDL Command: `/CPLANE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CPLANE.html>`_
+
+        **Command default:**
+
+        .. _s-CPLANE_default:
+
+        The cutting plane is normal to the viewing vector at the focus point.
 
         Parameters
         ----------
-        wn : str
-            Window number (or ALL) to which command applies (defaults to 1).
-
         key : int or str
-            Display key:
+            Specifies the cutting plane:
 
-            * ``0`` - No face distinction.
+            * ``0`` - Cutting plane is normal to the viewing vector ( :ref:`view` ) and passes through the focus
+              point ( :ref:`focus` ) (default).
 
-            * ``1`` - Show only area elements having their positive normals directed toward the viewing point.
-
-            * ``-1`` - Show only area elements having their positive normals directed away from the viewing
-              point.
+            * ``1`` - The working plane ( :ref:`wplane` ) is the cutting plane.
 
         Notes
         -----
 
-        .. _s-NORMAL_notes:
+        .. _s-CPLANE_notes:
 
-        :ref:`normal` allows you to select area elements and area plots by the top or bottom faces. It is
-        useful for checking the normal directions on shell elements. The positive normal (element Z
-        direction) is defined by the right-hand rule following the node I, J, K, L input direction. This
-        command is available only with raster or hidden-line displays, for WIN32 or X11 2D displays only.
+        Defines the cutting plane to be used for section and capped displays ( :ref:`slashtype`,,(1, 5, or
+        7)).
 
         This command is valid in any processor.
         """
-        command = f"/NORMAL,{wn},{key}"
-        return self.run(command, **kwargs)
-
-    def facet(self, lab: str = "", **kwargs):
-        r"""Specifies the facet representation used to form solid model displays.
-
-        Mechanical APDL Command: `/FACET <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FACET.html>`_
-
-        Parameters
-        ----------
-        lab : str
-            Valid labels:
-
-            * ``FINE`` - Use finer tessellation to increase the number of facets for the display. Provides the
-              best representation (but decreases speed of operation).
-
-            * ``NORML`` - Use the basic number of facets for the display (default).
-
-            * ``COAR`` - Use a limited number of facets for the display. This option will increase the speed of
-              the operations, but may produce poor representations for some imported models.
-
-            * ``WIRE`` - Display model with a wireframe representation (fast, but surfaces will not be shown).
-
-        Notes
-        -----
-
-        .. _s-FACET_notes:
-
-        Specifies the facet (or polygon) representation used to form solid model displays. Used only with
-        the :ref:`aplot`, :ref:`asum`, :ref:`vplot`, and :ref:`vsum` commands.
-
-        This command is valid in any processor.
-        """
-        command = f"/FACET,{lab}"
+        command = f"/CPLANE,{key}"
         return self.run(command, **kwargs)
 
     def shade(self, wn: str = "", type_: str = "", **kwargs):
@@ -827,104 +894,35 @@ class Style:
         command = f"/SHADE,{wn},{type_}"
         return self.run(command, **kwargs)
 
-    def gline(self, wn: str = "", style: int | str = "", **kwargs):
-        r"""Specifies the element outline style.
+    def facet(self, lab: str = "", **kwargs):
+        r"""Specifies the facet representation used to form solid model displays.
 
-        Mechanical APDL Command: `/GLINE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GLINE.html>`_
-
-        Parameters
-        ----------
-        wn : str
-            Window number (or ALL) to which command applies (defaults to 1).
-
-        style : int or str
-            Outline key:
-
-            * ``0`` - Solid element outlines (default)
-
-            * ``1`` - Dashed element outlines
-
-            * ``-1`` - No element outlines
-
-        Notes
-        -----
-
-        .. _s-GLINE_notes:
-
-        Determines the element outline style. Often used when node numbers are displayed to prevent element
-        lin  es from overwriting node numbers.
-
-        Unless you are using an OpenGL or Starbase driver, the dashed element outline option ( :ref:`gline`,
-        ``WN``,1) is not available in the following situations:
-
-        * Z-buffered displays ( :ref:`slashtype`, ``WN``,6).
-
-        * Capped Z-buffered displays ( :ref:`slashtype`, ``WN``,7).
-
-        * Qslice Z-buffered displays ( :ref:`slashtype`, ``WN``,8).
-
-        This command is valid in any processor.
-        """
-        command = f"/GLINE,{wn},{style}"
-        return self.run(command, **kwargs)
-
-    def gmface(self, lab: str = "", n: str = "", **kwargs):
-        r"""Specifies the facet representation used to form solid models.
-
-        Mechanical APDL Command: `GMFACE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GMFACE.html>`_
+        Mechanical APDL Command: `/FACET <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FACET.html>`_
 
         Parameters
         ----------
         lab : str
-            Valid Labels:
+            Valid labels:
 
-            * ``FINE`` - Value that determines how coarse the facets will be.
+            * ``FINE`` - Use finer tessellation to increase the number of facets for the display. Provides the
+              best representation (but decreases speed of operation).
 
-        n : str
-            An integer value between one (small) and ten (large) that determines the tolerances that will be
-            applied to the creation of arcs and surfaces. Ten will create many facets, which may in turn
-            cause Mechanical APDL to run very slowly. One will create fewer facets, which may in turn cause
-            larger tolerance errors.
-        """
-        command = f"GMFACE,{lab},{n}"
-        return self.run(command, **kwargs)
+            * ``NORML`` - Use the basic number of facets for the display (default).
 
-    def gmarker(self, curve: str = "", key: int | str = "", incr: str = "", **kwargs):
-        r"""Specifies the curve marking style.
+            * ``COAR`` - Use a limited number of facets for the display. This option will increase the speed of
+              the operations, but may produce poor representations for some imported models.
 
-        Mechanical APDL Command: `/GMARKER <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GMARKER.html>`_
-
-        Parameters
-        ----------
-        curve : str
-            Curve number markers will be applied on (integer value between 1 and 10).
-
-        key : int or str
-            Marker key:
-
-            * ``0`` - No markers will be applied (default).
-
-            * ``1`` - TRIANGLES will be applied.
-
-            * ``2`` - SQUARES will be applied.
-
-            * ``3`` - DIAMONDS will be applied.
-
-            * ``4`` - CROSSES will be applied.
-
-        incr : str
-            Determines the curve marking frequency. (a whole number value between 1 and 255). If ``INCR`` =
-            1, markers are displayed at every data point on the curve. If ``INCR`` = 2 then markers are
-            displayed at every second data point. If ``INCR`` = 3 then they are displayed at every third
-            data point.
+            * ``WIRE`` - Display model with a wireframe representation (fast, but surfaces will not be shown).
 
         Notes
         -----
 
-        .. _s-GMARKER_notes:
+        .. _s-FACET_notes:
 
-        The user-specified markers will not be drawn when the area under the curve is color-filled (
-        :ref:`gropt`, FILL).
+        Specifies the facet (or polygon) representation used to form solid model displays. Used only with
+        the :ref:`aplot`, :ref:`asum`, :ref:`vplot`, and :ref:`vsum` commands.
+
+        This command is valid in any processor.
         """
-        command = f"/GMARKER,{curve},{key},{incr}"
+        command = f"/FACET,{lab}"
         return self.run(command, **kwargs)
