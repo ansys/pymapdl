@@ -1,0 +1,73 @@
+# .github/workflows/recreate-pr.yml
+name: Fork PR Handler
+
+on:
+  issue_comment:
+    types: [created]
+
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number'
+        required: true
+        type: number
+
+jobs:
+  recreate:
+    if: |
+       (
+        github.event.issue.pull_request != null &&
+        contains(github.event.comment.body, '@pyansys-ci-bot migrate') &&
+        github.event.comment.user.login == 'germa89' 
+        ) || ( github.event_name == 'workflow_dispatch' )
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Configuration"
+        id: config
+        run: |
+          if [[ ${{ github.event_name }} == "workflow_dispatch" ]] ; then
+            echo "On workflow dispatch"
+            echo "issue_number=${{ inputs.issue_number }}" >> $GITHUB_OUTPUT
+          else
+            echo "On ${{ github.event_name }}"
+            echo "issue_number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+          fi;
+
+      - name: React to comment
+        if : ${{ github.event_name == 'issue_comment' }}
+        uses: dkershner6/reaction-action@v2
+        with:
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          commentId: ${{ github.event.comment.id }} # Optional if the trigger is a comment. Use another action to find this otherwise.
+          reaction: "rocket"
+
+      - name: Get PR info
+        id: pr
+        uses: octokit/request-action@v2.x
+        with:
+          route: GET /repos/${{ github.repository }}/pulls/${{ steps.config.outputs.issue_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clone PR branch from fork
+        run: |
+          PR_HEAD_REPO=${{ github.event.pull_request.head.repo.full_name }}
+          PR_HEAD_REF=${{ steps.pr.outputs.data.head.ref }}
+          NEW_BRANCH=migrated/pr-${{ steps.config.outputs.issue_number }}
+
+          git clone $PR_HEAD_REPO pr-source
+          cd pr-source
+          git checkout $PR_HEAD_REF
+          git config --global user.name "${{ secrets.PYANSYS_CI_BOT_USERNAME }}"
+          git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
+          git remote add dest https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ github.repository }}.git
+          git push dest HEAD:refs/heads/$NEW_BRANCH
+
+      - name: Create new PR
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          title: "Migrated PR #${{ steps.config.outputs.issue_number }}"
+          body: "This PR was migrated from a fork to allow secrets to run in workflows."
+          branch: migrated/pr-${{ steps.config.outputs.issue_number }}
+          base: ${{ steps.pr.outputs.data.base.ref }}
