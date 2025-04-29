@@ -437,7 +437,7 @@ class Labeling:
         .. _psf_tab_1:
 
         /PSF - Valid Item and Component Labels
-        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        **************************************
 
         .. flat-table::
            :header-rows: 1
