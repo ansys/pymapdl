@@ -11,13 +11,19 @@ on:
         description: 'Issue number'
         required: true
         type: number
+      
+      is_sync:
+        description: 'Is sync'
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   migrate:
     if: |
        (
         github.event.issue.pull_request != null &&
-        contains(github.event.comment.body, '@pyansys-ci-bot migrate') &&
+        (contains(github.event.comment.body, '@pyansys-ci-bot migrate') || contains(github.event.comment.body, '@pyansys-ci-bot sync') )&&
         github.event.comment.user.login == 'germa89' 
         ) || ( github.event_name == 'workflow_dispatch' )
     runs-on: ubuntu-latest
@@ -30,8 +36,6 @@ jobs:
           commentId: ${{ github.event.comment.id }}
           reaction: "rocket"
 
-      - uses: actions/checkout@v3
-
       - name: "Configuration"
         id: config
         run: |
@@ -39,10 +43,13 @@ jobs:
             echo "On workflow dispatch"
             echo "issue_number=${{ inputs.issue_number }}" >> $GITHUB_OUTPUT
             echo "user=${{ github.actor }}" >> $GITHUB_OUTPUT
+            echo "is_sync=${{ inputs.is_sync }}" >> $GITHUB_OUTPUT
+
           else
             echo "On ${{ github.event_name }}"
             echo "issue_number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
             echo "user=${{ github.event.comment.user.login }}" >> $GITHUB_OUTPUT
+            echo "is_sync=${{ contains(github.event.comment.body, '@pyansys-ci-bot sync') }}" >> $GITHUB_OUTPUT
           fi;
 
           # echo "Setting up git"
@@ -54,52 +61,76 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
         run: | 
           gh pr checkout ${{ steps.config.outputs.issue_number }}
-          echo $(git status)
 
-      - name: Clone PR branch from fork
+      - name: Migrate PR
         id: logic
+        if: ${{ steps.config.outputs.is_sync == 'false' }}
         env:
           GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
         run: |
-          REMOTE_NAME="dest"
           NEW_BRANCH=migrated/pr-${{ steps.config.outputs.issue_number }}
+          CURRENT_BRANCH=$(git branch --show-current)
 
           title=""
           body=""
 
           echo "Adding new remote"
-          git remote add $REMOTE_NAME https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ github.repository }}.git
+          git remote add pymapdl https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ github.repository }}.git
 
-          if git ls-remote --exit-code --heads $REMOTE_NAME refs/heads/$NEW_BRANCH; then
-            echo "Branch '$NEW_BRANCH' already exists on remote '$REMOTE_NAME'."
+          if [[ ${{ steps.config.outputs.is_sync }} == 'true' ]]; then
+            echo "Syncing with the PR"
 
-            body="The branch '$NEW_BRANCH' already exists on the remote. "
+            if git ls-remote --exit-code --heads pymapdl refs/heads/$NEW_BRANCH; then
+              echo "Branch '$NEW_BRANCH' already exists on remote 'pymapdl'."
+
+              body="The branch '$NEW_BRANCH' has been synced with '$CURRENT_BRANCH' using 'git merge'."
+
+              git fetch pymapdl pull/${{ steps.config.outputs.issue_number }}/head:refs/heads/$NEW_BRANCH
+              git fetch origin 
+              git checkout $NEW_BRANCH
+              git merge origin/$CURRENT_BRANCH
+              echo "Merge completed successfully."
+
+            else
+              echo "Branch '$NEW_BRANCH' does not exist on remote 'pymapdl'."
+              body="The branch '$NEW_BRANCH' does not exist. Use the `migrate` command to create it. "
+            fi
 
           else
-            echo "Branch '$NEW_BRANCH' does not exist. Safe to push."
+            echo "Migrating the PR"
 
-            body="The branch '$NEW_BRANCH' have been created on the remote. "
+            if git ls-remote --exit-code --heads pymapdl refs/heads/$NEW_BRANCH; then
+              echo "Branch '$NEW_BRANCH' already exists on remote 'pymapdl'."
 
-            git push $REMOTE_NAME HEAD:refs/heads/$NEW_BRANCH
-          fi
+              body="The branch '$NEW_BRANCH' already exists on the remote. "
 
-          PR_NUMBER=$(gh pr list --head $NEW_BRANCH --state open --json number --jq '.[0].number')
-          if [[ -n "$PR_NUMBER" ]]; then
-            echo "Open PR exists for branch '$NEW_BRANCH': PR #$PR_NUMBER"
+            else
+              echo "Branch '$NEW_BRANCH' does not exist. Safe to push."
 
-            title="PR already exists!"
-            body="$body There is already a pull request #$PR_NUMBER on that branch on the remote." # Use `sync` command to sync with that PR.
+              body="The branch '$NEW_BRANCH' have been created on the remote. "
 
-          else
-            echo "No open PR exists for branch '$NEW_BRANCH'. Creating PR..."
-            title_pr='chore: migrated PR ${{ steps.config.outputs.issue_number }}'
-            echo -e "\nThis PR was migrated from a fork to allow secrets to run in workflows. Check the [original PR](https://github.com/${{ github.repository }}/pull/${{ steps.config.outputs.issue_number }}) for more details.\n\nCloses #${{ steps.config.outputs.issue_number }}" > body_pr
+              git push pymapdl HEAD:refs/heads/$NEW_BRANCH
+            fi
 
-            NEW_PR=$(gh pr create --head $NEW_BRANCH --reviewer ${{ steps.config.outputs.user }} --title "$title_pr" --body-file body_pr | grep -o 'github\.com/.*/pull/[0-9]*' | sed -E 's#.*/pull/##')
-            echo "PR created: $NEW_PR"
+            PR_NUMBER=$(gh pr list --head $NEW_BRANCH --state open --json number --jq '.[0].number')
+            if [[ -n "$PR_NUMBER" ]]; then
+              echo "Open PR exists for branch '$NEW_BRANCH': PR #$PR_NUMBER"
 
-            title="New PR opened!"
-            body="$body The PR [#$NEW_PR](https://github.com/${{ github.repository }}/pull/${{ env.NEW_PR }}) has been opened."
+              title="PR already exists!"
+              body="$body There is already a pull request #$PR_NUMBER on that branch on the remote." # Use `sync` command to sync with that PR.
+
+            else
+              echo "No open PR exists for branch '$NEW_BRANCH'. Creating PR..."
+              title_pr='chore: migrated PR ${{ steps.config.outputs.issue_number }}'
+              echo -e "\nThis PR was migrated from a fork to allow secrets to run in workflows. Check the [original PR](https://github.com/${{ github.repository }}/pull/${{ steps.config.outputs.issue_number }}) for more details.\n\nCloses #${{ steps.config.outputs.issue_number }}" > body_pr
+
+              NEW_PR=$(gh pr create --head $NEW_BRANCH --reviewer ${{ steps.config.outputs.user }} --title "$title_pr" --body-file body_pr | grep -o 'github\.com/.*/pull/[0-9]*' | sed -E 's#.*/pull/##')
+              echo "PR created: $NEW_PR"
+
+              title="New PR opened!"
+              body="$body The PR [#$NEW_PR](https://github.com/${{ github.repository }}/pull/${{ env.NEW_PR }}) has been opened."
+            fi
+
           fi
 
           echo "title=$title" >> $GITHUB_OUTPUT
