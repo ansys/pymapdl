@@ -62,12 +62,12 @@ jobs:
           echo "NEW_BRANCH=$NEW_BRANCH" >> $GITHUB_ENV
           
           export REMOTE_NAME="dest"
-          if git ls-remote --exit-code --heads $REMOTE_NAME $BRANCH_NAME; then
-            echo "Branch '$BRANCH_NAME' already exists on remote '$REMOTE_NAME'."
+          if git ls-remote --exit-code --heads $REMOTE_NAME $NEW_BRANCH; then
+            echo "Branch '$NEW_BRANCH' already exists on remote '$REMOTE_NAME'."
             echo "RESULT='exists'" >> $GITHUB_ENV
           else
-            echo "Branch '$BRANCH_NAME' does not exist. Safe to push."
-            git push $REMOTE_NAME HEAD:refs/heads/$BRANCH_NAME
+            echo "Branch '$NEW_BRANCH' does not exist. Safe to push."
+            git push $REMOTE_NAME HEAD:refs/heads/$NEW_BRANCH
           fi
 
           echo "Adding new remote"
