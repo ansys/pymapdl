@@ -71,12 +71,12 @@ jobs:
           if git ls-remote --exit-code --heads $REMOTE_NAME refs/heads/$NEW_BRANCH; then
             echo "Branch '$NEW_BRANCH' already exists on remote '$REMOTE_NAME'."
 
-            body="The branch '$NEW_BRANCH' already exists on the remote."
+            body="The branch '$NEW_BRANCH' already exists on the remote. "
 
           else
             echo "Branch '$NEW_BRANCH' does not exist. Safe to push."
 
-            body="The branch '$NEW_BRANCH' have been created on the remote."
+            body="The branch '$NEW_BRANCH' have been created on the remote. "
 
             git push $REMOTE_NAME HEAD:refs/heads/$NEW_BRANCH
           fi
@@ -86,7 +86,7 @@ jobs:
             echo "Open PR exists for branch '$NEW_BRANCH': PR #$PR_NUMBER"
 
             title="PR already exists!"
-            body="$body\nThere is already a pull request #$PR_NUMBER on that branch on the remote." # Use `sync` command to sync with that PR.
+            body="$body There is already a pull request #$PR_NUMBER on that branch on the remote." # Use `sync` command to sync with that PR.
 
           else
             echo "No open PR exists for branch '$NEW_BRANCH'. Creating PR..."
@@ -94,7 +94,7 @@ jobs:
             echo "PR created: $NEW_PR"
 
             title="New PR opened!"
-            body="$body\nThe PR [#$NEW_PR](https://github.com/${{ github.repository }}/pull/${{ env.NEW_PR }}) has been opened."
+            body="$body The PR [#$NEW_PR](https://github.com/${{ github.repository }}/pull/${{ env.NEW_PR }}) has been opened."
           fi
 
           echo "title=$title" >> $GITHUB_OUTPUT
