@@ -103,11 +103,11 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
         run: |
-          PR_NUMBER=$(gh pr list --head ${{ env.PR_BASE_BRANCH }} --state open --json number --jq '.[0].number')
-          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+          BASE_PR_NUMBER=$(gh pr list --head ${{ env.PR_BASE_BRANCH }} --state open --json number --jq '.[0].number')
+          echo "BASE_PR_NUMBER=$BASE_PR_NUMBER" >> $GITHUB_ENV
 
-          if [[ -n "$PR_NUMBER" ]]; then
-            echo "Open PR exists for branch '${{ env.PR_BASE_BRANCH }}': PR #$PR_NUMBER"
+          if [[ -n "$BASE_PR_NUMBER" ]]; then
+            echo "Open PR exists for branch '${{ env.PR_BASE_BRANCH }}': PR #$BASE_PR_NUMBER"
             echo "COMMENT=false" >> $GITHUB_ENV
 
           else
