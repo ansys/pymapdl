@@ -36,31 +36,6 @@ jobs:
           commentId: ${{ github.event.comment.id }}
           reaction: "rocket"
 
-      - name: Checkout PR source branch
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.issue.number }}
-          fetch-depth: 0  # Needed to push branches
-
-      - name: Get PR details
-        id: pr
-        uses: octokit/request-action@v2.x
-        with:
-          route: GET /repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Parse PR data
-        id: extract
-        run: |
-          echo "PR_NUMBER=${{ github.event.issue.number }}" >> $GITHUB_ENV
-
-          PR_HEAD_BRANCH=$(${{ steps.pr.outputs.data }} | jq -r '.data.head.ref')
-          echo "PR_HEAD_BRANCH=$PR_HEAD_BRANCH" >> $GITHUB_ENV
-
-          PR_HEAD_REPO=$(${{ steps.pr.outputs.data }} | jq -r '.data.head.repo.full_name')
-          echo "PR_HEAD_REPO=$PR_HEAD_REPO" >> $GITHUB_ENV
-
       - name: "Configuration"
         id: config
         run: |
@@ -81,9 +56,31 @@ jobs:
           git config --global user.name "${{ secrets.PYANSYS_CI_BOT_USERNAME }}"
           git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
 
-      - run: |
-          echo "PR is from ${{ github.head_ref }} into ${{ github.base_ref }}"
-          echo "${{ toJson(github) }}"
+
+      - name: Checkout PR source branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.config.outputs.issue_number }}
+          fetch-depth: 0  # Needed to push branches
+
+      - name: Get PR details
+        id: pr
+        uses: octokit/request-action@v2.x
+        with:
+          route: GET /repos/${{ github.repository }}/pulls/${{ steps.config.outputs.issue_number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Parse PR data
+        id: extract
+        run: |
+          echo "PR_NUMBER=${{ steps.config.outputs.issue_number }}" >> $GITHUB_ENV
+
+          PR_HEAD_BRANCH=$(${{ steps.pr.outputs.data }} | jq -r '.data.head.ref')
+          echo "PR_HEAD_BRANCH=$PR_HEAD_BRANCH" >> $GITHUB_ENV
+
+          PR_HEAD_REPO=$(${{ steps.pr.outputs.data }} | jq -r '.data.head.repo.full_name')
+          echo "PR_HEAD_REPO=$PR_HEAD_REPO" >> $GITHUB_ENV
 
       - name: Check out the branch
         env:
