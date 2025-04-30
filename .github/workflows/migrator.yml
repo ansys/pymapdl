@@ -45,10 +45,10 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "PR_NUMBER=${{ github.event.inputs.issue_number }}" >> $GITHUB_ENV
-            echo "USER_TRIGGERING="${{ github.actor }}" >> $GITHUB_ENV
+            echo "USER_TRIGGERING=${{ github.actor }}" >> $GITHUB_ENV
           else
             echo "PR_NUMBER=${{ github.event.issue.number }}" >> $GITHUB_ENV
-            echo "USER_TRIGGERING="${{ github.event.comment.user.login }}" >> $GITHUB_ENV
+            echo "USER_TRIGGERING=${{ github.event.comment.user.login }}" >> $GITHUB_ENV
           fi
 
       - name: Get PR details
@@ -105,7 +105,6 @@ jobs:
         run: |
           PR_NUMBER=$(gh pr list --head ${{ env.PR_BASE_BRANCH }} --state open --json number --jq '.[0].number')
           echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
-
 
           if [[ -n "$PR_NUMBER" ]]; then
             echo "Open PR exists for branch '${{ env.PR_BASE_BRANCH }}': PR #$PR_NUMBER"
