@@ -66,7 +66,6 @@ jobs:
 
       - name: Migrate PR
         id: logic
-        if: ${{ steps.config.outputs.is_sync == 'false' }}
         env:
           GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
         run: |
