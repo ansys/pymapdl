@@ -38,9 +38,11 @@ jobs:
           if [[ ${{ github.event_name }} == "workflow_dispatch" ]] ; then
             echo "On workflow dispatch"
             echo "issue_number=${{ inputs.issue_number }}" >> $GITHUB_OUTPUT
+            echo "user=${{ github.actor }}" >> $GITHUB_OUTPUT
           else
             echo "On ${{ github.event_name }}"
             echo "issue_number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+            echo "user=${{ github.event.comment.user.login }}" >> $GITHUB_OUTPUT
           fi;
 
           # echo "Setting up git"
@@ -93,7 +95,7 @@ jobs:
             title_pr='chore: migrated PR ${{ steps.config.outputs.issue_number }}'
             echo -e "\nThis PR was migrated from a fork to allow secrets to run in workflows. Check the [original PR](https://github.com/${{ github.repository }}/pull/${{ steps.config.outputs.issue_number }}) for more details.\n\nCloses #${{ steps.config.outputs.issue_number }}" > body_pr
 
-            NEW_PR=$(gh pr create --head $NEW_BRANCH --reviewer ${{ github.event.comment.user.login }} --title "$title_pr" --body-file body_pr | grep -o 'github\.com/.*/pull/[0-9]*' | sed -E 's#.*/pull/##')
+            NEW_PR=$(gh pr create --head $NEW_BRANCH --reviewer ${{ steps.config.outputs.user }} --title "$title_pr" --body-file body_pr | grep -o 'github\.com/.*/pull/[0-9]*' | sed -E 's#.*/pull/##')
             echo "PR created: $NEW_PR"
 
             title="New PR opened!"
