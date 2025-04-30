@@ -1,16 +1,20 @@
-.. _ref_birth_and_death_commands_api:
 
-***************
-Birth and death
-***************
+.. _ref_birth_and_death:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands are used for the birth and death option for elements.
+BirthAndDeath
+=============
+
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.birth_and_death
+
+.. autoclass:: ansys.mapdl.core._commands.solution.birth_and_death.BirthAndDeath
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.ealive
-   Mapdl.ekill
-   Mapdl.estif
+
+   BirthAndDeath.ealive
+   BirthAndDeath.ekill
+   BirthAndDeath.estif

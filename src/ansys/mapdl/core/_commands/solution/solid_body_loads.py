@@ -22,480 +22,610 @@
 
 
 class SolidBodyLoads:
-    def bfa(self, area="", lab="", val1="", val2="", val3="", val4="", **kwargs):
-        """Defines a body force load on an area.
 
-        APDL Command: BFA
+    def bfvlist(self, volu: str = "", lab: str = "", **kwargs):
+        r"""Lists the body-force loads on a volume.
 
-        Parameters
-        ----------
-        area
-            Area to which body load applies.  If ALL, apply to all selected
-            areas [ASEL]. A component name may also be substituted for Area.
-
-        lab
-            Valid body load label. Load labels are listed under "Body Loads" in
-            the input table for each element type in the Element Reference.
-
-        val1, val2, val3
-            Value associated with the Lab item or a table name for specifying
-            tabular boundary conditions. Use only VAL1 for TEMP, FLUE, HGEN,
-            CHRGD. For Lab = JS in magnetics, use VAL1, VAL2, and VAL3 for the
-            X, Y, and Z components. For acoustics, if Lab = JS, use VAL1 for
-            mass source in a harmonic analysis or mass source rate in a
-            transient analysis, and ignore VAL2 and VAL3. For Lab = VLTG, VAL1
-            is the voltage drop and VAL2 is the phase angle. If Lab = IMPD,
-            VAL1 is the resistance and VAL2 is the reactance in ohms/square.
-            When specifying a table name, you must enclose the table name in
-            percent signs (%), e.g., BFA,Area,Lab,%tabname%. Use the ``*DIM``
-            command to define a table.
-
-        val4
-            If Lab = JS, VAL4 is the phase angle in degrees.
-
-        Notes
-        -----
-        Defines a body force load (such as temperature in a structural
-        analysis, heat generation rate in a thermal analysis, etc.) on an area.
-        Body loads may be transferred from areas to area elements (or to nodes
-        if area elements do not exist) with the BFTRAN or SBCTRAN commands.
-        Body loads default to the value specified on the BFUNIF command, if it
-        was previously specified.
-
-        You can specify a table name only when using temperature (TEMP) and
-        heat generation rate (HGEN) body load labels.
-
-        Body loads specified by the BFA command can conflict with other
-        specified body loads.  See Resolution of Conflicting Body Load
-        Specifications in the Basic Analysis Guide for details.
-
-        Graphical picking is available only via the listed menu paths.
-
-        This command is also valid in PREP7.
-        """
-        command = f"BFA,{area},{lab},{val1},{val2},{val3},{val4}"
-        return self.run(command, **kwargs)
-
-    def bfadele(self, area="", lab="", **kwargs):
-        """Deletes body force loads on an area.
-
-        APDL Command: BFADELE
+        Mechanical APDL Command: `BFVLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BFVLIST.html>`_
 
         Parameters
         ----------
-        area
-            Area at which body load is to be deleted.  If ALL, delete for all
-            selected areas [ASEL]. A component name may also be substituted for
-            AREA.
+        volu : str
+            Volume at which body load is to be listed. If ALL (or blank), list for all selected volumes (
+            :ref:`vsel` ). If ``VOLU`` = P, graphical picking is enabled and all remaining command fields
+            are ignored (valid only in the GUI). A component name may also be substituted for ``VOLU``.
 
-        lab
-            Valid body load label. If ALL, use all appropriate labels. Load
-            labels are listed under "Body Loads" in the input table for each
-            element type in the Element Reference. See the BFA command for
-            labels.
-
-        Notes
-        -----
-        Deletes body force loads (and all corresponding finite element loads)
-        for a specified area and label.  Body loads may be defined on an area
-        with the BFA command.
-
-        Graphical picking is available only via the listed menu paths.
-
-        This command is also valid in PREP7.
-        """
-        command = f"BFADELE,{area},{lab}"
-        return self.run(command, **kwargs)
-
-    def bfalist(self, area="", lab="", **kwargs):
-        """Lists the body force loads on an area.
-
-        APDL Command: BFALIST
-
-        Parameters
-        ----------
-        area
-            Area at which body load is to be listed.  If ALL (or blank), list
-            for all selected areas [ASEL].  If AREA = P, graphical picking is
-            enabled and all remaining command fields are ignored (valid only in
-            the GUI).  A component name may also be substituted for AREA.
-
-        lab
-            Valid body load label. If ALL, use all appropriate labels. Load
-            labels are listed under "Body Loads" in the input table for each
-            element type in the Element Reference. See the BFA command for
-            labels.
+        lab : str
+            Valid body load label. If ALL, use all appropriate labels. Load labels are listed under "Body
+            Loads" in the input table for each element type in the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_. See the
+            :ref:`bfv` command for labels.
 
         Notes
         -----
-        Lists the body force loads for the specified area and label.  Body
-        loads may be defined on an area with the BFA command.
+
+        .. _BFVLIST_notes:
+
+        Lists the body-force loads for the specified volume and label. Body loads may be defined on a volume
+        with the :ref:`bfv` command.
 
         This command is valid in any processor.
         """
-        command = f"BFALIST,{area},{lab}"
+        command = f"BFVLIST,{volu},{lab}"
         return self.run(command, **kwargs)
 
-    def bfk(self, kpoi="", lab="", val1="", val2="", val3="", phase="", **kwargs):
-        """Defines a body force load at a keypoint.
+    def bfk(
+        self,
+        kpoi: str = "",
+        lab: str = "",
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        phase: str = "",
+        **kwargs,
+    ):
+        r"""Defines a body-force load at a keypoint.
 
-        APDL Command: BFK
+        Mechanical APDL Command: `BFK <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BFK.html>`_
 
         Parameters
         ----------
-        kpoi
-            Keypoint to which body load applies.  If ALL, apply to all selected
-            keypoints [KSEL].  A component name may also be substituted for
-            Kpoi.
+        kpoi : str
+            Keypoint to which body load applies. If ALL, apply to all selected keypoints ( :ref:`ksel` ). A
+            component name may also be substituted for ``Kpoi``.
 
-        lab
-            Valid body load label. Load labels are listed under "Body Loads" in
-            the input table for each element type in the Element Reference.
+        lab : str
+            Valid body load label. Load labels are listed under "Body Loads" in the input table for each
+            element type in the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_.
 
-        val1, val2, val3
-            Value associated with the Lab item or a table name for specifying
-            tabular boundary conditions.  Use only VAL1 for TEMP, FLUE, HGEN,
-            MVDI and CHRGD.  For magnetics, use VAL1, VAL2, and VAL3 for the X,
-            Y, and Z components of JS . For acoustics, if Lab = JS,  use VAL1
-            for mass source in a harmonic analysis or mass source rate in a
-            transient analysis, and ignoreVAL2 and VAL3. When specifying a
-            table name, you must enclose the table name in percent signs (%),
-            e.g., BFK,Kpoi,Lab,%tabname%.  Use the ``*DIM`` command to define a
-            table.
+            This command contains some tables and extra information which can be inspected in the original
+            documentation pointed above.
 
-        phase
+            All keypoints on a given area (or volume) must have the same :ref:`bfk` table name for the
+            tables to be transferred to interior nodes.
+
+        val1 : str
+            Value associated with the ``Lab`` item or a table name for specifying tabular boundary
+            conditions. Use only ``VAL1`` for TEMP, FLUE, HGEN, MVDI and CHRGD. For magnetics, use ``VAL1``,
+            ``VAL2``, and ``VAL3`` for the X, Y, and Z components of JS. For acoustics, if ``Lab`` = JS, use
+            ``VAL1`` for mass source in a harmonic analysis or mass source rate in a transient analysis, and
+            ignore ``VAL2`` and ``VAL3``. When specifying a table name, you must enclose the table name in
+            percent signs (%), e.g., :ref:`bfk`, ``Kpoi``, ``Lab``,``%tabname%``. Use the :ref:`dim`
+            command to define a table.
+
+        val2 : str
+            Value associated with the ``Lab`` item or a table name for specifying tabular boundary
+            conditions. Use only ``VAL1`` for TEMP, FLUE, HGEN, MVDI and CHRGD. For magnetics, use ``VAL1``,
+            ``VAL2``, and ``VAL3`` for the X, Y, and Z components of JS. For acoustics, if ``Lab`` = JS, use
+            ``VAL1`` for mass source in a harmonic analysis or mass source rate in a transient analysis, and
+            ignore ``VAL2`` and ``VAL3``. When specifying a table name, you must enclose the table name in
+            percent signs (%), e.g., :ref:`bfk`, ``Kpoi``, ``Lab``,``%tabname%``. Use the :ref:`dim`
+            command to define a table.
+
+        val3 : str
+            Value associated with the ``Lab`` item or a table name for specifying tabular boundary
+            conditions. Use only ``VAL1`` for TEMP, FLUE, HGEN, MVDI and CHRGD. For magnetics, use ``VAL1``,
+            ``VAL2``, and ``VAL3`` for the X, Y, and Z components of JS. For acoustics, if ``Lab`` = JS, use
+            ``VAL1`` for mass source in a harmonic analysis or mass source rate in a transient analysis, and
+            ignore ``VAL2`` and ``VAL3``. When specifying a table name, you must enclose the table name in
+            percent signs (%), e.g., :ref:`bfk`, ``Kpoi``, ``Lab``,``%tabname%``. Use the :ref:`dim`
+            command to define a table.
+
+        phase : str
             Phase angle in degrees associated with the JS label.
 
         Notes
         -----
-        Defines a body force load (such as temperature in a structural
-        analysis, heat generation rate in a thermal analysis, etc.) at a
-        keypoint.  Body loads may be transferred from keypoints to nodes with
-        the BFTRAN or SBCTRAN commands.  Interpolation will be used to apply
-        loads to the nodes on the lines between keypoints.  All keypoints on a
-        given area (or volume) must have the same BFK specification, with the
-        same values, for the loads to be transferred to interior nodes in the
-        area (or volume).  If only one keypoint on a line has a BFK
-        specification, the other keypoint defaults to the value specified on
-        the BFUNIF command.
 
-        You can specify a table name only when using temperature (TEMP) and
-        heat generation rate (HGEN) body load labels.
+        .. _BFK_notes:
 
-        Body loads specified by the BFK command can conflict with other
-        specified body loads.  See Resolution of Conflicting Body Load
-        Specifications in the Basic Analysis Guide for details.
+        Defines a body-force load (such as temperature in a structural analysis, heat generation rate in a
+        thermal analysis, etc.) at a keypoint. Body loads may be transferred from keypoints to nodes with
+        the :ref:`bftran` or :ref:`sbctran` commands. Interpolation will be used to apply loads to the nodes
+        on the lines between keypoints. All keypoints on a given area (or volume) must have the same
+        :ref:`bfk` specification, with the same values, for the loads to be transferred to interior nodes in
+        the area (or volume). If only one keypoint on a line has a :ref:`bfk` specification, the other
+        keypoint defaults to the value specified on the :ref:`bfunif` command.
 
-        Graphical picking is available only via the listed menu paths.
+        You can specify a table name only when using temperature (TEMP) and heat generation rate (HGEN) body
+        load labels.
+
+        Body loads specified by the :ref:`bfk` command can conflict with other specified body loads. See
+        Resolution of Conflicting Body Load Specifications in the `Basic Analysis Guide
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS19.html>`_ for details.
+
+        In a mode-superposition harmonic or transient analysis, you must apply the load in the modal portion
+        of the analysis. Mechanical APDL calculates a load vector and writes it to the :file:`MODE` file,
+        which you
+        can apply via the :ref:`lvscale` command.
 
         This command is also valid in PREP7.
         """
         command = f"BFK,{kpoi},{lab},{val1},{val2},{val3},{phase}"
         return self.run(command, **kwargs)
 
-    def bfkdele(self, kpoi="", lab="", **kwargs):
-        """Deletes body force loads at a keypoint.
-
-        APDL Command: BFKDELE
-
-        Parameters
-        ----------
-        kpoi
-            Keypoint at which body load is to be deleted.  If ALL, delete for
-            all selected keypoints [KSEL]. A component name may also be
-            substituted for KPOI.
-
-        lab
-            Valid body load label. If ALL, use all appropriate labels. Load
-            labels are listed under "Body Loads" in the input table for each
-            element type in the Element Reference. See the BFK command for
-            labels.
-
-        Notes
-        -----
-        Deletes body force loads (and all corresponding finite element loads)
-        for a specified keypoint and label.  Body loads may be defined at a
-        keypoint with the BFK command.
-
-        Graphical picking is available only via the listed menu paths.
-
-        This command is also valid in PREP7.
-        """
-        command = f"BFKDELE,{kpoi},{lab}"
-        return self.run(command, **kwargs)
-
-    def bfklist(self, kpoi="", lab="", **kwargs):
-        """Lists the body force loads at keypoints.
-
-        APDL Command: BFKLIST
-
-        Parameters
-        ----------
-        kpoi
-            Keypoint at which body load is to be listed.  If ALL (or blank),
-            list for all selected keypoints [KSEL].  If KPOI = P, graphical
-            picking is enabled and all remaining command fields are ignored
-            (valid only in the GUI).  A component name may also be substituted
-            for KPOI
-
-        lab
-            Valid body load label. If ALL, use all appropriate labels. Load
-            labels are listed under "Body Loads" in the input table for each
-            element type in the Element Reference. See the BFK command for
-            labels.
-
-        Notes
-        -----
-        Lists the body force loads for the specified keypoint and label.
-        Keypoint body loads may be defined with the BFK command.
-
-        This command is valid in any processor.
-        """
-        command = f"BFKLIST,{kpoi},{lab}"
-        return self.run(command, **kwargs)
-
-    def bfl(self, line="", lab="", val1="", val2="", val3="", val4="", **kwargs):
-        """Defines a body force load on a line.
-
-        APDL Command: BFL
-
-        Parameters
-        ----------
-        line
-            Line to which body load applies.  If ALL, apply to all selected
-            lines [LSEL]. A component name may also be substituted for Line.
-
-        lab
-            Valid body load label. Load labels are listed under "Body loads" in
-            the input table for each element type in the Element Reference.
-
-        val1, val2, val3
-            Value associated with the Lab item or a table name for specifying
-            tabular boundary conditions.  Use only VAL1 for TEMP, FLUE, HGEN,
-            and CHRGD. For acoustics, if Lab = JS,  use VAL1 for mass source in
-            a harmonic analysis or mass source rate in a transient analysis,
-            and ignoreVAL2 and VAL3. When specifying a table name, you must
-            enclose the table name in percent signs (%), e.g.,
-            BFL,Line,Lab,%tabname%.  Use the ``*DIM`` command to define a table.
-
-        val4
-            If Lab = JS, VAL4 is the phase angle in degrees.
-
-        Notes
-        -----
-        Defines a body force load (such as temperature in a structural
-        analysis, heat generation rate in a thermal analysis, etc.) on a line.
-        Body loads may be transferred from lines to line elements (or to nodes
-        if line elements do not exist) with the BFTRAN or SBCTRAN commands.
-
-        You can specify a table name only when using temperature (TEMP) and
-        heat generation rate (HGEN) body load labels.
-
-        Body loads specified by the BFL command can conflict with other
-        specified body loads.  See Resolution of Conflicting Body Load
-        Specifications in the Basic Analysis Guide for details.
-
-        Graphical picking is available only via the listed menu paths.
-
-        This command is also valid in PREP7.
-        """
-        command = f"BFL,{line},{lab},{val1},{val2},{val3},{val4}"
-        return self.run(command, **kwargs)
-
-    def bfldele(self, line="", lab="", **kwargs):
-        """Deletes body force loads on a line.
-
-        APDL Command: BFLDELE
-
-        Parameters
-        ----------
-        line
-            Line at which body load is to be deleted.  If ALL, delete for all
-            selected lines [LSEL].  A component name may also be substituted
-            for LINE.
-
-        lab
-            Valid body load label. If ALL, use all appropriate labels. Load
-            labels are listed under "Body Loads" in the input table for each
-            element type in the Element Reference. See the BFL command for
-            labels.
-
-        Notes
-        -----
-        Deletes body force loads (and all corresponding finite element loads)
-        for a specified line and label.  Body loads may be defined on a line
-        with the BFL command.
-
-        Graphical picking is available only via the listed menu paths.
-
-        This command is also valid in PREP7.
-        """
-        command = f"BFLDELE,{line},{lab}"
-        return self.run(command, **kwargs)
-
-    def bfllist(self, line="", lab="", **kwargs):
-        """Lists the body force loads on a line.
-
-        APDL Command: BFLLIST
-
-        Parameters
-        ----------
-        line
-            Line at which body load is to be listed.  If ALL (or blank), list
-            for all selected lines [LSEL].  If LINE = P, graphical picking is
-            enabled and all remaining command fields are ignored (valid only in
-            the GUI).  A component name may also be substituted for LINE.
-
-        lab
-            Valid body load label. If ALL, use all appropriate labels. Load
-            labels are listed under "Body Loads" in the input table for each
-            element type in the Element Reference. See the BFL command for
-            labels.
-
-        Notes
-        -----
-        Lists the body force loads for the specified line and label.  Body
-        loads may be defined on a line with the BFL command.
-
-        This command is valid in any processor.
-        """
-        command = f"BFLLIST,{line},{lab}"
-        return self.run(command, **kwargs)
-
     def bftran(self, **kwargs):
-        """Transfers solid model body force loads to the finite element model.
+        r"""Transfers solid model body-force loads to the finite element model.
 
-        APDL Command: BFTRAN
+        Mechanical APDL Command: `BFTRAN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BFTRAN.html>`_
 
         Notes
         -----
-        Body loads are transferred from selected keypoints and lines to
-        selected nodes and from selected areas and volumes to selected
-        elements.  The BFTRAN operation is also done if the SBCTRAN command is
-        either explicitly issued or automatically issued upon initiation of the
-        solution calculations [SOLVE].
+
+        .. _BFTRAN_notes:
+
+        Body loads are transferred from selected keypoints and lines to selected nodes and from selected
+        areas and volumes to selected elements. The :ref:`bftran` operation is also done if the
+        :ref:`sbctran` command is either explicitly issued or automatically issued upon initiation of the
+        solution calculations ( :ref:`solve` ).
 
         This command is also valid in PREP7.
         """
-        command = f"BFTRAN,"
+        command = "BFTRAN"
         return self.run(command, **kwargs)
 
-    def bfv(self, volu="", lab="", val1="", val2="", val3="", phase="", **kwargs):
-        """Defines a body force load on a volume.
+    def bfalist(self, area: str = "", lab: str = "", **kwargs):
+        r"""Lists the body-force loads on an area.
 
-        APDL Command: BFV
+        Mechanical APDL Command: `BFALIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BFALIST.html>`_
 
         Parameters
         ----------
-        volu
-            Volume to which body load applies.  If ALL, apply to all selected
-            volumes [VSEL]. A component name may also be substituted for Volu.
+        area : str
+            Area at which body load is to be listed. If ALL (or blank), list for all selected areas (
+            :ref:`asel` ). If ``AREA`` = P, graphical picking is enabled and all remaining command fields
+            are ignored (valid only in the GUI). A component name may also be substituted for ``AREA``.
 
-        lab
-            Valid body load label. Load labels are listed under "Body Loads" in
-            the input table for each element type in the Element Reference.
-
-        val1, val2, val3
-            Value associated with the Lab item or a table name for specifying
-            tabular boundary conditions.  Use only VAL1 for TEMP, FLUE, HGEN,
-            and CHRGD.  Use VAL1, VAL2, and VAL3 for the X, Y, and Z components
-            of JS.  For Lab = JS in magnetics, use VAL1, VAL2, and VAL3 for the
-            X, Y, and Z components. For acoustics, if Lab = JS,  use VAL1 for
-            mass source in a harmonic analysis or mass source rate in a
-            transient analysis, and ignoreVAL2 and VAL3. For Lab = VLTG, VAL1
-            is the voltage drop and VAL2 is the phase angle.  When specifying a
-            table name, you must enclose the table name in percent signs (%),
-            e.g., BFV,Volu,Lab,%tabname%.  Use the ``*DIM`` command to define a
-            table.
-
-        phase
-            Phase angle in degrees associated with the JS label.
+        lab : str
+            Valid body load label. If ALL, use all appropriate labels. Load labels are listed under "Body
+            Loads" in the input table for each element type in the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_. See the
+            :ref:`bfa` command for labels.
 
         Notes
         -----
-        Defines a body force load (such as temperature in a structural
-        analysis, heat generation rate in a thermal analysis, etc.) on a
-        volume.  Body loads may be transferred from volumes to volume elements
-        (or to nodes if volume elements do not exist) with the BFTRAN or
-        SBCTRAN commands.  Body loads default to the value specified on the
-        BFUNIF command, if it was previously specified.
 
-        You can specify a table name only when using temperature (TEMP) and
-        heat generation rate (HGEN) body load labels.
+        .. _BFALIST_notes:
 
-        Body loads specified by the BFV command can conflict with other
-        specified body loads.  See Resolution of Conflicting Body Load
-        Specifications in the Basic Analysis Guide for details.
+        Lists the body-force loads for the specified area and label. Body loads may be defined on an area
+        with the :ref:`bfa` command.
 
-        Graphical picking is available only via the listed menu paths.
-
-        This command is also valid in PREP7.
-
-        Examples
-        --------
-        Set heat generation 1e4 on all selected volumes.
-
-        >>> mapdl.bfv('ALL', 'HGEN', 1e4)
+        This command is valid in any processor.
         """
-        command = f"BFV,{volu},{lab},{val1},{val2},{val3},{phase}"
+        command = f"BFALIST,{area},{lab}"
         return self.run(command, **kwargs)
 
-    def bfvdele(self, volu="", lab="", **kwargs):
-        """Deletes body force loads on a volume.
+    def bfvdele(self, volu: str = "", lab: str = "", **kwargs):
+        r"""Deletes body-force loads on a volume.
 
-        APDL Command: BFVDELE
+        Mechanical APDL Command: `BFVDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BFVDELE.html>`_
 
         Parameters
         ----------
-        volu
-            Volume at which body load is to be deleted.  If ALL, delete for all
-            selected volumes [VSEL]. A component name may also be substituted
-            for VOLU.
+        volu : str
+            Volume at which body load is to be deleted. If ALL, delete for all selected volumes (
+            :ref:`vsel` ). A component name may also be substituted for ``VOLU``.
 
-        lab
-            Valid body load label. If ALL, use all appropriate labels. Load
-            labels are listed under "Body Loads" in the input table for each
-            element type in the Element Reference. See the BFV command for
-            labels.
+        lab : str
+            Valid body load label. If ALL, use all appropriate labels. Load labels are listed under "Body
+            Loads" in the input table for each element type in the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_. See the
+            :ref:`bfv` command for labels.
 
         Notes
         -----
-        Deletes body force loads (and all corresponding finite element loads)
-        for a specified volume and label.  Body loads may be defined on a
-        volume with the BFV command.
 
-        Graphical picking is available only via the listed menu paths.
+        .. _BFVDELE_notes:
+
+        Deletes body-force loads (and all corresponding finite element loads) for a specified volume and
+        label. Body loads may be defined on a volume with the :ref:`bfv` command.
 
         This command is also valid in PREP7.
         """
         command = f"BFVDELE,{volu},{lab}"
         return self.run(command, **kwargs)
 
-    def bfvlist(self, volu="", lab="", **kwargs):
-        """Lists the body force loads on a volume.
+    def bfldele(self, line: str = "", lab: str = "", **kwargs):
+        r"""Deletes body-force loads on a line.
 
-        APDL Command: BFVLIST
+        Mechanical APDL Command: `BFLDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BFLDELE.html>`_
 
         Parameters
         ----------
-        volu
-            Volume at which body load is to be listed.  If ALL (or blank), list
-            for all selected volumes [VSEL].  If VOLU = P, graphical picking is
-            enabled and all remaining command fields are ignored (valid only in
-            the GUI).  A component name may also be substituted for VOLU.
+        line : str
+            Line at which body load is to be deleted. If ALL, delete for all selected lines ( :ref:`lsel` ).
+            A component name may also be substituted for ``LINE``.
 
-        lab
-            Valid body load label. If ALL, use all appropriate labels. Load
-            labels are listed under "Body Loads" in the input table for each
-            element type in the Element Reference. See the BFV command for
-            labels.
+        lab : str
+            Valid body load label. If ALL, use all appropriate labels. Load labels are listed under "Body
+            Loads" in the input table for each element type in the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_. See the
+            :ref:`bfl` command for labels.
 
         Notes
         -----
-        Lists the body force loads for the specified volume and label.  Body
-        loads may be defined on a volume with the BFV command.
+
+        .. _BFLDELE_notes:
+
+        Deletes body-force loads (and all corresponding finite element loads) for a specified line and
+        label. Body loads may be defined on a line with the :ref:`bfl` command.
+
+        This command is also valid in PREP7.
+        """
+        command = f"BFLDELE,{line},{lab}"
+        return self.run(command, **kwargs)
+
+    def bfklist(self, kpoi: str = "", lab: str = "", **kwargs):
+        r"""Lists the body-force loads at keypoints.
+
+        Mechanical APDL Command: `BFKLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BFKLIST.html>`_
+
+        Parameters
+        ----------
+        kpoi : str
+            Keypoint at which body load is to be listed. If ALL (or blank), list for all selected keypoints
+            ( :ref:`ksel` ). If ``KPOI`` = P, graphical picking is enabled and all remaining command fields
+            are ignored (valid only in the GUI). A component name may also be substituted for ``KPOI``
+
+        lab : str
+            Valid body load label. If ALL, use all appropriate labels. Load labels are listed under "Body
+            Loads" in the input table for each element type in the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_. See the
+            :ref:`bfk` command for labels.
+
+        Notes
+        -----
+
+        .. _BFKLIST_notes:
+
+        Lists the body-force loads for the specified keypoint and label. Keypoint body loads may be defined
+        with the :ref:`bfk` command.
 
         This command is valid in any processor.
         """
-        command = f"BFVLIST,{volu},{lab}"
+        command = f"BFKLIST,{kpoi},{lab}"
+        return self.run(command, **kwargs)
+
+    def bfadele(self, area: str = "", lab: str = "", **kwargs):
+        r"""Deletes body-force loads on an area.
+
+        Mechanical APDL Command: `BFADELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BFADELE.html>`_
+
+        Parameters
+        ----------
+        area : str
+            Area at which body load is to be deleted. If ALL, delete for all selected areas ( :ref:`asel` ).
+            A component name may also be substituted for ``AREA``.
+
+        lab : str
+            Valid body load label. If ALL, use all appropriate labels. Load labels are listed under "Body
+            Loads" in the input table for each element type in the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_. See the
+            :ref:`bfa` command for labels.
+
+        Notes
+        -----
+
+        .. _BFADELE_notes:
+
+        Deletes body-force loads (and all corresponding finite element loads) for a specified area and
+        label. Body loads may be defined on an area with the :ref:`bfa` command.
+
+        This command is also valid in PREP7.
+        """
+        command = f"BFADELE,{area},{lab}"
+        return self.run(command, **kwargs)
+
+    def bfkdele(self, kpoi: str = "", lab: str = "", **kwargs):
+        r"""Deletes body-force loads at a keypoint.
+
+        Mechanical APDL Command: `BFKDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BFKDELE.html>`_
+
+        Parameters
+        ----------
+        kpoi : str
+            Keypoint at which body load is to be deleted. If ALL, delete for all selected keypoints (
+            :ref:`ksel` ). A component name may also be substituted for ``KPOI``.
+
+        lab : str
+            Valid body load label. If ALL, use all appropriate labels. Load labels are listed under "Body
+            Loads" in the input table for each element type in the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_. See the
+            :ref:`bfk` command for labels.
+
+        Notes
+        -----
+
+        .. _BFKDELE_notes:
+
+        Deletes body-force loads (and all corresponding finite element loads) for a specified keypoint and
+        label. Body loads may be defined at a keypoint with the :ref:`bfk` command.
+
+        This command is also valid in PREP7.
+        """
+        command = f"BFKDELE,{kpoi},{lab}"
+        return self.run(command, **kwargs)
+
+    def bfllist(self, line: str = "", lab: str = "", **kwargs):
+        r"""Lists the body-force loads on a line.
+
+        Mechanical APDL Command: `BFLLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BFLLIST.html>`_
+
+        Parameters
+        ----------
+        line : str
+            Line at which body load is to be listed. If ALL (or blank), list for all selected lines (
+            :ref:`lsel` ). If ``LINE`` = P, graphical picking is enabled and all remaining command fields
+            are ignored (valid only in the GUI). A component name may also be substituted for ``LINE``.
+
+        lab : str
+            Valid body load label. If ALL, use all appropriate labels. Load labels are listed under "Body
+            Loads" in the input table for each element type in the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_. See the
+            :ref:`bfl` command for labels.
+
+        Notes
+        -----
+
+        .. _BFLLIST_notes:
+
+        Lists the body-force loads for the specified line and label. Body loads may be defined on a line
+        with the :ref:`bfl` command.
+
+        This command is valid in any processor.
+        """
+        command = f"BFLLIST,{line},{lab}"
+        return self.run(command, **kwargs)
+
+    def bfa(
+        self,
+        area: str = "",
+        lab: str = "",
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        val4: str = "",
+        **kwargs,
+    ):
+        r"""Defines a body-force load on an area.
+
+        Mechanical APDL Command: `BFA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BFA.html>`_
+
+        Parameters
+        ----------
+        area : str
+            Area to which body load applies. If ALL, apply to all selected areas ( :ref:`asel` ). A
+            component name may also be substituted for ``Area``.
+
+        lab : str
+            Valid body load label. Load labels are listed under "Body Loads" in the input table for each
+            element type in the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_.
+
+            This command contains some tables and extra information which can be inspected in the original
+            documentation pointed above.
+
+        val1 : str
+            Value associated with the ``Lab`` item or a table name for specifying tabular boundary
+            conditions. Use only ``VAL1`` for TEMP, FLUE, HGEN, CHRGD. For ``Lab`` = JS in magnetics, use
+            ``VAL1``, ``VAL2``, and ``VAL3`` for the X, Y, and Z components. For ``Lab`` = IMPD in
+            acoustics, ``VAL1`` is the resistance and ``VAL2`` is the reactance in ohms/square. When
+            specifying a table name, you must enclose the table name in percent signs (%), e.g., :ref:`bfa`,
+            ``Area``, ``Lab``,``%tabname%``. Use the :ref:`dim` command to define a table.
+
+        val2 : str
+            Value associated with the ``Lab`` item or a table name for specifying tabular boundary
+            conditions. Use only ``VAL1`` for TEMP, FLUE, HGEN, CHRGD. For ``Lab`` = JS in magnetics, use
+            ``VAL1``, ``VAL2``, and ``VAL3`` for the X, Y, and Z components. For ``Lab`` = IMPD in
+            acoustics, ``VAL1`` is the resistance and ``VAL2`` is the reactance in ohms/square. When
+            specifying a table name, you must enclose the table name in percent signs (%), e.g., :ref:`bfa`,
+            ``Area``, ``Lab``,``%tabname%``. Use the :ref:`dim` command to define a table.
+
+        val3 : str
+            Value associated with the ``Lab`` item or a table name for specifying tabular boundary
+            conditions. Use only ``VAL1`` for TEMP, FLUE, HGEN, CHRGD. For ``Lab`` = JS in magnetics, use
+            ``VAL1``, ``VAL2``, and ``VAL3`` for the X, Y, and Z components. For ``Lab`` = IMPD in
+            acoustics, ``VAL1`` is the resistance and ``VAL2`` is the reactance in ohms/square. When
+            specifying a table name, you must enclose the table name in percent signs (%), e.g., :ref:`bfa`,
+            ``Area``, ``Lab``,``%tabname%``. Use the :ref:`dim` command to define a table.
+
+        val4 : str
+            If ``Lab`` = JS, ``VAL4`` is the phase angle in degrees.
+
+        Notes
+        -----
+
+        .. _BFA_notes:
+
+        Defines a body-force load (such as temperature in a structural analysis, heat generation rate in a
+        thermal analysis, etc.) on an area. Body loads may be transferred from areas to area elements (or to
+        nodes if area elements do not exist) with the :ref:`bftran` or :ref:`sbctran` commands. Body loads
+        default to the value specified on the :ref:`bfunif` command, if it was previously specified.
+
+        You can specify a table name only when using temperature (TEMP) and heat generation rate (HGEN) body
+        load labels.
+
+        Body loads specified by the :ref:`bfa` command can conflict with other specified body loads. See
+        Resolution of Conflicting Body Load Specifications in the `Basic Analysis Guide
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS19.html>`_ for details.
+
+        In a mode-superposition harmonic or transient analysis, you must apply the load in the modal portion
+        of the analysis. Mechanical APDL calculates a load vector and writes it to the :file:`MODE` file,
+        which you
+        can apply via the :ref:`lvscale` command.
+
+        This command is also valid in PREP7.
+        """
+        command = f"BFA,{area},{lab},{val1},{val2},{val3},{val4}"
+        return self.run(command, **kwargs)
+
+    def bfl(
+        self,
+        line: str = "",
+        lab: str = "",
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        val4: str = "",
+        **kwargs,
+    ):
+        r"""Defines a body-force load on a line.
+
+        Mechanical APDL Command: `BFL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BFL.html>`_
+
+        Parameters
+        ----------
+        line : str
+            Line to which body load applies. If ALL, apply to all selected lines ( :ref:`lsel` ). A
+            component name may also be substituted for ``Line``.
+
+        lab : str
+            Valid body load label. Load labels are listed under "Body loads" in the input table for each
+            element type in the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_.
+
+            This command contains some tables and extra information which can be inspected in the original
+            documentation pointed above.
+
+        val1 : str
+            Value associated with the ``Lab`` item or a table name for specifying tabular boundary
+            conditions. Use only ``VAL1`` for TEMP, FLUE, HGEN, and CHRGD. For acoustics, if ``Lab`` = JS,
+            use ``VAL1`` for mass source in a harmonic analysis or mass source rate in a transient analysis,
+            and ignore ``VAL2`` and ``VAL3``. When specifying a table name, you must enclose the table name
+            in percent signs (%), for example, :ref:`bfl`, ``Line``, ``Lab``,``%tabname%``. Use the
+            :ref:`dim` command to define a table.
+
+        val2 : str
+            Value associated with the ``Lab`` item or a table name for specifying tabular boundary
+            conditions. Use only ``VAL1`` for TEMP, FLUE, HGEN, and CHRGD. For acoustics, if ``Lab`` = JS,
+            use ``VAL1`` for mass source in a harmonic analysis or mass source rate in a transient analysis,
+            and ignore ``VAL2`` and ``VAL3``. When specifying a table name, you must enclose the table name
+            in percent signs (%), for example, :ref:`bfl`, ``Line``, ``Lab``,``%tabname%``. Use the
+            :ref:`dim` command to define a table.
+
+        val3 : str
+            Value associated with the ``Lab`` item or a table name for specifying tabular boundary
+            conditions. Use only ``VAL1`` for TEMP, FLUE, HGEN, and CHRGD. For acoustics, if ``Lab`` = JS,
+            use ``VAL1`` for mass source in a harmonic analysis or mass source rate in a transient analysis,
+            and ignore ``VAL2`` and ``VAL3``. When specifying a table name, you must enclose the table name
+            in percent signs (%), for example, :ref:`bfl`, ``Line``, ``Lab``,``%tabname%``. Use the
+            :ref:`dim` command to define a table.
+
+        val4 : str
+            If ``Lab`` = JS, ``VAL4`` is the phase angle in degrees.
+
+        Notes
+        -----
+
+        .. _BFL_notes:
+
+        Defines a body-force load (such as temperature in a structural analysis, heat generation rate in a
+        thermal analysis, etc.) on a line. Body loads may be transferred from lines to line elements (or to
+        nodes if line elements do not exist) with the :ref:`bftran` or :ref:`sbctran` commands.
+
+        You can specify a table name only when using temperature (TEMP) and heat generation rate (HGEN) body
+        load labels.
+
+        Body loads specified by the :ref:`bfl` command can conflict with other specified body loads. See
+        Resolution of Conflicting Body Load Specifications in the `Basic Analysis Guide
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS19.html>`_ for details.
+
+        In a mode-superposition harmonic or transient analysis, you must apply the load in the modal portion
+        of the analysis. Mechanical APDL calculates a load vector and writes it to the :file:`MODE` file,
+        which you
+        can apply via the :ref:`lvscale` command.
+
+        This command is also valid in PREP7.
+        """
+        command = f"BFL,{line},{lab},{val1},{val2},{val3},{val4}"
+        return self.run(command, **kwargs)
+
+    def bfv(
+        self,
+        volu: str = "",
+        lab: str = "",
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        phase: str = "",
+        **kwargs,
+    ):
+        r"""Defines a body-force load on a volume.
+
+        Mechanical APDL Command: `BFV <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_BFV.html>`_
+
+        Parameters
+        ----------
+        volu : str
+            Volume to which body load applies. If ALL, apply to all selected volumes ( :ref:`vsel` ). A
+            component name may also be substituted for ``Volu``.
+
+        lab : str
+            Valid body load label. Load labels are listed under "Body Loads" in the input table for each
+            element type in the `Element Reference
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_BIBLIO.html>`_.
+
+            This command contains some tables and extra information which can be inspected in the original
+            documentation pointed above.
+
+        val1 : str
+            Value associated with the ``Lab`` item or a table name for specifying tabular boundary
+            conditions. Use only ``VAL1`` for TEMP, FLUE, HGEN, and CHRGD. Use ``VAL1``, ``VAL2``, and
+            ``VAL3`` for the X, Y, and Z components of JS. For ``Lab`` = JS in magnetics, use ``VAL1``,
+            ``VAL2``, and ``VAL3`` for the X, Y, and Z components. For acoustics, if ``Lab`` = JS, use
+            ``VAL1`` for mass source in a harmonic analysis or mass source rate in a transient analysis, and
+            ignore ``VAL2`` and ``VAL3``. When specifying a table name, you must enclose the table name in
+            percent signs (%), e.g., :ref:`bfv`, ``Volu``, ``Lab``,``%tabname%``. Use the :ref:`dim`
+            command to define a table.
+
+        val2 : str
+            Value associated with the ``Lab`` item or a table name for specifying tabular boundary
+            conditions. Use only ``VAL1`` for TEMP, FLUE, HGEN, and CHRGD. Use ``VAL1``, ``VAL2``, and
+            ``VAL3`` for the X, Y, and Z components of JS. For ``Lab`` = JS in magnetics, use ``VAL1``,
+            ``VAL2``, and ``VAL3`` for the X, Y, and Z components. For acoustics, if ``Lab`` = JS, use
+            ``VAL1`` for mass source in a harmonic analysis or mass source rate in a transient analysis, and
+            ignore ``VAL2`` and ``VAL3``. When specifying a table name, you must enclose the table name in
+            percent signs (%), e.g., :ref:`bfv`, ``Volu``, ``Lab``,``%tabname%``. Use the :ref:`dim`
+            command to define a table.
+
+        val3 : str
+            Value associated with the ``Lab`` item or a table name for specifying tabular boundary
+            conditions. Use only ``VAL1`` for TEMP, FLUE, HGEN, and CHRGD. Use ``VAL1``, ``VAL2``, and
+            ``VAL3`` for the X, Y, and Z components of JS. For ``Lab`` = JS in magnetics, use ``VAL1``,
+            ``VAL2``, and ``VAL3`` for the X, Y, and Z components. For acoustics, if ``Lab`` = JS, use
+            ``VAL1`` for mass source in a harmonic analysis or mass source rate in a transient analysis, and
+            ignore ``VAL2`` and ``VAL3``. When specifying a table name, you must enclose the table name in
+            percent signs (%), e.g., :ref:`bfv`, ``Volu``, ``Lab``,``%tabname%``. Use the :ref:`dim`
+            command to define a table.
+
+        phase : str
+            Phase angle in degrees associated with the JS label.
+
+        Notes
+        -----
+
+        .. _BFV_notes:
+
+        Defines a body-force load (such as temperature in a structural analysis, heat generation rate in a
+        thermal analysis, etc.) on a volume. Body loads may be transferred from volumes to volume elements
+        (or to nodes if volume elements do not exist) with the :ref:`bftran` or :ref:`sbctran` commands.
+        Body loads default to the value specified on the :ref:`bfunif` command, if it was previously
+        specified.
+
+        You can specify a table name only when using temperature (TEMP) and heat generation rate (HGEN) body
+        load labels.
+
+        Body loads specified by the :ref:`bfv` command can conflict with other specified body loads. See
+        Resolution of Conflicting Body Load Specifications in the `Basic Analysis Guide
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS19.html>`_ for details.
+
+        In a mode-superposition harmonic or transient analysis, you must apply the load in the modal portion
+        of the analysis. Mechanical APDL calculates a load vector and writes it to the :file:`MODE` file,
+        which you
+        can apply via the :ref:`lvscale` command.
+
+        This command is also valid in PREP7.
+        """
+        command = f"BFV,{volu},{lab},{val1},{val2},{val3},{phase}"
         return self.run(command, **kwargs)

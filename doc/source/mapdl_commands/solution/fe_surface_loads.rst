@@ -1,24 +1,29 @@
-.. _ref_fe_surface_loads_commands_api:
 
-****************
-FE surface loads
-****************
+.. _ref_fe_surface_loads:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands are used to define surface loads on the finite element model.
+FeSurfaceLoads
+==============
+
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.fe_surface_loads
+
+.. autoclass:: ansys.mapdl.core._commands.solution.fe_surface_loads.FeSurfaceLoads
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.sf
-   Mapdl.sfbeam
-   Mapdl.sfcum
-   Mapdl.sfdele
-   Mapdl.sfe
-   Mapdl.sfedele
-   Mapdl.sfelist
-   Mapdl.sffun
-   Mapdl.sfgrad
-   Mapdl.sflist
-   Mapdl.sfscale
+
+   FeSurfaceLoads.sf
+   FeSurfaceLoads.sfbeam
+   FeSurfaceLoads.sfcontrol
+   FeSurfaceLoads.sfcum
+   FeSurfaceLoads.sfdele
+   FeSurfaceLoads.sfe
+   FeSurfaceLoads.sfedele
+   FeSurfaceLoads.sfelist
+   FeSurfaceLoads.sffun
+   FeSurfaceLoads.sfgrad
+   FeSurfaceLoads.sflist
+   FeSurfaceLoads.sfscale
