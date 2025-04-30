@@ -90,7 +90,7 @@ jobs:
 
           else
             echo "No open PR exists for branch '$NEW_BRANCH'. Creating PR..."
-            title_pr="chore: migrated PR ${{ steps.config.outputs.issue_number }}"
+            title_pr='chore: migrated PR ${{ steps.config.outputs.issue_number }}'
             body_pr='
             This PR was migrated from a fork to allow secrets to run in workflows. Check the [original PR](https://github.com/${{ github.repository }}/pull/${{ steps.config.outputs.issue_number }}) for more details.
 
