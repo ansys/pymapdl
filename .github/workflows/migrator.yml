@@ -84,9 +84,9 @@ jobs:
             if git ls-remote --exit-code --heads pymapdl refs/heads/$NEW_BRANCH; then
               echo "Branch '$NEW_BRANCH' already exists on remote 'pymapdl'."
 
+              title="Branch synced!"
               body="The branch '$NEW_BRANCH' has been synced with '$CURRENT_BRANCH' using 'git merge'."
 
-              git fetch pymapdl pull/${{ steps.config.outputs.issue_number }}/head:refs/heads/$NEW_BRANCH
               git fetch origin 
               git checkout $NEW_BRANCH
               git merge origin/$CURRENT_BRANCH
@@ -94,6 +94,7 @@ jobs:
 
             else
               echo "Branch '$NEW_BRANCH' does not exist on remote 'pymapdl'."
+              title="Branch not found!"
               body="The branch '$NEW_BRANCH' does not exist. Use the `migrate` command to create it. "
             fi
 
