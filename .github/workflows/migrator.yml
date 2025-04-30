@@ -68,7 +68,7 @@ jobs:
           PR_HEAD_REPO="${{ fromJson(steps.pr.outputs.data).head.repo.full_name }}"
           echo "PR_HEAD_REPO=$PR_HEAD_REPO" >> $GITHUB_ENV
 
-          PR_BASE_BRANCH="migrated/pr-${{ env.PR_NUMBER }}"
+          PR_BASE_BRANCH="migration/pr-${{ env.PR_NUMBER }}"
           echo "PR_BASE_BRANCH=$PR_BASE_BRANCH" >> $GITHUB_ENV
           PR_BASE_REPO="${{ github.repository }}"
           echo "PR_BASE_REPO=$PR_BASE_REPO" >> $GITHUB_ENV
@@ -96,6 +96,59 @@ jobs:
           git push origin ${{ env.PR_BASE_BRANCH }} || echo "Failed to push changes"
 
           echo "Migration process completed successfully."  # Added success message
+      
+      - name: Opening PR if needed.
+        env:
+          GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+        run: |
+          PR_NUMBER=$(gh pr list --head $NEW_BRANCH --state open --json number --jq '.[0].number')
+          echo "PR_NUMBER=$PR_NUMBER" >> $GITHUB_ENV
+
+          echo "COMMENT='false'" >> $GITHUB_ENV
+
+          if [[ -n "$PR_NUMBER" ]]; then
+            echo "Open PR exists for branch '${{ env.PR_BASE_BRANCH }}': PR #$PR_NUMBER"
+
+          else
+            echo "No open PR exists for branch '${{ env.PR_BASE_BRANCH }}'. Creating PR..."
+            echo "COMMENT='true'" >> $GITHUB_ENV
+
+            title_pr='chore: migrated PR ${{ env.PR_NUMBER }}'
+            echo -e "\nThis PR was migrated from a fork to allow secrets to run in workflows. Check the [original PR](https://github.com/${{ github.repository }}/pull/${{ env.PR_NUMBER }}) for more details.\n\nCloses #${{ env.PR_NUMBER }}" > body_pr
+
+            NEW_PR=$(gh pr create --head "${{ env.PR_BASE_BRANCH }}" --reviewer ${{ steps.config.outputs.user }} --title "$title_pr" --body-file body_pr | grep -o 'github\.com/.*/pull/[0-9]*' | sed -E 's#.*/pull/##')
+            echo "PR created: $NEW_PR"
+
+            echo "TITLE='🚀 PR created!'" >> $GITHUB_ENV
+            echo "BODY='The PR [#$NEW_PR](https://github.com/${{ github.repository }}/pull/$NEW_PR) has been created successfully.'" >> $GITHUB_ENV
+
+          fi;
+
+      - name: Create comment
+        if: ${{ env.COMMENT == 'true' }}
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ env.PR_NUMBER}}
+          body: |
+            **${{ env.TITLE }}**
+
+            ${{ env.BODY }}
+
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+
+      - name: Create comment
+        if: failure()
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ env.PR_NUMBER}}
+          body: |
+            **Error**
+
+            An error occurred while migrating and syncing the PR. Please check the action logs for more details.
+
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+
+
 
       # - name: Make dummy change (simulate migration step)
       #   run: |
