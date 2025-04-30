@@ -54,8 +54,12 @@ jobs:
         id: extract
         run: |
           echo "PR_NUMBER=${{ github.event.issue.number }}" >> $GITHUB_ENV
-          echo "PR_HEAD_BRANCH=$(jq -r '.data.head.ref' <<< '${{ steps.pr.outputs.data }}')" >> $GITHUB_ENV
-          echo "PR_HEAD_REPO=$(jq -r '.data.head.repo.full_name' <<< '${{ steps.pr.outputs.data }}')" >> $GITHUB_ENV
+
+          PR_HEAD_BRANCH=$(${{ steps.pr.outputs.data }} | jq -r '.data.head.ref')
+          echo "PR_HEAD_BRANCH=$PR_HEAD_BRANCH" >> $GITHUB_ENV
+
+          PR_HEAD_REPO=$(${{ steps.pr.outputs.data }} | jq -r '.data.head.repo.full_name')
+          echo "PR_HEAD_REPO=$PR_HEAD_REPO" >> $GITHUB_ENV
 
       - name: "Configuration"
         id: config
