@@ -13,7 +13,7 @@ on:
         type: number
 
 jobs:
-  recreate:
+  migrate:
     if: |
        (
         github.event.issue.pull_request != null &&
@@ -22,6 +22,16 @@ jobs:
         ) || ( github.event_name == 'workflow_dispatch' )
     runs-on: ubuntu-latest
     steps:
+      - name: React to comment
+        if : ${{ github.event_name == 'issue_comment' }}
+        uses: dkershner6/reaction-action@v2
+        with:
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          commentId: ${{ github.event.comment.id }}
+          reaction: "rocket"
+
+      - uses: actions/checkout@v3
+
       - name: "Configuration"
         id: config
         run: |
@@ -33,18 +43,9 @@ jobs:
             echo "issue_number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
           fi;
 
-      - name: React to comment
-        if : ${{ github.event_name == 'issue_comment' }}
-        uses: dkershner6/reaction-action@v2
-        with:
-          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-          commentId: ${{ github.event.comment.id }} # Optional if the trigger is a comment. Use another action to find this otherwise.
-          reaction: "rocket"
-
-      - uses: actions/checkout@v3
-        with:
-          ref: ${{ steps.pr.outputs.data.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          # echo "Setting up git"
+          git config --global user.name "${{ secrets.PYANSYS_CI_BOT_USERNAME }}"
+          git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
 
       - name: Check out the branch
         env:
@@ -58,16 +59,55 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           NEW_BRANCH=migrated/pr-${{ steps.config.outputs.issue_number }}
-
-          # echo "Setting up git"
-          git config --global user.name "${{ secrets.PYANSYS_CI_BOT_USERNAME }}"
-          git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
+          echo "NEW_BRANCH=$NEW_BRANCH" >> $GITHUB_ENV
+          
+          export REMOTE_NAME="dest"
+          if git ls-remote --exit-code --heads $REMOTE_NAME $BRANCH_NAME; then
+            echo "Branch '$BRANCH_NAME' already exists on remote '$REMOTE_NAME'."
+            echo "RESULT='exists'" >> $GITHUB_ENV
+          else
+            echo "Branch '$BRANCH_NAME' does not exist. Safe to push."
+            git push $REMOTE_NAME HEAD:refs/heads/$BRANCH_NAME
+          fi
 
           echo "Adding new remote"
-          git remote add dest https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ github.repository }}.git
+          git remote add $REMOTE_NAME https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ github.repository }}.git
 
           echo "Pushing to new remote"
-          git push dest HEAD:refs/heads/$NEW_BRANCH
+          git push $REMOTE_NAME HEAD:refs/heads/$NEW_BRANCH
 
           echo "Creating PR"
-          gh pr create --head $NEW_BRANCH --title "Migrated PR #${{ steps.config.outputs.issue_number }}" --body "This PR was migrated from a fork to allow secrets to run in workflows."
+          NEW_PR=$(gh pr create --head $NEW_BRANCH --reviewer ${{ github.event.comment.user.login }} --title "chore: migrated PR #${{ steps.config.outputs.issue_number }}" --body "This PR was migrated from a fork to allow secrets to run in workflows. Check the [original PR](https://github.com/${{ github.repository }}/pull/${{ steps.config.outputs.issue_number }}) for more details.\nCloses #${{ steps.config.outputs.issue_number }}" | grep -o 'github\.com/.*/pull/[0-9]*' | sed -E 's#.*/pull/##')
+          echo "PR created: $NEW_PR"
+          echo "NEW_PR=$NEW_PR" >> $GITHUB_ENV
+
+          echo "RESULT='success'" >> $GITHUB_ENV
+
+      - name: Create comment text
+        id: comment_config
+        run: |
+          if [[ ${{ env.RESULT }} == "exists" ]] ; then
+            echo "Branch already exists"
+            echo title="Branch already exists!" >> $GITHUB_OUTPUT
+            echo body="The branch '${{ env.NEW_BRANCH }}' already exists on the remote. Probably the PR is already opened. Use `sync` command to sync with that PR." >> $GITHUB_OUTPUT
+
+          elif [[ ${{ env.RESULT }} == "success" ]] ; then
+            echo "Branch created and PR opened"
+            echo title="Branch created and PR opened!" >> $GITHUB_OUTPUT
+            echo body="The branch '${{ env.NEW_BRANCH }}' was created and the PR [#${{ env.NEW_PR }}](https://github.com/${{ github.repository }}/pull/${{ env.NEW_PR }}) was opened." >> $GITHUB_OUTPUT
+
+          else
+            echo "On ${{ github.event_name }}"
+            echo "issue_number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+          fi;
+
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ steps.config.outputs.issue_number }}
+          body: |
+            **${{ steps.comment_config.outputs.title }}**
+
+            ${{ steps.comment_config.outputs.body }}
+
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
