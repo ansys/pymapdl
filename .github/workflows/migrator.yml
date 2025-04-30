@@ -81,20 +81,20 @@ jobs:
           git config pull.rebase true
 
           echo "Adding ${{ env.PR_HEAD_REPO }} as remote"
-          git remote add head_repo https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ env.PR_HEAD_REPO }}.git || echo "Failed to add remote"
+          git remote add head_repo https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ env.PR_HEAD_REPO }}.git
 
           echo "Fetching '${{ env.PR_HEAD_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}'"
-          git fetch head_repo ${{ env.PR_HEAD_BRANCH }} || echo "Failed to fetch branch"
-          git pull head_repo ${{ env.PR_HEAD_BRANCH }} || echo "Failed to pull branch"
+          git fetch head_repo ${{ env.PR_HEAD_BRANCH }}
+          git pull head_repo ${{ env.PR_HEAD_BRANCH }}
 
           echo "Checking out '${{ env.PR_BASE_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}/${{ env.PR_HEAD_BRANCH }}'"
-          git checkout -b ${{ env.PR_BASE_BRANCH }} head_repo/${{ env.PR_HEAD_BRANCH }} || echo "Failed to checkout branch"
+          git checkout -b ${{ env.PR_BASE_BRANCH }} head_repo/${{ env.PR_HEAD_BRANCH }}
 
           echo "Merging '${{ env.PR_HEAD_BRANCH }}' branch into '${{ env.PR_BASE_BRANCH }}'"
-          git merge head_repo/${{ env.PR_HEAD_BRANCH }} || echo "Failed to merge branch"
+          git merge head_repo/${{ env.PR_HEAD_BRANCH }}
 
           echo "Pushing changes to '${{ env.PR_BASE_REPO }}' repo"
-          git push origin ${{ env.PR_BASE_BRANCH }} || echo "Failed to push changes" && exit 1
+          git push origin ${{ env.PR_BASE_BRANCH }} --force
 
       - name: Opening PR if needed.
         env:
