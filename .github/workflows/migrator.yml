@@ -70,7 +70,7 @@ jobs:
           PR_HEAD_REPO="${{ fromJson(steps.pr.outputs.data).head.repo.full_name }}"
           echo "PR_HEAD_REPO=$PR_HEAD_REPO" >> $GITHUB_ENV
 
-          PR_BASE_BRANCH="migration/pr-${{ env.PR_NUMBER }}"
+          PR_BASE_BRANCH="migration2/pr-${{ env.PR_NUMBER }}"
           echo "PR_BASE_BRANCH=$PR_BASE_BRANCH" >> $GITHUB_ENV
           PR_BASE_REPO="${{ github.repository }}"
           echo "PR_BASE_REPO=$PR_BASE_REPO" >> $GITHUB_ENV
@@ -108,11 +108,11 @@ jobs:
 
           if [[ -n "$PR_NUMBER" ]]; then
             echo "Open PR exists for branch '${{ env.PR_BASE_BRANCH }}': PR #$PR_NUMBER"
-            echo "COMMENT='false'" >> $GITHUB_ENV
+            echo "COMMENT=false" >> $GITHUB_ENV
 
           else
             echo "No open PR exists for branch '${{ env.PR_BASE_BRANCH }}'. Creating PR..."
-            echo "COMMENT='true'" >> $GITHUB_ENV
+            echo "COMMENT=true" >> $GITHUB_ENV
 
             title_pr='chore: migrated PR ${{ env.PR_NUMBER }}'
             echo -e "\nThis PR was migrated from a fork to allow secrets to run in workflows. Check the [original PR](https://github.com/${{ github.repository }}/pull/${{ env.PR_NUMBER }}) for more details.\n\nCloses #${{ env.PR_NUMBER }}" > body_pr
