@@ -90,8 +90,11 @@ jobs:
           echo "Checking out '${{ env.PR_BASE_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}/${{ env.PR_HEAD_BRANCH }}'"
           git checkout -b ${{ env.PR_BASE_BRANCH }} head_repo/${{ env.PR_HEAD_BRANCH }} || echo "Failed to checkout branch"
           
+          echo "Merging '${{ env.PR_HEAD_BRANCH }}' branch into '${{ env.PR_BASE_BRANCH }}'"
+          git merge head_repo/${{ env.PR_HEAD_BRANCH }} || echo "Failed to merge branch"
+
           echo "Pushing changes to '${{ env.PR_BASE_REPO }}' repo"
-          git push origin ${{ env.PR_BASE_BRANCH }} || echo "Failed to push changes"
+          git push origin ${{ env.PR_BASE_BRANCH }} || echo "Failed to push changes" && exit 1
       
       - name: Opening PR if needed.
         env:
