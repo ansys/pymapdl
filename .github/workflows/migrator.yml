@@ -36,7 +36,26 @@ jobs:
           commentId: ${{ github.event.comment.id }}
           reaction: "rocket"
 
-      - uses: actions/checkout@v3
+      - name: Checkout PR source branch
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.issue.number }}
+          fetch-depth: 0  # Needed to push branches
+
+      - name: Get PR details
+        id: pr
+        uses: octokit/request-action@v2.x
+        with:
+          route: GET /repos/${{ github.repository }}/pulls/${{ github.event.issue.number }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Parse PR data
+        id: extract
+        run: |
+          echo "PR_NUMBER=${{ github.event.issue.number }}" >> $GITHUB_ENV
+          echo "PR_HEAD_BRANCH=$(jq -r '.data.head.ref' <<< '${{ steps.pr.outputs.data }}')" >> $GITHUB_ENV
+          echo "PR_HEAD_REPO=$(jq -r '.data.head.repo.full_name' <<< '${{ steps.pr.outputs.data }}')" >> $GITHUB_ENV
 
       - name: "Configuration"
         id: config
@@ -65,7 +84,7 @@ jobs:
       - name: Check out the branch
         env:
           GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-        run: | 
+        run: |
           echo "Checking out the PR"
           # git remote add fork 
           gh pr checkout ${{ steps.config.outputs.issue_number }}
