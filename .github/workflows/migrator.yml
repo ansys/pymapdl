@@ -44,7 +44,7 @@ jobs:
         id: pr_number
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-            echo "PR_NUMBER=${{ github.event.inputs.pr_number }}" >> $GITHUB_ENV
+            echo "PR_NUMBER=${{ github.event.inputs.issue_number }}" >> $GITHUB_ENV
           else
             echo "PR_NUMBER=${{ github.event.issue.number }}" >> $GITHUB_ENV
           fi
