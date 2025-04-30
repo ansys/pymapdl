@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Analysis2DTo3D:
 
     def map2dto3d(self, action: str = "", value1: str = "", value2: str = "", **kwargs):
@@ -75,5 +76,3 @@ class Analysis2DTo3D:
         """
         command = f"MAP2DTO3D,{action},{value1},{value2}"
         return self.run(command, **kwargs)
-
-

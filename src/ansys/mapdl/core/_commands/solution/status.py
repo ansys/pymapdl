@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Status:
 
     def lsoper(self, **kwargs):
@@ -43,8 +44,6 @@ class Status:
         command = "LSOPER"
         return self.run(command, **kwargs)
 
-
-
     def master(self, **kwargs):
         r"""Specifies "Master DOF" as the subsequent status topic.
 
@@ -65,8 +64,6 @@ class Status:
         """
         command = "MASTER"
         return self.run(command, **kwargs)
-
-
 
     def genopt(self, **kwargs):
         r"""Specifies "General options" as the subsequent status topic.
@@ -90,8 +87,6 @@ class Status:
         command = "GENOPT"
         return self.run(command, **kwargs)
 
-
-
     def nlopt(self, **kwargs):
         r"""Specifies "Nonlinear analysis options" as the subsequent status topic.
 
@@ -112,8 +107,6 @@ class Status:
         """
         command = "NLOPT"
         return self.run(command, **kwargs)
-
-
 
     def outopt(self, **kwargs):
         r"""Specifies "Output options" as the subsequent status topic.
@@ -136,8 +129,6 @@ class Status:
         command = "OUTOPT"
         return self.run(command, **kwargs)
 
-
-
     def inrtia(self, **kwargs):
         r"""Specifies Inertial loads as the subsequent status topic.
 
@@ -158,8 +149,6 @@ class Status:
         """
         command = "INRTIA"
         return self.run(command, **kwargs)
-
-
 
     def atype(self, **kwargs):
         r"""Specifies "Analysis types" as the subsequent status topic.
@@ -182,8 +171,6 @@ class Status:
         command = "ATYPE"
         return self.run(command, **kwargs)
 
-
-
     def dynopt(self, **kwargs):
         r"""Specifies "Dynamic analysis options" as the subsequent status topic.
 
@@ -204,8 +191,6 @@ class Status:
         """
         command = "DYNOPT"
         return self.run(command, **kwargs)
-
-
 
     def deact(self, **kwargs):
         r"""Specifies "Element birth and death" as the subsequent status topic.
@@ -228,8 +213,6 @@ class Status:
         command = "DEACT"
         return self.run(command, **kwargs)
 
-
-
     def bioopt(self, **kwargs):
         r"""Specifies "Biot-Savart options" as the subsequent status topic.
 
@@ -250,8 +233,6 @@ class Status:
         """
         command = "BIOOPT"
         return self.run(command, **kwargs)
-
-
 
     def smcons(self, **kwargs):
         r"""Specifies "Constraints on the solid model" as the subsequent status topic.
@@ -274,8 +255,6 @@ class Status:
         command = "SMCONS"
         return self.run(command, **kwargs)
 
-
-
     def smfor(self, **kwargs):
         r"""Specifies "Forces on the solid model" as the subsequent status topic.
 
@@ -296,8 +275,6 @@ class Status:
         """
         command = "SMFOR"
         return self.run(command, **kwargs)
-
-
 
     def soluopt(self, **kwargs):
         r"""Specifies "Solution options" as the subsequent status topic.
@@ -320,8 +297,6 @@ class Status:
         command = "SOLUOPT"
         return self.run(command, **kwargs)
 
-
-
     def smsurf(self, **kwargs):
         r"""Specifies "Surface loads on the solid model" as the subsequent status topic.
 
@@ -342,8 +317,6 @@ class Status:
         """
         command = "SMSURF"
         return self.run(command, **kwargs)
-
-
 
     def sptopt(self, **kwargs):
         r"""Specifies "Spectrum analysis options" as the subsequent status topic.
@@ -366,8 +339,6 @@ class Status:
         command = "SPTOPT"
         return self.run(command, **kwargs)
 
-
-
     def smbody(self, **kwargs):
         r"""Specifies "Body loads on the solid model" as the subsequent status topic.
 
@@ -388,5 +359,3 @@ class Status:
         """
         command = "SMBODY"
         return self.run(command, **kwargs)
-
-

@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class Status:
 
     def gap(self, **kwargs):
@@ -47,5 +48,3 @@ class Status:
         """
         command = "GAP"
         return self.run(command, **kwargs)
-
-

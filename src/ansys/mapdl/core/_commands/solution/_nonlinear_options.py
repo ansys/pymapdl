@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class NonlinearOptions:
 
     def crplim(self, crcr: str = "", option: str = "", **kwargs):
@@ -61,5 +62,3 @@ class NonlinearOptions:
         """
         command = f"CRPLIM,{crcr},{option}"
         return self.run(command, **kwargs)
-
-

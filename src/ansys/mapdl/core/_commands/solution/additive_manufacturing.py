@@ -20,9 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class AdditiveManufacturing:
 
-    def ampowder(self, tpowder: str = "", hpowder: str = "", matfactor: str = "", **kwargs):
+    def ampowder(
+        self, tpowder: str = "", hpowder: str = "", matfactor: str = "", **kwargs
+    ):
         r"""Specifies the thermal conditions of the powder in an `additive manufacturing
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/add_ag/add_ag_cal.html>`_ analysis.
 
@@ -66,9 +69,17 @@ class AdditiveManufacturing:
         command = f"AMPOWDER,{tpowder},{hpowder},{matfactor}"
         return self.run(command, **kwargs)
 
-
-
-    def amstep(self, sequence: str = "", val1: str = "", val2: str = "", val3: str = "", val4: str = "", val5: str = "", val6: str = "", **kwargs):
+    def amstep(
+        self,
+        sequence: str = "",
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        val4: str = "",
+        val5: str = "",
+        val6: str = "",
+        **kwargs,
+    ):
         r"""Specifies the process-sequence steps in an additive manufacturing analysis.
 
         Mechanical APDL Command: `AMSTEP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AMSTEP.html>`_
@@ -207,8 +218,6 @@ class AdditiveManufacturing:
         command = f"AMSTEP,{sequence},{val1},{val2},{val3},{val4},{val5},{val6}"
         return self.run(command, **kwargs)
 
-
-
     def amtype(self, process: str = "", **kwargs):
         r"""Specifies the printing process in an `additive manufacturing
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/add_ag/add_ag_cal.html>`_ analysis.
@@ -244,8 +253,6 @@ class AdditiveManufacturing:
         command = f"AMTYPE,{process}"
         return self.run(command, **kwargs)
 
-
-
     def ambeam(self, numbeams: str = "", **kwargs):
         r"""For multiple-beam printers, specifies the number of beams in an `additive manufacturing
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/add_ag/add_ag_cal.html>`_ analysis.
@@ -270,8 +277,6 @@ class AdditiveManufacturing:
         """
         command = f"AMBEAM,{numbeams}"
         return self.run(command, **kwargs)
-
-
 
     def amresult(self, item: str = "", key: str = "", **kwargs):
         r"""Specifies `additive manufacturing
@@ -324,8 +329,6 @@ class AdditiveManufacturing:
         command = f"AMRESULT,{item},{key}"
         return self.run(command, **kwargs)
 
-
-
     def amenv(self, tgas: str = "", hgas: str = "", **kwargs):
         r"""Specifies the build-environment thermal boundary conditions in an `additive manufacturing
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/add_ag/add_ag_cal.html>`_ analysis.
@@ -363,9 +366,9 @@ class AdditiveManufacturing:
         command = f"AMENV,{tgas},{hgas}"
         return self.run(command, **kwargs)
 
-
-
-    def amsupports(self, nsupports: str = "", compname: str = "", sectarray: str = "", **kwargs):
+    def amsupports(
+        self, nsupports: str = "", compname: str = "", sectarray: str = "", **kwargs
+    ):
         r"""Specifies information about the supports in an `additive manufacturing
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/add_ag/add_ag_cal.html>`_ analysis.
 
@@ -418,9 +421,15 @@ class AdditiveManufacturing:
         command = f"AMSUPPORTS,{nsupports},{compname},{sectarray}"
         return self.run(command, **kwargs)
 
-
-
-    def ambuild(self, option: str = "", val1: str = "", val2: str = "", val3: str = "", val4: str = "", **kwargs):
+    def ambuild(
+        self,
+        option: str = "",
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        val4: str = "",
+        **kwargs,
+    ):
         r"""Specifies printer parameters for the build and other options in an `additive manufacturing
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/add_ag/add_ag_cal.html>`_ analysis.
 
@@ -531,8 +540,6 @@ class AdditiveManufacturing:
         command = f"AMBUILD,{option},{val1},{val2},{val3},{val4}"
         return self.run(command, **kwargs)
 
-
-
     def ammat(self, matpart: str = "", tmelt: str = "", trelax: str = "", **kwargs):
         r"""Specifies the melting and relaxation temperatures of the build material in an `additive
         manufacturing <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/add_ag/add_ag_cal.html>`_
@@ -579,5 +586,3 @@ class AdditiveManufacturing:
         """
         command = f"AMMAT,{matpart},{tmelt},{trelax}"
         return self.run(command, **kwargs)
-
-

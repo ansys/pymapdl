@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class MiscLoads:
 
     def mrpm(self, val1: str = "", **kwargs):
@@ -44,9 +45,14 @@ class MiscLoads:
         command = f"MRPM,{val1}"
         return self.run(command, **kwargs)
 
-
-
-    def rstcontrol(self, type_: str = "", cname: str = "", method: str = "", methoditem: str = "", **kwargs):
+    def rstcontrol(
+        self,
+        type_: str = "",
+        cname: str = "",
+        method: str = "",
+        methoditem: str = "",
+        **kwargs,
+    ):
         r"""Controls whether element single value results are written to the results file.
 
         Mechanical APDL Command: `RSTCONTROL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RSTCONTROL.html>`_
@@ -128,9 +134,16 @@ class MiscLoads:
         command = f"RSTCONTROL,{type_},{cname},{method},{methoditem}"
         return self.run(command, **kwargs)
 
-
-
-    def rescontrol(self, action: str = "", ldstep: str = "", frequency: str = "", maxfiles: int | str = "", maxtotalfiles: str = "", filetype: str = "", **kwargs):
+    def rescontrol(
+        self,
+        action: str = "",
+        ldstep: str = "",
+        frequency: str = "",
+        maxfiles: int | str = "",
+        maxtotalfiles: str = "",
+        filetype: str = "",
+        **kwargs,
+    ):
         r"""Controls file writing for multiframe restarts.
 
         Mechanical APDL Command: `RESCONTROL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RESCONTROL.html>`_
@@ -376,8 +389,6 @@ class MiscLoads:
         command = f"RESCONTROL,{action},{ldstep},{frequency},{maxfiles},,{maxtotalfiles},{filetype}"
         return self.run(command, **kwargs)
 
-
-
     def outgeom(self, item: str = "", freq: str = "", **kwargs):
         r"""Controls geometry-related data written to the results file.
 
@@ -436,9 +447,15 @@ class MiscLoads:
         command = f"OUTGEOM,{item},{freq}"
         return self.run(command, **kwargs)
 
-
-
-    def outres(self, item: str = "", freq: str = "", cname: str = "", nsvar: str = "", dsubres: str = "", **kwargs):
+    def outres(
+        self,
+        item: str = "",
+        freq: str = "",
+        cname: str = "",
+        nsvar: str = "",
+        dsubres: str = "",
+        **kwargs,
+    ):
         r"""Controls the solution-result data written to the database.
 
         Mechanical APDL Command: `OUTRES <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_OUTRES.html>`_
@@ -732,9 +749,9 @@ class MiscLoads:
         command = f"OUTRES,{item},{freq},{cname},,{nsvar},{dsubres}"
         return self.run(command, **kwargs)
 
-
-
-    def osresult(self, item: str = "", comp: str = "", freq: str = "", cname: str = "", **kwargs):
+    def osresult(
+        self, item: str = "", comp: str = "", freq: str = "", cname: str = "", **kwargs
+    ):
         r"""Controls the selected result data written to the database.
 
         Mechanical APDL Command: `OSRESULT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_OSRESULT.html>`_
@@ -813,8 +830,6 @@ class MiscLoads:
         """
         command = f"OSRESULT,{item},{comp},{freq},{cname}"
         return self.run(command, **kwargs)
-
-
 
     def outpr(self, item: str = "", freq: str = "", cname: str = "", **kwargs):
         r"""Controls the solution printout.
@@ -910,8 +925,6 @@ class MiscLoads:
         command = f"OUTPR,{item},{freq},{cname}"
         return self.run(command, **kwargs)
 
-
-
     def wsprings(self, **kwargs):
         r"""Creates weak springs on corner nodes of a bounding box of the currently selected elements.
 
@@ -943,9 +956,16 @@ class MiscLoads:
         command = "WSPRINGS"
         return self.run(command, **kwargs)
 
-
-
-    def ic(self, node: str = "", lab: str = "", value: str = "", value2: str = "", nend: str = "", ninc: str = "", **kwargs):
+    def ic(
+        self,
+        node: str = "",
+        lab: str = "",
+        value: str = "",
+        value2: str = "",
+        nend: str = "",
+        ninc: str = "",
+        **kwargs,
+    ):
         r"""Specifies initial conditions at nodes.
 
         Mechanical APDL Command: `IC <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_IC.html>`_
@@ -1046,9 +1066,22 @@ class MiscLoads:
         command = f"IC,{node},{lab},{value},{value2},{nend},{ninc}"
         return self.run(command, **kwargs)
 
-
-
-    def icrotate(self, node: str = "", omega: str = "", x1: str = "", y1: str = "", z1: str = "", x2: str = "", y2: str = "", z2: str = "", vx: str = "", vy: str = "", vz: str = "", accel: str = "", **kwargs):
+    def icrotate(
+        self,
+        node: str = "",
+        omega: str = "",
+        x1: str = "",
+        y1: str = "",
+        z1: str = "",
+        x2: str = "",
+        y2: str = "",
+        z2: str = "",
+        vx: str = "",
+        vy: str = "",
+        vz: str = "",
+        accel: str = "",
+        **kwargs,
+    ):
         r"""Specifies initial velocity at nodes as a sum of rotation about an axis and translation.
 
         Mechanical APDL Command: `ICROTATE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ICROTATE.html>`_
@@ -1145,8 +1178,6 @@ class MiscLoads:
         command = f"ICROTATE,{node},{omega},{x1},{y1},{z1},{x2},{y2},{z2},{vx},{vy},{vz},{accel}"
         return self.run(command, **kwargs)
 
-
-
     def icdele(self, **kwargs):
         r"""Deletes initial conditions at nodes.
 
@@ -1165,9 +1196,9 @@ class MiscLoads:
         command = "ICDELE"
         return self.run(command, **kwargs)
 
-
-
-    def iclist(self, node1: str = "", node2: str = "", ninc: str = "", lab: str = "", **kwargs):
+    def iclist(
+        self, node1: str = "", node2: str = "", ninc: str = "", lab: str = "", **kwargs
+    ):
         r"""Lists the initial conditions.
 
         Mechanical APDL Command: `ICLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ICLIST.html>`_
@@ -1219,9 +1250,14 @@ class MiscLoads:
         command = f"ICLIST,{node1},{node2},{ninc},{lab}"
         return self.run(command, **kwargs)
 
-
-
-    def anpres(self, nfram: str = "", delay: str = "", ncycl: str = "", refframe: int | str = "", **kwargs):
+    def anpres(
+        self,
+        nfram: str = "",
+        delay: str = "",
+        ncycl: str = "",
+        refframe: int | str = "",
+        **kwargs,
+    ):
         r"""Produces an animated sequence of the time-harmonic pressure variation of an engine-order excitation
         in a cyclic harmonic analysis.
 
@@ -1269,9 +1305,19 @@ class MiscLoads:
         command = f"ANPRES,{nfram},{delay},{ncycl},{refframe}"
         return self.run(command, **kwargs)
 
-
-
-    def aport(self, portnum: str = "", label: str = "", kcn: str = "", pres: str = "", phase: str = "", val1: str = "", val2: str = "", val3: str = "", val4: str = "", **kwargs):
+    def aport(
+        self,
+        portnum: str = "",
+        label: str = "",
+        kcn: str = "",
+        pres: str = "",
+        phase: str = "",
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        val4: str = "",
+        **kwargs,
+    ):
         r"""Specifies input data for plane wave and acoustic duct ports.
 
         Mechanical APDL Command: `APORT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_aport.html>`_
@@ -1501,12 +1547,32 @@ class MiscLoads:
         `Analytic Port Modes in a Duct
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thyacous_proprad.html#eq897eb704-ab8d-4c80-aa70-eeda53797cc5>`_
         """
-        command = f"APORT,{portnum},{label},{kcn},{pres},{phase},,{val1},{val2},{val3},{val4}"
+        command = (
+            f"APORT,{portnum},{label},{kcn},{pres},{phase},,{val1},{val2},{val3},{val4}"
+        )
         return self.run(command, **kwargs)
 
-
-
-    def awave(self, wavenum: str = "", wavetype: str = "", opt1: str = "", opt2: str = "", val1: str = "", val2: str = "", val3: str = "", val4: str = "", val5: str = "", val6: str = "", val7: str = "", val8: str = "", val9: str = "", val10: str = "", val11: str = "", val12: str = "", val13: str = "", **kwargs):
+    def awave(
+        self,
+        wavenum: str = "",
+        wavetype: str = "",
+        opt1: str = "",
+        opt2: str = "",
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        val4: str = "",
+        val5: str = "",
+        val6: str = "",
+        val7: str = "",
+        val8: str = "",
+        val9: str = "",
+        val10: str = "",
+        val11: str = "",
+        val12: str = "",
+        val13: str = "",
+        **kwargs,
+    ):
         r"""Specifies input data for an acoustic incident wave.
 
         Mechanical APDL Command: `AWAVE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AWAVE.html>`_
@@ -2014,9 +2080,18 @@ class MiscLoads:
         command = f"AWAVE,{wavenum},{wavetype},{opt1},{opt2},{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12},{val13}"
         return self.run(command, **kwargs)
 
-
-
-    def asifile(self, opt: str = "", fname: str = "", ext: str = "", oper: str = "", kdim: str = "", kout: str = "", limit: str = "", resopt: str = "", **kwargs):
+    def asifile(
+        self,
+        opt: str = "",
+        fname: str = "",
+        ext: str = "",
+        oper: str = "",
+        kdim: str = "",
+        kout: str = "",
+        limit: str = "",
+        resopt: str = "",
+        **kwargs,
+    ):
         r"""Writes or reads one-way acoustic-structural coupling data.
 
         Mechanical APDL Command: `ASIFILE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ASIFILE.html>`_
@@ -2124,9 +2199,18 @@ class MiscLoads:
         command = f"ASIFILE,{opt},{fname},{ext},{oper},{kdim},{kout},{limit},,{resopt}"
         return self.run(command, **kwargs)
 
-
-
-    def dfswave(self, kcn: str = "", radius: str = "", psdref: str = "", dens: str = "", sonic: str = "", incang: str = "", npara: str = "", sampopt: str = "", **kwargs):
+    def dfswave(
+        self,
+        kcn: str = "",
+        radius: str = "",
+        psdref: str = "",
+        dens: str = "",
+        sonic: str = "",
+        incang: str = "",
+        npara: str = "",
+        sampopt: str = "",
+        **kwargs,
+    ):
         r"""Specifies the incident planar waves with random phases for a diffuse sound field.
 
         Mechanical APDL Command: `DFSWAVE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DFSWAVE.html>`_
@@ -2196,10 +2280,10 @@ class MiscLoads:
         ``KCN`` ) must be consistent with the panel``s outward normal unit vector at the center of the
         panel``s sending side.
         """
-        command = f"DFSWAVE,{kcn},{radius},{psdref},{dens},{sonic},{incang},{npara},{sampopt}"
+        command = (
+            f"DFSWAVE,{kcn},{radius},{psdref},{dens},{sonic},{incang},{npara},{sampopt}"
+        )
         return self.run(command, **kwargs)
-
-
 
     def biot(self, label: str = "", **kwargs):
         r"""Calculates the Biot-Savart source magnetic field intensity.
@@ -2248,8 +2332,6 @@ class MiscLoads:
         command = f"BIOT,{label}"
         return self.run(command, **kwargs)
 
-
-
     def sbclist(self, **kwargs):
         r"""Lists solid model boundary conditions.
 
@@ -2268,8 +2350,6 @@ class MiscLoads:
         """
         command = "SBCLIST"
         return self.run(command, **kwargs)
-
-
 
     def sbctran(self, **kwargs):
         r"""Transfers solid model loads and boundary conditions to the FE  model.
@@ -2292,9 +2372,16 @@ class MiscLoads:
         command = "SBCTRAN"
         return self.run(command, **kwargs)
 
-
-
-    def fluread(self, fname: str = "", ext: str = "", kdim: str = "", kout: int | str = "", limit: str = "", listopt: str = "", **kwargs):
+    def fluread(
+        self,
+        fname: str = "",
+        ext: str = "",
+        kdim: str = "",
+        kout: int | str = "",
+        limit: str = "",
+        listopt: str = "",
+        **kwargs,
+    ):
         r"""Reads one-way Fluent-to-Mechanical APDL coupling data via a :file:`.cgns` file with one-side fast Fourier
         transformation complex pressure peak value.
 
@@ -2381,5 +2468,3 @@ class MiscLoads:
         """
         command = f"FLUREAD,,{fname},{ext},{kdim},{kout},{limit},{listopt}"
         return self.run(command, **kwargs)
-
-
