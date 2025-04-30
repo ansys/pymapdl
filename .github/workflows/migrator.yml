@@ -87,6 +87,8 @@ jobs:
               title="Branch synced!"
               body="The branch '$NEW_BRANCH' has been synced with '$CURRENT_BRANCH' using 'git merge'."
 
+              git remote -v
+
               git fetch origin 
               git checkout $NEW_BRANCH
               git merge origin/$CURRENT_BRANCH
