@@ -11,12 +11,6 @@ on:
         description: 'Issue number'
         required: true
         type: number
-      
-      is_sync:
-        description: 'Is sync'
-        required: false
-        default: false
-        type: boolean
 
 permissions:
   contents: write
@@ -70,7 +64,7 @@ jobs:
           PR_HEAD_REPO="${{ fromJson(steps.pr.outputs.data).head.repo.full_name }}"
           echo "PR_HEAD_REPO=$PR_HEAD_REPO" >> $GITHUB_ENV
 
-          PR_BASE_BRANCH="migration2/pr-${{ env.PR_NUMBER }}"
+          PR_BASE_BRANCH="migration3/pr-${{ env.PR_NUMBER }}"
           echo "PR_BASE_BRANCH=$PR_BASE_BRANCH" >> $GITHUB_ENV
           PR_BASE_REPO="${{ github.repository }}"
           echo "PR_BASE_REPO=$PR_BASE_REPO" >> $GITHUB_ENV
@@ -90,14 +84,13 @@ jobs:
           
           echo "Fetching '${{ env.PR_HEAD_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}'"
           git fetch head_repo ${{ env.PR_HEAD_BRANCH }} || echo "Failed to fetch branch"
+          git pull head_repo ${{ env.PR_HEAD_BRANCH }} || echo "Failed to pull branch"
 
           echo "Checking out '${{ env.PR_BASE_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}/${{ env.PR_HEAD_BRANCH }}'"
           git checkout -b ${{ env.PR_BASE_BRANCH }} head_repo/${{ env.PR_HEAD_BRANCH }} || echo "Failed to checkout branch"
           
           echo "Pushing changes to '${{ env.PR_BASE_REPO }}' repo"
           git push origin ${{ env.PR_BASE_BRANCH }} || echo "Failed to push changes"
-
-          echo "Migration process completed successfully."  # Added success message
       
       - name: Opening PR if needed.
         env:
