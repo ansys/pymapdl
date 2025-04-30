@@ -58,20 +58,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          export REMOTE_NAME="dest"
           NEW_BRANCH=migrated/pr-${{ steps.config.outputs.issue_number }}
           echo "NEW_BRANCH=$NEW_BRANCH" >> $GITHUB_ENV
-          
-          export REMOTE_NAME="dest"
-          if git ls-remote --exit-code --heads $REMOTE_NAME $NEW_BRANCH; then
+
+          echo "Adding new remote"
+          git remote add $REMOTE_NAME https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ github.repository }}.git
+
+          if git ls-remote --exit-code --heads $REMOTE_NAME refs/heads/$NEW_BRANCH; then
             echo "Branch '$NEW_BRANCH' already exists on remote '$REMOTE_NAME'."
             echo "RESULT='exists'" >> $GITHUB_ENV
           else
             echo "Branch '$NEW_BRANCH' does not exist. Safe to push."
             git push $REMOTE_NAME HEAD:refs/heads/$NEW_BRANCH
           fi
-
-          echo "Adding new remote"
-          git remote add $REMOTE_NAME https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ github.repository }}.git
 
           echo "Pushing to new remote"
           git push $REMOTE_NAME HEAD:refs/heads/$NEW_BRANCH
