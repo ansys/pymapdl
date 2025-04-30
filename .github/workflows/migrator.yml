@@ -64,7 +64,7 @@ jobs:
           git push dest HEAD:refs/heads/$NEW_BRANCH
 
       - name: Create new PR
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           title: "Migrated PR #${{ steps.config.outputs.issue_number }}"
