@@ -475,6 +475,11 @@ class SessionCommands(
 
 
 class SolutionCommands(
+    solution._gap_conditions.GapConditions,
+    solution._nonlinear_options.NonlinearOptions,
+    solution._status.Status,
+    solution.additive_manufacturing.AdditiveManufacturing,
+    solution.analysis_2d_to_3d.Analysis2DTo3D,
     solution.analysis_options.AnalysisOptions,
     solution.birth_and_death.BirthAndDeath,
     solution.dynamic_options.DynamicOptions,
@@ -482,19 +487,12 @@ class SolutionCommands(
     solution.fe_constraints.FeConstraints,
     solution.fe_forces.FeForces,
     solution.fe_surface_loads.FeSurfaceLoads,
-    solution.gap_conditions.GapConditions,
     solution.inertia.Inertia,
     solution.load_step_operations.LoadStepOperations,
     solution.load_step_options.LoadStepOptions,
-    solution.master_dof.MasterDOF,
-    solution.miscellaneous_loads.MiscellaneousLoads,
-    solution.multi_field_solver_convergence_controls.MultiFieldConvergenceControls,
-    solution.multi_field_solver_definition_commands.MultiFieldSolverDefinitionCommands,
-    solution.multi_field_solver_global_controls.MultiFieldSolverGlobalControls,
-    solution.multi_field_solver_interface_mapping.MultiFieldSolverInterfaceMapping,
-    solution.multi_field_solver_load_transfer.MultiFieldSolverLoadTransfer,
-    solution.multi_field_solver_time_controls.MultiFieldSolverTimeControls,
-    solution.nonlinear_options.NonLinearOptions,
+    solution.master_dof.MasterDof,
+    solution.misc_loads.MiscLoads,
+    solution.nonlinear_options.NonlinearOptions,
     solution.ocean.Ocean,
     solution.radiosity.Radiosity,
     solution.rezoning.Rezoning,
@@ -502,9 +500,8 @@ class SolutionCommands(
     solution.solid_constraints.SolidConstraints,
     solution.solid_forces.SolidForces,
     solution.solid_surface_loads.SolidSurfaceLoads,
-    solution.solution_status.SolutionStatus,
     solution.spectrum_options.SpectrumOptions,
-    solution.twod_to_3d_analysis.TwoDTo3DAnalysis,
+    solution.status.Status,
 ):
     pass
 
