@@ -30,6 +30,7 @@ echo "Collecting local build logs..."
 
 echo "Collecting docker run log..."
 cp log.txt ./"$LOG_NAMES"/log.txt || echo "MAPDL run docker log not found."
+cp log_dpf.txt ./"$LOG_NAMES"/log_dpf.txt || echo "DPF run docker log not found."
 
 echo "Copying docker launch log..."
 cp mapdl_launch_0.log ./"$LOG_NAMES"/mapdl_launch_0.log || echo "MAPDL launch docker log not found."
