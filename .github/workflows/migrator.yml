@@ -68,15 +68,34 @@ jobs:
           PR_HEAD_REPO="${{ fromJson(steps.pr.outputs.data).head.repo.full_name }}"
           echo "PR_HEAD_REPO=$PR_HEAD_REPO" >> $GITHUB_ENV
 
+          PR_BASE_BRANCH="migrated/pr-${{ env.PR_NUMBER }}"
+          echo "PR_BASE_BRANCH=$PR_BASE_BRANCH" >> $GITHUB_ENV
+          PR_BASE_REPO="${{ github.repository }}"
+          echo "PR_BASE_REPO=$PR_BASE_REPO" >> $GITHUB_ENV
 
-      # - name: Clone head repo and checkout branch
-      #   run: |
-      #     git config --global user.name "github-actions"
-      #     git config --global user.email "github-actions@github.com"
+      - name: Checkout repo
+        uses: actions/checkout@v4
 
-      #     git remote add head_repo https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${PR_HEAD_REPO}.git
-      #     git fetch head_repo ${PR_HEAD_BRANCH}
-      #     git checkout -b migrated-pr-${PR_NUMBER} head_repo/${PR_HEAD_BRANCH}
+      - name: Clone head repo and checkout branch
+        env:
+          GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+        run: |
+          git config --global user.name "${{ secrets.PYANSYS_CI_BOT_USERNAME }}"
+          git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
+
+          echo "Adding ${{ env.PR_HEAD_REPO }} as remote"
+          git remote add head_repo https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ env.PR_HEAD_REPO }}.git || echo "Failed to add remote"
+          
+          echo "Fetching '${{ env.PR_HEAD_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}'"
+          git fetch head_repo ${{ env.PR_HEAD_BRANCH }} || echo "Failed to fetch branch"
+
+          echo "Checking out '${{ env.PR_BASE_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}/${{ env.PR_HEAD_BRANCH }}'"
+          git checkout -b ${{ env.PR_BASE_BRANCH }} head_repo/${{ env.PR_HEAD_BRANCH }} || echo "Failed to checkout branch"
+          
+          echo "Pushing changes to '${{ env.PR_BASE_REPO }}' repo"
+          git push origin ${{ env.PR_BASE_BRANCH }} || echo "Failed to push changes"
+
+          echo "Migration process completed successfully."  # Added success message
 
       # - name: Make dummy change (simulate migration step)
       #   run: |
