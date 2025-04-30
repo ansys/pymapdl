@@ -32,7 +32,7 @@ jobs:
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           commentId: ${{ github.event.comment.id }}
-          reaction: "rocket"
+          reaction: "+1"
 
       - name: Determine PR Number
         id: pr_number
@@ -117,6 +117,15 @@ jobs:
             echo "BODY='The PR [#$NEW_PR](https://github.com/${{ github.repository }}/pull/$NEW_PR) has been created successfully.'" >> $GITHUB_ENV
 
           fi;
+
+      # Confirm with a reaction
+      - name: React to comment
+        if : ${{ github.event_name == 'issue_comment' }}
+        uses: dkershner6/reaction-action@v2
+        with:
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          commentId: ${{ github.event.comment.id }}
+          reaction: "rocket"
 
       - name: Create comment
         if: ${{ env.COMMENT == 'true' }}
