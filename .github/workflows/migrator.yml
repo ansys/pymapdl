@@ -91,12 +91,9 @@ jobs:
           else
             echo "No open PR exists for branch '$NEW_BRANCH'. Creating PR..."
             title_pr='chore: migrated PR ${{ steps.config.outputs.issue_number }}'
-            body_pr='
-            This PR was migrated from a fork to allow secrets to run in workflows. Check the [original PR](https://github.com/${{ github.repository }}/pull/${{ steps.config.outputs.issue_number }}) for more details.
+            echo -e "\nThis PR was migrated from a fork to allow secrets to run in workflows. Check the [original PR](https://github.com/${{ github.repository }}/pull/${{ steps.config.outputs.issue_number }}) for more details.\n\nCloses #${{ steps.config.outputs.issue_number }}" > body_pr
 
-            Closes #${{ steps.config.outputs.issue_number }}
-            '
-            NEW_PR=$(gh pr create --head $NEW_BRANCH --reviewer ${{ github.event.comment.user.login }} --title "$title_pr" --body "$body_pr" | grep -o 'github\.com/.*/pull/[0-9]*' | sed -E 's#.*/pull/##')
+            NEW_PR=$(gh pr create --head $NEW_BRANCH --reviewer ${{ github.event.comment.user.login }} --title "$title_pr" --body-file body_pr | grep -o 'github\.com/.*/pull/[0-9]*' | sed -E 's#.*/pull/##')
             echo "PR created: $NEW_PR"
 
             title="New PR opened!"
