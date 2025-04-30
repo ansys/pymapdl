@@ -36,6 +36,8 @@ jobs:
           commentId: ${{ github.event.comment.id }}
           reaction: "rocket"
 
+      - uses: actions/checkout@v3
+
       - name: "Configuration"
         id: config
         run: |
