@@ -51,7 +51,7 @@ jobs:
 
       - name: Check out the branch
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
         run: | 
           gh pr checkout ${{ steps.config.outputs.issue_number }}
           echo $(git status)
@@ -59,7 +59,7 @@ jobs:
       - name: Clone PR branch from fork
         id: logic
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
         run: |
           REMOTE_NAME="dest"
           NEW_BRANCH=migrated/pr-${{ steps.config.outputs.issue_number }}
