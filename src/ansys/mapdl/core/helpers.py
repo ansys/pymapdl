@@ -23,7 +23,7 @@
 """Module for helper functions"""
 
 from functools import namedtuple
-import importlib
+import importlib.util
 import os
 import sys
 from warnings import warn
@@ -34,14 +34,11 @@ from ansys.mapdl.core import LOG
 def is_installed(package_name: str) -> bool:
     """Check if a package is installed"""
     package_name = package_name.replace("-", ".")
-
-    try:
-        importlib.import_module(package_name)
-
-        return True
-    except ModuleNotFoundError:  # pragma: no cover
+    package_spec = importlib.util.find_spec(package_name)
+    if package_spec is None:  # pragma: no cover
         LOG.debug(f"The module '{package_name}' is not installed.")
         return False
+    return True
 
 
 def get_python_version() -> namedtuple:
