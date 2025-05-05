@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+
 class PressureMapping:
 
     def plgeom(self, item: str = "", nodekey: str = "", **kwargs):
@@ -55,9 +56,9 @@ class PressureMapping:
         command = f"PLGEOM,{item},{nodekey}"
         return self.run(command, **kwargs)
 
-
-
-    def plmap(self, item: str = "", nodekey: str = "", imagkey: int | str = "", **kwargs):
+    def plmap(
+        self, item: str = "", nodekey: str = "", imagkey: int | str = "", **kwargs
+    ):
         r"""Plots target and source pressures.
 
         Mechanical APDL Command: `PLMAP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PLMAP.html>`_
@@ -97,9 +98,9 @@ class PressureMapping:
         command = f"PLMAP,{item},,{nodekey},{imagkey}"
         return self.run(command, **kwargs)
 
-
-
-    def map(self, kdim: int | str = "", kout: int | str = "", limit: str = "", **kwargs):
+    def map(
+        self, kdim: int | str = "", kout: int | str = "", limit: str = "", **kwargs
+    ):
         r"""Maps pressures from source points to target surface elements.
 
         Mechanical APDL Command: `MAP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MAP.html>`_
@@ -139,8 +140,6 @@ class PressureMapping:
         command = f"MAP,,{kdim},,{kout},{limit}"
         return self.run(command, **kwargs)
 
-
-
     def slashmap(self, **kwargs):
         r"""Enters the mapping processor.
 
@@ -160,8 +159,6 @@ class PressureMapping:
         """
         command = "/MAP"
         return self.run(command, **kwargs)
-
-
 
     def target(self, nlist: str = "", **kwargs):
         r"""Specifies the target nodes for mapping pressures onto surface effect elements.
@@ -187,9 +184,18 @@ class PressureMapping:
         command = f"TARGET,{nlist}"
         return self.run(command, **kwargs)
 
-
-
-    def read(self, fname: str = "", nskip: str = "", format_: str = "", xfield: str = "", yfield: str = "", zfield: str = "", prfield: str = "", pifield: str = "", **kwargs):
+    def read(
+        self,
+        fname: str = "",
+        nskip: str = "",
+        format_: str = "",
+        xfield: str = "",
+        yfield: str = "",
+        zfield: str = "",
+        prfield: str = "",
+        pifield: str = "",
+        **kwargs,
+    ):
         r"""Reads coordinate and pressure data from a file.
 
         Mechanical APDL Command: `READ <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_READ.html>`_
@@ -245,8 +251,6 @@ class PressureMapping:
         command = f"READ,{fname},{nskip},{format_},{xfield},{yfield},{zfield},{prfield},{pifield}"
         return self.run(command, **kwargs)
 
-
-
     def writemap(self, fname: str = "", **kwargs):
         r"""Writes interpolated pressure data to a file.
 
@@ -270,8 +274,6 @@ class PressureMapping:
         """
         command = f"WRITEMAP,{fname}"
         return self.run(command, **kwargs)
-
-
 
     def ftype(self, filetype: str = "", prestype: int | str = "", **kwargs):
         r"""Specifies the file type and pressure type for the subsequent import of source points and pressures.
@@ -319,5 +321,3 @@ class PressureMapping:
         """
         command = f"FTYPE,{filetype},{prestype}"
         return self.run(command, **kwargs)
-
-
