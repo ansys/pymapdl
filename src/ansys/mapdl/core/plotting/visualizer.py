@@ -51,6 +51,24 @@ if _HAS_VISUALIZER:
     BC_plot_settings = DefaultSymbol()
 
 
+_FIRST_USE_RUN = False
+
+
+def _first_use():
+    # Run first time we use the visualizer
+    global BC_plot_settings
+    global _FIRST_USE_RUN
+    if _FIRST_USE_RUN is True:
+        return
+    if _HAS_VISUALIZER:
+        from ansys.mapdl.core.plotting.plotting_defaults import DefaultSymbol
+        from ansys.mapdl.core.plotting.theme import _apply_default_theme
+
+        _apply_default_theme()
+        BC_plot_settings = DefaultSymbol()
+    _FIRST_USE_RUN = True
+
+
 class MapdlPlotterBackend(PyVistaBackendInterface):
     """Provides the plotter for PyMAPDL.
 
@@ -115,6 +133,7 @@ class MapdlPlotter(Plotter):
         self, use_trame: bool = False, theme: pv.Plotter.theme = None, **plotter_kwargs
     ):
         """Initialize the ``MapdlPlotter`` class."""
+        _first_use()
         self._backend = MapdlPlotterBackend(use_trame=use_trame, **plotter_kwargs)
         super().__init__(backend=self._backend)
         self._theme = theme
