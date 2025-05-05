@@ -19,11 +19,7 @@ are grouped by capability.
    :maxdepth: 1
    :caption: Session
 
-   session/run_controls
-   session/processor_entry
-   session/files
-   session/list_controls
-
+   session/index.rst
 
 ********
 Database
@@ -34,12 +30,7 @@ These commands are used to operate on the database globally.
    :maxdepth: 1
    :caption: Database
 
-   database/setup
-   database/selecting
-   database/components
-   database/working_plane
-   database/coord_sys
-   database/picking
+   database/index.rst
 
 ********
 Graphics
@@ -50,14 +41,7 @@ These commands are used to control the graphics of the program.
    :maxdepth: 1
    :caption: Graphics
 
-   graphics/setup
-   graphics/views
-   graphics/scaling
-   graphics/style
-   graphics/labeling
-   graphics/graphs
-   graphics/annotation
-
+   graphics/index.rst
 
 ****
 APDL
@@ -120,36 +104,7 @@ These commands are used to load and solve the model.
    :maxdepth: 1
    :caption: Solution
 
-   solution/analysis_options
-   solution/nonlinear_options
-   solution/dynamic_options
-   solution/spectrum_options
-   solution/load_step_options
-   solution/solid_constraints
-   solution/solid_forces
-   solution/solid_surface_loads
-   solution/solid_body_loads
-   solution/inertia
-   solution/miscellaneous_loads
-   solution/load_step_operations
-   solution/master_dof
-   solution/gap_conditions
-   solution/rezoning
-   solution/2d_to_3d_analysis
-   solution/birth_and_death
-   solution/fe_constraints
-   solution/fe_forces
-   solution/fe_surface_loads
-   solution/fe_body_loads
-   solution/ocean
-   solution/solution_status
-   solution/radiosity
-   solution/multi_field_solver_definition_commands
-   solution/multi_field_solver_global_controls
-   solution/multi_field_solver_time_controls
-   solution/multi_field_solver_load_transfer
-   solution/multi_field_solver_convergence_controls
-   solution/multi_field_solver_interface_mapping
+   solution/index.rst
    
 *****
 POST1
@@ -205,8 +160,7 @@ binary files produced by the program.
    :maxdepth: 1
    :caption: AUX2
 
-   aux2/bin_dump
-   aux2/bin_manip
+   aux2/index.rst
 
 ****
 AUX3
@@ -218,7 +172,7 @@ files by deleting sets or by changing values.
    :maxdepth: 1
    :caption: AUX3
 
-   aux3/results_files
+   aux3/index.rst
 
 
 *****
@@ -231,9 +185,7 @@ analyses.
    :maxdepth: 1
    :caption: AUX12
 
-   aux12/general_radiation
-   aux12/radiation_mat
-   aux12/radiosity_solver
+   aux12/index.rst
 
 
 *****
@@ -245,7 +197,7 @@ These commands are used to read in an IGES file for analysis in ANSYS.
    :maxdepth: 1
    :caption: AUX15
 
-   aux15/iges
+   aux15/index.rst
 
 
 *****************
