@@ -217,7 +217,7 @@ class FeForces:
             Valid force labels are:
 
             * **Structural labels** : FX, FY, or FZ (forces); MX, MY, or MZ (moments).
-            * **Thermal labels** : HEAT, HBOT, HE2, HE3,..., HTOP (heat flow).
+            * **Thermal labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
             * **Fluid label** : FLOW (fluid flow).
             * **Electric labels** : AMPS (current flow), CHRG (electric charge).
             * **Magnetic labels** : FLUX (magnetic flux); CSGZ (magnetic current segment).
@@ -278,7 +278,7 @@ class FeForces:
 
         Tabular boundary conditions ( ``VALUE`` = ``%tabname%``) are available only for the following
         labels: Fluid (FLOW), Electric (AMPS), Structural force (FX, FY, FZ, MX, MY, MZ), Thermal (HEAT,
-        HBOT, HE2, HE3,..., HTOP), Diffusion (RATE). Tabular boundary conditions are valid only in static (
+        HBOT, HE2, HE3...., HTOP), Diffusion (RATE). Tabular boundary conditions are valid only in static (
         :ref:`antype`,STATIC), full transient ( :ref:`antype`,TRANS), full harmonic ( :ref:`antype`,
         HARMIC), modal superposition harmonic and modal superposition transient analyses.
 
@@ -312,7 +312,7 @@ class FeForces:
             If ALL, use all appropriate labels. Valid force labels are:
 
             * **Structural labels** : FX, FY, or FZ (forces); MX, MY, or MZ (moments).
-            * **Thermal labels** : HEAT, HBOT, HE2, HE3,..., HTOP (heat flow).
+            * **Thermal labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
             * **Fluid label** : FLOW (fluid flow).
             * **Electric labels** : AMPS (current flow), CHRG (electric charge).
             * **Magnetic labels** : FLUX (magnetic flux); CSGZ (magnetic current segment).

@@ -409,7 +409,7 @@ class Radiosity:
         nsect: str = "",
         condvalue: str = "",
         sval: str = "",
-        eval: str = "",
+        eval_: str = "",
         **kwargs,
     ):
         r"""Defines symmetry, rotation, or extrusion parameters for the radiosity method.
@@ -485,7 +485,7 @@ class Radiosity:
             Starting and ending Z values (if ``Axis`` = ZEXT) or angle values (if ``Axis`` = CEXT) used for
             the extrusion. Not used for planar or cyclic reflection.
 
-        eval : str
+        eval_ : str
             Starting and ending Z values (if ``Axis`` = ZEXT) or angle values (if ``Axis`` = CEXT) used for
             the extrusion. Not used for planar or cyclic reflection.
 
@@ -596,7 +596,7 @@ class Radiosity:
         `3D Open Enclosure with Symmetry: Radiation Analysis with Condensed View Factor Calculation
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_the/the_example_rad_condensedVF.html#>`_
         """
-        command = f"RSYMM,{option},{cs},{axis},{nsect},{condvalue},{sval},{eval}"
+        command = f"RSYMM,{option},{cs},{axis},{nsect},{condvalue},{sval},{eval_}"
         return self.run(command, **kwargs)
 
     def radopt(

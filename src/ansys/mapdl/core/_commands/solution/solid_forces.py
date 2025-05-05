@@ -41,7 +41,7 @@ class SolidForces:
             Valid force labels are:
 
             * **Structural labels** : FX, FY, or FZ (forces); MX, MY, or MZ (moments).
-            * **Thermal labels** : HEAT, HBOT, HE2, HE3,..., HTOP (heat flow).
+            * **Thermal labels** : HEAT, HBOT, HE2, HE3...., HTOP (heat flow).
             * **Fluid label** : FLOW (fluid flow).
             * **Electric labels** : AMPS (current flow), CHRG (electric charge).
             * **Magnetic labels** : FLUX (magnetic flux); CSGZ (magnetic current segment).
@@ -66,7 +66,7 @@ class SolidForces:
 
         Tabular boundary conditions ( ``VALUE`` = ``%tabname%``) are available only for the following
         labels: Fluid (FLOW), Electric (AMPS), Structural force (FX, FY, FZ, MX, MY, MZ), and Thermal (HEAT,
-        HBOT, HE2, HE3,..., HTOP).
+        HBOT, HE2, HE3...., HTOP).
 
         This command is also valid in PREP7.
         """

@@ -990,7 +990,7 @@ class MiscLoads:
               conditions using these labels: ACCX, ACCY, ACCZ (translational accelerations); DMGX, DMGY, DMGZ
               (rotational accelerations).
             * The velocity and acceleration initial conditions are not included with ``Lab`` = ALL.
-            * **Thermal labels** : TEMP, TBOT, TE2, TE3,..., TTOP (temperature)
+            * **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature)
             * **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential)
             * **Diffusion label** : CONC (concentration)
             * **Acoustic label** : ENKE (acoustic energy density)

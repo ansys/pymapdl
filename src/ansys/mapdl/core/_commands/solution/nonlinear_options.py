@@ -674,13 +674,13 @@ class NonlinearOptions:
 
         .. _nlhist_nsol_tabnote1:
 
-        For ``SHELL131``and ``SHELL132``elements with KEYOPT(3) = 0 or 1, use the labels TBOT, TE2, TE3,..
-        ., TTOP instead of TEMP.
+        For ``SHELL131``and ``SHELL132``elements with KEYOPT(3) = 0 or 1, use the labels TBOT, TE2, TE3..
+        .., TTOP instead of TEMP.
 
         .. _nlhist_nsol_tabnote2:
 
-        For ``SHELL131``and ``SHELL132``elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3,..
-        ., HTOP instead of HEAT.
+        For ``SHELL131``and ``SHELL132``elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3..
+        .., HTOP instead of HEAT.
 
         .. _nlhist_tab_1:
 

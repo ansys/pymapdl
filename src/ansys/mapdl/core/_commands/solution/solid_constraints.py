@@ -58,7 +58,7 @@ class SolidConstraints:
 
             * ``PRES`` - Pressure.
 
-            * ``TEMP, TBOT, TE2, TE3,..., TTOP`` - Temperature.
+            * ``TEMP, TBOT, TE2, TE3...., TTOP`` - Temperature.
 
             * ``MAG`` - Magnetic scalar potential.
 
@@ -136,7 +136,7 @@ class SolidConstraints:
 
             * ``PRES`` - Pressure.
 
-            * ``TEMP, TBOT, TE2, TE3,..., TTOP`` - Temperature.
+            * ``TEMP, TBOT, TE2, TE3...., TTOP`` - Temperature.
 
             * ``MAG`` - Magnetic scalar potential (see :ref:`da_LabFootnotes_2`below).
 
@@ -171,7 +171,7 @@ class SolidConstraints:
 
         Tabular boundary conditions ( ``VALUE`` = ``%tabname%``) are available only for the following
         degree-of-freedom labels: Electric (VOLT), Structural (UX, UY, UZ, ROTX, ROTY, ROTZ), Acoustic
-        (PRES, UX, UY, UZ), and temperature (TEMP, TBOT, TE2, TE3,..., TTOP).
+        (PRES, UX, UY, UZ), and temperature (TEMP, TBOT, TE2, TE3...., TTOP).
 
         Constraints specified by the :ref:`da` command can conflict with other specified constraints. See
         Resolution of Conflicting Constraint Specifications \ in the `Basic Analysis Guide
@@ -262,7 +262,7 @@ class SolidConstraints:
 
             * ``PRES`` - Pressure.
 
-            * ``TEMP, TBOT, TE2, TE3,..., TTOP`` - Temperature.
+            * ``TEMP, TBOT, TE2, TE3...., TTOP`` - Temperature.
 
             * ``VOLT`` - Electric scalar potential.
 
@@ -370,7 +370,7 @@ class SolidConstraints:
 
         Tabular boundary conditions ( ``VALUE`` = ``%tabname%``) are available only for the following
         degree of freedom labels: Electric (VOLT), structural (UX, UY, UZ, ROTX, ROTY, ROTZ), Acoustic
-        (PRES, UX, UY, UZ), and temperature (TEMP, TBOT, TE2, TE3,..., TTOP).
+        (PRES, UX, UY, UZ), and temperature (TEMP, TBOT, TE2, TE3...., TTOP).
 
         Constraints specified by the :ref:`dk` command can conflict with other specified constraints. See
         Resolution of Conflicting Constraint Specifications in the `Basic Analysis Guide
@@ -455,7 +455,7 @@ class SolidConstraints:
 
             * ``WARP`` - Warping magnitude.
 
-            * ``TEMP, TBOT, TE2, TE3,..., TTOP`` - Temperature
+            * ``TEMP, TBOT, TE2, TE3...., TTOP`` - Temperature
 
             * ``VOLT`` - Electric scalar potential (see :ref:`DL_LabFootnotes_2`).
 
@@ -488,7 +488,7 @@ class SolidConstraints:
 
         Tabular boundary conditions ( ``Value1`` = ``%tabname%``) are available only for the following
         degree of freedom labels: Electric (VOLT), Structural (UX, UY, UZ, ROTX, ROTY, ROTZ), Acoustic
-        (PRES, UX, UY, UZ), and temperature (TEMP, TBOT, TE2, TE3,..., TTOP).
+        (PRES, UX, UY, UZ), and temperature (TEMP, TBOT, TE2, TE3...., TTOP).
 
         Constraints specified with this command can conflict with other specified constraints. For more
         information, see Resolution of Conflicting Constraint Specifications.
@@ -537,7 +537,7 @@ class SolidConstraints:
         lab : str
             Valid degree of freedom label. If ALL, use all appropriate labels. Structural labels: UX, UY, or
             UZ (displacements); ROTX, ROTY, or ROTZ (rotations); WARP (warping). Thermal labels: TEMP, TBOT,
-            TE2, TE3,..., TTOP (temperature). Acoustic labels: PRES (pressure); UX, UY, or UZ (displacements
+            TE2, TE3...., TTOP (temperature). Acoustic labels: PRES (pressure); UX, UY, or UZ (displacements
             for FSI coupled elements). Electric label: VOLT (voltage). Magnetic labels: MAG (scalar magnetic
             potential); AZ (vector magnetic potential). Diffusion label: CONC (concentration).
 

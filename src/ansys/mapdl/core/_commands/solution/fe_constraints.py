@@ -754,7 +754,7 @@ class FeConstraints:
         lab : str
             Valid degree of freedom label. If ALL, use all selected labels ( :ref:`dofsel` ). Structural
             labels: UX, UY, or UZ (displacements); ROTX, ROTY, or ROTZ (rotations); WARP (warping). Thermal
-            labels: TEMP, TBOT, TE2, TE3,..., TTOP (temperature). Acoustic labels: PRES (pressure); UX, UY,
+            labels: TEMP, TBOT, TE2, TE3...., TTOP (temperature). Acoustic labels: PRES (pressure); UX, UY,
             or UZ (displacements for FSI coupled elements). Electric label: VOLT (voltage). Magnetic labels:
             MAG (scalar magnetic potential); AZ (vector magnetic potential). Diffusion label: CONC
             (concentration).
@@ -986,7 +986,7 @@ class FeConstraints:
 
             * **Structural labels** : UX, UY, or UZ (displacements); ROTX, ROTY, or ROTZ (rotations); WARP
               (warping).
-            * **Thermal labels** : TEMP, TBOT, TE2, TE3,..., TTOP (temperature).
+            * **Thermal labels** : TEMP, TBOT, TE2, TE3...., TTOP (temperature).
             * **Electric labels** : VOLT (voltage); EMF (electromotive force).
             * **Magnetic labels** : MAG (scalar magnetic potential); AZ (vector magnetic potential).
             * **Acoustic labels** : PRES (pressure); UX, UY, or UZ (displacements for FSI coupled elements);
@@ -1108,7 +1108,7 @@ class FeConstraints:
         Tabular boundary conditions ( ``VALUE`` = ``%tabname%``) are available only for the following
         degree-of-freedom labels: Electric (VOLT), structural (UX, UY, UZ, ROTX, ROTY, ROTZ, and velocity
         and acceleration loads VELX, VELY, VELZ, OMGX, OMGY, OMGZ, ACCX, ACCY, ACCZ, DMGX, DMGY, DMGZ),
-        acoustic (PRES, UX, UY, UZ, ENKE ), temperature (TEMP, TBOT, TE2, TE3,..., TTOP), diffusion (CONC).
+        acoustic (PRES, UX, UY, UZ, ENKE ), temperature (TEMP, TBOT, TE2, TE3...., TTOP), diffusion (CONC).
         All labels are valid only in static ( :ref:`antype`,STATIC) and full transient (
         :ref:`antype`,TRANS) analyses.
 
