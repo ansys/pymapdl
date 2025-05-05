@@ -678,6 +678,7 @@ class PostProcessing:
             )
 
         from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
         with self._mapdl.save_selection:
             # Select nodes to avoid segfault
             self._mapdl.nsle("s", "all")
