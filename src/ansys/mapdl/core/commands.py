@@ -46,7 +46,7 @@ from ._commands import (
     map_cmd,
     misc,
     post1_,
-    post26_,
+    post26,
     preproc,
     reduced,
     session,
@@ -445,13 +445,14 @@ class Post1Commands(
 
 
 class Post26Commands(
-    post26_.controls.Controls,
-    post26_.display.Display,
-    post26_.listing.Listing,
-    post26_.operations.Operations,
-    post26_.setup.Setup,
-    post26_.special.Special,
-    post26_.status.Status,
+    post26._set_up.SetUp,
+    post26.controls.Controls,
+    post26.display.Display,
+    post26.listing.Listing,
+    post26.operations.Operations,
+    post26.set_up.SetUp,
+    post26.special_purpose.SpecialPurpose,
+    post26.status.Status,
 ):
     pass
 

@@ -1,19 +1,20 @@
-.. _ref_post26_controls_api:
 
-********
+.. _ref_controls:
+
+
 Controls
-********
+========
 
-.. currentmodule:: ansys.mapdl.core
 
-These POST26 commands are used to control the calculations of other
-commands.
+.. currentmodule:: ansys.mapdl.core._commands.post26.controls
+
+.. autoclass:: ansys.mapdl.core._commands.post26.controls.Controls
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.cfact
-   Mapdl.force
-   Mapdl.layerp26
-   Mapdl.shell
-   Mapdl.tvar
+
+   Controls.cfact
+   Controls.layerp26
+   Controls.tvar
