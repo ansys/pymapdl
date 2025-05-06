@@ -139,6 +139,7 @@ class MapdlPlotter(Plotter):
 
     @property
     def bc_settings(self):
+        """Get the boundary condition settings object."""
         if self._bc_settings is None:
             self._make_bc_settings()
         return self._bc_settings
