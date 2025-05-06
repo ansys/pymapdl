@@ -45,6 +45,9 @@ from ansys.mapdl.core.plotting.theme import MapdlTheme
 
 _FIRST_USE_RUN = False
 
+if _HAS_VISUALIZER:
+    import pyvista as pv
+
 
 def _first_use():
     # Run first time we use the visualizer
@@ -344,8 +347,6 @@ class MapdlPlotter(Plotter):
             logger.warning("No meshes, points or labels to plot.")
             return
 
-        import pyvista as pv
-
         if theme is None:
             theme = MapdlTheme()
 
@@ -557,8 +558,6 @@ class MapdlPlotter(Plotter):
         bc_labels_font_size=16,
     ):
         """Plot nodes BC given a list of labels."""
-        import pyvista as pv
-
         nodes_xyz = mapdl.mesh.nodes
         nodes_num = mapdl.mesh.nnum
 
