@@ -22,7 +22,7 @@
 
 """Module for the MapdlPlotter class."""
 from collections import OrderedDict
-from typing import Any, Dict, Iterable, Optional, Union
+from typing import Any, Callable, Dict, Iterable, Optional, Union
 
 from ansys.tools.visualization_interface import Plotter
 from ansys.tools.visualization_interface.backends.pyvista import PyVistaBackendInterface
@@ -138,13 +138,13 @@ class MapdlPlotter(Plotter):
         self._bc_settings = None
 
     @property
-    def bc_settings(self):
+    def bc_settings(self) -> Callable:
         """Get the boundary condition settings object."""
         if self._bc_settings is None:
             self._make_bc_settings()
         return self._bc_settings
 
-    def _make_bc_settings(self):
+    def _make_bc_settings(self) -> None:
         from ansys.mapdl.core.plotting.plotting_defaults import DefaultSymbol
 
         self._bc_settings = DefaultSymbol()
