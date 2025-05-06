@@ -815,8 +815,6 @@ class MapdlPlotter(Plotter):
         MapdlPlotter
             The MapdlPlotter instance.
         """
-        import pyvista as pv
-
         if isinstance(pl, pv.Plotter):
             self._backend.scene = pl
             self._backend.enable_widgets()
