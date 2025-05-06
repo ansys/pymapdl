@@ -188,7 +188,6 @@ jobs:
           python -m pip install build
           python -m build
           python -m pip install dist/*.whl
-          # python -m pip install .
           xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: "Install ansys-mapdl-core with minimal requirements"
