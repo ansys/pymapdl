@@ -43,25 +43,34 @@ from ansys.mapdl.core.plotting.consts import (
 )
 from ansys.mapdl.core.plotting.theme import MapdlTheme
 
-_FIRST_USE_RUN = False
+_first_use_run = False
 
 if _HAS_VISUALIZER:
     import pyvista as pv
 
 
+# Overwrite this to change defaults
+class BC_plot_settings:
+    def __call__(self, name: str):
+        from ansys.mapdl.core.plotting.plotting_defaults import DefaultSymbol
+
+        return DefaultSymbol()(name=name)
+
+
 def _first_use():
     # Run first time we use the visualizer
     global BC_plot_settings
-    global _FIRST_USE_RUN
-    if _FIRST_USE_RUN is True:
+    global _first_use_run
+
+    if _first_use_run is True:
         return
+
     if _HAS_VISUALIZER:
-        from ansys.mapdl.core.plotting.plotting_defaults import DefaultSymbol
         from ansys.mapdl.core.plotting.theme import _apply_default_theme
 
         _apply_default_theme()
-        BC_plot_settings = DefaultSymbol()
-    _FIRST_USE_RUN = True
+
+    _first_use_run = True
 
 
 class MapdlPlotterBackend(PyVistaBackendInterface):
