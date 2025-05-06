@@ -20,4 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from . import files, list_controls, processor_entry, run_controls
+from . import (
+    files,
+    list_controls,
+    processor_entry,
+    run_controls,
+)
