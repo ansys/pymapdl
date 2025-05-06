@@ -56,6 +56,7 @@ def _first_use():
         return
     if _HAS_VISUALIZER:
         from ansys.mapdl.core.plotting.theme import _apply_default_theme
+
         _apply_default_theme()
     _FIRST_USE_RUN = True
 
@@ -144,6 +145,7 @@ class MapdlPlotter(Plotter):
 
     def _make_bc_settings(self):
         from ansys.mapdl.core.plotting.plotting_defaults import DefaultSymbol
+
         self._bc_settings = DefaultSymbol()
 
     def _bc_labels_checker(self, bc_labels):
