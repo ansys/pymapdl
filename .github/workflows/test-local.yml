@@ -142,6 +142,13 @@ jobs:
           echo "TAG_STUDENT: $TAG_STUDENT"
           echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
           echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
+        
+      - name: "Install gcc"
+        shell: bash
+        if: ${{ contains(inputs.mapdl-version, 'cicd') }}
+        run: |
+          apt-get update && apt-get -y install gcc mono-mcs
+    
 
       - name: "Installing minimal OS packages"
         shell: bash
