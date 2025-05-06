@@ -215,12 +215,13 @@ jobs:
       username: ${{ github.actor }}
     with:
       testing-minimal: false
-      pytest-arguments: '-k "not test_dpf" --reset_only_failed  --add_missing_images'
+      pytest-arguments: '--reset_only_failed  --add_missing_images'
       mapdl-version: ${{ matrix.mapdl-version }}
       file-name: "${{ matrix.mapdl-version }}-local"
       tags: "local"
       latest-version: "252"
       python-version: '3.13'
+      test_dpf: ${{ contains(matrix.mapdl-version, 'cicd') }}
 
 
   build-test-ubuntu-minimal:
@@ -239,12 +240,13 @@ jobs:
       username: ${{ github.actor }}
     with:
       testing-minimal: true
-      pytest-arguments: '-k "not test_dpf"'
+      pytest-arguments: ''
       mapdl-version: ${{ matrix.mapdl-version }}
       file-name: "${{ matrix.mapdl-version }}-minimal"
       tags: "local,minimal"
       latest-version: "252"
       python-version: '3.13'
+      test_dpf: false
 
 
   build-test-ubuntu-console:
@@ -270,6 +272,7 @@ jobs:
       python-version: '3.13'
       file-name: "${{ matrix.mapdl-version }}-console"
       tags: "local,console"
+      test_dpf: false
 
 
   test-windows:
@@ -313,7 +316,7 @@ jobs:
       contents: write
     steps:
       - name: "Download the library artifacts from build-library step"
-        uses: actions/download-artifact@95815c38cf2ff2164869cbab79da8d1f422bc89e # v4.2.1
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: ${{ env.PACKAGE_NAME }}-artifacts
           path: ${{ env.PACKAGE_NAME }}-artifacts

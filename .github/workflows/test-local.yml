@@ -32,6 +32,13 @@ on:
         type: boolean
         default: false
       
+      test_dpf:
+        description: |
+          If true, the DPF tests will be run.
+        required: false
+        type: boolean
+        default: true
+      
       on-console:
         description: |
           If true, the tests will be run on console.
@@ -108,6 +115,7 @@ jobs:
       ON_CI: True
       ON_LOCAL: true
       ON_UBUNTU: true
+      HAS_DPF: ${{ inputs.test_dpf }}
       PYMAPDL_DEBUG_TESTING: True
       TESTING_MINIMAL: ${{ inputs.testing-minimal }}
       P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"
