@@ -46,4 +46,3 @@ class GraphicsBackend(Enum):
 
 if _HAS_VISUALIZER:
     from ansys.mapdl.core.plotting.theme import MapdlTheme  # noqa: F401
-    from ansys.mapdl.core.plotting.visualizer import MapdlPlotter  # noqa: F401
