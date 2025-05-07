@@ -153,49 +153,6 @@ jobs:
           echo "Disk usage in /usr:"
           du -shx /usr/* || echo "Failed to get disk usage"
 
-          echo "Disk usage in /tmp:"
-          du -shx /tmp/* || echo "Failed to get disk usage"
-
-          echo "Disk usage in /var/tmp:"
-          du -shx /var/tmp/* || echo "Failed to get disk usage"
-
-      - name: "uninstall"
-        shell: bash
-        run: |
-          apt-get remove --purge --auto-remove -y \
-            azure-cli google-cloud-sdk dotnet-sdk-* \
-            mono-devel mysql* php* android-sdk* \
-            firefox google-chrome-stable && \
-            apt-get clean && \
-            (rm -rf /usr/local/lib/android || true )
-
-      - name: "Show space consumption"
-        shell: bash
-        run: |
-          echo "Disk space:"
-          df -h
-
-          echo ""
-          echo "Disk usage"
-          echo "=========="
-          echo "Disk usage in current directory:"
-          du -shx . || echo "Failed to get disk usage"
-
-          echo "Disk usage in /home:"
-          du -shx /home/* || echo "Failed to get disk usage""
-
-          echo "Disk usage root /:"
-          du -shx /* || echo "Failed to get disk usage""
-
-          echo "Disk usage in /usr:"
-          du -shx /usr/* || echo "Failed to get disk usage""
-
-          echo "Disk usage in /tmp:"
-          du -shx /tmp/* || echo "Failed to get disk usage""
-
-          echo "Disk usage in /var/tmp:"
-          du -shx /var/tmp/* || echo "Failed to get disk usage""
-
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.2.2
         with:
@@ -365,16 +322,10 @@ jobs:
           du -shx * || echo "Failed to get disk usage"
 
           echo "Disk usage in /home:"
-          du -shx /home/* || echo "Failed to get disk usage""
+          du -shx /home/* || echo "Failed to get disk usage"
 
           echo "Disk usage root /:"
-          du -shx /* || echo "Failed to get disk usage""
+          du -shx /* || echo "Failed to get disk usage"
 
           echo "Disk usage in /usr:"
-          du -shx /usr/* || echo "Failed to get disk usage""
-
-          echo "Disk usage in /tmp:"
-          du -shx /tmp/* || echo "Failed to get disk usage""
-
-          echo "Disk usage in /var/tmp:"
-          du -shx /var/tmp/* || echo "Failed to get disk usage""
+          du -shx /usr/* || echo "Failed to get disk usage"
