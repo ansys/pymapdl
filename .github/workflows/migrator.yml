@@ -21,20 +21,12 @@ jobs:
     if: |
        (
         github.event.issue.pull_request != null &&
-        (contains(github.event.comment.body, '@pyansys-ci-bot migrate') || contains(github.event.comment.body, '@pyansys-ci-bot sync') )&&
-        github.event.comment.user.login == 'germa89'
+        (contains(github.event.comment.body, '@pyansys-ci-bot migrate') || contains(github.event.comment.body, '@pyansys-ci-bot sync') )
         ) || ( github.event_name == 'workflow_dispatch' )
     runs-on: ubuntu-latest
     steps:
-      - name: React to comment
-        if : ${{ github.event_name == 'issue_comment' }}
-        uses: dkershner6/reaction-action@v2
-        with:
-          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-          commentId: ${{ github.event.comment.id }}
-          reaction: "+1"
 
-      - name: Determine PR Number
+      - name: Determine PR Number and user triggering the workflow
         id: pr_number
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
@@ -45,8 +37,33 @@ jobs:
             echo "USER_TRIGGERING=${{ github.event.comment.user.login }}" >> $GITHUB_ENV
           fi
 
+      - uses: tspascoal/get-user-teams-membership@v3
+        id: is_organization_member
+        with:
+          username: ${{ env.USER_TRIGGERING }}
+          organization: ansys
+          team: 'pymapdl-maintainers'
+          GITHUB_TOKEN: ${{ secrets.TOKEN_TEAMS_USER_READ }}
+
+      - name: React to comment
+        if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' && github.event_name == 'issue_comment' }}
+        uses: dkershner6/reaction-action@v2
+        with:
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          commentId: ${{ github.event.comment.id }}
+          reaction: "+1"
+
+      - name: React to comment
+        if : ${{ steps.is_organization_member.outputs.isTeamMember == 'false' && github.event_name == 'issue_comment' }}
+        uses: dkershner6/reaction-action@v2
+        with:
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          commentId: ${{ github.event.comment.id }}
+          reaction: "-1"
+
       - name: Get PR details
         id: pr
+        if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
         uses: octokit/request-action@v2.x
         with:
           route: GET /repos/${{ github.repository }}/pulls/${{ env.PR_NUMBER }}
@@ -55,6 +72,7 @@ jobs:
 
       - name: Parse PR data
         id: extract
+        if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
         run: |
           echo "PR_NUMBER=${{ env.PR_NUMBER }}" >> $GITHUB_ENV
 
@@ -70,9 +88,11 @@ jobs:
           echo "PR_BASE_REPO=$PR_BASE_REPO" >> $GITHUB_ENV
 
       - name: Checkout repo
+        if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
         uses: actions/checkout@v4
 
       - name: Clone head repo and checkout branch
+        if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
         run: |
@@ -97,6 +117,7 @@ jobs:
           git push origin ${{ env.PR_BASE_BRANCH }} --force
 
       - name: Opening PR if needed.
+        if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
         run: |
@@ -122,7 +143,7 @@ jobs:
 
       # Confirm with a reaction
       - name: React to comment
-        if : ${{ github.event_name == 'issue_comment' }}
+        if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' && github.event_name == 'issue_comment' }}
         uses: dkershner6/reaction-action@v2
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
@@ -130,7 +151,7 @@ jobs:
           reaction: "rocket"
 
       - name: Create comment
-        if: ${{ env.COMMENT == 'true' }}
+        if: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' && env.COMMENT == 'true' }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ env.PR_NUMBER}}
@@ -142,7 +163,7 @@ jobs:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
 
       - name: Create comment
-        if: failure()
+        if: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' && failure() }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ env.PR_NUMBER}}
