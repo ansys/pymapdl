@@ -74,8 +74,6 @@ jobs:
         id: extract
         if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
         run: |
-          echo "PR_NUMBER=${{ env.PR_NUMBER }}" >> $GITHUB_ENV
-
           PR_HEAD_BRANCH="${{ fromJson(steps.pr.outputs.data).head.ref }}"
           echo "PR_HEAD_BRANCH=$PR_HEAD_BRANCH" >> $GITHUB_ENV
 
@@ -112,9 +110,35 @@ jobs:
 
           echo "Merging '${{ env.PR_HEAD_BRANCH }}' branch into '${{ env.PR_BASE_BRANCH }}'"
           git merge head_repo/${{ env.PR_HEAD_BRANCH }}
+          CONFLICTS=$(git ls-files -u | wc -l)
+          echo "CONFLICTS=$CONFLICTS"
+
+          if [ "$CONFLICTS" -gt 0 ]; then
+            echo "Merge conflicts detected: $CONFLICTS files"
+
+            # Show conflicting files
+            git status
+
+            # Resolve conflicts by taking "theirs" changes (optional, depending on your strategy)
+            echo "Resolving conflicts by taking 'theirs' changes"
+            git checkout --theirs .
+            git add .
+
+            # Verify if conflicts are resolved
+            REMAINING_CONFLICTS=$(git ls-files -u | wc -l)
+            if [ "$REMAINING_CONFLICTS" -gt 0 ]; then
+              echo "Error: Conflicts remain after resolution. Aborting."
+              exit 1
+            fi
+
+            # Continue the merge
+            git merge --continue || { echo "Merge failed. Aborting."; exit 1; }
+          else
+            echo "No merge conflicts detected."
+          fi
 
           echo "Pushing changes to '${{ env.PR_BASE_REPO }}' repo"
-          git push origin ${{ env.PR_BASE_BRANCH }} --force
+          git push origin ${{ env.PR_BASE_BRANCH }} --force-with-lease || { echo "Push failed. Aborting."; exit 1; }
 
       - name: Opening PR if needed.
         if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
