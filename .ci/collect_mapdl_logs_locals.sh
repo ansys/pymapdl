@@ -7,7 +7,8 @@ mv *apdl.out ./"$LOG_NAMES"/ || echo "No APDL log files could be found"
 mv *pymapdl.apdl ./"$LOG_NAMES"/ || echo "No PYMAPDL APDL log files could be found"
 
 echo "Copying the profiling files..."
-mv -r prof ./"$LOG_NAMES"/prof || echo "No profile files could be found"
+mkdir -p ./"$LOG_NAMES"/prof
+mv prof/* ./"$LOG_NAMES"/prof || echo "No profile files could be found"
 
 echo "Copying the JSONL files..."
 mv *.jsonl ./"$LOG_NAMES"/ || echo "No JSONL files could be found"

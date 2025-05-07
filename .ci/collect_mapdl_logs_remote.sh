@@ -33,7 +33,8 @@ mv mapdl_launch_0.log ./"$LOG_NAMES"/mapdl_launch_0.log || echo "MAPDL launch do
 mv mapdl_launch_1.log ./"$LOG_NAMES"/mapdl_launch_1.log || echo "MAPDL launch docker log not found."
 
 echo "Moving the profiling files..."
-mv -r prof ./"$LOG_NAMES"/prof || echo "No profile files could be found"
+mkdir -p ./"$LOG_NAMES"/prof
+mv prof/* ./"$LOG_NAMES"/prof || echo "No profile files could be found"
 
 echo "Moving the JSONL files..."
 mv *.jsonl ./"$LOG_NAMES"/ || echo "No JSONL files could be found"
