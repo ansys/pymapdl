@@ -132,19 +132,31 @@ jobs:
         password: ${{ secrets.token }}
 
     steps:
-      - name: Free Disk Space Before Build
+      - name: "Show space consumption"
+        shell: bash
         run: |
-          echo "Disk space before cleanup:"
+          echo "Disk space:"
           df -h
-          sudo rm -rf /usr/local/.ghcup
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo rm -rf /usr/local/lib/android/sdk/ndk
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /usr/local/share/boost
-          sudo apt-get clean
-          echo "Disk space after cleanup:"
-          df -h
+          echo ""
+          echo "Disk usage"
+          echo "=========="
+          echo "Disk usage in current directory:"
+          du -sh *
+
+          echo "Disk usage in /home:"
+          du -sh /home/*
+
+          echo "Disk usage root /:"
+          du -sh /*
+
+          echo "Disk usage in /usr:"
+          du -sh /usr/*
+
+          echo "Disk usage in /tmp:"
+          du -sh /tmp/*
+
+          echo "Disk usage in /var/tmp:"
+          du -sh /var/tmp/*
 
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.2.2
@@ -176,13 +188,13 @@ jobs:
         shell: bash
         if: inputs.testing-minimal == true
         run: |
-          apt-get update && apt install -y libgomp1 graphviz
+          apt-get update && apt install -y libgomp1 graphviz && apt-get clean
 
       - name: "Installing OS packages"
         shell: bash
         if: inputs.testing-minimal == false
         run: |
-          apt-get update && apt install -y libgl1-mesa-glx xvfb libgomp1 graphviz
+          apt-get update && apt install -y libgl1-mesa-glx xvfb libgomp1 graphviz && apt-get clean
 
       - name: "Setup Python"
         uses: actions/setup-python@v5
@@ -302,7 +314,7 @@ jobs:
         with:
           name: ${{ inputs.file-name }}.xml
           path: ./${{ inputs.file-name }}.xml
-      
+
       - name: "Show space consumption"
         shell: bash
         run: |
@@ -328,17 +340,3 @@ jobs:
 
           echo "Disk usage in /var/tmp:"
           du -sh /var/tmp/*
-
-      - name: Free Disk Space Before Build
-        run: |
-          echo "Disk space before cleanup:"
-          df -h
-          sudo rm -rf /usr/local/.ghcup
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo rm -rf /usr/local/lib/android/sdk/ndk
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /usr/local/share/boost
-          sudo apt-get clean
-          echo "Disk space after cleanup:"
-          df -h
