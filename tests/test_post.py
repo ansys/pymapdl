@@ -1241,7 +1241,6 @@ class Test_contact_solve(TestClass):
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    @pytest.mark.skipif(True, reason="Crash python until #3782 is fixed.")
     def test_plot_incomplete_element_selection(mapdl, resume):
         mapdl.esel("S", "ELEM", "", 1, mapdl.mesh.n_elem // 2)
         assert mapdl.post_processing.plot_element_displacement() is None
