@@ -25,12 +25,8 @@ import weakref
 
 import numpy as np
 
-from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import requires_package, supress_logging
-
-if _HAS_VISUALIZER:
-    from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
 COMPONENT_STRESS_TYPE = ["X", "Y", "Z", "XY", "YZ", "XZ"]
 PRINCIPAL_TYPE = ["1", "2", "3"]
@@ -633,6 +629,8 @@ class PostProcessing:
                 "exist within the result file."
             )
 
+        from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
         with self._mapdl.save_selection:
             mask = self.selected_nodes
             nodes_ids = self._mapdl.get_array("NODE", item1="NLIST")
@@ -678,6 +676,8 @@ class PostProcessing:
                 "with ``mapdl.set(step, sub_step)`` or the result does not "
                 "exist within the result file."
             )
+
+        from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
         with self._mapdl.save_selection:
             # Select nodes to avoid segfault
