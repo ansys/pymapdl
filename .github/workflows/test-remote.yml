@@ -18,6 +18,13 @@ on:
         required: true
         type: string
 
+      python-version:
+        description: |
+          Python version to use.
+        required: false
+        type: string
+        default: "3.12"
+
     secrets:
       username:
         description: |
@@ -59,7 +66,6 @@ jobs:
       DPF_START_SERVER: False
       HAS_DPF: True
       PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile'
-      MAIN_PYTHON_VERSION: '3.12'
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
 
     steps:
@@ -151,13 +157,13 @@ jobs:
         if:  steps.changes.outputs.workflows != 'true'
         with:
           cache: 'pip'
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+          python-version: ${{ inputs.python-version }}
 
       - name: "Setup Python without cache"
         uses: actions/setup-python@v5
         if: steps.changes.outputs.workflows == 'true'
         with:
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+          python-version: ${{ inputs.python-version }}
 
       - name: "Install os packages"
         shell: bash
