@@ -26,7 +26,6 @@
 #
 import logging
 import os
-import sys
 from typing import Dict, List, Tuple
 from warnings import warn
 
@@ -135,6 +134,3 @@ if _HAS_ATP:
         get_mapdl_path,
         save_ansys_path,
     )
-
-if _HAS_VISUALIZER:
-    from ansys.tools.visualization_interface import Plotter
