@@ -137,11 +137,12 @@ jobs:
         run: |
           echo "Disk space:"
           df -h
+
           echo ""
           echo "Disk usage"
           echo "=========="
           echo "Disk usage in current directory:"
-          du -sh *
+          du -sh .
 
           echo "Disk usage in /home:"
           du -sh /home/*
