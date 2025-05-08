@@ -157,6 +157,7 @@ jobs:
           du -shx /__e/* || echo "Failed to get disk usage"
           du -shx /__w/* || echo "Failed to get disk usage"
           du -shx /__t/* || echo "Failed to get disk usage"
+          du -shx /__t/CodeQL/* || echo "Failed to get disk usage"
 
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.2.2
@@ -339,3 +340,4 @@ jobs:
           du -shx /__e/* || echo "Failed to get disk usage"
           du -shx /__w/* || echo "Failed to get disk usage"
           du -shx /__t/* || echo "Failed to get disk usage"
+          du -shx /__t/CodeQL/* || echo "Failed to get disk usage"
