@@ -46,4 +46,4 @@ echo "Collecting docker file structure..."
 docker exec "$MAPDL_INSTANCE" /bin/bash -c "ls -R" > ./"$LOG_NAMES"/docker_files_structure.txt || echo "Failed to copy the docker structure into a local file"
 
 echo "Tar files..."
-tar cvzf ./"$LOG_NAMES".tgz ./"$LOG_NAMES" || echo "Failed to compress"
+tar --remove-files -cvzf ./"$LOG_NAMES".tgz ./"$LOG_NAMES" || echo "Failed to compress"

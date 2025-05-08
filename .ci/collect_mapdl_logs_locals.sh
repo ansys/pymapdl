@@ -16,4 +16,4 @@ mv *.jsonl ./"$LOG_NAMES"/ || echo "No JSONL files could be found"
 ls -la ./"$LOG_NAMES"
 
 echo "Tar files..."
-tar cvzf ./"$LOG_NAMES".tgz ./"$LOG_NAMES" || echo "Failed to compress"
+tar --remove-files -cvzf ./"$LOG_NAMES".tgz ./"$LOG_NAMES" || echo "Failed to compress"
