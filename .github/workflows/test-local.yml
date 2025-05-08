@@ -132,36 +132,12 @@ jobs:
         password: ${{ secrets.token }}
 
     steps:
-      - name: "Show space consumption"
+      - name: "Freeing some space and show space consumption (pre-test)"
         shell: bash
         run: |
-          echo "Disk space:"
-          df -h
-
-          echo ""
-          echo "Disk usage"
-          echo "=========="
-          echo "Disk usage in current directory:"
-          du -shx . || echo "Failed to get disk usage"
-
-          echo "Disk usage in /home:"
-          du -shx /home/* || echo "Failed to get disk usage"
-
-          echo "Disk usage root /:"
-          du -shx /* || echo "Failed to get disk usage"
-
-          echo "Disk usage in /usr:"
-          du -shx /usr/* || echo "Failed to get disk usage"
-
-          echo "Disk usage for the runner:"
-          du -shx /__e/* || echo "Failed to get disk usage"
-          du -shx /__w/* || echo "Failed to get disk usage"
-          du -shx /__t/* || echo "Failed to get disk usage"
-          du -shx /__t/CodeQL/* || echo "Failed to get disk usage"
-
           echo "Deleting CodeQL..."
-          rm -rf /__t/CodeQL
-          
+          rm -rf /__t/CodeQL || echo "CodeQL not found"
+
           echo "Disk space:"
           df -h
 
@@ -322,28 +298,9 @@ jobs:
           name: ${{ inputs.file-name }}.xml
           path: ./${{ inputs.file-name }}.xml
 
-      - name: "Show space consumption"
+      - name: "Show space consumption (post-test)"
+        if: always()
         shell: bash
         run: |
           echo "Disk space:"
           df -h
-          echo ""
-          echo "Disk usage"
-          echo "=========="
-          echo "Disk usage in current directory:"
-          du -shx * || echo "Failed to get disk usage"
-
-          echo "Disk usage in /home:"
-          du -shx /home/* || echo "Failed to get disk usage"
-
-          echo "Disk usage root /:"
-          du -shx /* || echo "Failed to get disk usage"
-
-          echo "Disk usage in /usr:"
-          du -shx /usr/* || echo "Failed to get disk usage"
-
-          echo "Disk usage for the runner:"
-          du -shx /__e/* || echo "Failed to get disk usage"
-          du -shx /__w/* || echo "Failed to get disk usage"
-          du -shx /__t/* || echo "Failed to get disk usage"
-          du -shx /__t/CodeQL/* || echo "Failed to get disk usage"
