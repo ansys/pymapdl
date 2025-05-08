@@ -255,7 +255,7 @@ directory = "doc/changelog.d"
 filename = "doc/source/changelog.rst"
 template = "doc/changelog.d/changelog_template.jinja"
 start_string = ".. towncrier release notes start\n"
-title_format = "\n.. _{version}:\n\n`{version} <https://github.com/ansys/pymapdl/releases/tag/v{version}>`_ - {project_date}"
+title_format = "\n.. _v{version}:\n\n`{version} <https://github.com/ansys/pymapdl/releases/tag/v{version}>`_ - {project_date}"
 
 issue_format = "`#{issue} <https://github.com/ansys/pymapdl/pull/{issue}>`_"
 
