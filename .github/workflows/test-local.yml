@@ -159,8 +159,11 @@ jobs:
           du -shx /__t/* || echo "Failed to get disk usage"
           du -shx /__t/CodeQL/* || echo "Failed to get disk usage"
 
-          echo "Deleting CodeQL"
+          echo "Deleting CodeQL..."
           rm -rf /__t/CodeQL
+          
+          echo "Disk space:"
+          df -h
 
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.2.2
