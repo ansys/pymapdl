@@ -54,7 +54,7 @@ runs:
       if: ${{ env.HAS_FILES == 'true' }}
       shell: bash
       run: |
-        find . -mindepth 1 -maxdepth 4 -type f -name 'logs-*.tgz' -exec tar -xzvf {} -C $(dirname {}) \;
+        find . -mindepth 1 -maxdepth 4 -type f -name 'reports-*.tgz' -exec tar -xzvf {} -C $(dirname {}) \;
 
     - name: "List directories"
       if: ${{ env.HAS_FILES == 'true' }}

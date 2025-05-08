@@ -213,11 +213,11 @@ jobs:
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml
 
-      - name: "Upload logs to GitHub"
+      - name: "Upload pytest reports to GitHub"
         if: always()
         uses: actions/upload-artifact@v4.6.2
         with:
-          name: ${{ inputs.file-name }}.jsonl
+          name: "reports-${{ inputs.file-name }}"
           path: ./${{ inputs.file-name }}.jsonl
 
       - uses: codecov/codecov-action@v5
