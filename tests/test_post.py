@@ -214,18 +214,55 @@ class Test_static_solve(TestClass):
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    def test_disp_plot_subselection(mapdl, resume, verify_image_cache):
-        verify_image_cache.skip = True  # skipping image verification
+    def test_disp_plot_subselection(mapdl, resume):
+        mapdl.nsel("S", "NODE", vmin=500, vmax=503, mute=True)
+        mapdl.esel("S", "ELEM", vmin=500, vmax=510, mute=True)
 
-        mapdl.nsel("S", "NODE", vmin=500, vmax=2000, mute=True)
-        mapdl.esel("S", "ELEM", vmin=500, vmax=2000, mute=True)
-        assert (
-            mapdl.post_processing.plot_nodal_displacement(
-                "X", smooth_shading=True, show_node_numbering=True
-            )
-            is None
+        pl = mapdl.post_processing.plot_nodal_displacement(
+            "X",
+            smooth_shading=True,
+            show_node_numbering=True,
+            return_plotter=True,
         )
-        mapdl.allsel()
+
+        assert pl.show() is None
+
+    @staticmethod
+    @requires("ansys-tools-visualization_interface")
+    def test_uncomplete_element_plotting(mapdl, resume):
+        enums = mapdl.esel("S", "ELEM", vmin=500, vmax=510)
+        mapdl.nsel("s", "node", vmin=50, vmax=60)
+
+        pl = mapdl.post_processing.plot_element_displacement(
+            "X",
+            smooth_shading=True,
+            show_node_numbering=True,
+            return_plotter=True,
+        )
+
+        mesh = pl.meshes[0]
+        elem_ids = np.unique(mesh.cell_data["ansys_elem_num"])
+
+        # assert no state change
+        assert mapdl.mesh.n_elem == len(enums)
+
+        assert np.allclose(elem_ids, enums)
+
+    @staticmethod
+    @requires("ansys-tools-visualization_interface")
+    def test_uncomplete_nodal_plotting(mapdl, resume):
+        nnums = mapdl.nsel("S", "node", vmin=500, vmax=510)
+
+        pl = mapdl.post_processing.plot_nodal_displacement(
+            "X",
+            smooth_shading=True,
+            show_node_numbering=True,
+            return_plotter=True,
+        )
+
+        # assert no state change
+        assert mapdl.mesh.n_node == len(nnums)
+        assert np.allclose(mapdl.mesh.nnum, nnums)
 
     @staticmethod
     def test_nodal_eqv_stress(mapdl, resume):
@@ -1285,8 +1322,9 @@ def test_meta_post_plot_docstrings():
                     ), f"The argument '{each_}' in '{meth.__name__}' is not in its docstring."
 
             assert (
-                "If ``vkt=True`` (default), this function uses" in docstring
-            ), f"'vtk=True' part not found in {meth.__name__}"
+                "If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses"
+                in docstring
+            ), f"'graphics_backend=GraphicsBackend.PYVISTA' part not found in {meth.__name__}"
             assert (
                 len(
                     re.findall(

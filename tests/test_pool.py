@@ -177,7 +177,6 @@ class TestMapdlPool:
 
     @skip_if_ignore_pool
     @requires("local")
-    @pytest.mark.xfail(reason="Flaky test. See #2435")
     def test_map_timeout(self, pool):
         pool_sz = len(pool)
 
@@ -320,6 +319,10 @@ class TestMapdlPool:
         "ansys.mapdl.core.pool.MapdlPool.__del__",
         lambda *args, **kwargs: None,
     )
+    @patch(
+        "ansys.mapdl.core.pool.MapdlPool.exit",
+        lambda *args, **kwargs: None,
+    )
     def test_directory_names_function(self, tmpdir):
         def myfun(i):
             if i == 0:
@@ -336,7 +339,7 @@ class TestMapdlPool:
             names=myfun,
             run_location=tmpdir,
             additional_switches=QUICK_LAUNCH_SWITCHES,
-            wait=False,
+            wait=True,
             restart_failed=False,
         )
 
@@ -344,6 +347,9 @@ class TestMapdlPool:
         assert "instance_zero" in dirs_path_pool
         assert "instance_one" in dirs_path_pool
         assert "Other_instance" in dirs_path_pool
+
+        pool.exit()
+        del pool
 
     def test_num_instances(self):
         with pytest.raises(ValueError, match="least 1 instance"):

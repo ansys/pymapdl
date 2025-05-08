@@ -26,7 +26,6 @@
 #
 import logging
 import os
-import sys
 from typing import Dict, List, Tuple
 from warnings import warn
 
@@ -73,7 +72,9 @@ _HAS_PYANSYS_REPORT: bool = is_installed("ansys.tools.report")
 _HAS_PYVISTA: bool = is_installed("pyvista")
 _HAS_REQUESTS: bool = is_installed("requests")
 _HAS_TQDM: bool = is_installed("tqdm")
-_HAS_VISUALIZER: bool = is_installed("ansys.tools.visualization_interface")
+_HAS_VISUALIZER: bool = is_installed(
+    "ansys.tools.visualization_interface"
+) and is_installed("matplotlib")
 
 
 # Setup directories
@@ -133,6 +134,3 @@ if _HAS_ATP:
         get_mapdl_path,
         save_ansys_path,
     )
-
-if _HAS_VISUALIZER:
-    from ansys.tools.visualization_interface import Plotter
