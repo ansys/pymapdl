@@ -67,6 +67,15 @@ jobs:
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
 
     steps:
+      - name: "Freeing some space and show space consumption (pre-test)"
+        shell: bash
+        run: |
+          echo "Deleting CodeQL..."
+          rm -rf /__t/CodeQL || echo "CodeQL not found"
+
+          echo "Disk space:"
+          df -h
+
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.2.2
 
@@ -264,3 +273,10 @@ jobs:
         shell: bash
         run: |
           .ci/display_logs_remote.sh
+
+      - name: "Show space consumption (post-test)"
+        if: always()
+        shell: bash
+        run: |
+          echo "Disk space:"
+          df -h
