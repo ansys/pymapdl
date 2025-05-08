@@ -65,10 +65,19 @@ jobs:
       DPF_PORT: 21004
       DPF_START_SERVER: False
       HAS_DPF: True
-      PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile'
+      PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests'
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
 
     steps:
+      - name: "Freeing some space and show space consumption (pre-test)"
+        shell: bash
+        run: |
+          echo "Deleting CodeQL..."
+          rm -rf /__t/CodeQL || echo "CodeQL not found"
+
+          echo "Disk space:"
+          df -h
+
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.2.2
 
@@ -266,3 +275,10 @@ jobs:
         shell: bash
         run: |
           .ci/display_logs_remote.sh
+
+      - name: "Show space consumption (post-test)"
+        if: always()
+        shell: bash
+        run: |
+          echo "Disk space:"
+          df -h
