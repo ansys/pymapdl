@@ -153,6 +153,11 @@ jobs:
           echo "Disk usage in /usr:"
           du -shx /usr/* || echo "Failed to get disk usage"
 
+          echo "Disk usage for the runner:"
+          du -shx /__e/* || echo "Failed to get disk usage"
+          du -shx /__w/* || echo "Failed to get disk usage"
+          du -shx /__t/* || echo "Failed to get disk usage"
+
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.2.2
         with:
@@ -329,3 +334,8 @@ jobs:
 
           echo "Disk usage in /usr:"
           du -shx /usr/* || echo "Failed to get disk usage"
+
+          echo "Disk usage for the runner:"
+          du -shx /__e/* || echo "Failed to get disk usage"
+          du -shx /__w/* || echo "Failed to get disk usage"
+          du -shx /__t/* || echo "Failed to get disk usage"
