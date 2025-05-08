@@ -2465,7 +2465,6 @@ def test_graphics_backend(mapdl, cleared):
 
 
 @requires("local")
-@pytest.mark.xfail(reason="Flaky test. See #2435")
 def test_remove_temp_dir_on_exit(mapdl, cleared, tmpdir):
     path = os.path.join(tempfile.gettempdir(), "ansys_" + random_string())
     os.makedirs(path)
@@ -2486,7 +2485,6 @@ def test_remove_temp_dir_on_exit(mapdl, cleared, tmpdir):
 
 @requires("local")
 @requires("nostudent")
-@pytest.mark.xfail(reason="Flaky test. See #2435")
 def test_remove_temp_dir_on_exit_with_launch_mapdl(mapdl, cleared):
 
     mapdl_2 = launch_mapdl(remove_temp_dir_on_exit=True, port=PORT1)
