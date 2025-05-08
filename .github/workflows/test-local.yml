@@ -250,6 +250,13 @@ jobs:
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml
 
+      - name: "Upload logs to GitHub"
+        if: always()
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: ${{ inputs.file-name }}.jsonl
+          path: ./${{ inputs.file-name }}.jsonl
+
       - name: "Collect logs on failure"
         if: always()
         env:
@@ -260,7 +267,7 @@ jobs:
 
       - name: "Upload logs to GitHub"
         if: always()
-        uses: actions/upload-artifact@master
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: logs-${{ inputs.file-name }}.tgz
           path: ./logs-${{ inputs.file-name }}.tgz

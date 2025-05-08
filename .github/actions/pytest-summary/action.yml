@@ -30,6 +30,7 @@ runs:
     - name: "Download artifacts"
       uses: actions/download-artifact@v4
       with:
+        pattern: "*.jsonl"
         path: "artifacts"
 
     - name: "Check if artifacts directory has files"
