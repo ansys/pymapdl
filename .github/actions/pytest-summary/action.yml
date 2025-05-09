@@ -67,8 +67,11 @@ runs:
       shell: bash
       run: |
         echo "# Test summary 🚀" >>  $GITHUB_STEP_SUMMARY
-        echo -e "The followin tables show a summary of tests duration and standard desviation for all the jobs.\n" >>  $GITHUB_STEP_SUMMARY
+        echo -e "The following tables show a summary of tests duration and standard deviation for all the jobs.\n" >>  $GITHUB_STEP_SUMMARY
+        echo -e "You have the duration of all tests in the artifact 'tests_durations.json'\n" >>  $GITHUB_STEP_SUMMARY
+        echo "Running Pytest summary..."
         python .ci/pytest_summary.py --num 10 --save-file tests_durations.json >> summary.md
+        echo "Pytest summary done."
         echo "$(cat summary.md)" >> $GITHUB_STEP_SUMMARY
         cat summary.md
 
