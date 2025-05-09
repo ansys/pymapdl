@@ -46,7 +46,7 @@ class MapdlInProcess(MapdlBase):
     def __init__(self, in_process_backend: _Backend):
         super().__init__(
             loglevel="WARNING",
-            graphics_backend=GraphicsBackend.MAPDL,
+            graphics_backend=None,
             log_apdl=None,
             print_com=False,
         )
