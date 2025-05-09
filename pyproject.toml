@@ -68,7 +68,7 @@ tests = [
     "ansys-dpf-core==0.13.6",
     "ansys-tools-visualization-interface==0.9.1",
     "autopep8==2.3.2",
-    "matplotlib==3.10.1",
+    "matplotlib==3.10.3",
     "pandas==2.2.3",
     "pyansys-tools-report==0.8.2",
     "pyfakefs==5.8.0",
@@ -81,7 +81,7 @@ tests = [
     "pytest-rerunfailures==15.0",
     "pytest-timeout==2.3.1",
     "pytest==8.3.5",
-    "scipy==1.15.2",
+    "scipy==1.15.3",
     "vtk==9.4.2",
 ]
 
@@ -96,7 +96,7 @@ doc = [
     "jupyter_sphinx==0.5.3",
     "jupyter==1.1.1",
     "jupyterlab>=3.2.8",
-    "matplotlib==3.10.1",
+    "matplotlib==3.10.3",
     "nbformat==5.10.4",
     "numpydoc==1.8.0",
     "pandas==2.2.3",
