@@ -23,7 +23,6 @@
 from typing import Protocol
 
 from ansys.mapdl.core.mapdl import MapdlBase
-from ansys.mapdl.core.plotting import GraphicsBackend
 
 
 class _Backend(Protocol):
