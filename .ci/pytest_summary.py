@@ -1,16 +1,23 @@
 import json
 import os
+from typing import Any, TypedDict
 
 import click
 import numpy as np
+from numpy.typing import NDArray
 
 BIG_WIDTH = 80
 SMALL_WIDTH = 8
 
 
-def find_json_files(base_dir):
+class TEST_STATS_TYPE(TypedDict):
+    durations: list[str | float]
+    n_tests: int
+
+
+def find_json_files(base_dir: str) -> list[str]:
     """Recursively find all JSON files in subdirectories."""
-    json_files = []
+    json_files: list[str] = []
     for root, _, files in os.walk(base_dir):
         for file in files:
             if file.endswith(".jsonl"):
@@ -18,7 +25,7 @@ def find_json_files(base_dir):
     return json_files
 
 
-def read_json_file(file_path):
+def read_json_file(file_path: str) -> list[dict[str, str]]:
     """Read a JSON file and return its content as a list of test configurations."""
     with open(file_path, "r", encoding="utf-8") as f:
         try:
@@ -29,9 +36,9 @@ def read_json_file(file_path):
             return []
 
 
-def extract_tests_with_tags(json_files):
+def extract_tests_with_tags(json_files: list[str]) -> list[dict[str, str | list[str]]]:
     """Extract test data and assign a tag based on the directory name."""
-    tests = []
+    tests: list[dict[str, str | list[str]]] = []
 
     for file_path in json_files:
         directory_name = os.path.basename(os.path.dirname(file_path))
@@ -39,14 +46,18 @@ def extract_tests_with_tags(json_files):
 
         for test in test_data:
             if test.get("outcome", "").lower() == "passed" and test.get("duration"):
-                nodeid = test.get("nodeid")
+                nodeid: str = test.get("nodeid", "")
+
                 if nodeid.startswith("tests/"):
                     nodeid = nodeid[6:]
 
-                when = test.get("when")
-                duration = test["duration"]
-                tags = directory_name.split("-")
-                tags.remove("logs")
+                when: str = test.get("when", "")
+                duration: str = test["duration"]
+                tags: list[str] = directory_name.split("-")
+
+                if "logs" in tags:
+                    tags.remove("logs")
+
                 id_ = f"{nodeid}({when})"
 
                 tests.append(
@@ -61,12 +72,14 @@ def extract_tests_with_tags(json_files):
     return tests
 
 
-def compute_statistics(tests):
+def compute_statistics(
+    tests: list[dict[str, str | list[str]]],
+) -> list[dict[str, str | float]]:
     """Compute average duration and standard deviation per test ID."""
-    test_stats = {}
+    test_stats: dict[str, TEST_STATS_TYPE] = {}
 
     for test in tests:
-        test_id = test["id"]
+        test_id: str = test["id"]
         if test_id not in test_stats:
             test_stats[test_id] = {
                 "durations": [],
@@ -76,10 +89,10 @@ def compute_statistics(tests):
         test_stats[test_id]["durations"].append(test["duration"])
         test_stats[test_id]["n_tests"] += 1
 
-    summary = []
+    summary: list[dict[str, Any]] = []
 
     for test_id, data in test_stats.items():
-        durations = np.array(data["durations"])
+        durations: NDArray[Any] = np.array(data["durations"])
 
         if durations.size == 0:
             continue
@@ -119,10 +132,15 @@ def compute_statistics(tests):
     return summary
 
 
-def print_table(data, keys, headers, title=""):
+def print_table(
+    data: list[dict[str, str | float]],
+    keys: list[str],
+    headers: list[str],
+    title: str = "",
+):
     JUNCTION = "|"
 
-    def make_bold(s):
+    def make_bold(s: str) -> str:
         return click.style(s, bold=True)
 
     h = [headers[0].ljust(BIG_WIDTH)]
@@ -135,7 +153,7 @@ def print_table(data, keys, headers, title=""):
         + f"-{JUNCTION}-".join(["-" * len(each) for each in h])
         + f"-{JUNCTION}"
     )
-    top_sep = f"{JUNCTION}" + "-" * (len_h - 2) + f"{JUNCTION}"
+    # top_sep: str = f"{JUNCTION}" + "-" * (len_h - 2) + f"{JUNCTION}"
 
     if title:
         # click.echo(top_sep)
@@ -148,17 +166,17 @@ def print_table(data, keys, headers, title=""):
     click.echo(sep)
 
     for test in data:
-        s = []
+        s: list[str] = []
         for i, each_key in enumerate(keys):
 
             if i == 0:
-                id_ = test[each_key]
+                id_: str = test[each_key]
 
                 id_ = (
-                    id_.replace("(", "\(")
-                    .replace(")", "\)")
-                    .replace("[", "\[")
-                    .replace("]", "\]")
+                    id_.replace("(", r"(")
+                    .replace(")", r")")
+                    .replace("[", r"[")
+                    .replace("]", r"]")
                 )
                 if len(id_) >= BIG_WIDTH:
                     id_ = id_[: BIG_WIDTH - 15] + "..." + id_[-12:]
@@ -177,7 +195,7 @@ def print_table(data, keys, headers, title=""):
     # click.echo(sep)
 
 
-def print_summary(summary, num=10):
+def print_summary(summary: list[dict[str, str | float]], num: int = 10):
     """Print the top N longest tests and the top N most variable tests."""
     longest_tests = sorted(summary, key=lambda x: -x["average_duration"])[:num]
     most_variable_tests = sorted(summary, key=lambda x: -x["std_dev"])[:num]
@@ -225,15 +243,20 @@ def print_summary(summary, num=10):
     default=None,
 )
 @click.option(
-    "--num", default=10, help="Number of top tests to display.", show_default=True
+    "--num",
+    type=int,
+    default=10,
+    help="Number of top tests to display.",
+    show_default=True,
 )
 @click.option(
     "--save-file",
     default=None,
+    type=click.Path(exists=False, dir_okay=False),
     help="File to save the test durations. Default 'tests_durations.json'.",
     show_default=True,
 )
-def analyze_tests(directory, num, save_file):
+def analyze_tests(directory: str, num: int, save_file: str):
     directory = directory or os.getcwd()  # Change this to your base directory
     json_files = find_json_files(directory)
     tests = extract_tests_with_tags(json_files)
