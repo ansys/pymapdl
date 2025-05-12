@@ -18,6 +18,13 @@ on:
         required: true
         type: string
 
+      python-version:
+        description: |
+          Python version to use.
+        required: false
+        type: string
+        default: "3.12"
+
     secrets:
       username:
         description: |
@@ -56,11 +63,19 @@ jobs:
       PYMAPDL_DB_PORT2: 21003  # default won't work on GitHub runners
       DPF_PORT: 21004
       DPF_START_SERVER: False
-      PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile'
-      MAIN_PYTHON_VERSION: '3.12'
+      PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests'
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
 
     steps:
+      - name: "Freeing some space and show space consumption (pre-test)"
+        shell: bash
+        run: |
+          echo "Deleting CodeQL..."
+          rm -rf /__t/CodeQL || echo "CodeQL not found"
+
+          echo "Disk space:"
+          df -h
+
       - name: "Install Git and checkout project"
         uses: actions/checkout@v4.2.2
 
@@ -149,13 +164,13 @@ jobs:
         if:  steps.changes.outputs.workflows != 'true'
         with:
           cache: 'pip'
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+          python-version: ${{ inputs.python-version }}
 
       - name: "Setup Python without cache"
         uses: actions/setup-python@v5
         if: steps.changes.outputs.workflows == 'true'
         with:
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+          python-version: ${{ inputs.python-version }}
 
       - name: "Install os packages"
         shell: bash
@@ -207,6 +222,13 @@ jobs:
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml
 
+      - name: "Upload pytest reports to GitHub"
+        if: always()
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: "reports-${{ inputs.file-name }}"
+          path: ./${{ inputs.file-name }}.jsonl
+
       - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
         with:
@@ -215,7 +237,7 @@ jobs:
           flags: remote,${{ steps.ubuntu_check.outputs.TAG_UBUNTU }},${{ inputs.mapdl-version }},${{ steps.distributed_mode.outputs.distributed_mode }},${{ steps.student_check.outputs.TAG_STUDENT }}
 
       - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: "${{ inputs.file-name }}.xml"
           path: "./${{ inputs.file-name }}.xml"
@@ -227,7 +249,7 @@ jobs:
           twine check dist/*
 
       - name: "Upload wheel and binaries"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: PyMAPDL-packages-${{ inputs.mapdl-version }}
           path: dist/
@@ -245,7 +267,7 @@ jobs:
 
       - name: "Upload logs to GitHub"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: logs-${{ inputs.file-name }}.tgz
           path: ./logs-${{ inputs.file-name }}.tgz
@@ -258,3 +280,10 @@ jobs:
         shell: bash
         run: |
           .ci/display_logs_remote.sh
+
+      - name: "Show space consumption (post-test)"
+        if: always()
+        shell: bash
+        run: |
+          echo "Disk space:"
+          df -h

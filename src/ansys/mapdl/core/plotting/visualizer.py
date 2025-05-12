@@ -22,7 +22,7 @@
 
 """Module for the MapdlPlotter class."""
 from collections import OrderedDict
-from typing import Any, Dict, Iterable, Optional, Union
+from typing import Any, Callable, Dict, Iterable, Optional, Union
 
 from ansys.tools.visualization_interface import Plotter
 from ansys.tools.visualization_interface.backends.pyvista import PyVistaBackendInterface
@@ -43,12 +43,22 @@ from ansys.mapdl.core.plotting.consts import (
 )
 from ansys.mapdl.core.plotting.theme import MapdlTheme
 
+_FIRST_USE_RUN = False
+
 if _HAS_VISUALIZER:
     import pyvista as pv
 
-    from ansys.mapdl.core.plotting.plotting_defaults import DefaultSymbol
 
-    BC_plot_settings = DefaultSymbol()
+def _first_use():
+    # Run first time we use the visualizer
+    global _FIRST_USE_RUN
+    if _FIRST_USE_RUN is True:
+        return
+    if _HAS_VISUALIZER:
+        from ansys.mapdl.core.plotting.theme import _apply_default_theme
+
+        _apply_default_theme()
+    _FIRST_USE_RUN = True
 
 
 class MapdlPlotterBackend(PyVistaBackendInterface):
@@ -115,6 +125,7 @@ class MapdlPlotter(Plotter):
         self, use_trame: bool = False, theme: pv.Plotter.theme = None, **plotter_kwargs
     ):
         """Initialize the ``MapdlPlotter`` class."""
+        _first_use()
         self._backend = MapdlPlotterBackend(use_trame=use_trame, **plotter_kwargs)
         super().__init__(backend=self._backend)
         self._theme = theme
@@ -124,6 +135,19 @@ class MapdlPlotter(Plotter):
         self._notebook = None
         self._savefig = None
         self._title = None
+        self._bc_settings = None
+
+    @property
+    def bc_settings(self) -> Callable:
+        """Get the boundary condition settings object."""
+        if self._bc_settings is None:
+            self._make_bc_settings()
+        return self._bc_settings
+
+    def _make_bc_settings(self) -> None:
+        from ansys.mapdl.core.plotting.plotting_defaults import DefaultSymbol
+
+        self._bc_settings = DefaultSymbol()
 
     def _bc_labels_checker(self, bc_labels):
         """Make sure we have allowed parameters and data types for ``bc_labels``"""
@@ -587,13 +611,13 @@ class MapdlPlotter(Plotter):
                 orient=False,
                 scale="scale",
                 # tolerance=0.05,
-                geom=BC_plot_settings(each_label)["glyph"],
+                geom=self.bc_settings(each_label)["glyph"],
             )
             name_ = f"{each_label}"
             self.scene.add_mesh(
                 glyphs,
                 # name_filter=None,
-                color=BC_plot_settings(each_label)["color"],
+                color=self.bc_settings(each_label)["color"],
                 style="surface",
                 # style='wireframe',
                 # line_width=3,
@@ -644,11 +668,11 @@ class MapdlPlotter(Plotter):
                     # something it can be seen properly in the legend
                     label_ = value[1]
                     if "U" in label_:
-                        value = [BC_plot_settings("UY")["glyph"], label_, value[2]]
+                        value = [self.bc_settings("UY")["glyph"], label_, value[2]]
                     elif "F" in label_:
-                        value = [BC_plot_settings("FX")["glyph"], label_, value[2]]
+                        value = [self.bc_settings("FX")["glyph"], label_, value[2]]
                     else:
-                        value = [BC_plot_settings(label_)["glyph"], label_, value[2]]
+                        value = [self.bc_settings(label_)["glyph"], label_, value[2]]
 
                     if symbol == value[1]:
                         sorted_dict[key] = value
@@ -853,7 +877,7 @@ class MapdlPlotter(Plotter):
 
         else:
             if not return_plotter:
-                self._backend.show()
+                self._backend.show(**kwargs)
 
         if return_plotter:
             return self

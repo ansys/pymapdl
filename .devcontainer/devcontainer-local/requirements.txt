@@ -1,8 +1,8 @@
 
-ansys-dpf-core==0.10.1
-ansys-mapdl-reader==0.54.2
-ansys-sphinx-theme==1.4.2
-ansys-tools-visualization-interface==0.8.3
+ansys-dpf-core==0.13.6
+ansys-mapdl-reader==0.55.0
+ansys-sphinx-theme==1.4.4
+ansys-tools-visualization-interface==0.9.1
 autopep8==2.3.2
 grpcio==1.70.0
 imageio-ffmpeg==0.6.0
