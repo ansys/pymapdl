@@ -12,62 +12,188 @@ on:
         required: true
         type: number
 
+permissions:
+  contents: write
+  pull-requests: read
+
 jobs:
-  recreate:
+  migrate:
     if: |
        (
         github.event.issue.pull_request != null &&
-        contains(github.event.comment.body, '@pyansys-ci-bot migrate') &&
-        github.event.comment.user.login == 'germa89' 
+        (contains(github.event.comment.body, '@pyansys-ci-bot migrate') || contains(github.event.comment.body, '@pyansys-ci-bot sync') )
         ) || ( github.event_name == 'workflow_dispatch' )
     runs-on: ubuntu-latest
     steps:
-      - name: "Configuration"
-        id: config
+
+      - name: Determine PR Number and user triggering the workflow
+        id: pr_number
         run: |
-          if [[ ${{ github.event_name }} == "workflow_dispatch" ]] ; then
-            echo "On workflow dispatch"
-            echo "issue_number=${{ inputs.issue_number }}" >> $GITHUB_OUTPUT
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "PR_NUMBER=${{ github.event.inputs.issue_number }}" >> $GITHUB_ENV
+            echo "USER_TRIGGERING=${{ github.actor }}" >> $GITHUB_ENV
           else
-            echo "On ${{ github.event_name }}"
-            echo "issue_number=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
-          fi;
+            echo "PR_NUMBER=${{ github.event.issue.number }}" >> $GITHUB_ENV
+            echo "USER_TRIGGERING=${{ github.event.comment.user.login }}" >> $GITHUB_ENV
+          fi
+
+      - uses: tspascoal/get-user-teams-membership@v3
+        id: is_organization_member
+        with:
+          username: ${{ env.USER_TRIGGERING }}
+          organization: ansys
+          team: 'pymapdl-maintainers'
+          GITHUB_TOKEN: ${{ secrets.TOKEN_TEAMS_USER_READ }}
 
       - name: React to comment
-        if : ${{ github.event_name == 'issue_comment' }}
+        if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' && github.event_name == 'issue_comment' }}
         uses: dkershner6/reaction-action@v2
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-          commentId: ${{ github.event.comment.id }} # Optional if the trigger is a comment. Use another action to find this otherwise.
-          reaction: "rocket"
+          commentId: ${{ github.event.comment.id }}
+          reaction: "+1"
 
-      - name: Get PR info
+      - name: React to comment
+        if : ${{ steps.is_organization_member.outputs.isTeamMember == 'false' && github.event_name == 'issue_comment' }}
+        uses: dkershner6/reaction-action@v2
+        with:
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          commentId: ${{ github.event.comment.id }}
+          reaction: "-1"
+
+      - name: Get PR details
         id: pr
+        if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
         uses: octokit/request-action@v2.x
         with:
-          route: GET /repos/${{ github.repository }}/pulls/${{ steps.config.outputs.issue_number }}
+          route: GET /repos/${{ github.repository }}/pulls/${{ env.PR_NUMBER }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Clone PR branch from fork
+      - name: Parse PR data
+        id: extract
+        if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
         run: |
-          PR_HEAD_REPO=${{ github.event.pull_request.head.repo.full_name }}
-          PR_HEAD_REF=${{ steps.pr.outputs.data.head.ref }}
-          NEW_BRANCH=migrated/pr-${{ steps.config.outputs.issue_number }}
+          PR_HEAD_BRANCH="${{ fromJson(steps.pr.outputs.data).head.ref }}"
+          echo "PR_HEAD_BRANCH=$PR_HEAD_BRANCH" >> $GITHUB_ENV
 
-          git clone $PR_HEAD_REPO pr-source
-          cd pr-source
-          git checkout $PR_HEAD_REF
+          PR_HEAD_REPO="${{ fromJson(steps.pr.outputs.data).head.repo.full_name }}"
+          echo "PR_HEAD_REPO=$PR_HEAD_REPO" >> $GITHUB_ENV
+
+          PR_BASE_BRANCH="migration3/pr-${{ env.PR_NUMBER }}"
+          echo "PR_BASE_BRANCH=$PR_BASE_BRANCH" >> $GITHUB_ENV
+          PR_BASE_REPO="${{ github.repository }}"
+          echo "PR_BASE_REPO=$PR_BASE_REPO" >> $GITHUB_ENV
+
+      - name: Checkout repo
+        if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
+        uses: actions/checkout@v4
+
+      - name: Clone head repo and checkout branch
+        if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+        run: |
           git config --global user.name "${{ secrets.PYANSYS_CI_BOT_USERNAME }}"
           git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
-          git remote add dest https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ github.repository }}.git
-          git push dest HEAD:refs/heads/$NEW_BRANCH
+          git config pull.rebase true
 
-      - name: Create new PR
-        uses: peter-evans/create-pull-request@v7
+          echo "Adding ${{ env.PR_HEAD_REPO }} as remote"
+          git remote add head_repo https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ env.PR_HEAD_REPO }}.git
+
+          echo "Fetching '${{ env.PR_HEAD_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}'"
+          git fetch head_repo ${{ env.PR_HEAD_BRANCH }}
+          git pull head_repo ${{ env.PR_HEAD_BRANCH }}
+
+          echo "Checking out '${{ env.PR_BASE_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}/${{ env.PR_HEAD_BRANCH }}'"
+          git checkout -b ${{ env.PR_BASE_BRANCH }} head_repo/${{ env.PR_HEAD_BRANCH }}
+
+          echo "Merging '${{ env.PR_HEAD_BRANCH }}' branch into '${{ env.PR_BASE_BRANCH }}'"
+          git merge head_repo/${{ env.PR_HEAD_BRANCH }}
+          CONFLICTS=$(git ls-files -u | wc -l)
+          echo "CONFLICTS=$CONFLICTS"
+
+          if [ "$CONFLICTS" -gt 0 ]; then
+            echo "Merge conflicts detected: $CONFLICTS files"
+
+            # Show conflicting files
+            git status
+
+            # Resolve conflicts by taking "theirs" changes (optional, depending on your strategy)
+            echo "Resolving conflicts by taking 'theirs' changes"
+            git checkout --theirs .
+            git add .
+
+            # Verify if conflicts are resolved
+            REMAINING_CONFLICTS=$(git ls-files -u | wc -l)
+            if [ "$REMAINING_CONFLICTS" -gt 0 ]; then
+              echo "Error: Conflicts remain after resolution. Aborting."
+              exit 1
+            fi
+
+            # Continue the merge
+            git merge --continue || { echo "Merge failed. Aborting."; exit 1; }
+          else
+            echo "No merge conflicts detected."
+          fi
+
+          echo "Pushing changes to '${{ env.PR_BASE_REPO }}' repo"
+          git push origin ${{ env.PR_BASE_BRANCH }} --force-with-lease || { echo "Push failed. Aborting."; exit 1; }
+
+      - name: Opening PR if needed.
+        if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+        run: |
+          BASE_PR_NUMBER=$(gh pr list --head ${{ env.PR_BASE_BRANCH }} --state open --json number --jq '.[0].number')
+          echo "BASE_PR_NUMBER=$BASE_PR_NUMBER" >> $GITHUB_ENV
+
+          if [[ -n "$BASE_PR_NUMBER" ]]; then
+            echo "Open PR exists for branch '${{ env.PR_BASE_BRANCH }}': PR #$BASE_PR_NUMBER"
+            echo "COMMENT=false" >> $GITHUB_ENV
+
+          else
+            echo "No open PR exists for branch '${{ env.PR_BASE_BRANCH }}'. Creating PR..."
+            echo "COMMENT=true" >> $GITHUB_ENV
+
+            title_pr='chore: migrated PR ${{ env.PR_NUMBER }}'
+            echo -e "\nThis PR was migrated from a fork to allow secrets to run in workflows. Check the [original PR](https://github.com/${{ github.repository }}/pull/${{ env.PR_NUMBER }}) for more details.\n\nCloses #${{ env.PR_NUMBER }}" > body_pr
+
+            NEW_PR=$(gh pr create --head "${{ env.PR_BASE_BRANCH }}" --reviewer ${{ env.USER_TRIGGERING }} --title "$title_pr" --body-file body_pr | grep -o 'github\.com/.*/pull/[0-9]*' | sed -E 's#.*/pull/##')
+            echo "PR created: $NEW_PR"
+            echo "BASE_PR_NUMBER=$NEW_PR" >> $GITHUB_ENV
+
+          fi;
+
+      # Confirm with a reaction
+      - name: React to comment
+        if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' && github.event_name == 'issue_comment' }}
+        uses: dkershner6/reaction-action@v2
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-          title: "Migrated PR #${{ steps.config.outputs.issue_number }}"
-          body: "This PR was migrated from a fork to allow secrets to run in workflows."
-          branch: migrated/pr-${{ steps.config.outputs.issue_number }}
-          base: ${{ steps.pr.outputs.data.base.ref }}
+          commentId: ${{ github.event.comment.id }}
+          reaction: "rocket"
+
+      - name: Create comment
+        if: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' && env.COMMENT == 'true' }}
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ env.PR_NUMBER}}
+          body: |
+            **🚀 Migration completed!**
+
+            The PR [#${{ env.BASE_PR_NUMBER }}](https://github.com/${{ github.repository }}/pull/${{ env.BASE_PR_NUMBER }}) has been created successfully.
+
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+
+      - name: Create comment
+        if: ${{ steps.is_organization_member.outputs.isTeamMember == 'true' && failure() }}
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ env.PR_NUMBER}}
+          body: |
+            **Error**
+
+            An error occurred while migrating and syncing the PR. Please check the action logs for more details.
+
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
