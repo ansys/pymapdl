@@ -226,6 +226,7 @@ linkcheck_ignore = [
     "https://ansyshelp.ansys.com/*",  # behind authentication
     "https://forum.ansys.com/forums/*",  # It is detected as broken
     "https://courses.ansys.com/*",  # It is detected as broken
+    "https://stackoverflow.com/questions/*",  # It is detected as broken
 ]
 linkcheck_anchors_ignore = [
     # these anchors are picked by linkcheck as broken but they are not.
