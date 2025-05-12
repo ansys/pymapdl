@@ -25,19 +25,23 @@
     text-align: center;
 }
 
+/* Centering the page content */
+.bd-main .bd-content {
+    justify-content: center;
+}
+
+/* Removing navbar shadow */
+.sd-shadow-sm {
+        box-shadow: 0 0rem 0rem rgba(250, 250, 250, 0.6) !important
+    }
+
 /* anything related to the light theme */
 html[data-theme="light"] {
     /* whatever you want to change */
-    .sd-shadow-sm {
-        box-shadow: 0 0rem 0rem rgba(250, 250, 250, 0.6) !important
-    }
 }
 
 /* anything related to the dark theme */
 html[data-theme="dark"] {
     /* whatever you want to change */
 
-    .sd-shadow-sm {
-        box-shadow: 0 0rem 0rem rgba(250, 250, 250, 0.6) !important
-    }
 }
