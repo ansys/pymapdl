@@ -1,17 +1,21 @@
-.. _ref_master_dof_commands_api:
 
-*************************
-Master degrees of freedom
-*************************
+.. _ref_master_dof:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SOLUTION commands are used to define master degrees of freedom.
+MasterDof
+=========
+
+
+.. currentmodule:: ansys.mapdl.core._commands.solution.master_dof
+
+.. autoclass:: ansys.mapdl.core._commands.solution.master_dof.MasterDof
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.m
-   Mapdl.mdele
-   Mapdl.mgen
-   Mapdl.mlist
+
+   MasterDof.m
+   MasterDof.mdele
+   MasterDof.mgen
+   MasterDof.mlist
