@@ -144,7 +144,7 @@ jobs:
           export INSTANCE_NAME=MAPDL_1
           .ci/start_mapdl.sh &> mapdl_launch_1.log & export DOCKER_PID_1=$!
           echo "Launching MAPDL service 0 at PID: $DOCKER_PID_0"
-          echo "Launching MAPDL service 1 at PID: $DOCKER_PID_2"
+          echo "Launching MAPDL service 1 at PID: $DOCKER_PID_1"
           echo "DOCKER_PID_0=$(echo $DOCKER_PID_0)" >> $GITHUB_OUTPUT
           echo "DOCKER_PID_1=$(echo $DOCKER_PID_1)" >> $GITHUB_OUTPUT
 
@@ -153,7 +153,7 @@ jobs:
         env:
           ANSYS_DPF_ACCEPT_LA: Y
         run: |
-          docker pull $DPF_DOCKER_IMAGE && docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 $DPF_DOCKER_IMAGE && echo "DPF Server active on port ${{ env.DPF_PORT }}." > log_dpf.txt &
+          docker pull $DPF_DOCKER_IMAGE && docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y -p ${{ env.DPF_PORT }}:50052 $DPF_DOCKER_IMAGE && echo "DPF Server active on port ${{ env.DPF_PORT }}." > log_dpf.txt &
 
       - name: "Getting files change filters"
         uses: dorny/paths-filter@v3
