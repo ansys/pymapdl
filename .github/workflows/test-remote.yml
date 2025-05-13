@@ -226,6 +226,13 @@ jobs:
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml
 
+      - name: "Upload pytest reports to GitHub"
+        if: always()
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: "reports-${{ inputs.file-name }}"
+          path: ./${{ inputs.file-name }}.jsonl
+
       - uses: codecov/codecov-action@v5
         name: "Upload coverage to Codecov"
         with:
@@ -234,7 +241,7 @@ jobs:
           flags: remote,${{ steps.ubuntu_check.outputs.TAG_UBUNTU }},${{ inputs.mapdl-version }},${{ steps.distributed_mode.outputs.distributed_mode }},${{ steps.student_check.outputs.TAG_STUDENT }}
 
       - name: Upload coverage artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: "${{ inputs.file-name }}.xml"
           path: "./${{ inputs.file-name }}.xml"
@@ -246,7 +253,7 @@ jobs:
           twine check dist/*
 
       - name: "Upload wheel and binaries"
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: PyMAPDL-packages-${{ inputs.mapdl-version }}
           path: dist/
@@ -264,7 +271,7 @@ jobs:
 
       - name: "Upload logs to GitHub"
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.2
         with:
           name: logs-${{ inputs.file-name }}.tgz
           path: ./logs-${{ inputs.file-name }}.tgz
