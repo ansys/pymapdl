@@ -228,6 +228,7 @@ linkcheck_ignore = [
     "https://courses.ansys.com/*",  # It is detected as broken
     "https://blog.derlin.ch/genetic-algorithms-with-pygad",  # Error: Too Many Requests for url
     "https://www.mdpi.com/*",  # 403 Client Error: Forbidden for url
+    "https://stackoverflow.com/questions/*",  # It is detected as broken
 ]
 linkcheck_anchors_ignore = [
     # these anchors are picked by linkcheck as broken but they are not.
