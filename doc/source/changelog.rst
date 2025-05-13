@@ -10,6 +10,69 @@ This document contains the release notes for the project.
 .. towncrier release notes start
 
 
+.. _v0.70.1:
+
+`0.70.1 <https://github.com/ansys/pymapdl/releases/tag/v0.70.1>`_ - May 12, 2025
+===============================================================================================
+
+.. tab-set::
+
+
+  .. tab-item:: Added
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - chore: update version to 0.70.dev0 in pyproject.toml
+          - `#3907 <https://github.com/ansys/pymapdl/pull/3907>`_
+
+        * - chore: update CHANGELOG for v0.70.0
+          - `#3913 <https://github.com/ansys/pymapdl/pull/3913>`_
+
+
+  .. tab-item:: Fixed
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - fix: Change the mapdl_inprocess graphics backend
+          - `#3915 <https://github.com/ansys/pymapdl/pull/3915>`_
+
+        * - fix: documentation html looks
+          - `#3918 <https://github.com/ansys/pymapdl/pull/3918>`_
+
+
+  .. tab-item:: Dependencies
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - build: bump the core group with 2 updates
+          - `#3910 <https://github.com/ansys/pymapdl/pull/3910>`_
+
+        * - build: bump the testing group with 2 updates
+          - `#3911 <https://github.com/ansys/pymapdl/pull/3911>`_
+
+
+  .. tab-item:: Maintenance
+
+    .. list-table::
+        :header-rows: 0
+        :widths: auto
+
+        * - feat: add artifact upload steps for JSONL logs in local and remote test workflows
+          - `#3905 <https://github.com/ansys/pymapdl/pull/3905>`_
+
+        * - build: bump platformdirs from 4.3.7 to 4.3.8 in the minimal group
+          - `#3909 <https://github.com/ansys/pymapdl/pull/3909>`_
+
+        * - build: update action versions in CI workflows to latest stable releases
+          - `#3920 <https://github.com/ansys/pymapdl/pull/3920>`_
+
+
 .. _v0.70.0:
 
 `0.70.0 <https://github.com/ansys/pymapdl/releases/tag/v0.70.0>`_ - May 09, 2025
