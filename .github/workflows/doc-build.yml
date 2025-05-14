@@ -72,7 +72,7 @@ jobs:
       PYANSYS_OFF_SCREEN: True
       BUILD_CHEATSHEET: '${{ inputs.build_cheatsheet }}'
       MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.2-ubuntu-student
-      DPF_DOCKER_IMAGE: ghcr.io/ansys/mapdl:v25.2-dpf-standalone
+      DPF_DOCKER_IMAGE: ghcr.io/ansys/mapdl:v25.2-rocky-dpf-standalone
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
       PYMAPDL_START_INSTANCE: FALSE
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
