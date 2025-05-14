@@ -43,7 +43,7 @@ from ._commands import (
     graphics,
     hidden,
     inq_func,
-    map_cmd,
+    map,
     misc,
     post1_,
     post26_,
@@ -426,6 +426,12 @@ class GraphicsCommands(
     pass
 
 
+class MapCommands(
+    map.pressure_mapping.PressureMapping,
+):
+    pass
+
+
 class MiscCommands(misc.misc.Misc):
     pass
 
@@ -527,6 +533,7 @@ class Commands(
     DatabaseCommands,
     DisplayCommands,
     GraphicsCommands,
+    MapCommands,
     MiscCommands,
     Post1Commands,
     Post26Commands,
@@ -536,7 +543,6 @@ class Commands(
     SolutionCommands,
     conn.Conn,
     hidden._Hidden,
-    map_cmd.MapCommand,
     InqFunctions,
 ):
     """Wrapped MAPDL commands"""

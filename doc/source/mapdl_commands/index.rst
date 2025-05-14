@@ -258,7 +258,7 @@ onto the existing geometry.
    :maxdepth: 1
    :caption: MAP
 
-   map
+   map/pressure_mapping
 
 
 ***************
