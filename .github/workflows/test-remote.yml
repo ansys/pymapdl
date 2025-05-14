@@ -61,8 +61,10 @@ jobs:
       PYMAPDL_PORT2: 21001  # for the pool testing and default won't work on GitHub runners
       PYMAPDL_DB_PORT: 21002  # default won't work on GitHub runners
       PYMAPDL_DB_PORT2: 21003  # default won't work on GitHub runners
+      DPF_DOCKER_IMAGE: ghcr.io/ansys/mapdl:v25.2-rocky-dpf-standalone
       DPF_PORT: 21004
       DPF_START_SERVER: False
+      HAS_DPF: True
       PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests'
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
 
@@ -142,14 +144,16 @@ jobs:
           export INSTANCE_NAME=MAPDL_1
           .ci/start_mapdl.sh &> mapdl_launch_1.log & export DOCKER_PID_1=$!
           echo "Launching MAPDL service 0 at PID: $DOCKER_PID_0"
-          echo "Launching MAPDL service 1 at PID: $DOCKER_PID_2"
+          echo "Launching MAPDL service 1 at PID: $DOCKER_PID_1"
           echo "DOCKER_PID_0=$(echo $DOCKER_PID_0)" >> $GITHUB_OUTPUT
           echo "DOCKER_PID_1=$(echo $DOCKER_PID_1)" >> $GITHUB_OUTPUT
 
       - name: "DPF server activation"
         shell: bash
+        env:
+          ANSYS_DPF_ACCEPT_LA: Y
         run: |
-          $(docker pull ghcr.io/ansys/dpf-core:22.2dev && docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}.") &
+          docker pull $DPF_DOCKER_IMAGE && docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y -p ${{ env.DPF_PORT }}:50052 $DPF_DOCKER_IMAGE && echo "DPF Server active on port ${{ env.DPF_PORT }}." > log_dpf.txt &
 
       - name: "Getting files change filters"
         uses: dorny/paths-filter@v3
