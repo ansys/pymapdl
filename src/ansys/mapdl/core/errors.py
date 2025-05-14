@@ -282,6 +282,27 @@ class MapdlgRPCError(MapdlRuntimeError):
         super().__init__(msg)
 
 
+class PluginError(MapdlRuntimeError):
+    """Raised when a plugin fails"""
+
+    def __init__(self, msg=""):
+        super().__init__(msg)
+
+
+class PluginLoadError(PluginError):
+    """Raised when a plugin fails to load"""
+
+    def __init__(self, msg=""):
+        super().__init__(msg)
+
+
+class PluginUnloadError(PluginError):
+    """Raised when a plugin fails to unload"""
+
+    def __init__(self, msg=""):
+        super().__init__(msg)
+
+
 # handler for protect_grpc
 def handler(sig, frame):  # pragma: no cover
     """Pass signal to custom interrupt handler."""
