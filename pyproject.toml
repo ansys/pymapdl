@@ -87,7 +87,7 @@ tests = [
 
 doc = [
     "ansys-dpf-core[graphics]==0.13.6",
-    "ansys-mapdl-reader==0.55.0",
+    "ansys-mapdl-reader==0.55.1",
     "ansys-sphinx-theme==1.4.4",
     "ansys-tools-visualization-interface==0.9.1",
     "grpcio==1.70.0",
