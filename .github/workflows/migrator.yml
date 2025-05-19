@@ -115,6 +115,8 @@ jobs:
       - name: Checkout repo
         if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
         uses: actions/checkout@v4
+        with:
+          ref: main
 
       - name: Clone head repo and checkout branch. Resolve conflicts if needed.
         if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
