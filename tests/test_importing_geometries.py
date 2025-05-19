@@ -77,7 +77,8 @@ def clear_wkdir_from_cads(mapdl):
 ## IGES
 #
 def test_readin_igs(mapdl, cleared):
-    mapdl.igesin(fname=os.path.join(CADs_path, "CubeWithHole"), ext="igs")
+    mapdl.upload(os.path.join(CADs_path, "CubeWithHole.CATPart"))
+    mapdl.igesin(fname="CubeWithHole", ext="igs")
     assert geometry_test_is_correct(mapdl, geometry="iges")
 
     nareas = mapdl.geometry.n_area
@@ -118,6 +119,7 @@ def test_readin_sat(mapdl, cleared):
     else:
         context = NullContext()
 
+    mapdl.upload(os.path.join(CADs_path, "CubeWithHole.sat"))
     with context:
         mapdl.satin(
             "CubeWithHole", extension="sat", path=CADs_path, entity="solid", fmt=0
@@ -150,6 +152,7 @@ def test_readin_x_t(mapdl, cleared):
     else:
         context = NullContext()
 
+    mapdl.upload(os.path.join(CADs_path, "CubeWithHole.x_t"))
     with context:
         mapdl.parain(
             name="CubeWithHole", extension="x_t", path=CADs_path, entity="solid", fmt=0
@@ -165,7 +168,7 @@ def test_readin_catiav5(mapdl, cleared):
             MapdlRuntimeError, match="No shared command/library files were found"
         )
 
-    elif ON_CI:
+    elif os.name == "posix":
         context = pytest.raises(
             MapdlInvalidRoutineError, match=" ~CAT5IN is not a recognized"
         )
@@ -173,6 +176,7 @@ def test_readin_catiav5(mapdl, cleared):
     else:
         context = NullContext()
 
+    mapdl.upload(os.path.join(CADs_path, "CubeWithHole.CATPart"))
     with context:
         mapdl.cat5in(
             name="CubeWithHole",
