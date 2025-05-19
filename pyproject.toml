@@ -5,7 +5,7 @@ build-backend = "flit_core.buildapi"
 [project]
 # Check https://flit.readthedocs.io/en/latest/pyproject_toml.html for all available sections
 name = "ansys-mapdl-core"
-version = "0.69.dev0"
+version = "0.70.dev0"
 description = "A Python client library for Ansys MAPDL."
 readme = "README.md"
 requires-python = ">=3.10,<3.14"  # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
@@ -65,10 +65,10 @@ all = [
 ]
 
 tests = [
-    "ansys-dpf-core==0.13.6",
+    "ansys-dpf-core[graphics]==0.13.6",
     "ansys-tools-visualization-interface==0.9.1",
     "autopep8==2.3.2",
-    "matplotlib==3.10.1",
+    "matplotlib==3.10.3",
     "pandas==2.2.3",
     "pyansys-tools-report==0.8.2",
     "pyfakefs==5.8.0",
@@ -78,17 +78,17 @@ tests = [
     "pytest-pyvista==0.1.9",
     "pytest-random-order==1.1.1",
     "pytest-reportlog==0.4.0",
-    "pytest-rerunfailures==15.0",
-    "pytest-timeout==2.3.1",
+    "pytest-rerunfailures==15.1",
+    "pytest-timeout==2.4.0",
     "pytest==8.3.5",
-    "scipy==1.15.2",
+    "scipy==1.15.3",
     "vtk==9.4.2",
 ]
 
 doc = [
-    "ansys-dpf-core==0.13.6",
-    "ansys-mapdl-reader==0.55.0",
-    "ansys-sphinx-theme==1.4.2",
+    "ansys-dpf-core[graphics]==0.13.6",
+    "ansys-mapdl-reader==0.55.1",
+    "ansys-sphinx-theme==1.4.4",
     "ansys-tools-visualization-interface==0.9.1",
     "grpcio==1.70.0",
     "imageio-ffmpeg==0.6.0",
@@ -96,7 +96,7 @@ doc = [
     "jupyter_sphinx==0.5.3",
     "jupyter==1.1.1",
     "jupyterlab>=3.2.8",
-    "matplotlib==3.10.1",
+    "matplotlib==3.10.3",
     "nbformat==5.10.4",
     "numpydoc==1.8.0",
     "pandas==2.2.3",
@@ -255,7 +255,7 @@ directory = "doc/changelog.d"
 filename = "doc/source/changelog.rst"
 template = "doc/changelog.d/changelog_template.jinja"
 start_string = ".. towncrier release notes start\n"
-title_format = "\n.. _{version}:\n\n`{version} <https://github.com/ansys/pymapdl/releases/tag/v{version}>`_ - {project_date}"
+title_format = "\n.. _v{version}:\n\n`{version} <https://github.com/ansys/pymapdl/releases/tag/v{version}>`_ - {project_date}"
 
 issue_format = "`#{issue} <https://github.com/ansys/pymapdl/pull/{issue}>`_"
 
