@@ -123,6 +123,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
         run: |
+          echo "Setting up git configuration"
           git config --global user.name "${{ secrets.PYANSYS_CI_BOT_USERNAME }}"
           git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
           git config pull.rebase true
@@ -146,7 +147,9 @@ jobs:
             echo "Merge conflicts detected: $CONFLICTS files"
 
             # Show conflicting files
+            echo "Conflicting files:"
             git status
+            echo ""
 
             # Resolve conflicts by taking "theirs" changes (optional, depending on your strategy)
             echo "Resolving conflicts by taking 'theirs' changes"
@@ -168,6 +171,11 @@ jobs:
 
           echo "Pushing changes to '${{ env.PR_BASE_REPO }}' repo"
           git push origin ${{ env.PR_BASE_BRANCH }} --force-with-lease || { echo "Push failed. Aborting."; exit 1; }
+
+          if [[ "${{ env.MODE }}" == "--ours" ]]; then
+            echo "Sync mode is 'ours'. Pushing to head_repo/${{ env.PR_HEAD_BRANCH }} with 'ours' changes"
+            git push origin head_repo/${{ env.PR_HEAD_BRANCH }} --force-with-lease || { echo "Push to head_repo/${{ env.PR_HEAD_BRANCH }} failed. Aborting."; exit 1; }
+          fi
 
       - name: Opening PR if needed.
         if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
