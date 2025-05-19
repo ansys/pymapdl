@@ -41,7 +41,7 @@ Here's a quick demo of PyMAPDL within Visual Studio Code:
 ![landing_demo](https://github.com/ansys/pymapdl/raw/main/doc/source/_static/landing_page_demo.gif)
 
 PyMAPDL works within Jupyter Notebooks, the standard Python console,
-or in batch mode on Windows, Linux, and even Mac OS.
+or in batch mode on Windows, Linux, and even macOS.
 
 ## Documentation and issues
 
