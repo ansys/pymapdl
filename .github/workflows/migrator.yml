@@ -52,10 +52,10 @@ jobs:
           # 1. auto - automatically resolves conflicts if possible, otherwise exits
           # 2. theirs - resolves conflicts by taking changes from the head branch
           # 3. ours - resolves conflicts by taking changes from the base branch
-          if [[ "${{ env.COMMENT_BODY }}" == *"pyansys-ci-bot sync theirs"* ]]; then
+          if [[ "${{ env.COMMENT_BODY }}" == *"pyansys-ci-bot sync theirs"*  && "${{ env.COMMENT_BODY }}" == *"pyansys-ci-bot migrate theirs"* ]]; then
             echo "Resolving conflicts by taking 'theirs' changes"
             echo "MODE='--theirs'" >> $GITHUB_ENV
-          elif [[ "${{ env.COMMENT_BODY }}" == *"pyansys-ci-bot sync ours"* ]]; then
+          elif [[ "${{ env.COMMENT_BODY }}" == *"pyansys-ci-bot sync ours"* && "${{ env.COMMENT_BODY }}" == *"pyansys-ci-bot migrate ours"* ]]; then
             echo "Resolving conflicts by taking 'ours' changes"
             echo "MODE='--ours'" >> $GITHUB_ENV
           else
