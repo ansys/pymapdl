@@ -12,15 +12,11 @@ on:
         required: true
         type: number
 
-      mode:
-        description: 'Mode of operation'
+      comment_body:
+        description: 'Comment body'
         required: false
-        default: auto
-        type: choice
-        options:
-          - auto
-          - theirs
-          - ours
+        default: '@pyansys-ci-bot migrate'
+        type: string
 
 permissions:
   contents: write
@@ -39,10 +35,10 @@ jobs:
       - name: Setup the configuration
         id: pr_number
         run: |
-          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "PR_NUMBER=${{ github.event.inputs.issue_number }}" >> $GITHUB_ENV
             echo "USER_TRIGGERING=${{ github.actor }}" >> $GITHUB_ENV
-            echo "MODE=${{ github.event.inputs.mode }}" >> $GITHUB_ENV
+            echo "COMMENT_BODY=${{ github.event.inputs.comment_body }}" >> $GITHUB_ENV
           else
             echo "PR_NUMBER=${{ github.event.issue.number }}" >> $GITHUB_ENV
             echo "USER_TRIGGERING=${{ github.event.comment.user.login }}" >> $GITHUB_ENV
@@ -51,7 +47,6 @@ jobs:
 
       - name: Check the migration mode
         id: check_mode
-        if: ${{ github.event_name != 'workflow_dispatch' }}
         run: |
           # Three modes of operation:
           # 1. auto - automatically resolves conflicts if possible, otherwise exits
