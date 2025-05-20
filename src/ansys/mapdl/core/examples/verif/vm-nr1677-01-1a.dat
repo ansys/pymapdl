@@ -1,0 +1,391 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/verify,vm-nr1677-01-1a
+/title,vm-nr1677-01-1a,NRC Piping Benchmark Problems,Volume 1,Problem 1
+/com,****************************************************************************
+/com,
+/com, Reference: Piping Benchmark Problems
+/com,        NUREG/CR--1677-Vol.1
+/com,                P.Bezier, M.Hartzman, M.Reich
+/com,            August 1980
+/com,
+/com, Elements used: Pipe289, Elbow290, Mass21
+/com,
+/com, Results:
+/com, The following results are outputted
+/com, 1. Frequencies obtained from modal solution.
+/com, 2. Maximum nodal displacements and rotations obtained from spectrum solution.
+/com, 3. Element forces and moments obtained from spectrum solution.
+/com,
+/com,****************************************************************************
+
+/out,scratch
+
+/prep7
+et,1,pipe289                                            ! Element 1 - PIPE289 using cubic shape function
+keyopt,1,4,2
+et,2,elbow290,,6                                        ! Element 2 - ELBOW290
+et,3,mass21                                             ! Element 3 - MASS21
+
+keyopt,3,3,2                                            ! 3-D Mass without Rotary Inertia
+
+/com, Real Constants
+/com,****************
+sectype,1,pipe
+secdata,7.289,0.241,24
+
+/com, Keypoints
+/com,*******
+
+k,1,0.0,0.0,0.0
+k,2,0.0,54.45,0.0
+k,3,0.0,108.9,0.0
+k,4,10.632,134.568,0.0
+k,5,36.3,145.2,0.0
+k,6,54.15,145.2,0.0
+k,7,72.0,145.2,0.0
+k,8,97.668,145.2,10.632
+k,9,108.3,145.2,36.3
+k,10,108.3,145.2,56.80
+k,11,108.3,145.2,77.3
+
+k,12,2.7631,122.79,0
+k,13,22.408,142.44,0
+k,14,85.9,145,2.76
+k,15,106,145,22.4
+
+/com, Straight Pipe (Tangent Elements)
+/com,**********************************
+
+type,1
+mat,1
+secnum,1
+l,1,2
+l,2,3
+l,5,6
+l,6,7
+l,9,10
+l,10,11     !Line number 6
+
+/com, Bend Pipe Elements
+/com,**********************************
+
+larch,3,4,12            !Line number 7
+larch,4,5,13
+larch,7,8,14
+larch,8,9,15            !line number 10
+
+mp,ex,1,24e6
+mp,nuxy,1,0.3
+
+/com, **********************************
+/com, Meshing for Straight pipe
+/com, **********************************
+
+type,1
+secnum,1
+mat,1
+
+lsel,s,line,,1,6
+allsel,below,line
+lesize,all,,,2
+lmesh,all
+
+allsel,all,all
+
+/com, **********************************
+/com, Meshing for bend pipe
+/com, **********************************
+
+type,2
+secnum,1
+mat,1
+
+lsel,s,,,7,14
+allsel,below,line
+lesize,all,,,2
+lmesh,all
+
+allsel,all,all
+
+/com, Real constants for mass element
+/com, *******************************
+
+r,12,0.03988
+r,13,0.05032
+r,14,0.02088
+r,15,0.01698
+r,16,0.01307
+r,17,0.01698
+r,18,0.01044
+r,19,0.01795
+r,20,0.01501
+
+
+/com, Mass Elements
+/com,***************
+
+type,3
+real,12
+e,2
+
+real,13
+e,6
+
+real,14
+e,28
+
+real,15
+e,10
+
+real,16
+e,11
+
+real,17,
+e,15
+
+real,18
+e,35
+
+real,19
+e,19
+
+real,20
+e,20
+
+allsel,all,all
+
+/com, ************************************************************
+/com,  Using ELBOW, to convert some PIPE289 into ELBOW290
+/com, ************************************************************
+
+elbow,on,,,sect
+
+/com,*************
+/com, Constraints
+/com,*************
+
+dk,1,all,0
+dk,11,all,0
+
+allsel,all
+save
+finish
+
+/com,
+/com,=============
+/com,   Modal Solve
+/com,=============
+/com,
+
+/solution
+antype,modal
+modopt,lanb,5                                   ! LANB mode extraction method
+mxpand,,,,yes
+solve
+finish
+save
+
+/post1
+/out,
+/com, *******************************
+/com,  Frequencies from Modal solve
+/com, *******************************
+set,list
+finish
+
+/com,----------------------------------------------------------------------------
+
+/com,
+/com,================
+/com,   Spectrum Solve
+/com,================
+/com,
+/out,scratch
+
+/solution
+antype,spectr                                   ! Perform Spectrum Analysis
+spopt,sprs                                      ! Single Point Excitation Response Spectrum
+dmprat,0.02                                     ! Damping Ratio
+grp,0.001                                       ! Group Modes based on significance level
+svtyp,2                                         ! Seismic Acceleration Response Loading
+
+sed,1                                           ! Excitation in X direction
+freq
+freq,3.1,4,5,5.81,7.1,8.77,10.99,14.08,17.24
+freq,25,28.5,30,34.97,55,80,140,162,588.93
+sv,0.02,400,871,871,700,1188,1188,440,775,775
+sv,0.02,533.2,467.2,443.6,380,289,239.4,192.6,184.1,145
+solve
+
+sed,,1                                          ! Excitation in Y direction
+freq
+freq,3.1,4,5,5.81,7.1,8.77,10.99,14.08,17.24
+freq,25,28.5,30,34.97,55,80,140,162,588.93
+sv,0.02,266.7,580.7,580.7,466.7,792,792,293.3,516.7,516.7
+sv,0.02,355.5,311.5,295.7,253.3,192.7,159.6,128.4,122.7,96.7
+solve
+
+sed,,,1                                         ! Excitation in Z direction
+freq
+freq,3.1,4,5,5.81,7.1,8.77,10.99,14.08,17.24
+freq,25,28.5,30,34.97,55,80,140,162,588.93
+sv,0.02,400,871,871,700,1188,1188,440,775,775
+sv,0.02,533.2,467.2,443.6,380,289,239.4,192.6,184.1,145
+solve
+fini
+
+/com,----------------------------------------------------------------------------
+
+/post1
+/input,,mcom
+
+
+/com, ****************************
+
+*GET,AdisX,NODE,10,U,X
+*GET,AdisY,NODE,36,U,Y
+*GET,AdisZ,NODE,28,U,Z
+*GET,ArotX,NODE,9,ROT,X
+*GET,ArotY,NODE,18,ROT,Y
+*GET,ArotZ,NODE,9,ROT,Z
+/out,
+/com, *========================================================
+/com, * Maximum nodal displacements and rotations obtained from spectrum solution
+/com, *========================================================
+*stat,AdisX
+*stat,AdisY
+*stat,AdisZ
+*stat,ArotX
+*stat,ArotY
+*stat,ArotZ
+
+/com, *========================================================
+/com, * Element Forces and Moments obtained from spectrum solution
+/com, *==========================================================
+/out,scratch
+
+/com,==========
+/com,    Node I
+/com,==========
+
+
+/com, Element #12 (Pipe289 elements)
+/com,************************
+
+
+esel,s,elem,,12
+etable,pxi_12,smisc,1
+etable,vyi_12,smisc,6
+etable,vzi_12,smisc,5
+etable,txi_12,smisc,4
+etable,myi_12,smisc,2
+etable,mzi_12,smisc,3
+esel,all
+
+/com, Element #14 (Elbow 290 elements)
+/com,*************************
+
+esel,s,elem,,14
+
+etable,pxi_14,smisc,1
+etable,vyi_14,smisc,6
+etable,vzi_14,smisc,5
+etable,txi_14,smisc,4
+etable,myi_14,smisc,2
+etable,mzi_14,smisc,3
+esel,all
+
+
+/com,==========
+/com,    Node J
+/com,==========
+
+/com, Element #12 (Pipe289 elements)
+/com,************************
+
+esel,s,elem,,12
+
+etable,pxj_12,smisc,14
+etable,vyj_12,smisc,19
+etable,vzj_12,smisc,18
+etable,txj_12,smisc,17
+etable,myj_12,smisc,15
+etable,mzj_12,smisc,16
+esel,all
+
+
+/com, Element #14 (Elbow290 elements)
+/com,************************
+esel,s,elem,,14
+
+etable,pxj_14,smisc,36
+etable,vyj_14,smisc,41
+etable,vzj_14,smisc,40
+etable,txj_14,smisc,39
+etable,myj_14,smisc,37
+etable,mzj_14,smisc,38
+esel,all
+
+allsel,all
+
+/out,
+
+/com, **********************************************
+/com,  Element forces and moments at element 12, node i
+/com, ************************************************
+
+pretab,pxi_12,vyi_12,vzi_12,txi_12,myi_12,mzi_12
+
+/com, **********************************************
+/com,  Element forces and moments at element 12, node j
+/com, ************************************************
+
+pretab,pxj_12,vyj_12,vzj_12,txj_12,myj_12,mzj_12
+
+/com, **********************************************
+/com,  Element forces and moments at element 14, node i
+/com, ************************************************
+
+pretab,pxi_14,vyi_14,vzi_14,txi_14,myi_14,mzi_14
+
+/com, **********************************************
+/com,  Element forces and moments at element 14, node j
+/com, ************************************************
+
+pretab,pxj_14,vyj_14,vzj_14,txj_14,myj_14,mzj_14
+
+
+
+/com,----------------------------------------------------------------------------
+
+/com, *****************************
+/com,  Reaction forces
+/com, ******************************
+
+prrsol
+
+finish
+/exit,nosave
+

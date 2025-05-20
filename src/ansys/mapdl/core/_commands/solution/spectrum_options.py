@@ -1,3 +1,26 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class SpectrumOptions:
     def addam(self, af="", aa="", ab="", ac="", ad="", amin="", **kwargs):
         """Specifies the acceleration spectrum computation constants for the
@@ -669,7 +692,7 @@ class SpectrumOptions:
         command = f"PSDFRQ,{tblno1},{tblno2},{freq1},{freq2},{freq3},{freq4},{freq5},{freq6},{freq7}"
         return self.run(command, **kwargs)
 
-    def psdgraph(self, tblno1="", tblno2="", **kwargs):
+    def psdgraph(self, tblno1="", tblno2="", displaykey="", **kwargs):
         """Displays input PSD curves
 
         APDL Command: PSDGRAPH
@@ -682,6 +705,14 @@ class SpectrumOptions:
         tblno2
             Second PSD table number to display. TBLNO2 is used only in
             conjunction with the COVAL or the QDVAL commands.
+
+        displaykey
+            Key to display the points markers and numbering:
+
+                0 - Display points markers and numbering (default).
+                1 - Display points numbering only.
+                2 - Display points markers only.
+                3 - No points markers or numbering.
 
         Notes
         -----
@@ -699,7 +730,7 @@ class SpectrumOptions:
 
         This command is valid in any processor.
         """
-        command = f"PSDGRAPH,{tblno1},{tblno2}"
+        command = f"PSDGRAPH,{tblno1},{tblno2},{displaykey}"
         return self.run(command, **kwargs)
 
     def psdres(self, lab="", relkey="", **kwargs):
@@ -793,7 +824,7 @@ class SpectrumOptions:
         tblno
             Input table number.
 
-        type\_
+        type\\_
             Label identifying the type of spectrum:
 
             DISP - Displacement spectrum (in terms of displacement2/Hz ).
@@ -1309,7 +1340,7 @@ class SpectrumOptions:
         tblno
             Input table number.
 
-        type\_
+        type\\_
             Label identifying the type of spectrum:
 
             DISP   - Displacement spectrum (SPVAL values interpreted as displacements with units of

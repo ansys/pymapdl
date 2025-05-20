@@ -1,4 +1,26 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM7
 /PREP7
 /TITLE, VM7, PLASTIC COMPRESSION OF A PIPE ASSEMBLY
@@ -20,10 +42,10 @@ MP,EX  ,1,26.875E6                   ! STEEL
 MP,PRXY,1,0.3
 MP,EX  ,2,11E6                       ! ALUMINUM
 MP,PRXY,2,0.3
-TB,BKIN,1,1                          ! DEFINE NON-LINEAR MATERIAL PROPERTY FOR STEEL
+TB,PLAS,1,1,,BKIN                    ! DEFINE NON-LINEAR MATERIAL PROPERTY FOR STEEL
 TBTEMP,0
 TBDATA,1,86000,0
-TB,BKIN,2,1                          ! DEFINE NON-LINEAR MATERIAL PROPERTY FOR ALUMINUM
+TB,PLAS,2,1,,BKIN                    ! DEFINE NON-LINEAR MATERIAL PROPERTY FOR ALUMINUM
 TBTEMP,0
 TBDATA,1,55000,0
 N,1                                  ! GENERATE NODES AND ELEMENTS FOR PIPE288
@@ -66,7 +88,7 @@ D,2,UX,,,,,UY,ROTX,ROTY,ROTZ         ! ALLOW ONLY UZ DOF AT TOP END OF PIPE288 M
 C*** APPLY CONSTRAINTS TO SOLID185 AND SHELL181 MODELS
 CP,1,UX,101,111,105,115              ! COUPLE NODES AT BOUNDARY IN RADIAL DIR FOR SOLID185
 CPSGEN,4,,1
-CP,5,UX,201,205,203,20               ! COUPLE NODES AT BOUNDARY IN RADIAL DIR FOR SHELL181
+CP,5,UX,201,205,203,207               ! COUPLE NODES AT BOUNDARY IN RADIAL DIR FOR SHELL181
 CPSGEN,2,,5
 CP,7,ROTY,201,205                    ! COUPLE NODES AT BOUNDARY IN ROTY DIR FOR SHELL181
 CPSGEN,4,,7

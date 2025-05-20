@@ -1,3 +1,25 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """
 .. _ref_3d_bracket_example:
 
@@ -20,6 +42,7 @@ import numpy as np
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import examples
+from ansys.mapdl.core.plotting import MapdlTheme
 
 mapdl = pymapdl.launch_mapdl()
 
@@ -46,7 +69,7 @@ print(mapdl.geometry)
 # remotable (with 2021R1 and newer) interactive plotting.  The common
 # plotting methods (``kplot``, ``lplot``, ``aplot``, ``eplot``, etc.)
 # all have compatible commands that use the
-# :func:`ansys.mapdl.core.plotting.general_plotter` function.  You can
+# :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` class.  You can
 # configure this method with a variety of keyword arguments.  For example:
 
 mapdl.lplot(
@@ -66,13 +89,13 @@ mapdl.lplot(
 # multiple plots.  These theme parameters override any unset keyword
 # arguments.  For example:
 
-my_theme = pymapdl.MapdlTheme()
+my_theme = MapdlTheme()
 my_theme.background = "white"
 my_theme.cmap = "jet"  # colormap
 my_theme.axes.show = False
 my_theme.show_scalar_bar = False
 
-mapdl.aplot(theme=my_theme)
+mapdl.aplot(theme=my_theme, quality=8)
 
 
 ###############################################################################
@@ -150,12 +173,14 @@ grid.plot(
 # This grid can be also saved to disk in the compact cross-platform VTK
 # format and loaded again with ``pyvista`` or ParaView.
 #
-# ..code::
+# ..code:: pycon
 #
 #     >>> grid.save('my_mesh.vtk')
 #     >>> import pyvista
 #     >>> imported_mesh = pyvista.read('my_mesh.vtk')
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

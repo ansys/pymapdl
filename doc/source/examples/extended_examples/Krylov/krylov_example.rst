@@ -34,7 +34,7 @@ These are the main steps required:
 
 Perform required imports
 ------------------------
- Perform required imports and launch MAPDL.
+Perform required imports and launch MAPDL.
 
 .. code:: ipython3
 
@@ -43,10 +43,13 @@ Perform required imports
     import math
     import matplotlib.pyplot as plt
     from ansys.mapdl.core import launch_mapdl
+    from ansys.math.core.math import AnsMath
 
     mapdl = launch_mapdl(nproc=4)
     mapdl.clear()
-    mm = mapdl.math
+
+    # Importing and connecting PyAnsys Math with PyMAPDL
+    mm = AnsMath(mapdl)
 
   
 Define parameters
@@ -170,7 +173,7 @@ a length element size constraint to the longitudinal lines.
     mapdl.eplot()
 
 
-.. image:: ../../../examples/extended_examples/Krylov/Harmonic_Analysis_using_krylov_pymapdl_files/Harmonic_Analysis_using_krylov_pymapdl_15_1.png
+.. image:: files/file_15_1.png
 
 
 Define boundary conditions
@@ -221,22 +224,33 @@ Get the first 10 natural frequency modes of the acoustic duct.
     A = mm.mat(k.nrow, nev)
     eigenvalues = mm.eigs(nev, k, M, phi=A, fmin=1.0)
 
-    for each_freq in range(10):
-         print(f"Freq = {eigenvalues[each_freq]:8.2f} Hz") # Eigenfrequency (Hz)
 
+The first ten modes are:
 
-.. parsed-literal::
++-------------+----------------+
+| Mode number | Frequency (Hz) |
++=============+================+
+|      1      |     83.33      |
++-------------+----------------+
+|      2      |     250.00     |
++-------------+----------------+
+|      3      |     416.67     |
++-------------+----------------+
+|      4      |     583.34     |
++-------------+----------------+
+|      5      |     750.03     |
++-------------+----------------+
+|      6      |     916.74     |
++-------------+----------------+
+|      7      |    1083.49     |
++-------------+----------------+
+|      8      |    1250.32     |
++-------------+----------------+
+|      9      |    1417.26     |
++-------------+----------------+
+|     10      |    1584.36     |
++-------------+----------------+
 
-    Freq =    83.33 Hz
-    Freq =   250.00 Hz
-    Freq =   416.67 Hz
-    Freq =   583.34 Hz
-    Freq =   750.03 Hz
-    Freq =   916.74 Hz
-    Freq =  1083.49 Hz
-    Freq =  1250.32 Hz
-    Freq =  1417.26 Hz
-    Freq =  1584.36 Hz
     
 
 Run harmonic analysis using Krylov method
@@ -270,15 +284,11 @@ frequency-sweep Krylov method.
 
 Obtain the shape of the generated subspace.
 
-.. code:: ipython3
+.. code:: pycon
 
-    print(Qz.shape)
-
-
-.. parsed-literal::
-
+    >>> print(Qz.shape)
     (3240, 10)
-    
+
 
 **Step 3**: Reduce the system of equations and solve at each frequency
 from 0 Hz to 1000 Hz with ramped loading.
@@ -289,15 +299,11 @@ from 0 Hz to 1000 Hz with ramped loading.
 
 Obtain the shape of the reduced solution generated.
 
-.. code:: ipython3
+.. code:: pycon
 
-    print(Yz.shape)
-
-
-.. parsed-literal::
-
+    >>> print(Yz.shape)
     (10, 100)
-    
+
 
 **Step 4**: Expand the reduced solution back to the FE space.
 
@@ -337,12 +343,12 @@ Load the last result substep to get the pressure for each of the selected nodes.
         # Get pressure at the node
         pressure = get_pressure_at(each_node, substep_index)['x'][0]
 
-        #Calculate amplitude at 60 deg
+        # Calculate amplitude at 60 deg
         magnitude = abs(pressure)
         phase = math.atan2(pressure.imag, pressure.real)
         pressure_a = magnitude * np.cos(np.deg2rad(60)+phase)
 
-       # Store result for later plotting
+        # Store result for later plotting
         x_data.append(loc[0])  # X-Coordenate
         y_data.append(pressure_a)  # Nodal pressure at 60 degrees
 
@@ -370,7 +376,7 @@ Plot the calculated data.
     plt.show()
 
 
-.. image:: ../../../examples/extended_examples/Krylov/Harmonic_Analysis_using_krylov_pymapdl_files/Harmonic_Analysis_using_krylov_pymapdl_36_1.png
+.. image:: files/file_36_1.png
 
 
 Plot the frequency response function
@@ -388,7 +394,7 @@ This code plots the frequency response function for a node along 0.2 in the X di
 Get the response of the system for the selected node
 over a range of frequencies, such as 0 to 1000 Hz.
 
-.. code:: python3
+.. code:: python
 
     start_freq = 0
     end_freq = 1000
@@ -396,8 +402,8 @@ over a range of frequencies, such as 0 to 1000 Hz.
     step_val = (end_freq - start_freq) / num_steps
     dic = {}
 
-    for freq in range (0,num_steps):        
-        pressure = get_pressure_at(node_number, freq)['x']
+    for freq in range(0, num_steps):
+        pressure = get_pressure_at(node_number, freq)["x"]
         abs_pressure = abs(pressure)
 
         dic[start_freq] = abs_pressure
@@ -405,24 +411,24 @@ over a range of frequencies, such as 0 to 1000 Hz.
 
 Sort the results.
 
-.. code:: python3
+.. code:: python
 
     frf_List = dic.items()
     frf_List = sorted(frf_List)
-    frf_x, frf_y = zip(*frf_List) 
-        
-        
+    frf_x, frf_y = zip(*frf_List)
 
 Plot the frequency response function for the selected node. 
 
-.. code:: python3
-    
-    plt.plot(frf_x, frf_y, linewidth= 3.0, color='b')
+.. code:: python
+
+    plt.plot(frf_x, frf_y, linewidth=3.0, color="b")
 
     # Plot the natural frequency as vertical lines on the FRF graph
-    for itr in range(0,6):
-        plt.axvline(x=eigenvalues[itr], ymin=0,ymax=2, color='r', linestyle='dotted', linewidth=1)
-        
+    for itr in range(0, 6):
+        plt.axvline(
+            x=eigenvalues[itr], ymin=0, ymax=2, color="r", linestyle="dotted", linewidth=1
+        )
+
     # Name the graph and the x-axis and y-axis
     plt.title("Frequency Response Function")
     plt.xlabel("Frequency (HZ)")
@@ -432,4 +438,4 @@ Plot the frequency response function for the selected node.
     plt.show()
 
 
-.. image:: ../../../examples/extended_examples/Krylov/Harmonic_Analysis_using_krylov_pymapdl_files/Harmonic_Analysis_using_krylov_pymapdl_38_0.png
+.. image:: files/file_38_0.png

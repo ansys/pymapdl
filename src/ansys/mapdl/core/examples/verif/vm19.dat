@@ -1,4 +1,26 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM19
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
@@ -30,7 +52,6 @@ D,11,UY,0,0,11,1,UZ
 SOLVE
 *GET,FREQ,MODE,1,FREQ
 FINISH
-!/COPY,,tri,,mode,tri
 
 /SOLU
 ANTYPE,SPECTR                      ! PREFORM SPECTRUM PSD ANALYSIS
@@ -49,7 +70,6 @@ SOLVE
 FINISH
 
 /POST26
-/OUT,
 STORE,PSD,10
 NSOL,2,6,U,Y
 RPSD,8,2,2,0,2,,,1.0e-3
@@ -67,6 +87,7 @@ PRTIME,42.630,42.631
 PRVAR,9
 *GET,P2,VARI,9,RTIME,42.63
 PM2=P2/(1E12)
+/OUT,
 *DIM,LABEL,CHAR,3,2
 *DIM,VALUE,,3,3
 LABEL(1,1) = 'FREQ1','PEAK d','PSD(N/mm'

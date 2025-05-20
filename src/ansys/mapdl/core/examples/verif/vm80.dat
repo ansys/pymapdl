@@ -1,4 +1,26 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM80
 /PREP7    
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
@@ -12,7 +34,7 @@ SECTYPE,1,LINK
 SECDATA,.278		    ! AREA (A)
 R,2,0.0259          ! MASS
 MP,EX,1,30E3
-TB,BKIN,1,1         ! BILINEAR KINEMATIC HARDENING STRESS-STRAIN CURVE
+TB,PLAS,1,1,,BKIN   ! BILINEAR KINEMATIC HARDENING STRESS-STRAIN CURVE
 TBTEMP,0
 TBDATA,1,162.9,0    ! YIELD STRESS AND TANGENT MODULUS
 N,1
@@ -24,19 +46,20 @@ REAL,2
 E,1
 FINISH
 /SOLU    
-SOLCONTROL,0
 KBC,1               ! STEP BOUNDARY CONDITIONS
 TIME,4E-3           ! TIME AT THE END OF LOAD STEP 1
 D,1,UX,,,2
 D,2,UY
 F,1,FY,30           ! APPLY F1
-NSUBST,10           ! 10 SUBSTEPS FOR  TIME STEP OF .0004
+NSUBST,10,10,1     ! 10 SUBSTEPS FOR  TIME STEP OF .0004
 OUTPR,BASIC,1       ! PRINT BASIC SOLUTION FOR EACH SUBSTEP
 OUTRES,NSOL,1       ! STORE NODAL SOLUTION FOR EACH SUBSTEP
+AUTOTS,OFF
+TINTP,,,,0.5,0.5,0.2
 /OUT,SCRATCH
 SOLVE
 TIME,.14            ! FINAL TIME SLIGHTLY MORE THAN 1 CYCLE OF VIBRATION
-NSUBST,68           ! 68 REPEATS FOR TIME STEP OF 0.002 
+NSUBST,68,68,1     ! 68 REPEATS FOR TIME STEP OF 0.002 
 OUTPR,BASIC,8       ! PRINT BASIC SOLUTION FOR EVERY 8TH SUBSTEP
 SOLVE
 FINISH

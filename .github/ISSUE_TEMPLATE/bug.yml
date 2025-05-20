@@ -1,4 +1,4 @@
-name: 🐞 Bug, problem, error
+name: 🐞 Bug, problem, or error
 description: Fill a bug report here
 title: "Bug located in ..."
 labels: ["bug"]
@@ -13,26 +13,24 @@ body:
   - type: checkboxes
     id: new-bug
     attributes:
-      label: Before submitting the issue
+      label: 🤓 Before submitting the issue
       description: |
         Ensure that the following conditions are met.
 
-        Visit [Troubleshooting section](https://mapdl.docs.pyansys.com/troubleshoot/index.html) for more information.
-
       options:
-      - label: I have visited the Troubleshooting section.
+      - label: I have visited the [Troubleshooting section](https://mapdl.docs.pyansys.com/troubleshoot/index.html).
         required: true
-      - label: I have searched among the existing issues.
+      - label: I have searched among the [existing issues](https://github.com/ansys/pymapdl/issues?q=).
         required: true
-      - label: I am using a Python virtual environment.
+      - label: I am using a [Python virtual environment](https://docs.python.org/3/library/venv.html).
         required: true
-      - label: I have a fully updated virtual environment (i.e. ``pip install --upgrade --upgrade-strategy eager ansys-mapdl-core``)
+      - label: I am using the [latest version of PyMAPDL](https://github.com/ansys/pymapdl/releases) and its dependencies (fully updated virtual environment). You can update them using ``pip install --upgrade --upgrade-strategy eager ansys-mapdl-core`` in your activated virtual environment.
         required: true
 
   - type: textarea
     id: bug-description
     attributes:
-      label: Description of the bug
+      label: 🔍 Description of the bug
       placeholder: Describe what bug you encountered and what should have happened.
     validations:
       required: true
@@ -40,34 +38,21 @@ body:
   - type: textarea
     id: steps-to-reproduce
     attributes:
-      label: Steps To Reproduce
+      label: 🕵️ Steps To Reproduce
       description: |
-        Please write the steps in a list form e.g.:
-        * Install this package...
-        * Run this input file (attached)
-        * Run the following commands:
+        Please write the python commands you used:
         ```py
+        from ansys.mapdl.core import launch_mapdl
+        mapdl = launch_mapdl()
+
         mapdl.command1()
         mapdl.command2()
         ...
         ```
-        * Check obtained error...
+        Use the following text box:
 
-      value: |
-        Steps:
-          * First I did...
-          * ...
-
-        And I ran the following code:
-
-        ```py
-
-        from ansys.mapdl.core import launch_mapdl
-        mapdl = launch_mapdl()
-
-        # Insert your code here
-
-        ```
+      value: The log will automatically be formatted as Python code! No need to type backticks.
+      render: Python
 
     validations:
       required: true
@@ -79,38 +64,44 @@ body:
   - type: dropdown
     id: os-name
     attributes:
-      label: Which Operating System are you using?
+      label: 💻 Which Operating System are you using?
       multiple: false
       options:
        - 'Windows'
        - 'MacOS'
        - 'Linux'
     validations:
-      required: false
+      required: true
 
   - type: dropdown
     id: python-version
     attributes:
-      label: Which Python version are you using?
+      label: 🐍 Which Python version are you using?
       description: Run `python --version` to verify your Python version
       multiple: false
       options:
-       - '3.7'
-       - '3.8'
-       - '3.9'
        - '3.10'
+       - '3.11'
+       - '3.12'
+       - '3.13'
     validations:
-      required: false
+      required: true
+
+  - type: input
+    id: mapdl-version
+    attributes:
+      label: 💾 Which MAPDL version are you using?
+      placeholder: ex. 24.1 or 2024R1
+    validations:
+      required: true
 
   - type: textarea
     id: pymapdl-report
     attributes:
-      label: PyMAPDL Report
+      label: 📝 PyMAPDL Report
       description: Run `python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"` to get the PyMAPDL Report
       value: |
-        <details><summary>
-        Show the Report!
-        </summary>
+        <details><summary>Show the Report!</summary>
 
         ```text
 
@@ -125,12 +116,10 @@ body:
   - type: textarea
     id: installed-packages
     attributes:
-      label: Installed packages
+      label: 📝 Installed packages
       description: Run `python -m pip freeze` to list installed packages
       value: |
-        <details><summary>
-        Show the installed packages!
-        </summary>
+        <details><summary>Show the installed packages!</summary>
 
         ```text
 
@@ -145,16 +134,13 @@ body:
   - type: textarea
     id: logger_log
     attributes:
-      label: Logger output file
+      label: 📝 Logger output file
       description: |
         Attach the logger output file. For more information on how to set the logger and
-        attach its output file, see the [Troubleshooting section]
-        (https://mapdl.docs.pyansys.com/troubleshoot/index.html).
+        attach its output file, see the [Troubleshooting section](https://mapdl.docs.pyansys.com/version/stable/user_guide/troubleshoot.html).
         
       value: |
-        <details><summary>
-        Show the logger output file.
-        </summary>
+        <details><summary>Show the logger output file.</summary>
 
         ```text
 

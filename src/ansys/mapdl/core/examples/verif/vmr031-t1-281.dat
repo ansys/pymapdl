@@ -1,0 +1,142 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/verify,vmr031-t1-281
+/TITLE,vmr031-t1-281,LAMINATED STRIP UNDER THREE POINT BENDING
+/COM, REFERENCE: PROBLEM NO 1 FROM NAFEMS R0031
+/COM,
+/SHOW,JPEG
+/PREP7  
+C*** USING SHELL281
+ET,1,SHELL281   
+KEYOPT,1,1,0   
+KEYOPT,1,8,2		!STORES DATA FOR TOP,BOTTOM AND MID FOR ALL LAYERS
+KEYOPT,1,9,0		
+
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,EX,1,,1e5
+MPDATA,EY,1,,5e3
+MPDATA,EZ,1,,0.00001
+MPDATA,PRXY,1,,0.4  
+MPDATA,PRYZ,1,,0.3  
+MPDATA,PRXZ,1,,0  
+MPDATA,GXY,1,,3e3   
+MPDATA,GYZ,1,,2e3   
+MPDATA,GXZ,1,,2e3   
+SECT,1,SHELL,,  
+SECDATA, 0.1,1,0.0,3
+SECDATA, 0.1,1,90,3 
+SECDATA, 0.1,1,0.0,3
+SECDATA, 0.4,1,90,3 
+SECDATA, 0.1,1,0.0,3
+SECDATA, 0.1,1,90,3 
+SECDATA, 0.1,1,0.0,3
+SECOFFSET,BOT   
+SECCONTROL,,,, , , ,
+RECTNG,,25,,5, 
+  
+
+ET,2,SURF156		!SURFACE ELEMENTS TO APPLY THE LOAD
+KEYOPT,2,2,1		
+KEYOPT,2,4,0		!WITH MIDSIDE NODE
+KEYOPT,2,5,1		!WITHOUT ORIENTATION NODE
+KEYOPT,2,7,0 
+
+K,,10,,,   
+K,,10,5,,  
+L,5,6 
+ASBL,1,5  
+
+LESIZE,2,,,1
+LESIZE,4,,,1
+*REP,2,1
+LESIZE,6,,,3
+*REP,2,1
+LESIZE,8,,,2
+*REP,2,1
+AMESH,2,3
+
+LOCAL,13,0,0,0,0,0,0,0  
+CSYS,0  
+TYPE,2  
+ESYS,13 
+E,1,8,9
+ALLSEL,ALL  
+ESEL,S,TYPE,,2  
+SFE,ALL,3,PRESS,1,-10
+ESEL,ALL
+EPLOT  
+
+DL,9,3,SYMM
+DL,7,2,SYMM
+DL,2,2,SYMM
+DL,5,,UZ,0
+DL,5,,UX,0
+DL,5,,UY,0
+FINISH 
+
+/SOLUTION
+SOLVE   
+FINISH 
+  
+/POST1  
+SET,LAST
+LAYER,1
+SHELL,BOT
+PLNSOL,U,Z
+*GET,DISP,PLNSOL,0,MIN
+*STAT,DISP
+
+PLNSOL,S,X
+*GET,BENDING_STRESS,PLNSOL,0,MAX
+*STAT,BENDING_STRESS
+
+*DIM,LABEL,CHAR,2,2
+*DIM,VALUE,,2,3
+LABEL(1,1) = 'DEFLECTI','BEND STR'
+LABEL(1,2) = 'ON mm','ESS MPa '
+*VFILL,VALUE(1,1),DATA,-1.06,683.9
+*VFILL,VALUE(1,2),DATA,DISP,BENDING_STRESS
+*VFILL,VALUE(1,3),DATA,ABS((DISP)/(-1.06) ) ,ABS((BENDING_STRESS)/683.9 )
+
+/NOPR
+/COM
+/OUT,vmr031-t1-281,vrt
+/COM,------------------- VMr031-t1-281 RESULTS COMPARISON ---------------------
+/COM,
+/COM,                 |   TARGET   |   Mechanical APDL   |   RATIO
+/COM,
+/COM,USING SHELL281
+/COM,
+*VWRITE,LABEL(1,1),LABEL(1,2),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,A8,'   ',F10.3,'  ',F14.3,'   ',1F15.3)
+/COM,
+/COM,
+/COM,-----------------------------------------------------------------
+
+/OUT
+FINISH
+*list,vmr031-t1-281,vrt
+
+

@@ -1,0 +1,249 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/verify,vmr031-t2-281
+/TITLE,vmr031-t2-281,WRAPPED THICK CYLINDER UNDER PRESSURE AND THERMAL LOADING
+ C*** USING SHELL281 LOADED WITH INTERNAL PRESSURE  
+/COM, REFERENCE: PROBLEM NO 2 FROM NAFEMS: R0031
+/COM,
+
+/PREP7 
+ET,1,SHELL281   
+KEYOPT,1,1,0
+KEYOPT,1,8,2		!STORES DATA FOR TOP,BOTTOM AND MID FOR ALL LAYERS
+KEYOPT,1,9,0
+
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,EX,1,,2.1e5  
+MPDATA,PRXY,1,,0.3  
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,EX,2,,5000   
+MPDATA,EY,2,,1.3e5  
+MPDATA,EZ,2,,5e3
+MPDATA,PRXY,2,,0
+MPDATA,PRYZ,2,,0.25 
+MPDATA,PRXZ,2,,0.25 
+MPDATA,GXY,2,,5e3   
+MPDATA,GYZ,2,,1e4   
+MPDATA,GXZ,2,,5e3  
+
+SECT,1,SHELL,,  
+SECDATA,2,1,0.0,3  
+SECDATA,2,2,0.0,3  
+SECOFFSET,BOT   
+SECCONTROL,,,, , , ,
+
+CSYS,1
+K,1,23                ! DEFINE MODEL GEOMETRY
+K,2,23,,100
+KGEN,2,1,2,1,,90
+A,1,2,4,3
+ESIZE,,4
+AMESH,1
+CSYS,0
+ENSYM,,,,ALL
+
+DL,3,,SYMM  
+DL,1,,SYMM
+DL,4,,UZ,0 
+
+SFE,ALL,1,PRESS,,200
+EPLOT
+FINISH 
+ 
+/SOLUTION
+SOLVE   
+FINISH 
+
+/POST1
+
+LAYER,1
+SHELL,BOTTOM
+RSYS,1  
+*SET,n1,node(23,0,0)
+*GET,sy1,node,n1,s,y 
+*STAT,sy1
+
+LAYER, 1
+SHELL,TOP
+RSYS,1  
+*SET,n1,node(23,0,0)
+*GET,sy2,node,n1,s,y 
+*STAT,sy2
+
+LAYER, 2
+SHELL,BOTTOM
+RSYS,1  
+*SET,n1,node(23,0,0)
+*GET,sy3,node,n1,s,y 
+*STAT,sy3
+
+LAYER, 2
+SHELL,TOP
+RSYS,1  
+*SET,n1,node(23,0,0)
+*GET,sy4,node,n1,s,y 
+*STAT,sy4
+
+ *DIM,LABEL,CHAR,4,5
+*DIM,VALUE,,4,3
+LABEL(1,1) = 'HOOP STR','HOOP STR','HOOP STR','HOOP STR'
+LABEL(1,2) = 'ESS INNE','ESS INNE ','ESS OUTE','ESS OUTE'
+LABEL(1,3) = 'R CYLNDE','R CYLNDE','R CYLNDE','R CYLNDE'
+LABEL(1,4) = 'R @ R=23','R @ R=25','R @ R=25','R @ R=27'
+LABEL(1,5) = ' in MPa',' in MPa',' in MPa',' in MPa'
+*VFILL,VALUE(1,1),DATA,1565.3,1429.7,874.7,759.1
+*VFILL,VALUE(1,2),DATA,SY1,SY2,SY3,SY4
+*VFILL,VALUE(1,3),DATA,ABS((SY1)/(1565.3)) ,ABS((SY2)/(1429.7)),ABS((SY3)/(874.7)),ABS((SY4)/(759.1))
+SAVE,TABLE_1 
+ 
+
+FINI
+/CLEAR,NOSTART
+
+
+C*** USING SHELL281 LOADED WITH INTERNAL PRESSURE AND UNIFORM TEMPERATURE RAISE
+/PREP7 
+ET,1,shell281   
+KEYOPT,1,1,0
+KEYOPT,1,8,2		!STORES DATA FOR TOP,BOTTOM AND MID FOR ALL LAYERS
+KEYOPT,1,9,0
+
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,ALPX,1,,2e-5
+MPDATA,EX,1,,2.1e5  
+MPDATA,PRXY,1,,0.3  
+MPTEMP,,,,,,,,  
+MPTEMP,1,0  
+MPDATA,ALPX,2,, 
+MPDATA,ALPY,2,,3e-6 
+MPDATA,ALPZ,2,,2e-5 
+MPDATA,EX,2,,5000   
+MPDATA,EY,2,,1.3e5  
+MPDATA,EZ,2,,5e3
+MPDATA,PRXY,2,,0
+MPDATA,PRYZ,2,,0.25 
+MPDATA,PRXZ,2,,0.25 
+MPDATA,GXY,2,,5e3   
+MPDATA,GYZ,2,,1e4   
+MPDATA,GXZ,2,,5e3  
+
+SECT,1,SHELL,,  
+SECDATA,2,1,0.0,3  
+SECDATA,2,2,0.0,3  
+SECOFFSET,BOT   
+SECCONTROL,,,, , , ,
+
+CSYS,1
+K,1,23                ! DEFINE MODEL GEOMETRY
+K,2,23,,100
+KGEN,2,1,2,1,,90
+A,1,2,4,3
+ESIZE,,4
+AMESH,1
+CSYS,0
+ENSYM,,,,all
+
+DL,3,,SYMM  
+DL,1,,SYMM
+DL,4,,UZ,0 
+
+TUNIF,130, 		!UNIFORM TEMPERSTURE RAISE
+SFE,ALL,1,PRESS,,200
+EPLOT
+FINISH 
+ 
+/SOLUTION
+SOLVE   
+FINISH 
+
+/POST1
+
+LAYER,1
+SHELL,BOTTOM
+RSYS,1  
+*SET,n1,node(23,0,0)
+*GET,sy1,node,n1,s,y 
+*STAT,sy1
+
+LAYER, 1
+SHELL,TOP
+RSYS,1  
+*SET,n1,node(23,0,0)
+*GET,sy2,node,n1,s,y 
+*STAT,sy2
+
+LAYER, 2
+SHELL,BOTTOM
+RSYS,1  
+*SET,n1,node(23,0,0)
+*GET,sy3,node,n1,s,y 
+*STAT,sy3
+
+LAYER, 2
+SHELL,TOP
+RSYS,1  
+*SET,n1,node(23,0,0)
+*GET,sy4,node,n1,s,y 
+*STAT,sy4
+ 
+ *DIM,LABEL,CHAR,4,5
+*DIM,VALUE,,4,3
+LABEL(1,1) = 'HOOP STR','HOOP STR','HOOP STR','HOOP STR'
+LABEL(1,2) = 'ESS INNE','ESS INNE ','ESS OUTE','ESS OUTE'
+LABEL(1,3) = 'R CYLNDE','R CYLNDE','R CYLNDE','R CYLNDE'
+LABEL(1,4) = 'R @ R=23','R @ R=25','R @ R=25','R @ R=27'
+LABEL(1,5) = ' in MPa',' in MPa',' in MPa',' in MPa'
+*VFILL,VALUE(1,1),DATA,1381.0,1259.6,1056.0,936.1
+*VFILL,VALUE(1,2),DATA,SY1,SY2,SY3,SY4
+*VFILL,VALUE(1,3),DATA,ABS((SY1)/(1381.0)) ,ABS((SY2)/(1259.6)),ABS((SY3)/(1056.0)),ABS((SY4)/(936.1))
+SAVE,TABLE_2
+
+
+/NOPR
+/COM
+/OUT,vmr031-t2-281,vrt
+/COM,------------------- VMr031-t2-281 RESULTS COMPARISON ---------------------
+/COM,
+/COM,                                 	  |   TARGET   |   Mechanical APDL   |   RATIO
+/COM,
+RESUME,TABLE_1
+/COM,USING SHELL281 with internal pressure
+/COM,
+*VWRITE,LABEL(1,1),LABEL(1,2),LABEL(1,3),LABEL(1,4),LABEL(1,5),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,A8,A8,A8,A8'   ',F10.3,'  ',F12.3,'   ',1F10.3)
+/COM,
+RESUME,TABLE_2
+/COM,USING SHELL281 with internal pressure and uniform temperature raise
+/COM,
+*VWRITE,LABEL(1,1),LABEL(1,2),LABEL(1,3),LABEL(1,4),LABEL(1,5),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,A8,A8,A8,A8'   ',F10.3,'  ',F12.3,'   ',1F10.3)
+/COM,
+/COM,-----------------------------------------------------------------
+
+/OUT
+FINISH
+*list,vmr031-t2-281,vrt 

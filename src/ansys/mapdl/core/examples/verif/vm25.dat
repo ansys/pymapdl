@@ -1,4 +1,26 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM25
 /PREP7
 SMRT,OFF
@@ -12,16 +34,19 @@ ET,1,PLANE183,,,1,   ! AXISYMM
 MP,EX,1,30E6         ! MATERIAL PROPERTIES
 MP,DENS,1,.00073
 MP,NUXY,1,0.3        ! DEFINE KEYPOINTS, LINES, AND AREAS
-K,1,4 
-K,2,8
-KGEN,2,1,2,1,,1
-L,1,2,7 
-ESIZE,.5 
-LESIZE,1,,,14 
-MSHK,1                    ! MAPPED AREA MESH
-MSHA,0,2D                 ! USING QUADS
-A,3,1,2,4 
-AMESH,1
+N,1,4 
+N,2,4+4/14
+N,3,4+4/14,0.5
+N,4,4,0.5
+N,5,4+4/28
+N,6,4+4/14,0.25
+N,7,4+4/28,0.5
+N,8,4,0.25
+E,1,2,3,4,5,6,7,8
+EGEN,14,8,1,,,,,,,,4/14  
+NUMMRG,NODE
+EGEN,2,111,1,14,,,,,,,,0.5
+NUMMRG,NODE
 SAVE,MODEL           ! SAVE MODEL FOR SECOND LOAD CASE
 NSEL,S,LOC,Y,0       ! SET UP LONG CYLINDER EFFECT
 D,ALL,UY

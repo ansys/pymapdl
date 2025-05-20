@@ -14,19 +14,21 @@ Required modules
 
 For this example, install modules as needed:
 
-* ``dash``
-* ``dash_bootstrap_components``
-* ``plotly.express``
-* ``webbrowser``
-* ``pandas``
+* `dash <dash_>`_
+* `dash_bootstrap_components <dash_bootstrap_components_>`_
+* `plotly.express <plotly_express_>`_
+* `webbrowser <webbrowser_library_>`_
+* `pandas <pandas_org_>`_
+
 
 Structure
 ---------
 
-* Description page. Read the problem statement 
+* Description page. 
+  Read the problem statement 
 * Simulation Page. 
   Allow to change the input values, solve the problem and plot the results.
-* Data Page : 
+* Data Page. 
 	Allow to plot data in a table and graph
 
 
@@ -36,4 +38,4 @@ Usage
 Download the zip file from the link below and unzip it to a folder.
 Run the Python file ``BimetallicStrip.py`` which launches the app in your default browser.
 
-:download:`ANSYS Licensing Guide <dash-vm35.zip>`
+:download:`dash extra files <dash-vm35.zip>`

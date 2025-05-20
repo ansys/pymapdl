@@ -1,10 +1,35 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM51
 JPGPRF,500,100,1                ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
+_GEOMGEN_1=0                    ! SET THIS TO 1 TO UPDATE CDB FILE 
+_EXIT1=0                       ! SET THIS TO 1 TO EXIT WITHOUT SOLVING
+*IF,_GEOMGEN_1,EQ,1,THEN 
 /TITLE,VM51, FORCE BETWEEN CHARGED SPHERES
 C*** USING SOLID122
-!            THE ELECTROMAGNETIC FIELD,  SHADOWITZ, PAGE 61
+!         THE ELECTROMAGNETIC FIELD,  SHADOWITZ, PAGE 61
 /PREP7
 smrt,off $ shpp,warn
 mopt,amesh,alte
@@ -89,7 +114,7 @@ ALLSEL                          ! SELECT ALL ENTITIES
 NUMMRG,NODE
 NUMMRG,ELEM
 NUMMRG,KP
-/OUTPUT
+
 
 CSYS,0
 NSEL,S,LOC,Y,0                  ! SELECT SYMMETRY BOUNDARY
@@ -100,7 +125,20 @@ ESLN,S
 SF,ALL,INF                      ! SET INFINITE FLAG
 NSEL,ALL
 OUTRES,ALL,ALL
+
+ALLSEL,ALL
 FINISH
+CDWRITE,db,vm51_case1,cdb
+FINISH
+*IF,_EXIT1,EQ,1,THEN
+/EXIT,NOSAVE
+*ENDIF
+
+*ELSE
+CDREAD,db,vm51_case1,cdb
+*ENDIF
+FINISH
+
 /SOLU
 ALLSEL
 ESEL,U,TYPE,,1,                 ! UNSELECT DUMMY MESHING ELEMENT 122
@@ -173,7 +211,7 @@ PLNSOL,VOLT                     ! PLOT NODAL RESULTS, VOLTAGE DOF
 RSYS,0
 CSYS,11
 NSEL,S,LOC,X,R1
-EMFN
+EMFT
 YFORCE=_FYSUM*12                ! MULTIPLY TO ACCOUNT FOR 30 DEGREE SLICE
 *STATUS,YFORCE
 *DIM,LABEL,CHAR,1,2
@@ -187,8 +225,10 @@ SAVE,INF1
 FINISH
 /CLEAR,NOSTART
 
-
-
+/OUT,SCRATCH
+_GEOMGEN_2=0                    ! SET THIS TO 1 TO UPDATE CDB FILE 
+_EXIT2=0                       ! SET THIS TO 1 TO EXIT WITHOUT SOLVING
+*IF,_GEOMGEN_2,EQ,1,THEN 
 
 /TITLE,VM51, FORCE BETWEEN CHARGED SPHERES
 C*** USING SOLID123
@@ -254,7 +294,7 @@ ALLSEL                          ! SELECT ALL ENTITIES
 NUMMRG,NODE
 NUMMRG,ELEM
 NUMMRG,KP
-/OUTPUT
+
 
 CSYS,0
 NSEL,S,LOC,Y,0                  ! SELECT SYMMETRY BOUNDARY
@@ -265,6 +305,19 @@ ESLN,S
 SF,ALL,INF                      ! SET INFINITE FLAG
 NSEL,ALL
 OUTRES,ALL,ALL
+
+
+ALLSEL,ALL
+FINISH
+CDWRITE,db,vm51_case2,cdb
+FINISH
+*IF,_EXIT2,EQ,1,THEN
+/EXIT,NOSAVE
+*ENDIF
+
+*ELSE
+CDREAD,db,vm51_case2,cdb
+*ENDIF
 FINISH
 /SOLU
 ALLSEL
@@ -337,7 +390,7 @@ PLNSOL,VOLT                     ! PLOT NODAL RESULTS, VOLTAGE DOF
 RSYS,0
 CSYS,11
 NSEL,S,LOC,X,R1
-EMFN
+EMFT
 YFORCE=_FYSUM*12                 ! MULTIPLY TO ACCOUNT FOR 30 DEGREE SLICE
 *STATUS,YFORCE
 *DIM,LABEL,CHAR,1,2

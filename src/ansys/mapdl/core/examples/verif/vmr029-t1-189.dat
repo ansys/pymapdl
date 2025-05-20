@@ -1,0 +1,124 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/VERIFY,VMR029-T1-189
+/TITLE,VMR029-T1-189,ELASTIC LARGE DEFLECTION RESPONSE OF A Z-SHAPED CANTILEVER UNDER END LOAD
+/COM, REFERENCE: NAFEMS 3D BEAMS AND SHELL MANUAL TEST 3DNLG-1
+/SHOW,JPEG
+JPGPRF,500,100,1
+
+/PREP7
+SECN,1
+SECT,1,BEAM,RECT
+SECD,20,1.7
+N,1,0.0
+N,7,60.0
+N,13,120.0,30.0
+N,19,180.0,30.0
+FILL,1,7
+FILL,7,13
+FILL,13,19
+N,101,30,30
+N,102,120,60
+N,103,160,160
+ET,1,189
+E,1,3,2,101
+E,3,5,4,101
+E,5,7,6,101
+E,7,9,8,102
+E,9,11,10,102
+E,11,13,12,102
+E,13,15,14,103
+E,15,17,16,103
+E,16,19,18,103
+MP,EX,1,2.0E5
+MP,NUXY,1,0.3
+FINISH
+
+/SOLU
+ANTYPE,0
+NLGEOM,ON
+NSUBST,100
+D,1,ALL
+F,19,FY,4000.0
+OUTRES,ALL,ALL
+/OUT,SCRATCH
+SOLVE
+FINISH
+
+/POST26
+/GOLIST
+/GROPT,VIEW,0
+/GTHK,CURVE,1
+/GROPT,FILL,OFF
+/GRID,1
+/GTHK,GRID,1
+/GROPT,CGRID,1
+/AXLAB,X,TIP DEFLECTION
+/AXLAB,Y,LOAD
+/GTHK,AXIS,1
+/GRTYP,0
+/GROPT,ASCAL,ON
+/GROPT,LOGX,OFF
+/GROPT,LOGY,OFF
+/GROPT,AXDV,1
+/GROPT,AXNM,ON
+/GROPT,AXNSC,1,
+/GROPT,DIG1,4,
+/GROPT,DIG2,3,
+/XRANGE,0,150
+/YRANGE,0,4000
+/GOPR
+/OUT,
+NSOL,2,19,U,Y,
+RFORCE,3,1,F,Y,
+PROD,4,3, , , , , ,-1,1,1,
+XVAR,2
+/SHOW,,jpeg
+PLVAR,4
+PRVAR,4,2
+
+/POST1
+SET,1,LAST
+*GET,UY3,NODE,19,U,Y
+HF3=UY3/143.4
+*DIM,VALUE,,1,3
+*DIM,LABEL,CHAR,3
+LABEL(1) = 'vmr029-','t1-189'
+*VFILL,VALUE(1,1),DATA,4000.0
+*VFILL,VALUE(1,2),DATA,UY3
+*VFILL,VALUE(1,3),DATA,HF3
+/OUT,vmr029-t1-189,vrt
+/COM
+/COM,-------------- VMR029-T1 RESULTS COMPARISON--------------
+/COM,
+/COM,|  LOAD  |      Mechanical APDL      |   RATIO   |      TEST      |
+/COM,
+/COM,BEAM189
+*VWRITE,VALUE(1,1), VALUE(1,2), VALUE(1,3), LABEL(1),LABEL(2)
+(1X,F8.2,'     ',F12.2,'      ',F12.2,'      ',A7,A8)
+/COM,
+/COM,----------------------------------------------------------
+/OUT
+FINISH
+*LIST,vmr029-t1-189,vrt

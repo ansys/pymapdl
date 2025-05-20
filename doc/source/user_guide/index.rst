@@ -10,41 +10,67 @@ This section provides a general overview of PyMAPDL and how you use it.
    This toctreemust be a top level index to get it to show up in
    pydata_sphinx_theme
 
+
 .. toctree::
    :maxdepth: 1
    :hidden:
+   :caption: Basic
 
-   launcher
    mapdl
-   mapdl_examples
-   plotting
    mesh_geometry
-   post
+   plotting
    parameters
-   database
+   components
+   post
+   troubleshoot
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Intermediate
+
+   cli
    convert
+   database
    math
    pool
+
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Advanced
+
    xpl
    upf
    krylov
-   troubleshoot
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: High performance computing
+
+   hpc/introduction
+   hpc/settings
+   hpc/pymapdl
+   hpc/examples
+   hpc/troubleshooting
 
 
 PyMAPDL overview
 ================
-The :func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` function
+The :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` function
 within the ``ansys-mapdl-core`` library creates an instance of the
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class in the background and sends
-commands to that service. Errors and warnings are processed
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class in the background and sends
+commands to that instance. Errors and warnings are processed
 Pythonically, letting you develop a script in real time, without
 worrying about it functioning correctly when deployed in batch
 mode.
 
 MAPDL can be started from Python in gRPC mode using the
-:func:`launch_mapdl() <ansys.mapdl.core.launch_mapdl>` method. This starts
+:func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` method. This starts
 MAPDL in a temporary directory by default. You can change this to
-your current directory with:
+your current directory with this code:
 
 .. code:: python
 
@@ -54,37 +80,37 @@ your current directory with:
     path = os.getcwd()
     mapdl = launch_mapdl(run_location=path)
 
-MAPDL is now active, and you can send commands to it as a genuine a
+MAPDL is now active, and you can send commands to it as a genuine
 Python class. For example, if you wanted to create a surface using
 key points, you could run:
 
 .. code:: python
 
-    mapdl.run('/PREP7')
-    mapdl.run('K, 1, 0, 0, 0')
-    mapdl.run('K, 2, 1, 0, 0')
-    mapdl.run('K, 3, 1, 1, 0')
-    mapdl.run('K, 4, 0, 1, 0')
-    mapdl.run('L, 1, 2')
-    mapdl.run('L, 2, 3')
-    mapdl.run('L, 3, 4')
-    mapdl.run('L, 4, 1')
-    mapdl.run('AL, 1, 2, 3, 4')
+    mapdl.run("/PREP7")
+    mapdl.run("K, 1, 0, 0, 0")
+    mapdl.run("K, 2, 1, 0, 0")
+    mapdl.run("K, 3, 1, 1, 0")
+    mapdl.run("K, 4, 0, 1, 0")
+    mapdl.run("L, 1, 2")
+    mapdl.run("L, 2, 3")
+    mapdl.run("L, 3, 4")
+    mapdl.run("L, 4, 1")
+    mapdl.run("AL, 1, 2, 3, 4")
 
 MAPDL interactively returns the result of each command, which is
 stored to the logging module. Errors are caught immediately. For
 example, if you input an invalid command:
 
-.. code:: python
+.. code:: pycon
 
-    >>> mapdl.run('AL, 1, 2, 3')
+   >>> mapdl.run("AL, 1, 2, 3")
 
    MapdlRuntimeError: 
    AL, 1, 2, 3
 
    DEFINE AREA BY LIST OF LINES
    LINE LIST =     1    2    3
-   (TRAVERSED IN SAME DIRECTION AS LINE     1)
+   TRAVERSED IN SAME DIRECTION AS LINE     1)
 
    *** ERROR ***                           CP =       0.338   TIME= 09:45:36
    Keypoint 1 is referenced by only one line.  Improperly connected line   
@@ -95,7 +121,7 @@ you can write your MAPDL scripts in Python, run them interactively, and
 then run them as a batch without worrying if the script would run correctly if
 you had instead outputted it to a script file.
 
-The :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class supports much more
+The :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class supports much more
 than just sending text to MAPDL. It includes higher-level wrapping,
 allowing for better scripting and interaction with MAPDL. For an overview of the
 various advanced methods to visualize, script, and interact with MAPDL, see
@@ -103,16 +129,17 @@ various advanced methods to visualize, script, and interact with MAPDL, see
 
 
 Calling MAPDL Pythonically
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+==========================
+
 MAPDL functions can be called directly from an instance of
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` in a Pythonic manner. This is
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` in a Pythonic manner. This is
 to simplify calling Ansys, especially when inputs are variables within
 Python. For example, the following two commands are equivalent:
 
 .. code:: python
 
     mapdl.k(1, 0, 0, 0)
-    mapdl.run('K, 1, 0, 0, 0')
+    mapdl.run("K, 1, 0, 0, 0")
 
 This approach has some obvious advantages. Chiefly, it's easier
 to script because ``ansys-mapdl-core`` takes care of the string formatting for you.
@@ -127,9 +154,9 @@ For example, you can input points from a numpy array with:
 
 Additionally, exceptions are caught and handled within Python.
 
-.. code:: python
+.. code:: pycon
 
-    >>> mapdl.run('AL, 1, 2, 3')
+   >>> mapdl.run("AL, 1, 2, 3")
 
    Exception: 
    AL, 1, 2, 3
@@ -157,7 +184,7 @@ area creation example, you can instead run:
     mapdl.k(1, 0, 0, 0)
     mapdl.k(2, 1, 0, 0)
     mapdl.k(3, 1, 1, 0)
-    mapdl.k(4, 0, 1, 0)    
+    mapdl.k(4, 0, 1, 0)
     mapdl.l(1, 2)
     mapdl.l(2, 3)
     mapdl.l(3, 4)
@@ -165,7 +192,7 @@ area creation example, you can instead run:
     mapdl.al(1, 2, 3, 4)
 
 This approach has some obvious advantages, chiefly that it's a bit
-easier to script as :class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>`
+easier to script as :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>`
 takes care of the string formatting for you. For example, inputting
 points from a numpy array:
 
@@ -181,7 +208,7 @@ points from a numpy array:
 Additionally, each function with the MAPDL class has help associated
 with it. For example:
 
-.. code:: python
+.. code:: pycon
 
     >>> help(mapdl.k)
 
@@ -210,7 +237,7 @@ with it. For example:
         --------
         Create a keypoint at (1, 1, 2)
 
-        >>> mapdl.k(1, 1, 1, 2)
+    >>> mapdl.k(1, 1, 1, 2)
 
         Notes
         -----
@@ -222,4 +249,4 @@ with it. For example:
         recommended.
 
 
-For stability considerations, see :ref:`ref_pymapdl_stability`.
+For stability considerations, see :ref:`PyMAPDL stability <ref_pymapdl_stability>`.

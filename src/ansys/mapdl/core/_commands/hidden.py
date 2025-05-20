@@ -1,4 +1,26 @@
-"""These commands may be run by PyMapdl, but are not supported from a
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+"""These commands may be run by PyMAPDL, but are not supported from a
 user-context.
 
 """
@@ -15,9 +37,11 @@ class _Hidden:
         lab
             Specifies listing mode during a batch run:
 
-            LIST - The batch output will include a listing of the input file.
+            LIST
+                The batch output will include a listing of the input file.
 
-            (blank) - Suppress input data listing.
+            (blank)
+                Suppress input data listing.
 
         Notes
         -----
@@ -64,9 +88,11 @@ class _Hidden:
         loc
             Location within a file to which output will be written:
 
-            (blank) - Output is written starting at the top of the file (default).
+            (blank)
+                Output is written starting at the top of the file (default).
 
-            APPEND - Output is appended to the existing file.
+            APPEND
+                Output is appended to the existing file.
 
         Notes
         -----

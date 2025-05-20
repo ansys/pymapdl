@@ -2,15 +2,15 @@
 
 
 Using Python to code UPF subroutines
-------------------------------------
+====================================
 
 As an alternative to compiled languages like C and Fortran, you can use the
 Python language to code user programmable subroutines. A subset of the
 documented UPF subroutines support the Python UPF capability. For more information,
 see `Supported UPF subroutines`_).
 
-You must install a Python distribution before using this feature. Python 3.6
-through Python 3.7 are supported.
+You must install a Python distribution before using this feature. Python 3.10
+through Python 3.13 are supported.
 
 Python UPFs are only supported on Linux.
 
@@ -28,7 +28,7 @@ These topics are available:
 
 
 Supported UPF subroutines
-^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------
 
 A subset of the entire set of available UPF subroutines supports Python coding. The following
 table lists those that are supported.
@@ -82,7 +82,7 @@ table lists those that are supported.
 
 
 Python UPF methodology
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 
 Coding a Python UPF is different from using a compiled language like C/C++ or Fortran,
 mainly in terms of the API. Because the `gRPC technology <grpc_>`_ is used to handle
@@ -99,10 +99,12 @@ The description of the request object and the response object can be found in th
 ``MapdlUser.proto`` file stored in this installation directory:
 
 
-.. code::
+.. code:: output
 
-    Ansys Inc\v212\ansys\syslib\ansGRPC\User
+    Ansys Inc\vXXX\ansys\syslib\ansGRPC\User
 
+Where ``XXX`` is the version of Mechanical APDL you are using.
+For example ``222`` for Mechanical APDL 2022R2.
 
 First, create a Python file starting from this template:
 
@@ -115,20 +117,20 @@ First, create a Python file starting from this template:
     import sys
     from mapdl import *
 
-    class MapdlUserService( MapdlUser_pb2_grpc.MapdlUserServiceServicer ):
 
-    #   #################################################################
-        def UAnBeg( self, request, context):
-
-            print( " ======================================= ")
-            print( " >> Inside the PYTHON UAnBeg routine  << ")
-            print( " ======================================= \n")
+    class MapdlUserService(MapdlUser_pb2_grpc.MapdlUserServiceServicer):
+        #   #################################################################
+        def UAnBeg(self, request, context):
+            print(" ======================================= ")
+            print(" >> Inside the PYTHON UAnBeg routine  << ")
+            print(" ======================================= \n")
 
             response = google_dot_protobuf_dot_empty__pb2._EMPTY()
             return response
 
-    if __name__ == '__main__':
-        upf.launch( sys.argv[0])
+
+    if __name__ == "__main__":
+        upf.launch(sys.argv[0])
 
 
 Note that Mechanical APDL automatically installs a Mechanical APDL Python package (a
@@ -147,9 +149,9 @@ customized banner. This file must be in the same directory as the input file.
 To use this Python UPF, you must add the Mechanical APDL ``/UPF`` command to your
 input file (``my\_inp.dat``).
 
-.. code::
+.. code:: apdl
 
-    /UPF,my_upf.py
+    /UPF,'my_upf.py'
 
     ! The UAnBeg UPF must be activated by using the USRCAL APDL command
 
@@ -164,13 +166,13 @@ indicate Mechanical APDL detected the Python UPF instructions and has launched a
 server:
 
 
-.. code::
+.. code:: output
 
     Processing "/upf" found in input file "my_inp.dat"
 
     Python UPF Detected
 
-    PYTHON VERSION : 3.6
+    PYTHON VERSION : 3.10
     >>
     >> START PYTHON GRPC SERVER
     >>
@@ -182,9 +184,9 @@ server:
 During the Mechanical APDL process, you see this Python printout:
 
 
-.. code::
+.. code:: output
 
-    RUN SETUP PROCEDURE FROM FILE= /ansys_inc/v212/ansys/apdl/start.ans
+    RUN SETUP PROCEDURE FROM FILE= /ansys_inc/v241/ansys/apdl/start.ans
     =======================================
     >> Inside the PYTHON UAnBeg routine  <<
     =======================================
@@ -194,7 +196,7 @@ At the very end of the process, the Python server is automatically shut
 down:
 
 
-.. code::
+.. code:: output
     
     |-----------------------------------------------------------------|
     |                                                                 |
@@ -208,7 +210,7 @@ down:
 
 
 Accessing the database from the Python code
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+-------------------------------------------
 
 Within your UPF routine, you might need to access the Mechanical APDL database in read/write
 mode. 
@@ -226,16 +228,14 @@ variable:
 
     firstcall = 1
 
-    class MapdlUserService(MapdlUser_pb2_grpc.MapdlUserServiceServicer):
-        
 
-    #   ###############################################################
-        def UserMat( self, request, context):
-            
+    class MapdlUserService(MapdlUser_pb2_grpc.MapdlUserServiceServicer):
+        #   ###############################################################
+        def UserMat(self, request, context):
             global firstcall
-            
+
             if firstcall == 1:
-                print( ">> Connection to the MAPDL DB Server\n")
+                print(">> Connection to the MAPDL DB Server\n")
                 db.start()
                 firstcall = 0
 
@@ -280,7 +280,7 @@ The following table describes the exposed functions.
 
 
 Python UPF limitations
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 
 The Python UPF capability has these limitations:
 
@@ -290,7 +290,7 @@ The Python UPF capability has these limitations:
 
 
 Python UPF examples
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 The following Python UPF examples are available in :ref:`python_upf_examples`:
 

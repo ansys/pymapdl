@@ -1,3 +1,26 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class Aux3:
     def compress(self, **kwargs):
         """Deletes all specified sets.
@@ -65,13 +88,13 @@ class Aux3:
 
         Parameters
         ----------
-        set\_
+        set\\_
             Set of data in results file to be modified.
 
         lstep
             The new load step number.
 
-        iter\_
+        iter\\_
             The new load substep number.
 
         cumit
@@ -83,9 +106,11 @@ class Aux3:
         ktitle
             Indicates if the set title should be modified.
 
-            0 - Keep the original title.
+            0
+                Keep the original title.
 
-            1 - Change the title to the title specified with the most current /TITLE command.
+            1
+                Change the title to the title specified with the most current /TITLE command.
 
         Notes
         -----
@@ -112,10 +137,12 @@ class Aux3:
         option
             Specifies which sets are to be removed from the selected sets.
 
-            SET - Specifies one or more particular sets in the results file that are to be
-                  removed from the group of sets selected for deletion.
+            SET
+                Specifies one or more particular sets in the results file that are to be
+                removed from the group of sets selected for deletion.
 
-            ALL - Removes all selected sets that are currently selected for deletion.
+            ALL
+                Removes all selected sets that are currently selected for deletion.
 
         nstart
             The first set to be removed from the set selected for deletion.

@@ -1,8 +1,48 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class Ocean:
-    def ocdata(self, val1="", val2="", val3="", val14="", **kwargs):
+    def ocdata(
+        self,
+        val1: str = "",
+        val2: str = "",
+        val3: str = "",
+        val4: str = "",
+        val5: str = "",
+        val6: str = "",
+        val7: str = "",
+        val8: str = "",
+        val9: str = "",
+        val10: str = "",
+        val11: str = "",
+        val12: str = "",
+        val13: str = "",
+        val14: str = "",
+        **kwargs,
+    ):
         """Defines an ocean load using non-table data.
 
-        APDL Command: OCDATA
+        APDL Command: ``OCDATA``
 
         Parameters
         ----------
@@ -11,14 +51,14 @@ class Ocean:
 
         Notes
         -----
-        The OCDATA command specifies non-table data that defines the ocean
+        The ``OCDATA`` command specifies non-table data that defines the ocean
         load, such as the depth of the ocean to the mud line, the ratio of
         added mass over added mass for a circular cross section, or the wave
         type to apply. The terms VAL1, VAL2, etc. are specialized according to
         the input set required for the given ocean load.
 
-        The program interprets the data input via the OCDATA command within the
-        context of the most recently issued OCTYPE command.
+        The program interprets the data input via the ``OCDATA`` command within the
+        context of the most recently issued ``OCTYPE`` command.
 
         Input values in the order indicated.
 
@@ -29,19 +69,19 @@ class Ocean:
         For a better understanding of how to set up a basic ocean type, see
         Figure: 5:: Basic Ocean Data Type Components .
 
-        DEPTH -- The depth of the ocean (that is, the distance between the mean
+        ``DEPTH`` -- The depth of the ocean (that is, the distance between the mean
         sea level and the mud line). The water surface is assumed to be level
         in the XY plane, with Z being positive upwards. This value is required
         and must be positive.
 
-        MATOC -- The material number of the ocean. This value is required and
+        ``MATOC`` -- The material number of the ocean. This value is required and
         is used to input the required density. It is also used to input the
-        viscosity if the Reynolds number is used (OCTABLE).
+        viscosity if the Reynolds number is used (``OCTABLE``).
 
-        KFLOOD -- The inside-outside fluid-interaction key:
+        ``KFLOOD`` -- The inside-outside fluid-interaction key:
 
-        For beam subtype CTUBE and HREC used with BEAM188 or BEAM189 and ocean
-        loading, KFLOOD is always set to 1.
+        For beam subtype ``CTUBE`` and ``HREC`` used with BEAM188 or BEAM189 and ocean
+        loading, ``KFLOOD`` is always set to 1.
 
         Cay -- The ratio of added mass of the external fluid over the mass of
         the fluid displaced by the element cross section in the y direction
@@ -50,7 +90,7 @@ class Ocean:
         element moves in the element y direction during a dynamic analysis.
 
         If no value is specified, and the coefficient of inertia CMy is not
-        specified (OCTABLE), both values default to 0.0.
+        specified (``OCTABLE``), both values default to 0.0.
 
         If no value is specified, but CMy is specified, this value defaults to
         Cay = CMy - 1.0.
@@ -67,7 +107,7 @@ class Ocean:
         Cay.
 
         If no value is specified, and the coefficient of inertia CMz is not
-        specified (OCTABLE), both values default to 0.0.
+        specified (``OCTABLE``), both values default to 0.0.
 
         If no value is specified, but CMz is specified, this value defaults to
         Cay = CMz - 1.0.
@@ -92,31 +132,31 @@ class Ocean:
 
         Two example cases for Zmsl are:
 
-        A structure with its origin on the sea floor (Zmsl = DEPTH).
+        A structure with its origin on the sea floor (Zmsl = ``DEPTH``).
 
-        A tidal change (tc) above the mean sea level (Zmsl = tc, and DEPTH
-        becomes DEPTH + tc)
+        A tidal change (tc) above the mean sea level (Zmsl = tc, and ``DEPTH``
+        becomes ``DEPTH`` + tc)
 
-        Ktable -- The dependency of VAL1 on the OCTABLE command:
+        Ktable -- The dependency of VAL1 on the ``OCTABLE`` command:
 
-        KWAVE -- The incident wave type:
+        ``KWAVE`` -- The incident wave type:
 
-        THETA -- Angle of the wave direction θ from the global Cartesian X axis
+        ``THETA`` -- Angle of the wave direction θ from the global Cartesian X axis
         toward the global Cartesian Y axis (in degrees).
 
-        WAVELOC (valid when KWAVE = 0 through 3, and 101+) -- The wave location
+        ``WAVELOC`` (valid when ``KWAVE`` = 0 through 3, and 101+) -- The wave location
         type:
 
-        SPECTRUM (valid when KWAVE = 5 through 7) -- The wave spectrum type:
+        ``SPECTRUM`` (valid when ``KWAVE`` = 5 through 7) -- The wave spectrum type:
 
-        KCRC -- The wave-current interaction key.
+        ``KCRC`` -- The wave-current interaction key.
 
-        Adjustments to the current profile are available via the KCRC constant
+        Adjustments to the current profile are available via the ``KCRC`` constant
         of the water motion table. Typically, these options are used only when
         the wave amplitude is large relative to the water depth, such that
         significant wave-current interaction exists.
         """
-        command = f"OCDATA,{val1},{val2},{val3},{val14}"
+        command = f"OCDATA,{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12},{val13},{val14}"
         return self.run(command, **kwargs)
 
     def ocdelete(self, datatype="", zonename="", **kwargs):

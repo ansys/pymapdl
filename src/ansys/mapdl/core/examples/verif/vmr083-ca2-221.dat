@@ -1,0 +1,237 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/VERIFY, VMR083-CA2-221
+/TITLE, VMR083-CA2-221, SOUND RADIATION OF A CYLINDER WITH VIBRATING LATERAL SURFACE 
+/COM, REFERENCE: NAFEMS BENCHMARKS FOR RADIATION AND SCATTERING OF SOUND
+/COM, TEST NO: CA2, R0038
+
+/NOPR
+/PREP7
+/OUT,SCRATCH
+
+GEOM = 0
+*IF,GEOM,EQ,1,THEN
+
+PI = ACOS(-1)
+c0 = 340                        ! SPEED OF SOUND IN m/s
+rho = 1.225                     ! DENSITY OF FLUID IN kg/m^3
+
+R = 1                           ! RADIUS in m
+L = 4                           ! LENGTH in m
+
+ET,1,FLUID221,,1                ! FLUID221, NO FSI
+ET,2,FLUID221,,1,,1             ! FLUID221, NO FSI,INCLUDE PML ABSORBING
+
+MP,SONC,1,c0
+MP,DENS,1,rho
+
+vn = 1                          ! RADIAL VELOCITY IN m/s
+z0 = rho*c0                     
+
+k1 = 1
+k2 = 2
+FREQ1 = k1*c0/(2*PI)
+FREQ2 = k2*c0/(2*PI)
+WAVE = c0/FREQ2
+H = WAVE/12
+
+NA = 3
+NPML = 4
+A1 = R+NA*H
+A2 = L/2+NA*H
+B1 = A1+NPML*H
+B2 = A2+NPML*H
+
+CYLIND,0,R,-L/2,L/2,0,180
+BLOCK,-A1,A1,,A1,-A2,A2
+BLOCK,-B1,B1,,B1,-B2,B2
+VSBV,3,2,,DELETE,KEEP
+VSBV,2,1,,DELETE,DELETE
+ALLSEL,ALL
+VGLUE,ALL
+
+TYPE,1
+MAT,1
+VSEL,S,,,3
+ESIZE,H
+VMESH,ALL
+ALLSEL,ALL
+
+TYPE,2
+MAT,1
+VSEL,S,,,4
+ESIZE,H
+VMESH,ALL
+ALLSEL,ALL
+
+CSYS,1
+NSEL,S,LOC,X,R
+SF,ALL,SHLD,-vn
+CSYS,0
+ALLSEL,ALL
+
+NSEL,S,LOC,Z,L/2
+NSEL,A,LOC,Z,-L/2
+SF,ALL,SHLD,0
+ALLSEL,ALL
+
+NSEL,S,LOC,Z,B2
+NSEL,A,LOC,Z,-B2
+NSEL,A,LOC,X,B1
+NSEL,A,LOC,X,-B1
+NSEL,A,LOC,Y,B1
+D,ALL,PRES,0
+ALLSEL,ALL
+
+CDWRITE,DB,VMR083-CA2-221,CDB
+*ELSE
+CDREAD,DB,VMR083-CA2-221,CDB
+*ENDIF
+
+FINISH
+
+/SOLU
+ANTY,HARMONIC
+HROPT,AUTO
+HARFRQ,FREQ1
+SOLVE
+FINISH
+
+/POST1
+HFSYM,0,,SHB
+SET,1
+/OUT
+*DIM,P1,ARRAY,10,1
+*DO,i,1,10,1
+DEG = (i-1)*10
+PRFAR,PRES,SUMC,90,90,0,DEG,DEG,0,100
+*GET,P1(i,1),ACUS,0,PRES
+*ENDDO
+A1 = P1(1,1)/5.3532
+A2 = P1(2,1)/5.3532
+A3 = P1(3,1)/5.3532
+A4 = P1(4,1)/5.3532
+A5 = P1(5,1)/5.3532
+A6 = P1(6,1)/5.3532
+A7 = P1(7,1)/5.3532
+A8 = P1(8,1)/5.3532
+A9 = P1(9,1)/5.3532
+A10 = P1(10,1)/5.3532
+*DIM,ANS1,,10,1
+*DIM,ANG,CHAR,10,1
+*DIM,NAD1,CHAR,10,1
+*DIM,RATIO1,,10,1
+ANG(1)='0','10','20','30','40','50','60','70','80','90'
+NAD1(1)='0.770','0.780','0.800','0.840','0.880','0.920','0.950','0.990','1.000','1.000'
+R1 = A1/0.77
+R2 = A2/0.78
+R3 = A3/0.80
+R4 = A4/0.84
+R5 = A5/0.88
+R6 = A6/0.92
+R7 = A7/0.95
+R8 = A8/0.99
+R9 = A9/1.00
+R10 = A10/1.00
+*VFILL,ANS1,DATA,A1,A2,A3,A4,A5,A6,A7,A8,A9,A10
+*VFILL,RATIO1,DATA,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10
+SAVE,TABLE_1
+FINISH
+
+/OUT,SCRATCH
+/SOLU
+ANTY,HARMONIC
+HROPT,AUTO
+HARFRQ,FREQ2
+SOLVE
+FINISH
+
+/POST1
+HFSYM,0,,SHB
+SET,1
+/OUT
+*DIM,P2,ARRAY,10,1
+*DO,i,1,10,1
+DEG = (i-1)*10
+PRFAR,PRES,SUMC,90,90,0,DEG,DEG,0,100
+*GET,P2(i,1),ACUS,0,PRES
+*ENDDO
+A11 = P2(1,1)/8.4103
+A12 = P2(2,1)/8.4103
+A13 = P2(3,1)/8.4103
+A14 = P2(4,1)/8.4103
+A15 = P2(5,1)/8.4103
+A16 = P2(6,1)/8.4103
+A17 = P2(7,1)/8.4103
+A18 = P2(8,1)/8.4103
+A19 = P2(9,1)/8.4103
+A20 = P2(10,1)/8.4103
+*DIM,ANS2,,10,1
+*DIM,NAD2,CHAR,10,1
+*DIM,RATIO2,,10,1
+NAD2(1)='0.460','0.410','0.290','0.100','0.160','0.390','0.600','0.790','0.930','1.000'
+R11 = A11/0.46
+R12 = A12/0.41
+R13 = A13/0.29
+R14 = A14/0.10
+R15 = A15/0.16
+R16 = A16/0.39
+R17 = A17/0.60
+R18 = A18/0.79
+R19 = A19/0.93
+R20 = A20/1.00
+*VFILL,ANS2,DATA,A11,A12,A13,A14,A15,A16,A17,A18,A19,A20
+*VFILL,RATIO2,DATA,R11,R12,R13,R14,R15,R16,R17,R18,R19,R20
+SAVE,TABLE_2
+FINISH
+/OUT,vmr083-ca2-221,vrt
+/COM,
+/COM,--------------------------------------------------------
+/COM,                  
+/COM,|  THETA  |  Mechanical APDL  |  NADwork  |  RATIO  |
+/COM,
+/COM,
+/COM,                   Pn (k = 1)
+/COM,
+/NOPR
+RESUME,TABLE_1
+/GOPR
+/COM,
+*VWRITE,ANG(1),ANS1(1,1),NAD1(1),RATIO1(1,1)
+(6X,A8,'  ',F5.3,'  ',10X,A8,'  ',F7.3,'  ')
+/COM,
+/COM,
+/COM,                  Pn (k = 2)
+/NOPR
+RESUME,TABLE_2
+/GOPR
+/COM,
+*VWRITE,ANG(1),ANS2(1,1),NAD2(1),RATIO2(1,1)
+(6X,A8,'  ',F5.3,'  ',10X,A8,'  ',F7.3,'  ')
+/COM,
+/COM,-------------------------------------------------------
+/OUT,
+*LIST,vmr083-ca2-221,vrt
+FINISH
+/EXIT,NOSAVE

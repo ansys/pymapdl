@@ -23,13 +23,13 @@ with the theoretical result.
 Input data
 ++++++++++
 
-.. code::
+.. code:: apdl
 
     /batch,list
-    /title,upf-py1s, test usermat.py with 3D elements
+    /title,upf-py1s, 'test usermat.py with 3D elements'
 
     /prep7
-    /upf,usermat.py
+    /upf,'usermat.py'
     tb,user,1,,2
     tbdata,1,1e5, 0.3    ! E, Poisson
 
@@ -92,17 +92,15 @@ Input data
     import numpy as np
     from mapdl import *
 
-    class MapdlUserService( MapdlUser_pb2_grpc.MapdlUserServiceServicer ):
-        
 
-    #   #################################################################
+    class MapdlUserService(MapdlUser_pb2_grpc.MapdlUserServiceServicer):
+        #   #################################################################
         def UserMat(self, request, context):
-            
             ncomp = request.ncomp
             nDirect = request.nDirect
 
-            response = MapdlUser_pb2.UserMatResponse()                                    
-            
+            response = MapdlUser_pb2.UserMatResponse()
+
             response.stress[:] = request.stress[:]
             response.ustatev[:] = request.ustatev[:]
             response.sedEl = request.sedEl
@@ -114,108 +112,107 @@ Input data
             response.var4 = request.var4
             response.var5 = request.var5
             response.var6 = request.var6
-            response.var7 = request.var7                                                  
+            response.var7 = request.var7
 
-            if ncomp > 4:                        # ***    3d, plane strain and axisymmetric example
-                usermat3d( request, context, response)
-            elif nDirect== 2 and ncomp == 3:     # ***    plane stress example            
-                usermatps( request, context, response)
-            elif ncomp == 3:                     # ***    3d beam example
-                usermatbm( request, context, response)
-            elif ncomp == 1:                     # ***    1d beam example
-                usermat1d( request, context, response)
+            if ncomp > 4:  # ***    3d, plane strain and axisymmetric example
+                usermat3d(request, context, response)
+            elif nDirect == 2 and ncomp == 3:  # ***    plane stress example
+                usermatps(request, context, response)
+            elif ncomp == 3:  # ***    3d beam example
+                usermatbm(request, context, response)
+            elif ncomp == 1:  # ***    1d beam example
+                usermat1d(request, context, response)
 
             return response
 
 
+    def usermat3d(request, context, response):
+        ZERO = 0.0
+        HALF = 0.5
+        THIRD = 1.0 / 3.0
+        ONE = 1.0
+        TWO = 2.0
+        SMALL = 1.0e-08
+        sqTiny = 1.0e-20
+        ONEDM02 = 1.0e-02
+        ONEDM05 = 1.0e-05
+        ONEHALF = 1.5
+        TWOTHIRD = 2.0 / 3.0
+        mcomp = 6
 
-    def usermat3d( request, context, response):
-        
-        ZERO       = 0.
-        HALF       = 0.5
-        THIRD      = 1./3.
-        ONE        = 1.
-        TWO        = 2.
-        SMALL      = 1.e-08
-        sqTiny     = 1.e-20
-        ONEDM02    = 1.e-02
-        ONEDM05    = 1.e-05
-        ONEHALF    = 1.5
-        TWOTHIRD   = 2.0/3.0
-        mcomp      = 6
+        G = [1.0, 1.0, 1.0, 0.0, 0.0, 0.0]
 
-        G = [1., 1., 1., 0., 0. ,0.]
-
-        db.start()                          # Connect to the MAPDL DB gRPC Server
+        db.start()  # Connect to the MAPDL DB gRPC Server
         ncomp = request.ncomp
 
         # *** get Young's modulus and Poisson's ratio
-        young    = request.prop[0]
-        posn     = request.prop[1]
-        twoG     = young / (ONE+posn)
-        elast1   = young*posn/((1.0+posn)*(1.0-TWO*posn))
-        elast2   = HALF*twoG
+        young = request.prop[0]
+        posn = request.prop[1]
+        twoG = young / (ONE + posn)
+        elast1 = young * posn / ((1.0 + posn) * (1.0 - TWO * posn))
+        elast2 = HALF * twoG
 
         #
         # *** calculate elastic stiffness matrix (3d)
         #
-        dsdeEl = np.zeros( ( 6, 6))
+        dsdeEl = np.zeros((6, 6))
 
-        dsdeEl[0,0] = (elast1+TWO*elast2)*G[0]*G[0]                         
-        dsdeEl[0,1] = elast1*G[0]*G[1]+elast2*TWO*G[3]*G[3]                 
-        dsdeEl[0,2] = elast1*G[0]*G[2]+elast2*TWO*G[4]*G[4]
-        dsdeEl[0,3] = elast1*G[0]*G[3]+elast2*TWO*G[0]*G[3]
-        dsdeEl[0,4] = elast1*G[0]*G[4]+elast2*TWO*G[0]*G[4]
-        dsdeEl[0,5] = elast1*G[0]*G[5]+elast2*TWO*G[3]*G[4]
+        dsdeEl[0, 0] = (elast1 + TWO * elast2) * G[0] * G[0]
+        dsdeEl[0, 1] = elast1 * G[0] * G[1] + elast2 * TWO * G[3] * G[3]
+        dsdeEl[0, 2] = elast1 * G[0] * G[2] + elast2 * TWO * G[4] * G[4]
+        dsdeEl[0, 3] = elast1 * G[0] * G[3] + elast2 * TWO * G[0] * G[3]
+        dsdeEl[0, 4] = elast1 * G[0] * G[4] + elast2 * TWO * G[0] * G[4]
+        dsdeEl[0, 5] = elast1 * G[0] * G[5] + elast2 * TWO * G[3] * G[4]
 
-        dsdeEl[1,1] = (elast1+TWO*elast2)*G[1]*G[1]
-        dsdeEl[1,2] = elast1*G[1]*G[2]+elast2*TWO*G[5]*G[5]
-        dsdeEl[1,3] = elast1*G[1]*G[3]+elast2*TWO*G[0]*G[3]
-        dsdeEl[1,4] = elast1*G[1]*G[4]+elast2*TWO*G[0]*G[4]
-        dsdeEl[1,5] = elast1*G[1]*G[5]+elast2*TWO*G[1]*G[5]
+        dsdeEl[1, 1] = (elast1 + TWO * elast2) * G[1] * G[1]
+        dsdeEl[1, 2] = elast1 * G[1] * G[2] + elast2 * TWO * G[5] * G[5]
+        dsdeEl[1, 3] = elast1 * G[1] * G[3] + elast2 * TWO * G[0] * G[3]
+        dsdeEl[1, 4] = elast1 * G[1] * G[4] + elast2 * TWO * G[0] * G[4]
+        dsdeEl[1, 5] = elast1 * G[1] * G[5] + elast2 * TWO * G[1] * G[5]
 
-        dsdeEl[2,2] = (elast1+TWO*elast2)*G[2]*G[2]
-        dsdeEl[2,3] = elast1*G[2]*G[3]+elast2*TWO*G[4]*G[5]
-        dsdeEl[2,4] = elast1*G[2]*G[4]+elast2*TWO*G[4]*G[2]
-        dsdeEl[2,5] = elast1*G[2]*G[5]+elast2*TWO*G[5]*G[2]
+        dsdeEl[2, 2] = (elast1 + TWO * elast2) * G[2] * G[2]
+        dsdeEl[2, 3] = elast1 * G[2] * G[3] + elast2 * TWO * G[4] * G[5]
+        dsdeEl[2, 4] = elast1 * G[2] * G[4] + elast2 * TWO * G[4] * G[2]
+        dsdeEl[2, 5] = elast1 * G[2] * G[5] + elast2 * TWO * G[5] * G[2]
 
-        dsdeEl[3,3] = elast1*G[3]*G[3]+elast2*(G[0]*G[1]+G[3]*G[3])
-        dsdeEl[3,4] = elast1*G[3]*G[4]+elast2*(G[0]*G[5]+G[4]*G[3])
-        dsdeEl[3,5] = elast1*G[3]*G[5]+elast2*(G[3]*G[5]+G[4]*G[1])
+        dsdeEl[3, 3] = elast1 * G[3] * G[3] + elast2 * (G[0] * G[1] + G[3] * G[3])
+        dsdeEl[3, 4] = elast1 * G[3] * G[4] + elast2 * (G[0] * G[5] + G[4] * G[3])
+        dsdeEl[3, 5] = elast1 * G[3] * G[5] + elast2 * (G[3] * G[5] + G[4] * G[1])
 
-        dsdeEl[4,4] = elast1*G[4]*G[4]+elast2*(G[0]*G[2]+G[4]*G[4])
-        dsdeEl[4,5] = elast1*G[4]*G[5]+elast2*(G[3]*G[2]+G[4]*G[5])
+        dsdeEl[4, 4] = elast1 * G[4] * G[4] + elast2 * (G[0] * G[2] + G[4] * G[4])
+        dsdeEl[4, 5] = elast1 * G[4] * G[5] + elast2 * (G[3] * G[2] + G[4] * G[5])
 
-        dsdeEl[5,5] = elast1*G[5]*G[5]+elast2*(G[1]*G[2]+G[5]*G[5])
+        dsdeEl[5, 5] = elast1 * G[5] * G[5] + elast2 * (G[1] * G[2] + G[5] * G[5])
 
-        for i in range( 0, 5):
-            for j in range( i+1, 6):
-                dsdeEl[j,i] = dsdeEl[i,j]
+        for i in range(0, 5):
+            for j in range(i + 1, 6):
+                dsdeEl[j, i] = dsdeEl[i, j]
 
-        Strain = np.zeros( ncomp)
+        Strain = np.zeros(ncomp)
         Strain[0:ncomp] = request.Strain[0:ncomp]
-        dStrain = np.zeros( ncomp)
+        dStrain = np.zeros(ncomp)
         dStrain[0:ncomp] = request.dStrain[0:ncomp]
 
         #
         # *** calculate the stress and
         #     copy elastic moduli dsdeEl to material Jacobian matrix
 
-        strainEl = np.copy(Strain)                  # strainEl = Strain
-        strainEl = np.add( strainEl, dStrain)       # strainEl += dStrain
-        
-        dsdePl = np.copy(dsdeEl)
-        sigElp = np.zeros ( ncomp)
-        sigElp = dsdeEl.dot( strainEl)
+        strainEl = np.copy(Strain)  # strainEl = Strain
+        strainEl = np.add(strainEl, dStrain)  # strainEl += dStrain
 
-        response.stress[:] = sigElp                                                
-        dsdePl.shape = (6*6)
+        dsdePl = np.copy(dsdeEl)
+        sigElp = np.zeros(ncomp)
+        sigElp = dsdeEl.dot(strainEl)
+
+        response.stress[:] = sigElp
+        dsdePl.shape = 6 * 6
         response.dsdePl[:] = dsdePl
 
         return response
 
-    if __name__ == '__main__':
-        upf.launch( sys.argv[0])
+
+    if __name__ == "__main__":
+        upf.launch(sys.argv[0])
 
 
 
@@ -233,17 +230,13 @@ Input data
 ++++++++++
 
 
-.. code::
+.. code:: apdl
 
     /batch,list
-    /title,upf-py10s, test usrshift.py 
-    /com 
-    /com 
-    /com 
-    /nopr 
+    /title,upf-py10s, 'test usrshift.py'
 
     /prep7 
-    /upf,usrshift.py 
+    /upf,'usrshift.py'
 
     n1=60 
     n2=n1*10 
@@ -339,48 +332,48 @@ Input data
 
 .. code:: python
 
-    import grpc 
-    import sys 
-    import math 
-    from mapdl import * 
+    import grpc
+    import sys
+    import math
+    from mapdl import *
 
-    class MapdlUserService( MapdlUser_pb2_grpc.MapdlUserServiceServicer ): 
 
-    #   ################################################################# 
+    class MapdlUserService(MapdlUser_pb2_grpc.MapdlUserServiceServicer):
+        #   #################################################################
 
-        def UsrShift(self, request, context): 
+        def UsrShift(self, request, context):
+            response = MapdlUser_pb2.UsrShiftResponse()
+            one = 1.0
+            half = 0.5
+            quart = 0.25
 
-            response = MapdlUser_pb2.UsrShiftResponse() 
-            one = 1.0 
-            half = 0.5 
-            quart = 0.25 
+            tref = request.propsh[0]
+            temp = request.temp
+            timinc = request.timinc
+            dtemp = request.dtemp
+            nTerms = request.nTerms
 
-            tref = request.propsh[0] 
-            temp = request.temp 
-            timinc = request.timinc 
-            dtemp = request.dtemp 
-            nTerms = request.nTerms 
+            thalf = temp - dtemp * half - tref
+            t3quart = temp - dtemp * quart - tref
 
-            thalf = temp - dtemp*half - tref 
-            t3quart = temp - dtemp*quart - tref 
+            c1 = 0.0
+            c2 = 0.0
 
-            c1 = 0.0 
-            c2 = 0.0 
+            for i in range(nTerms - 1):
+                c1 = c1 + request.propsh[i + 1] * thalf ** (i + 1)
+                c2 = c2 + request.propsh[i + 1] * t3quart ** (i + 1)
 
-            for i in range(nTerms-1): 
-                c1 = c1 + request.propsh[i+1] * thalf ** (i+1) 
-                c2 = c2 + request.propsh[i+1] * t3quart ** (i+1) 
+            dxi = math.exp(c1) * timinc
+            dxihalf = math.exp(c2) * timinc * half
 
-            dxi = math.exp(c1) * timinc 
-            dxihalf = math.exp(c2) * timinc * half 
+            response.dxi = dxi
+            response.dxihalf = dxihalf
 
-            response.dxi = dxi 
-            response.dxihalf = dxihalf 
+            return response
 
-            return response 
 
-    if __name__ == '__main__': 
-        upf.launch( sys.argv[0]) 
+    if __name__ == "__main__":
+        upf.launch(sys.argv[0])
 
 
 
@@ -396,15 +389,15 @@ the reference.
 Input data
 ++++++++++
 
-.. code::
+.. code:: apdl
 
     /BATCH,LIST 
-    /title, upf-py16s, test UserHyper.py with MAPDL 
-    /com    displacement-controlled uniaxial tension test for Boyce material model  
+    /title, upf-py16s, 'test UserHyper.py with MAPDL'
+    /com, displacement-controlled uniaxial tension test for Boyce material model  
 
     /prep7 
 
-    /upf,userhyper.py 
+    /upf,'userhyper.py'
     tb,hyper,1,,,user 
     tbdata,1,2/100,0.2,2.8284 
 
@@ -442,7 +435,7 @@ Input data
     set,1,last 
     presol,s,x 
 
-    /com, expected results from equivalent userhyper.F 
+    /com, 'expected results from equivalent userhyper.F'
     /com,    NODE     SX           SY           SZ           SXY          SYZ 
     /com,       2  0.20118      0.32054E-003 0.32054E-003 0.13752E-015 0.67903E-017 
     /com,       4  0.20118      0.32054E-003 0.32054E-003 0.13776E-015 0.40293E-017 
@@ -464,81 +457,87 @@ Input data
 
 .. code:: python
 
-    import grpc 
-    import sys 
-    from mapdl import * 
-    import math 
-    import numpy as np 
+    import grpc
+    import sys
+    from mapdl import *
+    import math
+    import numpy as np
 
-    firstcall = 1 
+    firstcall = 1
 
-    class MapdlUserService( MapdlUser_pb2_grpc.MapdlUserServiceServicer ): 
 
-        #   ################################################################# 
-        def UserHyper(self, request, context): 
+    class MapdlUserService(MapdlUser_pb2_grpc.MapdlUserServiceServicer):
+        #   #################################################################
+        def UserHyper(self, request, context):
+            global firstcall
+            if firstcall == 1:
+                print(">> Using Python UserHyper function\n")
+                firstcall = 0
 
-            global firstcall    
-            if firstcall == 1: 
-                print( ">> Using Python UserHyper function\n") 
-                firstcall = 0 
+            prophy = np.copy(request.prophy)
+            invar = np.copy(request.invar)
 
-            prophy = np.copy(request.prophy) 
-            invar = np.copy(request.invar) 
+            response = MapdlUser_pb2.UserHyperResponse()
 
-            response = MapdlUser_pb2.UserHyperResponse() 
+            ZERO = 0.0
+            ONE = 1.0
+            HALF = 0.5
+            TWO = 2.0
+            THREE = 3.0
+            TOLER = 1.0e-12
 
-            ZERO  = 0.0 
-            ONE   = 1.0 
-            HALF  = 0.5 
-            TWO   = 2.0 
-            THREE = 3.0 
-            TOLER = 1.0e-12 
+            ci = (
+                0.5,
+                0.05,
+                0.104761904761905e-01,
+                0.271428571428571e-02,
+                0.770315398886827e-03,
+            )
 
-            ci = (0.5,0.05,.104761904761905E-01,.271428571428571E-02,.770315398886827E-03) 
+            i1 = invar[0]
+            jj = invar[2]
+            mu = prophy[1]
+            lm = prophy[2]
+            oD1 = prophy[0]
+            i1i = ONE
+            im1 = ONE / i1
+            t3i = ONE
+            potential = ZERO
+            pInvDer = np.zeros(9)
 
-            i1   = invar[0]  
-            jj   = invar[2] 
-            mu   = prophy[1] 
-            lm   = prophy[2] 
-            oD1  = prophy[0] 
-            i1i  = ONE 
-            im1  = ONE/i1 
-            t3i  = ONE 
-            potential = ZERO 
-            pInvDer = np.zeros(9) 
+            for i in range(5):
+                ia = i + 1
+                t3i = t3i * THREE
+                i1i = i1i * i1
+                i1i1 = i1i * im1
+                i1i2 = i1i1 * im1
+                lm2 = ci[i] / (lm ** (TWO * (ia - ONE)))
+                potential = potential + lm2 * (i1i - t3i)
+                pInvDer[0] = pInvDer[0] + lm2 * ia * i1i1
+                pInvDer[2] = pInvDer[2] + lm2 * ia * (ia - ONE) * i1i2
 
-            for i in range(5): 
-                ia    = i+1 
-                t3i   = t3i * THREE 
-                i1i   = i1i * i1 
-                i1i1  = i1i  * im1 
-                i1i2  = i1i1 * im1 
-                lm2 = ci[i] / (lm ** (TWO*(ia-ONE)))
-                potential = potential + lm2 * (i1i - t3i) 
-                pInvDer[0] = pInvDer[0] + lm2 * ia * i1i1 
-                pInvDer[2] = pInvDer[2] + lm2 * ia * (ia-ONE) * i1i2 
+            potential = potential * mu
+            pInvDer[0] = pInvDer[0] * mu
+            pInvDer[2] = pInvDer[2] * mu
 
-            potential = potential * mu 
-            pInvDer[0] = pInvDer[0] * mu 
-            pInvDer[2] = pInvDer[2] * mu 
+            j1 = ONE / jj
+            pInvDer[7] = ZERO
+            pInvDer[8] = ZERO
 
-            j1 = ONE / jj 
-            pInvDer[7] = ZERO 
-            pInvDer[8] = ZERO 
+            if oD1 > TOLER:
+                oD1 = ONE / oD1
+                incomp = False
+                potential = potential + oD1 * ((jj * jj - ONE) * HALF - math.log(jj))
+                pInvDer[7] = oD1 * (jj - j1)
+                pInvDer[8] = oD1 * (ONE + j1 * j1)
 
-            if oD1 > TOLER: 
-                oD1  = ONE / oD1 
-                incomp = False 
-                potential = potential + oD1*((jj*jj - ONE)*HALF - math.log(jj)) 
-                pInvDer[7] = oD1*(jj - j1) 
-                pInvDer[8] = oD1*(ONE + j1*j1) 
+            response.potential = potential
+            response.incomp = incomp
+            response.pInvDer[:] = pInvDer[:]
 
-            response.potential = potential 
-            response.incomp = incomp 
-            response.pInvDer[:] = pInvDer[:] 
+            return response
 
-            return response 
 
-    if __name__ == '__main__': 
-        upf.launch( sys.argv[0]) 
+    if __name__ == "__main__":
+        upf.launch(sys.argv[0])
 

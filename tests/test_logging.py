@@ -1,4 +1,26 @@
-""""Testing of log module"""
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+""" "Testing of log module"""
 import logging as deflogging  # Default logging
 import os
 import re
@@ -7,7 +29,7 @@ import pytest
 
 from ansys.mapdl.core import LOG  # Global logger
 from ansys.mapdl.core import logging
-from conftest import HAS_GRPC
+from conftest import requires
 
 ## Notes
 # Use the next fixtures for:
@@ -172,7 +194,7 @@ def test_global_logger_debug_levels(caplog):
                     )
 
 
-@pytest.mark.skipif(not HAS_GRPC, reason="Requires GRPC")
+@requires("grpc")
 def test_global_logger_format():
     # Since we cannot read the format of our logger, because pytest just dont show the console output or
     # if it does, it formats the logger with its own formatter, we are going to check the logger handlers
@@ -190,13 +212,13 @@ def test_global_logger_format():
         level=deflogging.DEBUG,
         extra={"instance_name": "172.1.1.1"},
     )
-    assert re.findall("(?:[0-9]{1,3}\.){3}[0-9]{1,3}", log)
+    assert re.findall(r"(?:[0-9]{1,3}\.){3}[0-9]{1,3}", log)
     assert "DEBUG" in log
     assert "This is a message" in log
 
 
-@pytest.mark.skipif(not HAS_GRPC, reason="Requires GRPC")
-def test_instance_logger_format(mapdl):
+@requires("grpc")
+def test_instance_logger_format(mapdl, cleared, tmpdir):
     # Since we cannot read the format of our logger, because pytest just dont show the console output or
     # if it does, it formats the logger with its own formatter, we are going to check the logger handlers
     # and output by faking a record.
@@ -204,15 +226,22 @@ def test_instance_logger_format(mapdl):
     # There are things such as filename or class that we cannot evaluate without going
     # into the code.
 
+    msg = "This is a message"
+    logfile = os.path.join(tmpdir, "mylogfile.log")
+
+    # Adding a log handler
+    mapdl.logger.log_to_file(logfile, logging.DEBUG)
+
+    # Faking a record
     log = fake_record(
         mapdl._log.logger,
-        msg="This is a message",
-        level=deflogging.DEBUG,
+        msg=msg,
+        level=logging.DEBUG,
         extra={"instance_name": "172.1.1.1"},
     )
-    assert re.findall("(?:[0-9]{1,3}\.){3}[0-9]{1,3}", log)
+    assert re.findall(r"(?:[0-9]{1,3}\.){3}[0-9]{1,3}", log)
     assert "DEBUG" in log
-    assert "This is a message" in log
+    assert msg in log
 
 
 def test_global_methods(caplog):
@@ -258,7 +287,12 @@ def test_log_to_file(tmpdir):
     LOG.logger.setLevel("ERROR")
     LOG.std_out_handler.setLevel("ERROR")
 
-    if not LOG.file_handler:
+    if LOG.file_handler is None:
+        old_logger = None
+        LOG.log_to_file(file_path)
+    else:
+        # the logger has been already instantiated
+        old_logger = LOG.file_handler.baseFilename
         LOG.log_to_file(file_path)
 
     LOG.error(file_msg_error)
@@ -284,13 +318,16 @@ def test_log_to_file(tmpdir):
 
     assert file_msg_debug in text
 
+    if old_logger is not None:
+        LOG.log_to_file(old_logger)
 
-def test_log_instance_name(mapdl):
+
+def test_log_instance_name(mapdl, cleared):
     # verify we can access via an instance name
     LOG[mapdl.name] == mapdl._log
 
 
-def test_instance_log_to_file(mapdl, tmpdir):
+def test_instance_log_to_file(mapdl, cleared, tmpdir):
     """Testing writing to log file.
 
     Since the default loglevel of LOG is error, debug are not normally recorded to it.
@@ -299,11 +336,15 @@ def test_instance_log_to_file(mapdl, tmpdir):
     file_msg_error = "This is a error message"
     file_msg_debug = "This is a debug message"
 
-    if not mapdl._log.file_handler:
-        mapdl._log.log_to_file(file_path)
+    mapdl._log.log_to_file(file_path)
+    mapdl._log.logger.setLevel("ERROR")
+    for each_handler in mapdl._log.logger.handlers:
+        each_handler.setLevel("ERROR")
 
     mapdl._log.error(file_msg_error)
     mapdl._log.debug(file_msg_debug)
+
+    assert os.path.exists(file_path)
 
     with open(file_path, "r") as fid:
         text = "".join(fid.readlines())
@@ -329,7 +370,6 @@ def test_instance_log_to_file(mapdl, tmpdir):
 def test_lowercases():
     # test that all loggers are lowercase
     for each_loglevel in LOG_LEVELS.keys():
-
         LOG.setLevel(each_loglevel.lower())
 
         for each_logger in LOG._instances.values():

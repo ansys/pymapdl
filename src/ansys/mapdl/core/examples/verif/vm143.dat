@@ -1,5 +1,28 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM143
+/TITLE, VM143, FRACTURE MECHANICS STRESS INTENSITY FOR CRACK IN A FINITE WIDTH PLATE
 *CREATE,FRACT,MAC
 !  MACRO TO CREATE 3D SOLID95 CRACK TIP ELEMENTS FROM 3D SOLID45 ELEMENTS
 !     MAKE A COMPONENT CONTAINING THE CRACK TIP NODES (CRACKTIP)
@@ -74,7 +97,6 @@ ESEL,ALL                             ! SELECT ALL ELEMENTS
 
 /PREP7
 SMRT,OFF
-/TITLE, VM143, FRACTURE MECHANICS STRESS INTENSITY  - CRACK IN A FINITE WIDTH PLATE
 C***    BROWN AND SRAWLEY, ASTM SPECIAL TECHNICAL PUBLICATION NO. 410.
 /COM,     ****** CRACK IN 3-DIMENSIONS USING SOLID45 AND SOLID95
 ANTYPE,STATIC                ! STATIC ANALYSIS

@@ -1,4 +1,26 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM46
 /TITLE, VM46, TWO DIMENSIONAL END NOTCHED FLEXURE PROBLEM
 /COM, REFERENCE:" J.F.MANDELL, ET AL., PREDICTION OF DELAMINATION IN 
@@ -12,8 +34,8 @@ KEYOPT,1,3,2                ! PLANE STRAIN
 
 !MATERIAL PROPERTIES
 YOUNG = 210000              ! YOUNG'S MODULUS
-NU = 0.3                    ! POISSION'S RATIO
-MP,EX,1,YOUNG               !MPa
+NU = 0.3                    ! POISSON'S RATIO
+MP,EX,1,YOUNG               ! MPa
 MP,PRXY,1,NU
 L=30                        ! DISTANCE FROM THE SUPPORT POINT TO LOADING POINT
 H=0.6                       ! THICKNESS OF BEAM
@@ -23,6 +45,11 @@ BB=0.2                      ! FINE MESH AREA
 PP=-10                      ! LOADING
 B=1                         ! SPECIMEN WIDTH
 NN=1                        ! CHANGE OF MESH SIZE
+
+_geomgen=0
+_exit=0
+
+*if,_geomgen,eq,1,then
 
 K,1,0,0
 K,2,2*(D+L)
@@ -73,7 +100,7 @@ KEYOPT,3,5,0
 KEYOPT,3,7,0
 KEYOPT,3,8,0
 KEYOPT,3,9,0
-KEYOPT,3,10,2   
+KEYOPT,3,10,0   
 KEYOPT,3,11,0   
 KEYOPT,3,12,0   
 KEYOPT,3,2,0
@@ -94,10 +121,6 @@ ESLN,S,0
 ESURF   
 ALLSEL  
 
-FINISH
-
-/SOLU
-TIME,1
 KSEL,S,KP,,21
 NSLK,S
 D,ALL,UX
@@ -115,6 +138,26 @@ KSEL,S,KP,,6
 NSLK,S
 CM,TIPP,NODE
 ALLSEL,ALL
+
+
+
+cdwrite,all,vm46,cdb
+
+*if,_exit,eq,1,then
+   /exit,nosave
+*endif
+
+*else
+
+/out,scratch
+/PREP7 
+   cdread,db,vm46,cdb
+*endif
+
+FINISH
+
+/SOLU
+TIME,1
 
 CINT,NEW,1                    ! DEFINE CRACK ID
 CINT,TYPE,VCCT 

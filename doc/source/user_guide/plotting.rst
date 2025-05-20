@@ -1,45 +1,44 @@
-********************
+====================
 Interactive plotting
-********************
+====================
 When generating geometry from scratch within MAPDL, it is often
 necessary to plot the geometry, such as key points, lines, areas,
 and volumes. PyMAPDL supports plotting basic CAD using VTK. The
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class leverages the
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class leverages the
 existing MAPDL commands by providing the following functions, which
 transfer the geometry to Python to visualize it:
 
 - :func:`Mapdl.kplot() <ansys.mapdl.core.Mapdl.kplot>`
 - :func:`Mapdl.vplot() <ansys.mapdl.core.Mapdl.vplot>`
-- :func:`Mapdl.eplot() <ansys.mapdl.core.Mapdl.eplot>`). 
+- :func:`Mapdl.eplot() <ansys.mapdl.core.Mapdl.eplot>`).
 
-These methods rely on the :func:`ansys.mapdl.core.plotting.general_plotter`
+These methods rely on the :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter`
 method. Combined with the MAPDL geometry commands, you can
 generate and visualize geometry from scratch without opening the GUI
 using the :func:`open_gui() <ansys.mapdl.core.Mapdl.open_gui>` method.
 
 
 Line plotting
-~~~~~~~~~~~~~
+-------------
 You plot lines within Python using the :func:`Mapdl.lplot() <ansys.mapdl.core.Mapdl.lplot>` method:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
+    >>> import numpy as np
     >>> mapdl = launch_mapdl()
 
-    Create a rectangle with a few holes
-
+    # Create a rectangle with a few holes
     >>> mapdl.prep7()
     >>> rect_anum = mapdl.blc4(width=1, height=0.2)
 
-    Create several circles in the middle in the rectangle
-
+    # Create several circles in the middle in the rectangle
     >>> for x in np.linspace(0.1, 0.9, 8):
-    ...    mapdl.cyl4(x, 0.1, 0.025)
+    ...     mapdl.cyl4(x, 0.1, 0.025)
+    ...
 
-    Generate a line plot
-
-    >>> mapdl.lplot(color_lines=True, cpos='xy')
+    # Generate a line plot
+    >>> mapdl.lplot(color_lines=True, cpos="xy")
 
 
 .. figure:: ../images/lplot_vtk.png
@@ -49,18 +48,17 @@ You plot lines within Python using the :func:`Mapdl.lplot() <ansys.mapdl.core.Ma
 
 
 Area and volume plotting
-~~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
 You can using Boolean operations to obtain more complex geometry and
-visualize them using the :func:`Mapdl.vplot()
-<ansys.mapdl.core.Mapdl.vplot>` method. This example cuts the initial
-area with the eight circles and then extrudes it.
+visualize them using the :func:`Mapdl.vplot() <ansys.mapdl.core.Mapdl.vplot>`
+method. This example cuts the initial area with the eight circles and then
+extrudes it.
 
-.. code:: python
+.. code:: pycon
 
-    >>> plate_holes = mapdl.asba(rect_anum, 'all')
+    >>> plate_holes = mapdl.asba(rect_anum, "all")
 
-    Extrude this area
-
+    # Extrude this area
     >>> mapdl.vext(plate_holes, dz=0.1)
     >>> mapdl.vplot()
 
@@ -72,50 +70,50 @@ area with the eight circles and then extrudes it.
 
 
 Node and element plotting
-~~~~~~~~~~~~~~~~~~~~~~~~~
+-------------------------
 You can plot nodes and elements directly from the instance of the
-:class:`Mapdl <ansys.mapdl.core.mapdl._MapdlCore>` class. This code defines
+:class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` class. This code defines
 some element types, performs meshing, and then displays the mesh:
 
-.. code:: python
+.. code:: pycon
 
-    >>> mapdl.et(1, 'SOLID186')
-    >>> mapdl.vsweep('ALL')
+    >>> mapdl.et(1, "SOLID186")
+    >>> mapdl.vsweep("ALL")
     >>> mapdl.esize(0.1)
     >>> mapdl.eplot()
 
 .. figure:: ../images/eplot_vtk.png
     :width: 400pt
 
-    Element Plot from MAPDL using PyMAPDL and `Pyvista <pyvista_docs_>`_
+    Element Plot from MAPDL using PyMAPDL and `PyVista <pyvista_docs_>`_
 
 
 Plotting non-interactively using MAPDL
 --------------------------------------
 You can also plot using MAPDL's native plotting tools. To use the
-native tools, pass ``vtk=False`` when running plotting commands such
+native tools, pass ``graphics_backend=GraphicsBackend.MAPDL`` when running plotting commands such
 as the :func:`Mapdl.aplot <ansys.mapdl.core.Mapdl.aplot>` and
 :func:`Mapdl.eplot <ansys.mapdl.core.Mapdl.eplot>` methods. Plots are
-generated within MAPDL and then shown using 
+generated within MAPDL and then shown using
 `Matplotlib <matplotlib_main_>`_.
 
 
 Start PyMAPDL
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
 
 Create a square area using key points
 
-.. code:: python
+.. code:: pycon
 
     >>> mapdl.prep7()
     >>> mapdl.k(1, 0, 0, 0)
     >>> mapdl.k(2, 1, 0, 0)
     >>> mapdl.k(3, 1, 1, 0)
-    >>> mapdl.k(4, 0, 1, 0)    
+    >>> mapdl.k(4, 0, 1, 0)
     >>> mapdl.l(1, 2)
     >>> mapdl.l(2, 3)
     >>> mapdl.l(3, 4)
@@ -124,25 +122,26 @@ Create a square area using key points
 
 Set the view to "isometric"
 
-.. code:: python
+.. code:: pycon
 
     >>> mapdl.view(1, 1, 1, 1)
-    >>> mapdl.pnum('kp', 1)  # enable keypoint numbering
-    >>> mapdl.pnum('line', 1)  # enable line numbering
+    >>> mapdl.pnum("kp", 1)  # enable keypoint numbering
+    >>> mapdl.pnum("line", 1)  # enable line numbering
 
 Each of these creates a Matplotlib figure and pause execution.
 
-.. code:: python
+.. code:: pycon
 
-    >>> mapdl.aplot(vtk=False)
-    >>> mapdl.lplot(vtk=False)
-    >>> mapdl.kplot(vtk=False)
+    >>> from ansys.mapdl.core.plotting import GraphicsBackend
+    >>> mapdl.aplot(graphics_backend=GraphicsBackend.MAPDL)
+    >>> mapdl.lplot(graphics_backend=GraphicsBackend.MAPDL)
+    >>> mapdl.kplot(graphics_backend=GraphicsBackend.MAPDL)
 
 
 .. figure:: ../images/aplot.png
     :width: 400pt
 
-    Area Plot from MAPDL displayed using 
+    Area Plot from MAPDL displayed using
     `Matplotlib <matplotlib_main_>`_
 
 
@@ -150,31 +149,31 @@ For more information on plotting functions, see :ref:`ref_plotting_api`.
 
 
 Plotting keyword options
-~~~~~~~~~~~~~~~~~~~~~~~~
-When ``vtk=True``, which is the default, all MAPDL plotting
+------------------------
+When ``graphics_backend=GraphicsBackend.PYVISTA``, which is the default, all MAPDL plotting
 methods allow you to enter in additional keyword arguments to better
 control the plot. For example, you can automatically generate a
 screenshot of an area plot or element plot with this code:
 
-.. code:: python
+.. code:: pycon
 
-    >>> mapdl.aplot(savefig='aplot.png')
-    >>> mapdl.eplot(savefig='eplot.png')
+    >>> mapdl.aplot(savefig="aplot.png")
+    >>> mapdl.eplot(savefig="eplot.png")
 
 You can also control the camera position with ``cpos`` when you
 want to view from a standard viewing direction. This code shows how
 to view the XY plane with ``cpos='xy'``.
 
-.. code:: python
+.. code:: pycon
 
-    >>> mapdl.eplot(cpos='xy')
+    >>> mapdl.eplot(cpos="xy")
 
 For all general plotting options, see the
-:func:`ansys.mapdl.core.plotting.general_plotter` method.
+:class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` class.
 
 
 Plotting boundary conditions
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----------------------------
 
 .. warning::
    This feature is beta so its functionalities and stability are
@@ -186,13 +185,10 @@ specifying ``plot_bc=True`` in plotting functions. For example, this code
 specifies ``plot_bc=True`` for the :func:`Mapdl.nplot() <ansys.mapdl.core.Mapdl.nplot>`
 method:
 
-.. code:: python
+.. code:: pycon
 
     >>> mapdl.nplot(
-    ...     plot_bc=True,
-    ...     plot_labels=True,
-    ...     savefig=f'bc_plot.png',
-    ...     bc_labels="mechanical"
+    ...     plot_bc=True, plot_labels=True, savefig=f"bc_plot.png", bc_labels="mechanical"
     ... )
 
 
@@ -204,8 +200,8 @@ method:
 
 .. note::
     Because boundary conditions can only target nodes, you can
-    only use ``plot_bc`` as an argument in the :func:`Mapdl.nplot()
-    <ansys.mapdl.core.Mapdl.nplot>` method.
+    only use ``plot_bc`` as an argument in the
+    :func:`Mapdl.nplot() <ansys.mapdl.core.Mapdl.nplot>` method.
 
 
 

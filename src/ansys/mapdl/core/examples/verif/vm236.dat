@@ -1,4 +1,26 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM236
 /TITLE,VM236,HYSTERESIS LOOP VERIFICATION OF A CLAMPED BEAM
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
@@ -46,7 +68,7 @@ EPS0=8.854E-6
 EMUNIT,EPZRO,EPS0
 
 ET,1,182,3,,2
-ET,2,223,1001,,,1  
+ET,2,223,1001,1,,1   ! force coupling 
 ET,3,178,,1
 
 MP,EX,1,169E3
@@ -72,16 +94,17 @@ CM,AREA1,AREA
 
 ALLS
 ESIZE,ESIZE
-MSHMID,2
 
 ASEL,S,MAT,,1
-MSHAPE,0,2
+MSHAPE,0,2D
 MSHKEY,2
 AMESH,ALL
 
-ASEL,S,MAT,,2
-MSHAPE,1,2
-MSHKEY,1
+ASEL,S,MAT,,2         ! "ELASTIC AIR" 
+MSHA,0,2D
+MSHMID,2              ! MESH WITHOUT MIDSIDE NODES
+LSEL,S,,,9,10
+LESIZE,ALL,,,1        ! ONE ELEMENT THROUGH LAYER
 AMESH,ALL
 
 TYPE,3				! GAP ELEMENT MESH

@@ -1,6 +1,29 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import pytest
 
 from ansys.mapdl.core.inline_functions import SelectionStatus
+from conftest import TestClass
 
 
 class TestSelectionStatus:
@@ -16,7 +39,24 @@ class TestSelectionStatus:
             SelectionStatus(value)
 
 
-class TestNSEL:
+class TestXSEL(TestClass):
+
+    @staticmethod
+    @pytest.fixture(scope="class")
+    def selection_test_geometry(mapdl):
+        k0 = mapdl.k(1, 0, 0, 0)
+        k1 = mapdl.k(2, 0, 0, 1)
+        k2 = mapdl.k(3, 0, 1, 0)
+        k3 = mapdl.k(4, 1, 0, 0)
+        mapdl.v(k0, k1, k2, k3)
+        mapdl.mshape(1, "3D")
+        mapdl.et(1, "SOLID98")
+        mapdl.esize(0.5)
+        mapdl.vmesh("ALL")
+        return mapdl.queries
+
+
+class TestNSEL(TestXSEL):
     def test_selected(self, selection_test_geometry):
         q = selection_test_geometry
         q._mapdl.nsel("S", "LOC", "X", 0)
@@ -37,7 +77,7 @@ class TestNSEL:
         assert select == 0
 
 
-class TestKSEL:
+class TestKSEL(TestXSEL):
     def test_selected(self, selection_test_geometry):
         q = selection_test_geometry
         q._mapdl.ksel("S", "LOC", "X", 0)
@@ -58,7 +98,7 @@ class TestKSEL:
         assert select == 0
 
 
-class TestLSEL:
+class TestLSEL(TestXSEL):
     def test_selected(self, selection_test_geometry):
         q = selection_test_geometry
         q._mapdl.lsel("all")
@@ -80,7 +120,7 @@ class TestLSEL:
         assert select == 0
 
 
-class TestASEL:
+class TestASEL(TestXSEL):
     def test_selected(self, selection_test_geometry):
         q = selection_test_geometry
         q._mapdl.asel("all")
@@ -102,7 +142,7 @@ class TestASEL:
         assert select == 0
 
 
-class TestESEL:
+class TestESEL(TestXSEL):
     def test_selected(self, selection_test_geometry):
         q = selection_test_geometry
         q._mapdl.esel("all")
@@ -124,7 +164,7 @@ class TestESEL:
         assert select == 0
 
 
-class TestVSEL:
+class TestVSEL(TestXSEL):
     def test_selected(self, selection_test_geometry):
         q = selection_test_geometry
         q._mapdl.vsel("all")
@@ -143,7 +183,7 @@ class TestVSEL:
         assert select == 0
 
 
-class TestNDNEXT:
+class TestNDNEXT(TestXSEL):
     def test_existing_nodes(
         self, selection_test_geometry, common_functions_and_classes
     ):
@@ -179,7 +219,7 @@ class TestNDNEXT:
         assert next_ == 0
 
 
-class TestELNEXT:
+class TestELNEXT(TestXSEL):
     def test_existing_elements(
         self, selection_test_geometry, common_functions_and_classes
     ):
@@ -215,7 +255,7 @@ class TestELNEXT:
         assert next_ == 0
 
 
-class TestKPNEXT:
+class TestKPNEXT(TestXSEL):
     def test_existing_kps(self, selection_test_geometry):
         q = selection_test_geometry
         next_ = q.kpnext(1)
@@ -232,7 +272,7 @@ class TestKPNEXT:
         assert next_ == 0
 
 
-class TestLSNEXT:
+class TestLSNEXT(TestXSEL):
     def test_existing_lines(self, selection_test_geometry):
         # there are 6 lines in in the selection_test_geometry fixture
         q = selection_test_geometry
@@ -250,7 +290,7 @@ class TestLSNEXT:
         assert next_ == 0
 
 
-class TestARNEXT:
+class TestARNEXT(TestXSEL):
     def test_existing_areas(self, selection_test_geometry):
         # there are 4 areas in in the selection_test_geometry fixture
         q = selection_test_geometry
@@ -268,10 +308,9 @@ class TestARNEXT:
         assert next_ == 0
 
 
-class TestVLNEXT:
+class TestVLNEXT(TestXSEL):
     @staticmethod
     def make_volumes(mapdl):
-        mapdl.prep7()
         point1 = mapdl.k(999, 0, 10, 0)
         point2 = mapdl.k(99, 0, 0, 10)
         kps = [mapdl.k(i + 1, i, 0, 0) for i in range(10)]

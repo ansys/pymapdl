@@ -1,3 +1,26 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class Aux15:
     def igesin(self, fname="", ext="", **kwargs):
         """Transfers IGES data from a file into MAPDL.
@@ -67,42 +90,60 @@ class Aux15:
             Label identifying the import option.  The meaning of VAL1 varies
             depending on Lab.
 
-            STAT - List overall status of import facilities, including current option values.
-                   VAL1 is ignored.
+            STAT
+                List overall status of import facilities, including current option values.
+                VAL1 is ignored.
 
-            DEFA - Set default values for all import options.  VAL1is ignored.
+            DEFA
+                Set default values for all import options.  VAL1is ignored.
 
-            MERG - Entity merge option.  VAL1 can be:
+            MERG
+                Entity merge option.  VAL1 can be:
 
-            YES - Automatic merging is performed (default).
+            YES
+                Automatic merging is performed (default).
 
-            NO - No merging of entities.
+            NO
+                No merging of entities.
 
-            SOLID - Solid option.  VAL1 can be:
+            SOLID
+                Solid option.  VAL1 can be:
 
-            YES - Solid is created automatically (default).
+            YES
+                Solid is created automatically (default).
 
-            NO - No solid created.
+            NO
+                No solid created.
 
-            GTOLER - Entity merging tolerance. If IGES = SMOOTH, the GTOLER,VAL1 can be:
+            GTOLER
+                Entity merging tolerance. If IGES = SMOOTH, the GTOLER,VAL1 can be:
 
-            DEFA - Use system defaults (default).
+            DEFA
+                Use system defaults (default).
 
-            FILE - Use tolerance from the imported file.
+            FILE
+                Use tolerance from the imported file.
 
-            n - A user-specified tolerance value.
+            n
+                A user-specified tolerance value.
 
-            IGES - IGES import option.  VAL1 can be:
+            IGES
+                IGES import option.  VAL1 can be:
 
-            STAT - List status of IGES related options in the output window.
+            STAT
+                List status of IGES related options in the output window.
 
-            SMOOTH (or RV52) - Use more robust IGES revision 5.2 import function (default).
+            SMOOTH (or RV52)
+                Use more robust IGES revision 5.2 import function (default).
 
-            SMALL - Small areas option.   VAL1 can be:
+            SMALL
+                Small areas option.   VAL1 can be:
 
-            YES - Small areas are deleted (default).
+            YES
+                Small areas are deleted (default).
 
-            NO - Small areas are retained.
+            NO
+                Small areas are retained.
 
         val1
             Additional input value as described under each Lab option.

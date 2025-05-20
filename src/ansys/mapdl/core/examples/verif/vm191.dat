@@ -1,8 +1,28 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM191 
 /TITLE, VM191, HERTZ CONTACT BETWEEN TWO CYLINDERS
-/stitle,1,Reason COMPARE differences are acceptable:
-/stitle,2,  Contact Element Number
 /COM    "FINITE ELEMENT ANALYSIS OF HERTZ CONTACT PROBLEM"
 /COM     N. CHANDRASEKARAN, W.E. HAISLER, R.E. GOFORTH,
 /COM     FINITE ELEMENTS IN ANALYSIS AND DESIGN 3, 1987, PP 39-56.
@@ -10,6 +30,7 @@
 /COM  2-D ANALYSIS USING PLANE182 AND CONTA175
 /COM  CONTACT ALGORITHM: AUGMENTED LAGRANGIAN - KEYOPT(2) = 0
 /COM
+/OUT,SCRATCH
 /PREP7 
 SMRT,OFF 
 ANTYPE,STATIC
@@ -84,16 +105,14 @@ FINISH
 SAVE,MODEL2D
 
 *CREATE,SOLV2D,MAC     ! CREATE SOLUTION MACRO FOR 2-D CASE
-/out,scratch
 /SOLU
 D,NC,UY,-0.005         ! APPLY SMALL DISPLACEMENT TO ENGAGE CONTACT
 SOLVE                  ! SOLVE FIRST LOAD STEP
 DDELE,NC,UY            ! DELETE IMPOSED DISPLACEMENT
 F,NC,FY,-1600          ! APPLY HALF LOAD ON (SYMMETRY) MODEL
-nsub,2,10,1
+NSUB,2,10,1
 SOLVE                  ! SOLVE SECOND LOAD STEP
 FINISH
-/out
 *END
 
 SOLV2D                 ! EXECUTE SOLUTION MACRO FOR 2-D CASE
@@ -216,16 +235,14 @@ FINISH
 SAVE,MODEL3D
 
 *CREATE,SOLV3D,MAC     ! CREATE SOLUTION MACRO FOR 3-D CASE
-/out,scratch
 /SOLU
 D,NC,UY,-0.001         ! APPLY SMALL DISPLACEMENT TO ENGAGE CONTACT
 SOLVE                  ! SOLVE FIRST LOAD STEP
 DDELE,NC,UY            ! DELETE IMPOSED DISPLACEMENT
 F,NC,FY,-1600          ! APPLY HALF LOAD ON (SYMMETRY) MODEL
-nsub,2,10,1
+NSUB,2,10,1
 SOLVE                  ! SOLVE SECOND LOAD STEP
 FINISH
-/out
 *END
 
 SOLV3D                 ! EXECUTE SOLUTION MACRO FOR 3-D CASE 

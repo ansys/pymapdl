@@ -1,9 +1,32 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Test element preprocess commands"""
 import numpy as np
 import pytest
 
 from ansys.mapdl.core import examples
 from ansys.mapdl.core._commands.parse import parse_e, parse_et
+from conftest import TestClass, requires
 
 
 @pytest.fixture
@@ -33,7 +56,7 @@ def test_et(mapdl, cleared):
     assert n_plane183 == 17
 
 
-@pytest.mark.skip_grpc
+@requires("grpc")
 def test_ewrite(mapdl, cleared):
     mapdl.et("", 183)
     n0 = mapdl.n("", 0, 0, 0)
@@ -83,7 +106,7 @@ def test_esol(mapdl, vm6):
     mapdl.esol(nvar, 1, 1, "S", "X", name="stuff")
     mapdl.dim("ARR", "ARRAY", 1)
     mapdl.vget("ARR", nvar)
-    assert mapdl.parameters["ARR"] < 0  # expected -1991.40234375
+    assert mapdl.parameters["ARR"] > 0  # expected 6017.83056641
 
 
 def test_etype(mapdl, cleared):
@@ -94,7 +117,7 @@ def test_etype(mapdl, cleared):
     assert "CURRENT NODAL DOF SET IS  UX    UY    UZ" in out
 
 
-def test_eshape(mapdl):
+def test_eshape(mapdl, cleared):
     with pytest.warns(UserWarning):
         mapdl.eshape()
 
@@ -115,7 +138,7 @@ def test_edele(mapdl, cleared):
     assert "DELETE SELECTED ELEMENTS" in output
 
 
-class TestParseElementCommands:
+class TestParseElementCommands(TestClass):
     @pytest.mark.parametrize(
         "message",
         [

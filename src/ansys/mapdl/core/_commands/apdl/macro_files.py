@@ -1,3 +1,26 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class MacroFiles:
     def cfclos(self, **kwargs):
         """Closes the "command" file.
@@ -333,7 +356,7 @@ class MacroFiles:
 
         Parameters
         ----------
-        dir\_
+        dir\\_
             The directory to remove. If no path is provided, it will be assumed
             to be in the current working directory. All files in the directory
             are also removed.
@@ -565,7 +588,4 @@ class MacroFiles:
         This command is valid in any processor.
         """
         command = f"*USE,{name},{arg1},{arg2},{arg3},{arg4},{arg5},{arg6},{arg7},{arg8},{arg9},{ar10},{ar11},{ar12},{ar13},{ar14},{ag15},{ar16},{ar17},{ar18}"
-        with self.non_interactive:
-            self.run(command, **kwargs)
-
-        return self._response  # returning last response
+        return self.run(command, **kwargs)

@@ -1,6 +1,28 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from typing import Optional, Union
 
-from ansys.mapdl.core._commands.parse import parse_e
+from ansys.mapdl.core._commands import parse
 from ansys.mapdl.core.mapdl_types import MapdlFloat, MapdlInt
 
 
@@ -119,7 +141,7 @@ class Elements:
 
         """
         command = f"E,{i},{j},{k},{l},{m},{n},{o},{p}"
-        return parse_e(self.run(command, **kwargs))
+        return parse.parse_e(self.run(command, **kwargs))
 
     def ecpchg(self, **kwargs):
         """Optimizes degree-of-freedom usage in a coupled acoustic model.
@@ -364,7 +386,7 @@ class Elements:
             Generate elements from selected pattern beginning with
             IEL1 to IEL2 (defaults to IEL1) in steps of IEINC (
             defaults to 1). If IEL1 is negative, IEL2 and IEINC are
-            ignored and the last \|IEL1\| elements
+            ignored and the last \\|IEL1\\| elements
             (in sequence backward from the maximum element number)
             are used as the pattern to be repeated.  If IEL1 = ALL,
             IEL2 and IEINC are ignored and use all selected elements
@@ -1061,7 +1083,7 @@ class Elements:
             Generate elements from the pattern that begins with IEL1
             to IEL2 (defaults to IEL1) in steps of IEINC (defaults to
             1). If IEL1 is negative, IEL2 and IEINC are ignored and
-            use the last \|IEL1\| elements (in sequence backward from
+            use the last \\|IEL1\\| elements (in sequence backward from
             the maximum element number) as the pattern to be
             repeated.  If IEL1 = ALL, IEL2 and IEINC are ignored and
             all selected elements [ESEL] are used as the
@@ -1241,7 +1263,7 @@ class Elements:
         APDL Command: EPLOT
 
         Notes
-        ------
+        -----
         Produces an element display of the selected elements. In full
         graphics, only those elements faces with all of their corresponding
         nodes selected are plotted. In PowerGraphics, all element faces of the selected
@@ -2074,7 +2096,7 @@ class Elements:
         -----
         The SHSD command creates a shell-solid interface to be used in
         shell-to-solid assemblies, or deletes a previously-created
-        shell-solid interface. “Virtual” shell elements and additional
+        shell-solid interface. "Virtual" shell elements and additional
         CONTA175 elements are created at the contact pair identified by
         RID when Action = CREATE. Set Action = DELETE to remove the
         generated nodes and elements at the contact pair identified by

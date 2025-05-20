@@ -1,13 +1,36 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM64
 /PREP7
 /TITLE, VM64, THERMAL EXPANSION TO CLOSE A GAP AT A RIGID SURFACE
 C***          INTRO. TO STRESS ANALYSIS, HARRIS, 1ST PRINTING, PAGE 58, PROB. 8
-C***          USING CONTAC26 AND PLANE182 ELEMENTS
+C***          USING CONTA175 AND PLANE182 ELEMENTS
 ANTYPE,STATIC                ! STATIC ANALYSIS
 ET,1,CONTA175                ! CONTACT ELEMENT
 R,1                          ! USE DEFAULTS
 KEYOPT,1,12,4                ! NO SEPARATION
+KEYOPT,1,10,1 
 ET,2,PLANE182,2,,3
 R,2,1                        ! THICKNESS = 1
 ET,3,TARGE169                ! TARGET SURFACE
@@ -39,6 +62,7 @@ OUTPR,BASIC,LAST
 FINISH
 /SOLU    
 /OUT,SCRATCH
+
 SOLVE
 FINISH
 /POST1

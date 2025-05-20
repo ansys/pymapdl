@@ -1,0 +1,694 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/verify,vm-nr1677-1-2a-a
+/title,vm-nr1677-1-2a-a,NRC Piping Benchmark Problems,Volume 1,Problem 2
+
+/com,****************************************************************************
+/com,
+/com, Reference: Piping Benchmark Problems
+/com, 	     NUREC/CR--1677-Vol.1
+/com,		     P.Bezier, M.Hartzman, M.Reich
+/com,            August 1980
+/com,
+/com,  Elements used: Pipe16, Mass21 element
+/com,
+/com,
+/com, Results comparsion:
+/com, The following results are compared against NRC piping benchmark values
+/com, 1. Frequencies obtained from modal solution.
+/com, 2. Maximum nodal displacements and rotations obtained from spectrum solution.
+/com, 3. Element forces/moments obtained from spectrum solution.
+/com,****************************************************************************
+
+/out,scratch
+
+/prep7
+et,1,pipe16				! Element 1 - PIPE16 (Straight Pipe Element)
+et,2,mass21				! Element 2 - MASS21 (Mass Element)
+
+/com, Real Constants
+/com,****************
+
+r,1,2.37500000,0.15400000,0.0,0.0,0.0						
+r,2,0.447000518e-01,0.447000518e-01,0.447000518e-01,0.0,0.0,0.0			
+r,3,0.447000518e-01,0.447000518e-01,0.447000518e-01,0.0,0.0,0.0			
+r,4,0.447000518e-01,0.447000518e-01,0.447000518e-01,0.0,0.0,0.0			
+r,5,0.447000518e-01,0.447000518e-01,0.447000518e-01,0.0,0.0,0.0			
+r,6,0.432699275e-01,0.432699275e-01,0.432699275e-01,0.0,0.0,0.0			
+r,7,0.893995859e-02,0.893995859e-02,0.893995859e-02,0.0,0.0,0.0		
+r,8,0.432699275e-01,0.432699275e-01,0.432699275e-01,0.0,0.0,0.0			
+r,9,0.893995859e-02,0.893995859e-02,0.893995859e-02,0.0,0.0,0.0		
+r,10,0.893995859e-02,0.893995859e-02,0.893995859e-02,0.0,0.0,0.0		
+r,11,0.432699275e-01,0.432699275e-01,0.432699275e-01,0.0,0.0,0.0			
+r,12,0.893995859e-02,0.893995859e-02,0.893995859e-02,0.0,0.0,0.0		
+r,13,0.432699275e-01,0.432699275e-01,0.432699275e-01,0.0,0.0,0.0		
+r,14,0.893995859e-02,0.893995859e-02,0.893995859e-02,0.0,0.0,0.0		
+r,15,0.893995859e-02,0.893995859e-02,0.893995859e-02,0.0,0.0,0.0		
+
+/com, Nodes
+/com,*******
+
+n,1,0.0,-30.00				! Node Numbers, Global Co-ordinates
+n,2,27.25,-30.00		
+n,3,27.25,-30.00,17.250	
+n,4,0.0,-30.00,17.250		
+n,5,0.0,18.625,17.250		
+n,6,0.0,18.625,8.625		
+n,7,0.0,18.625			
+n,8,8.625,18.625,		
+n,9,18.625,18.625		
+n,10,27.25,18.625		
+n,11,27.25,18.625,8.625	
+n,12,27.25,18.625,17.250	
+n,13,18.625,18.625,17.250	
+n,14,8.625,18.625,17.250	
+n,15,0.0,-80.00			
+n,16,27.25,-80.00		
+n,17,27.25,-80.00,17.250	
+n,18,0.0,-80.00,17.25		
+
+/com, Straight Pipe (Tangent Elements)
+/com,**********************************
+
+mat,1					
+type,1					
+real,1				
+
+en,1,15,1				
+en,2,1,7
+en,3,7,6
+en,4,6,5
+en,5,5,4
+en,6,4,18
+en,7,16,2
+en,8,2,10
+en,9,10,11
+en,10,11,12
+en,11,12,3
+en,12,3,17
+en,13,12,13
+en,14,13,14
+en,15,14,5
+en,16,7,8
+en,17,8,9
+en,18,9,10
+
+/com, Mass Elements
+/com,***************
+
+mat,1
+type,2
+
+real,2
+en,19,1
+
+real,3
+en,20,2
+
+real,4
+en,21,3
+
+real,5
+en,22,4
+
+real,6
+en,23,5
+
+real,7
+en,24,6
+
+real,8
+en,25,7
+
+real,9
+en,26,8
+
+real,10
+en,27,9
+
+real,11
+en,28,10
+
+real,12
+en,29,11
+
+real,13
+en,30,12
+
+real,14
+en,31,13
+
+real,15
+en,32,14
+
+nsel,s,node,,15				
+nsel,a,node,,16
+nsel,a,node,,17
+nsel,a,node,,18
+cm,fixedsu,node				
+allsel,all					
+
+mp,ex,1,27899996.8			
+mp,nuxy,1,0.3				
+mp,dens,1,2.587991718e-10		
+
+/com, Constraints
+/com,*************
+
+d,15,all,0
+d,16,all,0
+d,17,all,0
+d,18,all,0
+save
+allsel,all
+finish
+
+/com,
+/com,=============
+/com,	Modal Solve
+/com,=============
+/com,
+
+/solution
+antype,modal				
+modopt,lanb,5				! Use LANB solver
+mxpand,,,,yes				
+solve						
+save						
+finish					
+
+/com,----------------------------------------------------------------------------
+
+/com, =============================================
+/com,		  COMPARISON OF MODAL FREQUENCY 
+/com,			WITH EXPECTED RESULTS
+/com, =============================================
+
+*dim,label,,5
+*dim,freq_ans,,5
+*dim,freq_exp,,5
+*dim,freq_err,,5
+
+*do,i,1,5
+	label(i)=i
+*enddo
+
+*do,i,1,5
+	*get,freq_ans(i),mode,i,freq
+*enddo
+
+*vfill,freq_exp,data,0.8712e+01,0.8806e+01,0.1751e+02,0.4037e+02,0.4163e+02
+
+*do,i,1,5
+	freq_err(i)=abs(freq_ans(i)/freq_exp(i))
+*enddo
+
+*status,freq_err
+save,table_1
+finish					! Finish Solution routine
+
+/com,----------------------------------------------------------------------------
+
+/com,
+/com,================
+/com,	Spectrum Solve
+/com,================
+/com,
+
+/solution
+antype,spectr				! Perform Spectrum analysis
+spopt,sprs					! Single Point Excitation Response Spectrum
+dmprat,0.02					! Damping Ratio
+grp,0.001					! Group Modes based on Significance Level
+svtyp,2					! Seismic Acceleration Response Loading
+
+sed,1
+freq
+freq,3.1,4,5,5.8,7.1,8.8,11,14.1,17.2
+freq,35,40,588
+sv,0.02,400,871,871,700,1188,1188,440,775,775
+sv,0.02,380,348.6,145
+solve
+
+sed,,1
+freq
+freq,3.1,4,5,5.8,7.1,8.8,11,14.1,17.2
+freq,35,40,588
+sv,0.02,266.7,580.7,580.7,466.7,792,792,293.3333,516.7,516.7
+sv,0.02,253.3,232.4,96.7
+solve
+
+sed,,,1
+freq
+freq,3.1,4,5,5.8,7.1,8.8,11,14.1,17.2
+freq,35,40,588
+sv,0.02,400,871,871,700,1188,1188,440,775,775
+sv,0.02,380,348.6,145
+solve
+fini
+
+/com,----------------------------------------------------------------------------
+
+/post1
+/input,,mcom  		! compute SSRS
+
+/com, Labels
+/com,********
+
+*dim,label2,char,1,6
+*dim,label3,char,6,1
+*dim,label4,char,6,1
+
+/com,-------------------------
+
+label2(1,1) = 'ux_6'
+label2(1,2) = 'uy_8'
+label2(1,3) = 'uz_8'
+label2(1,4) = 'rotx_1'
+label2(1,5) = 'roty_9'
+label2(1,6) = 'rotz_1'
+
+/com,-------------------------
+
+label3(1,1)='PX(I)'
+label3(2,1)='VY(I)'
+label3(3,1)='VZ(I)'
+label3(4,1)='TX(I)'
+label3(5,1)='MY(I)'
+label3(6,1)='MZ(I)'
+
+/com,-------------------------
+
+label4(1,1)='PX(J)'
+label4(2,1)='VY(J)'
+label4(3,1)='VZ(J)'
+label4(4,1)='TX(J)'
+label4(5,1)='MY(J)'
+label4(6,1)='MZ(J)'
+
+/com,----------------------------------------------------------------------------
+
+
+/com, *========================================================
+/com, * Maximum nodal displacements and rotations comparsion
+/com, *==========================================================
+
+/com, Solution obtained from Mechanical APDL
+/com, ****************************
+
+*GET,AdisX,NODE,6,U,X
+*GET,AdisY,NODE,8,U,Y
+*GET,AdisZ,NODE,8,U,Z
+*GET,ArotX,NODE,1,ROT,X
+*GET,ArotY,NODE,9,ROT,Y
+*GET,ArotZ,NODE,1,ROT,Z
+
+/com, Expected results from NRC manual
+/com, *********************************
+
+*SET,EdisX,4.61886e-01
+*SET,EdisY,2.35426e-03
+*SET,EdisZ,4.46591e-01
+*SET,ErotX,6.53919e-03
+*SET,ErotY,1.27731e-05
+*SET,ErotZ,6.72098e-03
+
+/com, Error computation
+/com, *********************
+
+ERdisX=ABS((AdisX)/(EdisX))
+ERdisY=ABS((AdisY)/(EdisY))
+ERdisZ=ABS((AdisZ)/(EdisZ))
+ERrotX=ABS((ArotX)/(ErotX))
+ERrotY=ABS((ArotY)/(ErotY))
+ERrotZ=ABS((ArotZ)/(ErotZ))
+
+*dim,value,,6,3
+
+*vfill,value(1,1),data,EdisX
+*vfill,value(1,2),data,AdisX
+*vfill,value(1,3),data,ERdisX
+
+*vfill,value(2,1),data,EdisY
+*vfill,value(2,2),data,AdisY
+*vfill,value(2,3),data,ERdisY
+
+*vfill,value(3,1),data,EdisZ
+*vfill,value(3,2),data,AdisZ
+*vfill,value(3,3),data,ERdisZ
+
+*vfill,value(4,1),data,ErotX
+*vfill,value(4,2),data,ArotX
+*vfill,value(4,3),data,ERrotX
+
+*vfill,value(5,1),data,ErotY
+*vfill,value(5,2),data,ArotY
+*vfill,value(5,3),data,ERrotY
+
+*vfill,value(6,1),data,ErotZ
+*vfill,value(6,2),data,ArotZ
+*vfill,value(6,3),data,ERrotZ
+
+save,table_2
+
+/com,----------------------------------------------------------------------------
+
+/com, *========================================================
+/com, * Element Forces and Moments Comparison
+/com, *==========================================================
+
+/com, Solution obtained from Mechanical APDL
+/com, ****************************
+
+*dim,elem_res_I,,2,6
+*dim,elem_res_J,,2,6
+
+*dim,pxi,,2
+*dim,vyi,,2
+*dim,vzi,,2
+*dim,txi,,2
+*dim,myi,,2
+*dim,mzi,,2
+
+*dim,pxj,,2
+*dim,vyj,,2
+*dim,vzj,,2
+*dim,txj,,2
+*dim,myj,,2
+*dim,mzj,,2
+
+esel,s,ename,,16
+
+/com,==========
+/com,	 Node I
+/com,==========
+
+/com, Element #1
+/com,***********
+
+*get,pxi(1,1),elem,1,smisc,1
+*get,vyi(1,1),elem,1,smisc,2
+*get,vzi(1,1),elem,1,smisc,3
+*get,txi(1,1),elem,1,smisc,4
+*get,myi(1,1),elem,1,smisc,5
+*get,mzi(1,1),elem,1,smisc,6
+
+*vfill,elem_res_I(1,1),data,pxi(1,1)
+*vfill,elem_res_I(1,2),data,vyi(1,1)
+*vfill,elem_res_I(1,3),data,vzi(1,1)
+*vfill,elem_res_I(1,4),data,txi(1,1)
+*vfill,elem_res_I(1,5),data,myi(1,1)
+*vfill,elem_res_I(1,6),data,mzi(1,1)
+
+/com, Element #18
+/com,*************
+
+*get,pxi(2,1),elem,18,smisc,1
+*get,vyi(2,1),elem,18,smisc,2
+*get,vzi(2,1),elem,18,smisc,3
+*get,txi(2,1),elem,18,smisc,4
+*get,myi(2,1),elem,18,smisc,5
+*get,mzi(2,1),elem,18,smisc,6
+
+*vfill,elem_res_I(2,1),data,pxi(2,1)
+*vfill,elem_res_I(2,2),data,vyi(2,1)
+*vfill,elem_res_I(2,3),data,vzi(2,1)
+*vfill,elem_res_I(2,4),data,txi(2,1)
+*vfill,elem_res_I(2,5),data,myi(2,1)
+*vfill,elem_res_I(2,6),data,mzi(2,1)
+
+
+/com,==========
+/com,  Node J
+/com,==========
+
+/com, Element #1
+/com,************
+
+*get,pxj(1,1),elem,1,smisc,7
+*get,vyj(1,1),elem,1,smisc,8
+*get,vzj(1,1),elem,1,smisc,9
+*get,txj(1,1),elem,1,smisc,10
+*get,myj(1,1),elem,1,smisc,11
+*get,mzj(1,1),elem,1,smisc,12
+
+*vfill,elem_res_J(1,1),data,pxj(1,1)
+*vfill,elem_res_J(1,2),data,vyj(1,1)
+*vfill,elem_res_J(1,3),data,vzj(1,1)
+*vfill,elem_res_J(1,4),data,txj(1,1)
+*vfill,elem_res_J(1,5),data,myj(1,1)
+*vfill,elem_res_J(1,6),data,mzj(1,1)
+
+/com, Element #18
+/com,*************
+
+*get,pxj(2,1),elem,18,smisc,7
+*get,vyj(2,1),elem,18,smisc,8
+*get,vzj(2,1),elem,18,smisc,9
+*get,txj(2,1),elem,18,smisc,10
+*get,myj(2,1),elem,18,smisc,11
+*get,mzj(2,1),elem,18,smisc,12
+
+*vfill,elem_res_J(2,1),data,pxj(2,1)
+*vfill,elem_res_J(2,2),data,vyj(2,1)
+*vfill,elem_res_J(2,3),data,vzj(2,1)
+*vfill,elem_res_J(2,4),data,txj(2,1)
+*vfill,elem_res_J(2,5),data,myj(2,1)
+*vfill,elem_res_J(2,6),data,mzj(2,1)
+
+/com,----------------------------------------------------------------------------
+
+/com, Results from NRC benchmarks
+/com, ***************************
+
+*dim,exp_I,,2,6
+*dim,exp_J,,2,6
+
+/com, Element #1
+/com,************
+
+*vfill,exp_I(1,1),data,5.554e+02
+*vfill,exp_I(1,2),data,1.082e+02
+*vfill,exp_I(1,3),data,1.093e+02
+*vfill,exp_I(1,4),data,1.610e+00
+*vfill,exp_I(1,5),data,5.135e+03
+*vfill,exp_I(1,6),data,5.229e+03
+
+*vfill,exp_J(1,1),data,5.554e+02
+*vfill,exp_J(1,2),data,1.088e+02
+*vfill,exp_J(1,3),data,1.093e+02
+*vfill,exp_J(1,4),data,1.610e+00
+*vfill,exp_J(1,5),data,2.769e+02
+*vfill,exp_J(1,6),data,2.351e+02
+
+/com, Element #18
+/com,*************
+
+*vfill,exp_I(2,1),data,1.400e+01
+*vfill,exp_I(2,2),data,2.972e+02
+*vfill,exp_I(2,3),data,1.228e+01
+*vfill,exp_I(2,4),data,1.408e-02
+*vfill,exp_I(2,5),data,4.771e+01
+*vfill,exp_I(2,6),data,1.480e+03
+
+*vfill,exp_J(2,1),data,1.400e+01
+*vfill,exp_J(2,2),data,2.972e+02
+*vfill,exp_J(2,3),data,1.228e+01
+*vfill,exp_J(2,4),data,1.408e-02
+*vfill,exp_J(2,5),data,6.043e+01
+*vfill,exp_J(2,6),data,4.049e+03
+
+/com,---------------------------------------------------------------------------
+
+/com, Error computation
+/com, *********************
+
+*dim,elem_error_I,,2,6
+*dim,elem_error_J,,2,6
+*dim,elem_tab,,24,3
+
+/com,============
+/com,   Node I
+/com,============
+
+*do,i,1,2
+	*do,j,1,6
+		*vfill,elem_error_I(i,j),data,abs(elem_res_I(i,j)/exp_I(i,j))
+	*enddo
+*enddo
+
+/com,============
+/com,   Node J
+/com,============
+
+*do,i,1,2
+	*do,j,1,6
+		*vfill,elem_error_J(i,j),data,abs(elem_res_J(i,j)/exp_J(i,j))
+	*enddo
+*enddo
+
+/com,--------------------------------------------------------------------------
+
+*do,i,1,2
+	cs=(i-1)*6
+	*do,j,1,6
+		n=cs+j
+		*vfill,elem_tab(n,1),data,exp_I(i,j)
+		*vfill,elem_tab(n,2),data,elem_res_I(i,j)
+		*vfill,elem_tab(n,3),data,elem_error_I(i,j)
+	*enddo
+
+	*do,j,1,6
+		m=cs+j+12
+		*vfill,elem_tab(m,1),data,exp_J(i,j)
+		*vfill,elem_tab(m,2),data,elem_res_J(i,j)
+		*vfill,elem_tab(m,3),data,elem_error_J(i,j)
+	*enddo
+*enddo
+
+save,table_3
+
+/com,-------------------------------------------------------------------------
+/com,
+
+/com
+/com,--------------------------Results Verification---------------------------
+/com,
+
+/nopr
+resume,table_1
+/gopr
+
+/out,vm-nr1677-1-2a-a,vrt
+
+/com, 
+/com, =============================================
+/com,		  COMPARISON OF MODAL FREQUENCY 
+/com,			WITH EXPECTED RESULTS
+/com, =============================================
+/com,
+
+/com,			Mode | Expected | Mechanical APDL |  Ratio
+/com,
+
+*vwrite,label(1),freq_exp(1),freq_ans(1),freq_err(1)
+(1X,F3.0,2X,F8.4,3X,F8.4,3X,F4.2,'  ')
+
+/com,
+
+/com,-------------------------------------------------------------------------
+/com,
+
+/nopr
+resume,table_2
+/gopr
+
+/com,
+/com,===========================================================
+/com,  COMPARISON OF MAXIMUM NODAL DISPLACEMENTS AND ROTATIONS
+/com,		       WITH EXPECTED RESULTS
+/com,===========================================================
+/com,
+
+/com,			Result_Node | Expected | Mechanical APDL |  Ratio
+/com,
+
+*vwrite,label2(1,1),value(1,1),value(1,2),value(1,3)
+(1x,a8,'  ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label2(1,2),value(2,1),value(2,2),value(2,3)
+(1x,a8,'  ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label2(1,3),value(3,1),value(3,2),value(3,3)
+(1x,a8,'  ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label2(1,4),value(4,1),value(4,2),value(4,3)
+(1x,a8,'  ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label2(1,5),value(5,1),value(5,2),value(5,3)
+(1x,a8,'  ',f10.4,'  ',f10.4,'   ',f5.3)
+*vwrite,label2(1,6),value(6,1),value(6,2),value(6,3)
+(1x,a8,'  ',f10.4,'  ',f10.4,'   ',f5.3)
+
+/com,
+
+/com,-------------------------------------------------------------------------
+/com,
+
+/nopr
+resume,table_3
+/gopr
+
+/com,
+/com,===============================================
+/com,  COMPARISON OF ELEMENT FORCES AND MOMENTS
+/com,		     WITH EXPECTED RESULTS
+/com,===============================================
+/com,
+
+/com,------------------------------------------------
+/com,	Note: Element Forces and Moments along Y & Z
+/com,		directions are flipped between Mechanical APDL
+/com,		and NRC results 
+/com,------------------------------------------------
+
+/com,			Result | Expected | Mechanical APDL |  Ratio
+/com,
+
+/com,===============
+/com,   Element 1
+/com,===============
+/com,
+
+*vwrite,label3(1,1),elem_tab(1,1),elem_tab(1,2),elem_tab(1,3)
+(1x,a5,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+
+/com,
+
+*vwrite,label4(1,1),elem_tab(13,1),elem_tab(13,2),elem_tab(13,3)
+(1x,a5,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+
+/com,
+/com,
+
+/com,===============
+/com,   Element 18
+/com,===============
+/com,
+
+*vwrite,label3(1,1),elem_tab(7,1),elem_tab(7,2),elem_tab(7,3)
+(1x,a5,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+
+/com,
+
+*vwrite,label4(1,1),elem_tab(19,1),elem_tab(19,2),elem_tab(19,3)
+(1x,a5,'   ',f10.4,'  ',f10.4,'   ',f5.3)
+
+/com,
+/com,
+/com,*******************************************************************
+/com,*******************************************************************
+/com,
+/com,
+
+/out,
+*list,vm-nr1677-1-2a-a,vrt
+fini
+/exit,nosave

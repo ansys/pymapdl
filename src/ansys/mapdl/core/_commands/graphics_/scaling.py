@@ -1,4 +1,92 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class Scaling:
+    def slashdscale(self, wn="", dmult="", **kwargs):
+        """Sets the displacement multiplier for displacement displays.
+
+        APDL Command: /DSCALE
+
+        Parameters
+        ----------
+        wn
+            Window number (or ALL) to which command applies (defaults to 1).
+
+        dmult
+            AUTO or 0
+                Scale displacements automatically so that maximum displacement
+                (vector amplitude) displays as 5 percent of the maximum model
+                length, as measured in the global Cartesian X, Y, or Z
+                directions.
+
+            1
+                Do not scale displacements (that is, scale displacements by 1.0,
+                true to geometry). Often used with large deflection results.
+
+            FACTOR
+                Scale displacements by numerical value input for `FACTOR`.
+
+            OFF
+                Remove displacement scaling (that is, scale displacements by 0.0,
+                no distortion).
+
+            USER
+                Set `dmult` to that used for last display (useful when last `dmult`
+                value was automatically calculated).
+
+        Notes
+        -----
+
+        **Command Default**
+
+        The default value is AUTO or 0 except when:
+
+        * Large deflection effects are included (`NLGEOM,ON`) and it is not a
+          modal analysis; then the default is 1.
+
+        * It is a spectrum analysis (`ANTYPE,SPECTR`); then the default is `OFF`.
+
+        * The amplitude of a time-harmonic solution is computed using the `HRCPLX`
+          command (`OMEGAT ≥ 360°`); then the default is `OFF`.
+
+        * The amplitude of a complex modal or harmonic solution is stored into
+          the database using the `SET` command (`KIMG = AMPL`); then the default
+          is `OFF`.
+
+        If Multi-Plots are not being displayed, and the current device is a 3D
+        device (`/SHOW,3D`), then the displacement scale in all active windows
+        will be the same, even if separate `/DSCALE` commands are issued for
+        each active window. For efficiency, the program maintains a single data
+        structure (segment) containing only one displacement scale. The program
+        displays the same segment (displacement scale) in all windows. Only the
+        view settings will be different in each of the active windows.
+
+        This command is valid in any processor.
+
+        """
+        command = f"/DSCALE, {wn}, {dmult}"
+        return self.run(command, **kwargs)
+
     def iclwid(self, factor="", **kwargs):
         """Scales the line width of circuit builder icons.
 
@@ -140,112 +228,155 @@ class Scaling:
         lab
             You can apply texture according to the following labels:
 
-            ELEM - Apply texture to elements N1 through N2 in steps of NINC.
+            ELEM
+                Apply texture to elements N1 through N2 in steps of NINC.
 
-            AREA - Apply texture to areas N1 through N2 in steps of NINC.
+            AREA
+                Apply texture to areas N1 through N2 in steps of NINC.
 
-            VOLU - Apply texture to volumes N1 through N2 in steps of NINC.
+            VOLU
+                Apply texture to volumes N1 through N2 in steps of NINC.
 
-            CM - Apply texture to the component named in N1. N2 and
-            NINC are ignored.
+            CM
+                Apply texture to the component named in N1. N2 and
+                NINC are ignored.
 
-            ON, OFF - Sets the specified texture display on or
-            off. All other fields are ignored.
+            ON, OFF
+                Sets the specified texture display on or
+                off. All other fields are ignored.
 
-            File - If Lab = File, the command format is /TXTRE, File,
-                   Key_Index, Fname, Fext, --, Format (This variant of
-                   the command is applicable to 2-D drivers).
+            File
+                If Lab = File, the command format is /TXTRE, File,
+                Key_Index, Fname, Fext, --, Format (This variant of
+                the command is applicable to 2-D drivers).
 
-            Key_Index - The texture index associated with the file. If
-                        the number fifty-one (51) is used, the
-                        imported bitmap will be used as the window's
-                        logo.
+            Key_Index
+                The texture index associated with the file. If
+                the number fifty-one (51) is used, the
+                imported bitmap will be used as the window's
+                logo.
 
-            Fname - File name and directory path (248 characters
-                    maximum, including the characters needed for the
-                    directory path).  An unspecified directory path
-                    defaults to the working directory; in this case,
-                    you can use all 248 characters for the file name.
+            Fname
+                File name and directory path (248 characters
+                maximum, including the characters needed for the
+                directory path).  An unspecified directory path
+                defaults to the working directory; in this case,
+                you can use all 248 characters for the file name.
 
-            Fext - Filename extension (eight-character maximum).
+            Fext
+                Filename extension (eight-character maximum).
 
-            Format - The file format. If Format = 0, the file is a
-                     pixmap (Linux) or Bitmap (PC).  The file cannot
-                     contain a compressed image, and the PC file must
-                     be 8 or 24 bit BI_RGB format. If Format = 1 or
-                     JPEG, then the file is in JPEG (Joint
-                     Photographic Experts Group) format. If Format = 2
-                     or PNG, then the file is in PNG (Portable Network
-                     Graphics) format.
+            Format
+                The file format. If Format = 0, the file is a
+                pixmap (Linux) or Bitmap (PC).  The file cannot
+                contain a compressed image, and the PC file must
+                be 8 or 24 bit BI_RGB format. If Format = 1 or
+                JPEG, then the file is in JPEG (Joint
+                Photographic Experts Group) format. If Format = 2
+                or PNG, then the file is in PNG (Portable Network
+                Graphics) format.
 
         num
             Select the texture index number from the following list:
 
-            0 - No Texturing
+            0
+                No Texturing
 
-            1 - Aluminum
+            1
+                Aluminum
 
-            2 -  Aluminum, Brushed
+            2
+                 Aluminum, Brushed
 
-            3 - Steel With Bumps
+            3
+                Steel With Bumps
 
-            4 - Steel, Embossed
+            4
+                Steel, Embossed
 
-            5 - Iron
+            5
+                Iron
 
-            6 - Steel, Pattern
+            6
+                Steel, Pattern
 
-            7 - Steel, Riveted
+            7
+                Steel, Riveted
 
-            8 - Steel, Scratched
+            8
+                Steel, Scratched
 
-            9 - Tin
+            9
+                Tin
 
-            10 - Metal
+            10
+                Metal
 
-            11 - Steel, Etched
+            11
+                Steel, Etched
 
-            12 - Metal, Hot
+            12
+                Metal, Hot
 
-            13 - Iron, Grainy
+            13
+                Iron, Grainy
 
-            14 - Metal, Rusty
+            14
+                Metal, Rusty
 
-            15 - Brick
+            15
+                Brick
 
-            16 - Block
+            16
+                Block
 
-            17 - Wood
+            17
+                Wood
 
-            18 - Wood, Light
+            18
+                Wood, Light
 
-            19 - Wood, Walnut
+            19
+                Wood, Walnut
 
-            20 - Plastic, Hard Blue
+            20
+                Plastic, Hard Blue
 
-            21 - Plastic, Light Blue
+            21
+                Plastic, Light Blue
 
-            22 - Plastic, Hard Red
+            22
+                Plastic, Hard Red
 
-            31 - Gold
+            31
+                Gold
 
-            32 - Brass
+            32
+                Brass
 
-            33 - Silver
+            33
+                Silver
 
-            34 -  Plastic, Black
+            34
+                 Plastic, Black
 
-            35 - Plastic, Ivory
+            35
+                Plastic, Ivory
 
-            36 - Plastic, Blue
+            36
+                Plastic, Blue
 
-            37 - Plastic, Red
+            37
+                Plastic, Red
 
-            38 - Plastic, Yellow
+            38
+                Plastic, Yellow
 
-            39 - Plastic, Green
+            39
+                Plastic, Green
 
-            40 - Plastic, Brown
+            40
+                Plastic, Brown
 
         n1, n2, ninc
             Apply texture to Lab items numbered N1 through N2 in steps of NINC
@@ -297,9 +428,11 @@ class Scaling:
         key
             Relative scaling key:
 
-            0 - Use relative length scaling among vectors based on magnitudes.
+            0
+                Use relative length scaling among vectors based on magnitudes.
 
-            1 - Use uniform length scaling for all vector lengths.
+            1
+                Use uniform length scaling for all vector lengths.
 
         Notes
         -----

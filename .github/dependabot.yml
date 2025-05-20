@@ -1,6 +1,86 @@
 version: 2
 updates:
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
+    labels:
+      - "maintenance"
+    commit-message:
+      prefix: "ci"
+    groups:
+       actions:
+          patterns:
+            - "*"
+
+  - directory: "/" # Location of package manifests
+    package-ecosystem: "pip" # See documentation for possible values
+    insecure-external-code-execution: allow
+    schedule:
+      interval: "weekly"
+      day: "friday"
+      time: "00:00"
+    labels:
+      - "maintenance"
+      - "dependencies"
+    commit-message:
+      prefix: "build"
+    groups:
+       minimal:
+          patterns:
+            - "ansys-api-mapdl"
+            - "numpy"
+            - "platformdirs"
+            - "psutil"
+            - "pyansys-tools-versioning"
+
+       grpc-deps:
+          patterns:
+            - "google*"
+            - "grpc*"
+            - "protobuf"
+
+       core:
+          patterns:
+            - "ansys*"
+            - "click"
+            - "matplotlib"
+            - "pexpect"
+            - "pyiges"
+            - "ansys-tools-visualization-interface"
+            - "scipy"
+            - "tqdm"
+            - "vtk"
+            - "tabulate"
+
+          exclude-patterns:
+            - "ansys-api-mapdl"
+            - "ansys-dpf-core"
+            - "pyansys-tools-report"
+            - "pyansys-tools-versioning"
+
+       documentation:
+          patterns:
+            - "*sphinx*"
+            - "ansys-dpf-core"
+            - "imageio*"
+            - "jupyter*"
+            - "numpydoc"
+            - "pandas"
+            - "plotly"
+            - "pypandoc"
+            - "pythreejs"
+
+       testing:
+          patterns:
+            - "autopep8"
+            - "pytest*"
+            - "pyansys-tools-report"
+
+          exclude-patterns:
+            - "ansys-dpf-core"
+
+       jupyter:
+          patterns:
+            - "ipywidgets"

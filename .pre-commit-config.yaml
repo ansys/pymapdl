@@ -1,24 +1,63 @@
+fail_fast: True
+
+ci:
+  # Commit name when auto fixing PRs.
+  autofix_commit_msg: |
+    ci: auto fixes from pre-commit.com hooks.
+
+    for more information, see https://pre-commit.ci
+
+  # PR name when autoupdate
+  autoupdate_commit_msg: 'ci: pre-commit autoupdate'
+
+
 repos:
 
+- repo: https://github.com/ansys/pre-commit-hooks
+  rev: v0.5.2
+  hooks:
+  - id: add-license-headers
+    args:
+    - --start_year=2016
+
 - repo: https://github.com/pycqa/isort
-  rev: 5.11.2
+  rev: 6.0.1
   hooks:
   - id: isort
 
+- repo: https://github.com/numpy/numpydoc
+  rev: v1.8.0
+  hooks:
+    - id: numpydoc-validation
+      exclude: |
+          (?x)(
+              tests/|
+              examples|
+              doc/source/|
+              src/ansys/mapdl/core/_commands|
+              src/ansys/mapdl/core/commands
+          )
+
+- repo: https://github.com/adamchainz/blacken-docs
+  rev: 1.19.1
+  hooks:
+  - id: blacken-docs
+    additional_dependencies: [black==25.1.0]
+
 - repo: https://github.com/psf/black
-  rev: 22.12.0
+  rev: 25.1.0  # If version changes --> modify "blacken-docs" manually as well.
   hooks:
   - id: black
     args:
       - --line-length=88
 
 - repo: https://github.com/PyCQA/flake8
-  rev: 6.0.0
+  rev: 7.2.0
   hooks:
   - id: flake8
 
 - repo: https://github.com/codespell-project/codespell
-  rev: v2.2.2
+  rev: v2.4.1
   hooks:
   - id: codespell
     args: ["--toml", "pyproject.toml"]
@@ -32,13 +71,13 @@ repos:
 #     exclude: "tests/"
 
 - repo: https://github.com/pre-commit/pre-commit-hooks
-  rev: v4.4.0
+  rev: v5.0.0
   hooks:
   - id: check-merge-conflict
   - id: debug-statements
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.19.2
+  rev: 0.33.0
   hooks:
     - id: check-github-workflows

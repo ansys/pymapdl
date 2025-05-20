@@ -1,3 +1,26 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class Animation:
     def ancntr(self, nfram="", delay="", ncycl="", **kwargs):
         """Produces an animated sequence of a contoured deformed shape.
@@ -124,11 +147,11 @@ class Animation:
 
             2 - Range of results data.
 
-        min\_
+        min\\_
             The range minimum value.  If left blank or 0, defaults to the first
             data point.
 
-        max\_
+        max\\_
             The range maximum value.  If left blank or 0, defaults to the last
             data point.
 
@@ -623,11 +646,11 @@ class Animation:
         delay
             Time delay during animation (default = 0.5 seconds).
 
-        min\_
+        min\\_
             Minimum results file number to animate. Default = 1 (for
             Jobname.RS01).
 
-        max\_
+        max\\_
             Maximum results file number to animate. Defaults to the highest
             numbered results file, Jobname.RSnn.
 
@@ -720,11 +743,11 @@ class Animation:
 
             2 - Range of time data.
 
-        min\_
+        min\\_
             The range minimum value.  If left blank defaults to the first data
             point.
 
-        max\_
+        max\\_
             The range maximum value.  If left blank defaults to the last data
             point.
 

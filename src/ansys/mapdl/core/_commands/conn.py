@@ -1,3 +1,26 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class Conn:
     def cat5in(
         self,
@@ -31,33 +54,42 @@ class Conn:
         entity
             Entity to be imported.
 
-            SOLIDS - Solids only, imported as ANSYS volumes (default).
+            SOLIDS
+                Solids only, imported as ANSYS volumes (default).
 
-            SURFACES - Surfaces only, imported as ANSYS areas.
+            SURFACES
+                Surfaces only, imported as ANSYS areas.
 
-            ALL - All entities. Use this option when the file contains different types of
-                  entities.
+            ALL
+                All entities. Use this option when the file contains different types of
+                entities.
 
         fmt
             The format in which ANSYS will store the model.
 
-            0 - Neutral format (default). Defeaturing after import is restricted.
+            0
+                Neutral format (default). Defeaturing after import is restricted.
 
-            1 - Solid format; this allows defeaturing after import.
+            1
+                Solid format; this allows defeaturing after import.
 
         nocl
             Remove tiny objects.
 
-            0 - Remove tiny objects without checking model validity (default).
+            0
+                Remove tiny objects without checking model validity (default).
 
-            1 - Do not remove tiny objects.
+            1
+                Do not remove tiny objects.
 
         noan
             Perform an analysis of the model.
 
-            0 - Analyze the model (default).
+            0
+                Analyze the model (default).
 
-            1 - Do not analyze the model.
+            1
+                Do not analyze the model.
 
         Notes
         -----
@@ -80,7 +112,7 @@ class Conn:
         name
             The name of a valid CATIA model, created with CATIA 4.x or
             lower.  The first character of the file name must be an
-            alphanumeric.  Special characters such as & - and * and
+            alphanumeric.  Special characters such as ``&`` ``-`` and ``*`` and
             spaces are not permitted in the part name.
 
         extension
@@ -94,10 +126,12 @@ class Conn:
         blank
             Sets whether to import "blanked" entities.
 
-            0 - Does not import "blanked" (suppressed) CATIA entities (default).
+            0
+                Does not import "blanked" (suppressed) CATIA entities (default).
 
-            1 - Imports "blanked" entities. The portions of CATIA data
-            that were suppressed will be included in the import.
+            1
+                Imports "blanked" entities. The portions of CATIA data
+                that were suppressed will be included in the import.
 
         Notes
         -----
@@ -140,31 +174,39 @@ class Conn:
         entity
             Entity to be imported:
 
-            SOLIDS - Solids only, imported as ANSYS volumes (default)
+            SOLIDS
+                Solids only, imported as ANSYS volumes (default)
 
-            SURFACES - Surfaces only, imported as ANSYS areas.
+            SURFACES
+                Surfaces only, imported as ANSYS areas.
 
-            WIREFRAME - Wireframe only, imported as ANSYS lines.
+            WIREFRAME
+                Wireframe only, imported as ANSYS lines.
 
-            ALL - All entities. Use this option when the file contains
-                  more than one type of entity.
+            ALL
+                All entities. Use this option when the file contains
+                more than one type of entity.
 
         fmt
             Sets the format in which ANSYS will store the model
 
-            0 - Neutral format (default). Defeaturing after import is
+            0
+                Neutral format (default). Defeaturing after import is
                 restricted. Use this option if you need to scale a model
                 to a specific unit of measure (other than meters).
 
-            1 - Solid format; this allows defeaturing after import.
+            1
+                Solid format; this allows defeaturing after import.
 
         scale
             Allows scaling for the model
 
-            0 - Do not rescale the model; retain the default Parasolid
+            0
+                Do not rescale the model; retain the default Parasolid
                 setting of meters (default).
 
-            1 - Scale the model if warranted by the model size.
+            1
+                Scale the model if warranted by the model size.
 
         Notes
         -----
@@ -184,7 +226,7 @@ class Conn:
         name
             The name of the Creo Parametric part to be imported, which cannot
             exceed 64 characters in length and must begin with an alphanumeric
-            character. Special characters such as & - and * and spaces are not
+            character. Special characters such as ``&`` ``-`` and ``*`` and spaces are not
             permitted in the part name.
 
         extension
@@ -230,7 +272,7 @@ class Conn:
         name
             The name of a valid .SAT file, created with a supported version of
             ACIS. The first character of the file name must be an alphanumeric.
-            Special characters such as & - and * and spaces are not permitted
+            Special characters such as ``&`` ``-`` and ``*`` and spaces are not permitted
             in the part name. See File Names in the Command Reference for more
             information about ANSYS file naming conventions.
 
@@ -245,35 +287,45 @@ class Conn:
         entity
             Entity to be imported.
 
-            SOLIDS - Solids only, imported as ANSYS volumes (Not implemented, imports All).
+            SOLIDS
+                Solids only, imported as ANSYS volumes (Not implemented, imports All).
 
-            SURFACES - Surfaces only, imported as ANSYS areas (Not implemented, imports All).
+            SURFACES
+                Surfaces only, imported as ANSYS areas (Not implemented, imports All).
 
-            WIREFRAME - Wireframe only, imported as ANSYS lines (Not implemented, imports All).
+            WIREFRAME
+                Wireframe only, imported as ANSYS lines (Not implemented, imports All).
 
-            ALL - All entities. Use this option when the file contains different types of
-                  entities.
+            ALL
+                All entities. Use this option when the file contains different types of
+                entities.
 
         fmt
             The format in which ANSYS will store the model.
 
-            0 - Neutral format (default). Defeaturing after import is restricted.
+            0
+                Neutral format (default). Defeaturing after import is restricted.
 
-            1 - Solid format; this allows defeaturing after import.
+            1
+                Solid format; this allows defeaturing after import.
 
         nocl
             Remove tiny objects.
 
-            0 - Remove tiny objects without checking model validity (default).
+            0
+                Remove tiny objects without checking model validity (default).
 
-            1 - Do not remove tiny objects.
+            1
+                Do not remove tiny objects.
 
         noan
             Perform an ACIS analysis of the model.
 
-            0 - Analyze the model (default).
+            0
+                Analyze the model (default).
 
-            1 - Do not analyze the model.
+            1
+                Do not analyze the model.
 
         Notes
         -----
@@ -316,17 +368,21 @@ class Conn:
         entity
             Entity to be imported.
 
-            0 or Solid - Solids only, imported as ANSYS volumes (the
-            default).
+            0 or Solid
+                Solids only, imported as ANSYS volumes (the
+                default).
 
-            1 or Surface - Surfaces only, imported as ANSYS areas.
+            1 or Surface
+                Surfaces only, imported as ANSYS areas.
 
-            2 or Wireframe - Wireframe only, imported as ANSYS lines.
+            2 or Wireframe
+                Wireframe only, imported as ANSYS lines.
 
-            3 or All - All entities. Use this option when the part
-                       contains entities that may not be attached to each
-                       other, such as a solid in one location and a
-                       surface in another.
+            3 or All
+                All entities. Use this option when the part
+                contains entities that may not be attached to each
+                other, such as a solid in one location and a
+                surface in another.
 
         layer
             The number(s) assigned to the layer(s) to be imported. You can
@@ -336,9 +392,11 @@ class Conn:
         fmt
             The format in which ANSYS will store the model.
 
-            0 - Neutral format (default). Defeaturing after import is restricted.
+            0
+                Neutral format (default). Defeaturing after import is restricted.
 
-            1 - Solid format; this allows defeaturing after import.
+            1
+                Solid format; this allows defeaturing after import.
 
         Notes
         -----

@@ -1,4 +1,26 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VMD3
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
@@ -314,10 +336,10 @@ LAB(5)='PARL 15' $ LAB(6)='PARL 30' $ LAB(7)='PARL 45'
   RESUME                              ! RESTORE DATABASE
   PARRES                              ! RESTORE PARAMETERS
 *END
-ETYP=2
+ETYP=183
 ATYP=0                                ! 0=BENDING MODE, 1=AXIAL MODE
 /PREP7
-ET,1,ETYP,,,3
+ET,1,ETYP,1,,3
 R,1,.1
 MP,EX,1,200E9                         ! MATERIAL PROPERTIES
 MP,NUXY,1,0.3
@@ -344,7 +366,6 @@ NSLE,S                                ! SELECT AND DELETE UNNECESSARY NODES
 NSEL,INVERT
 NDELE,ALL
 NSEL,ALL
-WSORT,X
 NSEL,S,LOC,X,6                        ! SYMMETRY CONSTRAINTS
 DSYMM,SYMM,X
 *IF,ATYP,EQ,1,THEN           

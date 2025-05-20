@@ -1,8 +1,28 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Contains the ansXpl class."""
 import json
 import pathlib
-import random
-import string
 import weakref
 
 from ansys.api.mapdl.v0 import mapdl_pb2
@@ -10,12 +30,7 @@ import numpy as np
 
 from .common_grpc import ANSYS_VALUE_TYPE
 from .errors import MapdlRuntimeError
-
-
-def id_generator(size=6, chars=string.ascii_uppercase):
-    """Generate a random string using only uppercase letters."""
-    return "".join(random.choice(chars) for _ in range(size))
-
+from .misc import random_string
 
 MYCTYPE = {
     np.int32: "I",
@@ -109,6 +124,7 @@ class ansXpl:
         """
         response = self._mapdl.run("*XPL,CLOSE")
         self._check_ignored(response)
+        self._filename = None
         self._open = False
         return response
 
@@ -196,7 +212,7 @@ class ansXpl:
         """
         response = self._mapdl.run(f"*XPL,STEP,{where}")
         if "Not Found" in response:
-            raise RuntimeError(response.strip())
+            raise MapdlRuntimeError(response.strip())
         return response
 
     def info(self, recname, option=""):
@@ -358,11 +374,12 @@ class ansXpl:
         """Save the current file, ignoring the marked records."""
         response = self._mapdl.run("*XPL,SAVE").strip()
         self._check_ignored(response)
+        self._open = False
+        self._filename = None
         return response
 
-    def extract(self, recordname, sets="ALL", asarray=False):  # pragma: no cover
-        """
-        Import a Matrix/Vector from a MAPDL result file.
+    def extract(self, recordname, sets="ALL", asarray=False):
+        """Import a Matrix/Vector from a MAPDL result file.
 
         At the moment, this only supports reading the displacement vectors from
         a result file.
@@ -377,14 +394,14 @@ class ansXpl:
             Number of sets. Can be ``"ALL"`` or the number of sets to load.
 
         asarray : bool, optional
-            Return a :class:`numpy.ndarray` rather than a :class:`AnsMat
-            <ansys.mapdl.core.math.AnsMat>`. Default ``False``.
+            Return a :class:`numpy.ndarray` rather than a :class:`AnsMath
+            <ansy.math.core.math.AnsMath>`. Default ``False``.
 
         Returns
         -------
-        numpy.ndarray or ansys.mapdl.core.math.AnsMat
-            A :class:`numpy.ndarray` or :class:`AnsMat
-            <ansys.mapdl.core.math.AnsMat>` of the displacement vectors,
+        numpy.ndarray or ansys.math.core.math.AnsMath
+            A :class:`numpy.ndarray` or :class:`AnsMath
+            <ansys.math.core.math.AnsMath>` of the displacement vectors,
             depending on the value of ``asarray``.
 
         Notes
@@ -420,10 +437,12 @@ class ansXpl:
                  1.20642736e-02,  2.58299321e-11,  9.14504940e-04]])
 
         """
+        from ansys.math.core.math import AnsMath
+
         if recordname.upper() != "NSL":
             raise ValueError("Currently, the only supported recordname is 'NSL'")
 
-        rand_name = id_generator()
+        rand_name = random_string(stringLength=6)
         self._mapdl._log.info(
             "Calling MAPDL to extract the %s matrix from %s",
             recordname,
@@ -437,7 +456,7 @@ class ansXpl:
         dtype = np.double
         file_extension = pathlib.Path(self._filename).suffix[1:]
         if file_extension.lower() != "rst":
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "This method only supports extracting records from result files"
             )
 
@@ -446,7 +465,8 @@ class ansXpl:
             f"{num_first},{num_last},{recordname}",
             mute=False,
         )
-        return self._mapdl.math.mat(dtype=dtype, name=rand_name)
+
+        return AnsMath(self._mapdl).mat(dtype=dtype, name=rand_name)
 
     def read(self, recordname, asarray=False):
         """
@@ -454,12 +474,12 @@ class ansXpl:
 
         Returns
         -------
-        ansys.mapdl.AnsMat or ansys.mapdl.AnsVec
+        ansys.mapdl.AnsMath or ansys.mapdl.AnsVec
             A handle to the APDLMath object.
 
         asarray : bool, optional
-            Return a :class:`numpy.ndarray` rather than a :class:`AnsMat
-            <ansys.mapdl.core.math.AnsMat>`. Default ``False``.
+            Return a :class:`numpy.ndarray` rather than a :class:`AnsMath
+            <ansys.math.core.math.AnsMath>`. Default ``False``.
 
         Examples
         --------
@@ -471,23 +491,26 @@ class ansXpl:
         array([ 4,  7, 10, 13, 16, 19, 22, 25, 28, 31, 34, 37, 40, 43,
                46, 49, 52, 55, 58,  1], dtype=int32)
         """
-        rand_name = id_generator()
+        from ansys.math.core.math import AnsMath
+
+        rand_name = random_string(stringLength=6)
         response = self._mapdl.run(f"*XPL,READ,{recordname},{rand_name}")
         self._check_ignored(response)
         data_info = self._mapdl._data_info(rand_name)
 
         dtype = ANSYS_VALUE_TYPE[data_info.stype]
-        if dtype is None:  # pragma: no cover
+        if dtype is None:
             raise ValueError("Unknown MAPDL data type")
 
         # return either vector or matrix type
+        mm = AnsMath(self._mapdl)
         if data_info.objtype == mapdl_pb2.DataType.VEC:
-            out = self._mapdl.math.vec(dtype=dtype, name=rand_name)
+            out = mm.vec(dtype=dtype, name=rand_name)
         elif data_info.objtype in [
             mapdl_pb2.DataType.DMAT,
             mapdl_pb2.DataType.SMAT,
         ]:  # pragma: no cover
-            out = self._mapdl.math.mat(dtype=dtype, name=rand_name)
+            out = mm.mat(dtype=dtype, name=rand_name)
         else:  # pragma: no cover
             raise ValueError(f"Unhandled MAPDL matrix object type {data_info.objtype}")
 
@@ -530,8 +553,22 @@ class ansXpl:
     def __repr__(self):
         txt = "MAPDL File Explorer\n"
         if self._open:
-            txt += "\tOpen file:%s" % self._filename
+            txt += f"\tOpen file : {self._filename}"
             txt += "\n".join(self.where().splitlines()[1:])
         else:
             txt += "\tNo open file"
         return txt
+
+    @property
+    def opened(self):
+        """
+        Check if a file is currently open.
+
+        Returns:
+            str or None: The filename if a file is open, otherwise None.
+        """
+
+        if self._open:
+            return self._filename
+        else:
+            return None

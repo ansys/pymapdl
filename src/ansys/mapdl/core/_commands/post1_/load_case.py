@@ -1,3 +1,26 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class LoadCase:
     def lcabs(self, lcno="", kabs="", **kwargs):
         """Specifies absolute values for load case operations.
@@ -13,9 +36,11 @@ class LoadCase:
         kabs
             Absolute value key:
 
-            0 - Use algebraic values of load case LCNO in operations.
+            0
+                Use algebraic values of load case LCNO in operations.
 
-            1 - Use absolute values of load case LCNO in operations.
+            1
+                Use absolute values of load case LCNO in operations.
 
         Notes
         -----
@@ -68,9 +93,11 @@ class LoadCase:
         kimg
             Used only with results from complex analyses:
 
-            0 - Use real part of complex solution
+            0
+                Use real part of complex solution
 
-            1 - Use imaginary part.
+            1
+                Use imaginary part.
 
         Notes
         -----
@@ -160,31 +187,42 @@ class LoadCase:
         oper
             Valid operations are:
 
-            ZERO - Zero results portion of database (LCASE1 ignored).
+            ZERO
+                Zero results portion of database (LCASE1 ignored).
 
-            SQUA - Square database values (LCASE1 ignored).
+            SQUA
+                Square database values (LCASE1 ignored).
 
-            SQRT - Square root of database (absolute) values (LCASE1 ignored).
+            SQRT
+                Square root of database (absolute) values (LCASE1 ignored).
 
-            LPRIN - Recalculate line element principal stresses (LCASE1 ignored).  Stresses are as
-                    shown for the NMISC items of the ETABLE command for the
-                    specific line element type.
+            LPRIN
+                Recalculate line element principal stresses (LCASE1 ignored).  Stresses are as
+                shown for the NMISC items of the ETABLE command for the
+                specific line element type.
 
-            ADD - Add LCASE1 to database values.
+            ADD
+                Add LCASE1 to database values.
 
-            SUB - Subtract LCASE1 from database values.
+            SUB
+                Subtract LCASE1 from database values.
 
-            SRSS - Square root of the sum of the squares of database and LCASE1.
+            SRSS
+                Square root of the sum of the squares of database and LCASE1.
 
-            MIN - Compare and save in database the algebraic minimum of database and LCASE1.
+            MIN
+                Compare and save in database the algebraic minimum of database and LCASE1.
 
-            MAX - Compare and save in database the algebraic maximum of database and LCASE1.
+            MAX
+                Compare and save in database the algebraic maximum of database and LCASE1.
 
-            ABMN - Compare and save in database the absolute minimum of database and LCASE1 (based
-                   on magnitudes, then apply the corresponding sign).
+            ABMN
+                Compare and save in database the absolute minimum of database and LCASE1 (based
+                on magnitudes, then apply the corresponding sign).
 
-            ABMX - Compare and save in database the absolute maximum of database and LCASE1 (based
-                   on magnitudes, then apply the corresponding sign).
+            ABMX
+                Compare and save in database the absolute maximum of database and LCASE1 (based
+                on magnitudes, then apply the corresponding sign).
 
         lcase1
             First load case in the operation (if any).  See LCNO of the LCDEF
@@ -194,18 +232,20 @@ class LoadCase:
         oper2
             Valid operations are:
 
-            MULT - Multiplication: ``LCASE1*LCASE2``
+            MULT
+                Multiplication: ``LCASE1*LCASE2``
 
-            CPXMAX - This option does a phase angle sweep to calculate the maximum of derived
-                     stresses and equivalent strain for a complex solution
-                     where LCASE1 is the real part and LCASE2 is the imaginary
-                     part. The Oper field is not applicable with  this option.
-                     Also, the LCABS and SUMTYPE commands have no effect on
-                     this option. The value of S3 will be a minimum.   This
-                     option does not apply to derived displacement amplitude
-                     (USUM). Load case writing (LCWRITE) is not supported. See
-                     POST1 and POST26 – Complex Results Postprocessing in the
-                     Mechanical APDL Theory Reference for more information.
+            CPXMAX
+                This option does a phase angle sweep to calculate the maximum of derived
+                stresses and equivalent strain for a complex solution
+                where LCASE1 is the real part and LCASE2 is the imaginary
+                part. The Oper field is not applicable with  this option.
+                Also, the LCABS and SUMTYPE commands have no effect on
+                this option. The value of S3 will be a minimum.   This
+                option does not apply to derived displacement amplitude
+                (USUM). Load case writing (LCWRITE) is not supported. See
+                POST1 and POST26 – Complex Results Postprocessing in the
+                Mechanical APDL Theory Reference for more information.
 
         lcase2
             Second load case.  Used only with Oper2 operations.
@@ -249,24 +289,32 @@ class LoadCase:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
-            S - Select a new set.
+            S
+                Select a new set.
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
-            ALL - Restore the full set.
+            ALL
+                Restore the full set.
 
-            NONE - Unselect the full set.
+            NONE
+                Unselect the full set.
 
-            INVE - Invert the current set (selected becomes unselected and vice versa).
+            INVE
+                Invert the current set (selected becomes unselected and vice versa).
 
-            STAT - Display the current select status.
+            STAT
+                Display the current select status.
 
         lcmin
             Minimum value of load case pointer range.
@@ -301,9 +349,11 @@ class LoadCase:
         lab
             Combination option
 
-            (blank) - Only combine summable items [default].
+            (blank)
+                Only combine summable items [default].
 
-            ALL - Combine all items including non summable items.
+            ALL
+                Combine all items including non summable items.
 
         Notes
         -----

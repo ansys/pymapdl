@@ -1,3 +1,25 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """
 .. _ref_lathe_cutter_example:
 
@@ -5,7 +27,7 @@
 Structural Analysis of a Lathe Cutter
 =====================================
 
-**Summary**: Basic walk through PyMAPDL capabilities.
+Basic walk through PyMAPDL capabilities.
 
 Objective
 =========
@@ -17,7 +39,7 @@ supporting their design would most often be transient
 thermal-structural. However, for simplicity, this simulation
 example uses a non-uniform load.
 
-.. figure:: ../../../_static/lathe_cutter_model.png
+.. figure:: ../../../images/lathe_cutter_model.png
     :align: center
     :width: 600
     :alt:  Lathe cutter geometry and load description.
@@ -72,6 +94,7 @@ import numpy as np
 
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.examples.downloads import download_example_data
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 # cwd = current working directory
 path = os.getcwd()
@@ -81,7 +104,7 @@ NU = 0.27
 
 ###############################################################################
 # Often used MAPDL command line options are exposed as Pythonic parameter names in
-# :func:`ansys.mapdl.core.launch_mapdl`. For example, ``-dir``
+# :func:`ansys.mapdl.core.launcher.launch_mapdl`. For example, ``-dir``
 # has become ``run_location``.
 # You could use ``run_location`` to specify the MAPDL run location. For example:
 #
@@ -172,9 +195,9 @@ mapdl.vplot(
 #
 # VTK plots do not show MAPDL plot symbols.
 # However, to use MAPDL plotting capabilities, you can set the keyword
-# option ``vtk`` to ``False``.
-
-mapdl.lplot(vtk=False)
+# option ``backend`` to ``GraphicsBackend.MAPDL``.
+mapdl.set_graphics_backend(GraphicsBackend.MAPDL)
+mapdl.lplot()
 
 ###############################################################################
 # Step 4: Pressure load
@@ -222,7 +245,7 @@ mapdl.slashsolu()
 mapdl.nlgeom("On")
 mapdl.psf("PRES", "NORM", 3, 0, 1)
 mapdl.view(1, -1, 1, 1)
-mapdl.eplot(vtk=False)
+mapdl.eplot()
 
 ###############################################################################
 # Solve the model.
@@ -326,7 +349,7 @@ mapdl.post_processing.nodal_principal_stress("1")
 
 ###############################################################################
 # Get the principal nodal stresses of the node subset.
-mapdl.nsel("S", "S", 1, 6700, 7720)
+mapdl.nsel("S", vmin=1200, vmax=1210)
 mapdl.esln()
 mapdl.nsle()
 
@@ -391,9 +414,8 @@ sbar_kwargs = {
 # Generate a single horizontal slice along the XY plane.
 #
 # .. note::
-#    We're using ``eye_dome_lighting`` here to enhance the plots of our slices.
-#    Read more about it at `Eye Dome Lighting
-#    <pyvista_eye_dome_lighting_>`_
+#    PyVista's ``eye_dome_lighting`` method is used here to enhance the plots of the slices.
+#    For more information, see`Eye Dome Lighting <pyvista_eye_dome_lighting_>`_.
 
 single_slice = grid.slice(normal=[0, 0, 1], origin=[0, 0, 0])
 single_slice.plot(

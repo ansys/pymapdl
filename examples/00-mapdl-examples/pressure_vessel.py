@@ -1,8 +1,31 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """
 .. _pressure_vessel_example:
 
 Pressure Vessel
 ---------------
+
 This example demonstrates how to create a basic pressure vessel and
 apply a pressure to it.
 
@@ -52,7 +75,7 @@ mapdl.aplot(color="grey", background="w", show_area_numbering=True)
 
 # Generate a cylindrical volume by rotating an area pattern about an axis
 mapdl.vrotat(a_comb, pax1=6, arc=90)
-mapdl.vplot(color="grey", background="w", show_area_numbering=True, cpos="zy")
+mapdl.vplot(background="w")
 
 
 ###############################################################################
@@ -128,12 +151,12 @@ mapdl.post_processing.plot_nodal_eqv_stress(cpos="zy")
 ###############################################################################
 # We could, alternatively, get the exact same results by directly
 # accessing the result file using the legacy file reader
-# `ansys-mapdl-reader <https://github.com/pyansys/pymapdl-reader>`_.
+# `ansys-mapdl-reader <https://github.com/ansys/pymapdl-reader>`_.
 
 # access the result
 result = mapdl.result
 
-# Get the von mises stess and show that this is equivalent to the
+# Get the von Mises stress and show that this is equivalent to the
 # stress obtained from MAPDL.
 nnum, stress = result.principal_nodal_stress(0)
 von_mises = stress[:, -1]  # von-Mises stress is the right most column
@@ -161,5 +184,7 @@ print(f"LEGACY Reader and MAPDL VGET Min: {max_von_mises}")
 print(f"PRNSOL MAPDL Min:                 {prnsol_eqv.max()}")
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

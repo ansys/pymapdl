@@ -1,3 +1,25 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from typing import Optional
 
 from ansys.mapdl.core.mapdl_types import MapdlFloat, MapdlInt
@@ -1494,11 +1516,11 @@ class ExplicitDynamics:
 
         Parameters
         ----------
-        min\_
+        min\\_
             Minimum contact entity number to be selected and plotted (default
             = 1).
 
-        max\_
+        max\\_
             Maximum contact entity number to be selected and plotted (default =
             MIN).
 
@@ -1545,11 +1567,11 @@ class ExplicitDynamics:
 
             LIST   - List current setting for penetration checking.
 
-        min\_
+        min\\_
             Minimum contact entity number for which to turn on/off small
             penetration check (default = 1).
 
-        max\_
+        max\\_
             Maximum contact entity number for which to turn on/off small
             penetration check (defaults to MIN).
 
@@ -3624,7 +3646,7 @@ class ExplicitDynamics:
         value1: MapdlInt = "",
         value2: MapdlFloat = "",
         **kwargs,
-    ) -> Optional[str]:  # pragma: no cover
+    ) -> Optional[str]:
         """Plots explicit elements based on their time step size.
 
         APDL Command: EDTP

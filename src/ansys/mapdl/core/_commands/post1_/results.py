@@ -1,3 +1,26 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class Results:
     def nsort(self, item="", comp="", order="", kabs="", numb="", sel="", **kwargs):
         """Sorts nodal data.
@@ -95,7 +118,7 @@ class Results:
 
             FRONT - Plots CINT quantities distribution along the crack front.
 
-        id\_
+        id\\_
             Crack ID number.
 
         node
@@ -535,7 +558,7 @@ class Results:
 
         Parameters
         ----------
-        id\_
+        id\\_
             Crack ID number.
 
         node
@@ -1004,7 +1027,7 @@ class Results:
         sessions.
 
         SUMTYPE,PRIN also causes principal nodal values to be the average of
-        the contibuting principal element nodal values (see AVPRIN,1).
+        the contributing principal element nodal values (see AVPRIN,1).
 
         BEAM188 and BEAM189 elements compute principal stress, equivalent
         stress, and stress intensity values on request instead of storing them

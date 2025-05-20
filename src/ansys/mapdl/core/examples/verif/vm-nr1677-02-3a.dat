@@ -1,0 +1,1009 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/verify,vm-nr1677-02-3a
+/title,vm-nr1677-02-3a,NRC piping benchmarks problems,Volume II,Problem 3a
+/com, ***************************************************************************
+/com, Reference: Piping benchmark problems,Dynamic analysis independant support
+/com,            motion response spectrum method, P. Bezler, M. Subudhi and
+/com,            M.Hartzman, NUREG/CR--1677-Vol.2, August 1985.
+/com, 
+/com, 
+/com, Elements used: PIPE289, ELBOW290, COMBIN14
+/com,
+/com, Results:
+/com, The following results are outputted
+/com, 1. Frequencies obtained from modal solution.
+/com, 2. Maximum nodal displacements and rotations obtained from spectrum solution.
+/com, 3. Element forces/moments obtained from spectrum solution.
+/com, 4. Reaction forces obtained from spectrum solution.
+/com,
+/com, *******************************************************************************
+
+/out,scratch
+
+/prep7
+
+YoungModulus1 = 0.277e+08			! Young's Modulus
+Nu = 0.3						! Minor Poisson's Ratio
+ShearModulus1 = YoungModulus1/(2*(1+Nu))	! Shear Modulus
+WMass = 1.546e-03					! Density
+WTick=0.3750					! Wall Thickness
+OD=12.750						! Outer Diameter
+
+Temperature = 400
+Pressue = 615
+maxm=15						! No. of Modes to Extract
+
+radcur1 = -60              ! radius of curvature for bend pipes
+radcur2 = -18              ! radius of curvature for bend pipes             
+
+
+/com,------------------------------------------------------------------------------------
+
+et, 1,pipe289,,,,2				! Element 1 - PIPE289
+et, 2,elbow290,,6				! Element 2 - ELBOW290
+et, 3,elbow290,,6				! Element 3 - ELBOW290
+
+et, 4,combin14					! Element 4 - COMBIN14
+keyopt,4,2,2					! Y Degree of Freedom
+et, 5,combin14					! Element 5 - COMBIN14
+keyopt,5,2,1					! X Degree of Freedom
+et, 6,combin14					! Element 6 - COMBIN14
+keyopt,6,2,2					! Y Degree of Freedom
+et, 7,combin14					! Element 7 - COMBIN14
+keyopt,7,2,3					! Z Degree of Freedom
+et, 8,combin14					! Element 8 - COMBIN14
+keyopt,8,2,4					! ROT-X Degree of Freedom
+et, 9,combin14					! Element 9 - COMBIN14
+keyopt,9,2,5					! ROT-Y Degree of Freedom
+et,10,combin14					! Element 10 - COMBIN14
+keyopt,10,2,6					! ROT-Z Degree of Freedom
+
+/com,------------------------------------------------------------------------------------
+
+/com, Real Constants
+/com,****************
+
+sectype,1,pipe
+secdata,OD,WTick,24
+
+r, 4, 0.1e+2
+r, 5, 0.1e+13
+r, 6, 0.1e+13
+r, 7, 0.1e+13
+r, 8, 0.1e+13
+r, 9, 0.1e+13
+r,10, 0.1e+13
+
+/com, -------------------------------------------------------------------------------------
+
+/com, Material Properties
+/com,*********************
+
+mp,ex,  1, YoungModulus1			
+mp,nuxy,1, Nu					
+mp,gxy ,1, ShearModulus1			
+mp,dens,1, WMass					
+
+		
+
+/com,------------------------------------------------------------------------------------
+
+/com, key points
+/com,*******
+
+k,1,0,1226.875,0 
+k,2,30.021,1226.875,30.550
+k,3,60.042,1226.875,61.100 
+k,4,90.064,1226.875,91.651   
+k,5,105.154,1226.875,102.817 
+k,6,139.302,1226.875,120.593 
+k,7,181.878,1226.875,142.757 
+k,8,224.435,1226.875,164.922 
+k,9,243.383,1226.875,174.774 
+k,10,262.311,1226.875,184.628
+k,11,292.798,1226.875,191.342
+
+k,12,334.171,1226.875,189.421 
+!k,120,334.171,1226.875,189.421
+
+k,13,375.543,1226.875,187.500
+
+k,14,405.511,1226.875,186.110  
+k,140,431.483,1226.875,184.904
+ 
+k,15,501.172,1226.875,181.669 
+k,16,570.860,1226.875,178.433  
+k,17,579.777,1226.875,178.683 
+k,18,615.118,1226.875,182.316 
+k,20,633.028,1226.875,184.156
+
+k,21,678.227,1226.875,188.802 
+k,22,723.426,1226.875,193.448 
+k,23,768.625,1226.875,198.095 
+k,24,809.602,1226.875,187.256 
+k,25,814.057,1226.875,184.079 
+k,26,852.626,1226.875,156.568 
+k,27,891.195,1226.875,129.058 
+k,28,929.764,1226.875,101.547 
+
+k,29,968.332,1226.875,74.036  
+k,290,978.101,1226.875,67.067  
+
+k,31,1012.600,1226.875,42.430
+!k,310,1012.600,1226.875,42.430
+
+k,32,1047.098,1226.875,17.793 
+k,34,1061.752,1244.875,7.340   
+k,35,1061.752,1272.375,7.340   
+k,36,1072.214,1290.375,-7.307 
+k,37,1081.623,1290.375,-20.48 
+k,38,1108.85,1290.375,-58.399 
+k,39,1136.077,1290.375,-96.317
+k,40,1163.304,1290.375,-134.236 
+k,41,1190.531,1290.375,-172.154
+
+/com,
+/com, Elastic Support 
+/com,***********************
+
+k,410,1190.531,1290.375,-172.154
+   
+k,43,1197.006,1290.375,-182.019   
+k,44,1207.729,1290.375,-209.536   
+k,45,1211.63,1290.375,-241.111
+k,46,1215.531,1290.375,-272.687   
+k,47,1219.432,1290.375,-304.262   
+k,48,1223.333,1290.375,-335.873   
+k,49,1227.234,1290.375,-367.413   
+
+k,51,1232.114,1290.375,-407.115   
+k,52,1233.704,1295.647,-419.787   
+k,53,1234.945,1305.772,-429.836
+   
+k,55,1254.329,1318.500,-439.952 
+k,56,1279.579,1318.500,-436.387 
+k,57,1304.829,1318.500,-432.823 
+k,58,1330.078,1318.500,-429.258 
+k,59,1355.328,1318.500,-425.693 
+
+!k,61,431.943,1226.875,194.899 
+!k,62,616.14,1226.875,172.368  
+!k,63,974.139,1226.875,82.176  
+k,65,1227.234,1300.375,-367.413   
+!k,66,1255.726,1318.500,-449.852
+
+!k,67,1182.401,1290.375,-177.966   
+k,68,105.154,1236.875,102.817 
+k,69,224.435,1236.875,164.922 
+k,70,405.511,1236.875,186.110  
+k,71,633.028,1236.875,184.156 
+k,72,814.057,1236.875,184.079 
+k,73,978.101,1236.875,67.067  
+k,74,1081.623,1300.375,-20.48 
+k,75,1190.531,1300.375,-172.154   
+
+!k,101,10,1226.875,0
+!k,102,0,1236.875,0 
+!k,103,0,1226.875,10
+
+!k,591,1345.328,1318.5,-425.693 
+!k,592,1355.328,1328.5,-425.693
+!k,593,1355.328,1318.5,-415.693 
+
+k,601,93.495,1226.9,94.879
+
+k,701,90.618,1226.9,92.207
+k,702,91.180,1226.9,92.757
+k,703,91.748,1226.9,93.298
+k,704,92.324,1226.9,93.833
+k,705,92.906,1226.9,94.360
+
+k,711,94.091,1226.9,95.390
+k,712,94.694,1226.9,95.894
+k,713,95.304,1226.9,96.390
+k,714,95.919,1226.9,96.877
+k,715,96.542,1226.9,97.357
+
+k,602,97.170,1226.9,97.828
+
+k,721,97.804,1226.9,98.291
+k,722,98.443,1226.9,98.746
+k,723,99.089,1226.9,99.192
+k,724,99.740,1226.9,99.630
+k,725,100.40,1226.9,100.06
+
+k,731,101.73,1226.9,100.89
+k,732,102.40,1226.9,101.29
+k,733,103.08,1226.9,101.69
+k,734,103.77,1226.9,102.07
+k,735,104.46,1226.9,102.45
+
+k,603,101.06,1226.9,100.48
+
+k,741,267.08,1226.9,186.85
+k,742,272.03,1226.9,188.65
+k,743,277.11,1226.9,190.00
+k,744,282.29,1226.9,190.91
+k,745,287.54,1226.9,191.36
+
+k,751,572.35,1226.9,178.38
+k,752,573.84,1226.9,178.37
+k,753,575.32,1226.9,178.39
+k,754,576.81,1226.9,178.45
+k,755,578.29,1226.9,178.55
+
+k,761,775.83,1226.9,198.40
+k,762,783.03,1226.9,197.84
+k,763,790.10,1226.9,196.41
+k,764,796.95,1226.9,194.15
+k,765,803.49,1226.9,191.09
+
+k,771,1199.7,1290.4,-186.18
+k,772,1202.1,1290.4,-190.55
+k,773,1204.1,1290.4,-195.11
+k,774,1205.7,1290.4,-199.81
+k,775,1206.9,1290.4,-204.63
+
+k,781,1050.9,1227.5,15.088
+k,782,1054.4,1229.3,12.567
+k,783,1057.5,1232.1,10.402
+k,784,1059.8,1235.9,8.7405
+k,785,1061.3,1240.2,7.6962
+
+k,791,1062.1,1277.0,6.8409
+k,792,1063.2,1281.4,5.3777
+k,793,1064.8,1285.1,3.0499
+k,794,1067.0,1288.0,0.16395E-01
+k,795,1069.5,1289.8,-3.5163
+
+k,801,1232.4,1290.5,-409.45
+k,802,1232.7,1291.0,-411.75
+k,803,1233.0,1291.7,-413.97
+k,804,1233.2,1292.8,-416.08
+k,805,1233.5,1294.1,-418.02
+
+k,811,1236.0,1309.0,-432.99
+k,812,1238.2,1312.1,-435.76
+k,813,1241.3,1314.7,-437.97
+k,814,1245.3,1316.7,-439.46
+k,815,1249.7,1318.0,-440.13
+
+/com,------------------------------------------------------------------------------------
+
+/com,
+/com, Straight Pipe (Tangent) Elements
+/com,**********************************
+
+mat,1						! Material ID 1
+type,1						! Element Type 1
+secnum,1					! Section 1
+
+l,1,2                       ! line number 1 
+l,2,3   
+l,3,4   
+
+l,5,6
+l,6,7   
+l,7,8  
+ 
+l,8,9   
+l,9,10
+  
+l,11,12 
+l,12,13 
+l,13,14 
+l,14,140
+l,140,15 
+l,15,16 
+
+l,17,18
+ 
+l,18,20  
+l,20,21 
+l,21,22 
+l,22,23
+
+l,24,25 
+l,25,26 
+l,26,27 
+l,27,28 
+l,28,29 
+l,29,290
+l,290,31 
+l,31,32
+ 
+l,34,35
+ 
+l,36,37 
+l,37,38 
+l,38,39 
+l,39,40 
+l,40,41 
+l,41,43
+ 
+l,44,45 
+l,45,46 
+l,46,47 
+l,47,48
+l,48,49 
+l,49,51
+
+l,52,53
+
+l,55,56
+l,56,57
+l,57,58
+l,58,59             ! line number 45
+
+lesize,all,,,1
+lmesh,all
+allsel,all
+
+/com,
+/com, Pipe Bend Elements
+/com,********************
+
+type,2
+secnum,1
+mat,1
+
+larc,4,702,701, radcur1         ! line number 46
+larc,702,704,703, radcur1
+larc,704,601,705, radcur1
+larc,601,712,711, radcur1
+larc,712,714,713, radcur1
+larc,714,602,715, radcur1
+larc,602,722,721, radcur1
+larc,722,724,723, radcur1
+larc,724,603,725, radcur1
+larc,603,732,731, radcur1
+larc,732,734,733, radcur1
+larc,734,5,735, radcur1
+larc,10,742,741, radcur1
+larc,742,744,743, radcur1
+larc,744,11,745, radcur1
+larc,16,752,751, radcur1
+larc,752,754,753, radcur1
+larc,754,17,755, radcur1
+larc,23,762,761, radcur1
+larc,762,764,763, radcur1
+larc,764,24,765, radcur1
+larc,43,772,771, radcur1
+larc,772,774,773, radcur1
+larc,774,44,775, radcur1            ! line number 69
+
+lsel,s,line,,46,69,1
+lesize,all,,,1
+lmesh,all
+allsel,all
+
+
+type,3
+secnum,1
+mat,1
+
+larc,32,782,781, radcur2            ! line number 70
+larc,782,784,783, radcur2
+larc,784,34,785, radcur2
+larc,35,792,791, radcur2
+larc,792,794,793, radcur2
+larc,794,36,795, radcur2
+larc,51,802,801, radcur2
+larc,802,804,803, radcur2
+larc,804,52,805, radcur2
+larc,53,812,811, radcur2
+larc,812,814,813, radcur2
+larc,814,55,815, radcur2            ! line number 81
+
+
+lsel,s,line,,70,81,1
+lesize,all,,,1
+lmesh,all
+allsel,all
+/com,
+
+/com, Spring Elements
+/com,*****************
+
+type,4
+real,4
+l,49,65                         ! line number 82
+
+lesize,82,,,1
+lmesh,all
+allsel,all
+
+type,6
+real,6
+l,5,68                          ! line number 83
+l,8,69
+l,14,70
+l,20,71
+l,25,72
+l,290,73
+l,37,74
+l,410,75                        ! line number 90
+
+lsel,s,line,,83,90,1
+lesize,all,,,1
+lmesh,all
+allsel,all
+
+
+n1 = node(1254.329,1318.500,-439.952) 
+
+n,66000,1255.726,1318.500,-449.852
+
+n3 = node(1279.579,1318.500,-436.387) 
+n4 = node(1190.531,1290.375,-172.154)
+
+n, 67000,1182.401,1290.375,-177.966
+
+n6 = node(1163.304,1290.375,-134.236)
+n7 = node(375.543,1226.875,187.500)
+
+n, 120000,334.171,1226.875,189.421
+
+n9 = node(1355.328,1318.500,-425.693)
+n10 = node(431.483,1226.875,184.904)
+
+n,61000,431.943,1226.875,194.899
+
+n12 = node(501.172,1226.875,181.669)
+n13 = node(615.118,1226.875,182.316)
+
+n,62000,616.14,1226.875,172.368
+
+n15 = node(579.777,1226.875,178.683)
+n16 = node(968.332,1226.875,74.036)
+
+n,63000,974.139,1226.875,82.176
+
+n18 = node(929.764,1226.875,101.547)
+n19 = node(1047.098,1226.875,17.793)
+
+n,310000,1012.600,1226.875,42.430
+
+n21 = node(1061.752,1244.875,7.340)
+n22 = node(1190.531,1290.375,-172.154)
+
+!n,410000,1190.531,1290.375,-172.154
+
+n,61000,431.943,1226.875,194.899
+ 
+n,62000,616.14,1226.875,172.368
+
+n,63000,974.139,1226.875,82.176
+
+n27 = node(1227.234,1300.375,-367.413)   
+
+n,66000,1255.726,1318.500,-449.852
+
+n,67000,1182.401,1290.375,-177.966
+     
+
+n30 = node(105.154,1236.875,102.817) 
+n31 = node(224.435,1236.875,164.922) 
+n32 = node(405.511,1236.875,186.110)  
+n33 = node(633.028,1236.875,184.156) 
+n34 = node(814.057,1236.875,184.079) 
+n35 = node(978.101,1236.875,67.067)  
+n36 = node(1081.623,1300.375,-20.48) 
+n37 = node(1190.531,1300.375,-172.154)
+   
+n,101000,10,1226.875,0
+
+n,102000,0,1236.875,0 
+
+n,103000,0,1226.875,10   
+
+n,120000,334.171,1226.875,189.421
+
+n,310000,1012.600,1226.875,42.430
+
+n,591000,1345.328,1318.5,-425.693
+ 
+n,592000,1355.328,1328.5,-425.693
+
+n,593000,1355.328,1318.5,-415.693
+
+n46 = node(0,1226.875,0) 
+ 
+
+type,5
+real,5
+n1 = 92
+n2 = 66000
+n3 = 93
+
+ics = 11
+wplane,,nx(n1),ny(n1),nz(n1),nx(n2),ny(n2),nz(n2),nx(n3),ny(n3),nz(n3)  
+cswplane,ics,0   
+nrotat,n1   
+nrotat,n2 
+csys,0
+e,n1,n2
+
+n1 = 72
+n2 = 67000
+n3 = 70
+
+ics = ics + 1
+wplane,,nx(n1),ny(n1),nz(n1),nx(n2),ny(n2),nz(n2),nx(n3),ny(n3),nz(n3)  
+cswplane,ics,0   
+nrotat,n1   
+nrotat,n2 
+csys,0
+e,n1,n2
+
+/com,
+/com, Snubber Elements
+/com,******************
+
+n1 = 22
+n2 = 120000
+n3 = 99
+
+ics = ics + 1
+wplane,,nx(n1),ny(n1),nz(n1),nx(n2),ny(n2),nz(n2),nx(n3),ny(n3),nz(n3)  
+cswplane,ics,0   
+nrotat,n1   
+nrotat,n2 
+csys,0
+e,n1,n2
+
+n1 = 26
+n2 = 61000
+n3 = 28
+
+ics = ics + 1
+wplane,,nx(n1),ny(n1),nz(n1),nx(n2),ny(n2),nz(n2),nx(n3),ny(n3),nz(n3)  
+cswplane,ics,0   
+nrotat,n1   
+nrotat,n2 
+csys,0
+e,n1,n2
+
+n1 = 33
+n2 = 62000
+n3 = 32
+
+ics = ics + 1
+wplane,,nx(n1),ny(n1),nz(n1),nx(n2),ny(n2),nz(n2),nx(n3),ny(n3),nz(n3)  
+cswplane,ics,0   
+nrotat,n1   
+nrotat,n2 
+csys,0
+e,n1,n2
+
+n1 = 52
+n2 = 63000
+n3 = 50
+
+ics = ics + 1
+wplane,,nx(n1),ny(n1),nz(n1),nx(n2),ny(n2),nz(n2),nx(n3),ny(n3),nz(n3)  
+cswplane,ics,0   
+nrotat,n1   
+nrotat,n2 
+csys,0
+e,n1,n2
+
+n1 = 58
+n2 = 310000
+n3 = 60
+!n3 = 59
+
+ics = ics + 1
+wplane,,nx(n1),ny(n1),nz(n1),nx(n2),ny(n2),nz(n2),nx(n3),ny(n3),nz(n3)  
+cswplane,ics,0   
+nrotat,n1   
+nrotat,n2 
+csys,0
+e,n1,n2
+
+/com,
+/com, 3D Support at both ends
+/com,*************************
+
+type,5
+real,5
+e,1,101000
+e,99,591000
+
+type,6
+real,6
+e,1,102000
+e,99,592000
+
+type,7
+real,7
+e,1,103000
+e,99,593000
+
+type,8
+real,8
+e,1,101000
+e,99,591000
+
+type,9
+real,9
+e,1,102000
+e,99,592000
+
+type,10
+real,10
+e,1,103000
+e,99,593000
+
+/com,------------------------------------------------------------------------------------
+
+/com,
+/com, Model Rigid Region
+/com,********************
+
+cerig,72,172,uy
+
+/com,------------------------------------------------------------------------------------
+
+/com,
+/com, Convert some PIPE289 into ELBOW290 using ELBOW command
+/com, 
+
+elbow,on,,,sect
+allsel,all
+
+
+/com,
+/com, Constraints
+/com,*************
+
+nsel,s,node,,61000,63000
+nsel,a,node,,164
+nsel,a,node,,66000,67000,1
+nsel,a,node,,165,173,1
+nsel,a,node,,101000,103000
+nsel,a,node,,120000
+nsel,a,node,,310000
+nsel,a,node,,591000,593000
+d,all,all,0
+
+nsel,all
+
+/com,------------------------------------------------------------------------------------
+
+/com,
+/com, Loads
+/com,*******
+
+/com, Temperature Input
+/com,*******************
+
+bf,all,temp,Temperature
+
+esel,r,type,,1
+esel,a,type,,2
+esel,a,type,,3
+
+/com, Pressure Input
+/com,****************
+
+sfe,all,1,pres,,Pressue,,,
+
+allsel,all,all
+finish
+
+/com,------------------------------------------------------------------------------------
+
+/com,
+/com,=============
+/com,	Modal Solve
+/com,=============
+/com,
+
+/solution
+antype,modal							! Perform modal solve
+modopt,lanb,maxm
+lump,on								! Lumped mass formulation
+mxpand,maxm,,,yes							! Expand the modes with stress calculation
+solve
+save,
+finish
+
+
+/post1
+/out,
+/com, ********************************************
+/com,  Frequencies obtained from modal solution
+/com, *********************************************
+set,list
+finish
+
+
+/com,
+/com,================
+/com,	Spectrum Solve
+/com,================
+/com,
+
+/out,scratch
+
+/solution
+gvalue = 386.4
+
+sfedele,all,1,pres,,,
+bfdele,all,temp,,,
+
+antype,spectrum						! Perform Spectrum Analysis
+spopt,sprs,maxm						! Single Point Excitation Response System
+
+srss,,,							! SRSS mode combination method
+
+/com, 
+/com,  Excitation in X - Direction
+/com,*******************************
+
+svtyp,2,gvalue      					! Acceleration Response Spectrum
+
+freq,1.000,1.0428,1.1025,1.1905,1.2270,1.2739,1.2937,1.3423,1.3889
+sv,,1.1620,1.2820,1.3990,1.5490,1.6060,1.6760,1.7040,1.7740,1.8390
+
+freq,1.4104,1.4347,1.5552,1.6949,1.7825,1.9305,2.0747,2.2779,2.4752
+sv,,1.8690,1.9040,2.0840,2.2460,2.3040,2.3830,2.4790,2.5920,2.6440
+
+freq,2.6042,2.6596,2.9499,3.2362,3.3898,3.4965,3.5714,3.6101,3.6630
+sv,,2.6400,2.6390,2.7820,2.9510,3.0660,3.2150,3.3840,3.5320,3.7660
+
+freq,3.7313,3.8168,3.8911,3.9216,4.2918,4.6948,4.7847,5.0505,5.0761
+sv,,4.1890,4.7930,5.1890,5.2240,5.2320,5.2270,5.1520,3.0020,2.9230
+
+freq,5.3476,5.7471,5.9524,5.9880,6.6225,7.4627,7.8125,7.8740,7.9365
+sv,,2.9000,2.8730,2.8490,2.8440,2.7610,2.6670,2.6350,2.7850,2.7550
+
+freq,8.3333,8.9286,9.5238,9.6154,9.7087,10.4167,10.8696,11.6279,11.7647
+sv,,2.8070,2.7970,2.7440,2.6740,2.6270,2.7810,2.9310,3.0770,3.1120
+
+freq,12.1951,12.5000,12.8205,13.1579,13.3333,13.4953,13.5135,13.8889,14.2857
+sv,,3.1340,3.1340,3.1160,2.9750,2.6870,2.5600,2.3990,2.0640,1.8550
+
+
+freq,15.3846,15.6250,17.8571,18.8679,22.7273,23.8095,24.3902,25.6410,26.3158
+sv,,1.5240,1.5120,1.4720,1.3350,1.0900,1.0730,1.0700,1.0490,1.0040
+
+
+freq,27.0270,27.7778,28.5714,40.000,76.9231,1000.0000
+sv,,0.9823,0.9669,0.9560,0.8930,0.8300,0.7710
+
+sed,1,0,0							! Excitation in X - Direction
+solve
+
+/com, 
+/com, Excitation in Y - Direction
+/com,******************************
+
+svtyp,2,gvalue
+freq,,
+
+freq,0.5,2,2.100,2.898,4,5,7.692,8.474,10.309
+sv,,0.380,2.050,2.750,2.750,3.500,3.500,5.800,12.100,12.100
+
+freq,11.494,14.104,15.384,17.605,23.255,50
+sv,,10.700,10.700,5.900,5.900,2.050,1.570
+
+sed,0,1,0							! Excitation in Y - Direction
+solve						    
+
+/com, 
+/com, Excitation in Z - Direction
+/com,******************************
+
+svtyp,2,gvalue
+freq,,,
+
+freq,1,1.0428,1.1025,1.1905,1.2270,1.2739,1.2937,1.3423,1.3889
+sv,,1.1620,1.2820,1.3990,1.5490,1.6060,1.6760,1.7040,1.7740,1.8390
+
+freq,1.4104,1.4347,1.5552,1.6949,1.7825,1.9305,2.0747,2.2779,2.4752
+sv,,1.8690,1.9040,2.0840,2.2460,2.3040,2.3820,2.4790,2.5920,2.6440
+
+freq,2.6042,2.6596,2.9499,3.2362,3.3898,3.4965,3.5714,3.6101,3.6630
+sv,,2.6400,2.6390,2.7820,2.9510,3.0660,3.2150,3.3840,3.5320,3.7660
+
+freq,3.7313,3.8168,3.8911,3.9216,4.2918,4.6948,4.7847,5.0505,5.0761
+sv,,4.1890,4.7930,5.1890,5.2240,5.2320,5.2270,5.1520,3.0020,2.9230
+
+freq,5.3476,5.7471,5.9524,5.9880,6.6225,7.4627,7.8125,7.8740,7.9365
+sv,,2.900,2.8730,2.8490,2.8440,2.7610,2.6670,2.6350,2.6850,2.7550
+
+freq,8.333,8.9286,9.5238,9.6154,9.7087,10.4167,10.8696,11.6279,11.7647
+sv,,2.8070,2.7970,2.7440,2.6740,2.6270,2.7810,2.9310,3.0770,3.1120
+
+freq,12.1951,12.5000,12.8205,13.1579,13.3333,13.4953,13.5135,13.8889,14.2857
+sv,,3.1340,3.1340,3.1160,2.9750,2.6870,2.5600,2.3990,2.0640,1.8550
+
+freq,15.3846,15.6250,17.8571,18.8679,22.7273,23.8095,24.3902,25.6410,26.3158
+sv,,1.5240,1.5120,1.4720,1.3350,1.0900,1.0730,1.0700,1.0490,1.0040
+
+freq,27.0270,27.7778,28.5714,40.000,76.9231,1000.000
+sv,,0.9823,0.9669,0.9560,0.8930,0.8300,0.7710
+
+sed,0,0,1							! Excitation in Z - Direction
+solve
+
+finish
+
+/com,------------------------------------------------------------------------------------
+
+/post1
+/input,,mcom
+
+/out,
+
+/com,
+/com,===============================================================
+/com, Maximum nodal displacements and rotations from spectrum solution
+/com,===============================================================
+/com,
+
+/out,scratch
+
+*GET,AdisX,NODE,151,U,X
+*GET,AdisY,NODE,87,U,Y
+*GET,AdisZ,NODE,92,U,Z
+*GET,ArotX,NODE,92,ROT,X
+*GET,ArotY,NODE,72,ROT,Y
+*GET,ArotZ,NODE,160,ROT,Z
+
+/out,
+*stat,AdisX
+*stat,AdisY
+*stat,AdisZ
+*stat,ArotX
+*stat,ArotY
+*stat,ArotZ
+
+/com,==============================================================
+/com, Element Forces and Moments obtained from spectrum solution
+/com,==============================================================
+
+/out,scratch
+
+/com,==========
+/com,	 Node I
+/com,==========
+
+/com, Element #1 (Pipe289 element)
+/com,************************
+
+
+esel,s,elem,,1
+etable,pxi_1,smisc,1
+etable,vyi_1,smisc,6
+etable,vzi_1,smisc,5
+etable,txi_1,smisc,4
+etable,myi_1,smisc,2
+etable,mzi_1,smisc,3
+esel,all
+
+/out,
+/com, ************************************************
+/com,  Element forces and moments at element1, node i
+/com, ************************************************
+
+pretab,pxi_1,vyi_1,vzi_1,txi_1,myi_1,mzi_1
+
+
+/out,scratch
+/com,==========
+/com,  Node J
+/com,==========
+
+/com, Element #1 (Pipe289 element)  
+/com,************************
+
+esel,s,elem,,1
+etable,pxj_1,smisc,14
+etable,vyj_1,smisc,19
+etable,vzj_1,smisc,18
+etable,txj_1,smisc,17
+etable,myj_1,smisc,15
+etable,mzj_1,smisc,16
+esel,all
+
+/out,
+/com, **********************************************
+/com,  Element forces and moments at element1, node j
+/com, ************************************************
+
+pretab,pxj_1,vyj_1,vzj_1,txj_1,myj_1,mzj_1
+
+
+
+/out,scratch
+
+
+/com,==========
+/com,  Node I
+/com,==========
+
+/com, Element #50 (Elbow 290 element)
+/com,*************************
+
+esel,s,elem,,50
+etable,pxi_50,smisc,1
+etable,vyi_50,smisc,6
+etable,vzi_50,smisc,5
+etable,txi_50,smisc,4
+etable,myi_50,smisc,2
+etable,mzi_50,smisc,3
+esel,all
+
+/out,
+/com, *************************************************
+/com,  Element forces and moments at element 50, node i
+/com, ************************************************
+
+pretab,pxi_50,vyi_50,vzi_50,txi_50,myi_50,mzi_50
+
+
+/out,scratch
+/com,==========
+/com,  Node J
+/com,==========
+
+
+
+/com, Element #50 (Elbow290 element)
+/com,********************************
+esel,s,elem,,50
+
+etable,pxj_50,smisc,36
+etable,vyj_50,smisc,41
+etable,vzj_50,smisc,40
+etable,txj_50,smisc,39
+etable,myj_50,smisc,37
+etable,mzj_50,smisc,38
+esel,all
+
+allsel,all
+
+/out,
+/com, **********************************************
+/com,  Element forces and moments at element 50, node j
+/com, ************************************************
+
+pretab,pxj_50,vyj_50,vzj_50,txj_50,myj_50,mzj_50
+
+
+
+/com,----------------------------------------------------------------------------
+
+/com, ***************************************
+/com,  Reaction forces from spectrum solution
+/com, ****************************************
+
+prrsol
+
+finish
+/exit,nosave

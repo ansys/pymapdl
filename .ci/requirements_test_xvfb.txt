@@ -1,1 +1,1 @@
-pyvista>=0.27.2
+pyvista>=0.38.1

@@ -1,4 +1,26 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /verify,vm277
 /title,vm277,Hall Plate in a Uniform Magnetic Field
 /COM,
@@ -32,7 +54,7 @@ BLOCK,-A,-A+A/8,B,B-B/8,C/2,C	! SENSOR CONNECTIONS
 BLOCK,-A,-A+A/8,-B,-B+B/8,C/2,C
 BLOCK,A,A-A/8,B,B-B/8,C/2,C
 BLOCK,A,A-A/8,-B,-B+B/8,C/2,C
-ESIZE,C
+ESIZE,C/2
 MSHA,1,3D			! TETRAHEDRAL
 VOVLAP,ALL
 VMESH,ALL
@@ -87,18 +109,22 @@ FINISH
 
 /SOLU
 OUTRES,ALL,ALL
+/OUT,SCRATCH
 SOLVE
 VBASE=VOLT(ND4)-VOLT(ND3)	! OFFSET VOLTAGE = OUTPUT VOLTAGE AT B=0 T
 DFLX,ALL,,,BZ			! UNIFORM B-FIELD BZ IN THE +Z-DIRECTION
 ALLS
 SOLVE
+/OUT
 FINISH
 
 /POST1
 SET,LAST,LAST
 VSEL,S,VOLU,,6
 NSLV
+/OUT,SCRATCH
 FSUM
+/OUT
 *GET,_I,FSUM,,ITEM,AMPS		! CURRENT THROUGH PLATE
 ALLS
 
@@ -124,4 +150,5 @@ PLNSOL,VOLT
 /OUT,
 *list,vm277,vrt
 FINISH
-
+/EXIT,NOSAVE
+/DEL,SCRATCH

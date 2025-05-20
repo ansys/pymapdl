@@ -7,11 +7,15 @@ Frequently asked questions
 How do you report issues?
 =========================
 
-To report bugs and documentation errors and to make feature requests, use the `pymapdl_issues`_ page of 
-the GitHub repository.
+If you find an issue, the first place to visit for possible solutions is the :ref:`troubleshooting section <ref_troubleshooting>`.
 
-To ask more open-ended questions or seek advice from the community, use the `pymapdl_discussions`_ page
-of the GitHub repository.
+If you do not find a solution there, you can search for your issue within the `GitHub repository <pymapdl_repo_>`_. You can use `the search box <pymapdl_search_issues_pr_>`_ to find related issues or pull requests.
+
+To ask more open-ended questions or seek advice from the community,
+use the `PyMAPDL discussions <pymapdl_discussions_>`_ page of the GitHub repository.
+
+To report bugs and documentation errors and to make feature requests,
+use the `PyMAPDL issues <pymapdl_issues_>`_ page of the GitHub repository.
 
 
 What are the pros and cons of PyMAPDL versus Ansys ACT?
@@ -44,12 +48,15 @@ like to develop software.
 Has APDL been "deprecated" by Ansys? If so, what does that mean for PyMAPDL?
 ============================================================================
 
-APDL isn't going anywhere. In fact, whenever you call Mechanical Workbench, it's generating an input file
-(``ds.dat``) that's fed into MAPDL. However, what's changed over the past several years is where the geometry,
-meshing, and postprocessing is occurring. Geometry generation can take place within SpaceClaim or Design Modeler,
-and meshing is done using a variety of new and powerful meshers within Workbench. While these tools are
-far superior to the ones in MAPDL, their biggest limitation is that they're difficult to script
-(especially externally). As a result, there are still users who choose to generate the geometry and mesh within MAPDL.
+APDL isn't going anywhere. In fact, whenever you call Mechanical Workbench, it's
+generating an input file (``ds.dat``) that's fed into MAPDL. However, what's
+changed over the past several years is where the geometry, meshing, and
+postprocessing is occurring. Geometry generation can take place within
+SpaceClaim or Design Modeler, and meshing is done using a variety of new and
+powerful meshers within Workbench. While these tools are far superior to the
+ones in MAPDL, their biggest limitation is that they're difficult to script
+(especially externally). As a result, there are still users who choose to
+generate the geometry and mesh within MAPDL.
 
 
 What are the main reasons to use PyMAPDL over other Ansys products like Workbench?
@@ -77,6 +84,7 @@ data such as the mesh, you can use this code:
 .. code:: python
 
     import sys
+
     sys.modules[__name__].__dict__.clear()
 
 
@@ -107,7 +115,7 @@ You can change the graphics configuration in PyMAPDL using this command:
 
 .. code:: python
 
-    mapdl.graphics('POWER')
+    mapdl.graphics("POWER")
 
 Or, you can change the graphics configuration in the MAPDL GUI using the 
 ``POWRGRPH`` button or this command:

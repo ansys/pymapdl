@@ -1,3 +1,25 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Contains methods used only when running on ANSYS's jupyterhub cluster"""
 
 try:
@@ -9,34 +31,27 @@ except ImportError:
     )
 
 
-MAX_CPU = 128
-MAX_MEM = 256
+MAX_CPU: int = 128
+MAX_MEM: int = 256
 
 
-def check_manager():
+def check_manager() -> None:
     try:
         # response = manager.ping()
         manager.ping()
     except:
         raise RuntimeError("Unable to connect to scheduler")
 
-    # consider checking the version
-    # version = re.findall('(\d*\.\d*\.\d*)', response)
-    # if not version:
-    #     raise RuntimeError('Unable to parse version')
-    # if version[0] != '0.1.6':
-    #     raise RuntimeError('Invalid scheduler version')
-
 
 def launch_mapdl_on_cluster(
-    nproc=2,
-    memory=4,
-    loglevel="ERROR",
-    additional_switches="",
-    verbose=False,
-    start_timeout=600,
-    tag="latest",
-):
+    nproc: int = 2,
+    memory: int = 4,
+    loglevel: str = "ERROR",
+    additional_switches: str = "",
+    verbose: bool = False,
+    start_timeout: int = 600,
+    tag: str = "latest",
+) -> "Mapdl":
     """Start MAPDL on the ANSYS jupyter cluster in gRPC mode.
 
     Parameters
@@ -65,7 +80,7 @@ def launch_mapdl_on_cluster(
         Maximum allowable time to connect to the MAPDL server.
     tag : str, optional
         Docker image tag from `PyAnsys MAPDL Image
-        <https://github.com/orgs/pyansys/packages/container/package/pymapdl%2Fmapdl>`. Defaults
+        <https://github.com/orgs/ansys/packages/container/package/pymapdl%2Fmapdl>`. Defaults
         to ``"latest"``. For example "v22.1.0".
 
     Returns
@@ -128,9 +143,13 @@ def launch_mapdl_on_cluster(
         verbose=verbose,
         cpu=1000 * nproc,
         memory=memory,
+        start_timeout=start_timeout,
     )
 
     # connect to the pod instance
     from ansys.mapdl.core import Mapdl
 
-    return Mapdl(ip, loglevel=loglevel)
+    mapdl = Mapdl(ip, loglevel=loglevel)
+    mapdl._name = name
+
+    return mapdl

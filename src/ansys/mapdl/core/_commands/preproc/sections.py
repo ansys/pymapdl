@@ -1,3 +1,26 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class Sections:
     def bsax(self, val1="", val2="", t="", **kwargs):
         """Specifies the axial strain and axial force relationship for beam
@@ -599,6 +622,8 @@ class Sections:
         val10="",
         val11="",
         val12="",
+        val13="",
+        val14="",
         **kwargs,
     ):
         """Describes the geometry of a section.
@@ -607,7 +632,7 @@ class Sections:
 
         Parameters
         ----------
-        val1, val2, val3, . . . , val12
+        val1, val2, val3, . . . , val14
             Values, such as thickness or the length of a side or the numbers of
             cells along the width, that describe the geometry of a section. The
             terms VAL1, VAL2, etc. are specialized for each type of cross-
@@ -658,7 +683,7 @@ class Sections:
 
         Type: BEAM, Subtype: HATS
         """
-        command = f"SECDATA,{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12}"
+        command = f"SECDATA,{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12},{val13},{val14}"
         return self.run(command, **kwargs)
 
     def secjoint(
@@ -1059,7 +1084,7 @@ class Sections:
         secid
             Section identification number.
 
-        type\_
+        type\\_
             BEAM
 
             BEAM - Defines a beam section.
@@ -1275,7 +1300,7 @@ class Sections:
 
             GROUP - If a section calls other sections, this option lists those sections too.
 
-        type\_
+        type\\_
             The section type. Valid arguments are ALL (the default) and the
             types available on the SECTYPE command.
 

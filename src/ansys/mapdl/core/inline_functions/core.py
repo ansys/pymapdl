@@ -1,6 +1,30 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from enum import IntEnum
 from typing import Union
 import warnings
+
+from ansys.mapdl.core.errors import MapdlRuntimeError
 
 QUERY_NAME = "__QUERY_PARM__"
 
@@ -59,7 +83,7 @@ class _QueryExecution:
 
         # non_interactive mode won't work with these commands
         if self._mapdl._store_commands:
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 "Inline MAPDL functions are incompatible with the "
                 "non_interactive mode."
             )
@@ -69,7 +93,7 @@ class _QueryExecution:
         if isinstance(self._mapdl, MapdlGrpc):
             value = self._mapdl.scalar_param(QUERY_NAME)
             if value is None:
-                raise RuntimeError(resp)
+                raise MapdlRuntimeError(resp)
             if integer:
                 return int(value)
             return value
@@ -78,12 +102,12 @@ class _QueryExecution:
                 return self._parse_parameter_integer_response(resp)
             return self._parse_parameter_float_response(resp)
 
-    def _parse_parameter_integer_response(self, response) -> int:
+    def _parse_parameter_integer_response(self, response: str) -> int:
         """Parse integer response."""
         return int(self._parse_parameter_float_response(response))
 
     @staticmethod
-    def _parse_parameter_float_response(response) -> float:
+    def _parse_parameter_float_response(response: str) -> float:
         if "PARAMETER" not in response or "=" not in response:
             raise TypeError(f"Parameter response not recognised: " f'"{response}"')
         parts = response.rsplit("=", 1)

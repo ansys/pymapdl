@@ -1,7 +1,35 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from functools import wraps
 import re
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import numpy as np
+
+from ansys.mapdl.core import _HAS_PANDAS
+
+if _HAS_PANDAS:
+    import pandas
 
 from ._commands import (
     apdl,
@@ -26,36 +54,37 @@ from ._commands import (
 )
 
 # compiled regular expressions used for parsing tablular outputs
-REG_LETTERS = re.compile(r"[a-df-zA-DF-Z]+")  # all except E or e
-REG_FLOAT_INT = re.compile(
+REG_LETTERS: re.Pattern = re.compile(r"[a-df-zA-DF-Z]+")  # all except E or e
+REG_FLOAT_INT: re.Pattern = re.compile(
     r"[+-]?[0-9]*[.]?[0-9]*[Ee]?[+-]?[0-9]+|\s[0-9]+\s"
 )  # match number groups
-BC_REGREP = re.compile(
-    r"^\s*([0-9]+)\s*([A-Za-z]+)\s*([0-9]*[.]?[0-9]+)\s+([0-9]*[.]?[0-9]+)"
+BC_REGREP: re.Pattern = re.compile(
+    r"^\s*([0-9]+)\s*([A-Za-z]+)((?:\s+[0-9]*[.]?[0-9]+)+)$"
 )
 
-MSG_NOT_PANDAS = """'Pandas' is not installed or could not be found.
+
+MSG_NOT_PANDAS: str = """'Pandas' is not installed or could not be found.
 Hence this command is not applicable.
 
 You can install it using:
 pip install pandas
 """
 
-MSG_BCLISTINGOUTPUT_TO_ARRAY = """This command has strings values in some of its columns (such 'UX', 'FX', 'UY', 'TEMP', etc),
+MSG_BCLISTINGOUTPUT_TO_ARRAY: str = """This command has strings values in some of its columns (such 'UX', 'FX', 'UY', 'TEMP', etc),
 so it cannot be converted to Numpy Array.
 
 Please use 'to_list' or 'to_dataframe' instead."""
 
 
 # Identify where the data start in the output
-GROUP_DATA_START = ["NODE", "ELEM"]
+GROUP_DATA_START: List[str] = ["NODE", "ELEM"]
 
 # Allowed commands to get output as array or dataframe.
 # In theory, these commands should follow the same format.
 # Some of them are not documented (already deprecated?)
 # So they are not in the Mapdl class,
 # so they won't be wrapped.
-CMD_RESULT_LISTING = [
+CMD_RESULT_LISTING: List[str] = [
     "NLIN",  # not documented
     "PRCI",
     "PRDI",  # Not documented.
@@ -83,9 +112,36 @@ CMD_RESULT_LISTING = [
     "SWLI",
 ]
 
-CMD_BC_LISTING = ["FLIS", "DLIS"]
+CMD_BC_LISTING: List[str] = [
+    "DKLI",
+    "DLLI",
+    "DALI",
+    "DLIS",
+    "FKLI",
+    "FLIS",
+    "SFLL",
+    # "SFAL",   Define two integers before label (regex)
+    # "SFLI",   Use two lines to define each BC in the list
+    # "SFEL",   Use two lines to define each BC in the list
+    "BFKL",
+    "BFLL",
+    "BFAL",
+]
 
-CMD_ENTITY_LISTING = [
+COLNAMES_BC_LISTING: Dict[str, List[str]] = {
+    "DKLI": ["KEYPOINT", "LABEL", "REAL", "IMAG", "EXP KEY"],
+    "DLLI": ["LINE", "LABEL", "REAL", "IMAG", "NAREA"],
+    "DALI": ["AREA", "LABEL", "REAL", "IMAG"],
+    "DLIS": ["NODE", "LABEL", "REAL", "IMAG"],
+    "FKLI": ["KEYPOINT", "LABEL", "REAL", "IMAG"],
+    "FLIS": ["NODE", "LABEL", "REAL", "IMAG"],
+    "SFLL": ["LINE", "LABEL", "VALI", "VALJ", "VAL2I", "VAL2J"],
+    "BFKL": ["KEYPOINT", "LABEL", "VALUE"],
+    "BFLL": ["LINE", "LABEL", "VALUE"],
+    "BFAL": ["AREA", "LABEL", "VALUE"],
+}
+
+CMD_ENTITY_LISTING: List[str] = [
     "NLIS",
     # "ELIS", # To be implemented later
     # "KLIS",
@@ -94,12 +150,12 @@ CMD_ENTITY_LISTING = [
     # "VLIS",
 ]
 
-CMD_LISTING = []
+CMD_LISTING: List[str] = []
 CMD_LISTING.extend(CMD_ENTITY_LISTING)
 CMD_LISTING.extend(CMD_RESULT_LISTING)
 
 # Adding empty lines to match current format.
-docstring_injection = """
+CMD_DOCSTRING_INJECTION: str = r"""
 Returns
 -------
 
@@ -107,25 +163,48 @@ str
     Str object with the command console output.
 
     This object also has the extra methods:
+    :meth:`to_list() <ansys.mapdl.core.commands.CommandListingOutput.to_list>`,
+    :meth:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>` (only on listing commands) and
+    :meth:`to_dataframe() <ansys.mapdl.core.commands.CommandListingOutput.to_dataframe>` (only if Pandas is installed).
+    |bl|
+    **NOTE**: If you use these methods, you might
+    obtain a lower precision than using :class:`Mesh <ansys.mapdl.core.mesh_grpc.MeshGrpc>` methods.
+    |bl|
+    For more information visit :ref:`user_guide_postprocessing`.
 
-    * ``str.to_list()``
+"""
 
-    * ``str.to_array()`` (Only on listing commands)
+XSEL_DOCSTRING_INJECTION: str = r"""
+Returns
+-------
 
-    * ``str.to_dataframe()`` (Only if Pandas is installed)
+np.ndarray
+    Numpy array with the ids of the selected entities.
 
-    For more information visit `PyMAPDL Post-Processing <https://mapdl.docs.pyansys.com/user_guide/post.html>`_.
+    For more information visit :ref:`user_guide_postprocessing`.
 
 """
 
 
-def get_indentation(indentation_regx, docstring):
+CMD_XSEL: List[str] = [
+    "NSEL",
+    "ESEL",
+    "KSEL",
+    "LSEL",
+    "ASEL",
+    "VSEL",
+    "ESLN",
+    "NSLE",
+]
+
+
+def get_indentation(indentation_regx: str, docstring: str) -> List[Any]:
     return re.findall(indentation_regx, docstring, flags=re.DOTALL | re.IGNORECASE)[0][
         0
     ]
 
 
-def indent_text(indentation, docstring_injection):
+def indent_text(indentation: str, docstring_injection: str) -> str:
     return "\n".join(
         [
             indentation + each
@@ -133,21 +212,20 @@ def indent_text(indentation, docstring_injection):
             if each.strip()
         ]
     )
-    # return '\n'.join([indentation + each if each.strip() else '' for each in docstring_injection.splitlines()])
 
 
-def get_docstring_indentation(docstring):
+def get_docstring_indentation(docstring: str) -> List[Any]:
     indentation_regx = r"\n(\s*)\n"
     return get_indentation(indentation_regx, docstring)
 
 
-def get_sections(docstring):
+def get_sections(docstring: str) -> List[str]:
     return [
         each.strip().lower() for each in re.findall(r"\n\s*(\S*)\n\s*-+\n", docstring)
     ]
 
 
-def get_section_indentation(section_name, docstring):
+def get_section_indentation(section_name: str, docstring: str) -> List[Any]:
     sections = get_sections(docstring)
     if section_name.lower().strip() not in sections:
         raise ValueError(
@@ -159,16 +237,18 @@ def get_section_indentation(section_name, docstring):
     return get_indentation(indentation_regx, docstring)
 
 
-def inject_before(section, indentation, indented_doc_inject, docstring):
+def inject_before(
+    section: str, indentation: str, indented_doc_inject: str, docstring: str
+) -> str:
     return re.sub(
         section + r"\n\s*-*",
-        f"{indented_doc_inject.strip()}\n\n{indentation}\g<0>",
+        f"{indented_doc_inject.strip()}\n\n{indentation}" + r"\g<0>",
         docstring,
         flags=re.IGNORECASE,
     )
 
 
-def inject_after_return_section(indented_doc_inject, docstring):
+def inject_after_return_section(indented_doc_inject: str, docstring: str) -> str:
     return re.sub(
         "Returns" + r"\n\s*-*",
         f"{indented_doc_inject.strip()}\n",
@@ -177,10 +257,17 @@ def inject_after_return_section(indented_doc_inject, docstring):
     )
 
 
-def inject_docs(docstring):
+def inject_docs(docstring: str, docstring_injection: Optional[str] = None) -> str:
     """Inject a string in a docstring"""
+    if not docstring_injection:
+        docstring_injection = CMD_DOCSTRING_INJECTION
+
     return_header = r"Returns\n\s*-*"
-    if re.search(return_header, docstring):
+
+    if docstring_injection.splitlines()[-2].strip() in docstring:
+        # In case the docstring already has the injection.
+        return docstring
+    elif re.search(return_header, docstring):
         # There is a return block already, probably it should not.
         indentation = get_section_indentation("Returns", docstring)
         indented_doc_inject = indent_text(indentation, docstring_injection)
@@ -220,7 +307,7 @@ def inject_docs(docstring):
             return docstring + "\n" + indented_doc_inject
 
 
-def check_valid_output(func):
+def check_valid_output(func: Callable) -> Callable:
     """Wrapper that check if output can be wrapped by pandas, if not, it will raise an exception."""
 
     @wraps(func)
@@ -229,7 +316,7 @@ def check_valid_output(func):
         if (
             "*** WARNING ***" in output or "*** ERROR ***" in output
         ):  # Error should be caught in mapdl.run.
-            err_type = re.findall("\*\*\* (.*) \*\*\*", output)[0]
+            err_type = re.findall(r"*** (.*) ***", output)[0]
             msg = f"Unable to parse because of next {err_type.title()}" + "\n".join(
                 output.splitlines()[-2:]
             )
@@ -433,28 +520,19 @@ class Commands(
     map_cmd.MapCommand,
     InqFunctions,
 ):
-
     """Wrapped MAPDL commands"""
-
-
-def _requires_pandas(func):
-    """Wrapper that check ``HAS_PANDAS``, if not, it will raise an exception."""
-
-    def func_wrapper(self, *args, **kwargs):
-        if HAS_PANDAS:
-            return func(self, *args, **kwargs)
-        else:
-            raise ModuleNotFoundError(MSG_NOT_PANDAS)
-
-    return func_wrapper
 
 
 class CommandOutput(str):
     """Custom string subclass for handling the commands output.
 
-    This class add two method to track the cmd which generated this output.
-    * ``cmd`` - The MAPDL command which generated the output.
-    * ``command`` - The full command line (with arguments) which generated the output.
+    This class is a subclass of python :class`str`, hence it has all the methods of
+    a string python object.
+
+    Additionally it provides the following attributes:
+
+    * :attr:`cmd() <ansys.mapdl.core.commands.CommandOutput.cmd>`
+    * :attr:`command() <ansys.mapdl.core.commands.CommandOutput.command>`
 
     """
 
@@ -463,7 +541,7 @@ class CommandOutput(str):
     # - https://docs.python.org/3/library/collections.html#userstring-objects
     # - Source code of UserString
 
-    def __new__(cls, content, cmd=None):
+    def __new__(cls, content: str, cmd=None):
         obj = super().__new__(cls, content)
         obj._cmd = cmd
         return obj
@@ -474,7 +552,7 @@ class CommandOutput(str):
         return self._cmd.split(",")[0]
 
     @cmd.setter
-    def cmd(self, cmd):
+    def cmd(self, cmd: str):
         """Not allowed to change the value of ``cmd``."""
         raise AttributeError("The `cmd` attribute cannot be set")
 
@@ -493,25 +571,38 @@ class CommandListingOutput(CommandOutput):
 
     Custom class for handling the commands whose output is sensible to be converted to
     a list of lists, a Numpy array or a Pandas DataFrame.
+
+    This class is a subclass of python :class:`str`, hence it has all the methods of
+    a string python object.
+
+    Additionally it provides the following methods:
+
+    * :func:`to_list() <ansys.mapdl.core.commands.CommandListingOutput.to_list>`
+    * :func:`to_array() <ansys.mapdl.core.commands.CommandListingOutput.to_array>`
+    * :func:`to_dataframe() <ansys.mapdl.core.commands.CommandListingOutput.to_dataframe>`
+
     """
 
-    def __new__(cls, content, cmd=None, magicwords=None, columns_names=None):
+    def __new__(
+        cls,
+        content: str,
+        cmd: Optional[str] = None,
+        magicwords: Optional[str] = None,
+        columns_names: Optional[List[str]] = None,
+    ):
         obj = super().__new__(cls, content)
         obj._cmd = cmd
         obj._magicwords = magicwords
         obj._columns_names = columns_names
         return obj
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Tuple[Any], **kwargs: Dict[Any, Any]) -> None:
         self._cache = None
 
-    def _is_data_start(self, line, magicwords=None):
+    def _is_data_start(self, line: str, magicwords: List[str] = None) -> bool:
         """Check if line is the start of a data group."""
         if not magicwords:
-            if self._magicwords:
-                magicwords = self._magicwords
-            else:
-                magicwords = GROUP_DATA_START
+            magicwords = self._magicwords or GROUP_DATA_START
 
         # Checking if we are supplying a custom start function.
         if self.custom_data_start(line) is not None:
@@ -522,7 +613,7 @@ class CommandListingOutput(CommandOutput):
                 return True
         return False
 
-    def _is_data_end(self, line):
+    def _is_data_end(self, line: str) -> bool:
         """Check if line is the end of a data group."""
 
         # Checking if we are supplying a custom start function.
@@ -531,7 +622,7 @@ class CommandListingOutput(CommandOutput):
         else:
             return self._is_empty(line)
 
-    def custom_data_start(self, line):
+    def custom_data_start(self, line: str) -> None:
         """Custom data start line check function.
 
         This function is left empty so it can be overwritten by the user.
@@ -541,7 +632,7 @@ class CommandListingOutput(CommandOutput):
         """
         return None
 
-    def custom_data_end(self, line):
+    def custom_data_end(self, line: str) -> None:
         """Custom data end line check function.
 
         This function is left empty so it can be overwritten by the user.
@@ -552,14 +643,14 @@ class CommandListingOutput(CommandOutput):
         return None
 
     @staticmethod
-    def _is_empty_line(line):
+    def _is_empty_line(line: str) -> bool:
         return bool(line.split())
 
-    def _format(self):
+    def _format(self) -> str:
         """Perform some formatting (replacing mainly) in the raw text."""
         return re.sub(r"[^E](-)", " -", self.__str__())
 
-    def _get_body(self, trail_header=None):
+    def _get_body(self, trail_header: List[str] = None) -> str:
         """Get command body text.
 
         It removes the maximum absolute values tail part and makes sure there is
@@ -584,7 +675,9 @@ class CommandListingOutput(CommandOutput):
                 body = body[:i]
         return body
 
-    def _get_data_group_indexes(self, body, magicwords=None):
+    def _get_data_group_indexes(
+        self, body: str, magicwords: Optional[List[str]] = None
+    ) -> List[Tuple[int, int]]:
         """Return the indexes of the start and end of the data groups."""
         if "*****ANSYS VERIFICATION RUN ONLY*****" in str(self[:1000]):
             shift = 2
@@ -609,7 +702,7 @@ class CommandListingOutput(CommandOutput):
 
         return zip(start_idxs, ends)
 
-    def get_columns(self):
+    def get_columns(self) -> Optional[List[str]]:
         """Get the column names for the dataframe.
 
         Returns
@@ -627,7 +720,7 @@ class CommandListingOutput(CommandOutput):
         except:
             return None
 
-    def _parse_table(self):
+    def _parse_table(self) -> np.ndarray:
         """Parse tabular command output.
 
         Returns
@@ -646,14 +739,14 @@ class CommandListingOutput(CommandOutput):
         return np.array(parsed_lines, dtype=np.float64)
 
     @property
-    def _parsed(self):
+    def _parsed(self) -> str:
         """Return parsed output."""
         if self._cache is None:
             self._cache = self._parse_table()
         return self._cache
 
     @check_valid_output
-    def to_list(self):
+    def to_list(self) -> List[str]:
         """Export the command output a list or list of lists.
 
         Returns
@@ -662,7 +755,7 @@ class CommandListingOutput(CommandOutput):
         """
         return self._parsed.tolist()
 
-    def to_array(self):
+    def to_array(self) -> np.ndarray:
         """Export the command output as a numpy array.
 
         Returns
@@ -672,7 +765,9 @@ class CommandListingOutput(CommandOutput):
         """
         return self._parsed
 
-    def to_dataframe(self, data=None, columns=None):
+    def to_dataframe(
+        self, data: Optional[np.ndarray] = None, columns: Optional[List[str]] = None
+    ) -> "pandas.DataFrame":
         """Export the command output as a Pandas DataFrame.
 
         Parameters
@@ -701,9 +796,9 @@ class CommandListingOutput(CommandOutput):
         (inheritate from :func:`to_array()
         <ansys.mapdl.core.commands.CommandListingOutput.to_array>` method).
         """
-        try:
-            import pandas as pd
-        except ModuleNotFoundError:
+        if _HAS_PANDAS:
+            import pandas
+        else:
             raise ModuleNotFoundError(MSG_NOT_PANDAS)
 
         if data is None:
@@ -711,7 +806,7 @@ class CommandListingOutput(CommandOutput):
         if not columns:
             columns = self.get_columns()
 
-        return pd.DataFrame(data=data, columns=columns)
+        return pandas.DataFrame(data=data, columns=columns)
 
 
 class BoundaryConditionsListingOutput(CommandListingOutput):
@@ -720,22 +815,108 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
     Custom class for handling the boundary condition listing commands
     whose output is sensible to be converted to a list of lists,
     or a Pandas DataFrame.
+
+    This class is a subclass of python :class:`str`, hence it has all the methods of
+    a string python object and it can be used as such.
+
+    Additionally it provides the following methods:
+
+    * :func:`to_list() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput.to_list>`
+    * :func:`to_dataframe() <ansys.mapdl.core.commands.BoundaryConditionsListingOutput.to_dataframe>`
+
     """
 
-    def _parse_table(self):
+    def bc_colnames(self) -> Optional[List[str]]:
+        """Get the column names based on bc list command"""
+
+        bc_type: Dict[str, str] = {
+            "BODY FORCES": "BF",
+            "SURFACE LOAD": "SF",
+            "POINT LOAD": "F",
+            "FORCES": "F",
+            "CONSTRAINTS": "D",
+        }
+
+        entity = {
+            "KEYPOINT": "K",
+            "LINE": "L",
+            "AREA": "A",
+            "NODE": "",
+            "ELEMENT": "E",
+        }
+
+        title = self._get_body()[0]
+
+        _bcType = [i for i in bc_type if i in title]
+        _entity = [i for i in entity if i in title]
+
+        if _bcType and _entity:
+
+            key_bc = bc_type[_bcType[0]] + entity[_entity[0]] + "LIST"
+            key_bc = key_bc[:4]
+
+            if key_bc in COLNAMES_BC_LISTING.keys():
+
+                _cols = COLNAMES_BC_LISTING[key_bc]
+
+                # Check num columns in data
+                ldata = []
+                for line in self.splitlines():
+                    line = line.strip()
+                    # exclude any line containing characters [A-Z] except for E
+                    if line:
+                        items = BC_REGREP.findall(line)
+                        if items:
+                            ldata = list(items[0][:2]) + items[0][2].split()
+                            break
+
+                if ldata:
+                    if len(_cols) > len(ldata):
+                        _cols = _cols[: len(ldata)]
+
+                    return _cols
+
+        return None
+
+    def get_columns(self) -> List[str]:
+        """Get the column names for the dataframe.
+
+        Returns
+        -------
+        List of strings
+
+        """
+        if self._columns_names:
+            return self._columns_names
+
+        bc_colnames = self.bc_colnames()
+
+        if bc_colnames:
+            return bc_colnames
+
+        body = self._get_body()
+
+        pairs = list(self._get_data_group_indexes(body))
+        try:
+            return body[pairs[0][0]].split()
+        except:
+            return None
+
+    def _parse_table(self) -> List[str]:
         """Parse tabular command output."""
         parsed_lines = []
         for line in self.splitlines():
+            line = line.strip()
             # exclude any line containing characters [A-Z] except for E
             if line:
                 items = BC_REGREP.findall(line)
                 if items:
-                    parsed_lines.append(list(items[0]))
+                    parsed_lines.append(list(items[0][:2]) + items[0][2].split())
 
         return parsed_lines
 
     @check_valid_output
-    def to_list(self):
+    def to_list(self) -> List[str]:
         """Export the command output a list or list of lists.
 
         Returns
@@ -747,7 +928,7 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
     def to_array(self):
         raise ValueError(MSG_BCLISTINGOUTPUT_TO_ARRAY)
 
-    def to_dataframe(self):
+    def to_dataframe(self) -> "pandas.DataFrame":
         """Convert the command output to a Pandas Dataframe.
 
         Returns
@@ -767,21 +948,32 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
 
         """
         df = super().to_dataframe(data=self.to_list())
-        if "NODE" in df.columns:
-            df["NODE"] = df["NODE"].astype(np.int32, copy=False)
+
+        primitives = ["KEYPOINT", "LINE", "AREA", "VOLUME", "NODE", "ELEMENT"]
+
+        float_col = ["REAL", "IMAG", "VALUE", "VALI", "VALJ"]
+
+        for i in df.columns.intersection(primitives):
+            df[i] = df[i].astype(np.int32, copy=False)
 
         if "LABEL" in df.columns:
             df["LABEL"] = df["LABEL"].astype(str, copy=False)
 
-        if "REAL" in df.columns:
-            df["REAL"] = df["REAL"].astype(np.float64, copy=False)
-
-        if "IMAG" in df.columns:
-            df["IMAG"] = df["IMAG"].astype(np.float64, copy=False)
+        for i in df.columns.intersection(float_col):
+            df[i] = df[i].astype(np.float64, copy=False)
 
         return df
 
 
+class ComponentListing(CommandListingOutput):
+    @property
+    def _parsed(self) -> np.ndarray:
+        from ansys.mapdl.core.component import _parse_cmlist
+
+        # To keep same API as commands
+        return np.array(list(_parse_cmlist(self).keys()))
+
+
 class StringWithLiteralRepr(str):
-    def __repr__(self):
+    def __repr__(self) -> str:
         return self.__str__()

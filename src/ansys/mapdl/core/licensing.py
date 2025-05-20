@@ -1,13 +1,41 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Module for licensing and license serve checks."""
 
 import os
 import socket
-import subprocess
+
+# Subprocess is needed to start the backend. But
+# the input is controlled by the library. Excluding bandit check.
+import subprocess  # nosec B404
 import time
 
-from ansys.mapdl.core import LOG
+from ansys.mapdl.core import _HAS_ATP, LOG
 from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.misc import threaded_daemon
+
+if _HAS_ATP:
+    from ansys.tools.path import get_mapdl_path, version_from_path
 
 LOCALHOST = "127.0.0.1"
 LIC_PATH_ENVAR = "ANSYSLIC_DIR"
@@ -20,6 +48,7 @@ LICENSES = {
     "meba": "Ansys Mechanical Enterprise Solver",
     "mech_2": "Ansys Mechanical Premium",
     "mech_1": "Ansys Mechanical Pro",
+    "preppost": "Mechanical Enterprise PrepPost",
 }
 ALLOWABLE_LICENSES = list(LICENSES)
 
@@ -97,10 +126,10 @@ class LicenseChecker:
             self._license_file_success = False
             self._license_file_msg.append(str(error))
         else:
-            self._license_file_success = True  # pragma: no cover
+            self._license_file_success = True
 
     @threaded_daemon
-    def checkout_license(self, host=None):  # pragma: no cover
+    def checkout_license(self, host=None):
         try:
             self._check_mech_license_available(host)
         except Exception as error:
@@ -121,7 +150,7 @@ class LicenseChecker:
             disabled.
 
         """
-        if license_file:
+        if license_file and _HAS_ATP:
             self._lic_file_thread = self.check_license_file()
         if checkout_license:
             self._checkout_thread = self.checkout_license()
@@ -220,7 +249,6 @@ class LicenseChecker:
         notification_time = time.time() + notify_at_second
         notification_bool = True
         while time.time() < max_time:
-
             if self.stop:  # pragma: no cover
                 LOG.debug("The license checker has received a stop signal.")
                 raise Exception("The license checker has been stopped.")
@@ -303,13 +331,14 @@ class LicenseChecker:
             env["ANS_FLEXLM_DISABLE_DEFLICPATH"] = "TRUE"
 
         tstart = time.time()
+        # ansysli_util_path is controlled by the library.
+        # Excluding bandit check.
         process = subprocess.Popen(
-            f'"{ansysli_util_path}" -checkout {lic}',
+            [f'"{ansysli_util_path}"', "-checkout", f"{lic}"],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             env=env,
-            shell=True,
-        )
+        )  # nosec B603
         output = process.stdout.read().decode()
 
         t_elap = time.time() - tstart
@@ -465,13 +494,11 @@ def get_ansys_license_debug_file_name():  # pragma: no cover
     # - For version 22.1 and above: `licdebug.$hostname.$appname.$version.out`
     # - For version 21.2 and below: `licdebug.$appname.$version.out`
 
-    from ansys.mapdl.core.launcher import _version_from_path, get_ansys_path
-
     name = "licdebug"
     hostname = socket.gethostname()
     appname = APP_NAME
     # This is the type of license my client requests (Windows 10, 2021R2)
-    version = _version_from_path(get_ansys_path(allow_input=False))
+    version = version_from_path("mapdl", get_mapdl_path(allow_input=False))
     ending = "out"
 
     if version < 221:

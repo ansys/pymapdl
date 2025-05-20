@@ -1,3 +1,5 @@
+.. _api_logging:
+
 Logging
 =======
 To make the logging of events consistent, PyMAPDL has a specific
@@ -5,11 +7,11 @@ logging architecture with global and local logging instances.
 
 For these two types of loggers, the default log message format is:
 
-.. code:: python
+.. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
     >>> mapdl = launch_mapdl()
-    >>> mapdl._log.info('This is an useful message')
+    >>> mapdl._log.info("This is an useful message")
       LEVEL - INSTANCE NAME - MODULE - FUNCTION - MESSAGE
       INFO - GRPC_127.0.0.1:50052 -  test - <module> - This is an useful message
 

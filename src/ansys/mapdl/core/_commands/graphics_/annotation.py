@@ -1,3 +1,26 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class Annotation:
     def an3d(self, kywrd="", key="", **kwargs):
         """Specifies 3-D annotation functions
@@ -63,36 +86,48 @@ class Annotation:
         lab
             Annotation control key:
 
-            OFF - Turns off annotation for each subsequent display (default).
+            OFF
+                Turns off annotation for each subsequent display (default).
 
-            ON - Turns on annotation for each subsequent display.
+            ON
+                Turns on annotation for each subsequent display.
 
-            DELE - Deletes all annotation.
+            DELE
+                Deletes all annotation.
 
-            SAVE - Saves annotation on a file.  Use VAL1 for file name (defaults to Jobname) and
-                   VAL2 for the extension (defaults to ANO).
+            SAVE
+                Saves annotation on a file.  Use VAL1 for file name (defaults to Jobname) and
+                VAL2 for the extension (defaults to ANO).
 
-            SCALE - Sets annotation scale factor (direct input only).  Use VAL1 for value (0.1 to
-                    10.0) (defaults to 1.0).
+            SCALE
+                Sets annotation scale factor (direct input only).  Use VAL1 for value (0.1 to
+                10.0) (defaults to 1.0).
 
-            XORIG - Sets the annotation x origin (direct input only).  Use VAL1 for value (-3.0 to
-                    3.0).
+            XORIG
+                Sets the annotation x origin (direct input only).  Use VAL1 for value (-3.0 to
+                3.0).
 
-            YORIG - Sets annotation y origin (direct input only).  Use VAL1 for value (-3.0 to
-                    3.0).
+            YORIG
+                Sets annotation y origin (direct input only).  Use VAL1 for value (-3.0 to
+                3.0).
 
-            SNAP - Sets annotation snap (menu button input only).  Use VAL1 for value (0.002 to
-                   0.2) (defaults to 0.002).
+            SNAP
+                Sets annotation snap (menu button input only).  Use VAL1 for value (0.002 to
+                0.2) (defaults to 0.002).
 
-            STAT - Displays current annotation status.
+            STAT
+                Displays current annotation status.
 
-            DEFA - Sets annotation specifications to the default values.
+            DEFA
+                Sets annotation specifications to the default values.
 
-            REFR - Redisplays annotation graphics.
+            REFR
+                Redisplays annotation graphics.
 
-            TMOD - Sets the annotation text mode. If VAL1 = 1, annotation text will be drawn in
-                   scalable bitmap fonts (default). If VAL1 = 0, annotation
-                   text will be drawn with stroke text.
+            TMOD
+                Sets the annotation text mode. If VAL1 = 1, annotation text will be drawn in
+                scalable bitmap fonts (default). If VAL1 = 0, annotation
+                text will be drawn with stroke text.
 
         val1
             Value (or file name) as noted with label above.
@@ -136,33 +171,45 @@ class Annotation:
             number is available; ANSYS will substitute the lowest available
             number in place of any user-specified higher number.
 
-        type\_
+        type\\_
             Annotation internal type number.  If TYPE = DELE, delete annotation
             NUM.
 
-            1 - Text
+            1
+                Text
 
-            2 - Block text (not available in GUI)
+            2
+                Block text (not available in GUI)
 
-            3 - Dimensions
+            3
+                Dimensions
 
-            4 - Lines
+            4
+                Lines
 
-            5 - Rectangles
+            5
+                Rectangles
 
-            6 - Circles
+            6
+                Circles
 
-            7 - Polygons
+            7
+                Polygons
 
-            8 - Arcs
+            8
+                Arcs
 
-            9 - Wedges, pies
+            9
+                Wedges, pies
 
-            11 - Symbols
+            11
+                Symbols
 
-            12 - Arrows
+            12
+                Arrows
 
-            13 - Bitmap
+            13
+                Bitmap
 
         xhot
             X hot spot (-1.0 < X < 2.0).  Used for menu button item delete.
@@ -185,6 +232,78 @@ class Annotation:
         command = f"/ANUM,{num},{type_},{xhot},{yhot}"
         return self.run(command, **kwargs)
 
+    def slashlarc(self, xcentr="", ycentr="", xlrad="", angle1="", angle2="", **kwargs):
+        """Creates annotation arcs (GUI).
+
+        APDL Command: /LARC
+
+        Parameters
+        ----------
+        xcentr
+            Arc X center location (-1.0 < X < 1.0).
+
+        ycentr
+            Arc Y center location (-1.0 < Y < 1.0).
+
+        xlrad
+            Arc radius length.
+
+        angle1
+            Starting angle of arc.
+
+        angle2
+            Ending angle of arc. The arc is drawn counterclockwise from the
+            starting angle, `angle1`, to the ending angle, `angle2`.
+
+        Notes
+        -----
+        This command defines annotation arcs to be written directly onto the
+        display at a specified location. The command is generated by the Graphical
+        User Interface (GUI) and will appear in the log file (`Jobname.LOG`) if
+        annotation is used. It is not intended to be typed in directly in a
+        Mechanical APDL session (although it can be included in an input file
+        for batch input or for use with the `/INPUT` command).
+        All arcs are shown on subsequent displays unless the annotation is
+        turned off or deleted. Issueu `/LSPEC` to set the attributes
+        of the arc.
+
+        This command is valid in any processor.
+        """
+        command = f"/LARC, {xcentr}, {ycentr}, {xlrad}, {angle1}, {angle2}"
+        return self.run(command, **kwargs)
+
+    def slashline(self, x1="", y1="", x2="", y2="", **kwargs):
+        """Creates annotation lines (GUI).
+
+        APDL Command: /LINE
+
+        Parameters
+        ----------
+        X1
+            Line X starting location (-1.0 < X < 2.0).
+        Y1
+            Line Y starting location (-1.0 < Y < 1.0).
+        X2
+            Line X ending location (-1.0 < X < 2.0).
+        Y2
+            Line Y ending location (-1.0 < Y < 1.0).
+
+        Notes
+        -----
+        This command defines annotation lines to be written directly onto the
+        display at a specified location. The command is generated by the Graphical
+        User Interface (GUI) and appears in the log file (`Job-name.LOG`) if
+        annotation is used. It is not intended to be typed in directly in a
+        Mechanical APDL session (although it can be included in an input file
+        for batch input or for use with the `/INPUT` command). All lines are
+        shown on subsequent displays unless the annotation is turned off or
+        deleted. Issue `/LSPEC` to set the attributes of the line.
+
+        This command is valid in any processor.
+        """
+        command = f"/LINE, {x1}, {y1}, {x2}, {y2}"
+        return self.run(command, **kwargs)
+
     def lspec(self, lcolor="", linstl="", xlnwid="", **kwargs):
         """Specifies annotation line attributes (GUI).
 
@@ -195,44 +314,62 @@ class Annotation:
         lcolor
             Line color:
 
-            0 - Black
+            0
+                Black
 
-            1 - Red-Magenta
+            1
+                Red-Magenta
 
-            2 - Magenta
+            2
+                Magenta
 
-            3 - Blue-Magenta
+            3
+                Blue-Magenta
 
-            4 - Blue
+            4
+                Blue
 
-            5 - Cyan-Blue
+            5
+                Cyan-Blue
 
-            6 - Cyan
+            6
+                Cyan
 
-            7 - Green-Cyan
+            7
+                Green-Cyan
 
-            8 - Green
+            8
+                Green
 
-            9 - Yellow-Green
+            9
+                Yellow-Green
 
-            10 - Yellow
+            10
+                Yellow
 
-            11 - Orange
+            11
+                Orange
 
-            12 - Red
+            12
+                Red
 
-            13 - Dark Gray
+            13
+                Dark Gray
 
-            14 - Light Gray
+            14
+                Light Gray
 
-            15 - White
+            15
+                White
 
         linstl
             Line style:
 
-            0 - Solid line.
+            0
+                Solid line.
 
-            1 - Dashed line.
+            1
+                Dashed line.
 
         xlnwid
             Line width multiplier (1.0 to 20.0).  Defaults to 1.0.
@@ -271,15 +408,20 @@ class Annotation:
         symtyp
             Symbol type:
 
-            1 - Arrow.
+            1
+                Arrow.
 
-            2 - Tee.
+            2
+                Tee.
 
-            3 - Circle.
+            3
+                Circle.
 
-            4 - Triangle.
+            4
+                Triangle.
 
-            5 - Star.
+            5
+                Star.
 
         symsiz
             Symbol size multiplier (0.1 to 20.0).  Defaults to 1.0.
@@ -473,51 +615,71 @@ class Annotation:
         pcolor
             Polygon color (0  PCOLOR   15):
 
-            0 - Black.
+            0
+                Black.
 
-            1 - Red-Magenta.
+            1
+                Red-Magenta.
 
-            2 - Magenta.
+            2
+                Magenta.
 
-            3 - Blue-Magenta.
+            3
+                Blue-Magenta.
 
-            4 - Blue.
+            4
+                Blue.
 
-            5 - Cyan-Blue.
+            5
+                Cyan-Blue.
 
-            6 - Cyan.
+            6
+                Cyan.
 
-            7 - Green-Cyan.
+            7
+                Green-Cyan.
 
-            8 - Green.
+            8
+                Green.
 
-            9 - Yellow-Green.
+            9
+                Yellow-Green.
 
-            10 - Yellow.
+            10
+                Yellow.
 
-            11 - Orange.
+            11
+                Orange.
 
-            12 - Red.
+            12
+                Red.
 
-            13 - Dark Gray.
+            13
+                Dark Gray.
 
-            14 - Light Gray.
+            14
+                Light Gray.
 
-            15 - White.
+            15
+                White.
 
         kfill
             Polygon fill key:
 
-            0 - Hollow polygon.
+            0
+                Hollow polygon.
 
-            1 - Filled polygon.
+            1
+                Filled polygon.
 
         kbordr
             Polygon border key:
 
-            0 - No border.
+            0
+                No border.
 
-            1 - Border.
+            1
+                Border.
 
         Notes
         -----
@@ -621,37 +783,53 @@ class Annotation:
         tcolor
             Text color (0  TCOLOR   15):
 
-            0 - Black.
+            0
+                Black.
 
-            1 - Red-Magenta.
+            1
+                Red-Magenta.
 
-            2 - Magenta.
+            2
+                Magenta.
 
-            3 - Blue-Magenta.
+            3
+                Blue-Magenta.
 
-            4 - Blue.
+            4
+                Blue.
 
-            5 - Cyan-Blue.
+            5
+                Cyan-Blue.
 
-            6 - Cyan.
+            6
+                Cyan.
 
-            7 - Green-Cyan.
+            7
+                Green-Cyan.
 
-            8 - Green.
+            8
+                Green.
 
-            9 - Yellow-Green.
+            9
+                Yellow-Green.
 
-            10 - Yellow.
+            10
+                Yellow.
 
-            11 - Orange.
+            11
+                Orange.
 
-            12 - Red.
+            12
+                Red.
 
-            13 - Dark Gray.
+            13
+                Dark Gray.
 
-            14 - Light Gray.
+            14
+                Light Gray.
 
-            15 - White.
+            15
+                White.
 
         tsize
             Text size factor.
@@ -659,13 +837,17 @@ class Annotation:
         txthic
             Text thickness key:
 
-            1 - normal.
+            1
+                normal.
 
-            2 - twice as thick.
+            2
+                twice as thick.
 
-            3 - three times as thick.
+            3
+                three times as thick.
 
-            4 - four times as thick.
+            4
+                four times as thick.
 
         pangle
             Text path angle (0.0 < angle < 360.0).

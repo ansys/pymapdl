@@ -1,3 +1,25 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """
 .. _ref_plane_stress_concentration:
 
@@ -98,7 +120,6 @@ mapdl.mopt("EXPND", 0.7)  # default 1
 mapdl.esize(plate_esize)
 mapdl.amesh(plate_with_hole_anum)
 mapdl.eplot(
-    vtk=True,
     cpos="xy",
     show_edges=True,
     show_axes=False,
@@ -149,9 +170,10 @@ mapdl.allsel(mute=True)
 # Solve the Static Problem
 # ~~~~~~~~~~~~~~~~~~~~~~~~
 # Solve the static analysis
-mapdl.run("/SOLU")
+mapdl.solution()
 mapdl.antype("STATIC")
 output = mapdl.solve()
+mapdl.finish()
 print(output)
 
 ###############################################################################
@@ -202,7 +224,7 @@ max_stress = np.nanmax(von_mises)
 # We use nanmean here because mid-side nodes have no stress
 mask = result.mesh.nodes[:, 0] == length
 far_field_stress = np.nanmean(von_mises[mask])
-print("Far field von mises stress: %e" % far_field_stress)
+print("Far field von Mises stress: %e" % far_field_stress)
 # Which almost exactly equals the analytical value of 10000000.0 Pa
 
 ###############################################################################
@@ -286,7 +308,6 @@ def compute_stress_con(ratio):
     mapdl.esize(plate_esize)
     mapdl.amesh(plate_with_hole_anum)
 
-    ###############################################################################
     # Boundary Conditions
     # ~~~~~~~~~~~~~~~~~~~
     # Fix the left-hand side of the plate in the X direction
@@ -314,9 +335,10 @@ def compute_stress_con(ratio):
 
     # Solve the Static Problem
     # ~~~~~~~~~~~~~~~~~~~~~~~~
-    mapdl.run("/SOLU")
+    mapdl.solution()
     mapdl.antype("STATIC")
     mapdl.solve()
+    mapdl.finish()
 
     # Post-Processing
     # ~~~~~~~~~~~~~~~
@@ -382,5 +404,7 @@ plt.ylabel("Stress Concentration")
 plt.show()
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

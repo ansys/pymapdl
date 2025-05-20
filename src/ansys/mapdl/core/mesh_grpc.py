@@ -1,7 +1,32 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Module to manage downloading and parsing the FEM from the MAPDL gRPC server."""
 from functools import wraps
 import os
+import re
+import threading
 import time
+from typing import Dict
 import weakref
 
 from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
@@ -9,7 +34,7 @@ import numpy as np
 
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE, parse_chunks
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
-from ansys.mapdl.core.misc import supress_logging, threaded
+from ansys.mapdl.core.misc import requires_package, supress_logging, threaded
 
 TMP_NODE_CM = "__NODE__"
 
@@ -52,7 +77,10 @@ class MeshGrpc:
         self.logger = mapdl._log
         self._log = mapdl._log
 
+        self._freeze_model = False
         self._ignore_cache_reset = False
+        self._thread_lock_nodes = threading.Lock()
+        self._thread_lock_elem = threading.Lock()
         self._reset_cache()
 
     def __repr__(self):
@@ -94,6 +122,7 @@ class MeshGrpc:
 
     def _reset_cache(self):
         """Reset entire mesh cache"""
+
         if not self._ignore_cache_reset:
             self.logger.debug("Resetting cache")
 
@@ -104,7 +133,6 @@ class MeshGrpc:
             self._cached_elements = None  # cached list of elements
             self._chunk_size = None
             self._elem = None
-            self._elem_comps = {}
             self._elem_off = None
             self._enum = None  # cached element numbering
             self._esys = None  # cached element coordinate system
@@ -117,7 +145,6 @@ class MeshGrpc:
             self._mtype = None  # cached ansys material type
             self._nnum = None
             self._node_angles = None  # cached node angles
-            self._node_comps = {}
             self._node_coord = None  # cached node coordinates
             self._rcon = None  # cached ansys element real constant
             self._rdat = None
@@ -127,41 +154,44 @@ class MeshGrpc:
             self._tshape = None
             self._tshape_key = None
 
+    @property
+    def ignore_cache_reset(self):
+        """Context manager used to ignore mesh cache reset"""
+        return self._ignore_cache_reset_context(self)
+
     def _update_cache(self):
         """Threaded local cache update.
 
         Used when needing all the geometry entries from MAPDL.
         """
-        self.logger.debug("Updating cache")
-        # elements must have their underlying nodes selected to avoid
-        # VTK segfault
-        self._mapdl.cm(TMP_NODE_CM, "NODE", mute=True)
-        self._mapdl.nsle("S", mute=True)
+        if not self._ignore_cache_reset:
+            self.logger.debug("Updating cache")
+            # elements must have their underlying nodes selected to avoid
+            # VTK segfaul
+            with self._mapdl.save_selection:
+                self._mapdl.nsle("S", mute=True)
 
-        # not thread safe
-        self._update_cache_elem()
+                # not thread safe
+                self._update_cache_elem()
 
-        threads = [
-            self._update_cache_element_desc(),
-            self._update_cache_nnum(),
-            self._update_node_coord(),
-        ]
+                threads = [
+                    self._update_cache_element_desc(),
+                    self._update_cache_nnum(),
+                    self._update_node_coord(),
+                ]
 
-        for thread in threads:
-            thread.join()
+                for thread in threads:
+                    thread.join()
 
-        # must occur after read
-        self._ignore_cache_reset = True
+                # somehow requesting path seems to help windows avoid an
+                # outright segfault prior to running CMSEL
+                if os.name == "nt":
+                    _ = self._mapdl.path
 
-        # somehow requesting path seems to help windows avoid an
-        # outright segfault prior to running CMSEL
-        if os.name == "nt":
-            _ = self._mapdl.path
-
-        # TODO: flaky
-        time.sleep(0.05)
-        self._mapdl.cmsel("S", TMP_NODE_CM, "NODE", mute=True)
-        self._ignore_cache_reset = False
+                # TODO: flaky
+                time.sleep(0.05)
+        else:
+            self.logger.debug("Ignoring cache reset.")
 
     @threaded
     def _update_cache_nnum(self):
@@ -169,6 +199,7 @@ class MeshGrpc:
             self.logger.debug("Updating nodes cache")
             nnum = self._mapdl.get_array("NODE", item1="NLIST")
             self._cache_nnum = nnum.astype(np.int32)
+
         if self._cache_nnum.size == 1:
             if self._cache_nnum[0] == 0:
                 self._cache_nnum = np.empty(0, np.int32)
@@ -204,6 +235,7 @@ class MeshGrpc:
 
     @threaded
     def _update_node_coord(self):
+        # with self._thread_lock_nodes:
         if self._node_coord is None:
             self._node_coord = self._load_nodes()
 
@@ -325,7 +357,7 @@ class MeshGrpc:
         array of MAPDL element numbers corresponding to the element
         component.  The keys are element component names.
         """
-        return self._elem_comps
+        return self._mapdl.components._get_all_components_type("ELEM")
 
     @property
     def node_components(self):
@@ -335,7 +367,7 @@ class MeshGrpc:
         array of MAPDL node numbers corresponding to the node
         component.  The keys are node component names.
         """
-        return self._node_comps
+        return self._mapdl.components._get_all_components_type("NODE")
 
     @property
     @requires_model()
@@ -363,18 +395,12 @@ class MeshGrpc:
     @property
     def rlblock(self):
         """Real constant data from the RLBLOCK."""
-        # if not self._rdat:
-        #     pass # todo: fix this
-        # return self._rdat
-        raise NotImplementedError()
+        return self._parse_rlist()
 
     @property
     def rlblock_num(self):
         """Indices from the real constant data"""
-        # if not self._rnum:
-        #     pass # todo: to fix
-        # return self._rnum
-        raise NotImplementedError()
+        return list(self._parse_rlist().keys())
 
     @property
     def nnum(self) -> np.ndarray:
@@ -396,18 +422,13 @@ class MeshGrpc:
         >>> mapdl.mesh.nnum_all
         array([    1,     2,     3, ..., 19998, 19999, 20000])
         """
-        self._ignore_cache_reset = True
-        self._mapdl.cm(TMP_NODE_CM, "NODE", mute=True)
-        self._mapdl.nsel("all", mute=True)
+        with self.ignore_cache_reset, self._mapdl.save_selection:
+            self._mapdl.nsel("all", mute=True)
 
-        nnum = self._mapdl.get_array("NODE", item1="NLIST")
-        nnum = nnum.astype(np.int32)
-        if nnum.size == 1:
-            if nnum[0] == 0:
+            nnum = self._mapdl.get_array("NODE", item1="NLIST")
+            nnum = nnum.astype(np.int32)
+            if nnum.size == 1 and nnum[0] == 0:
                 nnum = np.empty(0, np.int32)
-
-        self._mapdl.cmsel("S", TMP_NODE_CM, "NODE", mute=True)
-        self._ignore_cache_reset = False
 
         return nnum
 
@@ -420,18 +441,13 @@ class MeshGrpc:
         >>> mapdl.mesh.enum_all
         array([    1,     2,     3, ..., 19998, 19999, 20000])
         """
-        self._ignore_cache_reset = True
-        self._mapdl.cm("__ELEM__", "ELEM", mute=True)
-        self._mapdl.esel("all", mute=True)
+        with self.ignore_cache_reset, self._mapdl.save_selection:
+            self._mapdl.esel("all", mute=True)
 
-        enum = self._mapdl.get_array("ELEM", item1="ELIST")
-        enum = enum.astype(np.int32)
-        if enum.size == 1:
-            if enum[0] == 0:
+            enum = self._mapdl.get_array("ELEM", item1="ELIST")
+            enum = enum.astype(np.int32)
+            if enum.size == 1 and enum[0] == 0:
                 enum = np.empty(0, np.int32)
-
-        self._mapdl.cmsel("S", "__ELEM__", "ELEM", mute=True)
-        self._ignore_cache_reset = False
 
         return enum
 
@@ -500,7 +516,7 @@ class MeshGrpc:
 
     @property
     def nodes(self) -> np.ndarray:
-        """Array of nodes.
+        """Array of nodes in Global Cartesian coordinate system.
 
         Examples
         --------
@@ -518,7 +534,54 @@ class MeshGrpc:
             return np.empty(0)
         return self._node_coord
 
-    def _load_nodes(self, chunk_size=DEFAULT_CHUNKSIZE):
+    @property
+    def nodes_in_current_CS(self) -> np.ndarray:
+        """Returns the nodes array in the current coordinate system."""
+        CS_id = self._mapdl.get_value("active", 0, "CSYS")
+        return self.nodes_in_coordinate_system(CS_id=CS_id)
+
+    def nodes_in_coordinate_system(self, CS_id):
+        """Return nodes in the desired coordinate system."""
+        if CS_id == 0:
+            return self.nodes
+        else:
+            # self._mapdl.parameters["__node_loc__"] = self.nodes
+            self._mapdl.get("__nnodes__", entity="NODE", entnum="0", item1="COUNT")
+            self._mapdl.dim(
+                par="__node_loc_cs__", type_="ARRAY", imax="__nnodes__", jmax=3
+            )
+
+            self._mapdl.starvget(
+                "__node_loc_cs__(1,1)",
+                entity="NODE",
+                entnum="0",
+                item1="LOC",
+                it1num="X",
+            )
+            self._mapdl.starvget(
+                "__node_loc_cs__(1,2)",
+                entity="NODE",
+                entnum="0",
+                item1="LOC",
+                it1num="Y",
+            )
+            self._mapdl.starvget(
+                "__node_loc_cs__(1,3)",
+                entity="NODE",
+                entnum="0",
+                item1="LOC",
+                it1num="Z",
+            )
+
+            self._mapdl.vfun("__node_loc_cs__", "local", "__node_loc__", CS_id)
+            return self._mapdl.parameters["__node_loc_cs__"]
+
+    @property
+    def nodes_rotation(self):
+        """Returns an array of node rotations"""
+        return self._mapdl.nlist(kinternal="").to_array()[:, 4:]
+
+    def _load_nodes(self, chunk_size=None):
         """Loads nodes from server.
 
         Parameters
@@ -529,11 +592,11 @@ class MeshGrpc:
 
         Returns
         -------
-        nodes : np.ndarray
+        np.ndarray
             Numpy array of nodes
         """
-        if self._chunk_size:
-            chunk_size = self._chunk_size
+        if not chunk_size:
+            chunk_size = self._chunk_size or DEFAULT_CHUNKSIZE
 
         request = anskernel.StreamRequest(chunk_size=chunk_size)
         chunks = self._mapdl._stub.Nodes(request)
@@ -573,7 +636,7 @@ class MeshGrpc:
     def _elem_off(self, value):
         self._cache_elem_off = value
 
-    def _load_elements_offset(self, chunk_size=DEFAULT_CHUNKSIZE):
+    def _load_elements_offset(self, chunk_size=None):
         """Loads elements from server
 
         Parameters
@@ -606,8 +669,8 @@ class MeshGrpc:
             Array of indices indicating the start of each element.
 
         """
-        if self._chunk_size:
-            chunk_size = self._chunk_size
+        if not chunk_size:
+            chunk_size = self._chunk_size or DEFAULT_CHUNKSIZE
 
         request = anskernel.StreamRequest(chunk_size=chunk_size)
         chunks = self._mapdl._stub.LoadElements(request)
@@ -631,7 +694,7 @@ class MeshGrpc:
         elems_[indx_elem] = self.enum
         return elems_, offset
 
-    def _load_element_types(self, chunk_size=DEFAULT_CHUNKSIZE):
+    def _load_element_types(self, chunk_size=None):
         """Loads element types from the MAPDL server.
 
         Returns
@@ -641,9 +704,12 @@ class MeshGrpc:
 
         Parameters
         ----------
-        chunk_size : int
+        int
             Size of the chunks to request from the server.
         """
+        if not chunk_size:
+            chunk_size = self._chunk_size or DEFAULT_CHUNKSIZE
+
         request = anskernel.StreamRequest(chunk_size=chunk_size)
         chunks = self._mapdl._stub.LoadElementTypeDescription(request)
         data = parse_chunks(chunks, np.int32)
@@ -700,6 +766,7 @@ class MeshGrpc:
         return self._grid
 
     @property
+    @requires_package("pyvista")
     def _grid(self):
         if self._grid_cache is None:
             self._update_cache()
@@ -770,11 +837,72 @@ class MeshGrpc:
     ):
         from ansys.mapdl.core.mesh.mesh import _parse_vtk
 
-        return _parse_vtk(
-            self,
-            allowable_types,
-            force_linear,
-            null_unallowed,
-            fix_midside,
-            additional_checking,
+        try:
+            return _parse_vtk(
+                self,
+                allowable_types,
+                force_linear,
+                null_unallowed,
+                fix_midside,
+                additional_checking,
+            )
+        except ValueError:
+            # In case we fail to detect/apply midside nodes in cuadratic
+            # elements
+            return _parse_vtk(
+                self,
+                allowable_types,
+                force_linear,
+                null_unallowed,
+                not fix_midside,
+                additional_checking,
+            )
+
+    def _parse_rlist(self) -> Dict[int, float]:
+        # mapdl.rmore(*list)
+        with self._mapdl.force_output:
+            rlist = self._mapdl.rlist()
+
+        # removing ueless part
+        rlist = rlist.replace(
+            """   *****MAPDL VERIFICATION RUN ONLY*****
+     DO NOT USE RESULTS FOR PRODUCTION
+""",
+            "",
         )
+        constants_ = re.findall(
+            r"REAL CONSTANT SET.*?\n\n", rlist + "\n\n", flags=re.DOTALL
+        )
+
+        const_ = {}
+        for each in constants_:
+            values = [0 for i in range(18)]
+            set_ = int(re.match(r"REAL CONSTANT SET\s+(\d+)\s+", each).groups()[0])
+            limits = (
+                int(re.match(r".*ITEMS\s+(\d+)\s+", each).groups()[0]),
+                int(re.match(r".*TO\s+(\d+)\s*", each).groups()[0]),
+            )
+            values_ = [float(i) for i in each.strip().splitlines()[1].split()]
+
+            if not set_ in const_:
+                const_[set_] = values
+
+            for i, jlimit in enumerate(range(limits[0] - 1, limits[1])):
+                const_[set_][jlimit] = values_[i]
+
+        return const_
+
+    class _ignore_cache_reset_context:
+        """Ignore cache reset context manager"""
+
+        def __init__(self, parent):
+            self._parent = weakref.ref(parent)
+            self._previous_state = None
+
+        def __enter__(self):
+            self._previous_state = self._parent()._ignore_cache_reset
+            self._parent()._ignore_cache_reset = True
+            self._parent()._log.debug("Ignore cache reset.")
+
+        def __exit__(self, *args):
+            self._parent()._ignore_cache_reset = self._previous_state

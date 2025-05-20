@@ -1,0 +1,38 @@
+name: "Julia testing"
+
+description: |
+  This action tests that PyMAPDL can be imported on Julia environments.
+
+inputs:
+  julia-version:
+    description: |
+      Julia version to test.
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+  steps:
+    - name: "Set up Julia"
+      uses: julia-actions/setup-julia@v2
+      with:
+        version: ${{ matrix.julia-version }}
+
+    - name: "Getting python interpreter"
+      id: get_python
+      shell: bash
+      run: |
+        pycallpython=$(julia -e 'using Pkg;Pkg.add("PyCall");using PyCall;println(PyCall.python)')
+        echo "pythonpath=$(echo $pycallpython)" >> $GITHUB_OUTPUT
+
+    - name: "Installing PyMAPDL"
+      env:
+        PYTHON_PATH: ${{ steps.get_python.outputs.pythonpath }}
+      shell: bash
+      run: |
+        "$PYTHON_PATH" -m pip install -e .
+
+    - name: "Starting Julia"
+      shell: julia {0}
+      run: |
+        using Pkg; Pkg.add("PyCall");using PyCall;pymapdl = pyimport("ansys.mapdl.core");print(pymapdl.__version__)

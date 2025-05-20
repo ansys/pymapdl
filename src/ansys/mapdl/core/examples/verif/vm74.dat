@@ -1,4 +1,26 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM74
 /PREP7
 /TITLE, VM74, TRANSIENT RESPONSE TO AN IMPULSIVE EXCITATION
@@ -19,7 +41,25 @@ FINISH
 ANTYPE,MODAL            ! PERFORM MODAL SOLVE
 MODOPT,QRDAMP,2         ! USE QRDAMP EIGENSOLVER
 MXPAND,2
+/OUT,vm74_SCRATCH
 SOLVE
+*DIM,CFREQ,,2,2
+*GET,CFREQ(1,1),MODE,1,FREQ
+*GET,CFREQ(1,2),MODE,1,DFRQ
+*GET,CFREQ(2,1),MODE,2,FREQ
+*GET,CFREQ(2,2),MODE,2,DFRQ
+*IF,CFREQ(1,1),LT,CFREQ(2,1),THEN
+    F1A=CFREQ(2,1)
+    CFREQ(2,1)=CFREQ(1,1)
+    CFREQ(1,1)=F1A
+    DF1A=CFREQ(2,2)
+    CFREQ(2,2)=CFREQ(1,2)
+    CFREQ(1,2)=DF1A
+    *DEL,F1A
+    *DEL,DF1A
+*ENDIF
+/OUT
+*STATUS,CFREQ
 FINISH
 
 /SOLU
@@ -29,16 +69,22 @@ F,2,FY,0,,4,2
 DELTIM,25E-4             ! INTEGRATION TIME STEP
 KBC,1                    ! STEP BOUNDARY CONDITIONS
 OUTPR,BASIC,1
+/OUT,vm74_SCRATCH,,,APPEND
 SOLVE                   ! PSEUDO STATIC SOLVE
+/OUT
 
 TIME,25E-4
 F,2,FY,4000,,4,2        ! IMPULSE FORCE
 KBC,1
+/OUT,vm74_SCRATCH,,,APPEND
 SOLVE
+/OUT
 
 TIME,.105                ! TIME TO ALLOW THE MASSES TO REACH LARGEST DEFLECTIONS
 F,2,FY,,,4,2             ! REMOVE FORCE
+/OUT,vm74_SCRATCH,,,APPEND
 SOLVE
+/OUT
 FINISH
 /POST26
 FILE,,rdsp
@@ -82,3 +128,4 @@ LABEL_2(1,2) = 'node=2  ','node=4  '
 /OUT
 FINISH
 *LIST,vm74,vrt
+/DEL,SCRATCH

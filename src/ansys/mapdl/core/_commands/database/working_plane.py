@@ -1,3 +1,26 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class WorkingPlane:
     def kwpave(
         self,
@@ -420,30 +443,38 @@ class WorkingPlane:
         wpctyp
             Working plane coordinate system type:
 
-            0 - Cartesian (default).  If working plane tracking is on [CSYS,4], the updated
+            0
+                Cartesian (default).  If working plane tracking is on [CSYS,4], the updated
                 active coordinate system will also be Cartesian.
 
-            1 - Polar.  If working plane tracking is on, the updated active coordinate system
+            1
+                Polar.  If working plane tracking is on, the updated active coordinate system
                 will be cylindrical.
 
-            2 - Polar.  If working plane tracking is on, the updated active coordinate system
+            2
+                Polar.  If working plane tracking is on, the updated active coordinate system
                 will be spherical.
 
         grtype
             Grid type:
 
-            0 - Grid and WP triad.
+            0
+                Grid and WP triad.
 
-            1 - Grid only.
+            1
+                Grid only.
 
-            2 - WP triad only (default).
+            2
+                WP triad only (default).
 
         wpvis
             Grid visibility:
 
-            0 - Do not show GRTYPE entities (grid and/or triad) (default).
+            0
+                Do not show GRTYPE entities (grid and/or triad) (default).
 
-            1 - Show GRTYPE entities.  Cartesian working planes will be displayed with a
+            1
+                Show GRTYPE entities.  Cartesian working planes will be displayed with a
                 Cartesian grid, polar with a polar grid.
 
         snapang

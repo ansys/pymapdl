@@ -1,3 +1,25 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import os
 
 import pytest
@@ -9,6 +31,8 @@ from ansys.mapdl.core.convert import (
     FileTranslator,
     convert_apdl_block,
 )
+from ansys.mapdl.core.plotting import GraphicsBackend
+from conftest import requires
 
 nblock = """nblock,3,,326253
 (1i9,3e20.9e3)
@@ -43,34 +67,34 @@ cmblock = """CMBLOCK,PRESSURE_AREAS,NODE,    48
 pynblock = """with mapdl.non_interactive:
     mapdl.run("nblock,3,,326253")
     mapdl.run("(1i9,3e20.9e3)")
-    mapdl.run("        1     3.352881632E-03     1.110639271E-02     5.172433282E-03")
-    mapdl.run("        2     3.485685736E-03     1.110981270E-02     4.999255638E-03")
-    mapdl.run("        3     3.615164748E-03     1.111323677E-02     4.823719994E-03")
-    mapdl.run("        4     3.673859471E-03     1.111439119E-02     4.740300611E-03")
-    mapdl.run("        5     3.709417144E-03     1.111407057E-02     4.691582629E-03")
+    mapdl.run("1     3.352881632E-03     1.110639271E-02     5.172433282E-03")
+    mapdl.run("2     3.485685736E-03     1.110981270E-02     4.999255638E-03")
+    mapdl.run("3     3.615164748E-03     1.111323677E-02     4.823719994E-03")
+    mapdl.run("4     3.673859471E-03     1.111439119E-02     4.740300611E-03")
+    mapdl.run("5     3.709417144E-03     1.111407057E-02     4.691582629E-03")
     mapdl.run("-1")"""
 
 pyeblock = """with mapdl.non_interactive:
     mapdl.run("eblock,19,solid,,6240")
     mapdl.run("(19i9)")
-    mapdl.run("        1        1        1        1        0        0        0        0       20        0    38161   186586   186589   192999   193065   191265   191262   193063   193064")
-    mapdl.run("   194712   194731   213866   194716   210305   210306   213993   210310   194715   194730   213865   213995")
-    mapdl.run("        1        1        1        1        0        0        0        0       20        0    38162   186586   193065   192999   186589   186781   193066   192935   186784")
-    mapdl.run("   194716   213866   194731   194712   195560   213737   195572   195557   194714   213997   213736   194729")
-    mapdl.run("        1        1        1        1        0        0        0        0       20        0    38163   186781   193066   192935   186784   186976   193067   192871   186979")
-    mapdl.run("   195560   213737   195572   195557   196210   213608   196222   196207   195559   213998   213607   195571")
-    mapdl.run("        1        1        1        1        0        0        0        0       20        0    38164   186976   193067   192871   186979   187171   193068   192807   187174")
-    mapdl.run("   196210   213608   196222   196207   196860   213479   196872   196857   196209   213999   213478   196221")"""
+    mapdl.run("1        1        1        1        0        0        0        0       20        0    38161   186586   186589   192999   193065   191265   191262   193063   193064")
+    mapdl.run("194712   194731   213866   194716   210305   210306   213993   210310   194715   194730   213865   213995")
+    mapdl.run("1        1        1        1        0        0        0        0       20        0    38162   186586   193065   192999   186589   186781   193066   192935   186784")
+    mapdl.run("194716   213866   194731   194712   195560   213737   195572   195557   194714   213997   213736   194729")
+    mapdl.run("1        1        1        1        0        0        0        0       20        0    38163   186781   193066   192935   186784   186976   193067   192871   186979")
+    mapdl.run("195560   213737   195572   195557   196210   213608   196222   196207   195559   213998   213607   195571")
+    mapdl.run("1        1        1        1        0        0        0        0       20        0    38164   186976   193067   192871   186979   187171   193068   192807   187174")
+    mapdl.run("196210   213608   196222   196207   196860   213479   196872   196857   196209   213999   213478   196221")"""
 
 pycmblock = """with mapdl.non_interactive:
     mapdl.run("CMBLOCK,PRESSURE_AREAS,NODE,    48")
     mapdl.run("(8i10)")
-    mapdl.run("      1688      1689      1690      1691      1700      1701      1702      1703")
-    mapdl.run("      1704      1705      1706      1707      1708      1709      1710      1711")
-    mapdl.run("      1712      1721      1723      1731      1736      1754      1755      1756")
-    mapdl.run("      1757      1758      1759      1760      1761      1762      1763      1764")
-    mapdl.run("      1765      1766      1767      1768      1769      1802      1803      1804")
-    mapdl.run("      1805      1806      1807      1808      1809      1831      1832      1833")"""
+    mapdl.run("1688      1689      1690      1691      1700      1701      1702      1703")
+    mapdl.run("1704      1705      1706      1707      1708      1709      1710      1711")
+    mapdl.run("1712      1721      1723      1731      1736      1754      1755      1756")
+    mapdl.run("1757      1758      1759      1760      1761      1762      1763      1764")
+    mapdl.run("1765      1766      1767      1768      1769      1802      1803      1804")
+    mapdl.run("1805      1806      1807      1808      1809      1831      1832      1833")"""
 
 
 block_commands = ["nblock", "eblock", "cmblock"]
@@ -142,6 +166,25 @@ LSWRITE,1 ! WRITE LOAD STEP FILE 1
 *END
 *USE,SLV"""
 
+DO_CONVERSION = """with mapdl.non_interactive:
+    mapdl.run("*DO,I,1,81")  # REPEAT MACRO EXECUTION"""
+
+GOLDEN_TESTS = {
+    "/DELETE,TABLE_1": 'mapdl.slashdelete("TABLE_1")',
+    "PROD,4,3, , ,FORCE , , ,-1.0,1,1,": 'mapdl.run("PROD,4,3, , ,FORCE , , ,-1.0,1,1")',
+    "ALLSEL,ALL": 'mapdl.allsel("ALL")',
+    "/EXIT,NOSAVE": 'mapdl.exit("NOSAVE")',
+    "": "",
+    "*DO,I,1,81                    ! REPEAT MACRO EXECUTION": DO_CONVERSION,
+    " *USE,LOAD                    ! EXECUTE MACRO": 'mapdl.use("LOAD")  # EXECUTE MACRO',
+    "*ENDDO": 'mapdl.run("*ENDDO")',
+    "SECT,1,SHELL": 'mapdl.sectype(1, "SHELL")',
+    "SECD,.00005,1            ! PLATE THICKNESS": "mapdl.secdata(.00005, 1)  # PLATE THICKNESS",
+    "/show, asdf": 'mapdl.show("asdf")',
+    "*STAT,UXFEA2	": 'mapdl.starstatus("UXFEA2")',
+    "/AXLAB,X,NORMALIZED TIME,TAU=ALPHA**2*D*t": 'mapdl.axlab("X", "NORMALIZED TIME,TAU=ALPHA**2*D*t")',
+}
+
 
 def test_convert_no_use_function_names(tmpdir):
     vm_file = examples.vmfiles["vm1"]
@@ -204,7 +247,6 @@ def test_convert_block_commands(tmpdir, cmd):
 
 
 def test_logger(capsys):
-
     apdl_ = """FINISH
     /PREP7
     """.split(
@@ -319,9 +361,16 @@ def test_header():
     assert '"""My header"""' in convert_apdl_block("/com", header="My header")
 
 
-def test_com():
-    converted_output = convert_apdl_block(
+@pytest.mark.parametrize(
+    "cmd",
+    [
         "/com, this is a comment !inline comment!",
+        "C***, this is a comment !inline comment!",
+    ],
+)
+def test_com(cmd):
+    converted_output = convert_apdl_block(
+        cmd,
         header=False,
         add_imports=False,
     )
@@ -361,11 +410,43 @@ def test_repeat():
     )
 
 
-@pytest.mark.parametrize("cmd", COMMANDS_TO_NOT_BE_CONVERTED)
-def test_commands_to_not_be_converted(cmd):
-    assert f'mapdl.run("{cmd}")' in convert_apdl_block(
+@pytest.mark.parametrize(
+    "cmd",
+    [
+        "/PMORE",  # "/PMORE,
+        "ANTYPE",  # ANTYPE,
+        "ASBL",  # ASBL,
+        "ATAN",  # ATAN,
+    ],
+)
+def test_empty_arguments_2(cmd):
+    # Checking trailing commas does not avoid conversion
+    assert f'mapdl.run("{cmd}")' not in convert_apdl_block(
+        cmd + ",,", header=False, add_imports=False
+    )
+
+    # Checking empty arguments avoid conversion
+    assert f'mapdl.run("{cmd.upper()},,OTHER_ARG")' in convert_apdl_block(
+        cmd + ",,OTHER_ARG", header=False, add_imports=False
+    )
+
+    # Checking default conversion
+    assert f'mapdl.run("{cmd}")' not in convert_apdl_block(
         cmd, header=False, add_imports=False
     )
+
+
+def test_commands_with_empty_arguments():
+    cmd = """ANTYPE,STATIC             ! STATIC ANALYSIS
+ANTYPE,STATIC,,NON_EMPTY_ARGUMENT
+
+ANTYPE,STATIC,,,"""
+    pycmd = """mapdl.antype("STATIC")  # STATIC ANALYSIS
+mapdl.run("ANTYPE,STATIC,,NON_EMPTY_ARGUMENT")
+
+mapdl.antype("STATIC")"""
+
+    assert pycmd in convert_apdl_block(cmd, header=False, add_imports=False)
 
 
 @pytest.mark.parametrize("ending", ["\n", "\r\n"])
@@ -388,7 +469,7 @@ def test_no_macro_as_functions():
         APDL_MACRO, macros_as_functions=False, add_imports=False, header=False
     )
     assert "with mapdl.non_interactive" in output
-    assert '    mapdl.run("*CREATE,SLV")' in output
+    assert '    mapdl.create("SLV")' in output
     assert '    mapdl.run("*END")' in output
 
 
@@ -429,6 +510,56 @@ def test_only_commands():
 
 
 @pytest.mark.parametrize(
+    "backend", [None, GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL]
+)
+def test_graphics_backend(backend):
+    output = convert_apdl_block(
+        "/view,1,1,1",
+        only_commands=False,
+        add_imports=True,
+        graphics_backend=backend,
+    )
+    assert "mapdl.view(1, 1, 1)" in output
+    assert "launch_mapdl" in output
+    if backend is None:
+        assert "graphics_backend" not in output
+    else:
+        assert f"graphics_backend={backend}" in output
+
+
+@pytest.mark.parametrize("check_parameter_names", [None, True, False])
+def test_check_parameter_names(check_parameter_names):
+    output = convert_apdl_block(
+        "/view,1,1,1",
+        only_commands=False,
+        add_imports=True,
+        check_parameter_names=check_parameter_names,
+    )
+    assert "mapdl.view(1, 1, 1)" in output
+    assert "launch_mapdl" in output
+    if check_parameter_names is not None and not check_parameter_names:
+        assert "check_parameter_names=False" in output
+    else:
+        assert f"check_parameter_names" not in output
+
+
+@pytest.mark.parametrize("clear_at_start", [None, True, False])
+def test_clear_at_start(clear_at_start):
+    output = convert_apdl_block(
+        "/view,1,1,1",
+        only_commands=False,
+        add_imports=True,
+        clear_at_start=clear_at_start,
+    )
+    assert "mapdl.view(1, 1, 1)" in output
+    assert "launch_mapdl" in output
+    if clear_at_start:
+        assert "mapdl.clear()" in output
+    else:
+        assert "mapdl.clear()" not in output
+
+
+@pytest.mark.parametrize(
     "parameters",
     [
         ["/view,1,1,1", "mapdl.view(1, 1, 1)"],
@@ -453,18 +584,43 @@ def test_convert_star_slash(parameters):
     assert convert_apdl_block(parameters[0], only_commands=True) == parameters[1]
 
 
+def test_parsing_items():
+    cmd = "VGET,VALUE7(2,2),2,7E-2"
+    conv_cmd = convert_apdl_block(cmd, only_commands=True)
+    assert 'mapdl.vget("VALUE7(2,2)", 2, 7E-2)' in conv_cmd
+
+
+def test_macros_call():
+    cmd = """
+*create,myfunc
+/prep7
+*end
+myfunc
+"""
+    conv_cmd = convert_apdl_block(cmd, only_commands=True)
+    assert "mapdl.prep7()" in conv_cmd
+    assert "def myfunc(" in conv_cmd
+    assert "myfunc()" in conv_cmd
+
+
+@pytest.mark.parametrize("mapdl_cmd", GOLDEN_TESTS.keys())
+def test_golden(mapdl_cmd):
+    assert GOLDEN_TESTS[mapdl_cmd] == convert_apdl_block(mapdl_cmd, only_commands=True)
+
+
 ## CLI testing
 
 
 @pytest.fixture
 def run_cli():
     def do_run(*args):
-        args = ["pymapdl_convert_script"] + list(args)
+        args = ["pymapdl convert"] + list(args)
         return os.system(" ".join(args))
 
     return do_run
 
 
+@requires("click")
 def test_converter_cli(tmpdir, run_cli):
     input_file = tmpdir.join("mapdl.dat")
     output_file = tmpdir.join("mapdl.py")
@@ -480,7 +636,7 @@ def test_converter_cli(tmpdir, run_cli):
     with input_file.open("w") as f:
         f.write(content)
 
-    assert run_cli(str(input_file)) == 0
+    assert run_cli(f"-f {input_file} -o {output_file}") == 0
 
     assert os.path.exists(output_file)
     with output_file.open("r") as f:
@@ -490,9 +646,33 @@ def test_converter_cli(tmpdir, run_cli):
     assert "mapdl.exit()" in newcontent
     assert "launch_mapdl" in newcontent
 
-    # This one overwrite the previous file
+    # This one is appended the previous file
     assert (
         run_cli(
+            "-f",
+            str(input_file),
+            "-o",
+            str(output_file),
+            "--auto_exit",
+            "False",
+            "--add_imports",
+            "False",
+        )
+        == 0
+    )
+
+    assert os.path.exists(output_file)
+    with output_file.open("r") as f:
+        newcontent = f.read()
+
+    assert newcontent.count("ansys-mapdl-core version") == 2
+
+    # Deleting file
+    os.remove(str(output_file))
+
+    assert (
+        run_cli(
+            "-f",
             str(input_file),
             "-o",
             str(output_file),
@@ -511,3 +691,85 @@ def test_converter_cli(tmpdir, run_cli):
     assert "mapdl.prep7()" in newcontent
     assert "mapdl.exit()" not in newcontent
     assert "launch_mapdl" not in newcontent
+
+
+def test_exit_in_non_interactive():
+    cmd = """
+*do,i,1,10
+/exit
+*enddo"""
+    output = convert_apdl_block(cmd, only_commands=True)
+
+    assert 'mapdl.run("*do,i,1,10")' in output
+    assert 'mapdl.com("Skipping: /exit")' in output
+    assert 'mapdl.run("*enddo")' in output
+    assert "mapdl.exit" not in output
+
+
+@pytest.mark.parametrize("cmd", COMMANDS_TO_NOT_BE_CONVERTED)
+def test_commands_to_not_be_converted(cmd):
+    assert f'mapdl.run("{cmd}")' in convert_apdl_block(cmd, only_commands=True)
+
+
+def test_vwrite():
+    cmd = """*VWRITE                                ! WRITE OUTPUT IN TABULAR FORMAT
+(///T14,'MODE',T24,'COEFF',T34,'ISYM',/)"""
+
+    pycmd = """with mapdl.non_interactive:
+    mapdl.run("*VWRITE")  # WRITE OUTPUT IN TABULAR FORMAT
+    mapdl.run("(///T14,'MODE',T24,'COEFF',T34,'ISYM',/)")"""
+
+    assert pycmd in convert_apdl_block(cmd, only_commands=True)
+
+
+def test_convert_dscale():
+    cmd = """/DSCALE,Arg1,
+DSCALE,asdf
+"""
+    pycmd = """mapdl.slashdscale("Arg1")
+mapdl.dscale("asdf")"""
+
+    assert pycmd in convert_apdl_block(cmd, only_commands=True)
+
+
+def test_convert_sf_all_inf():
+    cmd = """SF,ALL,INF"""
+    pycmd = """mapdl.sf("ALL", "INF")"""
+
+    assert pycmd in convert_apdl_block(cmd, only_commands=True)
+
+
+def test_convert_slash_typef():
+    assert "mapdl.slashtype()" in convert_apdl_block("/TYPE", only_commands=True)
+
+
+def test_chained_commands():
+    assert """with mapdl.chain_commands:
+    mapdl.type(11)
+    mapdl.real(11)
+    mapdl.mat(11)""" in convert_apdl_block(
+        "type,11 $real,11 $mat,11", only_commands=True
+    )
+
+    assert """with mapdl.chain_commands:
+    mapdl.esel("s")
+    mapdl.real(11)
+    mapdl.mat(22)
+    mapdl.com("hi")
+    # hello""" in convert_apdl_block(
+        "esel,s $real,11 $mat,22 $/com hi $!hello", only_commands=True
+    )
+
+    assert """mapdl.esel("s")
+with mapdl.chain_commands:
+    mapdl.real(11)
+    mapdl.mat(22)
+    mapdl.com("hi")
+    # hello
+mapdl.nsel()""" in convert_apdl_block(
+        """
+esel,s
+real,11 $mat,22 $/com hi $!hello
+nsel,""",
+        only_commands=True,
+    )

@@ -1,7 +1,35 @@
-"""Test geometry commands"""
-import math
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
+"""Test geometry commands"""
 import numpy as np
+import pytest
+
+from conftest import has_dependency, requires
+
+if has_dependency("pyvista"):
+    import pyvista as pv
+
+from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
 
 
 def test_keypoint_selection(mapdl, cleared):
@@ -111,7 +139,7 @@ def test_vext(mapdl, cleared):
     carc0 = mapdl.circle(k0, 1, k1)
     a0 = mapdl.al(*carc0)
 
-    # next, extrude it and plot it
+    # next, and extrude it
     mapdl.vext(a0, dz=4)
 
 
@@ -151,7 +179,7 @@ def test_va(mapdl, cleared):
     a2 = mapdl.a(k1, k2, k3)
     a3 = mapdl.a(k0, k2, k3)
 
-    # generate and plot the volume
+    # generate the volume
     vnum = mapdl.va(a0, a1, a2, a3)
     assert vnum == 1
 
@@ -170,7 +198,7 @@ def test_kdist(cleared, mapdl):
     knum1 = mapdl.k("", *kp1)
     kpdist, xdist, ydist, zdist = mapdl.kdist(knum0, knum1)
     assert kpdist == round(
-        math.sqrt(
+        np.sqrt(
             (kp1[0] - kp0[0]) ** 2 + (kp1[1] - kp0[1]) ** 2 + (kp1[2] - kp0[2]) ** 2
         ),
         7,
@@ -181,15 +209,13 @@ def test_kdist(cleared, mapdl):
 
 
 # kept here for potential usage
-# def test_kfill(cleared, mapdl):
-#     mapdl.clear()
-#     mapdl.prep7()
-#     kp0 = (0, 0, 0)
-#     kp1 = (10, 0, 0)
+def test_kfill(cleared, mapdl):
+    kp0 = (0, 0, 0)
+    kp1 = (10, 0, 0)
 
-#     knum0 = mapdl.k("", *kp0)
-#     knum1 = mapdl.k("", *kp1)
-#     mapdl.kfill(knum0, knum1, 8, ninc=1)
+    knum0 = mapdl.k("", *kp0)
+    knum1 = mapdl.k("", *kp1)
+    mapdl.kfill(knum0, knum1, 8, ninc=1)
 
 
 def test_kl(cleared, mapdl):
@@ -474,7 +500,7 @@ def test_ndist(cleared, mapdl):
     node_num2 = mapdl.n("", *node2)
     node_dist, node_xdist, node_ydist, node_zdist = mapdl.ndist(node_num1, node_num2)
     assert node_dist == round(
-        math.sqrt(
+        np.sqrt(
             (node2[0] - node1[0]) ** 2
             + (node2[1] - node1[1]) ** 2
             + (node2[2] - node1[2]) ** 2
@@ -486,10 +512,138 @@ def test_ndist(cleared, mapdl):
     assert node_zdist == node2[2] - node1[2]
 
 
-def test_empty_model(mapdl):
-    mapdl.clear()
-
+def test_empty_model(mapdl, cleared):
     assert mapdl.geometry.knum.size == 0
     assert mapdl.geometry.lnum.size == 0
     assert mapdl.geometry.anum.size == 0
     assert mapdl.geometry.vnum.size == 0
+
+
+@requires("pyvista")
+@pytest.mark.parametrize(
+    "entity,number", (["keypoints", 8], ["lines", 12], ["areas", 6], ["volumes", 1])
+)
+def test_entities_simple_cube(mapdl, cube_solve, entity, number):
+    entity = getattr(mapdl.geometry, entity)
+    assert len(entity) == number
+    assert isinstance(entity, pv.MultiBlock)
+
+
+@requires("pyvista")
+@pytest.mark.parametrize(
+    "entity,number", (["keypoints", 26], ["lines", 45], ["areas", 28], ["volumes", 6])
+)
+def test_entities_multiple_bodies(mapdl, contact_geom_and_mesh, entity, number):
+    entity = getattr(mapdl.geometry, entity)
+    assert len(entity) == number
+    assert isinstance(entity, pv.MultiBlock)
+
+
+def test_create_geometry(mapdl, cleared):
+    assert isinstance(mapdl._create_geometry(), Geometry)
+
+
+@requires("pyvista")
+def test_get_lines(mapdl, contact_geom_and_mesh):
+    assert isinstance(mapdl.geometry.get_lines(), pv.PolyData)
+
+
+@requires("pyvista")
+@pytest.mark.parametrize(
+    "entity,number", (["keypoints", 26], ["lines", 45], ["areas", 28], ["volumes", 6])
+)
+def test_geometry_get_apis(mapdl, contact_geom_and_mesh, entity, number):
+    func = getattr(mapdl.geometry, f"get_{entity}")
+
+    default = func()
+    assert isinstance(default, pv.PolyData)
+
+    if entity in ["areas", "volumes"]:
+        type_ = pv.UnstructuredGrid
+    else:
+        type_ = pv.PolyData
+
+    as_a_list = func(return_as_list=True)
+    assert isinstance(as_a_list, list)
+    assert all([isinstance(each, type_) for each in as_a_list])
+    assert len(as_a_list) == number
+
+    if "entity" == "keypoints":
+        as_an_array = func(return_as_array=True)
+        assert isinstance(as_an_array, np.ndarray)
+        assert len(as_an_array) == number
+
+
+@requires("pyvista")
+@pytest.mark.parametrize(
+    "entity,entity_name,number",
+    (
+        ["keypoints", "kp", 26],
+        ["lines", "line", 45],
+        ["areas", "area", 28],
+        ["volumes", "volume", 6],
+    ),
+)
+def test_geometry_names(mapdl, contact_geom_and_mesh, entity, entity_name, number):
+    func = getattr(mapdl.geometry, entity)
+
+    mb_names = list(func.keys())
+    assert len(mb_names) == number
+
+    func1 = getattr(mapdl.geometry, f"{entity[0]}num")
+    names = [f"{entity_name} {int(each)}" for each in func1]
+
+    # sorting because the Xnum return this sorted, but the underlying IGES doesn't have to.
+    mb_names.sort()
+    names.sort()
+
+    assert mb_names == names
+
+
+@requires("pyvista")
+def test_geometry_get_item(mapdl, contact_geom_and_mesh):
+    assert isinstance(mapdl.geometry["kp 2"], pv.PolyData)
+    assert mapdl.geometry["kp 2"].n_points > 0
+
+    assert isinstance(mapdl.geometry["line 1"], pv.PolyData)
+    assert mapdl.geometry["line 1"].n_cells > 0
+
+    assert isinstance(mapdl.geometry["area 1"], pv.UnstructuredGrid)
+    assert mapdl.geometry["area 1"].n_cells > 0
+
+    assert isinstance(mapdl.geometry["volume 1"], pv.UnstructuredGrid)
+    assert mapdl.geometry["volume 1"].n_cells > 0
+
+
+@requires("pyvista")
+def test_geometry_get_item_error(mapdl, contact_geom_and_mesh):
+    with pytest.raises(ValueError):
+        mapdl.geometry["l 0"]
+
+    with pytest.raises(ValueError):
+        mapdl.geometry["kip 0"]
+
+
+@requires("pyvista")
+def test_geometry_get_block_error(mapdl, contact_geom_and_mesh):
+    with pytest.raises(KeyError):
+        mapdl.geometry["kp 0"]
+
+
+@requires("pyvista")
+def test_build_legacy_geometry(mapdl, contact_geom_and_mesh):
+    leg_geo = LegacyGeometry(mapdl)
+
+    assert np.allclose(
+        leg_geo.keypoints(), mapdl.geometry.get_keypoints(return_as_array=True)
+    )
+    assert isinstance(leg_geo.keypoints(), np.ndarray)
+
+    assert leg_geo.lines() == mapdl.geometry.get_lines()
+    assert isinstance(leg_geo.lines(), pv.PolyData)
+
+    assert leg_geo.areas() == mapdl.geometry.get_areas(return_as_list=True)
+    assert isinstance(leg_geo.areas(), list)
+
+    assert leg_geo.areas(merge=True) == mapdl.geometry.get_areas()
+    assert isinstance(leg_geo.areas(merge=True), pv.PolyData)

@@ -1,3 +1,25 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """
 These PREP7 commands create and modify the material data tables (that
 is, to specify and define material models).
@@ -14,7 +36,7 @@ class MaterialDataTables:
         tbopt="",
         eosopt="",
         funcname="",
-        **kwargs
+        **kwargs,
     ):
         """APDL Command: TB
 
@@ -365,7 +387,7 @@ class MaterialDataTables:
         )
         return self.run(command, **kwargs)
 
-    def tbdele(self, lab="", mat1="", mat2="", inc="", **kwargs):
+    def tbdele(self, lab="", mat1="", mat2="", inc="", tbopt="", **kwargs):
         """APDL Command: TBDELE
 
         Deletes previously defined material data tables.
@@ -381,19 +403,24 @@ class MaterialDataTables:
             steps of INC (defaults to 1).  If MAT1= ALL, ignore MAT2 and INC
             and delete data tables for all materials.
 
+        tbopt
+            Material data table option. Visit :meth:`Mapdl.tb <ansys.mapdl.core.Mapdl.tb>` for valid ``tbopt`` values for a given Lab.
+
         **kwargs
             Extra arguments to be passed to :meth:`Mapdl.run <ansys.mapdl.core.Mapdl.run>`.
 
         Notes
         -----
-        This command is also valid in SOLUTION.
+
+        If ``lab = "ALL"``, delete all material data tables.
+
+        If ``mat1= "ALL"``, ``mat2`` and ``inc`` are ignored and all material data tables are deleted.
+
+        If ``tbopt`` is specified, the material data table corresponding to ``Lab`` is deleted if it also has the specified table option. If ``tbopt`` is not specified, all material data tables corresponding to ``Lab`` are deleted. ``tbopt`` is ignored when ``Lab = "ALL"``.
+
+        This command is also valid in the solution processor (:meth:`mapdl.slashsolu() <ansys.mapdl.core.Mapdl.slashsolu>`), but is not intended for changing material behaviors between load steps.
         """
-        command = "TBDELE,%s,%s,%s,%s" % (
-            str(lab),
-            str(mat1),
-            str(mat2),
-            str(inc),
-        )
+        command = f"TBDELE,{lab},{mat1},{mat2},{inc},{tbopt}"
         return self.run(command, **kwargs)
 
     def tbeo(self, par="", value="", **kwargs):

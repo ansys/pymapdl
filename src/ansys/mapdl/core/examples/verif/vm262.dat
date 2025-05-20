@@ -1,4 +1,26 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM262
 JPGPRF,500,100,1
 /SHOW,JPEG
@@ -7,8 +29,15 @@ JPGPRF,500,100,1
 /COM, REFERENCE: "W.K.WILSON, ET AL., THE USE OF THE J-INTEGRAL IN THERMAL STRESS CRACK PROBLEMS
 /COM,             INTERNATIONAL JOURNAL OF FRACTURE, 1979,PG:377-387
 /COM,
-/OUT,SCRATCH
+
+/COM, PARAMETER FOR CREATING THE CDB FILES TO STORE GEOMETRY AND MESH DATA
+/COM,
+_GEOMGEN = 0   ! SET TO 1 TO WRITE CDB FILES IF ANY INPUT FILE MODIFICATIONS
+PARSAV
+/OUT,vm262_scratch
+
 /PREP7
+*IF,_GEOMGEN,EQ,1,THEN
 A=1                    ! CRACK LENGTH
 W=2*A                  ! WIDTH
 L=4*W                  ! LENGTH
@@ -41,6 +70,11 @@ KSCON,1,A/12,1,8
 AMESH,1
 ESIZE,W/6
 AMESH,2
+ALLSEL,ALL
+CDWRITE,DB,vm262,cdb
+ *ELSE
+  CDREAD,DB,vm262,cdb
+*ENDIF
 
 NSEL,S,LOC,X,0,W/2      ! SYMMETRICAL CONDITIONS
 NSEL,R,LOC,Y,0
@@ -83,7 +117,7 @@ ALLSEL
 SOLVE
 FINISH
 
-/OUT,SCRATCH
+/OUT,vm262_scratch,,,APPEND
 /POST1
 PRCINT,1
 *GET,J1,CINT,1,CTIP,1,,1
@@ -106,9 +140,9 @@ LABEL(1,1) = 'K1'
 *VFILL,VALUE(1,1),DATA,K1_EXPECT
 *VFILL,VALUE(1,2),DATA,K1
 *VFILL,VALUE(1,3),DATA,ABS(K1/K1_EXPECT)
-SAVE,TABLE_1
+SAVE,vm262_TABLE_1
 FINISH
-RESUME,TABLE_1
+RESUME,vm262_TABLE_1
 /COM,
 /OUT,vm262,vrt
 /COM,

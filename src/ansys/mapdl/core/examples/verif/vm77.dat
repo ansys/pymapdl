@@ -1,16 +1,36 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM77
 /OUT,SCRATCH
 /PREP7
 /TITLE, VM77, TRANSIENT RESPONSE TO A CONSTANT FORCE WITH A FINITE RISE TIME
-/stitle,1,Reason COMPARE differences are acceptable:
-/stitle,2,  acceptable differences
 C***           INTRODUCTION TO STRUCT. DYNAMICS, BIGGS, PAGE 50, EXAMPLE E
 C***           DISPLACEMENT PASS USING BEAM188 AND MASS21 ELEMENTS
 ET,1,BEAM188,,,3        ! BEAM USING CUBIC OPTION
 SECTYPE,1,BEAM,RECT
 SECDATA,18,1.647
-SECCONTROL,,,2e15       ! OVERRIDE THE PROGRAM-CALCULATED TRANSVERSE SHEAR STIFFNESS
+SECCONTROL,,,2e10       ! OVERRIDE THE PROGRAM-CALCULATED TRANSVERSE SHEAR STIFFNESS
 ET,2,MASS21,,,4         ! STRUCTURAL MASS
 R,2,.0259067            ! MASS
 MP,EX  ,1,30E3
@@ -61,8 +81,10 @@ FINISH
 
 /OUT,
 /POST1
+ESEL,S,TYPE,,1
 ETABLE,STRS,SMISC,33
 *GET,STRSS,ELEM,2,ETAB,STRS
+ALLSEL,ALL
 FINISH
 
 /POST26

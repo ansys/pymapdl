@@ -1,3 +1,26 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class SpecialPurpose:
     def aerocoeff(
         self,
@@ -66,9 +89,9 @@ class SpecialPurpose:
         ``i, m, n, V_real, V_imag``
 
         where
-        ``i`` = the i th interblade phase angle (IBPA)
-        ``m`` = the m th vibrating blade mode
-        ``n`` = the n th blade mode generating the pressure oscillations
+        * ``i`` = the i th interblade phase angle (IBPA)
+        * ``m`` = the m th vibrating blade mode
+        * ``n`` = the n th blade mode generating the pressure oscillations
 
         ``Vreal`` and ``V_imag`` = the real and imaginary coefficients.
 
@@ -78,16 +101,16 @@ class SpecialPurpose:
         Modal Analysis in the Structural Analysis Guide. The file
         requirements for the AEROCOEFF command are the same as those
         needed for modal restart as described in Modal Analysis Restart.
-        The AeroSpecs values are specified in a 3×r array ``*DIM``,
+        The AeroSpecs values are specified in a 3xr array ``*DIM``,
         where r is a positive integer equal to the number of interblade
         phase angles and the pressure modes solved for in the CFD
         analysis.
 
         Each row has the structure: ``i, m, n``
         where
-        ``i`` = the i th interblade phase angle (IBPA)
-        ``m`` = the m th vibrating blade mode
-        ``n`` = the n th blade mode generating the pressure oscillations
+        * ``i`` = the i th interblade phase angle (IBPA)
+        * ``m`` = the m th vibrating blade mode
+        * ``n`` = the n th blade mode generating the pressure oscillations
 
         At least one aerodynamic damping coefficient must be specified for
         each IBPA (equal to the number of blades) while keeping and
@@ -132,40 +155,215 @@ class SpecialPurpose:
         action
             Specifies action for defining or manipulating initial crack data:
 
-            NEW - Initiate a new calculation and assign an ID.
+            NEW
+                Initiate a new calculation and assign an ID.
 
-            CTNC - Define the crack tip node component.
+            CTNC
+                Define the crack tip node component.
 
-            CENC - Define the crack extension node component, the crack tip node, and the crack
-                   extension direction.
+            CENC
+                Define the crack extension node component, the crack tip node,
+                and the crack extension direction.
 
-            TYPE - Define the type of calculation to perform.
+            TYPE
+                Define the type of calculation to perform.
 
-            DELE - Delete the CINT object associated with the specified ID.
+            DELE
+                Delete the ``CINT`` object associated with the specified ID.
 
-            NCON - Define the number of contours to be calculated in the contour-integral
-                   calculation.
+            NCON
+                Define the number of contours to be calculated in the
+                contour-integral calculation.
 
-            SYMM - Indicate whether the crack is on a symmetrical line or plane.
+            SYMM
+                Indicate whether the crack is on a symmetrical line or plane.
 
-            NORM - Define the crack plane normal.
+            NORM
+                Define the crack plane normal.
 
-            UMM - Activate or deactivate the unstructured mesh method.
+            UMM
+                Activate or deactivate the unstructured mesh method.
 
-            EDIR - Crack-assist extension direction.
+            EDIR
+                Crack-assist extension direction.
 
-            PLOT - Plots crack front and crack tip coordinate system.
+            PLOT
+                Plots crack front and crack tip coordinate system.
 
-            CXFE - Define the crack tip element or crack front element set. Valid for XFEM-based
-                   crack-growth analysis only.
+            CXFE
+                Define the crack tip element or crack front element set.
+                Valid for XFEM-based crack-growth analysis only.
 
-            RADIUS - Define the radius at which the given value is to be evaluated. Valid for XFEM-
-                     based crack-growth analysis only.
+            RADIUS
+                Define the radius at which the given value is to be evaluated.
+                Valid for XFEM-based crack-growth analysis only.
 
-            RSWEEP - Define the minimum and maximum sweep angle from existing crack direction. Valid
-                     for XFEM-based crack-growth analysis only.
+            RSWEEP
+                Define the minimum and maximum sweep angle from existing crack
+                direction. Valid for XFEM-based crack-growth analysis only.
         """
         command = f"CINT,{action},{par1},{par2},{par3},{par4},{par5},{par6},{par7}"
+        return self.run(command, **kwargs)
+
+    def cycexpand(self, wn="", option="", value1="", value2="", **kwargs):
+        """Graphically expands displacements, stresses and strains of a
+        cyclically symmetric model.
+
+        APDL Command: /CYCEXPAND
+
+        Parameters
+        ----------
+        wn
+            The window number to which the expansion applies. Valid values are
+            1 through 5. The default value is 1. The window number applies
+            only to the ``AMOUNT`` argument.
+
+        option
+            One of the following options:
+
+            ON
+                Activates cyclic expansion using the previous settings (if any).
+                If no previous settings exist, this option activates the default
+                settings. This option is default.
+
+            DEFAULT
+                Resets cyclic expansion to the default settings.
+
+            OFF
+                Deactivates cyclic expansion.
+
+            STATUS
+                Lists the current cyclic expansion settings.
+
+            AMOUNT
+                The number of repetitions or the total angle.
+
+                Value1
+                    ``NREPEAT``
+
+                Value2
+                    The number of repetitions. The default is the total number
+                    of sectors in 360 degrees.
+
+                or
+
+                Value1
+                    ANGLE
+
+                Value2
+                    The total angle in degrees. The default is 360.
+
+            WHAT
+                A specified portion or subset of the model to expand:
+
+                Value1
+                    The component name of the elements to expand. The default
+                    is all selected components.
+
+            EDGE
+                Sector edge display key. Possible ``Value1`` settings are:
+
+                -1
+                    Suppresses display of edges between sectors even if the
+                    cyclic count varies between active windows. This setting is
+                    not valid for cyclic mode-superposition (``MSUP``) harmonic
+                    analyses.
+
+                    .. warning::
+                        Plots with fewer than the maximum number of
+                        repetitions may have missing element faces at the sector
+                        boundaries.
+
+                0 or OFF
+                    Averages stresses or strains across sector boundaries. This
+                    value is the default (although the default reverts to 1 or
+                    ON if the cyclic count varies between active windows).
+
+                1 or ON
+                    No averaging of stresses or strains occurs, and sector
+                    boundaries are shown on the plot. This setting is not valid
+                    for cyclic ``MSUP`` harmonic analyses.
+
+            PHASEANG
+                Possible ``Value1`` settings are:
+
+                n
+                    The phase angle shift in degrees. The valid range for n is 0
+                    through 360. The default is 0. For a modal solution, this
+                    value is typically the phase angle obtained via the
+                    ``CYCPHASE`` command. The expanded modal results are printed
+                    or displayed for the specified phase angle shift.
+
+                AMPLITUDE (or n ≥ 360)
+                    The amplitude is reported, except for the following
+                    circumstances where the amplitude solution is not valid:
+
+                    * non-component results (such as equivalent stress)
+                    * modal analyses (no amplitude is calculated, and the
+                      expanded modal results are printed or displayed at a
+                      phase angle of 360º).
+
+                SWEEP
+                    For a mode-superposition harmonic solution, the maximum
+                    values across a phase angle sweep are reported.
+
+        Notes
+        -----
+        In preprocessing, the ``/CYCEXPAND`` command verifies a cyclically
+        symmetric model by graphically expanding it partially or through the
+        full 360 degrees.
+
+        For the postprocessing plot nodal solution (``PLNSOL``) operation, the
+        command graphically expands displacements, stresses and strains of a
+        cyclically symmetric model partially or though the full 360 degrees by
+        combining the real (original nodes and elements) and imaginary
+        (duplicate nodes and elements) parts of the solution.
+
+        For the print nodal solution (``PRNSOL``) operation, the command expands
+        the printed output of displacements or stresses on a sector-by-sector
+        basis. To learn more about specific ``PRNSOL`` behaviors in cyclic
+        analyses, see Using the ``/CYCEXPAND`` Command in the *Cyclic Symmetry
+        Analysis Guide*.
+
+        Use of the ``/CYCEXPAND`` command does not change the database. The
+        command does not modify the geometry, nodal displacements or element
+        stresses.
+
+        The command affects element and result plots only. It has no effect on
+        operations other than plot element solution (``PLESOL``), plot nodal
+        solution (``PLNSOL``), print nodal solution (`PRNSOL`), and calculate
+        harmonic solution (``CYCCALC``). Operations other than ``PLESOL``,
+        ``PLNSOL``, ``PRNSOL``, or ``CYCCALC`` work on the unprocessed real and
+        imaginary parts of a cyclic symmetry solution
+
+        If you issue a ``/CYCEXPAND,,OFF`` command, you cannot then expand the
+        model by simply issuing another ``/CYCEXPAND`` command (for example, to
+        specify an ``NREPEAT`` value for the number of repetitions). In such a
+        case, you must specify ``/CYCEXPAND,,ON``, which activates expansion
+        using the previous settings (if any) or the default settings.
+
+        The command requires PowerGraphics and will turn PowerGraphics on
+        (``/GRAPHICS,POWER``) if not already active. Any setting which bypasses
+        PowerGraphics (for example, ``/PBF``) also bypasses cyclic expansion; in
+        such cases, the ``/CYCEXPAND`` command displays unprocessed real and
+        imaginary results.
+
+        The ``CYCPHASE`` command uses full model graphics (``/GRAPHICS,FULL``)
+        to compute peak values. Because of this, there may be slight differences
+        between max/min values obtained with ``CYCPHASE``, and those obtained
+        via ``/CYCEXPAND``, which uses power graphics (``/GRAPHICS,POWER``).
+
+        For ``PHASEANG = AMPLITUDE`` (or 360) with a cyclic full harmonic
+        solution, the only appropriate coordinate system is the solution
+        coordinate system (``RSYS,SOLU``).
+
+        Load case operations (``LCOPER``) are not valid during a cyclic
+        expansion using ``/CYCEXPAND``.
+
+        To learn more about analyzing a cyclically symmetric structure, see the
+        *Cyclic Symmetry Analysis Guide*.
+        """
+        command = f"/CYCEXPAND, {wn}, {option}, {value1}, {value2}"
         return self.run(command, **kwargs)
 
     def cycfreq(
@@ -188,112 +386,159 @@ class SpecialPurpose:
         option
             One of the following options:
 
-            AERO - Specify the array containing the aerodynamic damping coefficients.
+            AERO
+                Specify the array containing the aerodynamic damping
+                coefficients.
 
-            Value1 - The name of the array containing the aerodynamic stiffness damping
-                     coefficients.
+                Value1
+                    The name of the array containing the aerodynamic stiffness
+                    damping coefficients.
 
-            BLADE - Blade information required for a mistuning analysis.
+            BLADE
+                Blade information required for a mistuning analysis.
 
-            Value1 - The name of the nodal component containing the blade boundary nodes at the
-                     blade-to-disk interface. Also include boundary nodes at
-                     any shroud interfaces.
+                Value1
+                    The name of the nodal component containing the blade
+                    boundary nodes at the
+                    blade-to-disk interface. Also include boundary nodes at
+                    any shroud interfaces.
 
-            Value2 - The name of the element component containing the blade elements.
+                Value2
+                    The name of the element component containing the blade
+                    elements.
 
-            Value3 - The number of blade modes to include in the CMS reduction.
+                Value3
+                    The number of blade modes to include in the CMS reduction.
 
-            Value4 - The lower bound of the frequency range of interest. This value is optional.
+                Value4
+                    The lower bound of the frequency range of interest. This
+                    value is optional.
 
-            Value5 - The upper bound of the frequency range of interest. This value is optional.
+                Value5
+                    The upper bound of the frequency range of interest. This
+                    value is optional.
 
-            DEFAULT - Set the default cyclic harmonic solution settings.
+            DEFAULT
+                Set the default cyclic harmonic solution settings.
 
-            EO - Excitation engine order.
+            EO
+                Excitation engine order.
 
-            Value1 - The value of the excitation order, which must be an integer. The loadings on
-                     the other sectors will be related to the loading on the
-                     basic sector based on the engine order phase shift.
+                Value1
+                    The value of the excitation order, which must be an integer.
+                    The loadings on the other sectors will be related to the
+                    loading on the basic sector based on the engine order phase
+                    shift.
 
-            MIST - Mistuning parameters.
+                Value2
+                    The name of the Mechanical APDL array containing the modal
+                    forces corresponding to the modes kept in the
+                    mode-superpostion analysis.
 
-            Value1 - The type of mistuning:
+            MIST
+                Mistuning parameters.
 
-            K - Stiffness (frequency) mistuning
+                Value1
+                    The type of mistuning:
 
-            Value2 - The name of the array containing the stiffness mistuning parameters.
+                    K
+                        Stiffness (frequency) mistuning
 
-            MODAL - Specifies if a damped modal analysis should be performed on the reduced system.
+                Value2
+                    The name of the array containing the stiffness mistuning
+                    parameters.
 
-            Value1 - On/Off key.
+            MODAL
+                Specifies if a damped modal analysis should be performed on the
+                reduced system.
 
-            0 (OFF or NO) - No modal solution. Perform the harmonic solution.
+                Value1
+                    On/Off key.
 
-            1 (ON or YES) - Perform a damped modal analysis of the reduced system in order to obtain the
-                            complex frequencies. The harmonic solution is not
-                            performed.
+                    0 (OFF or NO)
+                        No modal solution. Perform the harmonic solution.
 
-            Value2 - Number of modes for the damped modal analysis.
+                    1 (ON or YES)
+                        Perform a damped modal analysis of the reduced system in
+                        order to obtain the complex frequencies. The harmonic
+                        solution is not performed.
 
-            Value3 - The beginning, or lower end, of the frequency range of interest (in Hz).
+                Value2
+                    Number of modes for the damped modal analysis.
 
-            Value4 - The ending, or upper end, of the frequency range of interest (in Hz).
+                Value3
+                    The beginning, or lower end, of the frequency range of
+                    interest (in Hz).
 
-            RESTART - Defines the point at which to restart the harmonic analysis.
+                Value4
+                    The ending, or upper end, of the frequency range of interest
+                    (in Hz).
 
-            Value1 - The restart point:
+            RESTART
+                Defines the point at which to restart the harmonic analysis.
 
-            OFF - No restart (default)
+                Value1
+                    The restart point:
 
-            SWEEP - Restart for a new frequency sweep range (HARFRQ)
+                    OFF
+                        No restart (default)
 
-            MIST - Restart for new mistuning parameters (new mistuning arrays)
+                    SWEEP
+                        Restart for a new frequency sweep range (``HARFRQ``)
 
-            USER - Causes the program to call for a user-defined solution.
+                    MIST
+                        Restart for new mistuning parameters (new mistuning
+                        arrays)
 
-            Value1-5 - Values passed down to the user-defined solution.
+            USER
+                Causes the program to call for a user-defined solution.
 
-            STATUS - List the harmonic solution option settings active for the cyclic model.
+                Value1-5
+                    Values passed down to the user-defined solution.
+
+            STATUS
+                List the harmonic solution option settings active for the cyclic
+                model.
 
         Notes
         -----
-        The program solves a cyclically symmetric model (set up via the CYCLIC
+        The program solves a cyclically symmetric model (set up via the ``CYCLIC``
         command during preprocessing) at the harmonic indices specified via the
-        CYCOPT command.
+        ``CYCOPT`` command.
 
-        The aerodynamic coefficients are specified in a 5×(N×r) array (``*DIM``),
+        The aerodynamic coefficients are specified in a 5x(Nxr) array (``*DIM``),
         where N is the number of blades and r can be any positive integer. Each
         column has the structure:
 
         where:
 
-        One aerodynamic damping coefficient must be specified for each IBPA
+        One aerodynamic damping coefficient must be specified for each ``IBPA``
         (equal to the number of blades) while keeping m and n constant.
 
         For constant (frequency-independent) mistuning, the stiffness
-        parameters are specified in an N×1 array (``*DIM``) where N is the number
+        parameters are specified in an Nx1 array (``*DIM``) where N is the number
         of blades.
 
         For stiffness mistuning, each row entry represents the deviation of
-        Young’s modulus from nominal,  (or equivalently, the ratio of the
+        Young's modulus from nominal,  (or equivalently, the ratio of the
         frequency deviation squared). Each frequency can also be independently
-        mistuned, in which case the array is N×M, where M is the number of
-        blade frequencies (Value3 of CYCFREQ,BLADE). The entries in each row
+        mistuned, in which case the array is NxM, where M is the number of
+        blade frequencies (Value3 of ``CYCFREQ,BLADE``). The entries in each row
         therefore correspond to the ratio of the mistuned frequency to the
         tuned frequency squared minus one:
 
-        The USER option activates the solution macro CYCMSUPUSERSOLVE.MAC. The
-        normal solution is skipped. You may implement your own mistuning
+        The ``USER`` option activates the solution macro ``CYCMSUPUSERSOLVE.MAC``.
+        The normal solution is skipped. You may implement your own mistuning
         solution using APDL and APDL Math operations, or call your own program
         for the solution.
 
-        The CYCFREQ command is valid in the preprocessing and solution stages
+        The ``CYCFREQ`` command is valid in the preprocessing and solution stages
         of an analysis.
 
-        The CYCFREQ,MODAL,ON command writes modal frequencies to the output
+        The ``CYCFREQ,MODAL,ON`` command writes modal frequencies to the output
         file. No other postprocessing is available for this modal solve.
 
-        When using CYCFREQ,RESTART, only mistuning parameters or frequency
+        When using ``CYCFREQ,RESTART``, only mistuning parameters or frequency
         range may be changed. All other changes in parameters are ignored.
 
         To learn more about analyzing a cyclically symmetric structure, see the
@@ -322,15 +567,18 @@ class SpecialPurpose:
             The number of sectors in the full 360 degrees, or one of the
             following options:
 
-            STATUS - Indicates the current cyclic status.
+            STATUS
+                Indicates the current cyclic status.
 
-            OFF - Resets model to normal (non-cyclic) status and removes the duplicate sector if
-                  it exists. This option also deletes automatically detected
-                  edge components (generated when USRCOMP = 0).
+            OFF
+                Resets model to normal (non-cyclic) status and removes the
+                duplicate sector if it exists. This option also deletes
+                automatically detected edge components (generated when ``USRCOMP = 0``).
 
-            UNDOUBLE - Removes the duplicate sector if it exists. The duplicate sector is created
-                       during the solution (SOLVE) stage of a modal cyclic
-                       symmetry analysis.
+            UNDOUBLE
+                Removes the duplicate sector if it exists. The duplicate sector
+                is created during the solution (SOLVE) stage of a modal cyclic
+                symmetry analysis.
 
         angle
             The sector angle in degrees.
@@ -341,7 +589,7 @@ class SpecialPurpose:
 
         name
             The root name of sector low- and high-edge components (line, area,
-            or node components). The default root name (when USRCOMP = 0) is
+            or node components). The default root name (when ``USRCOMP`` = 0) is
             "CYCLIC". A root name that you specify can contain up to 11
             characters.
 
@@ -355,50 +603,50 @@ class SpecialPurpose:
 
         usrnmap
             The name of a user-defined array specifying the matching node pairs
-            between the sector low and high edges. Valid only when USRCOMP = 0.
+            between the sector low and high edges. Valid only when ``USRCOMP`` = 0.
             Skips the automatic detection of sector edges. Node pairs may be
             input in any order, but the low edge node must be the first entry
             in each pair.
 
         Notes
         -----
-        You can input your own value for NSECTOR, ANGLE or KCN; if you do so,
-        the command verifies argument values before executing.
+        You can input your own value for ``NSECTOR``, ``ANGLE`` or ``KCN``; if
+        you do so, the command verifies argument values before executing.
 
-        When USRCOMP = 0 and USRNMAP = blank (default), the CYCLIC command
+        When ``USRCOMP = 0`` and ``USRNMAP = blank`` (default), the ``CYCLIC`` command
         automatically detects low- and high-edge components for models
         comprised of any combination of line, area, or volume elements. If a
         solid model exists, however, the  command uses only the lines, areas,
         and/or volumes to determine the  low- and high-edge components; the
         elements, if any, are ignored.
 
-        Nodes will be automatically rotated unless CYCOPT,USERROT,YES has been
+        Nodes will be automatically rotated unless ``CYCOPT,USERROT,YES`` has been
         specified.
 
-        If you issue a CYCOPT,TOLER command to set a tolerance for edge-
-        component pairing before issuing the CYCLIC command, the CYCLIC command
+        If you issue a ``CYCOPT,TOLER`` command to set a tolerance for edge-
+        component pairing before issuing the ``CYCLIC`` command, the ``CYCLIC`` command
         uses the specified tolerance when performing automatic edge-component
         detection.
 
-        For 2-D models, autodetection does not consider the CSYS,5 or CSYS,6
+        For 2-D models, autodetection does not consider the ``CSYS,5`` or ``CSYS,6``
         coordinate system specification.  Autodetection for 180 degree (two-
         sector) models is not possible unless a central hole exists.
 
-        The CYCLIC command sets values and keys so that, if possible, the area-
-        mesh (AMESH) or volume-mesh (VMESH) command meshes the sector with
+        The ``CYCLIC`` command sets values and keys so that, if possible, the area-
+        mesh (``AMESH``) or volume-mesh (``VMESH``) command meshes the sector with
         matching node and element face patterns on the low and high edges. (The
         command has no effect on any other element-creation command.)
 
-        Issue the CYCLIC command prior to the meshing command to, if possible,
+        Issue the ``CYCLIC`` command prior to the meshing command to, if possible,
         produce a mesh with identical node and element patterns on the low and
-        high sector edges. Only the AMESH or VMESH commands can perform
+        high sector edges. Only the ``AMESH`` or ``VMESH`` commands can perform
         automated matching. (Other meshing operation commands such as VSWEEP
-        cannot.) If you employ a meshing operation other than AMESH or VMESH,
+        cannot.) If you employ a meshing operation other than ``AMESH`` or ``VMESH``,
         you should ensure that node and element face patterns match, if
-        desired. The CYCLIC command output indicates whether each edge-
+        desired. The ``CYCLIC`` command output indicates whether each edge-
         component pair has or can produce a matching node pair.
 
-        A cyclic solution (via the SOLVE command) allows dissimilar mesh
+        A cyclic solution (via the ``SOLVE`` command) allows dissimilar mesh
         patterns on the extreme boundaries of a cyclically symmetric model. The
         allowance for dissimilar patterns is useful when you have only finite-
         element meshes for your model but not the geometry data necessary to
@@ -412,29 +660,26 @@ class SpecialPurpose:
         the low- and high-edge components (and nowhere else). You should verify
         that automatically detected components are in the correct  locations
         and that you can account for all components; to do so, you can list
-        (CMLIST) or plot (CMPLOT) the components.
+        (``CMLIST``) or plot (``CMPLOT``) the components.
 
-        If you issue the CYCLIC command after meshing and have defined element
+        If you issue the ``CYCLIC`` command after meshing and have defined element
         types with rotational degrees of freedom (DOFs), ANSYS generates cyclic
         CEs for rotational DOFs that may not exist on the sector boundaries.
-        Issue the CYCOPT,DOF command to prevent unused rotational terms from
+        Issue the ``CYCOPT,DOF`` command to prevent unused rotational terms from
         being generated.
 
         Modal cyclic symmetry analysis is supported by the following
         eigensolvers:
 
-        Block Lanczos (MODOPT,LANB)
-
-        PCG Lanczos (MODOPT,LANPCG)
-
-        Super Node (MODOPT,SNODE)
-
-        Subspace (MODOPT,SUBSP)
+        * Block Lanczos (``MODOPT,LANB``)
+        * PCG Lanczos (``MODOPT,LANPCG``)
+        * Super Node (``MODOPT,SNODE``)
+        * Subspace (``MODOPT,SUBSP``)
 
         To learn more about analyzing a cyclically symmetric structure, see the
         Cyclic Symmetry Analysis Guide.
 
-        When using the: CYCLIC: command to automatically detect the sector, if
+        When using the: ``CYCLIC``: command to automatically detect the sector, if
         an area is defined with the: AL: command, the lines need to be oriented
         to form the closed curve.
         """
@@ -544,7 +789,8 @@ class SpecialPurpose:
 
             Move the low-edge component nodes to precisely match the high-edge component nodes - MSUP
 
-            For modal cyclic symmetry analysis only, this flag is used to limit the results written to the Jobname.MODE and Jobname.RST files in preparation for a subsequent mode-superposition-based analysis. In a linear perturbation modal analysis, this option must be specified in the first load step of the preceding base analysis.  - m"""
+            For modal cyclic symmetry analysis only, this flag is used to limit the results written to the Jobname.MODE and Jobname.RST files in preparation for a subsequent mode-superposition-based analysis. In a linear perturbation modal analysis, this option must be specified in the first load step of the preceding base analysis.  - m
+        """
         command = f"CYCOPT,{option},{value1},{value2},{value3},{value4},{value5},{value6},{value7}"
         return self.run(command, **kwargs)
 
@@ -968,7 +1214,9 @@ class SpecialPurpose:
         command = f"SSTATE,{action},{cm_name},{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9}"
         return self.run(command, **kwargs)
 
-    def xfdata(self, enrichmentid="", elemnum="", nodenum="", phi="", **kwargs):
+    def xfdata(
+        self, enrichmentid="", lsm="", elemnum="", nodenum="", phi="", psi="", **kwargs
+    ):
         """Defines a crack in the model by specifying nodal level set values
 
         APDL Command: XFDATA
@@ -992,6 +1240,10 @@ class SpecialPurpose:
         phi
             Signed normal distance of the node from the crack.
 
+        psi
+            Signed normal distance of the node from the crack tip (or crack front).
+            Used only in the singularity- based XFEM method.
+
         Notes
         -----
         Issue the XFDATA command multiple times as needed to specify nodal
@@ -999,10 +1251,19 @@ class SpecialPurpose:
 
         This command is valid in PREP7 (/PREP7) only.
         """
-        command = f"XFDATA,{enrichmentid},{elemnum},{nodenum},{phi}"
+        command = f"XFDATA,{enrichmentid},{lsm},{elemnum},{nodenum},{phi},{psi}"
         return self.run(command, **kwargs)
 
-    def xfenrich(self, enrichmentid="", compname="", matid="", **kwargs):
+    def xfenrich(
+        self,
+        enrichmentid="",
+        compname="",
+        matid="",
+        method="",
+        radius="",
+        snaptoler="",
+        **kwargs,
+    ):
         """Defines parameters associated with crack propagation using XFEM
 
         APDL Command: XFENRICH
@@ -1024,6 +1285,19 @@ class SpecialPurpose:
             the initial crack. If 0 or not specified, the initial crack is
             assumed to be free of cohesive zone behavior.
 
+        method
+            PHAN -- Use phantom-node-based XFEM (default).
+            SING -- Use singularity-based XFEM.
+
+        radius
+            Radius defining the region around the crack tip encompassing the
+            set of elements to be influenced by the crack-tip singularity effects.
+            Default = 0.0. Used only in singularity-based XFEM.
+
+        snaptoler
+            Snap tolerance to snap the crack tip to the closest crack face along
+            the extension direction. Default = 1.0E-6. Used only in singularity-based XFEM.
+
         Notes
         -----
         If MatID is specified, the cohesive zone behavior is described by the
@@ -1031,7 +1305,7 @@ class SpecialPurpose:
 
         This command is valid in PREP7 (/PREP7) only.
         """
-        command = f"XFENRICH,{enrichmentid},{compname},{matid}"
+        command = f"XFENRICH,{enrichmentid},{compname},{matid}, {method}, {radius}, {snaptoler}"
         return self.run(command, **kwargs)
 
     def xflist(self, enrichmentid="", **kwargs):

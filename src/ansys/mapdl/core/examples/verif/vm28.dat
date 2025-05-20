@@ -1,4 +1,26 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM28
 /PREP7
 /TITLE, VM28,  TRANSIENT HEAT TRANSFER IN AN INFINITE SLAB
@@ -24,12 +46,15 @@ NSEL,ALL
 TUNIF,0                             ! DEFINE INITIAL TEMPERATURES, T(0)
 FINISH
 /SOLU    
-SOLCONTROL,0
 KBC,1                               ! STEP BOUNDARY CONDITIONS
 DELTIM,10                           ! MINIMUM TIME STEP
 TIME,2000.0                         ! TIME AT END OF TRANSIENT
 OUTRES,,ALL
 AUTOTS,ON
+NEQIT,25
+CNVTOL,HEAT,,,,1.0
+TINTP,,,,0.5,,0.2
+/OUT,SCRATCH
 SOLVE
 FINISH
 /POST26
@@ -38,6 +63,7 @@ NSOL,3,9,TEMP,,T9
 NSOL,4,7,TEMP,,T7
 NSOL,5,5,TEMP,,T5
 NSOL,6,1,TEMP,,T1
+/OUT,
 PRVAR,2,3,4,5,6                     ! PRINT TEMPERATURE SOLUTION VS. TIME
 *GET,TEMP_11,NODE,11,TEMP
 *GET,TEMP_9,NODE,9,TEMP

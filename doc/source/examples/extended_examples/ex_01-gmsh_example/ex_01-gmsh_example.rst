@@ -11,8 +11,8 @@ open source Python meshing library. For more information, visit the Gmsh website
 
 Description
 -----------
-Gmsh is used to import an external geometry file in STL format. The `pymapdl-reader <legacy_reader_docs_>`_ library
-is then used to import the geometry into PyMAPDL. 
+Gmsh is used to import an external geometry file in STL format. The `PyMAPDL Reader <legacy_reader_docs_>`_
+library is then used to import the geometry into PyMAPDL. 
 
 This example makes use of these files: 
 
@@ -27,7 +27,7 @@ Requirements
 ------------
 You must have Gmsh installed. You can install it using ``pip``:
 
-.. code-block:: 
+.. code-block:: console
 
     pip install gmsh
 

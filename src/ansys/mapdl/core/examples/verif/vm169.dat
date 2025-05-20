@@ -1,12 +1,36 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM169
+/OUT,SCRATCH
+_GEOMGEN_1=0                    ! SET THIS TO 1 TO UPDATE CDB FILE 
+_EXIT1=0                       ! SET THIS TO 1 TO EXIT WITHOUT SOLVING
+*IF,_GEOMGEN_1,EQ,1,THEN 
 /PREP7
 smrt,off
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
 /TITLE, VM169, PERMANENT MAGNET CIRCUIT WITH AN AIR GAP
-/stitle,1,Reason COMPARE differences are acceptable:
-/stitle,2,  mesher accuracy - number of nodes, elements, numbering; near-zero values
 !                MAGNETO-SOLID MECHANICS, MOON, PG. 275
 !                USING TETRAHEDRAL SOLID ELEMENTS (SOLID98)
 ET,1,SOLID98,10             ! TETRAHEDRAL COUPLED-FIELD SOLID
@@ -50,10 +74,21 @@ VMESH,6                     ! MESH AIR GAP
 NSEL,,LOC,X,0
 D,ALL,MAG,0                 ! SET FLUX-NORMAL BOUNDARY CONDITION
 NSEL,ALL
-WSORT,Y                     ! REORDER WAVEFRONT
+
+CDWRITE,db,vm169,cdb
+FINISH
+*IF,_EXIT1,EQ,1,THEN
+/EXIT,NOSAVE
+*ENDIF
+
+*ELSE
+CDREAD,db,vm169,cdb
+*ENDIF
 FINISH
 /SOLU    
+/OUT
 MAGSOLV,2                   ! RSP METHOD
+/OUT,SCRATCH
 FINISH
 /POST1
 RSYS,11

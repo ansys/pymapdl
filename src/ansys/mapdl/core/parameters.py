@@ -1,3 +1,25 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import os
 import re
 import tempfile
@@ -15,7 +37,8 @@ except ModuleNotFoundError:  # pragma: no cover
 import numpy as np
 
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from ansys.mapdl.core.mapdl import _MapdlCore
+from ansys.mapdl.core.mapdl import MapdlBase
+from ansys.mapdl.core.mapdl_core import MAX_PARAM_CHARS
 from ansys.mapdl.core.misc import supress_logging
 
 ROUTINE_MAP = {
@@ -56,6 +79,8 @@ class Parameters:
     Simply list all parameters except for MAPDL MATH parameters.
 
     >>> mapdl.parameters
+    MAPDL Parameters
+    ----------------
     ARR                              : ARRAY DIM (3, 1, 1)
     PARM_FLOAT                       : 20.0
     PARM_INT                         : 10.0
@@ -75,8 +100,18 @@ class Parameters:
 
     """
 
-    def __init__(self, mapdl):
-        if not isinstance(mapdl, _MapdlCore):
+    def __init__(self, mapdl: MapdlBase):
+        """Parameters manager
+
+        Class to help to manage parameters in an
+        :class:`Mapdl instance <ansys.mapdl.core.Mapdl>` instance.
+
+        Parameters
+        ----------
+        mapdl : ansys.mapdl.core.Mapdl
+            Mapdl instance which this class references to.
+        """
+        if not isinstance(mapdl, MapdlBase):
             raise TypeError("Must be implemented from MAPDL class")
         self._mapdl_weakref = weakref.ref(mapdl)
         self.show_leading_underscore_parameters = False
@@ -115,7 +150,7 @@ class Parameters:
     def routine(self) -> str:
         """Current routine string as a string.  For example ``"/PREP7"``
 
-        MAPDL Command: \*GET, ACTIVE, 0, ROUT
+        MAPDL Command: \\*GET, ACTIVE, 0, ROUT
 
         Returns
         -------
@@ -137,7 +172,14 @@ class Parameters:
         >>> mapdl.parameters.routine
         'PREP7'
         """
-        value = self._mapdl.get_value("ACTIVE", item1="ROUT")
+        value = int(self._mapdl.get_value("ACTIVE", item1="ROUT"))
+        if value not in ROUTINE_MAP:
+            self._mapdl.logger.info(
+                f"Getting a valid routine number failed. Routine obtained is {value}. Executing 'FINISH'."
+            )
+            self._mapdl.finish()
+            value = 0
+
         return ROUTINE_MAP[int(value)]
 
     @property
@@ -280,14 +322,20 @@ class Parameters:
     @supress_logging
     def _parm(self):
         """Current MAPDL parameters"""
-        params = interp_star_status(self._mapdl.starstatus())
+        if self._mapdl._store_commands:
+            # in interactive mode
+            return {}
+
+        params = interp_star_status(
+            self._mapdl.starstatus(avoid_non_interactive=True, mute=False)
+        )
 
         if self.show_leading_underscore_parameters:
-            _params = interp_star_status(self._mapdl.starstatus("_PRM"))
+            _params = interp_star_status(self._mapdl.starstatus("_PRM", mute=False))
             params.update(_params)
 
         if self.show_trailing_underscore_parameters:
-            params_ = interp_star_status(self._mapdl.starstatus("PRM_"))
+            params_ = interp_star_status(self._mapdl.starstatus("PRM_", mute=False))
             params.update(params_)
 
         return params
@@ -307,13 +355,20 @@ class Parameters:
                 value_str = str(info["value"])
             else:
                 continue
-            lines.append("%-32s : %s" % (key, value_str))
+            lines.append(f"%-{MAX_PARAM_CHARS}s : %s" % (key, value_str))
         return "\n".join(lines)
 
     def __getitem__(self, key):
         """Return a parameter"""
+        if self._mapdl._store_commands:
+            raise MapdlRuntimeError(
+                "Cannot use `mapdl.parameters` to retrieve parameters when in "
+                "`non_interactive` mode. "
+                "Exit `non_interactive` mode before using this method."
+            )
+
         if not isinstance(key, str):
-            raise TypeError("Parameter name must be a string")
+            raise TypeError("Parameter name must be a string.")
         key = key.upper()
 
         with self.full_parameters_output:
@@ -322,12 +377,12 @@ class Parameters:
         if key not in parameters:
             try:
                 val_ = interp_star_status(self._mapdl.starstatus(key))
+                if not val_:
+                    raise KeyError(f"The parameter '{key}' does not exist.")
+
                 val_ = val_[list(val_.keys())[0]]["value"]
-                if len(val_) == 1:
-                    return val_[0]
-                else:
-                    return val_
-                return
+                return val_[0] if len(val_) == 1 else val_
+
             except MapdlRuntimeError:
                 raise IndexError("%s not a valid parameter_name" % key)
 
@@ -355,10 +410,81 @@ class Parameters:
             self._set_parameter(key, value)
 
     def __contains__(self, key):
-        return key in self._parm.keys()
+        """
+        Check if a given key is present in the dictionary.
+
+        Parameters
+        ----------
+        key : hashable
+            The key to search for in the dictionary.
+
+        Returns
+        -------
+        bool
+            True if the key is in the dictionary, False otherwise.
+
+        """
+        return key.upper() in self._parm.keys()
 
     def __iter__(self):
+        """
+        Return an iterator over the keys in the dictionary.
+
+        Returns
+        -------
+        iterator
+            An iterator over the keys in the dictionary.
+
+        """
         yield from self._parm.keys()
+
+    def keys(self):
+        """
+        Return a view object that contains the keys in the dictionary.
+
+        Returns
+        -------
+        dict_keys
+            A view object that contains the keys in the dictionary.
+
+        """
+        return self._parm.keys()
+
+    def values(self):
+        """
+        Return a view object that contains the values in the dictionary.
+
+        Returns
+        -------
+        dict_values
+            A view object that contains the values in the dictionary.
+
+        """
+        return self._parm.values()
+
+    def copy(self):
+        """
+        Return a shallow copy of the dictionary.
+
+        Returns
+        -------
+        dict
+            A shallow copy of the dictionary.
+
+        """
+        return self._parm.copy()
+
+    def items(self):
+        """
+        Return a view object that contains the key-value pairs in the dictionary.
+
+        Returns
+        -------
+        dict_items
+            A view object that contains the key-value pairs in the dictionary.
+
+        """
+        return self._parm.items()
 
     @supress_logging
     def _set_parameter(self, name, value):
@@ -368,19 +494,27 @@ class Parameters:
         ----------
         name : str
             An alphanumeric name used to identify this parameter.  Name
-            may be up to 32 characters, beginning with a letter and
-            containing only letters, numbers, and underscores.
+            may be up to 32 character or the value given in
+            :attr:`ansys.mapdl.core.mapdl_core.MAX_PARAM_CHARS`, beginning with
+            a letter and containing only letters, numbers, and underscores.
             Examples: ``"ABC" "A3X" "TOP_END"``.
 
         """
-        if not isinstance(value, (str, int, float)):
+        if not isinstance(value, (str, int, float, np.integer, np.floating)):
             raise TypeError("``Parameter`` must be either a float, int, or string")
+
+        if isinstance(value, str) and len(value) > MAX_PARAM_CHARS:
+            raise ValueError(
+                f"Length of ``value`` must be {MAX_PARAM_CHARS} characters or less"
+            )
 
         if not isinstance(name, str):
             raise TypeError("``name`` must be a string")
 
-        if len(name) > 32:
-            raise ValueError("Length of ``name`` must be 32 characters or less")
+        if len(name) > MAX_PARAM_CHARS:
+            raise ValueError(
+                f"Length of ``name`` must be {MAX_PARAM_CHARS} characters or less"
+            )
 
         # delete the parameter if it exists as an array
         parm = self._parm
@@ -411,27 +545,26 @@ class Parameters:
         """
         escaped = False
         for each_format_number in [20, 30, 40, 64, 100]:
-            format_str = f"(1F{each_format_number}.12)"
+            format_str = f"(1E{each_format_number}.12)"
             with self._mapdl.non_interactive:
                 # use C ordering
                 self._mapdl.mwrite(parm_name.upper(), label="kji")
                 self._mapdl.run(format_str)
 
             st = self._mapdl.last_response.rfind(format_str) + len(format_str) + 1
+            output = self._mapdl.last_response[st:]
 
-            if "**" not in self._mapdl.last_response[st:]:
+            if "**" not in output:
                 escaped = True
                 break
 
         if not escaped:  # pragma: no cover
-            raise RuntimeError(
+            raise MapdlRuntimeError(
                 f"The array '{parm_name}' has a number format "
-                "that could not be read using '{format_str}'."
+                f"that could not be read using '{format_str}'."
             )
 
-        arr_flat = np.fromstring(self._mapdl.last_response[st:], sep="\n").reshape(
-            shape
-        )
+        arr_flat = np.fromstring(output.strip(), sep="\n").reshape(shape)
 
         if len(shape) == 3:
             if shape[2] == 1:
@@ -444,15 +577,15 @@ class Parameters:
         """Load a numpy array or python list directly to MAPDL
 
         Writes the numpy array to disk and then reads it in within
-        MAPDL using \*VREAD.
+        MAPDL using \\*VREAD.
 
         Parameters
         ----------
-        arr : np.ndarray or List
-            Array to send to MAPDL.  Maximum of 3 dimensions.
-
         name : str
             Name of the array to write to within MAPDL.
+
+        arr : np.ndarray or List
+            Array to send to MAPDL.  Maximum of 3 dimensions.
 
         Examples
         --------
@@ -530,11 +663,6 @@ class Parameters:
         elif arr.ndim == 2:
             arr = np.expand_dims(arr, 2)
 
-        # backwards compatibility with CORBA
-        if hasattr(self._mapdl, "mute"):
-            old_mute = self._mapdl.mute
-            self._mapdl.mute = True
-
         with self._mapdl.non_interactive:
             self._mapdl.dim(name, imax=idim, jmax=jdim, kmax=kdim)
             for i in range(idim):
@@ -542,9 +670,6 @@ class Parameters:
                     for k in range(kdim):
                         index = f"{i + 1},{j + 1},{k + 1}"
                         self._mapdl.run(f"{name}({index})={arr[i, j, k]}")
-
-        if hasattr(self._mapdl, "mute"):
-            self._mapdl.mute = old_mute
 
     def _write_numpy_array(self, filename, arr):
         """Write a numpy array to disk"""
@@ -631,12 +756,12 @@ def is_array_listing(status):
 
 
 def interp_star_status(status):
-    """Interprets \*STATUS command output from MAPDL
+    """Interprets \\*STATUS command output from MAPDL
 
     Parameters
     ----------
     status : str
-        Output from MAPDL \*STATUS
+        Output from MAPDL \\*STATUS
 
     Returns
     -------
@@ -644,11 +769,13 @@ def interp_star_status(status):
         Dictionary of parameters.
     """
     # Exiting if there is no parameters
-    if "There are no parameters defined." in status:
+    if "no parameters defined" in status or (
+        "Parameter name" in status and "command is undefined" in status
+    ):
         return {}
 
     # If there is a general call to *STATUS (no arguments), the output has some extra
-    # parameters that we don't want to include in the analysis.
+    # text that we don't want to include in the output.
     ind = find_parameter_listing_line(status)
     status = "\n".join(status.splitlines()[ind:])
 
@@ -700,11 +827,11 @@ def interp_star_status(status):
 
         # line will contain either a character, scalar, or array
         name = items[0]
-        if len(items) == 2:
-            if items[1][-9:] == "CHARACTER":
-                parameters[name] = {"type": "CHARACTER", "value": items[1][:-9]}
-            # else:
-            # log.warning(
+        if len(items) == 2 or "CHARACTER" in items[-1].upper():
+            name = line[:MAX_PARAM_CHARS].strip()
+            value = line.replace(items[-1], "")[(MAX_PARAM_CHARS + 1) :].strip()
+            parameters[name] = {"type": "CHARACTER", "value": value}
+
         elif len(items) == 3:
             if items[2] == "SCALAR":
                 value = float(items[1])
@@ -714,10 +841,9 @@ def interp_star_status(status):
         elif len(items) == 4:
             # it is an array or string array
             if is_array_listing(status):
-                # Probably I could get rid of this loop
-                myarray[
-                    int(items[0]) - 1, int(items[1]) - 1, int(items[2]) - 1
-                ] = float(items[3])
+                myarray[int(items[0]) - 1, int(items[1]) - 1, int(items[2]) - 1] = (
+                    float(items[3])
+                )
             elif is_string_array:
                 elements.append(items[-1])
 

@@ -86,15 +86,15 @@ Generate the FULL file and FEA model
 Generate the FULL file for the Krylov method and the FEA model
 using Mechanical APDL:
 
-.. code:: py
+.. code:: pycon
 
     >>> from ansys.mapdl.core import launch_mapdl
-    
+
     >>> mapdl = launch_mapdl()
     >>> mapdl.prep7()
 
-	# Generate the FEA model (mesh, constraints, loads)
-  # ...
+	  # Generate the FEA model (mesh, constraints, loads)
+    # ...
 
     >>> mapdl.run("/SOLU")
     >>> mapdl.antype("HARMIC")  # HARMONIC ANALYSIS
@@ -109,7 +109,7 @@ using Mechanical APDL:
 Create an instance of the Krylov class
 --------------------------------------
 
-.. code:: py
+.. code:: pycon
     
     >>> mk = mapdl.krylov
 
@@ -118,7 +118,7 @@ Call the
 method to create the Krylov subspace and build a subspace of
 size/dimension 10 at a frequency of 500 Hz:
 
-.. code:: py
+.. code:: pycon
 
     >>> Qz = mk.gensubspace(10, 500, True)
 
@@ -129,9 +129,9 @@ Call the :func:`solve <ansys.mapdl.core.krylov.KrylovSolver.solve>` method to
 reduce the system of equations and solve at each frequency. This code
 solves from 0 Hz to 1000 Hz with 100 intervals in between, with stepped loading:
 
-.. code:: py
+.. code:: pycon
 
-    >>> Yz = mk.solve(0, 1000, 100, ramped_load= True)
+    >>> Yz = mk.solve(0, 1000, 100, ramped_load=True)
 
 
 Return the reduced solution over the frequency range
@@ -141,9 +141,11 @@ Call the :func:`expand <ansys.mapdl.core.krylov.KrylovSolver.expand>` method
 to expand the reduced solution back to the FE space, output the expanded
 solution, and calculate the residual:   
 
-.. code:: py
+.. code:: pycon
 
-    >>> result = mk.expand(residual_computation= True, "L-inf", compute_solution_vectors= True, True)
+    >>> result = mk.expand(
+    ...     residual_computation=True, "L-inf", compute_solution_vectors=True, True
+    ... )
 
 The preceding code returns a :class:`numpy array<numpy.ndarray>` if the kwarg ``out_key``
 is set to ``True``. Solution vectors are mapped to user order.
@@ -158,11 +160,11 @@ Get the dof solution at a specific frequency
 This code shows how to get the nodal solution at a specific frequency
 or step:
 
-.. code:: py
+.. code:: pycon
 
    # Get the nodal solution at freq number 3``````
-   >>> freq = 3  
-   >>> nodal_sol = result[freq-1] # Get the nodal solution for each node
+   >>> freq = 3
+   >>> nodal_sol = result[freq - 1]  # Get the nodal solution for each node
 
 Example
 =======

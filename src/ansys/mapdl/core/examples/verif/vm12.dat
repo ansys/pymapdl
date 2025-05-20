@@ -1,4 +1,26 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM12
 /PREP7
 /SHOW,JPEG
@@ -19,14 +41,15 @@ F,2,FX,-250
 FINISH
 /SOLU    
 OUTPR,BASIC,1
+/OUT,SCRATCH
 SOLVE
 FINISH
 /POST1
 ETABLE,P_STRS,NMISC,86
 ETABLE,SHR,NMISC,88
+/OUT,
 *GET,P_STRESS,ELEM,1,ETAB,P_STRS
 *GET,SHEAR,ELEM,1,ETAB,SHR
-
 *DIM,LABEL,CHAR,2,2
 *DIM,VALUE,,2,3
 LABEL(1,1) = 'MAX PRIN','MAX SH S'
@@ -38,16 +61,11 @@ SAVE,TABLE_1
 FINI
 /CLEAR,NOSTART
 
-
-!*********************************************************************
-
-
 /PREP7
 /SHOW,JPEG
 C***     USING PIPE288       
-
 ANTYPE,STATIC
-ET,1,PIPE288
+ET,1,PIPE288,,,,2
 SECTYPE,1,PIPE
 SECDATA,4.67017,2.33508
 KEYOPT,1,3,3			!CUBIC SHAPE FUNCTION
@@ -62,6 +80,7 @@ F,2,FX,-250
 FINISH
 /SOLU    
 OUTPR,BASIC,1
+/OUT,SCRATCH
 SOLVE
 FINISH
 /POST1
@@ -70,10 +89,10 @@ SET,LAST
 /ESHAPE,1
 /VIEW,1,1,1,1
 PLESOL,S,1
+/OUT,
 *GET,P_STRESS,PLNSOL,0,MAX
 PLESOL,S,INT
 *GET,SHEAR,PLNSOL,0,MAX
-
 *DIM,LABEL,CHAR,2,2
 *DIM,VALUE,,2,3
 LABEL(1,1) = 'MAX PRIN','MAX SH S'

@@ -1,3 +1,25 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """
 These DATABASE commands can be used to initialize the database, save
 it to a file, or annotate it with titles and systems of units.
@@ -25,11 +47,13 @@ class Setup:
         nopar
             Parameter resume key:
 
-            0 - All data in the database, including the scalar
+            0
+                All data in the database, including the scalar
                 parameters, are replaced with the data saved on
                 File.DB (default).
 
-            1 - All data in the database, except the scalar
+            1
+                All data in the database, except the scalar
                 parameters, are replaced with the data saved on
                 File.DB.
 
@@ -277,21 +301,29 @@ class Setup:
         label
             Label to denote the system of units used in this job:
 
-            USER - User-defined system (default).
+            USER
+                User-defined system (default).
 
-            SI - International system (m, kg, s, K).
+            SI
+                International system (m, kg, s, K).
 
-            MKS - MKS system (m, kg, s, °C).
+            MKS
+                MKS system (m, kg, s, °C).
 
-            uMKS - μMKS system (μm, kg, s, °C).
+            uMKS
+                μMKS system (μm, kg, s, °C).
 
-            CGS - CGS system (cm, g, s, °C).
+            CGS
+                CGS system (cm, g, s, °C).
 
-            MPA - MPA system (mm, Mg, s, °C).
+            MPA
+                MPA system (mm, Mg, s, °C).
 
-            BFT - U. S. Customary system using feet (ft, slug, s, °F).
+            BFT
+                U. S. Customary system using feet (ft, slug, s, °F).
 
-            BIN - U. S. Customary system using inches (in, lbf*s2/in, s, °F).
+            BIN
+                U. S. Customary system using inches (in, lbf*s2/in, s, °F).
 
         Notes
         -----

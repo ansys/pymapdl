@@ -1,4 +1,26 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM179
 /PREP7
 /TITLE, VM179, DYNAMIC DOUBLE ROTATION OF A JOINTED BEAM
@@ -39,10 +61,15 @@ E,2,3                       ! JOINT ELEMENT
 D,1,UX,0,,,,UY,UZ,ROTX,ROTY ! ALLOW ONLY Z-ROTATION AT PINNED END
 KBC,1
 FINISH
-/OUTPUT,SCRATCH             ! SEND SUBSEQUENT OUTPUT TO SCRATCH FILE
-/SOLU    
+/OUT,vm179_SCRATCH          ! SEND SUBSEQUENT OUTPUT TO SCRATCH FILE
+/SOLU
+DMPOPT,RNNN,YES    
+SOLCONT,ON
 PRED,ON
 CNVTOL,M
+CNVTOL,F,-1
+CNVTOL,U,-1
+CNVTOL,ROT,-1
 NSUBST,100,1000,10
 F,1,MZ,.7854                ! BEGIN ROTZ WITH NON-ZERO ACCELERATION
 TIME,.05
@@ -78,18 +105,12 @@ ETABLE,REFL
 ESEL,ALL
 PRETAB,ROTATE,ROT_STAT
 FINISH
+
 PARSAV
-/COPY,,rdb,,rest,rdb          ! SAVE THE FILES NEEDED FOR RESTART (NOT NEEDED
-/COPY,,ldhi,,rest,ldhi        ! FOR STRAIGHT-THRU RUN)
-/COPY,,r001,,rest,r001
-/COPY,,rst,,rest,rst          ! NEEDED FOR CONTINUITY OF THE RESULTS FILE
 /CLEAR,NOSTART                ! CLEAR THE DATABASE (TO SIMULATE RESTART)
 /COM,    
 /COM,        -----     RESTART  ANALYSIS    -----
-/COPY,rest,rdb,,file,rdb      ! COPY THE FILES NEEDED FOR RESTART (NOT NEEDED
-/COPY,rest,ldhi,,file,ldhi    ! FOR STRAIGHT-THRU RUN)
-/COPY,rest,r001,,file,r001
-/COPY,rest,rst,,file,rst
+
 /SOLU    
 ANTYPE,,REST         ! USE RESTART ANALYSIS TO DEFINE MORE LOADSTEPS
 F,1,MZ,0             ! REMOVE M1, ALLOW ROTZ MOTION TO STABILIZE

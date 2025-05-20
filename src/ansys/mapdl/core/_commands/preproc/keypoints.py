@@ -1,4 +1,24 @@
-import re
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
 from ansys.mapdl.core._commands import parse
 
@@ -48,16 +68,7 @@ class KeyPoints:
 
         """
         command = f"K,{npt},{x},{y},{z}"
-        msg = self.run(command, **kwargs)
-
-        if msg:
-            if not re.search(r"KEYPOINT NUMBER", msg):
-                res = re.search(r"(KEYPOINT\s*)([0-9]+)", msg)
-            else:
-                res = re.search(r"(KEYPOINT NUMBER =\s*)([0-9]+)", msg)
-
-            if res:
-                return int(res.group(2))
+        return parse.parse_k(self.run(command, **kwargs))
 
     def kbetw(self, kp1="", kp2="", kpnew="", type_="", value="", **kwargs) -> int:
         """Creates a keypoint between two existing keypoints.
@@ -86,7 +97,7 @@ class KeyPoints:
             Number assigned to the new keypoint.  Defaults to the
             lowest available keypoint number.
 
-        type\_
+        type\\_
             Type of input for VALUE.
 
             RATIO - Value is the ratio of the distances between keypoints as follows:
@@ -137,7 +148,7 @@ class KeyPoints:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Type of entity used to define the circular arc.  The
             meaning of VAL1 through VAL4 will vary depending on Type.
 
@@ -396,11 +407,8 @@ class KeyPoints:
         1
 
         """
-        msg = self.run(f"KL,{nl1},{ratio},{nk1}", **kwargs)
-        if msg:
-            res = re.search(r"KEYPOINT\s+(\d+)\s+", msg)
-            if res is not None:
-                return int(res.group(1))
+        cmd = f"KL,{nl1},{ratio},{nk1}"
+        return parse.parse_kl(self.run(cmd, **kwargs))
 
     def klist(self, np1="", np2="", ninc="", lab="", **kwargs):
         """Lists the defined keypoints or hard points.
@@ -543,7 +551,7 @@ class KeyPoints:
         command = f"KMOVE,{npt},{kc1},{x1},{y1},{z1},{kc2},{x2},{y2},{z2}"
         return self.run(command, **kwargs)
 
-    def knode(self, npt="", node="", **kwargs) -> int:
+    def knode(self, npt="", node="", **kwargs) -> str:
         """Defines a keypoint at an existing node location.
 
         APDL Command: KNODE
@@ -573,11 +581,8 @@ class KeyPoints:
         1
 
         """
-        msg = self.run(f"KNODE,{npt},{node}", **kwargs)
-        if msg:
-            res = re.search(r"KEYPOINT NUMBER =\s+(\d+)", msg)
-            if res is not None:
-                return int(res.group(1))
+        cmd = f"KNODE,{npt},{node}"
+        return parse.parse_knode(self.run(cmd, **kwargs))
 
     def kplot(self, np1="", np2="", ninc="", lab="", **kwargs):
         """Displays the selected keypoints.

@@ -1,5 +1,28 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM85
+/out,scratch
 /PREP7
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
@@ -22,14 +45,15 @@ GP,1,20,FX,3E7,.64          ! GAP CONDITION
 FINISH
 /SOLU
 ANTYPE,MODAL
-MODOPT,LANB,17              ! PERFORM MODAL SOLVE USING LANB EIGENSOLVER
-MXPAND,17
+MODOPT,LANB,17,              ! PERFORM MODAL SOLVE USING LANB EIGENSOLVER
+MXPAND,17,,,YES
 /OUT,SCRATCH
 SOLVE
 FINISH
+/OUT,SCRATCH
 /SOLU    
 ANTYPE,TRANSIENT
-TRNOPT,MSUP,17              ! PERFORM MODE SUPERPOSITION TRANSIENT SOLVE
+TRNOPT,MSUP,	            ! PERFORM MODE SUPERPOSITION TRANSIENT SOLVE
 DELTIM,.0001                ! ITS DEFINITION
 KBC,1                       ! STEP BOUNDARY CONDITION
 F,1,FX,,,17                 ! DEFINE NULL FORCES ON ALL BAR NODES
@@ -59,11 +83,9 @@ DERIV,6,2,,,1 VX            ! COMPUTE VELOCITIES
 DERIV,7,3,,,17VX
 DERIV,8,5,,,9 VX
 /AXLAB,Y,VELOCITY
-/OUT,
 PLVAR,6,7,8
 *GET,D_0544,VARI,4,RTIME,.0544
 *GET,D_0557,VARI,4,RTIME,.0557
-
 *DIM,LABEL,CHAR,3,2
 *DIM,VALUE,,3,3
 LABEL(1,1) = 'D,in(T=.','D,in(T=.','D,in(T=.'
@@ -76,7 +98,6 @@ FINISH
 EXPASS,ON                   ! EXPANSION PASS
 EXPSOL,,,0.0557             ! EXPAND SOLUTION AT TIME CLOSEST TO THE THEORETICAL TIME POINT
 OUTPR,,1
-/OUT,SCRATCH
 SOLVE
 FINISH
 /POST1

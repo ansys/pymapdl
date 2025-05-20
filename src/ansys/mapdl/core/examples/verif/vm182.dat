@@ -1,9 +1,31 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM182
 /PREP7   
 JPGPRF,500,100,1             ! MACRO TO SET PREFS FOR JPEG PLOTS
 /SHOW,JPEG
-/TITLE, VM182; TRANSIENT RESPONSE OF A SPRING-MASS SYSTEM
+/TITLE, VM182, TRANSIENT RESPONSE OF A SPRING-MASS SYSTEM
 C***               R. K. VIERCK, "VIBRATION ANALYSIS", 2ND EDITION, SEC.5-8
 ANTYPE,MODAL          ! MODE-FREQUENCY ANALYSIS
 MODOPT,LANB,2,,,      ! PRINT TWO REDUCED MODE SHAPES
@@ -20,8 +42,10 @@ E,2,3
 D,3,ALL
 OUTPR,,ALL
 FINISH
-/SOLU    
+/SOLU
+/OUT,vm182_SCRATCH    
 SOLVE
+/OUT
 FINISH
 /SOLU    
 ANTYPE,TRANS          ! TRANSIENT DYNAMIC ANALYSIS
@@ -31,13 +55,19 @@ OUTPR,,NONE
 OUTRES,,1
 KBC,1                 ! STEP BOUNDARY CONDITIONS
 F,1,FY,0              ! FORCE = 0 AT TIME = 0 (INIT. CONDITIONS)
+/OUT,vm182_SCRATCH,,,APPEND    
 SOLVE
+/OUT
 TIME,1.8
 F,1,FY,50             ! FORCE = 50N FROM TIME = 0 TO 1.8 SEC
+/OUT,vm182_SCRATCH,,,APPEND    
 SOLVE
+/OUT
 TIME,2.4
 F,1,FY,0              ! FORCE = 0 FROM TIME = 1.8 TO 2.4 SEC
+/OUT,vm182_SCRATCH,,,APPEND    
 SOLVE
+/OUT
 FINISH
 /POST26
 FILE,,rdsp            ! REDUCED DISPLACEMENTS FILE

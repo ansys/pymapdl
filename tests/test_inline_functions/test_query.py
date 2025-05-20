@@ -1,4 +1,29 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import pytest
+
+from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
+from conftest import TestClass, requires
 
 
 class TestParseParameter:
@@ -15,7 +40,11 @@ class TestParseParameter:
     )
     def test_parse_float(self, values, query):
         input_, output = values
-        assert query._parse_parameter_float_response(input_) == output
+        if "WARNING" in values[0]:
+            with pytest.warns(UserWarning):
+                assert query._parse_parameter_float_response(input_) == output
+        else:
+            assert query._parse_parameter_float_response(input_) == output
 
     @pytest.mark.parametrize(
         "values",
@@ -30,7 +59,11 @@ class TestParseParameter:
     )
     def test_parse_int(self, values, query):
         input_, output = values
-        assert query._parse_parameter_integer_response(input_) == output
+        if "WARNING" in values[0]:
+            with pytest.warns(UserWarning):
+                assert query._parse_parameter_integer_response(input_) == output
+        else:
+            assert query._parse_parameter_integer_response(input_) == output
 
     def test_parse_float_type_warning(self, query):
         input_ = "WARNING PARAMETER = 4"
@@ -59,7 +92,16 @@ class TestParseParameter:
             query._parse_parameter_integer_response(input_)
 
 
-class TestRunQuery:
+class TestRunQuery(TestClass):
+
+    @pytest.fixture(scope="class")
+    def line_geometry(self, mapdl):
+        k0 = mapdl.k(1, 0, 0, 0)
+        k1 = mapdl.k(2, 1, 2, 2)
+        l0 = mapdl.l(k0, k1)
+        q = mapdl.queries
+        return q, [k0, k1], l0
+
     @pytest.mark.parametrize("command", [("KX(1)", float), ("KP(1,1,1)", int)])
     def test_run_query_returned_type(self, line_geometry, command):
         q, kps, l0 = line_geometry
@@ -69,12 +111,12 @@ class TestRunQuery:
         assert isinstance(v, type_)
 
     def test_interactive_mode_error(self, mapdl, line_geometry):
-        q, kps, l0 = line_geometry
-        with mapdl.non_interactive:
-            with pytest.raises(RuntimeError):
-                v = q.kx(1)
+        q, _, _ = line_geometry
+        with pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError)):
+            with mapdl.non_interactive:
+                q.kx(1)
 
-    @pytest.mark.skip_grpc  # only works in gRPC mode
+    @requires("grpc")  # only works in gRPC mode
     def test_nopr_mode(self, mapdl, line_geometry):
         try:
             # enter no printout mode

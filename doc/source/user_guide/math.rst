@@ -1,54 +1,23 @@
 .. _mapdl_math_class_ref:
 
-APDL Math overview
-==================
-APDL Math provides the ability to access and manipulate the large
-sparse matrices and solve a variety of eigenproblems. PyMAPDL classes
-and bindings present APDL Math in a similar manner to the popular
-`numpy <numpy_docs_>`_ and `scipy <scipy_docs_>`_ libraries.
-The APDL Math command set is based on tools for manipulating large mathematical
-matrices and vectors that provide access to standard linear algebra
-operations, access to the powerful sparse linear solvers of ANSYS
-Mechanical APDL (MAPDL), and the ability to solve eigenproblems.
-
-Python and MATLAB eigensolvers are based on the publicly available
-LAPACK libraries and provides reasonable solve time for relatively
-small degrees of freedom (dof) eigenproblems of perhaps 100,000.
-However, Ansys solvers are designed for the scale of 100 s of
-millions of dof, providing a variety of situations where you can
-directly leverage Ansys high-performance solvers on a variety of
-eigenproblems. Fortunately, you can leverage this without relearning
-an entirely new language because APDL Math has been written in a similar manner
-as the ``numpy`` and ``scipy`` libraries. For example, here is a comparison between
-the NumPy and SciPy linear algebra solvers and the Ansys MAPDL Math solver:
-
-.. table:: ``numpy`` vs PyMAPDL Math Implementation
-
-   +--------------------------------------------+-----------------------------------+
-   | ``numpy`` and ``scipy``                    | ``ansys.mapdl.math``              |
-   +============================================+===================================+
-   | .. code:: python                           | .. code:: python                  |
-   |                                            |                                   |
-   |   k_py = k + sparse.triu(k, 1).T           |   k = mm.matrix(k_py, triu=True)  |
-   |   m_py = m + sparse.triu(m, 1).T           |   m = mm.matrix(m_py, triu=True)  |
-   |   n = 10                                   |   n = 10                          |
-   |   ev = linalg.eigsh(k_py, k=neqv, M=m_py)  |   ev = mm.eigs(n, k, m)           |
-   |                                            |                                   |
-   +--------------------------------------------+-----------------------------------+
-
-What follows is a basic example and a detailed description of the
-PyMAPDL Math API. For additional PyMAPDL Math examples, see
-:ref:`ref_apdl_math_examples`.
+PyAnsys Math overview
+=====================
+`PyAnsys Math <pyansys_math_>`_ provides the ability to access and manipulate
+large sparse matrices and solve a variety of eigenproblems in a similar
+manner to the popular `numpy <numpy_docs_>`_ and `scipy <scipy_docs_>`_ libraries.
 
 
-MAPDL matrix example
-~~~~~~~~~~~~~~~~~~~~
-This example demonstrates how to send an MAPDL Math matrix from MAPDL
-to Python and then send it back to be solved. While this example runs the
-:func:`MapdlMath.eigs() <ansys.mapdl.core.math.MapdlMath.eigs>` method on mass
-and stiffness matrices generated from MAPDL, you could instead use
-mass and stiffness matrices generated from an external FEM tool or
-even modify the mass and stiffness matrices within Python.
+PyMAPDL and PyAnsys Math
+~~~~~~~~~~~~~~~~~~~~~~~~
+This example demonstrates how to take advantage of the `ansys-math-core` package
+with PyMAPDL.
+
+It illustrates how to send an MAPDL Math matrix from MAPDL to Python and then send
+it back to be solved. While this example runs the 
+:func:`mm.eigs() <ansys.math.core.math.AnsMath.eigs>` method on mass and stiffness
+matrices generated from MAPDL, you could instead use mass and stiffness matrices
+generated from an external FEM tool or even modify the mass and stiffness matrices
+within Python.
 
 First, solve the first 10 modes of a ``1 x 1 x 1`` steel meter cube
 in MAPDL.
@@ -56,8 +25,8 @@ in MAPDL.
 .. code:: python
 
     import re
-
     from ansys.mapdl.core import launch_mapdl
+
     mapdl = launch_mapdl()
 
     # setup the full file
@@ -65,35 +34,38 @@ in MAPDL.
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.et(1, 186)
     mapdl.esize(0.5)
-    mapdl.vmesh('all')
+    mapdl.vmesh("all")
 
     # Define a material (nominal steel in SI)
-    mapdl.mp('EX', 1, 210E9)  # Elastic moduli in Pa (kg/(m*s**2))
-    mapdl.mp('DENS', 1, 7800)  # Density in kg/m3
-    mapdl.mp('NUXY', 1, 0.3)  # Poisson's Ratio
+    mapdl.mp("EX", 1, 210e9)  # Elastic moduli in Pa (kg/(m*s**2))
+    mapdl.mp("DENS", 1, 7800)  # Density in kg/m3
+    mapdl.mp("NUXY", 1, 0.3)  # Poisson's Ratio
 
     # solve first 10 non-trivial modes
     out = mapdl.modal_analysis(nmode=10, freqb=1)
 
     # store the first 10 natural frequencies
     mapdl.post1()
-    resp = mapdl.set('LIST')
-    w_n = np.array(re.findall(r'\s\d*\.\d\s', resp), np.float32)
+    resp = mapdl.set("LIST")
+    w_n = np.array(re.findall(r"\s\d*\.\d\s", resp), np.float32)
     print(w_n)
 
 You now have solved for the first 10 modes of the cube:
 
-.. code:: 
+.. code:: output
 
     [1475.1 1475.1 2018.8 2018.8 2018.8 2024.8 2024.8 2024.8 2242.2 2274.8]
 
 Next, load the mass and stiffness matrices that are stored by default
-in the ``<jobname>.full`` file.  First, create an instance of the :class:`MapdlMath
-<ansys.mapdl.core.math.MapdlMath>` class as ``mm``:
+in the :file:`<jobname>.full` file. First, create an instance of the 
+:class:`MapdlMath <ansys.math.core.math.AnsMath>` class as ``mm``:
 
 .. code:: python
 
-    mm = mapdl.math
+    from ansys.math.core.math import AnsMath
+
+    # Importing and connecting PyAnsys Math to PyMAPDL
+    mm = AnsMath(mapdl)
 
     # load by default from file.full
     k = mm.stiff()
@@ -105,10 +77,10 @@ in the ``<jobname>.full`` file.  First, create an instance of the :class:`MapdlM
     mapdl.clear()
     print(k_py)
 
-After running the :func:`Mapdl.clear() <ansys.mapdl.core.Mapdl.clear>` method,
+After running the :func:`mapdl.clear() <ansys.mapdl.core.Mapdl.clear>` method,
 these matrices are stored solely within Python.
 
-.. code:: 
+.. code:: output
 
     (0, 0)	37019230769.223404
     (0, 1)	10283119658.117708
@@ -117,6 +89,13 @@ these matrices are stored solely within Python.
     (240, 241)	11217948717.943113
     (241, 241)	50854700854.68495
     (242, 242)	95726495726.47179
+
+To call PyAnsys Math directly from PyMAPDL, you can run this command:
+
+.. code:: python
+
+    # Launching PyAnsys Math directly with PyMAPDL
+    mm = mapdl.math
 
 
 The final step is to send these matrices back to MAPDL to be solved.
@@ -135,28 +114,28 @@ transferred the matrices to a different MAPDL session to be solved:
     print(eigval)
 
 As expected, the natural frequencies obtained from the
-:func:`MapdlMath.eigs() <ansys.mapdl.core.math.MapdlMath.eigs>` method is
-identical to the result from the :func:`Mapdl.solve() <ansys.mapdl.core.Mapdl.solve>`
+:func:`mm.eigs() <ansys.math.core.math.AnsMath.eigs>` method is
+identical to the result from the :func:`mapdl.solve() <ansys.mapdl.core.Mapdl.solve>`
 method within MAPDL.
 
-.. code::
+.. code:: output
 
     [1475.1333421  1475.1333426  2018.83737064 2018.83737109 2018.83737237
      2024.78684466 2024.78684561 2024.7868466  2242.21532585 2274.82997741]
 
 If you want to obtain the eigenvectors as well as the eigenvalues,
 initialize a matrix ``eigvec`` and send that to the
-:func:`MapdlMath.eigs() <ansys.mapdl.core.math.MapdlMath.eigs>` method:
+:func:`mm.eigs() <ansys.math.core.math.AnsMath.eigs>` method:
 
-.. code::
+.. code:: pycon
 
-    nmode = 10
-    eigvec = mm.zeros(my_stiff.nrow, nmode)  # for eigenvectors
-    val = mm.eigs(nmode, my_stiff, my_mass, fmin=1)
+    >>> nmode = 10
+    >>> eigvec = mm.zeros(my_stiff.nrow, nmode)  # for eigenvectors
+    >>> val = mm.eigs(nmode, my_stiff, my_mass, fmin=1)
 
-The MAPDL Math matrix ``eigvec`` now contains the eigenvectors for the
+The AnsMath matrix ``eigvec`` now contains the eigenvectors for the
 solution.
 
-APDL Math reference
-~~~~~~~~~~~~~~~~~~~
-For more information, see :ref:`ref_math_api`.
+PyAnsys Math reference
+~~~~~~~~~~~~~~~~~~~~~~
+For more information, see the `PyAnsys Math API reference <pyansys_math_api_>`_.

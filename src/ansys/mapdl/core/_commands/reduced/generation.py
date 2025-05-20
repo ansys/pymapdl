@@ -1,3 +1,26 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class Generation:
     def rmalist(self, **kwargs):
         """Lists all defined master nodes for a ROM method.
@@ -163,10 +186,10 @@ class Generation:
 
             DOMINANT - Dominant mode
 
-        min\_
+        min\\_
             Lower bound for fit range of mode.
 
-        max\_
+        max\\_
             Upper bound for fit range of mode.
 
         nstep
@@ -316,7 +339,7 @@ class Generation:
             capacitance reference name previously defined by means of RMCAP
             command for the electrostatic domain.
 
-        type\_
+        type\\_
             Type of fitting function to be applied for regression analysis.
             Valid types are:
 
@@ -353,7 +376,7 @@ class Generation:
             definition, previously defined by means of the RMCAP command, for
             the electrostatic domain.
 
-        type\_
+        type\\_
             Type of data to be plotted. Valid types are:
 
             FUNC - Response surface (default)

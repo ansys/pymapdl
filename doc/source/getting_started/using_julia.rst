@@ -11,7 +11,7 @@ If you like to work with Julia, you can use Python libraries as if they were Jul
 Install Julia
 =============
 
-To install Julia, go to their website `julia`_ and follow the instructions given in the **Download** section.
+To install Julia, go to `their website <julia_>`_ and follow the instructions given in the **Download** section.
 
 * `Windows <julia_windows_>`_
 * `Linux <julia_linux_and_freebsd_>`_
@@ -26,21 +26,21 @@ To install it, run Julia and switch to the package manager by pressing the ``"]"
 If you need to work with different package versions or applications, it is beneficial to create a virtual environment in Julia.
 To create a virtual environment, use the ``activate`` command with the name of the new environment that you want to create or activate.
 
-.. code-block::
+.. code:: jlcon
 
-    (@1.7) pkg> activate julia_test
+    pkg> activate julia_test
       Activating project at `C:/Users/USER/julia_test`
 
 
 A message should appear, indicating that the new package (``julia_test``) has been activated. This environment name now precedes the command line.
 
-.. code-block:: julia
+.. code:: jlcon
 
     (julia_test) pkg>
 
 Next install the PyCall package by typing:
 
-.. code-block:: julia
+.. code:: jlcon
 
     (julia_test) pkg> add PyCall
 
@@ -48,13 +48,13 @@ Next install the PyCall package by typing:
 To use PyCall, press the backspace key to go to the Julia command line.
 The command line is then preceded by the name ``Julia``. 
 
-.. code-block:: julia
+.. code:: jlcon
 
     julia>
 
 Next use the PyCall package with:
 
-.. code-block:: julia
+.. code:: jlcon
 
     julia> using PyCall
 
@@ -64,7 +64,7 @@ This should be enough to use packages included in a basic Python distribution.
 
 For example:
 
-.. code-block:: julia
+.. code:: jlcon
 
     julia> math = pyimport("math")
     math.sin(math.pi/4) # returns ≈ 1/√2 = 0.70710678..
@@ -79,14 +79,14 @@ However, because it is a fully working Python environment, you can still use it 
 
 To install PyMAPDL, first locate the Python executable with:
 
-.. code-block:: julia
+.. code:: jlcon
 
     julia> PyCall.python
     "C:\\Users\\USER\\.julia\\conda\\3\\python.exe"
 
 In Linux, the preceding code prints the following, where ``python3`` is the default Python3 installation for the operating system.
 
-.. code-block:: julia
+.. code:: jlcon
     
     julia> PyCall.python
     "python3"
@@ -101,20 +101,20 @@ In Linux, the preceding code prints the following, where ``python3`` is the defa
 
 You would use this Python executable to install PyMAPDL:
 
-.. code:: bash
+.. code:: console
 
     C:\Users\USER\.julia\conda\3\python.exe -m pip install ansys-mapdl-core
 
 In Linux:, you would install with:
 
-.. code:: bash
+.. code:: console
 
     python3 -m pip install ansys-mapdl-core
 
 
 Finally, after restarting Julia, you can import PyMAPDL using the same procedure as described earlier:
 
-.. code-block::
+.. code:: jlcon
     
     julia> using PyCall
     julia> pymapdl = pyimport("ansys.mapdl.core")
@@ -122,13 +122,13 @@ Finally, after restarting Julia, you can import PyMAPDL using the same procedure
     julia> mapdl = pymapdl.launch_mapdl()
     julia> print(mapdl.__str__())
     Product:             Ansys Mechanical Enterprise
-    MAPDL Version:       21.2
-    ansys.mapdl Version: 0.60.6
+    MAPDL Version:       24.1
+    ansys.mapdl Version: 0.68.0
     
-.. note:: 
+.. note::
     If you experience errors when using PyCall, you can try to rebuild the package by pressing ``"]"`` to go to the package manager and typing:
     
-    .. code::
+    .. code:: jlcon
         
         pkg> build PyCall
 
@@ -138,61 +138,61 @@ Use PyMAPDL in Julia
 
 Here is a simple example of how you use PyMAPDL in Julia:
 
-.. code-block:: julia
+.. code:: julia
 
-    julia> using PyCall
-    julia> pymapdl = pyimport("ansys.mapdl.core")
-    julia> mapdl = pymapdl.launch_mapdl()
-    julia> np = pyimport("numpy")
-    julia> # define cylinder and mesh parameters
-    julia> torque = 100
-    julia> radius = 2
-    julia> h_tip = 2
-    julia> height = 20
-    julia> elemsize = 0.5
-    julia> pi = np.arccos(-1)
-    julia> force = 100/radius
-    julia> pressure = force/(h_tip*2*np.pi*radius)
-    julia> # Define higher-order SOLID186
-    julia> # Define surface effect elements SURF154 to apply torque
-    julia> # as a tangential pressure
-    julia> mapdl.prep7()
-    julia> mapdl.et(1, 186)
-    julia> mapdl.et(2, 154)
-    julia> mapdl.r(1)
-    julia> mapdl.r(2)
-    julia> # Aluminum properties (or something)
-    julia> mapdl.mp("ex", 1, 10e6)
-    julia> mapdl.mp("nuxy", 1, 0.3)
-    julia> mapdl.mp("dens", 1, 0.1/386.1)
-    julia> mapdl.mp("dens", 2, 0)
-    julia> # Simple cylinder
-    julia> for i in 1:5
-                mapdl.cylind(radius, "", "", height, 90*(i-1), 90*i)
-    julia> end
-    julia> mapdl.nummrg("kp")
-    julia> # interactive volume plot (optional)
-    julia> mapdl.vplot()
-    julia> # mesh cylinder
-    julia> mapdl.lsel("s", "loc", "x", 0)
-    julia> mapdl.lsel("r", "loc", "y", 0)
-    julia> mapdl.lsel("r", "loc", "z", 0, height - h_tip)
-    julia> mapdl.lesize("all", elemsize*2)
-    julia> mapdl.mshape(0)
-    julia> mapdl.mshkey(1)
-    julia> mapdl.esize(elemsize)
-    julia> mapdl.allsel("all")
-    julia> mapdl.vsweep("ALL")
-    julia> mapdl.csys(1)
-    julia> mapdl.asel("s", "loc", "z", "", height - h_tip + 0.0001)
-    julia> mapdl.asel("r", "loc", "x", radius)
-    julia> mapdl.local(11, 1)
-    julia> mapdl.csys(0)
-    julia> mapdl.aatt(2, 2, 2, 11)
-    julia> mapdl.amesh("all")
-    julia> mapdl.finish()
-    julia> # plot elements
-    julia> mapdl.eplot()
+    using PyCall
+    pymapdl = pyimport("ansys.mapdl.core")
+    mapdl = pymapdl.launch_mapdl()
+    np = pyimport("numpy")
+    # define cylinder and mesh parameters
+    torque = 100
+    radius = 2
+    h_tip = 2
+    height = 20
+    elemsize = 0.5
+    pi = np.arccos(-1)
+    force = 100/radius
+    pressure = force/(h_tip*2*np.pi*radius)
+    # Define higher-order SOLID186
+    # Define surface effect elements SURF154 to apply torque
+    # as a tangential pressure
+    mapdl.prep7()
+    mapdl.et(1, 186)
+    mapdl.et(2, 154)
+    mapdl.r(1)
+    mapdl.r(2)
+    # Aluminum properties (or something)
+    mapdl.mp("ex", 1, 10e6)
+    mapdl.mp("nuxy", 1, 0.3)
+    mapdl.mp("dens", 1, 0.1/386.1)
+    mapdl.mp("dens", 2, 0)
+    # Simple cylinder
+    for i in 1:5
+        mapdl.cylind(radius, "", "", height, 90*(i-1), 90*i)
+    end
+    mapdl.nummrg("kp")
+    # interactive volume plot (optional)
+    mapdl.vplot()
+    # mesh cylinder
+    mapdl.lsel("s", "loc", "x", 0)
+    mapdl.lsel("r", "loc", "y", 0)
+    mapdl.lsel("r", "loc", "z", 0, height - h_tip)
+    mapdl.lesize("all", elemsize*2)
+    mapdl.mshape(0)
+    mapdl.mshkey(1)
+    mapdl.esize(elemsize)
+    mapdl.allsel("all")
+    mapdl.vsweep("ALL")
+    mapdl.csys(1)
+    mapdl.asel("s", "loc", "z", "", height - h_tip + 0.0001)
+    mapdl.asel("r", "loc", "x", radius)
+    mapdl.local(11, 1)
+    mapdl.csys(0)
+    mapdl.aatt(2, 2, 2, 11)
+    mapdl.amesh("all")
+    mapdl.finish()
+    # plot elements
+    mapdl.eplot()
 
 
 .. note:: Notice the changes in the strings and the loops. Only ``""`` strings are allowed.

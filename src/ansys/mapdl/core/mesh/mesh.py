@@ -1,10 +1,31 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """Module for common class between Archive, and result mesh."""
 from ansys.mapdl.reader import _reader, _relaxmidside
 from ansys.mapdl.reader.elements import ETYPE_MAP
 from ansys.mapdl.reader.misc import unique_rows
 import numpy as np
 import pyvista as pv
-from pyvista._vtk import VTK9
 
 INVALID_ALLOWABLE_TYPES = TypeError(
     "`allowable_types` must be an array " "of ANSYS element types from 1 and 300"
@@ -37,7 +58,7 @@ SHAPE_MAP = {  # from ELIST definition
     7: "QUAD",
     8: "TRI6",
     9: "QUA8",
-    10: "POIN",
+    10: "POIN",  # codespell-ignore
     11: "CIRC",
     12: "",
     13: "",
@@ -91,7 +112,7 @@ def _parse_vtk(
     """
     if not mesh._has_nodes or not mesh._has_elements:
         # warnings.warn('Missing nodes or elements.  Unable to parse to vtk')
-        return
+        return pv.UnstructuredGrid()
 
     etype_map = ETYPE_MAP
     if allowable_types is not None:
@@ -115,7 +136,6 @@ def _parse_vtk(
 
     if allowable_types is None or 200 in allowable_types:
         for etype_ind, etype in mesh._ekey:
-
             # MESH200
             if etype == 200 and etype_ind in mesh.key_option:
                 # keyoption 1 contains various cell types
@@ -134,11 +154,11 @@ def _parse_vtk(
                 tshape_label = SHAPE_MAP[tshape_num]
                 type_ref[etype_ind] = TARGE170_MAP.get(tshape_label, 0)
 
-    offset, celltypes, cells = _reader.ans_vtk_convert(
-        mesh._elem, mesh._elem_off, type_ref, mesh.nnum, True
-    )  # for reset_midside
-
     nodes, angles, nnum = mesh.nodes, mesh.node_angles, mesh.nnum
+
+    offset, celltypes, cells = _reader.ans_vtk_convert(
+        mesh._elem, mesh._elem_off, type_ref, nnum, True
+    )  # for reset_midside
 
     # fix missing midside
     if np.any(cells == -1):
@@ -153,42 +173,33 @@ def _parse_vtk(
         cells[cells < 0] = 0
         # cells[cells >= nodes.shape[0]] = 0  # fails when n_nodes < 20
 
-    if VTK9:
-        grid = pv.UnstructuredGrid(cells, celltypes, nodes, deep=True)
-    else:
-        grid = pv.UnstructuredGrid(offset, cells, celltypes, nodes, deep=True)
+    grid = pv.UnstructuredGrid(cells, celltypes, nodes, deep=True)
 
     # Store original ANSYS element and node information
-    grid.point_data["ansys_node_num"] = nnum
+    try:
+        grid.point_data["ansys_node_num"] = nnum
+
+    except ValueError:
+        grid.point_data["ansys_node_num"] = (
+            mesh._mapdl.nlist(kinternal="internal").to_array()[:, 0].astype(np.int32)
+        )
+
     grid.cell_data["ansys_elem_num"] = mesh.enum
     grid.cell_data["ansys_real_constant"] = mesh.elem_real_constant
     grid.cell_data["ansys_material_type"] = mesh.material_type
     grid.cell_data["ansys_etype"] = mesh._ans_etype
     grid.cell_data["ansys_elem_type_num"] = mesh.etype
 
-    # add components
-    # Add element components to unstructured grid
-    for key, item in mesh.element_components.items():
-        mask = np.in1d(mesh.enum, item, assume_unique=True)
-        grid.cell_data[key] = mask
-
-    # Add node components to unstructured grid
-    for key, item in mesh.node_components.items():
-        mask = np.in1d(nnum, item, assume_unique=True)
-        grid.point_data[key] = mask
-
     # store node angles
-    if angles is not None:
-        if angles.shape[1] == 3:
-            grid.point_data["angles"] = angles
+    if angles is not None and angles.shape[1] == 3:
+        grid.point_data["angles"] = angles
 
     if not null_unallowed:
         grid = grid.extract_cells(grid.celltypes != 0)
 
-    if force_linear:
-        # only run if the grid has points or cells
-        if grid.n_points:
-            grid = grid.linear_copy()
+    # only run if the grid has points or cells
+    if force_linear and grid.n_points:
+        grid = grid.linear_copy()
 
     # map over element types
     # Add tracker for original node numbering
@@ -227,7 +238,7 @@ def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
     unique_nodes, idx_a, idx_b = unique_rows(temp_nodes[nnodes:])
 
     # rewrite node numbers
-    cells[mask] = idx_b + nnodes
+    cells[mask] = (idx_b + nnodes).ravel()
     nextra = idx_a.shape[0]  # extra unique nodes
     nodes_new = nodes_new[: nnodes + nextra]
     nodes_new[nnodes:] = unique_nodes

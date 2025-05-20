@@ -1,10 +1,33 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 """
 .. _ref_thermal_transient:
 
 Example Thermal Transient Analysis
 ----------------------------------
+
 This example shows how you can use PyMAPDL to input a time dependent
-temperature table to vary the temperature at a beam.  This uses
+temperature table to vary the temperature at a beam. This uses
 convection loads with independently varying convection coefficient and
 bulk temperature.
 
@@ -183,7 +206,7 @@ mapdl.post1()
 # Visualize a Slice
 # ~~~~~~~~~~~~~~~~~
 # Visualize a slice through the dataset using ``pyvista``
-# for more details visit `pyvista documentation <pyvista_docs_>`_.
+# for more details visit `PyVista documentation <pyvista_docs_>`_.
 
 # get the temperature of the 30th result set
 mapdl.set(1, 30)
@@ -271,5 +294,7 @@ plt.ylabel("Temperature ($^\circ$F)")
 plt.show()
 
 ###############################################################################
-# stop mapdl
+# Stop mapdl
+# ~~~~~~~~~~
+#
 mapdl.exit()

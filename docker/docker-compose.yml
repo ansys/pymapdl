@@ -1,50 +1,90 @@
-version: '3.3'
-
-# This is a docker-compose file which launch a remote MAPDL instance in a dockerized environment.
-# You can connect to this instance throught the port 50052 and 50055 (for the database feature).
+# This is a docker-compose file that will run Ansys MAPDL, and optionally DPF, in a container.
+# You can connect to this instance through port 50052 and 50055 (for the MAPDL database feature).
+# DPF server can be connected to using the port 50056.
 #
-# For the license, you need to provide the hostname of the license server.
+# For the license, you need to provide the hostname of the license server using ``ANSYSLMD_LICENSE_FILE``
+# environment variable.
 #
 # REQUIREMENTS:
 # =============
 #
-# - docker
-# - docker images from ghcr.io (you might need to do 'docker login ghcr.io' first)
+# - Docker
+# - MAPDL docker images
+# - (Optional) DPF docker images
 #
-# USAGE:
-# ======
+# USAGE
+# =====
 #
-# 1. You need an environment variable called ANSYSLMD_LICENSE_FILE which points to the license server. For example:
+# 1. You need two environment variables. One called `DOCKER_IMAGE` which contains the path to the
+# Docker image, and another one called `ANSYSLMD_LICENSE_FILE` which points to the license server.
+# For example:
 #
-#     export ANSYSLMD_LICENSE_FILE=1055@mylicensehost
+#    .. code:: bash
 # 
-# 2. Run the following command:
+#       export ANSYSLMD_LICENSE_FILE=1055@mylicenseserver
+#       export DOCKER_IMAGE=myregistry.com/myimage:mytag
+#       export DPF_DOCKER_IMAGE=myregistry.com/mydpfimage:mydpftag # optional
+#
+#    Additionally you can also configure the following environment variables:
 # 
-#     docker-compose up
-#
-# Optionally you can specify the '-d' flag for detaching mode (the container will run in the background).
-#
-#
-# NOTES:
-# ======
-#
-# - The docker image is based on the MAPDL Ubuntu docker image from ANSYS.
-# - 'AWP_ROOT222' is where Ansys is installed.
-# - The entrypoint is defined in the docker image.
-# - If you need to run a license server, please have a look at 'docker-compose.license_server.yml' file. 
-#   In that case, the command would be:
-#
-#    docker-compose -f docker-compose.yml -f docker-compose.license_server.yml up
-#
-#
-# - If you want to mount the local directory, please add the 'volumes' section to the 'mapdl' service.
+#    - ``AWP_ROOT``: Set the environment variable ``AWP_ROOTXXX`` where XXX is the MAPDL version.
+#      For instance, MAPDL 2025R1 is 251.
+#    - ``AWP_ROOT_VALUE``: Set the value of the ``AWP_ROOTXXX`` environment variable, which normally points
+#      to the MAPDL installation directory.
+#    - ``DOCKER_USER``: It should match the username inside the container. You can obtain this value by executing
+#      ``echo $USER`` in a terminal inside the container.
 # 
-#      volumes:
-#        - ./:/local
+# 2. Run the following command from the ``docker`` directory.
+# 
+#    .. code:: bash
+# 
+#       cd docker
+#       docker-compose up -d %service_name%
+#
+# This docker-compose file contains three services:
+#
+# - ``mapdl``: Core service. It runs an MAPDL instance with the gRPC server activated, and it open the
+#   specified port to allow incoming connections to it.
+# - ``dpf``: DPF service which can be used for data processing.
+# - ``mapdl-local``: Use this service to start an ubuntu docker image with MAPDL installed in it.
+#   It is said to be running as 'local' because it will mount the parent directory (``../``) in '/home/mapdl/pymapdl' 
+#   This service allow VS Code to attach to it and do development inside the container.
+#   and it will override the entrypoint to run the 'bash' command.
+#
+# You can also specify multiple services:
+#
+#    .. code:: bash
+# 
+#       docker-compose up -d mapdl dpf
+#
+# Or use profiles:
+#
+# 
+#    .. code:: bash
+# 
+#       docker-compose --profile dpf up -d 
+#
+# The following profiles are are available:
+#
+# - ``mapdl`` - Equivalent to run ``docker-compose up -d mapdl``.
+# - ``mapdl-dpf`` - Equivalent to run ``docker-compose up -d mapdl dpf``.
+# - ``local`` - Equivalent to run ``docker-compose up -d mapdl-local``.
+# - ``local-dpf`` -  Equivalent to run ``docker-compose up -d mapdl-local dpf``.
+# - ``dpf`` -  Equivalent to run ``docker-compose up -d dpf``.
+#
+# Optionally, you can specify the '-d' flag for detached mode (the container will run in the background).
+#
+# NOTES
+# =====
+#
+# - ``AWP_ROOT251`` is where Ansys 2025 R1 (v251) is installed.
 #
 
 services:
   mapdl:
+    profiles:
+      - mapdl
+      - mapdl-dpf
     restart: always
     shm_size: '8gb'
     container_name: mapdl
@@ -52,8 +92,51 @@ services:
     environment:
       - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
       - ANSYS_LOCK=OFF
-      - AWP_ROOT222=/ansys_inc
+      - ${AWP_ROOT:-AWP_ROOT251}=${AWP_ROOT_VALUE:-/ansys_inc}
     ports:
       - '50052:50052'
       - '50055:50055'
-    image: 'ghcr.io/pyansys/mapdl:v22.2-ubuntu'
+    image: ${DOCKER_IMAGE}
+    platform: linux/amd64
+    entrypoint: "/bin/bash ansys -grpc"
+
+  dpf:
+    profiles:
+      - dpf
+      - mapdl-dpf
+      - local-dpf
+    image: ${DPF_DOCKER_IMAGE}
+    platform: linux/amd64
+    ports:
+      - '50056:50052'
+    restart: always
+    environment:
+      - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
+
+  mapdl-local:
+    profiles:
+      - local
+      - local-dpf
+    restart: always
+    shm_size: '8gb'
+    container_name: mapdl-local
+    mem_reservation: 8g
+    environment:
+      - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
+      - ANSYS_LOCK=OFF
+      - ${AWP_ROOT:-AWP_ROOT251}=${AWP_ROOT_VALUE:-/ansys_inc}
+    # If also running the `mapdl` service, you need to set different ports
+    # to avoid conflicts.
+    ports:
+      - '50052:50052'
+      - '50055:50055'
+    platform: linux/amd64
+    image: ${DOCKER_IMAGE}
+    # Mount the current directory to /home/${DOCKER_USER:-mapdl}/pymapdl
+    # This allows you to run the container and have access to the current directory
+    # from inside the container.
+    # This is useful for development purposes.
+    volumes:
+      - ../:/home/${DOCKER_USER:-mapdl}/pymapdl:cached
+    working_dir: /home/${DOCKER_USER:-mapdl}/pymapdl
+    entrypoint: /bin/sh -c "echo 'Container is ready. You can now attach to it.'; while sleep 1000; do :; done"

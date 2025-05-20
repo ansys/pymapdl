@@ -1,4 +1,26 @@
-/COM,ANSYS MEDIA REL. 140 (11/26/2011) REF. VERIF. MANUAL: REL. 140
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM40
 /PREP7                
 MP,PRXY,,0.3
@@ -18,23 +40,26 @@ N,1                   ! BEGIN NODAL DEFINITION
 N,2,10
 E,1,2                 ! DEFINE ELEMENT
 FINISH
-/out,scratch
+/OUT,SCRATCH
 /SOLU    
-SOLCONTROL,0
 D,1,ROTZ,PI*2         ! ONE COMPLETE REVOLUTION
 D,1,UX,,,,,UY         ! CONSTRAIN NODE 1 (PINNED END OF BEAM)
 D,ALL,UZ
 D,ALL,ROTX
 D,ALL,ROTY
-NSUBST,24
+NSUBST,24,24,1
 TIME,.15              ! TIME STEP OF 0.00625 SEC. (.15/24)
 OUTRES,NSOL,1         ! SAVE NODAL DOF SOLUTION FOR EVERY SUBSTEP
 OUTRES,ESOL,1         ! SAVE ELEMENT SOLUTION FOR EVERY SUBSTEP
 CNVTOL,F,1,0.00001    ! CONVERGENCE CRITERION BASED UPON FORCES
 CNVTOL,M,1,0.00001    ! CONVERGENCE CRITERION BASED UPON MOMENTS
+AUTOTS,OFF
+NEQIT,25
+TINTP,,,,0.5,0.5,0.2
+KBC,0
 SOLVE
 FINISH
-/out
+/OUT
 /POST26
 NSOL,2,2,U,X,UX        ! DEFINE NODE 2 UX DISP AS VARIABLE 2
 NSOL,3,2,U,Y,UY        ! DEFINE NODE 2 UY DISP AS VARIABLE 3

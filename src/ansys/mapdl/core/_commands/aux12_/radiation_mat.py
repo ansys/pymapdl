@@ -1,3 +1,26 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class RadiationMat:
     def emis(self, mat="", evalu="", **kwargs):
         """Specifies emissivity as a material property for the Radiation Matrix
@@ -35,9 +58,11 @@ class RadiationMat:
         k2d
             Dimensionality key:
 
-            0 - 3-D geometry (default)
+            0
+                3-D geometry (default)
 
-            1 - 2-D geometry (plane or axisymmetric)
+            1
+                2-D geometry (plane or axisymmetric)
 
         ndiv
             Number of divisions in an axisymmetric model.  Used only with K2D =
@@ -59,9 +84,11 @@ class RadiationMat:
         key
             Print key:
 
-            0 - Do not print matrices.
+            0
+                Do not print matrices.
 
-            1 - Print matrices.
+            1
+                Print matrices.
 
         Notes
         -----
@@ -106,9 +133,11 @@ class RadiationMat:
         nohid
             Type of viewing procedure:
 
-            0 - Hidden procedure.
+            0
+                Hidden procedure.
 
-            1 - Non-hidden (faster, but less general) procedure.
+            1
+                Non-hidden (faster, but less general) procedure.
 
         nzone
             Number of sampling zones for the hidden procedure (100 maximum for

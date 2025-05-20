@@ -1,6 +1,26 @@
-"""These SESSION commands are for file operations, such as deleting, copying, and listing."""
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-import os
+"""These SESSION commands are for file operations, such as deleting, copying, and listing."""
 
 
 class Files:
@@ -505,34 +525,7 @@ class Files:
         K,2,2,0,0
 
         """
-        # always add extension to fname
-        if ext:
-            fname = fname + f".{ext}"
-
-        # seamlessly deal with remote instances in gRPC mode
-        target_dir = None
-        is_grpc = "Grpc" in type(self).__name__
-        if is_grpc and fname:
-            if not self._local and os.path.basename(fname) != fname:
-                target_dir, fname = os.path.dirname(fname), os.path.basename(fname)
-
-        # generate the log and download if necessary
-        output = self.run(f"LGWRITE,{fname},,,{kedit}", **kwargs)
-        if not fname:
-            # defaults to <jobname>.lgw
-            fname = self.jobname + ".lgw"
-        if target_dir is not None:
-            self.download(fname, target_dir=target_dir)
-
-        # remove extra grpc /OUT commands
-        if remove_grpc_extra and is_grpc and target_dir:
-            filename = os.path.join(target_dir, fname)
-            with open(filename, "r") as fid:
-                lines = [line for line in fid if not line.startswith("/OUT")]
-            with open(filename, "w") as fid:
-                fid.writelines(lines)
-
-        return output
+        return self.run(f"LGWRITE,{fname},{ext},,{kedit}")
 
     def starlist(self, fname="", ext="", **kwargs):
         """Displays the contents of an external, coded file.

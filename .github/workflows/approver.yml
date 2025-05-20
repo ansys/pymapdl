@@ -1,0 +1,82 @@
+name: Approve PRs
+on:
+  workflow_dispatch:
+    inputs:
+      user:
+        description: 'Username'
+        required: true
+        type: string
+      html_url:
+        description: 'URL to the comment'
+        required: true
+        type: string
+      pr:
+        description: 'Pull request to approve'
+        required: true
+        type: number
+      commentid:
+        description: 'Comment ID number'
+        type: number
+        required: true
+
+  issue_comment:                                     
+    types: [created, edited]
+
+jobs:
+  autoapprove:
+    # This job only runs for pull request comments
+    name: PR comment
+    if: (github.event.issue.pull_request &&
+        contains(github.event.comment.body, '@pyansys-ci-bot LGTM') && (
+          github.event.comment.user.login == 'germa89'
+        )) || ( github.event_name == 'workflow_dispatch' )
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: "Settings"
+        id: settings
+        run: |
+          export event_name=${{ github.event_name }}
+
+          if [[ $event_name == "workflow_dispatch" ]] ; then
+            echo "On workflow dispatch"
+            echo "user=${{ inputs.user }}" >> $GITHUB_OUTPUT
+            echo "html_url=${{ inputs.html_url }}" >> $GITHUB_OUTPUT
+            echo "pull_request=${{ inputs.pr }}" >> $GITHUB_OUTPUT
+            echo "commentid=${{ inputs.commentid }}" >> $GITHUB_OUTPUT
+
+          else
+            echo "On $event_name"
+            echo "user=${{ github.event.comment.user.login }}" >> $GITHUB_OUTPUT
+            echo "html_url=${{ github.event.comment.html_url }}" >> $GITHUB_OUTPUT
+            echo "pull_request=${{ github.event.issue.number }}" >> $GITHUB_OUTPUT
+            echo "commentid=${{ github.event.comment.id }}" >> $GITHUB_OUTPUT
+
+          fi;
+
+      - name: React to comment
+      #https://github.com/ansys/pymapdl/pull/2654#issuecomment-1889009514
+        uses: dkershner6/reaction-action@v2 # You can also use a specific version, e.g. v2.0.0
+        with:
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          commentId: ${{ steps.settings.outputs.commentid }} # Optional if the trigger is a comment. Use another action to find this otherwise.
+          reaction: "+1" # Optional
+
+      - name: "Grab url for GIF"
+        id: image_grabber
+        run: |
+          sudo apt-get install jq
+          export IMG_MSG=$(curl -s 'https://us-central1-lgtm-reloaded.cloudfunctions.net/lgtm' | jq -r '.markdown' | grep -v 'Powered By GIPHY')
+          echo "IMG_MSG=$IMG_MSG" >> $GITHUB_OUTPUT
+
+      - uses: hmarr/auto-approve-action@v4
+        with:
+          review-message: |
+            :white_check_mark: Approving this PR because [${{ steps.settings.outputs.user }}](https://github.com/${{ steps.settings.outputs.user }}) said so in [here](${{ steps.settings.outputs.html_url }}) :grimacing:
+
+            ${{ steps.image_grabber.outputs.IMG_MSG }}
+
+          pull-request-number: ${{ steps.settings.outputs.pull_request }}
+          github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}

@@ -1,0 +1,135 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/VERIFY,VMP09-T5-189
+/TITLE,VMP09-T5-189, DEEP SIMPLY-SUPPORTED BEAM
+/COM,REFERENCE: NAFEMS FVB MANUAL TEST 5
+
+/PREP7
+N,1,0.0
+N,2,1.0
+N,3,2.0
+N,4,3.0
+N,5,4.0
+N,6,5.0
+N,7,6.0
+N,8,7.0
+N,9,8.0
+N,10,9.0
+N,11,10.0
+ET,1,189
+SECN,1
+N,101,5.0,5.0
+E,1,3,2,101
+E,3,5,4,101
+E,5,7,6,101
+E,7,9,8,101
+E,9,11,10,101
+SECT,1,BEAM,RECT
+SECD,2.0,2.0
+MP,EX,1,200E9
+MP,NUXY,1,0.3
+MP,DENS,1,8000.0
+D,1,UX
+D,1,UY
+D,1,UZ
+D,1,ROTX
+D,11,UY
+D,11,UZ
+FINISH
+/out,scratch
+/SOLU
+ANTYPE,MODAL
+MODOPT,LANB,9
+MXPAND,9
+LUMPM,ON
+SOLVE
+FINISH
+/out
+/POST1
+*DIM,FREQ,ARRAY,9
+*GET,FREQ(1,1),MODE,1,FREQ
+*GET,FREQ(2,1),MODE,2,FREQ
+*GET,FREQ(3,1),MODE,3,FREQ
+*GET,FREQ(4,1),MODE,4,FREQ
+*GET,FREQ(5,1),MODE,5,FREQ
+*GET,FREQ(6,1),MODE,6,FREQ
+*GET,FREQ(7,1),MODE,7,FREQ
+*GET,FREQ(8,1),MODE,8,FREQ
+*GET,FREQ(9,1),MODE,9,FREQ
+R1=FREQ(1,1)/42.650
+R2=FREQ(2,1)/42.650
+R3=FREQ(3,1)/71.200
+R4=FREQ(4,1)/125.000
+R5=FREQ(5,1)/148.150
+R6=FREQ(6,1)/148.150
+R7=FREQ(7,1)/213.610
+R8=FREQ(8,1)/283.470
+R9=FREQ(9,1)/283.470
+
+*DIM,VALUE,,9,2
+*DIM,RATIO,,9,1
+*DIM,LABEL,CHAR,9
+LABEL(1) = 'FREQ 1','FREQ 2','FREQ 3','FREQ 4','FREQ 5','FREQ 6','FREQ 7','FREQ 8','FREQ 9'
+*VFILL,VALUE(1,1),DATA,42.650,42.650,71.200,125.000,148.150,148.150,213.610,283.470,283.470
+*VFILL,VALUE(1,2),DATA,FREQ(1,1),FREQ(2,1),FREQ(3,1),FREQ(4,1),FREQ(5,1),FREQ(6,1),FREQ(7,1),FREQ(8,1),FREQ(9,1)
+*VFILL,RATIO(1,1),DATA,R1,R2,R3,R4,R5,R6,R7,R8,R9
+
+/COM,
+/COM,
+/COM,-------------- VMP09-T5-189 RESULTS COMPARISON ------------------
+/COM,
+/COM,         |   TARGET   |   Mechanical APDL   |   RATIO
+/COM,
+*VWRITE,LABEL(1),VALUE(1,1),VALUE(1,2),RATIO(1,1)
+(1X,A8,'   ',F10.3,'  ',F15.3,'   ',1F8.3)
+FINISH
+
+/POST26
+*DIM,LABEL1,CHAR,6
+*DIM,LABEL3,CHAR,6
+LABEL1(1) = ' MODE',' MODE',' MODE',' MODE',' MODE',' MODE'
+LABEL3(1) = '1,2','3','4','5,6','7','8,9'
+*DIM,VALUE1,,6,2
+*VFILL,VALUE1(1,1),DATA,FREQ(2,1),FREQ(3,1),FREQ(4,1),FREQ(6,1),FREQ(7,1),FREQ(9,1)
+*VFILL,VALUE1(1,2),DATA,R2,R3,R4,R6,R7,R9
+*DIM,LABEL2,CHAR,6
+LABEL2(1) = 'vmp09-t5','vmp09-t5','vmp09-t5','vmp09-t5','vmp09-t5','vmp09-t5'
+*DIM,LABEL4,CHAR,6
+LABEL4(1) = '-189','-189','-189','-189','-189','-189'
+
+/OUT,vmp09-t5-189,vrt
+/COM
+/COM,------------------- VMP09-T5 RESULTS COMPARISON ---------------------
+/COM,
+/COM,            |   Mechanical APDL   |   RATIO  |         INPUT         |
+/COM,
+/COM, BEAM189
+*VWRITE,LABEL1(1),LABEL3(1),VALUE1(1,1),VALUE1(1,2),LABEL2(1),LABEL4(1)
+(1X,A5,A3,'      ',F13.3,'     ',F9.4,'        ',A8,A4)
+/COM,
+/COM,----------------------------------------------------------------
+/OUT
+
+FINISH
+*LIST,vmp09-t5-189,vrt

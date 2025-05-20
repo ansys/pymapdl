@@ -1,3 +1,25 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 from typing import Optional, Union
 import warnings
 
@@ -271,7 +293,7 @@ class Style:
         warnings.warn(
             "pymapdl does not support /ESHAPE when plotting in "
             "Python using ``mapdl.eplot()``.  "
-            "Use ``mapdl.eplot(vtk=False)`` "
+            "Use ``mapdl.eplot(backend=GraphicsBackend.MAPDL)`` "
         )
         command = f"/ESHAPE,{scale},{key}"
         return self.run(command, **kwargs)
@@ -427,7 +449,7 @@ class Style:
 
             1 - Directional light.
 
-        int\_
+        int\\_
             Light intensity factor (defaults to 0.3 for ambient, 1.0 for
             directional). This option is valid only for 3-D devices).
 
@@ -508,7 +530,7 @@ class Style:
         wn
             Window number (or ALL) to which command applies (defaults to 1).
 
-        type\_
+        type\\_
             Shading type:
 
             FACET or 0 - Facet shading (one color per area face) (default).
@@ -529,6 +551,116 @@ class Style:
         This command is valid in any processor.
         """
         command = f"/SHADE,{wn},{type_}"
+        return self.run(command, **kwargs)
+
+    def slashtype(self, wn="", type_="", **kwargs):
+        """Defines the type of display.
+
+        APDL Command: /TYPE
+
+        Parameters
+        ----------
+        wn
+            Window number (or ALL) to which command applies (defaults to 1).
+
+        type_
+            Display type. Defaults to `ZBUF` for raster mode displays or `BASIC`
+            for vector mode displays:
+
+            BASIC or 0
+                Basic display (no hidden or section operations).
+
+            SECT or 1
+                Section display (plane view). Use the `/CPLANE` command to
+                define the cutting plane.
+
+            HIDC or 2
+                Centroid hidden display (based on item centroid sort).
+
+            HIDD or 3
+                Face hidden display (based on face centroid sort).
+
+            HIDP or 4
+                Precise hidden display (like `HIDD` but with more precise checking).
+                Because all facets are sorted, this mode can be extremely slow,
+                especially for large models.
+
+            CAP or 5
+                Capped hidden display (same as combined `SECT` and `HIDD` with
+                model in front of section plane removed).
+
+            ZBUF or 6
+                Z-buffered display (like `HIDD` but using software Z-buffering).
+
+            ZCAP or 7
+                Capped Z-buffered display (same as combined `SECT` and `ZBUF`
+                with model in front of section plane removed).
+
+            ZQSL or 8
+                `QSLICE` Z-buffered display (same as `SECT` but the edge lines
+                of the remaining 3D model are shown).
+
+            HQSL or 9
+                `QSLICE` precise hidden display (like `ZQSL` but using precise hidden).
+
+        Notes
+        -----
+        **Command Default:** `ZBUF` for raster mode displays; `BASIC` for vector
+        mode displays.
+
+        Defines the type of display, such as section display or hidden-line
+        display. Use the `/DEVICE` command to specify either raster or
+        vector mode.
+
+        The `SECT`, `CAP`, `ZCAP`, `ZQSL`, and `HQSL` options produce section
+        displays. The section or "cutting" plane is specified on the `/CPLANE `
+        command as either normal to the viewing vector at the focus point
+        (default), or as the working plane.
+
+        When you use PowerGraphics, the section display options (`Section`,
+        `Slice`, and `Capped`) use different averaging techniques for the
+        interior and exterior results. Because of the different averaging
+        schemes, anomalies may appear at the transition areas. In many cases,
+        the automatically computed `MIN` and `MAX` values will differ from the
+        full range of interior values. You can lessen the effect of these
+        anomalies by issuing` AVRES,,FULL` (Main Menu> General Post Proc>
+        Options for Outp). This command sets your legend's automatic contour
+        interval range according to the minimum and maximum results found
+        throughout the entire model.
+
+        With PowerGraphics active (`/GRAPHICS,POWER`), the averaging scheme for
+        surface data with interior element data included (`AVRES,,FULL`) and
+        multiple facets per edge (`/EFACET,2` or `/EFACET,4`) will yield
+        differing minimum and maximum contour values depending on the Z-
+        Buffering options (`/TYPE,,6` or `/TYPE,,7`). When the Section data is
+        not included in the averaging schemes (`/TYPE,,7`), the resulting
+        absolute value for the midside node is significantly smaller.
+
+        The `HIDC`, `HIDD`, `HIDP`, `ZBUF`, `ZQSL`, and `HQSL` options produce
+        displays with "hidden" lines removed. Hidden lines are lines obscured
+        from view by another element, area, etc. The choice of non-Z-buffered
+        hidden-line procedure types is available only for raster mode
+        (`/DEVICE`) displays. For vector mode displays, all non-Z-buffered
+        "hidden-line" options use the same procedure (which is slightly
+        different from the raster procedures). Both geometry and postprocessing
+        displays may be of the hidden- line type. Interior stress contour lines
+        within solid elements can also be removed as hidden lines, leaving only
+        the stress contour lines and element outlines on the visible surfaces.
+        Midside nodes of elements are ignored on postprocessing displays.
+        Overlapping elements will not be displayed.
+
+        The `ZBUF`, `ZCAP`, and `ZQSL` options use a specific hidden-line
+        technique called software Z-buffering. This technique allows a more
+        accurate display of overlapping surfaces (common when using Boolean
+        operations or `/ESHAPE` on element displays), and allows smooth shaded
+        displays on all interactive graphics displays. Z-buffered displays can
+        be performed faster than `HIDP` and `CAP` type displays for large
+        models. See also the `/LIGHT`, `/SHADE`, and `/GFILE` commands for
+        additional options when Z-buffering is used.
+
+        This command is valid in any processor.
+        """
+        command = f"/TYPE,{wn},{type_}"
         return self.run(command, **kwargs)
 
     def trlcy(self, lab="", tlevel="", n1="", n2="", ninc="", **kwargs):

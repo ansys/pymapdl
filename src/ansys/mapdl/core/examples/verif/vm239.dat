@@ -1,4 +1,26 @@
-/COM,ANSYS MEDIA REL. 150 (11/8/2013) REF. VERIF. MANUAL: REL. 150
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
 /VERIFY,VM239
 /OUT,SCRATCH
 /PREP7
@@ -176,9 +198,7 @@ ET,1,BEAM188                         ! BEAM ELEMENTS
 ET,2,MPC184,7                        ! UNIVERSAL JOINT
 ET,3,MPC184,6                        ! REVOLUTE JOINT
 ET,4,MPC184,3                        ! SLIDER
-
-ET,11,TARGE170                       ! TARGET ELEMENT
-KEYOPT,11,2,1                        ! TARGET ELEMENT DEFINED AS RIGID BODY
+et,5,MPC184,1,1                      ! RIGID BEAM WITH LAGRANGE MULTIPLIER REDUCTION METHOD
 
 MP,EX,1,30E6
 MP,PRXY,1,0.33
@@ -199,37 +219,14 @@ N,12, 2+COS(ANG),SIN(ANG),2.25
 N,13, 2+COS(ANG),SIN(ANG),2.26
 
 ! DEFINE RIGID BODIES
-TYPE,11
-REAL,11
+TYPE,5
 EN,1, 1,2      ! TARGET ELEMENT FOR 1ST RIGID BODY
-REAL, 12
 EN,2, 3,4      ! TARGET ELEMENT FOR 2ND RIGID BODY
-REAL, 13
 EN,3, 6,5
 EN,4, 6,8      ! TARGET ELEMENTS FOR 3RD RIGID BODY
-REAL, 14
 EN,5, 10,9     ! TARGET ELEMENT FOR 4TH RIGID BODY
-REAL, 15
 EN,6, 11, 12   ! TARGET ELEMENT FOR 5TH RIGID BODY 
 EN,101, 12,13
-
-! PILOT NODES FOR RIGID BODIES
-TYPE,11
-REAL,11
-TSHAP,PILO
-EN,11,1       ! PILOT NODE FOR 1ST RIGID BODY
-REAL,12
-TSHAP,PILO
-EN,12,3       ! PILOT NODE FOR 2ND RIGID BODY
-REAL,13
-TSHAP,PILO
-EN,13,5       ! PILOT NODE FOR 3ND RIGID BODY
-REAL,14
-TSHAP,PILO
-EN,14,10       ! PILOT NODE FOR 4TH RIGID BODY
-REAL,15
-TSHAP,PILO
-EN,15,13      ! PILOT NODE FOR 5TH RIGID BODY
 
 ! COORDINATE SYSTEMS FOR JOINTS
 LOCAL,11,0, 0,0,0,-90.0         ! DEFINING LOCAL CSYS FOR UNIV. JOINTS
@@ -276,6 +273,9 @@ D, 6, UY, 0.0
 D, 6, UZ, 0.0
 D, 13, UX, 0,,,,UY,UZ,ROTX,ROTY,ROTZ
 D,1,ROTX,2*PI
+D,1,ROTY
+D,1,ROTZ
+D,10,ROTY
 OUTRES, ALL, ALL
 LNSRCH,OFF 
 CNVTOL, F

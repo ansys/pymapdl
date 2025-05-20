@@ -1,3 +1,26 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class BinManip:
     def combine(self, filetype="", **kwargs):
         """Combines distributed memory parallel (Distributed ANSYS) files.
@@ -10,29 +33,41 @@ class BinManip:
             Type of solution file to combine. There is no default; if (blank),
             the command is ignored.
 
-            RST - Structural results file (.RST)
+            RST
+                Structural results file (.RST)
 
-            RTH - Thermal results file (.RTH)
+            RTH
+                Thermal results file (.RTH)
 
-            RMG - Magnetics results file (.RMG)
+            RMG
+                Magnetics results file (.RMG)
 
-            RSTP - Linear perturbation results file (.RSTP)
+            RSTP
+                Linear perturbation results file (.RSTP)
 
-            EMAT - Element matrix file (.EMAT).
+            EMAT
+                Element matrix file (.EMAT).
 
-            ESAV - Element saved data file (.ESAV)
+            ESAV
+                Element saved data file (.ESAV)
 
-            MODE - Modal results file (.MODE)
+            MODE
+                Modal results file (.MODE)
 
-            MLV - Modal load vector file (.MLV)
+            MLV
+                Modal load vector file (.MLV)
 
-            IST - Initial state file (.IST)
+            IST
+                Initial state file (.IST)
 
-            FULL - Full matrix file (.FULL)
+            FULL
+                Full matrix file (.FULL)
 
-            RFRQ - Reduced complex displacement file (.RFRQ)
+            RFRQ
+                Reduced complex displacement file (.RFRQ)
 
-            RDSP - Reduced displacement file (.RDSP)
+            RDSP
+                Reduced displacement file (.RDSP)
 
         Notes
         -----
@@ -88,39 +123,48 @@ class BinManip:
         form
             Specifies format of output matrix file:
 
-            ASCII - Write output matrix file in ASCII form.
+            ASCII
+                Write output matrix file in ASCII form.
 
-            BIN - Write output matrix file in binary form.
+            BIN
+                Write output matrix file in binary form.
 
         matrx
             Specify which matrix to write to the output matrix file:
 
-            STIFF - Write stiffness matrix to output matrix file.  Valid for all types of analyses
-                    that write a .FULL file.
+            STIFF
+                Write stiffness matrix to output matrix file.  Valid for all types of analyses
+                that write a .FULL file.
 
-            MASS - Write mass matrix to output matrix file.  Valid for buckling, substructure, and
-                   modal analyses.  If .FULL file was generated in a buckling
-                   analysis, then this label will write stress stiffening
-                   matrix to output matrix file.
+            MASS
+                Write mass matrix to output matrix file.  Valid for buckling, substructure, and
+                modal analyses.  If .FULL file was generated in a buckling
+                analysis, then this label will write stress stiffening
+                matrix to output matrix file.
 
-            DAMP - Write damping matrix to output matrix file.  Only valid for damped modal
-                   analyses.
+            DAMP
+                Write damping matrix to output matrix file.  Only valid for damped modal
+                analyses.
 
         rhs
             Specifies whether to write the right-hand side vector to output
             matrix file:
 
-            YES - Write right-hand side vector to output matrix file.
+            YES
+                Write right-hand side vector to output matrix file.
 
-            NO - Do not write right-hand side vector to output matrix file.
+            NO
+                Do not write right-hand side vector to output matrix file.
 
         mapping
             Specifies whether to write the mapping file. This file is always
             named Fname.MAPPING.
 
-            YES - Write the mapping file.
+            YES
+                Write the mapping file.
 
-            NO - Do not write the mapping file (default).
+            NO
+                Do not write the mapping file (default).
 
         Notes
         -----
@@ -209,27 +253,32 @@ class BinManip:
         matrix
             Specify which matrix to write to the output postscript file:
 
-            STIFF - Write stiffness matrix to output postscript file. Valid for all types of
-                    analyses that write a .FULL file.
+            STIFF
+                Write stiffness matrix to output postscript file. Valid for all types of
+                analyses that write a .FULL file.
 
-            MASS - Write mass matrix to output postscript file. Valid for buckling, substructure,
-                   and modal analyses. If the .FULL file was generated in a
-                   buckling analysis, then this label will write the stress
-                   stiffening matrix to the output postscript file.
+            MASS
+                Write mass matrix to output postscript file. Valid for buckling, substructure,
+                and modal analyses. If the .FULL file was generated in a
+                buckling analysis, then this label will write the stress
+                stiffening matrix to the output postscript file.
 
-            DAMP - Write damping matrix to output postscript file. Only valid for damped modal
-                   analyses.
+            DAMP
+                Write damping matrix to output postscript file. Only valid for damped modal
+                analyses.
 
         color
             Specifies whether to display the grid in black and white or in
             color:
 
-            BLACK  - Each nonzero coefficient is symbolized by a black square (default).
+            BLACK
+                Each nonzero coefficient is symbolized by a black square (default).
 
-            COLOR  - Each nonzero coefficient is symbolized by a colored square. The color depends
-                     on the module of the coefficient; the range is from blue
-                     for the smallest values to red for the largest values. The
-                     color map is:
+            COLOR
+                Each nonzero coefficient is symbolized by a colored square. The color depends
+                on the module of the coefficient; the range is from blue
+                for the smallest values to red for the largest values. The
+                color map is:
 
         Notes
         -----

@@ -1,0 +1,367 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/verify,vmr020-t3c-183
+/title,vmr020-t3c-183,Angle crack plate embedded in a plate (Uniaxial tension)
+/com,
+/com, Problem is taken from NAFEMS Publication
+/com, "2D Test Cases in Linear Elastic Fracture Mechanics"
+/com, Test case 3.3, crack angle = 90
+/com,
+/com, Reference: Rooke D P and Cartwright D J : Compendium
+/com, of stress intensity factors, HMSO, London, England (1976)
+/com,
+/com, **********************************************************
+/com, Stress Intensity Factor Calculation using Interaction
+/com, Integral Approach
+/prep7
+
+e=207000		        !youngs modulus
+nu=0.3			        !poissons ratio
+sig=100			        !suface load
+pi=3.141593
+a=25			        !crack length
+
+et,1,plane183,,,2	    !plane183 elements, plane strain
+			            
+mp,ex,1,e
+mp,nuxy,1,nu
+
+k,1,,,
+k,2,50,,
+k,3,100,,
+k,4,100,62.5
+k,5,75,62.5,
+k,6,50,62.5
+k,7,25,62.5
+k,8,,62.5
+k,9,,125
+k,10,50,125
+k,11,50,62.5
+k,12,100,125
+
+l,1,2
+l,2,6
+l,6,7
+l,7,8
+l,8,1
+
+al,1,2,3,4,5
+
+l,2,3
+l,3,4
+l,4,5
+l,5,6
+
+al,6,7,8,9,2
+
+l,4,12
+l,12,10
+l,10,11
+l,11,5
+
+al,10,11,12,13,8
+
+l,10,9
+l,9,8
+l,7,11
+
+al,14,15,4,16,12
+
+kscon,5,5,1,4,0.75	!crack tip elements
+kscon,7,5,1,4,0.75
+
+lsel,s,loc,y,0
+lsel,a,loc,y,62.5
+lsel,a,loc,y,125
+lesize,all,,,5
+lsel,all
+lsel,s,loc,x,0
+lsel,a,loc,x,50
+lsel,a,loc,x,100
+lesize,all,,,12.5
+lsel,all
+
+cskp,11,0,7,6,9
+cskp,12,0,5,6,3
+csys,0
+
+amesh,1
+amesh,2
+amesh,3
+amesh,4
+
+/solu
+autots,on
+nsubst,10
+outres,all,all
+nsel,s,loc,y,0
+nsel,r,loc,x,0,100
+d,all,uy,0
+nsel,r,loc,x,100
+d,all,ux,0
+nsel,all
+lsel,s,line,,14
+lsel,a,line,,11
+sfl,all,press,-sig
+lsel,all
+
+nsel,s,loc,y,62.5
+nsel,r,loc,x,25
+cm,crack1,node     	! define the crack tip node component
+
+nsel,s,loc,y,62.5
+nsel,r,loc,x,75
+cm,crack2,node     	! define the crack tip node component
+
+cint,new,1
+cint,type,sifs          ! calculate stress intensity factor
+cint,ctnc,crack1      	! crack ID
+cint,ncon,6          	! number of countours
+cint,symm,off          	! symmetry off
+cint,norm,12,2         
+cint,list
+allsel,all
+
+cint,new,2
+cint,type,sifs          ! calculate stress intensity factor
+cint,ctnc,crack2      	! crack ID
+cint,ncon,6           	! number of countours
+cint,symm,off         	! symmetry off
+cint,norm,11,2         
+cint,list
+allsel,all
+solve
+fini  
+
+/out,scratch
+/post1
+prcint,1,,k1
+csys,0
+rsys,0
+*get,k1_1,cint,1,ctip,node(25,62.5,0),,1,dtype,k1
+*get,k1_2,cint,1,ctip,node(25,62.5,0),,2,dtype,k1
+*get,k1_3,cint,1,ctip,node(25,62.5,0),,3,dtype,k1
+*get,k1_4,cint,1,ctip,node(25,62.5,0),,4,dtype,k1
+*get,k1_5,cint,1,ctip,node(25,62.5,0),,5,dtype,k1
+*get,k1_6,cint,1,ctip,38,,6,dtype,k1
+
+con1 = ((pi*a)**0.5)
+k1=(k1_1+k1_2+k1_3+k1_4+k1_5+k1_6)/6
+k0=(sig*con1)
+norm_sif=k1/k0
+*stat,norm_sif
+
+/out,
+*DIM,LABEL,CHAR,1,5
+*DIM,VALUE,,1,3
+LABEL(1,1) = 'KI'
+*VFILL,VALUE(1,1),DATA,1.2
+*VFILL,VALUE(1,2),DATA,norm_sif
+*VFILL,VALUE(1,3),DATA,ABS(norm_sif/1.2 ) 
+SAVE,TABLE_1
+FINI
+/CLEAR,NOSTART
+
+
+/com,*************************************************************
+/com, Using J integral Calculation
+
+/prep7
+
+e=207000		        !youngs modulus
+nu=0.3			        !poissons ratio
+sig=100			        !suface load
+pi=3.141593
+a=25			        !crack length
+
+et,1,plane183,,,2	    !plane183 elements, plane strain
+			            
+mp,ex,1,e
+mp,nuxy,1,nu
+
+k,1,,,
+k,2,50,,
+k,3,100,,
+k,4,100,62.5
+k,5,75,62.5,
+k,6,50,62.5
+k,7,25,62.5
+k,8,,62.5
+k,9,,125
+k,10,50,125
+k,11,50,62.5
+k,12,100,125
+
+l,1,2
+l,2,6
+l,6,7
+l,7,8
+l,8,1
+
+al,1,2,3,4,5
+
+l,2,3
+l,3,4
+l,4,5
+l,5,6
+
+al,6,7,8,9,2
+
+l,4,12
+l,12,10
+l,10,11
+l,11,5
+
+al,10,11,12,13,8
+
+l,10,9
+l,9,8
+l,7,11
+
+al,14,15,4,16,12
+
+kscon,5,5,1,4,0.75	    !crack tip elemants
+kscon,7,5,1,4,0.75
+
+lsel,s,loc,y,0
+lsel,a,loc,y,62.5
+lsel,a,loc,y,125
+lesize,all,,,5
+lsel,all
+lsel,s,loc,x,0
+lsel,a,loc,x,50
+lsel,a,loc,x,100
+lesize,all,,,12.5
+lsel,all
+
+cskp,11,0,7,6,9
+cskp,12,0,5,6,3
+csys,0
+
+amesh,1
+amesh,2
+amesh,3
+amesh,4
+
+/solu
+autots,on
+nsubst,10
+outres,all,all
+nsel,s,loc,y,0
+nsel,r,loc,x,0,100
+d,all,uy,0
+nsel,r,loc,x,100
+d,all,ux,0
+nsel,all
+lsel,s,line,,14
+lsel,a,line,,11
+sfl,all,press,-sig
+lsel,all
+
+nsel,s,loc,y,62.5
+nsel,r,loc,x,25
+cm,crack1,node     	! define the crack tip node component
+
+nsel,s,loc,y,62.5
+nsel,r,loc,x,75
+cm,crack2,node     	! define the crack tip node component
+
+cint,new,1
+cint,ctnc,crack1      	! crack ID
+cint,ncon,6          	! number of countours
+cint,symm,off          	! symmetry off
+cint,norm,12,2         
+cint,list
+allsel,all
+
+cint,new,2
+cint,ctnc,crack2      	! crack ID
+cint,ncon,6           	! number of countours
+cint,symm,off         	! symmetry off
+cint,norm,11,2         
+cint,list
+allsel,all
+solve
+fini  
+
+
+/out,scratch
+/post1
+prcint,1
+csys,0
+rsys,0
+*get,j1,cint,1,ctip,node(25,62.5,0),,1,,
+*get,j2,cint,1,ctip,node(25,62.5,0),,2,,
+*get,j3,cint,1,ctip,node(25,62.5,0),,3,,
+*get,j4,cint,1,ctip,node(25,62.5,0),,4,,
+*get,j5,cint,1,ctip,node(25,62.5,0),,5,,
+*get,j6,cint,1,ctip,node(25,62.5,0),,6,,
+
+j_avg=(abs(j1)+abs(j2)+abs(j3)+abs(j4)+abs(j5)+abs(j6))/6
+*stat,j_avg
+con1 = ((pi*a)**0.5)
+con2 = E/(1-(nu*nu))
+k1 = ((con2*j_avg)**0.5)
+k0=(sig*con1)
+norm_sif=k1/k0
+/out,
+*stat,norm_sif
+
+*DIM,LABEL,CHAR,1,5
+*DIM,VALUE,,1,3
+LABEL(1,1) = 'KI'
+*VFILL,VALUE(1,1),DATA,1.2
+*VFILL,VALUE(1,2),DATA,norm_sif
+*VFILL,VALUE(1,3),DATA,ABS(norm_sif/1.2 ) 
+SAVE,TABLE_2
+
+/NOPR
+/COM
+/OUT,vmr020-t3c-183,vrt
+/COM,------------------- vmr020-t3c-183 RESULTS COMPARISON ---------------------
+/COM,
+/COM,              |   TARGET   |   MECHANICAL APDL   |   RATIO
+/COM,
+RESUME,TABLE_1
+/COM,USING STRESS INTENSITY FACTOR CALCULATION 
+*VWRITE,LABEL(1,1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,'   ',F10.3,'  ',F12.3,'   ',1F16.3)
+/COM,
+/COM,
+/COM,
+RESUME,TABLE_2
+/COM,USING J-INTEGRAL APPROACH
+/COM,
+*VWRITE,LABEL(1,1),VALUE(1,1),VALUE(1,2),VALUE(1,3)
+(1X,A8,'   ',F10.3,'  ',F12.3,'   ',1F16.3)
+/COM,
+/COM,
+/COM,
+/COM,-------------------------------------------------------------------------------
+
+/OUT
+FINISH
+*list,vmr020-t3c-183,vrt 
+        
+

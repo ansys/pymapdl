@@ -1,0 +1,217 @@
+! Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+! SPDX-License-Identifier: MIT
+! 
+!
+! Permission is hereby granted, free of charge, to any person obtaining a copy
+! of this software and associated documentation files (the "Software"), to deal
+! in the Software without restriction, including without limitation the rights
+! to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+! copies of the Software, and to permit persons to whom the Software is
+! furnished to do so, subject to the following conditions:
+!
+! The above copyright notice and this permission notice shall be included in all
+! copies or substantial portions of the Software.
+!
+! THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+! IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+! FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+! AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+! LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+! OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+! SOFTWARE.
+
+/COM,ANSYS MEDIA REL. 2023R2 (05/12/2023) REF. VERIF. MANUAL: REL. 2023R2
+/VERIFY,VMR029-T7-185
+/TITLE,VMR029-T7-185,LARGE DISPLACEMENT ELASTRIC RESPONSE OF A HINGED SPHERICAL SHELL UNDER UNIFORM PRESSURE LOADING
+/COM, REF. NAFEMS ASSEMBLY BENCHMARK TESTS FOR 3D BEAMS AND SHELLS TEST 3DNLG-7
+/SHOW,JPEG
+JPGPRF,500,100,1
+
+/PREP7
+L=1570
+T=100
+P=0.1
+ET,1,185
+KEYOPT,1,2,2
+MP,EX,1,69
+MP,NUXY,1,0.3
+K,1,
+K,6,5*L/8,,0.00020285*((5*L/8)*(3*L/8))
+K,9,L,,0
+LARC,       1,       9,       6
+K,15,,3*L/4,0.00020285*((3*L/4)*(L/4))
+K,17,,L,0
+LARC,       1,      17,      15
+ADRAG,1,,,,,,2
+VEXT,ALL,,,0,0,T/2,,,,
+VEXT,1,,,0,0,-T/2,,,,
+K,111,10000,1570,10000
+K,112,10000,1570,-10000
+K,113,-10000,1570,-10000
+K,114,-10000,1570,10000
+A,111,112,113,114
+VSBA,1,12,,,KEEP
+VSBA,2,12
+VDELE,1,3
+LESIZE,ALL,,,8
+LESIZE,10,,,1
+LESIZE,11,,,1
+LESIZE,12,,,1
+LESIZE,13,,,1
+LESIZE,18,,,1
+LESIZE,19,,,1
+LESIZE,20,,,1
+LESIZE,21,,,1
+VMESH,ALL
+NUMMRG,ALL, , , ,LOW
+DL,26, ,ALL,
+DL,5, ,ALL,
+DL,2, ,ALL,
+DL,1, ,ALL,
+VSEL,S, , ,4
+ESLV,S
+SFE,ALL,6,PRES,,P
+ALLSEL,ALL
+ESEL,S,,,1
+ESEL,A,,,35
+ESEL,A,,,92
+CM,ELESOL,ELEM
+ALLSEL,ALL
+FINISH
+
+/SOLVE
+NLGEOM,ON
+NSUBST,200,1000,25
+OUTRES,ALL,ALL
+ARCLEN,ON,,
+AUTOTS,-1
+/OUT,SCRATCH
+SOLVE
+FINISH
+
+/SHOW,,jpeg
+/OUT
+
+/POST26
+*DIM,X,TABLE,11,1
+*DIM,Y,TABLE,11,1
+X(1,1)= 0
+Y(1,1)= 0
+X(2,1)= 30
+Y(2,1)= 0.042
+X(3,1)= 60
+Y(3,1)= 0.06
+X(4,1)= 90
+Y(4,1)= 0.063
+X(5,1)= 120
+Y(5,1)= 0.056
+X(6,1)= 150
+Y(6,1)= 0.048
+X(7,1)= 180
+Y(7,1)= 0.037
+X(8,1)= 210
+Y(8,1)= 0.031
+X(9,1)= 240
+Y(9,1)= 0.03
+X(10,1)= 270
+Y(10,1)= 0.05
+X(11,1)= 300
+Y(11,1)= 0.096
+/XRANGE,0,420
+/YRANGE,0,0.1
+/AXLAB,X,CENTRAL DEFLECTION
+/AXLAB,Y,APPLIED PRESSURE
+/COLOR,CURVE,YGRE
+/GCOLUMN,1,REF,
+*VPLOT,X(1,1),Y(1,1)
+/NOERASE
+NSOL,2,138,U,Z,DISP.
+PROD,3,2,,,DISP.,,,-1.0,0,0,
+PROD,7,1,,,LOAD,,,0.1,0,0,
+/COLOR,CURVE,MRED
+XVAR,3
+PLVAR,7
+PRVAR,1,,3,7
+FINISH
+
+/POST1
+SET, , ,1, ,1.012, ,
+*GET,VAL8,NODE,138,U,Z
+*SET,UA_8,-1*VAL8
+*GET,VAL9,NODE,219,U,Z
+*SET,UA_9,-1*VAL9
+*GET,VAL7,NODE,57,U,Z
+*SET,UA_7,-1*VAL7
+*DIM,LABEL1,CHAR,1,2
+LABEL1(1,1) = '0.1012'
+LABEL1(1,2) = '      '
+*DIM,VALUE1,CHAR,1,2
+VALUE1(1,1) = '303.1'
+VALUE1(1,2) = '     '
+*DIM,LABEL2,CHAR,1,3
+LABEL2(1,1) = ' TOP '
+LABEL2(1,2) = ' MID.'
+LABEL2(1,3) = 'BOTT.'
+*DIM,ERROR1,,1,3
+*VFILL,ERROR1(1,1),DATA,UA_8
+*VFILL,ERROR1(1,2),DATA,UA_7
+*VFILL,ERROR1(1,3),DATA,UA_9
+/COM,------------------------NOTE-------------------------------
+/COM,GRAPHICAL DIFFERENCES IN RESULTS ARE DUE TO DIFFERENT
+/COM,ELEMENT FORMULATIONS BETWEEN SHELLS/SOLID AND DUE TO DIFFERENT
+/COM,GEOMETRY BECAUSE OF THE ASSUMPTIONS MADE IN SHELL ELEMENTS.
+
+/OUT,
+/COM,
+/COM,  -------------      CENTRAL DISPLACEMENT      -------------
+/COM,
+/COM,                  |   NAFEMS   |       Mechanical APDL         |
+/COM,         |  LOAD  |  NUM.RES.  |  LAYER  	| 	 SOL.185  |
+/COM,
+*VWRITE,LABEL1(1,1),VALUE1(1,1),LABEL2(1,1),ERROR1(1,1)
+(1X,'           ',A6,'     ',A5,'       ',A5,'    ',F12.3)
+*VWRITE,LABEL1(1,2),VALUE1(1,2),LABEL2(1,2),ERROR1(1,2)
+(1X,'           ',A6,'     ',A5,'       ',A5,'    ',F12.3)
+*VWRITE,LABEL1(1,2),VALUE1(1,2),LABEL2(1,3),ERROR1(1,3)
+(1X,'           ',A6,'     ',A5,'       ',A5,'    ',F12.3)
+/COM,
+/COM,  ----------------------------------------------------------
+
+ESEL,,,,ELESOL
+NSLE
+ESEL,ALL
+PRNSOL,S,COMP
+PRNSOL,EPTO,COMP
+
+SET,1,16
+*GET,PRES1,TIME
+SET,1,25
+*GET,PRES2,TIME
+V1=PRES1*0.1
+V2=PRES2*0.1
+R1=V1/0.06495
+R2=V2/0.03084
+*DIM,VALUE,,2,2
+*DIM,LABEL3,CHAR,2
+*DIM,LABEL,CHAR,2
+*DIM,LABEL4,CHAR,2
+*VFILL,VALUE(1,1),DATA,V1,V2
+*VFILL,VALUE(1,2),DATA,R1,R2
+LABEL3(1) = 'LIMIT1','LIMIT2'
+LABEL(1) = 'vmr029-','vmr029-'
+LABEL4(1) = 't7-185','t7-185'
+/OUT,vmr029-t7-185,vrt
+/COM
+/COM,-------------- VMR029-T7  RESULTS COMPARISON ---------------
+/COM,
+/COM,          |    Mechanical APDL    |   RATIO   |      INPUT      |
+/COM,
+/COM,SOLID185
+*VWRITE,LABEL3(1),VALUE(1,1),VALUE(1,2),LABEL(1),LABEL4(1)
+(1X,A6,'        ',F12.5,'      ',F13.5,'      ',A7,A8)
+/COM,
+/COM,----------------------------------------------------------------
+/OUT
+FINISH
+*LIST,vmr029-t7-185,vrt
+

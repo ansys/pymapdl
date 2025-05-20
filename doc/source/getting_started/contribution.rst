@@ -4,101 +4,75 @@
 Contributing
 ============
 
+
+.. toctree::
+   :hidden:
+   :maxdepth: 3
+
+   write_documentation
+   develop_pymapdl
+
+
+There are several ways to contribute to PyMAPDL. 
+
+* `Answer discussions`_
+* `Post issues`_
+* :ref:`write_documentation`
+* :ref:`developing_pymapdl`
+
 Overall guidance on contributing to a PyAnsys library appears in the
 `Contributing <dev_guide_contributing_>`_ topic
 in the *PyAnsys Developer's Guide*. Ensure that you are thoroughly familiar
-with it and all `Coding style <dev_guide_coding_style_>`_ before attempting to
+with it and the `Coding style <dev_guide_coding_style_>`_ before attempting to
 contribute to PyMAPDL.
- 
-The following contribution information is specific to PyMAPDL.
+
+In order to have a nice :ref:`ref_release_notes` section, it is important to follow
+the branch and commit names conventions as described in the *PyAnsys Developer's Guide*
+`branch <dev_guide_branch_names_>`_ and `commit <dev_guide_commit_names_>`_ naming
+sections.
 
 
-Cloning the PyMAPDL repository
-==============================
+Answer discussions
+==================
 
-Run this code to clone and install the latest version of PyMAPDL in development mode:
+Answering discussions is an excellent way to contribute to PyMAPDL, and
+it does not require any setup, just a GitHub account.
+It is probably the first step towards becoming a full PyMAPDL developer, since it
+helps you deepen your understanding of the project. Engaging in
+discussions often requires a thorough grasp of the project's goals and
+challenges.
+Your contributions can help other users or contributors who
+may be facing similar issues, making the repository more welcoming and
+inclusive. By providing answers or solutions, you can directly contribute to the project's
+success, maintain its health, and encourage a positive, open source ecosystem.
 
-.. code::
-
-    git clone https://github.com/pyansys/pymapdl
-    cd pymapdl
-    pip install pip -U
-    pip install -e .
-
-
-Posting issues
-==============
-
-Use the `PyMAPDL Issues <pymapdl_issues_>`_
-page to submit questions, report bugs, and request new features. When possible,
-use these issue templates:
-
-* Bug report template
-* Feature request template
-
-If your issue does not fit into one of these categories, create your own issue.
-
-To reach the project support team, email `pyansys.support@ansys.com <pyansys_support_>`_.
-
-Viewing PyMAPDL documentation
-=============================
-
-Documentation for the latest stable release of PyMAPDL is hosted at
-`PyMAPDL Documentation <pymapdl_docs_>`_.
-
-Documentation for the latest development version, which tracks the
-``main`` branch, is hosted at 
-`Development PyMAPDL Documentation <pymapdl_dev_docs_>`_.
-This version is automatically kept up to date via GitHub actions.
-
-Testing MAPDL
-=============
-
-If you do not have MAPDL installed locally but still want to run the
-unit testing, you must set up the following environment variables.
-
-In Windows, use:
-
-.. code::
-
-    SET PYMAPDL_START_INSTANCE=False
-    SET PYMAPDL_PORT=<MAPDL Port> (default 50052)
-    SET PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)
-
-In Linux, use:
-
-.. code::
-
-    export PYMAPDL_START_INSTANCE=False
-    export PYMAPDL_PORT=<MAPDL Port> (default 50052)
-    export PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)
-
-This tells ``ansys.mapdl.core`` to attempt to connect to the existing
-MAPDL service by default when the ``launch_mapdl`` function is used.
+To discover how you can help, see the `PyMAPDL Discussions <pymapdl_discussions_>`_ page.
 
 
-Code style
-==========
+Post issues
+===========
 
-PyMAPDL follows PEP8 standard as outlined in the `PyAnsys Development Guide
-<dev_guide_pyansys_>`_ and implements style checking using
-`pre-commit <precommit_>`_.
+Posting issues in a repository is a valuable contribution that benefits you, the
+repository, and PyMAPDL as a whole. It allows you to voice concerns, suggest
+improvements, or report bugs, which can lead to a more robust and user-friendly
+project. It also offers an opportunity for you to engage with the project's
+community, learn from others, and gain experience in issue tracking and
+collaboration. 
+For the repository, issues serve as a structured way to track and
+prioritize work, helping maintainers understand the needs of users and guide the
+project's development. It's an excellent way to contribute because it enhances
+the project's quality, fosters transparency, and encourages the collective
+effort of the community to continuously improve and innovate.
 
-To ensure your code meets minimum code styling standards, run::
+Use the `PyMAPDL Issues <pymapdl_issues_>`_ page to submit questions, report bugs,
+and request new features.
+When possible, use these issue templates:
 
-  pip install pre-commit
-  pre-commit run --all-files
+* **🐞 Bug, problem, or error**: Fill a bug report here
+* **📖 Documentation issue**: Modifications to the documentation only
+* **🎓 Adding an example**: Proposing a new example for the library
+* **💡 New feature**: Enhancements to the code
 
-You can also install this as a pre-commit hook by running::
 
-  pre-commit install
-
-This way, it's not possible for you to push code that fails the style checks. For example::
-
-  $ pre-commit install
-  $ git commit -am "added my cool feature"
-  black....................................................................Passed
-  isort....................................................................Passed
-  flake8...................................................................Passed
-  codespell................................................................Passed
-
+If your issue does not fit into one of these categories, click
+`Open a blank issue <pymapdl_new_blank_issue_>`_.

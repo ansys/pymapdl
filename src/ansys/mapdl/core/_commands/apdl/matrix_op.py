@@ -1,3 +1,26 @@
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
+# SPDX-License-Identifier: MIT
+#
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+
 class MatrixOP:
     def axpy(self, vr="", vi="", m1="", wr="", wi="", m2="", **kwargs):
         """Performs the matrix operation ``M2= v*M1 + w*M2``.
@@ -79,7 +102,7 @@ class MatrixOP:
         matrix
             Name used to identify the matrix. Must be specified.
 
-        type\_
+        type\\_
             Matrix type:
 
             Double precision real values (default). - Complex double precision values.
@@ -216,7 +239,7 @@ class MatrixOP:
             Name of the matrix to export (must be a matrix previously created
             with ``*DMAT`` or ``*SMAT``, or a vector previously created with ``*VEC``).
 
-        format\_
+        format\\_
             Format of the output file:
 
             Export the matrix in the Matrix Market Format. - Export
@@ -279,7 +302,7 @@ class MatrixOP:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Type of FFT transformation:
 
             Forward FFT computation (default). - Backward FFT computation.
@@ -397,7 +420,7 @@ class MatrixOP:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Specifies the algorithm to be used:
 
         enginename
@@ -710,11 +733,8 @@ class MatrixOP:
         to the L1 norm and is applicable to vectors only. The NRMINF option is
         the maximum norm and is applicable to either vectors or matrices.
         """
-        if not parr:
-            parr = "__temp_par__"
         command = f"*NRM,{name},{normtype},{parr},{normalize}"
-        self.run(command, **kwargs)
-        return self.parameters[parr]
+        return self.run(command, **kwargs)
 
     def remove(self, name="", val1="", val2="", val3="", **kwargs):
         """Suppresses rows or columns of a dense matrix or a vector.
@@ -752,7 +772,7 @@ class MatrixOP:
         return self.run(f"REMOVE,{name},{val1},{val2},{val3}", **kwargs)
 
     def scal(self, name="", val1="", val2="", **kwargs):
-        """Scales a vector or matrix by a constant.
+        """Scales a vector or matrix by a constant or a vector.
 
         APDL Command: ``*SCAL``
 
@@ -763,17 +783,34 @@ class MatrixOP:
             be specified.
 
         val1
-            The real part of the constant to use (default = 1).
+            When scaling a matrix or a vector by a scalar value, Val1 is
+            the real part of the constant to use (default = 1).
+
+            When scaling a matrix or a vector by a vector, Val1 is the
+            name of the vector used for the scaling operation.
 
         val2
-            The imaginary part of the constant to use (default = 0). This
-            value is used only if the vector or matrix specified by Name
-            is complex.
+            The imaginary part of the constant to use (default = 0).
+            This value is used only if the vector or matrix specified by
+            Name is complex.
+
+            val2 is only valid for scaling by a constant. It is not
+            used when scaling by a vector.
 
         Notes
         -----
         This command can be applied to vectors and matrices created by the
         ``*VEC``, ``*DMAT`` and ``*SMAT`` commands.
+
+        Data types must be consistent between the vectors and matrices
+        being scaled and the scaling vector (or constant value).
+
+        When scaling a matrix with a vector, the matrix must be square
+        and the scaling vector must be the same size.
+
+        Scaling a matrix with a vector, is available only on
+        MAPDL V23.2 and greater.
+
         """
         return self.run(f"*SCAL,{name},{val1},{val2}", **kwargs)
 
@@ -797,7 +834,7 @@ class MatrixOP:
         matrix
             Name used to identify the matrix. Must be specified.
 
-        type\_
+        type\\_
             Matrix type:
 
             Double precision real values (default). - Complex double precision values.
