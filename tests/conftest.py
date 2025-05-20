@@ -329,7 +329,6 @@ class MyReporter(TerminalReporter):
             )
 
 
-# @pytest.mark.trylast
 @pytest.hookimpl(trylast=True)
 def pytest_configure(config):
     vanilla_reporter = config.pluginmanager.getplugin("terminalreporter")
