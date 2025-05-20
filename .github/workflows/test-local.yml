@@ -1,0 +1,313 @@
+# This action tests PyMAPDL with MAPDL running locally.
+# It does support running with minimal requirements and with console interface.
+
+name: "Local testing"
+
+on:
+  workflow_call:
+    inputs:
+      mapdl-version:
+        description: |
+          MAPDL version to test.
+        required: true
+        type: string
+
+      latest-version:
+        description: |
+          Latest version of MAPDL.
+        required: true
+        type: string
+
+      pytest-arguments:
+        description: |
+          Arguments to pass to pytest, additionally to the ones in the environment variable PYTEST_ARGUMENTS.
+        required: false
+        type: string
+        default: ""
+
+      testing-minimal: 
+        description: |
+          If true, the minimal requirements will be installed.
+        required: false
+        type: boolean
+        default: false
+      
+      test_dpf:
+        description: |
+          If true, the DPF tests will be run.
+        required: false
+        type: boolean
+        default: true
+      
+      on-console:
+        description: |
+          If true, the tests will be run on console.
+        required: false
+        type: boolean
+        default: false
+
+      file-name:
+        description: |
+          Name of the file to save the logs.
+        required: true
+        type: string
+
+      tags:
+        description: |
+          Tags to add to the coverage report.
+        required: false
+        type: string
+
+      codecov-report:
+        description: |
+          Whether to upload the coverage report to Codecov or not. If `true`, then the
+          appropriate token is needed.
+        required: false
+        default: true
+        type: boolean
+
+      package-registry:
+        description: |
+          Package registry for the container.
+        required: false
+        type: string
+        default: ghcr.io/ansys/mapdl
+      
+      runner:
+        description: |
+          Runner to use.
+        required: false
+        type: string
+        default: ubuntu-22.04
+
+      python-version:
+        description: |
+          Python version to use.
+        required: false
+        type: string
+        default: "3.12"
+        
+    secrets:
+      license-server:
+        description: |
+          License server for ANSYS MAPDL
+        required: true
+
+      codecov-token:
+        description: |
+          Token for Codecov.
+        required: true
+      
+      token:
+        description: |
+          Token for GitHub. Used also for login into ghcr.io.
+        required: true
+      
+      username:
+        description: |
+          GitHub username for login into ghcr.io.
+        required: true
+
+jobs:
+  test-local:
+    runs-on: ${{ inputs.runner }}
+    env:
+      ON_CI: True
+      ON_LOCAL: true
+      ON_UBUNTU: true
+      HAS_DPF: ${{ inputs.test_dpf }}
+      PYMAPDL_DEBUG_TESTING: True
+      TESTING_MINIMAL: ${{ inputs.testing-minimal }}
+      P_SCHEMA: "/ansys_inc/v241/ansys/ac4/schema"
+      PYTEST_TIMEOUT: 120 # seconds. Limit the duration for each unit test
+      PYTEST_ARGUMENTS: '-vvv -rxXsa --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests'
+      OMPI_ALLOW_RUN_AS_ROOT: 1
+      OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
+
+    container:
+      image: "${{ inputs.package-registry }}:${{ inputs.mapdl-version }}"
+      options: -u=0:0 --oom-kill-disable --memory=6656MB --memory-swap=16896MB --shm-size=1gb --entrypoint /bin/bash
+      credentials:
+        username: ${{ secrets.username }}
+        password: ${{ secrets.token }}
+
+    steps:
+      - name: "Freeing some space and show space consumption (pre-test)"
+        shell: bash
+        run: |
+          echo "Deleting CodeQL..."
+          rm -rf /__t/CodeQL || echo "CodeQL not found"
+
+          echo "Disk space:"
+          df -h
+
+      - name: "Install Git and checkout project"
+        uses: actions/checkout@v4.2.2
+        with:
+          repository: ansys/pymapdl
+
+      - name: "Get if running student version"
+        id: student_check
+        shell: bash
+        run: |
+          if [[ "${{ inputs.mapdl-version }}" == *"student"* ]]; 
+            then export ON_STUDENT=true; export TAG_STUDENT="student";
+            else export ON_STUDENT=false; export TAG_STUDENT="non-student";
+          fi
+
+          echo "ON_STUDENT: $ON_STUDENT"
+          echo "TAG_STUDENT: $TAG_STUDENT"
+          echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT
+          echo "TAG_STUDENT=$(echo $TAG_STUDENT)" >> $GITHUB_OUTPUT
+        
+      - name: "Install gcc"
+        shell: bash
+        if: ${{ contains(inputs.mapdl-version, 'cicd') }}
+        run: |
+          apt-get update && apt-get -y install gcc mono-mcs g++
+    
+
+      - name: "Installing minimal OS packages"
+        shell: bash
+        if: inputs.testing-minimal == true
+        run: |
+          apt-get update && apt install -y libgomp1 graphviz && apt-get clean
+
+      - name: "Installing OS packages"
+        shell: bash
+        if: inputs.testing-minimal == false
+        run: |
+          apt-get update && apt install -y libgl1-mesa-glx xvfb libgomp1 graphviz && apt-get clean
+
+      - name: "Setup Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+
+      - name: "Checking Python"
+        shell: bash
+        run: |
+          python --version
+          python -m pip install --upgrade pip
+
+      - name: "Install ansys-mapdl-core"
+        if: inputs.testing-minimal == false
+        shell: bash
+        run: |
+          python -m pip install build
+          python -m build
+          python -m pip install dist/*.whl
+          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+
+      - name: "Install ansys-mapdl-core with minimal requirements"
+        shell: bash
+        if: inputs.testing-minimal == true
+        run: |
+          python -m pip install . --no-deps
+          python -m pip install -r minimum_requirements.txt
+          python -c "from ansys.mapdl import core as pymapdl; print('Import successfull')"
+
+      - name: "Unit testing requirements installation"
+        if: inputs.testing-minimal == false
+        shell: bash
+        run: |
+          python -m pip install .[tests]
+
+      - name: "Unit testing requirements installation"
+        if: inputs.testing-minimal == true
+        shell: bash
+        run: |
+          python -m pip install -r .ci/requirements_testing_minimal.txt
+
+      - name: "Unit testing"
+        env:
+          ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
+          ON_MINIMAL: ${{ inputs.testing-minimal }}
+          ON_CONSOLE: ${{ inputs.on-console }}
+          ANSYSLMD_LICENSE_FILE: "1055@${{ secrets.license-server }}"
+          file_name: ${{ inputs.file-name }}
+        shell: bash
+        run: |
+          echo "ON_UBUNTU: $ON_UBUNTU"
+          echo "ON_STUDENT: $ON_STUDENT"
+
+          # Because there is no 'ansys-tools-path' we need to input the
+          # executable path with the env var: PYMAPDL_MAPDL_EXEC.
+
+          if [[ "${{ inputs.mapdl-version }}" == *"latest-ubuntu"* ]] ; then
+            version=${{ inputs.latest-version }}
+          else
+            version=$(echo "${{ inputs.mapdl-version }}" | head -c 5 | tail -c 4 | tr -d '.')
+          fi;
+
+          echo "Version: $version"
+
+          # If minimal is true, we need to set the executable path.
+          if [[ "${{ inputs.testing-minimal }}" == "true" ]]; then
+            echo "PYMAPDL_MAPDL_EXEC: $PYMAPDL_MAPDL_EXEC"
+            export PYMAPDL_MAPDL_EXEC=/ansys_inc/v"$version"/ansys/bin/ansys"$version"
+            export cmd="pytest"
+          else
+            export cmd="xvfb-run pytest"
+          fi;
+
+          unset PYMAPDL_START_INSTANCE
+          unset PYMAPDL_PORT
+
+          $cmd ${{ inputs.pytest-arguments }} \
+            ${{ env.PYTEST_ARGUMENTS }} \
+            --report-log=$file_name.jsonl \
+            --cov-report=xml:$file_name.xml
+
+      - name: "Upload pytest reports to GitHub"
+        if: always()
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: "reports-${{ inputs.file-name }}"
+          path: ./${{ inputs.file-name }}.jsonl
+
+      - name: "Collect logs on failure"
+        if: always()
+        env:
+          LOG_NAMES: logs-${{ inputs.file-name }}
+        shell: bash
+        run: |
+          .ci/collect_mapdl_logs_locals.sh
+
+      - name: "Upload logs to GitHub"
+        if: always()
+        uses: actions/upload-artifact@v4.6.2
+        with:
+          name: logs-${{ inputs.file-name }}.tgz
+          path: ./logs-${{ inputs.file-name }}.tgz
+
+      - name: "Display files structure"
+        if: always()
+        env:
+          LOG_NAMES: logs-${{ inputs.file-name }}
+        shell: bash
+        run: |
+          .ci/display_logs_locals.sh
+
+      - uses: codecov/codecov-action@v5
+        name: "Upload coverage to Codecov"
+        if: inputs.codecov-report == true
+        with:
+          token: ${{ secrets.codecov-token }} # required
+          root_dir: ${{ github.workspace }}
+          name: ${{ inputs.file-name }}.xml
+          flags: ubuntu,local,${{ inputs.mapdl-version }},${{ inputs.tags }},${{ steps.student_check.outputs.TAG_STUDENT }},dmp
+
+      - name: "Upload coverage artifacts"
+        uses: actions/upload-artifact@v4
+        if: inputs.codecov-report == true
+        with:
+          name: ${{ inputs.file-name }}.xml
+          path: ./${{ inputs.file-name }}.xml
+
+      - name: "Show space consumption (post-test)"
+        if: always()
+        shell: bash
+        run: |
+          echo "Disk space:"
+          df -h

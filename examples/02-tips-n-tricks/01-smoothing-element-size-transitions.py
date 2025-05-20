@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -126,7 +126,7 @@ mapdl.aclear("ALL")
 for k in [k2, k3, k6, k7]:
     mapdl.kesize(k, 0.2)
 mapdl.amesh("ALL")
-mapdl.eplot(vtk=True, show_edges=True, show_axes=False, line_width=2, background="w")
+mapdl.eplot(show_edges=True, show_axes=False, line_width=2, background="w")
 
 
 ###############################################################################

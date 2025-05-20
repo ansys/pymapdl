@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -124,6 +124,7 @@ class ansXpl:
         """
         response = self._mapdl.run("*XPL,CLOSE")
         self._check_ignored(response)
+        self._filename = None
         self._open = False
         return response
 
@@ -373,6 +374,8 @@ class ansXpl:
         """Save the current file, ignoring the marked records."""
         response = self._mapdl.run("*XPL,SAVE").strip()
         self._check_ignored(response)
+        self._open = False
+        self._filename = None
         return response
 
     def extract(self, recordname, sets="ALL", asarray=False):
@@ -550,8 +553,22 @@ class ansXpl:
     def __repr__(self):
         txt = "MAPDL File Explorer\n"
         if self._open:
-            txt += "\tOpen file:%s" % self._filename
+            txt += f"\tOpen file : {self._filename}"
             txt += "\n".join(self.where().splitlines()[1:])
         else:
             txt += "\tNo open file"
         return txt
+
+    @property
+    def opened(self):
+        """
+        Check if a file is currently open.
+
+        Returns:
+            str or None: The filename if a file is open, otherwise None.
+        """
+
+        if self._open:
+            return self._filename
+        else:
+            return None

@@ -60,6 +60,7 @@ Dependabot
 Dev
 devcontainer
 DevContainer
+Dimitris
 dof
 ect
 eigenfrequency
@@ -76,6 +77,7 @@ FEMs
 filname
 Fortran
 FSW
+Giovanis
 GitHub
 Gmsh
 GPa
@@ -88,8 +90,10 @@ HTML
 Image[Mm]agick
 imagin
 importlib
+Ioannis
 ist
 Julia
+Kalogeris
 Krylov
 kwarg
 Lanzos
@@ -99,6 +103,7 @@ levl
 Linder
 Linux
 MacOS
+maint
 mapdl
 MAPDL
 mater
@@ -118,6 +123,7 @@ NORML
 NumPy
 onefile
 optiSLang
+Papadopoulos
 parm
 perf
 performant
@@ -152,6 +158,7 @@ sord
 spotweld
 squeue
 srun
+stationarity
 struc
 subselected
 substep
@@ -173,6 +180,7 @@ UPF
 UPFs
 viscoplastic
 vise
+Vissarion
 Visual Studio Code
 von
 VTK

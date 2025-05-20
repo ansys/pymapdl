@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -171,20 +171,19 @@ def test_detach_examples_submodule():
         """
 import sys
 
-assert 'ansys.mapdl.core' not in sys.modules
-assert 'requests' not in sys.modules
-assert 'ansys.mapdl.core.examples' not in sys.modules
+assert 'ansys.mapdl.core' not in sys.modules, 'PyMAPDL is loaded!'
+assert 'requests' not in sys.modules, 'Requests is loaded!'
+assert 'ansys.mapdl.core.examples' not in sys.modules, 'Examples is loaded!'
 
 from ansys.mapdl import core as pymapdl
 
-assert 'ansys.mapdl.core' in sys.modules
-assert 'ansys.mapdl.core.examples' not in sys.modules
-assert 'requests' not in sys.modules
+assert 'ansys.mapdl.core' in sys.modules, 'PyMAPDL is not loaded!'
+assert 'ansys.mapdl.core.examples' not in sys.modules, 'Examples is loaded!'
 
 from ansys.mapdl.core.examples import vmfiles
 
-assert 'ansys.mapdl.core.examples' in sys.modules
-assert 'requests' in sys.modules
+assert 'ansys.mapdl.core.examples' in sys.modules, 'examples is not loaded!'
+assert 'requests' in sys.modules, 'requests is not loaded!'
 
 print('Everything went well')
 """.strip()
@@ -198,3 +197,14 @@ print('Everything went well')
     out = p.communicate()[0].decode()
 
     assert out.strip() == "Everything went well"
+
+    p.kill()
+    del p
+
+
+def test_external_models():
+    from ansys.mapdl.core.examples import examples
+
+    for each in dir(examples):
+        if each not in ["os", "dir_path"] and not each.startswith("__"):
+            obj = getattr(examples, each)

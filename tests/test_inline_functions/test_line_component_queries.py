@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -24,15 +24,13 @@ from math import isclose
 
 import pytest
 
+from conftest import TestClass
 
-class TestLineCoordinateQueries:
+
+class TestLineCoordinateQueries(TestClass):
 
     @pytest.fixture(scope="class")
     def line_geometry(self, mapdl):
-        mapdl.finish(mute=True)
-        mapdl.clear("NOSTART", mute=True)
-
-        mapdl.prep7(mute=True)
         k0 = mapdl.k(1, 0, 0, 0)
         k1 = mapdl.k(2, 1, 2, 2)
         l0 = mapdl.l(k0, k1)
@@ -55,13 +53,9 @@ class TestLineCoordinateQueries:
         assert z == 1.0
 
 
-class TestLineSlopeQueries:
+class TestLineSlopeQueries(TestClass):
     @pytest.fixture(scope="class")
     def line_geometry(self, mapdl):
-        mapdl.finish(mute=True)
-        mapdl.clear("NOSTART", mute=True)
-
-        mapdl.prep7(mute=True)
         k0 = mapdl.k(1, 0, 0, 0)
         k1 = mapdl.k(2, 1, 2, 2)
         l0 = mapdl.l(k0, k1)

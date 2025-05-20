@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -29,18 +29,17 @@ For example:
 version_info = 0, 58, 'dev0'
 
 """
-
-try:
-    import importlib.metadata as importlib_metadata
-except ModuleNotFoundError:  # pragma: no cover
-    import importlib_metadata
+import importlib.metadata as importlib_metadata
+from typing import Dict
 
 # Read from the pyproject.toml
 # major, minor, patch
-__version__ = importlib_metadata.version("ansys-mapdl-core")
+__version__: str = importlib_metadata.version("ansys-mapdl-core")
 
 # In descending order
-SUPPORTED_ANSYS_VERSIONS = {
+SUPPORTED_ANSYS_VERSIONS: Dict[int, str] = {
+    252: "2025R2",
+    251: "2025R1",
     242: "2024R2",
     241: "2024R1",
     232: "2023R2",

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,16 +22,14 @@
 
 import pytest
 
+from conftest import TestClass
 
-class TestFieldComponentValueGetter:
+
+class TestFieldComponentValueGetter(TestClass):
 
     # The tests change the mesh so this fixture must be function scoped.
-    @pytest.fixture(scope="function")
+    @pytest.fixture(scope="class")
     def box_with_fields(self, mapdl):
-        mapdl.finish(mute=True)
-        mapdl.clear("NOSTART", mute=True)
-
-        mapdl.prep7()
         mapdl.mp("kxx", 1, 45)
         mapdl.mp("ex", 1, 2e10)
         mapdl.mp("perx", 1, 1)
@@ -47,11 +45,17 @@ class TestFieldComponentValueGetter:
         mapdl.et(4, "SOLID96")
         mapdl.block(0, 1, 0, 1, 0, 1)
         mapdl.esize(0.5)
-        return mapdl
 
-    def test_temp(self, box_with_fields):
-        mapdl = box_with_fields
+        mapdl.save("box_with_fields")
+
+    @staticmethod
+    @pytest.fixture(scope="function")
+    def resume(mapdl, box_with_fields):
         mapdl.prep7()
+        mapdl.resume("box_with_fields")
+        mapdl.prep7()
+
+    def test_temp(self, mapdl, resume):
         mapdl.type(1)
         mapdl.vmesh(1)
         mapdl.d("all", "temp", 5.0)
@@ -60,9 +64,7 @@ class TestFieldComponentValueGetter:
         temp_value = mapdl.queries.temp(1)
         assert temp_value == 5.0
 
-    def test_pressure(self, box_with_fields):
-        mapdl = box_with_fields
-        mapdl.prep7()
+    def test_pressure(self, mapdl, resume):
         mapdl.type(2)
         mapdl.vmesh(1)
         mapdl.d("all", "pres", 5.0)
@@ -72,9 +74,7 @@ class TestFieldComponentValueGetter:
         pres_value = mapdl.queries.pres(1)
         assert pres_value == 5.0
 
-    def test_volt(self, box_with_fields):
-        mapdl = box_with_fields
-        mapdl.prep7()
+    def test_volt(self, mapdl, resume):
         mapdl.type(3)
         mapdl.vmesh(1)
         mapdl.d("all", "volt", 5.0)
@@ -83,9 +83,7 @@ class TestFieldComponentValueGetter:
         volt_value = mapdl.queries.volt(1)
         assert volt_value == 5.0
 
-    def test_mag(self, box_with_fields):
-        mapdl = box_with_fields
-        mapdl.prep7()
+    def test_mag(self, mapdl, resume):
         mapdl.type(4)
         mapdl.vmesh(1)
         mapdl.d("all", "mag", 5.0)

@@ -7,8 +7,6 @@ updates:
       interval: "weekly"
     labels:
       - "maintenance"
-    assignees:
-      - "ansys/pymapdl-maintainers"
     commit-message:
       prefix: "ci"
     groups:
@@ -26,8 +24,6 @@ updates:
     labels:
       - "maintenance"
       - "dependencies"
-    assignees:
-      - "ansys/pymapdl-maintainers"
     commit-message:
       prefix: "build"
     groups:

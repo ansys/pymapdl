@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,25 +20,21 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Functions to download sample datasets from the pyansys data repository.
-"""
+"""Functions to download sample datasets from the pyansys data repository."""
 from functools import wraps
 import os
 import shutil
+from typing import Callable, Dict, Optional
 import zipfile
 
-try:
+from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core import _HAS_REQUESTS
+
+if _HAS_REQUESTS:
     import requests
 
-    _HAS_REQUESTS = True
 
-except ModuleNotFoundError:
-    _HAS_REQUESTS = False
-
-from ansys.mapdl import core as pymapdl
-
-
-def check_directory_exist(directory):
+def check_directory_exist(directory: str) -> Callable:
     # Wrapping LISTING FUNCTIONS.
     def wrap_function(func):
         @wraps(func)
@@ -54,13 +50,13 @@ def check_directory_exist(directory):
     return wrap_function
 
 
-def get_ext(filename):
+def get_ext(filename: str) -> str:
     """Extract the extension of the filename"""
     ext = os.path.splitext(filename)[1].lower()
     return ext
 
 
-def delete_downloads():
+def delete_downloads() -> bool:
     """Delete all downloaded examples to free space or update the files"""
     if os.path.exists(pymapdl.EXAMPLES_PATH):
         shutil.rmtree(pymapdl.EXAMPLES_PATH)
@@ -68,13 +64,13 @@ def delete_downloads():
 
 
 @check_directory_exist(pymapdl.EXAMPLES_PATH)
-def _decompress(filename):
+def _decompress(filename: str) -> None:
     zip_ref = zipfile.ZipFile(filename, "r")
     zip_ref.extractall(pymapdl.EXAMPLES_PATH)
     return zip_ref.close()
 
 
-def _get_file_url(filename, directory=None):
+def _get_file_url(filename: str, directory: Optional[str] = None) -> str:
     if directory:
         return (
             f"https://github.com/ansys/example-data/raw/master/{directory}/{filename}"
@@ -82,14 +78,14 @@ def _get_file_url(filename, directory=None):
     return f"https://github.com/ansys/example-data/raw/master/{filename}"
 
 
-def _check_url_exist(url):
+def _check_url_exist(url: str) -> bool:
     response = requests.get(url, timeout=10)  # 10 seconds timeout
     return response.status_code == 200
 
 
 @check_directory_exist(pymapdl.EXAMPLES_PATH)
-def _retrieve_file(url, filename, _test=False):
-    # scape test
+def _retrieve_file(url: str, filename: str, _test: bool = False) -> str:
+    # escape test
     if pymapdl.RUNNING_TESTS:
         return _check_url_exist(url)
 
@@ -112,7 +108,9 @@ def _retrieve_file(url, filename, _test=False):
     return local_path
 
 
-def _download_file(filename, directory=None, _test=False):
+def _download_file(
+    filename: str, directory: Optional[str] = None, _test: Optional[bool] = False
+) -> str:
     url = _get_file_url(filename, directory)
     try:
         return _retrieve_file(url, filename, _test)
@@ -127,7 +125,7 @@ def _download_file(filename, directory=None, _test=False):
         )
 
 
-def download_bracket():
+def download_bracket() -> str:
     """Download an IGS bracket.
 
     Examples
@@ -141,27 +139,27 @@ def download_bracket():
     return _download_file("bracket.iges", "geometry")
 
 
-def download_tech_demo_data(example, filename):
+def download_tech_demo_data(example: str, filename: str) -> str:
     """Download Tech Demos external data."""
     example = "tech_demos/" + example
     return _download_file(filename=filename, directory=example)
 
 
-def download_vtk_rotor():
+def download_vtk_rotor() -> str:
     """Download rotor vtk file."""
     return _download_file("rotor.vtk", "geometry")
 
 
-def _download_rotor_tech_demo_vtk():
+def _download_rotor_tech_demo_vtk() -> str:
     """Download the rotor surface VTK file."""
     return _download_file("rotor2.vtk", "geometry")
 
 
-def download_example_data(filename, directory=None):
+def download_example_data(filename: str, directory: Optional[str] = None) -> str:
     return _download_file(filename, directory=directory)
 
 
-def download_manifold_example_data() -> dict:
+def download_manifold_example_data() -> Dict[str, str]:
     """Download the manifold example data and return the
     download paths into a dictionary domain id->path.
     Examples files are downloaded to a persistent cache to avoid
@@ -193,7 +191,7 @@ def download_manifold_example_data() -> dict:
     }
 
 
-def download_cfx_mapping_example_data() -> dict:
+def download_cfx_mapping_example_data() -> Dict[str, str]:
     """Download the CFX mapping data and return the
     download paths into a dictionary domain id->path.
     Examples files are downloaded to a persistent cache to avoid

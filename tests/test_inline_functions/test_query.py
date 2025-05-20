@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -23,7 +23,7 @@
 import pytest
 
 from ansys.mapdl.core.errors import MapdlCommandIgnoredError, MapdlRuntimeError
-from conftest import requires
+from conftest import TestClass, requires
 
 
 class TestParseParameter:
@@ -40,7 +40,11 @@ class TestParseParameter:
     )
     def test_parse_float(self, values, query):
         input_, output = values
-        assert query._parse_parameter_float_response(input_) == output
+        if "WARNING" in values[0]:
+            with pytest.warns(UserWarning):
+                assert query._parse_parameter_float_response(input_) == output
+        else:
+            assert query._parse_parameter_float_response(input_) == output
 
     @pytest.mark.parametrize(
         "values",
@@ -55,7 +59,11 @@ class TestParseParameter:
     )
     def test_parse_int(self, values, query):
         input_, output = values
-        assert query._parse_parameter_integer_response(input_) == output
+        if "WARNING" in values[0]:
+            with pytest.warns(UserWarning):
+                assert query._parse_parameter_integer_response(input_) == output
+        else:
+            assert query._parse_parameter_integer_response(input_) == output
 
     def test_parse_float_type_warning(self, query):
         input_ = "WARNING PARAMETER = 4"
@@ -84,14 +92,10 @@ class TestParseParameter:
             query._parse_parameter_integer_response(input_)
 
 
-class TestRunQuery:
+class TestRunQuery(TestClass):
 
     @pytest.fixture(scope="class")
     def line_geometry(self, mapdl):
-        mapdl.finish(mute=True)
-        mapdl.clear("NOSTART", mute=True)
-
-        mapdl.prep7(mute=True)
         k0 = mapdl.k(1, 0, 0, 0)
         k1 = mapdl.k(2, 1, 2, 2)
         l0 = mapdl.l(k0, k1)

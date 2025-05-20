@@ -1,0 +1,294 @@
+# This action builds the documentation for PyMAPDL.
+name: "Documentation Build"
+
+on:
+  workflow_call:  
+    inputs:
+      builder:
+        description: |
+          The builder to use for the documentation. Default is "html".
+        required: false
+        default: "html"
+        type: string
+
+      build_pdf:
+        description: |
+          Whether to build the PDF documentation. Default is "false".
+        required: false
+        default: true
+        type: boolean
+
+      build_cheatsheet:
+        description: |
+          Whether to build the cheatsheet. Default is "false".
+        required: false
+        default: true
+        type: boolean
+
+      use_cache_examples:
+        description: |
+          Whether to use the examples cache. Default is "true".
+        required: false
+        default: true
+        type: boolean
+
+      use_cache_doc_build:
+        description: |
+          Whether to use the doc build cache. Default is "true".
+        required: false
+        default: true
+        type: boolean
+
+      use_cache_autosummary:
+        description: |
+          Whether to use the autosummary cache. Default is "true".
+        required: false
+        default: true
+        type: boolean
+
+    # Secrets
+    secrets:
+      license-server:
+        description: |
+          License server for ANSYS MAPDL
+        required: true
+
+      username:
+        description: |
+          Username for the GitHub container registry.
+        required: true
+
+      password:
+        description: |
+          Password for the GitHub container registry.
+        required: true
+
+jobs:
+  doc-build:
+    runs-on: ubuntu-22.04
+    env:
+      ON_CI: True
+      ON_DOCUMENTATION: TRUE
+      PYANSYS_OFF_SCREEN: True
+      BUILD_CHEATSHEET: '${{ inputs.build_cheatsheet }}'
+      MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.2-ubuntu-student
+      DPF_DOCKER_IMAGE: ghcr.io/ansys/mapdl:v25.2-rocky-dpf-standalone
+      MAPDL_PACKAGE: ghcr.io/ansys/mapdl
+      PYMAPDL_START_INSTANCE: FALSE
+      PYMAPDL_PORT: 21000  # default won't work on GitHub runners
+      PYMAPDL_DB_PORT: 21001  # default won't work on GitHub runners
+      DPF_PORT: 21004
+      DPF_START_SERVER: False
+      GRPC_ENABLE_FORK_SUPPORT: false  # See #3434
+      MAIN_PYTHON_VERSION: "3.12"
+      NOT_ON_RELEASE: ${{ github.ref == 'refs/heads/main' && !contains(github.ref, 'refs/tags') }}
+
+    steps:
+      - name: "Install Git and checkout project"
+        uses: actions/checkout@v4.2.2
+
+      - name: "Login in Github container registry"
+        uses: docker/login-action@v3.4.0
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.username }}
+          password: ${{ secrets.password }}
+
+      - name: "Pull, launch, and validate MAPDL service"
+        id: start_mapdl
+        env:
+          LICENSE_SERVER: ${{ secrets.license-server }}
+          MAPDL_VERSION: ${{ env.MAPDL_IMAGE_VERSION_DOCS_BUILD }}
+          MAPDL_PACKAGE: ${{ env.MAPDL_PACKAGE }}
+          DISTRIBUTED_MODE: "dmp"
+        shell: bash
+        run: |
+          export INSTANCE_NAME=MAPDL_0
+          .ci/start_mapdl.sh &> mapdl_launch.log & export DOCKER_PID=$!
+          echo "Launching MAPDL service at PID: $DOCKER_PID"
+          echo "DOCKER_PID=$(echo $DOCKER_PID)" >> $GITHUB_OUTPUT
+
+      - name: "DPF server activation"
+        shell: bash
+        run: |
+          $(docker pull $DPF_DOCKER_IMAGE && docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y -p ${{ env.DPF_PORT }}:50052 $DPF_DOCKER_IMAGE && echo "DPF Server active on port ${{ env.DPF_PORT }}.") &
+
+      - name: "Getting files change filters"
+        uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            workflows:
+              - '.github/workflows/**'
+              - 'pyproject.toml'
+            examples:
+              - 'examples/**'
+              - 'pyproject.toml'
+            documentation:
+              - 'examples/**'
+              - 'doc/source/**'
+              - 'pyproject.toml'
+
+      - name: "Setup Python with cache"
+        uses: actions/setup-python@v5
+        if:  steps.changes.outputs.workflows != 'true'
+        with:
+          cache: 'pip'
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+
+      - name: "Setup Python without cache"
+        uses: actions/setup-python@v5
+        if: steps.changes.outputs.workflows == 'true'
+        with:
+          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+
+      - name: "Install OS packages"
+        shell: bash
+        run: |
+          sudo apt update && sudo apt install zip pandoc libgl1-mesa-glx xvfb texlive-latex-extra latexmk graphviz texlive-xetex texlive-fonts-extra qpdf xindy
+
+      - name: "Test virtual framebuffer"
+        shell: bash
+        run: |
+          pip install -r .ci/requirements_test_xvfb.txt
+          xvfb-run python .ci/display_test.py
+
+      - name: "Install ansys-mapdl-core"
+        shell: bash
+        run: |
+          pip install .
+          xvfb-run python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+
+      - name: "Retrieve PyMAPDL version"
+        id: version
+        shell: bash
+        run: |
+          echo "PYMAPDL_VERSION=$(python -c 'from ansys.mapdl.core import __version__; print(__version__)')" >> $GITHUB_OUTPUT
+          echo "PyMAPDL version is: $(python -c "from ansys.mapdl.core import __version__; print(__version__)")"
+
+      - name: "Cache examples"
+        uses: actions/cache@v4
+        if: ${{ inputs.use_cache_examples && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
+        with:
+          path: doc/source/examples
+          key: Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          restore-keys: |
+            Examples-v${{ env.RESET_EXAMPLES_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
+
+      - name: "Cache docs build directory"
+        uses: actions/cache@v4
+        if: ${{ inputs.use_cache_doc_build && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
+        with:
+          path: doc/_build
+          key: doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          restore-keys: |
+            doc-build-v${{ env.RESET_DOC_BUILD_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
+
+      - name: "Cache autosummary"
+        uses: actions/cache@v4
+        if: ${{ inputs.use_cache_autosummary && (steps.changes.outputs.documentation != 'true' || env.NOT_ON_RELEASE) }}
+        with:
+          path: doc/source/**/_autosummary/*.rst
+          key: autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}-${{ github.sha }}
+          restore-keys: |
+            autosummary-v${{ env.RESET_AUTOSUMMARY_CACHE }}-${{ steps.version.outputs.PYMAPDL_VERSION }}
+
+      - name: "Install docs build requirements"
+        shell: bash
+        run: |
+          pip install .[doc]
+
+      - name: "Waiting for the services to be up"
+        shell: bash
+        run: |
+          .ci/waiting_services.sh
+      
+      - name: Install Quarto
+        if: ${{ inputs.build_cheatsheet }}
+        uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          tinytex: true
+          version: 1.6.43
+
+      - name: Check Quarto Version
+        if: ${{ inputs.build_cheatsheet }}
+        shell: bash
+        run: |
+          quarto --version
+      
+      - name: "Install Poppler for PDF to PNG conversion"
+        if: ${{ inputs.build_cheatsheet }}
+        shell: bash
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y poppler-utils
+
+      - name: "Build documentation"
+        shell: bash
+        run: |
+          xvfb-run make -C doc ${{ inputs.builder }} SPHINXOPTS="-j auto -W --keep-going"
+
+      - name: "Substitute defective GIF"
+        shell: bash
+        run: |
+          .ci/substitute_defective_gif.sh
+
+      - name: "Upload HTML Documentation"
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-html
+          path: doc/_build/html
+          retention-days: 7
+
+      - name: "Build PDF Documentation"
+        if: ${{ inputs.build_pdf }}
+        working-directory: doc
+        shell: bash
+        run: make pdf
+
+      - name: "Show latex dir"
+        if: ${{ inputs.build_pdf }}
+        working-directory: doc
+        shell: bash
+        run: ls _build/latex
+
+      - name: "Upload PDF documentation"
+        if: ${{ inputs.build_pdf }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: documentation-pdf
+          path: doc/_build/latex/pymapdl*.pdf
+          retention-days: 7
+
+      - name: "Upload minimal requirements file"
+        # To include it in the release
+        uses: actions/upload-artifact@v4
+        with:
+          name: minimum_requirements.txt
+          path: ./minimum_requirements.txt
+
+      - name: "Collect logs on failure"
+        if: always()
+        env:
+          MAPDL_VERSION: ${{ env.MAPDL_IMAGE_VERSION_DOCS_BUILD }}
+          MAPDL_INSTANCE: MAPDL_0
+          LOG_NAMES: logs-build-docs
+        shell: bash
+        run: |
+          .ci/collect_mapdl_logs_remote.sh
+
+      - name: "Upload logs to GitHub"
+        if: always()
+        uses: actions/upload-artifact@master
+        with:
+          name: logs-build-docs.tgz
+          path: ./logs-build-docs.tgz
+
+      - name: "Display files structure"
+        if: always()
+        env:
+          MAPDL_INSTANCE: MAPDL_0
+          LOG_NAMES: logs-build-docs
+        shell: bash
+        run: |
+          .ci/display_logs_remote.sh

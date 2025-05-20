@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -27,7 +27,7 @@ import inspect
 import pytest
 
 
-def test_mapdl_info(mapdl, capfd):
+def test_mapdl_info(mapdl, cleared, capfd):
     info = mapdl.info
     for attr, value in inspect.getmembers(info):
         if not attr.startswith("_") and attr not in ["title", "stitles"]:
@@ -45,13 +45,13 @@ def test_mapdl_info(mapdl, capfd):
     assert "UPDATE" in out
 
 
-def test_info_title(mapdl):
+def test_info_title(mapdl, cleared):
     title = "this is my title"
     mapdl.info.title = title
     assert title == mapdl.info.title
 
 
-def test_info_stitle(mapdl):
+def test_info_stitle(mapdl, cleared):
     info = mapdl.info
 
     assert all([not each for each in info.stitles])

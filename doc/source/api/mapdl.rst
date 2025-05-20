@@ -54,6 +54,7 @@
    Mapdl.logger
    Mapdl.mapdl_on_hpc
    Mapdl.mute
+   Mapdl.muted
    Mapdl.name
    Mapdl.non_interactive
    Mapdl.on_docker
@@ -74,7 +75,7 @@
    Mapdl.screenshot
    Mapdl.set_log_level
    Mapdl.thermal_result
-   Mapdl.use_vtk
+   Mapdl.graphics_backend
    Mapdl.version
 
 

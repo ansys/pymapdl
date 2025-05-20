@@ -1,0 +1,83 @@
+
+name: |
+  Pytest summary
+
+description: |
+  This action summarizes the duration of the tests and the standard deviation for all the jobs.
+
+inputs:
+  python-version:
+    description: | 
+      Python version to use.
+    required: true
+    type: string
+
+runs:
+  using: "composite"
+
+  steps:
+
+    - name: "Setup Python with cache"
+      uses: actions/setup-python@v5
+      with:
+        cache: 'pip'
+        python-version: ${{ inputs.python-version }}
+
+    - name: "Install numpy"
+      shell: bash
+      run: python -m pip install numpy click
+
+    - name: "Download artifacts"
+      uses: actions/download-artifact@v4
+      with:
+        pattern: "reports-*"
+        path: "artifacts"
+
+    - name: "Check if artifacts directory has files"
+      shell: bash
+      run: |
+        if [ "$(find artifacts -type f | wc -l)" -gt 0 ]; then
+          echo "artifacts directory has files"
+          echo "HAS_FILES=true" >> $GITHUB_ENV
+        else
+          echo "::notice:: 'artifacts' directory has NO files. Skipping rest of the steps."
+          echo "HAS_FILES=false" >> $GITHUB_ENV
+        fi
+
+    - name: "List directories"
+      shell: bash
+      if: ${{ env.HAS_FILES == 'true' }}
+      run: |
+        echo "::group:: List directories:" && ls -Rla artifacts && echo "::endgroup::"
+
+    - name: "Uncompress files"
+      if: ${{ env.HAS_FILES == 'true' }}
+      shell: bash
+      run: |
+        find . -mindepth 1 -maxdepth 4 -type f -name 'reports-*.tgz' -exec tar -xzvf {} -C $(dirname {}) \;
+
+    - name: "List directories"
+      if: ${{ env.HAS_FILES == 'true' }}
+      shell: bash
+      run: |
+        echo "::group:: List directories:" && ls -Rla . && echo "::endgroup::"
+
+    - name: "Create summary"
+      if: ${{ env.HAS_FILES == 'true' }}
+      shell: bash
+      run: |
+        echo "# Test summary 🚀" >>  $GITHUB_STEP_SUMMARY
+        echo -e "The following tables show a summary of tests duration and standard deviation for all the jobs.\n" >>  $GITHUB_STEP_SUMMARY
+        echo -e "You have the duration of all tests in the artifact 'tests_durations.json'\n" >>  $GITHUB_STEP_SUMMARY
+        echo "Running Pytest summary..."
+        python .ci/pytest_summary.py --num 10 --save-file tests_durations.json >> summary.md
+        echo "Pytest summary done."
+        echo "$(cat summary.md)" >> $GITHUB_STEP_SUMMARY
+        cat summary.md
+
+    - name: "Upload tests summary"
+      if: ${{ env.HAS_FILES == 'true' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: tests_durations.json
+        path: tests_durations.json

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -23,9 +23,29 @@
 """Shared testing module"""
 from collections import namedtuple
 import os
-from typing import Dict
+import subprocess
+import time
+from typing import Dict, List
 
-from ansys.mapdl.core.launcher import _is_ubuntu
+import psutil
+
+from ansys.mapdl.core import LOG, Mapdl
+from ansys.mapdl.core.errors import MapdlConnectionError, MapdlExitedError
+from ansys.mapdl.core.launcher import (
+    _is_ubuntu,
+    get_start_instance,
+    is_ansys_process,
+    launch_mapdl,
+)
+
+PROCESS_OK_STATUS = [
+    psutil.STATUS_RUNNING,  #
+    psutil.STATUS_SLEEPING,  #
+    psutil.STATUS_DISK_SLEEP,
+    psutil.STATUS_DEAD,
+    psutil.STATUS_PARKED,  # (Linux)
+    psutil.STATUS_IDLE,  # (Linux, macOS, FreeBSD)
+]
 
 Node = namedtuple("Node", ["number", "x", "y", "z", "thx", "thy", "thz"])
 Element = namedtuple(
@@ -104,7 +124,7 @@ def has_grpc():
 
 
 def has_dpf():
-    return bool(os.environ.get("DPF_PORT"))
+    return bool(os.environ.get("HAS_DPF", "false").lower() == "true")
 
 
 def is_smp():
@@ -137,14 +157,14 @@ def testing_minimal():
     return os.environ.get("TESTING_MINIMAL", "NO").upper().strip() in ["YES", "TRUE"]
 
 
-def log_apdl() -> bool:
-    if os.environ.get("PYMAPDL_LOG_APDL"):
-        log_apdl = os.environ.get("PYMAPDL_LOG_APDL")
+def debug_testing() -> bool:
+    if os.environ.get("PYMAPDL_DEBUG_TESTING"):
+        debug_testing = os.environ.get("PYMAPDL_DEBUG_TESTING")
 
-        if log_apdl.lower() in ["true", "false", "yes", "no"]:
-            return log_apdl.lower() in ["true", "yes"]
+        if debug_testing.lower() in ["true", "false", "yes", "no"]:
+            return debug_testing.lower() in ["true", "yes"]
         else:
-            return log_apdl
+            return debug_testing
 
     else:
         return False
@@ -199,3 +219,109 @@ def get_details_of_elements(mapdl_) -> Dict[int, Node]:
             if len(args) == 6:
                 elements[args[0]] = Element(*args, node_numbers=None)
     return elements
+
+
+def log_test_start(mapdl: Mapdl) -> None:
+    """Print the current test to the MAPDL log file and console output."""
+    test_name = os.environ.get(
+        "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
+    )
+
+    mapdl.run("!")
+    mapdl.run(f"! PyMAPDL running test: {test_name}"[:639])
+    mapdl.run("!")
+
+    # To see it also in MAPDL terminal output
+    if len(test_name) > 75:
+        # terminal output is limited to 75 characters
+        test_name = test_name.split("::")
+        if len(test_name) > 2:
+            types_ = ["File path", "Test class", "Method"]
+        else:
+            types_ = ["File path", "Test function"]
+
+        mapdl._run("/com,Running test in:", mute=True)
+
+        for type_, name_ in zip(types_, test_name):
+            mapdl._run(f"/com,    {type_}: {name_}", mute=True)
+
+    else:
+        mapdl._run(f"/com,Running test: {test_name}", mute=True)
+
+
+def restart_mapdl(mapdl: Mapdl) -> Mapdl:
+    """Restart MAPDL after a failed test"""
+
+    def is_exited(mapdl: Mapdl):
+        try:
+            _ = mapdl._ctrl("VERSION")
+            return False
+        except MapdlExitedError:
+            return True
+
+    if get_start_instance() and (is_exited(mapdl) or mapdl._exited):
+        # Backing up the current local configuration
+        local_ = mapdl._local
+        ip = mapdl.ip
+        port = mapdl.port
+        try:
+            # to connect
+            mapdl = Mapdl(port=port, ip=ip)
+            LOG.warning("MAPDL disconnected during testing, reconnected.")
+
+        except MapdlConnectionError as err:
+            from conftest import DEBUG_TESTING, ON_LOCAL
+
+            # Registering error.
+            LOG.warning(str(err))
+
+            # we cannot connect.
+            # Kill the instance
+            try:
+                mapdl.exit()
+            except Exception as e:
+                LOG.error(f"An error occurred when killing the instance:\n{str(e)}")
+
+            # Relaunching MAPDL
+            mapdl = launch_mapdl(
+                port=mapdl._port,
+                override=True,
+                run_location=mapdl._path,
+                cleanup_on_exit=mapdl._cleanup,
+                license_server_check=False,
+                start_timeout=50,
+                loglevel="DEBUG" if DEBUG_TESTING else "ERROR",
+                # If the following file names are changed, update `ci.yml`.
+                log_apdl="pymapdl.apdl" if DEBUG_TESTING else None,
+                mapdl_output="apdl.out" if (DEBUG_TESTING and ON_LOCAL) else None,
+            )
+            LOG.info("MAPDL died during testing, relaunched.")
+
+        LOG.info("Successfully re-connected to MAPDL")
+
+        # Restoring the local configuration
+        mapdl._local = local_
+        mapdl._exited = False
+
+    return mapdl
+
+
+def make_sure_not_instances_are_left_open(valid_ports: List) -> None:
+    """Make sure we leave no MAPDL running behind"""
+
+    if is_on_local():
+        for proc in psutil.process_iter():
+            try:
+                if (
+                    psutil.pid_exists(proc.pid)
+                    and proc.status() in PROCESS_OK_STATUS
+                    and is_ansys_process(proc)
+                ):
+                    cmdline = proc.cmdline()
+                    port = int(cmdline[cmdline.index("-port") + 1])
+
+                    if port not in valid_ports:
+                        subprocess.run(["pymapdl", "stop", "--port", f"{port}"])
+                        time.sleep(1)
+            except psutil.NoSuchProcess:
+                continue

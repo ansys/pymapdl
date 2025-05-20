@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""A gRPC specific class and methods for the MAPDL gRPC client """
+"""A gRPC specific class and methods for the MAPDL gRPC client"""
 
 import fnmatch
 from functools import wraps
@@ -108,7 +108,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.database import MapdlDb
     from ansys.mapdl.core.xpl import ansXpl
 
-TMP_VAR = "__tmpvar__"
 VOID_REQUEST = anskernel.EmptyRequest()
 
 # Default 256 MB message length
@@ -118,6 +117,10 @@ VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26
 
 
 SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
+
+DEFAULT_TIME_STEP_STREAM = None
+DEFAULT_TIME_STEP_STREAM_NT = 500
+DEFAULT_TIME_STEP_STREAM_POSIX = 100
 
 # Retry policy for gRPC calls.
 SERVICE_DEFAULT_CONFIG = {
@@ -400,6 +403,7 @@ class MapdlGrpc(MapdlBase):
             log_apdl=log_apdl,
             log_file=log_file,
             print_com=print_com,
+            mode="grpc",
             **start_parm,
         )
         self._mode: Literal["grpc"] = "grpc"
@@ -420,7 +424,7 @@ class MapdlGrpc(MapdlBase):
         )
         self._busy: bool = False  # used to check if running a command on the server
         self._local: bool = start_parm.get("local", True)
-        self._launched: bool = start_parm.get("launched", True)
+        self._launched: bool = start_parm.get("launched", False)
         self._health_response_queue: Optional["Queue"] = None
         self._exiting: bool = False
         self._exited: Optional[bool] = None
@@ -433,6 +437,7 @@ class MapdlGrpc(MapdlBase):
         self._channel_state: grpc.ChannelConnectivity = (
             grpc.ChannelConnectivity.CONNECTING
         )
+        self._time_step_stream: Optional[int] = None
 
         if channel is None:
             self._log.debug("Creating channel to %s:%s", ip, port)
@@ -491,7 +496,7 @@ class MapdlGrpc(MapdlBase):
         # Set to not abort after encountering errors.  Otherwise, many
         # failures in a row will cause MAPDL to exit without returning
         # anything useful.  Also avoids abort in batch mode if set.
-        if set_no_abort:
+        if set_no_abort is None or set_no_abort:
             self._set_no_abort()
 
         # double check we have access to the local path if not
@@ -504,6 +509,11 @@ class MapdlGrpc(MapdlBase):
             self._cache_pids()
 
         self._create_session()
+
+        # Caching platform.
+        self._log.info(
+            f"Connected to MAPDL server running at {self._hostname} on {self.ip}:{self.port} on {self.platform} OS"
+        )
 
     def _after_run(self, command: str) -> None:
         if command[:4].upper() == "/CLE":
@@ -604,7 +614,7 @@ class MapdlGrpc(MapdlBase):
                 # Process is alive
                 raise MapdlConnectionError(
                     msg
-                    + f"The MAPDL process seems to be alive (PID: {self._mapdl_process.pid}) but PyMAPDL cannot connect to it."
+                    + f" The MAPDL process seems to be alive (PID: {self._mapdl_process.pid}) but PyMAPDL cannot connect to it."
                 )
             else:
                 pid_msg = (
@@ -632,10 +642,12 @@ class MapdlGrpc(MapdlBase):
         """Check if the MAPDL process is alive"""
         return self._is_alive_subprocess()
 
-    def _post_mortem_checks(self):
+    def _post_mortem_checks(self, process=None):
         """Check possible reasons for not having a successful connection."""
         # Check early exit
-        process = self._mapdl_process
+        if process is None:
+            process = self._mapdl_process
+
         if process is None or not self.is_grpc:
             return
 
@@ -646,11 +658,9 @@ class MapdlGrpc(MapdlBase):
 
     def _read_stds(self):
         """Read the stdout and stderr from the subprocess."""
-        from ansys.mapdl.core.launcher import (
-            _get_std_output,  # Avoid circular import error
-        )
+        from ansys.mapdl.core.launcher import _get_std_output
 
-        if self._mapdl_process is None:
+        if self._mapdl_process is None or not self._mapdl_process.stdout:
             return
 
         self._log.debug("Reading stdout")
@@ -802,6 +812,7 @@ class MapdlGrpc(MapdlBase):
 
     @mute.setter
     def mute(self, value):
+        self._log.debug(f"Mute value has been changed to '{value}'.")
         self._mute = value
 
     def __repr__(self):
@@ -926,11 +937,15 @@ class MapdlGrpc(MapdlBase):
     @supress_logging
     def _set_no_abort(self):
         """Do not abort MAPDL."""
+        self._log.debug("Setting no abort")
         self.nerr(abort=-1, mute=True)
 
     def _run_at_connect(self):
         """Run house-keeping commands when initially connecting to MAPDL."""
         # increase the number of variables allowed in POST26 to the maximum
+        with self.run_as_routine("Begin level"):
+            self._run("/verify", mute=False)
+
         with self.run_as_routine("POST26"):
             self.numvar(200, mute=True)
 
@@ -1065,7 +1080,8 @@ class MapdlGrpc(MapdlBase):
     def _send_command_stream(self, cmd, verbose=False) -> str:
         """Send a command and expect a streaming response"""
         request = pb_types.CmdRequest(command=cmd)
-        metadata = [("time_step_stream", "100")]
+        time_step = self._get_time_step_stream()
+        metadata = [("time_step_stream", str(time_step))]
         stream = self._stub.SendCommandS(request, metadata=metadata)
         response = []
         for item in stream:
@@ -1108,10 +1124,16 @@ class MapdlGrpc(MapdlBase):
 
         Notes
         -----
+        If Mapdl didn't start the instance, then this will be ignored unless
+        ``force=True``.
+
         If ``PYMAPDL_START_INSTANCE`` is set to ``False`` (generally set in
         remote testing or documentation build), then this will be
         ignored. Override this behavior with ``force=True`` to always force
         exiting MAPDL regardless of your local environment.
+
+        If ``Mapdl.finish_job_on_exit`` is set to ``True`` and there is a valid
+        JobID in ``Mapdl.jobid``, then the SLURM job will be canceled.
 
         Examples
         --------
@@ -1120,20 +1142,13 @@ class MapdlGrpc(MapdlBase):
         # check if permitted to start (and hence exit) instances
         from ansys.mapdl import core as pymapdl
 
-        if hasattr(self, "_log"):
-            self._log.debug(
-                f"Exiting MAPLD gRPC instance {self.ip}:{self.port} on '{self._path}'."
-            )
+        self._log.debug(
+            f"Exiting MAPLD gRPC instance {self.ip}:{self.port} on '{self._path}'."
+        )
 
         mapdl_path = self._path  # using cached version
-        if self._exited is None:
-            self._log.debug("'self._exited' is none.")
-            return  # Some edge cases the class object is not completely
-            # initialized but the __del__ method
-            # is called when exiting python. So, early exit here instead an
-            # error in the following self.directory command.
-            # See issue #1796
-        elif self._exited:
+
+        if self._exited:
             # Already exited.
             self._log.debug("Already exited")
             return
@@ -1144,8 +1159,10 @@ class MapdlGrpc(MapdlBase):
 
         if not force:
             # ignore this method if PYMAPDL_START_INSTANCE=False
-            if not self._start_instance:
-                self._log.info("Ignoring exit due to PYMAPDL_START_INSTANCE=False")
+            if not self._start_instance or not self._launched:
+                self._log.info(
+                    "Ignoring exit due to PYMAPDL_START_INSTANCE=False or because PyMAPDL didn't launch the instance."
+                )
                 return
 
             # or building the gallery
@@ -1153,17 +1170,14 @@ class MapdlGrpc(MapdlBase):
                 self._log.info("Ignoring exit due as BUILDING_GALLERY=True")
                 return
 
-        # Actually exiting MAPDL instance
-        if self.finish_job_on_exit:
-            self._exiting = True
-            self._exit_mapdl(path=mapdl_path)
-            self._exited = True
+        # Exiting MAPDL instance if we launched.
+        self._exiting = True
+        self._exit_mapdl(path=mapdl_path)
+        self._exited = True
 
-            # Exiting HPC job
-            if self._mapdl_on_hpc:
-                self.kill_job(self.jobid)
-                if hasattr(self, "_log"):
-                    self._log.debug(f"Job (id: {self.jobid}) has been cancel.")
+        if self.finish_job_on_exit and self._mapdl_on_hpc:
+            self.kill_job(self.jobid)
+            self._log.debug(f"Job (id: {self.jobid}) has been cancel.")
 
         # Exiting remote instances
         if self._remote_instance:  # pragma: no cover
@@ -1184,12 +1198,13 @@ class MapdlGrpc(MapdlBase):
         if self._local:
             self._cache_pids()  # Recache processes
 
-            if os.name == "nt":
-                self._kill_server()
+            self._exit_mapdl_server()
+
             self._close_process()
-            self._remove_lock_file(path)
+
+            self._remove_lock_file(path, use_cached=True)
         else:
-            self._kill_server()
+            self._exit_mapdl_server()
 
     def _remove_temp_dir_on_exit(self, path=None):
         """Removes the temporary directory created by the launcher.
@@ -1215,7 +1230,7 @@ class MapdlGrpc(MapdlBase):
                     tmp_dir,
                 )
 
-    def _kill_server(self):
+    def _exit_mapdl_server(self):
         """Call exit(0) on the server.
 
         Notes
@@ -1228,13 +1243,17 @@ class MapdlGrpc(MapdlBase):
         if self._exited:
             return
 
-        if (
-            self._version and self._version >= 24.2
-        ):  # We can't use the non-cached version because of recursion error.
+        # Default
+        if self._version is None or self._version < 24.1:
+            self._ctrl("EXIT")
+
+        elif self._version >= 24.1:
+            # We can't use the non-cached version because of recursion error.
             # self.run("/EXIT,NOSAVE,,,,,SERVER")
+            self.finish()
             self._ctrl("EXIT")
-        else:
-            self._ctrl("EXIT")
+
+        return
 
     def _kill_process(self):
         """Kill process stored in self._mapdl_process"""
@@ -1284,15 +1303,12 @@ class MapdlGrpc(MapdlBase):
         Notes
         -----
         This is effectively the only way to completely close down MAPDL locally on
-        linux. Just killing the server with ``_kill_server`` leaves orphaned
+        linux. Just killing the server with ``_exit_mapdl_server`` leaves orphaned
         processes making this method ineffective for a local instance of MAPDL.
 
         """
         self._log.debug("Closing processes")
         if self._local:
-            # killing server process
-            self._kill_server()
-
             # killing main process (subprocess)
             self._kill_process()
 
@@ -1328,7 +1344,12 @@ class MapdlGrpc(MapdlBase):
                     pids = set(re.findall(r"-9 (\d+)", raw))
                 self._pids = [int(pid) for pid in pids]
 
-        if not self._pids:
+        if not self._pids and not self._mapdl_process:
+            self._log.debug(
+                f"MAPDL process is not provided. PIDs could not be retrieved."
+            )
+            return
+        elif not self._pids:
             # For the cases where the cleanup file is not generated,
             # we relay on the process.
             parent_pid = self._mapdl_process.pid
@@ -1344,17 +1365,24 @@ class MapdlGrpc(MapdlBase):
 
         self._log.debug(f"Recaching PIDs: {self._pids}")
 
-    def _remove_lock_file(self, mapdl_path=None):
+    def _remove_lock_file(
+        self, mapdl_path: str = None, jobname: str = None, use_cached: bool = False
+    ):
         """Removes the lock file.
 
         Necessary to call this as a segfault of MAPDL or exit(0) will
         not remove the lock file.
         """
+        if jobname is None and use_cached:
+            jobname = self._jobname
+        elif jobname is None:
+            jobname = self.jobname
+
         self._log.debug("Removing lock file after exit.")
         if mapdl_path is None:  # pragma: no cover
             mapdl_path = self.directory
         if mapdl_path:
-            for lockname in [self.jobname + ".lock", "file.lock"]:
+            for lockname in [jobname + ".lock", "file.lock"]:
                 lock_file = os.path.join(mapdl_path, lockname)
                 if os.path.isfile(lock_file):
                     try:
@@ -1611,6 +1639,11 @@ class MapdlGrpc(MapdlBase):
             return
 
         resp = self._stub.Ctrl(request)
+
+        if cmd.lower() == "set_verb" and str(opt1) == "0":
+            warn("Disabling gRPC verbose ('_ctr') by issuing also '/VERIFY' command.")
+            self.run("/verify")
+
         if hasattr(resp, "response"):
             return resp.response
 
@@ -1759,13 +1792,14 @@ class MapdlGrpc(MapdlBase):
             execution time.
 
             Due to stability issues, the default time_step_stream is
-            dependent on verbosity.  The defaults are:
+            dependent on the OS MAPDL is running on.  The defaults are:
 
-            - ``verbose=True``: ``time_step_stream=500``
-            - ``verbose=False``: ``time_step_stream=50``
+            - Windows: ``time_step_stream=500``
+            - Linux: ``time_step_stream=100``
 
             These defaults will be ignored if ``time_step_stream`` is
-            manually set.
+            manually set. See the *Examples* section to learn how to change
+            the default value globally.
 
         orig_cmd : str, optional
             Original command. There are some cases, were input is
@@ -1814,6 +1848,11 @@ class MapdlGrpc(MapdlBase):
         'inputtrigger.inp'
         >>> with mapdl.non_interactive:
                 mapdl.run("/input,inputtrigger,inp") # This inputs 'myinput.inp'
+
+        You can also change them globably using:
+
+        >>> from ansys.mapdl.core import mapdl_grpc
+        >>> mapdl_grpc.DEFAULT_TIME_STEP_STREAM=100 # in milliseconds
 
         """
         # Checking compatibility
@@ -1895,18 +1934,14 @@ class MapdlGrpc(MapdlBase):
             # are unclear
             filename = self._get_file_path(fname, progress_bar)
 
-        if time_step_stream is not None:
-            if time_step_stream <= 0:
-                raise ValueError("``time_step_stream`` must be greater than 0``")
+        time_step_stream = self._get_time_step_stream(time_step_stream)
+
+        metadata = [
+            ("time_step_stream", str(time_step_stream)),
+            ("chunk_size", str(chunk_size)),
+        ]
 
         if verbose:
-            if time_step_stream is None:
-                time_step_stream = 500
-            metadata = [
-                ("time_step_stream", str(time_step_stream)),
-                ("chunk_size", str(chunk_size)),
-            ]
-
             request = pb_types.InputFileRequest(filename=filename)
             strouts = self._stub.InputFileS(request, metadata=metadata)
             responses = []
@@ -1918,13 +1953,8 @@ class MapdlGrpc(MapdlBase):
             response = "\n".join(responses)
             return response.strip()
 
-        # otherwise, not verbose
-        if time_step_stream is None:
-            time_step_stream = 50
-        metadata = [
-            ("time_step_stream", str(time_step_stream)),
-            ("chunk_size", str(chunk_size)),
-        ]
+        ##
+        # Otherwise, not verbose
 
         # since we can't directly run /INPUT, we have to write a
         # temporary input file that tells MAPDL to read the input
@@ -1936,12 +1966,12 @@ class MapdlGrpc(MapdlBase):
         if "CDRE" in orig_cmd.upper():
             # Using CDREAD
             option = kwargs.get("cd_read_option", "COMB")
-            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{option}','{filename}'\n"
+            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{option}','{filename}'\n/OUT,"
             delete_uploaded_files = False
 
         else:
             # Using default INPUT
-            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n"
+            tmp_dat = f"/OUT,{tmp_out}\n{orig_cmd},'{filename}'\n/OUT,"
             delete_uploaded_files = True
 
         if write_to_log and self._apdl_log is not None:
@@ -1961,7 +1991,7 @@ class MapdlGrpc(MapdlBase):
             self._stored_commands.append(tmp_dat.splitlines()[1])
             return None
 
-        request = pb_types.InputFileRequest(filename=tmp_name)
+        request = pb_types.InputFileRequest(filename=tmp_name, opt="MUTE")
 
         # even though we don't care about the output, we still
         # need to check.  otherwise, since inputfile is
@@ -1997,6 +2027,35 @@ class MapdlGrpc(MapdlBase):
                 self.slashdelete(filename)
 
         return output
+
+    def _get_time_step_stream(
+        self, time_step: Optional[Union[int, float]] = None
+    ) -> str:
+        """Return the time step for checking if MAPDL is done writing the
+        output to the file which later will be returned as response
+        """
+        if time_step is None:
+            if DEFAULT_TIME_STEP_STREAM is not None:
+                time_step = DEFAULT_TIME_STEP_STREAM
+            elif self._time_step_stream is not None:
+                time_step = self._time_step_stream
+            else:
+                if self.platform == "windows":
+                    time_step = DEFAULT_TIME_STEP_STREAM_NT
+                elif self.platform == "linux":
+                    time_step = DEFAULT_TIME_STEP_STREAM_POSIX
+                else:
+                    raise ValueError(
+                        f"The MAPDL platform ('{self.platform}') is not recognaised."
+                    )
+
+        else:
+            if time_step <= 0:
+                raise ValueError("``time_step`` argument must be greater than 0``")
+
+        self.logger.debug(f"The time_step argument is set to: {time_step}")
+        self._time_step_stream = time_step
+        return time_step
 
     def _get_file_path(self, fname: str, progress_bar: bool = False) -> str:
         """Find files in the Python and MAPDL working directories.
@@ -2150,7 +2209,8 @@ class MapdlGrpc(MapdlBase):
         )
         # skip the first line as it simply states that it's reading an input file
         self._response = out[out.find("LINE=       0") + 13 :]
-        self._log.info(self._response)
+        response_ = "\n".join(self._response.splitlines()[:20])
+        self._log.info(response_)
 
         if not self._ignore_errors:
             self._raise_errors(self._response)
@@ -2196,39 +2256,51 @@ class MapdlGrpc(MapdlBase):
         cmd = f"{entity},{entnum},{item1},{it1num},{item2},{it2num},{item3}, {it3num}, {item4}, {it4num}"
 
         # not threadsafe; don't allow multiple get commands
+        timeout_ = kwargs.pop("timeout", 2)
+        timeout = time.time() + timeout_
         while self._get_lock:
             time.sleep(0.001)
+            if time.time() > timeout:
+                raise MapdlRuntimeError(
+                    f"PyMAPDL couldn't obtain 'get_lock' in {timeout_} seconds "
+                    "and PyMAPDL cannot issue multiple get commands simultaneously."
+                )
 
         self._get_lock = True
         try:
-            getresponse = self._stub.Get(pb_types.GetRequest(getcmd=cmd))
+            response = self._stub.Get(pb_types.GetRequest(getcmd=cmd))
         finally:
             self._get_lock = False
 
-        if getresponse.type == 0:
+        if response.type == 0:
             self._log.debug(
                 "The 'grpc' get method seems to have failed. Trying old implementation for more verbose output."
             )
 
-            try:
-                out = self.run("*GET,__temp__," + cmd)
-                return float(out.split("VALUE=")[1].strip())
+            response = self.run("*GET,__temp__," + cmd, mute=False)
+            self._log.debug(f"Default *get output:\n{response}")
 
-            except MapdlRuntimeError as e:
-                # Get can thrown some errors, in that case, they are caught in the default run method.
-                raise e
+            if response:
+                from ansys.mapdl.core.misc import is_float
 
-            except (IndexError, ValueError):
-                raise MapdlError("Error when processing '*get' request output.")
+                if "VALUE=" in response:
+                    response = response.split("VALUE=")[1].strip()
 
-        if getresponse.type == 1:
-            return getresponse.dval
-        elif getresponse.type == 2:
-            return getresponse.sval
+                if is_float(response):
+                    return float(response)
+                else:
+                    return response
+            else:
+                raise MapdlError(
+                    f"Error when processing '*get' request output.\n{response}"
+                )
 
-        raise MapdlRuntimeError(
-            f"Unsupported type {getresponse.type} response from MAPDL"
-        )
+        if response.type == 1:
+            return response.dval
+        elif response.type == 2:
+            return response.sval
+
+        raise MapdlRuntimeError(f"Unsupported type {response.type} response from MAPDL")
 
     def download_project(
         self,
@@ -2474,7 +2546,7 @@ class MapdlGrpc(MapdlBase):
 
         else:
             raise ValueError(
-                f"The `file` parameter type ({type(files)}) is not supported."
+                f"The `file` parameter type ({type(files)}) is not supported. "
                 "Only strings, tuple of strings or list of strings are allowed."
             )
 
@@ -2579,9 +2651,10 @@ class MapdlGrpc(MapdlBase):
         )
 
         if not file_size:
-            warn(
-                f'File "{target_name}" is empty or does not exist in {self.list_files()}.'
-            )
+            if target_name not in self.list_files():
+                warn(f'File "{target_name}" does not exist.')
+            else:
+                warn(f'File "{target_name}" is empty.')
 
     @protect_grpc
     def upload(self, file_name: str, progress_bar: bool = _HAS_TQDM) -> str:
@@ -2691,7 +2764,7 @@ class MapdlGrpc(MapdlBase):
     @property
     def is_alive(self) -> bool:
         """True when there is an active connect to the gRPC server"""
-        if self.channel_state not in ["IDLE", "READY"]:
+        if self.channel_state not in ["IDLE", "READY", None]:
             self._log.debug(
                 "MAPDL instance is not alive because the channel is not 'IDLE' o 'READY'."
             )
@@ -2930,7 +3003,7 @@ class MapdlGrpc(MapdlBase):
 
     @property
     def locked(self):
-        """Instance is in use within a pool"""
+        """Instance is in use within a pool."""
         return self._locked
 
     @locked.setter
@@ -2976,7 +3049,7 @@ class MapdlGrpc(MapdlBase):
 
     @property
     def _distributed_result_file(self):
-        """Path of the distributed result file"""
+        """Path of the distributed result file."""
         if not self._distributed:
             return
 
@@ -3011,7 +3084,7 @@ class MapdlGrpc(MapdlBase):
 
     @property
     def thermal_result(self):
-        """The thermal result object"""
+        """The thermal result object."""
         self._prioritize_thermal = True
         result = self.result
         self._prioritize_thermal = False
@@ -3034,7 +3107,7 @@ class MapdlGrpc(MapdlBase):
             return open(os.path.join(self.directory, error_file)).read()
         elif self._exited:
             raise MapdlExitedError(
-                "Cannot list error file when MAPDL Service has " "exited"
+                "Cannot list error file when MAPDL Service has exited"
             )
 
         return self._download_as_raw(error_file).decode("latin-1")
@@ -3049,9 +3122,7 @@ class MapdlGrpc(MapdlBase):
         capname="",
         **kwargs,
     ):
-        """Run CMATRIX in non-interactive mode and return the response
-        from file.
-        """
+        """Run CMATRIX in non-interactive mode and return the response from file."""
 
         # The CMATRIX command needs to run in non-interactive mode
         if not self._store_commands:
@@ -3080,126 +3151,6 @@ class MapdlGrpc(MapdlBase):
         if self.__distributed is None:
             self.__distributed = self.parameters.numcpu > 1
         return self.__distributed
-
-    @wraps(MapdlBase.ndinqr)
-    def ndinqr(self, node, key, **kwargs):
-        """Wrap the ``ndinqr`` method to take advantage of the gRPC methods."""
-        super().ndinqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.elmiqr)
-    def elmiqr(self, ielem, key, **kwargs):
-        """Wrap the ``elmiqr`` method to take advantage of the gRPC methods."""
-        super().elmiqr(ielem, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.kpinqr)
-    def kpinqr(self, knmi, key, **kwargs):
-        """Wrap the ``kpinqr`` method to take advantage of the gRPC methods."""
-        super().kpinqr(knmi, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.lsinqr)
-    def lsinqr(self, line, key, **kwargs):
-        """Wrap the ``lsinqr`` method to take advantage of the gRPC methods."""
-        super().lsinqr(line, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.arinqr)
-    def arinqr(self, anmi, key, **kwargs):
-        """Wrap the ``arinqr`` method to take advantage of the gRPC methods."""
-        super().arinqr(anmi, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.vlinqr)
-    def vlinqr(self, vnmi, key, **kwargs):
-        """Wrap the ``vlinqr`` method to take advantage of the gRPC methods."""
-        super().vlinqr(vnmi, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.rlinqr)
-    def rlinqr(self, nreal, key, **kwargs):
-        """Wrap the ``rlinqr`` method to take advantage of the gRPC methods."""
-        super().rlinqr(nreal, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.gapiqr)
-    def gapiqr(self, ngap, key, **kwargs):
-        """Wrap the ``gapiqr`` method to take advantage of the gRPC methods."""
-        super().gapiqr(ngap, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.masiqr)
-    def masiqr(self, node, key, **kwargs):
-        """Wrap the ``masiqr`` method to take advantage of the gRPC methods."""
-        super().masiqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.ceinqr)
-    def ceinqr(self, nce, key, **kwargs):
-        """Wrap the ``ceinqr`` method to take advantage of the gRPC methods."""
-        super().ceinqr(nce, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.cpinqr)
-    def cpinqr(self, ncp, key, **kwargs):
-        """Wrap the ``cpinqr`` method to take advantage of the gRPC methods."""
-        super().cpinqr(ncp, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.csyiqr)
-    def csyiqr(self, ncsy, key, **kwargs):
-        """Wrap the ``csyiqr`` method to take advantage of the gRPC methods."""
-        super().csyiqr(ncsy, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.etyiqr)
-    def etyiqr(self, itype, key, **kwargs):
-        """Wrap the ``etyiqr`` method to take advantage of the gRPC methods."""
-        super().etyiqr(itype, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.foriqr)
-    def foriqr(self, node, key, **kwargs):
-        """Wrap the ``foriqr`` method to take advantage of the gRPC methods."""
-        super().foriqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.sectinqr)
-    def sectinqr(self, nsect, key, **kwargs):
-        """Wrap the ``sectinqr`` method to take advantage of the gRPC methods."""
-        super().sectinqr(nsect, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.mpinqr)
-    def mpinqr(self, mat, iprop, key, **kwargs):
-        """Wrap the ``mpinqr`` method to take advantage of the gRPC methods."""
-        super().mpinqr(mat, iprop, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.dget)
-    def dget(self, node, idf, kcmplx, **kwargs):
-        """Wrap the ``dget`` method to take advantage of the gRPC methods."""
-        super().dget(node, idf, kcmplx, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.fget)
-    def fget(self, node, idf, kcmplx, **kwargs):
-        """Wrap the ``fget`` method to take advantage of the gRPC methods."""
-        super().fget(node, idf, kcmplx, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.erinqr)
-    def erinqr(self, key, **kwargs):
-        """Wrap the ``erinqr`` method to take advantage of the gRPC methods."""
-        super().erinqr(key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.wrinqr)
-    def wrinqr(self, key, **kwargs):
-        """Wrap the ``wrinqr`` method to take advantage of the gRPC methods."""
-        super().wrinqr(key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
 
     @wraps(MapdlBase.file)
     def file(self, fname: str = "", ext: str = "", **kwargs) -> str:
@@ -3764,26 +3715,23 @@ class MapdlGrpc(MapdlBase):
         """
         cmd = ["scancel", f"{jobid}"]
         # to ensure the job is stopped properly, let's issue the scancel twice.
-        subprocess.Popen(cmd)
+        subprocess.Popen(cmd)  # nosec B603
 
     def __del__(self):
         """In case the object is deleted"""
         # We are just going to escape early if needed, and kill the HPC job.
         # The garbage collector remove attributes before we can evaluate this.
-        try:
-            # Exiting HPC job
-            if (
-                hasattr(self, "_mapdl_on_hpc")
-                and self._mapdl_on_hpc
-                and hasattr(self, "finish_job_on_exit")
-                and self.finish_job_on_exit
-            ):
+        if self._exited:
+            return
 
-                self.kill_job(self.jobid)
+        if not self._start_instance:
+            # Early skip if start_instance is False
+            return
 
-            if not self._start_instance:
-                return
+        # Killing the instance if we launched it.
+        if self._launched:
+            self._exit_mapdl(self._path)
 
-        except Exception as e:
-            # This is on clean up.
-            pass
+        # Exiting HPC job
+        if self._mapdl_on_hpc and self.finish_job_on_exit:
+            self.kill_job(self.jobid)

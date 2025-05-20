@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -31,11 +31,11 @@ except ImportError:
     )
 
 
-MAX_CPU = 128
-MAX_MEM = 256
+MAX_CPU: int = 128
+MAX_MEM: int = 256
 
 
-def check_manager():
+def check_manager() -> None:
     try:
         # response = manager.ping()
         manager.ping()
@@ -44,14 +44,14 @@ def check_manager():
 
 
 def launch_mapdl_on_cluster(
-    nproc=2,
-    memory=4,
-    loglevel="ERROR",
-    additional_switches="",
-    verbose=False,
-    start_timeout=600,
-    tag="latest",
-):
+    nproc: int = 2,
+    memory: int = 4,
+    loglevel: str = "ERROR",
+    additional_switches: str = "",
+    verbose: bool = False,
+    start_timeout: int = 600,
+    tag: str = "latest",
+) -> "Mapdl":
     """Start MAPDL on the ANSYS jupyter cluster in gRPC mode.
 
     Parameters

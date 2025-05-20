@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -31,6 +31,7 @@ from ansys.mapdl.core.convert import (
     FileTranslator,
     convert_apdl_block,
 )
+from ansys.mapdl.core.plotting import GraphicsBackend
 from conftest import requires
 
 nblock = """nblock,3,,326253
@@ -508,20 +509,22 @@ def test_only_commands():
     assert "mapdl.exit" not in output
 
 
-@pytest.mark.parametrize("vtk", [None, True, False])
-def test_use_vtk(vtk):
+@pytest.mark.parametrize(
+    "backend", [None, GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL]
+)
+def test_graphics_backend(backend):
     output = convert_apdl_block(
         "/view,1,1,1",
         only_commands=False,
         add_imports=True,
-        use_vtk=vtk,
+        graphics_backend=backend,
     )
     assert "mapdl.view(1, 1, 1)" in output
     assert "launch_mapdl" in output
-    if vtk is None:
-        assert "use_vtk" not in output
+    if backend is None:
+        assert "graphics_backend" not in output
     else:
-        assert f"use_vtk={vtk}" in output
+        assert f"graphics_backend={backend}" in output
 
 
 @pytest.mark.parametrize("check_parameter_names", [None, True, False])
@@ -633,7 +636,7 @@ def test_converter_cli(tmpdir, run_cli):
     with input_file.open("w") as f:
         f.write(content)
 
-    assert run_cli(str(input_file)) == 0
+    assert run_cli(f"-f {input_file} -o {output_file}") == 0
 
     assert os.path.exists(output_file)
     with output_file.open("r") as f:
@@ -643,9 +646,33 @@ def test_converter_cli(tmpdir, run_cli):
     assert "mapdl.exit()" in newcontent
     assert "launch_mapdl" in newcontent
 
-    # This one overwrite the previous file
+    # This one is appended the previous file
     assert (
         run_cli(
+            "-f",
+            str(input_file),
+            "-o",
+            str(output_file),
+            "--auto_exit",
+            "False",
+            "--add_imports",
+            "False",
+        )
+        == 0
+    )
+
+    assert os.path.exists(output_file)
+    with output_file.open("r") as f:
+        newcontent = f.read()
+
+    assert newcontent.count("ansys-mapdl-core version") == 2
+
+    # Deleting file
+    os.remove(str(output_file))
+
+    assert (
+        run_cli(
+            "-f",
             str(input_file),
             "-o",
             str(output_file),

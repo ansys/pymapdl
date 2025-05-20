@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -116,7 +116,6 @@ def test_run_as_prep7(mapdl, cleared):
 
 
 def test_no_return(mapdl, cleared):
-    mapdl.prep7()
 
     @no_return
     def fun(
@@ -130,7 +129,7 @@ def test_no_return(mapdl, cleared):
 
 
 @pytest.mark.parametrize("file_", ["dummy.dumdum", "dumdum.dummy"])
-def test_load_file_local(mapdl, tmpdir, file_):
+def test_load_file_local(mapdl, cleared, tmpdir, file_):
     """Checking 'load_file' function.
 
     In CICD it seems we cannot write to the root folder '/'.

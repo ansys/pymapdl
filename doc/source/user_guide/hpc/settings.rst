@@ -40,7 +40,7 @@ To print the version of Python you have available, use this code:
 .. code-block:: console
 
     user@machine:~$ python3 --version
-    Python 3.9.16
+    Python 3.10.15
 
 You should be aware that your machine might have other Python versions
 installed.
