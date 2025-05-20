@@ -148,6 +148,7 @@ markers = [
     "skip_grpc: skip tests using grpc",
     "requires_gui: run tests that require to launch the GUI interface",
     "console: run console test based",
+    "gui: run gui test",
 ]
 
 testpaths = "tests"
