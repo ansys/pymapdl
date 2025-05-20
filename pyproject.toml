@@ -242,11 +242,17 @@ checks = [
   # "EX01", # "No examples section found",
 ]
 
-
 override_SS05 = [  # override SS05 to allow docstrings starting with these words
     # '^Process ',
     # '^Assess ',
     # '^Access ',
+]
+
+[tool.mypy]
+disable_error_code = ["return-value", "return", "import-untyped", "import-not-found"]
+exclude = [
+    '^tests/*\.py$',  # TOML literal string (single-quotes, no escaping necessary)
+    '^doc/*\.py$',  # TOML basic string (double-quotes, backslash and other characters need escaping)
 ]
 
 [tool.towncrier]
