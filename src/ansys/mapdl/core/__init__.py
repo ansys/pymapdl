@@ -75,6 +75,7 @@ _HAS_TQDM: bool = is_installed("tqdm")
 _HAS_VISUALIZER: bool = is_installed(
     "ansys.tools.visualization_interface"
 ) and is_installed("matplotlib")
+_HAS_DPF: bool = is_installed("ansys.dpf.core")
 
 
 # Setup directories
