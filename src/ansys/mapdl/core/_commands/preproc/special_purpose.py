@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -205,7 +205,7 @@ class SpecialPurpose:
         command = f"CINT,{action},{par1},{par2},{par3},{par4},{par5},{par6},{par7}"
         return self.run(command, **kwargs)
 
-    def cycexpand(self, wn="", option="", value1="", value2=""):
+    def cycexpand(self, wn="", option="", value1="", value2="", **kwargs):
         """Graphically expands displacements, stresses and strains of a
         cyclically symmetric model.
 

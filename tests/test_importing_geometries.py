@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -159,7 +159,6 @@ def test_readin_x_t(mapdl, cleared):
     clear_wkdir_from_cads(mapdl)
 
 
-@pytest.mark.xfail(True, reason="Command seems broken. See #2377")
 def test_readin_catiav5(mapdl, cleared):
     if ON_CI and mapdl.version <= 22.2 and not ON_UBUNTU:
         context = pytest.raises(

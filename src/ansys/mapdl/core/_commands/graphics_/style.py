@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -293,7 +293,7 @@ class Style:
         warnings.warn(
             "pymapdl does not support /ESHAPE when plotting in "
             "Python using ``mapdl.eplot()``.  "
-            "Use ``mapdl.eplot(vtk=False)`` "
+            "Use ``mapdl.eplot(backend=GraphicsBackend.MAPDL)`` "
         )
         command = f"/ESHAPE,{scale},{key}"
         return self.run(command, **kwargs)

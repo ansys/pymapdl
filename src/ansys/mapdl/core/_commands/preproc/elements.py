@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,7 +22,7 @@
 
 from typing import Optional, Union
 
-from ansys.mapdl.core._commands.parse import parse_e
+from ansys.mapdl.core._commands import parse
 from ansys.mapdl.core.mapdl_types import MapdlFloat, MapdlInt
 
 
@@ -141,7 +141,7 @@ class Elements:
 
         """
         command = f"E,{i},{j},{k},{l},{m},{n},{o},{p}"
-        return parse_e(self.run(command, **kwargs))
+        return parse.parse_e(self.run(command, **kwargs))
 
     def ecpchg(self, **kwargs):
         """Optimizes degree-of-freedom usage in a coupled acoustic model.

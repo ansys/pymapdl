@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -39,14 +39,14 @@ NUMERIC_CONST_PATTERN = r"""
 NUM_PATTERN = re.compile(NUMERIC_CONST_PATTERN, re.VERBOSE)
 
 
-def parse_kdist(msg):
+def parse_kdist(msg: Optional[str] = None) -> Optional[int]:
     """Parse the keypoint value from a keypoint message"""
     finds = re.findall(NUM_PATTERN, msg)[-4:]
     if len(finds) == 4:
         return [float(val) for val in finds]
 
 
-def parse_et(msg: Optional[str]) -> Optional[int]:
+def parse_et(msg: Optional[str] = None) -> Optional[int]:
     """Parse local element type number definition message
     and return element type number.
     """
@@ -56,7 +56,7 @@ def parse_et(msg: Optional[str]) -> Optional[int]:
             return int(res.group(2))
 
 
-def parse_e(msg: Optional[str]) -> Optional[int]:
+def parse_e(msg: Optional[str] = None) -> Optional[int]:
     """Parse create element message and return element number."""
     if msg:
         res = re.search(r"(ELEMENT\s*)([0-9]+)", msg)
@@ -64,7 +64,19 @@ def parse_e(msg: Optional[str]) -> Optional[int]:
             return int(res.group(2))
 
 
-def parse_kpoint(msg):
+def parse_k(msg: Optional[str] = None) -> Optional[int]:
+    """Parse output from ``K`` command"""
+    if msg:
+        if not re.search(r"KEYPOINT NUMBER", msg):
+            res = re.search(r"(KEYPOINT\s*)([0-9]+)", msg)
+        else:
+            res = re.search(r"(KEYPOINT NUMBER =\s*)([0-9]+)", msg)
+
+        if res:
+            return int(res.group(2))
+
+
+def parse_kpoint(msg: Optional[str] = None) -> Optional[int]:
     """Parse create keypoint message and return keypoint number."""
     if msg:
         res = re.search(r"kpoint=\s+(\d+)\s+", msg)
@@ -72,7 +84,7 @@ def parse_kpoint(msg):
             return int(res.group(1))
 
 
-def parse_output_areas(msg):
+def parse_output_areas(msg: Optional[str] = None) -> Optional[int]:
     """Parse create area message and return area number."""
     if msg:
         res = re.search(r"(OUTPUT AREAS =\s*)([0-9]+)", msg)
@@ -83,7 +95,7 @@ def parse_output_areas(msg):
             return int(res.group(2))
 
 
-def parse_a(msg):
+def parse_a(msg: Optional[str] = None) -> Optional[int]:
     """Parse create area message and return area number."""
     if msg:
         res = re.search(r"(AREA NUMBER =\s*)([0-9]+)", msg)
@@ -91,7 +103,7 @@ def parse_a(msg):
             return int(res.group(2))
 
 
-def parse_line_no(msg):
+def parse_line_no(msg: Optional[str] = None) -> Optional[int]:
     """Parse create line message and return line number."""
     if msg:
         res = re.search(r"LINE NO[.]=\s+(\d+)", msg)
@@ -99,14 +111,14 @@ def parse_line_no(msg):
             return int(res.group(1))
 
 
-def parse_line_nos(msg):
+def parse_line_nos(msg: Optional[str] = None) -> Optional[int]:
     if msg:
         matches = re.findall(r"LINE NO[.]=\s*(\d*)", msg)
         if matches:
             return [int(match) for match in matches]
 
 
-def parse_v(msg):
+def parse_v(msg: Optional[str] = None) -> Optional[int]:
     """Parse volume message and return volume number"""
     if msg:
         res = re.search(r"(VOLUME NUMBER =\s*)([0-9]+)", msg)
@@ -114,7 +126,7 @@ def parse_v(msg):
             return int(res.group(2))
 
 
-def parse_output_volume_area(msg):
+def parse_output_volume_area(msg: Optional[str] = None) -> Optional[int]:
     """Parse create area message and return area or volume number"""
     if msg:
         res = re.search(r"OUTPUT (AREA|VOLUME|AREAS) =\s*([0-9]+)", msg)
@@ -122,8 +134,32 @@ def parse_output_volume_area(msg):
             return int(res.group(2))
 
 
-def parse_ndist(msg):
+def parse_n(msg: Optional[str] = None) -> Optional[int]:
+    """Parse output of ``N``"""
+    if msg:
+        res = re.search(r"(NODE\s*)([0-9]+)", msg)
+        if res is not None:
+            return int(res.group(2))
+
+
+def parse_ndist(msg: Optional[str] = None) -> Optional[int]:
     """Parse the node value from a node message"""
     finds = re.findall(NUM_PATTERN, msg)[-4:]
     if len(finds) == 4:
         return [float(val) for val in finds]
+
+
+def parse_kl(msg: Optional[str] = None) -> Optional[int]:
+    """Parse the output of ``KL``."""
+    if msg:
+        res = re.search(r"KEYPOINT\s+(\d+)\s+", msg)
+        if res is not None:
+            return int(res.group(1))
+
+
+def parse_knode(msg: Optional[str] = None) -> Optional[int]:
+    """Parse the output of ``KNODE``."""
+    if msg:
+        res = re.search(r"KEYPOINT NUMBER =\s+(\d+)", msg)
+        if res is not None:
+            return int(res.group(1))

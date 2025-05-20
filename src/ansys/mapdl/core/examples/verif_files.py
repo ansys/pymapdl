@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,19 +20,22 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""loads a list of verification files
-"""
+"""loads a list of verification files"""
 import glob
 import inspect
 import os
+from typing import Dict
 
-module_path = os.path.dirname(inspect.getfile(inspect.currentframe()))
+module_path: str = os.path.dirname(inspect.getfile(inspect.currentframe()))
 
 
-def load_vmfiles():
+def load_vmfiles() -> Dict[str, str]:
     """load vmfiles and store their filenames"""
     vmfiles = {}
     verif_path = os.path.join(module_path, "verif")
+    if not os.path.exists(verif_path):
+        return {}
+
     for filename in glob.glob(os.path.join(verif_path, "*dat")):
         basename = os.path.basename(filename)
         vmname = os.path.splitext(basename)[0]
@@ -42,7 +45,4 @@ def load_vmfiles():
 
 
 # save the module from failing if the verification files are unavailable.
-try:
-    vmfiles = load_vmfiles()
-except:
-    vmfiles = []
+vmfiles: Dict[str, str] = load_vmfiles()

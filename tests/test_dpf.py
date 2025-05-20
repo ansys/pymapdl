@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -25,47 +25,66 @@ import os
 
 import pytest
 
-from conftest import HAS_DPF, has_dependency, requires
+from ansys.mapdl.core.helpers import is_installed
+from conftest import HAS_DPF, ON_LOCAL
 
-if not has_dependency("ansys-dpf-core") or not HAS_DPF:
-    pytest.skip(allow_module_level=True)
+if is_installed("ansys-dpf-core"):
+    from ansys.dpf import core as dpf
+    from ansys.dpf.core.server_types import DPF_DEFAULT_PORT
 
-from ansys.dpf import core as dpf
-from ansys.dpf.core.server_types import DPF_DEFAULT_PORT
-
-DPF_PORT = os.environ.get("DPF_PORT", DPF_DEFAULT_PORT)  # Set in ci.yaml
-
-
-@requires("dpf")
-@requires("ansys-dpf-core")
-def test_dpf_connection():
-    # uses 127.0.0.1 and port 50054 by default
-    try:
-        grpc_con = dpf.connect_to_server(port=DPF_PORT)
-        assert grpc_con.live
-        assert True
-    except OSError:
-        assert False
+    DPF_PORT = int(os.environ.get("DPF_PORT", DPF_DEFAULT_PORT))  # Set in ci.yaml
 
 
-@requires("dpf")
-@requires("ansys-dpf-core")
-def test_upload(mapdl, solved_box, tmpdir):
+@pytest.fixture()
+def dpf_server():
+    if not HAS_DPF:
+        pytest.skip("DPF is not available.", allow_module_level=True)
+
+    if not is_installed("ansys-dpf-core"):
+        pytest.skip(f"'ansys-dpf-core' is not available.", allow_module_level=True)
+
+    # Start the DPF server
+    if ON_LOCAL:
+        # If running locally, start the server
+        dpf_server = dpf.start_local_server(port=DPF_PORT)
+        assert not dpf_server.info["server_ip"]
+
+    else:
+        # If running in a container or remote, connect to the server
+        dpf_server = dpf.connect_to_server(port=DPF_PORT)
+        assert dpf_server.info["server_ip"]
+
+    return dpf_server
+
+
+@pytest.fixture()
+def model(dpf_server, mapdl, solved_box, tmpdir):
     # Download RST file
     rst_path = mapdl.download_result(str(tmpdir.mkdir("tmpdir")))
 
-    # Stabilishing connection
-    grpc_con = dpf.connect_to_server(port=DPF_PORT)
-    assert grpc_con.live
-
     # Upload RST
-    server_file_path = dpf.upload_file_in_tmp_folder(rst_path)
+    if not dpf_server.local_server:
+        rst_path = dpf.upload_file_in_tmp_folder(rst_path, server=dpf_server)
 
-    # Creating model
-    model = dpf.Model(server_file_path)
+    model = dpf.Model(rst_path)
     assert model.results is not None
 
+    return model
+
+
+def test_metadata_meshed_region(dpf_server, mapdl, model):
     # Checks
     mapdl.allsel()
     assert mapdl.mesh.n_node == model.metadata.meshed_region.nodes.n_nodes
     assert mapdl.mesh.n_elem == model.metadata.meshed_region.elements.n_elements
+
+
+def test_displacement(model, mapdl):
+    results = model.results
+    displacements = results.displacement()
+
+    disp_dpf = displacements.outputs.fields_container()[0].data
+    disp_mapdl = mapdl.post_processing.nodal_displacement("all")
+
+    assert disp_dpf.max() == disp_mapdl.max()
+    assert disp_dpf.min() == disp_mapdl.min()

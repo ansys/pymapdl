@@ -7,8 +7,6 @@ updates:
       interval: "weekly"
     labels:
       - "maintenance"
-    assignees:
-      - "ansys/pymapdl-maintainers"
     commit-message:
       prefix: "ci"
     groups:
@@ -20,21 +18,18 @@ updates:
     package-ecosystem: "pip" # See documentation for possible values
     insecure-external-code-execution: allow
     schedule:
-      interval: "weekly"      
+      interval: "weekly"
       day: "friday"
       time: "00:00"
     labels:
       - "maintenance"
       - "dependencies"
-    assignees:
-      - "ansys/pymapdl-maintainers"
     commit-message:
       prefix: "build"
     groups:
        minimal:
           patterns:
             - "ansys-api-mapdl"
-            - "importlib-metadata"
             - "numpy"
             - "platformdirs"
             - "psutil"

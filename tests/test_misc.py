@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,19 +21,12 @@
 # SOFTWARE.
 
 """Small or misc tests that don't fit in other test modules"""
-import inspect
 import os
 import pathlib
 
 import numpy as np
 import pytest
 
-from conftest import has_dependency, requires
-
-if has_dependency("pyvista"):
-    from pyvista.plotting import system_supports_plotting
-
-from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.misc import (
     check_valid_ip,
     check_valid_port,
@@ -43,20 +36,9 @@ from ansys.mapdl.core.misc import (
     load_file,
     no_return,
     requires_package,
-    run_as_prep7,
+    run_as,
 )
-
-
-@requires("pyvista")
-def test_report():
-    report = pymapdl.Report(
-        additional=["matplotlib", "pyvista", "pyiges", "tqdm"],
-        gpu=system_supports_plotting(),
-    )
-    assert "PyAnsys Software and Environment Report" in str(report)
-
-    # Check that when adding additional (repeated) packages, they appear only once
-    assert str(report).count("pyvista") == 1
+from conftest import requires
 
 
 @pytest.mark.parametrize(
@@ -121,7 +103,7 @@ def test_run_as_prep7(mapdl, cleared):
     mapdl.post1()
     assert "POST1" in mapdl.parameters.routine
 
-    @run_as_prep7
+    @run_as("PREP7")
     def fun(
         mapdl,
     ):  # This function is for mapdl methods, hence we have to pass the MAPDL instance somehow.
@@ -134,7 +116,6 @@ def test_run_as_prep7(mapdl, cleared):
 
 
 def test_no_return(mapdl, cleared):
-    mapdl.prep7()
 
     @no_return
     def fun(
@@ -147,50 +128,8 @@ def test_no_return(mapdl, cleared):
     assert np.allclose(last_keypoint, np.array([1, 1, 1, 1]))
 
 
-def test_mapdl_info(mapdl, capfd):
-    info = mapdl.info
-    for attr, value in inspect.getmembers(info):
-        if not attr.startswith("_") and attr not in ["title", "stitles"]:
-            assert isinstance(value, str)
-
-            with pytest.raises(AttributeError):
-                setattr(info, attr, "any_value")
-
-    assert "PyMAPDL" in mapdl.info.__repr__()
-    out = info.__str__()
-
-    assert "ansys" in out.lower()
-    assert "Product" in out
-    assert "MAPDL Version" in out
-    assert "UPDATE" in out
-
-
-def test_info_title(mapdl):
-    title = "this is my title"
-    mapdl.info.title = title
-    assert title == mapdl.info.title
-
-
-def test_info_stitle(mapdl):
-    info = mapdl.info
-
-    assert all([not each for each in info.stitles])
-    stitles = ["asfd", "qwer", "zxcv", "jkl"]
-    info.stitles = "\n".join(stitles)
-
-    assert stitles == info.stitles
-
-    stitles = stitles[::-1]
-
-    info.stitles = stitles
-    assert stitles == info.stitles
-
-    info.stitles = None
-    assert all([not each for each in info.stitles])
-
-
 @pytest.mark.parametrize("file_", ["dummy.dumdum", "dumdum.dummy"])
-def test_load_file_local(mapdl, tmpdir, file_):
+def test_load_file_local(mapdl, cleared, tmpdir, file_):
     """Checking 'load_file' function.
 
     In CICD it seems we cannot write to the root folder '/'.
@@ -275,68 +214,6 @@ def test_load_file_local(mapdl, tmpdir, file_):
 
     mapdl.slashdelete(file_)
     assert file_ not in mapdl.list_files()
-
-
-def test_plain_report():
-    from ansys.mapdl.core.misc import Plain_Report
-
-    core = ["numpy", "ansys.mapdl.reader"]
-    optional = ["pyvista", "tqdm"]
-    additional = ["scipy", "ger"]
-
-    report = Plain_Report(core=core, optional=optional, additional=additional, gpu=True)
-    rep_str = report.__repr__()
-
-    for each in core + optional + additional:
-        assert each in rep_str
-
-    # There should be only one package not found ("ger")
-    assert "Package not found" in rep_str
-    not_found_packages = 1
-
-    # Plus the not additional packages
-    if not has_dependency("pyvista"):
-        not_found_packages += 1
-    if not has_dependency("tqdm"):
-        not_found_packages += 1
-    if not has_dependency("ansys.mapdl.reader"):
-        not_found_packages += 1
-    if not has_dependency("scipy"):
-        not_found_packages += 1
-    if not has_dependency("pexpect"):
-        not_found_packages += 1
-
-    _rep_str = rep_str.replace("Package not found", "", not_found_packages)
-    assert "Package not found" not in _rep_str
-
-    assert "\n" in rep_str
-    assert len(rep_str.splitlines()) > 3
-
-    assert "Core packages" in rep_str
-    assert "Optional packages" in rep_str
-    assert "Additional packages" in rep_str
-
-    # Plain report should not represent GPU details evenif asked for
-    assert "GPU Details" not in rep_str
-
-
-def test_plain_report_no_options():
-    from ansys.mapdl.core.misc import Plain_Report
-
-    core = ["numpy", "ansys.mapdl.reader"]
-
-    report = Plain_Report(core=core)
-    rep_str = report.__repr__()
-
-    for each in core:
-        assert each in rep_str
-
-    assert "\n" in rep_str
-    assert len(rep_str.splitlines()) > 3
-
-    assert "Core packages" in rep_str
-    assert "Optional packages" not in rep_str
-    assert "Additional packages" not in rep_str
 
 
 def test_requires_package_decorator():

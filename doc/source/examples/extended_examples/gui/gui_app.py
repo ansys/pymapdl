@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -38,14 +38,15 @@ from PySide6.QtWidgets import (
 )
 from pyvistaqt import QtInteractor
 
-from ansys.mapdl.core import Mapdl, MapdlTheme, launch_mapdl
+from ansys.mapdl.core import Mapdl, launch_mapdl
+from ansys.mapdl.core.plotting.theme import MapdlTheme
 
 
 class MainWindow(QMainWindow):
     def __init__(self, mapdl: Mapdl, parent=None) -> None:
         super().__init__(parent)
-        self._setup_ui()
         self._mapdl = mapdl
+        self._setup_ui()
 
     def _setup_ui(self) -> None:
         # General settings for the window
@@ -61,10 +62,6 @@ class MainWindow(QMainWindow):
         self._tab_preprocessing = QtWidgets.QWidget()
         self._tab_widget.addTab(self._tab_preprocessing, "Preprocessing")
         self._setup_tab_preprocessing()
-
-        self._tab_solver = QtWidgets.QWidget()
-        self._tab_widget.addTab(self._tab_solver, "Solver")
-        self._setup_tab_solver()
 
         self._tab_postprocessing = QtWidgets.QWidget()
         self._tab_widget.addTab(self._tab_postprocessing, "Postprocessing")
@@ -83,32 +80,28 @@ class MainWindow(QMainWindow):
         poisson_ratio_label = QLabel("Poisson's ratio: ")
         container_layout.addWidget(poisson_ratio_label, 0, 0)
         self._poisson_ratio_input = QLineEdit()
-        self._poisson_ratio_input.setPlaceholderText("Poisson's ratio (PRXY)")
         self._poisson_ratio_input.setText("0.3")
         self._poisson_ratio_input.setMaximumWidth(max_qlineedit_width)
 
         # Young modulus input
-        young_modulus_label = QLabel("Young's modulus: ")
+        young_modulus_label = QLabel("Young's modulus (N/m2): ")
         container_layout.addWidget(young_modulus_label, 1, 0)
         self._young_modulus_input = QLineEdit()
-        self._young_modulus_input.setPlaceholderText(
-            "Young's modulus in the x direction (E)"
-        )
         self._young_modulus_input.setText("210e3")
         self._young_modulus_input.setMaximumWidth(max_qlineedit_width)
 
         # Beam length input
-        length_label = QLabel("Length: ")
+        length_label = QLabel("Length (m): ")
         container_layout.addWidget(length_label, 2, 0)
         self._length_input = QLineEdit()
-        self._length_input.setPlaceholderText("Length")
+        self._length_input.setText("1")
         self._length_input.setMaximumWidth(max_qlineedit_width)
 
         # Input for the force exerced on the beam
-        force_label = QLabel("Force: ")
+        force_label = QLabel("Force (N): ")
         container_layout.addWidget(force_label, 3, 0)
         self._force_input = QLineEdit()
-        self._force_input.setPlaceholderText("Load force")
+        self._force_input.setText("100000")
         self._force_input.setMaximumWidth(max_qlineedit_width)
 
         # Slider for the number of nodes (between 3 and 9)
@@ -124,15 +117,7 @@ class MainWindow(QMainWindow):
         self._number_of_node_label = QLabel(
             f"{self._number_of_nodes_input.value()} nodes"
         )
-        self._number_of_nodes_input.valueChanged.connect(
-            lambda _: self._number_of_node_label.setText(
-                f"{self._number_of_nodes_input.value()} nodes"
-            )
-        )
-
-        # Button to run the preprocessor
-        self._run_preprocessor_button = QPushButton(text="Run preprocessor")
-        self._run_preprocessor_button.clicked.connect(self._run_preprocessor)
+        self._number_of_nodes_input.valueChanged.connect(self.update_pre_plot)
 
         container_layout.addWidget(self._poisson_ratio_input, 0, 1, 1, 2)
         container_layout.addWidget(self._young_modulus_input, 1, 1, 1, 2)
@@ -140,28 +125,32 @@ class MainWindow(QMainWindow):
         container_layout.addWidget(self._force_input, 3, 1, 1, 2)
         container_layout.addWidget(self._number_of_nodes_input, 4, 1, 1, 1)
         container_layout.addWidget(self._number_of_node_label, 4, 2, 1, 1)
-        container_layout.addWidget(self._run_preprocessor_button, 5, 0, 1, 3)
-
         # PyVista frame in the window
         self._preprocessing_plotter = QtInteractor(theme=MapdlTheme())
         container_layout.addWidget(self._preprocessing_plotter, 0, 4, 6, 50)
 
-    def _setup_tab_solver(self) -> None:
-        container_layout = QGridLayout()
-        self._tab_solver.setLayout(container_layout)
+        # Generating the plot for the first time.
+        self._run_preprocessor()
 
-        # Button to run the solver
+        # Solve button
         self._solve_button = QPushButton(text="Solve")
-        self._solve_button.clicked.connect(self._run_solver)
+        self._solve_button.clicked.connect(self.run_solver)
+        container_layout.addWidget(self._solve_button, 5, 0, 1, 3)
 
-        container_layout.addWidget(self._solve_button)
+    def update_pre_plot(self):
+        self._number_of_node_label.setText(
+            f"{self._number_of_nodes_input.value()} nodes"
+        )
+        self._run_preprocessor()
 
     def _setup_tab_postprocessing(self) -> None:
         container_layout = QtWidgets.QVBoxLayout()
         self._tab_postprocessing.setLayout(container_layout)
+
         # Add a PyVista frame
         self._postprocessing_plotter = QtInteractor(theme=MapdlTheme())
         container_layout.addWidget(self._postprocessing_plotter)
+
         self._deflection_label = QLabel("Deflection: ")
         container_layout.addWidget(self._deflection_label)
 
@@ -179,9 +168,25 @@ class MainWindow(QMainWindow):
 
         poisson_ratio = float(self._poisson_ratio_input.text())
         young_modulus = float(self._young_modulus_input.text())
+        nnodes = int(self._number_of_nodes_input.value())
         length = float(self._length_input.text())
         force = float(self._force_input.text())
 
+        self.build_model(poisson_ratio, young_modulus, nnodes, length, force)
+
+        # Get the pv.Plotter object from mapdl.eplot function
+        # to plot in the window
+        preprocessing_plotter = self._mapdl.eplot(
+            show_node_numbering=True, show_edges=True, cpos="xy", return_plotter=True
+        )
+
+        self._preprocessing_plotter.GetRenderWindow().AddRenderer(
+            preprocessing_plotter.scene.renderer
+        )
+
+        self._mapdl.finish()
+
+    def build_model(self, poisson_ratio, young_modulus, nnodes, length, force):
         self._mapdl.clear()
         self._mapdl.verify()
         self._mapdl.prep7()
@@ -195,38 +200,22 @@ class MainWindow(QMainWindow):
         self._mapdl.sectype(1, "BEAM", "RECT")
         self._mapdl.secdata("10", "10")
 
-        self._number_of_nodes = self._number_of_nodes_input.value()
-
         # Create the nodes
-        for node_num in range(1, self._number_of_nodes + 1):
-            self._mapdl.n(
-                node_num, (node_num - 1) * length / (self._number_of_nodes - 1), 0, 0
-            )
+        for node_num in range(1, nnodes + 1):
+            self._mapdl.n(node_num, (node_num - 1) * length / (nnodes - 1), 0, 0)
 
         # Create the elements
-        for elem_num in range(1, self._number_of_nodes):
+        for elem_num in range(1, nnodes):
             self._mapdl.e(elem_num, elem_num + 1)
 
         # Fix beam ends
         self._mapdl.d(1, lab="ALL")
-        self._mapdl.d(self._number_of_nodes, lab="ALL")
+        self._mapdl.d(nnodes, lab="ALL")
 
         #  Apply the force to the node in the middle
-        self._mapdl.f(self._number_of_nodes // 2 + 1, lab="FY", value=force)
+        self._mapdl.f(nnodes // 2 + 1, lab="FY", value=force)
 
-        # Get the pv.Plotter object from mapdl.eplot function
-        # to plot in the window
-        preprocessing_plotter = self._mapdl.eplot(
-            show_node_numbering=True, show_edges=True, cpos="xy", return_plotter=True
-        )
-
-        self._preprocessing_plotter.GetRenderWindow().AddRenderer(
-            preprocessing_plotter.renderer
-        )
-
-        self._mapdl.finish()
-
-    def _run_solver(self) -> None:
+    def run_solver(self) -> None:
         # solve
         self._mapdl.slashsolu()
         self._mapdl.solve()
@@ -245,13 +234,16 @@ class MainWindow(QMainWindow):
             "norm", show_node_numbering=True, cpos="xy", return_plotter=True
         )
         self._postprocessing_plotter.GetRenderWindow().AddRenderer(
-            nodal_disp_plotter.renderer
+            nodal_disp_plotter.scene.renderer
         )
 
+        nnodes = len(mapdl.mesh.nodes)
+
         mid_node_uy = mapdl.get_value(
-            entity="NODE", entnum=self._number_of_nodes // 2 + 1, item1="u", it1num="y"
+            entity="NODE", entnum=nnodes // 2 + 1, item1="u", it1num="y"
         )
-        self._deflection_label.setText(f"Deflection: {mid_node_uy:.3f}")
+
+        self._deflection_label.setText(f"Deflection: {mid_node_uy:.6f}")
 
     def closeEvent(self, event) -> None:
         self._preprocessing_plotter.close()

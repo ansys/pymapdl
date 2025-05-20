@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,13 +22,14 @@
 
 """Module for the MapdlPlotter class."""
 from collections import OrderedDict
-from typing import Any, Iterable, Optional, Union
+from typing import Any, Callable, Dict, Iterable, Optional, Union
 
 from ansys.tools.visualization_interface import Plotter
 from ansys.tools.visualization_interface.backends.pyvista import PyVistaBackendInterface
 import numpy as np
 from numpy.typing import NDArray
 
+from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.misc import get_bounding_box
 from ansys.mapdl.core.plotting.consts import (
@@ -42,12 +43,22 @@ from ansys.mapdl.core.plotting.consts import (
 )
 from ansys.mapdl.core.plotting.theme import MapdlTheme
 
+_FIRST_USE_RUN = False
+
 if _HAS_VISUALIZER:
     import pyvista as pv
 
-    from ansys.mapdl.core.plotting.plotting_defaults import DefaultSymbol
 
-    BC_plot_settings = DefaultSymbol()
+def _first_use():
+    # Run first time we use the visualizer
+    global _FIRST_USE_RUN
+    if _FIRST_USE_RUN is True:
+        return
+    if _HAS_VISUALIZER:
+        from ansys.mapdl.core.plotting.theme import _apply_default_theme
+
+        _apply_default_theme()
+    _FIRST_USE_RUN = True
 
 
 class MapdlPlotterBackend(PyVistaBackendInterface):
@@ -114,6 +125,7 @@ class MapdlPlotter(Plotter):
         self, use_trame: bool = False, theme: pv.Plotter.theme = None, **plotter_kwargs
     ):
         """Initialize the ``MapdlPlotter`` class."""
+        _first_use()
         self._backend = MapdlPlotterBackend(use_trame=use_trame, **plotter_kwargs)
         super().__init__(backend=self._backend)
         self._theme = theme
@@ -123,6 +135,19 @@ class MapdlPlotter(Plotter):
         self._notebook = None
         self._savefig = None
         self._title = None
+        self._bc_settings = None
+
+    @property
+    def bc_settings(self) -> Callable:
+        """Get the boundary condition settings object."""
+        if self._bc_settings is None:
+            self._make_bc_settings()
+        return self._bc_settings
+
+    def _make_bc_settings(self) -> None:
+        from ansys.mapdl.core.plotting.plotting_defaults import DefaultSymbol
+
+        self._bc_settings = DefaultSymbol()
 
     def _bc_labels_checker(self, bc_labels):
         """Make sure we have allowed parameters and data types for ``bc_labels``"""
@@ -225,15 +250,12 @@ class MapdlPlotter(Plotter):
         list[pv.PolyData]
             Plotted meshes.
         """
-        datasets = []
-        for actor in self.scene.actors.values():
-            if hasattr(actor, "mapper"):
-                datasets.append(actor.mapper.dataset)
-
         return [
             actor.mapper.dataset
             for actor in self.scene.actors.values()
             if hasattr(actor, "mapper")
+            and hasattr(actor.mapper, "dataset")
+            and actor.mapper.dataset
         ]
 
     def add_labels(
@@ -280,9 +302,9 @@ class MapdlPlotter(Plotter):
 
     def add_mesh(
         self,
-        meshes,
-        points,
-        labels,
+        meshes: Union[pv.PolyData, Dict[str, Any]] = [],
+        points=[],
+        labels=[],
         *,
         cpos=None,
         show_bounds=False,
@@ -331,6 +353,10 @@ class MapdlPlotter(Plotter):
         plotter_kwargs : dict, optional
             Extra kwargs, by default {}
         """
+        if not meshes and not points and not labels:
+            logger.warning("No meshes, points or labels to plot.")
+            return
+
         if theme is None:
             theme = MapdlTheme()
 
@@ -378,31 +404,43 @@ class MapdlPlotter(Plotter):
                 **(add_points_kwargs or {}),
             )
 
+        if isinstance(meshes, pv.PolyData):
+            meshes = [meshes]
         for mesh in meshes:
-            scalars: Optional[NDArray[Any]] = mesh.get("scalars")
+            rgb = False
+            if isinstance(mesh, Dict):
+                scalars: Optional[NDArray[Any]] = mesh.get("scalars")
 
-            if (
-                "scalars" in mesh
-                and scalars.ndim == 2
-                and (scalars.shape[1] == 3 or scalars.shape[1] == 4)
-            ):
-                # for the case we are using scalars for plotting
-                rgb = True
+                if (
+                    "scalars" in mesh
+                    and scalars.ndim == 2
+                    and (scalars.shape[1] == 3 or scalars.shape[1] == 4)
+                ):
+                    # for the case we are using scalars for plotting
+                    rgb = True
+
+                # To avoid index error.
+                mesh_ = mesh["mesh"]
+                if not isinstance(mesh_, list):
+                    mesh_ = [mesh_]
             else:
-                rgb = False
-
-            # To avoid index error.
-            mesh_ = mesh["mesh"]
-            if not isinstance(mesh_, list):
-                mesh_ = [mesh_]
-
+                scalars = None
+                mesh_ = meshes
             for each_mesh in mesh_:
                 self.scene.add_mesh(
                     each_mesh,
                     scalars=scalars,
                     scalar_bar_args=scalar_bar_args,
-                    color=mesh.get("color", color),
-                    style=mesh.get("style", style),
+                    color=(
+                        mesh.get("color", color)
+                        if isinstance(mesh, Dict) and "color" in mesh
+                        else color
+                    ),
+                    style=(
+                        mesh.get("style", style)
+                        if isinstance(mesh, Dict) and "style" in mesh
+                        else style
+                    ),
                     show_edges=show_edges,
                     edge_color=edge_color,
                     smooth_shading=smooth_shading,
@@ -573,13 +611,13 @@ class MapdlPlotter(Plotter):
                 orient=False,
                 scale="scale",
                 # tolerance=0.05,
-                geom=BC_plot_settings(each_label)["glyph"],
+                geom=self.bc_settings(each_label)["glyph"],
             )
             name_ = f"{each_label}"
             self.scene.add_mesh(
                 glyphs,
                 # name_filter=None,
-                color=BC_plot_settings(each_label)["color"],
+                color=self.bc_settings(each_label)["color"],
                 style="surface",
                 # style='wireframe',
                 # line_width=3,
@@ -630,11 +668,11 @@ class MapdlPlotter(Plotter):
                     # something it can be seen properly in the legend
                     label_ = value[1]
                     if "U" in label_:
-                        value = [BC_plot_settings("UY")["glyph"], label_, value[2]]
+                        value = [self.bc_settings("UY")["glyph"], label_, value[2]]
                     elif "F" in label_:
-                        value = [BC_plot_settings("FX")["glyph"], label_, value[2]]
+                        value = [self.bc_settings("FX")["glyph"], label_, value[2]]
                     else:
-                        value = [BC_plot_settings(label_)["glyph"], label_, value[2]]
+                        value = [self.bc_settings(label_)["glyph"], label_, value[2]]
 
                     if symbol == value[1]:
                         sorted_dict[key] = value
@@ -651,9 +689,9 @@ class MapdlPlotter(Plotter):
 
     def plot(
         self,
-        meshes,
-        points,
-        labels,
+        meshes: Union[pv.PolyData, Dict[str, Any]] = [],
+        points=[],
+        labels=[],
         *,
         title="",
         cpos=None,
@@ -819,6 +857,7 @@ class MapdlPlotter(Plotter):
         if savefig:
             self._off_screen = True
             self._notebook = False
+
         # permit user to save the figure as a screenshot
         if self._savefig or savefig:
             self._backend.show(
@@ -833,12 +872,12 @@ class MapdlPlotter(Plotter):
             if return_plotter:
                 return self
 
-            # ifplotter.scene.set_background("paraview") not returning plotter, close right away
+            # if plotter.scene.set_background("paraview") not returning plotter, close right away
             self.scene.close()
 
         else:
             if not return_plotter:
-                self._backend.show()
+                self._backend.show(**kwargs)
 
         if return_plotter:
             return self

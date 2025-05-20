@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -420,12 +420,7 @@ class MaterialDataTables:
 
         This command is also valid in the solution processor (:meth:`mapdl.slashsolu() <ansys.mapdl.core.Mapdl.slashsolu>`), but is not intended for changing material behaviors between load steps.
         """
-        command = "TBDELE,%s,%s,%s,%s" % (
-            str(lab),
-            str(mat1),
-            str(mat2),
-            str(inc),
-        )
+        command = f"TBDELE,{lab},{mat1},{mat2},{inc},{tbopt}"
         return self.run(command, **kwargs)
 
     def tbeo(self, par="", value="", **kwargs):

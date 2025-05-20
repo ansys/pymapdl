@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -19,8 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
-import re
 
 from ansys.mapdl.core._commands import parse
 
@@ -249,11 +247,7 @@ class Nodes:
 
         """
         command = f"N,{node},{x},{y},{z},{thxy},{thyz},{thzx}"
-        msg = self.run(command, **kwargs)
-        if msg:
-            res = re.search(r"(NODE\s*)([0-9]+)", msg)
-            if res is not None:
-                return int(res.group(2))
+        return parse.parse_n(self.run(command, **kwargs))
 
     def naxis(self, action="", val="", **kwargs):
         """Generates nodes for general axisymmetric element sections.

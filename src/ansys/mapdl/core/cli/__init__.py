@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,32 +20,26 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-try:
-    import click
-
-    _HAS_CLICK = True
-
-except ModuleNotFoundError:
-    _HAS_CLICK = False
-
+from ansys.mapdl.core import _HAS_CLICK
 
 if _HAS_CLICK:
     ###################################
     # PyMAPDL CLI
+    import click
 
     @click.group(invoke_without_command=True)
     @click.pass_context
-    def main(ctx):
+    def main(ctx: click.Context):
         pass
 
-    from ansys.mapdl.core.cli.convert import convert
+    from ansys.mapdl.core.cli.convert import convert as convert_cmd
     from ansys.mapdl.core.cli.list_instances import list_instances
-    from ansys.mapdl.core.cli.start import start
-    from ansys.mapdl.core.cli.stop import stop
+    from ansys.mapdl.core.cli.start import start as start_cmd
+    from ansys.mapdl.core.cli.stop import stop as stop_cmd
 
-    main.add_command(convert)
-    main.add_command(start)
-    main.add_command(stop)
+    main.add_command(convert_cmd, name="convert")
+    main.add_command(start_cmd, name="start")
+    main.add_command(stop_cmd, name="stop")
     main.add_command(list_instances, name="list")
 
 

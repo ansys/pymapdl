@@ -56,10 +56,10 @@ body:
       description: Run `python --version` to verify your Python version
       multiple: false
       options:
-       - '3.9'
        - '3.10'
        - '3.11'
        - '3.12'
+       - '3.13'
     validations:
       required: true
 

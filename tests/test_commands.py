@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,11 +21,11 @@
 # SOFTWARE.
 
 import inspect
+from unittest.mock import patch
 
 import numpy as np
 import pytest
 
-from ansys.mapdl.core import examples
 from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
     CMD_LISTING,
@@ -35,8 +35,8 @@ from ansys.mapdl.core.commands import (
     Commands,
     StringWithLiteralRepr,
 )
-from ansys.mapdl.core.examples import verif_files
-from conftest import has_dependency, requires
+from ansys.mapdl.core.examples.verif_files import vmfiles
+from conftest import NullContext, TestClass, has_dependency, requires
 
 if has_dependency("pandas"):
     import pandas as pd
@@ -139,422 +139,17 @@ PRNSOL_OUT_LONG = """PRINT F    REACTION SOLUTIONS PER NODE
  VALUE  -0.37253E-008 0.46566E-009
 """
 
-DLIST_RESULT = [
-    ["1", "UX", "0.00000000", "0.00000000"],
-    ["1", "UY", "0.00000000", "0.00000000"],
-    ["1", "UZ", "0.00000000", "0.00000000"],
-    ["1", "TEMP", "300.000000", "0.00000000"],
-    ["2", "UX", "0.00000000", "0.00000000"],
-    ["2", "UY", "0.00000000", "0.00000000"],
-    ["2", "UZ", "0.00000000", "0.00000000"],
-    ["2", "TEMP", "300.000000", "0.00000000"],
-    ["3", "UX", "0.00000000", "0.00000000"],
-    ["3", "UY", "0.00000000", "0.00000000"],
-    ["3", "UZ", "0.00000000", "0.00000000"],
-    ["3", "TEMP", "300.000000", "0.00000000"],
-    ["4", "UX", "0.00000000", "0.00000000"],
-    ["4", "UY", "0.00000000", "0.00000000"],
-    ["4", "UZ", "0.00000000", "0.00000000"],
-    ["4", "TEMP", "300.000000", "0.00000000"],
-    ["5", "UX", "0.00000000", "0.00000000"],
-    ["5", "UY", "0.00000000", "0.00000000"],
-    ["5", "UZ", "0.00000000", "0.00000000"],
-    ["5", "TEMP", "300.000000", "0.00000000"],
-    ["6", "UX", "0.00000000", "0.00000000"],
-    ["6", "UY", "0.00000000", "0.00000000"],
-    ["6", "UZ", "0.00000000", "0.00000000"],
-    ["6", "TEMP", "300.000000", "0.00000000"],
-    ["7", "UX", "0.00000000", "0.00000000"],
-    ["7", "UY", "0.00000000", "0.00000000"],
-    ["7", "UZ", "0.00000000", "0.00000000"],
-    ["7", "TEMP", "300.000000", "0.00000000"],
-    ["8", "UX", "0.00000000", "0.00000000"],
-    ["8", "UY", "0.00000000", "0.00000000"],
-    ["8", "UZ", "0.00000000", "0.00000000"],
-    ["8", "TEMP", "300.000000", "0.00000000"],
-    ["9", "UX", "0.00000000", "0.00000000"],
-    ["9", "UY", "0.00000000", "0.00000000"],
-    ["9", "UZ", "0.00000000", "0.00000000"],
-    ["9", "TEMP", "300.000000", "0.00000000"],
-    ["10", "UX", "0.00000000", "0.00000000"],
-    ["10", "UY", "0.00000000", "0.00000000"],
-    ["10", "UZ", "0.00000000", "0.00000000"],
-    ["10", "TEMP", "300.000000", "0.00000000"],
-    ["11", "UX", "0.00000000", "0.00000000"],
-    ["11", "UY", "0.00000000", "0.00000000"],
-    ["11", "UZ", "0.00000000", "0.00000000"],
-    ["11", "TEMP", "300.000000", "0.00000000"],
-    ["12", "UX", "0.00000000", "0.00000000"],
-    ["12", "UY", "0.00000000", "0.00000000"],
-    ["12", "UZ", "0.00000000", "0.00000000"],
-    ["12", "TEMP", "300.000000", "0.00000000"],
-    ["13", "UX", "0.00000000", "0.00000000"],
-    ["13", "UY", "0.00000000", "0.00000000"],
-    ["13", "UZ", "0.00000000", "0.00000000"],
-    ["13", "TEMP", "300.000000", "0.00000000"],
-    ["146", "UX", "0.00000000", "0.00000000"],
-    ["146", "UY", "0.00000000", "0.00000000"],
-    ["146", "UZ", "0.00000000", "0.00000000"],
-    ["146", "TEMP", "300.000000", "0.00000000"],
-    ["158", "UX", "0.00000000", "0.00000000"],
-    ["158", "UY", "0.00000000", "0.00000000"],
-    ["158", "UZ", "0.00000000", "0.00000000"],
-    ["158", "TEMP", "300.000000", "0.00000000"],
-    ["159", "UX", "0.00000000", "0.00000000"],
-    ["159", "UY", "0.00000000", "0.00000000"],
-    ["159", "UZ", "0.00000000", "0.00000000"],
-    ["159", "TEMP", "300.000000", "0.00000000"],
-    ["160", "UX", "0.00000000", "0.00000000"],
-    ["160", "UY", "0.00000000", "0.00000000"],
-    ["160", "UZ", "0.00000000", "0.00000000"],
-    ["160", "TEMP", "300.000000", "0.00000000"],
-    ["161", "UX", "0.00000000", "0.00000000"],
-    ["161", "UY", "0.00000000", "0.00000000"],
-    ["161", "UZ", "0.00000000", "0.00000000"],
-    ["161", "TEMP", "300.000000", "0.00000000"],
-    ["162", "UX", "0.00000000", "0.00000000"],
-    ["162", "UY", "0.00000000", "0.00000000"],
-    ["162", "UZ", "0.00000000", "0.00000000"],
-    ["162", "TEMP", "300.000000", "0.00000000"],
-    ["163", "UX", "0.00000000", "0.00000000"],
-    ["163", "UY", "0.00000000", "0.00000000"],
-    ["163", "UZ", "0.00000000", "0.00000000"],
-    ["163", "TEMP", "300.000000", "0.00000000"],
-    ["164", "UX", "0.00000000", "0.00000000"],
-    ["164", "UY", "0.00000000", "0.00000000"],
-    ["164", "UZ", "0.00000000", "0.00000000"],
-    ["164", "TEMP", "300.000000", "0.00000000"],
-    ["165", "UX", "0.00000000", "0.00000000"],
-    ["165", "UY", "0.00000000", "0.00000000"],
-    ["165", "UZ", "0.00000000", "0.00000000"],
-    ["165", "TEMP", "300.000000", "0.00000000"],
-    ["166", "UX", "0.00000000", "0.00000000"],
-    ["166", "UY", "0.00000000", "0.00000000"],
-    ["166", "UZ", "0.00000000", "0.00000000"],
-    ["166", "TEMP", "300.000000", "0.00000000"],
-    ["167", "UX", "0.00000000", "0.00000000"],
-    ["167", "UY", "0.00000000", "0.00000000"],
-    ["167", "UZ", "0.00000000", "0.00000000"],
-    ["167", "TEMP", "300.000000", "0.00000000"],
-    ["168", "UX", "0.00000000", "0.00000000"],
-    ["168", "UY", "0.00000000", "0.00000000"],
-    ["168", "UZ", "0.00000000", "0.00000000"],
-    ["168", "TEMP", "300.000000", "0.00000000"],
-    ["169", "UX", "0.00000000", "0.00000000"],
-    ["169", "UY", "0.00000000", "0.00000000"],
-    ["169", "UZ", "0.00000000", "0.00000000"],
-    ["169", "TEMP", "300.000000", "0.00000000"],
-    ["171", "UX", "0.00000000", "0.00000000"],
-    ["171", "UY", "0.00000000", "0.00000000"],
-    ["171", "UZ", "0.00000000", "0.00000000"],
-    ["171", "TEMP", "300.000000", "0.00000000"],
-    ["172", "UX", "0.00000000", "0.00000000"],
-    ["172", "UY", "0.00000000", "0.00000000"],
-    ["172", "UZ", "0.00000000", "0.00000000"],
-    ["172", "TEMP", "300.000000", "0.00000000"],
-    ["173", "UX", "0.00000000", "0.00000000"],
-    ["173", "UY", "0.00000000", "0.00000000"],
-    ["173", "UZ", "0.00000000", "0.00000000"],
-    ["173", "TEMP", "300.000000", "0.00000000"],
-    ["174", "UX", "0.00000000", "0.00000000"],
-    ["174", "UY", "0.00000000", "0.00000000"],
-    ["174", "UZ", "0.00000000", "0.00000000"],
-    ["174", "TEMP", "300.000000", "0.00000000"],
-    ["175", "UX", "0.00000000", "0.00000000"],
-    ["175", "UY", "0.00000000", "0.00000000"],
-    ["175", "UZ", "0.00000000", "0.00000000"],
-    ["175", "TEMP", "300.000000", "0.00000000"],
-    ["176", "UX", "0.00000000", "0.00000000"],
-    ["176", "UY", "0.00000000", "0.00000000"],
-    ["176", "UZ", "0.00000000", "0.00000000"],
-    ["176", "TEMP", "300.000000", "0.00000000"],
-    ["177", "UX", "0.00000000", "0.00000000"],
-    ["177", "UY", "0.00000000", "0.00000000"],
-    ["177", "UZ", "0.00000000", "0.00000000"],
-    ["177", "TEMP", "300.000000", "0.00000000"],
-    ["178", "UX", "0.00000000", "0.00000000"],
-    ["178", "UY", "0.00000000", "0.00000000"],
-    ["178", "UZ", "0.00000000", "0.00000000"],
-    ["178", "TEMP", "300.000000", "0.00000000"],
-    ["179", "UX", "0.00000000", "0.00000000"],
-    ["179", "UY", "0.00000000", "0.00000000"],
-    ["179", "UZ", "0.00000000", "0.00000000"],
-    ["179", "TEMP", "300.000000", "0.00000000"],
-    ["314", "UX", "0.00000000", "0.00000000"],
-    ["314", "UY", "0.00000000", "0.00000000"],
-    ["314", "UZ", "0.00000000", "0.00000000"],
-    ["314", "TEMP", "300.000000", "0.00000000"],
-    ["315", "UX", "0.00000000", "0.00000000"],
-    ["315", "UY", "0.00000000", "0.00000000"],
-    ["315", "UZ", "0.00000000", "0.00000000"],
-    ["315", "TEMP", "300.000000", "0.00000000"],
-    ["316", "UX", "0.00000000", "0.00000000"],
-    ["316", "UY", "0.00000000", "0.00000000"],
-    ["316", "UZ", "0.00000000", "0.00000000"],
-    ["316", "TEMP", "300.000000", "0.00000000"],
-    ["317", "UX", "0.00000000", "0.00000000"],
-    ["317", "UY", "0.00000000", "0.00000000"],
-    ["317", "UZ", "0.00000000", "0.00000000"],
-    ["317", "TEMP", "300.000000", "0.00000000"],
-    ["318", "UX", "0.00000000", "0.00000000"],
-    ["318", "UY", "0.00000000", "0.00000000"],
-    ["318", "UZ", "0.00000000", "0.00000000"],
-    ["318", "TEMP", "300.000000", "0.00000000"],
-    ["319", "UX", "0.00000000", "0.00000000"],
-    ["319", "UY", "0.00000000", "0.00000000"],
-    ["319", "UZ", "0.00000000", "0.00000000"],
-    ["319", "TEMP", "300.000000", "0.00000000"],
-    ["320", "UX", "0.00000000", "0.00000000"],
-    ["320", "UY", "0.00000000", "0.00000000"],
-    ["320", "UZ", "0.00000000", "0.00000000"],
-    ["320", "TEMP", "300.000000", "0.00000000"],
-    ["321", "UX", "0.00000000", "0.00000000"],
-    ["321", "UY", "0.00000000", "0.00000000"],
-    ["321", "UZ", "0.00000000", "0.00000000"],
-    ["321", "TEMP", "300.000000", "0.00000000"],
-    ["322", "UX", "0.00000000", "0.00000000"],
-    ["322", "UY", "0.00000000", "0.00000000"],
-    ["322", "UZ", "0.00000000", "0.00000000"],
-    ["322", "TEMP", "300.000000", "0.00000000"],
-    ["323", "UX", "0.00000000", "0.00000000"],
-    ["323", "UY", "0.00000000", "0.00000000"],
-    ["323", "UZ", "0.00000000", "0.00000000"],
-    ["323", "TEMP", "300.000000", "0.00000000"],
-    ["324", "UX", "0.00000000", "0.00000000"],
-    ["324", "UY", "0.00000000", "0.00000000"],
-    ["324", "UZ", "0.00000000", "0.00000000"],
-    ["324", "TEMP", "300.000000", "0.00000000"],
-    ["330", "UX", "0.00000000", "0.00000000"],
-    ["330", "UY", "0.00000000", "0.00000000"],
-    ["330", "UZ", "0.00000000", "0.00000000"],
-    ["330", "TEMP", "300.000000", "0.00000000"],
-    ["331", "UX", "0.00000000", "0.00000000"],
-    ["331", "UY", "0.00000000", "0.00000000"],
-    ["331", "UZ", "0.00000000", "0.00000000"],
-    ["331", "TEMP", "300.000000", "0.00000000"],
-    ["332", "UX", "0.00000000", "0.00000000"],
-    ["332", "UY", "0.00000000", "0.00000000"],
-    ["332", "UZ", "0.00000000", "0.00000000"],
-    ["332", "TEMP", "300.000000", "0.00000000"],
-    ["334", "UX", "0.00000000", "0.00000000"],
-    ["334", "UY", "0.00000000", "0.00000000"],
-    ["334", "UZ", "0.00000000", "0.00000000"],
-    ["334", "TEMP", "300.000000", "0.00000000"],
-    ["335", "UX", "0.00000000", "0.00000000"],
-    ["335", "UY", "0.00000000", "0.00000000"],
-    ["335", "UZ", "0.00000000", "0.00000000"],
-    ["335", "TEMP", "300.000000", "0.00000000"],
-    ["336", "UX", "0.00000000", "0.00000000"],
-    ["336", "UY", "0.00000000", "0.00000000"],
-    ["336", "UZ", "0.00000000", "0.00000000"],
-    ["336", "TEMP", "300.000000", "0.00000000"],
-    ["340", "UX", "0.00000000", "0.00000000"],
-    ["340", "UY", "0.00000000", "0.00000000"],
-    ["340", "UZ", "0.00000000", "0.00000000"],
-    ["340", "TEMP", "300.000000", "0.00000000"],
-    ["341", "UX", "0.00000000", "0.00000000"],
-    ["341", "UY", "0.00000000", "0.00000000"],
-    ["341", "UZ", "0.00000000", "0.00000000"],
-    ["341", "TEMP", "300.000000", "0.00000000"],
-    ["342", "UX", "0.00000000", "0.00000000"],
-    ["342", "UY", "0.00000000", "0.00000000"],
-    ["342", "UZ", "0.00000000", "0.00000000"],
-    ["342", "TEMP", "300.000000", "0.00000000"],
-    ["343", "UX", "0.00000000", "0.00000000"],
-    ["343", "UY", "0.00000000", "0.00000000"],
-    ["343", "UZ", "0.00000000", "0.00000000"],
-    ["343", "TEMP", "300.000000", "0.00000000"],
-    ["348", "UX", "0.00000000", "0.00000000"],
-    ["348", "UY", "0.00000000", "0.00000000"],
-    ["348", "UZ", "0.00000000", "0.00000000"],
-    ["348", "TEMP", "300.000000", "0.00000000"],
-    ["349", "UX", "0.00000000", "0.00000000"],
-    ["349", "UY", "0.00000000", "0.00000000"],
-    ["349", "UZ", "0.00000000", "0.00000000"],
-    ["349", "TEMP", "300.000000", "0.00000000"],
-    ["350", "UX", "0.00000000", "0.00000000"],
-    ["350", "UY", "0.00000000", "0.00000000"],
-    ["350", "UZ", "0.00000000", "0.00000000"],
-    ["350", "TEMP", "300.000000", "0.00000000"],
-    ["351", "UX", "0.00000000", "0.00000000"],
-    ["351", "UY", "0.00000000", "0.00000000"],
-    ["351", "UZ", "0.00000000", "0.00000000"],
-    ["351", "TEMP", "300.000000", "0.00000000"],
-    ["352", "UX", "0.00000000", "0.00000000"],
-    ["352", "UY", "0.00000000", "0.00000000"],
-    ["352", "UZ", "0.00000000", "0.00000000"],
-    ["352", "TEMP", "300.000000", "0.00000000"],
-    ["353", "UX", "0.00000000", "0.00000000"],
-    ["353", "UY", "0.00000000", "0.00000000"],
-    ["353", "UZ", "0.00000000", "0.00000000"],
-    ["353", "TEMP", "300.000000", "0.00000000"],
-    ["354", "UX", "0.00000000", "0.00000000"],
-    ["354", "UY", "0.00000000", "0.00000000"],
-    ["354", "UZ", "0.00000000", "0.00000000"],
-    ["354", "TEMP", "300.000000", "0.00000000"],
-    ["355", "UX", "0.00000000", "0.00000000"],
-    ["355", "UY", "0.00000000", "0.00000000"],
-    ["355", "UZ", "0.00000000", "0.00000000"],
-    ["355", "TEMP", "300.000000", "0.00000000"],
-    ["356", "UX", "0.00000000", "0.00000000"],
-    ["356", "UY", "0.00000000", "0.00000000"],
-    ["356", "UZ", "0.00000000", "0.00000000"],
-    ["356", "TEMP", "300.000000", "0.00000000"],
-    ["357", "UX", "0.00000000", "0.00000000"],
-    ["357", "UY", "0.00000000", "0.00000000"],
-    ["357", "UZ", "0.00000000", "0.00000000"],
-    ["357", "TEMP", "300.000000", "0.00000000"],
-    ["358", "UX", "0.00000000", "0.00000000"],
-    ["358", "UY", "0.00000000", "0.00000000"],
-    ["358", "UZ", "0.00000000", "0.00000000"],
-    ["358", "TEMP", "300.000000", "0.00000000"],
-    ["359", "UX", "0.00000000", "0.00000000"],
-    ["359", "UY", "0.00000000", "0.00000000"],
-    ["359", "UZ", "0.00000000", "0.00000000"],
-    ["359", "TEMP", "300.000000", "0.00000000"],
-    ["360", "UX", "0.00000000", "0.00000000"],
-    ["360", "UY", "0.00000000", "0.00000000"],
-    ["360", "UZ", "0.00000000", "0.00000000"],
-    ["360", "TEMP", "300.000000", "0.00000000"],
-    ["361", "UX", "0.00000000", "0.00000000"],
-    ["361", "UY", "0.00000000", "0.00000000"],
-    ["361", "UZ", "0.00000000", "0.00000000"],
-    ["361", "TEMP", "300.000000", "0.00000000"],
-    ["362", "UX", "0.00000000", "0.00000000"],
-    ["362", "UY", "0.00000000", "0.00000000"],
-    ["362", "UZ", "0.00000000", "0.00000000"],
-    ["362", "TEMP", "300.000000", "0.00000000"],
-    ["363", "UX", "0.00000000", "0.00000000"],
-    ["363", "UY", "0.00000000", "0.00000000"],
-    ["363", "UZ", "0.00000000", "0.00000000"],
-    ["363", "TEMP", "300.000000", "0.00000000"],
-    ["364", "UX", "0.00000000", "0.00000000"],
-    ["364", "UY", "0.00000000", "0.00000000"],
-    ["364", "UZ", "0.00000000", "0.00000000"],
-    ["364", "TEMP", "300.000000", "0.00000000"],
-    ["365", "UX", "0.00000000", "0.00000000"],
-    ["365", "UY", "0.00000000", "0.00000000"],
-    ["365", "UZ", "0.00000000", "0.00000000"],
-    ["365", "TEMP", "300.000000", "0.00000000"],
-    ["366", "UX", "0.00000000", "0.00000000"],
-    ["366", "UY", "0.00000000", "0.00000000"],
-    ["366", "UZ", "0.00000000", "0.00000000"],
-    ["366", "TEMP", "300.000000", "0.00000000"],
-    ["520", "UX", "0.00000000", "0.00000000"],
-    ["520", "UY", "0.00000000", "0.00000000"],
-    ["520", "UZ", "0.00000000", "0.00000000"],
-    ["520", "TEMP", "300.000000", "0.00000000"],
-    ["572", "UX", "0.00000000", "0.00000000"],
-    ["572", "UY", "0.00000000", "0.00000000"],
-    ["572", "UZ", "0.00000000", "0.00000000"],
-    ["572", "TEMP", "300.000000", "0.00000000"],
-    ["573", "UX", "0.00000000", "0.00000000"],
-    ["573", "UY", "0.00000000", "0.00000000"],
-    ["573", "UZ", "0.00000000", "0.00000000"],
-    ["573", "TEMP", "300.000000", "0.00000000"],
-    ["574", "UX", "0.00000000", "0.00000000"],
-    ["574", "UY", "0.00000000", "0.00000000"],
-    ["574", "UZ", "0.00000000", "0.00000000"],
-    ["574", "TEMP", "300.000000", "0.00000000"],
-    ["575", "UX", "0.00000000", "0.00000000"],
-    ["575", "UY", "0.00000000", "0.00000000"],
-    ["575", "UZ", "0.00000000", "0.00000000"],
-    ["575", "TEMP", "300.000000", "0.00000000"],
-    ["576", "UX", "0.00000000", "0.00000000"],
-    ["576", "UY", "0.00000000", "0.00000000"],
-    ["576", "UZ", "0.00000000", "0.00000000"],
-    ["576", "TEMP", "300.000000", "0.00000000"],
-    ["628", "UX", "0.00000000", "0.00000000"],
-    ["628", "UY", "0.00000000", "0.00000000"],
-    ["628", "UZ", "0.00000000", "0.00000000"],
-    ["628", "TEMP", "300.000000", "0.00000000"],
-    ["645", "UX", "0.00000000", "0.00000000"],
-    ["645", "UY", "0.00000000", "0.00000000"],
-    ["645", "UZ", "0.00000000", "0.00000000"],
-    ["645", "TEMP", "300.000000", "0.00000000"],
-    ["708", "UX", "0.00000000", "0.00000000"],
-    ["708", "UY", "0.00000000", "0.00000000"],
-    ["708", "UZ", "0.00000000", "0.00000000"],
-    ["708", "TEMP", "300.000000", "0.00000000"],
-    ["709", "UX", "0.00000000", "0.00000000"],
-    ["709", "UY", "0.00000000", "0.00000000"],
-    ["709", "UZ", "0.00000000", "0.00000000"],
-    ["709", "TEMP", "300.000000", "0.00000000"],
-    ["710", "UX", "0.00000000", "0.00000000"],
-    ["710", "UY", "0.00000000", "0.00000000"],
-    ["710", "UZ", "0.00000000", "0.00000000"],
-    ["710", "TEMP", "300.000000", "0.00000000"],
-    ["711", "UX", "0.00000000", "0.00000000"],
-    ["711", "UY", "0.00000000", "0.00000000"],
-    ["711", "UZ", "0.00000000", "0.00000000"],
-    ["711", "TEMP", "300.000000", "0.00000000"],
-    ["712", "UX", "0.00000000", "0.00000000"],
-    ["712", "UY", "0.00000000", "0.00000000"],
-    ["712", "UZ", "0.00000000", "0.00000000"],
-    ["712", "TEMP", "300.000000", "0.00000000"],
-    ["713", "UX", "0.00000000", "0.00000000"],
-    ["713", "UY", "0.00000000", "0.00000000"],
-    ["713", "UZ", "0.00000000", "0.00000000"],
-    ["713", "TEMP", "300.000000", "0.00000000"],
-    ["757", "UX", "0.00000000", "0.00000000"],
-    ["757", "UY", "0.00000000", "0.00000000"],
-    ["757", "UZ", "0.00000000", "0.00000000"],
-    ["757", "TEMP", "300.000000", "0.00000000"],
-    ["758", "UX", "0.00000000", "0.00000000"],
-    ["758", "UY", "0.00000000", "0.00000000"],
-    ["758", "UZ", "0.00000000", "0.00000000"],
-    ["758", "TEMP", "300.000000", "0.00000000"],
-    ["784", "UX", "0.00000000", "0.00000000"],
-    ["784", "UY", "0.00000000", "0.00000000"],
-    ["784", "UZ", "0.00000000", "0.00000000"],
-    ["784", "TEMP", "300.000000", "0.00000000"],
-    ["785", "UX", "0.00000000", "0.00000000"],
-    ["785", "UY", "0.00000000", "0.00000000"],
-    ["785", "UZ", "0.00000000", "0.00000000"],
-    ["785", "TEMP", "300.000000", "0.00000000"],
-    ["831", "UX", "0.00000000", "0.00000000"],
-    ["831", "UY", "0.00000000", "0.00000000"],
-    ["831", "UZ", "0.00000000", "0.00000000"],
-    ["831", "TEMP", "300.000000", "0.00000000"],
-    ["832", "UX", "0.00000000", "0.00000000"],
-    ["832", "UY", "0.00000000", "0.00000000"],
-    ["832", "UZ", "0.00000000", "0.00000000"],
-    ["832", "TEMP", "300.000000", "0.00000000"],
-    ["833", "UX", "0.00000000", "0.00000000"],
-    ["833", "UY", "0.00000000", "0.00000000"],
-    ["833", "UZ", "0.00000000", "0.00000000"],
-    ["833", "TEMP", "300.000000", "0.00000000"],
-    ["835", "UX", "0.00000000", "0.00000000"],
-    ["835", "UY", "0.00000000", "0.00000000"],
-    ["835", "UZ", "0.00000000", "0.00000000"],
-]
-
 CMD_DOC_STRING_INJECTOR = CMD_LISTING.copy()
 CMD_DOC_STRING_INJECTOR.extend(CMD_BC_LISTING)
 
 
-@pytest.fixture(scope="module")
-def plastic_solve(mapdl):
-    mapdl.mute = True
-    mapdl.finish()
-    mapdl.clear()
-    mapdl.input(examples.verif_files.vmfiles["vm273"])
+@pytest.fixture()
+def beam_solve(mapdl, cleared):
+    with mapdl.muted:
+        mapdl.input(vmfiles["vm10"])
 
-    mapdl.post1()
-    mapdl.set(1, 2)
-    mapdl.mute = False
-
-
-@pytest.fixture(scope="module")
-def beam_solve(mapdl):
-    mapdl.mute = True
-    mapdl.finish()
-    mapdl.clear()
-    mapdl.input(examples.verif_files.vmfiles["vm10"])
-
-    mapdl.post1()
-    mapdl.set(1, 2)
-    mapdl.mute = False
+        mapdl.post1()
+        mapdl.set(1, 2)
 
 
 def test_cmd_class():
@@ -595,32 +190,50 @@ def test_cmd_class_prnsol_short():
 
 def test_cmd_class_dlist_vm(mapdl, cleared):
     # Run only the first 100 lines of VM223
-    with open(verif_files.vmfiles["vm223"]) as fid:
-        cmds = fid.read()
+    DLIST_RESULT = [
+        ["1", "UX", "10.0000000", "0.00000000"],
+        ["3", "TEMP", "10.0000000", "0.00000000"],
+        ["5", "UZ", "0.00000000", "0.00000000"],
+        ["10", "UX", "0.00000000", "0.00000000"],
+        ["10", "UY", "0.00000000", "0.00000000"],
+        ["10", "UZ", "0.00000000", "0.00000000"],
+        ["10", "TEMP", "0.00000000", "0.00000000"],
+        ["10", "VOLT", "0.00000000", "0.00000000"],
+        ["11", "TEMP", "20.0000000", "0.00000000"],
+    ]
+    mapdl.allsel()
+    mapdl.prep7()
+    mapdl.et(1, "SOLID227", 111)
+    mapdl.block(0, 10, 0, 20, 0, 30)
+    mapdl.esize(10)
+    mapdl.vmesh("ALL")
 
-    mapdl.finish()
-    ind = cmds.find("NSEL,ALL")
-    mapdl.input_strings(cmds[:ind])
+    mapdl.d(1, "UX", 10)
+    mapdl.d(3, "TEMP", 10)
+    mapdl.d(5, "UZ", 0)
+
+    mapdl.d(10, "ALL", 0)
+    mapdl.d(11, "TEMP", 20)
+    mapdl.d(11, "VOLT", 20)
 
     mapdl.allsel("all")
     out = mapdl.dlist()
     out_list = out.to_list()
 
-    def are_the_same_result():
-        for el1, el2 in zip(out_list, DLIST_RESULT):
+    def are_the_same_result(a, b):
+        for el1, el2 in zip(a, b):
             for el11, el22 in zip(el1, el2):
-                if el11 != el22:
-                    return False
+                assert el11 == el22
         return True
 
     assert isinstance(out, BoundaryConditionsListingOutput)
     assert isinstance(out_list, list)
     assert out_list
-    assert are_the_same_result()
+    assert are_the_same_result(out_list, DLIST_RESULT)
 
 
 @pytest.mark.parametrize("func", LIST_OF_INQUIRE_FUNCTIONS)
-def test_inquire_functions(mapdl, func):
+def test_inquire_functions(mapdl, cleared, func):
     func_ = getattr(mapdl, func)
     func_args = inspect.getfullargspec(func_).args
     args = [
@@ -632,27 +245,6 @@ def test_inquire_functions(mapdl, func):
     else:
         assert isinstance(output, str)
         assert "=" in output
-
-
-@pytest.mark.parametrize(
-    "func,args",
-    [("prnsol", ("U", "X")), ("presol", ("S", "X")), ("presol", ("S", "ALL"))],
-)
-def test_output_listing(mapdl, plastic_solve, func, args):
-    mapdl.post1()
-    func_ = getattr(mapdl, func)
-    out = func_(*args)
-
-    out_list = out.to_list()
-    out_array = out.to_array()
-
-    assert isinstance(out, CommandListingOutput)
-    assert isinstance(out_list, list) and out_list
-    assert isinstance(out_array, np.ndarray) and out_array.size != 0
-
-    if has_dependency("pandas"):
-        out_df = out.to_dataframe()
-        assert isinstance(out_df, pd.DataFrame) and not out_df.empty
 
 
 @pytest.mark.parametrize("func", ["dlist", "flist"])
@@ -673,7 +265,7 @@ def test_bclist(mapdl, beam_solve, func):
 
 
 @pytest.mark.parametrize("method", CMD_DOC_STRING_INJECTOR)
-def test_docstring_injector(mapdl, method):
+def test_docstring_injector(mapdl, cleared, method):
     """Check if the docstring has been injected."""
     for name in dir(mapdl):
         if name[0:4].upper() == method and name in dir(
@@ -735,10 +327,7 @@ def test_nlist_to_array(mapdl, beam_solve):
     assert np.allclose(nlist.to_array()[:, 1:4], mapdl.mesh.nodes)
 
 
-def test_cmlist(mapdl):
-    mapdl.clear()
-
-    mapdl.prep7()
+def test_cmlist(mapdl, cleared):
     # setup the full file
     mapdl.block(0, 1, 0, 1, 0, 1)
     mapdl.et(1, 186)
@@ -768,40 +357,40 @@ def test_cmlist(mapdl):
         assert each_ in cmlist_all
 
 
-class Test_bc_cmdlist_solid:
+def solid_FE_model(mapdl):
+    # Define keypoints, lines and area
+    # --------------------
+    mapdl.k(1, 0, 0)
+    mapdl.k(2, 1, 0)
+    mapdl.k(3, 1, 1)
+    mapdl.l(1, 2)
+    mapdl.l(2, 3)
+    mapdl.l(3, 1)
+    mapdl.a(1, 2, 3)
 
-    def solid_model(self, mapdl):
-        # Solid model (Geometry)
+    # Define a material
+    # --------------------
+    mapdl.mp("EX", 1, 30e6)
+    mapdl.mp("NUXY", 1, 0.25)  # Poisson's Ratio
 
-        mapdl.clear()
+    # Define section
+    # --------------------
+    mapdl.et(1, "PLANE183")
+    mapdl.keyopt(1, 1, 0)
+    mapdl.keyopt(1, 3, 3)
+    mapdl.keyopt(1, 6, 0)
+    mapdl.r(1, 0.01)
 
-        mapdl.prep7()
 
-        # Define keypoints, lines and area
-        # --------------------
-        mapdl.k(1, 0, 0)
-        mapdl.k(2, 1, 0)
-        mapdl.k(3, 1, 1)
-        mapdl.l(1, 2)
-        mapdl.l(2, 3)
-        mapdl.l(3, 1)
-        mapdl.a(1, 2, 3)
+class Test_bc_cmdlist_solid(TestClass):
 
-        # Define a material
-        # --------------------
-        mapdl.mp("EX", 1, 30e6)
-        mapdl.mp("NUXY", 1, 0.25)  # Poisson's Ratio
-
-        # Define section
-        # --------------------
-        mapdl.et(1, "PLANE183")
-        mapdl.keyopt(1, 1, 0)
-        mapdl.keyopt(1, 3, 3)
-        mapdl.keyopt(1, 6, 0)
-        mapdl.r(1, 0.01)
+    @staticmethod
+    @pytest.fixture(scope="class")
+    def solid_model(mapdl):
+        solid_FE_model(mapdl)
 
     @requires("pandas")
-    def test_dklist(self, mapdl):
+    def test_dklist(self, mapdl, solid_model):
 
         df_dk = pd.DataFrame(
             {
@@ -812,8 +401,6 @@ class Test_bc_cmdlist_solid:
                 "EXP KEY": ["0"],
             }
         )
-
-        self.solid_model(mapdl)
         mapdl.dk(1, "UX", 0)
 
         dklist_result = mapdl.dklist().to_dataframe()
@@ -822,7 +409,7 @@ class Test_bc_cmdlist_solid:
         assert dklist_result.compare(df_dk).empty
 
     @requires("pandas")
-    def test_dllist(self, mapdl):
+    def test_dllist(self, mapdl, solid_model):
 
         df_dl = pd.DataFrame(
             {
@@ -834,7 +421,6 @@ class Test_bc_cmdlist_solid:
             }
         )
 
-        self.solid_model(mapdl)
         mapdl.dl(2, 1, "ALL", 0)
 
         dllist_result = mapdl.dllist().to_dataframe()
@@ -843,7 +429,7 @@ class Test_bc_cmdlist_solid:
         assert dllist_result.compare(df_dl).empty
 
     @requires("pandas")
-    def test_dalist(self, mapdl):
+    def test_dalist(self, mapdl, solid_model):
 
         df_da = pd.DataFrame(
             {
@@ -854,7 +440,6 @@ class Test_bc_cmdlist_solid:
             }
         )
 
-        self.solid_model(mapdl)
         mapdl.da(1, "UZ", 0)
 
         dalist_result = mapdl.dalist().to_dataframe()
@@ -863,7 +448,7 @@ class Test_bc_cmdlist_solid:
         assert dalist_result.compare(df_da).empty
 
     @requires("pandas")
-    def test_fklist(self, mapdl):
+    def test_fklist(self, mapdl, solid_model):
 
         df_fk = pd.DataFrame(
             {
@@ -874,7 +459,6 @@ class Test_bc_cmdlist_solid:
             }
         )
 
-        self.solid_model(mapdl)
         mapdl.fk(2, "FY", 200)
         mapdl.fk(3, "FY", 100)
 
@@ -884,7 +468,7 @@ class Test_bc_cmdlist_solid:
         assert fklist_result.compare(df_fk).empty
 
     @requires("pandas")
-    def test_sfllist(self, mapdl):
+    def test_sfllist(self, mapdl, solid_model):
 
         df_sfl = pd.DataFrame(
             {
@@ -895,7 +479,6 @@ class Test_bc_cmdlist_solid:
             }
         )
 
-        self.solid_model(mapdl)
         mapdl.sfl(2, "PRES", 50, 500)
         mapdl.sfl(3, "PRES", 50, 500)
 
@@ -905,7 +488,7 @@ class Test_bc_cmdlist_solid:
         assert sfllist_result.compare(df_sfl).empty
 
     @requires("pandas")
-    def test_bfklist(self, mapdl):
+    def test_bfklist(self, mapdl, solid_model):
 
         df_bfk = pd.DataFrame(
             {
@@ -915,7 +498,6 @@ class Test_bc_cmdlist_solid:
             }
         )
 
-        self.solid_model(mapdl)
         mapdl.bfk(2, "TEMP", 10)
 
         bfklist_result = mapdl.bfklist().to_dataframe()
@@ -924,7 +506,7 @@ class Test_bc_cmdlist_solid:
         assert bfklist_result.compare(df_bfk).empty
 
     @requires("pandas")
-    def test_bfllist(self, mapdl):
+    def test_bfllist(self, mapdl, solid_model):
 
         df_bfl = pd.DataFrame(
             {
@@ -934,7 +516,6 @@ class Test_bc_cmdlist_solid:
             }
         )
 
-        self.solid_model(mapdl)
         mapdl.bfl(3, "TEMP", 15)
 
         bfllist_result = mapdl.bfllist().to_dataframe()
@@ -943,7 +524,7 @@ class Test_bc_cmdlist_solid:
         assert bfllist_result.compare(df_bfl).empty
 
     @requires("pandas")
-    def test_bfalist(self, mapdl):
+    def test_bfalist(self, mapdl, solid_model):
 
         df_bfa = pd.DataFrame(
             {
@@ -953,7 +534,6 @@ class Test_bc_cmdlist_solid:
             }
         )
 
-        self.solid_model(mapdl)
         mapdl.bfa(1, "TEMP", 20)
 
         bfalist_result = mapdl.bfalist().to_dataframe()
@@ -962,42 +542,11 @@ class Test_bc_cmdlist_solid:
         assert bfalist_result.compare(df_bfa).empty
 
 
-class Test_bc_cmdlist_model:
+class Test_bc_cmdlist_model(TestClass):
 
-    def solid_model(self, mapdl):
-        # Solid model (Geometry)
-
-        mapdl.clear()
-
-        mapdl.prep7()
-
-        # Define keypoints, lines and area
-        # --------------------
-        mapdl.k(1, 0, 0)
-        mapdl.k(2, 1, 0)
-        mapdl.k(3, 1, 1)
-        mapdl.l(1, 2)
-        mapdl.l(2, 3)
-        mapdl.l(3, 1)
-        mapdl.a(1, 2, 3)
-
-        # Define a material
-        # --------------------
-        mapdl.mp("EX", 1, 30e6)
-        mapdl.mp("NUXY", 1, 0.25)  # Poisson's Ratio
-
-        # Define section
-        # --------------------
-        mapdl.et(1, "PLANE183")
-        mapdl.keyopt(1, 1, 0)
-        mapdl.keyopt(1, 3, 3)
-        mapdl.keyopt(1, 6, 0)
-        mapdl.r(1, 0.01)
-
+    @pytest.fixture(scope="class")
     def fe_model(self, mapdl):
-        # FE model (Mesh)
-
-        self.solid_model(mapdl)
+        solid_FE_model(mapdl)
 
         mapdl.esize(0.02)
         mapdl.mshape(0, "2D")
@@ -1005,7 +554,7 @@ class Test_bc_cmdlist_model:
         mapdl.amesh(1, 1, 1)
 
     @requires("pandas")
-    def test_dlist(self, mapdl):
+    def test_dlist(self, mapdl, fe_model):
 
         df_d = pd.DataFrame(
             {
@@ -1016,7 +565,6 @@ class Test_bc_cmdlist_model:
             }
         )
 
-        self.fe_model(mapdl)
         mapdl.d(2, "UX", 0)
         mapdl.d(2, "UY", 0)
 
@@ -1026,7 +574,7 @@ class Test_bc_cmdlist_model:
         assert dlist_result.compare(df_d).empty
 
     @requires("pandas")
-    def test_flist(self, mapdl):
+    def test_flist(self, mapdl, fe_model):
 
         df_f = pd.DataFrame(
             {
@@ -1037,7 +585,6 @@ class Test_bc_cmdlist_model:
             }
         )
 
-        self.fe_model(mapdl)
         mapdl.f(4, "FX", 10)
         mapdl.f(4, "FY", 20)
 
@@ -1045,3 +592,135 @@ class Test_bc_cmdlist_model:
 
         assert not flist_result.empty
         assert flist_result.compare(df_f).empty
+
+
+class Test_MAPDL_commands(TestClass):
+    SKIP = [
+        "aplot",
+        "cfopen",
+        "cmatrix",
+        "create",
+        "end",
+        "eplot",
+        "geometry",
+        "input",
+        "kplot",
+        "lgwrite",
+        "lplot",
+        "lsread",
+        "mwrite",
+        "nplot",
+        "sys",
+        "vplot",
+        "vwrite",
+    ]
+
+    RAISE_WARNINGS = ["eshape"]
+    RAISE_EXCEPTIONS = []
+
+    @staticmethod
+    def fake_wrap(*args, **kwags):
+        return args[0]
+
+    MAPDL_cmds = [each for each in dir(Commands) if not each.startswith("_")]
+
+    @pytest.mark.parametrize("cmd", MAPDL_cmds)
+    @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc._send_command", fake_wrap)
+    # Skip post processing the plot in PLESOL commands like.
+    @patch("ansys.mapdl.core.mapdl_core.PLOT_COMMANDS", [])
+    # skip retrieving value
+    @patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.scalar_param", fake_wrap)
+    # Skip output the entity id after geometry manipulation
+    @patch("ansys.mapdl.core._commands.parse.parse_a", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_e", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_et", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_k", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_knode", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_kdist", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_kl", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_kpoint", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_line_no", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_line_nos", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_n", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_ndist", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_output_areas", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_output_volume_area", fake_wrap)
+    @patch("ansys.mapdl.core._commands.parse.parse_v", fake_wrap)
+    def test_command(self, mapdl, cmd):
+        func = getattr(mapdl, cmd)
+
+        # Avoid wraps
+        while hasattr(func, "__wrapped__"):
+            func = func.__wrapped__
+
+        if cmd in self.SKIP:
+            pytest.skip("This function is overwritten in a subclass.")
+
+        parm = inspect.signature(func).parameters
+        assert "kwargs" in parm, "'kwargs' argument is missing in function signature."
+
+        args = [f"arg{i}" for i in range(len(parm) - 1)]  # 3 = self, cmd, kwargs
+
+        if cmd in self.RAISE_WARNINGS:
+            context = pytest.warns(UserWarning)
+        elif cmd in self.RAISE_EXCEPTIONS:
+            context = pytest.raises(Exception)
+        else:
+            context = NullContext()
+
+        with context:
+            if list(parm)[0].lower() == "self":
+                args = args[:-1]
+                post = func(mapdl, *args)
+            else:
+                post = func(*args)
+
+        for arg in args:
+            assert arg in post
+
+        # assert ",".join(args) in post.replace(",,", ",").replace(" ", "")
+        cmd_ = cmd.upper()
+        if cmd_.startswith("SLASH"):
+            cmd_ = cmd_.replace("SLASH_", "/").replace("SLASH", "/")
+
+        if cmd_.startswith("STAR"):
+            cmd_ = cmd_.replace("STAR", "*")
+
+        assert cmd_ in post.upper()
+
+        # Restoring defaults
+        if "show" in cmd:
+            mapdl.show("PNG")
+
+
+class Test_output_listing(TestClass):
+
+    @staticmethod
+    @pytest.fixture(scope="class")
+    def plastic_solve_output(mapdl):
+        with mapdl.muted:
+            mapdl.input(vmfiles["vm273"])
+
+            mapdl.post1()
+            mapdl.set(1, 2)
+
+    @staticmethod
+    @pytest.mark.parametrize(
+        "func,args",
+        [("prnsol", ("U", "X")), ("presol", ("S", "X")), ("presol", ("S", "ALL"))],
+    )
+    def test_output_listing(mapdl, plastic_solve_output, func, args):
+        mapdl.post1()
+        func_ = getattr(mapdl, func)
+        out = func_(*args)
+
+        out_list = out.to_list()
+        out_array = out.to_array()
+
+        assert isinstance(out, CommandListingOutput)
+        assert isinstance(out_list, list) and out_list
+        assert isinstance(out_array, np.ndarray) and out_array.size != 0
+
+        if has_dependency("pandas"):
+            out_df = out.to_dataframe()
+            assert isinstance(out_df, pd.DataFrame) and not out_df.empty

@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -36,7 +36,7 @@ if _HAS_PYVISTA:
 if TYPE_CHECKING:  # pragma: no cover
     from pyiges import Iges
 
-from ansys.mapdl.core.misc import requires_package, run_as_prep7, supress_logging
+from ansys.mapdl.core.misc import requires_package, run_as, supress_logging
 from ansys.mapdl.core.plotting.theme import MapdlTheme
 
 VALID_SELECTION_TYPE = ["S", "R", "A", "U"]
@@ -614,7 +614,7 @@ class Geometry:
         return areas
 
     @supress_logging
-    @run_as_prep7
+    @run_as("PREP7")
     @requires_package("pyvista")
     def generate_surface(
         self,

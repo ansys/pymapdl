@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -25,12 +25,8 @@ import weakref
 
 import numpy as np
 
-from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import requires_package, supress_logging
-
-if _HAS_VISUALIZER:
-    from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
 COMPONENT_STRESS_TYPE = ["X", "Y", "Z", "XY", "YZ", "XZ"]
 PRINCIPAL_TYPE = ["1", "2", "3"]
@@ -130,34 +126,48 @@ class PostProcessing:
         if not isinstance(mapdl, MapdlBase):  # pragma: no cover
             raise TypeError("Must be initialized using Mapdl instance")
         self._mapdl_weakref = weakref.ref(mapdl)
-        self._set_loaded = False
 
     @property
     def _mapdl(self):
         """Return the weakly referenced instance of MAPDL"""
         return self._mapdl_weakref()
 
-    @property
-    def _log(self):
-        """Alias for mapdl log"""
-        return self._mapdl._log
-
-    def _set_log_level(self, level):
-        """Alias for mapdl._set_log_level"""
-        return self._mapdl._set_log_level(level)
-
     @supress_logging
     def __repr__(self):
         info = "PyMAPDL PostProcessing Instance\n"
-        info += "\tActive Result File:    %s\n" % self.filename
-        info += "\tNumber of result sets: %d\n" % self.nsets
-        info += "\tCurrent load step:     %d\n" % self.load_step
-        info += "\tCurrent sub step:      %d\n" % self.sub_step
+        info += f"\tActive Result File:    {self.filename}\n"
+
+        # If there is no result file, this fails.
+        try:
+            nsets = int(self.nsets)
+        except MapdlRuntimeError as error:
+            self._mapdl.logger.debug(
+                f"Error when obtaining the number of sets:\n{error}"
+            )
+            nsets = "NA"
+
+        info += f"\tNumber of result sets: {nsets}\n"
+        info += f"\tCurrent load step:     {self.load_step}\n"
+        info += f"\tCurrent sub step:      {self.sub_step}\n"
 
         if self._mapdl.parameters.routine == "POST1":
-            info += "\n\n" + self._mapdl.set("LIST")
+            try:
+                nlist = self._mapdl.set("LIST")
+            except MapdlRuntimeError as err:
+                if (
+                    "An error occurred while attempting to open the results file"
+                    in str(err)
+                ):
+                    self._mapdl.logger.debug(
+                        f"List of steps could not be obtained due to error:\n{err}"
+                    )
+                    nlist = "Results file is not available"
+                else:
+                    raise err
+
+            info += "\n\n" + nlist
         else:
-            info += "\n\n Enable routine POST1 to see a table of available results"
+            info += "\n\nEnable routine POST1 to see a table of available results"
 
         return info
 
@@ -207,10 +217,6 @@ class PostProcessing:
         """
         # Because in MAPDL is the same.
         return self.time_values
-
-    def _reset_cache(self):
-        """Reset local cache"""
-        self._set_loaded = False
 
     @property
     def filename(self) -> str:
@@ -517,7 +523,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -589,7 +595,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -623,29 +629,42 @@ class PostProcessing:
                 "exist within the result file."
             )
 
-        mask = self.selected_nodes
-        all_scalars = np.empty(mask.size)
-        all_scalars[mask] = scalars
+        from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
-        # we can directly the node numbers as the array of selected
-        # nodes will be a mask sized to the highest node index - 1
-        surf = self._mapdl.mesh._surf
-        node_id = surf["ansys_node_num"].astype(np.int32) - 1
-        all_scalars = all_scalars[node_id]
+        with self._mapdl.save_selection:
+            mask = self.selected_nodes
+            nodes_ids = self._mapdl.get_array("NODE", item1="NLIST")
+            nodes_loc = self._mapdl.mesh.nodes
 
-        meshes = [
-            {
-                "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
-                "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
-                "scalars": all_scalars,
-            }
-        ]
+            self._mapdl.esln("S", 0)  # selecting elements associated with those nodes
+            self._mapdl.nsle(
+                "A", "all"
+            )  # selecting nodes associated with those elements to avoid segfault
 
-        labels = []
-        if show_node_numbering:
-            labels = [{"points": surf.points, "labels": surf["ansys_node_num"]}]
-        pl = MapdlPlotter()
-        pl.plot(meshes, [], labels, mapdl=self, **kwargs)
+            all_scalars = np.empty(mask.size)
+            all_scalars[mask] = scalars
+
+            # we can directly the node numbers as the array of selected
+            # nodes will be a mask sized to the highest node index - 1
+            surf = self._mapdl.mesh._surf  # problem here
+            node_id = surf["ansys_node_num"].astype(np.int32) - 1
+            all_scalars = all_scalars[node_id]
+
+            meshes = [
+                {
+                    "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
+                    "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
+                    "scalars": all_scalars,
+                }
+            ]
+
+            labels = []
+            if show_node_numbering:
+                labels = [{"points": nodes_loc, "labels": nodes_ids}]
+
+            pl = MapdlPlotter()
+            pl.plot(meshes, [], labels, mapdl=self, **kwargs)
+
         return pl.show(**kwargs)
 
     @requires_package("ansys.tools.visualization_interface")
@@ -658,92 +677,86 @@ class PostProcessing:
                 "exist within the result file."
             )
 
-        surf = self._mapdl.mesh._surf
+        from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
-        # as ``disp`` returns the result for all nodes/elems, we need all node/elem numbers
-        # and to index to the output node numbers
-        if hasattr(self._mapdl.mesh, "enum_all"):
-            enum = self._mapdl.mesh.enum_all
-        else:
-            enum = self._all_enum
+        with self._mapdl.save_selection:
+            # Select nodes to avoid segfault
+            self._mapdl.nsle("s", "all")
 
-        #######################################################################
-        # Bool operations
-        # ===============
-        # I'm going to explain this clearly because it can be confusing for the
-        # future developers (me).
-        # This explanation is based in scalars (`element_values`) NOT having the
-        # full elements (selected and not selected) size.
-        #
-        # First, it's possible that there are duplicated element numbers,
-        # in the surf object returned by Pyvista.
-        # Therefore we need to get the unique values and a reverse index, to
-        # later convert the MAPDL values to Pyvista values.
-        uni, ridx = np.unique(surf["ansys_elem_num"], return_inverse=True)
-        # which means that, uni is the id of mapdl elements in the polydata
-        # object. These elements does not need to be in order, and there can be
-        # duplicated!
-        # Hence:
-        # uni[ridx] = surf["ansys_elem_num"]
-        #
-        # Let's notice that:
-        # * enum[self.selected_elements] is mapdl selected elements ids in MAPDL notation.
-        #
-        # Theoretical approach
-        # --------------------
-        # The theoretical approach will be using an intermediate array of the
-        # size of the MAPDL total number of elements (we do not care about selected).
-        #
-        values = np.zeros(enum.shape)
-        #
-        # Then assign the MAPDL values for the selected element (scalars)
-        #
-        values[self.selected_elements] = scalars
-        #
-        # Because values are in order, but with python notation, then we can do:
-        #
-        surf_values = values[
-            uni - 1
-        ]  # -1 to set MAPDL element indexing to python indexing
-        #
-        # Then to account for the original Pyvista object:
-        #
-        surf_values = surf_values[ridx]
-        #
-        #######################################################################
+            # Getting mesh
+            surf = self._mapdl.mesh._surf
 
-        meshes = [
-            {
-                "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
-                "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
-                "scalars": surf_values,
-            }
-        ]
+            # as ``disp`` returns the result for all nodes/elems, we need all node/elem numbers
+            # and to index to the output node numbers
+            if hasattr(self._mapdl.mesh, "enum_all"):
+                enum = self._mapdl.mesh.enum_all
+            else:
+                enum = self._all_enum
 
-        labels = []
-        if show_elem_numbering:
-            labels = [
+            #######################################################################
+            # Bool operations
+            # ===============
+            # I'm going to explain this clearly because it can be confusing for the
+            # future developers (me).
+            # This explanation is based in scalars (`element_values`) NOT having the
+            # full elements (selected and not selected) size.
+            #
+            # First, it's possible that there are duplicated element numbers,
+            # in the surf object returned by Pyvista.
+            # Therefore we need to get the unique values and a reverse index, to
+            # later convert the MAPDL values to Pyvista values.
+            uni, ridx = np.unique(surf["ansys_elem_num"], return_inverse=True)
+            # which means that, uni is the id of mapdl elements in the polydata
+            # object. These elements does not need to be in order, and there can be
+            # duplicated!
+            # Hence:
+            # uni[ridx] = surf["ansys_elem_num"]
+            #
+            # Let's notice that:
+            # * enum[self.selected_elements] is mapdl selected elements ids in MAPDL notation.
+            #
+            # Theoretical approach
+            # --------------------
+            # The theoretical approach will be using an intermediate array of the
+            # size of the MAPDL total number of elements (we do not care about selected).
+            #
+            values = np.zeros(enum.shape)
+            #
+            # Then assign the MAPDL values for the selected element (scalars)
+            #
+            values[self.selected_elements] = scalars
+            #
+            # Because values are in order, but with python notation, then we can do:
+            #
+            surf_values = values[
+                uni - 1
+            ]  # -1 to set MAPDL element indexing to python indexing
+            #
+            # Then to account for the original Pyvista object:
+            #
+            surf_values = surf_values[ridx]
+            #
+            #######################################################################
+
+            meshes = [
                 {
-                    "points": surf.cell_centers().points,
-                    "labels": surf["ansys_elem_num"],
+                    "mesh": surf.copy(deep=False),  # deep=False for ipyvtk-simple
+                    "scalar_bar_args": {"title": kwargs.pop("stitle", "")},
+                    "scalars": surf_values,
                 }
             ]
-        pl = MapdlPlotter()
-        pl.plot(meshes, [], labels, mapdl=self, **kwargs)
+
+            labels = []
+            if show_elem_numbering:
+                labels = [
+                    {
+                        "points": surf.cell_centers().points,
+                        "labels": surf["ansys_elem_num"],
+                    }
+                ]
+            pl = MapdlPlotter()
+            pl.plot(meshes, [], labels, mapdl=self, **kwargs)
         return pl.show(**kwargs)
-
-    @property
-    @supress_logging
-    def _all_nnum(self):
-        with self._mapdl.save_selection:
-            self._mapdl.allsel()
-            nnum = self._mapdl.get_array("NODE", item1="NLIST")
-
-            # rerun if encountered weird edge case of negative first index.
-            if nnum[0] == -1:
-                nnum = self._mapdl.get_array("NODE", item1="NLIST")
-
-        return nnum.astype(np.int32, copy=False)
 
     @property
     @supress_logging
@@ -897,7 +910,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -946,11 +959,6 @@ class PostProcessing:
         -------
         numpy.ndarray
             Array containing the nodal structural displacement.
-
-        Notes
-        -----
-        This command always returns all nodal displacements regardless
-        of if the nodes are selected or not.
 
         Examples
         --------
@@ -1022,7 +1030,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1046,7 +1054,7 @@ class PostProcessing:
         if isinstance(component, str):
             if component.upper() == "ALL":
                 raise ValueError(
-                    '"ALL" not allowed in this context.  Select a '
+                    '"ALL" not allowed in this context. Select a '
                     'single displacement component (e.g. "X")'
                 )
 
@@ -1138,7 +1146,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1156,7 +1164,7 @@ class PostProcessing:
         if isinstance(component, str):
             if component.upper() == "ALL":
                 raise ValueError(
-                    '"ALL" not allowed in this context.  Select a '
+                    '"ALL" not allowed in this context. Select a '
                     'single component (e.g. "X")'
                 )
 
@@ -1272,7 +1280,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1293,7 +1301,7 @@ class PostProcessing:
         """
         if component.upper() == "ALL":
             raise ValueError(
-                '"ALL" not allowed in this context.  Select a '
+                '"ALL" not allowed in this context. Select a '
                 'single displacement component (e.g. "X" or "NORM")'
             )
 
@@ -1364,6 +1372,8 @@ class PostProcessing:
                 0.        ,  0.        ])
 
         """
+        if not isinstance(component, str):
+            component = str(component)
         component = elem_check_inputs(component, option, STRESS_TYPES)
         return self.element_values("S", component, option)
 
@@ -1416,7 +1426,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1526,7 +1536,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1596,7 +1606,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1685,7 +1695,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1788,7 +1798,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1879,7 +1889,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1956,7 +1966,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2052,7 +2062,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2119,8 +2129,6 @@ class PostProcessing:
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
 
         """
-        if isinstance(component, int):
-            component = str(component)
         component = check_comp(component, COMPONENT_STRESS_TYPE)
         return self.nodal_values("EPTO", component)
 
@@ -2159,7 +2167,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2258,7 +2266,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2339,7 +2347,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2391,7 +2399,7 @@ class PostProcessing:
 
         Examples
         --------
-        Total quivalent strain for the current result.
+        Total equivalent strain for the current result.
 
         >>> mapdl.post_processing.nodal_total_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
@@ -2435,7 +2443,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2497,8 +2505,6 @@ class PostProcessing:
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
 
         """
-        if isinstance(component, int):
-            component = str(component)
         component = check_comp(component, COMPONENT_STRESS_TYPE)
         return self.nodal_values("EPEL", component)
 
@@ -2535,7 +2541,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2631,7 +2637,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2716,7 +2722,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2767,7 +2773,7 @@ class PostProcessing:
 
         Examples
         --------
-        Elastic quivalent strain for the current result.
+        Elastic equivalent strain for the current result.
 
         >>> mapdl.post_processing.nodal_elastic_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
@@ -2811,7 +2817,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2838,7 +2844,7 @@ class PostProcessing:
         """
         scalars = self.nodal_elastic_eqv_strain()
         kwargs.setdefault(
-            "scalar_bar_args", {"title": "Elastic Nodal\n Equivalent Strain"}
+            "scalar_bar_args", {"title": "Elastic Nodal\nEquivalent Strain"}
         )
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
@@ -2878,8 +2884,6 @@ class PostProcessing:
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
 
         """
-        if isinstance(component, int):
-            component = str(component)
         component = check_comp(component, COMPONENT_STRESS_TYPE)
         return self.nodal_values("EPPL", component)
 
@@ -2916,7 +2920,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3006,7 +3010,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3092,7 +3096,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3150,7 +3154,7 @@ class PostProcessing:
 
         Examples
         --------
-        Plastic quivalent strain for the current result
+        Plastic equivalent strain for the current result
 
         >>> mapdl.post_processing.nodal_plastic_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
@@ -3194,7 +3198,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3221,7 +3225,7 @@ class PostProcessing:
         """
         scalars = self.nodal_plastic_eqv_strain()
         kwargs.setdefault(
-            "scalar_bar_args", {"title": "Plastic Nodal\n Equivalent Strain"}
+            "scalar_bar_args", {"title": "Plastic Nodal\nEquivalent Strain"}
         )
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
@@ -3262,8 +3266,6 @@ class PostProcessing:
         array([   1,    2,    3, ..., 7215, 7216, 7217], dtype=int32)
 
         """
-        if isinstance(component, int):
-            component = str(component)
         component = check_comp(component, COMPONENT_STRESS_TYPE)
         return self.nodal_values("EPTH", component)
 
@@ -3300,7 +3302,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3396,7 +3398,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3424,7 +3426,7 @@ class PostProcessing:
 
         Equivalent MAPDL command:
 
-        * ``PRNSOL, EPTH, PRIN``
+        * ``PRNSOL, EPTH, INT``
 
         Returns
         -------
@@ -3482,7 +3484,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3540,7 +3542,7 @@ class PostProcessing:
 
         Examples
         --------
-        Thermal quivalent strain for the current result.
+        Thermal equivalent strain for the current result.
 
         >>> mapdl.post_processing.nodal_thermal_eqv_strain()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
@@ -3584,7 +3586,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3611,7 +3613,7 @@ class PostProcessing:
         """
         scalars = self.nodal_thermal_eqv_strain()
         kwargs.setdefault(
-            "scalar_bar_args", {"title": "Thermal Nodal\n Equivalent Strain"}
+            "scalar_bar_args", {"title": "Thermal Nodal\nEquivalent Strain"}
         )
         return self._plot_point_scalars(
             scalars, show_node_numbering=show_node_numbering, **kwargs
@@ -3632,7 +3634,7 @@ class PostProcessing:
 
         Examples
         --------
-        Thermal quivalent strain for the current result.
+        Thermal equivalent strain for the current result.
 
         >>> mapdl.post_processing.nodal_contact_friction_stress()
         array([15488.84357602, 16434.95432337, 15683.2334295 , ...,
@@ -3676,7 +3678,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3702,7 +3704,7 @@ class PostProcessing:
 
         """
         kwargs.setdefault(
-            "scalar_bar_args", {"title": "Nodal Contact\n Friction Stress"}
+            "scalar_bar_args", {"title": "Nodal Contact\nFriction Stress"}
         )
         return self._plot_point_scalars(
             self.nodal_contact_friction_stress(),

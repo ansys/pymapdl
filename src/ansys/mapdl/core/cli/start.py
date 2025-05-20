@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -191,7 +191,7 @@ def start(
     add_env_vars: Dict[str, str],  # ignored
     replace_env_vars: Dict[str, str],  # ignored
     version: Union[int, str],
-):
+) -> None:
     from ansys.mapdl.core.launcher import launch_mapdl
 
     if mode:
@@ -281,7 +281,6 @@ def start(
         additional_switches=additional_switches,
         start_timeout=start_timeout,
         port=port,
-        license_server_check=license_server_check,
         license_type=license_type,
         version=version,
     )

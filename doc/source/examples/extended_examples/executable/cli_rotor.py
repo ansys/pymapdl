@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -46,7 +46,7 @@ def main(n_blades, blade_length, elastic_modulus, density):
         f"Elastic modulus: {elastic_modulus/1E9} GPa\nDensity: {density} Kg/m3"
     )
     # Launch MAPDL
-    mapdl = launch_mapdl(port=50052)
+    mapdl = launch_mapdl()
     mapdl.clear()
     mapdl.prep7()
 

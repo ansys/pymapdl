@@ -1,4 +1,4 @@
-# Copyright (C) 2016 - 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,18 +21,21 @@
 # SOFTWARE.
 
 """Common gRPC functions"""
-from time import sleep
-from typing import List, Literal, get_args
+import time
+from typing import Dict, Iterable, List, Literal, Optional, get_args
 
+from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
+import grpc
 import numpy as np
 
+from ansys.mapdl.core import LOG
 from ansys.mapdl.core.errors import MapdlConnectionError, MapdlRuntimeError
 
 # chunk sizes for streaming and file streaming
-DEFAULT_CHUNKSIZE = 256 * 1024  # 256 kB
-DEFAULT_FILE_CHUNK_SIZE = 1024 * 1024  # 1MB
+DEFAULT_CHUNKSIZE: int = 256 * 1024  # 256 kB
+DEFAULT_FILE_CHUNK_SIZE: int = 1024 * 1024  # 1MB
 
-ANSYS_VALUE_TYPE = {
+ANSYS_VALUE_TYPE: Dict[int, Optional[np.typing.DTypeLike]] = {
     0: None,  # UNKNOWN
     1: np.int32,  # INTEGER
     2: np.int64,  # HYPER
@@ -45,7 +48,7 @@ ANSYS_VALUE_TYPE = {
 }
 
 
-VGET_ENTITY_TYPES_TYPING = Literal[
+VGET_ENTITY_TYPES_TYPING: List[str] = Literal[
     "NODE",
     "ELEM",
     "KP",
@@ -59,9 +62,9 @@ VGET_ENTITY_TYPES_TYPING = Literal[
 
 VGET_ENTITY_TYPES: List[str] = list(get_args(VGET_ENTITY_TYPES_TYPING))
 
-STRESS_TYPES = ["X", "Y", "Z", "XY", "YZ", "XZ", "1", "2", "3", "INT", "EQV"]
-COMP_TYPE = ["X", "Y", "Z", "SUM"]
-VGET_NODE_ENTITY_TYPES = {
+STRESS_TYPES: List[str] = ["X", "Y", "Z", "XY", "YZ", "XZ", "1", "2", "3", "INT", "EQV"]
+COMP_TYPE: List[str] = ["X", "Y", "Z", "SUM"]
+VGET_NODE_ENTITY_TYPES: Dict[str, List[str]] = {
     "U": ["X", "Y", "Z"],
     "S": STRESS_TYPES,
     "EPTO": STRESS_TYPES,
@@ -89,7 +92,7 @@ VGET_NODE_ENTITY_TYPES = {
 class GrpcError(MapdlRuntimeError):
     """Raised when gRPC fails"""
 
-    def __init__(self, msg=""):
+    def __init__(self, msg: str = "") -> None:
         super().__init__(self, msg)
 
 
@@ -168,7 +171,9 @@ def check_vget_input(entity: str, item: str, itnum: str) -> str:
     return "%s, , %s, %s" % (entity, item, itnum)
 
 
-def parse_chunks(chunks, dtype=None):
+def parse_chunks(
+    chunks: Iterable[anskernel.Chunk], dtype: Optional[np.typing.DTypeLike] = None
+) -> np.ndarray:
     """Deserialize gRPC chunks into a numpy array
 
     Parameters
@@ -185,19 +190,28 @@ def parse_chunks(chunks, dtype=None):
         Deserialized numpy array.
 
     """
-    time_int = 0
+    timeout = 3  # seconds
     time_step = 0.01
-    time_max = 3  # seconds
-    while not chunks.is_active():
-        time_int += 1
-        sleep(time_step)
-        if time_int > time_max / time_step:
-            raise MapdlConnectionError("The channel is not alive.")
+    time_max = timeout + time.time()  # seconds
+
+    while not chunks.is_active() and time.time() < time_max:
+        time.sleep(time_step)
+
+    if not chunks.is_active() and chunks.code() != grpc.StatusCode.OK:
+        LOG.error("The channel might not alive.")
 
     try:
         chunk = chunks.next()
-    except:
-        return np.empty(0)
+
+    except StopIteration:
+        if chunks.code() == grpc.StatusCode.OK:
+            return np.empty(0)
+        else:
+            raise MapdlConnectionError(
+                "The chunk couldn't be parsed. The error information is:\n"
+                f"code: {chunks.code()}\n"
+                f"message: '{chunks.details()}'"
+            )
 
     if not chunk.value_type and dtype is None:
         raise ValueError("Must specify a data type for this record")
