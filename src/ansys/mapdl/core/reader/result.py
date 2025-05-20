@@ -148,7 +148,9 @@ class DPFResult(Result):
             self._mode_rst = True
 
         elif mapdl is not None:
-            from ansys.mapdl.core.mapdl import _MapdlCore  # avoid circular import fail.
+            from ansys.mapdl.core.mapdl_core import (
+                _MapdlCore,  # avoid circular import fail.
+            )
 
             if not isinstance(mapdl, _MapdlCore):  # pragma: no cover
                 raise TypeError("Must be initialized using Mapdl instance")
@@ -476,7 +478,8 @@ class DPFResult(Result):
         self._update_required = False
 
     def _upload_to_dpf(self):
-        self._server_file_path = dpf.upload_file_in_tmp_folder(self._rst)
+        # self._server_file_path = dpf.upload_file_in_tmp_folder(self._rst)
+        self._server_file_path = self._mapdl.directory
 
     def _update_rst(self, progress_bar=None, chunk_size=None, save=True):
         # Saving model
