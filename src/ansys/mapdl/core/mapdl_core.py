@@ -2758,7 +2758,7 @@ class _MapdlCore(Commands):
             # Picking points
             pl.scene.enable_point_picking(
                 callback=callback_points,
-                use_mesh=True,
+                use_picker=True,
                 show_message=gen_text(),
                 show_point=True,
                 left_clicking=PICKING_USING_LEFT_CLICKING,
@@ -2769,7 +2769,7 @@ class _MapdlCore(Commands):
             # Picking meshes
             pl.scene.enable_mesh_picking(
                 callback=callback_mesh,
-                use_mesh=True,
+                use_picker=True,
                 show=False,  # This should be false to avoid a warning.
                 show_message=gen_text(),
                 left_clicking=PICKING_USING_LEFT_CLICKING,
