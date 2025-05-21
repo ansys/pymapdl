@@ -243,12 +243,14 @@ checks = [
   # "EX01", # "No examples section found",
 ]
 
-
 override_SS05 = [  # override SS05 to allow docstrings starting with these words
     # '^Process ',
     # '^Assess ',
     # '^Access ',
 ]
+
+[tool.mypy]
+disable_error_code = ["return-value", "return", "import-untyped", "import-not-found"]
 
 [tool.towncrier]
 package = "ansys.mapdl.core"
