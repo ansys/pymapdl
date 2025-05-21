@@ -2062,9 +2062,7 @@ def get_slurm_options(
     SLURM_CPUS_ON_NODE = int(get_value("SLURM_CPUS_ON_NODE", kwargs))
     LOG.info(f"SLURM_CPUS_ON_NODE: {SLURM_CPUS_ON_NODE}")
 
-    SLURM_MEM_PER_NODE = str(
-        get_value("SLURM_MEM_PER_NODE", kwargs, default="")  # type: ignore
-    ).upper()  # type: ignore
+    SLURM_MEM_PER_NODE = get_value("SLURM_MEM_PER_NODE", kwargs, default="", astype=str).upper()  # type: ignore
     LOG.info(f"SLURM_MEM_PER_NODE: {SLURM_MEM_PER_NODE}")
 
     SLURM_NODELIST = str(

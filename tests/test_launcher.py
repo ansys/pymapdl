@@ -203,7 +203,9 @@ def test_find_mapdl_linux(my_fs, path, version, raises):
     my_fs.os = OSType.LINUX
     my_fs.create_file(path)
 
-    bin_file, ver = pymapdl.launcher.find_mapdl()
+    from ansys.tools.path import find_mapdl
+
+    bin_file, ver = find_mapdl()
 
     if raises:
         assert not bin_file
@@ -1262,7 +1264,7 @@ def test_launch_grpc(tmpdir, launch_on_hpc):
     if launch_on_hpc:
         assert "sbatch" in kwargs["args"]
         assert "--wrap" in kwargs["args"]
-        assert " ".join(cmd) == kwargs["args"]
+        assert " ".join(cmd) == " ".join(kwargs["args"])
     else:
         assert cmd == kwargs["args"]
         assert os.path.exists(inp_file)
@@ -1393,7 +1395,7 @@ def test_check_mapdl_launch_on_hpc(message_stdout, message_stderr):
         )
 
     with context:
-        assert check_mapdl_launch_on_hpc(process, start_parm) == 1001
+        assert check_mapdl_launch_on_hpc(process) == 1001
 
 
 @patch("ansys.mapdl.core.Mapdl._exit_mapdl", lambda *args, **kwargs: None)
