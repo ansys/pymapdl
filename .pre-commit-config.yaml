@@ -17,7 +17,7 @@ repos:
   rev: v1.15.0
   hooks:
     - id: mypy
-      files: '(src)/.*\.py$'
+      args: [ --follow-imports=silent, --config-file=pyproject.toml]
 
 - repo: https://github.com/ansys/pre-commit-hooks
   rev: v0.5.2
