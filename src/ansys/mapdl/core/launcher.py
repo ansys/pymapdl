@@ -570,7 +570,7 @@ def launch_grpc(
         stdout=stdout,
         stderr=stderr,
         env_vars=env_vars,
-    )
+    )  # nosec B604
 
 
 def check_mapdl_launch(
