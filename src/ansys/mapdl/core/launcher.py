@@ -35,24 +35,13 @@ import socket
 import subprocess  # nosec B404
 import threading
 import time
-from typing import (
-    IO,
-    TYPE_CHECKING,
-    Any,
-    Callable,
-    Dict,
-    List,
-    Literal,
-    Optional,
-    Tuple,
-    Union,
-)
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 import warnings
 
 import psutil
 
 from ansys.mapdl import core as pymapdl
-from ansys.mapdl.core import _HAS_ATP, _HAS_PIM, LOG  # type: ignore
+from ansys.mapdl.core import _HAS_ATP, _HAS_PIM, LOG
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.errors import (
     LockFileException,
@@ -63,24 +52,25 @@ from ansys.mapdl.core.errors import (
     VersionError,
 )
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
-from ansys.mapdl.core.mapdl_core import _ALLOWED_START_PARM  # type: ignore
+from ansys.mapdl.core.mapdl_core import _ALLOWED_START_PARM
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import (
     check_valid_ip,
     check_valid_port,
     create_temp_dir,
+    threaded,
 )
-from ansys.mapdl.core.misc import threaded  # type: ignore
 from ansys.mapdl.core.plotting import GraphicsBackend
 
 if _HAS_PIM:
-    import ansys.platform.instancemanagement as pypim  # type: ignore
+    import ansys.platform.instancemanagement as pypim
 
 if _HAS_ATP:
+    from ansys.tools.path import find_mapdl, get_mapdl_path
     from ansys.tools.path import version_from_path as _version_from_path
 
     @wraps(_version_from_path)
-    def version_from_path(*args: Any, **kwargs: Any) -> int | None:
+    def version_from_path(*args, **kwargs):
         """Wrap ansys.tool.path.version_from_path to raise a warning if the
         executable couldn't be found"""
         if kwargs.pop("launch_on_hpc", False):
@@ -109,7 +99,6 @@ if not os.path.isdir(SETTINGS_DIR):
 
 CONFIG_FILE = os.path.join(SETTINGS_DIR, "config.txt")
 ALLOWABLE_MODES = ["console", "grpc"]
-ALLOWABLE_MODES_TYPE = Literal["console", "grpc"]
 ALLOWABLE_VERSION_INT = tuple(SUPPORTED_ANSYS_VERSIONS.keys())
 
 ALLOWABLE_LAUNCH_MAPDL_ARGS = [
@@ -179,7 +168,7 @@ LAUNCH_ON_HCP_ERROR_MESSAGE_IP = (
     ">>> mapdl = launch_mapdl(start_instance=False, ip='123.45.67.89')\n\n"
     "where '123.45.67.89' is the IP of the machine where MAPDL is running."
 )
-GALLERY_INSTANCE: list[dict[str, Any] | None] = [None]
+GALLERY_INSTANCE = [None]
 
 
 def _cleanup_gallery_instance() -> None:  # pragma: no cover
@@ -189,50 +178,10 @@ def _cleanup_gallery_instance() -> None:  # pragma: no cover
             ip=GALLERY_INSTANCE[0]["ip"],
             port=GALLERY_INSTANCE[0]["port"],
         )
-        mapdl.exit(force=True)  # type: ignore
+        mapdl.exit(force=True)
 
 
 atexit.register(_cleanup_gallery_instance)
-
-from typing import TypedDict
-
-
-class args_type(TypedDict):
-    force_intel: bool | None
-    broadcast: bool | None
-    graphics_backend: str | None
-    just_launch: bool | None
-    on_pool: bool | None
-    _debug_no_launch: bool | None
-    launch_on_hpc: bool
-    ip: str | None
-    set_no_abort: bool
-    kwargs: Dict[str, Any]
-
-
-class start_parameters_type(TypedDict):
-    additional_switches: str | None
-    check_parameter_names: bool
-    env_vars: dict[str, str]
-    exec_file: str | None
-    finish_job_on_exit: bool
-    hostname: str | None
-    ip: str | None
-    jobid: int | None
-    jobname: str | None
-    launch_on_hpc: bool
-    launched: bool
-    mode: Literal["grpc", "console"]
-    nproc: int | bool
-    override: bool
-    port: int
-    print_com: bool
-    process: subprocess.Popen[bytes] | None
-    ram: str | None
-    run_location: str
-    start_instance: bool
-    start_timeout: int
-    timeout: int
 
 
 def _is_ubuntu() -> bool:
@@ -253,21 +202,21 @@ def _is_ubuntu() -> bool:
     # Excluding bandit check.
     proc = submitter(["awk", "-F=", "/^NAME/{print $2}", "/etc/os-release"])
 
-    if proc.stdout and "ubuntu" in proc.stdout.read().decode().lower():
+    if "ubuntu" in proc.stdout.read().decode().lower():
         return True
 
     # try lsb_release as this is more reliable, but not always available.
     try:
-        import lsb_release  # type: ignore
+        import lsb_release
 
-        return lsb_release.get_distro_information()["ID"].lower() == "ubuntu"  # type: ignore
-
+        if lsb_release.get_distro_information()["ID"].lower() == "ubuntu":
+            return True
     except ImportError:
         # finally, check platform
         return "ubuntu" in platform.platform().lower()
 
 
-def close_all_local_instances(port_range: range | None = None) -> None:
+def close_all_local_instances(port_range: range = None) -> None:
     """Close all MAPDL instances within a port_range.
 
     This function can be used when cleaning up from a failed pool or
@@ -295,7 +244,7 @@ def close_all_local_instances(port_range: range | None = None) -> None:
         # Name argument is used by the threaded decorator.
         try:
             mapdl = MapdlGrpc(port=port, set_no_abort=False)
-            mapdl.exit()  # type: ignore
+            mapdl.exit()
         except OSError:
             pass
 
@@ -305,15 +254,15 @@ def close_all_local_instances(port_range: range | None = None) -> None:
             close_mapdl(port)
 
 
-def check_ports(port_range: range, ip: str = "localhost") -> dict[int, bool]:
+def check_ports(port_range: range, ip: str = "localhost") -> List[int]:
     """Check the state of ports in a port range"""
-    ports: dict[int, bool] = {}
+    ports = {}
     for port in port_range:
         ports[port] = port_in_use(port, ip)
     return ports
 
 
-def port_in_use(port: int, host: str = LOCALHOST) -> bool:
+def port_in_use(port: Union[int, str], host: str = LOCALHOST) -> bool:
     """Returns True when a port is in use at the given host.
 
     Must actually "bind" the address.  Just checking if we can create
@@ -326,7 +275,7 @@ def port_in_use(port: int, host: str = LOCALHOST) -> bool:
     return port_in_use_using_socket(port, host) or port_in_use_using_psutil(port)
 
 
-def port_in_use_using_socket(port: int, host: str) -> bool:
+def port_in_use_using_socket(port: Union[int, str], host: str) -> bool:
     """Returns True when a port is in use at the given host using socket library.
 
     Must actually "bind" the address.  Just checking if we can create
@@ -353,7 +302,7 @@ def is_ansys_process(proc: psutil.Process) -> bool:
     )
 
 
-def get_process_at_port(port: int) -> Optional[psutil.Process]:
+def get_process_at_port(port) -> Optional[psutil.Process]:
     """Get the process (psutil.Process) running at the given port"""
     for proc in psutil.process_iter():
         try:
@@ -372,7 +321,7 @@ def get_process_at_port(port: int) -> Optional[psutil.Process]:
     return None
 
 
-def port_in_use_using_psutil(port: int) -> bool:
+def port_in_use_using_psutil(port: Union[int, str]) -> bool:
     """Returns True when a port is in use at the given host using psutil.
 
     This function iterate over all the process, and their connections until
@@ -487,16 +436,16 @@ def generate_mapdl_launch_command(
 
 def launch_grpc(
     cmd: list[str],
-    run_location: str,
+    run_location: Optional[str] = None,
     env_vars: Optional[Dict[str, str]] = None,
     launch_on_hpc: bool = False,
     mapdl_output: Optional[str] = None,
-) -> subprocess.Popen[bytes]:
+) -> subprocess.Popen:
     """Start MAPDL locally in gRPC mode.
 
     Parameters
     ----------
-    cmd : list[str]
+    cmd : str
         Command to use to launch the MAPDL instance.
 
     run_location : str, optional
@@ -524,13 +473,15 @@ def launch_grpc(
     # disable all MAPDL pop-up errors:
     env_vars.setdefault("ANS_CMD_NODIAG", "TRUE")
 
-    cmd_string: str = " ".join(cmd)
+    cmd_string = " ".join(cmd)
     if "sbatch" in cmd:
         header = "Running an MAPDL instance on the Cluster:"
         shell = os.name != "nt"
+        cmd_ = cmd_string
     else:
         header = "Running an MAPDL instance"
         shell = False  # To prevent shell injection
+        cmd_ = cmd
 
     LOG.info(
         "\n============"
@@ -546,7 +497,7 @@ def launch_grpc(
         stdout = open(str(mapdl_output), "wb", 0)
         stderr = subprocess.STDOUT
     else:
-        stdout = subprocess.PIPE  # type: ignore
+        stdout = subprocess.PIPE
         stderr = subprocess.PIPE
 
     if os.name == "nt":
@@ -563,18 +514,18 @@ def launch_grpc(
 
     LOG.debug("MAPDL starting in background.")
     return submitter(
-        cmd,
+        cmd_,
         shell=shell,  # sbatch does not work without shell.
         cwd=run_location,
         stdin=subprocess.DEVNULL,
         stdout=stdout,
         stderr=stderr,
         env_vars=env_vars,
-    )  # nosec B604
+    )
 
 
 def check_mapdl_launch(
-    process: subprocess.Popen[bytes], run_location: str, timeout: int, cmd: list[str]
+    process: subprocess.Popen[bytes], run_location: str, timeout: int, cmd: str
 ) -> None:
     """Check MAPDL launching process.
 
@@ -625,26 +576,23 @@ def check_mapdl_launch(
             + f"\nCommand line used: {' '.join(cmd)}\n\n"
         )
 
-        if stdout_queue is not None:
-            terminal_output = "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
-            if terminal_output.strip():
-                msg = msg + "The full terminal output is:\n\n" + terminal_output
+        terminal_output = "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
+        if terminal_output.strip():
+            msg = msg + "The full terminal output is:\n\n" + terminal_output
 
         raise MapdlDidNotStart(msg) from e
 
 
-def _check_process_is_alive(process: subprocess.Popen[bytes], run_location: str):
+def _check_process_is_alive(process, run_location):
     if process.poll() is not None:  # pragma: no cover
         msg = f"MAPDL process died."
         raise MapdlDidNotStart(msg)
 
 
-def _check_file_error_created(run_location: str, timeout: int):
+def _check_file_error_created(run_location, timeout):
     # watch for the creation of temporary files at the run_directory.
     # This lets us know that the MAPDL process has at least started
     sleep_time = 0.1
-    has_ans = True
-
     for _ in range(int(timeout / sleep_time)):
         # check if any error files have been created.  This is
         # more reliable than using the lock file
@@ -661,7 +609,7 @@ def _check_file_error_created(run_location: str, timeout: int):
         raise MapdlDidNotStart(msg)
 
 
-def _check_server_is_alive(stdout_queue: Queue[bytes], timeout: int):
+def _check_server_is_alive(stdout_queue: Queue[str], timeout: int):
     if not stdout_queue:
         LOG.debug("No STDOUT queue. Not checking MAPDL this way.")
         return
@@ -685,8 +633,8 @@ def _check_server_is_alive(stdout_queue: Queue[bytes], timeout: int):
             "START GRPC SERVER" in terminal_output
             and "Server listening on" in terminal_output
         ):
-            listening_on = terminal_output.splitlines()[-1]
-            listening_on = ":".join(listening_on.split(":")[1:]).strip()
+            listening_on = terminal_output.splitlines()[-1].split(":")
+            listening_on = ":".join(listening_on[1:]).strip()
             LOG.debug(f"MAPDL gRPC server successfully launched at: {listening_on}")
             break
 
@@ -697,7 +645,7 @@ def _check_server_is_alive(stdout_queue: Queue[bytes], timeout: int):
         raise MapdlDidNotStart("MAPDL failed to start the gRPC server")
 
 
-def _get_std_output(std_queue: Queue[bytes], timeout: int = 1) -> List[str]:
+def _get_std_output(std_queue: Queue[str], timeout: int = 1) -> List[str]:
     if not std_queue:
         return [""]
 
@@ -715,14 +663,14 @@ def _get_std_output(std_queue: Queue[bytes], timeout: int = 1) -> List[str]:
 
 
 def _create_queue_for_std(
-    std: IO[bytes] | None,
-) -> Tuple[Optional[Queue[bytes]], Optional[threading.Thread]]:
+    std: subprocess.PIPE,
+) -> Tuple[Optional[Queue[str]], Optional[threading.Thread]]:
     """Create a queue and thread objects for a given PIPE std"""
     if not std:
         LOG.debug("No STDOUT. Not checking MAPDL this way.")
         return None, None
 
-    def enqueue_output(out: IO[bytes], queue: Queue[bytes]) -> None:
+    def enqueue_output(out: subprocess.PIPE, queue: Queue[str]) -> None:
         try:
             for line in iter(out.readline, b""):
                 queue.put(line)
@@ -732,7 +680,7 @@ def _create_queue_for_std(
             # ValueError: PyMemoryView_FromBuffer(): info -> buf must not be NULL
             pass
 
-    q: Queue[bytes] = Queue()
+    q: Queue[str] = Queue()
     t: threading.Thread = threading.Thread(target=enqueue_output, args=(std, q))
     t.daemon = True  # thread dies with the program
     t.start()
@@ -741,7 +689,7 @@ def _create_queue_for_std(
 
 
 def launch_remote_mapdl(
-    version: str,
+    version: Optional[str] = None,
     cleanup_on_exit: bool = True,
 ) -> MapdlGrpc:
     """Start MAPDL remotely using the product instance management API.
@@ -772,10 +720,10 @@ def launch_remote_mapdl(
             "The package 'ansys-platform-instancemanagement' is required to use this function."
         )
 
-    pim = pypim.connect()  # type: ignore
+    pim = pypim.connect()
     instance = pim.create_instance(product_name="mapdl", product_version=version)
     instance.wait_for_ready()
-    channel = instance.build_grpc_channel(  # type: ignore
+    channel = instance.build_grpc_channel(
         options=[
             ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
         ]
@@ -787,7 +735,7 @@ def launch_remote_mapdl(
     )
 
 
-def get_start_instance(start_instance: bool | str | None = None) -> bool:
+def get_start_instance(start_instance: Optional[Union[bool, str]] = None) -> bool:
     """Check if the environment variable ``PYMAPDL_START_INSTANCE`` exists and is valid.
 
     Parameters
@@ -827,7 +775,7 @@ def get_start_instance(start_instance: bool | str | None = None) -> bool:
     if isinstance(start_instance, bool):
         return start_instance
 
-    else:
+    elif start_instance is None or isinstance(start_instance, str):
         if start_instance is None:
             if os.environ.get("PYMAPDL_START_INSTANCE"):
                 start_instance = os.environ.get("PYMAPDL_START_INSTANCE", "")
@@ -849,8 +797,11 @@ def get_start_instance(start_instance: bool | str | None = None) -> bool:
 
         return start_instance.lower().strip() == "true"
 
+    else:
+        raise ValueError("Only booleans are allowed as arguments.")
 
-def get_default_ansys() -> Union[Tuple[str, float], Tuple[Literal[""], Literal[""]]]:
+
+def get_default_ansys():
     """Searches for ansys path within the standard install location
     and returns the path and version of the latest MAPDL version installed.
 
@@ -875,8 +826,6 @@ def get_default_ansys() -> Union[Tuple[str, float], Tuple[Literal[""], Literal["
     >>> get_default_ansys()
     (/usr/ansys_inc/v211/ansys/bin/ansys211, 21.1)
     """
-    from ansys.tools.path import find_mapdl
-
     return find_mapdl(supported_versions=SUPPORTED_ANSYS_VERSIONS)
 
 
@@ -930,23 +879,16 @@ def get_default_ansys_version():
     return get_default_ansys()[1]
 
 
-def check_valid_ansys() -> bool:
+def check_valid_ansys():
     """Checks if a valid version of ANSYS is installed and preconfigured"""
-    if not _HAS_ATP:
-        raise ModuleNotFoundError(
-            "The package 'ansys-tools-path' is required to use this function."
-        )
-    from ansys.tools.path import get_mapdl_path
-
-    ansys_bin = get_mapdl_path(allow_input=False)  # type: ignore
+    ansys_bin = get_mapdl_path(allow_input=False)
     if ansys_bin is not None:
         version = version_from_path("mapdl", ansys_bin)
-        if version is not None:
-            return not (version < 170 and os.name != "posix")
+        return not (version < 170 and os.name != "posix")
     return False
 
 
-def check_lock_file(path: str, jobname: str, override: bool) -> None:
+def check_lock_file(path, jobname, override):
     LOG.debug("Checking for lock file")
     # Check for lock file
     lockfile = os.path.join(path, jobname + ".lock")
@@ -1037,7 +979,7 @@ def set_MPI_additional_switches(
     return add_sw
 
 
-def configure_ubuntu(envvars: Dict[str, Any]) -> Dict[str, Any]:
+def configure_ubuntu(envvars: Dict[str, Any]):
     # Ubuntu ANSYS fails to launch without I_MPI_SHM_LMT
     if _is_ubuntu():
         LOG.debug("Ubuntu system detected. Adding 'I_MPI_SHM_LMT' env var.")
@@ -1046,7 +988,7 @@ def configure_ubuntu(envvars: Dict[str, Any]) -> Dict[str, Any]:
     return envvars
 
 
-def force_smp_in_student(add_sw: str | None, exec_path: str) -> str:
+def force_smp_in_student(add_sw, exec_path):
     """Force SMP in student version.
 
     Parameters
@@ -1063,9 +1005,6 @@ def force_smp_in_student(add_sw: str | None, exec_path: str) -> str:
 
     """
     # Converting additional_switches to lower case to avoid mismatches.
-    if add_sw is None:
-        return ""
-
     add_sw_lower_case = add_sw.lower()
 
     if (
@@ -1108,7 +1047,7 @@ def launch_mapdl(
     start_timeout: Optional[int] = None,
     version: Optional[Union[int, str]] = None,
     **kwargs: Dict[str, Any],
-) -> "MapdlGrpc | MapdlConsole | list[Any]":
+) -> Union[MapdlGrpc, "MapdlConsole"]:
     """Start MAPDL locally.
 
     Parameters
@@ -1542,13 +1481,13 @@ def launch_mapdl(
     # ----------------
     # Delegating to PyPIM if applicable
     #
-    if _HAS_PIM and exec_file is None and pypim.is_configured():  # type: ignore
+    if _HAS_PIM and exec_file is None and pypim.is_configured():
         # Start MAPDL with PyPIM if the environment is configured for it
         # and the user did not pass a directive on how to launch it.
         LOG.info("Starting MAPDL remotely. The startup configuration will be ignored.")
 
         return launch_remote_mapdl(
-            cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]  # type: ignore
+            cleanup_on_exit=args["cleanup_on_exit"], version=args["version"]
         )
 
     ########################################
@@ -1576,8 +1515,6 @@ def launch_mapdl(
 
     args["port"] = get_port(args["port"], args["start_instance"])
 
-    env_vars: Dict[str, Any] = {}
-
     if args["start_instance"]:
         ########################################
         # Local adjustments
@@ -1595,7 +1532,9 @@ def launch_mapdl(
             args["license_type"], args["additional_switches"]
         )
 
-        env_vars = update_env_vars(args["add_env_vars"], args["replace_env_vars"])
+        env_vars: Dict[str, str] = update_env_vars(
+            args["add_env_vars"], args["replace_env_vars"]
+        )
 
         get_run_location(args)
 
@@ -1663,7 +1602,7 @@ def launch_mapdl(
             **start_parm,
         )
         if args["clear_on_connect"]:
-            mapdl.clear()  # type: ignore
+            mapdl.clear()
         return mapdl
 
     ########################################
@@ -1727,12 +1666,12 @@ def launch_mapdl(
                 cmd=cmd,
                 run_location=args["run_location"],
                 env_vars=env_vars,
-                launch_on_hpc=args.get("launch_on_hpc", False),
+                launch_on_hpc=args.get("launch_on_hpc"),
                 mapdl_output=args.get("mapdl_output"),
             )
 
             if args["launch_on_hpc"]:
-                start_parm["jobid"] = check_mapdl_launch_on_hpc(process)
+                start_parm["jobid"] = check_mapdl_launch_on_hpc(process, start_parm)
                 get_job_info(start_parm=start_parm, timeout=args["start_timeout"])
             else:
                 # Local mapdl launch check
@@ -1743,7 +1682,7 @@ def launch_mapdl(
         except Exception as exception:
             LOG.error("An error occurred when launching MAPDL.")
 
-            jobid: int | None = start_parm.get("jobid")
+            jobid: int = start_parm.get("jobid")
 
             if (
                 args["launch_on_hpc"]
@@ -1756,12 +1695,12 @@ def launch_mapdl(
 
             if args["license_server_check"]:
                 LOG.debug("Checking license server.")
-                lic_check.check()  # type: ignore
+                lic_check.check()
 
             raise exception
 
         if args["just_launch"]:
-            out: list[Any] = [args["ip"], args["port"]]
+            out = [args["ip"], args["port"]]
             if hasattr(process, "pid"):
                 out += [process.pid]
             return out
@@ -1786,12 +1725,10 @@ def launch_mapdl(
             LOG.error("An error occurred when connecting to MAPDL.")
             raise exception
 
-    return mapdl  # type: ignore
+    return mapdl
 
 
-def check_mode(
-    mode: ALLOWABLE_MODES_TYPE | None, version: Optional[int] = None
-) -> ALLOWABLE_MODES_TYPE:
+def check_mode(mode: ALLOWABLE_MODES, version: Optional[int] = None):
     """Check if the MAPDL server mode matches the allowable version
 
     If :class:`None`, the newest mode will be selected.
@@ -1806,13 +1743,10 @@ def check_mode(
             f"verify that the provided connection mode '{mode}' is compatible "
             "with the current MAPDL installation."
         )
-        if mode:
-            return mode
-        else:
-            return "grpc"
+        return mode
 
     if isinstance(mode, str):
-        mode = mode.lower()  # type: ignore
+        mode = mode.lower()
         if mode == "grpc":
             if version and version < 211:
                 if version < 202 and os.name == "nt":
@@ -1860,9 +1794,7 @@ def check_mode(
     return mode
 
 
-def update_env_vars(
-    add_env_vars: dict[str, str], replace_env_vars: dict[str, str]
-) -> dict[str, Any]:
+def update_env_vars(add_env_vars: dict, replace_env_vars: dict) -> dict:
     """
     Update environment variables for the MAPDL process.
 
@@ -1892,7 +1824,7 @@ def update_env_vars(
         )
 
     elif add_env_vars:
-        if not isinstance(add_env_vars, dict):  # type: ignore
+        if not isinstance(add_env_vars, dict):
             raise TypeError(
                 "The variable 'add_env_vars' should be a dict with env vars."
             )
@@ -1901,7 +1833,7 @@ def update_env_vars(
         LOG.debug(f"Updating environment variables with: {add_env_vars}")
 
     elif replace_env_vars:
-        if not isinstance(replace_env_vars, dict):  # type: ignore
+        if not isinstance(replace_env_vars, dict):
             raise TypeError(
                 "The variable 'replace_env_vars' should be a dict with env vars."
             )
@@ -1911,7 +1843,7 @@ def update_env_vars(
     return envvars
 
 
-def set_license_switch(license_type: str | None, additional_switches: str) -> str:
+def set_license_switch(license_type, additional_switches):
     if isinstance(license_type, str):
         # In newer license server versions an invalid license name just get discarded and produces no effect or warning.
         # For example:
@@ -1982,13 +1914,13 @@ def set_license_switch(license_type: str | None, additional_switches: str) -> st
     return additional_switches
 
 
-def _get_windows_host_ip() -> str | None:
+def _get_windows_host_ip():
     output = _run_ip_route()
     if output:
         return _parse_ip_route(output)
 
 
-def _run_ip_route() -> str | None:
+def _run_ip_route():
 
     try:
         # args value is controlled by the library.
@@ -2005,7 +1937,7 @@ def _run_ip_route() -> str | None:
         return p.stdout.decode()
 
 
-def _parse_ip_route(output: str) -> str | None:
+def _parse_ip_route(output):
     match = re.findall(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*", output)
 
     if match:
@@ -2018,17 +1950,13 @@ def get_slurm_options(
 ) -> Dict[str, Any]:
     def get_value(
         variable: str,
-        kwargs: Dict[str, str],
+        kwargs: Dict[str, Any],
         default: Optional[Union[str, int, float]] = 1,
         astype: Optional[Callable[[Any], Any]] = int,
-    ) -> str | int | float:
+    ):
         value_from_env_vars = os.environ.get(variable)
         value_from_kwargs = kwargs.pop(variable, None)
         value = value_from_kwargs or value_from_env_vars or default
-
-        if value is None:
-            raise ValueError("The value of the variable couldn't be found.")
-
         if astype and value:
             return astype(value)
         else:
@@ -2050,26 +1978,26 @@ def get_slurm_options(
 
     # cpus-per-task is for multithreading,
     # sharing tasks across multiple CPUs in same node (SMP)
-    SLURM_CPUS_PER_TASK = int(get_value("SLURM_CPUS_PER_TASK", kwargs))
+    SLURM_CPUS_PER_TASK = get_value("SLURM_CPUS_PER_TASK", kwargs)
     LOG.info(f"SLURM_CPUS_PER_TASK: {SLURM_CPUS_PER_TASK}")
 
     # Set to value of the --ntasks option, if specified. See SLURM_NTASKS.
     # Included for backwards compatibility.
-    SLURM_NPROCS = int(get_value("SLURM_NPROCS", kwargs))
+    SLURM_NPROCS = get_value("SLURM_NPROCS", kwargs)
     LOG.info(f"SLURM_NPROCS: {SLURM_NPROCS}")
 
     # Number of CPUs allocated to the batch step.
-    SLURM_CPUS_ON_NODE = int(get_value("SLURM_CPUS_ON_NODE", kwargs))
+    SLURM_CPUS_ON_NODE = get_value("SLURM_CPUS_ON_NODE", kwargs)
     LOG.info(f"SLURM_CPUS_ON_NODE: {SLURM_CPUS_ON_NODE}")
 
-    SLURM_MEM_PER_NODE = str(
-        get_value("SLURM_MEM_PER_NODE", kwargs, default="")  # type: ignore
-    ).upper()  # type: ignore
+    SLURM_MEM_PER_NODE = get_value(
+        "SLURM_MEM_PER_NODE", kwargs, default="", astype=str
+    ).upper()
     LOG.info(f"SLURM_MEM_PER_NODE: {SLURM_MEM_PER_NODE}")
 
-    SLURM_NODELIST = str(
-        get_value("SLURM_NODELIST", kwargs, default="")  # type: ignore
-    ).lower()  # type: ignore
+    SLURM_NODELIST = get_value(
+        "SLURM_NODELIST", kwargs, default="", astype=None
+    ).lower()
     LOG.info(f"SLURM_NODELIST: {SLURM_NODELIST}")
 
     if not args["exec_file"]:
@@ -2096,7 +2024,7 @@ def get_slurm_options(
         options = max(
             [
                 # 4,  # Fall back option
-                int(SLURM_CPUS_PER_TASK) * int(SLURM_NTASKS),  # (CPUs)
+                SLURM_CPUS_PER_TASK * SLURM_NTASKS,  # (CPUs)
                 SLURM_NPROCS,  # (CPUs)
                 # SLURM_NTASKS,  # (tasks) Not necessary the number of CPUs,
                 # SLURM_NNODES * SLURM_TASKS_PER_NODE * SLURM_CPUS_PER_TASK,  # (CPUs)
@@ -2152,14 +2080,14 @@ def get_slurm_options(
     return args
 
 
-def pack_arguments(locals_: dict[str, Any]) -> dict[str, Any | None]:
-    args: dict[str, Any] = {}
+def pack_arguments(locals_):
+    args = {}
     for each in ALLOWABLE_LAUNCH_MAPDL_ARGS:
         if each in locals_:
             args[each] = locals_[each]
 
     args["kwargs"] = locals_["kwargs"]
-    args.update(locals_["kwargs"])  # type: ignore # attaching kwargs
+    args.update(locals_["kwargs"])  # attaching kwargs
 
     args["set_no_abort"] = locals_.get(
         "set_no_abort", locals_["kwargs"].get("set_no_abort", True)
@@ -2176,7 +2104,7 @@ def pack_arguments(locals_: dict[str, Any]) -> dict[str, Any | None]:
     )
 
     if locals_.get("use_vtk"):
-        LOG.warn(  # type: ignore
+        LOG.warn(
             "'use_vtk' will be deprecated in the next releases. Please use `graphics_backend` instead"
         )
         if locals_["use_vtk"]:
@@ -2213,7 +2141,7 @@ def is_running_on_slurm(args: Dict[str, Any]) -> bool:
     return args["running_on_hpc"]
 
 
-def generate_start_parameters(args: Dict[str, Any]) -> dict[str, Any]:
+def generate_start_parameters(args: Dict[str, Any]) -> Dict[str, Any]:
     """Generate start parameters
 
     Generate a dict with the parameters for launching MAPDL.
@@ -2235,7 +2163,7 @@ def generate_start_parameters(args: Dict[str, Any]) -> dict[str, Any]:
         a non-allowed key was used.
     """
     # Transferring MAPDL arguments to start_parameters:
-    start_parm: dict[str, Any] = {}
+    start_parm = {}
 
     for each_par in _ALLOWED_START_PARM:
         if each_par in args:
@@ -2256,7 +2184,7 @@ def generate_start_parameters(args: Dict[str, Any]) -> dict[str, Any]:
     return start_parm
 
 
-def get_ip_env_var() -> str | None:
+def get_ip_env_var() -> str:
     """Get IP from 'PYMAPDL_IP' env var"""
 
     # Getting IP from env var
@@ -2346,16 +2274,16 @@ def get_port(port: Optional[int] = None, start_instance: Optional[bool] = None) 
     if port is None:
         if os.environ.get("PYMAPDL_PORT"):
             LOG.debug(f"Using port from 'PYMAPDL_PORT' env var: {port}")
-            return int(os.environ["PYMAPDL_PORT"])
+            return int(os.environ.get("PYMAPDL_PORT"))
 
-        if not pymapdl._LOCAL_PORTS:  # type: ignore
+        if not pymapdl._LOCAL_PORTS:
             port = MAPDL_DEFAULT_PORT
             LOG.debug(f"Using default port: {port}")
         else:
-            port = max(pymapdl._LOCAL_PORTS) + 1  # type: ignore
+            port = max(pymapdl._LOCAL_PORTS) + 1
             LOG.debug(f"Using next available port: {port}")
 
-        while (port_in_use(port) and start_instance) or port in pymapdl._LOCAL_PORTS:  # type: ignore
+        while (port_in_use(port) and start_instance) or port in pymapdl._LOCAL_PORTS:
             port += 1
             LOG.debug(f"Port in use.  Incrementing port number. port={port}")
 
@@ -2368,7 +2296,7 @@ def get_port(port: Optional[int] = None, start_instance: Optional[bool] = None) 
                 else:
                     raise PortAlreadyInUse(port)
 
-    pymapdl._LOCAL_PORTS.append(port)  # type: ignore
+    pymapdl._LOCAL_PORTS.append(port)
 
     check_valid_port(port)
     LOG.debug(f"Using default port {port}")
@@ -2377,7 +2305,7 @@ def get_port(port: Optional[int] = None, start_instance: Optional[bool] = None) 
 
 
 def get_version(
-    version: str | int | None = None,
+    version: Optional[Union[str, int]] = None,
     exec_file: Optional[str] = None,
     launch_on_hpc: bool = False,
 ) -> Optional[int]:
@@ -2466,7 +2394,7 @@ def create_gallery_instances(
     # we're allowed to start instances
     if GALLERY_INSTANCE[0] is None:
         LOG.debug("Loading first MAPDL instance for gallery building.")
-        GALLERY_INSTANCE[0] = None
+        GALLERY_INSTANCE[0] = "Loading..."
         mapdl = launch_mapdl(
             start_instance=True,
             cleanup_on_exit=False,
@@ -2474,18 +2402,12 @@ def create_gallery_instances(
             set_no_abort=args["set_no_abort"],
             **start_parm,
         )
-        if isinstance(mapdl, MapdlGrpc):
-            GALLERY_INSTANCE[0] = {"ip": mapdl.ip, "port": mapdl.port}
-        else:
-            raise ValueError(
-                "The MAPDL instance is not a gRPC instance. "
-                "Please check the MAPDL version."
-            )
+        GALLERY_INSTANCE[0] = {"ip": mapdl._ip, "port": mapdl._port}
         return mapdl
 
     # otherwise, connect to the existing gallery instance if available, but it needs to be fully loaded.
     else:
-        while not GALLERY_INSTANCE[0]:
+        while not isinstance(GALLERY_INSTANCE[0], dict):
             # Waiting for MAPDL instance to be ready
             time.sleep(0.1)
 
@@ -2502,7 +2424,7 @@ def create_gallery_instances(
             **start_parm,
         )
         if args["clear_on_connect"]:
-            mapdl.clear()  # type: ignore
+            mapdl.clear()
         return mapdl
 
 
@@ -2537,14 +2459,13 @@ def get_exec_file(args: Dict[str, Any]) -> None:
                 "to input the executable path ('exec_file' argument) or use the "
                 "'PYMAPDL_MAPDL_EXEC' environment variable."
             )
-        from ansys.tools.path import get_mapdl_path
 
         if args.get("_debug_no_launch", False):
             args["exec_file"] = ""
             return
 
         LOG.debug("Using default executable.")
-        args["exec_file"] = get_mapdl_path(version=args.get("version"))  # type: ignore
+        args["exec_file"] = get_mapdl_path(version=args.get("version"))
 
         # Edge case
         if args["exec_file"] is None:
@@ -2678,7 +2599,7 @@ def get_cpus(args: Dict[str, Any]):
         return
 
     # Setting number of processors
-    machine_cores = psutil.cpu_count(logical=False) or 1  # 1 if we cannot get it
+    machine_cores = psutil.cpu_count(logical=False)
 
     # Some machines only have 1 core
     min_cpus = machine_cores if machine_cores < 2 else 2
@@ -2693,7 +2614,7 @@ def get_cpus(args: Dict[str, Any]):
         )
 
 
-def remove_err_files(run_location: str, jobname: str) -> None:
+def remove_err_files(run_location, jobname):
     # remove any temporary error files at the run location.  This is
     # important because we need to know if MAPDL is already running
     # here and because we're looking for any temporary files that are
@@ -2717,9 +2638,9 @@ def remove_err_files(run_location: str, jobname: str) -> None:
 def launch_mapdl_on_cluster(
     nproc: int,
     *,
-    scheduler_options: Dict[str, Any] | None = None,
-    **launch_mapdl_args: Any,
-) -> "MapdlGrpc | MapdlConsole":
+    scheduler_options: Union[str, Dict[str, str]] = None,
+    **launch_mapdl_args: Dict[str, Any],
+) -> MapdlGrpc:
     """Launch MAPDL on a HPC cluster
 
     Launches an interactive MAPDL instance on an HPC cluster.
@@ -2759,8 +2680,6 @@ def launch_mapdl_on_cluster(
     ValueError
         _description_
     """
-    if scheduler_options is None:
-        scheduler_options = {}
 
     # Processing the arguments
     launch_mapdl_args["launch_on_hpc"] = True
@@ -2778,27 +2697,24 @@ def launch_mapdl_on_cluster(
             "The 'start_instance' argument must be 'True' when launching on HPC."
         )
 
-    # Unpack the launch_mapdl_args dict so that only valid keyword arguments are passed
-    return launch_mapdl(  # type: ignore
+    return launch_mapdl(
         nproc=nproc,
         scheduler_options=scheduler_options,
         **launch_mapdl_args,
     )
 
 
-def get_hostname_host_cluster(job_id: int, timeout: int = 30) -> tuple[str, str]:
+def get_hostname_host_cluster(job_id: int, timeout: int = 30) -> str:
     options = f"show jobid -dd {job_id}"
     LOG.debug(f"Executing the command 'scontrol {options}'")
 
     ready = False
     time_start = time.time()
     counter = 0
-    stdout: str = ""
-
     while not ready:
         proc = send_scontrol(options)
 
-        stdout = proc.stdout.read().decode() if proc.stdout else ""
+        stdout = proc.stdout.read().decode()
 
         if "JobState=RUNNING" not in stdout:
             counter += 1
@@ -2850,8 +2766,10 @@ def get_hostname_host_cluster(job_id: int, timeout: int = 30) -> tuple[str, str]
 
 def get_jobid(stdout: str) -> int:
     """Extract the jobid from a command output"""
+    job_id = stdout.strip().split(" ")[-1]
+
     try:
-        job_id = int(stdout.strip().split(" ")[-1])
+        job_id = int(job_id)
     except ValueError:
         LOG.error(f"The console output does not seems to have a valid jobid:\n{stdout}")
         raise ValueError("PyMAPDL could not retrieve the job id.")
@@ -2861,7 +2779,7 @@ def get_jobid(stdout: str) -> int:
 
 
 def generate_sbatch_command(
-    cmd: str | List[str], scheduler_options: str | dict[str, Any] | None = None
+    cmd: Union[str, List[str]], scheduler_options: Optional[Union[str, Dict[str, str]]]
 ) -> List[str]:
     """Generate sbatch command for a given MAPDL launch command."""
 
@@ -2916,7 +2834,9 @@ def get_state_from_scontrol(stdout: str) -> str:
     return stdout.split("JobState=")[1].splitlines()[0].strip()
 
 
-def check_mapdl_launch_on_hpc(process: subprocess.Popen[bytes]) -> int | None:
+def check_mapdl_launch_on_hpc(
+    process: subprocess.Popen, start_parm: Dict[str, str]
+) -> int:
     """Check if the job is ready on the HPC
 
     Check if the job has been successfully submitted, and additionally, it does
@@ -2925,25 +2845,24 @@ def check_mapdl_launch_on_hpc(process: subprocess.Popen[bytes]) -> int | None:
 
     Parameters
     ----------
-    process : subprocess.Popen[bytes]
+    process : subprocess.Popen
         Process used to submit the job. The stdout is read from there.
+    start_parm : Dict[str, str]
+        To store the job ID, the BatchHost hostname and IP into.
 
     Returns
     -------
-    int | None :
-        The jobID or None if not found
+    int :
+        The jobID
 
     Raises
     ------
     MapdlDidNotStart
         The job submission failed.
     """
-    if process.stdout is None:
-        return
-
-    stdout: str = process.stdout.read().decode()
-    if "Submitted batch job" not in stdout and process.stderr is not None:
-        stderr: str = process.stderr.read().decode()
+    stdout = process.stdout.read().decode()
+    if "Submitted batch job" not in stdout:
+        stderr = process.stderr.read().decode()
         raise MapdlDidNotStart(
             "PyMAPDL failed to submit the sbatch job:\n"
             f"stdout:\n{stdout}\nstderr:\n{stderr}"
@@ -2955,7 +2874,7 @@ def check_mapdl_launch_on_hpc(process: subprocess.Popen[bytes]) -> int | None:
 
 
 def get_job_info(
-    start_parm: Dict[str, str | int], jobid: Optional[int] = None, timeout: int = 30
+    start_parm: Dict[str, str], jobid: Optional[int] = None, timeout: int = 30
 ):
     """Get job info like BatchHost IP and hostname
 
@@ -2963,7 +2882,7 @@ def get_job_info(
 
     Parameters
     ----------
-    start_parm : Dict[str, str | int]
+    start_parm : Dict[str, str]
         Starting parameters for MAPDL.
     jobid : int
         Job ID
@@ -2973,9 +2892,9 @@ def get_job_info(
         is found, it passes :class:`None` to
         :func:`ansys.mapdl.core.launcher.get_hostname_host_cluster`.
     """
-    timeout = int(start_parm.get("start_instance", timeout))
+    timeout = timeout or start_parm.get("start_instance")
 
-    jobid = jobid or int(start_parm["jobid"])
+    jobid = jobid or start_parm["jobid"]
 
     batch_host, batch_ip = get_hostname_host_cluster(jobid, timeout=timeout)
 
@@ -2995,19 +2914,23 @@ def send_scontrol(args: str):
 
 
 def submitter(
-    cmd: List[str],
+    cmd: Union[str, List[str]],
     *,
-    executable: str | None = None,
+    executable: str = None,
     shell: bool = False,
-    cwd: str | None = None,
-    stdin: int | None = None,
-    stdout: int | IO[Any] | None = None,
-    stderr: int | IO[Any] | None = None,
-    env_vars: dict[str, str] | None = None,
-) -> subprocess.Popen[bytes]:
+    cwd: str = None,
+    stdin: subprocess.PIPE = None,
+    stdout: subprocess.PIPE = None,
+    stderr: subprocess.PIPE = None,
+    env_vars: dict[str, str] = None,
+):
 
     if executable:
-        cmd = [executable] + cmd
+        if isinstance(cmd, list):
+            cmd = [executable] + cmd
+        else:
+            cmd = [executable, cmd]
+
     if not stdin:
         stdin = subprocess.DEVNULL
     if not stdout:
@@ -3028,7 +2951,7 @@ def submitter(
     )
 
 
-def check_console_start_parameters(start_parm: Dict[str, Any]) -> Dict[str, Any]:
+def check_console_start_parameters(start_parm):
     valid_args = [
         "exec_file",
         "run_location",

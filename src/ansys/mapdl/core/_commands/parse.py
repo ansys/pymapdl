@@ -39,12 +39,11 @@ NUMERIC_CONST_PATTERN = r"""
 NUM_PATTERN = re.compile(NUMERIC_CONST_PATTERN, re.VERBOSE)
 
 
-def parse_kdist(msg: Optional[str] = None) -> Optional[list[float]]:
+def parse_kdist(msg: Optional[str] = None) -> Optional[int]:
     """Parse the keypoint value from a keypoint message"""
-    if msg:
-        finds = re.findall(NUM_PATTERN, msg)[-4:]
-        if len(finds) == 4:
-            return [float(val) for val in finds]
+    finds = re.findall(NUM_PATTERN, msg)[-4:]
+    if len(finds) == 4:
+        return [float(val) for val in finds]
 
 
 def parse_et(msg: Optional[str] = None) -> Optional[int]:
@@ -112,7 +111,7 @@ def parse_line_no(msg: Optional[str] = None) -> Optional[int]:
             return int(res.group(1))
 
 
-def parse_line_nos(msg: Optional[str] = None) -> Optional[list[int]]:
+def parse_line_nos(msg: Optional[str] = None) -> Optional[int]:
     if msg:
         matches = re.findall(r"LINE NO[.]=\s*(\d*)", msg)
         if matches:
@@ -143,12 +142,11 @@ def parse_n(msg: Optional[str] = None) -> Optional[int]:
             return int(res.group(2))
 
 
-def parse_ndist(msg: Optional[str] = None) -> Optional[list[float]]:
+def parse_ndist(msg: Optional[str] = None) -> Optional[int]:
     """Parse the node value from a node message"""
-    if msg:
-        finds = re.findall(NUM_PATTERN, msg)[-4:]
-        if len(finds) == 4:
-            return [float(val) for val in finds]
+    finds = re.findall(NUM_PATTERN, msg)[-4:]
+    if len(finds) == 4:
+        return [float(val) for val in finds]
 
 
 def parse_kl(msg: Optional[str] = None) -> Optional[int]:

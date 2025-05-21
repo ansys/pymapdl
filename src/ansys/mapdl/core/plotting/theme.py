@@ -22,11 +22,38 @@
 
 """Store parameters for a PyMAPDL-specific theme for PyVista"""
 
-from typing import TYPE_CHECKING, Any
-
 import numpy as np
 
-from ansys.mapdl.core import _HAS_MATPLOTLIB, _HAS_PYVISTA
+try:
+    from matplotlib.colors import LinearSegmentedColormap, ListedColormap
+
+    _HAS_MATPLOTLIB = True
+except ModuleNotFoundError:
+    _HAS_MATPLOTLIB = False
+
+
+from ansys.mapdl.core import _HAS_PYVISTA
+
+if _HAS_PYVISTA:
+    from cycler import Cycler
+    from pyvista.plotting.colors import get_cycler
+
+    try:
+        from pyvista.plotting.themes import Theme
+
+    except ImportError:
+        from pyvista import __version__ as pyvista_version
+
+        if "0.40" in pyvista_version:
+            from pyvista.themes import Theme
+        else:  # older versions
+            from pyvista.themes import DefaultTheme as Theme
+
+else:  # pragma: no cover
+
+    class Theme:
+        pass
+
 
 MAPDL_colorbar = (
     np.array(
@@ -47,66 +74,7 @@ MAPDL_colorbar = (
 )
 
 if _HAS_MATPLOTLIB:
-    from matplotlib.colors import ListedColormap
-
     PyMAPDL_cmap: ListedColormap = ListedColormap(MAPDL_colorbar, name="PyMAPDL")
-
-if _HAS_PYVISTA:
-    from ansys.tools.versioning.utils import version_string_as_tuple  # type: ignore
-    from cycler import Cycler
-    from pyvista import __version__ as pyvista_version
-    from pyvista.plotting.colors import get_cycler  # type: ignore
-
-    version = version_string_as_tuple(pyvista_version)
-
-    if version[1] >= 41:
-        from pyvista.plotting.themes import Theme  # type: ignore
-    elif version[1] >= 40:
-        from pyvista.themes import Theme  # type: ignore
-    else:
-        from pyvista.themes import DefaultTheme as Theme  # type: ignore
-
-else:  # pragma: no cover
-    from dataclasses import dataclass
-
-    @dataclass
-    class Font:
-        """Font class for PyVista theme."""
-
-        family: str = "arial"
-        size: int = 18
-        title_size: int = 18
-        label_size: int = 18
-        color: str = "black"
-
-    @dataclass
-    class Axes:
-        """Axes class for PyVista theme."""
-
-        x_color: str = "tomato"
-        y_color: str = "seagreen"
-        z_color: str = "blue"
-
-    @dataclass
-    class Theme:  # type: ignore
-        name: str = "PyMAPDL-Theme"
-        title: str = "PyMAPDL"
-        background: str = "paraview"
-        interactive: bool = True
-        cmap: Any = None
-        font = Font()
-        axes = Axes()
-
-        show_edges: bool = False
-        color: str = "lightblue"
-        outline_color: str = "black"
-        edge_color: str = "black"
-        color_cycler: Any = None
-        render_points_as_spheres: bool = True
-
-
-if _HAS_MATPLOTLIB and TYPE_CHECKING:
-    from matplotlib.colors import LinearSegmentedColormap
 
 
 def get_ansys_cmap(N: int = 9) -> "LinearSegmentedColormap":
@@ -124,22 +92,11 @@ def get_ansys_cmap(N: int = 9) -> "LinearSegmentedColormap":
     -------
     matplotlib.colors.LinearSegmentedColormap
         Colormap
-
-    Raises
-    ------
-    ModuleNotFoundError
-        If matplotlib is not installed.
     """
-    if not _HAS_MATPLOTLIB:
-        raise ModuleNotFoundError(
-            "'matplotlib' package is needed for 'get_ansys_cmap'."
-        )
-    from matplotlib.colors import LinearSegmentedColormap
-
     return LinearSegmentedColormap.from_list("PyMAPDL", MAPDL_colorbar.tolist(), N=N)
 
 
-def get_ansys_colors(N: int = 9) -> np.ndarray[Any, Any]:
+def get_ansys_colors(N: int = 9) -> np.array:
     """Get N number of colors as array.
 
     Obtain N unique colors as a Numpy array (N x 4). Transparency is included.
@@ -167,10 +124,10 @@ def get_ansys_colors(N: int = 9) -> np.ndarray[Any, Any]:
         )
 
     cmap = get_ansys_cmap(N=N)
-    return np.array(cmap([i for i in range(N)]), dtype=np.float64)
+    return cmap([i for i in range(N)])
 
 
-def get_ansys_color_cycle(N: int = 9) -> np.ndarray[Any, Any]:
+def get_ansys_color_cycle(N: int = 9) -> np.array:
     """Get a color cycler
 
     Give an array of N colors which is the result of cycling through the MAPDL
@@ -190,10 +147,10 @@ def get_ansys_color_cycle(N: int = 9) -> np.ndarray[Any, Any]:
     from cycler import cycler
 
     cyc_ = cycler(color=MAPDL_colorbar.tolist())()
-    return np.array([each["color"] for _, each in zip(range(N), cyc_)])
+    return np.array([each["color"] for i, each in zip(range(N), cyc_)])
 
 
-class MapdlTheme(Theme):  # type: ignore
+class MapdlTheme(Theme):
     """Provides the PyMAPDL-specific theme for PyVista.
 
     The theme includes these defaults:
@@ -222,7 +179,7 @@ class MapdlTheme(Theme):  # type: ignore
 
     """
 
-    def __init__(self) -> None:  # type: ignore
+    def __init__(self):
         """Initialize the theme."""
         super().__init__()
 
@@ -233,28 +190,27 @@ class MapdlTheme(Theme):  # type: ignore
 
         if _HAS_MATPLOTLIB:
             self.cmap = PyMAPDL_cmap
+        self.font.family: str = "arial"
 
-        self.font.family: str = "arial"  # type: ignore
+        self.font.size: int = 18
+        self.font.title_size: int = 18
+        self.font.label_size: int = 18
+        self.font.color: str = "black"
 
-        self.font.size: int = 18  # type: ignore
-        self.font.title_size: int = 18  # type: ignore
-        self.font.label_size: int = 18  # type: ignore
-        self.font.color: str = "black"  # type: ignore
-
-        self.axes.x_color: str = "tomato"  # type: ignore
-        self.axes.y_color: str = "seagreen"  # type: ignore
-        self.axes.z_color: str = "blue"  # type: ignore
+        self.axes.x_color: str = "tomato"
+        self.axes.y_color: str = "seagreen"
+        self.axes.z_color: str = "blue"
 
         self.show_edges: bool = False
         self.color: str = "lightblue"
         self.outline_color: str = "black"
         self.edge_color: str = "black"
 
-        self.color_cycler: Cycler = get_cycler(MAPDL_colorbar.tolist())  # type: ignore
+        self.color_cycler: Cycler = get_cycler(MAPDL_colorbar.tolist())
         self.render_points_as_spheres: bool = True
 
 
-def _apply_default_theme() -> None:
+def _apply_default_theme():
     import pyvista as pv
 
     pv.global_theme = MapdlTheme()
