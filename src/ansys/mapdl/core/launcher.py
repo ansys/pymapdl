@@ -2716,7 +2716,7 @@ def launch_mapdl_on_cluster(
     *,
     scheduler_options: Dict[str, Any] | None = None,
     **launch_mapdl_args: Any,
-) -> MapdlGrpc | MapdlConsole:
+) -> "MapdlGrpc | MapdlConsole":
     """Launch MAPDL on a HPC cluster
 
     Launches an interactive MAPDL instance on an HPC cluster.
