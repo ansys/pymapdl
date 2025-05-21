@@ -2474,10 +2474,13 @@ def create_gallery_instances(
             set_no_abort=args["set_no_abort"],
             **start_parm,
         )
-        assert isinstance(
-            mapdl, MapdlGrpc
-        ), "MAPDL instance is not a MapdlGrpc instance"
-        GALLERY_INSTANCE[0] = {"ip": mapdl.ip, "port": mapdl.port}
+        if isinstance(mapdl, MapdlGrpc):
+            GALLERY_INSTANCE[0] = {"ip": mapdl.ip, "port": mapdl.port}
+        else:
+            raise ValueError(
+                "The MAPDL instance is not a gRPC instance. "
+                "Please check the MAPDL version."
+            )
         return mapdl
 
     # otherwise, connect to the existing gallery instance if available, but it needs to be fully loaded.
