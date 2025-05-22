@@ -132,7 +132,7 @@ pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_
 pymapdl = "ansys.mapdl.core.cli:main"
 
 [tool.pytest.ini_options]
-addopts = "-rxXsa -vvv --maxfail=10 --random-order-bucket=class --random-order --durations=10  --timeout=180"
+addopts = "-rxXsa -vvv --maxfail=10 --strict-markers --random-order-bucket=class --random-order --durations=10  --timeout=180"
 junit_family = "legacy"
 filterwarnings = [
     "ignore::ResourceWarning",
@@ -146,8 +146,9 @@ filterwarnings = [
 ]
 markers = [
     "skip_grpc: skip tests using grpc",
-    "gui: skip tests that launch the GUI interface",
-    "console: Run also console tests",
+    "requires_gui: run tests that require to launch the GUI interface",
+    "console: run console test based",
+    "gui: run gui test",
 ]
 
 testpaths = "tests"
@@ -242,12 +243,14 @@ checks = [
   # "EX01", # "No examples section found",
 ]
 
-
 override_SS05 = [  # override SS05 to allow docstrings starting with these words
     # '^Process ',
     # '^Assess ',
     # '^Access ',
 ]
+
+[tool.mypy]
+disable_error_code = ["return-value", "return", "import-untyped", "import-not-found"]
 
 [tool.towncrier]
 package = "ansys.mapdl.core"

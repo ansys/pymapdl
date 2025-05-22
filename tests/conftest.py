@@ -77,7 +77,7 @@ SUPPORT_PLOTTING = support_plotting()
 IS_SMP = is_smp()
 
 QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
-VALID_PORTS = []
+VALID_PORTS: list[int] = []
 ACCEPTABLE_FAILURE_RATE = 50
 
 ## Skip ifs
@@ -351,7 +351,6 @@ class MyReporter(TerminalReporter):
             self.write_line(f"[ERROR] {rep.head_line} - {get_error_message(rep)}")
 
 
-# @pytest.mark.trylast
 @pytest.hookimpl(trylast=True)
 def pytest_configure(config):
     vanilla_reporter = config.pluginmanager.getplugin("terminalreporter")
