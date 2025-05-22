@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import ast
 from collections import namedtuple
 from collections.abc import Generator
 import os
@@ -316,17 +317,38 @@ class MyReporter(TerminalReporter):
         # your own impl goes here, for example:
         self.write_sep("=", "PyMAPDL Pytest short summary")
 
+        def get_error_message(rep):
+            rep_ = rep.longreprtext.splitlines()
+            location = rep.location
+            path = f"{location[0]}:{location[1]}"
+            if len(rep_) >= 3:
+                # It is a fail/error
+                # A list of all the lines of the failed test + an empty string
+                # and the test location.
+                err_type = rep_[-1].split(":")[-1].strip()
+                cause = rep_[-3]  # Picking the last line of the error message
+                cause = cause[2:].strip() if cause.startswith("E ") else cause.strip()
+                return f"{path} - {err_type}: {cause}"
+            else:
+                # Skip rep_ is a list with on string
+                tupl_ = ast.literal_eval(rep_[0])
+                if len(tupl_) < 3:
+                    # Early exit just in case
+                    return f"{path} - " + " ".join(tupl_)
+                cause = f"{tupl_[2]}"
+                return f"{path} - {cause}"
+
         failed = self.stats.get("failed", [])
         for rep in failed:
-            self.write_line(
-                f"[FAILED] {rep.head_line} - {rep.longreprtext.splitlines()[-3]}"
-            )
+            self.write_line(f"[FAILED] {rep.head_line} - {get_error_message(rep)}")
+
+        skipped = self.stats.get("skipped", [])
+        for rep in skipped:
+            self.write_line(f"[SKIPPED] {rep.head_line} - {get_error_message(rep)}")
 
         errored = self.stats.get("error", [])
         for rep in errored:
-            self.write_line(
-                f"[ERROR] {rep.head_line} - {rep.longreprtext.splitlines()[-3]}"
-            )
+            self.write_line(f"[ERROR] {rep.head_line} - {get_error_message(rep)}")
 
 
 # @pytest.mark.trylast
