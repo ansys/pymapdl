@@ -43,7 +43,7 @@ import numpy as np
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core import _HAS_DPF, _HAS_VISUALIZER
+from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
     CMD_LISTING,
@@ -1087,6 +1087,7 @@ class _MapdlCore(Commands):
         NSL : Nodal displacements
         RF  : Nodal reaction forces
         """
+        from ansys.mapdl.core import _HAS_DPF
 
         if _HAS_DPF:
             from ansys.mapdl.core.reader import DPFResult
