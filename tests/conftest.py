@@ -319,7 +319,13 @@ class MyReporter(TerminalReporter):
         def get_error_message(rep):
             rep_ = rep.longreprtext.splitlines()
             location = rep.location
-            path = f"{location[0]}:{location[1]}"
+            sep = " - "
+            if location[0] == location[2]:
+                # Skipping a module.
+                path = ""  # already included as head_title
+                sep = ""
+            else:
+                path = f"{location[0]}:{location[1]}"
 
             if len(rep_) >= 3:
                 # It is a fail/error
@@ -328,14 +334,14 @@ class MyReporter(TerminalReporter):
                 err_type = rep_[-1].split(":")[-1].strip()
                 cause = rep_[-3]  # Picking the last line of the error message
                 cause = cause[2:].strip() if cause.startswith("E ") else cause.strip()
-                return f"{path} - {err_type}: {cause}"
+                return f"{path}{sep}{err_type}: {cause}"
             else:
                 # Skip rep_ is a list with on string
                 if len(rep.longrepr) < 2:
                     cause = rep.longrepr[-1]
                 else:
                     cause = rep.longrepr[2]
-                return f"{path} - {cause}"
+                return f"{path}{sep}{cause}"
 
         failed = self.stats.get("failed", [])
         for rep in failed:
