@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import ast
 from collections import namedtuple
 from collections.abc import Generator
 import os
@@ -321,6 +320,7 @@ class MyReporter(TerminalReporter):
             rep_ = rep.longreprtext.splitlines()
             location = rep.location
             path = f"{location[0]}:{location[1]}"
+
             if len(rep_) >= 3:
                 # It is a fail/error
                 # A list of all the lines of the failed test + an empty string
@@ -331,11 +331,10 @@ class MyReporter(TerminalReporter):
                 return f"{path} - {err_type}: {cause}"
             else:
                 # Skip rep_ is a list with on string
-                tupl_ = ast.literal_eval(rep_[0])
-                if len(tupl_) < 3:
-                    # Early exit just in case
-                    return f"{path} - " + " ".join(tupl_)
-                cause = f"{tupl_[2]}"
+                if len(rep.longrepr) < 2:
+                    cause = rep.longrepr[-1]
+                else:
+                    cause = rep.longrepr[2]
                 return f"{path} - {cause}"
 
         failed = self.stats.get("failed", [])
