@@ -87,9 +87,9 @@ def update_result(function):
 
     @wraps(function)
     def wrapper(self, *args, **kwargs):
-        # if self._update_required or not self._loaded or self._cached_dpf_model is None:
-        #     self.update()
-        #     self.logger.debug("RST file updated.")
+        if self._update_required or not self._loaded or self._cached_dpf_model is None:
+            self.update()
+            self.logger.debug("RST file updated.")
         return function(self, *args, **kwargs)
 
     return wrapper
@@ -385,6 +385,16 @@ class DPFResult(Result):
             return False
 
     @property
+    def same_machine(self):
+        """True if the DPF server is running on the same machine as MAPDL"""
+        if self.is_remote:
+            # Some logic should be added here for cases where DPF is in different
+            # remote machine than MAPDL.
+            return True
+        else:
+            return True
+
+    @property
     def _is_thermal(self):
         """Return True if there are TEMP DOF in the solution."""
         return hasattr(self.model.results, "temperature")
@@ -478,8 +488,17 @@ class DPFResult(Result):
         self._update_required = False
 
     def _upload_to_dpf(self):
-        # self._server_file_path = dpf.upload_file_in_tmp_folder(self._rst)
-        self._server_file_path = self._mapdl.directory
+        if self.same_machine:
+            self._server_file_path = os.path.join(
+                self._mapdl.directory, self._mapdl.result_file
+            )
+        else:
+            # Upload to DPF is broken on Ubuntu: https://github.com/ansys/pydpf-core/issues/2254
+            # self._server_file_path = dpf.upload_file_in_tmp_folder(self._rst)
+            raise NotImplementedError(
+                "Uploading to DPF is not implemented yet. "
+                "Please use the local mode for now."
+            )
 
     def _update_rst(self, progress_bar=None, chunk_size=None, save=True):
         # Saving model
