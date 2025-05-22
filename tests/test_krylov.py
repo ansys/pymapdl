@@ -31,7 +31,10 @@ from conftest import has_dependency
 
 if not has_dependency("ansys-math-core"):
     # Needs ansys-math-core
-    pytest.skip(allow_module_level=True)
+    pytest.skip(
+        allow_module_level=True,
+        reason="Skipping because 'ansys-math-core' is not installed",
+    )
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
