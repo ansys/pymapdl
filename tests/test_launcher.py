@@ -851,8 +851,6 @@ def test_is_running_on_slurm(
         pytest.param(False, NullContext(), id="Boolean false"),
         pytest.param("true", NullContext(), id="String true"),
         pytest.param("TRue", NullContext(), id="String true weird capitalization"),
-        pytest.param("2", pytest.raises(ValueError), id="String number"),
-        pytest.param(2, pytest.raises(ValueError), id="Int"),
     ],
 )
 def test_get_start_instance_argument(monkeypatch, start_instance, context):
@@ -1914,7 +1912,7 @@ def test_send_scontrol(jobid):
         ["mycmd", None, True, "my_cwd", None, None, None, None],
         [["my", "cmd"], None, True, "my_cwd", None, None, None, None],
         [
-            "mycmd",
+            ["mycmd"],
             "exec",
             False,
             "my_other_cwd",

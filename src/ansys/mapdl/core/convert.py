@@ -563,7 +563,7 @@ class FileTranslator:
         """
         if self.cleanup_output:
             try:
-                import autopep8
+                import autopep8  # type: ignore
             except ModuleNotFoundError:  # pragma: no cover
                 warn(
                     "Install `autopep8` to use this feature with\n"
@@ -573,22 +573,26 @@ class FileTranslator:
 
             if not text:
                 text = self.line_ending.join(self.lines)
-                self.lines = autopep8.fix_code(text).splitlines()
+                self.lines = autopep8.fix_code(text).splitlines()  # type: ignore
 
             else:  # pragma: no cover
                 # for development purposes
                 return autopep8.fix_code(text)
 
-    def save(self, filename) -> None:
+    def save(self, filename: str) -> None:
         """Saves lines to file"""
         if os.path.isfile(filename):
             os.remove(filename)
 
         # Making sure we write python string with double slash.
         # We are not expecting other type of unicode symbols.
-        self.lines = Lines(
-            [each_line.replace("\\", "\\\\") for each_line in self.lines]
-        )
+        _lines = Lines()
+
+        # Lines() class does not have comprenhension list
+        for each_line in self.lines:
+            _lines.append(each_line.replace("\\", "\\\\"))
+
+        self.lines = _lines
 
         # Try to format the file using AutoPEP8
         self.format_using_autopep8()

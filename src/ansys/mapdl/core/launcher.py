@@ -827,27 +827,26 @@ def get_start_instance(start_instance: bool | str | None = None) -> bool:
     if isinstance(start_instance, bool):
         return start_instance
 
-    else:
-        if start_instance is None:
-            if os.environ.get("PYMAPDL_START_INSTANCE"):
-                start_instance = os.environ.get("PYMAPDL_START_INSTANCE", "")
-                if not valid_start_instance(start_instance):
-                    raise OSError(
-                        f'Invalid value "{start_instance}" for "start_instance" (or "PYMAPDL_START_INSTANCE"\n'
-                        '"start_instance" should be either "TRUE" or "FALSE"'
-                    )
-            else:
-                LOG.debug(
-                    "'PYMAPDL_START_INSTANCE' is unset, and there is no supplied value. Using default, which is 'True'."
+    elif start_instance is None:
+        if os.environ.get("PYMAPDL_START_INSTANCE"):
+            start_instance = os.environ.get("PYMAPDL_START_INSTANCE", "")
+            if not valid_start_instance(start_instance):
+                raise OSError(
+                    f'Invalid value "{start_instance}" for "start_instance" (or "PYMAPDL_START_INSTANCE"\n'
+                    '"start_instance" should be either "TRUE" or "FALSE"'
                 )
-                return True  # Default is true
+        else:
+            LOG.debug(
+                "'PYMAPDL_START_INSTANCE' is unset, and there is no supplied value. Using default, which is 'True'."
+            )
+            return True  # Default is true
 
         if not valid_start_instance(start_instance):
             raise ValueError(
                 f"The value given for 'start_instance' ({start_instance}) is invalid."
             )
 
-        return start_instance.lower().strip() == "true"
+    return start_instance.lower().strip() == "true"
 
 
 def get_default_ansys() -> Union[Tuple[str, float], Tuple[Literal[""], Literal[""]]]:
