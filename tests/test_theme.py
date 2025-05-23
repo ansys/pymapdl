@@ -25,7 +25,9 @@ import pytest
 from conftest import has_dependency
 
 if not has_dependency("pyvista"):
-    pytest.skip(allow_module_level=True)
+    pytest.skip(
+        allow_module_level=True, reason="Skipping because 'pyvista' is not installed"
+    )
 
 import matplotlib
 import numpy as np

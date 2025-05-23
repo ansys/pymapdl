@@ -51,7 +51,9 @@ IGNORE_POOL = os.environ.get("IGNORE_POOL", "").upper() == "TRUE"
 
 # skipping if ON_STUDENT and ON_LOCAL because we cannot spawn that many instances.
 if ON_STUDENT:
-    pytest.skip(allow_module_level=True)
+    pytest.skip(
+        allow_module_level=True, reason="Skipping Pool tests on student version."
+    )
 
 
 skip_if_ignore_pool = pytest.mark.skipif(
@@ -177,7 +179,6 @@ class TestMapdlPool:
 
     @skip_if_ignore_pool
     @requires("local")
-    @pytest.mark.xfail(reason="Flaky test. See #2435")
     def test_map_timeout(self, pool):
         pool_sz = len(pool)
 

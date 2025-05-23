@@ -26,7 +26,10 @@ import pytest
 from conftest import has_dependency
 
 if not has_dependency("ansys-platform-instancemanagement"):
-    pytest.skip(allow_module_level=True)
+    pytest.skip(
+        allow_module_level=True,
+        reason="Skipping because 'ansys-platform-instancemanagement' is not installed",
+    )
 
 from unittest.mock import create_autospec
 
