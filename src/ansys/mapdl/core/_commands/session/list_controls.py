@@ -53,25 +53,6 @@ class ListControls:
         command = f"/COM,{comment}"
         return self.run(command, **kwargs)
 
-    def slashgo(self, **kwargs):
-        r"""Reactivates suppressed printout.
-
-        Mechanical APDL Command: `/GO <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GO.html>`_
-
-        Notes
-        -----
-
-        .. _s-GO_notes:
-
-        Reactivates printout suppressed with the :ref:`nopr` command without producing any output. The
-        :ref:`gopr` command has the same function except that it also produces a command response from the
-        program.
-
-        This command is valid in any processor.
-        """
-        command = "/GO"
-        return self.run(command, **kwargs)
-
     def golist(self, **kwargs):
         r"""Reactivates the suppressed data input listing.
 
@@ -147,4 +128,23 @@ class ListControls:
         This command is valid in any processor.
         """
         command = "/NOPR"
+        return self.run(command, **kwargs)
+
+    def slashgo(self, **kwargs):
+        r"""Reactivates suppressed printout.
+
+        Mechanical APDL Command: `/GO <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GO.html>`_
+
+        Notes
+        -----
+
+        .. _s-GO_notes:
+
+        Reactivates printout suppressed with the :ref:`nopr` command without producing any output. The
+        :ref:`gopr` command has the same function except that it also produces a command response from the
+        program.
+
+        This command is valid in any processor.
+        """
+        command = "/GO"
         return self.run(command, **kwargs)

@@ -191,49 +191,6 @@ class RunControls:
             )
         return self.run(f"/CWD,'{dirpath}'", **kwargs)
 
-    def slashexit(self, slab: str = "", fname: str = "", ext: str = "", **kwargs):
-        r"""Stops the run and returns control to the system.
-
-        Mechanical APDL Command: `/EXIT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EXIT.html>`_
-
-        Parameters
-        ----------
-        slab : str
-            Mode for saving the database:
-
-            * ``MODEL`` - Save the model data (solid model, finite element model, loadings, etc.) only
-              (default).
-
-            * ``SOLU`` - Save the model data and the solution data (nodal and element results).
-
-            * ``ALL`` - Save the model data, solution data and post data (element tables, path results, etc.)
-
-            * ``NOSAVE`` - Do not save any data on :file:`File.DB` (an existing DB file will not be
-              overwritten).
-
-        fname : str
-            File name and directory path (248 characters maximum, including the characters needed for the
-            directory path). An unspecified directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name. The file name, defaults to :file:`Jobname`.
-
-        ext : str
-            Filename extension (eight-character maximum). The extension defaults to DB if ``Fname`` is
-            blank.
-
-        Notes
-        -----
-
-        .. _s-EXIT_notes:
-
-        The current database information may be written on :file:`File.DB` or a named file. If
-        :file:`File.DB` already exists, a backup file ( :file:`File.DBB` ) will also be written whenever a
-        new :file:`File.DB` is written.
-
-        This command is valid in any processor. Issuing this command at any point will exit the program.
-        """
-        command = f"/EXIT,{slab},{fname},{ext}"
-        return self.run(command, **kwargs)
-
     def filname(self, fname: str = "", key: str = "", **kwargs):
         r"""Changes the Jobname for the analysis.
 
@@ -347,6 +304,61 @@ class RunControls:
         This command is valid in any processor.
         """
         command = f"/INPUT,{fname},{ext},{dir_},{line},{log}"
+        return self.run(command, **kwargs)
+
+    def keyw(self, **kwargs):
+        r"""Sets a keyword used by the GUI for context filtering (GUI).
+
+        Mechanical APDL Command: `KEYW <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KEYW.html>`_
+
+        Notes
+        -----
+
+        .. _KEYW_notes:
+
+        This is a program-generated command and is not intended for your use. It is included here in the
+        documentation because it might appear in the log file ( :file:`Jobname.log` ). When using log files,
+        or portions of log files, as input, any included :ref:`keyw` commands may be left as is, or removed,
+        without consequence.
+        """
+        command = "KEYW"
+        return self.run(command, **kwargs)
+
+    def memm(self, lab: str = "", kywrd: str = "", **kwargs):
+        r"""Allows the current session to keep allocated memory
+
+        Mechanical APDL Command: `MEMM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MEMM.html>`_
+
+        Parameters
+        ----------
+        lab : str
+            When ``Lab`` = KEEP, the memory manager's ability to acquire and keep memory is controlled by
+            ``Kywrd``
+
+        kywrd : str
+            Turns the memory "keep" mode on or off
+
+            * ``ON`` - Keep any memory allocated during the analysis.
+
+            * ``OFF`` - Use memory dynamically and free it up to other users after use (default).
+
+        Notes
+        -----
+
+        .. _MEMM_notes:
+
+        You can use the :ref:`memm` command to ensure that memory intensive operations will always have the
+        same memory available when the operations occur intermittently. Normally, if a large amount of
+        memory is allocated for a specific operation, it will be returned to the system once the operation
+        is finished. This option always maintains the highest level used during the analysis until the
+        analysis is finished.
+
+        The :ref:`memm` command does not affect the value you specify with the -m switch. When you allocate
+        memory with the -m switch, that amount will always be available. However, if dynamic memory
+        allocation in excess of the -m value occurs, you can use the :ref:`memm` command to ensure that
+        amount is retained until the end of your analysis.
+        """
+        command = f"MEMM,{lab},{kywrd}"
         return self.run(command, **kwargs)
 
     def menu(self, key: str = "", **kwargs):
@@ -556,6 +568,78 @@ class RunControls:
         This command is valid in any processor.
         """
         command = f"/OUTPUT,{fname},{ext},,{loc}"
+        return self.run(command, **kwargs)
+
+    def pause(self, **kwargs):
+        r"""Temporarily releases the current product license.
+
+        Mechanical APDL Command: `PAUSE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PAUSE.html>`_
+
+        Notes
+        -----
+
+        .. _PAUSE_notes:
+
+        The :ref:`pause` command temporarily releases (or pauses) the current product license so that
+        another application can use it.
+
+        This application consumes a license as soon as you launch it, and retains that license until it is
+        finished. If you launch the product interactively, the license is retained until you either close
+        the application or issue a :ref:`pause` command via the command line.
+
+        No other operation (other than :ref:`save` or :ref:`slashexit` ) is possible in the current
+        application  while use of the product license is paused.
+
+        When the second application has finished and releases the license, issue an :ref:`unpause` command
+        via the command line to restore use of the license to the current application.
+
+        For more information, see the `Ansys Licensing Guide
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/licensing/Hlp_IN_TBSHOOT.html>`_.
+        """
+        command = "PAUSE"
+        return self.run(command, **kwargs)
+
+    def slashexit(self, slab: str = "", fname: str = "", ext: str = "", **kwargs):
+        r"""Stops the run and returns control to the system.
+
+        Mechanical APDL Command: `/EXIT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EXIT.html>`_
+
+        Parameters
+        ----------
+        slab : str
+            Mode for saving the database:
+
+            * ``MODEL`` - Save the model data (solid model, finite element model, loadings, etc.) only
+              (default).
+
+            * ``SOLU`` - Save the model data and the solution data (nodal and element results).
+
+            * ``ALL`` - Save the model data, solution data and post data (element tables, path results, etc.)
+
+            * ``NOSAVE`` - Do not save any data on :file:`File.DB` (an existing DB file will not be
+              overwritten).
+
+        fname : str
+            File name and directory path (248 characters maximum, including the characters needed for the
+            directory path). An unspecified directory path defaults to the working directory; in this case,
+            you can use all 248 characters for the file name. The file name, defaults to :file:`Jobname`.
+
+        ext : str
+            Filename extension (eight-character maximum). The extension defaults to DB if ``Fname`` is
+            blank.
+
+        Notes
+        -----
+
+        .. _s-EXIT_notes:
+
+        The current database information may be written on :file:`File.DB` or a named file. If
+        :file:`File.DB` already exists, a backup file ( :file:`File.DBB` ) will also be written whenever a
+        new :file:`File.DB` is written.
+
+        This command is valid in any processor. Issuing this command at any point will exit the program.
+        """
+        command = f"/EXIT,{slab},{fname},{ext}"
         return self.run(command, **kwargs)
 
     def slashstatus(self, lab: str = "", **kwargs):
@@ -1056,90 +1140,6 @@ class RunControls:
         This command is valid in any processor.
         """
         command = f"/UIS,{label},{value}"
-        return self.run(command, **kwargs)
-
-    def keyw(self, **kwargs):
-        r"""Sets a keyword used by the GUI for context filtering (GUI).
-
-        Mechanical APDL Command: `KEYW <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_KEYW.html>`_
-
-        Notes
-        -----
-
-        .. _KEYW_notes:
-
-        This is a program-generated command and is not intended for your use. It is included here in the
-        documentation because it might appear in the log file ( :file:`Jobname.log` ). When using log files,
-        or portions of log files, as input, any included :ref:`keyw` commands may be left as is, or removed,
-        without consequence.
-        """
-        command = "KEYW"
-        return self.run(command, **kwargs)
-
-    def memm(self, lab: str = "", kywrd: str = "", **kwargs):
-        r"""Allows the current session to keep allocated memory
-
-        Mechanical APDL Command: `MEMM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MEMM.html>`_
-
-        Parameters
-        ----------
-        lab : str
-            When ``Lab`` = KEEP, the memory manager's ability to acquire and keep memory is controlled by
-            ``Kywrd``
-
-        kywrd : str
-            Turns the memory "keep" mode on or off
-
-            * ``ON`` - Keep any memory allocated during the analysis.
-
-            * ``OFF`` - Use memory dynamically and free it up to other users after use (default).
-
-        Notes
-        -----
-
-        .. _MEMM_notes:
-
-        You can use the :ref:`memm` command to ensure that memory intensive operations will always have the
-        same memory available when the operations occur intermittently. Normally, if a large amount of
-        memory is allocated for a specific operation, it will be returned to the system once the operation
-        is finished. This option always maintains the highest level used during the analysis until the
-        analysis is finished.
-
-        The :ref:`memm` command does not affect the value you specify with the -m switch. When you allocate
-        memory with the -m switch, that amount will always be available. However, if dynamic memory
-        allocation in excess of the -m value occurs, you can use the :ref:`memm` command to ensure that
-        amount is retained until the end of your analysis.
-        """
-        command = f"MEMM,{lab},{kywrd}"
-        return self.run(command, **kwargs)
-
-    def pause(self, **kwargs):
-        r"""Temporarily releases the current product license.
-
-        Mechanical APDL Command: `PAUSE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PAUSE.html>`_
-
-        Notes
-        -----
-
-        .. _PAUSE_notes:
-
-        The :ref:`pause` command temporarily releases (or pauses) the current product license so that
-        another application can use it.
-
-        This application consumes a license as soon as you launch it, and retains that license until it is
-        finished. If you launch the product interactively, the license is retained until you either close
-        the application or issue a :ref:`pause` command via the command line.
-
-        No other operation (other than :ref:`save` or :ref:`slashexit` ) is possible in the current
-        application  while use of the product license is paused.
-
-        When the second application has finished and releases the license, issue an :ref:`unpause` command
-        via the command line to restore use of the license to the current application.
-
-        For more information, see the `Ansys Licensing Guide
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/licensing/Hlp_IN_TBSHOOT.html>`_.
-        """
-        command = "PAUSE"
         return self.run(command, **kwargs)
 
     def unpause(self, **kwargs):

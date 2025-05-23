@@ -23,6 +23,38 @@
 
 class ProcessorEntry:
 
+    def finish(self, **kwargs):
+        r"""Exits normally from a processor.
+
+        Mechanical APDL Command: `FINISH <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FINISH.html>`_
+
+        Notes
+        -----
+
+        .. _FINISH_notes:
+
+        This command exits any of the Mechanical APDL processors.
+
+        When exiting the Mechanical APDL processors, data remains intact in the database, but the database
+        is not
+        automatically written to a file. (Issue :ref:`save` to write the database to a file.)
+
+        If exiting POST1 or POST26:
+
+        * POST1: Data in the database remains intact (including the POST1 element table data, the path table
+          data, the fatigue table data, and the load case pointers).
+
+        * POST26: Data in the database remains intact, except that POST26 variables are erased and
+          specification commands (such as :ref:`file`, :ref:`prtime`, and :ref:`nprint` ) are reset. Issue
+          :ref:`quit` to exit the processor and bypass these exceptions.
+
+        See :ref:`quit` for an alternate processor exit command.
+
+        This command is valid in any processor. This command is not valid at the Begin level.
+        """
+        command = "FINISH"
+        return self.run(command, **kwargs)
+
     def post1(self, **kwargs):
         r"""Enters the database results postprocessor.
 
@@ -107,36 +139,4 @@ class ProcessorEntry:
         This command is valid only at the Begin Level.
         """
         command = "/SOLU"
-        return self.run(command, **kwargs)
-
-    def finish(self, **kwargs):
-        r"""Exits normally from a processor.
-
-        Mechanical APDL Command: `FINISH <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FINISH.html>`_
-
-        Notes
-        -----
-
-        .. _FINISH_notes:
-
-        This command exits any of the Mechanical APDL processors.
-
-        When exiting the Mechanical APDL processors, data remains intact in the database, but the database
-        is not
-        automatically written to a file. (Issue :ref:`save` to write the database to a file.)
-
-        If exiting POST1 or POST26:
-
-        * POST1: Data in the database remains intact (including the POST1 element table data, the path table
-          data, the fatigue table data, and the load case pointers).
-
-        * POST26: Data in the database remains intact, except that POST26 variables are erased and
-          specification commands (such as :ref:`file`, :ref:`prtime`, and :ref:`nprint` ) are reset. Issue
-          :ref:`quit` to exit the processor and bypass these exceptions.
-
-        See :ref:`quit` for an alternate processor exit command.
-
-        This command is valid in any processor. This command is not valid at the Begin level.
-        """
-        command = "FINISH"
         return self.run(command, **kwargs)

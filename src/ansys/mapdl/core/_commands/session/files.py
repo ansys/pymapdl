@@ -23,420 +23,6 @@
 
 class Files:
 
-    def starlist(self, fname: str = "", ext: str = "", **kwargs):
-        r"""Displays the contents of an external, coded file.
-
-        Mechanical APDL Command: `\*LIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LIST_st.html>`_
-
-        Parameters
-        ----------
-        fname : str
-            File name and directory path (248 characters maximum, including the characters needed for the
-            directory path). An unspecified directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name.
-
-        ext : str
-            Filename extension (eight-character maximum).
-
-        Notes
-        -----
-
-        .. _a-LIST_notes:
-
-        Displays the contents of an external, coded file. The file to be listed cannot be in use (open) at
-        the time (except for the error file, :file:`Jobname.err` None, which may be displayed with
-        :ref:`starlist`,ERR).
-
-        Use caution when you are listing active Mechanical APDL files via the List> Files> Other and File>
-        List>
-        Other menu paths. File I/O buffer and system configurations can result in incomplete listings unless
-        the files are closed.
-
-        This command is valid in any processor.
-        """
-        command = f"*LIST,{fname},{ext}"
-        return self.run(command, **kwargs)
-
-    def assign(
-        self, ident: str = "", fname: str = "", ext: str = "", lgkey: str = "", **kwargs
-    ):
-        r"""Reassigns a file name to a Mechanical APDL file identifier.
-
-        Mechanical APDL Command: `/ASSIGN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ASSIGN.html>`_
-
-        Parameters
-        ----------
-        ident : str
-            Mechanical APDL file name identifier. Valid identifiers are: CMS, EMAT, EROT, ESAV, FULL, LN07,
-            LN09, LN11, LN20, LN21, LN22, LN25, LN31, LN32, MODE, OSAV, RDSP, RFRQ, RMG, RST, RSTP, RTH,
-            SELD, and SSCR. See `File Management and Files
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS18_9.html>`_
-
-        fname : str
-            File name and directory path (248 characters maximum, including the characters needed for the
-            directory path). An unspecified directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name.
-
-        ext : str
-            Filename extension (eight-character maximum).
-
-        lgkey : str
-            Key to specify local or global file name control for the specified file identifier in a distributed-
-            memory parallel processing run. For more information on local and global files, see File Handling Conventions in the `Parallel Processing Guide <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_dan/HybParallel.html>`_.
-
-            * ``BOTH`` - Reassign the file name for both the local and global files (default).
-
-            * ``LOCAL`` - Reassign the file name for only the local files.
-
-            * ``GLOBAL`` - Reassign the file name for only the global file.
-
-        Notes
-        -----
-
-        .. _s-ASSIGN_notes:
-
-        The reassignment of file names is valid only if it is done before the file is used. All file
-        reassignments are retained (not cleared) even if the database is cleared ( ``/CLEAR`` ) or the
-        Jobname is changed ( :ref:`filname` ). Assigned files may be overwritten. If file name arguments
-        (``Fname``, ``Ext``, ``--``) are blank, the default Mechanical APDL assignment is restored. Use
-        :ref:`seopt` for SUB files
-        and :ref:`seexp` for DSUB files.
-
-        This command is valid only at the Begin level.
-
-        This command also checks to ensure that the path/file is valid and can be written by the user. If it
-        is not valid, an error message will be returned. Ensure that the directory exists prior to using
-        :ref:`assign` command.
-        """
-        command = f"/ASSIGN,{ident},{fname},{ext},,{lgkey}"
-        return self.run(command, **kwargs)
-
-    def slashclog(self, fname: str = "", ext: str = "", **kwargs):
-        r"""Copies the session log file to a named file.
-
-        Mechanical APDL Command: `/CLOG <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CLOG_sl.html>`_
-
-        Parameters
-        ----------
-        fname : str
-            File name and directory path to which the log file is to be copied (248 characters maximum,
-            including directory). If you do not specify a directory path, it will default to your working
-            directory and you can use all 248 characters for the file name.
-
-        ext : str
-            Filename extension (eight-character maximum).
-
-        Notes
-        -----
-
-        .. _s-CLOG_notes:
-
-        This command is valid in any processor, but only during an interactive run.
-        """
-        command = f"/CLOG,{fname},{ext}"
-        return self.run(command, **kwargs)
-
-    def copy(
-        self,
-        fname1: str = "",
-        ext1: str = "",
-        fname2: str = "",
-        ext2: str = "",
-        distkey: str = "",
-        **kwargs,
-    ):
-        r"""Copies a file.
-
-        Mechanical APDL Command: `/COPY <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_COPY.html>`_
-
-        Parameters
-        ----------
-        fname1 : str
-            File name to be copied and its directory path (248 characters maximum for both file name and
-            directory). If you do not specify a directory path, it will default to your working directory
-            and you can use all 248 characters for the file name.
-
-            The file name defaults to the current :file:`Jobname`.
-
-        ext1 : str
-            Filename extension (eight-character maximum).
-
-        fname2 : str
-            File name to be created and its directory path (248 characters maximum for both file name and
-            directory). If you do not specify a directory path, it will default to your working directory
-            and you can use all 248 characters for the file name.
-
-            ``Fname2`` defaults to ``Fname1``.
-
-        ext2 : str
-            Filename extension (eight-character maximum). ``Ext2`` defaults to ``Ext1``.
-
-        distkey : str
-            Key that specifies which copy operation is performed on all processes in distributed-memory parallel
-            mode :
-
-            * ``0 (OFF or NO)`` - The program performs the copy operation only on the master process (default).
-
-            * ``1 (ON or YES)`` - The program performs the copy operation locally on each process.
-
-            * ``2 or BOTH`` - The program performs the copy operation for ``Fname``. ``Ext`` on the master
-              process and for ``FnameN``. ``Ext`` on all processes.
-
-        Notes
-        -----
-
-        .. _s-COPY_notes:
-
-        The original file is untouched. Ex: :ref:`copy`,A,,,B copies file A to B in the same directory.
-        :ref:`copy`,A,DAT,,,INP copies the file :file:`A.DAT` to :file:`A.INP`. See the `Operations Guide
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ope/Hlp_G_OPE8.html>`_ for
-        details. Mechanical APDL binary and ASCII files can be copied.
-
-        In distributed-memory parallel (DMP) mode, only the master process will copy ``Fname1``. ``Ext1`` to
-        ``Fname2``. ``Ext2`` by default. However, when ``DistKey`` is set to 1 (or ON, or YES) or 2 (or
-        BOTH), the command is executed by all processes. In this case, ``Fname1`` and ``Fname2`` will
-        automatically have the process rank appended to them. This means ``Fname1N``. ``Ext1`` will be
-        copied to ``Fname2N``. ``Ext2`` by all processes, where ``N`` is the DMP process rank. For more
-        information see in the `Parallel Processing Guide
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_dan/HybParallel.html>`_.
-        """
-        command = f"/COPY,{fname1},{ext1},,{fname2},{ext2},,{distkey}"
-        return self.run(command, **kwargs)
-
-    def slashdelete(self, fname: str = "", ext: str = "", distkey: str = "", **kwargs):
-        r"""Deletes a file.
-
-        Mechanical APDL Command: `/DELETE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DELETE_sl.html>`_
-
-        Parameters
-        ----------
-        fname : str
-            File name and directory path (248 characters maximum, including the characters needed for the
-            directory path). An unspecified directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name. The file name defaults to the current
-            :file:`Jobname`.
-
-        ext : str
-            Filename extension (eight-character maximum).
-
-        distkey : str
-            Key that specifies which file deletion action is performed on all processes in distributed-memory
-            parallel mode:
-
-            * ``0 (OFF or NO)`` - The program performs the file deletion only on the master process (default).
-
-            * ``1 (ON or YES)`` - The program performs the file deletion locally on each process.
-
-            * ``2 or BOTH`` - The program performs file deletion for ``Fname``. ``Ext`` on the master process
-              and for ``FnameN``. ``Ext`` on all processes.
-
-        Notes
-        -----
-        In distributed-memory parallel (DMP) mode, only the master process will delete ``Fname``. ``Ext`` by
-        default. However, when ``DistKey`` is set to 1 (or ON, or YES) or 2 (or BOTH), the command is
-        executed by all processes. In this case, ``Fname`` will automatically have the process rank appended
-        to it. This means ``FnameN``. ``Ext`` will be deleted by all processes, where ``N`` is the DMP
-        process rank. For more information see in the `Parallel Processing Guide
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_dan/HybParallel.html>`_.
-        """
-        command = f"/DELETE,{fname},{ext},,{distkey}"
-        return self.run(command, **kwargs)
-
-    def fclean(self, **kwargs):
-        r"""Deletes all local files in all processors in a distributed parallel processing run.
-
-        Mechanical APDL Command: `/FCLEAN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FCLEAN_sl.html>`_
-
-        Notes
-        -----
-
-        .. _s-FCLEAN_notes:
-
-        Issue :ref:`fclean` to delete all local files having the current ``Jobname`` ( :ref:`filname` ) and
-        save disk space in a distributed parallel processing run. Like other file deletion commands,
-        deletion happens immediately upon issuing this command. Different than other file deletion commands,
-        it enables the convenience of deleting all :file:`Jobname.\*` local files without having to issue
-        separate commands specifying each file type.
-
-        All :file:`.log` files except the master ( :file:`Jobname0.log` ) are deleted.
-
-        .. warning::
-
-            Because /FCLEAN deletes all local files, it should only be issued if you are sure that none of
-            those files are needed in any downstream analyses. Deleting files that are necessary for
-            subsequent substeps, load steps, commands, or analyses will prevent continuation of the run. For
-            example, since the local files are combined into global files when you issue FINISH in the
-            solution processor, issuing /FCLEAN before FINISH in /SOLU will result in a program crash.
-        """
-        command = "/FCLEAN"
-        return self.run(command, **kwargs)
-
-    def fcomp(self, ident: str = "", level: int | str = "", **kwargs):
-        r"""Specifies file-compression options.
-
-        Mechanical APDL Command: `/FCOMP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FCOMP_sl.html>`_
-
-        Parameters
-        ----------
-        ident : str
-            Mechanical APDL file identifier. There is no default. Valid labels are:
-
-            * ``RST`` - Results file.
-
-            * ``DB`` - Database file.
-
-            * ``RNNN`` - Restart file.
-
-            * ``OSAV`` - File created during a nonlinear analysis that contains a copy of :file:`ESAV` file from
-              the last converged substep.
-
-        level : int or str
-            Compression level:
-
-            * ``SPARSE`` - Use a sparsification scheme for file compression (default).
-
-            * ``0`` - No file compression occurs.
-
-            * ``n`` - A zlib-based file compression occurs using level number ``n``, which ranges from 1 to 5.
-
-        Notes
-        -----
-
-        .. _s-FCOMP_notes:
-
-        Specifies file compression options for results files ( :file:`.rst`, :file:`.rstp`, :file:`.rth`,
-        and :file:`.rmg` files), database files ( :file:`.db` and :file:`.rdb` ), certain restart files (
-        :file:`.Rnnn` ), and the :file:`.osav` file created during a nonlinear analysis. (See `Program-
-        Generated Files
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS18_4.html#aHXtsq2aaldm>`_
-        :ref:`set` command or the :ref:`resume` command).
-
-        For results files compressed using the sparsification scheme ( ``LEVEL`` = SPARSE, which is the
-        default), use the ``\*XPL`` command to uncompress the file. For third party tools that need to read
-        the results file, use the method described in `Accessing Mechanical APDL Binary Files
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_prog/Hlp_P_INT2_1.html#intlargeintget>`_
-
-        See in the `Basic Analysis Guide
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS19.html>`_ for more
-        details.
-
-        This command is valid only at the Begin Level.
-        """
-        command = f"/FCOMP,{ident},{level}"
-        return self.run(command, **kwargs)
-
-    def slashfdele(self, ident: str = "", stat: str = "", **kwargs):
-        r"""Deletes a binary file after it is used.
-
-        Mechanical APDL Command: `/FDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FDELE_sl.html>`_
-
-        Parameters
-        ----------
-        ident : str
-            Mechanical APDL file name identifier. Valid identifiers are: EMAT, ESAV, FULL, SUB, MODE, DSUB,
-            USUB, OSAV, and SELD. See the `Basic Analysis Guide
-            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS19.html>`_ for file
-            descriptions.
-
-        stat : str
-            Keep or delete key:
-
-            * ``KEEP`` - Keep this file.
-
-            * ``DELE`` - Delete (or do not write, if not necessary) this file.
-
-        Notes
-        -----
-
-        .. _s-FDELE_notes:
-
-        Deletes as soon as possible (or prevents writing) a binary file created by Mechanical APDL to save
-        space.
-
-        .. warning::
-
-            Deleting files that are necessary for the next substep, load step, or analysis will prevent
-            continuation of the run.
-
-        This command is valid only at the Begin level.
-        """
-        command = f"/FDELE,{ident},{stat}"
-        return self.run(command, **kwargs)
-
-    def slashrename(
-        self,
-        fname1: str = "",
-        ext1: str = "",
-        fname2: str = "",
-        ext2: str = "",
-        distkey: str = "",
-        **kwargs,
-    ):
-        r"""Renames a file.
-
-        Mechanical APDL Command: `/RENAME <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RENAME.html>`_
-
-        Parameters
-        ----------
-        fname1 : str
-            The file to be renamed. You can also include an optional directory path as part of the specified
-            file name; if not, the default file location is the working directory.
-
-            File name defaults to the current :file:`Jobname`.
-
-        ext1 : str
-            Filename extension (eight-character maximum).
-
-        fname2 : str
-            The new name for the file. You can also include an optional directory path as part of the new
-            file name; if not, the default is the working directory. A maximum of 248 characters is allowed
-            for the file name (or combined file name and directory path, if both are specified).
-
-            ``Fname2`` defaults to ``Fname1``.
-
-        ext2 : str
-            Filename extension (eight-character maximum). ``Ext2`` defaults to ``Ext1``.
-
-        distkey : str
-            Key that specifies which rename operation is performed on all processes in distributed-memory
-            parallel mode:
-
-            * ``0 (OFF or NO)`` - The program performs the rename operation only on the master process
-              (default).
-
-            * ``1 (ON or YES)`` - The program performs the rename operation locally on each process.
-
-            * ``2 or BOTH`` - The program performs the rename operation for ``Fname``. ``Ext`` on the master
-              process and for ``FnameN``. ``Ext`` on all processes.
-
-        Notes
-        -----
-
-        .. _s-RENAME_notes:
-
-        Renames a file. Ex: :ref:`slashrename`,A,,,B renames file A to B in the same directory.
-        :ref:`slashrename`,A,DAT,,,INP renames file A.DAT to A.INP. On all systems, this command will
-        overwrite any existing file named B. See the `Operations Guide
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ope/Hlp_G_OPE8.html>`_ for details. Only
-        Mechanical APDL binary files should
-        be renamed. Use :ref:`sys` and system renaming commands for other files.
-
-        In distributed-memory parallel (DMP) mode, only the master process will rename ``Fname1``. ``Ext1``
-        to ``Fname2``. ``Ext2`` by default. However, when ``DistKey`` is set to 1 (or ON, or YES) or 2 (or
-        BOTH), the command is executed by all processes. In this case, ``Fname1`` and ``Fname2`` will
-        automatically have the process rank appended to them. This means ``Fname1N``. ``Ext1`` will be
-        renamed to ``Fname2N``. ``Ext2`` by all processes, where ``N`` is the DMP process rank. For more
-        information see in the `Parallel Processing Guide
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_dan/HybParallel.html>`_.
-
-        Renaming across system partitions may be internally done by a copy and delete operation on some
-        systems.
-
-        This command is valid only at the Begin level.
-        """
-        command = f"/RENAME,{fname1},{ext1},,{fname2},{ext2},,{distkey}"
-        return self.run(command, **kwargs)
-
     def anstoaqwa(
         self,
         fname: str = "",
@@ -718,6 +304,210 @@ class Files:
         command = f"ANSTOASAS,{fname},{key}"
         return self.run(command, **kwargs)
 
+    def assign(
+        self, ident: str = "", fname: str = "", ext: str = "", lgkey: str = "", **kwargs
+    ):
+        r"""Reassigns a file name to a Mechanical APDL file identifier.
+
+        Mechanical APDL Command: `/ASSIGN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ASSIGN.html>`_
+
+        Parameters
+        ----------
+        ident : str
+            Mechanical APDL file name identifier. Valid identifiers are: CMS, EMAT, EROT, ESAV, FULL, LN07,
+            LN09, LN11, LN20, LN21, LN22, LN25, LN31, LN32, MODE, OSAV, RDSP, RFRQ, RMG, RST, RSTP, RTH,
+            SELD, and SSCR. See `File Management and Files
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS18_9.html>`_
+
+        fname : str
+            File name and directory path (248 characters maximum, including the characters needed for the
+            directory path). An unspecified directory path defaults to the working directory; in this case,
+            you can use all 248 characters for the file name.
+
+        ext : str
+            Filename extension (eight-character maximum).
+
+        lgkey : str
+            Key to specify local or global file name control for the specified file identifier in a distributed-
+            memory parallel processing run. For more information on local and global files, see File Handling Conventions in the `Parallel Processing Guide <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_dan/HybParallel.html>`_.
+
+            * ``BOTH`` - Reassign the file name for both the local and global files (default).
+
+            * ``LOCAL`` - Reassign the file name for only the local files.
+
+            * ``GLOBAL`` - Reassign the file name for only the global file.
+
+        Notes
+        -----
+
+        .. _s-ASSIGN_notes:
+
+        The reassignment of file names is valid only if it is done before the file is used. All file
+        reassignments are retained (not cleared) even if the database is cleared ( ``/CLEAR`` ) or the
+        Jobname is changed ( :ref:`filname` ). Assigned files may be overwritten. If file name arguments
+        (``Fname``, ``Ext``, ``--``) are blank, the default Mechanical APDL assignment is restored. Use
+        :ref:`seopt` for SUB files
+        and :ref:`seexp` for DSUB files.
+
+        This command is valid only at the Begin level.
+
+        This command also checks to ensure that the path/file is valid and can be written by the user. If it
+        is not valid, an error message will be returned. Ensure that the directory exists prior to using
+        :ref:`assign` command.
+        """
+        command = f"/ASSIGN,{ident},{fname},{ext},,{lgkey}"
+        return self.run(command, **kwargs)
+
+    def copy(
+        self,
+        fname1: str = "",
+        ext1: str = "",
+        fname2: str = "",
+        ext2: str = "",
+        distkey: str = "",
+        **kwargs,
+    ):
+        r"""Copies a file.
+
+        Mechanical APDL Command: `/COPY <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_COPY.html>`_
+
+        Parameters
+        ----------
+        fname1 : str
+            File name to be copied and its directory path (248 characters maximum for both file name and
+            directory). If you do not specify a directory path, it will default to your working directory
+            and you can use all 248 characters for the file name.
+
+            The file name defaults to the current :file:`Jobname`.
+
+        ext1 : str
+            Filename extension (eight-character maximum).
+
+        fname2 : str
+            File name to be created and its directory path (248 characters maximum for both file name and
+            directory). If you do not specify a directory path, it will default to your working directory
+            and you can use all 248 characters for the file name.
+
+            ``Fname2`` defaults to ``Fname1``.
+
+        ext2 : str
+            Filename extension (eight-character maximum). ``Ext2`` defaults to ``Ext1``.
+
+        distkey : str
+            Key that specifies which copy operation is performed on all processes in distributed-memory parallel
+            mode :
+
+            * ``0 (OFF or NO)`` - The program performs the copy operation only on the master process (default).
+
+            * ``1 (ON or YES)`` - The program performs the copy operation locally on each process.
+
+            * ``2 or BOTH`` - The program performs the copy operation for ``Fname``. ``Ext`` on the master
+              process and for ``FnameN``. ``Ext`` on all processes.
+
+        Notes
+        -----
+
+        .. _s-COPY_notes:
+
+        The original file is untouched. Ex: :ref:`copy`,A,,,B copies file A to B in the same directory.
+        :ref:`copy`,A,DAT,,,INP copies the file :file:`A.DAT` to :file:`A.INP`. See the `Operations Guide
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ope/Hlp_G_OPE8.html>`_ for
+        details. Mechanical APDL binary and ASCII files can be copied.
+
+        In distributed-memory parallel (DMP) mode, only the master process will copy ``Fname1``. ``Ext1`` to
+        ``Fname2``. ``Ext2`` by default. However, when ``DistKey`` is set to 1 (or ON, or YES) or 2 (or
+        BOTH), the command is executed by all processes. In this case, ``Fname1`` and ``Fname2`` will
+        automatically have the process rank appended to them. This means ``Fname1N``. ``Ext1`` will be
+        copied to ``Fname2N``. ``Ext2`` by all processes, where ``N`` is the DMP process rank. For more
+        information see in the `Parallel Processing Guide
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_dan/HybParallel.html>`_.
+        """
+        command = f"/COPY,{fname1},{ext1},,{fname2},{ext2},,{distkey}"
+        return self.run(command, **kwargs)
+
+    def fclean(self, **kwargs):
+        r"""Deletes all local files in all processors in a distributed parallel processing run.
+
+        Mechanical APDL Command: `/FCLEAN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FCLEAN_sl.html>`_
+
+        Notes
+        -----
+
+        .. _s-FCLEAN_notes:
+
+        Issue :ref:`fclean` to delete all local files having the current ``Jobname`` ( :ref:`filname` ) and
+        save disk space in a distributed parallel processing run. Like other file deletion commands,
+        deletion happens immediately upon issuing this command. Different than other file deletion commands,
+        it enables the convenience of deleting all :file:`Jobname.\*` local files without having to issue
+        separate commands specifying each file type.
+
+        All :file:`.log` files except the master ( :file:`Jobname0.log` ) are deleted.
+
+        .. warning::
+
+            Because /FCLEAN deletes all local files, it should only be issued if you are sure that none of
+            those files are needed in any downstream analyses. Deleting files that are necessary for
+            subsequent substeps, load steps, commands, or analyses will prevent continuation of the run. For
+            example, since the local files are combined into global files when you issue FINISH in the
+            solution processor, issuing /FCLEAN before FINISH in /SOLU will result in a program crash.
+        """
+        command = "/FCLEAN"
+        return self.run(command, **kwargs)
+
+    def fcomp(self, ident: str = "", level: int | str = "", **kwargs):
+        r"""Specifies file-compression options.
+
+        Mechanical APDL Command: `/FCOMP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FCOMP_sl.html>`_
+
+        Parameters
+        ----------
+        ident : str
+            Mechanical APDL file identifier. There is no default. Valid labels are:
+
+            * ``RST`` - Results file.
+
+            * ``DB`` - Database file.
+
+            * ``RNNN`` - Restart file.
+
+            * ``OSAV`` - File created during a nonlinear analysis that contains a copy of :file:`ESAV` file from
+              the last converged substep.
+
+        level : int or str
+            Compression level:
+
+            * ``SPARSE`` - Use a sparsification scheme for file compression (default).
+
+            * ``0`` - No file compression occurs.
+
+            * ``n`` - A zlib-based file compression occurs using level number ``n``, which ranges from 1 to 5.
+
+        Notes
+        -----
+
+        .. _s-FCOMP_notes:
+
+        Specifies file compression options for results files ( :file:`.rst`, :file:`.rstp`, :file:`.rth`,
+        and :file:`.rmg` files), database files ( :file:`.db` and :file:`.rdb` ), certain restart files (
+        :file:`.Rnnn` ), and the :file:`.osav` file created during a nonlinear analysis. (See `Program-
+        Generated Files
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS18_4.html#aHXtsq2aaldm>`_
+        :ref:`set` command or the :ref:`resume` command).
+
+        For results files compressed using the sparsification scheme ( ``LEVEL`` = SPARSE, which is the
+        default), use the ``\*XPL`` command to uncompress the file. For third party tools that need to read
+        the results file, use the method described in `Accessing Mechanical APDL Binary Files
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_prog/Hlp_P_INT2_1.html#intlargeintget>`_
+
+        See in the `Basic Analysis Guide
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS19.html>`_ for more
+        details.
+
+        This command is valid only at the Begin Level.
+        """
+        command = f"/FCOMP,{ident},{level}"
+        return self.run(command, **kwargs)
+
     def lgwrite(self, fname: str = "", ext: str = "", kedit: str = "", **kwargs):
         r"""Writes the database command log to a file.
 
@@ -760,4 +550,214 @@ class Files:
         This command is valid in any processor.
         """
         command = f"LGWRITE,{fname},{ext},,{kedit}"
+        return self.run(command, **kwargs)
+
+    def slashclog(self, fname: str = "", ext: str = "", **kwargs):
+        r"""Copies the session log file to a named file.
+
+        Mechanical APDL Command: `/CLOG <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CLOG_sl.html>`_
+
+        Parameters
+        ----------
+        fname : str
+            File name and directory path to which the log file is to be copied (248 characters maximum,
+            including directory). If you do not specify a directory path, it will default to your working
+            directory and you can use all 248 characters for the file name.
+
+        ext : str
+            Filename extension (eight-character maximum).
+
+        Notes
+        -----
+
+        .. _s-CLOG_notes:
+
+        This command is valid in any processor, but only during an interactive run.
+        """
+        command = f"/CLOG,{fname},{ext}"
+        return self.run(command, **kwargs)
+
+    def slashdelete(self, fname: str = "", ext: str = "", distkey: str = "", **kwargs):
+        r"""Deletes a file.
+
+        Mechanical APDL Command: `/DELETE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DELETE_sl.html>`_
+
+        Parameters
+        ----------
+        fname : str
+            File name and directory path (248 characters maximum, including the characters needed for the
+            directory path). An unspecified directory path defaults to the working directory; in this case,
+            you can use all 248 characters for the file name. The file name defaults to the current
+            :file:`Jobname`.
+
+        ext : str
+            Filename extension (eight-character maximum).
+
+        distkey : str
+            Key that specifies which file deletion action is performed on all processes in distributed-memory
+            parallel mode:
+
+            * ``0 (OFF or NO)`` - The program performs the file deletion only on the master process (default).
+
+            * ``1 (ON or YES)`` - The program performs the file deletion locally on each process.
+
+            * ``2 or BOTH`` - The program performs file deletion for ``Fname``. ``Ext`` on the master process
+              and for ``FnameN``. ``Ext`` on all processes.
+
+        Notes
+        -----
+        In distributed-memory parallel (DMP) mode, only the master process will delete ``Fname``. ``Ext`` by
+        default. However, when ``DistKey`` is set to 1 (or ON, or YES) or 2 (or BOTH), the command is
+        executed by all processes. In this case, ``Fname`` will automatically have the process rank appended
+        to it. This means ``FnameN``. ``Ext`` will be deleted by all processes, where ``N`` is the DMP
+        process rank. For more information see in the `Parallel Processing Guide
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_dan/HybParallel.html>`_.
+        """
+        command = f"/DELETE,{fname},{ext},,{distkey}"
+        return self.run(command, **kwargs)
+
+    def slashfdele(self, ident: str = "", stat: str = "", **kwargs):
+        r"""Deletes a binary file after it is used.
+
+        Mechanical APDL Command: `/FDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FDELE_sl.html>`_
+
+        Parameters
+        ----------
+        ident : str
+            Mechanical APDL file name identifier. Valid identifiers are: EMAT, ESAV, FULL, SUB, MODE, DSUB,
+            USUB, OSAV, and SELD. See the `Basic Analysis Guide
+            <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS19.html>`_ for file
+            descriptions.
+
+        stat : str
+            Keep or delete key:
+
+            * ``KEEP`` - Keep this file.
+
+            * ``DELE`` - Delete (or do not write, if not necessary) this file.
+
+        Notes
+        -----
+
+        .. _s-FDELE_notes:
+
+        Deletes as soon as possible (or prevents writing) a binary file created by Mechanical APDL to save
+        space.
+
+        .. warning::
+
+            Deleting files that are necessary for the next substep, load step, or analysis will prevent
+            continuation of the run.
+
+        This command is valid only at the Begin level.
+        """
+        command = f"/FDELE,{ident},{stat}"
+        return self.run(command, **kwargs)
+
+    def slashrename(
+        self,
+        fname1: str = "",
+        ext1: str = "",
+        fname2: str = "",
+        ext2: str = "",
+        distkey: str = "",
+        **kwargs,
+    ):
+        r"""Renames a file.
+
+        Mechanical APDL Command: `/RENAME <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RENAME.html>`_
+
+        Parameters
+        ----------
+        fname1 : str
+            The file to be renamed. You can also include an optional directory path as part of the specified
+            file name; if not, the default file location is the working directory.
+
+            File name defaults to the current :file:`Jobname`.
+
+        ext1 : str
+            Filename extension (eight-character maximum).
+
+        fname2 : str
+            The new name for the file. You can also include an optional directory path as part of the new
+            file name; if not, the default is the working directory. A maximum of 248 characters is allowed
+            for the file name (or combined file name and directory path, if both are specified).
+
+            ``Fname2`` defaults to ``Fname1``.
+
+        ext2 : str
+            Filename extension (eight-character maximum). ``Ext2`` defaults to ``Ext1``.
+
+        distkey : str
+            Key that specifies which rename operation is performed on all processes in distributed-memory
+            parallel mode:
+
+            * ``0 (OFF or NO)`` - The program performs the rename operation only on the master process
+              (default).
+
+            * ``1 (ON or YES)`` - The program performs the rename operation locally on each process.
+
+            * ``2 or BOTH`` - The program performs the rename operation for ``Fname``. ``Ext`` on the master
+              process and for ``FnameN``. ``Ext`` on all processes.
+
+        Notes
+        -----
+
+        .. _s-RENAME_notes:
+
+        Renames a file. Ex: :ref:`slashrename`,A,,,B renames file A to B in the same directory.
+        :ref:`slashrename`,A,DAT,,,INP renames file A.DAT to A.INP. On all systems, this command will
+        overwrite any existing file named B. See the `Operations Guide
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ope/Hlp_G_OPE8.html>`_ for details. Only
+        Mechanical APDL binary files should
+        be renamed. Use :ref:`sys` and system renaming commands for other files.
+
+        In distributed-memory parallel (DMP) mode, only the master process will rename ``Fname1``. ``Ext1``
+        to ``Fname2``. ``Ext2`` by default. However, when ``DistKey`` is set to 1 (or ON, or YES) or 2 (or
+        BOTH), the command is executed by all processes. In this case, ``Fname1`` and ``Fname2`` will
+        automatically have the process rank appended to them. This means ``Fname1N``. ``Ext1`` will be
+        renamed to ``Fname2N``. ``Ext2`` by all processes, where ``N`` is the DMP process rank. For more
+        information see in the `Parallel Processing Guide
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_dan/HybParallel.html>`_.
+
+        Renaming across system partitions may be internally done by a copy and delete operation on some
+        systems.
+
+        This command is valid only at the Begin level.
+        """
+        command = f"/RENAME,{fname1},{ext1},,{fname2},{ext2},,{distkey}"
+        return self.run(command, **kwargs)
+
+    def starlist(self, fname: str = "", ext: str = "", **kwargs):
+        r"""Displays the contents of an external, coded file.
+
+        Mechanical APDL Command: `\*LIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LIST_st.html>`_
+
+        Parameters
+        ----------
+        fname : str
+            File name and directory path (248 characters maximum, including the characters needed for the
+            directory path). An unspecified directory path defaults to the working directory; in this case,
+            you can use all 248 characters for the file name.
+
+        ext : str
+            Filename extension (eight-character maximum).
+
+        Notes
+        -----
+
+        .. _a-LIST_notes:
+
+        Displays the contents of an external, coded file. The file to be listed cannot be in use (open) at
+        the time (except for the error file, :file:`Jobname.err` None, which may be displayed with
+        :ref:`starlist`,ERR).
+
+        Use caution when you are listing active Mechanical APDL files via the List> Files> Other and File>
+        List>
+        Other menu paths. File I/O buffer and system configurations can result in incomplete listings unless
+        the files are closed.
+
+        This command is valid in any processor.
+        """
+        command = f"*LIST,{fname},{ext}"
         return self.run(command, **kwargs)
