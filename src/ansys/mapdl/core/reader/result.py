@@ -42,10 +42,11 @@ TODO's
 """
 
 from functools import wraps
+import logging
 import os
 import pathlib
 import tempfile
-from typing import Iterable
+from typing import TYPE_CHECKING, Any, Callable, Iterable, Literal
 import uuid
 import weakref
 
@@ -55,19 +56,25 @@ from ansys.mapdl.reader.rst import Result
 import numpy as np
 
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core import _HAS_DPF
+from ansys.mapdl.core import Logger, Mapdl
+from ansys.mapdl.core import _HAS_DPF, _HAS_PYVISTA
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import check_valid_ip, random_string
 
-COMPONENTS = ["X", "Y", "Z", "XY", "YZ", "XZ"]
-
-DPF_PORT: int | None = None
-DPF_IP: str | None = None
+COMPONENTS: list[str] = ["X", "Y", "Z", "XY", "YZ", "XZ"]
 
 if _HAS_DPF:
     from ansys.dpf import core as dpf
     from ansys.dpf.core import Model
     from ansys.dpf.core.errors import DPFServerException
+
+
+if TYPE_CHECKING:
+    from ansys.mapdl.core import Mapdl
+
+    if _HAS_PYVISTA:
+        import pyvista as pv
+
 
 class ResultNotFound(MapdlRuntimeError):
     """Results not found"""
@@ -76,7 +83,7 @@ class ResultNotFound(MapdlRuntimeError):
         MapdlRuntimeError.__init__(self, msg)
 
 
-def update_result(function):
+def update_result(function: Callable[..., Any]) -> Callable[..., Any]:
     """
     Decorator to wrap :class:`DPFResult <ansys.mapdl.core.reader.result.DPFResult>`
     methods to force update the RST when accessed the first time.
@@ -98,7 +105,7 @@ def update_result(function):
     return wrapper
 
 
-def generate_session_id(length=10):
+def generate_session_id(length: int = 10):
     """Generate an unique ssesion id.
 
     It can be shorten by the argument 'length'."""
@@ -125,14 +132,20 @@ class DPFResult(Result):
 
     """
 
-    def __init__(self, rst_file_path=None, mapdl=None):
+    def __init__(
+        self, rst_file_path: str | None = None, mapdl: "Mapdl | None" = None
+    ) -> None:
         """Initialize Result instance"""
 
-        self.__rst_directory = None
-        self.__rst_name = None
+        if not _HAS_DPF:
+            raise ModuleNotFoundError(
+                "The DPF library is not installed. Please install it using 'pip install ansys-dpf-core'."
+            )
+
         self._mapdl_weakref = None
         self._server_file_path = None  # In case DPF is remote.
         self._session_id = None
+        self._logger: Logger | None = None
 
         if rst_file_path is not None and mapdl is not None:
             raise ValueError(
@@ -140,25 +153,27 @@ class DPFResult(Result):
             )
 
         elif rst_file_path is not None:
-            if os.path.exists(rst_file_path):
-                self.__rst_directory = os.path.dirname(rst_file_path)
-                self.__rst_name = os.path.basename(rst_file_path)
-            else:
+            if not os.path.exists(rst_file_path):
                 raise FileNotFoundError(
                     f"The RST file '{rst_file_path}' could not be found."
                 )
 
+            logger.debug("Initializing DPFResult class in RST mode.")
             self._mode_rst = True
 
         elif mapdl is not None:
-            from ansys.mapdl.core.mapdl_core import (
-                _MapdlCore,  # avoid circular import fail.
-            )
+            from ansys.mapdl.core import Mapdl
 
-            if not isinstance(mapdl, _MapdlCore):  # pragma: no cover
+            if not isinstance(mapdl, Mapdl):  # pragma: no cover # type: ignore
                 raise TypeError("Must be initialized using Mapdl instance")
+
+            logger.debug("Initializing DPFResult class in MAPDL mode.")
             self._mapdl_weakref = weakref.ref(mapdl)
             self._mode_rst = False
+            rst_file_path = mapdl.result_file
+            assert (
+                rst_file_path is not None
+            ), "RST file path is None. Please check the MAPDL instance."
 
             # self._session_id = f"__{uuid.uuid4()}__"
             # self.mapdl.parameters[self._session_id] = 1
@@ -168,15 +183,20 @@ class DPFResult(Result):
                 "One of the following kwargs must be supplied: 'rst_file_path' or 'mapdl'"
             )
 
+        self.__rst_directory: str = os.path.dirname(rst_file_path)
+        self.__rst_name: str = os.path.basename(rst_file_path)
+
         # dpf
-        # self._update()
-        self._loaded = False
-        self._update_required = False  # if true, it triggers a update on the RST file
+        self._loaded: bool = False
+        self._update_required: bool = (
+            False  # if true, it triggers a update on the RST file
+        )
         self._cached_dpf_model = None
         self._connected = False
         self._is_remote = (
             False  # Default false, unless using self.connect or the env var are set.
         )
+        self._connection: Any | None = None
 
         self.connect_to_server()
 
@@ -185,17 +205,21 @@ class DPFResult(Result):
         ELEMENT_RESULT_NCOMP = None  # todo: to fix
 
         # these will be removed once the reader class has been fully substituted.
+        # then we will inheritate from object.
         self._update()
         super().__init__(self._rst, read_mesh=False)
 
-    def _generate_session_id(self, length=10):
+    def _generate_session_id(self, length: int = 10):
         """Generate an unique ssesion id.
 
         It can be shorten by the argument 'length'."""
         return "__" + generate_session_id(length)
 
     def _connect_to_dpf_using_mode(
-        self, mode="InProcess", external_ip=None, external_port=None
+        self,
+        mode: Literal["InProcess", "LocalGrpc", "RemoteGrpc"] = "InProcess",
+        external_ip: str | None = None,
+        external_port: int | None = None,
     ):
         if mode == "InProcess":
             dpf.server.set_server_configuration(
@@ -219,31 +243,31 @@ class DPFResult(Result):
                 )
         self._connection = srvr
 
-    def _try_connect_inprocess(self):
+    def _try_connect_inprocess(self) -> None:
         try:
             self._connect_to_dpf_using_mode(mode="InProcess")
             self._connected = True
-        except DPFServerException:  # probably should filter a bit here
+        except DPFServerException:  # type: ignore # probably should filter a bit here
             self._connected = False
 
-    def _try_connect_localgrpc(self):
+    def _try_connect_localgrpc(self) -> None:
         try:
             self._connect_to_dpf_using_mode(mode="LocalGrpc")
             self._connected = True
-        except DPFServerException:  # probably should filter a bit here
+        except DPFServerException:  # type: ignore # probably should filter a bit here
             self._connected = False
 
-    def _try_connect_remotegrpc(self, DPF_IP, DPF_PORT):
+    def _try_connect_remote_grpc(self, dpf_ip: str, dpf_port: int) -> None:
         try:
             self._connect_to_dpf_using_mode(
-                mode="RemoteGrpc", external_ip=DPF_IP, external_port=DPF_PORT
+                mode="RemoteGrpc", external_ip=dpf_ip, external_port=dpf_port
             )
             self._connected = True
             self._is_remote = True
-        except DPFServerException:
+        except DPFServerException:  # type: ignore
             self._connected = False
 
-    def _iterate_connections(self, DPF_IP, DPF_PORT):
+    def _iterate_connections(self, dpf_ip: str, dpf_port: int) -> None:
 
         if not self._connected:
             self._try_connect_inprocess()
@@ -252,45 +276,48 @@ class DPFResult(Result):
             self._try_connect_localgrpc()
 
         if not self._connected:
-            self._try_connect_remotegrpc(DPF_IP, DPF_PORT)
+            self._try_connect_remote_grpc(dpf_ip, dpf_port)
 
         if self._connected:
             return
-
-        raise DPFServerException(
-            "Could not connect to DPF server after trying all the available options."
-        )
-
-    def _set_dpf_env_vars(self, ip=None, port=None):
-        if ip is not None:
-            DPF_IP = ip
-        elif "DPF_IP" in os.environ:
-            DPF_IP = os.environ["DPF_IP"]
-        elif self.mapdl:
-            DPF_IP = self.mapdl._ip
         else:
-            DPF_IP = "127.0.0.1"
+            raise DPFServerException(
+                "Could not connect to DPF server after trying all the available options."
+            )
+
+    def _set_dpf_env_vars(
+        self, ip: str | None = None, port: int | None = None
+    ) -> tuple[str, int]:
+        if ip is not None:
+            dpf_ip = ip
+        elif "DPF_IP" in os.environ:
+            dpf_ip = os.environ["DPF_IP"]
+        elif self.mapdl:
+            dpf_ip = self.mapdl.ip
+        else:
+            dpf_ip = "127.0.0.1"
 
         if port is not None:
-            DPF_PORT = port
+            dpf_port = port
         elif "DPF_PORT" in os.environ:
-            DPF_PORT = os.environ["DPF_PORT"]
+            dpf_port = int(os.environ["DPF_PORT"])
         elif self.mapdl:
-            DPF_PORT = self.mapdl._port + 3
+            dpf_port = self.mapdl.port + 3
         else:
-            DPF_PORT = 50055
-        return DPF_IP, DPF_PORT
+            dpf_port = 50055
 
-    def _connect_to_dpf(self, ip=None, port=None):
+        return dpf_ip, dpf_port
 
-        if not self._mode_rst and not self._mapdl._local:
-            self._try_connect_remotegrpc(ip, port)
+    def _connect_to_dpf(self, ip: str, port: int) -> None:
+
+        if not self._mode_rst and self._mapdl and not self._mapdl.is_local:
+            self._try_connect_remote_grpc(ip, port)
 
         else:
             # any connection method is supported because the file local.
-            self._iterate_connections(DPF_IP, DPF_PORT)
+            self._iterate_connections(ip, port)
 
-    def connect_to_server(self, ip=None, port=None):
+    def connect_to_server(self, ip: str | None = None, port: int | None = None) -> None:
         """
         Connect to the DPF Server.
 
@@ -338,12 +365,12 @@ class DPFResult(Result):
         return "DPF_IP" in os.environ or "DPF_PORT" in os.environ
 
     @property
-    def is_remote(self):
+    def is_remote(self) -> bool:
         """Returns True if we are connected to the DPF Server using a gRPC connection to a remote IP."""
         return self._is_remote
 
     @property
-    def _mapdl(self):
+    def _mapdl(self) -> "Mapdl | None":
         """Return the weakly referenced instance of MAPDL"""
         if self._mapdl_weakref:
             return self._mapdl_weakref()
@@ -354,17 +381,30 @@ class DPFResult(Result):
         return self._mapdl
 
     @property
-    def _log(self):
+    def _log(self) -> Logger:
         """Alias for mapdl logger"""
         if self._mapdl:
             return self._mapdl._log
         else:
-            return logger
+            if self._logger is None:
+                self._logger = Logger(
+                    level=logging.ERROR, to_file=False, to_stdout=True
+                )
+            return self._logger
 
     @property
-    def logger(self):
+    def logger(self) -> Logger:
         """Logger property"""
         return self._log
+
+    @logger.setter
+    def logger(self, logger: Logger) -> None:
+        if self.mode_mapdl:
+            raise ValueError(
+                "Cannot set logger in MAPDL mode. Use the MAPDL instance methods to set the logger instead."
+            )
+        else:
+            self._logger = logger
 
     @property
     def mode(self):
@@ -427,35 +467,32 @@ class DPFResult(Result):
     @property
     def local(self):
         if self._mapdl:
-            return self._mapdl._local
+            return self._mapdl.is_local
 
     @property
-    def _rst_directory(self):
-        if self.__rst_directory is None:
-            if self.mode_mapdl:
-                if self.local:
-                    _rst_directory = self._mapdl.directory
-                else:
-                    _rst_directory = os.path.join(
-                        tempfile.gettempdir(), random_string()
-                    )
-                    if not os.path.exists(_rst_directory):
-                        os.mkdir(_rst_directory)
-                self.__rst_directory = _rst_directory
+    def _rst_directory(self) -> str:
+        if self.mode_mapdl:
+            # Update
+            assert self._mapdl is not None
+            if self.local:
+                self.__rst_directory: str = self._mapdl.directory  # type: ignore
 
-            else:  # rst mode
-                # It should have been initialized with this value already.
-                pass
+            else:
+                self.__rst_directory: str = os.path.join(  # type: ignore
+                    tempfile.gettempdir(), random_string()
+                )
+                if not os.path.exists(self.__rst_directory):
+                    os.mkdir(self.__rst_directory)
 
-        return self.__rst_directory
+        return self.__rst_directory  # type: ignore
 
     @property
-    def _rst_name(self):
-        if self.__rst_name is None:
-            self.__rst_name = self._mapdl.result_file
+    def _rst_name(self) -> str:
         return self.__rst_name
 
-    def update(self, progress_bar=None, chunk_size=None):
+    def update(
+        self, progress_bar: bool | None = None, chunk_size: int | None = None
+    ) -> None:
         """Update the DPF Model.
 
         It does trigger an update on the underlying RST file.
@@ -474,12 +511,14 @@ class DPFResult(Result):
         """
         return self._update(progress_bar=progress_bar, chunk_size=chunk_size)
 
-    def _update(self, progress_bar=None, chunk_size=None):
+    def _update(
+        self, progress_bar: bool | None = None, chunk_size: int | None = None
+    ) -> None:
         if self._mapdl:
             self._update_rst(progress_bar=progress_bar, chunk_size=chunk_size)
 
         # Upload it to DPF if we are not in local
-        if self.is_remote:
+        if self.is_remote and not self.same_machine:
             # self.connect_to_server()
             self._upload_to_dpf()
 
@@ -503,15 +542,20 @@ class DPFResult(Result):
                 "Please use the local mode for now."
             )
 
-    def _update_rst(self, progress_bar=None, chunk_size=None, save=True):
+    def _update_rst(
+        self,
+        progress_bar: bool | None = None,
+        chunk_size: int | None = None,
+        save: bool = True,
+    ) -> None:
         # Saving model
         if save:
-            self._mapdl.save()
+            self._mapdl.save()  # type: ignore
 
         if self.local is False:
             self._log.debug("Updating the local copy of remote RST file.")
             # download file
-            self._mapdl.download(
+            self._mapdl.download(  # type: ignore
                 self._rst_name,
                 self._rst_directory,
                 progress_bar=progress_bar,
@@ -536,20 +580,24 @@ class DPFResult(Result):
         return self._cached_dpf_model
 
     @property
-    def metadata(self):
+    def metadata(self) -> "dpf.model.Metadata":
         return self.model.metadata
 
     @property
-    def mesh(self):
+    def mesh(self) -> "dpf.MeshedRegion":
         """Mesh from result file."""
         # TODO: this should be a class equivalent to reader.mesh class.
         return self.model.metadata.meshed_region
 
     @property
-    def grid(self):
+    def grid(self) -> "pv.UnstructuredGrid":
         return self.mesh.grid
 
-    def _get_entities_ids(self, entities, entity_type="Nodal"):
+    def _get_entities_ids(
+        self,
+        entities: str | int | float | Iterable[str | int | float],
+        entity_type: str = "Nodal",
+    ) -> Iterable[int | float]:
         """Get entities ids given their ids, or component names.
 
         If a list is given it checks can be int, floats, or list/tuple of int/floats, or
@@ -557,7 +605,7 @@ class DPFResult(Result):
 
         Parameters
         ----------
-        entities : str, int, floats, Iter[int], Iter[float], Iter[str]
+        entities : str | int | float | Iterable[str | int | float]
             Entities ids or components
 
         entity_type : str, optional
@@ -589,18 +637,17 @@ class DPFResult(Result):
         if entities is None:
             return entities
 
-        elif isinstance(entities, (int, float)):
-            return [entities]
-
-        elif isinstance(entities, str):
-            # it is component name
+        elif isinstance(entities, (int, float, str)):
             entities = [entities]
 
-        elif isinstance(entities, Iterable):
+        if isinstance(entities, Iterable):  # type: ignore
             if all([isinstance(each, (int, float)) for each in entities]):
-                return entities
+                return entities  # type: ignore
             elif all([isinstance(each, str) for each in entities]):
+                # Need to map the components to the ids.
                 pass
+            else:
+                raise ValueError("Strings and numbers are not allowed together.")
 
         else:
             raise TypeError(
@@ -608,8 +655,8 @@ class DPFResult(Result):
             )
 
         # For components selections:
-        entities_ = []
-        available_ns = self.mesh.available_named_selections
+        entities_: list[int] = []
+        available_ns: list[str] = self.mesh.available_named_selections
 
         for each_named_selection in entities:
             if each_named_selection not in available_ns:
@@ -623,12 +670,12 @@ class DPFResult(Result):
                     f"The named selection '{each_named_selection}' does not contain {entity_type} information."
                 )
 
-            entities_.append(scoping.ids)
+            entities_.append(scoping.ids.tolist())
 
         return entities_
 
-    def _get_principal(self, op):
-        fc = op.outputs.fields_as_fields_container()[
+    def _get_principal(self, op: "dpf.Operator") -> np.ndarray[Any, Any]:
+        fc: dpf.FieldsContainer = op.outputs.fields_as_fields_container()[
             0
         ]  # This index 0 is the step indexing.
 
@@ -657,7 +704,9 @@ class DPFResult(Result):
             )
         )
 
-    def _extract_data(self, op):
+    def _extract_data(
+        self, op: "dpf.Operator"
+    ) -> tuple[np.ndarray[Any, Any], np.ndarray[Any, Any]]:
         fc = op.outputs.fields_as_fields_container()[
             0
         ]  # This index 0 is the step indexing.
@@ -665,10 +714,9 @@ class DPFResult(Result):
         # When we destroy the operator, we might lose access to the array, that is why we copy.
         ids = fc.scoping.ids.copy()
         data = fc.data.copy()
-
         return ids, data
 
-    def _set_rescope(self, op, scope_ids):
+    def _set_rescope(self, op: "dpf.Operator", scope_ids: list[int]) -> "dpf.Operator":
         fc = op.outputs.fields_container()
 
         rescope = dpf.operators.scoping.rescope()
@@ -676,23 +724,31 @@ class DPFResult(Result):
         rescope.inputs.fields(fc)
         return rescope
 
-    def _set_mesh_scoping(self, op, mesh, requested_location, scope_ids):
-        scop = dpf.Scoping()
+    def _set_mesh_scoping(
+        self,
+        op: "dpf.Operator",
+        mesh: "dpf.MeshedRegion",
+        requested_location: Literal["nodal", "elemental_nodal", "elemental"],
+        scope_ids: list[int] | None = None,
+    ):
 
-        if requested_location.lower() == "nodal":
+        scop = dpf.Scoping()
+        requested_location = requested_location.lower()  # type: ignore
+
+        if requested_location == "nodal":
             scop.location = dpf.locations.nodal
             if scope_ids:
                 scop.ids = scope_ids
             else:
                 scop.ids = mesh.nodes.scoping.ids
 
-        elif requested_location.lower() == "elemental_nodal":
+        elif requested_location == "elemental_nodal":
             if scope_ids:
                 scop.ids = scope_ids
             else:
                 scop.ids = mesh.elements.scoping.ids
 
-        elif requested_location.lower() == "elemental":
+        elif requested_location == "elemental":
             scop.location = dpf.locations.elemental
             if scope_ids:
                 scop.ids = scope_ids
@@ -854,7 +910,7 @@ class DPFResult(Result):
         """
 
         # todo: accepts components in nodes.
-        mesh = self.metadata.meshed_region
+        mesh: dpf.MeshedRegion = self.metadata.meshed_region
 
         if isinstance(scope_ids, np.ndarray):
             scope_ids = scope_ids.tolist()
