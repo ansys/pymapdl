@@ -100,7 +100,7 @@ doc = [
     "nbformat==5.10.4",
     "numpydoc==1.8.0",
     "pandas==2.2.3",
-    "plotly==6.0.1",
+    "plotly==6.1.1",
     "pyiges[full]==0.3.1",
     "pypandoc==1.15",
     "pytest-sphinx==0.6.3",
