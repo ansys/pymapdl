@@ -23,7 +23,7 @@
 from logging import Logger, StreamHandler
 import os
 import re
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 from warnings import warn
 
 from ansys.mapdl.core import __version__
@@ -39,7 +39,7 @@ FORMAT_OPTIONS: Dict[str, Any] = {
     "max-line-length": 100,
 }
 
-LOGLEVEL_DEFAULT: StreamHandler = "WARNING"
+LOGLEVEL_DEFAULT: str = "WARNING"
 AUTO_EXIT_DEFAULT: bool = True
 LINE_ENDING_DEFAULT: Optional[str] = None
 EXEC_FILE_DEFAULT: Optional[str] = None
@@ -58,7 +58,7 @@ CHECK_PARAMETER_NAMES_DEFAULT: bool = True
 
 
 # This commands have "--" as one or some arguments
-COMMANDS_WITH_EMPTY_ARGS: Dict[str, Tuple[Any]] = {
+COMMANDS_WITH_EMPTY_ARGS: Dict[str, Tuple[Any, ...]] = {
     "/CMA": (),  # "/CMAP,
     "/NER": (),  # "/NERR,
     "/PBF": (),  # "/PBF,
@@ -430,12 +430,16 @@ def convert_apdl_block(
     return translator.lines
 
 
-class Lines(list):
-    def __init__(self, mute):
+from collections import UserList
+from typing import Any
+
+
+class Lines(UserList[str]):
+    def __init__(self, *args: Any, mute: bool = False, **kwargs: Any) -> None:
         self._log = Logger("convert_logger")
         self._setup_logger()
         self._mute = mute
-        super().__init__()
+        super().__init__((each for each in args), **kwargs)
 
     def append(self, item: Any, mute: bool = True) -> None:
         # append the item to itself (the list)
@@ -475,8 +479,8 @@ class FileTranslator:
         check_parameter_names: bool = False,
     ) -> None:
         self._non_interactive_level = 0
-        self.lines = Lines(mute=not show_log)
-        self._functions = []
+        self.lines: Lines = Lines(mute=not show_log)
+        self._functions: list[str] = []
         if line_ending:
             self.line_ending = line_ending
         else:
@@ -494,7 +498,7 @@ class FileTranslator:
         self.graphics_backend = graphics_backend
         self.clear_at_start = clear_at_start
         self.check_parameter_names = check_parameter_names
-        self.macros_names = []
+        self.macros_names: list[str] = []
 
         self.write_header()
         if self._add_imports:
@@ -530,7 +534,7 @@ class FileTranslator:
         self._block_count = 0
         self._block_count_target = 0
         self._in_block = False
-        self._block_current_cmd = None
+        self._block_current_cmd: str | None = None
 
     def write_header(self) -> None:
         if isinstance(self._header, bool):
@@ -548,7 +552,7 @@ class FileTranslator:
     def write_exit(self) -> None:
         self.lines.append(f"\n{self.obj_name}.exit()")
 
-    def format_using_autopep8(self, text: str = None) -> str:
+    def format_using_autopep8(self, text: str | None = None) -> str | None:
         """Format internal `self.lines` with autopep8.
 
         Parameters
@@ -559,7 +563,7 @@ class FileTranslator:
         """
         if self.cleanup_output:
             try:
-                import autopep8
+                import autopep8  # type: ignore
             except ModuleNotFoundError:  # pragma: no cover
                 warn(
                     "Install `autopep8` to use this feature with\n"
@@ -569,20 +573,26 @@ class FileTranslator:
 
             if not text:
                 text = self.line_ending.join(self.lines)
-                self.lines = autopep8.fix_code(text).splitlines()
+                self.lines = autopep8.fix_code(text).splitlines()  # type: ignore
 
             else:  # pragma: no cover
                 # for development purposes
                 return autopep8.fix_code(text)
 
-    def save(self, filename, format_autopep8: bool = True) -> None:
+    def save(self, filename: str) -> None:
         """Saves lines to file"""
         if os.path.isfile(filename):
             os.remove(filename)
 
         # Making sure we write python string with double slash.
         # We are not expecting other type of unicode symbols.
-        self.lines = [each_line.replace("\\", "\\\\") for each_line in self.lines]
+        _lines = Lines()
+
+        # Lines() class does not have comprenhension list
+        for each_line in self.lines:
+            _lines.append(each_line.replace("\\", "\\\\"))
+
+        self.lines = _lines
 
         # Try to format the file using AutoPEP8
         self.format_using_autopep8()
@@ -590,7 +600,7 @@ class FileTranslator:
         with open(filename, "w") as f:
             f.write(self.line_ending.join(self.lines))
 
-    def initialize_mapdl_object(self, loglevel: str, exec_file: str) -> None:
+    def initialize_mapdl_object(self, loglevel: str, exec_file: Optional[str]) -> None:
         """Initializes ansys object as lines"""
         core_module = "ansys.mapdl.core"  # shouldn't change
         self.lines.append(f"from {core_module} import launch_mapdl")
@@ -783,12 +793,14 @@ class FileTranslator:
 
         if cmd_caps_short == "/TIT":  # /TITLE
             parameters = line.split(",")[1:]
-            return self.store_command("title", [",".join(parameters).strip()])
+            self.store_command("title", [",".join(parameters).strip()])
+            return
 
         if cmd_caps_short == "/AXL":  # /AXLAB
             parameters = line.split(",")[1:]
             parameters_ = [parameters[0], ",".join(parameters[1:])]
-            return self.store_command("axlab", parameters_)
+            self.store_command("axlab", parameters_)
+            return
 
         if cmd_caps_short == "*GET":
             if self.non_interactive:  # gives error
@@ -796,7 +808,8 @@ class FileTranslator:
                 return
             else:
                 parameters = line.split(",")[1:]
-                return self.store_command("get", parameters)
+                self.store_command("get", parameters)
+                return
 
         if cmd_caps_short == "/NOP":
             self.comment = (
@@ -830,7 +843,8 @@ class FileTranslator:
                 return
 
         if cmd_caps == "/PREP7":
-            return self.store_command("prep7", [])
+            self.store_command("prep7", [])
+            return
 
         if "*END" in line_upper:
             if self.macros_as_functions:
@@ -1052,24 +1066,23 @@ class FileTranslator:
 
         return ", ".join(parsed_parameters)
 
-    def store_command(self, function: Callable, parameters: List[str]) -> None:
+    def store_command(self, function: str, parameters: List[str]) -> None:
         """Stores a valid pyansys function with parameters"""
         parameter_str = self._parse_arguments(parameters)
-
+        parameters_dict = {
+            "indentation": self.indent,
+            "obj_name": self.obj_name,
+            "function": function,
+            "parameter_str": parameter_str,
+            "comment": self.comment,
+        }
         if self.comment:
-            line = "%s%s.%s(%s)  # %s" % (
-                self.indent,
-                self.obj_name,
-                function,
-                parameter_str,
-                self.comment,
+            line = "{indentation}{obj_name}.{function}({parameter_str})  # {comment}".format(
+                **parameters_dict
             )
         else:
-            line = "%s%s.%s(%s)" % (
-                self.indent,
-                self.obj_name,
-                function,
-                parameter_str,
+            line = "{indentation}{obj_name}.{function}({parameter_str})".format(
+                **parameters_dict
             )
 
         self.lines.append(line)
@@ -1192,7 +1205,7 @@ class FileTranslator:
 
 
 def _convert(
-    apdl_strings: str,
+    apdl_strings: str | List[str],
     loglevel: str = "WARNING",
     auto_exit: bool = True,
     line_ending: Optional[str] = None,

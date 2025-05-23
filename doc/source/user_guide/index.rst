@@ -129,7 +129,8 @@ various advanced methods to visualize, script, and interact with MAPDL, see
 
 
 Calling MAPDL Pythonically
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+==========================
+
 MAPDL functions can be called directly from an instance of
 :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` in a Pythonic manner. This is
 to simplify calling Ansys, especially when inputs are variables within

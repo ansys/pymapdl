@@ -97,6 +97,7 @@ services:
       - '50052:50052'
       - '50055:50055'
     image: ${DOCKER_IMAGE}
+    platform: linux/amd64
     entrypoint: "/bin/bash ansys -grpc"
 
   dpf:
@@ -105,6 +106,7 @@ services:
       - mapdl-dpf
       - local-dpf
     image: ${DPF_DOCKER_IMAGE}
+    platform: linux/amd64
     ports:
       - '50056:50052'
     restart: always
@@ -128,6 +130,7 @@ services:
     ports:
       - '50052:50052'
       - '50055:50055'
+    platform: linux/amd64
     image: ${DOCKER_IMAGE}
     # Mount the current directory to /home/${DOCKER_USER:-mapdl}/pymapdl
     # This allows you to run the container and have access to the current directory
