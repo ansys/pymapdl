@@ -49,22 +49,25 @@ from typing import Iterable
 import uuid
 import weakref
 
-# from ansys.dpf import post
-from ansys.dpf import core as dpf
-from ansys.dpf.core import Model
-from ansys.dpf.core.errors import DPFServerException
 from ansys.mapdl.reader.rst import Result
+
+# from ansys.dpf import post
 import numpy as np
 
 from ansys.mapdl.core import LOG as logger
+from ansys.mapdl.core import _HAS_DPF
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import check_valid_ip, random_string
 
 COMPONENTS = ["X", "Y", "Z", "XY", "YZ", "XZ"]
 
-DPF_PORT = None
-DPF_IP = None
+DPF_PORT: int | None = None
+DPF_IP: str | None = None
 
+if _HAS_DPF:
+    from ansys.dpf import core as dpf
+    from ansys.dpf.core import Model
+    from ansys.dpf.core.errors import DPFServerException
 
 class ResultNotFound(MapdlRuntimeError):
     """Results not found"""

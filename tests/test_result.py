@@ -41,18 +41,28 @@ import os
 import tempfile
 from warnings import warn
 
-from ansys.dpf import core as dpf_core
-from ansys.dpf.gate.errors import DPFServerException
-from ansys.mapdl.reader import read_binary
 import numpy as np
 import pytest
 
-from ansys.mapdl.core.logging import PymapdlCustomAdapter as MAPDLLogger
-from conftest import ON_LOCAL
+from conftest import HAS_DPF, ON_LOCAL
 
 DPF_PORT = os.environ.get("DPF_PORT", 50056)  # Set in ci.yaml
 
-from ansys.mapdl.core.examples import (  # threed_nonaxisymmetric_vibration_of_a_stretched_membrane,
+if not HAS_DPF:
+    pytest.skip(
+        "Skipping DPF tests because DPF is not installed. "
+        "Please install the ansys-dpf-core package.",
+        allow_module_level=True,
+    )
+
+else:
+    from ansys.dpf import core as dpf_core
+    from ansys.dpf.gate.errors import DPFServerException
+    from ansys.mapdl.core.reader.result import COMPONENTS
+
+from ansys.mapdl.reader import read_binary
+
+from ansys.mapdl.core.examples import (
     electrothermal_microactuator_analysis,
     elongation_of_a_solid_bar,
     modal_analysis_of_a_cyclic_symmetric_annular_plate,
@@ -61,7 +71,7 @@ from ansys.mapdl.core.examples import (  # threed_nonaxisymmetric_vibration_of_a
     transient_response_of_a_ball_impacting_a_flexible_surface,
     transient_thermal_stress_in_a_cylinder,
 )
-from ansys.mapdl.core.reader.result import COMPONENTS
+from ansys.mapdl.core.logging import PymapdlCustomAdapter as MAPDLLogger
 
 
 def validate(result_values, reader_values=None, post_values=None, rtol=1e-5, atol=1e-8):
@@ -201,10 +211,12 @@ def title(apdl_code):
 class TestExample:
     """Generic class to test examples."""
 
-    example = None  # String 'vm33'
-    example_name = None  # Example name, used to create a temporal directory
-    _temp_dir = None  # Temporal directory where download the RST file to.
-    apdl_code = None  # In case you want to overwrite the APDL code of the example. Use with ``prepare_example`` function.
+    example: str | None = None  # String 'vm33'
+    example_name: str | None = None  # Example name, used to create a temporal directory
+    _temp_dir: str | None = None  # Temporal directory where download the RST file to.
+    # In case you want to overwrite the APDL code of the example.
+    # Use with ``prepare_example`` function.
+    apdl_code: str | None = None
 
     @property
     def tmp_dir(self):
