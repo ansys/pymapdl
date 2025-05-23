@@ -33,14 +33,6 @@
 
 .. vale off
 
-.. let's hide the `Edit on GitHub` link in this page...
-.. and the whole sidebar with it.
-.. hideobject::
-    :class: bd-sidebar-secondary bd-toc
-    :remove: true
-    :adjustmargin: true
-
-
 .. title is given using the 
 
 **What do you want to do? I want to...**

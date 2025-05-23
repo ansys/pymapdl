@@ -5,10 +5,10 @@ build-backend = "flit_core.buildapi"
 [project]
 # Check https://flit.readthedocs.io/en/latest/pyproject_toml.html for all available sections
 name = "ansys-mapdl-core"
-version = "0.69.dev0"
+version = "0.70.dev0"
 description = "A Python client library for Ansys MAPDL."
 readme = "README.md"
-requires-python = ">=3.10,<3.13"  # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
+requires-python = ">=3.10,<3.14"  # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
 license = {file = "LICENSE"}
 authors = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
@@ -43,6 +43,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
 [project.optional-dependencies]
@@ -64,10 +65,10 @@ all = [
 ]
 
 tests = [
-    "ansys-dpf-core==0.13.6",
+    "ansys-dpf-core[graphics]==0.13.6",
     "ansys-tools-visualization-interface==0.9.1",
     "autopep8==2.3.2",
-    "matplotlib==3.10.1",
+    "matplotlib==3.10.3",
     "pandas==2.2.3",
     "pyansys-tools-report==0.8.2",
     "pyfakefs==5.8.0",
@@ -77,17 +78,17 @@ tests = [
     "pytest-pyvista==0.1.9",
     "pytest-random-order==1.1.1",
     "pytest-reportlog==0.4.0",
-    "pytest-rerunfailures==15.0",
-    "pytest-timeout==2.3.1",
+    "pytest-rerunfailures==15.1",
+    "pytest-timeout==2.4.0",
     "pytest==8.3.5",
-    "scipy==1.15.2",
-    "vtk==9.3.1",
+    "scipy==1.15.3",
+    "vtk==9.4.2",
 ]
 
 doc = [
-    "ansys-dpf-core==0.13.6",
-    "ansys-mapdl-reader==0.54.2",
-    "ansys-sphinx-theme==1.4.2",
+    "ansys-dpf-core[graphics]==0.13.6",
+    "ansys-mapdl-reader==0.55.1",
+    "ansys-sphinx-theme==1.4.4",
     "ansys-tools-visualization-interface==0.9.1",
     "grpcio==1.70.0",
     "imageio-ffmpeg==0.6.0",
@@ -96,11 +97,11 @@ doc = [
     "jupyter==1.1.1",
     "jupyterlab>=3.2.8",
     "linuxdoc==20240924",
-    "matplotlib==3.10.1",
+    "matplotlib==3.10.3",
     "nbformat==5.10.4",
     "numpydoc==1.8.0",
     "pandas==2.2.3",
-    "plotly==6.0.1",
+    "plotly==6.1.1",
     "pyiges[full]==0.3.1",
     "pypandoc==1.15",
     "pytest-sphinx==0.6.3",
@@ -115,7 +116,7 @@ doc = [
     "sphinx==8.2.3",
     "sphinxcontrib-websupport==2.0.0",
     "sphinxemoji==0.3.1",
-    "vtk==9.3.1",
+    "vtk==9.4.2",
 ]
 
 [tool.flit.module]
@@ -132,7 +133,7 @@ pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_
 pymapdl = "ansys.mapdl.core.cli:main"
 
 [tool.pytest.ini_options]
-addopts = "-rxXsa -vvv --maxfail=10 --random-order-bucket=class --random-order --durations=10  --timeout=180"
+addopts = "-rxXsa -vvv --maxfail=10 --strict-markers --random-order-bucket=class --random-order --durations=10  --timeout=180"
 junit_family = "legacy"
 filterwarnings = [
     "ignore::ResourceWarning",
@@ -146,8 +147,9 @@ filterwarnings = [
 ]
 markers = [
     "skip_grpc: skip tests using grpc",
-    "gui: skip tests that launch the GUI interface",
-    "console: Run also console tests",
+    "requires_gui: run tests that require to launch the GUI interface",
+    "console: run console test based",
+    "gui: run gui test",
 ]
 
 testpaths = "tests"
@@ -242,12 +244,14 @@ checks = [
   # "EX01", # "No examples section found",
 ]
 
-
 override_SS05 = [  # override SS05 to allow docstrings starting with these words
     # '^Process ',
     # '^Assess ',
     # '^Access ',
 ]
+
+[tool.mypy]
+disable_error_code = ["return-value", "return", "import-untyped", "import-not-found"]
 
 [tool.towncrier]
 package = "ansys.mapdl.core"
@@ -255,7 +259,7 @@ directory = "doc/changelog.d"
 filename = "doc/source/changelog.rst"
 template = "doc/changelog.d/changelog_template.jinja"
 start_string = ".. towncrier release notes start\n"
-title_format = "\n.. _{version}:\n\n`{version} <https://github.com/ansys/pymapdl/releases/tag/v{version}>`_ - {project_date}"
+title_format = "\n.. _v{version}:\n\n`{version} <https://github.com/ansys/pymapdl/releases/tag/v{version}>`_ - {project_date}"
 
 issue_format = "`#{issue} <https://github.com/ansys/pymapdl/pull/{issue}>`_"
 
