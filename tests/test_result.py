@@ -46,7 +46,7 @@ import pytest
 
 from conftest import HAS_DPF, ON_LOCAL
 
-DPF_PORT = os.environ.get("DPF_PORT", 50056)  # Set in ci.yaml
+DPF_PORT = int(os.environ.get("DPF_PORT", 50056))  # Set in ci.yaml
 
 if not HAS_DPF:
     pytest.skip(
@@ -286,6 +286,7 @@ def test_dpf_connection():
 
 
 @pytest.mark.skipif(ON_LOCAL, reason="Skip on local machine")
+@pytest.mark.skip("Skip until DPF grpc connection is fixed on Ubuntu container. See #")
 def test_upload(mapdl, solved_box, tmpdir):
     # Download RST file
     rst_path = mapdl.download_result(str(tmpdir.mkdir("tmpdir")))

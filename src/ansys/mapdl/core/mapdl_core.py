@@ -362,6 +362,9 @@ class _MapdlCore(Commands):
 
         self._info = Information(self)
 
+        # DPF
+        self._dpf_result: "DPFResult | None" = None
+
     def _after_run(self, _command: str) -> None:
         pass
 
@@ -1092,7 +1095,11 @@ class _MapdlCore(Commands):
         if _HAS_DPF:
             from ansys.mapdl.core.reader import DPFResult
 
-            return DPFResult(None, self)
+            if self._dpf_result is None:
+                # create a DPFResult object
+                self._dpf_result = DPFResult(None, mapdl=self)
+
+            return self._dpf_result
 
         from ansys.mapdl.reader import read_binary
         from ansys.mapdl.reader.rst import Result

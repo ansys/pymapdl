@@ -472,7 +472,7 @@ class DPFResult(Result):
 
     @property
     def _rst_directory(self) -> str:
-        if self.mode_mapdl:
+        if self.__rst_directory is None and self.mode_mapdl:
             # Update
             if self._mapdl is None:
                 raise ValueError("MAPDL instance is None")
@@ -569,7 +569,7 @@ class DPFResult(Result):
         if self._log:
             self._log.debug("Building/Updating DPF Model object.")
 
-        if self.is_remote:
+        if self.is_remote and not self.same_machine:
             self._cached_dpf_model = Model(self._server_file_path)
         else:
             self._cached_dpf_model = Model(self._rst)
