@@ -327,7 +327,7 @@ class SetUp:
     def cisol(
         self,
         n: str = "",
-        id: str = "",
+        id_: str = "",
         node: str = "",
         cont: str = "",
         dtype: str = "",
@@ -342,7 +342,7 @@ class SetUp:
         n : str
             Arbitrary reference number or name assigned to this variable. Number must be >1 but </= NUMVAR.
 
-        id : str
+        id_ : str
             Crack ID number.
 
         node : str
@@ -384,7 +384,7 @@ class SetUp:
 
             * ``CEXT`` - Crack extension
         """
-        command = f"CISOL,{n},{id},{node},{cont},{dtype}"
+        command = f"CISOL,{n},{id_},{node},{cont},{dtype}"
         return self.run(command, **kwargs)
 
     def data(
@@ -706,7 +706,7 @@ class SetUp:
              - Total number of contact status changes during substep.
            * - FPRS
              - Fluid penetration pressure.
-           * - TG For ``SHELL131``and ``SHELL132``elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3...., HTOP instead of HEAT.
+           * - TG For ``SHELL131``and ``SHELL132``elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3,..., HTOP instead of HEAT.
              - X, Y, Z, SUM
              - Component thermal gradient or vector sum.
            * - TF
@@ -1265,8 +1265,8 @@ class SetUp:
 
         .. _NSOL_temp:
 
-        For ``SHELL131``and ``SHELL132``elements with KEYOPT(3) = 0 or 1, use the labels TBOT, TE2, TE3..
-        .., TTOP instead of TEMP.
+        For ``SHELL131``and ``SHELL132``elements with KEYOPT(3) = 0 or 1, use the labels TBOT, TE2, TE3,..
+        ., TTOP instead of TEMP.
         """
         command = f"NSOL,{nvar},{node},{item},{comp},{name},{sector}"
         return self.run(command, **kwargs)
@@ -1406,8 +1406,8 @@ class SetUp:
 
         .. _rforce_table1_note1:
 
-        For ``SHELL131``and ``SHELL132``elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3..
-        .., HTOP instead of HEAT.
+        For ``SHELL131``and ``SHELL132``elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3,..
+        ., HTOP instead of HEAT.
         """
         command = f"RFORCE,{nvar},{node},{item},{comp},{name}"
         return self.run(command, **kwargs)
