@@ -316,6 +316,75 @@ class MyReporter(TerminalReporter):
     def short_test_summary(self):
         # your own impl goes here, for example:
         self.write_sep("=", "PyMAPDL Pytest short summary")
+        markup = self._tw.markup
+
+        if self.hasmarkup:
+            color = True
+        else:
+            color = False
+
+        ERROR_COLOR = {"Red": color, "bold": True}
+        FAILED_COLOR = {"red": color, "bold": True}
+        PASSED_COLOR = {"green": color}
+        SKIPPED_COLOR = {"green": color, "bold": True}
+        XPASSED_COLOR = {"Yellow": color, "bold": True}
+        XFAILED_COLOR = {"yellow": color}
+
+        # self._tw.markup("asdf", Red=True)
+
+        def get_normal_message(rep, header, message):
+            location = rep.location
+            if message:
+                message = f" - {message}"
+
+            if location[0] == location[2]:
+                return f"{header} {rep.head_line}{message}"
+            else:
+                path = f"{location[0]}:{location[1]}"
+                return f"{header} {rep.head_line} - {path}{message}"
+
+        def get_failure_message(rep, header, message):
+            location = rep.location
+            path = f"{location[0]}:{location[1]}"
+            cause = message.splitlines()
+            cause = " ".join(
+                [
+                    each[2:].strip() if each.startswith("E ") else each.strip()
+                    for each in cause
+                ]
+            )
+
+            return f"{header} {rep.head_line} - {path}: {cause}"
+
+        def get_skip_message(rep):
+            message = rep.longrepr[2]
+            header = markup("[SKIPPED]", **SKIPPED_COLOR)
+            return get_normal_message(rep, header, message)
+
+        def get_passed_message(rep):
+            message = rep.longreprtext
+            header = markup("[PASSED]", **PASSED_COLOR)
+            return get_normal_message(rep, header, message)
+
+        def get_xfailed_message(rep):
+            message = " ".join(rep.longrepr.reprcrash.message.split(":")[1:]).strip()
+            header = markup("[XFAILED]", **XFAILED_COLOR)
+            return get_normal_message(rep, header, message)
+
+        def get_xpassed_message(rep):
+            message = rep.longreprtext
+            header = markup("[XPASSED]", **XPASSED_COLOR)
+            return get_normal_message(rep, header, message)
+
+        def get_error_message(rep):
+            message = rep.longrepr.reprcrash.message
+            header = markup("[ERROR]", **ERROR_COLOR)
+            return get_failure_message(rep, header, message)
+
+        def get_failed_message(rep):
+            message = rep.longrepr.reprcrash.message
+            header = markup("[FAILED]", **FAILED_COLOR)
+            return get_failure_message(rep, header, message)
 
         def get_error_message(rep):
             rep_ = rep.longreprtext.splitlines()
@@ -340,21 +409,34 @@ class MyReporter(TerminalReporter):
 
         failed = self.stats.get("failed", [])
         for rep in failed:
-            self.write_line(f"[FAILED] {rep.head_line} - {get_error_message(rep)}")
+            self.write_line(get_failed_message(rep))
 
         skipped = self.stats.get("skipped", [])
         for rep in skipped:
-            self.write_line(f"[SKIPPED] {rep.head_line} - {get_error_message(rep)}")
+            self.write_line(get_skip_message(rep))
 
         errored = self.stats.get("error", [])
         for rep in errored:
-            self.write_line(f"[ERROR] {rep.head_line} - {get_error_message(rep)}")
+            self.write_line(get_error_message(rep))
+
+        passed = self.stats.get("passed", [])
+        for rep in passed:
+            self.write_line(get_passed_message(rep))
+
+        xpassed = self.stats.get("xpassed", [])
+        for rep in xpassed:
+            self.write_line(get_xpassed_message(rep))
+
+        xfailed = self.stats.get("xfailed", [])
+        for rep in xfailed:
+            self.write_line(get_xfailed_message(rep))
 
 
 @pytest.hookimpl(trylast=True)
 def pytest_configure(config):
     vanilla_reporter = config.pluginmanager.getplugin("terminalreporter")
     my_reporter = MyReporter(config)
+    my_reporter._tw.fullwidth = 160
     config.pluginmanager.unregister(vanilla_reporter)
     config.pluginmanager.register(my_reporter, "terminalreporter")
 
