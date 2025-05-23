@@ -419,3 +419,4 @@ jobs:
         uses: ./.github/actions/pytest-summary
         with:
           python-version: '3.13'
+          token: ${{ secrets.GITHUB_TOKEN }}
