@@ -119,7 +119,7 @@ class ProcessorEntry:
 
         This is an alternative to the :ref:`finish` command. If any cleanup or file writing is normally done
         by the :ref:`finish` command, it is bypassed if the :ref:`quit` command is used instead. A new
-        processor may be entered after this command. See the :ref:`slashexit` command to terminate the run.
+        processor may be entered after this command. See the ``/EXIT`` command to terminate the run.
 
         This command is valid in any processor. This command is not valid at the Begin level.
         """

@@ -587,8 +587,8 @@ class RunControls:
         finished. If you launch the product interactively, the license is retained until you either close
         the application or issue a :ref:`pause` command via the command line.
 
-        No other operation (other than :ref:`save` or :ref:`slashexit` ) is possible in the current
-        application  while use of the product license is paused.
+        No other operation (other than :ref:`save` or ``/EXIT`` ) is possible in the current application
+         while use of the product license is paused.
 
         When the second application has finished and releases the license, issue an :ref:`unpause` command
         via the command line to restore use of the license to the current application.
@@ -597,49 +597,6 @@ class RunControls:
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/licensing/Hlp_IN_TBSHOOT.html>`_.
         """
         command = "PAUSE"
-        return self.run(command, **kwargs)
-
-    def slashexit(self, slab: str = "", fname: str = "", ext: str = "", **kwargs):
-        r"""Stops the run and returns control to the system.
-
-        Mechanical APDL Command: `/EXIT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_EXIT.html>`_
-
-        Parameters
-        ----------
-        slab : str
-            Mode for saving the database:
-
-            * ``MODEL`` - Save the model data (solid model, finite element model, loadings, etc.) only
-              (default).
-
-            * ``SOLU`` - Save the model data and the solution data (nodal and element results).
-
-            * ``ALL`` - Save the model data, solution data and post data (element tables, path results, etc.)
-
-            * ``NOSAVE`` - Do not save any data on :file:`File.DB` (an existing DB file will not be
-              overwritten).
-
-        fname : str
-            File name and directory path (248 characters maximum, including the characters needed for the
-            directory path). An unspecified directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name. The file name, defaults to :file:`Jobname`.
-
-        ext : str
-            Filename extension (eight-character maximum). The extension defaults to DB if ``Fname`` is
-            blank.
-
-        Notes
-        -----
-
-        .. _s-EXIT_notes:
-
-        The current database information may be written on :file:`File.DB` or a named file. If
-        :file:`File.DB` already exists, a backup file ( :file:`File.DBB` ) will also be written whenever a
-        new :file:`File.DB` is written.
-
-        This command is valid in any processor. Issuing this command at any point will exit the program.
-        """
-        command = f"/EXIT,{slab},{fname},{ext}"
         return self.run(command, **kwargs)
 
     def slashstatus(self, lab: str = "", **kwargs):
@@ -1156,7 +1113,7 @@ class RunControls:
         command is valid only after a previously issued :ref:`pause` command.
 
         When use of the product license is paused via the :ref:`pause` command, no other operation (other
-        than :ref:`save` or :ref:`slashexit` ) is possible until you issue the :ref:`unpause` command.
+        than :ref:`save` or ``/EXIT`` ) is possible until you issue the :ref:`unpause` command.
 
         For more information, see the documentation for the :ref:`pause` command and the `Ansys Licensing
         Guide <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/licensing/Hlp_IN_TBSHOOT.html>`_.

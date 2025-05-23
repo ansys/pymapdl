@@ -26,7 +26,6 @@ RunControls
    RunControls.nerr
    RunControls.output
    RunControls.pause
-   RunControls.slashexit
    RunControls.slashstatus
    RunControls.syp
    RunControls.sys
