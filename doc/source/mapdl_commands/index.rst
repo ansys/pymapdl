@@ -186,14 +186,14 @@ time-history processor.
    :maxdepth: 1
    :caption: POST26
 
-    post26/_set_up
-    post26/controls
-    post26/display
-    post26/listing
-    post26/operations
-    post26/set_up
-    post26/special_purpose
-    post26/status
+   post26/_set_up
+   post26/controls
+   post26/display
+   post26/listing
+   post26/operations
+   post26/set_up
+   post26/special_purpose
+   post26/status
 
 
 ****

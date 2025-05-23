@@ -23,6 +23,430 @@
 
 class SetUp:
 
+    def ansol(
+        self,
+        nvar: str = "",
+        node: str = "",
+        item: str = "",
+        comp: str = "",
+        name: str = "",
+        mat: str = "",
+        real: str = "",
+        ename: str = "",
+        datakey: str = "",
+        **kwargs,
+    ):
+        r"""Specifies averaged element nodal data to be stored from the results file.
+
+        Mechanical APDL Command: `ANSOL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ANSOL.html>`_
+
+        Parameters
+        ----------
+        nvar : str
+            Arbitrary reference number assigned to this variable (2 to ``NV`` ( :ref:`numvar` )). Overwrites
+            any existing results for this variable.
+
+        node : str
+            Node number for which data are to be stored.
+
+        item : str
+            Label identifying the item. General item labels are shown in :ref:`ANSOL_tab_1`below. Some items
+            also require a component label.
+
+        comp : str
+            Component of the item (if required). General component labels are shown in :ref:`ANSOL_tab_1`.
+            Selected result components ( ``Item`` = SRES) are shown in :ref:`ANSOL_tab_2`.
+
+        name : str
+            32-character name to identify the item on the printout and displays. Default: An eight-character
+            label formed by concatenating the first four characters of the ``Item`` and ``Comp`` labels.
+
+        mat : str
+            Material number. Average is calculated based on the subset of elements with the specified
+            material number. Default: Use all elements in the active set unless ``Real`` and/or ``Ename`` is
+            specified.
+
+        real : str
+            Real number. Average is calculated based on the subset of elements with the specified real
+            number. Default: Use all elements in the active set unless ``Mat`` and/or ``Ename`` is
+            specified.
+
+        ename : str
+            Element type name. Average is calculated based on the subset of elements with the specified
+            element type name. Default: Use all elements in the active set unless ``Mat`` and/or ``Real`` is
+            specified.
+
+        datakey : str
+            Key to specify which data is stored:
+
+            * ``AUTO`` - `Nodal-averaged results
+              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost>`_ are
+              used if they are available for the first applicable time step; otherwise, the element-based data is
+              used, if available. (Default.)
+
+            * ``ESOL`` - Only element-based results are used. If they are not available, the command is ignored.
+
+            * ``NAR`` - Only nodal-averaged results are used. If they are not available, the command is ignored.
+
+            ``Mat``, ``Real``, and ``Ename`` are ignored when nodal-averaged results are used.
+
+        Notes
+        -----
+
+        .. _ANSOL_notes:
+
+        Valid item and component labels for element nodal results are listed in :ref:`ANSOL_tab_1`.
+
+        :ref:`ansol` defines element nodal results data to be stored from a results file ( :ref:`file` ).
+        Not all items are valid for all nodes. See the input and output summary tables of each element
+        attached to the node for the available items.
+
+        If `nodal-averaged results
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost>`_ (
+        :ref:`outres`,NAR or another nodal-averaged label) are available, then :ref:`ansol` uses the nodal-
+        averaged data for the applicable items (S, EPEL, EPPL, EPCR, EPTH) as dictated by the by ``DataKey``
+        argument. By default, ( ``DataKey`` = AUTO), the availability of nodal-averaged results or element-
+        based data is determined at the first load step that has results for the associated item. For more
+        information, see `Postprocessing Nodal-Averaged Results
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#>`_
+
+        **Coordinate systems:** Generally, element nodal quantities stored by :ref:`ansol` are obtained in
+        the solution coordinate system ( :ref:`rsys`, SOLU) and then averaged. There are some exceptions as
+        listed below. :ref:`ansol` does not transform results from :ref:`rsys`,SOLU (or from the coordinate
+        systems described for the exceptions below) to other coordinate systems. Verify that all elements
+        attached to the subject node have the same coordinate system before using :ref:`ansol`.
+
+        * Layered element results are in the layer coordinate system ( :ref:`rsys`,LSYS). You can further
+          specify the element nodal results, for some elements, with the :ref:`shell`, :ref:`layerp26`, and
+          :ref:`force` commands.
+
+        * When :ref:`ansol` is used to store nodal-averaged result data (based on the ``DataType`` setting),
+          the global Cartesian coordinate system ( :ref:`rsys`,0) is used.
+
+        **Shell elements:** The default shell element coordinate system is based on node ordering. For shell
+        elements the
+        adjacent elements could have a different :ref:`rsys`,SOLU, making the resultant averaged data
+        inconsistent. A message to this effect is issued when :ref:`ansol` is used in models containing
+        shell elements. Ensure that consistent coordinate systems are active for all associated elements
+        used by the :ref:`ansol` command.
+
+        **Derived quantities:** Some of the result items supported by :ref:`ansol` ( :ref:`ANSOL_tab_1`) are
+        derived from the component quantities. Issue :ref:`avprin` to specify the principal and vector sum
+        quantity averaging methods.
+
+        **Default:** If ``Mat``, ``Real``, and ``Ename`` are not specified, all elements attached to the
+        node are considered. When a material ID, real constant ID, or element-type discontinuity is detected
+        at a node, a message is issued. For example, in a FSI analysis, a ``FLUID30``element at the
+        structure interface would be considered; however, because it contains no SX result, it is not used
+        during :ref:`store` operations.
+
+        .. _ANSOL_tab_1:
+
+        ANSOL - General Result Item and Component Labels
+        ************************************************
+
+        .. flat-table:: General Item and Component Labels :ref:`ansol`, ``NVAR,NODE,Item,Comp,Name,Mat,Real,Ename,DataType``
+           :header-rows: 1
+
+           * - Item
+             - Comp
+             - Description
+           * - :rspan:`3` S
+             - X, Y, Z, XY, YZ, XZ
+             - Component stress. This item stores `nodal-averaged results<https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost>`_ ifthey are available on the results file.
+           * - 1, 2, 3
+             - Principal stress.
+           * - INT
+             - Stress intensity.
+           * - EQV
+             - Equivalent stress.
+           * - :rspan:`3` EPEL
+             - X, Y, Z, XY, YZ, XZ
+             - Component elastic strain.
+           * - 1, 2, 3
+             - Principal elastic strain.
+           * - INT
+             - Elastic strain intensity.
+           * - EQV
+             - Elastic equivalent strain.
+           * - :rspan:`3` EPPL
+             - X, Y, Z, XY, YZ, XZ
+             - Component plastic strain.
+           * - 1, 2, 3
+             - Principal plastic strain.
+           * - INT
+             - Plastic strain intensity.
+           * - EQV
+             - Plastic equivalent strain.
+           * - :rspan:`3` EPCR
+             - X, Y, Z, XY, YZ, XZ
+             - Component creep strain.
+           * - 1,2,3
+             - Principal creep strain.
+           * - INT
+             - Creep strain intensity.
+           * - EQV
+             - Creep equivalent strain.
+           * - :rspan:`3` EPTH
+             - X, Y, Z, XY, YZ, XZ
+             - Component thermal strain.
+           * - 1, 2, 3
+             - Principal thermal strain.
+           * - INT
+             - Thermal strain intensity.
+           * - EQV
+             - Thermal equivalent strain.
+           * - :rspan:`3` ESIG
+             - X, Y, Z, XY, YZ, XZ
+             - Components of Biot``s effective stress.
+           * - 1, 2, 3
+             - Principal stresses of Biot's effective stress.
+           * - INT
+             - Stress intensity of Biot's effective stress.
+           * - EQV
+             - Equivalent stress of Biot's effective stress.
+           * - :rspan:`6` NL
+             - SEPL
+             - Equivalent stress (from stress-strain curve).
+           * - SRAT
+             - Stress state ratio.
+           * - HPRES
+             - Hydrostatic pressure.
+           * - EPEQ
+             - Accumulated equivalent plastic strain.
+           * - CREQ
+             - Accumulated equivalent creep strain.
+           * - PSV
+             - Plastic state variable.
+           * - PLWK
+             - Plastic work/volume.
+           * - :rspan:`9` CONT
+             - STAT For more information about the meaning of contact status and its possible values, see `ReviewingResults in POST1<https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_revresu.html#ctecpostslide>`_
+             - Contact status.
+           * - PENE
+             - Contact penetration.
+           * - PRES
+             - Contact pressure.
+           * - SFRIC
+             - Contact friction stress.
+           * - STOT
+             - Contact total stress (pressure plus friction).
+           * - SLIDE
+             - Contact sliding distance.
+           * - GAP
+             - Contact gap distance.
+           * - FLUX
+             - Total heat flux at contact surface.
+           * - CNOS
+             - Total number of contact status changes during substep.
+           * - FPRS
+             - Fluid penetration pressure.
+           * - TG
+             - X, Y, Z, SUM ``Comp`` = SUM is not supported for coupled pore-pressure-thermal (CPT ``nnn`` ) elements.
+             - Component thermal gradient or vector sum.
+           * - TF
+             - X, Y, Z, SUM
+             - Component thermal flux or vector sum.
+           * - PG
+             - X, Y, Z, SUM
+             - Component pressure gradient or vector sum.
+           * - EF
+             - X, Y, Z, SUM
+             - Component electric field or vector sum.
+           * - D
+             - X, Y, Z, SUM
+             - Component electric flux density or vector sum.
+           * - H
+             - X, Y, Z, SUM
+             - Component magnetic field intensity or vector sum.
+           * - B
+             - X, Y, Z, SUM
+             - Component magnetic flux density or vector sum.
+           * - CG
+             - X, Y, Z, SUM
+             - Component concentration gradient or vector sum.
+           * - DF
+             - X, Y, Z, SUM
+             - Component diffusion flux density or vector sum.
+           * - JC
+             - X, Y, Z, SUM
+             - Conduction current density for elements that support conduction current calculation. Components (X, Y, Z) and vector sum (SUM).
+           * - FFLX
+             - X, Y, Z
+             - Fluid-flow flux in poromechanics.
+           * - FGRA
+             - X, Y, Z
+             - Fluid pore-pressure gradient in poromechanics.
+           * - PMSV
+             - VRAT, PPRE, DSAT, RPER
+             - Void volume ratio, pore pressure, degree of saturation, and relative permeability for coupled pore-pressure-thermal elements.
+           * - NS
+             - X, Y, Z, XY, YZ, XZ
+             - `Nominal strain <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_mat5.html#eq4dc2eb28-41da-4d81-b0d0-8716ce41a6e1>`_ for hyperelastic material, reported in the current configuration (unaffected by :ref:`rsys` ).
+           * - MPLA
+             - DMAC, DMAX
+             - Microplane damage, macroscopic and maximum values.
+           * - MPDP
+             - TOTA, TENS, COMP, RW
+             - Microplane homogenized total, tension, and compression damages (TOTA, TENS, COMP), and split weight factor (RW).
+           * - EPFR
+             -
+             - Free strain in porous media
+           * - DAMAGE
+             - 1,2,3,MAX
+             - Damage in directions 1, 2, 3 (1, 2, 3) and the maximum damage (MAX).
+           * - GDMG
+             -
+             - Damage
+           * - IDIS
+             -
+             - Structural-thermal dissipation rate
+
+
+        .. _ANSOL_tab_2:
+
+        ANSOL - Selected Result Component Labels
+        ****************************************
+
+        .. flat-table:: Selected Result Component Labels :ref:`ansol`, ``NVAR``, ``NODE``,SRES, ``Comp``, ``Name``, ``Mat``, ``Real``, ``Ename``
+           :header-rows: 1
+
+           * - Comp
+             - Description
+           * - SVAR ``n``
+             - The ``n`` th state variable.
+           * - FLDUF0 ``n``
+             - The ``n`` th user-defined field variable.
+
+        """
+        command = (
+            f"ANSOL,{nvar},{node},{item},{comp},{name},{mat},{real},{ename},{datakey}"
+        )
+        return self.run(command, **kwargs)
+
+    def cisol(
+        self,
+        n: str = "",
+        id: str = "",
+        node: str = "",
+        cont: str = "",
+        dtype: str = "",
+        **kwargs,
+    ):
+        r"""Stores fracture parameter information in a variable.
+
+        Mechanical APDL Command: `CISOL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CISOL.html>`_
+
+        Parameters
+        ----------
+        n : str
+            Arbitrary reference number or name assigned to this variable. Number must be >1 but </= NUMVAR.
+
+        id : str
+            Crack ID number.
+
+        node : str
+            Crack tip node number.
+
+        cont : str
+            Contour number.
+
+        dtype : str
+            Data type to output:
+
+            * ``JINT`` - J-integral
+
+            * ``IIN1`` - Interaction integral 1
+
+            * ``IIN2`` - Interaction integral 2
+
+            * ``IIN3`` - Interaction integral 3
+
+            * ``K1`` - Mode 1 stress-intensity factor
+
+            * ``K2`` - Mode 2 stress-intensity factor
+
+            * ``K3`` - Mode 3 stress-intensity factor
+
+            * ``G1`` - Mode 1 energy release rate
+
+            * ``G2`` - Mode 2 energy release rate
+
+            * ``G3`` - Mode 3 energy release rate
+
+            * ``GT`` - Total energy release rate
+
+            * ``MFTX`` - Total material force X
+
+            * ``MFTY`` - Total material force Y
+
+            * ``MFTZ`` - Total material force Z
+
+            * ``CEXT`` - Crack extension
+        """
+        command = f"CISOL,{n},{id},{node},{cont},{dtype}"
+        return self.run(command, **kwargs)
+
+    def data(
+        self,
+        ir: str = "",
+        lstrt: str = "",
+        lstop: str = "",
+        linc: str = "",
+        name: str = "",
+        kcplx: int | str = "",
+        **kwargs,
+    ):
+        r"""Reads data records from a file into a variable.
+
+        Mechanical APDL Command: `DATA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DATA.html>`_
+
+        Parameters
+        ----------
+        ir : str
+            Arbitrary reference number assigned to the resulting variable (2 to NV ( :ref:`numvar` )). If
+            this number is the same as for a previously defined variable, the previously defined variable
+            will be overwritten with this result.
+
+        lstrt : str
+            Start at location ``LSTRT`` (defaults to 1).
+
+        lstop : str
+            Stop at location ``LSTOP`` (defaults to ``LSTRT`` ). Maximum location available is determined
+            from data previously stored.
+
+        linc : str
+            Fill every ``LINC`` location between ``LSTRT`` and ``LSTOP`` (defaults to 1).
+
+        name : str
+            Eight character name for identifying the variable on the printout and displays. Embedded blanks
+            are compressed upon output.
+
+        kcplx : int or str
+            Complex number key:
+
+            * ``0`` - Data stored as the real part of the complex number.
+
+            * ``1`` - Data stored as the imaginary part of the complex number.
+
+        Notes
+        -----
+
+        .. _DATA_notes:
+
+        This command must be followed by a format statement (on the next line) and the subsequent data
+        records, and all must be on the same file (that may then be read with the :ref:`input` command). The
+        format specifies the number of fields to be read per record, the field width, and the placement of
+        the decimal point (if one is not included in the data value). The read operation follows the
+        available FORTRAN FORMAT conventions of the system. See the system FORTRAN manual for details. Any
+        standard FORTRAN real format (such as (4F6.0), (F2.0,2X,F12.0), etc.) may be used. Integer (I),
+        character (A), and list-directed (\2) descriptors may not be used. The parentheses must be included
+        in the format. Up to 80 columns per record may be read. Locations may be filled within a range.
+        Previous data in the range will be overwritten.
+        """
+        command = f"DATA,{ir},{lstrt},{lstop},{linc},{name},{kcplx}"
+        return self.run(command, **kwargs)
+
     def enersol(self, nvar: str = "", item: str = "", name: str = "", **kwargs):
         r"""Specifies the total energies to be stored.
 
@@ -636,74 +1060,86 @@ class SetUp:
         command = f"GSSOL,{nvar},{item},{comp},{name}"
         return self.run(command, **kwargs)
 
-    def timerange(self, tmin: str = "", tmax: str = "", **kwargs):
-        r"""Specifies the time range for which data are to be stored.
+    def jsol(
+        self,
+        nvar: str = "",
+        elem: str = "",
+        item: str = "",
+        comp: str = "",
+        name: str = "",
+        **kwargs,
+    ):
+        r"""Specifies result items to be stored for the joint element.
 
-        Mechanical APDL Command: `TIMERANGE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TIMERANGE.html>`_
-
-        Parameters
-        ----------
-        tmin : str
-            Minimum time (defaults to first time (or frequency) point on the file).
-
-        tmax : str
-            Maximum time (defaults to last time (or frequency) point on the file).
-
-        Notes
-        -----
-
-        .. _TIMERANGE_notes:
-
-        Defines the time (or frequency) range for which data are to be read from the file and stored in
-        memory. Use the :ref:`nstore` command to define the time increment.
-
-        Use :ref:`prtime` or :ref:`pltime` to specify the time (frequency) range for cyclic mode-
-        superposition harmonic analyses.
-        """
-        command = f"TIMERANGE,{tmin},{tmax}"
-        return self.run(command, **kwargs)
-
-    def vardel(self, nvar: str = "", **kwargs):
-        r"""Deletes a variable (GUI).
-
-        Mechanical APDL Command: `VARDEL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VARDEL.html>`_
+        Mechanical APDL Command: `JSOL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_JSOL.html>`_
 
         Parameters
         ----------
         nvar : str
-            The reference number of the variable to be deleted. ``NVAR`` is as defined by :ref:`nsol`,
-            :ref:`esol`, etc.
+            Arbitrary reference number or name assigned to this variable. Variable numbers can be 2 to
+            ``NV`` ( :ref:`numvar` ) while the name can be an eight-byte character string. Overwrites any
+            existing results for this variable.
+
+        elem : str
+            Element number for which to store results.
+
+        item : str
+            Label identifying the item. Valid item labels are shown in :ref:`jsol_tab_1`below.
+
+        comp : str
+            Component of the ``Item`` (if required). Valid component labels are shown in
+            :ref:`jsol_tab_1`below.
+
+        name : str
+            Thirty-two character name identifying the item on printouts and displays. Defaults to a label
+            formed by concatenating the first four characters of the ``Item`` and ``Comp`` labels.
 
         Notes
         -----
 
-        .. _VARDEL_notes:
+        .. _JSOL_notes:
 
-        Deletes a POST26 solution results variable. This command is generated by the Graphical User
-        Interface (GUI). It appears in the log file ( :file:`Jobname.LOG` ) if a POST26 variable is deleted
-        from the Defined Time-History Variables dialog box.
+        This command is valid for the ``MPC184``joint elements. The values stored are for the free or
+        unconstrained degrees of freedom of a joint element. Relative reaction forces and moments are
+        available only if stiffness, damping, or friction is associated with the joint element.
+        .. _jsol_tab_1:
 
-        The command is not intended to be typed in directly in a Mechanical APDL session (although it can be
-        included in an input file for batch input or for use with :ref:`input` ).
+        JSOL - Valid Item and Component Labels
+        **************************************
+
+        .. flat-table::
+           :header-rows: 1
+
+           * - Item
+             - Comp
+             - Description
+           * - U
+             - X, Y, Z
+             - x, y, or z relative displacement.
+           * - ROT
+             - X, Y, Z
+             - x, y, or z relative rotation.
+           * - VEL
+             - X, Y, Z
+             - x, y, or z relative linear velocity.
+           * - OMG
+             - X, Y, Z
+             - x, y, or z relative angular velocity.
+           * - ACC
+             - X, Y, Z
+             - x, y, or z relative linear acceleration.
+           * - DMG
+             - X, Y, Z
+             - x, y, or z relative angular acceleration.
+           * - RF
+             - X, Y, Z
+             - Relative reaction forces in the local x, y, or z direction.
+           * - RM
+             - X, Y, Z
+             - Relative reaction moments in the local x, y, or z direction.
+
         """
-        command = f"VARDEL,{nvar}"
-        return self.run(command, **kwargs)
-
-    def varnam(self, ir: str = "", name: str = "", **kwargs):
-        r"""Names (or renames) a variable.
-
-        Mechanical APDL Command: `VARNAM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VARNAM.html>`_
-
-        Parameters
-        ----------
-        ir : str
-            Reference number of the variable (2 to NV ( :ref:`numvar` )).
-
-        name : str
-            Thirty-two character name for identifying variable on printouts and displays. Embedded blanks
-            are compressed for output.
-        """
-        command = f"VARNAM,{ir},{name}"
+        command = f"JSOL,{nvar},{elem},{item},{comp},{name}"
         return self.run(command, **kwargs)
 
     def nsol(
@@ -835,6 +1271,27 @@ class SetUp:
         command = f"NSOL,{nvar},{node},{item},{comp},{name},{sector}"
         return self.run(command, **kwargs)
 
+    def nstore(self, tinc: str = "", **kwargs):
+        r"""Defines which time points are to be stored.
+
+        Mechanical APDL Command: `NSTORE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NSTORE.html>`_
+
+        Parameters
+        ----------
+        tinc : str
+            Store data associated with every ``TINC`` time (or frequency) point(s), within the previously
+            defined range of ``TMIN`` to ``TMAX`` ( :ref:`timerange` ). (Defaults to 1)
+
+        Notes
+        -----
+
+        .. _NSTORE_notes:
+
+        Defines which time (or frequency) points within the range are to be stored.
+        """
+        command = f"NSTORE,{tinc}"
+        return self.run(command, **kwargs)
+
     def numvar(self, nv: str = "", **kwargs):
         r"""Specifies the number of variables allowed in POST26.
 
@@ -856,27 +1313,6 @@ class SetUp:
         cannot be changed after data storage begins.
         """
         command = f"NUMVAR,{nv}"
-        return self.run(command, **kwargs)
-
-    def nstore(self, tinc: str = "", **kwargs):
-        r"""Defines which time points are to be stored.
-
-        Mechanical APDL Command: `NSTORE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NSTORE.html>`_
-
-        Parameters
-        ----------
-        tinc : str
-            Store data associated with every ``TINC`` time (or frequency) point(s), within the previously
-            defined range of ``TMIN`` to ``TMAX`` ( :ref:`timerange` ). (Defaults to 1)
-
-        Notes
-        -----
-
-        .. _NSTORE_notes:
-
-        Defines which time (or frequency) points within the range are to be stored.
-        """
-        command = f"NSTORE,{tinc}"
         return self.run(command, **kwargs)
 
     def rforce(
@@ -1034,510 +1470,44 @@ class SetUp:
         command = f"/RGB,{kywrd},{pred},{pgrn},{pblu},{n1},{n2},{ninc},{ncntr}"
         return self.run(command, **kwargs)
 
-    def cisol(
-        self,
-        n: str = "",
-        id: str = "",
-        node: str = "",
-        cont: str = "",
-        dtype: str = "",
-        **kwargs,
+    def solu(
+        self, nvar: str = "", item: str = "", comp: str = "", name: str = "", **kwargs
     ):
-        r"""Stores fracture parameter information in a variable.
+        r"""Specifies solution summary data per substep to be stored.
 
-        Mechanical APDL Command: `CISOL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CISOL.html>`_
-
-        Parameters
-        ----------
-        n : str
-            Arbitrary reference number or name assigned to this variable. Number must be >1 but </= NUMVAR.
-
-        id : str
-            Crack ID number.
-
-        node : str
-            Crack tip node number.
-
-        cont : str
-            Contour number.
-
-        dtype : str
-            Data type to output:
-
-            * ``JINT`` - J-integral
-
-            * ``IIN1`` - Interaction integral 1
-
-            * ``IIN2`` - Interaction integral 2
-
-            * ``IIN3`` - Interaction integral 3
-
-            * ``K1`` - Mode 1 stress-intensity factor
-
-            * ``K2`` - Mode 2 stress-intensity factor
-
-            * ``K3`` - Mode 3 stress-intensity factor
-
-            * ``G1`` - Mode 1 energy release rate
-
-            * ``G2`` - Mode 2 energy release rate
-
-            * ``G3`` - Mode 3 energy release rate
-
-            * ``GT`` - Total energy release rate
-
-            * ``MFTX`` - Total material force X
-
-            * ``MFTY`` - Total material force Y
-
-            * ``MFTZ`` - Total material force Z
-
-            * ``CEXT`` - Crack extension
-        """
-        command = f"CISOL,{n},{id},{node},{cont},{dtype}"
-        return self.run(command, **kwargs)
-
-    def ansol(
-        self,
-        nvar: str = "",
-        node: str = "",
-        item: str = "",
-        comp: str = "",
-        name: str = "",
-        mat: str = "",
-        real: str = "",
-        ename: str = "",
-        datakey: str = "",
-        **kwargs,
-    ):
-        r"""Specifies averaged element nodal data to be stored from the results file.
-
-        Mechanical APDL Command: `ANSOL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ANSOL.html>`_
+        Mechanical APDL Command: `SOLU <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SOLU.html>`_
 
         Parameters
         ----------
         nvar : str
-            Arbitrary reference number assigned to this variable (2 to ``NV`` ( :ref:`numvar` )). Overwrites
-            any existing results for this variable.
-
-        node : str
-            Node number for which data are to be stored.
+            Arbitrary reference number assigned to this variable (2 to ``NV`` ( :ref:`numvar` )).
 
         item : str
-            Label identifying the item. General item labels are shown in :ref:`ANSOL_tab_1`below. Some items
-            also require a component label.
+            Label identifying the item. Valid item labels are shown in the table below. Some items may also
+            require a component label.
 
         comp : str
-            Component of the item (if required). General component labels are shown in :ref:`ANSOL_tab_1`.
-            Selected result components ( ``Item`` = SRES) are shown in :ref:`ANSOL_tab_2`.
+            Component of the item (if required). Valid component labels are shown in the table below. None
+            are currently required.
 
         name : str
-            32-character name to identify the item on the printout and displays. Default: An eight-character
-            label formed by concatenating the first four characters of the ``Item`` and ``Comp`` labels.
-
-        mat : str
-            Material number. Average is calculated based on the subset of elements with the specified
-            material number. Default: Use all elements in the active set unless ``Real`` and/or ``Ename`` is
-            specified.
-
-        real : str
-            Real number. Average is calculated based on the subset of elements with the specified real
-            number. Default: Use all elements in the active set unless ``Mat`` and/or ``Ename`` is
-            specified.
-
-        ename : str
-            Element type name. Average is calculated based on the subset of elements with the specified
-            element type name. Default: Use all elements in the active set unless ``Mat`` and/or ``Real`` is
-            specified.
-
-        datakey : str
-            Key to specify which data is stored:
-
-            * ``AUTO`` - `Nodal-averaged results
-              <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost>`_ are
-              used if they are available for the first applicable time step; otherwise, the element-based data is
-              used, if available. (Default.)
-
-            * ``ESOL`` - Only element-based results are used. If they are not available, the command is ignored.
-
-            * ``NAR`` - Only nodal-averaged results are used. If they are not available, the command is ignored.
-
-            ``Mat``, ``Real``, and ``Ename`` are ignored when nodal-averaged results are used.
+            Thirty-two character name identifying the item on printouts and displays. Defaults to an eight
+            character label formed by concatenating the first four characters of the ``Item`` and ``Comp``
+            labels.
 
         Notes
         -----
 
-        .. _ANSOL_notes:
+        .. _SOLU_notes:
 
-        Valid item and component labels for element nodal results are listed in :ref:`ANSOL_tab_1`.
+        See also the :ref:`priter` command of POST1 to display some of these items directly. Valid for a
+        static or full transient analysis. All other analyses have zeros for the data. Valid item and
+        component labels for solution summary values are:
 
-        :ref:`ansol` defines element nodal results data to be stored from a results file ( :ref:`file` ).
-        Not all items are valid for all nodes. See the input and output summary tables of each element
-        attached to the node for the available items.
-
-        If `nodal-averaged results
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost>`_ (
-        :ref:`outres`,NAR or another nodal-averaged label) are available, then :ref:`ansol` uses the nodal-
-        averaged data for the applicable items (S, EPEL, EPPL, EPCR, EPTH) as dictated by the by ``DataKey``
-        argument. By default, ( ``DataKey`` = AUTO), the availability of nodal-averaged results or element-
-        based data is determined at the first load step that has results for the associated item. For more
-        information, see `Postprocessing Nodal-Averaged Results
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#>`_
-
-        **Coordinate systems:** Generally, element nodal quantities stored by :ref:`ansol` are obtained in
-        the solution coordinate system ( :ref:`rsys`, SOLU) and then averaged. There are some exceptions as
-        listed below. :ref:`ansol` does not transform results from :ref:`rsys`,SOLU (or from the coordinate
-        systems described for the exceptions below) to other coordinate systems. Verify that all elements
-        attached to the subject node have the same coordinate system before using :ref:`ansol`.
-
-        * Layered element results are in the layer coordinate system ( :ref:`rsys`,LSYS). You can further
-          specify the element nodal results, for some elements, with the :ref:`shell`, :ref:`layerp26`, and
-          :ref:`force` commands.
-
-        * When :ref:`ansol` is used to store nodal-averaged result data (based on the ``DataType`` setting),
-          the global Cartesian coordinate system ( :ref:`rsys`,0) is used.
-
-        **Shell elements:** The default shell element coordinate system is based on node ordering. For shell
-        elements the
-        adjacent elements could have a different :ref:`rsys`,SOLU, making the resultant averaged data
-        inconsistent. A message to this effect is issued when :ref:`ansol` is used in models containing
-        shell elements. Ensure that consistent coordinate systems are active for all associated elements
-        used by the :ref:`ansol` command.
-
-        **Derived quantities:** Some of the result items supported by :ref:`ansol` ( :ref:`ANSOL_tab_1`) are
-        derived from the component quantities. Issue :ref:`avprin` to specify the principal and vector sum
-        quantity averaging methods.
-
-        **Default:** If ``Mat``, ``Real``, and ``Ename`` are not specified, all elements attached to the
-        node are considered. When a material ID, real constant ID, or element-type discontinuity is detected
-        at a node, a message is issued. For example, in a FSI analysis, a ``FLUID30``element at the
-        structure interface would be considered; however, because it contains no SX result, it is not used
-        during :ref:`store` operations.
-
-        .. _ANSOL_tab_1:
-
-        ANSOL - General Result Item and Component Labels
-        ************************************************
-
-        .. flat-table:: General Item and Component Labels :ref:`ansol`, ``NVAR,NODE,Item,Comp,Name,Mat,Real,Ename,DataType``
-           :header-rows: 1
-
-           * - Item
-             - Comp
-             - Description
-           * - :rspan:`3` S
-             - X, Y, Z, XY, YZ, XZ
-             - Component stress. This item stores `nodal-averaged results<https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost>`_ ifthey are available on the results file.
-           * - 1, 2, 3
-             - Principal stress.
-           * - INT
-             - Stress intensity.
-           * - EQV
-             - Equivalent stress.
-           * - :rspan:`3` EPEL
-             - X, Y, Z, XY, YZ, XZ
-             - Component elastic strain.
-           * - 1, 2, 3
-             - Principal elastic strain.
-           * - INT
-             - Elastic strain intensity.
-           * - EQV
-             - Elastic equivalent strain.
-           * - :rspan:`3` EPPL
-             - X, Y, Z, XY, YZ, XZ
-             - Component plastic strain.
-           * - 1, 2, 3
-             - Principal plastic strain.
-           * - INT
-             - Plastic strain intensity.
-           * - EQV
-             - Plastic equivalent strain.
-           * - :rspan:`3` EPCR
-             - X, Y, Z, XY, YZ, XZ
-             - Component creep strain.
-           * - 1,2,3
-             - Principal creep strain.
-           * - INT
-             - Creep strain intensity.
-           * - EQV
-             - Creep equivalent strain.
-           * - :rspan:`3` EPTH
-             - X, Y, Z, XY, YZ, XZ
-             - Component thermal strain.
-           * - 1, 2, 3
-             - Principal thermal strain.
-           * - INT
-             - Thermal strain intensity.
-           * - EQV
-             - Thermal equivalent strain.
-           * - :rspan:`3` ESIG
-             - X, Y, Z, XY, YZ, XZ
-             - Components of Biot``s effective stress.
-           * - 1, 2, 3
-             - Principal stresses of Biot's effective stress.
-           * - INT
-             - Stress intensity of Biot's effective stress.
-           * - EQV
-             - Equivalent stress of Biot's effective stress.
-           * - :rspan:`6` NL
-             - SEPL
-             - Equivalent stress (from stress-strain curve).
-           * - SRAT
-             - Stress state ratio.
-           * - HPRES
-             - Hydrostatic pressure.
-           * - EPEQ
-             - Accumulated equivalent plastic strain.
-           * - CREQ
-             - Accumulated equivalent creep strain.
-           * - PSV
-             - Plastic state variable.
-           * - PLWK
-             - Plastic work/volume.
-           * - :rspan:`9` CONT
-             - STAT For more information about the meaning of contact status and its possible values, see `ReviewingResults in POST1<https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_revresu.html#ctecpostslide>`_
-             - Contact status.
-           * - PENE
-             - Contact penetration.
-           * - PRES
-             - Contact pressure.
-           * - SFRIC
-             - Contact friction stress.
-           * - STOT
-             - Contact total stress (pressure plus friction).
-           * - SLIDE
-             - Contact sliding distance.
-           * - GAP
-             - Contact gap distance.
-           * - FLUX
-             - Total heat flux at contact surface.
-           * - CNOS
-             - Total number of contact status changes during substep.
-           * - FPRS
-             - Fluid penetration pressure.
-           * - TG
-             - X, Y, Z, SUM ``Comp`` = SUM is not supported for coupled pore-pressure-thermal (CPT ``nnn`` ) elements.
-             - Component thermal gradient or vector sum.
-           * - TF
-             - X, Y, Z, SUM
-             - Component thermal flux or vector sum.
-           * - PG
-             - X, Y, Z, SUM
-             - Component pressure gradient or vector sum.
-           * - EF
-             - X, Y, Z, SUM
-             - Component electric field or vector sum.
-           * - D
-             - X, Y, Z, SUM
-             - Component electric flux density or vector sum.
-           * - H
-             - X, Y, Z, SUM
-             - Component magnetic field intensity or vector sum.
-           * - B
-             - X, Y, Z, SUM
-             - Component magnetic flux density or vector sum.
-           * - CG
-             - X, Y, Z, SUM
-             - Component concentration gradient or vector sum.
-           * - DF
-             - X, Y, Z, SUM
-             - Component diffusion flux density or vector sum.
-           * - JC
-             - X, Y, Z, SUM
-             - Conduction current density for elements that support conduction current calculation. Components (X, Y, Z) and vector sum (SUM).
-           * - FFLX
-             - X, Y, Z
-             - Fluid-flow flux in poromechanics.
-           * - FGRA
-             - X, Y, Z
-             - Fluid pore-pressure gradient in poromechanics.
-           * - PMSV
-             - VRAT, PPRE, DSAT, RPER
-             - Void volume ratio, pore pressure, degree of saturation, and relative permeability for coupled pore-pressure-thermal elements.
-           * - NS
-             - X, Y, Z, XY, YZ, XZ
-             - `Nominal strain <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_mat5.html#eq4dc2eb28-41da-4d81-b0d0-8716ce41a6e1>`_ for hyperelastic material, reported in the current configuration (unaffected by :ref:`rsys` ).
-           * - MPLA
-             - DMAC, DMAX
-             - Microplane damage, macroscopic and maximum values.
-           * - MPDP
-             - TOTA, TENS, COMP, RW
-             - Microplane homogenized total, tension, and compression damages (TOTA, TENS, COMP), and split weight factor (RW).
-           * - EPFR
-             -
-             - Free strain in porous media
-           * - DAMAGE
-             - 1,2,3,MAX
-             - Damage in directions 1, 2, 3 (1, 2, 3) and the maximum damage (MAX).
-           * - GDMG
-             -
-             - Damage
-           * - IDIS
-             -
-             - Structural-thermal dissipation rate
-
-
-        .. _ANSOL_tab_2:
-
-        ANSOL - Selected Result Component Labels
-        ****************************************
-
-        .. flat-table:: Selected Result Component Labels :ref:`ansol`, ``NVAR``, ``NODE``,SRES, ``Comp``, ``Name``, ``Mat``, ``Real``, ``Ename``
-           :header-rows: 1
-
-           * - Comp
-             - Description
-           * - SVAR ``n``
-             - The ``n`` th state variable.
-           * - FLDUF0 ``n``
-             - The ``n`` th user-defined field variable.
-
+        This command contains some tables and extra information which can be inspected in the original
+        documentation pointed above.
         """
-        command = (
-            f"ANSOL,{nvar},{node},{item},{comp},{name},{mat},{real},{ename},{datakey}"
-        )
-        return self.run(command, **kwargs)
-
-    def data(
-        self,
-        ir: str = "",
-        lstrt: str = "",
-        lstop: str = "",
-        linc: str = "",
-        name: str = "",
-        kcplx: int | str = "",
-        **kwargs,
-    ):
-        r"""Reads data records from a file into a variable.
-
-        Mechanical APDL Command: `DATA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DATA.html>`_
-
-        Parameters
-        ----------
-        ir : str
-            Arbitrary reference number assigned to the resulting variable (2 to NV ( :ref:`numvar` )). If
-            this number is the same as for a previously defined variable, the previously defined variable
-            will be overwritten with this result.
-
-        lstrt : str
-            Start at location ``LSTRT`` (defaults to 1).
-
-        lstop : str
-            Stop at location ``LSTOP`` (defaults to ``LSTRT`` ). Maximum location available is determined
-            from data previously stored.
-
-        linc : str
-            Fill every ``LINC`` location between ``LSTRT`` and ``LSTOP`` (defaults to 1).
-
-        name : str
-            Eight character name for identifying the variable on the printout and displays. Embedded blanks
-            are compressed upon output.
-
-        kcplx : int or str
-            Complex number key:
-
-            * ``0`` - Data stored as the real part of the complex number.
-
-            * ``1`` - Data stored as the imaginary part of the complex number.
-
-        Notes
-        -----
-
-        .. _DATA_notes:
-
-        This command must be followed by a format statement (on the next line) and the subsequent data
-        records, and all must be on the same file (that may then be read with the :ref:`input` command). The
-        format specifies the number of fields to be read per record, the field width, and the placement of
-        the decimal point (if one is not included in the data value). The read operation follows the
-        available FORTRAN FORMAT conventions of the system. See the system FORTRAN manual for details. Any
-        standard FORTRAN real format (such as (4F6.0), (F2.0,2X,F12.0), etc.) may be used. Integer (I),
-        character (A), and list-directed (\2) descriptors may not be used. The parentheses must be included
-        in the format. Up to 80 columns per record may be read. Locations may be filled within a range.
-        Previous data in the range will be overwritten.
-        """
-        command = f"DATA,{ir},{lstrt},{lstop},{linc},{name},{kcplx}"
-        return self.run(command, **kwargs)
-
-    def jsol(
-        self,
-        nvar: str = "",
-        elem: str = "",
-        item: str = "",
-        comp: str = "",
-        name: str = "",
-        **kwargs,
-    ):
-        r"""Specifies result items to be stored for the joint element.
-
-        Mechanical APDL Command: `JSOL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_JSOL.html>`_
-
-        Parameters
-        ----------
-        nvar : str
-            Arbitrary reference number or name assigned to this variable. Variable numbers can be 2 to
-            ``NV`` ( :ref:`numvar` ) while the name can be an eight-byte character string. Overwrites any
-            existing results for this variable.
-
-        elem : str
-            Element number for which to store results.
-
-        item : str
-            Label identifying the item. Valid item labels are shown in :ref:`jsol_tab_1`below.
-
-        comp : str
-            Component of the ``Item`` (if required). Valid component labels are shown in
-            :ref:`jsol_tab_1`below.
-
-        name : str
-            Thirty-two character name identifying the item on printouts and displays. Defaults to a label
-            formed by concatenating the first four characters of the ``Item`` and ``Comp`` labels.
-
-        Notes
-        -----
-
-        .. _JSOL_notes:
-
-        This command is valid for the ``MPC184``joint elements. The values stored are for the free or
-        unconstrained degrees of freedom of a joint element. Relative reaction forces and moments are
-        available only if stiffness, damping, or friction is associated with the joint element.
-        .. _jsol_tab_1:
-
-        JSOL - Valid Item and Component Labels
-        **************************************
-
-        .. flat-table::
-           :header-rows: 1
-
-           * - Item
-             - Comp
-             - Description
-           * - U
-             - X, Y, Z
-             - x, y, or z relative displacement.
-           * - ROT
-             - X, Y, Z
-             - x, y, or z relative rotation.
-           * - VEL
-             - X, Y, Z
-             - x, y, or z relative linear velocity.
-           * - OMG
-             - X, Y, Z
-             - x, y, or z relative angular velocity.
-           * - ACC
-             - X, Y, Z
-             - x, y, or z relative linear acceleration.
-           * - DMG
-             - X, Y, Z
-             - x, y, or z relative angular acceleration.
-           * - RF
-             - X, Y, Z
-             - Relative reaction forces in the local x, y, or z direction.
-           * - RM
-             - X, Y, Z
-             - Relative reaction moments in the local x, y, or z direction.
-
-        """
-        command = f"JSOL,{nvar},{elem},{item},{comp},{name}"
+        command = f"SOLU,{nvar},{item},{comp},{name}"
         return self.run(command, **kwargs)
 
     def store(
@@ -1627,42 +1597,72 @@ class SetUp:
         command = f"STORE,{lab},{npts},,{freq},{toler},{cluster}"
         return self.run(command, **kwargs)
 
-    def solu(
-        self, nvar: str = "", item: str = "", comp: str = "", name: str = "", **kwargs
-    ):
-        r"""Specifies solution summary data per substep to be stored.
+    def timerange(self, tmin: str = "", tmax: str = "", **kwargs):
+        r"""Specifies the time range for which data are to be stored.
 
-        Mechanical APDL Command: `SOLU <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SOLU.html>`_
+        Mechanical APDL Command: `TIMERANGE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TIMERANGE.html>`_
 
         Parameters
         ----------
-        nvar : str
-            Arbitrary reference number assigned to this variable (2 to ``NV`` ( :ref:`numvar` )).
+        tmin : str
+            Minimum time (defaults to first time (or frequency) point on the file).
 
-        item : str
-            Label identifying the item. Valid item labels are shown in the table below. Some items may also
-            require a component label.
-
-        comp : str
-            Component of the item (if required). Valid component labels are shown in the table below. None
-            are currently required.
-
-        name : str
-            Thirty-two character name identifying the item on printouts and displays. Defaults to an eight
-            character label formed by concatenating the first four characters of the ``Item`` and ``Comp``
-            labels.
+        tmax : str
+            Maximum time (defaults to last time (or frequency) point on the file).
 
         Notes
         -----
 
-        .. _SOLU_notes:
+        .. _TIMERANGE_notes:
 
-        See also the :ref:`priter` command of POST1 to display some of these items directly. Valid for a
-        static or full transient analysis. All other analyses have zeros for the data. Valid item and
-        component labels for solution summary values are:
+        Defines the time (or frequency) range for which data are to be read from the file and stored in
+        memory. Use the :ref:`nstore` command to define the time increment.
 
-        This command contains some tables and extra information which can be inspected in the original
-        documentation pointed above.
+        Use :ref:`prtime` or :ref:`pltime` to specify the time (frequency) range for cyclic mode-
+        superposition harmonic analyses.
         """
-        command = f"SOLU,{nvar},{item},{comp},{name}"
+        command = f"TIMERANGE,{tmin},{tmax}"
+        return self.run(command, **kwargs)
+
+    def vardel(self, nvar: str = "", **kwargs):
+        r"""Deletes a variable (GUI).
+
+        Mechanical APDL Command: `VARDEL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VARDEL.html>`_
+
+        Parameters
+        ----------
+        nvar : str
+            The reference number of the variable to be deleted. ``NVAR`` is as defined by :ref:`nsol`,
+            :ref:`esol`, etc.
+
+        Notes
+        -----
+
+        .. _VARDEL_notes:
+
+        Deletes a POST26 solution results variable. This command is generated by the Graphical User
+        Interface (GUI). It appears in the log file ( :file:`Jobname.LOG` ) if a POST26 variable is deleted
+        from the Defined Time-History Variables dialog box.
+
+        The command is not intended to be typed in directly in a Mechanical APDL session (although it can be
+        included in an input file for batch input or for use with :ref:`input` ).
+        """
+        command = f"VARDEL,{nvar}"
+        return self.run(command, **kwargs)
+
+    def varnam(self, ir: str = "", name: str = "", **kwargs):
+        r"""Names (or renames) a variable.
+
+        Mechanical APDL Command: `VARNAM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VARNAM.html>`_
+
+        Parameters
+        ----------
+        ir : str
+            Reference number of the variable (2 to NV ( :ref:`numvar` )).
+
+        name : str
+            Thirty-two character name for identifying variable on printouts and displays. Embedded blanks
+            are compressed for output.
+        """
+        command = f"VARNAM,{ir},{name}"
         return self.run(command, **kwargs)

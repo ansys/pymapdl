@@ -23,6 +23,68 @@
 
 class Controls:
 
+    def cfact(
+        self,
+        rfacta: str = "",
+        ifacta: str = "",
+        rfactb: str = "",
+        ifactb: str = "",
+        rfactc: str = "",
+        ifactc: str = "",
+        **kwargs,
+    ):
+        r"""Defines complex scaling factors to be used with operations.
+
+        Mechanical APDL Command: `CFACT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CFACT.html>`_
+
+        **Command default:**
+
+        .. _CFACT_default:
+
+        Use the real factors as described with the operation command.
+
+        Parameters
+        ----------
+        rfacta : str
+            Real portion of the complex scale factor used in place of ``FACTA``.
+
+        ifacta : str
+            Imaginary portion of the complex scale factor used in place of ``FACTA``.
+
+        rfactb : str
+            Real portion of the complex scale factor used in place of ``FACTB``.
+
+        ifactb : str
+            Imaginary portion of the complex scale factor used in place of ``FACTB``.
+
+        rfactc : str
+            Real portion of the complex scale factor used in place of ``FACTC``.
+
+        ifactc : str
+            Imaginary portion of the complex scale factor used in place of ``FACTC``.
+
+        Notes
+        -----
+
+        .. _CFACT_notes:
+
+        Defines complex scale factors to be used with the operations ( :ref:`add`, :ref:`prod`, etc.). If
+        this command is supplied, these complex factors override any real factors ( ``FACTA``, ``FACTB``,
+        ``FACTC`` ) supplied on the operation commands. Factors are typically involved in scaling a
+        specified variable, such as in the term ``FACTA`` x ``IA`` of the :ref:`add` command to scale
+        variable ``IA`` before the ADD operation.
+
+        When the :ref:`cfact` command is active, defaults are as follows: 1) if the complex factor is not
+        specified, but the variable upon which it acts (such as ``IA`` ) is specified, the factor defaults
+        to 1.0+ i 0.0; 2) if the variable upon which the factor operates is not specified, but the factor is
+        specified, the variable defaults to 1.0 so that the term in the operation becomes the complex factor
+        itself; 3) if neither the factor nor the variable number is supplied, the term is omitted from the
+        operation. Once the operation (such as the :ref:`add` command) has been processed, the :ref:`cfact`
+        command becomes inactive and must be specified again if it is to be used.
+        """
+        command = f"CFACT,{rfacta},{ifacta},{rfactb},{ifactb},{rfactc},{ifactc}"
+        return self.run(command, **kwargs)
+
     def layerp26(self, num: str = "", **kwargs):
         r"""Specifies the element layer for which data are to be stored.
 
@@ -87,66 +149,4 @@ class Controls:
         POST26 descriptions applying to TIME then apply to NCUMIT.
         """
         command = f"TVAR,{key}"
-        return self.run(command, **kwargs)
-
-    def cfact(
-        self,
-        rfacta: str = "",
-        ifacta: str = "",
-        rfactb: str = "",
-        ifactb: str = "",
-        rfactc: str = "",
-        ifactc: str = "",
-        **kwargs,
-    ):
-        r"""Defines complex scaling factors to be used with operations.
-
-        Mechanical APDL Command: `CFACT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CFACT.html>`_
-
-        **Command default:**
-
-        .. _CFACT_default:
-
-        Use the real factors as described with the operation command.
-
-        Parameters
-        ----------
-        rfacta : str
-            Real portion of the complex scale factor used in place of ``FACTA``.
-
-        ifacta : str
-            Imaginary portion of the complex scale factor used in place of ``FACTA``.
-
-        rfactb : str
-            Real portion of the complex scale factor used in place of ``FACTB``.
-
-        ifactb : str
-            Imaginary portion of the complex scale factor used in place of ``FACTB``.
-
-        rfactc : str
-            Real portion of the complex scale factor used in place of ``FACTC``.
-
-        ifactc : str
-            Imaginary portion of the complex scale factor used in place of ``FACTC``.
-
-        Notes
-        -----
-
-        .. _CFACT_notes:
-
-        Defines complex scale factors to be used with the operations ( :ref:`add`, :ref:`prod`, etc.). If
-        this command is supplied, these complex factors override any real factors ( ``FACTA``, ``FACTB``,
-        ``FACTC`` ) supplied on the operation commands. Factors are typically involved in scaling a
-        specified variable, such as in the term ``FACTA`` x ``IA`` of the :ref:`add` command to scale
-        variable ``IA`` before the ADD operation.
-
-        When the :ref:`cfact` command is active, defaults are as follows: 1) if the complex factor is not
-        specified, but the variable upon which it acts (such as ``IA`` ) is specified, the factor defaults
-        to 1.0+ i 0.0; 2) if the variable upon which the factor operates is not specified, but the factor is
-        specified, the variable defaults to 1.0 so that the term in the operation becomes the complex factor
-        itself; 3) if neither the factor nor the variable number is supplied, the term is omitted from the
-        operation. Once the operation (such as the :ref:`add` command) has been processed, the :ref:`cfact`
-        command becomes inactive and must be specified again if it is to be used.
-        """
-        command = f"CFACT,{rfacta},{ifacta},{rfactb},{ifactb},{rfactc},{ifactc}"
         return self.run(command, **kwargs)

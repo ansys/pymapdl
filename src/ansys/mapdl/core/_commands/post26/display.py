@@ -62,6 +62,69 @@ class Display:
         command = f"KEEP,{key}"
         return self.run(command, **kwargs)
 
+    def plcplx(self, key: int | str = "", **kwargs):
+        r"""Specifies the part of a complex variable to display.
+
+        Mechanical APDL Command: `PLCPLX <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PLCPLX.html>`_
+
+        Parameters
+        ----------
+        key : int or str
+            Complex variable part:
+
+            * ``0`` - Amplitude.
+
+            * ``1`` - Phase angle.
+
+            * ``2`` - Real part.
+
+            * ``3`` - Imaginary part.
+
+        Notes
+        -----
+
+        .. _PLCPLX_notes:
+
+        Used only with harmonic analyses ( :ref:`antype`,HARMIC).
+
+        All results data are stored in the form of real and imaginary components and converted to amplitude
+        and/or phase angle as specified via the :ref:`plcplx` command. The conversion is not valid for
+        derived results (such as principal stress/strain, equivalent stress/strain and USUM).
+        """
+        command = f"PLCPLX,{key}"
+        return self.run(command, **kwargs)
+
+    def pltime(self, tmin: str = "", tmax: str = "", **kwargs):
+        r"""Defines the time range for which data are to be displayed.
+
+        Mechanical APDL Command: `PLTIME <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PLTIME.html>`_
+
+        **Command default:**
+
+        .. _PLTIME_default:
+
+        Use the previously defined range ( :ref:`timerange` ).
+
+        Parameters
+        ----------
+        tmin : str
+            Minimum time (defaults to the first point stored).
+
+        tmax : str
+            Maximum time (defaults to the last point stored).
+
+        Notes
+        -----
+
+        .. _PLTIME_notes:
+
+        Defines the time (or frequency) range (within the range stored) for which data are to be displayed.
+        Time is always displayed in the Z-axis direction for 3D graph displays. If XVAR = 1, time is also
+        displayed in the X-axis direction and this control also sets the abscissa scale range.
+        """
+        command = f"PLTIME,{tmin},{tmax}"
+        return self.run(command, **kwargs)
+
     def plvar(
         self,
         nvar1: str = "",
@@ -145,67 +208,17 @@ class Display:
         command = f"PLVAR,{nvar1},{nvar2},{nvar3},{nvar4},{nvar5},{nvar6},{nvar7},{nvar8},{nvar9},{nvar10}"
         return self.run(command, **kwargs)
 
-    def pltime(self, tmin: str = "", tmax: str = "", **kwargs):
-        r"""Defines the time range for which data are to be displayed.
+    def spread(self, value: str = "", **kwargs):
+        r"""Turns on a dashed tolerance curve for the subsequent curve plots.
 
-        Mechanical APDL Command: `PLTIME <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PLTIME.html>`_
-
-        **Command default:**
-
-        .. _PLTIME_default:
-
-        Use the previously defined range ( :ref:`timerange` ).
+        Mechanical APDL Command: `SPREAD <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SPREAD.html>`_
 
         Parameters
         ----------
-        tmin : str
-            Minimum time (defaults to the first point stored).
-
-        tmax : str
-            Maximum time (defaults to the last point stored).
-
-        Notes
-        -----
-
-        .. _PLTIME_notes:
-
-        Defines the time (or frequency) range (within the range stored) for which data are to be displayed.
-        Time is always displayed in the Z-axis direction for 3D graph displays. If XVAR = 1, time is also
-        displayed in the X-axis direction and this control also sets the abscissa scale range.
+        value : str
+            Amount of tolerance. For example, 0.1 is ± 10%.
         """
-        command = f"PLTIME,{tmin},{tmax}"
-        return self.run(command, **kwargs)
-
-    def plcplx(self, key: int | str = "", **kwargs):
-        r"""Specifies the part of a complex variable to display.
-
-        Mechanical APDL Command: `PLCPLX <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PLCPLX.html>`_
-
-        Parameters
-        ----------
-        key : int or str
-            Complex variable part:
-
-            * ``0`` - Amplitude.
-
-            * ``1`` - Phase angle.
-
-            * ``2`` - Real part.
-
-            * ``3`` - Imaginary part.
-
-        Notes
-        -----
-
-        .. _PLCPLX_notes:
-
-        Used only with harmonic analyses ( :ref:`antype`,HARMIC).
-
-        All results data are stored in the form of real and imaginary components and converted to amplitude
-        and/or phase angle as specified via the :ref:`plcplx` command. The conversion is not valid for
-        derived results (such as principal stress/strain, equivalent stress/strain and USUM).
-        """
-        command = f"PLCPLX,{key}"
+        command = f"SPREAD,{value}"
         return self.run(command, **kwargs)
 
     def xvar(self, n: int | str = "", **kwargs):
@@ -234,17 +247,4 @@ class Display:
         ) are to be displayed.
         """
         command = f"XVAR,{n}"
-        return self.run(command, **kwargs)
-
-    def spread(self, value: str = "", **kwargs):
-        r"""Turns on a dashed tolerance curve for the subsequent curve plots.
-
-        Mechanical APDL Command: `SPREAD <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SPREAD.html>`_
-
-        Parameters
-        ----------
-        value : str
-            Amount of tolerance. For example, 0.1 is ± 10%.
-        """
-        command = f"SPREAD,{value}"
         return self.run(command, **kwargs)

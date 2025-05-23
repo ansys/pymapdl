@@ -54,33 +54,45 @@ class Listing:
         command = f"EXTREM,{nvar1},{nvar2},{ninc}"
         return self.run(command, **kwargs)
 
-    def prtime(self, tmin: str = "", tmax: str = "", **kwargs):
-        r"""Defines the time range for which data are to be listed.
+    def lines(self, n: str = "", **kwargs):
+        r"""Specifies the length of a printed page.
 
-        Mechanical APDL Command: `PRTIME <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PRTIME.html>`_
-
-        **Command default:**
-
-        .. _PRTIME_default:
-
-        Use the previously defined range ( :ref:`timerange` ).
+        Mechanical APDL Command: `LINES <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LINES.html>`_
 
         Parameters
         ----------
-        tmin : str
-            Minimum time (defaults to the first point stored).
-
-        tmax : str
-            Maximum time (defaults to the last point stored).
+        n : str
+            Number of lines per page (defaults to 20). (Minimum allowed = 11).
 
         Notes
         -----
 
-        .. _PRTIME_notes:
+        .. _LINES_notes:
 
-        Defines the time (or frequency) range (within the range stored) for which data are to be listed.
+        Specifies the length of a printed page (for use in reports, etc.).
         """
-        command = f"PRTIME,{tmin},{tmax}"
+        command = f"LINES,{n}"
+        return self.run(command, **kwargs)
+
+    def nprint(self, n: str = "", **kwargs):
+        r"""Defines which time points stored are to be listed.
+
+        Mechanical APDL Command: `NPRINT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NPRINT.html>`_
+
+        Parameters
+        ----------
+        n : str
+            List data associated with every ``N`` time (or frequency) point(s), beginning with the first
+            point stored (defaults to 1).
+
+        Notes
+        -----
+
+        .. _NPRINT_notes:
+
+        Defines which time (or frequency) points within the range stored are to be listed.
+        """
+        command = f"NPRINT,{n}"
         return self.run(command, **kwargs)
 
     def prcplx(self, key: int | str = "", **kwargs):
@@ -111,6 +123,35 @@ class Listing:
         derived results (such as principal stress/strain, equivalent stress/strain and USUM).
         """
         command = f"PRCPLX,{key}"
+        return self.run(command, **kwargs)
+
+    def prtime(self, tmin: str = "", tmax: str = "", **kwargs):
+        r"""Defines the time range for which data are to be listed.
+
+        Mechanical APDL Command: `PRTIME <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PRTIME.html>`_
+
+        **Command default:**
+
+        .. _PRTIME_default:
+
+        Use the previously defined range ( :ref:`timerange` ).
+
+        Parameters
+        ----------
+        tmin : str
+            Minimum time (defaults to the first point stored).
+
+        tmax : str
+            Maximum time (defaults to the last point stored).
+
+        Notes
+        -----
+
+        .. _PRTIME_notes:
+
+        Defines the time (or frequency) range (within the range stored) for which data are to be listed.
+        """
+        command = f"PRTIME,{tmin},{tmax}"
         return self.run(command, **kwargs)
 
     def prvar(
@@ -169,45 +210,4 @@ class Listing:
         and ``DSIGNF``.
         """
         command = f"PRVAR,{nvar1},{nvar2},{nvar3},{nvar4},{nvar5},{nvar6}"
-        return self.run(command, **kwargs)
-
-    def lines(self, n: str = "", **kwargs):
-        r"""Specifies the length of a printed page.
-
-        Mechanical APDL Command: `LINES <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LINES.html>`_
-
-        Parameters
-        ----------
-        n : str
-            Number of lines per page (defaults to 20). (Minimum allowed = 11).
-
-        Notes
-        -----
-
-        .. _LINES_notes:
-
-        Specifies the length of a printed page (for use in reports, etc.).
-        """
-        command = f"LINES,{n}"
-        return self.run(command, **kwargs)
-
-    def nprint(self, n: str = "", **kwargs):
-        r"""Defines which time points stored are to be listed.
-
-        Mechanical APDL Command: `NPRINT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NPRINT.html>`_
-
-        Parameters
-        ----------
-        n : str
-            List data associated with every ``N`` time (or frequency) point(s), beginning with the first
-            point stored (defaults to 1).
-
-        Notes
-        -----
-
-        .. _NPRINT_notes:
-
-        Defines which time (or frequency) points within the range stored are to be listed.
-        """
-        command = f"NPRINT,{n}"
         return self.run(command, **kwargs)

@@ -23,6 +23,68 @@
 
 class SpecialPurpose:
 
+    def cvar(
+        self,
+        ir: str = "",
+        ia: str = "",
+        ib: str = "",
+        itype: int | str = "",
+        datum: int | str = "",
+        name: str = "",
+        **kwargs,
+    ):
+        r"""Computes covariance between two quantities.
+
+        Mechanical APDL Command: `CVAR <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CVAR.html>`_
+
+        Parameters
+        ----------
+        ir : str
+            Arbitrary reference number assigned to the resulting variable (2 to ``NV`` ( :ref:`numvar` )).
+            If this number is the same as for a previous variable, the previous variable will be overwritten
+            with this result.
+
+        ia : str
+            Reference numbers of the two variables to be operated on. If only one, leave ``IB`` blank.
+
+        ib : str
+            Reference numbers of the two variables to be operated on. If only one, leave ``IB`` blank.
+
+        itype : int or str
+            Defines the type of response PSD to be calculated:
+
+            * ``0,1`` - Displacement (default).
+
+            * ``2`` - Velocity.
+
+            * ``3`` - Acceleration.
+
+        datum : int or str
+            Defines the reference with respect to which covariance is to be calculated:
+
+            * ``1`` - Absolute value.
+
+            * ``2`` - Relative to base (default).
+
+        name : str
+            Thirty-two character name for identifying the variable on listings and displays. Embedded blanks
+            are compressed upon output.
+
+        Notes
+        -----
+
+        .. _CVAR_notes:
+
+        This command computes the covariance value for the variables referenced by the reference numbers
+        ``IA`` and ``IB``. If ``DATUM`` = 2, the variable referenced by ``IR`` will contain the individual
+        modal contributions (that is, the dynamic or relative values). If ``DATUM`` = 1, the variable
+        referenced by ``IR`` will contain the modal contributions followed by the contributions of pseudo-
+        static and covariance between dynamic and pseudo-static responses. :file:`File.PSD` must be
+        available for the calculations to occur.
+        """
+        command = f"CVAR,{ir},{ia},{ib},{itype},{datum},{name}"
+        return self.run(command, **kwargs)
+
     def pmgtran(
         self,
         fname: str = "",
@@ -91,106 +153,6 @@ class SpecialPurpose:
         :ref:`pmgtran` is restricted to MKSA units.
         """
         command = f"PMGTRAN,{fname},{freq},{fcnam1},{fcnam2},{pcnam1},{pcnam2},{ecnam1},{ccnam1}"
-        return self.run(command, **kwargs)
-
-    def vget(
-        self,
-        par: str = "",
-        ir: str = "",
-        tstrt: str = "",
-        kcplx: int | str = "",
-        **kwargs,
-    ):
-        r"""Moves a variable into an array parameter vector.
-
-        Mechanical APDL Command: `VGET <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VGET.html>`_
-
-        Parameters
-        ----------
-        par : str
-            Array parameter vector in the operation.
-
-        ir : str
-            Reference number of the variable (1 to NV ( :ref:`numvar` )).
-
-        tstrt : str
-            Time (or frequency) corresponding to start of ``IR`` data. If between values, the nearer value
-            is used.
-
-        kcplx : int or str
-            Complex number key:
-
-            * ``0`` - Use the real part of the ``IR`` data.
-
-            * ``1`` - Use the imaginary part of the ``IR`` data.
-
-        Notes
-        -----
-
-        .. _VGET_notes:
-
-        Moves a variable into an array parameter vector. The starting array element number must be defined.
-        For example, :ref:`vget`,A(1),2 moves variable 2 (starting at time 0.0) to array parameter A.
-        Looping continues from array element A(1) with the index number incremented by one until the
-        variable is filled. The number of loops may be controlled with the `\*VLEN
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_VLEN.html#>`_  :ref:`vlen`
-        command (except that loop skipping ( ``NINC`` ) is not allowed). For multi-dimensioned array
-        parameters, only the first (row) subscript is incremented.
-        """
-        command = f"VGET,{par},{ir},{tstrt},{kcplx}"
-        return self.run(command, **kwargs)
-
-    def vput(
-        self,
-        par: str = "",
-        ir: str = "",
-        tstrt: str = "",
-        kcplx: int | str = "",
-        name: str = "",
-        **kwargs,
-    ):
-        r"""Moves an array parameter vector into a variable.
-
-        Mechanical APDL Command: `VPUT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VPUT.html>`_
-
-        Parameters
-        ----------
-        par : str
-            Array parameter vector in the operation.
-
-        ir : str
-            Arbitrary reference number assigned to this variable (1 to ``NV``   ( :ref:`numvar` )).
-            Overwrites any existing results for this variable.
-
-        tstrt : str
-            Time (or frequency) corresponding to start of ``IR`` data. If between values, the nearer value
-            is used.
-
-        kcplx : int or str
-            Complex number key:
-
-            * ``0`` - Use the real part of the ``IR`` data.
-
-            * ``1`` - Use the imaginary part of the ``IR`` data.
-
-        name : str
-            Thirty-two character name identifying the item on printouts and displays. Defaults to the label
-            formed by concatenating VPUT with the reference number ``IR``.
-
-        Notes
-        -----
-
-        .. _VPUT_notes:
-
-        At least one variable should be defined ( :ref:`nsol`, :ref:`esol`, :ref:`rforce`, etc.) before
-        using this command. The starting array element number must be defined. For example,
-        :ref:`vput`,A(1),2 moves array parameter A to variable 2 starting at time 0.0. Looping continues
-        from array element A(1) with the index number incremented by one until the variable is filled.
-        Unfilled variable locations are assigned a zero value. The number of loops may be controlled with
-        the :ref:`vlen` command (except that loop skipping (NINC) is not allowed). For multi-dimensioned
-        array parameters, only the first (row) subscript is incremented.
-        """
-        command = f"VPUT,{par},{ir},{tstrt},{kcplx},{name}"
         return self.run(command, **kwargs)
 
     def rcyc(
@@ -431,68 +393,6 @@ class SpecialPurpose:
         command = f"RPSD,{ir},{ia},{ib},{itype},{datum},{name},,{signif}"
         return self.run(command, **kwargs)
 
-    def cvar(
-        self,
-        ir: str = "",
-        ia: str = "",
-        ib: str = "",
-        itype: int | str = "",
-        datum: int | str = "",
-        name: str = "",
-        **kwargs,
-    ):
-        r"""Computes covariance between two quantities.
-
-        Mechanical APDL Command: `CVAR <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CVAR.html>`_
-
-        Parameters
-        ----------
-        ir : str
-            Arbitrary reference number assigned to the resulting variable (2 to ``NV`` ( :ref:`numvar` )).
-            If this number is the same as for a previous variable, the previous variable will be overwritten
-            with this result.
-
-        ia : str
-            Reference numbers of the two variables to be operated on. If only one, leave ``IB`` blank.
-
-        ib : str
-            Reference numbers of the two variables to be operated on. If only one, leave ``IB`` blank.
-
-        itype : int or str
-            Defines the type of response PSD to be calculated:
-
-            * ``0,1`` - Displacement (default).
-
-            * ``2`` - Velocity.
-
-            * ``3`` - Acceleration.
-
-        datum : int or str
-            Defines the reference with respect to which covariance is to be calculated:
-
-            * ``1`` - Absolute value.
-
-            * ``2`` - Relative to base (default).
-
-        name : str
-            Thirty-two character name for identifying the variable on listings and displays. Embedded blanks
-            are compressed upon output.
-
-        Notes
-        -----
-
-        .. _CVAR_notes:
-
-        This command computes the covariance value for the variables referenced by the reference numbers
-        ``IA`` and ``IB``. If ``DATUM`` = 2, the variable referenced by ``IR`` will contain the individual
-        modal contributions (that is, the dynamic or relative values). If ``DATUM`` = 1, the variable
-        referenced by ``IR`` will contain the modal contributions followed by the contributions of pseudo-
-        static and covariance between dynamic and pseudo-static responses. :file:`File.PSD` must be
-        available for the calculations to occur.
-        """
-        command = f"CVAR,{ir},{ia},{ib},{itype},{datum},{name}"
-        return self.run(command, **kwargs)
-
     def smooth(
         self,
         vect1: str = "",
@@ -585,4 +485,104 @@ class SpecialPurpose:
         This command is also valid in PREP7 and SOLUTION.
         """
         command = f"SMOOTH,{vect1},{vect2},{datap},{fitpt},{vect3},{vect4},{disp}"
+        return self.run(command, **kwargs)
+
+    def vget(
+        self,
+        par: str = "",
+        ir: str = "",
+        tstrt: str = "",
+        kcplx: int | str = "",
+        **kwargs,
+    ):
+        r"""Moves a variable into an array parameter vector.
+
+        Mechanical APDL Command: `VGET <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VGET.html>`_
+
+        Parameters
+        ----------
+        par : str
+            Array parameter vector in the operation.
+
+        ir : str
+            Reference number of the variable (1 to NV ( :ref:`numvar` )).
+
+        tstrt : str
+            Time (or frequency) corresponding to start of ``IR`` data. If between values, the nearer value
+            is used.
+
+        kcplx : int or str
+            Complex number key:
+
+            * ``0`` - Use the real part of the ``IR`` data.
+
+            * ``1`` - Use the imaginary part of the ``IR`` data.
+
+        Notes
+        -----
+
+        .. _VGET_notes:
+
+        Moves a variable into an array parameter vector. The starting array element number must be defined.
+        For example, :ref:`vget`,A(1),2 moves variable 2 (starting at time 0.0) to array parameter A.
+        Looping continues from array element A(1) with the index number incremented by one until the
+        variable is filled. The number of loops may be controlled with the `\*VLEN
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cmd/Hlp_C_VLEN.html#>`_  :ref:`vlen`
+        command (except that loop skipping ( ``NINC`` ) is not allowed). For multi-dimensioned array
+        parameters, only the first (row) subscript is incremented.
+        """
+        command = f"VGET,{par},{ir},{tstrt},{kcplx}"
+        return self.run(command, **kwargs)
+
+    def vput(
+        self,
+        par: str = "",
+        ir: str = "",
+        tstrt: str = "",
+        kcplx: int | str = "",
+        name: str = "",
+        **kwargs,
+    ):
+        r"""Moves an array parameter vector into a variable.
+
+        Mechanical APDL Command: `VPUT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VPUT.html>`_
+
+        Parameters
+        ----------
+        par : str
+            Array parameter vector in the operation.
+
+        ir : str
+            Arbitrary reference number assigned to this variable (1 to ``NV``   ( :ref:`numvar` )).
+            Overwrites any existing results for this variable.
+
+        tstrt : str
+            Time (or frequency) corresponding to start of ``IR`` data. If between values, the nearer value
+            is used.
+
+        kcplx : int or str
+            Complex number key:
+
+            * ``0`` - Use the real part of the ``IR`` data.
+
+            * ``1`` - Use the imaginary part of the ``IR`` data.
+
+        name : str
+            Thirty-two character name identifying the item on printouts and displays. Defaults to the label
+            formed by concatenating VPUT with the reference number ``IR``.
+
+        Notes
+        -----
+
+        .. _VPUT_notes:
+
+        At least one variable should be defined ( :ref:`nsol`, :ref:`esol`, :ref:`rforce`, etc.) before
+        using this command. The starting array element number must be defined. For example,
+        :ref:`vput`,A(1),2 moves array parameter A to variable 2 starting at time 0.0. Looping continues
+        from array element A(1) with the index number incremented by one until the variable is filled.
+        Unfilled variable locations are assigned a zero value. The number of loops may be controlled with
+        the :ref:`vlen` command (except that loop skipping (NINC) is not allowed). For multi-dimensioned
+        array parameters, only the first (row) subscript is incremented.
+        """
+        command = f"VPUT,{par},{ir},{tstrt},{kcplx},{name}"
         return self.run(command, **kwargs)
