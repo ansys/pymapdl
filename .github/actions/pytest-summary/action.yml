@@ -12,6 +12,12 @@ inputs:
     required: true
     type: string
 
+  token:
+    description: |
+      GitHub token to use.
+    required: true
+    type: string
+
 runs:
   using: "composite"
 
@@ -32,6 +38,7 @@ runs:
       with:
         pattern: "reports-*"
         path: "artifacts"
+        github-token: ${{ inputs.token }}
 
     - name: "Check if artifacts directory has files"
       shell: bash
@@ -81,3 +88,4 @@ runs:
       with:
         name: tests_durations.json
         path: tests_durations.json
+        github-token: ${{ inputs.token }}
