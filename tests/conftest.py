@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import ast
 from collections import namedtuple
 from collections.abc import Generator
 import os
@@ -76,7 +77,7 @@ SUPPORT_PLOTTING = support_plotting()
 IS_SMP = is_smp()
 
 QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
-VALID_PORTS = []
+VALID_PORTS: list[int] = []
 ACCEPTABLE_FAILURE_RATE = 50
 
 ## Skip ifs
@@ -384,6 +385,27 @@ class MyReporter(TerminalReporter):
             message = rep.longrepr.reprcrash.message
             header = markup("[FAILED]", **FAILED_COLOR)
             return get_failure_message(rep, header, message)
+
+        def get_error_message(rep):
+            rep_ = rep.longreprtext.splitlines()
+            location = rep.location
+            path = f"{location[0]}:{location[1]}"
+            if len(rep_) >= 3:
+                # It is a fail/error
+                # A list of all the lines of the failed test + an empty string
+                # and the test location.
+                err_type = rep_[-1].split(":")[-1].strip()
+                cause = rep_[-3]  # Picking the last line of the error message
+                cause = cause[2:].strip() if cause.startswith("E ") else cause.strip()
+                return f"{path} - {err_type}: {cause}"
+            else:
+                # Skip rep_ is a list with on string
+                tupl_ = ast.literal_eval(rep_[0])
+                if len(tupl_) < 3:
+                    # Early exit just in case
+                    return f"{path} - " + " ".join(tupl_)
+                cause = f"{tupl_[2]}"
+                return f"{path} - {cause}"
 
         failed = self.stats.get("failed", [])
         for rep in failed:
