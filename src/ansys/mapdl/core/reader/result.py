@@ -171,9 +171,10 @@ class DPFResult(Result):
             self._mapdl_weakref = weakref.ref(mapdl)
             self._mode_rst = False
             rst_file_path = mapdl.result_file
-            assert (
-                rst_file_path is not None
-            ), "RST file path is None. Please check the MAPDL instance."
+            if rst_file_path is None:
+                raise ValueError(
+                    "RST file path is None. Please check the MAPDL instance."
+                )
 
             # self._session_id = f"__{uuid.uuid4()}__"
             # self.mapdl.parameters[self._session_id] = 1
@@ -473,7 +474,9 @@ class DPFResult(Result):
     def _rst_directory(self) -> str:
         if self.mode_mapdl:
             # Update
-            assert self._mapdl is not None
+            if self._mapdl is None:
+                raise ValueError("MAPDL instance is None")
+
             if self.local:
                 self.__rst_directory: str = self._mapdl.directory  # type: ignore
 
