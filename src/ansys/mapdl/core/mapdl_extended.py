@@ -2257,6 +2257,45 @@ class _MapdlCommandExtended(_MapdlCore):
         super().wrinqr(key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
 
+    @wraps(_MapdlCore.catiain)
+    def catiain(self, name="", extension="", path="", blank="", **kwargs):
+        """Wrap the ``catiain`` method to take advantage of the gRPC methods."""
+        if self.platform == "windows":
+            raise OSError(
+                "The command 'catiain' is not supported on Windows. Use the 'mapdl.cat5in' method instead to import Catia v5 files."
+            )
+        return super().catiain(
+            name=name, extension=extension, path=path, blank=blank, **kwargs
+        )
+
+    @wraps(_MapdlCore.cat5in)
+    def cat5in(
+        self,
+        name="",
+        extension="",
+        path="",
+        entity="",
+        fmt="",
+        nocl="",
+        noan="",
+        **kwargs,
+    ):
+        """Wrap the ``cat5in`` method to take advantage of the gRPC methods."""
+        if self.platform == "linux":
+            raise OSError(
+                "The command 'cat5in' is not supported on Linux. Use the 'mapdl.catiain' method instead to import Catia v4 files."
+            )
+        return super().cat5in(
+            name=name,
+            extension=extension,
+            path=path,
+            entity=entity,
+            fmt=fmt,
+            nocl=nocl,
+            noan=noan,
+            **kwargs,
+        )
+
 
 class _MapdlExtended(_MapdlCommandExtended):
     """Extend Mapdl class with new functions"""

@@ -9,9 +9,16 @@ ci:
 
   # PR name when autoupdate
   autoupdate_commit_msg: 'ci: pre-commit autoupdate'
+  skip: [mypy]
 
 
 repos:
+
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.15.0
+  hooks:
+    - id: mypy
+      args: [ --follow-imports=silent, --config-file=pyproject.toml]
 
 - repo: https://github.com/ansys/pre-commit-hooks
   rev: v0.5.2
