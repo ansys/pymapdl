@@ -1767,7 +1767,7 @@ class MapdlGrpc(MapdlBase):
         ext : str, optional
             Filename extension (eight-character maximum).
 
-        dir : str, optional
+        dir_ : str, optional
             Directory path. The default is the current working directory.
 
         line : int, optional
