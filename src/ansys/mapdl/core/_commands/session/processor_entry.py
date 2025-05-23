@@ -23,23 +23,6 @@
 
 class ProcessorEntry:
 
-    def post26(self, **kwargs):
-        r"""Enters the time-history results postprocessor.
-
-        Mechanical APDL Command: `/POST26 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_POST26.html>`_
-
-        Notes
-        -----
-
-        .. _s-POST26_notes:
-
-        Enters the time-history results postprocessor (POST26).
-
-        This command is valid only at the Begin Level.
-        """
-        command = "/POST26"
-        return self.run(command, **kwargs)
-
     def post1(self, **kwargs):
         r"""Enters the database results postprocessor.
 
@@ -56,6 +39,23 @@ class ProcessorEntry:
         This command is valid only at the Begin Level.
         """
         command = "/POST1"
+        return self.run(command, **kwargs)
+
+    def post26(self, **kwargs):
+        r"""Enters the time-history results postprocessor.
+
+        Mechanical APDL Command: `/POST26 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_POST26.html>`_
+
+        Notes
+        -----
+
+        .. _s-POST26_notes:
+
+        Enters the time-history results postprocessor (POST26).
+
+        This command is valid only at the Begin Level.
+        """
+        command = "/POST26"
         return self.run(command, **kwargs)
 
     def prep7(self, **kwargs):

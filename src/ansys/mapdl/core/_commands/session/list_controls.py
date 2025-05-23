@@ -23,6 +23,55 @@
 
 class ListControls:
 
+    def com(self, comment: str = "", **kwargs):
+        r"""Places a comment in the output.
+
+        Mechanical APDL Command: `/COM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_COM.html>`_
+
+        Parameters
+        ----------
+        comment : str
+            Comment string, up to 75 characters.
+
+        Notes
+        -----
+
+        .. _s-COM_notes:
+
+        The output from this command consists of the comment string. This command is similar to ``C***``
+        except that the comment produced by ``C***`` is more easily identified in the output. Parameter
+        substitution within the comment occurs for every valid expression delimited by percent (%) signs.
+        Enclosing such an expression in single quotes prevents parameter substitution.
+
+        Another way to include a comment is to precede it with a ! character (on the same line). The ! may
+        be placed anywhere on the line, and any input following it is ignored as a comment. No output is
+        produced by such a comment, but the comment line is included on the log file. This is a convenient
+        way to annotate the log file.
+
+        This command is valid anywhere.
+        """
+        command = f"/COM,{comment}"
+        return self.run(command, **kwargs)
+
+    def slashgo(self, **kwargs):
+        r"""Reactivates suppressed printout.
+
+        Mechanical APDL Command: `/GO <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GO.html>`_
+
+        Notes
+        -----
+
+        .. _s-GO_notes:
+
+        Reactivates printout suppressed with the :ref:`nopr` command without producing any output. The
+        :ref:`gopr` command has the same function except that it also produces a command response from the
+        program.
+
+        This command is valid in any processor.
+        """
+        command = "/GO"
+        return self.run(command, **kwargs)
+
     def golist(self, **kwargs):
         r"""Reactivates the suppressed data input listing.
 
@@ -58,23 +107,22 @@ class ListControls:
         command = "/GOPR"
         return self.run(command, **kwargs)
 
-    def slashgo(self, **kwargs):
-        r"""Reactivates suppressed printout.
+    def nolist(self, **kwargs):
+        r"""Suppresses the data input listing.
 
-        Mechanical APDL Command: `/GO <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GO.html>`_
+        Mechanical APDL Command: `/NOLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NOLIST.html>`_
 
         Notes
         -----
 
-        .. _s-GO_notes:
+        .. _s-NOLIST_notes:
 
-        Reactivates printout suppressed with the :ref:`nopr` command without producing any output. The
-        :ref:`gopr` command has the same function except that it also produces a command response from the
-        program.
+        Printout is suppressed until a :ref:`golist` command is read or the end of the listing is
+        encountered.
 
-        This command is valid in any processor.
+        This command is valid in any processor, but only within a batch run ( ``/BATCH`` ).
         """
-        command = "/GO"
+        command = "/NOLIST"
         return self.run(command, **kwargs)
 
     def nopr(self, **kwargs):
@@ -99,52 +147,4 @@ class ListControls:
         This command is valid in any processor.
         """
         command = "/NOPR"
-        return self.run(command, **kwargs)
-
-    def nolist(self, **kwargs):
-        r"""Suppresses the data input listing.
-
-        Mechanical APDL Command: `/NOLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NOLIST.html>`_
-
-        Notes
-        -----
-
-        .. _s-NOLIST_notes:
-
-        Printout is suppressed until a :ref:`golist` command is read or the end of the listing is
-        encountered.
-
-        This command is valid in any processor, but only within a batch run ( ``/BATCH`` ).
-        """
-        command = "/NOLIST"
-        return self.run(command, **kwargs)
-
-    def com(self, comment: str = "", **kwargs):
-        r"""Places a comment in the output.
-
-        Mechanical APDL Command: `/COM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_COM.html>`_
-
-        Parameters
-        ----------
-        comment : str
-            Comment string, up to 75 characters.
-
-        Notes
-        -----
-
-        .. _s-COM_notes:
-
-        The output from this command consists of the comment string. This command is similar to ``C***``
-        except that the comment produced by ``C***`` is more easily identified in the output. Parameter
-        substitution within the comment occurs for every valid expression delimited by percent (%) signs.
-        Enclosing such an expression in single quotes prevents parameter substitution.
-
-        Another way to include a comment is to precede it with a ! character (on the same line). The ! may
-        be placed anywhere on the line, and any input following it is ignored as a comment. No output is
-        produced by such a comment, but the comment line is included on the log file. This is a convenient
-        way to annotate the log file.
-
-        This command is valid anywhere.
-        """
-        command = f"/COM,{comment}"
         return self.run(command, **kwargs)
