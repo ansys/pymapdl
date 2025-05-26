@@ -69,13 +69,15 @@ jobs:
             echo "COMMENT_BODY=${{ github.event.comment.body }}" >> $GITHUB_ENV
           fi
 
-      - uses: tspascoal/get-user-teams-membership@v3
+      - name: Get user team membership
         id: is_organization_member
-        # Checking if the user triggering the action is a member of the 'pymapdl-maintainers' team in the 'ansys' organization
+        uses: octokit/request-action@v2.4.0
         with:
+          route: GET /organizations/{org_id}/team/{team_id}/memberships/{username}
+          org_id: ansys
+          team_id: pymapdl-maintainers
           username: ${{ env.USER_TRIGGERING }}
-          organization: ansys
-          team: 'pymapdl-maintainers'
+        env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_TEAMS_USER_READ }}
 
       - name: Check the migration mode
@@ -115,7 +117,7 @@ jobs:
       - name: Get PR details
         id: pr
         if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' }}
-        uses: octokit/request-action@v2.x
+        uses: octokit/request-action@v2.4.0
         with:
           route: GET /repos/${{ github.repository }}/pulls/${{ env.PR_NUMBER }}
         env:
