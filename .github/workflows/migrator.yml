@@ -341,12 +341,11 @@ jobs:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |
             // React positively to the comment
-
             commentId = '${{ env.COMMENT_ID }}';
             pr_number = '${{ env.PR_NUMBER }}';
 
             // Remove previous reaction if it exists
-            data = await github.rest.reactions.listForCommitComment({
+            data = await github.rest.reactions.listForIssueComment({
               owner: 'ansys',
               repo: 'pymapdl',
               comment_id: commentId,
