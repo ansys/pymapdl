@@ -205,12 +205,12 @@ jobs:
               pull_number: ${{ env.PR_NUMBER }},
             });
 
-            if (core.isDebug()) {
-              core.debug(data);
-            }
-
             if (!data || !data.head || !data.base) {
               throw new Error('Pull request data is incomplete');
+            }
+
+            if (core.isDebug()) {
+              core.debug(data);
             }
 
             if (data.head.repo.full_name === 'ansys/pymapdl') {
@@ -327,7 +327,7 @@ jobs:
             const existingPrs = await github.rest.pulls.list({
               owner: 'ansys',
               repo: 'pymapdl',
-              head: `${prHeadBranch}`,
+              base: `${prBaseBranch}`,
               state: 'open',
             });
 
