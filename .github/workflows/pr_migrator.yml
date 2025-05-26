@@ -69,6 +69,15 @@ jobs:
             echo "COMMENT_BODY=${{ github.event.comment.body }}" >> $GITHUB_ENV
           fi
 
+      - uses: tspascoal/get-user-teams-membership@v3
+        id: is_organization_member
+        # Checking if the user triggering the action is a member of the 'pymapdl-maintainers' team in the 'ansys' organization
+        with:
+          username: ${{ env.USER_TRIGGERING }}
+          organization: ansys
+          team: 'pymapdl-maintainers'
+          GITHUB_TOKEN: ${{ secrets.TOKEN_TEAMS_USER_READ }}
+
       - name: Check the migration mode
         id: check_mode
         run: |
@@ -86,15 +95,6 @@ jobs:
             echo "No specific sync mode provided, defaulting to 'auto' which will exit if there are conflicts."
             echo "MODE=''" >> $GITHUB_ENV
           fi
-
-      - uses: tspascoal/get-user-teams-membership@v3
-        id: is_organization_member
-        # Checking if the user triggering the action is a member of the 'pymapdl-maintainers' team in the 'ansys' organization
-        with:
-          username: ${{ env.USER_TRIGGERING }}
-          organization: ansys
-          team: 'pymapdl-maintainers'
-          GITHUB_TOKEN: ${{ secrets.TOKEN_TEAMS_USER_READ }}
 
       - name: React positively to comment if user is a team member
         if : ${{ steps.is_organization_member.outputs.isTeamMember == 'true' && github.event_name == 'issue_comment' }}
