@@ -130,11 +130,17 @@ jobs:
         with:
           github-token: ${{ secrets.TOKEN_TEAMS_USER_READ }}
           script: |
-            const { data } = await github.rest.teams.getMembershipForUserInOrg({
-              org: 'ansys',
-              team_slug: 'pymapdl-maintainers',
-              username: '${{ env.USER_TRIGGERING }}',
-            });
+            try {
+              const { data } = await github.rest.teams.getMembershipForUserInOrg({
+                org: 'ansys',
+                team_slug: 'pymapdl-maintainers',
+                username: '${{ env.USER_TRIGGERING }}',
+              });
+            } catch (error) {
+              core.error(`Error fetching team membership: ${error.message}`);
+              core.exportVariable('CONTINUE', 'false');
+              return;
+             }
 
             if (core.isDebug()) {
               core.debug(data);
