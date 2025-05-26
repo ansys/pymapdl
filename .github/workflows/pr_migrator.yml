@@ -287,12 +287,15 @@ jobs:
 
       - name: Create comment about failed migration
         if: ${{ failure() }}
-        uses: peter-evans/create-or-update-comment@v4
+        uses: octokit/request-action@v2.4.0
         with:
-          issue-number: ${{ env.PR_NUMBER}}
+          route: POST /repos/{owner}/{repo}/issues/{issue_number}/comments
+          owner: ansys
+          repo: pymapdl
+          issue_number: ${{ env.PR_NUMBER }}
           body: |
-            **Error**
+            **⚠️ Error ⚠️**
 
             An error occurred while migrating and syncing the PR. Please check the action logs for more details.
-
-          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
