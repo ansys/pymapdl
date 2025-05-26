@@ -67,17 +67,21 @@ jobs:
         with:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |
-            const eventName = ${{ github.event_name }};
+            const eventName = '${{ github.event_name }}';
             core.debug(`Event name: ${eventName}`);
 
             let prNumber, userTriggering, commentBody;
 
             if (eventName === "workflow_dispatch") {
+              core.info('Running in workflow_dispatch mode');
+
               prNumber = '${{ github.event.inputs.issue_number }}';
               userTriggering = '${{ github.actor }}';
               commentBody = '${{ github.event.inputs.comment_body }}';
               commentId = '${{ github.event.inputs.comment_id }}';
             } else {
+              core.info('Running in issue_comment mode');
+
               prNumber = '${{ github.event.issue.number }}';
               userTriggering = '${{ github.event.comment.user.login }}';
               commentBody = '${{ github.event.comment.body }}';
@@ -332,21 +336,21 @@ jobs:
           script: |
             // React positively to the comment
             try {
-              github.rest.reactions.createForIssueComment({
-                owner: 'ansys',
-                repo: 'pymapdl',
-                comment_id: '${{ env.COMMENT_ID }}',
-                content: '-1',
-              });
-              // Create a comment to notify the user about success.
-              github.rest.issues.createComment({
-                owner: 'ansys',
-                repo: 'pymapdl',
-                issue_number: '${{ env.PR_NUMBER }}',
-                body: `**:x: Error :x:**
+                github.rest.reactions.createForIssueComment({
+                  owner: 'ansys',
+                  repo: 'pymapdl',
+                  comment_id: '${{ env.COMMENT_ID }}',
+                  content: '-1',
+                });
+                // Create a comment to notify the user about success.
+                github.rest.issues.createComment({
+                  owner: 'ansys',
+                  repo: 'pymapdl',
+                  issue_number: '${{ env.PR_NUMBER }}',
+                  body: `**:x: Error :x:**
 
             An error occurred while migrating and syncing the PR. Please check the action logs for more details.`,
-            });
+              });
 
             } catch (error) {
               console.error('Failed to react to the comment:', error);
