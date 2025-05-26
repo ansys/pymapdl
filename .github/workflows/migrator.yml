@@ -206,6 +206,34 @@ jobs:
             if (core.isDebug()) {
               core.debug(data);
             }
+
+            if (!data || !data.head || !data.base) {
+              throw new Error('Pull request data is incomplete');
+            }
+
+            if (data.head.repo.full_name === 'ansys/pymapdl') {
+              core.warning('The PR is already in the main repository. No migration needed. Exiting...');
+              core.exportVariable('CONTINUE', 'false');
+
+              // React neutrally to the comment
+              github.rest.reactions.createForIssueComment({
+                owner: 'ansys',
+                repo: 'pymapdl',
+                comment_id: ${{ env.COMMENT_ID }},
+                content: 'confused',
+              });
+              // Create a comment to notify the user about insufficient permissions
+              github.rest.issues.createComment({
+                owner: 'ansys',
+                repo: 'pymapdl',
+                issue_number: '${{ env.PR_NUMBER }}',
+                body: `**:question: Wrong command? :question:**
+
+            You are trying to migrate a PR that is already in the main repository :confused:. No migration needed.`,
+              });
+              return;
+            }
+
             // Set the PR head and base branches as environment variables
             if (data && data.head && data.base) {
               core.exportVariable('PR_HEAD_BRANCH', data.head.ref);
