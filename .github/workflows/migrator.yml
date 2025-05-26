@@ -67,21 +67,21 @@ jobs:
         with:
           github-token: ${{ secrets.TOKEN_TEAMS_USER_READ }}
           script: |
-            const eventName = github.event_name;
+            const eventName = ${{ github.event_name }};
             core.debug(`Event name: ${eventName}`);
 
             let prNumber, userTriggering, commentBody;
 
             if (eventName === "workflow_dispatch") {
-              prNumber = github.event.inputs.issue_number;
-              userTriggering = github.actor;
-              commentBody = github.event.inputs.comment_body;
-              commentId = github.event.inputs.comment_id;
+              prNumber = ${{ github.event.inputs.issue_number }};
+              userTriggering = ${{ github.actor }};
+              commentBody = ${{ github.event.inputs.comment_body }};
+              commentId = ${{ github.event.inputs.comment_id }};
             } else {
-              prNumber = github.event.issue.number;
-              userTriggering = github.event.comment.user.login;
-              commentBody = github.event.comment.body;
-              commentId = github.event.comment.id;
+              prNumber = ${{ github.event.issue.number }};
+              userTriggering = ${{ github.event.comment.user.login }};
+              commentBody = ${{ github.event.comment.body }};
+              commentId = ${{ github.event.comment.id }};
             }
             core.debug(`PR Number: ${prNumber}`);
             core.debug(`User triggering: ${userTriggering}`);
@@ -334,7 +334,7 @@ jobs:
             github.rest.reactions.createForIssueComment({
               owner: 'ansys',
               repo: 'pymapdl',
-              comment_id: ${{ env.COMMENT_ID }},
+              comment_id: '${{ env.COMMENT_ID }}',
               content: '-1',
             });
             // Create a comment to notify the user about success.
