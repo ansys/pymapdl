@@ -336,6 +336,26 @@ jobs:
           script: |
             // React positively to the comment
             try {
+                // Remove previous reaction if it exists
+                data = await github.rest.reactions.listForCommitComment({
+                  owner: 'ansys',
+                  repo: 'pymapdl',
+                  comment_id: '${{ env.COMMENT_ID }}',
+                  content: '+1',
+                });
+
+                for (const reaction of data.data) {
+                  if (reaction.content === '+1' && reaction.user.login === 'pyansys-ci-bot') {
+                    // Remove the reaction
+                    await github.rest.reactions.deleteForIssueComment({
+                        owner: 'ansys',
+                        repo: 'pymapdl',
+                        comment_id: '${{ env.COMMENT_ID }}',
+                        reaction_id: reaction.id,
+                      });
+                    }
+                }
+
                 github.rest.reactions.createForIssueComment({
                   owner: 'ansys',
                   repo: 'pymapdl',
