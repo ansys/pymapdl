@@ -290,9 +290,6 @@ jobs:
           owner: ansys
           repo: pymapdl
           issue_number: ${{ env.PR_NUMBER }}
-          body: |
-            **:x: Error :x:**
-
-            An error occurred while migrating and syncing the PR. Please check the action logs for more details.
+          body: An error occurred while migrating and syncing the PR. Please check the action logs for more details.
         env:
           GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
