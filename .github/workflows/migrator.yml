@@ -46,6 +46,12 @@ on:
         description: 'Comment ID'
         required: true
         type: number
+      
+      actor:
+        description: 'Actor triggering the workflow'
+        required: true
+        type: string
+
 
 permissions:
   contents: write
@@ -76,7 +82,7 @@ jobs:
               core.info('Running in workflow_dispatch mode');
 
               prNumber = '${{ github.event.inputs.issue_number }}';
-              userTriggering = '${{ github.actor }}';
+              userTriggering = '${{ github.event.inputs.actor }}';
               commentBody = '${{ github.event.inputs.comment_body }}';
               commentId = '${{ github.event.inputs.comment_id }}';
             } else {
@@ -335,55 +341,50 @@ jobs:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |
             // React positively to the comment
-            try {
-                // Remove previous reaction if it exists
-                data = await github.rest.reactions.listForCommitComment({
-                  owner: 'ansys',
-                  repo: 'pymapdl',
-                  comment_id: '${{ env.COMMENT_ID }}',
-                  content: '+1',
-                });
 
-                for (const reaction of data.data) {
-                  if (reaction.content === '+1' && reaction.user.login === 'pyansys-ci-bot') {
-                    // Remove the reaction
-                    await github.rest.reactions.deleteForIssueComment({
-                        owner: 'ansys',
-                        repo: 'pymapdl',
-                        comment_id: '${{ env.COMMENT_ID }}',
-                        reaction_id: reaction.id,
-                      });
-                    }
-                }
+            commentId = '${{ env.COMMENT_ID }}';
+            pr_number = '${{ env.PR_NUMBER }}';
 
-                github.rest.reactions.createForIssueComment({
-                  owner: 'ansys',
-                  repo: 'pymapdl',
-                  comment_id: '${{ env.COMMENT_ID }}',
-                  content: '-1',
-                });
-                // Create a comment to notify the user about success.
-                github.rest.issues.createComment({
-                  owner: 'ansys',
-                  repo: 'pymapdl',
-                  issue_number: '${{ env.PR_NUMBER }}',
-                  body: `**:x: Error :x:**
+            // Remove previous reaction if it exists
+            data = await github.rest.reactions.listForCommitComment({
+              owner: 'ansys',
+              repo: 'pymapdl',
+              comment_id: commentId,
+              content: '+1',
+            });
+
+            if (data && data.data && data.data.length > 0) {
+              core.debug(`Found ${data.data.length} reactions for comment ${commentId}`);
+
+              for (const reaction of data.data) {
+                if (reaction.content === '+1' && reaction.user.login === 'pyansys-ci-bot') {
+                  // Remove the reaction
+                  await github.rest.reactions.deleteForIssueComment({
+                      owner: 'ansys',
+                      repo: 'pymapdl',
+                      comment_id: commentId,
+                      reaction_id: reaction.id,
+                    });
+                  }
+              }
+
+            } else {
+              core.debug(`No reactions found for comment ${commentId}`);
+            }
+
+            github.rest.reactions.createForIssueComment({
+              owner: 'ansys',
+              repo: 'pymapdl',
+              comment_id: commentId,
+              content: '-1',
+            });
+            // Create a comment to notify the user about success.
+            github.rest.issues.createComment({
+              owner: 'ansys',
+              repo: 'pymapdl',
+              issue_number: pr_number,
+              body: `**:x: Error :x:**
 
             An error occurred while migrating and syncing the PR. Please check the action logs for more details.`,
               });
 
-            } catch (error) {
-              console.error('Failed to react to the comment:', error);
-              pr_number = '${{ github.event.issue.number }}';
-              if (!pr_number) {
-                pr_number = '${{ github.event.inputs.issue_number }}';
-              }
-              github.rest.issues.createComment({
-                owner: 'ansys',
-                repo: 'pymapdl',
-                issue_number: pr_number,
-                body: `**:x: Error :x:**
-
-            An error occurred while migrating and syncing the PR. Please check the action logs for more details.`,
-            });
-            }
