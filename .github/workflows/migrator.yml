@@ -273,7 +273,7 @@ jobs:
             if (data && data.head && data.base) {
               core.exportVariable('PR_HEAD_BRANCH', data.head.ref);
               core.exportVariable('PR_HEAD_REPO', data.head.repo.full_name);
-              core.exportVariable('PR_BASE_BRANCH', `migration4/pr-${{ env.PR_NUMBER }}`);
+              core.exportVariable('PR_BASE_BRANCH', `migration5/pr-${{ env.PR_NUMBER }}`);
               core.exportVariable('PR_BASE_REPO', data.base.repo.full_name);
             } else {
               throw new Error('Failed to retrieve pull request details');
@@ -385,7 +385,7 @@ jobs:
             Closes #${prNumber}`,
             });
 
-            core.info(`New PR created: ${newPrData}`);
+            core.info(`New PR created: ${newPrData.data.number}`);
 
             // React positively to the comment
             github.rest.reactions.createForIssueComment({
@@ -402,7 +402,7 @@ jobs:
               issue_number: '${{ env.PR_NUMBER }}',
               body: `**:rocket: Migration completed!**
 
-            The PR [#${newPrData.number}](${newPrData.html_url}) has been created successfully.`,
+            The PR [#${newPrData.data.number}](${newPrData.data.html_url}) has been created successfully.`,
             });
 
       - name: Create comment about failed migration
