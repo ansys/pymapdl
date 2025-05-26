@@ -229,9 +229,9 @@ jobs:
                 owner: 'ansys',
                 repo: 'pymapdl',
                 issue_number: '${{ env.PR_NUMBER }}',
-                body: `**:question: Wrong command? :question:**
+                body: `**:question: Wrong command? :confused:**
 
-            You are trying to migrate a PR that is already in the main repository :confused:. No migration needed.`,
+            You are trying to migrate a PR that is already in the main repository. No migration needed.`,
               });
               return;
             }
