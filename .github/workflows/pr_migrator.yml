@@ -101,9 +101,25 @@ jobs:
           content: '-1'
         env:
           GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          
+      - name: Comment negatively if the user is NOT a team member
+        if : ${{ env.IS_MEMBER == 'false' && github.event_name == 'issue_comment' && env.CONTINUE != 'true' }}
+        uses: octokit/request-action@v2.4.0
+        with:
+          route: POST /repos/{owner}/{repo}/issues/{issue_number}/comments
+          owner: ansys
+          repo: pymapdl
+          issue_number: ${{ env.PR_NUMBER }}
+          body: |
+            ** ⛔️ Not appropiated permissions! **
 
+            You are not a member of the PyMAPDL maintainers team. Please contact a team member to migrate this PR.          
+        env:
+          GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+      
       - name: Check the migration mode
         id: check_mode
+        if: ${{ env.CONTINUE == 'true' }}
         run: |
           # Three modes of operation:
           # 1. auto - automatically resolves conflicts if possible, otherwise exits
@@ -121,7 +137,7 @@ jobs:
           fi
 
       - name: React positively to comment if user is a team member
-        if : ${{ env.IS_MEMBER == 'true' && github.event_name == 'issue_comment' }}
+        if : ${{ env.IS_MEMBER == 'true' && github.event_name == 'issue_comment' && env.CONTINUE == 'true'}}
         uses: dkershner6/reaction-action@v2
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
@@ -130,7 +146,7 @@ jobs:
 
       - name: Get PR details
         id: pr
-        if : ${{ env.IS_MEMBER == 'true' }}
+        if : ${{ env.IS_MEMBER == 'true' && env.CONTINUE == 'true' }}
         uses: octokit/request-action@v2.4.0
         with:
           route: GET /repos/${{ github.repository }}/pulls/${{ env.PR_NUMBER }}
@@ -139,7 +155,7 @@ jobs:
 
       - name: Parse PR data
         id: extract
-        if : ${{ env.IS_MEMBER == 'true' }}
+        if : ${{ env.IS_MEMBER == 'true' && env.CONTINUE == 'true'}}
         run: |
           PR_HEAD_BRANCH="${{ fromJson(steps.pr.outputs.data).head.ref }}"
           echo "PR_HEAD_BRANCH=$PR_HEAD_BRANCH" >> $GITHUB_ENV
@@ -153,13 +169,13 @@ jobs:
           echo "PR_BASE_REPO=$PR_BASE_REPO" >> $GITHUB_ENV
 
       - name: Checkout repo
-        if : ${{ env.IS_MEMBER == 'true' }}
+        if : ${{ env.IS_MEMBER == 'true' && env.CONTINUE == 'true'}}
         uses: actions/checkout@v4
         with:
           ref: main
 
       - name: Clone head repo and checkout branch. Resolve conflicts if needed.
-        if : ${{ env.IS_MEMBER == 'true' }}
+        if : ${{ env.IS_MEMBER == 'true' && env.CONTINUE == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
         run: |
@@ -218,7 +234,7 @@ jobs:
           fi
 
       - name: Opening PR if needed.
-        if : ${{ env.IS_MEMBER == 'true' }}
+        if : ${{ env.IS_MEMBER == 'true' && env.CONTINUE == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
         run: |
@@ -243,7 +259,7 @@ jobs:
 
       # Confirm success with a reaction
       - name: React to comment when success
-        if : ${{ env.IS_MEMBER == 'true' && github.event_name == 'issue_comment' }}
+        if : ${{ env.IS_MEMBER == 'true' && github.event_name == 'issue_comment' && env.CONTINUE == 'true' }}
         uses: dkershner6/reaction-action@v2
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
@@ -251,7 +267,7 @@ jobs:
           reaction: "rocket"
 
       - name: Create comment about successful migration
-        if: ${{ env.IS_MEMBER == 'true' && env.COMMENT == 'true' }}
+        if: ${{ env.IS_MEMBER == 'true' && env.COMMENT == 'true' && env.CONTINUE == 'true' }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ env.PR_NUMBER}}
