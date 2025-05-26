@@ -136,24 +136,25 @@ jobs:
                 team_slug: 'pymapdl-maintainers',
                 username: '${{ env.USER_TRIGGERING }}',
               });
+
+              if (core.isDebug()) {
+                core.debug(data);
+              }
+
+              // Check if the user is a member or maintainer of the team
+              if (data && data.state === 'active' && (data.role === 'member' || data.role === 'maintainer')) {
+                core.setOutput('is_member', true);
+                core.exportVariable('CONTINUE', 'true');
+              } else {
+                core.setOutput('is_member', false);
+                core.exportVariable('CONTINUE', 'false');
+              }
+
             } catch (error) {
               core.error(`Error fetching team membership: ${error.message}`);
               core.exportVariable('CONTINUE', 'false');
               return;
              }
-
-            if (core.isDebug()) {
-              core.debug(data);
-            }
-
-            // Check if the user is a member or maintainer of the team
-            if (data && data.state === 'active' && (data.role === 'member' || data.role === 'maintainer')) {
-              core.setOutput('is_member', true);
-              core.exportVariable('CONTINUE', 'true');
-            } else {
-              core.setOutput('is_member', false);
-              core.exportVariable('CONTINUE', 'false');
-            }
 
       - name: 'Reply to comment'
         uses: actions/github-script@v7
@@ -203,6 +204,7 @@ jobs:
               repo: 'pymapdl',
               pull_number: ${{ env.PR_NUMBER }},
             });
+
             if (core.isDebug()) {
               core.debug(data);
             }
