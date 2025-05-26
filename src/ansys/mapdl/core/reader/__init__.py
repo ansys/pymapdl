@@ -20,12 +20,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ansys.mapdl.core.examples.downloads import (
-    download_bracket,
-    download_cfx_mapping_example_data,
-    download_manifold_example_data,
-)
-
-# Canonical Examples
-from ansys.mapdl.core.examples.examples import *
-from ansys.mapdl.core.examples.verif_files import vmfiles
+from .result import DPFResult
