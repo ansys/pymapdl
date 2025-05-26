@@ -73,10 +73,7 @@ jobs:
         id: is_organization_member
         uses: octokit/request-action@v2.4.0
         with:
-          route: GET /organizations/{org_id}/team/{team_id}/memberships/{username}
-          org_id: ansys
-          team_id: pymapdl-maintainers
-          username: ${{ env.USER_TRIGGERING }}
+          route: GET /organizations/ansys/team/pymapdl-maintainers/memberships/${{ env.USER_TRIGGERING }}
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN_TEAMS_USER_READ }}
 
@@ -111,7 +108,7 @@ jobs:
           repo: pymapdl
           issue_number: ${{ env.PR_NUMBER }}
           body: |
-            ** ⛔️ Not appropiated permissions! **
+            ** :stop_sign: Not appropiated permissions! :stop_sign: **
 
             You are not a member of the PyMAPDL maintainers team. Please contact a team member to migrate this PR.          
         env:
@@ -279,7 +276,7 @@ jobs:
           repo: pymapdl
           issue_number: ${{ env.PR_NUMBER }}
           body: |
-            **🚀 Migration completed!**
+            **:rocket: Migration completed!**
 
             The PR [#${{ env.BASE_PR_NUMBER }}](https://github.com/${{ github.repository }}/pull/${{ env.BASE_PR_NUMBER }}) has been created successfully.
         env:
@@ -294,7 +291,7 @@ jobs:
           repo: pymapdl
           issue_number: ${{ env.PR_NUMBER }}
           body: |
-            **⚠️ Error ⚠️**
+            **:x: Error :x:**
 
             An error occurred while migrating and syncing the PR. Please check the action logs for more details.
         env:
