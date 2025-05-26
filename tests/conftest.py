@@ -76,7 +76,7 @@ SUPPORT_PLOTTING = support_plotting()
 IS_SMP = is_smp()
 
 QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
-VALID_PORTS = []
+VALID_PORTS: list[int] = []
 ACCEPTABLE_FAILURE_RATE = 50
 
 ## Skip ifs
@@ -385,9 +385,9 @@ class MyReporter(TerminalReporter):
             header = markup("[FAILED]", **FAILED_COLOR)
             return get_failure_message(rep, header, message)
 
-        failed = self.stats.get("failed", [])
-        for rep in failed:
-            self.write_line(get_failed_message(rep))
+        passed = self.stats.get("passed", [])
+        for rep in passed:
+            self.write_line(get_passed_message(rep))
 
         skipped = self.stats.get("skipped", [])
         for rep in skipped:
@@ -397,9 +397,9 @@ class MyReporter(TerminalReporter):
         for rep in errored:
             self.write_line(get_error_message(rep))
 
-        passed = self.stats.get("passed", [])
-        for rep in passed:
-            self.write_line(get_passed_message(rep))
+        failed = self.stats.get("failed", [])
+        for rep in failed:
+            self.write_line(get_failed_message(rep))
 
         xpassed = self.stats.get("xpassed", [])
         for rep in xpassed:
