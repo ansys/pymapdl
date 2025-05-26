@@ -88,11 +88,21 @@ jobs:
               team_slug: 'pymapdl-maintainers',
               username: '${{ env.USER_TRIGGERING }}',
             });
-            core.setOutput('data', data);
+
+            // Check if the user is a member or maintainer of the team
+            core.debug(data);
+
+            if (data && data.state === 'active' && (data.role === 'member' || data.role === 'maintainer')) {
+              core.setOutput('is_member', true);
+              core.exportVariable('CONTINUE', 'true');
+            } else {
+              core.setOutput('is_member', false);
+              core.exportVariable('CONTINUE', 'false');
+            }
 
       - name: Set IS_MEMBER and CONTINUE environment variables
         env:
-          ROLE: ${{ fromJson(steps.is_organization_member.outputs.data).role }}
+          ROLE: ${{ steps.is_organization_member.outputs.role }}
         run: |
           if [[ $ROLE == 'member' || $ROLE == 'maintainer']]; then
             echo "IS_MEMBER='true'" >> $GITHUB_ENV
