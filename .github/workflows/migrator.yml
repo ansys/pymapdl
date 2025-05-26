@@ -91,8 +91,10 @@ jobs:
             core.setOutput('data', data);
 
       - name: Set IS_MEMBER and CONTINUE environment variables
+        env:
+          ROLE: ${{ fromJson(steps.is_organization_member.outputs.data).role }}
         run: |
-          if [[ ${{ fromJson(steps.is_organization_member.outputs.data).role }} == 'member' ]]; then
+          if [[ $ROLE == 'member' || $ROLE == 'maintainer']]; then
             echo "IS_MEMBER='true'" >> $GITHUB_ENV
             echo "CONTINUE='true'" >> $GITHUB_ENV
           else
@@ -289,7 +291,7 @@ jobs:
           repo: pymapdl
           issue_number: ${{ env.PR_NUMBER }}
           body: |
-            **:rocket: Migration completed!**
+            ** :rocket: Migration completed! **
 
             The PR [#${{ env.BASE_PR_NUMBER }}](https://github.com/${{ github.repository }}/pull/${{ env.BASE_PR_NUMBER }}) has been created successfully.
         env:
@@ -304,7 +306,7 @@ jobs:
           repo: pymapdl
           issue_number: ${{ env.PR_NUMBER }}
           body: |
-            **:x: Error :x:**
+            ** :x: Error :x: **
 
             An error occurred while migrating and syncing the PR. Please check the action logs for more details.
         env:
