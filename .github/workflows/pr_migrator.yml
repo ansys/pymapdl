@@ -101,7 +101,7 @@ jobs:
           content: '-1'
         env:
           GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-          
+
       - name: Comment negatively if the user is NOT a team member
         if : ${{ env.IS_MEMBER == 'false' && github.event_name == 'issue_comment' && env.CONTINUE != 'true' }}
         uses: octokit/request-action@v2.4.0
@@ -116,7 +116,19 @@ jobs:
             You are not a member of the PyMAPDL maintainers team. Please contact a team member to migrate this PR.          
         env:
           GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-      
+
+      - name: React positively to comment if the user is a team member
+        if : ${{ github.event_name == 'issue_comment' && env.CONTINUE == 'true' }}
+        uses: octokit/request-action@v2.4.0
+        with:
+          route: POST /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions
+          owner: ansys
+          repo: pymapdl
+          comment_id: ${{ github.event.comment.id }}
+          content: '+1'
+        env:
+          GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+
       - name: Check the migration mode
         id: check_mode
         if: ${{ env.CONTINUE == 'true' }}
@@ -136,46 +148,34 @@ jobs:
             echo "MODE=''" >> $GITHUB_ENV
           fi
 
-      - name: React positively to comment if user is a team member
-        if : ${{ env.IS_MEMBER == 'true' && github.event_name == 'issue_comment' && env.CONTINUE == 'true'}}
-        uses: dkershner6/reaction-action@v2
-        with:
-          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-          commentId: ${{ github.event.comment.id }}
-          reaction: "+1"
-
-      - name: Get PR details
+      - name: Get pull request details
         id: pr
-        if : ${{ env.IS_MEMBER == 'true' && env.CONTINUE == 'true' }}
+        if : ${{ env.CONTINUE == 'true' }}
         uses: octokit/request-action@v2.4.0
         with:
-          route: GET /repos/${{ github.repository }}/pulls/${{ env.PR_NUMBER }}
+          route: GET /repos/{owner}/{repo}/pulls/{pull_number}
+          owner: ansys
+          repo: pymapdl
+          pull_number: ${{ env.PR_NUMBER }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Parse PR data
-        id: extract
-        if : ${{ env.IS_MEMBER == 'true' && env.CONTINUE == 'true'}}
+      - name: Parse pull request data
+        if : ${{ env.CONTINUE == 'true' }}
         run: |
-          PR_HEAD_BRANCH="${{ fromJson(steps.pr.outputs.data).head.ref }}"
-          echo "PR_HEAD_BRANCH=$PR_HEAD_BRANCH" >> $GITHUB_ENV
-
-          PR_HEAD_REPO="${{ fromJson(steps.pr.outputs.data).head.repo.full_name }}"
-          echo "PR_HEAD_REPO=$PR_HEAD_REPO" >> $GITHUB_ENV
-
-          PR_BASE_BRANCH="migration/pr-${{ env.PR_NUMBER }}"
-          echo "PR_BASE_BRANCH=$PR_BASE_BRANCH" >> $GITHUB_ENV
-          PR_BASE_REPO="${{ github.repository }}"
-          echo "PR_BASE_REPO=$PR_BASE_REPO" >> $GITHUB_ENV
+          echo "PR_HEAD_BRANCH='${{ fromJson(steps.pr.outputs.data).head.ref }}'" >> $GITHUB_ENV
+          echo "PR_HEAD_REPO='${{ fromJson(steps.pr.outputs.data).head.repo.full_name }}'" >> $GITHUB_ENV
+          echo "PR_BASE_BRANCH='migration/pr-${{ env.PR_NUMBER }}'" >> $GITHUB_ENV
+          echo "PR_BASE_REPO='${{ github.repository }}'" >> $GITHUB_ENV
 
       - name: Checkout repo
-        if : ${{ env.IS_MEMBER == 'true' && env.CONTINUE == 'true'}}
+        if : ${{ env.CONTINUE == 'true'}}
         uses: actions/checkout@v4
         with:
           ref: main
 
       - name: Clone head repo and checkout branch. Resolve conflicts if needed.
-        if : ${{ env.IS_MEMBER == 'true' && env.CONTINUE == 'true' }}
+        if : ${{ env.CONTINUE == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
         run: |
@@ -194,13 +194,13 @@ jobs:
           echo "Checking out '${{ env.PR_BASE_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}/${{ env.PR_HEAD_BRANCH }}'"
           git checkout -b ${{ env.PR_BASE_BRANCH }} head_repo/${{ env.PR_HEAD_BRANCH }}
 
-          echo "Merging '${{ env.PR_HEAD_BRANCH }}' branch into '${{ env.PR_BASE_BRANCH }}'"
+          echo "\033[1;92m[INFO] Merging '${{ env.PR_HEAD_BRANCH }}' branch into '${{ env.PR_BASE_BRANCH }}' \033[0m"
           git merge head_repo/${{ env.PR_HEAD_BRANCH }}
           CONFLICTS=$(git ls-files -u | wc -l)
           echo "CONFLICTS=$CONFLICTS"
 
           if [[ "$CONFLICTS" -gt 0 && -n "${{ env.MODE }}" ]]; then
-            echo "Merge conflicts detected: $CONFLICTS files"
+            echo "::warning:: Conflicts trying to solve using mode '${{ env.MODE }}'."
 
             # Show conflicting files
             echo "Conflicting files:"
@@ -215,26 +215,26 @@ jobs:
             # Verify if conflicts are resolved
             REMAINING_CONFLICTS=$(git ls-files -u | wc -l)
             if [ "$REMAINING_CONFLICTS" -gt 0 ]; then
-              echo "Error: Conflicts remain after resolution. Aborting."
+              echo "::error:: Conflicts remain after resolution. Aborting."
               exit 1
             fi
 
             # Continue the merge
-            git merge --continue || { echo "Merge failed. Aborting."; exit 1; }
+            git merge --continue || { echo "::error:: Merge failed. Aborting."; exit 1; }
           else
             echo "No merge conflicts detected."
           fi
 
           echo "Pushing changes to '${{ env.PR_BASE_REPO }}' repo"
-          git push origin ${{ env.PR_BASE_BRANCH }} --force-with-lease || { echo "Push failed. Aborting."; exit 1; }
+          git push origin ${{ env.PR_BASE_BRANCH }} --force-with-lease || { echo "::error:: Push failed. Aborting."; exit 1; }
 
           if [[ "${{ env.MODE }}" == "--ours" ]]; then
             echo "Sync mode is 'ours'. Pushing to head_repo/${{ env.PR_HEAD_BRANCH }} with 'ours' changes"
-            git push origin head_repo/${{ env.PR_HEAD_BRANCH }} --force-with-lease || { echo "Push to head_repo/${{ env.PR_HEAD_BRANCH }} failed. Aborting."; exit 1; }
+            git push origin head_repo/${{ env.PR_HEAD_BRANCH }} --force-with-lease || { echo "::error:: Push to head_repo/${{ env.PR_HEAD_BRANCH }} failed. Aborting."; exit 1; }
           fi
 
       - name: Opening PR if needed.
-        if : ${{ env.IS_MEMBER == 'true' && env.CONTINUE == 'true' }}
+        if : ${{ env.CONTINUE == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
         run: |
@@ -242,11 +242,11 @@ jobs:
           echo "BASE_PR_NUMBER=$BASE_PR_NUMBER" >> $GITHUB_ENV
 
           if [[ -n "$BASE_PR_NUMBER" ]]; then
-            echo "Open PR exists for branch '${{ env.PR_BASE_BRANCH }}': PR #$BASE_PR_NUMBER"
+            echo "\033[1;92m[INFO] Open PR exists for branch '${{ env.PR_BASE_BRANCH }}': PR #$BASE_PR_NUMBER \033[0m"
             echo "COMMENT=false" >> $GITHUB_ENV
 
           else
-            echo "No open PR exists for branch '${{ env.PR_BASE_BRANCH }}'. Creating PR..."
+            echo "\033[1;92m[INFO] No open PR exists for branch '${{ env.PR_BASE_BRANCH }}'. Creating PR... \033[0m"
             echo "COMMENT=true" >> $GITHUB_ENV
 
             title_pr='chore: migrated PR ${{ env.PR_NUMBER }}'
@@ -259,27 +259,34 @@ jobs:
 
       # Confirm success with a reaction
       - name: React to comment when success
-        if : ${{ env.IS_MEMBER == 'true' && github.event_name == 'issue_comment' && env.CONTINUE == 'true' }}
-        uses: dkershner6/reaction-action@v2
+        if : ${{ github.event_name == 'issue_comment' && env.CONTINUE == 'true' }}
+        uses: octokit/request-action@v2.4.0
         with:
-          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-          commentId: ${{ github.event.comment.id }}
-          reaction: "rocket"
+          route: POST /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions
+          owner: ansys
+          repo: pymapdl
+          comment_id: ${{ github.event.comment.id }}
+          content: 'rocket'
+        env:
+          GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
 
-      - name: Create comment about successful migration
-        if: ${{ env.IS_MEMBER == 'true' && env.COMMENT == 'true' && env.CONTINUE == 'true' }}
-        uses: peter-evans/create-or-update-comment@v4
+      - name:  Create comment in case of successful migration
+        if : ${{ github.event_name == 'issue_comment' && env.CONTINUE != 'true' }}
+        uses: octokit/request-action@v2.4.0
         with:
-          issue-number: ${{ env.PR_NUMBER}}
+          route: POST /repos/{owner}/{repo}/issues/{issue_number}/comments
+          owner: ansys
+          repo: pymapdl
+          issue_number: ${{ env.PR_NUMBER }}
           body: |
             **🚀 Migration completed!**
 
             The PR [#${{ env.BASE_PR_NUMBER }}](https://github.com/${{ github.repository }}/pull/${{ env.BASE_PR_NUMBER }}) has been created successfully.
-
-          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
 
       - name: Create comment about failed migration
-        if: ${{ env.IS_MEMBER == 'true' && failure() }}
+        if: ${{ failure() }}
         uses: peter-evans/create-or-update-comment@v4
         with:
           issue-number: ${{ env.PR_NUMBER}}
