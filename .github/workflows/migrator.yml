@@ -155,6 +155,37 @@ jobs:
               core.exportVariable('CONTINUE', 'false');
               return;
              }
+      
+      - name: 'Delete previous reactions'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          script: |
+            // Remove previous reaction if it exists
+            data = await github.rest.reactions.listForIssueComment({
+              owner: 'ansys',
+              repo: 'pymapdl',
+              comment_id: commentId,
+            });
+
+            if (data && data.data && data.data.length > 0) {
+              core.debug(`Found ${data.data.length} reactions for comment ${commentId}`);
+
+              for (const reaction of data.data) {
+                if (reaction.user.login === 'pyansys-ci-bot') {
+                  // Remove the reaction
+                  await github.rest.reactions.deleteForIssueComment({
+                      owner: 'ansys',
+                      repo: 'pymapdl',
+                      comment_id: commentId,
+                      reaction_id: reaction.id,
+                    });
+                  }
+              }
+
+            } else {
+              core.debug(`No reactions found for comment ${commentId}`);
+            }
 
       - name: 'Reply to comment'
         uses: actions/github-script@v7
@@ -380,33 +411,6 @@ jobs:
             // React positively to the comment
             commentId = '${{ env.COMMENT_ID }}';
             pr_number = '${{ env.PR_NUMBER }}';
-
-            // Remove previous reaction if it exists
-            data = await github.rest.reactions.listForIssueComment({
-              owner: 'ansys',
-              repo: 'pymapdl',
-              comment_id: commentId,
-              content: '+1',
-            });
-
-            if (data && data.data && data.data.length > 0) {
-              core.debug(`Found ${data.data.length} reactions for comment ${commentId}`);
-
-              for (const reaction of data.data) {
-                if (reaction.content === '+1' && reaction.user.login === 'pyansys-ci-bot') {
-                  // Remove the reaction
-                  await github.rest.reactions.deleteForIssueComment({
-                      owner: 'ansys',
-                      repo: 'pymapdl',
-                      comment_id: commentId,
-                      reaction_id: reaction.id,
-                    });
-                  }
-              }
-
-            } else {
-              core.debug(`No reactions found for comment ${commentId}`);
-            }
 
             github.rest.reactions.createForIssueComment({
               owner: 'ansys',
