@@ -90,6 +90,18 @@ jobs:
             echo "CONTINUE='false'" >> $GITHUB_ENV
           fi
 
+      - name: React negatively to comment if the user is NOT a team member
+        if : ${{ env.IS_MEMBER == 'false' && github.event_name == 'issue_comment' && env.CONTINUE != 'true' }}
+        uses: octokit/request-action@v2.4.0
+        with:
+          route: POST /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions
+          owner: ansys
+          repo: pymapdl
+          comment_id: ${{ github.event.comment.id }}
+          content: '-1'
+        env:
+          GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+
       - name: Check the migration mode
         id: check_mode
         run: |
@@ -115,14 +127,6 @@ jobs:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           commentId: ${{ github.event.comment.id }}
           reaction: "+1"
-
-      - name: React negatively to comment if the user is NOT a team member
-        if : ${{ env.IS_MEMBER == 'false' && github.event_name == 'issue_comment' }}
-        uses: dkershner6/reaction-action@v2
-        with:
-          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
-          commentId: ${{ github.event.comment.id }}
-          reaction: "-1"
 
       - name: Get PR details
         id: pr
