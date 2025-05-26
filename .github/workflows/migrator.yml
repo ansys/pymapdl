@@ -161,6 +161,8 @@ jobs:
         with:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |
+            commentId = '${{ env.COMMENT_ID }}';
+
             // Remove previous reaction if it exists
             data = await github.rest.reactions.listForIssueComment({
               owner: 'ansys',
@@ -169,7 +171,7 @@ jobs:
             });
 
             if (data && data.data && data.data.length > 0) {
-              core.debug(`Found ${data.data.length} reactions for comment ${commentId}`);
+              core.info(`Found ${data.data.length} reactions for comment ${commentId}`);
 
               for (const reaction of data.data) {
                 if (reaction.user.login === 'pyansys-ci-bot') {
