@@ -240,7 +240,7 @@ jobs:
             if (data && data.head && data.base) {
               core.exportVariable('PR_HEAD_BRANCH', data.head.ref);
               core.exportVariable('PR_HEAD_REPO', data.head.repo.full_name);
-              core.exportVariable('PR_BASE_BRANCH', `migration/pr-${{ env.PR_NUMBER }}`);
+              core.exportVariable('PR_BASE_BRANCH', `migration2/pr-${{ env.PR_NUMBER }}`);
               core.exportVariable('PR_BASE_REPO', data.base.repo.full_name);
             } else {
               throw new Error('Failed to retrieve pull request details');
