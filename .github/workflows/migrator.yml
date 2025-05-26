@@ -273,7 +273,7 @@ jobs:
             if (data && data.head && data.base) {
               core.exportVariable('PR_HEAD_BRANCH', data.head.ref);
               core.exportVariable('PR_HEAD_REPO', data.head.repo.full_name);
-              core.exportVariable('PR_BASE_BRANCH', `migration3/pr-${{ env.PR_NUMBER }}`);
+              core.exportVariable('PR_BASE_BRANCH', `migration4/pr-${{ env.PR_NUMBER }}`);
               core.exportVariable('PR_BASE_REPO', data.base.repo.full_name);
             } else {
               throw new Error('Failed to retrieve pull request details');
@@ -376,6 +376,7 @@ jobs:
             newPrData = await github.rest.pulls.create({
               owner: 'ansys',
               repo: 'pymapdl',
+              debug: true,
               head: `${prBaseBranch}`,  // This is the branch we just created which becomes now the head of the PR, and the base (target) branch is the main branch.
               base: `main`,
               title: `chore: migrated PR 2 ${prNumber}`,
