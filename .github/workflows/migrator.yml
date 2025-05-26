@@ -51,13 +51,6 @@ on:
         description: 'Actor triggering the workflow'
         required: true
         type: string
-      
-      recreate:
-        description: 'Recreate the PR if it already exists'
-        required: true
-        default: false
-        type: boolean
-
 
 permissions:
   contents: write
@@ -91,7 +84,6 @@ jobs:
               userTriggering = '${{ github.event.inputs.actor }}';
               commentBody = '${{ github.event.inputs.comment_body }}';
               commentId = '${{ github.event.inputs.comment_id }}';
-              recreate = '${{ github.event.inputs.recreate }}';
             } else {
               core.info('Running in issue_comment mode');
 
@@ -99,9 +91,8 @@ jobs:
               userTriggering = '${{ github.event.comment.user.login }}';
               commentBody = '${{ github.event.comment.body }}';
               commentId = '${{ github.event.comment.id }}';
-              recreate = 'false'; // Not used in issue_comment mode
-
             }
+
             core.debug(`PR Number: ${prNumber}`);
             core.debug(`User triggering: ${userTriggering}`);
             core.debug(`Comment body: ${commentBody}`);
@@ -118,14 +109,14 @@ jobs:
             // 3. ours - resolves conflicts by taking changes from the base branch
             let mode = '';
             if (
-              commentBody.includes('pyansys-ci-bot sync theirs') ||
-              commentBody.includes('pyansys-ci-bot migrate theirs')
+              commentBody.includes('@pyansys-ci-bot sync theirs') ||
+              commentBody.includes('@pyansys-ci-bot migrate theirs')
             ) {
               core.info("Resolving conflicts by taking 'theirs' changes");
               mode = '--theirs';
             } else if (
-              commentBody.includes('pyansys-ci-bot sync ours') ||
-              commentBody.includes('pyansys-ci-bot migrate ours')
+              commentBody.includes('@pyansys-ci-bot sync ours') ||
+              commentBody.includes('@pyansys-ci-bot migrate ours')
             ) {
               core.info("Resolving conflicts by taking 'ours' changes");
               mode = '--ours';
@@ -134,13 +125,12 @@ jobs:
             }
             core.exportVariable('MODE', mode);
 
-            if (eventName !== "workflow_dispatch"){
-              // Check if the comment body contains the trigger phrase
-              if (commentBody.includes('recreate') && commentBody.includes('pyansys-ci-bot')) {
-                core.info('Recreate flag detected in comment body. Setting RECREATE to true.');
-                core.exportVariable('RECREATE', 'true');
-              }
+            // Check if the comment body contains the trigger phrase
+            if (commentBody.includes('recreate') && commentBody.includes('@pyansys-ci-bot')) {
+              core.info('Recreate flag detected in comment body. Setting RECREATE to true.');
+              core.exportVariable('RECREATE', 'true');
             }
+
 
       - id: is_organization_member
         uses: actions/github-script@v7
