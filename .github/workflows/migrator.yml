@@ -86,7 +86,7 @@ jobs:
             const { data } = await github.rest.teams.getMembershipForUserInOrg({
               org: 'ansys',
               team_slug: 'pymapdl-maintainers',
-              username: 'pmaroneh',
+              username: '${{ env.USER_TRIGGERING }}',
             });
             core.setOutput('data', data);
 
