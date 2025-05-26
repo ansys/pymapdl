@@ -345,13 +345,13 @@ jobs:
               repo: 'pymapdl',
               head: `${prBaseBranch}`,  // This is the branch we just created which becomes now the head of the PR, and the base (target) branch is the main branch.
               base: `main`,
-              title: `chore: migrated PR ${prNumber}`,
+              title: `chore: migrated PR 2 ${prNumber}`,
               body: `This PR was migrated from a fork to allow secrets to run in workflows. Check the [original PR](https://github.com/ansys/pymapdl/pull/${prNumber}) for more details.
 
             Closes #${prNumber}`,
             });
 
-            core.debug(`New PR created: ${newPrData.number}`);
+            core.info(`New PR created: ${newPrData.number}`);
 
             // React positively to the comment
             github.rest.reactions.createForIssueComment({
@@ -360,6 +360,7 @@ jobs:
               comment_id: ${{ env.COMMENT_ID }},
               content: 'rocket',
             });
+
             // Create a comment to notify the user about success.
             github.rest.issues.createComment({
               owner: 'ansys',
