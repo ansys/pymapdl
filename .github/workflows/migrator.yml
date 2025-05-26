@@ -51,12 +51,6 @@ on:
         description: 'Actor triggering the workflow'
         required: true
         type: string
-      
-      recreate:
-        description: 'Recreate the PR if it already exists'
-        required: true
-        default: false
-        type: boolean
 
 
 permissions:
@@ -91,7 +85,6 @@ jobs:
               userTriggering = '${{ github.event.inputs.actor }}';
               commentBody = '${{ github.event.inputs.comment_body }}';
               commentId = '${{ github.event.inputs.comment_id }}';
-              recreate = '${{ github.event.inputs.recreate }}';
             } else {
               core.info('Running in issue_comment mode');
 
@@ -99,8 +92,6 @@ jobs:
               userTriggering = '${{ github.event.comment.user.login }}';
               commentBody = '${{ github.event.comment.body }}';
               commentId = '${{ github.event.comment.id }}';
-              recreate = 'false'; // Not used in issue_comment mode
-
             }
             core.debug(`PR Number: ${prNumber}`);
             core.debug(`User triggering: ${userTriggering}`);
@@ -133,14 +124,6 @@ jobs:
               core.info("No specific sync mode provided, defaulting to 'auto' which will exit if there are conflicts.");
             }
             core.exportVariable('MODE', mode);
-
-            if (eventName !== "workflow_dispatch"){
-              // Check if the comment body contains the trigger phrase
-              if (commentBody.includes('recreate') && commentBody.includes('pyansys-ci-bot')) {
-                core.info('Recreate flag detected in comment body. Setting RECREATE to true.');
-                core.exportVariable('RECREATE', 'true');
-              }
-            }
 
       - id: is_organization_member
         uses: actions/github-script@v7
@@ -350,7 +333,7 @@ jobs:
 
             core.debug(existingPrs.data);
 
-            if (existingPrs.data.length > 0 && ${{ env.RECREATE }} == 'false') {
+            if (existingPrs.data.length > 0) {
               core.info(`PR already exists for branch ${prBaseBranch}. Skipping creation.`);
               core.exportVariable('COMMENT', 'false');
               return;
