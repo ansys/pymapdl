@@ -132,7 +132,7 @@ pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_
 pymapdl = "ansys.mapdl.core.cli:main"
 
 [tool.pytest.ini_options]
-addopts = "-rxXsa -vvv --maxfail=10 --strict-markers --random-order-bucket=class --random-order --durations=10  --timeout=180"
+addopts = "-ra -vvv --color=yes --durations=10 --ignore_image_cache --maxfail=10 --profile --profile-svg --random-order --random-order-bucket=class --strict-markers --strict-markers --timeout=180"
 junit_family = "legacy"
 filterwarnings = [
     "ignore::ResourceWarning",
