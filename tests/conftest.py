@@ -26,6 +26,7 @@ import os
 from pathlib import Path
 from shutil import get_terminal_size
 from sys import platform
+from typing import Any
 from unittest.mock import patch
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
@@ -76,7 +77,7 @@ SUPPORT_PLOTTING = support_plotting()
 IS_SMP = is_smp()
 
 QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
-VALID_PORTS = []
+VALID_PORTS: list[int] = []
 ACCEPTABLE_FAILURE_RATE = 50
 
 ## Skip ifs
@@ -313,8 +314,12 @@ def pytest_report_header(config, start_path, startdir):
 ## Changing report line length
 class MyReporter(TerminalReporter):
     def short_test_summary(self):
-        # your own impl goes here, for example:
-        self.write_sep("=", "PyMAPDL Pytest short summary")
+        from _pytest.reports import CollectReport
+
+        if not self.reportchars:
+            return
+
+        self.write_sep("=", "PyMAPDL Pytest short summary", cyan=True, bold=True)
         markup = self._tw.markup
 
         if self.hasmarkup:
@@ -329,85 +334,93 @@ class MyReporter(TerminalReporter):
         XPASSED_COLOR = {"Yellow": color, "bold": True}
         XFAILED_COLOR = {"yellow": color}
 
-        # self._tw.markup("asdf", Red=True)
-
-        def get_normal_message(rep, header, message):
+        def get_normal_message(rep: Any, header: str, message: str):
             location = rep.location
             if message:
                 message = f" - {message}"
-
             if location[0] == location[2]:
                 return f"{header} {rep.head_line}{message}"
             else:
                 path = f"{location[0]}:{location[1]}"
                 return f"{header} {rep.head_line} - {path}{message}"
 
-        def get_failure_message(rep, header, message):
+        def get_failure_message(rep: Any, header: str, message: str):
             location = rep.location
             path = f"{location[0]}:{location[1]}"
-            cause = message.splitlines()
             cause = " ".join(
                 [
                     each[2:].strip() if each.startswith("E ") else each.strip()
-                    for each in cause
+                    for each in message.splitlines()
                 ]
             )
 
             return f"{header} {rep.head_line} - {path}: {cause}"
 
-        def get_skip_message(rep):
+        def get_skip_message(rep: CollectReport):
             message = rep.longrepr[2]
             header = markup("[SKIPPED]", **SKIPPED_COLOR)
             return get_normal_message(rep, header, message)
 
-        def get_passed_message(rep):
+        def get_passed_message(rep: CollectReport):
             message = rep.longreprtext
             header = markup("[PASSED]", **PASSED_COLOR)
             return get_normal_message(rep, header, message)
 
-        def get_xfailed_message(rep):
-            message = " ".join(rep.longrepr.reprcrash.message.split(":")[1:]).strip()
+        def get_xfailed_message(rep: CollectReport):
+            # Removing the error type
+            message_lines = rep.longrepr.reprcrash.message.split(":")[1:]
+            message = " ".join([each.strip() for each in message_lines])
+            message = " ".join(message.splitlines())
+
             header = markup("[XFAILED]", **XFAILED_COLOR)
             return get_normal_message(rep, header, message)
 
-        def get_xpassed_message(rep):
-            message = rep.longreprtext
+        def get_xpassed_message(rep: CollectReport):
+            message = str(rep.longreprtext)
+            if not message:
+                message = "This test was expected to fail, but it passed."
             header = markup("[XPASSED]", **XPASSED_COLOR)
             return get_normal_message(rep, header, message)
 
-        def get_error_message(rep):
-            message = rep.longrepr.reprcrash.message
+        def get_error_message(rep: CollectReport):
+            message = str(rep.longrepr.reprcrash.message)
             header = markup("[ERROR]", **ERROR_COLOR)
             return get_failure_message(rep, header, message)
 
-        def get_failed_message(rep):
-            message = rep.longrepr.reprcrash.message
+        def get_failed_message(rep: CollectReport):
+            message = str(rep.longrepr.reprcrash.message)
             header = markup("[FAILED]", **FAILED_COLOR)
             return get_failure_message(rep, header, message)
 
-        failed = self.stats.get("failed", [])
-        for rep in failed:
-            self.write_line(get_failed_message(rep))
+        if "p" in self.reportchars:
+            passed: list[CollectReport] = self.stats.get("passed", [])
+            for rep in passed:
+                self.write_line(get_passed_message(rep))
 
-        skipped = self.stats.get("skipped", [])
-        for rep in skipped:
-            self.write_line(get_skip_message(rep))
+        if "s" in self.reportchars:
+            skipped: list[CollectReport] = self.stats.get("skipped", [])
+            for rep in skipped:
+                self.write_line(get_skip_message(rep))
 
-        errored = self.stats.get("error", [])
-        for rep in errored:
-            self.write_line(get_error_message(rep))
+        if "E" in self.reportchars:
+            errored: list[CollectReport] = self.stats.get("error", [])
+            for rep in errored:
+                self.write_line(get_error_message(rep))
 
-        passed = self.stats.get("passed", [])
-        for rep in passed:
-            self.write_line(get_passed_message(rep))
+        if "f" in self.reportchars:
+            failed: list[CollectReport] = self.stats.get("failed", [])
+            for rep in failed:
+                self.write_line(get_failed_message(rep))
 
-        xpassed = self.stats.get("xpassed", [])
-        for rep in xpassed:
-            self.write_line(get_xpassed_message(rep))
+        if "X" in self.reportchars:
+            xpassed: list[CollectReport] = self.stats.get("xpassed", [])
+            for rep in xpassed:
+                self.write_line(get_xpassed_message(rep))
 
-        xfailed = self.stats.get("xfailed", [])
-        for rep in xfailed:
-            self.write_line(get_xfailed_message(rep))
+        if "x" in self.reportchars:
+            xfailed: list[CollectReport] = self.stats.get("xfailed", [])
+            for rep in xfailed:
+                self.write_line(get_xfailed_message(rep))
 
 
 @pytest.hookimpl(trylast=True)
