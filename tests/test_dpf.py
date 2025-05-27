@@ -32,7 +32,7 @@ if is_installed("ansys-dpf-core"):
     from ansys.dpf import core as dpf
     from ansys.dpf.core.server_types import DPF_DEFAULT_PORT
 
-    DPF_PORT = os.environ.get("DPF_PORT", DPF_DEFAULT_PORT)  # Set in ci.yaml
+    DPF_PORT = int(os.environ.get("DPF_PORT", DPF_DEFAULT_PORT))  # Set in ci.yaml
 
 
 @pytest.fixture()
@@ -46,7 +46,7 @@ def dpf_server():
     # Start the DPF server
     if ON_LOCAL:
         # If running locally, start the server
-        dpf_server = dpf.start_local_server(port=int(DPF_PORT))
+        dpf_server = dpf.start_local_server(port=DPF_PORT)
         assert not dpf_server.info["server_ip"]
 
     else:
@@ -64,7 +64,7 @@ def model(dpf_server, mapdl, solved_box, tmpdir):
 
     # Upload RST
     if not dpf_server.local_server:
-        rst_path = dpf.upload_file_in_tmp_folder(rst_path)
+        rst_path = dpf.upload_file_in_tmp_folder(rst_path, server=dpf_server)
 
     model = dpf.Model(rst_path)
     assert model.results is not None

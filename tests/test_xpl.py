@@ -202,7 +202,6 @@ class Test_xpl:
 
     @requires("ansys-math-core")
     @pytest.mark.usefixtures("check_supports_extract")
-    @pytest.mark.xfail(reason="Flaky test. See #2435")
     def test_extract(self, xpl):
         # expecting fixture to already have a non-result file open
         assert xpl._filename[-3:] != "rst"

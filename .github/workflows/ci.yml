@@ -21,7 +21,6 @@ on:
 env:
   ON_CI: True
   PROJECT_NAME: 'PyMAPDL'
-  MAIN_PYTHON_VERSION: '3.12'
   PACKAGE_NAME: 'ansys-mapdl-core'
   PACKAGE_NAMESPACE: 'ansys.mapdl.core'
   DOCUMENTATION_CNAME: 'mapdl.docs.pyansys.com'
@@ -53,7 +52,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: ansys/actions/doc-deploy-changelog@v9
+      - uses: ansys/actions/doc-deploy-changelog@5dc39c7838f50142138f7ac518ff3e4dca065d97 # v9.0.12
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
@@ -66,7 +65,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Check pull-request name
-        uses: ansys/actions/check-pr-title@v9
+        uses: ansys/actions/check-pr-title@5dc39c7838f50142138f7ac518ff3e4dca065d97 # v9.0.12
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -79,7 +78,7 @@ jobs:
         folder: ["doc", "examples"]
     steps:
       - name: "Ansys documentation style checks"
-        uses: ansys/actions/doc-style@v9
+        uses: ansys/actions/doc-style@5dc39c7838f50142138f7ac518ff3e4dca065d97 # v9.0.12
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: ${{ matrix.folder }}
@@ -96,7 +95,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: ['3.10', '3.11', '3.12']
+        python-version: ['3.10', '3.11', '3.12', '3.13']
         # Only perform wheelhouse builds for macOS when releasing
         should-release: 
           - ${{ github.event_name == 'push' && contains(github.ref, 'refs/tags') }}
@@ -105,7 +104,7 @@ jobs:
             os: macos-latest
     steps:
       - name: "Build wheelhouse and perform smoke test"
-        uses: ansys/actions/build-wheelhouse@v9
+        uses: ansys/actions/build-wheelhouse@5dc39c7838f50142138f7ac518ff3e4dca065d97 # v9.0.12
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           operating-system: ${{ matrix.os }}
@@ -124,9 +123,9 @@ jobs:
     name: "Check library vulnerabilities"
     runs-on: ubuntu-22.04
     steps:
-      - uses: ansys/actions/check-vulnerabilities@v9
+      - uses: ansys/actions/check-vulnerabilities@5dc39c7838f50142138f7ac518ff3e4dca065d97 # v9.0.12
         with:
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+          python-version: '3.13'
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           python-package-name: ${{ env.PACKAGE_NAME }}
           dev-mode: ${{ github.ref != 'refs/heads/main' }}
@@ -178,6 +177,7 @@ jobs:
     with:
       mapdl-version: "${{ matrix.mapdl-version }}"
       file-name: "${{ matrix.mapdl-version }}-remote"
+      python-version: '3.13'
 
 
   build-test-local-matrix:
@@ -219,6 +219,7 @@ jobs:
       file-name: "${{ matrix.mapdl-version }}-local"
       tags: "local"
       latest-version: "252"
+      python-version: '3.13'
       test_dpf: ${{ contains(matrix.mapdl-version, 'cicd') }}
 
 
@@ -243,6 +244,7 @@ jobs:
       file-name: "${{ matrix.mapdl-version }}-minimal"
       tags: "local,minimal"
       latest-version: "252"
+      python-version: '3.13'
       test_dpf: false
 
 
@@ -266,6 +268,7 @@ jobs:
       testing-minimal: false
       on-console: true
       pytest-arguments: '-k console'
+      python-version: '3.13'
       file-name: "${{ matrix.mapdl-version }}-console"
       tags: "local,console"
       test_dpf: false
@@ -294,10 +297,10 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: "Build library source and wheel artifacts"
-        uses: ansys/actions/build-library@v9
+        uses: ansys/actions/build-library@5dc39c7838f50142138f7ac518ff3e4dca065d97 # v9.0.12
         with:
           library-name: ${{ env.PACKAGE_NAME }}
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+          python-version: '3.13'
 
 
   release:
@@ -329,7 +332,7 @@ jobs:
           skip-existing: false
 
       - name: "Release to GitHub"
-        uses: ansys/actions/release-github@v9
+        uses: ansys/actions/release-github@5dc39c7838f50142138f7ac518ff3e4dca065d97 # v9.0.12
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           additional-artifacts: "minimum_requirements.txt"
@@ -343,7 +346,7 @@ jobs:
     needs: [release]
     steps:
       - name: "Deploy the stable documentation"
-        uses: ansys/actions/doc-deploy-stable@v9
+        uses: ansys/actions/doc-deploy-stable@5dc39c7838f50142138f7ac518ff3e4dca065d97 # v9.0.12
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -359,7 +362,7 @@ jobs:
     needs: [docs-build]
     steps:
       - name: "Deploy the latest documentation"
-        uses: ansys/actions/doc-deploy-dev@v9
+        uses: ansys/actions/doc-deploy-dev@5dc39c7838f50142138f7ac518ff3e4dca065d97 # v9.0.12
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -414,4 +417,4 @@ jobs:
       - name: "Run Pytest-summary action"
         uses: ./.github/actions/pytest-summary
         with:
-          python-version: ${{ env.MAIN_PYTHON_VERSION }}
+          python-version: '3.13'
