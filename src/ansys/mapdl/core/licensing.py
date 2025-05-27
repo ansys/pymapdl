@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -24,21 +24,18 @@
 
 import os
 import socket
-import subprocess
+
+# Subprocess is needed to start the backend. But
+# the input is controlled by the library. Excluding bandit check.
+import subprocess  # nosec B404
 import time
 
-from ansys.mapdl.core import LOG
+from ansys.mapdl.core import _HAS_ATP, LOG
 from ansys.mapdl.core.errors import LicenseServerConnectionError
 from ansys.mapdl.core.misc import threaded_daemon
 
-try:
-    from ansys.tools.path import get_ansys_path, version_from_path
-
-    _HAS_ATP = True
-
-except ModuleNotFoundError:
-    _HAS_ATP = False
-
+if _HAS_ATP:
+    from ansys.tools.path import get_mapdl_path, version_from_path
 
 LOCALHOST = "127.0.0.1"
 LIC_PATH_ENVAR = "ANSYSLIC_DIR"
@@ -51,6 +48,7 @@ LICENSES = {
     "meba": "Ansys Mechanical Enterprise Solver",
     "mech_2": "Ansys Mechanical Premium",
     "mech_1": "Ansys Mechanical Pro",
+    "preppost": "Mechanical Enterprise PrepPost",
 }
 ALLOWABLE_LICENSES = list(LICENSES)
 
@@ -333,13 +331,14 @@ class LicenseChecker:
             env["ANS_FLEXLM_DISABLE_DEFLICPATH"] = "TRUE"
 
         tstart = time.time()
+        # ansysli_util_path is controlled by the library.
+        # Excluding bandit check.
         process = subprocess.Popen(
-            f'"{ansysli_util_path}" -checkout {lic}',
+            [f'"{ansysli_util_path}"', "-checkout", f"{lic}"],
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             env=env,
-            shell=True,
-        )
+        )  # nosec B603
         output = process.stdout.read().decode()
 
         t_elap = time.time() - tstart
@@ -499,7 +498,7 @@ def get_ansys_license_debug_file_name():  # pragma: no cover
     hostname = socket.gethostname()
     appname = APP_NAME
     # This is the type of license my client requests (Windows 10, 2021R2)
-    version = version_from_path("mapdl", get_ansys_path(allow_input=False))
+    version = version_from_path("mapdl", get_mapdl_path(allow_input=False))
     ending = "out"
 
     if version < 221:

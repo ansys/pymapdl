@@ -120,53 +120,61 @@ The following table shows the supported versions of Ansys and the recommended in
 |                           |                        +-----------------------+-----------------------+-----------------------+
 |                           |                        | gRPC                  | CORBA                 | Console (Only Linux)  |
 +===========================+========================+=======================+=======================+=======================+
-| Ansys 2023 R1             | gRPC                   | |:heavy_check_mark:|  | |:heavy_minus_sign:|  | |:heavy_minus_sign:|  |
+| Ansys 2025 R1             | gRPC                   | |:white_check_mark:|  | |:exclamation:|       | |:exclamation:|       |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 2022 R2             | gRPC                   | |:heavy_check_mark:|  | |:heavy_minus_sign:|  | |:heavy_minus_sign:|  |
+| Ansys 2024 R2             | gRPC                   | |:white_check_mark:|  | |:exclamation:|       | |:exclamation:|       |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 2022 R1             | gRPC                   | |:heavy_check_mark:|  | |:heavy_minus_sign:|  | |:heavy_minus_sign:|  |
+| Ansys 2024 R1             | gRPC                   | |:white_check_mark:|  | |:exclamation:|       | |:exclamation:|       |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 2021 R2             | gRPC                   | |:heavy_check_mark:|  | |:heavy_check_mark:|  | |:heavy_minus_sign:|  |
+| Ansys 2023 R2             | gRPC                   | |:white_check_mark:|  | |:exclamation:|       | |:exclamation:|       |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 2021 R1             | gRPC                   | |:heavy_check_mark:|  | |:heavy_check_mark:|  | |:heavy_minus_sign:|  |
+| Ansys 2023 R1             | gRPC                   | |:white_check_mark:|  | |:exclamation:|       | |:exclamation:|       |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 2020 R2             | CORBA                  | |:x:|                 | |:heavy_check_mark:|  | |:heavy_check_mark:|  |
+| Ansys 2022 R2             | gRPC                   | |:white_check_mark:|  | |:exclamation:|       | |:exclamation:|       |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 2020 R1             | CORBA                  | |:x:|                 | |:heavy_check_mark:|  | |:heavy_check_mark:|  |
+| Ansys 2022 R1             | gRPC                   | |:white_check_mark:|  | |:exclamation:|       | |:exclamation:|       |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 2019 R3             | CORBA                  | |:x:|                 | |:heavy_check_mark:|  | |:heavy_check_mark:|  |
+| Ansys 2021 R2             | gRPC                   | |:white_check_mark:|  | |:white_check_mark:|  | |:exclamation:|       |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 2019 R2             | CORBA                  | |:x:|                 | |:heavy_check_mark:|  | |:heavy_check_mark:|  |
+| Ansys 2021 R1             | gRPC                   | |:white_check_mark:|  | |:white_check_mark:|  | |:exclamation:|       |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 2019 R1             | CORBA                  | |:x:|                 | |:heavy_check_mark:|  | |:heavy_check_mark:|  |
+| Ansys 2020 R2             | CORBA                  | |:x:|                 | |:white_check_mark:|  | |:white_check_mark:|  |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 19.2                | CORBA                  | |:x:|                 | |:heavy_check_mark:|  | |:heavy_check_mark:|  |
+| Ansys 2020 R1             | CORBA                  | |:x:|                 | |:white_check_mark:|  | |:white_check_mark:|  |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 19.1                | CORBA                  | |:x:|                 | |:heavy_check_mark:|  | |:heavy_check_mark:|  |
+| Ansys 2019 R3             | CORBA                  | |:x:|                 | |:white_check_mark:|  | |:white_check_mark:|  |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 19.0                | CORBA                  | |:x:|                 | |:heavy_check_mark:|  | |:heavy_check_mark:|  |
+| Ansys 2019 R2             | CORBA                  | |:x:|                 | |:white_check_mark:|  | |:white_check_mark:|  |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 18.2                | CORBA                  | |:x:|                 | |:heavy_check_mark:|  | |:heavy_check_mark:|  |
+| Ansys 2019 R1             | CORBA                  | |:x:|                 | |:white_check_mark:|  | |:white_check_mark:|  |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 18.1                | CORBA                  | |:x:|                 | |:heavy_check_mark:|  | |:heavy_check_mark:|  |
+| Ansys 19.2                | CORBA                  | |:x:|                 | |:white_check_mark:|  | |:white_check_mark:|  |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 18.0                | CORBA                  | |:x:|                 | |:heavy_check_mark:|  | |:heavy_check_mark:|  |
+| Ansys 19.1                | CORBA                  | |:x:|                 | |:white_check_mark:|  | |:white_check_mark:|  |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 17.2                | CORBA                  | |:x:|                 | |:heavy_check_mark:|  | |:heavy_check_mark:|  |
+| Ansys 19.0                | CORBA                  | |:x:|                 | |:white_check_mark:|  | |:white_check_mark:|  |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 17.1                | CORBA                  | |:x:|                 | |:heavy_check_mark:|  | |:heavy_check_mark:|  |
+| Ansys 18.2                | CORBA                  | |:x:|                 | |:white_check_mark:|  | |:white_check_mark:|  |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 17.0                | CORBA                  | |:x:|                 | |:heavy_check_mark:|  | |:heavy_check_mark:|  |
+| Ansys 18.1                | CORBA                  | |:x:|                 | |:white_check_mark:|  | |:white_check_mark:|  |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Ansys 16.2                | Console                | |:x:|                 | |:x:|                 | |:heavy_check_mark:|  |
+| Ansys 18.0                | CORBA                  | |:x:|                 | |:white_check_mark:|  | |:white_check_mark:|  |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
-| Older up to Ansys 13.0    | Console                | |:x:|                 | |:x:|                 | |:heavy_check_mark:|  |
+| Ansys 17.2                | CORBA                  | |:x:|                 | |:white_check_mark:|  | |:white_check_mark:|  |
++---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
+| Ansys 17.1                | CORBA                  | |:x:|                 | |:white_check_mark:|  | |:white_check_mark:|  |
++---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
+| Ansys 17.0                | CORBA                  | |:x:|                 | |:white_check_mark:|  | |:white_check_mark:|  |
++---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
+| Ansys 16.2                | Console                | |:x:|                 | |:x:|                 | |:white_check_mark:|  |
++---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
+| Older up to Ansys 13.0    | Console                | |:x:|                 | |:x:|                 | |:white_check_mark:|  |
 +---------------------------+------------------------+-----------------------+-----------------------+-----------------------+
 
 Where:
 
-* |:heavy_check_mark:| means that the interface is supported and recommended.
-* |:heavy_minus_sign:| means that the interface is supported, but not recommended. Their support might be dropped in the future.
+* |:white_check_mark:| means that the interface is supported and recommended.
+* |:exclamation:| means that the interface is supported, but not recommended. Their support might be dropped in the future.
 * |:x:| means that the interface is not supported.
 
 

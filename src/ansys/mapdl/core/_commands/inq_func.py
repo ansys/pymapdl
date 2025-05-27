@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -153,7 +153,7 @@ class inq_function:
               * 1 - double precision
               * 2 - real
               * 3 - complex
-              * 4 - character\*8
+              * 4 - character\\*8
               * 7 - index
 
             * 19 - return virtual type of file.
@@ -233,7 +233,7 @@ class inq_function:
               * 1 - double precision
               * 2 - real
               * 3 - complex
-              * 4 - character\*8
+              * 4 - character\\*8
               * 7 - index
 
             * 19 - return virtual type of file.
@@ -501,7 +501,7 @@ class inq_function:
             * -6, number of elements.
             * -7, pointer to volume in foreign db
             * -8, element shape.
-            * -9, (``section id``)\*10 + 2
+            * -9, (``section id``)\\*10 + 2
             * -10, element coordinate system.
             * -11, KZ2 - 2nd kpt for elem Z
             * -12, color and transparency packed
@@ -750,7 +750,7 @@ class inq_function:
             * 5 - return number of values stored for ncp
             * 11 - return void percent (integer)
             * 16 - return location of next record
-            * \-1 - return master node for this eqn (this is currently only used by solution DB object)
+            * -1 - return master node for this eqn (this is currently only used by solution DB object)
 
         pname : str
             Name of the variable where the queried value is stored.

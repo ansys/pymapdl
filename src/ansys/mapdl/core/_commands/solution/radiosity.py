@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -87,7 +87,7 @@ class Radiosity:
             Filename extension for radiosity mapping data file (default =
             .rsm).
 
-        dir\_
+        dir\\_
             Directory path for radiosity mapping data file. If you do not
             specify a directory path, it will default to your working
             directory.

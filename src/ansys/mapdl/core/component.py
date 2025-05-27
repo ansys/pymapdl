@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -25,7 +25,9 @@ import re
 from typing import (
     TYPE_CHECKING,
     Any,
+    Callable,
     Dict,
+    Iterator,
     List,
     Literal,
     Optional,
@@ -45,13 +47,13 @@ from ansys.mapdl.core.errors import ComponentDoesNotExits, ComponentIsNotSelecte
 if TYPE_CHECKING:  # pragma: no cover
     import logging
 
-ENTITIES_TYP = Literal[
+ENTITIES_TYP: List[str] = Literal[
     "NODE", "NODES", "ELEM", "ELEMS", "ELEMENTS", "VOLU", "AREA", "LINE", "KP"
 ]
 
-VALID_ENTITIES = list(get_args(ENTITIES_TYP))
+VALID_ENTITIES: List[str] = list(get_args(ENTITIES_TYP))
 
-SELECTOR_FUNCTION = [
+SELECTOR_FUNCTION: List[str] = [
     "NSEL",
     "NSEL",
     "ESEL",
@@ -63,7 +65,7 @@ SELECTOR_FUNCTION = [
     "KSEL",
 ]
 
-ENTITIES_MAPPING = {
+ENTITIES_MAPPING: Dict[str, Callable] = {
     entity.upper(): func for entity, func in zip(VALID_ENTITIES, SELECTOR_FUNCTION)
 }
 
@@ -71,18 +73,18 @@ ENTITIES_MAPPING = {
 ITEMS_VALUES = Optional[Union[str, int, List[int], NDArray[Any]]]
 UNDERLYING_DICT = Dict[str, ITEMS_VALUES]
 
-warning_entity = (
+WARNING_ENTITY: str = (
     "Assuming a {default_entity} selection.\n"
     "It is recommended you use the following notation to avoid this warning:\n"
-    ">>> mapdl.components['{key}'] = '{default_entity}' {value}\n"
+    ">>> mapdl.components['{key}'] = '{default_entity}', {value}\n"
     "Alternatively, you disable this warning using:\n"
     ">>> mapdl.components.default_entity_warning=False"
 )
 
 
 def _check_valid_pyobj_to_entities(
-    items: Union[Tuple[int, ...], List[int], NDArray[Any]]
-):
+    items: Union[Tuple[int, ...], List[int], NDArray[Any]],
+) -> None:
     """Check whether the python objects can be converted to entities.
     At the moment, only list and numpy arrays of ints are allowed.
     """
@@ -130,7 +132,7 @@ class Component(tuple):
     [1, 2, 3]
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args: Tuple[Any], **kwargs: Dict[Any, Any]) -> None:
         """Component object"""
         # Using tuple init because using object.__init__
         # For more information visit:
@@ -151,7 +153,7 @@ class Component(tuple):
 
         return obj
 
-    def __str__(self):
+    def __str__(self) -> str:
         tup_str = super().__str__()
         return f"Component(type='{self._type}', items={tup_str})"
 
@@ -165,7 +167,7 @@ class Component(tuple):
         return self._type
 
     @property
-    def items(self) -> tuple:
+    def items(self) -> Tuple[int]:
         """Return the ids of the entities in the component."""
         return tuple(self)
 
@@ -177,8 +179,8 @@ class ComponentManager:
     -----
 
     **Components need to be selected** using
-    :attr:`Mapdl.cmsel() <ansys.mapdl.core.Mapdl.cmsel>` before
-    being listed in :attr:`Mapdl.components <ansys.mapdl.core.Mapdl.components>`
+    :attr:`Mapdl.cmsel() <ansys.mapdl.core.Mapdl.cmsel>` before being listed in
+    :class:`Mapdl.components <ansys.mapdl.core.component.ComponentManager>`
 
     Examples
     --------
@@ -203,11 +205,15 @@ class ComponentManager:
 
     >>> mapdl.components["mycomp4"] = (1, 2, 3)
     /Users/german.ayuso/pymapdl/src/ansys/mapdl/core/component.py:282: UserWarning: Assuming a NODES selection.
+
+    This assumes you are doing a NODES selection.
     It is recommended you use the following notation to avoid this warning:
-    \>\>\> mapdl.components['mycomp3'] = 'NODES' (1, 2, 3)
+
+    >>> mapdl.components['mycomp3'] = 'NODES', (1, 2, 3)
+
     Alternatively, you disable this warning using:
-    > mapdl.components.default_entity_warning=False
-    warnings.warn(
+
+    >>> mapdl.components.default_entity_warning=False
 
     You can change the default type by changing
     :attr:`Mapdl.components.default_entity <ansys.mapdl.core.Mapdl.components.default_entity>`
@@ -250,13 +256,15 @@ class ComponentManager:
         self._mapdl_weakref: weakref.ReferenceType[Mapdl] = weakref.ref(mapdl)
         self.__comp: UNDERLYING_DICT = {}
         self._update_always: bool = True
-        self._autoselect_components: bool = False  # if True, PyMAPDL will try to select the CM first if it does not appear in the CMLIST output.
+        self._autoselect_components: bool = (
+            False  # if True, PyMAPDL will try to select the CM first if it does not appear in the CMLIST output.
+        )
 
         self._default_entity: ENTITIES_TYP = "NODES"
         self._default_entity_warning: bool = True
 
     @property
-    def default_entity(self):
+    def default_entity(self) -> ENTITIES_TYP:
         """Default entity for component creation."""
         return self._default_entity
 
@@ -269,12 +277,12 @@ class ComponentManager:
         self._default_entity = value.upper()
 
     @property
-    def default_entity_warning(self):
+    def default_entity_warning(self) -> bool:
         """Enables the warning when creating components other than node components without specifying its type."""
         return self._default_entity_warning
 
     @default_entity_warning.setter
-    def default_entity_warning(self, value: bool):
+    def default_entity_warning(self, value: bool) -> None:
         self._default_entity_warning = value
 
     @property
@@ -299,7 +307,7 @@ class ComponentManager:
         return self.__comp
 
     @_comp.setter
-    def _comp(self, value):
+    def _comp(self, value) -> None:
         self.__comp = value
 
     def __getitem__(self, key: str) -> ITEMS_VALUES:
@@ -369,7 +377,7 @@ class ComponentManager:
                 # Asumng default entity
                 if self.default_entity_warning:
                     warnings.warn(
-                        warning_entity.format(
+                        WARNING_ENTITY.format(
                             default_entity=self.default_entity,
                             key=key,
                             value=value,
@@ -399,7 +407,7 @@ class ComponentManager:
             # Assuming we are defining a CM with nodes
             if self.default_entity_warning:
                 warnings.warn(
-                    warning_entity.format(
+                    WARNING_ENTITY.format(
                         default_entity=self.default_entity,
                         key=key,
                         value=value,
@@ -455,7 +463,7 @@ class ComponentManager:
         """
         return key.upper() in self._comp.keys()
 
-    def __iter__(self):
+    def __iter__(self) -> Iterator:
         """
         Return an iterator over the component names.
 
@@ -467,8 +475,18 @@ class ComponentManager:
         """
         yield from self._comp.keys()
 
+    def __len__(self) -> int:
+        """Return the number of components
+
+        Returns
+        -------
+        int
+            Number of components
+        """
+        return self._comp.__len__()
+
     @property
-    def names(self):
+    def names(self) -> Tuple[str]:
         """
         Return a tuple that contains the components.
 
@@ -481,7 +499,7 @@ class ComponentManager:
         return tuple(self._comp.keys())
 
     @property
-    def types(self):
+    def types(self) -> Tuple[str]:
         """
         Return the types of the components.
 
@@ -493,7 +511,7 @@ class ComponentManager:
         """
         return tuple(self._comp.values())
 
-    def items(self):
+    def items(self) -> UNDERLYING_DICT:
         """
         Return a view object that contains the name-type pairs for each component.
 
@@ -505,7 +523,9 @@ class ComponentManager:
         """
         return self._comp.items()
 
-    def select(self, names: Union[str, list[str], tuple[str]], mute=False) -> None:
+    def select(
+        self, names: Union[str, list[str], tuple[str]], mute: bool = False
+    ) -> None:
         """Select Select components given their names
 
         Select components given their names.
@@ -516,6 +536,7 @@ class ComponentManager:
             Name(s) of the components
         mute : bool, optional
             Whether to mute the `/CMSEL` command output or not, by default False.
+
         """
         if isinstance(names, str):
             names = [names]
@@ -573,13 +594,13 @@ def _parse_cmlist(cmlist: Optional[str] = None) -> Dict[str, Any]:
         # header
         #  "NAME                            TYPE      SUBCOMPONENTS"
         blocks = re.findall(
-            r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+            r"(?s)NAME\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\*\*\*\*\*|\Z)",
             cmlist,
             flags=re.DOTALL,
         )
     elif re.search(r"NAME\s+SELE\s+TYPE\s+SUBCOMPONENTS", cmlist):
         blocks = re.findall(
-            r"(?s)NAME\s+SELE\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\Z)",
+            r"(?s)NAME\s+SELE\s+TYPE\s+SUBCOMPONENTS\s+(.*?)\s*(?=\n\s*\n|\*\*\*\*\*|\Z)",
             cmlist,
             flags=re.DOTALL,
         )

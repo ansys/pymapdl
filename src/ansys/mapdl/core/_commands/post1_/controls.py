@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -171,7 +171,7 @@ class Controls:
 
         .. warning::
            This will not change element plotting within PyMAPDL with
-           ``eplot(vtk=True)``
+           ``eplot()``
 
         Parameters
         ----------

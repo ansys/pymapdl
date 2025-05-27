@@ -79,14 +79,13 @@ docker/mapdl/v212
 docker/mapdl/_old
 docker/mapdl/*.sh
 
-
 # temp testing
 tmp.out
 
 # virtual environment
-venv/
+venv*
 .venv/
-.venv
+.venv*
 
 # Visual studio code local settings
 .vscode/
@@ -101,3 +100,6 @@ doc/source/sg_execution_times.rst
 *prin-stresses.html
 doc/webserver.log
 doc/webserver.pid
+
+# Profiling
+prof

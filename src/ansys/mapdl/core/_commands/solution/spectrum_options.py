@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -824,7 +824,7 @@ class SpectrumOptions:
         tblno
             Input table number.
 
-        type\_
+        type\\_
             Label identifying the type of spectrum:
 
             DISP - Displacement spectrum (in terms of displacement2/Hz ).
@@ -1340,7 +1340,7 @@ class SpectrumOptions:
         tblno
             Input table number.
 
-        type\_
+        type\\_
             Label identifying the type of spectrum:
 
             DISP   - Displacement spectrum (SPVAL values interpreted as displacements with units of

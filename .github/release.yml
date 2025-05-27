@@ -2,20 +2,21 @@ changelog:
   categories:
     - title: New Features
       labels:
-        - Enhancement
-        - NEW FEATURE
+        - enhancement
+        - new feature
     - title: Bug fixes or behavior changes
       labels:
-        - BUG
+        - bug
         - BLOCKER
     - title: Documentation
       labels:
-        - Documentation
-        - Examples
+        - documentation
+        - examples
     - title: Maintenance
       labels:
-        - Maintenance
-        - Dependencies
+        - maintenance
+        - dependencies
+        - CI/CD
     - title: MAPDL and/or API related
       labels:
         - MAPDL

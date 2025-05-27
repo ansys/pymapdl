@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -1167,7 +1167,7 @@ class AnalysisOptions:
         domains by expanding the smaller domains from the reduced graph back to
         the original mesh.
         """
-        command = f"DDOPTION,{decomp}"
+        command = f"DDOPTION,{decomp},{nprocpersol},{numsolforlp}"
         return self.run(command, **kwargs)
 
     def dmpext(
@@ -2619,7 +2619,7 @@ class AnalysisOptions:
 
             LOADSTEP - At the beginning of each load step.
 
-        set\_
+        set\\_
             Set of equations:
 
             All - Check for overconstraint between all constraint equations (default).
@@ -2781,7 +2781,7 @@ class AnalysisOptions:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Type of linear perturbation analysis to be performed:
 
             STATIC - Perform a linear perturbation static analysis.

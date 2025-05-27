@@ -105,9 +105,9 @@ To install Ansys products in WSL Linux, perform these steps:
      If you omit this argument, all products are installed. The *Ansys, Inc.
      Installation Guides* in the Ansys Help provides a list of valid
      values for the ``product_flags`` argument in `Chapter 6
-     <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v231/en/installation/unix_silent.html>`_
+     <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v241/en/installation/unix_silent.html>`_
      of the *Linux Installation Guide* and `Chapter 7
-     <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v231/en/installation/win_silent.html>`_
+     <https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v241/en/installation/win_silent.html>`_
      of the *Windows Installation Guide*.
 
      In the preceding example for MAPDL, you only need to specify the ``-mechapdl`` flag.
@@ -214,14 +214,14 @@ An example follows.
 
 .. code:: console
 
-    /ansys_inc/v222/ansys/bin/ansys222 -grpc
+    /ansys_inc/v241/ansys/bin/ansys241 -grpc
 
 This launches an MAPDL instance whose working directory is the current directory.
 If you want to change the working directory, you can use the ``-dir`` flag.
 
 .. code:: console
 
-    /ansys_inc/v222/ansys/bin/ansys222 -grpc -dir /tmp/ansys_jobs/myjob
+    /ansys_inc/v241/ansys/bin/ansys241 -grpc -dir /tmp/ansys_jobs/myjob
 
 
 Launch MAPDL in the Windows host OS
@@ -236,7 +236,7 @@ To do that, run this code:
    from ansys.mapdl.core import launch_mapdl
 
    mapdl = launch_mapdl(
-       exec_file="/mnt/c/Program Files/ANSYS Inc/v231/ANSYS/bin/winx64/ANSYS231.exe",
+       exec_file="/mnt/c/Program Files/ANSYS Inc/v241/ANSYS/bin/winx64/ANSYS241.exe",
    )
 
 As mentioned in `Open ports for license server communication`_, the Windows host OS
@@ -250,7 +250,7 @@ address is not correct, you can specify the IP address to connect to like this:
    from ansys.mapdl.core import launch_mapdl
 
    mapdl = launch_mapdl(
-       exec_file="/mnt/c/Program Files/ANSYS Inc/v231/ANSYS/bin/winx64/ANSYS231.exe",
+       exec_file="/mnt/c/Program Files/ANSYS Inc/v241/ANSYS/bin/winx64/ANSYS241.exe",
        ip="172.23.112.1",
    )
 
@@ -468,7 +468,7 @@ You can stop all processes with a given name with this command.
 
 .. code:: pwsh-session
 
-   Get-Process "ANSYS212" | Stop-Process
+   Get-Process "ANSYS241" | Stop-Process
 
 
 Install ``xvfb`` in CentOS 7

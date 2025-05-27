@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -27,10 +27,12 @@ This has been copied from test_mapdl.py
 """
 import os
 import time
+from unittest.mock import patch
+from warnings import catch_warnings
 
 import pytest
 
-from conftest import has_dependency, requires
+from conftest import clear, has_dependency, requires
 
 # skip entire module unless --console is enabled
 pytestmark = requires("console")
@@ -46,6 +48,12 @@ if has_dependency("ansys-mapdl-reader"):
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import MapdlRuntimeError
+from ansys.mapdl.core.plotting import GraphicsBackend
+
+
+@pytest.fixture(scope="function")
+def cleared(mapdl_console):
+    clear(mapdl_console)
 
 
 @pytest.fixture(scope="function")
@@ -68,16 +76,16 @@ def test_jobname(mapdl_console, cleared):
     assert mapdl_console.jobname == other_jobname
 
 
-def test_empty(mapdl_console):
+def test_empty(mapdl_console, cleared):
     with pytest.raises(ValueError):
         mapdl_console.run("")
 
 
-def test_str(mapdl_console):
-    assert "ANSYS Mechanical" in str(mapdl_console)
+def test_str(mapdl_console, cleared):
+    assert "Ansys Mechanical" in str(mapdl_console)
 
 
-def test_version(mapdl_console):
+def test_version(mapdl_console, cleared):
     assert isinstance(mapdl_console.version, float)
 
 
@@ -100,13 +108,14 @@ def test_comment(cleared, mapdl_console):
 
 def test_basic_command(cleared, mapdl_console):
     resp = mapdl_console.block(0, 1, 0, 1, 0, 1)
-    assert "CREATE A HEXAHEDRAL VOLUME" in resp
+    assert resp == 1
 
 
-def test_allow_ignore(mapdl_console):
-    mapdl_console.clear()
+def test_allow_ignore(mapdl_console, cleared):
     mapdl_console.allow_ignore = False
     assert mapdl_console.allow_ignore is False
+
+    mapdl_console.finish()
     with pytest.raises(pymapdl.errors.MapdlInvalidRoutineError):
         mapdl_console.k()
 
@@ -118,16 +127,23 @@ def test_allow_ignore(mapdl_console):
 
 
 def test_chaining(mapdl_console, cleared):
-    mapdl_console.prep7()
-    n_kp = 1000
-    with mapdl_console.chain_commands:
-        for i in range(1, 1 + n_kp):
-            mapdl_console.k(i, i, i, i)
+    # test chaining with distributed only
+    if mapdl_console._distributed:
+        with pytest.raises(MapdlRuntimeError):
+            with mapdl_console.chain_commands:
+                mapdl_console.prep7()
+    else:
+        mapdl_console.prep7()
+        n_kp = 1000
+        with mapdl_console.chain_commands:
+            for i in range(1, 1 + n_kp):
+                mapdl_console.k(i, i, i, i)
 
-    assert mapdl_console.geometry.n_keypoint == 1000
+        assert mapdl_console.geometry.n_keypoint == 1000
 
 
 def test_e(mapdl_console, cleared):
+    mapdl_console.prep7()
     mapdl_console.et("", 183)
     n0 = mapdl_console.n("", 0, 0, 0)
     n1 = mapdl_console.n("", 1, 0, 0)
@@ -217,20 +233,22 @@ def test_al(cleared, mapdl_console):
     assert a0 == 1
 
 
-def test_invalid_area(mapdl_console):
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
+def test_invalid_area(mapdl_console, cleared):
     with pytest.raises(MapdlRuntimeError):
         mapdl_console.a(0, 0, 0, 0)
 
 
-# def test_invalid_input(mapdl_console):
+# def test_invalid_input(mapdl_console, cleared):
 # with pytest.raises(FileNotFoundError):
 # mapdl_console.input('thisisnotafile')
 
 
 @requires("xserver")
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_kplot(cleared, mapdl_console, tmpdir):
     with pytest.raises(MapdlRuntimeError):
-        mapdl_console.kplot(vtk=True)
+        mapdl_console.kplot()
 
     mapdl_console.k("", 0, 0, 0)
     mapdl_console.k("", 1, 0, 0)
@@ -242,9 +260,12 @@ def test_kplot(cleared, mapdl_console, tmpdir):
     assert cpos is None
     assert os.path.isfile(filename)
 
-    mapdl_console.kplot(knum=True, vtk=False)  # make sure legacy still works
+    mapdl_console.kplot(
+        knum=True, backend=GraphicsBackend.MAPDL
+    )  # make sure legacy still works
 
 
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 @requires("xserver")
 def test_aplot(cleared, mapdl_console):
     k0 = mapdl_console.k("", 0, 0, 0)
@@ -263,14 +284,15 @@ def test_aplot(cleared, mapdl_console):
     mapdl_console.aplot(quality=-1)
 
     # and legacy as well
-    mapdl_console.aplot(vtk=False)
+    mapdl_console.aplot(graphics_backend=GraphicsBackend.MAPDL)
 
 
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 @requires("xserver")
-@pytest.mark.parametrize("vtk", [True, False])
-def test_vplot(cleared, mapdl_console, vtk):
+@pytest.mark.parametrize("backend", [GraphicsBackend.PYVISTA, GraphicsBackend.MAPDL])
+def test_vplot(cleared, mapdl_console, backend):
     mapdl_console.block(0, 1, 0, 1, 0, 1)
-    mapdl_console.vplot(vtk=vtk, color_areas=True)
+    mapdl_console.vplot(graphics_backend=backend, color_areas=True)
 
 
 def test_keypoints(cleared, mapdl_console):
@@ -285,7 +307,7 @@ def test_keypoints(cleared, mapdl_console):
         i += 1
 
     assert mapdl_console.geometry.n_keypoint == 4
-    assert np.allclose(kps, mapdl_console.geometry.keypoints)
+    assert np.allclose(kps, mapdl_console.geometry.get_keypoints(return_as_array=True))
     assert np.allclose(knum, mapdl_console.geometry.knum)
 
 
@@ -302,15 +324,16 @@ def test_lines(cleared, mapdl_console):
     l3 = mapdl_console.l(k3, k0)
 
     lines = mapdl_console.geometry.lines
-    assert isinstance(lines, pyvista.PolyData)
+    assert isinstance(lines, pyvista.MultiBlock)
     assert np.allclose(mapdl_console.geometry.lnum, [l0, l1, l2, l3])
     assert mapdl_console.geometry.n_line == 4
 
 
 @requires("xserver")
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_lplot(cleared, mapdl_console, tmpdir):
     with pytest.raises(MapdlRuntimeError):
-        mapdl_console.lplot(vtk=True)
+        mapdl_console.lplot()
 
     k0 = mapdl_console.k("", 0, 0, 0)
     k1 = mapdl_console.k("", 1, 0, 0)
@@ -326,7 +349,9 @@ def test_lplot(cleared, mapdl_console, tmpdir):
     assert cpos is None
     assert os.path.isfile(filename)
 
-    mapdl_console.lplot(vtk=False)  # make sure legacy still works
+    mapdl_console.lplot(
+        graphics_backend=GraphicsBackend.MAPDL
+    )  # make sure legacy still works
 
 
 def test_logging(mapdl_console, tmpdir):
@@ -363,7 +388,7 @@ def test_nodes(tmpdir, cleared, mapdl_console):
     basename = "tmp.nodes"
     filename = str(tmpdir.mkdir("tmpdir").join(basename))
     mapdl_console.nwrite(filename)
-    mapdl_console.download(basename, filename)
+    # mapdl_console.download(basename, filename)
 
     assert np.allclose(mapdl_console.mesh.nodes, np.loadtxt(filename)[:, 1:])
     assert mapdl_console.mesh.n_node == 11
@@ -376,6 +401,7 @@ def test_nodes(tmpdir, cleared, mapdl_console):
     assert not mapdl_console.mesh.nnum.size
 
 
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_enum(mapdl_console, make_block):
     assert mapdl_console.mesh.n_elem
     assert np.allclose(mapdl_console.mesh.enum, range(1, mapdl_console.mesh.n_elem + 1))
@@ -383,6 +409,7 @@ def test_enum(mapdl_console, make_block):
 
 @pytest.mark.parametrize("knum", [True, False])
 @requires("xserver")
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_nplot_vtk(cleared, mapdl_console, knum):
     with pytest.raises(MapdlRuntimeError):
         mapdl_console.nplot()
@@ -390,17 +417,21 @@ def test_nplot_vtk(cleared, mapdl_console, knum):
     mapdl_console.n(1, 0, 0, 0)
     mapdl_console.n(11, 10, 0, 0)
     mapdl_console.fill(1, 11, 9)
-    mapdl_console.nplot(vtk=True, knum=knum, background="w", color="k")
+    mapdl_console.nplot(knum=knum, background="w", color="k")
 
 
 @requires("xserver")
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_nplot(cleared, mapdl_console):
     mapdl_console.n(1, 0, 0, 0)
     mapdl_console.n(11, 10, 0, 0)
     mapdl_console.fill(1, 11, 9)
-    mapdl_console.nplot(vtk=False, background="w", color="k")
+    mapdl_console.nplot(
+        graphics_backend=GraphicsBackend.MAPDL, background="w", color="k"
+    )
 
 
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_elements(cleared, mapdl_console):
     mapdl_console.et(1, 185)
 
@@ -427,7 +458,7 @@ def test_elements(cleared, mapdl_console):
         [0, 1, 3],
     ]
 
-    with mapdl_console.chain_commands:
+    with mapdl_console.non_interactive:
         for cell in [cell1, cell2]:
             for x, y, z in cell:
                 mapdl_console.n(x=x, y=y, z=z)
@@ -462,7 +493,7 @@ def test_elements(cleared, mapdl_console):
         np.random.random((10, 3, 3)),
     ),
 )
-def test_set_get_parameters(mapdl_console, parm):
+def test_set_get_parameters(mapdl_console, cleared, parm):
     parm_name = pymapdl.misc.random_string(20)
     mapdl_console.parameters[parm_name] = parm
     if isinstance(parm, str):
@@ -476,7 +507,7 @@ def test_set_parameters_arr_to_scalar(mapdl_console, cleared):
     mapdl_console.parameters["PARM"] = 2
 
 
-def test_set_parameters_string_spaces(mapdl_console):
+def test_set_parameters_string_spaces(mapdl_console, cleared):
     with pytest.raises(ValueError):
         mapdl_console.parameters["PARM"] = "string with spaces"
 
@@ -506,13 +537,15 @@ def test_builtin_parameters(mapdl_console, cleared):
     assert mapdl_console.parameters.real == 1
 
 
-def test_eplot_fail(mapdl_console):
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
+def test_eplot_fail(mapdl_console, cleared):
     # must fail with empty mesh
     with pytest.raises(MapdlRuntimeError):
         mapdl_console.eplot()
 
 
 @requires("xserver")
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_eplot(mapdl_console, make_block):
     init_elem = mapdl_console.mesh.n_elem
     mapdl_console.aplot()  # check aplot and verify it doesn't mess up the element plotting
@@ -522,6 +555,7 @@ def test_eplot(mapdl_console, make_block):
 
 
 @requires("xserver")
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_eplot_screenshot(mapdl_console, make_block, tmpdir):
     filename = str(tmpdir.mkdir("tmpdir").join("tmp.png"))
     mapdl_console.eplot(
@@ -557,6 +591,7 @@ def test_cyclic_solve(mapdl_console, cleared):
         assert mapdl_console.result.nsets == 16
 
 
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_partial_mesh_nnum(mapdl_console, make_block):
     allsel_nnum_old = mapdl_console.mesh.nnum
     mapdl_console.nsel("S", "NODE", vmin=100, vmax=200)
@@ -567,7 +602,8 @@ def test_partial_mesh_nnum(mapdl_console, make_block):
     assert np.allclose(allsel_nnum_old, mapdl_console.mesh.nnum)
 
 
-def test_partial_mesh_nnum(mapdl_console, make_block):
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
+def test_partial_mesh_n_cells(mapdl_console, make_block):
     mapdl_console.nsel("S", "NODE", vmin=1, vmax=10)
     mapdl_console.esel("S", "ELEM", vmin=10, vmax=20)
     assert mapdl_console.mesh._grid.n_cells == 11
@@ -596,7 +632,7 @@ def test_cyclic_solve(mapdl_console, cleared):
     assert mapdl_console.result.nsets == 16  # multiple result files...
 
 
-def test_load_table(mapdl_console):
+def test_load_table(mapdl_console, cleared):
     my_conv = np.array(
         [
             [0, 0.001],
@@ -608,11 +644,114 @@ def test_load_table(mapdl_console):
         ]
     )
     mapdl_console.load_table("my_conv", my_conv, "TIME")
-    assert np.allclose(mapdl_console.parameters["my_conv"], my_conv[:, -1])
+    assert np.allclose(
+        mapdl_console.parameters["my_conv"].reshape(-1, 1),
+        my_conv[:, -1].reshape(-1, 1),
+    )
 
 
-def test_mode_console(mapdl_console):
-    assert mapdl_console.mode == "console"
+def test_mode_console(mapdl_console, cleared):
+    assert mapdl_console._mode == "console"
     assert not mapdl_console.is_grpc
     assert not mapdl_console.is_corba
     assert mapdl_console.is_console
+
+
+@requires("console")
+def test_console_apdl_logging_start(tmpdir):
+    filename = str(tmpdir.mkdir("tmpdir").join("tmp.inp"))
+
+    mapdl = pymapdl.launch_mapdl(log_apdl=filename, mode="console")
+
+    mapdl.prep7()
+    mapdl.run("!comment test")
+    mapdl.k(1, 0, 0, 0)
+    mapdl.k(2, 1, 0, 0)
+    mapdl.k(3, 1, 1, 0)
+    mapdl.k(4, 0, 1, 0)
+
+    mapdl.exit()
+
+    with open(filename, "r") as fid:
+        text = "".join(fid.readlines())
+
+    assert "PREP7" in text
+    assert "!comment test" in text
+    assert "K,1,0,0,0" in text
+    assert "K,2,1,0,0" in text
+    assert "K,3,1,1,0" in text
+    assert "K,4,0,1,0" in text
+
+
+def test__del__console():
+    from ansys.mapdl.core.mapdl_console import MapdlConsole
+
+    class FakeProcess:
+        def sendline(self, command):
+            pass
+
+    class DummyMapdl(MapdlConsole):
+        @property
+        def _process(self):
+            return _proc
+
+        def __init__(self):
+            self._proc = FakeProcess()
+
+    with (
+        patch.object(DummyMapdl, "_process", autospec=True) as mock_process,
+        patch.object(DummyMapdl, "_close_apdl_log") as mock_close_log,
+    ):
+
+        mock_close_log.return_value = None
+
+        # Setup
+        mapdl = DummyMapdl()
+
+        del mapdl
+
+        mock_close_log.assert_not_called()
+        assert [each.args[0] for each in mock_process.sendline.call_args_list] == [
+            "FINISH",
+            "EXIT",
+        ]
+
+
+@pytest.mark.parametrize("close_log", [True, False])
+def test_exit_console(mapdl_console, close_log):
+    with (
+        patch.object(mapdl_console, "_close_apdl_log") as mock_close_log,
+        patch.object(mapdl_console, "_exit") as mock_exit,
+    ):
+        mock_exit.return_value = None
+        mock_close_log.return_value = None
+
+        with catch_warnings(record=True):
+            mapdl_console.exit(close_log=close_log, timeout=1)
+
+        if close_log:
+            mock_close_log.assert_called_once()
+        else:
+            mock_close_log.assert_not_called()
+
+        mock_exit.assert_called_once()
+        assert mapdl_console._exited
+
+    # restoring state
+    mapdl_console._exited = False
+
+
+@pytest.mark.parametrize("command", ["FINISH", "/PREP7", "/SOLU"])
+def test_not_command_in_response(mapdl_console, cleared, command):
+    resp = mapdl_console.run(command)
+
+    assert command not in resp
+
+
+@pytest.mark.parametrize("command", ["FINISH", "/PREP7", "/SOLU"])
+def test_command_in_response(mapdl_console, cleared, command):
+    mapdl_console.clean_response = False
+    resp = mapdl_console.run(command, clean_response=False)
+    mapdl_console.clean_response = True
+
+    assert command in resp

@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -81,11 +81,14 @@ class Labelling:
         key
             Labeling key:
 
-            0 or 1 - Label contours with legend or color (default).
+            0 or 1
+                Label contours with legend or color (default).
 
-            -1 - No contour labeling.
+            -1
+                No contour labeling.
 
-            N - Same as 1 except show alphabetic legend only on every Nth element.
+            N
+                Same as 1 except show alphabetic legend only on every Nth element.
 
         Notes
         -----
@@ -219,11 +222,14 @@ class Labelling:
             FORTRAN format types (G is the default if this field is left
             blank.)
 
-            G - Gxx.yy.  xx and yy are described below.
+            G
+                Gxx.yy.  xx and yy are described below.
 
-            F - Fxx.yy
+            F
+                Fxx.yy
 
-            E - Exx.yy
+            E
+                Exx.yy
 
         nwidth
             Total width (12 maximum) of the field (the xx in Ftype).  Defaults
@@ -333,84 +339,117 @@ class Labelling:
         item
             Label identifying the item:
 
-            U - Applied translational constraints (UX, UY, UZ).
+            U
+                Applied translational constraints (UX, UY, UZ).
 
-            ROT - Applied rotational constraints (ROTX, ROTY, ROTZ).
+            ROT
+                Applied rotational constraints (ROTX, ROTY, ROTZ).
 
-            TEMP - Applied temperatures (TEMP, TBOT, TE2, TE3, . . ., TTOP).
+            TEMP
+                Applied temperatures (TEMP, TBOT, TE2, TE3, . . ., TTOP).
 
-            PRES - Applied fluid pressures.
+            PRES
+                Applied fluid pressures.
 
-            V - Applied flow velocities (VX, VY, VZ).
+            V
+                Applied flow velocities (VX, VY, VZ).
 
-            VOLT - Applied voltages.
+            VOLT
+                Applied voltages.
 
-            MAG - Applied scalar magnetic potentials.
+            MAG
+                Applied scalar magnetic potentials.
 
-            A - Applied vector magnetic potentials.
+            A
+                Applied vector magnetic potentials.
 
-            CONC - Concentration.
+            CONC
+                Concentration.
 
-            CHRG - Applied electric charge.
+            CHRG
+                Applied electric charge.
 
-            F or FORC - Applied structural forces (FX, FY, FZ).
+            F or FORC
+                Applied structural forces (FX, FY, FZ).
 
-            M or MOME - Applied structural moments (MX, MY, MZ).
+            M or MOME
+                Applied structural moments (MX, MY, MZ).
 
-            HEAT - Applied heat flows (HEAT, HBOT, HE2, HE3, . . ., HTOP).
+            HEAT
+                Applied heat flows (HEAT, HBOT, HE2, HE3, . . ., HTOP).
 
-            FLOW - Applied fluid flow.
+            FLOW
+                Applied fluid flow.
 
-            AMPS - Applied current flow.
+            AMPS
+                Applied current flow.
 
-            FLUX - Applied magnetic flux.
+            FLUX
+                Applied magnetic flux.
 
-            CSG - Applied magnetic current segments.
+            CSG
+                Applied magnetic current segments.
 
-            RATE - Diffusion flow rate.
+            RATE
+                Diffusion flow rate.
 
-            MAST - Master degrees of freedom.
+            MAST
+                Master degrees of freedom.
 
-            CP - Coupled nodes.
+            CP
+                Coupled nodes.
 
-            CE - Nodes in constraint equations.
+            CE
+                Nodes in constraint equations.
 
-            NFOR - POST1 nodal forces.
+            NFOR
+                POST1 nodal forces.
 
-            NMOM - POST1 nodal moments
+            NMOM
+                POST1 nodal moments
 
-            RFOR - POST1 reaction forces.
+            RFOR
+                POST1 reaction forces.
 
-            RMOM - POST1 reaction moments (MX, MY, MZ).
+            RMOM
+                POST1 reaction moments (MX, MY, MZ).
 
-            PATH - Path geometry (undistorted) associated with the PATH command after a PDEF or
-                   PVECT command has been issued.
+            PATH
+                Path geometry (undistorted) associated with the PATH command after a PDEF or
+                PVECT command has been issued.
 
-            ACEL - Global acceleration (ACELX, ACELY, ACELZ vector).
+            ACEL
+                Global acceleration (ACELX, ACELY, ACELZ vector).
 
-            OMEG - Global angular velocity (OMEGX, OMEGY, OMEGZ vector) and acceleration (DOMEGX,
-                   DOMEGY, DOMEGZ vector).
+            OMEG
+                Global angular velocity (OMEGX, OMEGY, OMEGZ vector) and acceleration (DOMEGX,
+                DOMEGY, DOMEGZ vector).
 
-            WELD - Applied spotwelds (ANSYS LS-DYNA).
+            WELD
+                Applied spotwelds (ANSYS LS-DYNA).
 
-            ALL - Represents all appropriate labels.
+            ALL
+                Represents all appropriate labels.
 
         key
             Symbol key:
 
-            0 - Do not show symbol.
+            0
+                Do not show symbol.
 
-            1 - Show symbol.
+            1
+                Show symbol.
 
-            2 - Plot value next to symbol.
+            2
+                Plot value next to symbol.
 
-        min\_
+        min\\_
             Minimum value in a range of values plotted on screen.
 
-        max\_
+        max\\_
             Maximum value in a range of values plotted on screen.
 
-        abs\_
+        abs\\_
             Absolute number.  If KEY = 2 and ABS = 0, a number falling between
             the MIN and MAX is displayed.  If ABS is not specified, it defaults
             to 0.  If KEY = 2 and ABS = 1, an absolute value falling between
@@ -481,36 +520,50 @@ class Labelling:
         item
             Label identifying the item:
 
-            TEMP - Applied temperatures.
+            TEMP
+                Applied temperatures.
 
-            FLUE - Applied fluences.
+            FLUE
+                Applied fluences.
 
-            HGEN - Applied heat generation rates.
+            HGEN
+                Applied heat generation rates.
 
-            JS - Applied current density magnitude.
+            JS
+                Applied current density magnitude.
 
-            JSX - X-component of current density.
+            JSX
+                X-component of current density.
 
-            JSY - Y-component of current density.
+            JSY
+                Y-component of current density.
 
-            JSZ - Z-component of current density.
+            JSZ
+                Z-component of current density.
 
-            PHASE - Phase angle of applied load.
+            PHASE
+                Phase angle of applied load.
 
-            MVDI - Applied magnetic virtual displacements flag.
+            MVDI
+                Applied magnetic virtual displacements flag.
 
-            CHRGD - Applied electric charge density.
+            CHRGD
+                Applied electric charge density.
 
-            VLTG - Applied voltage drop.
+            VLTG
+                Applied voltage drop.
 
         key
             Symbol key:
 
-            0 - Do not show body force load contours.
+            0
+                Do not show body force load contours.
 
-            1 - Show body force load contours.
+            1
+                Show body force load contours.
 
-            2 - Show current density as a vector (not a contour).
+            2
+                Show current density as a vector (not a contour).
 
         Notes
         -----
@@ -557,63 +610,79 @@ class Labelling:
         label
             Apply display items as selected from the following labels:
 
-            INFO - Controls the display of the legend (ON or OFF) and allows the choice of preset
-                   or Multi-legend placement. Control is provided by the KEY
-                   values. (Defaults to KEY=3 when the GUI is on. Defaults to
-                   KEY= 2 otherwise.)
+            INFO
+                Controls the display of the legend (ON or OFF) and allows the choice of preset
+                or Multi-legend placement. Control is provided by the KEY
+                values. (Defaults to KEY=3 when the GUI is on. Defaults to
+                KEY= 2 otherwise.)
 
-            LEG1 - Header portion of legend column (defaults to ON).
+            LEG1
+                Header portion of legend column (defaults to ON).
 
-            LEG2 - View portion of legend column (defaults to ON (except off with contour
-                   displays)).
+            LEG2
+                View portion of legend column (defaults to ON (except off with contour
+                displays)).
 
-            LEG3 - View the contour section of the legend column (defaults to ON).
+            LEG3
+                View the contour section of the legend column (defaults to ON).
 
-            FRAME - Frame border lines around windows (defaults to ON).
+            FRAME
+                Frame border lines around windows (defaults to ON).
 
-            TITLE - Title (bottom left text) (defaults to ON).
+            TITLE
+                Title (bottom left text) (defaults to ON).
 
-            MINM - Min-Max symbols on contour displays (defaults to ON).
+            MINM
+                Min-Max symbols on contour displays (defaults to ON).
 
-            LOGO - ANSYS logo (defaults to OFF (displayed as text at top of legend column)).  If
-                   KEY = ON, the text is removed from legend column but the
-                   logo symbol is displayed in whichever active window is
-                   either in the uppermost right corner and on top, or if there
-                   is no window in that location, then in the window to the
-                   furthest right of the screen.  Version information remains
-                   in the legend column.
+            LOGO
+                ANSYS logo (defaults to OFF (displayed as text at top of legend column)).  If
+                KEY = ON, the text is removed from legend column but the
+                logo symbol is displayed in whichever active window is
+                either in the uppermost right corner and on top, or if there
+                is no window in that location, then in the window to the
+                furthest right of the screen.  Version information remains
+                in the legend column.
 
-            WINS - Controls whether graphics windows automatically stretch or shrink to adjust to
-                   screen size as the legend column is turned off or on
-                   [/PLOPTS,INFO] (defaults to ON).  If WINS is on and the
-                   legend column is changed from off to on, all windows are
-                   shrunk regardless of what their correct size is.
+            WINS
+                Controls whether graphics windows automatically stretch or shrink to adjust to
+                screen size as the legend column is turned off or on
+                [/PLOPTS,INFO] (defaults to ON).  If WINS is on and the
+                legend column is changed from off to on, all windows are
+                shrunk regardless of what their correct size is.
 
-            WP - Working plane (defaults to OFF).  The working plane is drawn as part of the
-                 display (not just an overlaid image as in WPSTYL).  This
-                 option is best used in combination with a hidden-line
-                 technique [/TYPE].
+            WP
+                Working plane (defaults to OFF).  The working plane is drawn as part of the
+                display (not just an overlaid image as in WPSTYL).  This
+                option is best used in combination with a hidden-line
+                technique [/TYPE].
 
-            DATE - Controls the display of the date and time in your legend. Subsequent KEY values
-                   control the display as follows:
+            DATE
+                Controls the display of the date and time in your legend. Subsequent KEY values
+                control the display as follows:
 
-            FILE - Controls the display of the ANSYS jobname in your legend. Subsequent KEY values
-                   control the display as follows:
+            FILE
+                Controls the display of the ANSYS jobname in your legend. Subsequent KEY values
+                control the display as follows:
 
         key
             Switch:
 
-            OFF or 0 - Do not apply this display item. For Label = DATE, no time or date are
-                       displayed.
+            OFF or 0
+                Do not apply this display item. For Label = DATE, no time or date are
+                displayed.
 
-            ON or 1 - Apply this display item. For Label = DATE, show only the date.
+            ON or 1
+                Apply this display item. For Label = DATE, show only the date.
 
-            AUTO or 2 - For Label = INFO, initiate Auto-legend mode.  If the display has contours, the
-                        legend is ON; if the display has no contours, the
-                        legend is OFF. For Label = DATE, display both the date
-                        and time.
+            AUTO or 2
+                For Label = INFO, initiate Auto-legend mode.  If the display has contours, the
+                legend is ON; if the display has no contours, the
+                legend is OFF. For Label = DATE, display both the date
+                and time.
 
-            3 - For Label = INFO , switch to Multi-legend mode. See the /UDOC command for the
+            3
+                For Label = INFO , switch to Multi-legend mode. See the /UDOC command for the
                 available legend configurations.
 
         Notes
@@ -647,52 +716,79 @@ class Labelling:
         label
             Type of numbering/coloring:
 
-            NODE - Node numbers on node and element plots.
+            NODE
+                Node numbers on node and element plots.
 
-            ELEM - Element numbers and colors on element plots.
+            ELEM
+                Element numbers and colors on element plots.
 
-            SEC - Section numbers and colors on element and solid model plots (see "Notes").
+            SEC
+                Section numbers and colors on element and solid model plots (see "Notes").
 
-            MAT - Material set numbers and colors on element and solid model plots  (see
-                  "Notes").
+            MAT
+                Material set numbers and colors on element and solid model plots  (see
+                "Notes").
 
-            TYPE - Element type reference numbers and colors on element and solid model plots (see
-                   "Notes").
+            TYPE
+                Element type reference numbers and colors on element and solid model plots (see
+                "Notes").
 
-            REAL - Real constant set numbers and colors on element and solid model plots (see
-                   "Notes").
+            REAL
+                Real constant set numbers and colors on element and solid model plots (see
+                "Notes").
 
-            ESYS - Element coordinate system numbers on element and solid model plots (see
-                   "Notes").
+            ESYS
+                Element coordinate system numbers on element and solid model plots (see
+                "Notes").
 
-            PART - Element part numbers and colors on element plots (applicable to ANSYS LS-DYNA
-                   only).
+            PART
+                Element part numbers and colors on element plots (applicable to ANSYS LS-DYNA
+                only).
 
-            LOC - Location numbers/colors of the element in matrix assembly order on element
-                  plots.
+            LOC
+                Location numbers/colors of the element in matrix assembly order on element
+                plots.
 
-            Note:LOC and ELEM numbers will be the same unless the model has been reordered. - KP
+                .. note:: ``LOC`` and ``ELEM`` numbers will be the same unless the model has been reordered.
 
-            Keypoint numbers on solid model plots. - LINE
+            KP
+                Keypoint numbers on solid model plots.
 
-            Line numbers on solid model plots (both numbers and colors on line plots). - AREA
+            LINE
+                Line numbers on solid model plots (both numbers and colors on line plots).
 
-            Area numbers on solid model plots (both numbers and colors on area plots). - VOLU
+            AREA
+                Area numbers on solid model plots (both numbers and colors on area plots).
 
-            Volume numbers on solid model plots (both numbers and colors on volume plots). - SVAL
+            VOLU
+                Volume numbers on solid model plots (both numbers and colors on volume plots).
 
-            Stress (or any contour) values on postprocessing plots, and surface load values and colors on model plots (when surface load symbols are on [/PSF]).  For tabular boundary conditions, the table-evaluated values will be displayed on node, element, or contour displays in POST1 when load symbols (/PBF, /PSF, /PBC) are on and TABNAM is OFF. - TABNAM
+            SVAL
+                Stress (or any contour) values on postprocessing plots, and
+                surface load values and colors on model plots (when surface load
+                symbols are on [/PSF]).  For tabular boundary conditions, the
+                table-evaluated values will be displayed on node, element, or
+                contour displays in POST1 when load symbols (/PBF, /PSF, /PBC)
+                are on and TABNAM is OFF.
 
-            Table names for tabular boundary conditions.  If this label is turned on, the table name appears next to the appropriate symbol, arrow, face outline, or contour as dictated by the /PSF, /PBC, and /PBF commands. - STAT
+            TABNAM
+                Table names for tabular boundary conditions.  If this label is
+                turned on, the table name appears next to the appropriate
+                symbol, arrow, face outline, or contour as dictated by the /PSF,
+                /PBC, and /PBF commands.
 
-            Shows current settings for /PNUM. - DEFA
+            STAT
+                Shows current settings for /PNUM.
 
-        key
+            DEFA
+            key
             Switch:
 
-            0 - Turns OFF numbers/colors for specified label.
+            0
+                Turns OFF numbers/colors for specified label.
 
-            1 - Turns ON numbers/colors for specified label.
+            1
+                Turns ON numbers/colors for specified label.
 
         Notes
         -----
@@ -731,35 +827,43 @@ class Labelling:
         ----------
         item, comp
             Labels identifying the surface load to be shown; see
-            Table 227: /PSF - Valid Item and Component Labels.
+            Table 227: /PSF Valid Item and Component Labels.
 
         key
             Key to turn surface load symbols on or off:
 
-            0 - Off (default).
+            0
+                Off (default).
 
-            1 - On, shown as face outlines.  Line surface loads (SFL) on solid model plots are
+            1
+                On, shown as face outlines.  Line surface loads (SFL) on solid model plots are
                 shown as arrows.
 
-            2 - On, shown as arrows.
+            2
+                On, shown as arrows.
 
-            3 - On, shown as color filled surfaces.  Line and area surface loads (SFL and SFA)
+            3
+                On, shown as color filled surfaces.  Line and area surface loads (SFL and SFA)
                 on solid model plots are shown as arrows.
 
         kshell
             Visibility key for shell elements.
 
-            0 - Off (default),  surface load symbols are displayed only on visible load faces.
+            0
+                Off (default),  surface load symbols are displayed only on visible load faces.
 
-            1 - On, surface load symbols are displayed even if load face is not visible.
+            1
+                On, surface load symbols are displayed even if load face is not visible.
 
         color
             Visibility key for contour legend.
 
-            ON - The symbols (arrows or face outlines) will show up in color with the legend
+            ON
+                The symbols (arrows or face outlines) will show up in color with the legend
                  showing the corresponding color labels (default).
 
-            OFF - The contour legend will not be displayed. The symbols (arrows or face outlines)
+            OFF
+                The contour legend will not be displayed. The symbols (arrows or face outlines)
                   will show up in grey. The size of the arrows will be
                   proportional to the applied load.
 
@@ -811,7 +915,8 @@ class Labelling:
 
         This command is valid in any processor.
 
-        Table: 227:: : /PSF - Valid Item and Component Labels
+        Table: 227:: : /PSF
+            Valid Item and Component Labels
 
         Pressure loads apply to the element coordinate system (KEYOPT(2) = 0).
         Adjust appropriately for a local coordinate system (KEYOPT(2) = 1). See
@@ -840,76 +945,93 @@ class Labelling:
         label
             Show symbols as selected from the following labels:
 
-            CS - Local coordinate systems.
+            CS
+                Local coordinate systems.
 
-            NDIR - Nodal coordinate systems (on rotated nodes only).
+            NDIR
+                Nodal coordinate systems (on rotated nodes only).
 
-            ESYS - Element coordinate systems (element displays only).
+            ESYS
+                Element coordinate systems (element displays only).
 
-            LDIR - Line directions (line displays only).
+            LDIR
+                Line directions (line displays only).
 
-            LDIV - Controls the display of element divisions on lines.
+            LDIV
+                Controls the display of element divisions on lines.
 
-            ADIR - Area direction symbol (for keypoint, line, area and volume plots).
+            ADIR
+                Area direction symbol (for keypoint, line, area and volume plots).
 
-            LAYR - Layer orientations (relative to the projected element x-axis) or fiber
-                   orientations in smeared reinforcing elements. Used only
-                   within an element display. Use KEY to specify the layer
-                   number.
+            LAYR
+                Layer orientations (relative to the projected element x-axis) or fiber
+                orientations in smeared reinforcing elements. Used only
+                within an element display. Use KEY to specify the layer
+                number.
 
-            ECON - Element mesh symbols on keypoints and lines.
+            ECON
+                Element mesh symbols on keypoints and lines.
 
-            DOT - Larger symbols displayed for node and keypoint locations.  When Label = DOT,
-                  KEY = 1 by default.
+            DOT
+                Larger symbols displayed for node and keypoint locations.  When Label = DOT,
+                KEY = 1 by default.
 
-            XNOD - Extra node of surface or circuit elements.
+            XNOD
+                Extra node of surface or circuit elements.
 
-            FBCS - Force boundary condition scaling. Subsequent KEY value determines whether or
-                   not to scale the applied and derived forces/moments to the
-                   same maximum value.
+            FBCS
+                Force boundary condition scaling. Subsequent KEY value determines whether or
+                not to scale the applied and derived forces/moments to the
+                same maximum value.
 
-            DEFA - Resets the symbol keys so that ANSYS displays none of the symbols controlled by
-                   the /PSYMB command.  The value of the KEY field is ignored.
+            DEFA
+                Resets the symbol keys so that ANSYS displays none of the symbols controlled by
+                the /PSYMB command.  The value of the KEY field is ignored.
 
-            STAT - Prints the status of the settings of the symbol
-                   keys controlled by the /PSYMB command.  The KEY
-                   field is ignored.
+            STAT
+                Prints the status of the settings of the symbol
+                keys controlled by the /PSYMB command.  The KEY
+                field is ignored.
 
         key
             Symbol key:
 
-            ``-1`` - Effective only if Label = LAYR and solid shape
-                  element display (/ESHAPE) is active. Orientation of
-                  all layers appears with the solid shape element
-                  display.
+            ``-1``
+                Effective only if Label = LAYR and solid shape
+                element display (/ESHAPE) is active. Orientation of
+                all layers appears with the solid shape element
+                display.
 
-            0 - No symbol (default). If Label = LDIV, then KEY= 0
-                 indicates that the displayed element divisions will
-                 correspond to the existing mesh (the word MESHED or
-                 EXISTING can also be substituted). Also, for Label =
-                 LDIV, if you execute any meshing command (such as
-                 AMESH or VMESH), KEY is set to 0 (MESHED)
-                 automatically. If Label = FBCS, then KEY= 0 indicates
-                 that boundary condition scaling will not be
-                 common. The applied and derived forces/moments will
-                 be scaled to their respective maximum values.
+            0
+                No symbol (default). If Label = LDIV, then KEY= 0
+                indicates that the displayed element divisions will
+                correspond to the existing mesh (the word MESHED or
+                EXISTING can also be substituted). Also, for Label =
+                LDIV, if you execute any meshing command (such as
+                AMESH or VMESH), KEY is set to 0 (MESHED)
+                automatically. If Label = FBCS, then KEY= 0 indicates
+                that boundary condition scaling will not be
+                common. The applied and derived forces/moments will
+                be scaled to their respective maximum values.
 
-            1 - Include symbol. If Label = LDIV, then KEY = 1
-                 indicates that the displayed line divisions will
-                 correspond to the value assigned by LESIZE (the word
-                 LESIZE can also be substituted). Also, for Label =
-                 LDIV, if you execute the LESIZE command, KEY is set
-                 to 1 (LESIZE) automatically. If Label = FBCS, then
-                 KEY= 1 indicates that boundary condition scaling will
-                 be common. The applied and derived forces/moments
-                 will be scaled to the same maximum value.
+            1
+                Include symbol. If Label = LDIV, then KEY = 1
+                indicates that the displayed line divisions will
+                correspond to the value assigned by LESIZE (the word
+                LESIZE can also be substituted). Also, for Label =
+                LDIV, if you execute the LESIZE command, KEY is set
+                to 1 (LESIZE) automatically. If Label = FBCS, then
+                KEY= 1 indicates that boundary condition scaling will
+                be common. The applied and derived forces/moments
+                will be scaled to the same maximum value.
 
-            N - If Label = LAYR, then N is equal to the layer
-                 number. If Label = DOT, then N can be equal to
-                 0,1,.....15, indicating the dot size. If Label =
-                 LDIV, then KEY = -1, indicates that no element
-                 divisions will be displayed (the word OFF can also be
-                 substituted).
+            N
+                If Label = LAYR, then N is equal to the layer
+                number. If Label = DOT, then N can be equal to
+                0,1,.....15, indicating the dot size. If Label =
+                LDIV, then KEY = -1, indicates that no element
+                divisions will be displayed (the word OFF can also be
+                substituted).
 
         Notes
         -----
@@ -955,17 +1077,23 @@ class Labelling:
         lab
             Display triad as follows:
 
-            ORIG - Display triad at global origin (default).
+            ORIG
+                Display triad at global origin (default).
 
-            OFF - Turn off triad display.
+            OFF
+                Turn off triad display.
 
-            LBOT - Display triad in lower left screen corner.
+            LBOT
+                Display triad in lower left screen corner.
 
-            RBOT - Display triad in lower right screen corner.
+            RBOT
+                Display triad in lower right screen corner.
 
-            LTOP - Display triad in upper left screen corner.
+            LTOP
+                Display triad in upper left screen corner.
 
-            RTOP - Display triad in upper right screen corner.
+            RTOP
+                Display triad in upper right screen corner.
 
         Notes
         -----
@@ -997,57 +1125,70 @@ class Labelling:
         class
             The type (and relative importance) of legend item being displayed:
 
-            CNTR - Contour legend. This legend item is controlled separately from the other legend
-                   items (see note below).
+            CNTR
+                Contour legend. This legend item is controlled separately from the other legend
+                items (see note below).
 
-            DATE - The items in the DATE class include the date and time, or the ANSYS graphical
-                   logo (/PLOPTS,LOGO,1). This item is shown by default in all
-                   plots.
+            DATE
+                The items in the DATE class include the date and time, or the ANSYS graphical
+                logo (/PLOPTS,LOGO,1). This item is shown by default in all
+                plots.
 
-            GWIN - The items in the GWIN class include the entity acronyms that appear in the
-                   legend of a multiplot of entities (Nodes, Elements,
-                   Keypoints, Lines, Areas, Volumes). GWIN items are shown by
-                   default for all GPLOT displays.
+            GWIN
+                The items in the GWIN class include the entity acronyms that appear in the
+                legend of a multiplot of entities (Nodes, Elements,
+                Keypoints, Lines, Areas, Volumes). GWIN items are shown by
+                default for all GPLOT displays.
 
-            TYPE - Items in the TYPE class include the plot type (e.g. ELEMENTS, MATERIALS, NODAL
-                   SOLUTIONS, etc.). TYPE items are shown by default in all
-                   plots.
+            TYPE
+                Items in the TYPE class include the plot type (e.g. ELEMENTS, MATERIALS, NODAL
+                SOLUTIONS, etc.). TYPE items are shown by default in all
+                plots.
 
-            TYP2 - Items in the TYP2 class include supplementary type information, such as DMAX
-                   and SMAX for nodal solutions. TYP2 items are shown by
-                   default in all plots.
+            TYP2
+                Items in the TYP2 class include supplementary type information, such as DMAX
+                and SMAX for nodal solutions. TYP2 items are shown by
+                default in all plots.
 
-            INUM - Items in the INUM class include the number labels generated by the /PNUM
-                   command. This class is displayed by default in all plots
-                   that contain /PNUM information.
+            INUM
+                Items in the INUM class include the number labels generated by the /PNUM
+                command. This class is displayed by default in all plots
+                that contain /PNUM information.
 
-            BCDC - The items in the BCDC class include labels created by the /PBC  command. This
-                   class is shown by default in all plots which contain /PBC
-                   information.
+            BCDC
+                The items in the BCDC class include labels created by the /PBC  command. This
+                class is shown by default in all plots which contain /PBC
+                information.
 
-            VECT - Items in the VECT class include labels created by the PLVECT command. This
-                   class is shown by default for all PLVECT plots.
+            VECT
+                Items in the VECT class include labels created by the PLVECT command. This
+                class is shown by default for all PLVECT plots.
 
-            SURF - The items in the SURF class include labels from the /PSF legend. This class is
-                   shown by default on all plots of surface boundary
-                   conditions.
+            SURF
+                The items in the SURF class include labels from the /PSF legend. This class is
+                shown by default on all plots of surface boundary
+                conditions.
 
-            BODY - Items from the BODY class include labels from the /PBF legend. This class is
-                   shown by default in all plots of body forces.
+            BODY
+                Items from the BODY class include labels from the /PBF legend. This class is
+                shown by default in all plots of body forces.
 
-            PSTA - Items from the PSTA class include stress scaling statistics, such as the
-                   /SSCALE setting. This class is not shown as the default for
-                   any type of plot, and must be specifically referenced to
-                   display the included data.
+            PSTA
+                Items from the PSTA class include stress scaling statistics, such as the
+                /SSCALE setting. This class is not shown as the default for
+                any type of plot, and must be specifically referenced to
+                display the included data.
 
-            VIEW - The items in the VIEW class include view statistics. This class is not shown as
-                   the default for any type of plot, and must be specifically
-                   referenced to display the included data.
+            VIEW
+                The items in the VIEW class include view statistics. This class is not shown as
+                the default for any type of plot, and must be specifically
+                referenced to display the included data.
 
-            MISC - The items in the MISC class include supplementary labels like /EXPANDED and
-                   Stress Section Cross Section. This class is not shown as the
-                   default for any type of plot, and must be specifically
-                   referenced to display the included data.
+            MISC
+                The items in the MISC class include supplementary labels like /EXPANDED and
+                Stress Section Cross Section. This class is not shown as the
+                default for any type of plot, and must be specifically
+                referenced to display the included data.
 
         key
             Switch:

@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -26,10 +26,9 @@ import pytest
 
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
-    MapdlInvalidRoutineError,
     MapdlRuntimeError,
 )
-from conftest import ON_CI, ON_LOCAL, ON_UBUNTU
+from conftest import ON_CI, ON_LOCAL, ON_UBUNTU, NullContext
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -72,17 +71,6 @@ def clear_wkdir_from_cads(mapdl):
             mapdl.slashdelete(each_file)
         except IOError:
             pass
-
-
-class NullContext:
-    def __enter__(self):
-        pass
-
-    def __exit__(self, *args):
-        pass
-
-    def __init__(self):
-        pass
 
 
 ## IGES
@@ -170,17 +158,34 @@ def test_readin_x_t(mapdl, cleared):
     clear_wkdir_from_cads(mapdl)
 
 
-@pytest.mark.xfail(True, reason="Command seems broken. See #2377")
+@pytest.mark.xfail(ON_CI, reason="MAPDL docker image do not have the CAD libraries")
+def test_readin_catiav4(mapdl, cleared):
+    # Catia v4 is only supported on Linux
+    if mapdl.platform == "windows":
+        context = pytest.raises(OSError)
+    else:
+        context = NullContext()
+
+    with context:
+        mapdl.catiain(
+            name="CubeWithHole",  # this file is catia v5. We need to change it
+            extension="CATPart",
+            path=CADs_path,
+        )
+        assert geometry_test_is_correct(mapdl)
+
+    clear_wkdir_from_cads(mapdl)
+
+
 def test_readin_catiav5(mapdl, cleared):
+    # Catia v5 is only supported on Windows
     if ON_CI and mapdl.version <= 22.2 and not ON_UBUNTU:
         context = pytest.raises(
             MapdlRuntimeError, match="No shared command/library files were found"
         )
 
-    elif ON_CI:
-        context = pytest.raises(
-            MapdlInvalidRoutineError, match=" ~CAT5IN is not a recognized"
-        )
+    elif mapdl.platform == "linux":
+        context = pytest.raises(OSError)
 
     else:
         context = NullContext()

@@ -25,7 +25,12 @@ Overall guidance on contributing to a PyAnsys library appears in the
 in the *PyAnsys Developer's Guide*. Ensure that you are thoroughly familiar
 with it and the `Coding style <dev_guide_coding_style_>`_ before attempting to
 contribute to PyMAPDL.
- 
+
+In order to have a nice :ref:`ref_release_notes` section, it is important to follow
+the branch and commit names conventions as described in the *PyAnsys Developer's Guide*
+`branch <dev_guide_branch_names_>`_ and `commit <dev_guide_commit_names_>`_ naming
+sections.
+
 
 Answer discussions
 ==================

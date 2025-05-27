@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -24,16 +24,25 @@
 import os
 import re
 import shutil
+import subprocess
+import sys
+from unittest.mock import patch
 
+import grpc
 import pytest
 
 from ansys.mapdl.core import examples
 from ansys.mapdl.core.common_grpc import DEFAULT_CHUNKSIZE
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
+    MapdlConnectionError,
+    MapdlDidNotStart,
     MapdlExitedError,
+    MapdlgRPCError,
     MapdlRuntimeError,
+    protect_grpc,
 )
+from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 from ansys.mapdl.core.misc import random_string
 
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -42,6 +51,19 @@ from conftest import has_dependency, requires
 
 # skip entire module unless HAS_GRPC installed or connecting to server
 pytestmark = requires("grpc")
+
+
+class UnavailableError(grpc.RpcError):
+    def __init__(self, message="Service is temporarily unavailable."):
+        self._message = message
+        self._code = grpc.StatusCode.UNAVAILABLE
+        super().__init__(message)
+
+    def code(self):
+        return self._code
+
+    def details(self):
+        return self._message
 
 
 def write_tmp_in_mapdl_instance(mapdl, filename, ext="txt"):
@@ -55,7 +77,6 @@ def write_tmp_in_mapdl_instance(mapdl, filename, ext="txt"):
 
 @pytest.fixture(scope="function")
 def setup_for_cmatrix(mapdl, cleared):
-    mapdl.prep7()
     mapdl.title("Capacitance of two long cylinders above a ground plane")
     mapdl.run("a=100")  # Cylinder inside radius (μm)
     mapdl.run("d=400")  # Outer radius of air region
@@ -99,24 +120,24 @@ def setup_for_cmatrix(mapdl, cleared):
     mapdl.run("/solu")
 
 
-def test_connect_via_channel(mapdl):
-    """Validate MapdlGrpc can be created directly from a channel."""
-
-    import grpc
-
-    from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
-
+@pytest.fixture(scope="function")
+def grpc_channel(mapdl, cleared):
     channel = grpc.insecure_channel(
         mapdl._channel_str,
         options=[
             ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
         ],
     )
-    mapdl = MapdlGrpc(channel=channel)
+    return channel
+
+
+def test_connect_via_channel(grpc_channel):
+    """Validate MapdlGrpc can be created directly from a channel."""
+    mapdl = MapdlGrpc(channel=grpc_channel)
     assert mapdl.is_alive
 
 
-def test_clear_nostart(mapdl):
+def test_clear_nostart(mapdl, cleared):
     resp = mapdl._send_command("FINISH")
     resp = mapdl._send_command("/CLEAR, NOSTART")
     assert re.search("CLEAR (ANSYS|MAPDL) DATABASE AND RESTART", resp)
@@ -124,40 +145,41 @@ def test_clear_nostart(mapdl):
 
 # NOTE: This command cannot be run repeately, otherwise we end up with
 # to many levels of /INPUT.  2021R2 should have a fix for this
-def test_clear(mapdl):
+def test_clear(mapdl, cleared):
     resp = mapdl._send_command("FINISH")
     resp = mapdl._send_command("/CLEAR")
     assert "CLEAR" in resp
 
 
-def test_clear_multiple(mapdl):
+def test_clear_multiple(mapdl, cleared):
     # simply should not fail.  See:
     # https://github.com/ansys/pymapdl/issues/380
     for i in range(20):
         mapdl.run("/CLEAR")
 
 
-@pytest.mark.xfail(
-    reason="MAPDL bug 867421", raises=(MapdlExitedError, UnicodeDecodeError)
-)
-def test_invalid_get_bug(mapdl):
-    with pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError)):
+def test_invalid_get_bug(mapdl, cleared):
+    # versions before 24.1 should raise an error
+    if mapdl.version < 24.1:
+        context = pytest.raises(MapdlCommandIgnoredError)
+    else:
+        context = pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError))
+
+    with context:
         mapdl.get_value("ACTIVE", item1="SET", it1num="invalid")
 
 
-def test_invalid_get(mapdl):
+def test_invalid_get(mapdl, cleared):
     with pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError)):
         mapdl.get_value("ACTIVE")
 
 
-def test_stream(mapdl):
+def test_stream(mapdl, cleared):
     resp = mapdl._send_command_stream("/PREP7")
     assert "PREP7" in resp
 
 
-def test_basic_input_output(mapdl, tmpdir):
-    mapdl.finish()
-    mapdl.clear("NOSTART")
+def test_basic_input_output(mapdl, tmpdir, cleared):
     filename = "tmp2.inp"
     basic_inp = tmpdir.join(filename)
     with open(basic_inp, "w") as f:
@@ -175,9 +197,7 @@ def test_basic_input_output(mapdl, tmpdir):
     # input file won't actually run, but we want to see if the output switches
 
 
-def test_upload_large(mapdl):
-    mapdl.finish()
-    mapdl.clear("NOSTART")
+def test_upload_large(mapdl, cleared):
 
     file_name = examples.vmfiles["vm153"]
     test_file = os.path.join(PATH, "test_files", file_name)
@@ -186,17 +206,17 @@ def test_upload_large(mapdl):
     assert os.path.basename(file_name) in mapdl.list_files()
 
 
-def test_upload_fail(mapdl):
+def test_upload_fail(mapdl, cleared):
     with pytest.raises(FileNotFoundError):
         mapdl.upload("thisisnotafile")
 
 
-def test_input_empty(mapdl):
+def test_input_empty(mapdl, cleared):
     resp = mapdl._send_command("/INPUT")
     assert "INPUT FILE" in resp
 
 
-def test_input_empty(mapdl):
+def test_input_not_a_file(mapdl, cleared):
     resp = mapdl._send_command("/INPUT, not_a_file")
     assert "does not exist" in resp
 
@@ -208,10 +228,11 @@ def test_large_output(mapdl, cleared):
     mapdl.esize(0.05)
     mapdl.vmesh("all")
     msg = mapdl.nlist()
-    assert len(msg) > 4 * 1024**2
+
+    assert sys.getsizeof(msg) > 4 * 1024**2
 
 
-def test__download_missing_file(mapdl, tmpdir):
+def test__download_missing_file(mapdl, cleared, tmpdir):
     target = tmpdir.join("tmp")
     with pytest.raises(FileNotFoundError):
         mapdl.download("__notafile__", target)
@@ -241,34 +262,33 @@ def test_cmatrix(mapdl, setup_for_cmatrix):
 # directory.
 
 
-def test_read_input_file_verbose(mapdl):
+def test_read_input_file_verbose(mapdl, cleared):
     test_file = examples.vmfiles["vm153"]
-    mapdl.finish()
-    mapdl.clear()
     response = mapdl.input(test_file, verbose=True)
-    assert re.search("\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
-
-
-@pytest.mark.parametrize("file_name", ["full26.dat", "static.dat"])
-def test_read_input_file(mapdl, file_name):
-    test_file = os.path.join(PATH, "test_files", file_name)
-    mapdl.finish()
-    mapdl.clear()
-    response = mapdl.input(test_file)
-
-    assert (
-        re.search("\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
-        or "PyMAPDL: Simulation Finished." in response
+    assert re.search(
+        r"\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response
     )
 
 
-def test_no_get_value_non_interactive(mapdl):
+@pytest.mark.parametrize("file_name", ["full26.dat", "static.dat"])
+def test_read_input_file(mapdl, file_name, cleared):
+    mapdl.prep7()
+    test_file = os.path.join(PATH, "test_files", file_name)
+    response = mapdl.input(test_file)
+
+    assert (
+        re.search(r"\*\*\*\*\*  (ANSYS|MAPDL) SOLUTION ROUTINE  \*\*\*\*\*", response)
+        or "***** ROUTINE COMPLETED *****" in response
+    )
+
+
+def test_no_get_value_non_interactive(mapdl, cleared):
     with pytest.raises((MapdlRuntimeError, MapdlCommandIgnoredError)):
         with mapdl.non_interactive:
             mapdl.get_value("ACTIVE", item1="CSYS")
 
 
-def test__download(mapdl, tmpdir):
+def test__download(mapdl, cleared, tmpdir):
     # Creating temp file
     write_tmp_in_mapdl_instance(mapdl, "myfile0")
 
@@ -303,7 +323,7 @@ def test__download(mapdl, tmpdir):
         ["myfile*", ["myfile0.txt", "myfile1.txt"]],
     ],
 )
-def test_download(mapdl, tmpdir, files_to_download, expected_output):
+def test_download(mapdl, cleared, tmpdir, files_to_download, expected_output):
     write_tmp_in_mapdl_instance(mapdl, "myfile0")
     write_tmp_in_mapdl_instance(mapdl, "myfile1")
 
@@ -326,7 +346,9 @@ def test_download(mapdl, tmpdir, files_to_download, expected_output):
         ["myfile*", ["myfile0.txt", "myfile1.txt"]],
     ],
 )
-def test_download_without_target_dir(mapdl, files_to_download, expected_output):
+def test_download_without_target_dir(
+    mapdl, cleared, files_to_download, expected_output
+):
     write_tmp_in_mapdl_instance(mapdl, "myfile0")
     write_tmp_in_mapdl_instance(mapdl, "myfile1")
 
@@ -351,7 +373,7 @@ def test_download_without_target_dir(mapdl, files_to_download, expected_output):
     ],
 )
 def test_download_with_extension(
-    mapdl, extension_to_download, files_to_download, expected_output
+    mapdl, cleared, extension_to_download, files_to_download, expected_output
 ):
     write_tmp_in_mapdl_instance(mapdl, "myfile0")
     write_tmp_in_mapdl_instance(mapdl, "myfile1")
@@ -381,7 +403,7 @@ def test_download_with_extension(
 
 
 @requires("local")
-def test_download_recursive(mapdl):
+def test_download_recursive(mapdl, cleared):
     if mapdl.is_local:
         temp_dir = os.path.join(mapdl.directory, "new_folder")
         os.makedirs(temp_dir, exist_ok=True)
@@ -403,7 +425,7 @@ def test_download_recursive(mapdl):
         shutil.rmtree("new_dir")
 
 
-def test_download_project(mapdl, tmpdir):
+def test_download_project(mapdl, cleared, tmpdir):
     target_dir = tmpdir.mkdir("tmp")
     mapdl.download_project(target_dir=target_dir)
     files_extensions = list(
@@ -412,7 +434,7 @@ def test_download_project(mapdl, tmpdir):
     assert "log" in files_extensions
 
 
-def test_download_project_extensions(mapdl, tmpdir):
+def test_download_project_extensions(mapdl, cleared, tmpdir):
     target_dir = tmpdir.mkdir("tmp")
     mapdl.download_project(extensions=["log", "err"], target_dir=target_dir)
     files_extensions = set([each.split(".")[-1] for each in os.listdir(target_dir)])
@@ -445,21 +467,21 @@ def test_download_result(mapdl, cleared, tmpdir):
         pass
 
 
-def test__channel_str(mapdl):
+def test__channel_str(mapdl, cleared):
     assert mapdl._channel_str is not None
     assert ":" in mapdl._channel_str
-    assert re.search("\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", mapdl._channel_str)
-    assert re.search("\d{4,6}", mapdl._channel_str)
+    assert re.search(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}", mapdl._channel_str)
+    assert re.search(r"\d{4,6}", mapdl._channel_str)
 
 
-def test_mode(mapdl):
+def test_mode(mapdl, cleared):
     assert mapdl.connection == "grpc"
     assert mapdl.is_grpc
     assert not mapdl.is_corba
     assert not mapdl.is_console
 
 
-def test_input_output(mapdl):
+def test_input_output(mapdl, cleared):
     file_ = "myinput.inp"
     with open(file_, "w") as fid:
         for i in range(4):
@@ -473,7 +495,7 @@ def test_input_output(mapdl):
     os.remove(file_)
 
 
-def test_input_ext_argument(mapdl):
+def test_input_ext_argument(mapdl, cleared):
     file_ = "myinput.inp"
     with open(file_, "w") as fid:
         for i in range(4):
@@ -489,7 +511,7 @@ def test_input_ext_argument(mapdl):
     os.remove(file_)
 
 
-def test_input_dir_argument(mapdl, tmpdir):
+def test_input_dir_argument(mapdl, cleared, tmpdir):
     file_ = "myinput.inp"
     target_dir = str(tmpdir.mkdir(f"tmp_{random_string()}"))
     file_path = os.path.join(target_dir, file_)
@@ -507,7 +529,7 @@ def test_input_dir_argument(mapdl, tmpdir):
     os.remove(file_path)
 
 
-def test_input_line_argument(mapdl):
+def test_input_line_argument(mapdl, cleared):
     file_ = "myinput.inp"
     with open(file_, "w") as fid:
         for i in range(4):
@@ -523,7 +545,7 @@ def test_input_line_argument(mapdl):
     os.remove(file_)
 
 
-def test_input_multiple_argument(mapdl, tmpdir):
+def test_input_multiple_argument(mapdl, cleared, tmpdir):
     file_ = "myinput.inp"
     target_dir = str(tmpdir.mkdir(f"tmp_{random_string()}"))
     file_path = os.path.join(target_dir, file_)
@@ -541,12 +563,12 @@ def test_input_multiple_argument(mapdl, tmpdir):
     os.remove(file_path)
 
 
-def test_input_log_argument(mapdl):
+def test_input_log_argument(mapdl, cleared):
     with pytest.raises(ValueError, match="'log' argument is not supported"):
         mapdl.input(log="asdf")
 
 
-def test_input_compatibility_api_change(mapdl):
+def test_input_compatibility_api_change(mapdl, cleared):
     """This test is because the API change happened in 0.65 to homogenise the APDL command
     with the gRPC method."""
 
@@ -561,10 +583,238 @@ def test_input_compatibility_api_change(mapdl):
 
 
 @requires("grpc")
-@requires("local")
 def test__check_stds(mapdl):
     """Test that the standard input is checked."""
+    from ansys.mapdl.core.launcher import _check_server_is_alive, _get_std_output
 
-    mapdl._read_stds()
-    assert mapdl._stdout is not None
-    assert mapdl._stderr is not None
+    cmd = "counter=1; while true; do echo $counter; ((counter++)); sleep 1; done"
+
+    process = subprocess.Popen(
+        ["bash", "-c", cmd], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )  # nosec B603 B607
+
+    if not hasattr(mapdl, "_stdout_queue"):
+        mapdl._stdout_queue = None
+    if not hasattr(mapdl, "_stdout_thread"):
+        mapdl._stdout_thread = None
+
+    with (
+        # To avoid overwriting the values for the rest of the tests.
+        patch.object(mapdl, "_stdout_queue"),
+        patch.object(mapdl, "_stdout_thread"),
+        patch.object(mapdl, "_mapdl_process"),
+        patch(
+            "ansys.mapdl.core.launcher._get_std_output", autospec=True
+        ) as mock_get_std_output,
+    ):
+
+        mock_get_std_output.side_effect = _get_std_output
+
+        mapdl._mapdl_process = process
+        mapdl._create_process_stds_queue(process)
+
+        # this should raise no issues
+        mapdl._post_mortem_checks(process)
+
+        with pytest.raises(MapdlDidNotStart):
+            _check_server_is_alive(mapdl._stdout_queue, 0.5)
+
+        assert isinstance(mapdl._stdout, list)
+        assert isinstance(mapdl._stderr, list)
+
+        assert (
+            mapdl._stdout
+            and len(mapdl._stdout) > 0
+            and mapdl._stdout[-1]
+            and mapdl._stdout[-1].strip().isdigit()
+        )
+
+        mock_get_std_output.assert_called()
+
+    process.kill()
+    del process
+
+
+@requires("grpc")
+@requires("nowindows")  # since we are using bash
+def test__post_mortem_checks(mapdl):
+    """Test that the standard input is checked."""
+    from ansys.mapdl.core.launcher import _get_std_output
+
+    bash_command = """
+counter=1; while true; do
+  echo $counter;
+  ((counter++));
+  sleep 0.1;
+  if [ $counter -eq 7 ]; then
+    echo "";
+    echo "ERROR: Expected MapdlConnection error";
+    echo "";
+  fi;
+done
+"""
+    process = subprocess.Popen(
+        ["bash", "-c", bash_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    )
+
+    if not hasattr(mapdl, "_stdout_queue"):
+        mapdl._stdout_queue = None
+    if not hasattr(mapdl, "_stdout_thread"):
+        mapdl._stdout_thread = None
+
+    with (
+        # To avoid overwriting the values for the rest of the tests.
+        patch.object(mapdl, "_stdout_queue"),
+        patch.object(mapdl, "_stdout_thread"),
+        patch.object(mapdl, "_mapdl_process"),
+        patch(
+            "ansys.mapdl.core.launcher._get_std_output", autospec=True
+        ) as mock_get_std_output,
+    ):
+
+        mock_get_std_output.side_effect = _get_std_output
+
+        mapdl._mapdl_process = process
+        mapdl._create_process_stds_queue(process)
+
+        with pytest.raises(
+            MapdlConnectionError, match="Expected MapdlConnection error"
+        ):
+            mapdl._post_mortem_checks(process)
+
+    process.kill()
+    del process
+
+
+def test_subscribe_to_channel(mapdl, cleared):
+    assert mapdl.channel_state in [
+        "IDLE",
+        "CONNECTING",
+        "READY",
+        "TRANSIENT_FAILURE",
+        "SHUTDOWN",
+    ]
+    assert mapdl._channel_state in [
+        grpc.ChannelConnectivity.IDLE,
+        grpc.ChannelConnectivity.CONNECTING,
+        grpc.ChannelConnectivity.READY,
+        grpc.ChannelConnectivity.TRANSIENT_FAILURE,
+        grpc.ChannelConnectivity.SHUTDOWN,
+    ]
+
+
+@requires("remote")
+def test_exception_message_length(mapdl, cleared):
+    # This test does not fail if running on local
+    channel = grpc.insecure_channel(
+        mapdl._channel_str,
+        options=[
+            ("grpc.max_receive_message_length", int(1024)),
+        ],
+    )
+    mapdl2 = MapdlGrpc(channel=channel)
+    assert mapdl2.is_alive
+
+    mapdl2.prep7()
+    mapdl2.dim("myarr", "", 1e5)
+    mapdl2.vfill("myarr", "rand", 0, 1)  # filling array with random numbers
+
+    # Retrieving
+    with pytest.raises(MapdlgRPCError, match="Received message larger than max"):
+        values = mapdl2.parameters["myarr"]
+
+    assert mapdl2.is_alive
+
+    # Deleting generated mapdl instance and channel.
+    channel.close()
+    mapdl2._exited = True  # To avoid side effects.
+    mapdl2.exit()
+
+
+def test_generic_grpc_exception(monkeypatch, grpc_channel):
+    mapdl = MapdlGrpc(channel=grpc_channel)
+    assert mapdl.is_alive
+
+    @protect_grpc
+    def _raise_error_code(*args, **kwargs):
+        raise UnavailableError()
+
+    # Monkey patch to raise the same issue.
+    monkeypatch.setattr(mapdl, "prep7", _raise_error_code)
+
+    with pytest.raises(
+        MapdlRuntimeError, match="MAPDL server connection terminated unexpectedly while"
+    ):
+        # passing mapdl to simulate the function `_raise_error_code` to be a method.
+        mapdl.prep7(mapdl)
+
+    assert not mapdl.is_alive
+    mapdl._exited = False
+
+
+def test_generic_grpc_exception_exited(monkeypatch, grpc_channel):
+    mapdl = MapdlGrpc(channel=grpc_channel)
+    assert mapdl.is_alive
+
+    @protect_grpc
+    def _raise_error_code(*args, **kwargs):
+        raise UnavailableError()
+
+    def _null_close_process():
+        return None
+
+    # faking exiting MAPDL
+    mapdl._exited = True
+
+    # Monkey patch to raise the same issue.
+    monkeypatch.setattr(mapdl, "prep7", _raise_error_code)
+
+    # monkey patch `_close_process` so MAPDL does not exit when
+    monkeypatch.setattr(mapdl, "_close_process", _null_close_process)
+
+    with pytest.raises(
+        MapdlExitedError, match="MAPDL server connection terminated unexpectedly while"
+    ):
+        mapdl.prep7(mapdl)
+
+    mapdl._exited = False  # Restoring
+
+
+@pytest.mark.parametrize("platform", ["linux", "windows", "error"])
+def test__get_time_step_stream(mapdl, platform):
+    with patch("ansys.mapdl.core.mapdl_grpc.MapdlGrpc.platform", platform):
+        from ansys.mapdl.core import mapdl_grpc
+
+        mapdl._time_step_stream = None
+        mapdl_grpc.DEFAULT_TIME_STEP_STREAM = None
+
+        if platform == "linux":
+            DEFAULT_TIME_STEP_STREAM = mapdl_grpc.DEFAULT_TIME_STEP_STREAM_POSIX
+        elif platform == "windows":
+            DEFAULT_TIME_STEP_STREAM = mapdl_grpc.DEFAULT_TIME_STEP_STREAM_NT
+        else:
+            mapdl_grpc.DEFAULT_TIME_STEP_STREAM = None
+            with pytest.raises(ValueError, match="The MAPDL platform"):
+                mapdl._get_time_step_stream()
+
+            return  # Early exit
+
+        assert DEFAULT_TIME_STEP_STREAM == mapdl._get_time_step_stream()
+
+        # Using global
+        mapdl._time_step_stream = None
+        mapdl_grpc.DEFAULT_TIME_STEP_STREAM = 200
+        assert mapdl_grpc.DEFAULT_TIME_STEP_STREAM == mapdl._get_time_step_stream()
+
+        # Using argument, should override the global
+        mapdl_grpc.DEFAULT_TIME_STEP_STREAM = 1000
+        assert 700 == mapdl._get_time_step_stream(700)
+        assert mapdl._time_step_stream == 700
+
+        with pytest.raises(
+            ValueError, match="``time_step`` argument must be greater than 0``"
+        ):
+            mapdl._get_time_step_stream(-700)
+
+        mapdl._time_step_stream = None
+        mapdl_grpc.DEFAULT_TIME_STEP_STREAM = None

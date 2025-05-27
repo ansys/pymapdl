@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -38,7 +38,6 @@ from matplotlib import pyplot as plt
 
 # sphinx_gallery_thumbnail_number = 3
 import numpy as np
-import pyvista as pv
 
 from ansys.mapdl.core import launch_mapdl
 
@@ -88,30 +87,21 @@ rect_anum = mapdl.blc4(width=length, height=width)
 # plate_with_hole_anum = mapdl.asba(rect_anum, circ_anum)
 cut_area = mapdl.asba(rect_anum, "ALL")  # cut all areas except the plate
 
-plotter = pv.Plotter(shape=(1, 3))
 
-plotter.subplot(0, 0)
 mapdl.lsla("S")
-mapdl.lplot(vtk=True, show_keypoint_numbering=True, plotter=plotter)
+mapdl.lplot(show_keypoint_numbering=True)
 mapdl.lsel("all")
 
 # plot the area using vtk/pyvista
-plotter.subplot(0, 1)
-mapdl.aplot(
-    vtk=True, show_area_numbering=True, show_lines=True, cpos="xy", plotter=plotter
-)
+mapdl.aplot(show_area_numbering=True, show_lines=True, cpos="xy")
 
 # Next, extrude the area to create volume
 thickness = 0.01
 mapdl.vext(cut_area, dz=thickness)
 
 # Checking volume plot
-plotter.subplot(0, 2)
-mapdl.vplot(
-    vtk=True, show_lines=True, show_axes=True, smooth_shading=True, plotter=plotter
-)
+mapdl.vplot(show_lines=True, show_axes=True, smooth_shading=True)
 
-plotter.show()
 
 ###############################################################################
 # Meshing
@@ -136,7 +126,7 @@ plate_esize = 0.01
 # line and area numbers identified using aplot
 
 mapdl.asel("S", "AREA", vmin=1, vmax=1)
-mapdl.aplot(vtk=True, show_line_numbering=True)
+mapdl.aplot(show_line_numbering=True)
 
 
 mapdl.lsel("NONE")
@@ -157,7 +147,7 @@ if esize > thickness / 2:
 mapdl.esize()  # this is tough to automate
 mapdl.et(1, "SOLID186")
 mapdl.vsweep("all")
-mapdl.eplot(vtk=True, show_edges=True, show_axes=False, line_width=2, background="w")
+mapdl.eplot(show_edges=True, show_axes=False, line_width=2, background="w")
 
 
 ###############################################################################

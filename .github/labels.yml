@@ -6,6 +6,14 @@
 # and assign a label to the new pull requrest.
 # 
 # Check the yml for more info: .github\workflows\label.yml
+#
+
+#############################################################
+# NOTES
+# =====
+#
+# If the labels names are change, the file ``./.github/release.yml`` should be also updated!
+#
 
 #############################################################
 # Main colors (hex)
@@ -34,23 +42,23 @@
   description: "No further development until this is fixed"
   color: C0392B
 
-- name: Critical Priority
+- name: critical priority
   description: "This issue affects almost all users"
   color: E67E22
 
-- name: Major Priority
+- name: major priority
   description: "This issue affects some users"
   color: F4D03F
 
-- name: Minor Priority
-  description: "It does not affect almost any users"
+- name: minor priority
+  description: "This issue affects few users"
   color: F9E79F
 
-- name: Future
+- name: future
   description: "To work on it in the future, since it can be delayed"
   color: 27AE60
 
-- name: Won't fix
+- name: won't fix
   description: "For different reasons, this won't be fixed"
   color: ffffff
 
@@ -58,35 +66,35 @@
 # By Category
 # ===========
 
-- name: BUG
+- name: bug
   description: "Issue, problem or error in PyMAPDL"
   color: E67E22
 
-- name: New Feature
+- name: new feature
   description: "Request or proposal for a new feature"
   color: 85C1E9
   
-- name: Enhancement
+- name: enhancement
   description: "Improve any current implemented feature"
   color: 85C1E9
 
-- name: Examples
+- name: examples
   description: "Publishing PyMAPDL examples"
   color: A569BD
 
-- name: Documentation
+- name: documentation
   description: "Documentation related (improving, adding, etc)"
   color: A569BD
 
-- name: Maintenance
+- name: maintenance
   description: "General maintenance of the repo (libraries, cicd, etc)"
   color: 76D7C4
 
-- name: Discussion
+- name: discussion
   description: ""
   color: 76D7C4
 
-- name: Question
+- name: question
   description: ""
   color: 76D7C4
 
@@ -94,21 +102,25 @@
 # Issue management
 # ================
 
-- name: Duplicate
+- name: duplicate
   description: "Duplicated issue"
   color: E67E22
 
-- name: Good First Issue
+- name: good first issue
   description: "Best way to start working on PyMAPDL development"
   color: 27AE60
 
-- name: Help wanted!
+- name: help wanted!
   description: "Tell the developers you need help or guidance"
   color: F4D03F
 
-- name: Stale
-  description: "Stale issue, it will be closed soon"
+- name: stale
+  description: "Stale issue likely to be closed soon"
   color: E67E22
+
+- name: waiting doc review
+  description: "This PR is waiting for its documentation to be reviewed."
+  color: 27AE60
 
 #############################################################
 # For repo maintance
@@ -123,7 +135,7 @@
   description: "Related with CICD, Github Actions, etc"
   color: F9E79F
 
-- name: Dependencies
+- name: dependencies
   description: ""
   color: F9E79F
 
@@ -135,6 +147,6 @@
   description: "Related to the reminder bot"
   color: ffffff
 
-- name: Build failed
+- name: build failed
   description: "Schedule build fails"
   color: E67E22

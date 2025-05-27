@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -34,20 +34,26 @@ class MapCommand:
             Type of file from which the pressure data will be retrieved (no
             default):
 
-            CFXTBR - File from a CFX Transient Blade Row (TBR) analysis export.
+            CFXTBR
+                File from a CFX Transient Blade Row (TBR) analysis export.
 
-            CFDPOST - File from a CFD-Post BC Profile export.
+            CFDPOST
+                File from a CFD-Post BC Profile export.
 
-            FORMATTED - Formatted file.
+            FORMATTED
+                Formatted file.
 
-            CSV - Comma-Separated Values file.
+            CSV
+                Comma-Separated Values file.
 
         prestype
             Type of pressure data contained in the file:
 
-            0 - Only real-valued pressures are on the file.
+            0
+                Only real-valued pressures are on the file.
 
-            1 - Real-valued and imaginary-valued pressures are on the file (default).
+            1
+                Real-valued and imaginary-valued pressures are on the file (default).
 
         Notes
         -----
@@ -117,11 +123,14 @@ class MapCommand:
         item
             Items to plot:
 
-            BOTH - Plot both target and source geometries (default).
+            BOTH
+                Plot both target and source geometries (default).
 
-            TARGET - Plot only the target geometry.
+            TARGET
+                Plot only the target geometry.
 
-            SOURCE - Plot only the source geometry.
+            SOURCE
+                Plot only the source geometry.
 
         nodekey
             If the source data contains faces (that is, surface elements were
@@ -148,11 +157,14 @@ class MapCommand:
         item
             Items to plot:
 
-            BOTH - Plot both target and source pressures (default).
+            BOTH
+                Plot both target and source pressures (default).
 
-            TARGET - Plot only the target pressures.
+            TARGET
+                Plot only the target pressures.
 
-            SOURCE - Plot only the source pressures.
+            SOURCE
+                Plot only the source pressures.
 
         nodekey
             If the source data contains faces (that is, surface
@@ -161,9 +173,11 @@ class MapCommand:
             nodes and the elements.
 
         imagkey
-            1 - Plot the real pressures (default).
+            1
+                Plot the real pressures (default).
 
-            0 - Plot the imaginary pressures.
+            0
+                Plot the imaginary pressures.
 
         Notes
         -----
@@ -206,7 +220,7 @@ class MapCommand:
             while it is read. Default = 0. NSKIP is ignored for FileType =
             CFXTBR or CFDPOST on the FTYPE command.
 
-        format\_
+        format\\_
             For FileType = FORMATTED on the FTYPE command, Format is the read
             format in the FORTRAN FORMAT convention enclosed in parentheses;
             for example: (3e10.0,10x,e10.0,70x,e10.0)

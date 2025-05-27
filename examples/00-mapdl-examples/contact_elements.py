@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -81,7 +81,7 @@ print(output)
 # Here, we plot the element mesh as a wire-frame to show that the
 # contact pairs overlap.
 
-mapdl.esel("S", "SEC", vmin=5, vmax=6)
+mapdl.esel("S", "SEC", vmin=3, vmax=4)
 mapdl.eplot(style="wireframe", line_width=3)
 
 ###############################################################################

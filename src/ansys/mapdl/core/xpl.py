@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -23,8 +23,6 @@
 """Contains the ansXpl class."""
 import json
 import pathlib
-import random
-import string
 import weakref
 
 from ansys.api.mapdl.v0 import mapdl_pb2
@@ -32,12 +30,7 @@ import numpy as np
 
 from .common_grpc import ANSYS_VALUE_TYPE
 from .errors import MapdlRuntimeError
-
-
-def id_generator(size=6, chars=string.ascii_uppercase):
-    """Generate a random string using only uppercase letters."""
-    return "".join(random.choice(chars) for _ in range(size))
-
+from .misc import random_string
 
 MYCTYPE = {
     np.int32: "I",
@@ -131,6 +124,7 @@ class ansXpl:
         """
         response = self._mapdl.run("*XPL,CLOSE")
         self._check_ignored(response)
+        self._filename = None
         self._open = False
         return response
 
@@ -380,6 +374,8 @@ class ansXpl:
         """Save the current file, ignoring the marked records."""
         response = self._mapdl.run("*XPL,SAVE").strip()
         self._check_ignored(response)
+        self._open = False
+        self._filename = None
         return response
 
     def extract(self, recordname, sets="ALL", asarray=False):
@@ -446,7 +442,7 @@ class ansXpl:
         if recordname.upper() != "NSL":
             raise ValueError("Currently, the only supported recordname is 'NSL'")
 
-        rand_name = id_generator()
+        rand_name = random_string(stringLength=6)
         self._mapdl._log.info(
             "Calling MAPDL to extract the %s matrix from %s",
             recordname,
@@ -497,7 +493,7 @@ class ansXpl:
         """
         from ansys.math.core.math import AnsMath
 
-        rand_name = id_generator()
+        rand_name = random_string(stringLength=6)
         response = self._mapdl.run(f"*XPL,READ,{recordname},{rand_name}")
         self._check_ignored(response)
         data_info = self._mapdl._data_info(rand_name)
@@ -557,8 +553,22 @@ class ansXpl:
     def __repr__(self):
         txt = "MAPDL File Explorer\n"
         if self._open:
-            txt += "\tOpen file:%s" % self._filename
+            txt += f"\tOpen file : {self._filename}"
             txt += "\n".join(self.where().splitlines()[1:])
         else:
             txt += "\tNo open file"
         return txt
+
+    @property
+    def opened(self):
+        """
+        Check if a file is currently open.
+
+        Returns:
+            str or None: The filename if a file is open, otherwise None.
+        """
+
+        if self._open:
+            return self._filename
+        else:
+            return None

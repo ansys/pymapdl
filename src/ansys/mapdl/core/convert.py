@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -23,40 +23,42 @@
 from logging import Logger, StreamHandler
 import os
 import re
+from typing import Any, Dict, List, Optional, Tuple
 from warnings import warn
 
 from ansys.mapdl.core import __version__
 from ansys.mapdl.core.commands import Commands
 from ansys.mapdl.core.misc import is_float
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 # Because the APDL version has empty arguments, whereas the PyMAPDL
 # doesn't have them. Hence the order of arguments is messed up.
 
-FORMAT_OPTIONS = {
+FORMAT_OPTIONS: Dict[str, Any] = {
     "select": "W191,W291,W293,W391,E115,E117,E122,E124,E125,E225,E231,E301,E303,F401,F403",
     "max-line-length": 100,
 }
 
-LOGLEVEL_DEFAULT = "WARNING"
-AUTO_EXIT_DEFAULT = True
-LINE_ENDING_DEFAULT = None
-EXEC_FILE_DEFAULT = None
-MACROS_AS_FUNCTIONS_DEFAULT = True
-USE_FUNCTION_NAMES_DEFAULT = True
-SHOW_LOG_DEFAULT = False
-ADD_IMPORTS_DEFAULT = True
-COMMENT_SOLVE_DEFAULT = False
-CLEANUP_OUTPUT_DEFAULT = True
-HEADER_DEFAULT = True
-PRINT_COM_DEFAULT = True
-ONLY_COMMANDS_DEFAULT = False
-USE_VTK_DEFAULT = None
-CLEAR_AT_START_DEFAULT = False
-CHECK_PARAMETER_NAMES_DEFAULT = True
+LOGLEVEL_DEFAULT: str = "WARNING"
+AUTO_EXIT_DEFAULT: bool = True
+LINE_ENDING_DEFAULT: Optional[str] = None
+EXEC_FILE_DEFAULT: Optional[str] = None
+MACROS_AS_FUNCTIONS_DEFAULT: bool = True
+USE_FUNCTION_NAMES_DEFAULT: bool = True
+SHOW_LOG_DEFAULT: bool = False
+ADD_IMPORTS_DEFAULT: bool = True
+COMMENT_SOLVE_DEFAULT: bool = False
+CLEANUP_OUTPUT_DEFAULT: bool = True
+HEADER_DEFAULT: bool = True
+PRINT_COM_DEFAULT: bool = True
+ONLY_COMMANDS_DEFAULT: bool = False
+GRAPHICS_BACKEND_DEFAULT: Optional[GraphicsBackend] = None
+CLEAR_AT_START_DEFAULT: bool = False
+CHECK_PARAMETER_NAMES_DEFAULT: bool = True
 
 
 # This commands have "--" as one or some arguments
-COMMANDS_WITH_EMPTY_ARGS = {
+COMMANDS_WITH_EMPTY_ARGS: Dict[str, Tuple[Any, ...]] = {
     "/CMA": (),  # "/CMAP,
     "/NER": (),  # "/NERR,
     "/PBF": (),  # "/PBF,
@@ -114,42 +116,37 @@ COMMANDS_WITH_EMPTY_ARGS = {
 }
 
 
-COMMANDS_TO_NOT_BE_CONVERTED = [
+COMMANDS_TO_NOT_BE_CONVERTED: List[str] = [
     "CMPL",  # CMPLOT default behaviour does not match the `mapdl.cmplot`'s at the moemnt
-    "MODE",  # Until we merge #2431
-    "/LIN",  # Until we merge 2432
-    "/LAR",  # Until we merge 2432
-    "/TYP",  # Until we merge 2432
-    "/DSC",  # Until we merge 2432
     # CDREAD # commented above
 ]
 
-FORCED_MAPPING = {
+FORCED_MAPPING: Dict[str, str] = {
     # Forced mapping between MAPDL and PyMAPDL
     "SECT": "sectype",  # Because it is shadowed by `sectinqr`
 }
 
 
 def convert_script(
-    filename_in,
-    filename_out=None,
-    loglevel="WARNING",
-    auto_exit=True,
-    line_ending=None,
-    exec_file=None,
-    macros_as_functions=True,
-    use_function_names=True,
-    show_log=False,
-    add_imports=True,
-    comment_solve=False,
-    cleanup_output=True,
-    header=True,
-    print_com=True,
-    only_commands=False,
-    use_vtk=None,
-    clear_at_start=False,
-    check_parameter_names=True,
-):
+    filename_in: str,
+    filename_out: Optional[str] = None,
+    loglevel: str = "WARNING",
+    auto_exit: bool = True,
+    line_ending: Optional[str] = None,
+    exec_file: Optional[str] = None,
+    macros_as_functions: bool = True,
+    use_function_names: bool = True,
+    show_log: bool = False,
+    add_imports: bool = True,
+    comment_solve: bool = False,
+    cleanup_output: bool = True,
+    header: bool = True,
+    print_com: bool = True,
+    only_commands: bool = False,
+    graphics_backend: Optional[GraphicsBackend] = None,
+    clear_at_start: bool = False,
+    check_parameter_names: bool = True,
+) -> List[str]:
     """Converts an ANSYS input file to a python PyMAPDL script.
 
     Parameters
@@ -220,8 +217,8 @@ def convert_script(
         and exit commands are NOT included (``auto_exit=False``).
         Overrides ``header``, ``add_imports`` and ``auto_exit``.
 
-    use_vtk : bool, optional
-        It sets the `mapdl.use_vtk` argument equals True or False depending on
+    graphics_backend : bool, optional
+        It sets the `mapdl.graphics_backend` argument equals True or False depending on
         this value.
 
     clear_at_start : bool, optional
@@ -282,7 +279,7 @@ def convert_script(
         header=header,
         print_com=print_com,
         only_commands=only_commands,
-        use_vtk=use_vtk,
+        graphics_backend=graphics_backend,
         clear_at_start=clear_at_start,
         check_parameter_names=check_parameter_names,
     )
@@ -292,24 +289,24 @@ def convert_script(
 
 
 def convert_apdl_block(
-    apdl_strings,
-    loglevel="WARNING",
-    auto_exit=True,
-    line_ending=None,
-    exec_file=None,
-    macros_as_functions=True,
-    use_function_names=True,
-    show_log=False,
-    add_imports=True,
-    comment_solve=False,
-    cleanup_output=True,
-    header=True,
-    print_com=True,
-    only_commands=False,
-    use_vtk=None,
-    clear_at_start=False,
-    check_parameter_names=False,
-):
+    apdl_strings: str,
+    loglevel: str = "WARNING",
+    auto_exit: bool = True,
+    line_ending: Optional[str] = None,
+    exec_file: Optional[str] = None,
+    macros_as_functions: bool = True,
+    use_function_names: bool = True,
+    show_log: bool = False,
+    add_imports: bool = True,
+    comment_solve: bool = False,
+    cleanup_output: bool = True,
+    header: bool = True,
+    print_com: bool = True,
+    only_commands: bool = False,
+    graphics_backend: Optional[GraphicsBackend] = None,
+    clear_at_start: bool = False,
+    check_parameter_names: bool = False,
+) -> List[str]:
     """Converts an ANSYS input string to a python PyMAPDL string.
 
     Parameters
@@ -376,8 +373,8 @@ def convert_apdl_block(
         and exit commands are NOT included (``auto_exit=False``).
         Overrides ``header``, ``add_imports`` and ``auto_exit``.
 
-    use_vtk : bool, optional
-        It sets the `mapdl.use_vtk` argument equals True or False depending on
+    graphics_backend : bool, optional
+        It sets the `mapdl.graphics_backend` argument equals True or False depending on
         this value. Defaults to `None` which is Mapdl class default.
 
     clear_at_start : bool, optional
@@ -423,7 +420,7 @@ def convert_apdl_block(
         header=header,
         print_com=print_com,
         only_commands=only_commands,
-        use_vtk=use_vtk,
+        graphics_backend=graphics_backend,
         clear_at_start=clear_at_start,
         check_parameter_names=check_parameter_names,
     )
@@ -433,82 +430,25 @@ def convert_apdl_block(
     return translator.lines
 
 
-def _convert(
-    apdl_strings,
-    loglevel="WARNING",
-    auto_exit=True,
-    line_ending=None,
-    exec_file=None,
-    macros_as_functions=True,
-    use_function_names=True,
-    show_log=False,
-    add_imports=True,
-    comment_solve=False,
-    cleanup_output=True,
-    header=True,
-    print_com=True,
-    only_commands=False,
-    use_vtk=None,
-    clear_at_start=False,
-    check_parameter_names=True,
-):
-    if only_commands:
-        auto_exit = False
-        add_imports = False
-        header = False
-
-    translator = FileTranslator(
-        loglevel,
-        line_ending,
-        exec_file=exec_file,
-        macros_as_functions=macros_as_functions,
-        use_function_names=use_function_names,
-        show_log=show_log,
-        add_imports=add_imports,
-        comment_solve=comment_solve,
-        cleanup_output=cleanup_output,
-        header=header,
-        print_com=print_com,
-        use_vtk=use_vtk,
-        clear_at_start=clear_at_start,
-        check_parameter_names=check_parameter_names,
-    )
-
-    if isinstance(apdl_strings, str):
-        # os.linesep does not work well, so we are making sure
-        # the line separation is appropriate.
-        regx = f"[^\\r]({translator.line_ending})"
-        if not re.search(regx, apdl_strings):
-            if "\r\n" in apdl_strings:
-                translator.line_ending = "\r\n"
-            elif "\n" in apdl_strings:
-                translator.line_ending = "\n"
-
-        apdl_strings = apdl_strings.split(translator.line_ending)
-
-    for line in apdl_strings:
-        translator.translate_line(line)
-
-    if auto_exit and add_imports:
-        translator.write_exit()
-    return translator
+from collections import UserList
+from typing import Any
 
 
-class Lines(list):
-    def __init__(self, mute):
+class Lines(UserList[str]):
+    def __init__(self, *args: Any, mute: bool = False, **kwargs: Any) -> None:
         self._log = Logger("convert_logger")
         self._setup_logger()
         self._mute = mute
-        super().__init__()
+        super().__init__((each for each in args), **kwargs)
 
-    def append(self, item, mute=True):
+    def append(self, item: Any, mute: bool = True) -> None:
         # append the item to itself (the list)
         if not self._mute and item:
             stripped_msg = item.replace("\n", "\\n")
             self._log.info(msg=f"Converted: '{stripped_msg}'")
         super(Lines, self).append(item)
 
-    def _setup_logger(self):
+    def _setup_logger(self) -> None:
         stdhdl = StreamHandler()
         stdhdl.setLevel(10)
         stdhdl.set_name("stdout")
@@ -523,24 +463,24 @@ class FileTranslator:
 
     def __init__(
         self,
-        loglevel="INFO",
-        line_ending=None,
-        exec_file=None,
-        macros_as_functions=True,
-        use_function_names=True,
-        show_log=False,
-        add_imports=True,
-        comment_solve=False,
-        cleanup_output=True,
-        header=True,
-        print_com=True,
-        use_vtk=None,
-        clear_at_start=False,
-        check_parameter_names=False,
-    ):
+        loglevel: str = "INFO",
+        line_ending: Optional[str] = None,
+        exec_file: Optional[str] = None,
+        macros_as_functions: bool = True,
+        use_function_names: bool = True,
+        show_log: bool = False,
+        add_imports: bool = True,
+        comment_solve: bool = False,
+        cleanup_output: bool = True,
+        header: bool = True,
+        print_com: bool = True,
+        graphics_backend: Optional[GraphicsBackend] = None,
+        clear_at_start: bool = False,
+        check_parameter_names: bool = False,
+    ) -> None:
         self._non_interactive_level = 0
-        self.lines = Lines(mute=not show_log)
-        self._functions = []
+        self.lines: Lines = Lines(mute=not show_log)
+        self._functions: list[str] = []
         if line_ending:
             self.line_ending = line_ending
         else:
@@ -555,10 +495,10 @@ class FileTranslator:
         self._header = header
         self.print_com = print_com
         self.verification_example = False
-        self.use_vtk = use_vtk
+        self.graphics_backend = graphics_backend
         self.clear_at_start = clear_at_start
         self.check_parameter_names = check_parameter_names
-        self.macros_names = []
+        self.macros_names: list[str] = []
 
         self.write_header()
         if self._add_imports:
@@ -589,12 +529,14 @@ class FileTranslator:
             + list(self._enum_block_commands)
         )
 
+        self._chained_commands = 0
+        self.chained_commands = False
         self._block_count = 0
         self._block_count_target = 0
         self._in_block = False
-        self._block_current_cmd = None
+        self._block_current_cmd: str | None = None
 
-    def write_header(self):
+    def write_header(self) -> None:
         if isinstance(self._header, bool):
             if self._header:
                 header = f'"""Script generated by ansys-mapdl-core version {__version__}"""\n'
@@ -607,10 +549,10 @@ class FileTranslator:
                 "The keyword argument 'header' should be a string or a boolean."
             )
 
-    def write_exit(self):
+    def write_exit(self) -> None:
         self.lines.append(f"\n{self.obj_name}.exit()")
 
-    def format_using_autopep8(self, text=None):
+    def format_using_autopep8(self, text: str | None = None) -> str | None:
         """Format internal `self.lines` with autopep8.
 
         Parameters
@@ -621,7 +563,7 @@ class FileTranslator:
         """
         if self.cleanup_output:
             try:
-                import autopep8
+                import autopep8  # type: ignore
             except ModuleNotFoundError:  # pragma: no cover
                 warn(
                     "Install `autopep8` to use this feature with\n"
@@ -631,20 +573,26 @@ class FileTranslator:
 
             if not text:
                 text = self.line_ending.join(self.lines)
-                self.lines = autopep8.fix_code(text).splitlines()
+                self.lines = autopep8.fix_code(text).splitlines()  # type: ignore
 
             else:  # pragma: no cover
                 # for development purposes
                 return autopep8.fix_code(text)
 
-    def save(self, filename, format_autopep8=True):
+    def save(self, filename: str) -> None:
         """Saves lines to file"""
         if os.path.isfile(filename):
             os.remove(filename)
 
         # Making sure we write python string with double slash.
         # We are not expecting other type of unicode symbols.
-        self.lines = [each_line.replace("\\", "\\\\") for each_line in self.lines]
+        _lines = Lines()
+
+        # Lines() class does not have comprenhension list
+        for each_line in self.lines:
+            _lines.append(each_line.replace("\\", "\\\\"))
+
+        self.lines = _lines
 
         # Try to format the file using AutoPEP8
         self.format_using_autopep8()
@@ -652,7 +600,7 @@ class FileTranslator:
         with open(filename, "w") as f:
             f.write(self.line_ending.join(self.lines))
 
-    def initialize_mapdl_object(self, loglevel, exec_file):
+    def initialize_mapdl_object(self, loglevel: str, exec_file: Optional[str]) -> None:
         """Initializes ansys object as lines"""
         core_module = "ansys.mapdl.core"  # shouldn't change
         self.lines.append(f"from {core_module} import launch_mapdl")
@@ -665,8 +613,10 @@ class FileTranslator:
         if self.print_com:
             mapdl_arguments.append("print_com=True")
 
-        if self.use_vtk is not None:
-            mapdl_arguments.append(f"use_vtk={bool(self.use_vtk)}")
+        if self.graphics_backend is not None:
+            mapdl_arguments.append(
+                f"graphics_backend={GraphicsBackend(self.graphics_backend)}"
+            )
 
         if self.check_parameter_names is not None and not self.check_parameter_names:
             mapdl_arguments.append("check_parameter_names=False")
@@ -678,17 +628,28 @@ class FileTranslator:
             self.lines.append(f"{self.obj_name}.clear() # Clearing session")
 
     @property
-    def line_ending(self):
+    def line_ending(self) -> str:
         return self._line_ending
 
     @line_ending.setter
-    def line_ending(self, line_ending):
+    def line_ending(self, line_ending: str) -> None:
         if line_ending not in ["\n", "\r\n"]:
             raise ValueError('Line ending must be either "\\n", "\\r\\n"')
         self._line_ending = line_ending
 
-    def translate_line(self, line):
+    def translate_line(self, line: str) -> Optional[str]:
         """Converts a single line from an ANSYS APDL script"""
+
+        if "$" in line:
+            # these are chained commands.
+            lines = line.split("$")
+            self.start_chained_commands()
+            for each_line in lines:
+                self.translate_line(each_line)
+
+            self.end_chained_commands()
+            return
+
         self.comment = ""
         original_line = line.replace("\r\n", "").replace(
             "\n", ""
@@ -832,12 +793,14 @@ class FileTranslator:
 
         if cmd_caps_short == "/TIT":  # /TITLE
             parameters = line.split(",")[1:]
-            return self.store_command("title", [",".join(parameters).strip()])
+            self.store_command("title", [",".join(parameters).strip()])
+            return
 
         if cmd_caps_short == "/AXL":  # /AXLAB
             parameters = line.split(",")[1:]
             parameters_ = [parameters[0], ",".join(parameters[1:])]
-            return self.store_command("axlab", parameters_)
+            self.store_command("axlab", parameters_)
+            return
 
         if cmd_caps_short == "*GET":
             if self.non_interactive:  # gives error
@@ -845,7 +808,8 @@ class FileTranslator:
                 return
             else:
                 parameters = line.split(",")[1:]
-                return self.store_command("get", parameters)
+                self.store_command("get", parameters)
+                return
 
         if cmd_caps_short == "/NOP":
             self.comment = (
@@ -879,7 +843,8 @@ class FileTranslator:
                 return
 
         if cmd_caps == "/PREP7":
-            return self.store_command("prep7", [])
+            self.store_command("prep7", [])
+            return
 
         if "*END" in line_upper:
             if self.macros_as_functions:
@@ -993,12 +958,12 @@ class FileTranslator:
         else:
             self.store_run_command(line.strip())
 
-    def _pymapdl_command(self, command):
+    def _pymapdl_command(self, command: str) -> str:
         if command[0] in ["/", "*"]:
             command = command[1:]
         return command
 
-    def start_function(self, func_name):
+    def start_function(self, func_name: str) -> None:
         self._functions.append(func_name)
         self.store_empty_line()
         self.store_empty_line()
@@ -1021,10 +986,10 @@ class FileTranslator:
         self.lines.append(line)
         self.indent = self.indent + "    "
 
-    def store_under_scored_run_command(self, command):
+    def store_under_scored_run_command(self, command: str) -> None:
         self.store_run_command(command, run_underscored=True)
 
-    def store_run_command(self, command, run_underscored=False):
+    def store_run_command(self, command: str, run_underscored: bool = False) -> None:
         """Stores pyansys.ANSYS command that cannot be broken down
         into a function and parameters.
         """
@@ -1070,20 +1035,20 @@ class FileTranslator:
             )
         self.lines.append(line)
 
-    def store_comment(self):
+    def store_comment(self) -> None:
         """Stores a line containing only a comment"""
         line = f"{self.indent}# {self.comment}"
         self.lines.append(line)
 
-    def store_empty_line(self):
+    def store_empty_line(self) -> None:
         """Stores an empty line"""
         self.lines.append("")
 
-    def store_python_command(self, command):
+    def store_python_command(self, command: str) -> None:
         line = f"{self.indent}{command}"
         self.lines.append(line)
 
-    def _parse_arguments(self, parameters):
+    def _parse_arguments(self, parameters: List[str]) -> str:
         parsed_parameters = []
         for parameter in parameters:
             parameter = parameter.strip()
@@ -1101,29 +1066,28 @@ class FileTranslator:
 
         return ", ".join(parsed_parameters)
 
-    def store_command(self, function, parameters):
+    def store_command(self, function: str, parameters: List[str]) -> None:
         """Stores a valid pyansys function with parameters"""
         parameter_str = self._parse_arguments(parameters)
-
+        parameters_dict = {
+            "indentation": self.indent,
+            "obj_name": self.obj_name,
+            "function": function,
+            "parameter_str": parameter_str,
+            "comment": self.comment,
+        }
         if self.comment:
-            line = "%s%s.%s(%s)  # %s" % (
-                self.indent,
-                self.obj_name,
-                function,
-                parameter_str,
-                self.comment,
+            line = "{indentation}{obj_name}.{function}({parameter_str})  # {comment}".format(
+                **parameters_dict
             )
         else:
-            line = "%s%s.%s(%s)" % (
-                self.indent,
-                self.obj_name,
-                function,
-                parameter_str,
+            line = "{indentation}{obj_name}.{function}({parameter_str})".format(
+                **parameters_dict
             )
 
         self.lines.append(line)
 
-    def start_non_interactive(self):
+    def start_non_interactive(self) -> None:
         self._non_interactive_level += 1
         if self.non_interactive:
             return
@@ -1132,13 +1096,28 @@ class FileTranslator:
         self.non_interactive = True
         self.indent = self.indent + "    "
 
-    def end_non_interactive(self):
+    def end_non_interactive(self) -> None:
         self._non_interactive_level -= 1
         if self._non_interactive_level <= 0:
             self.indent = self.indent[4:]
             self.non_interactive = False
 
-    def output_to_file(self, line):
+    def start_chained_commands(self) -> None:
+        self._chained_commands += 1
+        if self.chained_commands:
+            return
+        line = f"{self.indent}with {self.obj_name}.chain_commands:"
+        self.lines.append(line)
+        self.chained_commands = True
+        self.indent = self.indent + "    "
+
+    def end_chained_commands(self) -> None:
+        self._chained_commands -= 1
+        if self._chained_commands <= 0:
+            self.indent = self.indent[4:]
+            self.chained_commands = False
+
+    def output_to_file(self, line: str) -> bool:
         """Return if an APDL line is redirecting to a file."""
         if line[:4].upper() == "/OUT":
             # We are redirecting the output to somewhere, probably a file.
@@ -1159,7 +1138,7 @@ class FileTranslator:
 
         return False
 
-    def output_to_default(self, line):
+    def output_to_default(self, line: str) -> bool:
         if line[:4].upper() == "/OUT":
             # We are redirecting the output to somewhere, probably a file.
             # Because of the problem with the ansys output, we need to execute
@@ -1178,7 +1157,7 @@ class FileTranslator:
 
         return False
 
-    def _get_items(self, line_):
+    def _get_items(self, line_: str) -> List[str]:
         """Parse the line items (comma separated elements) but ignoring the ones inside parenthesis, or brackets"""
 
         parenthesis_count = 0
@@ -1202,7 +1181,7 @@ class FileTranslator:
 
         return items
 
-    def _get_valid_pymapdl_methods_short(self):
+    def _get_valid_pymapdl_methods_short(self) -> List[str]:
         pymethods = dir(Commands)
 
         reduced_list = []
@@ -1217,9 +1196,70 @@ class FileTranslator:
                 reduced_list.append(each_method[:4])
         return reduced_list
 
-    def find_match(self, cmd):
+    def find_match(self, cmd: str) -> str:
         pymethods = sorted(dir(Commands))
 
         for each in pymethods:
             if each.startswith(cmd):
                 return each
+
+
+def _convert(
+    apdl_strings: str | List[str],
+    loglevel: str = "WARNING",
+    auto_exit: bool = True,
+    line_ending: Optional[str] = None,
+    exec_file: Optional[str] = None,
+    macros_as_functions: bool = True,
+    use_function_names: bool = True,
+    show_log: bool = False,
+    add_imports: bool = True,
+    comment_solve: bool = False,
+    cleanup_output: bool = True,
+    header: bool = True,
+    print_com: bool = True,
+    only_commands: bool = False,
+    graphics_backend: Optional[bool] = None,
+    clear_at_start: bool = False,
+    check_parameter_names: bool = False,
+) -> FileTranslator:
+    if only_commands:
+        auto_exit = False
+        add_imports = False
+        header = False
+
+    translator = FileTranslator(
+        loglevel,
+        line_ending,
+        exec_file=exec_file,
+        macros_as_functions=macros_as_functions,
+        use_function_names=use_function_names,
+        show_log=show_log,
+        add_imports=add_imports,
+        comment_solve=comment_solve,
+        cleanup_output=cleanup_output,
+        header=header,
+        print_com=print_com,
+        graphics_backend=graphics_backend,
+        clear_at_start=clear_at_start,
+        check_parameter_names=check_parameter_names,
+    )
+
+    if isinstance(apdl_strings, str):
+        # os.linesep does not work well, so we are making sure
+        # the line separation is appropriate.
+        regx = f"[^\\r]({translator.line_ending})"
+        if not re.search(regx, apdl_strings):
+            if "\r\n" in apdl_strings:
+                translator.line_ending = "\r\n"
+            elif "\n" in apdl_strings:
+                translator.line_ending = "\n"
+
+        apdl_strings = apdl_strings.split(translator.line_ending)
+
+    for line in apdl_strings:
+        translator.translate_line(line)
+
+    if auto_exit and add_imports:
+        translator.write_exit()
+    return translator

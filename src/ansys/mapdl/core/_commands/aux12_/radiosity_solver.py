@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,7 +22,7 @@
 
 
 class RadiositySolver:
-    def hemiopt(self, hres="", **kwargs):
+    def hemiopt(self, hres="", tolerance="", **kwargs):
         """Specifies options for Hemicube view factor calculation.
 
         APDL Command: HEMIOPT
@@ -62,11 +62,14 @@ class RadiositySolver:
         solver
             Choice of solver for radiosity calculation:
 
-            0 - Gauss-Seidel iterative solver (default).
+            0
+                Gauss-Seidel iterative solver (default).
 
-            1 - Direct solver.
+            1
+                Direct solver.
 
-            2 - Jacobi solver.
+            2
+                Jacobi solver.
 
         maxiter
             Maximum number of iterations for iterative solver (SOLVER = 0 or
@@ -84,22 +87,20 @@ class RadiositySolver:
             Maximum number of flux iterations to be performed according to the
             specified solver type:
 
-            0 - If the FULL solver is specified (THOPT,FULL), convergence criteria are
-                monitored and iterations are performed until convergence
-                occurs. If the QUASI solver is specified (THOPT,QUASI),
-                convergence criteria are ignored and one iteration is
-                performed. This value is the default.
+            0
+                If the FULL solver is specified (``THOPT,FULL``), convergence
+                criteria are monitored and iterations are performed until
+                convergence occurs. If the QUASI solver is specified
+                (``THOPT,QUASI``), convergence criteria are ignored and one
+                iteration is performed. This value is the default.
 
-            1, 2, 3, ...N  - If the FULL solver is specified
-                             (THOPT,FULL), convergence criteria are
-                             monitored and iterations are performed
-                             until convergence occurs, or until the
-                             specified number of iterations has been
-                             completed, whichever comes first. If the
-                             QUASI solver is specified (THOPT,QUASI),
-                             convergence criteria are ignored and the
-                             specified number of iterations are
-                             completed.
+            1, 2, 3, ...N
+                If the FULL solver is specified (``THOPT,FULL``), convergence
+                criteria are monitored and iterations are performed until
+                convergence occurs, or until the specified number of iterations
+                has been completed, whichever comes first. If the QUASI solver
+                is specified (``THOPT,QUASI``), convergence criteria are ignored and
+                the specified number of iterations are completed.
 
         Notes
         -----
@@ -232,9 +233,11 @@ class RadiositySolver:
         geom
             Choice of geometry:
 
-            0 - Planar (default).
+            0
+                Planar (default).
 
-            1 - Axisymmetric
+            1
+                Axisymmetric
 
         ndiv
             Number of divisions for axisymmetric geometry (that is, the number
@@ -243,9 +246,11 @@ class RadiositySolver:
         hidopt
             Viewing option:
 
-            0 - Hidden (default).
+            0
+                Hidden (default).
 
-            1 - Non-hidden
+            1
+                Non-hidden
 
         nzone
             Number of zones (that is, the number of rays emanating from a
@@ -266,12 +271,15 @@ class RadiositySolver:
         action
             Action to be performed:
 
-            Define - Define a view factor summation (default)
+            Define
+                Define a view factor summation (default)
 
-            Clear - Resets the scaling method to 0 for all
-                    enclosures. All subsequent arguments are ignored.
+            Clear
+                Resets the scaling method to 0 for all
+                enclosures. All subsequent arguments are ignored.
 
-            Status - Outputs the OPT value for each enclosure in the model.
+            Status
+                Outputs the OPT value for each enclosure in the model.
 
         encl
             Previously defined enclosure number for the view factor adjustment.
@@ -279,19 +287,24 @@ class RadiositySolver:
         opt
             Option key:
 
-            0 - The view factor matrix values are not adjusted (default).
+            0
+                The view factor matrix values are not adjusted (default).
 
-            1 - The view factor matrix values are adjusted so that the
+            1
+                The view factor matrix values are adjusted so that the
                 row sum equals 1.0.
 
-            2 - The view factor matrix values are adjusted so that the
+            2
+                The view factor matrix values are adjusted so that the
                 row sum equals 1.0 and the reciprocity relationship is
                 satisfied.
 
-            3 - The view factor matrix values are adjusted so that the
+            3
+                The view factor matrix values are adjusted so that the
                 original row sum is maintained.
 
-            4 - The view factor matrix values are adjusted so that the
+            4
+                The view factor matrix values are adjusted so that the
                 original row sum is maintained and the reciprocity
                 relationship is satisfied.
 
@@ -343,16 +356,20 @@ class RadiositySolver:
         opt
             View factor option:
 
-            NEW - Calculate view factors and write them to a file.
+            NEW
+                Calculate view factors and write them to a file.
 
-            OFF - Do not recalculate view factors it they already exist in the database,
+            OFF
+                Do not recalculate view factors it they already exist in the database,
                   otherwise calculate compute them. This option is the default
                   behavior.
 
-            READ - Read view factors from a binary file. For subsequent SOLVE commands, switch to
+            READ
+                Read view factors from a binary file. For subsequent SOLVE commands, switch to
                    the default option (OFF).
 
-            NONE - Do not write view factors to a file.
+            NONE
+                Do not write view factors to a file.
 
         fname
             File name for view factor matrix. Default = Jobname.
@@ -360,23 +377,38 @@ class RadiositySolver:
         ext
             Filename extension for view factor matrix. Default = .vf.
 
-        dir\_
+        dir\\_
             Directory path for view factor matrix. If you do not specify a
             directory path, it will default to your working directory.
 
         filetype
             View factor file type:
 
-            BINA - Binary (default).
+            BINA
+                Binary (default).
 
-            ASCI - ASCII.
+            ASCI
+                ASCII.
 
         fileformat
             Format for the specified Filetype:
 
-            Binary files (Filetype = BINA): - 0
+            Binary files (Filetype = BINA):
 
-            No compression. (View factor file size may be very large.) - 1
+            0
+                No compression. (View factor file size may be very large.)
+
+            1
+                Zeroes are compressed out. (Useful for large models to reduce
+                the view factor file size.)
+
+            ASCII files (Filetype = ASCI):
+
+            0
+                10F7.4 (low precision, lower accuracy).
+
+            1
+                7F11.8 (high precision, higher accuracy).
 
         Notes
         -----
@@ -402,7 +434,7 @@ class RadiositySolver:
         command = f"VFOPT,{opt},{filename},{ext},{dir_},{filetype},{fileformat}"
         return self.run(command, **kwargs)
 
-    def vfquery(self, srcelem="", tarelem="", **kwargs):
+    def vfquery(self, srcelem="", tarelem="", wropt="", **kwargs):
         """Queries and prints element Hemicube view factors and average view
 
         APDL Command: VFQUERY
@@ -439,5 +471,5 @@ class RadiositySolver:
         When resuming a database, issue the command VFOPT,READ before issuing
         the VFQUERY command.
         """
-        command = f"VFQUERY,{srcelem},{tarelem}"
+        command = f"VFQUERY,{srcelem},{tarelem},,{wropt}"
         return self.run(command, **kwargs)

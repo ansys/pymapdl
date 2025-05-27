@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -53,13 +53,17 @@ class CoordinateSystem:
         kcs
             Coordinate system type:
 
-            0 or CART - Cartesian
+            0 or CART
+                Cartesian
 
-            1 or CYLIN - Cylindrical (circular or elliptical)
+            1 or CYLIN
+                Cylindrical (circular or elliptical)
 
-            2 or SPHE - Spherical (or spheroidal)
+            2 or SPHE
+                Spherical (or spheroidal)
 
-            3 or TORO - Toroidal
+            3 or TORO
+                Toroidal
 
         xl, yl, zl
             Location (in the active coordinate system) of the origin of the new
@@ -129,13 +133,17 @@ class CoordinateSystem:
         kcs
             Coordinate system type:
 
-            0 or CART - Cartesian
+            0 or CART
+                Cartesian
 
-            1 or CYLIN - Cylindrical (circular or elliptical)
+            1 or CYLIN
+                Cylindrical (circular or elliptical)
 
-            2 or SPHE - Spherical (or spheroidal)
+            2 or SPHE
+                Spherical (or spheroidal)
 
-            3 or TORO - Toroidal
+            3 or TORO
+                Toroidal
 
         norig
             Node defining the origin of this coordinate system.  If NORIG = P,
@@ -197,16 +205,20 @@ class CoordinateSystem:
             Theta singularity location for cylindrical, spherical, and toroidal
             systems:
 
-            0 - Singularity at ±180°.
+            0
+                Singularity at ±180°.
 
-            1 - Singularity at 0° (360°).
+            1
+                Singularity at 0° (360°).
 
         kphi
             Phi singularity location for toroidal systems:
 
-            0 - Singularity in phi direction at ±180°.
+            0
+                Singularity in phi direction at ±180°.
 
-            1 - Singularity in phi direction at 0° (360°).
+            1
+                Singularity in phi direction at 0° (360°).
 
         Notes
         -----
@@ -262,13 +274,17 @@ class CoordinateSystem:
         kcs
             Coordinate system type:
 
-            0 or CART - Cartesian
+            0 or CART
+                Cartesian
 
-            1 or CYLIN - Cylindrical (circular or elliptical)
+            1 or CYLIN
+                Cylindrical (circular or elliptical)
 
-            2 or SPHE - Spherical (or spheroidal)
+            2 or SPHE
+                Spherical (or spheroidal)
 
-            3 or TORO - Toroidal
+            3 or TORO
+                Toroidal
 
         porig
             Keypoint defining the origin of this coordinate system.  If PORIG =
@@ -349,13 +365,17 @@ class CoordinateSystem:
         kcs
             Coordinate system type:
 
-            0 or CART - Cartesian
+            0 or CART
+                Cartesian
 
-            1 or CYLIN - Cylindrical (circular or elliptical)
+            1 or CYLIN
+                Cylindrical (circular or elliptical)
 
-            2 or SPHE - Spherical (or spheroidal)
+            2 or SPHE
+                Spherical (or spheroidal)
 
-            3 or TORO - Toroidal
+            3 or TORO
+                Toroidal
 
         par1
             Used for elliptical, spheroidal, or toroidal systems.  If KCS = 1
@@ -397,17 +417,23 @@ class CoordinateSystem:
         kcn
             Specifies the active coordinate system, as follows:
 
-            0 (default) - Cartesian
+            0 (default)
+                Cartesian
 
-            1 - Cylindrical with global Cartesian Z as the axis of rotation
+            1
+                Cylindrical with global Cartesian Z as the axis of rotation
 
-            2 - Spherical
+            2
+                Spherical
 
-            4 or WP - Working Plane
+            4 or WP
+                Working Plane
 
-            5 - Cylindrical with global Cartesian Y as the axis of rotation
+            5
+                Cylindrical with global Cartesian Y as the axis of rotation
 
-            11 or greater - Any previously defined local coordinate system
+            11 or greater
+                Any previously defined local coordinate system
 
         Notes
         -----
@@ -487,13 +513,17 @@ class CoordinateSystem:
         kcs
             Coordinate system type:
 
-            0 or CART - Cartesian
+            0 or CART
+                Cartesian
 
-            1 or CYLIN - Cylindrical (circular or elliptical)
+            1 or CYLIN
+                Cylindrical (circular or elliptical)
 
-            2 or SPHE - Spherical (or spheroidal)
+            2 or SPHE
+                Spherical (or spheroidal)
 
-            3 or TORO - Toroidal
+            3 or TORO
+                Toroidal
 
         xc, yc, zc
             Location (in the global Cartesian coordinate system) of the origin

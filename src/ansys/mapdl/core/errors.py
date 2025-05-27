@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -21,19 +21,25 @@
 # SOFTWARE.
 
 """PyMAPDL specific errors"""
-
 from functools import wraps
 import signal
 import threading
+from time import sleep
+from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
 
-from grpc._channel import _InactiveRpcError, _MultiThreadedRendezvous
+import grpc
 
 from ansys.mapdl.core import LOG as logger
 
-SIGINT_TRACKER = []
+SIGINT_TRACKER: List = []
+
+# Configuration of 'protect_grpc' wrapper
+N_ATTEMPTS = 5
+INITIAL_BACKOFF = 0.1
+MULTIPLIER_BACKOFF = 2
 
 
-LOCKFILE_MSG = """
+LOCKFILE_MSG: str = """
 Another ANSYS job with the same job name is already running in this
 directory, or the lock file has not been deleted from an abnormally
 terminated ANSYS run.
@@ -43,55 +49,79 @@ Disable this check by passing ``override=True``
 """
 
 
-TYPE_MSG = (
+TYPE_MSG: str = (
     "Invalid datatype.  Must be one of the following:\n"
     + "np.int32, np.int64, or np.double"
 )
 
 
-class ANSYSDataTypeError(ValueError):
-    """Raised when and invalid data type is sent to APDLMath"""
+## Abraham class
+class MapdlException(Exception):
+    """MAPDL general exception"""
 
-    def __init__(self, msg=TYPE_MSG):
+    def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class VersionError(ValueError):
-    """Raised when MAPDL is the wrong version"""
+## Main subclasses
+class MapdlValueError(MapdlException, ValueError):
+    """MAPDL Value error"""
 
-    def __init__(self, msg="Invalid MAPDL version"):
+    def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class NoDistributedFiles(FileNotFoundError):
-    """Unable to find any distributed result files"""
+class MapdlFileNotFoundError(MapdlException, FileNotFoundError):
+    """Error when file is not found"""
 
-    def __init__(self, msg="Unable to find any distributed result files"):
+    def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class MapdlRuntimeError(RuntimeError):
+class MapdlRuntimeError(MapdlException, RuntimeError):
     """Raised when MAPDL passes an error"""
 
     def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class MapdlInvalidRoutineError(RuntimeError):
+## Inheritated
+class ANSYSDataTypeError(MapdlValueError):
+    """Raised when and invalid data type is sent to APDLMath"""
+
+    def __init__(self, msg=TYPE_MSG):
+        super().__init__(msg)
+
+
+class VersionError(MapdlValueError):
+    """Raised when MAPDL is the wrong version"""
+
+    def __init__(self, msg="Invalid MAPDL version"):
+        super().__init__(msg)
+
+
+class NoDistributedFiles(MapdlFileNotFoundError):
+    """Unable to find any distributed result files"""
+
+    def __init__(self, msg="Unable to find any distributed result files"):
+        super().__init__(msg)
+
+
+class MapdlInvalidRoutineError(MapdlRuntimeError):
     """Raised when MAPDL is in the wrong routine"""
 
     def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class MapdlCommandIgnoredError(RuntimeError):
+class MapdlCommandIgnoredError(MapdlRuntimeError):
     """Raised when MAPDL ignores a command."""
 
     def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class MapdlExitedError(RuntimeError):
+class MapdlExitedError(MapdlRuntimeError):
     """Raised when MAPDL has exited"""
 
     def __init__(self, msg="MAPDL has exited"):
@@ -109,14 +139,14 @@ class NotEnoughResources(MapdlExitedError):
         super().__init__(msg.format(resource=resource))
 
 
-class LockFileException(RuntimeError):
+class LockFileException(MapdlRuntimeError):
     """Error message when the lockfile has not been removed"""
 
     def __init__(self, msg=LOCKFILE_MSG):
         super().__init__(msg)
 
 
-class MapdlDidNotStart(RuntimeError):
+class MapdlDidNotStart(MapdlRuntimeError):
     """Error when the MAPDL process does not start"""
 
     def __init__(self, msg=""):
@@ -126,7 +156,7 @@ class MapdlDidNotStart(RuntimeError):
 class PortAlreadyInUse(MapdlDidNotStart):
     """Error when the port is already occupied"""
 
-    def __init__(self, msg="The port {port} is already being used.", port=50052):
+    def __init__(self, port=50052, msg="The port {port} is already being used."):
         super().__init__(msg.format(port=port))
 
 
@@ -134,12 +164,12 @@ class PortAlreadyInUseByAnMAPDLInstance(PortAlreadyInUse):
     """Error when the port is already occupied"""
 
     def __init__(
-        self, msg="The port {port} is already used by an MAPDL instance.", port=50052
+        self, port=50052, msg="The port {port} is already used by an MAPDL instance."
     ):
         super().__init__(msg.format(port=port))
 
 
-class MapdlConnectionError(RuntimeError):
+class MapdlConnectionError(MapdlRuntimeError):
     """Provides the error when connecting to the MAPDL instance fails."""
 
     def __init__(self, msg=""):
@@ -161,22 +191,15 @@ class IncorrectWorkingDirectory(OSError, MapdlRuntimeError):
         super().__init__(msg)
 
 
-class DifferentSessionConnectionError(RuntimeError):
+class DifferentSessionConnectionError(MapdlRuntimeError):
     """Provides the error when connecting to the MAPDL instance fails."""
 
     def __init__(self, msg=""):
         super().__init__(msg)
 
 
-class DeprecationError(RuntimeError):
+class DeprecationError(MapdlRuntimeError):
     """Provides the error for deprecated commands, classes, interfaces, etc"""
-
-    def __init__(self, msg=""):
-        super().__init__(msg)
-
-
-class MapdlException(MapdlRuntimeError):
-    """General MAPDL exception."""
 
     def __init__(self, msg=""):
         super().__init__(msg)
@@ -217,7 +240,7 @@ class MapdlVersionError(MapdlException):
         super().__init__(msg)
 
 
-class EmptyRecordError(RuntimeError):
+class EmptyRecordError(MapdlRuntimeError):
     """Raised when a record is empty"""
 
     def __init__(self, msg=""):
@@ -245,8 +268,15 @@ class ComponentDoesNotExits(MapdlException):
         super().__init__(msg)
 
 
-class CommandDeprecated(MapdlException, DeprecationError):
+class CommandDeprecated(DeprecationError):
     """Raised when a command is deprecated"""
+
+    def __init__(self, msg=""):
+        super().__init__(msg)
+
+
+class MapdlgRPCError(MapdlRuntimeError):
+    """Raised when gRPC issues are found"""
 
     def __init__(self, msg=""):
         super().__init__(msg)
@@ -261,7 +291,7 @@ def handler(sig, frame):  # pragma: no cover
     SIGINT_TRACKER.append(True)
 
 
-def protect_grpc(func):
+def protect_grpc(func: Callable) -> Callable:
     """Capture gRPC exceptions and return a more succinct error message
 
     Capture KeyboardInterrupt to avoid segfaulting MAPDL.
@@ -282,24 +312,81 @@ def protect_grpc(func):
                 old_handler = signal.signal(signal.SIGINT, handler)
 
         # Capture gRPC exceptions
-        try:
-            out = func(*args, **kwargs)
-        except (_InactiveRpcError, _MultiThreadedRendezvous) as error:
-            # can't use isinstance here due to circular imports
+        n_attempts = kwargs.get("n_attempts", N_ATTEMPTS)
+        initial_backoff = kwargs.get("initial_backoff", INITIAL_BACKOFF)
+        multiplier_backoff = kwargs.get("multiplier_backoff", MULTIPLIER_BACKOFF)
+
+        i_attemps = 0
+
+        while True:
             try:
-                class_name = args[0].__class__.__name__
-            except:
-                class_name = ""
+                out = func(*args, **kwargs)
 
-            if class_name == "MapdlGrpc":
-                mapdl = args[0]
-            elif hasattr(args[0], "_mapdl"):
-                mapdl = args[0]._mapdl
+                # Exit while-loop if success
+                break
 
-            # Must close unfinished processes
-            mapdl._close_process()
-            raise MapdlExitedError("MAPDL server connection terminated") from None
+            except grpc.RpcError as error:
+                mapdl = retrieve_mapdl_from_args(args)
 
+                mapdl._log.debug("A gRPC error has been detected.")
+
+                if not mapdl.exited:
+                    i_attemps += 1
+                    if i_attemps <= n_attempts:
+
+                        wait = (
+                            initial_backoff * multiplier_backoff**i_attemps
+                        )  # Exponential backoff
+
+                        # reconnect
+                        mapdl._log.debug(
+                            f"Re-connection attempt {i_attemps} after waiting {wait:0.3f} seconds"
+                        )
+
+                        if not mapdl.is_alive:
+                            connected = mapdl._connect(timeout=wait)
+                        else:
+                            sleep(wait)
+
+                        # Retry again
+                        continue
+
+                # Custom errors
+                reason = ""
+                suggestion = ""
+
+                if error.code() == grpc.StatusCode.RESOURCE_EXHAUSTED:
+                    if "Received message larger than max" in error.details():
+                        try:
+                            lim_ = int(error.details().split("(")[1].split("vs")[0])
+                        except IndexError:
+                            lim_ = int(512 * 1024**2)
+
+                        raise MapdlgRPCError(
+                            f"RESOURCE_EXHAUSTED: {error.details()}. "
+                            "You can try to increase the gRPC message length size using 'PYMAPDL_MAX_MESSAGE_LENGTH'"
+                            " environment variable. For instance:\n\n"
+                            f"$ export PYMAPDL_MAX_MESSAGE_LENGTH={lim_}"
+                        )
+
+                # Every try to reconnecto to MAPDL failed
+                # So let's avoid execution from now on.
+                # The above exception should not break the channel.
+                mapdl._exited = True
+
+                if error.code() == grpc.StatusCode.UNAVAILABLE:
+                    # Very likely the MAPDL server has died.
+                    suggestion = (
+                        "  MAPDL *might* have died because it executed a not-allowed command or ran out of memory.\n"
+                        "  Check the MAPDL command output for more details.\n"
+                        "  Open an issue on GitHub if you need assistance: "
+                        "https://github.com/ansys/pymapdl/issues"
+                    )
+
+                # Generic error
+                handle_generic_grpc_error(error, func, args, kwargs, reason, suggestion)
+
+        # No exceptions
         if threading.current_thread().__class__.__name__ == "_MainThread":
             received_interrupt = bool(SIGINT_TRACKER)
 
@@ -314,3 +401,120 @@ def protect_grpc(func):
         return out
 
     return wrapper
+
+
+def retrieve_mapdl_from_args(args: Iterable[Any]) -> "Mapdl":
+    # can't use isinstance here due to circular imports
+    try:
+        class_name = args[0].__class__.__name__
+    except (IndexError, AttributeError):
+        class_name = ""
+
+    if class_name == "MapdlGrpc":
+        mapdl = args[0]
+    elif hasattr(args[0], "_mapdl"):
+        mapdl = args[0]._mapdl
+
+    return mapdl
+
+
+def handle_generic_grpc_error(
+    error: Exception,
+    func: Callable,
+    args: Tuple[Any],
+    kwargs: Dict[Any, Any],
+    reason: str = "",
+    suggestion: str = "",
+):
+    """Handle non-custom gRPC errors"""
+
+    mapdl = retrieve_mapdl_from_args(args)
+
+    # trying to get "cmd" argument:
+    cmd = args[1] if len(args) >= 2 else ""
+    cmd = kwargs.get("cmd", cmd)
+
+    caller = func.__name__
+
+    if cmd:
+        msg_ = f"running:\n  {cmd}\ncalled by:\n  {caller}\n"
+    else:
+        msg_ = f"calling:{caller}\nwith the following arguments:\n  args: {args}\n  kwargs: {kwargs}"
+
+    if reason:
+        reason = f"Possible reason:\n{reason}\n"
+
+    if suggestion:
+        suggestion = f"Suggestions:\n{suggestion}\n"
+
+    msg = (
+        f"Error:\nMAPDL server connection terminated unexpectedly while {msg_}\n"
+        f"{reason}"
+        f"{suggestion}"
+        "MAPDL instance:\n"
+        f"  {mapdl._path}\n"
+        f"  {mapdl.ip}:{mapdl.port}\n"
+        "Error:\n"
+        f"  {error.details()}\n"
+        f"Full error:\n{error}"
+    )
+
+    # Generic error
+    # Test if MAPDL is alive or not.
+    if mapdl.is_alive:
+        raise MapdlRuntimeError(msg)
+
+    else:
+        # Making sure we do not keep executing gRPC calls.
+        # Must close unfinished processes
+        mapdl.exit()
+        raise MapdlExitedError(msg)
+
+
+def protect_from(
+    exception, match: Optional[str] = None, condition: Optional[bool] = None
+) -> Callable:
+    """Protect the decorated method from raising an exception of
+    of a given type.
+
+    You can filter the exceptions by using 'match' and/or 'condition'. If both
+    are given, **both** need to be fulfilled. If you only need one or the other,
+    you can use multiple decorators.
+
+    Parameters
+    ----------
+    exception : Exception
+        Exception to catch.
+    match : optional
+        String against to match the exception, by default None
+    condition : optional
+        Condition that needs to be fulfil to catch the exception, by default None
+
+    Returns
+    -------
+    Callable
+        Decorated function
+
+    Raises
+    ------
+    e
+        The given exception if not caught by the internal try.
+    """
+
+    def decorator(function):
+        @wraps(function)
+        def wrapper(self, *args, **kwargs):
+            try:
+                return function(self, *args, **kwargs)
+            except exception as e:
+                if (match is None or match in str(e)) and (
+                    condition is None or condition
+                ):
+                    pass
+                # everything else raises
+                else:
+                    raise e
+
+        return wrapper
+
+    return decorator

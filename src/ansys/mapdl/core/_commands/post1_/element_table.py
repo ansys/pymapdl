@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -610,7 +610,7 @@ class ElementTable:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Type of calculation:
 
             0 - No nodal safety factor or margin of safety calculations.
@@ -658,7 +658,7 @@ class ElementTable:
         labt
             Labeled result item corresponding to the element temperature.
 
-        type\_
+        type\\_
             Type of calculation:
 
             0 or 1 - Use safety factor (SF) calculation.

@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -34,8 +34,8 @@ First, start MAPDL as a service.
 """
 # sphinx_gallery_thumbnail_number = 3
 
-import matplotlib.pyplot as plt
 import numpy as np
+import plotly.graph_objects as go
 
 from ansys.mapdl.core import launch_mapdl
 
@@ -120,7 +120,6 @@ mapdl.mopt("EXPND", 0.7)  # default 1
 mapdl.esize(plate_esize)
 mapdl.amesh(plate_with_hole_anum)
 mapdl.eplot(
-    vtk=True,
     cpos="xy",
     show_edges=True,
     show_axes=False,
@@ -397,12 +396,24 @@ for ratio in ratios:
 # where ratio is (d/h)
 k_t_anl = 3 - 3.14 * ratios + 3.667 * ratios**2 - 1.527 * ratios**3
 
-plt.plot(ratios, k_t_anl, label=r"$K_t$ Analytical")
-plt.plot(ratios, k_t_exp, label=r"$K_t$ ANSYS")
-plt.legend()
-plt.xlabel("Ratio of Hole Diameter to Width of Plate")
-plt.ylabel("Stress Concentration")
-plt.show()
+
+# Create traces
+fig = go.Figure()
+fig.add_trace(
+    go.Scatter(x=ratios, y=k_t_anl, mode="lines", name=r"$K_t \text{ Analytical}$")
+)
+fig.add_trace(
+    go.Scatter(x=ratios, y=k_t_exp, mode="lines+markers", name=r"$K_t \text{ ANSYS}$")
+)
+
+fig.update_layout(
+    title="Analytical Comparison",
+    xaxis_title="Ratio of Hole Diameter to Width of Plate",
+    yaxis_title="Stress Concentration",
+)
+
+fig
+
 
 ###############################################################################
 # Stop mapdl

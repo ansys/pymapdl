@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -371,6 +371,7 @@ class Logger:
         to_file: bool = False,
         to_stdout: bool = True,
         filename: str = FILE_NAME,
+        catch_all_exceptions: bool = False,
     ):
         """Customized logger class for PyMAPDL.
 
@@ -413,7 +414,8 @@ class Logger:
             self.log_to_stdout(level=level)
 
         # Using logger to record unhandled exceptions
-        self.add_handling_uncaught_expections(self.logger)
+        if catch_all_exceptions:
+            self.add_handling_uncaught_expections(self.logger)
 
     def log_to_file(
         self, filename: str = FILE_NAME, level: LOG_LEVEL_TYPE = LOG_LEVEL
@@ -462,14 +464,14 @@ class Logger:
         self._level = level
 
     def _make_child_logger(
-        self, sufix: str, level: Optional[LOG_LEVEL_TYPE]
+        self, logger_name: str, level: Optional[LOG_LEVEL_TYPE]
     ) -> logging.Logger:
         """Create a child logger.
 
         Uses ``getChild`` or copying attributes between ``pymapdl_global``
         logger and the new one.
         """
-        logger = logging.getLogger(sufix)
+        logger = logging.getLogger(logger_name)
         logger.std_out_handler = None
         logger.file_handler = None
 
@@ -508,7 +510,9 @@ class Logger:
         logger.propagate = True
         return logger
 
-    def add_child_logger(self, sufix: str, level: Optional[LOG_LEVEL_TYPE] = None):
+    def add_child_logger(
+        self, logger_name: str, level: Optional[LOG_LEVEL_TYPE] = None
+    ):
         """Add a child logger to the main logger.
 
         This logger is more general than an instance logger which is designed to
@@ -519,7 +523,7 @@ class Logger:
 
         Parameters
         ----------
-        sufix : str
+        logger_name : str
             Name of the logger.
         level : str or int, optional
             Level of logging
@@ -529,7 +533,7 @@ class Logger:
         logging.logger
             Logger class.
         """
-        name = self.logger.name + "." + sufix
+        name = self.logger.name + "." + logger_name
         self._instances[name] = self._make_child_logger(name, level)
         return self._instances[name]
 
@@ -583,6 +587,7 @@ class Logger:
         ------
         Exception
             You can only input strings as ``name`` to this method.
+
         """
         count_ = 0
         new_name = name

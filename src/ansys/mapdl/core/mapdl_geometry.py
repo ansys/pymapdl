@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,7 +22,6 @@
 
 """Module to support MAPDL CAD geometry"""
 from functools import wraps
-import re
 from typing import TYPE_CHECKING, Any, Iterable, List, Optional, Sequence, Tuple, Union
 
 import numpy as np
@@ -37,8 +36,8 @@ if _HAS_PYVISTA:
 if TYPE_CHECKING:  # pragma: no cover
     from pyiges import Iges
 
-from ansys.mapdl.core.misc import requires_package, run_as_prep7, supress_logging
-from ansys.mapdl.core.theme import MapdlTheme
+from ansys.mapdl.core.misc import requires_package, run_as, supress_logging
+from ansys.mapdl.core.plotting.theme import MapdlTheme
 
 VALID_SELECTION_TYPE = ["S", "R", "A", "U"]
 VALID_SELECTION_ENTYTY = ["VOLU", "AREA", "LINE", "KP", "ELEM", "NODE"]
@@ -101,48 +100,6 @@ if _HAS_PYVISTA:
             afilter.Update()
 
         return pv.wrap(afilter.GetOutput())
-
-
-def get_elements_per_area(resp: str) -> List[List[int]]:
-    """Get the number of elements meshed for each area given the response
-    from ``AMESH``.
-
-    GENERATE NODES AND ELEMENTS   IN  ALL  SELECTED AREAS
-        ** AREA     1 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA     2 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA     3 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA     4 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA     5 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA     6 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA     7 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA     8 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA     9 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA    10 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA    11 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-        ** AREA    12 MESHED WITH      64 QUADRILATERALS,        0 TRIANGLES **
-
-     NUMBER OF AREAS MESHED     =         12
-     MAXIMUM NODE NUMBER        =        772
-     MAXIMUM ELEMENT NUMBER     =        768
-
-    Returns
-    -------
-    list
-        List of tuples, each containing the area number and number of
-        elements per area.
-
-    """
-    # MAPDL changed their output at some point.  Check for both output types.
-    reg = re.compile(r"Meshing of area (\d*) completed \*\* (\d*) elements")
-    groups = reg.findall(resp)
-    if groups:
-        groups = [[int(anum), int(nelem)] for anum, nelem in groups]
-    else:
-        reg = re.compile(r"AREA\s*(\d*).*?(\d*)\s*QUADRILATERALS,\s*(\d*) TRIANGLES")
-        groups = reg.findall(resp)
-        groups = [[int(anum), int(nquad) + int(ntri)] for anum, nquad, ntri in groups]
-
-    return groups
 
 
 class Geometry:
@@ -637,10 +594,9 @@ class Geometry:
         ...
 
         """
-        quality = int(quality)
-        if quality > 10:
+        if not isinstance(quality, int) or (quality > 10 or quality < 1):
             raise ValueError(
-                "The ``quality`` parameter must be a value between 0 and 10."
+                "The argument 'quality' can only be an integer between 1 and 10 (both included)."
             )
 
         surf = self.generate_surface(11 - quality)
@@ -658,7 +614,7 @@ class Geometry:
         return areas
 
     @supress_logging
-    @run_as_prep7
+    @run_as("PREP7")
     @requires_package("pyvista")
     def generate_surface(
         self,
@@ -686,30 +642,32 @@ class Geometry:
 
         ninc : int, optional
             Steps to between amin and amax.
+
         """
         with self._mapdl.save_selection:
             orig_anum = self.anum
 
             # reselect from existing selection to mimic APDL behavior
             if amin or amax:
-                if amax is None:
-                    amax = amin
-
-                if amin is None:  # amax is non-zero
-                    amin = 1
-
-                if ninc is None:
-                    ninc = ""
+                amax = amax or amin
+                amin = amin or 1
+                ninc = ninc or ""
 
                 self._mapdl.asel("R", "AREA", vmin=amin, vmax=amax, vinc=ninc)
 
+            ## Duplication
             # duplicate areas to avoid affecting existing areas
+            # Getting the maximum area ID
             a_num = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
+            # Setting the new areas ID starting number
             self._mapdl.numstr("AREA", a_num, mute=True)
+            # Generating new areas
             self._mapdl.agen(2, "ALL", noelem=1, mute=True)
-            a_max = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
 
+            # Getting the new maximum area ID
+            a_max = int(self._mapdl.get(entity="AREA", item1="NUM", it1num="MAXD"))
             self._mapdl.asel("S", "AREA", vmin=a_num + 1, vmax=a_max, mute=True)
+
             # necessary to reset element/area meshing association
             self._mapdl.aatt(mute=True)
 
@@ -730,11 +688,11 @@ class Geometry:
 
             # Mesh and get the number of elements per area
             resp = self._mapdl.amesh("all")
-            groups = get_elements_per_area(resp)
+            elements_per_area = self.get_elements_per_area()
 
             self._mapdl.esla("S")
             grid = self._mapdl.mesh._grid.linear_copy()
-            pd = pv.PolyData(grid.points, grid.cells, n_faces=grid.n_cells)
+            pd = pv.PolyData(grid.points, grid.cells)
 
             # pd['ansys_node_num'] = grid['ansys_node_num']
             # pd['vtkOriginalPointIds'] = grid['vtkOriginalPointIds']
@@ -751,10 +709,10 @@ class Geometry:
 
         # store the area number used for each element
         entity_num = np.empty(grid.n_cells, dtype=np.int32)
-        if grid and groups:
+        if grid and len(elements_per_area) != 0:
             # add anum info
             i = 0
-            for index, (anum, nelem) in enumerate(groups):
+            for index, (anum, nelem) in enumerate(elements_per_area):
                 # have to use original area numbering here as the
                 # duplicated areas numbers are inaccurate
                 entity_num[i : i + nelem] = orig_anum[index]
@@ -1503,6 +1461,23 @@ class Geometry:
         else:
             raise ValueError(f'Unable to select "{item_type}"')
 
+    def get_elements_per_area(self) -> NDArray[np.int32]:
+        """Get the number of elements meshed for each area.
+
+        Returns
+        -------
+        np.ndarray
+            An array with the area id for the first column, and the number of
+            elements per each area on the second column.
+
+        """
+        anum = self.anum.ravel()
+
+        elem_per_areas = self._mapdl.get_array("area", "", "ATTR", "NELM")
+        elem_per_areas = elem_per_areas[anum - 1].ravel()
+
+        return np.vstack((anum, elem_per_areas)).T.astype(np.int32)
+
 
 class LegacyGeometry(Geometry):
     """Legacy Pythonic representation of the MAPDL CAD geometry.
@@ -1525,7 +1500,7 @@ class LegacyGeometry(Geometry):
         super().__init__(mapdl)
 
     def keypoints(self) -> np.array:  # type: ignore
-        """Keypoint coordinates"""
+        """Keypoint coordinates."""
         return super().get_keypoints(return_as_array=True)
 
     @requires_package("pyvista")

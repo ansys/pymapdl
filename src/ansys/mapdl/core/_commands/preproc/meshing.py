@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -1005,7 +1005,7 @@ class Meshing:
 
         Parameters
         ----------
-        mat, real, type\_, esys
+        mat, real, type\\_, esys
             Material number, real constant set number, type number, and
             coordinate system number to be associated with selected, unmeshed
             keypoints.
@@ -1269,7 +1269,7 @@ class Meshing:
 
         Parameters
         ----------
-        mat, real, type\_
+        mat, real, type\\_
             Material number, real constant set number, and type number
             to be associated with selected, unmeshed lines.
 
@@ -2770,7 +2770,7 @@ class Meshing:
 
         Parameters
         ----------
-        mat, real, type\_, esys, secnum
+        mat, real, type\\_, esys, secnum
             Material number, real constant set number, type number, coordinate
             system number, and section number to be associated with selected,
             unmeshed volumes.

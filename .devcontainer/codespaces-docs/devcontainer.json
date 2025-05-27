@@ -32,12 +32,12 @@
 		"codespaces": {
 			"openFiles": [
 				".devcontainer/codespaces-docs/welcome.rst"
-			],
-			"extensions": {
-				"recommendations": [
+			]
+		},
+		"vscode": {
+			"extensions": [
 					"ms-python.python" // Installing also in the startup script
-				]
-			},
+				],
 			"settings": {
 				"python.defaultInterpreterPath": "/home/mapdl/pymapdl/.venv/bin/python",
 				"terminal.integrated.defaultProfile.linux": "bash",

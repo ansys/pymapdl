@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -58,9 +58,11 @@ class RadiationMat:
         k2d
             Dimensionality key:
 
-            0 - 3-D geometry (default)
+            0
+                3-D geometry (default)
 
-            1 - 2-D geometry (plane or axisymmetric)
+            1
+                2-D geometry (plane or axisymmetric)
 
         ndiv
             Number of divisions in an axisymmetric model.  Used only with K2D =
@@ -82,9 +84,11 @@ class RadiationMat:
         key
             Print key:
 
-            0 - Do not print matrices.
+            0
+                Do not print matrices.
 
-            1 - Print matrices.
+            1
+                Print matrices.
 
         Notes
         -----
@@ -129,9 +133,11 @@ class RadiationMat:
         nohid
             Type of viewing procedure:
 
-            0 - Hidden procedure.
+            0
+                Hidden procedure.
 
-            1 - Non-hidden (faster, but less general) procedure.
+            1
+                Non-hidden (faster, but less general) procedure.
 
         nzone
             Number of sampling zones for the hidden procedure (100 maximum for

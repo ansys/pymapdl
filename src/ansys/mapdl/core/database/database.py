@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -25,6 +25,7 @@ from enum import Enum
 from functools import wraps
 import os
 import time
+from typing import Optional
 from warnings import warn
 import weakref
 
@@ -33,30 +34,12 @@ from ansys.tools.versioning import server_meets_version
 import grpc
 
 from ansys.mapdl.core.errors import MapdlConnectionError
-
-from ..mapdl_grpc import MapdlGrpc
+from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
 
 MINIMUM_MAPDL_VERSION = "21.1"
+FAILING_DATABASE_MAPDL = ["24.1", "24.2"]
 
-
-class WithinBeginLevel:
-
-    """Context manager to run MAPDL within the being level."""
-
-    def __init__(self, mapdl):
-        """Initialize this context manager."""
-        self._mapdl = mapdl
-
-    def __enter__(self):
-        """Enter the begin level and cache the current routine."""
-        self._mapdl._cache_routine()
-        if "BEGIN" not in self._mapdl._cached_routine.upper():
-            self._mapdl.finish()
-
-    def __exit__(self, *args, **kwargs):
-        """Exit the begin level and reload the previous routine."""
-        if "BEGIN" not in self._mapdl._cached_routine.upper():
-            self._mapdl._resume_routine()
+DEFAULT_DB_PORT = 50055
 
 
 def check_mapdl_db_is_alive(function):
@@ -86,7 +69,6 @@ def check_mapdl_db_is_alive(function):
 
 
 class DBDef(Enum):  # From MAPDL ansysdef.inc include file
-
     """Database type definitions."""
 
     DB_SELECTED = 1
@@ -104,7 +86,6 @@ class DBDef(Enum):  # From MAPDL ansysdef.inc include file
 
 
 class MapdlDb:
-
     """
     Abstract mapdl database class.  Created from a ``Mapdl`` instance.
 
@@ -163,7 +144,7 @@ class MapdlDb:
         """Return the weakly referenced instance of mapdl."""
         return self._mapdl_weakref()
 
-    def _start(self) -> int:
+    def _start(self, port: Optional[int] = None) -> int:
         """
         Lower level start of the database server.
 
@@ -173,38 +154,39 @@ class MapdlDb:
             Port of the database server.
 
         """
-        self._mapdl._log.debug("Starting MAPDL server")
-
         # database server must be run from the "BEGIN" level
+        self._mapdl._log.debug("Starting MAPDL server")
         self._mapdl._cache_routine()
-        with WithinBeginLevel(self._mapdl):
-            self._mapdl.run("/DBS,SERVER,START")
+        with self._mapdl.run_as_routine("Begin level"):
+            self._mapdl.run(f"/DBS,SERVER,START,{port}")
 
-        # Scan the DBServer.info file to get the Port Number
+        if not port:
+            # We do not know which port has started with
+            # Scan the DBServer.info file to get the Port Number
 
-        # Default is 50055
-        # wait for start
-        tstart = time.time()
-        timeout = 1
-        status = self._mapdl._download_as_raw("DBServer.info").decode()
-        while status == "":  # pragma: no cover
+            self._mapdl._log.debug("Downloading 'DBServer' file.")
+            tstart = time.time()
+            timeout = 1
             status = self._mapdl._download_as_raw("DBServer.info").decode()
-            time.sleep(0.05)
-            if time.time() - tstart > timeout:
-                raise TimeoutError(
-                    f"Unable to start database server in {timeout} second(s)"
-                )
+            while status == "":  # pragma: no cover
+                status = self._mapdl._download_as_raw("DBServer.info").decode()
+                time.sleep(0.05)
+                if time.time() - tstart > timeout:
+                    raise TimeoutError(
+                        f"Unable to start database server in {timeout} second(s). DBServer not received."
+                    )
 
-        try:
-            # expected of the form 'Port : 50055'
-            port = int(status.split(":")[1])
-        except Exception as e:  # pragma: no cover
-            self._mapdl._log.error(
-                "Unable to read port number from '%s' due to\n%s",
-                status,
-                str(e),
-            )
-            port = 50055
+            self._mapdl._log.debug("Downloading 'DBServer' file.")
+            try:
+                # expected of the form 'Port : 50055'
+                port = int(status.split(":")[1])
+            except Exception as e:  # pragma: no cover
+                self._mapdl._log.error(
+                    "Unable to read port number from '%s' due to\n%s",
+                    status,
+                    str(e),
+                )
+                port = DEFAULT_DB_PORT
 
         self._mapdl._log.debug("MAPDL database server started on port %d", port)
         return port
@@ -214,7 +196,7 @@ class MapdlDb:
         """Return if the database server is active."""
         return "NOT" not in self._status()
 
-    def start(self, timeout=10):
+    def start(self, port: Optional[int] = None, timeout: int = 10):
         """
         Start the gRPC MAPDL database server.
 
@@ -239,9 +221,10 @@ class MapdlDb:
             )
 
         ## Checking MAPDL versions
-        mapdl_version = self._mapdl.version
-        if not server_meets_version(
-            str(mapdl_version), MINIMUM_MAPDL_VERSION
+        mapdl_version = str(self._mapdl.version)
+        if (
+            not server_meets_version(mapdl_version, MINIMUM_MAPDL_VERSION)
+            or mapdl_version in FAILING_DATABASE_MAPDL
         ):  # pragma: no cover
             from ansys.mapdl.core.errors import MapdlVersionError
 
@@ -264,24 +247,37 @@ class MapdlDb:
         self._mapdl._log.debug("MAPDL DB server running: %s", str(is_running))
         if is_running:
             return
-        db_port = self._start()
-
-        self._ip = self._mapdl._ip
 
         # permit overriding db_port via env var for CI
-        if "PYMAPDL_DB_PORT" in os.environ:
-            db_port_str = os.environ.get("PYMAPDL_DB_PORT")
-            try:
-                db_port = int(db_port_str)
-            except ValueError:  # pragma: no cover
-                raise ValueError(
-                    f"Invalid port '{db_port_str}' specified in the env var PYMAPDL_DB_PORT"
+        if not port:
+            if (
+                "PYMAPDL_DB_PORT" in os.environ
+                and os.environ.get("PYMAPDL_DB_PORT").isdigit()
+            ):
+                db_port_str = int(os.environ.get("PYMAPDL_DB_PORT"))
+                self._mapdl._log.debug(
+                    f"Setting DB port from 'PYMAPDL_DB_PORT' env var: {db_port_str}"
                 )
+            else:
+                self._mapdl._log.debug(
+                    f"Setting default DB port ('{DEFAULT_DB_PORT}') because no port was input or the env var 'PYMAPDL_DB_PORT' is not correctly set."
+                )
+                port = DEFAULT_DB_PORT
+
+        db_port = self._start(port=port)
+
+        if not self._ip:
+            self._ip = self._mapdl.ip
 
         self._server = {"ip": self._ip, "port": db_port}
         self._channel_str = f"{self._ip}:{db_port}"
 
-        self._channel = grpc.insecure_channel(self._channel_str)
+        self._channel = grpc.insecure_channel(
+            self._channel_str,
+            options=[
+                ("grpc.max_receive_message_length", MAX_MESSAGE_LENGTH),
+            ],
+        )
         self._state = grpc.channel_ready_future(self._channel)
         self._stub = mapdl_db_pb2_grpc.MapdlDbServiceStub(self._channel)
 
@@ -292,13 +288,13 @@ class MapdlDb:
 
         if not self._state._matured:  # pragma: no cover
             raise MapdlConnectionError(
-                "Unable to establish connection to MAPDL database server"
+                f"Unable to establish connection to MAPDL database server {self._channel_str}"
             )
         self._mapdl._log.debug("Established connection to MAPDL database server")
 
     def _stop(self):
         """Stop the MAPDL database service."""
-        with WithinBeginLevel(self._mapdl):
+        with self._mapdl.run_as_routine("Begin level"):
             return self._mapdl.run("/DBS,SERVER,STOP")
 
     def stop(self):
@@ -317,8 +313,9 @@ class MapdlDb:
 
         self._mapdl._log.debug("Closing the connection with the MAPDL DB Server")
         self._stop()
-        self._channel.close()
-        self._channel = None
+        if self._channel:
+            self._channel.close()
+            self._channel = None
         self._stub = None
         self._state = None
 
@@ -335,7 +332,7 @@ class MapdlDb:
          DB Server is NOT currently running ..
         """
         # Need to use the health check here
-        with WithinBeginLevel(self._mapdl):
+        with self._mapdl.run_as_routine("Begin level"):
             return self._mapdl.run("/DBS,SERVER,STATUS")
 
     def load(self, fname, progress_bar=False):

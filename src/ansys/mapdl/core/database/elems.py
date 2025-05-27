@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -36,7 +36,6 @@ from . import DBDef, MapdlDb, check_mapdl_db_is_alive
 
 
 class DbElems:
-
     """
     Abstract mapdl database element class.
 

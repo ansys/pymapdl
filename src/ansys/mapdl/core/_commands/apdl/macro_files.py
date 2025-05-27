@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -356,7 +356,7 @@ class MacroFiles:
 
         Parameters
         ----------
-        dir\_
+        dir\\_
             The directory to remove. If no path is provided, it will be assumed
             to be in the current working directory. All files in the directory
             are also removed.

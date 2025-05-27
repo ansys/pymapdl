@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,94 +20,92 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Importing logging
+###############################################################################
+# Imports
+# =======
+#
 import logging
 import os
-import sys
+from typing import Dict, List, Tuple
 from warnings import warn
 
-import platformdirs
+from platformdirs import user_data_dir
 
-# Setup data directory
-USER_DATA_PATH = platformdirs.user_data_dir(
-    appname="ansys_mapdl_core", appauthor="Ansys"
-)
-if not os.path.exists(USER_DATA_PATH):  # pragma: no cover
-    os.makedirs(USER_DATA_PATH)
-
-DEPRECATING_MINIMUM_PYTHON_VERSION = True
-MINIMUM_PYTHON_VERSION = (3, 8)
-
-first_time_file = os.path.join(USER_DATA_PATH, ".firstime")
-if not os.path.exists(first_time_file):  # pragma: no cover
-    py_ver = f"{sys.version_info[0]}.{sys.version_info[1]}"
-    py_ver_min = f"{MINIMUM_PYTHON_VERSION[0]}.{MINIMUM_PYTHON_VERSION[1]}"
-
-    if (
-        sys.version_info[1] == MINIMUM_PYTHON_VERSION[1]
-        and DEPRECATING_MINIMUM_PYTHON_VERSION
-    ):
-        warn(
-            f"Support for Python {py_ver} will be dropped in the next minor " "release."
-        )
-
-    if sys.version_info[1] <= MINIMUM_PYTHON_VERSION[1]:
-        warn(
-            f"Python {py_ver} is not being tested or officially supported. "
-            "It is recommended you use a newer version of Python. "
-            f"The mininimum supported and tested version is {py_ver_min}.\n\n"
-            "**This warning is shown only the first time you run PyMAPDL.**\n"
-        )
-
-    with open(first_time_file, "w") as fid:
-        fid.write("")
-
-EXAMPLES_PATH = os.path.join(USER_DATA_PATH, "examples")
-
+###############################################################################
+# Logging
+# =======
+#
 from ansys.mapdl.core.logging import Logger
 
-LOG = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
+LOG: Logger = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
 LOG.debug("Loaded logging module as LOG")
 
+###############################################################################
+# Globals
+# =======
+#
+from ansys.mapdl.core._version import __version__
+from ansys.mapdl.core.helpers import is_installed, run_every_import, run_first_time
 
-BUILDING_GALLERY = False
-RUNNING_TESTS = False
+# A dictionary relating PyMAPDL server versions with the unified install ones
+VERSION_MAP: Dict[Tuple[int, int, int], str] = {
+    (0, 0, 0): "2020R2",
+    (0, 3, 0): "2021R1",
+    (0, 4, 0): "2021R2",
+    (0, 4, 1): "2021R2",
+    (0, 5, 0): "2022R1",
+    (0, 5, 1): "2022R2",
+}
 
-if RUNNING_TESTS:  # pragma: no cover
-    LOG.debug("Running tests on Pytest")
+BUILDING_GALLERY: bool = False
+RUNNING_TESTS: bool = False
 
-_LOCAL_PORTS = []
+DEPRECATING_MINIMUM_PYTHON_VERSION: bool = False
+MINIMUM_PYTHON_VERSION: Tuple[int, int] = (3, 10)
+
+# Import related globals
+_HAS_ATP: bool = is_installed("ansys.tools.path")
+_HAS_CLICK: bool = is_installed("click")
+_HAS_PIM: bool = is_installed("ansys.platform.instancemanagement")
+_HAS_PANDAS: bool = is_installed("pandas")
+_HAS_PYANSYS_REPORT: bool = is_installed("ansys.tools.report")
+_HAS_PYVISTA: bool = is_installed("pyvista")
+_HAS_REQUESTS: bool = is_installed("requests")
+_HAS_TQDM: bool = is_installed("tqdm")
+_HAS_MATPLOTLIB: bool = is_installed("matplotlib")
+_HAS_VISUALIZER: bool = (
+    is_installed("ansys.tools.visualization_interface") and _HAS_MATPLOTLIB
+)
 
 
-# Per contract with Sphinx-Gallery, this method must be available at top level
-try:
-    import pyvista
+# Setup directories
+USER_DATA_PATH: str = user_data_dir(appname="ansys_mapdl_core", appauthor="Ansys")
+EXAMPLES_PATH: str = os.path.join(USER_DATA_PATH, "examples")
 
-    _HAS_PYVISTA = True
-except ModuleNotFoundError:  # pragma: no cover
-    LOG.debug("The module 'PyVista' is not installed.")
-    _HAS_PYVISTA = False
+# Store ports occupied by local instances
+_LOCAL_PORTS: List[int] = []
 
-try:
-    import importlib.metadata as importlib_metadata
-except ModuleNotFoundError:  # pragma: no cover
-    import importlib_metadata
+###############################################################################
+# First time
+# ==========
+#
+# This function runs only the first time PyMAPDL is importad after it is installed.
+# It creates the required directories and raise Python version related warnings.
+#
+run_first_time()
 
-__version__ = importlib_metadata.version(__name__.replace(".", "-"))
+###############################################################################
+# Runs every time
+# ===============
+#
+# This function runs every time that PyMAPDL is imported.
+#
+run_every_import()
 
-try:
-    from ansys.tools.path.path import (
-        change_default_ansys_path,
-        find_ansys,
-        get_ansys_path,
-        get_available_ansys_installations,
-        save_ansys_path,
-    )
-except:
-    # We don't really use these imports in the library. They are here for
-    # convenience.
-    pass
-
+###############################################################################
+# Library imports
+# ===============
+#
 from ansys.mapdl.core._version import SUPPORTED_ANSYS_VERSIONS
 from ansys.mapdl.core.convert import convert_apdl_block, convert_script
 from ansys.mapdl.core.launcher import close_all_local_instances
@@ -118,26 +116,22 @@ if "ANSJUPHUB_VER" in os.environ:  # pragma: no cover
 else:
     from ansys.mapdl.core.launcher import launch_mapdl
 
+from ansys.mapdl.core.information import Information
 from ansys.mapdl.core.mapdl_grpc import MapdlGrpc as Mapdl
-from ansys.mapdl.core.misc import Information, Report, _check_has_ansys
-from ansys.mapdl.core.pool import LocalMapdlPool
-from ansys.mapdl.core.theme import MapdlTheme, _apply_default_theme
+from ansys.mapdl.core.misc import check_has_mapdl
+from ansys.mapdl.core.pool import MapdlPool
+from ansys.mapdl.core.report import Report
 
-_HAS_ANSYS = _check_has_ansys()
-
-if _HAS_PYVISTA:
-    _apply_default_theme()
-
-BUILDING_GALLERY = False
-RUNNING_TESTS = False
-
-
-VERSION_MAP = {
-    (0, 0, 0): "2020R2",
-    (0, 3, 0): "2021R1",
-    (0, 4, 0): "2021R2",
-    (0, 4, 1): "2021R2",
-    (0, 5, 0): "2022R1",
-    (0, 5, 1): "2022R2",  # as of 21 Mar 2022 unreleased
-}
-"""A dictionary relating PyMAPDL server versions with the unified install ones."""
+###############################################################################
+# Convenient imports
+# ==================
+#
+# For compatibility with other versions or for convenience
+if _HAS_ATP:
+    from ansys.tools.path.path import (
+        change_default_ansys_path,
+        find_mapdl,
+        get_available_ansys_installations,
+        get_mapdl_path,
+        save_ansys_path,
+    )

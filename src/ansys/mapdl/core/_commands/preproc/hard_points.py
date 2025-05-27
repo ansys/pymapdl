@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -39,7 +39,7 @@ class HardPoints:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Type of entity on which the hard point will be created.
 
             LINE - Hard point will be created on a line.

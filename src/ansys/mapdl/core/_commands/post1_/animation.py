@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -147,11 +147,11 @@ class Animation:
 
             2 - Range of results data.
 
-        min\_
+        min\\_
             The range minimum value.  If left blank or 0, defaults to the first
             data point.
 
-        max\_
+        max\\_
             The range maximum value.  If left blank or 0, defaults to the last
             data point.
 
@@ -646,11 +646,11 @@ class Animation:
         delay
             Time delay during animation (default = 0.5 seconds).
 
-        min\_
+        min\\_
             Minimum results file number to animate. Default = 1 (for
             Jobname.RS01).
 
-        max\_
+        max\\_
             Maximum results file number to animate. Defaults to the highest
             numbered results file, Jobname.RSnn.
 
@@ -743,11 +743,11 @@ class Animation:
 
             2 - Range of time data.
 
-        min\_
+        min\\_
             The range minimum value.  If left blank defaults to the first data
             point.
 
-        max\_
+        max\\_
             The range maximum value.  If left blank defaults to the last data
             point.
 

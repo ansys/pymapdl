@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -24,16 +24,12 @@ import pytest
 
 from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
-    MapdlDidNotStart,
-    MapdlError,
     MapdlException,
-    MapdlInfo,
     MapdlInvalidRoutineError,
-    MapdlNote,
     MapdlRuntimeError,
-    MapdlVersionError,
-    MapdlWarning,
+    protect_from,
 )
+from conftest import NullContext
 
 error_shape_error_limits = """
 
@@ -106,7 +102,7 @@ empty_log = """
         ),
     ],
 )
-def test_raise_output_errors(mapdl, response, expected_error):
+def test_raise_output_errors(mapdl, cleared, response, expected_error):
     if expected_error:
         with pytest.raises(expected_error):
             mapdl._raise_output_errors(response)
@@ -114,28 +110,31 @@ def test_raise_output_errors(mapdl, response, expected_error):
         mapdl._raise_output_errors(response)
 
 
-@pytest.mark.parametrize(
-    "error_class",
-    [
-        MapdlDidNotStart,
-        MapdlException,
-        MapdlError,
-        MapdlWarning,
-        MapdlNote,
-        MapdlInfo,
-        MapdlVersionError,
-        MapdlInvalidRoutineError,
-        MapdlCommandIgnoredError,
-        MapdlRuntimeError,
-    ],
-)
+def get_error_classes():
+    from ansys.mapdl.core import errors
+
+    def is_exception_class(obj):
+        try:
+            return issubclass(obj, MapdlException)
+        except TypeError:
+            return False
+
+    errors_to_tests = []
+    for each in dir(errors):
+        obj = getattr(errors, each)
+        if not each.startswith("_") and is_exception_class(obj):
+            errors_to_tests.append(obj)
+    return errors_to_tests
+
+
+@pytest.mark.parametrize("error_class", get_error_classes())
 def test_exception_classes(error_class):
     message = "Exception message"
-    with pytest.raises(error_class):
+    with pytest.raises(error_class, match=message):
         raise error_class(message)
 
 
-def test_error_handler(mapdl):
+def test_error_handler(mapdl, cleared):
     text = "is not a recognized"
     with pytest.raises(MapdlInvalidRoutineError, match="recognized"):
         mapdl._raise_errors(text)
@@ -147,3 +146,43 @@ def test_error_handler(mapdl):
     text = "*** ERROR ***\n This is my own errorrrr"
     with pytest.raises(MapdlRuntimeError, match="errorrrr"):
         mapdl._raise_errors(text)
+
+
+@pytest.mark.parametrize(
+    # Tests inputs
+    "message,condition,context",
+    [
+        (None, None, NullContext()),
+        ("My custom error", None, NullContext()),
+        ("my error", None, pytest.raises(ValueError)),
+        (None, None, NullContext()),
+        (None, True, NullContext()),
+        (None, False, pytest.raises(ValueError)),
+        ("my error", False, pytest.raises(ValueError)),
+        ("my error", True, pytest.raises(ValueError)),
+        ("My custom error", False, pytest.raises(ValueError)),
+        ("My custom error", True, NullContext()),
+    ],
+    # Test ids
+    ids=[
+        "Match any message. No condition",
+        "Match message. No condition",
+        "Raises an exception. No condition (raise internal exception)",
+        "No message. No condition",
+        "No message. True condition",
+        "No message. False condition (raise internal exception)",
+        "Different error message. False condition (raise internal exception)",
+        "Different error message. True condition (raise internal exception)",
+        "Same error message. False condition (raise internal exception)",
+        "Same error message. True condition",
+    ],
+)
+def test_protect_from(message, condition, context):
+    class myclass:
+        @protect_from(ValueError, message, condition)
+        def raising(self):
+            raise ValueError("My custom error")
+
+    with context:
+        myobj = myclass()
+        myobj.raising()

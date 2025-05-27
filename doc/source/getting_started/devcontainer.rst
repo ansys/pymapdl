@@ -5,8 +5,7 @@ Develop on containers
 =====================
 
 This guide describes how to develop PyMAPDL features or fix bugs using
-a `remote container <vscode_devcontainers_containers_>`_
-or `Codespaces <codespaces_features_>`_.
+a `remote container <vscode_devcontainers_containers_>`_.
 The files for setting up the container can be found in the 
 `.devcontainer directory <pymapdl_devcontainer_directory_>`_.
 
@@ -35,19 +34,26 @@ container, you are prompt to enter your license server port and address.
 You can set the :envvar:`ANSYSLMD_LICENSE_FILE` environment variable 
 from the terminal before launching VS Code.
 For example, if you have a license server at the address ``123.45.67.89``,
-you can set the license on Windows using:
+you can set the license using:
 
-.. code:: pwsh-session
-  
-   $env:ANSYSLMD_LICENSE_FILE = '1055@123.45.65.89'
-   code . # launch VS Code
+.. tab-set::
 
-On Linux
+    .. tab-item:: Windows
+        :sync: key1
 
-.. code:: bash
+        .. code:: pwsh-session
 
-   $ export ANSYSLMD_LICENSE_FILE =1055@123.45.65.89
-   code . # launch VS Code
+            (.venv) PS C:\Users\user\pymapdl> $env:ANSYSLMD_LICENSE_FILE = '1055@123.45.65.89'
+            (.venv) PS C:\Users\user\pymapdl> code . # launch VS Code
+
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
+
+            (.venv) user@machine:~$ export ANSYSLMD_LICENSE_FILE =1055@123.45.65.89
+            (.venv) user@machine:~$code . # launch VS Code
+
 
 And then open the folder in the container using the `Command palette`.
 

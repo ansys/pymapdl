@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -622,6 +622,8 @@ class Sections:
         val10="",
         val11="",
         val12="",
+        val13="",
+        val14="",
         **kwargs,
     ):
         """Describes the geometry of a section.
@@ -630,7 +632,7 @@ class Sections:
 
         Parameters
         ----------
-        val1, val2, val3, . . . , val12
+        val1, val2, val3, . . . , val14
             Values, such as thickness or the length of a side or the numbers of
             cells along the width, that describe the geometry of a section. The
             terms VAL1, VAL2, etc. are specialized for each type of cross-
@@ -681,7 +683,7 @@ class Sections:
 
         Type: BEAM, Subtype: HATS
         """
-        command = f"SECDATA,{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12}"
+        command = f"SECDATA,{val1},{val2},{val3},{val4},{val5},{val6},{val7},{val8},{val9},{val10},{val11},{val12},{val13},{val14}"
         return self.run(command, **kwargs)
 
     def secjoint(
@@ -1082,7 +1084,7 @@ class Sections:
         secid
             Section identification number.
 
-        type\_
+        type\\_
             BEAM
 
             BEAM - Defines a beam section.
@@ -1298,7 +1300,7 @@ class Sections:
 
             GROUP - If a section calls other sections, this option lists those sections too.
 
-        type\_
+        type\\_
             The section type. Valid arguments are ALL (the default) and the
             types available on the SECTYPE command.
 

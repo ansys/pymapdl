@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -42,6 +42,7 @@ import numpy as np
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import examples
+from ansys.mapdl.core.plotting import MapdlTheme
 
 mapdl = pymapdl.launch_mapdl()
 
@@ -68,7 +69,7 @@ print(mapdl.geometry)
 # remotable (with 2021R1 and newer) interactive plotting.  The common
 # plotting methods (``kplot``, ``lplot``, ``aplot``, ``eplot``, etc.)
 # all have compatible commands that use the
-# :func:`ansys.mapdl.core.plotting.general_plotter` function.  You can
+# :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` class.  You can
 # configure this method with a variety of keyword arguments.  For example:
 
 mapdl.lplot(
@@ -88,7 +89,7 @@ mapdl.lplot(
 # multiple plots.  These theme parameters override any unset keyword
 # arguments.  For example:
 
-my_theme = pymapdl.MapdlTheme()
+my_theme = MapdlTheme()
 my_theme.background = "white"
 my_theme.cmap = "jet"  # colormap
 my_theme.axes.show = False

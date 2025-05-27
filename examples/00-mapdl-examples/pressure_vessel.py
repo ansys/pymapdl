@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -156,7 +156,7 @@ mapdl.post_processing.plot_nodal_eqv_stress(cpos="zy")
 # access the result
 result = mapdl.result
 
-# Get the von Mises stess and show that this is equivalent to the
+# Get the von Mises stress and show that this is equivalent to the
 # stress obtained from MAPDL.
 nnum, stress = result.principal_nodal_stress(0)
 von_mises = stress[:, -1]  # von-Mises stress is the right most column

@@ -71,7 +71,7 @@ body:
        - 'MacOS'
        - 'Linux'
     validations:
-      required: false
+      required: true
 
   - type: dropdown
     id: python-version
@@ -80,12 +80,20 @@ body:
       description: Run `python --version` to verify your Python version
       multiple: false
       options:
-       - '3.9'
        - '3.10'
        - '3.11'
        - '3.12'
+       - '3.13'
     validations:
-      required: false
+      required: true
+
+  - type: input
+    id: mapdl-version
+    attributes:
+      label: 💾 Which MAPDL version are you using?
+      placeholder: ex. 24.1 or 2024R1
+    validations:
+      required: true
 
   - type: textarea
     id: pymapdl-report

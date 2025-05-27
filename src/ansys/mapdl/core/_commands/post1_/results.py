@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -118,7 +118,7 @@ class Results:
 
             FRONT - Plots CINT quantities distribution along the crack front.
 
-        id\_
+        id\\_
             Crack ID number.
 
         node
@@ -558,7 +558,7 @@ class Results:
 
         Parameters
         ----------
-        id\_
+        id\\_
             Crack ID number.
 
         node

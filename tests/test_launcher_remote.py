@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -26,7 +26,10 @@ import pytest
 from conftest import has_dependency
 
 if not has_dependency("ansys-platform-instancemanagement"):
-    pytest.skip(allow_module_level=True)
+    pytest.skip(
+        allow_module_level=True,
+        reason="Skipping because 'ansys-platform-instancemanagement' is not installed",
+    )
 
 from unittest.mock import create_autospec
 
@@ -38,7 +41,7 @@ from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH
 from conftest import QUICK_LAUNCH_SWITCHES
 
 
-def test_launch_remote_instance(monkeypatch, mapdl):
+def test_launch_remote_instance(mapdl, cleared, monkeypatch):
     # Create a mock pypim pretenting it is configured and returning a channel to an already running mapdl
     mock_instance = pypim.Instance(
         definition_name="definitions/fake-mapdl",

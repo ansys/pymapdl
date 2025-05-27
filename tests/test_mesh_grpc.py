@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Test mesh """
+"""Test mesh"""
 import os
 
 import numpy as np
@@ -34,9 +34,7 @@ if has_dependency("pyvista"):
 from ansys.mapdl.core import examples
 
 
-def test_empty_model(mapdl):
-    mapdl.clear()
-
+def test_empty_model(mapdl, cleared):
     assert mapdl.mesh.nnum.size == 0
     assert mapdl.mesh.enum.size == 0
 
@@ -73,57 +71,71 @@ def test_repr(mapdl, cube_geom_and_mesh):
     assert "Number of Element Types" in out
 
 
-def test_mapdl(mapdl):
+def test_mapdl(mapdl, cleared):
     from ansys.mapdl.core.mapdl import MapdlBase
 
     assert isinstance(mapdl.mesh._mapdl, MapdlBase)
 
 
-def test_local(mapdl):
+def test_local(mapdl, cleared):
     assert isinstance(mapdl.mesh.local, bool)
     assert mapdl._local == mapdl.mesh.local
 
 
-@pytest.mark.xfail(strict=False, reason="Flaky test. See #2435")
+@requires("pyvista")
 def test_empty_mesh(mapdl, cleared):
-    assert mapdl.mesh.n_node == 0
-    assert mapdl.mesh.n_elem == 0
-    assert mapdl.mesh.nnum_all.size == 0
-    assert mapdl.mesh.enum_all.size == 0
-    assert mapdl.mesh.nnum.size == 0
-    assert mapdl.mesh.enum.size == 0
-    assert mapdl.mesh.nodes.size == 0
-    # assert mapdl.mesh.node_angles.size == 0 Not implemented
+    # Reset mesh grid
+    mapdl.mesh._grid_cache = None
+    assert mapdl.mesh.grid is not None
 
-    # elem is a list
-    assert len(mapdl.mesh.elem) == 0
+    # To avoid further cache updates
+    with mapdl.mesh.ignore_cache_reset:
 
-    # Using size because it should be empty arrays
-    assert mapdl.mesh.ekey.size == 0
-    assert mapdl.mesh.et_id.size == 0
-    assert mapdl.mesh.tshape.size == 0
-    assert mapdl.mesh.material_type.size == 0
-    assert mapdl.mesh.etype.size == 0
-    assert mapdl.mesh.section.size == 0
-    assert mapdl.mesh.element_coord_system.size == 0
-    assert mapdl.mesh.elem_real_constant.size == 0
-    assert mapdl.mesh.ekey.size == 0
+        if has_dependency("pyvista"):
+            assert mapdl.mesh.grid.points.size == 0
+            assert mapdl.mesh.grid.cells.size == 0
+            assert mapdl.mesh.grid.n_points == 0
+            assert mapdl.mesh.grid.n_cells == 0
 
-    # should be empty dicts
-    assert not mapdl.mesh.key_option
-    assert not mapdl.mesh.tshape_key
-    assert not mapdl.mesh.element_components
-    assert not mapdl.mesh.node_components
+        assert mapdl.mesh.n_node == 0
+        assert mapdl.mesh.n_elem == 0
+        assert mapdl.mesh.nnum_all.size == 0
+        assert mapdl.mesh.enum_all.size == 0
+        assert mapdl.mesh.nnum.size == 0
+        assert mapdl.mesh.enum.size == 0
+        assert mapdl.mesh.nodes.size == 0
+        # assert mapdl.mesh.node_angles.size == 0 Not implemented
 
-    # bools
-    assert not mapdl.mesh._has_elements
-    assert not mapdl.mesh._has_nodes
+        # elem is a list
+        assert len(mapdl.mesh.elem) == 0
 
-    # Others
-    if has_dependency("pyvista"):
-        assert mapdl.mesh.grid is None
-        with pytest.raises(ValueError):
-            mapdl.mesh.save("file.vtk")
+        # Using size because it should be empty arrays
+        assert mapdl.mesh.ekey.size == 0
+        assert mapdl.mesh.et_id.size == 0
+        assert mapdl.mesh.tshape.size == 0
+        assert mapdl.mesh.material_type.size == 0
+        assert mapdl.mesh.etype.size == 0
+        assert mapdl.mesh.section.size == 0
+        assert mapdl.mesh.element_coord_system.size == 0
+        assert mapdl.mesh.elem_real_constant.size == 0
+        assert mapdl.mesh.ekey.size == 0
+
+        # should be empty dicts
+        assert not mapdl.mesh.key_option
+        assert not mapdl.mesh.tshape_key
+        assert not mapdl.mesh.element_components
+        assert not mapdl.mesh.node_components
+
+        # bools
+        assert not mapdl.mesh._has_elements
+        assert not mapdl.mesh._has_nodes
+
+        # Others
+        if has_dependency("pyvista"):
+            assert mapdl.mesh.grid.points.size == 0
+            assert mapdl.mesh.grid.cells.size == 0
+            assert mapdl.mesh.grid.n_points == 0
+            assert mapdl.mesh.grid.n_cells == 0
 
 
 def test_element_node_components(mapdl, contact_geom_and_mesh):
@@ -294,6 +306,7 @@ def test_nodes_in_current_CS(mapdl, cleared, cube_geom_and_mesh):
     for icoord in range(6):
         mapdl.csys(icoord)
         mapdl.dsys(icoord)
+
         assert np.allclose(
             mapdl.mesh.nodes_in_current_CS, mapdl.nlist().to_array()[:, 1:4], atol=1e-3
         )  # nlist is not as accurate as 'nodes_in_current_CS'
@@ -319,3 +332,55 @@ def test_nodal_rotation(mapdl, cleared):
         ]
     )
     assert np.allclose(nrotation_ref, nrotations[:7, :])
+
+
+def test_esln(mapdl, two_dimensional_mesh):
+    mapdl.nsel("S", "LOC", "X", 0)
+    selected_ids = mapdl.esln("S", 0)
+    expected_selected_ids = np.array([1, 41, 81, 121, 161, 201, 241, 281, 321, 361])
+    assert all(selected_ids == expected_selected_ids)
+
+
+def test_nsle(mapdl, two_dimensional_mesh):
+    mapdl.esel("S", "CENT", "X", 0, 0.1)
+    selected_ids = mapdl.nsle("S")
+    expected_selected_ids = np.array(
+        [
+            1,
+            3,
+            52,
+            91,
+            92,
+            93,
+            94,
+            95,
+            96,
+            97,
+            98,
+            99,
+            100,
+            101,
+            102,
+            103,
+            104,
+            105,
+            106,
+            107,
+            108,
+            109,
+        ]
+    )
+    assert all(selected_ids == expected_selected_ids)
+
+
+@pytest.mark.parametrize("initial_state", [None, True, False])
+def test_ignore_cache_reset_context(mapdl, cleared, initial_state):
+    mesh = mapdl.mesh
+    previous_state = mesh._ignore_cache_reset
+    mesh._ignore_cache_reset = initial_state
+
+    with mesh.ignore_cache_reset:
+        assert mesh._ignore_cache_reset is True
+
+    assert mesh._ignore_cache_reset == initial_state
+    mesh._ignore_cache_reset = previous_state

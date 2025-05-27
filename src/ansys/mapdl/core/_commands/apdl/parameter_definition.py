@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -65,7 +65,7 @@ class ParameterDefinition:
             Name of parameter to be dimensioned.  See ``*SET`` for name
             restrictions.
 
-        type\_
+        type\\_
             Array type:
 
             Arrays are similar to standard FORTRAN arrays (indices are
@@ -261,7 +261,7 @@ class ParameterDefinition:
         Parameters
         ----------
         par : str, optional
-            The name of the resulting parameter. See \*SET for name
+            The name of the resulting parameter. See \\*SET for name
             restrictions.
 
         entity
@@ -336,7 +336,7 @@ class ParameterDefinition:
         command = f"*GET,{par},{entity},{entnum},{item1},{it1num},{item2},{it2num}"
         return self.run(command, **kwargs)
 
-    def inquire(self, strarray="", func="", arg1="", arg2=""):
+    def inquire(self, strarray="", func="", arg1="", arg2="", **kwargs):
         """Returns system information.
 
         By default, with no arguments, it returns the working directory.
@@ -489,7 +489,7 @@ class ParameterDefinition:
         >>> mapdl.inquire('', 'RSTFILE')
         'file.rst'
         """
-        return self.run(f"/INQUIRE,{strarray},{func},{arg1},{arg2}")
+        return self.run(f"/INQUIRE,{strarray},{func},{arg1},{arg2}", **kwargs)
 
     def parres(self, lab="", fname="", ext="", **kwargs):
         """Reads parameters from a file.

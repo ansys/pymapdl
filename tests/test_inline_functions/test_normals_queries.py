@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from conftest import TestClass
 
-class TestNormalsNodeQueries:
+
+class TestNormalsNodeQueries(TestClass):
     @staticmethod
     def build_plane(mapdl, plane: str):
         n1 = mapdl.n(1, 0, 0, 0)
@@ -52,7 +54,7 @@ class TestNormalsNodeQueries:
         assert abs(cosine) == 1.0
 
 
-class TestNormalsKeypointsQueries:
+class TestNormalsKeypointsQueries(TestClass):
     @staticmethod
     def build_plane(mapdl, plane: str):
         k1 = mapdl.k(1, 0, 0, 0)

@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -137,10 +137,11 @@ class DynamicOptions:
         ----------
         scaling
 
+            Off
+                Do not use automatic scaling of the mass matrix and frequency range.
 
-            Off  - Do not use automatic scaling of the mass matrix and frequency range.
-
-            On  - Use automatic scaling of the mass matrix and frequency range.
+            On
+                Use automatic scaling of the mass matrix and frequency range.
 
         Notes
         -----
@@ -206,19 +207,26 @@ class DynamicOptions:
             frequency or beginning frequency is used for NSBSTP = 1. Valid
             values are:
 
-            OB1 - Octave band.
+            OB1
+                Octave band.
 
-            OB2 - 1/2 octave band.
+            OB2
+                1/2 octave band.
 
-            OB3 - 1/3 octave band.
+            OB3
+                1/3 octave band.
 
-            OB6 - 1/6 octave band.
+            OB6
+                1/6 octave band.
 
-            OB12 - 1/12 octave band.
+            OB12
+                1/12 octave band.
 
-            OB24 - 1/24 octave band.
+            OB24
+                1/24 octave band.
 
-            LOG - General logarithm frequency span.
+            LOG
+                General logarithm frequency span.
 
         freqarr
             An array containing frequency values (Hz). Combined with the
@@ -253,7 +261,7 @@ class DynamicOptions:
 
         This command is also valid in PREP7.
         """
-        command = f"HARFRQ,{freqb},{freqe},{logopt},{freqarr},{toler}"
+        command = f"HARFRQ,{freqb},{freqe},,{logopt},{freqarr},{toler}"
         return self.run(command, **kwargs)
 
     def hrexp(self, angle="", **kwargs):
@@ -296,22 +304,25 @@ class DynamicOptions:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Specifies how to include ocean wave information in a harmonic
             analysis:
 
-            HARMONIC - Performs a harmonic analysis using both real and imaginary load vectors
-                       calculated via the harmonic ocean wave procedure (HOWP).
-                       This behavior is the default. This option performs a
-                       harmonic analysis running at a frequency determined by
-                       the wave period (specified via OCTABLE command input).
+            HARMONIC
+                Performs a harmonic analysis using both real and imaginary load vectors
+                calculated via the harmonic ocean wave procedure (HOWP).
+                This behavior is the default. This option performs a
+                harmonic analysis running at a frequency determined by
+                the wave period (specified via OCTABLE command input).
 
-            STATIC - Performs a static analysis using both real and imaginary load vectors
-                     (calculated via HOWP). This option works by performing a
-                     harmonic analysis running at a frequency of 0.0.
+            STATIC
+                Performs a static analysis using both real and imaginary load vectors
+                (calculated via HOWP). This option works by performing a
+                harmonic analysis running at a frequency of 0.0.
 
-            OFF - Deactivates a previously activated HOWP and performs a standard harmonic
-                  analysis.
+            OFF
+                Deactivates a previously activated HOWP and performs a standard harmonic
+                analysis.
 
         nphase
             Positive number specifying the number of phases to calculate
@@ -367,20 +378,26 @@ class DynamicOptions:
         method
             Solution method for the harmonic analysis:
 
-            AUTO - Automatically select the most efficient method. Either the FULL method or the
-                   Variational Technology method is selected depending on the
-                   model. (default method).
+            AUTO
+                Automatically select the most efficient method. Either the FULL method or the
+                Variational Technology method is selected depending on the
+                model. (default method).
 
-            FULL - Full method.
+            FULL
+                Full method.
 
-            MSUP - Mode-superposition method.
+            MSUP
+                Mode-superposition method.
 
-            VT - Variational Technology method (based on FULL harmonic algorithm).
+            VT
+                Variational Technology method (based on FULL harmonic algorithm).
 
-            VTPA - Variational Technology perfect absorber method (based on FULL harmonic
-                   algorithm).
+            VTPA
+                Variational Technology perfect absorber method (based on FULL harmonic
+                algorithm).
 
-            VTRU - Variational Technology reuse method (based on FULL harmonic algorithm).
+            VTRU
+                Variational Technology reuse method (based on FULL harmonic algorithm).
 
         maxmode
             Largest mode number to be used to calculate the response (for
@@ -395,17 +412,21 @@ class DynamicOptions:
             Modal coordinates output key (valid only for the mode superposition
             method MSUP):
 
-            NO - No output of modal coordinates (default).
+            NO
+                No output of modal coordinates (default).
 
-            YES - Output modal coordinates to the text file jobname.MCF.
+            YES
+                Output modal coordinates to the text file jobname.MCF.
 
         damp
             Damping mode for frequency-dependent material properties (valid
             only for the Variational Technology Method VT).
 
-            Hysteretic - Not proportional to the frequency.
+            Hysteretic
+                Not proportional to the frequency.
 
-            Viscous - Proportional to the frequency (default).
+            Viscous
+                Proportional to the frequency (default).
 
         Notes
         -----
@@ -437,23 +458,29 @@ class DynamicOptions:
         reimky
             Real/Imaginary print key:
 
-            ON - Print complex displacements as real and imaginary components (default).
+            ON
+                Print complex displacements as real and imaginary components (default).
 
-            OFF - Print complex displacements as amplitude and phase angle (degrees).
+            OFF
+                Print complex displacements as amplitude and phase angle (degrees).
 
         clust
             Cluster option (for HROPT,MSUP):
 
-            OFF - Uniform spacing of frequency solutions (default).
+            OFF
+                Uniform spacing of frequency solutions (default).
 
-            ON - Cluster frequency solutions about natural frequencies.
+            ON
+                Cluster frequency solutions about natural frequencies.
 
         mcont
             Mode contributions key (for HROPT,MSUP):
 
-            OFF - No print of mode contributions at each frequency (default).
+            OFF
+                No print of mode contributions at each frequency (default).
 
-            ON - Print mode contributions at each frequency.
+            ON
+                Print mode contributions at each frequency.
 
         Notes
         -----
@@ -597,13 +624,17 @@ class DynamicOptions:
         function
             Function to display.
 
-            d_coeff - Damping coefficient
+            d_coeff
+                Damping coefficient
 
-            s_coeff - Squeeze coefficient
+            s_coeff
+                Squeeze coefficient
 
-            d_ratio - Damping ratio
+            d_ratio
+                Damping ratio
 
-            s_ratio - Squeeze stiffness ratio
+            s_ratio
+                Squeeze stiffness ratio
 
         dmpname
             Array parameter name where damping information is stored. Defaults
@@ -612,9 +643,11 @@ class DynamicOptions:
         scale
             Indicates whether to perform a linear or a double logarithmic plot.
 
-            LIN - Perform a linear plot. Default
+            LIN
+                Perform a linear plot. Default
 
-            LOG - Perform a double logarithmic plot.
+            LOG
+                Perform a double logarithmic plot.
 
         Notes
         -----
@@ -634,12 +667,15 @@ class DynamicOptions:
         key
             Midstep residual criterion activation key.
 
-            ON or 1 - Activate midstep residual criterion in a structural transient analysis
-                      (default).
+            ON or 1
+                Activate midstep residual criterion in a structural transient analysis
+                (default).
 
-            OFF or 0 - Deactivate midstep residual criterion in a structural transient analysis.
+            OFF or 0
+                Deactivate midstep residual criterion in a structural transient analysis.
 
-            STAT  - List the current midstep residual criterion setting.
+            STAT
+                List the current midstep residual criterion setting.
 
         tolerb
             Midstep residual tolerance or reference value for bisection.
@@ -649,10 +685,12 @@ class DynamicOptions:
             Key to use response frequency computation along with midstep
             residual criterion for automatic time stepping (AUTOTS,ON).
 
-            OFF or 0 - Do not calculate response frequency and do not consider it in the automatic
-                       time stepping (default).
+            OFF or 0
+                Do not calculate response frequency and do not consider it in the automatic
+                time stepping (default).
 
-            ON or 1 - Calculate response frequency and consider it in the automatic time stepping.
+            ON or 1
+                Calculate response frequency and consider it in the automatic time stepping.
 
         Notes
         -----
@@ -691,21 +729,25 @@ class DynamicOptions:
         mlskey
             Multiple load step key:
 
-            OFF - Perform the modal analysis (compute the eigenvalues and the load vector) for
-                  each load step. (default)
+            OFF
+                Perform the modal analysis (compute the eigenvalues and the load vector) for
+                each load step. (default)
 
-            ON - Perform the modal analysis (compute the eigenvalues and the load vector) only
-                 for the first load step; form the load vector for each
-                 subsequent load step (without repeating the eigenvalue
-                 calculations) and write all load vectors to the Jobname.MODE
-                 file for downstream mode-superposition analyses.
+            ON
+                Perform the modal analysis (compute the eigenvalues and the load vector) only
+                for the first load step; form the load vector for each
+                subsequent load step (without repeating the eigenvalue
+                calculations) and write all load vectors to the Jobname.MODE
+                file for downstream mode-superposition analyses.
 
         enforcedkey
             Enforced motion key:
 
-            OFF - Do not calculate enforced static modes. (default)
+            OFF
+                Do not calculate enforced static modes. (default)
 
-            ON - Calculate enforced static modes and write them to the Jobname.MODE file.
+            ON
+                Calculate enforced static modes and write them to the Jobname.MODE file.
 
         Notes
         -----
@@ -801,21 +843,29 @@ class DynamicOptions:
         method
             Mode-extraction method to be used for the modal analysis.
 
-            LANB - Block Lanczos
+            LANB
+                Block Lanczos
 
-            LANPCG - PCG Lanczos
+            LANPCG
+                PCG Lanczos
 
-            SNODE - Supernode modal solver
+            SNODE
+                Supernode modal solver
 
-            SUBSP - Subspace algorithm
+            SUBSP
+                Subspace algorithm
 
-            UNSYM - Unsymmetric matrix
+            UNSYM
+                Unsymmetric matrix
 
-            DAMP - Damped system
+            DAMP
+                Damped system
 
-            QRDAMP - Damped system using QR algorithm
+            QRDAMP
+                Damped system using QR algorithm
 
-            VT - Variational Technology
+            VT
+                Variational Technology
 
         nmode
             The number of modes to extract. The value can depend on the value
@@ -837,36 +887,43 @@ class DynamicOptions:
             Complex eigenmode key. (Valid only when Method = QRDAMP or Method =
             UNSYM).
 
-            AUTO - Determine automatically if the eigensolutions are real or complex and output
-                   them accordingly. This is the default for Method = UNSYM.
-                   Not supported for Method = QRDAMP.
+            AUTO
+                Determine automatically if the eigensolutions are real or complex and output
+                them accordingly. This is the default for Method = UNSYM.
+                Not supported for Method = QRDAMP.
 
-            ON or CPLX - Calculate and output complex eigenmode shapes.
+            ON or CPLX
+                Calculate and output complex eigenmode shapes.
 
-            OFF or REAL - Do not calculate complex eigenmode shapes. This is required if a mode-
-                          superposition analysis is intended after the modal
-                          analysis for Method = QRDAMP. This is the default for
-                          this method.
+            OFF or REAL
+                Do not calculate complex eigenmode shapes. This is required if a mode-
+                superposition analysis is intended after the modal
+                analysis for Method = QRDAMP. This is the default for
+                this method.
 
         nrmkey
             Mode shape normalization key:
 
-            OFF - Normalize the mode shapes to the mass matrix (default).
+            OFF
+                Normalize the mode shapes to the mass matrix (default).
 
-            ON - Normalize the mode shapes to unity instead of to the mass matrix.  If a
-                 subsequent spectrum or mode-superposition analysis is planned,
-                 the mode shapes should be normalized to the mass matrix
-                 (Nrmkey = OFF).
+            ON
+                Normalize the mode shapes to unity instead of to the mass matrix.  If a
+                subsequent spectrum or mode-superposition analysis is planned,
+                the mode shapes should be normalized to the mass matrix
+                (Nrmkey = OFF).
 
         modtype
             Type of modes calculated by the eigensolver. Only applicable to the
             unsymmetric eigensolver.
 
-            Blank - Right eigenmodes. This value is the default.
+            Blank
+                Right eigenmodes. This value is the default.
 
-            BOTH - Right and left eigenmodes. The left eigenmodes are written to Jobname.LMODE.
-                   This option must be activated if a mode-superposition
-                   analysis is intended.
+            BOTH
+                Right and left eigenmodes. The left eigenmodes are written to Jobname.LMODE.
+                This option must be activated if a mode-superposition
+                analysis is intended.
 
         blocksize
             The block vector size to be used with the Block Lanczos or
@@ -976,10 +1033,12 @@ class DynamicOptions:
         elcalc
             Element calculation key:
 
-            NO - Do not calculate element results, reaction forces, and energies (default).
+            NO
+                Do not calculate element results, reaction forces, and energies (default).
 
-            YES - Calculate element results, reaction forces, energies, and the nodal degree of
-                  freedom solution.
+            YES
+                Calculate element results, reaction forces, energies, and the nodal degree of
+                freedom solution.
 
         signif
             Expand only those modes whose significance level exceeds the SIGNIF
@@ -988,27 +1047,33 @@ class DynamicOptions:
         msupkey
             Element result superposition key:
 
-            NO - Do not write element results to the mode file Jobname.MODE.
+            NO
+                Do not write element results to the mode file Jobname.MODE.
 
-            YES - Write element result to the mode file for use in the expansion pass of a
-                  subsequent mode-superposition PSD, transient, or harmonic
-                  analysis (default if Elcalc = YES and the mode shapes are
-                  normalized to the mass matrix).
+            YES
+                Write element result to the mode file for use in the expansion pass of a
+                subsequent mode-superposition PSD, transient, or harmonic
+                analysis (default if Elcalc = YES and the mode shapes are
+                normalized to the mass matrix).
 
         modeselmethod
             Methods for mode selection (not supported for complex
             eigensolvers):
 
-            blank - No mode selection is performed (default).
+            blank
+                No mode selection is performed (default).
 
-            MODM - The mode selection is based on the modal effective masses.
+            MODM
+                The mode selection is based on the modal effective masses.
 
-            MODC - The mode selection is based on the mode coefficients.
+            MODC
+                The mode selection is based on the mode coefficients.
 
-            DDAM - The mode selection is based on DDAM procedure (see Mode Selection Based on DDAM
-                   Procedure in the Mechanical APDL Structural Analysis Guide
-                   for more information). This option is applicable only to
-                   DDAM spectrum analysis.
+            DDAM
+                The mode selection is based on DDAM procedure (see Mode Selection Based on DDAM
+                Procedure in the Mechanical APDL Structural Analysis Guide
+                for more information). This option is applicable only to
+                DDAM spectrum analysis.
 
         Notes
         -----
@@ -1071,20 +1136,24 @@ class DynamicOptions:
         reusekey
             Reuse key for method=QRDAMP specified in MODOPT command.
 
-            ON - Reuse the symmetric eigensolution from the previous
-                 load steps or from the previous solution.
+            ON
+                Reuse the symmetric eigensolution from the previous
+                load steps or from the previous solution.
 
-            OFF - Do not reuse (calculates symmetric eigensolution at
-                  current load step). This is the default.
+            OFF
+                Do not reuse (calculates symmetric eigensolution at
+                current load step). This is the default.
 
         symmeth
             Mode-extraction method to be used for the symmetric eigenvalue
             problem.
 
-            LANB - Block Lanczos (default for shared-memory parallel processing).
+            LANB
+                Block Lanczos (default for shared-memory parallel processing).
 
-            SUBSP - Subspace algorithm (default for distributed-memory
-                    parallel processing).
+            SUBSP
+                Subspace algorithm (default for distributed-memory
+                parallel processing).
 
         cmccoutkey
             Complex Modal Contribution Coefficients (CMCC) output
@@ -1092,9 +1161,11 @@ class DynamicOptions:
             Coefficients (CMCC) in the Structural Analysis Guide for
             details and usage.
 
-            ON - Output the CMCC to the text file Jobname.CMCC.
+            ON
+                Output the CMCC to the text file Jobname.CMCC.
 
-            OFF - Do not output the CMCC. This is the default.
+            OFF
+                Do not output the CMCC. This is the default.
 
         Notes
         -----
@@ -1162,26 +1233,42 @@ class DynamicOptions:
         option
             One of the following options:
 
-            STRMCK - Controls whether a Sturm sequence check is performed.
+            STRMCK
+                Controls whether a Sturm sequence check is performed.
+                Valid input for Value1 when Option = STRMCK:
 
-            Value1: - OFF
+                OFF
+                    Do not perform Sturm sequence check (default).
 
-            Do not perform Sturm sequence check (default). - ON
+                ON
+                    Perform Sturm sequence check.
 
-            Perform Sturm sequence check. - MEMORY
+            MEMORY
+                Controls the memory allocation strategy for the Subspace eigensolver.
+                Valid input for Value1 when Option = MEMORY:
 
-            Controls the memory allocation strategy for the Subspace eigensolver. - Value1:
+                AUTO
+                    Use the default memory allocation strategy (``default``).
 
-            AUTO - Use the default memory allocation strategy (default).
+                INCORE
+                    Force the Subspace eigensolver to allocate in-core memory.
 
-            INCORE - Force the Subspace eigensolver to allocate in-core memory.
+                MIX1
+                    First level of mixed in-core / out-of-core configuration.
 
-            OUTOFCORE - Force the Subspace eigensolver to use scratch files.
+                MIX2
+                    Second level of mixed in-core / out-of-core configuration.
+
+                OUTOFCORE
+                    Force the Subspace eigensolver to use scratch files.
+
+            Value1
+                Assigned value for the specified Option (as described above).
 
         Notes
         -----
-        SUBOPT specifies options to be used with the Subspace eigensolver
-        (MODOPT,SUBSP) during a modal analysis.
+        ``SUBOPT`` specifies options to be used with the Subspace eigensolver
+        (``MODOPT,SUBSP``) during a modal analysis.
         """
         command = f"SUBOPT,{option},{value1}"
         return self.run(command, **kwargs)
@@ -1196,26 +1283,35 @@ class DynamicOptions:
         key
             Transient effects key:
 
-            OFF - No transient effects (static or steady-state).
+            OFF
+                No transient effects (static or steady-state).
 
-            ON - Include transient (mass or inertia) effects.
+            ON
+                Include transient (mass or inertia) effects.
 
         lab
             Degree of freedom label:
 
-            ALL - Apply this key to all appropriate labels (default).
+            ALL
+                Apply this key to all appropriate labels (default).
 
-            STRUC - Apply this key to structural DOFs.
+            STRUC
+                Apply this key to structural DOFs.
 
-            THERM - Apply this key to thermal DOFs.
+            THERM
+                Apply this key to thermal DOFs.
 
-            ELECT - Apply this key to electric DOFs.
+            ELECT
+                Apply this key to electric DOFs.
 
-            MAG - Apply this key to magnetic DOFs.
+            MAG
+                Apply this key to magnetic DOFs.
 
-            FLUID - Apply this key to fluid DOFs.
+            FLUID
+                Apply this key to fluid DOFs.
 
-            DIFFU - Apply this key to concentration of DOFs.
+            DIFFU
+                Apply this key to concentration of DOFs.
 
         Notes
         -----
@@ -1282,10 +1378,12 @@ class DynamicOptions:
         avsmooth
             Smoothing flag option:
 
-            0 - Include smoothing of the velocity (1st order system)
+            0
+                Include smoothing of the velocity (1st order system)
                 or the acceleration (2nd order system) (default).
 
-            1 - Do not include smoothing.
+            1
+                Do not include smoothing.
 
         alphaf
             Interpolation factor in HHT algorithm for force and damping terms
@@ -1329,6 +1427,7 @@ class DynamicOptions:
         self,
         method="",
         maxmode="",
+        initialacc="",
         minmode="",
         mcfwrite="",
         tintopt="",
@@ -1347,16 +1446,29 @@ class DynamicOptions:
         method
             Solution method for the transient analysis:
 
-            FULL - Full method (default).
+            FULL
+                Full method (default).
 
-            MSUP - Mode-superposition method.
+            MSUP
+                Mode-superposition method.
 
-            VT - Variational Technology method.  (Removed by V18.2)
+            VT
+                Variational Technology method.  (Removed by V18.2)
 
         maxmode
             Largest mode number to be used to calculate the response
             (for Method = MSUP).  Defaults to the highest mode
             calculated in the preceding modal analysis.
+
+        initialacc
+            Key to activate calculation of initial acceleration:
+
+            (blank)
+                Initial accelerations are not calculated (default).
+
+            INIL
+                Calculate initial acceleration for a full transient analysis
+                using the lumped mass matrix.
 
         minmode
             Smallest mode number to be used (for Method = MSUP).
@@ -1366,25 +1478,31 @@ class DynamicOptions:
             Modal coordinates output key to the .mcf file (valid only
             for the mode-superposition method):
 
-            NO - No output of modal coordinates (default).
+            NO
+                No output of modal coordinates (default).
 
-            YES - Output modal coordinates to the text file Jobname.MCF.
+            YES
+                Output modal coordinates to the text file Jobname.MCF.
 
         tintopt
             Time integration method for the transient analysis:
 
-            NMK or 0 - Newmark algorithm (default).
+            NMK or 0
+                Newmark algorithm (default).
 
-            HHT or 1 - HHT algorithm (valid only for the full transient method).
+            HHT or 1
+                HHT algorithm (valid only for the full transient method).
 
         vaout
             Velocities and accelerations output key (valid only for
             mode- superposition transient analysis):
 
-            NO - No output of velocities and accelerations (default).
+            NO
+                No output of velocities and accelerations (default).
 
-            YES - Write velocities and accelerations on the reduced displacement file
-                  Jobname.RDSP.
+            YES
+                Write velocities and accelerations on the reduced displacement
+                file Jobname.RDSP.
 
         dmpsfreq
             Average excitation frequency (Hz) for the calculation of
@@ -1399,22 +1517,26 @@ class DynamicOptions:
         engcalc
             Additional element energies calculation key:
 
-            NO - Do not calculate additional element energies
-            (default).
+            NO
+                Do not calculate additional element energies
+                (default).
 
-            YES - Calculate damping energy and work done by external
-            loads.
+            YES
+                Calculate damping energy and work done by external
+                loads.
 
         mckey
             Modal coordinates output key to the .rdsp file (valid only
             for the mode-superposition method):
 
-            AUTO - Writing depends on the modal analysis settings of
-            the MXPAND command (default).
+            AUTO
+                Writing depends on the modal analysis settings of
+                the MXPAND command (default).
 
-            YES - Always write the modal coordinates to the file
-            Jobname.rdsp. A subsequent expansion pass (EXPASS) is not
-            supported.
+            YES
+                Always write the modal coordinates to the file
+                Jobname.rdsp. A subsequent expansion pass (EXPASS) is not
+                supported.
 
         Notes
         -----
@@ -1446,5 +1568,6 @@ class DynamicOptions:
 
         This command is also valid in PREP7.
         """
-        command = f"TRNOPT,{method},{maxmode},,{minmode},{mcfwrite},{tintopt},{vaout},{dmpsfreq},{engcalc},{mckey}"
+        command = f"TRNOPT,{method},{maxmode},{initialacc},{minmode},{mcfwrite},{tintopt},{vaout},{dmpsfreq},{engcalc},{mckey}"
         return self.run(command, **kwargs)
+        # TRNOPT,Method,MAXMODE,InitialAcc,MINMODE,MCFwrite,TINTOPT,VAout, DMPSFreq, EngCalc, MCkey

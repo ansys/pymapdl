@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -32,9 +32,13 @@ class ArrayParam:
         oper
             Type of Fourier operation:
 
-            Calculate Fourier coefficients COEFF from MODE, ISYM,
-            THETA, and CURVE. - Evaluate the Fourier curve CURVE from
-            COEFF, MODE, ISYM and THETA.
+            FIT
+              Calculate Fourier coefficients COEFF from MODE, ISYM,
+              THETA, and CURVE.
+
+            EVAL
+              Evaluate the Fourier curve CURVE from
+              COEFF, MODE, ISYM and THETA.
 
         coeff
             Name of the array parameter vector containing the Fourier
@@ -50,7 +54,11 @@ class ArrayParam:
             the corresponding Fourier terms.  The vector should contain keys
             for each term as follows:
 
-            Symmetric (cosine) term - Antisymmetric (sine) term.
+            0 or 1
+              Symmetric (cosine) term
+
+            -1
+              Antisymmetric (sine) term.
 
         theta, curve
             Names of the array parameter vectors containing the theta vs. curve
@@ -174,16 +182,22 @@ class ArrayParam:
         oper
             Matrix operations:
 
-            * `INVERT` - ``(*MOPER, ParR, Par1, INVERT)``
+            * `INVERT`
+              ``(*MOPER, ParR, Par1, INVERT)``
               Square matrix invert: Inverts the ``n`` x ``n`` matrix in ``Par1``
               into ``ParR``. The matrix must be well conditioned.
 
-              **Warning**: Non-independent or ill-conditioned equations can
-              cause erroneous results. - For large matrices, use the
+              .. warning::
+
+                 Non-independent or ill-conditioned equations can
+                 cause erroneous results.
+
+              For large matrices, use the
               APDL Math operation ``*LSFACTOR`` for efficiency (see APDL
               Math).
 
-            * `MULT` - ``(*MOPER, ParR, Par1, MULT, Par2)``
+            * `MULT`
+              ``(*MOPER, ParR, Par1, MULT, Par2)``
               Matrix multiply: Multiplies ``Par1`` by ``Par2``.  The number of
               rows of ``Par2`` must equal the number of columns of ``Par1`` for
               the operation. If ``Par2`` is input with a number of rows
@@ -192,7 +206,8 @@ class ArrayParam:
               number of rows of ``Par2`` equal to the number of columns of
               ``Par1``.
 
-            * `COVAR` - ``(*MOPER, ParR, Par1, COVAR, Par2)``
+            * `COVAR`
+              ``(*MOPER, ParR, Par1, COVAR, Par2)``
               Covariance: The measure of association between two columns
               of the input matrix (``Par1``).  ``Par1``, of size m runs (rows)
               by ``n`` data (columns) is first processed to produce a row
@@ -202,7 +217,8 @@ class ArrayParam:
               ``n`` matrix (``ParR``) of covariances (with the variances as the
               diagonal terms).
 
-            * `CORR` - ``(*MOPER, ParR, Par1, CORR, Par2)``
+            * `CORR`
+              ``(*MOPER, ParR, Par1, CORR, Par2)``
               Correlation: The correlation coefficient between two
               variables.  The input matrix (``Par1``), of size m runs (rows)
               by n data (columns), is first processed to produce a row
@@ -212,7 +228,8 @@ class ArrayParam:
               ``n`` matrix (``ParR``) of correlation coefficients (with a value
               of 1.0 for the diagonal terms).
 
-            * `SOLV` - ``(*MOPER, ParR, Par1, SOLV, Par2)``
+            * `SOLV`
+              ``(*MOPER, ParR, Par1, SOLV, Par2)``
               Solution of simultaneous equations: Solves the set of ``n``
               equations of n terms of the form ``an_1 x_1 + an_2 x_2 + ... +
               an_n x_n = b_n`` where ``Par1`` contains the matrix of
@@ -226,7 +243,8 @@ class ArrayParam:
               APDL Math operation ``*LSFACTOR`` for efficiency (see APDL
               Math).
 
-            * `SORT` - ``(*MOPER, ParR, Par1, SORT, Par2, n1, n2, n3)``
+            * `SORT`
+              ``(*MOPER, ParR, Par1, SORT, Par2, n1, n2, n3)``
               Matrix sort: Sorts matrix ``Par1`` according to sort vector
               ``Par2`` and places the result back in ``Par1``. Rows of ``Par1`` are
               moved to the corresponding positions indicated by the
@@ -238,7 +256,8 @@ class ArrayParam:
               row positions (the permutation vector).  Sorting ``Par1``
               according to ``ParR`` should reproduce the initial ordering.
 
-            * `NNEAR` - ``(*MOPER, ParR, Par1, NNEAR, Toler)``
+            * `NNEAR`
+              ``(*MOPER, ParR, Par1, NNEAR, Toler)``
               Nearest Node: Quickly determine all the nodes within a
               specified tolerance of a given array.  ``ParR`` is a vector of
               the nearest selected nodes, or 0 if no nodes are nearer
@@ -246,7 +265,8 @@ class ArrayParam:
               locations. ``Toler`` defaults to 1 and is limited to the
               maximum model size.
 
-            * `ENEAR` - ``(*MOPER, ``ParR``, ``Par1``, ENEAR, Toler)``
+            * `ENEAR`
+              ``(*MOPER, ``ParR``, ``Par1``, ENEAR, Toler)``
               Nearest Element: Quickly determine the elements with
               centroids that are within a specified tolerance of the
               points in a given array. - ``ParR`` is a vector of the nearest
@@ -254,7 +274,8 @@ class ArrayParam:
               than ``Toler``. ``Par1`` is the ``n`` x 3 array of coordinate
               locations.
 
-            * `MAP` - ``(*MOPER, ParR, Par1, MAP, Par2, Par3, kDim, --, kOut, LIMIT)``
+            * `MAP`
+              ``(*MOPER, ParR, Par1, MAP, Par2, Par3, kDim, --, kOut, LIMIT)``
               Maps the results from one set of points to another. For
               example, you can map pressures from a CFD analysis onto
               your model for a structural analysis.
@@ -297,14 +318,16 @@ class ArrayParam:
               bounds. Results mapping is available from the command line
               only.
 
-            * `INTP` - ``(*MOPER, ParR, Par1, INTP, Par2)``
+            * `INTP`
+              ``(*MOPER, ParR, Par1, INTP, Par2)``
               Finds the elements that contain each point in the array of
               ``n`` x 3 points in ``Par1``. ``Par2`` will contain the set of element
               ID numbers and ``ParR`` will contain their ``n`` x 3 set of
               natural element coordinates (values between -1 and
               1). ``Par1`` must be in global Cartesian coordinates.
 
-            * `SGET` - ``(*MOPER, ParR, Par1, SGET, Par2, Label, Comp)``
+            * `SGET`
+              ``(*MOPER, ParR, Par1, SGET, Par2, Label, Comp)``
               Gets the nodal solution item corresponding to Label and
               Comp (see the PLNSOL command) and interpolates it to the
               given element locations. ``Par1`` contains the ``n`` x 3 array of
@@ -329,6 +352,10 @@ class ArrayParam:
         """Writes a matrix to a file in a formatted sequence.
 
         APDL Command: ``*MWRITE``
+
+        .. warning::
+           This command cannot be run interactively.  See
+           :func:`non_interactive <ansys.mapdl.core.Mapdl.non_interactive>`.
 
         Parameters
         ----------
@@ -1141,7 +1168,8 @@ class ArrayParam:
               First derivative:
 
               .. math::
-                 \dfrac{\mathrm{d}(\mathrm{Par1})}{\mathrm{d}(\mathrm{Par2})}
+
+                 \\dfrac{\\mathrm{d}(\\mathrm{Par1})}{\\mathrm{d}(\\mathrm{Par2})}
 
               The derivative at a point is determined over points
               half way between the previous and next points
@@ -1154,7 +1182,8 @@ class ArrayParam:
               Second derivative:
 
               .. math::
-                 \dfrac{\mathrm{d}^2(\mathrm{Par1})}{\mathrm{d}(\mathrm{Par2})^2}
+
+                 \\dfrac{\\mathrm{d}^2(\\mathrm{Par1})}{\\mathrm{d}(\\mathrm{Par2})^2}
 
               See also ``DER1``.
 
@@ -1163,7 +1192,7 @@ class ArrayParam:
 
               .. math::
 
-                 \int Par1 \, d(Par2)
+                 \\int Par1 \\, d(Par2)
 
               where ``CON1`` is the integration constant.
               The integral at a point is
@@ -1175,7 +1204,7 @@ class ArrayParam:
 
               .. math::
 
-                 \iint Par1 \, d(Par2)
+                 \\iint Par1 \\, d(Par2)
 
               where ``CON1`` is the integration constant of the first
               integral and ``CON2`` is the integration constant

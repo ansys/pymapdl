@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Script to calculate the first natural frequecy of
-# a rotor for a given set of properties
+# Script to calculate the first natural frequency of a rotor for a given set of
+# properties
 
 # Import packages
 import numpy as np
@@ -29,7 +29,7 @@ import numpy as np
 from ansys.mapdl.core import launch_mapdl
 
 # Launch MAPDL
-mapdl = launch_mapdl(port=50052)
+mapdl = launch_mapdl()
 mapdl.clear()
 mapdl.prep7()
 

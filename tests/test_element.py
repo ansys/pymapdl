@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -26,7 +26,7 @@ import pytest
 
 from ansys.mapdl.core import examples
 from ansys.mapdl.core._commands.parse import parse_e, parse_et
-from conftest import requires
+from conftest import TestClass, requires
 
 
 @pytest.fixture
@@ -117,7 +117,7 @@ def test_etype(mapdl, cleared):
     assert "CURRENT NODAL DOF SET IS  UX    UY    UZ" in out
 
 
-def test_eshape(mapdl):
+def test_eshape(mapdl, cleared):
     with pytest.warns(UserWarning):
         mapdl.eshape()
 
@@ -138,7 +138,7 @@ def test_edele(mapdl, cleared):
     assert "DELETE SELECTED ELEMENTS" in output
 
 
-class TestParseElementCommands:
+class TestParseElementCommands(TestClass):
     @pytest.mark.parametrize(
         "message",
         [

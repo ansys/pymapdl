@@ -51,7 +51,8 @@ To build the documentation as html use the following command:
 
 .. code:: console
 
-    (.venv) mapdl@machine:~/pymapdl$ make html
+    (.venv) mapdl@machine:~/pymapdl$ cd doc
+    (.venv) mapdl@machine:~/pymapdl/doc$ make html
     On codespaces. Using xvfb.
     Running Sphinx v7.2.6
     Using pandoc version: 3.1.9 to convert rst text blocks to markdown for .ipynb files
@@ -68,7 +69,8 @@ without building the gallery of examples using the following command:
 
 .. code:: console
     
-    (.venv) mapdl@machine:~/pymapdl$ make html
+    (.venv) mapdl@machine:~/pymapdl$ cd doc
+    (.venv) mapdl@machine:~/pymapdl/doc$ make html
     On codespaces. Using xvfb.
     Building gallery without running examples.
     Running Sphinx v7.2.6
@@ -82,7 +84,8 @@ and access it from your local browser using the following command:
 
 .. code:: console
 
-    (.venv) mapdl@machine:~/pymapdl$ make start-webserver
+    (.venv) mapdl@machine:~/pymapdl$ cd doc
+    (.venv) mapdl@machine:~/pymapdl/doc$ make start-webserver
     Starting Python server.
     You can find the web server log in: /Users/german.ayuso/pymapdl/doc/webserver.log
     The pid of the web server is 71867
@@ -100,7 +103,8 @@ To stop all web servers use the following command:
 
 .. code:: console
 
-    (.venv) mapdl@machine:~/pymapdl$ make stop-webserver
+    (.venv) mapdl@machine:~/pymapdl$ cd doc
+    (.venv) mapdl@machine:~/pymapdl/doc$ make stop-webserver
     Stopping web server
     All web servers stopped
 

@@ -9,8 +9,8 @@ Python language to code user programmable subroutines. A subset of the
 documented UPF subroutines support the Python UPF capability. For more information,
 see `Supported UPF subroutines`_).
 
-You must install a Python distribution before using this feature. Python 3.8
-through Python 3.12 are supported.
+You must install a Python distribution before using this feature. Python 3.10
+through Python 3.13 are supported.
 
 Python UPFs are only supported on Linux.
 
@@ -186,7 +186,7 @@ During the Mechanical APDL process, you see this Python printout:
 
 .. code:: output
 
-    RUN SETUP PROCEDURE FROM FILE= /ansys_inc/v212/ansys/apdl/start.ans
+    RUN SETUP PROCEDURE FROM FILE= /ansys_inc/v241/ansys/apdl/start.ans
     =======================================
     >> Inside the PYTHON UAnBeg routine  <<
     =======================================

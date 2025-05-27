@@ -50,21 +50,6 @@ If you are going to do testing, you must install the testing dependencies with t
     pip install -e '.[tests]'
 
 
-Developing using Codespaces
-===========================
-
-You can save time by using `GitHub Codespaces <codespaces_features_>`_, which launches a fully ready
-coding environment based on Visual Studio Code. In this environment, some the of the preceding steps are already
-set for your convenience:
-
-* An MAPDL Student Edition is installed.
-* Git is installed with the latest PyMAPDL branch cloned.
-* A Python environment is installed with all dependencies.
-* PyMAPDL is installed as editable.
-
-For more information, see :ref:`develop_on_codespaces`.
-
-
 Develop PyMAPDL
 ===============
 
@@ -77,11 +62,47 @@ guidelines for developing code in a repository:
 
 #. **Use branches**: Create branches for different features, bug fixes, or
    experiments. This keeps changes isolated and facilitates parallel
-   development.
+   development. The CI/CD checks that the branch name is compliant. For example,
+   the branch name must start with a lower case prefix and a backslash.
+   The allowed prefixes are:
+
+   - `build/` - Changes that affect the build system or external dependencies (such as to ``pip`` or ``make``).
+   - `ci/` - Changes to the CI/CD configuration files and scripts.
+   - `dependabot/` - Created by Dependabot.
+   - `docs/` - Improves documentation and examples.
+   - `feat/` - Changes that introduce a new feature or significant addition.
+   - `fix/` - Bug fixes.
+   - `junk/` - Other purposes. It should not be used for branches that are going to be merged to ``main``.
+   - `maint/` - General maintenance of the repository.
+   - `no-ci/` - (Not applicable to PyMAPDL) In some repositories, branches with this prefix do not trigger CI/CD.
+   - `perf/` - A code change that improves performance.
+   - `refactor/` - A code change that neither fixes a bug nor adds a feature.
+   - `release/` - Contains the released versions changes.
+   - `revert/` - Reverts a previous commit.
+   - `testing/` - For testing and debugging. It can be used to add new tests.
+
+   **Note**: For more information, see `Table of allowed prefix <table_prefix_>`_.
 
 #. **Write descriptive commit messages**: Provide clear and concise commit
    messages that explain the purpose and context of the changes. Follow a
    consistent style.
+
+   - `build:` - Changes that affect the build system or external dependencies (such as to ``pip`` or ``make``).
+   - `chore:` - Other changes that don't modify the code. It can be used as a fall back general branch name.
+   - `ci:` - Changes to the CI/CD configuration files and scripts.
+   - `docs:` - Improves documentation and examples.
+   - `feat:` - Changes that introduce a new feature or significant addition.
+   - `fix:` - Bug fixes.
+   - `maint:` - General maintenance of the repository.
+   - `no-ci:` - (Not applicable to PyMAPDL) In some repositories, branches with this prefix do not trigger CI/CD.
+   - `perf:` - A code change that improves performance.
+   - `refactor:` - A code change that neither fixes a bug nor adds a feature.
+   - `release:` - Contains the released versions changes.
+   - `revert:` - Reverts a previous commit.
+   - `style:` - Changes that do not affect the meaning of the code (white-space, formatting, missing semi-colons, etc).
+   - `testing:` - For testing and debugging. It can be used to add new tests.
+
+   **Note**: For more information, see `Table of allowed prefix <table_prefix_>`_.
 
 #. **Commit frequently**: Make small, meaningful commits frequently. Avoid
    making a large number of unrelated changes in a single commit.
@@ -92,6 +113,27 @@ guidelines for developing code in a repository:
 
 #. **Use pull requests (PRs)**: Use PRs to submit your changes for review.
    This allows for discussion and validation before merging into the main branch.
+   Pull requests must follow the same convention as the commit messages.
+   The following prefixes are allowed in the pull request names:
+
+   - `build:` - Changes that affect the build system or external dependencies (such as to ``pip`` or ``make``).
+   - `ci:` - Changes to the CI/CD configuration files and scripts.
+   - `docs:` - Improves documentation and examples.
+   - `feat:` - Changes that introduce a new feature or significant addition.
+   - `fix:` - Bug fixes.
+   - `maint:` - General maintenance of the repository.
+   - `no-ci:` - (Not applicable to PyMAPDL) In some repositories, branches with this prefix do not trigger CI/CD.
+   - `perf:` - A code change that improves performance.
+   - `refactor:` - A code change that neither fixes a bug nor adds a feature.
+   - `revert:` - Reverts a previous commit.
+   - `testing:` - For testing and debugging. It can be used to add new tests.
+
+   **Note**: For more information, see `Table of allowed prefix <table_prefix_>`_.
+
+   The pull requests can also be labeled for easier repository maintenance.
+   The CI/CD automatically labels each pull request based on the pull requests prefix and
+   the modified files, but you can also add extra labels as long as they are already defined
+   in the repository.
 
 #. **Write good documentation**: Maintain clear and up-to-date documentation for your
    contribution or changes, including comments in code, and relevant project
@@ -119,6 +161,52 @@ guidelines for developing code in a repository:
 
 By following these guidelines, you can ensure smooth and organized code
 development within a repository, fostering collaboration, code quality, and feature enhancement.
+
+**Table of allowed prefix**
+
+.. _table_prefix:
+
++-------------+-----------------------------+------------------------------+----------------------------------+
+| Prefix      | Commit (``prefix:``)        | Branch (``prefix/``)         | Pull-request (``prefix:``)       |
++=============+=============================+==============================+==================================+
+| `build`     | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `dependabot`| |:x:|                       | |:white_check_mark:|         | |:x:|                            |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `chore`     | |:white_check_mark:|        | |:x:|                        | |:x:|                            |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `ci`        | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `docs`      | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `feat`      | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `fix`       | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `junk`      | |:x:|                       | |:white_check_mark:|         | |:x:|                            |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `maint`     | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `no-ci`     | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `perf`      | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `refactor`  | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `release`   | |:white_check_mark:|        | |:white_check_mark:|         | |:white_check_mark:|             |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `revert`    | |:white_check_mark:|        | |:white_check_mark:|         | |:x:|                            |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `style`     | |:white_check_mark:|        | |:x:|                        | |:x:|                            |
++-------------+-----------------------------+------------------------------+----------------------------------+
+| `testing`   | |:white_check_mark:|        | |:white_check_mark:|         | |:x:|                            |
++-------------+-----------------------------+------------------------------+----------------------------------+
+
+
+Where:
+
+* |:white_check_mark:| means that the prefix is allowed.
+* |:x:| means that the prefix is not allowed.
 
 
 .. _ref_unit_testing_contributing:
@@ -201,30 +289,37 @@ It is executed upstream of each test and not within all tests.
 
 .. code:: python
 
-   def test_my_new_feature(mapdl):  # pass the 'mapdl' fixture as an argument.
+   def test_my_new_feature(mapdl, cleared):  # pass the 'mapdl' fixture as an argument.
        mapdl.prep7()
        # .... more code
 
        return True  # if everything goes ok until here
 
+Passing the ``cleared`` fixture is also useful since it clears up the MAPDL database
+and configuration before performing the test.
 If you do not have MAPDL installed locally but still want to run the
 unit testing, you must set up the following environment variables.
 
-In Windows, use this code:
+.. tab-set::
 
-.. code:: pwsh-session
+    .. tab-item:: Windows
+        :sync: key1
 
-    SET PYMAPDL_START_INSTANCE=False
-    SET PYMAPDL_PORT=<MAPDL Port> (default 50052)
-    SET PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)
+        .. code:: pwsh-session
 
-In Linux, use this code:
+            SET PYMAPDL_START_INSTANCE=False
+            SET PYMAPDL_PORT=<MAPDL Port> (default 50052)
+            SET PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)
 
-.. code:: console
+    .. tab-item:: Linux
+        :sync: key1
+                
+        .. code:: console
 
-    export PYMAPDL_START_INSTANCE=False
-    export PYMAPDL_PORT=<MAPDL Port> (default 50052)
-    export PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)
+            export PYMAPDL_START_INSTANCE=False
+            export PYMAPDL_PORT=<MAPDL Port> (default 50052)
+            export PYMAPDL_IP=<MAPDL IP> (default 127.0.0.1)
+
 
 These environment variables tell PyMAPDL to attempt to connect to the existing
 MAPDL service by default when the ``launch_mapdl`` function is used.
@@ -241,8 +336,14 @@ The automation of testing, monitoring, and deployment of newly added
 code allows continuous deployment (CD) throughout the app lifecycle,
 providing a comprehensive CI/CD approach.
 
-.. figure:: ../images/cicd.jpg
+.. image:: ../images/cicd_dark_theme.png
+    :class: only-dark
     :width: 300pt
+
+.. image:: ../images/cicd_light_theme.png
+    :class: only-light
+    :width: 300pt
+
 
 Example
 --------
@@ -432,7 +533,7 @@ This way, it's not possible for you to push code that fails the style checks. Fo
    debug statements (python)............................(no files to check)Skipped
    Validate GitHub Workflows............................(no files to check)Skipped
    [INFO] Restored changes from /home/mapdl/.cache/pre-commit/patch1704703895-16914.
-   [ci/codespaces-quick-fixes-regarding-welcome-page c0f59f4c] my commit
+   [ci/mybranch cXXXXXXX] my commit
    1 file changed, 25 insertions(+)
    (.venv) mapdl@machine:~/pymapdl$ 
 

@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -1139,7 +1139,7 @@ class MiscellaneousLoads:
         maxfiles
             Maximum number of ``.Xnnn`` files to save for Ldstep.
 
-            \-1
+            \\-1
                 Overwrite existing ``.Xnnn`` files (default). The total maximum number of ``.Xnnn``
                 files for one run is 999. If this number is reached before the analysis is complete,
                 the program will reset the ``.Xnnn`` file numbering back to 1 and continue to write

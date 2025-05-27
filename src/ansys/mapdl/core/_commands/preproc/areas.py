@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -121,7 +121,7 @@ class Areas:
             The real constant set number to be associated with selected,
             unmeshed areas.
 
-        type\_
+        type\\_
             The type number to be associated with selected, unmeshed areas.
 
         esys

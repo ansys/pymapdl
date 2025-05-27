@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -708,7 +708,7 @@ class FeBodyLoads:
             DYNA - Get initial stresses from an earlier explicit
             (ANSYS LS-DYNA) run (default).
 
-        type\_
+        type\\_
             Type of data imported.  Note that this is an ANSYS-defined
             field; the only valid value is STRESS.
 

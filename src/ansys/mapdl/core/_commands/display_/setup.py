@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -42,13 +42,16 @@ class Setup:
         kywrd
             Keyword indicating the disposition of the color map file.
 
-            (blank) - Loads existing color map file.
+            (blank)
+                Loads existing color map file.
 
-            CREATE - Starts the CMAP utility and modifies or creates
-            the specified file.
+            CREATE
+                Starts the CMAP utility and modifies or creates
+                the specified file.
 
-            SAVE - Writes the active color map to the specified file,
-            which can be imported into future sessions.
+            SAVE
+                Writes the active color map to the specified file,
+                which can be imported into future sessions.
 
         ncntr
             Number of contours to be defined. Default = 9 (even if an existing
@@ -87,33 +90,39 @@ class Setup:
         label
             Device function label:
 
-            BBOX - Disables display information sorting for PowerGraphics displays. When activated
-                   (KEY = 1 or ON), model rotations and replots are performed
-                   without recalculating edge and surface data. This will speed
-                   up the rotation (especially for 2-D displays) of large
-                   models, although the display information will not be
-                   resolved as quickly (you will see a bounding box instead of
-                   the model during dynamic rotations). The default is OFF (KEY
-                   = 0).
+            BBOX
+                Disables display information sorting for PowerGraphics displays. When activated
+                (KEY = 1 or ON), model rotations and replots are performed
+                without recalculating edge and surface data. This will speed
+                up the rotation (especially for 2-D displays) of large
+                models, although the display information will not be
+                resolved as quickly (you will see a bounding box instead of
+                the model during dynamic rotations). The default is OFF (KEY
+                = 0).
 
-            DITHER - Dithering.  When turned on (default), dithering smooths transitions in color
-                     intensity.  Applies only to Z-buffered displays.
+            DITHER
+                Dithering.  When turned on (default), dithering smooths transitions in color
+                intensity.  Applies only to Z-buffered displays.
 
-            FONT - Font selection for the ANSYS graphics window.  When Label = FONT, the command
-                   format is: /DEVDISP,FONT,KEY,Val1,Val2,Val3,VAL4,Val5,Val6,
-                   where KEY determines the type of font being controlled, and
-                   values 1 through 6 control various font parameters. Note
-                   that these values are device specific; using the same
-                   command input file [/INPUT] on different machines may yield
-                   different results.The following KEY values determine the
-                   font information that will be supplied to the appropriate
-                   driver (e.g., Postscript, X11, Win32, JPEG, ...):
+            FONT
+                Font selection for the ANSYS graphics window.  When Label = FONT, the command
+                format is: /DEVDISP,FONT,KEY,Val1,Val2,Val3,VAL4,Val5,Val6,
+                where KEY determines the type of font being controlled, and
+                values 1 through 6 control various font parameters. Note
+                that these values are device specific; using the same
+                command input file [/INPUT] on different machines may yield
+                different results.The following KEY values determine the
+                font information that will be supplied to the appropriate
+                driver (e.g., Postscript, X11, Win32, JPEG, ...):
 
-            KEY = 1 - The command controls the LEGEND (documentation column) font.
+            KEY = 1
+                The command controls the LEGEND (documentation column) font.
 
-            KEY = 2 - The command controls the ENTITY (node and keypoint number) font.
+            KEY = 2
+                The command controls the ENTITY (node and keypoint number) font.
 
-            KEY = 3 - The command controls the ANNOTATION/GRAPH font.
+            KEY = 3
+                The command controls the ANNOTATION/GRAPH font.
 
             Linux: Values 1 through 4 are used to find a match in the X11 database of font strings.  Values 1, 2, and 3 are character strings; value 4 is a nonzero integer:    - Val1
 
@@ -201,11 +210,14 @@ class Setup:
         key
             Color key:
 
-            0 - Color the displays.
+            0
+                Color the displays.
 
-            1 - Do not color the displays.
+            1
+                Do not color the displays.
 
-            2 - Do not shade the displays.
+            2
+                Do not shade the displays.
         """
         command = f"NOCOLOR,{key}"
         return self.run(command, **kwargs)
@@ -221,19 +233,25 @@ class Setup:
             Valid driver name (see Getting Started with Graphics in the Basic
             Analysis Guide for details):
 
-            <device name> - Any linked terminal driver (such as X11, TEKTRONIX, etc.)
+            <device name>
+                Any linked terminal driver (such as X11, TEKTRONIX, etc.)
 
-            HPGL - Hewlett-Packard Graphics Language
+            HPGL
+                Hewlett-Packard Graphics Language
 
-            HPGL2 - Hewlett-Packard Graphics Language with enhanced
-                    color.  (See the HPGL command for options.)
-                    Ignores the NCPL field.
+            HPGL2
+                Hewlett-Packard Graphics Language with enhanced
+                color.  (See the HPGL command for options.)
+                Ignores the NCPL field.
 
-            INTERLEAF - Interleaf ASCII Format, OPS Version 5.0
+            INTERLEAF
+                Interleaf ASCII Format, OPS Version 5.0
 
-            POSTSCRIPT - PostScript, Version 1.0 Minimally Conforming
+            POSTSCRIPT
+                PostScript, Version 1.0 Minimally Conforming
 
-            DUMP - ASCII Text Dump
+            DUMP
+                ASCII Text Dump
 
         ncpl
             Number of color planes (4 to 8).  Default is device-dependent.

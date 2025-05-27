@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -102,7 +102,7 @@ class MatrixOP:
         matrix
             Name used to identify the matrix. Must be specified.
 
-        type\_
+        type\\_
             Matrix type:
 
             Double precision real values (default). - Complex double precision values.
@@ -239,7 +239,7 @@ class MatrixOP:
             Name of the matrix to export (must be a matrix previously created
             with ``*DMAT`` or ``*SMAT``, or a vector previously created with ``*VEC``).
 
-        format\_
+        format\\_
             Format of the output file:
 
             Export the matrix in the Matrix Market Format. - Export
@@ -302,7 +302,7 @@ class MatrixOP:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Type of FFT transformation:
 
             Forward FFT computation (default). - Backward FFT computation.
@@ -420,7 +420,7 @@ class MatrixOP:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Specifies the algorithm to be used:
 
         enginename
@@ -834,7 +834,7 @@ class MatrixOP:
         matrix
             Name used to identify the matrix. Must be specified.
 
-        type\_
+        type\\_
             Matrix type:
 
             Double precision real values (default). - Complex double precision values.

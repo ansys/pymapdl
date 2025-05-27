@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -26,7 +26,7 @@ from .core import _QueryExecution
 class _ConnectivityQueries(_QueryExecution):
     _mapdl = None
 
-    def nelem(self, e, npos) -> int:
+    def nelem(self, e: int, npos: int) -> int:
         """Return the number of the node at position ``npos`` in element ``e``.
 
         Returns the node number in position `npos` for element number ``e``.
@@ -64,7 +64,7 @@ class _ConnectivityQueries(_QueryExecution):
         """
         return self._run_query(f"NELEM({e},{npos})", integer=True)
 
-    def enextn(self, n, loc) -> int:
+    def enextn(self, n: int, loc: int) -> int:
         """Returns the ``loc`` element connected to node ``n``.
 
         Returns the element connected to node ``n``. ``loc`` is the position

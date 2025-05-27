@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -40,28 +40,37 @@ class Selecting:
         labt
             Type of selection to be made:
 
-            ALL - Selects all items of the specified entity type and all
-                  items of lower entity types (default).
+            ALL
+                Selects all items of the specified entity type and all
+                items of lower entity types (default).
 
-            BELOW - Selects all items directly associated with and below
-                    the selected items of the specified entity type.
+            BELOW
+                Selects all items directly associated with and below
+                the selected items of the specified entity type.
 
         entity
             Entity type on which selection is based:
 
-            ALL - All entity types (default).
+            ALL
+                All entity types (default).
 
-            VOLU - Volumes.
+            VOLU
+                Volumes.
 
-            AREA - Areas.
+            AREA
+                Areas.
 
-            LINE - Lines.
+            LINE
+                Lines.
 
-            KP - Keypoints.
+            KP
+                Keypoints.
 
-            ELEM - Elements.
+            ELEM
+                Elements.
 
-            NODE - Nodes.
+            NODE
+                Nodes.
 
         Notes
         -----
@@ -99,23 +108,29 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of area select:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
         arkey
             Specifies whether all contained area lines must be selected [LSEL]:
 
-            0 - Select area if any of its lines are in the selected line set.
+            0
+                Select area if any of its lines are in the selected line set.
 
-            1 - Select area only if all of its lines are in the selected line set.
+            1
+                Select area only if all of its lines are in the selected line set.
 
         Notes
         -----
@@ -152,45 +167,56 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
-            S - Select a new set (default)
+            S
+                Select a new set (default)
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
-            ALL - Restore the full set.
+            ALL
+                Restore the full set.
 
-            NONE - Unselect the full set.
+            NONE
+                Unselect the full set.
 
-            INVE - Invert the current set (selected becomes unselected and vice versa).
+            INVE
+                Invert the current set (selected becomes unselected and vice versa).
 
-            STAT - Display the current select status.
+            STAT
+                Display the current select status.
 
 
         The following fields are used only with Type = S, R, A, or U:
 
         Item
-            Label identifying data. Valid item labels are shown in Table 105: ASEL - Valid Item and Component
-            Labels (p. 185). Some items also require a component label. If Item = PICK (or simply "P"), graphical
-            picking is enabled and all remaining command fields are ignored (valid only in the GUI). Defaults
-            to AREA.
+            Label identifying data. Valid item labels are shown in Table 105:
+            ASEL - Valid Item and Component Labels (p. 185). Some items also
+            require a component label. If Item = PICK (or simply "P"), graphical
+            picking is enabled and all remaining command fields are ignored
+            (valid only in the GUI). Defaults to AREA.
 
         Comp
-            Component of the item (if required). Valid component labels are shown in Table 105: ASEL - Valid
-            Item and Component Labels (p. 185).
+            Component of the item (if required). Valid component labels are
+            shown in Table 105: ASEL - Valid Item and Component Labels (p. 185).
 
         VMIN
-            Minimum value of item range. Ranges are area numbers, coordinate values, attribute numbers, etc.,
-            as appropriate for the item. A component name (as specified on the CM (p. 338) command) may
-            also be substituted for VMIN (VMAX and VINC are ignored). If Item = MAT, TYPE, REAL, or ESYS
-            and if VMIN is positive, the absolute value of Item is compared against the range for selection; if
-            VMIN is negative, the signed value of Item is compared. See the ALIST (p. 106) command for a
-            discussion of signed attributes.
+            Minimum value of item range. Ranges are area numbers, coordinate
+            values, attribute numbers, etc., as appropriate for the item. A
+            component name (as specified on the CM (p. 338) command) may also be
+            substituted for VMIN (VMAX and VINC are ignored). If Item = MAT,
+            TYPE, REAL, or ESYS and if VMIN is positive, the absolute value of
+            Item is compared against the range for selection; if VMIN is
+            negative, the signed value of Item is compared. See the ALIST (p.
+            106) command for a discussion of signed attributes.
 
         VMAX
             Maximum value of item range. VMAX defaults to VMIN.
@@ -202,8 +228,10 @@ class Selecting:
         KSWP
             Specifies whether only areas are to be selected:
 
-                - `kswp = 0` - Select areas only.
-                - `kswp = 1` - Select areas, as well as keypoints, lines, nodes, and elements associated with selected areas.
+                - `kswp = 0`
+                  Select areas only.
+                - `kswp = 1`
+                  Select areas, as well as keypoints, lines, nodes, and elements associated with selected areas.
 
             Valid only with Type = S.
 
@@ -272,16 +300,20 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of area select:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
         Notes
         -----
@@ -306,18 +338,23 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
-            S - Select a new set of labels.
+            S
+                Select a new set of labels.
 
-            A - Add labels to the current set.
+            A
+                Add labels to the current set.
 
-            U - Unselect (remove) labels from the current set.
+            U
+                Unselect (remove) labels from the current set.
 
-            ALL - Restore the full set of labels.
+            ALL
+                Restore the full set of labels.
 
-            STAT - Display the current select status.
+            STAT
+                Display the current select status.
 
         dof1, dof2, dof3, . . . , dof6
             Used only with Type = S, A, or U.  Valid structural labels:  UX,
@@ -393,18 +430,26 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
-            - S - Select a new set (default).
-            - R - Reselect a set from the current set.
-            - A - Additionally select a set and extend the current set.
-            - U - Unselect a set from the current set.
-            - ALL - Restore the full set.
-            - NONE - Unselect the full set.
-            - INVE - Invert the current set (selected becomes
-              unselected and vice versa).
-            - STAT - Display the current select status.
+            S
+                Select a new set (default).
+            R
+                Reselect a set from the current set.
+            A
+                Additionally select a set and extend the current set.
+            U
+                Unselect a set from the current set.
+            ALL
+                Restore the full set.
+            NONE
+                Unselect the full set.
+            INVE
+                Invert the current set (selected becomes
+                unselected and vice versa).
+            STAT
+                Display the current select status.
 
         item
             Label identifying data, see Table 110: ESEL - Valid Item
@@ -443,9 +488,12 @@ class Selecting:
         kabs
             Absolute value key:
 
-                - `kabs = 0` - Check sign of value during selection.
-                - `kabs = 1` - Use absolute value during selection (sign
-                  ignored).
+            `kabs = 0`
+                Check sign of value during selection.
+
+            `kabs = 1`
+                Use absolute value during selection (sign
+                ignored).
 
         Notes
         -----
@@ -532,13 +580,17 @@ class Selecting:
         type_
             Label identifying the type of element select:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
         Notes
         -----
@@ -560,13 +612,17 @@ class Selecting:
         type_
             Label identifying the type of element select:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
         Notes
         -----
@@ -590,41 +646,52 @@ class Selecting:
         type_
             Label identifying the type of element selected:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
         ekey
             Node set key:
 
-            0 - Select element if any of its nodes are in the
-            selected nodal set (default).
+            0
+                Select element if any of its nodes are in the
+                selected nodal set (default).
 
-            1 - Select element only if all of its nodes are in the
-            selected nodal set.
+            1
+                Select element only if all of its nodes are in the
+                selected nodal set.
 
         nodetype
             Label identifying type of nodes to consider when selecting:
 
-            ALL - Select elements considering all of their nodes (
-                  default).
+            ALL
+                Select elements considering all of their nodes (
+                default).
 
-            ACTIVE - Select elements considering only their active
-                     nodes. An active node is a node
-                     that contributes DOFs to the model.
+            ACTIVE
+                Select elements considering only their active
+                nodes. An active node is a node
+                that contributes DOFs to the model.
 
-            INACTIVE - Select elements considering only their
-                       inactive nodes (such as orientation or
-                       radiation nodes).
+            INACTIVE
+                Select elements considering only their
+                inactive nodes (such as orientation or
+                radiation nodes).
 
-            CORNER - Select elements considering only their corner
-                     nodes.
+            CORNER
+                Select elements considering only their corner
+                nodes.
 
-            MID - Select elements considering only their midside nodes.
+            MID
+                Select elements considering only their midside nodes.
 
         Notes
         -----
@@ -647,13 +714,17 @@ class Selecting:
         type_
             Label identifying the type of element selected:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
         Notes
         -----
@@ -694,7 +765,7 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
             S
@@ -750,8 +821,11 @@ class Selecting:
         KABS
             Absolute value key:
 
-                - `kabs = 0` - Check sign of value during selection.
-                - `kabs = 1` - Use absolute value during selection (sign ignored).
+                `kabs = 0`
+                    Check sign of value during selection.
+
+                `kabs = 1`
+                    Use absolute value during selection (sign ignored).
 
         Notes
         -----
@@ -808,16 +882,20 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of keypoint select:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
         Notes
         -----
@@ -833,16 +911,20 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of keypoint select:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
         Notes
         -----
@@ -883,24 +965,32 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
-            ALL - Restore the full set.
+            ALL
+                Restore the full set.
 
-            NONE - Unselect the full set.
+            NONE
+                Unselect the full set.
 
-            INVE - Invert the current set (selected becomes unselected and vice versa).
+            INVE
+                Invert the current set (selected becomes unselected and vice versa).
 
-            STAT - Display the current select status.
+            STAT
+                Display the current select status.
 
 
         The following fields are used only with Type = S, R, A, or U:
@@ -938,9 +1028,12 @@ class Selecting:
         KSWP
             Specifies whether only lines are to be selected:
 
-                - ``kswp=0`` - Select lines only.  ``kswp=1`` - Select lines,
-                - as well as keypoints, nodes, and elements associated with
-                - selected lines. Valid only with ``type="s"``.
+                ``kswp=0``
+                    Select lines only.
+
+                ``kswp=1``
+                    Select lines, as well as keypoints, nodes, and elements associated with
+                    selected lines. Valid only with ``type="s"``.
 
         Notes
         -----
@@ -995,16 +1088,20 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of line select:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
         Notes
         -----
@@ -1020,24 +1117,30 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of line select:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
         lskey
             Specifies whether all contained line keypoints must be selected
             [KSEL]:
 
-            0 - Select line if any of its keypoints are in the selected keypoint set.
+            0
+                Select line if any of its keypoints are in the selected keypoint set.
 
-            1 - Select line only if all of its keypoints are in the selected keypoint set.
+            1
+                Select line only if all of its keypoints are in the selected keypoint set.
 
         Notes
         -----
@@ -1074,24 +1177,32 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of select:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
-            ALL - Restore the full set.
+            ALL
+                Restore the full set.
 
-            NONE - Unselect the full set.
+            NONE
+                Unselect the full set.
 
-            INVE - Invert the current set (selected becomes unselected and vice versa).
+            INVE
+                Invert the current set (selected becomes unselected and vice versa).
 
-            STAT - Display the current select status.
+            STAT
+                Display the current select status.
 
 
         The following fields are used only with Type = S, R, A, or U:
@@ -1235,23 +1346,29 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of node select:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
         nkey
             Specifies whether only interior area nodes are to be selected:
 
-            0 - Select only nodes interior to selected areas.
+            0
+                Select only nodes interior to selected areas.
 
-            1 - Select all nodes (interior to area, interior to lines, and at keypoints)
+            1
+                Select all nodes (interior to area, interior to lines, and at keypoints)
                 associated with the selected areas.
 
         Notes
@@ -1282,34 +1399,45 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of node select:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
         nodetype
             Label identifying type of nodes to consider when selecting:
 
-            ALL - Select all nodes of the selected elements (default).
+            ALL
+                Select all nodes of the selected elements (default).
 
-            ACTIVE - Select only the active nodes. An active node is a node that contributes DOFs to
+            ACTIVE
+                Select only the active nodes. An active node is a node that contributes DOFs to
                      the model.
 
-            INACTIVE - Select only inactive  nodes (such as orientation or radiation).
+            INACTIVE
+                Select only inactive  nodes (such as orientation or radiation).
 
-            CORNER - Select only corner nodes.
+            CORNER
+                Select only corner nodes.
 
-            MID - Select only midside nodes.
+            MID
+                Select only midside nodes.
 
-            POS - Select nodes in position Num.
+            POS
+                Select nodes in position Num.
 
-            FACE - Select nodes on face Num.
+            FACE
+                Select nodes on face Num.
 
         num
             Position or face number for NodeType = POS or FACE.
@@ -1345,16 +1473,20 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of node select:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
         Notes
         -----
@@ -1374,23 +1506,29 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of node select:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
         nkey
             Specifies whether only interior line nodes are to be selected:
 
-            0 - Select only nodes interior to selected lines.
+            0
+                Select only nodes interior to selected lines.
 
-            1 - Select all nodes (interior to line and at keypoints)
+            1
+                Select all nodes (interior to line and at keypoints)
                 associated with the selected lines.
 
         Notes
@@ -1411,16 +1549,20 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of node select:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
         nkey
             Specifies whether only interior volume nodes are to be selected:
@@ -1447,23 +1589,30 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying type of select. Because PARTSEL is a command
             macro, the label must be enclosed in single quotes.
 
-            'S' - Select a new set (default).
+            'S'
+                Select a new set (default).
 
-            'R' - Reselect a set from the current set.
+            'R'
+                Reselect a set from the current set.
 
-            'A' - Additionally select a set and extend the current set.
+            'A'
+                Additionally select a set and extend the current set.
 
-            'U' - Unselect a set from the current set.
+            'U'
+                Unselect a set from the current set.
 
-            'ALL' - Select all parts.
+            'ALL'
+                Select all parts.
 
-            'NONE' - Unselect all parts.
+            'NONE'
+                Unselect all parts.
 
-            'INVE' - Invert the current selected set.
+            'INVE'
+                Invert the current selected set.
 
         Notes
         -----
@@ -1536,24 +1685,32 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of volume select:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
-            ALL - Restore the full set.
+            ALL
+                Restore the full set.
 
-            NONE - Unselect the full set.
+            NONE
+                Unselect the full set.
 
-            INVE - Invert the current set (selected becomes unselected and vice versa).
+            INVE
+                Invert the current set (selected becomes unselected and vice versa).
 
-            STAT - Display the current select status.
+            STAT
+                Display the current select status.
 
         item : str, optional
             Label identifying data. Valid item labels are shown in the table
@@ -1583,10 +1740,12 @@ class Selecting:
         kswp : int, optional
             Specifies whether only volumes are to be selected:
 
-            - ``kswp=0`` - Select volumes only.
-            - ``kswp=1`` - Select volumes, as well as keypoints, lines, areas,
-              nodes, and elements associated with selected volumes. Valid only
-              with Type = S.
+            ``kswp=0``
+                Select volumes only.
+            ``kswp=1``
+                Select volumes, as well as keypoints, lines, areas,
+                nodes, and elements associated with selected volumes. Valid only
+                with Type = S.
 
         Notes
         -----
@@ -1633,24 +1792,30 @@ class Selecting:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Label identifying the type of volume select:
 
-            S - Select a new set (default).
+            S
+                Select a new set (default).
 
-            R - Reselect a set from the current set.
+            R
+                Reselect a set from the current set.
 
-            A - Additionally select a set and extend the current set.
+            A
+                Additionally select a set and extend the current set.
 
-            U - Unselect a set from the current set.
+            U
+                Unselect a set from the current set.
 
         vlkey
             Specifies whether all contained volume areas must be selected
             [ASEL]:
 
-            0 - Select volume if any of its areas are in the selected area set.
+            0
+                Select volume if any of its areas are in the selected area set.
 
-            1 - Select volume only if all of its areas are in the selected area set.
+            1
+                Select volume only if all of its areas are in the selected area set.
 
         Notes
         -----

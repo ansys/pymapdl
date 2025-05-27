@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -35,7 +35,7 @@ mapdl.prep7()
 mapdl.shpp("SUMM")
 
 # specify material properties
-# using aprox values for AISI 5000 Series Steel
+# using approximated values for AISI 5000 Series Steel
 mapdl.units("SI")
 mapdl.mp("EX", 1, 200e9)  # Elastic moduli in Pa (kg/(m*s**2))
 mapdl.mp("DENS", 1, 7700)  # Density in kg/m3

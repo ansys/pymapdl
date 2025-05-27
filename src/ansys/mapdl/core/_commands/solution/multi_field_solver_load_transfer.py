@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -40,7 +40,7 @@ class MultiFieldSolverLoadTransfer:
 
         Parameters
         ----------
-        type\_
+        type\\_
             Set to SURF for a surface load transfer. Only surface load
             transfers are available for MFX.
 

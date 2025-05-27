@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,7 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import logging
 import re
+from unittest.mock import patch
 
 import numpy as np
 import pytest
@@ -28,22 +30,21 @@ import pytest
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.parameters import interp_star_status
 
-parm_status = """PARAMETER STATUS- PORT  (     12 PARAMETERS DEFINED)
+GOLDEN_TESTS = {
+    "parameter status": """PARAMETER STATUS- PORT  (     12 PARAMETERS DEFINED)
                   (INCLUDING        3 INTERNAL PARAMETERS)
 
  NAME                              VALUE                        TYPE  DIMENSIONS
- PORT                              50054.0000                  SCALAR"""
-
-arr_status = """PARAMETER STATUS- ASDF  (      5 PARAMETERS DEFINED)
+ PORT                              50054.0000                  SCALAR""",
+    "array status": """PARAMETER STATUS- ASDF  (      5 PARAMETERS DEFINED)
                   (INCLUDING        3 INTERNAL PARAMETERS)
 
       LOCATION                VALUE
         1       1       1    1.00000000
         2       1       1    2.00000000
         3       1       1    3.00000000
-        4       1       1    4.00000000"""
-
-arr3d_status = """
+        4       1       1    4.00000000""",
+    "array 3d status": """
 PARAMETER STATUS- MYARR  (      6 PARAMETERS DEFINED)
                   (INCLUDING        3 INTERNAL PARAMETERS)
 
@@ -74,17 +75,15 @@ PARAMETER STATUS- MYARR  (      6 PARAMETERS DEFINED)
         3       2       3    3.00000000
         1       3       3    0.00000000
         2       3       3    0.00000000
-        3       3       3    0.00000000"""
-
-strarr_status = """PARAMETER STATUS- MYSTR3  (     12 PARAMETERS DEFINED)
+        3       3       3    0.00000000""",
+    "string array status": """PARAMETER STATUS- MYSTR3  (     12 PARAMETERS DEFINED)
                   (INCLUDING        3 INTERNAL PARAMETERS)
        96       1       1  aqzzzxcv zx zxcv   zxcv
 
        96       2       1  qwer wer qwer
 
-       96       3       1  zxcv"""
-
-gen_status = """ABBREVIATION STATUS-
+       96       3       1  zxcv""",
+    "general status": """ABBREVIATION STATUS-
 
   ABBREV    STRING
   SAVE_DB   SAVE
@@ -104,7 +103,8 @@ gen_status = """ABBREVIATION STATUS-
  PGFZJK_DIM                        20.0000000                  SCALAR
  PGFZJK_ROWDIM                     20.0000000                  SCALAR
  PORT                              50054.0000                  SCALAR
- STRARRAY                                   STRING ARRAY      96       1       1"""
+ STRARRAY                                   STRING ARRAY      96       1       1""",
+}
 
 
 @pytest.mark.parametrize(
@@ -118,7 +118,7 @@ gen_status = """ABBREVIATION STATUS-
         1e61,
     ],
 )
-def test__get_parameter_array(mapdl, number):
+def test__get_parameter_array(mapdl, cleared, number):
     name = "param_array"
 
     # Testing 1D arrays
@@ -134,11 +134,20 @@ def test__get_parameter_array(mapdl, number):
     assert np.allclose(array, mapdl.parameters._get_parameter_array(name, shape))
 
     # High number
-    with pytest.raises(MapdlRuntimeError):
-        shape = (100, 100)
-        array = np.ones(shape) * number
-        mapdl.load_array(name=name, array=array)
-        mapdl.parameters._get_parameter_array(name, shape)
+    shape = (100, 100)
+    array = np.ones(shape) * number
+    mapdl.load_array(name=name, array=array)
+    assert np.allclose(array, mapdl.parameters._get_parameter_array(name, shape))
+
+    # Random number
+    array = np.random.rand(*shape)
+    mapdl.load_array(name=name, array=array)
+    assert np.allclose(array, mapdl.parameters._get_parameter_array(name, shape))
+
+    # Random big number
+    array = np.random.rand(*shape) * number
+    mapdl.load_array(name=name, array=array)
+    assert np.allclose(array, mapdl.parameters._get_parameter_array(name, shape))
 
 
 def parameters_name(mapdl, func, par_name):
@@ -182,7 +191,7 @@ def parameters_name(mapdl, func, par_name):
         "array3d_(1,1,1)",
     ],
 )
-def test_parameters_name(mapdl, func, par_name):
+def test_parameters_name(mapdl, cleared, func, par_name):
     parameters_name(mapdl, func, par_name)
 
 
@@ -281,13 +290,13 @@ def test_parameters_name(mapdl, func, par_name):
         ),
     ],
 )
-def test_parameters_name_error(mapdl, func, par_name):
+def test_parameters_name_error(mapdl, cleared, func, par_name):
     with pytest.raises(ValueError):
         parameters_name(mapdl, func, par_name)
 
 
 def test_contain_iter(mapdl, cleared):
-    mapdl.clear()  # to check that #1107 is solved
+    mapdl.finish()  # to check that #1107 is solved
     mapdl.parameters["TWO"] = 2.0
     assert 2.0 == mapdl.parameters["TWO"]
     assert "TWO" in mapdl.parameters
@@ -299,7 +308,7 @@ def test_contain_iter(mapdl, cleared):
 
 
 @pytest.mark.parametrize("number", [1 / 3, 1 / 7, 0.0181681816816816168168168])
-def test_double_parameter_get(mapdl, number):
+def test_double_parameter_get(mapdl, number, cleared):
     # Running grpc method
     mapdl.parameters["value"] = number
 
@@ -324,18 +333,18 @@ def test_double_parameter_get(mapdl, number):
     mapdl._name = mapdl_name
 
 
-def test_parameter_delete_raise(mapdl):
+def test_parameter_delete_raise(mapdl, cleared):
     with pytest.raises(KeyError, match="does not exist"):
         del mapdl.parameters["not-a-parm"]
 
 
 @pytest.mark.parametrize(
-    "status,check",
+    "status_key,check",
     [
-        (parm_status, 50054),
-        (arr_status, np.array([1, 2, 3, 4])),
+        ("parameter status", 50054),
+        ("array status", np.array([1, 2, 3, 4])),
         (
-            arr3d_status,
+            "array 3d status",
             np.array(
                 [
                     [[1.0, 1.0, 1.0], [0.0, 0.0, 1.0], [0.0, 0.0, 0.0]],
@@ -344,11 +353,12 @@ def test_parameter_delete_raise(mapdl):
                 ]
             ),
         ),
-        (strarr_status, ["aqzzzxcv zx zxcv   zxcv", "qwer wer qwer", "zxcv"]),
-        (gen_status, None),
+        ("string array status", ["aqzzzxcv zx zxcv   zxcv", "qwer wer qwer", "zxcv"]),
+        ("general status", None),
     ],
 )
-def test_interp_star_status(status, check):
+def test_interp_star_status(status_key, check):
+    status = GOLDEN_TESTS[status_key]
     output = interp_star_status(status)
     if len(output) == 1:
         name = list(output.keys())[0]
@@ -368,7 +378,7 @@ def test_interp_star_status(status, check):
         assert output["PORT"]["value"] == 50054.0
 
 
-def test_str_arrays(mapdl):
+def test_str_arrays(mapdl, cleared):
     mapdl.run("*dim, mystrarr, string, 80")
     mapdl.run("mystrarr(1) = 'hello there!'")
 
@@ -384,7 +394,7 @@ def test_str_arrays(mapdl):
     ]
 
 
-def test_3d_array(mapdl):
+def test_3d_array(mapdl, cleared):
     mapdl.dim("myarr", "array", 2, 2, 2)
     mapdl.run("myarr(1,1,1)= 100")
     mapdl.run("myarr(1,1,2)= 200")
@@ -397,10 +407,10 @@ def test_3d_array(mapdl):
     )
 
 
-def test_parameter_with_spaces(mapdl):
+def test_parameter_with_spaces(mapdl, cleared):
     string_ = "DEV:F10X, front weights     "
     mapdl.run(f"*SET,SIMULATION,'{string_}'")
-    mapdl.parsav()
+    mapdl.parsav("all", fname="file", ext="parm")
     mapdl.clear()
     mapdl.parres("NEW", fname="file", ext="parm")
     assert mapdl.starstatus()
@@ -409,7 +419,7 @@ def test_parameter_with_spaces(mapdl):
     assert string_.strip() == mapdl.parameters["SIMULATION"]
 
 
-def test_parameters_keys(mapdl):
+def test_parameters_keys(mapdl, cleared):
     mapdl.parameters["MYPAR"] = 1234
 
     assert "MYPAR" in list(mapdl.parameters.keys())
@@ -451,7 +461,7 @@ def test_non_existing_parameter(mapdl, cleared):
         mapdl.parameters["A"]
 
 
-def test_non_interactive(mapdl):
+def test_non_interactive(mapdl, cleared):
     mapdl.parameters["asdf"] = 2
     with pytest.raises(MapdlRuntimeError):
         with mapdl.non_interactive:
@@ -461,3 +471,104 @@ def test_non_interactive(mapdl):
         mapdl.parameters["qwer"] = 3
 
     assert mapdl.parameters["qwer"] == 3
+
+
+@pytest.mark.parametrize("value", [121, 299])
+def test_failing_get_routine(mapdl, caplog, value):
+    from ansys.mapdl.core.parameters import ROUTINE_MAP
+
+    prev_level = mapdl.logger.logger.level
+    mapdl.logger.setLevel(logging.INFO)
+
+    with patch("ansys.mapdl.core.mapdl_extended._MapdlExtended.get_value") as mck:
+        mck.return_value = value
+        with caplog.at_level(logging.INFO):
+            routine = mapdl.parameters.routine
+
+        mck.assert_called_once()
+
+    txt = str(caplog.text)
+    assert f"Getting a valid routine number failed." in txt
+    assert f"Routine obtained is {value}. Executing 'FINISH'." in txt
+    assert routine == ROUTINE_MAP[0]
+
+    mapdl.logger.setLevel(prev_level)
+
+
+@pytest.mark.parametrize(
+    "parameter",
+    [
+        "asdf",
+        "32_chars_length",
+        1,
+        1.0,
+        np.array([1, 2, 3]),
+        np.array([1, 3])[0],
+        np.array([1.0, 2.2, 3.5]),
+        np.array([1.03, 3.9])[0],
+        np.array([1.4, 2.3], dtype=np.int32),
+        np.array([1.4, 2.3], dtype=np.int32)[0],
+        np.array([1.4, 2.3], dtype=np.int64),
+        np.array([1.4, 2.3], dtype=np.int64)[0],
+    ],
+)
+def test_parameter_types(mapdl, cleared, parameter):
+    mapdl.parameters["temp_arr"] = parameter
+
+    if isinstance(parameter, np.ndarray):
+        # Reshaping arrays until #3717 is closed
+        assert np.allclose(
+            parameter.reshape((-1, 1)), mapdl.parameters["temp_arr"].reshape((-1, 1))
+        )
+    else:
+        assert parameter == mapdl.parameters["temp_arr"]
+
+    if isinstance(parameter, (int, np.integer)):
+        # All numbers in MAPDL are stored as float.
+        assert isinstance(mapdl.parameters["temp_arr"], float)
+
+    elif isinstance(parameter, (float, np.floating)):
+        assert isinstance(mapdl.parameters["temp_arr"], float)
+
+    else:
+        assert isinstance(mapdl.parameters["temp_arr"], type(parameter))
+
+
+@pytest.mark.parametrize("use_load_table", [True, False])
+def test_table_interpolation(mapdl, use_load_table):
+    file_name = "table.txt"
+
+    table = """
+    0,1,2,3,4
+    10, 0.1, 0.2, 0.3, 0.4
+    20, 0.2, 0.3, 0.4, 0.5
+    30, 0.3, 0.4, 0.5, 0.6
+    40, 0.4, 0.5, 0.6, 0.7
+    """
+
+    with open(file_name, "w") as fid:
+        fid.write(table)
+
+    if use_load_table:
+        table_data = np.genfromtxt(file_name, delimiter=",")
+        mapdl.load_table("table", table_data, "time")
+    else:
+        mapdl.upload(file_name)
+        mapdl.run("*DIM,table,TABLE,4,4,,time,,,")
+        mapdl.run(f"*TREAD,table,{file_name},,,")
+        mapdl.starstatus("table")
+
+    mapdl.run("tmp_ = table(10, 1)")
+    assert np.allclose(mapdl.parameters["tmp_"], 0.100000000)
+    mapdl.run("tmp_ = table(15, 1)")  # Interpolated!
+    assert np.allclose(mapdl.parameters["tmp_"], 0.15000000000)
+    mapdl.run("tmp_ = table(20,1)")
+    assert np.allclose(mapdl.parameters["tmp_"], 0.2000000000)
+    mapdl.run("tmp_ = table(10,1)")
+    assert np.allclose(mapdl.parameters["tmp_"], 0.1000000000)
+    mapdl.run("tmp_ = table(10, 1.5)")  # Interpolated!
+    assert np.allclose(mapdl.parameters["tmp_"], 0.15000000000)
+    mapdl.run("tmp_ = table(10,2)")
+    assert np.allclose(mapdl.parameters["tmp_"], 0.2000000000)
+    mapdl.run("tmp_ = table(15,1.5)")  # Interpolated!
+    assert np.allclose(mapdl.parameters["tmp_"], 0.20000000000)

@@ -2,7 +2,7 @@
    <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://github.com/ansys/pymapdl/blob/main/doc/source/_static/logo_dark.png">
       <source media="(prefers-color-scheme: light)" srcset="https://github.com/ansys/pymapdl/blob/main/doc/source/_static/logo_light.png">
-      <img alt="PyMAPDL Logo" src="https://github.com/ansys/pymapdl/blob/main/doc/source/_static/logo_light.png" width="70%">
+      <img alt="PyMAPDL Logo" src="https://raw.githubusercontent.com/ansys/pymapdl/blob/main/doc/source/_static/logo_light.png" width="70%">
    </picture>
 </p>
 
@@ -39,24 +39,7 @@ Here's a quick demo of PyMAPDL within Visual Studio Code:
 ![landing_demo](https://github.com/ansys/pymapdl/raw/main/doc/source/_static/landing_page_demo.gif)
 
 PyMAPDL works within Jupyter Notebooks, the standard Python console,
-or in batch mode on Windows, Linux, and even Mac OS.
-
-## Try it!
-
-You can try PyMAPDL library by launching a PyMAPDL GitHub Codespace!
-This environment has already everything in place for you to start using PyMAPDL :smile:
-
-<p align="center">
-   <a href="https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fdevcontainer.json">
-   <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/-Open%20GitHub%20Codespace-ffffff?style=flat-square&logo=github&logoColor=000000">
-      <source media="(prefers-color-scheme: light)" srcset="https://img.shields.io/badge/-Open%20GitHub%20Codespace-333?style=flat-square&logo=github">
-      <img alt="PyMAPDL Logo" src="https://github.com/ansys/pymapdl/blob/main/doc/source/_static/logo_light.png" tar>
-   </picture>
-   </a>
-</p>
-
-More information can be found in [develop on codespaces](https://mapdl.docs.pyansys.com/version/dev/getting_started/codespaces.html).
+or in batch mode on Windows, Linux, and even macOS.
 
 ## Documentation and issues
 
@@ -67,8 +50,7 @@ In the upper right corner of the documentation's title bar, there is an option f
 viewing the documentation for the latest stable release to viewing the documentation for the
 development version or previously released versions.
 
-You can also [view](https://cheatsheets.docs.pyansys.com/pymapdl_cheat_sheet.png) or
-[download](https://cheatsheets.docs.pyansys.com/pymapdl_cheat_sheet.pdf) the
+You can also [download](https://mapdl.docs.pyansys.com/version/stable/_static/cheat_sheet.pdf) the
 PyMAPDL cheat sheet. This one-page reference provides syntax rules and commands
 for using PyMAPDL. 
 
@@ -87,6 +69,11 @@ Unfortunately, this team cannot answer specific library questions or issues. You
 use the [PyMAPDL Issues](https://github.com/ansys/pymapdl/issues)
 and [PyMAPDL Discussions](https://github.com/ansys/pymapdl/discussions) pages
 for raising issues, request new features, and asking questions.
+
+You can contribute to PyMAPDL by developing new features, fixing bugs, improving the documentation,
+fixing typos, writing examples, etc.
+To learn how to contribute to PyMAPDL, visit [Contributing section](https://mapdl.docs.pyansys.com/version/stable/getting_started/contribution.html).
+
 
 ## Project transition -  legacy support
 
@@ -120,14 +107,13 @@ correct citation.  For example, the BibTex citation is:
 ```bibtex
 @software{alexander_kaszynski_2020_4009467,
   author       = {Alexander Kaszynski},
-  title        = {{pyansys: Python Interface to MAPDL and Associated 
-                    Binary and ASCII Files}},
-  month        = aug,
-  year         = 2020,
+  title        = {{pyansys: Pythonic interface to MAPDL}},
+  month        = nov,
+  year         = 2021,
   publisher    = {Zenodo},
-  version      = {0.43.2},
-  doi          = {10.5281/zenodo.4009467},
-  url          = {https://doi.org/10.5281/zenodo.4009467}
+  version      = {0.60.3},
+  doi          = {10.5281/zenodo.4009466},
+  url          = {https://doi.org/10.5281/zenodo.4009466}
 }
 ```
 
@@ -136,7 +122,7 @@ the most recent citation.
 
 ## License and acknowledgments
 
-[PyMAPDL](https://mapdl.docs.pyansys.com/version/stable/) is licensed under
+[PyMAPDL](https://mapdl.docs.pyansys.com/) is licensed under
 [the MIT license](https://github.com/ansys/pymapdl/blob/main/LICENSE).
 
 [ansys-mapdl-core](https://pypi.org/project/ansys-mapdl-core/) package
@@ -144,7 +130,7 @@ makes no commercial claim over Ansys whatsoever.
 This tool extends the functionality of ``MAPDL`` by adding a Python
 interface to the MAPDL service without changing the
 core behavior or license of the original software.  The use of the
-interactive APDL control of [PyMAPDL](https://mapdl.docs.pyansys.com/version/stable/)
+interactive APDL control of [PyMAPDL](https://mapdl.docs.pyansys.com/)
 requires a legally licensed local copy of Ansys.
 
 To get a copy of Ansys, visit [Ansys](https://www.ansys.com/).

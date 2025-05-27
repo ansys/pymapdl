@@ -7,10 +7,8 @@ updates:
       interval: "weekly"
     labels:
       - "maintenance"
-    assignees:
-      - "ansys/pymapdl-maintainers"
     commit-message:
-      prefix: "MAINT"
+      prefix: "ci"
     groups:
        actions:
           patterns:
@@ -20,21 +18,18 @@ updates:
     package-ecosystem: "pip" # See documentation for possible values
     insecure-external-code-execution: allow
     schedule:
-      interval: "weekly"      
+      interval: "weekly"
       day: "friday"
       time: "00:00"
     labels:
-      - "Maintenance"
-      - "Dependencies"
-    assignees:
-      - "ansys/pymapdl-maintainers"
+      - "maintenance"
+      - "dependencies"
     commit-message:
-      prefix: "MAINT"
+      prefix: "build"
     groups:
        minimal:
           patterns:
             - "ansys-api-mapdl"
-            - "importlib-metadata"
             - "numpy"
             - "platformdirs"
             - "psutil"
@@ -48,15 +43,16 @@ updates:
 
        core:
           patterns:
-            - "*ansys*"
+            - "ansys*"
             - "click"
             - "matplotlib"
             - "pexpect"
             - "pyiges"
-            - "pyvista"
+            - "ansys-tools-visualization-interface"
             - "scipy"
             - "tqdm"
             - "vtk"
+            - "tabulate"
 
           exclude-patterns:
             - "ansys-api-mapdl"
@@ -88,61 +84,3 @@ updates:
        jupyter:
           patterns:
             - "ipywidgets"
-
-
-  - directory: "/.devcontainer" # Location of package manifests
-    package-ecosystem: "pip" # See documentation for possible values
-    insecure-external-code-execution: allow
-    schedule:
-      interval: "weekly"      
-      day: "friday"
-      time: "00:00"
-    labels:
-      - "Maintenance"
-      - "Dependencies"
-    assignees:
-      - "ansys/pymapdl-maintainers"
-    commit-message:
-      prefix: "MAINT"
-    groups:
-       all:
-          patterns:
-            - *
-
-  - directory: "/.devcontainer/codespaces-docs" # Location of package manifests
-    package-ecosystem: "pip" # See documentation for possible values
-    insecure-external-code-execution: allow
-    schedule:
-      interval: "weekly"      
-      day: "friday"
-      time: "00:00"
-    labels:
-      - "Maintenance"
-      - "Dependencies"
-    assignees:
-      - "ansys/pymapdl-maintainers"
-    commit-message:
-      prefix: "MAINT"
-    groups:
-       all:
-          patterns:
-            - *
-
-  - directory: "/.devcontainer/devcontainer-local" # Location of package manifests
-    package-ecosystem: "pip" # See documentation for possible values
-    insecure-external-code-execution: allow
-    schedule:
-      interval: "weekly"      
-      day: "friday"
-      time: "00:00"
-    labels:
-      - "Maintenance"
-      - "Dependencies"
-    assignees:
-      - "ansys/pymapdl-maintainers"
-    commit-message:
-      prefix: "MAINT"
-    groups:
-       all:
-          patterns:
-            - *

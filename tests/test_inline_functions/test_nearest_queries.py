@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -20,8 +20,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import pytest
 
-class TestNearestEntityQueries:
+from conftest import TestClass, create_geometry, get_details_of_nodes
+
+
+class TestNearestEntityQueries(TestClass):
+
+    @pytest.fixture(scope="class")
+    def box_geometry(self, mapdl):
+        areas, keypoints = create_geometry(mapdl)
+        q = mapdl.queries
+        return q, keypoints, areas, get_details_of_nodes(mapdl)
+
     def test_nnear(self, box_geometry):
         q, kps, areas, nodes = box_geometry
         nearest_node = q.nnear(1)

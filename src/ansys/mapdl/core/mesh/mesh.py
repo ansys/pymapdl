@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -112,7 +112,7 @@ def _parse_vtk(
     """
     if not mesh._has_nodes or not mesh._has_elements:
         # warnings.warn('Missing nodes or elements.  Unable to parse to vtk')
-        return
+        return pv.UnstructuredGrid()
 
     etype_map = ETYPE_MAP
     if allowable_types is not None:
@@ -191,17 +191,15 @@ def _parse_vtk(
     grid.cell_data["ansys_elem_type_num"] = mesh.etype
 
     # store node angles
-    if angles is not None:
-        if angles.shape[1] == 3:
-            grid.point_data["angles"] = angles
+    if angles is not None and angles.shape[1] == 3:
+        grid.point_data["angles"] = angles
 
     if not null_unallowed:
         grid = grid.extract_cells(grid.celltypes != 0)
 
-    if force_linear:
-        # only run if the grid has points or cells
-        if grid.n_points:
-            grid = grid.linear_copy()
+    # only run if the grid has points or cells
+    if force_linear and grid.n_points:
+        grid = grid.linear_copy()
 
     # map over element types
     # Add tracker for original node numbering
@@ -240,7 +238,7 @@ def fix_missing_midside(cells, nodes, celltypes, offset, angles, nnum):
     unique_nodes, idx_a, idx_b = unique_rows(temp_nodes[nnodes:])
 
     # rewrite node numbers
-    cells[mask] = idx_b + nnodes
+    cells[mask] = (idx_b + nnodes).ravel()
     nextra = idx_a.shape[0]  # extra unique nodes
     nodes_new = nodes_new[: nnodes + nextra]
     nodes_new[nnodes:] = unique_nodes

@@ -10,25 +10,51 @@ This section provides a general overview of PyMAPDL and how you use it.
    This toctreemust be a top level index to get it to show up in
    pydata_sphinx_theme
 
+
 .. toctree::
    :maxdepth: 1
    :hidden:
+   :caption: Basic
 
    mapdl
-   convert
    mesh_geometry
    plotting
    parameters
    components
    post
+   troubleshoot
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Intermediate
+
    cli
+   convert
    database
    math
    pool
+
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: Advanced
+
    xpl
    upf
    krylov
-   troubleshoot
+
+.. toctree::
+   :maxdepth: 1
+   :hidden:
+   :caption: High performance computing
+
+   hpc/introduction
+   hpc/settings
+   hpc/pymapdl
+   hpc/examples
+   hpc/troubleshooting
 
 
 PyMAPDL overview
@@ -103,7 +129,8 @@ various advanced methods to visualize, script, and interact with MAPDL, see
 
 
 Calling MAPDL Pythonically
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+==========================
+
 MAPDL functions can be called directly from an instance of
 :class:`Mapdl <ansys.mapdl.core.mapdl.MapdlBase>` in a Pythonic manner. This is
 to simplify calling Ansys, especially when inputs are variables within

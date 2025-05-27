@@ -1,0 +1,278 @@
+---
+title: PyMAPDL cheat sheet
+format: cheat_sheet-pdf
+params:
+  version: main
+footer: PyMAPDL
+footerlinks:
+  - urls: 'https://mapdl.docs.pyansys.com/version/stable/'
+    text: Documentation
+  - urls: 'https://mapdl.docs.pyansys.com/version/stable/getting_started/index.html'
+    text: Getting started
+  - urls: 'https://mapdl.docs.pyansys.com/version/stable/examples.html'
+    text: Examples
+  - urls: 'https://mapdl.docs.pyansys.com/version/stable/api/index.html'
+    text: API reference
+  - urls: 'https://github.com/ansys/pymapdl/discussions'
+    text: Discussions
+  - urls: 'https://github.com/ansys/pmapdl/issues'
+    text: 'Issues'
+execute:
+  output: false
+  eval: true
+
+latex-clean: true
+latex-auto-install: true
+jupyter:
+  jupytext:
+    text_representation:
+      extension: .qmd
+      format_name: quarto
+      format_version: '1.0'
+      jupytext_version: 1.16.1
+  kernelspec:
+    display_name: Python 3 (ipykernel)
+    language: python
+    name: python3
+---
+
+# Connect to MAPDL remote session
+
+Launch and connect to MAPDL. You can specify the version you want to use with
+``version`` argument.
+```{python}
+#| eval: false
+from ansys.mapdl.core import launch_mapdl
+mapdl = launch_mapdl(version=242)
+```
+
+Exit a session
+```{python}
+#| eval: false
+mapdl.exit()
+```
+
+Connect to an existing instance at IP address ``192.168.1.30`` and port ``50001``:
+```{python}
+#| eval: false
+mapdl = launch_mapdl(start_instance=False, ip='192.168.1.30', port=50001)
+```
+
+```{python}
+#| echo: false
+from ansys.mapdl.core import launch_mapdl
+mapdl = launch_mapdl()
+```
+
+Create and exit a pool of instances:
+```{python}
+#| eval: false
+# Create a pool of 10 instances
+from ansys.mapdl.core import pool
+mapdl_pool = pool.MapdlPool(10)
+# Exit the pool
+mapdl_pool.exit()
+```
+
+# PyMAPDL CLI
+
+Access MAPDL instances through CLI
+```{python}
+#| eval: false
+# Start an MAPDL instance at port ``50051``
+pymapdl start --port 50051
+# List the current MAPDL instances and processes
+pymapdl list
+# Stop all the MAPDL instances
+pymapdl stop --all
+```
+
+# PyMAPDL commands
+
+PyMAPDL commands are Python statements that act as a
+wrapper for APDL commands. For example: ``ESEL,s,type,1`` 
+is translated as
+```{python}
+#| echo: false
+mapdl.clear()
+```
+```{python}
+mapdl.esel('s', 'type', vmin=1)
+```
+
+Help for the MAPDL class functions is accessible with:
+```{python}
+help(mapdl.esel)
+```
+
+Most of the time, commands that start with \* or \/ have these characters
+removed:
+```{python}
+#| eval: false
+mapdl.prep7() # /PREP7
+mapdl.get() # *GET
+```
+
+Load arrays from Python to MAPDL:
+```{python}
+#| echo: false
+mapdl.clear()
+```
+```{python}
+import numpy as np
+np_array = np.array([[1,2,3], [4,5,6]])
+mapdl.load_array("array_name", np_array)
+```
+
+Write parameters and access from or to the MAPDL database:
+```{python}
+# Create a parameter from a NumPy array
+mapdl.parameters['my_np_param'] = np_array
+# Save a parameter to a NumPy array
+saved_np_array = mapdl.parameters['my_np_param']
+```
+
+Access to specific model entity values with ``get_array`` and 
+`` get_value``.
+```{python}
+# List the current selected node numbers
+mapdl.get_array('NODE', item1='NLIST')
+# Get the number of selected nodes
+total_node = mapdl.get_value(entity='node', item1='count')
+```
+
+# Convert APDL script to Python files
+
+An existing APDL script can be converted to PyMAPDL format
+with the following commands:
+```{python}
+#| eval: false
+import ansys.mapdl.core as pymapdl
+pymapdl.convert_script(
+  "mapdl_script.dat", "pymapdl_script.py"
+)
+```
+
+# Mesh and geometry of a model
+
+Store the finite element mesh as a 
+[VTK UnstructuredGrid data](https://vtk.org/doc/nightly/html/classvtkUnstructuredGrid.html)
+object:
+
+```{python}
+#| echo: false
+#####################################################################
+# Hidden example for testing purpose (3d_plate_thermal.py)
+# ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+mapdl.clear()
+
+# Create a simple beam, specify the material properties, and mesh it.
+mapdl.prep7()
+mapdl.mp("kxx", 1, 45)
+mapdl.et(1, 90)
+mapdl.block(-0.3, 0.3, -0.46, 1.34, -0.2, -0.2 + 0.02)
+mapdl.vsweep(1)
+
+# Set the thermal boundary conditions
+mapdl.asel("S", vmin=3)
+mapdl.nsla()
+mapdl.d("all", "temp", 5)
+mapdl.asel("S", vmin=4)
+mapdl.nsla()
+mapdl.d("all", "temp", 100)
+out = mapdl.allsel()
+
+mapdl.vsweep(1)
+```
+
+```{python}
+grid = mapdl.mesh.grid
+```
+
+Save element and node numbers to Python arrays with
+the ``mapdl.mesh`` and the ``mapdl.geometry`` classes.
+
+
+```{python}
+# Get an array of the nodal coordinates
+nodes = mapdl.mesh.nodes
+# Save node numbers of selected nodes to an array
+node_num = mapdl.mesh.nnum
+# Save volume numbers of selected nodes to an array
+volum_numbers = mapdl.geometry.vnum
+# Save keypoint numbers of selected nodes to an array
+keypoints = mapdl.geometry.keypoints
+```
+
+# Solve an analysis
+
+```{python}
+mapdl.solution()
+mapdl.solve()
+mapdl.finish()
+```
+
+# Post-process results
+
+The
+[PostProcessing](https://mapdl.docs.pyansys.com/version/stable/api/_autosummary/ansys.mapdl.core.post.PostProcessing.html#ansys.mapdl.core.post.PostProcessing)
+class is used for plotting and saving results to NumPy arrays.
+
+```{python}
+mapdl.post1()
+mapdl.set(1, 1)
+mapdl.allsel()
+
+# Plot nodal temperatures
+mapdl.post_processing.plot_nodal_temperature()
+# Save nodal temperatures to a Python array
+nodal_temp= mapdl.post_processing.nodal_temperature()
+```
+
+You can store the command output following the 
+[Postprocessing object methods](https://mapdl.docs.pyansys.com/version/stable/user_guide/post.html#postprocessing-object-methods):
+```{python}
+cmd = mapdl.prnsol("TEMP")
+cmd.to_list()
+```
+
+# Create nice plots
+
+Use [PyVista](https://docs.pyvista.org/) to interpolate data, save results
+and store them in the underlying
+[UnstructuredGrid](https://docs.pyvista.org/api/core/_autosummary/pyvista.unstructuredgrid#)
+object:
+
+```{python}
+from pyvista import Plotter
+pl = Plotter()
+pm = mapdl.post_processing.plot_element_stress(
+  "X", return_plotter=True
+)
+pl.add_mesh(pm.meshes[0])
+pl.show()
+```
+
+```{python}
+#| eval: false
+# Plot selected elements
+mapdl.eplot()
+# Plot selected volumes
+mapdl.vplot()
+# Plot selected areas
+mapdl.aplot()
+# Plot selected lines
+mapdl.lplot()
+```
+
+```{python}
+#| eval: false
+# Testing one of the above plotting
+mapdl.eplot()
+```
+
+```{python}
+#| echo: false
+mapdl.exit()
+```

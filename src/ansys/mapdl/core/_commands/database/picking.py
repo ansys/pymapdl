@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -95,35 +95,46 @@ class Picking:
         narg
             Number of items in the picked list.
 
-        type\_
+        type\\_
             Type of items picked:
 
-            1 - Node numbers
+            1
+                Node numbers
 
-            2 - Element numbers
+            2
+                Element numbers
 
-            3 - Keypoint numbers
+            3
+                Keypoint numbers
 
-            4 - Line numbers
+            4
+                Line numbers
 
-            5 - Area numbers
+            5
+                Area numbers
 
-            6 - Volume numbers
+            6
+                Volume numbers
 
-            7 - Trace points
+            7
+                Trace points
 
-            8 - Coordinate locations (in Global Cartesian coordinates)
+            8
+                Coordinate locations (in Global Cartesian coordinates)
 
-            9 - Screen picks (in X, Y screen coordinates (-1 to 1))
+            9
+                Screen picks (in X, Y screen coordinates (-1 to 1))
 
         otype
             Data order:
 
-            NOOR - Data is not ordered (default).
+            NOOR
+                Data is not ordered (default).
 
-            ORDER - Data is in an ordered list (such as for the E,P51X and A,P51X commands, in
-                    which the order of the data items is significant for the
-                    picking operation).
+            ORDER
+                Data is in an ordered list (such as for the E,P51X and A,P51X commands, in
+                which the order of the data items is significant for the picking
+                operation).
 
         leng
             Length of number of items describing the list (should equal NARG if

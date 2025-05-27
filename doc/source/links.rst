@@ -23,6 +23,8 @@
 .. _dev_guide_contributing: https://dev.docs.pyansys.com/how-to/contributing.html
 .. _dev_guide_coding_style: https://dev.docs.pyansys.com/coding-style/index.html
 .. _dev_guide_setup_your_environment: https://dev.docs.pyansys.com/how-to/setting-up.html
+.. _dev_guide_branch_names: https://dev.docs.pyansys.com/how-to/contributing.html#branch-naming-conventions
+.. _dev_guide_commit_names: https://dev.docs.pyansys.com/how-to/contributing.html#commit-naming-conventions
 
 .. #Other libraries
 .. _pyvista_docs: https://docs.pyvista.org/version/stable/
@@ -64,7 +66,7 @@
 .. _ansys_installation_and_licensing: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/prod_page.html?pn=Installation%20and%20Licensing&pid=InstallationAndLicensing&lang=en
 .. _ansys_parallel_computing_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_dan/dantoc.html
 .. _ansys_verification_manual: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_vm/Hlp_V_VMTOC.html
-.. _ansys_tutorials_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/v231/en/ans_tut/Hlp_UI_Tutorials.html
+.. _ansys_tutorials_guide: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_tut/Hlp_UI_Tutorials.html
 
 .. # Ansys introductory tutorials
 .. _ansys_introtut: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_tut/Hlp_UI_Tutorials.html
@@ -80,6 +82,8 @@
 .. _pymapdl_ex_repo: https://github.com/ansys/pymapdl-examples
 .. _pymapdl_ex_ts: https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/index.html
 .. _pymapdl_ex_vm: https://examples.mapdl.docs.pyansys.com/verif-manual/index.html
+.. _pymapdl_cheat_sheet: https://mapdl.docs.pyansys.com/stable/_static/_static/cheat_sheet.pdf
+
 
 .. # Ansys Structural Guide links:
 .. _ansys_krylov_sweep_harmonic_analysis: https://ansyshelp.ansys.com/account/secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_str/str_Krysweep.html
@@ -89,6 +93,7 @@
 .. _course_intro_python: https://courses.ansys.com/index.php/courses/intro-to-python/
 .. _course_getting_started_pymapdl: https://courses.ansys.com/index.php/courses/getting-started-with-pymapdl/
 .. _course_intro_apdl: https://courses.ansys.com/index.php/courses/intro-to-ansys-mechanical-apdl-scripting/
+.. _course_fem_track: https://courses.ansys.com/index.php/learning-track/introduction-to-finite-element-methods/
 
 .. #External links
 .. _padt_post: https://www.padtinc.com/2022/07/18/ansys-scripting-python-p1-solve-post/
@@ -122,6 +127,17 @@
 .. _ghcr: https://github.com/features/packages
 .. _vscode_open_a_repository_in_container: https://code.visualstudio.com/docs/devcontainers/containers#_quick-start-open-a-git-repository-or-github-pr-in-an-isolated-container-volume
 .. _pytest_parametrize: https://docs.pytest.org/en/7.3.x/how-to/parametrize.html
+.. _sphinx_directives: https://www.sphinx-doc.org/en/master/usage/restructuredtext/directives.html
+.. _docutils_directives: https://docutils.sourceforge.io/docs/ref/rst/directives.html
+.. _sphinx_basics: https://www.sphinx-doc.org/en/master/usage/restructuredtext/basics.html
+.. _slurm_docs: https://slurm.schedmd.com
+.. _slurm_srun: https://slurm.schedmd.com/srun.html
+.. _slurm_sbatch: https://slurm.schedmd.com/sbatch.html
+.. _modules_docs: https://modules.readthedocs.io/en/latest/
+.. _lmod_docs: https://lmod.readthedocs.io/en/latest/
+.. _pygad_docs: https://pygad.readthedocs.io/en/latest/
+.. _ga_article: https://blog.derlin.ch/genetic-algorithms-with-pygad
+.. _simutech_linux_dependencies: https://install.simutechgroup.com/info-required-linux-packages-and-libraries
 
 
 .. #Github links:
@@ -155,7 +171,7 @@
 .. _pymapdl_2d_plate_with_a_hole: https://github.com/ansys/pymapdl/blob/main/examples/00-mapdl-examples/2d_plate_with_a_hole.py
 .. _pymapdl_doc_2d_plate_with_a_hole: https://mapdl.docs.pyansys.com/version/stable/examples/gallery_examples/00-mapdl-examples/2d_plate_with_a_hole.html
 .. _pymapdl_doc_krylov_example: https://mapdl.docs.pyansys.com/version/stable/examples/extended_examples/Krylov/krylov_example.html
-.. _pymapdl_doc_krylov_example_rst: https://raw.githubusercontent.com/ansys/pymapdl/main/doc/source/examples/extended_examples/Krylov/krylov_example.rst
+.. _pymapdl_doc_krylov_example_rst: https://github.com/ansys/pymapdl/blob/main/doc/source/examples/extended_examples/Krylov/krylov_example.rst
 .. _pymapdl_doc_source: https://github.com/ansys/pymapdl/tree/main/doc/source
 .. _pymapdl_techdemo_28_rst: https://raw.githubusercontent.com/ansys/pymapdl-examples/main/doc/source/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.rst
 .. _pymapdl_techdemo_28: https://examples.mapdl.docs.pyansys.com/technology_showcase_examples/techdemo-28/ex_28-tecfricstir.html
@@ -184,6 +200,8 @@
 .. _pymapdl_create_codespace_docs_quick_start: https://codespaces.new/ansys/pymapdl?quickstart=1&devcontainer_path=.devcontainer%2Fcodespaces-docs%2Fdevcontainer.json
 .. _pymapdl_create_codespace_dev: https://codespaces.new/ansys/pymapdl?devcontainer_path=.devcontainer%2Fdevcontainer.json
 .. _pymapdl_create_codespace_docs: https://codespaces.new/ansys/pymapdl?devcontainer_path=.devcontainer%2Fcodespaces-docs%2Fdevcontainer.json
+.. _pymapdl_examples_template: https://mapdl.docs.pyansys.com/version/stable/examples/gallery_examples/02-tips-n-tricks/00-example-template.html
+.. _pymapdl_bracket_static_example: https://mapdl.docs.pyansys.com/version/stable/examples/gallery_examples/00-mapdl-examples/bracket_static.html#sphx-glr-examples-gallery-examples-00-mapdl-examples-bracket-static-py
 
 
 .. #Python
@@ -211,4 +229,4 @@
 
 .. # Elements references
 
-.. _elem_plane183: https://ansyshelp.ansys.com/account/Secured?returnurl=/Views/Secured/corp/v231/en/ans_elem/Hlp_E_PLANE183.html
+.. _elem_plane183: https://ansyshelp.ansys.com/account/Secured?returnurl=/Views/Secured/corp/%%VERSION%%/en/ans_elem/Hlp_E_PLANE183.html

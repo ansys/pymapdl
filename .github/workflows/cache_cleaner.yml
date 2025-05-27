@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Cleanup PR caches
         if: github.event_name != 'workflow_dispatch'
@@ -26,9 +26,15 @@ jobs:
           ## Setting this to not fail the workflow while deleting cache keys. 
           set +e
           echo "Deleting caches..."
-          for cacheKey in $cacheKeysForPR
+          
+          while [ ! -z "$cacheKeysForPR" ];
           do
-              gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm && echo "Deleting cache with key: $cacheKey"
+            for cacheKey in $cacheKeysForPR
+            do
+                gh actions-cache delete $cacheKey -R $REPO -B $BRANCH --confirm && echo "Deleting cache with key: $cacheKey"
+            done
+          
+            cacheKeysForPR=$(gh actions-cache list -R $REPO -B $BRANCH | cut -f 1 )
           done
           echo "Done"
         env:
@@ -48,9 +54,14 @@ jobs:
             ## Setting this to not fail the workflow while deleting cache keys. 
             set +e
             echo "Deleting caches..."
-            for cacheKey in $cacheKeysForPR
+            while [ ! -z "$cacheKeysForPR" ];
             do
-                gh actions-cache delete $cacheKey -R $REPO --confirm && echo "Deleting cache with key: $cacheKey"
+              for cacheKey in $cacheKeysForPR
+              do
+                  gh actions-cache delete $cacheKey -R $REPO --confirm && echo "Deleting cache with key: $cacheKey"
+              done
+
+              cacheKeysForPR=$(gh actions-cache list -R $REPO | cut -f 1 )
             done
             echo "Done"
         env:

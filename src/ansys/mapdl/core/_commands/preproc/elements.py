@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -22,7 +22,7 @@
 
 from typing import Optional, Union
 
-from ansys.mapdl.core._commands.parse import parse_e
+from ansys.mapdl.core._commands import parse
 from ansys.mapdl.core.mapdl_types import MapdlFloat, MapdlInt
 
 
@@ -141,7 +141,7 @@ class Elements:
 
         """
         command = f"E,{i},{j},{k},{l},{m},{n},{o},{p}"
-        return parse_e(self.run(command, **kwargs))
+        return parse.parse_e(self.run(command, **kwargs))
 
     def ecpchg(self, **kwargs):
         """Optimizes degree-of-freedom usage in a coupled acoustic model.
@@ -386,7 +386,7 @@ class Elements:
             Generate elements from selected pattern beginning with
             IEL1 to IEL2 (defaults to IEL1) in steps of IEINC (
             defaults to 1). If IEL1 is negative, IEL2 and IEINC are
-            ignored and the last \|IEL1\| elements
+            ignored and the last \\|IEL1\\| elements
             (in sequence backward from the maximum element number)
             are used as the pattern to be repeated.  If IEL1 = ALL,
             IEL2 and IEINC are ignored and use all selected elements
@@ -1083,7 +1083,7 @@ class Elements:
             Generate elements from the pattern that begins with IEL1
             to IEL2 (defaults to IEL1) in steps of IEINC (defaults to
             1). If IEL1 is negative, IEL2 and IEINC are ignored and
-            use the last \|IEL1\| elements (in sequence backward from
+            use the last \\|IEL1\\| elements (in sequence backward from
             the maximum element number) as the pattern to be
             repeated.  If IEL1 = ALL, IEL2 and IEINC are ignored and
             all selected elements [ESEL] are used as the

@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -144,7 +144,7 @@ class Setup:
             Arbitrary reference number or name assigned to this variable.
             Number must be >1 but </= NUMVAR.
 
-        id\_
+        id\\_
             Crack ID number.
 
         node

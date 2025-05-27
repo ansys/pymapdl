@@ -6,7 +6,7 @@ Managing components
 *******************
 
 MAPDL components can be retrieved and set using
-:attr:`Mapdl.components <ansys.mapdl.core.Mapdl.components>`.
+:attr:`Mapdl.components <ansys.mapdl.core.component.ComponentManager>`.
 
 
 There are several ways to create a component in MAPDL.
@@ -36,13 +36,13 @@ Set a component without specifying the type, by default it is ``NODE``:
    >>> mapdl.components["mycomp4"] = (1, 2, 3)
    /Users/german.ayuso/pymapdl/src/ansys/mapdl/core/component.py:347: UserWarning: Assuming   a KP selection.
    It is recommended you use the following notation to avoid this warning:
-   > mapdl.components['mycomp4'] = 'KP' (1, 2, 3)
+   > mapdl.components['mycomp4'] = 'KP', (1, 2, 3)
    Alternatively, you disable this warning using:
    > mapdl.components.default_entity_warning=False
    warnings.warn(
 
 You can change the default type by changing
-:attr:`Mapdl.components.default_entity <ansys.mapdl.core.Mapdl.components.default_entity>`
+:attr:`Mapdl.components.default_entity <ansys.mapdl.core.component.ComponentManager.default_entity>`
 
 .. code:: pycon
 
@@ -78,10 +78,10 @@ Selecting a component and retrieving it:
 Component object
 ================
 
-The `Component object <ansys.mapdl.core.component.Component>` is the object returned by 
+The :class:`Component object <ansys.mapdl.core.component.Component>` is the object returned by 
 :attr:`Mapdl.components <ansys.mapdl.core.Mapdl.components>` when you query it with a component name.
-This object has two main attributes: `type <Component.type>` and `items <Component.items>`.
-The former returns the component type (`"ELEM"`, `"NODE"`, `"KP"`, etc) and the later returns
+This object has two main attributes: :attr:`type <Component.type>` and :attr:`items <Component.items>`.
+The former returns the component type (``"ELEM"``, ``"NODE"``, ``"KP"``, etc) and the later returns
 a tuple with the index of the entities which belong to that component.
 
 .. code:: pycon

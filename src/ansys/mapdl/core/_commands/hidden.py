@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -37,9 +37,11 @@ class _Hidden:
         lab
             Specifies listing mode during a batch run:
 
-            LIST - The batch output will include a listing of the input file.
+            LIST
+                The batch output will include a listing of the input file.
 
-            (blank) - Suppress input data listing.
+            (blank)
+                Suppress input data listing.
 
         Notes
         -----
@@ -86,9 +88,11 @@ class _Hidden:
         loc
             Location within a file to which output will be written:
 
-            (blank) - Output is written starting at the top of the file (default).
+            (blank)
+                Output is written starting at the top of the file (default).
 
-            APPEND - Output is appended to the existing file.
+            APPEND
+                Output is appended to the existing file.
 
         Notes
         -----

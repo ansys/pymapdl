@@ -1,42 +1,34 @@
 [build-system]
-requires = ["flit_core >=3.2,<4"]
+requires = ["flit_core >=3.2,<3.11"]
 build-backend = "flit_core.buildapi"
 
 [project]
 # Check https://flit.readthedocs.io/en/latest/pyproject_toml.html for all available sections
 name = "ansys-mapdl-core"
-version = "0.68.dev0"
-description = "A Python wrapper for Ansys MAPDL."
+version = "0.70.dev0"
+description = "A Python client library for Ansys MAPDL."
 readme = "README.md"
-requires-python = ">=3.9,<3.13"
+requires-python = ">=3.10,<3.14"  # Update also 'MINIMUM_PYTHON_VERSION' in src/ansys/mapdl/core/__init__.py
 license = {file = "LICENSE"}
-authors = [
-    {name = "Ansys, Inc.", email = "pyansys.maintainers@ansys.com"},
-]
-maintainers = [
-    {name = "PyAnsys developers", email = "pyansys.maintainers@ansys.com"},
-]
+authors = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
+maintainers = [{ name = "ANSYS, Inc.", email = "pyansys.core@ansys.com" }]
 dependencies = [
-    "ansys-api-mapdl==0.5.1",  # supports at least 2020R2 - 2022R1
+    "ansys-api-mapdl==0.5.2",  # supports at least 2020R2 - 2022R1
     "ansys-mapdl-reader>=0.51.7",
     "ansys-math-core>=0.1.2",
     "ansys-platform-instancemanagement~=1.0",
-    "platformdirs>=3.6.0",
+    "ansys-tools-path>=0.3.1",
     "click>=8.1.3", # for CLI interface
-    "tabulate>=0.8.0", # for cli plotting
     "grpcio>=1.30.0",  # tested up to grpcio==1.35
-    "importlib-metadata>=4.0",
-    "matplotlib>=3.0.0",  # for colormaps for pyvista
-    "numpy>=1.14.0,<1.25.0; python_version < '3.9'",
-    "numpy>=1.14.0,<2.0.0; python_version >= '3.9'",
+    "numpy>=1.14.0,<3.0.0",
     "pexpect>=4.8.0 ; platform_system=='Linux'",
+    "platformdirs>=3.6.0",
     "protobuf>=3.12.2",  # minimum required based on latest ansys-grpc-mapdl
     "psutil>=5.9.4",
     "pyansys-tools-versioning>=0.3.3",
-    "ansys-tools-path>=0.3.1",
     "pyiges[full]>=0.3.1", # Since v0.3.0, the 'full' flag is needed in order to install 'geomdl'
-    "pyvista>=0.38.1",
     "scipy>=1.3.0",  # for sparse (consider optional?)
+    "tabulate>=0.8.0", # for cli plotting
     "tqdm>=4.45.0",
     "vtk>=9.0.0",
 ]
@@ -48,64 +40,82 @@ classifiers = [
     "Operating System :: Microsoft :: Windows",
     "Operating System :: POSIX",
     "Operating System :: MacOS",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
 ]
 
 [project.optional-dependencies]
 jupyter = [
     "jupyterlab>=3",
     "ipywidgets",
-    "pyvista[jupyter]",
+]
+
+graphics = [
+    "ansys-tools-visualization-interface>=0.2.6",
+    "matplotlib>=3.0.0",  # for colormaps for pyvista
+]
+
+all = [
+    "ansys-tools-visualization-interface>=0.9.0",
+    "matplotlib>=3.0.0",  # for colormaps for pyvista
+    "jupyterlab>=3",
+    "ipywidgets",
 ]
 
 tests = [
-    "ansys-dpf-core==0.10.1",
-    "autopep8==2.0.4",
-    "matplotlib==3.8.2",
-    "scipy==1.11.4",
-    "pandas==2.1.4",
+    "ansys-dpf-core[graphics]==0.13.6",
+    "ansys-tools-visualization-interface==0.9.1",
+    "autopep8==2.3.2",
+    "matplotlib==3.10.3",
+    "pandas==2.2.3",
+    "pyansys-tools-report==0.8.2",
+    "pyfakefs==5.8.0",
     "pyiges[full]==0.3.1",
-    "pytest==7.4.4",
-    "pytest-cov==4.1.0",
-    "pyvista==0.43.1",
-    "pyansys-tools-report==0.7.0",
-    "vtk==9.3.0",
-    "pytest-rerunfailures==13.0",
+    "pytest-cov==6.1.1",
+    "pytest-profiling==1.8.1",
     "pytest-pyvista==0.1.9",
+    "pytest-random-order==1.1.1",
+    "pytest-reportlog==0.4.0",
+    "pytest-rerunfailures==15.1",
+    "pytest-timeout==2.4.0",
+    "pytest==8.3.5",
+    "scipy==1.15.3",
+    "vtk==9.4.2",
 ]
+
 doc = [
-    "sphinx==7.2.6",
-    "ansys-dpf-core==0.10.1",
-    "ansys-mapdl-reader==0.53.0",
-    "ansys-sphinx-theme==0.13.1",
-    "grpcio==1.60.0",
-    "imageio-ffmpeg==0.4.9",
-    "imageio==2.33.1",
+    "ansys-dpf-core[graphics]==0.13.6",
+    "ansys-mapdl-reader==0.55.1",
+    "ansys-sphinx-theme==1.4.4",
+    "ansys-tools-visualization-interface==0.9.1",
+    "grpcio==1.70.0",
+    "imageio-ffmpeg==0.6.0",
+    "imageio==2.37.0",
     "jupyter_sphinx==0.5.3",
+    "jupyter==1.1.1",
     "jupyterlab>=3.2.8",
-    "matplotlib==3.8.2",
-    "numpydoc==1.6.0",
-    "pandas==2.1.4",
-    "plotly==5.18.0",
+    "matplotlib==3.10.3",
+    "nbformat==5.10.4",
+    "numpydoc==1.8.0",
+    "pandas==2.2.3",
+    "plotly==6.1.1",
     "pyiges[full]==0.3.1",
-    "pypandoc==1.12",
-    "pytest-sphinx==0.5.0",
+    "pypandoc==1.15",
+    "pytest-sphinx==0.6.3",
     "pythreejs==2.4.2",
-    "pyvista[trame]==0.43.1",
-    "sphinx-autobuild==2021.3.14",
-    "sphinx-autodoc-typehints==1.25.2",
+    "sphinx-autobuild==2024.10.3",
+    "sphinx-autodoc-typehints==3.1.0",
     "sphinx-copybutton==0.5.2",
-    "sphinx-design==0.5.0",
-    "sphinx-gallery==0.15.0",
-    "sphinx-notfound-page==0.8.3",
-    "sphinxcontrib-websupport==1.2.6",
-    "sphinxemoji==0.2.0",
-    "sphinx-reredirects==0.1.3",
-    "vtk==9.3.0",
-    "sphinx_design==0.5.0",
+    "sphinx-design==0.6.1",
+    "sphinx-gallery==0.19.0",
+    "sphinx-jinja==2.0.2",
+    "sphinx-notfound-page==1.1.0",
+    "sphinx==8.2.3",
+    "sphinxcontrib-websupport==2.0.0",
+    "sphinxemoji==0.3.1",
+    "vtk==9.4.2",
 ]
 
 [tool.flit.module]
@@ -113,14 +123,19 @@ name = "ansys.mapdl.core"
 
 [project.urls]
 Source = "https://github.com/ansys/pymapdl"
+Issues = "https://github.com/ansys/pymapdl/issues"
+Documentation = "https://mapdl.docs.pyansys.com"
+Tracker = "https://github.com/ansys/pymapdl/issues"
 
 [project.scripts]
-pymapdl_convert_script = "ansys.mapdl.core.cli:convert"
-launch_mapdl = "ansys.mapdl.core.cli:launch_mapdl"
+pymapdl_convert_script = "ansys.mapdl.core.cli:old_pymapdl_convert_script_entry_point"
+pymapdl = "ansys.mapdl.core.cli:main"
 
 [tool.pytest.ini_options]
+addopts = "-ra -vvv --maxfail=10 --strict-markers --random-order-bucket=class --random-order --durations=10  --timeout=180"
 junit_family = "legacy"
 filterwarnings = [
+    "ignore::ResourceWarning",
     "ignore::FutureWarning",
     "ignore::PendingDeprecationWarning",
     "ignore::DeprecationWarning",
@@ -131,10 +146,16 @@ filterwarnings = [
 ]
 markers = [
     "skip_grpc: skip tests using grpc",
-    "gui: skip tests that launch the GUI interface",
+    "requires_gui: run tests that require to launch the GUI interface",
+    "console: run console test based",
+    "gui: run gui test",
 ]
+
 testpaths = "tests"
 image_cache_dir = "tests/.image_cache"
+# Output logging records as they are emitted directly into the console
+# https://docs.pytest.org/en/stable/how-to/logging.html#live-logs
+# log_cli = true
 
 [tool.isort]
 profile = "black"
@@ -143,15 +164,14 @@ default_section = "THIRDPARTY"
 skip_glob = ["__init__.py"]
 src_paths = ["doc", "src", "tests"]
 
-
 [tool.coverage.run]
 source = ["ansys/pymapdl"]
 omit = [
-    # omit commands
-    "ansys/mapdl/core/_commands/*",
     # ignore legacy interfaces
     "ansys/mapdl/core/mapdl_console.py",
     "ansys/mapdl/core/jupyter.py",
+    # ignore non exposed interfaces
+    "ansys/mapdl/core/mapdl_inprocess.py",
 ]
 
 [tool.coverage.report]
@@ -159,9 +179,9 @@ show_missing = true
 
 [tool.codespell]
 skip = '*.pyc,*.txt,*.gif,*.png,*.jpg,*.js,*.html,*.doctree,*.ttf,*.woff,*.woff2,*.eot,*.mp4,*.inv,*.pickle,*.ipynb,flycheck*,./.git/*,./.hypothesis/*,*.yml,./doc/build/*,./doc/images/*,./dist/*,*~,.hypothesis*,./doc/source/examples/*,*cover,*.dat,*.mac,*.cdb,*.CDB,build,./docker/mapdl/v*,./factory/*,./ansys/mapdl/core/mapdl_functions.py,PKG-INFO,*.mypy_cache/*,./docker/mapdl/*,./_unused/*'
-ignore-words = "doc/styles/Vocab/ANSYS/accept.txt"
 quiet-level = 3
 ignore-regex=".*codespell-ignore$|NORML|POIN"
+ignore-words = "doc/styles/config/vocabularies/ANSYS/accept.txt"
 
 [tool.numpydoc_validation]
 checks = [
@@ -223,9 +243,61 @@ checks = [
   # "EX01", # "No examples section found",
 ]
 
-
 override_SS05 = [  # override SS05 to allow docstrings starting with these words
     # '^Process ',
     # '^Assess ',
     # '^Access ',
 ]
+
+[tool.mypy]
+disable_error_code = ["return-value", "return", "import-untyped", "import-not-found"]
+
+[tool.towncrier]
+package = "ansys.mapdl.core"
+directory = "doc/changelog.d"
+filename = "doc/source/changelog.rst"
+template = "doc/changelog.d/changelog_template.jinja"
+start_string = ".. towncrier release notes start\n"
+title_format = "\n.. _v{version}:\n\n`{version} <https://github.com/ansys/pymapdl/releases/tag/v{version}>`_ - {project_date}"
+
+issue_format = "`#{issue} <https://github.com/ansys/pymapdl/pull/{issue}>`_"
+
+[[tool.towncrier.type]]
+directory = "added"
+name = "Added"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "changed"
+name = "Changed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "fixed"
+name = "Fixed"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "dependencies"
+name = "Dependencies"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "miscellaneous"
+name = "Miscellaneous"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "documentation"
+name = "Documentation"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "maintenance"
+name = "Maintenance"
+showcontent = true
+
+[[tool.towncrier.type]]
+directory = "test"
+name = "Test"
+showcontent = true

@@ -1,7 +1,10 @@
 name: "Pull Request Labeler"
 on:
   pull_request:
-    types: [opened, reopened]
+    # opened, reopened, and synchronize are default for pull_request
+    # edited - when PR title or body is changed
+    # labeled - when labels are added to PR
+    types: [opened, reopened, synchronize, edited, labeled]
   push:
     branches: [ main ]
     paths:
@@ -18,7 +21,7 @@ jobs:
     name: Syncer
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4.2.2
       - uses: micnncim/action-label-syncer@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -42,42 +45,56 @@ jobs:
     # Label based on branch name
     - uses: actions-ecosystem/action-add-labels@v1
       if: |
-        startsWith(github.event.pull_request.head.ref, 'doc') || 
-        startsWith(github.event.pull_request.head.ref, 'docs')
+        startsWith(github.event.pull_request.title, 'fix') || 
+        startsWith(github.event.pull_request.title, 'bug') ||
+        startsWith(github.event.pull_request.title, 'patch')
       with:
         github_token: ${{ secrets.GITHUB_TOKEN}}
-        labels: Documentation
+        labels: bug
 
     - uses: actions-ecosystem/action-add-labels@v1
       if: |
-        startsWith(github.event.pull_request.head.ref, 'docker') ||
-        startsWith(github.event.pull_request.head.ref, 'no-ci') ||
-        startsWith(github.event.pull_request.head.ref, 'ci')
+        startsWith(github.event.pull_request.title, 'feat')
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN}}
+        labels: new feature
+
+    - uses: actions-ecosystem/action-add-labels@v1
+      if: |
+        startsWith(github.event.pull_request.title, 'style') ||
+        startsWith(github.event.pull_request.title, 'refactor') ||
+        startsWith(github.event.pull_request.title, 'perf') ||
+        startsWith(github.event.pull_request.title, 'test') ||
+        startsWith(github.event.pull_request.title, 'chore')
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN}}
+        labels: enhancement
+
+    - uses: actions-ecosystem/action-add-labels@v1
+      if: |
+        startsWith(github.event.pull_request.title, 'build') ||
+        startsWith(github.event.pull_request.title, 'revert') ||
+        startsWith(github.event.pull_request.title, 'maint')
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN}}
+        labels: maintenance
+      
+    - uses: actions-ecosystem/action-add-labels@v1
+      if: |
+        startsWith(github.event.pull_request.title, 'doc') || 
+        startsWith(github.event.pull_request.title, 'docs')
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN}}
+        labels: documentation
+
+    - uses: actions-ecosystem/action-add-labels@v1
+      if: |
+        startsWith(github.event.pull_request.title, 'docker') ||
+        startsWith(github.event.pull_request.title, 'no-ci') ||
+        startsWith(github.event.pull_request.title, 'ci')
       with:
         github_token: ${{ secrets.GITHUB_TOKEN}}
         labels: CI/CD
-
-    - uses: actions-ecosystem/action-add-labels@v1
-      if: startsWith(github.event.pull_request.head.ref, 'maint')
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN}}
-        labels: Maintenance
-
-    - uses: actions-ecosystem/action-add-labels@v1
-      if: startsWith(github.event.pull_request.head.ref, 'feat')
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN}}
-        labels: |
-          Enhancement
-          NEW FEATURE
-
-    - uses: actions-ecosystem/action-add-labels@v1
-      if: |
-        startsWith(github.event.pull_request.head.ref, 'fix') ||
-        startsWith(github.event.pull_request.head.ref, 'patch')
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN}}
-        labels: BUG
 
   commenter:
     runs-on: ubuntu-latest
@@ -86,7 +103,7 @@ jobs:
       pull-requests: write
     steps:
     - name: Suggest to add labels
-      uses: peter-evans/create-or-update-comment@v3
+      uses: peter-evans/create-or-update-comment@v4
       # Execute only when no labels have been applied to the pull request
       if: toJSON(github.event.pull_request.labels.*.name) == '{}' # Empty labels
       with:
@@ -94,10 +111,24 @@ jobs:
         issue-number: ${{ github.event.pull_request.number }}
         body: |
           Please add one of the following labels to add this contribution to the Release Notes :point_down:
-          - [BUG](https://github.com/ansys/pymapdl/pulls?q=label%3Abug+)
-          - [NEW FEATURE](https://github.com/ansys/pymapdl/pulls?q=label%3A"NEW%20FEATURE"+)
-          - [Enhancement](https://github.com/ansys/pymapdl/pulls?q=label%3Aenhancement+)
-          - [Documentation](https://github.com/ansys/pymapdl/pulls?q=label%3Adocumentation+)
-          - [Examples](https://github.com/ansys/pymapdl/pulls?q=label%3Aexamples+)
-          - [Maintenance](https://github.com/ansys/pymapdl/pulls?q=label%3Amaintenance+)
+          - [bug](https://github.com/ansys/pymapdl/pulls?q=label%3Abug+)
+          - [new feature](https://github.com/ansys/pymapdl/pulls?q=label%3A"new%20feature"+)
+          - [enhancement](https://github.com/ansys/pymapdl/pulls?q=label%3Aenhancement+)
+          - [documentation](https://github.com/ansys/pymapdl/pulls?q=label%3Adocumentation+)
+          - [examples](https://github.com/ansys/pymapdl/pulls?q=label%3Aexamples+)
+          - [maintenance](https://github.com/ansys/pymapdl/pulls?q=label%3Amaintenance+)
           - [CI/CD](https://github.com/ansys/pymapdl/pulls?q=label%3Aci%2Fcd+)
+
+  changelog-fragment:
+    name: "Create changelog fragment"
+    needs: [labeler]
+    permissions:
+      contents: write
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+    - uses: ansys/actions/doc-changelog@5dc39c7838f50142138f7ac518ff3e4dca065d97 # v9.0.12
+      with:
+        bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
+        bot-email: ${{ secrets.PYANSYS_CI_BOT_EMAIL }}
+        token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}

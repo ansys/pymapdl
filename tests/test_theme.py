@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -25,9 +25,20 @@ import pytest
 from conftest import has_dependency
 
 if not has_dependency("pyvista"):
-    pytest.skip(allow_module_level=True)
+    pytest.skip(
+        allow_module_level=True, reason="Skipping because 'pyvista' is not installed"
+    )
 
-from ansys.mapdl.core.theme import MapdlTheme, _apply_default_theme
+import matplotlib
+import numpy as np
+
+from ansys.mapdl.core.plotting.theme import (
+    MapdlTheme,
+    _apply_default_theme,
+    get_ansys_cmap,
+    get_ansys_color_cycle,
+    get_ansys_colors,
+)
 
 
 def test_load_theme():
@@ -36,3 +47,19 @@ def test_load_theme():
 
 def test_apply_default_theme():
     _apply_default_theme()
+
+
+def test_get_ansys_cmap():
+    assert isinstance(get_ansys_cmap(11), matplotlib.colors.LinearSegmentedColormap)
+
+
+def test_get_ansys_colors():
+    assert len(get_ansys_colors(10)) == 10
+    assert len(get_ansys_colors(100)) == 100
+    assert np.unique(get_ansys_colors(100), axis=0).shape[0] == 100
+
+
+def test_get_ansys_color_cycle():
+    assert len(get_ansys_color_cycle(10)) == 10
+    assert len(get_ansys_color_cycle(100)) == 100
+    assert np.unique(get_ansys_color_cycle(100), axis=0).shape[0] == 9

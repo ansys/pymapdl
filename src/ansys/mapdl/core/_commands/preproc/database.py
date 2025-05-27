@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -138,54 +138,63 @@ class Database:
         option
             Selects which data to write:
 
-            ALL - Write all appropriate geometry, material property,
-                  load, and component data (default). Two files will
-                  be produced. Fname.Ext will contain all data items
-                  mentioned in "Notes", except the solid model
-                  data. Fnamei.Exti will contain the solid model
-                  geometry and solid model loads data in the form of
-                  IGES commands. This option is not valid when
-                  CDOPT,ANF is active.
+            ALL
+                Write all appropriate geometry, material property,
+                load, and component data (default). Two files will
+                be produced. ``Fname.Ext`` will contain all data items
+                mentioned in "Notes", except the solid model
+                data. ``Fnamei.Exti`` will contain the solid model
+                geometry and solid model loads data in the form of
+                ``IGES`` commands. This option is not valid when
+                ``CDOPT,ANF`` is active.
 
-            COMB - Write all data mentioned, but to a single file,
-                   Fname.Ext. Solid model geometry data will be
-                   written in either IGES or ANF format as specified
-                   in the CDOPT command, followed by the remainder of
-                   the data in the form of ANSYS commands. More
-                   information on these (IGES/ANF) file formats is
-                   provided in "Notes".
+            COMB
+                Write all data mentioned, but to a single file,
+                ``Fname.Ext``. Solid model geometry data will be
+                written in either ``IGES`` or ``ANF`` format as specified
+                in the ``CDOPT`` command, followed by the remainder of
+                the data in the form of ANSYS commands. More
+                information on these (IGES/ANF) file formats is
+                provided in "Notes".
 
-            DB - Write all database information except the solid model
-                 and solid model loads to Fname.Ext in the form of
-                 ANSYS commands. This option is not valid when
-                 CDOPT,ANF is active.
+            DB
+                Write all database information except the solid model
+                and solid model loads to ``Fname.Ext`` in the form of
+                ANSYS commands. This option is not valid when
+                ``CDOPT,ANF`` is active.
 
-            SOLID - Write only the solid model geometry and solid
-                    model load data. This output will be in IGES or
-                    ANF format, as specified in the CDOPT
-                    command. More information on these (IGES/ANF) file
-                    formats is provided in "Notes".
+            SOLID
+                Write only the solid model geometry and solid
+                model load data. This output will be in IGES or
+                ANF format, as specified in the ``CDOPT``
+                command. More information on these (``IGES/ANF``) file
+                formats is provided in "Notes".
 
-            GEOM - Write only element and nodal geometry data. Neither
-                   solid model geometry nor element attribute data
-                   will be written. One file, Fname.Ext, will be
-                   produced. Use CDREAD,DB to read in a file written
-                   with this option. Element types [ET] compatible
-                   with the connectivity of the elements on the file
-                   must first be defined before reading the file in
-                   with CDREAD,DB.
+            GEOM
+                Write only element and nodal geometry data. Neither
+                solid model geometry nor element attribute data
+                will be written. One file, ``Fname.Ext``, will be
+                produced. Use ``CDREAD,DB`` to read in a file written
+                with this option. Element types [``ET``] compatible
+                with the connectivity of the elements on the file
+                must first be defined before reading the file in
+                with ``CDREAD,DB``.
 
-            CM - Write only node and element component and geometry
-            data to Fname.Ext.
+            CM
+                Write only node and element component and geometry
+                data to ``Fname.Ext``.
 
-            MAT - Write only material property data (both linear and
-            nonlinear) to Fname.Ext.
+            MAT
+                Write only material property data (both linear and
+                nonlinear) to ``Fname.Ext``.
 
-            LOAD - Write only loads for current load step to
-            Fname.Ext.
+            LOAD
+                Write only loads for current load step to
+                ``Fname.Ext``.
 
-            SECT - Write only section data to Fname.Ext. Pretension
-            sections are not included.
+            SECT
+                Write only section data to ``Fname.Ext``. Pretension
+                sections are not included.
 
         fname
             File name and directory path (248 characters maximum,
@@ -210,12 +219,14 @@ class Database:
         fmat
             Format of the output file (defaults to BLOCKED).
 
-            BLOCKED - Blocked format. This format allows faster
-                      reading of the output file. The time savings is
-                      most significant when BLOCKED is used to read
-                      .cdb files associated with very large models.
+            BLOCKED
+                Blocked format. This format allows faster
+                reading of the output file. The time savings is
+                most significant when BLOCKED is used to read
+                .cdb files associated with very large models.
 
-            UNBLOCKED - Unblocked format.
+            UNBLOCKED
+                Unblocked format.
 
         Returns
         -------
@@ -230,7 +241,7 @@ class Database:
         writes out solid model loads for meshed models only. If the
         model is not meshed, the solid model loads cannot be
         saved. Component data include component definitions, but not
-        assembly definitions. Appropriate NUMOFF commands are included
+        assembly definitions. Appropriate ``NUMOFF`` commands are included
         at the beginning of the file; this is to avoid overlap of an
         existing database when the file is read in.
 
@@ -241,16 +252,16 @@ class Database:
         file unless you specifically change a default solution
         setting.
 
-        CDWRITE does not support the GSBDATA and GSGDATA commands, and
+        ``CDWRITE`` does not support the ``GSBDATA`` and ``GSGDATA`` commands, and
         these commands are not written to the file.
 
         The data may be reread (on a different machine, for example)
-        with the CDREAD command. Caution: When the file is read in,
-        the NUMOFF,MAT command may cause a mismatch between material
+        with the ``CDREAD`` command. Caution: When the file is read in,
+        the ``NUMOFF,MAT`` command may cause a mismatch between material
         definitions and material numbers referenced by certain loads
-        and element real constants. See NUMOFF for details. Also, be
+        and element real constants. See ``NUMOFF`` for details. Also, be
         aware that the files created by the CDWRITE command explicitly
-        set the active coordinate system to Cartesian (CSYS,0).
+        set the active coordinate system to Cartesian (``CSYS,0``).
 
         You should generally use the blocked format (Fmat = BLOCKED)
         when writing out model data with CDWRITE. This is a compressed
@@ -259,27 +270,27 @@ class Database:
         unblocked formats are described in Chapter 3 of the Guide to
         Interfacing with ANSYS.
 
-        If you use CDWRITE in any of the derived products (ANSYS Emag,
+        If you use ``CDWRITE`` in any of the derived products (ANSYS Emag,
         ANSYS Professional), then before reading the file, you must
-        edit the Jobname.cdb file to remove commands that are not
+        edit the ``Jobname.cdb`` file to remove commands that are not
         available in the respective component product.
 
-        The CDWRITE command writes PART information for any ANSYS
-        LS-DYNA input file to the Jobname.cdb file via the EDPREAD
-        command. (EDPREAD is not a documented command; it is written
-        only when the CDWRITE command is issued.) The PART information
-        can be automatically read in via the CDREAD command; however,
-        if more than one Jobname.cdb file is read, the PART list from
-        the last Jobname.cdb file overwrites the existing PART list of
+        The ``CDWRITE`` command writes PART information for any ANSYS
+        LS-DYNA input file to the ``Jobname.cdb`` file via the ``EDPREAD``
+        command. (``EDPREAD`` is not a documented command; it is written
+        only when the ``CDWRITE`` command is issued.) The PART information
+        can be automatically read in via the ``CDREAD`` command; however,
+        if more than one ``Jobname.cdb`` file is read, the PART list from
+        the last ``Jobname.cdb`` file overwrites the existing PART list of
         the total model. This behavior affects all PART-related
-        commands contained in the Jobname.cdb file. You can join
+        commands contained in the ``Jobname.cdb`` file. You can join
         models, but not PART-related inputs, which you must modify
         using the newly-created PART numbers. In limited cases, an
-        update of the PART list (EDWRITE,PUPDATE) is possible; doing
-        so requires that no used combination of MAT/TYPE/REAL appears
+        update of the PART list (``EDWRITE,PUPDATE``) is possible; doing
+        so requires that no used combination of ``MAT/TYPE/REAL`` appears
         more than once in the list.
 
-        The CDWRITE command does not support (for beam meshing) any
+        The ``CDWRITE`` command does not support (for beam meshing) any
         line operation that relies on solid model associativity. For
         example, meshing the areas adjacent to the meshed line,
         plotting the line that contains the orientation nodes, or
@@ -291,11 +302,11 @@ class Database:
         IGES and ANF File Formats for Solid Model Geometry Information
 
         The format used for solid model geometry information is
-        determined by the current CDOPT command setting. The default
-        format is IGES.
+        determined by the current ``CDOPT`` command setting. The default
+        format is ``IGES``.
 
-        IGES option (default) to write solid model information (CDOPT,
-        IGS):
+        IGES option (default) to write solid model information (``CDOPT,
+        IGS``):
 
         Before writing solid model entities, select all corresponding
         lower level entities (ALLSEL,BELOW,ALL).
@@ -346,11 +357,14 @@ class Database:
         option
             IGES
 
-            IGES - Write solid model geometry information using IGES format (default).
+            IGES
+                Write solid model geometry information using IGES format (default).
 
-            ANF - Write solid model geometry information using ANSYS Neutral File format.
+            ANF
+                Write solid model geometry information using ANSYS Neutral File format.
 
-            STAT - Print out the current format setting.
+            STAT
+                Print out the current format setting.
 
         Notes
         -----
@@ -373,11 +387,14 @@ class Database:
         itemlab
             Item indicating what is to be checked:
 
-            CE - Check constraint equations only
+            CE
+                Check constraint equations only
 
-            CP - Check couplings only
+            CP
+                Check couplings only
 
-            ALL - Check both CE and CP
+            ALL
+                Check both CE and CP
 
         tolerance
             Allowed amount of out-of-balance for any constraint equation or
@@ -414,21 +431,25 @@ class Database:
         sele
             Specifies which elements are to be checked:
 
-            (blank) - Check all data.
+            (blank)
+                Check all data.
 
-            ESEL - Check only elements in the selected set and unselect any elements not producing
-                   geometry check messages.  The remaining elements (those
-                   producing check messages) can then be displayed and
-                   corrected.  A null set results if no elements produce a
-                   message.  Issue ESEL,ALL to select all elements before
-                   proceeding.
+            ESEL
+                Check only elements in the selected set and unselect any elements not producing
+                geometry check messages.  The remaining elements (those
+                producing check messages) can then be displayed and
+                corrected.  A null set results if no elements produce a
+                message.  Issue ESEL,ALL to select all elements before
+                proceeding.
 
         levl
             Used only with Sele = ESEL:
 
-            WARN - Select elements producing warning and error messages.
+            WARN
+                Select elements producing warning and error messages.
 
-            ERR - Select only elements producing error messages (default).
+            ERR
+                Select only elements producing error messages (default).
 
         Notes
         -----
@@ -468,10 +489,12 @@ class Database:
         att
             Attribute key:
 
-            0 - Do not write assigned numbers and attributes of the
+            0
+                Do not write assigned numbers and attributes of the
                 solid model entities to the IGES file (default).
 
-            1 - Write assigned numbers and attributes of solid model
+            1
+                Write assigned numbers and attributes of solid model
                 entities (keypoints, lines, areas, volumes) to the
                 IGES file.  Attributes include MAT, TYPE, REAL, and
                 ESYS specifications as well as associated solid model
@@ -531,8 +554,9 @@ class Database:
         option
             Selects data to read.
 
-            DB - Reads a CDB file. The CDB file name and extension are specified by Fname and
-                 Ext.
+            DB
+                Reads a CDB file. The CDB file name and extension are specified by Fname and
+                Ext.
 
         fname
             File name and directory path (248 characters maximum, including the
@@ -618,31 +642,44 @@ class Database:
         label
             Items to be compressed:
 
-            NODE - Node numbers
+            NODE
+                Node numbers
 
-            ELEM - Element numbers
+            ELEM
+                Element numbers
 
-            KP - Keypoint numbers
+            KP
+                Keypoint numbers
 
-            LINE - Line numbers
+            LINE
+                Line numbers
 
-            AREA - Area numbers
+            AREA
+                Area numbers
 
-            VOLU - Volume numbers
+            VOLU
+                Volume numbers
 
-            MAT - Material numbers
+            MAT
+                Material numbers
 
-            TYPE - Element type numbers
+            TYPE
+                Element type numbers
 
-            REAL - Real constant numbers
+            REAL
+                Real constant numbers
 
-            CP - Coupled set numbers
+            CP
+                Coupled set numbers
 
-            SECN - Section numbers
+            SECN
+                Section numbers
 
-            CE - Constraint equation numbers
+            CE
+                Constraint equation numbers
 
-            ALL - All item numbers
+            ALL
+                All item numbers
 
         Notes
         -----
@@ -681,23 +718,32 @@ class Database:
         label
             Items to be merged:
 
-            NODE - Nodes
+            NODE
+                Nodes
 
-            ELEM - Elements
+            ELEM
+                Elements
 
-            KP - Keypoints (will also merge lines, areas, and volumes)
+            KP
+                Keypoints (will also merge lines, areas, and volumes)
 
-            MAT - Materials
+            MAT
+                Materials
 
-            TYPE - Element types
+            TYPE
+                Element types
 
-            REAL - Real constants
+            REAL
+                Real constants
 
-            CP - Coupled sets
+            CP
+                Coupled sets
 
-            CE - Constraint equations
+            CE
+                Constraint equations
 
-            ALL - All items
+            ALL
+                All items
 
         toler
             Range of coincidence.  For Label = NODE and KP, defaults to 1.0E-4
@@ -717,10 +763,12 @@ class Database:
         action
             Specifies whether to merge or select coincident items.
 
-            SELE - Select coincident items but do not merge. Action = SELE is only valid for Label
-                   = NODE.
+            SELE
+                Select coincident items but do not merge. Action = SELE is only valid for Label
+                = NODE.
 
-            (Blank) - Merge the coincident items (default).
+            (Blank)
+                Merge the coincident items (default).
 
         switch
             Specifies whether the lowest or highest numbered coincident item is
@@ -728,10 +776,12 @@ class Database:
             to keypoints; i.e., for Label = KP, the lowest numbered keypoint is
             retained regardless of the Switch setting.
 
-            LOW - Retain the lowest numbered coincident item after the merging operation
+            LOW
+                Retain the lowest numbered coincident item after the merging operation
                   (default).
 
-            HIGH - Retain the highest numbered coincident item after the merging operation.
+            HIGH
+                Retain the highest numbered coincident item after the merging operation.
 
         Notes
         -----
@@ -846,31 +896,44 @@ class Database:
         label
             Apply offset number to one of the following sets of items:
 
-            NODE - Nodes
+            NODE
+                Nodes
 
-            ELEM - Elements
+            ELEM
+                Elements
 
-            KP - Keypoints
+            KP
+                Keypoints
 
-            LINE - Lines
+            LINE
+                Lines
 
-            AREA - Areas
+            AREA
+                Areas
 
-            VOLU - Volumes
+            VOLU
+                Volumes
 
-            MAT - Materials
+            MAT
+                Materials
 
-            TYPE - Element types
+            TYPE
+                Element types
 
-            REAL - Real constants
+            REAL
+                Real constants
 
-            CP - Coupled sets
+            CP
+                Coupled sets
 
-            SECN - Section numbers
+            SECN
+                Section numbers
 
-            CE - Constraint equations
+            CE
+                Constraint equations
 
-            CSYS - Coordinate systems
+            CSYS
+                Coordinate systems
 
         value
             Offset number value (cannot be negative).
@@ -907,25 +970,32 @@ class Database:
         label
             Apply starting number to one of the following sets of items:
 
-            NODE - Node numbers.  Value defaults (and is continually reset) to 1 + maximum node
-                   number in model.  Cannot be reset lower.
+            NODE
+                Node numbers.  Value defaults (and is continually reset) to 1 + maximum node
+                number in model.  Cannot be reset lower.
 
-            ELEM - Element numbers.  Value defaults (and is continually reset) to 1 + maximum
-                   element number in model.  Cannot be reset lower.
+            ELEM
+                Element numbers.  Value defaults (and is continually reset) to 1 + maximum
+                element number in model.  Cannot be reset lower.
 
-            KP - Keypoint numbers.  Value defaults to 1.  Only undefined numbers are used.
-                 Existing keypoints are not overwritten.
+            KP
+                Keypoint numbers.  Value defaults to 1.  Only undefined numbers are used.
+                Existing keypoints are not overwritten.
 
-            LINE - Line numbers.  Value defaults to 1.  Only undefined numbers are used.  Existing
-                   lines are not overwritten.
+            LINE
+                Line numbers.  Value defaults to 1.  Only undefined numbers are used.  Existing
+                lines are not overwritten.
 
-            AREA - Area numbers.  Value defaults to 1.  Only undefined numbers are used.  Existing
-                   areas are not overwritten.
+            AREA
+                Area numbers.  Value defaults to 1.  Only undefined numbers are used.  Existing
+                areas are not overwritten.
 
-            VOLU - Volume numbers.  Value defaults to 1.  Only undefined numbers are used.
-                   Existing volumes are not overwritten.
+            VOLU
+                Volume numbers.  Value defaults to 1.  Only undefined numbers are used.
+                Existing volumes are not overwritten.
 
-            DEFA - Default.  Returns all starting numbers to their default values.
+            DEFA
+                Default.  Returns all starting numbers to their default values.
 
         value
             Starting number value.

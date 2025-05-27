@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -443,30 +443,38 @@ class WorkingPlane:
         wpctyp
             Working plane coordinate system type:
 
-            0 - Cartesian (default).  If working plane tracking is on [CSYS,4], the updated
+            0
+                Cartesian (default).  If working plane tracking is on [CSYS,4], the updated
                 active coordinate system will also be Cartesian.
 
-            1 - Polar.  If working plane tracking is on, the updated active coordinate system
+            1
+                Polar.  If working plane tracking is on, the updated active coordinate system
                 will be cylindrical.
 
-            2 - Polar.  If working plane tracking is on, the updated active coordinate system
+            2
+                Polar.  If working plane tracking is on, the updated active coordinate system
                 will be spherical.
 
         grtype
             Grid type:
 
-            0 - Grid and WP triad.
+            0
+                Grid and WP triad.
 
-            1 - Grid only.
+            1
+                Grid only.
 
-            2 - WP triad only (default).
+            2
+                WP triad only (default).
 
         wpvis
             Grid visibility:
 
-            0 - Do not show GRTYPE entities (grid and/or triad) (default).
+            0
+                Do not show GRTYPE entities (grid and/or triad) (default).
 
-            1 - Show GRTYPE entities.  Cartesian working planes will be displayed with a
+            1
+                Show GRTYPE entities.  Cartesian working planes will be displayed with a
                 Cartesian grid, polar with a polar grid.
 
         snapang

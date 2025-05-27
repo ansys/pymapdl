@@ -1,4 +1,4 @@
-# Copyright (C) 2024 ANSYS, Inc. and/or its affiliates.
+# Copyright (C) 2016 - 2025 ANSYS, Inc. and/or its affiliates.
 # SPDX-License-Identifier: MIT
 #
 #
@@ -293,7 +293,7 @@ class Style:
         warnings.warn(
             "pymapdl does not support /ESHAPE when plotting in "
             "Python using ``mapdl.eplot()``.  "
-            "Use ``mapdl.eplot(vtk=False)`` "
+            "Use ``mapdl.eplot(backend=GraphicsBackend.MAPDL)`` "
         )
         command = f"/ESHAPE,{scale},{key}"
         return self.run(command, **kwargs)
@@ -449,7 +449,7 @@ class Style:
 
             1 - Directional light.
 
-        int\_
+        int\\_
             Light intensity factor (defaults to 0.3 for ambient, 1.0 for
             directional). This option is valid only for 3-D devices).
 
@@ -530,7 +530,7 @@ class Style:
         wn
             Window number (or ALL) to which command applies (defaults to 1).
 
-        type\_
+        type\\_
             Shading type:
 
             FACET or 0 - Facet shading (one color per area face) (default).

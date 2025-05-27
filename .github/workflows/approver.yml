@@ -60,7 +60,7 @@ jobs:
       #https://github.com/ansys/pymapdl/pull/2654#issuecomment-1889009514
         uses: dkershner6/reaction-action@v2 # You can also use a specific version, e.g. v2.0.0
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           commentId: ${{ steps.settings.outputs.commentid }} # Optional if the trigger is a comment. Use another action to find this otherwise.
           reaction: "+1" # Optional
 
@@ -71,7 +71,7 @@ jobs:
           export IMG_MSG=$(curl -s 'https://us-central1-lgtm-reloaded.cloudfunctions.net/lgtm' | jq -r '.markdown' | grep -v 'Powered By GIPHY')
           echo "IMG_MSG=$IMG_MSG" >> $GITHUB_OUTPUT
 
-      - uses: hmarr/auto-approve-action@v3
+      - uses: hmarr/auto-approve-action@v4
         with:
           review-message: |
             :white_check_mark: Approving this PR because [${{ steps.settings.outputs.user }}](https://github.com/${{ steps.settings.outputs.user }}) said so in [here](${{ steps.settings.outputs.html_url }}) :grimacing:
