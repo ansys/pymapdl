@@ -338,7 +338,6 @@ class MyReporter(TerminalReporter):
             location = rep.location
             if message:
                 message = f" - {message}"
-
             if location[0] == location[2]:
                 return f"{header} {rep.head_line}{message}"
             else:
@@ -358,7 +357,7 @@ class MyReporter(TerminalReporter):
             return f"{header} {rep.head_line} - {path}: {cause}"
 
         def get_skip_message(rep: CollectReport):
-            message = rep.longreprtext[2]
+            message = rep.longrepr[2]
             header = markup("[SKIPPED]", **SKIPPED_COLOR)
             return get_normal_message(rep, header, message)
 
@@ -368,13 +367,18 @@ class MyReporter(TerminalReporter):
             return get_normal_message(rep, header, message)
 
         def get_xfailed_message(rep: CollectReport):
-            message = str(rep.longrepr.reprcrash.message)
-            message = " ".join(message.split(":")[1:]).strip()
+            # Removing the error type
+            message_lines = rep.longrepr.reprcrash.message.split(":")[1:]
+            message = " ".join([each.strip() for each in message_lines])
+            message = " ".join(message.splitlines())
+
             header = markup("[XFAILED]", **XFAILED_COLOR)
             return get_normal_message(rep, header, message)
 
         def get_xpassed_message(rep: CollectReport):
             message = str(rep.longreprtext)
+            if not message:
+                message = "This test was expected to fail, but it passed."
             header = markup("[XPASSED]", **XPASSED_COLOR)
             return get_normal_message(rep, header, message)
 
