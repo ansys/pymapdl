@@ -72,6 +72,7 @@ jobs:
       PYANSYS_OFF_SCREEN: True
       BUILD_CHEATSHEET: '${{ inputs.build_cheatsheet }}'
       MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.2-ubuntu-student
+      DPF_DOCKER_IMAGE: ghcr.io/ansys/mapdl:v25.2-rocky-dpf-standalone
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
       PYMAPDL_START_INSTANCE: FALSE
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
@@ -110,7 +111,7 @@ jobs:
       - name: "DPF server activation"
         shell: bash
         run: |
-          $(docker pull ghcr.io/ansys/dpf-core:22.2dev && docker run -d --name dpfserver -p ${{ env.DPF_PORT }}:50052 ghcr.io/ansys/dpf-core:22.2dev && echo "DPF Server active on port ${{ env.DPF_PORT }}.") &
+          $(docker pull $DPF_DOCKER_IMAGE && docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y -p ${{ env.DPF_PORT }}:50052 $DPF_DOCKER_IMAGE && echo "DPF Server active on port ${{ env.DPF_PORT }}.") &
 
       - name: "Getting files change filters"
         uses: dorny/paths-filter@v3
@@ -195,7 +196,6 @@ jobs:
       - name: "Install docs build requirements"
         shell: bash
         run: |
-          pip uninstall ansys-sphinx-theme
           pip install .[doc]
 
       - name: "Waiting for the services to be up"
@@ -208,6 +208,7 @@ jobs:
         uses: quarto-dev/quarto-actions/setup@v2
         with:
           tinytex: true
+          version: 1.6.43
 
       - name: Check Quarto Version
         if: ${{ inputs.build_cheatsheet }}

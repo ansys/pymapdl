@@ -232,6 +232,7 @@ linkcheck_ignore = [
     "https://courses.ansys.com/*",  # It is detected as broken
     "https://blog.derlin.ch/genetic-algorithms-with-pygad",  # Error: Too Many Requests for url
     "https://www.mdpi.com/*",  # 403 Client Error: Forbidden for url
+    "https://stackoverflow.com/questions/*",  # It is detected as broken
 ]
 linkcheck_anchors_ignore = [
     # these anchors are picked by linkcheck as broken but they are not.
@@ -324,7 +325,22 @@ html_theme_options = {
         "json_url": f"https://{cname}/versions.json",
         "version_match": switcher_version,
     },
+    # Removing the secondary sidebar for the MAPDL commands
+    "secondary_sidebar_items": {
+        # "mapdl_commands/**/**": [],
+        # "mapdl_commands/index": [],
+        "**": [],  # "page-toc", "edit-this-page", "sourcelink"]
+    },
+    "navbar_persistent": [],
+    "primary_sidebar_end": ["edit-this-page", "sourcelink"],
+    "navbar_end": [
+        "search-button-field",
+        "version-switcher",
+        "theme-switcher",
+        "navbar-icon-links",
+    ],
 }
+
 
 BUILD_CHEATSHEET = os.environ.get("BUILD_CHEATSHEET", "false").lower() == "true"
 
@@ -346,10 +362,6 @@ html_context = {
 }
 html_show_sourcelink = False
 
-html_sidebars = {
-    "mapdl_commands/**/**": [],
-    "mapdl_commands/index": [],
-}
 
 html_js_files = ["https://cdn.plot.ly/plotly-3.0.1.min.js"]
 
