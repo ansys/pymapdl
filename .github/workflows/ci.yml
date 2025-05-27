@@ -111,12 +111,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           check-licenses: true
           # whitelist-license-check: "attrs" # This has MIT license but fails the check
-
-      - name: "Importing library"
-        run: python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
-
-      - name: "Checking plotting support"
-        run: python -c "from pyvista.plotting import system_supports_plotting; print('System support plotting ' + str(system_supports_plotting()))"
+          smoke-test-module: 'ansys.mapdl.core'
 
 
   check-vulnerabilities:
