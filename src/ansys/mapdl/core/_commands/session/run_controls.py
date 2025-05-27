@@ -184,11 +184,6 @@ class RunControls:
 
         >>> mapdl.cwd("/tmp/")
         """
-        dirpath = str(dirpath)
-        if not (dirpath.startswith("'") and dirpath.endswith("'")) and "'" in dirpath:
-            raise MapdlRuntimeError(
-                'The CWD command does not accept paths that contain singular quotes "\'".'
-            )
         return self.run(f"/CWD,'{dirpath}'", **kwargs)
 
     def filname(self, fname: str = "", key: str = "", **kwargs):
