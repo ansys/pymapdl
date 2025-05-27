@@ -937,8 +937,8 @@ class MapdlGrpc(MapdlBase):
     @supress_logging
     def _set_no_abort(self):
         """Do not abort MAPDL."""
-        self._log.debug("Setting no abort")
-        self.nerr(abort=-1, mute=True)
+        self._log.debug("Setting to no abort")
+        self.run("/NERR,,,-1", mute=True)
 
     def _run_at_connect(self):
         """Run house-keeping commands when initially connecting to MAPDL."""
