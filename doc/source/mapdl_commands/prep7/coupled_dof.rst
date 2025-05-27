@@ -1,22 +1,26 @@
-.. _ref_coupled_dof_commands_api:
 
-**************************
-Coupled degrees of freedom
-**************************
+.. _ref_coupled_dof:
 
-.. currentmodule:: ansys.mapdl.core
 
-These PREP7 commands are used to define, modify, list, etc., coupled
-degrees of freedom.
+CoupledDof
+==========
+
+
+.. currentmodule:: ansys.mapdl.core._commands.prep7.coupled_dof
+
+.. autoclass:: ansys.mapdl.core._commands.prep7.coupled_dof.CoupledDof
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.cp
-   Mapdl.cpdele
-   Mapdl.cpintf
-   Mapdl.cplgen
-   Mapdl.cplist
-   Mapdl.cpmerge
-   Mapdl.cpngen
-   Mapdl.cpsgen
+
+   CoupledDof.cp
+   CoupledDof.cpdele
+   CoupledDof.cpintf
+   CoupledDof.cplgen
+   CoupledDof.cplist
+   CoupledDof.cpmerge
+   CoupledDof.cpngen
+   CoupledDof.cpsel
+   CoupledDof.cpsgen
