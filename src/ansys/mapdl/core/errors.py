@@ -468,7 +468,7 @@ def protect_grpc(func: Callable) -> Callable:
     return wrapper
 
 
-def retrieve_mapdl_from_args(args: tuple[Any]) -> "MapdlGrpc":
+def retrieve_mapdl_from_args(args: tuple[Any, ...]) -> "MapdlGrpc":
     # can't use isinstance here due to circular imports
     try:
         class_name = args[0].__class__.__name__
