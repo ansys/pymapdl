@@ -1,6 +1,5 @@
 """Sphinx documentation configuration file."""
 
-from atsphinx.mini18n import get_template_dir
 from datetime import datetime
 import os
 from pathlib import Path
@@ -9,6 +8,7 @@ import warnings
 
 import ansys.tools.visualization_interface as viz_interface
 from ansys_sphinx_theme import ansys_favicon, get_version_match
+from atsphinx.mini18n import get_template_dir
 import numpy as np
 import plotly.io as pio
 from plotly.io._sg_scraper import plotly_sg_scraper
