@@ -1,5 +1,6 @@
 """Sphinx documentation configuration file."""
 
+from atsphinx.mini18n import get_template_dir
 from datetime import datetime
 import os
 from pathlib import Path
@@ -108,6 +109,7 @@ extensions = [
     "sphinx.ext.graphviz",
     "ansys_sphinx_theme.extension.linkcode",
     "sphinx.ext.mathjax",
+    'atsphinx.mini18n',
 ]
 
 # Intersphinx mapping
@@ -175,7 +177,7 @@ html_css_files = [
 panels_add_fontawesome_latex = True
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+templates_path = ["_templates", get_template_dir()]
 
 # The suffix(es) of source filenames.
 source_suffix = ".rst"
@@ -298,6 +300,10 @@ sphinx_gallery_conf = {
 html_short_title = html_title = "PyMAPDL"
 html_theme = "ansys_sphinx_theme"
 html_theme_options = {
+    "navbar_start": [
+        "navbar-logo",
+        "mini18n/snippets/select-lang",
+    ],
     "logo": "pyansys",
     "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
     "github_url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}",
