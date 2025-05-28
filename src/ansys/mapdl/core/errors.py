@@ -99,10 +99,15 @@ class MapdlException(Exception):
     """MAPDL general exception"""
 
     def __init__(self, msg: str = "", notes: str = ""):
-        msg_lines = msg.splitlines()
-        msg_lines_ = [color_text(msg_lines[0], "ERRORS", True)]
-        msg_lines_.extend(msg_lines[1:])
-        msg = "\n".join(msg_lines_)
+
+        if msg:
+            msg_lines = msg.splitlines()
+
+            # If there are multiple lines, color the first line
+            msg_lines_ = [color_text(msg_lines[0], "ERRORS", True)]
+            msg_lines_.extend(msg_lines[1:])
+
+            msg = "\n".join(msg_lines_)
 
         self.msg = msg
         self.notes = notes
