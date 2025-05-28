@@ -190,11 +190,45 @@ If this command doesn't launch MAPDL, look at the command output:
 
 .. vale on
 
+
+Message Passing Interface (MPI) issues
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you are using a distributed memory parallel (DMP) version of MAPDL, you might
+experience issues with the Message Passing Interface (MPI) communication libraries when running on AMD processors.
+By default, MAPDL uses OpenMPI as MPI implementation when running on AMD processors.
+If this has not being installed or you are trying to use IntelMPI on AMD processors, you might see an error similar to the following one:
+
+.. code:: text
+
+    line 430: mpirun: command not found
+
+
+You can make sure you are using OpenMPI by passing the ``-mpi openmpi`` option to the :func:`launch_mapdl() <ansys.mapdl.core.launcher.launch_mapdl>` method.
+
+.. code:: python
+
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(additional_switches="-mpi openmpi")
+
+Additionally, you can try to run MAPDL in shared memory parallel (SMP) mode by passing the ``-smp`` option.
+
+.. code:: python
+
+    from ansys.mapdl.core import launch_mapdl
+
+    mapdl = launch_mapdl(additional_switches="-smp")
+
+
+See also :ref:`vpn_issues_troubleshooting` for incompatibilities between the VPN and the MPI communication.
+
+
 Licensing issues
 ~~~~~~~~~~~~~~~~
 
 Incorrect license server configuration can prevent MAPDL from being able to get a valid license.
-In such cases, you might see output **similar** to:
+In such cases, if you try to start MAPDL from the command line you might see an output **similar** to:
 
 
 .. tab-set::
@@ -239,12 +273,17 @@ In such cases, you might see output **similar** to:
             FlexNet Licensing error:-5,357
 
 
-PADT has a great blog regarding ANSYS issues, and licensing is always a common issue. For 
-example, see `Changes to Licensing at ANSYS 2020R1 <padt_licensing_>`_. If you are responsible
-for maintaining Ansys licensing or have a personal install of Ansys, see the online
+If there are not enough licenses available, you might see an error similar to the above one. 
+In these cases you should contact your Ansys license administrator at your organization.
+
+If you are responsible for maintaining Ansys licensing or have a personal installation of Ansys, see the online
 `Ansys Installation and Licensing documentation <ansys_installation_and_licensing_>`_.
+In case you are not able to find the information you need, you can open a customer request ticket.
 
 For more comprehensive information, download the :download:`ANSYS Licensing Guide <lic_guide.pdf>`.
+PADT has a great blog regarding ANSYS issues, and licensing is always a common issue. For 
+example, see `Changes to Licensing at ANSYS 2020R1 <padt_licensing_>`_. 
+
 
 Incorrect licensing environment variables
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

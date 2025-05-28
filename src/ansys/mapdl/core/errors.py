@@ -183,6 +183,13 @@ class LicenseServerConnectionError(MapdlDidNotStart):
         super().__init__(msg)
 
 
+class NotAvailableLicenses(MapdlDidNotStart):
+    """Provides the error when the license server is not available."""
+
+    def __init__(self, msg=""):
+        super().__init__(msg)
+
+
 class IncorrectWorkingDirectory(OSError, MapdlRuntimeError):
     """Raised when the MAPDL working directory does not exist."""
 
@@ -277,6 +284,13 @@ class CommandDeprecated(DeprecationError):
 
 class MapdlgRPCError(MapdlRuntimeError):
     """Raised when gRPC issues are found"""
+
+    def __init__(self, msg=""):
+        super().__init__(msg)
+
+
+class IncorrectMPIConfigurationError(MapdlDidNotStart):
+    """Raised when the MPI configuration is incorrect"""
 
     def __init__(self, msg=""):
         super().__init__(msg)
