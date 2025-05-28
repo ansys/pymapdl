@@ -21,17 +21,22 @@
 # SOFTWARE.
 
 """PyMAPDL specific errors"""
-from functools import wraps
+from enum import Enum
+from functools import cache, wraps
 import signal
+import sys
 import threading
 from time import sleep
-from typing import Any, Callable, Dict, Iterable, List, Optional, Tuple
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple
+
+if TYPE_CHECKING:
+    from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
 import grpc
 
 from ansys.mapdl.core import LOG as logger
 
-SIGINT_TRACKER: List = []
+SIGINT_TRACKER: List[bool] = []
 
 # Configuration of 'protect_grpc' wrapper
 N_ATTEMPTS = 5
@@ -55,77 +60,123 @@ TYPE_MSG: str = (
 )
 
 
+@cache
+def terminal_support_color() -> bool:
+    """Check if the terminal supports color output."""
+    # This is a simple check, you can expand it based on your requirements
+    return sys.stdout.isatty()
+
+
+class bcolors(Enum):
+    NOTES = "\033[92m"  # Green
+    WARNINGS = "\033[93m"  # Yellow
+    ERRORS = "\033[91m"  # Red
+    INFO = "\033[94m"  # Blue
+
+    # ANSI escape sequences for colors
+    HEADER = "\033[95m"
+    OKBLUE = "\033[94m"
+    OKCYAN = "\033[96m"
+    OKGREEN = "\033[92m"
+    WARNING = "\033[93m"
+    FAIL = "\033[91m"
+    ENDC = "\033[0m"
+    BOLD = "\033[1m"
+    UNDERLINE = "\033[4m"
+
+
+def color_text(text: str, color: str, bold: bool = False) -> str:
+    """Color the text if terminal supports color."""
+    bold_ = bcolors.BOLD.value if bold else ""
+
+    if terminal_support_color():
+        return f"{bcolors[color].value}{bold_}{text}{bcolors.ENDC.value}"
+    return text
+
+
 ## Abraham class
 class MapdlException(Exception):
     """MAPDL general exception"""
 
-    def __init__(self, msg=""):
+    def __init__(self, msg: str = "", notes: str = ""):
+        msg_lines = msg.splitlines()
+        msg_lines_ = [color_text(msg_lines[0], "ERRORS", True)]
+        msg_lines_.extend(msg_lines[1:])
+        msg = "\n".join(msg_lines_)
+
+        self.msg = msg
+        self.notes = notes
+
         super().__init__(msg)
+
+    def __str__(self):
+        """Return the string representation of the exception."""
+        msg = self.msg
+        if self.notes:
+            msg += f"\n{color_text('NOTES:', 'NOTES')} {self.notes}"
+        return msg
 
 
 ## Main subclasses
 class MapdlValueError(MapdlException, ValueError):
     """MAPDL Value error"""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class MapdlFileNotFoundError(MapdlException, FileNotFoundError):
     """Error when file is not found"""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class MapdlRuntimeError(MapdlException, RuntimeError):
     """Raised when MAPDL passes an error"""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 ## Inheritated
 class ANSYSDataTypeError(MapdlValueError):
     """Raised when and invalid data type is sent to APDLMath"""
 
-    def __init__(self, msg=TYPE_MSG):
-        super().__init__(msg)
+    def __init__(self, msg=TYPE_MSG, notes: str = ""):
+        super().__init__(msg=msg, notes=notes)
 
 
 class VersionError(MapdlValueError):
     """Raised when MAPDL is the wrong version"""
 
-    def __init__(self, msg="Invalid MAPDL version"):
-        super().__init__(msg)
+    def __init__(self, msg="Invalid MAPDL version", notes: str = ""):
+        super().__init__(msg=msg, notes=notes)
 
 
 class NoDistributedFiles(MapdlFileNotFoundError):
     """Unable to find any distributed result files"""
 
-    def __init__(self, msg="Unable to find any distributed result files"):
-        super().__init__(msg)
+    def __init__(
+        self, msg="Unable to find any distributed result files", notes: str = ""
+    ):
+        super().__init__(msg=msg, notes=notes)
 
 
 class MapdlInvalidRoutineError(MapdlRuntimeError):
     """Raised when MAPDL is in the wrong routine"""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class MapdlCommandIgnoredError(MapdlRuntimeError):
     """Raised when MAPDL ignores a command."""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class MapdlExitedError(MapdlRuntimeError):
     """Raised when MAPDL has exited"""
 
-    def __init__(self, msg="MAPDL has exited"):
-        super().__init__(msg)
+    def __init__(self, msg="MAPDL has exited", notes: str = ""):
+        super().__init__(msg=msg, notes=notes)
 
 
 class NotEnoughResources(MapdlExitedError):
@@ -133,30 +184,58 @@ class NotEnoughResources(MapdlExitedError):
 
     def __init__(
         self,
-        msg="MAPDL has exited because there is not enough resources ({resource})",
-        resource="CPUs",
+        msg: str = "MAPDL has exited because there is not enough resources ({resource})",
+        notes: str = "",
+        resource: str = "CPUs",
     ):
-        super().__init__(msg.format(resource=resource))
+        super().__init__(msg=msg.format(resource=resource), notes=notes)
 
 
 class LockFileException(MapdlRuntimeError):
     """Error message when the lockfile has not been removed"""
 
-    def __init__(self, msg=LOCKFILE_MSG):
-        super().__init__(msg)
+    def __init__(self, msg=LOCKFILE_MSG, notes: str = ""):
+        super().__init__(msg=msg, notes=notes)
 
 
 class MapdlDidNotStart(MapdlRuntimeError):
     """Error when the MAPDL process does not start"""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    def __init__(
+        self,
+        msg: str = "MAPDL failed to start",
+        notes: str = "",
+        stdout: str = "",
+        stderr: str = "",
+    ):
+        super().__init__(msg=msg, notes=notes)
+        self.stdout = stdout
+        self.stderr = stderr
+
+    def __str__(self):
+        """Return the string representation of the exception."""
+        msg = self.msg
+
+        if self.stdout:
+            msg += (
+                f"\n{color_text('Terminal output (STDOUT):', 'INFO')}\n {self.stdout}"
+            )
+
+        if self.stderr:
+            msg += f"\n{color_text('Terminal error output (STDERR):', 'INFO')}\n {self.stderr}"
+
+        if self.notes:
+            msg += f"\n{color_text('NOTES:', 'NOTES')} {self.notes}"
+
+        return msg
 
 
 class PortAlreadyInUse(MapdlDidNotStart):
     """Error when the port is already occupied"""
 
-    def __init__(self, port=50052, msg="The port {port} is already being used."):
+    def __init__(
+        self, port: int = 50052, msg: str = "The port {port} is already being used."
+    ):
         super().__init__(msg.format(port=port))
 
 
@@ -164,122 +243,108 @@ class PortAlreadyInUseByAnMAPDLInstance(PortAlreadyInUse):
     """Error when the port is already occupied"""
 
     def __init__(
-        self, port=50052, msg="The port {port} is already used by an MAPDL instance."
+        self,
+        port: int = 50052,
+        msg: str = "The port {port} is already used by an MAPDL instance.",
     ):
-        super().__init__(msg.format(port=port))
+        super().__init__(port=port, msg=msg)
 
 
 class MapdlConnectionError(MapdlRuntimeError):
     """Provides the error when connecting to the MAPDL instance fails."""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class LicenseServerConnectionError(MapdlDidNotStart):
     """Provides the error when the license server is not available."""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class IncorrectWorkingDirectory(OSError, MapdlRuntimeError):
     """Raised when the MAPDL working directory does not exist."""
 
     # The working directory specified (wrong_path) is not a directory.
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class DifferentSessionConnectionError(MapdlRuntimeError):
     """Provides the error when connecting to the MAPDL instance fails."""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class DeprecationError(MapdlRuntimeError):
     """Provides the error for deprecated commands, classes, interfaces, etc"""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class MapdlError(MapdlException):
     """General MAPDL Error"""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class MapdlWarning(MapdlException):
     """General MAPDL warning"""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class MapdlNote(MapdlException):
     """General MAPDL note"""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class MapdlInfo(MapdlException):
     """General MAPDL info message"""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class MapdlVersionError(MapdlException):
     """Incompatible MAPDL version"""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class EmptyRecordError(MapdlRuntimeError):
     """Raised when a record is empty"""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class ComponentNoData(MapdlException):
     """Raised when the component has no data"""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class ComponentIsNotSelected(MapdlException):
     """Raised when the component is not selected"""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class ComponentDoesNotExits(MapdlException):
     """Raised when the component does not exist"""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class CommandDeprecated(DeprecationError):
     """Raised when a command is deprecated"""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 class MapdlgRPCError(MapdlRuntimeError):
     """Raised when gRPC issues are found"""
 
-    def __init__(self, msg=""):
-        super().__init__(msg)
+    pass
 
 
 # handler for protect_grpc
@@ -403,7 +468,7 @@ def protect_grpc(func: Callable) -> Callable:
     return wrapper
 
 
-def retrieve_mapdl_from_args(args: Iterable[Any]) -> "Mapdl":
+def retrieve_mapdl_from_args(args: tuple[Any]) -> "MapdlGrpc":
     # can't use isinstance here due to circular imports
     try:
         class_name = args[0].__class__.__name__
@@ -414,13 +479,17 @@ def retrieve_mapdl_from_args(args: Iterable[Any]) -> "Mapdl":
         mapdl = args[0]
     elif hasattr(args[0], "_mapdl"):
         mapdl = args[0]._mapdl
+    else:
+        raise TypeError(
+            "The first argument must be a MapdlGrpc instance or an object with a '_mapdl' attribute."
+        )
 
     return mapdl
 
 
 def handle_generic_grpc_error(
-    error: Exception,
-    func: Callable,
+    error: grpc.RpcError,
+    func: Callable[..., Any],
     args: Tuple[Any],
     kwargs: Dict[Any, Any],
     reason: str = "",
