@@ -109,7 +109,7 @@ extensions = [
     "sphinx.ext.graphviz",
     "ansys_sphinx_theme.extension.linkcode",
     "sphinx.ext.mathjax",
-    'atsphinx.mini18n',
+    "atsphinx.mini18n",
 ]
 
 # Intersphinx mapping
