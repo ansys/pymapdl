@@ -446,6 +446,10 @@ epub_title = project
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ["search.html"]
 
+# -- atsphinx.mini18n options -------------------------------------------------
+mini18n_default_language = language
+mini18n_support_languages = ['en', 'ja']
+locale_dirs = ['../../pymapdl-doc-translations/locale']
 
 def setup(app: Sphinx):
     """Add custom configuration to sphinx app.
