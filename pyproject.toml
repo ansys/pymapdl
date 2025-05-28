@@ -86,7 +86,7 @@ tests = [
 ]
 
 doc = [
-  'atsphinx-mini18n==0.4.1',
+  "atsphinx-mini18n==0.4.1",
     "ansys-dpf-core[graphics]==0.13.6",
     "ansys-mapdl-reader==0.55.1",
     "ansys-sphinx-theme==1.4.4",
