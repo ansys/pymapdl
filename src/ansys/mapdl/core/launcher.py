@@ -1798,7 +1798,7 @@ def launch_mapdl(
                 lic_check.check()  # type: ignore
 
             # Catching exceptions and provide custom error messages
-            raise handle_launch_exception(exception)
+            raise handle_launch_exceptions(exception)
 
         if args["just_launch"]:
             out: list[Any] = [args["ip"], args["port"]]
@@ -3112,7 +3112,7 @@ def inject_additional_switches(args: dict[str, Any]) -> dict[str, Any]:
     return args
 
 
-def handle_launch_exception(exception: Exception) -> Exception:
+def handle_launch_exceptions(exception: Exception) -> Exception:
     """Handle exceptions raised during MAPDL launch
 
     Parameters
@@ -3122,16 +3122,16 @@ def handle_launch_exception(exception: Exception) -> Exception:
     """
     exception_msg = str(exception)
 
-    if "mpirun: command not found" in exception_msg.lower():
+    if "mpirun: command not found" in exception_msg:
         from ansys.mapdl.core.errors import IncorrectMPIConfigurationError
 
         msg = exception_msg + (
             "\n\n"
             "The 'mpirun' command was not found. "
-            "Please ensure that MPI is installed and configured correctly. "
+            "Please ensure that MPI is installed and configured correctly.\n"
             "If you are using a cluster, ensure that the MPI environment is set up properly.\n"
             "If you are using a local machine, ensure that MPI is installed and the "
-            "'mpirun' command is available in your PATH. "
+            "'mpirun' command is available in your PATH.\n"
             "Additionally, make sure that the selected MPI is compatible with your CPU architecture.\n"
             "For more information visit: "
             "https://mapdl.docs.pyansys.com/version/stable/user_guide/troubleshoot.html#launching-issues"
