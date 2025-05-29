@@ -235,6 +235,43 @@ class start_parameters_type(TypedDict):
     timeout: int
 
 
+class QueueWithStorage(Queue[bytes | str]):
+    """A queue that stores all items permanently.
+
+    This queue is used to store the MAPDL instances created during the
+    documentation gallery building.
+    """
+
+    _storage: list[bytes | str] = []
+
+    def get(
+        self: "QueueWithStorage", block: bool = True, timeout: float | None = None
+    ) -> bytes | str:
+        """Get an item from the queue."""
+        item = super().get(block=block, timeout=timeout)
+        self._storage.append(item)
+        return item
+
+    @property
+    def storage(self) -> list[bytes | str]:
+        """Get the storage of the queue."""
+        return self._storage
+
+    @property
+    def storage_text(self) -> str:
+        """Get the storage of the queue as a string."""
+        return "".join(
+            [
+                (
+                    item.decode(encoding="utf-8", errors="replace")
+                    if isinstance(item, bytes)
+                    else str(item)
+                )
+                for item in self.storage
+            ]
+        )
+
+
 def _is_ubuntu() -> bool:
     """Determine if running as Ubuntu.
 
@@ -666,7 +703,7 @@ def _check_file_error_created(run_location: str, timeout: int):
         raise MapdlDidNotStart(msg)
 
 
-def _check_server_is_alive(stdout_queue: Queue[bytes], timeout: int):
+def _check_server_is_alive(stdout_queue: QueueWithStorage, timeout: int):
     if not stdout_queue:
         LOG.debug("No STDOUT queue. Not checking MAPDL this way.")
         return
@@ -702,7 +739,7 @@ def _check_server_is_alive(stdout_queue: Queue[bytes], timeout: int):
         raise MapdlDidNotStart("MAPDL failed to start the gRPC server")
 
 
-def _get_std_output(std_queue: Queue[bytes], timeout: int = 1) -> str:
+def _get_std_output(std_queue: QueueWithStorage | None, timeout: int = 1) -> str:
     if not std_queue:
         return ""
 
@@ -719,13 +756,13 @@ def _get_std_output(std_queue: Queue[bytes], timeout: int = 1) -> str:
 
 def _create_queue_for_std(
     std: IO[bytes] | None,
-) -> Tuple[Optional[Queue[bytes]], Optional[threading.Thread]]:
+) -> Tuple[Optional[QueueWithStorage], Optional[threading.Thread]]:
     """Create a queue and thread objects for a given PIPE std"""
     if not std:
         LOG.debug("No STDOUT. Not checking MAPDL this way.")
         return None, None
 
-    def enqueue_output(out: IO[bytes], queue: Queue[bytes]) -> None:
+    def enqueue_output(out: IO[bytes], queue: QueueWithStorage) -> None:
         try:
             for line in iter(out.readline, b""):
                 queue.put(line)
@@ -735,7 +772,7 @@ def _create_queue_for_std(
             # ValueError: PyMemoryView_FromBuffer(): info -> buf must not be NULL
             pass
 
-    q: Queue[bytes] = QueueWithPermanentStorage()
+    q: QueueWithStorage = QueueWithStorage()
     t: threading.Thread = threading.Thread(target=enqueue_output, args=(std, q))
     t.daemon = True  # thread dies with the program
     t.start()
@@ -3085,7 +3122,7 @@ def handle_launch_exception(exception: Exception) -> Exception:
     """
     exception_msg = str(exception)
 
-    if "mpirun: command not found" in exception_msg:
+    if "mpirun: command not found" in exception_msg.lower():
         from ansys.mapdl.core.errors import IncorrectMPIConfigurationError
 
         msg = exception_msg + (
@@ -3113,33 +3150,3 @@ def handle_launch_exception(exception: Exception) -> Exception:
         return NotAvailableLicenses(msg)
 
     return exception
-
-
-class QueueWithPermanentStorage(Queue):
-    """A queue that stores all items permanently.
-
-    This queue is used to store the MAPDL instances created during the
-    documentation gallery building.
-    """
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._storage: list[Any] = []  # type: ignore
-
-    def get(self, *args, **kwargs) -> Any:
-        """Get an item from the queue."""
-        item = super().get(*args, **kwargs)
-        self._storage.append(item)
-        return item
-
-    @property
-    def storage(self) -> list[Any]:
-        """Get the storage of the queue."""
-        return self._storage
-
-    @property
-    def storage_text(self) -> str:
-        """Get the storage of the queue as a string."""
-        return "".join(
-            [item.decode(encoding="utf-8", errors="replace") for item in self._storage]
-        )
