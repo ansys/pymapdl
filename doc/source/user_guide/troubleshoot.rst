@@ -197,7 +197,7 @@ Message Passing Interface (MPI) issues
 If you are using a distributed memory parallel (DMP) version of MAPDL, you might
 experience issues with the Message Passing Interface (MPI) communication libraries when running on AMD processors.
 By default, MAPDL uses OpenMPI as MPI implementation when running on AMD processors.
-If this has not being installed or you are trying to use IntelMPI on AMD processors, you might see an error similar to the following one:
+If this has not been installed or you are trying to use IntelMPI on AMD processors, you might see an error similar to the following one:
 
 .. code:: text
 
