@@ -305,10 +305,13 @@ jobs:
           echo "Checking out '${{ env.PR_BASE_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}/${{ env.PR_HEAD_BRANCH }}'"
           git checkout -b ${{ env.PR_BASE_BRANCH }} head_repo/${{ env.PR_HEAD_BRANCH }}
 
-          echo "\033[1;92m[INFO] Merging '${{ env.PR_HEAD_BRANCH }}' branch into '${{ env.PR_BASE_BRANCH }}' \033[0m"
-          git merge head_repo/${{ env.PR_HEAD_BRANCH }}
+          echo "\033[1;92m[INFO] Merging 'main' branch into '${{ env.PR_BASE_BRANCH }}' \033[0m"
+          git merge origin/main
+
+          # Check for merge conflicts
           CONFLICTS=$(git ls-files -u | wc -l)
-          echo "CONFLICTS=$CONFLICTS"
+          echo "Merge conflicts:"
+          echo "${CONFLICTS}"
 
           if [[ "$CONFLICTS" -gt 0 && -n "${{ env.MODE }}" ]]; then
             echo "::warning:: Conflicts trying to solve using mode '${{ env.MODE }}'."
