@@ -79,19 +79,19 @@ jobs:
             let prNumber, userTriggering, commentBody;
 
             if (eventName === "workflow_dispatch") {
-              core.info('Running in workflow_dispatch mode');
+              core.info('Running in "workflow_dispatch" mode');
 
-              prNumber = '${{ github.event.inputs.issue_number }}';
-              userTriggering = '${{ github.event.inputs.actor }}';
-              commentBody = '${{ github.event.inputs.comment_body }}';
-              commentId = '${{ github.event.inputs.comment_id }}';
+              prNumber = `${{ github.event.inputs.issue_number }}`;
+              userTriggering = `${{ github.event.inputs.actor }}`;
+              commentBody = `${{ github.event.inputs.comment_body }}`;
+              commentId = `${{ github.event.inputs.comment_id }}`;
             } else {
-              core.info('Running in issue_comment mode');
+              core.info('Running in "issue_comment" mode');
 
-              prNumber = '${{ github.event.issue.number }}';
-              userTriggering = '${{ github.event.comment.user.login }}';
-              commentBody = '${{ github.event.comment.body }}';
-              commentId = '${{ github.event.comment.id }}';
+              prNumber = `${{ github.event.issue.number }}`;
+              userTriggering = `${{ github.event.comment.user.login }}`;
+              commentBody = `${{ github.event.comment.body }}`;
+              commentId = `${{ github.event.comment.id }}`;
             }
             core.debug(`PR Number: ${prNumber}`);
             core.debug(`User triggering: ${userTriggering}`);
@@ -295,15 +295,17 @@ jobs:
           git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
           git config pull.rebase true
 
-          echo "Adding ${{ env.PR_HEAD_REPO }} as remote"
+          echo "\033[1;92m[INFO]Adding ${{ env.PR_HEAD_REPO }} as remote \033[0m"
           git remote add head_repo https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ env.PR_HEAD_REPO }}.git
 
-          echo "Fetching '${{ env.PR_HEAD_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}'"
+          echo "\033[1;92m[INFO]Fetching '${{ env.PR_HEAD_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}' \033[0m"
           git fetch head_repo ${{ env.PR_HEAD_BRANCH }}
-          git pull head_repo ${{ env.PR_HEAD_BRANCH }}
 
-          echo "Checking out '${{ env.PR_BASE_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}/${{ env.PR_HEAD_BRANCH }}'"
+          echo "\033[1;92m[INFO] Checking out '${{ env.PR_BASE_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}/${{ env.PR_HEAD_BRANCH }}' \033[0m"
           git checkout -b ${{ env.PR_BASE_BRANCH }} head_repo/${{ env.PR_HEAD_BRANCH }}
+
+          echo  "\033[1;92m[INFO] Pulling '${{ env.PR_HEAD_BRANCH }}' from '${{ env.PR_BASE_REPO }}' \033[0m"
+          git pull head_repo ${{ env.PR_HEAD_BRANCH }}
 
           echo "\033[1;92m[INFO] Merging 'main' branch into '${{ env.PR_BASE_BRANCH }}' \033[0m"
           git merge origin/main
