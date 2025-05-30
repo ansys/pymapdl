@@ -109,14 +109,14 @@ class Controls:
         The :ref:`shell` command can be used (for shell elements) to specify a location (TOP, MID, BOT)
         within the layer for selection on the :ref:`esol` command. Transverse shear stresses for MID are
         linearly averaged from TOP and BOT, and do not reflect a parabolic distribution. Setting KEYOPT(8) =
-        2 for ``SHELL181``, ``SHELL208``, ``SHELL209``, ``SHELL281``, and ``ELBOW290``writes the mid-surface
-        values directly to the results file and yields more accurate values than linear averaging.
+        2 for ``SHELL181``, ``SHELL208``, ``SHELL209``, ``SHELL281``, and ``ELBOW290`` writes the mid-
+        surface values directly to the results file and yields more accurate values than linear averaging.
 
         That this command cannot be used for energy output, as energy is a per-element quantity.
 
         When using the :ref:`layerp26` command with ``SHELL181``, ``SOLID185``, ``SOLID186``, ``SOLSH190``,
         ``SHELL208``, or ``SHELL209``, KEYOPT(8) must be set to 1 (or 2 for ``SHELL181``, ``SHELL208``,
-        ``SHELL209``, ``SHELL281``, and ``ELBOW290``) in order to store results for all layers.
+        ``SHELL209``, ``SHELL281``, and ``ELBOW290`` ) in order to store results for all layers.
 
         In POST26, the :ref:`esol` data stored is based on the active :ref:`layerp26` specification at the
         time the data is stored. To store data at various specifications (for example, layers 2 and 5),

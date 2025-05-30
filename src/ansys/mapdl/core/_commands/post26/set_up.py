@@ -136,7 +136,7 @@ class SetUp:
 
         **Default:** If ``Mat``, ``Real``, and ``Ename`` are not specified, all elements attached to the
         node are considered. When a material ID, real constant ID, or element-type discontinuity is detected
-        at a node, a message is issued. For example, in a FSI analysis, a ``FLUID30``element at the
+        at a node, a message is issued. For example, in a FSI analysis, a ``FLUID30`` element at the
         structure interface would be considered; however, because it contains no SX result, it is not used
         during :ref:`store` operations.
 
@@ -153,7 +153,7 @@ class SetUp:
              - Description
            * - :rspan:`3` S
              - X, Y, Z, XY, YZ, XZ
-             - Component stress. This item stores `nodal-averaged results<https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost>`_ ifthey are available on the results file.
+             - Component stress. This item stores `nodal-averaged results <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost>`_ if they are available on the results file.
            * - 1, 2, 3
              - Principal stress.
            * - INT
@@ -221,7 +221,7 @@ class SetUp:
            * - PLWK
              - Plastic work/volume.
            * - :rspan:`9` CONT
-             - STAT For more information about the meaning of contact status and its possible values, see `ReviewingResults in POST1<https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_revresu.html#ctecpostslide>`_
+             - STAT For more information about the meaning of contact status and its possible values, see `Reviewing Results in POST1 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_revresu.html#ctecpostslide>`_
              - Contact status.
            * - PENE
              - Contact penetration.
@@ -646,7 +646,7 @@ class SetUp:
            * - PLWK
              - Plastic work/volume.
            * - :rspan:`7` SEND
-             - ELASTIC The results for this postprocessing SEND component are invalid for ``ELBOW290``if that element isused with viscoelastic or viscohyperelastic materials.
+             - ELASTIC The results for this postprocessing SEND component are invalid for ``ELBOW290`` if that element is used with viscoelastic or viscohyperelastic materials.
              - Elastic strain energy density. (For `viscoelastic <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/evis.html#mat_harmvisco>`_ and `sintering <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/amp8sq21dldm.html#>`_ materials, the `stored energy <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/evis.html#eq92b60ee3-7e22-457b-9543-53f86d16432a>`_.)
            * - PLASTIC
              - Plastic strain energy density.
@@ -686,7 +686,7 @@ class SetUp:
              - X,XY,XZ
              - Interface separation.
            * - :rspan:`9` CONT
-             - STAT For more information about the meaning of contact status and its possible values, see `ReviewingResults in POST1<https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_revresu.html#ctecpostslide>`_
+             - STAT For more information about the meaning of contact status and its possible values, see `Reviewing Results in POST1 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ctec/Hlp_ctec_revresu.html#ctecpostslide>`_
              - Contact status.
            * - PENE
              - Contact penetration.
@@ -706,7 +706,7 @@ class SetUp:
              - Total number of contact status changes during substep.
            * - FPRS
              - Fluid penetration pressure.
-           * - TG For ``SHELL131``and ``SHELL132``elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3,..., HTOP instead of HEAT.
+           * - TG For ``SHELL131`` and ``SHELL132`` elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3,..., HTOP instead of HEAT.
              - X, Y, Z, SUM
              - Component thermal gradient or vector sum.
            * - TF
@@ -787,7 +787,7 @@ class SetUp:
            * - DENE
              -
              - Damping energy.
-           * - WEXT WEXT is calculated for element-based loading only (and not for nodal-force loading). WEXT is storedon elements to which loading has been applied; if surface elements are added on top of otherelements, for example, and pressure loading is applied to the surface elements, WEXT is availablefor the surface elements only.
+           * - WEXT WEXT is calculated for element-based loading only (and not for nodal-force loading). WEXT is stored on elements to which loading has been applied; if surface elements are added on top of other elements, for example, and pressure loading is applied to the surface elements, WEXT is available for the surface elements only.
              -
              - Work due to external load.
            * - AENE
@@ -859,7 +859,7 @@ class SetUp:
            * - BKS
              - X, Y, Z, XY, YZ, XZ
              - Total `nonlinear kinematic backstress <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/amp8sq21dldm.html#>`_ reported in the current configuration (unaffected by :ref:`rsys` ). Available for 3D, plane strain, and axisymmetric elements.
-           * - BKS1,...,BKS5
+           * - BKS1....,BKS5
              - X, Y, Z, XY, YZ, XZ
              - Superimposed components of the total `nonlinear kinematic backstress`_ reported in the current configuration (unaffected by :ref:`rsys` ). Available for 3D, plane strain, and axisymmetric elements when more than one superimposed back-stress component is defined.
            * - EPFR
@@ -1099,7 +1099,7 @@ class SetUp:
 
         .. _JSOL_notes:
 
-        This command is valid for the ``MPC184``joint elements. The values stored are for the free or
+        This command is valid for the ``MPC184`` joint elements. The values stored are for the free or
         unconstrained degrees of freedom of a joint element. Relative reaction forces and moments are
         available only if stiffness, damping, or friction is associated with the joint element.
         .. _jsol_tab_1:
@@ -1265,7 +1265,7 @@ class SetUp:
 
         .. _NSOL_temp:
 
-        For ``SHELL131``and ``SHELL132``elements with KEYOPT(3) = 0 or 1, use the labels TBOT, TE2, TE3,..
+        For ``SHELL131`` and ``SHELL132`` elements with KEYOPT(3) = 0 or 1, use the labels TBOT, TE2, TE3,..
         ., TTOP instead of TEMP.
         """
         command = f"NSOL,{nvar},{node},{item},{comp},{name},{sector}"
@@ -1406,7 +1406,7 @@ class SetUp:
 
         .. _rforce_table1_note1:
 
-        For ``SHELL131``and ``SHELL132``elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3,..
+        For ``SHELL131`` and ``SHELL132`` elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3,..
         ., HTOP instead of HEAT.
         """
         command = f"RFORCE,{nvar},{node},{item},{comp},{name}"
@@ -1555,9 +1555,9 @@ class SetUp:
 
         freq : str
             A frequency value, or an array containing frequency values (Hz). Use :ref:`dim` to define the
-            array and enclose the array name in percent signs (for example, :ref:`store`,,,,``%arrayname``
-            %). A default value of 1% of damping is considered for clustering around the user-input
-            frequency values. Supported for ``Lab`` = PSD only.
+            array and enclose the array name in percent signs (for example,
+            :ref:`store`,,,,``%arrayname%``). A default value of 1% of damping is considered for clustering
+            around the user-input frequency values. Supported for ``Lab`` = PSD only.
 
         toler : str
             Tolerance to determine if a user-input frequency value ( ``FREQ`` ) is a duplicate and can be

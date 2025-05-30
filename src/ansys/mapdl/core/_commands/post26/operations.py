@@ -59,7 +59,8 @@ class Operations:
         For a complex number (a + i b), the absolute value is the magnitude, where the ``IA`` values are
         obtained from:
 
-         a 2  +  b 2
+        .. math::
+
         See `POST26 - Data Operations
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_post10.html#eqbe42048a-448b-4de9-91a9-1c8007937622>`_
          in the `Mechanical APDL Theory Reference
@@ -852,7 +853,7 @@ class Operations:
 
         Forms the square root of a variable according to the operation:
 
-        I R  =   F A C T A  ×  I A
+        .. math::
         """
         command = f"SQRT,{ir},{ia},,,{name},,,{facta}"
         return self.run(command, **kwargs)
