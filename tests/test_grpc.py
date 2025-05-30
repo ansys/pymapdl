@@ -613,14 +613,11 @@ def test__check_stds(mapdl):
         mapdl._mapdl_process = process
         mapdl._create_process_stds_queue(process)
 
-        # this should raise no issues
-        mapdl._post_mortem_checks(process)
-
         with pytest.raises(MapdlDidNotStart):
             _check_server_is_alive(mapdl._stdout_queue, 0.5)
 
-        assert isinstance(mapdl._stdout, list)
-        assert isinstance(mapdl._stderr, list)
+        assert isinstance(mapdl._stdout, str)
+        assert isinstance(mapdl._stderr, str)
 
         assert (
             mapdl._stdout

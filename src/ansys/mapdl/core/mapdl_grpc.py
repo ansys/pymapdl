@@ -675,6 +675,7 @@ class MapdlGrpc(MapdlBase):
         """Check the stdout and stderr for any errors."""
         if stdout is None:
             stdout = self._stdout
+
         if stderr is None:
             stderr = self._stderr
 
@@ -692,7 +693,9 @@ class MapdlGrpc(MapdlBase):
         """Parse the stderr for any errors."""
         if stderr is None:
             stderr = self._stderr
+
         errs = self._parse_std(stderr)
+
         if errs:
             self._log.debug("MAPDL exited with errors in stderr.")
 

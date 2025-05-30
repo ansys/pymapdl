@@ -235,6 +235,43 @@ class start_parameters_type(TypedDict):
     timeout: int
 
 
+class QueueWithStorage(Queue[bytes | str]):
+    """A queue that stores all items permanently.
+
+    This queue is used to store the MAPDL instances created during the
+    documentation gallery building.
+    """
+
+    _storage: list[bytes | str] = []
+
+    def get(
+        self: "QueueWithStorage", block: bool = True, timeout: float | None = None
+    ) -> bytes | str:
+        """Get an item from the queue."""
+        item = super().get(block=block, timeout=timeout)
+        self._storage.append(item)
+        return item
+
+    @property
+    def storage(self) -> list[bytes | str]:
+        """Get the storage of the queue."""
+        return self._storage
+
+    @property
+    def storage_text(self) -> str:
+        """Get the storage of the queue as a string."""
+        return "".join(
+            [
+                (
+                    item.decode(encoding="utf-8", errors="replace")
+                    if isinstance(item, bytes)
+                    else str(item)
+                )
+                for item in self.storage
+            ]
+        )
+
+
 def _is_ubuntu() -> bool:
     """Determine if running as Ubuntu.
 
@@ -622,13 +659,18 @@ def check_mapdl_launch(
         msg = (
             str(e)
             + f"\nRun location: {run_location}"
-            + f"\nCommand line used: {' '.join(cmd)}\n\n"
+            + f"\nCommand line used: {' '.join(cmd)}"
         )
 
-        if stdout_queue is not None:
-            terminal_output = "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
-            if terminal_output.strip():
-                msg = msg + "The full terminal output is:\n\n" + terminal_output
+        stderr_queue, _ = _create_queue_for_std(process.stderr)
+
+        stderr_out = _get_std_output(std_queue=stderr_queue)
+        if stderr_out.strip():
+            msg = msg + "\n\nThe terminal error output (stderr) is:\n\n" + stderr_out
+
+        stdout_out = _get_std_output(std_queue=stdout_queue)
+        if stdout_out.strip():
+            msg = msg + "\n\nThe terminal output (stdout) is:\n\n" + stdout_out
 
         raise MapdlDidNotStart(msg) from e
 
@@ -661,21 +703,21 @@ def _check_file_error_created(run_location: str, timeout: int):
         raise MapdlDidNotStart(msg)
 
 
-def _check_server_is_alive(stdout_queue: Queue[bytes], timeout: int):
+def _check_server_is_alive(stdout_queue: QueueWithStorage, timeout: int):
     if not stdout_queue:
         LOG.debug("No STDOUT queue. Not checking MAPDL this way.")
         return
 
     t0 = time.time()
-    empty_attemps = 3
+    empty_attempts = 3
     empty_i = 0
     terminal_output = ""
 
     LOG.debug(f"Checking if MAPDL server is alive")
     while time.time() < (t0 + timeout):
-        terminal_output += "\n".join(_get_std_output(std_queue=stdout_queue)).strip()
+        terminal_output += _get_std_output(std_queue=stdout_queue)
 
-        if not terminal_output and empty_i < empty_attemps:
+        if not terminal_output and empty_i < empty_attempts:
             # For stability reasons.
             empty_i += 1
             time.sleep(0.1)
@@ -697,32 +739,30 @@ def _check_server_is_alive(stdout_queue: Queue[bytes], timeout: int):
         raise MapdlDidNotStart("MAPDL failed to start the gRPC server")
 
 
-def _get_std_output(std_queue: Queue[bytes], timeout: int = 1) -> List[str]:
+def _get_std_output(std_queue: QueueWithStorage | None, timeout: int = 1) -> str:
     if not std_queue:
-        return [""]
+        return ""
 
-    lines: List[str] = []
     reach_empty = False
     t0 = time.time()
     while (not reach_empty) or (time.time() < (t0 + timeout)):
         try:
-            message = std_queue.get_nowait().decode(encoding="utf-8", errors="replace")
-            lines.append(message)
+            std_queue.get_nowait()
         except Empty:
             reach_empty = True
 
-    return lines
+    return std_queue.storage_text
 
 
 def _create_queue_for_std(
     std: IO[bytes] | None,
-) -> Tuple[Optional[Queue[bytes]], Optional[threading.Thread]]:
+) -> Tuple[Optional[QueueWithStorage], Optional[threading.Thread]]:
     """Create a queue and thread objects for a given PIPE std"""
     if not std:
         LOG.debug("No STDOUT. Not checking MAPDL this way.")
         return None, None
 
-    def enqueue_output(out: IO[bytes], queue: Queue[bytes]) -> None:
+    def enqueue_output(out: IO[bytes], queue: QueueWithStorage) -> None:
         try:
             for line in iter(out.readline, b""):
                 queue.put(line)
@@ -732,7 +772,7 @@ def _create_queue_for_std(
             # ValueError: PyMemoryView_FromBuffer(): info -> buf must not be NULL
             pass
 
-    q: Queue[bytes] = Queue()
+    q: QueueWithStorage = QueueWithStorage()
     t: threading.Thread = threading.Thread(target=enqueue_output, args=(std, q))
     t.daemon = True  # thread dies with the program
     t.start()
@@ -1757,7 +1797,8 @@ def launch_mapdl(
                 LOG.debug("Checking license server.")
                 lic_check.check()  # type: ignore
 
-            raise exception
+            # Catching exceptions and provide custom error messages
+            raise handle_launch_exceptions(exception)
 
         if args["just_launch"]:
             out: list[Any] = [args["ip"], args["port"]]
@@ -3069,3 +3110,43 @@ def inject_additional_switches(args: dict[str, Any]) -> dict[str, Any]:
         )
 
     return args
+
+
+def handle_launch_exceptions(exception: Exception) -> Exception:
+    """Handle exceptions raised during MAPDL launch
+
+    Parameters
+    ----------
+    exception : Exception
+        Exception raised during MAPDL launch
+    """
+    exception_msg = str(exception)
+
+    if "mpirun: command not found" in exception_msg:
+        from ansys.mapdl.core.errors import IncorrectMPIConfigurationError
+
+        msg = exception_msg + (
+            "\n\n"
+            "The 'mpirun' command was not found. "
+            "Please ensure that MPI is installed and configured correctly.\n"
+            "If you are using a cluster, ensure that the MPI environment is set up properly.\n"
+            "If you are using a local machine, ensure that MPI is installed and the "
+            "'mpirun' command is available in your PATH.\n"
+            "Additionally, make sure that the selected MPI is compatible with your CPU architecture.\n"
+            "For more information visit: "
+            "https://mapdl.docs.pyansys.com/version/stable/user_guide/troubleshoot.html#launching-issues"
+        )
+        return IncorrectMPIConfigurationError(msg)
+
+    elif "ERROR - ANSYS license not available" in exception_msg:
+        from ansys.mapdl.core.errors import NotAvailableLicenses
+
+        msg = (
+            "The ANSYS license is not available. "
+            "Please ensure that you have a valid license and that the license server is running.\n"
+            "For more information visit: "
+            "https://mapdl.docs.pyansys.com/version/stable/user_guide/troubleshoot.html#licensing-issues"
+        )
+        return NotAvailableLicenses(msg)
+
+    return exception
