@@ -8,6 +8,7 @@ import warnings
 
 import ansys.tools.visualization_interface as viz_interface
 from ansys_sphinx_theme import ansys_favicon, get_version_match
+from atsphinx.mini18n import get_template_dir
 import numpy as np
 import plotly.io as pio
 from plotly.io._sg_scraper import plotly_sg_scraper
@@ -108,6 +109,7 @@ extensions = [
     "sphinx.ext.graphviz",
     "ansys_sphinx_theme.extension.linkcode",
     "sphinx.ext.mathjax",
+    "atsphinx.mini18n",
 ]
 
 # Intersphinx mapping
@@ -175,7 +177,7 @@ html_css_files = [
 panels_add_fontawesome_latex = True
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ["_templates"]
+templates_path = ["_templates", get_template_dir()]
 
 # The suffix(es) of source filenames.
 source_suffix = ".rst"
@@ -298,6 +300,10 @@ sphinx_gallery_conf = {
 html_short_title = html_title = "PyMAPDL"
 html_theme = "ansys_sphinx_theme"
 html_theme_options = {
+    "navbar_start": [
+        "navbar-logo",
+        "mini18n/snippets/select-lang",
+    ],
     "logo": "pyansys",
     "analytics": {"google_analytics_id": "G-JQJKPV6ZVB"},
     "github_url": f"https://github.com/{USERNAME}/{REPOSITORY_NAME}",
@@ -439,6 +445,11 @@ epub_title = project
 
 # A list of files that should not be packed into the epub file.
 epub_exclude_files = ["search.html"]
+
+# -- atsphinx.mini18n options -------------------------------------------------
+mini18n_default_language = language
+mini18n_support_languages = ["en", "ja"]
+locale_dirs = ["../../pymapdl-doc-translations/locale"]
 
 
 def setup(app: Sphinx):

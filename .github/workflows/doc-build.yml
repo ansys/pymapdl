@@ -228,6 +228,19 @@ jobs:
         run: |
           xvfb-run make -C doc ${{ inputs.builder }} SPHINXOPTS="-j auto -W --keep-going"
 
+      - uses: actions/checkout@v4
+        with:
+          repository: tkoyama010/pymapdl-doc-translations
+          path: pymapdl-doc-translations
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Build I18N Documentation
+        run: |
+          xvfb-run make -C doc mini18n-html SPHINXOPTS="-j auto -W --keep-going"
+          find doc/_build/mini18n-html -mindepth 1 -maxdepth 1 -type d -exec cp -rf {} doc/_build/html/ \;
+          rm -rf doc/_build/mini18n-html
+
       - name: "Substitute defective GIF"
         shell: bash
         run: |
