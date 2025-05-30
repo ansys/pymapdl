@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ansys.mapdl.core.errors import MapdlRuntimeError
+
 
 class RunControls:
 
@@ -184,6 +186,11 @@ class RunControls:
 
         >>> mapdl.cwd("/tmp/")
         """
+        dirpath = str(dirpath)
+        if not (dirpath.startswith("'") and dirpath.endswith("'")) and "'" in dirpath:
+            raise MapdlRuntimeError(
+                'The CWD command does not accept paths that contain singular quotes "\'".'
+            )
         return self.run(f"/CWD,'{dirpath}'", **kwargs)
 
     def filname(self, fname: str = "", key: str = "", **kwargs):
@@ -262,7 +269,7 @@ class RunControls:
 
             * ``LINE_NUMBER`` - Begins reading from the specified line number in the file.
 
-            * ``:, label`` - Begins reading from the first line beginning with the matching user-defined label :
+            * ``label`` - Begins reading from the first line beginning with the matching user-defined label :
               ``label`` (beginning with a colon (:), 8 characters maximum).
 
         log : int or str

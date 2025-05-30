@@ -97,8 +97,8 @@ class Files:
         no diffracting elements at the waterline, which will severely reduce the accuracy of the diffraction
         analysis.
 
-        The translator maps PLANE42, SHELL63, and ``SHELL181``elements to PANELs, and maps PIPE16 and PIPE59
-        elements to TUBEs. It does not recognize any other element types. Any material or geometric
+        The translator maps PLANE42, SHELL63, and ``SHELL181`` elements to PANELs, and maps PIPE16 and
+        PIPE59 elements to TUBEs. It does not recognize any other element types. Any material or geometric
         properties can be used for the shell elements, as AQWA does not need any properties at all and the
         command does not use them. All the shell elements below the water must have their normals pointing
         outward.
@@ -206,7 +206,7 @@ class Files:
 
         * :ref:`Loads <loadsasas>`
 
-        * Added mass (via ``MASS21``element)
+        * Added mass (via ``MASS21`` element)
 
         Details are provided in the following sections.
 
@@ -294,8 +294,8 @@ class Files:
         automatically defined to identify the wetted surface of the elements for use by AQWA-WAVE based on
         the normal surface loads applied to the solid or shell elements.
 
-        Pressure loads from ``SURF154``elements are converted to equivalent nodal loads for ASAS. For AQWA-
-        WAVE, the ``SURF154``pressures are used to identify the wetted surface of the underlying elements.
+        Pressure loads from ``SURF154`` elements are converted to equivalent nodal loads for ASAS. For AQWA-
+        WAVE, the ``SURF154`` pressures are used to identify the wetted surface of the underlying elements.
         The following loads are converted for ASAS:
 
         This command contains some tables and extra information which can be inspected in the original
