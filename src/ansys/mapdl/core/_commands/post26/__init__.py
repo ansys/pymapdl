@@ -20,4 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from . import controls, display, listing, operations, setup, special, status
+from . import (
+    _set_up,
+    controls,
+    display,
+    listing,
+    operations,
+    set_up,
+    special_purpose,
+    status,
+)
