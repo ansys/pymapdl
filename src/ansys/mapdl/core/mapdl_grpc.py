@@ -464,18 +464,7 @@ class MapdlGrpc(MapdlBase):
         if not self._mapdl_on_hpc and self._mapdl_process:
             self._create_process_stds_queue()
 
-        try:
-            self._multi_connect(timeout=timeout)
-        except MapdlConnectionError as err:  # pragma: no cover
-            self._post_mortem_checks()
-            self._log.debug(
-                "The error wasn't caught by the post-mortem checks.\nThe stdout is printed now:"
-            )
-            self._log.debug(self._stdout)
-
-            raise err  # Raise original error if we couldn't catch it in post-mortem analysis
-        else:
-            self._log.debug("Connection established")
+        self.reconnect_to_mapdl()
 
         # Avoiding muting when connecting to the session
         # It might trigger some errors later on if not.
@@ -526,6 +515,38 @@ class MapdlGrpc(MapdlBase):
         else:
             # For some reason the session hasn't been created
             self._create_session()
+
+    def _connect_to_mapdl(self, timeout: int):
+        """(Re)connect to an existing MAPDL instance"""
+        try:
+            self._multi_connect(timeout=timeout)
+        except MapdlConnectionError as err:  # pragma: no cover
+            self._post_mortem_checks()
+            self._log.debug(
+                "The error wasn't caught by the post-mortem checks.\nThe stdout is printed now:"
+            )
+            self._log.debug(self._stdout)
+
+            raise err  # Raise original error if we couldn't catch it in post-mortem analysis
+        else:
+            self._log.debug("Connection established")
+
+    def reconnect_to_mapdl(self, timeout: int = None):
+        """Reconnect to an already instantiated MAPDL instance.
+
+        Re-establish an stopped or crashed gRPC connection with an already alive
+        MAPDL instance. This function does not relaunch the MAPDL instance.
+
+        Parameters
+        ----------
+        timeout : int, optional
+            Timeout before raising an exception, by default None
+        """
+
+        if timeout is None:
+            timeout = self._timeout
+
+        self._connect_to_mapdl(timeout)
 
     def _create_process_stds_queue(self, process=None):
         from ansys.mapdl.core.launcher import (
