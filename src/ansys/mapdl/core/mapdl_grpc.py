@@ -543,7 +543,7 @@ class MapdlGrpc(MapdlBase):
             Timeout before raising an exception, by default None
         """
 
-        if not timeout:
+        if timeout is None:
             timeout = self._timeout
 
         self._connect_to_mapdl(timeout)
