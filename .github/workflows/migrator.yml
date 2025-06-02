@@ -79,19 +79,19 @@ jobs:
             let prNumber, userTriggering, commentBody;
 
             if (eventName === "workflow_dispatch") {
-              core.info('Running in workflow_dispatch mode');
+              core.info('Running in "workflow_dispatch" mode');
 
-              prNumber = '${{ github.event.inputs.issue_number }}';
-              userTriggering = '${{ github.event.inputs.actor }}';
-              commentBody = '${{ github.event.inputs.comment_body }}';
-              commentId = '${{ github.event.inputs.comment_id }}';
+              prNumber = `${{ github.event.inputs.issue_number }}`;
+              userTriggering = `${{ github.event.inputs.actor }}`;
+              commentBody = `${{ github.event.inputs.comment_body }}`;
+              commentId = `${{ github.event.inputs.comment_id }}`;
             } else {
-              core.info('Running in issue_comment mode');
+              core.info('Running in "issue_comment" mode');
 
-              prNumber = '${{ github.event.issue.number }}';
-              userTriggering = '${{ github.event.comment.user.login }}';
-              commentBody = '${{ github.event.comment.body }}';
-              commentId = '${{ github.event.comment.id }}';
+              prNumber = `${{ github.event.issue.number }}`;
+              userTriggering = `${{ github.event.comment.user.login }}`;
+              commentBody = `${{ github.event.comment.body }}`;
+              commentId = `${{ github.event.comment.id }}`;
             }
             core.debug(`PR Number: ${prNumber}`);
             core.debug(`User triggering: ${userTriggering}`);
@@ -275,6 +275,7 @@ jobs:
               core.exportVariable('PR_HEAD_REPO', data.head.repo.full_name);
               core.exportVariable('PR_BASE_BRANCH', `migration/pr-${{ env.PR_NUMBER }}`);
               core.exportVariable('PR_BASE_REPO', data.base.repo.full_name);
+
             } else {
               throw new Error('Failed to retrieve pull request details');
             }
@@ -295,20 +296,25 @@ jobs:
           git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
           git config pull.rebase true
 
-          echo "Adding ${{ env.PR_HEAD_REPO }} as remote"
+          echo "\033[1;92m[INFO]Adding ${{ env.PR_HEAD_REPO }} as remote \033[0m"
           git remote add head_repo https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ env.PR_HEAD_REPO }}.git
 
-          echo "Fetching '${{ env.PR_HEAD_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}'"
+          echo "\033[1;92m[INFO]Fetching '${{ env.PR_HEAD_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}' \033[0m"
           git fetch head_repo ${{ env.PR_HEAD_BRANCH }}
-          git pull head_repo ${{ env.PR_HEAD_BRANCH }}
 
-          echo "Checking out '${{ env.PR_BASE_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}/${{ env.PR_HEAD_BRANCH }}'"
+          echo "\033[1;92m[INFO] Checking out '${{ env.PR_BASE_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}/${{ env.PR_HEAD_BRANCH }}' \033[0m"
           git checkout -b ${{ env.PR_BASE_BRANCH }} head_repo/${{ env.PR_HEAD_BRANCH }}
 
-          echo "\033[1;92m[INFO] Merging '${{ env.PR_HEAD_BRANCH }}' branch into '${{ env.PR_BASE_BRANCH }}' \033[0m"
-          git merge head_repo/${{ env.PR_HEAD_BRANCH }}
+          echo  "\033[1;92m[INFO] Pulling '${{ env.PR_HEAD_BRANCH }}' from '${{ env.PR_BASE_REPO }}' \033[0m"
+          git pull head_repo ${{ env.PR_HEAD_BRANCH }}
+
+          echo "\033[1;92m[INFO] Merging 'main' branch into '${{ env.PR_BASE_BRANCH }}' \033[0m"
+          git merge origin/main
+
+          # Check for merge conflicts
           CONFLICTS=$(git ls-files -u | wc -l)
-          echo "CONFLICTS=$CONFLICTS"
+          echo "Merge conflicts:"
+          echo "${CONFLICTS}"
 
           if [[ "$CONFLICTS" -gt 0 && -n "${{ env.MODE }}" ]]; then
             echo "::warning:: Conflicts trying to solve using mode '${{ env.MODE }}'."
@@ -355,6 +361,7 @@ jobs:
             const prHeadRepo = process.env.PR_HEAD_REPO;
             const prBaseBranch = process.env.PR_BASE_BRANCH;
             const prBaseRepo = process.env.PR_BASE_REPO;
+            const userTriggering = process.env.USER_TRIGGERING;
 
             core.debug(`Listing existing PRs for branch ${prBaseBranch}...`);
             const existingPrs = await github.rest.pulls.list({
@@ -372,20 +379,49 @@ jobs:
               return;
             }
 
+            // Retrieving the original PR details
+            const { originalPR } = await github.rest.pulls.get({
+              owner: 'ansys',
+              repo: 'pymapdl',
+              pull_number: prNumber,
+            });
+
             // https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#create-a-pull-request
             newPrData = await github.rest.pulls.create({
               owner: 'ansys',
               repo: 'pymapdl',
               debug: true,
-              head: `${prBaseBranch}`,  // This is the branch we just created which becomes now the head of the PR, and the base (target) branch is the main branch.
-              base: `main`,
-              title: `chore: migrated PR ${prNumber}`,
-              body: `This PR was migrated from a fork to allow secrets to run in workflows. Check the [original PR](https://github.com/ansys/pymapdl/pull/${prNumber}) for more details.
+              head: prBaseBranch,  // This is the branch we just created which becomes now the head of the PR, and the base (target) branch is the main branch.
+              base: 'main',
+              title: `chore: [migrated PR ${prNumber}] ${originalPR.title}`,
+              body: `This PR is a mirror pull request created from [${originalPR.title}](https://github.com/ansys/pymapdl/pull/${originalPR.number}) to allow the code to access PyMAPDL CICD secrets.
+
+            Check the [original PR](https://github.com/ansys/pymapdl/pull/${originalPR.number}) made by @${originalPR.user.login} for more details.
 
             Closes #${prNumber}`,
+
+            ## Original pull request
+
+            ### ${originalPR.title}
+            ${originalPR.body}
+
             });
 
             core.info(`New PR created: ${newPrData.data.number}`);
+            
+            core.info(`Assinging PR to: ${userTriggering} and ${originalPR.user.login}`);
+            await octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/assignees', {
+              owner: 'ansys',
+              repo: 'pymapdl',
+              issue_number: newPrData.data.number,
+              assignees: [
+                userTriggering,  // The user who triggered the action
+                originalPR.user.login,  // The original PR author
+              ],
+              headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+              }
+            })
 
             // React positively to the comment
             github.rest.reactions.createForIssueComment({
@@ -399,10 +435,12 @@ jobs:
             github.rest.issues.createComment({
               owner: 'ansys',
               repo: 'pymapdl',
-              issue_number: '${{ env.PR_NUMBER }}',
+              issue_number: prNumber,
               body: `**:rocket: Migration completed!**
 
-            The PR [#${newPrData.data.number}](${newPrData.data.html_url}) has been created successfully.`,
+            The PR [#${newPrData.data.number}](${newPrData.data.html_url}) has been created successfully.
+
+            Thank you @${userTriggering} for your contribution! Please review the PR and make any necessary changes.`,
             });
 
       - name: Create comment about failed migration
@@ -412,8 +450,8 @@ jobs:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |
             // React positively to the comment
-            commentId = '${{ env.COMMENT_ID }}';
-            pr_number = '${{ env.PR_NUMBER }}';
+            commentId = process.env.COMMENT_ID;
+            pr_number = process.env.PR_NUMBER;
 
             github.rest.reactions.createForIssueComment({
               owner: 'ansys',
@@ -428,6 +466,6 @@ jobs:
               issue_number: pr_number,
               body: `**:x: Error :x:**
 
-            An error occurred while migrating and syncing the PR. Please check the action logs for more details.`,
+            An error occurred while migrating or syncing the PR. Pinging @pymapdl-maintainers for assistance.`,
               });
 
