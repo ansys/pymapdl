@@ -2195,11 +2195,45 @@ class AnalysisOptions:
         command = f"GMATRIX,{symfac},{condname},{numcond},,{matrixname}"
         return self.run(command, **kwargs)
 
+    def invopt(self, option="", **kwargs):
+        """Enables or disables inverse solving for the current load step.
+
+        APDL Command: INVOPT
+
+        Parameters
+        ----------
+        Option
+            Enables or disables inverse solving for a load step:
+
+            ON - Enable.
+            OFF - Disable and revert to forward solving (default).
+
+        Notes
+        -----
+        Option = ON is valid only at the first load step of a static analysis.
+        Large-deflection effects must be enabled (NLGEOM,ON).
+        The unsymmetric solver (NROPT,UNSYM) is required and the program selects
+        it automatically.
+
+        After issuing INVOPT,ON, inverse solving remains in effect
+        until INVOPT,OFF is issued.
+        The solution then reverts to traditional forward solving (default).
+
+        This command cannot be issued during a restart. Option can only be
+        changed between load steps.
+
+        For more information, see Nonlinear Static Analysis with Inverse Solving
+        in the Structural Analysis Guide.
+        """
+        return self.run(f"INVOPT,{option}", **kwargs)
+
     def lanboption(self, strmck="", **kwargs):
         """Specifies Block Lanczos eigensolver options.
 
         APDL Command: LANBOPTION
 
+        Parameters
+        ----------
         strmck
             Controls whether the Block Lanczos eigensolver will perform a
             Sturm sequence check:
