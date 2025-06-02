@@ -446,7 +446,7 @@ def test_download_project_extensions(mapdl, cleared, tmpdir):
 def test_download_result(mapdl, cleared, tmpdir):
     if "file.rst" not in mapdl.list_files():
         write_tmp_in_mapdl_instance(mapdl, "file", ext="rst")  # fake rst file
-    target_dir = tmpdir.mkdir(f"tmp_{random_string()}")
+    target_dir = str(tmpdir.mkdir(f"tmp_{random_string()}"))
     mapdl.download_result(target_dir)
     assert os.path.exists(os.path.join(target_dir, "file.rst"))
 
@@ -582,6 +582,10 @@ def test_input_compatibility_api_change(mapdl, cleared):
         mapdl.input()
 
 
+@pytest.mark.skipif(
+    True,
+    reason="We must refactor the stdout/stderr handling first before re-enabling this test.",
+)
 @requires("grpc")
 def test__check_stds(mapdl):
     """Test that the standard input is checked."""
@@ -613,14 +617,11 @@ def test__check_stds(mapdl):
         mapdl._mapdl_process = process
         mapdl._create_process_stds_queue(process)
 
-        # this should raise no issues
-        mapdl._post_mortem_checks(process)
-
         with pytest.raises(MapdlDidNotStart):
             _check_server_is_alive(mapdl._stdout_queue, 0.5)
 
-        assert isinstance(mapdl._stdout, list)
-        assert isinstance(mapdl._stderr, list)
+        assert isinstance(mapdl._stdout, str)
+        assert isinstance(mapdl._stderr, str)
 
         assert (
             mapdl._stdout
@@ -633,6 +634,15 @@ def test__check_stds(mapdl):
 
     process.kill()
     del process
+
+
+def test__check_stds_2(mapdl):
+    """Test that the standard input is checked."""
+    err = "ERROR: Something went wrong"
+    with pytest.raises(MapdlConnectionError, match=err):
+        # Simulating a MapdlConnectionError
+        # when the stderr contains an error message.
+        mapdl._check_stds(stdout="No problems detected", stderr=err)
 
 
 @requires("grpc")

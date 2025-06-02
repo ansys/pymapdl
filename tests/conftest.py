@@ -402,6 +402,16 @@ class MyReporter(TerminalReporter):
             for rep in skipped:
                 self.write_line(get_skip_message(rep))
 
+        if "x" in self.reportchars:
+            xfailed: list[CollectReport] = self.stats.get("xfailed", [])
+            for rep in xfailed:
+                self.write_line(get_xfailed_message(rep))
+
+        if "X" in self.reportchars:
+            xpassed: list[CollectReport] = self.stats.get("xpassed", [])
+            for rep in xpassed:
+                self.write_line(get_xpassed_message(rep))
+
         if "E" in self.reportchars:
             errored: list[CollectReport] = self.stats.get("error", [])
             for rep in errored:
@@ -411,16 +421,6 @@ class MyReporter(TerminalReporter):
             failed: list[CollectReport] = self.stats.get("failed", [])
             for rep in failed:
                 self.write_line(get_failed_message(rep))
-
-        if "X" in self.reportchars:
-            xpassed: list[CollectReport] = self.stats.get("xpassed", [])
-            for rep in xpassed:
-                self.write_line(get_xpassed_message(rep))
-
-        if "x" in self.reportchars:
-            xfailed: list[CollectReport] = self.stats.get("xfailed", [])
-            for rep in xfailed:
-                self.write_line(get_xfailed_message(rep))
 
 
 @pytest.hookimpl(trylast=True)
