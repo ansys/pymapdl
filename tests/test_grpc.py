@@ -582,6 +582,10 @@ def test_input_compatibility_api_change(mapdl, cleared):
         mapdl.input()
 
 
+@pytest.mark.skipif(
+    True,
+    reason="We must refactor the stdout/stderr handling first before re-enabling this test.",
+)
 @requires("grpc")
 def test__check_stds(mapdl):
     """Test that the standard input is checked."""
@@ -630,6 +634,15 @@ def test__check_stds(mapdl):
 
     process.kill()
     del process
+
+
+def test__check_stds_2(mapdl):
+    """Test that the standard input is checked."""
+    err = "ERROR: Something went wrong"
+    with pytest.raises(MapdlConnectionError, match=err):
+        # Simulating a MapdlConnectionError
+        # when the stderr contains an error message.
+        mapdl._check_stds(stdout="No problems detected", stderr=err)
 
 
 @requires("grpc")

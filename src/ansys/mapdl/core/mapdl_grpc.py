@@ -682,12 +682,12 @@ class MapdlGrpc(MapdlBase):
         if not stderr:
             self._log.debug("MAPDL exited without stderr.")
         else:
-            self._parse_stderr()
+            self._parse_stderr(stderr)
 
         if not stdout:
             self._log.debug("MAPDL exited without stdout.")
         else:
-            self._parse_stdout()
+            self._parse_stdout(stdout)
 
     def _parse_stderr(self, stderr=None):
         """Parse the stderr for any errors."""
@@ -706,6 +706,7 @@ class MapdlGrpc(MapdlBase):
         """Parse the stdout for any errors."""
         if stdout is None:
             stdout = self._stdout
+
         errs = self._parse_std(stdout)
         if errs:
             self._log.debug("MAPDL exited with errors in stdout.")
@@ -719,6 +720,7 @@ class MapdlGrpc(MapdlBase):
         if isinstance(std, list):
             std = "\n".join(std)
             std = std.replace("\n\n", "\n")
+
         groups = std.split("\r\n\r\n")
         errs = []
 
