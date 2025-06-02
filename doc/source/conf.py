@@ -9,10 +9,14 @@ import warnings
 import ansys.tools.visualization_interface as viz_interface
 from ansys_sphinx_theme import ansys_favicon, get_version_match
 import numpy as np
+import plotly.io as pio
+from plotly.io._sg_scraper import plotly_sg_scraper
 import pyvista
 from sphinx.application import Sphinx
 from sphinx.util import logging
 from sphinx_gallery.sorting import FileNameSortKey
+
+pio.renderers.default = "sphinx_gallery"
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
@@ -276,7 +280,11 @@ sphinx_gallery_conf = {
     "backreferences_dir": None,
     # Modules for which function level galleries are created.  In
     "doc_module": "ansys-mapdl-core",
-    "image_scrapers": ("pyvista", "matplotlib"),
+    "image_scrapers": (
+        "pyvista",
+        "matplotlib",
+        plotly_sg_scraper,
+    ),
     "ignore_pattern": "flycheck*",
     "thumbnail_size": (350, 350),
     "remove_config_comments": True,
@@ -354,6 +362,8 @@ html_context = {
 }
 html_show_sourcelink = False
 
+
+html_js_files = ["https://cdn.plot.ly/plotly-3.0.1.min.js"]
 
 # -- Options for HTMLHelp output ---------------------------------------------
 

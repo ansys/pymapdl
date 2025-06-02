@@ -52,5 +52,6 @@
 * [Sandeep Medikonda](https://github.com/smedikon)
 * [Sebastian Pißermayr](https://github.com/Seb-Pi)
 * [Simon Marwitz](https://github.com/simonmarwitz)
+* [sourcery-ai[bot]](https://github.com/apps/sourcery-ai)
 * [Sébastien Morais](https://github.com/SMoraisAnsys)
 * [Vikas Namdeo](https://github.com/vnamdeo)
