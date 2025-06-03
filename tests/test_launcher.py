@@ -35,7 +35,9 @@ import pytest
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import (
+    IncorrectMPIConfigurationError,
     MapdlDidNotStart,
+    NotAvailableLicenses,
     NotEnoughResources,
     PortAlreadyInUseByAnMAPDLInstance,
     VersionError,
@@ -2076,7 +2078,7 @@ def test_check_server_is_alive_no_queue():
 def test_get_std_output_no_queue():
     from ansys.mapdl.core.launcher import _get_std_output
 
-    assert _get_std_output(None, 30) == [""]
+    assert _get_std_output(None, 30) == ""
 
 
 def test_create_queue_for_std_no_queue():
@@ -2097,3 +2099,32 @@ def test_inject_additional_switches(monkeypatch):
     assert args["additional_switches"] in new_args["additional_switches"]
     # The env var is ignored if the argument is used
     assert envvar not in new_args["additional_switches"]
+
+
+@pytest.mark.parametrize(
+    "msg,match,exception_type",
+    [
+        (
+            "mpirun: command not found",
+            "Please ensure that MPI is installed and configured correctly",
+            IncorrectMPIConfigurationError,
+        ),
+        (
+            "ERROR - ANSYS license not available",
+            "Please ensure that you have a valid license",
+            NotAvailableLicenses,
+        ),
+        (
+            "Other message",
+            "Other message",
+            # This will raise a generic Exception
+            Exception,
+        ),
+    ],
+)
+def test_handle_launch_exceptions(msg, match, exception_type):
+    from ansys.mapdl.core.launcher import handle_launch_exceptions
+
+    exception = exception_type(msg)
+    with pytest.raises(exception_type, match=match):
+        raise handle_launch_exceptions(exception)
