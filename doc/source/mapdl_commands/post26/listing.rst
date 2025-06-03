@@ -1,20 +1,23 @@
-.. _ref_post26_listing_api:
 
-*******
+.. _ref_listing:
+
+
 Listing
-*******
+=======
 
-.. currentmodule:: ansys.mapdl.core
 
-These POST26 commands are used to produce tabular listings of the
-results.
+.. currentmodule:: ansys.mapdl.core._commands.post26.listing
+
+.. autoclass:: ansys.mapdl.core._commands.post26.listing.Listing
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.extrem
-   Mapdl.lines
-   Mapdl.nprint
-   Mapdl.prcplx
-   Mapdl.prtime
-   Mapdl.prvar
+
+   Listing.extrem
+   Listing.lines
+   Listing.nprint
+   Listing.prcplx
+   Listing.prtime
+   Listing.prvar

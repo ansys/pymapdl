@@ -1,17 +1,19 @@
-.. _ref_status_api:
 
-******
+.. _ref_status:
+
+
 Status
-******
+======
 
-.. currentmodule:: ansys.mapdl.core
 
-These POST26 commands are for use with the STAT command.
+.. currentmodule:: ansys.mapdl.core._commands.post26.status
+
+.. autoclass:: ansys.mapdl.core._commands.post26.status.Status
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.define
-   Mapdl.operate
-   Mapdl.plotting
-   Mapdl.print
+
+   Status.operate
+   Status.plotting
