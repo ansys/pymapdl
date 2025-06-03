@@ -1,29 +1,34 @@
-.. _ref_run_controls_commands_api:
 
-************
-Run controls
-************
+.. _ref_run_controls:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SESSION commands control the overall characteristics of the
-session, including the job name, Graphical User Interface behavior, and
-file switching.
+RunControls
+===========
+
+
+.. currentmodule:: ansys.mapdl.core._commands.session.run_controls
+
+.. autoclass:: ansys.mapdl.core._commands.session.run_controls.RunControls
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.config
-   Mapdl.cwd
-   Mapdl.exit
-   Mapdl.filname
-   Mapdl.input
-   Mapdl.keyw
-   Mapdl.memm
-   Mapdl.nerr
-   Mapdl.pause
-   Mapdl.slashstatus
-   Mapdl.starstatus
-   Mapdl.syp
-   Mapdl.sys
-   Mapdl.unpause
+
+   RunControls.config
+   RunControls.cwd
+   RunControls.filname
+   RunControls.input
+   RunControls.keyw
+   RunControls.memm
+   RunControls.menu
+   RunControls.mstart
+   RunControls.nerr
+   RunControls.output
+   RunControls.pause
+   RunControls.slashstatus
+   RunControls.syp
+   RunControls.sys
+   RunControls.ui
+   RunControls.uis
+   RunControls.unpause
