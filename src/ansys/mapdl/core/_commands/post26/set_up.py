@@ -706,7 +706,7 @@ class SetUp:
              - Total number of contact status changes during substep.
            * - FPRS
              - Fluid penetration pressure.
-           * - TG For ``SHELL131`` and ``SHELL132`` elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3,..., HTOP instead of HEAT.
+           * - TG For ``SHELL131`` and ``SHELL132`` elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3..., HTOP instead of HEAT.
              - X, Y, Z, SUM
              - Component thermal gradient or vector sum.
            * - TF
@@ -1265,8 +1265,8 @@ class SetUp:
 
         .. _NSOL_temp:
 
-        For ``SHELL131`` and ``SHELL132`` elements with KEYOPT(3) = 0 or 1, use the labels TBOT, TE2, TE3,..
-        ., TTOP instead of TEMP.
+        For ``SHELL131`` and ``SHELL132`` elements with KEYOPT(3) = 0 or 1, use the labels TBOT, TE2, TE3,.
+        .., TTOP instead of TEMP.
         """
         command = f"NSOL,{nvar},{node},{item},{comp},{name},{sector}"
         return self.run(command, **kwargs)
@@ -1406,8 +1406,8 @@ class SetUp:
 
         .. _rforce_table1_note1:
 
-        For ``SHELL131`` and ``SHELL132`` elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3,..
-        ., HTOP instead of HEAT.
+        For ``SHELL131`` and ``SHELL132`` elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3,.
+        .., HTOP instead of HEAT.
         """
         command = f"RFORCE,{nvar},{node},{item},{comp},{name}"
         return self.run(command, **kwargs)
@@ -1555,9 +1555,9 @@ class SetUp:
 
         freq : str
             A frequency value, or an array containing frequency values (Hz). Use :ref:`dim` to define the
-            array and enclose the array name in percent signs (for example,
-            :ref:`store`,,,,``%arrayname%``). A default value of 1% of damping is considered for clustering
-            around the user-input frequency values. Supported for ``Lab`` = PSD only.
+            array and enclose the array name in percent signs (for example, :ref:`store`,,,,``arrayname``).
+            A default value of 1% of damping is considered for clustering around the user-input frequency
+            values. Supported for ``Lab`` = PSD only.
 
         toler : str
             Tolerance to determine if a user-input frequency value ( ``FREQ`` ) is a duplicate and can be
