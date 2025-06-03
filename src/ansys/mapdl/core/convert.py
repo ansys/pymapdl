@@ -68,14 +68,15 @@ COMMANDS_WITH_EMPTY_ARGS: Dict[str, Tuple[Any, ...]] = {
     "ASBL": (),  # ASBL,
     "ATAN": (),  # ATAN,
     "BCSO": (),  # BCSOPTION,
-    "CORI": (),  # CORIOLIS
     "CDRE": (),  # CDREAD
     "CLOG": (),  # CLOG,
     "CONJ": (),  # CONJUG,
+    "CORI": (),  # CORIOLIS
     "DERI": (),  # DERIV,
     "DSPO": (),  # DSPOPTION,
     "ENER": (),  # ENERSOL,
     "ENSY": (),  # ENSYM,
+    "EQSL": (),  # EQSLV
     "ESYM": (),  # ESYM,
     "EXP": (),  # EXP,
     "EXPA": (),  # EXPAND,
