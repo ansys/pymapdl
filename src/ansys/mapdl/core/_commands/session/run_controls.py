@@ -288,7 +288,7 @@ class RunControls:
         or another file switching directive is read. An end-of-file occurs after the last record of the file
         or when a ``/EOF`` command is read. An automatic switch back one level (to the previous file) occurs
         when an end-of-file is encountered. Twenty levels of nested file switching are allowed. Note that
-        files including ``\*DO``, :ref:`use`, :ref:`ulib`, and the "Unknown Command" Macro have less nesting
+        files including ``*DO``, :ref:`use`, :ref:`ulib`, and the "Unknown Command" Macro have less nesting
         available because each of these operations also uses a level of file switching. For an interactive
         run, a :ref:`input`,TERM switches to the terminal for the next input. A ``/EOF`` read from the
         terminal then switches back to the previous file. A :ref:`input` (with a blank second field)
@@ -840,7 +840,7 @@ class RunControls:
 
             .. _ui_coll_label:
 
-             Label specifying the behavior of the Mechanical APDL main menu after a :ref:`finish` command is issued. User interaction with the main menu is unaffected. Valid only for ``Func`` = COLL:
+            Label specifying the behavior of the Mechanical APDL main menu after a :ref:`finish` command is issued. User interaction with the main menu is unaffected. Valid only for ``Func`` = COLL:
 
             * ``YES, 1 or blank`` - Allows the Main Menu to collapse after :ref:`finish` command.
 

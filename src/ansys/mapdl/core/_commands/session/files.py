@@ -215,7 +215,7 @@ class Files:
 
         .. _solconop:
 
-         **Solution Control Options**
+        **Solution Control Options**
 
         The ASAS project name is defined as "Ansys".
 
@@ -230,7 +230,7 @@ class Files:
 
         .. _elemdat:
 
-         **Element Data**
+        **Element Data**
 
         If you intend to use the data only with AQWA-WAVE, only the elements that form the wetted surface
         are required. Selecting these elements before invoking the :ref:`anstoasas` command will improve
@@ -250,13 +250,13 @@ class Files:
 
         .. _matdat:
 
-         **Material Data**
+        **Material Data**
 
         Linear isotropic material conversion is supported for ASAS and ASAS(NL).
 
         .. _geomdat:
 
-         **Geometry Data**
+        **Geometry Data**
 
         The following ASAS element geometry data is supported:
 
@@ -268,7 +268,7 @@ class Files:
 
         .. _sectdat:
 
-         **Section Data**
+        **Section Data**
 
         No user sections are generated if AQWA-WAVE data is selected.
 
@@ -279,7 +279,7 @@ class Files:
 
         .. _boundcon:
 
-         **Boundary Conditions**
+        **Boundary Conditions**
 
         The following boundary conditions are converted for ASAS and ASAS(NL):
 
@@ -288,7 +288,7 @@ class Files:
 
         .. _loadsasas:
 
-         **Loads**
+        **Loads**
 
         No user loading is generated if AQWA-WAVE data is selected. However, a load case (number 1000) is
         automatically defined to identify the wetted surface of the elements for use by AQWA-WAVE based on
@@ -495,7 +495,7 @@ class Files:
         :ref:`set` command or the :ref:`resume` command).
 
         For results files compressed using the sparsification scheme ( ``LEVEL`` = SPARSE, which is the
-        default), use the ``\*XPL`` command to uncompress the file. For third party tools that need to read
+        default), use the ``*XPL`` command to uncompress the file. For third party tools that need to read
         the results file, use the method described in `Accessing Mechanical APDL Binary Files
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_prog/Hlp_P_INT2_1.html#intlargeintget>`_
 
