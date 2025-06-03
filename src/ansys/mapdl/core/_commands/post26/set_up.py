@@ -859,7 +859,7 @@ class SetUp:
            * - BKS
              - X, Y, Z, XY, YZ, XZ
              - Total `nonlinear kinematic backstress <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_mat/amp8sq21dldm.html#>`_ reported in the current configuration (unaffected by :ref:`rsys` ). Available for 3D, plane strain, and axisymmetric elements.
-           * - BKS1....,BKS5
+           * - BKS1,...,BKS5
              - X, Y, Z, XY, YZ, XZ
              - Superimposed components of the total `nonlinear kinematic backstress`_ reported in the current configuration (unaffected by :ref:`rsys` ). Available for 3D, plane strain, and axisymmetric elements when more than one superimposed back-stress component is defined.
            * - EPFR
