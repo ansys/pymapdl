@@ -1,4 +1,4 @@
-FROM ghcr.io/ansys/mapdl:v24.1-ubuntu-student
+FROM ghcr.io/ansys/mapdl:v25.2-ubuntu-cicd
 
 ENV USERNAME=mapdl
 USER root
@@ -7,6 +7,9 @@ USER root
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ON_CODESPACES=true
 ENV CODESPACES_MODE=dev
+ENV ON_LOCAL=true
+ENV ON_UBUNTU=true
+ENV ON_CI=true
 
 # Installing libs for testing and docs
 RUN apt-get -qq update &&  apt install -qq -y
