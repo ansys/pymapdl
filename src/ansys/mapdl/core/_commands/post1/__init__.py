@@ -29,12 +29,4 @@ from . import (
     failure_criteria,
     listing,
     load_case_calculations,
-    magnetics_calculations,
-    path_operations,
-    results,
-    set_up,
-    special_purpose,
-    status,
-    surface_operations,
-    trace_points,
 )
