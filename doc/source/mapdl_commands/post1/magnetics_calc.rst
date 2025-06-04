@@ -1,4 +1,4 @@
-.. _ref_magnetics Calculations_api:
+.. _ref_magnetics_calculations:
 
 **********************
 Magnetics calculations
