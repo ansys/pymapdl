@@ -145,8 +145,8 @@ class Controls:
         :ref:`graphics`,POWER command).
 
         With PowerGraphics active ( :ref:`graphics`,POWER), the averaging scheme for surface data with
-        interior element data included ( :ref:`avres`,,FULL) and multiple facets per edge ( :ref:`efacet`,2
-        or :ref:`efacet`,4) will yield differing minimum and maximum contour values depending on the
+        interior element data included ( :ref:`avres`,,FULL) and multiple facets per edge ( :ref:`efacet`
+        ,2 or :ref:`efacet`,4) will yield differing minimum and maximum contour values depending on the
         Z-Buffering options ( :ref:`slashtype`,,6 or :ref:`slashtype`,,7). When the Section data is not
         included in the averaging schemes ( :ref:`slashtype`,,7), the resulting absolute value for the
         midside node is significantly smaller.
@@ -222,8 +222,8 @@ class Controls:
         commands for more information.
 
         With PowerGraphics active ( :ref:`graphics`,POWER), the averaging scheme for surface data with
-        interior element data included ( :ref:`avres`,,FULL) and multiple facets per edge ( :ref:`efacet`,2
-        or :ref:`efacet`,4) will yield differing minimum and maximum contour values depending on the
+        interior element data included ( :ref:`avres`,,FULL) and multiple facets per edge ( :ref:`efacet`
+        ,2 or :ref:`efacet`,4) will yield differing minimum and maximum contour values depending on the
         Z-Buffering options ( :ref:`slashtype`,,6 or :ref:`slashtype`,,7). When the Section data is not
         included in the averaging schemes ( :ref:`slashtype`,,7), the resulting absolute value for the
         midside node is significantly smaller.
@@ -888,9 +888,9 @@ class Controls:
         systems. For a specific layer of interest, issue a :ref:`layer`, ``N`` command (where ``N`` refers
         to a layer number).
 
-        If a model has both nonlayered and layered elements, you can use :ref:`rsys`,SOLU and
-        :ref:`rsys`,LSYS simultaneously (with :ref:`rsys`,SOLU applicable to nonlayered elements and
-        :ref:`rsys`,LSYS applicable to layered elements).
+        If a model has both nonlayered and layered elements, you can use :ref:`rsys`,SOLU and :ref:`rsys`
+        ,LSYS simultaneously (with :ref:`rsys`,SOLU applicable to nonlayered elements and :ref:`rsys`,LSYS
+        applicable to layered elements).
 
         To reverse effects of the LSYS option, issue an :ref:`rsys`,0 command.
 

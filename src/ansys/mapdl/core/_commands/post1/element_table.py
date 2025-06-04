@@ -233,7 +233,7 @@ class ElementTable:
            * - ROT
              - X, Y, Z
              - X, Y, or Z structural rotation.
-           * - TEMP For ``SHELL131`` and ``SHELL132`` elements with KEYOPT(3) = 0 or 1, use labels TBOT, TE2, TE3..., TTOP instead of TEMP.
+           * - TEMP For ``SHELL131`` and ``SHELL132`` elements with KEYOPT(3) = 0 or 1, use labels TBOT, TE2, TE3, ..., TTOP instead of TEMP.
              -
              - Temperature.
            * - PRES

@@ -30,7 +30,7 @@ class Listing:
         nwidth: str = "",
         dsignf: str = "",
         line: str = "",
-        char: str = "",
+        char_: str = "",
         exptype: str = "",
         **kwargs,
     ):
@@ -66,7 +66,7 @@ class Listing:
         line : str
             Number of lines (11 minimum) per page. Default = ``ILINE`` or ``BLINE`` ( :ref:`page` ).
 
-        char : str
+        char_ : str
             Number of characters (41 to 240, system-dependent) per line before wraparound. Default =
             ``ICHAR`` or ``BCHAR`` ( :ref:`page` ).
 
@@ -96,7 +96,7 @@ class Listing:
 
         This command is valid in any processor.
         """
-        command = f"/FORMAT,{ndigit},{ftype},{nwidth},{dsignf},{line},{char},{exptype}"
+        command = f"/FORMAT,{ndigit},{ftype},{nwidth},{dsignf},{line},{char_},{exptype}"
         return self.run(command, **kwargs)
 
     def header(
@@ -234,9 +234,8 @@ class Listing:
         Defines the printout page size for batch runs and the screen page size for interactive runs. Applies
         to the POST1 :ref:`prnsol`, :ref:`presol`, :ref:`pretab`, :ref:`prrsol`, and :ref:`prpath` commands.
         See the :ref:`header` command for additional controls (page ejects, headers, etc.) that affect the
-        amount of printout. A blank (or out-of-range) value retains the previous setting. Issue
-        :ref:`page`,STAT to display the current settings. Issue :ref:`page`,DEFA to reset the default
-        specifications.
+        amount of printout. A blank (or out-of-range) value retains the previous setting. Issue :ref:`page`
+        ,STAT to display the current settings. Issue :ref:`page`,DEFA to reset the default specifications.
 
         This command is valid in any processor.
         """
