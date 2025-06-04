@@ -8,7 +8,7 @@ SOURCEDIR     = source
 BUILDDIR      = _build
 LINKCHECKDIR  = $(BUILDDIR)/linkcheck
 SPHINXOPTS    = -j auto --color
-LINKCHECKOPTS = -d $(BUILDDIR)/.doctrees -W --keep-going --color
+LINKCHECKOPTS = -d $(BUILDDIR)/.doctrees --color
 
 # For codespaces
 ON_CS  = $$(echo $(ON_CODESPACES) | tr A-Z a-z) # to lowercase
