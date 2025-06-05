@@ -102,6 +102,7 @@ doc = [
   "pypandoc==1.15",
   "pytest-sphinx==0.6.3",
   "pythreejs==2.4.2",
+  "pytwin>=0.7",
   "sphinx-autobuild==2024.10.3",
   "sphinx-autodoc-typehints==3.1.0",
   "sphinx-copybutton==0.5.2",
