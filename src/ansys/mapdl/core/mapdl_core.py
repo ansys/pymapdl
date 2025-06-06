@@ -362,6 +362,9 @@ class _MapdlCore(Commands):
 
         self._info = Information(self)
 
+        # DPF
+        self._dpf_result: "DPFResult | None" = None
+
     def _after_run(self, _command: str) -> None:
         pass
 
@@ -1049,7 +1052,11 @@ class _MapdlCore(Commands):
     @property
     @requires_package("ansys.mapdl.reader", softerror=True)
     def result(self):
-        """Binary interface to the result file using :class:`ansys.mapdl.reader.rst.Result`.
+        """Binary interface to the result file using ``ansys-dpf-core`` or
+        ``ansys-mapdl-reader``.
+
+        If `ansys-dpf-core` is not installed, then a :class:`ansys.mapdl.reader.rst.Result`
+        object is returned.
 
         Returns
         -------
@@ -1083,12 +1090,27 @@ class _MapdlCore(Commands):
         NSL : Nodal displacements
         RF  : Nodal reaction forces
         """
+        from ansys.mapdl.core import _HAS_DPF
+
+        if _HAS_DPF:
+            from ansys.mapdl.core.reader import DPFResult
+
+            if self._dpf_result is None:
+                # create a DPFResult object
+                self._dpf_result = DPFResult(None, mapdl=self)
+
+            return self._dpf_result
+
         from ansys.mapdl.reader import read_binary
         from ansys.mapdl.reader.rst import Result
 
         if not self._local:
             # download to temporary directory
-            save_path = os.path.join(tempfile.gettempdir())
+            save_path = os.path.join(
+                tempfile.gettempdir(), f"ansys_tmp_{random_string()}"
+            )
+            if not os.path.exists(save_path):
+                os.mkdir(save_path)
             result_path = self.download_result(save_path)
         else:
             if self._distributed_result_file and self._result_file:
