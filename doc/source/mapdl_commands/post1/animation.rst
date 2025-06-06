@@ -1,28 +1,31 @@
-.. _ref_animation_api:
 
-*********
+.. _ref_animation:
+
+
 Animation
-*********
+=========
 
-.. currentmodule:: ansys.mapdl.core
 
-These POST1 commands are used to animate results.
+.. currentmodule:: ansys.mapdl.core._commands.post1.animation
+
+.. autoclass:: ansys.mapdl.core._commands.post1.animation.Animation
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.ancntr
-   Mapdl.ancut
-   Mapdl.andata
-   Mapdl.andscl
-   Mapdl.ancyc
-   Mapdl.andyna
-   Mapdl.anfile
-   Mapdl.anflow
-   Mapdl.anharm
-   Mapdl.anim
-   Mapdl.anisos
-   Mapdl.anmode
-   Mapdl.anmres
-   Mapdl.antime
-   Mapdl.trtime
+
+   Animation.ancntr
+   Animation.ancut
+   Animation.ancyc
+   Animation.andata
+   Animation.andscl
+   Animation.andyna
+   Animation.anfile
+   Animation.anflow
+   Animation.anharm
+   Animation.anim
+   Animation.anisos
+   Animation.anmode
+   Animation.antime
+   Animation.trtime

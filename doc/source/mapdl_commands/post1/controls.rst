@@ -1,21 +1,26 @@
-.. _ref_controls_api:
 
-********
+.. _ref_controls:
+
+
 Controls
-********
+========
 
-.. currentmodule:: ansys.mapdl.core
 
-These POST1 commands are used to control the calculations done for
-other commands.
+.. currentmodule:: ansys.mapdl.core._commands.post1.controls
+
+.. autoclass:: ansys.mapdl.core._commands.post1.controls.Controls
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.avprin
-   Mapdl.avres
-   Mapdl.efacet
-   Mapdl.ernorm
-   Mapdl.inres
-   Mapdl.layer
-   Mapdl.rsys
+
+   Controls.avprin
+   Controls.avres
+   Controls.efacet
+   Controls.ernorm
+   Controls.force
+   Controls.inres
+   Controls.layer
+   Controls.rsys
+   Controls.shell

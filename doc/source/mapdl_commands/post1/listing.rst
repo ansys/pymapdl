@@ -1,19 +1,23 @@
-.. _ref_listing_api:
 
-*******
+.. _ref_listing:
+
+
 Listing
-*******
+=======
 
-.. currentmodule:: ansys.mapdl.core
 
-These POST1 commands are used to control printed listings of results.
+.. currentmodule:: ansys.mapdl.core._commands.post1.listing
+
+.. autoclass:: ansys.mapdl.core._commands.post1.listing.Listing
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.format
-   Mapdl.header
-   Mapdl.irlist
-   Mapdl.page
-   Mapdl.prerr
-   Mapdl.priter
+
+   Listing.format
+   Listing.header
+   Listing.irlist
+   Listing.page
+   Listing.prerr
+   Listing.priter

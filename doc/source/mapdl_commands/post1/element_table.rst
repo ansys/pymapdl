@@ -1,35 +1,36 @@
-.. _ref_element_table_api:
 
-*************
-Element table
-*************
+.. _ref_element_table:
 
-.. currentmodule:: ansys.mapdl.core
 
-These POST1 commands are used to operate with the element table, which
-in turn is used to process results stored for each element, such as
-average stresses, heat fluxes, etc.
+ElementTable
+============
+
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.element_table
+
+.. autoclass:: ansys.mapdl.core._commands.post1.element_table.ElementTable
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.detab
-   Mapdl.esort
-   Mapdl.etable
-   Mapdl.eusort
-   Mapdl.pletab
-   Mapdl.plls
-   Mapdl.pretab
-   Mapdl.sabs
-   Mapdl.sadd
-   Mapdl.sallow
-   Mapdl.sexp
-   Mapdl.sfact
-   Mapdl.sfcalc
-   Mapdl.smax
-   Mapdl.smin
-   Mapdl.smult
-   Mapdl.ssum
-   Mapdl.tallow
-   Mapdl.vcross
-   Mapdl.vdot
+
+   ElementTable.esort
+   ElementTable.etable
+   ElementTable.eusort
+   ElementTable.pletab
+   ElementTable.plls
+   ElementTable.pretab
+   ElementTable.sabs
+   ElementTable.sadd
+   ElementTable.sallow
+   ElementTable.sexp
+   ElementTable.sfact
+   ElementTable.sfcalc
+   ElementTable.smax
+   ElementTable.smin
+   ElementTable.smult
+   ElementTable.ssum
+   ElementTable.tallow
+   ElementTable.vcross
+   ElementTable.vdot

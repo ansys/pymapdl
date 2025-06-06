@@ -21,12 +21,12 @@
 # SOFTWARE.
 
 from . import (
-    magnetics_calc,
-    path_operations,
-    results,
-    setup,
-    special,
-    status,
-    surface_operations,
-    trace_points,
+    _fatigue,
+    _special_purpose,
+    animation,
+    controls,
+    element_table,
+    failure_criteria,
+    listing,
+    load_case_calculations,
 )
