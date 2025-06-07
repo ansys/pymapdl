@@ -54,9 +54,159 @@ import json
 from pathlib import Path
 
 from ansys.dpf import core as dpf
+import numpy as np
 from pytwin import write_binary
 
 from ansys.mapdl.core import launch_mapdl
+
+
+###############################################################################
+# Helper functions
+# ~~~~~~~~~~~~
+def compress_id_list(id_list: np.ndarray):
+    """
+    Compress array of consecutive IDs.
+
+    Compress array by replacing runs of three or more consecutive integers with ``start, -1, end``.
+
+    Example
+    -------
+    >>> input = np.array([0, 1, 2, 3, 4, 5, 6, 28, 29, 30, 31, 13, 15, 17, 18, 19, 20])
+    >>> compress_id_list(input)
+    [0, -1, 6, 28, -1, 31, 13, 15, 17, -1, 20]
+    """
+    if id_list.size == 0:
+        return []
+
+    # Find breaks in consecutive sequences.
+    breaks = np.where(np.diff(id_list) != 1)[0]
+
+    # Add endpoints to form run boundaries
+    run_starts = np.insert(breaks + 1, 0, 0)
+    run_ends = np.append(breaks, len(id_list) - 1)
+
+    result = []
+    for start, end in zip(run_starts, run_ends):
+        length = end - start + 1
+        if length >= 3:
+            result.extend([int(id_list[start]), -1, int(id_list[end])])
+        else:
+            result.extend(id_list[start : end + 1].tolist())
+    return result
+
+
+def write_settings(path: str | Path, field: dpf.Field, name: str, is_deformation=False):
+    """Write the settings.json file."""
+
+    if field.component_count == 1 or field.component_count == 3:
+        dimensionality = [field.component_count]
+        symmetricalDim = False
+    elif field.component_count == 6:
+        dimensionality = [3, 3]
+        symmetricalDim = True
+    else:
+        raise ValueError(f"Unsupported field dimensionality {field.component_count}")
+
+    settings = {
+        "pointsCoordinates": False,
+        "ids": compress_id_list(field.scoping.ids),
+        "location": "Nodal",
+        "unit": field.unit,
+        "unitDimension": {},
+        "unitFactor": 1.0,
+        "name": name,
+        "deformation": is_deformation,
+        "dimensionality": dimensionality,
+        "symmetricalDim": symmetricalDim,
+        "namedSelections": {},
+    }
+
+    with open(Path(path).joinpath("settings.json"), "w") as fw:
+        # Set default to convert Numpy int to int
+        json.dump(settings, fw, default=int, indent=4)
+
+
+def get_scoping(model: dpf.Model):
+    """Return scoping of unique node IDs connected to elements in model."""
+    op = dpf.operators.scoping.connectivity_ids(
+        mesh_scoping=model.metadata.meshed_region.elements.scoping,
+        mesh=model.metadata.meshed_region,
+        take_mid_nodes=True,
+    )
+    # Get output data
+    connected_nodes_scoping = op.outputs.mesh_scoping()
+    # Compress the list to only keep unique IDs
+    connected_nodes_scoping.ids = list(set(op.outputs.mesh_scoping().ids))
+    return connected_nodes_scoping
+
+
+def write_points(model: dpf.Model, scoping: dpf.Scoping, output_folder: str | Path):
+    """Write points.bin file."""
+    # Get node locations
+    nodes = model.metadata.meshed_region.nodes
+    scoped_node_indices, _ = nodes.map_scoping(scoping)
+    points_coordinates = nodes.coordinates_field.data[scoped_node_indices]
+    write_binary(Path(output_folder).joinpath("points.bin"), points_coordinates)
+
+
+def write_doe_headers(output_folder: str | Path, name: str, parameters: dict):
+    """Write blank doe.csv file with headers."""
+    # Write doe.csv headers
+    with open(Path(output_folder).joinpath("doe.csv"), "w") as fw:
+        parameter_headers = ",".join([str(key) for key in parameters.keys()])
+        fw.write(f"{name},{parameter_headers}\n")
+
+
+def write_doe_entry(output_folder: str | Path, snapshot_name: str, parameters: dict):
+    """Write entry to doe.csv file."""
+    # Write doe.csv headers
+    with open(Path(output_folder).joinpath("doe.csv"), "a") as fw:
+        parameter_values = ",".join([str(value) for value in parameters.values()])
+        fw.write(f"{snapshot_name},{parameter_values}\n")
+
+
+def export_static_ROM_data(
+    model: dpf.Model,
+    scoping: dpf.Scoping,
+    name: str,
+    output_folder: str | Path,
+    parameters: dict,
+    snap_idx: int = 0,
+    new_metadata: bool = False,
+):
+    # Create the output folder
+    output_folder = Path(output_folder)
+    output_folder.mkdir(parents=True, exist_ok=True)
+
+    is_deformation = False
+    if name == "displacement":
+        result = model.results.displacement
+        is_deformation = True
+    elif name == "stress":
+        result = model.results.stress
+    else:
+        raise ValueError(f"Unsupported result type: {name}")
+
+    # To retrieve displacement and stress at last result set, scoped to corner nodes.
+    scoped_result = result.on_last_time_freq.on_mesh_scoping(scoping)
+    # Result must be sorted by scoping to ensure consistency across outputs.
+    sorted_result = dpf.operators.logic.ascending_sort_fc(
+        scoped_result, sort_by_scoping=True
+    )
+    result_field = sorted_result.outputs.fields_container()[0]
+
+    if new_metadata:
+        write_points(model, scoping, output_folder)
+        write_doe_headers(output_folder, name, parameters)
+        write_settings(output_folder, result_field, name, is_deformation=is_deformation)
+
+    # Write snapshots
+    snapshot_folder = output_folder.joinpath("snapshots")
+    snapshot_folder.mkdir(parents=True, exist_ok=True)
+    snap_name = f"file{snap_idx}.bin"
+    write_doe_entry(output_folder, snap_name, parameters)
+    write_binary(snapshot_folder.joinpath(snap_name), result_field.data)
+
 
 ###############################################################################
 # Launch MAPDL
@@ -83,144 +233,39 @@ mapdl = launch_mapdl(loglevel="ERROR")
 notch_file = Path.cwd().joinpath(r"src\ansys\mapdl\core\examples\3d_notch.db")
 mapdl.resume(notch_file, mute=True)
 
-force_load = 500
-mapdl.run("/SOLU")
-mapdl.cmsel("S", "load_node", "NODE")
-mapdl.fdele("ALL", "FX")
-mapdl.f("ALL", "FX", force_load)
-mapdl.allsel()
-mapdl.antype("STATIC")
-mapdl.solve()
-mapdl.finish(mute=True)
+for idx, force_load in enumerate([250, 500, 750, 1000]):
+    mapdl.run("/SOLU")
+    mapdl.cmsel("S", "load_node", "NODE")
+    mapdl.fdele("ALL", "FX")
+    mapdl.f("ALL", "FX", force_load)
+    mapdl.allsel()
+    mapdl.antype("STATIC")
+    mapdl.solve()
+    mapdl.finish(mute=True)
 
-###############################################################################
-# from basic DPF exampl
-rst_path = mapdl.result_file
+    # Define folders for output
+    rom_folder = Path(mapdl.directory).joinpath("Static_ROM")
 
-model = dpf.Model(rst_path)
-dpf.operators.result.stress()
+    rst_path = mapdl.result_file
+    model = dpf.Model(rst_path)
+    results = model.results
+    scoping = get_scoping(model)
+    parameters = {"force[N]": force_load}
 
+    new_metadata = idx == 0
+    for name in ["displacement", "stress"]:
+        output_folder = rom_folder.joinpath(name)
+        # Ensure displacement scoping and stress scoping are the same by only taking nodes connected to
+        # elements.
+        export_static_ROM_data(
+            model,
+            scoping,
+            name,
+            output_folder,
+            parameters=parameters,
+            snap_idx=idx,
+            new_metadata=new_metadata,
+        )
 
-results = model.results
-
-# Ensure displacement scoping and stress scoping are the same by only taking nodes connected to
-# elements.
-op = dpf.operators.scoping.connectivity_ids(
-    mesh_scoping=model.metadata.meshed_region.elements.scoping,
-    mesh=model.metadata.meshed_region,
-    take_mid_nodes=True,
-)
-# Get output data
-connected_nodes_scoping = op.outputs.mesh_scoping()
-
-# Compress the list to only keep unique IDs
-connected_nodes_scoping.ids = sorted(list(set(op.outputs.mesh_scoping().ids)))
-
-# To retrieve displacement and stress at last result set, scoped to corner nodes.
-displacement = results.displacement.on_last_time_freq.on_mesh_scoping(
-    connected_nodes_scoping
-)
-stress = results.stress.on_last_time_freq.on_mesh_scoping(connected_nodes_scoping)
-sorted_displacement = dpf.operators.logic.ascending_sort_fc(
-    displacement, sort_by_scoping=True
-)
-sorted_stress = dpf.operators.logic.ascending_sort_fc(stress, sort_by_scoping=True)
-
-displacement_field = sorted_displacement.outputs.fields_container()[0]
-stress_field = sorted_stress.outputs.fields_container()[0]
-
-nodes = model.metadata.meshed_region.nodes
-ind, _ = nodes.map_scoping(connected_nodes_scoping)
-
-# Define folders for output
-output_folder = Path(mapdl.directory).joinpath("Static_ROM")
-
-displacement_folder = output_folder.joinpath("displacement")
-disp_snap_folder = displacement_folder.joinpath("snapshots")
-disp_snap_folder.mkdir(parents=True, exist_ok=True)
-
-stress_folder = output_folder.joinpath("stress")
-stress_snap_folder = stress_folder.joinpath("snapshots")
-stress_snap_folder.mkdir(parents=True, exist_ok=True)
-
-# Get node locations
-nodes = model.metadata.meshed_region.nodes
-scoped_node_indices, _ = nodes.map_scoping(connected_nodes_scoping)
-points_coordinates = nodes.coordinates_field.data[scoped_node_indices]
-
-# Write points.bin
-write_binary(displacement_folder.joinpath("points.bin"), points_coordinates)
-write_binary(stress_folder.joinpath("points.bin"), points_coordinates)
-
-# Write doe.csv headers
-with open(displacement_folder.joinpath("doe.csv"), "w") as fw:
-    fw.write(f"displacement,force[N]\n")
-with open(stress_folder.joinpath("doe.csv"), "w") as fw:
-    fw.write(f"stress,force[N]\n")
-
-# Write snapshots
-snap_idx = 0
-snap_file = f"file{snap_idx}.bin"
-write_binary(disp_snap_folder.joinpath(snap_file), displacement_field.data)
-write_binary(stress_snap_folder.joinpath(snap_file), stress_field.data)
-
-# Write doe.csv entry
-with open(displacement_folder.joinpath("doe.csv"), "a") as fw:
-    fw.write(f"{snap_file},{force_load}\n")
-with open(stress_folder.joinpath("doe.csv"), "a") as fw:
-    fw.write(f"{snap_file},{force_load}\n")
-
-# Write settings.json
-if displacement_field.component_count == 1 or displacement_field.component_count == 3:
-    dimensionality = [displacement_field.component_count]
-    symmetricalDim = False
-elif displacement_field.component_count == 6:
-    dimensionality = [3, 3]
-    symmetricalDim = True
-else:
-    raise ValueError(f"Unsupported dimensionality {displacement_field.component_count}")
-
-displacement_settings = {
-    "pointsCoordinates": False,
-    "ids": list(connected_nodes_scoping.ids),
-    "location": displacement_field.location,
-    "unit": displacement_field.unit,
-    "unitDimension": {},
-    "unitFactor": 1.0,
-    "name": "Displacement",
-    "deformation": True,
-    "dimensionality": dimensionality,
-    "symmetricalDim": symmetricalDim,
-    "namedSelections": {},
-}
-
-with open(displacement_folder.joinpath("settings.json"), "w") as fw:
-    # Set default to convert Numpy int to int
-    json.dump(displacement_settings, fw, default=int, indent=4)
-
-if stress_field.component_count == 1 or stress_field.component_count == 3:
-    dimensionality = [stress_field.component_count]
-    symmetricalDim = False
-elif stress_field.component_count == 6:
-    dimensionality = [3, 3]
-    symmetricalDim = True
-else:
-    raise ValueError(f"Unsupported dimensionality {stress_field.component_count}")
-
-stress_settings = {
-    "pointsCoordinates": False,
-    "ids": list(connected_nodes_scoping.ids),
-    "location": stress_field.location,
-    "unit": stress_field.unit,
-    "unitDimension": {},
-    "unitFactor": 1.0,
-    "name": "Stress",
-    "deformation": False,
-    "dimensionality": dimensionality,
-    "symmetricalDim": symmetricalDim,
-    "namedSelections": {},
-}
-
-with open(stress_folder.joinpath("settings.json"), "w") as fw:
-    # Set default to convert Numpy int to int
-    json.dump(stress_settings, fw, default=int, indent=4)
+    print(rom_folder)
+mapdl.exit()
