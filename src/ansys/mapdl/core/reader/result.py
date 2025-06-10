@@ -76,6 +76,67 @@ if TYPE_CHECKING:
         import pyvista as pv
 
 
+MATERIAL_PROPERTIES: list[str] = [
+    "EX",
+    "EY",
+    "EZ",
+    "ALPX",
+    "ALPY",
+    "ALPZ",
+    "REFT",
+    "PRXY",
+    "PRYZ",
+    "PRX",
+    "NUXY",
+    "NUYZ",
+    "NUXZ",
+    "GXY",
+    "GYZ",
+    "GXZ",
+    "DAMP",
+    "MU",
+    "DENS",
+    "C",
+    "ENTH",
+    "KXX",
+    "KYY",
+    "KZZ",
+    "HF",
+    "EMIS",
+    "QRATE",
+    "VISC",
+    "SONC",
+    "RSVX",
+    "RSVY",
+    "RSVZ",
+    "PERX",
+    "PERY",
+    "PERZ",
+    "MURX",
+    "MURY",
+    "MURZ",
+    "MGXX",
+    "MGYY",
+    "MGZZ",
+    "XTEN",
+    "XCMP",
+    "YTEN",
+    "YCMP",
+    "ZTEN",
+    "ZCMP",
+    "XY",
+    "YZ",
+    "XZ",
+    "XYCP",
+    "YZCP",
+    "XZCP",
+    "XZIT",
+    "XZIC",
+    "YZIT",
+    "YZIC",
+]
+
+
 class ResultNotFound(MapdlRuntimeError):
     """Results not found"""
 
@@ -2002,6 +2063,151 @@ class DPFResult(Result):
     def time_values(self):
         "Values for the time/frequency"
         return self.metadata.time_freq_support.time_frequencies.data_as_list
+
+    @property
+    def materials(self):
+        """Result file material properties.
+
+        Returns
+        -------
+        dict
+            Dictionary of Materials.  Keys are the material numbers,
+            and each material is a dictionary of the material
+            properrties of that material with only the valid entries filled.
+
+        Notes
+        -----
+        Material properties:
+
+        - EX : Elastic modulus, element x direction (Force/Area)
+        - EY : Elastic modulus, element y direction (Force/Area)
+        - EZ : Elastic modulus, element z direction (Force/Area)
+        - ALPX : Coefficient of thermal expansion, element x direction (Strain/Temp)
+        - ALPY : Coefficient of thermal expansion, element y direction (Strain/Temp)
+        - ALPZ : Coefficient of thermal expansion, element z direction (Strain/Temp)
+        - REFT : Reference temperature (as a property) [TREF]
+        - PRXY : Major Poisson's ratio, x-y plane
+        - PRYZ : Major Poisson's ratio, y-z plane
+        - PRX  Z : Major Poisson's ratio, x-z plane
+        - NUXY : Minor Poisson's ratio, x-y plane
+        - NUYZ : Minor Poisson's ratio, y-z plane
+        - NUXZ : Minor Poisson's ratio, x-z plane
+        - GXY : Shear modulus, x-y plane (Force/Area)
+        - GYZ : Shear modulus, y-z plane (Force/Area)
+        - GXZ : Shear modulus, x-z plane (Force/Area)
+        - DAMP : K matrix multiplier for damping [BETAD] (Time)
+        - MU : Coefficient of friction (or, for FLUID29 and FLUID30
+               elements, boundary admittance)
+        - DENS : Mass density (Mass/Vol)
+        - C : Specific heat (Heat/Mass*Temp)
+        - ENTH : Enthalpy (e DENS*C d(Temp)) (Heat/Vol)
+        - KXX : Thermal conductivity, element x direction
+                (Heat*Length / (Time*Area*Temp))
+        - KYY : Thermal conductivity, element y direction
+                (Heat*Length / (Time*Area*Temp))
+        - KZZ : Thermal conductivity, element z direction
+                (Heat*Length / (Time*Area*Temp))
+        - HF : Convection (or film) coefficient (Heat / (Time*Area*Temp))
+        - EMIS : Emissivity
+        - QRATE : Heat generation rate (MASS71 element only) (Heat/Time)
+        - VISC : Viscosity (Force*Time / Length2)
+        - SONC : Sonic velocity (FLUID29 and FLUID30 elements only) (Length/Time)
+        - RSVX : Electrical resistivity, element x direction (Resistance*Area / Length)
+        - RSVY : Electrical resistivity, element y direction (Resistance*Area / Length)
+        - RSVZ : Electrical resistivity, element z direction (Resistance*Area / Length)
+        - PERX : Electric permittivity, element x direction (Charge2 / (Force*Length))
+        - PERY : Electric permittivity, element y direction (Charge2 / (Force*Length))
+        - PERZ : Electric permittivity, element z direction (Charge2 / (Force*Length))
+        - MURX : Magnetic relative permeability, element x direction
+        - MURY : Magnetic relative permeability, element y direction
+        - MURZ : Magnetic relative permeability, element z direction
+        - MGXX : Magnetic coercive force, element x direction (Charge / (Length*Time))
+        - MGYY : Magnetic coercive force, element y direction (Charge / (Length*Time))
+        - MGZZ : Magnetic coercive force, element z direction (Charge / (Length*Time))
+
+        Materials may contain the key ``"stress_failure_criteria"``, which
+        contains failure criteria information for temperature-dependent stress
+        limits. This includes the following keys:
+
+        - XTEN : Allowable tensile stress or strain in the x-direction. (Must
+          be positive.)
+
+        - XCMP : Allowable compressive stress or strain in the
+          x-direction. (Defaults to negative of XTEN.)
+
+        - YTEN : Allowable tensile stress or strain in the y-direction. (Must
+          be positive.)
+
+        - YCMP : Allowable compressive stress or strain in the
+          y-direction. (Defaults to negative of YTEN.)
+
+        - ZTEN : Allowable tensile stress or strain in the z-direction. (Must
+          be positive.)
+
+        - ZCMP : Allowable compressive stress or strain in the
+          z-direction. (Defaults to negative of ZTEN.)
+
+        - XY : Allowable XY stress or shear strain. (Must be positive.)
+
+        - YZ : Allowable YZ stress or shear strain. (Must be positive.)
+
+        - XZ : Allowable XZ stress or shear strain. (Must be positive.)
+
+        - XYCP : XY coupling coefficient (Used only if Lab1 = S). Defaults to -1.0. [1]
+
+        - YZCP : YZ coupling coefficient (Used only if Lab1 = S). Defaults to -1.0. [1]
+
+        - XZCP : XZ coupling coefficient (Used only if Lab1 = S). Defaults to -1.0. [1]
+
+        - XZIT : XZ tensile inclination parameter for Puck failure index (default =
+          0.0)
+
+        - XZIC : XZ compressive inclination parameter for Puck failure index
+          (default = 0.0)
+
+        - YZIT : YZ tensile inclination parameter for Puck failure index
+          (default = 0.0)
+
+        - YZIC : YZ compressive inclination parameter for Puck failure index
+          (default = 0.0)
+
+        Examples
+        --------
+        Return the material properties from the example result
+        file. Note that the keys of ``rst.materials`` is the material
+        type.
+
+        >>> from ansys.mapdl import reader as pymapdl_reader
+        >>> from ansys.mapdl.reader import examples
+        >>> rst = pymapdl_reader.read_binary(examples.rstfile)
+        >>> rst.materials
+        {1: {'EX': 16900000.0, 'NUXY': 0.31, 'DENS': 0.00041408}}
+
+        """
+        mats = self.mesh.property_field("mat")
+
+        mat_prop = dpf.operators.result.mapdl_material_properties()
+        mat_prop.inputs.materials.connect(mats)
+
+        mat_prop.connect(0, MATERIAL_PROPERTIES)
+        mat_prop.inputs.data_sources.connect(self.model)
+        prop_field = mat_prop.outputs.properties_value.get_data()
+
+        # Obtaining materials ids
+        mat_ids = set()
+        for prop in prop_field:
+            mat_ids = mat_ids.union(prop.scoping.ids.tolist())
+
+        # Building dictionary of materials
+        mats = {}
+        for ind, mat_id in enumerate(mat_ids):
+            mats[mat_id] = {}
+
+            for ind2, (prop, field) in enumerate(zip(MATERIAL_PROPERTIES, prop_field)):
+                value = field.data[ind].item()
+                if value:
+                    mats[mat_id][prop] = value
+        return mats
 
     def plot_nodal_stress(
         self,

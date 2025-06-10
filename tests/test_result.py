@@ -409,6 +409,9 @@ class TestStaticThermocoupledExample(TestExample):
             assert result.parse_step_substep((0, each)) == each
             assert result.parse_step_substep([0, each]) == each
 
+    def test_material_properties(self, mapdl, reader, post, result):
+        assert reader.materials == result.materials
+
 
 class TestElectroThermalCompliantMicroactuator(TestExample):
     """Class to test the Electro-Thermal-Compliant Microactuator VM223 example."""
@@ -462,6 +465,12 @@ class TestElectroThermalCompliantMicroactuator(TestExample):
         validate(
             result_values, reader_values, post_values, rtol=1e-4, atol=1e-5
         )  # Reader results are broken
+
+    @pytest.mark.xfail(
+        reason="Temperature dependent material properties are not implemented yet"
+    )
+    def test_material_properties(self, mapdl, reader, post, result):
+        assert reader.materials == result.materials
 
 
 class TestSolidStaticPlastic(TestExample):
@@ -528,6 +537,9 @@ class TestSolidStaticPlastic(TestExample):
 
         validate(result_values, reader_values=None, post_values=post_values[ids])
         mapdl.allsel()  # resetting selection
+
+    def test_material_properties(self, mapdl, reader, post, result):
+        assert reader.materials == result.materials
 
 
 class TestPiezoelectricRectangularStripUnderPureBendingLoad(TestExample):
@@ -622,6 +634,10 @@ class TestPiezoelectricRectangularStripUnderPureBendingLoad(TestExample):
         validate(result_values, reader_values=None, post_values=post_values)
         mapdl.allsel()
 
+    @pytest.mark.xfail(reason="DPF does not read the PERX properties.")
+    def test_material_properties(self, mapdl, reader, post, result):
+        assert reader.materials == result.materials
+
 
 class TestPinchedCylinderVM6(TestExample):
     """Class to test a pinched cylinder (VM6 example).
@@ -689,6 +705,9 @@ class TestPinchedCylinderVM6(TestExample):
         validate(result_values, reader_values, post_values)
         mapdl.rsys(0)  # Back to default
         mapdl.shell()
+
+    def test_material_properties(self, mapdl, reader, post, result):
+        assert reader.materials == result.materials
 
 
 class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(TestExample):
@@ -787,6 +806,9 @@ class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(TestExample):
         assert result.n_sector is None
         assert result.num_stages is None
 
+    def test_material_properties(self, mapdl, reader, post, result):
+        assert reader.materials == result.materials
+
 
 # class TestChabocheRateDependentPlasticMaterialunderCyclicLoadingVM155(TestExample):
 #     """Class to test Chaboche Rate-Dependent Plastic Material under Cyclic Loading (VM155 example).
@@ -846,3 +868,6 @@ class TestModalAnalysisofaCyclicSymmetricAnnularPlateVM244(TestExample):
         assert result.is_cyclic
         assert result.n_sector == 12
         assert result.num_stages == 1
+
+    def test_material_properties(self, mapdl, reader, post, result):
+        assert reader.materials == result.materials
