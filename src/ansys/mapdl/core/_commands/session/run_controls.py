@@ -384,8 +384,8 @@ class RunControls:
 
         .. warning::
 
-            if you include the /MENU,ON command in your start.ans, it should be the lastcommand in the file.
-            Any commands after /MENU,ON may be ignored. (It is not necessary to include the /SHOW and
+            if you include the /MENU,ON command in your start.ans, it should be the lastcommand in the
+            file. Any commands after /MENU,ON may be ignored. (It is not necessary to include the /SHOW and
             /MENU,ON commands in start.ansif you will be using the launcher to enter the Mechanical APDL program.)
 
         This command is valid in any processor.
@@ -1088,13 +1088,13 @@ class RunControls:
         Controls certain features of the Graphical User Interface (GUI), including whether Mechanical APDL
         displays
         dialog boxes to show you the status of an operation (such as meshing or solution) in progress and to
-        enable you to cancel that operation. Issue :ref:`uis`,STAT for current status. Issue :ref:`uis`,DEFA
-        to reset default values for all labels. Issue :ref:`uis`, ``Label``,STAT and :ref:`uis`,
+        enable you to cancel that operation. Issue :ref:`uis`,STAT for current status. Issue :ref:`uis`
+        ,DEFA to reset default values for all labels. Issue :ref:`uis`, ``Label``,STAT and :ref:`uis`,
         ``Label``,DEFA for status and to reset a specific ``Label`` item.
 
         A :ref:`uis`,HPOP,1 command employs a fast redraw method which does not allow entering the legend
-        logic for a :ref:`plopts`,INFO,1 or :ref:`plopts`,INFO,2 command. However, the legend is redrawn for
-        :ref:`plopts`,INFO,3 because that command also allows a fast redraw.
+        logic for a :ref:`plopts`,INFO,1 or :ref:`plopts`,INFO,2 command. However, the legend is redrawn
+        for :ref:`plopts`,INFO,3 because that command also allows a fast redraw.
 
         This command is valid in any processor.
         """

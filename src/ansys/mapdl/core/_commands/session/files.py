@@ -414,8 +414,8 @@ class Files:
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_ope/Hlp_G_OPE8.html>`_ for
         details. Mechanical APDL binary and ASCII files can be copied.
 
-        In distributed-memory parallel (DMP) mode, only the master process will copy ``Fname1``. ``Ext1`` to
-        ``Fname2``. ``Ext2`` by default. However, when ``DistKey`` is set to 1 (or ON, or YES) or 2 (or
+        In distributed-memory parallel (DMP) mode, only the master process will copy ``Fname1``. ``Ext1``
+        to ``Fname2``. ``Ext2`` by default. However, when ``DistKey`` is set to 1 (or ON, or YES) or 2 (or
         BOTH), the command is executed by all processes. In this case, ``Fname1`` and ``Fname2`` will
         automatically have the process rank appended to them. This means ``Fname1N``. ``Ext1`` will be
         copied to ``Fname2N``. ``Ext2`` by all processes, where ``N`` is the DMP process rank. For more
@@ -606,8 +606,8 @@ class Files:
 
         Notes
         -----
-        In distributed-memory parallel (DMP) mode, only the master process will delete ``Fname``. ``Ext`` by
-        default. However, when ``DistKey`` is set to 1 (or ON, or YES) or 2 (or BOTH), the command is
+        In distributed-memory parallel (DMP) mode, only the master process will delete ``Fname``. ``Ext``
+        by default. However, when ``DistKey`` is set to 1 (or ON, or YES) or 2 (or BOTH), the command is
         executed by all processes. In this case, ``Fname`` will automatically have the process rank appended
         to it. This means ``FnameN``. ``Ext`` will be deleted by all processes, where ``N`` is the DMP
         process rank. For more information see in the `Parallel Processing Guide

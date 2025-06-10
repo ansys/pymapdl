@@ -111,6 +111,13 @@ class ListControls:
 
         Mechanical APDL Command: `/NOPR <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NOPR.html>`_
 
+        .. warning::
+
+            PyMAPDL uses the console output to parse and retrieve information from the MAPDL
+            instance. Hence, it is strongly advised to **NOT** use this command unless you really
+            know what you are doing. In case of an accidental ``NOPR`` activation, you can run
+            `mapdl.gopr()` to reactivate console output.
+
         Notes
         -----
 
