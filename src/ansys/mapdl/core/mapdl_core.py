@@ -1360,7 +1360,7 @@ class _MapdlCore(Commands):
             def inner_wrapper(*args, **kwargs):
                 # in interactive mode (item='p'), the output is not suppressed
                 if self._store_commands:
-                    # In non-interactive mode, we do not need to check anything.
+                    # In non-interactive mode, execute the wrapped function and return its result.
                     return func(*args, **kwargs)
 
                 is_interactive_arg = (

@@ -3020,7 +3020,7 @@ def test_selection_on_non_interactive(mapdl, cleared, solved_box, sel_type):
         else:
             mapdl.nsel(sel_type, vmin=7)
 
-    if sel_type == "S" or sel_type == "R":
+    if sel_type in ["S", "R"]:
         assert np.allclose(mapdl.mesh.nnum, [7])
     elif sel_type == "U":
         assert np.allclose(mapdl.mesh.nnum, [5, 6])
