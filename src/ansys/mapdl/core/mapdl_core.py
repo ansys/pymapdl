@@ -1361,7 +1361,7 @@ class _MapdlCore(Commands):
                 # in interactive mode (item='p'), the output is not suppressed
                 if self._store_commands:
                     # In non-interactive mode, we do not need to check anything.
-                    return
+                    return func(*args, **kwargs)
 
                 is_interactive_arg = (
                     True
