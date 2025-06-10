@@ -4,6 +4,7 @@ from datetime import datetime
 import os
 from pathlib import Path
 import sys
+from typing import Any
 import warnings
 
 import ansys.tools.visualization_interface as viz_interface
@@ -363,8 +364,6 @@ html_context = {
 html_show_sourcelink = False
 
 
-html_js_files = ["https://cdn.plot.ly/plotly-3.0.1.min.js"]
-
 # -- Options for HTMLHelp output ---------------------------------------------
 
 # Output file base name for HTML help builder.
@@ -372,7 +371,7 @@ htmlhelp_basename = "pymapdldoc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
-latex_elements = {}
+latex_elements: dict[Any, Any] = {}
 
 latex_engine = "xelatex"
 
