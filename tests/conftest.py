@@ -294,6 +294,7 @@ def pytest_report_header(config, start_path, startdir):
     line = ""
     for env_var in [
         "PYMAPDL_START_INSTANCE",
+        "PYMAPDL_ADDITIONAL_SWITCHES",
         "PYMAPDL_PORT",
         "PYMAPDL_PORT2",
         "PYMAPDL_DB_PORT",
