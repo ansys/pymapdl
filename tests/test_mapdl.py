@@ -3009,35 +3009,50 @@ def test_set_no_abort(monkeypatch, set_no_abort, start_instance):
         assert any(["/NERR,,,-1" in each for each in calls])
 
 
-@pytest.mark.parametrize("func", ["nsel", "esel", "ksel", "lsel", "asel"])
-@pytest.mark.parametrize("sel_type", ["S", "R", "U", "A"])
-def test_selection_on_non_interactive(mapdl, cleared, solved_box, func, sel_type):
+class TestSelectionOnNonInteractive:
+    """Test selection commands in non-interactive mode."""
 
-    function = getattr(mapdl, func)
+    @pytest.fixture(scope="class", autouse=True)
+    def setup(self, mapdl):
+        self.mapdl = mapdl
 
-    if func == "nsel":
-        checker = lambda: mapdl.mesh.nnum
-    elif func == "esel":
-        checker = lambda: mapdl.mesh.enum
-    elif func == "ksel":
-        checker = lambda: mapdl.geometry.knum
-    elif func == "lsel":
-        checker = lambda: mapdl.geometry.lnum
-    elif func == "asel":
-        checker = lambda: mapdl.geometry.anum
+        mapdl.clear()
+        mapdl.prep7()
+        mapdl.block(0, 1, 0, 1, 0, 1)
+        mapdl.et(1, 186)
+        mapdl.esize(0.25)
+        mapdl.vmesh("ALL")
 
-    function("S", vmin=1, vmax=3)
-    assert np.allclose(checker(), [1, 2, 3])
+    @pytest.mark.parametrize("func", ["nsel", "esel", "ksel", "lsel", "asel"])
+    @pytest.mark.parametrize("sel_type", ["S", "R", "U", "A"])
+    def test_selection_on_non_interactive(self, mapdl, func, sel_type):
+        mapdl.allsel()
 
-    with mapdl.non_interactive:
-        if sel_type == "A":
-            function(sel_type, vmin=5)
-        else:
-            function(sel_type, vmin=2)
+        function = getattr(mapdl, func)
 
-    if sel_type in ["S", "R"]:
-        assert np.allclose(checker(), [2])
-    elif sel_type == "U":
-        assert np.allclose(checker(), [1, 3])
-    elif sel_type == "A":
-        assert np.allclose(checker(), [1, 2, 3, 5])
+        if func == "nsel":
+            checker = lambda: mapdl.mesh.nnum
+        elif func == "esel":
+            checker = lambda: mapdl.mesh.enum
+        elif func == "ksel":
+            checker = lambda: mapdl.geometry.knum
+        elif func == "lsel":
+            checker = lambda: mapdl.geometry.lnum
+        elif func == "asel":
+            checker = lambda: mapdl.geometry.anum
+
+        function("S", vmin=1, vmax=3)
+        assert np.allclose(checker(), [1, 2, 3])
+
+        with mapdl.non_interactive:
+            if sel_type == "A":
+                function(sel_type, vmin=5)
+            else:
+                function(sel_type, vmin=2)
+
+        if sel_type in ["S", "R"]:
+            assert np.allclose(checker(), [2])
+        elif sel_type == "U":
+            assert np.allclose(checker(), [1, 3])
+        elif sel_type == "A":
+            assert np.allclose(checker(), [1, 2, 3, 5])
