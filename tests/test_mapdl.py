@@ -381,12 +381,12 @@ def test_empty(mapdl, cleared):
         mapdl.run("")
 
 
-def test_multiline_fail(mapdl, cleared):
+def test_multiline_fail_value_error(mapdl, cleared):
     with pytest.raises(ValueError, match="Use ``input_strings``"):
         mapdl.run(CMD_BLOCK)
 
 
-def test_multiline_fail(mapdl, cleared):
+def test_multiline_fail_deprecation_warning(mapdl, cleared):
     with pytest.warns(DeprecationWarning):
         resp = mapdl.run_multiline(CMD_BLOCK)
         assert "IS SOLID186" in resp, "not capturing the beginning of the block"
@@ -3007,3 +3007,22 @@ def test_set_no_abort(monkeypatch, set_no_abort, start_instance):
 
     if set_no_abort is None or set_no_abort:
         assert any(["/NERR,,,-1" in each for each in calls])
+
+
+@pytest.mark.parametrize("sel_type", ["S", "R", "U", "A"])
+def test_selection_on_non_interactive(mapdl, cleared, solved_box, sel_type):
+    mapdl.nsel("S", vmin=5, vmax=7)
+    assert np.allclose(mapdl.mesh.nnum, [5, 6, 7])
+
+    with mapdl.non_interactive:
+        if sel_type == "A":
+            mapdl.nsel(sel_type, vmin=10)
+        else:
+            mapdl.nsel(sel_type, vmin=7)
+
+    if sel_type == "S" or sel_type == "R":
+        assert np.allclose(mapdl.mesh.nnum, [7])
+    elif sel_type == "U":
+        assert np.allclose(mapdl.mesh.nnum, [5, 6])
+    elif sel_type == "A":
+        assert np.allclose(mapdl.mesh.nnum, [5, 6, 7, 10])
