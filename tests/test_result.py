@@ -76,7 +76,6 @@ from ansys.mapdl.core.logging import PymapdlCustomAdapter as MAPDLLogger
 
 def validate(result_values, reader_values=None, post_values=None, rtol=1e-5, atol=1e-8):
     if reader_values is not None and post_values is not None:
-        err_post_reader = None
         err_reader = None
         err_post = None
 
@@ -87,7 +86,7 @@ def validate(result_values, reader_values=None, post_values=None, rtol=1e-5, ato
             # Attempt to validate all three sets of values
             all_close(result_values, reader_values, post_values, rtol=rtol, atol=atol)
             return
-        except AssertionError as err:
+        except AssertionError:
             pass
 
         try:
@@ -100,7 +99,6 @@ def validate(result_values, reader_values=None, post_values=None, rtol=1e-5, ato
         except AssertionError as err:
             # Attempt partial validation against Reader values
             err_post = err
-            pass
 
         if EXIGENT:
             try:

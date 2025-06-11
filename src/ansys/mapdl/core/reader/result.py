@@ -69,11 +69,8 @@ if _HAS_DPF:
     from ansys.dpf.core.errors import DPFServerException
 
 
-if TYPE_CHECKING:
-    from ansys.mapdl.core import Mapdl
-
-    if _HAS_PYVISTA:
-        import pyvista as pv
+if TYPE_CHECKING and _HAS_PYVISTA:
+    import pyvista as pv
 
 
 MATERIAL_PROPERTIES: list[str] = [
@@ -2048,7 +2045,7 @@ class DPFResult(Result):
         return self.metadata.time_freq_support.time_frequencies.data_as_list
 
     @property
-    def materials(self):
+    def materials(self) -> dict[int, dict[str, int | float]]:
         """Result file material properties.
 
         Returns
@@ -2176,7 +2173,7 @@ class DPFResult(Result):
         prop_field = mat_prop.outputs.properties_value.get_data()
 
         # Obtaining materials ids
-        mat_ids = set()
+        mat_ids: set[int] = set()
         for prop in prop_field:
             mat_ids = mat_ids.union(prop.scoping.ids.tolist())
 
@@ -2185,8 +2182,8 @@ class DPFResult(Result):
         for ind, mat_id in enumerate(mat_ids):
             mats[mat_id] = {}
 
-            for ind2, (prop, field) in enumerate(zip(MATERIAL_PROPERTIES, prop_field)):
-                value = field.data[ind].item()
+            for prop, field in zip(MATERIAL_PROPERTIES, prop_field):
+                value: float = float(field.data[ind].item())
                 if value:
                     mats[mat_id][prop] = value
         return mats
@@ -2252,21 +2249,21 @@ class DPFResult(Result):
 
         >>> rst.plot_nodal_stress(0, comp='x', show_displacement=True)
         """
-        if not comp:
-            comp = "X"
+        # if not comp:
+        #     comp = "X"
 
-        ind = COMPONENTS.index(comp)
+        # ind = COMPONENTS.index(comp)
 
-        op = self._get_nodes_result(
-            rnum,
-            "stress",
-            nodes=node_components,
-            in_nodal_coord_sys=False,
-            return_operator=True,
-        )
-        fc = op.outputs.fields_as_fields_container()[0]
+        # op = self._get_nodes_result(
+        #     rnum,
+        #     "stress",
+        #     nodes=node_components,
+        #     in_nodal_coord_sys=False,
+        #     return_operator=True,
+        # )
+        # fc = op.outputs.fields_as_fields_container()[0]
 
-        raise Exception()
+        raise NotImplementedError("WIP")
 
     @property
     def _elements(self):
@@ -2638,6 +2635,50 @@ class DPFResult(Result):
         """
         return self._get_comp_dict("ELEM")
 
+    def result_dof(self):
+        pass
+
+    def nodal_input_force(self, rnum):
+        """Nodal input force for a given result number.
+
+        Nodal input force is generally set with the APDL command
+        ``F``.  For example, ``F, 25, FX, 0.001``
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        Returns
+        -------
+        nnum : np.ndarray
+            Node numbers of the nodes with nodal forces.
+
+        dof : np.ndarray
+            Array of indices of the degrees of freedom of the nodes
+            with input force.  See ``rst.result_dof`` for the degrees
+            of freedom associated with each index.
+
+        force : np.ndarray
+            Nodal input force.
+
+        Examples
+        --------
+        Print the nodal input force where:
+        - Node 25 has FX=20
+        - Node 26 has FY=30
+        - Node 27 has FZ=40
+
+        >>> rst.nodal_input_force(0)
+        (array([ 25,  26, 27], dtype=int32),
+         array([2, 1, 3], dtype=int32),
+         array([30., 20., 40.]))
+        """
+        from ansys.dpf.core.operators.result.nodal_force import InputsNodalForce
+
+        op = InputsNodalForce()
+
     # def save_as_vtk(
     #     self, filename, rsets=None, result_types=["ENS"], progress_bar=True
     # ):
@@ -2790,9 +2831,6 @@ class DPFResult(Result):
     #     pass
 
     # def quadgrid(self):
-    #     pass
-
-    # def result_dof(self):
     #     pass
 
     # def section_data(self):
