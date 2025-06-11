@@ -2056,7 +2056,7 @@ class DPFResult(Result):
         dict
             Dictionary of Materials.  Keys are the material numbers,
             and each material is a dictionary of the material
-            properrties of that material with only the valid entries filled.
+            properties of that material with only the valid entries filled.
 
         Notes
         -----
