@@ -274,36 +274,36 @@ class Results:
              - Plastic work/volume.
            * - FAIL
              - MAX
-             - Maximum of all active failure criteria defined at the current location. (See the :ref:`fctyp` command for details.) [ :ref:`NSORTinputneed`]
+             - Maximum of all active failure criteria defined at the current location. (See the :ref:`fctyp` command for details.) [ :ref:`NSORTinputneed` ]
            * - "
              - EMAX
-             - Maximum Strain Failure Criterion [ :ref:`NSORTinputneed`]
+             - Maximum Strain Failure Criterion [ :ref:`NSORTinputneed` ]
            * - "
              - SMAX
-             - Maximum Stress Failure Criterion [ :ref:`NSORTinputneed`]
+             - Maximum Stress Failure Criterion [ :ref:`NSORTinputneed` ]
            * - "
              - TWSI
-             - Tsai-Wu Strength Index Failure Criterion [ :ref:`NSORTinputneed`]
+             - Tsai-Wu Strength Index Failure Criterion [ :ref:`NSORTinputneed` ]
            * - "
              - TWSR
-             - Inverse of Tsai-Wu Strength Ratio Index Failure Criterion [ :ref:`NSORTinputneed`]
+             - Inverse of Tsai-Wu Strength Ratio Index Failure Criterion [ :ref:`NSORTinputneed` ]
            * - "
              - HFIB
-             - Hashin Fiber Failure Criterion. [ :ref:`NSORTinputneed`][ :ref:`nsort_tab_elemlim`]
+             - Hashin Fiber Failure Criterion. [ :ref:`NSORTinputneed` ][ :ref:`nsort_tab_elemlim` ]
            * - "
              - HMAT
-             - Hashin Matrix Failure Criterion. [ :ref:`NSORTinputneed`][ :ref:`nsort_tab_elemlim`]
+             - Hashin Matrix Failure Criterion. [ :ref:`NSORTinputneed` ][ :ref:`nsort_tab_elemlim` ]
            * - "
              - PFIB
-             - Puck Fiber Failure Criterion. [ :ref:`NSORTinputneed`][ :ref:`nsort_tab_elemlim`]
+             - Puck Fiber Failure Criterion. [ :ref:`NSORTinputneed` ][ :ref:`nsort_tab_elemlim` ]
            * - "
              - PMAT
-             - Puck Matrix Failure Criterion. [ :ref:`NSORTinputneed`][ :ref:`nsort_tab_elemlim`]
+             - Puck Matrix Failure Criterion. [ :ref:`NSORTinputneed` ][ :ref:`nsort_tab_elemlim` ]
            * - "
              - USR1, USR2,..., USR9
-             - User-defined failure criteria [ :ref:`NSORTinputneed`][ :ref:`nsort_tab_elemlim`][ :ref:`NSORT_ftnote_failcritroutine`]
+             - User-defined failure criteria [ :ref:`NSORTinputneed` ][ :ref:`nsort_tab_elemlim` ][ :ref:`NSORT_ftnote_failcritroutine` ]
            * - CONT
-             - STAT [ :ref:`NSORTcontstat`]
+             - STAT [ :ref:`NSORTcontstat` ]
              - Contact status.
            * - "
              - PENE
@@ -1814,8 +1814,8 @@ class Results:
         Parameters
         ----------
         item : str
-            Predefined vector item (from :ref:`plvect_tab_1`below) or a label identifying the i-component of
-            a user-defined vector.
+            Predefined vector item (from :ref:`plvect_tab_1` below) or a label identifying the i-component
+            of a user-defined vector.
 
         lab2 : str
             Label identifying the j-component of a user-defined vector. In most cases, this value must be
@@ -1894,7 +1894,7 @@ class Results:
 
         When vector mode is active ( ``Mode`` = VECT), use the Z-buffered display type ( :ref:`slashtype`
         ,,6) to maximize speed of :ref:`plvect` plots (other hidden display types may make plotting slow).
-        For PowerGraphics ( :ref:`graphics`,POWER), the items marked with [ :ref:`plvect_tab3-43note1`] are
+        For PowerGraphics ( :ref:`graphics`,POWER), the items marked with [ :ref:`plvect_tab3-43note1` ] are
         not supported by PowerGraphics.
 
         It is possible to plot principal stresses ( ``Item`` = S) or principal strains ( ``Item`` = EP
@@ -1927,19 +1927,19 @@ class Results:
              - Fluid flux in poromechanics.
            * - **Valid item labels for structural element results are:**
            * - S
-             - Principal stresses [ :ref:`plvect_tab3-43note1`].
+             - Principal stresses [ :ref:`plvect_tab3-43note1` ].
            * - EPTO
-             - Principal total strain (EPEL + EPPL + EPCR) [ :ref:`plvect_tab3-43note1`].
+             - Principal total strain (EPEL + EPPL + EPCR) [ :ref:`plvect_tab3-43note1` ].
            * - EPEL
-             - Principal elastic strains [ :ref:`plvect_tab3-43note1`].
+             - Principal elastic strains [ :ref:`plvect_tab3-43note1` ].
            * - EPPL
-             - Principal plastic strains [ :ref:`plvect_tab3-43note1`].
+             - Principal plastic strains [ :ref:`plvect_tab3-43note1` ].
            * - EPCR
-             - Principal creep strains [ :ref:`plvect_tab3-43note1`].
+             - Principal creep strains [ :ref:`plvect_tab3-43note1` ].
            * - EPTH
-             - Principal thermal strains [ :ref:`plvect_tab3-43note1`].
+             - Principal thermal strains [ :ref:`plvect_tab3-43note1` ].
            * - EPDI
-             - Principal diffusion strains [ :ref:`plvect_tab3-43note1`].
+             - Principal diffusion strains [ :ref:`plvect_tab3-43note1` ].
            * - **Valid item labels for field element results are:**
            * - TG
              - Thermal gradient vector.
@@ -1970,7 +1970,7 @@ class Results:
            * - JC
              - Conduction current density vector for elements that support conduction current calculation.
            * - SNDI
-             - Sound intensity vector [ :ref:`plvect_tab3-43note1`].
+             - Sound intensity vector [ :ref:`plvect_tab3-43note1` ].
 
         .. _plvect_tab3-43note1:
 
@@ -3579,8 +3579,8 @@ class Results:
         Parameters
         ----------
         item : str
-            Predefined vector item (from :ref:`prvect_tab_1`below) or a label identifying the i-component of
-            a user-defined vector.
+            Predefined vector item (from :ref:`prvect_tab_1` below) or a label identifying the i-component
+            of a user-defined vector.
 
         lab2 : str
             Label identifying the j-component of a user-defined vector. In most cases, this value must be

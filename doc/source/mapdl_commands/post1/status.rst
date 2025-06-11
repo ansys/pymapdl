@@ -1,19 +1,26 @@
-.. _ref_status_post1:
 
-******
+.. _ref_status:
+
+
 Status
-******
+======
 
-.. currentmodule:: ansys.mapdl.core
 
-These POST1 commands are for use with the STAT command.
+.. currentmodule:: ansys.mapdl.core._commands.post1.status
+
+.. autoclass:: ansys.mapdl.core._commands.post1.status.Status
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.calc
-   Mapdl.datadef
-   Mapdl.display
-   Mapdl.lccalc
-   Mapdl.point
-   Mapdl.spec
+
+   Status.calc
+   Status.datadef
+   Status.define
+   Status.display
+   Status.lccalc
+   Status.point
+   Status.print
+   Status.sort
+   Status.spec

@@ -52,13 +52,13 @@ class TracePoints:
             * ``EMAG`` - Particle trace in presence of both electric and magnetic fields (default)
 
         item : str
-            Label identifying the item to be contoured. Valid item labels are shown in
-            :ref:`pltrac_tab_1`below. Some items also require a component label. If ``Item`` is blank,
-            display only the path trajectory.
+            Label identifying the item to be contoured. Valid item labels are shown in :ref:`pltrac_tab_1`
+            below. Some items also require a component label. If ``Item`` is blank, display only the path
+            trajectory.
 
         comp : str
-            Component of the item (if required). Valid component labels are shown in
-            :ref:`pltrac_tab_1`below.
+            Component of the item (if required). Valid component labels are shown in :ref:`pltrac_tab_1`
+            below.
 
         trpnum : str
             Trace point number for storing trajectory data for use with :ref:`path` logic. Defaults to 0 (no

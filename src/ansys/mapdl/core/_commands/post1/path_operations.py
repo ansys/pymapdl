@@ -329,7 +329,7 @@ class PathOperations:
         Parameters
         ----------
         oper : str
-            Type of operation to be performed. See :ref:`PCALC_notes`below for specific descriptions of each operation:
+            Type of operation to be performed. See :ref:`PCALC_notes` below for specific descriptions of each operation:
 
             * ``ADD`` - Adds two existing path items.
 
@@ -520,11 +520,12 @@ class PathOperations:
             for other path operations.
 
         item : str
-            Label identifying the item for interpolation. Valid item labels are shown in
-            :ref:`pdef_tab_1`below. Some items also require a component label.
+            Label identifying the item for interpolation. Valid item labels are shown in :ref:`pdef_tab_1`
+            below. Some items also require a component label.
 
         comp : str
-            Component of the item (if required). Valid component labels are shown in :ref:`pdef_tab_1`below.
+            Component of the item (if required). Valid component labels are shown in :ref:`pdef_tab_1`
+            below.
 
         avglab : str
             Option to average across element boundaries:
@@ -586,7 +587,7 @@ class PathOperations:
            * - ROT
              - X, Y, Z, SUM
              - X, Y, or Z structural rotation or vector sum.
-           * - TEMP[ :ref:`PDEF_temp`]
+           * - TEMP[ :ref:`PDEF_temp` ]
              -
              - Temperature.
            * - PRES
@@ -925,11 +926,11 @@ class PathOperations:
         Parameters
         ----------
         item : str
-            Label identifying the item to be processed. Valid item labels are shown in
-            :ref:`plsect_tab_1`below. Items also require a component label.
+            Label identifying the item to be processed. Valid item labels are shown in :ref:`plsect_tab_1`
+            below. Items also require a component label.
 
         comp : str
-            Component of the item. Valid component labels are shown in :ref:`plsect_tab_1`below.
+            Component of the item. Valid component labels are shown in :ref:`plsect_tab_1` below.
 
         rho : str
             In-plane (X-Y) average radius of curvature of the inside and outside surfaces of an axisymmetric

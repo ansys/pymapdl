@@ -522,7 +522,7 @@ class SpecialPurpose:
         response can occur at any phase shift.
 
         :ref:`cycphase` response results are valid only for the first cyclic sector. To obtain the response
-        at any part of the expanded model, Ansys, Inc. recommends using `cyclicsymmetry results
+        at any part of the expanded model, Ansys, Inc. recommends using `cyclic symmetry results
         expansion
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/advcycpost.html#ans_cycsym_res_coord_sys>`_
         at the phase angle obtained via :ref:`cycphase`.
@@ -2022,8 +2022,8 @@ class SpecialPurpose:
         :ref:`outres` command description.
 
         For a cyclic harmonic mode-superposition analysis, use the :ref:`cycfiles` command to identify the
-        :file:`.rfrq` None and modal :file:`.rst` None file. For other analyses, use the :ref:`file` command
-        to specify the :file:`.rdsp` or :file:`.rfrq` file.
+        :file:`.rfrq` None and modal :file:`.rst` None file. For other analyses, use the ``FILE`` command to
+        specify the :file:`.rdsp` or :file:`.rfrq` file.
 
         You may limit the plot to display only those modes in a certain harmonic index range. The modes
         having the same harmonic index are each plotted in a unique color. If there are less than 10
@@ -3018,8 +3018,8 @@ class SpecialPurpose:
         :ref:`outres` command description.
 
         For a cyclic harmonic mode-superposition analysis, use the :ref:`cycfiles` command to identify the
-        :file:`.rfrq` None and modal :file:`.rst` None files. For other analyses, use the :ref:`file`
-        command to specify the :file:`.rdsp` or :file:`.rfrq` file.
+        :file:`.rfrq` None and modal :file:`.rst` None files. For other analyses, use the ``FILE`` command
+        to specify the :file:`.rdsp` or :file:`.rfrq` file.
 
         This information can also be obtained from the optional :file:`Jobname.mcf` text file (see the
         :ref:`trnopt` and :ref:`hropt` commands), and it can be plotted using the :ref:`plmc` command. For
@@ -3506,7 +3506,7 @@ class SpecialPurpose:
         the results written on the file.
 
         The command is primarily intended for use in a top-down substructuring analysis, where the full
-        model is resumed and the results data read from the `usepass
+        model is resumed and the results data read from the `use pass
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_substr/an9Auq1d6ldm.html#advobsl5jla062999>`_
         results file ( :ref:`set` ), and subsequently from all substructure `expansion pass
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_substr/axcAuq367ldm.html#adv5note4jla062999>`_
@@ -3667,7 +3667,7 @@ class SpecialPurpose:
         Each results file renumbers its nodes and elements starting with 1.
 
         This feature is useful when working with large models. For more information on the advantages and
-        uses of the :ref:`rsplit` command, see `SplittingLarge Results Files
+        uses of the :ref:`rsplit` command, see `Splitting Large Results Files
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS5_4.html#>`_ in the
         `Basic Analysis Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/Hlp_G_BAS19.html>`_.
