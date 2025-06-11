@@ -157,7 +157,7 @@ class Animation:
 
         .. _ANCYC_notes:
 
-        The :ref:`ancyc` command is valid in a `modal cyclic symmetryanalysis
+        The :ref:`ancyc` command is valid in a `modal cyclic symmetry analysis
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/advcycmodalans.html#cycsym_postproc_modal>`_
         only.
 
@@ -174,7 +174,7 @@ class Animation:
         wave animation is applicable only to nodal diameters (harmonic indices) greater than 0 and less than
         ``N`` / 2 (where ``N`` is the number of cyclic sectors in the model).
 
-        For more information, see `Applying a Traveling Wave Animation to theCyclic Model
+        For more information, see `Applying a Traveling Wave Animation to the Cyclic Model
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/advcycmodalans.html#gadvcyctwave>`_
         in the `Cyclic Symmetry Analysis Guide
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_cycsym/cycsym_example.html>`_.

@@ -1,26 +1,29 @@
-.. _ref_surface_operations_api:
 
-******************
-Surface operations
-******************
+.. _ref_surface_operations:
 
-.. currentmodule:: ansys.mapdl.core
 
-These POST1 commands are used to define an arbitrary surface and to
-develop results information for that surface.
+SurfaceOperations
+=================
+
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.surface_operations
+
+.. autoclass:: ansys.mapdl.core._commands.post1.surface_operations.SurfaceOperations
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.sucalc
-   Mapdl.sucr
-   Mapdl.sudel
-   Mapdl.sueval
-   Mapdl.suget
-   Mapdl.sumap
-   Mapdl.supl
-   Mapdl.supr
-   Mapdl.suresu
-   Mapdl.susave
-   Mapdl.susel
-   Mapdl.suvect
+
+   SurfaceOperations.sucalc
+   SurfaceOperations.sucr
+   SurfaceOperations.sudel
+   SurfaceOperations.sueval
+   SurfaceOperations.suget
+   SurfaceOperations.sumap
+   SurfaceOperations.supl
+   SurfaceOperations.supr
+   SurfaceOperations.suresu
+   SurfaceOperations.susave
+   SurfaceOperations.susel
+   SurfaceOperations.suvect

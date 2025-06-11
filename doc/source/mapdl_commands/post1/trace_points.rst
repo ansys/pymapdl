@@ -1,18 +1,21 @@
-.. _ref_trace Points_api:
 
-************
-Trace points
-************
+.. _ref_trace_points:
 
-.. currentmodule:: ansys.mapdl.core
 
-These POST1 commands are used to trace particle motions in a flow
-stream.
+TracePoints
+===========
+
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.trace_points
+
+.. autoclass:: ansys.mapdl.core._commands.post1.trace_points.TracePoints
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.pltrac
-   Mapdl.trpdel
-   Mapdl.trplis
-   Mapdl.trpoin
+
+   TracePoints.pltrac
+   TracePoints.trpdel
+   TracePoints.trplis
+   TracePoints.trpoin

@@ -1,33 +1,38 @@
-.. _ref_path_operations_api:
 
-***************
-Path operations
-***************
+.. _ref_path_operations:
 
-.. currentmodule:: ansys.mapdl.core
 
-These POST1 commands are used for path operations.
+PathOperations
+==============
+
+
+.. currentmodule:: ansys.mapdl.core._commands.post1.path_operations
+
+.. autoclass:: ansys.mapdl.core._commands.post1.path_operations.PathOperations
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.padele
-   Mapdl.paget
-   Mapdl.paput
-   Mapdl.paresu
-   Mapdl.pasave
-   Mapdl.path
-   Mapdl.pcalc
-   Mapdl.pcross
-   Mapdl.pdef
-   Mapdl.pdot
-   Mapdl.plpagm
-   Mapdl.plpath
-   Mapdl.plsect
-   Mapdl.pmap
-   Mapdl.ppath
-   Mapdl.prange
-   Mapdl.prpath
-   Mapdl.prsect
-   Mapdl.psel
-   Mapdl.pvect
+
+   PathOperations.fssect
+   PathOperations.padele
+   PathOperations.paget
+   PathOperations.paput
+   PathOperations.paresu
+   PathOperations.pasave
+   PathOperations.path
+   PathOperations.pcalc
+   PathOperations.pcross
+   PathOperations.pdef
+   PathOperations.pdot
+   PathOperations.plpagm
+   PathOperations.plpath
+   PathOperations.plsect
+   PathOperations.pmap
+   PathOperations.ppath
+   PathOperations.prange
+   PathOperations.prpath
+   PathOperations.prsect
+   PathOperations.psel
+   PathOperations.pvect
