@@ -21,6 +21,14 @@
 # SOFTWARE.
 
 from . import (
+    _fatigue,
+    _special_purpose,
+    animation,
+    controls,
+    element_table,
+    failure_criteria,
+    listing,
+    load_case_calculations,
     magnetics_calculations,
     path_operations,
     results,

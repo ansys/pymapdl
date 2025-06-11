@@ -46,7 +46,6 @@ from ._commands import (
     map,
     misc,
     post1,
-    post1_,
     post26,
     preproc,
     reduced,
@@ -433,12 +432,14 @@ class MiscCommands(misc.misc.Misc):
 
 
 class Post1Commands(
-    post1_.animation.Animation,
-    post1_.controls.Controls,
-    post1_.element_table.ElementTable,
-    post1_.failure_criteria.FailureCriteria,
-    post1_.listing.Listing,
-    post1_.load_case.LoadCase,
+    post1._fatigue.Fatigue,
+    post1._special_purpose.SpecialPurpose,
+    post1.animation.Animation,
+    post1.controls.Controls,
+    post1.element_table.ElementTable,
+    post1.failure_criteria.FailureCriteria,
+    post1.listing.Listing,
+    post1.load_case_calculations.LoadCaseCalculations,
     post1.magnetics_calculations.MagneticsCalculations,
     post1.path_operations.PathOperations,
     post1.results.Results,
