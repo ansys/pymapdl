@@ -381,12 +381,12 @@ def test_empty(mapdl, cleared):
         mapdl.run("")
 
 
-def test_multiline_fail(mapdl, cleared):
+def test_multiline_fail_value_error(mapdl, cleared):
     with pytest.raises(ValueError, match="Use ``input_strings``"):
         mapdl.run(CMD_BLOCK)
 
 
-def test_multiline_fail(mapdl, cleared):
+def test_multiline_fail_deprecation_warning(mapdl, cleared):
     with pytest.warns(DeprecationWarning):
         resp = mapdl.run_multiline(CMD_BLOCK)
         assert "IS SOLID186" in resp, "not capturing the beginning of the block"
@@ -3007,3 +3007,52 @@ def test_set_no_abort(monkeypatch, set_no_abort, start_instance):
 
     if set_no_abort is None or set_no_abort:
         assert any(["/NERR,,,-1" in each for each in calls])
+
+
+class TestSelectionOnNonInteractive:
+    """Test selection commands in non-interactive mode."""
+
+    @pytest.fixture(scope="class", autouse=True)
+    def setup(self, mapdl):
+        self.mapdl = mapdl
+
+        mapdl.clear()
+        mapdl.prep7()
+        mapdl.block(0, 1, 0, 1, 0, 1)
+        mapdl.et(1, 186)
+        mapdl.esize(0.25)
+        mapdl.vmesh("ALL")
+
+    @pytest.mark.parametrize("func", ["nsel", "esel", "ksel", "lsel", "asel"])
+    @pytest.mark.parametrize("sel_type", ["S", "R", "U", "A"])
+    def test_selection_on_non_interactive(self, mapdl, func, sel_type):
+        mapdl.allsel()
+
+        function = getattr(mapdl, func)
+
+        if func == "nsel":
+            checker = lambda: mapdl.mesh.nnum
+        elif func == "esel":
+            checker = lambda: mapdl.mesh.enum
+        elif func == "ksel":
+            checker = lambda: mapdl.geometry.knum
+        elif func == "lsel":
+            checker = lambda: mapdl.geometry.lnum
+        elif func == "asel":
+            checker = lambda: mapdl.geometry.anum
+
+        function("S", vmin=1, vmax=3)
+        assert np.allclose(checker(), [1, 2, 3])
+
+        with mapdl.non_interactive:
+            if sel_type == "A":
+                function(sel_type, vmin=5)
+            else:
+                function(sel_type, vmin=2)
+
+        if sel_type in ["S", "R"]:
+            assert np.allclose(checker(), [2])
+        elif sel_type == "U":
+            assert np.allclose(checker(), [1, 3])
+        elif sel_type == "A":
+            assert np.allclose(checker(), [1, 2, 3, 5])
