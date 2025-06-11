@@ -89,6 +89,7 @@ Hashin
 hexahedral
 hostname
 HTML
+Iges
 Image[Mm]agick
 imagin
 importlib

@@ -80,6 +80,7 @@ DEFAULT_EXAMPLE_EXTENSION = "py"
 
 DOC_PATH = "doc/source"
 GALLERY_EXAMPLES_PATH = "examples/gallery_examples"
+MAPDL_COMMANDS_PATH = "api/src/ansys/mapdl/core/_commands"
 EXAMPLES_ROOT = "examples"
 EXAMPLES_PATH_FOR_DOCS = f"../../{EXAMPLES_ROOT}/"
 
@@ -92,7 +93,9 @@ pyansys_light_mode_logo = str(
 
 # -- General configuration ---------------------------------------------------
 extensions = [
+    "ansys_sphinx_theme.extension.linkcode",
     "jupyter_sphinx",
+    "linuxdoc.rstFlatTable",
     "numpydoc",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
@@ -126,7 +129,14 @@ intersphinx_mapping = {
     "ansys-tools-path": ("https://path.tools.docs.pyansys.com/version/stable/", None),
 }
 
-suppress_warnings = ["label.*", "design.fa-build", "config.cache"]
+# ref.ref warning needs to be re-added when merging to main
+suppress_warnings = [
+    "label.*",
+    "design.fa-build",
+    "config.cache",
+    "ref.ref",
+    "misc.highlighting_failure",
+]
 sd_fontawesome_latex = True
 
 # Graphviz diagrams configuration
@@ -155,6 +165,7 @@ numpydoc_validation_checks = {
 numpydoc_validation_exclude = {  # set of regex
     # class inherits from pymapdl-reader
     r"\.*MeshGrpc\.*",
+    r"ansys\.mapdl\.core\._commands\..+",
 }
 
 # Favicon

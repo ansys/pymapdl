@@ -69,12 +69,7 @@ These commands make up the ANSYS Parametric Design Language
    :maxdepth: 1
    :caption: APDL
 
-   apdl/parameter_definition
-   apdl/macro_files
-   apdl/abbreviations
-   apdl/array_parm
-   apdl/matrix_op
-   apdl/process_controls
+   apdl/index
 
 .. _ref_prep_commands:
 
@@ -191,12 +186,13 @@ time-history processor.
    :maxdepth: 1
    :caption: POST26
 
-   post26/setup
+   post26/_set_up
    post26/controls
-   post26/operations
    post26/display
    post26/listing
-   post26/special
+   post26/operations
+   post26/set_up
+   post26/special_purpose
    post26/status
 
 
@@ -223,7 +219,7 @@ files by deleting sets or by changing values.
    :maxdepth: 1
    :caption: AUX3
 
-   aux3
+   aux3/results_files
 
 
 *****
@@ -250,7 +246,7 @@ These commands are used to read in an IGES file for analysis in ANSYS.
    :maxdepth: 1
    :caption: AUX15
 
-   aux15
+   aux15/iges
 
 
 *****************
@@ -263,7 +259,7 @@ onto the existing geometry.
    :maxdepth: 1
    :caption: MAP
 
-   map
+   map/pressure_mapping
 
 
 ***************

@@ -375,14 +375,21 @@ class _MapdlCommandExtended(_MapdlCore):
         return self.input(fname)
 
     @wraps(_MapdlCore.cwd)
-    def cwd(self, *args, **kwargs):
+    def cwd(self, dirpath: str = "", **kwargs):
         """Wraps cwd."""
+        dirpath = str(dirpath)
+        if not (dirpath.startswith("'") and dirpath.endswith("'")) and "'" in dirpath:
+            raise MapdlRuntimeError(
+                'The CWD command does not accept paths that contain singular quotes "\'".'
+            )
+        kwargs["mute"] = False
+
         try:
-            output = super().cwd(*args, mute=False, **kwargs)
+            output = super().cwd(dirpath, **kwargs)
         except MapdlCommandIgnoredError as e:
             raise IncorrectWorkingDirectory(e.args[0])
 
-        self._path = args[0]  # caching
+        self._path = dirpath  # caching
         return output
 
     @wraps(_MapdlCore.list)

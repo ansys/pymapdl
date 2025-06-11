@@ -33,21 +33,21 @@ if _HAS_PANDAS:
 
 from ._commands import (
     apdl,
-    aux2_,
-    aux3_,
-    aux12_,
-    aux15_,
+    aux2,
+    aux3,
+    aux12,
+    aux15,
     conn,
     database,
     display_,
-    graphics_,
+    graphics,
     hidden,
     inq_func,
-    map_cmd,
+    map,
     misc,
     post1,
     post1_,
-    post26_,
+    post26,
     preproc,
     reduced,
     session,
@@ -358,33 +358,47 @@ class PreprocessorCommands(
     pass
 
 
-class APDLCommands(
+class Apdl(
     apdl.abbreviations.Abbreviations,
-    apdl.array_param.ArrayParam,
+    apdl.array_parameters.ArrayParameters,
+    apdl.encryption_decryption.EncryptionDecryption,
     apdl.macro_files.MacroFiles,
-    apdl.matrix_op.MatrixOP,
+    apdl.matrix_operations.MatrixOperations,
     apdl.parameter_definition.ParameterDefinition,
     apdl.process_controls.ProcessControls,
 ):
     pass
 
 
-class Aux2Commands(aux2_.bin_dump.BinDump, aux2_.bin_manip.BinManip):
+class Aux2Commands(
+    aux2.binary_file_dump.BinaryFileDump,
+    aux2.binary_file_manipulation.BinaryFileManipulation,
+):
+    pass
+
+
+class Aux3Commands(aux3.results_files.ResultsFiles):
     pass
 
 
 class Aux12Commands(
-    aux12_.radiosity_solver.RadiositySolver,
-    aux12_.radiation_mat.RadiationMat,
-    aux12_.general_radiation.GeneralRadiation,
+    aux12.radiosity_solver.RadiositySolver,
+    aux12.radiation_matrix_method.RadiationMatrixMethod,
+    aux12.general_radiation.GeneralRadiation,
+):
+    pass
+
+
+class Aux15Commands(
+    aux15.iges.Iges,
 ):
     pass
 
 
 class DatabaseCommands(
-    database.setup.Setup,
+    database.set_up.SetUp,
     database.picking.Picking,
-    database.coord_sys.CoordinateSystem,
+    database.coordinate_system.CoordinateSystem,
     database.selecting.Selecting,
     database.working_plane.WorkingPlane,
     database.components.Components,
@@ -397,13 +411,19 @@ class DisplayCommands(display_.setup.Setup):
 
 
 class GraphicsCommands(
-    graphics_.annotation.Annotation,
-    graphics_.graphs.Graphs,
-    graphics_.labeling.Labelling,
-    graphics_.scaling.Scaling,
-    graphics_.setup.Setup,
-    graphics_.style.Style,
-    graphics_.views.Views,
+    graphics.annotation.Annotation,
+    graphics.graphs.Graphs,
+    graphics.labeling.Labeling,
+    graphics.scaling.Scaling,
+    graphics.set_up.SetUp,
+    graphics.style.Style,
+    graphics.views.Views,
+):
+    pass
+
+
+class MapCommands(
+    map.pressure_mapping.PressureMapping,
 ):
     pass
 
@@ -434,13 +454,14 @@ class Post1Commands(
 
 
 class Post26Commands(
-    post26_.controls.Controls,
-    post26_.display.Display,
-    post26_.listing.Listing,
-    post26_.operations.Operations,
-    post26_.setup.Setup,
-    post26_.special.Special,
-    post26_.status.Status,
+    post26._set_up.SetUp,
+    post26.controls.Controls,
+    post26.display.Display,
+    post26.listing.Listing,
+    post26.operations.Operations,
+    post26.set_up.SetUp,
+    post26.special_purpose.SpecialPurpose,
+    post26.status.Status,
 ):
     pass
 
@@ -503,12 +524,15 @@ class InqFunctions(inq_func.inq_function):
 
 
 class Commands(
-    APDLCommands,
+    Apdl,
     Aux2Commands,
+    Aux3Commands,
     Aux12Commands,
+    Aux15Commands,
     DatabaseCommands,
     DisplayCommands,
     GraphicsCommands,
+    MapCommands,
     MiscCommands,
     Post1Commands,
     Post26Commands,
@@ -516,11 +540,8 @@ class Commands(
     ReducedCommands,
     SessionCommands,
     SolutionCommands,
-    aux3_.Aux3,
-    aux15_.Aux15,
     conn.Conn,
     hidden._Hidden,
-    map_cmd.MapCommand,
     InqFunctions,
 ):
     """Wrapped MAPDL commands"""
