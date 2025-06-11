@@ -136,6 +136,9 @@ MATERIAL_PROPERTIES: list[str] = [
     "YZIC",
 ]
 
+NOT_AVAILABLE_METHOD = """The method '{method}' has not been ported to the new DPF-based Results backend.
+If you still want to use it, you can switch to 'pymapdl-reader' backend."""
+
 
 class ResultNotFound(MapdlRuntimeError):
     """Results not found"""
@@ -2185,7 +2188,6 @@ class DPFResult(Result):
 
         """
         mats = self.mesh.property_field("mat")
-
         mat_prop = dpf.operators.result.mapdl_material_properties()
         mat_prop.inputs.materials.connect(mats)
 
@@ -2286,6 +2288,330 @@ class DPFResult(Result):
 
         raise Exception()
 
+    @property
+    def _elements(self):
+        return self.mesh.elements.scoping.ids
+
+    def element_lookup(self, element_id):
+        """Index of the element within the result mesh"""
+        mapping = {
+            elem_: id_
+            for elem_, id_ in zip(
+                self._elements, np.arange(self.mesh.elements.n_elements)
+            )
+        }
+        return mapping[element_id]
+
+    def overwrite_element_solution_record(self, data, rnum, solution_type, element_id):
+        """Overwrite element solution record.
+
+        This method replaces solution data for of an element at a
+        result index for a given solution type.  The number of items
+        in ``data`` must match the number of items in the record.
+
+        If you are not sure how many records are in a given record,
+        use ``element_solution_data`` to retrieve all the records for
+        a given ``solution_type`` and check the number of items in the
+        record.
+
+        Note: The record being replaced cannot be a compressed record.
+        If the result file uses compression (default sparse
+        compression as of 2019R1), you can disable this within MAPDL
+        with:
+        ``/FCOMP, RST, 0``
+
+        Parameters
+        ----------
+        data : list or np.ndarray
+            Data that will replace the existing records.
+
+        rnum : int
+            Zero based result number.
+
+        solution_type : str
+            Element data type to overwrite.
+
+            - EMS: misc. data
+            - ENF: nodal forces
+            - ENS: nodal stresses
+            - ENG: volume and energies
+            - EGR: nodal gradients
+            - EEL: elastic strains
+            - EPL: plastic strains
+            - ECR: creep strains
+            - ETH: thermal strains
+            - EUL: euler angles
+            - EFX: nodal fluxes
+            - ELF: local forces
+            - EMN: misc. non-sum values
+            - ECD: element current densities
+            - ENL: nodal nonlinear data
+            - EHC: calculated heat generations
+            - EPT: element temperatures
+            - ESF: element surface stresses
+            - EDI: diffusion strains
+            - ETB: ETABLE items
+            - ECT: contact data
+            - EXY: integration point locations
+            - EBA: back stresses
+            - ESV: state variables
+            - MNL: material nonlinear record
+
+        element_id : int
+            Ansys element number (e.g. ``1``)
+
+        Examples
+        --------
+        Overwrite the elastic strain record for element 1 for the
+        first result with random data.
+
+        >>> from ansys.mapdl import reader as pymapdl_reader
+        >>> rst = pymapdl_reader.read_binary('file.rst')
+        >>> data = np.random.random(56)
+        >>> rst.overwrite_element_solution_data(data, 0, 'EEL', 1)
+        """
+        raise NotImplementedError(
+            NOT_AVAILABLE_METHOD.format(method="overwrite_element_solution_record")
+        )
+
+    def overwrite_element_solution_records(self, element_data, rnum, solution_type):
+        """Overwrite element solution record.
+
+        This method replaces solution data for a set of elements at a
+        result index for a given solution type.  The number of items
+        in ``data`` must match the number of items in the record.
+
+        If you are not sure how many records are in a given record,
+        use ``element_solution_data`` to retrieve all the records for
+        a given ``solution_type`` and check the number of items in the
+        record.
+
+        Note: The record being replaced cannot be a compressed record.
+        If the result file uses compression (default sparse
+        compression as of 2019R1), you can disable this within MAPDL
+        with:
+        ``/FCOMP, RST, 0``
+
+        Parameters
+        ----------
+        element_data : dict
+            Dictionary of results that will replace the existing records.
+
+        rnum : int
+            Zero based result number.
+
+        solution_type : str
+            Element data type to overwrite.
+
+            - EMS: misc. data
+            - ENF: nodal forces
+            - ENS: nodal stresses
+            - ENG: volume and energies
+            - EGR: nodal gradients
+            - EEL: elastic strains
+            - EPL: plastic strains
+            - ECR: creep strains
+            - ETH: thermal strains
+            - EUL: euler angles
+            - EFX: nodal fluxes
+            - ELF: local forces
+            - EMN: misc. non-sum values
+            - ECD: element current densities
+            - ENL: nodal nonlinear data
+            - EHC: calculated heat generations
+            - EPT: element temperatures
+            - ESF: element surface stresses
+            - EDI: diffusion strains
+            - ETB: ETABLE items
+            - ECT: contact data
+            - EXY: integration point locations
+            - EBA: back stresses
+            - ESV: state variables
+            - MNL: material nonlinear record
+
+        Examples
+        --------
+        Overwrite the elastic strain record for elements 1 and 2 with
+        for the first result with random data.
+
+        >>> from ansys.mapdl import reader as pymapdl_reader
+        >>> rst = pymapdl_reader.read_binary('file.rst')
+        >>> data = {1: np.random.random(56),
+                    2: np.random.random(56)}
+        >>> rst.overwrite_element_solution_data(data, 0, 'EEL')
+        """
+        raise NotImplementedError(
+            NOT_AVAILABLE_METHOD.format(method="overwrite_element_solution_records")
+        )
+
+    def read_record(self, pointer, return_bufsize=False):
+        """Reads a record at a given position.
+
+        Because ANSYS 19.0+ uses compression by default, you must use
+        this method rather than ``np.fromfile``.
+
+        Parameters
+        ----------
+        pointer : int
+            ANSYS file position (n words from start of file).  A word
+            is four bytes.
+
+        return_bufsize : bool, optional
+            Returns the number of words read (includes header and
+            footer).  Useful for determining the new position in the
+            file after reading a record.
+
+        Returns
+        -------
+        record : np.ndarray
+            The record read as a ``n x 1`` numpy array.
+
+        bufsize : float, optional
+            When ``return_bufsize`` is enabled, returns the number of
+            words read.
+
+        """
+        raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="read_record"))
+
+    def text_result_table(self, rnum):
+        """Returns a text result table for plotting"""
+        raise NotImplementedError(
+            NOT_AVAILABLE_METHOD.format(method="text_result_table")
+        )
+
+    def cs_4x4(self, cs_cord, as_vtk_matrix=False):
+        """Return a 4x4 transformation matrix for a given coordinate system.
+
+        Parameters
+        ----------
+        cs_cord : int
+            Coordinate system index.
+
+        as_vtk_matrix : bool, default: False
+            Return the transformation matrix as a ``vtkMatrix4x4``.
+
+        Returns
+        -------
+        np.ndarray | vtk.vtkMatrix4x4
+            Matrix or ``vtkMatrix4x4`` depending on the value of ``as_vtk_matrix``.
+
+        Notes
+        -----
+        Values 11 and greater correspond to local coordinate systems
+
+        Examples
+        --------
+        Return the transformation matrix for coordinate system 1.
+
+        >>> tmat = rst.cs_4x4(1)
+        >>> tmat
+        array([[1., 0., 0., 0.],
+               [0., 1., 0., 0.],
+               [0., 0., 1., 0.],
+               [0., 0., 0., 1.]])
+
+        Return the transformation matrix for coordinate system 5. This
+        corresponds to ``CSYS, 5``, the cylindrical with global Cartesian Y as
+        the axis of rotation.
+
+        >>> tmat = rst.cs_4x4(5)
+        >>> tmat
+        array([[ 1.,  0.,  0.,  0.],
+               [ 0.,  0., -1.,  0.],
+               [ 0.,  1.,  0.,  0.],
+               [ 0.,  0.,  0.,  1.]])
+
+        """
+        raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="cs_4x4"))
+
+    def solution_info(self, rnum):
+        """Return an informative dictionary of solution data for a
+        result.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        Returns
+        -------
+        header : dict
+            Double precision solution header data.
+
+        Examples
+        --------
+        Extract the solution info from a sample example result file.
+
+        >>> from ansys.mapdl.reader import examples
+        >>> rst = examples.download_pontoon()
+        >>> rst.solution_info(0)
+        {'cgcent': [],
+         'fatjack': [],
+         'timfrq': 44.85185724963714,
+         'lfacto': 1.0,
+         'lfactn': 1.0,
+         'cptime': 3586.4873046875,
+         'tref': 71.6,
+         'tunif': 71.6,
+         'tbulk': 293.0,
+         'volbase': 0.0,
+         'tstep': 0.0,
+         '__unused': 0.0,
+         'accel_x': 0.0,
+         'accel_y': 0.0,
+         'accel_z': 0.0,
+         'omega_v_x': 0.0,
+         'omega_v_y': 0.0,
+         'omega_v_z': 0.0,
+         'omega_a_x': 0.0,
+         'omega_a_y': 0.0,
+         'omega_a_z': 0.0,
+         'omegacg_v_x': 0.0,
+         'omegacg_v_y': 0.0,
+         'omegacg_v_z': 0.0,
+         'omegacg_a_x': 0.0,
+         'omegacg_a_y': 0.0,
+         'omegacg_a_z': 0.0,
+         'dval1': 0.0,
+         'pCnvVal': 0.0}
+
+
+        Notes
+        -----
+        The keys of the solution header are described below:
+
+        - timfrq : Time value (or frequency value, for a modal or
+                   harmonic analysis)
+        - lfacto : the "old" load factor (used in ramping a load
+                    between old and new values)
+        - lfactn  : The "new" load factor
+        - cptime  : Elapsed CPU time (in seconds)
+        - tref    : The reference temperature
+        - tunif   : The uniform temperature
+        - tbulk   : Bulk temp for FLOTRAN film coefs.
+        - VolBase : Initial total volume for VOF
+        - tstep   : Time Step size for FLOTRAN analysis
+        - 0.0     : Position not used
+        - accel   : Linear acceleration terms
+        - omega   : Angular velocity (first 3 terms) and angular acceleration
+                    (second 3 terms)
+        - omegacg : Angular velocity (first 3 terms) and angular
+                    acceleration (second 3 terms) these
+                    velocity/acceleration terms are computed about the
+                    center of gravity
+        - cgcent  : (X,y,z) location of center of gravity
+        - fatjack : Fatjack ocean wave data (wave height and period)
+        - dval1   : If pmeth=0: FATJACK ocean wave direction
+                    if pmeth=1: p-method convergence values
+        - pCnvVal : P-method convergence values
+        """
+        raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="solution_info"))
+
+    @property
+    def subtitle(self):
+        raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="subtitle"))
+
     # def save_as_vtk(
     #     self, filename, rsets=None, result_types=["ENS"], progress_bar=True
     # ):
@@ -2370,14 +2696,6 @@ class DPFResult(Result):
     #     # This should probably be included a part of the ansys.dpf.post.result_data.ResultData class
     #     raise NotImplementedError("To be implemented by DPF")
 
-    # @property
-    # def subtitle(self):
-    #     raise NotImplementedError("To be implemented by DPF")
-
-    # def cs_4x4(self, cs_cord, as_vtk_matrix=False):
-    #     """return a 4x4 transformation array for a given coordinate system"""
-    #     raise NotImplementedError("To be implemented by DPF.")
-
     # def cylindrical_nodal_stress(self):
     #     """Retrieves the stresses for each node in the solution in the
     #     cylindrical coordinate system as the following values:
@@ -2439,12 +2757,6 @@ class DPFResult(Result):
     #     """
     #     raise NotImplementedError("This should be implemented by DPF")
 
-    # def element_lookup(self, element_id):
-    #     """Index of the element within the result mesh"""
-    #     # We need to get the mapping between the mesh.grid and the results.elements.
-    #     # Probably DPF already has that mapping.
-    #     raise NotImplementedError("This should be implemented by DPF")
-
     # def element_solution_data(self):
     #     pass
 
@@ -2454,19 +2766,10 @@ class DPFResult(Result):
     # def quadgrid(self):
     #     pass
 
-    # def read_record(self):
-    #     pass
-
     # def result_dof(self):
     #     pass
 
     # def section_data(self):
-    #     pass
-
-    # def solution_info(self):
-    #     pass
-
-    # def text_result_table(self):
     #     pass
 
     # def write_table(self):
@@ -2487,13 +2790,8 @@ class DPFResult(Result):
     # def parse_coordinate_system(self):
     #     pass
 
+    #### overwriting
 
-#### overwriting
-# def overwrite_element_solution_record(self):
-#     pass
-
-# def overwrite_element_solution_records(self):
-#     pass
 
 ### plotting
 

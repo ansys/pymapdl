@@ -182,7 +182,9 @@ def extract_sections(vm_code, index):
     return "\n".join(code_) + "\nSAVE"
 
 
-def prepare_example(example, index=None, solve=True, stop_after_first_solve=False):
+def prepare_example(
+    example, index=None, solve=True, stop_after_first_solve=False, avoid_exit=True
+):
     """Extract the different examples inside each VM. You can also choose to solve or not."""
 
     with open(example, "r") as fid:
@@ -192,6 +194,9 @@ def prepare_example(example, index=None, solve=True, stop_after_first_solve=Fals
 
     if not solve:
         vm_code = vm_code.replace("SOLVE", "!SOLVE")
+
+    if avoid_exit:
+        vm_code = vm_code.replace("/EXIT", "!/EXIT\n/EOF")
 
     if stop_after_first_solve:
         return vm_code.replace("SOLVE", "SOLVE\n/EOF")
@@ -237,6 +242,7 @@ class TestExample:
             mapdl.input_strings(self.apdl_code)
         else:
             mapdl.input(self.example)
+
         mapdl.allsel()
         mapdl.save()
         mapdl.post1()
@@ -246,6 +252,9 @@ class TestExample:
         rst_name = mapdl.jobname + ".rst"
         mapdl.download_result(self.tmp_dir)
         self.rst_path = os.path.join(self.tmp_dir, rst_name)
+
+        # Update results
+        mapdl.result.update()
 
         mapdl.post1()
         return mapdl
@@ -410,7 +419,14 @@ class TestStaticThermocoupledExample(TestExample):
             assert result.parse_step_substep([0, each]) == each
 
     def test_material_properties(self, mapdl, reader, post, result):
-        assert reader.materials == result.materials
+        assert reader.materials == result.materialspy
+
+    @pytest.mark.parametrize("id_", [1, 2, 3, 4, 10, 14])
+    def test_element_lookup(self, mapdl, reader, result, id_):
+        assert reader.element_lookup(id_) == result.element_lookup(id_)
+
+    def test_mesh_enum(self, mapdl, reader, result):
+        assert np.allclose(reader.mesh.enum, result._elements)
 
 
 class TestElectroThermalCompliantMicroactuator(TestExample):
@@ -471,6 +487,13 @@ class TestElectroThermalCompliantMicroactuator(TestExample):
     )
     def test_material_properties(self, mapdl, reader, post, result):
         assert reader.materials == result.materials
+
+    @pytest.mark.parametrize("id_", [1, 2, 3, 4, 500, 800])
+    def test_element_lookup(self, mapdl, reader, result, id_):
+        assert reader.element_lookup(id_) == result.element_lookup(id_)
+
+    def test_mesh_enum(self, mapdl, reader, result):
+        assert np.allclose(reader.mesh.enum, result._elements)
 
 
 class TestSolidStaticPlastic(TestExample):
@@ -540,6 +563,13 @@ class TestSolidStaticPlastic(TestExample):
 
     def test_material_properties(self, mapdl, reader, post, result):
         assert reader.materials == result.materials
+
+    @pytest.mark.parametrize("id_", [1, 2, 3, 4])
+    def test_element_lookup(self, mapdl, reader, result, id_):
+        assert reader.element_lookup(id_) == result.element_lookup(id_)
+
+    def test_mesh_enum(self, mapdl, reader, result):
+        assert np.allclose(reader.mesh.enum, result._elements)
 
 
 class TestPiezoelectricRectangularStripUnderPureBendingLoad(TestExample):
@@ -638,6 +668,13 @@ class TestPiezoelectricRectangularStripUnderPureBendingLoad(TestExample):
     def test_material_properties(self, mapdl, reader, post, result):
         assert reader.materials == result.materials
 
+    @pytest.mark.parametrize("id_", [1])
+    def test_element_lookup(self, mapdl, reader, result, id_):
+        assert reader.element_lookup(id_) == result.element_lookup(id_)
+
+    def test_mesh_enum(self, mapdl, reader, result):
+        assert np.allclose(reader.mesh.enum, result._elements)
+
 
 class TestPinchedCylinderVM6(TestExample):
     """Class to test a pinched cylinder (VM6 example).
@@ -708,6 +745,13 @@ class TestPinchedCylinderVM6(TestExample):
 
     def test_material_properties(self, mapdl, reader, post, result):
         assert reader.materials == result.materials
+
+    @pytest.mark.parametrize("id_", [1, 2, 3, 4, 44, 62])
+    def test_element_lookup(self, mapdl, reader, result, id_):
+        assert reader.element_lookup(id_) == result.element_lookup(id_)
+
+    def test_mesh_enum(self, mapdl, reader, result):
+        assert np.allclose(reader.mesh.enum, result._elements)
 
 
 class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(TestExample):
@@ -809,6 +853,13 @@ class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(TestExample):
     def test_material_properties(self, mapdl, reader, post, result):
         assert reader.materials == result.materials
 
+    @pytest.mark.parametrize("id_", [1, 2, 3])
+    def test_element_lookup(self, mapdl, reader, result, id_):
+        assert reader.element_lookup(id_) == result.element_lookup(id_)
+
+    def test_mesh_enum(self, mapdl, reader, result):
+        assert np.allclose(reader.mesh.enum, result._elements)
+
 
 # class TestChabocheRateDependentPlasticMaterialunderCyclicLoadingVM155(TestExample):
 #     """Class to test Chaboche Rate-Dependent Plastic Material under Cyclic Loading (VM155 example).
@@ -871,3 +922,29 @@ class TestModalAnalysisofaCyclicSymmetricAnnularPlateVM244(TestExample):
 
     def test_material_properties(self, mapdl, reader, post, result):
         assert reader.materials == result.materials
+
+    @pytest.mark.parametrize("id_", [1, 2, 3, 4, 500, 464])
+    def test_element_lookup(self, mapdl, reader, result, id_):
+        assert reader.element_lookup(id_) == result.element_lookup(id_)
+
+    def test_mesh_enum(self, mapdl, reader, result):
+        assert np.allclose(reader.mesh.enum, result._elements)
+
+
+@pytest.mark.parametrize(
+    "method",
+    [
+        "write_tables",
+        "read_record",
+        "overwrite_element_solution_record",
+        "overwrite_element_solution_records",
+    ],
+)
+def test_not_implemented(mapdl, method):
+    func = getattr(mapdl.result, method)
+
+    with pytest.raises(
+        NotImplementedError,
+        match="This method has not been ported to the new DPF-based Results backend",
+    ):
+        func()
