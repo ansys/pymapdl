@@ -21,10 +21,12 @@
 # SOFTWARE.
 
 from . import (
-    animation,
-    controls,
-    element_table,
-    failure_criteria,
-    listing,
-    load_case,
+    magnetics_calculations,
+    path_operations,
+    results,
+    set_up,
+    special_purpose,
+    status,
+    surface_operations,
+    trace_points,
 )
