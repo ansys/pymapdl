@@ -1,4 +1,4 @@
-.. _ref_special Purpose_api:
+.. _ref_special_purpose:
 
 ***************
 Special purpose
