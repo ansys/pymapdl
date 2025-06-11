@@ -1,18 +1,23 @@
-.. _ref_list_controls_commands_api:
 
-*************
-List controls
-*************
+.. _ref_list_controls:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SESSION commands are used to control listings and printed program output.
+ListControls
+============
+
+
+.. currentmodule:: ansys.mapdl.core._commands.session.list_controls
+
+.. autoclass:: ansys.mapdl.core._commands.session.list_controls.ListControls
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.com
-   Mapdl.golist
-   Mapdl.gopr
-   Mapdl.nolist
-   Mapdl.nopr
+
+   ListControls.com
+   ListControls.golist
+   ListControls.gopr
+   ListControls.nolist
+   ListControls.nopr
+   ListControls.slashgo

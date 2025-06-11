@@ -963,8 +963,8 @@ class MapdlGrpc(MapdlBase):
     @supress_logging
     def _set_no_abort(self):
         """Do not abort MAPDL."""
-        self._log.debug("Setting no abort")
-        self.nerr(abort=-1, mute=True)
+        self._log.debug("Setting to no abort")
+        self.run("/NERR,,,-1", mute=True)
 
     def _run_at_connect(self):
         """Run house-keeping commands when initially connecting to MAPDL."""
@@ -1793,7 +1793,7 @@ class MapdlGrpc(MapdlBase):
         ext : str, optional
             Filename extension (eight-character maximum).
 
-        dir : str, optional
+        dir_ : str, optional
             Directory path. The default is the current working directory.
 
         line : int, optional
