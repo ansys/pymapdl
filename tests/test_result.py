@@ -213,7 +213,7 @@ def title(apdl_code):
         return ",".join(line.split(",")[1:]).strip()
 
 
-class TestExample:
+class Example:
     """Generic class to test examples."""
 
     example: str | None = None  # String 'vm33'
@@ -238,15 +238,18 @@ class TestExample:
     @pytest.fixture(scope="class")
     def setup(self, mapdl):
         mapdl.clear()
+        mapdl.ignore_errors = True
         if self.apdl_code:
             mapdl.input_strings(self.apdl_code)
         else:
             mapdl.input(self.example)
 
-        mapdl.allsel()
+        mapdl.allsel(mute=True)
         mapdl.save()
         mapdl.post1()
         mapdl.csys(0)
+
+        mapdl.ignore_errors = False
 
         # downloading file
         rst_name = mapdl.jobname + ".rst"
@@ -275,6 +278,15 @@ class TestExample:
     @pytest.fixture(scope="class")
     def result(self, setup):
         return setup.result
+
+    def test_node_components(self, mapdl, result):
+        assert mapdl.mesh.node_components == result.node_components
+
+    def test_element_component(self, mapdl, result):
+        assert mapdl.mesh.element_components == result.element_components
+
+    def test_mesh_enum(self, mapdl, reader, result):
+        assert np.allclose(reader.mesh.enum, result._elements)
 
 
 def test_DPF_result_class(mapdl, cube_solve):
@@ -326,7 +338,7 @@ def test_upload(mapdl, solved_box, tmpdir):
 #     assert
 
 
-class TestStaticThermocoupledExample(TestExample):
+class TestStaticThermocoupledExample(Example):
     """Class to test a Static Thermo-coupled example."""
 
     example = transient_thermal_stress_in_a_cylinder
@@ -425,11 +437,8 @@ class TestStaticThermocoupledExample(TestExample):
     def test_element_lookup(self, mapdl, reader, result, id_):
         assert reader.element_lookup(id_) == result.element_lookup(id_)
 
-    def test_mesh_enum(self, mapdl, reader, result):
-        assert np.allclose(reader.mesh.enum, result._elements)
 
-
-class TestElectroThermalCompliantMicroactuator(TestExample):
+class TestElectroThermalCompliantMicroactuator(Example):
     """Class to test the Electro-Thermal-Compliant Microactuator VM223 example."""
 
     example = electrothermal_microactuator_analysis
@@ -492,11 +501,8 @@ class TestElectroThermalCompliantMicroactuator(TestExample):
     def test_element_lookup(self, mapdl, reader, result, id_):
         assert reader.element_lookup(id_) == result.element_lookup(id_)
 
-    def test_mesh_enum(self, mapdl, reader, result):
-        assert np.allclose(reader.mesh.enum, result._elements)
 
-
-class TestSolidStaticPlastic(TestExample):
+class TestSolidStaticPlastic(Example):
     """Test on the vm37."""
 
     example = elongation_of_a_solid_bar
@@ -568,11 +574,8 @@ class TestSolidStaticPlastic(TestExample):
     def test_element_lookup(self, mapdl, reader, result, id_):
         assert reader.element_lookup(id_) == result.element_lookup(id_)
 
-    def test_mesh_enum(self, mapdl, reader, result):
-        assert np.allclose(reader.mesh.enum, result._elements)
 
-
-class TestPiezoelectricRectangularStripUnderPureBendingLoad(TestExample):
+class TestPiezoelectricRectangularStripUnderPureBendingLoad(Example):
     """Class to test the piezoelectric rectangular strip under pure bending load VM231 example.
 
     A piezoceramic (PZT-4) rectangular strip occupies the region |x| l, |y| h. The material is oriented
@@ -672,11 +675,8 @@ class TestPiezoelectricRectangularStripUnderPureBendingLoad(TestExample):
     def test_element_lookup(self, mapdl, reader, result, id_):
         assert reader.element_lookup(id_) == result.element_lookup(id_)
 
-    def test_mesh_enum(self, mapdl, reader, result):
-        assert np.allclose(reader.mesh.enum, result._elements)
 
-
-class TestPinchedCylinderVM6(TestExample):
+class TestPinchedCylinderVM6(Example):
     """Class to test a pinched cylinder (VM6 example).
 
     A thin-walled cylinder is pinched by a force F at the middle of the cylinder length.
@@ -750,11 +750,8 @@ class TestPinchedCylinderVM6(TestExample):
     def test_element_lookup(self, mapdl, reader, result, id_):
         assert reader.element_lookup(id_) == result.element_lookup(id_)
 
-    def test_mesh_enum(self, mapdl, reader, result):
-        assert np.allclose(reader.mesh.enum, result._elements)
 
-
-class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(TestExample):
+class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(Example):
     """Class to test Transient Response of a Ball Impacting a Flexible Surface (VM65 example).
 
     A rigid ball of mass m is dropped through a height h onto a flexible surface of stiffness k. Determine
@@ -857,11 +854,8 @@ class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(TestExample):
     def test_element_lookup(self, mapdl, reader, result, id_):
         assert reader.element_lookup(id_) == result.element_lookup(id_)
 
-    def test_mesh_enum(self, mapdl, reader, result):
-        assert np.allclose(reader.mesh.enum, result._elements)
 
-
-# class TestChabocheRateDependentPlasticMaterialunderCyclicLoadingVM155(TestExample):
+# class TestChabocheRateDependentPlasticMaterialunderCyclicLoadingVM155(Example):
 #     """Class to test Chaboche Rate-Dependent Plastic Material under Cyclic Loading (VM155 example).
 
 #     A thin plate is modeled with chaboche rate-dependent plastic material model. Uniaxial cyclic displacement
@@ -887,7 +881,7 @@ class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(TestExample):
 #     example_name = "Transient Response of a Ball Impacting a Flexible Surface"
 
 
-class TestModalAnalysisofaCyclicSymmetricAnnularPlateVM244(TestExample):
+class TestModalAnalysisofaCyclicSymmetricAnnularPlateVM244(Example):
     """Class to test Modal Analysis of a Cyclic Symmetric Annular Plate (VM244 example).
 
     The fundamental natural frequency of an annular plate is determined using a mode-frequency analysis.
@@ -926,9 +920,6 @@ class TestModalAnalysisofaCyclicSymmetricAnnularPlateVM244(TestExample):
     @pytest.mark.parametrize("id_", [1, 2, 3, 4, 500, 464])
     def test_element_lookup(self, mapdl, reader, result, id_):
         assert reader.element_lookup(id_) == result.element_lookup(id_)
-
-    def test_mesh_enum(self, mapdl, reader, result):
-        assert np.allclose(reader.mesh.enum, result._elements)
 
 
 @pytest.mark.parametrize(

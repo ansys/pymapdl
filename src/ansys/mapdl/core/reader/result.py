@@ -136,6 +136,11 @@ MATERIAL_PROPERTIES: list[str] = [
     "YZIC",
 ]
 
+LOCATION_MAPPING: dict[str, str] = {
+    "NODE": "Nodal",
+    "ELEM": "Elemental",
+}
+
 NOT_AVAILABLE_METHOD = """The method '{method}' has not been ported to the new DPF-based Results backend.
 If you still want to use it, you can switch to 'pymapdl-reader' backend."""
 
@@ -272,7 +277,7 @@ class DPFResult(Result):
         # these will be removed once the reader class has been fully substituted.
         # then we will inheritate from object.
         self._update()
-        super().__init__(self._rst, read_mesh=False)
+        # super().__init__(self._rst, read_mesh=False)
 
     def _generate_session_id(self, length: int = 10):
         """Generate an unique ssesion id.
@@ -2037,31 +2042,6 @@ class DPFResult(Result):
 
         return nnum, data
 
-    def element_components(self):
-        """Dictionary of ansys element components from the result file.
-
-        Examples
-        --------
-        >>> from ansys.mapdl import reader as pymapdl_reader
-        >>> from ansys.mapdl.reader import examples
-        >>> rst = pymapdl_reader.read_binary(examples.rstfile)
-        >>> rst.element_components
-        {'ECOMP1': array([17, 18, 21, 22, 23, 24, 25, 26, 27, 28, 29,
-                30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40], dtype=int32),
-        'ECOMP2': array([ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
-                14, 15, 16, 17, 18, 19, 20, 23, 24], dtype=int32),
-        'ELEM_COMP': array([ 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-                16, 17, 18, 19, 20], dtype=int32)}
-        """
-        element_components_ = {}
-        for each_named_selection in self.mesh.available_named_selections:
-            scoping = self.mesh.named_selection(each_named_selection)
-            element_components_[each_named_selection] = np.array(
-                scoping.ids, dtype=np.int32
-            )
-
-        return element_components_
-
     @property
     def time_values(self):
         "Values for the time/frequency"
@@ -2612,6 +2592,52 @@ class DPFResult(Result):
     def subtitle(self):
         raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="subtitle"))
 
+    def _get_comp_dict(self, entity: str):
+        """Get a dictionary of components given an entity"""
+        entity_comp = {}
+        for each_comp in self.mesh.available_named_selections:
+            scoping = self.mesh.named_selection(each_comp)
+            if scoping.location == LOCATION_MAPPING[entity]:
+                entity_comp[each_comp] = scoping.ids.tolist()
+
+        return entity_comp
+
+    @property
+    def node_components(self):
+        """Dictionary of ansys node components from the result file.
+
+        Examples
+        --------
+        >>> from ansys.mapdl import reader as pymapdl_reader
+        >>> from ansys.mapdl.reader import examples
+        >>> rst = pymapdl_reader.read_binary(examples.rstfile)
+        >>> rst.node_components.keys()
+        dict_keys(['ECOMP1', 'ECOMP2', 'ELEM_COMP'])
+        >>> rst.node_components['NODE_COMP']
+        array([ 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+              20], dtype=int32)
+        """
+        return self._get_comp_dict("NODE")
+
+    @property
+    def element_components(self):
+        """Dictionary of ansys element components from the result file.
+
+        Examples
+        --------
+        >>> from ansys.mapdl import reader as pymapdl_reader
+        >>> from ansys.mapdl.reader import examples
+        >>> rst = pymapdl_reader.read_binary(examples.rstfile)
+        >>> rst.element_components
+        {'ECOMP1': array([17, 18, 21, 22, 23, 24, 25, 26, 27, 28, 29,
+                30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40], dtype=int32),
+        'ECOMP2': array([ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13,
+                14, 15, 16, 17, 18, 19, 20, 23, 24], dtype=int32),
+        'ELEM_COMP': array([ 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+                16, 17, 18, 19, 20], dtype=int32)}
+        """
+        return self._get_comp_dict("ELEM")
+
     # def save_as_vtk(
     #     self, filename, rsets=None, result_types=["ENS"], progress_bar=True
     # ):
@@ -2782,9 +2808,6 @@ class DPFResult(Result):
     #     pass
 
     # def nodal_static_forces(self):
-    #     pass
-
-    # def node_components(self):
     #     pass
 
     # def parse_coordinate_system(self):
