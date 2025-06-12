@@ -237,9 +237,11 @@ class DPFResult(Result):
             self._mapdl_weakref = weakref.ref(mapdl)
             self._mode_rst = False
             rst_file_path = mapdl.result_file
-            if rst_file_path is None:
-                raise ValueError(
-                    "RST file path is None. Please check the MAPDL instance."
+            if rst_file_path is None or not os.path.isfile(rst_file_path):
+                raise FileNotFoundError(
+                    f"No result file(s) at {mapdl.directory or rst_file_path}. "
+                    "Check that there is at least one RST file in the working directory "
+                    f"'{mapdl.directory}, or solve an MAPDL model to generate one."
                 )
 
             # self._session_id = f"__{uuid.uuid4()}__"

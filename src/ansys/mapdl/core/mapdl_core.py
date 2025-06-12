@@ -211,6 +211,7 @@ _ALLOWED_START_PARM = [
     "start_instance",
     "start_timeout",
     "timeout",
+    "use_reader_backend",
 ]
 
 
@@ -264,7 +265,7 @@ class _MapdlCore(Commands):
         local: bool = True,
         print_com: bool = False,
         file_type_for_plots: VALID_FILE_TYPE_FOR_PLOT_LITERAL = "PNG",
-        **start_parm,
+        **start_parm: dict[str, Any],
     ):
         """Initialize connection with MAPDL."""
         self._show_matplotlib_figures = True  # for testing
@@ -285,6 +286,7 @@ class _MapdlCore(Commands):
         self._version = None  # cached version
         self._mute = False
         self._save_selection_obj = None
+        self._use_reader_backend: bool = start_parm.pop("use_reader_backend", True)
 
         if _HAS_VISUALIZER:
             if graphics_backend is not None:  # pragma: no cover
@@ -1092,7 +1094,7 @@ class _MapdlCore(Commands):
         """
         from ansys.mapdl.core import _HAS_DPF
 
-        if _HAS_DPF:
+        if _HAS_DPF and not self._use_reader_backend:
             from ansys.mapdl.core.reader import DPFResult
 
             if self._dpf_result is None:
@@ -1140,10 +1142,12 @@ class _MapdlCore(Commands):
             else:
                 result_path = self._result_file
 
-        if result_path is None:
-            raise FileNotFoundError("No result file(s) at %s" % self.directory)
-        if not os.path.isfile(result_path):
-            raise FileNotFoundError("No results found at %s" % result_path)
+        if result_path is None or not os.path.isfile(result_path):
+            raise FileNotFoundError(
+                f"No result file(s) at {self.directory or result_path}. "
+                "Check that there is at least one RST file in the working directory "
+                f"'{self.directory}, or solve an MAPDL model to generate one."
+            )
 
         return read_binary(result_path)
 
