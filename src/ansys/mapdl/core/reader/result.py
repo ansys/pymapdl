@@ -2182,10 +2182,16 @@ class DPFResult(Result):
         for ind, mat_id in enumerate(mat_ids):
             mats[mat_id] = {}
 
-            for prop, field in zip(MATERIAL_PROPERTIES, prop_field):
-                value: float = float(field.data[ind].item())
-                if value:
-                    mats[mat_id][prop] = value
+            for each_label in prop_field.labels:
+                field = prop_field.get_fields({each_label: 1})[0]
+                data = field.data.tolist()
+
+                if data and len(data) > 0 and data[0] != 0:
+                    if len(data) == 1:
+                        mats[mat_id][each_label] = data[0]
+                    else:
+                        mats[mat_id][each_label] = data
+
         return mats
 
     def plot_nodal_stress(
