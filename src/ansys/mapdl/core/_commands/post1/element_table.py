@@ -181,7 +181,7 @@ class ElementTable:
         into the element table for further "worksheet" manipulation. (See `Getting Started
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_bas/afbRsqe0ldm.html>`_  ``Item`` and
         ``Comp`` labels for the component name method is shown in :ref:`ETABLE_tab_1`. See
-        :ref:`ETABLE_tab_2`for a list of selected result ( ``Item`` = SRES) ``Comp`` labels.
+        :ref:`ETABLE_tab_2` for a list of selected result ( ``Item`` = SRES) ``Comp`` labels.
 
         The sequence number method enables you to view results for data that is not averaged (such as
         pressures at nodes, temperatures at integration points, etc.), or data that is not easily described
