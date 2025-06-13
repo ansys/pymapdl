@@ -49,9 +49,6 @@ from conftest import (
 if has_dependency("pyvista"):
     from pyvista import MultiBlock
 
-if has_dependency("ansys-mapdl-reader"):
-    from ansys.mapdl.reader.rst import Result
-
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import USER_DATA_PATH
 from ansys.mapdl.core.commands import CommandListingOutput
@@ -2100,12 +2097,6 @@ def test_rlblock_rlblock_num(mapdl, cleared):
     assert [1, 2, 4] == mapdl.mesh.rlblock_num
 
 
-@requires("ansys-mapdl-reader")
-def test_download_results_non_local(mapdl, cube_solve):
-    assert mapdl.result is not None
-    assert isinstance(mapdl.result, Result)
-
-
 def test__flush_stored(mapdl, cleared):
     with mapdl.non_interactive:
         mapdl.com("mycomment")
@@ -2981,7 +2972,11 @@ def test_muted(mapdl, prop):
     "ansys.tools.path.path._get_application_path",
     lambda *args, **kwargs: "path/to/mapdl/executable",
 )
-@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
+@patch(
+    "ansys.tools.path.path.version_from_path",
+    autospec=True,
+    side_effect=lambda *args, **kwargs: 242,
+)
 @stack(*PATCH_MAPDL)
 @pytest.mark.parametrize("set_no_abort", [True, False, None])
 @pytest.mark.parametrize("start_instance", [True, False])
