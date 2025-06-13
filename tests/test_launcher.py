@@ -1430,7 +1430,7 @@ def test_exit_job(mock_popen, mapdl, cleared):
     "ansys.tools.path.path._get_application_path",
     lambda *args, **kwargs: "path/to/mapdl/executable",
 )
-@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
+@patch("ansys.tools.path.path.version_from_path", lambda *args, **kwargs: 242)
 @stack(*PATCH_MAPDL_START)
 @patch("ansys.mapdl.core.launcher.launch_grpc")
 @patch("ansys.mapdl.core.launcher.send_scontrol")
@@ -1769,7 +1769,7 @@ def test_get_hostname_host_cluster(
 
 
 @requires("ansys-tools-path")
-@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 201)
+@patch("ansys.tools.path.path.version_from_path", lambda *args, **kwargs: 201)
 @patch("ansys.mapdl.core._HAS_ATP", True)
 def test_get_version_version_error(monkeypatch):
     monkeypatch.delenv("PYMAPDL_MAPDL_VERSION", False)
@@ -1985,7 +1985,7 @@ def test_submitter(cmd, executable, shell, cwd, stdin, stdout, stderr, envvars):
     "ansys.tools.path.path._get_application_path",
     lambda *args, **kwargs: "path/to/mapdl/executable",
 )
-@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
+@patch("ansys.tools.path.path.version_from_path", lambda *args, **kwargs: 242)
 @stack(*PATCH_MAPDL)
 @pytest.mark.parametrize(
     "arg,value,method",
