@@ -50,6 +50,7 @@ from common import (
     make_sure_not_instances_are_left_open,
     restart_mapdl,
     support_plotting,
+    test_cad,
     testing_minimal,
 )
 
@@ -60,6 +61,7 @@ from common import (
 #
 DEBUG_TESTING = debug_testing()
 TESTING_MINIMAL = testing_minimal()
+TEST_CAD = test_cad()
 
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()

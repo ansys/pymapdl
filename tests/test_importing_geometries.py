@@ -28,7 +28,7 @@ from ansys.mapdl.core.errors import (
     MapdlCommandIgnoredError,
     MapdlRuntimeError,
 )
-from conftest import ON_CI, ON_LOCAL, ON_UBUNTU, NullContext
+from conftest import ON_CI, ON_LOCAL, ON_UBUNTU, TEST_CAD, NullContext
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -95,7 +95,7 @@ def test_readin_igs(mapdl, cleared):
 
 ## Connection commands
 #
-@pytest.mark.xfail(True, reason="Command seems broken. See #2377")
+@pytest.mark.skipif(not TEST_CAD, reason="CAD libraries are not being tested")
 def test_readin_sat(mapdl, cleared):
     if ON_CI and mapdl.version >= 23.2:
         context = pytest.raises(
@@ -125,7 +125,7 @@ def test_readin_sat(mapdl, cleared):
     clear_wkdir_from_cads(mapdl)
 
 
-@pytest.mark.xfail(True, reason="Command seems broken. See #2377")
+@pytest.mark.skipif(not TEST_CAD, reason="CAD libraries are not being tested")
 def test_readin_x_t(mapdl, cleared):
     if ON_CI and mapdl.version >= 23.2:
         context = pytest.raises(
@@ -158,7 +158,7 @@ def test_readin_x_t(mapdl, cleared):
     clear_wkdir_from_cads(mapdl)
 
 
-@pytest.mark.xfail(ON_CI, reason="MAPDL docker image do not have the CAD libraries")
+@pytest.mark.skipif(not TEST_CAD, reason="CAD libraries are not being tested")
 def test_readin_catiav4(mapdl, cleared):
     # Catia v4 is only supported on Linux
     if mapdl.platform == "windows":

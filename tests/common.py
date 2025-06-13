@@ -25,7 +25,6 @@ from collections import namedtuple
 import os
 import subprocess
 import time
-from typing import Dict, List
 
 import psutil
 
@@ -157,15 +156,16 @@ def testing_minimal():
     return os.environ.get("TESTING_MINIMAL", "NO").upper().strip() in ["YES", "TRUE"]
 
 
+def test_cad():
+    """Check if the test is running on a CAD test."""
+    return os.environ.get("TEST_CAD", "NO").upper().strip() in ["YES", "TRUE"]
+
+
 def debug_testing() -> bool:
-    if os.environ.get("PYMAPDL_DEBUG_TESTING"):
-        debug_testing = os.environ.get("PYMAPDL_DEBUG_TESTING")
+    debug_testing = os.environ.get("PYMAPDL_DEBUG_TESTING", "").lower().strip()
 
-        if debug_testing.lower() in ["true", "false", "yes", "no"]:
-            return debug_testing.lower() in ["true", "yes"]
-        else:
-            return debug_testing
-
+    if debug_testing in ["true", "yes"]:
+        return True
     else:
         return False
 
@@ -191,10 +191,10 @@ def is_just_floats(s: str, delimiter=None):
     return True
 
 
-def get_details_of_nodes(mapdl_) -> Dict[int, Node]:
-    string = mapdl_.nlist("ALL")
+def get_details_of_nodes(mapdl_) -> dict[int, Node]:
+    string = str(mapdl_.nlist("ALL"))
     rows = string.split("\n")
-    nodes = {}
+    nodes: dict[int, Node] = {}
     for row in rows:
         if is_just_floats(row):
             row_values = [v for v in row.split(" ") if v != ""]
@@ -203,12 +203,12 @@ def get_details_of_nodes(mapdl_) -> Dict[int, Node]:
     return nodes
 
 
-def get_details_of_elements(mapdl_) -> Dict[int, Node]:
-    string = mapdl_.elist("ALL")
+def get_details_of_elements(mapdl_: Mapdl) -> dict[int, Element]:
+    string = str(mapdl_.elist("ALL"))
     # string = string.split(' ELEM ')[1]
     # string = string.split('\n', 1)[1]
     rows = string.split("\n")
-    elements = {}
+    elements: dict[int, Element] = {}
     for row in rows:
         if is_just_floats(row):
             row_values = [v for v in row.split(" ") if v != ""]
@@ -234,15 +234,15 @@ def log_test_start(mapdl: Mapdl) -> None:
     # To see it also in MAPDL terminal output
     if len(test_name) > 75:
         # terminal output is limited to 75 characters
-        test_name = test_name.split("::")
-        if len(test_name) > 2:
+        test_name_list = test_name.split("::")
+        if len(test_name_list) > 2:
             types_ = ["File path", "Test class", "Method"]
         else:
             types_ = ["File path", "Test function"]
 
         mapdl._run("/com,Running test in:", mute=True)
 
-        for type_, name_ in zip(types_, test_name):
+        for type_, name_ in zip(types_, test_name_list):
             mapdl._run(f"/com,    {type_}: {name_}", mute=True)
 
     else:
@@ -306,7 +306,7 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
     return mapdl
 
 
-def make_sure_not_instances_are_left_open(valid_ports: List) -> None:
+def make_sure_not_instances_are_left_open(valid_ports: list[int]) -> None:
     """Make sure we leave no MAPDL running behind"""
 
     if is_on_local():
