@@ -49,7 +49,7 @@ from conftest import HAS_DPF, ON_LOCAL, TEST_DPF_BACKEND
 
 DPF_PORT = int(os.environ.get("DPF_PORT", 50056))  # Set in ci.yaml
 
-if not HAS_DPF and not TEST_DPF_BACKEND:
+if not HAS_DPF or not TEST_DPF_BACKEND:
     pytest.skip(
         "Skipping DPF tests because DPF is not installed. "
         "Please install the ansys-dpf-core package.",
@@ -198,6 +198,8 @@ def prepare_example(
     if avoid_exit:
         vm_code = vm_code.replace("/EXIT", "/EOF")
 
+    assert "EXIT" not in vm_code, "The APDL code should not contain '/EXIT' commands."
+
     if stop_after_first_solve:
         return vm_code.replace("SOLVE", "/EOF")
 
@@ -238,13 +240,13 @@ class Example:
     @pytest.fixture(scope="class")
     def setup(self, mapdl):
         mapdl.clear()
-        mapdl.ignore_errors = True
+        mapdl.ignore_errors = False
         if self.apdl_code:
             mapdl.input_strings(self.apdl_code)
         else:
             mapdl.input(self.example)
 
-        mapdl.allsel(mute=True)
+        mapdl.allsel(mute=False)
         mapdl.save()
         mapdl.post1()
         mapdl.csys(0)
