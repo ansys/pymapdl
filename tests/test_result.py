@@ -640,7 +640,7 @@ class TestSolidStaticPlastic(Example):
 
 
 class TestPiezoelectricRectangularStripUnderPureBendingLoad(Example):
-    """Class to test the piezoelectric rectangular strip under pure bending load VM231 example.
+    r"""Class to test the piezoelectric rectangular strip under pure bending load VM231 example.
 
     A piezoceramic (PZT-4) rectangular strip occupies the region |x| l, |y| h. The material is oriented
     such that its polarization direction is aligned with the Y axis. The strip is subjected to the pure bending
