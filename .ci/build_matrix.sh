@@ -105,7 +105,7 @@ for version in "${versions[@]}"; do
         echo "Not skipping CICD versions when running on remote."
         echo ""
 
-    else if [[ "$ON_STUDENT" != "true" && "$ON_REMOTE" == "true" ]]; then
+    elif [[ "$ON_STUDENT" != "true" && "$ON_REMOTE" == "true" ]]; then
         echo "Skipping non-student versions when running on remote"
         echo ""
         continue
