@@ -2464,6 +2464,20 @@ class DPFResult(Result):
             NOT_AVAILABLE_METHOD.format(method="text_result_table")
         )
 
+    def write_tables(self, filename: str | pathlib.Path):
+        """Write binary tables to ASCII.  Assumes int32
+
+        Parameters
+        ----------
+        filename : str, pathlib.Path
+            Filename to write the tables to.
+
+        Examples
+        --------
+        >>> rst.write_tables('tables.txt')
+        """
+        raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="write_tables"))
+
     def cs_4x4(self, cs_cord, as_vtk_matrix=False):
         """Return a 4x4 transformation matrix for a given coordinate system.
 

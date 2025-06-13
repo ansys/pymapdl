@@ -36,6 +36,7 @@ Notes
 - ``Post`` does not filter based on mapdl selected nodes (neither reader)
 
 """
+from inspect import signature
 from logging import Logger
 import os
 import tempfile
@@ -58,9 +59,10 @@ if not HAS_DPF:
 else:
     from ansys.dpf import core as dpf_core
     from ansys.dpf.gate.errors import DPFServerException
-    from ansys.mapdl.core.reader.result import COMPONENTS
+    from ansys.mapdl.core.reader.result import COMPONENTS, DPFResult
 
 from ansys.mapdl.reader import read_binary
+from ansys.mapdl.reader.rst import Result
 
 from ansys.mapdl.core.examples import (
     electrothermal_microactuator_analysis,
@@ -194,10 +196,10 @@ def prepare_example(
         vm_code = vm_code.replace("SOLVE", "!SOLVE")
 
     if avoid_exit:
-        vm_code = vm_code.replace("/EXIT", "!/EXIT\n/EOF")
+        vm_code = vm_code.replace("/EXIT", "/EOF")
 
     if stop_after_first_solve:
-        return vm_code.replace("SOLVE", "SOLVE\n/EOF")
+        return vm_code.replace("SOLVE", "/EOF")
 
     if index:
         vm_code = extract_sections(vm_code, index)
@@ -254,9 +256,6 @@ class Example:
         mapdl.download_result(self.tmp_dir)
         self.rst_path = os.path.join(self.tmp_dir, rst_name)
 
-        # Update results
-        mapdl.result.update()
-
         mapdl.post1()
         return mapdl
 
@@ -273,9 +272,9 @@ class Example:
         mapdl.shell()
         return mapdl.post_processing
 
-    @pytest.fixture(scope="class")
+    @pytest.fixture()
     def result(self, setup):
-        return setup.result
+        return DPFResult(mapdl=setup)
 
     def test_node_components(self, mapdl, result):
         assert mapdl.mesh.node_components == result.node_components
@@ -287,10 +286,14 @@ class Example:
         assert np.allclose(reader.mesh.enum, result._elements)
 
 
-def test_DPF_result_class(mapdl, cube_solve):
+def test_error_initialization():
+    """Test that DPFResult raises an error if the mapdl instance is not provided."""
     from ansys.mapdl.core.reader.result import DPFResult
 
-    assert isinstance(mapdl.result, DPFResult)
+    with pytest.raises(
+        ValueError, match="One of the following kwargs must be supplied"
+    ):
+        DPFResult()
 
 
 @pytest.mark.skipif(ON_LOCAL, reason="Skip on local machine")
@@ -334,6 +337,69 @@ def test_upload(mapdl, solved_box, tmpdir):
 #     mapdl._run(f"{session_id} = 1")
 #     assert session_id not in mapdl.parameters # session id should not shown in mapdl.parameters
 #     assert
+
+
+class TestDPFResult:
+
+    @pytest.fixture(scope="class")
+    def result(self, mapdl):
+        """Fixture to ensure the model is solved before running tests."""
+        from conftest import clear, solved_box_func
+
+        clear(mapdl)
+        solved_box_func(mapdl)
+
+        mapdl.allsel()
+        mapdl.save()
+
+        return DPFResult(rst_file_path=mapdl.result_file)
+
+    @pytest.mark.parametrize(
+        "method",
+        [
+            "write_tables",
+            "read_record",
+            "text_result_table",
+            "overwrite_element_solution_record",
+            "overwrite_element_solution_records",
+        ],
+    )
+    def test_not_implemented(self, result, method):
+        func = getattr(result, method)
+        sig = signature(func)
+        args = (f"arg{i}" for i in range(len(sig.parameters)))
+        with pytest.raises(
+            NotImplementedError,
+            match=f"The method '{method}' has not been ported to the new DPF-based Results backend",
+        ):
+            func(*args)
+
+    def test_DPF_result_class(self, mapdl, result):
+        from ansys.mapdl.core.reader.result import DPFResult
+
+        if mapdl._use_reader_backend:
+            assert isinstance(mapdl.result, Result)
+        else:
+            assert isinstance(mapdl.result, DPFResult)
+
+    def test_solve_rst_only(self, mapdl, result):
+        """Test that the result object can be created with a solved RST file."""
+        # Check if the result object is created successfully
+        assert result is not None
+
+        # Check if the mesh is loaded correctly
+        assert result.mesh is not None
+        assert mapdl.mesh.n_node == result.model.metadata.meshed_region.nodes.n_nodes
+        assert (
+            mapdl.mesh.n_elem == result.model.metadata.meshed_region.elements.n_elements
+        )
+
+        displacements = result.model.results.displacement()
+        disp_dpf = displacements.outputs.fields_container()[0].data
+        disp_mapdl = mapdl.post_processing.nodal_displacement("all")
+
+        assert disp_dpf.max() == disp_mapdl.max()
+        assert disp_dpf.min() == disp_mapdl.min()
 
 
 class TestStaticThermocoupledExample(Example):
@@ -429,7 +495,7 @@ class TestStaticThermocoupledExample(Example):
             assert result.parse_step_substep([0, each]) == each
 
     def test_material_properties(self, mapdl, reader, post, result):
-        assert reader.materials == result.materialspy
+        assert reader.materials == result.materials
 
     @pytest.mark.parametrize("id_", [1, 2, 3, 4, 10, 14])
     def test_element_lookup(self, mapdl, reader, result, id_):
@@ -836,9 +902,9 @@ class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(Example):
 
     def test_configuration(self, mapdl, result):
         if result.mode_rst:
-            assert isinstance(mapdl.result.logger, Logger)
+            assert isinstance(result.logger, Logger)
         elif result.mode_mapdl:
-            assert isinstance(mapdl.result.logger, MAPDLLogger)
+            assert isinstance(result.logger, MAPDLLogger)
 
     def test_no_cyclic(self, mapdl, reader, post, result):
         assert not result.is_cyclic
@@ -846,7 +912,16 @@ class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(Example):
         assert result.num_stages is None
 
     def test_material_properties(self, mapdl, reader, post, result):
-        assert reader.materials == result.materials
+        # This model does not have material properties defined because it uses
+        # MASS21, CONTA175 and TARGE169
+        assert result.materials
+        assert not result.materials[1]
+        assert len(result.materials) == 1
+
+        with pytest.raises(
+            RuntimeError, match="Legacy record: Unable to read this material record"
+        ):
+            assert reader.materials
 
     @pytest.mark.parametrize("id_", [1, 2, 3])
     def test_element_lookup(self, mapdl, reader, result, id_):
@@ -918,22 +993,3 @@ class TestModalAnalysisofaCyclicSymmetricAnnularPlateVM244(Example):
     @pytest.mark.parametrize("id_", [1, 2, 3, 4, 500, 464])
     def test_element_lookup(self, mapdl, reader, result, id_):
         assert reader.element_lookup(id_) == result.element_lookup(id_)
-
-
-@pytest.mark.parametrize(
-    "method",
-    [
-        "write_tables",
-        "read_record",
-        "overwrite_element_solution_record",
-        "overwrite_element_solution_records",
-    ],
-)
-def test_not_implemented(mapdl, method):
-    func = getattr(mapdl.result, method)
-
-    with pytest.raises(
-        NotImplementedError,
-        match="This method has not been ported to the new DPF-based Results backend",
-    ):
-        func()
