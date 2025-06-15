@@ -19,13 +19,16 @@ with other programs, libraries, and features in development.
 +------------------------------------------------------+--------------------------------------------------------------------------------------------+
 | :ref:`dash_example`                                  | Demonstrates the use of PyMAPDL with Dash.                                                 |
 +------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| :ref:`executable_example`                            |  Demonstrates how to create your own Python app with a command-line interface.             |
+| :ref:`executable_example`                            | Demonstrates how to create your own Python app with a command-line interface.              |
 +------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| :ref:`gui_example`                                   |  Demonstrates how to create your own GUI app with Python and PySide6.                      |
+| :ref:`gui_example`                                   | Demonstrates how to create your own GUI app with Python and PySide6.                       |
 +------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| :ref:`hpc_ml_ga_example`                             |  Demonstrates how to use PyMAPDL in a high-performance computing system managed by SLURM.  |
+| :ref:`hpc_ml_ga_example`                             | Demonstrates how to use PyMAPDL in a high-performance computing system managed by SLURM.   |
 +------------------------------------------------------+--------------------------------------------------------------------------------------------+
-| :ref:`stochastic_fem_example`                        |  Demonstrates using PyMAPDL for stochastic FEA using Monte Carlo simulation.               |
+| :ref:`stochastic_fem_example`                        | Demonstrates using PyMAPDL for stochastic FEA using Monte Carlo simulation.                |
++------------------------------------------------------+--------------------------------------------------------------------------------------------+
+| :ref:`static_rom_data_generation`                    | Demonstrates using PyMAPDL and PyDPF to generate training data for an Ansys Twin Builder   |
+|                                                      | static reduced order model (ROM)  .                                                        |
 +------------------------------------------------------+--------------------------------------------------------------------------------------------+
 
 
@@ -42,4 +45,5 @@ with other programs, libraries, and features in development.
     gui/executable.rst
     hpc/hpc_ml_ga.rst
     sfem/stochastic_fem.rst
+    static_rom/static_rom_data_generation.rst
 
