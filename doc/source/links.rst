@@ -17,6 +17,7 @@
 .. _ansys_tools_path: http://path.tools.docs.pyansys.com/
 .. _pyansys_math: https://math.docs.pyansys.com/version/stable/
 .. _pyansys_math_api: https://math.docs.pyansys.com/version/stable/api/index.html
+.. _pytwin_docs: https://twin.docs.pyansys.com
 
 .. #PyAnsys Developer Guide
 .. _dev_guide_pyansys: https://dev.docs.pyansys.com
