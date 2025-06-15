@@ -273,7 +273,7 @@ sphinx_gallery_conf = {
     # path where to save gallery generated examples
     "gallery_dirs": [GALLERY_EXAMPLES_PATH],
     # Pattern to search for example files
-    # "filename_pattern": r"\." + DEFAULT_EXAMPLE_EXTENSION,
+    "filename_pattern": r"\." + DEFAULT_EXAMPLE_EXTENSION,
     # Remove the "Download all examples" button from the top level gallery
     "download_all_examples": False,
     # Sort gallery example by file name instead of number of lines (default)
