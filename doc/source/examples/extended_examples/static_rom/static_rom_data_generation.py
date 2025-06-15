@@ -24,19 +24,19 @@
 Creating training data for a 3D Static reduced order model (ROM)
 ----------------------------------------------------------------
 
-This example is an extension of the example, :ref:`ref_3d_plane_stress_concentration`.
-It shows how a parametric sweep may be run and the output displacement and stress data exported into
-the format required to build a Static ROM with Ansys Twin Builder.
+This example shows how a parametric sweep may be run on a MAPDL model and the output displacement
+and stress data exported into the format required to build a Static ROM with Ansys Twin Builder.
 """
 
 import json
 from pathlib import Path
+import tempfile
 
 from ansys.dpf import core as dpf
 import numpy as np
 from pytwin import write_binary
 
-from ansys.mapdl.core import Mapdl, launch_mapdl
+from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.examples.downloads import download_example_data
 
 
@@ -141,7 +141,7 @@ def write_doe_entry(output_folder: str | Path, snapshot_name: str, parameters: d
         fw.write(f"{snapshot_name},{parameter_values}\n")
 
 
-def export_static_ROM_data(
+def export_static_ROM_variation(
     model: dpf.Model,
     scoping: dpf.Scoping,
     name: str,
@@ -150,10 +150,34 @@ def export_static_ROM_data(
     snap_idx: int = 0,
     new_metadata: bool = False,
 ):
+    """
+    Export static ROM data for one parameter variation.
+
+    Parameters
+    ----------
+    model : dpf.Model
+        DPF model with results data loaded.
+    scoping : dpf.Scoping
+        DPF nodal scoping for result export.
+    name : str
+        result quantity to export. Valid options are `displacement` and `stress`.
+    output_folder : str|Path
+        exported data will be stored in this folder. Use separate folders for each physics type.
+    parameters : dict
+        dictionary of name-value pairs for the input parameters used to generate the current
+        results.
+    snap_idx : int, default = 0
+        unique ID for the current results.
+    new_metadata : bool, default = False
+        used the first time the function is called for a given data generation run. Triggers the
+        creation of ``points.bin``, ``settings.json`` and a new ``doe.csv`` file. Existing files are
+        overrwritten.
+    """
     # Create the output folder
     output_folder = Path(output_folder)
     output_folder.mkdir(parents=True, exist_ok=True)
 
+    # Modify this section to export additional result types
     is_deformation = False
     if name == "displacement":
         result = model.results.displacement
@@ -185,37 +209,20 @@ def export_static_ROM_data(
     write_binary(snapshot_folder.joinpath(snap_name), result_field.data)
 
 
-def solve_design_point(mapdl: Mapdl, force_load: float):
-    """Solve the MAPDL model."""
-    mapdl.run("/SOLU")
-    mapdl.cmsel("S", "load_node", "NODE")
-    mapdl.fdele("ALL", "FX")
-    mapdl.f("ALL", "FX", force_load)
-    mapdl.allsel()
-    mapdl.antype("STATIC")
-    mapdl.solve()
-    mapdl.finish(mute=True)
-    rst_path = mapdl.result_file
-    return rst_path
+def export_static_ROM_data(
+    mapdl_results: list[tuple[str, dict]], output_folder: str | Path
+):
+    """
+    Export static ROM data to output folder.
 
-
-def run_doe():
-    # First, start MAPDL as a service and disable all but error messages.
-    mapdl = launch_mapdl(loglevel="ERROR")
-
-    # Download the example database: notch_file is the path to the downloaded file.
-    notch_file = download_example_data(
-        filename="3d_notch.db", directory="pymapdl/static_ROM_data_generation"
-    )
-
-    mapdl.resume(notch_file, mute=True)
-
-    # Define folders for output.
-    rom_folder = Path(mapdl.directory).joinpath("Static_ROM")
-    for idx, force_load in enumerate([250]):
-        # Solve the MAPDL model
-        rst_path = solve_design_point(mapdl, force_load)
-
+    Parameters
+    ----------
+    mapdl_results: list[tuple[str, dict]]
+        list of tuples of MAPDL result file path and the parameter values for each variation solved.
+    output_folder: str|Path
+        location where ROM output data will be stored.
+    """
+    for idx, (rst_path, parameters) in enumerate(mapdl_results):
         # Load the results to DPF and create scoping.
         model = dpf.Model(rst_path)
         scoping = get_scoping(model)
@@ -223,22 +230,72 @@ def run_doe():
         # Only create points.bin and settings.json on first design point.
         new_metadata = idx == 0
 
-        # Set current parameters and export displacement and stress data.
-        parameters = {"force[N]": force_load}
+        # Export displacement and stress data.
         for name in ["displacement", "stress"]:
-            output_folder = rom_folder.joinpath(name)
-            export_static_ROM_data(
+            data_folder = Path(output_folder).joinpath(name)
+            export_static_ROM_variation(
                 model,
                 scoping,
                 name,
-                output_folder,
+                data_folder,
                 parameters=parameters,
                 snap_idx=idx,
                 new_metadata=new_metadata,
             )
-        print(rom_folder)
+
+
+def run_mapdl_variations():
+    """
+    Run the MAPDL model parametric variations.
+
+    Returns
+    -------
+    list[tuple[str, dict]]
+        list of tuples of MAPDL result file path (on the platform where MAPDL was executed) and the
+        parameter values for each variation solved.
+    """
+    # Specify the force load variations
+    forces = [250, 500, 750, 1000]
+
+    # First, start MAPDL and disable all but error messages.
+    mapdl = launch_mapdl(loglevel="ERROR")
+
+    # Download the example database: ``notch_file`` is the path to the downloaded file.
+    notch_file = download_example_data(
+        filename="3d_notch.db", directory="pymapdl/static_ROM_data_generation"
+    )
+
+    mapdl.resume(notch_file, mute=True)
+
+    # Initialise the outputs
+    outputs = []
+
+    # Solve the parameter variations.
+    for idx, force_load in enumerate(forces):
+        # Rename the job and change log, err etc. files.
+        mapdl.filname(f"variation_{idx}")
+        mapdl.run("/SOLU")
+        mapdl.cmsel("S", "load_node", "NODE")
+        mapdl.fdele("ALL", "FX")
+        mapdl.f("ALL", "FX", force_load)
+        mapdl.allsel()
+        mapdl.antype("STATIC")
+        mapdl.solve()
+        mapdl.finish(mute=True)
+        rst_path = mapdl.result_file
+        outputs.append((rst_path, {"force[N]": force_load}))
+    print(f"MAPDL run in: {mapdl.directory}")
     mapdl.exit()
+    return outputs
+
+
+def run():
+    # Define a folder for output.
+    rom_folder = Path(tempfile.gettempdir()).joinpath("ansys_pymadl_Static_ROM")
+    mapdl_results = run_mapdl_variations()
+    export_static_ROM_data(mapdl_results, rom_folder)
+    print(f"ROM data exported to: {rom_folder}")
 
 
 if __name__ == "__main__":
-    run_doe()
+    run()
