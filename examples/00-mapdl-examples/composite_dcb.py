@@ -346,14 +346,19 @@ damage_df = mapdl.pretab("damage").to_dataframe()
 temp_directory = tempfile.gettempdir()
 rst_path = mapdl.download_result(temp_directory)
 
-if os.environ.get("DPF_PORT", None):
-    # Remote server
-    dpf_server = dpf.server.connect_to_server(port=int(os.environ["DPF_PORT"]))
-    path_source = dpf.upload_file_in_tmp_folder(rst_path)
-else:
+
+server_is_local = "DPF_PORT" not in os.environ
+
+if server_is_local:
     # Local server
     dpf_server = dpf.server.start_local_server()
     path_source = rst_path
+
+else:
+    # Remote server
+    dpf_server = dpf.server.connect_to_server(port=int(os.environ["DPF_PORT"]))
+    path_source = dpf.upload_file_in_tmp_folder(rst_path)
+    os.remove(rst_path)  # Delete local copy
 
 # Building the model
 model = dpf.Model(path_source)
@@ -445,7 +450,7 @@ plotter.close()
 mesh_scoping = model.metadata.named_selection("BOT_NOD")
 f_tot = []
 d_tot = []
-for i in range(0, 100):
+for i in range(100):
     force_eval = model.results.element_nodal_forces(
         time_scoping=i, mesh_scoping=mesh_scoping
     ).eval()
@@ -485,8 +490,3 @@ camera_pos = disp.animate(
 #
 # Exit MAPDL
 mapdl.exit()
-
-try:
-    os.remove(path_source)
-except (FileNotFoundError, PermissionError):
-    pass
