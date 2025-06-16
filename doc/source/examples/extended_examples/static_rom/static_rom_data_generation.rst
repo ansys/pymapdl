@@ -182,10 +182,9 @@ The script exports ``stress`` and ``displacement`` results. Additional result ty
 or excluded by modifying :func:`export_static_ROM_variation`.
 
 For example elastic strain could be added by making these changes to
-:func:`export_static_ROM_variation`:
+:func:`export_static_ROM_variation` from line 180:
 
 .. code-block:: python
-   :lineno-start: 180
 
     # Modify this section to export additional result types
     is_deformation = False
