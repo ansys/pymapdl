@@ -285,6 +285,7 @@ class TestMapdlPool:
             assert f"Instance_{i}" in dirs_path_pool
 
     @skip_if_ignore_pool
+    @requires("local")
     @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
     def test_directory_names_custom_string(self, tmpdir):
         pool = MapdlPool(
@@ -303,6 +304,7 @@ class TestMapdlPool:
         assert all(["my_instance" in each for each in dirs_path_pool])
 
     @skip_if_ignore_pool
+    @requires("local")
     @patch("ansys.mapdl.core.pool.launch_mapdl", lambda *args, **kwargs: kwargs)
     @patch(
         "ansys.mapdl.core.pool.MapdlPool.is_initialized", lambda *args, **kwargs: True
@@ -357,6 +359,7 @@ class TestMapdlPool:
             )
 
     @skip_if_ignore_pool
+    @requires("local")
     @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
     def test_only_one_instance(self):
         pool_ = MapdlPool(
