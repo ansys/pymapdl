@@ -106,7 +106,7 @@ jobs:
     steps:
       - name: "Build wheelhouse and perform smoke test"
         id: build-wheelhouse
-        uses: ansys/actions/build-wheelhouse@v10.0.8
+        uses: ansys/actions/build-wheelhouse@fix/unify-artifacts-file-names
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           operating-system: ${{ matrix.os }}
