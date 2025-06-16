@@ -28,6 +28,7 @@ This example shows how a parametric sweep may be run on a MAPDL model and the ou
 and stress data exported into the format required to build a Static ROM with Ansys Twin Builder.
 """
 
+import csv
 import json
 from pathlib import Path
 import tempfile
@@ -77,7 +78,7 @@ def write_settings(
 ):
     """Write the settings.json file."""
 
-    if field.component_count == 1 or field.component_count == 3:
+    if field.component_count in [1, 3]:
         dimensionality = [field.component_count]
         symmetricalDim = False
     elif field.component_count == 6:
@@ -129,16 +130,16 @@ def write_points(model: dpf.Model, scoping: dpf.Scoping, output_folder: str | Pa
 
 def write_doe_headers(output_folder: str | Path, name: str, parameters: dict):
     """Write blank doe.csv file with headers."""
-    with open(Path(output_folder).joinpath("doe.csv"), "w") as fw:
-        parameter_headers = ",".join([str(key) for key in parameters.keys()])
-        fw.write(f"{name},{parameter_headers}\n")
+    with open(Path(output_folder).joinpath("doe.csv"), "w", newline="") as fw:
+        writer = csv.writer(fw)
+        writer.writerow([name] + list(parameters.keys()))
 
 
 def write_doe_entry(output_folder: str | Path, snapshot_name: str, parameters: dict):
     """Write entry to doe.csv file."""
-    with open(Path(output_folder).joinpath("doe.csv"), "a") as fw:
-        parameter_values = ",".join([str(value) for value in parameters.values()])
-        fw.write(f"{snapshot_name},{parameter_values}\n")
+    with open(Path(output_folder).joinpath("doe.csv"), "a", newline="") as fw:
+        writer = csv.writer(fw)
+        writer.writerow([snapshot_name] + list(parameters.values()))
 
 
 def export_static_ROM_variation(

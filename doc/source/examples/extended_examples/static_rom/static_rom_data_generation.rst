@@ -4,8 +4,8 @@
 Creating training data for a 3D Static reduced order model (ROM)
 ================================================================
 
-This example how a parametric sweep may be run on and MAPDL model and the output displacement and
-stress data exported into the format required to build a Static ROM with Ansys Twin Builder.
+This example shows how a parametric sweep may be run on an MAPDL model and the output displacement
+and stress data exported into the format required to build a Static ROM with Ansys Twin Builder.
 
 The general data structure for the ROM building is shown in Figure 1.
 
@@ -55,8 +55,8 @@ In addition to PyMAPDL, the example requires the following packages that should 
 running:
 
 * `NumPy <https://numpy.org>`_ is used for using NumPy arrays.
-* `PyPDF <dpf_core_docs_>`_ is used to efficiently manipulate result data.
-* `PyTwin <pytwin_docs_>`_ is used convert result data to binary snapshots.
+* `PyDPF <dpf_core_docs_>`_ is used to efficiently manipulate result data.
+* `PyTwin <pytwin_docs_>`_ is used to convert result data to binary snapshots.
 
 
 Core functions
@@ -81,7 +81,8 @@ calls the :func:`export_static_ROM_variation` function to export the ROM data fo
 The ``new_metadata`` Boolean is set to ``True`` on the first loop to trigger the creation of the
 ``points.bin`` and ``settings.json`` files and a new ``doe.csv`` file.
 
-The :func:`pytwin.write_binary` function is used to write the result field data a ROM binary file.
+The :func:`pytwin.write_binary` function is used to write the result field data to a ROM binary
+file.
 
 
 .. literalinclude:: static_rom_data_generation.py
@@ -238,4 +239,4 @@ this:
 
 .. code-block:: python
 
-    namedSelections: {"first_nodes": [0, -1, 99], "first_nodes": [49, -1, 149]}
+    namedSelections: {"first_nodes": [0, -1, 99], "second_nodes": [49, -1, 149]}
