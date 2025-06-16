@@ -85,10 +85,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pyvista as pv
 
-from ansys.mapdl import core as pymapdl
+from ansys.mapdl.core import launch_mapdl
 
 # Start MAPDL as a service
-mapdl = pymapdl.launch_mapdl()
+mapdl = launch_mapdl()
 print(mapdl)
 
 ###############################################################################
@@ -175,16 +175,14 @@ mapdl.eplot()
 # Identify the two touching areas and assign them to components
 mapdl.allsel()
 mapdl.asel("s", "loc", "z", 1.7)
-areas = mapdl.geometry.anum
-mapdl.asel("r", vmin=areas[0])
+mapdl.asel("r", vmin=mapdl.geometry.anum[0])
 mapdl.nsla("r", 1)
 mapdl.nsel("r", "loc", "x", pre_crack, length + pre_crack + eps)
 mapdl.components["cm_1"] = "node"
 
 mapdl.allsel()
 mapdl.asel("s", "loc", "z", 1.7)
-areas = mapdl.geometry.anum
-mapdl.asel("r", vmin=areas[1])
+mapdl.asel("r", vmin=mapdl.geometry.anum[1])
 mapdl.nsla("r", 1)
 mapdl.nsel("r", "loc", "x", pre_crack, length + pre_crack + eps)
 mapdl.components["cm_2"] = "node"
@@ -285,7 +283,7 @@ mapdl.eplot(
 # Enter the solution processor and define the analysis settings
 mapdl.allsel()
 mapdl.finish()
-mapdl.run("/SOLU")
+mapdl.solution()
 mapdl.antype("static")
 
 # Activate non-linear geometry
@@ -298,7 +296,6 @@ mapdl.kbc(key=0)
 mapdl.outres("all", "all")
 
 # Solve
-mapdl._run("/SOLU")
 output = mapdl.solve()
 
 ###############################################################################
