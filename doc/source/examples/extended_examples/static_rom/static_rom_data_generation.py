@@ -116,7 +116,7 @@ def get_scoping(model: dpf.Model):
     # Get output data
     connected_nodes_scoping = op.outputs.mesh_scoping()
     # Compress the list to only keep unique IDs
-    connected_nodes_scoping.ids = list(set(op.outputs.mesh_scoping().ids))
+    connected_nodes_scoping.ids = sorted(list(set(op.outputs.mesh_scoping().ids)))
     return connected_nodes_scoping
 
 
