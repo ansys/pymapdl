@@ -226,6 +226,7 @@ jobs:
       - name: "Build documentation"
         shell: bash
         run: |
+          export PYTHONFAULTHANDLER=1
           xvfb-run make -C doc ${{ inputs.builder }} SPHINXOPTS="-j auto -W --keep-going"
 
       - name: "Substitute defective GIF"
