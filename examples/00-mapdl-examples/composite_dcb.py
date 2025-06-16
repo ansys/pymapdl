@@ -156,6 +156,8 @@ mapdl.type(1)
 # performing the meshing
 mapdl.vmesh(vnum0)
 mapdl.vmesh(vnum1)
+
+mapdl.esel("all")
 mapdl.eplot()
 
 ###############################################################################
@@ -264,6 +266,8 @@ mapdl.d(node="all", lab="ux", value=0.0)
 mapdl.d(node="all", lab="uy", value=0.0)
 mapdl.d(node="all", lab="uz", value=0.0)
 
+
+mapdl.esln("s", 0)
 mapdl.eplot(
     plot_bc=True,
     bc_glyph_size=3,
@@ -345,12 +349,14 @@ damage_df = mapdl.pretab("damage").to_dataframe()
 temp_directory = tempfile.gettempdir()
 rst_path = mapdl.download_result(temp_directory)
 
-dpf.core.make_tmp_dir_server(dpf.SERVER)
-
-if dpf.SERVER.local_server:
-    path_source = rst_path
-else:
+if os.environ.get("DPF_PORT", None):
+    # Remote server
+    dpf_server = dpf.server.connect_to_server(port=int(os.environ["DPF_PORT"]))
     path_source = dpf.upload_file_in_tmp_folder(rst_path)
+else:
+    # Local server
+    dpf_server = dpf.server.start_local_server()
+    path_source = rst_path
 
 # Building the model
 model = dpf.Model(path_source)
