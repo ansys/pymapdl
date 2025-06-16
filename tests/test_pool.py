@@ -49,9 +49,7 @@ pytestmark = requires("grpc")
 # Check env var
 IGNORE_POOL = os.environ.get("IGNORE_POOL", "").upper() == "TRUE"
 
-# skipping if ON_STUDENT and ON_LOCAL because we cannot spawn that many instances.
-
-
+# skipping if ON_STUDENT because we cannot spawn that many instances.
 skip_if_ignore_pool = pytest.mark.skipif(
     IGNORE_POOL or ON_STUDENT,
     reason=f"Ignoring Pool tests because {'of the IGNORE_POOL env var' if IGNORE_POOL else 'running on student'}.",
