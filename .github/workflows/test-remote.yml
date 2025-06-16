@@ -109,6 +109,12 @@ jobs:
             then export ON_UBUNTU=true; export TAG_UBUNTU="ubuntu";
             else export ON_UBUNTU=false; export TAG_UBUNTU="centos";
           fi
+
+          if [[ "${{ inputs.mapdl-version }}" == *"cicd"* ]]; then
+            echo "CICD MAPDL version detected, testing DPF backend for results module.";
+            echo "TEST_DPF_BACKEND=true" >> $GITHUB_ENV;
+          fi
+
           echo "ON_UBUNTU: $ON_UBUNTU"
           echo "TAG_UBUNTU: $TAG_UBUNTU"
           echo "ON_UBUNTU=$(echo $ON_UBUNTU)" >> $GITHUB_OUTPUT
