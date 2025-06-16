@@ -251,6 +251,14 @@ mapdl.nsel(type_="r", item="loc", comp="z", vmin=0.0, vmax=0.0)
 mapdl.d(node="all", lab="uz", value=-10)
 mapdl.components["bot_nod"] = "node"
 
+mapdl.allsel()
+mapdl.eplot(
+    plot_bc=True,
+    bc_glyph_size=3,
+    title="Applied displacements",
+    cpos=[-1, 1, 1],
+)
+
 # Apply the fix condition
 mapdl.allsel()
 mapdl.nsel(
@@ -265,11 +273,11 @@ mapdl.d(node="all", lab="uy", value=0.0)
 mapdl.d(node="all", lab="uz", value=0.0)
 
 
-mapdl.esln("s", 0)
+mapdl.allsel()
 mapdl.eplot(
     plot_bc=True,
     bc_glyph_size=3,
-    title="",
+    title="Fixed boundary condition",
 )
 
 ###############################################################################
