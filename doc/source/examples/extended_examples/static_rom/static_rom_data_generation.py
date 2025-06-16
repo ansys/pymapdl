@@ -116,7 +116,7 @@ def get_scoping(model: dpf.Model):
     # Get output data
     connected_nodes_scoping = op.outputs.mesh_scoping()
     # Compress the list to only keep unique IDs
-    connected_nodes_scoping.ids = sorted(list(set(op.outputs.mesh_scoping().ids)))
+    connected_nodes_scoping.ids = sorted(list(set(connected_nodes_scoping.ids)))
     return connected_nodes_scoping
 
 
@@ -292,7 +292,7 @@ def run_mapdl_variations():
 
 def run():
     # Define a folder for output.
-    rom_folder = Path(tempfile.gettempdir()).joinpath("ansys_pymadl_Static_ROM")
+    rom_folder = Path(tempfile.gettempdir()).joinpath("ansys_pymapdl_Static_ROM")
     mapdl_results = run_mapdl_variations()
     export_static_ROM_data(mapdl_results, rom_folder)
     print(f"ROM data exported to: {rom_folder}")

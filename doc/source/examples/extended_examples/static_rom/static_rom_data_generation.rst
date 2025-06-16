@@ -183,7 +183,7 @@ The script exports ``stress`` and ``displacement`` results. Additional result ty
 or excluded by modifying :func:`export_static_ROM_variation`.
 
 For example elastic strain could be added by making these changes to
-:func:`export_static_ROM_variation` from line 180:
+:func:`export_static_ROM_variation` from line 181:
 
 .. code-block:: python
 
@@ -204,8 +204,9 @@ Modifying result scoping
 ------------------------
 The script exports results on all nodes that are connected to elements. This does not account for
 nodes that are connected to elements, but do not have results associated with them. For example
-MPC184 pilot nodes would not usually have a stress result. The script also does not allow scoping 
-component.
+MPC184 pilot nodes would not usually have a stress result.
+
+The script also does not allow scoping to components.
 
 The :func:`get_scoping` could be modified to allow broader scoping options.
 
