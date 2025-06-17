@@ -392,15 +392,14 @@ class DPFResult(Result):
             self._connected = False
 
     def _iterate_connections(self, dpf_ip: str, dpf_port: int) -> None:
+        if not self._connected:
+            self._try_connect_remote_grpc(dpf_ip, dpf_port)
 
         if not self._connected:
             self._try_connect_inprocess()
 
         if not self._connected:
             self._try_connect_localgrpc()
-
-        if not self._connected:
-            self._try_connect_remote_grpc(dpf_ip, dpf_port)
 
         if self._connected:
             return
@@ -555,12 +554,7 @@ class DPFResult(Result):
     @property
     def same_machine(self):
         """True if the DPF server is running on the same machine as MAPDL"""
-        if self.is_remote:
-            # Some logic should be added here for cases where DPF is in different
-            # remote machine than MAPDL.
-            return True
-        else:
-            return True
+        return self._get_is_same_machine()
 
     @property
     def _is_thermal(self):
@@ -645,7 +639,7 @@ class DPFResult(Result):
         self._update_required = False
 
     def _upload_to_dpf(self):
-        if self.same_machine:
+        if self.same_machine is True:
             self._log.debug("Updating server file path for DPF model.")
             self._server_file_path = os.path.join(
                 self._mapdl.directory, self._mapdl.result_file
