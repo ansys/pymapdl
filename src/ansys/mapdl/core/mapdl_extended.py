@@ -1459,9 +1459,24 @@ class _MapdlCommandExtended(_MapdlCore):
         ]:  # the output is multiline, we just need the last line.
             response = response.splitlines()[-1]
 
-            response = response.split("=")[1].strip()
+        response = response.split("=")[1].strip()
 
-        return response
+        # Check if the function is to check existence
+        # so it makes sense to return a boolean
+        if func.upper() in ["EXIST", "WRITE", "READ", "EXEC"]:
+            if "1.0" in response:
+                return True
+            elif "0.0" in response:
+                return False
+            else:
+                raise MapdlRuntimeError(
+                    f"Unexpected output from 'mapdl.inquire' function:\n{response}"
+                )
+
+        try:
+            return float(response)
+        except ValueError:
+            return response
 
     @wraps(_MapdlCore.parres)
     def parres(self, lab="", fname="", ext="", **kwargs):
