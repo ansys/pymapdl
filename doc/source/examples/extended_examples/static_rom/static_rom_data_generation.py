@@ -163,7 +163,7 @@ def export_static_ROM_variation(
     name : str
         Result quantity to export. Options are ``displacement`` and ``stress``.
     output_folder : str|Path
-        exported data will be stored in this folder. Use separate folders for each physics type.
+        Folder to store exported data in. Use separate folders for each physics type.
     parameters : dict
         Dictionary of name-value pairs for the input parameters used to generate the current
         results.
@@ -219,7 +219,8 @@ def export_static_ROM_data(
     Parameters
     ----------
     mapdl_results: list[tuple[str, dict]]
-        list of tuples of MAPDL result file path and the parameter values for each variation solved.
+        List of tuples of the MAPDL result file path and the parameter values for each variation
+        solved.
     output_folder: str|Path
         Path to the folder to store ROM output data in.
     """
@@ -252,7 +253,8 @@ def run_mapdl_variations():
     Returns
     -------
     list[tuple[str, dict]]
-        list of tuples of MAPDL result file path (on the platform where MAPDL was executed) and the
+        List of tuples of the MAPDL result file path (on the platform where MAPDL was executed) and
+        the
         parameter values for each variation solved.
     """
     # Specify the force load variations
@@ -261,7 +263,7 @@ def run_mapdl_variations():
     # Start MAPDL and disable all but error messages
     mapdl = launch_mapdl(loglevel="ERROR")
 
-    # Download the example database: ``notch_file`` is the path to the downloaded file.
+    # Download the example database
     notch_file = download_example_data(
         filename="3d_notch.db", directory="pymapdl/static_ROM_data_generation"
     )

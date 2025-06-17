@@ -127,7 +127,7 @@ duplicates.
 
 Write points coordinates file
 -----------------------------
-:func:`write_points` writes the x,y,z coordinates of the scoped nodes to the ROM ``points.bin`` file
+The :func:`write_points` function writes the x, y, z coordinates of the scoped nodes to the ROM ``points.bin`` file
 using the :func:`pytwin.write_binary` function.
 
 .. literalinclude:: static_rom_data_generation.py
@@ -206,7 +206,7 @@ the :func:`export_static_ROM_variation` function from line 181:
 Modify result scoping
 ---------------------
 The script exports results on all nodes that are connected to elements. This does not account for
-nodes that are connected to elements, but do not have results associated with them. For example
+nodes that are connected to elements but do not have results associated with them. For example,
 MPC184 pilot nodes would not usually have a stress result.
 
 The script also does not allow scoping to components.
