@@ -397,9 +397,10 @@ class MyReporter(TerminalReporter):
         def get_error_message(rep: CollectReport):
             if hasattr(rep.longrepr, "reprcrash"):
                 message = str(rep.longrepr.reprcrash.message)
-            else:
-                # Error string
+            elif hasattr(rep.longrepr, "errorstring"):
                 message = str(rep.longrepr.errorstring)
+            else:
+                raise Exception(str(rep.longrepr))
 
             header = markup("[ERROR]", **ERROR_COLOR)
             return get_failure_message(rep, header, message)
