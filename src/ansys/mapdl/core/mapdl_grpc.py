@@ -1510,7 +1510,7 @@ class MapdlGrpc(MapdlBase):
             obj = self._download_as_raw(tmp_file).decode()
 
         self.slashdelete(tmp_file)
-        return obj
+        return obj.strip()
 
     def download_result(
         self,
