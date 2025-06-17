@@ -53,7 +53,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: ansys/actions/doc-deploy-changelog@v10.0.8
+      - uses: ansys/actions/doc-deploy-changelog@v10.0.11
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
@@ -66,7 +66,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Check pull-request name
-        uses: ansys/actions/check-pr-title@v10.0.8
+        uses: ansys/actions/check-pr-title@v10.0.11
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -79,7 +79,7 @@ jobs:
         folder: ["doc", "examples"]
     steps:
       - name: "Ansys documentation style checks"
-        uses: ansys/actions/doc-style@v10.0.8
+        uses: ansys/actions/doc-style@v10.0.11
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: ${{ matrix.folder }}
@@ -106,7 +106,7 @@ jobs:
     steps:
       - name: "Build wheelhouse and perform smoke test"
         id: build-wheelhouse
-        uses: ansys/actions/build-wheelhouse@v10.0.8
+        uses: ansys/actions/build-wheelhouse@v10.0.11
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           operating-system: ${{ matrix.os }}
@@ -128,7 +128,7 @@ jobs:
     name: "Check library vulnerabilities"
     runs-on: ubuntu-22.04
     steps:
-      - uses: ansys/actions/check-vulnerabilities@v10.0.8
+      - uses: ansys/actions/check-vulnerabilities@v10.0.11
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
@@ -299,7 +299,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: "Build library source and wheel artifacts"
-        uses: ansys/actions/build-library@v10.0.8
+        uses: ansys/actions/build-library@v10.0.11
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
@@ -334,7 +334,7 @@ jobs:
           skip-existing: false
 
       - name: "Release to GitHub"
-        uses: ansys/actions/release-github@v10.0.8
+        uses: ansys/actions/release-github@v10.0.11
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           additional-artifacts: "minimum_requirements.txt"
@@ -348,7 +348,7 @@ jobs:
     needs: [release]
     steps:
       - name: "Deploy the stable documentation"
-        uses: ansys/actions/doc-deploy-stable@v10.0.8
+        uses: ansys/actions/doc-deploy-stable@v10.0.11
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -364,7 +364,7 @@ jobs:
     needs: [docs-build]
     steps:
       - name: "Deploy the latest documentation"
-        uses: ansys/actions/doc-deploy-dev@v10.0.8
+        uses: ansys/actions/doc-deploy-dev@v10.0.11
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
