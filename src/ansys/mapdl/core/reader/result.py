@@ -208,12 +208,17 @@ class DPFResult(Result):
         self._session_id = None
         self._logger: Logger | None = None
 
+        # RST parameters
+        self.__rst_directory: str | None = None
+        self.__rst_name: str | None = None
+
         if rst_file_path is not None and mapdl is not None:
             raise ValueError(
                 "Only one the arguments must be supplied: 'rst_file_path' or 'mapdl'."
             )
 
         elif rst_file_path is not None:
+            # Using RST file only allows for one RST file at the time.
             if not os.path.exists(rst_file_path):
                 raise FileNotFoundError(
                     f"The RST file '{rst_file_path}' could not be found."
@@ -222,43 +227,30 @@ class DPFResult(Result):
             logger.debug("Initializing DPFResult class in RST mode.")
             self._mode_rst = True
 
+            self.__rst_directory = os.path.dirname(rst_file_path)
+            self.__rst_name = os.path.basename(rst_file_path)
+
         elif mapdl is not None:
+            # Using MAPDL instance allows to switch between RST files.
             if not isinstance(mapdl, Mapdl):  # pragma: no cover # type: ignore
                 raise TypeError("Must be initialized using Mapdl instance")
 
             logger.debug("Initializing DPFResult class in MAPDL mode.")
             self._mapdl_weakref = weakref.ref(mapdl)
             self._mode_rst = False
-            rst_file_path = mapdl.result_file
-            if rst_file_path is None or not os.path.isfile(rst_file_path):
-                raise FileNotFoundError(
-                    f"No result file(s) at {mapdl.directory or rst_file_path}. "
-                    "Check that there is at least one RST file in the working directory "
-                    f"'{mapdl.directory}, or solve an MAPDL model to generate one."
-                )
-
-            # self._session_id = f"__{uuid.uuid4()}__"
-            # self.mapdl.parameters[self._session_id] = 1
 
         else:
             raise ValueError(
                 "One of the following kwargs must be supplied: 'rst_file_path' or 'mapdl'"
             )
 
-        self.__rst_directory: str = os.path.dirname(rst_file_path)
-        self.__rst_name: str = os.path.basename(rst_file_path)
-
         # dpf
         self._loaded: bool = False
-        self._update_required: bool = (
-            False  # if true, it triggers a update on the RST file
-        )
+        # If True, it triggers a update on the RST file
+        self._update_required: bool = False
         self._cached_dpf_model = None
         self._connected = False
-        self._is_remote = (
-            False  # Default false, unless using self.connect or the env var are set.
-        )
-        self._connection: Any | None = None
+        self._server: dpf.server_types.BaseServer | None = None
 
         self.connect_to_server()
 
@@ -266,10 +258,59 @@ class DPFResult(Result):
         ELEMENT_INDEX_TABLE_KEY = None  # todo: To fix
         ELEMENT_RESULT_NCOMP = None  # todo: to fix
 
-        # these will be removed once the reader class has been fully substituted.
-        # then we will inheritate from object.
-        self._update()
-        # super().__init__(self._rst, read_mesh=False)
+        # Let's try to delay the loading of the RST file until the first access
+        # self._update() # Loads the RST file and sets the dpf model
+
+    def _get_is_same_machine(self) -> bool | None:
+        """
+        Check if the MAPDL and the DPF instances are running on the same machine.
+
+        """
+        from ansys.mapdl.core.misc import check_valid_ip, parse_ip_route
+
+        if self.mapdl is None:
+            return None
+        else:
+            mapdl = self.mapdl
+
+        # The 'ifconfig' output is reliable in terms of order of the IP address,
+        # however it is not installed by default on all systems.
+        # The 'hostname -I' command is more widely available, but it may return
+        # multiple IP addresses, hence we are going to try both.
+        cmds = [
+            r"ifconfig | grep -Eo 'inet (addr:)?([0-9]*\.){3}[0-9]*' | grep -Eo '([0-9]*\.){3}[0-9]*' | grep -v '127.0.0.1'",
+            "hostname -I | cut -d' ' -f1",
+        ]
+        mapdl_ip = None
+        for cmd in cmds:
+            output: str = mapdl.sys(cmd)
+
+            if output:
+                # If the command returns an IP address, it means MAPDL is running on a local machine.
+                mapdl_ip = parse_ip_route(output)
+                if check_valid_ip(mapdl_ip):
+                    break
+
+        self._mapdl_ip = mapdl_ip if mapdl_ip else mapdl.ip
+
+        # Get DPF server IP
+        dpf_ip = self.server.ip if self.server else None
+
+        if mapdl_ip != dpf_ip:
+            return False
+
+        # Check MAPDL can find the route
+        mapdl_version = str(mapdl.version).replace(".", "")  # Version as 252
+        awp_root = mapdl.inquire("", "env", f"AWP_ROOT{mapdl_version}")
+
+        if not awp_root:
+            awp_root = f"/ansys_inc/v{mapdl_version}"
+
+        dpf_executable = f"{awp_root}/aisol/bin/linx64/Ans.Dpf.Grpc.exe"
+        if mapdl.inquire("", "exist", dpf_executable):
+            return True
+        else:
+            return False
 
     def _generate_session_id(self, length: int = 10):
         """Generate an unique ssesion id.
@@ -303,12 +344,27 @@ class DPFResult(Result):
                 raise Exception(
                     "external_ip and external_port should be provided for RemoteGrpc communication"
                 )
-        self._connection = srvr
+        self._server = srvr
+
+    @property
+    def server(self) -> dpf.server_types.BaseServer:
+        """
+        Return the DPF server connection.
+
+        Returns
+        -------
+        dpf.server_types.BaseServer
+            The DPF server connection.
+        """
+        if self._server is None:
+            raise MapdlRuntimeError("DPF server is not connected.")
+        return self._server
 
     def _try_connect_inprocess(self) -> None:
         try:
             self._connect_to_dpf_using_mode(mode="InProcess")
             self._connected = True
+            self._is_remote = False
         except DPFServerException:  # type: ignore # probably should filter a bit here
             self._connected = False
 
@@ -316,6 +372,7 @@ class DPFResult(Result):
         try:
             self._connect_to_dpf_using_mode(mode="LocalGrpc")
             self._connected = True
+            self._is_remote = False
         except DPFServerException:  # type: ignore # probably should filter a bit here
             self._connected = False
 
@@ -347,7 +404,7 @@ class DPFResult(Result):
                 "Could not connect to DPF server after trying all the available options."
             )
 
-    def _set_dpf_env_vars(
+    def _get_dpf_env_vars(
         self, ip: str | None = None, port: int | None = None
     ) -> tuple[str, int]:
         if ip is not None:
@@ -371,7 +428,6 @@ class DPFResult(Result):
         return dpf_ip, dpf_port
 
     def _connect_to_dpf(self, ip: str, port: int) -> None:
-
         if not self._mode_rst and self._mapdl and not self._mapdl.is_local:
             self._try_connect_remote_grpc(ip, port)
 
@@ -412,10 +468,9 @@ class DPFResult(Result):
         2. The environment variables
         3. The MAPDL stored values (if working on MAPDL mode)
         3. The default values
-
         """
 
-        ip, port = self._set_dpf_env_vars(ip, port)
+        ip, port = self._get_dpf_env_vars(ip, port)
         check_valid_ip(ip)
 
         self.logger.debug(f"Attempting to connect to DPF server using: {ip}:{port}")
@@ -539,10 +594,10 @@ class DPFResult(Result):
                 raise ValueError("MAPDL instance is None")
 
             if self.local:
-                self.__rst_directory: str = self._mapdl.directory  # type: ignore
+                self.__rst_directory = self._mapdl.directory  # type: ignore
 
             else:
-                self.__rst_directory: str = os.path.join(  # type: ignore
+                self.__rst_directory = os.path.join(  # type: ignore
                     tempfile.gettempdir(), random_string()
                 )
                 if not os.path.exists(self.__rst_directory):
@@ -557,21 +612,15 @@ class DPFResult(Result):
     def update(
         self, progress_bar: bool | None = None, chunk_size: int | None = None
     ) -> None:
-        """Update the DPF Model.
-
-        It does trigger an update on the underlying RST file.
+        """Update the DPF Model
 
         Parameters
         ----------
-        progress_bar : _type_, optional
-            Show progress br, by default None
-        chunk_size : _type_, optional
-            _description_, by default None
+        progress_bar : bool, optional
+            If True, display a progress bar during the update process. If None, the default behavior is used.
 
-        Returns
-        -------
-        _type_
-            _description_
+        chunk_size : int, optional
+            Number of items to process per chunk. If None, the default chunk size is used.
         """
         return self._update(progress_bar=progress_bar, chunk_size=chunk_size)
 
@@ -582,8 +631,7 @@ class DPFResult(Result):
             self._update_rst(progress_bar=progress_bar, chunk_size=chunk_size)
 
         # Upload it to DPF if we are not in local
-        if self.is_remote and not self.same_machine:
-            # self.connect_to_server()
+        if self.is_remote:
             self._upload_to_dpf()
 
         # Updating model
@@ -595,6 +643,7 @@ class DPFResult(Result):
 
     def _upload_to_dpf(self):
         if self.same_machine:
+            self._log.debug("Updating server file path for DPF model.")
             self._server_file_path = os.path.join(
                 self._mapdl.directory, self._mapdl.result_file
             )
@@ -616,7 +665,7 @@ class DPFResult(Result):
         if save:
             self._mapdl.save()  # type: ignore
 
-        if self.local is False:
+        if self.local is False and not self.same_machine:
             self._log.debug("Updating the local copy of remote RST file.")
             # download file
             self._mapdl.download(  # type: ignore
