@@ -40,7 +40,6 @@ from functools import wraps
 import logging
 import os
 import pathlib
-import tempfile
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Literal
 import uuid
 import weakref
@@ -54,7 +53,7 @@ from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import Logger, Mapdl
 from ansys.mapdl.core import _HAS_DPF, _HAS_PYVISTA
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from ansys.mapdl.core.misc import check_valid_ip, get_ip, random_string
+from ansys.mapdl.core.misc import check_valid_ip, get_ip
 
 COMPONENTS: list[str] = ["X", "Y", "Z", "XY", "YZ", "XZ"]
 
@@ -263,9 +262,11 @@ class DPFResult(Result):
 
     def _get_is_remote(self) -> bool:
         """Check if the DPF server is running on a remote machine."""
+        if not hasattr(self.server, "ip"):
+            return False
+
         own_ip = get_ip()
         dpf_ip = self.server.ip if self.server else ""
-
         return own_ip != dpf_ip
 
     def _get_is_same_machine(self) -> bool | None:
@@ -586,34 +587,29 @@ class DPFResult(Result):
 
     @property
     def _rst(self):
-        return os.path.join(self._rst_directory, self._rst_name)
+        if self.mode_mapdl:
+            # because it might be remote
+            return self.mapdl.result_file
+
+        else:
+            return os.path.join(self._rst_directory, self._rst_name)
 
     @property
     def local(self):
-        if self._mapdl:
+        if self.mapdl:
             return self._mapdl.is_local
 
     @property
     def _rst_directory(self) -> str:
-        if self.__rst_directory is None and self.mode_mapdl:
-            # Update
-            if self._mapdl is None:
-                raise ValueError("MAPDL instance is None")
-
-            if self.local:
-                self.__rst_directory = self._mapdl.directory  # type: ignore
-
-            else:
-                self.__rst_directory = os.path.join(  # type: ignore
-                    tempfile.gettempdir(), random_string()
-                )
-                if not os.path.exists(self.__rst_directory):
-                    os.mkdir(self.__rst_directory)
-
+        if self.mapdl:
+            self.__rst_directory = os.path.dirname(self.mapdl.result_file)  # type: ignore
         return self.__rst_directory  # type: ignore
 
     @property
     def _rst_name(self) -> str:
+        if self.mapdl:
+            # update always
+            self.__rst_name = os.path.basename(self.mapdl.result_file)
         return self.__rst_name
 
     def update(
@@ -634,7 +630,7 @@ class DPFResult(Result):
     def _update(
         self, progress_bar: bool | None = None, chunk_size: int | None = None
     ) -> None:
-        if self._mapdl:
+        if self.mode_mapdl:
             self._update_rst(progress_bar=progress_bar, chunk_size=chunk_size)
 
         # Upload it to DPF if we are not in local
@@ -668,14 +664,37 @@ class DPFResult(Result):
         chunk_size: int | None = None,
         save: bool = True,
     ) -> None:
+        """Update RST from MAPDL instance
+
+        Parameters
+        ----------
+        progress_bar: bool
+            Whether print or not the progress bar during the RST file uploading
+
+        chunk_size: int
+            The value of the size of the chunk used to upload the file.
+
+        save: bool
+            Whether save the model or not before update the RST file
+        """
         # Saving model
         if save:
-            self._mapdl.save()  # type: ignore
+            self.mapdl.save()  # type: ignore
+
+        if self.mapdl.is_local:
+            rst_file_exists = os.path.exists(self._rst)
+        else:
+            rst_file_exists = self.mapdl.inquire("", "exist", self._rst)
+
+        if not rst_file_exists:
+            raise FileNotFoundError(
+                f"The result file could not be found in {self.mapdl.directory}"
+            )
 
         if self.local is False and not self.same_machine:
             self._log.debug("Updating the local copy of remote RST file.")
             # download file
-            self._mapdl.download(  # type: ignore
+            self.mapdl.download(  # type: ignore
                 self._rst_name,
                 self._rst_directory,
                 progress_bar=progress_bar,
