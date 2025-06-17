@@ -369,7 +369,7 @@ else:
     os.remove(rst_path)  # Delete local copy
 
 # Building the model
-model = dpf.Model(path_source)
+model = dpf.Model(path_source, dpf_server)
 
 # Get the mesh of the whole model
 meshed_region = model.metadata.meshed_region
