@@ -385,6 +385,13 @@ def check_valid_ip(ip: str) -> None:
         socket.inet_aton(ip)
 
 
+def parse_ip_route(output: str) -> str | None:
+    match = re.findall(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*", output)
+
+    if match:
+        return match[0]
+
+
 def check_valid_port(
     port: int, lower_bound: int = 1000, high_bound: int = 60000
 ) -> None:
