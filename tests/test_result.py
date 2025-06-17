@@ -344,8 +344,6 @@ class TestDPFResult:
     @pytest.fixture(scope="class")
     def result(self, mapdl):
         """Fixture to ensure the model is solved before running tests."""
-        import tempfile
-
         from ansys.mapdl.core.misc import create_temp_dir
         from conftest import clear, solved_box_func
 
@@ -388,7 +386,7 @@ class TestDPFResult:
         else:
             assert isinstance(mapdl.result, DPFResult)
 
-    @pytest.mark.xfail(not ON_LOCAL, reason= "Upload to remote using DPF is broken")
+    @pytest.mark.xfail(not ON_LOCAL, reason="Upload to remote using DPF is broken")
     def test_solve_rst_only(self, mapdl, result):
         """Test that the result object can be created with a solved RST file."""
         # Check if the result object is created successfully
