@@ -1260,8 +1260,8 @@ def test_inquire(mapdl, cleared):
 
     # **Returning Information About a File to a Parameter**
     jobname = mapdl.inquire("", "jobname")
-    assert float(mapdl.inquire("", "exist", jobname + ".lock")) in [0, 1]
-    assert float(mapdl.inquire("", "exist", jobname, "lock")) in [0, 1]
+    assert isinstance(mapdl.inquire("", "exist", jobname + ".lock"), bool)
+    assert isinstance(mapdl.inquire("", "exist", jobname, "lock"), bool)
 
 
 def test_ksel(mapdl, cleared):
