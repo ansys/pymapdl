@@ -344,10 +344,10 @@ class TestDPFResult:
     @pytest.fixture(scope="class")
     def result(self, mapdl):
         """Fixture to ensure the model is solved before running tests."""
-        from conftest import clear, solved_box_func
-        from ansys.mapdl.core.misc import create_temp_dir
-
         import tempfile
+
+        from ansys.mapdl.core.misc import create_temp_dir
+        from conftest import clear, solved_box_func
 
         clear(mapdl)
         solved_box_func(mapdl)
