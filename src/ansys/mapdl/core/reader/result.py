@@ -54,7 +54,7 @@ from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import Logger, Mapdl
 from ansys.mapdl.core import _HAS_DPF, _HAS_PYVISTA
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from ansys.mapdl.core.misc import check_valid_ip, random_string
+from ansys.mapdl.core.misc import check_valid_ip, get_ip, random_string
 
 COMPONENTS: list[str] = ["X", "Y", "Z", "XY", "YZ", "XZ"]
 
@@ -245,9 +245,9 @@ class DPFResult(Result):
             )
 
         # dpf
-        self._loaded: bool = False
         # If True, it triggers a update on the RST file
         self._update_required: bool = False
+        self._loaded: bool = False
         self._cached_dpf_model = None
         self._connected = False
         self._server: dpf.server_types.BaseServer | None = None
@@ -260,6 +260,13 @@ class DPFResult(Result):
 
         # Let's try to delay the loading of the RST file until the first access
         # self._update() # Loads the RST file and sets the dpf model
+
+    def _get_is_remote(self) -> bool:
+        """Check if the DPF server is running on a remote machine."""
+        own_ip = get_ip()
+        dpf_ip = self.server.ip if self.server else ""
+
+        return own_ip != dpf_ip
 
     def _get_is_same_machine(self) -> bool | None:
         """
@@ -364,7 +371,6 @@ class DPFResult(Result):
         try:
             self._connect_to_dpf_using_mode(mode="InProcess")
             self._connected = True
-            self._is_remote = False
         except DPFServerException:  # type: ignore # probably should filter a bit here
             self._connected = False
 
@@ -372,7 +378,6 @@ class DPFResult(Result):
         try:
             self._connect_to_dpf_using_mode(mode="LocalGrpc")
             self._connected = True
-            self._is_remote = False
         except DPFServerException:  # type: ignore # probably should filter a bit here
             self._connected = False
 
@@ -382,7 +387,6 @@ class DPFResult(Result):
                 mode="RemoteGrpc", external_ip=dpf_ip, external_port=dpf_port
             )
             self._connected = True
-            self._is_remote = True
         except DPFServerException:  # type: ignore
             self._connected = False
 
@@ -476,6 +480,9 @@ class DPFResult(Result):
         self.logger.debug(f"Attempting to connect to DPF server using: {ip}:{port}")
 
         self._connect_to_dpf(ip, port)
+
+        # Check if server is remote
+        self._is_remote: bool = self._get_is_remote()
 
     def _dpf_remote_envvars(self):
         """Return True if any of the env variables are set"""
