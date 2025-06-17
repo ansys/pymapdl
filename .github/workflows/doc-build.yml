@@ -111,7 +111,7 @@ jobs:
       - name: "DPF server activation"
         shell: bash
         run: |
-          $(docker pull $DPF_DOCKER_IMAGE && docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y -p ${{ env.DPF_PORT }}:50052 $DPF_DOCKER_IMAGE && echo "DPF Server active on port ${{ env.DPF_PORT }}.") &
+          $(docker pull $DPF_DOCKER_IMAGE && docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y --env ANSYSLMD_LICENSE_FILE="1055@${{ secrets.license-server }}" -p ${{ env.DPF_PORT }}:50052 $DPF_DOCKER_IMAGE && echo "DPF Server active on port ${{ env.DPF_PORT }}.") &
 
       - name: "Getting files change filters"
         uses: dorny/paths-filter@v3
@@ -226,6 +226,7 @@ jobs:
       - name: "Build documentation"
         shell: bash
         run: |
+          export PYTHONFAULTHANDLER=1
           xvfb-run make -C doc ${{ inputs.builder }} SPHINXOPTS="-j auto -W --keep-going"
 
       - name: "Substitute defective GIF"
