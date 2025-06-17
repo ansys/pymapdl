@@ -124,6 +124,7 @@ intersphinx_mapping = {
     "ansys-dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
     "ansys-math-core": ("https://math.docs.pyansys.com/version/stable/", None),
     "ansys-tools-path": ("https://path.tools.docs.pyansys.com/version/stable/", None),
+    "pytwin": ("https://twin.docs.pyansys.com/version/stable/", None),
 }
 
 suppress_warnings = ["label.*", "design.fa-build", "config.cache"]
