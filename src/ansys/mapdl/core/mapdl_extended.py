@@ -1458,7 +1458,10 @@ class _MapdlCommandExtended(_MapdlCore):
 
             response = response.split("=")[1].strip()
 
-        return response
+        try:
+            return float(response)
+        except ValueError:
+            return response
 
     @wraps(_MapdlCore.parres)
     def parres(self, lab="", fname="", ext="", **kwargs):
