@@ -254,8 +254,7 @@ def run_mapdl_variations():
     -------
     list[tuple[str, dict]]
         List of tuples of the MAPDL result file path (on the platform where MAPDL was executed) and
-        the
-        parameter values for each variation solved.
+        the parameter values for each variation solved.
     """
     # Specify the force load variations
     forces = [250, 500, 750, 1000]

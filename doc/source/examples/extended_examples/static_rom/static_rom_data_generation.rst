@@ -164,7 +164,7 @@ Run the script
 ================
 
 To run the script, install PyMAPDL and the additional dependencies listed in
-`Additional packages used`_. Then, download and run
+`Additional packages used`_. Then download and run
 :download:`static_rom_data_generation.py <static_rom_data_generation.py>`. The ROM data is stored in
 a folder named ``ansys_pymadl_Static_ROM`` in the system temporary folder.
 
