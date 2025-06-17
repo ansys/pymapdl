@@ -21,11 +21,6 @@
 # SOFTWARE.
 
 """
-Replacing Result in PyMAPDL.
-"""
-
-
-"""
 COMMENTS
 ========
 
@@ -72,6 +67,10 @@ if _HAS_DPF:
 if TYPE_CHECKING and _HAS_PYVISTA:
     import pyvista as pv
 
+LOCATION_MAPPING: dict[str, str] = {
+    "NODE": "Nodal",
+    "ELEM": "Elemental",
+}
 
 MATERIAL_PROPERTIES: list[str] = [
     "EX",
@@ -133,10 +132,6 @@ MATERIAL_PROPERTIES: list[str] = [
     "YZIC",
 ]
 
-LOCATION_MAPPING: dict[str, str] = {
-    "NODE": "Nodal",
-    "ELEM": "Elemental",
-}
 
 NOT_AVAILABLE_METHOD = """The method '{method}' has not been ported to the new DPF-based Results backend.
 If you still want to use it, you can switch to 'pymapdl-reader' backend."""
@@ -228,8 +223,6 @@ class DPFResult(Result):
             self._mode_rst = True
 
         elif mapdl is not None:
-            from ansys.mapdl.core import Mapdl
-
             if not isinstance(mapdl, Mapdl):  # pragma: no cover # type: ignore
                 raise TypeError("Must be initialized using Mapdl instance")
 
@@ -998,7 +991,6 @@ class DPFResult(Result):
         self._set_input_timestep_scope(op, rnum)
 
         # getting the ids of the entities scope
-        entity_type = "elemental" if "elemental" in requested_location else "nodal"
         scope_ids = self._get_entities_ids(scope_ids, requested_location)
 
         # Set type of return
@@ -2181,7 +2173,7 @@ class DPFResult(Result):
 
         # Building dictionary of materials
         mats = {}
-        for ind, mat_id in enumerate(mat_ids):
+        for mat_id in mat_ids:
             mats[mat_id] = {}
 
             for each_label in prop_field.labels:
@@ -2657,8 +2649,128 @@ class DPFResult(Result):
         """
         return self._get_comp_dict("ELEM")
 
-    def result_dof(self):
-        pass
+    def element_solution_data(self, rnum, datatype, sort=True, **kwargs):
+        """Retrieves element solution data.  Similar to ETABLE.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        datatype : str
+            Element data type to retrieve.
+
+            - EMS: misc. data
+            - ENF: nodal forces
+            - ENS: nodal stresses
+            - ENG: volume and energies
+            - EGR: nodal gradients
+            - EEL: elastic strains
+            - EPL: plastic strains
+            - ECR: creep strains
+            - ETH: thermal strains
+            - EUL: euler angles
+            - EFX: nodal fluxes
+            - ELF: local forces
+            - EMN: misc. non-sum values
+            - ECD: element current densities
+            - ENL: nodal nonlinear data
+            - EHC: calculated heat generations
+            - EPT: element temperatures
+            - ESF: element surface stresses
+            - EDI: diffusion strains
+            - ETB: ETABLE items
+            - ECT: contact data
+            - EXY: integration point locations
+            - EBA: back stresses
+            - ESV: state variables
+            - MNL: material nonlinear record
+
+        sort : bool
+            Sort results by element number.  Default ``True``.
+
+        **kwargs : optional keyword arguments
+            Hidden options for distributed result files.
+
+        Returns
+        -------
+        enum : np.ndarray
+            Element numbers.
+
+        element_data : list
+            List with one data item for each element.
+
+        enode : list
+            Node numbers corresponding to each element.
+            results.  One list entry for each element.
+
+        Notes
+        -----
+        See ANSYS element documentation for available items for each
+        element type.  See:
+
+        https://www.mm.bme.hu/~gyebro/files/ans_help_v182/ans_elem/
+
+        Examples
+        --------
+        Retrieve "LS" solution results from an PIPE59 element for result set 1
+
+        >>> enum, edata, enode = result.element_solution_data(0, datatype='ENS')
+        >>> enum[0]  # first element number
+        >>> enode[0]  # nodes belonging to element 1
+        >>> edata[0]  # data belonging to element 1
+        array([ -4266.19   ,   -376.18857,  -8161.785  , -64706.766  ,
+                -4266.19   ,   -376.18857,  -8161.785  , -45754.594  ,
+                -4266.19   ,   -376.18857,  -8161.785  ,      0.     ,
+                -4266.19   ,   -376.18857,  -8161.785  ,  45754.594  ,
+                -4266.19   ,   -376.18857,  -8161.785  ,  64706.766  ,
+                -4266.19   ,   -376.18857,  -8161.785  ,  45754.594  ,
+                -4266.19   ,   -376.18857,  -8161.785  ,      0.     ,
+                -4266.19   ,   -376.18857,  -8161.785  , -45754.594  ,
+                -4274.038  ,   -376.62527,  -8171.2603 ,   2202.7085 ,
+               -29566.24   ,   -376.62527,  -8171.2603 ,   1557.55   ,
+               -40042.613  ,   -376.62527,  -8171.2603 ,      0.     ,
+               -29566.24   ,   -376.62527,  -8171.2603 ,  -1557.55   ,
+                -4274.038  ,   -376.62527,  -8171.2603 ,  -2202.7085 ,
+                21018.164  ,   -376.62527,  -8171.2603 ,  -1557.55   ,
+                31494.537  ,   -376.62527,  -8171.2603 ,      0.     ,
+                21018.164  ,   -376.62527,  -8171.2603 ,   1557.55   ],
+              dtype=float32)
+
+        This data corresponds to the results you would obtain directly
+        from MAPDL with ESOL commands:
+
+        >>> ansys.esol(nvar='2', elem=enum[0], node=enode[0][0], item='LS', comp=1)
+        >>> ansys.vget(par='SD_LOC1', ir='2', tstrt='1') # store in a variable
+        >>> ansys.read_float_parameter('SD_LOC1(1)')
+        -4266.19
+        """
+        raise NotImplementedError(
+            NOT_AVAILABLE_METHOD.format(method="element_solution_data")
+        )
+
+    def result_dof(self, rnum):
+        """Return a list of degrees of freedom for a given result number.
+
+        Parameters
+        ----------
+        rnum : int or list
+            Cumulative result number with zero based indexing, or a
+            list containing (step, substep) of the requested result.
+
+        Returns
+        -------
+        dof : list
+            List of degrees of freedom.
+
+        Examples
+        --------
+        >>> rst.result_dof(0)
+        ['UX', 'UY', 'UZ']
+        """
+        # To be done later
+        raise NotImplementedError(NOT_AVAILABLE_METHOD.format(method="result_dof"))
 
     def nodal_input_force(self, rnum):
         """Nodal input force for a given result number.
@@ -2697,9 +2809,10 @@ class DPFResult(Result):
          array([2, 1, 3], dtype=int32),
          array([30., 20., 40.]))
         """
-        from ansys.dpf.core.operators.result.nodal_force import InputsNodalForce
-
-        op = InputsNodalForce()
+        # To be done later
+        raise NotImplementedError(
+            NOT_AVAILABLE_METHOD.format(method="nodal_input_force")
+        )
 
     # def save_as_vtk(
     #     self, filename, rsets=None, result_types=["ENS"], progress_bar=True
@@ -2845,9 +2958,6 @@ class DPFResult(Result):
     #     PRNSOL, S
     #     """
     #     raise NotImplementedError("This should be implemented by DPF")
-
-    # def element_solution_data(self):
-    #     pass
 
     # def materials(self):
     #     pass

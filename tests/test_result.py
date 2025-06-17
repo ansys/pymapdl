@@ -78,7 +78,6 @@ from ansys.mapdl.core.logging import PymapdlCustomAdapter as MAPDLLogger
 
 def validate(result_values, reader_values=None, post_values=None, rtol=1e-5, atol=1e-8):
     if reader_values is not None and post_values is not None:
-        err_reader = None
         err_post = None
 
         # Make it fail if the Reader shows different results to DPF and MAPDL-Post
@@ -120,7 +119,6 @@ def validate(result_values, reader_values=None, post_values=None, rtol=1e-5, ato
             ) from err_post
 
         except AssertionError as err:
-            err_reader = err
             pass
 
         try:

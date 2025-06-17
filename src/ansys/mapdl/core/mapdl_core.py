@@ -43,7 +43,7 @@ import numpy as np
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core import _HAS_VISUALIZER
+from ansys.mapdl.core import _HAS_DPF, _HAS_VISUALIZER
 from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
     CMD_LISTING,
@@ -87,6 +87,9 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.parameters import Parameters
     from ansys.mapdl.core.solution import Solution
     from ansys.mapdl.core.xpl import ansXpl
+
+    if _HAS_DPF:
+        from ansys.mapdl.core.reader import DPFResult
 
 from ansys.mapdl.core.post import PostProcessing
 
