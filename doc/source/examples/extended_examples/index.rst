@@ -28,7 +28,7 @@ with other programs, libraries, and features in development.
 | :ref:`stochastic_fem_example`                        | Demonstrates using PyMAPDL for stochastic FEA using Monte Carlo simulation.                |
 +------------------------------------------------------+--------------------------------------------------------------------------------------------+
 | :ref:`static_rom_data_generation`                    | Demonstrates using PyMAPDL and PyDPF to generate training data for an Ansys Twin Builder   |
-|                                                      | static reduced order model (ROM).                                                        |
+|                                                      | static reduced order model (ROM).                                                          |
 +------------------------------------------------------+--------------------------------------------------------------------------------------------+
 
 
