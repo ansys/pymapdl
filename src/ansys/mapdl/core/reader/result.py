@@ -284,6 +284,9 @@ class DPFResult(Result):
         from ansys.mapdl.core.misc import check_valid_ip, parse_ip_route
 
         if self.mapdl is None:
+            self.logger.warning(
+                "MAPDL instance is not provided. Cannot determine if MAPDL and DPF are running on the same machine."
+            )
             return None
         else:
             mapdl = self.mapdl
@@ -304,12 +307,19 @@ class DPFResult(Result):
                 if check_valid_ip(mapdl_ip):
                     break
 
+        self.logger.debug(
+            f"MAPDL IP address determined as: {mapdl_ip} using command: {cmd}"
+        )
         self._mapdl_ip = mapdl_ip or mapdl.ip
+        self.logger.debug(f"Using MAPDL IP address: {self._mapdl_ip}")
 
         # Get DPF server IP
         dpf_ip = self.server.ip if self.server else None
 
         if mapdl_ip != dpf_ip:
+            self.logger.debug(
+                f"DPF server IP ({dpf_ip}) is different from MAPDL IP ({mapdl_ip})."
+            )
             return False
 
         # Check MAPDL can find the route
@@ -321,8 +331,14 @@ class DPFResult(Result):
 
         dpf_executable = f"{awp_root}/aisol/bin/linx64/Ans.Dpf.Grpc.exe"
         if mapdl.inquire("", "exist", dpf_executable):
+            self.logger.debug(
+                f"DPF executable found at {dpf_executable}. MAPDL and DPF are running on the same machine."
+            )
             return True
         else:
+            self.logger.debug(
+                f"DPF executable not found at {dpf_executable}. MAPDL and DPF are NOT running on the same machine."
+            )
             return False
 
     def _generate_session_id(self, length: int = 10):
