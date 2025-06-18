@@ -378,13 +378,16 @@ class TestDPFResult:
         ):
             func(*args)
 
-    def test_DPF_result_class(self, mapdl, result):
-        from ansys.mapdl.core.reader.result import DPFResult
+    import pytest
 
-        if mapdl._use_reader_backend:
-            assert isinstance(mapdl.result, Result)
-        else:
-            assert isinstance(mapdl.result, DPFResult)
+    @pytest.mark.parametrize("_use_reader_backend,expected_cls", [
+        (True, Result),
+        (False, __import__("ansys.mapdl.core.reader.result", fromlist=["DPFResult"]).DPFResult),
+    ])
+    def test_DPF_result_class(self, mapdl, _use_reader_backend, expected_cls):
+        # Set the backend
+        mapdl._use_reader_backend = _use_reader_backend
+        assert isinstance(mapdl.result, expected_cls)
 
     @pytest.mark.xfail(not ON_LOCAL, reason="Upload to remote using DPF is broken")
     def test_solve_rst_only(self, mapdl, result):

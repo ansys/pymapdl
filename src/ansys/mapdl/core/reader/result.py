@@ -291,15 +291,13 @@ class DPFResult(Result):
         ]
         mapdl_ip = None
         for cmd in cmds:
-            output: str = mapdl.sys(cmd)
-
-            if output:
+            if output: str := mapdl.sys(cmd)
                 # If the command returns an IP address, it means MAPDL is running on a local machine.
                 mapdl_ip = parse_ip_route(output)
                 if check_valid_ip(mapdl_ip):
                     break
 
-        self._mapdl_ip = mapdl_ip if mapdl_ip else mapdl.ip
+        self._mapdl_ip = mapdl_ip or mapdl.ip
 
         # Get DPF server IP
         dpf_ip = self.server.ip if self.server else None
@@ -309,10 +307,8 @@ class DPFResult(Result):
 
         # Check MAPDL can find the route
         mapdl_version = str(mapdl.version).replace(".", "")  # Version as 252
-        awp_root = mapdl.inquire("", "env", f"AWP_ROOT{mapdl_version}")
+        awp_root = mapdl.inquire("", "env", f"AWP_ROOT{mapdl_version}") or f"/ansys_inc/v{mapdl_version}"
 
-        if not awp_root:
-            awp_root = f"/ansys_inc/v{mapdl_version}"
 
         dpf_executable = f"{awp_root}/aisol/bin/linx64/Ans.Dpf.Grpc.exe"
         if mapdl.inquire("", "exist", dpf_executable):
@@ -324,7 +320,7 @@ class DPFResult(Result):
         """Generate an unique ssesion id.
 
         It can be shorten by the argument 'length'."""
-        return "__" + generate_session_id(length)
+        return f"__{generate_session_id(length)}"
 
     def _connect_to_dpf_using_mode(
         self,
@@ -349,7 +345,7 @@ class DPFResult(Result):
             if external_ip is not None and external_port is not None:
                 srvr = dpf.server.connect_to_server(ip=external_ip, port=external_port)
             else:
-                raise Exception(
+                raise ValueError(
                     "external_ip and external_port should be provided for RemoteGrpc communication"
                 )
         self._server = srvr
@@ -532,24 +528,15 @@ class DPFResult(Result):
 
     @property
     def mode(self):
-        if self._mode_rst:
-            return "RST"
-        else:
-            return "MAPDL"
+        return "RST" if self._mode_rst else "MAPDL"
 
     @property
     def mode_rst(self):
-        if self._mode_rst:
-            return True
-        else:
-            return False
+        return bool(self._mode_rst)
 
     @property
     def mode_mapdl(self):
-        if not self._mode_rst:
-            return True
-        else:
-            return False
+        return not self._mode_rst
 
     @property
     def same_machine(self):
@@ -803,7 +790,7 @@ class DPFResult(Result):
                     f"The named selection '{each_named_selection}' does not contain {entity_type} information."
                 )
 
-            entities_.append(scoping.ids.tolist())
+            entities_.extend(scoping.ids.tolist())
 
         return entities_
 
