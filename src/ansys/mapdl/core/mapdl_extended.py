@@ -1449,6 +1449,9 @@ class _MapdlCommandExtended(_MapdlCore):
         if not response:
             if not self._store_commands:
                 raise MapdlRuntimeError("/INQUIRE command didn't return a response.")
+            else:
+                # Exit since we are in non-interactive mode
+                return None
 
         if func.upper() in [
             "ENV",
