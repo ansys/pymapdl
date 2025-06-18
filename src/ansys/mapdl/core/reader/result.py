@@ -40,6 +40,7 @@ from functools import wraps
 import logging
 import os
 import pathlib
+import tempfile
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Literal
 import uuid
 import weakref
@@ -250,6 +251,12 @@ class DPFResult(Result):
         self._cached_dpf_model = None
         self._connected = False
         self._server: dpf.server_types.BaseServer | None = None
+        self._tmp_dir: str | None = (
+            None  # Temporary directory to store the RST file locally
+        )
+        self._same_machine = (
+            None  # True if the DPF server is running on the same machine as MAPDL
+        )
 
         self.connect_to_server()
 
@@ -543,7 +550,9 @@ class DPFResult(Result):
     @property
     def same_machine(self):
         """True if the DPF server is running on the same machine as MAPDL"""
-        return self._get_is_same_machine()
+        if self._same_machine is None:
+            self._same_machine = self._get_is_same_machine()
+        return self._same_machine
 
     @property
     def _is_thermal(self):
@@ -628,11 +637,13 @@ class DPFResult(Result):
         self._update_required = False
 
     def _upload_to_dpf(self):
-        if self.same_machine is True:
+        if self.mode_mapdl and self.same_machine is True:
             self._log.debug("Updating server file path for DPF model.")
             self._server_file_path = os.path.join(
                 self._mapdl.directory, self._mapdl.result_file
             )
+        elif self.mode_rst and not self.is_remote:
+            self._server_file_path = self._rst
         else:
             # Upload to DPF is broken on Ubuntu: https://github.com/ansys/pydpf-core/issues/2254
             # self._server_file_path = dpf.upload_file_in_tmp_folder(self._rst)
@@ -674,12 +685,13 @@ class DPFResult(Result):
                 f"The result file could not be found in {self.mapdl.directory}"
             )
 
-        if self.local is False and not self.same_machine:
+        if self.local is False and self.same_machine is False:
             self._log.debug("Updating the local copy of remote RST file.")
             # download file
+            self._tmp_dir = tempfile.gettempdir()
             self.mapdl.download(  # type: ignore
-                self._rst_name,
-                self._rst_directory,
+                self._rst,
+                self._tmp_dir,
                 progress_bar=progress_bar,
                 chunk_size=chunk_size,
             )
