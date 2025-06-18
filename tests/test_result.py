@@ -196,7 +196,7 @@ def prepare_example(
     if avoid_exit:
         vm_code = vm_code.replace("/EXIT", "/EOF")
 
-    assert "EXIT" not in vm_code, "The APDL code should not contain '/EXIT' commands."
+    assert "/EXIT" not in vm_code, "The APDL code should not contain '/EXIT' commands."
 
     if stop_after_first_solve:
         return vm_code.replace("SOLVE", "/EOF")
@@ -217,11 +217,29 @@ class Example:
     """Generic class to test examples."""
 
     example: str | None = None  # String 'vm33'
-    example_name: str | None = None  # Example name, used to create a temporal directory
+    _example_name: str | None = None
     _temp_dir: str | None = None  # Temporal directory where download the RST file to.
     # In case you want to overwrite the APDL code of the example.
     # Use with ``prepare_example`` function.
-    apdl_code: str | None = None
+    _apdl_code: str | None = None
+
+    @property
+    def example_name(self) -> str:
+        """Return the name of the example, used to create a temporal directory"""
+        if self._example_name is None:
+            if self.example is None:
+                raise ValueError("The 'example' attribute must be set.")
+            self._example_name = title(self.apdl_code)
+
+        return self._example_name
+
+    @property
+    def apdl_code(self) -> str:
+        if self._apdl_code is None:
+            if self.example is None:
+                raise ValueError("The 'example' attribute must be set.")
+            self._apdl_code = prepare_example(self.example, 0)
+        return self._apdl_code
 
     @property
     def tmp_dir(self):
@@ -238,6 +256,7 @@ class Example:
     @pytest.fixture(scope="class")
     def setup(self, mapdl):
         mapdl.clear()
+
         mapdl.ignore_errors = False
         if self.apdl_code:
             mapdl.input_strings(self.apdl_code)
@@ -586,8 +605,6 @@ class TestSolidStaticPlastic(Example):
     """Test on the vm37."""
 
     example = elongation_of_a_solid_bar
-    apdl_code = prepare_example(example, 0)
-    example_name = title(apdl_code)
 
     def test_compatibility_nodal_displacement(self, mapdl, reader, post, result):
         mapdl.set(1, 1)
@@ -765,8 +782,6 @@ class TestPinchedCylinderVM6(Example):
 
     example = pinched_cylinder
     example_name = "piezoelectric rectangular strip under pure bending load"
-    apdl_code = prepare_example(example, 0)
-    example_name = title(apdl_code)
 
     def test_compatibility_nodal_displacement(self, mapdl, reader, post, result):
         mapdl.set(1, 1)
@@ -854,8 +869,6 @@ class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(Example):
 
     example = transient_response_of_a_ball_impacting_a_flexible_surface
     example_name = "Transient Response of a Ball Impacting a Flexible Surface"
-    apdl_code = prepare_example(example, 0)
-    example_name = title(apdl_code)
 
     @pytest.mark.parametrize(
         "step",
