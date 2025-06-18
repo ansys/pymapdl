@@ -1449,12 +1449,15 @@ class _MapdlCommandExtended(_MapdlCore):
         if not response:
             if not self._store_commands:
                 raise MapdlRuntimeError("/INQUIRE command didn't return a response.")
-        else:
-            if func.upper() in [
-                "ENV",
-                "TITLE",
-            ]:  # the output is multiline, we just need the last line.
-                response = response.splitlines()[-1]
+            else:
+                # Exit since we are in non-interactive mode
+                return None
+
+        if func.upper() in [
+            "ENV",
+            "TITLE",
+        ]:  # the output is multiline, we just need the last line.
+            response = response.splitlines()[-1]
 
             response = response.split("=")[1].strip()
 
