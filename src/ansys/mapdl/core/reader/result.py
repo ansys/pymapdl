@@ -291,7 +291,7 @@ class DPFResult(Result):
         ]
         mapdl_ip = None
         for cmd in cmds:
-            if output: str := mapdl.sys(cmd)
+            if output := mapdl.sys(cmd):
                 # If the command returns an IP address, it means MAPDL is running on a local machine.
                 mapdl_ip = parse_ip_route(output)
                 if check_valid_ip(mapdl_ip):
@@ -307,8 +307,10 @@ class DPFResult(Result):
 
         # Check MAPDL can find the route
         mapdl_version = str(mapdl.version).replace(".", "")  # Version as 252
-        awp_root = mapdl.inquire("", "env", f"AWP_ROOT{mapdl_version}") or f"/ansys_inc/v{mapdl_version}"
-
+        awp_root = (
+            mapdl.inquire("", "env", f"AWP_ROOT{mapdl_version}")
+            or f"/ansys_inc/v{mapdl_version}"
+        )
 
         dpf_executable = f"{awp_root}/aisol/bin/linx64/Ans.Dpf.Grpc.exe"
         if mapdl.inquire("", "exist", dpf_executable):
