@@ -262,8 +262,8 @@ class DPFResult(Result):
         # self.connect_to_server()
 
         # old attributes
-        ELEMENT_INDEX_TABLE_KEY = None  # todo: To fix
-        ELEMENT_RESULT_NCOMP = None  # todo: to fix
+        # ELEMENT_INDEX_TABLE_KEY = None  # todo: To fix
+        # ELEMENT_RESULT_NCOMP = None  # todo: to fix
 
         # Let's try to delay the loading of the RST file until the first access
         # self._update() # Loads the RST file and sets the dpf model
