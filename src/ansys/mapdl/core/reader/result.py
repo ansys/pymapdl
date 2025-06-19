@@ -258,7 +258,7 @@ class DPFResult(Result):
             None  # True if the DPF server is running on the same machine as MAPDL
         )
 
-        self.connect_to_server()
+        # self.connect_to_server()
 
         # old attributes
         ELEMENT_INDEX_TABLE_KEY = None  # todo: To fix
@@ -386,13 +386,15 @@ class DPFResult(Result):
             The DPF server connection.
         """
         if self._server is None:
-            raise MapdlRuntimeError("DPF server is not connected.")
+            self.connect_to_server()
+
         return self._server
 
     def _try_connect_inprocess(self) -> None:
         try:
             self._connect_to_dpf_using_mode(mode="InProcess")
             self._connected = True
+            self.logger.debug("Connected to DPF server using InProcess.")
         except DPFServerException:  # type: ignore # probably should filter a bit here
             self._connected = False
 
@@ -400,6 +402,7 @@ class DPFResult(Result):
         try:
             self._connect_to_dpf_using_mode(mode="LocalGrpc")
             self._connected = True
+            self.logger.debug("Connected to DPF server using LocalGrpc.")
         except DPFServerException:  # type: ignore # probably should filter a bit here
             self._connected = False
 
@@ -409,6 +412,7 @@ class DPFResult(Result):
                 mode="RemoteGrpc", external_ip=dpf_ip, external_port=dpf_port
             )
             self._connected = True
+            self.logger.debug("Connected to DPF server using RemoteGrpc.")
         except DPFServerException:  # type: ignore
             self._connected = False
 
