@@ -118,7 +118,7 @@ def validate(result_values, reader_values=None, post_values=None, rtol=1e-5, ato
                 "Showing the post-error\n" + str(err_post)
             ) from err_post
 
-        except AssertionError as err:
+        except AssertionError:
             pass
 
         try:
@@ -128,7 +128,7 @@ def validate(result_values, reader_values=None, post_values=None, rtol=1e-5, ato
             )
             return
 
-        except AssertionError as err:
+        except AssertionError:
             raise AssertionError(
                 "Failed to validate against Post, Reader or DPF values. It seems "
                 "the values are all different. Showing the post-error\n" + str(err_post)
