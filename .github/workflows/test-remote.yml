@@ -63,6 +63,7 @@ jobs:
       PYMAPDL_DB_PORT2: 21003  # default won't work on GitHub runners
       DPF_DOCKER_IMAGE: ghcr.io/ansys/mapdl:v25.2-rocky-dpf-standalone
       DPF_PORT: 21004
+      DPF_PORT2: 21005
       DPF_START_SERVER: False
       HAS_DPF: True
       TEST_DPF_BACKEND: false
@@ -153,11 +154,14 @@ jobs:
           echo "Launching first MAPDL instance..."
           export INSTANCE_NAME=MAPDL_0
           .ci/start_mapdl.sh &> mapdl_launch_0.log & export DOCKER_PID_0=$!
+
           echo "Launching a second instance for MAPDL pool testing..."
           export PYMAPDL_PORT=${{ env.PYMAPDL_PORT2 }}
           export PYMAPDL_DB_PORT=${{ env.PYMAPDL_DB_PORT2 }}
           export INSTANCE_NAME=MAPDL_1
+          export DPF_PORT=${{ env.DPF_PORT2 }}
           .ci/start_mapdl.sh &> mapdl_launch_1.log & export DOCKER_PID_1=$!
+
           echo "Launching MAPDL service 0 at PID: $DOCKER_PID_0"
           echo "Launching MAPDL service 1 at PID: $DOCKER_PID_1"
           echo "DOCKER_PID_0=$(echo $DOCKER_PID_0)" >> $GITHUB_OUTPUT
