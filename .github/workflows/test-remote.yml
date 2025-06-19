@@ -106,15 +106,18 @@ jobs:
         shell: bash
         run: |
           export ON_SAME_CONTAINER=false
+
           if [[ "${{ inputs.mapdl-version }}" == *"ubuntu"* ]];
             then export ON_UBUNTU=true; export TAG_UBUNTU="ubuntu";
             else export ON_UBUNTU=false; export TAG_UBUNTU="centos";
-            if [[ "${{ inputs.mapdl-version }}" == *"cicd"* ]]; then export ON_SAME_CONTAINER="true"; fi
           fi
 
           if [[ "${{ inputs.mapdl-version }}" == *"cicd"* ]]; then
             echo "CICD MAPDL version detected, testing DPF backend for results module.";
             echo "TEST_DPF_BACKEND=true" >> $GITHUB_ENV;
+
+            echo "It should be run on the same container as MAPDL";
+            export ON_SAME_CONTAINER=true;
           fi
 
           echo "ON_UBUNTU: $ON_UBUNTU"
