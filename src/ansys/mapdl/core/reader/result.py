@@ -257,6 +257,7 @@ class DPFResult(Result):
         self._same_machine = (
             None  # True if the DPF server is running on the same machine as MAPDL
         )
+        self._is_remote: bool | None = None  # Whether DPF is remote or not
 
         # self.connect_to_server()
 
@@ -506,9 +507,6 @@ class DPFResult(Result):
 
         self._connect_to_dpf(ip, port)
 
-        # Check if server is remote
-        self._is_remote: bool = self._get_is_remote()
-
     def _dpf_remote_envvars(self):
         """Return True if any of the env variables are set"""
         return "DPF_IP" in os.environ or "DPF_PORT" in os.environ
@@ -516,6 +514,8 @@ class DPFResult(Result):
     @property
     def is_remote(self) -> bool:
         """Returns True if we are connected to the DPF Server using a gRPC connection to a remote IP."""
+        if self._is_remote is None:
+            self._is_remote = self._get_is_remote()
         return self._is_remote
 
     @property
