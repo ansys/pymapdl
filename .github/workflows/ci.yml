@@ -299,7 +299,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: "Build library source and wheel artifacts"
-        uses: ansys/actions/build-library@v10.0.8
+        uses: ansys/actions/build-library@fix/unify-artifacts-file-names
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
