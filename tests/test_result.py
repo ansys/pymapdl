@@ -397,8 +397,6 @@ class TestDPFResult:
         ):
             func(*args)
 
-    import pytest
-
     @pytest.mark.parametrize(
         "_use_reader_backend,expected_cls",
         [
