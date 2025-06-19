@@ -33,6 +33,9 @@ echo "Moving docker launch log..."
 mv mapdl_launch_0.log ./"$LOG_NAMES"/mapdl_launch_0.log || echo "MAPDL launch docker log not found."
 mv mapdl_launch_1.log ./"$LOG_NAMES"/mapdl_launch_1.log || echo "MAPDL launch docker log not found."
 
+echo "Moving the docker ps log..."
+mv docker_ps.txt ./"$LOG_NAMES"/docker_ps.txt || echo "Docker ps log not found."
+
 echo "Moving the profiling files..."
 mkdir -p ./"$LOG_NAMES"/prof
 mv prof/* ./"$LOG_NAMES"/prof || echo "No profile files could be found"
