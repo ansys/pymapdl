@@ -29,6 +29,13 @@ else
     export P_SCHEMA=/ansys_inc/ansys/ac4/schema
 fi;
 
+if [[ $MAPDL_VERSION == *"cicd" ]] ; then
+    echo "It is a CICD version, binding DPF port too"
+    export DPF_ARG="-p $DPF_PORT:50055"
+else
+    export DPF_ARG=""
+fi;
+
 echo "EXEC_PATH: $EXEC_PATH"
 echo "P_SCHEMA: $P_SCHEMA"
 
@@ -45,6 +52,7 @@ docker run \
     -e ANSYS_LOCK="OFF" \
     -p "$PYMAPDL_PORT":50052 \
     -p "$PYMAPDL_DB_PORT":50055 \
+    $DPF_ARG \
     --shm-size=2gb \
     -e I_MPI_SHM_LMT=shm \
     -e P_SCHEMA="$P_SCHEMA" \
