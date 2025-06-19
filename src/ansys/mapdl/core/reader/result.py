@@ -54,7 +54,7 @@ from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import Logger, Mapdl
 from ansys.mapdl.core import _HAS_DPF, _HAS_PYVISTA
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from ansys.mapdl.core.misc import check_valid_ip, get_ip
+from ansys.mapdl.core.misc import check_valid_ip, get_ip, parse_ip_route
 
 COMPONENTS: list[str] = ["X", "Y", "Z", "XY", "YZ", "XZ"]
 
@@ -282,8 +282,6 @@ class DPFResult(Result):
         Check if the MAPDL and the DPF instances are running on the same machine.
 
         """
-        from ansys.mapdl.core.misc import check_valid_ip, parse_ip_route
-
         if self.mapdl is None:
             self.logger.warning(
                 "MAPDL instance is not provided. Cannot determine if MAPDL and DPF are running on the same machine."
