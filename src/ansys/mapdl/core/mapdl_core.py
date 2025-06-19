@@ -1095,8 +1095,6 @@ class _MapdlCore(Commands):
         NSL : Nodal displacements
         RF  : Nodal reaction forces
         """
-        from ansys.mapdl.core import _HAS_DPF
-
         if _HAS_DPF and not self._use_reader_backend:
             from ansys.mapdl.core.reader import DPFResult
 
