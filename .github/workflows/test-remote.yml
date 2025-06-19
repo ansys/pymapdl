@@ -162,7 +162,6 @@ jobs:
           export DPF_PORT=${{ env.DPF_PORT2 }}
           .ci/start_mapdl.sh &> mapdl_launch_1.log & export DOCKER_PID_1=$!
 
-          docker ps > docker_ps.txt
           echo "Launching MAPDL service 0 at PID: $DOCKER_PID_0"
           echo "Launching MAPDL service 1 at PID: $DOCKER_PID_1"
           echo "DOCKER_PID_0=$(echo $DOCKER_PID_0)" >> $GITHUB_OUTPUT
@@ -236,6 +235,7 @@ jobs:
           PYMAPDL_PORT: ${{ env.PYMAPDL_PORT }}
           PYMAPDL_PORT2: ${{ env.PYMAPDL_PORT2 }}
         run: |
+          docker ps > docker_ps.txt
           .ci/waiting_services.sh
 
       - name: "Unit testing"
