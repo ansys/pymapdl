@@ -32,8 +32,10 @@ fi;
 if [[ $MAPDL_VERSION == *"cicd" ]] ; then
     echo "It is a CICD version, binding DPF port too"
     export DPF_ARG="-p $DPF_PORT:50055"
+    export DB_INT_PORT=50056
 else
     export DPF_ARG=""
+    export DB_INT_PORT=50055
 fi;
 
 echo "EXEC_PATH: $EXEC_PATH"
@@ -51,7 +53,7 @@ docker run \
     -e ANSYSLMD_LICENSE_FILE=1055@"$LICENSE_SERVER" \
     -e ANSYS_LOCK="OFF" \
     -p "$PYMAPDL_PORT":50052 \
-    -p "$PYMAPDL_DB_PORT":50055 \
+    -p "$PYMAPDL_DB_PORT":$DB_INT_PORT \
     "$DPF_ARG" \
     --shm-size=2gb \
     -e I_MPI_SHM_LMT=shm \
