@@ -465,7 +465,10 @@ class _MapdlCommandExtended(_MapdlCore):
 
         if graphics_backend is GraphicsBackend.PYVISTA:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
-
+            return_plotter = kwargs.pop("return_plotter", False)
+            savefig = kwargs.pop("savefig", None)
+            cpos = kwargs.pop("cpos", None)
+            return_cpos = kwargs.pop("return_cpos", None)
             pl = kwargs.get("plotter", None)
             pl = MapdlPlotter().switch_scene(pl)
 
@@ -477,7 +480,12 @@ class _MapdlCommandExtended(_MapdlCore):
                     "the database."
                 )
                 pl.plot([], [], [], **kwargs)
-                return pl.show()
+                return pl.show(
+                    return_plotter=return_plotter,
+                    savefig=savefig,
+                    return_cpos=return_cpos,
+                    cpos=cpos,
+                )
 
             keypoints = self.geometry.get_keypoints(return_as_array=True)
             points = [{"points": keypoints}]
@@ -488,7 +496,12 @@ class _MapdlCommandExtended(_MapdlCore):
                     {"points": keypoints, "labels": self.geometry.knum.astype(int)}
                 )
             pl.plot([], points, labels, **kwargs)
-            return pl.show()
+            return pl.show(
+                return_plotter=return_plotter,
+                savefig=savefig,
+                return_cpos=return_cpos,
+                cpos=cpos,
+            )
 
         # otherwise, use the legacy plotter
         if graphics_backend is GraphicsBackend.MAPDL:
@@ -559,6 +572,10 @@ class _MapdlCommandExtended(_MapdlCore):
         if graphics_backend:
             from ansys.mapdl.core.plotting.theme import get_ansys_colors
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+            return_plotter = kwargs.pop("return_plotter", False)
+            savefig = kwargs.pop("savefig", None)
+            cpos = kwargs.pop("cpos", None)
+            return_cpos = kwargs.pop("return_cpos", False)
 
             kwargs.setdefault("show_scalar_bar", False)
             kwargs.setdefault("title", "MAPDL Line Plot")
@@ -568,7 +585,13 @@ class _MapdlCommandExtended(_MapdlCore):
                 )
                 pl = MapdlPlotter()
                 pl.plot([], [], [], **kwargs)
-                return pl.show()
+
+                return pl.show(
+                    return_plotter=return_plotter,
+                    savefig=savefig,
+                    return_cpos=return_cpos,
+                    cpos=cpos
+                )
 
             lines = self.geometry.get_lines(return_as_list=True)
             meshes = []
@@ -626,7 +649,13 @@ class _MapdlCommandExtended(_MapdlCore):
                 )
             pl = MapdlPlotter()
             pl.plot(meshes, [], labels, **kwargs)
-            return pl.show()
+            obj = pl.show(
+                return_plotter=return_plotter,
+                savefig=savefig,
+                return_cpos=return_cpos,
+                cpos=cpos,
+            )
+            return obj
         else:
             with self._enable_interactive_plotting():
                 return super().lplot(nl1=nl1, nl2=nl2, ninc=ninc, **kwargs)
@@ -747,14 +776,22 @@ class _MapdlCommandExtended(_MapdlCore):
             kwargs.setdefault("show_scalar_bar", False)
             kwargs.setdefault("title", "MAPDL Area Plot")
             kwargs.setdefault("scalar_bar_args", {"title": "Scalar Bar Title"})
-
+            return_plotter = kwargs.pop("return_plotter", False)
+            return_cpos = kwargs.pop("return_cpos", False)
+            savefig = kwargs.pop("savefig", None)
+            cpos = kwargs.pop("cpos", None)
             if not self.geometry.n_area:
                 warnings.warn(
                     "Either no areas have been selected or there is nothing to plot."
                 )
                 pl = MapdlPlotter()
                 pl.plot([], [], [], **kwargs)
-                return pl.show()
+                return pl.show(
+                    return_plotter=return_plotter,
+                    savefig=savefig,
+                    return_cpos=return_cpos,
+                    cpos=cpos,
+                )
 
             surfs = self.geometry.get_areas(return_as_list=True, quality=quality)
             meshes = []
@@ -859,7 +896,12 @@ class _MapdlCommandExtended(_MapdlCore):
                     )
             pl = MapdlPlotter()
             pl.plot(meshes, [], labels, **kwargs)
-            return pl.show()
+            return pl.show(
+                return_plotter=return_plotter,
+                savefig=savefig,
+                return_cpos=return_cpos,
+                cpos=cpos,
+                )
         if graphics_backend is GraphicsBackend.MAPDL:
             with self._enable_interactive_plotting():
                 return super().aplot(
@@ -942,6 +984,10 @@ class _MapdlCommandExtended(_MapdlCore):
 
         if graphics_backend is GraphicsBackend.PYVISTA:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+            return_plotter = kwargs.pop("return_plotter", False)
+            return_cpos = kwargs.pop("return_cpos", False)
+            savefig = kwargs.pop("savefig", None)
+            cpos = kwargs.pop("cpos", None)
 
             pl = kwargs.get("plotter", None)
             pl = MapdlPlotter().switch_scene(pl)
@@ -953,7 +999,12 @@ class _MapdlCommandExtended(_MapdlCore):
                 )
                 pl = MapdlPlotter()
                 pl.plot([], [], [], **kwargs)
-                return pl.show()
+                return pl.show(
+                    return_plotter=return_plotter,
+                    savefig=savefig,
+                    return_cpos=return_cpos,
+                    cpos=cpos,
+                )
 
             # Storing entities selection
             with self.save_selection:
@@ -962,7 +1013,6 @@ class _MapdlCommandExtended(_MapdlCore):
                 points = []
                 labels = []
 
-                return_plotter = kwargs.pop("return_plotter", False)
                 color_areas = True
 
                 for each_volu in volumes:
@@ -990,7 +1040,12 @@ class _MapdlCommandExtended(_MapdlCore):
                 meshes = [{"mesh": meshes}]
 
             pl.plot(meshes, points, labels, **kwargs)
-            return pl.show(return_plotter=return_plotter, **kwargs)
+            return pl.show(
+                return_plotter=return_plotter,
+                savefig=savefig,
+                return_cpos=return_cpos,
+                cpos=cpos,
+                )
 
         elif graphics_backend is GraphicsBackend.MAPDL:
             with self._enable_interactive_plotting():
@@ -1124,7 +1179,10 @@ class _MapdlCommandExtended(_MapdlCore):
             import pyvista as pv
 
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
-
+            return_plotter = kwargs.pop("return_plotter", False)
+            savefig = kwargs.pop("savefig", None)
+            cpos = kwargs.pop("cpos", None)
+            return_cpos = kwargs.pop("return_cpos", False)
             pl = kwargs.get("plotter", None)
             pl = MapdlPlotter().switch_scene(pl)
 
@@ -1132,7 +1190,12 @@ class _MapdlCommandExtended(_MapdlCore):
             if not self.mesh.n_node:
                 warnings.warn("There are no nodes to plot.")
                 pl.plot([], [], [], **kwargs)
-                return pl.show()
+                return pl.show(
+                    return_plotter=return_plotter,
+                    savefig=savefig,
+                    return_cpos=return_cpos,
+                    cpos=cpos,
+                    )
 
             labels = []
             if nnum:
@@ -1146,7 +1209,13 @@ class _MapdlCommandExtended(_MapdlCore):
                 ]
             points = [{"points": self.mesh.nodes}]
             pl.plot([], points, labels, mapdl=self, **kwargs)
-            return pl.show()
+
+            return pl.show(
+                return_plotter=return_plotter,
+                savefig=savefig,
+                return_cpos=return_cpos,
+                cpos=cpos,
+            )
 
         elif graphics_backend is GraphicsBackend.MAPDL:
             # otherwise, use the built-in nplot
@@ -1260,7 +1329,10 @@ class _MapdlCommandExtended(_MapdlCore):
 
         if graphics_backend is GraphicsBackend.PYVISTA:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
-
+            return_plotter = kwargs.pop("return_plotter", False)
+            cpos = kwargs.pop("cpos", None)
+            return_cpos = kwargs.pop("return_cpos", False)
+            savefig = kwargs.pop("savefig", None)
             pl = kwargs.get("plotter", None)
             pl = MapdlPlotter().switch_scene(pl)
             pl.mapdl = self
@@ -1269,7 +1341,12 @@ class _MapdlCommandExtended(_MapdlCore):
             if not self._mesh.n_elem:
                 warnings.warn("There are no elements to plot.")
                 pl.plot([], [], [], mapdl=self, **kwargs)
-                return pl.show()
+                return pl.show(
+                    return_plotter=return_plotter,
+                    cpos=cpos,
+                    return_cpos=return_cpos,
+                    savefig=savefig,
+                )
 
             # TODO: Consider caching the surface
             esurf = self.mesh._grid.linear_copy().extract_surface().clean()
@@ -1292,7 +1369,13 @@ class _MapdlCommandExtended(_MapdlCore):
                 mapdl=self,
                 **kwargs,
             )
-            return pl.show()
+
+            return pl.show(
+                return_plotter=return_plotter,
+                cpos=cpos,
+                return_cpos=return_cpos,
+                savefig=savefig,
+                )
         elif graphics_backend is GraphicsBackend.MAPDL:
             # otherwise, use MAPDL plotter
             with self._enable_interactive_plotting():

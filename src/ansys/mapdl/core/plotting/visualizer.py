@@ -876,7 +876,7 @@ class MapdlPlotter(Plotter):
 
         else:
             if not return_plotter:
-                self._backend.show()
+                self._backend.show(**kwargs)
 
         if return_plotter:
             return self
