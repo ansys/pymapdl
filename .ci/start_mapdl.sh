@@ -86,7 +86,7 @@ run \
   --health-retries=4 \
   --health-timeout=0.5s \
   --health-start-period=10s \
-  -e ANSYSLMD_LICENSE_FILE=1055@"${LICENSE_SERVER}" \
+  -e ANSYSLMD_LICENSE_FILE=1055@${LICENSE_SERVER} \
   -e ANSYS_LOCK="OFF" \
   -p ${PYMAPDL_PORT}:50052 \
   -p ${PYMAPDL_DB_PORT}:${DB_INT_PORT} \
@@ -98,7 +98,7 @@ run \
   -u=0:0 \
   --memory=6656MB \
   --memory-swap=16896MB \
-  "$MAPDL_IMAGE" "$EXEC_PATH" -grpc -dir /jobs -"$DISTRIBUTED_MODE" -np 2 -db -5000 -m -5000 -
+  ${MAPDL_IMAGE} ${EXEC_PATH} -grpc -dir /jobs -${DISTRIBUTED_MODE} -np 2 -db -5000 -m -5000 -
 _EOT_
 )
 
