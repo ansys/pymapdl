@@ -29,7 +29,7 @@ else
     export P_SCHEMA=/ansys_inc/ansys/ac4/schema
 fi;
 
-if [[ $MAPDL_VERSION == *"cicd" ]] ; then
+if [[ $MAPDL_VERSION == *"cicd"* ]] ; then
     echo "It is a CICD version, binding DPF port too"
     export DPF_ARG="-p $DPF_PORT:50055"
     export DB_INT_PORT=50056
