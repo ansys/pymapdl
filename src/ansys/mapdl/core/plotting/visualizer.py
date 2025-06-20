@@ -864,7 +864,6 @@ class MapdlPlotter(Plotter):
                 auto_close=False,
                 window_size=window_size,
                 screenshot=savefig,
-                **kwargs,
             )
             self.scene.screenshot(self._savefig)
 
