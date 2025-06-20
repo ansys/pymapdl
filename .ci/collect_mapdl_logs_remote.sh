@@ -38,7 +38,7 @@ mkdir -p ./"$LOG_NAMES"/prof
 mv prof/* ./"$LOG_NAMES"/prof || echo "No profile files could be found"
 
 echo "Moving the JSONL files..."
-mv *.jsonl ./"$LOG_NAMES"/ || echo "No JSONL files could be found"
+mv ./*.jsonl ./"$LOG_NAMES"/ || echo "No JSONL files could be found"
 
 echo "Collecting file structure..."
 ls -R > ./"$LOG_NAMES"/files_structure.txt || echo "Failed to copy file structure to a file"
