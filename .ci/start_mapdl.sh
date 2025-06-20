@@ -78,8 +78,8 @@ echo "P_SCHEMA: $P_SCHEMA"
 # Building docker command
 CMD=$(cat <<-_EOT_
 run \
-  --entrypoint "/bin/bash" \
-  --name "$INSTANCE_NAME" \
+  --entrypoint /bin/bash \
+  --name ${INSTANCE_NAME} \
   --restart always \
   --health-interval=0.5s \
   --health-retries=4 \
