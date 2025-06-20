@@ -182,8 +182,9 @@ jobs:
           MAPDL_INSTANCE: "MAPDL_0"
           DPF_PORT: "${{ env.DPF_PORT }}"
         run: |
+          docker ps
           echo "Starting DPF server on same MAPDL container: ${MAPDL_INSTANCE}"
-          docker exec "${MAPDL_INSTANCE}" /bin/bash -c "/ansys_inc/v252/aisol/bin/linx64/Ans.Dpf.Grpc.sh --port ${DPF_PORT} &" &> log_dpf.log &
+          docker exec MAPDL_0 /bin/bash -c "/ansys_inc/v252/aisol/bin/linx64/Ans.Dpf.Grpc.sh --port ${DPF_PORT} &"
 
       - name: "Getting files change filters"
         uses: dorny/paths-filter@v3
