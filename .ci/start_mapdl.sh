@@ -35,7 +35,7 @@ echo "MAPDL_VERSION: $MAPDL_VERSION"
 
 export MAPDL_IMAGE="$MAPDL_PACKAGE:$MAPDL_VERSION"
 echo "MAPDL_IMAGE:   $MAPDL_IMAGE"
-# docker pull "$MAPDL_IMAGE"
+docker pull "$MAPDL_IMAGE"
 
 export MAJOR=$(echo "$MAPDL_VERSION" | head -c 3 | tail -c 2)
 export MINOR=$(echo "$MAPDL_VERSION" | head -c 5 | tail -c 1)
