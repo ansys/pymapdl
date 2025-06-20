@@ -864,7 +864,6 @@ class MapdlPlotter(Plotter):
                 auto_close=False,
                 window_size=window_size,
                 screenshot=savefig,
-                **kwargs,
             )
             self.scene.screenshot(self._savefig)
 
@@ -877,7 +876,7 @@ class MapdlPlotter(Plotter):
 
         else:
             if not return_plotter:
-                self._backend.show(**kwargs)
+                self._backend.show()
 
         if return_plotter:
             return self

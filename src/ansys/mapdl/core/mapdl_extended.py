@@ -477,7 +477,7 @@ class _MapdlCommandExtended(_MapdlCore):
                     "the database."
                 )
                 pl.plot([], [], [], **kwargs)
-                return pl.show(**kwargs)
+                return pl.show()
 
             keypoints = self.geometry.get_keypoints(return_as_array=True)
             points = [{"points": keypoints}]
@@ -488,7 +488,7 @@ class _MapdlCommandExtended(_MapdlCore):
                     {"points": keypoints, "labels": self.geometry.knum.astype(int)}
                 )
             pl.plot([], points, labels, **kwargs)
-            return pl.show(**kwargs)
+            return pl.show()
 
         # otherwise, use the legacy plotter
         if graphics_backend is GraphicsBackend.MAPDL:
@@ -568,7 +568,7 @@ class _MapdlCommandExtended(_MapdlCore):
                 )
                 pl = MapdlPlotter()
                 pl.plot([], [], [], **kwargs)
-                return pl.show(**kwargs)
+                return pl.show()
 
             lines = self.geometry.get_lines(return_as_list=True)
             meshes = []
@@ -626,7 +626,7 @@ class _MapdlCommandExtended(_MapdlCore):
                 )
             pl = MapdlPlotter()
             pl.plot(meshes, [], labels, **kwargs)
-            return pl.show(**kwargs)
+            return pl.show()
         else:
             with self._enable_interactive_plotting():
                 return super().lplot(nl1=nl1, nl2=nl2, ninc=ninc, **kwargs)
@@ -754,7 +754,7 @@ class _MapdlCommandExtended(_MapdlCore):
                 )
                 pl = MapdlPlotter()
                 pl.plot([], [], [], **kwargs)
-                return pl.show(**kwargs)
+                return pl.show()
 
             surfs = self.geometry.get_areas(return_as_list=True, quality=quality)
             meshes = []
@@ -859,7 +859,7 @@ class _MapdlCommandExtended(_MapdlCore):
                     )
             pl = MapdlPlotter()
             pl.plot(meshes, [], labels, **kwargs)
-            return pl.show(**kwargs)
+            return pl.show()
         if graphics_backend is GraphicsBackend.MAPDL:
             with self._enable_interactive_plotting():
                 return super().aplot(
@@ -953,7 +953,7 @@ class _MapdlCommandExtended(_MapdlCore):
                 )
                 pl = MapdlPlotter()
                 pl.plot([], [], [], **kwargs)
-                return pl.show(**kwargs)
+                return pl.show()
 
             # Storing entities selection
             with self.save_selection:
@@ -1132,7 +1132,7 @@ class _MapdlCommandExtended(_MapdlCore):
             if not self.mesh.n_node:
                 warnings.warn("There are no nodes to plot.")
                 pl.plot([], [], [], **kwargs)
-                return pl.show(**kwargs)
+                return pl.show()
 
             labels = []
             if nnum:
@@ -1146,7 +1146,7 @@ class _MapdlCommandExtended(_MapdlCore):
                 ]
             points = [{"points": self.mesh.nodes}]
             pl.plot([], points, labels, mapdl=self, **kwargs)
-            return pl.show(**kwargs)
+            return pl.show()
 
         elif graphics_backend is GraphicsBackend.MAPDL:
             # otherwise, use the built-in nplot
@@ -1269,7 +1269,7 @@ class _MapdlCommandExtended(_MapdlCore):
             if not self._mesh.n_elem:
                 warnings.warn("There are no elements to plot.")
                 pl.plot([], [], [], mapdl=self, **kwargs)
-                return pl.show(**kwargs)
+                return pl.show()
 
             # TODO: Consider caching the surface
             esurf = self.mesh._grid.linear_copy().extract_surface().clean()
@@ -1292,7 +1292,7 @@ class _MapdlCommandExtended(_MapdlCore):
                 mapdl=self,
                 **kwargs,
             )
-            return pl.show(**kwargs)
+            return pl.show()
         elif graphics_backend is GraphicsBackend.MAPDL:
             # otherwise, use MAPDL plotter
             with self._enable_interactive_plotting():

@@ -665,7 +665,7 @@ class PostProcessing:
             pl = MapdlPlotter()
             pl.plot(meshes, [], labels, mapdl=self, **kwargs)
 
-        return pl.show(**kwargs)
+        return pl.show()
 
     @requires_package("ansys.tools.visualization_interface")
     def _plot_cell_scalars(self, scalars, show_elem_numbering=False, **kwargs):
@@ -756,7 +756,7 @@ class PostProcessing:
                 ]
             pl = MapdlPlotter()
             pl.plot(meshes, [], labels, mapdl=self, **kwargs)
-        return pl.show(**kwargs)
+        return pl.show()
 
     @property
     @supress_logging
