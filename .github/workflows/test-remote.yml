@@ -62,8 +62,8 @@ jobs:
       PYMAPDL_DB_PORT: 21002  # default won't work on GitHub runners
       PYMAPDL_DB_PORT2: 21003  # default won't work on GitHub runners
       DPF_DOCKER_IMAGE: ghcr.io/ansys/mapdl:v25.2-rocky-dpf-standalone
-      DPF_PORT: 21004
-      DPF_PORT2: 21005
+      DPF_PORT: 21014
+      DPF_PORT2: 21015
       DPF_START_SERVER: False
       HAS_DPF: True
       TEST_DPF_BACKEND: false
