@@ -1253,7 +1253,7 @@ class AnalysisOptions:
         command = f"DMPEXT,{smode},{tmode},{dmpname},{freqb},{freqe},{nsteps}"
         return self.run(command, **kwargs)
 
-    def dmpoption(self, filetype="", combine="", **kwargs):
+    def dmpoption(self, filetype="", combine="", rescombfreq="", deleopt="", **kwargs):
         """Specifies distributed memory parallel (Distributed ANSYS) file
 
         APDL Command: DMPOPTION
@@ -1290,6 +1290,22 @@ class AnalysisOptions:
             Yes - Combine solution files (default).
 
             No - Do not combine solution files.
+
+        rescombfreq
+            Frequency used to combine the local results files during a distributed memory parallel solution. This option applies only when FileType = RST and Combine = YES.
+
+            NONE - Do not combine the local results files during solution. The local results files is combined only upon leaving the solution processor (default).
+
+            ALL - Combines the local results files at every time point.
+
+            LAST - Combines the local results files at the last time point of every load step.
+
+        deleopt
+            Option to delete local solution files of the type specified by FileType option after they are combined. This option applies only when Combine = Yes.
+
+            Yes - Delete the local solution files after they are combined.
+
+            No - Do not delete the local solution files after they are combined (default).
 
         Notes
         -----
@@ -1350,7 +1366,7 @@ class AnalysisOptions:
         a subsequent analysis. In this case, use the COMBINE command to combine
         local solution files into a single, global file.
         """
-        command = f"DMPOPTION,{filetype},{combine}"
+        command = f"DMPOPTION,{filetype},{combine}{rescombfreq},{deleopt}"
         return self.run(command, **kwargs)
 
     def dspoption(
