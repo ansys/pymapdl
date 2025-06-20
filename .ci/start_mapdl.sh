@@ -81,7 +81,6 @@ run \
   --entrypoint "/bin/bash" \
   --name "$INSTANCE_NAME" \
   --restart always \
-  --health-cmd="ps aux | grep \"[/]ansys_inc/.*ansys\.e.*grpc\" -q && echo 0 || echo 1" \
   --health-interval=0.5s \
   --health-retries=4 \
   --health-timeout=0.5s \
