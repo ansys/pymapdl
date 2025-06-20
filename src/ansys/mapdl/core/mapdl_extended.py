@@ -465,6 +465,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
         if graphics_backend is GraphicsBackend.PYVISTA:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
             return_plotter = kwargs.pop("return_plotter", False)
             savefig = kwargs.pop("savefig", None)
             cpos = kwargs.pop("cpos", None)
@@ -572,6 +573,7 @@ class _MapdlCommandExtended(_MapdlCore):
         if graphics_backend:
             from ansys.mapdl.core.plotting.theme import get_ansys_colors
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
             return_plotter = kwargs.pop("return_plotter", False)
             savefig = kwargs.pop("savefig", None)
             cpos = kwargs.pop("cpos", None)
@@ -590,7 +592,7 @@ class _MapdlCommandExtended(_MapdlCore):
                     return_plotter=return_plotter,
                     savefig=savefig,
                     return_cpos=return_cpos,
-                    cpos=cpos
+                    cpos=cpos,
                 )
 
             lines = self.geometry.get_lines(return_as_list=True)
@@ -901,7 +903,7 @@ class _MapdlCommandExtended(_MapdlCore):
                 savefig=savefig,
                 return_cpos=return_cpos,
                 cpos=cpos,
-                )
+            )
         if graphics_backend is GraphicsBackend.MAPDL:
             with self._enable_interactive_plotting():
                 return super().aplot(
@@ -984,6 +986,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
         if graphics_backend is GraphicsBackend.PYVISTA:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
             return_plotter = kwargs.pop("return_plotter", False)
             return_cpos = kwargs.pop("return_cpos", False)
             savefig = kwargs.pop("savefig", None)
@@ -1045,7 +1048,7 @@ class _MapdlCommandExtended(_MapdlCore):
                 savefig=savefig,
                 return_cpos=return_cpos,
                 cpos=cpos,
-                )
+            )
 
         elif graphics_backend is GraphicsBackend.MAPDL:
             with self._enable_interactive_plotting():
@@ -1179,6 +1182,7 @@ class _MapdlCommandExtended(_MapdlCore):
             import pyvista as pv
 
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
             return_plotter = kwargs.pop("return_plotter", False)
             savefig = kwargs.pop("savefig", None)
             cpos = kwargs.pop("cpos", None)
@@ -1195,7 +1199,7 @@ class _MapdlCommandExtended(_MapdlCore):
                     savefig=savefig,
                     return_cpos=return_cpos,
                     cpos=cpos,
-                    )
+                )
 
             labels = []
             if nnum:
@@ -1329,6 +1333,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
         if graphics_backend is GraphicsBackend.PYVISTA:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
             return_plotter = kwargs.pop("return_plotter", False)
             cpos = kwargs.pop("cpos", None)
             return_cpos = kwargs.pop("return_cpos", False)
@@ -1375,7 +1380,7 @@ class _MapdlCommandExtended(_MapdlCore):
                 cpos=cpos,
                 return_cpos=return_cpos,
                 savefig=savefig,
-                )
+            )
         elif graphics_backend is GraphicsBackend.MAPDL:
             # otherwise, use MAPDL plotter
             with self._enable_interactive_plotting():
