@@ -30,14 +30,10 @@ docker cp "$MAPDL_INSTANCE":/mapdl_logs/. ./"$LOG_NAMES"/. || echo "Failed to co
 
 ####
 echo "Collecting local build logs..."
+ls -la
 
-echo "Collecting docker run log..."
+echo "Collecting logs..."
 mv ./*.log ./"$LOG_NAMES"/ || echo "MAPDL run docker log not found."
-mv log_dpf*.txt ./"$LOG_NAMES"/ || echo "DPF run docker log not found."
-
-echo "Moving docker launch log..."
-mv mapdl_launch_0.log ./"$LOG_NAMES"/mapdl_launch_0.log || echo "MAPDL launch docker log not found."
-mv mapdl_launch_1.log ./"$LOG_NAMES"/mapdl_launch_1.log || echo "MAPDL launch docker log not found."
 
 echo "Moving the profiling files..."
 mkdir -p ./"$LOG_NAMES"/prof
