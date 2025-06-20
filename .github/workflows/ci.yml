@@ -182,7 +182,7 @@ jobs:
       username: ${{ github.actor }}
     with:
       mapdl-version: "${{ matrix.mapdl-version }}"
-      file-name: "${{ matrix.mapdl-version }}-remote"
+      file-name: "remote-${{ matrix.mapdl-version }}"
 
 
   build-test-local-matrix:
@@ -221,7 +221,7 @@ jobs:
       testing-minimal: false
       pytest-arguments: '--reset_only_failed  --add_missing_images'
       mapdl-version: ${{ matrix.mapdl-version }}
-      file-name: "${{ matrix.mapdl-version }}-local"
+      file-name: "local-${{ matrix.mapdl-version }}"
       tags: "local"
       latest-version: "252"
       test_dpf: ${{ contains(matrix.mapdl-version, 'cicd') }}

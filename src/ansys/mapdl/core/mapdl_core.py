@@ -43,7 +43,7 @@ import numpy as np
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core import _HAS_VISUALIZER
+from ansys.mapdl.core import _HAS_DPF, _HAS_VISUALIZER
 from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
     CMD_LISTING,
@@ -87,6 +87,9 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.parameters import Parameters
     from ansys.mapdl.core.solution import Solution
     from ansys.mapdl.core.xpl import ansXpl
+
+    if _HAS_DPF:
+        from ansys.mapdl.core.reader import DPFResult
 
 from ansys.mapdl.core.post import PostProcessing
 
@@ -211,6 +214,7 @@ _ALLOWED_START_PARM = [
     "start_instance",
     "start_timeout",
     "timeout",
+    "use_reader_backend",
 ]
 
 
@@ -264,7 +268,7 @@ class _MapdlCore(Commands):
         local: bool = True,
         print_com: bool = False,
         file_type_for_plots: VALID_FILE_TYPE_FOR_PLOT_LITERAL = "PNG",
-        **start_parm,
+        **start_parm: dict[str, Any],
     ):
         """Initialize connection with MAPDL."""
         self._show_matplotlib_figures = True  # for testing
@@ -285,6 +289,7 @@ class _MapdlCore(Commands):
         self._version = None  # cached version
         self._mute = False
         self._save_selection_obj = None
+        self._use_reader_backend: bool = start_parm.pop("use_reader_backend", True)
 
         if _HAS_VISUALIZER:
             if graphics_backend is not None:  # pragma: no cover
@@ -361,6 +366,9 @@ class _MapdlCore(Commands):
         self._wrap_xsel_commands()
 
         self._info = Information(self)
+
+        # DPF
+        self._dpf_result: "DPFResult | None" = None
 
     def _after_run(self, _command: str) -> None:
         pass
@@ -1049,7 +1057,11 @@ class _MapdlCore(Commands):
     @property
     @requires_package("ansys.mapdl.reader", softerror=True)
     def result(self):
-        """Binary interface to the result file using :class:`ansys.mapdl.reader.rst.Result`.
+        """Binary interface to the result file using ``ansys-dpf-core`` or
+        ``ansys-mapdl-reader``.
+
+        If `ansys-dpf-core` is not installed, then a :class:`ansys.mapdl.reader.rst.Result`
+        object is returned.
 
         Returns
         -------
@@ -1083,12 +1095,25 @@ class _MapdlCore(Commands):
         NSL : Nodal displacements
         RF  : Nodal reaction forces
         """
+        if _HAS_DPF and not self._use_reader_backend:
+            from ansys.mapdl.core.reader import DPFResult
+
+            if self._dpf_result is None:
+                # create a DPFResult object
+                self._dpf_result = DPFResult(None, mapdl=self)
+
+            return self._dpf_result
+
         from ansys.mapdl.reader import read_binary
         from ansys.mapdl.reader.rst import Result
 
         if not self._local:
             # download to temporary directory
-            save_path = os.path.join(tempfile.gettempdir())
+            save_path = os.path.join(
+                tempfile.gettempdir(), f"ansys_tmp_{random_string()}"
+            )
+            if not os.path.exists(save_path):
+                os.mkdir(save_path)
             result_path = self.download_result(save_path)
         else:
             if self._distributed_result_file and self._result_file:
@@ -1118,10 +1143,12 @@ class _MapdlCore(Commands):
             else:
                 result_path = self._result_file
 
-        if result_path is None:
-            raise FileNotFoundError("No result file(s) at %s" % self.directory)
-        if not os.path.isfile(result_path):
-            raise FileNotFoundError("No results found at %s" % result_path)
+        if result_path is None or not os.path.isfile(result_path):
+            raise FileNotFoundError(
+                f"No result file(s) at {self.directory or result_path}. "
+                "Check that there is at least one RST file in the working directory "
+                f"'{self.directory}, or solve an MAPDL model to generate one."
+            )
 
         return read_binary(result_path)
 
@@ -1276,7 +1303,8 @@ class _MapdlCore(Commands):
                 if os.path.isfile(filename):
                     return filename
         else:
-            return f"{filename}.{ext}"
+            sep = "/" if self.platform == "linux" else r"\\"
+            return f"{self.directory}{sep}{filename}.{ext}"
 
     def _wrap_listing_functions(self):
         # Wrapping LISTING FUNCTIONS.

@@ -46,7 +46,6 @@ from ansys.mapdl.core.launcher import (
     _HAS_ATP,
     LOCALHOST,
     _is_ubuntu,
-    _parse_ip_route,
     check_mapdl_launch_on_hpc,
     check_mode,
     force_smp_in_student,
@@ -77,7 +76,7 @@ from ansys.mapdl.core.launcher import (
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from ansys.mapdl.core.misc import check_has_mapdl, stack
+from ansys.mapdl.core.misc import check_has_mapdl, parse_ip_route, stack
 from conftest import (
     ON_LOCAL,
     PATCH_MAPDL,
@@ -589,13 +588,13 @@ def test__parse_ip_route():
     output = """default via 172.25.192.1 dev eth0 proto kernel <<<=== this
 172.25.192.0/20 dev eth0 proto kernel scope link src 172.25.195.101 <<<=== not this"""
 
-    assert "172.25.192.1" == _parse_ip_route(output)
+    assert "172.25.192.1" == parse_ip_route(output)
 
     output = """
 default via 172.23.112.1 dev eth0 proto kernel
 172.23.112.0/20 dev eth0 proto kernel scope link src 172.23.121.145"""
 
-    assert "172.23.112.1" == _parse_ip_route(output)
+    assert "172.23.112.1" == parse_ip_route(output)
 
 
 def test_launched(mapdl, cleared):
