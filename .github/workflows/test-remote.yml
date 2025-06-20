@@ -178,9 +178,11 @@ jobs:
       - name: "Start DPF server on same container as MAPDL"
         if: ${{ steps.ubuntu_check.outputs.ON_SAME_CONTAINER == 'true' }}
         shell: bash
+        env:
+          MAPDL_INSTANCE: MAPDL_0
         run: |
-          echo "Starting DPF server on same MAPDL container..."
-          docker exec MAPDL_0 /bin/bash -c "/ansys_inc/v252/aisol/bin/linx64/Ans.Dpf.Grpc.sh --port ${{ env.DPF_PORT }} &" &> log_dpf.txt &
+          echo "Starting DPF server on same MAPDL container: ${MAPDL_INSTANCE}"
+          docker exec "$MAPDL_INSTANCE" /bin/bash -c "/ansys_inc/v252/aisol/bin/linx64/Ans.Dpf.Grpc.sh --port ${{ env.DPF_PORT }} &" &> log_dpf.txt &
 
       - name: "Getting files change filters"
         uses: dorny/paths-filter@v3
@@ -234,8 +236,12 @@ jobs:
         env:
           PYMAPDL_PORT: ${{ env.PYMAPDL_PORT }}
           PYMAPDL_PORT2: ${{ env.PYMAPDL_PORT2 }}
+          MAPDL_INSTANCE: MAPDL_0
         run: |
-          docker ps > docker_ps.txt
+          (docker exec "$MAPDL_INSTANCE" /bin/bash -c "docker ps > docker_ps_start.log") || echo "Failed to get the docker images from the docker container"
+          (docker exec "$MAPDL_INSTANCE" /bin/bash -c "ps aux > docker_processes_start.log") || echo "Failed to get the processes from the docker container"
+
+          docker ps > docker_ps.log
           .ci/waiting_services.sh
 
       - name: "Unit testing"
