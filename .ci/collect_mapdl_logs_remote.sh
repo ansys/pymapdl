@@ -15,6 +15,10 @@ mkdir "$LOG_NAMES" && echo "Successfully generated directory $LOG_NAMES"
 echo "Collecting MAPDL logs..."
 
 (docker exec "$MAPDL_INSTANCE" /bin/bash -c "mkdir -p /mapdl_logs && echo 'Successfully created directory inside docker container'") || echo "Failed to create a directory inside docker container for logs."
+
+(docker exec "$MAPDL_INSTANCE" /bin/bash -c "docker ps > /mapdl_logs/docker_ps_end.txt") || echo "Failed to get the docker images from the docker container"
+(docker exec "$MAPDL_INSTANCE" /bin/bash -c "ps aux > /mapdl_logs/docker_processes_end.txt") || echo "Failed to get the processes from the docker container"
+
 (docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$FILE*.out' > /dev/null ;then mv -f /file*.out /mapdl_logs && echo 'Successfully moved out files.'; fi") || echo "Failed to move the 'out' files into a local file"
 (docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$FILE*.err' > /dev/null ;then mv -f /file*.err /mapdl_logs && echo 'Successfully moved err files.'; fi") || echo "Failed to move the 'err' files into a local file"
 (docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$FILE*.log' > /dev/null ;then mv -f /file*.log /mapdl_logs && echo 'Successfully moved log files.'; fi") || echo "Failed to move the 'log' files into a local file"
