@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 # Script to activate the venv, and install the PyMAPDL
 echo "Starting Documentation codespaces"
 
