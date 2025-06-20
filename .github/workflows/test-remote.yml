@@ -238,10 +238,9 @@ jobs:
           PYMAPDL_PORT2: ${{ env.PYMAPDL_PORT2 }}
           MAPDL_INSTANCE: MAPDL_0
         run: |
-          (docker exec "$MAPDL_INSTANCE" /bin/bash -c "docker ps > docker_ps_start.log") || echo "Failed to get the docker images from the docker container"
+          docker ps > docker_ps_start.log || echo "Failed to get the docker images from the docker container"
           (docker exec "$MAPDL_INSTANCE" /bin/bash -c "ps aux > docker_processes_start.log") || echo "Failed to get the processes from the docker container"
 
-          docker ps > docker_ps.log
           .ci/waiting_services.sh
 
       - name: "Unit testing"

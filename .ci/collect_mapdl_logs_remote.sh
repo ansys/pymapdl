@@ -18,7 +18,6 @@ echo "Collecting MAPDL logs..."
 
 (docker exec "$MAPDL_INSTANCE" /bin/bash -c "mv ./*.log /mapdl_logs") || echo "Failed to move the logs files."
 
-(docker exec "$MAPDL_INSTANCE" /bin/bash -c "docker ps > /mapdl_logs/docker_ps_end.log") || echo "Failed to get the docker images from the docker container"
 (docker exec "$MAPDL_INSTANCE" /bin/bash -c "ps aux > /mapdl_logs/docker_processes_end.log") || echo "Failed to get the processes from the docker container"
 
 (docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$FILE*.out' > /dev/null ;then mv -f /file*.out /mapdl_logs && echo 'Successfully moved out files.'; fi") || echo "Failed to move the 'out' files into a local file"
@@ -31,6 +30,8 @@ docker cp "$MAPDL_INSTANCE":/mapdl_logs/. ./"$LOG_NAMES"/. || echo "Failed to co
 ####
 echo "Collecting local build logs..."
 ls -la
+
+docker ps > /"$LOG_NAMES"/docker_ps_end.log || echo "Failed to print the docker ps"
 
 echo "Collecting logs..."
 mv ./*.log ./"$LOG_NAMES"/ || echo "MAPDL run docker log not found."
