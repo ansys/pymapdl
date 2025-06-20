@@ -53,10 +53,10 @@ docker run \
     --health-retries=4 \
     --health-timeout=0.5s \
     --health-start-period=10s \
-    -e ANSYSLMD_LICENSE_FILE=1055@"$LICENSE_SERVER" \
+    -e ANSYSLMD_LICENSE_FILE=1055@"${LICENSE_SERVER}" \
     -e ANSYS_LOCK="OFF" \
     -p "$PYMAPDL_PORT":50052 \
-    -p "$PYMAPDL_DB_PORT":$DB_INT_PORT \
+    -p "$PYMAPDL_DB_PORT":"${DB_INT_PORT}" \
     "${DPF_ARG}" \
     --shm-size=2gb \
     -e I_MPI_SHM_LMT=shm \
