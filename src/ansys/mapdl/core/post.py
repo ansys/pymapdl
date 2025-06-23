@@ -630,9 +630,11 @@ class PostProcessing:
             )
 
         from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
         return_cpos = kwargs.pop("return_cpos", False)
         return_plotter = kwargs.pop("return_plotter", False)
         savefig = kwargs.pop("savefig", None)
+        cpos = kwargs.pop("cpos", None)
 
         with self._mapdl.save_selection:
             mask = self.selected_nodes
@@ -668,7 +670,12 @@ class PostProcessing:
             pl = MapdlPlotter()
             pl.plot(meshes, [], labels, mapdl=self, **kwargs)
 
-        return pl.show(return_cpos=return_cpos, return_plotter=return_plotter, savefig=savefig)
+        return pl.show(
+            return_cpos=return_cpos,
+            return_plotter=return_plotter,
+            savefig=savefig,
+            cpos=cpos,
+        )
 
     @requires_package("ansys.tools.visualization_interface")
     def _plot_cell_scalars(self, scalars, show_elem_numbering=False, **kwargs):
@@ -681,9 +688,11 @@ class PostProcessing:
             )
 
         from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
         return_cpos = kwargs.pop("return_cpos", False)
         return_plotter = kwargs.pop("return_plotter", False)
         savefig = kwargs.pop("savefig", None)
+        cpos = kwargs.pop("cpos", False)
         with self._mapdl.save_selection:
             # Select nodes to avoid segfault
             self._mapdl.nsle("s", "all")
@@ -761,7 +770,12 @@ class PostProcessing:
                 ]
             pl = MapdlPlotter()
             pl.plot(meshes, [], labels, mapdl=self, **kwargs)
-        return pl.show(return_cpos=return_cpos, return_plotter=return_plotter, savefig=savefig)
+        return pl.show(
+            return_cpos=return_cpos,
+            return_plotter=return_plotter,
+            savefig=savefig,
+            cpos=cpos,
+        )
 
     @property
     @supress_logging
