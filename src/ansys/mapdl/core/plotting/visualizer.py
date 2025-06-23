@@ -807,11 +807,6 @@ class MapdlPlotter(Plotter):
         if title:  # Added here to avoid labels overlapping title
             self.scene.add_title(title, color=text_color)
 
-        if return_cpos and return_plotter:
-            raise ValueError(
-                "'return_cpos' and 'return_plotter' cannot be both 'True' at the same time."
-            )
-
     def switch_scene(self, pl: Union["pv.Plotter", "MapdlPlotter"]) -> "MapdlPlotter":
         """Switches the backend scene to the given plotter.
 
@@ -849,6 +844,10 @@ class MapdlPlotter(Plotter):
         **kwargs,
     ) -> None:
         """Show the plotter."""
+        if return_cpos and return_plotter:
+            raise ValueError(
+                "'return_cpos' and 'return_plotter' cannot be both 'True' at the same time."
+            )
 
         self._off_screen = off_screen
         if notebook:
