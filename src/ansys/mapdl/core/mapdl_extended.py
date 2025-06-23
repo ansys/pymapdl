@@ -469,7 +469,7 @@ class _MapdlCommandExtended(_MapdlCore):
             return_plotter = kwargs.pop("return_plotter", False)
             savefig = kwargs.pop("savefig", None)
             cpos = kwargs.pop("cpos", None)
-            return_cpos = kwargs.pop("return_cpos", None)
+            return_cpos = kwargs.pop("return_cpos", False)
             pl = kwargs.get("plotter", None)
             pl = MapdlPlotter().switch_scene(pl)
 

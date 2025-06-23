@@ -693,7 +693,7 @@ class PostProcessing:
         return_cpos = kwargs.pop("return_cpos", False)
         return_plotter = kwargs.pop("return_plotter", False)
         savefig = kwargs.pop("savefig", None)
-        cpos = kwargs.pop("cpos", False)
+        cpos = kwargs.pop("cpos", None)
         with self._mapdl.save_selection:
             # Select nodes to avoid segfault
             self._mapdl.nsle("s", "all")
