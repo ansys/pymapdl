@@ -630,6 +630,7 @@ class PostProcessing:
             )
 
         from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
         return_cpos = kwargs.pop("return_cpos", False)
         return_plotter = kwargs.pop("return_plotter", False)
         savefig = kwargs.pop("savefig", None)
@@ -668,7 +669,9 @@ class PostProcessing:
             pl = MapdlPlotter()
             pl.plot(meshes, [], labels, mapdl=self, **kwargs)
 
-        return pl.show(return_cpos=return_cpos, return_plotter=return_plotter, savefig=savefig)
+        return pl.show(
+            return_cpos=return_cpos, return_plotter=return_plotter, savefig=savefig
+        )
 
     @requires_package("ansys.tools.visualization_interface")
     def _plot_cell_scalars(self, scalars, show_elem_numbering=False, **kwargs):
@@ -681,6 +684,7 @@ class PostProcessing:
             )
 
         from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
+
         return_cpos = kwargs.pop("return_cpos", False)
         return_plotter = kwargs.pop("return_plotter", False)
         savefig = kwargs.pop("savefig", None)
@@ -761,7 +765,9 @@ class PostProcessing:
                 ]
             pl = MapdlPlotter()
             pl.plot(meshes, [], labels, mapdl=self, **kwargs)
-        return pl.show(return_cpos=return_cpos, return_plotter=return_plotter, savefig=savefig)
+        return pl.show(
+            return_cpos=return_cpos, return_plotter=return_plotter, savefig=savefig
+        )
 
     @property
     @supress_logging
