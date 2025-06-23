@@ -343,7 +343,7 @@ jobs:
           fi
 
           echo "Pushing changes to '${{ env.PR_BASE_REPO }}' repo"
-          git push origin ${{ env.PR_BASE_BRANCH }} --force-with-lease || { echo "::error:: Push failed. Aborting."; exit 1; }
+          git push origin ${{ env.PR_BASE_BRANCH }} --force-with-lease || git fetch --all && git push origin ${{ env.PR_BASE_BRANCH }} --force-with-lease || { echo "::error:: Push failed. Aborting."; exit 1; }
 
           if [[ "${{ env.MODE }}" == "--ours" ]]; then
             echo "Sync mode is 'ours'. Pushing to head_repo/${{ env.PR_HEAD_BRANCH }} with 'ours' changes"
