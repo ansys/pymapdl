@@ -436,7 +436,7 @@ jobs:
               owner: 'ansys',
               repo: 'pymapdl',
               issue_number: prNumber,
-              body: `**:rocket: Migration completed!**
+              body: `## :rocket: Migration completed!
 
             The PR [#${newPrData.data.number}](${newPrData.data.html_url}) has been created successfully.
 
