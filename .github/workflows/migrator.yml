@@ -381,7 +381,7 @@ jobs:
             }
 
             // Retrieving the original PR details
-            const { originalPR } = await github.rest.pulls.get({
+            const { data: originalPR } = await github.rest.pulls.get({
               owner: 'ansys',
               repo: 'pymapdl',
               pull_number: prNumber,
