@@ -631,6 +631,7 @@ class PostProcessing:
 
         from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
+
         return_cpos = kwargs.pop("return_cpos", False)
         return_plotter = kwargs.pop("return_plotter", False)
         savefig = kwargs.pop("savefig", None)
