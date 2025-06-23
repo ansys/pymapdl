@@ -399,13 +399,12 @@ jobs:
 
             Check the [original PR](https://github.com/ansys/pymapdl/pull/${originalPR.number}) made by @${originalPR.user.login} for more details.
 
-            Closes #${prNumber}`,
+            Closes #${prNumber}
 
             ## Original pull request
 
             ### ${originalPR.title}
-            ${originalPR.body}
-
+            ${originalPR.body}`,
             });
 
             core.info(`New PR created: ${newPrData.data.number}`);
