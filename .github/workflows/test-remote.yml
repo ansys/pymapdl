@@ -231,7 +231,7 @@ jobs:
         run: |
           docker ps
           echo "Starting DPF server on same MAPDL container: ${MAPDL_INSTANCE}"
-          docker exec MAPDL_0 /bin/bash -c "/ansys_inc/v252/aisol/bin/linx64/Ans.Dpf.Grpc.sh --port ${DPF_PORT} &"
+          docker exec ${MAPDL_INSTANCE} /bin/bash -c "/ansys_inc/v252/aisol/bin/linx64/Ans.Dpf.Grpc.sh --port ${DPF_PORT} &"
 
       - name: "Waiting for the services to be up"
         shell: bash
