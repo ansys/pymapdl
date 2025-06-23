@@ -440,7 +440,22 @@ jobs:
 
             The PR [#${newPrData.data.number}](${newPrData.data.html_url}) has been created successfully.
 
-            Thank you @${userTriggering} for your contribution! Please review the PR and make any necessary changes.`,
+            Thank you @${userTriggering} for your contribution! Please review the PR and make any necessary changes.
+
+            You can clone this branch in a new repository by doing:
+
+            ~~~terminal
+            git clone -b ${prHeadBranch} --single-branch https://github.com/ansys/pymapdl.git
+            ~~~
+
+            If you have [GitHub CLI](https://cli.github.com/) installed, you can also use the following command to check out the pull request:
+
+            ~~~terminal
+            gh pr checkout https://github.com/ansys/pymapdl/pull/${prNumber}
+            ~~~
+
+            This PR will be closed by the admins when the new PR has been checked to work.
+            `,
             });
 
       - name: Create comment about failed migration
