@@ -2329,7 +2329,7 @@ class _MapdlCore(Commands):
             # We are storing a parameter.
             param_name = command.split("=")[0].strip()
 
-            if "/COM" not in cmd_ and "/TITLE" not in cmd_:
+            if cmd_[:4].upper() not in ["/COM", "/TITLE", "/SYS"]:
                 # Edge case. `\title, 'par=1234' `
                 self._check_parameter_name(param_name)
 
