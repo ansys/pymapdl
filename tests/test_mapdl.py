@@ -1254,7 +1254,7 @@ def test_inquire(mapdl, cleared):
 
     # **Returning Information About a File to a Parameter**
     jobname = mapdl.inquire("", "jobname")
-    existing_file = mapdl.list_files()[0]
+    existing_file = [each for each in mapdl.list_files() if each.endswith(".log")][0]
 
     assert isinstance(mapdl.inquire("", "exist", existing_file), bool)
     assert isinstance(mapdl.inquire("", "exist", "unexisting_file.myext"), bool)
