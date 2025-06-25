@@ -69,6 +69,7 @@ from ansys.mapdl.core.misc import (
     check_valid_ip,
     check_valid_port,
     create_temp_dir,
+    parse_ip_route,
 )
 from ansys.mapdl.core.misc import threaded  # type: ignore
 from ansys.mapdl.core.plotting import GraphicsBackend
@@ -2025,7 +2026,7 @@ def set_license_switch(license_type: str | None, additional_switches: str) -> st
 def _get_windows_host_ip() -> str | None:
     output = _run_ip_route()
     if output:
-        return _parse_ip_route(output)
+        return parse_ip_route(output)
 
 
 def _run_ip_route() -> str | None:
@@ -2043,13 +2044,6 @@ def _run_ip_route() -> str | None:
 
     if p and p.stdout and isinstance(p.stdout, bytes):
         return p.stdout.decode()
-
-
-def _parse_ip_route(output: str) -> str | None:
-    match = re.findall(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*", output)
-
-    if match:
-        return match[0]
 
 
 def get_slurm_options(
