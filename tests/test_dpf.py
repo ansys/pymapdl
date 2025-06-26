@@ -93,7 +93,8 @@ class Test_dpf:
 
         yield rst_path
 
-        tmpdir_.cleanup()
+        if not same_container and not dpf_server.local_server:
+            tmpdir_.cleanup()
 
     @pytest.fixture()
     def model(self, dpf_server, mapdl, solved_box_rst):
