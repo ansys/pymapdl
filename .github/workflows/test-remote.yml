@@ -251,6 +251,7 @@ jobs:
           ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
           ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
           file_name: "${{ inputs.file-name }}"
+          MAPDL-VERSION: "${{ inputs.mapdl-version }}"
         shell: bash
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
