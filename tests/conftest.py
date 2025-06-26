@@ -896,7 +896,9 @@ def solved_box_func(mapdl):
 
         mapdl.nsel("S", "LOC", "Z", 30)
         mapdl.f("ALL", "FX", 1000)
-        mapdl.run("/SOLU")
+
+        mapdl.solution()
+        mapdl.allsel()
         mapdl.antype("STATIC")
         mapdl.solve()
         mapdl.finish()

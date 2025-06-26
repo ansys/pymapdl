@@ -72,6 +72,7 @@ class Test_dpf:
         from conftest import solved_box_func
 
         solved_box_func(mapdl)
+        mapdl.save()
 
         # Upload RST
         same_container = dpf_same_container()
