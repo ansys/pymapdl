@@ -1232,23 +1232,17 @@ def test_cwd(mapdl, cleared, tmpdir):
     mapdl.slashdelete("anstmp")
 
 
-@requires("nocicd")
-@requires("local")
 def test_inquire(mapdl, cleared):
     # Testing basic functions (First block: Functions)
     assert "apdl" in mapdl.inquire("", "apdl").lower()
 
     # **Returning the Value of an Environment Variable to a Parameter**
-    env = list(os.environ.keys())[0]
-    if os.name == "nt":
-        env_value = os.getenv(env).split(";")[0]
-    elif os.name == "posix":
-        env_value = os.getenv(env).split(":")[0]
+    if mapdl.platform == "linux":
+        name, value = mapdl.sys(f"printenv").splitlines()[0].split("=")
     else:
-        raise Exception("Not supported OS.")
+        pytest.skip(f"Platform {mapdl.platform} not supported")
 
-    env_ = mapdl.inquire("", "ENV", env, 0)
-    assert env_ == env_value
+    assert value == mapdl.inquire("", "ENV", name, 0)
 
     # **Returning the Value of a Title to a Parameter**
     title = "This is the title"
@@ -1257,8 +1251,17 @@ def test_inquire(mapdl, cleared):
 
     # **Returning Information About a File to a Parameter**
     jobname = mapdl.inquire("", "jobname")
-    assert float(mapdl.inquire("", "exist", jobname + ".lock")) in [0, 1]
-    assert float(mapdl.inquire("", "exist", jobname, "lock")) in [0, 1]
+    existing_file = [each for each in mapdl.list_files() if each.endswith(".log")][0]
+
+    assert isinstance(mapdl.inquire("", "exist", existing_file), bool)
+    assert isinstance(mapdl.inquire("", "exist", "unexisting_file.myext"), bool)
+
+    assert mapdl.inquire("", "exist", existing_file)
+    assert not mapdl.inquire("", "exist", "unexisting_file.myext")
+
+    with mapdl.non_interactive:
+        # Testing the case where the file does not exist
+        assert mapdl.inquire("", "exist", "unexisting_file.myext") is None
 
 
 def test_ksel(mapdl, cleared):
@@ -2397,8 +2400,7 @@ def test_inquire_invalid(mapdl, cleared):
         mapdl.inquire("dummy", "hi")
 
 
-def test_inquire_default(mapdl, cleared):
-    mapdl.title("heeeelloo")
+def test_inquire_default_no_args(mapdl, cleared):
     assert str(Path(mapdl.directory)) == str(Path(mapdl.inquire()))
 
 

@@ -400,7 +400,9 @@ def check_valid_ip(ip: str) -> None:
 
 
 def parse_ip_route(output: str) -> str | None:
-    if match := re.findall(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*", output):
+    match = re.findall(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*", output)
+
+    if match:
         return match[0]
 
 
