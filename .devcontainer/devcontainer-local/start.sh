@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 # Script to create the venv, and install the dependencies
 echo "Starting local development container"
 
