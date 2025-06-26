@@ -38,8 +38,8 @@ if is_installed("ansys-dpf-core"):
 
 def dpf_same_container() -> bool:
     """By default we assume DPF is running on the same container as MAPDL"""
-    if mapdl_version := os.environ.get("MAPDL-VERSION", None):
-        if "cicd" not in mapdl_version:
+    if mapdl_version := os.environ.get("MAPDL_VERSION", None):
+        if "cicd" not in mapdl_version.lower():
             return False
     return True
 
@@ -78,7 +78,7 @@ class Test_dpf:
         same_container = dpf_same_container()
         mapdl.logger.info(f"MAPDL and DPF is on the same container: {same_container}")
 
-        if not same_container and not dpf_server.local_server:
+        if not ON_LOCAL and not same_container and not dpf_server.local_server:
             # Create temporary directory
             tmpdir_ = tempfile.TemporaryDirectory()
 
