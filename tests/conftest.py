@@ -393,7 +393,12 @@ class MyReporter(TerminalReporter):
             return get_normal_message(rep, header, message)
 
         def get_error_message(rep: CollectReport):
-            message = str(rep.longrepr.reprcrash.message)
+            if hasattr(rep.longrepr, "reprcrash"):
+                message = str(rep.longrepr.reprcrash.message)
+            else:
+                # Error string
+                message = str(rep.longrepr.errorstring)
+
             header = markup("[ERROR]", **ERROR_COLOR)
             return get_failure_message(rep, header, message)
 
@@ -872,9 +877,9 @@ def cube_solve(cleared, mapdl, cube_geom_and_mesh):
     out = mapdl.modal_analysis(nmode=10, freqb=1)
 
 
-@pytest.fixture
-def solved_box(mapdl, cleared):
+def solved_box_func(mapdl):
     with mapdl.muted:  # improve stability
+        mapdl.prep7()
         mapdl.et(1, "SOLID5")
         mapdl.block(0, 10, 0, 20, 0, 30)
         mapdl.esize(10)
@@ -892,10 +897,17 @@ def solved_box(mapdl, cleared):
 
         mapdl.nsel("S", "LOC", "Z", 30)
         mapdl.f("ALL", "FX", 1000)
-        mapdl.run("/SOLU")
+
+        mapdl.solution()
+        mapdl.allsel()
         mapdl.antype("STATIC")
         mapdl.solve()
         mapdl.finish()
+
+
+@pytest.fixture
+def solved_box(mapdl, cleared):
+    return solved_box_func(mapdl)
 
 
 @pytest.fixture(scope="function")

@@ -62,10 +62,12 @@ jobs:
       PYMAPDL_DB_PORT: 21002  # default won't work on GitHub runners
       PYMAPDL_DB_PORT2: 21003  # default won't work on GitHub runners
       DPF_DOCKER_IMAGE: ghcr.io/ansys/mapdl:v25.2-rocky-dpf-standalone
-      DPF_PORT: 21004
+      DPF_PORT: 21014
+      DPF_PORT2: 21015
       DPF_START_SERVER: False
       HAS_DPF: True
-      PYTEST_ARGUMENTS: '-vvv -ra --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests --strict-markers'
+      TEST_DPF_BACKEND: false
+      PYTEST_ARGUMENTS: '-vvv -ra --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=5 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests --strict-markers'
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
 
     steps:
@@ -105,11 +107,20 @@ jobs:
         shell: bash
         run: |
           export ON_SAME_CONTAINER=false
+
           if [[ "${{ inputs.mapdl-version }}" == *"ubuntu"* ]];
             then export ON_UBUNTU=true; export TAG_UBUNTU="ubuntu";
             else export ON_UBUNTU=false; export TAG_UBUNTU="centos";
-            if [[ "${{ inputs.mapdl-version }}" == *"cicd"* ]]; then export ON_SAME_CONTAINER="true"; fi
           fi
+
+          if [[ "${{ inputs.mapdl-version }}" == *"cicd"* ]]; then
+            echo "CICD MAPDL version detected, testing DPF backend for results module.";
+            echo "TEST_DPF_BACKEND=true" >> $GITHUB_ENV;
+
+            echo "It should be run on the same container as MAPDL";
+            export ON_SAME_CONTAINER=true;
+          fi
+
           echo "ON_UBUNTU: $ON_UBUNTU"
           echo "TAG_UBUNTU: $TAG_UBUNTU"
           echo "ON_SAME_CONTAINER: $ON_SAME_CONTAINER"
@@ -143,11 +154,14 @@ jobs:
           echo "Launching first MAPDL instance..."
           export INSTANCE_NAME=MAPDL_0
           .ci/start_mapdl.sh &> mapdl_launch_0.log & export DOCKER_PID_0=$!
+
           echo "Launching a second instance for MAPDL pool testing..."
           export PYMAPDL_PORT=${{ env.PYMAPDL_PORT2 }}
           export PYMAPDL_DB_PORT=${{ env.PYMAPDL_DB_PORT2 }}
           export INSTANCE_NAME=MAPDL_1
+          export DPF_PORT=${{ env.DPF_PORT2 }}
           .ci/start_mapdl.sh &> mapdl_launch_1.log & export DOCKER_PID_1=$!
+
           echo "Launching MAPDL service 0 at PID: $DOCKER_PID_0"
           echo "Launching MAPDL service 1 at PID: $DOCKER_PID_1"
           echo "DOCKER_PID_0=$(echo $DOCKER_PID_0)" >> $GITHUB_OUTPUT
@@ -159,14 +173,7 @@ jobs:
         env:
           ANSYS_DPF_ACCEPT_LA: Y
         run: |
-          docker pull $DPF_DOCKER_IMAGE && docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y -p ${{ env.DPF_PORT }}:50052 $DPF_DOCKER_IMAGE && echo "DPF Server active on port ${{ env.DPF_PORT }}." > log_dpf.txt &
-      
-      - name: "Start DPF server on same container as MAPDL"
-        if: ${{ steps.ubuntu_check.outputs.ON_SAME_CONTAINER == 'true' }}
-        shell: bash
-        run: |
-          echo "Starting DPF server on same MAPDL container..."
-          docker exec MAPDL_0 /bin/bash -c "/ansys_inc/v252/aisol/bin/linx64/Ans.Dpf.Grpc.sh --port ${{ env.DPF_PORT }} &" &> log_dpf.txt &
+          docker pull $DPF_DOCKER_IMAGE && docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y -p ${{ env.DPF_PORT }}:50052 $DPF_DOCKER_IMAGE && echo "DPF Server active on port ${{ env.DPF_PORT }}." > log_dpf.log &
 
       - name: "Getting files change filters"
         uses: dorny/paths-filter@v3
@@ -215,12 +222,27 @@ jobs:
         run: |
           python -m pip install .[tests]
 
+      - name: "Start DPF server on same container as MAPDL"
+        if: ${{ steps.ubuntu_check.outputs.ON_SAME_CONTAINER == 'true' }}
+        shell: bash
+        env:
+          MAPDL_INSTANCE: "MAPDL_0"
+          DPF_PORT: "${{ env.DPF_PORT }}"
+        run: |
+          docker ps
+          echo "Starting DPF server on same MAPDL container: ${MAPDL_INSTANCE}"
+          docker exec ${MAPDL_INSTANCE} /bin/bash -c "/ansys_inc/v252/aisol/bin/linx64/Ans.Dpf.Grpc.sh --port 50055 &" > log_dpf.log &
+
       - name: "Waiting for the services to be up"
         shell: bash
         env:
           PYMAPDL_PORT: ${{ env.PYMAPDL_PORT }}
           PYMAPDL_PORT2: ${{ env.PYMAPDL_PORT2 }}
+          MAPDL_INSTANCE: MAPDL_0
         run: |
+          docker ps > docker_ps_start.log || echo "Failed to get the docker images from the docker container"
+          (docker exec "${MAPDL_INSTANCE}" /bin/bash -c "ps aux > docker_processes_start.log") || echo "Failed to get the processes from the docker container"
+
           .ci/waiting_services.sh
 
       - name: "Unit testing"
@@ -229,6 +251,7 @@ jobs:
           ON_UBUNTU: ${{ steps.ubuntu_check.outputs.ON_UBUNTU }}
           ON_STUDENT: ${{ steps.student_check.outputs.ON_STUDENT }}
           file_name: "${{ inputs.file-name }}"
+          MAPDL_VERSION: "${{ inputs.mapdl-version }}"
         shell: bash
         run: |
           echo "ON_UBUNTU: $ON_UBUNTU"
