@@ -76,7 +76,6 @@ class Test_dpf:
         # Upload RST
         same_container = dpf_same_container()
         mapdl.logger.info(f"MAPDL and DPF is on the same container: {same_container}")
-
         if not same_container and not dpf_server.local_server:
             # Create temporary directory
             tmpdir_ = tempfile.TemporaryDirectory()
@@ -88,7 +87,7 @@ class Test_dpf:
             rst_path = dpf.upload_file_in_tmp_folder(rst_path, server=dpf_server)
 
         else:
-            rst_path = f"{mapdl.directory}{'/' if mapdl.platform == 'windows' else '/'}{mapdl.result_file}"
+            rst_path = mapdl.result_file
             mapdl.logger.info(f"Using RST file from MAPDL directory: {rst_path}")
 
         yield rst_path
