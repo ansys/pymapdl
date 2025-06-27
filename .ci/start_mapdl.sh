@@ -69,7 +69,7 @@ if [[ $MAPDL_VERSION == *"cicd"* ]] ; then
     echo "DB_INT_PORT: $DB_INT_PORT"
 else
     export DPF_ARG=""
-    export DB_INT_PORT="${DPF_PORT_INTERNAL}"
+    export DB_INT_PORT=50055
 fi;
 
 echo "EXEC_PATH: $EXEC_PATH"

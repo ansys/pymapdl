@@ -22,6 +22,7 @@
 
 """Test the DPF implementation"""
 import os
+import tempfile
 
 import pytest
 
@@ -35,56 +36,86 @@ if is_installed("ansys-dpf-core"):
     DPF_PORT = int(os.environ.get("DPF_PORT", DPF_DEFAULT_PORT))  # Set in ci.yaml
 
 
-@pytest.fixture()
-def dpf_server():
-    if not HAS_DPF:
-        pytest.skip("DPF is not available.", allow_module_level=True)
-
-    if not is_installed("ansys-dpf-core"):
-        pytest.skip(f"'ansys-dpf-core' is not available.", allow_module_level=True)
-
-    # Start the DPF server
-    if ON_LOCAL:
-        # If running locally, start the server
-        dpf_server = dpf.start_local_server(port=DPF_PORT)
-        assert not dpf_server.info["server_ip"]
-
-    else:
-        # If running in a container or remote, connect to the server
-        dpf_server = dpf.connect_to_server(port=DPF_PORT)
-        assert dpf_server.info["server_ip"]
-
-    return dpf_server
+def dpf_same_container() -> bool:
+    """By default we assume DPF is running on the same container as MAPDL"""
+    if mapdl_version := os.environ.get("MAPDL_VERSION", None):
+        if "cicd" not in mapdl_version.lower():
+            return False
+    return True
 
 
-@pytest.fixture()
-def model(dpf_server, mapdl, solved_box, tmpdir):
-    # Download RST file
-    rst_path = mapdl.download_result(str(tmpdir.mkdir("tmpdir")))
+class Test_dpf:
 
-    # Upload RST
-    if not dpf_server.local_server:
-        rst_path = dpf.upload_file_in_tmp_folder(rst_path, server=dpf_server)
+    @pytest.fixture(scope="class")
+    def dpf_server(self):
+        if not HAS_DPF:
+            pytest.skip("DPF is not available.", allow_module_level=True)
 
-    model = dpf.Model(rst_path)
-    assert model.results is not None
+        if not is_installed("ansys-dpf-core"):
+            pytest.skip(f"'ansys-dpf-core' is not available.", allow_module_level=True)
 
-    return model
+        # Start the DPF server
+        if ON_LOCAL:
+            # If running locally, start the server
+            dpf_server = dpf.start_local_server(port=DPF_PORT)
+            assert not dpf_server.info["server_ip"]
 
+        else:
+            # If running in a container or remote, connect to the server
+            dpf_server = dpf.connect_to_server(port=DPF_PORT)
+            assert dpf_server.info["server_ip"]
 
-def test_metadata_meshed_region(dpf_server, mapdl, model):
-    # Checks
-    mapdl.allsel()
-    assert mapdl.mesh.n_node == model.metadata.meshed_region.nodes.n_nodes
-    assert mapdl.mesh.n_elem == model.metadata.meshed_region.elements.n_elements
+        return dpf_server
 
+    @pytest.fixture(scope="class")
+    def solved_box_rst(self, dpf_server, mapdl):
+        from conftest import solved_box_func
 
-def test_displacement(model, mapdl):
-    results = model.results
-    displacements = results.displacement()
+        solved_box_func(mapdl)
+        mapdl.save()
 
-    disp_dpf = displacements.outputs.fields_container()[0].data
-    disp_mapdl = mapdl.post_processing.nodal_displacement("all")
+        # Upload RST
+        same_container = dpf_same_container()
+        mapdl.logger.info(f"MAPDL and DPF is on the same container: {same_container}")
 
-    assert disp_dpf.max() == disp_mapdl.max()
-    assert disp_dpf.min() == disp_mapdl.min()
+        if not ON_LOCAL and not same_container and not dpf_server.local_server:
+            # Create temporary directory
+            tmpdir_ = tempfile.TemporaryDirectory()
+
+            # Download the results file
+            rst_path = mapdl.download_result(tmpdir_.name)
+
+            mapdl.logger.info(f"Uploading RST file to DPF server: {rst_path}")
+            rst_path = dpf.upload_file_in_tmp_folder(rst_path, server=dpf_server)
+
+        else:
+            rst_path = mapdl.result_file
+            mapdl.logger.info(f"Using RST file from MAPDL directory: {rst_path}")
+
+        yield rst_path
+
+        if not same_container and not dpf_server.local_server:
+            tmpdir_.cleanup()
+
+    @pytest.fixture()
+    def model(self, dpf_server, mapdl, solved_box_rst):
+        model = dpf.Model(solved_box_rst)
+        assert model.results is not None
+
+        return model
+
+    def test_metadata_meshed_region(self, mapdl, model):
+        # Checks
+        mapdl.allsel()
+        assert mapdl.mesh.n_node == model.metadata.meshed_region.nodes.n_nodes
+        assert mapdl.mesh.n_elem == model.metadata.meshed_region.elements.n_elements
+
+    def test_displacement(self, model, mapdl):
+        results = model.results
+        displacements = results.displacement()
+
+        disp_dpf = displacements.outputs.fields_container()[0].data
+        disp_mapdl = mapdl.post_processing.nodal_displacement("all")
+
+        assert disp_dpf.max() == disp_mapdl.max()
+        assert disp_dpf.min() == disp_mapdl.min()
