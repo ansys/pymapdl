@@ -50,6 +50,7 @@ from common import (
     make_sure_not_instances_are_left_open,
     restart_mapdl,
     support_plotting,
+    test_dpf_backend,
     testing_minimal,
 )
 
@@ -60,6 +61,7 @@ from common import (
 #
 DEBUG_TESTING = debug_testing()
 TESTING_MINIMAL = testing_minimal()
+TEST_DPF_BACKEND = test_dpf_backend()
 
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()
@@ -395,9 +397,10 @@ class MyReporter(TerminalReporter):
         def get_error_message(rep: CollectReport):
             if hasattr(rep.longrepr, "reprcrash"):
                 message = str(rep.longrepr.reprcrash.message)
-            else:
-                # Error string
+            elif hasattr(rep.longrepr, "errorstring"):
                 message = str(rep.longrepr.errorstring)
+            else:
+                raise Exception(str(rep.longrepr))
 
             header = markup("[ERROR]", **ERROR_COLOR)
             return get_failure_message(rep, header, message)

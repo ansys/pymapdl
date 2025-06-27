@@ -148,6 +148,7 @@ ALLOWABLE_LAUNCH_MAPDL_ARGS = [
     "just_launch",
     "on_pool",
     "graphics_backend",
+    "use_reader_backend",
 ]
 
 ON_WSL = os.name == "posix" and (

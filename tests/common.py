@@ -170,6 +170,10 @@ def debug_testing() -> bool:
         return False
 
 
+def test_dpf_backend() -> bool:
+    return os.environ.get("TEST_DPF_BACKEND", "NO").upper().strip() in ["YES", "TRUE"]
+
+
 def is_float(s: str) -> bool:
     try:
         float(s)

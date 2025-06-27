@@ -62,7 +62,7 @@ fi;
 
 if [[ $MAPDL_VERSION == *"cicd"* ]] ; then
     echo "It is a CICD version, binding DPF port too"
-    export DPF_ARG="-p ${DPF_PORT}:50055"
+    export DPF_ARG="-p ${DPF_PORT}:${DPF_PORT_INTERNAL}"
     export DB_INT_PORT=50056
 
     echo "DPF_ARG: $DPF_ARG"
