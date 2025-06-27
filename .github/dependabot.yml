@@ -9,6 +9,11 @@ updates:
       - "maintenance"
     commit-message:
       prefix: "ci"
+    cooldown:
+      default-days: 10
+      semver-patch-days: 3
+      include:
+        - "*"  # Include all dependencies in cooldown
     groups:
        actions:
           patterns:
@@ -26,6 +31,11 @@ updates:
       - "dependencies"
     commit-message:
       prefix: "build"
+    cooldown:
+      default-days: 10
+      semver-patch-days: 3
+      include:
+        - "*"  # Include all dependencies in cooldown
     groups:
        minimal:
           patterns:
