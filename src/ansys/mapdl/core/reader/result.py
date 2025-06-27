@@ -258,6 +258,7 @@ class DPFResult(Result):
             None  # True if the DPF server is running on the same machine as MAPDL
         )
         self._is_remote: bool | None = None  # Whether DPF is remote or not
+        self._dpf_ip: str | None = None
 
         # self.connect_to_server()
 
@@ -313,7 +314,7 @@ class DPFResult(Result):
         self.logger.debug(f"Using MAPDL IP address: {self._mapdl_ip}")
 
         # Get DPF server IP
-        dpf_ip = self.server.ip if self.server else None
+        dpf_ip = self.dpf_ip
 
         if mapdl_ip != dpf_ip:
             self.logger.debug(
@@ -372,7 +373,17 @@ class DPFResult(Result):
                 raise ValueError(
                     "external_ip and external_port should be provided for RemoteGrpc communication"
                 )
+
         self._server = srvr
+
+    def _get_dpf_ip(self) -> str:
+        return self.server.ip if self.server and hasattr(self.server, "ip") else ""
+
+    @property
+    def dpf_ip(self) -> str:
+        if self._dpf_ip is None:
+            self._dpf_ip = self._get_dpf_ip()
+        return self._dpf_ip
 
     @property
     def server(self) -> dpf.server_types.BaseServer:
@@ -386,6 +397,8 @@ class DPFResult(Result):
         """
         if self._server is None:
             self.connect_to_server()
+            if self.dpf_ip:
+                self.logger.debug(f"Connected to DPF server at {self.dpf_ip}")
 
         return self._server
 
