@@ -11,7 +11,6 @@ updates:
       prefix: "ci"
     cooldown:
       default-days: 10
-      semver-patch-days: 3
       include:
         - "*"  # Include all dependencies in cooldown
       exclude:
