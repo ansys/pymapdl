@@ -343,7 +343,7 @@ jobs:
           fi
 
           echo "Pushing changes to '${{ env.PR_BASE_REPO }}' repo"
-          git push origin ${{ env.PR_BASE_BRANCH }} --force-with-lease || { echo "::error:: Push failed. Aborting."; exit 1; }
+          git push origin ${{ env.PR_BASE_BRANCH }} --force-with-lease || git fetch --all && git push origin ${{ env.PR_BASE_BRANCH }} --force-with-lease || { echo "::error:: Push failed. Aborting."; exit 1; }
 
           if [[ "${{ env.MODE }}" == "--ours" ]]; then
             echo "Sync mode is 'ours'. Pushing to head_repo/${{ env.PR_HEAD_BRANCH }} with 'ours' changes"
@@ -354,7 +354,7 @@ jobs:
         if : ${{ env.CONTINUE == 'true' }}
         uses: actions/github-script@v7
         with:
-          github-token: "${{ secrets.PYANSYS_CI_BOT_TOKEN }}"
+          github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           script: |
             const prNumber = process.env.PR_NUMBER;
             const prHeadBranch = process.env.PR_HEAD_BRANCH;
@@ -362,6 +362,7 @@ jobs:
             const prBaseBranch = process.env.PR_BASE_BRANCH;
             const prBaseRepo = process.env.PR_BASE_REPO;
             const userTriggering = process.env.USER_TRIGGERING;
+            const comment_id = process.env.COMMENT_ID;
 
             core.debug(`Listing existing PRs for branch ${prBaseBranch}...`);
             const existingPrs = await github.rest.pulls.list({
@@ -380,14 +381,14 @@ jobs:
             }
 
             // Retrieving the original PR details
-            const { originalPR } = await github.rest.pulls.get({
+            const { data: originalPR } = await github.rest.pulls.get({
               owner: 'ansys',
               repo: 'pymapdl',
               pull_number: prNumber,
             });
 
             // https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#create-a-pull-request
-            newPrData = await github.rest.pulls.create({
+            const newPrData = await github.rest.pulls.create({
               owner: 'ansys',
               repo: 'pymapdl',
               debug: true,
@@ -398,19 +399,18 @@ jobs:
 
             Check the [original PR](https://github.com/ansys/pymapdl/pull/${originalPR.number}) made by @${originalPR.user.login} for more details.
 
-            Closes #${prNumber}`,
+            Closes #${prNumber}
 
             ## Original pull request
 
             ### ${originalPR.title}
-            ${originalPR.body}
-
+            ${originalPR.body}`,
             });
 
             core.info(`New PR created: ${newPrData.data.number}`);
             
             core.info(`Assinging PR to: ${userTriggering} and ${originalPR.user.login}`);
-            await octokit.request('POST /repos/{owner}/{repo}/issues/{issue_number}/assignees', {
+            await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/assignees', {
               owner: 'ansys',
               repo: 'pymapdl',
               issue_number: newPrData.data.number,
@@ -427,7 +427,7 @@ jobs:
             github.rest.reactions.createForIssueComment({
               owner: 'ansys',
               repo: 'pymapdl',
-              comment_id: ${{ env.COMMENT_ID }},
+              comment_id: comment_id,
               content: 'rocket',
             });
 
@@ -436,16 +436,31 @@ jobs:
               owner: 'ansys',
               repo: 'pymapdl',
               issue_number: prNumber,
-              body: `**:rocket: Migration completed!**
+              body: `## :rocket: Migration completed!
 
             The PR [#${newPrData.data.number}](${newPrData.data.html_url}) has been created successfully.
 
-            Thank you @${userTriggering} for your contribution! Please review the PR and make any necessary changes.`,
+            Thank you @${userTriggering} for your contribution! Please review the PR and make any necessary changes.
+
+            You can clone this branch in a new repository by doing:
+
+            ~~~terminal
+            git clone -b ${prHeadBranch} --single-branch https://github.com/ansys/pymapdl.git
+            ~~~
+
+            If you have [GitHub CLI](https://cli.github.com/) installed, you can also use the following command to check out the pull request:
+
+            ~~~terminal
+            gh pr checkout https://github.com/ansys/pymapdl/pull/${prNumber}
+            ~~~
+
+            This PR will be closed by the admins when the new PR has been checked to work.
+            `,
             });
 
       - name: Create comment about failed migration
         # Not creating more failure comments if the workflow is retried
-        if: ${{ failure() && github.run_attempt == 1 }}
+        if: ${{ failure() && github.run_attempt == 1 && github.event_name != 'workflow_dispatch' }}
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
