@@ -63,7 +63,7 @@ all = [
 
 tests = [
   "ansys-dpf-core[graphics]==0.13.6",
-  "ansys-tools-visualization-interface==0.9.2",
+  "ansys-tools-visualization-interface==0.10.0",
   "autopep8==2.3.2",
   "matplotlib==3.10.3",
   "pandas==2.3.0",
@@ -86,7 +86,7 @@ doc = [
   "ansys-dpf-core[graphics]==0.13.6",
   "ansys-mapdl-reader==0.55.1",
   "ansys-sphinx-theme==1.5.2",
-  "ansys-tools-visualization-interface==0.9.2",
+  "ansys-tools-visualization-interface==0.10.0",
   "grpcio==1.73.1",
   "imageio-ffmpeg==0.6.0",
   "imageio==2.37.0",
