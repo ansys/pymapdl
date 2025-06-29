@@ -8,8 +8,8 @@
 
 * [1081](https://github.com/1081)
 * [Alex Fernandez](https://github.com/AlejandroFernandezLuces)
-* [Alex Kaszynski](https://github.com/akaszynski)
 * [Alex Kaszynski](https://github.com/ansys-akaszyns)
+* [Alex Kaszynski](https://github.com/akaszynski)
 * [beppo-dd](https://github.com/beppo-dd)
 * [Camille](https://github.com/clatapie)
 * [Daniel Correia](https://github.com/DanReia)
@@ -34,6 +34,7 @@
 * [Mathilde](https://github.com/mgalloue)
 * [Maxime Rey](https://github.com/MaxJPRey)
 * [Maxjrey](https://github.com/Maxjrey)
+* [Mehmet Baris Batukan](https://github.com/mbbatukan)
 * [Mohamed Koubaa](https://github.com/koubaa)
 * [Muhammed Adedigba](https://github.com/moe-ad)
 * [natter1](https://github.com/natter1)
