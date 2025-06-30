@@ -2031,7 +2031,7 @@ class Results:
 
             * ``STTMAX`` - Maximum circumferential stress
 
-            * ``PSMAX`` - Maximum circumferential stress when :math:`equation_not_available`
+            * ``PSMAX`` - Maximum circumferential stress when :math:`equation not available`
 
             * ``DLTA`` - Incremental crack extension in a `fatigue crack-growth analysis
               <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/fracfcgxfem.html#fracfcgxfemexample>`_
@@ -2811,7 +2811,7 @@ class Results:
 
             * ``> 0`` - Absolute tolerance about zero within which loads are not printed.
 
-             Defaults to 1.0E-9 times the absolute value of the maximum load on the selected nodes.
+            Defaults to 1.0E-9 times the absolute value of the maximum load on the selected nodes.
 
         item : str
             Selected set of nodes.

@@ -51,9 +51,9 @@ class SpecialPurpose:
             Symmetry key:
 
             * ``0 or 1`` - Half-crack model with symmetry boundary conditions ( :ref:`dsym` ]) in the crack-tip
-              coordinate system. K II = K III = 0. Three nodes are required on the path.
+              coordinate system. K:sub:`II` = K:sub:`III` = 0. Three nodes are required on the path.
 
-            * ``2`` - Like 1 except with antisymmetric boundary conditions (K I = 0).
+            * ``2`` - Like 1 except with antisymmetric boundary conditions (K:sub:`I` = 0).
 
             * ``3`` - Full-crack model (both faces). Five nodes are required on the path (one at the tip and two
               on each face).
@@ -70,8 +70,8 @@ class SpecialPurpose:
 
         .. _KCALC_notes:
 
-        Calculates the stress intensity factors (K I, K II, and K III ) associated with homogeneous
-        isotropic linear elastic fracture mechanics.
+        Calculates the stress intensity factors (K:sub:`I`, K:sub:`II`, and K:sub:`III` ) associated with
+        homogeneous isotropic linear elastic fracture mechanics.
 
         A displacement extrapolation method is used in the calculation. (See `POST1 - Crack Analysis (KCALC)
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_arch/bob143.html#eq57266024-e263-4fd8-b9d4-5ff7d2c2411a>`_

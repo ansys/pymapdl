@@ -1212,8 +1212,6 @@ class SpecialPurpose:
         ``Option`` = ABSTOLN or NUMMATCH). Multiple :ref:`macopt`, DOF commands can be issued consecutively
         to combine different degrees of freedom.
 
-         .. _MACOPT_FRF:
-
         The FRF option is not compatible with any MAC calculation options (DOF, NMAC and KEYMASS) and can
         only be used with node matching procedures.
 
@@ -3730,8 +3728,8 @@ class SpecialPurpose:
             * ``All`` - Reads all substeps. This value is the default.
 
         maclim : str
-            Smallest acceptable criterion value. Must be :math:`equation_not_available`  0 and
-            :math:`equation_not_available`  1. The default value is 0.90.
+            Smallest acceptable criterion value. Must be :math:`equation not available`  0 and
+            :math:`equation not available`  1. The default value is 0.90.
 
         cname : str
             Name of the component from the first file ( ``File1`` ). The component must be based on nodes.

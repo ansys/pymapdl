@@ -618,10 +618,10 @@ class SetUp:
 
         .. math::
 
-            equation_not_available
+            equation not available
 
-        R R and R I are, respectively, the real and imaginary parts of the results quantity (e.g. the nodal
-        displacements, the reaction forces,...).
+        R:sub:`R` and R:sub:`I` are, respectively, the real and imaginary parts of the results quantity
+        (e.g. the nodal displacements, the reaction forces,...).
 
         α is the angle (OMEGAT).
 
@@ -864,6 +864,11 @@ class SetUp:
         r"""Defines the data set to be read from the results file.
 
         Mechanical APDL Command: `SET <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SET.html>`_
+
+        .. note::
+
+            From version 0.64 you can use the methods ``to_list`` and ``to_array`` on the object
+            returning from ``mapdl.set("list")``.
 
         Parameters
         ----------

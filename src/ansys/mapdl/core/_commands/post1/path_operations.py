@@ -429,7 +429,7 @@ class PathOperations:
 
         .. math::
 
-            equation_not_available
+            equation not available
 
         Use S for ``Lab2`` to integrate ``Lab1`` with respect to the path length. S, the distance along the
         path, is automatically calculated by the program when a path item is created with the :ref:`pdef`
@@ -553,8 +553,6 @@ class PathOperations:
         coordinates, and the path length (label S). For alternate methods of mapping the path geometry (to
         include, for example, material discontinuity) see the :ref:`pmap` command. These items may also be
         listed or displayed with the :ref:`prpath`, :ref:`plpath`, and :ref:`plpagm` commands.
-
-         .. _Onyx27480:
 
         If specifying that load case operations act on principal/equivalent stresses ( :ref:`sumtype`,PRIN),
         derived quantities (principal and equivalent stresses/strains) will be zero for path plots. A
