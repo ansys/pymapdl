@@ -23,851 +23,6 @@
 
 class SetUp:
 
-    def pstatus(self, wn: str = "", **kwargs):
-        r"""Displays the global or window display specifications.
-
-        Mechanical APDL Command: `/PSTATUS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PSTATUS.html>`_
-
-        Parameters
-        ----------
-        wn : str
-            Window number for status (defaults to global specifications).
-
-        Notes
-        -----
-
-        .. _s-PSTATUS_notes:
-
-        Displays the current global or window display specifications. Global display specifications are
-        common to all windows (e.g. :ref:`show`, etc.). Window display specifications are specific to one
-        window (e.g. :ref:`view`, :ref:`slashtype`, etc.).
-
-        This command is valid in any processor.
-        """
-        command = f"/PSTATUS,{wn}"
-        return self.run(command, **kwargs)
-
-    def pngr(self, kywrd: str = "", opt: str = "", val: int | str = "", **kwargs):
-        r"""Provides PNG file export for Mechanical APDL displays.
-
-        Mechanical APDL Command: `PNGR <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PNGR.html>`_
-
-        Parameters
-        ----------
-        kywrd : str
-            Specifies various PNG file export options.
-
-            * ``COMP`` - If ``Kywrd`` = COMP, then ``OPT`` is either ON or OFF (blank is interpreted as OFF).
-              This option allows you to turn PNG file compression ON or OFF. If OPT = ON, then The VAL field is
-              read to determine the degree of compression. See the VALUE argument for acceptable compression
-              values.
-
-            * ``ORIENT`` - If ``Kywrd`` = ORIENT, then ``OPT`` will determine the orientation of the entire
-              plot. ``OPT`` can be either Horizontal (default) or Vertical.
-
-            * ``COLOR`` - If ``Kywrd`` = COLOR, then ``OPT`` will determine the color depth of the saved file.
-              ``OPT`` can be 0, 1, or 2, corresponding to Black and White, Grayscale, and Color (default),
-              respectively.
-
-            * ``TMOD`` - If ``Kywrd`` = TMOD, then ``OPT`` will determine the text method. ``OPT`` can be either
-              1 or 0, corresponding to bitmap text (default) or line stroke text, respectively.
-
-            * ``DEFAULT`` - If ``Kywrd`` = DEFAULT, then all of the default values, for all of the Kywrd
-              parameters listed above, are active.
-
-            * ``STAT`` - Shows the current status of PNG file export.
-
-        opt : str
-            ``OPT`` can have the following names or values, depending on the value for ``Kywrd`` (see above).
-
-            * ``ON, OFF`` - If ``Kywrd`` = COMP, the values On and Off control the use of compression. The
-              degree of compression is determined by VAL
-
-            * ``Horizontal, Vertical`` - If ``Kywrd`` = ORIENT, the terms Horizontal or Vertical determine the
-              orientation of the plot.
-
-            * ``0, 1, 2`` - If ``Kywrd`` = COLOR, the numbers 0, 1, and 2 correspond to Black and White,
-              Grayscale and Color, respectively.
-
-            * ``1, 0`` - If ``Kywrd`` = TMOD, the values 1 and 0 determine whether bitmap (1) or stroke text (0)
-              fonts will be used
-
-        val : int or str
-            ``VAL`` is active only when ``Kywrd`` = COMP, and determines the degree of compression applied to
-            the exported file (see above).
-
-            * ``-1`` - Apply the default, optimum value for compression. This value represents the best
-              combination of speed and compression. It varies according to the release level of the ZLIB
-              compression package.
-
-            * ``1-9`` - Use this value to specify a specific compression level. 1 is the lowest compression
-              level (fastest) and 9 is the highest compression level (slowest).
-
-        """
-        command = f"PNGR,{kywrd},{opt},{val}"
-        return self.run(command, **kwargs)
-
-    def mrep(
-        self,
-        name: str = "",
-        arg1: str = "",
-        arg2: str = "",
-        arg3: str = "",
-        arg4: str = "",
-        arg5: str = "",
-        arg6: str = "",
-        arg7: str = "",
-        arg8: str = "",
-        arg9: str = "",
-        arg10: str = "",
-        arg11: str = "",
-        arg12: str = "",
-        arg13: str = "",
-        arg14: str = "",
-        arg15: str = "",
-        arg16: str = "",
-        arg17: str = "",
-        arg18: str = "",
-        **kwargs,
-    ):
-        r"""Enables you to reissue the graphics command macro "name" during a replot or zoom operation.
-
-        Mechanical APDL Command: `/MREP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MREP.html>`_
-
-        Parameters
-        ----------
-        name : str
-            The name identifying the macro file or macro block on a macro library file. The name can contain
-            up to eight characters maximum and must begin with a letter.
-
-        arg1 : str
-            Values to be passed into the file or block.
-
-        arg2 : str
-            Values to be passed into the file or block.
-
-        arg3 : str
-            Values to be passed into the file or block.
-
-        arg4 : str
-            Values to be passed into the file or block.
-
-        arg5 : str
-            Values to be passed into the file or block.
-
-        arg6 : str
-            Values to be passed into the file or block.
-
-        arg7 : str
-            Values to be passed into the file or block.
-
-        arg8 : str
-            Values to be passed into the file or block.
-
-        arg9 : str
-            Values to be passed into the file or block.
-
-        arg10 : str
-            Values to be passed into the file or block.
-
-        arg11 : str
-            Values to be passed into the file or block.
-
-        arg12 : str
-            Values to be passed into the file or block.
-
-        arg13 : str
-            Values to be passed into the file or block.
-
-        arg14 : str
-            Values to be passed into the file or block.
-
-        arg15 : str
-            Values to be passed into the file or block.
-
-        arg16 : str
-            Values to be passed into the file or block.
-
-        arg17 : str
-            Values to be passed into the file or block.
-
-        arg18 : str
-            Values to be passed into the file or block.
-
-        Notes
-        -----
-
-        .. _s-MREP_notes:
-
-        This command reissues the graphics command macro "name" during a replot operation ( :ref:`replot` )
-        or a zoom ( :ref:`zoom` ) operation. The program passes the command macro arguments to the replot
-        and zoom feature for use by the graphics macro. You should place the ``s-MREP`` command at the end
-        of the graphics command macro, following the last graphics command within the macro, to enable the
-        replot or zoom feature.
-        """
-        command = f"/MREP,{name},{arg1},{arg2},{arg3},,{arg4},{arg5},{arg6},{arg7},{arg8},{arg9},{arg10},{arg11},{arg12},{arg13},{arg14},{arg15},{arg16},{arg17},{arg18}"
-        return self.run(command, **kwargs)
-
-    def gplot(self, **kwargs):
-        r"""Controls general plotting.
-
-        Mechanical APDL Command: `GPLOT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GPLOT.html>`_
-
-        Notes
-        -----
-
-        .. _GPLOT_notes:
-
-        This command displays all entity types as specified via the :ref:`gtype` command. Only selected
-        entities ( :ref:`nsel`, :ref:`esel`, :ref:`ksel`, :ref:`lsel`, :ref:`asel`, :ref:`vsel` ) will be
-        displayed. See the descriptions of the :ref:`gtype` and :ref:`gcmd` commands for methods of setting
-        the entity types displayed.
-
-        This command is valid in any processor.
-        """
-        command = "GPLOT"
-        return self.run(command, **kwargs)
-
-    def gcolumn(self, curve: str = "", string: str = "", **kwargs):
-        r"""Allows the user to apply a label to a specified curve.
-
-        Mechanical APDL Command: `/GCOLUMN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GCOLUMN.html>`_
-
-        Parameters
-        ----------
-        curve : str
-            Curve number on which label will be applied (integer value between 1 and 10).
-
-        string : str
-            Name or designation that will be applied to the curve (8 characters max).
-
-        Notes
-        -----
-
-        .. _s-GCOLUMN_notes:
-
-        This command is used for an array parameter plot (a plot created by the :ref:`starvplot` command).
-        Normally the label for curve 1 is COL 1, the label for curve 2 is COL 2 and so on; the column number
-        is the field containing the dependent variables for that particular curve. Issuing :ref:`gcolumn`,
-        ``CURVE``, with no string value specified resets the label to the original value.
-        """
-        command = f"/GCOLUMN,{curve},{string}"
-        return self.run(command, **kwargs)
-
-    def gresume(self, fname: str = "", ext: str = "", **kwargs):
-        r"""Sets graphics settings to the settings on a file.
-
-        Mechanical APDL Command: `/GRESUME <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GRESUME.html>`_
-
-        Parameters
-        ----------
-        fname : str
-            File name and directory path (248 characters maximum, including the characters needed for the
-            directory path). An unspecified directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name. The file name defaults to :file:`Jobname`.
-
-        ext : str
-            Filename extension (eight-character maximum). The extension defaults to GSAV if ``Fname`` is
-            blank.
-
-        Notes
-        -----
-
-        .. _s-GRESUME_notes:
-
-        Causes a file to be read to reset the graphics slash (/) commands as they were at the last
-        :ref:`gsave` command.
-
-        This command is valid in any processor.
-        """
-        command = f"/GRESUME,{fname},{ext}"
-        return self.run(command, **kwargs)
-
-    def gtype(self, wn: str = "", label: str = "", key: int | str = "", **kwargs):
-        r"""Controls the entities that the :ref:`gplot` command displays.
-
-        Mechanical APDL Command: `/GTYPE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GTYPE.html>`_
-
-        Parameters
-        ----------
-        wn : str
-            Window number (or ALL) to which this command applies (defaults to 1)
-
-        label : str
-            This represents the type of entity to display:
-
-            * ``NODE`` - Nodes
-
-            * ``ELEM`` - Elements
-
-            * ``KEYP`` - Keypoints
-
-            * ``LINE`` - Lines
-
-            * ``AREA`` - Areas
-
-            * ``VOLU`` - Volumes
-
-            * ``GRPH`` - Graph displays
-
-        key : int or str
-            Switch:
-
-            * ``0`` - Turns the entity type off.
-
-            * ``1`` - Turns the entity type on.
-
-        Notes
-        -----
-
-        .. _s-GTYPE_notes:
-
-        The :ref:`gtype` command controls which entities the :ref:`gplot` command displays. NODE, ELEM,
-        KEYP, LINE, AREA, and VOLU are on by default. When ELEM is activated, you can control the type of
-        element displayed via the :ref:`gcmd` command (which also controls the type of graph display). When
-        the GRPH entity type is activated, all other entity types are deactivated. Conversely, when any of
-        the NODE, ELEM, KEYP, LINE, AREA, and VOLU entity types are active, the GRPH entity type is
-        deactivated.
-
-        The :ref:`gtype` command gives you several options for multi-window layout:
-
-        * One window
-
-        * Two windows (left and right or top and bottom of the screen)
-
-        * Three windows (two at the top and one at the bottom of the screen, or one top and two bottom
-          windows
-
-        * Four windows (two at the top and two at the bottom)
-
-        Once you choose a window layout, you can choose one of the following: multiple plots, replotting, or
-        no redisplay.
-
-        This command is valid in any processor.
-        """
-        command = f"/GTYPE,{wn},{label},{key}"
-        return self.run(command, **kwargs)
-
-    def gfile(self, size: str = "", **kwargs):
-        r"""Specifies the pixel resolution on Z-buffered graphics files.
-
-        Mechanical APDL Command: `/GFILE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GFILE.html>`_
-
-        Parameters
-        ----------
-        size : str
-            Pixel resolution. Defaults to a pixel resolution of 800. Valid values are from 256 to 2400.
-
-        Notes
-        -----
-
-        .. _s-GFILE_notes:
-
-        Defines the pixel resolution on subsequently written graphics files (for example, JPEG, PNG, TIFF)
-        for software Z-buffered displays ( :ref:`slashtype` ). Lowering the pixel resolution produces a
-        fuzzier image; increasing the resolution produces a sharper image but takes a little longer.
-
-        This command is valid in any processor.
-        """
-        command = f"/GFILE,{size}"
-        return self.run(command, **kwargs)
-
-    def gsave(self, fname: str = "", ext: str = "", **kwargs):
-        r"""Saves graphics settings to a file for later use.
-
-        Mechanical APDL Command: `/GSAVE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GSAVE.html>`_
-
-        Parameters
-        ----------
-        fname : str
-            File name and directory path (248 characters maximum, including the characters needed for the
-            directory path). An unspecified directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name. The file name defaults to :file:`Jobname`.
-
-        ext : str
-            Filename extension (eight-character maximum). The extension defaults to GSAV if ``Fname`` is
-            blank.
-
-        Notes
-        -----
-
-        .. _s-GSAVE_notes:
-
-        This command does not save all graphics settings, but only those that may be reset by the
-        :ref:`slashreset` command. The database remains untouched. Use the :ref:`gresume` command to read
-        the file. Repeated use of the :ref:`gsave` command overwrites the previous data on the file. The
-        following commands are saved by :ref:`gsave` :
-
-        This command contains some tables and extra information which can be inspected in the original
-        documentation pointed above.
-
-        This command is valid in any processor.
-        """
-        command = f"/GSAVE,{fname},{ext}"
-        return self.run(command, **kwargs)
-
-    def graphics(self, key: str = "", **kwargs):
-        r"""Defines the type of graphics display.
-
-        Mechanical APDL Command: `/GRAPHICS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GRAPHICS.html>`_
-
-        Parameters
-        ----------
-        key : str
-            Graphics key:
-
-            * ``FULL`` - Display all model geometry and results.
-
-            * ``POWER`` - Activate PowerGraphics (default when GUI is on).
-
-        Notes
-        -----
-
-        .. _s-GRAPHICS_notes:
-
-        The :ref:`graphics` command specifies the type of graphics display. ``Key`` = POWER activates the
-        PowerGraphics capability. PowerGraphics offers faster plotting than the  ``Key`` = FULL
-        option,  and speeds up element, results, area, line, and volume displays.
-
-        The default PowerGraphics mode is enabled automatically when accessing the GUI. This action
-        supersedes all prior macros or start-up routines ( :file:`start.ans`, :file:`config.ans`, etc.).
-        Full graphics mode is accessed only by issuing :ref:`graphics`,FULL after the GUI is active.
-
-        Results values (both printed and plotted) may differ between the  ``Key`` = FULL
-         and ``Key`` = POWER options because each option specifies a different set of data for
-        averaging and display. For  ``Key`` = FULL, all element and results
-        values (interior and surface) are included. For  ``Key`` = POWER, only
-        element and results values along the model exterior surface are processed.
-
-        When ``Key`` = FULL, it is possible to deselect an individual node, select all elements (including
-        the element that contains that node), and then perform postprocessing calculations on those elements
-        and have that unselected node not be considered in those calculations. If PowerGraphics is active,
-        however, postprocessing always displays based on selected elements.
-
-        If you have specified one facet per element edge for PowerGraphics displays (via the :ref:`efacet`
-        command or options from the General Postproc or Utility menu), PowerGraphics does not plot midside
-        nodes. ( :ref:`efacet` applies to element type displays only.)
-
-        Maximum values shown in plots can differ from printed maximum values. This is due to different
-        averaging schemes used for plotted and printed maximum values.
-
-        When using solution coordinate systems for results output ( :ref:`rsys`,SOLU) with PowerGraphics,
-        the deformed or displaced shape in a POST1 contour display can be unexpected (although the contours
-        are displayed in the expected colors). The program does not rotate displacement values (Ux,Uy,Uz) to
-        global; instead, the displacements (stored locally) are added directly to the global coordinates
-        (X,Y,Z). For example, if in PREP7 the nodes are rotated 90 degrees about the z axis and the global
-        Uy displacements are relatively large, the Ux values will be large, causing the model to display a
-        large deformation in the global X direction.
-
-        PowerGraphics displays do not average at geometric discontinuities. The printouts in PowerGraphics
-        will, however, provide averaging information at geometric discontinuities if the models do not
-        contain shell elements. Carefully inspect the data you obtain at geometric discontinuities.
-
-        PowerGraphics does not support the following diffusion analysis results: CONC, CG, DF, EPDI.
-
-        ``Key`` = FULL is not available for `XFEM-based crack-growth analysis
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_FRACXFEM.html#fracxfemreferences>`_.
-
-        Excepting a few options, PowerGraphics supports these commands:
-
-        This command contains some tables and extra information which can be inspected in the original
-        documentation pointed above.
-
-        The following commands are executed via the  ``Key`` = FULL  option,
-        regardless of whether PowerGraphics is activated:
-
-        This command contains some tables and extra information which can be inspected in the original
-        documentation pointed above.
-        """
-        command = f"/GRAPHICS,{key}"
-        return self.run(command, **kwargs)
-
-    def gcmd(
-        self,
-        wn: str = "",
-        lab1: str = "",
-        lab2: str = "",
-        lab3: str = "",
-        lab4: str = "",
-        lab5: str = "",
-        lab6: str = "",
-        lab7: str = "",
-        lab8: str = "",
-        lab9: str = "",
-        lab10: str = "",
-        lab11: str = "",
-        lab12: str = "",
-        **kwargs,
-    ):
-        r"""Controls the type of element or graph display used for the :ref:`gplot` command.
-
-        Mechanical APDL Command: `/GCMD <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GCMD.html>`_
-
-        Parameters
-        ----------
-        wn : str
-            Window number (or ALL) to which this command applies (defaults to 1)
-
-        lab1 : str
-            Command labels (for example, :ref:`plnsol`,S,X)
-
-        lab2 : str
-            Command labels (for example, :ref:`plnsol`,S,X)
-
-        lab3 : str
-            Command labels (for example, :ref:`plnsol`,S,X)
-
-        lab4 : str
-            Command labels (for example, :ref:`plnsol`,S,X)
-
-        lab5 : str
-            Command labels (for example, :ref:`plnsol`,S,X)
-
-        lab6 : str
-            Command labels (for example, :ref:`plnsol`,S,X)
-
-        lab7 : str
-            Command labels (for example, :ref:`plnsol`,S,X)
-
-        lab8 : str
-            Command labels (for example, :ref:`plnsol`,S,X)
-
-        lab9 : str
-            Command labels (for example, :ref:`plnsol`,S,X)
-
-        lab10 : str
-            Command labels (for example, :ref:`plnsol`,S,X)
-
-        lab11 : str
-            Command labels (for example, :ref:`plnsol`,S,X)
-
-        lab12 : str
-            Command labels (for example, :ref:`plnsol`,S,X)
-
-        Notes
-        -----
-
-        .. _s-GCMD_notes:
-
-        This command controls the type of element or graph display that appears when you issue the
-        :ref:`gplot` command when the :ref:`gtype`,,(ELEM or GRPH) entity type is active. If you have
-        multiple plotting windows enabled, you can also use :ref:`gcmd` to select one window when you wish
-        to edit its contents.
-
-        For related information, see the descriptions of the :ref:`gplot` and :ref:`gtype` commands in this
-        manual.
-
-        This command is valid in any processor.
-        """
-        command = f"/GCMD,{wn},{lab1},{lab2},{lab3},{lab4},{lab5},{lab6},{lab7},{lab8},{lab9},{lab10},{lab11},{lab12}"
-        return self.run(command, **kwargs)
-
-    def tiff(self, kywrd: str = "", opt: str = "", **kwargs):
-        r"""Provides TIFF file export for Mechanical APDL displays.
-
-        Mechanical APDL Command: `TIFF <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TIFF.html>`_
-
-        Parameters
-        ----------
-        kywrd : str
-            Specifies various TIFF file export options.
-
-            * ``COMP`` - If ``Kywrd`` = COMP, then ``OPT`` controls data compression for the output file. If
-              COMP = 0, then compression is off. If COMP = 1 (default), then compression is on.
-
-            * ``ORIENT`` - If ``Kywrd`` = ORIENT, then ``OPT`` will determine the orientation of the entire
-              plot. ``OPT`` can be either Horizontal (default) or Vertical.
-
-            * ``COLOR`` - If ``Kywrd`` = COLOR, then ``OPT`` will determine the color attribute of the saved
-              file. ``OPT`` can be 0, 1, or 2, corresponding to Black and White, Grayscale, and Color (default),
-              respectively.
-
-            * ``TMOD`` - If ``Kywrd`` = TMOD, then ``OPT`` will determine the text method. ``OPT`` can be either
-              1 or 0, corresponding to bitmap text (default) or line stroke text, respectively.
-
-            * ``DEFAULT`` - If ``Kywrd`` = DEFAULT, then all of the default values, for all of the Kywrd
-              parameters listed above, are active.
-
-        opt : str
-            ``OPT`` can have the following names or values, depending on the value for ``Kywrd`` (see above).
-
-            * ``1 or 0`` - If ``Kywrd`` = COMP, a value or 1 (on) or 0 (off) will control compression for the
-              TIFF file.
-
-            * ``Horizontal, Vertical`` - If ``Kywrd`` = ORIENT, the terms Horizontal or Vertical determine the
-              orientation of the plot.
-
-            * ``0, 1, 2`` - If ``Kywrd`` = COLOR, the numbers 0, 1, and 2 correspond to Black and White,
-              Grayscale and Color, respectively.
-
-            * ``1, 0`` - If ``Kywrd`` = TMOD, the values 1 and 0 determine whether bitmap (1) or stroke text (0)
-              fonts will be used
-
-        """
-        command = f"TIFF,{kywrd},{opt}"
-        return self.run(command, **kwargs)
-
-    def noerase(self, **kwargs):
-        r"""Prevents the screen erase between displays.
-
-        Mechanical APDL Command: `/NOERASE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NOERASE.html>`_
-
-        Notes
-        -----
-
-        .. _s-NOERASE_notes:
-
-        Preventing the normal screen erase between requested displays allows you to overlay multiple views.
-
-        Clearing the screen with the ``ERASE`` command ( Utility Menu> PlotCtrls> Erase Options> Erase
-        screen ) active simply clears the display area. Subsequent replots will provide the cumulative plots
-        previously generated by the :ref:`noerase` command.
-
-        For 3D devices, you can issue :ref:`dv3d`,DELS to suppress repeated screen overlays and generate
-        clear contour plots.
-
-        Use the ``/ERASE`` command to reactivate automatic screen erase.
-
-        For 3D devices ( :ref:`show`,3D), the model in all active windows will be the same, even if you
-        issue a different display command ( :ref:`nplot`, :ref:`eplot`, etc.) for each active window. Use
-        the Multi-Plot command ( :ref:`gplot` ) to display different entities, in different windows, on 3D
-        devices.
-
-        This command is valid in any processor.
-        """
-        command = "/NOERASE"
-        return self.run(command, **kwargs)
-
-    def replot(self, label: str = "", **kwargs):
-        r"""Reissues the last display command.
-
-        Mechanical APDL Command: `/REPLOT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_REPLOT.html>`_
-
-        Parameters
-        ----------
-        label : str
-            Controls the type of replot.
-
-            * ``RESIZE`` - Issued internally when a graphics window resize occurs (Default).
-
-            * ``FAST`` - Only applicable for 3D devices that allow a fast redisplay for changes in the view
-              characteristics only.
-
-        Notes
-        -----
-
-        .. _s-REPLOT_notes:
-
-        Reissues the last display command ( :ref:`nplot`, :ref:`eplot`, :ref:`kplot`, :ref:`plnsol`,
-        :ref:`plvar`, etc.), along with its parameters, for convenience. The current display specifications
-        are used.
-
-        When the last display command is invalid in a given processor, :ref:`replot` is also invalid in that
-        processor. However, if you attempt a :ref:`replot` and the last display command is invalid in the
-        current processor, Mechanical APDL generates an element display ( :ref:`eplot` ) instead, as long as
-        the
-        last display command was  :ref:`plnsol`, :ref:`plesol`, or  :ref:`pldisp`.
-
-          Example: :ref:`replot` Replaced by :ref:`eplot` Automatically
-
-          :ref:`plnsol`, used to display solution results as continuous contours, is a valid command in the
-          POST1 general postprocessor.
-
-          If you issue :ref:`plnsol` followed by :ref:`replot` while in POST1, :ref:`replot` effectively
-          reissues your earlier :ref:`plnsol` command, along with its parameters.
-
-          If you then exit POST1, enter the PREP7 preprocessor, and again issue :ref:`replot`, the program
-          uses :ref:`eplot` internally instead.
-
-          The command substitution occurs because :ref:`plnsol` is not a valid command in PREP7.
-
-        When you click one of the buttons on the `Pan, Zoom, Rotate
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_wid/Hlp_UI_PanZoom.html#wpanzoomk>`_
-        dialog box to manipulate the view of a model, :ref:`replot` is issued internally. Thus, the
-        substitution of :ref:`replot` with :ref:`eplot` as described above may also occur for operations
-        that you perform via with the `Pan, Zoom, Rotate
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_wid/Hlp_UI_PanZoom.html#wpanzoomk>`_
-        dialog box.
-
-        :ref:`replot` does not show boundary conditions if they are applied only to a solid model and the
-        last display command (such as :ref:`eplot` ) displays the finite element model. To show boundary
-        conditions, the following options are available:
-
-        * Issue :ref:`replot` after you issue :ref:`sbctran` to transfer solid model boundary conditions to
-          the finite element model.
-
-        * Issue :ref:`replot` after you issue a solid model display command (such as :ref:`vplot` ).
-
-        This command is valid in any processor (except as noted above).
-        """
-        command = f"/REPLOT,{label}"
-        return self.run(command, **kwargs)
-
-    def slashreset(self, **kwargs):
-        r"""Resets display specifications to their initial defaults.
-
-        Mechanical APDL Command: `/RESET <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RESET_sl.html>`_
-
-        Notes
-        -----
-
-        .. _s-RESET_notes:
-
-        Resets slash display specifications ( :ref:`window`, :ref:`slashtype`, :ref:`view`, etc.) back to
-        their initial default settings (for convenience). Also resets the focus location to the geometric
-        center of the object.
-
-        This command is valid in any processor.
-        """
-        command = "/RESET"
-        return self.run(command, **kwargs)
-
-    def window(
-        self,
-        wn: str = "",
-        xmin: str = "",
-        xmax: str = "",
-        ymin: str = "",
-        ymax: str = "",
-        ncopy: str = "",
-        **kwargs,
-    ):
-        r"""Defines the window size on the screen.
-
-        Mechanical APDL Command: `/WINDOW <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_WINDOW.html>`_
-
-        Parameters
-        ----------
-        wn : str
-            Window reference number (1 to 5). Defaults to 1. This number, or ALL (for all active windows),
-            may be used on other commands.
-
-        xmin : str
-            Screen coordinates defining window size. Screen coordinates are measured as -1.0 to 1.67 with
-            the origin at the screen center. For example, (-1,1.67,-1,1) is full screen, (-1,0,-1,0) is the
-            left bottom quadrant. If ``XMIN`` = OFF, deactivate this previously defined window; if ON,
-            reactivate this previously defined window. If FULL, LEFT, RIGH, TOP, BOT, LTOP, LBOT, RTOP,
-            RBOT, form full, half, or quarter window. If SQUA, form largest square window within the current
-            graphics area. If DELE, delete this window (cannot be reactivated with ON).
-
-        xmax : str
-            Screen coordinates defining window size. Screen coordinates are measured as -1.0 to 1.67 with
-            the origin at the screen center. For example, (-1,1.67,-1,1) is full screen, (-1,0,-1,0) is the
-            left bottom quadrant. If ``XMIN`` = OFF, deactivate this previously defined window; if ON,
-            reactivate this previously defined window. If FULL, LEFT, RIGH, TOP, BOT, LTOP, LBOT, RTOP,
-            RBOT, form full, half, or quarter window. If SQUA, form largest square window within the current
-            graphics area. If DELE, delete this window (cannot be reactivated with ON).
-
-        ymin : str
-            Screen coordinates defining window size. Screen coordinates are measured as -1.0 to 1.67 with
-            the origin at the screen center. For example, (-1,1.67,-1,1) is full screen, (-1,0,-1,0) is the
-            left bottom quadrant. If ``XMIN`` = OFF, deactivate this previously defined window; if ON,
-            reactivate this previously defined window. If FULL, LEFT, RIGH, TOP, BOT, LTOP, LBOT, RTOP,
-            RBOT, form full, half, or quarter window. If SQUA, form largest square window within the current
-            graphics area. If DELE, delete this window (cannot be reactivated with ON).
-
-        ymax : str
-            Screen coordinates defining window size. Screen coordinates are measured as -1.0 to 1.67 with
-            the origin at the screen center. For example, (-1,1.67,-1,1) is full screen, (-1,0,-1,0) is the
-            left bottom quadrant. If ``XMIN`` = OFF, deactivate this previously defined window; if ON,
-            reactivate this previously defined window. If FULL, LEFT, RIGH, TOP, BOT, LTOP, LBOT, RTOP,
-            RBOT, form full, half, or quarter window. If SQUA, form largest square window within the current
-            graphics area. If DELE, delete this window (cannot be reactivated with ON).
-
-        ncopy : str
-            Copies the current specifications from window ``NCOPY`` (1 to 5) to this window. If ``NCOPY`` =
-            0 (or blank), no specifications are copied.
-
-        Notes
-        -----
-
-        .. _s-WINDOW_notes:
-
-        Defines the window size on the screen. Windows may occupy a separate section of the screen or they
-        may overlap. Requested displays are formed in all windows according to the selected window
-        specifications.
-
-        This command is valid in any processor.
-        """
-        command = f"/WINDOW,{wn},{xmin},{xmax},{ymin},{ymax},{ncopy}"
-        return self.run(command, **kwargs)
-
-    def image(self, label: str = "", fname: str = "", ext: str = "", **kwargs):
-        r"""Allows graphics data to be captured and saved.
-
-        Mechanical APDL Command: `/IMAGE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_IMAGE.html>`_
-
-        Parameters
-        ----------
-        label : str
-            Label specifying the operation to be performed:
-
-            * ``CAPTURE`` - Capture the image from the graphics window to a new window.
-
-            * ``RESTORE`` - Restore the image from a file to a new window.
-
-            * ``SAVE`` - Save the contents of the graphic window to a file.
-
-            * ``DELETE`` - Delete the window that contains the file.
-
-        fname : str
-            File name and directory path (248 characters maximum, including the characters needed for the
-            directory path). An unspecified directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name.
-
-        ext : str
-            Filename extension (eight-character maximum). If no extension is specified, :file:`bmp` will be
-            used on Windows systems, and :file:`img` will be used on Linux systems.
-        """
-        command = f"/IMAGE,{label},{fname},{ext}"
-        return self.run(command, **kwargs)
-
-    def immed(self, key: int | str = "", **kwargs):
-        r"""Allows immediate display of a model as it is generated.
-
-        Mechanical APDL Command: `IMMED <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_IMMED.html>`_
-
-        Parameters
-        ----------
-        key : int or str
-            Immediate mode key:
-
-            * ``0`` - Display only upon request, that is, no immediate display (default with the GUI off ).
-
-            * ``1`` - Display immediately as model is generated (default with the GUI on ).
-
-        Notes
-        -----
-
-        .. _IMMED_notes:
-
-        The command enables you to control whether or not the model is displayed immediately as it is
-        generated in an interactive session. Available only during an interactive session at a graphics
-        display terminal. A valid graphics device name must first be specified ( :ref:`show` ).
-
-        By default in the GUI, your model is immediately displayed in the Graphics window as you create new
-        entities (such as areas, keypoints, nodes, elements, local coordinate systems, boundary conditions,
-        etc.), referred to as immediate mode graphics.
-
-        Symbols (such as boundary conditions, local coordinate system triads, etc.) appear immediately and
-        are present on subsequent displays unless you disable the appropriate symbol (via the GUI plot
-        controls function or the appropriate graphics-specification command).
-
-        An immediate image is also scaled automatically to fit within the Graphics window. The new scaling
-        is usually apparent on the automatic replot associated with immediate mode. To suppress automatic
-        replot, issue :ref:`uis`,REPLOT,0. (With automatic replot suppressed, the immediate image may not
-        always be scaled correctly.)
-
-        An immediate display in progress should not be aborted with the usual system "break" feature (or
-        else the Mechanical APDL session itself terminates). When you run Mechanical APDL interactively
-        without using the
-        GUI, immediate mode is off by default.
-
-        This command is valid only in PREP7.
-        """
-        command = f"IMMED,{key}"
-        return self.run(command, **kwargs)
-
     def cmap(
         self, fname: str = "", ext: str = "", kywrd: str = "", ncntr: str = "", **kwargs
     ):
@@ -1083,46 +238,6 @@ class SetUp:
         command = f"/COLOR,{lab},{clab},{n1},{n2},{ninc}"
         return self.run(command, **kwargs)
 
-    def dsys(self, kcn: str = "", **kwargs):
-        r"""Activates a display coordinate system for geometry listings and plots.
-
-        Mechanical APDL Command: `DSYS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DSYS.html>`_
-
-        **Command default:**
-
-        .. _DSYS_default:
-
-        Global Cartesian ( ``KCN`` = 0) display coordinate system.
-
-        Parameters
-        ----------
-        kcn : str
-            Coordinate system reference number. ``KCN`` may be 0,1,2 or any previously defined local
-            coordinate system number. If a cylinder is displayed in its cylindrical coordinate system (with
-            a 1,0,0 view), it will be unrolled (developed) into a flat plane (with theta along the Y
-            direction).
-
-        Notes
-        -----
-
-        .. _DSYS_notes:
-
-        Boundary condition symbols, vector arrows, and element coordinate system triads are not transformed
-        to the display coordinate system. The display system orientation (for the default view) is X
-        horizontal to the right, Y vertical upward, and Z out of the screen (normal).
-
-        Line directions and area directions ( :ref:`psymb`,LDIR and :ref:`psymb`,ADIR) are not plotted for
-        ``KCN`` >0.
-
-        When you create 3D annotation, the coordinates are stored to the database in the display coordinate
-        system that was active at the time of creation. Changing the display coordinate system does not
-        change the annotation coordinate data in the database.
-
-        This command is valid in any processor.
-        """
-        command = f"DSYS,{kcn}"
-        return self.run(command, **kwargs)
-
     def device(self, label: str = "", key: int | str = "", **kwargs):
         r"""Controls graphics device options.
 
@@ -1242,6 +357,46 @@ class SetUp:
         ignoring the BBOX option).
         """
         command = f"/DEVICE,{label},{key}"
+        return self.run(command, **kwargs)
+
+    def dsys(self, kcn: str = "", **kwargs):
+        r"""Activates a display coordinate system for geometry listings and plots.
+
+        Mechanical APDL Command: `DSYS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DSYS.html>`_
+
+        **Command default:**
+
+        .. _DSYS_default:
+
+        Global Cartesian ( ``KCN`` = 0) display coordinate system.
+
+        Parameters
+        ----------
+        kcn : str
+            Coordinate system reference number. ``KCN`` may be 0,1,2 or any previously defined local
+            coordinate system number. If a cylinder is displayed in its cylindrical coordinate system (with
+            a 1,0,0 view), it will be unrolled (developed) into a flat plane (with theta along the Y
+            direction).
+
+        Notes
+        -----
+
+        .. _DSYS_notes:
+
+        Boundary condition symbols, vector arrows, and element coordinate system triads are not transformed
+        to the display coordinate system. The display system orientation (for the default view) is X
+        horizontal to the right, Y vertical upward, and Z out of the screen (normal).
+
+        Line directions and area directions ( :ref:`psymb`,LDIR and :ref:`psymb`,ADIR) are not plotted for
+        ``KCN`` >0.
+
+        When you create 3D annotation, the coordinates are stored to the database in the display coordinate
+        system that was active at the time of creation. Changing the display coordinate system does not
+        change the annotation coordinate data in the database.
+
+        This command is valid in any processor.
+        """
+        command = f"DSYS,{kcn}"
         return self.run(command, **kwargs)
 
     def dv3d(self, lab: str = "", key: int | str = "", **kwargs):
@@ -1375,6 +530,436 @@ class SetUp:
         command = f"/DV3D,{lab},{key}"
         return self.run(command, **kwargs)
 
+    def gcmd(
+        self,
+        wn: str = "",
+        lab1: str = "",
+        lab2: str = "",
+        lab3: str = "",
+        lab4: str = "",
+        lab5: str = "",
+        lab6: str = "",
+        lab7: str = "",
+        lab8: str = "",
+        lab9: str = "",
+        lab10: str = "",
+        lab11: str = "",
+        lab12: str = "",
+        **kwargs,
+    ):
+        r"""Controls the type of element or graph display used for the :ref:`gplot` command.
+
+        Mechanical APDL Command: `/GCMD <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GCMD.html>`_
+
+        Parameters
+        ----------
+        wn : str
+            Window number (or ALL) to which this command applies (defaults to 1)
+
+        lab1 : str
+            Command labels (for example, :ref:`plnsol`,S,X)
+
+        lab2 : str
+            Command labels (for example, :ref:`plnsol`,S,X)
+
+        lab3 : str
+            Command labels (for example, :ref:`plnsol`,S,X)
+
+        lab4 : str
+            Command labels (for example, :ref:`plnsol`,S,X)
+
+        lab5 : str
+            Command labels (for example, :ref:`plnsol`,S,X)
+
+        lab6 : str
+            Command labels (for example, :ref:`plnsol`,S,X)
+
+        lab7 : str
+            Command labels (for example, :ref:`plnsol`,S,X)
+
+        lab8 : str
+            Command labels (for example, :ref:`plnsol`,S,X)
+
+        lab9 : str
+            Command labels (for example, :ref:`plnsol`,S,X)
+
+        lab10 : str
+            Command labels (for example, :ref:`plnsol`,S,X)
+
+        lab11 : str
+            Command labels (for example, :ref:`plnsol`,S,X)
+
+        lab12 : str
+            Command labels (for example, :ref:`plnsol`,S,X)
+
+        Notes
+        -----
+
+        .. _s-GCMD_notes:
+
+        This command controls the type of element or graph display that appears when you issue the
+        :ref:`gplot` command when the :ref:`gtype`,,(ELEM or GRPH) entity type is active. If you have
+        multiple plotting windows enabled, you can also use :ref:`gcmd` to select one window when you wish
+        to edit its contents.
+
+        For related information, see the descriptions of the :ref:`gplot` and :ref:`gtype` commands in this
+        manual.
+
+        This command is valid in any processor.
+        """
+        command = f"/GCMD,{wn},{lab1},{lab2},{lab3},{lab4},{lab5},{lab6},{lab7},{lab8},{lab9},{lab10},{lab11},{lab12}"
+        return self.run(command, **kwargs)
+
+    def gcolumn(self, curve: str = "", string: str = "", **kwargs):
+        r"""Allows the user to apply a label to a specified curve.
+
+        Mechanical APDL Command: `/GCOLUMN <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GCOLUMN.html>`_
+
+        Parameters
+        ----------
+        curve : str
+            Curve number on which label will be applied (integer value between 1 and 10).
+
+        string : str
+            Name or designation that will be applied to the curve (8 characters max).
+
+        Notes
+        -----
+
+        .. _s-GCOLUMN_notes:
+
+        This command is used for an array parameter plot (a plot created by the :ref:`starvplot` command).
+        Normally the label for curve 1 is COL 1, the label for curve 2 is COL 2 and so on; the column number
+        is the field containing the dependent variables for that particular curve. Issuing :ref:`gcolumn`,
+        ``CURVE``, with no string value specified resets the label to the original value.
+        """
+        command = f"/GCOLUMN,{curve},{string}"
+        return self.run(command, **kwargs)
+
+    def gfile(self, size: str = "", **kwargs):
+        r"""Specifies the pixel resolution on Z-buffered graphics files.
+
+        Mechanical APDL Command: `/GFILE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GFILE.html>`_
+
+        Parameters
+        ----------
+        size : str
+            Pixel resolution. Defaults to a pixel resolution of 800. Valid values are from 256 to 2400.
+
+        Notes
+        -----
+
+        .. _s-GFILE_notes:
+
+        Defines the pixel resolution on subsequently written graphics files (for example, JPEG, PNG, TIFF)
+        for software Z-buffered displays ( :ref:`slashtype` ). Lowering the pixel resolution produces a
+        fuzzier image; increasing the resolution produces a sharper image but takes a little longer.
+
+        This command is valid in any processor.
+        """
+        command = f"/GFILE,{size}"
+        return self.run(command, **kwargs)
+
+    def gplot(self, **kwargs):
+        r"""Controls general plotting.
+
+        Mechanical APDL Command: `GPLOT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GPLOT.html>`_
+
+        Notes
+        -----
+
+        .. _GPLOT_notes:
+
+        This command displays all entity types as specified via the :ref:`gtype` command. Only selected
+        entities ( :ref:`nsel`, :ref:`esel`, :ref:`ksel`, :ref:`lsel`, :ref:`asel`, :ref:`vsel` ) will be
+        displayed. See the descriptions of the :ref:`gtype` and :ref:`gcmd` commands for methods of setting
+        the entity types displayed.
+
+        This command is valid in any processor.
+        """
+        command = "GPLOT"
+        return self.run(command, **kwargs)
+
+    def graphics(self, key: str = "", **kwargs):
+        r"""Defines the type of graphics display.
+
+        Mechanical APDL Command: `/GRAPHICS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GRAPHICS.html>`_
+
+        Parameters
+        ----------
+        key : str
+            Graphics key:
+
+            * ``FULL`` - Display all model geometry and results.
+
+            * ``POWER`` - Activate PowerGraphics (default when GUI is on).
+
+        Notes
+        -----
+
+        .. _s-GRAPHICS_notes:
+
+        The :ref:`graphics` command specifies the type of graphics display. ``Key`` = POWER activates the
+        PowerGraphics capability. PowerGraphics offers faster plotting than the  ``Key`` = FULL
+        option,  and speeds up element, results, area, line, and volume displays.
+
+        The default PowerGraphics mode is enabled automatically when accessing the GUI. This action
+        supersedes all prior macros or start-up routines ( :file:`start.ans`, :file:`config.ans`, etc.).
+        Full graphics mode is accessed only by issuing :ref:`graphics`,FULL after the GUI is active.
+
+        Results values (both printed and plotted) may differ between the  ``Key`` = FULL
+         and ``Key`` = POWER options because each option specifies a different set of data for
+        averaging and display. For  ``Key`` = FULL, all element and results
+        values (interior and surface) are included. For  ``Key`` = POWER, only
+        element and results values along the model exterior surface are processed.
+
+        When ``Key`` = FULL, it is possible to deselect an individual node, select all elements (including
+        the element that contains that node), and then perform postprocessing calculations on those elements
+        and have that unselected node not be considered in those calculations. If PowerGraphics is active,
+        however, postprocessing always displays based on selected elements.
+
+        If you have specified one facet per element edge for PowerGraphics displays (via the :ref:`efacet`
+        command or options from the General Postproc or Utility menu), PowerGraphics does not plot midside
+        nodes. ( :ref:`efacet` applies to element type displays only.)
+
+        Maximum values shown in plots can differ from printed maximum values. This is due to different
+        averaging schemes used for plotted and printed maximum values.
+
+        When using solution coordinate systems for results output ( :ref:`rsys`,SOLU) with PowerGraphics,
+        the deformed or displaced shape in a POST1 contour display can be unexpected (although the contours
+        are displayed in the expected colors). The program does not rotate displacement values (Ux,Uy,Uz) to
+        global; instead, the displacements (stored locally) are added directly to the global coordinates
+        (X,Y,Z). For example, if in PREP7 the nodes are rotated 90 degrees about the z axis and the global
+        Uy displacements are relatively large, the Ux values will be large, causing the model to display a
+        large deformation in the global X direction.
+
+        PowerGraphics displays do not average at geometric discontinuities. The printouts in PowerGraphics
+        will, however, provide averaging information at geometric discontinuities if the models do not
+        contain shell elements. Carefully inspect the data you obtain at geometric discontinuities.
+
+        PowerGraphics does not support the following diffusion analysis results: CONC, CG, DF, EPDI.
+
+        ``Key`` = FULL is not available for `XFEM-based crack-growth analysis
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_frac/Hlp_G_FRACXFEM.html#fracxfemreferences>`_.
+
+        Excepting a few options, PowerGraphics supports these commands:
+
+        This command contains some tables and extra information which can be inspected in the original
+        documentation pointed above.
+
+        The following commands are executed via the  ``Key`` = FULL  option,
+        regardless of whether PowerGraphics is activated:
+
+        This command contains some tables and extra information which can be inspected in the original
+        documentation pointed above.
+        """
+        command = f"/GRAPHICS,{key}"
+        return self.run(command, **kwargs)
+
+    def gresume(self, fname: str = "", ext: str = "", **kwargs):
+        r"""Sets graphics settings to the settings on a file.
+
+        Mechanical APDL Command: `/GRESUME <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GRESUME.html>`_
+
+        Parameters
+        ----------
+        fname : str
+            File name and directory path (248 characters maximum, including the characters needed for the
+            directory path). An unspecified directory path defaults to the working directory; in this case,
+            you can use all 248 characters for the file name. The file name defaults to :file:`Jobname`.
+
+        ext : str
+            Filename extension (eight-character maximum). The extension defaults to GSAV if ``Fname`` is
+            blank.
+
+        Notes
+        -----
+
+        .. _s-GRESUME_notes:
+
+        Causes a file to be read to reset the graphics slash (/) commands as they were at the last
+        :ref:`gsave` command.
+
+        This command is valid in any processor.
+        """
+        command = f"/GRESUME,{fname},{ext}"
+        return self.run(command, **kwargs)
+
+    def gsave(self, fname: str = "", ext: str = "", **kwargs):
+        r"""Saves graphics settings to a file for later use.
+
+        Mechanical APDL Command: `/GSAVE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GSAVE.html>`_
+
+        Parameters
+        ----------
+        fname : str
+            File name and directory path (248 characters maximum, including the characters needed for the
+            directory path). An unspecified directory path defaults to the working directory; in this case,
+            you can use all 248 characters for the file name. The file name defaults to :file:`Jobname`.
+
+        ext : str
+            Filename extension (eight-character maximum). The extension defaults to GSAV if ``Fname`` is
+            blank.
+
+        Notes
+        -----
+
+        .. _s-GSAVE_notes:
+
+        This command does not save all graphics settings, but only those that may be reset by the
+        :ref:`slashreset` command. The database remains untouched. Use the :ref:`gresume` command to read
+        the file. Repeated use of the :ref:`gsave` command overwrites the previous data on the file. The
+        following commands are saved by :ref:`gsave` :
+
+        This command contains some tables and extra information which can be inspected in the original
+        documentation pointed above.
+
+        This command is valid in any processor.
+        """
+        command = f"/GSAVE,{fname},{ext}"
+        return self.run(command, **kwargs)
+
+    def gtype(self, wn: str = "", label: str = "", key: int | str = "", **kwargs):
+        r"""Controls the entities that the :ref:`gplot` command displays.
+
+        Mechanical APDL Command: `/GTYPE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GTYPE.html>`_
+
+        Parameters
+        ----------
+        wn : str
+            Window number (or ALL) to which this command applies (defaults to 1)
+
+        label : str
+            This represents the type of entity to display:
+
+            * ``NODE`` - Nodes
+
+            * ``ELEM`` - Elements
+
+            * ``KEYP`` - Keypoints
+
+            * ``LINE`` - Lines
+
+            * ``AREA`` - Areas
+
+            * ``VOLU`` - Volumes
+
+            * ``GRPH`` - Graph displays
+
+        key : int or str
+            Switch:
+
+            * ``0`` - Turns the entity type off.
+
+            * ``1`` - Turns the entity type on.
+
+        Notes
+        -----
+
+        .. _s-GTYPE_notes:
+
+        The :ref:`gtype` command controls which entities the :ref:`gplot` command displays. NODE, ELEM,
+        KEYP, LINE, AREA, and VOLU are on by default. When ELEM is activated, you can control the type of
+        element displayed via the :ref:`gcmd` command (which also controls the type of graph display). When
+        the GRPH entity type is activated, all other entity types are deactivated. Conversely, when any of
+        the NODE, ELEM, KEYP, LINE, AREA, and VOLU entity types are active, the GRPH entity type is
+        deactivated.
+
+        The :ref:`gtype` command gives you several options for multi-window layout:
+
+        * One window
+
+        * Two windows (left and right or top and bottom of the screen)
+
+        * Three windows (two at the top and one at the bottom of the screen, or one top and two bottom
+          windows
+
+        * Four windows (two at the top and two at the bottom)
+
+        Once you choose a window layout, you can choose one of the following: multiple plots, replotting, or
+        no redisplay.
+
+        This command is valid in any processor.
+        """
+        command = f"/GTYPE,{wn},{label},{key}"
+        return self.run(command, **kwargs)
+
+    def image(self, label: str = "", fname: str = "", ext: str = "", **kwargs):
+        r"""Allows graphics data to be captured and saved.
+
+        Mechanical APDL Command: `/IMAGE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_IMAGE.html>`_
+
+        Parameters
+        ----------
+        label : str
+            Label specifying the operation to be performed:
+
+            * ``CAPTURE`` - Capture the image from the graphics window to a new window.
+
+            * ``RESTORE`` - Restore the image from a file to a new window.
+
+            * ``SAVE`` - Save the contents of the graphic window to a file.
+
+            * ``DELETE`` - Delete the window that contains the file.
+
+        fname : str
+            File name and directory path (248 characters maximum, including the characters needed for the
+            directory path). An unspecified directory path defaults to the working directory; in this case,
+            you can use all 248 characters for the file name.
+
+        ext : str
+            Filename extension (eight-character maximum). If no extension is specified, :file:`bmp` will be
+            used on Windows systems, and :file:`img` will be used on Linux systems.
+        """
+        command = f"/IMAGE,{label},{fname},{ext}"
+        return self.run(command, **kwargs)
+
+    def immed(self, key: int | str = "", **kwargs):
+        r"""Allows immediate display of a model as it is generated.
+
+        Mechanical APDL Command: `IMMED <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_IMMED.html>`_
+
+        Parameters
+        ----------
+        key : int or str
+            Immediate mode key:
+
+            * ``0`` - Display only upon request, that is, no immediate display (default with the GUI off ).
+
+            * ``1`` - Display immediately as model is generated (default with the GUI on ).
+
+        Notes
+        -----
+
+        .. _IMMED_notes:
+
+        The command enables you to control whether or not the model is displayed immediately as it is
+        generated in an interactive session. Available only during an interactive session at a graphics
+        display terminal. A valid graphics device name must first be specified ( :ref:`show` ).
+
+        By default in the GUI, your model is immediately displayed in the Graphics window as you create new
+        entities (such as areas, keypoints, nodes, elements, local coordinate systems, boundary conditions,
+        etc.), referred to as immediate mode graphics.
+
+        Symbols (such as boundary conditions, local coordinate system triads, etc.) appear immediately and
+        are present on subsequent displays unless you disable the appropriate symbol (via the GUI plot
+        controls function or the appropriate graphics-specification command).
+
+        An immediate image is also scaled automatically to fit within the Graphics window. The new scaling
+        is usually apparent on the automatic replot associated with immediate mode. To suppress automatic
+        replot, issue :ref:`uis`,REPLOT,0. (With automatic replot suppressed, the immediate image may not
+        always be scaled correctly.)
+
+        An immediate display in progress should not be aborted with the usual system "break" feature (or
+        else the Mechanical APDL session itself terminates). When you run Mechanical APDL interactively
+        without using the
+        GUI, immediate mode is off by default.
+
+        This command is valid only in PREP7.
+        """
+        command = f"IMMED,{key}"
+        return self.run(command, **kwargs)
+
     def jpeg(self, kywrd: str = "", opt: str = "", **kwargs):
         r"""Provides JPEG file export for Mechanical APDL displays.
 
@@ -1418,6 +1003,335 @@ class SetUp:
 
         """
         command = f"JPEG,{kywrd},{opt}"
+        return self.run(command, **kwargs)
+
+    def mrep(
+        self,
+        name: str = "",
+        arg1: str = "",
+        arg2: str = "",
+        arg3: str = "",
+        arg4: str = "",
+        arg5: str = "",
+        arg6: str = "",
+        arg7: str = "",
+        arg8: str = "",
+        arg9: str = "",
+        arg10: str = "",
+        arg11: str = "",
+        arg12: str = "",
+        arg13: str = "",
+        arg14: str = "",
+        arg15: str = "",
+        arg16: str = "",
+        arg17: str = "",
+        arg18: str = "",
+        **kwargs,
+    ):
+        r"""Enables you to reissue the graphics command macro "name" during a replot or zoom operation.
+
+        Mechanical APDL Command: `/MREP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_MREP.html>`_
+
+        Parameters
+        ----------
+        name : str
+            The name identifying the macro file or macro block on a macro library file. The name can contain
+            up to eight characters maximum and must begin with a letter.
+
+        arg1 : str
+            Values to be passed into the file or block.
+
+        arg2 : str
+            Values to be passed into the file or block.
+
+        arg3 : str
+            Values to be passed into the file or block.
+
+        arg4 : str
+            Values to be passed into the file or block.
+
+        arg5 : str
+            Values to be passed into the file or block.
+
+        arg6 : str
+            Values to be passed into the file or block.
+
+        arg7 : str
+            Values to be passed into the file or block.
+
+        arg8 : str
+            Values to be passed into the file or block.
+
+        arg9 : str
+            Values to be passed into the file or block.
+
+        arg10 : str
+            Values to be passed into the file or block.
+
+        arg11 : str
+            Values to be passed into the file or block.
+
+        arg12 : str
+            Values to be passed into the file or block.
+
+        arg13 : str
+            Values to be passed into the file or block.
+
+        arg14 : str
+            Values to be passed into the file or block.
+
+        arg15 : str
+            Values to be passed into the file or block.
+
+        arg16 : str
+            Values to be passed into the file or block.
+
+        arg17 : str
+            Values to be passed into the file or block.
+
+        arg18 : str
+            Values to be passed into the file or block.
+
+        Notes
+        -----
+
+        .. _s-MREP_notes:
+
+        This command reissues the graphics command macro "name" during a replot operation ( :ref:`replot` )
+        or a zoom ( :ref:`zoom` ) operation. The program passes the command macro arguments to the replot
+        and zoom feature for use by the graphics macro. You should place the ``s-MREP`` command at the end
+        of the graphics command macro, following the last graphics command within the macro, to enable the
+        replot or zoom feature.
+        """
+        command = f"/MREP,{name},{arg1},{arg2},{arg3},,{arg4},{arg5},{arg6},{arg7},{arg8},{arg9},{arg10},{arg11},{arg12},{arg13},{arg14},{arg15},{arg16},{arg17},{arg18}"
+        return self.run(command, **kwargs)
+
+    def noerase(self, **kwargs):
+        r"""Prevents the screen erase between displays.
+
+        Mechanical APDL Command: `/NOERASE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_NOERASE.html>`_
+
+        Notes
+        -----
+
+        .. _s-NOERASE_notes:
+
+        Preventing the normal screen erase between requested displays allows you to overlay multiple views.
+
+        Clearing the screen with the ``ERASE`` command ( Utility Menu> PlotCtrls> Erase Options> Erase
+        screen ) active simply clears the display area. Subsequent replots will provide the cumulative plots
+        previously generated by the :ref:`noerase` command.
+
+        For 3D devices, you can issue :ref:`dv3d`,DELS to suppress repeated screen overlays and generate
+        clear contour plots.
+
+        Use the ``/ERASE`` command to reactivate automatic screen erase.
+
+        For 3D devices ( :ref:`show`,3D), the model in all active windows will be the same, even if you
+        issue a different display command ( :ref:`nplot`, :ref:`eplot`, etc.) for each active window. Use
+        the Multi-Plot command ( :ref:`gplot` ) to display different entities, in different windows, on 3D
+        devices.
+
+        This command is valid in any processor.
+        """
+        command = "/NOERASE"
+        return self.run(command, **kwargs)
+
+    def pngr(self, kywrd: str = "", opt: str = "", val: int | str = "", **kwargs):
+        r"""Provides PNG file export for Mechanical APDL displays.
+
+        Mechanical APDL Command: `PNGR <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PNGR.html>`_
+
+        Parameters
+        ----------
+        kywrd : str
+            Specifies various PNG file export options.
+
+            * ``COMP`` - If ``Kywrd`` = COMP, then ``OPT`` is either ON or OFF (blank is interpreted as OFF).
+              This option allows you to turn PNG file compression ON or OFF. If OPT = ON, then The VAL field is
+              read to determine the degree of compression. See the VALUE argument for acceptable compression
+              values.
+
+            * ``ORIENT`` - If ``Kywrd`` = ORIENT, then ``OPT`` will determine the orientation of the entire
+              plot. ``OPT`` can be either Horizontal (default) or Vertical.
+
+            * ``COLOR`` - If ``Kywrd`` = COLOR, then ``OPT`` will determine the color depth of the saved file.
+              ``OPT`` can be 0, 1, or 2, corresponding to Black and White, Grayscale, and Color (default),
+              respectively.
+
+            * ``TMOD`` - If ``Kywrd`` = TMOD, then ``OPT`` will determine the text method. ``OPT`` can be either
+              1 or 0, corresponding to bitmap text (default) or line stroke text, respectively.
+
+            * ``DEFAULT`` - If ``Kywrd`` = DEFAULT, then all of the default values, for all of the Kywrd
+              parameters listed above, are active.
+
+            * ``STAT`` - Shows the current status of PNG file export.
+
+        opt : str
+            ``OPT`` can have the following names or values, depending on the value for ``Kywrd`` (see above).
+
+            * ``ON, OFF`` - If ``Kywrd`` = COMP, the values On and Off control the use of compression. The
+              degree of compression is determined by VAL
+
+            * ``Horizontal, Vertical`` - If ``Kywrd`` = ORIENT, the terms Horizontal or Vertical determine the
+              orientation of the plot.
+
+            * ``0, 1, 2`` - If ``Kywrd`` = COLOR, the numbers 0, 1, and 2 correspond to Black and White,
+              Grayscale and Color, respectively.
+
+            * ``1, 0`` - If ``Kywrd`` = TMOD, the values 1 and 0 determine whether bitmap (1) or stroke text (0)
+              fonts will be used
+
+        val : int or str
+            ``VAL`` is active only when ``Kywrd`` = COMP, and determines the degree of compression applied to
+            the exported file (see above).
+
+            * ``-1`` - Apply the default, optimum value for compression. This value represents the best
+              combination of speed and compression. It varies according to the release level of the ZLIB
+              compression package.
+
+            * ``1-9`` - Use this value to specify a specific compression level. 1 is the lowest compression
+              level (fastest) and 9 is the highest compression level (slowest).
+
+        """
+        command = f"PNGR,{kywrd},{opt},{val}"
+        return self.run(command, **kwargs)
+
+    def pstatus(self, wn: str = "", **kwargs):
+        r"""Displays the global or window display specifications.
+
+        Mechanical APDL Command: `/PSTATUS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_PSTATUS.html>`_
+
+        Parameters
+        ----------
+        wn : str
+            Window number for status (defaults to global specifications).
+
+        Notes
+        -----
+
+        .. _s-PSTATUS_notes:
+
+        Displays the current global or window display specifications. Global display specifications are
+        common to all windows (e.g. :ref:`show`, etc.). Window display specifications are specific to one
+        window (e.g. :ref:`view`, :ref:`slashtype`, etc.).
+
+        This command is valid in any processor.
+        """
+        command = f"/PSTATUS,{wn}"
+        return self.run(command, **kwargs)
+
+    def replot(self, label: str = "", **kwargs):
+        r"""Reissues the last display command.
+
+        Mechanical APDL Command: `/REPLOT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_REPLOT.html>`_
+
+        Parameters
+        ----------
+        label : str
+            Controls the type of replot.
+
+            * ``RESIZE`` - Issued internally when a graphics window resize occurs (Default).
+
+            * ``FAST`` - Only applicable for 3D devices that allow a fast redisplay for changes in the view
+              characteristics only.
+
+        Notes
+        -----
+
+        .. _s-REPLOT_notes:
+
+        Reissues the last display command ( :ref:`nplot`, :ref:`eplot`, :ref:`kplot`, :ref:`plnsol`,
+        :ref:`plvar`, etc.), along with its parameters, for convenience. The current display specifications
+        are used.
+
+        When the last display command is invalid in a given processor, :ref:`replot` is also invalid in that
+        processor. However, if you attempt a :ref:`replot` and the last display command is invalid in the
+        current processor, Mechanical APDL generates an element display ( :ref:`eplot` ) instead, as long as
+        the
+        last display command was  :ref:`plnsol`, :ref:`plesol`, or  :ref:`pldisp`.
+
+          Example: :ref:`replot` Replaced by :ref:`eplot` Automatically
+
+          :ref:`plnsol`, used to display solution results as continuous contours, is a valid command in the
+          POST1 general postprocessor.
+
+          If you issue :ref:`plnsol` followed by :ref:`replot` while in POST1, :ref:`replot` effectively
+          reissues your earlier :ref:`plnsol` command, along with its parameters.
+
+          If you then exit POST1, enter the PREP7 preprocessor, and again issue :ref:`replot`, the program
+          uses :ref:`eplot` internally instead.
+
+          The command substitution occurs because :ref:`plnsol` is not a valid command in PREP7.
+
+        When you click one of the buttons on the `Pan, Zoom, Rotate
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_wid/Hlp_UI_PanZoom.html#wpanzoomk>`_
+        dialog box to manipulate the view of a model, :ref:`replot` is issued internally. Thus, the
+        substitution of :ref:`replot` with :ref:`eplot` as described above may also occur for operations
+        that you perform via with the `Pan, Zoom, Rotate
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_wid/Hlp_UI_PanZoom.html#wpanzoomk>`_
+        dialog box.
+
+        :ref:`replot` does not show boundary conditions if they are applied only to a solid model and the
+        last display command (such as :ref:`eplot` ) displays the finite element model. To show boundary
+        conditions, the following options are available:
+
+        * Issue :ref:`replot` after you issue :ref:`sbctran` to transfer solid model boundary conditions to
+          the finite element model.
+
+        * Issue :ref:`replot` after you issue a solid model display command (such as :ref:`vplot` ).
+
+        This command is valid in any processor (except as noted above).
+        """
+        command = f"/REPLOT,{label}"
+        return self.run(command, **kwargs)
+
+    def seg(self, label: str = "", aviname: str = "", delay: str = "", **kwargs):
+        r"""Allows graphics data to be stored in the local terminal memory.
+
+        Mechanical APDL Command: `/SEG <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SEG.html>`_
+
+        Parameters
+        ----------
+        label : str
+            Storage key:
+
+            * ``SINGL`` - Store subsequent display in a single segment (overwrites last storage).
+
+            * ``MULTI`` - Store subsequent displays in unique segments ( :ref:`anim` ).
+
+            * ``DELET`` - Delete all currently stored segments.
+
+            * ``OFF`` - Stop storing display data in segments.
+
+            * ``STAT`` - Display segment status.
+
+            * ``PC`` - This option only applies to PC versions of Mechanical APDL and only when animating via the AVI
+              movie player ( :ref:`device`,ANIM,2). The command appends frames to the :file:`File.AVI`, so that
+              the animation goes in both directions (that is, forward--backward--forward). You must have a current
+              animation file to use this option.
+
+        aviname : str
+            Name of the animation file that will be created when each frame is saved. The :file:`.AVI`
+            extension is applied automatically. Defaults to :file:`Jobname.AVI` if no filename is specified.
+
+        delay : str
+            Delay factor between each frame, in seconds. Defaults to 0.015 seconds if no value is specified.
+
+        Notes
+        -----
+
+        .. _s-SEG_notes:
+
+        Allows graphics data to be stored in the terminal local memory (device-dependent). Storage occurs
+        concurrently with the display.
+
+        Although the information from your graphics window is stored as an individual segment, you cannot
+        plot directly ( :ref:`gplot` ) from the segment memory.
+
+        This command is valid in any processor.
+        """
+        command = f"/SEG,{label},{aviname},{delay}"
         return self.run(command, **kwargs)
 
     def show(
@@ -1521,50 +1435,136 @@ class SetUp:
         command = f"/SHOW,{fname},{option},{vect},{ncpl}"
         return self.run(command, **kwargs)
 
-    def seg(self, label: str = "", aviname: str = "", delay: str = "", **kwargs):
-        r"""Allows graphics data to be stored in the local terminal memory.
+    def slashreset(self, **kwargs):
+        r"""Resets display specifications to their initial defaults.
 
-        Mechanical APDL Command: `/SEG <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SEG.html>`_
-
-        Parameters
-        ----------
-        label : str
-            Storage key:
-
-            * ``SINGL`` - Store subsequent display in a single segment (overwrites last storage).
-
-            * ``MULTI`` - Store subsequent displays in unique segments ( :ref:`anim` ).
-
-            * ``DELET`` - Delete all currently stored segments.
-
-            * ``OFF`` - Stop storing display data in segments.
-
-            * ``STAT`` - Display segment status.
-
-            * ``PC`` - This option only applies to PC versions of Mechanical APDL and only when animating via the AVI
-              movie player ( :ref:`device`,ANIM,2). The command appends frames to the :file:`File.AVI`, so that
-              the animation goes in both directions (that is, forward--backward--forward). You must have a current
-              animation file to use this option.
-
-        aviname : str
-            Name of the animation file that will be created when each frame is saved. The :file:`.AVI`
-            extension is applied automatically. Defaults to :file:`Jobname.AVI` if no filename is specified.
-
-        delay : str
-            Delay factor between each frame, in seconds. Defaults to 0.015 seconds if no value is specified.
+        Mechanical APDL Command: `/RESET <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RESET_sl.html>`_
 
         Notes
         -----
 
-        .. _s-SEG_notes:
+        .. _s-RESET_notes:
 
-        Allows graphics data to be stored in the terminal local memory (device-dependent). Storage occurs
-        concurrently with the display.
-
-        Although the information from your graphics window is stored as an individual segment, you cannot
-        plot directly ( :ref:`gplot` ) from the segment memory.
+        Resets slash display specifications ( :ref:`window`, :ref:`slashtype`, :ref:`view`, etc.) back to
+        their initial default settings (for convenience). Also resets the focus location to the geometric
+        center of the object.
 
         This command is valid in any processor.
         """
-        command = f"/SEG,{label},{aviname},{delay}"
+        command = "/RESET"
+        return self.run(command, **kwargs)
+
+    def tiff(self, kywrd: str = "", opt: str = "", **kwargs):
+        r"""Provides TIFF file export for Mechanical APDL displays.
+
+        Mechanical APDL Command: `TIFF <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_TIFF.html>`_
+
+        Parameters
+        ----------
+        kywrd : str
+            Specifies various TIFF file export options.
+
+            * ``COMP`` - If ``Kywrd`` = COMP, then ``OPT`` controls data compression for the output file. If
+              COMP = 0, then compression is off. If COMP = 1 (default), then compression is on.
+
+            * ``ORIENT`` - If ``Kywrd`` = ORIENT, then ``OPT`` will determine the orientation of the entire
+              plot. ``OPT`` can be either Horizontal (default) or Vertical.
+
+            * ``COLOR`` - If ``Kywrd`` = COLOR, then ``OPT`` will determine the color attribute of the saved
+              file. ``OPT`` can be 0, 1, or 2, corresponding to Black and White, Grayscale, and Color (default),
+              respectively.
+
+            * ``TMOD`` - If ``Kywrd`` = TMOD, then ``OPT`` will determine the text method. ``OPT`` can be either
+              1 or 0, corresponding to bitmap text (default) or line stroke text, respectively.
+
+            * ``DEFAULT`` - If ``Kywrd`` = DEFAULT, then all of the default values, for all of the Kywrd
+              parameters listed above, are active.
+
+        opt : str
+            ``OPT`` can have the following names or values, depending on the value for ``Kywrd`` (see above).
+
+            * ``1 or 0`` - If ``Kywrd`` = COMP, a value or 1 (on) or 0 (off) will control compression for the
+              TIFF file.
+
+            * ``Horizontal, Vertical`` - If ``Kywrd`` = ORIENT, the terms Horizontal or Vertical determine the
+              orientation of the plot.
+
+            * ``0, 1, 2`` - If ``Kywrd`` = COLOR, the numbers 0, 1, and 2 correspond to Black and White,
+              Grayscale and Color, respectively.
+
+            * ``1, 0`` - If ``Kywrd`` = TMOD, the values 1 and 0 determine whether bitmap (1) or stroke text (0)
+              fonts will be used
+
+        """
+        command = f"TIFF,{kywrd},{opt}"
+        return self.run(command, **kwargs)
+
+    def window(
+        self,
+        wn: str = "",
+        xmin: str = "",
+        xmax: str = "",
+        ymin: str = "",
+        ymax: str = "",
+        ncopy: str = "",
+        **kwargs,
+    ):
+        r"""Defines the window size on the screen.
+
+        Mechanical APDL Command: `/WINDOW <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_WINDOW.html>`_
+
+        Parameters
+        ----------
+        wn : str
+            Window reference number (1 to 5). Defaults to 1. This number, or ALL (for all active windows),
+            may be used on other commands.
+
+        xmin : str
+            Screen coordinates defining window size. Screen coordinates are measured as -1.0 to 1.67 with
+            the origin at the screen center. For example, (-1,1.67,-1,1) is full screen, (-1,0,-1,0) is the
+            left bottom quadrant. If ``XMIN`` = OFF, deactivate this previously defined window; if ON,
+            reactivate this previously defined window. If FULL, LEFT, RIGH, TOP, BOT, LTOP, LBOT, RTOP,
+            RBOT, form full, half, or quarter window. If SQUA, form largest square window within the current
+            graphics area. If DELE, delete this window (cannot be reactivated with ON).
+
+        xmax : str
+            Screen coordinates defining window size. Screen coordinates are measured as -1.0 to 1.67 with
+            the origin at the screen center. For example, (-1,1.67,-1,1) is full screen, (-1,0,-1,0) is the
+            left bottom quadrant. If ``XMIN`` = OFF, deactivate this previously defined window; if ON,
+            reactivate this previously defined window. If FULL, LEFT, RIGH, TOP, BOT, LTOP, LBOT, RTOP,
+            RBOT, form full, half, or quarter window. If SQUA, form largest square window within the current
+            graphics area. If DELE, delete this window (cannot be reactivated with ON).
+
+        ymin : str
+            Screen coordinates defining window size. Screen coordinates are measured as -1.0 to 1.67 with
+            the origin at the screen center. For example, (-1,1.67,-1,1) is full screen, (-1,0,-1,0) is the
+            left bottom quadrant. If ``XMIN`` = OFF, deactivate this previously defined window; if ON,
+            reactivate this previously defined window. If FULL, LEFT, RIGH, TOP, BOT, LTOP, LBOT, RTOP,
+            RBOT, form full, half, or quarter window. If SQUA, form largest square window within the current
+            graphics area. If DELE, delete this window (cannot be reactivated with ON).
+
+        ymax : str
+            Screen coordinates defining window size. Screen coordinates are measured as -1.0 to 1.67 with
+            the origin at the screen center. For example, (-1,1.67,-1,1) is full screen, (-1,0,-1,0) is the
+            left bottom quadrant. If ``XMIN`` = OFF, deactivate this previously defined window; if ON,
+            reactivate this previously defined window. If FULL, LEFT, RIGH, TOP, BOT, LTOP, LBOT, RTOP,
+            RBOT, form full, half, or quarter window. If SQUA, form largest square window within the current
+            graphics area. If DELE, delete this window (cannot be reactivated with ON).
+
+        ncopy : str
+            Copies the current specifications from window ``NCOPY`` (1 to 5) to this window. If ``NCOPY`` =
+            0 (or blank), no specifications are copied.
+
+        Notes
+        -----
+
+        .. _s-WINDOW_notes:
+
+        Defines the window size on the screen. Windows may occupy a separate section of the screen or they
+        may overlap. Requested displays are formed in all windows according to the selected window
+        specifications.
+
+        This command is valid in any processor.
+        """
+        command = f"/WINDOW,{wn},{xmin},{xmax},{ymin},{ymax},{ncopy}"
         return self.run(command, **kwargs)

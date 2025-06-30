@@ -108,8 +108,8 @@ class Files:
         can
         have added mass and damping coefficients; these will be written to the file. The Mechanical APDL
         program
-        uses the inertia coefficient C M, whereas AQWA uses the added mass coefficient C A, where C M = (1 +
-        C A ). This correction is made automatically.
+        uses the inertia coefficient C:sub:`M`, whereas AQWA uses the added mass coefficient C:sub:`A`,
+        where C:sub:`M` = (1 + C:sub:`A` ). This correction is made automatically.
 
         This command contains some tables and extra information which can be inspected in the original
         documentation pointed above.
@@ -215,7 +215,7 @@ class Files:
 
         .. _solconop:
 
-        **Solution Control Options**
+        .. rubric:: **Solution Control Options**
 
         The ASAS project name is defined as "Ansys".
 
@@ -230,7 +230,7 @@ class Files:
 
         .. _elemdat:
 
-        **Element Data**
+        .. rubric:: **Element Data**
 
         If you intend to use the data only with AQWA-WAVE, only the elements that form the wetted surface
         are required. Selecting these elements before invoking the :ref:`anstoasas` command will improve
@@ -250,13 +250,13 @@ class Files:
 
         .. _matdat:
 
-        **Material Data**
+        .. rubric:: **Material Data**
 
         Linear isotropic material conversion is supported for ASAS and ASAS(NL).
 
         .. _geomdat:
 
-        **Geometry Data**
+        .. rubric:: **Geometry Data**
 
         The following ASAS element geometry data is supported:
 
@@ -268,7 +268,7 @@ class Files:
 
         .. _sectdat:
 
-        **Section Data**
+        .. rubric:: **Section Data**
 
         No user sections are generated if AQWA-WAVE data is selected.
 
@@ -279,7 +279,7 @@ class Files:
 
         .. _boundcon:
 
-        **Boundary Conditions**
+        .. rubric:: **Boundary Conditions**
 
         The following boundary conditions are converted for ASAS and ASAS(NL):
 
@@ -288,7 +288,7 @@ class Files:
 
         .. _loadsasas:
 
-        **Loads**
+        .. rubric:: **Loads**
 
         No user loading is generated if AQWA-WAVE data is selected. However, a load case (number 1000) is
         automatically defined to identify the wetted surface of the elements for use by AQWA-WAVE based on

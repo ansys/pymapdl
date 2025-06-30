@@ -45,7 +45,7 @@ class ProcessorEntry:
           data, the fatigue table data, and the load case pointers).
 
         * POST26: Data in the database remains intact, except that POST26 variables are erased and
-          specification commands (such as :ref:`file`, :ref:`prtime`, and :ref:`nprint` ) are reset. Issue
+          specification commands (such as ``FILE``, :ref:`prtime`, and :ref:`nprint` ) are reset. Issue
           :ref:`quit` to exit the processor and bypass these exceptions.
 
         See :ref:`quit` for an alternate processor exit command.

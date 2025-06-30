@@ -23,6 +23,24 @@
 
 class BinaryFileDump:
 
+    def aux2(self, **kwargs):
+        r"""Enters the binary file dumping processor.
+
+        Mechanical APDL Command: `/AUX2 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AUX2.html>`_
+
+        Notes
+        -----
+
+        .. _s-AUX2_notes:
+
+        Enters the binary file-dumping processor (auxiliary processor AUX2), used for dumping the contents
+        of certain Mechanical APDL binary files for visual examination.
+
+        This command is valid only at the Begin Level.
+        """
+        command = "/AUX2"
+        return self.run(command, **kwargs)
+
     def dump(self, nstrt: str = "", nstop: str = "", **kwargs):
         r"""Dumps the contents of a binary file.
 
@@ -42,48 +60,13 @@ class BinaryFileDump:
 
         Notes
         -----
+
+        .. _DUMP_notes:
+
         Dumps the file named on the AUX2 :ref:`fileaux2` command according the format specified on the
         :ref:`form` command.
         """
         command = f"DUMP,{nstrt},{nstop}"
-        return self.run(command, **kwargs)
-
-    def aux2(self, **kwargs):
-        r"""Enters the binary file dumping processor.
-
-        Mechanical APDL Command: `/AUX2 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AUX2.html>`_
-
-        Notes
-        -----
-        Enters the binary file-dumping processor (auxiliary processor AUX2), used for dumping the contents
-        of certain Mechanical APDL binary files for visual examination.
-
-        This command is valid only at the Begin Level.
-        """
-        command = "/AUX2"
-        return self.run(command, **kwargs)
-
-    def form(self, lab: str = "", **kwargs):
-        r"""Specifies the format of the file dump.
-
-        Mechanical APDL Command: `FORM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FORM.html>`_
-
-        Parameters
-        ----------
-        lab : str
-            Format:
-
-            * ``RECO`` - Basic record description only (minimum output) (default).
-
-            * ``TEN`` - Same as RECO plus the first ten words of each record.
-
-            * ``LONG`` - Same as RECO plus all words of each record.
-
-        Notes
-        -----
-        Specifies the format of the file dump (from the :ref:`dump` command).
-        """
-        command = f"FORM,{lab}"
         return self.run(command, **kwargs)
 
     def fileaux2(self, fname: str = "", ident: str = "", **kwargs):
@@ -107,9 +90,38 @@ class BinaryFileDump:
 
         Notes
         -----
+
+        .. _FILEAUX2_notes:
+
         Specifies the binary file to be dumped with the :ref:`dump` command.
         """
         command = f"FILEAUX2,{fname},{ident}"
+        return self.run(command, **kwargs)
+
+    def form(self, lab: str = "", **kwargs):
+        r"""Specifies the format of the file dump.
+
+        Mechanical APDL Command: `FORM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_FORM.html>`_
+
+        Parameters
+        ----------
+        lab : str
+            Format:
+
+            * ``RECO`` - Basic record description only (minimum output) (default).
+
+            * ``TEN`` - Same as RECO plus the first ten words of each record.
+
+            * ``LONG`` - Same as RECO plus all words of each record.
+
+        Notes
+        -----
+
+        .. _FORM_notes:
+
+        Specifies the format of the file dump (from the :ref:`dump` command).
+        """
+        command = f"FORM,{lab}"
         return self.run(command, **kwargs)
 
     def ptr(
@@ -137,6 +149,9 @@ class BinaryFileDump:
 
         Notes
         -----
+
+        .. _PTR_notes:
+
         Dumps the record of the file named on the AUX2 :ref:`fileaux2` command according the format
         specified on the :ref:`form` command.
         """
