@@ -29,11 +29,11 @@ Post1
    :hidden:
 
    animation
-   setup
+   set_up
    controls
-   special
+   special_purpose
    status
-   magnetics_calc
+   magnetics_calculations
    element_table
    failure_criteria
    _fatigue
