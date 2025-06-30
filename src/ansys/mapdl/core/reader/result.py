@@ -40,6 +40,7 @@ from functools import wraps
 import logging
 import os
 import pathlib
+import socket
 import tempfile
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Literal
 import uuid
@@ -512,6 +513,10 @@ class DPFResult(Result):
         """
 
         ip, port = self._get_dpf_env_vars(ip, port)
+
+        # resolve ip
+        ip = socket.gethostbyname(ip)
+
         check_valid_ip(ip)
 
         self.logger.debug(f"Attempting to connect to DPF server using: {ip}:{port}")
