@@ -262,39 +262,6 @@ onto the existing geometry.
    map/pressure_mapping
 
 
-***************
-DISPLAY program
-***************
-These commands are used for the DISPLAY program. The DISPLAY program
-is a companion program to ANSYS, used for recovering graphics displays
-produced within ANSYS.
-
-.. note::
-   Many of these commands are not applicable when using PyMAPDL.
-
-.. toctree::
-   :maxdepth: 1
-   :caption: DISPLAY
-
-   display/setup
-
-
-**********************
-REDUCED order modeling
-**********************
-These commands are used for the DISPLAY program. The DISPLAY program
-is a companion program to ANSYS, used for recovering graphics displays
-produced within ANSYS.
-
-.. toctree::
-   :maxdepth: 1
-   :caption: REDUCED
-
-   reduced/setup
-   reduced/preparation
-   reduced/generation
-   reduced/use_pass
-
 *******************
 Connection commands
 *******************

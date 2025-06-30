@@ -48,7 +48,6 @@ from ._commands import (
     post1_,
     post26,
     preproc,
-    reduced,
     session,
     solution,
 )
@@ -461,15 +460,6 @@ class Post26Commands(
     pass
 
 
-class ReducedCommands(
-    reduced.generation.Generation,
-    reduced.preparation.Preparation,
-    reduced.setup.Setup,
-    reduced.use_pass.UsePass,
-):
-    pass
-
-
 class SessionCommands(
     session.files.Files,
     session.list_controls.ListControls,
@@ -531,7 +521,6 @@ class Commands(
     Post1Commands,
     Post26Commands,
     PreprocessorCommands,
-    ReducedCommands,
     SessionCommands,
     SolutionCommands,
     conn.Conn,
