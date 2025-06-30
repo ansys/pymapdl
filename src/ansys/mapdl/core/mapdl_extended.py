@@ -1456,16 +1456,34 @@ class _MapdlCommandExtended(_MapdlCore):
         if not response:
             if not self._store_commands:
                 raise MapdlRuntimeError("/INQUIRE command didn't return a response.")
-        else:
-            if func.upper() in [
-                "ENV",
-                "TITLE",
-            ]:  # the output is multiline, we just need the last line.
-                response = response.splitlines()[-1]
+            else:
+                # Exit since we are in non-interactive mode
+                return None
 
-            response = response.split("=")[1].strip()
+        if func.upper() in [
+            "ENV",
+            "TITLE",
+        ]:  # the output is multiline, we just need the last line.
+            response = response.splitlines()[-1]
 
-        return response
+        response = response.split("=")[1].strip()
+
+        # Check if the function is to check existence
+        # so it makes sense to return a boolean
+        if func.upper() in ["EXIST", "WRITE", "READ", "EXEC"]:
+            if "1.0" in response:
+                return True
+            elif "0.0" in response:
+                return False
+            else:
+                raise MapdlRuntimeError(
+                    f"Unexpected output from 'mapdl.inquire' function:\n{response}"
+                )
+
+        try:
+            return float(response)
+        except ValueError:
+            return response
 
     @wraps(_MapdlCore.parres)
     def parres(self, lab="", fname="", ext="", **kwargs):

@@ -15,7 +15,7 @@ ci:
 repos:
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.16.0
+  rev: v1.16.1
   hooks:
     - id: mypy
       args: [ --follow-imports=silent, --config-file=pyproject.toml]
@@ -59,7 +59,7 @@ repos:
       - --line-length=88
 
 - repo: https://github.com/PyCQA/flake8
-  rev: 7.2.0
+  rev: 7.3.0
   hooks:
   - id: flake8
 
@@ -85,7 +85,7 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.33.0
+  rev: 0.33.1
   hooks:
     - id: check-github-workflows
 

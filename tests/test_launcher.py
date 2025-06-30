@@ -46,7 +46,6 @@ from ansys.mapdl.core.launcher import (
     _HAS_ATP,
     LOCALHOST,
     _is_ubuntu,
-    _parse_ip_route,
     check_mapdl_launch_on_hpc,
     check_mode,
     force_smp_in_student,
@@ -77,7 +76,7 @@ from ansys.mapdl.core.launcher import (
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from ansys.mapdl.core.misc import check_has_mapdl, stack
+from ansys.mapdl.core.misc import check_has_mapdl, parse_ip_route, stack
 from conftest import (
     ON_LOCAL,
     PATCH_MAPDL,
@@ -589,13 +588,13 @@ def test__parse_ip_route():
     output = """default via 172.25.192.1 dev eth0 proto kernel <<<=== this
 172.25.192.0/20 dev eth0 proto kernel scope link src 172.25.195.101 <<<=== not this"""
 
-    assert "172.25.192.1" == _parse_ip_route(output)
+    assert "172.25.192.1" == parse_ip_route(output)
 
     output = """
 default via 172.23.112.1 dev eth0 proto kernel
 172.23.112.0/20 dev eth0 proto kernel scope link src 172.23.121.145"""
 
-    assert "172.23.112.1" == _parse_ip_route(output)
+    assert "172.23.112.1" == parse_ip_route(output)
 
 
 def test_launched(mapdl, cleared):
@@ -1430,7 +1429,7 @@ def test_exit_job(mock_popen, mapdl, cleared):
     "ansys.tools.path.path._get_application_path",
     lambda *args, **kwargs: "path/to/mapdl/executable",
 )
-@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
+@patch("ansys.tools.path.path._version_from_path", lambda *args, **kwargs: 242)
 @stack(*PATCH_MAPDL_START)
 @patch("ansys.mapdl.core.launcher.launch_grpc")
 @patch("ansys.mapdl.core.launcher.send_scontrol")
@@ -1769,7 +1768,9 @@ def test_get_hostname_host_cluster(
 
 
 @requires("ansys-tools-path")
-@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 201)
+@patch(
+    "ansys.tools.path.path._version_from_path", side_effect=lambda *args, **kwargs: 201
+)
 @patch("ansys.mapdl.core._HAS_ATP", True)
 def test_get_version_version_error(monkeypatch):
     monkeypatch.delenv("PYMAPDL_MAPDL_VERSION", False)
@@ -1985,7 +1986,7 @@ def test_submitter(cmd, executable, shell, cwd, stdin, stdout, stderr, envvars):
     "ansys.tools.path.path._get_application_path",
     lambda *args, **kwargs: "path/to/mapdl/executable",
 )
-@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
+@patch("ansys.tools.path.path._version_from_path", lambda *args, **kwargs: 242)
 @stack(*PATCH_MAPDL)
 @pytest.mark.parametrize(
     "arg,value,method",
