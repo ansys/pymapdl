@@ -262,7 +262,9 @@ jobs:
             ${{ env.PYTEST_ARGUMENTS }} \
             --ignore_image_cache \
             --report-log=$file_name.jsonl \
-            --cov-report=xml:$file_name.xml
+            --cov-report=xml:$file_name.xml \
+            --random-order-seed=560238 \
+            tests/test_result.py
 
       - name: "Upload pytest reports to GitHub"
         if: always()
