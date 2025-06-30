@@ -49,11 +49,16 @@ from conftest import HAS_DPF, ON_LOCAL, TEST_DPF_BACKEND
 
 DPF_PORT = int(os.environ.get("DPF_PORT", 50056))  # Set in ci.yaml
 
-if not HAS_DPF or not TEST_DPF_BACKEND:
+if not HAS_DPF:
     pytest.skip(
-        "Skipping DPF tests because DPF is not installed. "
+        "Skipping DPF tests because DPF tests are skipped or DPF is not installed."
         "Please install the ansys-dpf-core package.",
         allow_module_level=True,
+    )
+
+elif not TEST_DPF_BACKEND:
+    pytest.skip(
+        reason="Skipping DPF tests because the DPF backend testing is not enabled. "
     )
 
 else:
