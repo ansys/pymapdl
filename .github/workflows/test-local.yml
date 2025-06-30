@@ -155,6 +155,11 @@ jobs:
             else export ON_STUDENT=false; export TAG_STUDENT="non-student";
           fi
 
+          if [[ "${{ inputs.mapdl-version }}" == *"cicd"* ]]; then
+            echo "CICD MAPDL version detected, testing DPF backend for results module.";
+            echo "TEST_DPF_BACKEND=true" >> $GITHUB_ENV;
+          fi
+
           echo "ON_STUDENT: $ON_STUDENT"
           echo "TAG_STUDENT: $TAG_STUDENT"
           echo "ON_STUDENT=$(echo $ON_STUDENT)" >> $GITHUB_OUTPUT

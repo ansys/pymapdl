@@ -354,7 +354,7 @@ jobs:
         if : ${{ env.CONTINUE == 'true' }}
         uses: actions/github-script@v7
         with:
-          github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          github-token: "${{ secrets.PYANSYS_CI_BOT_TOKEN }}"
           script: |
             const prNumber = process.env.PR_NUMBER;
             const prHeadBranch = process.env.PR_HEAD_BRANCH;
@@ -393,7 +393,7 @@ jobs:
               debug: true,
               head: prBaseBranch,  // This is the branch we just created which becomes now the head of the PR, and the base (target) branch is the main branch.
               base: 'main',
-              title: `chore: [migrated PR ${prNumber}] ${originalPR.title}`,
+              title: `migrated (PR ${prNumber}): ${originalPR.title}`,
               body: `This PR is a mirror pull request created from [${originalPR.title}](https://github.com/ansys/pymapdl/pull/${originalPR.number}) to allow the code to access PyMAPDL CICD secrets.
 
             Check the [original PR](https://github.com/ansys/pymapdl/pull/${originalPR.number}) made by @${originalPR.user.login} for more details.
@@ -444,7 +444,8 @@ jobs:
             });
 
       - name: Create comment about failed migration
-        if: ${{ failure() }}
+        # Not creating more failure comments if the workflow is retried
+        if: ${{ failure() && github.run_attempt == 1 }}
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
