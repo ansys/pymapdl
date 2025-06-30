@@ -58,7 +58,8 @@ if not HAS_DPF:
 
 elif not TEST_DPF_BACKEND:
     pytest.skip(
-        reason="Skipping DPF tests because the DPF backend testing is not enabled. "
+        "Skipping DPF tests because the DPF backend testing is not enabled. ",
+        allow_module_level=True,
     )
 
 else:
