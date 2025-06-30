@@ -39,7 +39,6 @@ from ._commands import (
     aux15,
     conn,
     database,
-    display_,
     graphics,
     hidden,
     inq_func,
@@ -406,10 +405,6 @@ class DatabaseCommands(
     pass
 
 
-class DisplayCommands(display_.setup.Setup):
-    pass
-
-
 class GraphicsCommands(
     graphics.annotation.Annotation,
     graphics.graphs.Graphs,
@@ -530,7 +525,6 @@ class Commands(
     Aux12Commands,
     Aux15Commands,
     DatabaseCommands,
-    DisplayCommands,
     GraphicsCommands,
     MapCommands,
     MiscCommands,
