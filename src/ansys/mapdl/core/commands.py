@@ -39,7 +39,6 @@ from ._commands import (
     aux15,
     conn,
     database,
-    display_,
     graphics,
     hidden,
     inq_func,
@@ -48,7 +47,6 @@ from ._commands import (
     post1,
     post26,
     preproc,
-    reduced,
     session,
     solution,
 )
@@ -405,10 +403,6 @@ class DatabaseCommands(
     pass
 
 
-class DisplayCommands(display_.setup.Setup):
-    pass
-
-
 class GraphicsCommands(
     graphics.annotation.Annotation,
     graphics.graphs.Graphs,
@@ -461,15 +455,6 @@ class Post26Commands(
     post26.set_up.SetUp,
     post26.special_purpose.SpecialPurpose,
     post26.status.Status,
-):
-    pass
-
-
-class ReducedCommands(
-    reduced.generation.Generation,
-    reduced.preparation.Preparation,
-    reduced.setup.Setup,
-    reduced.use_pass.UsePass,
 ):
     pass
 
@@ -529,14 +514,12 @@ class Commands(
     Aux12Commands,
     Aux15Commands,
     DatabaseCommands,
-    DisplayCommands,
     GraphicsCommands,
     MapCommands,
     MiscCommands,
     Post1Commands,
     Post26Commands,
     PreprocessorCommands,
-    ReducedCommands,
     SessionCommands,
     SolutionCommands,
     conn.Conn,
