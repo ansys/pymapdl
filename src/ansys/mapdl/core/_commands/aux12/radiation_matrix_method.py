@@ -23,29 +23,6 @@
 
 class RadiationMatrixMethod:
 
-    def write(self, fname: str = "", **kwargs):
-        r"""Writes the radiation matrix file.
-
-        Mechanical APDL Command: `WRITE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_WRITE.html>`_
-
-        Parameters
-        ----------
-        fname : str
-            File name and directory path (248 characters maximum, including the characters needed for the
-            directory path). An unspecified directory path defaults to the working directory; in this case,
-            you can use all 248 characters for the file name. The file name Defaults to :file:`Jobname`.
-
-        Notes
-        -----
-
-        .. _WRITE_notes:
-
-        Writes radiation matrix file ( :file:`File.SUB` ) for input to the substructure thermal "use" pass.
-        Subsequent :ref:`write` operations to the same file overwrite the file.
-        """
-        command = f"WRITE,{fname}"
-        return self.run(command, **kwargs)
-
     def emis(self, mat: str = "", evalu: str = "", **kwargs):
         r"""Specifies emissivity as a material property for the Radiation Matrix method.
 
@@ -65,8 +42,8 @@ class RadiationMatrixMethod:
             Material number associated with this emissivity (500 maximum). Defaults to 1.
 
         evalu : str
-            Emissivity for this material (0.0 < ``EVALU``  :math:``  1.0).  Enter a very small number for
-            zero.
+            Emissivity for this material (0.0 < ``EVALU``  :math:`equation not available`  1.0).  Enter a
+            very small number for zero.
 
         Notes
         -----
@@ -79,25 +56,27 @@ class RadiationMatrixMethod:
         command = f"EMIS,{mat},{evalu}"
         return self.run(command, **kwargs)
 
-    def vtype(self, nohid: int | str = "", nzone: str = "", **kwargs):
-        r"""Specifies the viewing procedure used to determine the form factors for the Radiation Matrix method.
+    def geom(self, k2d: int | str = "", ndiv: str = "", **kwargs):
+        r"""Defines the geometry specifications for the radiation matrix calculation.
 
-        Mechanical APDL Command: `VTYPE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VTYPE.html>`_
+        Mechanical APDL Command: `GEOM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GEOM.html>`_
 
         Parameters
         ----------
-        nohid : int or str
-            Type of viewing procedure:
+        k2d : int or str
+            Dimensionality key:
 
-            * ``0`` - Hidden procedure.
+            * ``0`` - 3D geometry (default)
 
-            * ``1`` - Non-hidden (faster, but less general) procedure.
+            * ``1`` - 2D geometry (plane or axisymmetric)
 
-        nzone : str
-            Number of sampling zones for the hidden procedure (100 maximum for 3D, 1000 maximum for 2D).
-            Defaults to 20 for 3D, 200 for 2D. Number of points is 2* ``NZONE`` for 2D and 2\* ``NZONE`` \*( ``NZONE`` +1) for 3D.
+        ndiv : str
+            Number of divisions in an axisymmetric model. Used only with ``K2D`` = 1. Defaults to 0 (2D
+            plane). The 2D model is internally expanded to a 3D model based on the number of divisions
+            specified (6 :math:`equation not available`   ``NDIV``  :math:`equation not available`  90).
+            For example, ``NDIV`` of 6 is internally represented by six 60° sections.
         """
-        command = f"VTYPE,{nohid},{nzone}"
+        command = f"GEOM,{k2d},{ndiv}"
         return self.run(command, **kwargs)
 
     def mprint(self, key: int | str = "", **kwargs):
@@ -125,29 +104,6 @@ class RadiationMatrixMethod:
         command = f"MPRINT,{key}"
         return self.run(command, **kwargs)
 
-    def geom(self, k2d: int | str = "", ndiv: str = "", **kwargs):
-        r"""Defines the geometry specifications for the radiation matrix calculation.
-
-        Mechanical APDL Command: `GEOM <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_GEOM.html>`_
-
-        Parameters
-        ----------
-        k2d : int or str
-            Dimensionality key:
-
-            * ``0`` - 3D geometry (default)
-
-            * ``1`` - 2D geometry (plane or axisymmetric)
-
-        ndiv : str
-            Number of divisions in an axisymmetric model. Used only with ``K2D`` = 1. Defaults to 0 (2D
-            plane). The 2D model is internally expanded to a 3D model based on the number of divisions
-            specified (6 :math:``   ``NDIV``  :math:``  90).  For example,  ``NDIV`` of 6 is internally
-            represented by six 60° sections.
-        """
-        command = f"GEOM,{k2d},{ndiv}"
-        return self.run(command, **kwargs)
-
     def space(self, node: str = "", **kwargs):
         r"""Defines a space node for radiation using the Radiation Matrix method.
 
@@ -166,4 +122,48 @@ class RadiationMatrixMethod:
         A space node is required in an open system to account for radiation losses.
         """
         command = f"SPACE,{node}"
+        return self.run(command, **kwargs)
+
+    def vtype(self, nohid: int | str = "", nzone: str = "", **kwargs):
+        r"""Specifies the viewing procedure used to determine the form factors for the Radiation Matrix method.
+
+        Mechanical APDL Command: `VTYPE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VTYPE.html>`_
+
+        Parameters
+        ----------
+        nohid : int or str
+            Type of viewing procedure:
+
+            * ``0`` - Hidden procedure.
+
+            * ``1`` - Non-hidden (faster, but less general) procedure.
+
+        nzone : str
+            Number of sampling zones for the hidden procedure (100 maximum for 3D, 1000 maximum for 2D).
+            Defaults to 20 for 3D, 200 for 2D. Number of points is 2* ``NZONE`` for 2D and 2\* ``NZONE`` \*( ``NZONE`` +1) for 3D.
+        """
+        command = f"VTYPE,{nohid},{nzone}"
+        return self.run(command, **kwargs)
+
+    def write(self, fname: str = "", **kwargs):
+        r"""Writes the radiation matrix file.
+
+        Mechanical APDL Command: `WRITE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_WRITE.html>`_
+
+        Parameters
+        ----------
+        fname : str
+            File name and directory path (248 characters maximum, including the characters needed for the
+            directory path). An unspecified directory path defaults to the working directory; in this case,
+            you can use all 248 characters for the file name. The file name Defaults to :file:`Jobname`.
+
+        Notes
+        -----
+
+        .. _WRITE_notes:
+
+        Writes radiation matrix file ( :file:`File.SUB` ) for input to the substructure thermal "use" pass.
+        Subsequent :ref:`write` operations to the same file overwrite the file.
+        """
+        command = f"WRITE,{fname}"
         return self.run(command, **kwargs)

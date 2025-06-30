@@ -23,39 +23,66 @@
 
 class EncryptionDecryption:
 
-    def encrypt(self, key: str = "", fname: str = "", ext: str = "", **kwargs):
-        r"""Controls encryption of command input.
+    def dbdecrypt(
+        self,
+        keya: str = "",
+        keyb: str = "",
+        datatype: str = "",
+        num1: str = "",
+        num2: str = "",
+        inc: str = "",
+        **kwargs,
+    ):
+        r"""Controls decryption of material data in the database file.
 
-        Mechanical APDL Command: `/ENCRYPT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ENCRYPT.html>`_
+        Mechanical APDL Command: `/DBDECRYPT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DBDECRYPT.html>`_
 
         Parameters
         ----------
-        key : str
-            Encryption key used to encrypt the data (32-character maximum). A character parameter may be
-            used. If the key is unspecified, encryption is turned off.
+        keya : str
+            Decryption key A (32-character maximum). This key is used to decrypt the data in a one-level
+            encryption or to control access to the data in a two-level encryption. Leave this field blank if
+            you do not have key A.
 
-        fname : str
-            Name of file (including directory path) where the encrypted commands are written (248-character
-            maximum for both file name and directory). An unspecified directory path defaults to the working
-            directory; in this case, you can use all 248 characters for the file name.
+        keyb : str
+            Decryption key B (32-character maximum). This key is used to decrypt the data in a two-level
+            encryption. Leave this field blank if the database file is encrypted with one-level encryption.
 
-        ext : str
-            File name extension (eight-character maximum).
+        datatype : str
+            Type of data to decrypt. Must be set to MAT for material data.
+
+        num1 : str
+            Decrypt materials from material number ``NUM1`` to ``NUM2`` (defaults to ``NUM1`` ) in steps of
+            ``INC`` (defaults to 1). If ``NUM1`` = ALL (default), ``NUM2`` and ``INC`` are ignored.
+
+        num2 : str
+            Decrypt materials from material number ``NUM1`` to ``NUM2`` (defaults to ``NUM1`` ) in steps of
+            ``INC`` (defaults to 1). If ``NUM1`` = ALL (default), ``NUM2`` and ``INC`` are ignored.
+
+        inc : str
+            Decrypt materials from material number ``NUM1`` to ``NUM2`` (defaults to ``NUM1`` ) in steps of
+            ``INC`` (defaults to 1). If ``NUM1`` = ALL (default), ``NUM2`` and ``INC`` are ignored.
 
         Notes
         -----
-        This command opens the encrypted file specified by ``Fname`` and ``Ext`` for writing encrypted input
-        commands.
 
-        Issuing this command results in a new file that overwrites any data in an existing file by the same
-        name. When the encrypted file is written, the first line in the file is
-        ``/DECRYPT``,PASSWORD,OPENSSL and the last line is ``/DECRYPT``.
+        .. _s-DBDECRYPT_notes:
 
-        See `Encrypting Command Input and Other Data
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdl_encryptmat.html>`_
-        :ref:`encrypt` and performing encryption and decryption.
+        This command decrypts data in the database file. It must be issued before resuming the database file
+        ( :ref:`resume` command). Only ``KeyA`` is required for a one-level encryption. For a `two-level
+        encryption
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdl_encryptmat.html#partial_access>`_,
+        inputting ``KeyB`` gives you partial access to the data. Inputting both ``KeyA`` and ``KeyB`` gives
+        you full access.
+
+        For more information about using :ref:`dbdecrypt` in the encryption/decryption procedure, see
+        `Encrypting Material Data
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdl_encryptmat.html#apdl_encryptsteps_mat>`_
+        :ref:`dbencrypt` command.
+
+        This command is valid in any processor.
         """
-        command = f"/ENCRYPT,{key},{fname},{ext}"
+        command = f"/DBDECRYPT,{keya},{keyb},{datatype},{num1},{num2},{inc}"
         return self.run(command, **kwargs)
 
     def dbencrypt(
@@ -99,6 +126,9 @@ class EncryptionDecryption:
 
         Notes
         -----
+
+        .. _s-DBENCRYPT_notes:
+
         This command encrypts data in the database file. It must be issued before saving the database file (
         :ref:`save` command).
 
@@ -133,13 +163,19 @@ class EncryptionDecryption:
             Key to decrypt the encrypted input or to set the global encryption key. The following are valid
             inputs:
 
-            If ``Key2`` = OPENSSL or is blank, then decryption commences and the previously set global
-            encryption key is used for decryption. If ``Key2`` has a value, then that value is set as the
-            global encryption key. If ``Key2`` = OFF, then the global encryption password previously set by
-            the command :ref:`decrypt`,PASSWORD, ``Key2`` is reset.
+            * If ``Key2`` = OPENSSL or is blank, then decryption commences and the previously set global
+              encryption key is used for decryption.
+
+            * If ``Key2`` has a value, then that value is set as the global encryption key.
+
+            * If ``Key2`` = OFF, then the global encryption password previously set by the command
+              :ref:`decrypt`,PASSWORD, ``Key2`` is reset.
 
         Notes
         -----
+
+        .. _s-DECRYPT_notes:
+
         When decrypting an encrypted input, ``/DECRYPT,PASSWORD,OPENSSL`` must appear as the first line of
         the encrypted file. The line is inserted automatically when you issue :ref:`encrypt` to create the
         encrypted file.
@@ -158,61 +194,40 @@ class EncryptionDecryption:
         command = f"/DECRYPT,{key1},{key2}"
         return self.run(command, **kwargs)
 
-    def dbdecrypt(
-        self,
-        keya: str = "",
-        keyb: str = "",
-        datatype: str = "",
-        num1: str = "",
-        num2: str = "",
-        inc: str = "",
-        **kwargs,
-    ):
-        r"""Controls decryption of material data in the database file.
+    def encrypt(self, key: str = "", fname: str = "", ext: str = "", **kwargs):
+        r"""Controls encryption of command input.
 
-        Mechanical APDL Command: `/DBDECRYPT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_DBDECRYPT.html>`_
+        Mechanical APDL Command: `/ENCRYPT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_ENCRYPT.html>`_
 
         Parameters
         ----------
-        keya : str
-            Decryption key A (32-character maximum). This key is used to decrypt the data in a one-level
-            encryption or to control access to the data in a two-level encryption. Leave this field blank if
-            you do not have key A.
+        key : str
+            Encryption key used to encrypt the data (32-character maximum). A character parameter may be
+            used. If the key is unspecified, encryption is turned off.
 
-        keyb : str
-            Decryption key B (32-character maximum). This key is used to decrypt the data in a two-level
-            encryption. Leave this field blank if the database file is encrypted with one-level encryption.
+        fname : str
+            Name of file (including directory path) where the encrypted commands are written (248-character
+            maximum for both file name and directory). An unspecified directory path defaults to the working
+            directory; in this case, you can use all 248 characters for the file name.
 
-        datatype : str
-            Type of data to decrypt. Must be set to MAT for material data.
-
-        num1 : str
-            Decrypt materials from material number ``NUM1`` to ``NUM2`` (defaults to ``NUM1`` ) in steps of
-            ``INC`` (defaults to 1). If ``NUM1`` = ALL (default), ``NUM2`` and ``INC`` are ignored.
-
-        num2 : str
-            Decrypt materials from material number ``NUM1`` to ``NUM2`` (defaults to ``NUM1`` ) in steps of
-            ``INC`` (defaults to 1). If ``NUM1`` = ALL (default), ``NUM2`` and ``INC`` are ignored.
-
-        inc : str
-            Decrypt materials from material number ``NUM1`` to ``NUM2`` (defaults to ``NUM1`` ) in steps of
-            ``INC`` (defaults to 1). If ``NUM1`` = ALL (default), ``NUM2`` and ``INC`` are ignored.
+        ext : str
+            File name extension (eight-character maximum).
 
         Notes
         -----
-        This command decrypts data in the database file. It must be issued before resuming the database file
-        ( :ref:`resume` command). Only ``KeyA`` is required for a one-level encryption. For a `two-level
-        encryption
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdl_encryptmat.html#partial_access>`_,
-        inputting ``KeyB`` gives you partial access to the data. Inputting both ``KeyA`` and ``KeyB`` gives
-        you full access.
 
-        For more information about using :ref:`dbdecrypt` in the encryption/decryption procedure, see
-        `Encrypting Material Data
-        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdl_encryptmat.html#apdl_encryptsteps_mat>`_
-        :ref:`dbencrypt` command.
+        .. _s-ENCRYPT_notes:
 
-        This command is valid in any processor.
+        This command opens the encrypted file specified by ``Fname`` and ``Ext`` for writing encrypted input
+        commands.
+
+        Issuing this command results in a new file that overwrites any data in an existing file by the same
+        name. When the encrypted file is written, the first line in the file is
+        ``/DECRYPT``,PASSWORD,OPENSSL and the last line is ``/DECRYPT``.
+
+        See `Encrypting Command Input and Other Data
+        <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_apdl/apdl_encryptmat.html>`_
+        :ref:`encrypt` and performing encryption and decryption.
         """
-        command = f"/DBDECRYPT,{keya},{keyb},{datatype},{num1},{num2},{inc}"
+        command = f"/ENCRYPT,{key},{fname},{ext}"
         return self.run(command, **kwargs)

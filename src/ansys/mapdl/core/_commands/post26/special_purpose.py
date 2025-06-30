@@ -478,9 +478,10 @@ class SpecialPurpose:
         the program.
 
         The program also creates an additional TABLE type array that contains the smoothed array and the
-        unsmoothed data to enable plotting later with :ref:`starvplot`. Column 1 in the table corresponds to
-        ``Vect1``, column 2 to ``Vect2``, and column 3 to ``Vect4``. The array is named ``Vect3`` _SMOOTH,
-        up to a limit of 32 characters. For example, if the array name is X1, the table name is X1_SMOOTH.
+        unsmoothed data to enable plotting later with :ref:`starvplot`. Column 1 in the table corresponds
+        to ``Vect1``, column 2 to ``Vect2``, and column 3 to ``Vect4``. The array is named ``Vect3``
+        _SMOOTH, up to a limit of 32 characters. For example, if the array name is X1, the table name is
+        X1_SMOOTH.
 
         This command is also valid in PREP7 and SOLUTION.
         """

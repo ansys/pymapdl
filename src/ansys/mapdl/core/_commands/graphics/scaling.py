@@ -23,70 +23,6 @@
 
 class Scaling:
 
-    def vscale(self, wn: str = "", vratio: str = "", key: int | str = "", **kwargs):
-        r"""Scales the length of displayed vectors.
-
-        Mechanical APDL Command: `/VSCALE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSCALE.html>`_
-
-        Parameters
-        ----------
-        wn : str
-            Window number (or ALL) to which command applies (defaults to 1).
-
-        vratio : str
-            Ratio value applied to the automatically calculated scale factor (defaults to 1.0, that is, use
-            scale factor as automatically calculated).
-
-        key : int or str
-            Relative scaling key:
-
-            * ``0`` - Use relative length scaling among vectors based on magnitudes.
-
-            * ``1`` - Use uniform length scaling for all vector lengths.
-
-        Notes
-        -----
-
-        .. _s-VSCALE_notes:
-
-        Allows scaling of the vector length displayed with the :ref:`plvect` command of POST1 and the
-        :ref:`pbc` and :ref:`psf` commands. Also allows the scaling of the element (that is,
-        :ref:`psymb`,ESYS) and the nodal (that is, :ref:`psymb`,NDIR) coordinate system symbols.
-
-        This command is valid in any processor.
-        """
-        command = f"/VSCALE,{wn},{vratio},{key}"
-        return self.run(command, **kwargs)
-
-    def ratio(self, wn: str = "", ratox: str = "", ratoy: str = "", **kwargs):
-        r"""Distorts the object geometry.
-
-        Mechanical APDL Command: `/RATIO <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RATIO.html>`_
-
-        Parameters
-        ----------
-        wn : str
-            Window number (or ALL) to which command applies (defaults to 1).
-
-        ratox : str
-            Distort object in the window X direction by this factor (defaults to 1.0).
-
-        ratoy : str
-            Distort object in the window Y direction by this factor (defaults to 1.0).
-
-        Notes
-        -----
-
-        .. _s-RATIO_notes:
-
-        Distorts the object geometry in a particular direction. An example of this command's use would be to
-        allow long narrow sections to be distorted to a more square area for better display visualization.
-
-        This command is valid in any processor.
-        """
-        command = f"/RATIO,{wn},{ratox},{ratoy}"
-        return self.run(command, **kwargs)
-
     def iclwid(self, factor: str = "", **kwargs):
         r"""Scales the line width of circuit builder icons.
 
@@ -123,6 +59,62 @@ class Scaling:
         Circuit Builder (an interactive builder available in the Mechanical APDL GUI).
         """
         command = f"/ICSCALE,{wn},{factor}"
+        return self.run(command, **kwargs)
+
+    def ratio(self, wn: str = "", ratox: str = "", ratoy: str = "", **kwargs):
+        r"""Distorts the object geometry.
+
+        Mechanical APDL Command: `/RATIO <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_RATIO.html>`_
+
+        Parameters
+        ----------
+        wn : str
+            Window number (or ALL) to which command applies (defaults to 1).
+
+        ratox : str
+            Distort object in the window X direction by this factor (defaults to 1.0).
+
+        ratoy : str
+            Distort object in the window Y direction by this factor (defaults to 1.0).
+
+        Notes
+        -----
+
+        .. _s-RATIO_notes:
+
+        Distorts the object geometry in a particular direction. An example of this command's use would be to
+        allow long narrow sections to be distorted to a more square area for better display visualization.
+
+        This command is valid in any processor.
+        """
+        command = f"/RATIO,{wn},{ratox},{ratoy}"
+        return self.run(command, **kwargs)
+
+    def shrink(self, ratio: str = "", **kwargs):
+        r"""Shrinks elements, lines, areas, and volumes for display clarity.
+
+        Mechanical APDL Command: `/SHRINK <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SHRINK.html>`_
+
+        Parameters
+        ----------
+        ratio : str
+            Shrinkage ratio (input as a decimal (0.0 to 0.5)). Defaults to 0.0 (no shrinkage). Values
+            greater than 0.5 default to 0.1 (10% shrinkage).
+
+        Notes
+        -----
+
+        .. _s-SHRINK_notes:
+
+        Shrinks the elements, lines, areas, and volumes so that adjacent entities are separated for clarity.
+        Portions of this command are not supported by PowerGraphics ( :ref:`graphics`,POWER).
+
+        If only the common lines of non-coplanar faces are drawn (as per the :ref:`edge` command), then this
+        command is ignored.
+
+        This command is valid in any processor.
+        """
+        command = f"/SHRINK,{ratio}"
         return self.run(command, **kwargs)
 
     def slashdscale(self, wn: str = "", dmult: int | str = "", **kwargs):
@@ -214,29 +206,37 @@ class Scaling:
         command = f"/SSCALE,{wn},{smult}"
         return self.run(command, **kwargs)
 
-    def shrink(self, ratio: str = "", **kwargs):
-        r"""Shrinks elements, lines, areas, and volumes for display clarity.
+    def vscale(self, wn: str = "", vratio: str = "", key: int | str = "", **kwargs):
+        r"""Scales the length of displayed vectors.
 
-        Mechanical APDL Command: `/SHRINK <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_SHRINK.html>`_
+        Mechanical APDL Command: `/VSCALE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_VSCALE.html>`_
 
         Parameters
         ----------
-        ratio : str
-            Shrinkage ratio (input as a decimal (0.0 to 0.5)). Defaults to 0.0 (no shrinkage). Values
-            greater than 0.5 default to 0.1 (10% shrinkage).
+        wn : str
+            Window number (or ALL) to which command applies (defaults to 1).
+
+        vratio : str
+            Ratio value applied to the automatically calculated scale factor (defaults to 1.0, that is, use
+            scale factor as automatically calculated).
+
+        key : int or str
+            Relative scaling key:
+
+            * ``0`` - Use relative length scaling among vectors based on magnitudes.
+
+            * ``1`` - Use uniform length scaling for all vector lengths.
 
         Notes
         -----
 
-        .. _s-SHRINK_notes:
+        .. _s-VSCALE_notes:
 
-        Shrinks the elements, lines, areas, and volumes so that adjacent entities are separated for clarity.
-        Portions of this command are not supported by PowerGraphics ( :ref:`graphics`,POWER).
-
-        If only the common lines of non-coplanar faces are drawn (as per the :ref:`edge` command), then this
-        command is ignored.
+        Allows scaling of the vector length displayed with the :ref:`plvect` command of POST1 and the
+        :ref:`pbc` and :ref:`psf` commands. Also allows the scaling of the element (that is, :ref:`psymb`
+        ,ESYS) and the nodal (that is, :ref:`psymb`,NDIR) coordinate system symbols.
 
         This command is valid in any processor.
         """
-        command = f"/SHRINK,{ratio}"
+        command = f"/VSCALE,{wn},{vratio},{key}"
         return self.run(command, **kwargs)

@@ -35,8 +35,8 @@ class Display:
 
             * ``On or 1`` - Allows you to exit and reenter :ref:`post26` without losing your current time
               history variable information. Keeps a cache of the :ref:`post26` variable information including the
-              active file name ( :ref:`file` ), variable definitions ( :ref:`nsol`, :ref:`esol`, :ref:`rforce`,
-              and :ref:`solu` ) and stored variable data in memory for the current Mechanical APDL session.
+              active file name ( ``FILE`` ), variable definitions ( :ref:`nsol`, :ref:`esol`, :ref:`rforce`, and
+              :ref:`solu` ) and stored variable data in memory for the current Mechanical APDL session.
 
             * ``Off or 0`` - :ref:`post26` variable information is deleted when you exit :ref:`post26`.
 
@@ -53,8 +53,8 @@ class Display:
         When you reenter :ref:`post26` all time history variable data is available for use. When you issue
         :ref:`store`, NEW, variable definitions created by math operations such as :ref:`add` or :ref:`prod`
         will not be restored. However, variables defined with :ref:`nsol`, :ref:`esol`, :ref:`rforce`, and
-        :ref:`solu`  will be restored. Only the last active results file name is kept in memory (
-        :ref:`file` ).
+        :ref:`solu`  will be restored. Only the last active results file name is kept in memory ( ``FILE``
+        ).
 
         Commands such as :ref:`layerp26`, :ref:`shell`, and :ref:`force` that specify the location or a
         component of data to be stored will retain the setting at the time of exiting :ref:`post26`.

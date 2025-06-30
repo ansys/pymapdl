@@ -258,7 +258,7 @@ class Listing:
 
         The structural approximation is based on the energy error (which is similar in concept to the strain
         energy) and represents the error associated with the discrepancy between the calculated stress field
-        and the globally continuous stress field (see `POST1 - Error ApproximationTechnique
+        and the globally continuous stress field (see `POST1 - Error Approximation Technique
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_post7.html#errormagbased>`_ in
         the `Mechanical APDL Theory Reference
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_biblio.html>`_). This

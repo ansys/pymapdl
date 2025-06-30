@@ -11,7 +11,7 @@ Post1
    * - :ref:`ref_controls`
    * - :ref:`ref_special_purpose`
    * - :ref:`ref_status`
-   * - :ref:`_ref_magnetics_calculations`
+   * - :ref:`ref_magnetics_calculations`
    * - :ref:`ref_element_table`
    * - :ref:`ref_failure_criteria`
    * - :ref:`ref__fatigue`

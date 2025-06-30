@@ -172,7 +172,7 @@ class RunControls:
         .. _s-CWD_notes:
 
         After issuing the /CWD command, all new files opened with no default directory specified (via the
-        :ref:`file`, :ref:`copy`, or :ref:`resume` commands, for example) default to the new ``DIRPATH``
+        ``FILE``, :ref:`copy`, or :ref:`resume` commands, for example) default to the new ``DIRPATH``
         directory.
 
         Examples
@@ -403,23 +403,23 @@ class RunControls:
         label : str
             Label identifying the GUI component:
 
-            * ``ZOOM`` - `Pan,Zoom, Rotate
+            * ``ZOOM`` - `Pan, Zoom, Rotate
               <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_wid/Hlp_UI_PanZoom.html#wpanzoomk>`_
               dialog box, off by default.
 
-            * ``WORK`` - `OffsetWorking Plane
+            * ``WORK`` - `Offset Working Plane
               <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_wid/Hlp_UI_WP_Offset.html#wwpoffsetdynamic>`_
               dialog box, off by default.
 
-            * ``WPSET`` - `WorkingPlane Settings
+            * ``WPSET`` - `Working Plane Settings
               <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_wid/Hlp_UI_WP_Set.html#wwpsetgrid>`_
               dialog box, off by default.
 
-            * ``ABBR`` - `EditToolbar/Abbreviations
+            * ``ABBR`` - `Edit Toolbar/Abbreviations
               <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_wid/Hlp_UI_Toolbar.html#edittoolbarselect>`_
               dialog box, off by default.
 
-            * ``PARM`` - `ScalarParameters
+            * ``PARM`` - `Scalar Parameters
               <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_wid/Hlp_UI_Scal_Parm.html#wscalparmselect>`_
               dialog box, off by default.
 
@@ -837,8 +837,6 @@ class RunControls:
             * ``NODE`` - Nodal solution data (h-elements only).
 
             * ``ELEMENT`` - Element solution data.
-
-            .. _ui_coll_label:
 
             Label specifying the behavior of the Mechanical APDL main menu after a :ref:`finish` command is issued. User interaction with the main menu is unaffected. Valid only for ``Func`` = COLL:
 

@@ -6,12 +6,12 @@ Graphics
 
 .. list-table::
 
-   * - :ref:`ref_style`
    * - :ref:`ref_annotation`
-   * - :ref:`ref_labeling`
-   * - :ref:`ref_set_up`
    * - :ref:`ref_views`
    * - :ref:`ref_graphs`
+   * - :ref:`ref_labeling`
+   * - :ref:`ref_set_up`
+   * - :ref:`ref_style`
    * - :ref:`ref_scaling`
 
 
@@ -19,10 +19,10 @@ Graphics
    :maxdepth: 1
    :hidden:
 
-   style
    annotation
-   labeling
-   set_up
    views
    graphs
+   labeling
+   set_up
+   style
    scaling

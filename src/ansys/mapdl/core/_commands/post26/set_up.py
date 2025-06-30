@@ -50,8 +50,8 @@ class SetUp:
             Node number for which data are to be stored.
 
         item : str
-            Label identifying the item. General item labels are shown in :ref:`ANSOL_tab_1`below. Some items
-            also require a component label.
+            Label identifying the item. General item labels are shown in :ref:`ANSOL_tab_1` below. Some
+            items also require a component label.
 
         comp : str
             Component of the item (if required). General component labels are shown in :ref:`ANSOL_tab_1`.
@@ -97,9 +97,9 @@ class SetUp:
 
         Valid item and component labels for element nodal results are listed in :ref:`ANSOL_tab_1`.
 
-        :ref:`ansol` defines element nodal results data to be stored from a results file ( :ref:`file` ).
-        Not all items are valid for all nodes. See the input and output summary tables of each element
-        attached to the node for the available items.
+        :ref:`ansol` defines element nodal results data to be stored from a results file ( ``FILE`` ). Not
+        all items are valid for all nodes. See the input and output summary tables of each element attached
+        to the node for the available items.
 
         If `nodal-averaged results
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_elem/Hlp_E_CH2_2.html#nodeavepost>`_ (
@@ -130,9 +130,9 @@ class SetUp:
         shell elements. Ensure that consistent coordinate systems are active for all associated elements
         used by the :ref:`ansol` command.
 
-        **Derived quantities:** Some of the result items supported by :ref:`ansol` ( :ref:`ANSOL_tab_1`) are
-        derived from the component quantities. Issue :ref:`avprin` to specify the principal and vector sum
-        quantity averaging methods.
+        **Derived quantities:** Some of the result items supported by :ref:`ansol` ( :ref:`ANSOL_tab_1` )
+        are derived from the component quantities. Issue :ref:`avprin` to specify the principal and vector
+        sum quantity averaging methods.
 
         **Default:** If ``Mat``, ``Real``, and ``Ename`` are not specified, all elements attached to the
         node are considered. When a material ID, real constant ID, or element-type discontinuity is detected
@@ -525,9 +525,8 @@ class SetUp:
             require a component label.
 
         comp : str
-            Component of the item (if required). General component labels are shown in
-            :ref:`ESOL_tab_1`below. If ``Comp`` is a sequence number ( ``n`` ), the ``NODE`` field is
-            ignored.
+            Component of the item (if required). General component labels are shown in :ref:`ESOL_tab_1`
+            below. If ``Comp`` is a sequence number ( ``n`` ), the ``NODE`` field is ignored.
 
         name : str
             32-character name for identifying the item on the printout and displays. Defaults to a label
@@ -538,10 +537,10 @@ class SetUp:
 
         .. _ESOL_notes:
 
-        See :ref:`ESOL_tab_1`for a list of item and component labels for element (excluding line element)
-        results. See :ref:`ESOL_tab_2`for a list of valid selected result ( ``Item`` = SRES) components.
+        See :ref:`ESOL_tab_1` for a list of item and component labels for element (excluding line element)
+        results. See :ref:`ESOL_tab_2` for a list of valid selected result ( ``Item`` = SRES) components.
 
-        :ref:`esol` defines element results data to be stored from a results file ( :ref:`file` ). Not all
+        :ref:`esol` defines element results data to be stored from a results file ( ``FILE`` ). Not all
         items are valid for all elements. To see the available items for a given element, refer to the input
         and output summary tables in the documentation for that element.
 
@@ -706,7 +705,7 @@ class SetUp:
              - Total number of contact status changes during substep.
            * - FPRS
              - Fluid penetration pressure.
-           * - TG For ``SHELL131`` and ``SHELL132`` elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3..., HTOP instead of HEAT.
+           * - TG For ``SHELL131`` and ``SHELL132`` elements with KEYOPT(3) = 0 or 1, use the labels HBOT, HE2, HE3, ..., HTOP instead of HEAT.
              - X, Y, Z, SUM
              - Component thermal gradient or vector sum.
            * - TF
@@ -1084,11 +1083,11 @@ class SetUp:
             Element number for which to store results.
 
         item : str
-            Label identifying the item. Valid item labels are shown in :ref:`jsol_tab_1`below.
+            Label identifying the item. Valid item labels are shown in :ref:`jsol_tab_1` below.
 
         comp : str
-            Component of the ``Item`` (if required). Valid component labels are shown in
-            :ref:`jsol_tab_1`below.
+            Component of the ``Item`` (if required). Valid component labels are shown in :ref:`jsol_tab_1`
+            below.
 
         name : str
             Thirty-two character name identifying the item on printouts and displays. Defaults to a label
@@ -1211,7 +1210,7 @@ class SetUp:
            * - ROT
              - X, Y, Z
              - X, Y, or Z structural rotation.
-           * - TEMP[ :ref:`NSOL_temp`]
+           * - TEMP[ :ref:`NSOL_temp` ]
              -
              - Temperature.
            * - PRES
@@ -1376,7 +1375,7 @@ class SetUp:
            * - M
              - X,Y,Z
              - X, Y, or Z structural moment
-           * - HEAT[ :ref:`rforce_table1_note1`]
+           * - HEAT[ :ref:`rforce_table1_note1` ]
              -
              - Heat flow
            * - FLOW

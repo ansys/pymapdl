@@ -23,13 +23,13 @@
 
 class CoordinateSystem:
 
-    def local(
+    def clocal(
         self,
         kcn: str = "",
         kcs: str = "",
-        xc: str = "",
-        yc: str = "",
-        zc: str = "",
+        xl: str = "",
+        yl: str = "",
+        zl: str = "",
         thxy: str = "",
         thyz: str = "",
         thzx: str = "",
@@ -37,9 +37,9 @@ class CoordinateSystem:
         par2: str = "",
         **kwargs,
     ):
-        r"""Defines a local coordinate system by a location and orientation.
+        r"""Defines a local coordinate system relative to the active coordinate system.
 
-        Mechanical APDL Command: `LOCAL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LOCAL.html>`_
+        Mechanical APDL Command: `CLOCAL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CLOCAL.html>`_
 
         Parameters
         ----------
@@ -58,14 +58,17 @@ class CoordinateSystem:
 
             * ``3 or TORO`` - Toroidal
 
-        xc : str
-            Location (in the global Cartesian coordinate system) of the origin of the new coordinate system.
+        xl : str
+            Location (in the active coordinate system) of the origin of the new coordinate system (R, θ, Z
+            for cylindrical, R, θ,Φ for spherical or toroidal).
 
-        yc : str
-            Location (in the global Cartesian coordinate system) of the origin of the new coordinate system.
+        yl : str
+            Location (in the active coordinate system) of the origin of the new coordinate system (R, θ, Z
+            for cylindrical, R, θ,Φ for spherical or toroidal).
 
-        zc : str
-            Location (in the global Cartesian coordinate system) of the origin of the new coordinate system.
+        zl : str
+            Location (in the active coordinate system) of the origin of the new coordinate system (R, θ, Z
+            for cylindrical, R, θ,Φ for spherical or toroidal).
 
         thxy : str
             First rotation about local Z (positive X toward Y).
@@ -88,99 +91,20 @@ class CoordinateSystem:
         Notes
         -----
 
-        .. _LOCAL_notes:
+        .. _CLOCAL_notes:
 
-        Defines a local coordinate system by origin location and orientation angles. The local coordinate
-        system is parallel to the global Cartesian system unless rotated. Rotation angles are in degrees and
-        redefine any previous rotation angles. See the :ref:`clocal`, :ref:`cs`, :ref:`cswpla`, and
-        :ref:`cskp` commands for alternate definitions. This local system becomes the active coordinate
-        system ( :ref:`csys` ). Local coordinate systems may be displayed with the :ref:`psymb` command.
-
-        This command is valid in any processor.
-        """
-        command = f"LOCAL,{kcn},{kcs},{xc},{yc},{zc},{thxy},{thyz},{thzx},{par1},{par2}"
-        return self.run(command, **kwargs)
-
-    def cswpla(
-        self, kcn: str = "", kcs: str = "", par1: str = "", par2: str = "", **kwargs
-    ):
-        r"""Defines a local coordinate system at the origin of the working plane.
-
-        Mechanical APDL Command: `CSWPLA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CSWPLA.html>`_
-
-        Parameters
-        ----------
-        kcn : str
-            Arbitrary reference number assigned to this coordinate system. Must be greater than 10. A
-            coordinate system previously defined with this number will be redefined.
-
-        kcs : str
-            Coordinate system type:
-
-            * ``0 or CART`` - Cartesian
-
-            * ``1 or CYLIN`` - Cylindrical (circular or elliptical)
-
-            * ``2 or SPHE`` - Spherical (or spheroidal)
-
-            * ``3 or TORO`` - Toroidal
-
-        par1 : str
-            Used for elliptical, spheroidal, or toroidal systems. If ``KCS`` = 1 or 2, ``PAR1`` is the ratio
-            of the ellipse Y-axis radius to X-axis radius (defaults to 1.0 (circle)). If ``KCS`` = 3,
-            ``PAR1`` is the major radius of the torus.
-
-        par2 : str
-            Used for spheroidal systems. If ``KCS`` = 2, ``PAR2`` = ratio of ellipse Z-axis radius to X-axis
-            radius (defaults to 1.0 (circle)).
-
-        Notes
-        -----
-
-        .. _CSWPLA_notes:
-
-        Defines and activates a local right-handed coordinate system centered at the origin of the working
-        plane. The coordinate system's local x-y plane (for a Cartesian system) or R-θ plane (for a
-        cylindrical or spherical system) corresponds to the working plane. This local system becomes the
-        active coordinate system. See the :ref:`cs`, :ref:`local`, :ref:`clocal`, and :ref:`cskp` commands
-        for alternate ways to define a local coordinate system. Local coordinate systems may be displayed
-        with the :ref:`psymb` command.
+        Defines and activates a local coordinate system by origin location and orientation angles relative
+        to the active coordinate system. This local system becomes the active coordinate system, and is
+        automatically aligned with the active system (that is, x is radial if a cylindrical system is
+        active, etc.). Nonzero rotation angles (degrees) are relative to this automatic rotation. See the
+        :ref:`cs`, :ref:`cskp`, :ref:`cswpla`, and :ref:`local` commands for alternate definitions. Local
+        coordinate systems may be displayed with the :ref:`psymb` command.
 
         This command is valid in any processor.
         """
-        command = f"CSWPLA,{kcn},{kcs},{par1},{par2}"
-        return self.run(command, **kwargs)
-
-    def csdele(self, kcn1: str = "", kcn2: str = "", kcinc: str = "", **kwargs):
-        r"""Deletes local coordinate systems.
-
-        Mechanical APDL Command: `CSDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CSDELE.html>`_
-
-        Parameters
-        ----------
-        kcn1 : str
-            Delete coordinate systems from ``KCN1`` (must be greater than 10) to ``KCN2`` (defaults to
-            ``KCN1`` ) in steps of ``KCINC`` (defaults to 1). If ``KCN1`` = ALL, ``KCN2`` and ``KCINC`` are
-            ignored and all coordinate systems are deleted.
-
-        kcn2 : str
-            Delete coordinate systems from ``KCN1`` (must be greater than 10) to ``KCN2`` (defaults to
-            ``KCN1`` ) in steps of ``KCINC`` (defaults to 1). If ``KCN1`` = ALL, ``KCN2`` and ``KCINC`` are
-            ignored and all coordinate systems are deleted.
-
-        kcinc : str
-            Delete coordinate systems from ``KCN1`` (must be greater than 10) to ``KCN2`` (defaults to
-            ``KCN1`` ) in steps of ``KCINC`` (defaults to 1). If ``KCN1`` = ALL, ``KCN2`` and ``KCINC`` are
-            ignored and all coordinate systems are deleted.
-
-        Notes
-        -----
-
-        .. _CSDELE_notes:
-
-        This command is valid in any processor.
-        """
-        command = f"CSDELE,{kcn1},{kcn2},{kcinc}"
+        command = (
+            f"CLOCAL,{kcn},{kcs},{xl},{yl},{zl},{thxy},{thyz},{thzx},{par1},{par2}"
+        )
         return self.run(command, **kwargs)
 
     def cs(
@@ -302,94 +226,36 @@ class CoordinateSystem:
         command = f"CSCIR,{kcn},{kthet},{kphi}"
         return self.run(command, **kwargs)
 
-    def csys(self, kcn: int | str = "", **kwargs):
-        r"""Activates a previously defined coordinate system.
+    def csdele(self, kcn1: str = "", kcn2: str = "", kcinc: str = "", **kwargs):
+        r"""Deletes local coordinate systems.
 
-        Mechanical APDL Command: `CSYS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CSYS.html>`_
-
-        Parameters
-        ----------
-        kcn : int or str
-            Specifies the active coordinate system, as follows:
-
-            * ``0 (default)`` - Cartesian
-
-            * ``1`` - Cylindrical with global Cartesian Z as the axis of rotation
-
-            * ``2`` - Spherical
-
-            * ``4 or WP`` - Working Plane
-
-            * ``5`` - Cylindrical with global Cartesian Y as the axis of rotation
-
-            * ``6`` - Cylindrical with global Cartesian X as the axis of rotation
-
-            * ``11 or greater`` - Any previously defined local coordinate system
-
-        Notes
-        -----
-
-        .. _CSYS_notes:
-
-        The :ref:`csys` command activates a previously defined coordinate system for geometry input and
-        generation. The :ref:`local`, :ref:`clocal`, :ref:`cs`, :ref:`cskp`, and :ref:`cswpla` commands also
-        activate coordinate systems as they are defined. To set the active element coordinate system
-        attribute pointer, issue the :ref:`esys` command.
-
-        The active coordinate system for files created via the :ref:`cdwrite` command is Cartesian (
-        :ref:`csys`,0).
-
-        This command is valid in any processor.
-
-        :ref:`csys`,4 (or :ref:`csys`,WP) activates working plane tracking, which updates the coordinate
-        system to follow working plane changes. To deactivate working plane tracking, activate any other
-        coordinate system (for example, :ref:`csys`,0 or :ref:`csys`,11).
-
-        :ref:`csys`,5 is a cylindrical coordinate system with global Cartesian Y as the axis of rotation.
-        The local x, y and z axes are radial, θ, and axial (respectively). The R-Theta plane is the
-        global X-Z plane, as it is for an axisymmetric model. Thus, at θ = 0.0, :ref:`csys`,5 has a
-        specific orientation: the local x is in the global +X direction, local y is in the global -Z
-        direction, and local z (the cylindrical axis) is in the global +Y direction.
-
-        :ref:`csys`,6 is a cylindrical coordinate system with global Cartesian X as the axis of rotation.
-        The local x, y and z axes are axial, radial, and θ (respectively). The R-Theta plane is the
-        global Y-Z plane, as it is for an axisymmetric model. Thus, at θ = 0.0, :ref:`csys`,6 has a
-        specific orientation: the local x is in the global -Z direction, local y is in the global +Y
-        direction, and local z (the cylindrical axis) is in the global +X direction.
-        """
-        command = f"CSYS,{kcn}"
-        return self.run(command, **kwargs)
-
-    def cslist(self, kcn1: str = "", kcn2: str = "", kcinc: str = "", **kwargs):
-        r"""Lists coordinate systems.
-
-        Mechanical APDL Command: `CSLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CSLIST.html>`_
+        Mechanical APDL Command: `CSDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CSDELE.html>`_
 
         Parameters
         ----------
         kcn1 : str
-            List coordinate systems from ``KCN1`` to ``KCN2`` (defaults to ``KCN1`` ) in steps of ``KCINC``
-            (defaults to 1). If ``KCN1`` = ALL (default), ``KCN2`` and ``KCINC`` are ignored and all
-            coordinate systems are listed.
+            Delete coordinate systems from ``KCN1`` (must be greater than 10) to ``KCN2`` (defaults to
+            ``KCN1`` ) in steps of ``KCINC`` (defaults to 1). If ``KCN1`` = ALL, ``KCN2`` and ``KCINC`` are
+            ignored and all coordinate systems are deleted.
 
         kcn2 : str
-            List coordinate systems from ``KCN1`` to ``KCN2`` (defaults to ``KCN1`` ) in steps of ``KCINC``
-            (defaults to 1). If ``KCN1`` = ALL (default), ``KCN2`` and ``KCINC`` are ignored and all
-            coordinate systems are listed.
+            Delete coordinate systems from ``KCN1`` (must be greater than 10) to ``KCN2`` (defaults to
+            ``KCN1`` ) in steps of ``KCINC`` (defaults to 1). If ``KCN1`` = ALL, ``KCN2`` and ``KCINC`` are
+            ignored and all coordinate systems are deleted.
 
         kcinc : str
-            List coordinate systems from ``KCN1`` to ``KCN2`` (defaults to ``KCN1`` ) in steps of ``KCINC``
-            (defaults to 1). If ``KCN1`` = ALL (default), ``KCN2`` and ``KCINC`` are ignored and all
-            coordinate systems are listed.
+            Delete coordinate systems from ``KCN1`` (must be greater than 10) to ``KCN2`` (defaults to
+            ``KCN1`` ) in steps of ``KCINC`` (defaults to 1). If ``KCN1`` = ALL, ``KCN2`` and ``KCINC`` are
+            ignored and all coordinate systems are deleted.
 
         Notes
         -----
 
-        .. _CSLIST_notes:
+        .. _CSDELE_notes:
 
         This command is valid in any processor.
         """
-        command = f"CSLIST,{kcn1},{kcn2},{kcinc}"
+        command = f"CSDELE,{kcn1},{kcn2},{kcinc}"
         return self.run(command, **kwargs)
 
     def cskp(
@@ -460,23 +326,44 @@ class CoordinateSystem:
         command = f"CSKP,{kcn},{kcs},{porig},{pxaxs},{pxypl},{par1},{par2}"
         return self.run(command, **kwargs)
 
-    def clocal(
-        self,
-        kcn: str = "",
-        kcs: str = "",
-        xl: str = "",
-        yl: str = "",
-        zl: str = "",
-        thxy: str = "",
-        thyz: str = "",
-        thzx: str = "",
-        par1: str = "",
-        par2: str = "",
-        **kwargs,
-    ):
-        r"""Defines a local coordinate system relative to the active coordinate system.
+    def cslist(self, kcn1: str = "", kcn2: str = "", kcinc: str = "", **kwargs):
+        r"""Lists coordinate systems.
 
-        Mechanical APDL Command: `CLOCAL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CLOCAL.html>`_
+        Mechanical APDL Command: `CSLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CSLIST.html>`_
+
+        Parameters
+        ----------
+        kcn1 : str
+            List coordinate systems from ``KCN1`` to ``KCN2`` (defaults to ``KCN1`` ) in steps of ``KCINC``
+            (defaults to 1). If ``KCN1`` = ALL (default), ``KCN2`` and ``KCINC`` are ignored and all
+            coordinate systems are listed.
+
+        kcn2 : str
+            List coordinate systems from ``KCN1`` to ``KCN2`` (defaults to ``KCN1`` ) in steps of ``KCINC``
+            (defaults to 1). If ``KCN1`` = ALL (default), ``KCN2`` and ``KCINC`` are ignored and all
+            coordinate systems are listed.
+
+        kcinc : str
+            List coordinate systems from ``KCN1`` to ``KCN2`` (defaults to ``KCN1`` ) in steps of ``KCINC``
+            (defaults to 1). If ``KCN1`` = ALL (default), ``KCN2`` and ``KCINC`` are ignored and all
+            coordinate systems are listed.
+
+        Notes
+        -----
+
+        .. _CSLIST_notes:
+
+        This command is valid in any processor.
+        """
+        command = f"CSLIST,{kcn1},{kcn2},{kcinc}"
+        return self.run(command, **kwargs)
+
+    def cswpla(
+        self, kcn: str = "", kcs: str = "", par1: str = "", par2: str = "", **kwargs
+    ):
+        r"""Defines a local coordinate system at the origin of the working plane.
+
+        Mechanical APDL Command: `CSWPLA <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CSWPLA.html>`_
 
         Parameters
         ----------
@@ -495,17 +382,133 @@ class CoordinateSystem:
 
             * ``3 or TORO`` - Toroidal
 
-        xl : str
-            Location (in the active coordinate system) of the origin of the new coordinate system (R, θ, Z
-            for cylindrical, R, θ,Φ for spherical or toroidal).
+        par1 : str
+            Used for elliptical, spheroidal, or toroidal systems. If ``KCS`` = 1 or 2, ``PAR1`` is the ratio
+            of the ellipse Y-axis radius to X-axis radius (defaults to 1.0 (circle)). If ``KCS`` = 3,
+            ``PAR1`` is the major radius of the torus.
 
-        yl : str
-            Location (in the active coordinate system) of the origin of the new coordinate system (R, θ, Z
-            for cylindrical, R, θ,Φ for spherical or toroidal).
+        par2 : str
+            Used for spheroidal systems. If ``KCS`` = 2, ``PAR2`` = ratio of ellipse Z-axis radius to X-axis
+            radius (defaults to 1.0 (circle)).
 
-        zl : str
-            Location (in the active coordinate system) of the origin of the new coordinate system (R, θ, Z
-            for cylindrical, R, θ,Φ for spherical or toroidal).
+        Notes
+        -----
+
+        .. _CSWPLA_notes:
+
+        Defines and activates a local right-handed coordinate system centered at the origin of the working
+        plane. The coordinate system's local x-y plane (for a Cartesian system) or R-θ plane (for a
+        cylindrical or spherical system) corresponds to the working plane. This local system becomes the
+        active coordinate system. See the :ref:`cs`, :ref:`local`, :ref:`clocal`, and :ref:`cskp` commands
+        for alternate ways to define a local coordinate system. Local coordinate systems may be displayed
+        with the :ref:`psymb` command.
+
+        This command is valid in any processor.
+        """
+        command = f"CSWPLA,{kcn},{kcs},{par1},{par2}"
+        return self.run(command, **kwargs)
+
+    def csys(self, kcn: int | str = "", **kwargs):
+        r"""Activates a previously defined coordinate system.
+
+        Mechanical APDL Command: `CSYS <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CSYS.html>`_
+
+        Parameters
+        ----------
+        kcn : int or str
+            Specifies the active coordinate system, as follows:
+
+            * ``0 (default)`` - Cartesian
+
+            * ``1`` - Cylindrical with global Cartesian Z as the axis of rotation
+
+            * ``2`` - Spherical
+
+            * ``4 or WP`` - Working Plane
+
+            * ``5`` - Cylindrical with global Cartesian Y as the axis of rotation
+
+            * ``6`` - Cylindrical with global Cartesian X as the axis of rotation
+
+            * ``11 or greater`` - Any previously defined local coordinate system
+
+        Notes
+        -----
+
+        .. _CSYS_notes:
+
+        The :ref:`csys` command activates a previously defined coordinate system for geometry input and
+        generation. The :ref:`local`, :ref:`clocal`, :ref:`cs`, :ref:`cskp`, and :ref:`cswpla` commands also
+        activate coordinate systems as they are defined. To set the active element coordinate system
+        attribute pointer, issue the :ref:`esys` command.
+
+        The active coordinate system for files created via the :ref:`cdwrite` command is Cartesian (
+        :ref:`csys`,0).
+
+        This command is valid in any processor.
+
+        :ref:`csys`,4 (or :ref:`csys`,WP) activates working plane tracking, which updates the coordinate
+        system to follow working plane changes. To deactivate working plane tracking, activate any other
+        coordinate system (for example, :ref:`csys`,0 or :ref:`csys`,11).
+
+        :ref:`csys`,5 is a cylindrical coordinate system with global Cartesian Y as the axis of rotation.
+        The local x, y and z axes are radial, θ, and axial (respectively). The R-Theta plane is the
+        global X-Z plane, as it is for an axisymmetric model. Thus, at θ = 0.0, :ref:`csys`,5 has a
+        specific orientation: the local x is in the global +X direction, local y is in the global -Z
+        direction, and local z (the cylindrical axis) is in the global +Y direction.
+
+        :ref:`csys`,6 is a cylindrical coordinate system with global Cartesian X as the axis of rotation.
+        The local x, y and z axes are axial, radial, and θ (respectively). The R-Theta plane is the
+        global Y-Z plane, as it is for an axisymmetric model. Thus, at θ = 0.0, :ref:`csys`,6 has a
+        specific orientation: the local x is in the global -Z direction, local y is in the global +Y
+        direction, and local z (the cylindrical axis) is in the global +X direction.
+        """
+        command = f"CSYS,{kcn}"
+        return self.run(command, **kwargs)
+
+    def local(
+        self,
+        kcn: str = "",
+        kcs: str = "",
+        xc: str = "",
+        yc: str = "",
+        zc: str = "",
+        thxy: str = "",
+        thyz: str = "",
+        thzx: str = "",
+        par1: str = "",
+        par2: str = "",
+        **kwargs,
+    ):
+        r"""Defines a local coordinate system by a location and orientation.
+
+        Mechanical APDL Command: `LOCAL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_LOCAL.html>`_
+
+        Parameters
+        ----------
+        kcn : str
+            Arbitrary reference number assigned to this coordinate system. Must be greater than 10. A
+            coordinate system previously defined with this number will be redefined.
+
+        kcs : str
+            Coordinate system type:
+
+            * ``0 or CART`` - Cartesian
+
+            * ``1 or CYLIN`` - Cylindrical (circular or elliptical)
+
+            * ``2 or SPHE`` - Spherical (or spheroidal)
+
+            * ``3 or TORO`` - Toroidal
+
+        xc : str
+            Location (in the global Cartesian coordinate system) of the origin of the new coordinate system.
+
+        yc : str
+            Location (in the global Cartesian coordinate system) of the origin of the new coordinate system.
+
+        zc : str
+            Location (in the global Cartesian coordinate system) of the origin of the new coordinate system.
 
         thxy : str
             First rotation about local Z (positive X toward Y).
@@ -528,18 +531,15 @@ class CoordinateSystem:
         Notes
         -----
 
-        .. _CLOCAL_notes:
+        .. _LOCAL_notes:
 
-        Defines and activates a local coordinate system by origin location and orientation angles relative
-        to the active coordinate system. This local system becomes the active coordinate system, and is
-        automatically aligned with the active system (that is, x is radial if a cylindrical system is
-        active, etc.). Nonzero rotation angles (degrees) are relative to this automatic rotation. See the
-        :ref:`cs`, :ref:`cskp`, :ref:`cswpla`, and :ref:`local` commands for alternate definitions. Local
-        coordinate systems may be displayed with the :ref:`psymb` command.
+        Defines a local coordinate system by origin location and orientation angles. The local coordinate
+        system is parallel to the global Cartesian system unless rotated. Rotation angles are in degrees and
+        redefine any previous rotation angles. See the :ref:`clocal`, :ref:`cs`, :ref:`cswpla`, and
+        :ref:`cskp` commands for alternate definitions. This local system becomes the active coordinate
+        system ( :ref:`csys` ). Local coordinate systems may be displayed with the :ref:`psymb` command.
 
         This command is valid in any processor.
         """
-        command = (
-            f"CLOCAL,{kcn},{kcs},{xl},{yl},{zl},{thxy},{thyz},{thzx},{par1},{par2}"
-        )
+        command = f"LOCAL,{kcn},{kcs},{xc},{yc},{zc},{thxy},{thyz},{thzx},{par1},{par2}"
         return self.run(command, **kwargs)

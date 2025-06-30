@@ -61,7 +61,7 @@ class Operations:
 
         .. math::
 
-            equation_not_available
+            equation not available
 
         See `POST26 - Data Operations
         <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en/ans_thry/thy_post10.html#eqbe42048a-448b-4de9-91a9-1c8007937622>`_
@@ -857,7 +857,7 @@ class Operations:
 
         .. math::
 
-            equation_not_available
+            equation not available
         """
         command = f"SQRT,{ir},{ia},,,{name},,,{facta}"
         return self.run(command, **kwargs)

@@ -30,8 +30,11 @@ class ProcessControls:
 
         Notes
         -----
-        The command following the ``\*ENDDO`` is executed next. The exit option may also be conditional [Use
-        the ``\*IF`` ]. The :ref:`starexit` command must appear on the same file as the ``\*DO`` command.
+
+        .. _a-EXIT_notes:
+
+        The command following the ``*ENDDO`` is executed next. The exit option may also be conditional [Use
+        the ``*IF`` ]. The :ref:`starexit` command must appear on the same file as the ``*DO`` command.
 
         This command is valid in any processor.
         """
@@ -50,10 +53,25 @@ class ProcessControls:
 
         Notes
         -----
+
+        .. warning::
+
+           This function contains specificities regarding the argument definitions.
+           Please refer to the `command documentation <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_WAIT.html>`_
+           for further explanations.
+
+        **Argument Descriptions**
+
+        .. _s-WAIT_argdescript:
+
+        * ``dtime : str`` - Time delay (in seconds). Maximum time delay is 59 seconds.
+
+        .. _s-WAIT_notes:
+
         The command following the :ref:`wait` will not be processed until the specified wait time increment
         has elapsed. Useful when reading from a prepared input file to cause a pause, for example, after a
         display command so that the display can be reviewed for a period of time. Another "wait" feature is
-        available via the ``\*ASK`` command.
+        available via the ``*ASK`` command.
 
         This command is valid in any processor.
         """

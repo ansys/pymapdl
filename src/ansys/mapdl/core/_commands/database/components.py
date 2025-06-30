@@ -104,6 +104,217 @@ class Components:
         command = f"CM,{cname},{entity},,{kopt}"
         return self.run(command, **kwargs)
 
+    def cmdele(self, name: str = "", **kwargs):
+        r"""Deletes a component or assembly definition.
+
+        Mechanical APDL Command: `CMDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CMDELE.html>`_
+
+        Parameters
+        ----------
+        name : str
+            Name of the component or assembly whose definition is to be removed.
+
+        Notes
+        -----
+
+        .. _CMDELE_notes:
+
+        Entities contained in the component, or the components within the assembly, are unaffected. Only the
+        grouping relationships are deleted. Assemblies are automatically updated to reflect deletion of
+        their components or subassemblies, but they are not automatically deleted when all their components
+        or subassemblies are deleted.
+
+        This command is valid in any processor.
+        """
+        command = f"CMDELE,{name}"
+        return self.run(command, **kwargs)
+
+    def cmedit(
+        self,
+        aname: str = "",
+        oper: str = "",
+        cnam1: str = "",
+        cnam2: str = "",
+        cnam3: str = "",
+        cnam4: str = "",
+        cnam5: str = "",
+        cnam6: str = "",
+        cnam7: str = "",
+        **kwargs,
+    ):
+        r"""Edits an existing assembly.
+
+        Mechanical APDL Command: `CMEDIT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CMEDIT.html>`_
+
+        Parameters
+        ----------
+        aname : str
+            Name of the assembly to be edited.
+
+        oper : str
+            Operation label:
+
+            * ``ADD`` - To add more components. The level of any assembly to be added must be lower than that of
+              the assembly ``Aname`` (see :ref:`cmgrp` command).
+
+            * ``DELE`` - To remove components.
+
+        cnam1 : str
+            Names of components and assemblies to be added to or deleted from the assembly.
+
+        cnam2 : str
+            Names of components and assemblies to be added to or deleted from the assembly.
+
+        cnam3 : str
+            Names of components and assemblies to be added to or deleted from the assembly.
+
+        cnam4 : str
+            Names of components and assemblies to be added to or deleted from the assembly.
+
+        cnam5 : str
+            Names of components and assemblies to be added to or deleted from the assembly.
+
+        cnam6 : str
+            Names of components and assemblies to be added to or deleted from the assembly.
+
+        cnam7 : str
+            Names of components and assemblies to be added to or deleted from the assembly.
+
+        Notes
+        -----
+
+        .. _CMEDIT_notes:
+
+        This command is valid in any processor.
+        """
+        command = f"CMEDIT,{aname},{oper},{cnam1},{cnam2},{cnam3},{cnam4},{cnam5},{cnam6},{cnam7}"
+        return self.run(command, **kwargs)
+
+    def cmgrp(
+        self,
+        aname: str = "",
+        cnam1: str = "",
+        cnam2: str = "",
+        cnam3: str = "",
+        cnam4: str = "",
+        cnam5: str = "",
+        cnam6: str = "",
+        cnam7: str = "",
+        cnam8: str = "",
+        **kwargs,
+    ):
+        r"""Groups components and assemblies into an assembly.
+
+        Mechanical APDL Command: `CMGRP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CMGRP.html>`_
+
+        Parameters
+        ----------
+        aname : str
+            An alphanumeric name used to identify this assembly. ``Aname`` may be up to 256 characters,
+            beginning with a letter and containing only letters, numbers, dots (.), and underscores (_).
+            Overwrites a previously defined ``Aname`` (and removes it from higher level assemblies, if any).
+
+        cnam1 : str
+            Names of existing components or other assemblies to be included in this assembly.
+
+        cnam2 : str
+            Names of existing components or other assemblies to be included in this assembly.
+
+        cnam3 : str
+            Names of existing components or other assemblies to be included in this assembly.
+
+        cnam4 : str
+            Names of existing components or other assemblies to be included in this assembly.
+
+        cnam5 : str
+            Names of existing components or other assemblies to be included in this assembly.
+
+        cnam6 : str
+            Names of existing components or other assemblies to be included in this assembly.
+
+        cnam7 : str
+            Names of existing components or other assemblies to be included in this assembly.
+
+        cnam8 : str
+            Names of existing components or other assemblies to be included in this assembly.
+
+        Notes
+        -----
+
+        .. _CMGRP_notes:
+
+        Groups components and other assemblies into an assembly identified by a name. :ref:`cmgrp` is used
+        for the initial definition of an assembly. An assembly is used in the same manner as a component. Up
+        to 5 levels of assemblies within assemblies may be used.
+
+        An assembly is a convenient grouping of previously defined components and other assemblies.
+        Assemblies may contain components only, other assemblies, or any combination. A component may belong
+        to any number of assemblies. Up to 5 levels of nested assemblies may be defined. Components and
+        assemblies may be added to or deleted from an existing assembly by the :ref:`cmedit` command. Once
+        defined, an assembly may be listed, deleted, selected, or unselected using the same commands as for
+        a component. Assemblies are automatically updated to reflect deletions of one or more of their
+        components or lower-level assemblies. Assemblies are not automatically deleted when all their
+        components or subassemblies are deleted.
+
+        This command is valid in any processor.
+        """
+        command = f"CMGRP,{aname},{cnam1},{cnam2},{cnam3},{cnam4},{cnam5},{cnam6},{cnam7},{cnam8}"
+        return self.run(command, **kwargs)
+
+    def cmlist(self, name: str = "", key: int | str = "", entity: str = "", **kwargs):
+        r"""Lists the contents of a component or assembly.
+
+        Mechanical APDL Command: `CMLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CMLIST.html>`_
+
+        Parameters
+        ----------
+        name : str
+            Name of the component or assembly to be listed (if blank, list all selected components and
+            assemblies). If ``Name`` is specified, then ``Entity`` is ignored.
+
+        key : int or str
+            Expansion key:
+
+            * ``0`` - Do not list individual entities in the component.
+
+            * ``1 or EXPA`` - List individual entities in the component.
+
+        entity : str
+            If ``Name`` is blank, then the following entity types can be specified:
+
+            * ``VOLU`` - List the volume components only.
+
+            * ``AREA`` - List the area components only.
+
+            * ``LINE`` - List the line components only.
+
+            * ``KP`` - List the keypoint components only
+
+            * ``ELEM`` - List the element components only.
+
+            * ``NODE`` - List the node components only.
+
+        Notes
+        -----
+
+        .. _CMLIST_notes:
+
+        This command is valid in any processor. For components, it lists the type of geometric entity. For
+        assemblies, it lists the components and/or assemblies that make up the assembly.
+
+        Examples of possible usage:
+
+        * :ref:`cmlist` - List all selected components.
+        * :ref:`cmlist`, EXPA - List all selected components and for each component list the underlying
+          entity ID's.
+        * :ref:`cmlist`, ``Name`` - List the specified component.
+        * :ref:`cmlist`, ``Name``,EXPA - List specified component along with all underlying entity ID's.
+        * :ref:`cmlist`, EXPA,  ``Entity`` - List all selected components of specified entity type.
+          For each component also list the underlying entity ID's.
+        """
+        command = f"CMLIST,{name},{key},{entity}"
+        return self.run(command, **kwargs)
+
     def cmmod(self, cname: str = "", keyword: str = "", value: str = "", **kwargs):
         r"""Modifies the specification of a component.
 
@@ -137,98 +348,6 @@ class Components:
         This command is valid in any processor.
         """
         command = f"CMMOD,{cname},{keyword},{value}"
-        return self.run(command, **kwargs)
-
-    def cmdele(self, name: str = "", **kwargs):
-        r"""Deletes a component or assembly definition.
-
-        Mechanical APDL Command: `CMDELE <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CMDELE.html>`_
-
-        Parameters
-        ----------
-        name : str
-            Name of the component or assembly whose definition is to be removed.
-
-        Notes
-        -----
-
-        .. _CMDELE_notes:
-
-        Entities contained in the component, or the components within the assembly, are unaffected. Only the
-        grouping relationships are deleted. Assemblies are automatically updated to reflect deletion of
-        their components or subassemblies, but they are not automatically deleted when all their components
-        or subassemblies are deleted.
-
-        This command is valid in any processor.
-        """
-        command = f"CMDELE,{name}"
-        return self.run(command, **kwargs)
-
-    def cmsel(self, type_: str = "", name: str = "", entity: str = "", **kwargs):
-        r"""Selects a subset of components and assemblies.
-
-        Mechanical APDL Command: `CMSEL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CMSEL.html>`_
-
-        Parameters
-        ----------
-        type_ : str
-            Label identifying the type of select:
-
-            * ``S`` - Select a new set (default).
-
-            * ``R`` - Reselect a set from the current set.
-
-            * ``A`` - Additionally select a set and extend the current set.
-
-            * ``U`` - Unselect a set from the current set.
-
-            * ``ALL`` - Also select all components.
-
-            * ``NONE`` - Unselect all components.
-
-        name : str
-            Name of component or assembly whose items are to be selected (valid only if ``Type`` = S, R, A,
-            or U).
-
-            Graphical picking is enabled if ``Type`` is blank and ``Name`` = PICK (or simply "P").
-
-        entity : str
-            If ``Name`` is blank, then the following entity types can be specified:
-
-            * ``VOLU`` - Select the volume components only.
-
-            * ``AREA`` - Select the area components only.
-
-            * ``LINE`` - Select the line components only.
-
-            * ``KP`` - Select the keypoint components only.
-
-            * ``ELEM`` - Select the element components only.
-
-            * ``NODE`` - Select the node components only.
-
-        Notes
-        -----
-
-        .. _CMSEL_notes:
-
-        Selecting by component is a convenient adjunct to individual item selection (for example,
-        :ref:`vsel`, :ref:`esel`, etc.). :ref:`cmsel`, ALL allows you to select components **in addition**
-        to other items you have already selected.
-
-        If ``Type`` = R for an assembly selection ( :ref:`cmsel`,R,< assembly-name >), the reselect
-        operation is performed on each component in the assembly in the order in which the components make
-        up the assembly. Thus, if one reselect operation results in an empty set, subsequent operations will
-        also result in empty sets. For example, if the first reselect operation tries to reselect node 1
-        from the selected set of nodes 3, 4, and 5, the operation results in an empty set (that is, no nodes
-        are selected). Since the current set is now an empty set, if the second reselect operation tries to
-        reselect any nodes, the second operation also results in an empty set, and so on. This is equivalent
-        to repeating the command :ref:`cmsel`,R,< component-name > once for each component making up the
-        assembly.
-
-        This command is valid in any processor.
-        """
-        command = f"CMSEL,{type_},{name},{entity}"
         return self.run(command, **kwargs)
 
     def cmplot(self, label: str = "", entity: str = "", keyword: str = "", **kwargs):
@@ -303,119 +422,71 @@ class Components:
         command = f"CMPLOT,{label},{entity},{keyword}"
         return self.run(command, **kwargs)
 
-    def cmedit(
-        self,
-        aname: str = "",
-        oper: str = "",
-        cnam1: str = "",
-        cnam2: str = "",
-        cnam3: str = "",
-        cnam4: str = "",
-        cnam5: str = "",
-        cnam6: str = "",
-        cnam7: str = "",
-        **kwargs,
-    ):
-        r"""Edits an existing assembly.
+    def cmsel(self, type_: str = "", name: str = "", entity: str = "", **kwargs):
+        r"""Selects a subset of components and assemblies.
 
-        Mechanical APDL Command: `CMEDIT <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CMEDIT.html>`_
+        Mechanical APDL Command: `CMSEL <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CMSEL.html>`_
 
         Parameters
         ----------
-        aname : str
-            Name of the assembly to be edited.
+        type_ : str
+            Label identifying the type of select:
 
-        oper : str
-            Operation label:
+            * ``S`` - Select a new set (default).
 
-            * ``ADD`` - To add more components. The level of any assembly to be added must be lower than that of
-              the assembly ``Aname`` (see :ref:`cmgrp` command).
+            * ``R`` - Reselect a set from the current set.
 
-            * ``DELE`` - To remove components.
+            * ``A`` - Additionally select a set and extend the current set.
 
-        cnam1 : str
-            Names of components and assemblies to be added to or deleted from the assembly.
+            * ``U`` - Unselect a set from the current set.
 
-        cnam2 : str
-            Names of components and assemblies to be added to or deleted from the assembly.
+            * ``ALL`` - Also select all components.
 
-        cnam3 : str
-            Names of components and assemblies to be added to or deleted from the assembly.
+            * ``NONE`` - Unselect all components.
 
-        cnam4 : str
-            Names of components and assemblies to be added to or deleted from the assembly.
-
-        cnam5 : str
-            Names of components and assemblies to be added to or deleted from the assembly.
-
-        cnam6 : str
-            Names of components and assemblies to be added to or deleted from the assembly.
-
-        cnam7 : str
-            Names of components and assemblies to be added to or deleted from the assembly.
-
-        Notes
-        -----
-
-        .. _CMEDIT_notes:
-
-        This command is valid in any processor.
-        """
-        command = f"CMEDIT,{aname},{oper},{cnam1},{cnam2},{cnam3},{cnam4},{cnam5},{cnam6},{cnam7}"
-        return self.run(command, **kwargs)
-
-    def cmlist(self, name: str = "", key: int | str = "", entity: str = "", **kwargs):
-        r"""Lists the contents of a component or assembly.
-
-        Mechanical APDL Command: `CMLIST <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CMLIST.html>`_
-
-        Parameters
-        ----------
         name : str
-            Name of the component or assembly to be listed (if blank, list all selected components and
-            assemblies). If ``Name`` is specified, then ``Entity`` is ignored.
+            Name of component or assembly whose items are to be selected (valid only if ``Type`` = S, R, A,
+            or U).
 
-        key : int or str
-            Expansion key:
-
-            * ``0`` - Do not list individual entities in the component.
-
-            * ``1 or EXPA`` - List individual entities in the component.
+            Graphical picking is enabled if ``Type`` is blank and ``Name`` = PICK (or simply "P").
 
         entity : str
             If ``Name`` is blank, then the following entity types can be specified:
 
-            * ``VOLU`` - List the volume components only.
+            * ``VOLU`` - Select the volume components only.
 
-            * ``AREA`` - List the area components only.
+            * ``AREA`` - Select the area components only.
 
-            * ``LINE`` - List the line components only.
+            * ``LINE`` - Select the line components only.
 
-            * ``KP`` - List the keypoint components only
+            * ``KP`` - Select the keypoint components only.
 
-            * ``ELEM`` - List the element components only.
+            * ``ELEM`` - Select the element components only.
 
-            * ``NODE`` - List the node components only.
+            * ``NODE`` - Select the node components only.
 
         Notes
         -----
 
-        .. _CMLIST_notes:
+        .. _CMSEL_notes:
 
-        This command is valid in any processor. For components, it lists the type of geometric entity. For
-        assemblies, it lists the components and/or assemblies that make up the assembly.
+        Selecting by component is a convenient adjunct to individual item selection (for example,
+        :ref:`vsel`, :ref:`esel`, etc.). :ref:`cmsel`, ALL allows you to select components **in addition**
+        to other items you have already selected.
 
-        Examples of possible usage:
+        If ``Type`` = R for an assembly selection ( :ref:`cmsel`,R,< assembly-name >), the reselect
+        operation is performed on each component in the assembly in the order in which the components make
+        up the assembly. Thus, if one reselect operation results in an empty set, subsequent operations will
+        also result in empty sets. For example, if the first reselect operation tries to reselect node 1
+        from the selected set of nodes 3, 4, and 5, the operation results in an empty set (that is, no nodes
+        are selected). Since the current set is now an empty set, if the second reselect operation tries to
+        reselect any nodes, the second operation also results in an empty set, and so on. This is equivalent
+        to repeating the command :ref:`cmsel`,R,< component-name > once for each component making up the
+        assembly.
 
-        * :ref:`cmlist` - List all selected components.
-        * :ref:`cmlist`, EXPA - List all selected components and for each component list the underlying
-          entity ID's.
-        * :ref:`cmlist`, ``Name`` - List the specified component.
-        * :ref:`cmlist`, ``Name``,EXPA - List specified component along with all underlying entity ID's.
-        * :ref:`cmlist`, EXPA,  ``Entity`` - List all selected components of specified entity type.
-          For each component also list the underlying entity ID's.
+        This command is valid in any processor.
         """
-        command = f"CMLIST,{name},{key},{entity}"
+        command = f"CMSEL,{type_},{name},{entity}"
         return self.run(command, **kwargs)
 
     def cmwrite(self, fname: str = "", ext: str = "", fmat: str = "", **kwargs):
@@ -443,77 +514,4 @@ class Components:
 
         """
         command = f"CMWRITE,{fname},{ext},,,{fmat}"
-        return self.run(command, **kwargs)
-
-    def cmgrp(
-        self,
-        aname: str = "",
-        cnam1: str = "",
-        cnam2: str = "",
-        cnam3: str = "",
-        cnam4: str = "",
-        cnam5: str = "",
-        cnam6: str = "",
-        cnam7: str = "",
-        cnam8: str = "",
-        **kwargs,
-    ):
-        r"""Groups components and assemblies into an assembly.
-
-        Mechanical APDL Command: `CMGRP <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_CMGRP.html>`_
-
-        Parameters
-        ----------
-        aname : str
-            An alphanumeric name used to identify this assembly. ``Aname`` may be up to 256 characters,
-            beginning with a letter and containing only letters, numbers, dots (.), and underscores (_).
-            Overwrites a previously defined
-
-             ``Aname`` (and removes it from higher level assemblies, if any).
-
-        cnam1 : str
-            Names of existing components or other assemblies to be included in this assembly.
-
-        cnam2 : str
-            Names of existing components or other assemblies to be included in this assembly.
-
-        cnam3 : str
-            Names of existing components or other assemblies to be included in this assembly.
-
-        cnam4 : str
-            Names of existing components or other assemblies to be included in this assembly.
-
-        cnam5 : str
-            Names of existing components or other assemblies to be included in this assembly.
-
-        cnam6 : str
-            Names of existing components or other assemblies to be included in this assembly.
-
-        cnam7 : str
-            Names of existing components or other assemblies to be included in this assembly.
-
-        cnam8 : str
-            Names of existing components or other assemblies to be included in this assembly.
-
-        Notes
-        -----
-
-        .. _CMGRP_notes:
-
-        Groups components and other assemblies into an assembly identified by a name. :ref:`cmgrp` is used
-        for the initial definition of an assembly. An assembly is used in the same manner as a component. Up
-        to 5 levels of assemblies within assemblies may be used.
-
-        An assembly is a convenient grouping of previously defined components and other assemblies.
-        Assemblies may contain components only, other assemblies, or any combination. A component may belong
-        to any number of assemblies. Up to 5 levels of nested assemblies may be defined. Components and
-        assemblies may be added to or deleted from an existing assembly by the :ref:`cmedit` command. Once
-        defined, an assembly may be listed, deleted, selected, or unselected using the same commands as for
-        a component. Assemblies are automatically updated to reflect deletions of one or more of their
-        components or lower-level assemblies. Assemblies are not automatically deleted when all their
-        components or subassemblies are deleted.
-
-        This command is valid in any processor.
-        """
-        command = f"CMGRP,{aname},{cnam1},{cnam2},{cnam3},{cnam4},{cnam5},{cnam6},{cnam7},{cnam8}"
         return self.run(command, **kwargs)

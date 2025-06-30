@@ -23,6 +23,24 @@
 
 class Iges:
 
+    def aux15(self, **kwargs):
+        r"""Enters the IGES file transfer processor.
+
+        Mechanical APDL Command: `/AUX15 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AUX15.html>`_
+
+        Notes
+        -----
+
+        .. _s-AUX15_notes:
+
+        Enters the IGES file-transfer processor (auxiliary processor AUX15), used to read an IGES data file
+        into the Mechanical APDL program.
+
+        This command is valid only at the Begin Level.
+        """
+        command = "/AUX15"
+        return self.run(command, **kwargs)
+
     def igesin(self, fname: str = "", ext: str = "", **kwargs):
         r"""Transfers IGES data from a file into Mechanical APDL.
 
@@ -70,7 +88,8 @@ class Iges:
         lab : str
             Label identifying the import option. The meaning of ``VAL1`` varies depending on ``Lab``.
 
-            * ``STAT`` - List overall status of import facilities, including current option values. ``VAL1`` is ignored.
+            * ``STAT`` - List overall status of import facilities, including current option values. ``VAL1`` is
+              ignored.
 
             * ``DEFA`` - Set default values for all import options. ``VAL1`` is ignored.
 
@@ -128,7 +147,7 @@ class Iges:
         Attempts to read in B-spline curve or surface entities of degree higher than 20 may result in error
         messages.
 
-        If you issue the :ref:`clear` command, the :ref:`ioptn` settings return to their defaults.
+        If you issue the ``/CLEAR`` command, the :ref:`ioptn` settings return to their defaults.
 
         For MERG,YES, merging of coincident geometry items is performed automatically when the :ref:`igesin`
         command is issued (that is, an internal :ref:`nummrg`,KP command is issued). The model is merged
@@ -137,13 +156,15 @@ class Iges:
         information about the tolerances. In most cases, the default merging is appropriate. Use the
         :ref:`ioptn` command when you want to:
 
-        Disable merging operations.
-        Override the default merging and specify a global solid model tolerance value (GTOLER).
-        Disable the automatic creation of solids (SOLID).
+        * Disable merging operations.
+
+        * Override the default merging and specify a global solid model tolerance value (GTOLER).
+
+        * Disable the automatic creation of solids (SOLID).
 
         The :ref:`ioptn` command should be issued before the :ref:`igesin` command. You cannot change these
         options after your model has been imported or created. If you must change the options: Clear the
-        database ( :ref:`clear` ) or exit and restart the program.
+        database ( ``/CLEAR`` ) or exit and restart the program.
 
         Set the correct options.
 
@@ -152,22 +173,4 @@ class Iges:
         This command is valid in any processor.
         """
         command = f"IOPTN,{lab},{val1}"
-        return self.run(command, **kwargs)
-
-    def aux15(self, **kwargs):
-        r"""Enters the IGES file transfer processor.
-
-        Mechanical APDL Command: `/AUX15 <https://ansyshelp.ansys.com/Views/Secured/corp/v232/en//ans_cmd/Hlp_C_AUX15.html>`_
-
-        Notes
-        -----
-
-        .. _s-AUX15_notes:
-
-        Enters the IGES file-transfer processor (auxiliary processor AUX15), used to read an IGES data file
-        into the Mechanical APDL program.
-
-        This command is valid only at the Begin Level.
-        """
-        command = "/AUX15"
         return self.run(command, **kwargs)
