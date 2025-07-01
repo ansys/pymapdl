@@ -22,7 +22,7 @@ on:
         description: |
           Whether to build the cheatsheet. Default is "false".
         required: false
-        default: true
+        default: false
         type: boolean
 
       use_cache_examples:
@@ -228,29 +228,6 @@ jobs:
         run: |
           export PYTHONFAULTHANDLER=1
           xvfb-run make -C doc ${{ inputs.builder }} SPHINXOPTS="-j auto -W --keep-going" | tee doc_build.log
-
-      - if: failure()
-        run: |
-          cd doc
-          ls -Rl
-      - if: failure()
-        run: |
-          cd doc/cheat_sheet
-          ls -l .
-          quarto render cheat_sheet.qmd --to cheat_sheet.pdf --output-dir /home/runner/work/pymapdl/pymapdl/doc/_build/html/_static -V version=v0.70.dev0 | tee quarto_render.log
-          cat quarto_render.log
-
-      - name: "Check for errors in documentation build"
-        if: failure()
-        shell: bash
-        run: |
-          # Extract the tmp file path
-          tmp_file=$(grep -q 'Extension error (ansys_sphinx_theme.cheatsheet)!' doc_build.log && awk '/The full traceback has been saved in:/{getline; print}' doc_build.log)
-          cp "${tmp_file}" .
-
-          echo "::group:: Show tmp file content:" && cat "${tmp_file}" && echo "::endgroup::"
-
-          cp /tmp/sphinx-err-*.log .
 
       - name: "Substitute defective GIF"
         shell: bash
