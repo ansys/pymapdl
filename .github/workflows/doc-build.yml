@@ -208,7 +208,7 @@ jobs:
         uses: quarto-dev/quarto-actions/setup@v2
         with:
           tinytex: true
-          version: 1.6.43
+          version: 1.7.32
 
       - name: Check Quarto Version
         if: ${{ inputs.build_cheatsheet }}
