@@ -229,11 +229,17 @@ jobs:
           export PYTHONFAULTHANDLER=1
           xvfb-run make -C doc ${{ inputs.builder }} SPHINXOPTS="-j auto -W --keep-going" | tee doc_build.log
 
+      - name: "Check for errors in documentation build"
+        if: failure()
+        shell: bash
+        run: |
           # Extract the tmp file path
           tmp_file=$(grep -q 'Extension error (ansys_sphinx_theme.cheatsheet)!' doc_build.log && awk '/The full traceback has been saved in:/{getline; print}' doc_build.log)
           cp "${tmp_file}" .
 
           echo "::group:: Show tmp file content:" && cat "${tmp_file}" && echo "::endgroup::"
+
+          cp /tmp/sphinx-err-*.log .
 
       - name: "Substitute defective GIF"
         shell: bash
