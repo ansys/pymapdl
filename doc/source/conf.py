@@ -80,7 +80,6 @@ DEFAULT_EXAMPLE_EXTENSION = "py"
 
 DOC_PATH = "doc/source"
 GALLERY_EXAMPLES_PATH = "examples/gallery_examples"
-MAPDL_COMMANDS_PATH = "api/src/ansys/mapdl/core/_commands"
 EXAMPLES_ROOT = "examples"
 EXAMPLES_PATH_FOR_DOCS = f"../../{EXAMPLES_ROOT}/"
 
