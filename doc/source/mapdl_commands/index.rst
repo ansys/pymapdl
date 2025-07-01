@@ -19,10 +19,7 @@ are grouped by capability.
    :maxdepth: 1
    :caption: Session
 
-   session/run_controls
-   session/processor_entry
-   session/files
-   session/list_controls
+   session/index
 
 
 ********
@@ -34,12 +31,8 @@ These commands are used to operate on the database globally.
    :maxdepth: 1
    :caption: Database
 
-   database/setup
-   database/selecting
-   database/components
-   database/working_plane
-   database/coord_sys
-   database/picking
+   database/index
+
 
 ********
 Graphics
@@ -50,13 +43,7 @@ These commands are used to control the graphics of the program.
    :maxdepth: 1
    :caption: Graphics
 
-   graphics/setup
-   graphics/views
-   graphics/scaling
-   graphics/style
-   graphics/labeling
-   graphics/graphs
-   graphics/annotation
+   graphics/index
 
 
 ****
@@ -161,20 +148,8 @@ processor.
    :maxdepth: 1
    :caption: POST1
 
-   post1/setup
-   post1/controls
-   post1/results
-   post1/element_table
-   post1/listing
-   post1/animation
-   post1/path_operations
-   post1/surface_operations
-   post1/load_case
-   post1/magnetics_calc
-   post1/trace_points
-   post1/special
-   post1/status
-   post1/failure_criteria
+   post1/index
+
 
 ******
 POST26
@@ -186,14 +161,7 @@ time-history processor.
    :maxdepth: 1
    :caption: POST26
 
-   post26/_set_up
-   post26/controls
-   post26/display
-   post26/listing
-   post26/operations
-   post26/set_up
-   post26/special_purpose
-   post26/status
+   post26/index
 
 
 ****
@@ -206,8 +174,7 @@ binary files produced by the program.
    :maxdepth: 1
    :caption: AUX2
 
-   aux2/bin_dump
-   aux2/bin_manip
+   aux2/index
 
 ****
 AUX3
@@ -219,7 +186,7 @@ files by deleting sets or by changing values.
    :maxdepth: 1
    :caption: AUX3
 
-   aux3/results_files
+   aux3/index
 
 
 *****
@@ -232,9 +199,7 @@ analyses.
    :maxdepth: 1
    :caption: AUX12
 
-   aux12/general_radiation
-   aux12/radiation_mat
-   aux12/radiosity_solver
+   aux12/index
 
 
 *****
@@ -246,7 +211,7 @@ These commands are used to read in an IGES file for analysis in ANSYS.
    :maxdepth: 1
    :caption: AUX15
 
-   aux15/iges
+   aux15/index
 
 
 *****************
@@ -259,7 +224,7 @@ onto the existing geometry.
    :maxdepth: 1
    :caption: MAP
 
-   map/pressure_mapping
+   map/index
 
 
 *******************

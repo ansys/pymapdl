@@ -379,9 +379,9 @@ class Aux3Commands(aux3.results_files.ResultsFiles):
 
 
 class Aux12Commands(
-    aux12.radiosity_solver.RadiositySolver,
-    aux12.radiation_matrix_method.RadiationMatrixMethod,
     aux12.general_radiation.GeneralRadiation,
+    aux12.radiation_matrix_method.RadiationMatrixMethod,
+    aux12.radiosity_solver.RadiositySolver,
 ):
     pass
 
@@ -393,12 +393,12 @@ class Aux15Commands(
 
 
 class DatabaseCommands(
-    database.set_up.SetUp,
-    database.picking.Picking,
-    database.coordinate_system.CoordinateSystem,
-    database.selecting.Selecting,
-    database.working_plane.WorkingPlane,
     database.components.Components,
+    database.coordinate_system.CoordinateSystem,
+    database.picking.Picking,
+    database.selecting.Selecting,
+    database.set_up.SetUp,
+    database.working_plane.WorkingPlane,
 ):
     pass
 
