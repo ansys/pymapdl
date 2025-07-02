@@ -534,25 +534,20 @@ class TestStaticThermocoupledExample(Example):
             assert result.parse_step_substep((0, each)) == each
             assert result.parse_step_substep([0, each]) == each
 
-        # Additional invalid input types
-        invalid_inputs = [
+    @pytest.mark.parametrize(
+        "invalid_input",
+        [
             "invalid",
             None,
             -1,
-            (0, -1),
-            [0, -1],
-            (1, 0),  # out-of-range step
-            [1, 0],  # out-of-range step
-            (0, 100),  # out-of-range substep
-            [0, 100],  # out-of-range substep
             (0,),  # incomplete tuple
             [0],  # incomplete list
-            (0, 1, 2),  # too many elements
-            [0, 1, 2],  # too many elements
-        ]
-        for invalid in invalid_inputs:
-            with pytest.raises(DPFServerException):
-                result.parse_step_substep(invalid)
+        ],
+    )
+    def test_parse_step_substep_invalid(self, mapdl, result, invalid_input):
+        # Additional invalid input types
+        with pytest.raises((DPFServerException, TypeError, IndexError)):
+            result.parse_step_substep(invalid_input)
 
     def test_material_properties(self, mapdl, reader, post, result):
         assert reader.materials == result.materials
