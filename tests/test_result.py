@@ -559,8 +559,8 @@ class TestStaticThermocoupledExample(Example):
     @pytest.mark.parametrize("invalid_id", [-1, 0, 99999, None, "invalid"])
     def test_element_lookup_invalid(self, reader, result, invalid_id):
         # Check that both reader and result behave the same for invalid IDs
-        with pytest.raises((KeyError, ValueError)) as exc_info:
-            reader_result = result.element_lookup(invalid_id)
+        with pytest.raises((KeyError, ValueError)):
+            result.element_lookup(invalid_id)
 
 
 class TestElectroThermalCompliantMicroactuator(Example):
