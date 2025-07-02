@@ -467,7 +467,7 @@ class TestStaticThermocoupledExample(Example):
 
     @pytest.mark.parametrize("comp", [0, 1, 2, 3, 4, 5], scope="class")
     @pytest.mark.parametrize("set_", list(range(1, 10)), scope="class")
-    @pytest.mark.skipif(True, reason="Python SEGFaults on this test")
+    # @pytest.mark.skipif(True, reason="Python SEGFaults on this test")
     def test_compatibility_element_stress(
         self, mapdl, reader, post, result, set_, comp
     ):
@@ -578,7 +578,7 @@ class TestElectroThermalCompliantMicroactuator(Example):
         )  # Reader results are broken
 
     @pytest.mark.parametrize("comp", [0, 1, 2, 3, 4, 5], scope="class")
-    @pytest.mark.skipif(True, reason="Python SEGFaults on this test")
+    # @pytest.mark.skipif(True, reason="Python SEGFaults on this test")
     def test_compatibility_element_stress(self, mapdl, reader, post, result, comp):
         mapdl.set(1, self.mapdl_set)
         post_values = post.element_stress(COMPONENTS[comp])
@@ -621,7 +621,7 @@ class TestSolidStaticPlastic(Example):
         validate(result_values, reader_values, post_values)  # Reader results are broken
 
     @pytest.mark.parametrize("comp", [0, 1, 2, 3, 4, 5], scope="class")
-    @pytest.mark.skipif(True, reason="Python SEGFaults on this test")
+    # @pytest.mark.skipif(True, reason="Python SEGFaults on this test")
     def test_compatibility_element_stress(self, mapdl, reader, post, result, comp):
         set_ = 1
         mapdl.set(1, set_)
@@ -711,7 +711,7 @@ class TestPiezoelectricRectangularStripUnderPureBendingLoad(Example):
         )  # Reader results are broken
 
     @pytest.mark.parametrize("comp", [0, 1, 2], scope="class")
-    @pytest.mark.skipif(True, reason="Python SEGFaults on this test")
+    # @pytest.mark.skipif(True, reason="Python SEGFaults on this test")
     def test_compatibility_element_stress(self, mapdl, reader, post, result, comp):
         set_ = 1
         mapdl.set(1, set_)
@@ -800,7 +800,7 @@ class TestPinchedCylinderVM6(Example):
         validate(result_values, reader_values, post_values)  # Reader results are broken
 
     @pytest.mark.parametrize("comp", [0, 1, 2, 3, 4, 5], scope="class")
-    @pytest.mark.skipif(True, reason="Python SEGFaults on this test")
+    # @pytest.mark.skipif(True, reason="Python SEGFaults on this test")
     def test_compatibility_element_stress(self, mapdl, reader, post, result, comp):
         set_ = 1
         mapdl.set(1, set_)
