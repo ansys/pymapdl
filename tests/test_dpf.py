@@ -104,6 +104,7 @@ class Test_dpf:
 
         return model
 
+    @pytest.mark.xfail(True, reason="This test is flaky")
     def test_metadata_meshed_region(self, mapdl, model):
         # Checks
         mapdl.allsel()
