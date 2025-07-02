@@ -544,7 +544,7 @@ class ElementTable:
              - Source current density for low-frequency magnetic analyses. Total current density (sum of conduction and displacement current densities) in low frequency electric analyses. Components (X, Y, Z) and vector sum (SUM).
            * - JT
              - X, Y, Z, SUM
-             - Total measureable current density in low-frequency electromagnetic analyses. (Conduction current density in a low-frequency electric analysis.) Components (X, Y, Z) and vector sum (SUM).
+             - Total measurable current density in low-frequency electromagnetic analyses. (Conduction current density in a low-frequency electric analysis.) Components (X, Y, Z) and vector sum (SUM).
            * - JC
              - X, Y, Z, SUM
              - Conduction current density for elements that support conduction current calculation. Components (X, Y, Z) and vector sum (SUM).

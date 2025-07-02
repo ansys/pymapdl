@@ -944,7 +944,7 @@ class Results:
              - Source current density for low-frequency magnetic analyses. Total current density (sum of conduction and displacement current densities) in low frequency electric analyses. Components (X, Y, Z) and vector sum (SUM).
            * - JT
              - X, Y, Z, SUM
-             - Total measureable current density in low-frequency electromagnetic analyses. (Conduction current density in a low-frequency electric analysis.) Components (X, Y, Z) and vector sum (SUM).
+             - Total measurable current density in low-frequency electromagnetic analyses. (Conduction current density in a low-frequency electric analysis.) Components (X, Y, Z) and vector sum (SUM).
            * - JC
              - X, Y, Z, SUM
              - Conduction current density for elements that support conduction current calculation. Components (X, Y, Z) and vector sum (SUM).
@@ -1966,7 +1966,7 @@ class Results:
            * - JS
              - Source current density vector for low-frequency magnetic analyses. Total current density vector (sum of conduction and displacement current densities) in low frequency electric analyses.
            * - JT
-             - Total measureable current density vector in low-frequency electromagnetic analyses. (Conduction current density vector in a low-frequency electric analysis.)
+             - Total measurable current density vector in low-frequency electromagnetic analyses. (Conduction current density vector in a low-frequency electric analysis.)
            * - JC
              - Conduction current density vector for elements that support conduction current calculation.
            * - SNDI
@@ -2527,7 +2527,7 @@ class Results:
              - Source current density for low-frequency magnetic analyses. Total current density (sum of conduction and displacement current densities) in low frequency electric analyses. Components (X, Y, Z) and vector sum (SUM).
            * - JT
              -
-             - Total measureable current density in low-frequency electromagnetic analyses. (Conduction current density in a low-frequency electric analysis.) Components (X, Y, Z) and vector sum (SUM).
+             - Total measurable current density in low-frequency electromagnetic analyses. (Conduction current density in a low-frequency electric analysis.) Components (X, Y, Z) and vector sum (SUM).
            * - JC
              -
              - Conduction current density for elements that support conduction current calculation. Components (X, Y, Z) and vector sum (SUM).
@@ -3735,7 +3735,7 @@ class Results:
         when you want to read in load cases ( :ref:`lcase` ). Note that the :ref:`sumtype` setting is not
         maintained between /POS  T1 sessions.
 
-        :ref:`sumtype`,PRIN also causes principal nodal values to be the average of the contibuting
+        :ref:`sumtype`,PRIN also causes principal nodal values to be the average of the contributing
         principal element nodal values (see :ref:`avprin`,1).
 
         ``BEAM188`` and ``BEAM189`` elements compute principal stress, equivalent stress, and stress

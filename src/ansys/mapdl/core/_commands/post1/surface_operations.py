@@ -186,7 +186,7 @@ class SurfaceOperations:
         surfname : str
             Eight character surface name.
 
-            ``SurfName`` = ALL will delete all surface geometry and result infromation.
+            ``SurfName`` = ALL will delete all surface geometry and result information.
         """
         command = f"SUDEL,{surfname}"
         return self.run(command, **kwargs)
@@ -220,7 +220,7 @@ class SurfaceOperations:
 
         The result of this operation is a scalar APDL parameter value. If multiple surfaces are selected
         when this command is issued, then the operation is carried out on each surface individually and the
-        parameter reperesents the culmulative value of the operation on all selected surfaces.
+        parameter represents the cumulative value of the operation on all selected surfaces.
         """
         command = f"SUEVAL,{parm},{lab1},{oper}"
         return self.run(command, **kwargs)
