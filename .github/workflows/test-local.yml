@@ -301,7 +301,7 @@ jobs:
           token: ${{ secrets.codecov-token }} # required
           root_dir: ${{ github.workspace }}
           name: ${{ inputs.file-name }}.xml
-          flags: ubuntu,local,${{ inputs.mapdl-version }},${{ inputs.tags }},${{ steps.student_check.outputs.TAG_STUDENT }},dmp
+          flags: local-ubuntu-${{ inputs.mapdl-version }}-dmp-${{ steps.student_check.outputs.TAG_STUDENT }}-${{ inputs.tags }}
 
       - name: "Upload coverage artifacts"
         uses: actions/upload-artifact@v4

@@ -274,7 +274,7 @@ jobs:
         with:
           token: ${{ secrets.codecov-token }} # required
           name: "${{ inputs.file-name }}.xml"
-          flags: remote,${{ steps.ubuntu_check.outputs.TAG_UBUNTU }},${{ inputs.mapdl-version }},${{ steps.distributed_mode.outputs.distributed_mode }},${{ steps.student_check.outputs.TAG_STUDENT }}
+          flags: remote-${{ steps.ubuntu_check.outputs.TAG_UBUNTU }}-${{ inputs.mapdl-version }}-${{ steps.distributed_mode.outputs.distributed_mode }}-${{ steps.student_check.outputs.TAG_STUDENT }}
 
       - name: Upload coverage artifacts
         uses: actions/upload-artifact@v4.6.2
