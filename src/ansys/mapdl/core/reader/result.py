@@ -55,7 +55,7 @@ from ansys.mapdl.core import LOG as logger
 from ansys.mapdl.core import Logger, Mapdl
 from ansys.mapdl.core import _HAS_DPF, _HAS_PYVISTA
 from ansys.mapdl.core.errors import MapdlRuntimeError
-from ansys.mapdl.core.misc import check_valid_ip, get_ip, parse_ip_route
+from ansys.mapdl.core.misc import check_valid_ip, get_local_ip, parse_ip_route
 
 COMPONENTS: list[str] = ["X", "Y", "Z", "XY", "YZ", "XZ"]
 
@@ -275,7 +275,7 @@ class DPFResult(Result):
         if not hasattr(self.server, "ip"):
             return False
 
-        own_ip = get_ip()
+        own_ip = get_local_ip()
         dpf_ip = self.server.ip if self.server else ""
         return own_ip != dpf_ip
 
@@ -1179,7 +1179,9 @@ class DPFResult(Result):
         """
         return self._get_nodes_result(rnum, "displacement", in_nodal_coord_sys, nodes)
 
-    def nodal_solution(self, rnum, in_nodal_coord_sys=None, nodes=None):
+    def nodal_solution(
+        self, rnum, in_nodal_coord_sys=None, nodes=None, return_temperature=False
+    ):
         """Returns the DOF solution for each node in the global
         cartesian coordinate system or nodal coordinate system.
 
@@ -1203,6 +1205,10 @@ class DPFResult(Result):
             * ``"MY_COMPONENT"``
             * ``['MY_COMPONENT', 'MY_OTHER_COMPONENT]``
             * ``np.arange(1000, 2001)``
+
+        return_temperature: bool, optional
+            When ``True``, returns the nodal temperature instead of
+            the displacement.  Default ``False``.
 
         Returns
         -------
@@ -1240,7 +1246,7 @@ class DPFResult(Result):
         solution results are reflected in ``nnum``.
         """
 
-        if hasattr(self.model.results, "displacement"):
+        if hasattr(self.model.results, "displacement") and not return_temperature:
             return self.nodal_displacement(rnum, in_nodal_coord_sys, nodes)
         elif hasattr(self.model.results, "temperature"):
             return self.nodal_temperature(rnum, nodes)

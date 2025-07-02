@@ -106,7 +106,11 @@ def is_float(input_string: str) -> bool:
         return False
 
 
-def get_ip():
+def get_local_ip():
+    """Get the local IP address of this machine.
+
+    It uses a socket to determine the local IP address, if fails, it returns local IP.
+    """
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.settimeout(0)
     try:
