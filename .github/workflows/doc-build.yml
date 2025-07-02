@@ -22,7 +22,7 @@ on:
         description: |
           Whether to build the cheatsheet. Default is "false".
         required: false
-        default: false
+        default: false  # temporarily disabled due to CICD failure
         type: boolean
 
       use_cache_examples:
