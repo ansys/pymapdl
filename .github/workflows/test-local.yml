@@ -176,13 +176,13 @@ jobs:
         shell: bash
         if: inputs.testing-minimal == true
         run: |
-          apt-get update && apt install -y libgomp1 graphviz && apt-get clean
+          apt-get update && apt install -y libgomp1 graphviz curl && apt-get clean
 
       - name: "Installing OS packages"
         shell: bash
         if: inputs.testing-minimal == false
         run: |
-          apt-get update && apt install -y libgl1-mesa-glx xvfb libgomp1 graphviz && apt-get clean
+          apt-get update && apt install -y libgl1-mesa-glx xvfb libgomp1 graphviz curl && apt-get clean
 
       - name: "Setup Python"
         uses: actions/setup-python@v5
