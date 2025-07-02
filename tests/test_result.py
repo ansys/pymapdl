@@ -534,12 +534,38 @@ class TestStaticThermocoupledExample(Example):
             assert result.parse_step_substep((0, each)) == each
             assert result.parse_step_substep([0, each]) == each
 
+        # Additional invalid input types
+        invalid_inputs = [
+            "invalid",
+            None,
+            -1,
+            (0, -1),
+            [0, -1],
+            (1, 0),  # out-of-range step
+            [1, 0],  # out-of-range step
+            (0, 100),  # out-of-range substep
+            [0, 100],  # out-of-range substep
+            (0,),  # incomplete tuple
+            [0],  # incomplete list
+            (0, 1, 2),  # too many elements
+            [0, 1, 2],  # too many elements
+        ]
+        for invalid in invalid_inputs:
+            with pytest.raises(DPFServerException):
+                result.parse_step_substep(invalid)
+
     def test_material_properties(self, mapdl, reader, post, result):
         assert reader.materials == result.materials
 
     @pytest.mark.parametrize("id_", [1, 2, 3, 4, 10, 14])
     def test_element_lookup(self, mapdl, reader, result, id_):
         assert reader.element_lookup(id_) == result.element_lookup(id_)
+
+    @pytest.mark.parametrize("invalid_id", [-1, 0, 99999, None, "invalid"])
+    def test_element_lookup_invalid(self, reader, result, invalid_id):
+        # Check that both reader and result behave the same for invalid IDs
+        with pytest.raises((KeyError, ValueError)) as exc_info:
+            reader_result = result.element_lookup(invalid_id)
 
 
 class TestElectroThermalCompliantMicroactuator(Example):

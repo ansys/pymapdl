@@ -776,7 +776,8 @@ class DPFResult(Result):
         Parameters
         ----------
         entities : str | int | float | Iterable[str | int | float]
-            Entities ids or components
+            Entities ids or components. If a mix of strings and numbers is
+            provided in the iterable, a ValueError will be raised.
 
         entity_type : str, optional
             Type of entity, by default "Nodal"
@@ -1108,7 +1109,10 @@ class DPFResult(Result):
             )  # overwrite op to be the elemental results OP
 
         # Applying rescope to make sure the order is right
-        op = self._set_rescope(op, ids.astype(int).tolist())
+        if not isinstance(ids, list):
+            ids = ids.astype(int).tolist()
+
+        op = self._set_rescope(op, ids)
 
         fc = op.outputs.fields_as_fields_container()[0]
         if fc.shell_layers is not dpf.shell_layers.nonelayer:
@@ -2389,6 +2393,12 @@ class DPFResult(Result):
                 self._elements, np.arange(self.mesh.elements.n_elements)
             )
         }
+        if element_id not in mapping:
+            raise KeyError(
+                f"Element ID {element_id} not found in the result mesh. "
+                f"Available element IDs: {list(mapping.keys())}"
+            )
+
         return mapping[element_id]
 
     def overwrite_element_solution_record(self, data, rnum, solution_type, element_id):
