@@ -176,13 +176,13 @@ jobs:
         shell: bash
         if: inputs.testing-minimal == true
         run: |
-          apt-get update && apt install -y libgomp1 graphviz && apt-get clean
+          apt-get update && apt install -y libgomp1 graphviz curl && apt-get clean
 
       - name: "Installing OS packages"
         shell: bash
         if: inputs.testing-minimal == false
         run: |
-          apt-get update && apt install -y libgl1-mesa-glx xvfb libgomp1 graphviz && apt-get clean
+          apt-get update && apt install -y libgl1-mesa-glx xvfb libgomp1 graphviz curl && apt-get clean
 
       - name: "Setup Python"
         uses: actions/setup-python@v5
@@ -301,7 +301,7 @@ jobs:
           token: ${{ secrets.codecov-token }} # required
           root_dir: ${{ github.workspace }}
           name: ${{ inputs.file-name }}.xml
-          flags: ubuntu,local,${{ inputs.mapdl-version }},${{ inputs.tags }},${{ steps.student_check.outputs.TAG_STUDENT }},dmp
+          flags: local-ubuntu-${{ inputs.mapdl-version }}-dmp-${{ steps.student_check.outputs.TAG_STUDENT }}-${{ inputs.tags }}
 
       - name: "Upload coverage artifacts"
         uses: actions/upload-artifact@v4
