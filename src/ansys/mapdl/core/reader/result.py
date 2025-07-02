@@ -20,22 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""
-COMMENTS
-========
-
-
-TODO's
-======
-* Check #todos
-* Allow (step, substep) in rnum
-* Component support
-* Check what happens when a node does not have results in all the steps. In DPF is it zero?
-* Adding 'principal' support ("SIGMA1, SIGMA2, SIGMA3, SINT, SEQV when principal is True.")
-* Check DPF issues
-
-"""
-
 from functools import wraps
 import logging
 import os
@@ -43,7 +27,6 @@ import pathlib
 import socket
 import tempfile
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Literal
-import uuid
 import weakref
 
 from ansys.mapdl.reader.rst import Result
@@ -52,8 +35,8 @@ from ansys.mapdl.reader.rst import Result
 import numpy as np
 
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core import Logger, Mapdl
-from ansys.mapdl.core import _HAS_DPF, _HAS_PYVISTA
+from ansys.mapdl.core import Logger, Mapdl  # type: ignore
+from ansys.mapdl.core import _HAS_DPF, _HAS_PYVISTA  # type: ignore
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import check_valid_ip, get_local_ip, parse_ip_route
 
@@ -141,7 +124,7 @@ If you still want to use it, you can switch to 'pymapdl-reader' backend."""
 class ResultNotFound(MapdlRuntimeError):
     """Results not found"""
 
-    def __init__(self, msg=""):
+    def __init__(self, msg: str = ""):
         MapdlRuntimeError.__init__(self, msg)
 
 
@@ -165,14 +148,6 @@ def update_result(function: Callable[..., Any]) -> Callable[..., Any]:
         return function(self, *args, **kwargs)
 
     return wrapper
-
-
-def generate_session_id(length: int = 10):
-    """Generate an unique ssesion id.
-
-    It can be shorten by the argument 'length'."""
-    uid = uuid.uuid4()
-    return "".join(str(uid).split("-")[:-1])[:length]
 
 
 class DPFResult(Result):
@@ -204,9 +179,8 @@ class DPFResult(Result):
                 "The DPF library is not installed. Please install it using 'pip install ansys-dpf-core'."
             )
 
-        self._mapdl_weakref = None
-        self._server_file_path = None  # In case DPF is remote.
-        self._session_id = None
+        self._mapdl_weakref: weakref.ref["Mapdl"] | None = None
+        self._server_file_path: str | None = None  # In case DPF is remote.
         self._logger: Logger | None = None
 
         # RST parameters
@@ -226,7 +200,7 @@ class DPFResult(Result):
                 )
 
             logger.debug("Initializing DPFResult class in RST mode.")
-            self._mode_rst = True
+            self._mode_rst: bool = True
 
             self.__rst_directory = os.path.dirname(rst_file_path)
             self.__rst_name = os.path.basename(rst_file_path)
@@ -238,7 +212,7 @@ class DPFResult(Result):
 
             logger.debug("Initializing DPFResult class in MAPDL mode.")
             self._mapdl_weakref = weakref.ref(mapdl)
-            self._mode_rst = False
+            self._mode_rst: bool = False
 
         else:
             raise ValueError(
@@ -249,19 +223,17 @@ class DPFResult(Result):
         # If True, it triggers a update on the RST file
         self._update_required: bool = False
         self._loaded: bool = False
-        self._cached_dpf_model = None
-        self._connected = False
+        self._cached_dpf_model: "dpf.Model" | None = None
+        self._connected: bool = False
         self._server: dpf.server_types.BaseServer | None = None
         self._tmp_dir: str | None = (
             None  # Temporary directory to store the RST file locally
         )
-        self._same_machine = (
+        self._same_machine: bool | None = (
             None  # True if the DPF server is running on the same machine as MAPDL
         )
         self._is_remote: bool | None = None  # Whether DPF is remote or not
         self._dpf_ip: str | None = None
-
-        # self.connect_to_server()
 
         # old attributes
         # ELEMENT_INDEX_TABLE_KEY = None  # todo: To fix
@@ -342,12 +314,6 @@ class DPFResult(Result):
             )
             return False
 
-    def _generate_session_id(self, length: int = 10):
-        """Generate an unique ssesion id.
-
-        It can be shorten by the argument 'length'."""
-        return f"__{generate_session_id(length)}"
-
     def _connect_to_dpf_using_mode(
         self,
         mode: Literal["InProcess", "LocalGrpc", "RemoteGrpc"] = "InProcess",
@@ -375,7 +341,7 @@ class DPFResult(Result):
                     "external_ip and external_port should be provided for RemoteGrpc communication"
                 )
 
-        self._server = srvr
+        self._server: dpf.server_types.BaseServer | None = srvr
 
     def _get_dpf_ip(self) -> str:
         return self.server.ip if self.server and hasattr(self.server, "ip") else ""
@@ -387,7 +353,7 @@ class DPFResult(Result):
         return self._dpf_ip
 
     @property
-    def server(self) -> dpf.server_types.BaseServer:
+    def server(self) -> "dpf.server_types.BaseServer":
         """
         Return the DPF server connection.
 
