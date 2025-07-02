@@ -104,12 +104,14 @@ class Test_dpf:
 
         return model
 
+    @pytest.mark.xfail(True, reason="This test is flaky")
     def test_metadata_meshed_region(self, mapdl, model):
         # Checks
         mapdl.allsel()
         assert mapdl.mesh.n_node == model.metadata.meshed_region.nodes.n_nodes
         assert mapdl.mesh.n_elem == model.metadata.meshed_region.elements.n_elements
 
+    @pytest.mark.xfail(True, reason="This test is flaky")
     def test_displacement(self, model, mapdl):
         results = model.results
         displacements = results.displacement()

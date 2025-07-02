@@ -202,6 +202,8 @@ Recommended articles
   `Link to 'Towards Data Science' article in Medium <tds_article_web_app_2_>`_.
 * Paraview: Reading ANSYS APDL (RST) results in Paraview.
   `Link to 'Paraview Forum' question <paraview_question_read_rst_>`_.
+* APDL: The Language of Simulation.
+  `Link to 'What is APDL?' article in Ansys Blog <what_is_apdl_ansys_blog_>`_.
 
 .. vale on
 
