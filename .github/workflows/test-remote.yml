@@ -262,6 +262,11 @@ jobs:
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml
 
+      - name: "Print amount of restarts"
+        run: |
+          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  MAPDL_0)
+          echo "Number of restarts in the main container: $N_RESTART"
+
       - name: "Upload pytest reports to GitHub"
         if: always()
         uses: actions/upload-artifact@v4.6.2
