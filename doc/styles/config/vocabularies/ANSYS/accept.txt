@@ -53,9 +53,7 @@ CentOS7
 Chao
 ci
 container_layout
-contibuting
 CPUs
-culmulative
 datas
 delet
 Dependabot
@@ -93,7 +91,6 @@ Iges
 Image[Mm]agick
 imagin
 importlib
-infromation
 Ioannis
 ist
 Julia
@@ -114,7 +111,6 @@ mater
 MATLAB
 matricies
 mesher
-measureable
 midside
 Mises
 mkdir
@@ -152,7 +148,6 @@ Python
 QRDAMP
 Radiosity
 Rao
-reperesents
 righ
 RNNN
 sbatch
