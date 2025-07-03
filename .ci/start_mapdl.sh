@@ -62,14 +62,16 @@ fi;
 
 if [[ $MAPDL_VERSION == *"cicd"* ]] ; then
     echo "It is a CICD version, binding DPF port too"
-    export DPF_ARG="-p ${DPF_PORT}:${DPF_PORT_INTERNAL}"
+    export DPF_PORT_ARG="-p ${DPF_PORT}:${DPF_PORT_INTERNAL}"
     export DB_INT_PORT=50056
+    export DPF_DB='-e DATAPROCESSING_DEBUG="/home/mapdl/dpf_logs"'
 
-    echo "DPF_ARG: $DPF_ARG"
+    echo "DPF_PORT_ARG: $DPF_PORT_ARG"
     echo "DB_INT_PORT: $DB_INT_PORT"
 else
-    export DPF_ARG=""
+    export DPF_PORT_ARG=""
     export DB_INT_PORT=50055
+    export DPF_DB=''
 fi;
 
 echo "EXEC_PATH: $EXEC_PATH"
@@ -87,6 +89,7 @@ run \
   --health-start-period=10s \
   -e ANSYSLMD_LICENSE_FILE=1055@${LICENSE_SERVER} \
   -e ANSYS_LOCK="OFF" \
+  ${DPF_DB} \
   -p ${PYMAPDL_PORT}:50052 \
   -p ${PYMAPDL_DB_PORT}:${DB_INT_PORT} \
   ${DPF_ARG} \
