@@ -92,7 +92,7 @@ run \
   ${DPF_DB} \
   -p ${PYMAPDL_PORT}:50052 \
   -p ${PYMAPDL_DB_PORT}:${DB_INT_PORT} \
-  ${DPF_ARG} \
+  ${DPF_PORT_ARG} \
   --shm-size=2gb \
   -e I_MPI_SHM_LMT=shm \
   -e P_SCHEMA="$P_SCHEMA" \
