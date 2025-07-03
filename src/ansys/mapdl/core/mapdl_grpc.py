@@ -964,7 +964,7 @@ class MapdlGrpc(MapdlBase):
     def _set_no_abort(self):
         """Do not abort MAPDL."""
         self._log.debug("Setting to no abort")
-        self.nerr(abort=-1, mute=True)
+        self.run("/NERR,,,-1", mute=True) # ABORT argument is not surfaced in PyMAPDL because it is not documented in the manual
 
     def _run_at_connect(self):
         """Run house-keeping commands when initially connecting to MAPDL."""
