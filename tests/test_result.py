@@ -187,7 +187,7 @@ def extract_sections(vm_code, index):
 
 
 def prepare_example(
-    example, index=None, solve=True, stop_after_first_solve=False, avoid_exit=True
+    example, index=None, solve=True, stop_after_first_solve=True, avoid_exit=True
 ):
     """Extract the different examples inside each VM. You can also choose to solve or not."""
 
@@ -205,7 +205,7 @@ def prepare_example(
     assert "/EXIT" not in vm_code, "The APDL code should not contain '/EXIT' commands."
 
     if stop_after_first_solve:
-        return vm_code.replace("SOLVE", "/EOF")
+        return vm_code.replace("\nSOLVE", "\nSOLVE\n/EOF")
 
     if index:
         vm_code = extract_sections(vm_code, index)
