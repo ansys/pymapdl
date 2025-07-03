@@ -29,8 +29,6 @@ import tempfile
 from typing import TYPE_CHECKING, Any, Callable, Iterable, Literal
 import weakref
 
-from ansys.mapdl.reader.rst import Result
-
 # from ansys.dpf import post
 import numpy as np
 
@@ -150,7 +148,7 @@ def update_result(function: Callable[..., Any]) -> Callable[..., Any]:
     return wrapper
 
 
-class DPFResult(Result):
+class DPFResult:
     """
     Result object based on DPF library.
 
