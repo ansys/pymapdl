@@ -39,6 +39,7 @@ Notes
 from inspect import signature
 from logging import Logger
 import os
+import shutil
 import tempfile
 from warnings import warn
 
@@ -257,6 +258,7 @@ class Example:
                 os.mkdir(self._temp_dir)
             except FileExistsError:
                 pass
+
         return self._temp_dir
 
     @pytest.fixture(scope="class")
@@ -285,10 +287,14 @@ class Example:
         return mapdl
 
     @pytest.fixture(scope="class")
-    def reader(self, setup):
-        return read_binary(os.path.join(self.tmp_dir, self.rst_path))
+    def reader(self, setup, tmp_path_factory):
+        tmp_dir = tmp_path_factory.mktemp(
+            "reader_" + self.example_name.replace(" ", "_")
+        )
+        rst_path = shutil.copy(self.rst_path, tmp_dir)
+        return read_binary(rst_path)
 
-    @pytest.fixture()
+    @pytest.fixture(scope="class")
     def post(self, setup):
         mapdl = setup
         mapdl.allsel()
@@ -297,9 +303,13 @@ class Example:
         mapdl.shell()
         return mapdl.post_processing
 
-    @pytest.fixture()
-    def result(self, setup):
-        return DPFResult(mapdl=setup)
+    @pytest.fixture(scope="class")
+    def result(self, setup, tmp_path_factory):
+        tmp_dir = tmp_path_factory.mktemp(
+            "result_" + self.example_name.replace(" ", "_")
+        )
+        rst_path = shutil.copy(self.rst_path, tmp_dir)
+        return DPFResult(rst_file_path=rst_path)
 
     def test_node_components(self, mapdl, result):
         assert mapdl.mesh.node_components == result.node_components
