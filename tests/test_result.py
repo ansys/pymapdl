@@ -459,6 +459,7 @@ class TestStaticThermocoupledExample(Example):
 
     @pytest.mark.parametrize("set_", list(range(1, 10)), scope="class")
     def test_compatibility_nodal_temperature(self, mapdl, reader, post, result, set_):
+        mapdl.post1()
         mapdl.set(1, set_)
         post_values = post.nodal_temperature()
         result_values = result.nodal_temperature(set_)[1]
@@ -468,6 +469,7 @@ class TestStaticThermocoupledExample(Example):
 
     @pytest.mark.parametrize("set_", list(range(1, 10)), scope="class")
     def test_compatibility_nodal_displacement(self, mapdl, reader, post, result, set_):
+        mapdl.post1()
         mapdl.set(1, set_)
         post_values = post.nodal_displacement("all")[:, :3]
         result_values = result.nodal_displacement(set_)[1]
@@ -481,6 +483,7 @@ class TestStaticThermocoupledExample(Example):
     def test_compatibility_element_stress(
         self, mapdl, reader, post, result, set_, comp
     ):
+        mapdl.post1()
         mapdl.set(1, set_)
         post_values = post.element_stress(COMPONENTS[comp])
 
@@ -583,6 +586,7 @@ class TestElectroThermalCompliantMicroactuator(Example):
     reader_set = 1
 
     def test_compatibility_nodal_temperature(self, mapdl, reader, post, result):
+        mapdl.post1()
         mapdl.set(1, self.mapdl_set)
         post_values = post.nodal_temperature()
         result_values = result.nodal_temperature(self.result_set)[1]
@@ -591,6 +595,7 @@ class TestElectroThermalCompliantMicroactuator(Example):
         validate(result_values, reader_values, post_values)
 
     def test_compatibility_nodal_displacement(self, mapdl, reader, post, result):
+        mapdl.post1()
         mapdl.set(1, self.mapdl_set)
         post_values = post.nodal_displacement("all")[:, :3]
         result_values = result.nodal_displacement(self.result_set)[1]
@@ -599,6 +604,7 @@ class TestElectroThermalCompliantMicroactuator(Example):
         validate(result_values, reader_values, post_values)  # Reader results are broken
 
     def test_compatibility_nodal_voltage(self, mapdl, post, result):
+        mapdl.post1()
         mapdl.set(1, self.mapdl_set)
         post_values = post.nodal_voltage()
         result_values = result.nodal_voltage(self.result_set)[1]
@@ -611,6 +617,7 @@ class TestElectroThermalCompliantMicroactuator(Example):
     @pytest.mark.parametrize("comp", [0, 1, 2, 3, 4, 5], scope="class")
     # @pytest.mark.skipif(True, reason="Python SEGFaults on this test")
     def test_compatibility_element_stress(self, mapdl, reader, post, result, comp):
+        mapdl.post1()
         mapdl.set(1, self.mapdl_set)
         post_values = post.element_stress(COMPONENTS[comp])
 
@@ -644,6 +651,7 @@ class TestSolidStaticPlastic(Example):
     example = elongation_of_a_solid_bar
 
     def test_compatibility_nodal_displacement(self, mapdl, reader, post, result):
+        mapdl.post1()
         mapdl.set(1, 1)
         post_values = post.nodal_displacement("all")[:, :3]
         result_values = result.nodal_displacement(1)[1]
@@ -654,6 +662,7 @@ class TestSolidStaticPlastic(Example):
     @pytest.mark.parametrize("comp", [0, 1, 2, 3, 4, 5], scope="class")
     # @pytest.mark.skipif(True, reason="Python SEGFaults on this test")
     def test_compatibility_element_stress(self, mapdl, reader, post, result, comp):
+        mapdl.post1()
         set_ = 1
         mapdl.set(1, set_)
 
@@ -673,6 +682,7 @@ class TestSolidStaticPlastic(Example):
         validate(result_values, reader_values, post_values)
 
     def test_selection_nodes(self, mapdl, result, post):
+        mapdl.post1()
         set_ = 1
         mapdl.set(1, set_)
         nodes = mapdl.mesh.nnum
@@ -688,6 +698,7 @@ class TestSolidStaticPlastic(Example):
         mapdl.allsel()  # resetting selection
 
     def test_selection_elements(self, mapdl, result, post):
+        mapdl.post1()
         set_ = 1
         mapdl.set(1, set_)
         mapdl.esel("s", "elem", "", 1, 200)
@@ -722,6 +733,7 @@ class TestPiezoelectricRectangularStripUnderPureBendingLoad(Example):
     example_name = "piezoelectric rectangular strip under pure bending load"
 
     def test_compatibility_nodal_displacement(self, mapdl, reader, post, result):
+        mapdl.post1()
         set_ = 1
         mapdl.set(1, set_)
         post_values = post.nodal_displacement("all")[:, :3]
@@ -731,6 +743,7 @@ class TestPiezoelectricRectangularStripUnderPureBendingLoad(Example):
         validate(result_values, reader_values, post_values)  # Reader results are broken
 
     def test_compatibility_nodal_voltage(self, mapdl, post, result):
+        mapdl.post1()
         set_ = 1
         mapdl.set(1, set_)
         post_values = post.nodal_voltage()
@@ -744,6 +757,7 @@ class TestPiezoelectricRectangularStripUnderPureBendingLoad(Example):
     @pytest.mark.parametrize("comp", [0, 1, 2], scope="class")
     # @pytest.mark.skipif(True, reason="Python SEGFaults on this test")
     def test_compatibility_element_stress(self, mapdl, reader, post, result, comp):
+        mapdl.post1()
         set_ = 1
         mapdl.set(1, set_)
         post_values = post.element_stress(COMPONENTS[comp])
@@ -759,6 +773,7 @@ class TestPiezoelectricRectangularStripUnderPureBendingLoad(Example):
     def test_compatibility_nodal_elastic_strain(
         self, mapdl, reader, post, result, comp
     ):
+        mapdl.post1()
         set_ = 1
         mapdl.set(1, set_)
         post_values = post.nodal_elastic_component_strain(COMPONENTS[comp])
@@ -774,6 +789,7 @@ class TestPiezoelectricRectangularStripUnderPureBendingLoad(Example):
         validate(result_values, reader_values, post_values)
 
     def test_selection_nodes(self, mapdl, result, post):
+        mapdl.post1()
         set_ = 1
         mapdl.set(1, set_)
         mapdl.nsel("s", "node", "", 1, 200)
@@ -789,6 +805,7 @@ class TestPiezoelectricRectangularStripUnderPureBendingLoad(Example):
         mapdl.allsel()
 
     def test_selection_elements(self, mapdl, result, post):
+        mapdl.post1()
         set_ = 1
         mapdl.set(1, set_)
         mapdl.esel("s", "elem", "", 1, 200)
@@ -823,6 +840,7 @@ class TestPinchedCylinderVM6(Example):
     example_name = "piezoelectric rectangular strip under pure bending load"
 
     def test_compatibility_nodal_displacement(self, mapdl, reader, post, result):
+        mapdl.post1()
         mapdl.set(1, 1)
         post_values = post.nodal_displacement("all")[:, :3]
         result_values = result.nodal_displacement(1)[1]
@@ -833,6 +851,7 @@ class TestPinchedCylinderVM6(Example):
     @pytest.mark.parametrize("comp", [0, 1, 2, 3, 4, 5], scope="class")
     # @pytest.mark.skipif(True, reason="Python SEGFaults on this test")
     def test_compatibility_element_stress(self, mapdl, reader, post, result, comp):
+        mapdl.post1()
         set_ = 1
         mapdl.set(1, set_)
         mapdl.shell("mid")  # DPF returns the middle layer value.
@@ -857,6 +876,7 @@ class TestPinchedCylinderVM6(Example):
     def test_result_in_element_coordinate_system(
         self, mapdl, result, reader, post, comp
     ):
+        mapdl.post1()
         set_ = 1
         mapdl.set(1, set_)
         mapdl.rsys("solu")
@@ -934,6 +954,7 @@ class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(Example):
         """
         loadstep = step[0]
         set_ = step[1]
+        mapdl.post1()
 
         mapdl.set(*loadstep)
         assert mapdl.post_processing.step == set_
