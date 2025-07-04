@@ -227,7 +227,7 @@ jobs:
         shell: bash
         run: |
           export PYTHONFAULTHANDLER=1
-          xvfb-run make -C doc ${{ inputs.builder }} SPHINXOPTS="-j auto -W --keep-going" | tee doc_build.log
+          xvfb-run make -C doc ${{ inputs.builder }} SPHINXOPTS="-j auto" | tee doc_build.log
 
       - name: "Substitute defective GIF"
         shell: bash

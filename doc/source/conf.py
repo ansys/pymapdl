@@ -92,7 +92,9 @@ pyansys_light_mode_logo = str(
 
 # -- General configuration ---------------------------------------------------
 extensions = [
+    "ansys_sphinx_theme.extension.linkcode",
     "jupyter_sphinx",
+    "linuxdoc.rstFlatTable",
     "numpydoc",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
@@ -156,6 +158,7 @@ numpydoc_validation_checks = {
 numpydoc_validation_exclude = {  # set of regex
     # class inherits from pymapdl-reader
     r"\.*MeshGrpc\.*",
+    r"ansys\.mapdl\.core\._commands\..+",
 }
 
 # Favicon

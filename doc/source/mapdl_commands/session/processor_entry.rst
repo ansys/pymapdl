@@ -1,24 +1,23 @@
-.. _ref_processor_entry_commands_api:
 
-***************
-Processor entry
-***************
+.. _ref_processor_entry:
 
-.. currentmodule:: ansys.mapdl.core
 
-These SESSION commands are used to enter and exit the various processors in the program.
+ProcessorEntry
+==============
+
+
+.. currentmodule:: ansys.mapdl.core._commands.session.processor_entry
+
+.. autoclass:: ansys.mapdl.core._commands.session.processor_entry.ProcessorEntry
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.aux2
-   Mapdl.aux3
-   Mapdl.aux12
-   Mapdl.aux15
-   Mapdl.finish
-   Mapdl.map
-   Mapdl.post1
-   Mapdl.post26
-   Mapdl.prep7
-   Mapdl.quit
-   Mapdl.slashsolu
+
+   ProcessorEntry.finish
+   ProcessorEntry.post1
+   ProcessorEntry.post26
+   ProcessorEntry.prep7
+   ProcessorEntry.quit
+   ProcessorEntry.slashsolu

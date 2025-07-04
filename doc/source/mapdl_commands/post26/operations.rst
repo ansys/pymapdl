@@ -1,31 +1,34 @@
-.. _ref_operations_api:
 
-**********
+.. _ref_operations:
+
+
 Operations
-**********
+==========
 
-.. currentmodule:: ansys.mapdl.core
 
-These POST26 commands are used to perform operations on the stored
-variables.
+.. currentmodule:: ansys.mapdl.core._commands.post26.operations
+
+.. autoclass:: ansys.mapdl.core._commands.post26.operations.Operations
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.abs
-   Mapdl.add
-   Mapdl.atan
-   Mapdl.clog
-   Mapdl.conjug
-   Mapdl.deriv
-   Mapdl.exp
-   Mapdl.filldata
-   Mapdl.imagin
-   Mapdl.int1
-   Mapdl.large
-   Mapdl.nlog
-   Mapdl.prod
-   Mapdl.quot
-   Mapdl.realvar
-   Mapdl.small
-   Mapdl.sqrt
+
+   Operations.abs
+   Operations.add
+   Operations.atan
+   Operations.clog
+   Operations.conjug
+   Operations.deriv
+   Operations.exp
+   Operations.filldata
+   Operations.imagin
+   Operations.int1
+   Operations.large
+   Operations.nlog
+   Operations.prod
+   Operations.quot
+   Operations.realvar
+   Operations.small
+   Operations.sqrt

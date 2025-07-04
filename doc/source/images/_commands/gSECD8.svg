@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 17.1.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 width="129.3px" height="151.7px" viewBox="0 1.2 129.3 151.7" enable-background="new 0 1.2 129.3 151.7" xml:space="preserve">
+<polygon fill="#00BDF2" stroke="#000000" points="33,1.7 43.3,1.7 43.3,110.7 117.3,110.7 117.3,126 33,126 "/>
+<g>
+	<g>
+		<polygon fill="#FFFFFF" points="106.1,138.5 117,135.6 106.1,132.6 		"/>
+		<polygon fill="#FFFFFF" points="43.7,132.7 32.9,135.6 43.7,138.5 		"/>
+	</g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-linecap="square" stroke-miterlimit="10" x1="41.8" y1="135.6" x2="108.1" y2="135.6"/>
+		<polygon points="106.1,138.5 117,135.6 106.1,132.6 		"/>
+		<polygon points="43.7,132.7 32.9,135.6 43.7,138.5 		"/>
+	</g>
+</g>
+<g>
+	<g>
+		<polygon fill="#FFFFFF" points="19.3,115 22.2,125.8 25.1,115 		"/>
+		<polygon fill="#FFFFFF" points="25.1,13.2 22.1,2.4 19.2,13.2 		"/>
+	</g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-linecap="square" stroke-miterlimit="6" x1="22.2" y1="11.2" x2="22.2" y2="117"/>
+		<polygon points="19.3,115 22.2,125.8 25.1,115 		"/>
+		<polygon points="25.1,13.2 22.1,2.4 19.2,13.2 		"/>
+	</g>
+</g>
+<g>
+	<g>
+		<g>
+			<g>
+				<text transform="matrix(0.9992 0 0 1 66.5986 149.351)" font-family="'ArialMT'" font-size="11">W1</text>
+			</g>
+		</g>
+	</g>
+</g>
+<g>
+	<g>
+		<g>
+			<g>
+				<text transform="matrix(0.9992 0 0 1 0 63.1787)" font-family="'ArialMT'" font-size="11">W2</text>
+			</g>
+		</g>
+	</g>
+</g>
+<g>
+	<g>
+		<g>
+			<g>
+				<text transform="matrix(0.9992 0 0 1 120.1387 122.0913)" font-family="'ArialMT'" font-size="11">t1</text>
+			</g>
+		</g>
+	</g>
+</g>
+<g>
+	<g>
+		<g>
+			<g>
+				<text transform="matrix(0.9992 0 0 1 47.6182 10.9995)" font-family="'ArialMT'" font-size="11">t2</text>
+			</g>
+		</g>
+	</g>
+</g>
+<polyline fill="none" stroke="#000000" stroke-width="0.9504" stroke-linecap="square" stroke-miterlimit="6" points="43.3,126 
+	43.3,110.7 34,110.7 "/>
+<line fill="none" stroke="#000000" stroke-linecap="square" stroke-miterlimit="10" x1="78.6" y1="110.7" x2="78.6" y2="126"/>
+<line fill="none" stroke="#000000" stroke-linecap="square" stroke-miterlimit="6" x1="33" y1="61.4" x2="43.3" y2="61.4"/>
+<g>
+	<g>
+		<g>
+			<g>
+				<text transform="matrix(0.9992 0 0 1 45.6182 80.6831)" font-family="'ArialMT'" font-size="11">z</text>
+			</g>
+		</g>
+	</g>
+</g>
+<g>
+	<g>
+		<g>
+			<g>
+				<text transform="matrix(0.9992 0 0 1 67.2422 106.2212)" font-family="'ArialMT'" font-size="11">y</text>
+			</g>
+		</g>
+	</g>
+</g>
+<g>
+	<g>
+		<polygon fill="#FFFFFF" points="40.9,73.2 38,62.4 35.1,73.2 		"/>
+	</g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-linecap="square" stroke-miterlimit="10" x1="38" y1="119.1" x2="38" y2="71.2"/>
+		<polygon points="40.9,73.2 38,62.4 35.1,73.2 		"/>
+	</g>
+</g>
+<ellipse stroke="#000000" cx="38.1" cy="119.1" rx="3.7" ry="3.6"/>
+<g>
+	<g>
+		<polygon fill="#FFFFFF" points="67,122 77.8,119.1 67,116.2 		"/>
+	</g>
+	<g>
+		<line fill="none" stroke="#000000" stroke-linecap="square" stroke-miterlimit="10" x1="38" y1="119.1" x2="69" y2="119.1"/>
+		<polygon points="67,122 77.8,119.1 67,116.2 		"/>
+	</g>
+</g>
+</svg>

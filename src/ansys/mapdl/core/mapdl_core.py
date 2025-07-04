@@ -1621,7 +1621,6 @@ class _MapdlCore(Commands):
         """
         if self._apdl_log is not None:
             raise MapdlRuntimeError("APDL command logging already enabled")
-
         self._log.debug("Opening ANSYS log file at %s", filename)
 
         if mode not in ["w", "a", "x"]:
