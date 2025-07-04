@@ -1463,7 +1463,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
         if len(response) >= 248:
             warnings.warn(
-                "Response might have been trimmed to 248 characters because of "
+                "Response might have been truncated to 248 characters because of "
                 "MAPDL string limitations. "
                 "Check the output of 'mapdl.inquire' carefully. "
                 "Alternatively, you can use 'mapdl.sys('printenv') to obtain "
