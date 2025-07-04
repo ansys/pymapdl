@@ -63,11 +63,12 @@ jobs:
       PYMAPDL_DB_PORT2: 21003  # default won't work on GitHub runners
       DPF_DOCKER_IMAGE: ghcr.io/ansys/mapdl:v25.2-rocky-dpf-standalone
       DPF_PORT: 21014
+      DPF_PORT_INTERNAL: 50055 # Internal port for DPF server
       DPF_PORT2: 21015
       DPF_START_SERVER: False
       HAS_DPF: True
       TEST_DPF_BACKEND: false
-      PYTEST_ARGUMENTS: '-vvv -ra --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=5 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests --strict-markers'
+      PYTEST_ARGUMENTS: '-vvv -ra --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=5 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests --strict-markers --random-order-seed=650199'
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
 
     steps:
@@ -149,6 +150,7 @@ jobs:
           MAPDL_VERSION: ${{ inputs.mapdl-version }}
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
           MAPDL_PACKAGE: ${{ env.MAPDL_PACKAGE }}
+          DPF_PORT_INTERNAL: ${{ env.DPF_PORT_INTERNAL }}
         shell: bash
         run: |
           echo "Launching first MAPDL instance..."
@@ -231,7 +233,7 @@ jobs:
         run: |
           docker ps
           echo "Starting DPF server on same MAPDL container: ${MAPDL_INSTANCE}"
-          docker exec ${MAPDL_INSTANCE} /bin/bash -c "/ansys_inc/v252/aisol/bin/linx64/Ans.Dpf.Grpc.sh --port 50055 &" > log_dpf.log &
+          docker exec ${MAPDL_INSTANCE} /bin/bash -c "mkdir -p /home/mapdl/dpf_logs && /ansys_inc/v252/aisol/bin/linx64/Ans.Dpf.Grpc.sh --port ${{ env.DPF_PORT_INTERNAL }}" > log_dpf.log &
 
       - name: "Waiting for the services to be up"
         shell: bash
@@ -262,8 +264,13 @@ jobs:
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml
 
-      - name: "Upload pytest reports to GitHub"
+      - name: "Print amount of restarts"
         if: always()
+        run: |
+          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  MAPDL_0)
+          echo "Number of restarts in the main container: $N_RESTART"
+
+      - name: "Upload pytest reports to GitHub"
         uses: actions/upload-artifact@v4.6.2
         with:
           name: "reports-${{ inputs.file-name }}"

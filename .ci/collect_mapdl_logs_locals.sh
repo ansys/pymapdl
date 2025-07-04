@@ -5,6 +5,7 @@ echo "Copying the log files..."
 mv *.log ./"$LOG_NAMES"/ || echo "No log files could be found"
 mv *apdl.out ./"$LOG_NAMES"/ || echo "No APDL log files could be found"
 mv *pymapdl.apdl ./"$LOG_NAMES"/ || echo "No PYMAPDL APDL log files could be found"
+mv /home/mapdl/dpf_logs ./"$LOG_NAMES"/ || echo "No DPF log files could be found"
 
 echo "Copying the profiling files..."
 mkdir -p ./"$LOG_NAMES"/prof
