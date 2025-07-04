@@ -1250,7 +1250,7 @@ def test_inquire_apdl(mapdl, cleared):
 def test_inquire_env(mapdl, cleared, envvar):
     env_vars = {
         line.split("=")[0]: line.split("=")[1]
-        for line in mapdl.sys(f"printenv").splitlines()
+        for line in mapdl.sys("printenv").splitlines()
     }
     if envvar not in env_vars:
         pytest.skip(f"Environment variable {envvar} not found")
