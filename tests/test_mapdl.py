@@ -1260,7 +1260,7 @@ def test_inquire_env(mapdl, cleared, envvar):
         # MAPDL warns about long environment variables because it trims them to
         # 248
         with pytest.warns(UserWarning):
-            assert mapdl.inquire("", "ENV", envvar, 0) in value
+            assert mapdl.inquire("", "ENV", envvar, 0) == value[:248]
 
     else:
         assert mapdl.inquire("", "ENV", envvar, 0) == value
