@@ -63,7 +63,7 @@ all = [
 
 tests = [
   "ansys-dpf-core[graphics]==0.13.6",
-  "ansys-tools-visualization-interface==0.9.2",
+  "ansys-tools-visualization-interface==0.11.0",
   "autopep8==2.3.2",
   "matplotlib==3.10.3",
   "pandas==2.3.0",
@@ -86,13 +86,14 @@ doc = [
   "ansys-dpf-core[graphics]==0.13.6",
   "ansys-mapdl-reader==0.55.1",
   "ansys-sphinx-theme==1.5.2",
-  "ansys-tools-visualization-interface==0.9.2",
+  "ansys-tools-visualization-interface==0.11.0",
   "grpcio==1.73.1",
   "imageio-ffmpeg==0.6.0",
   "imageio==2.37.0",
   "jupyter==1.1.1",
   "jupyter_sphinx==0.5.3",
   "jupyterlab>=3.2.8",
+  "linuxdoc==20240924",
   "matplotlib==3.10.3",
   "nbformat==5.10.4",
   "numpydoc==1.9.0",
@@ -178,7 +179,7 @@ show_missing = true
 ignore-regex = ".*codespell-ignore$|NORML|POIN"
 ignore-words = "doc/styles/config/vocabularies/ANSYS/accept.txt"
 quiet-level = 3
-skip = '*.pyc,*.txt,*.gif,*.png,*.jpg,*.js,*.html,*.doctree,*.ttf,*.woff,*.woff2,*.eot,*.mp4,*.inv,*.pickle,*.ipynb,flycheck*,./.git/*,./.hypothesis/*,*.yml,./doc/build/*,./doc/images/*,./dist/*,*~,.hypothesis*,./doc/source/examples/*,*cover,*.dat,*.mac,*.cdb,*.CDB,build,./docker/mapdl/v*,./factory/*,./ansys/mapdl/core/mapdl_functions.py,PKG-INFO,*.mypy_cache/*,./docker/mapdl/*,./_unused/*'
+skip = '*.pyc,*.txt,*.gif,*.png,*.jpg,*.js,*.html,*.doctree,*.ttf,*.woff,*.woff2,*.eot,*.mp4,*.inv,*.pickle,*.ipynb,flycheck*,./.git/*,./.hypothesis/*,*.yml,./doc/build/*,./doc/images/*,./dist/*,*~,.hypothesis*,./doc/source/examples/*,*cover,*.dat,*.mac,*.cdb,*.CDB,build,./docker/mapdl/v*,./factory/*,./ansys/mapdl/core/mapdl_functions.py,PKG-INFO,*.mypy_cache/*,./docker/mapdl/*,./_unused/*,src/ansys/mapdl/core/_commands/*'
 
 [tool.numpydoc_validation]
 checks = [
