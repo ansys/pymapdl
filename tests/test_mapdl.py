@@ -1235,33 +1235,61 @@ def test_cwd(mapdl, cleared, tmpdir):
     mapdl.slashdelete("anstmp")
 
 
-def test_inquire(mapdl, cleared):
+def test_inquire_apdl(mapdl, cleared):
     # Testing basic functions (First block: Functions)
+    # Returns the path to MAPDL
     assert "apdl" in mapdl.inquire("", "apdl").lower()
 
-    # **Returning the Value of an Environment Variable to a Parameter**
-    if mapdl.platform == "linux":
-        name, value = mapdl.sys(f"printenv").splitlines()[0].split("=")
+
+@pytest.mark.skipif(
+    os.name != "posix", reason="Needed printenv, so Linux only for the moment"
+)
+@pytest.mark.parametrize(
+    "envvar", ["HOME", "USER", "PATH", "HOSTNAME", "LD_LIBRARY_PATH"]
+)
+def test_inquire_env(mapdl, cleared, envvar):
+    env_vars = {
+        line.split("=")[0]: line.split("=")[1]
+        for line in mapdl.sys(f"printenv").splitlines()
+    }
+    if envvar not in env_vars:
+        pytest.skip(f"Environment variable {envvar} not found")
+
+    value = env_vars[envvar]
+    if envvar in ["PATH", "LD_LIBRARY_PATH"] and len(value) > 248:
+        # MAPDL warns about long environment variables because it trims them to
+        # 248
+        with pytest.warns(UserWarning):
+            assert mapdl.inquire("", "ENV", envvar, 0) in value
+
     else:
-        pytest.skip(f"Platform {mapdl.platform} not supported")
+        assert mapdl.inquire("", "ENV", envvar, 0) == value
 
-    assert value == mapdl.inquire("", "ENV", name, 0)
 
+def test_inquire_title(mapdl, cleared):
     # **Returning the Value of a Title to a Parameter**
     title = "This is the title"
     mapdl.title(title)
     assert title == mapdl.inquire("", "title")
 
+
+def test_inquire_jobname(mapdl, cleared):
     # **Returning Information About a File to a Parameter**
     jobname = mapdl.inquire("", "jobname")
-    existing_file = [each for each in mapdl.list_files() if each.endswith(".log")][0]
+    assert isinstance(jobname, str)
+    assert jobname
 
+
+def test_inquire_exist(mapdl, cleared):
+    existing_file = [each for each in mapdl.list_files() if each.endswith(".log")][0]
     assert isinstance(mapdl.inquire("", "exist", existing_file), bool)
     assert isinstance(mapdl.inquire("", "exist", "unexisting_file.myext"), bool)
 
     assert mapdl.inquire("", "exist", existing_file)
     assert not mapdl.inquire("", "exist", "unexisting_file.myext")
 
+
+def test_inquire_non_interactive(mapdl, cleared):
     with mapdl.non_interactive:
         # Testing the case where the file does not exist
         assert mapdl.inquire("", "exist", "unexisting_file.myext") is None
