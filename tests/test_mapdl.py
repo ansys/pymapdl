@@ -1256,7 +1256,7 @@ def test_inquire_env(mapdl, cleared, envvar):
         pytest.skip(f"Environment variable {envvar} not found")
 
     value = env_vars[envvar]
-    if envvar in ["PATH", "LD_LIBRARY_PATH"] and len(value) > 248:
+    if envvar in ["PATH", "LD_LIBRARY_PATH"] and len(value) >= 248:
         # MAPDL warns about long environment variables because it trims them to
         # 248
         with pytest.warns(UserWarning):
