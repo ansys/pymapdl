@@ -1461,6 +1461,15 @@ class _MapdlCommandExtended(_MapdlCore):
 
         response = response.split("=")[1].strip()
 
+        if len(response) >= 248:
+            warnings.warn(
+                "Response might have been trimmed to 248 characters because of "
+                "MAPDL string limitations. "
+                "Check the output of 'mapdl.inquire' carefully. "
+                "Alternatively, you can use 'mapdl.sys('printenv') to obtain "
+                "the environment variables on Linux."
+            )
+
         # Check if the function is to check existence
         # so it makes sense to return a boolean
         if func.upper() in ["EXIST", "WRITE", "READ", "EXEC"]:
