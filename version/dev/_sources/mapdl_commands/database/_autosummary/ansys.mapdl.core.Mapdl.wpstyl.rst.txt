@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.wpstyl
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.wpstyl

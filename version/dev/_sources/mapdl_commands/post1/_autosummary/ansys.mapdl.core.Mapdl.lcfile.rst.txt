@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.lcfile
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.lcfile

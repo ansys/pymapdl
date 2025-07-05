@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.plfar
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.plfar

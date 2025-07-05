@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.ancntr
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.ancntr

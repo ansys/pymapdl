@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.sudel
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.sudel

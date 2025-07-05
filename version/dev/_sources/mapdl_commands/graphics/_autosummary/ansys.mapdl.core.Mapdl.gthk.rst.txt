@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.gthk
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.gthk

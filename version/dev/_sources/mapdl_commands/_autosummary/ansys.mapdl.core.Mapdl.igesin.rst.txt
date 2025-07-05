@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.igesin
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.igesin

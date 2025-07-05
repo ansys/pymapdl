@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.lcabs
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.lcabs

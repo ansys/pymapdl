@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.v2dopt
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.v2dopt

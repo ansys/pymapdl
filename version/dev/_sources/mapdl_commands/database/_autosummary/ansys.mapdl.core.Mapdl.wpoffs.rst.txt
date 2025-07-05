@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.wpoffs
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.wpoffs

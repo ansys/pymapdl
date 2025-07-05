@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.lcwrite
+==============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.lcwrite

@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.prsect
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.prsect

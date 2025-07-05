@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.tvar
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.tvar

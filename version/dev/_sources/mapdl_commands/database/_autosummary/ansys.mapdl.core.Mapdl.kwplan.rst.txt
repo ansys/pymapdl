@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.kwplan
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.kwplan

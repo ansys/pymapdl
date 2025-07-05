@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.plmc
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.plmc

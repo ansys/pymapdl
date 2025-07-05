@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.anisos
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.anisos
