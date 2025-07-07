@@ -33,22 +33,20 @@ if _HAS_PANDAS:
 
 from ._commands import (
     apdl,
-    aux2_,
-    aux3_,
-    aux12_,
-    aux15_,
+    aux2,
+    aux3,
+    aux12,
+    aux15,
     conn,
     database,
-    display_,
-    graphics_,
+    graphics,
     hidden,
     inq_func,
-    map_cmd,
+    map,
     misc,
-    post1_,
-    post26_,
+    post1,
+    post26,
     preproc,
-    reduced,
     session,
     solution,
 )
@@ -357,52 +355,68 @@ class PreprocessorCommands(
     pass
 
 
-class APDLCommands(
+class Apdl(
     apdl.abbreviations.Abbreviations,
-    apdl.array_param.ArrayParam,
+    apdl.array_parameters.ArrayParameters,
+    apdl.encryption_decryption.EncryptionDecryption,
     apdl.macro_files.MacroFiles,
-    apdl.matrix_op.MatrixOP,
+    apdl.matrix_operations.MatrixOperations,
     apdl.parameter_definition.ParameterDefinition,
     apdl.process_controls.ProcessControls,
 ):
     pass
 
 
-class Aux2Commands(aux2_.bin_dump.BinDump, aux2_.bin_manip.BinManip):
+class Aux2Commands(
+    aux2.binary_file_dump.BinaryFileDump,
+    aux2.binary_file_manipulation.BinaryFileManipulation,
+):
+    pass
+
+
+class Aux3Commands(aux3.results_files.ResultsFiles):
     pass
 
 
 class Aux12Commands(
-    aux12_.radiosity_solver.RadiositySolver,
-    aux12_.radiation_mat.RadiationMat,
-    aux12_.general_radiation.GeneralRadiation,
+    aux12.general_radiation.GeneralRadiation,
+    aux12.radiation_matrix_method.RadiationMatrixMethod,
+    aux12.radiosity_solver.RadiositySolver,
+):
+    pass
+
+
+class Aux15Commands(
+    aux15.iges.Iges,
 ):
     pass
 
 
 class DatabaseCommands(
-    database.setup.Setup,
-    database.picking.Picking,
-    database.coord_sys.CoordinateSystem,
-    database.selecting.Selecting,
-    database.working_plane.WorkingPlane,
     database.components.Components,
+    database.coordinate_system.CoordinateSystem,
+    database.picking.Picking,
+    database.selecting.Selecting,
+    database.set_up.SetUp,
+    database.working_plane.WorkingPlane,
 ):
     pass
 
 
-class DisplayCommands(display_.setup.Setup):
+class GraphicsCommands(
+    graphics.annotation.Annotation,
+    graphics.graphs.Graphs,
+    graphics.labeling.Labeling,
+    graphics.scaling.Scaling,
+    graphics.set_up.SetUp,
+    graphics.style.Style,
+    graphics.views.Views,
+):
     pass
 
 
-class GraphicsCommands(
-    graphics_.annotation.Annotation,
-    graphics_.graphs.Graphs,
-    graphics_.labeling.Labelling,
-    graphics_.scaling.Scaling,
-    graphics_.setup.Setup,
-    graphics_.style.Style,
-    graphics_.views.Views,
+class MapCommands(
+    map.pressure_mapping.PressureMapping,
 ):
     pass
 
@@ -412,41 +426,35 @@ class MiscCommands(misc.misc.Misc):
 
 
 class Post1Commands(
-    post1_.animation.Animation,
-    post1_.controls.Controls,
-    post1_.element_table.ElementTable,
-    post1_.failure_criteria.FailureCriteria,
-    post1_.listing.Listing,
-    post1_.load_case.LoadCase,
-    post1_.magnetics_calc.MagneticsCalc,
-    post1_.path_operations.PathOperations,
-    post1_.results.Results,
-    post1_.setup.Setup,
-    post1_.special.Special,
-    post1_.status.Status,
-    post1_.surface_operations.SurfaceOperations,
-    post1_.trace_points.TracePoints,
+    post1._fatigue.Fatigue,
+    post1._special_purpose.SpecialPurpose,
+    post1.animation.Animation,
+    post1.controls.Controls,
+    post1.element_table.ElementTable,
+    post1.failure_criteria.FailureCriteria,
+    post1.listing.Listing,
+    post1.load_case_calculations.LoadCaseCalculations,
+    post1.magnetics_calculations.MagneticsCalculations,
+    post1.path_operations.PathOperations,
+    post1.results.Results,
+    post1.set_up.SetUp,
+    post1.special_purpose.SpecialPurpose,
+    post1.status.Status,
+    post1.surface_operations.SurfaceOperations,
+    post1.trace_points.TracePoints,
 ):
     pass
 
 
 class Post26Commands(
-    post26_.controls.Controls,
-    post26_.display.Display,
-    post26_.listing.Listing,
-    post26_.operations.Operations,
-    post26_.setup.Setup,
-    post26_.special.Special,
-    post26_.status.Status,
-):
-    pass
-
-
-class ReducedCommands(
-    reduced.generation.Generation,
-    reduced.preparation.Preparation,
-    reduced.setup.Setup,
-    reduced.use_pass.UsePass,
+    post26._set_up.SetUp,
+    post26.controls.Controls,
+    post26.display.Display,
+    post26.listing.Listing,
+    post26.operations.Operations,
+    post26.set_up.SetUp,
+    post26.special_purpose.SpecialPurpose,
+    post26.status.Status,
 ):
     pass
 
@@ -500,24 +508,22 @@ class InqFunctions(inq_func.inq_function):
 
 
 class Commands(
-    APDLCommands,
+    Apdl,
     Aux2Commands,
+    Aux3Commands,
     Aux12Commands,
+    Aux15Commands,
     DatabaseCommands,
-    DisplayCommands,
     GraphicsCommands,
+    MapCommands,
     MiscCommands,
     Post1Commands,
     Post26Commands,
     PreprocessorCommands,
-    ReducedCommands,
     SessionCommands,
     SolutionCommands,
-    aux3_.Aux3,
-    aux15_.Aux15,
     conn.Conn,
     hidden._Hidden,
-    map_cmd.MapCommand,
     InqFunctions,
 ):
     """Wrapped MAPDL commands"""
