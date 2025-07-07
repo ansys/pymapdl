@@ -310,10 +310,6 @@ class Example:
 
     @pytest.fixture(scope="class")
     def result(self, setup, tmp_path_factory, mapdl):
-        tmp_dir = tmp_path_factory.mktemp(
-            "result_" + self.example_name.replace(" ", "_")
-        )
-        rst_path = shutil.copy(self.rst_path, tmp_dir)
         # Since the DPF upload is broken, we copy the RST file to a temporary directory
         # in the MAPDL directory
         dpf_rst_name = f"dpf_{self.rst_name}"
