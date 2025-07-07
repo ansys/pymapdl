@@ -230,6 +230,7 @@ class Example:
     # In case you want to overwrite the APDL code of the example.
     # Use with ``prepare_example`` function.
     _apdl_code: str | None = None
+    stop_after_first_solve: bool = True
 
     @property
     def example_name(self) -> str:
@@ -246,7 +247,9 @@ class Example:
         if self._apdl_code is None:
             if self.example is None:
                 raise ValueError("The 'example' attribute must be set.")
-            self._apdl_code = prepare_example(self.example, 0)
+            self._apdl_code = prepare_example(
+                self.example, 0, stop_after_first_solve=self.stop_after_first_solve
+            )
         return self._apdl_code
 
     @property
@@ -327,7 +330,7 @@ class Example:
         assert mapdl.inquire(
             "", "EXIST", rst_file_path
         ), "The RST file for DPF does not exist."
-        return DPFResult(rst_file_path=rst_file_path)
+        return DPFResult(rst_file_path=rst_file_path, rst_is_on_remote=True)
 
     def test_node_components(self, mapdl, result):
         assert mapdl.mesh.node_components == result.node_components
@@ -944,6 +947,7 @@ class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(Example):
 
     example = transient_response_of_a_ball_impacting_a_flexible_surface
     example_name = "Transient Response of a Ball Impacting a Flexible Surface"
+    stop_after_first_solve = False  # To solve all the steps
 
     @pytest.mark.parametrize(
         "step",

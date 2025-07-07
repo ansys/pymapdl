@@ -165,10 +165,18 @@ class DPFResult:
     mapdl : _MapdlCore
         Mapdl instantiated object.
 
+    rst_is_on_remote : bool, optional
+        If True, the RST file is located on the remote server already.
+        If False, the RST file is located on the local machine, and it will be
+        uploaded to the DPF server
+
     """
 
     def __init__(
-        self, rst_file_path: str | None = None, mapdl: "Mapdl | None" = None
+        self,
+        rst_file_path: str | None = None,
+        mapdl: "Mapdl | None" = None,
+        rst_is_on_remote: bool = False,
     ) -> None:
         """Initialize Result instance"""
 
@@ -184,6 +192,7 @@ class DPFResult:
         # RST parameters
         self.__rst_directory: str | None = None
         self.__rst_name: str | None = None
+        self._mode_rst: bool
 
         if rst_file_path is not None and mapdl is not None:
             raise ValueError(
@@ -192,13 +201,15 @@ class DPFResult:
 
         elif rst_file_path is not None:
             # Using RST file only allows for one RST file at the time.
-            if not os.path.exists(rst_file_path):
+            if not rst_is_on_remote and not os.path.exists(rst_file_path):
                 raise FileNotFoundError(
                     f"The RST file '{rst_file_path}' could not be found."
                 )
+            elif rst_is_on_remote:
+                self._server_file_path = rst_file_path
 
             logger.debug("Initializing DPFResult class in RST mode.")
-            self._mode_rst: bool = True
+            self._mode_rst = True
 
             self.__rst_directory = os.path.dirname(rst_file_path)
             self.__rst_name = os.path.basename(rst_file_path)
@@ -210,7 +221,7 @@ class DPFResult:
 
             logger.debug("Initializing DPFResult class in MAPDL mode.")
             self._mapdl_weakref = weakref.ref(mapdl)
-            self._mode_rst: bool = False
+            self._mode_rst = False
 
         else:
             raise ValueError(
@@ -227,11 +238,12 @@ class DPFResult:
         self._tmp_dir: str | None = (
             None  # Temporary directory to store the RST file locally
         )
-        self._same_machine: bool | None = (
+        self.__mapdl_and_dpf_on_same_machine: bool | None = (
             None  # True if the DPF server is running on the same machine as MAPDL
         )
-        self._is_remote: bool | None = None  # Whether DPF is remote or not
+        self._dpf_is_remote: bool | None = None  # Whether DPF is remote or not
         self._dpf_ip: str | None = None
+        self._rst_is_on_remote: bool = rst_is_on_remote
 
         # old attributes
         # ELEMENT_INDEX_TABLE_KEY = None  # todo: To fix
@@ -339,7 +351,7 @@ class DPFResult:
                     "external_ip and external_port should be provided for RemoteGrpc communication"
                 )
 
-        self._server: dpf.server_types.BaseServer | None = srvr
+        self._server = srvr
 
     def _get_dpf_ip(self) -> str:
         return self.server.ip if self.server and hasattr(self.server, "ip") else ""
@@ -366,6 +378,10 @@ class DPFResult:
                 self.logger.debug(f"Connected to DPF server at {self.dpf_ip}")
 
         return self._server
+
+    @property
+    def rst_is_on_remote(self) -> bool:
+        return self._rst_is_on_remote
 
     def _try_connect_inprocess(self) -> None:
         try:
@@ -492,11 +508,11 @@ class DPFResult:
         return "DPF_IP" in os.environ or "DPF_PORT" in os.environ
 
     @property
-    def is_remote(self) -> bool:
+    def dpf_is_remote(self) -> bool:
         """Returns True if we are connected to the DPF Server using a gRPC connection to a remote IP."""
-        if self._is_remote is None:
-            self._is_remote = self._get_is_remote()
-        return self._is_remote
+        if self._dpf_is_remote is None:
+            self._dpf_is_remote = self._get_is_remote()
+        return self._dpf_is_remote
 
     @property
     def _mapdl(self) -> "Mapdl | None":
@@ -548,11 +564,11 @@ class DPFResult:
         return not self._mode_rst
 
     @property
-    def same_machine(self):
+    def _mapdl_dpf_on_same_machine(self):
         """True if the DPF server is running on the same machine as MAPDL"""
-        if self._same_machine is None:
-            self._same_machine = self._get_is_same_machine()
-        return self._same_machine
+        if self.__mapdl_and_dpf_on_same_machine is None:
+            self.__mapdl_and_dpf_on_same_machine = self._get_is_same_machine()
+        return self.__mapdl_and_dpf_on_same_machine
 
     @property
     def _is_thermal(self):
@@ -587,7 +603,7 @@ class DPFResult:
             return os.path.join(self._rst_directory, self._rst_name)
 
     @property
-    def local(self):
+    def mapdl_is_local(self):
         if self.mapdl:
             return self._mapdl.is_local
 
@@ -625,9 +641,13 @@ class DPFResult:
         if self.mode_mapdl:
             self._update_rst(progress_bar=progress_bar, chunk_size=chunk_size)
 
-        # Upload it to DPF if we are not in local
-        if self.is_remote:
-            self._upload_to_dpf()
+            # Upload it to DPF if we are not in local
+            if self.dpf_is_remote and not self._mapdl_dpf_on_same_machine:
+                self._upload_to_dpf()
+        else:  # mode_rst
+            if self.dpf_is_remote and not self.rst_is_on_remote:
+                # If the RST is not on the remote server, we need to upload it
+                self._upload_to_dpf()
 
         # Updating model
         self._build_dpf_object()
@@ -637,12 +657,12 @@ class DPFResult:
         self._update_required = False
 
     def _upload_to_dpf(self):
-        if self.mode_mapdl and self.same_machine is True:
+        if self.mode_mapdl and self._mapdl_dpf_on_same_machine is True:
             self._log.debug("Updating server file path for DPF model.")
             self._server_file_path = os.path.join(
                 self._mapdl.directory, self._mapdl.result_file
             )
-        elif self.mode_rst and not self.is_remote:
+        elif self.mode_rst and not self.dpf_is_remote:
             self._server_file_path = self._rst
         else:
             # Upload to DPF is broken on Ubuntu: https://github.com/ansys/pydpf-core/issues/2254
@@ -675,7 +695,7 @@ class DPFResult:
         if save:
             self.mapdl.save()  # type: ignore
 
-        if self.mapdl.is_local:
+        if self.mapdl_is_local:
             rst_file_exists = os.path.exists(self._rst)
         else:
             rst_file_exists = self.mapdl.inquire("", "exist", self._rst)
@@ -685,7 +705,7 @@ class DPFResult:
                 f"The result file could not be found in {self.mapdl.directory}"
             )
 
-        if self.local is False and self.same_machine is False:
+        if self.mapdl_is_local is False and self._mapdl_dpf_on_same_machine is False:
             self._log.debug("Updating the local copy of remote RST file.")
             # download file
             self._tmp_dir = tempfile.gettempdir()
@@ -700,7 +720,7 @@ class DPFResult:
         if self._log:
             self._log.debug("Building/Updating DPF Model object.")
 
-        if self.is_remote and not self.same_machine:
+        if self.dpf_is_remote and not self._mapdl_dpf_on_same_machine:
             self._cached_dpf_model = Model(self._server_file_path)
         else:
             self._cached_dpf_model = Model(self._rst)
