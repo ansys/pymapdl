@@ -360,7 +360,7 @@ def test_remove_temp_dir_on_exit(mapdl, cleared):
 
     tmp_dir = tempfile.gettempdir()
     ans_temp_dir = os.path.join(tmp_dir, "ansys_")
-    if path.startswith(ans_temp_dir):
+    if str(path).startswith(ans_temp_dir):
         assert not os.path.isdir(path)
     else:
         assert os.path.isdir(path)
