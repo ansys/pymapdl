@@ -273,8 +273,6 @@ def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:
             LOG.warning("MAPDL disconnected during testing, reconnected.")
 
         except MapdlConnectionError as err:
-            from conftest import DEBUG_TESTING, ON_LOCAL
-
             # Registering error.
             LOG.warning(str(err))
 
@@ -295,10 +293,10 @@ def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:
                 cleanup_on_exit=mapdl._cleanup,
                 license_server_check=False,
                 start_timeout=50,
-                loglevel="DEBUG" if DEBUG_TESTING else "ERROR",
+                # loglevel="DEBUG" if DEBUG_TESTING else "ERROR",
                 # If the following file names are changed, update `ci.yml`.
-                log_apdl="pymapdl.apdl" if DEBUG_TESTING else None,
-                mapdl_output="apdl.out" if (DEBUG_TESTING and ON_LOCAL) else None,
+                # log_apdl="pymapdl.apdl" if DEBUG_TESTING else None,
+                # mapdl_output="apdl.out" if (DEBUG_TESTING and ON_LOCAL) else None,
             )
             LOG.info("MAPDL died during testing, relaunched.")
 
