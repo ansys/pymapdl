@@ -217,7 +217,7 @@ def get_details_of_elements(mapdl_) -> Dict[int, Node]:
             #  parsing them properly a real pain. So for now I'll leave
             #  this as is and work on a better version in the future
             if len(args) == 6:
-                elements[args[0]] = Element(*args, node_numbers=None)
+                elements[args[0]] = Element(*args, node_numbers=None)  # type: ignore
     return elements
 
 
@@ -234,15 +234,15 @@ def log_test_start(mapdl: Mapdl) -> None:
     # To see it also in MAPDL terminal output
     if len(test_name) > 75:
         # terminal output is limited to 75 characters
-        test_name = test_name.split("::")
-        if len(test_name) > 2:
+        test_name_ = test_name.split("::")
+        if len(test_name_) > 2:
             types_ = ["File path", "Test class", "Method"]
         else:
             types_ = ["File path", "Test function"]
 
         mapdl._run("/com,Running test in:", mute=True)
 
-        for type_, name_ in zip(types_, test_name):
+        for type_, name_ in zip(types_, test_name_):
             mapdl._run(f"/com,    {type_}: {name_}", mute=True)
 
     else:
@@ -302,9 +302,16 @@ def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:
 
         LOG.info("Successfully re-connected to MAPDL")
 
+        LOG.debug("Closing old channel...")
+        new_mapdl.channel.close()  # close the old channel
+        del new_mapdl  # delete the old mapdl instance
+
         # Restoring the local configuration
         mapdl._local = local_
         mapdl._exited = False
+
+        assert mapdl.finish()
+        assert mapdl.prep7()
 
         return mapdl
 
