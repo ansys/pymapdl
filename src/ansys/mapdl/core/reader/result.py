@@ -1962,6 +1962,7 @@ class DPFResult:
         """Return the ``pathlib.Path`` version of the filename. This property can not be set."""
         return pathlib.Path(self._rst)
 
+    @property
     def nsets(self):
         return self.metadata.time_freq_support.n_sets
 
