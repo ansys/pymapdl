@@ -25,7 +25,7 @@ from datetime import datetime
 from importlib import reload
 import logging
 import os
-from pathlib import Path
+import pathlib
 import re
 import shutil
 import tempfile
@@ -1575,7 +1575,7 @@ def test_file_command_local(mapdl, cube_solve, tmpdir):
     old_path = mapdl.directory
     tmp_dir = tmpdir.mkdir("asdf")
     mapdl.directory = str(tmp_dir)
-    assert Path(mapdl.directory) == tmp_dir
+    assert pathlib.Path(mapdl.directory) == tmp_dir
 
     mapdl.clear()
     mapdl.post1()
@@ -2438,7 +2438,7 @@ def test_inquire_invalid(mapdl, cleared):
 
 
 def test_inquire_default_no_args(mapdl, cleared):
-    assert str(Path(mapdl.directory)) == str(Path(mapdl.inquire()))
+    assert str(mapdl.directory) == str(pathlib.Path(mapdl.inquire()))
 
 
 def test_vwrite_error(mapdl, cleared):
@@ -2735,6 +2735,16 @@ def test_cwd_changing_directory(mapdl, cleared):
 
     assert mapdl._path == prev_path
     assert mapdl.directory == prev_path
+
+
+def test_directory_pathlib(mapdl, cleared):
+    assert isinstance(mapdl.directory, pathlib.PurePath)
+    if mapdl.platform == "windows":
+        path_rst = f"{mapdl.directory}\\{mapdl.jobname}.rst"
+    else:
+        path_rst = f"{mapdl.directory}/{mapdl.jobname}.rst"
+
+    assert str(mapdl.directory / (mapdl.jobname + ".rst")) == path_rst
 
 
 def test_load_not_raising_warning():
