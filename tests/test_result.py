@@ -46,7 +46,8 @@ from warnings import warn
 import numpy as np
 import pytest
 
-from conftest import HAS_DPF, ON_LOCAL, TEST_DPF_BACKEND
+from ansys.mapdl.core.misc import create_temp_dir
+from conftest import HAS_DPF, ON_LOCAL, TEST_DPF_BACKEND, clear, solved_box_func
 
 DPF_PORT = int(os.environ.get("DPF_PORT", 50056))  # Set in ci.yaml
 
@@ -280,6 +281,10 @@ class Example:
 
         # downloading file
         rst_name = mapdl.jobname + ".rst"
+        self.rst_name = rst_name
+
+        # We download the RST file to a temporary directory
+        # for the PyMAPDL-Reader to read it.
         mapdl.download_result(self.tmp_dir)
         self.rst_path = os.path.join(self.tmp_dir, rst_name)
 
@@ -304,12 +309,24 @@ class Example:
         return mapdl.post_processing
 
     @pytest.fixture(scope="class")
-    def result(self, setup, tmp_path_factory):
+    def result(self, setup, tmp_path_factory, mapdl):
         tmp_dir = tmp_path_factory.mktemp(
             "result_" + self.example_name.replace(" ", "_")
         )
         rst_path = shutil.copy(self.rst_path, tmp_dir)
-        return DPFResult(rst_file_path=rst_path)
+        # Since the DPF upload is broken, we copy the RST file to a temporary directory
+        # in the MAPDL directory
+        dpf_rst_name = f"dpf_{self.rst_name}"
+        mapdl.sys("mkdir dpf_tmp")
+        mapdl.sys(f"cp {self.rst_name} dpf_tmp/{dpf_rst_name}")
+        if mapdl.platform == "linux":
+            sep = "/"
+        else:
+            sep = "\\"
+
+        rst_file_path = f"{mapdl.directory}{sep}dpf_tmp{sep}{dpf_rst_name}"
+
+        return DPFResult(rst_file_path=rst_file_path)
 
     def test_node_components(self, mapdl, result):
         assert mapdl.mesh.node_components == result.node_components
@@ -379,9 +396,6 @@ class TestDPFResult:
     @pytest.fixture(scope="class")
     def result(self, mapdl):
         """Fixture to ensure the model is solved before running tests."""
-        from ansys.mapdl.core.misc import create_temp_dir
-        from conftest import clear, solved_box_func
-
         clear(mapdl)
         solved_box_func(mapdl)
 
