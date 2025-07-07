@@ -42,6 +42,7 @@ from conftest import (
     PATCH_MAPDL,
     PATCH_MAPDL_START,
     VALID_PORTS,
+    NullContext,
     Running_test,
     has_dependency,
 )
@@ -2737,8 +2738,26 @@ def test_cwd_changing_directory(mapdl, cleared):
     assert mapdl.directory == prev_path
 
 
-def test_directory_pathlib(mapdl, cleared):
-    assert isinstance(mapdl.directory, pathlib.PurePath)
+@pytest.mark.parametrize(
+    "platform, class_, contextmanager",
+    [
+        [None, str, NullContext()],
+        ["windows", pathlib.PureWindowsPath, NullContext()],
+        ["linux", pathlib.PurePosixPath, NullContext()],
+        [
+            "Other",
+            pathlib.PurePosixPath,
+            pytest.warns(UserWarning, match="MAPDL is running on an unknown OS"),
+        ],
+    ],
+)
+def test_directory_pathlib(mapdl, cleared, platform, class_, contextmanager):
+    with patch.object(mapdl, "_platform", platform):
+        with contextmanager:
+            assert isinstance(mapdl._wrap_directory("my_path"), class_)
+
+
+def test_directory_pathlib_value(mapdl, cleared):
     if mapdl.platform == "windows":
         path_rst = f"{mapdl.directory}\\{mapdl.jobname}.rst"
     else:
