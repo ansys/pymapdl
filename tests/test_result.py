@@ -667,6 +667,7 @@ class TestSolidStaticPlastic(Example):
     """Test on the vm37."""
 
     example = elongation_of_a_solid_bar
+    example_name = "Test VM37 Solid Static Plastic Example"
 
     def test_compatibility_nodal_displacement(self, mapdl, reader, post, result):
         mapdl.post1()
