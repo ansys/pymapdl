@@ -2744,7 +2744,7 @@ def test_directory_pathlib(mapdl, cleared):
     else:
         path_rst = f"{mapdl.directory}/{mapdl.jobname}.rst"
 
-    assert str(mapdl.directory / (mapdl.jobname + ".rst")) == path_rst
+    assert str(mapdl.directory / f"{mapdl.jobname}.rst") == path_rst
 
 
 def test_load_not_raising_warning():
