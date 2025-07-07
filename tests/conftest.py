@@ -560,7 +560,7 @@ def run_before_and_after_tests(
     )
 
     # Relaunching MAPDL if dead
-    mapdl = restart_mapdl(mapdl, test_name)
+    restart_mapdl(mapdl, test_name)
 
     # Write test info to log_apdl
     if DEBUG_TESTING:

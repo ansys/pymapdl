@@ -158,8 +158,8 @@ def testing_minimal():
 
 
 def debug_testing() -> bool:
-    if os.environ.get("PYMAPDL_DEBUG_TESTING"):
-        debug_testing = os.environ.get("PYMAPDL_DEBUG_TESTING")
+    if "PYMAPDL_DEBUG_TESTING" in os.environ:
+        debug_testing = os.environ["PYMAPDL_DEBUG_TESTING"]
 
         if debug_testing.lower() in ["true", "false", "yes", "no"]:
             return debug_testing.lower() in ["true", "yes"]
@@ -305,10 +305,10 @@ def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:
         LOG.info("Successfully re-connected to MAPDL")
 
         # Restoring the local configuration
-        new_mapdl._local = local_
-        new_mapdl._exited = False
+        mapdl._local = local_
+        mapdl._exited = False
 
-        return new_mapdl
+        return mapdl
 
     return mapdl
 
