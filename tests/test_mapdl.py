@@ -1042,7 +1042,7 @@ def test_cdread(mapdl, cleared):
 
 @requires("local")
 def test_cdread_different_location(mapdl, cleared, tmpdir):
-    random_letters = mapdl.directory.split("/")[0][-3:0]
+    random_letters = random_string(4)
     dirname = "tt" + random_letters
 
     curdir = mapdl.directory
