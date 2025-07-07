@@ -305,8 +305,8 @@ def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:
         LOG.info("Successfully re-connected to MAPDL")
 
         # Restoring the local configuration
-        mapdl._local = local_
-        mapdl._exited = False
+        new_mapdl._local = local_
+        new_mapdl._exited = False
 
     return new_mapdl
 
