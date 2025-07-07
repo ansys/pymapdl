@@ -249,7 +249,7 @@ def log_test_start(mapdl: Mapdl) -> None:
         mapdl._run(f"/com,Running test: {test_name}", mute=True)
 
 
-def restart_mapdl(mapdl: Mapdl) -> Mapdl:
+def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:
     """Restart MAPDL after a failed test"""
 
     def is_exited(mapdl: Mapdl):
@@ -259,14 +259,17 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
         except MapdlExitedError:
             return True
 
+    LOG.debug("Checking if MAPDL is exited...")
     if get_start_instance() and (is_exited(mapdl) or mapdl._exited):
         # Backing up the current local configuration
         local_ = mapdl._local
         ip = mapdl.ip
         port = mapdl.port
+
         try:
             # to connect
-            mapdl = Mapdl(port=port, ip=ip)
+            LOG.debug(f"MAPDL is exited on {test_name}, trying to reconnect...")
+            new_mapdl = Mapdl(port=port, ip=ip)
             LOG.warning("MAPDL disconnected during testing, reconnected.")
 
         except MapdlConnectionError as err:
@@ -277,13 +280,15 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
 
             # we cannot connect.
             # Kill the instance
+            LOG.debug("Trying to reconnect to failed. Killing the instance...")
             try:
                 mapdl.exit()
             except Exception as e:
                 LOG.error(f"An error occurred when killing the instance:\n{str(e)}")
 
             # Relaunching MAPDL
-            mapdl = launch_mapdl(
+            LOG.debug("Relaunching MAPDL...")
+            new_mapdl = launch_mapdl(
                 port=mapdl._port,
                 override=True,
                 run_location=mapdl._path,
@@ -303,7 +308,7 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
         mapdl._local = local_
         mapdl._exited = False
 
-    return mapdl
+    return new_mapdl
 
 
 def make_sure_not_instances_are_left_open(valid_ports: List) -> None:

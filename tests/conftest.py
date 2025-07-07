@@ -555,8 +555,12 @@ def run_before_and_after_tests(
 ) -> Generator[Mapdl]:
     """Fixture to execute asserts before and after a test is run"""
 
+    test_name = os.environ.get(
+        "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
+    )
+
     # Relaunching MAPDL if dead
-    mapdl = restart_mapdl(mapdl)
+    mapdl = restart_mapdl(mapdl, test_name)
 
     # Write test info to log_apdl
     if DEBUG_TESTING:
@@ -593,10 +597,6 @@ def run_before_and_after_tests(
     # Teardown
     if mapdl.is_local and mapdl._exited:
         # The test exited MAPDL, so it has failed.
-        test_name = os.environ.get(
-            "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
-        )
-
         assert (
             False
         ), f"Test {test_name} failed at the teardown."  # this will fail the test
