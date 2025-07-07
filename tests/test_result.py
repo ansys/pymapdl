@@ -38,6 +38,7 @@ Notes
 """
 from inspect import signature
 import os
+import re
 import shutil
 import tempfile
 from warnings import warn
