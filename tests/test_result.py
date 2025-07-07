@@ -474,6 +474,7 @@ class TestStaticThermocoupledExample(Example):
 
     example = transient_thermal_stress_in_a_cylinder
     example_name = "transient_thermal_stress_in_a_cylinder"
+    stop_after_first_solve = False
 
     @pytest.mark.parametrize("set_", list(range(1, 10)), scope="class")
     def test_compatibility_nodal_temperature(self, mapdl, reader, post, result, set_):
