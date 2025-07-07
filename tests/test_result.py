@@ -37,7 +37,6 @@ Notes
 
 """
 from inspect import signature
-from logging import Logger
 import os
 import shutil
 import tempfile
@@ -46,7 +45,6 @@ from warnings import warn
 import numpy as np
 import pytest
 
-from ansys.mapdl.core.misc import create_temp_dir
 from conftest import HAS_DPF, ON_LOCAL, TEST_DPF_BACKEND, clear, solved_box_func
 
 DPF_PORT = int(os.environ.get("DPF_PORT", 50056))  # Set in ci.yaml
@@ -72,6 +70,7 @@ else:
 from ansys.mapdl.reader import read_binary
 from ansys.mapdl.reader.rst import Result
 
+from ansys.mapdl.core import Logger
 from ansys.mapdl.core.examples import (
     electrothermal_microactuator_analysis,
     elongation_of_a_solid_bar,
@@ -82,6 +81,7 @@ from ansys.mapdl.core.examples import (
     transient_thermal_stress_in_a_cylinder,
 )
 from ansys.mapdl.core.logging import PymapdlCustomAdapter as MAPDLLogger
+from ansys.mapdl.core.misc import create_temp_dir
 
 
 def validate(result_values, reader_values=None, post_values=None, rtol=1e-5, atol=1e-8):
