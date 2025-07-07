@@ -312,6 +312,7 @@ class Example:
     def result(self, setup, tmp_path_factory, mapdl):
         # Since the DPF upload is broken, we copy the RST file to a temporary directory
         # in the MAPDL directory
+        mapdl.save()
         dpf_rst_name = f"dpf_{self.rst_name}"
         mapdl.sys("mkdir dpf_tmp")
         mapdl.sys(f"cp {self.rst_name} dpf_tmp/{dpf_rst_name}")
@@ -321,7 +322,11 @@ class Example:
             sep = "\\"
 
         rst_file_path = f"{mapdl.directory}{sep}dpf_tmp{sep}{dpf_rst_name}"
+        mapdl.logger.info(mapdl.sys(f"ls dpf_tmp/{dpf_rst_name}"))
 
+        assert mapdl.inquire(
+            "", "EXIST", rst_file_path
+        ), "The RST file for DPF does not exist."
         return DPFResult(rst_file_path=rst_file_path)
 
     def test_node_components(self, mapdl, result):
