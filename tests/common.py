@@ -308,7 +308,9 @@ def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:
         new_mapdl._local = local_
         new_mapdl._exited = False
 
-    return new_mapdl
+        return new_mapdl
+
+    return mapdl
 
 
 def make_sure_not_instances_are_left_open(valid_ports: List) -> None:
