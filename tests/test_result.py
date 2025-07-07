@@ -364,7 +364,9 @@ def test_dpf_connection():
 
 
 @pytest.mark.skipif(ON_LOCAL, reason="Skip on local machine")
-@pytest.mark.skip("Skip until DPF grpc connection is fixed on Ubuntu container. See #")
+@pytest.mark.skip(
+    "Skip until DPF grpc connection is fixed on Ubuntu container. See https://github.com/ansys/pydpf-core/issues/2254"
+)
 def test_upload(mapdl, solved_box, tmpdir):
     # Download RST file
     rst_path = mapdl.download_result(str(tmpdir.mkdir("tmpdir")))
@@ -384,15 +386,6 @@ def test_upload(mapdl, solved_box, tmpdir):
     mapdl.allsel()
     assert mapdl.mesh.n_node == model.metadata.meshed_region.nodes.n_nodes
     assert mapdl.mesh.n_elem == model.metadata.meshed_region.elements.n_elements
-
-
-# def test_session_id(mapdl):
-#     session_id = f"__{generate_session_id()}"
-
-#     assert session_id not in mapdl.parameters
-#     mapdl._run(f"{session_id} = 1")
-#     assert session_id not in mapdl.parameters # session id should not shown in mapdl.parameters
-#     assert
 
 
 class TestDPFResult:
@@ -1093,11 +1086,15 @@ class TestModalAnalysisofaCyclicSymmetricAnnularPlateVM244(Example):
     example = modal_analysis_of_a_cyclic_symmetric_annular_plate
     example_name = "Modal Analysis of a Cyclic Symmetric Annular Plate"
 
-    @pytest.mark.skip("DPF segfault on this example")
     def test_cyclic(self, mapdl, reader, post, result):
         assert result.is_cyclic
         assert result.n_sector == 12
         assert result.num_stages == 1
+
+        str_result = str(result)
+        assert re.search(r"Cyclic\s*:\s*True", str_result)
+        assert re.search(r"Title\s*:\s*VM244", str_result)
+        assert re.search(r"Result Sets\s*:\s*4", str_result)
 
     def test_material_properties(self, mapdl, reader, post, result):
         assert reader.materials == result.materials
