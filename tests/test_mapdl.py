@@ -25,7 +25,7 @@ from datetime import datetime
 from importlib import reload
 import logging
 import os
-from pathlib import Path
+import pathlib
 import re
 import shutil
 import tempfile
@@ -42,6 +42,7 @@ from conftest import (
     PATCH_MAPDL,
     PATCH_MAPDL_START,
     VALID_PORTS,
+    NullContext,
     Running_test,
     has_dependency,
 )
@@ -1039,7 +1040,7 @@ def test_cdread(mapdl, cleared):
 
 @requires("local")
 def test_cdread_different_location(mapdl, cleared, tmpdir):
-    random_letters = mapdl.directory.split("/")[0][-3:0]
+    random_letters = random_string(4)
     dirname = "tt" + random_letters
 
     curdir = mapdl.directory
@@ -1572,7 +1573,7 @@ def test_file_command_local(mapdl, cube_solve, tmpdir):
     old_path = mapdl.directory
     tmp_dir = tmpdir.mkdir("asdf")
     mapdl.directory = str(tmp_dir)
-    assert Path(mapdl.directory) == tmp_dir
+    assert pathlib.Path(mapdl.directory) == tmp_dir
 
     mapdl.clear()
     mapdl.post1()
@@ -2429,7 +2430,7 @@ def test_inquire_invalid(mapdl, cleared):
 
 
 def test_inquire_default_no_args(mapdl, cleared):
-    assert str(Path(mapdl.directory)) == str(Path(mapdl.inquire()))
+    assert str(mapdl.directory) == str(pathlib.Path(mapdl.inquire()))
 
 
 def test_vwrite_error(mapdl, cleared):
@@ -2726,6 +2727,34 @@ def test_cwd_changing_directory(mapdl, cleared):
 
     assert mapdl._path == prev_path
     assert mapdl.directory == prev_path
+
+
+@pytest.mark.parametrize(
+    "platform, class_, contextmanager",
+    [
+        [None, str, NullContext()],
+        ["windows", pathlib.PureWindowsPath, NullContext()],
+        ["linux", pathlib.PurePosixPath, NullContext()],
+        [
+            "Other",
+            pathlib.PurePosixPath,
+            pytest.warns(UserWarning, match="MAPDL is running on an unknown OS"),
+        ],
+    ],
+)
+def test_directory_pathlib(mapdl, cleared, platform, class_, contextmanager):
+    with patch.object(mapdl, "_platform", platform):
+        with contextmanager:
+            assert isinstance(mapdl._wrap_directory("my_path"), class_)
+
+
+def test_directory_pathlib_value(mapdl, cleared):
+    if mapdl.platform == "windows":
+        path_rst = f"{mapdl.directory}\\{mapdl.jobname}.rst"
+    else:
+        path_rst = f"{mapdl.directory}/{mapdl.jobname}.rst"
+
+    assert str(mapdl.directory / f"{mapdl.jobname}.rst") == path_rst
 
 
 def test_load_not_raising_warning():
