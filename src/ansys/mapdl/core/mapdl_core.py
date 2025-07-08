@@ -498,6 +498,29 @@ class _MapdlCore(Commands):
             raise ValueError(f"'{value}' is not allowed as file output for plots.")
         return self._default_file_type_for_plots
 
+    def _wrap_directory(self, path: str) -> pathlib.PurePath:
+        if self._platform is None:
+            # MAPDL is not initialized yet so returning the path as is.
+            return path
+
+        if self._platform == "windows":
+            # Windows path
+            return pathlib.PureWindowsPath(path)
+        elif self._platform == "linux":
+            # Linux path
+            return pathlib.PurePosixPath(path)
+        else:
+            # Other OS path
+            warn(
+                f"MAPDL is running on an unknown OS '{self._platform}'. "
+                "Using PurePosixPath as default.",
+                UserWarning,
+            )
+            # Default to PurePosixPath
+            # This is a fallback, it should not happen.
+            # If it does, it is probably a bug.
+            return pathlib.PurePosixPath(path)
+
     @property
     @supress_logging
     def directory(self) -> str:
@@ -538,7 +561,7 @@ class _MapdlCore(Commands):
             path = path.replace("\\", "/")
             # new line to fix path issue, see #416
             path = repr(path)[1:-1]
-            self._path = path
+            self._path = self._wrap_directory(path)
 
         elif not self._path:
             raise MapdlRuntimeError(
@@ -552,7 +575,7 @@ class _MapdlCore(Commands):
     def directory(self, path: Union[str, pathlib.Path]) -> None:
         """Change the directory using ``Mapdl.cwd``"""
         self.cwd(path)
-        self._path = path
+        self._path = self._wrap_directory(path)
 
     @property
     def exited(self):
