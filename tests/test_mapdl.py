@@ -2147,6 +2147,9 @@ def test_result_type(mapdl, cube_solve):
     else:
         from ansys.mapdl.core.reader import DPFResult
 
+        if mapdl._use_reader_backend:
+            pytest.skip("DPF backend is not set. Skipping test.")
+
         assert isinstance(mapdl.result, DPFResult)
 
 
