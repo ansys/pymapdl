@@ -61,11 +61,19 @@ from ansys.mapdl.core.errors import (
     MapdlExitedError,
     MapdlRuntimeError,
 )
+from ansys.mapdl.core.helpers import is_installed
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string, stack
 from ansys.mapdl.core.plotting import GraphicsBackend
-from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
+from conftest import (
+    IS_SMP,
+    ON_CI,
+    ON_LOCAL,
+    QUICK_LAUNCH_SWITCHES,
+    TEST_DPF_BACKEND,
+    requires,
+)
 
 # Path to files needed for examples
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -2127,6 +2135,19 @@ def test_rlblock_rlblock_num(mapdl, cleared):
             assert comparison[i][j] == rlblock[i][j]
 
     assert [1, 2, 4] == mapdl.mesh.rlblock_num
+
+
+def test_result_type(mapdl, cube_solve):
+    assert mapdl.result is not None
+    if is_installed("ansys-mapdl-reader") and not TEST_DPF_BACKEND:
+        from ansys.mapdl.reader.rst import Result
+
+        assert isinstance(mapdl.result, Result)
+
+    else:
+        from ansys.mapdl.core.reader import DPFResult
+
+        assert isinstance(mapdl.result, DPFResult)
 
 
 def test__flush_stored(mapdl, cleared):
