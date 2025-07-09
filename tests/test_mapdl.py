@@ -25,7 +25,7 @@ from datetime import datetime
 from importlib import reload
 import logging
 import os
-from pathlib import Path
+import pathlib
 import re
 import shutil
 import tempfile
@@ -42,6 +42,7 @@ from conftest import (
     PATCH_MAPDL,
     PATCH_MAPDL_START,
     VALID_PORTS,
+    NullContext,
     Running_test,
     has_dependency,
 )
@@ -1042,7 +1043,7 @@ def test_cdread(mapdl, cleared):
 
 @requires("local")
 def test_cdread_different_location(mapdl, cleared, tmpdir):
-    random_letters = mapdl.directory.split("/")[0][-3:0]
+    random_letters = random_string(4)
     dirname = "tt" + random_letters
 
     curdir = mapdl.directory
@@ -1235,33 +1236,64 @@ def test_cwd(mapdl, cleared, tmpdir):
     mapdl.slashdelete("anstmp")
 
 
-@requires("nocicd")
-@requires("local")
-def test_inquire(mapdl, cleared):
+def test_inquire_apdl(mapdl, cleared):
     # Testing basic functions (First block: Functions)
+    # Returns the path to MAPDL
     assert "apdl" in mapdl.inquire("", "apdl").lower()
 
-    # **Returning the Value of an Environment Variable to a Parameter**
-    env = list(os.environ.keys())[0]
-    if os.name == "nt":
-        env_value = os.getenv(env).split(";")[0]
-    elif os.name == "posix":
-        env_value = os.getenv(env).split(":")[0]
+
+@pytest.mark.skipif(
+    os.name != "posix", reason="Needed printenv, so Linux only for the moment"
+)
+@pytest.mark.parametrize(
+    "envvar", ["HOME", "USER", "PATH", "HOSTNAME", "LD_LIBRARY_PATH"]
+)
+def test_inquire_env(mapdl, cleared, envvar):
+    env_vars = {
+        line.split("=")[0]: line.split("=")[1]
+        for line in mapdl.sys("printenv").splitlines()
+    }
+    if envvar not in env_vars:
+        pytest.skip(f"Environment variable {envvar} not found")
+
+    value = env_vars[envvar]
+    if envvar in ["PATH", "LD_LIBRARY_PATH"] and len(value) >= 248:
+        # MAPDL warns about long environment variables because it trims them to
+        # 248
+        with pytest.warns(UserWarning):
+            assert mapdl.inquire("", "ENV", envvar, 0) == value[:248]
+
     else:
-        raise Exception("Not supported OS.")
+        assert mapdl.inquire("", "ENV", envvar, 0) == value
 
-    env_ = mapdl.inquire("", "ENV", env, 0)
-    assert env_ == env_value
 
+def test_inquire_title(mapdl, cleared):
     # **Returning the Value of a Title to a Parameter**
     title = "This is the title"
     mapdl.title(title)
     assert title == mapdl.inquire("", "title")
 
+
+def test_inquire_jobname(mapdl, cleared):
     # **Returning Information About a File to a Parameter**
     jobname = mapdl.inquire("", "jobname")
-    assert float(mapdl.inquire("", "exist", jobname + ".lock")) in [0, 1]
-    assert float(mapdl.inquire("", "exist", jobname, "lock")) in [0, 1]
+    assert isinstance(jobname, str)
+    assert jobname
+
+
+def test_inquire_exist(mapdl, cleared):
+    existing_file = [each for each in mapdl.list_files() if each.endswith(".log")][0]
+    assert isinstance(mapdl.inquire("", "exist", existing_file), bool)
+    assert isinstance(mapdl.inquire("", "exist", "unexisting_file.myext"), bool)
+
+    assert mapdl.inquire("", "exist", existing_file)
+    assert not mapdl.inquire("", "exist", "unexisting_file.myext")
+
+
+def test_inquire_non_interactive(mapdl, cleared):
+    with mapdl.non_interactive:
+        # Testing the case where the file does not exist
+        assert mapdl.inquire("", "exist", "unexisting_file.myext") is None
 
 
 def test_ksel(mapdl, cleared):
@@ -1544,7 +1576,7 @@ def test_file_command_local(mapdl, cube_solve, tmpdir):
     old_path = mapdl.directory
     tmp_dir = tmpdir.mkdir("asdf")
     mapdl.directory = str(tmp_dir)
-    assert Path(mapdl.directory) == tmp_dir
+    assert pathlib.Path(mapdl.directory) == tmp_dir
 
     mapdl.clear()
     mapdl.post1()
@@ -2406,9 +2438,8 @@ def test_inquire_invalid(mapdl, cleared):
         mapdl.inquire("dummy", "hi")
 
 
-def test_inquire_default(mapdl, cleared):
-    mapdl.title("heeeelloo")
-    assert str(Path(mapdl.directory)) == str(Path(mapdl.inquire()))
+def test_inquire_default_no_args(mapdl, cleared):
+    assert str(mapdl.directory) == str(pathlib.Path(mapdl.inquire()))
 
 
 def test_vwrite_error(mapdl, cleared):
@@ -2705,6 +2736,34 @@ def test_cwd_changing_directory(mapdl, cleared):
 
     assert mapdl._path == prev_path
     assert mapdl.directory == prev_path
+
+
+@pytest.mark.parametrize(
+    "platform, class_, contextmanager",
+    [
+        [None, str, NullContext()],
+        ["windows", pathlib.PureWindowsPath, NullContext()],
+        ["linux", pathlib.PurePosixPath, NullContext()],
+        [
+            "Other",
+            pathlib.PurePosixPath,
+            pytest.warns(UserWarning, match="MAPDL is running on an unknown OS"),
+        ],
+    ],
+)
+def test_directory_pathlib(mapdl, cleared, platform, class_, contextmanager):
+    with patch.object(mapdl, "_platform", platform):
+        with contextmanager:
+            assert isinstance(mapdl._wrap_directory("my_path"), class_)
+
+
+def test_directory_pathlib_value(mapdl, cleared):
+    if mapdl.platform == "windows":
+        path_rst = f"{mapdl.directory}\\{mapdl.jobname}.rst"
+    else:
+        path_rst = f"{mapdl.directory}/{mapdl.jobname}.rst"
+
+    assert str(mapdl.directory / f"{mapdl.jobname}.rst") == path_rst
 
 
 def test_load_not_raising_warning():
