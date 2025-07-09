@@ -78,7 +78,7 @@ on:
           Runner to use.
         required: false
         type: string
-        default: ubuntu-latest
+        default: ubuntu-23.04
 
       python-version:
         description: |
