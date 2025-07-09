@@ -34,6 +34,7 @@ PORT="${2:-${PORT:-8000}}"
 
 if [[ "$STOP" == "stop" ]]; then
     pkill -9 -f 'm http.server' && echo -e "${BLUE}${BOLD}All web servers have been stopped.${END_FT}" || echo -e "${ERROR} Web server could not be stopped or does not exist.${END_FT}"
+    rm -f webserver.pid && echo -e "${BLUE}${BOLD}Web server PID file removed.${END_FT}"
     exit 0
 fi
 
