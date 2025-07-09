@@ -49,7 +49,7 @@ on:
 
 jobs:
   test-remote:
-    runs-on: ubuntu-22.04
+    runs-on: public-ubuntu-latest-16-cores
     env:
       ON_CI: True
       ON_LOCAL: FALSE
