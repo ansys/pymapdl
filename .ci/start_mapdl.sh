@@ -83,7 +83,7 @@ run \
   --entrypoint /bin/bash \
   --name ${INSTANCE_NAME} \
   --restart always \
-  --health-cmd="pgrep -f 'aisol/bin/linx64/Ans.Dpf.Grpc.exe' > /dev/null && pgrep -f '/ansys/bin/mapdl -grpc' > /dev/null || exit 1" \
+  --health-cmd="pgrep -f aisol/bin/linx64/Ans.Dpf.Grpc.exe > /dev/null && pgrep -f /ansys/bin/mapdl > /dev/null || exit 1" \
   --health-interval=0.5s \
   --health-retries=4 \
   --health-timeout=0.5s \
