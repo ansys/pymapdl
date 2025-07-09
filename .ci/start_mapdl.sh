@@ -106,8 +106,8 @@ _EOT_
 
 echo "Running docker command: "
 echo "docker ${CMD}"
-docker ${CMD} > ${INSTANCE_NAME}.log &
-grep -q 'Server listening on' <(timeout 60 tail -f ${INSTANCE_NAME}.log)
+docker "${CMD}" > "${INSTANCE_NAME}.log" &
+grep -q 'Server listening on' <(timeout 60 tail -f "${INSTANCE_NAME}.log")
 
 echo "Content of ${INSTANCE_NAME}.log:"
-cat ${INSTANCE_NAME}.log
+cat "${INSTANCE_NAME}.log"
