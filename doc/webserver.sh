@@ -46,7 +46,7 @@ echo "==============" >> "${LOG_FILE}"
 (cd _build/html &> /dev/null ) || { echo -e "${ERROR} HTML docs files are not found!${END_FT}"; exit 1; }
 which python &> /dev/null || { echo -e "${ERROR} Python is not available!${END_FT}" && exit 1; }
 
-python -m http.server "${PORT}" >> "${LOG_FILE}" 2>&1 & echo -n "$!" > webserver.pid
+cd _build/html && python -m http.server "${PORT}" >> "${LOG_FILE}" 2>&1 & echo -n "$!" > webserver.pid
 
 echo "The pid of the web server is $(cat webserver.pid)"
 sleep 0.5
