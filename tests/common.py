@@ -274,7 +274,6 @@ def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:
                 LOG.warning(
                     f"Failed to reconnect to MAPDL... Attempting to relaunch MAPDL.\n{str(e)}"
                 )
-                pass
 
             # Killing the instance (just in case)
             try:
