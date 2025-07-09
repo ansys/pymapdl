@@ -16,7 +16,7 @@ echo "RUN_DPF_SERVER: $RUN_DPF_SERVER"
 
 if [ "$RUN_DPF_SERVER" = true ]; then
     echo "Setting DPF Debug directory..."
-    export DATAPROCESSING_DEBUG=${HOME}/dpf_logs/
+    export DATAPROCESSING_DEBUG="${HOME}/dpf_logs/"
     mkdir -p "$DATAPROCESSING_DEBUG"
 
     echo "Starting DPF server..."
