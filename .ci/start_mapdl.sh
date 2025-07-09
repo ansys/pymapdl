@@ -63,6 +63,7 @@ fi;
 if [[ $MAPDL_VERSION == *"cicd"* ]] ; then
     echo "It is a CICD version, binding DPF port too"
     export DPF_ON="-e ANSYS_DPF_ACCEPT_LA=Y"
+    export DPF_PORT_INTERNAL=50055
     export DPF_PORT_ARG="-p ${DPF_PORT}:${DPF_PORT_INTERNAL}"
     export DB_INT_PORT=50056
 
@@ -93,13 +94,13 @@ run \
   -p ${PYMAPDL_PORT}:50052 \
   -p ${PYMAPDL_DB_PORT}:${DB_INT_PORT} \
   ${DPF_PORT_ARG} \
-  -e VERSION="$VERSION" \
-  -e DPF_PORT_INTERNAL="$DPF_PORT_INTERNAL" \
-  -e EXEC_PATH="$EXEC_PATH" \
-  -e DISTRIBUTED_MODE="$DISTRIBUTED_MODE" \
+  -e VERSION=${VERSION} \
+  -e DPF_PORT_INTERNAL=${DPF_PORT_INTERNAL} \
+  -e EXEC_PATH=${EXEC_PATH} \
+  -e DISTRIBUTED_MODE=${DISTRIBUTED_MODE} \
   --shm-size=2gb \
   -e I_MPI_SHM_LMT=shm \
-  -e P_SCHEMA="$P_SCHEMA" \
+  -e P_SCHEMA=${P_SCHEMA} \
   -w /jobs \
   -u=0:0 \
   --memory=6656MB \

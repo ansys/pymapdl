@@ -16,7 +16,7 @@ echo "RUN_DPF_SERVER: $RUN_DPF_SERVER"
 
 if [ "$RUN_DPF_SERVER" == "true" ]; then
     echo "Setting DPF Debug directory..."
-    export DATAPROCESSING_DEBUG="${HOME}/dpf_logs/"
+    export DATAPROCESSING_DEBUG=${HOME}/dpf_logs/
     mkdir -p "$DATAPROCESSING_DEBUG"
 
     echo "Starting DPF server..."
@@ -26,4 +26,5 @@ fi
 
 echo "Starting MAPDL..."
 echo "Using executable path: ${EXEC_PATH}"
-${EXEC_PATH} -grpc -dir /jobs -${DISTRIBUTED_MODE} -np 2 -db -5000 -m -5000
+
+$EXEC_PATH -grpc -dir /jobs -${DISTRIBUTED_MODE} -np 2 -db -5000 -m -5000
