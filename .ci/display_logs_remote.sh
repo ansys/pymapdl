@@ -16,4 +16,4 @@ FILE_PAT="./$LOG_NAMES/*.log"
 if compgen -G "$FILE_PAT" > /dev/null ;then for f in $FILE_PAT; do echo "::group:: Log file $f" && cat "$f" && echo "::endgroup::" ; done; fi || echo "Failed to display the 'log' files."
 
 FILE_PAT="./$LOG_NAMES/*.out"
-if compgen -G "$FILE_PAT" > /dev/null ;then for f in $FILE_PAT; do echo "::group:: Output file $f" && cat "$f" && echo "::endgroup::" ; done; fi || echo "Failed to display the 'log' files."
+if compgen -G "$FILE_PAT" > /dev/null ;then for f in $FILE_PAT; do echo "::group:: Output file $f" && cat "$f" && echo "::endgroup::" ; done; fi || echo "Failed to display the 'output' files."
