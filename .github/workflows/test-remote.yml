@@ -259,7 +259,9 @@ jobs:
         if: always()
         run: |
           N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  MAPDL_0)
-          echo "Number of restarts in the main container: $N_RESTART"
+          echo "Number of restarts in the MAPDL_0 container: $N_RESTART"
+          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  MAPDL_1)
+          echo "Number of restarts in the MAPDL_1 container: $N_RESTART"
 
       - name: "Upload pytest reports to GitHub"
         uses: actions/upload-artifact@v4.6.2
