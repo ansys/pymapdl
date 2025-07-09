@@ -7,7 +7,7 @@ fi
 
 RUN_DPF_SERVER=${RUN_DPF_SERVER:-false}
 
-if [ ! -z "${ANSYS_DPF_ACCEPT_LA}" ]; then
+if [ -n "${ANSYS_DPF_ACCEPT_LA}" ]; then
     if [ "${ANSYS_DPF_ACCEPT_LA}" == "Y" ]; then
         RUN_DPF_SERVER=true
     fi
@@ -21,11 +21,11 @@ if [ "$RUN_DPF_SERVER" == "true" ]; then
     # mkdir -p "$DATAPROCESSING_DEBUG"
 
     echo "Starting DPF server..."
-    /ansys_inc/v${VERSION}/aisol/bin/linx64/Ans.Dpf.Grpc.sh --port ${DPF_PORT_INTERNAL} > log_dpf.log &
+    "/ansys_inc/v${VERSION}/aisol/bin/linx64/Ans.Dpf.Grpc.sh" --port "${DPF_PORT_INTERNAL}" > log_dpf.log &
     echo "DPF server started."
 fi
 
 echo "Starting MAPDL..."
 echo "Using executable path: ${EXEC_PATH}"
 
-$EXEC_PATH -grpc -dir /jobs -${DISTRIBUTED_MODE} -np 2 -db -6000 -m -6000 -
+$EXEC_PATH -grpc -dir /jobs -"${DISTRIBUTED_MODE}" -np 2 -db -6000 -m -6000 -
