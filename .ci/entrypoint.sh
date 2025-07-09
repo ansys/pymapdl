@@ -1,3 +1,4 @@
+#!/bin/bash
 
 if [ -z "${VERSION}" ]; then
     echo "VERSION environment variable is not set. Please set it to the desired Ansys version."
