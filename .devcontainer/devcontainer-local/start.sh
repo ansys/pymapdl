@@ -5,6 +5,7 @@ echo "Starting local development container"
 echo "Activating virtual environment..."
 
 ln -s /home/mapdl/.venv /home/mapdl/pymapdl/.venv_pymapdl && echo "Linking venv original dir"
+# shellcheck disable=SC1091
 source ./.venv_pymapdl/bin/activate
 
 echo "Installing PyMAPDL package and dependencies for development"

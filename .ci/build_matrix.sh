@@ -168,4 +168,4 @@ JSON="$JSON]}"
 echo "$JSON"
 
 # Set output
-echo "matrix=$( echo "${JSON}" )" >> $GITHUB_OUTPUT
+echo "matrix=${JSON}" >> "$GITHUB_OUTPUT"

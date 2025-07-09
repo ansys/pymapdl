@@ -1,32 +1,35 @@
 #!/bin/bash
+
+export MAJOR MINOR MAPDL_IMAGE VERSION
+
 echo "MAPDL Instance name: $INSTANCE_NAME"
 echo "MAPDL_VERSION: $MAPDL_VERSION"
 
-export MAPDL_IMAGE="$MAPDL_PACKAGE:$MAPDL_VERSION"
+MAPDL_IMAGE="$MAPDL_PACKAGE:$MAPDL_VERSION"
 echo "MAPDL_IMAGE:   $MAPDL_IMAGE"
 docker pull "$MAPDL_IMAGE"
 
-export MAJOR=$(echo "$MAPDL_VERSION" | head -c 3 | tail -c 2)
-export MINOR=$(echo "$MAPDL_VERSION" | head -c 5 | tail -c 1)
+MAJOR=$(echo "$MAPDL_VERSION" | head -c 3 | tail -c 2)
+MINOR=$(echo "$MAPDL_VERSION" | head -c 5 | tail -c 1)
 
-export VERSION="$MAJOR$MINOR"
+VERSION="$MAJOR$MINOR"
 echo "MAPDL VERSION: $VERSION"
 
 
 if [[ $MAPDL_VERSION == *"latest-ubuntu"* ]]; then
     echo "It is latest-ubuntu. Using 'ansys' script to launch"
-    export EXEC_PATH=ansys
-    # export P_SCHEMA=/ansys_inc/ansys/ac4/schema
+    EXEC_PATH=ansys
+    # P_SCHEMA=/ansys_inc/ansys/ac4/schema
 
 elif [[ $MAPDL_VERSION == *"ubuntu"* ]] ; then
     echo "It is an ubuntu based image"
-    export EXEC_PATH=/ansys_inc/v$VERSION/ansys/bin/mapdl
-    export P_SCHEMA=/ansys_inc/v$VERSION/ansys/ac4/schema
+    EXEC_PATH=/ansys_inc/v$VERSION/ansys/bin/mapdl
+    P_SCHEMA=/ansys_inc/v$VERSION/ansys/ac4/schema
 
 else
     echo "It is a CentOS based image"
-    export EXEC_PATH=/ansys_inc/ansys/bin/mapdl
-    export P_SCHEMA=/ansys_inc/ansys/ac4/schema
+    EXEC_PATH=/ansys_inc/ansys/bin/mapdl
+    P_SCHEMA=/ansys_inc/ansys/ac4/schema
 fi;
 
 echo "EXEC_PATH: $EXEC_PATH"
