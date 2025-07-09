@@ -30,6 +30,9 @@ LATEST=3 # for 'latest-ubuntu' and 'latest-ubuntu-student'
 # Run only ubuntu jobs
 ONLY_UBUNTU="${ONLY_UBUNTU:-false}"
 
+# Default authenticated user flag
+AUTH_USER="${AUTH_USER:-false}"
+
 # On remote
 ON_REMOTE="${ON_REMOTE:-false}"
 
@@ -87,7 +90,7 @@ for version in "${versions[@]}"; do
     echo "Processing $counter"
     echo "  - Version: $version"
     echo "  - extended_testing: $extended_testing"
-    echo "  - auth_user: $auth_user"
+    echo "  - AUTH_USER: $AUTH_USER"
     echo "  - Student: $ON_STUDENT"
     echo "  - Ubuntu: $ON_UBUNTU"
 
@@ -109,15 +112,15 @@ for version in "${versions[@]}"; do
         continue
     fi
 
-    # Skipping student versions on auth_user
-    # if [[ "$auth_user" == "true" && "$ON_STUDENT" == "true" ]]; then
+    # Skipping student versions on AUTH_USER
+    # if [[ "$AUTH_USER" == "true" && "$ON_STUDENT" == "true" ]]; then
     #     echo "Skipping student versions when user is authenticated"
     #     echo ""
     #     continue
     # fi
 
     # main logic
-    if [[ "$auth_user" == "true" ]]; then
+    if [[ "$AUTH_USER" == "true" ]]; then
         if [[ "$extended_testing" == "true" ]]; then
             # runs everything 
             add_line="true";
@@ -163,4 +166,5 @@ JSON="$JSON]}"
 echo "$JSON"
 
 # Set output
-echo "matrix=$( echo "$JSON" )" >> $GITHUB_OUTPUT
+# shellcheck disable=SC2086
+echo "matrix=${JSON}" >> $GITHUB_OUTPUT
