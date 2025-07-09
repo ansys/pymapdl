@@ -547,6 +547,7 @@ class MapdlGrpc(MapdlBase):
             timeout = self._timeout
 
         self._connect_to_mapdl(timeout)
+        self._exited = False  # Reset the exited state
 
     def _create_process_stds_queue(self, process=None):
         from ansys.mapdl.core.launcher import (

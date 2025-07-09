@@ -33,7 +33,6 @@ from ansys.mapdl.core import LOG, Mapdl
 from ansys.mapdl.core.errors import MapdlConnectionError, MapdlExitedError
 from ansys.mapdl.core.launcher import (
     _is_ubuntu,
-    get_start_instance,
     is_ansys_process,
     launch_mapdl,
 )
@@ -158,8 +157,8 @@ def testing_minimal():
 
 
 def debug_testing() -> bool:
-    if os.environ.get("PYMAPDL_DEBUG_TESTING"):
-        debug_testing = os.environ.get("PYMAPDL_DEBUG_TESTING")
+    if "PYMAPDL_DEBUG_TESTING" in os.environ:
+        debug_testing = os.environ["PYMAPDL_DEBUG_TESTING"]
 
         if debug_testing.lower() in ["true", "false", "yes", "no"]:
             return debug_testing.lower() in ["true", "yes"]
@@ -221,7 +220,7 @@ def get_details_of_elements(mapdl_) -> Dict[int, Node]:
             #  parsing them properly a real pain. So for now I'll leave
             #  this as is and work on a better version in the future
             if len(args) == 6:
-                elements[args[0]] = Element(*args, node_numbers=None)
+                elements[args[0]] = Element(*args, node_numbers=None)  # type: ignore
     return elements
 
 
@@ -238,23 +237,24 @@ def log_test_start(mapdl: Mapdl) -> None:
     # To see it also in MAPDL terminal output
     if len(test_name) > 75:
         # terminal output is limited to 75 characters
-        test_name = test_name.split("::")
-        if len(test_name) > 2:
+        test_name_ = test_name.split("::")
+        if len(test_name_) > 2:
             types_ = ["File path", "Test class", "Method"]
         else:
             types_ = ["File path", "Test function"]
 
         mapdl._run("/com,Running test in:", mute=True)
 
-        for type_, name_ in zip(types_, test_name):
+        for type_, name_ in zip(types_, test_name_):
             mapdl._run(f"/com,    {type_}: {name_}", mute=True)
 
     else:
         mapdl._run(f"/com,Running test: {test_name}", mute=True)
 
 
-def restart_mapdl(mapdl: Mapdl) -> Mapdl:
+def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:
     """Restart MAPDL after a failed test"""
+    from conftest import ON_LOCAL
 
     def is_exited(mapdl: Mapdl):
         try:
@@ -263,49 +263,56 @@ def restart_mapdl(mapdl: Mapdl) -> Mapdl:
         except MapdlExitedError:
             return True
 
-    if get_start_instance() and (is_exited(mapdl) or mapdl._exited):
-        # Backing up the current local configuration
-        local_ = mapdl._local
-        ip = mapdl.ip
-        port = mapdl.port
-        try:
-            # to connect
-            mapdl = Mapdl(port=port, ip=ip)
-            LOG.warning("MAPDL disconnected during testing, reconnected.")
+    LOG.debug("Checking if MAPDL is exited...")
+    if mapdl.exited or is_exited(mapdl):
 
-        except MapdlConnectionError as err:
-            from conftest import DEBUG_TESTING, ON_LOCAL
-
-            # Registering error.
-            LOG.warning(str(err))
-
-            # we cannot connect.
-            # Kill the instance
+        if ON_LOCAL:
+            # First we try to reconnect
             try:
-                mapdl.exit()
+                mapdl.reconnect_to_mapdl(timeout=5)
+                assert mapdl.finish()
+
+                return mapdl
+
+            except MapdlConnectionError as e:
+                LOG.warning(
+                    f"Failed to reconnect to MAPDL... Attempting to relaunch MAPDL.\n{str(e)}"
+                )
+
+            # Killing the instance (just in case)
+            try:
+                mapdl.exit(force=True)
             except Exception as e:
-                LOG.error(f"An error occurred when killing the instance:\n{str(e)}")
+                pass
 
             # Relaunching MAPDL
-            mapdl = launch_mapdl(
+            LOG.debug("Relaunching MAPDL...")
+            new_mapdl = launch_mapdl(
                 port=mapdl._port,
                 override=True,
                 run_location=mapdl._path,
                 cleanup_on_exit=mapdl._cleanup,
                 license_server_check=False,
-                start_timeout=50,
-                loglevel="DEBUG" if DEBUG_TESTING else "ERROR",
-                # If the following file names are changed, update `ci.yml`.
-                log_apdl="pymapdl.apdl" if DEBUG_TESTING else None,
-                mapdl_output="apdl.out" if (DEBUG_TESTING and ON_LOCAL) else None,
+                start_timeout=10,
             )
             LOG.info("MAPDL died during testing, relaunched.")
 
-        LOG.info("Successfully re-connected to MAPDL")
+            LOG.debug("Closing old channel...")
+            new_mapdl.channel.close()  # close the old channel
+            del new_mapdl  # delete the old mapdl instance
 
-        # Restoring the local configuration
-        mapdl._local = local_
-        mapdl._exited = False
+            # Restoring the configuration
+            mapdl._exited = False
+
+        else:
+            # In remote mode, we just try to reconnect
+            LOG.debug("Remote MAPDL is exited, trying to reconnect...")
+            mapdl.reconnect_to_mapdl(timeout=10)
+
+        assert mapdl.finish()
+        assert mapdl.prep7()
+
+        LOG.info("Successfully relaunched/re-connected to MAPDL")
 
     return mapdl
 
