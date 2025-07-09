@@ -104,7 +104,7 @@ run \
   -u=0:0 \
   --memory=6656MB \
   --memory-swap=16896MB \
-  -v ./ci/entrypoint.sh:/entrypoint.sh \
+  --mount type=bind,src=${PWD}/.ci/entrypoint.sh,dst=/entrypoint.sh \
   ${MAPDL_IMAGE} /entrypoint.sh
 _EOT_
 )
