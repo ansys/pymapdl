@@ -6,7 +6,7 @@ fi
 
 RUN_DPF_SERVER=${RUN_DPF_SERVER:-false}
 
-if [ -z "${ANSYS_DPF_ACCEPT_LA}" ]; then
+if [ ! -z "${ANSYS_DPF_ACCEPT_LA}" ]; then
     if [ "${ANSYS_DPF_ACCEPT_LA}" == "Y" ]; then
         RUN_DPF_SERVER=true
     fi
@@ -25,4 +25,5 @@ if [ "$RUN_DPF_SERVER" == "true" ]; then
 fi
 
 echo "Starting MAPDL..."
-${EXEC_PATH} -grpc -dir /jobs -${DISTRIBUTED_MODE} -np 2 -db -5000 -m -5000 -
+echo "Using executable path: ${EXEC_PATH}"
+${EXEC_PATH} -grpc -dir /jobs -${DISTRIBUTED_MODE} -np 2 -db -5000 -m -5000
