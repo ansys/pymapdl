@@ -1,9 +1,10 @@
-#/bin/bash
+#!/bin/bash
 # Script to activate the venv, and install the PyMAPDL
 echo "Starting Documentation codespaces"
 
 echo "Activating virtual environment..."
 ln -s /home/mapdl/.venv /home/mapdl/pymapdl/.venv && echo "Linking venv original dir"
+# shellcheck disable=SC1091
 source ./.venv/bin/activate
 
 echo "Installing PyMAPDL package and dependencies for development"
