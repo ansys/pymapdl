@@ -166,4 +166,5 @@ JSON="$JSON]}"
 echo "$JSON"
 
 # Set output
-echo "matrix=${JSON}" >> "$GITHUB_OUTPUT"
+# shellcheck disable=SC2086
+echo "matrix=${JSON}" >> $GITHUB_OUTPUT

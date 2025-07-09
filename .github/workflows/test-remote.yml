@@ -260,7 +260,16 @@ jobs:
             ${{ env.PYTEST_ARGUMENTS }} \
             --ignore_image_cache \
             --report-log=$file_name.jsonl \
-            --cov-report=xml:$file_name.xml
+            --cov-report=xml:$file_name.xml \
+            --log-file=pytest.log \
+            --log-file-level="DEBUG"
+
+      - name: "Print amount of restarts"
+        run: |
+          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  MAPDL_0)
+          echo "Number of restarts in MAPDL_0 container: $N_RESTART"
+          N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  MAPDL_1)
+          echo "Number of restarts in MAPDL_1 container: $N_RESTART"
 
       - name: "Upload pytest reports to GitHub"
         if: always()
