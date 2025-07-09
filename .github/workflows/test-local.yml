@@ -264,7 +264,7 @@ jobs:
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml \
             --log-file=pytest.log \
-            --log_file_level=DEBUG
+            --log-file-level="DEBUG"
 
       - name: "Upload pytest reports to GitHub"
         if: always()
