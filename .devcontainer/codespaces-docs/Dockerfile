@@ -15,8 +15,8 @@ ENV ON_CI=true
 RUN apt-get -qq update && apt install -qq -y \
     graphviz \
     libgl1 \
+    libglx-mesa0 \
     latexmk \
-    libgl1-mesa-glx \
     pandoc \
     python3-pip \
     python3.11-venv \

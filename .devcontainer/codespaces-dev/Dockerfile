@@ -14,7 +14,7 @@ ENV ON_CI=true
 # Installing libs for testing and docs
 RUN apt-get -qq update &&  apt install -qq -y
     libgl1 \
-    libgl1-mesa-glx \
+    libglx-mesa0 \
     libgomp1 \
     python3-pip \
     python3.11-venv \
