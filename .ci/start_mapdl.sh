@@ -105,7 +105,7 @@ run \
   --memory=6656MB \
   --memory-swap=16896MB \
   -v ./ci/entrypoint.sh:/entrypoint.sh \
-  ${MAPDL_IMAGE} ./entrypoint.sh
+  ${MAPDL_IMAGE} /entrypoint.sh
 _EOT_
 )
 

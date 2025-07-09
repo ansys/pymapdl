@@ -4,8 +4,8 @@ if [ -z "${VERSION}" ]; then
     exit 1
 fi
 
+RUN_DPF_SERVER=${RUN_DPF_SERVER:-false}
 
-RUN_DPF_SERVER=false
 if [ -z "${ANSYS_DPF_ACCEPT_LA}" ]; then
     if [ "${ANSYS_DPF_ACCEPT_LA}" == "Y" ]; then
         RUN_DPF_SERVER=true
