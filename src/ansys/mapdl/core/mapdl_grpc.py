@@ -108,7 +108,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.database import MapdlDb
     from ansys.mapdl.core.xpl import ansXpl
 
-TMP_VAR = "__tmpvar__"
 VOID_REQUEST = anskernel.EmptyRequest()
 
 # Default 256 MB message length
@@ -465,18 +464,7 @@ class MapdlGrpc(MapdlBase):
         if not self._mapdl_on_hpc and self._mapdl_process:
             self._create_process_stds_queue()
 
-        try:
-            self._multi_connect(timeout=timeout)
-        except MapdlConnectionError as err:  # pragma: no cover
-            self._post_mortem_checks()
-            self._log.debug(
-                "The error wasn't caught by the post-mortem checks.\nThe stdout is printed now:"
-            )
-            self._log.debug(self._stdout)
-
-            raise err  # Raise original error if we couldn't catch it in post-mortem analysis
-        else:
-            self._log.debug("Connection established")
+        self.reconnect_to_mapdl()
 
         # Avoiding muting when connecting to the session
         # It might trigger some errors later on if not.
@@ -527,6 +515,39 @@ class MapdlGrpc(MapdlBase):
         else:
             # For some reason the session hasn't been created
             self._create_session()
+
+    def _connect_to_mapdl(self, timeout: int):
+        """(Re)connect to an existing MAPDL instance"""
+        try:
+            self._multi_connect(timeout=timeout)
+        except MapdlConnectionError as err:  # pragma: no cover
+            self._post_mortem_checks()
+            self._log.debug(
+                "The error wasn't caught by the post-mortem checks.\nThe stdout is printed now:"
+            )
+            self._log.debug(self._stdout)
+
+            raise err  # Raise original error if we couldn't catch it in post-mortem analysis
+        else:
+            self._log.debug("Connection established")
+
+    def reconnect_to_mapdl(self, timeout: int = None):
+        """Reconnect to an already instantiated MAPDL instance.
+
+        Re-establish an stopped or crashed gRPC connection with an already alive
+        MAPDL instance. This function does not relaunch the MAPDL instance.
+
+        Parameters
+        ----------
+        timeout : int, optional
+            Timeout before raising an exception, by default None
+        """
+
+        if timeout is None:
+            timeout = self._timeout
+
+        self._connect_to_mapdl(timeout)
+        self._exited = False  # Reset the exited state
 
     def _create_process_stds_queue(self, process=None):
         from ansys.mapdl.core.launcher import (
@@ -676,24 +697,27 @@ class MapdlGrpc(MapdlBase):
         """Check the stdout and stderr for any errors."""
         if stdout is None:
             stdout = self._stdout
+
         if stderr is None:
             stderr = self._stderr
 
         if not stderr:
             self._log.debug("MAPDL exited without stderr.")
         else:
-            self._parse_stderr()
+            self._parse_stderr(stderr)
 
         if not stdout:
             self._log.debug("MAPDL exited without stdout.")
         else:
-            self._parse_stdout()
+            self._parse_stdout(stdout)
 
     def _parse_stderr(self, stderr=None):
         """Parse the stderr for any errors."""
         if stderr is None:
             stderr = self._stderr
+
         errs = self._parse_std(stderr)
+
         if errs:
             self._log.debug("MAPDL exited with errors in stderr.")
 
@@ -704,6 +728,7 @@ class MapdlGrpc(MapdlBase):
         """Parse the stdout for any errors."""
         if stdout is None:
             stdout = self._stdout
+
         errs = self._parse_std(stdout)
         if errs:
             self._log.debug("MAPDL exited with errors in stdout.")
@@ -717,6 +742,7 @@ class MapdlGrpc(MapdlBase):
         if isinstance(std, list):
             std = "\n".join(std)
             std = std.replace("\n\n", "\n")
+
         groups = std.split("\r\n\r\n")
         errs = []
 
@@ -938,8 +964,10 @@ class MapdlGrpc(MapdlBase):
     @supress_logging
     def _set_no_abort(self):
         """Do not abort MAPDL."""
-        self._log.debug("Setting no abort")
-        self.nerr(abort=-1, mute=True)
+        self._log.debug("Setting to no abort")
+        self.run(
+            "/NERR,,,-1", mute=True
+        )  # ABORT argument is not surfaced in PyMAPDL because it is not documented in the manual
 
     def _run_at_connect(self):
         """Run house-keeping commands when initially connecting to MAPDL."""
@@ -1768,7 +1796,7 @@ class MapdlGrpc(MapdlBase):
         ext : str, optional
             Filename extension (eight-character maximum).
 
-        dir : str, optional
+        dir_ : str, optional
             Directory path. The default is the current working directory.
 
         line : int, optional
@@ -3152,126 +3180,6 @@ class MapdlGrpc(MapdlBase):
         if self.__distributed is None:
             self.__distributed = self.parameters.numcpu > 1
         return self.__distributed
-
-    @wraps(MapdlBase.ndinqr)
-    def ndinqr(self, node, key, **kwargs):
-        """Wrap the ``ndinqr`` method to take advantage of the gRPC methods."""
-        super().ndinqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.elmiqr)
-    def elmiqr(self, ielem, key, **kwargs):
-        """Wrap the ``elmiqr`` method to take advantage of the gRPC methods."""
-        super().elmiqr(ielem, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.kpinqr)
-    def kpinqr(self, knmi, key, **kwargs):
-        """Wrap the ``kpinqr`` method to take advantage of the gRPC methods."""
-        super().kpinqr(knmi, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.lsinqr)
-    def lsinqr(self, line, key, **kwargs):
-        """Wrap the ``lsinqr`` method to take advantage of the gRPC methods."""
-        super().lsinqr(line, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.arinqr)
-    def arinqr(self, anmi, key, **kwargs):
-        """Wrap the ``arinqr`` method to take advantage of the gRPC methods."""
-        super().arinqr(anmi, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.vlinqr)
-    def vlinqr(self, vnmi, key, **kwargs):
-        """Wrap the ``vlinqr`` method to take advantage of the gRPC methods."""
-        super().vlinqr(vnmi, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.rlinqr)
-    def rlinqr(self, nreal, key, **kwargs):
-        """Wrap the ``rlinqr`` method to take advantage of the gRPC methods."""
-        super().rlinqr(nreal, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.gapiqr)
-    def gapiqr(self, ngap, key, **kwargs):
-        """Wrap the ``gapiqr`` method to take advantage of the gRPC methods."""
-        super().gapiqr(ngap, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.masiqr)
-    def masiqr(self, node, key, **kwargs):
-        """Wrap the ``masiqr`` method to take advantage of the gRPC methods."""
-        super().masiqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.ceinqr)
-    def ceinqr(self, nce, key, **kwargs):
-        """Wrap the ``ceinqr`` method to take advantage of the gRPC methods."""
-        super().ceinqr(nce, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.cpinqr)
-    def cpinqr(self, ncp, key, **kwargs):
-        """Wrap the ``cpinqr`` method to take advantage of the gRPC methods."""
-        super().cpinqr(ncp, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.csyiqr)
-    def csyiqr(self, ncsy, key, **kwargs):
-        """Wrap the ``csyiqr`` method to take advantage of the gRPC methods."""
-        super().csyiqr(ncsy, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.etyiqr)
-    def etyiqr(self, itype, key, **kwargs):
-        """Wrap the ``etyiqr`` method to take advantage of the gRPC methods."""
-        super().etyiqr(itype, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.foriqr)
-    def foriqr(self, node, key, **kwargs):
-        """Wrap the ``foriqr`` method to take advantage of the gRPC methods."""
-        super().foriqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.sectinqr)
-    def sectinqr(self, nsect, key, **kwargs):
-        """Wrap the ``sectinqr`` method to take advantage of the gRPC methods."""
-        super().sectinqr(nsect, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.mpinqr)
-    def mpinqr(self, mat, iprop, key, **kwargs):
-        """Wrap the ``mpinqr`` method to take advantage of the gRPC methods."""
-        super().mpinqr(mat, iprop, key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.dget)
-    def dget(self, node, idf, kcmplx, **kwargs):
-        """Wrap the ``dget`` method to take advantage of the gRPC methods."""
-        super().dget(node, idf, kcmplx, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.fget)
-    def fget(self, node, idf, kcmplx, **kwargs):
-        """Wrap the ``fget`` method to take advantage of the gRPC methods."""
-        super().fget(node, idf, kcmplx, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.erinqr)
-    def erinqr(self, key, **kwargs):
-        """Wrap the ``erinqr`` method to take advantage of the gRPC methods."""
-        super().erinqr(key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
-
-    @wraps(MapdlBase.wrinqr)
-    def wrinqr(self, key, **kwargs):
-        """Wrap the ``wrinqr`` method to take advantage of the gRPC methods."""
-        super().wrinqr(key, pname=TMP_VAR, mute=True, **kwargs)
-        return self.scalar_param(TMP_VAR)
 
     @wraps(MapdlBase.file)
     def file(self, fname: str = "", ext: str = "", **kwargs) -> str:

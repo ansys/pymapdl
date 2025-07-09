@@ -24,6 +24,8 @@ import sys
 
 import click
 
+from ansys.mapdl.core.plotting import GraphicsBackend
+
 
 @click.command(
     short_help="Convert APDL code to PyMAPDL code.",
@@ -82,6 +84,7 @@ import click
     "--loglevel",
     "-ll",
     default="WARNING",
+    type=str,
     help="Logging level of the ansys object within the script.",
 )
 @click.option(
@@ -151,6 +154,7 @@ import click
     "--header",
     "-h",
     default=True,
+    type=bool,
     help="If ``True``, the default header is written in the first line of the output. If a string is provided, this string will be used as header.",
 )
 @click.option(
@@ -173,15 +177,16 @@ and exit commands are NOT included (``auto_exit=False``).
 Overrides ``header``, ``add_imports`` and ``auto_exit``.""",
 )
 @click.option(
-    "--use_vtk",
+    "--graphics_backend",
     default=None,
-    type=bool,
-    help="""It sets the `mapdl.use_vtk` argument equals True or False depending on
+    type=str,
+    help="""It sets the `mapdl.graphics_backend` argument depending on
 this value. Defaults to `None` which is Mapdl class default.""",
 )
 @click.option(
     "--clear_at_start",
     default=False,
+    type=bool,
     help="""Add a `mapdl.clear()` after the Mapdl object initialization. Defaults to
 `False`.""",
 )
@@ -189,6 +194,7 @@ this value. Defaults to `None` which is Mapdl class default.""",
     "--check_parameter_names",
     "--cpn",
     default=False,
+    type=bool,
     help="""Set MAPDL object to avoid parameter name checks (do not raise leading underscored parameter exceptions). Defaults to `False`.""",
 )
 def convert(
@@ -207,12 +213,31 @@ def convert(
     header: str,
     print_com: bool,
     only_commands: bool,
-    use_vtk: bool,
+    graphics_backend: str,
     clear_at_start: bool,
     check_parameter_names: bool,
 ) -> None:
     """Convert MAPDL code to PyMAPDL"""
     from ansys.mapdl.core.convert import convert_apdl_block
+
+    allowed_backends = GraphicsBackend.__members__
+    backend = None
+
+    if graphics_backend is not None:
+        if (
+            isinstance(graphics_backend, str)
+            and graphics_backend.upper() in allowed_backends
+        ):
+            backend = GraphicsBackend[graphics_backend.upper()]
+        elif graphics_backend in list(allowed_backends.values()):
+            backend = graphics_backend
+        else:
+            allowed_backend_string = ", ".join(
+                [str(each) for each in allowed_backends.values()]
+            )
+            raise ValueError(
+                f"Invalid graphics backend '{graphics_backend}'. Allowed values are: {allowed_backend_string}."
+            )
 
     converted_code = convert_apdl_block(
         apdl_strings=file.read(),
@@ -229,7 +254,7 @@ def convert(
         header=header,
         print_com=print_com,
         only_commands=only_commands,
-        use_vtk=use_vtk,
+        graphics_backend=backend,
         clear_at_start=clear_at_start,
         check_parameter_names=check_parameter_names,
     )

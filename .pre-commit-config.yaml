@@ -9,9 +9,16 @@ ci:
 
   # PR name when autoupdate
   autoupdate_commit_msg: 'ci: pre-commit autoupdate'
+  skip: [mypy]
 
 
 repos:
+
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.16.1
+  hooks:
+    - id: mypy
+      args: [ --follow-imports=silent, --config-file=pyproject.toml]
 
 - repo: https://github.com/ansys/pre-commit-hooks
   rev: v0.5.2
@@ -26,7 +33,7 @@ repos:
   - id: isort
 
 - repo: https://github.com/numpy/numpydoc
-  rev: v1.8.0
+  rev: v1.9.0
   hooks:
     - id: numpydoc-validation
       exclude: |
@@ -52,7 +59,7 @@ repos:
       - --line-length=88
 
 - repo: https://github.com/PyCQA/flake8
-  rev: 7.2.0
+  rev: 7.3.0
   hooks:
   - id: flake8
 
@@ -78,6 +85,13 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.32.1
+  rev: 0.33.2
   hooks:
     - id: check-github-workflows
+
+- repo: https://github.com/ComPWA/taplo-pre-commit
+  rev: v0.9.3
+  hooks:
+    - id: taplo-format
+      # See options: https://taplo.tamasfe.dev/configuration/formatter-options.html
+      args: [--option, "reorder_arrays=true", --option, "reorder_keys=true"]

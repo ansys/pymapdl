@@ -1,0 +1,487 @@
+# ------------------------------------------------------------------------------------
+# Fork PR Handler GitHub Action
+#
+# Description:
+#   This workflow migrates pull requests (PRs) from forks to branches within the main
+#   repository, enabling workflows that require repository secrets to run. It is triggered
+#   by comments containing "@pyansys-ci-bot migrate" or "@pyansys-ci-bot sync" on PRs,
+#   or manually via workflow dispatch.
+#
+# Usage:
+#   - Comment "@pyansys-ci-bot migrate" or "@pyansys-ci-bot sync" on a forked PR.
+#   - Optionally specify "theirs" or "ours" to resolve merge conflicts automatically.
+#   - Can also be triggered manually from the Actions tab with required inputs.
+#
+# Intended Output:
+#   - Migrates the PR to a new branch in the main repository.
+#   - Optionally resolves merge conflicts using the specified strategy.
+#   - Opens a new PR in the main repository and notifies the user.
+#   - Reacts to the triggering comment to indicate success or failure.
+#
+# Inputs (for workflow_dispatch/dev mode):
+#   - issue_number: The PR/issue number to migrate (required).
+#   - comment_body: The comment body to simulate (optional, default: "@pyansys-ci-bot migrate").
+# ------------------------------------------------------------------------------------
+
+name: Fork PR Handler
+
+on:
+  issue_comment:
+    types: [created]
+
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: 'Issue number'
+        required: true
+        type: number
+
+      comment_body:
+        description: 'Comment body'
+        required: false
+        default: '@pyansys-ci-bot migrate'
+        type: string
+      
+      comment_id:
+        description: 'Comment ID'
+        required: true
+        type: number
+      
+      actor:
+        description: 'Actor triggering the workflow'
+        required: true
+        type: string
+
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  migrate:
+    if: |
+       (
+        github.event.issue.pull_request != null &&
+        (contains(github.event.comment.body, '@pyansys-ci-bot migrate') || contains(github.event.comment.body, '@pyansys-ci-bot sync') )
+        ) || ( github.event_name == 'workflow_dispatch' )
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Setup the configuration
+        id: pr_number
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          script: |
+            const eventName = '${{ github.event_name }}';
+            core.debug(`Event name: ${eventName}`);
+
+            let prNumber, userTriggering, commentBody;
+
+            if (eventName === "workflow_dispatch") {
+              core.info('Running in "workflow_dispatch" mode');
+
+              prNumber = `${{ github.event.inputs.issue_number }}`;
+              userTriggering = `${{ github.event.inputs.actor }}`;
+              commentBody = `${{ github.event.inputs.comment_body }}`;
+              commentId = `${{ github.event.inputs.comment_id }}`;
+            } else {
+              core.info('Running in "issue_comment" mode');
+
+              prNumber = `${{ github.event.issue.number }}`;
+              userTriggering = `${{ github.event.comment.user.login }}`;
+              commentBody = `${{ github.event.comment.body }}`;
+              commentId = `${{ github.event.comment.id }}`;
+            }
+            core.debug(`PR Number: ${prNumber}`);
+            core.debug(`User triggering: ${userTriggering}`);
+            core.debug(`Comment body: ${commentBody}`);
+            core.debug(`Comment ID: ${commentId}`);
+            
+            // Export variables for later steps
+            core.exportVariable('PR_NUMBER', prNumber);
+            core.exportVariable('USER_TRIGGERING', userTriggering);
+            core.exportVariable('COMMENT_ID', commentId);
+
+            // Three modes of operation:
+            // 1. auto - automatically resolves conflicts if possible, otherwise exits
+            // 2. theirs - resolves conflicts by taking changes from the head branch
+            // 3. ours - resolves conflicts by taking changes from the base branch
+            let mode = '';
+            if (
+              commentBody.includes('pyansys-ci-bot sync theirs') ||
+              commentBody.includes('pyansys-ci-bot migrate theirs')
+            ) {
+              core.info("Resolving conflicts by taking 'theirs' changes");
+              mode = '--theirs';
+            } else if (
+              commentBody.includes('pyansys-ci-bot sync ours') ||
+              commentBody.includes('pyansys-ci-bot migrate ours')
+            ) {
+              core.info("Resolving conflicts by taking 'ours' changes");
+              mode = '--ours';
+            } else {
+              core.info("No specific sync mode provided, defaulting to 'auto' which will exit if there are conflicts.");
+            }
+            core.exportVariable('MODE', mode);
+
+      - id: is_organization_member
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.TOKEN_TEAMS_USER_READ }}
+          script: |
+            try {
+              const { data } = await github.rest.teams.getMembershipForUserInOrg({
+                org: 'ansys',
+                team_slug: 'pymapdl-maintainers',
+                username: '${{ env.USER_TRIGGERING }}',
+              });
+
+              if (core.isDebug()) {
+                core.debug(data);
+              }
+
+              // Check if the user is a member or maintainer of the team
+              if (data && data.state === 'active' && (data.role === 'member' || data.role === 'maintainer')) {
+                core.setOutput('is_member', true);
+                core.exportVariable('CONTINUE', 'true');
+              } else {
+                core.setOutput('is_member', false);
+                core.exportVariable('CONTINUE', 'false');
+              }
+
+            } catch (error) {
+              core.error(`Error fetching team membership: ${error.message}`);
+              core.exportVariable('CONTINUE', 'false');
+              return;
+             }
+      
+      - name: 'Delete previous reactions'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          script: |
+            commentId = '${{ env.COMMENT_ID }}';
+
+            // Remove previous reaction if it exists
+            data = await github.rest.reactions.listForIssueComment({
+              owner: 'ansys',
+              repo: 'pymapdl',
+              comment_id: commentId,
+            });
+
+            if (data && data.data && data.data.length > 0) {
+              core.info(`Found ${data.data.length} reactions for comment ${commentId}`);
+
+              for (const reaction of data.data) {
+                if (reaction.user.login === 'pyansys-ci-bot') {
+                  // Remove the reaction
+                  await github.rest.reactions.deleteForIssueComment({
+                      owner: 'ansys',
+                      repo: 'pymapdl',
+                      comment_id: commentId,
+                      reaction_id: reaction.id,
+                    });
+                  }
+              }
+
+            } else {
+              core.debug(`No reactions found for comment ${commentId}`);
+            }
+
+      - name: 'Reply to comment'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          script: |
+            // React negatively to the comment if the user is NOT a team member
+            const CONTINUE = process.env.CONTINUE;
+            if (CONTINUE == 'true') {
+              core.info('User is a member of the PyMAPDL maintainers team.');
+              github.rest.reactions.createForIssueComment({
+                owner: 'ansys',
+                repo: 'pymapdl',
+                comment_id: ${{ env.COMMENT_ID }},
+                content: '+1',
+              });
+            } else {
+              // React negatively to the comment if the user is NOT a team member
+              core.warning('User is \u001b[1mNOT a member of the PyMAPDL maintainers team!');
+
+              github.rest.reactions.createForIssueComment({
+                owner: 'ansys',
+                repo: 'pymapdl',
+                comment_id: ${{ env.COMMENT_ID }},
+                content: '-1',
+              });
+              // Create a comment to notify the user about insufficient permissions
+              github.rest.issues.createComment({
+                owner: 'ansys',
+                repo: 'pymapdl',
+                issue_number: '${{ env.PR_NUMBER }}',
+                body: `**:stop_sign: Not appropiated permissions! :stop_sign:**
+
+            You are not a member of the PyMAPDL maintainers team. Please contact a team member to migrate this PR.`,
+              });
+              core.exportVariable('CONTINUE', 'false');
+            }
+
+      - name: Get pull request details
+        if : ${{ env.CONTINUE == 'true' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          script: |
+            const { data } = await github.rest.pulls.get({
+              owner: 'ansys',
+              repo: 'pymapdl',
+              pull_number: ${{ env.PR_NUMBER }},
+            });
+
+            if (!data || !data.head || !data.base) {
+              throw new Error('Pull request data is incomplete');
+            }
+
+            if (core.isDebug()) {
+              core.debug(data);
+            }
+
+            if (data.head.repo.full_name === 'ansys/pymapdl') {
+              core.warning('The PR is already in the main repository. No migration needed. Exiting...');
+              core.exportVariable('CONTINUE', 'false');
+
+              // React neutrally to the comment
+              github.rest.reactions.createForIssueComment({
+                owner: 'ansys',
+                repo: 'pymapdl',
+                comment_id: ${{ env.COMMENT_ID }},
+                content: 'confused',
+              });
+              // Create a comment to notify the user about insufficient permissions
+              github.rest.issues.createComment({
+                owner: 'ansys',
+                repo: 'pymapdl',
+                issue_number: '${{ env.PR_NUMBER }}',
+                body: `**:question: Wrong command? :confused:**
+
+            You are trying to migrate a PR that is already in the main repository. No migration needed.`,
+              });
+              return;
+            }
+
+            // Set the PR head and base branches as environment variables
+            if (data && data.head && data.base) {
+              core.exportVariable('PR_HEAD_BRANCH', data.head.ref);
+              core.exportVariable('PR_HEAD_REPO', data.head.repo.full_name);
+              core.exportVariable('PR_BASE_BRANCH', `migration/pr-${{ env.PR_NUMBER }}`);
+              core.exportVariable('PR_BASE_REPO', data.base.repo.full_name);
+
+            } else {
+              throw new Error('Failed to retrieve pull request details');
+            }
+
+      - name: Checkout repo
+        if : ${{ env.CONTINUE == 'true'}}
+        uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Clone head repo and checkout branch. Resolve conflicts if needed.
+        if : ${{ env.CONTINUE == 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+        run: |
+          echo "Setting up git configuration"
+          git config --global user.name "${{ secrets.PYANSYS_CI_BOT_USERNAME }}"
+          git config --global user.email "${{ secrets.PYANSYS_CI_BOT_EMAIL}}"
+          git config pull.rebase true
+
+          echo "\033[1;92m[INFO]Adding ${{ env.PR_HEAD_REPO }} as remote \033[0m"
+          git remote add head_repo https://x-access-token:${{ secrets.PYANSYS_CI_BOT_TOKEN }}@github.com/${{ env.PR_HEAD_REPO }}.git
+
+          echo "\033[1;92m[INFO]Fetching '${{ env.PR_HEAD_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}' \033[0m"
+          git fetch head_repo ${{ env.PR_HEAD_BRANCH }}
+
+          echo "\033[1;92m[INFO] Checking out '${{ env.PR_BASE_BRANCH }}' branch from '${{ env.PR_HEAD_REPO }}/${{ env.PR_HEAD_BRANCH }}' \033[0m"
+          git checkout -b ${{ env.PR_BASE_BRANCH }} head_repo/${{ env.PR_HEAD_BRANCH }}
+
+          echo  "\033[1;92m[INFO] Pulling '${{ env.PR_HEAD_BRANCH }}' from '${{ env.PR_BASE_REPO }}' \033[0m"
+          git pull head_repo ${{ env.PR_HEAD_BRANCH }}
+
+          echo "\033[1;92m[INFO] Merging 'main' branch into '${{ env.PR_BASE_BRANCH }}' \033[0m"
+          git merge origin/main
+
+          # Check for merge conflicts
+          CONFLICTS=$(git ls-files -u | wc -l)
+          echo "Merge conflicts:"
+          echo "${CONFLICTS}"
+
+          if [[ "$CONFLICTS" -gt 0 && -n "${{ env.MODE }}" ]]; then
+            echo "::warning:: Conflicts trying to solve using mode '${{ env.MODE }}'."
+
+            # Show conflicting files
+            echo "Conflicting files:"
+            git status
+            echo ""
+
+            # Resolve conflicts by taking "theirs" changes (optional, depending on your strategy)
+            echo "Resolving conflicts by taking 'theirs' changes"
+            git checkout ${{ env.MODE }} .
+            git add .
+
+            # Verify if conflicts are resolved
+            REMAINING_CONFLICTS=$(git ls-files -u | wc -l)
+            if [ "$REMAINING_CONFLICTS" -gt 0 ]; then
+              echo "::error:: Conflicts remain after resolution. Aborting."
+              exit 1
+            fi
+
+            # Continue the merge
+            git merge --continue || { echo "::error:: Merge failed. Aborting."; exit 1; }
+          else
+            echo "No merge conflicts detected."
+          fi
+
+          echo "Pushing changes to '${{ env.PR_BASE_REPO }}' repo"
+          git push origin ${{ env.PR_BASE_BRANCH }} --force-with-lease || git fetch --all && git push origin ${{ env.PR_BASE_BRANCH }} --force-with-lease || { echo "::error:: Push failed. Aborting."; exit 1; }
+
+          if [[ "${{ env.MODE }}" == "--ours" ]]; then
+            echo "Sync mode is 'ours'. Pushing to head_repo/${{ env.PR_HEAD_BRANCH }} with 'ours' changes"
+            git push origin head_repo/${{ env.PR_HEAD_BRANCH }} --force-with-lease || { echo "::error:: Push to head_repo/${{ env.PR_HEAD_BRANCH }} failed. Aborting."; exit 1; }
+          fi
+
+      - name: Opening PR if needed.
+        if : ${{ env.CONTINUE == 'true' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          script: |
+            const prNumber = process.env.PR_NUMBER;
+            const prHeadBranch = process.env.PR_HEAD_BRANCH;
+            const prHeadRepo = process.env.PR_HEAD_REPO;
+            const prBaseBranch = process.env.PR_BASE_BRANCH;
+            const prBaseRepo = process.env.PR_BASE_REPO;
+            const userTriggering = process.env.USER_TRIGGERING;
+            const comment_id = process.env.COMMENT_ID;
+
+            core.debug(`Listing existing PRs for branch ${prBaseBranch}...`);
+            const existingPrs = await github.rest.pulls.list({
+              owner: 'ansys',
+              repo: 'pymapdl',
+              base: `${prBaseBranch}`,
+              state: 'open',
+            });
+
+            core.debug(existingPrs.data);
+
+            if (existingPrs.data.length > 0) {
+              core.info(`PR already exists for branch ${prBaseBranch}. Skipping creation.`);
+              core.exportVariable('COMMENT', 'false');
+              return;
+            }
+
+            // Retrieving the original PR details
+            const { data: originalPR } = await github.rest.pulls.get({
+              owner: 'ansys',
+              repo: 'pymapdl',
+              pull_number: prNumber,
+            });
+
+            // https://docs.github.com/en/rest/pulls/pulls?apiVersion=2022-11-28#create-a-pull-request
+            const newPrData = await github.rest.pulls.create({
+              owner: 'ansys',
+              repo: 'pymapdl',
+              debug: true,
+              head: prBaseBranch,  // This is the branch we just created which becomes now the head of the PR, and the base (target) branch is the main branch.
+              base: 'main',
+              title: `migrated (PR ${prNumber}): ${originalPR.title}`,
+              body: `This PR is a mirror pull request created from [${originalPR.title}](https://github.com/ansys/pymapdl/pull/${originalPR.number}) to allow the code to access PyMAPDL CICD secrets.
+
+            Check the [original PR](https://github.com/ansys/pymapdl/pull/${originalPR.number}) made by @${originalPR.user.login} for more details.
+
+            Closes #${prNumber}
+
+            ## Original pull request
+
+            ### ${originalPR.title}
+            ${originalPR.body}`,
+            });
+
+            core.info(`New PR created: ${newPrData.data.number}`);
+            
+            core.info(`Assinging PR to: ${userTriggering} and ${originalPR.user.login}`);
+            await github.request('POST /repos/{owner}/{repo}/issues/{issue_number}/assignees', {
+              owner: 'ansys',
+              repo: 'pymapdl',
+              issue_number: newPrData.data.number,
+              assignees: [
+                userTriggering,  // The user who triggered the action
+                originalPR.user.login,  // The original PR author
+              ],
+              headers: {
+                'X-GitHub-Api-Version': '2022-11-28'
+              }
+            })
+
+            // React positively to the comment
+            github.rest.reactions.createForIssueComment({
+              owner: 'ansys',
+              repo: 'pymapdl',
+              comment_id: comment_id,
+              content: 'rocket',
+            });
+
+            // Create a comment to notify the user about success.
+            github.rest.issues.createComment({
+              owner: 'ansys',
+              repo: 'pymapdl',
+              issue_number: prNumber,
+              body: `## :rocket: Migration completed!
+
+            The PR [#${newPrData.data.number}](${newPrData.data.html_url}) has been created successfully.
+
+            Thank you @${userTriggering} for your contribution! Please review the PR and make any necessary changes.
+
+            You can clone this branch in a new repository by doing:
+
+            ~~~terminal
+            git clone -b ${prHeadBranch} --single-branch https://github.com/ansys/pymapdl.git
+            ~~~
+
+            If you have [GitHub CLI](https://cli.github.com/) installed, you can also use the following command to check out the pull request:
+
+            ~~~terminal
+            gh pr checkout https://github.com/ansys/pymapdl/pull/${prNumber}
+            ~~~
+
+            This PR will be closed by the admins when the new PR has been checked to work.
+            `,
+            });
+
+      - name: Create comment about failed migration
+        # Not creating more failure comments if the workflow is retried
+        if: ${{ failure() && github.run_attempt == 1 && github.event_name != 'workflow_dispatch' }}
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
+          script: |
+            // React positively to the comment
+            commentId = process.env.COMMENT_ID;
+            pr_number = process.env.PR_NUMBER;
+
+            github.rest.reactions.createForIssueComment({
+              owner: 'ansys',
+              repo: 'pymapdl',
+              comment_id: commentId,
+              content: '-1',
+            });
+            // Create a comment to notify the user about success.
+            github.rest.issues.createComment({
+              owner: 'ansys',
+              repo: 'pymapdl',
+              issue_number: pr_number,
+              body: `**:x: Error :x:**
+
+            An error occurred while migrating or syncing the PR. Pinging @pymapdl-maintainers for assistance.`,
+              });
+

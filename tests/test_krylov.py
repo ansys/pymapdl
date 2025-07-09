@@ -31,11 +31,14 @@ from conftest import has_dependency
 
 if not has_dependency("ansys-math-core"):
     # Needs ansys-math-core
-    pytest.skip(allow_module_level=True)
+    pytest.skip(
+        allow_module_level=True,
+        reason="Skipping because 'ansys-math-core' is not installed",
+    )
 
 PATH = os.path.dirname(os.path.abspath(__file__))
 
-# Krylov Apdl Macro Files
+# Krylov APDL Macro Files
 lib_path = os.path.join(PATH, "test_files")
 
 # Results from APDL Macro to compare with PyMAPDL results

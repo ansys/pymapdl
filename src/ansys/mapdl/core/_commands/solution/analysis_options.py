@@ -1253,7 +1253,7 @@ class AnalysisOptions:
         command = f"DMPEXT,{smode},{tmode},{dmpname},{freqb},{freqe},{nsteps}"
         return self.run(command, **kwargs)
 
-    def dmpoption(self, filetype="", combine="", **kwargs):
+    def dmpoption(self, filetype="", combine="", rescombfreq="", deleopt="", **kwargs):
         """Specifies distributed memory parallel (Distributed ANSYS) file
 
         APDL Command: DMPOPTION
@@ -1290,6 +1290,22 @@ class AnalysisOptions:
             Yes - Combine solution files (default).
 
             No - Do not combine solution files.
+
+        rescombfreq
+            Frequency used to combine the local results files during a distributed memory parallel solution. This option applies only when FileType = RST and Combine = YES.
+
+            NONE - Do not combine the local results files during solution. The local results files is combined only upon leaving the solution processor (default).
+
+            ALL - Combines the local results files at every time point.
+
+            LAST - Combines the local results files at the last time point of every load step.
+
+        deleopt
+            Option to delete local solution files of the type specified by FileType option after they are combined. This option applies only when Combine = Yes.
+
+            Yes - Delete the local solution files after they are combined.
+
+            No - Do not delete the local solution files after they are combined (default).
 
         Notes
         -----
@@ -1350,7 +1366,7 @@ class AnalysisOptions:
         a subsequent analysis. In this case, use the COMBINE command to combine
         local solution files into a single, global file.
         """
-        command = f"DMPOPTION,{filetype},{combine}"
+        command = f"DMPOPTION,{filetype},{combine}{rescombfreq},{deleopt}"
         return self.run(command, **kwargs)
 
     def dspoption(
@@ -1627,132 +1643,137 @@ class AnalysisOptions:
         lab
             Equation solver type:
 
-            SPARSE - Sparse direct equation solver.  Applicable to
-                     real-value or complex-value symmetric and
-                     unsymmetric matrices. Available only for STATIC,
-                     HARMIC (full method only), TRANS (full method
-                     only), SUBSTR, and PSD spectrum analysis types
-                     [ANTYPE].  Can be used for nonlinear and linear
-                     analyses, especially nonlinear analysis where
-                     indefinite matrices are frequently
-                     encountered. Well suited for contact analysis
-                     where contact status alters the mesh
-                     topology. Other typical well-suited applications
-                     are: (a) models consisting of shell/beam or
-                     shell/beam and solid elements (b) models with a
-                     multi-branch structure, such as an automobile
-                     exhaust or a turbine fan. This is an alternative
-                     to iterative solvers since it combines both speed
-                     and robustness. Generally, it requires
-                     considerably more memory (~10x) than the PCG
-                     solver to obtain optimal performance (running
-                     totally in-core). When memory is limited, the
-                     solver works partly in-core and out-of-core,
-                     which can noticeably slow down the performance of
-                     the solver. See the BCSOPTION command for more
-                     details on the various modes of operation for
-                     this solver.
+            SPARSE
+                Sparse direct equation solver.  Applicable to
+                real-value or complex-value symmetric and
+                unsymmetric matrices. Available only for STATIC,
+                HARMIC (full method only), TRANS (full method
+                only), SUBSTR, and PSD spectrum analysis types
+                [ANTYPE].  Can be used for nonlinear and linear
+                analyses, especially nonlinear analysis where
+                indefinite matrices are frequently
+                encountered. Well suited for contact analysis
+                where contact status alters the mesh
+                topology. Other typical well-suited applications
+                are: (a) models consisting of shell/beam or
+                shell/beam and solid elements (b) models with a
+                multi-branch structure, such as an automobile
+                exhaust or a turbine fan. This is an alternative
+                to iterative solvers since it combines both speed
+                and robustness. Generally, it requires
+                considerably more memory (~10x) than the PCG
+                solver to obtain optimal performance (running
+                totally in-core). When memory is limited, the
+                solver works partly in-core and out-of-core,
+                which can noticeably slow down the performance of
+                the solver. See the BCSOPTION command for more
+                details on the various modes of operation for
+                this solver.
 
-            This solver can be run in shared memory parallel or
-            distributed memory parallel (Distributed ANSYS) mode. When
-            used in Distributed ANSYS, this solver preserves all of
-            the merits of the classic or shared memory sparse
-            solver. The total sum of memory (summed for all processes)
-            is usually higher than the shared memory sparse
-            solver. System configuration also affects the performance
-            of the distributed memory parallel solver. If enough
-            physical memory is available, running this solver in the
-            in-core memory mode achieves optimal performance. The
-            ideal configuration when using the out-of-core memory mode
-            is to use one processor per machine on multiple machines
-            (a cluster), spreading the I/O across the hard drives of
-            each machine, assuming that you are using a high-speed
-            network such as Infiniband to efficiently support all
-            communication across the multiple machines.  - This solver
-            supports use of the GPU accelerator capability.
+                This solver can be run in shared memory parallel or
+                distributed memory parallel (Distributed ANSYS) mode. When
+                used in Distributed ANSYS, this solver preserves all of
+                the merits of the classic or shared memory sparse
+                solver. The total sum of memory (summed for all processes)
+                is usually higher than the shared memory sparse
+                solver. System configuration also affects the performance
+                of the distributed memory parallel solver. If enough
+                physical memory is available, running this solver in the
+                in-core memory mode achieves optimal performance. The
+                ideal configuration when using the out-of-core memory mode
+                is to use one processor per machine on multiple machines
+                (a cluster), spreading the I/O across the hard drives of
+                each machine, assuming that you are using a high-speed
+                network such as Infiniband to efficiently support all
+                communication across the multiple machines.  - This solver
+                supports use of the GPU accelerator capability.
 
-            JCG - Jacobi Conjugate Gradient iterative equation
-                  solver. Available only for STATIC, HARMIC (full
-                  method only), and TRANS (full method only) analysis
-                  types [ANTYPE]. Can be used for structural, thermal,
-                  and multiphysics applications. Applicable for
-                  symmetric, unsymmetric, complex, definite, and
-                  indefinite matrices.  Recommended for 3-D harmonic
-                  analyses in structural and multiphysics
-                  applications. Efficient for heat transfer,
-                  electromagnetics, piezoelectrics, and acoustic field
-                  problems.
+            JCG
+                Jacobi Conjugate Gradient iterative equation
+                solver. Available only for STATIC, HARMIC (full
+                method only), and TRANS (full method only) analysis
+                types [ANTYPE]. Can be used for structural, thermal,
+                and multiphysics applications. Applicable for
+                symmetric, unsymmetric, complex, definite, and
+                indefinite matrices.  Recommended for 3-D harmonic
+                analyses in structural and multiphysics
+                applications. Efficient for heat transfer,
+                electromagnetics, piezoelectrics, and acoustic field
+                problems.
 
-            This solver can be run in shared memory parallel or
-            distributed memory parallel (Distributed ANSYS) mode. When
-            used in Distributed ANSYS, in addition to the limitations
-            listed above, this solver only runs in a distributed
-            parallel fashion for STATIC and TRANS (full method)
-            analyses in which the stiffness is symmetric and only when
-            not using the fast thermal option (THOPT). Otherwise, this
-            solver runs in shared memory parallel mode inside
-            Distributed ANSYS. - This solver supports use of the GPU
-            accelerator capability. When using the GPU accelerator
-            capability, in addition to the limitations listed above,
-            this solver is available only for STATIC and TRANS (full
-            method) analyses where the stiffness is symmetric and does
-            not support the fast thermal option (THOPT).
+                This solver can be run in shared memory parallel or
+                distributed memory parallel (Distributed ANSYS) mode. When
+                used in Distributed ANSYS, in addition to the limitations
+                listed above, this solver only runs in a distributed
+                parallel fashion for STATIC and TRANS (full method)
+                analyses in which the stiffness is symmetric and only when
+                not using the fast thermal option (THOPT). Otherwise, this
+                solver runs in shared memory parallel mode inside
+                Distributed ANSYS. - This solver supports use of the GPU
+                accelerator capability. When using the GPU accelerator
+                capability, in addition to the limitations listed above,
+                this solver is available only for STATIC and TRANS (full
+                method) analyses where the stiffness is symmetric and does
+                not support the fast thermal option (THOPT).
 
-            ICCG - Incomplete Cholesky Conjugate Gradient iterative
-                   equation solver. Available for STATIC, HARMIC (full
-                   method only), and TRANS (full method only) analysis
-                   types [ANTYPE].  Can be used for structural,
-                   thermal, and multiphysics applications, and for
-                   symmetric, unsymmetric, complex, definite, and
-                   indefinite matrices. The ICCG solver requires more
-                   memory than the JCG solver, but is more robust than
-                   the JCG solver for ill-conditioned matrices.
+            ICCG
+                Incomplete Cholesky Conjugate Gradient iterative
+                equation solver. Available for STATIC, HARMIC (full
+                method only), and TRANS (full method only) analysis
+                types [ANTYPE].  Can be used for structural,
+                thermal, and multiphysics applications, and for
+                symmetric, unsymmetric, complex, definite, and
+                indefinite matrices. The ICCG solver requires more
+                memory than the JCG solver, but is more robust than
+                the JCG solver for ill-conditioned matrices.
 
-            This solver can only be run in shared memory parallel
-            mode. This is also true when the solver is used inside
-            Distributed ANSYS. - This solver does not support use of
-            the GPU accelerator capability.
+                This solver can only be run in shared memory parallel
+                mode. This is also true when the solver is used inside
+                Distributed ANSYS. - This solver does not support use of
+                the GPU accelerator capability.
 
-            QMR - Quasi-Minimal Residual iterative equation
-                  solver. Available for the HARMIC (full method only)
-                  analysis type [ANTYPE]. Can be used for
-                  high-frequency electromagnetic applications, and for
-                  symmetric, complex, definite, and indefinite
-                  matrices. The QMR solver is more stable than the
-                  ICCG solver.
+            QMR
+                Quasi-Minimal Residual iterative equation
+                solver. Available for the HARMIC (full method only)
+                analysis type [ANTYPE]. Can be used for
+                high-frequency electromagnetic applications, and for
+                symmetric, complex, definite, and indefinite
+                matrices. The QMR solver is more stable than the
+                ICCG solver.
 
-            This solver can only be run in shared memory parallel
-            mode. This is also true when the solver is used inside
-            Distributed ANSYS. - This solver does not support use of
-            the GPU accelerator capability.
+                This solver can only be run in shared memory parallel
+                mode. This is also true when the solver is used inside
+                Distributed ANSYS. - This solver does not support use of
+                the GPU accelerator capability.
 
-            PCG - Preconditioned Conjugate Gradient iterative equation
-                  solver (licensed from Computational Applications and
-                  Systems Integration, Inc.).  Requires less disk file
-                  space than SPARSE and is faster for large
-                  models. Useful for plates, shells, 3-D models, large
-                  2-D models, and other problems having symmetric,
-                  sparse, definite or indefinite matrices for
-                  nonlinear analysis.  Requires twice as much memory
-                  as JCG. Available only for analysis types [ANTYPE]
-                  STATIC, TRANS (full method only), or MODAL (with PCG
-                  Lanczos option only). Also available for the use
-                  pass of substructure analyses (MATRIX50). The PCG
-                  solver can robustly solve equations with constraint
-                  equations (CE, CEINTF, CPINTF, and CERIG).  With
-                  this solver, you can use the MSAVE command to obtain
-                  a considerable memory savings.
+            PCG
+                Preconditioned Conjugate Gradient iterative equation
+                solver (licensed from Computational Applications and
+                Systems Integration, Inc.).  Requires less disk file
+                space than SPARSE and is faster for large
+                models. Useful for plates, shells, 3-D models, large
+                2-D models, and other problems having symmetric,
+                sparse, definite or indefinite matrices for
+                nonlinear analysis.  Requires twice as much memory
+                as JCG. Available only for analysis types [ANTYPE]
+                STATIC, TRANS (full method only), or MODAL (with PCG
+                Lanczos option only). Also available for the use
+                pass of substructure analyses (MATRIX50). The PCG
+                solver can robustly solve equations with constraint
+                equations (CE, CEINTF, CPINTF, and CERIG).  With
+                this solver, you can use the MSAVE command to obtain
+                a considerable memory savings.
 
-            The PCG solver can handle ill-conditioned problems by
-            using a higher level of difficulty (see
-            PCGOPT). Ill-conditioning arises from elements with high
-            aspect ratios, contact, and plasticity. - This solver can
-            be run in shared memory parallel or distributed memory
-            parallel (Distributed ANSYS) mode. When used in
-            Distributed ANSYS, this solver preserves all of the merits
-            of the classic or shared memory PCG solver. The total sum
-            of memory (summed for all processes) is about 30% more
-            than the shared memory PCG solver.
+                The PCG solver can handle ill-conditioned problems by
+                using a higher level of difficulty (see
+                PCGOPT). Ill-conditioning arises from elements with high
+                aspect ratios, contact, and plasticity. - This solver can
+                be run in shared memory parallel or distributed memory
+                parallel (Distributed ANSYS) mode. When used in
+                Distributed ANSYS, this solver preserves all of the merits
+                of the classic or shared memory PCG solver. The total sum
+                of memory (summed for all processes) is about 30% more
+                than the shared memory PCG solver.
 
         toler
             Iterative solver tolerance value. Used only with the
@@ -2195,11 +2216,45 @@ class AnalysisOptions:
         command = f"GMATRIX,{symfac},{condname},{numcond},,{matrixname}"
         return self.run(command, **kwargs)
 
+    def invopt(self, option="", **kwargs):
+        """Enables or disables inverse solving for the current load step.
+
+        APDL Command: INVOPT
+
+        Parameters
+        ----------
+        Option
+            Enables or disables inverse solving for a load step:
+
+            ON - Enable.
+            OFF - Disable and revert to forward solving (default).
+
+        Notes
+        -----
+        Option = ON is valid only at the first load step of a static analysis.
+        Large-deflection effects must be enabled (NLGEOM,ON).
+        The unsymmetric solver (NROPT,UNSYM) is required and the program selects
+        it automatically.
+
+        After issuing INVOPT,ON, inverse solving remains in effect
+        until INVOPT,OFF is issued.
+        The solution then reverts to traditional forward solving (default).
+
+        This command cannot be issued during a restart. Option can only be
+        changed between load steps.
+
+        For more information, see Nonlinear Static Analysis with Inverse Solving
+        in the Structural Analysis Guide.
+        """
+        return self.run(f"INVOPT,{option}", **kwargs)
+
     def lanboption(self, strmck="", **kwargs):
         """Specifies Block Lanczos eigensolver options.
 
         APDL Command: LANBOPTION
 
+        Parameters
+        ----------
         strmck
             Controls whether the Block Lanczos eigensolver will perform a
             Sturm sequence check:

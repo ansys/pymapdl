@@ -26,6 +26,7 @@ import os
 from pathlib import Path
 from shutil import get_terminal_size
 from sys import platform
+from typing import Any
 from unittest.mock import patch
 
 from _pytest.terminal import TerminalReporter  # for terminal customization
@@ -76,7 +77,7 @@ SUPPORT_PLOTTING = support_plotting()
 IS_SMP = is_smp()
 
 QUICK_LAUNCH_SWITCHES = "-smp -m 100 -db 100"
-VALID_PORTS = []
+VALID_PORTS: list[int] = []
 ACCEPTABLE_FAILURE_RATE = 50
 
 ## Skip ifs
@@ -229,6 +230,7 @@ from ansys.mapdl.core.errors import MapdlExitedError, MapdlRuntimeError
 from ansys.mapdl.core.examples import vmfiles
 from ansys.mapdl.core.launcher import get_start_instance, launch_mapdl
 from ansys.mapdl.core.mapdl_core import VALID_DEVICES
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 if has_dependency("ansys-tools-visualization_interface"):
     import ansys.tools.visualization_interface as viz_interface
@@ -292,6 +294,7 @@ def pytest_report_header(config, start_path, startdir):
     line = ""
     for env_var in [
         "PYMAPDL_START_INSTANCE",
+        "PYMAPDL_ADDITIONAL_SWITCHES",
         "PYMAPDL_PORT",
         "PYMAPDL_PORT2",
         "PYMAPDL_DB_PORT",
@@ -312,27 +315,134 @@ def pytest_report_header(config, start_path, startdir):
 ## Changing report line length
 class MyReporter(TerminalReporter):
     def short_test_summary(self):
-        # your own impl goes here, for example:
-        self.write_sep("=", "PyMAPDL Pytest short summary")
+        from _pytest.reports import CollectReport
 
-        failed = self.stats.get("failed", [])
-        for rep in failed:
-            self.write_line(
-                f"[FAILED] {rep.head_line} - {rep.longreprtext.splitlines()[-3]}"
+        if not self.reportchars:
+            return
+
+        self.write_sep("=", "PyMAPDL Pytest short summary", cyan=True, bold=True)
+        markup = self._tw.markup
+
+        if self.hasmarkup:
+            color = True
+        else:
+            color = False
+
+        ERROR_COLOR = {"Red": color, "bold": True}
+        FAILED_COLOR = {"red": color, "bold": True}
+        PASSED_COLOR = {"green": color}
+        SKIPPED_COLOR = {"green": color, "bold": True}
+        XPASSED_COLOR = {"Yellow": color, "bold": True}
+        XFAILED_COLOR = {"yellow": color}
+
+        MAXIMUM_MESSAGE_LENGTH = 1000
+
+        def wrap_len(s):
+            """Wrap string to a maximum length"""
+            if len(s) > MAXIMUM_MESSAGE_LENGTH:
+                return s[:MAXIMUM_MESSAGE_LENGTH] + "..."
+            return s
+
+        def get_normal_message(rep: Any, header: str, message: str):
+            location = rep.location
+            if message:
+                message = f" - {message}"
+            if location[0] == location[2]:
+                s = f"{header} {rep.head_line}{message}"
+            else:
+                path = f"{location[0]}:{location[1]}"
+                s = f"{header} {rep.head_line} - {path}{message}"
+            return wrap_len(s)
+
+        def get_failure_message(rep: Any, header: str, message: str):
+            location = rep.location
+            path = f"{location[0]}:{location[1]}"
+            cause = " ".join(
+                [
+                    each[2:].strip() if each.startswith("E ") else each.strip()
+                    for each in message.splitlines()
+                ]
             )
 
-        errored = self.stats.get("error", [])
-        for rep in errored:
-            self.write_line(
-                f"[ERROR] {rep.head_line} - {rep.longreprtext.splitlines()[-3]}"
-            )
+            return wrap_len(f"{header} {rep.head_line} - {path}: {cause}")
+
+        def get_skip_message(rep: CollectReport):
+            message = rep.longrepr[2]
+            header = markup("[SKIPPED]", **SKIPPED_COLOR)
+            return get_normal_message(rep, header, message)
+
+        def get_passed_message(rep: CollectReport):
+            message = rep.longreprtext
+            header = markup("[PASSED]", **PASSED_COLOR)
+            return get_normal_message(rep, header, message)
+
+        def get_xfailed_message(rep: CollectReport):
+            # Removing the error type
+            message_lines = rep.longrepr.reprcrash.message.split(":")[1:]
+            message = " ".join([each.strip() for each in message_lines])
+            message = " ".join(message.splitlines())
+
+            header = markup("[XFAILED]", **XFAILED_COLOR)
+            return get_normal_message(rep, header, message)
+
+        def get_xpassed_message(rep: CollectReport):
+            message = str(rep.longreprtext)
+            if not message:
+                message = "This test was expected to fail, but it passed."
+            header = markup("[XPASSED]", **XPASSED_COLOR)
+            return get_normal_message(rep, header, message)
+
+        def get_error_message(rep: CollectReport):
+            if hasattr(rep.longrepr, "reprcrash"):
+                message = str(rep.longrepr.reprcrash.message)
+            else:
+                # Error string
+                message = str(rep.longrepr.errorstring)
+
+            header = markup("[ERROR]", **ERROR_COLOR)
+            return get_failure_message(rep, header, message)
+
+        def get_failed_message(rep: CollectReport):
+            message = str(rep.longrepr.reprcrash.message)
+            header = markup("[FAILED]", **FAILED_COLOR)
+            return get_failure_message(rep, header, message)
+
+        if "p" in self.reportchars:
+            passed: list[CollectReport] = self.stats.get("passed", [])
+            for rep in passed:
+                self.write_line(get_passed_message(rep)[:MAXIMUM_MESSAGE_LENGTH])
+
+        if "s" in self.reportchars:
+            skipped: list[CollectReport] = self.stats.get("skipped", [])
+            for rep in skipped:
+                self.write_line(get_skip_message(rep)[:MAXIMUM_MESSAGE_LENGTH])
+
+        if "x" in self.reportchars:
+            xfailed: list[CollectReport] = self.stats.get("xfailed", [])
+            for rep in xfailed:
+                self.write_line(get_xfailed_message(rep)[:MAXIMUM_MESSAGE_LENGTH])
+
+        if "X" in self.reportchars:
+            xpassed: list[CollectReport] = self.stats.get("xpassed", [])
+            for rep in xpassed:
+                self.write_line(get_xpassed_message(rep)[:MAXIMUM_MESSAGE_LENGTH])
+
+        if "E" in self.reportchars:
+            errored: list[CollectReport] = self.stats.get("error", [])
+            for rep in errored:
+                self.write_line(get_error_message(rep)[:MAXIMUM_MESSAGE_LENGTH])
+
+        if "f" in self.reportchars:
+            failed: list[CollectReport] = self.stats.get("failed", [])
+            for rep in failed:
+                self.write_line(get_failed_message(rep)[:MAXIMUM_MESSAGE_LENGTH])
 
 
-# @pytest.mark.trylast
 @pytest.hookimpl(trylast=True)
 def pytest_configure(config):
     vanilla_reporter = config.pluginmanager.getplugin("terminalreporter")
     my_reporter = MyReporter(config)
+    my_reporter._tw.fullwidth = 160
     config.pluginmanager.unregister(vanilla_reporter)
     config.pluginmanager.register(my_reporter, "terminalreporter")
 
@@ -445,8 +555,12 @@ def run_before_and_after_tests(
 ) -> Generator[Mapdl]:
     """Fixture to execute asserts before and after a test is run"""
 
+    test_name = os.environ.get(
+        "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
+    )
+
     # Relaunching MAPDL if dead
-    mapdl = restart_mapdl(mapdl)
+    restart_mapdl(mapdl, test_name)
 
     # Write test info to log_apdl
     if DEBUG_TESTING:
@@ -471,6 +585,7 @@ def run_before_and_after_tests(
     assert not mapdl.ignore_errors, "Mapdl class is ignoring errors!"
     assert not mapdl.mute
     assert mapdl.file_type_for_plots in VALID_DEVICES
+    assert mapdl._graphics_backend is GraphicsBackend.PYVISTA
     assert mapdl._jobid is None
 
     # Returning to default
@@ -482,10 +597,6 @@ def run_before_and_after_tests(
     # Teardown
     if mapdl.is_local and mapdl._exited:
         # The test exited MAPDL, so it has failed.
-        test_name = os.environ.get(
-            "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
-        )
-
         assert (
             False
         ), f"Test {test_name} failed at the teardown."  # this will fail the test
@@ -574,6 +685,7 @@ def mapdl_console(request):
         mode="console",
         log_apdl="pymapdl.apdl" if DEBUG_TESTING else None,
         loglevel="DEBUG" if DEBUG_TESTING else "ERROR",
+        additional_switches="-smp",
     )
     from ansys.mapdl.core.mapdl_console import MapdlConsole
 
@@ -605,7 +717,7 @@ def mapdl(request, tmpdir_factory):
         cleanup_on_exit=cleanup,
         license_server_check=False,
         start_timeout=50,
-        loglevel="DEBUG" if DEBUG_TESTING else "ERROR",
+        loglevel="ERROR",  # Because Pytest captures all output
         # If the following file names are changed, update `ci.yml`.
         log_apdl="pymapdl.apdl" if DEBUG_TESTING else None,
         mapdl_output="apdl.out" if (DEBUG_TESTING and ON_LOCAL) else None,
@@ -620,7 +732,9 @@ def mapdl(request, tmpdir_factory):
         mapdl._local = ON_LOCAL  # CI: override for testing
 
     if ON_LOCAL and mapdl.is_local:
-        assert Path(mapdl.directory) == Path(run_path)
+        assert Path(mapdl.directory) == Path(
+            run_path
+        ), "Make sure you are not reusing an MAPDL instance. Use 'pymapdl stop --all' to kill all MAPDL instances."
 
     # using yield rather than return here to be able to test exit
     yield mapdl
@@ -763,9 +877,9 @@ def cube_solve(cleared, mapdl, cube_geom_and_mesh):
     out = mapdl.modal_analysis(nmode=10, freqb=1)
 
 
-@pytest.fixture
-def solved_box(mapdl, cleared):
+def solved_box_func(mapdl):
     with mapdl.muted:  # improve stability
+        mapdl.prep7()
         mapdl.et(1, "SOLID5")
         mapdl.block(0, 10, 0, 20, 0, 30)
         mapdl.esize(10)
@@ -783,10 +897,17 @@ def solved_box(mapdl, cleared):
 
         mapdl.nsel("S", "LOC", "Z", 30)
         mapdl.f("ALL", "FX", 1000)
-        mapdl.run("/SOLU")
+
+        mapdl.solution()
+        mapdl.allsel()
         mapdl.antype("STATIC")
         mapdl.solve()
         mapdl.finish()
+
+
+@pytest.fixture
+def solved_box(mapdl, cleared):
+    return solved_box_func(mapdl)
 
 
 @pytest.fixture(scope="function")

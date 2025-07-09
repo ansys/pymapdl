@@ -28,7 +28,7 @@
 #    Additionally you can also configure the following environment variables:
 # 
 #    - ``AWP_ROOT``: Set the environment variable ``AWP_ROOTXXX`` where XXX is the MAPDL version.
-#      For instance, MAPDL 2022R1 is 222.
+#      For instance, MAPDL 2025R1 is 251.
 #    - ``AWP_ROOT_VALUE``: Set the value of the ``AWP_ROOTXXX`` environment variable, which normally points
 #      to the MAPDL installation directory.
 #    - ``DOCKER_USER``: It should match the username inside the container. You can obtain this value by executing
@@ -77,7 +77,7 @@
 # NOTES
 # =====
 #
-# - ``AWP_ROOT222`` is where Ansys 2022 R1 (v222) is installed.
+# - ``AWP_ROOT251`` is where Ansys 2025 R1 (v251) is installed.
 #
 
 services:
@@ -92,11 +92,12 @@ services:
     environment:
       - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
       - ANSYS_LOCK=OFF
-      - ${AWP_ROOT:-AWP_ROOT222}=${AWP_ROOT_VALUE:-/ansys_inc}
+      - ${AWP_ROOT:-AWP_ROOT251}=${AWP_ROOT_VALUE:-/ansys_inc}
     ports:
       - '50052:50052'
       - '50055:50055'
     image: ${DOCKER_IMAGE}
+    platform: linux/amd64
     entrypoint: "/bin/bash ansys -grpc"
 
   dpf:
@@ -105,6 +106,7 @@ services:
       - mapdl-dpf
       - local-dpf
     image: ${DPF_DOCKER_IMAGE}
+    platform: linux/amd64
     ports:
       - '50056:50052'
     restart: always
@@ -122,11 +124,18 @@ services:
     environment:
       - ANSYSLMD_LICENSE_FILE=${ANSYSLMD_LICENSE_FILE}
       - ANSYS_LOCK=OFF
-      - ${AWP_ROOT:-AWP_ROOT222}=${AWP_ROOT_VALUE:-/ansys_inc}
+      - ${AWP_ROOT:-AWP_ROOT251}=${AWP_ROOT_VALUE:-/ansys_inc}
+    # If also running the `mapdl` service, you need to set different ports
+    # to avoid conflicts.
     ports:
       - '50052:50052'
       - '50055:50055'
+    platform: linux/amd64
     image: ${DOCKER_IMAGE}
+    # Mount the current directory to /home/${DOCKER_USER:-mapdl}/pymapdl
+    # This allows you to run the container and have access to the current directory
+    # from inside the container.
+    # This is useful for development purposes.
     volumes:
       - ../:/home/${DOCKER_USER:-mapdl}/pymapdl:cached
     working_dir: /home/${DOCKER_USER:-mapdl}/pymapdl

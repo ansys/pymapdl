@@ -1,19 +1,23 @@
-.. _ref_display_api:
 
-*******
+.. _ref_display:
+
+
 Display
-*******
+=======
 
-.. currentmodule:: ansys.mapdl.core
 
-These POST26 commands are used to display the results.
+.. currentmodule:: ansys.mapdl.core._commands.post26.display
+
+.. autoclass:: ansys.mapdl.core._commands.post26.display.Display
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.keep
-   Mapdl.plcplx
-   Mapdl.pltime
-   Mapdl.plvar
-   Mapdl.spread
-   Mapdl.xvar
+
+   Display.keep
+   Display.plcplx
+   Display.pltime
+   Display.plvar
+   Display.spread
+   Display.xvar

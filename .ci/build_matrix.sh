@@ -15,10 +15,8 @@ versions=(
     'v25.1-ubuntu-student'
     'v24.2.0'
     'v24.2-ubuntu'
-    'v24.2-ubuntu-student'
     'v24.1.0'
     'v24.1-ubuntu'
-    'v24.1-ubuntu-student'
     'v23.2.0'
     'v23.2-ubuntu'
     'v23.1.0'
@@ -101,7 +99,11 @@ for version in "${versions[@]}"; do
     fi
 
     # Skipping if on remote and on student
-    if [[ "$ON_STUDENT" != "true" && "$ON_REMOTE" == "true" ]]; then
+    if [[ "$ON_STUDENT" != "true" && "$ON_REMOTE" == "true"  && "$version" == *"cicd"* ]]; then
+        echo "Not skipping CICD versions when running on remote."
+        echo ""
+
+    elif [[ "$ON_STUDENT" != "true" && "$ON_REMOTE" == "true" ]]; then
         echo "Skipping non-student versions when running on remote"
         echo ""
         continue

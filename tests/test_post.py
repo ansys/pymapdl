@@ -1241,7 +1241,6 @@ class Test_contact_solve(TestClass):
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    @pytest.mark.skipif(True, reason="Crash python until #3782 is fixed.")
     def test_plot_incomplete_element_selection(mapdl, resume):
         mapdl.esel("S", "ELEM", "", 1, mapdl.mesh.n_elem // 2)
         assert mapdl.post_processing.plot_element_displacement() is None
@@ -1262,7 +1261,6 @@ class Test_contact_solve(TestClass):
 
     @staticmethod
     @requires("ansys-tools-visualization_interface")
-    @pytest.mark.skipif(True, reason="Crash python until #3782 is fixed.")
     def test_plot_incomplete_nodal_selection(mapdl, resume, verify_image_cache):
         verify_image_cache.skip = True
 
@@ -1324,8 +1322,9 @@ def test_meta_post_plot_docstrings():
                     ), f"The argument '{each_}' in '{meth.__name__}' is not in its docstring."
 
             assert (
-                "If ``vkt=True`` (default), this function uses" in docstring
-            ), f"'vtk=True' part not found in {meth.__name__}"
+                "If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses"
+                in docstring
+            ), f"'graphics_backend=GraphicsBackend.PYVISTA' part not found in {meth.__name__}"
             assert (
                 len(
                     re.findall(

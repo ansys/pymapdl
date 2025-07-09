@@ -53,7 +53,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: ansys/actions/doc-deploy-changelog@v9
+      - uses: ansys/actions/doc-deploy-changelog@v10.0.12
         with:
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
           bot-user: ${{ secrets.PYANSYS_CI_BOT_USERNAME }}
@@ -66,7 +66,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check pull-request name
-        uses: ansys/actions/check-pr-title@v9
+        uses: ansys/actions/check-pr-title@v10.0.12
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -79,7 +79,7 @@ jobs:
         folder: ["doc", "examples"]
     steps:
       - name: "Ansys documentation style checks"
-        uses: ansys/actions/doc-style@v9
+        uses: ansys/actions/doc-style@v10.0.12
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: ${{ matrix.folder }}
@@ -105,26 +105,30 @@ jobs:
             os: macos-latest
     steps:
       - name: "Build wheelhouse and perform smoke test"
-        uses: ansys/actions/build-wheelhouse@v9
+        id: build-wheelhouse
+        uses: ansys/actions/build-wheelhouse@v10.0.12
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           operating-system: ${{ matrix.os }}
           python-version: ${{ matrix.python-version }}
           check-licenses: true
-          # whitelist-license-check: "attrs" # This has MIT license but fails the check
 
       - name: "Importing library"
-        run: python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
+        run: |
+          ${{ steps.build-wheelhouse.outputs.activate-venv }}
+          python -c "from ansys.mapdl import core as pymapdl; print(pymapdl.Report())"
 
       - name: "Checking plotting support"
-        run: python -c "from pyvista.plotting import system_supports_plotting; print('System support plotting ' + str(system_supports_plotting()))"
+        run: |
+          ${{ steps.build-wheelhouse.outputs.activate-venv }}
+          python -c "from pyvista.plotting import system_supports_plotting; print('System support plotting ' + str(system_supports_plotting()))"
 
 
   check-vulnerabilities:
     name: "Check library vulnerabilities"
     runs-on: ubuntu-latest
     steps:
-      - uses: ansys/actions/check-vulnerabilities@v9
+      - uses: ansys/actions/check-vulnerabilities@v10.0.12
         with:
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
           token: ${{ secrets.PYANSYS_CI_BOT_TOKEN }}
@@ -178,7 +182,7 @@ jobs:
       username: ${{ github.actor }}
     with:
       mapdl-version: "${{ matrix.mapdl-version }}"
-      file-name: "${{ matrix.mapdl-version }}-remote"
+      file-name: "remote-${{ matrix.mapdl-version }}"
 
 
   build-test-local-matrix:
@@ -215,11 +219,12 @@ jobs:
       username: ${{ github.actor }}
     with:
       testing-minimal: false
-      pytest-arguments: '-k "not test_dpf" --reset_only_failed  --add_missing_images'
+      pytest-arguments: '--reset_only_failed  --add_missing_images'
       mapdl-version: ${{ matrix.mapdl-version }}
-      file-name: "${{ matrix.mapdl-version }}-local"
+      file-name: "local-${{ matrix.mapdl-version }}"
       tags: "local"
       latest-version: "252"
+      test_dpf: ${{ contains(matrix.mapdl-version, 'cicd') }}
 
 
   build-test-ubuntu-minimal:
@@ -238,11 +243,12 @@ jobs:
       username: ${{ github.actor }}
     with:
       testing-minimal: true
-      pytest-arguments: '-k "not test_dpf"'
+      pytest-arguments: ''
       mapdl-version: ${{ matrix.mapdl-version }}
       file-name: "${{ matrix.mapdl-version }}-minimal"
       tags: "local,minimal"
       latest-version: "252"
+      test_dpf: false
 
 
   build-test-ubuntu-console:
@@ -262,11 +268,12 @@ jobs:
     with:
       latest-version: "252"
       mapdl-version: ${{ matrix.mapdl-version }}
-      testing-minimal: true
+      testing-minimal: false
       on-console: true
       pytest-arguments: '-k console'
-      file-name: "${{ matrix.mapdl-version }}-minimal-console"
-      tags: "local,minimal,console"
+      file-name: "${{ matrix.mapdl-version }}-console"
+      tags: "local,console"
+      test_dpf: false
 
 
   test-windows:
@@ -292,7 +299,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Build library source and wheel artifacts"
-        uses: ansys/actions/build-library@v9
+        uses: ansys/actions/build-library@v10.0.12
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           python-version: ${{ env.MAIN_PYTHON_VERSION }}
@@ -310,7 +317,7 @@ jobs:
       contents: write
     steps:
       - name: "Download the library artifacts from build-library step"
-        uses: actions/download-artifact@cc203385981b70ca67e1cc392babf9cc229d5806 # v4.1.9
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: ${{ env.PACKAGE_NAME }}-artifacts
           path: ${{ env.PACKAGE_NAME }}-artifacts
@@ -327,7 +334,7 @@ jobs:
           skip-existing: false
 
       - name: "Release to GitHub"
-        uses: ansys/actions/release-github@v9
+        uses: ansys/actions/release-github@v10.0.12
         with:
           library-name: ${{ env.PACKAGE_NAME }}
           additional-artifacts: "minimum_requirements.txt"
@@ -341,7 +348,7 @@ jobs:
     needs: [release]
     steps:
       - name: "Deploy the stable documentation"
-        uses: ansys/actions/doc-deploy-stable@v9
+        uses: ansys/actions/doc-deploy-stable@v10.0.12
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -357,7 +364,7 @@ jobs:
     needs: [docs-build]
     steps:
       - name: "Deploy the latest documentation"
-        uses: ansys/actions/doc-deploy-dev@v9
+        uses: ansys/actions/doc-deploy-dev@v10.0.12
         with:
           cname: ${{ env.DOCUMENTATION_CNAME }}
           token: ${{ secrets.GITHUB_TOKEN }}

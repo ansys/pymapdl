@@ -23,7 +23,7 @@
 """Module for helper functions"""
 
 from functools import namedtuple
-import importlib
+import importlib.util
 import os
 import sys
 from warnings import warn
@@ -34,14 +34,15 @@ from ansys.mapdl.core import LOG
 def is_installed(package_name: str) -> bool:
     """Check if a package is installed"""
     package_name = package_name.replace("-", ".")
-
     try:
-        importlib.import_module(package_name)
-
-        return True
-    except ModuleNotFoundError:  # pragma: no cover
+        package_spec = importlib.util.find_spec(package_name)
+        if package_spec is None:  # pragma: no cover
+            LOG.debug(f"The module '{package_name}' is not installed.")
+            return False
+    except ModuleNotFoundError:
         LOG.debug(f"The module '{package_name}' is not installed.")
         return False
+    return True
 
 
 def get_python_version() -> namedtuple:
@@ -94,13 +95,7 @@ def run_first_time() -> None:
 
 def run_every_import() -> None:
     # Run every time we import PyMAPDL
-    from ansys.mapdl.core import _HAS_VISUALIZER, RUNNING_TESTS
-
-    # Apply custom theme
-    if _HAS_VISUALIZER:
-        from ansys.mapdl.core.plotting.theme import _apply_default_theme
-
-        _apply_default_theme()
+    from ansys.mapdl.core import RUNNING_TESTS
 
     # In case we want to do something specific for testing.
     if RUNNING_TESTS:  # pragma: no cover

@@ -25,7 +25,7 @@ from datetime import datetime
 from importlib import reload
 import logging
 import os
-from pathlib import Path
+import pathlib
 import re
 import shutil
 import tempfile
@@ -42,6 +42,7 @@ from conftest import (
     PATCH_MAPDL,
     PATCH_MAPDL_START,
     VALID_PORTS,
+    NullContext,
     Running_test,
     has_dependency,
 )
@@ -66,6 +67,7 @@ from ansys.mapdl.core.errors import (
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string, stack
+from ansys.mapdl.core.plotting import GraphicsBackend
 from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 
 # Path to files needed for examples
@@ -380,12 +382,12 @@ def test_empty(mapdl, cleared):
         mapdl.run("")
 
 
-def test_multiline_fail(mapdl, cleared):
+def test_multiline_fail_value_error(mapdl, cleared):
     with pytest.raises(ValueError, match="Use ``input_strings``"):
         mapdl.run(CMD_BLOCK)
 
 
-def test_multiline_fail(mapdl, cleared):
+def test_multiline_fail_deprecation_warning(mapdl, cleared):
     with pytest.warns(DeprecationWarning):
         resp = mapdl.run_multiline(CMD_BLOCK)
         assert "IS SOLID186" in resp, "not capturing the beginning of the block"
@@ -1041,7 +1043,7 @@ def test_cdread(mapdl, cleared):
 
 @requires("local")
 def test_cdread_different_location(mapdl, cleared, tmpdir):
-    random_letters = mapdl.directory.split("/")[0][-3:0]
+    random_letters = random_string(4)
     dirname = "tt" + random_letters
 
     curdir = mapdl.directory
@@ -1234,33 +1236,64 @@ def test_cwd(mapdl, cleared, tmpdir):
     mapdl.slashdelete("anstmp")
 
 
-@requires("nocicd")
-@requires("local")
-def test_inquire(mapdl, cleared):
+def test_inquire_apdl(mapdl, cleared):
     # Testing basic functions (First block: Functions)
+    # Returns the path to MAPDL
     assert "apdl" in mapdl.inquire("", "apdl").lower()
 
-    # **Returning the Value of an Environment Variable to a Parameter**
-    env = list(os.environ.keys())[0]
-    if os.name == "nt":
-        env_value = os.getenv(env).split(";")[0]
-    elif os.name == "posix":
-        env_value = os.getenv(env).split(":")[0]
+
+@pytest.mark.skipif(
+    os.name != "posix", reason="Needed printenv, so Linux only for the moment"
+)
+@pytest.mark.parametrize(
+    "envvar", ["HOME", "USER", "PATH", "HOSTNAME", "LD_LIBRARY_PATH"]
+)
+def test_inquire_env(mapdl, cleared, envvar):
+    env_vars = {
+        line.split("=")[0]: line.split("=")[1]
+        for line in mapdl.sys("printenv").splitlines()
+    }
+    if envvar not in env_vars:
+        pytest.skip(f"Environment variable {envvar} not found")
+
+    value = env_vars[envvar]
+    if envvar in ["PATH", "LD_LIBRARY_PATH"] and len(value) >= 248:
+        # MAPDL warns about long environment variables because it trims them to
+        # 248
+        with pytest.warns(UserWarning):
+            assert mapdl.inquire("", "ENV", envvar, 0) == value[:248]
+
     else:
-        raise Exception("Not supported OS.")
+        assert mapdl.inquire("", "ENV", envvar, 0) == value
 
-    env_ = mapdl.inquire("", "ENV", env, 0)
-    assert env_ == env_value
 
+def test_inquire_title(mapdl, cleared):
     # **Returning the Value of a Title to a Parameter**
     title = "This is the title"
     mapdl.title(title)
     assert title == mapdl.inquire("", "title")
 
+
+def test_inquire_jobname(mapdl, cleared):
     # **Returning Information About a File to a Parameter**
     jobname = mapdl.inquire("", "jobname")
-    assert float(mapdl.inquire("", "exist", jobname + ".lock")) in [0, 1]
-    assert float(mapdl.inquire("", "exist", jobname, "lock")) in [0, 1]
+    assert isinstance(jobname, str)
+    assert jobname
+
+
+def test_inquire_exist(mapdl, cleared):
+    existing_file = [each for each in mapdl.list_files() if each.endswith(".log")][0]
+    assert isinstance(mapdl.inquire("", "exist", existing_file), bool)
+    assert isinstance(mapdl.inquire("", "exist", "unexisting_file.myext"), bool)
+
+    assert mapdl.inquire("", "exist", existing_file)
+    assert not mapdl.inquire("", "exist", "unexisting_file.myext")
+
+
+def test_inquire_non_interactive(mapdl, cleared):
+    with mapdl.non_interactive:
+        # Testing the case where the file does not exist
+        assert mapdl.inquire("", "exist", "unexisting_file.myext") is None
 
 
 def test_ksel(mapdl, cleared):
@@ -1543,7 +1576,7 @@ def test_file_command_local(mapdl, cube_solve, tmpdir):
     old_path = mapdl.directory
     tmp_dir = tmpdir.mkdir("asdf")
     mapdl.directory = str(tmp_dir)
-    assert Path(mapdl.directory) == tmp_dir
+    assert pathlib.Path(mapdl.directory) == tmp_dir
 
     mapdl.clear()
     mapdl.post1()
@@ -2405,9 +2438,8 @@ def test_inquire_invalid(mapdl, cleared):
         mapdl.inquire("dummy", "hi")
 
 
-def test_inquire_default(mapdl, cleared):
-    mapdl.title("heeeelloo")
-    assert str(Path(mapdl.directory)) == str(Path(mapdl.inquire()))
+def test_inquire_default_no_args(mapdl, cleared):
+    assert str(mapdl.directory) == str(pathlib.Path(mapdl.inquire()))
 
 
 def test_vwrite_error(mapdl, cleared):
@@ -2453,18 +2485,17 @@ def test_default_file_type_for_plots(mapdl, cleared):
 
 
 @requires("matplotlib")
-def test_use_vtk(mapdl, cleared):
-    assert isinstance(mapdl.use_vtk, bool)
+def test_graphics_backend(mapdl, cleared):
+    assert isinstance(mapdl.graphics_backend, GraphicsBackend)
 
-    prev = mapdl.use_vtk
-    mapdl.use_vtk = False
+    prev = mapdl.graphics_backend
+    mapdl.graphics_backend = GraphicsBackend.MAPDL
     mapdl.eplot()
 
-    mapdl.use_vtk = prev
+    mapdl.graphics_backend = prev
 
 
 @requires("local")
-@pytest.mark.xfail(reason="Flaky test. See #2435")
 def test_remove_temp_dir_on_exit(mapdl, cleared, tmpdir):
     path = os.path.join(tempfile.gettempdir(), "ansys_" + random_string())
     os.makedirs(path)
@@ -2485,7 +2516,6 @@ def test_remove_temp_dir_on_exit(mapdl, cleared, tmpdir):
 
 @requires("local")
 @requires("nostudent")
-@pytest.mark.xfail(reason="Flaky test. See #2435")
 def test_remove_temp_dir_on_exit_with_launch_mapdl(mapdl, cleared):
 
     mapdl_2 = launch_mapdl(remove_temp_dir_on_exit=True, port=PORT1)
@@ -2706,6 +2736,34 @@ def test_cwd_changing_directory(mapdl, cleared):
 
     assert mapdl._path == prev_path
     assert mapdl.directory == prev_path
+
+
+@pytest.mark.parametrize(
+    "platform, class_, contextmanager",
+    [
+        [None, str, NullContext()],
+        ["windows", pathlib.PureWindowsPath, NullContext()],
+        ["linux", pathlib.PurePosixPath, NullContext()],
+        [
+            "Other",
+            pathlib.PurePosixPath,
+            pytest.warns(UserWarning, match="MAPDL is running on an unknown OS"),
+        ],
+    ],
+)
+def test_directory_pathlib(mapdl, cleared, platform, class_, contextmanager):
+    with patch.object(mapdl, "_platform", platform):
+        with contextmanager:
+            assert isinstance(mapdl._wrap_directory("my_path"), class_)
+
+
+def test_directory_pathlib_value(mapdl, cleared):
+    if mapdl.platform == "windows":
+        path_rst = f"{mapdl.directory}\\{mapdl.jobname}.rst"
+    else:
+        path_rst = f"{mapdl.directory}/{mapdl.jobname}.rst"
+
+    assert str(mapdl.directory / f"{mapdl.jobname}.rst") == path_rst
 
 
 def test_load_not_raising_warning():
@@ -2982,7 +3040,7 @@ def test_muted(mapdl, prop):
     "ansys.tools.path.path._get_application_path",
     lambda *args, **kwargs: "path/to/mapdl/executable",
 )
-@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
+@patch("ansys.tools.path.path._version_from_path", lambda *args, **kwargs: 242)
 @stack(*PATCH_MAPDL)
 @pytest.mark.parametrize("set_no_abort", [True, False, None])
 @pytest.mark.parametrize("start_instance", [True, False])
@@ -3008,3 +3066,52 @@ def test_set_no_abort(monkeypatch, set_no_abort, start_instance):
 
     if set_no_abort is None or set_no_abort:
         assert any(["/NERR,,,-1" in each for each in calls])
+
+
+class TestSelectionOnNonInteractive:
+    """Test selection commands in non-interactive mode."""
+
+    @pytest.fixture(scope="class", autouse=True)
+    def setup(self, mapdl):
+        self.mapdl = mapdl
+
+        mapdl.clear()
+        mapdl.prep7()
+        mapdl.block(0, 1, 0, 1, 0, 1)
+        mapdl.et(1, 186)
+        mapdl.esize(0.25)
+        mapdl.vmesh("ALL")
+
+    @pytest.mark.parametrize("func", ["nsel", "esel", "ksel", "lsel", "asel"])
+    @pytest.mark.parametrize("sel_type", ["S", "R", "U", "A"])
+    def test_selection_on_non_interactive(self, mapdl, func, sel_type):
+        mapdl.allsel()
+
+        function = getattr(mapdl, func)
+
+        if func == "nsel":
+            checker = lambda: mapdl.mesh.nnum
+        elif func == "esel":
+            checker = lambda: mapdl.mesh.enum
+        elif func == "ksel":
+            checker = lambda: mapdl.geometry.knum
+        elif func == "lsel":
+            checker = lambda: mapdl.geometry.lnum
+        elif func == "asel":
+            checker = lambda: mapdl.geometry.anum
+
+        function("S", vmin=1, vmax=3)
+        assert np.allclose(checker(), [1, 2, 3])
+
+        with mapdl.non_interactive:
+            if sel_type == "A":
+                function(sel_type, vmin=5)
+            else:
+                function(sel_type, vmin=2)
+
+        if sel_type in ["S", "R"]:
+            assert np.allclose(checker(), [2])
+        elif sel_type == "U":
+            assert np.allclose(checker(), [1, 3])
+        elif sel_type == "A":
+            assert np.allclose(checker(), [1, 2, 3, 5])
