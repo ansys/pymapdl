@@ -2761,7 +2761,10 @@ def test_directory_pathlib_value(mapdl, cleared):
     if mapdl.platform == "windows":
         path_rst = f"{mapdl.directory}\\{mapdl.jobname}.rst"
     else:
-        path_rst = f"{mapdl.directory}/{mapdl.jobname}.rst"
+        if mapdl.directory == "/":
+            path_rst = f"/{mapdl.jobname}.rst"
+        else:
+            path_rst = f"{mapdl.directory}/{mapdl.jobname}.rst"
 
     assert str(mapdl.directory / f"{mapdl.jobname}.rst") == path_rst
 
