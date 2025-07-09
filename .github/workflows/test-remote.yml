@@ -155,9 +155,11 @@ jobs:
         run: |
           echo "Launching first MAPDL instance..."
           export INSTANCE_NAME=MAPDL_0
+          export RUN_DPF_SERVER=true
           .ci/start_mapdl.sh &> mapdl_launch_0.log & export DOCKER_PID_0=$!
 
           echo "Launching a second instance for MAPDL pool testing..."
+          export RUN_DPF_SERVER=false
           export PYMAPDL_PORT=${{ env.PYMAPDL_PORT2 }}
           export PYMAPDL_DB_PORT=${{ env.PYMAPDL_DB_PORT2 }}
           export INSTANCE_NAME=MAPDL_1
