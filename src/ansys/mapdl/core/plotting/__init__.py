@@ -23,8 +23,7 @@
 from enum import Enum
 
 from ansys.mapdl.core import _HAS_VISUALIZER
-from ansys.mapdl.core.plotting.consts import (  # noqa: F401
-    ALLOWED_TARGETS,
+from ansys.mapdl.core.plotting.consts import (
     BC_D,
     BC_F,
     BCS,
@@ -32,6 +31,7 @@ from ansys.mapdl.core.plotting.consts import (  # noqa: F401
     FIELDS_ORDERED_LABELS,
     POINT_SIZE,
 )
+from ansys.mapdl.core.plotting.consts import ALLOWED_TARGETS  # noqa: F401
 
 
 class GraphicsBackend(Enum):

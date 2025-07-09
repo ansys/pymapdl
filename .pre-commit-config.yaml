@@ -20,7 +20,7 @@ repos:
         args: [ "-x"]
 
 - repo: https://github.com/pre-commit/mirrors-mypy
-  rev: v1.16.0
+  rev: v1.16.1
   hooks:
     - id: mypy
       args: [ --follow-imports=silent, --config-file=pyproject.toml]
@@ -38,7 +38,7 @@ repos:
   - id: isort
 
 - repo: https://github.com/numpy/numpydoc
-  rev: v1.8.0
+  rev: v1.9.0
   hooks:
     - id: numpydoc-validation
       exclude: |
@@ -64,7 +64,7 @@ repos:
       - --line-length=88
 
 - repo: https://github.com/PyCQA/flake8
-  rev: 7.2.0
+  rev: 7.3.0
   hooks:
   - id: flake8
 
@@ -90,7 +90,7 @@ repos:
 
 # this validates our github workflow files
 - repo: https://github.com/python-jsonschema/check-jsonschema
-  rev: 0.33.0
+  rev: 0.33.2
   hooks:
     - id: check-github-workflows
 
