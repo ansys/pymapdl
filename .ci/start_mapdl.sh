@@ -70,13 +70,15 @@ if [[ $MAPDL_VERSION == *"cicd"* ]] ; then
         export DPF_ON="-e ANSYS_DPF_ACCEPT_LA=Y"
     fi
 
-
     export DPF_PORT_INTERNAL=50055
     export DPF_PORT_ARG="-p ${DPF_PORT}:${DPF_PORT_INTERNAL}"
     export DB_INT_PORT=50056
 
     echo "DPF_PORT_ARG: $DPF_PORT_ARG"
     echo "DB_INT_PORT: $DB_INT_PORT"
+
+    echo "Overriding DISTRIBUTED_MODE to 'dmp' for CICD version"
+    export DISTRIBUTED_MODE="dmp"
 else
     export DPF_PORT_ARG=""
     export DB_INT_PORT=50055
