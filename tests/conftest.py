@@ -46,7 +46,7 @@ from common import (
     is_on_ubuntu,
     is_running_on_student,
     is_smp,
-    log_test_start,
+    log_test,
     make_sure_not_instances_are_left_open,
     restart_mapdl,
     support_plotting,
@@ -567,7 +567,7 @@ def run_before_and_after_tests(
 
     # Write test info to log_apdl
     if DEBUG_TESTING:
-        log_test_start(mapdl)
+        log_test(mapdl)
 
     # check if the local/remote state has changed or not
     prev = mapdl.is_local
@@ -575,6 +575,9 @@ def run_before_and_after_tests(
     assert not mapdl.mute
 
     yield  # this is where the testing happens
+
+    if DEBUG_TESTING:
+        log_test(mapdl, end=True)
 
     mapdl.prep7()
 
