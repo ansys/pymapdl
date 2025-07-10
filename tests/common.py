@@ -271,9 +271,11 @@ def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:
         if ON_LOCAL:
             # First we try to reconnect
             try:
+                LOG.debug("Reconnecting to MAPDL...")
                 mapdl.reconnect_to_mapdl(timeout=5)
                 assert mapdl.finish()
 
+                LOG.debug("Reconnected to MAPDL successfully.")
                 return mapdl
 
             except MapdlConnectionError as e:
@@ -283,9 +285,11 @@ def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:
 
             # Killing the instance (just in case)
             try:
+
+                LOG.debug("Exiting MAPDL...")
                 mapdl.exit(force=True)
             except Exception as e:
-                pass
+                LOG.warning(f"Failed to exit MAPDL: {str(e)}")
 
             # Relaunching MAPDL
             LOG.debug("Relaunching MAPDL...")

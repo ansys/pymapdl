@@ -71,7 +71,7 @@ else:
 from ansys.mapdl.reader import read_binary
 from ansys.mapdl.reader.rst import Result
 
-from ansys.mapdl.core import Logger
+from ansys.mapdl.core import LOG, Logger
 from ansys.mapdl.core.examples import (
     electrothermal_microactuator_analysis,
     elongation_of_a_solid_bar,
@@ -316,6 +316,10 @@ class Example:
     def result(self, setup, tmp_path_factory, mapdl):
         # Since the DPF upload is broken, we copy the RST file to a temporary directory
         # in the MAPDL directory
+        LOG.debug(
+            f"Creating DPFResult with RST file: {self.rst_path}",
+        )
+
         mapdl.save()
         dpf_rst_name = f"dpf_{self.rst_name}"
         mapdl.sys("mkdir dpf_tmp")
@@ -325,12 +329,14 @@ class Example:
         else:
             sep = "\\"
 
-        rst_file_path = f"{mapdl.directory}{sep}dpf_tmp{sep}{dpf_rst_name}"
+        rst_file_path = mapdl.directory / "dpf_tmp" / dpf_rst_name
+
         mapdl.logger.info(mapdl.sys(f"ls dpf_tmp/{dpf_rst_name}"))
 
         assert mapdl.inquire(
             "", "EXIST", rst_file_path
         ), "The RST file for DPF does not exist."
+        LOG.debug(f"DPFResult will use RST file: {rst_file_path}")
         return DPFResult(rst_file_path=rst_file_path, rst_is_on_remote=True)
 
     def test_node_components(self, mapdl, result):
