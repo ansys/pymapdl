@@ -405,7 +405,9 @@ class DPFResult:
                 mode="RemoteGrpc", external_ip=dpf_ip, external_port=dpf_port
             )
             self._connected = True
-            self.logger.debug("Connected to DPF server using RemoteGrpc.")
+            self.logger.debug(
+                f"Connected to DPF server using RemoteGrpc on {dpf_port}:{dpf_ip}."
+            )
         except DPFServerException:  # type: ignore
             self._connected = False
 
@@ -451,16 +453,17 @@ class DPFResult:
 
     def _connect_to_dpf(self, ip: str, port: int) -> None:
         if not self._mode_rst and self._mapdl and not self._mapdl.is_local:
+            self.logger.debug("Connecting to a remote gRPC DPF server")
             self._try_connect_remote_grpc(ip, port)
 
         else:
             # any connection method is supported because the file local.
+            self.logger.debug("Attempting any connection method")
             self._iterate_connections(ip, port)
 
     def connect_to_server(self, ip: str | None = None, port: int | None = None) -> None:
         """
         Connect to the DPF Server.
-
 
         Parameters
         ----------
