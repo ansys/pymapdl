@@ -1,4 +1,6 @@
 #!/bin/bash
+export OMPI_ALLOW_RUN_AS_ROOT=1
+export OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
 
 if [ -z "${VERSION}" ]; then
     echo "VERSION environment variable is not set. Please set it to the desired Ansys version."
