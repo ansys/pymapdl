@@ -124,7 +124,7 @@ class MeshGrpc:
         """Reset entire mesh cache"""
 
         if not self._ignore_cache_reset:
-            self.logger.debug("Resetting cache")
+            # self.logger.debug("Resetting cache")
 
             self._cache_elem = None
             self._cache_elem_off = None
