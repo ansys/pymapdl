@@ -2760,7 +2760,7 @@ def test_directory_pathlib(mapdl, cleared, platform, class_, contextmanager):
 def test_directory_pathlib_value(mapdl, cleared):
     if mapdl.platform == "windows":
         path_rst = f"{mapdl.directory}\\{mapdl.jobname}.rst"
-    elif mapdl.directory == "/":
+    elif str(mapdl.directory) == "/":
         path_rst = f"/{mapdl.jobname}.rst"
     else:
         path_rst = f"{mapdl.directory}/{mapdl.jobname}.rst"
