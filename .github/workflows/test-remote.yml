@@ -255,8 +255,7 @@ jobs:
             --report-log=$file_name.jsonl \
             --cov-report=xml:$file_name.xml \
             --log-file=pytest.log \
-            --log-file-level="DEBUG" \
-            tests/test_result.py
+            --log-file-level="DEBUG"
 
       - name: "Print amount of restarts"
         if: always()
