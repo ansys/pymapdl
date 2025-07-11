@@ -2674,6 +2674,7 @@ def test_ctrl(mapdl, cleared):
     mapdl.run("/verify")  # mocking might skip running this inside mapdl._ctrl
 
 
+@pytest.mark.skip("This test is removing all loggers, which is not desired")
 def test_cleanup_loggers(mapdl, cleared):
     assert mapdl.logger is not None
     assert mapdl.logger.hasHandlers()
