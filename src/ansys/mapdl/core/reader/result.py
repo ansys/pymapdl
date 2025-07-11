@@ -533,12 +533,10 @@ class DPFResult:
         """Alias for mapdl logger"""
         if self._mapdl:
             return self._mapdl._log
-        else:
-            if self._logger is None:
-                self._logger = Logger(
-                    level=logging.ERROR, to_file=False, to_stdout=True
-                )
-            return self._logger
+
+        if self._logger is None:
+            self._logger = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
+        return self._logger
 
     @property
     def logger(self) -> Logger:
@@ -551,8 +549,7 @@ class DPFResult:
             raise ValueError(
                 "Cannot set logger in MAPDL mode. Use the MAPDL instance methods to set the logger instead."
             )
-        else:
-            self._logger = logger
+        self._logger = logger
 
     @property
     def mode(self):
@@ -724,9 +721,11 @@ class DPFResult:
             self._log.debug("Building/Updating DPF Model object.")
 
         if self.dpf_is_remote and not self._mapdl_dpf_on_same_machine:
-            self._cached_dpf_model = Model(self._server_file_path)
+            rst = self._server_file_path
         else:
-            self._cached_dpf_model = Model(self._rst)
+            rst = self._rst
+
+        self._cached_dpf_model = Model(str(rst))
 
     @property
     def model(self):

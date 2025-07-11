@@ -321,6 +321,7 @@ class Example:
         )
 
         mapdl.save()
+
         dpf_rst_name = f"dpf_{self.rst_name}"
         mapdl.sys("mkdir dpf_tmp")
         mapdl.sys(f"cp {self.rst_name} dpf_tmp/{dpf_rst_name}")
@@ -330,12 +331,12 @@ class Example:
             sep = "\\"
 
         rst_file_path = mapdl.directory / "dpf_tmp" / dpf_rst_name
-
-        mapdl.logger.info(mapdl.sys(f"ls dpf_tmp/{dpf_rst_name}"))
+        mapdl.logger.info(mapdl.sys(f"ls -al dpf_tmp"))
 
         assert mapdl.inquire(
             "", "EXIST", rst_file_path
         ), "The RST file for DPF does not exist."
+
         LOG.debug(f"DPFResult will use RST file: {rst_file_path}")
         return DPFResult(rst_file_path=rst_file_path, rst_is_on_remote=True)
 
