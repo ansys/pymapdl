@@ -66,7 +66,7 @@ elif not TEST_DPF_BACKEND:
 else:
     from ansys.dpf import core as dpf_core
     from ansys.dpf.gate.errors import DPFServerException
-    from ansys.mapdl.core.reader.result import COMPONENTS, DPFResult
+    from ansys.mapdl.core.reader.result import COMPONENTS
 
 from ansys.mapdl.reader import read_binary
 from ansys.mapdl.reader.rst import Result
@@ -316,6 +316,8 @@ class Example:
     def result(self, setup, tmp_path_factory, mapdl):
         # Since the DPF upload is broken, we copy the RST file to a temporary directory
         # in the MAPDL directory
+        from ansys.mapdl.core.reader.result import DPFResult
+
         LOG.debug(
             f"Creating DPFResult with RST file: {self.rst_path}",
         )
@@ -325,19 +327,16 @@ class Example:
         dpf_rst_name = f"dpf_{self.rst_name}"
         mapdl.sys("mkdir dpf_tmp")
         mapdl.sys(f"cp {self.rst_name} dpf_tmp/{dpf_rst_name}")
-        if mapdl.platform == "linux":
-            sep = "/"
-        else:
-            sep = "\\"
 
         rst_file_path = mapdl.directory / "dpf_tmp" / dpf_rst_name
-        mapdl.logger.info(mapdl.sys(f"ls -al dpf_tmp"))
+        mapdl.logger.info(mapdl.sys("ls -al dpf_tmp"))
 
         assert mapdl.inquire(
             "", "EXIST", rst_file_path
         ), "The RST file for DPF does not exist."
 
         LOG.debug(f"DPFResult will use RST file: {rst_file_path}")
+
         return DPFResult(
             rst_file_path=rst_file_path, rst_is_on_remote=True, logger=mapdl.logger
         )
@@ -399,10 +398,14 @@ def test_upload(mapdl, solved_box, tmpdir):
 
 
 class TestDPFResult:
+    # This class tests the DPFResult functionality without comparing it with
+    # PyMAPDL-Reader or Post_Processing results.
 
     @pytest.fixture(scope="class")
     def result(self, mapdl):
         """Fixture to ensure the model is solved before running tests."""
+        from ansys.mapdl.core.reader.result import DPFResult
+
         clear(mapdl)
         solved_box_func(mapdl)
 
