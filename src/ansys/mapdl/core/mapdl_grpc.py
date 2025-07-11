@@ -383,7 +383,7 @@ class MapdlGrpc(MapdlBase):
             self._hostname = (
                 "localhost"
                 if ip in ["127.0.0.1", "127.0.1.1", "localhost"]
-                else socket.gethostbyaddr(ip)[0]
+                else ip
             )
 
         check_valid_ip(ip)
