@@ -79,13 +79,13 @@ tests = [
   "pytest-timeout==2.4.0",
   "pytest==8.4.1",
   "scipy==1.15.3",
-  "vtk==9.4.2",
+  "vtk==9.5.0",
 ]
 
 doc = [
   "ansys-dpf-core[graphics]==0.13.6",
   "ansys-mapdl-reader==0.55.1",
-  "ansys-sphinx-theme==1.5.2",
+  "ansys-sphinx-theme==1.5.3",
   "ansys-tools-visualization-interface==0.11.0",
   "grpcio==1.73.1",
   "imageio-ffmpeg==0.6.0",
@@ -113,7 +113,7 @@ doc = [
   "sphinx==8.2.3",
   "sphinxcontrib-websupport==2.0.0",
   "sphinxemoji==0.3.1",
-  "vtk==9.4.2",
+  "vtk==9.5.0",
 ]
 
 [tool.flit.module]
