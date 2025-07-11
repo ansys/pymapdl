@@ -21,7 +21,6 @@
 # SOFTWARE.
 
 from functools import wraps
-import logging
 import os
 import pathlib
 import socket
@@ -32,9 +31,7 @@ import weakref
 # from ansys.dpf import post
 import numpy as np
 
-from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core import Logger, Mapdl  # type: ignore
-from ansys.mapdl.core import _HAS_DPF, _HAS_PYVISTA  # type: ignore
+from ansys.mapdl.core import _HAS_DPF, _HAS_PYVISTA, LOG, Logger, Mapdl  # type: ignore
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import check_valid_ip, get_local_ip, parse_ip_route
 
@@ -177,6 +174,7 @@ class DPFResult:
         rst_file_path: str | None = None,
         mapdl: "Mapdl | None" = None,
         rst_is_on_remote: bool = False,
+        logger: Logger | None = None,
     ) -> None:
         """Initialize Result instance"""
 
@@ -187,7 +185,7 @@ class DPFResult:
 
         self._mapdl_weakref: weakref.ref["Mapdl"] | None = None
         self._server_file_path: str | None = None  # In case DPF is remote.
-        self._logger: Logger | None = None
+        self._logger: Logger | None = logger
 
         # RST parameters
         self.__rst_directory: str | None = None
@@ -208,7 +206,7 @@ class DPFResult:
             elif rst_is_on_remote:
                 self._server_file_path = rst_file_path
 
-            logger.debug("Initializing DPFResult class in RST mode.")
+            self.logger.debug("Initializing DPFResult class in RST mode.")
             self._mode_rst = True
 
             self.__rst_directory = os.path.dirname(rst_file_path)
@@ -219,7 +217,7 @@ class DPFResult:
             if not isinstance(mapdl, Mapdl):  # pragma: no cover # type: ignore
                 raise TypeError("Must be initialized using Mapdl instance")
 
-            logger.debug("Initializing DPFResult class in MAPDL mode.")
+            self.logger.debug("Initializing DPFResult class in MAPDL mode.")
             self._mapdl_weakref = weakref.ref(mapdl)
             self._mode_rst = False
 
@@ -374,8 +372,6 @@ class DPFResult:
         """
         if self._server is None:
             self.connect_to_server()
-            if self.dpf_ip:
-                self.logger.debug(f"Connected to DPF server at {self.dpf_ip}")
 
         return self._server
 
@@ -406,7 +402,7 @@ class DPFResult:
             )
             self._connected = True
             self.logger.debug(
-                f"Connected to DPF server using RemoteGrpc on {dpf_port}:{dpf_ip}."
+                f"Connected to DPF server using RemoteGrpc on {dpf_ip}:{dpf_port}."
             )
         except DPFServerException:  # type: ignore
             self._connected = False
@@ -502,8 +498,6 @@ class DPFResult:
 
         check_valid_ip(ip)
 
-        self.logger.debug(f"Attempting to connect to DPF server using: {ip}:{port}")
-
         self._connect_to_dpf(ip, port)
 
     def _dpf_remote_envvars(self):
@@ -531,11 +525,8 @@ class DPFResult:
     @property
     def _log(self) -> Logger:
         """Alias for mapdl logger"""
-        if self._mapdl:
-            return self._mapdl._log
-
         if self._logger is None:
-            self._logger = Logger(level=logging.ERROR, to_file=False, to_stdout=True)
+            self._logger = LOG
         return self._logger
 
     @property

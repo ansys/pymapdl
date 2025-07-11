@@ -71,7 +71,7 @@ else:
 from ansys.mapdl.reader import read_binary
 from ansys.mapdl.reader.rst import Result
 
-from ansys.mapdl.core import LOG, Logger
+from ansys.mapdl.core import LOG
 from ansys.mapdl.core.examples import (
     electrothermal_microactuator_analysis,
     elongation_of_a_solid_bar,
@@ -338,7 +338,9 @@ class Example:
         ), "The RST file for DPF does not exist."
 
         LOG.debug(f"DPFResult will use RST file: {rst_file_path}")
-        return DPFResult(rst_file_path=rst_file_path, rst_is_on_remote=True)
+        return DPFResult(
+            rst_file_path=rst_file_path, rst_is_on_remote=True, logger=mapdl.logger
+        )
 
     def test_node_components(self, mapdl, result):
         assert mapdl.mesh.node_components == result.node_components
@@ -1013,10 +1015,7 @@ class TestTransientResponseOfABallImpactingAFlexibleSurfaceVM65(Example):
         assert np.allclose(mapdl.mesh.enum, result.mesh.elements.scoping.ids)
 
     def test_configuration(self, mapdl, result):
-        if result.mode_rst:
-            assert isinstance(result.logger, Logger)
-        elif result.mode_mapdl:
-            assert isinstance(result.logger, MAPDLLogger)
+        assert isinstance(result.logger, MAPDLLogger)
 
     def test_no_cyclic(self, mapdl, reader, post, result):
         assert not result.is_cyclic

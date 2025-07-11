@@ -1123,7 +1123,7 @@ class _MapdlCore(Commands):
 
             if self._dpf_result is None:
                 # create a DPFResult object
-                self._dpf_result = DPFResult(None, mapdl=self)
+                self._dpf_result = DPFResult(None, mapdl=self, logger=self._log)
 
             return self._dpf_result
 
