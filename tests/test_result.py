@@ -199,8 +199,6 @@ def prepare_example(
 
     vm_code = vm_code.upper()
 
-    vm_code = vm_code.replace("QAEND", "!QAEND")
-
     if not solve:
         vm_code = vm_code.replace("SOLVE", "!SOLVE")
 
