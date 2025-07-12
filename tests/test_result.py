@@ -600,7 +600,7 @@ class TestStaticThermocoupledExample(Example):
             result.element_lookup(invalid_id)
 
 
-@pytest.mark.skip("Test is broken.")
+@pytest.mark.skip("This test is broken for some reason.")
 class TestElectroThermalCompliantMicroactuator(Example):
     """Class to test the Electro-Thermal-Compliant Microactuator VM223 example."""
 
