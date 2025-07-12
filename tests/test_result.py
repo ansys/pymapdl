@@ -273,9 +273,13 @@ class Example:
         mapdl.clear()
 
         if self.apdl_code:
+            mapdl.logger.debug("Using **custom** APDL code for the example.")
             mapdl.input_strings(self.apdl_code)
         else:
+            mapdl.logger.debug("Using **default** APDL code for the example.")
             mapdl.input(self.example)
+
+        mapdl.logger.info(f"Example finished: {self.example_name}")
 
         mapdl.allsel(mute=False)
         mapdl.save()
