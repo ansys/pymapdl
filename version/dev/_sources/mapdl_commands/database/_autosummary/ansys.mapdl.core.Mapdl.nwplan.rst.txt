@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.nwplan
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.nwplan

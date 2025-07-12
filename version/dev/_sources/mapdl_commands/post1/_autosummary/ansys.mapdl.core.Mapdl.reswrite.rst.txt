@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.reswrite
+===============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.reswrite

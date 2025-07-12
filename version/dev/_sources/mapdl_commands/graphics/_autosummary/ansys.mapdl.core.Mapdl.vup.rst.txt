@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.vup
+==========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.vup

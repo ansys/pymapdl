@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.xfrm
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.xfrm

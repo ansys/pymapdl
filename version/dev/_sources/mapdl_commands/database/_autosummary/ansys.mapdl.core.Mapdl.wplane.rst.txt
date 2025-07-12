@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.wplane
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.wplane

@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.cm
+=========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.cm

@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.reset
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.reset

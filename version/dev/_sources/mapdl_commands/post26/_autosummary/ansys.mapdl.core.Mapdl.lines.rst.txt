@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.lines
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.lines

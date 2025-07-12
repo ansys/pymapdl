@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.prorb
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.prorb

@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.gmface
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.gmface

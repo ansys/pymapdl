@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.lcoper
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.lcoper

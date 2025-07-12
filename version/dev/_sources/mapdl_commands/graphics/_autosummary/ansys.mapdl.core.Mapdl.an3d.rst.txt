@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.an3d
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.an3d

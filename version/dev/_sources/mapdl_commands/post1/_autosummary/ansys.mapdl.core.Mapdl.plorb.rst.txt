@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.plorb
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.plorb

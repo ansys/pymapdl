@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.rmrstatus
+================================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.rmrstatus

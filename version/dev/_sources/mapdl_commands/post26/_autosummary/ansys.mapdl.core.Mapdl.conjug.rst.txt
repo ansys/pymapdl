@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.conjug
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.conjug
