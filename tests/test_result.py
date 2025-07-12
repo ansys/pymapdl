@@ -199,6 +199,8 @@ def prepare_example(
 
     vm_code = vm_code.upper()
 
+    vm_code = vm_code.replace("QAEND", "!QAEND")
+
     if not solve:
         vm_code = vm_code.replace("SOLVE", "!SOLVE")
 
@@ -270,7 +272,6 @@ class Example:
     def setup(self, mapdl):
         mapdl.clear()
 
-        mapdl.ignore_errors = False
         if self.apdl_code:
             mapdl.input_strings(self.apdl_code)
         else:
@@ -280,8 +281,6 @@ class Example:
         mapdl.save()
         mapdl.post1()
         mapdl.csys(0)
-
-        mapdl.ignore_errors = False
 
         # downloading file
         rst_name = mapdl.jobname + ".rst"
