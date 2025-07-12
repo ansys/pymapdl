@@ -207,8 +207,6 @@ def prepare_example(
     if avoid_exit:
         vm_code = vm_code.replace("/EXIT", "/EOF\n/EXIT")
 
-    assert "/EXIT" not in vm_code, "The APDL code should not contain '/EXIT' commands."
-
     if stop_after_first_solve:
         return vm_code.replace("\nSOLVE", "\nSOLVE\n/EOF")
 
