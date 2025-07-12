@@ -39,12 +39,18 @@ import psutil
 import pytest
 
 from conftest import (
+    IS_SMP,
+    ON_CI,
+    ON_LOCAL,
     PATCH_MAPDL,
     PATCH_MAPDL_START,
+    QUICK_LAUNCH_SWITCHES,
+    TEST_DPF_BACKEND,
     VALID_PORTS,
     NullContext,
     Running_test,
     has_dependency,
+    requires,
 )
 
 if has_dependency("pyvista"):
@@ -66,14 +72,6 @@ from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string, stack
 from ansys.mapdl.core.plotting import GraphicsBackend
-from conftest import (
-    IS_SMP,
-    ON_CI,
-    ON_LOCAL,
-    QUICK_LAUNCH_SWITCHES,
-    TEST_DPF_BACKEND,
-    requires,
-)
 
 # Path to files needed for examples
 PATH = os.path.dirname(os.path.abspath(__file__))
@@ -2138,7 +2136,14 @@ def test_rlblock_rlblock_num(mapdl, cleared):
 
 
 def test_result_type(mapdl, cube_solve):
+    if not has_dependency("ansys-mapdl-reader") and not has_dependency(
+        "ansys-dpf-core"
+    ):
+        assert mapdl.result is None
+        return
+
     assert mapdl.result is not None
+
     if is_installed("ansys-mapdl-reader") and not TEST_DPF_BACKEND:
         from ansys.mapdl.reader.rst import Result
 
