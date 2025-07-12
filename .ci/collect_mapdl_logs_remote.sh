@@ -25,6 +25,7 @@ echo "Collecting MAPDL logs..."
 (docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$FILE*.log' > /dev/null ;then mv -f /file*.log /mapdl_logs && echo 'Successfully moved log files.'; fi") || echo "Failed to move the 'log' files into a local file"
 (docker exec "$MAPDL_INSTANCE" /bin/bash -c "if compgen -G '$WDIR*.crash' > /dev/null ;then mv -f $WDIR*.crash /mapdl_logs && echo 'Successfully moved crash files.'; fi") || echo "Failed to move the 'crash' files into a local file"
 
+docker cp "$MAPDL_INSTANCE":/home/mapdl/dpf_logs ./"$LOG_NAMES"/ || echo "Failed to copy the 'dpf_logs' files into a local directory"
 docker cp "$MAPDL_INSTANCE":/mapdl_logs/. ./"$LOG_NAMES"/. || echo "Failed to copy the 'log-build-docs' files into a local directory"
 
 ####
