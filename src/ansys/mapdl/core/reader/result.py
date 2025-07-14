@@ -635,10 +635,9 @@ class DPFResult:
             # Upload it to DPF if we are not in local
             if self.dpf_is_remote and not self._mapdl_dpf_on_same_machine:
                 self._upload_to_dpf()
-        else:  # mode_rst
-            if self.dpf_is_remote and not self.rst_is_on_remote:
-                # If the RST is not on the remote server, we need to upload it
-                self._upload_to_dpf()
+        elif self.dpf_is_remote and not self.rst_is_on_remote:
+            # If the RST is not on the remote server, we need to upload it
+            self._upload_to_dpf()
 
         # Updating model
         self._build_dpf_object()
