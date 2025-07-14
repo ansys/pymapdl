@@ -1462,7 +1462,7 @@ class MapdlGrpc(MapdlBase):
         return files
 
     @supress_logging
-    def sys(self, cmd, **kwargs):
+    def sys(self, cmd: str, **kwargs) -> str:
         """Pass a command string to the operating system.
 
         APDL Command: /SYS
@@ -1503,7 +1503,9 @@ class MapdlGrpc(MapdlBase):
             obj = self._download_as_raw(tmp_file).decode()
 
         self.slashdelete(tmp_file)
-        return obj
+
+        # Remove trailing newline character if present and only once
+        return obj[:-1] if (len(obj) > 0 and obj[-1] == "\n") else obj
 
     def download_result(
         self,
