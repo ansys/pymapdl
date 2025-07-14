@@ -63,11 +63,12 @@ jobs:
       PYMAPDL_DB_PORT2: 21003  # default won't work on GitHub runners
       DPF_DOCKER_IMAGE: ghcr.io/ansys/mapdl:v25.2-rocky-dpf-standalone
       DPF_PORT: 21014
+      DPF_PORT_INTERNAL: 50055 # Internal port for DPF server
       DPF_PORT2: 21015
       DPF_START_SERVER: False
       HAS_DPF: True
       TEST_DPF_BACKEND: false
-      PYTEST_ARGUMENTS: '-vvv -ra --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=5 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests --strict-markers'
+      PYTEST_ARGUMENTS: '-vvv -ra --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests --strict-markers'
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
 
     steps:
@@ -149,13 +150,16 @@ jobs:
           MAPDL_VERSION: ${{ inputs.mapdl-version }}
           DISTRIBUTED_MODE: ${{ steps.distributed_mode.outputs.distributed_mode }}
           MAPDL_PACKAGE: ${{ env.MAPDL_PACKAGE }}
+          DPF_PORT_INTERNAL: ${{ env.DPF_PORT_INTERNAL }}
         shell: bash
         run: |
           echo "Launching first MAPDL instance..."
           export INSTANCE_NAME=MAPDL_0
+          export RUN_DPF_SERVER=true
           .ci/start_mapdl.sh &> mapdl_launch_0.log & export DOCKER_PID_0=$!
 
           echo "Launching a second instance for MAPDL pool testing..."
+          export RUN_DPF_SERVER=false
           export PYMAPDL_PORT=${{ env.PYMAPDL_PORT2 }}
           export PYMAPDL_DB_PORT=${{ env.PYMAPDL_DB_PORT2 }}
           export INSTANCE_NAME=MAPDL_1
@@ -222,17 +226,6 @@ jobs:
         run: |
           python -m pip install .[tests]
 
-      - name: "Start DPF server on same container as MAPDL"
-        if: ${{ steps.ubuntu_check.outputs.ON_SAME_CONTAINER == 'true' }}
-        shell: bash
-        env:
-          MAPDL_INSTANCE: "MAPDL_0"
-          DPF_PORT: "${{ env.DPF_PORT }}"
-        run: |
-          docker ps
-          echo "Starting DPF server on same MAPDL container: ${MAPDL_INSTANCE}"
-          docker exec ${MAPDL_INSTANCE} /bin/bash -c "/ansys_inc/v252/aisol/bin/linx64/Ans.Dpf.Grpc.sh --port 50055 &" > log_dpf.log &
-
       - name: "Waiting for the services to be up"
         shell: bash
         env:
@@ -265,14 +258,14 @@ jobs:
             --log-file-level="DEBUG"
 
       - name: "Print amount of restarts"
+        if: always()
         run: |
           N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  MAPDL_0)
-          echo "Number of restarts in MAPDL_0 container: $N_RESTART"
+          echo "Number of restarts in the MAPDL_0 container: $N_RESTART"
           N_RESTART=$(docker inspect --format '{{ .RestartCount }}'  MAPDL_1)
-          echo "Number of restarts in MAPDL_1 container: $N_RESTART"
+          echo "Number of restarts in the MAPDL_1 container: $N_RESTART"
 
       - name: "Upload pytest reports to GitHub"
-        if: always()
         uses: actions/upload-artifact@v4.6.2
         with:
           name: "reports-${{ inputs.file-name }}"
