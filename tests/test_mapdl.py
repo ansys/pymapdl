@@ -39,12 +39,17 @@ import psutil
 import pytest
 
 from conftest import (
+    IS_SMP,
+    ON_CI,
+    ON_LOCAL,
     PATCH_MAPDL,
     PATCH_MAPDL_START,
+    QUICK_LAUNCH_SWITCHES,
     VALID_PORTS,
     NullContext,
     Running_test,
     has_dependency,
+    requires,
 )
 
 if has_dependency("pyvista"):
@@ -68,7 +73,6 @@ from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string, stack
 from ansys.mapdl.core.plotting import GraphicsBackend
-from conftest import IS_SMP, ON_CI, ON_LOCAL, QUICK_LAUNCH_SWITCHES, requires
 
 # Path to files needed for examples
 PATH = os.path.dirname(os.path.abspath(__file__))
