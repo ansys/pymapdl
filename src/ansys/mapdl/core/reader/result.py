@@ -1084,7 +1084,6 @@ class DPFResult:
 
         op = self._set_rescope(op, ids)
 
-        fc = op.outputs.fields_as_fields_container()[0]
         return op if return_operator else self._extract_data(op)
 
     def nodal_displacement(self, rnum, in_nodal_coord_sys=None, nodes=None):
