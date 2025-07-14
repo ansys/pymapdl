@@ -374,6 +374,7 @@ class MapdlGrpc(MapdlBase):
             ip = start_parm.pop("ip", None) or "127.0.0.1"
 
         # setting hostname
+        self._hostname: Optional[str] = None
         if not only_numbers_and_dots(ip):
             # it is a hostname
             self._hostname = ip
@@ -803,8 +804,9 @@ class MapdlGrpc(MapdlBase):
             else:
                 jobname = self._jobname
 
-            lockfile = os.path.join(directory, jobname + ".err")
-            lockfile0 = os.path.join(directory, jobname + "0.err")
+            lockfile = directory / (jobname + ".err")
+            lockfile0 = directory / (jobname + "0.err")
+
             if os.path.isfile(lockfile):
                 return
             if os.path.isfile(lockfile0):
@@ -1363,7 +1365,7 @@ class MapdlGrpc(MapdlBase):
 
         for filename in self.list_files():
             if "cleanup" in filename:  # Linux does not seem to generate this file?
-                script = os.path.join(self.directory, filename)
+                script = self.directory / filename
                 with open(script) as f:
                     raw = f.read()
 
@@ -1507,7 +1509,7 @@ class MapdlGrpc(MapdlBase):
         tmp_file = f"__tmp_sys_out_{random_string()}__"
         super().sys(f"{cmd} > {tmp_file}", **kwargs)
         if self._local:  # no need to download when local
-            with open(os.path.join(self.directory, tmp_file)) as fobj:
+            with open(self.directory / tmp_file) as fobj:
                 obj = fobj.read()
         else:
             obj = self._download_as_raw(tmp_file).decode()
@@ -2123,11 +2125,11 @@ class MapdlGrpc(MapdlBase):
                 filename = os.path.join(os.getcwd(), fname)
             elif not self._store_commands and fname in self.list_files():
                 # It exists in the Mapdl working directory
-                filename = os.path.join(self.directory, fname)
+                filename = self.directory / fname
             elif self._store_commands:
                 # Assuming that in non_interactive we have uploaded the file
                 # manually.
-                filename = os.path.join(self.directory, fname)
+                filename = self.directory / fname
             else:
                 # Finally
                 raise FileNotFoundError(f"Unable to locate filename '{fname}'")
@@ -2495,7 +2497,7 @@ class MapdlGrpc(MapdlBase):
         """Download files when we are on a local session."""
 
         if isinstance(files, str):
-            if not os.path.isdir(os.path.join(self.directory, files)):
+            if not os.path.isdir(self.directory / files):
                 list_files = self._validate_files(
                     files, extension=extension, recursive=recursive
                 )
@@ -2531,10 +2533,10 @@ class MapdlGrpc(MapdlBase):
                     f"The file {file} has been updated in the current working directory."
                 )
 
-            if os.path.isdir(os.path.join(self.directory, file)):
+            if os.path.isdir(self.directory / file):
                 if recursive:  # only copy the directory if recursive is true.
                     shutil.copytree(
-                        os.path.join(self.directory, file),
+                        self.directory / file,
                         target_dir,
                         dirs_exist_ok=True,
                     )
@@ -2545,7 +2547,7 @@ class MapdlGrpc(MapdlBase):
             else:
                 return_list_files.append(destination)
                 shutil.copy(
-                    os.path.join(self.directory, file),
+                    self.directory / file,
                     destination,
                 )
 
@@ -2605,7 +2607,7 @@ class MapdlGrpc(MapdlBase):
         if self.is_local:
             # filtering with glob (accepting *)
             if not os.path.dirname(file):
-                file = os.path.join(self.directory, file)
+                file = self.directory / file
             list_files = glob.glob(file + extension, recursive=recursive)
 
         else:
@@ -3068,7 +3070,7 @@ class MapdlGrpc(MapdlBase):
         """Save IGES geometry representation to disk"""
         basename = "_tmp.iges"
         if self._local:
-            filename = os.path.join(self.directory, basename)
+            filename = self.directory / basename
             self.igesout(basename, att=1)
         else:
             self.igesout(basename, att=1)
@@ -3096,8 +3098,8 @@ class MapdlGrpc(MapdlBase):
         rth_basename = "%s0.%s" % (filename, "rth")
         rst_basename = "%s0.%s" % (filename, "rst")
 
-        rth_file = os.path.join(self.directory, rth_basename)
-        rst_file = os.path.join(self.directory, rst_basename)
+        rth_file = self.directory / rth_basename
+        rst_file = self.directory / rst_basename
 
         if self._prioritize_thermal:
             if not os.path.isfile(rth_file):
@@ -3133,7 +3135,7 @@ class MapdlGrpc(MapdlBase):
             return None
 
         if self._local:
-            return open(os.path.join(self.directory, error_file)).read()
+            return open(self.directory / error_file).read()
         elif self._exited:
             raise MapdlExitedError(
                 "Cannot list error file when MAPDL Service has exited"

@@ -406,7 +406,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
         path = pathlib.Path(filename)
         if path.parent != ".":
-            path = os.path.join(self.directory, filename)
+            path = self.directory / filename
 
         path = str(path) + ext
         with open(path) as fid:

@@ -1021,7 +1021,7 @@ def test_WithInterativePlotting(mapdl, make_block):
     last_png = list_files[0]
 
     if mapdl.is_local:
-        last_png = os.path.join(mapdl.directory, last_png)
+        last_png = mapdl.directory / last_png
     else:
         mapdl.download(last_png)
 

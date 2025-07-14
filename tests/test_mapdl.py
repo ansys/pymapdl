@@ -1144,17 +1144,17 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
-    fullpath = os.path.join(mapdl.directory, "model.cdb")
+    fullpath = mapdl.directory / "model.cdb"
     mapdl.cdread("db", fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
-    fullpath = os.path.join(mapdl.directory, "model")
+    fullpath = mapdl.directory / "model"
     mapdl.cdread("db", fullpath, "cdb")
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
-    fullpath = os.path.join(mapdl.directory, "model")
+    fullpath = mapdl.directory / "model"
     mapdl.cdread("db", fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl)
 
@@ -1222,7 +1222,7 @@ def test_cwd(mapdl, cleared, tmpdir):
     if mapdl.is_local:
         tempdir_ = tmpdir
     else:
-        tempdir_ = os.path.join(mapdl.directory, "tmp")
+        tempdir_ = mapdl.directory / "tmp"
         mapdl.sys(f"mkdir tmp")
 
     try:
@@ -1574,7 +1574,7 @@ def test_file_command_local(mapdl, cube_solve, tmpdir):
         mapdl.file("potato")
 
     assert os.path.basename(rst_file) in mapdl.list_files()
-    rst_fpath = os.path.join(mapdl.directory, rst_file)
+    rst_fpath = str(mapdl.directory / rst_file)
 
     # change directory
     old_path = mapdl.directory
@@ -2562,7 +2562,7 @@ def test_lgwrite(mapdl, cleared, filename, ext, remove_grpc_extra, kedit):
     filename_ = f"{filename}.{ext}"
     assert filename_ in mapdl.list_files()
     if mapdl.is_local:
-        assert os.path.exists(os.path.join(mapdl.directory, filename_))
+        assert os.path.exists(mapdl.directory / filename_)
     else:
         assert os.path.exists(filename_)
 

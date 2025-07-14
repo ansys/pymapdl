@@ -32,7 +32,16 @@ import socket
 import string
 import tempfile
 from threading import Thread
-from typing import Callable, Dict, Iterable, List, Tuple, Union
+from typing import (
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    ParamSpec,
+    Tuple,
+    TypeVar,
+    Union,
+)
 from warnings import warn
 
 import numpy as np
@@ -56,6 +65,10 @@ class ROUTINES(Enum):
     AUX3 = 53
     AUX12 = 62
     AUX15 = 65
+
+
+P = ParamSpec("P")
+R = TypeVar("R")
 
 
 def check_valid_routine(routine: ROUTINES) -> bool:
@@ -133,11 +146,11 @@ def check_has_mapdl() -> bool:
         return False
 
 
-def supress_logging(func: Callable) -> Callable:
+def supress_logging(func: Callable[P, R]) -> Callable[P, R]:
     """Decorator to suppress logging for a MAPDL instance"""
 
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
         from ansys.mapdl.core.mapdl import MapdlBase
 
         mapdl = args[0]
