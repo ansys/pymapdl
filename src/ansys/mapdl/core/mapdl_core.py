@@ -1213,7 +1213,7 @@ class _MapdlCore(Commands):
         """Lockfile path"""
         path = self.directory
         if path is not None:
-            return path / (self.jobname + ".lock")
+            return path / f"{self.jobname}.lock"
 
     @property
     @supress_logging
@@ -2532,7 +2532,7 @@ class _MapdlCore(Commands):
 
     def _screenshot_path(self):
         """Return last filename based on the current jobname"""
-        filenames = glob.glob(self.directory / f"{self.jobname}*.png")
+        filenames = glob.glob(str(self.directory / f"{self.jobname}*.png"))
         filenames.sort()
         return filenames[-1]
 
