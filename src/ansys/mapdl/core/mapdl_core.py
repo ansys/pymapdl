@@ -1322,8 +1322,7 @@ class _MapdlCore(Commands):
                 if os.path.isfile(filename):
                     return filename
         else:
-            sep = "/" if self.platform == "linux" else r"\\"
-            return f"{self.directory}{sep}{filename}.{ext}"
+            return self.directory / f"{filename}.{ext}"
 
     def _wrap_listing_functions(self):
         # Wrapping LISTING FUNCTIONS.
