@@ -374,6 +374,7 @@ class MapdlGrpc(MapdlBase):
 
         # setting hostname and ip
         ip, hostname = get_ip_hostname(ip)
+        self._hostname = hostname
 
         check_valid_ip(ip)
         self._ip: str = ip
