@@ -884,10 +884,7 @@ class DPFResult:
 
         if requested_location == "nodal":
             scop.location = dpf.locations.nodal
-            if scope_ids:
-                scop.ids = scope_ids
-            else:
-                scop.ids = mesh.nodes.scoping.ids
+            scop.ids = scope_ids if scope_ids else mesh.nodes.scoping.ids
 
         elif requested_location == "elemental_nodal":
             if scope_ids:
@@ -922,15 +919,12 @@ class DPFResult:
 
         if not rnum:
             rnum = [int(1)]
+        elif isinstance(rnum, (int, float)):
+            rnum = [rnum]
+        elif isinstance(rnum, (list, tuple)):
+            rnum = [self.parse_step_substep(rnum)]
         else:
-            if isinstance(rnum, (int, float)):
-                rnum = [rnum]
-            elif isinstance(rnum, (list, tuple)):
-                rnum = [self.parse_step_substep(rnum)]
-            else:
-                raise TypeError(
-                    "Only 'int' and 'float' are supported to define the steps."
-                )
+            raise TypeError("Only 'int' and 'float' are supported to define the steps.")
 
         my_time_scoping = dpf.Scoping()
         my_time_scoping.location = "time_freq_steps"  # "time_freq"
@@ -1091,14 +1085,7 @@ class DPFResult:
         op = self._set_rescope(op, ids)
 
         fc = op.outputs.fields_as_fields_container()[0]
-        if fc.shell_layers is not dpf.shell_layers.nonelayer:
-            # check
-            pass
-
-        if return_operator:
-            return op
-        else:
-            return self._extract_data(op)
+        return op if return_operator else self._extract_data(op)
 
     def nodal_displacement(self, rnum, in_nodal_coord_sys=None, nodes=None):
         """Returns the DOF solution for each node in the global
@@ -1404,10 +1391,9 @@ class DPFResult:
                 **kwargs,
             )
             return self._get_principal(op)
-        else:
-            return self._get_elem_result(
-                rnum, "stress", in_element_coord_sys, elements, **kwargs
-            )
+        return self._get_elem_result(
+            rnum, "stress", in_element_coord_sys, elements, **kwargs
+        )
 
     def element_nodal_stress(
         self, rnum, principal=None, in_element_coord_sys=None, elements=None, **kwargs
@@ -1480,10 +1466,9 @@ class DPFResult:
                 **kwargs,
             )
             return self._get_principal(op)
-        else:
-            return self._get_elemnodal_result(
-                rnum, "stress", in_element_coord_sys, elements, **kwargs
-            )
+        return self._get_elemnodal_result(
+            rnum, "stress", in_element_coord_sys, elements, **kwargs
+        )
 
     def nodal_elastic_strain(self, rnum, in_nodal_coord_sys=False, nodes=None):
         """Nodal component elastic strains.  This record contains
@@ -2274,11 +2259,7 @@ class DPFResult:
                 data = field.data.tolist()
 
                 if data and len(data) > 0 and data[0] != 0:
-                    if len(data) == 1:
-                        mats[mat_id][each_label] = data[0]
-                    else:
-                        mats[mat_id][each_label] = data
-
+                    mats[mat_id][each_label] = data[0] if len(data) == 1 else data
         return mats
 
     def plot_nodal_stress(
@@ -2364,12 +2345,7 @@ class DPFResult:
 
     def element_lookup(self, element_id):
         """Index of the element within the result mesh"""
-        mapping = {
-            elem_: id_
-            for elem_, id_ in zip(
-                self._elements, np.arange(self.mesh.elements.n_elements)
-            )
-        }
+        mapping = dict(zip(self._elements, np.arange(self.mesh.elements.n_elements)))
         if element_id not in mapping:
             raise KeyError(
                 f"Element ID {element_id} not found in the result mesh. "
