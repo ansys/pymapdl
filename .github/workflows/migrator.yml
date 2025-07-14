@@ -438,14 +438,16 @@ jobs:
               issue_number: prNumber,
               body: `## :rocket: Migration completed!
 
-            The PR [#${newPrData.data.number}](${newPrData.data.html_url}) has been created successfully.
+            The pull request [#${newPrData.data.number}](${newPrData.data.html_url}) has been created successfully.
 
-            Thank you @${userTriggering} for your contribution! Please review the PR and make any necessary changes.
+            Thank you @${originalPR.user.login} for your contribution! Please review the new PR and make any necessary changes.
 
-            You can clone this branch in a new repository by doing:
+            This PR will be closed by the admins soon.
+            
+            You can now start to work in the new pull request by cloning this pull request branch in a new repository by doing:
 
             ~~~terminal
-            git clone -b ${prHeadBranch} --single-branch https://github.com/ansys/pymapdl.git
+            git clone -b ${prBaseBranch} --single-branch https://github.com/ansys/pymapdl.git
             ~~~
 
             If you have [GitHub CLI](https://cli.github.com/) installed, you can also use the following command to check out the pull request:
@@ -454,7 +456,7 @@ jobs:
             gh pr checkout https://github.com/ansys/pymapdl/pull/${prNumber}
             ~~~
 
-            This PR will be closed by the admins when the new PR has been checked to work.
+            Thank you again for your contribution @${originalPR.user.login}!
             `,
             });
 

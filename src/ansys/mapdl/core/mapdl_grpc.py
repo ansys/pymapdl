@@ -1513,7 +1513,9 @@ class MapdlGrpc(MapdlBase):
             obj = self._download_as_raw(tmp_file).decode()
 
         self.slashdelete(tmp_file)
-        return obj.strip()
+
+        # Remove trailing newline character if present and only once
+        return obj if obj[-1] != "\n" else obj[:-1]
 
     def download_result(
         self,
