@@ -169,6 +169,10 @@ def debug_testing() -> bool:
         return False
 
 
+def testing_dpf_backend() -> bool:
+    return os.environ.get("TEST_DPF_BACKEND", "NO").upper().strip() in ["YES", "TRUE"]
+
+
 def is_float(s: str) -> bool:
     try:
         float(s)
@@ -220,16 +224,8 @@ def get_details_of_elements(mapdl_) -> Dict[int, Node]:
     return elements
 
 
-def log_test_start(mapdl: Mapdl) -> None:
+def log_start_test(mapdl: Mapdl, test_name: str) -> None:
     """Print the current test to the MAPDL log file and console output."""
-    test_name = os.environ.get(
-        "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
-    )
-
-    mapdl.run("!")
-    mapdl.run(f"! PyMAPDL running test: {test_name}"[:639])
-    mapdl.run("!")
-
     # To see it also in MAPDL terminal output
     if len(test_name) > 75:
         # terminal output is limited to 75 characters
@@ -239,13 +235,19 @@ def log_test_start(mapdl: Mapdl) -> None:
         else:
             types_ = ["File path", "Test function"]
 
-        mapdl._run("/com,Running test in:", mute=True)
+        mapdl.com("Running test in:", mute=True)
 
         for type_, name_ in zip(types_, test_name_):
-            mapdl._run(f"/com,    {type_}: {name_}", mute=True)
+            mapdl.com(f"    {type_}: {name_}", mute=True)
 
     else:
-        mapdl._run(f"/com,Running test: {test_name}", mute=True)
+        mapdl.com(f"Running test: {test_name}", mute=True)
+
+
+def log_end_test(mapdl: Mapdl, test_name: str) -> None:
+    mapdl.com("!", mute=True)
+    mapdl.com(f"! End of test: {test_name.split('::')[1]}"[:639], mute=True)
+    mapdl.com("!", mute=True)
 
 
 def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:
@@ -265,9 +267,11 @@ def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:
         if ON_LOCAL:
             # First we try to reconnect
             try:
+                LOG.debug("Reconnecting to MAPDL...")
                 mapdl.reconnect_to_mapdl(timeout=5)
                 assert mapdl.finish()
 
+                LOG.debug("Reconnected to MAPDL successfully.")
                 return mapdl
 
             except MapdlConnectionError as e:
@@ -277,9 +281,11 @@ def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:
 
             # Killing the instance (just in case)
             try:
+
+                LOG.debug("Exiting MAPDL...")
                 mapdl.exit(force=True)
             except Exception as e:
-                pass
+                LOG.warning(f"Failed to exit MAPDL: {str(e)}")
 
             # Relaunching MAPDL
             LOG.debug("Relaunching MAPDL...")
