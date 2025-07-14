@@ -31,7 +31,6 @@ import os
 import pathlib
 import re
 import shutil
-import socket
 
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
@@ -87,8 +86,8 @@ from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat, MapdlInt
 from ansys.mapdl.core.misc import (
     check_valid_ip,
+    get_ip_hostname,
     last_created,
-    only_numbers_and_dots,
     random_string,
     run_as,
     supress_logging,
@@ -373,19 +372,9 @@ class MapdlGrpc(MapdlBase):
         if ip is None:
             ip = start_parm.pop("ip", None) or "127.0.0.1"
 
-        # setting hostname
-        self._hostname: Optional[str] = None
-        if not only_numbers_and_dots(ip):
-            # it is a hostname
-            self._hostname = ip
-            ip = socket.gethostbyname(ip)
-        else:
-            # it is an IP
-            self._hostname = (
-                "localhost"
-                if ip in ["127.0.0.1", "127.0.1.1", "localhost"]
-                else socket.gethostbyaddr(ip)[0]
-            )
+        # setting hostname and ip
+        ip, hostname = get_ip_hostname(ip)
+        self._hostname: str = hostname
 
         check_valid_ip(ip)
         self._ip: str = ip
@@ -1474,7 +1463,7 @@ class MapdlGrpc(MapdlBase):
         return files
 
     @supress_logging
-    def sys(self, cmd, **kwargs):
+    def sys(self, cmd: str, **kwargs) -> str:
         """Pass a command string to the operating system.
 
         APDL Command: /SYS
@@ -1515,7 +1504,9 @@ class MapdlGrpc(MapdlBase):
             obj = self._download_as_raw(tmp_file).decode()
 
         self.slashdelete(tmp_file)
-        return obj
+
+        # Remove trailing newline character if present and only once
+        return obj[:-1] if (len(obj) > 0 and obj[-1] == "\n") else obj
 
     def download_result(
         self,
