@@ -666,3 +666,23 @@ def stack(*decorators: Iterable[Callable]) -> Callable:
         return f
 
     return deco
+
+
+def get_ip_hostname(ip: str) -> Tuple[str, str]:
+    """Get ip and hostname"""
+    if not only_numbers_and_dots(ip):
+        # it is a hostname
+        hostname = ip
+        ip = socket.gethostbyname(ip)
+    else:
+        # it is an IP
+        if ip in ["127.0.0.1", "127.0.1.1", "localhost"]:
+            hostname = "localhost"
+        else:
+            try:
+                hostname = socket.gethostbyaddr(ip)[0]
+            except OSError:
+                # If the IP address does not resolve to a hostname, use the IP
+                hostname = ip
+
+    return ip, hostname
