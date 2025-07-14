@@ -169,7 +169,7 @@ def debug_testing() -> bool:
         return False
 
 
-def test_dpf_backend() -> bool:
+def testing_dpf_backend() -> bool:
     return os.environ.get("TEST_DPF_BACKEND", "NO").upper().strip() in ["YES", "TRUE"]
 
 
@@ -224,18 +224,8 @@ def get_details_of_elements(mapdl_) -> Dict[int, Node]:
     return elements
 
 
-def log_test(mapdl: Mapdl, end=False) -> None:
+def log_start_test(mapdl: Mapdl, test_name: str) -> None:
     """Print the current test to the MAPDL log file and console output."""
-    test_name = os.environ.get(
-        "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
-    )
-
-    if end:
-        mapdl.com("!", mute=True)
-        mapdl.com(f"! End of test: {test_name.split('::')[1]}"[:639], mute=True)
-        mapdl.com("!", mute=True)
-        return
-
     # To see it also in MAPDL terminal output
     if len(test_name) > 75:
         # terminal output is limited to 75 characters
@@ -252,6 +242,12 @@ def log_test(mapdl: Mapdl, end=False) -> None:
 
     else:
         mapdl.com(f"Running test: {test_name}", mute=True)
+
+
+def log_end_test(mapdl: Mapdl, test_name: str) -> None:
+    mapdl.com("!", mute=True)
+    mapdl.com(f"! End of test: {test_name.split('::')[1]}"[:639], mute=True)
+    mapdl.com("!", mute=True)
 
 
 def restart_mapdl(mapdl: Mapdl, test_name: str = "") -> Mapdl:

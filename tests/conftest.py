@@ -46,11 +46,12 @@ from common import (
     is_on_ubuntu,
     is_running_on_student,
     is_smp,
-    log_test,
+    log_end_test,
+    log_start_test,
     make_sure_not_instances_are_left_open,
     restart_mapdl,
     support_plotting,
-    test_dpf_backend,
+    testing_dpf_backend,
     testing_minimal,
 )
 
@@ -61,7 +62,7 @@ from common import (
 #
 DEBUG_TESTING = debug_testing()
 TESTING_MINIMAL = testing_minimal()
-TEST_DPF_BACKEND = test_dpf_backend()
+TEST_DPF_BACKEND = testing_dpf_backend()
 
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()
@@ -567,7 +568,7 @@ def run_before_and_after_tests(
 
     # Write test info to log_apdl
     if DEBUG_TESTING:
-        log_test(mapdl)
+        log_start_test(mapdl, test_name)
 
     # check if the local/remote state has changed or not
     prev = mapdl.is_local
@@ -577,7 +578,7 @@ def run_before_and_after_tests(
     yield  # this is where the testing happens
 
     if DEBUG_TESTING:
-        log_test(mapdl, end=True)
+        log_end_test(mapdl, test_name)
 
     mapdl.prep7()
 
