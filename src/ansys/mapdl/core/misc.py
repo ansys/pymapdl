@@ -668,7 +668,7 @@ def stack(*decorators: Iterable[Callable]) -> Callable:
     return deco
 
 
-def get_ip_hostname(ip):
+def get_ip_hostname(ip: str) -> Tuple[str, str]:
     """Get ip and hostname"""
     if not only_numbers_and_dots(ip):
         # it is a hostname
