@@ -46,10 +46,11 @@ from common import (
     is_on_ubuntu,
     is_running_on_student,
     is_smp,
-    log_test_start,
+    log_test,
     make_sure_not_instances_are_left_open,
     restart_mapdl,
     support_plotting,
+    test_dpf_backend,
     testing_minimal,
 )
 
@@ -60,6 +61,7 @@ from common import (
 #
 DEBUG_TESTING = debug_testing()
 TESTING_MINIMAL = testing_minimal()
+TEST_DPF_BACKEND = test_dpf_backend()
 
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()
@@ -395,9 +397,10 @@ class MyReporter(TerminalReporter):
         def get_error_message(rep: CollectReport):
             if hasattr(rep.longrepr, "reprcrash"):
                 message = str(rep.longrepr.reprcrash.message)
-            else:
-                # Error string
+            elif hasattr(rep.longrepr, "errorstring"):
                 message = str(rep.longrepr.errorstring)
+            else:
+                raise Exception(str(rep.longrepr))
 
             header = markup("[ERROR]", **ERROR_COLOR)
             return get_failure_message(rep, header, message)
@@ -564,7 +567,7 @@ def run_before_and_after_tests(
 
     # Write test info to log_apdl
     if DEBUG_TESTING:
-        log_test_start(mapdl)
+        log_test(mapdl)
 
     # check if the local/remote state has changed or not
     prev = mapdl.is_local
@@ -572,6 +575,9 @@ def run_before_and_after_tests(
     assert not mapdl.mute
 
     yield  # this is where the testing happens
+
+    if DEBUG_TESTING:
+        log_test(mapdl, end=True)
 
     mapdl.prep7()
 
@@ -717,7 +723,7 @@ def mapdl(request, tmpdir_factory):
         cleanup_on_exit=cleanup,
         license_server_check=False,
         start_timeout=50,
-        loglevel="ERROR",  # Because Pytest captures all output
+        loglevel="DEBUG",  # Because Pytest captures all output
         # If the following file names are changed, update `ci.yml`.
         log_apdl="pymapdl.apdl" if DEBUG_TESTING else None,
         mapdl_output="apdl.out" if (DEBUG_TESTING and ON_LOCAL) else None,
