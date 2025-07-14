@@ -925,9 +925,7 @@ class DPFResult:
         elif isinstance(rnum, (list, tuple)):
             rnum = [self.parse_step_substep(rnum)]
         else:
-            raise TypeError(
-                "Only 'int' and 'float' are supported to define the steps."
-            )
+            raise TypeError("Only 'int' and 'float' are supported to define the steps.")
 
         my_time_scoping = dpf.Scoping()
         my_time_scoping.location = "time_freq_steps"  # "time_freq"
@@ -2348,9 +2346,7 @@ class DPFResult:
 
     def element_lookup(self, element_id):
         """Index of the element within the result mesh"""
-        mapping = dict(
-            zip(self._elements, np.arange(self.mesh.elements.n_elements))
-        )
+        mapping = dict(zip(self._elements, np.arange(self.mesh.elements.n_elements)))
         if element_id not in mapping:
             raise KeyError(
                 f"Element ID {element_id} not found in the result mesh. "
