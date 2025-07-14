@@ -66,7 +66,7 @@ fi;
 if [[ $MAPDL_VERSION == *"cicd"* ]] ; then
     echo "It is a CICD version, binding DPF port too"
     if [ "$RUN_DPF_SERVER" == "true" ]; then
-        echo "RUN_DPF_SERVER is not set to true, starting DPF server"
+        echo "RUN_DPF_SERVER is set to true, starting DPF server"
         export DPF_ON="-e ANSYS_DPF_ACCEPT_LA=Y"
     fi
 

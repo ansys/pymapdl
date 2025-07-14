@@ -1132,11 +1132,7 @@ class _MapdlCore(Commands):
 
         if not self._local:
             # download to temporary directory
-            save_path = os.path.join(
-                tempfile.gettempdir(), f"ansys_tmp_{random_string()}"
-            )
-            if not os.path.exists(save_path):
-                os.mkdir(save_path)
+            save_path = tempfile.mkdtemp(suffix=f"ansys_tmp_{random_string()}")
             result_path = self.download_result(save_path)
         else:
             if self._distributed_result_file and self._result_file:
