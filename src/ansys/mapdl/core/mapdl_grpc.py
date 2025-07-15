@@ -2598,7 +2598,7 @@ class MapdlGrpc(MapdlBase):
         if self.is_local:
             # filtering with glob (accepting *)
             if not os.path.dirname(file):
-                file = self.directory / file
+                file = str(self.directory / file)
             list_files = glob.glob(file + extension, recursive=recursive)
 
         else:
