@@ -2490,7 +2490,6 @@ class MapdlGrpc(MapdlBase):
         recursive: bool = False,
     ) -> List[str]:
         """Download files when we are on a local session."""
-
         if isinstance(files, str):
             if not os.path.isdir(self.directory / files):
                 list_files = self._validate_files(
@@ -2498,6 +2497,9 @@ class MapdlGrpc(MapdlBase):
                 )
             else:
                 list_files = [files]
+
+        elif isinstance(files, pathlib.PurePath):
+            list_files = [str(files)]
 
         elif isinstance(files, (list, tuple)):
             if not all([isinstance(each, str) for each in files]):
@@ -2512,7 +2514,7 @@ class MapdlGrpc(MapdlBase):
 
         else:
             raise ValueError(
-                f"The `file` parameter type ({type(files)}) is not supported."
+                f"The `file` parameter type ({type(files)}) is not supported. "
                 "Only strings, tuple of strings or list of strings are allowed."
             )
 
@@ -3186,11 +3188,11 @@ class MapdlGrpc(MapdlBase):
         fname = self._get_file_name(fname, ext, "cdb")
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
         file_, ext_, _ = self._decompose_fname(fname)
-        fname = fname[: -len(ext_) - 1]  # Removing extension. -1 for the dot.
+
         if self._local:
-            return self._file(filename=fname, extension=ext_, **kwargs)
+            return self._file(filename=fname, **kwargs)
         else:
-            return self._file(filename=file_, extension=ext_)
+            return self._file(filename=file_, extension=ext_, **kwargs)
 
     @wraps(MapdlBase.vget)
     def vget(
