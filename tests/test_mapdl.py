@@ -1285,13 +1285,23 @@ def test_inquire_jobname(mapdl, cleared):
     assert jobname
 
 
-def test_inquire_exist(mapdl, cleared):
-    existing_file = [each for each in mapdl.list_files() if each.endswith(".log")][0]
-    assert isinstance(mapdl.inquire("", "exist", existing_file), bool)
-    assert isinstance(mapdl.inquire("", "exist", "unexisting_file.myext"), bool)
+def test_inquire_exist(mapdl, cleared, tmpdir):
+    try:
+        existing_file = tempfile.mkstemp(suffix=".log")[1]
+        mapdl.upload(existing_file)
 
-    assert mapdl.inquire("", "exist", existing_file)
-    assert not mapdl.inquire("", "exist", "unexisting_file.myext")
+        basename = os.path.basename(existing_file)
+        assert isinstance(mapdl.inquire("", "exist", basename), bool)
+        assert isinstance(mapdl.inquire("", "exist", "unexisting_file.myext"), bool)
+
+        assert mapdl.inquire("", "exist", basename)
+        assert not mapdl.inquire("", "exist", "unexisting_file.myext")
+
+    finally:
+        # Clean up the temporary file
+        if os.path.exists(existing_file):
+            os.remove(existing_file)
+        mapdl.slashdelete(basename)
 
 
 def test_inquire_non_interactive(mapdl, cleared):
@@ -1562,7 +1572,7 @@ def test_equal_in_comments_and_title(mapdl, cleared):
 
 def test_result_file(mapdl, solved_box):
     assert mapdl.result_file
-    assert isinstance(mapdl.result_file, str)
+    assert isinstance(mapdl.result_file, (str, pathlib.PurePath))
 
 
 @requires("local")

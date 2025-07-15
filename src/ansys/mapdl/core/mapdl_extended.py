@@ -109,7 +109,7 @@ class _MapdlCommandExtended(_MapdlCore):
         file_, ext_, _ = self._decompose_fname(fname)
         return self._file(file_, ext_, **kwargs)
 
-    def _file(self, filename: str, extension: str, **kwargs) -> str:
+    def _file(self, filename: str = "", extension: str = "", **kwargs) -> str:
         """Run the MAPDL ``file`` command with a proper filename."""
         return self.run(f"FILE,{filename},{extension}", **kwargs)
 
