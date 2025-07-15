@@ -2149,7 +2149,7 @@ class MapdlGrpc(MapdlBase):
 
     def _get_file_name(
         self,
-        fname: str,
+        fname: str | pathlib.PurePath,
         ext: Optional[str] = None,
         default_extension: Optional[str] = None,
     ) -> str:
@@ -2171,6 +2171,8 @@ class MapdlGrpc(MapdlBase):
 
         # the old behaviour is to supplied the name and the extension separately.
         # to make it easier let's going to allow names with extensions
+        if not isinstance(fname, str):
+            fname = str(fname)
 
         # Sanitizing ext
         while ext and ext[0] == ".":

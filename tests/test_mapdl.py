@@ -2746,7 +2746,7 @@ def test_cwd_changing_directory(mapdl, cleared):
 @pytest.mark.parametrize(
     "platform, class_, contextmanager",
     [
-        [None, str, NullContext()],
+        [None, pathlib.PurePath, NullContext()],
         ["windows", pathlib.PureWindowsPath, NullContext()],
         ["linux", pathlib.PurePosixPath, NullContext()],
         [
