@@ -737,9 +737,9 @@ class DPFResult:
 
     def _get_entities_ids(
         self,
-        entities: str | int | float | Iterable[str | int | float],
+        entities: str | int | float | Iterable[str | int | float] | None,
         entity_type: str = "Nodal",
-    ) -> Iterable[int | float]:
+    ) -> Iterable[int | float] | None:
         """Get entities ids given their ids, or component names.
 
         If a list is given it checks can be int, floats, or list/tuple of int/floats, or
@@ -777,7 +777,10 @@ class DPFResult:
         else:
             entity_type = entity_type.title()  # Sanity check
 
-        if isinstance(entities, (int, float, str)):
+        if entities is None:
+            return None
+
+        elif isinstance(entities, (int, float, str)):
             entities = [entities]
 
         if isinstance(entities, Iterable):  # type: ignore
