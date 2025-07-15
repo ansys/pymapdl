@@ -1322,7 +1322,7 @@ class _MapdlCore(Commands):
                 if os.path.isfile(filename):
                     return filename
         else:
-            return self.directory / f"{filename}.{ext}"
+            return f"{filename}.{ext}"
 
     def _wrap_listing_functions(self):
         # Wrapping LISTING FUNCTIONS.
