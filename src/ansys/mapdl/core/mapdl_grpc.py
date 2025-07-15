@@ -408,7 +408,9 @@ class MapdlGrpc(MapdlBase):
         self._cleanup: bool = cleanup_on_exit
         self.remove_temp_dir_on_exit: bool = remove_temp_dir_on_exit
         self._jobname: str = start_parm.get("jobname", "file")
-        self._path: Optional[str] = self._wrap_directory(start_parm.get("run_location"))
+        self._path: Optional[str] = (
+            None  # self._wrap_directory(start_parm.get("run_location"))
+        )
         self._start_instance: Optional[str] = (
             start_parm.get("start_instance") or get_start_instance()
         )

@@ -315,8 +315,8 @@ class _MapdlCore(Commands):
         _sanitize_start_parm(start_parm)
         self._start_parm: Dict[str, Any] = start_parm
         self._jobname: str = start_parm.get("jobname", "file")
-        self._path: pathlib.PurePath = self._wrap_directory(
-            start_parm.get("run_location")
+        self._path: str | pathlib.PurePath | None = (
+            None  # start_parm.get("run_location", None)
         )
         self._check_parameter_names: bool = start_parm.get(
             "check_parameter_names", True
