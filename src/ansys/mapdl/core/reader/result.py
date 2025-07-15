@@ -500,10 +500,6 @@ class DPFResult:
 
         self._connect_to_dpf(ip, port)
 
-    def _dpf_remote_envvars(self):
-        """Return True if any of the env variables are set"""
-        return "DPF_IP" in os.environ or "DPF_PORT" in os.environ
-
     @property
     def dpf_is_remote(self) -> bool:
         """Returns True if we are connected to the DPF Server using a gRPC connection to a remote IP."""
@@ -781,10 +777,7 @@ class DPFResult:
         else:
             entity_type = entity_type.title()  # Sanity check
 
-        if entities is None:
-            return entities
-
-        elif isinstance(entities, (int, float, str)):
+        if isinstance(entities, (int, float, str)):
             entities = [entities]
 
         if isinstance(entities, Iterable):  # type: ignore
@@ -2683,7 +2676,7 @@ class DPFResult:
         for each_comp in self.mesh.available_named_selections:
             scoping = self.mesh.named_selection(each_comp)
             if scoping.location == LOCATION_MAPPING[entity]:
-                entity_comp[each_comp] = scoping.ids.tolist()
+                entity_comp[each_comp] = tuple(scoping.ids.tolist())
 
         return entity_comp
 

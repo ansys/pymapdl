@@ -76,6 +76,7 @@ from ansys.mapdl.core.examples import (
     electrothermal_microactuator_analysis,
     elongation_of_a_solid_bar,
     modal_analysis_of_a_cyclic_symmetric_annular_plate,
+    nonaxisymmetric_vibration_of_a_stretched_circular_membrane,
     piezoelectric_rectangular_strip_under_pure_bending_load,
     pinched_cylinder,
     transient_response_of_a_ball_impacting_a_flexible_surface,
@@ -345,15 +346,60 @@ class Example:
     def test_mesh_enum(self, mapdl, reader, result):
         assert np.allclose(reader.mesh.enum, result._elements)
 
+    def test_mode(self, result):
+        assert result.mode == "RST", "DPFResult mode is not set to 'RST'."
 
-def test_error_initialization():
-    """Test that DPFResult raises an error if the mapdl instance is not provided."""
+    def test_rst(self, result):
+        """Test that the RST file path is set correctly."""
+        assert result._rst is not None
+
+    def test_grid(self, result):
+        """Test that the grid is set correctly."""
+        assert result.grid is not None, "DPFResult grid is not set."
+
+    @pytest.mark.parametrize(
+        "entity, match",
+        [
+            ["notnodal", "The named selection 'notnodal' does not exist"],
+            [[1, 2, "asdf"], "Strings and numbers are not allowed together."],
+        ],
+    )
+    def test__get_entities_ids_fail(self, result, entity, match):
+        """Test that the entity IDs are retrieved correctly."""
+        # Test with nodes
+        with pytest.raises(ValueError, match=match):
+            result._get_entities_ids(entity)
+
+    def test__get_entities_ids_ints(self, result):
+        """Test that the entity IDs are retrieved correctly."""
+        # Test with nodes
+        assert [1, 2, 3] == result._get_entities_ids([1, 2, 3])
+
+
+def test_error_initialization_none():
     from ansys.mapdl.core.reader.result import DPFResult
 
     with pytest.raises(
         ValueError, match="One of the following kwargs must be supplied"
     ):
         DPFResult()
+
+
+def test_error_initialization_both():
+    from ansys.mapdl.core.reader.result import DPFResult
+
+    with pytest.raises(ValueError, match="Only one the arguments must be supplied"):
+        DPFResult(rst_file_path="", mapdl="")
+
+
+def test_error_initialization_rst_file_not_found():
+    from ansys.mapdl.core.reader.result import DPFResult
+
+    rst_file_path = "my_unexisting_rst_file.rst"
+    with pytest.raises(
+        ValueError, match=f"The RST file '{rst_file_path}' could not be found."
+    ):
+        DPFResult(rst_file_path=rst_file_path)
 
 
 @pytest.mark.skipif(ON_LOCAL, reason="Skip on local machine")
@@ -394,7 +440,7 @@ def test_upload(mapdl, solved_box, tmpdir):
 
 class TestDPFResult:
     # This class tests the DPFResult functionality without comparing it with
-    # PyMAPDL-Reader or Post_Processing results.
+    # PyMAPDL-Reader or Post_Processing results to avoid file access issues
 
     @pytest.fixture(scope="class")
     def result(self, mapdl):
@@ -468,6 +514,32 @@ class TestDPFResult:
 
         assert disp_dpf.max() == disp_mapdl.max()
         assert disp_dpf.min() == disp_mapdl.min()
+
+    def test_is_same_machine(result):
+        assert (
+            result._mapdl_dpf_on_same_machine() is True
+        ), "DPF is not on the same machine as MAPDL."
+
+    def test_dpf_ip(result):
+        assert result.dpf_ip is not None, "DPF IP is not set."
+
+    def test_mapdl(result):
+        from ansys.mapdl.core import Mapdl
+
+        assert result.mapdl is not None, "MAPDL instance is not set in DPFResult."
+        assert result.mapdl._use_reader_backend is False
+        assert isinstance(result.mapdl, Mapdl), "MAPDL instance is not of type Mapdl."
+
+    def test_set_logger_fail(result):
+        """Test that setting a logger raises an error."""
+        with pytest.raises(
+            ValueError,
+            match="Cannot set logger in MAPDL mode. Use the MAPDL instance methods ",
+        ):
+            result.logger = "adsf"
+
+    def test_mode(result):
+        assert result.mode == "MAPDL", "DPFResult mode is not set to 'MAPDL'."
 
 
 class TestStaticThermocoupledExample(Example):
@@ -1118,3 +1190,52 @@ class TestModalAnalysisofaCyclicSymmetricAnnularPlateVM244(Example):
     @pytest.mark.parametrize("id_", [1, 2, 3, 4, 500, 464])
     def test_element_lookup(self, mapdl, reader, result, id_):
         assert reader.element_lookup(id_) == result.element_lookup(id_)
+
+
+class TestNonaxisymmetric_vibration_of_a_stretched_circular_membrane(Example):
+    example = nonaxisymmetric_vibration_of_a_stretched_circular_membrane
+    example_name = "Non-axisymmetric Vibration of a Stretched Circular Membrane VM153"
+
+    def test_element_stress_ids(self, result):
+        elems = [1, 2, 3, 4, 5, 6, 7, 8]
+        elems_, results = result.element_stress(0, elements=elems)
+        assert (elems_ == elems).all()
+        assert results.shape == (
+            8,
+            6,
+        ), "Element stress should have 6 components for each element."
+
+    @pytest.mark.parametrize(
+        "values",
+        [
+            ["RIGHT"],
+            ["LEFT", "RIGHT"],
+        ],
+    )
+    def test_nodal_stress_components(self, result, values):
+        elems_, results = result.nodal_stress(0, nodes=values)
+        assert len(elems_) > 0
+        assert (
+            results.shape
+        ), "Element stress should have 6 components for each element."
+
+    @pytest.mark.parametrize(
+        "values",
+        [
+            ["RIGHT"],
+            ["LEFT", "RIGHT"],
+        ],
+    )
+    def test_retrieving_elemental_values_from_nodal_components_failure(
+        self, result, values
+    ):
+        """Test that retrieving elemental values from nodal components fails."""
+        with pytest.raises(
+            ValueError,
+            match="does not contain Elemental information",
+        ):
+            result.element_stress(0, elements=values)
+
+    @pytest.mark.xfail(reason="To be fixed later.")
+    def test_mesh_enum(self, mapdl, reader, result):
+        assert np.allclose(reader.mesh.enum, result._elements)
