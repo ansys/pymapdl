@@ -1164,9 +1164,9 @@ class _MapdlCore(Commands):
 
         if result_path is None or not os.path.isfile(result_path):
             raise FileNotFoundError(
-                f"No result file(s) at {self.directory or result_path}. "
+                f"No result file(s) at {result_path or self.directory}. "
                 "Check that there is at least one RST file in the working directory "
-                f"'{self.directory}, or solve an MAPDL model to generate one."
+                f"'{self.directory}', or solve an MAPDL model to generate one."
             )
 
         return read_binary(result_path)
