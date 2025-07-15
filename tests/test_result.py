@@ -515,22 +515,22 @@ class TestDPFResult:
         assert disp_dpf.max() == disp_mapdl.max()
         assert disp_dpf.min() == disp_mapdl.min()
 
-    def test_is_same_machine(result):
+    def test_is_same_machine(self, result):
         assert (
             result._mapdl_dpf_on_same_machine() is True
         ), "DPF is not on the same machine as MAPDL."
 
-    def test_dpf_ip(result):
+    def test_dpf_ip(self, result):
         assert result.dpf_ip is not None, "DPF IP is not set."
 
-    def test_mapdl(result):
+    def test_mapdl(self, result):
         from ansys.mapdl.core import Mapdl
 
         assert result.mapdl is not None, "MAPDL instance is not set in DPFResult."
         assert result.mapdl._use_reader_backend is False
         assert isinstance(result.mapdl, Mapdl), "MAPDL instance is not of type Mapdl."
 
-    def test_set_logger_fail(result):
+    def test_set_logger_fail(self, result):
         """Test that setting a logger raises an error."""
         with pytest.raises(
             ValueError,
@@ -538,7 +538,7 @@ class TestDPFResult:
         ):
             result.logger = "adsf"
 
-    def test_mode(result):
+    def test_mode(self, result):
         assert result.mode == "MAPDL", "DPFResult mode is not set to 'MAPDL'."
 
 
