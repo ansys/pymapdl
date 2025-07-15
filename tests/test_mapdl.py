@@ -1288,16 +1288,22 @@ def test_inquire_jobname(mapdl, cleared):
 def test_inquire_exist(mapdl, cleared, tmpdir):
     try:
         existing_file = tempfile.mkstemp(suffix=".log")[1]
+
+        with open(existing_file, "w") as f:
+            f.write("This is a test file for inquire exist.")
+
         mapdl.upload(existing_file)
 
         basename = os.path.basename(existing_file)
         if mapdl.is_local:
             assert isinstance(mapdl.inquire("", "exist", existing_file), bool)
+            assert mapdl.inquire("", "exist", basename)
         else:
             assert isinstance(mapdl.inquire("", "exist", basename), bool)
+            assert mapdl.inquire("", "exist", basename)
+
         assert isinstance(mapdl.inquire("", "exist", "unexisting_file.myext"), bool)
 
-        assert mapdl.inquire("", "exist", basename)
         assert not mapdl.inquire("", "exist", "unexisting_file.myext")
 
     finally:
