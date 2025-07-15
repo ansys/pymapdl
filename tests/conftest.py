@@ -216,13 +216,14 @@ if has_dependency("ansys-tools-path"):
 if has_dependency("pyvista"):
     import pyvista
 
+    # Necessary for CI plotting
+    pyvista.OFF_SCREEN = True
+    pyvista.global_theme.allow_empty_mesh = True
+
     from ansys.mapdl.core.plotting.theme import _apply_default_theme
 
     _apply_default_theme()
 
-    # Necessary for CI plotting
-    pyvista.OFF_SCREEN = True
-    pyvista.global_theme.allow_empty_mesh = True
 
 import ansys.mapdl.core as pymapdl
 
