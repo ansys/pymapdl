@@ -352,7 +352,7 @@ class MapdlGrpc(MapdlBase):
         disable_run_at_connect: bool = False,
         channel: Optional[grpc.Channel] = None,
         remote_instance: Optional["PIM_Instance"] = None,
-        **start_parm,
+        **start_parm: dict[str, Any],
     ):
         """Initialize connection to the mapdl server"""
         self._name: Optional[str] = None
@@ -408,7 +408,7 @@ class MapdlGrpc(MapdlBase):
         self._cleanup: bool = cleanup_on_exit
         self.remove_temp_dir_on_exit: bool = remove_temp_dir_on_exit
         self._jobname: str = start_parm.get("jobname", "file")
-        self._path: Optional[str] = start_parm.get("run_location", None)
+        self._path: Optional[str] = self._wrap_directory(start_parm.get("run_location"))
         self._start_instance: Optional[str] = (
             start_parm.get("start_instance") or get_start_instance()
         )

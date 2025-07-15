@@ -264,7 +264,7 @@ class _MapdlCore(Commands):
         local: bool = True,
         print_com: bool = False,
         file_type_for_plots: VALID_FILE_TYPE_FOR_PLOT_LITERAL = "PNG",
-        **start_parm,
+        **start_parm: dict[str, Any],
     ):
         """Initialize connection with MAPDL."""
         self._show_matplotlib_figures = True  # for testing
@@ -315,8 +315,12 @@ class _MapdlCore(Commands):
         _sanitize_start_parm(start_parm)
         self._start_parm: Dict[str, Any] = start_parm
         self._jobname: str = start_parm.get("jobname", "file")
-        self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
-        self._check_parameter_names = start_parm.get("check_parameter_names", True)
+        self._path: pathlib.PurePath = self._wrap_directory(
+            start_parm.get("run_location")
+        )
+        self._check_parameter_names: bool = start_parm.get(
+            "check_parameter_names", True
+        )
 
         # Setting up loggers
         self._log: logger = logger.add_instance_logger(
@@ -501,7 +505,7 @@ class _MapdlCore(Commands):
     def _wrap_directory(self, path: str) -> pathlib.PurePath:
         if self._platform is None:
             # MAPDL is not initialized yet so returning the path as is.
-            return path
+            return pathlib.PurePath(path)
 
         if self._platform == "windows":
             # Windows path

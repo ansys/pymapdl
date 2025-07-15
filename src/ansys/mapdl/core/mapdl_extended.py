@@ -382,7 +382,7 @@ class _MapdlCommandExtended(_MapdlCore):
         except MapdlCommandIgnoredError as e:
             raise IncorrectWorkingDirectory(e.args[0])
 
-        self._path = args[0]  # caching
+        self._path = self._wrap_directory(args[0])  # caching
         return output
 
     @wraps(_MapdlCore.list)
