@@ -1291,7 +1291,10 @@ def test_inquire_exist(mapdl, cleared, tmpdir):
         mapdl.upload(existing_file)
 
         basename = os.path.basename(existing_file)
-        assert isinstance(mapdl.inquire("", "exist", basename), bool)
+        if mapdl.is_local:
+            assert isinstance(mapdl.inquire("", "exist", existing_file), bool)
+        else:
+            assert isinstance(mapdl.inquire("", "exist", basename), bool)
         assert isinstance(mapdl.inquire("", "exist", "unexisting_file.myext"), bool)
 
         assert mapdl.inquire("", "exist", basename)
