@@ -62,6 +62,7 @@ from ansys.mapdl.core.errors import (
     PortAlreadyInUseByAnMAPDLInstance,
     VersionError,
 )
+from ansys.mapdl.core.helpers import is_installed
 from ansys.mapdl.core.licensing import ALLOWABLE_LICENSES, LicenseChecker
 from ansys.mapdl.core.mapdl_core import _ALLOWED_START_PARM  # type: ignore
 from ansys.mapdl.core.mapdl_grpc import MAX_MESSAGE_LENGTH, MapdlGrpc
@@ -93,8 +94,14 @@ if _HAS_ATP:
             return _version_from_path(*args, **kwargs)
 
 
+HAS_PARAMIKO = is_installed("paramiko")
+
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl_console import MapdlConsole
+
+    if HAS_PARAMIKO:
+        from paramiko import SSHClient
+
 
 # settings directory
 SETTINGS_DIR = pymapdl.USER_DATA_PATH
@@ -530,7 +537,7 @@ def launch_grpc(
     env_vars: Optional[Dict[str, str]] = None,
     launch_on_hpc: bool = False,
     mapdl_output: Optional[str] = None,
-    ssh_session=None,
+    ssh_session: "SSHClient | None" = None,
 ) -> subprocess.Popen[bytes]:
     """Start MAPDL locally in gRPC mode.
 
@@ -2823,7 +2830,9 @@ def launch_mapdl_on_cluster(
 
 
 def get_hostname_host_cluster(
-    job_id: int, timeout: int = 30, ssh_session=None
+    job_id: int,
+    timeout: int = 30,
+    ssh_session: "SSHClient | None" = None,
 ) -> tuple[str, str]:
     options = f"show jobid -dd {job_id}"
     LOG.debug(f"Executing the command 'scontrol {options}'")
@@ -3003,7 +3012,7 @@ def get_job_info(
     start_parm: Dict[str, str],
     jobid: Optional[int] = None,
     timeout: int = 30,
-    ssh_session=None,
+    ssh_session: "SSHClient | None" = None,
 ):
     """Get job info like BatchHost IP and hostname
 
@@ -3034,12 +3043,12 @@ def get_job_info(
     start_parm["jobid"] = jobid
 
 
-def kill_job(jobid: int, ssh_session=None):
+def kill_job(jobid: int, ssh_session: "SSHClient | None" = None):
     """Kill SLURM job"""
     submitter(["scancel", str(jobid)], ssh_session=ssh_session)
 
 
-def send_scontrol(args: str, ssh_session=None):
+def send_scontrol(args: str, ssh_session: "SSHClient | None" = None):
     cmd = f"scontrol {args}".split(" ")
     return submitter(cmd, ssh_session=ssh_session)
 
@@ -3049,12 +3058,12 @@ def submitter(
     *,
     executable: str | None = None,
     shell: bool = False,
-    cwd: str = None,
-    stdin: subprocess.PIPE = None,
-    stdout: subprocess.PIPE = None,
-    stderr: subprocess.PIPE = None,
-    env_vars: dict[str, str] = None,
-    ssh_session=None,
+    cwd: str | None = None,
+    stdin: int | None = None,
+    stdout: int | None = None,
+    stderr: int | None = None,
+    env_vars: dict[str, str] | None = None,
+    ssh_session: "SSHClient | None" = None,
 ):
 
     if executable:
