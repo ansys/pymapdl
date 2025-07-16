@@ -241,5 +241,4 @@ class ansPlugin:
             raise PluginError("Failed to retrieve the list of loaded plugins.")
 
         # Parse response and extract plugin names (assuming response is newline-separated text)
-        plugins = [line.strip() for line in response.splitlines() if line.strip()]
-        return plugins
+        return []

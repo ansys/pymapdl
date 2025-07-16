@@ -94,3 +94,11 @@ def test_deleter_commands(plugins, dpf_load_response):
         assert not hasattr(
             plugins._mapdl, command
         ), f"Command {command} should be deleted"
+
+
+def test_unload_plugin_twice(plugins):
+    plugins.load(TEST_PLUGIN)
+    assert f"Close of the {TEST_PLUGIN} Plugin" in plugins.unload(TEST_PLUGIN)
+    assert (
+        plugins.unload(TEST_PLUGIN) == ""
+    ), "Unloading a plugin twice should return an empty string"
