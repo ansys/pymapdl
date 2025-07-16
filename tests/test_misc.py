@@ -159,8 +159,7 @@ def test_load_file_local(mapdl, cleared, tmpdir, file_):
     assert os.path.exists(file_path)
 
     if mapdl.is_local:
-        pth = os.path.join(mapdl.directory, file_)
-        assert not os.path.exists(pth)
+        assert not os.path.exists(mapdl.directory / file_)
     else:
         assert file_ not in mapdl.list_files()
 
@@ -170,10 +169,9 @@ def test_load_file_local(mapdl, cleared, tmpdir, file_):
     assert os.path.exists(file_path)
 
     if mapdl.is_local:
-        pth = os.path.join(mapdl.directory, file_)
-        assert os.path.exists(pth)
+        assert os.path.exists(mapdl.directory / file_)
 
-        with open(os.path.join(mapdl.directory, file_), "r") as fid:
+        with open(mapdl.directory / file_, "r") as fid:
             assert "empty" in fid.read()
 
     else:
@@ -195,7 +193,7 @@ def test_load_file_local(mapdl, cleared, tmpdir, file_):
     load_file(mapdl, file_path, priority_mapdl_file=False)
 
     if mapdl.is_local:
-        file_name__ = os.path.join(mapdl.directory, file_)
+        file_name__ = mapdl.directory / file_
         with open(file_name__, "r") as fid:
             assert "not that empty" in fid.read()
         os.remove(file_name__)

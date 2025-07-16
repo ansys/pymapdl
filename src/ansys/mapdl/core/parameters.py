@@ -677,7 +677,7 @@ class Parameters:
             arr = arr.astype(np.double)
 
         if self._mapdl._local:
-            filename = os.path.join(self._mapdl.directory, filename)
+            filename = str(self._mapdl.directory / filename)
         else:
             filename = os.path.join(tempfile.gettempdir(), filename)
         write_array(filename.encode(), arr.ravel("F"))

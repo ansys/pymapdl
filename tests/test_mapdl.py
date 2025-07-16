@@ -1144,17 +1144,17 @@ def test_cdread_in_apdl_directory(mapdl, cleared):
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
-    fullpath = os.path.join(mapdl.directory, "model.cdb")
+    fullpath = mapdl.directory / "model.cdb"
     mapdl.cdread("db", fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
-    fullpath = os.path.join(mapdl.directory, "model")
+    fullpath = mapdl.directory / "model"
     mapdl.cdread("db", fullpath, "cdb")
     assert asserting_cdread_cdwrite_tests(mapdl)
 
     clearing_cdread_cdwrite_tests(mapdl)
-    fullpath = os.path.join(mapdl.directory, "model")
+    fullpath = mapdl.directory / "model"
     mapdl.cdread("db", fullpath)
     assert asserting_cdread_cdwrite_tests(mapdl)
 
@@ -1222,7 +1222,7 @@ def test_cwd(mapdl, cleared, tmpdir):
     if mapdl.is_local:
         tempdir_ = tmpdir
     else:
-        tempdir_ = os.path.join(mapdl.directory, "tmp")
+        tempdir_ = mapdl.directory / "tmp"
         mapdl.sys(f"mkdir tmp")
 
     try:
@@ -1285,13 +1285,32 @@ def test_inquire_jobname(mapdl, cleared):
     assert jobname
 
 
-def test_inquire_exist(mapdl, cleared):
-    existing_file = [each for each in mapdl.list_files() if each.endswith(".log")][0]
-    assert isinstance(mapdl.inquire("", "exist", existing_file), bool)
-    assert isinstance(mapdl.inquire("", "exist", "unexisting_file.myext"), bool)
+def test_inquire_exist(mapdl, cleared, tmpdir):
+    try:
+        existing_file = tempfile.mkstemp(suffix=".log")[1]
 
-    assert mapdl.inquire("", "exist", existing_file)
-    assert not mapdl.inquire("", "exist", "unexisting_file.myext")
+        with open(existing_file, "w") as f:
+            f.write("This is a test file for inquire exist.")
+
+        mapdl.upload(existing_file)
+
+        basename = os.path.basename(existing_file)
+        if mapdl.is_local:
+            assert isinstance(mapdl.inquire("", "exist", existing_file), bool)
+            assert mapdl.inquire("", "exist", basename)
+        else:
+            assert isinstance(mapdl.inquire("", "exist", basename), bool)
+            assert mapdl.inquire("", "exist", basename)
+
+        assert isinstance(mapdl.inquire("", "exist", "unexisting_file.myext"), bool)
+
+        assert not mapdl.inquire("", "exist", "unexisting_file.myext")
+
+    finally:
+        # Clean up the temporary file
+        if os.path.exists(existing_file):
+            os.remove(existing_file)
+        mapdl.slashdelete(basename)
 
 
 def test_inquire_non_interactive(mapdl, cleared):
@@ -1562,7 +1581,7 @@ def test_equal_in_comments_and_title(mapdl, cleared):
 
 def test_result_file(mapdl, solved_box):
     assert mapdl.result_file
-    assert isinstance(mapdl.result_file, str)
+    assert isinstance(mapdl.result_file, (str, pathlib.PurePath))
 
 
 @requires("local")
@@ -1574,7 +1593,7 @@ def test_file_command_local(mapdl, cube_solve, tmpdir):
         mapdl.file("potato")
 
     assert os.path.basename(rst_file) in mapdl.list_files()
-    rst_fpath = os.path.join(mapdl.directory, rst_file)
+    rst_fpath = str(mapdl.directory / rst_file)
 
     # change directory
     old_path = mapdl.directory
@@ -2563,7 +2582,7 @@ def test_lgwrite(mapdl, cleared, filename, ext, remove_grpc_extra, kedit):
     filename_ = f"{filename}.{ext}"
     assert filename_ in mapdl.list_files()
     if mapdl.is_local:
-        assert os.path.exists(os.path.join(mapdl.directory, filename_))
+        assert os.path.exists(mapdl.directory / filename_)
     else:
         assert os.path.exists(filename_)
 
@@ -2746,7 +2765,7 @@ def test_cwd_changing_directory(mapdl, cleared):
 @pytest.mark.parametrize(
     "platform, class_, contextmanager",
     [
-        [None, str, NullContext()],
+        [None, pathlib.PurePath, NullContext()],
         ["windows", pathlib.PureWindowsPath, NullContext()],
         ["linux", pathlib.PurePosixPath, NullContext()],
         [
