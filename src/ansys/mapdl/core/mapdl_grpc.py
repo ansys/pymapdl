@@ -352,7 +352,7 @@ class MapdlGrpc(MapdlBase):
         disable_run_at_connect: bool = False,
         channel: Optional[grpc.Channel] = None,
         remote_instance: Optional["PIM_Instance"] = None,
-        **start_parm,
+        **start_parm: dict[str, Any],
     ):
         """Initialize connection to the mapdl server"""
         self._name: Optional[str] = None
@@ -374,7 +374,7 @@ class MapdlGrpc(MapdlBase):
 
         # setting hostname and ip
         ip, hostname = get_ip_hostname(ip)
-        self._hostname = hostname
+        self._hostname: str = hostname
 
         check_valid_ip(ip)
         self._ip: str = ip
@@ -408,7 +408,9 @@ class MapdlGrpc(MapdlBase):
         self._cleanup: bool = cleanup_on_exit
         self.remove_temp_dir_on_exit: bool = remove_temp_dir_on_exit
         self._jobname: str = start_parm.get("jobname", "file")
-        self._path: Optional[str] = start_parm.get("run_location", None)
+        self._path: Optional[str] = (
+            None  # self._wrap_directory(start_parm.get("run_location"))
+        )
         self._start_instance: Optional[str] = (
             start_parm.get("start_instance") or get_start_instance()
         )
@@ -793,8 +795,9 @@ class MapdlGrpc(MapdlBase):
             else:
                 jobname = self._jobname
 
-            lockfile = os.path.join(directory, jobname + ".err")
-            lockfile0 = os.path.join(directory, jobname + "0.err")
+            lockfile = directory / (jobname + ".err")
+            lockfile0 = directory / (jobname + "0.err")
+
             if os.path.isfile(lockfile):
                 return
             if os.path.isfile(lockfile0):
@@ -1353,7 +1356,7 @@ class MapdlGrpc(MapdlBase):
 
         for filename in self.list_files():
             if "cleanup" in filename:  # Linux does not seem to generate this file?
-                script = os.path.join(self.directory, filename)
+                script = self.directory / filename
                 with open(script) as f:
                     raw = f.read()
 
@@ -1497,7 +1500,7 @@ class MapdlGrpc(MapdlBase):
         tmp_file = f"__tmp_sys_out_{random_string()}__"
         super().sys(f"{cmd} > {tmp_file}", **kwargs)
         if self._local:  # no need to download when local
-            with open(os.path.join(self.directory, tmp_file)) as fobj:
+            with open(self.directory / tmp_file) as fobj:
                 obj = fobj.read()
         else:
             obj = self._download_as_raw(tmp_file).decode()
@@ -2115,11 +2118,11 @@ class MapdlGrpc(MapdlBase):
                 filename = os.path.join(os.getcwd(), fname)
             elif not self._store_commands and fname in self.list_files():
                 # It exists in the Mapdl working directory
-                filename = os.path.join(self.directory, fname)
+                filename = self.directory / fname
             elif self._store_commands:
                 # Assuming that in non_interactive we have uploaded the file
                 # manually.
-                filename = os.path.join(self.directory, fname)
+                filename = self.directory / fname
             else:
                 # Finally
                 raise FileNotFoundError(f"Unable to locate filename '{fname}'")
@@ -2146,7 +2149,7 @@ class MapdlGrpc(MapdlBase):
 
     def _get_file_name(
         self,
-        fname: str,
+        fname: str | pathlib.PurePath,
         ext: Optional[str] = None,
         default_extension: Optional[str] = None,
     ) -> str:
@@ -2168,6 +2171,8 @@ class MapdlGrpc(MapdlBase):
 
         # the old behaviour is to supplied the name and the extension separately.
         # to make it easier let's going to allow names with extensions
+        if not isinstance(fname, str):
+            fname = str(fname)
 
         # Sanitizing ext
         while ext and ext[0] == ".":
@@ -2485,14 +2490,16 @@ class MapdlGrpc(MapdlBase):
         recursive: bool = False,
     ) -> List[str]:
         """Download files when we are on a local session."""
-
         if isinstance(files, str):
-            if not os.path.isdir(os.path.join(self.directory, files)):
+            if not os.path.isdir(self.directory / files):
                 list_files = self._validate_files(
                     files, extension=extension, recursive=recursive
                 )
             else:
                 list_files = [files]
+
+        elif isinstance(files, pathlib.PurePath):
+            list_files = [str(files)]
 
         elif isinstance(files, (list, tuple)):
             if not all([isinstance(each, str) for each in files]):
@@ -2507,7 +2514,7 @@ class MapdlGrpc(MapdlBase):
 
         else:
             raise ValueError(
-                f"The `file` parameter type ({type(files)}) is not supported."
+                f"The `file` parameter type ({type(files)}) is not supported. "
                 "Only strings, tuple of strings or list of strings are allowed."
             )
 
@@ -2523,10 +2530,10 @@ class MapdlGrpc(MapdlBase):
                     f"The file {file} has been updated in the current working directory."
                 )
 
-            if os.path.isdir(os.path.join(self.directory, file)):
+            if os.path.isdir(self.directory / file):
                 if recursive:  # only copy the directory if recursive is true.
                     shutil.copytree(
-                        os.path.join(self.directory, file),
+                        self.directory / file,
                         target_dir,
                         dirs_exist_ok=True,
                     )
@@ -2537,7 +2544,7 @@ class MapdlGrpc(MapdlBase):
             else:
                 return_list_files.append(destination)
                 shutil.copy(
-                    os.path.join(self.directory, file),
+                    self.directory / file,
                     destination,
                 )
 
@@ -2597,7 +2604,7 @@ class MapdlGrpc(MapdlBase):
         if self.is_local:
             # filtering with glob (accepting *)
             if not os.path.dirname(file):
-                file = os.path.join(self.directory, file)
+                file = str(self.directory / file)
             list_files = glob.glob(file + extension, recursive=recursive)
 
         else:
@@ -3060,7 +3067,7 @@ class MapdlGrpc(MapdlBase):
         """Save IGES geometry representation to disk"""
         basename = "_tmp.iges"
         if self._local:
-            filename = os.path.join(self.directory, basename)
+            filename = self.directory / basename
             self.igesout(basename, att=1)
         else:
             self.igesout(basename, att=1)
@@ -3088,8 +3095,8 @@ class MapdlGrpc(MapdlBase):
         rth_basename = "%s0.%s" % (filename, "rth")
         rst_basename = "%s0.%s" % (filename, "rst")
 
-        rth_file = os.path.join(self.directory, rth_basename)
-        rst_file = os.path.join(self.directory, rst_basename)
+        rth_file = self.directory / rth_basename
+        rst_file = self.directory / rst_basename
 
         if self._prioritize_thermal:
             if not os.path.isfile(rth_file):
@@ -3125,7 +3132,7 @@ class MapdlGrpc(MapdlBase):
             return None
 
         if self._local:
-            return open(os.path.join(self.directory, error_file)).read()
+            return open(self.directory / error_file).read()
         elif self._exited:
             raise MapdlExitedError(
                 "Cannot list error file when MAPDL Service has exited"
@@ -3180,12 +3187,12 @@ class MapdlGrpc(MapdlBase):
         # are unclear
         fname = self._get_file_name(fname, ext, "cdb")
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
-        file_, ext_, _ = self._decompose_fname(fname)
-        fname = fname[: -len(ext_) - 1]  # Removing extension. -1 for the dot.
+        file_, ext_, path_ = self._decompose_fname(fname)
+
         if self._local:
-            return self._file(filename=fname, extension=ext_, **kwargs)
+            return self._file(filename=path_ / file_, extension=ext_, **kwargs)
         else:
-            return self._file(filename=file_, extension=ext_)
+            return self._file(filename=file_, extension=ext_, **kwargs)
 
     @wraps(MapdlBase.vget)
     def vget(

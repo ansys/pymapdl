@@ -405,11 +405,11 @@ def test_download_with_extension(
 @requires("local")
 def test_download_recursive(mapdl, cleared):
     if mapdl.is_local:
-        temp_dir = os.path.join(mapdl.directory, "new_folder")
+        temp_dir = mapdl.directory / "new_folder"
         os.makedirs(temp_dir, exist_ok=True)
-        with open(os.path.join(temp_dir, "file0.txt"), "a") as fid:
+        with open(temp_dir / "file0.txt", "a") as fid:
             fid.write("dummy")
-        with open(os.path.join(temp_dir, "file1.txt"), "a") as fid:
+        with open(temp_dir / "file1.txt", "a") as fid:
             fid.write("dummy")
 
         mapdl.download(temp_dir, recursive=True)  # This is referenced to os.getcwd

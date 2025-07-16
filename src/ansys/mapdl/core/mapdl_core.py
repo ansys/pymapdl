@@ -320,8 +320,12 @@ class _MapdlCore(Commands):
         _sanitize_start_parm(start_parm)
         self._start_parm: Dict[str, Any] = start_parm
         self._jobname: str = start_parm.get("jobname", "file")
-        self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
-        self._check_parameter_names = start_parm.get("check_parameter_names", True)
+        self._path: str | pathlib.PurePath | None = (
+            None  # start_parm.get("run_location", None)
+        )
+        self._check_parameter_names: bool = start_parm.get(
+            "check_parameter_names", True
+        )
 
         # Setting up loggers
         self._log: logger = logger.add_instance_logger(
@@ -509,7 +513,7 @@ class _MapdlCore(Commands):
     def _wrap_directory(self, path: str) -> pathlib.PurePath:
         if self._platform is None:
             # MAPDL is not initialized yet so returning the path as is.
-            return path
+            return pathlib.PurePath(path)
 
         if self._platform == "windows":
             # Windows path
@@ -531,7 +535,7 @@ class _MapdlCore(Commands):
 
     @property
     @supress_logging
-    def directory(self) -> str:
+    def directory(self) -> pathlib.PurePath:
         """
         Current MAPDL directory.
 
@@ -1207,8 +1211,9 @@ class _MapdlCore(Commands):
         rth_basename = "%s0.%s" % (filename, "rth")
         rst_basename = "%s0.%s" % (filename, "rst")
 
-        rth_file = os.path.join(self.directory, rth_basename)
-        rst_file = os.path.join(self.directory, rst_basename)
+        rth_file = self.directory / rth_basename
+        rst_file = self.directory / rst_basename
+
         if os.path.isfile(rth_file) and os.path.isfile(rst_file):
             return last_created([rth_file, rst_file])
         elif os.path.isfile(rth_file):
@@ -1235,7 +1240,7 @@ class _MapdlCore(Commands):
         """Lockfile path"""
         path = self.directory
         if path is not None:
-            return os.path.join(path, self.jobname + ".lock").replace("\\", "/")
+            return path / f"{self.jobname}.lock"
 
     @property
     @supress_logging
@@ -1246,8 +1251,8 @@ class _MapdlCore(Commands):
 
         if self._archive_cache is None:
             # write database to an archive file
-            arch_filename = os.path.join(self.directory, "_tmp.cdb")
-            nblock_filename = os.path.join(self.directory, "nblock.cdb")
+            arch_filename = self.directory / "_tmp.cdb"
+            nblock_filename = self.directory / "nblock.cdb"
 
             # must have all nodes elements are using selected
             self.cm("__NODE__", "NODE", mute=True)
@@ -1305,8 +1310,8 @@ class _MapdlCore(Commands):
                 # Case where there is RST extension because it is thermal for example
                 filename = self.jobname
 
-                rth_file = os.path.join(self.directory, f"{filename}.rth")
-                rst_file = os.path.join(self.directory, f"{filename}.rst")
+                rth_file = self.directory / f"{filename}.rth"
+                rst_file = self.directory / f"{filename}.rst"
 
                 if self._prioritize_thermal and os.path.isfile(rth_file):
                     return rth_file
@@ -1318,7 +1323,7 @@ class _MapdlCore(Commands):
                 elif os.path.isfile(rst_file):
                     return rst_file
             else:
-                filename = os.path.join(self.directory, f"{filename}.{ext}")
+                filename = self.directory / f"{filename}.{ext}"
                 if os.path.isfile(filename):
                     return filename
         else:
@@ -1684,7 +1689,7 @@ class _MapdlCore(Commands):
     @run_as("PREP7")
     def _generate_iges(self):
         """Save IGES geometry representation to disk"""
-        filename = os.path.join(self.directory, "_tmp.iges")
+        filename = self.directory / "_tmp.iges"
         self.igesout(filename, att=1, mute=True)
         return filename
 
@@ -1972,7 +1977,7 @@ class _MapdlCore(Commands):
     def _list(self, command):
         """Replaces *LIST command"""
         items = command.split(",")
-        filename = os.path.join(self.directory, ".".join(items[1:]))
+        filename = self.directory / ".".join(items[1:])
         if os.path.isfile(filename):
             self._response = open(filename).read()
             response_ = "\n".join(self._response.splitlines()[:10])
@@ -2554,7 +2559,7 @@ class _MapdlCore(Commands):
 
     def _screenshot_path(self):
         """Return last filename based on the current jobname"""
-        filenames = glob.glob(os.path.join(self.directory, f"{self.jobname}*.png"))
+        filenames = glob.glob(str(self.directory / f"{self.jobname}*.png"))
         filenames.sort()
         return filenames[-1]
 
@@ -3023,7 +3028,7 @@ class _MapdlCore(Commands):
             sys_output = self._download_as_raw("__outputcmd__.txt").decode().strip()
 
         else:
-            file_ = os.path.join(self.directory, "__outputcmd__.txt")
+            file_ = self.directory / "__outputcmd__.txt"
             with open(file_, "r") as f:
                 sys_output = f.read().strip()
 
