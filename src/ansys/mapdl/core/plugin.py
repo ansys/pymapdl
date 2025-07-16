@@ -99,8 +99,7 @@ class ansPlugin:
         mapdl = self._mapdl
 
         for each_command in commands:
-            each_command.replace("*", "star")
-            each_command.replace("/", "slash")
+            each_command = each_command.replace("*", "star").replace("/", "slash")
 
             if hasattr(mapdl, each_command):
                 # We are allowing to overwrite existing commands
@@ -214,7 +213,6 @@ class ansPlugin:
         if "error" in response.lower():
             raise PluginUnloadError(f"Failed to unload plugin '{plugin_name}'.")
 
-        self._load_commands(response, plugin_name)
         self._log.info(f"Plugin '{plugin_name}' unloaded successfully.")
 
         commands = self._parse_commands(response)
