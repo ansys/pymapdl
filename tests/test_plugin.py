@@ -47,8 +47,7 @@ def plugins(mapdl: Mapdl) -> ansPlugin:
 
 @pytest.fixture()
 def dpf_load_response(plugins: ansPlugin) -> ansPlugin:
-    response = plugins.load(TEST_PLUGIN)
-    yield response
+    yield plugins.load(TEST_PLUGIN)
     plugins.unload(TEST_PLUGIN)
 
 
