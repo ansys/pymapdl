@@ -85,9 +85,9 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.mapdl import MapdlBase
     from ansys.mapdl.core.mapdl_geometry import Geometry, LegacyGeometry
     from ansys.mapdl.core.parameters import Parameters
+    from ansys.mapdl.core.plugin import ansPlugin
     from ansys.mapdl.core.solution import Solution
     from ansys.mapdl.core.xpl import ansXpl
-    from ansys.mapdl.core.plugin import ansPlugin
 
     if _HAS_DPF:
         from ansys.mapdl.core.reader import DPFResult
