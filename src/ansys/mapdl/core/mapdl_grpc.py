@@ -2859,7 +2859,7 @@ class MapdlGrpc(MapdlBase):
         return self._xpl
 
     @property
-    def plugin(self) -> "ansPlugin":
+    def plugins(self) -> "ansPlugin":
         """MAPDL plugin handler
 
         Plugin Manager for MAPDL

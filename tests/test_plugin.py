@@ -22,22 +22,75 @@
 
 """Test the plugin implementation"""
 
+import pytest
+
+pytestmark = pytest.mark.random_order(disabled=True)
+
+from ansys.mapdl.core import Mapdl
+from ansys.mapdl.core.plugin import ansPlugin
+
+pytestmark = pytest.mark.random_order(disabled=True)
+
+TEST_PLUGIN = "PluginDPF"
+
 
 @pytest.fixture()
-def plugin(mapdl):
+def plugins(mapdl: Mapdl) -> ansPlugin:
     if mapdl.version < 25.2:
         pytest.skip(
             "Plugin support is only for versions 25.2 and above",
             allow_module_level=True,
         )
 
-    return mapdl.plugin
+    return mapdl.plugins
 
 
-def test_plugin_lifecycle(plugin):
-    plugin_name = "my_plugin"
-    plugin.load(plugin_name)
+@pytest.fixture()
+def dpf_load_response(plugins: ansPlugin) -> ansPlugin:
+    response = plugins.load(TEST_PLUGIN)
+    yield response
+    plugins.unload(TEST_PLUGIN)
 
-    assert plugin_name in plugin.list(), "Plugin should be loaded"
 
-    plugin.unload(plugin_name)
+def test_plugin_load(plugins):
+    assert plugins.load(TEST_PLUGIN) is not None
+
+
+@pytest.mark.xfail(reason="Plugin unload not implemented in MAPDL yet")
+def test_plugin_list(plugins, dpf_load_response):
+    assert TEST_PLUGIN in plugins.list(), "Plugin should be loaded"
+
+
+def test_plugin_unload(plugins):
+    plugins.unload(TEST_PLUGIN)
+    assert TEST_PLUGIN not in plugins.list(), "Plugin should be unloaded"
+
+
+def test_parse_commands(plugins, dpf_load_response):
+    commands = plugins._parse_commands(dpf_load_response)
+
+    assert isinstance(commands, list), "Commands should be a list"
+    assert len(commands) > 0, "Commands list should not be empty"
+    assert "*DPF" in commands, "Expected command '*DPF' should be in the list"
+
+
+def test_load_commands(plugins, dpf_load_response):
+    commands = plugins._parse_commands(dpf_load_response)
+    assert isinstance(commands, list), "Commands should be a list"
+    assert len(commands) > 0, "Commands list should not be empty"
+
+    for command in commands:
+        assert hasattr(plugins._mapdl, command)
+
+
+def test_deleter_commands(plugins, dpf_load_response):
+    commands = plugins._parse_commands(dpf_load_response)
+    assert isinstance(commands, list), "Commands should be a list"
+    assert len(commands) > 0, "Commands list should not be empty"
+
+    plugins._deleter_commands(commands, TEST_PLUGIN)
+
+    for command in commands:
+        assert not hasattr(
+            plugins._mapdl, command
+        ), f"Command {command} should be deleted"

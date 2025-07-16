@@ -21,9 +21,13 @@
 # SOFTWARE.
 
 """Contains the ansPlugin class."""
+import re
+from warnings import warn
 import weakref
 
+from ansys.mapdl.core import Mapdl
 from ansys.mapdl.core.errors import PluginError, PluginLoadError, PluginUnloadError
+from ansys.mapdl.core.logging import Logger
 
 
 class ansPlugin:
@@ -39,7 +43,7 @@ class ansPlugin:
     Load a plugin in the MAPDL Session
     """
 
-    def __init__(self, mapdl):
+    def __init__(self, mapdl: Mapdl):
         """Initialize the class."""
         from ansys.mapdl.core.mapdl_grpc import MapdlGrpc
 
@@ -51,11 +55,113 @@ class ansPlugin:
         self._open = False
 
     @property
-    def _mapdl(self):
+    def _mapdl(self) -> Mapdl:
         """Return the weakly referenced instance of mapdl."""
         return self._mapdl_weakref()
 
-    def load(self, plugin_name: str, feature: str = "") -> None:
+    @property
+    def _log(self) -> Logger:
+        """Return the logger from the MAPDL instance."""
+        return self._mapdl._log
+
+    def _parse_commands(self, response: str) -> list[str]:
+        """
+        Parse the response string to extract commands.
+
+        Parameters
+        ----------
+        response : str
+            The response string containing commands.
+
+        Returns
+        -------
+        list[str]
+            A list of commands extracted from the response.
+        """
+        if not response:
+            return []
+
+        # Assuming commands are separated by newlines
+        return re.findall(r"New command \[(.*)\] registered", response)
+
+    def _set_commands(self, commands: list[str], plugin_name: str = "NOT_SET") -> None:
+        """
+        Set commands to be executed.
+
+        Parameters
+        ----------
+        commands : list[str]
+            List of commands to be set.
+        """
+        if not commands:
+            return
+
+        mapdl = self._mapdl
+
+        for each_command in commands:
+            each_command.replace("*", "star")
+            each_command.replace("/", "slash")
+
+            if hasattr(mapdl, each_command):
+                # We are allowing to overwrite existing commands
+                warn(f"Command '{each_command}' already exists in the MAPDL instance.")
+
+            def passer(self, *args, **kwargs):
+                return self.run(*args, **kwargs)
+
+            # Inject docstring
+            passer.__doc__ = f"""Command from plugin {plugin_name}: {each_command}.
+            Use this plugin documentation to understand the command and its parameters.
+
+            Automatically generated docstring by ansPlugin.
+            """
+            setattr(mapdl, each_command, passer)
+            self._log.info(
+                f"Command '{each_command}' from plugin '{plugin_name}' set successfully."
+            )
+
+    def _deleter_commands(
+        self, commands: list[str], plugin_name: str = "NOT_SET"
+    ) -> None:
+        """
+        Delete commands from the MAPDL instance.
+
+        Parameters
+        ----------
+        commands : list[str]
+            List of commands to be deleted.
+        """
+        if not commands:
+            return
+
+        mapdl = self._mapdl
+
+        for each_command in commands:
+            if hasattr(mapdl, each_command):
+                delattr(mapdl, each_command)
+                self._log.info(
+                    f"Command '{each_command}' from '{plugin_name}' deleted successfully."
+                )
+
+    def _load_commands(self, response: str, plugin_name: str) -> None:
+        """
+        Load commands from the response string.
+
+        Parameters
+        ----------
+        response : str
+            The response string containing commands to be loaded.
+        """
+        if not response:
+            return
+
+        commands = self._parse_commands(response)
+        if not commands:
+            self._log.warning("No commands found in the response.")
+            return
+        self._set_commands(commands, plugin_name=plugin_name)
+
+    def load(self, plugin_name: str, feature: str = "") -> str:
         """
         Loads a plugin into MAPDL.
 
@@ -81,8 +187,10 @@ class ansPlugin:
         self._log.info(
             f"Plugin '{plugin_name}' with feature '{feature}' loaded successfully."
         )
+        self._load_commands(response, plugin_name=plugin_name)
+        return response
 
-    def unload(self, plugin_name: str) -> None:
+    def unload(self, plugin_name: str) -> str:
         """
         Unloads a plugin from MAPDL.
 
@@ -99,9 +207,20 @@ class ansPlugin:
 
         command = f"*PLUG,UNLOAD,{plugin_name}"
         response = self._mapdl.run(command)
+
+        if not response:
+            return ""
+
         if "error" in response.lower():
             raise PluginUnloadError(f"Failed to unload plugin '{plugin_name}'.")
+
+        self._load_commands(response, plugin_name)
         self._log.info(f"Plugin '{plugin_name}' unloaded successfully.")
+
+        commands = self._parse_commands(response)
+        self._deleter_commands(commands, plugin_name=plugin_name)
+
+        return response
 
     def list(self) -> list[str]:
         """
@@ -119,9 +238,8 @@ class ansPlugin:
         """
 
         command = "*PLUG,LIST"
-        response = self._mapdl.run(command)
-
-        if "error" in response.lower():
+        response = self._mapdl.run(command) or ""
+        if response and "error" in response.lower():
             raise PluginError("Failed to retrieve the list of loaded plugins.")
 
         # Parse response and extract plugin names (assuming response is newline-separated text)
