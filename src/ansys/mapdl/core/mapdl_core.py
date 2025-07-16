@@ -1085,6 +1085,26 @@ class _MapdlCore(Commands):
         self._graphics_backend = value
 
     @property
+    def plugins(self) -> "ansPlugin":
+        """MAPDL plugin handler
+
+        Plugin Manager for MAPDL
+
+        Examples
+        --------
+
+        >>> from ansys import Mapdl
+        >>> mapdl = Mapdl()
+        >>> plugin = mapdl.plugin
+        >>> plugin.load('PluginDPF')
+        """
+        if self._plugin is None:
+            from ansys.mapdl.core.plugin import ansPlugin
+
+            self._plugin = ansPlugin(self)
+        return self._plugin
+
+    @property
     @requires_package("ansys.mapdl.reader", softerror=True)
     def result(self):
         """Binary interface to the result file using ``ansys-dpf-core`` or

@@ -105,7 +105,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.platform.instancemanagement import Instance as PIM_Instance
 
     from ansys.mapdl.core.database import MapdlDb
-    from ansys.mapdl.core.plugin import ansPlugin
     from ansys.mapdl.core.xpl import ansXpl
 
 VOID_REQUEST = anskernel.EmptyRequest()
@@ -2857,26 +2856,6 @@ class MapdlGrpc(MapdlBase):
 
             self._xpl = ansXpl(self)
         return self._xpl
-
-    @property
-    def plugins(self) -> "ansPlugin":
-        """MAPDL plugin handler
-
-        Plugin Manager for MAPDL
-
-        Examples
-        --------
-
-        >>> from ansys import Mapdl
-        >>> mapdl = Mapdl()
-        >>> plugin = mapdl.plugin
-        >>> plugin.load('PluginDPF')
-        """
-        if self._plugin is None:
-            from ansys.mapdl.core.plugin import ansPlugin
-
-            self._plugin = ansPlugin(self)
-        return self._plugin
 
     @protect_grpc
     def scalar_param(self, pname: str) -> float:
