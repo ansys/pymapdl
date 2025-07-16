@@ -45,6 +45,7 @@ from conftest import (
     PATCH_MAPDL,
     PATCH_MAPDL_START,
     QUICK_LAUNCH_SWITCHES,
+    TEST_DPF_BACKEND,
     VALID_PORTS,
     NullContext,
     Running_test,
@@ -54,9 +55,6 @@ from conftest import (
 
 if has_dependency("pyvista"):
     from pyvista import MultiBlock
-
-if has_dependency("ansys-mapdl-reader"):
-    from ansys.mapdl.reader.rst import Result
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import USER_DATA_PATH
@@ -69,6 +67,7 @@ from ansys.mapdl.core.errors import (
     MapdlExitedError,
     MapdlRuntimeError,
 )
+from ansys.mapdl.core.helpers import is_installed
 from ansys.mapdl.core.launcher import launch_mapdl
 from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string, stack
@@ -2155,10 +2154,27 @@ def test_rlblock_rlblock_num(mapdl, cleared):
     assert [1, 2, 4] == mapdl.mesh.rlblock_num
 
 
-@requires("ansys-mapdl-reader")
-def test_download_results_non_local(mapdl, cube_solve):
+def test_result_type(mapdl, cube_solve):
+    if not has_dependency("ansys-mapdl-reader") and not has_dependency(
+        "ansys-dpf-core"
+    ):
+        assert mapdl.result is None
+        return
+
     assert mapdl.result is not None
-    assert isinstance(mapdl.result, Result)
+
+    if is_installed("ansys-mapdl-reader") and not TEST_DPF_BACKEND:
+        from ansys.mapdl.reader.rst import Result
+
+        assert isinstance(mapdl.result, Result)
+
+    else:
+        from ansys.mapdl.core.reader import DPFResult
+
+        if mapdl._use_reader_backend:
+            pytest.skip("DPF backend is not set. Skipping test.")
+
+        assert isinstance(mapdl.result, DPFResult)
 
 
 def test__flush_stored(mapdl, cleared):
@@ -2682,6 +2698,7 @@ def test_ctrl(mapdl, cleared):
     mapdl.run("/verify")  # mocking might skip running this inside mapdl._ctrl
 
 
+@pytest.mark.skip("This test is removing all loggers, which is not desired")
 def test_cleanup_loggers(mapdl, cleared):
     assert mapdl.logger is not None
     assert mapdl.logger.hasHandlers()
