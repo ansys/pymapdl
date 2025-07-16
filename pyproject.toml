@@ -69,6 +69,7 @@ tests = [
   "autopep8==2.3.2",
   "matplotlib==3.10.3",
   "pandas==2.3.1",
+  "paramiko==3.5.0",
   "pyansys-tools-report==0.8.2",
   "pyfakefs==5.9.1",
   "pyiges[full]==0.3.2",
