@@ -15,6 +15,7 @@
 [![MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![black](https://img.shields.io/badge/code%20style-black-000000.svg?style=flat)](https://github.com/psf/black)
 [![pre-commit](https://results.pre-commit.ci/badge/github/ansys/pymapdl/main.svg)](https://results.pre-commit.ci/latest/github/ansys/pymapdl/main)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/ansys/pymapdl)
 
 ## Overview
 
@@ -39,7 +40,7 @@ Here's a quick demo of PyMAPDL within Visual Studio Code:
 ![landing_demo](https://github.com/ansys/pymapdl/raw/main/doc/source/_static/landing_page_demo.gif)
 
 PyMAPDL works within Jupyter Notebooks, the standard Python console,
-or in batch mode on Windows, Linux, and even Mac OS.
+or in batch mode on Windows, Linux, and even macOS.
 
 ## Documentation and issues
 

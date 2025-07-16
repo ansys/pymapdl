@@ -109,7 +109,7 @@ class _MapdlCommandExtended(_MapdlCore):
         file_, ext_, _ = self._decompose_fname(fname)
         return self._file(file_, ext_, **kwargs)
 
-    def _file(self, filename: str, extension: str, **kwargs) -> str:
+    def _file(self, filename: str = "", extension: str = "", **kwargs) -> str:
         """Run the MAPDL ``file`` command with a proper filename."""
         return self.run(f"FILE,{filename},{extension}", **kwargs)
 
@@ -382,7 +382,7 @@ class _MapdlCommandExtended(_MapdlCore):
         except MapdlCommandIgnoredError as e:
             raise IncorrectWorkingDirectory(e.args[0])
 
-        self._path = args[0]  # caching
+        self._path = self._wrap_directory(args[0])  # caching
         return output
 
     @wraps(_MapdlCore.list)
@@ -406,7 +406,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
         path = pathlib.Path(filename)
         if path.parent != ".":
-            path = os.path.join(self.directory, filename)
+            path = self.directory / filename
 
         path = str(path) + ext
         with open(path) as fid:
@@ -1449,16 +1449,43 @@ class _MapdlCommandExtended(_MapdlCore):
         if not response:
             if not self._store_commands:
                 raise MapdlRuntimeError("/INQUIRE command didn't return a response.")
-        else:
-            if func.upper() in [
-                "ENV",
-                "TITLE",
-            ]:  # the output is multiline, we just need the last line.
-                response = response.splitlines()[-1]
+            else:
+                # Exit since we are in non-interactive mode
+                return None
 
-            response = response.split("=")[1].strip()
+        if func.upper() in [
+            "ENV",
+            "TITLE",
+        ]:  # the output is multiline, we just need the last line.
+            response = response.splitlines()[-1]
 
-        return response
+        response = response.split("=")[1].strip()
+
+        if len(response) >= 248:
+            warnings.warn(
+                "Response might have been truncated to 248 characters because of "
+                "MAPDL string limitations. "
+                "Check the output of 'mapdl.inquire' carefully. "
+                "Alternatively, you can use 'mapdl.sys('printenv') to obtain "
+                "the environment variables on Linux."
+            )
+
+        # Check if the function is to check existence
+        # so it makes sense to return a boolean
+        if func.upper() in ["EXIST", "WRITE", "READ", "EXEC"]:
+            if "1.0" in response:
+                return True
+            elif "0.0" in response:
+                return False
+            else:
+                raise MapdlRuntimeError(
+                    f"Unexpected output from 'mapdl.inquire' function:\n{response}"
+                )
+
+        try:
+            return float(response)
+        except ValueError:
+            return response
 
     @wraps(_MapdlCore.parres)
     def parres(self, lab="", fname="", ext="", **kwargs):
@@ -2256,6 +2283,45 @@ class _MapdlCommandExtended(_MapdlCore):
         """Wrap the ``wrinqr`` method to take advantage of the gRPC methods."""
         super().wrinqr(key, pname=TMP_VAR, mute=True, **kwargs)
         return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.catiain)
+    def catiain(self, name="", extension="", path="", blank="", **kwargs):
+        """Wrap the ``catiain`` method to take advantage of the gRPC methods."""
+        if self.platform == "windows":
+            raise OSError(
+                "The command 'catiain' is not supported on Windows. Use the 'mapdl.cat5in' method instead to import Catia v5 files."
+            )
+        return super().catiain(
+            name=name, extension=extension, path=path, blank=blank, **kwargs
+        )
+
+    @wraps(_MapdlCore.cat5in)
+    def cat5in(
+        self,
+        name="",
+        extension="",
+        path="",
+        entity="",
+        fmt="",
+        nocl="",
+        noan="",
+        **kwargs,
+    ):
+        """Wrap the ``cat5in`` method to take advantage of the gRPC methods."""
+        if self.platform == "linux":
+            raise OSError(
+                "The command 'cat5in' is not supported on Linux. Use the 'mapdl.catiain' method instead to import Catia v4 files."
+            )
+        return super().cat5in(
+            name=name,
+            extension=extension,
+            path=path,
+            entity=entity,
+            fmt=fmt,
+            nocl=nocl,
+            noan=noan,
+            **kwargs,
+        )
 
 
 class _MapdlExtended(_MapdlCommandExtended):

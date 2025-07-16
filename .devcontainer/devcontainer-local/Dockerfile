@@ -6,12 +6,16 @@ USER root
 # General libraries
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ON_CODESPACES=false
+ENV ON_LOCAL=true
+ENV ON_UBUNTU=true
+ENV ON_CI=true
 
 # Installing libs for testing and docs
 RUN apt-get -qq update && apt-get install -qq -y \
     graphviz \
     latexmk \
-    libgl1-mesa-glx \
+    libgl1 \
+    libglx-mesa0 \
     libgomp1 \
     pandoc \
     python3-pip \

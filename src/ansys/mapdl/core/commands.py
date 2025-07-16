@@ -33,32 +33,30 @@ if _HAS_PANDAS:
 
 from ._commands import (
     apdl,
-    aux2_,
-    aux3_,
-    aux12_,
-    aux15_,
+    aux2,
+    aux3,
+    aux12,
+    aux15,
     conn,
     database,
-    display_,
-    graphics_,
+    graphics,
     hidden,
     inq_func,
-    map_cmd,
+    map,
     misc,
-    post1_,
-    post26_,
+    post1,
+    post26,
     preproc,
-    reduced,
     session,
     solution,
 )
 
 # compiled regular expressions used for parsing tablular outputs
-REG_LETTERS: re.Pattern = re.compile(r"[a-df-zA-DF-Z]+")  # all except E or e
-REG_FLOAT_INT: re.Pattern = re.compile(
+REG_LETTERS: re.Pattern[str] = re.compile(r"[a-df-zA-DF-Z]+")  # all except E or e
+REG_FLOAT_INT: re.Pattern[str] = re.compile(
     r"[+-]?[0-9]*[.]?[0-9]*[Ee]?[+-]?[0-9]+|\s[0-9]+\s"
 )  # match number groups
-BC_REGREP: re.Pattern = re.compile(
+BC_REGREP: re.Pattern[str] = re.compile(
     r"^\s*([0-9]+)\s*([A-Za-z]+)((?:\s+[0-9]*[.]?[0-9]+)+)$"
 )
 
@@ -198,7 +196,7 @@ CMD_XSEL: List[str] = [
 ]
 
 
-def get_indentation(indentation_regx: str, docstring: str) -> List[Any]:
+def get_indentation(indentation_regx: str, docstring: str) -> str:
     return re.findall(indentation_regx, docstring, flags=re.DOTALL | re.IGNORECASE)[0][
         0
     ]
@@ -214,7 +212,7 @@ def indent_text(indentation: str, docstring_injection: str) -> str:
     )
 
 
-def get_docstring_indentation(docstring: str) -> List[Any]:
+def get_docstring_indentation(docstring: str) -> str:
     indentation_regx = r"\n(\s*)\n"
     return get_indentation(indentation_regx, docstring)
 
@@ -225,7 +223,7 @@ def get_sections(docstring: str) -> List[str]:
     ]
 
 
-def get_section_indentation(section_name: str, docstring: str) -> List[Any]:
+def get_section_indentation(section_name: str, docstring: str) -> str:
     sections = get_sections(docstring)
     if section_name.lower().strip() not in sections:
         raise ValueError(
@@ -307,12 +305,12 @@ def inject_docs(docstring: str, docstring_injection: Optional[str] = None) -> st
             return docstring + "\n" + indented_doc_inject
 
 
-def check_valid_output(func: Callable) -> Callable:
+def check_valid_output(func: Callable[..., Any]) -> Callable[..., Any]:
     """Wrapper that check if output can be wrapped by pandas, if not, it will raise an exception."""
 
     @wraps(func)
-    def func_wrapper(self, *args, **kwargs):
-        output = self.__str__()
+    def func_wrapper(self, *args: Any, **kwargs: dict[Any, Any]):
+        output: str = self.__str__()
         if (
             "*** WARNING ***" in output or "*** ERROR ***" in output
         ):  # Error should be caught in mapdl.run.
@@ -357,52 +355,68 @@ class PreprocessorCommands(
     pass
 
 
-class APDLCommands(
+class Apdl(
     apdl.abbreviations.Abbreviations,
-    apdl.array_param.ArrayParam,
+    apdl.array_parameters.ArrayParameters,
+    apdl.encryption_decryption.EncryptionDecryption,
     apdl.macro_files.MacroFiles,
-    apdl.matrix_op.MatrixOP,
+    apdl.matrix_operations.MatrixOperations,
     apdl.parameter_definition.ParameterDefinition,
     apdl.process_controls.ProcessControls,
 ):
     pass
 
 
-class Aux2Commands(aux2_.bin_dump.BinDump, aux2_.bin_manip.BinManip):
+class Aux2Commands(
+    aux2.binary_file_dump.BinaryFileDump,
+    aux2.binary_file_manipulation.BinaryFileManipulation,
+):
+    pass
+
+
+class Aux3Commands(aux3.results_files.ResultsFiles):
     pass
 
 
 class Aux12Commands(
-    aux12_.radiosity_solver.RadiositySolver,
-    aux12_.radiation_mat.RadiationMat,
-    aux12_.general_radiation.GeneralRadiation,
+    aux12.general_radiation.GeneralRadiation,
+    aux12.radiation_matrix_method.RadiationMatrixMethod,
+    aux12.radiosity_solver.RadiositySolver,
+):
+    pass
+
+
+class Aux15Commands(
+    aux15.iges.Iges,
 ):
     pass
 
 
 class DatabaseCommands(
-    database.setup.Setup,
-    database.picking.Picking,
-    database.coord_sys.CoordinateSystem,
-    database.selecting.Selecting,
-    database.working_plane.WorkingPlane,
     database.components.Components,
+    database.coordinate_system.CoordinateSystem,
+    database.picking.Picking,
+    database.selecting.Selecting,
+    database.set_up.SetUp,
+    database.working_plane.WorkingPlane,
 ):
     pass
 
 
-class DisplayCommands(display_.setup.Setup):
+class GraphicsCommands(
+    graphics.annotation.Annotation,
+    graphics.graphs.Graphs,
+    graphics.labeling.Labeling,
+    graphics.scaling.Scaling,
+    graphics.set_up.SetUp,
+    graphics.style.Style,
+    graphics.views.Views,
+):
     pass
 
 
-class GraphicsCommands(
-    graphics_.annotation.Annotation,
-    graphics_.graphs.Graphs,
-    graphics_.labeling.Labelling,
-    graphics_.scaling.Scaling,
-    graphics_.setup.Setup,
-    graphics_.style.Style,
-    graphics_.views.Views,
+class MapCommands(
+    map.pressure_mapping.PressureMapping,
 ):
     pass
 
@@ -412,41 +426,35 @@ class MiscCommands(misc.misc.Misc):
 
 
 class Post1Commands(
-    post1_.animation.Animation,
-    post1_.controls.Controls,
-    post1_.element_table.ElementTable,
-    post1_.failure_criteria.FailureCriteria,
-    post1_.listing.Listing,
-    post1_.load_case.LoadCase,
-    post1_.magnetics_calc.MagneticsCalc,
-    post1_.path_operations.PathOperations,
-    post1_.results.Results,
-    post1_.setup.Setup,
-    post1_.special.Special,
-    post1_.status.Status,
-    post1_.surface_operations.SurfaceOperations,
-    post1_.trace_points.TracePoints,
+    post1._fatigue.Fatigue,
+    post1._special_purpose.SpecialPurpose,
+    post1.animation.Animation,
+    post1.controls.Controls,
+    post1.element_table.ElementTable,
+    post1.failure_criteria.FailureCriteria,
+    post1.listing.Listing,
+    post1.load_case_calculations.LoadCaseCalculations,
+    post1.magnetics_calculations.MagneticsCalculations,
+    post1.path_operations.PathOperations,
+    post1.results.Results,
+    post1.set_up.SetUp,
+    post1.special_purpose.SpecialPurpose,
+    post1.status.Status,
+    post1.surface_operations.SurfaceOperations,
+    post1.trace_points.TracePoints,
 ):
     pass
 
 
 class Post26Commands(
-    post26_.controls.Controls,
-    post26_.display.Display,
-    post26_.listing.Listing,
-    post26_.operations.Operations,
-    post26_.setup.Setup,
-    post26_.special.Special,
-    post26_.status.Status,
-):
-    pass
-
-
-class ReducedCommands(
-    reduced.generation.Generation,
-    reduced.preparation.Preparation,
-    reduced.setup.Setup,
-    reduced.use_pass.UsePass,
+    post26._set_up.SetUp,
+    post26.controls.Controls,
+    post26.display.Display,
+    post26.listing.Listing,
+    post26.operations.Operations,
+    post26.set_up.SetUp,
+    post26.special_purpose.SpecialPurpose,
+    post26.status.Status,
 ):
     pass
 
@@ -500,24 +508,22 @@ class InqFunctions(inq_func.inq_function):
 
 
 class Commands(
-    APDLCommands,
+    Apdl,
     Aux2Commands,
+    Aux3Commands,
     Aux12Commands,
+    Aux15Commands,
     DatabaseCommands,
-    DisplayCommands,
     GraphicsCommands,
+    MapCommands,
     MiscCommands,
     Post1Commands,
     Post26Commands,
     PreprocessorCommands,
-    ReducedCommands,
     SessionCommands,
     SolutionCommands,
-    aux3_.Aux3,
-    aux15_.Aux15,
     conn.Conn,
     hidden._Hidden,
-    map_cmd.MapCommand,
     InqFunctions,
 ):
     """Wrapped MAPDL commands"""
@@ -540,6 +546,8 @@ class CommandOutput(str):
     # - https://stackoverflow.com/questions/7255655/how-to-subclass-str-in-python
     # - https://docs.python.org/3/library/collections.html#userstring-objects
     # - Source code of UserString
+
+    _cmd: str | None
 
     def __new__(cls, content: str, cmd=None):
         obj = super().__new__(cls, content)
@@ -583,44 +591,57 @@ class CommandListingOutput(CommandOutput):
 
     """
 
+    _magicwords: list[str] | None
+    _columns_names: List[str] | None
+
     def __new__(
         cls,
         content: str,
-        cmd: Optional[str] = None,
-        magicwords: Optional[str] = None,
-        columns_names: Optional[List[str]] = None,
+        cmd: str | None = None,
+        magicwords: list[str] | None = None,
+        columns_names: List[str] | None = None,
     ):
-        obj = super().__new__(cls, content)
+        obj = super().__new__(cls, content)  # type: ignore
         obj._cmd = cmd
         obj._magicwords = magicwords
         obj._columns_names = columns_names
         return obj
 
-    def __init__(self, *args: Tuple[Any], **kwargs: Dict[Any, Any]) -> None:
-        self._cache = None
+    def __init__(
+        self,
+        content: str,
+        cmd: str | None = None,
+        magicwords: list[str] | None = None,
+        columns_names: List[str] | None = None,
+    ) -> None:
+        self._cache: Any = None
 
-    def _is_data_start(self, line: str, magicwords: List[str] = None) -> bool:
+    def _is_data_start(self, line: str, magicwords: List[str] | None = None) -> bool:
         """Check if line is the start of a data group."""
         if not magicwords:
             magicwords = self._magicwords or GROUP_DATA_START
 
         # Checking if we are supplying a custom start function.
-        if self.custom_data_start(line) is not None:
-            return self.custom_data_start(line)
+        if self.custom_data_start(line) is not None:  # type: ignore
+            return self.custom_data_start(line)  # type: ignore # function should be overloaded
 
         if line.split():
-            if line.split()[0] in magicwords or self.custom_data_start(line):
+            if self.custom_data_start(line) is not None:  # type: ignore
+                return self.custom_data_start(line)  # type: ignore # function should be overloaded
+
+            if line.split()[0] in magicwords:
                 return True
+
         return False
 
     def _is_data_end(self, line: str) -> bool:
         """Check if line is the end of a data group."""
 
         # Checking if we are supplying a custom start function.
-        if self.custom_data_end(line) is not None:
-            return self.custom_data_end(line)
+        if self.custom_data_end(line) is not None:  # type: ignore
+            return self.custom_data_end(line)  # type: ignore # function should be overloaded
         else:
-            return self._is_empty(line)
+            return self._is_empty_line(line)
 
     def custom_data_start(self, line: str) -> None:
         """Custom data start line check function.
@@ -650,7 +671,7 @@ class CommandListingOutput(CommandOutput):
         """Perform some formatting (replacing mainly) in the raw text."""
         return re.sub(r"[^E](-)", " -", self.__str__())
 
-    def _get_body(self, trail_header: List[str] = None) -> str:
+    def _get_body(self, trail_header: List[str] | None = None) -> list[str]:
         """Get command body text.
 
         It removes the maximum absolute values tail part and makes sure there is
@@ -662,9 +683,6 @@ class CommandListingOutput(CommandOutput):
         if not trail_header:
             trail_header = ["MAXIMUM ABSOLUTE VALUES", "TOTAL VALUES"]
 
-        if not isinstance(trail_header, list):
-            trail_header = list(trail_header)
-
         # Removing parts matching trail_header
         for each_trail_header in trail_header:
             if each_trail_header in self.__str__():
@@ -672,11 +690,12 @@ class CommandListingOutput(CommandOutput):
                 for i in range(len(body) - 1, -1, -1):
                     if each_trail_header in body[i]:
                         break
-                body = body[:i]
+                body = body[:i]  # type: ignore
+
         return body
 
     def _get_data_group_indexes(
-        self, body: str, magicwords: Optional[List[str]] = None
+        self, body: list[str], magicwords: Optional[List[str]] = None
     ) -> List[Tuple[int, int]]:
         """Return the indexes of the start and end of the data groups."""
         if "*****ANSYS VERIFICATION RUN ONLY*****" in str(self[:1000]):
@@ -700,7 +719,7 @@ class CommandListingOutput(CommandOutput):
         ends = [indexes[indexes.index(each) + 1] for each in start_idxs[:-1]]
         ends.append(len(body))
 
-        return zip(start_idxs, ends)
+        return list(zip(start_idxs, ends))
 
     def get_columns(self) -> Optional[List[str]]:
         """Get the column names for the dataframe.
@@ -720,7 +739,7 @@ class CommandListingOutput(CommandOutput):
         except:
             return None
 
-    def _parse_table(self) -> np.ndarray:
+    def _parse_table(self) -> np.ndarray[np.float64, Any]:
         """Parse tabular command output.
 
         Returns
@@ -729,7 +748,7 @@ class CommandListingOutput(CommandOutput):
             Parsed tabular data from command output.
 
         """
-        parsed_lines = []
+        parsed_lines: list[list[str]] = []
         for line in self.splitlines():
             # exclude any line containing characters [A-Z] except for E
             if line.strip() and not REG_LETTERS.search(line):
@@ -739,7 +758,7 @@ class CommandListingOutput(CommandOutput):
         return np.array(parsed_lines, dtype=np.float64)
 
     @property
-    def _parsed(self) -> str:
+    def _parsed(self) -> np.ndarray[Any, Any]:
         """Return parsed output."""
         if self._cache is None:
             self._cache = self._parse_table()
@@ -755,7 +774,7 @@ class CommandListingOutput(CommandOutput):
         """
         return self._parsed.tolist()
 
-    def to_array(self) -> np.ndarray:
+    def to_array(self) -> np.ndarray[Any, Any]:
         """Export the command output as a numpy array.
 
         Returns
@@ -766,7 +785,7 @@ class CommandListingOutput(CommandOutput):
         return self._parsed
 
     def to_dataframe(
-        self, data: Optional[np.ndarray] = None, columns: Optional[List[str]] = None
+        self, data: np.ndarray[Any, Any] | None = None, columns: List[str] | None = None
     ) -> "pandas.DataFrame":
         """Export the command output as a Pandas DataFrame.
 
@@ -878,7 +897,7 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
 
         return None
 
-    def get_columns(self) -> List[str]:
+    def get_columns(self) -> List[str] | None:
         """Get the column names for the dataframe.
 
         Returns
@@ -902,9 +921,9 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
         except:
             return None
 
-    def _parse_table(self) -> List[str]:
+    def _parse_table(self) -> List[list[str]]:  # type: ignore
         """Parse tabular command output."""
-        parsed_lines = []
+        parsed_lines: List[list[str]] = []
         for line in self.splitlines():
             line = line.strip()
             # exclude any line containing characters [A-Z] except for E
@@ -916,20 +935,29 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
         return parsed_lines
 
     @check_valid_output
-    def to_list(self) -> List[str]:
+    def to_list(self) -> list[list[str]]:
         """Export the command output a list or list of lists.
 
         Returns
         -------
         list
         """
-        return self._parsed
+        return self._parse_table()
 
-    def to_array(self):
+    def to_array(self) -> None:
         raise ValueError(MSG_BCLISTINGOUTPUT_TO_ARRAY)
 
-    def to_dataframe(self) -> "pandas.DataFrame":
+    def to_dataframe(
+        self, data: np.ndarray[Any, Any] | None = None, columns: List[str] | None = None
+    ) -> "pandas.DataFrame":
         """Convert the command output to a Pandas Dataframe.
+
+        Parameters
+        ----------
+        data : np.ndarray, optional
+            Not used, but kept for compatibility with the parent class.
+        columns : list of str, optional
+            Not used, but kept for compatibility with the parent class.
 
         Returns
         -------
@@ -967,8 +995,8 @@ class BoundaryConditionsListingOutput(CommandListingOutput):
 
 class ComponentListing(CommandListingOutput):
     @property
-    def _parsed(self) -> np.ndarray:
-        from ansys.mapdl.core.component import _parse_cmlist
+    def _parsed(self) -> np.ndarray[Any, Any]:
+        from ansys.mapdl.core.component import _parse_cmlist  # type: ignore
 
         # To keep same API as commands
         return np.array(list(_parse_cmlist(self).keys()))

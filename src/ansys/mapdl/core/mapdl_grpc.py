@@ -31,7 +31,6 @@ import os
 import pathlib
 import re
 import shutil
-import socket
 
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
@@ -87,8 +86,8 @@ from ansys.mapdl.core.mapdl import MapdlBase
 from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat, MapdlInt
 from ansys.mapdl.core.misc import (
     check_valid_ip,
+    get_ip_hostname,
     last_created,
-    only_numbers_and_dots,
     random_string,
     run_as,
     supress_logging,
@@ -354,7 +353,7 @@ class MapdlGrpc(MapdlBase):
         disable_run_at_connect: bool = False,
         channel: Optional[grpc.Channel] = None,
         remote_instance: Optional["PIM_Instance"] = None,
-        **start_parm,
+        **start_parm: dict[str, Any],
     ):
         """Initialize connection to the mapdl server"""
         self._name: Optional[str] = None
@@ -374,18 +373,9 @@ class MapdlGrpc(MapdlBase):
         if ip is None:
             ip = start_parm.pop("ip", None) or "127.0.0.1"
 
-        # setting hostname
-        if not only_numbers_and_dots(ip):
-            # it is a hostname
-            self._hostname = ip
-            ip = socket.gethostbyname(ip)
-        else:
-            # it is an IP
-            self._hostname = (
-                "localhost"
-                if ip in ["127.0.0.1", "127.0.1.1", "localhost"]
-                else socket.gethostbyaddr(ip)[0]
-            )
+        # setting hostname and ip
+        ip, hostname = get_ip_hostname(ip)
+        self._hostname: str = hostname
 
         check_valid_ip(ip)
         self._ip: str = ip
@@ -419,7 +409,9 @@ class MapdlGrpc(MapdlBase):
         self._cleanup: bool = cleanup_on_exit
         self.remove_temp_dir_on_exit: bool = remove_temp_dir_on_exit
         self._jobname: str = start_parm.get("jobname", "file")
-        self._path: Optional[str] = start_parm.get("run_location", None)
+        self._path: Optional[str] = (
+            None  # self._wrap_directory(start_parm.get("run_location"))
+        )
         self._start_instance: Optional[str] = (
             start_parm.get("start_instance") or get_start_instance()
         )
@@ -465,18 +457,7 @@ class MapdlGrpc(MapdlBase):
         if not self._mapdl_on_hpc and self._mapdl_process:
             self._create_process_stds_queue()
 
-        try:
-            self._multi_connect(timeout=timeout)
-        except MapdlConnectionError as err:  # pragma: no cover
-            self._post_mortem_checks()
-            self._log.debug(
-                "The error wasn't caught by the post-mortem checks.\nThe stdout is printed now:"
-            )
-            self._log.debug(self._stdout)
-
-            raise err  # Raise original error if we couldn't catch it in post-mortem analysis
-        else:
-            self._log.debug("Connection established")
+        self.reconnect_to_mapdl()
 
         # Avoiding muting when connecting to the session
         # It might trigger some errors later on if not.
@@ -527,6 +508,39 @@ class MapdlGrpc(MapdlBase):
         else:
             # For some reason the session hasn't been created
             self._create_session()
+
+    def _connect_to_mapdl(self, timeout: int):
+        """(Re)connect to an existing MAPDL instance"""
+        try:
+            self._multi_connect(timeout=timeout)
+        except MapdlConnectionError as err:  # pragma: no cover
+            self._post_mortem_checks()
+            self._log.debug(
+                "The error wasn't caught by the post-mortem checks.\nThe stdout is printed now:"
+            )
+            self._log.debug(self._stdout)
+
+            raise err  # Raise original error if we couldn't catch it in post-mortem analysis
+        else:
+            self._log.debug("Connection established")
+
+    def reconnect_to_mapdl(self, timeout: int = None):
+        """Reconnect to an already instantiated MAPDL instance.
+
+        Re-establish an stopped or crashed gRPC connection with an already alive
+        MAPDL instance. This function does not relaunch the MAPDL instance.
+
+        Parameters
+        ----------
+        timeout : int, optional
+            Timeout before raising an exception, by default None
+        """
+
+        if timeout is None:
+            timeout = self._timeout
+
+        self._connect_to_mapdl(timeout)
+        self._exited = False  # Reset the exited state
 
     def _create_process_stds_queue(self, process=None):
         from ansys.mapdl.core.launcher import (
@@ -676,24 +690,27 @@ class MapdlGrpc(MapdlBase):
         """Check the stdout and stderr for any errors."""
         if stdout is None:
             stdout = self._stdout
+
         if stderr is None:
             stderr = self._stderr
 
         if not stderr:
             self._log.debug("MAPDL exited without stderr.")
         else:
-            self._parse_stderr()
+            self._parse_stderr(stderr)
 
         if not stdout:
             self._log.debug("MAPDL exited without stdout.")
         else:
-            self._parse_stdout()
+            self._parse_stdout(stdout)
 
     def _parse_stderr(self, stderr=None):
         """Parse the stderr for any errors."""
         if stderr is None:
             stderr = self._stderr
+
         errs = self._parse_std(stderr)
+
         if errs:
             self._log.debug("MAPDL exited with errors in stderr.")
 
@@ -704,6 +721,7 @@ class MapdlGrpc(MapdlBase):
         """Parse the stdout for any errors."""
         if stdout is None:
             stdout = self._stdout
+
         errs = self._parse_std(stdout)
         if errs:
             self._log.debug("MAPDL exited with errors in stdout.")
@@ -717,6 +735,7 @@ class MapdlGrpc(MapdlBase):
         if isinstance(std, list):
             std = "\n".join(std)
             std = std.replace("\n\n", "\n")
+
         groups = std.split("\r\n\r\n")
         errs = []
 
@@ -777,8 +796,9 @@ class MapdlGrpc(MapdlBase):
             else:
                 jobname = self._jobname
 
-            lockfile = os.path.join(directory, jobname + ".err")
-            lockfile0 = os.path.join(directory, jobname + "0.err")
+            lockfile = directory / (jobname + ".err")
+            lockfile0 = directory / (jobname + "0.err")
+
             if os.path.isfile(lockfile):
                 return
             if os.path.isfile(lockfile0):
@@ -938,8 +958,10 @@ class MapdlGrpc(MapdlBase):
     @supress_logging
     def _set_no_abort(self):
         """Do not abort MAPDL."""
-        self._log.debug("Setting no abort")
-        self.nerr(abort=-1, mute=True)
+        self._log.debug("Setting to no abort")
+        self.run(
+            "/NERR,,,-1", mute=True
+        )  # ABORT argument is not surfaced in PyMAPDL because it is not documented in the manual
 
     def _run_at_connect(self):
         """Run house-keeping commands when initially connecting to MAPDL."""
@@ -1335,7 +1357,7 @@ class MapdlGrpc(MapdlBase):
 
         for filename in self.list_files():
             if "cleanup" in filename:  # Linux does not seem to generate this file?
-                script = os.path.join(self.directory, filename)
+                script = self.directory / filename
                 with open(script) as f:
                     raw = f.read()
 
@@ -1444,7 +1466,7 @@ class MapdlGrpc(MapdlBase):
         return files
 
     @supress_logging
-    def sys(self, cmd, **kwargs):
+    def sys(self, cmd: str, **kwargs) -> str:
         """Pass a command string to the operating system.
 
         APDL Command: /SYS
@@ -1479,13 +1501,15 @@ class MapdlGrpc(MapdlBase):
         tmp_file = f"__tmp_sys_out_{random_string()}__"
         super().sys(f"{cmd} > {tmp_file}", **kwargs)
         if self._local:  # no need to download when local
-            with open(os.path.join(self.directory, tmp_file)) as fobj:
+            with open(self.directory / tmp_file) as fobj:
                 obj = fobj.read()
         else:
             obj = self._download_as_raw(tmp_file).decode()
 
         self.slashdelete(tmp_file)
-        return obj
+
+        # Remove trailing newline character if present and only once
+        return obj[:-1] if (len(obj) > 0 and obj[-1] == "\n") else obj
 
     def download_result(
         self,
@@ -1768,7 +1792,7 @@ class MapdlGrpc(MapdlBase):
         ext : str, optional
             Filename extension (eight-character maximum).
 
-        dir : str, optional
+        dir_ : str, optional
             Directory path. The default is the current working directory.
 
         line : int, optional
@@ -2095,11 +2119,11 @@ class MapdlGrpc(MapdlBase):
                 filename = os.path.join(os.getcwd(), fname)
             elif not self._store_commands and fname in self.list_files():
                 # It exists in the Mapdl working directory
-                filename = os.path.join(self.directory, fname)
+                filename = self.directory / fname
             elif self._store_commands:
                 # Assuming that in non_interactive we have uploaded the file
                 # manually.
-                filename = os.path.join(self.directory, fname)
+                filename = self.directory / fname
             else:
                 # Finally
                 raise FileNotFoundError(f"Unable to locate filename '{fname}'")
@@ -2126,7 +2150,7 @@ class MapdlGrpc(MapdlBase):
 
     def _get_file_name(
         self,
-        fname: str,
+        fname: str | pathlib.PurePath,
         ext: Optional[str] = None,
         default_extension: Optional[str] = None,
     ) -> str:
@@ -2148,6 +2172,8 @@ class MapdlGrpc(MapdlBase):
 
         # the old behaviour is to supplied the name and the extension separately.
         # to make it easier let's going to allow names with extensions
+        if not isinstance(fname, str):
+            fname = str(fname)
 
         # Sanitizing ext
         while ext and ext[0] == ".":
@@ -2465,14 +2491,16 @@ class MapdlGrpc(MapdlBase):
         recursive: bool = False,
     ) -> List[str]:
         """Download files when we are on a local session."""
-
         if isinstance(files, str):
-            if not os.path.isdir(os.path.join(self.directory, files)):
+            if not os.path.isdir(self.directory / files):
                 list_files = self._validate_files(
                     files, extension=extension, recursive=recursive
                 )
             else:
                 list_files = [files]
+
+        elif isinstance(files, pathlib.PurePath):
+            list_files = [str(files)]
 
         elif isinstance(files, (list, tuple)):
             if not all([isinstance(each, str) for each in files]):
@@ -2487,7 +2515,7 @@ class MapdlGrpc(MapdlBase):
 
         else:
             raise ValueError(
-                f"The `file` parameter type ({type(files)}) is not supported."
+                f"The `file` parameter type ({type(files)}) is not supported. "
                 "Only strings, tuple of strings or list of strings are allowed."
             )
 
@@ -2503,10 +2531,10 @@ class MapdlGrpc(MapdlBase):
                     f"The file {file} has been updated in the current working directory."
                 )
 
-            if os.path.isdir(os.path.join(self.directory, file)):
+            if os.path.isdir(self.directory / file):
                 if recursive:  # only copy the directory if recursive is true.
                     shutil.copytree(
-                        os.path.join(self.directory, file),
+                        self.directory / file,
                         target_dir,
                         dirs_exist_ok=True,
                     )
@@ -2517,7 +2545,7 @@ class MapdlGrpc(MapdlBase):
             else:
                 return_list_files.append(destination)
                 shutil.copy(
-                    os.path.join(self.directory, file),
+                    self.directory / file,
                     destination,
                 )
 
@@ -2577,7 +2605,7 @@ class MapdlGrpc(MapdlBase):
         if self.is_local:
             # filtering with glob (accepting *)
             if not os.path.dirname(file):
-                file = os.path.join(self.directory, file)
+                file = str(self.directory / file)
             list_files = glob.glob(file + extension, recursive=recursive)
 
         else:
@@ -3060,7 +3088,7 @@ class MapdlGrpc(MapdlBase):
         """Save IGES geometry representation to disk"""
         basename = "_tmp.iges"
         if self._local:
-            filename = os.path.join(self.directory, basename)
+            filename = self.directory / basename
             self.igesout(basename, att=1)
         else:
             self.igesout(basename, att=1)
@@ -3088,8 +3116,8 @@ class MapdlGrpc(MapdlBase):
         rth_basename = "%s0.%s" % (filename, "rth")
         rst_basename = "%s0.%s" % (filename, "rst")
 
-        rth_file = os.path.join(self.directory, rth_basename)
-        rst_file = os.path.join(self.directory, rst_basename)
+        rth_file = self.directory / rth_basename
+        rst_file = self.directory / rst_basename
 
         if self._prioritize_thermal:
             if not os.path.isfile(rth_file):
@@ -3125,7 +3153,7 @@ class MapdlGrpc(MapdlBase):
             return None
 
         if self._local:
-            return open(os.path.join(self.directory, error_file)).read()
+            return open(self.directory / error_file).read()
         elif self._exited:
             raise MapdlExitedError(
                 "Cannot list error file when MAPDL Service has exited"
@@ -3180,12 +3208,12 @@ class MapdlGrpc(MapdlBase):
         # are unclear
         fname = self._get_file_name(fname, ext, "cdb")
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
-        file_, ext_, _ = self._decompose_fname(fname)
-        fname = fname[: -len(ext_) - 1]  # Removing extension. -1 for the dot.
+        file_, ext_, path_ = self._decompose_fname(fname)
+
         if self._local:
-            return self._file(filename=fname, extension=ext_, **kwargs)
+            return self._file(filename=path_ / file_, extension=ext_, **kwargs)
         else:
-            return self._file(filename=file_, extension=ext_)
+            return self._file(filename=file_, extension=ext_, **kwargs)
 
     @wraps(MapdlBase.vget)
     def vget(

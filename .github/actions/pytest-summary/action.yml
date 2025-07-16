@@ -12,6 +12,12 @@ inputs:
     required: true
     type: string
 
+  token:
+    description: |
+      GitHub token to use.
+    required: true
+    type: string
+
 runs:
   using: "composite"
 
@@ -30,7 +36,9 @@ runs:
     - name: "Download artifacts"
       uses: actions/download-artifact@v4
       with:
+        pattern: "reports-*"
         path: "artifacts"
+        github-token: ${{ inputs.token }}
 
     - name: "Check if artifacts directory has files"
       shell: bash
@@ -53,7 +61,7 @@ runs:
       if: ${{ env.HAS_FILES == 'true' }}
       shell: bash
       run: |
-        find . -mindepth 1 -maxdepth 4 -type f -name 'logs-*.tgz' -exec tar -xzvf {} -C $(dirname {}) \;
+        find . -mindepth 1 -maxdepth 4 -type f -name 'reports-*.tgz' -exec tar -xzvf {} -C $(dirname {}) \;
 
     - name: "List directories"
       if: ${{ env.HAS_FILES == 'true' }}
@@ -66,8 +74,11 @@ runs:
       shell: bash
       run: |
         echo "# Test summary 🚀" >>  $GITHUB_STEP_SUMMARY
-        echo -e "The followin tables show a summary of tests duration and standard desviation for all the jobs.\n" >>  $GITHUB_STEP_SUMMARY
+        echo -e "The following tables show a summary of tests duration and standard deviation for all the jobs.\n" >>  $GITHUB_STEP_SUMMARY
+        echo -e "You have the duration of all tests in the artifact 'tests_durations.json'\n" >>  $GITHUB_STEP_SUMMARY
+        echo "Running Pytest summary..."
         python .ci/pytest_summary.py --num 10 --save-file tests_durations.json >> summary.md
+        echo "Pytest summary done."
         echo "$(cat summary.md)" >> $GITHUB_STEP_SUMMARY
         cat summary.md
 
@@ -77,3 +88,4 @@ runs:
       with:
         name: tests_durations.json
         path: tests_durations.json
+        github-token: ${{ inputs.token }}

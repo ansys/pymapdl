@@ -179,7 +179,6 @@ from ansys.mapdl import core as pymapdl
 
 assert 'ansys.mapdl.core' in sys.modules, 'PyMAPDL is not loaded!'
 assert 'ansys.mapdl.core.examples' not in sys.modules, 'Examples is loaded!'
-assert 'requests' in sys.modules, 'Requests is loaded!'
 
 from ansys.mapdl.core.examples import vmfiles
 

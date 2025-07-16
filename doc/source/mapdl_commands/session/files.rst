@@ -1,25 +1,29 @@
-.. _ref_files_commands_api:
 
-*****
+.. _ref_files:
+
+
 Files
-*****
+=====
 
-.. currentmodule:: ansys.mapdl.core
 
-These SESSION commands are for file operations, such as deleting,
-copying, and listing.
+.. currentmodule:: ansys.mapdl.core._commands.session.files
+
+.. autoclass:: ansys.mapdl.core._commands.session.files.Files
 
 .. autosummary::
-   :toctree: _autosummary/
+   :template: base.rst
+   :toctree: _autosummary
 
-   Mapdl.anstoaqwa
-   Mapdl.anstoasas
-   Mapdl.assign
-   Mapdl.copy
-   Mapdl.slashdelete
-   Mapdl.fcomp
-   Mapdl.lgwrite
-   Mapdl.starlist
-   Mapdl.slashclog
-   Mapdl.slashfdele
-   Mapdl.rename
+
+   Files.anstoaqwa
+   Files.anstoasas
+   Files.assign
+   Files.copy
+   Files.fclean
+   Files.fcomp
+   Files.lgwrite
+   Files.slashclog
+   Files.slashdelete
+   Files.slashfdele
+   Files.slashrename
+   Files.starlist

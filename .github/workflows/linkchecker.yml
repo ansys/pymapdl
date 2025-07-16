@@ -29,10 +29,10 @@ jobs:
     name: "Notify failed build"
     needs: [linkcheck]
     if: failure() && github.event_name == 'schedule'
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-latest
     steps:
       - name: "Open issue"
-        uses: jayqi/failed-build-issue-action@v1
+        uses: jayqi/failed-build-issue-action@v1.2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           title-template: "Failed scheduled linkcheck 🔗 build"

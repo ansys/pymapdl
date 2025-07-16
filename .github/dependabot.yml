@@ -7,10 +7,14 @@ updates:
       interval: "weekly"
     labels:
       - "maintenance"
-    assignees:
-      - "ansys/pymapdl-maintainers"
     commit-message:
       prefix: "ci"
+    cooldown:
+      default-days: 10
+      include:
+        - "*"  # Include all dependencies in cooldown
+      exclude:
+        - "ansys/actions"
     groups:
        actions:
           patterns:
@@ -26,10 +30,15 @@ updates:
     labels:
       - "maintenance"
       - "dependencies"
-    assignees:
-      - "ansys/pymapdl-maintainers"
     commit-message:
       prefix: "build"
+    cooldown:
+      default-days: 10
+      semver-patch-days: 3
+      include:
+        - "*"  # Include all dependencies in cooldown
+      exclude:
+        - "ansys-tools-visualization-interface"
     groups:
        minimal:
           patterns:

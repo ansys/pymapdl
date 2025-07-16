@@ -30,7 +30,13 @@ import pytest
 from conftest import has_dependency, requires
 
 if not has_dependency("pyvista"):
-    pytest.skip(allow_module_level=True)
+    pytest.skip(
+        allow_module_level=True, reason="Skipping because 'pyvista' is not installed"
+    )
+
+import pyvista
+
+pyvista.global_theme.allow_empty_mesh = True
 
 from ansys.mapdl.core.errors import ComponentDoesNotExits, MapdlRuntimeError
 from ansys.mapdl.core.plotting import GraphicsBackend
@@ -1019,7 +1025,7 @@ def test_WithInterativePlotting(mapdl, make_block):
     last_png = list_files[0]
 
     if mapdl.is_local:
-        last_png = os.path.join(mapdl.directory, last_png)
+        last_png = mapdl.directory / last_png
     else:
         mapdl.download(last_png)
 
