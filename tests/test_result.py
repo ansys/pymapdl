@@ -397,7 +397,7 @@ def test_error_initialization_rst_file_not_found():
 
     rst_file_path = "my_unexisting_rst_file.rst"
     with pytest.raises(
-        ValueError, match=f"The RST file '{rst_file_path}' could not be found."
+        FileNotFoundError, match=f"The RST file '{rst_file_path}' could not be found."
     ):
         DPFResult(rst_file_path=rst_file_path)
 
@@ -443,6 +443,14 @@ class TestDPFResult:
     # PyMAPDL-Reader or Post_Processing results to avoid file access issues
 
     @pytest.fixture(scope="class")
+    def reader(self):
+        pass
+
+    @pytest.fixture(scope="class")
+    def post(self):
+        pass
+
+    @pytest.fixture(scope="class")
     def result(self, mapdl):
         """Fixture to ensure the model is solved before running tests."""
         from ansys.mapdl.core.reader.result import DPFResult
@@ -456,7 +464,7 @@ class TestDPFResult:
         # Download the RST file to a temporary directory
         tmp_dir = create_temp_dir()
         rst_path = mapdl.download_result(str(tmp_dir))
-        return DPFResult(rst_file_path=rst_path)
+        return DPFResult(mapdl=mapdl)
 
     @pytest.mark.parametrize(
         "method",
@@ -517,7 +525,7 @@ class TestDPFResult:
 
     def test_is_same_machine(self, result):
         assert (
-            result._mapdl_dpf_on_same_machine() is True
+            result._mapdl_dpf_on_same_machine is True
         ), "DPF is not on the same machine as MAPDL."
 
     def test_dpf_ip(self, result):
