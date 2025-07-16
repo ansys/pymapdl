@@ -25,12 +25,8 @@ import weakref
 
 import numpy as np
 
-from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.errors import MapdlRuntimeError
 from ansys.mapdl.core.misc import requires_package, supress_logging
-
-if _HAS_VISUALIZER:
-    from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
 COMPONENT_STRESS_TYPE = ["X", "Y", "Z", "XY", "YZ", "XZ"]
 PRINCIPAL_TYPE = ["1", "2", "3"]
@@ -527,7 +523,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -599,7 +595,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -632,6 +628,8 @@ class PostProcessing:
                 "with ``mapdl.set(step, sub_step)`` or the result does not "
                 "exist within the result file."
             )
+
+        from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
         with self._mapdl.save_selection:
             mask = self.selected_nodes
@@ -678,6 +676,8 @@ class PostProcessing:
                 "with ``mapdl.set(step, sub_step)`` or the result does not "
                 "exist within the result file."
             )
+
+        from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
         with self._mapdl.save_selection:
             # Select nodes to avoid segfault
@@ -862,7 +862,7 @@ class PostProcessing:
     def nodal_temperature(self) -> np.ndarray:
         """The nodal temperature of the current result.
 
-        Equilvanent MAPDL command:
+        Equivalent MAPDL command:
         ``PRNSOL, TEMP``
 
         Notes
@@ -910,7 +910,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -944,7 +944,7 @@ class PostProcessing:
     def nodal_displacement(self, component="NORM") -> np.ndarray:
         """Nodal X, Y, or Z structural displacement.
 
-        Equilvanent MAPDL command:
+        Equivalent MAPDL command:
 
         * ``PRNSOL, U, X``
 
@@ -1030,7 +1030,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1067,7 +1067,7 @@ class PostProcessing:
     def nodal_rotation(self, component="ALL") -> np.ndarray:
         """Nodal X, Y, or Z structural rotation
 
-        Equilvanent MAPDL commands:
+        Equivalent MAPDL commands:
 
         * ``PRNSOL, ROT, X``
         * ``PRNSOL, ROT, Y``
@@ -1146,7 +1146,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1180,7 +1180,7 @@ class PostProcessing:
         One value per element.  Either minimum, maximum, or average of
         all nodes in each element.
 
-        Equilvanent MAPDL commands:
+        Equivalent MAPDL commands:
 
         * ``ETABLE,VALUES,U,X``
         * ``PRETAB,VALUES`` or ``*VGET,TMP,ELEM,1,ETAB,VALUES``
@@ -1280,7 +1280,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1324,7 +1324,7 @@ class PostProcessing:
         One value per element.  Either minimum, maximum, or average of
         all nodes in each element.
 
-        Equilvanent MAPDL commands:
+        Equivalent MAPDL commands:
 
         * ``ETABLE,VALUES,S,X``
         * ``PRETAB,VALUES`` or ``*VGET,TMP,ELEM,1,ETAB,VALUES``
@@ -1426,7 +1426,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1467,7 +1467,7 @@ class PostProcessing:
         One value per element.  Either minimum, maximum, or average of
         all nodes in each element.
 
-        Equilvanent MAPDL commands:
+        Equivalent MAPDL commands:
 
         * ``ETABLE,VALUES,TEMP``
         * ``PRETAB,VALUES`` or ``*VGET,TMP,ELEM,1,ETAB,VALUES``
@@ -1536,7 +1536,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1558,7 +1558,7 @@ class PostProcessing:
     def nodal_pressure(self) -> np.ndarray:
         """The nodal pressure of the current result.
 
-        Equilvanent MAPDL command:
+        Equivalent MAPDL command:
         ``PRNSOL, PRES``
 
         Notes
@@ -1606,7 +1606,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1640,7 +1640,7 @@ class PostProcessing:
     def nodal_voltage(self) -> np.ndarray:
         """The nodal voltage of the current result.
 
-        Equilvanent MAPDL command:
+        Equivalent MAPDL command:
 
         * ``PRNSOL, PRES``
 
@@ -1695,7 +1695,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1729,7 +1729,7 @@ class PostProcessing:
     def nodal_component_stress(self, component) -> np.ndarray:
         """Nodal component stress.
 
-        Equilvanent MAPDL commands:
+        Equivalent MAPDL commands:
 
         * ``VGET, PARM, NODE, , S, X``
         * ``PRNSOL, S, COMP``
@@ -1798,7 +1798,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1821,7 +1821,7 @@ class PostProcessing:
     def nodal_principal_stress(self, component) -> np.ndarray:
         """Nodal principal stress.
 
-        Equilvanent MAPDL commands:
+        Equivalent MAPDL commands:
 
         * ``*VGET, PARM, NODE, , S, 1``
         * ``PRNSOL, S, PRIN``
@@ -1889,7 +1889,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -1914,7 +1914,7 @@ class PostProcessing:
     def nodal_stress_intensity(self) -> np.ndarray:
         """The nodal stress intensity of the current result.
 
-        Equilvanent MAPDL command: ``PRNSOL, S, PRIN``
+        Equivalent MAPDL command: ``PRNSOL, S, PRIN``
 
         Notes
         -----
@@ -1966,7 +1966,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2000,7 +2000,7 @@ class PostProcessing:
     def nodal_eqv_stress(self) -> np.ndarray:
         """The nodal equivalent stress of the current result.
 
-        Equilvanent MAPDL command: ``PRNSOL, S, PRIN``
+        Equivalent MAPDL command: ``PRNSOL, S, PRIN``
 
         Returns
         -------
@@ -2062,7 +2062,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2098,7 +2098,7 @@ class PostProcessing:
 
         Includes elastic, plastic, and creep strain.
 
-        Equilvanent MAPDL commands:
+        Equivalent MAPDL commands:
 
         * ``*VGET, PARM, NODE, , EPTO, X``
 
@@ -2167,7 +2167,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2195,7 +2195,7 @@ class PostProcessing:
 
         Includes elastic, plastic, and creep strain.
 
-        Equilvanent MAPDL command:
+        Equivalent MAPDL command:
 
         * ``*VGET,PARM,NODE,,EPTO,1``
 
@@ -2266,7 +2266,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2293,7 +2293,7 @@ class PostProcessing:
     def nodal_total_strain_intensity(self) -> np.ndarray:
         """The total nodal strain intensity of the current result.
 
-        Equilvanent MAPDL command:
+        Equivalent MAPDL command:
 
         * ``PRNSOL, EPTO, PRIN``
 
@@ -2347,7 +2347,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2383,7 +2383,7 @@ class PostProcessing:
     def nodal_total_eqv_strain(self) -> np.ndarray:
         """The total nodal equivalent strain of the current result.
 
-        Equilvanent MAPDL command:
+        Equivalent MAPDL command:
 
         * ``PRNSOL, EPTO, PRIN``
 
@@ -2443,7 +2443,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2541,7 +2541,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2637,7 +2637,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2722,7 +2722,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2817,7 +2817,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -2920,7 +2920,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3010,7 +3010,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3096,7 +3096,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3198,7 +3198,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3302,7 +3302,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3398,7 +3398,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3484,7 +3484,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3586,7 +3586,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using
@@ -3678,7 +3678,7 @@ class PostProcessing:
 
         Notes
         -----
-        If ``vkt=True`` (default), this function uses
+        If ``graphics_backend=GraphicsBackend.PYVISTA`` (default), this function uses
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>`
         You can pass key arguments to
         :class:`MapdlPlotter<ansys.mapdl.core.plotting.visualizer.MapdlPlotter>` using

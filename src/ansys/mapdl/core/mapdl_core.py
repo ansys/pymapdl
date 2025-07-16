@@ -67,13 +67,16 @@ from ansys.mapdl.core.information import Information
 from ansys.mapdl.core.inline_functions import Query
 from ansys.mapdl.core.mapdl_types import MapdlFloat
 from ansys.mapdl.core.misc import (
+    check_deprecated_vtk_kwargs,
     check_valid_routine,
     last_created,
     random_string,
+    requires_graphics,
     requires_package,
     run_as,
     supress_logging,
 )
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.reader import Archive
@@ -189,7 +192,6 @@ _ALLOWED_START_PARM = [
     "additional_switches",
     "check_parameter_names",
     "env_vars",
-    "launched",
     "exec_file",
     "finish_job_on_exit",
     "hostname",
@@ -197,6 +199,7 @@ _ALLOWED_START_PARM = [
     "jobid",
     "jobname",
     "launch_on_hpc",
+    "launched",
     "mode",
     "nproc",
     "override",
@@ -251,16 +254,17 @@ def _sanitize_start_parm(start_parm):
 class _MapdlCore(Commands):
     """Contains methods in common between all Mapdl subclasses"""
 
+    @check_deprecated_vtk_kwargs
     def __init__(
         self,
         loglevel: DEBUG_LEVELS = "DEBUG",
-        use_vtk: Optional[bool] = None,
+        graphics_backend: Optional[GraphicsBackend] = None,
         log_apdl: Optional[str] = None,
         log_file: Union[bool, str] = False,
         local: bool = True,
         print_com: bool = False,
         file_type_for_plots: VALID_FILE_TYPE_FOR_PLOT_LITERAL = "PNG",
-        **start_parm,
+        **start_parm: dict[str, Any],
     ):
         """Initialize connection with MAPDL."""
         self._show_matplotlib_figures = True  # for testing
@@ -283,18 +287,16 @@ class _MapdlCore(Commands):
         self._save_selection_obj = None
 
         if _HAS_VISUALIZER:
-            if use_vtk is not None:  # pragma: no cover
-                self._use_vtk = use_vtk
+            if graphics_backend is not None:  # pragma: no cover
+                self._graphics_backend = graphics_backend
             else:
-                self._use_vtk = True
+                self._graphics_backend = GraphicsBackend.PYVISTA
         else:  # pragma: no cover
-            if use_vtk:
+            if graphics_backend:
                 raise ModuleNotFoundError(
-                    "Using the keyword argument 'use_vtk' requires having "
-                    "'ansys-tools-visualization_interface' installed."
+                    "Graphic libraries are required to use this class.\n"
+                    "You can install this using `pip install ansys-mapdl-core[graphics]`."
                 )
-            else:
-                self._use_vtk = False
 
         self._log_filehandler = None
         self._local: bool = local
@@ -313,8 +315,12 @@ class _MapdlCore(Commands):
         _sanitize_start_parm(start_parm)
         self._start_parm: Dict[str, Any] = start_parm
         self._jobname: str = start_parm.get("jobname", "file")
-        self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
-        self._check_parameter_names = start_parm.get("check_parameter_names", True)
+        self._path: str | pathlib.PurePath | None = (
+            None  # start_parm.get("run_location", None)
+        )
+        self._check_parameter_names: bool = start_parm.get(
+            "check_parameter_names", True
+        )
 
         # Setting up loggers
         self._log: logger = logger.add_instance_logger(
@@ -496,9 +502,32 @@ class _MapdlCore(Commands):
             raise ValueError(f"'{value}' is not allowed as file output for plots.")
         return self._default_file_type_for_plots
 
+    def _wrap_directory(self, path: str) -> pathlib.PurePath:
+        if self._platform is None:
+            # MAPDL is not initialized yet so returning the path as is.
+            return pathlib.PurePath(path)
+
+        if self._platform == "windows":
+            # Windows path
+            return pathlib.PureWindowsPath(path)
+        elif self._platform == "linux":
+            # Linux path
+            return pathlib.PurePosixPath(path)
+        else:
+            # Other OS path
+            warn(
+                f"MAPDL is running on an unknown OS '{self._platform}'. "
+                "Using PurePosixPath as default.",
+                UserWarning,
+            )
+            # Default to PurePosixPath
+            # This is a fallback, it should not happen.
+            # If it does, it is probably a bug.
+            return pathlib.PurePosixPath(path)
+
     @property
     @supress_logging
-    def directory(self) -> str:
+    def directory(self) -> pathlib.PurePath:
         """
         Current MAPDL directory.
 
@@ -536,7 +565,7 @@ class _MapdlCore(Commands):
             path = path.replace("\\", "/")
             # new line to fix path issue, see #416
             path = repr(path)[1:-1]
-            self._path = path
+            self._path = self._wrap_directory(path)
 
         elif not self._path:
             raise MapdlRuntimeError(
@@ -550,7 +579,7 @@ class _MapdlCore(Commands):
     def directory(self, path: Union[str, pathlib.Path]) -> None:
         """Change the directory using ``Mapdl.cwd``"""
         self.cwd(path)
-        self._path = path
+        self._path = self._wrap_directory(path)
 
     @property
     def exited(self):
@@ -1035,14 +1064,14 @@ class _MapdlCore(Commands):
         return self._solution
 
     @property
-    def use_vtk(self):
-        """Returns if using VTK by default or not."""
-        return self._use_vtk
+    def graphics_backend(self) -> GraphicsBackend:
+        """Returns current graphics backend."""
+        return self._graphics_backend
 
-    @use_vtk.setter
-    def use_vtk(self, value: bool):
-        """Set VTK to be used by default or not."""
-        self._use_vtk = value
+    @graphics_backend.setter
+    def graphics_backend(self, value: GraphicsBackend):
+        """Set the graphics backend to be used."""
+        self._graphics_backend = value
 
     @property
     @requires_package("ansys.mapdl.reader", softerror=True)
@@ -1159,8 +1188,9 @@ class _MapdlCore(Commands):
         rth_basename = "%s0.%s" % (filename, "rth")
         rst_basename = "%s0.%s" % (filename, "rst")
 
-        rth_file = os.path.join(self.directory, rth_basename)
-        rst_file = os.path.join(self.directory, rst_basename)
+        rth_file = self.directory / rth_basename
+        rst_file = self.directory / rst_basename
+
         if os.path.isfile(rth_file) and os.path.isfile(rst_file):
             return last_created([rth_file, rst_file])
         elif os.path.isfile(rth_file):
@@ -1187,7 +1217,7 @@ class _MapdlCore(Commands):
         """Lockfile path"""
         path = self.directory
         if path is not None:
-            return os.path.join(path, self.jobname + ".lock").replace("\\", "/")
+            return path / f"{self.jobname}.lock"
 
     @property
     @supress_logging
@@ -1198,8 +1228,8 @@ class _MapdlCore(Commands):
 
         if self._archive_cache is None:
             # write database to an archive file
-            arch_filename = os.path.join(self.directory, "_tmp.cdb")
-            nblock_filename = os.path.join(self.directory, "nblock.cdb")
+            arch_filename = self.directory / "_tmp.cdb"
+            nblock_filename = self.directory / "nblock.cdb"
 
             # must have all nodes elements are using selected
             self.cm("__NODE__", "NODE", mute=True)
@@ -1257,8 +1287,8 @@ class _MapdlCore(Commands):
                 # Case where there is RST extension because it is thermal for example
                 filename = self.jobname
 
-                rth_file = os.path.join(self.directory, f"{filename}.rth")
-                rst_file = os.path.join(self.directory, f"{filename}.rst")
+                rth_file = self.directory / f"{filename}.rth"
+                rst_file = self.directory / f"{filename}.rst"
 
                 if self._prioritize_thermal and os.path.isfile(rth_file):
                     return rth_file
@@ -1270,7 +1300,7 @@ class _MapdlCore(Commands):
                 elif os.path.isfile(rst_file):
                     return rst_file
             else:
-                filename = os.path.join(self.directory, f"{filename}.{ext}")
+                filename = self.directory / f"{filename}.{ext}"
                 if os.path.isfile(filename):
                     return filename
         else:
@@ -1358,8 +1388,8 @@ class _MapdlCore(Commands):
             def inner_wrapper(*args, **kwargs):
                 # in interactive mode (item='p'), the output is not suppressed
                 if self._store_commands:
-                    # In non-interactive mode, we do not need to check anything.
-                    return
+                    # In non-interactive mode, execute the wrapped function and return its result.
+                    return func(*args, **kwargs)
 
                 is_interactive_arg = (
                     True
@@ -1619,7 +1649,6 @@ class _MapdlCore(Commands):
         """
         if self._apdl_log is not None:
             raise MapdlRuntimeError("APDL command logging already enabled")
-
         self._log.debug("Opening ANSYS log file at %s", filename)
 
         if mode not in ["w", "a", "x"]:
@@ -1637,7 +1666,7 @@ class _MapdlCore(Commands):
     @run_as("PREP7")
     def _generate_iges(self):
         """Save IGES geometry representation to disk"""
-        filename = os.path.join(self.directory, "_tmp.iges")
+        filename = self.directory / "_tmp.iges"
         self.igesout(filename, att=1, mute=True)
         return filename
 
@@ -1862,15 +1891,9 @@ class _MapdlCore(Commands):
             self._parent = weakref.ref(parent)
             self._pixel_res = pixel_res
 
+        @requires_graphics
         def __enter__(self) -> None:
             self._parent()._log.debug("Entering in 'WithInterativePlotting' mode")
-
-            if not self._parent()._has_matplotlib:  # pragma: no cover
-                raise ModuleNotFoundError(
-                    "Install matplotlib to display plots from MAPDL ,"
-                    "from Python.  Otherwise, plot with vtk with:\n"
-                    "``vtk=True``"
-                )
 
             if not self._parent()._store_commands:
                 if not self._parent()._png_mode:
@@ -1931,7 +1954,7 @@ class _MapdlCore(Commands):
     def _list(self, command):
         """Replaces *LIST command"""
         items = command.split(",")
-        filename = os.path.join(self.directory, ".".join(items[1:]))
+        filename = self.directory / ".".join(items[1:])
         if os.path.isfile(filename):
             self._response = open(filename).read()
             response_ = "\n".join(self._response.splitlines()[:10])
@@ -2333,7 +2356,7 @@ class _MapdlCore(Commands):
             # We are storing a parameter.
             param_name = command.split("=")[0].strip()
 
-            if "/COM" not in cmd_ and "/TITLE" not in cmd_:
+            if cmd_[:4].upper() not in ["/COM", "/TIT", "/SYS"]:
                 # Edge case. `\title, 'par=1234' `
                 self._check_parameter_name(param_name)
 
@@ -2513,7 +2536,7 @@ class _MapdlCore(Commands):
 
     def _screenshot_path(self):
         """Return last filename based on the current jobname"""
-        filenames = glob.glob(os.path.join(self.directory, f"{self.jobname}*.png"))
+        filenames = glob.glob(str(self.directory / f"{self.jobname}*.png"))
         filenames.sort()
         return filenames[-1]
 
@@ -2982,7 +3005,7 @@ class _MapdlCore(Commands):
             sys_output = self._download_as_raw("__outputcmd__.txt").decode().strip()
 
         else:
-            file_ = os.path.join(self.directory, "__outputcmd__.txt")
+            file_ = self.directory / "__outputcmd__.txt"
             with open(file_, "r") as f:
                 sys_output = f.read().strip()
 

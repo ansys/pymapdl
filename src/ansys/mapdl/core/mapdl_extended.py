@@ -31,7 +31,6 @@ import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core import _HAS_VISUALIZER
 from ansys.mapdl.core.commands import CommandListingOutput
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
@@ -45,14 +44,33 @@ from ansys.mapdl.core.mapdl_types import KwargDict, MapdlFloat
 from ansys.mapdl.core.misc import (
     allow_iterables_vmin,
     allow_pickable_entities,
+    check_deprecated_vtk_kwargs,
     load_file,
     random_string,
+    requires_graphics,
     supress_logging,
 )
+from ansys.mapdl.core.plotting import GraphicsBackend
+
+TMP_VAR = "__tmpvar__"
 
 
 class _MapdlCommandExtended(_MapdlCore):
     """Class that extended MAPDL capabilities by wrapping or overwriting commands"""
+
+    def __init__(self, *args, **kwargs):
+        """Initialize the MAPDL command extended class.
+
+        Parameters
+        ----------
+        *args : list
+            Positional arguments to pass to the base class.
+
+        **kwargs : dict
+            Keyword arguments to pass to the base class.
+        """
+        super().__init__(*args, **kwargs)
+        self._graphics_backend = GraphicsBackend.PYVISTA
 
     def file(self, fname: str = "", ext: str = "", **kwargs) -> str:
         """Specifies the data file where results are to be found.
@@ -91,9 +109,13 @@ class _MapdlCommandExtended(_MapdlCore):
         file_, ext_, _ = self._decompose_fname(fname)
         return self._file(file_, ext_, **kwargs)
 
-    def _file(self, filename: str, extension: str, **kwargs) -> str:
+    def _file(self, filename: str = "", extension: str = "", **kwargs) -> str:
         """Run the MAPDL ``file`` command with a proper filename."""
         return self.run(f"FILE,{filename},{extension}", **kwargs)
+
+    def set_graphics_backend(self, backend: GraphicsBackend):
+        """Set the graphics backend to use for plotting."""
+        self._graphics_backend = backend
 
     @wraps(_MapdlCore.lsread)
     def lsread(self, *args, **kwargs):
@@ -360,7 +382,7 @@ class _MapdlCommandExtended(_MapdlCore):
         except MapdlCommandIgnoredError as e:
             raise IncorrectWorkingDirectory(e.args[0])
 
-        self._path = args[0]  # caching
+        self._path = self._wrap_directory(args[0])  # caching
         return output
 
     @wraps(_MapdlCore.list)
@@ -384,19 +406,22 @@ class _MapdlCommandExtended(_MapdlCore):
 
         path = pathlib.Path(filename)
         if path.parent != ".":
-            path = os.path.join(self.directory, filename)
+            path = self.directory / filename
 
         path = str(path) + ext
         with open(path) as fid:
             return fid.read()
 
+    @check_deprecated_vtk_kwargs
+    @requires_graphics
     def kplot(
         self,
         np1="",
         np2="",
         ninc="",
         lab="",
-        vtk=None,
+        *,
+        graphics_backend=None,
         show_keypoint_numbering=True,
         **kwargs,
     ):
@@ -405,7 +430,7 @@ class _MapdlCommandExtended(_MapdlCore):
         APDL Command: KPLOT
 
         .. note::
-            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            PyMAPDL plotting commands with ``graphics_backend=GraphicsBackend.PYVISTA`` ignore any
             values set with the ``PNUM`` command.
 
         Parameters
@@ -423,11 +448,11 @@ class _MapdlCommandExtended(_MapdlCore):
 
             HPT - Plots only those keypoints that are hard points.
 
-        vtk : bool, optional
+        graphics_backend : GraphicsBackend, optional
             Plot the currently selected lines using ``ansys-tools-visualization_interface``.
 
         show_keypoint_numbering : bool, optional
-            Display keypoint numbers when ``vtk=True``.
+            Display keypoint numbers when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
 
 
@@ -435,14 +460,10 @@ class _MapdlCommandExtended(_MapdlCore):
         -----
         This command is valid in any processor.
         """
-        if vtk is None:
-            vtk = self._use_vtk
-        elif vtk is True:
-            if not _HAS_VISUALIZER:  # pragma: no cover
-                raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
-                )
-        if vtk:
+        if graphics_backend is None:
+            graphics_backend = self._graphics_backend
+
+        if graphics_backend is GraphicsBackend.PYVISTA:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
             pl = kwargs.get("plotter", None)
@@ -468,16 +489,21 @@ class _MapdlCommandExtended(_MapdlCore):
                 )
             pl.plot([], points, labels, **kwargs)
             return pl.show(**kwargs)
-        # otherwise, use the legacy plotter
-        with self._enable_interactive_plotting():
-            return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
 
+        # otherwise, use the legacy plotter
+        if graphics_backend is GraphicsBackend.MAPDL:
+            with self._enable_interactive_plotting():
+                return super().kplot(np1=np1, np2=np2, ninc=ninc, lab=lab, **kwargs)
+
+    @check_deprecated_vtk_kwargs
+    @requires_graphics
     def lplot(
         self,
         nl1="",
         nl2="",
         ninc="",
-        vtk=None,
+        *,
+        graphics_backend=None,
         show_line_numbering=True,
         show_keypoint_numbering=False,
         color_lines=False,
@@ -488,7 +514,7 @@ class _MapdlCommandExtended(_MapdlCore):
         APDL Command: LPLOT
 
         .. note::
-            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            PyMAPDL plotting commands with ``graphics_backend=GraphicsBackend.PYVISTA`` ignore any
             values set with the ``PNUM`` command.
 
         Parameters
@@ -498,11 +524,11 @@ class _MapdlCommandExtended(_MapdlCore):
             of NINC (defaults to 1).  If NL1 = ALL (default), NL2 and
             NINC are ignored and display all selected lines [LSEL].
 
-        vtk : bool, optional
+        graphics_backend : GraphicsBackend, optional
             Plot the currently selected lines using ``ansys-tools-visualization_interface``.
 
         show_line_numbering : bool, optional
-            Display line and keypoint numbers when ``vtk=True``.
+            Display line and keypoint numbers when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         show_keypoint_numbering : bool, optional
             Number keypoints.  Only valid when ``show_keypoints=True``
@@ -513,29 +539,24 @@ class _MapdlCommandExtended(_MapdlCore):
         **kwargs
             See :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
-            ``vtk=True``.
+            ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         Notes
         -----
         Mesh divisions on plotted lines are controlled by the ``ldiv``
-        option of the ``psymb`` command when ``vtk=False``.
+        option of the ``psymb`` command when ``graphics_backend=GraphicsBackend.MAPDL``.
         Otherwise, line divisions are controlled automatically.
 
         This command is valid in any processor.
 
         Examples
         --------
-        >>> mapdl.lplot(vtk=True, cpos='xy', line_width=10)
+        >>> mapdl.lplot(graphics_backend=GraphicsBackend.PYVISTA, cpos='xy', line_width=10)
         """
-        if vtk is None:
-            vtk = self._use_vtk
-        elif vtk is True:
-            if not _HAS_VISUALIZER:  # pragma: no cover
-                raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
-                )
+        if graphics_backend is None:
+            graphics_backend = self._graphics_backend
 
-        if vtk:
+        if graphics_backend:
             from ansys.mapdl.core.plotting.theme import get_ansys_colors
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
@@ -610,6 +631,8 @@ class _MapdlCommandExtended(_MapdlCore):
             with self._enable_interactive_plotting():
                 return super().lplot(nl1=nl1, nl2=nl2, ninc=ninc, **kwargs)
 
+    @check_deprecated_vtk_kwargs
+    @requires_graphics
     def aplot(
         self,
         na1="",
@@ -617,7 +640,8 @@ class _MapdlCommandExtended(_MapdlCore):
         ninc="",
         degen="",
         scale="",
-        vtk=None,
+        *,
+        graphics_backend=None,
         quality=4,
         show_area_numbering=False,
         show_line_numbering=False,
@@ -633,7 +657,7 @@ class _MapdlCommandExtended(_MapdlCore):
         APDL Command: ``APLOT``
 
         .. note::
-            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            PyMAPDL plotting commands with ``graphics_backend=GraphicsBackend.PYVISTA`` ignore any
             values set with the ``PNUM`` command.
 
         Parameters
@@ -648,31 +672,31 @@ class _MapdlCommandExtended(_MapdlCore):
             Increment between minimum and maximum area.
 
         degen, str, optional
-            Degeneracy marker.  This option is ignored when ``vtk=True``.
+            Degeneracy marker.  This option is ignored when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         scale : float, optional
             Scale factor for the size of the degeneracy-marker star.
             The scale is the size in window space (-1 to 1 in both
             directions) (defaults to 0.075).  This option is ignored
-            when ``vtk=True``.
+            when ``graphics_backend != GraphicsBackend.MAPDL``.
 
-        vtk : bool, optional
+        graphics_backend : GraphicsBackend, optional
             Plot the currently selected areas using ``ansys-tools-visualization_interface``.
             As this creates a temporary surface mesh, this may have a
             long execution time for large meshes.
 
         quality : int, optional
             Quality of the mesh to display.  Varies between 1 (worst)
-            to 10 (best) when ``vtk=True``.
+            to 10 (best) when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         show_area_numbering : bool, optional
-            Display area numbers when ``vtk=True``.
+            Display area numbers when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         show_line_numbering : bool, optional
-            Display line numbers when ``vtk=True``.
+            Display line numbers when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         color_areas : Union[bool, str, np.array], optional
-            Only used when ``vtk=True``.
+            Only used when ``graphics_backend=GraphicsBackend.PYVISTA``.
             If ``color_areas`` is a bool, randomly color areas when ``True``.
             If ``color_areas`` is a string, it must be a valid color string
             which will be applied to all areas.
@@ -687,7 +711,7 @@ class _MapdlCommandExtended(_MapdlCore):
         **kwargs
             See :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
-            ``vtk=True``.
+            ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         Examples
         --------
@@ -711,15 +735,10 @@ class _MapdlCommandExtended(_MapdlCore):
         >>> pl.show()
 
         """
-        if vtk is None:
-            vtk = self._use_vtk
-        elif vtk is True:
-            if not _HAS_VISUALIZER:  # pragma: no cover
-                raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
-                )
+        if graphics_backend is None:
+            graphics_backend = self._graphics_backend
 
-        if vtk:
+        if graphics_backend:
             from matplotlib.colors import to_rgba
 
             from ansys.mapdl.core.plotting.theme import get_ansys_colors
@@ -841,12 +860,14 @@ class _MapdlCommandExtended(_MapdlCore):
             pl = MapdlPlotter()
             pl.plot(meshes, [], labels, **kwargs)
             return pl.show(**kwargs)
+        if graphics_backend is GraphicsBackend.MAPDL:
+            with self._enable_interactive_plotting():
+                return super().aplot(
+                    na1=na1, na2=na2, ninc=ninc, degen=degen, scale=scale, **kwargs
+                )
 
-        with self._enable_interactive_plotting():
-            return super().aplot(
-                na1=na1, na2=na2, ninc=ninc, degen=degen, scale=scale, **kwargs
-            )
-
+    @check_deprecated_vtk_kwargs
+    @requires_graphics
     def vplot(
         self,
         nv1="",
@@ -854,7 +875,8 @@ class _MapdlCommandExtended(_MapdlCore):
         ninc="",
         degen="",
         scale="",
-        vtk=None,
+        *,
+        graphics_backend=None,
         quality=4,
         show_volume_numbering=False,
         show_area_numbering=False,
@@ -868,7 +890,7 @@ class _MapdlCommandExtended(_MapdlCore):
         APDL Command: VPLOT
 
         .. note::
-            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            PyMAPDL plotting commands with ``graphics_backend=GraphicsBackend.PYVISTA`` ignore any
             values set with the ``PNUM`` command.
 
         Parameters
@@ -877,36 +899,36 @@ class _MapdlCommandExtended(_MapdlCore):
             Display volumes from NV1 to NV2 (defaults to NV1) in steps
             of NINC (defaults to 1).  If NV1 = ALL (default), NV2 and
             NINC are ignored and all selected volumes [VSEL] are
-            displayed.  Ignored when ``vtk=True``.
+            displayed.  Ignored when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         degen
             Degeneracy marker.  ``"blank"`` No degeneracy marker is
             used (default), or ``"DEGE"``.  A red star is placed on
             keypoints at degeneracies (see the Modeling and Meshing
             Guide).  Not available if /FACET,WIRE is set.  Ignored
-            when ``vtk=True``.
+            when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         scale
             Scale factor for the size of the degeneracy-marker star.  The scale
             is the size in window space (-1 to 1 in both directions) (defaults
-            to .075).  Ignored when ``vtk=True``.
+            to .075).  Ignored when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
-        vtk : bool, optional
+        graphics_backend : GraphicsBackend, optional
             Plot the currently selected volumes using ``ansys-tools-visualization_interface``.
             As this creates a temporary surface mesh, this may have a
             long execution time for large meshes.
 
         quality : int, optional
             quality of the mesh to display.  Varies between 1 (worst)
-            to 10 (best).  Applicable when ``vtk=True``.
+            to 10 (best).  Applicable when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         show_numbering : bool, optional
-            Display line and keypoint numbers when ``vtk=True``.
+            Display line and keypoint numbers when ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         **kwargs
             See :class:`ansys.mapdl.core.plotting.visualizer.MapdlPlotter` for
             more keyword arguments applicable when visualizing with
-            ``vtk=True``.
+            ``graphics_backend=GraphicsBackend.PYVISTA``.
 
         Examples
         --------
@@ -915,15 +937,10 @@ class _MapdlCommandExtended(_MapdlCore):
         >>> mapdl.vplot(show_area_numbering=True)
 
         """
-        if vtk is None:
-            vtk = self._use_vtk
-        elif vtk is True:
-            if not _HAS_VISUALIZER:  # pragma: no cover
-                raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
-                )
+        if graphics_backend is None:
+            graphics_backend = self._graphics_backend
 
-        if vtk:
+        if graphics_backend is GraphicsBackend.PYVISTA:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
             pl = kwargs.get("plotter", None)
@@ -953,7 +970,7 @@ class _MapdlCommandExtended(_MapdlCore):
                     self.aslv("S", mute=True)  # select areas attached to active volumes
 
                     pl_aplot = self.aplot(
-                        vtk=True,
+                        graphics_backend=GraphicsBackend.PYVISTA,
                         color_areas=color_areas,
                         quality=quality,
                         show_area_numbering=show_area_numbering,
@@ -975,19 +992,23 @@ class _MapdlCommandExtended(_MapdlCore):
             pl.plot(meshes, points, labels, **kwargs)
             return pl.show(return_plotter=return_plotter, **kwargs)
 
-        else:
+        elif graphics_backend is GraphicsBackend.MAPDL:
             with self._enable_interactive_plotting():
                 return super().vplot(
                     nv1=nv1, nv2=nv2, ninc=ninc, degen=degen, scale=scale, **kwargs
                 )
+        else:
+            raise ValueError(f"Invalid graphics backend: {graphics_backend}. ")
 
-    def nplot(self, nnum="", vtk=None, **kwargs):
+    @check_deprecated_vtk_kwargs
+    @requires_graphics
+    def nplot(self, nnum="", *, graphics_backend=None, **kwargs):
         """APDL Command: NPLOT
 
         Displays nodes.
 
         .. note::
-           PyMAPDL plotting commands with ``vtk=True`` ignore any
+           PyMAPDL plotting commands with ``graphics_backend=GraphicsBackend.PYVISTA`` ignore any
            values set with the ``PNUM`` command.
 
         Parameters
@@ -999,11 +1020,11 @@ class _MapdlCommandExtended(_MapdlCore):
             - ``True`` : Include node numbers on display.
 
             .. note::
-               This parameter is only valid when ``vtk==True``
+               This parameter is only valid when ``graphics_backend==GraphicsBackend.PYVISTA``
 
-        vtk : bool, optional
-            Plot the currently selected nodes using ``pyvista``.
-            Defaults to current ``use_vtk`` setting as set on the
+        graphics_backend : GraphicsBackend, optional
+            Plot the currently selected nodes using an specific backend.
+            Defaults to current ``graphics_backend`` setting as set on the
             initialization of MAPDL.
 
         plot_bc : bool, optional
@@ -1070,7 +1091,7 @@ class _MapdlCommandExtended(_MapdlCore):
         >>> mapdl.fill(1, 11, 9)
         >>> mapdl.nplot(
         ...     nnum=True,
-        ...     vtk=True,
+        ...     graphics_backend=GraphicsBackend.PYVISTA,
         ...     background='w',
         ...     color='k',
         ...     show_bounds=True
@@ -1082,7 +1103,7 @@ class _MapdlCommandExtended(_MapdlCore):
         >>> mapdl.n(1, 0, 0, 0)
         >>> mapdl.n(11, 10, 0, 0)
         >>> mapdl.fill(1, 11, 9)
-        >>> mapdl.nplot(vtk=False)
+        >>> mapdl.nplot(graphics_backend=GraphicsBackend.MAPDL)
 
         Plot nodal boundary conditions.
 
@@ -1093,22 +1114,15 @@ class _MapdlCommandExtended(_MapdlCore):
         ... )
 
         """
-        if vtk is None:
-            vtk = self._use_vtk
-
-        if vtk is True:
-            if _HAS_VISUALIZER:
-                # lazy import here to avoid top level import
-                import pyvista as pv
-            else:  # pragma: no cover
-                raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
-                )
+        if graphics_backend is None:
+            graphics_backend = self._graphics_backend
 
         if "knum" in kwargs:
             raise ValueError("`knum` keyword deprecated.  Please use `nnum` instead.")
 
-        if vtk:
+        if graphics_backend is GraphicsBackend.PYVISTA:
+            import pyvista as pv
+
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
             pl = kwargs.get("plotter", None)
@@ -1134,27 +1148,32 @@ class _MapdlCommandExtended(_MapdlCore):
             pl.plot([], points, labels, mapdl=self, **kwargs)
             return pl.show(**kwargs)
 
-        # otherwise, use the built-in nplot
-        if isinstance(nnum, bool):
-            nnum = int(nnum)
+        elif graphics_backend is GraphicsBackend.MAPDL:
+            # otherwise, use the built-in nplot
+            if isinstance(nnum, bool):
+                nnum = int(nnum)
 
-        with self._enable_interactive_plotting():
-            return super().nplot(nnum, **kwargs)
+            with self._enable_interactive_plotting():
+                return super().nplot(nnum, **kwargs)
+        else:
+            raise ValueError(f"Invalid graphics backend: {graphics_backend}. ")
 
-    def eplot(self, show_node_numbering=False, vtk=None, **kwargs):
+    @check_deprecated_vtk_kwargs
+    @requires_graphics
+    def eplot(self, show_node_numbering=False, *, graphics_backend=None, **kwargs):
         """Plots the currently selected elements.
 
         APDL Command: EPLOT
 
         .. note::
-            PyMAPDL plotting commands with ``vtk=True`` ignore any
+            PyMAPDL plotting commands with ``graphics_backend=GraphicsBackend.PYVISTA`` ignore any
             values set with the ``PNUM`` command.
 
         Parameters
         ----------
-        vtk : bool, optional
-            Plot the currently selected elements using ``ansys-tools-visualization_interface``.
-            Defaults to current ``use_vtk`` setting.
+        graphics_backend : GraphicsBackend, optional
+            Plot the currently selected elements using the picked backend.
+            Defaults to current ``graphics_backend`` setting.
 
         show_node_numbering : bool, optional
             Plot the node numbers of surface nodes.
@@ -1215,7 +1234,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
         **kwargs
             See ``help(ansys.mapdl.core.plotting.visualizer.MapdlPlotter)`` for more
-            keyword arguments related to visualizing using ``vtk``.
+            keyword arguments related to visualizing using ``graphics_backend``.
 
         Examples
         --------
@@ -1236,15 +1255,10 @@ class _MapdlCommandExtended(_MapdlCore):
                         off_screen=True)
 
         """
-        if vtk is None:
-            vtk = self._use_vtk
-        elif vtk is True:
-            if not _HAS_VISUALIZER:  # pragma: no cover
-                raise ModuleNotFoundError(
-                    "Using the keyword argument 'vtk' requires having 'ansys-tools-visualization_interface' installed."
-                )
+        if graphics_backend is None:
+            graphics_backend = self._graphics_backend
 
-        if vtk:
+        if graphics_backend is GraphicsBackend.PYVISTA:
             from ansys.mapdl.core.plotting.visualizer import MapdlPlotter
 
             pl = kwargs.get("plotter", None)
@@ -1279,10 +1293,10 @@ class _MapdlCommandExtended(_MapdlCore):
                 **kwargs,
             )
             return pl.show(**kwargs)
-
-        # otherwise, use MAPDL plotter
-        with self._enable_interactive_plotting():
-            return self.run("EPLOT", **kwargs)
+        elif graphics_backend is GraphicsBackend.MAPDL:
+            # otherwise, use MAPDL plotter
+            with self._enable_interactive_plotting():
+                return self.run("EPLOT", **kwargs)
 
     def clear(self, *args, **kwargs):
         """Clear the database.
@@ -1435,16 +1449,43 @@ class _MapdlCommandExtended(_MapdlCore):
         if not response:
             if not self._store_commands:
                 raise MapdlRuntimeError("/INQUIRE command didn't return a response.")
-        else:
-            if func.upper() in [
-                "ENV",
-                "TITLE",
-            ]:  # the output is multiline, we just need the last line.
-                response = response.splitlines()[-1]
+            else:
+                # Exit since we are in non-interactive mode
+                return None
 
-            response = response.split("=")[1].strip()
+        if func.upper() in [
+            "ENV",
+            "TITLE",
+        ]:  # the output is multiline, we just need the last line.
+            response = response.splitlines()[-1]
 
-        return response
+        response = response.split("=")[1].strip()
+
+        if len(response) >= 248:
+            warnings.warn(
+                "Response might have been truncated to 248 characters because of "
+                "MAPDL string limitations. "
+                "Check the output of 'mapdl.inquire' carefully. "
+                "Alternatively, you can use 'mapdl.sys('printenv') to obtain "
+                "the environment variables on Linux."
+            )
+
+        # Check if the function is to check existence
+        # so it makes sense to return a boolean
+        if func.upper() in ["EXIST", "WRITE", "READ", "EXEC"]:
+            if "1.0" in response:
+                return True
+            elif "0.0" in response:
+                return False
+            else:
+                raise MapdlRuntimeError(
+                    f"Unexpected output from 'mapdl.inquire' function:\n{response}"
+                )
+
+        try:
+            return float(response)
+        except ValueError:
+            return response
 
     @wraps(_MapdlCore.parres)
     def parres(self, lab="", fname="", ext="", **kwargs):
@@ -2122,6 +2163,165 @@ class _MapdlCommandExtended(_MapdlCore):
         from ansys.mapdl.core.commands import ComponentListing
 
         return ComponentListing(super().cmlist(*args, **kwargs))
+
+    @wraps(_MapdlCore.ndinqr)
+    def ndinqr(self, node, key, **kwargs):
+        """Wrap the ``ndinqr`` method to take advantage of the gRPC methods."""
+        super().ndinqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.elmiqr)
+    def elmiqr(self, ielem, key, **kwargs):
+        """Wrap the ``elmiqr`` method to take advantage of the gRPC methods."""
+        super().elmiqr(ielem, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.kpinqr)
+    def kpinqr(self, knmi, key, **kwargs):
+        """Wrap the ``kpinqr`` method to take advantage of the gRPC methods."""
+        super().kpinqr(knmi, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.lsinqr)
+    def lsinqr(self, line, key, **kwargs):
+        """Wrap the ``lsinqr`` method to take advantage of the gRPC methods."""
+        super().lsinqr(line, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.arinqr)
+    def arinqr(self, anmi, key, **kwargs):
+        """Wrap the ``arinqr`` method to take advantage of the gRPC methods."""
+        super().arinqr(anmi, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.vlinqr)
+    def vlinqr(self, vnmi, key, **kwargs):
+        """Wrap the ``vlinqr`` method to take advantage of the gRPC methods."""
+        super().vlinqr(vnmi, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.rlinqr)
+    def rlinqr(self, nreal, key, **kwargs):
+        """Wrap the ``rlinqr`` method to take advantage of the gRPC methods."""
+        super().rlinqr(nreal, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.gapiqr)
+    def gapiqr(self, ngap, key, **kwargs):
+        """Wrap the ``gapiqr`` method to take advantage of the gRPC methods."""
+        super().gapiqr(ngap, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.masiqr)
+    def masiqr(self, node, key, **kwargs):
+        """Wrap the ``masiqr`` method to take advantage of the gRPC methods."""
+        super().masiqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.ceinqr)
+    def ceinqr(self, nce, key, **kwargs):
+        """Wrap the ``ceinqr`` method to take advantage of the gRPC methods."""
+        super().ceinqr(nce, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.cpinqr)
+    def cpinqr(self, ncp, key, **kwargs):
+        """Wrap the ``cpinqr`` method to take advantage of the gRPC methods."""
+        super().cpinqr(ncp, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.csyiqr)
+    def csyiqr(self, ncsy, key, **kwargs):
+        """Wrap the ``csyiqr`` method to take advantage of the gRPC methods."""
+        super().csyiqr(ncsy, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.etyiqr)
+    def etyiqr(self, itype, key, **kwargs):
+        """Wrap the ``etyiqr`` method to take advantage of the gRPC methods."""
+        super().etyiqr(itype, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.foriqr)
+    def foriqr(self, node, key, **kwargs):
+        """Wrap the ``foriqr`` method to take advantage of the gRPC methods."""
+        super().foriqr(node, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.sectinqr)
+    def sectinqr(self, nsect, key, **kwargs):
+        """Wrap the ``sectinqr`` method to take advantage of the gRPC methods."""
+        super().sectinqr(nsect, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.mpinqr)
+    def mpinqr(self, mat, iprop, key, **kwargs):
+        """Wrap the ``mpinqr`` method to take advantage of the gRPC methods."""
+        super().mpinqr(mat, iprop, key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.dget)
+    def dget(self, node, idf, kcmplx, **kwargs):
+        """Wrap the ``dget`` method to take advantage of the gRPC methods."""
+        super().dget(node, idf, kcmplx, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.fget)
+    def fget(self, node, idf, kcmplx, **kwargs):
+        """Wrap the ``fget`` method to take advantage of the gRPC methods."""
+        super().fget(node, idf, kcmplx, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.erinqr)
+    def erinqr(self, key, **kwargs):
+        """Wrap the ``erinqr`` method to take advantage of the gRPC methods."""
+        super().erinqr(key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.wrinqr)
+    def wrinqr(self, key, **kwargs):
+        """Wrap the ``wrinqr`` method to take advantage of the gRPC methods."""
+        super().wrinqr(key, pname=TMP_VAR, mute=True, **kwargs)
+        return self.scalar_param(TMP_VAR)
+
+    @wraps(_MapdlCore.catiain)
+    def catiain(self, name="", extension="", path="", blank="", **kwargs):
+        """Wrap the ``catiain`` method to take advantage of the gRPC methods."""
+        if self.platform == "windows":
+            raise OSError(
+                "The command 'catiain' is not supported on Windows. Use the 'mapdl.cat5in' method instead to import Catia v5 files."
+            )
+        return super().catiain(
+            name=name, extension=extension, path=path, blank=blank, **kwargs
+        )
+
+    @wraps(_MapdlCore.cat5in)
+    def cat5in(
+        self,
+        name="",
+        extension="",
+        path="",
+        entity="",
+        fmt="",
+        nocl="",
+        noan="",
+        **kwargs,
+    ):
+        """Wrap the ``cat5in`` method to take advantage of the gRPC methods."""
+        if self.platform == "linux":
+            raise OSError(
+                "The command 'cat5in' is not supported on Linux. Use the 'mapdl.catiain' method instead to import Catia v4 files."
+            )
+        return super().cat5in(
+            name=name,
+            extension=extension,
+            path=path,
+            entity=entity,
+            fmt=fmt,
+            nocl=nocl,
+            noan=noan,
+            **kwargs,
+        )
 
 
 class _MapdlExtended(_MapdlCommandExtended):

@@ -32,12 +32,22 @@ import socket
 import string
 import tempfile
 from threading import Thread
-from typing import Callable, Dict, Iterable, List, Tuple, Union
+from typing import (
+    Callable,
+    Dict,
+    Iterable,
+    List,
+    ParamSpec,
+    Tuple,
+    TypeVar,
+    Union,
+)
 from warnings import warn
 
 import numpy as np
 
-from ansys.mapdl.core import _HAS_PYVISTA, LOG
+from ansys.mapdl.core import _HAS_PYVISTA, _HAS_VISUALIZER, LOG
+from ansys.mapdl.core.plotting import GraphicsBackend
 
 # path of this module
 MODULE_PATH = os.path.dirname(inspect.getfile(inspect.currentframe()))
@@ -55,6 +65,10 @@ class ROUTINES(Enum):
     AUX3 = 53
     AUX12 = 62
     AUX15 = 65
+
+
+P = ParamSpec("P")
+R = TypeVar("R")
 
 
 def check_valid_routine(routine: ROUTINES) -> bool:
@@ -132,11 +146,11 @@ def check_has_mapdl() -> bool:
         return False
 
 
-def supress_logging(func: Callable) -> Callable:
+def supress_logging(func: Callable[P, R]) -> Callable[P, R]:
     """Decorator to suppress logging for a MAPDL instance"""
 
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
         from ansys.mapdl.core.mapdl import MapdlBase
 
         mapdl = args[0]
@@ -270,7 +284,7 @@ def create_temp_dir(tmpdir: str = None, name: str = None) -> str:
     letters_ = string.ascii_lowercase.replace("n", "")
 
     def get_name():
-        return random_string(10, letters_)
+        return "ansys_" + random_string(10, letters_)
 
     name = name or get_name()
     while os.path.exists(os.path.join(tmpdir, name)):
@@ -384,6 +398,13 @@ def check_valid_ip(ip: str) -> None:
         socket.inet_aton(ip)
 
 
+def parse_ip_route(output: str) -> str | None:
+    match = re.findall(r"(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}).*", output)
+
+    if match:
+        return match[0]
+
+
 def check_valid_port(
     port: int, lower_bound: int = 1000, high_bound: int = 60000
 ) -> None:
@@ -423,6 +444,41 @@ def is_package_installed_cached(package_name):
 
     except ModuleNotFoundError:
         return False
+
+
+def requires_graphics(function):
+    """Warn the user if the visualizer is not installed"""
+
+    @wraps(function)
+    def wrapper(*args, **kwargs):
+        if not _HAS_VISUALIZER:
+            raise ModuleNotFoundError(
+                "Graphic libraries are required to use this method.\n"
+                "You can install this using `pip install ansys-mapdl-core[graphics]`."
+            )
+        return function(*args, **kwargs)
+
+    return wrapper
+
+
+def check_deprecated_vtk_kwargs(func: Callable) -> Callable:
+    """Decorator to warn if 'vtk' or 'use_vtk' are passed as kwargs."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        if "vtk" in kwargs or "use_vtk" in kwargs:
+            warn(
+                "From 0.70.0, the arguments 'vtk' and 'use_vtk' are deprecated. "
+                "To use interactive plots, use 'graphics_backend=GraphicsBackend.PYVISTA' instead. ",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            if kwargs.get("vtk") is False or kwargs.get("use_vtk") is False:
+                kwargs["graphics_backend"] = GraphicsBackend.MAPDL
+
+        return func(*args, **kwargs)
+
+    return wrapper
 
 
 def requires_package(package_name: str, softerror: bool = False) -> Callable:
@@ -623,3 +679,23 @@ def stack(*decorators: Iterable[Callable]) -> Callable:
         return f
 
     return deco
+
+
+def get_ip_hostname(ip: str) -> Tuple[str, str]:
+    """Get ip and hostname"""
+    if not only_numbers_and_dots(ip):
+        # it is a hostname
+        hostname = ip
+        ip = socket.gethostbyname(ip)
+    else:
+        # it is an IP
+        if ip in ["127.0.0.1", "127.0.1.1", "localhost"]:
+            hostname = "localhost"
+        else:
+            try:
+                hostname = socket.gethostbyaddr(ip)[0]
+            except OSError:
+                # If the IP address does not resolve to a hostname, use the IP
+                hostname = ip
+
+    return ip, hostname

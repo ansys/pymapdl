@@ -49,14 +49,10 @@ pytestmark = requires("grpc")
 # Check env var
 IGNORE_POOL = os.environ.get("IGNORE_POOL", "").upper() == "TRUE"
 
-# skipping if ON_STUDENT and ON_LOCAL because we cannot spawn that many instances.
-if ON_STUDENT:
-    pytest.skip(allow_module_level=True)
-
-
+# skipping if ON_STUDENT because we cannot spawn that many instances.
 skip_if_ignore_pool = pytest.mark.skipif(
-    IGNORE_POOL,
-    reason="Ignoring Pool tests.",
+    IGNORE_POOL or ON_STUDENT,
+    reason=f"Ignoring Pool tests because {'of the IGNORE_POOL env var' if IGNORE_POOL else 'running on student'}.",
 )
 
 
@@ -177,7 +173,6 @@ class TestMapdlPool:
 
     @skip_if_ignore_pool
     @requires("local")
-    @pytest.mark.xfail(reason="Flaky test. See #2435")
     def test_map_timeout(self, pool):
         pool_sz = len(pool)
 
@@ -290,6 +285,7 @@ class TestMapdlPool:
             assert f"Instance_{i}" in dirs_path_pool
 
     @skip_if_ignore_pool
+    @requires("local")
     @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
     def test_directory_names_custom_string(self, tmpdir):
         pool = MapdlPool(
@@ -308,6 +304,7 @@ class TestMapdlPool:
         assert all(["my_instance" in each for each in dirs_path_pool])
 
     @skip_if_ignore_pool
+    @requires("local")
     @patch("ansys.mapdl.core.pool.launch_mapdl", lambda *args, **kwargs: kwargs)
     @patch(
         "ansys.mapdl.core.pool.MapdlPool.is_initialized", lambda *args, **kwargs: True
@@ -362,6 +359,7 @@ class TestMapdlPool:
             )
 
     @skip_if_ignore_pool
+    @requires("local")
     @patch("ansys.mapdl.core.pool.MapdlPool._spawn_mapdl", patch_spawn_mapdl)
     def test_only_one_instance(self):
         pool_ = MapdlPool(

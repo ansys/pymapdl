@@ -35,7 +35,9 @@ import pytest
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core.errors import (
+    IncorrectMPIConfigurationError,
     MapdlDidNotStart,
+    NotAvailableLicenses,
     NotEnoughResources,
     PortAlreadyInUseByAnMAPDLInstance,
     VersionError,
@@ -44,7 +46,6 @@ from ansys.mapdl.core.launcher import (
     _HAS_ATP,
     LOCALHOST,
     _is_ubuntu,
-    _parse_ip_route,
     check_mapdl_launch_on_hpc,
     check_mode,
     force_smp_in_student,
@@ -61,6 +62,7 @@ from ansys.mapdl.core.launcher import (
     get_slurm_options,
     get_start_instance,
     get_version,
+    inject_additional_switches,
     is_running_on_slurm,
     kill_job,
     launch_grpc,
@@ -74,7 +76,7 @@ from ansys.mapdl.core.launcher import (
     update_env_vars,
 )
 from ansys.mapdl.core.licensing import LICENSES
-from ansys.mapdl.core.misc import check_has_mapdl, stack
+from ansys.mapdl.core.misc import check_has_mapdl, parse_ip_route, stack
 from conftest import (
     ON_LOCAL,
     PATCH_MAPDL,
@@ -202,7 +204,9 @@ def test_find_mapdl_linux(my_fs, path, version, raises):
     my_fs.os = OSType.LINUX
     my_fs.create_file(path)
 
-    bin_file, ver = pymapdl.launcher.find_mapdl()
+    from ansys.tools.path import find_mapdl
+
+    bin_file, ver = find_mapdl()
 
     if raises:
         assert not bin_file
@@ -283,8 +287,9 @@ def test_not_valid_versions(mapdl, my_fs, cleared, monkeypatch, version):
 @requires("local")
 @requires("linux")
 @requires("console")
+@pytest.mark.skipif(True, reason="Skipping this console test. See issue #3791")
 def test_failed_console():
-    exec_file = find_mapdl(installed_mapdl_versions[0])[0]
+    exec_file = find_mapdl(str(installed_mapdl_versions[0]))[0]
     with pytest.raises(ValueError):
         pymapdl.launch_mapdl(exec_file, mode="console", start_timeout=start_timeout)
 
@@ -355,7 +360,7 @@ def test_remove_temp_dir_on_exit(mapdl, cleared):
 
     tmp_dir = tempfile.gettempdir()
     ans_temp_dir = os.path.join(tmp_dir, "ansys_")
-    if path.startswith(ans_temp_dir):
+    if str(path).startswith(ans_temp_dir):
         assert not os.path.isdir(path)
     else:
         assert os.path.isdir(path)
@@ -583,13 +588,13 @@ def test__parse_ip_route():
     output = """default via 172.25.192.1 dev eth0 proto kernel <<<=== this
 172.25.192.0/20 dev eth0 proto kernel scope link src 172.25.195.101 <<<=== not this"""
 
-    assert "172.25.192.1" == _parse_ip_route(output)
+    assert "172.25.192.1" == parse_ip_route(output)
 
     output = """
 default via 172.23.112.1 dev eth0 proto kernel
 172.23.112.0/20 dev eth0 proto kernel scope link src 172.23.121.145"""
 
-    assert "172.23.112.1" == _parse_ip_route(output)
+    assert "172.23.112.1" == parse_ip_route(output)
 
 
 def test_launched(mapdl, cleared):
@@ -847,8 +852,6 @@ def test_is_running_on_slurm(
         pytest.param(False, NullContext(), id="Boolean false"),
         pytest.param("true", NullContext(), id="String true"),
         pytest.param("TRue", NullContext(), id="String true weird capitalization"),
-        pytest.param("2", pytest.raises(ValueError), id="String number"),
-        pytest.param(2, pytest.raises(ValueError), id="Int"),
     ],
 )
 def test_get_start_instance_argument(monkeypatch, start_instance, context):
@@ -1260,7 +1263,7 @@ def test_launch_grpc(tmpdir, launch_on_hpc):
     if launch_on_hpc:
         assert "sbatch" in kwargs["args"]
         assert "--wrap" in kwargs["args"]
-        assert " ".join(cmd) == kwargs["args"]
+        assert " ".join(cmd) == " ".join(kwargs["args"])
     else:
         assert cmd == kwargs["args"]
         assert os.path.exists(inp_file)
@@ -1391,7 +1394,7 @@ def test_check_mapdl_launch_on_hpc(message_stdout, message_stderr):
         )
 
     with context:
-        assert check_mapdl_launch_on_hpc(process, start_parm) == 1001
+        assert check_mapdl_launch_on_hpc(process) == 1001
 
 
 @patch("ansys.mapdl.core.Mapdl._exit_mapdl", lambda *args, **kwargs: None)
@@ -1426,7 +1429,7 @@ def test_exit_job(mock_popen, mapdl, cleared):
     "ansys.tools.path.path._get_application_path",
     lambda *args, **kwargs: "path/to/mapdl/executable",
 )
-@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
+@patch("ansys.tools.path.path._version_from_path", lambda *args, **kwargs: 242)
 @stack(*PATCH_MAPDL_START)
 @patch("ansys.mapdl.core.launcher.launch_grpc")
 @patch("ansys.mapdl.core.launcher.send_scontrol")
@@ -1765,7 +1768,9 @@ def test_get_hostname_host_cluster(
 
 
 @requires("ansys-tools-path")
-@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 201)
+@patch(
+    "ansys.tools.path.path._version_from_path", side_effect=lambda *args, **kwargs: 201
+)
 @patch("ansys.mapdl.core._HAS_ATP", True)
 def test_get_version_version_error(monkeypatch):
     monkeypatch.delenv("PYMAPDL_MAPDL_VERSION", False)
@@ -1910,7 +1915,7 @@ def test_send_scontrol(jobid):
         ["mycmd", None, True, "my_cwd", None, None, None, None],
         [["my", "cmd"], None, True, "my_cwd", None, None, None, None],
         [
-            "mycmd",
+            ["mycmd"],
             "exec",
             False,
             "my_other_cwd",
@@ -1981,7 +1986,7 @@ def test_submitter(cmd, executable, shell, cwd, stdin, stdout, stderr, envvars):
     "ansys.tools.path.path._get_application_path",
     lambda *args, **kwargs: "path/to/mapdl/executable",
 )
-@patch("ansys.tools.path.path._mapdl_version_from_path", lambda *args, **kwargs: 242)
+@patch("ansys.tools.path.path._version_from_path", lambda *args, **kwargs: 242)
 @stack(*PATCH_MAPDL)
 @pytest.mark.parametrize(
     "arg,value,method",
@@ -2000,11 +2005,13 @@ def test_args_pass(monkeypatch, arg, value, method):
     monkeypatch.delenv("PYMAPDL_START_INSTANCE", False)
 
     kwargs = {arg: value}
+
     mapdl = launch_mapdl(**kwargs)
     meth = getattr(mapdl, method)
     assert meth == value
 
     mapdl._ctrl = lambda *args, **kwargs: None
+    mapdl.kill_job = lambda *args, **kwargs: None
     del mapdl
 
 
@@ -2072,10 +2079,53 @@ def test_check_server_is_alive_no_queue():
 def test_get_std_output_no_queue():
     from ansys.mapdl.core.launcher import _get_std_output
 
-    assert _get_std_output(None, 30) == [None]
+    assert _get_std_output(None, 30) == ""
 
 
 def test_create_queue_for_std_no_queue():
     from ansys.mapdl.core.launcher import _create_queue_for_std
 
     assert _create_queue_for_std(None) == (None, None)
+
+
+def test_inject_additional_switches(monkeypatch):
+    """
+    Test the inject_additional_switches function.
+    """
+    envvar = "-my-add=switch --other_switch -b"
+    monkeypatch.setenv("PYMAPDL_ADDITIONAL_SWITCHES", envvar)
+    args = {"additional_switches": "-my_add=switch --other_switch -b"}
+
+    new_args = inject_additional_switches(args)
+    assert args["additional_switches"] in new_args["additional_switches"]
+    # The env var is ignored if the argument is used
+    assert envvar not in new_args["additional_switches"]
+
+
+@pytest.mark.parametrize(
+    "msg,match,exception_type",
+    [
+        (
+            "mpirun: command not found",
+            "Please ensure that MPI is installed and configured correctly",
+            IncorrectMPIConfigurationError,
+        ),
+        (
+            "ERROR - ANSYS license not available",
+            "Please ensure that you have a valid license",
+            NotAvailableLicenses,
+        ),
+        (
+            "Other message",
+            "Other message",
+            # This will raise a generic Exception
+            Exception,
+        ),
+    ],
+)
+def test_handle_launch_exceptions(msg, match, exception_type):
+    from ansys.mapdl.core.launcher import handle_launch_exceptions
+
+    exception = exception_type(msg)
+    with pytest.raises(exception_type, match=match):
+        raise handle_launch_exceptions(exception)

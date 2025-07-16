@@ -4,15 +4,20 @@ from datetime import datetime
 import os
 from pathlib import Path
 import sys
+from typing import Any
 import warnings
 
 import ansys.tools.visualization_interface as viz_interface
 from ansys_sphinx_theme import ansys_favicon, get_version_match
 import numpy as np
+import plotly.io as pio
+from plotly.io._sg_scraper import plotly_sg_scraper
 import pyvista
 from sphinx.application import Sphinx
 from sphinx.util import logging
 from sphinx_gallery.sorting import FileNameSortKey
+
+pio.renderers.default = "sphinx_gallery"
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import __version__
@@ -87,7 +92,9 @@ pyansys_light_mode_logo = str(
 
 # -- General configuration ---------------------------------------------------
 extensions = [
+    "ansys_sphinx_theme.extension.linkcode",
     "jupyter_sphinx",
+    "linuxdoc.rstFlatTable",
     "numpydoc",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
@@ -119,6 +126,7 @@ intersphinx_mapping = {
     "ansys-dpf-core": ("https://dpf.docs.pyansys.com/version/stable/", None),
     "ansys-math-core": ("https://math.docs.pyansys.com/version/stable/", None),
     "ansys-tools-path": ("https://path.tools.docs.pyansys.com/version/stable/", None),
+    "pytwin": ("https://twin.docs.pyansys.com/version/stable/", None),
 }
 
 suppress_warnings = ["label.*", "design.fa-build", "config.cache"]
@@ -150,6 +158,7 @@ numpydoc_validation_checks = {
 numpydoc_validation_exclude = {  # set of regex
     # class inherits from pymapdl-reader
     r"\.*MeshGrpc\.*",
+    r"ansys\.mapdl\.core\._commands\..+",
 }
 
 # Favicon
@@ -226,6 +235,9 @@ linkcheck_ignore = [
     "https://ansyshelp.ansys.com/*",  # behind authentication
     "https://forum.ansys.com/forums/*",  # It is detected as broken
     "https://courses.ansys.com/*",  # It is detected as broken
+    "https://blog.derlin.ch/genetic-algorithms-with-pygad",  # Error: Too Many Requests for url
+    "https://www.mdpi.com/*",  # 403 Client Error: Forbidden for url
+    "https://stackoverflow.com/questions/*",  # It is detected as broken
 ]
 linkcheck_anchors_ignore = [
     # these anchors are picked by linkcheck as broken but they are not.
@@ -273,7 +285,11 @@ sphinx_gallery_conf = {
     "backreferences_dir": None,
     # Modules for which function level galleries are created.  In
     "doc_module": "ansys-mapdl-core",
-    "image_scrapers": ("pyvista", "matplotlib"),
+    "image_scrapers": (
+        "pyvista",
+        "matplotlib",
+        plotly_sg_scraper,
+    ),
     "ignore_pattern": "flycheck*",
     "thumbnail_size": (350, 350),
     "remove_config_comments": True,
@@ -314,7 +330,22 @@ html_theme_options = {
         "json_url": f"https://{cname}/versions.json",
         "version_match": switcher_version,
     },
+    # Removing the secondary sidebar for the MAPDL commands
+    "secondary_sidebar_items": {
+        # "mapdl_commands/**/**": [],
+        # "mapdl_commands/index": [],
+        "**": [],  # "page-toc", "edit-this-page", "sourcelink"]
+    },
+    "navbar_persistent": [],
+    "primary_sidebar_end": ["edit-this-page", "sourcelink"],
+    "navbar_end": [
+        "search-button-field",
+        "version-switcher",
+        "theme-switcher",
+        "navbar-icon-links",
+    ],
 }
+
 
 BUILD_CHEATSHEET = os.environ.get("BUILD_CHEATSHEET", "false").lower() == "true"
 
@@ -336,10 +367,6 @@ html_context = {
 }
 html_show_sourcelink = False
 
-html_sidebars = {
-    "mapdl_commands/**/**": [],
-    "mapdl_commands/index": [],
-}
 
 # -- Options for HTMLHelp output ---------------------------------------------
 
@@ -348,7 +375,7 @@ htmlhelp_basename = "pymapdldoc"
 
 
 # -- Options for LaTeX output ------------------------------------------------
-latex_elements = {}
+latex_elements: dict[Any, Any] = {}
 
 latex_engine = "xelatex"
 
@@ -393,7 +420,7 @@ texinfo_documents = [
         "ansys.mapdl.core Documentation",
         author,
         "ansys.mapdl.core",
-        "Pythonic interface to MAPDL using gRPC",
+        "A Python client library for Ansys MAPDL",
         "Engineering Software",
     ),
 ]

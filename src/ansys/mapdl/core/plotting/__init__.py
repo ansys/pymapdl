@@ -19,9 +19,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
+
+from enum import Enum
+
 from ansys.mapdl.core import _HAS_VISUALIZER
-from ansys.mapdl.core.plotting.consts import (  # noqa: F401
-    ALLOWED_TARGETS,
+from ansys.mapdl.core.plotting.consts import (
     BC_D,
     BC_F,
     BCS,
@@ -29,7 +31,18 @@ from ansys.mapdl.core.plotting.consts import (  # noqa: F401
     FIELDS_ORDERED_LABELS,
     POINT_SIZE,
 )
+from ansys.mapdl.core.plotting.consts import ALLOWED_TARGETS  # noqa: F401
+
+
+class GraphicsBackend(Enum):
+    """Graphics backend for PyMAPDL.
+
+    This enum is used to set the graphics backend for PyMAPDL.
+    """
+
+    PYVISTA: str = "pyvista"
+    MAPDL: str = "mapdl"
+
 
 if _HAS_VISUALIZER:
     from ansys.mapdl.core.plotting.theme import MapdlTheme  # noqa: F401
-    from ansys.mapdl.core.plotting.visualizer import MapdlPlotter  # noqa: F401
