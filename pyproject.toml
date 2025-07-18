@@ -72,7 +72,7 @@ tests = [
   "pyiges[full]==0.3.2",
   "pytest-cov==6.2.1",
   "pytest-profiling==1.8.1",
-  "pytest-pyvista==0.1.9",
+  "pytest-pyvista==0.2.0",
   "pytest-random-order==1.2.0",
   "pytest-reportlog==0.4.0",
   "pytest-rerunfailures==15.1",
