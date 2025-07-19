@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.psmat
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.psmat

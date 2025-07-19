@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.intsrf
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.intsrf

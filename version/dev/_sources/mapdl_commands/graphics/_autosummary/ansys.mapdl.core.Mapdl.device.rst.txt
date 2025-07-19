@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.device
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.device

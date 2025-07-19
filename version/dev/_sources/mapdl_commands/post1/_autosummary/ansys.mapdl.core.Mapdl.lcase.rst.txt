@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.lcase
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.lcase

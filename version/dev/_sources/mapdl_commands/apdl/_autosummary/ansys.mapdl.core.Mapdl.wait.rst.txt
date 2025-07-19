@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.wait
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.wait

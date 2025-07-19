@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.slashclog
+================================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.slashclog

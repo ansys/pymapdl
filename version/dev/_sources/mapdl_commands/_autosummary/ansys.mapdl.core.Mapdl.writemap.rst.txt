@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.writemap
+===============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.writemap

@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.rmaster
+==============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.rmaster

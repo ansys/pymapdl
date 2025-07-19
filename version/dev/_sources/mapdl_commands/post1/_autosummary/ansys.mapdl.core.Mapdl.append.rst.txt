@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.append
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.append

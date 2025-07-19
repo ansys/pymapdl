@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.atan
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.atan

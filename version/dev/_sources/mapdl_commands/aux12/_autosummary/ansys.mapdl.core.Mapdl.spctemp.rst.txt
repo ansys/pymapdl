@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.spctemp
+==============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.spctemp

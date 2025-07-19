@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.rmxport
+==============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.rmxport

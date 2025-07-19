@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.pretab
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.pretab

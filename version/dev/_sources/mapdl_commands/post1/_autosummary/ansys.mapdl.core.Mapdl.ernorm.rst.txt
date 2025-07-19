@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.ernorm
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.ernorm

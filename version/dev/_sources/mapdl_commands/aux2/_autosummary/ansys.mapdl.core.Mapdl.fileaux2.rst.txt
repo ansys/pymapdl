@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.fileaux2
+===============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.fileaux2

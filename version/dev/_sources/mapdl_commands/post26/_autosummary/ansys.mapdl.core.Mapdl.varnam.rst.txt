@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.varnam
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.varnam

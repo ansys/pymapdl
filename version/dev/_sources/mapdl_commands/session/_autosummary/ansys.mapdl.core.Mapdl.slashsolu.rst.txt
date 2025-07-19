@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.slashsolu
+================================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.slashsolu

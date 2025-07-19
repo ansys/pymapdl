@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.focus
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.focus

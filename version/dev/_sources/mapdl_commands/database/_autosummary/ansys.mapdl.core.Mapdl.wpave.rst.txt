@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.wpave
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.wpave
