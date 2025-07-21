@@ -523,8 +523,6 @@ class Parameters:
                 self._mapdl.starset(name, mute=True)
 
         if isinstance(value, str):
-            if " " in value:
-                raise ValueError("Spaces not allowed in strings in MAPDL")
             self._mapdl.starset(name, f"'{value}'", mute=True)
         else:
             self._mapdl.starset(name, value, mute=True)
