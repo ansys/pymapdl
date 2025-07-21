@@ -620,6 +620,8 @@ def test_pick_nodes(mapdl, make_block, selection, verify_image_cache):
         assert 2 not in selected, "Node 2 should not be selected."
         assert 1 in selected, "Node 1 should be selected."
 
+    mapdl.nplot()
+
 
 @pytest.mark.parametrize(
     "selection",
