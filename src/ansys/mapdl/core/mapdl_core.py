@@ -95,6 +95,7 @@ if TYPE_CHECKING:  # pragma: no cover
 from ansys.mapdl.core.post import PostProcessing
 
 MAX_PARAM_CHARS = 32
+SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
 
 DEBUG_LEVELS = Literal["DEBUG", "INFO", "WARNING", "ERROR"]
 

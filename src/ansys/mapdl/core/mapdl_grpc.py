@@ -111,8 +111,6 @@ MAX_MESSAGE_LENGTH = int(os.environ.get("PYMAPDL_MAX_MESSAGE_LENGTH", 256 * 1024
 VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26)
 
 
-SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
-
 DEFAULT_TIME_STEP_STREAM = None
 DEFAULT_TIME_STEP_STREAM_NT = 500
 DEFAULT_TIME_STEP_STREAM_POSIX = 100
