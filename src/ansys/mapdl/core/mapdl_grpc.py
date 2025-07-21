@@ -39,7 +39,6 @@ import tempfile
 import threading
 import time
 from typing import TYPE_CHECKING, Any, Dict, List, Literal, Optional, Tuple, Union
-from uuid import uuid4
 from warnings import warn
 import weakref
 
@@ -57,8 +56,6 @@ Please make sure you have the latest updated version using:
 
 If this does not solve it, please reinstall 'ansys.mapdl.core'
 or contact Technical Support at 'https://github.com/ansys/pymapdl'."""
-
-from ansys.mapdl import core as pymapdl
 
 try:
     from ansys.api.mapdl.v0 import ansys_kernel_pb2 as anskernel
@@ -92,7 +89,6 @@ from ansys.mapdl.core.misc import (
     run_as,
     supress_logging,
 )
-from ansys.mapdl.core.parameters import interp_star_status
 
 # Checking if tqdm is installed.
 # If it is, the default value for progress_bar is true.
@@ -114,8 +110,6 @@ MAX_MESSAGE_LENGTH = int(os.environ.get("PYMAPDL_MAX_MESSAGE_LENGTH", 256 * 1024
 
 VAR_IR = 9  # Default variable number for automatic variable retrieving (/post26)
 
-
-SESSION_ID_NAME = "__PYMAPDL_SESSION_ID__"
 
 DEFAULT_TIME_STEP_STREAM = None
 DEFAULT_TIME_STEP_STREAM_NT = 500
@@ -1412,58 +1406,6 @@ class MapdlGrpc(MapdlBase):
                     except OSError:
                         pass
 
-    def list_files(self, refresh_cache: bool = True) -> List[str]:
-        """List the files in the working directory of MAPDL.
-
-        Parameters
-        ----------
-        refresh_cache : bool, optional
-            If local, refresh local cache by querying MAPDL for its
-            current path.
-
-        Returns
-        -------
-        list
-            List of files in the working directory of MAPDL.
-
-        Examples
-        --------
-        >>> files = mapdl.list_files()
-        >>> for file in files: print(file)
-        file.lock
-        file0.bat
-        file0.err
-        file0.log
-        file0.page
-        file1.err
-        file1.log
-        file1.out
-        file1.page
-        """
-        if self._local:  # simply return a python list of files
-            if refresh_cache:
-                local_path = self.directory
-            else:
-                local_path = self._directory
-            if local_path:
-                if os.path.isdir(local_path):
-                    return os.listdir(local_path)
-            return []
-
-        elif self._exited:
-            raise MapdlExitedError("Cannot list remote files since MAPDL has exited")
-
-        # this will sometimes return 'LINUX x6', 'LIN', or 'L'
-        if "L" in self.parameters.platform[:1]:
-            cmd = "ls"
-        else:
-            cmd = "dir /b /a"
-
-        files = self.sys(cmd).splitlines()
-        if not files:
-            warn("No files listed")
-        return files
-
     @supress_logging
     def sys(self, cmd: str, **kwargs) -> str:
         """Pass a command string to the operating system.
@@ -2080,115 +2022,6 @@ class MapdlGrpc(MapdlBase):
         self.logger.debug(f"The time_step argument is set to: {time_step}")
         self._time_step_stream = time_step
         return time_step
-
-    def _get_file_path(self, fname: str, progress_bar: bool = False) -> str:
-        """Find files in the Python and MAPDL working directories.
-
-        **The priority is for the Python directory.**
-
-        Hence if the same file is in the Python directory and in the MAPDL directory,
-        PyMAPDL will upload a copy from the Python directory to the MAPDL directory,
-        overwriting the MAPDL directory copy.
-        """
-
-        if os.path.isdir(fname):
-            raise ValueError(
-                f"`fname` should be a full file path or name, not the directory '{fname}'."
-            )
-
-        fPath = pathlib.Path(fname)
-
-        fpath = os.path.dirname(fname)
-        fname = fPath.name
-        fext = fPath.suffix
-
-        # if there is no dirname, we are assuming the file is
-        # in the python working directory.
-        if not fpath:
-            fpath = os.getcwd()
-
-        ffullpath = os.path.join(fpath, fname)
-
-        if os.path.exists(ffullpath) and self._local:
-            return ffullpath
-
-        if self._local:
-            if os.path.isfile(fname):
-                # And it exists
-                filename = os.path.join(os.getcwd(), fname)
-            elif not self._store_commands and fname in self.list_files():
-                # It exists in the Mapdl working directory
-                filename = self.directory / fname
-            elif self._store_commands:
-                # Assuming that in non_interactive we have uploaded the file
-                # manually.
-                filename = self.directory / fname
-            else:
-                # Finally
-                raise FileNotFoundError(f"Unable to locate filename '{fname}'")
-
-        else:  # Non-local
-            # upload the file if it exists locally
-            if os.path.isfile(ffullpath):
-                self.upload(ffullpath, progress_bar=progress_bar)
-                filename = fname
-
-            elif not self._store_commands and fname in self.list_files():
-                # It exists in the Mapdl working directory
-                filename = fname
-
-            elif self._store_commands:
-                # Assuming that in non_interactive, the file exists already in
-                # the Mapdl working directory
-                filename = fname
-
-            else:
-                raise FileNotFoundError(f"Unable to locate filename '{fname}'")
-
-        return filename
-
-    def _get_file_name(
-        self,
-        fname: str | pathlib.PurePath,
-        ext: Optional[str] = None,
-        default_extension: Optional[str] = None,
-    ) -> str:
-        """Get file name from fname and extension arguments.
-
-        fname can be the full path.
-
-        Parameters
-        ----------
-        fname : str
-            File name (with our with extension). It can be a full path.
-
-        ext : str, optional
-            File extension. The default is None.
-
-        default_extension : str
-            Default filename extension. The default is None.
-        """
-
-        # the old behaviour is to supplied the name and the extension separately.
-        # to make it easier let's going to allow names with extensions
-        if not isinstance(fname, str):
-            fname = str(fname)
-
-        # Sanitizing ext
-        while ext and ext[0] == ".":
-            ext = ext[1:]
-
-        if ext:
-            fname = fname + "." + ext
-        else:
-            basename = os.path.basename(fname)
-
-            if len(basename.split(".")) == 1:
-                # there is no extension in the main name.
-                if default_extension:
-                    fname = fname + "." + default_extension
-
-        return fname
 
     def _flush_stored(self):
         """Writes stored commands to an input file and runs the input
@@ -3180,20 +3013,6 @@ class MapdlGrpc(MapdlBase):
             self.__distributed = self.parameters.numcpu > 1
         return self.__distributed
 
-    @wraps(MapdlBase.file)
-    def file(self, fname: str = "", ext: str = "", **kwargs) -> str:
-        """Wrap ``MapdlBase.file`` to take advantage of the gRPC methods."""
-        # always check if file is present as the grpc and MAPDL errors
-        # are unclear
-        fname = self._get_file_name(fname, ext, "cdb")
-        fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
-        file_, ext_, path_ = self._decompose_fname(fname)
-
-        if self._local:
-            return self._file(filename=path_ / file_, extension=ext_, **kwargs)
-        else:
-            return self._file(filename=file_, extension=ext_, **kwargs)
-
     @wraps(MapdlBase.vget)
     def vget(
         self,
@@ -3467,269 +3286,6 @@ class MapdlGrpc(MapdlBase):
         )
         # Using get_variable because it deletes the intermediate parameter after using it.
         return self.get_variable(VAR_IR, tstrt=tstrt, kcplx=kcplx)
-
-    def _create_session(self):
-        """Generate a session ID."""
-        id_ = uuid4()
-        id_ = str(id_)[:31].replace("-", "")
-        self._session_id_ = id_
-        self._run(f"{SESSION_ID_NAME}='{id_}'")
-
-    @property
-    def _session_id(self):
-        """Return the session ID."""
-        return self._session_id_
-
-    def _check_session_id(self):
-        """Verify that the local session ID matches the remote MAPDL session ID."""
-        if self._checking_session_id_ or not self._strict_session_id_check:
-            # To avoid recursion error
-            return
-
-        pymapdl_session_id = self._session_id
-        if not pymapdl_session_id:
-            # We return early if pymapdl_session is not fixed yet.
-            return
-
-        self._checking_session_id_ = True
-        self._mapdl_session_id = self._get_mapdl_session_id()
-
-        self._checking_session_id_ = False
-
-        if pymapdl_session_id is None or self._mapdl_session_id is None:
-            return
-        elif pymapdl.RUNNING_TESTS or self._strict_session_id_check:
-            if pymapdl_session_id != self._mapdl_session_id:
-                self._log.error("The session ids do not match")
-
-            else:
-                self._log.debug("The session ids match")
-                return True
-        else:
-            return pymapdl_session_id == self._mapdl_session_id
-
-    def _get_mapdl_session_id(self):
-        """Retrieve MAPDL session ID."""
-        try:
-            parameter = interp_star_status(
-                self._run(f"*STATUS,{SESSION_ID_NAME}", mute=False)
-            )
-        except AttributeError:
-            return None
-
-        if parameter:
-            return parameter[SESSION_ID_NAME]["value"]
-        return None
-
-    @wraps(MapdlBase.igesin)
-    def igesin(self, fname, ext="", **kwargs):
-        """Wrap the IGESIN command to handle the remote case."""
-
-        fname = self._get_file_name(fname=fname, ext=ext)
-        filename = self._get_file_path(fname, progress_bar=False)
-
-        # Entering aux15 preprocessor
-        self.aux15()
-
-        if " " in fname:
-            # Bug in reading file paths with whitespaces.
-            # https://github.com/ansys/pymapdl/issues/1601
-
-            msg_ = f"Applying \\IGESIN whitespace patch.\nSee #1601 issue in PyMAPDL repository.\nReading file {fname}"
-            self.input_strings("\n".join([f"! {each}" for each in msg_.splitlines()]))
-            self._log.debug(msg_)
-
-            cmd = f"*dim,__iges_file__,string,248\n*set,__iges_file__(1), '{filename}'"
-            self.input_strings(cmd)
-
-            out = super().igesin(fname="__iges_file__(1)", **kwargs)
-            self.run("__iges_file__ =")  # cleaning array.
-            self.run("! Ending \\IGESIN whitespace patch.")
-            return out
-        else:
-            return super().igesin(fname=filename, **kwargs)
-
-    @wraps(MapdlBase.satin)
-    def satin(
-        self,
-        name,
-        extension="",
-        path="",
-        entity="",
-        fmt="",
-        nocl="",
-        noan="",
-        **kwargs,
-    ):
-        """Wraps ~SATIN command"""
-        fname = name
-        if path:
-            fname = os.path.join(path, name)
-        fname = self._get_file_name(fname, extension, "sat")
-        fname = self._get_file_path(fname, False)
-        name, extension, path = self._decompose_fname(fname)
-
-        if path == path.parent:
-            path = ""
-        else:
-            path = str(path)
-
-        # wrapping path in single quotes because of #2286
-        path = f"'{path}'"
-        return super().satin(
-            name=name,
-            extension=extension,
-            path=path,
-            entity=entity,
-            fmt=fmt,
-            nocl=nocl,
-            noan=noan,
-            **kwargs,
-        )
-
-    @wraps(MapdlBase.cat5in)
-    def cat5in(
-        self,
-        name,
-        extension="",
-        path="",
-        entity="",
-        fmt="",
-        nocl="",
-        noan="",
-        **kwargs,
-    ):
-        """Wraps ~cat5in command"""
-        fname = name
-        if path:
-            fname = os.path.join(path, name)
-        fname = self._get_file_name(fname, extension, "CATPart")
-        fname = self._get_file_path(fname, False)
-        name, extension, path = self._decompose_fname(fname)
-
-        if path == path.parent:
-            path = ""
-        else:
-            path = str(path)
-
-        # wrapping path in single quotes because of #2286
-        path = f"'{path}'"
-        self.finish()
-        return super().cat5in(
-            name=name,
-            extension=extension,
-            path=path,
-            entity=entity,
-            fmt=fmt,
-            nocl=nocl,
-            noan=noan,
-            **kwargs,
-        )
-
-    @wraps(MapdlBase.parain)
-    def parain(
-        self,
-        name,
-        extension="",
-        path="",
-        entity="",
-        fmt="",
-        scale="",
-        **kwargs,
-    ):
-        """Wraps ~parain command"""
-        fname = name
-        if path:
-            fname = os.path.join(path, name)
-        fname = self._get_file_name(fname, extension, "x_t")
-        fname = self._get_file_path(fname, False)
-        name, extension, path = self._decompose_fname(fname)
-
-        if path == path.parent:
-            path = ""
-        else:
-            path = str(path)
-
-        # wrapping path in single quotes because of #2286
-        path = f"'{path}'"
-        return super().parain(
-            name=name,
-            extension=extension,
-            path=path,
-            entity=entity,
-            fmt=fmt,
-            scale=scale,
-            **kwargs,
-        )
-
-    def screenshot(self, savefig: Optional[str] = None):
-        """Take an MAPDL screenshot and show it in a popup window.
-
-        Parameters
-        ----------
-        savefig : Optional[str], optional
-            Name of or path to the screenshot file.
-            The default is ``None``.
-
-        Returns
-        -------
-        str
-            File name.
-
-        Raises
-        ------
-        FileNotFoundError
-            If the path given in the ``savefig`` parameter is not found or is not consistent.
-        ValueError
-            If given a wrong type for the ``savefig`` parameter.
-        """
-        previous_device = self.file_type_for_plots
-        self.show("PNG")
-        out_ = self.replot()
-        self.show(previous_device)  # previous device
-        file_name = self._get_plot_name(out_)
-
-        def get_file_name(path):
-            """Get a new filename so as not to overwrite an existing one."""
-            target_dir = os.path.join(path, "mapdl_screenshot_0.png")
-            i = 0
-            while os.path.exists(target_dir):
-                # Ensuring file is not overwritten.
-                i += 1
-                target_dir = os.path.join(path, f"mapdl_screenshot_{i}.png")
-            return target_dir
-
-        if savefig is None or savefig is False:
-            self._display_plot(file_name)
-
-        else:
-            if savefig is True:
-                # Copying to working directory
-                target_dir = get_file_name(os.getcwd())
-
-            elif isinstance(savefig, str):
-                if not os.path.dirname(savefig):
-                    # File name given only
-                    target_dir = os.path.join(os.getcwd(), savefig)
-
-                elif os.path.isdir(savefig):
-                    # Given directory path only, but not file name.
-                    target_dir = get_file_name(savefig)
-
-                elif os.path.exists(os.path.dirname(savefig)):
-                    # Only directory is given. Checking if directory exists.
-                    target_dir = savefig
-
-                else:
-                    raise FileNotFoundError("The filename or path is not valid.")
-
-            else:
-                raise ValueError(
-                    "Only strings or Booleans are valid inputs for the 'savefig' parameter."
-                )
-
-            shutil.copy(file_name, target_dir)
-            return os.path.basename(target_dir)
 
     def kill_job(self, jobid: int) -> None:
         """Kill an HPC job
