@@ -106,7 +106,7 @@ class _MapdlCommandExtended(_MapdlCore):
         """
         fname = self._get_file_name(fname, ext, "cdb")
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
-        file_, ext_, _ = self._decompose_fname(fname)
+        file_, ext_, path_ = self._decompose_fname(fname)
         if self._local:
             return self._file(filename=path_ / file_, extension=ext_, **kwargs)
         else:
@@ -2323,10 +2323,7 @@ class _MapdlCommandExtended(_MapdlCore):
         fname = self._get_file_path(fname, False)
         name, extension, path = self._decompose_fname(fname)
 
-        if path == path.parent:
-            path = ""
-        else:
-            path = str(path)
+        path = "" if path == path.parent else str(path)
 
         # wrapping path in single quotes because of #2286
         path = f"'{path}'"
@@ -2352,23 +2349,23 @@ class _MapdlCommandExtended(_MapdlCore):
         # Entering aux15 preprocessor
         self.aux15()
 
-        if " " in fname:
-            # Bug in reading file paths with whitespaces.
-            # https://github.com/ansys/pymapdl/issues/1601
-
-            msg_ = f"Applying \\IGESIN whitespace patch.\nSee #1601 issue in PyMAPDL repository.\nReading file {fname}"
-            self.input_strings("\n".join([f"! {each}" for each in msg_.splitlines()]))
-            self._log.debug(msg_)
-
-            cmd = f"*dim,__iges_file__,string,248\n*set,__iges_file__(1), '{filename}'"
-            self.input_strings(cmd)
-
-            out = super().igesin(fname="__iges_file__(1)", **kwargs)
-            self.run("__iges_file__ =")  # cleaning array.
-            self.run("! Ending \\IGESIN whitespace patch.")
-            return out
-        else:
+        if " " not in fname:
             return super().igesin(fname=filename, **kwargs)
+
+        # Bug in reading file paths with whitespaces.
+        # https://github.com/ansys/pymapdl/issues/1601
+
+        msg_ = f"Applying \\IGESIN whitespace patch.\nSee #1601 issue in PyMAPDL repository.\nReading file {fname}"
+        self.input_strings("\n".join([f"! {each}" for each in msg_.splitlines()]))
+        self._log.debug(msg_)
+
+        cmd = f"*dim,__iges_file__,string,248\n*set,__iges_file__(1), '{filename}'"
+        self.input_strings(cmd)
+
+        out = super().igesin(fname="__iges_file__(1)", **kwargs)
+        self.run("__iges_file__ =")  # cleaning array.
+        self.run("! Ending \\IGESIN whitespace patch.")
+        return out
 
     @wraps(_MapdlCore.satin)
     def satin(
@@ -2390,10 +2387,7 @@ class _MapdlCommandExtended(_MapdlCore):
         fname = self._get_file_path(fname, False)
         name, extension, path = self._decompose_fname(fname)
 
-        if path == path.parent:
-            path = ""
-        else:
-            path = str(path)
+        path = "" if path == path.parent else str(path)
 
         # wrapping path in single quotes because of #2286
         path = f"'{path}'"
@@ -2427,10 +2421,7 @@ class _MapdlCommandExtended(_MapdlCore):
         fname = self._get_file_path(fname, False)
         name, extension, path = self._decompose_fname(fname)
 
-        if path == path.parent:
-            path = ""
-        else:
-            path = str(path)
+        path = "" if path == path.parent else str(path)
 
         # wrapping path in single quotes because of #2286
         path = f"'{path}'"

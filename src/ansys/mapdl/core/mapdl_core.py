@@ -28,7 +28,7 @@ import logging
 import os
 import pathlib
 import re
-from shutil import copyfile, rmtree
+from shutil import copy, copyfile, rmtree
 
 # Subprocess is needed to start the backend. But
 # the input is controlled by the library. Excluding bandit check.
@@ -3203,10 +3203,9 @@ class _MapdlCore(Commands):
         else:
             basename = os.path.basename(fname)
 
-            if len(basename.split(".")) == 1:
+            if len(basename.split(".")) == 1 and default_extension:
                 # there is no extension in the main name.
-                if default_extension:
-                    fname = fname + "." + default_extension
+                fname = fname + "." + default_extension
 
         return fname
 
@@ -3243,9 +3242,8 @@ class _MapdlCore(Commands):
                 local_path = self.directory
             else:
                 local_path = self._directory
-            if local_path:
-                if os.path.isdir(local_path):
-                    return os.listdir(local_path)
+            if local_path and os.path.isdir(local_path):
+                return os.listdir(local_path)
             return []
 
         elif self._exited:
@@ -3328,7 +3326,7 @@ class _MapdlCore(Commands):
                     "Only strings or Booleans are valid inputs for the 'savefig' parameter."
                 )
 
-            shutil.copy(file_name, target_dir)
+            copy(file_name, target_dir)
             return os.path.basename(target_dir)
 
     def _create_session(self):
