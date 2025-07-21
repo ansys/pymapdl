@@ -788,14 +788,20 @@ def test_set_get_parameters(mapdl, cleared, parm):
         assert np.allclose(mapdl.parameters[parm_name], parm)
 
 
-def test_set_parameters_arr_to_scalar(mapdl, cleared):
+def test_set_parameters_arr_to_scalar_overwrite(mapdl, cleared):
     mapdl.parameters["PARM"] = np.arange(10)
+    assert "PARM" in mapdl.parameters
+    assert np.allclose(mapdl.parameters["PARM"], np.arange(10))
+
     mapdl.parameters["PARM"] = 2
+    assert "PARM" in mapdl.parameters
+    assert mapdl.parameters["PARM"] == 2
 
 
 def test_set_parameters_string_spaces(mapdl, cleared):
-    with pytest.raises(ValueError):
-        mapdl.parameters["PARM"] = "string with spaces"
+    mapdl.parameters["PARM"] = "string with spaces"
+    assert "PARM" in mapdl.parameters
+    assert mapdl.parameters["PARM"] == "string with spaces"
 
 
 def test_set_parameters_too_long(mapdl, cleared):
