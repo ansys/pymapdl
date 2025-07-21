@@ -3158,3 +3158,11 @@ class TestSelectionOnNonInteractive:
             assert np.allclose(checker(), [1, 3])
         elif sel_type == "A":
             assert np.allclose(checker(), [1, 2, 3, 5])
+
+
+def test_rpsd(mapdl, psd_analysis):
+    """Test the rpsd command."""
+    mapdl.post26()
+    output = mapdl.rpsd(3, 2, "", 1, 2)
+    assert isinstance(output, np.ndarray)
+    assert output.shape == (64, 1)
