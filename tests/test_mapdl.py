@@ -791,7 +791,7 @@ def test_set_get_parameters(mapdl, cleared, parm):
 def test_set_parameters_arr_to_scalar_overwrite(mapdl, cleared):
     mapdl.parameters["PARM"] = np.arange(10)
     assert "PARM" in mapdl.parameters
-    assert np.allclose(mapdl.parameters["PARM"], np.arange(10).reshape((10,-1)))
+    assert np.allclose(mapdl.parameters["PARM"], np.arange(10).reshape((10, -1)))
 
     mapdl.parameters["PARM"] = 2
     assert "PARM" in mapdl.parameters
