@@ -518,9 +518,8 @@ class Parameters:
 
         # delete the parameter if it exists as an array
         parm = self._parm
-        if name in parm:
-            if parm[name]["type"] == "ARRAY":
-                self._mapdl.starset(name, mute=True)
+        if name in parm and parm[name]["type"] == "ARRAY":
+            self._mapdl.starset(name, mute=True)
 
         if isinstance(value, str):
             self._mapdl.starset(name, f"'{value}'", mute=True)
