@@ -46,10 +46,12 @@ from common import (
     is_on_ubuntu,
     is_running_on_student,
     is_smp,
-    log_test_start,
+    log_end_test,
+    log_start_test,
     make_sure_not_instances_are_left_open,
     restart_mapdl,
     support_plotting,
+    testing_dpf_backend,
     testing_minimal,
 )
 
@@ -60,6 +62,7 @@ from common import (
 #
 DEBUG_TESTING = debug_testing()
 TESTING_MINIMAL = testing_minimal()
+TEST_DPF_BACKEND = testing_dpf_backend()
 
 ON_LOCAL = is_on_local()
 ON_CI = is_on_ci()
@@ -213,13 +216,14 @@ if has_dependency("ansys-tools-path"):
 if has_dependency("pyvista"):
     import pyvista
 
+    # Necessary for CI plotting
+    pyvista.OFF_SCREEN = True
+    pyvista.global_theme.allow_empty_mesh = True
+
     from ansys.mapdl.core.plotting.theme import _apply_default_theme
 
     _apply_default_theme()
 
-    # Necessary for CI plotting
-    pyvista.OFF_SCREEN = True
-    pyvista.global_theme.allow_empty_mesh = True
 
 import ansys.mapdl.core as pymapdl
 
@@ -395,9 +399,10 @@ class MyReporter(TerminalReporter):
         def get_error_message(rep: CollectReport):
             if hasattr(rep.longrepr, "reprcrash"):
                 message = str(rep.longrepr.reprcrash.message)
-            else:
-                # Error string
+            elif hasattr(rep.longrepr, "errorstring"):
                 message = str(rep.longrepr.errorstring)
+            else:
+                raise Exception(str(rep.longrepr))
 
             header = markup("[ERROR]", **ERROR_COLOR)
             return get_failure_message(rep, header, message)
@@ -555,12 +560,16 @@ def run_before_and_after_tests(
 ) -> Generator[Mapdl]:
     """Fixture to execute asserts before and after a test is run"""
 
+    test_name = os.environ.get(
+        "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
+    )
+
     # Relaunching MAPDL if dead
-    mapdl = restart_mapdl(mapdl)
+    restart_mapdl(mapdl, test_name)
 
     # Write test info to log_apdl
     if DEBUG_TESTING:
-        log_test_start(mapdl)
+        log_start_test(mapdl, test_name)
 
     # check if the local/remote state has changed or not
     prev = mapdl.is_local
@@ -568,6 +577,9 @@ def run_before_and_after_tests(
     assert not mapdl.mute
 
     yield  # this is where the testing happens
+
+    if DEBUG_TESTING:
+        log_end_test(mapdl, test_name)
 
     mapdl.prep7()
 
@@ -593,10 +605,6 @@ def run_before_and_after_tests(
     # Teardown
     if mapdl.is_local and mapdl._exited:
         # The test exited MAPDL, so it has failed.
-        test_name = os.environ.get(
-            "PYTEST_CURRENT_TEST", "**test id could not get retrieved.**"
-        )
-
         assert (
             False
         ), f"Test {test_name} failed at the teardown."  # this will fail the test
@@ -717,7 +725,7 @@ def mapdl(request, tmpdir_factory):
         cleanup_on_exit=cleanup,
         license_server_check=False,
         start_timeout=50,
-        loglevel="DEBUG" if DEBUG_TESTING else "ERROR",
+        loglevel="DEBUG",  # Because Pytest captures all output
         # If the following file names are changed, update `ci.yml`.
         log_apdl="pymapdl.apdl" if DEBUG_TESTING else None,
         mapdl_output="apdl.out" if (DEBUG_TESTING and ON_LOCAL) else None,

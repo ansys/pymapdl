@@ -43,7 +43,7 @@ import numpy as np
 
 from ansys.mapdl import core as pymapdl
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core import _HAS_VISUALIZER
+from ansys.mapdl.core import _HAS_DPF, _HAS_VISUALIZER
 from ansys.mapdl.core.commands import (
     CMD_BC_LISTING,
     CMD_LISTING,
@@ -87,6 +87,9 @@ if TYPE_CHECKING:  # pragma: no cover
     from ansys.mapdl.core.parameters import Parameters
     from ansys.mapdl.core.solution import Solution
     from ansys.mapdl.core.xpl import ansXpl
+
+    if _HAS_DPF:
+        from ansys.mapdl.core.reader import DPFResult
 
 from ansys.mapdl.core.post import PostProcessing
 
@@ -211,6 +214,7 @@ _ALLOWED_START_PARM = [
     "start_instance",
     "start_timeout",
     "timeout",
+    "use_reader_backend",
 ]
 
 
@@ -264,7 +268,7 @@ class _MapdlCore(Commands):
         local: bool = True,
         print_com: bool = False,
         file_type_for_plots: VALID_FILE_TYPE_FOR_PLOT_LITERAL = "PNG",
-        **start_parm,
+        **start_parm: dict[str, Any],
     ):
         """Initialize connection with MAPDL."""
         self._show_matplotlib_figures = True  # for testing
@@ -285,6 +289,7 @@ class _MapdlCore(Commands):
         self._version = None  # cached version
         self._mute = False
         self._save_selection_obj = None
+        self._use_reader_backend: bool = start_parm.pop("use_reader_backend", True)
 
         if _HAS_VISUALIZER:
             if graphics_backend is not None:  # pragma: no cover
@@ -315,8 +320,12 @@ class _MapdlCore(Commands):
         _sanitize_start_parm(start_parm)
         self._start_parm: Dict[str, Any] = start_parm
         self._jobname: str = start_parm.get("jobname", "file")
-        self._path: Union[str, pathlib.Path] = start_parm.get("run_location", None)
-        self._check_parameter_names = start_parm.get("check_parameter_names", True)
+        self._path: str | pathlib.PurePath | None = (
+            None  # start_parm.get("run_location", None)
+        )
+        self._check_parameter_names: bool = start_parm.get(
+            "check_parameter_names", True
+        )
 
         # Setting up loggers
         self._log: logger = logger.add_instance_logger(
@@ -361,6 +370,9 @@ class _MapdlCore(Commands):
         self._wrap_xsel_commands()
 
         self._info = Information(self)
+
+        # DPF
+        self._dpf_result: "DPFResult | None" = None
 
     def _after_run(self, _command: str) -> None:
         pass
@@ -498,9 +510,32 @@ class _MapdlCore(Commands):
             raise ValueError(f"'{value}' is not allowed as file output for plots.")
         return self._default_file_type_for_plots
 
+    def _wrap_directory(self, path: str) -> pathlib.PurePath:
+        if self._platform is None:
+            # MAPDL is not initialized yet so returning the path as is.
+            return pathlib.PurePath(path)
+
+        if self._platform == "windows":
+            # Windows path
+            return pathlib.PureWindowsPath(path)
+        elif self._platform == "linux":
+            # Linux path
+            return pathlib.PurePosixPath(path)
+        else:
+            # Other OS path
+            warn(
+                f"MAPDL is running on an unknown OS '{self._platform}'. "
+                "Using PurePosixPath as default.",
+                UserWarning,
+            )
+            # Default to PurePosixPath
+            # This is a fallback, it should not happen.
+            # If it does, it is probably a bug.
+            return pathlib.PurePosixPath(path)
+
     @property
     @supress_logging
-    def directory(self) -> str:
+    def directory(self) -> pathlib.PurePath:
         """
         Current MAPDL directory.
 
@@ -538,7 +573,7 @@ class _MapdlCore(Commands):
             path = path.replace("\\", "/")
             # new line to fix path issue, see #416
             path = repr(path)[1:-1]
-            self._path = path
+            self._path = self._wrap_directory(path)
 
         elif not self._path:
             raise MapdlRuntimeError(
@@ -552,7 +587,7 @@ class _MapdlCore(Commands):
     def directory(self, path: Union[str, pathlib.Path]) -> None:
         """Change the directory using ``Mapdl.cwd``"""
         self.cwd(path)
-        self._path = path
+        self._path = self._wrap_directory(path)
 
     @property
     def exited(self):
@@ -1049,7 +1084,11 @@ class _MapdlCore(Commands):
     @property
     @requires_package("ansys.mapdl.reader", softerror=True)
     def result(self):
-        """Binary interface to the result file using :class:`ansys.mapdl.reader.rst.Result`.
+        """Binary interface to the result file using ``ansys-dpf-core`` or
+        ``ansys-mapdl-reader``.
+
+        If `ansys-dpf-core` is not installed, then a :class:`ansys.mapdl.reader.rst.Result`
+        object is returned.
 
         Returns
         -------
@@ -1083,12 +1122,21 @@ class _MapdlCore(Commands):
         NSL : Nodal displacements
         RF  : Nodal reaction forces
         """
+        if _HAS_DPF and not self._use_reader_backend:
+            from ansys.mapdl.core.reader import DPFResult
+
+            if self._dpf_result is None:
+                # create a DPFResult object
+                self._dpf_result = DPFResult(None, mapdl=self, logger=self._log)
+
+            return self._dpf_result
+
         from ansys.mapdl.reader import read_binary
         from ansys.mapdl.reader.rst import Result
 
         if not self._local:
             # download to temporary directory
-            save_path = os.path.join(tempfile.gettempdir())
+            save_path = tempfile.mkdtemp(suffix=f"ansys_tmp_{random_string()}")
             result_path = self.download_result(save_path)
         else:
             if self._distributed_result_file and self._result_file:
@@ -1118,10 +1166,12 @@ class _MapdlCore(Commands):
             else:
                 result_path = self._result_file
 
-        if result_path is None:
-            raise FileNotFoundError("No result file(s) at %s" % self.directory)
-        if not os.path.isfile(result_path):
-            raise FileNotFoundError("No results found at %s" % result_path)
+        if result_path is None or not os.path.isfile(result_path):
+            raise FileNotFoundError(
+                f"No result file(s) at {result_path or self.directory}. "
+                "Check that there is at least one RST file in the working directory "
+                f"'{self.directory}', or solve an MAPDL model to generate one."
+            )
 
         return read_binary(result_path)
 
@@ -1161,8 +1211,9 @@ class _MapdlCore(Commands):
         rth_basename = "%s0.%s" % (filename, "rth")
         rst_basename = "%s0.%s" % (filename, "rst")
 
-        rth_file = os.path.join(self.directory, rth_basename)
-        rst_file = os.path.join(self.directory, rst_basename)
+        rth_file = self.directory / rth_basename
+        rst_file = self.directory / rst_basename
+
         if os.path.isfile(rth_file) and os.path.isfile(rst_file):
             return last_created([rth_file, rst_file])
         elif os.path.isfile(rth_file):
@@ -1189,7 +1240,7 @@ class _MapdlCore(Commands):
         """Lockfile path"""
         path = self.directory
         if path is not None:
-            return os.path.join(path, self.jobname + ".lock").replace("\\", "/")
+            return path / f"{self.jobname}.lock"
 
     @property
     @supress_logging
@@ -1200,8 +1251,8 @@ class _MapdlCore(Commands):
 
         if self._archive_cache is None:
             # write database to an archive file
-            arch_filename = os.path.join(self.directory, "_tmp.cdb")
-            nblock_filename = os.path.join(self.directory, "nblock.cdb")
+            arch_filename = self.directory / "_tmp.cdb"
+            nblock_filename = self.directory / "nblock.cdb"
 
             # must have all nodes elements are using selected
             self.cm("__NODE__", "NODE", mute=True)
@@ -1259,8 +1310,8 @@ class _MapdlCore(Commands):
                 # Case where there is RST extension because it is thermal for example
                 filename = self.jobname
 
-                rth_file = os.path.join(self.directory, f"{filename}.rth")
-                rst_file = os.path.join(self.directory, f"{filename}.rst")
+                rth_file = self.directory / f"{filename}.rth"
+                rst_file = self.directory / f"{filename}.rst"
 
                 if self._prioritize_thermal and os.path.isfile(rth_file):
                     return rth_file
@@ -1272,7 +1323,7 @@ class _MapdlCore(Commands):
                 elif os.path.isfile(rst_file):
                     return rst_file
             else:
-                filename = os.path.join(self.directory, f"{filename}.{ext}")
+                filename = self.directory / f"{filename}.{ext}"
                 if os.path.isfile(filename):
                     return filename
         else:
@@ -1638,7 +1689,7 @@ class _MapdlCore(Commands):
     @run_as("PREP7")
     def _generate_iges(self):
         """Save IGES geometry representation to disk"""
-        filename = os.path.join(self.directory, "_tmp.iges")
+        filename = self.directory / "_tmp.iges"
         self.igesout(filename, att=1, mute=True)
         return filename
 
@@ -1926,7 +1977,7 @@ class _MapdlCore(Commands):
     def _list(self, command):
         """Replaces *LIST command"""
         items = command.split(",")
-        filename = os.path.join(self.directory, ".".join(items[1:]))
+        filename = self.directory / ".".join(items[1:])
         if os.path.isfile(filename):
             self._response = open(filename).read()
             response_ = "\n".join(self._response.splitlines()[:10])
@@ -2508,7 +2559,7 @@ class _MapdlCore(Commands):
 
     def _screenshot_path(self):
         """Return last filename based on the current jobname"""
-        filenames = glob.glob(os.path.join(self.directory, f"{self.jobname}*.png"))
+        filenames = glob.glob(str(self.directory / f"{self.jobname}*.png"))
         filenames.sort()
         return filenames[-1]
 
@@ -2977,7 +3028,7 @@ class _MapdlCore(Commands):
             sys_output = self._download_as_raw("__outputcmd__.txt").decode().strip()
 
         else:
-            file_ = os.path.join(self.directory, "__outputcmd__.txt")
+            file_ = self.directory / "__outputcmd__.txt"
             with open(file_, "r") as f:
                 sys_output = f.read().strip()
 

@@ -123,6 +123,7 @@ jobs:
       PYTEST_ARGUMENTS: '-vvv -ra --color=yes --durations=30 --random-order --random-order-bucket=class --maxfail=10 --reruns 3 --reruns-delay 4 --cov=ansys.mapdl.core --cov-report=html --timeout=180 --profile-svg --profile --report-log-exclude-logs-on-passed-tests --strict-markers'
       OMPI_ALLOW_RUN_AS_ROOT: 1
       OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
+      DATAPROCESSING_DEBUG: /home/mapdl/dpf_logs
 
     container:
       image: "${{ inputs.package-registry }}:${{ inputs.mapdl-version }}"
@@ -182,7 +183,7 @@ jobs:
         shell: bash
         if: inputs.testing-minimal == false
         run: |
-          apt-get update && apt install -y libgl1-mesa-glx xvfb libgomp1 graphviz curl && apt-get clean
+          apt-get update && apt install -y libgl1 libglx-mesa0 xvfb libgomp1 graphviz curl && apt-get clean
 
       - name: "Setup Python"
         uses: actions/setup-python@v5
@@ -262,7 +263,9 @@ jobs:
           $cmd ${{ inputs.pytest-arguments }} \
             ${{ env.PYTEST_ARGUMENTS }} \
             --report-log=$file_name.jsonl \
-            --cov-report=xml:$file_name.xml
+            --cov-report=xml:$file_name.xml \
+            --log-file=pytest.log \
+            --log-file-level="DEBUG"
 
       - name: "Upload pytest reports to GitHub"
         if: always()

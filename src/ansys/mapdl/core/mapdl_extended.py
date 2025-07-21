@@ -109,7 +109,7 @@ class _MapdlCommandExtended(_MapdlCore):
         file_, ext_, _ = self._decompose_fname(fname)
         return self._file(file_, ext_, **kwargs)
 
-    def _file(self, filename: str, extension: str, **kwargs) -> str:
+    def _file(self, filename: str = "", extension: str = "", **kwargs) -> str:
         """Run the MAPDL ``file`` command with a proper filename."""
         return self.run(f"FILE,{filename},{extension}", **kwargs)
 
@@ -382,7 +382,7 @@ class _MapdlCommandExtended(_MapdlCore):
         except MapdlCommandIgnoredError as e:
             raise IncorrectWorkingDirectory(e.args[0])
 
-        self._path = args[0]  # caching
+        self._path = self._wrap_directory(args[0])  # caching
         return output
 
     @wraps(_MapdlCore.list)
@@ -406,7 +406,7 @@ class _MapdlCommandExtended(_MapdlCore):
 
         path = pathlib.Path(filename)
         if path.parent != ".":
-            path = os.path.join(self.directory, filename)
+            path = self.directory / filename
 
         path = str(path) + ext
         with open(path) as fid:
