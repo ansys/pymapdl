@@ -69,7 +69,7 @@ from ansys.mapdl.core.errors import (
 )
 from ansys.mapdl.core.helpers import is_installed
 from ansys.mapdl.core.launcher import launch_mapdl
-from ansys.mapdl.core.mapdl_grpc import SESSION_ID_NAME
+from ansys.mapdl.core.mapdl_core import SESSION_ID_NAME
 from ansys.mapdl.core.misc import random_string, stack
 from ansys.mapdl.core.plotting import GraphicsBackend
 

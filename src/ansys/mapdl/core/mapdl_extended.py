@@ -104,10 +104,13 @@ class _MapdlCommandExtended(_MapdlCore):
         >>> mapdl.file('/tmp/file.rst')
 
         """
-        fname = self._get_file_name(fname, ext, "rst")
+        fname = self._get_file_name(fname, ext, "cdb")
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
-        file_, ext_, _ = self._decompose_fname(fname)
-        return self._file(file_, ext_, **kwargs)
+        file_, ext_, path_ = self._decompose_fname(fname)
+        if self._local:
+            return self._file(filename=path_ / file_, extension=ext_, **kwargs)
+        else:
+            return self._file(filename=file_, extension=ext_, **kwargs)
 
     def _file(self, filename: str = "", extension: str = "", **kwargs) -> str:
         """Run the MAPDL ``file`` command with a proper filename."""
@@ -2312,6 +2315,19 @@ class _MapdlCommandExtended(_MapdlCore):
             raise OSError(
                 "The command 'cat5in' is not supported on Linux. Use the 'mapdl.catiain' method instead to import Catia v4 files."
             )
+
+        fname = name
+        if path:
+            fname = os.path.join(path, name)
+        fname = self._get_file_name(fname, extension, "CATPart")
+        fname = self._get_file_path(fname, False)
+        name, extension, path = self._decompose_fname(fname)
+
+        path = "" if path == path.parent else str(path)
+
+        # wrapping path in single quotes because of #2286
+        path = f"'{path}'"
+        self.finish()
         return super().cat5in(
             name=name,
             extension=extension,
@@ -2320,6 +2336,102 @@ class _MapdlCommandExtended(_MapdlCore):
             fmt=fmt,
             nocl=nocl,
             noan=noan,
+            **kwargs,
+        )
+
+    @wraps(_MapdlCore.igesin)
+    def igesin(self, fname, ext="", **kwargs):
+        """Wrap the IGESIN command to handle the remote case."""
+
+        fname = self._get_file_name(fname=fname, ext=ext)
+        filename = self._get_file_path(fname, progress_bar=False)
+
+        # Entering aux15 preprocessor
+        self.aux15()
+
+        if " " not in fname:
+            return super().igesin(fname=filename, **kwargs)
+
+        # Bug in reading file paths with whitespaces.
+        # https://github.com/ansys/pymapdl/issues/1601
+
+        msg_ = f"Applying \\IGESIN whitespace patch.\nSee #1601 issue in PyMAPDL repository.\nReading file {fname}"
+        self.input_strings("\n".join([f"! {each}" for each in msg_.splitlines()]))
+        self._log.debug(msg_)
+
+        cmd = f"*dim,__iges_file__,string,248\n*set,__iges_file__(1), '{filename}'"
+        self.input_strings(cmd)
+
+        out = super().igesin(fname="__iges_file__(1)", **kwargs)
+        self.run("__iges_file__ =")  # cleaning array.
+        self.run("! Ending \\IGESIN whitespace patch.")
+        return out
+
+    @wraps(_MapdlCore.satin)
+    def satin(
+        self,
+        name,
+        extension="",
+        path="",
+        entity="",
+        fmt="",
+        nocl="",
+        noan="",
+        **kwargs,
+    ):
+        """Wraps ~SATIN command"""
+        fname = name
+        if path:
+            fname = os.path.join(path, name)
+        fname = self._get_file_name(fname, extension, "sat")
+        fname = self._get_file_path(fname, False)
+        name, extension, path = self._decompose_fname(fname)
+
+        path = "" if path == path.parent else str(path)
+
+        # wrapping path in single quotes because of #2286
+        path = f"'{path}'"
+        return super().satin(
+            name=name,
+            extension=extension,
+            path=path,
+            entity=entity,
+            fmt=fmt,
+            nocl=nocl,
+            noan=noan,
+            **kwargs,
+        )
+
+    @wraps(_MapdlCore.parain)
+    def parain(
+        self,
+        name,
+        extension="",
+        path="",
+        entity="",
+        fmt="",
+        scale="",
+        **kwargs,
+    ):
+        """Wraps ~parain command"""
+        fname = name
+        if path:
+            fname = os.path.join(path, name)
+        fname = self._get_file_name(fname, extension, "x_t")
+        fname = self._get_file_path(fname, False)
+        name, extension, path = self._decompose_fname(fname)
+
+        path = "" if path == path.parent else str(path)
+
+        # wrapping path in single quotes because of #2286
+        path = f"'{path}'"
+        return super().parain(
+            name=name,
+            extension=extension,
+            path=path,
+            entity=entity,
+            fmt=fmt,
+            scale=scale,
             **kwargs,
         )
 
