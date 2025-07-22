@@ -58,6 +58,7 @@ from ansys.mapdl.core import launch_mapdl
 
 mapdl = launch_mapdl()
 
+mapdl.clear()
 mapdl.prep7()
 mapdl.units("mks")
 
