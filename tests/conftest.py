@@ -1329,3 +1329,10 @@ def query(mapdl, cleared):
 @pytest.fixture
 def common_functions_and_classes():
     return get_details_of_nodes, get_details_of_elements, Node, Element
+
+
+@pytest.fixture(scope="function")
+def psd_analysis(mapdl, cleared):
+    from ansys.mapdl.core.examples import vmfiles
+
+    mapdl.input(vmfiles["vm203"])

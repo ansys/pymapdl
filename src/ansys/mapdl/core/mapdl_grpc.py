@@ -3109,6 +3109,31 @@ class MapdlGrpc(MapdlBase):
         )
         return self.vget("_temp", nvar)
 
+    @wraps(MapdlBase.rpsd)
+    def rpsd(
+        self,
+        ir: str = "",
+        ia: str = "",
+        ib: str = "",
+        itype: int | str = "",
+        datum: int | str = "",
+        name: str = "",
+        signif: str = "",
+        **kwargs,
+    ) -> NDArray[np.float64]:
+        """Wraps RPSD to return the variable as an array."""
+        super().rpsd(
+            ir=ir,
+            ia=ia,
+            ib=ib,
+            itype=itype,
+            datum=datum,
+            name=name,
+            signif=signif,
+            **kwargs,
+        )
+        return self.vget("_temp", ir)
+
     def get_nsol(
         self,
         node: MapdlInt = "",
