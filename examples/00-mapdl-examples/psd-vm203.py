@@ -44,7 +44,7 @@ frequency.
 
 A frequency range of 1.0 Hz to 80 Hz is used as an approximation of the
 white noise PSD forcing function frequency.  The PSD curve is a constant
-(10E6 N/m^2)^2 / Hz.
+$$(1E6 N/m^2)^2 / Hz$$.
 
 The model is solved using SHELL281 elements and generic materials.
 
@@ -265,6 +265,7 @@ plt.plot(freqs[:-2], rpsduz[:-2], label="RPSD UZ")
 plt.xlabel("Frequency Hz")
 plt.ylabel(r"RPSD $\left( \dfrac{M^2}{Hz}\right)$")
 plt.legend()
+plt.tight_layout()
 plt.show()
 
 ###############################################################################
