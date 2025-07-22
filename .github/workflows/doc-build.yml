@@ -71,8 +71,7 @@ jobs:
       ON_DOCUMENTATION: TRUE
       PYANSYS_OFF_SCREEN: True
       BUILD_CHEATSHEET: '${{ inputs.build_cheatsheet }}'
-      MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.2-ubuntu-student
-      DPF_DOCKER_IMAGE: ghcr.io/ansys/mapdl:v25.2-rocky-dpf-standalone
+      MAPDL_IMAGE_VERSION_DOCS_BUILD: v25.2-ubuntu-cicd
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
       PYMAPDL_START_INSTANCE: FALSE
       PYMAPDL_PORT: 21000  # default won't work on GitHub runners
@@ -101,17 +100,15 @@ jobs:
           MAPDL_VERSION: ${{ env.MAPDL_IMAGE_VERSION_DOCS_BUILD }}
           MAPDL_PACKAGE: ${{ env.MAPDL_PACKAGE }}
           DISTRIBUTED_MODE: "dmp"
+          DPF_PORT: ${{ env.DPF_PORT }}
+          DPF_PORT_INTERNAL: 50055
         shell: bash
         run: |
           export INSTANCE_NAME=MAPDL_0
+          export RUN_DPF_SERVER=true
           .ci/start_mapdl.sh &> mapdl_launch.log & export DOCKER_PID=$!
           echo "Launching MAPDL service at PID: $DOCKER_PID"
           echo "DOCKER_PID=$(echo $DOCKER_PID)" >> $GITHUB_OUTPUT
-
-      - name: "DPF server activation"
-        shell: bash
-        run: |
-          $(docker pull $DPF_DOCKER_IMAGE && docker run -d --name dpfserver --env ANSYS_DPF_ACCEPT_LA=Y --env ANSYSLMD_LICENSE_FILE="1055@${{ secrets.license-server }}" -p ${{ env.DPF_PORT }}:50052 $DPF_DOCKER_IMAGE && echo "DPF Server active on port ${{ env.DPF_PORT }}.") &
 
       - name: "Getting files change filters"
         uses: dorny/paths-filter@v3
