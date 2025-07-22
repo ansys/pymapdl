@@ -184,7 +184,18 @@ INVAL_COMMANDS_SILENT = {
     "/NOPR": "Suppressing console output is not recommended, use ``Mute`` parameter instead. This command is disabled in interactive mode."
 }
 
-PLOT_COMMANDS = ["NPLO", "EPLO", "KPLO", "LPLO", "APLO", "VPLO", "PLNS", "PLES"]
+PLOT_COMMANDS = [
+    "NPLO",
+    "EPLO",
+    "KPLO",
+    "LPLO",
+    "APLO",
+    "VPLO",
+    "PLNS",
+    "PLES",
+    "PSDG",
+    "SPGR",
+]
 MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
 
 VALID_SELECTION_TYPE_TP = Literal["S", "R", "A", "U"]
