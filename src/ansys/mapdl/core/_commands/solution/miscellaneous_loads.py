@@ -1000,7 +1000,6 @@ class MiscellaneousLoads:
         command = f"OUTRES,{item},{freq},{cname},{nsvar},{dsubres}"
         return self.run(command, **kwargs)
 
-
     def osresult(self, item="", comp="", freq="", cname="", **kwargs):
         """Controls the selected result data written to the database.
 
@@ -1091,12 +1090,12 @@ class MiscellaneousLoads:
 
         OSRESULT,STATUS lists the current set of selected result specifications.
 
-        The output of selected results is valid for static (ANTYPE,STATIC) and 
+        The output of selected results is valid for static (ANTYPE,STATIC) and
         transient (ANTYPE,TRANS) analysis types.
 
-        To select other results to output to the database, see OUTRES. (Element 
-        quantities specified via OUTRES can be redundant to those specified via 
-        OSRESULT. Avoid specifying redundant quantities, as they are stored and 
+        To select other results to output to the database, see OUTRES. (Element
+        quantities specified via OUTRES can be redundant to those specified via
+        OSRESULT. Avoid specifying redundant quantities, as they are stored and
         processed separately.)
 
         All OSRESULT results are in the solution coordinate system.
@@ -1124,9 +1123,9 @@ class MiscellaneousLoads:
         >>> mapdl.post1()
 
         Retrieve selected results using PRESOL and PRNSOL
-        
+
         >>> mapdl.presol("SRES", "SY")      # Print selected stress Y
-        >>> mapdl.presol("SRES", "SEQV")    # Print selected equivalent stress  
+        >>> mapdl.presol("SRES", "SEQV")    # Print selected equivalent stress
         >>> mapdl.prnsol("SRES", "EPPLINT") # Print selected plastic strain intensity
 
         """
