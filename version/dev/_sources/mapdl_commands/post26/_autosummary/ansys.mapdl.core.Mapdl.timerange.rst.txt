@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.timerange
+================================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.timerange

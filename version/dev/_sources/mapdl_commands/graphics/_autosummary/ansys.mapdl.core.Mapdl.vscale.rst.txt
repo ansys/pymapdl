@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.vscale
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.vscale

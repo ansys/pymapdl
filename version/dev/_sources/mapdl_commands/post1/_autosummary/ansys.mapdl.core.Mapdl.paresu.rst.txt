@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.paresu
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.paresu

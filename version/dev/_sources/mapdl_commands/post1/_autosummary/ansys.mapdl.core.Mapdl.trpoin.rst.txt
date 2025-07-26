@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.trpoin
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.trpoin

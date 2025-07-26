@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.print
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.print

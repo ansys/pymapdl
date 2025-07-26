@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.hbc
+==========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.hbc

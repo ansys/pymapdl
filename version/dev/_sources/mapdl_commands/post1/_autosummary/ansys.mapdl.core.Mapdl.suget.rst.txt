@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.suget
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.suget

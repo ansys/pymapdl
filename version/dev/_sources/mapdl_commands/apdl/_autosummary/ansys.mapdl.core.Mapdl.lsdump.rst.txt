@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.lsdump
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.lsdump

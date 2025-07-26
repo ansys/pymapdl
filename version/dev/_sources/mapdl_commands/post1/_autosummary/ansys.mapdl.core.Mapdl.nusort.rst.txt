@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.nusort
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.nusort

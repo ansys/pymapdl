@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.number
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.number

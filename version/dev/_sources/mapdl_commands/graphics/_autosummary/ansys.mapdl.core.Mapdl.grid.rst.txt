@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.grid
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.grid

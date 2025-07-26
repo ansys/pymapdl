@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.abbsav
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.abbsav

@@ -1,0 +1,6 @@
+﻿prcplx
+======
+
+.. currentmodule:: ansys.mapdl.core._commands.post26.listing
+
+.. automethod:: Listing.prcplx

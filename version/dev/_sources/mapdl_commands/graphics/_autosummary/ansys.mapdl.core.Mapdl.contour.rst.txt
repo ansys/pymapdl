@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.contour
+==============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.contour

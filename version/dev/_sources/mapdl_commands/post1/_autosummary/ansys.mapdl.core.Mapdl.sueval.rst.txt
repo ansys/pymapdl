@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.sueval
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.sueval

@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.xvar
+===========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.xvar

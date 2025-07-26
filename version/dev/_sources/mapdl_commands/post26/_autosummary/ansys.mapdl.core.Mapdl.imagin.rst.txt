@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.imagin
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.imagin

@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.color
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.color

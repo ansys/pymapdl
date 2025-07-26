@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.psymb
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.psymb

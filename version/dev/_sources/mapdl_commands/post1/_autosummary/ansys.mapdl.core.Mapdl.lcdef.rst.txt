@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.lcdef
+============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.lcdef

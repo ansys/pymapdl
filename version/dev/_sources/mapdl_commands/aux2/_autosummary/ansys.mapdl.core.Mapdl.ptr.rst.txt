@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.ptr
+==========================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.ptr

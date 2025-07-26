@@ -1,0 +1,6 @@
+﻿ansys.mapdl.core.Mapdl.prtime
+=============================
+
+.. currentmodule:: ansys.mapdl.core
+
+.. automethod:: Mapdl.prtime
