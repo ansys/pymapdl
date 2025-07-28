@@ -896,7 +896,7 @@ class MatrixOperations:
 
         .. _a-FREE_notes:
 
-        A ``/CLEAR`` command will automatically delete all the current APDL Math objects.
+        A :ref:`clear` command will automatically delete all the current APDL Math objects.
         """
         command = f"*FREE,{name},{val1}"
         return self.run(command, **kwargs)
