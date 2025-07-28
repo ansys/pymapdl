@@ -116,10 +116,6 @@ class _MapdlCommandExtended(_MapdlCore):
         """Run the MAPDL ``file`` command with a proper filename."""
         return self.run(f"FILE,{filename},{extension}", **kwargs)
 
-    def set_graphics_backend(self, backend: GraphicsBackend):
-        """Set the graphics backend to use for plotting."""
-        self._graphics_backend = backend
-
     @wraps(_MapdlCore.lsread)
     def lsread(self, *args, **kwargs):
         """Wraps the ``LSREAD`` which does not work in interactive mode."""
@@ -2438,6 +2434,10 @@ class _MapdlCommandExtended(_MapdlCore):
 
 class _MapdlExtended(_MapdlCommandExtended):
     """Extend Mapdl class with new functions"""
+
+    def set_graphics_backend(self, backend: GraphicsBackend):
+        """Set the graphics backend to use for plotting."""
+        self._graphics_backend = backend
 
     def load_table(
         self, name, array, var1="", var2="", var3="", csysid="", col_header=False
