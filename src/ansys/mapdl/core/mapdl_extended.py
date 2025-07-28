@@ -45,7 +45,6 @@ from ansys.mapdl.core.misc import (
     allow_iterables_vmin,
     allow_pickable_entities,
     check_deprecated_vtk_kwargs,
-    load_file,
     random_string,
     requires_graphics,
     supress_logging,
@@ -345,7 +344,7 @@ class _MapdlCommandExtended(_MapdlCore):
         self,
         fname="",
         ext="",
-        lib="",
+        lib="LIB",
         mat="",
         download_file=False,
         progress_bar=False,
@@ -359,23 +358,21 @@ class _MapdlCommandExtended(_MapdlCore):
                     f"The supplied path {fname_} is not allowed."
                 )
 
-        output = super().mpwrite(fname, ext, lib, mat, **kwargs)
+        output = super().mpwrite(fname, ext, lib=lib, mat=mat, **kwargs)
         if download_file:
             self.download(os.path.basename(fname_), progress_bar=progress_bar)
 
         return output
 
     @wraps(_MapdlCore.mpread)
-    def mpread(self, fname="", ext="", lib="", **kwargs):
-        if lib:
-            raise NotImplementedError(
-                "The option 'lib' is not supported by the MAPDL gRPC server."
-            )
+    def mpread(self, fname="", ext="", lib="LIB", **kwargs):
+        if lib != "LIB":
+            raise MapdlRuntimeError("The 'lib' argument only support 'LIB' value.")
 
-        fname_ = fname + "." + ext
-        fname = load_file(self, fname_)
-        self._log.info("Bypassing 'MPREAD' with 'INPUT'.")
-        return self.input(fname)
+        fname = self._get_file_name(fname, ext, "mp")
+        fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
+        file_, ext_, path_ = self._decompose_fname(fname)
+        return self.input(file_, ext_, **kwargs)
 
     @wraps(_MapdlCore.cwd)
     def cwd(self, *args, **kwargs):
