@@ -382,7 +382,7 @@ def port_in_use_using_socket(port: int, host: str) -> bool:
         try:
             sock.bind((host, port))
             return False
-        except OSError:
+        except socket.error:
             return True
 
 
