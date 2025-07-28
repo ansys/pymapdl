@@ -93,7 +93,23 @@ class Information:
     """
 
     def __init__(self, mapdl: "Mapdl") -> None:
-        """Class Initializer
+        """
+        Initialize the Information class with a weakly referenced MAPDL instance.
+
+        This method validates that the provided `mapdl` object is an instance of
+        the `MapdlBase` class. It sets up a weak reference to the MAPDL instance,
+        initializes internal attributes for caching information, and defines
+        keys for representing the information in a structured format.
+
+        Parameters
+        ----------
+        mapdl : Mapdl
+            The MAPDL instance to get information from.
+
+        Raises
+        ------
+        TypeError
+            If the provided `mapdl` object is not an instance of `MapdlBase`.
         """
         from ansys.mapdl.core.mapdl import MapdlBase  # lazy import to avoid circular
 
@@ -111,6 +127,11 @@ class Information:
     @property
     def _mapdl(self) -> "Mapdl":
         """Return the weakly referenced MAPDL instance.
+        
+        Returns
+        -------
+        Mapdl
+            The weakly referenced MAPDL instance associated with this object.
         """
         return self._mapdl_weakref()
 
