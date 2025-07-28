@@ -1494,14 +1494,14 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     mapdl.prep7()
     mapdl.slashdelete(fname, ext)  # remove file if it exists
 
-    assert f"WRITE OUT MATERIAL PROPERTY" in mapdl.mpwrite(fname, ext, mat=1)
+    assert "WRITE OUT MATERIAL PROPERTY" in mapdl.mpwrite(fname, ext, mat=1)
     assert f"{fname}.{ext}" in mapdl.list_files()
 
     # asserting downloading
     ext = "mp2"
     mapdl.slashdelete(fname, ext)  # remove file if it exists
 
-    assert f"WRITE OUT MATERIAL PROPERTY" in mapdl.mpwrite(
+    assert "WRITE OUT MATERIAL PROPERTY" in mapdl.mpwrite(
         fname, ext, download_file=True, mat=1
     )
     assert f"{fname}.{ext}" in mapdl.list_files()
