@@ -264,8 +264,7 @@ class LicenseChecker:
                     "PyMAPDL is taking longer than expected to connect to an MAPDL session.\n"
                     "Checking if there are any available licenses..."
                 )
-                LOG.debug(msg)
-                print(msg)
+                LOG.info(msg)
                 notification_bool = False
 
             msg = next(file_iterator)

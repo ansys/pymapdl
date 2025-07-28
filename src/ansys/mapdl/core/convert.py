@@ -561,6 +561,10 @@ class FileTranslator:
         text : str, optional
             Text to format instead of `self.lines`. For development use.
 
+        Returns
+        -------
+        str or None
+            The formatted text string, or None if no text provided.
         """
         if self.cleanup_output:
             try:

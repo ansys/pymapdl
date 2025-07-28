@@ -60,6 +60,11 @@ class Information:
     It is also the object that is called when you issue ``print(mapdl)``,
     which means ``print`` calls ``mapdl.info.__str__()``.
 
+    Parameters
+    ----------
+    mapdl : Mapdl
+        The MAPDL instance to get information from.
+
     Notes
     -----
     You cannot directly modify the values of this class.
@@ -88,7 +93,8 @@ class Information:
     """
 
     def __init__(self, mapdl: "Mapdl") -> None:
-        """Class Initializer"""
+        """Class Initializer
+        """
         from ansys.mapdl.core.mapdl import MapdlBase  # lazy import to avoid circular
 
         if not isinstance(mapdl, MapdlBase):  # pragma: no cover
@@ -104,12 +110,14 @@ class Information:
 
     @property
     def _mapdl(self) -> "Mapdl":
-        """Return the weakly referenced MAPDL instance."""
+        """Return the weakly referenced MAPDL instance.
+        """
         return self._mapdl_weakref()
 
     def _update(self) -> None:
         """We might need to do more calls if we implement properties
-        that change over the MAPDL session."""
+        that change over the MAPDL session.
+        """
         try:
             if self._mapdl._exited:  # pragma: no cover
                 raise MapdlExitedError("Information class: MAPDL exited")
@@ -140,13 +148,25 @@ class Information:
     @property
     @update_information_first(False)
     def product(self) -> str:
-        """Retrieve the product from the MAPDL instance."""
+        """Retrieve the product from the MAPDL instance.
+        
+        Returns
+        -------
+        str
+            The product name.
+        """
         return self._get_product()
 
     @property
     @update_information_first(False)
     def mapdl_version(self) -> str:
-        """Retrieve the MAPDL version from the MAPDL instance."""
+        """Retrieve the MAPDL version from the MAPDL instance.
+        
+        Returns
+        -------
+        str
+            The MAPDL version string.
+        """
         return self._get_mapdl_version()
 
     @property
@@ -173,7 +193,13 @@ class Information:
     @property
     @update_information_first(False)
     def pymapdl_version(self) -> str:
-        """Retrieve the PyMAPDL version from the MAPDL instance."""
+        """Retrieve the PyMAPDL version from the MAPDL instance.
+        
+        Returns
+        -------
+        str
+            The PyMAPDL version string.
+        """
         return self._get_pymapdl_version()
 
     @property
