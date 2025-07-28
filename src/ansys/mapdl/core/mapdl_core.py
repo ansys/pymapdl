@@ -3192,7 +3192,7 @@ class _MapdlCore(Commands):
         Parameters
         ----------
         fname : str
-            File name (with our with extension). It can be a full path.
+            File name (with or without extension). It can be a full path.
 
         ext : str, optional
             File extension. The default is None.
