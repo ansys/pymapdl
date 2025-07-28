@@ -367,7 +367,7 @@ class _MapdlCommandExtended(_MapdlCore):
     @wraps(_MapdlCore.mpread)
     def mpread(self, fname="", ext="", lib="LIB", **kwargs):
         if lib != "LIB":
-            raise MapdlRuntimeError("The 'lib' argument only support 'LIB' value.")
+            raise MapdlRuntimeError("The 'lib' argument only supports the 'LIB' value.")
 
         fname = self._get_file_name(fname, ext, "mp")
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
