@@ -372,6 +372,7 @@ class _MapdlCommandExtended(_MapdlCore):
         fname = self._get_file_name(fname, ext, "mp")
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
         file_, ext_, path_ = self._decompose_fname(fname)
+        self._log.info("Bypassing 'MPREAD' with 'INPUT'.")
         return self.input(file_, ext_, **kwargs)
 
     @wraps(_MapdlCore.cwd)
