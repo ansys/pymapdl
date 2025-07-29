@@ -30,7 +30,7 @@ I-Beam Analysis with Automated Report Generation
    `I-Beam Analysis with Automated Report Generation <beam_analysis_report_example>`_
    example.
 
-This example demonstrates a comprehensive structural analysis of a simply supported
+This example demonstrates a comprehensive structural analysis of a fully constrained
 I-beam using PyMAPDL. The script creates a parameterized I-beam model, applies loads,
 solves for structural response, and generates a detailed engineering report in both
 Markdown and Microsoft Word formats.
@@ -38,7 +38,7 @@ Markdown and Microsoft Word formats.
 The example showcases:
 - Parameterized I-beam geometry definition
 - Material property assignment
-- Simply supported boundary conditions
+- Fully constrained at both ends
 - Distributed load application
 - Result extraction and post-processing
 - Automated report generation with plots and tables
@@ -180,7 +180,7 @@ def generate_model(mapdl, beam_params, material_props, load_params):
 
     # Enter preprocessor
     mapdl.prep7()
-    mapdl.title("Simply Supported I-Beam Analysis")
+    mapdl.title("Fully constrained I-Beam Analysis")
 
     # Define element type - BEAM188 (3D linear finite strain beam)
     mapdl.et(1, "BEAM188")
@@ -510,9 +510,12 @@ def generate_markdown_report(data, output_dir):
 
 ## Executive Summary
 
-This report presents the results of a static structural analysis of a simply supported I-beam subjected to a uniformly distributed load. The analysis was performed using finite element methods via PyMAPDL.
+This report presents the results of a static structural analysis of a fully
+constrained I-beam at both ends, subjected to a uniformly distributed load.
+The analysis was performed using finite element methods via PyMAPDL.
 
 ### Key Results
+
 - **Maximum Displacement:** {data['results']['max_displacement']:.2f} mm
 - **Maximum Stress:** {data['results']['max_stress']:.1f} MPa
 - **Safety Factor:** {data['results']['safety_factor']:.2f}
@@ -521,6 +524,7 @@ This report presents the results of a static structural analysis of a simply sup
 ## Model Description
 
 ### Geometry
+
 The analyzed structure is an I-beam with the following dimensions:
 
 | Parameter | Value | Unit |
@@ -542,6 +546,7 @@ The analyzed structure is an I-beam with the following dimensions:
 *Figure 2: Beam showing elements*
 
 ### Material Properties
+
 The beam is modeled using structural steel with the following properties:
 
 | Property | Value | Unit |
@@ -552,22 +557,26 @@ The beam is modeled using structural steel with the following properties:
 | Yield Strength | {data['material_props']['yield_strength']:.0f} | MPa |
 
 ### Loading and Boundary Conditions
-- **Support Type:** Simply supported (pin and roller)
+
+- **Support Type:** Fully constrained at both ends.
 - **Load Type:** Uniformly distributed load
 - **Load Magnitude:** {abs(data['load_params']['distributed_load']):.0f} N/mm
 
 ## Analysis Results
 
 ### Displacement Results
+
 - **Maximum vertical displacement:** {data['results']['max_displacement']:.2f} mm
 - **Location:** Node {data['results']['max_displacement_node']} (approximately mid-span)
 
 ### Stress Results
+
 - **Maximum bending stress:** {data['results']['max_stress']:.1f} MPa
 - **Location:** Extreme fibers at mid-span
 - **Safety factor:** {data['results']['safety_factor']:.2f}
 
 ### Section Properties
+
 | Property | Value | Unit |
 |----------|-------|------|
 | Cross-sectional Area | {data['section_props']['Area']:.0f} | mm² |
@@ -579,18 +588,21 @@ The beam is modeled using structural steel with the following properties:
 The following plots visualize the analysis results:
 
 #### Displacement Contours
+
 ![Displacement Plot](displacement_plot.png)
 
 *Figure 3: Y-direction displacement contours showing maximum deformation at mid-span*
 
 #### Stress Distribution
+
 ![Stress Plot](stress_plot.png)
 
 *Figure 4: Equivalent stress distribution showing maximum stress at beam extreme fibers*
 
 ## Conclusions
 
-1. **Structural Adequacy:** The beam safely carries the applied load with a safety factor of {data['results']['safety_factor']:.2f}.
+1. **Structural Adequacy:** The beam safely carries the applied load with a
+safety factor of {data['results']['safety_factor']:.2f}.
 
 2. **Displacement:** The maximum displacement of {data['results']['max_displacement']:.2f} mm is within acceptable limits for most structural applications.
 
@@ -667,8 +679,8 @@ def generate_word_report(data, output_dir):
     # Executive Summary
     doc.add_heading("Executive Summary", level=1)
     doc.add_paragraph(
-        "This report presents the results of a static structural analysis of a simply "
-        "supported I-beam subjected to a uniformly distributed load."
+        "This report presents the results of a static structural analysis of a "
+        "fully constrained I-beam at both ends, subjected to a uniformly distributed load."
     )
 
     # Key Results table

@@ -13,7 +13,7 @@ result extraction, and automated documentation generation.
 
 * Parameterized I-beam geometry creation
 * Material property definition and assignment
-* Simply supported boundary condition implementation
+* Fully constrained beam at both ends
 * Distributed load applied using nodal forces
 * Comprehensive result extraction and post-processing
 * Automated report generation in Markdown and Word formats
@@ -27,7 +27,7 @@ the analysis process, assumptions, and findings in a professional report format.
 This example shows how PyMAPDL can be used to create a complete analysis workflow
 that includes automated report generation.
 
-The analysis focuses on a simply supported I-beam subjected to an uniformly distributed
+The analysis focuses on a fully constrained I-beam subjected to an uniformly distributed
 load, a fundamental structural engineering problem. The results are verified against
 analytical solutions and presented in professional report formats.
 
