@@ -320,7 +320,7 @@ def generate_model(mapdl, beam_params, material_props, load_params):
     )  # Force per interior node
     end_nodal_force = nodal_force / 2  # Force per end node
 
-    print(f"Applying distributed load as nodal forces:")
+    print("Applying distributed load as nodal forces:")
     print(f"End nodes (1, {last_node}): {end_nodal_force} N each")
     print(f"Interior nodes (2 to {num_elements}): {nodal_force} N each")
     print(f"Node spacing: {node_spacing} mm")
@@ -336,7 +336,6 @@ def generate_model(mapdl, beam_params, material_props, load_params):
 
     print(f"Total applied force: {abs(force_sum)} N = {abs(force_sum)/1000:.1f} kN")
     expected_total = abs(load_params["distributed_load"] * beam_params["length"])
-    # print(f"Expected total force: {expected_total} N = {expected_total/1000:.1f} kN")
     print(
         f"Force application error: {abs(abs(force_sum) - expected_total)/expected_total*100:.2f}%"
     )
@@ -694,7 +693,6 @@ def generate_word_report(data, output_dir):
                 disp_plot_path = Path(data["plot_files"]["displacement"])
                 if disp_plot_path.exists():
                     doc.add_paragraph("Displacement Contours:", style="Heading 3")
-                    from docx.shared import Inches
 
                     doc.add_picture(str(disp_plot_path), width=Inches(6))
                     doc.add_paragraph(
@@ -709,7 +707,6 @@ def generate_word_report(data, output_dir):
                 stress_plot_path = Path(data["plot_files"]["stress"])
                 if stress_plot_path.exists():
                     doc.add_paragraph("Stress Distribution:", style="Heading 3")
-                    from docx.shared import Inches
 
                     doc.add_picture(str(stress_plot_path), width=Inches(6))
                     doc.add_paragraph(

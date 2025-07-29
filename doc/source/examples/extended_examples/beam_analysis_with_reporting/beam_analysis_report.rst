@@ -34,13 +34,13 @@ analytical solutions and presented in professional report formats.
 Problem Definition
 ==================
 
-Analyze a simply supported I-beam with the following characteristics:
+Analyze a I-beam with the following characteristics:
 
 **Geometry:**
 
 - Length: 5.0 meters
 - I-section with typical structural steel proportions
-- Clamped at both ends
+- Fully constrained at both ends
 
 **Loading:**
 
