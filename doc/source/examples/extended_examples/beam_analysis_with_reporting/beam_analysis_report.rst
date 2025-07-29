@@ -14,7 +14,7 @@ result extraction, and automated documentation generation.
 * Parameterized I-beam geometry creation
 * Material property definition and assignment
 * Simply supported boundary condition implementation
-* Distributed load application using nodal forces
+* Distributed load applied using nodal forces
 * Comprehensive result extraction and post-processing
 * Automated report generation in Markdown and Word formats
 * Analytical verification of finite element results
@@ -34,7 +34,7 @@ analytical solutions and presented in professional report formats.
 Problem Definition
 ==================
 
-We analyze a simply supported I-beam with the following characteristics:
+Analyze a simply supported I-beam with the following characteristics:
 
 **Geometry:**
 
@@ -59,8 +59,8 @@ We analyze a simply supported I-beam with the following characteristics:
 - Verify safety against yielding
 - Generate comprehensive documentation
 
-Model Setup and Parameterization
-=================================
+Model Setup and Parametrisation
+===============================
 
 The example begins by defining all analysis parameters in dictionaries for easy
 modification and reuse:
@@ -267,7 +267,7 @@ The Word report provides:
 Plot Generation
 ---------------
 
-The example includes functionality to generate analysis plots:
+The example includes capability to generate analysis plots:
 
 .. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
@@ -372,7 +372,7 @@ When running this example, you should expect:
 **Model Validation:**
 
 - Finite element results match analytical predictions
-- Mesh convergence demonstrates adequate discretization
+- Mesh convergence demonstrates adequate discretisation
 - Boundary conditions properly represent support conditions
 
 **Report Quality:**
@@ -423,7 +423,7 @@ Additional Report Features
        ["pandoc", "ibeam_analysis_report.md", "-o", "ibeam_analysis_report.pdf"]
    )
 
-**Email Reports:**
+**email Reports:**
 
 .. code-block:: python
 
