@@ -140,7 +140,7 @@ Fully clamped boundary conditions on the ends are implemented as:
 .. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
     :dedent: 4
-    :start-at: # Apply simply supported boundary conditions
+    :start-at:  print(f"\n-- Setting MAPDL Boundary conditions --")
     :end-at: mapdl.d(last_node, "ROTZ", 0)
 
 Distributed Load Application
@@ -207,7 +207,7 @@ The Moment at both nodes are extracted using ``ETABLE`` command, with ``SMISC`` 
 Bending Stress Results
 ----------------------
 
-Again we use ``ETABLE`` to retrieve MAPDL values:
+Again ``ETABLE`` is used to retrieve MAPDL values:
 
 .. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python

@@ -62,6 +62,7 @@ Dev
 devcontainer
 DevContainer
 Dimitris
+discretisation
 dof
 ect
 eigenfrequency
@@ -134,6 +135,7 @@ performant
 PMLs
 POIN
 Poisson
+post_processing
 postprocessor
 Prasanna
 preprocessor
