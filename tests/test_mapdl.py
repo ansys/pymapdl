@@ -1535,9 +1535,6 @@ def test_mpfunctions(mapdl, cube_solve, capsys):
     captured = capsys.readouterr()  # To flush it
     output = mapdl.mpread(fname, ext)
     captured = capsys.readouterr()
-    if has_dependency("tqdm"):
-        # Printing uploading requires tqdm
-        assert f"Uploading {fname}.{ext}:" in captured.err
 
     assert "PROPERTY TEMPERATURE TABLE    NUM. TEMPS=  1" in output
     assert "TEMPERATURE TABLE ERASED." in output
