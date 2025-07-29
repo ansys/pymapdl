@@ -393,6 +393,7 @@ def generate_model(mapdl, beam_params, material_props, load_params):
             "max_displacement_node": max_displacement_location,
             "max_moment": max_moment_fem / 1e6,  # Convert to kN⋅m
             "max_stress": max_stress_fem,
+            "max_strain": max_strain_fem,
             "safety_factor": safety_factor,
             "total_load": total_load / 1000,  # Convert to kN
         },

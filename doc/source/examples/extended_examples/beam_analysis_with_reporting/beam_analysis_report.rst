@@ -352,44 +352,13 @@ The framework can be extended for multiple load cases:
 This parameterized approach enables design optimization studies:
 
 
-Expected Results
-================
-
-When running this example, you should expect:
-
-**Displacement Results:**
-
-- Maximum displacement: ~40-50 mm at mid-span
-- Smooth displacement profile along beam length
-
-**Stress Results:**
-
-- Maximum stress: ~150-200 MPa at extreme fibers
-- Safety factor: ~2-3 against yielding
-- Linear stress distribution through beam height
-
-**Model Validation:**
-
-- Finite element results match analytical predictions
-- Mesh convergence demonstrates adequate discretisation
-- Boundary conditions properly represent support conditions
-
-**Report Quality:**
-
-- Professional formatting and presentation
-- Complete documentation of analysis process
-- Tables, figures, and calculations clearly presented
-
-
-Extensions and Modifications
-============================
-
 Advanced Analysis Options
---------------------------
+=========================
 
 The example can be extended for more sophisticated analyses:
 
-**Nonlinear Analysis:**
+Nonlinear Analysis
+------------------
 
 .. code-block:: python
 
@@ -399,7 +368,8 @@ The example can be extended for more sophisticated analyses:
    # Material nonlinearity
    mapdl.mp("BISO", 1, yield_strength, hardening_modulus)
 
-**Dynamic Analysis:**
+Dynamic Analysis
+----------------
 
 .. code-block:: python
 
@@ -409,9 +379,10 @@ The example can be extended for more sophisticated analyses:
 
 
 Additional Report Features
---------------------------
+==========================
 
-**PDF Generation:**
+PDF Generation
+--------------
 
 If you install `pandoc <https://pandoc.org>`_, you can convert the markdown report to a PDF file as follows:
 
@@ -424,7 +395,51 @@ If you install `pandoc <https://pandoc.org>`_, you can convert the markdown repo
        ["pandoc", "ibeam_analysis_report.md", "-o", "ibeam_analysis_report.pdf"]
    )
 
-**email Reports:**
+Excel Export
+------------
+
+You can export results to Excel using `pandas`. This is quite useful when reporting parametric studies:
+
+.. code-block:: python
+
+   import pandas as pd
+
+   load_cases = [
+       {"name": "Service Load", "distributed_load": -50.0},
+       {"name": "Ultimate Load", "distributed_load": -75.0},
+       {"name": "Wind Load", "distributed_load": -25.0},
+   ]
+
+   df_result = pd.DataFrame()
+
+   for case in load_cases:
+       # Run analysis for each case
+       # Generate separate reports
+       results = create_ibeam_analysis_and_report(**case)
+
+       # Create DataFrame from results
+       df_result = pd.concat(
+           [
+               df_result,
+               pd.DataFrame(
+                   {
+                       "Load Case": case["name"],
+                       "Max Displacement (mm)": results["max_displacement"],
+                       "Max Bending Moment (Nm)": results["max_moment"],
+                       "Max Bending Stress (MPa)": results["max_stress"],
+                       "Max Bending Strain": results["max_strain"],
+                       "Safety Factor": results["safety_factor"],
+                   }
+               ),
+           ],
+           ignore_index=True,
+       )
+
+   # Save to Excel
+   df_result.to_excel("ibeam_load_cases_analysis_results.xlsx", index=False)
+
+Email Reports
+-------------
 
 Using Python you can send the generated reports via email:
 
