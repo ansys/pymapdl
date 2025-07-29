@@ -185,18 +185,18 @@ INVAL_COMMANDS_SILENT = {
 }
 
 PLOT_COMMANDS = [
-    "NPLO",
+    "APLO",
     "EPLO",
     "KPLO",
     "LPLO",
-    "APLO",
-    "VPLO",
-    "PLNS",
+    "NPLO",
     "PLES",
+    "PLNS",
     "PSDG",
+    "SECP",
     "SPGR",
     "TBPL",
-    "SECP",
+    "VPLO",
 ]
 MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
 
