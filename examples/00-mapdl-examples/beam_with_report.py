@@ -26,6 +26,10 @@
 I-Beam Analysis with Automated Report Generation
 =================================================
 
+.. note:: This file is complimentary material of
+   `I-Beam Analysis with Automated Report Generation <beam_analysis_report_example>`_
+   example.
+
 This example demonstrates a comprehensive structural analysis of a simply supported
 I-beam using PyMAPDL. The script creates a parameterized I-beam model, applies loads,
 solves for structural response, and generates a detailed engineering report in both
@@ -39,6 +43,8 @@ The example showcases:
 - Result extraction and post-processing
 - Automated report generation with plots and tables
 
+This example requires the following imports:
+
 """
 
 from datetime import datetime
@@ -48,6 +54,13 @@ import numpy as np
 
 from ansys.mapdl.core import launch_mapdl
 from ansys.mapdl.core.plotting import GraphicsBackend
+
+###############################################################################
+# Workflow design
+# ---------------
+#
+# The main function defines the workflow for creating the I-beam analysis and
+# generating reports.
 
 
 def create_ibeam_analysis_and_report(**kwargs):
@@ -142,70 +155,21 @@ def create_ibeam_analysis_and_report(**kwargs):
     return analysis_data
 
 
-def generate_analysis_plots(mapdl, output_dir):
-    """
-    Generate plots for the analysis report.
-
-    Parameters
-    ----------
-    mapdl : ansys.mapdl.core.Mapdl
-        MAPDL instance
-    output_dir : Path
-        Directory to save plots
-
-    Returns
-    -------
-    dict
-        Dictionary of generated plot file paths
-    """
-
-    plot_files = {}
-
-    try:
-        # Beam section plot
-        mapdl.prep7()
-        ibeam_plot_file = output_dir / "ibeam_section.png"
-        mapdl.secplot(1, savefig=str(ibeam_plot_file))
-
-        if ibeam_plot_file.exists():
-            plot_files["section"] = str(ibeam_plot_file)
-            print(f"Generated I-beam section plot: {ibeam_plot_file}")
-
-        eplot_file = output_dir / "geometry.png"
-        mapdl.run("eshape,1,1")  # Using run to avoid warning
-        mapdl.eplot(1, graphics_backend=GraphicsBackend.MAPDL, savefig=str(eplot_file))
-
-        if eplot_file.exists():
-            plot_files["geometry"] = str(eplot_file)
-            print(f"Generated element plot: {eplot_file}")
-
-        mapdl.post1()
-        mapdl.set("LAST")
-
-        # Displacement plot
-        disp_plot_file = output_dir / "displacement_plot.png"
-        mapdl.plnsol("U", "Y", savefig=str(disp_plot_file))
-        if disp_plot_file.exists():
-            plot_files["displacement"] = str(disp_plot_file)
-            print(f"Generated displacement plot: {disp_plot_file}")
-
-        # Stress plot
-        stress_plot_file = output_dir / "stress_plot.png"
-        mapdl.plesol("S", "EQV", savefig=str(stress_plot_file))
-        if stress_plot_file.exists():
-            plot_files["stress"] = str(stress_plot_file)
-            print(f"Generated stress plot: {stress_plot_file}")
-
-    except Exception as e:
-        print(f"Warning: Could not generate plots: {e}")
-        print(
-            "This may be due to graphics/display limitations in the current environment."
-        )
-        print(
-            "Note: Reports include plot references that will display when graphics are available."
-        )
-
-    return plot_files
+###############################################################################
+# Generate and solve the finite element model
+# -------------------------------------------
+#
+# A complete structural analysis of an I-beam is generated and solved.
+# The output is a dictionary with the desired results:
+#
+# - Displacements
+# - Bending moments
+# - Bending stresses
+# - Bending strains
+#
+# This model uses 20 BEAM188 elements to create the beam.
+# The material properties, load parameters and geometry are taken from the
+# function inputs.
 
 
 def generate_model(mapdl, beam_params, material_props, load_params):
@@ -436,6 +400,88 @@ def generate_model(mapdl, beam_params, material_props, load_params):
     }
 
 
+###############################################################################
+# Preparing plots
+# ---------------
+#
+# The plots needs to be saved to a PNG and passed later to the report creation
+# functions.
+
+
+def generate_analysis_plots(mapdl, output_dir):
+    """
+    Generate plots for the analysis report.
+
+    Parameters
+    ----------
+    mapdl : ansys.mapdl.core.Mapdl
+        MAPDL instance
+    output_dir : Path
+        Directory to save plots
+
+    Returns
+    -------
+    dict
+        Dictionary of generated plot file paths
+    """
+
+    plot_files = {}
+
+    try:
+        # Beam section plot
+        mapdl.prep7()
+        ibeam_plot_file = output_dir / "ibeam_section.png"
+        mapdl.secplot(1, savefig=str(ibeam_plot_file))
+
+        if ibeam_plot_file.exists():
+            plot_files["section"] = str(ibeam_plot_file)
+            print(f"Generated I-beam section plot: {ibeam_plot_file}")
+
+        eplot_file = output_dir / "geometry.png"
+        mapdl.run("eshape,1,1")  # Using run to avoid warning
+        mapdl.eplot(1, graphics_backend=GraphicsBackend.MAPDL, savefig=str(eplot_file))
+
+        if eplot_file.exists():
+            plot_files["geometry"] = str(eplot_file)
+            print(f"Generated element plot: {eplot_file}")
+
+        mapdl.post1()
+        mapdl.set("LAST")
+
+        # Displacement plot
+        disp_plot_file = output_dir / "displacement_plot.png"
+        mapdl.plnsol("U", "Y", savefig=str(disp_plot_file))
+        if disp_plot_file.exists():
+            plot_files["displacement"] = str(disp_plot_file)
+            print(f"Generated displacement plot: {disp_plot_file}")
+
+        # Stress plot
+        stress_plot_file = output_dir / "stress_plot.png"
+        mapdl.plesol("S", "EQV", savefig=str(stress_plot_file))
+        if stress_plot_file.exists():
+            plot_files["stress"] = str(stress_plot_file)
+            print(f"Generated stress plot: {stress_plot_file}")
+
+    except Exception as e:
+        print(f"Warning: Could not generate plots: {e}")
+        print(
+            "This may be due to graphics/display limitations in the current environment."
+        )
+        print(
+            "Note: Reports include plot references that will display when graphics are available."
+        )
+
+    return plot_files
+
+
+###############################################################################
+# Generate Markdown report
+# ------------------------
+#
+# The following function uses a Markdown template to generate a Markdown file.
+# You can customize the following function to accept a different template.
+
+
 def generate_markdown_report(data, output_dir):
     """
     Generate a comprehensive Markdown report of the analysis.
@@ -566,6 +612,22 @@ The following plots visualize the analysis results:
         f.write(markdown_content)
 
     return str(report_file)
+
+
+###############################################################################
+# Generate Word report
+# --------------------
+#
+# Generate a simple Word report, with some tables and images to demonstrate
+# the reporting capabilities.
+#
+# .. note:: You need to have installed the library ``python-docx``.
+#    You can install it with:
+#
+#    .. code:: bash
+#
+#       pip install python-docx"
+#
 
 
 def generate_word_report(data, output_dir):

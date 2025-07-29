@@ -536,7 +536,6 @@ workflows using PyMAPDL by combining:
 * Analytical verification
 * Automated report generation
 
-
 The approach shown here can be adapted for various structural analysis problems
 and extended with additional features as needed for specific engineering applications.
 
@@ -546,10 +545,12 @@ References
 * PyMAPDL Documentation: https://mapdl.docs.pyansys.com/
 * Ansys Mechanical APDL Element Reference
 
-
 Additional files
 ================
 
-* :download:`beam_with_report.py <../../../../../examples/00-mapdl-examples/beam_with_report.py>`: Complete Python script.
+* :download:`beam_with_report.py <ref_beam_report_example_>`: Complete Python script.
+
+Examples of the generated report files are:
+
 * :download:`ibeam_analysis_report.md <ibeam_analysis_report.md>`: Markdown report file.
 * :download:`ibeam_analysis_report.docx <ibeam_analysis_report.docx>`: Word document file.
