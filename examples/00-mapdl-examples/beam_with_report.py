@@ -189,7 +189,7 @@ def generate_model(mapdl, beam_params, material_props, load_params):
     mapdl.keyopt(1, 3, 2)  # Use Euler-Bernoulli beam theory (no shear deformation)
 
     # Define material properties
-    print(f"\n-- Setting MAPDL material properties --")
+    print("\n-- Setting MAPDL material properties --")
     print(f"EX = {material_props['elastic_modulus']} MPa")
     print(f"PRXY = {material_props['poisson_ratio']}")
     print(f"DENS = {material_props['density']} kg/mm³")
@@ -199,7 +199,7 @@ def generate_model(mapdl, beam_params, material_props, load_params):
     mapdl.mp("DENS", 1, material_props["density"])  # Density
 
     # Define I-beam cross-section using SECTYPE and SECDATA
-    print(f"\n-- Setting MAPDL section properties --")
+    print("\n-- Setting MAPDL section properties --")
     mapdl.sectype(1, "BEAM", "I", "ISection", 3)
     mapdl.secoffset("CENT")  # Section offset at centroid
 
@@ -234,7 +234,7 @@ def generate_model(mapdl, beam_params, material_props, load_params):
     beam_data["Section_modulus"] = section_modulus  # Add to beam data
 
     # Meshing
-    print(f"\n-- Setting MAPDL Mesh --")
+    print("\n-- Setting MAPDL Mesh --")
     # Create nodes along the beam length
     num_elements = 20  # Number of elements for discretization
     beam_params["num_elements"] = num_elements  # Store for report
@@ -257,7 +257,7 @@ def generate_model(mapdl, beam_params, material_props, load_params):
     # BOUNDARY CONDITIONS AND LOADING
     # ==========================================================================
 
-    print(f"\n-- Setting MAPDL Boundary conditions --")
+    print("\n-- Setting MAPDL Boundary conditions --")
     # Left support (node 1)
     mapdl.d(1, "UX", 0)  # Horizontal displacement constrained
     mapdl.d(1, "UY", 0)  # Vertical displacement constrained
@@ -666,7 +666,7 @@ def generate_word_report(data, output_dir):
 
     # Executive Summary
     doc.add_heading("Executive Summary", level=1)
-    summary = doc.add_paragraph(
+    doc.add_paragraph(
         "This report presents the results of a static structural analysis of a simply "
         "supported I-beam subjected to a uniformly distributed load."
     )
