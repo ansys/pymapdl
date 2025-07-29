@@ -1,5 +1,6 @@
 [aA]nsys
 [Bb]ooleans
+[Cc]entroidal
 [Cc]odespace
 [Cc]odespaces
 [Cc]ommand [Pp]rompt
@@ -110,10 +111,12 @@ MAPDL
 mater
 MATLAB
 matricies
+Mc
 mesher
 midside
 Mises
 mkdir
+MPa
 MSc
 multipoint
 nce
@@ -150,6 +153,7 @@ Radiosity
 Rao
 righ
 RNNN
+Roark
 sbatch
 singl
 Slurm
