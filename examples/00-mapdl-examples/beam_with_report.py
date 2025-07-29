@@ -503,9 +503,9 @@ def generate_markdown_report(data, output_dir):
 
     markdown_content = f"""# {data['name']}
 
-**Generated:** {timestamp}
-**Analysis Type:** Static Structural Analysis
-**Software:** PyMAPDL (Ansys MAPDL)
+- **Generated:** {timestamp}
+- **Analysis Type:** Static Structural Analysis
+- **Software:** PyMAPDL (Ansys MAPDL)
 
 ## Executive Summary
 
