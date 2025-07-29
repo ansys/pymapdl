@@ -65,8 +65,9 @@ Model Setup and Parameterization
 The example begins by defining all analysis parameters in dictionaries for easy
 modification and reuse:
 
-.. literalinclude:: ../examples/00-mapdl-examples/beam_with_report.py
+.. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
+    :dedent: 4
     :start-at: # I-beam geometric parameters
     :end-at: print(f"Load: {load_params['distributed_load']} N/mm")
 
@@ -90,8 +91,9 @@ The analysis uses BEAM188 elements, which are:
 * Capable of handling large deflection effects (if needed)
 * Provide comprehensive stress output
 
-.. literalinclude:: ../../../examples/00-mapdl-examples/beam_with_report.py
+.. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
+    :dedent: 4
     :start-at: # Define element type
     :end-at: mapdl.keyopt(1, 6, 1)
 
@@ -100,10 +102,11 @@ Cross-Section Definition
 
 The I-beam cross-section is defined using PyMAPDL's section commands:
 
-.. literalinclude:: ../../../examples/00-mapdl-examples/beam_with_report.py
+.. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
-    :start-at: # Define I-beam cross-section
-    :end-at: beam_params["web_thickness"]/10
+    :dedent: 4
+    :start-at: print(f"\n-- Setting MAPDL section properties --")
+    :end-at: print(beam_info)
 
 The ``SECDATA`` command defines the I-beam geometry where:
 
@@ -117,8 +120,9 @@ Node and Element Generation
 
 Nodes are created along the beam length with uniform spacing:
 
-.. literalinclude:: ../../../examples/00-mapdl-examples/beam_with_report.py
+.. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
+    :dedent: 4
     :start-at: # Create nodes along the beam length
     :end-at: mapdl.e(i + 1, i + 2)
 
@@ -128,18 +132,14 @@ for accurate results while maintaining computational efficiency.
 Boundary Conditions and Loading
 ===============================
 
-Simply Supported Conditions
-----------------------------
+Fully Constrained End Conditions
+--------------------------------
 
-Simply supported boundary conditions are implemented as:
+Fully clamped boundary conditions on the ends are implemented as:
 
-* **Left support (Pin):**
-  Constrains vertical (UY), out-of-plane (UZ), and rotational degrees of freedom
-* **Right support (Roller):**
-  Same constraints as pin, but allows horizontal movement
-
-.. literalinclude:: ../../../examples/00-mapdl-examples/beam_with_report.py
+.. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
+    :dedent: 4
     :start-at: # Apply simply supported boundary conditions
     :end-at: mapdl.d(last_node, "ROTZ", 0)
 
@@ -148,8 +148,9 @@ Distributed Load Application
 
 The uniformly distributed load is applied as equivalent nodal forces:
 
-.. literalinclude:: ../../../examples/00-mapdl-examples/beam_with_report.py
+.. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
+    :dedent: 4
     :start-at: # Apply distributed load as nodal forces
     :end-at: mapdl.f(last_node, "FY", end_nodal_force)
 
@@ -159,13 +160,16 @@ This approach:
 * Maintains load equilibrium
 * Provides accurate representation of the distributed loading
 
+Alternatively, the load can be applied using the ``SFBEAM`` command for surface loads on BEAM and PIPE elements.
+
 Solution Process
 ================
 
 The static structural solution is configured and executed:
 
-.. literalinclude:: ../../../examples/00-mapdl-examples/beam_with_report.py
+.. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
+    :dedent: 4
     :start-at: # Enter solution processor
     :end-at: print("Solution completed successfully")
 
@@ -181,56 +185,44 @@ Post-Processing and Result Extraction
 Displacement Results
 --------------------
 
-The maximum displacement is extracted and compared with analytical theory:
+The maximum displacement is extracted using the `post_processing` module:
 
-.. literalinclude:: ../../../examples/00-mapdl-examples/beam_with_report.py
+.. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
+    :dedent: 4
     :start-at: # Get nodal displacements
-    :end-at: max_displacement_location = np.argmin(displacements[:, 1]) + 1
+    :end-at: max_displacement_location = np.argmin(displacements) + 1
 
-Theoretical Verification
-------------------------
+Moment Results
+--------------
 
-Results are verified against classical beam theory:
+The Moment at both nodes are extracted using ``ETABLE`` command, with ``SMISC`` items:
 
-.. literalinclude:: ../../../examples/00-mapdl-examples/beam_with_report.py
+.. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
-    :start-at: # Theoretical maximum displacement
-    :end-at: theoretical_stress = (theoretical_moment * c) / I
+    :dedent: 4
+    :start-at: # Get moment values
+    :end-at: max_moment_fem = max(max_moment_i, max_moment_j)
 
-**Key formulas used:**
+Bending Stress Results
+----------------------
 
-* **Maximum displacement:** :math:`\delta_{max} = \frac{5wL^4}{384EI}`
-* **Maximum moment:** :math:`M_{max} = \frac{wL^2}{8}`
-* **Maximum stress:** :math:`\sigma_{max} = \frac{Mc}{I}`
+Again we use ``ETABLE`` to retrieve MAPDL values:
 
-Where:
-
-- :math:`w` = distributed load intensity
-- :math:`L` = beam span
-- :math:`E` = elastic modulus
-- :math:`I` = moment of inertia
-- :math:`c` = distance to extreme fiber
-
-Section Property Calculations
-=============================
-
-The example includes a function to calculate I-beam section properties:
-
-.. literalinclude:: ../../../examples/00-mapdl-examples/beam_with_report.py
+.. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
-    :start-at: def calculate_moment_of_inertia(beam_params):
-    :end-at: }
+    :dedent: 4
+    :start-at: # Get bending stress values
+    :end-at: max_moment_fem = max(max_moment_i, max_moment_j)
 
-This function calculates:
+Bending Strain Results
+----------------------
 
-* Cross-sectional area
-* Moment of inertia about the strong axis
-* Section modulus
-* Centroidal properties
-
-The calculations use composite section analysis principles, considering the
-I-beam as two flanges plus a web.
+.. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
+    :language: python
+    :dedent: 4
+    :start-at: # Get bending strain values
+    :end-at: max_strain_fem = max(bending_strain_top, bending_strain_bottom)
 
 Report Generation Features
 ==========================
@@ -246,7 +238,7 @@ The Markdown report includes:
 * Analytical verification section
 * Professional formatting with tables and equations
 
-.. literalinclude:: ../../../examples/00-mapdl-examples/beam_with_report.py
+.. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
     :start-at: def generate_markdown_report(data, output_dir):
     :end-at: return str(report_file)
@@ -261,7 +253,7 @@ The Word report provides:
 * Structured sections and headings
 * Executive summary format
 
-.. literalinclude:: ../../../examples/00-mapdl-examples/beam_with_report.py
+.. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
     :start-at: def generate_word_report(data, output_dir):
     :end-at: return str(word_file)
@@ -277,8 +269,9 @@ Plot Generation
 
 The example includes functionality to generate analysis plots:
 
-.. literalinclude:: ../../../examples/00-mapdl-examples/beam_with_report.py
+.. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
+    :dedent: 4
     :start-at: def generate_analysis_plots(mapdl, output_dir):
     :end-at: return plot_files
 
@@ -347,28 +340,18 @@ The framework can be extended for multiple load cases:
 .. code-block:: python
 
    load_cases = [
-       {"name": "Service Load", "magnitude": -50.0},
-       {"name": "Ultimate Load", "magnitude": -75.0},
-       {"name": "Wind Load", "magnitude": -25.0},
+       {"name": "Service Load", "distributed_load": -50.0},
+       {"name": "Ultimate Load", "distributed_load": -75.0},
+       {"name": "Wind Load", "distributed_load": -25.0},
    ]
 
    for case in load_cases:
        # Run analysis for each case
        # Generate separate reports
-       pass
+       results = create_ibeam_analysis_and_report(**case)
 
-Design Optimization
--------------------
+This parameterized approach enables design optimization studies:
 
-The parameterized approach enables design optimization studies:
-
-.. code-block:: python
-
-   # Optimization loop
-   for height in range(300, 600, 50):  # Test different heights
-       beam_params["web_height"] = height
-       results = create_ibeam_analysis_and_report()
-       # Evaluate design criteria
 
 Expected Results
 ================
@@ -378,7 +361,6 @@ When running this example, you should expect:
 **Displacement Results:**
 
 - Maximum displacement: ~40-50 mm at mid-span
-- Excellent agreement with theory (< 1% error)
 - Smooth displacement profile along beam length
 
 **Stress Results:**
@@ -399,47 +381,6 @@ When running this example, you should expect:
 - Complete documentation of analysis process
 - Tables, figures, and calculations clearly presented
 
-Troubleshooting
-===============
-
-Common Issues and Solutions
----------------------------
-
-**MAPDL License Issues:**
-
-If you encounter licensing problems:
-
-.. code-block:: python
-
-   # Use student version if available
-   mapdl = launch_mapdl(mode="grpc", version=231)
-
-**Plot Generation Errors:**
-
-If plots fail to generate:
-
-.. code-block:: python
-
-   # Check graphics capabilities
-   mapdl = launch_mapdl(additional_switches="-grpc")
-
-**Missing Dependencies:**
-
-Install required packages:
-
-.. code-block:: bash
-
-   pip install numpy python-docx matplotlib
-
-**File Permission Errors:**
-
-Ensure write permissions for output directory:
-
-.. code-block:: python
-
-   import os
-
-   os.chmod("beam_analysis_output", 0o755)
 
 Extensions and Modifications
 ============================
@@ -467,13 +408,6 @@ The example can be extended for more sophisticated analyses:
    mapdl.antype("MODAL")
    mapdl.modopt("LANB", 10)  # First 10 modes
 
-**Buckling Analysis:**
-
-.. code-block:: python
-
-   # Linear buckling
-   mapdl.antype("BUCKLE")
-   mapdl.bucopt("LANB", 5)  # First 5 modes
 
 Additional Report Features
 --------------------------
@@ -485,7 +419,9 @@ Additional Report Features
    # Convert Markdown to PDF using pandoc
    import subprocess
 
-   subprocess.run(["pandoc", "report.md", "-o", "report.pdf"])
+   subprocess.run(
+       ["pandoc", "ibeam_analysis_report.md", "-o", "ibeam_analysis_report.pdf"]
+   )
 
 **Email Reports:**
 
@@ -528,11 +464,8 @@ and extended with additional features as needed for specific engineering applica
 References
 ==========
 
-* Ansys Mechanical APDL Element Reference
-* "Formulas for Stress and Strain" by Roark and Young
-* "Theory of Plates and Shells" by Timoshenko and Woinowsky-Krieger
 * PyMAPDL Documentation: https://mapdl.docs.pyansys.com/
+* Ansys Mechanical APDL Element Reference
 
 .. note::
    This example requires PyMAPDL 0.60+ and a valid Ansys license.
-   For optimal report generation, install python-docx: ``pip install python-docx``
