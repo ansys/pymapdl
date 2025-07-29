@@ -414,6 +414,8 @@ Additional Report Features
 
 **PDF Generation:**
 
+If you install `pandoc <https://pandoc.org>`_, you can convert the markdown report to a PDF file as follows:
+
 .. code-block:: python
 
    # Convert Markdown to PDF using pandoc
@@ -425,38 +427,116 @@ Additional Report Features
 
 **email Reports:**
 
+Using Python you can send the generated reports via email:
+
 .. code-block:: python
 
+   # The following code is not tested
    import smtplib
    from email.mime.multipart import MIMEMultipart
+   from email.mime.text import MIMEText
    from email.mime.base import MIMEBase
+   from email import encoders
+   import os
+   from pathlib import Path
 
-   # Send reports via email
-   # Implementation details...
 
-**Database Storage:**
+   def send_analysis_report_email(
+       smtp_server="smtp.gmail.com",
+       smtp_port=587,
+       sender_email="your-email@gmail.com",
+       sender_password="your-app-password",
+       recipient_emails=["recipient@example.com"],
+       subject="I-Beam Analysis Report",
+       body_text="",
+       attachments=None,
+   ):
+       """
+       Send analysis reports via email with attachments
 
-.. code-block:: python
+       Parameters
+       ----------
+       smtp_server : str
+          SMTP server address (e.g., 'smtp.gmail.com', 'smtp.outlook.com')
+       smtp_port : int
+          SMTP port (587 for TLS, 465 for SSL)
+       sender_email : str
+          Sender's email address
+       sender_password : str
+          Sender's email password or app-specific password
+       recipient_emails : list
+          List of recipient email addresses
+       subject : str
+          Email subject line
+       body_text : str
+          Email body content
+       attachments : list
+          List of file paths to attach
+       """
 
-   import sqlite3
+       # Create message container
+       msg = MIMEMultipart()
+       msg["From"] = sender_email
+       msg["To"] = ", ".join(recipient_emails)
+       msg["Subject"] = subject
 
-   # Store results in database
-   conn = sqlite3.connect("analysis_results.db")
-   # Insert results...
+       # Add body to email
+       msg.attach(MIMEText(body_text, "plain"))
+
+       # Add attachments
+       if attachments:
+           for file_path in attachments:
+               if os.path.isfile(file_path):
+                   with open(file_path, "rb") as attachment:
+                       # Instance of MIMEBase and named as part
+                       part = MIMEBase("application", "octet-stream")
+                       part.set_payload(attachment.read())
+
+                   # Encode file in ASCII characters to send by email
+                   encoders.encode_base64(part)
+
+                   # Add header as key/value pair to attachment part
+                   filename = os.path.basename(file_path)
+                   part.add_header(
+                       "Content-Disposition",
+                       f"attachment; filename= {filename}",
+                   )
+
+                   # Attach the part to message
+                   msg.attach(part)
+
+       try:
+           # Create SMTP session
+           server = smtplib.SMTP(smtp_server, smtp_port)
+           server.starttls()  # Enable security
+           server.login(sender_email, sender_password)
+
+           # Send email
+           text = msg.as_string()
+           server.sendmail(sender_email, recipient_emails, text)
+           server.quit()
+
+           print(f"Email sent successfully to {', '.join(recipient_emails)}")
+           return True
+
+       except Exception as e:
+           print(f"Error sending email: {e}")
+           return False
+
 
 Conclusion
 ==========
 
 This example demonstrates a complete PyMAPDL workflow that goes beyond simple
-analysis to include professional documentation and reporting. The combination of:
+analysis to include professional documentation and reporting.
+It provides a foundation for developing robust engineering analysis tools and
+workflows using PyMAPDL by combining:
 
 * Parameterized modeling
 * Comprehensive result extraction  
 * Analytical verification
 * Automated report generation
 
-provides a foundation for developing robust engineering analysis tools and
-workflows using PyMAPDL.
 
 The approach shown here can be adapted for various structural analysis problems
 and extended with additional features as needed for specific engineering applications.
