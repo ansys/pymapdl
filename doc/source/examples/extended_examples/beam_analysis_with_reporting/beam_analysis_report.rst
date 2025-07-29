@@ -213,7 +213,7 @@ Again we use ``ETABLE`` to retrieve MAPDL values:
     :language: python
     :dedent: 4
     :start-at: # Get bending stress values
-    :end-at: max_moment_fem = max(max_moment_i, max_moment_j)
+    :end-at: max_stress_fem = max(bending_stress_top, bending_stress_bottom)
 
 Bending Strain Results
 ----------------------
