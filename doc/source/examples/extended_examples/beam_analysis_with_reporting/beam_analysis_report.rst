@@ -271,7 +271,6 @@ The example includes capability to generate analysis plots:
 
 .. literalinclude:: ../../../../../examples/00-mapdl-examples/beam_with_report.py
     :language: python
-    :dedent: 4
     :start-at: def generate_analysis_plots(mapdl, output_dir):
     :end-at: return plot_files
 
@@ -547,5 +546,10 @@ References
 * PyMAPDL Documentation: https://mapdl.docs.pyansys.com/
 * Ansys Mechanical APDL Element Reference
 
-.. note::
-   This example requires PyMAPDL 0.60+ and a valid Ansys license.
+
+Additional files
+================
+
+* :download:`beam_with_report.py <../../../../../examples/00-mapdl-examples/beam_with_report.py>`: Complete Python script.
+* :download:`ibeam_analysis_report.md <ibeam_analysis_report.md>`: Markdown report file.
+* :download:`ibeam_analysis_report.docx <ibeam_analysis_report.docx>`: Word document file.
