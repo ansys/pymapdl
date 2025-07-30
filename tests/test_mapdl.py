@@ -3237,8 +3237,6 @@ def test_osresult_presol(mapdl, solved_box):
     mapdl.solution()
 
     mapdl.outres("ALL", "NONE")
-
-    mapdl.outres("ALL", "NONE")
     mapdl.osresult("S", "Y", "ALL")  # Stress Y component
 
     mapdl.solve()
