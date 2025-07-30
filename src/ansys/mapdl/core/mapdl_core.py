@@ -185,17 +185,18 @@ INVAL_COMMANDS_SILENT = {
 }
 
 PLOT_COMMANDS = [
-    "NPLO",
+    "APLO",
     "EPLO",
     "KPLO",
     "LPLO",
-    "APLO",
-    "VPLO",
-    "PLNS",
+    "NPLO",
     "PLES",
+    "PLNS",
     "PSDG",
+    "SECP",
     "SPGR",
     "TBPL",
+    "VPLO",
 ]
 MAX_COMMAND_LENGTH = 600  # actual is 640, but seems to fail above 620
 
@@ -3192,7 +3193,7 @@ class _MapdlCore(Commands):
         Parameters
         ----------
         fname : str
-            File name (with our with extension). It can be a full path.
+            File name (with or without extension). It can be a full path.
 
         ext : str, optional
             File extension. The default is None.

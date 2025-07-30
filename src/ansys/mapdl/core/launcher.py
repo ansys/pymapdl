@@ -102,9 +102,12 @@ if not os.path.isdir(SETTINGS_DIR):
     try:
         os.makedirs(SETTINGS_DIR)
         LOG.debug(f"Created settings directory: {SETTINGS_DIR}")
-    except:
+    except FileExistsError:
+        # Directory already exists, no action needed
+        pass
+    except PermissionError:
         warnings.warn(
-            "Unable to create settings directory.\n"
+            "Permission denied: Unable to create settings directory.\n"
             "Will be unable to cache MAPDL executable location"
         )
 
@@ -379,7 +382,7 @@ def port_in_use_using_socket(port: int, host: str) -> bool:
         try:
             sock.bind((host, port))
             return False
-        except:
+        except socket.error:
             return True
 
 
