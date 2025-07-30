@@ -3175,8 +3175,6 @@ def test_rpsd(mapdl, psd_analysis):
 
 
 def test_osresult(mapdl, solved_box):
-    import pandas as pd
-
     mapdl.solution()
 
     mapdl.outres("ALL", "NONE")
@@ -3189,6 +3187,18 @@ def test_osresult(mapdl, solved_box):
     assert "EQV" in mapdl.osresult("STATUS")
     assert "EPPL" in mapdl.osresult("STATUS")
     assert "INT" in mapdl.osresult("STATUS")
+
+
+@requires("pandas")
+def test_osresult_to_list_and_dataframe(mapdl, solved_box):
+    import pandas as pd
+
+    mapdl.solution()
+
+    mapdl.outres("ALL", "NONE")
+    mapdl.osresult("S", "Y", "ALL")  # Stress Y component
+    mapdl.osresult("S", "EQV", "ALL")  # Equivalent stress
+    mapdl.osresult("EPPL", "INT", "ALL")  # Plastic strain intensity
 
     expected_list = [["SY", "ALL", ""], ["SEQV", "ALL", ""], ["EPPLINT", "ALL", ""]]
     assert (
