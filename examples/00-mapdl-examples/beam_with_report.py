@@ -27,7 +27,7 @@ I-Beam Analysis with Automated Report Generation
 =================================================
 
 .. note:: This file is complimentary material of
-   `I-Beam Analysis with Automated Report Generation <beam_analysis_report_example>`_
+   `I-Beam Analysis with Automated Report Generation <beam_analysis_report_example_>`_
    example.
 
 This example demonstrates a comprehensive structural analysis of a fully constrained
@@ -36,6 +36,7 @@ solves for structural response, and generates a detailed engineering report in b
 Markdown and Microsoft Word formats.
 
 The example showcases:
+
 - Parameterized I-beam geometry definition
 - Material property assignment
 - Fully constrained at both ends
