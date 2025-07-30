@@ -1270,7 +1270,7 @@ class _MapdlCommandExtended(_MapdlCore):
         if self.is_grpc:
             self._create_session()
         kwargs.setdefault("mute", True)
-        super().clear(read=read, mute=True, **kwargs)
+        super().clear(read=read, **kwargs)
 
     @wraps(_MapdlCore.cmplot)
     def cmplot(self, label: str = "", entity: str = "", keyword: str = "", **kwargs):
