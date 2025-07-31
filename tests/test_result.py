@@ -324,18 +324,16 @@ class Example:
         mapdl.sys("mkdir dpf_tmp")
         mapdl.sys(f"cp {self.rst_name} dpf_tmp/{dpf_rst_name}")
 
-        rst_file_path = mapdl.directory / "dpf_tmp" / dpf_rst_name
+        rst_file = mapdl.directory / "dpf_tmp" / dpf_rst_name
         mapdl.logger.info(mapdl.sys("ls -al dpf_tmp"))
 
         assert mapdl.inquire(
-            "", "EXIST", rst_file_path
+            "", "EXIST", rst_file
         ), "The RST file for DPF does not exist."
 
-        LOG.debug(f"DPFResult will use RST file: {rst_file_path}")
+        LOG.debug(f"DPFResult will use RST file: {rst_file}")
 
-        return DPFResult(
-            rst_file_path=rst_file_path, rst_is_on_remote=True, logger=mapdl.logger
-        )
+        return DPFResult(rst_file=rst_file, rst_is_on_remote=True, logger=mapdl.logger)
 
     def test_node_components(self, mapdl, result):
         assert mapdl.mesh.node_components == result.node_components
@@ -389,17 +387,17 @@ def test_error_initialization_both():
     from ansys.mapdl.core.reader.result import DPFResult
 
     with pytest.raises(ValueError, match="Only one the arguments must be supplied"):
-        DPFResult(rst_file_path="", mapdl="")
+        DPFResult(rst_file="", mapdl="")
 
 
 def test_error_initialization_rst_file_not_found():
     from ansys.mapdl.core.reader.result import DPFResult
 
-    rst_file_path = "my_unexisting_rst_file.rst"
+    rst_file = "my_unexisting_rst_file.rst"
     with pytest.raises(
-        FileNotFoundError, match=f"The RST file '{rst_file_path}' could not be found."
+        FileNotFoundError, match=f"The RST file '{rst_file}' could not be found."
     ):
-        DPFResult(rst_file_path=rst_file_path)
+        DPFResult(rst_file=rst_file)
 
 
 @pytest.mark.skipif(ON_LOCAL, reason="Skip on local machine")

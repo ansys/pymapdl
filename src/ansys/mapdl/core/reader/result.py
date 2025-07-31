@@ -25,7 +25,16 @@ import os
 import pathlib
 import socket
 import tempfile
-from typing import TYPE_CHECKING, Any, Callable, Iterable, Literal, TypeAlias, Union
+from typing import (
+    TYPE_CHECKING,
+    Any,
+    Callable,
+    Iterable,
+    Literal,
+    ParamSpec,
+    TypeAlias,
+    Union,
+)
 import weakref
 
 # from ansys.dpf import post
@@ -59,9 +68,12 @@ Nodes: TypeAlias = str | int | Iterable[int | str] | None
 Elements: TypeAlias = str | int | Iterable[int | str] | None
 MAPDLComponents: TypeAlias = str | Iterable[int | str] | None
 
-ReturnData: TypeAlias = tuple[np.ndarray[Any, Any], np.ndarray[Any, Any]]
+ReturnData: TypeAlias = tuple[
+    np.ndarray[Any, np.dtype[np.floating[Any]]],
+    np.ndarray[Any, np.dtype[np.floating[Any]]],
+]
 Kwargs: TypeAlias = dict[Any, Any]
-
+P = ParamSpec("P")
 
 ## Globals
 COMPONENTS: list[str] = ["X", "Y", "Z", "XY", "YZ", "XZ"]
@@ -173,7 +185,7 @@ def update_result(function: Callable[..., Any]) -> Callable[..., Any]:
     """
 
     @wraps(function)
-    def wrapper(self, *args, **kwargs: Kwargs):
+    def wrapper(self, *args: P.args, **kwargs: P.kwargs):
         if self._update_required or not self._loaded or self._cached_dpf_model is None:
             self.update()
             self.logger.debug("RST file updated.")
@@ -193,7 +205,7 @@ class DPFResult:
 
     Parameters
     ----------
-    rst_file_path : str
+    rst_file : str
         Path to the RST file.
 
     mapdl : _MapdlCore
@@ -211,7 +223,7 @@ class DPFResult:
     def __init__(
         self,
         *,
-        rst_file_path: str | None = None,
+        rst_file: str | None = None,
         mapdl: "Mapdl | None" = None,
         rst_is_on_remote: bool = False,
         logger: Logger | None = None,
@@ -220,7 +232,7 @@ class DPFResult:
 
         Parameters
         ----------
-        rst_file_path
+        rst_file
             Path to the RST file.
 
         mapdl
@@ -249,25 +261,25 @@ class DPFResult:
         self.__rst_name: str | None = None
         self._mode_rst: bool
 
-        if rst_file_path is not None and mapdl is not None:
+        if rst_file is not None and mapdl is not None:
             raise ValueError(
-                "Only one the arguments must be supplied: 'rst_file_path' or 'mapdl'."
+                "Only one the arguments must be supplied: 'rst_file' or 'mapdl'."
             )
 
-        elif rst_file_path is not None:
+        elif rst_file is not None:
             # Using RST file only allows for one RST file at the time.
-            if not rst_is_on_remote and not os.path.exists(rst_file_path):
+            if not rst_is_on_remote and not os.path.exists(rst_file):
                 raise FileNotFoundError(
-                    f"The RST file '{rst_file_path}' could not be found."
+                    f"The RST file '{rst_file}' could not be found."
                 )
             elif rst_is_on_remote:
-                self._server_file_path = rst_file_path
+                self._server_file_path = rst_file
 
             self.logger.debug("Initializing DPFResult class in RST mode.")
             self._mode_rst = True
 
-            self.__rst_directory = os.path.dirname(rst_file_path)
-            self.__rst_name = os.path.basename(rst_file_path)
+            self.__rst_directory = os.path.dirname(rst_file)
+            self.__rst_name = os.path.basename(rst_file)
 
         elif mapdl is not None:
             # Using MAPDL instance allows to switch between RST files.
@@ -280,7 +292,7 @@ class DPFResult:
 
         else:
             raise ValueError(
-                "One of the following kwargs must be supplied: 'rst_file_path' or 'mapdl'"
+                "One of the following kwargs must be supplied: 'rst_file' or 'mapdl'"
             )
 
         # dpf
@@ -1017,7 +1029,7 @@ class DPFResult:
         )
 
     def _extract_data(self, op: "dpf.Operator") -> ReturnData:
-        fc: dpf.Field = op.outputs.fields_as_fields_container()[
+        fc: dpf.Field = op.outputs.fields_as_fields_container()[  # type: ignore
             0
         ]  # This index 0 is the step indexing.
 
@@ -1219,8 +1231,7 @@ class DPFResult:
         """
 
         # todo: accepts components in nodes.
-        mesh = self.metadata.meshed_region  # type: ignore
-        assert isinstance(mesh, dpf.MeshedRegion), "mesh must be a dpf.MeshedRegion"
+        mesh: dpf.MeshedRegion = self.metadata.meshed_region  # type: ignore
 
         if isinstance(scope_ids, np.ndarray):
             scope_ids = scope_ids.tolist()
@@ -1240,7 +1251,7 @@ class DPFResult:
         scope_ids_ = self._get_entities_ids(scope_ids, requested_location)
 
         # Set type of return
-        ids = self._set_mesh_scoping(op, mesh, requested_location, scope_ids_)
+        ids = self._set_mesh_scoping(op, mesh, requested_location, scope_ids_)  # type: ignore
 
         if requested_location.lower() == "elemental":
             op = self._set_element_results(
