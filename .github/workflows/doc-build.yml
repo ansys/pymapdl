@@ -71,7 +71,7 @@ jobs:
       ON_DOCUMENTATION: TRUE
       PYANSYS_OFF_SCREEN: True
       BUILD_CHEATSHEET: '${{ inputs.build_cheatsheet }}'
-      MAPDL_IMAGE_VERSION_DOCS_BUILD: v24.2-ubuntu-student
+      MAPDL_IMAGE_VERSION_DOCS_BUILD: v25.2-ubuntu-amd
       DPF_DOCKER_IMAGE: ghcr.io/ansys/mapdl:v25.2-rocky-dpf-standalone
       MAPDL_PACKAGE: ghcr.io/ansys/mapdl
       PYMAPDL_START_INSTANCE: FALSE
