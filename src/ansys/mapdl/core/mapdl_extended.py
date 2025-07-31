@@ -72,53 +72,17 @@ class _MapdlCommandExtended(_MapdlCore):
         super().__init__(*args, **kwargs)
         self._graphics_backend = GraphicsBackend.PYVISTA
 
+    @wraps(_MapdlCore.file)
     def file(self, fname: str = "", ext: str = "", **kwargs) -> str:
-        """Specifies the data file where results are to be found.
-
-        APDL Command: FILE
-
-        Parameters
-        ----------
-        fname : str
-            File name and directory path (248 characters maximum, including the
-            characters needed for the directory path).  An unspecified
-            directory path defaults to the working directory; in this case, you
-            can use all 248 characters for the file name.
-
-        ext : str, default: "rst"
-            Filename extension (eight-character maximum). If ``fname`` has an
-            extension this is ignored.
-
-        Notes
-        -----
-        Specifies the Ansys data file where the results are to be found for
-        postprocessing.
-
-        Examples
-        --------
-        Load a result file that is outside of the current working directory.
-
-        >>> from ansys.mapdl.core import launch_mapdl
-        >>> mapdl = launch_mapdl()
-        >>> mapdl.post1()
-        >>> mapdl.file('/tmp/file.rst')
-
-        """
+        """Wraps file to upload the file to the MAPDL working directory."""
         fname = self._get_file_name(fname, ext, "cdb")
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
         file_, ext_, path_ = self._decompose_fname(fname)
+
         if self._local:
-            return self._file(filename=path_ / file_, extension=ext_, **kwargs)
+            return super().file(fname=path_ / file_, ext=ext_, **kwargs)
         else:
-            return self._file(filename=file_, extension=ext_, **kwargs)
-
-    def _file(self, filename: str = "", extension: str = "", **kwargs) -> str:
-        """Run the MAPDL ``file`` command with a proper filename."""
-        return self.run(f"FILE,{filename},{extension}", **kwargs)
-
-    def set_graphics_backend(self, backend: GraphicsBackend):
-        """Set the graphics backend to use for plotting."""
-        self._graphics_backend = backend
+            return super().file(fname=file_, ext=ext_, **kwargs)
 
     @wraps(_MapdlCore.lsread)
     def lsread(self, *args, **kwargs):
@@ -1301,37 +1265,13 @@ class _MapdlCommandExtended(_MapdlCore):
             with self._enable_interactive_plotting():
                 return self.run("EPLOT", **kwargs)
 
-    def clear(self, *args, **kwargs):
-        """Clear the database.
-
-        APDL Command: ``/CLEAR``
-
-        Resets the ANSYS database to the conditions at the beginning
-        of the problem.  Sets the import and Boolean options back to
-        the ANSYS default. All items are deleted from the database and
-        memory values are set to zero for items derived from database
-        information.  All files are left intact.  This command is
-        useful between multiple analyses in the same run, or between
-        passes of a multi-pass analysis (such as between the
-        substructure generation, use, and expansion passes).  Should
-        not be used in a do-loop since loop counters will be reset.
-        on the same line as the ``/CLEAR`` command.
-
-        ``/CLEAR`` resets the jobname to match the currently open
-        session .LOG and .ERR files. This will return the jobname to
-        its original value, or to the most recent value specified on
-        ``/FILNAME`` with KEY = 1.
-
-        This command is valid only at the Begin level.
-
-        Examples
-        --------
-        >>> mapdl.clear()
-
-        """
+    @wraps(_MapdlCore.clear)
+    def clear(self, read: str = "NOSTART", **kwargs):
+        """Wraps the MAPDL ``CLEAR`` command to use `NOSTART` with mute=True"""
         if self.is_grpc:
             self._create_session()
-        self.run("/CLE,NOSTART", mute=True)
+        kwargs.setdefault("mute", True)
+        super().clear(read=read, **kwargs)
 
     @wraps(_MapdlCore.cmplot)
     def cmplot(self, label: str = "", entity: str = "", keyword: str = "", **kwargs):
@@ -2438,6 +2378,10 @@ class _MapdlCommandExtended(_MapdlCore):
 
 class _MapdlExtended(_MapdlCommandExtended):
     """Extend Mapdl class with new functions"""
+
+    def set_graphics_backend(self, backend: GraphicsBackend):
+        """Set the graphics backend to use for plotting."""
+        self._graphics_backend = backend
 
     def load_table(
         self, name, array, var1="", var2="", var3="", csysid="", col_header=False

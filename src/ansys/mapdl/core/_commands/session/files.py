@@ -343,7 +343,7 @@ class Files:
         .. _s-ASSIGN_notes:
 
         The reassignment of file names is valid only if it is done before the file is used. All file
-        reassignments are retained (not cleared) even if the database is cleared ( ``/CLEAR`` ) or the
+        reassignments are retained (not cleared) even if the database is cleared ( :ref:`clear` ) or the
         Jobname is changed ( :ref:`filname` ). Assigned files may be overwritten. If file name arguments
         (``Fname``, ``Ext``, ``--``) are blank, the default Mechanical APDL assignment is restored. Use
         :ref:`seopt` for SUB files

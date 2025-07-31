@@ -1103,7 +1103,7 @@ class SetUp:
         of the graphics command macro, following the last graphics command within the macro, to enable the
         replot or zoom feature.
         """
-        command = f"/MREP,{name},{arg1},{arg2},{arg3},,{arg4},{arg5},{arg6},{arg7},{arg8},{arg9},{arg10},{arg11},{arg12},{arg13},{arg14},{arg15},{arg16},{arg17},{arg18}"
+        command = f"/MREP,{name},{arg1},{arg2},{arg3},{arg4},{arg5},{arg6},{arg7},{arg8},{arg9},{arg10},{arg11},{arg12},{arg13},{arg14},{arg15},{arg16},{arg17},{arg18}"
         return self.run(command, **kwargs)
 
     def noerase(self, **kwargs):

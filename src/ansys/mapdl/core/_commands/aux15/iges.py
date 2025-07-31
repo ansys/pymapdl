@@ -147,7 +147,7 @@ class Iges:
         Attempts to read in B-spline curve or surface entities of degree higher than 20 may result in error
         messages.
 
-        If you issue the ``/CLEAR`` command, the :ref:`ioptn` settings return to their defaults.
+        If you issue the :ref:`clear` command, the :ref:`ioptn` settings return to their defaults.
 
         For MERG,YES, merging of coincident geometry items is performed automatically when the :ref:`igesin`
         command is issued (that is, an internal :ref:`nummrg`,KP command is issued). The model is merged
@@ -164,7 +164,7 @@ class Iges:
 
         The :ref:`ioptn` command should be issued before the :ref:`igesin` command. You cannot change these
         options after your model has been imported or created. If you must change the options: Clear the
-        database ( ``/CLEAR`` ) or exit and restart the program.
+        database ( :ref:`clear` ) or exit and restart the program.
 
         Set the correct options.
 

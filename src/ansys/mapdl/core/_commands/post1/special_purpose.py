@@ -318,7 +318,7 @@ class SpecialPurpose:
         If ``CmsKey`` = ON (default), output from the command appears as: ``ADD CMS FILE =`` filename.rst
         ``CmsKey`` = OFF, output from the command appears as: ``ADD FILE =`` filename.rst
 
-        If ``Option`` = DELETE or CLEAR, you must clear the database ( ``/CLEAR`` ), then re-enter the
+        If ``Option`` = DELETE or CLEAR, you must clear the database ( :ref:`clear` ), then re-enter the
         postprocessor ( :ref:`post1` ) and issue a :ref:`set` command for the change to take effect on
         subsequent plots.
 
@@ -2020,8 +2020,8 @@ class SpecialPurpose:
         :ref:`outres` command description.
 
         For a cyclic harmonic mode-superposition analysis, use the :ref:`cycfiles` command to identify the
-        :file:`.rfrq` None and modal :file:`.rst` None file. For other analyses, use the ``FILE`` command to
-        specify the :file:`.rdsp` or :file:`.rfrq` file.
+        :file:`.rfrq` None and modal :file:`.rst` None file. For other analyses, use the :ref:`file` command
+        to specify the :file:`.rdsp` or :file:`.rfrq` file.
 
         You may limit the plot to display only those modes in a certain harmonic index range. The modes
         having the same harmonic index are each plotted in a unique color. If there are less than 10
@@ -3016,8 +3016,8 @@ class SpecialPurpose:
         :ref:`outres` command description.
 
         For a cyclic harmonic mode-superposition analysis, use the :ref:`cycfiles` command to identify the
-        :file:`.rfrq` None and modal :file:`.rst` None files. For other analyses, use the ``FILE`` command
-        to specify the :file:`.rdsp` or :file:`.rfrq` file.
+        :file:`.rfrq` None and modal :file:`.rst` None files. For other analyses, use the :ref:`file`
+        command to specify the :file:`.rdsp` or :file:`.rfrq` file.
 
         This information can also be obtained from the optional :file:`Jobname.mcf` text file (see the
         :ref:`trnopt` and :ref:`hropt` commands), and it can be plotted using the :ref:`plmc` command. For
