@@ -78,10 +78,11 @@ class _MapdlCommandExtended(_MapdlCore):
         fname = self._get_file_name(fname, ext, "cdb")
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
         file_, ext_, path_ = self._decompose_fname(fname)
+
         if self._local:
-            return super().file(filename=path_ / file_, extension=ext_, **kwargs)
+            return super().file(fname=path_ / file_, ext=ext_, **kwargs)
         else:
-            return super().file(filename=file_, extension=ext_, **kwargs)
+            return super().file(fname=file_, ext=ext_, **kwargs)
 
     @wraps(_MapdlCore.lsread)
     def lsread(self, *args, **kwargs):
