@@ -426,7 +426,11 @@ class _MapdlCommandExtended(_MapdlCore):
         file_, ext_, path_ = self._decompose_fname(fname)
         with self.non_interactive:
             # Use not interactive to avoid gRPC issues. See #975
-            super().mpread(fname=file_, ext=ext_, lib=lib, **kwargs)
+            if self._local:
+                # If local, we can use the full path
+                super().mpread(fname=path_ / file_, ext=ext_, lib=lib, **kwargs)
+            else:
+                super().mpread(fname=file_, ext=ext_, lib=lib, **kwargs)
 
         return self.last_response
 
