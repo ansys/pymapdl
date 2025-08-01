@@ -19,7 +19,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
 """Contains the MapdlDb classes, allowing the access to MAPDL DB from Python."""
 from enum import Enum
 from functools import wraps
@@ -116,7 +115,6 @@ class MapdlDb:
     >>> sel, coord = nodes.coord(22)
     >>> coord
     (1.0, 0.5, 0.0, 0.0, 0.0, 0.0)
-
     """
 
     def __init__(self, mapdl):
@@ -152,7 +150,6 @@ class MapdlDb:
         -------
         int
             Port of the database server.
-
         """
         # database server must be run from the "BEGIN" level
         self._mapdl._log.debug("Starting MAPDL server")
@@ -449,7 +446,6 @@ class MapdlDb:
                [0., 0., 0.],
                [0., 0., 0.],
                [0., 0., 0.]])
-
         """
         if self._nodes is None:
             from .nodes import DbNodes  # here to avoid circular import
@@ -494,7 +490,6 @@ class MapdlDb:
 
         >>> elem_info.elmdat
         [1, 1, 1, 1, 0, 0, 14, 0, 0, 0]
-
         """
         if self._elems is None:
             from .elems import DbElems  # here to avoid circular import

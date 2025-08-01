@@ -86,7 +86,6 @@ class Areas:
         >>> a0 = mapdl.a(k0, k1, k2)
         >>> a0
         1
-
         """
         command = f"A,{p1},{p2},{p3},{p4},{p5},{p6},{p7},{p8},{p9},{p10},{p11},{p12},{p13},{p14},{p15},{p16},{p17},{p18}"
         return parse.parse_a(self.run(command, **kwargs))
@@ -130,7 +129,6 @@ class Areas:
 
         secn
             The section number to be associated with selected unmeshed areas.
-
         """
         command = f"AATT,{mat},{real},{type_},{esys},{secn}"
         return self.run(command, **kwargs)
@@ -269,7 +267,6 @@ class Areas:
              1,
         ALONG LINES
              2,
-
         """
         command = f"ADRAG,{nl1},{nl2},{nl3},{nl4},{nl5},{nl6},{nlp1},{nlp2},{nlp3},{nlp4},{nlp5},{nlp6}"
         return self.run(command, **kwargs)
@@ -296,7 +293,6 @@ class Areas:
 
         rad
             Radius of fillet to be generated.
-
         """
         command = f"AFILLT,{na1},{na2},{rad}"
         return self.run(command, **kwargs)
@@ -375,7 +371,6 @@ class Areas:
                 attached to a volume), they are not moved, and new areas are
                 generated instead.  Meshed items corresponding to moved areas
                 are also moved if not needed at their original position.
-
         """
         command = (
             f"AGEN,{itime},{na1},{na2},{ninc},{dx},{dy},{dz},{kinc},{noelem},{imove}"
@@ -444,7 +439,6 @@ class Areas:
         >>> anum = mapdl.al(l0, l1, l2, l3)
         >>> anum
         1
-
         """
         command = f"AL,{l1},{l2},{l3},{l4},{l5},{l6},{l7},{l8},{l9},{l10}"
         return parse.parse_a(self.run(command, **kwargs))

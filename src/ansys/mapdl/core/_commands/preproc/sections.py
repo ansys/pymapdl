@@ -761,8 +761,6 @@ class Sections:
         The current working directory
 
         The path specified by the /SECLIB command
-
-
         """
         command = f"/SECLIB,{option},{path}"
         return self.run(command, **kwargs)
@@ -1166,7 +1164,6 @@ class Sections:
         material IDs). For a tapered pipe section, end sections must have the
         same number of cells around the circumference and along the pipe wall,
         and the same shell section ID for a composite pipe wall.
-
         """
         command = f"SECTYPE,{secid},{type_},{subtype},{name},{refinekey}"
         return self.run(command, **kwargs)

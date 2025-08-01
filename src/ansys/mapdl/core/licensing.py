@@ -76,7 +76,6 @@ class LicenseChecker:
     ----------
     timeout : float, optional
         Timeout for the licensing log file check.
-
     """
 
     def __init__(self, timeout=30, verbose=None):
@@ -148,7 +147,6 @@ class LicenseChecker:
         checkout_license : bool, optional
             Start the checkout license thread.  By default this is
             disabled.
-
         """
         if license_file and _HAS_ATP:
             self._lic_file_thread = self.check_license_file()
@@ -181,7 +179,6 @@ class LicenseChecker:
         LicenseServerConnectionError
             If there were any errors during the license checkout or
             license file check.
-
         """
         if self._license_file_success:
             return True
@@ -228,7 +225,6 @@ class LicenseChecker:
             If there is an error message in the license log file.
         TimeoutError
             Exceeded ``timeout`` while waiting for the license log file.
-
         """
         licdebug_file = os.path.join(
             get_ansys_license_debug_file_path(),
@@ -310,7 +306,6 @@ class LicenseChecker:
             overrides any settings from the default license path.
         port : int, optional
             Port on the host to connect to.  Only used when ``host`` is set.
-
         """
         if lic.lower() not in ALLOWABLE_LICENSES:  # pragma: no cover
             raise ValueError(f"Invalid license '{lic}'")
@@ -381,7 +376,6 @@ class LicenseChecker:
         ------
         LicenseServerConnectionError
             When errors messages found in the output of the license file.
-
         """
 
         if licenses is None:
@@ -416,7 +410,6 @@ def get_ansys_license_debug_file_tail(licdebug_file, start_timeout=10, debug=Fal
     ------
     msg : str
         Message formatted as a single string.
-
     """
     # wait until file exists
     max_time = time.time() + start_timeout
@@ -487,7 +480,6 @@ def get_ansys_license_debug_file_name():  # pragma: no cover
     -------
     str
         licdebug log file complete name.
-
     """
     # Licdebug name convention:
     # - For version 22.1 and above: `licdebug.$hostname.$appname.$version.out`
