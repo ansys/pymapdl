@@ -426,8 +426,7 @@ class _MapdlCommandExtended(_MapdlCore):
         file_, ext_, path_ = self._decompose_fname(fname)
         self._log.info("Bypassing 'MPREAD' with 'INPUT'.")
         with self.non_interactive:
-            # Use INPUT instead of MPREAD to avoid issues with the gRPC server
-            # which does not support MPREAD.
+            # Use not interactive to avoid gRPC issues
             super().mpread(fname=file_, ext=ext_, lib=lib, **kwargs)
 
         return self.last_response
