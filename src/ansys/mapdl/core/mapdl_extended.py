@@ -418,15 +418,14 @@ class _MapdlCommandExtended(_MapdlCore):
         """
         if lib:
             raise NotImplementedError(
-                "The 'lib' argument is not supported by the MAPDL gRPC server. See #975"
+                "The 'lib' argument is not supported by the MAPDL gRPC server."
             )
 
         fname = self._get_file_name(fname, ext, "mp")
         fname = self._get_file_path(fname, kwargs.get("progress_bar", False))
         file_, ext_, path_ = self._decompose_fname(fname)
-        self._log.info("Bypassing 'MPREAD' with 'INPUT'.")
         with self.non_interactive:
-            # Use not interactive to avoid gRPC issues
+            # Use not interactive to avoid gRPC issues. See #975
             super().mpread(fname=file_, ext=ext_, lib=lib, **kwargs)
 
         return self.last_response
@@ -444,19 +443,6 @@ class _MapdlCommandExtended(_MapdlCore):
 
     @wraps(_MapdlCore.list)
     def list(self, filename, ext=""):
-        """Displays the contents of an external, coded file.
-
-        APDL Command: ``/LIST``
-
-        Parameters
-        ----------
-        fname : str
-            File name and directory path. An unspecified directory
-            path defaults to the working directory.
-
-        ext : str, optional
-            Filename extension
-        """
         if hasattr(self, "_local"):  # gRPC
             if not self._local:
                 return self._download_as_raw(filename).decode()
