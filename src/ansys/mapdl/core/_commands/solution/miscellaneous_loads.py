@@ -1269,7 +1269,6 @@ class MiscellaneousLoads:
         The program accepts only one occurrence of ``RESCONTROL`` with a negative ``Ldstep`` value
         (``RESCONTROL,,N`` where ``N`` is a negative number). If you issue ``RESCONTROL`` multiple times
         with a negative ``Ldstep`` value, the last specification overwrites the previous one.
-
         """
         command = f"RESCONTROL, {action}, {ldstep}, {frequency}, {maxfiles}, , {maxtotalfiles}, {filetype}"
         return self.run(command, **kwargs)

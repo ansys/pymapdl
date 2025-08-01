@@ -90,7 +90,6 @@ def check_valid_routine(routine: ROUTINES) -> bool:
     ------
     ValueError
         Raised when a routine is invalid.
-
     """
     if routine.lower().startswith("/"):
         routine = routine[1:]
@@ -375,7 +374,6 @@ def load_file(mapdl: "Mapdl", fname: str, priority_mapdl_file: bool = None) -> s
 
     Check if the file exists locally or in the working directory, if not, it will raise a ``FileNotFound`` exception.
     If the file is local, it will be uploaded.
-
     """
 
     base_fname = os.path.basename(fname)

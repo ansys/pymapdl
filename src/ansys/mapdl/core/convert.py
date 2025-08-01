@@ -253,7 +253,6 @@ def convert_script(
     >>> with open(out_file, 'r') as fid:
     ...     cmds = fid.read()
     >>> mapdl.input_strings(cmds.splitlines()[2:10])
-
     """
     with open(filename_in, "r") as fid:
         apdl_strings = fid.readlines()
@@ -403,7 +402,6 @@ def convert_apdl_block(
     >>> cmds = cmds.replace('solve', '!solve')
     >>> mapdl = launch_mapdl()
     >>> mapdl.input_strings(cmds.splitlines()[2:10])
-
     """
 
     translator = _convert(
@@ -560,7 +558,6 @@ class FileTranslator:
         ----------
         text : str, optional
             Text to format instead of `self.lines`. For development use.
-
         """
         if self.cleanup_output:
             try:

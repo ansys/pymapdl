@@ -188,7 +188,6 @@ def parse_chunks(
     -------
     np.ndarray
         Deserialized numpy array.
-
     """
     timeout = 3  # seconds
     time_step = 0.01

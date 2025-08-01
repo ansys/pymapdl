@@ -84,7 +84,6 @@ class Information:
     >>> info = mapdl.info
     >>> info.mapdl_version
     'RELEASE  2021 R2           BUILD 21.2      UPDATE 20210601'
-
     """
 
     def __init__(self, mapdl: "Mapdl") -> None:
@@ -109,7 +108,8 @@ class Information:
 
     def _update(self) -> None:
         """We might need to do more calls if we implement properties
-        that change over the MAPDL session."""
+        that change over the MAPDL session.
+        """
         try:
             if self._mapdl._exited:  # pragma: no cover
                 raise MapdlExitedError("Information class: MAPDL exited")
