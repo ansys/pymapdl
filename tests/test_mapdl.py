@@ -3172,3 +3172,74 @@ def test_rpsd(mapdl, psd_analysis):
     output = mapdl.rpsd(3, 2, "", 1, 2)
     assert isinstance(output, np.ndarray)
     assert output.shape == (64, 1)
+
+
+def test_osresult(mapdl, solved_box):
+    mapdl.solution()
+
+    mapdl.outres("ALL", "NONE")
+    mapdl.osresult("S", "Y", "ALL")  # Stress Y component
+    mapdl.osresult("S", "EQV", "ALL")  # Equivalent stress
+    mapdl.osresult("EPPL", "INT", "ALL")  # Plastic strain intensity
+
+    assert "S" in mapdl.osresult("STATUS")
+    assert "Y" in mapdl.osresult("STATUS")
+    assert "EQV" in mapdl.osresult("STATUS")
+    assert "EPPL" in mapdl.osresult("STATUS")
+    assert "INT" in mapdl.osresult("STATUS")
+
+
+@requires("pandas")
+def test_osresult_to_list_and_dataframe(mapdl, solved_box):
+    import pandas as pd
+
+    mapdl.solution()
+
+    mapdl.outres("ALL", "NONE")
+    mapdl.osresult("S", "Y", "ALL")  # Stress Y component
+    mapdl.osresult("S", "EQV", "ALL")  # Equivalent stress
+    mapdl.osresult("EPPL", "INT", "ALL")  # Plastic strain intensity
+
+    expected_list = [["SY", "ALL", ""], ["SEQV", "ALL", ""], ["EPPLINT", "ALL", ""]]
+    assert (
+        mapdl.osresult("STATUS").to_list() == expected_list
+    ), "Status should contain the requested results"
+
+    expected_df = pd.DataFrame(
+        data=expected_list, columns=["ITEM", "FREQUENCY", "COMPONENT"]
+    )
+    assert (
+        mapdl.osresult("STATUS").to_dataframe().equals(expected_df)
+    ), "DataFrame should match the expected results"
+
+
+@pytest.mark.xfail(
+    reason="Bug in v25R2, osresult lists results as many times as issued",
+    strict=True,
+)
+def test_osresult_multiple(mapdl, solved_box):
+    mapdl.solution()
+
+    mapdl.outres("ALL", "NONE")
+    for i in range(3):
+        mapdl.osresult("EPPL", "INT", "ALL")
+
+    assert (
+        mapdl.osresult("STATUS").count("EPPLINT") == 1
+    ), "EPPLINT should only be listed once in the status"
+
+
+@pytest.mark.xfail(
+    reason="Bug? PRESOL cannot retrieve osresult data",
+    strict=True,
+)
+def test_osresult_presol(mapdl, solved_box):
+    mapdl.solution()
+
+    mapdl.outres("ALL", "NONE")
+    mapdl.osresult("S", "Y", "ALL")  # Stress Y component
+
+    mapdl.solve()
+    mapdl.post1()
+
+    assert mapdl.presol("SRES", "SY")

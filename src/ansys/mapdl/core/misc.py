@@ -33,6 +33,7 @@ import string
 import tempfile
 from threading import Thread
 from typing import (
+    Any,
     Callable,
     Dict,
     Iterable,
@@ -717,3 +718,13 @@ def get_ip_hostname(ip: str) -> Tuple[str, str]:
                 hostname = ip
 
     return ip, hostname
+
+
+def expand_all_inner_lists(
+    lst: list[list[Any]], target_length: int, fill_value: str = ""
+) -> list[list[Any]]:
+    for inner in lst:
+        missing = target_length - len(inner)
+        if missing > 0:
+            inner.extend([fill_value] * missing)
+    return lst

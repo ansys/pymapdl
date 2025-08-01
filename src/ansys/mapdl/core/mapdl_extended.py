@@ -23,6 +23,7 @@
 from functools import wraps
 import os
 import pathlib
+import re
 import tempfile
 from typing import Union
 import warnings
@@ -31,7 +32,7 @@ import numpy as np
 from numpy.typing import DTypeLike, NDArray
 
 from ansys.mapdl.core import LOG as logger
-from ansys.mapdl.core.commands import CommandListingOutput
+from ansys.mapdl.core.commands import CommandListingOutput, CommandOutput
 from ansys.mapdl.core.errors import (
     CommandDeprecated,
     ComponentDoesNotExits,
@@ -2374,6 +2375,26 @@ class _MapdlCommandExtended(_MapdlCore):
             scale=scale,
             **kwargs,
         )
+
+    @wraps(_MapdlCore.osresult)
+    def osresult(self, item="", comp="", freq="", cname="", **kwargs) -> CommandOutput:
+        result = super().osresult(item, comp, freq, cname, **kwargs)
+        if item.upper().strip() == "STATUS":
+            from ansys.mapdl.core.misc import expand_all_inner_lists
+
+            columns_names = ["ITEM", "FREQUENCY", "COMPONENT"]
+            result = CommandListingOutput(result)
+            table = re.search(
+                r"ITEM\s+FREQUENCY\s+COMPONENT(.*)", result, flags=re.DOTALL
+            ).group(1)
+            table = [each.split() for each in table.splitlines() if each.strip()]
+            table = expand_all_inner_lists(
+                table, target_length=len(columns_names), fill_value=""
+            )
+
+            result._columns_names = columns_names
+            result._cache = np.array(table)
+        return result
 
 
 class _MapdlExtended(_MapdlCommandExtended):
