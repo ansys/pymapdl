@@ -30,6 +30,8 @@ with other programs, libraries, and features in development.
 | :ref:`static_rom_data_generation`                    | Demonstrates using PyMAPDL and PyDPF to generate training data for an Ansys Twin Builder   |
 |                                                      | static reduced order model (ROM).                                                          |
 +------------------------------------------------------+--------------------------------------------------------------------------------------------+
+| :ref:`beam_analysis_report_example`                  | Demonstrates using PyMAPDL for beam analysis with automated report generation.             |
++------------------------------------------------------+--------------------------------------------------------------------------------------------+
 
 
 .. toctree::
@@ -46,4 +48,5 @@ with other programs, libraries, and features in development.
     hpc/hpc_ml_ga.rst
     sfem/stochastic_fem.rst
     static_rom/static_rom_data_generation.rst
+    beam_analysis_with_reporting/beam_analysis_report.rst
 
